@@ -307,7 +307,7 @@ static const char *getRequiredAttr(cXMLElement *elem, const char *attrName)
 {
     const char *s = elem->getAttribute(attrName);
     if (!s)
-        throw cRuntimeError("element <%s> misses required attribute %s at %s",
+        throw cRuntimeError("Element <%s> misses required attribute %s at %s",
                   elem->getTagName(), attrName, elem->getSourceLocation());
     return s;
 }
@@ -363,7 +363,7 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
         // 0 should be treated as infinity
         int pfxLen;
         if (!prefix.prefix.tryParseAddrWithPrefix(node->getNodeValue(), pfxLen))
-            throw cRuntimeError("element <%s> at %s: wrong IPv6Address/prefix syntax %s",
+            throw cRuntimeError("Element <%s> at %s: wrong IPv6Address/prefix syntax %s",
                       node->getTagName(), node->getSourceLocation(), node->getNodeValue());
 
         prefix.prefixLength = pfxLen;

@@ -86,11 +86,11 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
         /* find the audio encoder */
         AVCodec *avcodec = avcodec_find_encoder(c->codec_id);
         if (!avcodec)
-            throw cRuntimeError("codec %d not found", c->codec_id);
+            throw cRuntimeError("Codec %d not found", c->codec_id);
 
         /* open it */
         if (avcodec_open(c, avcodec) < 0)
-            throw cRuntimeError("could not open codec %d", c->codec_id);
+            throw cRuntimeError("Could not open codec %d", c->codec_id);
     }
 
     /* open the output file, if needed */

@@ -30,7 +30,7 @@ static cXMLElement *firstChildWithTag(cXMLElement *node, const char *tagname)
         child = child->getNextSibling();
 
     if (!child)
-        throw cRuntimeError("element <%s> has no <%s> child at %s",
+        throw cRuntimeError("Element <%s> has no <%s> child at %s",
                 node->getTagName(), tagname, node->getSourceLocation());
 
     return child;
@@ -55,11 +55,11 @@ void ANSimMobility::initialize(int stage)
         // get script: param should point to <simulation> element
         cXMLElement *rootElem = par("ansimTrace");
         if (strcmp(rootElem->getTagName(), "simulation")!=0)
-            throw cRuntimeError("ansimTrace: <simulation> is expected as root element not <%s> at %s",
+            throw cRuntimeError("<simulation> is expected as root element not <%s> at %s",
                   rootElem->getTagName(), rootElem->getSourceLocation());
         nextPositionChange = rootElem->getElementByPath("mobility/position_change");
         if (!nextPositionChange)
-            throw cRuntimeError("element doesn't have <mobility> child or <position_change> grandchild at %s",
+            throw cRuntimeError("Element doesn't have <mobility> child or <position_change> grandchild at %s",
                   rootElem->getSourceLocation());
     }
 }
@@ -114,7 +114,7 @@ void ANSimMobility::extractDataFrom(cXMLElement *node)
     const char *yStr = firstChildWithTag(destElem, "ypos")->getNodeValue();
 
     if (!endTimeStr || !xStr || !yStr)
-        throw cRuntimeError("no content in <end_time>, <destination>/<xpos> or <ypos> element at %s", node->getSourceLocation());
+        throw cRuntimeError("No content in <end_time>, <destination>/<xpos> or <ypos> element at %s", node->getSourceLocation());
 
     nextChange = atof(endTimeStr);
     targetPosition.x = atof(xStr);

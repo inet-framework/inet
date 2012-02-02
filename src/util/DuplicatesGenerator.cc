@@ -87,9 +87,9 @@ void DuplicatesGenerator::parseVector(const char *vector)
         while (isspace(*v)) v++;
         if (!*v || *v==';') break;
         if (!isdigit(*v))
-            throw cRuntimeError("syntax error in duplicatesVector: packet number expected");
+            throw cRuntimeError("Syntax error in duplicatesVector: packet number expected");
         if (duplicatesVector.size()>0 && duplicatesVector.back() >= (unsigned int)atoi(v))
-            throw cRuntimeError("syntax error in duplicatesVector: packet numbers in ascending order expected");
+            throw cRuntimeError("Syntax error in duplicatesVector: packet numbers in ascending order expected");
 
         duplicatesVector.push_back(atoi(v));
         while (isdigit(*v)) v++;
@@ -98,7 +98,7 @@ void DuplicatesGenerator::parseVector(const char *vector)
         while (isspace(*v)) v++;
         if (!*v) break;
         if (*v!=';')
-            throw cRuntimeError("syntax error in duplicatesVector: separator ';' missing");
+            throw cRuntimeError("Syntax error in duplicatesVector: separator ';' missing");
         v++;
         while (isspace(*v)) v++;
     }

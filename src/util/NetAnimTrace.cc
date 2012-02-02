@@ -202,7 +202,7 @@ void NetAnimTrace::resolveNodeCoordinates(cModule *submod, double& x, double& y)
     }
     else
     {
-        throw cRuntimeError("invalid layout `%s' in `p' tag of display string", layout);
+        throw cRuntimeError("Invalid layout `%s' in `p' tag of display string", layout);
     }
 }
 

@@ -108,11 +108,11 @@ void VoIPSinkApp::Connection::openAudio(const char *fileName)
     // find the audio encoder
     avcodec = avcodec_find_encoder(c->codec_id);
     if (!avcodec)
-        throw cRuntimeError("codec %d not found", c->codec_id);
+        throw cRuntimeError("Codec %d not found", c->codec_id);
 
     // open it
     if (avcodec_open(c, avcodec) < 0)
-        throw cRuntimeError("could not open codec %d", c->codec_id);
+        throw cRuntimeError("Could not open codec %d", c->codec_id);
 */
     outFile.open(fileName, sampleRate, av_get_bits_per_sample_format(decCtx->sample_fmt));
 }

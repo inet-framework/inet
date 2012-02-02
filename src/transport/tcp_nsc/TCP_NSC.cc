@@ -876,7 +876,7 @@ void TCP_NSC::processAppCommand(TCP_NSC_Connection& connP, cMessage *msgP)
         case TCP_C_CLOSE: process_CLOSE(connP, tcpCommand, msgP); break;
         case TCP_C_ABORT: process_ABORT(connP, tcpCommand, msgP); break;
         case TCP_C_STATUS: process_STATUS(connP, tcpCommand, msgP); break;
-        default: throw cRuntimeError("wrong command from app: %d", msgP->getKind());
+        default: throw cRuntimeError("Wrong command from app: %d", msgP->getKind());
     }
 
     /*

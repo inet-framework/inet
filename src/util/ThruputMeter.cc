@@ -26,7 +26,7 @@ void ThruputMeter::initialize()
     startTime = par("startTime");
     long _batchSize = par("batchSize");
     if ((_batchSize < 0) || (((long)(unsigned int)_batchSize) != _batchSize))
-        throw cRuntimeError("invalid 'batchSize=%ld' parameter at '%s' module", _batchSize, getFullPath().c_str());
+        throw cRuntimeError("Invalid 'batchSize=%ld' parameter at '%s' module", _batchSize, getFullPath().c_str());
     batchSize = (unsigned int)_batchSize;
     maxInterval = par("maxInterval");
 

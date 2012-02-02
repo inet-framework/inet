@@ -145,7 +145,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
      stream = associter->second;
   }
   else {
-     throw cRuntimeError("stream with id %d not found", streamId);
+     throw cRuntimeError("Stream with id %d not found", streamId);
   }
 
   char name[64];

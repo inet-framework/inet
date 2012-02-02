@@ -93,7 +93,7 @@ void EtherLLC::handleMessage(cMessage *msg)
             break;
 
           default:
-            throw cRuntimeError("received message `%s' with unknown message kind %d",
+            throw cRuntimeError("Received message `%s' with unknown message kind %d",
                   msg->getName(), msg->getKind());
         }
     }

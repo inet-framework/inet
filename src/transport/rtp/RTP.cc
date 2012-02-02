@@ -105,7 +105,7 @@ void RTP::handleMessageFromApp(cMessage *msg)
         break;
 
     default:
-        throw cRuntimeError("unknown RTPControlInfo type from application");
+        throw cRuntimeError("Unknown RTPControlInfo type from application");
     }
 }
 

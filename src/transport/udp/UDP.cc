@@ -195,11 +195,11 @@ void UDP::processCommandFromApp(cMessage *msg)
                 leaveMulticastGroups(cmd->getSockId(), cmd->getMulticastAddrArrayPtr(), cmd->getMulticastAddrArraySize());
             }
             else
-                throw cRuntimeError("unknown subclass of UDPSetOptionCommand received from app: %s", ctrl->getClassName());
+                throw cRuntimeError("Unknown subclass of UDPSetOptionCommand received from app: %s", ctrl->getClassName());
             break;
         }
         default: {
-            throw cRuntimeError("unknown command code (message kind) %d received from app", msg->getKind());
+            throw cRuntimeError("Unknown command code (message kind) %d received from app", msg->getKind());
         }
     }
 

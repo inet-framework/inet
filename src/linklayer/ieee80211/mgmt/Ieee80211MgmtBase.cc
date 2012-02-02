@@ -243,7 +243,7 @@ void Ieee80211MgmtBase::processFrame(Ieee80211DataOrMgmtFrame *frame)
         break;
 
       default:
-        throw cRuntimeError("unexpected frame type (%s)%s", frame->getClassName(), frame->getName());
+        throw cRuntimeError("Unexpected frame type (%s)%s", frame->getClassName(), frame->getName());
     }
 }
 

@@ -50,7 +50,7 @@ void BonnMotionMobility::initialize(int stage)
         const BonnMotionFile *bmFile = BonnMotionFileCache::getInstance()->getFile(fname);
         lines = bmFile->getLine(nodeId);
         if (!lines)
-            throw cRuntimeError("invalid nodeId %d -- no such line in file '%s'", nodeId, fname);
+            throw cRuntimeError("Invalid nodeId %d -- no such line in file '%s'", nodeId, fname);
         currentLine = 0;
     }
 }

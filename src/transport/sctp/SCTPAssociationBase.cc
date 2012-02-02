@@ -556,7 +556,7 @@ bool SCTPAssociation::processAppCommand(cPacket *msg)
             }*/
             break;
 
-        default: throw cRuntimeError("wrong event code");
+        default: throw cRuntimeError("Wrong event code");
     }
 
     delete sctpCommand;

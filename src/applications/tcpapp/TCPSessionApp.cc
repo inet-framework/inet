@@ -44,14 +44,14 @@ void TCPSessionApp::parseScript(const char *script)
         cmd.tSend = strtod(s, &const_cast<char *&>(s));
 
         if (s == s0)
-            throw cRuntimeError("syntax error in script: simulation time expected");
+            throw cRuntimeError("Syntax error in script: simulation time expected");
 
         // parse number of bytes
         while (isspace(*s))
             s++;
 
         if (!isdigit(*s))
-            throw cRuntimeError("syntax error in script: number of bytes expected");
+            throw cRuntimeError("Syntax error in script: number of bytes expected");
 
         cmd.numBytes = atoi(s);
 
@@ -69,7 +69,7 @@ void TCPSessionApp::parseScript(const char *script)
             break;
 
         if (*s!=';')
-            throw cRuntimeError("syntax error in script: separator ';' missing");
+            throw cRuntimeError("Syntax error in script: separator ';' missing");
 
         s++;
 
@@ -179,7 +179,7 @@ void TCPSessionApp::activity()
     parseScript(script);
 
     if (sendBytes > 0 && commands.size() > 0)
-        throw cRuntimeError("cannot use both sendScript and tSend+sendBytes");
+        throw cRuntimeError("Cannot use both sendScript and tSend+sendBytes");
 
     socket.setOutputGate(gate("tcpOut"));
 

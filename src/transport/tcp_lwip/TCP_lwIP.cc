@@ -383,7 +383,7 @@ err_t TCP_lwIP::tcp_event_err(TcpLwipConnection &conn, err_t err)
         break;
 
     default:
-        throw cRuntimeError("invalid LWIP error code: %d", err);
+        throw cRuntimeError("Invalid LWIP error code: %d", err);
     }
 
     return err;
@@ -654,7 +654,7 @@ void TCP_lwIP::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
             break;
 
         default:
-            throw cRuntimeError("wrong command from app: %d", msgP->getKind());
+            throw cRuntimeError("Wrong command from app: %d", msgP->getKind());
     }
 }
 

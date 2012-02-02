@@ -85,9 +85,9 @@ void DropsGenerator::parseVector(const char *vector)
         while (isspace(*v)) v++;
         if (!*v || *v==';') break;
         if (!isdigit(*v))
-            throw cRuntimeError("syntax error in dropsVector: packet number expected");
+            throw cRuntimeError("Syntax error in dropsVector: packet number expected");
         if (dropsVector.size()>0 && dropsVector.back() >= (unsigned int)atoi(v))
-            throw cRuntimeError("syntax error in dropsVector: packet numbers in ascending order expected");
+            throw cRuntimeError("Syntax error in dropsVector: packet numbers in ascending order expected");
 
         dropsVector.push_back(atoi(v));
         while (isdigit(*v)) v++;
@@ -96,7 +96,7 @@ void DropsGenerator::parseVector(const char *vector)
         while (isspace(*v)) v++;
         if (!*v) break;
         if (*v!=';')
-            throw cRuntimeError("syntax error in dropsVector: separator ';' missing");
+            throw cRuntimeError("Syntax error in dropsVector: separator ';' missing");
         v++;
         while (isspace(*v)) v++;
     }

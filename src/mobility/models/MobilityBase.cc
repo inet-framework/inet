@@ -80,9 +80,9 @@ void MobilityBase::initialize(int stage)
     {
         initializePosition();
         if (!isFiniteNumber(lastPosition.x) || !isFiniteNumber(lastPosition.y) || !isFiniteNumber(lastPosition.z))
-            throw cRuntimeError("mobility position is not a finite number after initialize (x=%g,y=%g,z=%g)", lastPosition.x, lastPosition.y, lastPosition.z);
+            throw cRuntimeError("Mobility position is not a finite number after initialize (x=%g,y=%g,z=%g)", lastPosition.x, lastPosition.y, lastPosition.z);
         if (isOutside())
-            throw cRuntimeError("mobility position (x=%g,y=%g,z=%g) is outside the constraint area (%g,%g,%g - %g,%g,%g)",
+            throw cRuntimeError("Mobility position (x=%g,y=%g,z=%g) is outside the constraint area (%g,%g,%g - %g,%g,%g)",
                   lastPosition.x, lastPosition.y, lastPosition.z,
                   constraintAreaMin.x, constraintAreaMin.y, constraintAreaMin.z,
                   constraintAreaMax.x, constraintAreaMax.y, constraintAreaMax.z);
@@ -121,7 +121,7 @@ void MobilityBase::handleMessage(cMessage * message)
     if (message->isSelfMessage())
         handleSelfMessage(message);
     else
-        throw cRuntimeError("mobility modules can only receive self messages");
+        throw cRuntimeError("Mobility modules can only receive self messages");
 }
 
 void MobilityBase::updateVisualRepresentation()
@@ -222,7 +222,7 @@ void MobilityBase::raiseErrorIfOutside()
 {
     if (isOutside())
     {
-        throw cRuntimeError("mobility moved outside the area %g,%g,%g - %g,%g,%g (x=%g,y=%g,z=%g)",
+        throw cRuntimeError("Mobility moved outside the area %g,%g,%g - %g,%g,%g (x=%g,y=%g,z=%g)",
               constraintAreaMin.x, constraintAreaMin.y, constraintAreaMin.z,
               constraintAreaMax.x, constraintAreaMax.y, constraintAreaMax.z,
               lastPosition.x, lastPosition.y, lastPosition.z);

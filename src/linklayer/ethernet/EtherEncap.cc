@@ -68,7 +68,7 @@ void EtherEncap::handleMessage(cMessage *msg)
               break;
 
             default:
-              throw cRuntimeError("received message `%s' with unknown message kind %d", msg->getName(), msg->getKind());
+              throw cRuntimeError("Received message `%s' with unknown message kind %d", msg->getName(), msg->getKind());
         }
     }
 
