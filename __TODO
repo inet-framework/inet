@@ -1,3 +1,5 @@
+TODO: revise ethernet/eth-index.ned! e.g it writes about autoconfiguration, and probably half of it is obsolete
+
 TODO: examples/ospfv2/areas does not work: the UDP apps in H3 keep sending, but never receive answer; seems like
       sent packets cannot even leave H3 (they are queued up in ARP, due to "address resolution pending")
 
