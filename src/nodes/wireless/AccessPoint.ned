@@ -24,18 +24,18 @@ import inet.base.NotificationBoard;
 
 //
 // A generic access point supporting multiple wireless radios, and
-// multiple ethernet ports. The type of the ethernet MAC, relay Unit
+// multiple ethernet ports. The type of the ethernet MAC, relay unit
 // and wireless card can be specified as parameters.
 //
-// By default the access point is stationary (~StationaryMobility), but can be
-// changed also if needed.
+// By default, the access point is stationary (~StationaryMobility),
+// but that can also be configured by a parameter.
 //
 // The wlan[*].mgmtType can be configured for different management types
 // currently it can be: ~Ieee80211MgmtAPSimplified and ~Ieee80211MgmtAP.
-// By default it is ~Ieee80211MgmtAP. The Simplified version does not 
-// support channel scanning, authentication and association . 
-// In this case nodes must explicitly specify the hardware address
-// of the Wlan card they want to be associated with. 
+// By default it is ~Ieee80211MgmtAP. The Simplified version does not
+// support channel scanning, authentication and association .
+// In this case, nodes must explicitly specify the hardware address
+// of the wlan card they want to be associated with.
 //
 module AccessPoint
 {
@@ -76,8 +76,8 @@ module AccessPoint
         }
     connections allowunconnected:
         // connections to network outside
-        // wireless interfaces MUST be connted first (i.e. ports 0..numRadios-1) 
-        // because broadcasts must be handled differently for wilreless IFs by the relayUnit
+        // wireless interfaces MUST be connected first (i.e. ports 0..numRadios-1)
+        // because broadcasts must be handled differently for wireless IFs by the relayUnit
         for i=0..numRadios-1 {
             radioIn[i] --> wlan[i].radioIn;
             wlan[i].upperLayerOut --> relayUnit.lowerLayerIn++ if sizeof(ethg)+numRadios>1;

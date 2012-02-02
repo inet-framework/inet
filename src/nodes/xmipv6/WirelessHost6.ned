@@ -1,3 +1,4 @@
+//
 // Copyright (C) 2007 Faqir Zarrar Yousaf
 // Communication Networks Institute, University of Dortmund
 // faqir.yousaf@uni-dortmund.de
@@ -24,7 +25,7 @@ import inet.nodes.ipv6.StandardHost6;
 
 
 //
-//It is an IPv6 compatible node with MIPv6 support.
+// IPv6 compatible node with MIPv6 support.
 // Models a host with one wireless (802.11b) card in infrastructure mode, supports handovers and MIPv6 protocol.
 // This module is basically a StandardHost with an Ieee80211NicSTA and MobileIPLayer6
 // added. It should be used in conjunction with WirelessAPSimplified,

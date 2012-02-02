@@ -1,3 +1,4 @@
+//
 // Copyright (C) 2007 Faqir Zarrar Yousaf
 // Communication Networks Institute, University of Dortmund
 // faqir.yousaf@uni-dortmund.de
@@ -17,15 +18,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-//
-// IPv6 router Configured to operate as a Home Agent in a network supporting MIPv6.
-//
 
 package inet.nodes.xmipv6;
 
 import inet.nodes.ipv6.Router6;
 
 
+//
+// IPv6 router Configured to operate as a Home Agent in a network supporting MIPv6.
+//
 module HomeAgent6 extends Router6
 {
     networkLayer.xMIPv6Support = true;

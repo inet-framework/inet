@@ -140,7 +140,7 @@ class INET_API BindingCache : public cSimpleModule
     virtual int generateHomeToken(const IPv6Address& HoA, int nonce);
 
     /**
-     * Generates a care-of token from the provided paramters.
+     * Generates a care-of token from the provided parameters.
      * Returns a static value for now.
      */
     virtual int generateCareOfToken(const IPv6Address& CoA, int nonce);

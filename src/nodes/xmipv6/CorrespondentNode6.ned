@@ -18,8 +18,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-// Same as StandardHost6.ned except with the new parameter isMobileNode = true/false
-// & isHomeAgent = true/false & isProxy = false (for FMIPv6)
 
 package inet.nodes.xmipv6;
 
