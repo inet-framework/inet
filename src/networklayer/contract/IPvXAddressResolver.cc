@@ -112,7 +112,7 @@ IPv4Address IPvXAddressResolver::routerIdOf(cModule *host)
     IRoutingTable *rt = routingTableOf(host);
     return rt->getRouterId();
 #else
-    throw cRuntimeError("INET compiled without IPv4 features!");
+    throw cRuntimeError("INET was compiled without IPv4 support");
 #endif
 }
 

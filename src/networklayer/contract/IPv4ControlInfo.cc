@@ -41,7 +41,7 @@ void IPv4ControlInfo::clean()
     dropAndDelete(dgram);
 #else
     if(dgram)
-        throw cRuntimeError("INET compiled without IPv4 features!");
+        throw cRuntimeError("INET was compiled without IPv4 support");
 #endif
 }
 
@@ -55,7 +55,7 @@ void IPv4ControlInfo::copy(const IPv4ControlInfo& other)
         dgram = dgram->dup();
         take(dgram);
 #else
-        throw cRuntimeError(this, "INET compiled without IPv4 features!");
+        throw cRuntimeError(this, "INET was compiled without IPv4 support");
 #endif
     }
 }
@@ -68,7 +68,7 @@ void IPv4ControlInfo::setOrigDatagram(IPv4Datagram *d)
     dgram = d;
     take(dgram);
 #else
-    throw cRuntimeError(this, "INET compiled without IPv4 features!");
+    throw cRuntimeError(this, "INET was compiled without IPv4 support");
 #endif
 }
 
@@ -85,7 +85,7 @@ IPv4Datagram *IPv4ControlInfo::removeOrigDatagram()
     dgram = NULL;
     return ret;
 #else
-    throw cRuntimeError(this, "INET compiled without IPv4 features!");
+    throw cRuntimeError(this, "INET was compiled without IPv4 support");
 #endif
 }
 

@@ -394,7 +394,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
 #ifdef WITH_IPv4
                         adv.push_back(ift->getInterface(i)->ipv4Data()->getIPAddress());
 #else
-                        throw cRuntimeError("INET compiled without IPv4 features!");
+                        throw cRuntimeError("INET was compiled without IPv4 support");
 #endif
                     }
                     else if (ift->getInterface(i)->ipv6Data()!=NULL)
@@ -402,7 +402,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
 #ifdef WITH_IPv6
                         adv.push_back(ift->getInterface(i)->ipv6Data()->getAddress(0));
 #else
-                        throw cRuntimeError("INET compiled without IPv6 features!");
+                        throw cRuntimeError("INET was compiled without IPv6 support");
 #endif
                     }
                 }
