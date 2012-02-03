@@ -55,7 +55,7 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
 {
     cPacket *outFrame = frame;
     if (convertToEtherFrameFlag)
-        outFrame = convertToEtherFrame(frame);
+        outFrame = (cPacket *) convertToEtherFrame(frame);
     send(outFrame, "upperLayerOut");
 }
 
