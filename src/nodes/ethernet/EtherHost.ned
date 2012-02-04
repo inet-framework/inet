@@ -28,8 +28,8 @@ import inet.applications.ethernet.EtherAppCli;
 //
 // An example host with one Ethernet port and a traffic generator that
 // generates request-reply traffic directly over Ethernet. This host model
-// does not contain higher layer protocols (IP, TCP). By default is configured
-// to use half duplex MAC (CSMA/CD).
+// does not contain higher layer protocols (IP, TCP). By default it is 
+// configured to use half duplex MAC (CSMA/CD).
 //
 module EtherHost
 {

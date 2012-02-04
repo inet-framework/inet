@@ -15,8 +15,8 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPCONTROLINFO_H
-#define __INET_IPCONTROLINFO_H
+#ifndef __INET_IPv4CONTROLINFO_H
+#define __INET_IPv4CONTROLINFO_H
 
 #include "IPv4ControlInfo_m.h"
 
