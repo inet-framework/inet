@@ -25,7 +25,7 @@ const uint32 LINK_LOCAL_PREFIX = 0xFE800000;
 const uint32 SITE_LOCAL_PREFIX = 0xFEC00000;
 const uint32 MULTICAST_PREFIX = 0xFF000000;
 
-//Link and Site local masks should only preserve 10 bits as prefix length is 10.
+// Link and Site local masks should only preserve 10 bits as prefix length is 10.
 const uint32 LINK_LOCAL_MASK = 0xFFC00000;
 const uint32 SITE_LOCAL_MASK = 0xFFC00000;
 const uint32 MULTICAST_MASK = 0xFF000000;
@@ -43,23 +43,23 @@ const IPv6Address IPv6Address::SOLICITED_NODE_PREFIX("FF02:0:0:0:0:1:FF00:0");
 const IPv6Address IPv6Address::LINKLOCAL_PREFIX("FE80::");
 
 
-// returns numOctals; advances s just over the last hex digit converted
-// FIXME "octal" appears to be a bad name
-static int parseOctals(const char *&s, int *octals)
+// Helper: Parses at most 8 colon-separated 16-bit hex numbers ("groups"),
+// and returns their count. Advances s just over the last hex digit converted.
+static int parseGroups(const char *&s, int *groups)
 {
     int k = 0;
     while (1)
     {
         char *e;
-        octals[k] = strtoul(s, &e, 16);
+        groups[k] = strtoul(s, &e, 16);
         if (s==e) { // no hex digit converted
             if (k!=0) s--;  // "unskip" preceding ':'
             return k;
         }
         // if negative or too big, return (s will point to beginning of large number)
-        if (octals[k]<0 || octals[k]>0xffff)
+        if (groups[k]<0 || groups[k]>0xffff)
             return k;
-        k++;  // octals[k] successfully stored
+        k++;  // group[k] successfully stored
         s = e;  // skip converted hex number
         if (*s!=':' || k==8)
             return k;
@@ -77,32 +77,32 @@ bool IPv6Address::doTryParse(const char *&addr)
     }
 
     // parse and store 16-bit units
-    int octals[8];
-    int numOctals = parseOctals(addr, octals);
+    int groups[8];
+    int numGroups = parseGroups(addr, groups);
 
     // if address string contains "::", parse and store second half too
     if (*addr==':' && *(addr+1)==':')
     {
         addr += 2;
-        int suffixOctals[8];
-        int numSuffixOctals = parseOctals(addr, suffixOctals);
+        int suffixGroups[8];
+        int numSuffixGroups = parseGroups(addr, suffixGroups);
 
-        // merge suffixOctals[] into octals[]
-        if (numOctals+numSuffixOctals>8)
+        // merge suffixGroups[] into groups[]
+        if (numGroups+numSuffixGroups>8)
             return false; // too many
-        for (int i=numOctals; i<8; i++) {
-            int j = i-8+numSuffixOctals;
-            octals[i] = j<0 ? 0 : suffixOctals[j];
+        for (int i=numGroups; i<8; i++) {
+            int j = i-8+numSuffixGroups;
+            groups[i] = j<0 ? 0 : suffixGroups[j];
         }
-        numOctals = 8;
+        numGroups = 8;
     }
 
-    if (numOctals!=8)
+    if (numGroups!=8)
         return false; // too few
 
-    // copy octets to d[]
+    // copy groups to d[]
     for (unsigned int i=0; i<4; i++)
-        d[i] = (octals[i*2]<<16) + octals[2*i + 1];
+        d[i] = (groups[i*2]<<16) + groups[2*i + 1];
 
     return true;
 }
@@ -146,19 +146,19 @@ void IPv6Address::set(const char *addr)
         throw cRuntimeError("IPv6Address: cannot interpret address string `%s'", addr);
 }
 
-// find longest sequence of zeros in address (at least with len=2)
-static void findGap(int *octals, int& start, int& end)
+// Helper: finds the longest sequence of zeroes in the address (at least with len=2)
+static void findGap(int *groups, int& start, int& end)
 {
     start = end = 0;
     int beg = -1;
     for (int i=0; i<8; i++)
     {
-        if (beg==-1 && octals[i]==0)
+        if (beg==-1 && groups[i]==0)
         {
             // begin counting
             beg = i;
         }
-        else if (beg!=-1 && octals[i]!=0)
+        else if (beg!=-1 && groups[i]!=0)
         {
             // end counting
             if (i-beg>=2 && i-beg>end-start) {
@@ -179,27 +179,27 @@ std::string IPv6Address::str() const
     if (isUnspecified())
         return std::string("<unspec>");
 
-    // convert to 16-bit octals
-    int octals[8] = {
+    // convert to 16-bit grops
+    int groups[8] = {
         (d[0]>>16), (d[0]&0xffff), (d[1]>>16), (d[1]&0xffff),
         (d[2]>>16), (d[2]&0xffff), (d[3]>>16), (d[3]&0xffff)
     };
 
-    // find longest sequence of zeros in octals[]
+    // find longest sequence of zeros in groups[]
     int start, end;
-    findGap(octals, start, end);
+    findGap(groups, start, end);
     if (start==0 && end==8)
         return "::0";  // the unspecified address is a special case
 
-    // print octals, replacing gap with "::"
+    // print groups, replacing gap with "::"
     std::stringstream os;
     os << std::hex;
     for (int i=0; i<start; i++)
-        os << (i==0?"":":") << octals[i];
+        os << (i==0?"":":") << groups[i];
     if (start!=end)
         os << "::";
     for (int j=end; j<8; j++)
-        os << (j==end?"":":") << octals[j];
+        os << (j==end?"":":") << groups[j];
     return os.str();
 }
 
