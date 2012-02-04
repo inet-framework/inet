@@ -209,21 +209,15 @@ bool IPv4Address::isNetwork(const IPv4Address& toCmp) const
 }
 
 
-bool IPv4Address::prefixMatches(const IPv4Address& to_cmp, int numbits) const
+bool IPv4Address::prefixMatches(const IPv4Address& other, int length) const
 {
-    if (numbits<1)
+    if (length<1)
         return true;
+    if (length > 31)
+        return addr==other.addr;
 
-    uint32 addr2 = to_cmp.getInt();
-
-    if (numbits > 31)
-        return addr==addr2;
-
-    // The right shift on an unsigned int produces 0 on the left
-    uint32 mask = 0xFFFFFFFF;
-    mask = ~(mask >> numbits);
-
-    return (addr & mask) == (addr2 & mask);
+    uint32 mask = _makeNetmask(length);
+    return (addr & mask) == (other.addr & mask);
 }
 
 int IPv4Address::getNumMatchingPrefixBits(const IPv4Address& to_cmp) const
@@ -244,16 +238,16 @@ int IPv4Address::getNumMatchingPrefixBits(const IPv4Address& to_cmp) const
 
 int IPv4Address::getNetmaskLength() const
 {
-    int i;
-    for (i=0; i<31; i++)
+    for (int i=0; i<32; i++)
         if (addr & (1 << i))
             return 32-i;
     return 0;
 }
 
-void IPv4Address::keepFirstBits(unsigned int n)
+void IPv4Address::_checkNetmaskLength(int length)
 {
-    addr &= 0xFFFFFFFF << n;
+    if (length < 0 || length > 32)
+    	throw cRuntimeError("IPv4Address: wrong netmask length %d (not in 0..32)", length);
 }
 
 bool IPv4Address::maskedAddrAreEqual(const IPv4Address& addr1,

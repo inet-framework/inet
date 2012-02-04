@@ -50,6 +50,10 @@ class INET_API IPv4Address
   protected:
     // Parses IPv4 address into the given bytes, and returns true if syntax was OK.
     static bool parseIPAddress(const char *text, unsigned char tobytes[]);
+    // Throws error if length is outside 0..32
+    static void _checkNetmaskLength(int length);
+    // Returns a netmask with the given length (Implementation note: MSVC refuses to shift by 32 bits!)
+    static uint32 _makeNetmask(int length) {return length>=32 ? 0xffffffffu : ~(0xffffffffu >> length);}
 
   public:
     /**
@@ -264,6 +268,12 @@ class INET_API IPv4Address
     int getNetmaskLength() const;
 
     /**
+     * Returns true if the address is a valid netmask, i.e. ones are contiguous
+     * and shifted fully to the left in the binary representation.
+     */
+    bool isValidNetmask() const {return addr == _makeNetmask(getNetmaskLength());}
+
+    /**
      * Test if the masked addresses (ie the mask is applied to addr1 and
      * addr2) are equal.
      */
@@ -305,11 +315,10 @@ class INET_API IPv4Address
     static bool isWellFormed(const char *text);
 
     /**
-     * Only keeps the n first bits of the address, completing it with zeros.
-     * Typical usage is when the length of an IPv4 prefix is done and to check
-     * the address ends with the right number of 0.
+     * Creates and returns a netmask with the given length. For example,
+     * for length=23 it will return 255.255.254.0.
      */
-    void keepFirstBits(unsigned int n);
+    static IPv4Address makeNetmask(int length) {_checkNetmaskLength(length); return _makeNetmask(length);}
 };
 
 inline std::ostream& operator<<(std::ostream& os, const IPv4Address& ip)

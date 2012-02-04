@@ -255,13 +255,13 @@ void BGPRouting::processMessage(const BGPUpdateMessage& msg)
     _BGPSessions[_currSessionId]->getFSM()->UpdateMsgEvent();
 
     unsigned char               decisionProcessResult;
-    IPv4Address                   netMask(IPv4Address::ALLONES_ADDRESS);
+    IPv4Address                 netMask(IPv4Address::ALLONES_ADDRESS);
     BGP::RoutingTableEntry*     entry = new BGP::RoutingTableEntry();
     const unsigned char         length = msg.getNLRI().length;
     unsigned int                ASValueCount = msg.getPathAttributeList(0).getAsPath(0).getValue(0).getAsValueArraySize();
 
     entry->setDestination(msg.getNLRI().prefix);
-    netMask.keepFirstBits(32-length);
+    netMask = IPv4Address::makeNetmask(length);
     entry->setNetmask(netMask);
     for (unsigned int j=0; j < ASValueCount; j++)
     {
