@@ -412,7 +412,7 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
         else
             delete udpPacket;   // drop multicast packet
     }
-    else if (dynamic_cast<IPv6ControlInfo *>(udpPacket->getControlInfo()) != NULL)
+    else if (dynamic_cast<IPv6ControlInfo *>(ctrl) != NULL)
     {
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
 
