@@ -186,13 +186,21 @@ void UDP::processCommandFromApp(cMessage *msg)
             else if (dynamic_cast<UDPJoinMulticastGroupsCommand*>(ctrl))
             {
                 UDPJoinMulticastGroupsCommand *cmd = (UDPJoinMulticastGroupsCommand*)ctrl;
-                joinMulticastGroups(cmd->getSockId(), cmd->getMulticastAddrArrayPtr(), cmd->getMulticastAddrArraySize(),
-                                            cmd->getInterfaceIdArrayPtr(), cmd->getInterfaceIdArraySize());
+                std::vector<IPvXAddress> addresses;
+                std::vector<int> interfaceIds;
+                for (int i = 0; i < cmd->getMulticastAddrArraySize(); i++)
+                    addresses.push_back(cmd->getMulticastAddr(i));
+                for (int i = 0; i < cmd->getInterfaceIdArraySize(); i++)
+                    interfaceIds.push_back(cmd->getInterfaceId(i));
+                joinMulticastGroups(cmd->getSockId(), addresses, interfaceIds);
             }
             else if (dynamic_cast<UDPLeaveMulticastGroupsCommand*>(ctrl))
             {
                 UDPLeaveMulticastGroupsCommand *cmd = (UDPLeaveMulticastGroupsCommand*)ctrl;
-                leaveMulticastGroups(cmd->getSockId(), cmd->getMulticastAddrArrayPtr(), cmd->getMulticastAddrArraySize());
+                std::vector<IPvXAddress> addresses;
+                for (int i = 0; i < cmd->getMulticastAddrArraySize(); i++)
+                    addresses.push_back(cmd->getMulticastAddr(i));
+                leaveMulticastGroups(cmd->getSockId(), addresses);
             }
             else
                 throw cRuntimeError("Unknown subclass of UDPSetOptionCommand received from app: %s", ctrl->getClassName());
@@ -723,14 +731,15 @@ void UDP::setMulticastOutputInterface(int sockId, int interfaceId)
     sd->multicastOutputInterfaceId = interfaceId;
 }
 
-void UDP::joinMulticastGroups(int sockId, const IPvXAddress *multicastAddresses, unsigned int multicastAddressesLen,
-                                const int *interfaceIds, unsigned int interfaceIdsLen)
+void UDP::joinMulticastGroups(int sockId, const std::vector<IPvXAddress>& multicastAddresses, const std::vector<int> interfaceIds)
 {
     SockDesc *sd = getSocketById(sockId);
-    for (unsigned int k = 0; k < multicastAddressesLen; ++k)
+    int multicastAddressesLen = multicastAddresses.size();
+    int interfaceIdsLen = interfaceIds.size();
+    for (int k = 0; k < multicastAddressesLen; k++)
     {
         const IPvXAddress &multicastAddr = multicastAddresses[k];
-        int interfaceId = interfaceIds && k < interfaceIdsLen ? interfaceIds[k] : -1;
+        int interfaceId = k < interfaceIdsLen ? interfaceIds[k] : -1;
         ASSERT(multicastAddr.isMulticast());
         sd->multicastAddrs[multicastAddr] = interfaceId;
 
@@ -768,10 +777,10 @@ void UDP::addMulticastAddressToInterface(InterfaceEntry *ie, const IPvXAddress& 
     }
 }
 
-void UDP::leaveMulticastGroups(int sockId, const IPvXAddress *multicastAddresses, unsigned int multicastAddressesLen)
+void UDP::leaveMulticastGroups(int sockId, const std::vector<IPvXAddress>& multicastAddresses)
 {
     SockDesc *sd = getSocketById(sockId);
-    for (unsigned int i = 0; i < multicastAddressesLen; ++i)
+    for (unsigned int i = 0; i < multicastAddresses.size(); i++)
         sd->multicastAddrs.erase(multicastAddresses[i]);
     // note: we cannot remove the address from the interface, because someone else may still use it
 }

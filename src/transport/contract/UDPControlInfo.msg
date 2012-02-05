@@ -216,7 +216,6 @@ class UDPSetMulticastInterfaceCommand extends UDPSetOptionCommand
 //
 class UDPJoinMulticastGroupsCommand extends UDPSetOptionCommand
 {
-    @customize(true);
     IPvXAddress multicastAddr[];
     int interfaceId[];
 }
@@ -231,7 +230,6 @@ class UDPJoinMulticastGroupsCommand extends UDPSetOptionCommand
 //
 class UDPLeaveMulticastGroupsCommand extends UDPSetOptionCommand
 {
-    @customize(true);
     IPvXAddress multicastAddr[];
 }
 

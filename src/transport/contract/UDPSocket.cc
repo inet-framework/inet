@@ -17,10 +17,11 @@
 
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
-#include "IPv4InterfaceData.h"
 #include "UDPSocket.h"
 #include "UDPControlInfo.h"
-
+#ifdef WITH_IPv4
+#include "IPv4InterfaceData.h"
+#endif
 
 UDPSocket::UDPSocket()
 {

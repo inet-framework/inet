@@ -97,9 +97,8 @@ class INET_API UDP : public cSimpleModule
     virtual void setTimeToLive(int sockId, int ttl);
     virtual void setBroadcast(int sockId, bool broadcast);
     virtual void setMulticastOutputInterface(int sockId, int interfaceId);
-    virtual void joinMulticastGroups(int sockId, const IPvXAddress *multicastAddresses, unsigned int multicastAddressesLen,
-                                             const int *interfaceIds = NULL, unsigned int interfaceIdsLen = 0);
-    virtual void leaveMulticastGroups(int sockId, const IPvXAddress *multicastAddresses, unsigned int multicastAddressesLen);
+    virtual void joinMulticastGroups(int sockId, const std::vector<IPvXAddress>& multicastAddresses, const std::vector<int> interfaceIds);
+    virtual void leaveMulticastGroups(int sockId, const std::vector<IPvXAddress>& multicastAddresses);
     virtual void addMulticastAddressToInterface(InterfaceEntry *ie, const IPvXAddress& multicastAddr);
 
     // ephemeral port

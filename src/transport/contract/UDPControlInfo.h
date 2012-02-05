@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005,2012 Andras Varga
+// Copyright (C) 2012 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,8 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "UDPControlInfo.h"
 
-Register_Class(UDPLeaveMulticastGroupsCommand);
+#ifndef __INET_UDPCONTROLINFO_H
+#define __INET_UDPCONTROLINFO_H
 
-Register_Class(UDPLeaveMulticastGroupsCommand);
+#include "UDPControlInfo_m.h"
+
+#endif
+
+
