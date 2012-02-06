@@ -265,6 +265,8 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
             interfaceId = tunneling->getVIfIndexForDest(destAddress);
     }
 #else
+    // FIXME this is not the same as the code above (when WITH_xMIPv6 is defined),
+    // so tunneling examples could not work with xMIPv6
     interfaceId = tunneling->getVIfIndexForDest(destAddress, IPv6Tunneling::NORMAL);
 #endif /* WITH_xMIPv6 */
 
@@ -691,7 +693,7 @@ void IPv6::fragmentAndSend(IPv6Datagram *datagram, InterfaceEntry *ie, const MAC
     // create and send fragments
     int headerLength = datagram->calculateUnfragmentableHeaderByteLength();
     int payloadLength = datagram->getByteLength() - headerLength;
-    int fragmentLength = ((mtu - headerLength - 8) / 8) * 8;
+    int fragmentLength = ((mtu - headerLength - IPv6_FRAGMENT_HEADER_LENGTH) / 8) * 8;
     ASSERT(fragmentLength > 0);
 
     int noOfFragments = (payloadLength + fragmentLength - 1)/ fragmentLength;
@@ -711,7 +713,7 @@ void IPv6::fragmentAndSend(IPv6Datagram *datagram, InterfaceEntry *ie, const MAC
         fh->setFragmentOffset(offset);
         fh->setMoreFragments(!lastFragment);
 
-        IPv6Datagram *fragment = (IPv6Datagram *) datagram->dup();
+        IPv6Datagram *fragment = datagram->dup();
         if (offset == 0)
             fragment->encapsulate(encapsulatedPacket);
         fragment->setName(fragMsgName.c_str());
