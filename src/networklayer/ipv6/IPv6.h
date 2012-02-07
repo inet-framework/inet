@@ -153,10 +153,13 @@ class INET_API IPv6 : public QueueBase
     virtual void endService(cPacket *msg);
 
     /**
-     * Determines the correct interface for the specified destination address.
+     * Determines the correct interface and next hop address for the destination
+     * address of the datagram.
+     * If successful it attaches an IPv6RoutingDecision to the datagram and
+     * returns true. Otherwise it sends the datagram to Neighbour Discovery
+     * and returns false.
      */
-    bool determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop, int& interfaceId,
-            IPv6Datagram* datagram);
+    bool determineOutputInterface(IPv6Datagram* datagram);
 
 #ifdef WITH_xMIPv6
     /**

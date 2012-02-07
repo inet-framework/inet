@@ -27,6 +27,8 @@
 #include "INETDefs.h"
 
 #include "IPv6Address.h"
+#include "RoutingTable6.h"
+#include "IPv6ControlInfo_m.h"
 #include "IPv6NDMessage_m.h"
 #include "IPv6NeighbourCache.h"
 
@@ -179,11 +181,9 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
          *  to determine the destination's next hop address and interface ID by:
          *  (1) looking up the destination cache, (2)looking up the routing table,
          *  or (3) selecting a default router. It then updates the destination
-         *  cache. If no default router can be selected than we assume the
-         *  destination address to be onlink and simply return any available
-         *  interface.
+         *  cache.
          */
-        virtual IPv6Address determineNextHop(const IPv6Address& destAddr, int& outIfID);
+        virtual IPv6RoutingDecision *determineNextHop(IPv6Datagram *datagram);
         virtual void initiateNeighbourUnreachabilityDetection(Neighbour *neighbour);
         virtual void processNUDTimeout(cMessage *timeoutMsg);
         virtual IPv6Address selectDefaultRouter(int& outIfID);

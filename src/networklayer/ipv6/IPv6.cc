@@ -217,20 +217,23 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
         //so we add a 2nd condition
         // FIXME rewrite code so that condition is cleaner --Andras
         //if (!rt->isRouter())
-        if (!rt->isRouter() && !(datagram->getArrivalGate()->isName("ndIn")))
+        if (!datagram->getArrivalGate()->isName("ndIn"))
         {
-            EV << "forwarding is off, dropping packet\n";
-            numDropped++;
-            delete datagram;
-            return;
-        }
+            if (!rt->isRouter())
+            {
+                EV << "forwarding is off, dropping packet\n";
+                numDropped++;
+                delete datagram;
+                return;
+            }
 
-        // don't forward link-local addresses or weaker
-        if (destAddress.isLinkLocal() || destAddress.isLoopback())
-        {
-            EV << "dest address is link-local (or weaker) scope, doesn't get forwarded\n";
-            delete datagram;
-            return;
+            // don't forward link-local addresses or weaker
+            if (destAddress.isLinkLocal() || destAddress.isLoopback())
+            {
+                EV << "dest address is link-local (or weaker) scope, doesn't get forwarded\n";
+                delete datagram;
+                return;
+            }
         }
 
         // hop counter decrement: only if datagram arrived from network, and will be
@@ -242,7 +245,6 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
 
     // routing
     int interfaceId = -1;
-    IPv6Address nextHop;
 
 #ifdef WITH_xMIPv6
     // tunneling support - CB
@@ -279,11 +281,23 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     }
 
     if (interfaceId == -1)
-        if ( !determineOutputInterface(destAddress, nextHop, interfaceId, datagram) )
+    {
+        if (destIE)
+        {
+            IPv6RoutingDecision *rd = new IPv6RoutingDecision();
+            rd->setInterfaceId(destIE->getInterfaceId());
+            datagram->setControlInfo(rd);
+        }
+
+        if ( !determineOutputInterface(datagram) )
             // no interface found; sent to ND or to ICMP for error processing
             //opp_error("No interface found!");//return;
             return; // don't raise error if sent to ND or ICMP!
+    }
 
+    IPv6RoutingDecision *rd = check_and_cast<IPv6RoutingDecision*>(datagram->getControlInfo());
+    IPv6Address nextHop = rd->getNextHopAddr();
+    interfaceId = rd->getInterfaceId();
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
     ASSERT(ie!=NULL);
     EV << "next hop for " << destAddress << " is " << nextHop << ", interface " << ie->getName() << "\n";
@@ -614,7 +628,6 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, IPv6ControlInfo *contr
         if (rt->getInterfaceByAddress(src)==NULL)
         {
             delete datagram;
-            delete controlInfo;
 #ifndef WITH_xMIPv6
             throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
                       src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
@@ -737,6 +750,8 @@ void IPv6::fragmentAndSend(IPv6Datagram *datagram, InterfaceEntry *ie, const MAC
 
 void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, const MACAddress& macAddr)
 {
+    delete datagram->removeControlInfo();
+
     // if link layer uses MAC addresses (basically, not PPP), add control info
     if (!macAddr.isUnspecified())
     {
@@ -750,44 +765,74 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, cons
     send(datagram, "queueOut", ie->getNetworkLayerGateIndex());
 }
 
-bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop,
-                                    int& interfaceId, IPv6Datagram* datagram)
+bool IPv6::determineOutputInterface(IPv6Datagram* datagram)
 {
-    // try destination cache
-    //IPv6Address nextHop = rt->lookupDestCache(destAddress, interfaceId);
-    nextHop = rt->lookupDestCache(destAddress, interfaceId);
+    IPv6RoutingDecision *rd = dynamic_cast<IPv6RoutingDecision*>(datagram->getControlInfo());
+    if (rd && rd->getInterfaceId() != -1 && !rd->getNextHopAddr().isUnspecified())
+        return true;
 
-    if (interfaceId == -1)
+    if (!rd)
     {
-        // address not in destination cache: do longest prefix match in routing table
-        EV << "do longest prefix match in routing table" << endl;
-        const IPv6Route *route = rt->doLongestPrefixMatch(destAddress);
-        EV << "finished longest prefix match in routing table" << endl;
-        if (!route)
-        {
-            if (rt->isRouter())
-            {
-                EV << "unroutable, sending ICMPv6_DESTINATION_UNREACHABLE\n";
-                numUnroutable++;
-                icmp->sendErrorMessage(datagram, ICMPv6_DESTINATION_UNREACHABLE, 0); // FIXME check ICMP 'code'
-            }
-            else // host
-            {
-                EV << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
-                send(datagram, "ndOut");
-            }
-            return false;
-        }
-        interfaceId = route->getInterfaceId();
-        nextHop = route->getNextHop();
-        if (nextHop.isUnspecified())
-            nextHop = destAddress;  // next hop is the host itself
-
-        // add result into destination cache
-        rt->updateDestCache(destAddress, nextHop, interfaceId, route->getExpiryTime());
+        rd = new IPv6RoutingDecision();
+        datagram->setControlInfo(rd);
     }
 
-    return true;
+    // set interface id of there is only one interface
+    if (rd->getInterfaceId() == -1)
+    {
+        for (int i = 0; i < ift->getNumInterfaces(); ++i)
+        {
+            InterfaceEntry *ie = ift->getInterface(i);
+            if (!ie->isLoopback())
+            {
+                if (rd->getInterfaceId() == -1)
+                    rd->setInterfaceId(ie->getInterfaceId());
+                else
+                {
+                    rd->setInterfaceId(-1);
+                    break;
+                }
+            }
+        }
+    }
+
+    // try destination cache
+    IPv6Destination dest(datagram->getDestAddress(), rd->getInterfaceId());
+    const DestCacheEntry *entry = rt->lookupDestCache(dest);
+    if (entry)
+    {
+        rd->setInterfaceId(entry->interfaceId);
+        rd->setNextHopAddr(entry->nextHopAddr);
+        return true;
+    }
+
+    // address not in destination cache: do longest prefix match in routing table
+    EV << "do longest prefix match in routing table" << endl;
+    const IPv6Route *route = rt->doLongestPrefixMatch(dest);
+    EV << "finished longest prefix match in routing table" << endl;
+    if (route)
+    {
+        rd->setInterfaceId(route->getInterfaceId());
+        rd->setNextHopAddr(route->getNextHop().isUnspecified() ? datagram->getDestAddress() : route->getNextHop());
+        // add result into destination cache
+        rt->updateDestCache(dest, rd->getNextHopAddr(), rd->getInterfaceId(), route->getExpiryTime());
+        return true;
+    }
+    else
+    {
+        if (rt->isRouter())
+        {
+            EV << "unroutable, sending ICMPv6_DESTINATION_UNREACHABLE\n";
+            numUnroutable++;
+            icmp->sendErrorMessage(datagram, ICMPv6_DESTINATION_UNREACHABLE, 0); // FIXME check ICMP 'code'
+        }
+        else // host
+        {
+            EV << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
+            send(datagram, "ndOut");
+        }
+        return false;
+    }
 }
 
 #ifdef WITH_xMIPv6

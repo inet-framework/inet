@@ -67,7 +67,13 @@ std::ostream& operator<<(std::ostream& os, const IPv6Route& e)
     return os;
 };
 
-std::ostream& operator<<(std::ostream& os, const RoutingTable6::DestCacheEntry& e)
+std::ostream& operator<<(std::ostream& os, const IPv6Destination& dest)
+{
+    os << "if=" << dest.getInterfaceId() << " " << dest.getAddress();
+    return os;
+};
+
+std::ostream& operator<<(std::ostream& os, const DestCacheEntry& e)
 {
     os << "if=" << e.interfaceId << " " << e.nextHopAddr;  //FIXME try printing interface name
     return os;
@@ -463,53 +469,45 @@ bool RoutingTable6::isLocalAddress(const IPv6Address& dest) const
     return false;
 }
 
-const IPv6Address& RoutingTable6::lookupDestCache(const IPv6Address& dest, int& outInterfaceId)
+const DestCacheEntry *RoutingTable6::lookupDestCache(const IPv6Destination& dest)
 {
-    Enter_Method("lookupDestCache(%s)", dest.str().c_str());
+    Enter_Method("lookupDestCache(%s,%d)", dest.getAddress().str().c_str(), dest.getInterfaceId());
 
     DestCache::iterator it = destCache.find(dest);
     if (it == destCache.end())
-    {
-        outInterfaceId = -1;
-        return IPv6Address::UNSPECIFIED_ADDRESS;
-    }
+        return NULL;
+
     DestCacheEntry &entry = it->second;
     if (entry.expiryTime > 0 && simTime() > entry.expiryTime)
     {
         destCache.erase(it);
-        outInterfaceId = -1;
-        return IPv6Address::UNSPECIFIED_ADDRESS;
+        return NULL;
     }
 
-    outInterfaceId = entry.interfaceId;
-    return entry.nextHopAddr;
+    return &entry;
 }
 
-const IPv6Route *RoutingTable6::doLongestPrefixMatch(const IPv6Address& dest)
+const IPv6Route *RoutingTable6::doLongestPrefixMatch(const IPv6Destination& dest)
 {
-    Enter_Method("doLongestPrefixMatch(%s)", dest.str().c_str());
+    Enter_Method("doLongestPrefixMatch(%s,%d)", dest.getAddress().str().c_str(), dest.getInterfaceId());
 
     // we'll just stop at the first match, because the table is sorted
     // by prefix lengths and metric (see addRoute())
-
-    // bugfix - CB
-    RouteList::iterator it = routeList.begin();
-    while (it!=routeList.end())
+    for (RouteList::iterator it = routeList.begin(); it!=routeList.end(); )
     {
-        if (dest.matches((*it)->getDestPrefix(), (*it)->getPrefixLength()))
+        IPv6Route *route = *it;
+        if (route->matches(dest.getAddress()) &&
+                (dest.getInterfaceId() == -1 || dest.getInterfaceId() == route->getInterfaceId()))
         {
-            if (simTime() > (*it)->getExpiryTime() && (*it)->getExpiryTime() != 0)//since 0 represents infinity.
+            // check expiry
+            if (route->getExpiryTime() == 0/*infinity*/ || simTime() <= route->getExpiryTime())
+                return route;
+
+            if ( (*it)->getSrc()==IPv6Route::FROM_RA )
             {
-                if ( (*it)->getSrc()==IPv6Route::FROM_RA )
-                {
-                    EV << "Expired prefix detected!!" << endl;
-                    it = routeList.erase(it);
-                    //RouteList::iterator oldIt = it++;
-                    //removeOnLinkPrefix((*oldIt)->getDestPrefix(), (*oldIt)->getPrefixLength());
-                }
+                EV << "Expired prefix detected!!" << endl;
+                it = routeList.erase(it);
             }
-            else
-                return *it;
         }
         else
             ++it;
@@ -526,7 +524,7 @@ bool RoutingTable6::isPrefixPresent(const IPv6Address& prefix) const
     return false;
 }
 
-void RoutingTable6::updateDestCache(const IPv6Address& dest, const IPv6Address& nextHopAddr, int interfaceId, simtime_t expiryTime)
+void RoutingTable6::updateDestCache(const IPv6Destination &dest, const IPv6Address& nextHopAddr, int interfaceId, simtime_t expiryTime)
 {
     DestCacheEntry &entry = destCache[dest];
     entry.nextHopAddr = nextHopAddr;

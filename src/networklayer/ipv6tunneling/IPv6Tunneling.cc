@@ -400,8 +400,8 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram* dgram)
         {
             // if we do not have a valid source address, we'll have to ask
             // the routing table for the correct interface.
-            int interfaceId;
-            IPv6Address nextHop = rt->lookupDestCache(dest, interfaceId);
+            // FIXME why is lookupDestCache() called if the result is not used???
+            const DestCacheEntry *entry = rt->lookupDestCache(IPv6Destination(dest));
         }
 
         if (tunnels[vIfIndex].tunnelType == T2RH) // update 15.01.08 - CB

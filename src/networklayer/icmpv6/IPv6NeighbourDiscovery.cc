@@ -216,17 +216,16 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
 {
     EV << "Packet " << msg << " arrived from IPv6 module.\n";
 
-    int nextHopIfID;
-    EV << "Determining Next Hop" << endl;
-    IPv6Address nextHopAddr = determineNextHop(msg->getDestAddress(), nextHopIfID);
-
-    if (nextHopIfID == -1)
+    IPv6RoutingDecision *routingDecision = determineNextHop(msg);
+    if (!routingDecision)
     {
-        //draft-ietf-ipv6-2461bis-04 has omitted on-link assumption.
-        //draft-ietf-v6ops-onlinkassumption-03 explains why.
         icmpv6->sendErrorMessage(msg, ICMPv6_DESTINATION_UNREACHABLE, NO_ROUTE_TO_DEST);
         return;
     }
+
+    int nextHopIfID = routingDecision->getInterfaceId();
+    IPv6Address nextHopAddr = routingDecision->getNextHopAddr();
+    delete routingDecision;
 
     EV << "Next Hop Address is: " << nextHopAddr << " on interface: " << nextHopIfID << endl;
 
@@ -411,11 +410,19 @@ void IPv6NeighbourDiscovery::reachabilityConfirmed(const IPv6Address& neighbour,
     reachability of the forward path is of interest.*/
 }
 
-IPv6Address IPv6NeighbourDiscovery::determineNextHop(
-    const IPv6Address& destAddr, int& outIfID)
+IPv6RoutingDecision *IPv6NeighbourDiscovery::determineNextHop(IPv6Datagram *datagram)
 {
-    IPv6Address nextHopAddr;
+    EV << "Determining Next Hop" << endl;
+
     simtime_t expiryTime;
+    IPv6RoutingDecision *ctrlInfo = dynamic_cast<IPv6RoutingDecision*>(datagram->removeControlInfo());
+    int nextHopIfID = ctrlInfo ? ctrlInfo->getInterfaceId() : -1;
+    IPv6Address nextHopAddr = ctrlInfo ? ctrlInfo->getNextHopAddr() : IPv6Address::UNSPECIFIED_ADDRESS;
+
+    if (nextHopIfID != -1 && !nextHopAddr.isUnspecified())
+        return ctrlInfo;
+
+    IPv6Destination dest(datagram->getDestAddress(), nextHopIfID);
 
     //RFC 2461 Section 5.2
     //Next-hop determination for a given unicast destination operates as follows.
@@ -423,19 +430,19 @@ IPv6Address IPv6NeighbourDiscovery::determineNextHop(
     //The sender performs a longest prefix match against the Prefix List to
     //determine whether the packet's destination is on- or off-link.
     EV << "Find out if supplied dest addr is on-link or off-link.\n";
-    const IPv6Route *route = rt6->doLongestPrefixMatch(destAddr);
+    const IPv6Route *route = rt6->doLongestPrefixMatch(dest);
 
     if (route != NULL)
     {
         expiryTime = route->getExpiryTime();
-        outIfID = route->getInterfaceId();
+        nextHopIfID = route->getInterfaceId();
 
         //If the destination is on-link, the next-hop address is the same as the
         //packet's destination address.
         if (route->getNextHop().isUnspecified())
         {
             EV << "Dest is on-link, next-hop addr is same as dest addr.\n";
-            nextHopAddr = destAddr;
+            nextHopAddr = datagram->getDestAddress();
         }
         else
         {
@@ -450,19 +457,30 @@ IPv6Address IPv6NeighbourDiscovery::determineNextHop(
         //(following the rules described in Section 6.3.6).
 
         EV << "No routes were found, Dest addr is off-link.\n";
-        nextHopAddr = selectDefaultRouter(outIfID);
+        nextHopAddr = selectDefaultRouter(nextHopIfID);
         expiryTime = 0;
 
-        if (outIfID == -1)
-            EV << "No Default Routers were found.";
+        if (nextHopIfID == -1)
+        {
+            EV << "No Default Routers were found.\n";
+            //draft-ietf-ipv6-2461bis-04 has omitted on-link assumption.
+            //draft-ietf-v6ops-onlinkassumption-03 explains why.
+            delete ctrlInfo;
+            return NULL;
+        }
         else
             EV << "Default router found.\n";
     }
 
     /*the results of next-hop determination computations are saved in the Destination
     Cache (which also contains updates learned from Redirect messages).*/
-    rt6->updateDestCache(destAddr, nextHopAddr, outIfID, expiryTime);
-    return nextHopAddr;
+    rt6->updateDestCache(dest, nextHopAddr, nextHopIfID, expiryTime);
+
+    if (!ctrlInfo)
+        ctrlInfo = new IPv6RoutingDecision();
+    ctrlInfo->setInterfaceId(nextHopIfID);
+    ctrlInfo->setNextHopAddr(nextHopAddr);
+    return ctrlInfo;
 }
 
 void IPv6NeighbourDiscovery::initiateNeighbourUnreachabilityDetection(

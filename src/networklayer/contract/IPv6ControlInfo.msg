@@ -71,3 +71,16 @@ class IPv6ControlInfo
                           // should be sent (see ~InterfaceTable)
     abstract IPv6ExtensionHeaderPtr extensionHeader[]; // array of extension headers, subclassed from ~IPv6ExtensionHeader
 }
+
+//
+// Control info attached to packets sent from ~IPv6 to ~IPv6NeighbourDiscovery.
+//
+// Next hop address is used on a LAN to determine the MAC destination
+// address (and it may be used on other multicast networks for similar
+// addressing purpose).
+//
+class IPv6RoutingDecision
+{
+    int interfaceId = -1; // interface on which dgram should be sent (see ~InterfaceTable)
+    IPv6Address nextHopAddr;
+}

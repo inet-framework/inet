@@ -83,7 +83,41 @@ class INET_API IPv6Route : public cObject
     const IPv6Address& getNextHop() const  {return _nextHop;}
     simtime_t getExpiryTime() const  {return _expiryTime;}
     int getMetric() const  {return _metric;}
+
+    bool matches(IPv6Address dest) { return dest.matches(_destPrefix, _length); }
 };
+
+class IPv6Destination
+{
+    int interfaceId; // requested outgoing interface or -1, used for link-local destinations
+    IPv6Address destAddr;
+  public:
+    explicit IPv6Destination(const IPv6Address &destAddr, int interfaceId=-1)
+        : interfaceId(interfaceId), destAddr(destAddr)
+    {
+        if (interfaceId == -1 && destAddr.isLinkLocal())
+            throw cRuntimeError("Outgoing interface must be specified for link-local destinations.");
+    }
+    bool operator==(const IPv6Destination &rhs) const
+       { return interfaceId == rhs.interfaceId && destAddr == rhs.destAddr; }
+    bool operator<(const IPv6Destination &rhs) const
+       { return interfaceId < rhs.interfaceId ||
+         (interfaceId==rhs.interfaceId && destAddr<rhs.destAddr);}
+    int getInterfaceId() const { return interfaceId; }
+    IPv6Address getAddress() const { return destAddr; }
+};
+std::ostream& operator<<(std::ostream& os, const IPv6Destination& dest);
+
+// Destination Cache maps dest address to next hop and interfaceId.
+// NOTE: nextHop might be a link-local address from which interfaceId cannot be deduced
+struct DestCacheEntry
+{
+    int interfaceId;
+    IPv6Address nextHopAddr;
+    simtime_t expiryTime;
+    // more destination specific data may be added here, e.g. path MTU
+};
+std::ostream& operator<<(std::ostream& os, const DestCacheEntry& e);
 
 /**
  * Represents the IPv6 routing table and neighbour discovery data structures.
@@ -114,17 +148,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     bool mipv6Support; // 4.9.07 - CB
 #endif /* WITH_xMIPv6 */
 
-    // Destination Cache maps dest address to next hop and interfaceId.
-    // NOTE: nextHop might be a link-local address from which interfaceId cannot be deduced
-    struct DestCacheEntry
-    {
-        int interfaceId;
-        IPv6Address nextHopAddr;
-        simtime_t expiryTime;
-        // more destination specific data may be added here, e.g. path MTU
-    };
-    friend std::ostream& operator<<(std::ostream& os, const DestCacheEntry& e);
-    typedef std::map<IPv6Address,DestCacheEntry> DestCache;
+    typedef std::map<IPv6Destination,DestCacheEntry> DestCache;
     DestCache destCache;
 
     // RouteList contains local prefixes, and (for routers)
@@ -223,22 +247,22 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
 
     /**
      * Looks up the given destination address in the Destination Cache,
-     * then returns the next-hop address and the interface in the outInterfaceId
-     * variable. If the destination is not in the cache, outInterfaceId is set to
+     * then returns the next-hop address and the interface in the interfaceId
+     * variable. If the destination is not in the cache, interfaceId is set to
      * -1 and the unspecified address is returned. The caller should check
      * for interfaceId==-1, because unspecified address is also returned
      * if the link layer doesn't use addresses at all (e.g. PPP).
-     *
-     * NOTE: outInterfaceId is an OUTPUT parameter -- its initial value is ignored,
-     * and the lookupDestCache() sets it to the correct value instead.
      */
-    const IPv6Address& lookupDestCache(const IPv6Address& dest, int& outInterfaceId);
+    const DestCacheEntry *lookupDestCache(const IPv6Destination& dest);
 
     /**
      * Performs longest prefix match in the routing table and returns
      * the resulting route, or NULL if there was no match.
+     *
+     * If interfaceId is specified, it considers only the routes outgoing
+     * on the specified interface.
      */
-    const IPv6Route *doLongestPrefixMatch(const IPv6Address& dest);
+    const IPv6Route *doLongestPrefixMatch(const IPv6Destination& dest);
 
     /**
      * Checks if the given prefix already exists in the routing table (prefix list)
@@ -252,7 +276,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     /**
      * Add or update a destination cache entry.
      */
-    virtual void updateDestCache(const IPv6Address& dest, const IPv6Address& nextHopAddr, int interfaceId, simtime_t expiryTime);
+    virtual void updateDestCache(const IPv6Destination& dest, const IPv6Address& nextHopAddr, int interfaceId, simtime_t expiryTime);
 
     /**
      * Discard all entries in destination cache
