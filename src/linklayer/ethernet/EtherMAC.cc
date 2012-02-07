@@ -140,7 +140,7 @@ void EtherMAC::calculateParameters(bool errorWhenAsymmetric)
     if (connected && !duplexMode)
     {
         if (curEtherDescr->halfDuplexFrameMinBytes < 0.0)
-            error("%g bps Ethernet only supports full duplex links", curEtherDescr->txrate);
+            error("%g bps Ethernet only supports full-duplex links", curEtherDescr->txrate);
     }
 }
 

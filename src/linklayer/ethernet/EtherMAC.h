@@ -27,7 +27,11 @@ class EtherJam;
 class IPassiveQueue;
 
 /**
- * Ethernet MAC module.
+ * Ethernet MAC module which supports both half-duplex (CSMA/CD) and full-duplex
+ * operation. (See also EtherMACFullDuplex which has a considerably smaller
+ * code with all the CSMA/CD complexity removed.)
+ *
+ * See NED file for more details.
  */
 class INET_API EtherMAC : public EtherMACBase
 {

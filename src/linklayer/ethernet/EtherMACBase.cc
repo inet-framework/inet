@@ -91,7 +91,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
-        -1,  // half duplex is not supported
+        -1,  // half-duplex is not supported
         0,
         0.0,
         0.0
@@ -102,7 +102,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
-        -1,  // half duplex is not supported
+        -1,  // half-duplex is not supported
         0,
         0.0,
         0.0
@@ -113,7 +113,7 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
         MIN_ETHERNET_FRAME_BYTES,
         0,
         0,
-        -1,  // half duplex is not supported
+        -1,  // half-duplex is not supported
         0,
         0.0,
         0.0
@@ -528,7 +528,7 @@ void EtherMACBase::finish()
     {
         simtime_t t = simTime();
         recordScalar("simulated time", t);
-        recordScalar("full duplex", duplexMode);
+        recordScalar("full-duplex", duplexMode);
 
         if (t > 0)
         {

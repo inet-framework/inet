@@ -23,11 +23,11 @@ import inet.linklayer.IEtherMAC;
 
 
 //
-// Ethernet MAC which supports full duplex operation ONLY.
+// Ethernet MAC which supports full-duplex operation ONLY.
 // See the ~IEtherMAC for general informations.
 //
 // Most of today's Ethernet networks are switched, and operate
-// in full duplex mode. Full-duplex transmission can be used for
+// in full-duplex mode. Full-duplex transmission can be used for
 // point-to-point connections only. Since full-duplex connections
 // cannot be shared, collisions are eliminated. This setup eliminates
 // most of the need for the CSMA/CD access control mechanism because
@@ -44,12 +44,12 @@ import inet.linklayer.IEtherMAC;
 // for that.
 //
 // Supported variations:
-// - 10Mb Ethernet (full duplex mode)
-// - 100Mb Ethernet (full duplex mode)
-// - 1Gb Ethernet (full duplex mode)
-// - 10Gb Ethernet (full duplex mode)
-// - 40Gb Ethernet (full duplex mode)
-// - 100Gb Ethernet (full duplex mode)
+// - 10Mb Ethernet (full-duplex mode)
+// - 100Mb Ethernet (full-duplex mode)
+// - 1Gb Ethernet (full-duplex mode)
+// - 10Gb Ethernet (full-duplex mode)
+// - 40Gb Ethernet (full-duplex mode)
+// - 100Gb Ethernet (full-duplex mode)
 //
 // Supports all three Ethernet frame types. (It handles ~EtherFrame message class;
 // specific frame classes (Ethernet-II, IEEE 802.3) are subclassed from that one.)
@@ -124,7 +124,7 @@ simple EtherMACFullDuplex like IEtherMAC
         string address = default("auto");   // MAC address as hex string (12 hex digits), or
                                             // "auto". "auto" values will be replaced by
                                             // a generated MAC address in init stage 0.
-        bool duplexMode = default(true);    // must be set to "true", as EtherMACFullDuplex does not support half duplex operation
+        bool duplexMode = default(true);    // must be set to "true", as EtherMACFullDuplex does not support half-duplex operation
                                             // (parameter is present to reduce the risk of accidental misconfiguration)
         int txQueueLimit = default(1000);   // maximum number of frames queued up for transmission in the internal queue
                                             // (only used if queueModule==""); additional frames cause a runtime error

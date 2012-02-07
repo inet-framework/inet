@@ -31,9 +31,9 @@ import inet.applications.ISCTPApp;
 // IPv4 host with SCTP, TCP, UDP layers and applications.
 // IP forwarding is disabled by default (see IPForward).
 // - Can be connected via ethernet interface to other nodes using
-//   the ethg gate. By default full duplex connections are supported
+//   the ethg gate. By default full-duplex connections are supported
 //   only (twisted pair). Set **.eth[*].typename="EthernetInterface" for
-//   a full/half duplex CSMA/CD implementation (coaxial cable)
+//   a full/half-duplex CSMA/CD implementation (coaxial cable)
 // - By default contains no wireless cards, however it can be configured
 //   by the numRadios parameter. Wirless card type is configured by the
 //   **.wlan[*].typename parameter. see:  inet.linklayer.ieee80211 or other

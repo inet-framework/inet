@@ -28,13 +28,13 @@ import inet.applications.ethernet.EtherAppCli;
 //
 // An example host with one Ethernet port and a traffic generator that
 // generates request-reply traffic directly over Ethernet. This host model
-// does not contain higher layer protocols (IP, TCP). By default it is 
-// configured to use half duplex MAC (CSMA/CD).
+// does not contain higher layer protocols (IP, TCP). By default it is
+// configured to use half-duplex MAC (CSMA/CD).
 //
 module EtherHost
 {
     parameters:
-        bool csmacdSupport = default(true);  // by default use CSMA/CD 
+        bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default(""); // DropTailQueue, DropTailQoSQueue, REDQueue, or empty to use the internal queue
         @node();

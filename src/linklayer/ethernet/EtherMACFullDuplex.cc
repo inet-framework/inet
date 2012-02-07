@@ -183,7 +183,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
     if (!frame)
     {
         if (dynamic_cast<EtherIFG *>(msg))
-            throw cRuntimeError("There is no burst mode in full duplex, invalid received EtherIFG frame");
+            throw cRuntimeError("There is no burst mode in full-duplex operation: EtherIFG is unexpected");
         check_and_cast<EtherFrame *>(msg);
     }
 

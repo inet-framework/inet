@@ -28,7 +28,7 @@
 // and 900 switches and hubs. This results in about 165MB process size
 // on my (32-bit) linux box when I run the simulation.
 // The model mixes all kinds of Ethernet technology: Gigabit Ethernet,
-// 100Mb full duplex, 100Mb half duplex, 10Mb UTP, 10Mb bus ("thin Ethernet"),
+// 100Mb full-duplex, 100Mb half-duplex, 10Mb UTP, 10Mb bus ("thin Ethernet"),
 // switched hubs, repeating hubs.
 //
 // The topology is in LargeNet.ned, and it looks like this: there's chain
@@ -40,7 +40,7 @@
 // Then there're several smaller LANs hanging off each backbone switch.
 // There're three types of LANs: small, medium and large (represented by
 // compound module types ~SmallLAN, ~MediumLAN, ~LargeLAN). A small LAN
-// consists of a few computers on a hub (100Mb half duplex); a medium
+// consists of a few computers on a hub (100Mb half-duplex); a medium
 // LAN consists of a smaller switch with a hub on one of its port
 // (and computers on both); the large one also has a switch and a hub,
 // plus an Ethernet bus hanging of one port of the hub (there's still hubs

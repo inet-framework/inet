@@ -54,7 +54,7 @@ moduleinterface IEtherMAC
         string address;         // MAC address as hex string (12 hex digits), or
                                 // "auto". "auto" values will be replaced by
                                 // a generated MAC address in init stage 0.
-        bool duplexMode;        // selects full duplex (true) or half duplex (false) operation
+        bool duplexMode;        // selects full-duplex (true) or half-duplex (false) operation
         int txQueueLimit;       // maximum number of frames queued up for transmission;
                                 // additional frames are dropped. Only used if queueModule==""
         string queueModule;     // name of optional external queue module

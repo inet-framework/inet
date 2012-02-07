@@ -30,12 +30,12 @@ import inet.applications.ethernet.EtherAppCli;
 // An example host with one Ethernet interface and an Ethernet traffic
 // generator directly connected to it. This host model does not contain
 // higher layer protocols (IP, TCP). By default is configured to use
-// half duplex MAC (CSMA/CD).
+// half-duplex MAC (CSMA/CD).
 //
 module EtherHost2
 {
     parameters:
-        bool csmacdSupport = default(true);  // by default use CSMA/CD 
+        bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default(""); // DropTailQueue, DropTailQoSQueue, REDQueue, or "" to use the internal queue
         @node();
@@ -65,6 +65,6 @@ module EtherHost2
         queue.out --> mac.upperLayerIn if queueType != "";
         encap.lowerLayerOut --> mac.upperLayerIn if queueType == "";
         mac.upperLayerOut --> encap.lowerLayerIn;
-        
+
         mac.phys <--> ethg;
 }

@@ -31,7 +31,7 @@ class EtherTraffic;
 class InterfaceEntry;
 
 /**
- * Base class for ethernet MAC implementations.
+ * Base class for Ethernet MAC implementations.
  */
 class INET_API EtherMACBase : public cSimpleModule, public cListener
 {
@@ -76,10 +76,10 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
         double        txrate;
         double        halfBitTime;          // transmission time of a half bit
         int64         frameMinBytes;        // minimal frame length
-        //for half duplex:
+        // for half-duplex operation:
         unsigned int  maxFramesInBurst;
         int64         maxBytesInBurst;      // with IFG and external datas
-        int64         halfDuplexFrameMinBytes;   // minimal frame length in half duplex mode, half duplex not supported when smaller than 0
+        int64         halfDuplexFrameMinBytes;   // minimal frame length in half-duplex mode; -1 means half duplex is not supported
         int64         frameInBurstMinBytes; // minimal frame length in burst mode, after first frame
         double        slotTime;             // slot time
         double        maxPropagationDelay;  // used for detecting longer cables than allowed
@@ -126,24 +126,24 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     bool disabled;                  // true if the MAC is disabled, defined by the user
     bool promiscuous;               // if true, passes up all received frames
 
-    bool dataratesDiffer;           // true when tx rate and rx rate differ (configuration error, or between datarate change of tx/rx channels)
+    bool dataratesDiffer;           // true when tx rate and rx rate differ (configuration error, or between datarate changes of tx/rx channels)
 
     // MAC operation modes and parameters
     // TODO: some of these parameters do not have any meaning for EtherMACFullDuplex, they should rather be in EtherMAC instead
-    bool duplexMode;                // channel connecting to MAC is full duplex, i.e. like a switch with 2 half-duplex lines
+    bool duplexMode;                // true if operating in full-duplex mode
 
     bool frameBursting;             // frame bursting on/off (Gigabit Ethernet)
     simtime_t lastTxFinishTime;     // time of finish last transmission
 
     // states
-    MACTransmitState transmitState; // State of the MAC unit transmitting
-    MACReceiveState receiveState;   // State of the MAC unit receiving
+    MACTransmitState transmitState; // "transmit state" of the MAC
+    MACReceiveState receiveState;   // "receive state" of the MAC
 
     // MAC transmission characteristics
     static const EtherDescr etherDescrs[NUM_OF_ETHERDESCRS];
     static const EtherDescr nullEtherDescr;
 
-    const EtherDescr *curEtherDescr;       // Current Ethernet Constants (eg txrate, ...)
+    const EtherDescr *curEtherDescr; // constants for the current Ethernet mode (e.g. txrate)
 
     cChannel *transmissionChannel;  // transmission channel
 
