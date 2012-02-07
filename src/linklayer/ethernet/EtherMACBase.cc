@@ -205,7 +205,7 @@ void EtherMACBase::initializeQueueModule()
         EV << "Requesting first frame from queue module\n";
         txQueue.setExternalQueue(queueModule);
 
-        if (0 == txQueue.extQueue->getNumPendingRequests())
+        if (txQueue.extQueue->getNumPendingRequests() == 0)
             txQueue.extQueue->requestPacket();
     }
     else
@@ -321,8 +321,10 @@ void EtherMACBase::registerInterface()
         ift->addInterface(interfaceEntry, this);
 }
 
-void EtherMACBase::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
+void EtherMACBase::receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj)
 {
+    ASSERT(signalId == POST_MODEL_CHANGE);
+
     if (dynamic_cast<cPostPathCreateNotification *>(obj))
     {
         cPostPathCreateNotification *gcobj = (cPostPathCreateNotification *)obj;
@@ -337,7 +339,7 @@ void EtherMACBase::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
         if ((physOutGate == gcobj->pathStartGate) || (physInGate == gcobj->pathEndGate))
             refreshConnection();
     }
-    else if (transmissionChannel && dynamic_cast<cPostParameterChangeNotification *>(obj))
+    else if (transmissionChannel && dynamic_cast<cPostParameterChangeNotification *>(obj)) // note: we are subscribed to the channel object too
     {
         cPostParameterChangeNotification *gcobj = (cPostParameterChangeNotification *)obj;
         if (transmissionChannel == gcobj->par->getOwner() && !strcmp("datarate", gcobj->par->getName()))
@@ -363,7 +365,7 @@ void EtherMACBase::processConnectionChanged()
         if (txQueue.extQueue)
         {
             // Clear external queue: send a request, and received packet will be deleted in handleMessage()
-            if (0 == txQueue.extQueue->getNumPendingRequests())
+            if (txQueue.extQueue->getNumPendingRequests() == 0)
                 txQueue.extQueue->requestPacket();
         }
         else
@@ -503,7 +505,7 @@ void EtherMACBase::getNextFrameFromQueue()
 {
     if (txQueue.extQueue)
     {
-        if (0 == txQueue.extQueue->getNumPendingRequests())
+        if (txQueue.extQueue->getNumPendingRequests() == 0)
             txQueue.extQueue->requestPacket();
     }
     else
@@ -517,7 +519,7 @@ void EtherMACBase::requestNextFrameFromExtQueue()
 {
     if (txQueue.extQueue)
     {
-        if (0 == txQueue.extQueue->getNumPendingRequests())
+        if (txQueue.extQueue->getNumPendingRequests() == 0)
             txQueue.extQueue->requestPacket();
     }
 }

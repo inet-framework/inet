@@ -157,7 +157,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     unsigned long numFramesReceivedOK;
     unsigned long numBytesSent;        // includes Ethernet frame bytes with preamble
     unsigned long numBytesReceivedOK;  // includes Ethernet frame bytes with preamble
-    unsigned long numFramesFromHL;     // packets received from higer layer (LLC or MACRelayUnit)
+    unsigned long numFramesFromHL;     // packets received from higher layer (LLC or MACRelayUnit)
     unsigned long numDroppedIfaceDown; // packets from higher layer dropped because interface down (TBD not impl yet)
     unsigned long numDroppedBitError;  // frames dropped because of bit errors
     unsigned long numDroppedNotForUs;  // frames dropped because destination address didn't match
@@ -203,7 +203,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     // finish
     virtual void finish();
 
-    /** Checks destination address and drop frame when not came for me */
+    /** Checks destination address and drops the frame when frame is not for us; returns true if frame is dropped */
     virtual bool dropFrameNotForUs(EtherFrame *frame);
 
     /**
@@ -223,7 +223,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     virtual void updateConnectionColor(int txState);
 
     // model change related functions
-    virtual void receiveSignal(cComponent *src, simsignal_t id, cObject *obj);
+    virtual void receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj);
     virtual void refreshConnection();
 };
 

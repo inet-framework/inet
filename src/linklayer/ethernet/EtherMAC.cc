@@ -347,13 +347,13 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     // detect cable length violation in half-duplex mode
     if (!duplexMode)
     {
-        if (simTime() - msg->getSendingTime() >= curEtherDescr->maxPropagationDelay)
+        simtime_t propagationTime = simTime() - msg->getSendingTime();
+        if (propagationTime >= curEtherDescr->maxPropagationDelay)
         {
-            error("Very long frame propagation time detected, "
-                  "maybe cable exceeds maximum allowed length? "
-                  "(%lgs corresponds to an approx. %lgm cable)",
-                  SIMTIME_STR(simTime() - msg->getSendingTime()),
-                  SIMTIME_STR((simTime() - msg->getSendingTime()) * SPEED_OF_LIGHT_IN_CABLE));
+            error("Very long frame propagation time detected, maybe cable exceeds "
+                  "maximum allowed length? (%lgs corresponds to an approx. %lgm cable)",
+                  SIMTIME_STR(propagationTime),
+                  SIMTIME_STR(propagationTime * SPEED_OF_LIGHT_IN_CABLE));
         }
     }
 
@@ -366,10 +366,9 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         processEndReceptionAtReconnectState(treeId, endRxTime);
         delete msg;
     }
-    else
-    if (!duplexMode && (transmitState == TRANSMITTING_STATE || transmitState == SEND_IFG_STATE))
+    else if (!duplexMode && (transmitState == TRANSMITTING_STATE || transmitState == SEND_IFG_STATE))
     {
-        // since we're halfduplex, receiveState must be RX_IDLE_STATE (asserted at top of handleMessage)
+        // since we're half-duplex, receiveState must be RX_IDLE_STATE (asserted at top of handleMessage)
         if (jamMsg)
             error("Stray jam signal arrived while transmitting (usual cause is cable length exceeding allowed maximum)");
 
