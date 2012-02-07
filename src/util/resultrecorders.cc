@@ -77,40 +77,44 @@ void PercentileRecorder::finish(cResultFilter *prev)
 {
     int N = signalVector.size();
     bool empty = (N == 0);
-    sort(signalVector.begin(), signalVector.end()); // sort the signal values
 
-    // calculate percentiles for given percentage numbers
-    double percentile[NUMBER_OF_PERCENTAGES];
-    for (int i = 0; i < NUMBER_OF_PERCENTAGES; i++)
+    if (empty == false)
     {
-        int k;
-        double d, tmp;
+        sort(signalVector.begin(), signalVector.end()); // sort the signal values
 
-        d = modf(percentage[i]*(N+1)/100, &tmp);
+        // calculate percentiles for given percentage numbers
+        double percentile[NUMBER_OF_PERCENTAGES];
+        for (int i = 0; i < NUMBER_OF_PERCENTAGES; i++)
+        {
+            int k;
+            double d, tmp;
+
+            d = modf(percentage[i] * (N + 1) / 100, &tmp);
             // tmp and d are the integral and the fractional parts of
             // "percentage * (N + 1) / 100", respectively.
-        k = int(tmp);
-        if (k == 0)
-            percentile[i] = signalVector[0];
-        else if (k >= N)
-            percentile[i] = signalVector[N-1];
-        else
-            percentile[i] = signalVector[k-1] + d*(signalVector[k] - signalVector[k-1]);
-    }
-    
-    // record the results
-    // FIXME revise them later to use recordStatistic() as follows:
-    // - opp_string_map attributes = getStatisticAttributes();
-    // - ev.recordScalar(getComponent(), getResultName().c_str(), empty ? NaN : p, &attributes);
-    for (int i = 0; i < NUMBER_OF_PERCENTAGES; i++)
-    {
-        string percentage_name = to_string<int>(int(percentage[i])) + "th-";
-        opp_string_map attributes = getStatisticAttributes();
-        // FIXME remove macro processing here once the library issues with windows platfom have been solved
+            k = int(tmp);
+            if (k == 0)
+                percentile[i] = signalVector[0];
+            else if (k >= N)
+                percentile[i] = signalVector[N - 1];
+            else
+                percentile[i] = signalVector[k - 1] + d * (signalVector[k] - signalVector[k - 1]);
+        }
+
+        // record the results
+        // FIXME revise them later to use recordStatistic() as follows:
+        // - opp_string_map attributes = getStatisticAttributes();
+        // - ev.recordScalar(getComponent(), getResultName().c_str(), empty ? NaN : p, &attributes);
+        for (int i = 0; i < NUMBER_OF_PERCENTAGES; i++)
+        {
+            string percentage_name = to_string<int>(int(percentage[i])) + "th-";
+            opp_string_map attributes = getStatisticAttributes();
+            // FIXME remove macro processing here once the library issues with windows platfom have been solved
 #ifdef __linux__
-        ev.recordScalar(getComponent(), (percentage_name + getResultName()).c_str(), empty ? NaN : percentile[i], &attributes);
+            ev.recordScalar(getComponent(), (percentage_name + getResultName()).c_str(), empty ? NaN : percentile[i], &attributes);
 #else
-        ev.recordScalar(getComponent(), (percentage_name + getResultName()).c_str(), percentile[i], &attributes);
+            ev.recordScalar(getComponent(), (percentage_name + getResultName()).c_str(), percentile[i], &attributes);
 #endif
+        }
     }
 }
