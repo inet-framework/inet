@@ -102,12 +102,12 @@ std::string TCPVirtualDataRcvQueue::info() const
 {
     std::string res;
     char buf[32];
-    sprintf(buf, "rcv_nxt=%u ", rcv_nxt);
+    sprintf(buf, "rcv_nxt=%u", rcv_nxt);
     res = buf;
 
     for (RegionList::const_iterator i=regionList.begin(); i!=regionList.end(); ++i)
     {
-        sprintf(buf, "[%u..%u) ", (*i)->getBegin(), (*i)->getEnd());
+        sprintf(buf, " [%u..%u)", (*i)->getBegin(), (*i)->getEnd());
         res += buf;
     }
     return res;
