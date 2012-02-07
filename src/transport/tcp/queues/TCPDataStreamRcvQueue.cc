@@ -38,8 +38,8 @@ bool TCPDataStreamRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region* 
     if (seqLess(end, other->begin) || seqLess(other->end, begin))
         return false;
 
-    uint32 nbegin = (seqLess(other->begin, begin)) ? other->begin : begin;
-    uint32 nend = (seqLess(end, other->end)) ? other->end : end;
+    uint32 nbegin = seqMin(begin, other->begin);
+    uint32 nend = seqMax(end, other->end);
 
     if (nbegin != begin || nend != end)
     {
