@@ -15,7 +15,7 @@ package inet.examples.mpls.net37;
 
 import ned.DatarateChannel;
 import inet.nodes.mpls.RSVP_LSR;
-import inet.networklayer.autorouting.ipv4.NetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 network R37orig
@@ -27,7 +27,7 @@ network R37orig
             datarate = 60kbps;
         }
     submodules:
-        configurator: NetworkConfigurator;
+        configurator: FlatNetworkConfigurator;
         LSR0: RSVP_LSR {
             parameters:
                 @display("p=489,376");

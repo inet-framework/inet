@@ -18,7 +18,7 @@ import inet.world.scenario.ScenarioManager;
 import inet.nodes.mpls.RSVP_LSR;
 import inet.nodes.inet.StandardHost;
 import inet.networklayer.extras.FailureManager;
-import inet.networklayer.autorouting.ipv4.NetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 
 
 //
@@ -29,7 +29,7 @@ import inet.networklayer.autorouting.ipv4.NetworkConfigurator;
 network RSVPTE4
 {
     submodules:
-        configurator: NetworkConfigurator {
+        configurator: FlatNetworkConfigurator {
             parameters:
                 @display("p=115,50");
         }
