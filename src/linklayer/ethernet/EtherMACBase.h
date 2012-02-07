@@ -78,7 +78,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
         int64         frameMinBytes;        // minimal frame length
         // for half-duplex operation:
         unsigned int  maxFramesInBurst;
-        int64         maxBytesInBurst;      // with IFG and external datas
+        int64         maxBytesInBurst;      // including IFG and preamble, etc.
         int64         halfDuplexFrameMinBytes;   // minimal frame length in half-duplex mode; -1 means half duplex is not supported
         int64         frameInBurstMinBytes; // minimal frame length in burst mode, after first frame
         double        slotTime;             // slot time
@@ -107,7 +107,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     class MacQueue
     {
       public:
-        InnerQueue * innerQueue;
+        InnerQueue *innerQueue;
         IPassiveQueue *extQueue;
 
       public:
@@ -120,45 +120,34 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
                 { delete innerQueue; innerQueue = new InnerQueue(name, limit); extQueue = NULL; };
     };
 
-    MACAddress address;             // own MAC address
-
-    bool connected;                 // true if connected to a network, set automatically by exploring the network configuration
-    bool disabled;                  // true if the MAC is disabled, defined by the user
-    bool promiscuous;               // if true, passes up all received frames
-
-    bool dataratesDiffer;           // true when tx rate and rx rate differ (configuration error, or between datarate changes of tx/rx channels)
-
-    // MAC operation modes and parameters
-    // TODO: some of these parameters do not have any meaning for EtherMACFullDuplex, they should rather be in EtherMAC instead
-    bool duplexMode;                // true if operating in full-duplex mode
-
-    bool frameBursting;             // frame bursting on/off (Gigabit Ethernet)
-    simtime_t lastTxFinishTime;     // time of finish last transmission
-
-    // states
-    MACTransmitState transmitState; // "transmit state" of the MAC
-    MACReceiveState receiveState;   // "receive state" of the MAC
-
-    // MAC transmission characteristics
+    // MAC constants for bitrates and modes
     static const EtherDescr etherDescrs[NUM_OF_ETHERDESCRS];
     static const EtherDescr nullEtherDescr;
 
-    const EtherDescr *curEtherDescr; // constants for the current Ethernet mode (e.g. txrate)
+    // configuration
+    const EtherDescr *curEtherDescr;// constants for the current Ethernet mode, e.g. txrate
+    MACAddress address;             // own MAC address
+    bool connected;                 // true if connected to a network, set automatically by exploring the network configuration
+    bool disabled;                  // true if the MAC is disabled, defined by the user
+    bool promiscuous;               // if true, passes up all received frames
+    bool duplexMode;                // true if operating in full-duplex mode
+    bool frameBursting;             // frame bursting on/off (Gigabit Ethernet)
 
+    // gate pointers, etc.
+    MacQueue txQueue;               // the output queue
     cChannel *transmissionChannel;  // transmission channel
-
-    int pauseUnitsRequested;        // requested pause duration, or zero -- examined at endTx
-
-    MacQueue txQueue;               // output queue
-
     cGate *physInGate;              // pointer to the "phys$i" gate
     cGate *physOutGate;             // pointer to the "phys$o" gate
     cGate *upperLayerInGate;        // pointer to the "upperLayerIn" gate
+    InterfaceEntry *interfaceEntry; // the associated entry in IInterfaceTable
 
-    // notification stuff
-    InterfaceEntry *interfaceEntry;  // points into IInterfaceTable
-
-    EtherFrame *curTxFrame;
+    // state
+    bool dataratesDiffer;           // true when tx rate and rx rate differ (configuration error, or between datarate changes of tx/rx channels)
+    MACTransmitState transmitState; // "transmit state" of the MAC
+    MACReceiveState receiveState;   // "receive state" of the MAC
+    simtime_t lastTxFinishTime;     // time of finishing the last transmission
+    int pauseUnitsRequested;        // requested pause duration, or zero -- examined at endTx
+    EtherFrame *curTxFrame;         // frame being transmitted
 
     // self messages
     cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;
@@ -211,22 +200,18 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     virtual void initializeStatistics();
     virtual void registerInterface();
 
-    // helpers
+    // finish
+    virtual void finish();
+
     /** Checks destination address and drop frame when not came for me */
     virtual bool dropFrameNotForUs(EtherFrame *frame);
 
     /**
-     * Calculates datarates, etc. Verify the same settings on in/out channels, and throw error
-     * when differs and the parameter errorWhenAsymmetric is true.
+     * Calculates datarates, etc. Verifies the datarates on the incoming/outgoing channels,
+     * and throws error when they differ and the parameter errorWhenAsymmetric is true.
      */
     virtual void calculateParameters(bool errorWhenAsymmetric);
-
     virtual void printParameters();
-
-    // finish
-    virtual void finish();
-
-    // event handlers
 
     // helpers
     virtual void getNextFrameFromQueue();

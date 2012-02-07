@@ -607,7 +607,7 @@ void EtherMAC::handleEndRxPeriod()
             break;
 
         case RX_RECONNECT_STATE:
-            EV << "Incoming signals finished or reconnect time ellapsed after reconnect\n";
+            EV << "Incoming signals finished or reconnect time elapsed after reconnect\n";
             endRxTimeList.clear();
             break;
 

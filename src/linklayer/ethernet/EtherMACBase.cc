@@ -137,7 +137,7 @@ simsignal_t EtherMACBase::packetReceivedFromUpperSignal = SIMSIGNAL_NULL;
 
 EtherMACBase::EtherMACBase()
 {
-    lastTxFinishTime = -1.0; // never equals with current simtime.
+    lastTxFinishTime = -1.0; // never equals to current simtime
     curEtherDescr = &nullEtherDescr;
     transmissionChannel = NULL;
     physInGate = NULL;
@@ -357,7 +357,7 @@ void EtherMACBase::processConnectionChanged()
         {
             delete curTxFrame;
             curTxFrame = NULL;
-            lastTxFinishTime = -1.0;  // so that it never equals with current simtime, used for Burst mode detection.
+            lastTxFinishTime = -1.0;  // so that it never equals to the current simtime, used for Burst mode detection.
         }
 
         if (txQueue.extQueue)
@@ -368,7 +368,7 @@ void EtherMACBase::processConnectionChanged()
         }
         else
         {
-            //Clear inner queue
+            // Clear inner queue
             while (!txQueue.innerQueue->empty())
             {
                 cMessage *msg = check_and_cast<cMessage *>(txQueue.innerQueue->pop());
