@@ -648,6 +648,15 @@ IPv6Datagram *IPv6::encapsulate(cPacket *transportPacket, IPv6ControlInfo *contr
 
 void IPv6::fragmentAndSend(IPv6Datagram *datagram, InterfaceEntry *ie, const MACAddress& nextHopAddr, bool fromHL)
 {
+    // hop counter check
+    if (datagram->getHopLimit() <= 0)
+    {
+        // drop datagram, destruction responsibility in ICMP
+        EV << "datagram hopLimit reached zero, sending ICMPv6_TIME_EXCEEDED\n";
+        icmp->sendErrorMessage(datagram, ICMPv6_TIME_EXCEEDED, 0); // FIXME check icmp 'code'
+        return;
+    }
+
 	// ensure source address is filled
 	if (fromHL && datagram->getSrcAddress().isUnspecified() &&
 			!datagram->getDestAddress().isSolicitedNodeMulticastAddress())
@@ -728,15 +737,6 @@ void IPv6::fragmentAndSend(IPv6Datagram *datagram, InterfaceEntry *ie, const MAC
 
 void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, const MACAddress& macAddr)
 {
-    // hop counter check
-    if (datagram->getHopLimit() <= 0)
-    {
-        // drop datagram, destruction responsibility in ICMP
-        EV << "datagram hopLimit reached zero, sending ICMPv6_TIME_EXCEEDED\n";
-        icmp->sendErrorMessage(datagram, ICMPv6_TIME_EXCEEDED, 0); // FIXME check icmp 'code'
-        return;
-    }
-
     // if link layer uses MAC addresses (basically, not PPP), add control info
     if (!macAddr.isUnspecified())
     {
