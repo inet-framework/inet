@@ -685,8 +685,8 @@ void EtherMAC::handleRetransmission()
     }
 
     EV << "Executing backoff procedure\n";
-    int backoffrange = (backoffs >= BACKOFF_RANGE_LIMIT) ? 1024 : (1 << backoffs);
-    int slotNumber = intuniform(0, backoffrange-1);
+    int backoffRange = (backoffs >= BACKOFF_RANGE_LIMIT) ? 1024 : (1 << backoffs);
+    int slotNumber = intuniform(0, backoffRange-1);
 
     scheduleAt(simTime() + slotNumber *curEtherDescr->slotTime, endBackoffMsg);
     transmitState = BACKOFF_STATE;
@@ -777,7 +777,7 @@ void EtherMAC::frameReceptionComplete()
     EtherTraffic *msg = frameBeingReceived;
     frameBeingReceived = NULL;
 
-    if ((dynamic_cast<EtherIFG*>(msg)) != NULL)
+    if (dynamic_cast<EtherIFG*>(msg) != NULL)
     {
         delete msg;
         return;
@@ -934,8 +934,8 @@ void EtherMAC::beginSendFrames()
     }
     else
     {
+        // No more frames, set transmitter to idle
         transmitState = TX_IDLE_STATE;
-        // No more frames set transmitter to idle
         EV << "No more frames to send, transmitter set to idle\n";
     }
 }
