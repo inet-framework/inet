@@ -44,9 +44,7 @@
 #include "IPv6InterfaceData.h"
 #endif
 
-#ifdef WITH_UDP
 #include "UDPControlInfo_m.h"
-#endif
 
 
 void SCTPAssociation::printSctpPathMap() const
@@ -247,11 +245,7 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
 
     if ((bool)sctpMain->par("udpEncapsEnabled"))
     {
-#ifdef WITH_UDP
         sctpMain->udpSocket.sendTo(sctpmsg, remoteAddr, SCTP_UDP_PORT);
-#else
-        throw cRuntimeError("SCTP feature compiled without UDP feature.");
-#endif
     }
     else {
         if (dest.isIPv6()) {

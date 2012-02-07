@@ -23,15 +23,12 @@
 #pragma warning(disable : 4786)
 #endif
 
-#include "INETDefs.h"
-
 #include <map>
 
-#include "IPvXAddress.h"
+#include "INETDefs.h"
 
-#ifdef WITH_UDP
+#include "IPvXAddress.h"
 #include "UDPSocket.h"
-#endif
 
 #define SCTP_UDP_PORT  9899
 
@@ -171,9 +168,7 @@ class INET_API SCTP : public cSimpleModule
         SctpConnMap sctpConnMap;
         std::list<SCTPAssociation*>assocList;
 
-#ifdef WITH_UDP
         UDPSocket udpSocket;
-#endif
 
     protected:
         int32 sizeConnMap;

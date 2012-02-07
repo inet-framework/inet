@@ -27,10 +27,8 @@
 #include "IPv4Datagram.h"
 #endif
 
-#ifdef WITH_UDP
 #include "UDPControlInfo_m.h"
 #include "UDPSocket.h"
-#endif
 
 Define_Module(SCTP);
 
@@ -87,12 +85,8 @@ void SCTP::bindPortForUDP()
 {
     EV << "Binding to UDP port " << SCTP_UDP_PORT << endl;
 
-#ifdef WITH_UDP
     udpSocket.setOutputGate(gate("to_ip"));
     udpSocket.bind(SCTP_UDP_PORT);
-#else
-    throw cRuntimeError("SCTP feature compiled without UDP feature.");
-#endif
 }
 
 void SCTP::initialize()
@@ -186,15 +180,11 @@ void SCTP::handleMessage(cMessage *msg)
             if (par("udpEncapsEnabled"))
             {
                 std::cout<<"Size of SCTPMSG="<<sctpmsg->getByteLength()<<"\n";
-#ifdef WITH_UDP
                 UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(msg->removeControlInfo());
                 srcAddr = ctrl->getSrcAddr();
                 destAddr = ctrl->getDestAddr();
                 std::cout<<"controlInfo srcAddr="<<srcAddr<<"  destAddr="<<destAddr<<"\n";
                 std::cout<<"VTag="<<sctpmsg->getTag()<<"\n";
-#else
-                throw cRuntimeError("SCTP feature compiled without UDP feature.");
-#endif
             }
             else
             {
@@ -355,12 +345,8 @@ void SCTP::sendAbortFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAddr, IPvXAddr
     msg->addChunk(abortChunk);
     if ((bool)par("udpEncapsEnabled"))
     {
-#ifdef WITH_UDP
         std::cout<<"VTag="<<msg->getTag()<<"\n";
         udpSocket.sendTo(msg, destAddr, SCTP_UDP_PORT);
-#else
-        throw cRuntimeError("SCTP feature compiled without UDP feature.");
-#endif
     }
     else
     {
