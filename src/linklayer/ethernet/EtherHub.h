@@ -24,19 +24,22 @@
  * Models a wiring hub. It simply broadcasts the received message
  * on all other ports.
  */
-class INET_API EtherHub : public cSimpleModule
+class INET_API EtherHub : public cSimpleModule, protected cListener
 {
   protected:
-    int ports;          // number of ports
-    long numMessages;   // number of messages handled
+    int numPorts;         // sizeof(ethg)
+    int inputGateBaseId;  // gate id of ethg$i[0]
+    int outputGateBaseId; // gate id of ethg$o[0]
 
     // statistics
+    long numMessages;   // number of messages handled
     static simsignal_t pkSignal;
 
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     virtual void checkConnections();
 };

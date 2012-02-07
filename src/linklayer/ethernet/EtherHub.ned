@@ -22,17 +22,18 @@ package inet.linklayer.ethernet;
 // A generic wiring hub model.
 //
 // ethg[i] gates represent ports. Messages arriving on a port are broadcast
-// to every other port.
+// to every other port. For the model to work correctly, all connecting 
+// links (both incoming and outgoing ones) must have the same datarate.
 //
 // Messages are not interpreted by the hub model in any way, thus the hub
 // model is not specific to Ethernet. Messages may represent anything, from
 // the beginning of a frame transmission to end (or abortion) of transmission.
 //
-// The module checks equivalence of input/output datarates only in initialize() function.
-// The module don't work correctly when you modify some datarates or add new connections
-// with different datarates.
+// It is allowed to dynamically unconnect/reconnect ports of the hub, and also
+// to change the size of ethg[] to add/remove ports. However, the model only
+// checks the equivalence of input/output datarates on startup; you are
+// responsible that links added at runtime have have the correct datarate.
 //
-
 simple EtherHub
 {
     parameters:

@@ -20,13 +20,6 @@
 
 Define_Module(EtherHub);
 
-//TODO
-// For checking datarates and connections when changed these, you must add a listener
-// of POST_MODEL_CHANGE signal and recheck settings when created a new connection or changed a
-// datarate parameter. When a new connection created, the module receives two signal:
-// one signal for incoming and one for outgoing gate.
-// See it in EtherMACBase, EtherMAC, EtherMACFullDuplex modules.
-
 
 simsignal_t EtherHub::pkSignal = SIMSIGNAL_NULL;
 
@@ -38,42 +31,66 @@ static cEnvir& operator<<(cEnvir& out, cMessage *msg)
 
 void EtherHub::initialize()
 {
+    numPorts = gateSize("ethg");
+    inputGateBaseId = gateBaseId("ethg$i");
+    outputGateBaseId = gateBaseId("ethg$o");
+    pkSignal = registerSignal("pk");
+
     numMessages = 0;
     WATCH(numMessages);
 
-    pkSignal = registerSignal("pk");
+    // ensure we receive frames when their first bits arrive
+    for (int i = 0; i < numPorts; i++)
+        gate(inputGateBaseId + i)->setDeliverOnReceptionStart(true);
+    subscribe(POST_MODEL_CHANGE, this);  // we'll need to do the same for dynamically added gates as well
 
+    // To keep the code small, we only check datarates once on startup. If it's important to check
+    // it after dynamic model changes too, it can be done by listening on the POST_MODEL_CHANGE
+    // signal; see EtherMACBase for how it's done.
     checkConnections();
 }
 
 void EtherHub::checkConnections()
 {
-    ports = gateSize("ethg");
-    int activePorts = 0;
-
+    int numActivePorts = 0;
     double datarate = 0.0;
 
-    for (int i=0; i < ports; i++)
+    for (int i = 0; i < numPorts; i++)
     {
-        cGate* igate = gate("ethg$i", i);
-        cGate* ogate = gate("ethg$o", i);
-        if (!(igate->isConnected() && ogate->isConnected()))
+        cGate *igate = gate(inputGateBaseId + i);
+        cGate *ogate = gate(outputGateBaseId + i);
+        if (!igate->isConnected() || !ogate->isConnected())
             continue;
 
-        activePorts++;
+        numActivePorts++;
         double drate = igate->getIncomingTransmissionChannel()->getNominalDatarate();
 
-        if (activePorts == 1)
+        if (numActivePorts == 1)
             datarate = drate;
         else if (datarate != drate)
             throw cRuntimeError("The input datarate at port %i differs from datarates of previous ports", i);
 
-        drate = gate("ethg$o", i)->getTransmissionChannel()->getNominalDatarate();
+        drate = gate(outputGateBaseId + i)->getTransmissionChannel()->getNominalDatarate();
 
         if (datarate != drate)
             throw cRuntimeError("The output datarate at port %i differs from datarates of previous ports", i);
+    }
+}
 
-        igate->setDeliverOnReceptionStart(true);
+void EtherHub::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+{
+    ASSERT(signalID == POST_MODEL_CHANGE);
+
+    // if new gates have been added, we need to call setDeliverOnReceptionStart(true) on them
+    cPostGateVectorResizeNotification *notif = dynamic_cast<cPostGateVectorResizeNotification*>(obj);
+    if (notif)
+    {
+        if (strcmp(notif->gateName, "ethg") == 0)
+        {
+            int newSize = gateSize("ethg");
+            for (int i = notif->oldSize; i < newSize; i++)
+                gate(inputGateBaseId + i)->setDeliverOnReceptionStart(true);
+        }
     }
 }
 
@@ -86,23 +103,22 @@ void EtherHub::handleMessage(cMessage *msg)
     numMessages++;
     emit(pkSignal, msg);
 
-    if (ports <= 1)
+    if (numPorts <= 1)
     {
         delete msg;
         return;
     }
 
-    for (int i=0; i < ports; i++)
+    for (int i = 0; i < numPorts; i++)
     {
         if (i != arrivalPort)
         {
-            cGate* igate = gate("ethg$i", i);
-            cGate* ogate = gate("ethg$o", i);
-            if (!(igate->isConnected() && ogate->isConnected()))
+            cGate *ogate = gate(outputGateBaseId + i);
+            if (!ogate->isConnected())
                 continue;
 
-            bool isLast = (arrivalPort == ports-1) ? (i == ports-2) : (i == ports-1);
-            cMessage *msg2 = isLast ? msg : (cMessage*) msg->dup();
+            bool isLast = (arrivalPort == numPorts-1) ? (i == numPorts-2) : (i == numPorts-1);
+            cMessage *msg2 = isLast ? msg : msg->dup();
 
             // stop current transmission
             ogate->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
