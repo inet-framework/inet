@@ -122,6 +122,19 @@ uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 {
     Region *region = createRegionFromSegment(tcpseg);
 
+    if (!regionList.empty())
+    {
+        uint32 ob = regionList.front()->getBegin();
+        uint32 oe = regionList.back()->getEnd();
+        uint32 nb = region->getBegin();
+        uint32 ne = region->getEnd();
+        uint32 minb = seqMin(ob, nb);
+        uint32 maxe = seqMax(oe, ne);
+        if (seqGE(minb, oe) || seqGE(minb, ne) || seqGE(ob, maxe) || seqGE(nb, maxe))
+            throw cRuntimeError("The new segment is [%u, %u) out of the acceptable range at the queue %s",
+                    region->getBegin(), region->getEnd(), info().c_str());
+    }
+
     merge(region);
 
     if (seqGE(rcv_nxt, regionList.front()->getBegin()))
