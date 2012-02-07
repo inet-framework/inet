@@ -45,7 +45,10 @@ std::string TCPVirtualDataSendQueue::info() const
 void TCPVirtualDataSendQueue::enqueueAppData(cPacket *msg)
 {
     //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
-    end += msg->getByteLength();
+    uint32 newend = end + msg->getByteLength();
+    if (seqLess(newend, begin))
+        throw cRuntimeError("queue is full");
+    end = newend;
     delete msg;
 }
 
