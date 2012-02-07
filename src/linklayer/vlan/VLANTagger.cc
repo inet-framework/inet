@@ -172,7 +172,7 @@ EthernetIIFrameWithVLAN *VLANTagger::TagFrame(EthernetIIFrame *frame)
         // dynamic tagging based on the VLAN address table
     	vid = relay->getVIDForMACAddress(frame->getDest());
 
-        // TODO: Extend to the case of multiple VIDs for a given MAC address
+        // FIXME Extend to the case of multiple VIDs for a given MAC address
     }
     else
     {

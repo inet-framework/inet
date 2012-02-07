@@ -34,7 +34,7 @@ simple UDPVideoStreamCliWithTrace like UDPApp
         string serverAddress;
         int serverPort;
         double startTime @unit("s") = default(1s);
-        double startupDelay @unit(s) = default(5s);	// start-up delay resulting from both decoding and networking (e.g., jitter, depacketization)
+        double startupDelay @unit(s) = default(5s);	// due to play-out buffering; 5s is default value for Windows Media Player
         int fps = default(30);	// frames per second (fps) of the trace file
         int appOverhead @unit(byte) = default(12B);	// size of application layer overhead (e.g., RTP header)
 													// default of 1460B is MTU of 1500B minus RTP (12B), UDP (8B), and IP (20B) headers.

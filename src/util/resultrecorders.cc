@@ -117,4 +117,5 @@ void PercentileRecorder::finish(cResultFilter *prev)
 #endif
         }
     }
+    // FIXME Provide better processing for the case of zero-size signalVector
 }
