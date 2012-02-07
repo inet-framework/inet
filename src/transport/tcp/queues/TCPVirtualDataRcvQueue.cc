@@ -44,12 +44,12 @@ TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::Region::split(uint32 seq
 
 TCPVirtualDataRcvQueue::Region::CompareStatus TCPVirtualDataRcvQueue::Region::compare(const TCPVirtualDataRcvQueue::Region& other) const
 {
-    if (seqLess(end, other.begin))
-        return BEFORE;
     if (end == other.begin)
         return BEFORE_TOUCH;
     if (begin == other.end)
         return AFTER_TOUCH;
+    if (seqLess(end, other.begin))
+        return BEFORE;
     if (seqLess(other.end, begin))
         return AFTER;
     return OVERLAP;
@@ -151,21 +151,26 @@ void TCPVirtualDataRcvQueue::merge(TCPVirtualDataRcvQueue::Region *seg)
     // existing regions; we also may have to merge existing regions if
     // they become overlapping (or touching) after adding tcpseg.
 
-    RegionList::iterator i = regionList.begin();
+    RegionList::reverse_iterator i = regionList.rbegin();
     Region::CompareStatus cmp;
 
-    while (i != regionList.end() && Region::AFTER != (cmp = (*i)->compare(*seg)))
+    while (i != regionList.rend() && Region::BEFORE != (cmp = (*i)->compare(*seg)))
     {
-        RegionList::iterator old = i++;
-        if (cmp != Region::BEFORE)
+        if (cmp != Region::AFTER)
         {
-            seg->merge(*old);
-            delete *old;
-            regionList.erase(old);
+            if (seg->merge(*i))
+            {
+                delete *i;
+                i = (RegionList::reverse_iterator)(regionList.erase((++i).base()));
+                continue;
+            }
+            else
+                throw cRuntimeError("Model error: merge of region [%u,%u) with [%u,%u) unsuccessful", (*i)->getBegin(), (*i)->getEnd(), seg->getBegin(), seg->getEnd());
         }
+        ++i;
     }
 
-    regionList.insert(i, seg);
+    regionList.insert(i.base(), seg);
 }
 
 cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
