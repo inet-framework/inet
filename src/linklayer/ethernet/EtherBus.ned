@@ -14,25 +14,26 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// The module checks equivalence of input/output datarates only in initialize() function.
-// The module don't work correctly when you modify some datarates or add new connections
-// with different datarates.
-//
 
 
 package inet.linklayer.ethernet;
 
 //
-// A generic bus model.
+// Implements the shared coaxial cable for classic Ethernet.
 //
 // The ethg[i] gates represent taps. Messages arriving on a tap
 // travel on the bus on both directions, and copies of it are sent out
 // on every other tap after delays proportional to their distances.
 //
+// For the model to work correctly, all connecting links (both incoming 
+// and outgoing ones) must have the same datarate.
+//
 // Messages are not interpreted by the bus model in any way, thus the bus
-// model is not specific to Ethernet in any way. Messages may
-// represent anything, from the beginning of a frame transmission to
-// end (or abortion) of transmission.
+// model is not specific to Ethernet.
+//
+// It is allowed to disconnect/reconnect links at runtime. However, 
+// the model does not support changing the tap positions or adding/removing
+// taps at runtime.
 //
 simple EtherBus
 {

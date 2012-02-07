@@ -19,14 +19,6 @@
 
 Define_Module(EtherBus);
 
-//TODO
-// For checking datarates and connections when changed these, you must add a listener
-// of POST_MODEL_CHANGE signal and recheck settings when created a new connection or changed a
-// datarate parameter. When a new connection created, the module receives two signal:
-// one signal for incoming and one for outgoing gate.
-// See it in EtherMACBase, EtherMAC, EtherMACFullDuplex modules.
-
-
 static cEnvir& operator<<(cEnvir& out, cMessage *msg)
 {
     out.printf("(%s)%s", msg->getClassName(), msg->getFullName());
@@ -51,34 +43,35 @@ void EtherBus::initialize()
     propagationSpeed = par("propagationSpeed").doubleValue();
 
     // initialize the positions where the hosts connects to the bus
-    taps = gateSize("ethg");
+    numTaps = gateSize("ethg");
+    inputGateBaseId = gateBaseId("ethg$i");
+    outputGateBaseId = gateBaseId("ethg$o");
 
     // read positions and check if positions are defined in order (we're lazy to sort...)
-    std::vector<double> pos;
-    tokenize(par("positions").stringValue(), pos);
+    std::vector<double> pos = cStringTokenizer(par("positions").stringValue()).asDoubleVector();
     int numPos = pos.size();
 
-    if (numPos > taps)
+    if (numPos > numTaps)
         EV << "Note: `positions' parameter contains more values ("<< numPos << ") than "
-              "the number of taps (" << taps << "), ignoring excess values.\n";
-    else if (numPos < taps && numPos >= 2)
+              "the number of taps (" << numTaps << "), ignoring excess values.\n";
+    else if (numPos < numTaps && numPos >= 2)
         EV << "Note: `positions' parameter contains less values ("<< numPos << ") than "
-              "the number of taps (" << taps << "), repeating distance between last 2 positions.\n";
-    else if (numPos < taps && numPos < 2)
+              "the number of taps (" << numTaps << "), repeating distance between last 2 positions.\n";
+    else if (numPos < numTaps && numPos < 2)
         EV << "Note: `positions' parameter contains too few values, using 5m distances.\n";
 
-    tap = new BusTap[taps];
+    tap = new BusTap[numTaps];
 
     int i;
     double distance = numPos >= 2 ? pos[numPos-1] - pos[numPos-2] : 5;
 
-    for (i = 0; i < taps; i++)
+    for (i = 0; i < numTaps; i++)
     {
         tap[i].id = i;
         tap[i].position = i < numPos ? pos[i] : i == 0 ? 5 : tap[i-1].position + distance;
     }
 
-    for (i = 0; i < taps-1; i++)
+    for (i = 0; i < numTaps-1; i++)
     {
         if (tap[i].position > tap[i+1].position)
             error("Tap positions must be ordered in ascending fashion, modify 'positions' parameter and rerun\n");
@@ -89,37 +82,45 @@ void EtherBus::initialize()
     EV << "propagationSpeed: " << propagationSpeed << "\n";
 
     // Calculate propagation of delays between tap points on the bus
-    for (i = 0; i < taps; i++)
+    for (i = 0; i < numTaps; i++)
     {
         // Propagation delay between adjacent tap points
         tap[i].propagationDelay[UPSTREAM] = (i > 0) ? tap[i-1].propagationDelay[DOWNSTREAM] : 0;
-        tap[i].propagationDelay[DOWNSTREAM] = (i+1 < taps) ? (tap[i+1].position - tap[i].position)/propagationSpeed : 0;
+        tap[i].propagationDelay[DOWNSTREAM] = (i+1 < numTaps) ? (tap[i+1].position - tap[i].position)/propagationSpeed : 0;
         EV << "tap[" << i << "] pos: " << tap[i].position <<
               "  upstream delay: " << tap[i].propagationDelay[UPSTREAM] <<
               "  downstream delay: " << tap[i].propagationDelay[DOWNSTREAM] << endl;
     }
     EV << "\n";
 
+    // ensure we receive frames when their first bits arrive
+    for (int i = 0; i < numTaps; i++)
+        gate(inputGateBaseId + i)->setDeliverOnReceptionStart(true);
+    subscribe(POST_MODEL_CHANGE, this);  // we'll need to do the same for dynamically added gates as well
+
+    // To keep the code small, we only check datarates once on startup. If it's important to check
+    // it after dynamic model changes too, it can be done by listening on the POST_MODEL_CHANGE
+    // signal; see EtherMACBase for how it's done.
     checkConnections();
 }
 
 void EtherBus::checkConnections()
 {
-    int activeTaps = 0;
+    int numActiveTaps = 0;
 
     double datarate = 0.0;
 
-    for (int i=0; i < taps; i++)
+    for (int i = 0; i < numTaps; i++)
     {
-        cGate* igate = gate("ethg$i", i);
-        cGate* ogate = gate("ethg$o", i);
-        if (!(igate->isConnected() && ogate->isConnected()))
+        cGate* igate = gate(inputGateBaseId + i);
+        cGate* ogate = gate(outputGateBaseId + i);
+        if (!igate->isConnected() || !ogate->isConnected())
             continue;
 
-        activeTaps++;
+        numActiveTaps++;
         double drate = igate->getIncomingTransmissionChannel()->getNominalDatarate();
 
-        if (activeTaps == 1)
+        if (numActiveTaps == 1)
             datarate = drate;
         else if (datarate != drate)
             throw cRuntimeError("The input datarate at tap %i differs from datarates of previous taps", i);
@@ -129,7 +130,19 @@ void EtherBus::checkConnections()
         if (datarate != drate)
             throw cRuntimeError("The output datarate at tap %i differs from datarates of previous taps", i);
 
-        igate->setDeliverOnReceptionStart(true);
+    }
+}
+
+void EtherBus::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+{
+    ASSERT(signalID == POST_MODEL_CHANGE);
+
+    // throw error if new gates have been added
+    cPostGateVectorResizeNotification *notif = dynamic_cast<cPostGateVectorResizeNotification*>(obj);
+    if (notif)
+    {
+        if (strcmp(notif->gateName, "ethg") == 0)
+            throw cRuntimeError("EtherBus does not allow adding/removing links dynamically");
     }
 }
 
@@ -146,13 +159,13 @@ void EtherBus::handleMessage(cMessage *msg)
         {
             // start UPSTREAM travel
             // if goes downstream too, we need to make a copy
-            cMessage *msg2 = (tapPoint < taps-1) ? (cMessage *)msg->dup() : msg;
+            cMessage *msg2 = (tapPoint < numTaps-1) ? msg->dup() : msg;
             msg2->setKind(UPSTREAM);
             msg2->setContextPointer(&tap[tapPoint-1]);
             scheduleAt(simTime()+tap[tapPoint].propagationDelay[UPSTREAM], msg2);
         }
 
-        if (tapPoint < taps-1)
+        if (tapPoint < numTaps-1)
         {
             // start DOWNSTREAM travel
             msg->setKind(DOWNSTREAM);
@@ -160,7 +173,7 @@ void EtherBus::handleMessage(cMessage *msg)
             scheduleAt(simTime()+tap[tapPoint].propagationDelay[DOWNSTREAM], msg);
         }
 
-        if (taps == 1)
+        if (numTaps == 1)
         {
             // if there's only one tap, there's nothing to do
             delete msg;
@@ -176,14 +189,12 @@ void EtherBus::handleMessage(cMessage *msg)
         EV << "Event " << msg << " on tap " << tapPoint << ", sending out frame\n";
 
         // send out on gate
-        bool isLast = (direction == UPSTREAM) ? (tapPoint == 0) : (tapPoint == taps-1);
-        cGate* igate = gate("ethg$i", tapPoint);
-        cGate* ogate = gate("ethg$o", tapPoint);
-        if (igate->isConnected() && ogate->isConnected())
+        bool isLast = (direction == UPSTREAM) ? (tapPoint == 0) : (tapPoint == numTaps-1);
+        cGate* ogate = gate(outputGateBaseId + tapPoint);
+        if (ogate->isConnected())
         {
             // send out on gate
-
-            cPacket *msg2 = isLast ? PK(msg) : PK(msg->dup());
+            cMessage *msg2 = isLast ? msg : msg->dup();
 
             // stop current transmission
             ogate->getTransmissionChannel()->forceTransmissionFinishTime(SIMTIME_ZERO);
@@ -209,23 +220,6 @@ void EtherBus::handleMessage(cMessage *msg)
             scheduleAt(simTime()+tap[tapPoint].propagationDelay[direction], msg);
         }
     }
-}
-
-void EtherBus::tokenize(const char *str, std::vector<double>& array)
-{
-    char *str2 = opp_strdup(str);
-
-    if (!str2)
-        return;
-
-    char *s = strtok(str2, " ");
-    while (s)
-    {
-        array.push_back(atof(s));
-        s = strtok(NULL, " ");
-    }
-
-    delete [] str2;
 }
 
 void EtherBus::finish()
