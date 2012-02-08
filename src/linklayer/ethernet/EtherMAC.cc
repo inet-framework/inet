@@ -303,7 +303,7 @@ void EtherMAC::addReceptionInReconnectState(long packetTreeId, simtime_t endRxTi
 
     // adjust endRxMsg if needed (we'll exit reconnect mode when endRxMsg expires)
     simtime_t maxRxTime = endRxTimeList.back().endTime;
-    if (endRxMsg->getArrivalTime() < maxRxTime)
+    if (endRxMsg->getArrivalTime() != maxRxTime)
     {
         cancelEvent(endRxMsg);
         scheduleAt(maxRxTime, endRxMsg);
