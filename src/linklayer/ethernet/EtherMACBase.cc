@@ -347,7 +347,7 @@ void EtherMACBase::receiveSignal(cComponent *src, simsignal_t signalId, cObject 
     }
 }
 
-void EtherMACBase::processConnectionChanged()
+void EtherMACBase::processConnectDisconnect()
 {
     if (!connected)
     {
@@ -394,7 +394,7 @@ void EtherMACBase::refreshConnection()
     readChannelParameters(false);
 
     if (oldConn != connected)
-        processConnectionChanged();
+        processConnectDisconnect();
 }
 
 bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)

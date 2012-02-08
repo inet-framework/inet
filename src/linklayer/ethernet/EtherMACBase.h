@@ -216,7 +216,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     // helpers
     virtual void getNextFrameFromQueue();
     virtual void requestNextFrameFromExtQueue();
-    virtual void processConnectionChanged();
+    virtual void processConnectDisconnect();
 
     // display
     virtual void updateDisplayString();

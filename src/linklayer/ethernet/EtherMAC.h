@@ -106,7 +106,7 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void processReceivedDataFrame(EtherFrame *frame);
     virtual void processReceivedJam(EtherJam *jam);
     virtual void processReceivedPauseFrame(EtherPauseFrame *frame);
-    virtual void processConnectionChanged();
+    virtual void processConnectDisconnect();
     virtual void addReception(simtime_t endRxTime);
     virtual void addReceptionInReconnectState(long id, simtime_t endRxTime);
     virtual void processDetectedCollision();

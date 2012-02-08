@@ -105,7 +105,7 @@ void EtherMAC::initializeFlags()
     physInGate->setDeliverOnReceptionStart(true);
 }
 
-void EtherMAC::processConnectionChanged()
+void EtherMAC::processConnectDisconnect()
 {
     if (!connected)
     {
@@ -118,7 +118,7 @@ void EtherMAC::processConnectionChanged()
         framesSentInBurst = 0;
     }
 
-    EtherMACBase::processConnectionChanged();
+    EtherMACBase::processConnectDisconnect();
 
     if (connected)
     {
