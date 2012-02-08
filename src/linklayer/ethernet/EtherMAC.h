@@ -95,8 +95,6 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void readChannelParameters(bool errorWhenAsymmetric);
     virtual void processFrameFromUpperLayer(EtherFrame *msg);
     virtual void processMsgFromNetwork(EtherTraffic *msg);
-    virtual void processMessageWhenNotConnected(cMessage *msg);
-    virtual void processMessageWhenDisabled(cMessage *msg);
     virtual void scheduleEndIFGPeriod();
     virtual void scheduleEndTxPeriod(EtherFrame *);
     virtual void scheduleEndRxPeriod(EtherTraffic *);

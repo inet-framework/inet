@@ -129,7 +129,8 @@ simple EtherMAC like IEtherMAC
         @signal[rxPkFromHL](type=EtherFrame);
         @signal[dropPkNotForUs](type=EtherFrame);
         @signal[dropPkBitError](type=EtherFrame);
-        @signal[dropPkIfaceDown](type=cPacket);
+        @signal[dropPkFromHLIfaceDown](type=EtherFrame);
+        @signal[dropPkIfaceDown](type=EtherTraffic);        // emitted at begin of receiving
         @signal[packetSentToLower](type=EtherFrame);
         @signal[packetReceivedFromLower](type=EtherFrame);
         @signal[packetSentToUpper](type=EtherFrame);

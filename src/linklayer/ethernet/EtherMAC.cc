@@ -193,10 +193,6 @@ void EtherMAC::handleMessage(cMessage *msg)
 
     if (msg->isSelfMessage())
         handleSelfMessage(msg);
-    else if (!connected)
-        processMessageWhenNotConnected(msg);
-    else if (disabled)
-        processMessageWhenDisabled(msg);
     else if (msg->getArrivalGate() == upperLayerInGate)
         processFrameFromUpperLayer(check_and_cast<EtherFrame *>(msg));
     else if (msg->getArrivalGate() == physInGate)
@@ -231,6 +227,17 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
     {
         error("Packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
                 (int)(frame->getByteLength()), MAX_ETHERNET_FRAME_BYTES);
+    }
+
+    if (!connected || disabled)
+    {
+        EV << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping packet " << frame << endl;
+        emit(dropPkFromHLIfaceDownSignal, frame);
+        numDroppedPkFromHLIfaceDown++;
+        delete frame;
+
+        requestNextFrameFromExtQueue();
+        return;
     }
 
     // fill in src address if not set
@@ -342,6 +349,19 @@ void EtherMAC::processReceivedJam(EtherJam *jam)
 void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
 {
     EV << "Received frame from network: " << msg << endl;
+
+    if (!connected || disabled)
+    {
+        EV << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << msg << endl;
+        if (dynamic_cast<EtherFrame *>(msg))    // do not count JAM and IFG packets
+        {
+            emit(dropPkIfaceDownSignal, msg);
+            numDroppedIfaceDown++;
+        }
+        delete msg;
+
+        return;
+    }
 
     // detect cable length violation in half-duplex mode
     if (!duplexMode)
@@ -747,25 +767,6 @@ void EtherMAC::finish()
     recordScalar("rx channel collision (%)", 100*(totalCollisionTime/t));
     recordScalar("collisions", numCollisions);
     recordScalar("backoffs", numBackoffs);
-}
-
-void EtherMAC::processMessageWhenNotConnected(cMessage *msg)
-{
-    EV << "Interface is not connected -- dropping packet " << msg << endl;
-    emit(dropPkIfaceDownSignal, msg);
-    numDroppedIfaceDown++;
-    delete msg;
-
-    requestNextFrameFromExtQueue();
-}
-
-void EtherMAC::processMessageWhenDisabled(cMessage *msg)
-{
-    EV << "MAC is disabled -- dropping message " << msg << endl;
-    emit(dropPkIfaceDownSignal, msg);
-    delete msg;
-
-    requestNextFrameFromExtQueue();
 }
 
 void EtherMAC::handleEndPausePeriod()

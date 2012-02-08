@@ -158,7 +158,8 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     unsigned long numBytesSent;        // includes Ethernet frame bytes with preamble
     unsigned long numBytesReceivedOK;  // includes Ethernet frame bytes with preamble
     unsigned long numFramesFromHL;     // packets received from higher layer (LLC or MACRelayUnit)
-    unsigned long numDroppedIfaceDown; // packets from higher layer dropped because interface down (TBD not impl yet)
+    unsigned long numDroppedPkFromHLIfaceDown; // packets from higher layer dropped because interface down or not connected
+    unsigned long numDroppedIfaceDown; // packets from network layer dropped because interface down or not connected
     unsigned long numDroppedBitError;  // frames dropped because of bit errors
     unsigned long numDroppedNotForUs;  // frames dropped because destination address didn't match
     unsigned long numFramesPassedToHL; // frames passed to higher layer
@@ -173,6 +174,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     static simsignal_t dropPkNotForUsSignal;
     static simsignal_t dropPkBitErrorSignal;
     static simsignal_t dropPkIfaceDownSignal;
+    static simsignal_t dropPkFromHLIfaceDownSignal;
 
     static simsignal_t packetSentToLowerSignal;
     static simsignal_t packetReceivedFromLowerSignal;

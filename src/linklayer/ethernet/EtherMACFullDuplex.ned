@@ -139,7 +139,8 @@ simple EtherMACFullDuplex like IEtherMAC
         @signal[rxPkFromHL](type=EtherFrame);
         @signal[dropPkNotForUs](type=EtherFrame);
         @signal[dropPkBitError](type=EtherFrame);
-        @signal[dropPkIfaceDown](type=cPacket);
+        @signal[dropPkIfaceDown](type=EtherTraffic);        // emitted at end of receiving
+        @signal[dropPkFromHLIfaceDown](type=EtherFrame);
         @signal[packetSentToLower](type=EtherFrame);
         @signal[packetReceivedFromLower](type=EtherFrame);
         @signal[packetSentToUpper](type=EtherFrame);

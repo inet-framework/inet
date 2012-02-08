@@ -128,6 +128,7 @@ simsignal_t EtherMACBase::rxPkFromHLSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::dropPkNotForUsSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::dropPkBitErrorSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::dropPkIfaceDownSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::dropPkFromHLIfaceDownSignal = SIMSIGNAL_NULL;
 
 simsignal_t EtherMACBase::packetSentToLowerSignal = SIMSIGNAL_NULL;
 simsignal_t EtherMACBase::packetReceivedFromLowerSignal = SIMSIGNAL_NULL;
@@ -263,7 +264,7 @@ void EtherMACBase::initializeStatistics()
 {
     numFramesSent = numFramesReceivedOK = numBytesSent = numBytesReceivedOK = 0;
     numFramesPassedToHL = numDroppedBitError = numDroppedNotForUs = 0;
-    numFramesFromHL = numDroppedIfaceDown = 0;
+    numFramesFromHL = numDroppedIfaceDown = numDroppedPkFromHLIfaceDown = 0;
     numPauseFramesRcvd = numPauseFramesSent = 0;
 
     WATCH(numFramesSent);
@@ -271,6 +272,7 @@ void EtherMACBase::initializeStatistics()
     WATCH(numBytesSent);
     WATCH(numBytesReceivedOK);
     WATCH(numFramesFromHL);
+    WATCH(numDroppedPkFromHLIfaceDown);
     WATCH(numDroppedIfaceDown);
     WATCH(numDroppedBitError);
     WATCH(numDroppedNotForUs);
@@ -285,6 +287,7 @@ void EtherMACBase::initializeStatistics()
     rxPkFromHLSignal = registerSignal("rxPkFromHL");
     dropPkBitErrorSignal = registerSignal("dropPkBitError");
     dropPkIfaceDownSignal = registerSignal("dropPkIfaceDown");
+    dropPkFromHLIfaceDownSignal = registerSignal("dropPkFromHLIfaceDown");
     dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
 
     packetSentToLowerSignal = registerSignal("packetSentToLower");
@@ -375,7 +378,7 @@ void EtherMACBase::processConnectDisconnect()
             {
                 cMessage *msg = check_and_cast<cMessage *>(txQueue.innerQueue->pop());
                 EV << "Interface is not connected, dropping packet " << msg << endl;
-                numDroppedIfaceDown++;
+                numDroppedPkFromHLIfaceDown++;
                 emit(dropPkIfaceDownSignal, msg);
                 delete msg;
             }
