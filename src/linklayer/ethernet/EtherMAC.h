@@ -90,7 +90,7 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void handleRetransmission();
 
     // helpers
-    virtual void calculateParameters(bool errorWhenAsymmetric);
+    virtual void readChannelParameters(bool errorWhenAsymmetric);
     virtual void processFrameFromUpperLayer(EtherFrame *msg);
     virtual void processMsgFromNetwork(EtherTraffic *msg);
     virtual void processMessageWhenNotConnected(cMessage *msg);

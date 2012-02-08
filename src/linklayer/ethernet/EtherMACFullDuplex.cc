@@ -60,7 +60,7 @@ void EtherMACFullDuplex::initializeFlags()
 void EtherMACFullDuplex::handleMessage(cMessage *msg)
 {
     if (dataratesDiffer)
-        calculateParameters(true);
+        readChannelParameters(true);
 
     if (msg->isSelfMessage())
         handleSelfMessage(msg);

@@ -133,9 +133,9 @@ void EtherMAC::processConnectionChanged()
     }
 }
 
-void EtherMAC::calculateParameters(bool errorWhenAsymmetric)
+void EtherMAC::readChannelParameters(bool errorWhenAsymmetric)
 {
-    EtherMACBase::calculateParameters(errorWhenAsymmetric);
+    EtherMACBase::readChannelParameters(errorWhenAsymmetric);
 
     if (connected && !duplexMode)
     {
@@ -183,7 +183,7 @@ void EtherMAC::handleSelfMessage(cMessage *msg)
 void EtherMAC::handleMessage(cMessage *msg)
 {
     if (dataratesDiffer)
-        calculateParameters(true);
+        readChannelParameters(true);
 
     printState();
 

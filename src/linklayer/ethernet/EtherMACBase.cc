@@ -174,7 +174,7 @@ void EtherMACBase::initialize()
 
     registerInterface(); // needs MAC address
 
-    calculateParameters(true);
+    readChannelParameters(true);
 
     lastTxFinishTime = -1.0; // not equals with current simtime.
 
@@ -391,7 +391,7 @@ void EtherMACBase::refreshConnection()
     Enter_Method_Silent();
 
     bool oldConn = connected;
-    calculateParameters(false);
+    readChannelParameters(false);
 
     if (oldConn != connected)
         processConnectionChanged();
@@ -430,7 +430,7 @@ bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)
     return true;
 }
 
-void EtherMACBase::calculateParameters(bool errorWhenAsymmetric)
+void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
 {
     cChannel *outTrChannel = physOutGate->findTransmissionChannel();
     cChannel *inTrChannel = physInGate->findIncomingTransmissionChannel();

@@ -210,7 +210,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
      * Calculates datarates, etc. Verifies the datarates on the incoming/outgoing channels,
      * and throws error when they differ and the parameter errorWhenAsymmetric is true.
      */
-    virtual void calculateParameters(bool errorWhenAsymmetric);
+    virtual void readChannelParameters(bool errorWhenAsymmetric);
     virtual void printParameters();
 
     // helpers
