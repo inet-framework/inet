@@ -48,12 +48,23 @@ class INET_API EtherMAC : public EtherMACBase
 
   protected:
     // states
+    int numConcurrentTransmissions;    // number of colliding frames -- we must receive this many jams (caches endRxTimeList.size())
     int  backoffs;                     // value of backoff for exponential back-off algorithm
     long currentSendPkTreeID;
 
     // other variables
     EtherTraffic *frameBeingReceived;
     cMessage *endRxMsg, *endBackoffMsg, *endJammingMsg;
+
+    // list of receptions during reconnect state
+    struct PkIdRxTime
+    {
+        long packetTreeId;             // tree ID of packet being received.
+        simtime_t endTime;             // end of reception
+        PkIdRxTime(long id, simtime_t time) {packetTreeId=id; endTime = time;}
+    };
+    typedef std::list<PkIdRxTime> EndRxTimeList;
+    EndRxTimeList endRxTimeList;       // list of incoming packets, ordered by endTime
 
     // statistics
     simtime_t totalCollisionTime;      // total duration of collisions on channel
@@ -63,16 +74,6 @@ class INET_API EtherMAC : public EtherMACBase
     unsigned long numBackoffs;         // number of retransmissions
     unsigned int  framesSentInBurst;   // Number of frames send out in current frame burst
     long bytesSentInBurst;             // Number of bytes transmitted in current frame burst
-
-    struct PkIdRxTime
-    {
-        long packetTreeId;             // tree ID of packet being received.
-        simtime_t endTime;             // end of reception
-        PkIdRxTime(long id, simtime_t time) {packetTreeId=id; endTime = time;}
-    };
-    typedef std::list<PkIdRxTime> EndRxTimeList;
-    EndRxTimeList endRxTimeList;       // list of incoming packets, ordered by endTime
-    int numConcurrentTransmissions;    // number of colliding frames -- we must receive this many jams (caches endRxTimeList.size())
 
     static simsignal_t collisionSignal;
     static simsignal_t backoffSignal;
