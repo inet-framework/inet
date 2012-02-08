@@ -32,8 +32,8 @@
 #include "ICMPv6Message_m.h"
 #endif
 
-#include "TCPDataStreamRcvQueue.h"
-#include "TCPDataStreamSendQueue.h"
+#include "TCPByteStreamRcvQueue.h"
+#include "TCPByteStreamSendQueue.h"
 #include "TCPMsgBasedRcvQueue.h"
 #include "TCPMsgBasedSendQueue.h"
 #include "TCPVirtualDataRcvQueue.h"
@@ -456,7 +456,7 @@ TCPSendQueue* TCP::createSendQueue(TCPDataTransferMode transferModeP)
     {
         case TCP_TRANSFER_BYTECOUNT:   return new TCPVirtualDataSendQueue();
         case TCP_TRANSFER_OBJECT:      return new TCPMsgBasedSendQueue();
-        case TCP_TRANSFER_BYTESTREAM:  return new TCPDataStreamSendQueue();
+        case TCP_TRANSFER_BYTESTREAM:  return new TCPByteStreamSendQueue();
         default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
     }
 }
@@ -467,7 +467,7 @@ TCPReceiveQueue* TCP::createReceiveQueue(TCPDataTransferMode transferModeP)
     {
         case TCP_TRANSFER_BYTECOUNT:   return new TCPVirtualDataRcvQueue();
         case TCP_TRANSFER_OBJECT:      return new TCPMsgBasedRcvQueue();
-        case TCP_TRANSFER_BYTESTREAM:  return new TCPDataStreamRcvQueue;
+        case TCP_TRANSFER_BYTESTREAM:  return new TCPByteStreamRcvQueue();
         default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
     }
 }

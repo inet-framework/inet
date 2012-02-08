@@ -19,16 +19,16 @@
 
 #include "INETDefs.h"
 
-#include "TCPDataStreamRcvQueue.h"
+#include "TCPByteStreamRcvQueue.h"
 
 #include "ByteArrayMessage.h"
 #include "TCPCommand_m.h"
 #include "TCPSegment.h"
 
-Register_Class(TCPDataStreamRcvQueue);
+Register_Class(TCPByteStreamRcvQueue);
 
 
-bool TCPDataStreamRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region* _other)
+bool TCPByteStreamRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region* _other)
 {
     const Region *other = dynamic_cast<const Region *>(_other);
 
@@ -61,7 +61,7 @@ bool TCPDataStreamRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region* 
     return true;
 }
 
-TCPDataStreamRcvQueue::Region* TCPDataStreamRcvQueue::Region::split(uint32 seq)
+TCPByteStreamRcvQueue::Region* TCPByteStreamRcvQueue::Region::split(uint32 seq)
 {
     ASSERT(seqGreater(seq, begin) && seqLess(seq, end));
 
@@ -72,7 +72,7 @@ TCPDataStreamRcvQueue::Region* TCPDataStreamRcvQueue::Region::split(uint32 seq)
     return reg;
 }
 
-void TCPDataStreamRcvQueue::Region::copyTo(cPacket* msg_) const
+void TCPByteStreamRcvQueue::Region::copyTo(cPacket* msg_) const
 {
     ASSERT(getLength() == data.getDataArraySize());
 
@@ -83,11 +83,11 @@ void TCPDataStreamRcvQueue::Region::copyTo(cPacket* msg_) const
 
 ////////////////////////////////////////////////////////////////////
 
-TCPDataStreamRcvQueue::~TCPDataStreamRcvQueue()
+TCPByteStreamRcvQueue::~TCPByteStreamRcvQueue()
 {
 }
 
-std::string TCPDataStreamRcvQueue::info() const
+std::string TCPByteStreamRcvQueue::info() const
 {
     std::stringstream os;
 
@@ -103,7 +103,7 @@ std::string TCPDataStreamRcvQueue::info() const
     return os.str();
 }
 
-cPacket *TCPDataStreamRcvQueue::extractBytesUpTo(uint32 seq)
+cPacket *TCPByteStreamRcvQueue::extractBytesUpTo(uint32 seq)
 {
     cPacket *msg = NULL;
     TCPVirtualDataRcvQueue::Region *reg = extractTo(seq);
@@ -116,7 +116,7 @@ cPacket *TCPDataStreamRcvQueue::extractBytesUpTo(uint32 seq)
     return msg;
 }
 
-TCPVirtualDataRcvQueue::Region* TCPDataStreamRcvQueue::createRegionFromSegment(TCPSegment *tcpseg)
+TCPVirtualDataRcvQueue::Region* TCPByteStreamRcvQueue::createRegionFromSegment(TCPSegment *tcpseg)
 {
     ASSERT(tcpseg->getPayloadLength() == tcpseg->getByteArray().getDataArraySize());
 

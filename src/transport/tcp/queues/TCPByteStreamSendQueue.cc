@@ -16,37 +16,37 @@
 //
 
 
-#include "TCPDataStreamSendQueue.h"
+#include "TCPByteStreamSendQueue.h"
 
 #include "ByteArrayMessage.h"
 #include "TCPSegment.h"
 
-Register_Class(TCPDataStreamSendQueue);
+Register_Class(TCPByteStreamSendQueue);
 
-TCPDataStreamSendQueue::TCPDataStreamSendQueue() : TCPSendQueue()
+TCPByteStreamSendQueue::TCPByteStreamSendQueue() : TCPSendQueue()
 {
     begin = end = 0;
 }
 
-TCPDataStreamSendQueue::~TCPDataStreamSendQueue()
+TCPByteStreamSendQueue::~TCPByteStreamSendQueue()
 {
 }
 
-void TCPDataStreamSendQueue::init(uint32 startSeq)
+void TCPByteStreamSendQueue::init(uint32 startSeq)
 {
     begin = startSeq;
     end = startSeq;
     dataBuffer.clear();
 }
 
-std::string TCPDataStreamSendQueue::info() const
+std::string TCPByteStreamSendQueue::info() const
 {
     std::stringstream out;
     out << "[" << begin << ".." << end << "), " << dataBuffer.getLength() << " bytes";
     return out.str();
 }
 
-void TCPDataStreamSendQueue::enqueueAppData(cPacket *msg)
+void TCPByteStreamSendQueue::enqueueAppData(cPacket *msg)
 {
     //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
     ByteArrayMessage *bamsg = check_and_cast<ByteArrayMessage *>(msg);
@@ -57,17 +57,17 @@ void TCPDataStreamSendQueue::enqueueAppData(cPacket *msg)
     delete msg;
 }
 
-uint32 TCPDataStreamSendQueue::getBufferStartSeq()
+uint32 TCPByteStreamSendQueue::getBufferStartSeq()
 {
     return begin;
 }
 
-uint32 TCPDataStreamSendQueue::getBufferEndSeq()
+uint32 TCPByteStreamSendQueue::getBufferEndSeq()
 {
     return end;
 }
 
-TCPSegment *TCPDataStreamSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
+TCPSegment *TCPByteStreamSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 {
     //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
     ASSERT(seqLE(begin, fromSeq) && seqLE(fromSeq+numBytes, end));
@@ -91,7 +91,7 @@ TCPSegment *TCPDataStreamSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong
     return tcpseg;
 }
 
-void TCPDataStreamSendQueue::discardUpTo(uint32 seqNum)
+void TCPByteStreamSendQueue::discardUpTo(uint32 seqNum)
 {
     //tcpEV << "sendQ: " << info() << " discardUpTo(seq=" << seqNum << ")\n";
     ASSERT(seqLE(begin, seqNum) && seqLE(seqNum, end));

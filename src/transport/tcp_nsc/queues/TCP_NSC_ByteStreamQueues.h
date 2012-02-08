@@ -27,21 +27,20 @@
 
 
 /**
- * Send/Receive queue that manages "virtual bytes", that is, byte counts only.
+ * Send queue that manages actual bytes.
  */
-
-class INET_API TCP_NSC_DataStreamSendQueue : public TCP_NSC_SendQueue
+class INET_API TCP_NSC_ByteStreamSendQueue : public TCP_NSC_SendQueue
 {
   public:
     /**
      * Ctor.
      */
-    TCP_NSC_DataStreamSendQueue();
+    TCP_NSC_ByteStreamSendQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCP_NSC_DataStreamSendQueue();
+    virtual ~TCP_NSC_ByteStreamSendQueue();
 
     virtual void setConnection(TCP_NSC_Connection *connP);
 
@@ -61,18 +60,22 @@ class INET_API TCP_NSC_DataStreamSendQueue : public TCP_NSC_SendQueue
     ByteArrayBuffer byteArrayBufferM;
 };
 
-class INET_API TCP_NSC_DataStreamReceiveQueue : public TCP_NSC_ReceiveQueue
+
+/**
+ * Receive queue that manages actual bytes.
+ */
+class INET_API TCP_NSC_ByteStreamReceiveQueue : public TCP_NSC_ReceiveQueue
 {
   public:
     /**
      * Ctor.
      */
-    TCP_NSC_DataStreamReceiveQueue();
+    TCP_NSC_ByteStreamReceiveQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCP_NSC_DataStreamReceiveQueue();
+    virtual ~TCP_NSC_ByteStreamReceiveQueue();
 
     virtual void setConnection(TCP_NSC_Connection *connP);
 

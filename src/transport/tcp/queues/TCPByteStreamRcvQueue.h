@@ -29,11 +29,11 @@
 #include "ByteArray.h"
 
 /**
- * FIXME
+ * TCP send queue that stores actual bytes.
  *
  * @see TCPSendQueue
  */
-class INET_API TCPDataStreamRcvQueue : public TCPVirtualDataRcvQueue
+class INET_API TCPByteStreamRcvQueue : public TCPVirtualDataRcvQueue
 {
   protected:
     class Region : public TCPVirtualDataRcvQueue::Region
@@ -57,19 +57,19 @@ class INET_API TCPDataStreamRcvQueue : public TCPVirtualDataRcvQueue
         /**
          * Returns an allocated new Region object with filled with begin..seq and set self to seq..end
          */
-        virtual TCPDataStreamRcvQueue::Region* split(uint32 seq);
+        virtual TCPByteStreamRcvQueue::Region* split(uint32 seq);
     };
 
   public:
     /**
      * Ctor.
      */
-    TCPDataStreamRcvQueue() : TCPVirtualDataRcvQueue() {};
+    TCPByteStreamRcvQueue() : TCPVirtualDataRcvQueue() {};
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCPDataStreamRcvQueue();
+    virtual ~TCPByteStreamRcvQueue();
 
     /**
      * Returns a string with region stored.

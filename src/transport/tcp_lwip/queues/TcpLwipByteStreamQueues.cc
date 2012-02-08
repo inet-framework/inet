@@ -17,7 +17,7 @@
 //
 
 
-#include "TcpLwipDataStreamQueues.h"
+#include "TcpLwipByteStreamQueues.h"
 
 #include "ByteArrayMessage.h"
 #include "TCPCommand_m.h"
@@ -26,26 +26,26 @@
 #include "TCPSerializer.h"
 
 
-Register_Class(TcpLwipDataStreamSendQueue);
+Register_Class(TcpLwipByteStreamSendQueue);
 
-Register_Class(TcpLwipDataStreamReceiveQueue);
+Register_Class(TcpLwipByteStreamReceiveQueue);
 
 
-TcpLwipDataStreamSendQueue::TcpLwipDataStreamSendQueue()
+TcpLwipByteStreamSendQueue::TcpLwipByteStreamSendQueue()
 {
 }
 
-TcpLwipDataStreamSendQueue::~TcpLwipDataStreamSendQueue()
+TcpLwipByteStreamSendQueue::~TcpLwipByteStreamSendQueue()
 {
 }
 
-void TcpLwipDataStreamSendQueue::setConnection(TcpLwipConnection *connP)
+void TcpLwipByteStreamSendQueue::setConnection(TcpLwipConnection *connP)
 {
     byteArrayBufferM.clear();
     TcpLwipSendQueue::setConnection(connP);
 }
 
-void TcpLwipDataStreamSendQueue::enqueueAppData(cPacket *msgP)
+void TcpLwipByteStreamSendQueue::enqueueAppData(cPacket *msgP)
 {
     ASSERT(msgP);
 
@@ -58,7 +58,7 @@ void TcpLwipDataStreamSendQueue::enqueueAppData(cPacket *msgP)
     delete msgP;
 }
 
-unsigned int TcpLwipDataStreamSendQueue::getBytesForTcpLayer(
+unsigned int TcpLwipByteStreamSendQueue::getBytesForTcpLayer(
         void* bufferP, unsigned int bufferLengthP) const
 {
     ASSERT(bufferP);
@@ -66,17 +66,17 @@ unsigned int TcpLwipDataStreamSendQueue::getBytesForTcpLayer(
     return byteArrayBufferM.getBytesToBuffer(bufferP, bufferLengthP);
 }
 
-void TcpLwipDataStreamSendQueue::dequeueTcpLayerMsg(unsigned int msgLengthP)
+void TcpLwipByteStreamSendQueue::dequeueTcpLayerMsg(unsigned int msgLengthP)
 {
     byteArrayBufferM.drop(msgLengthP);
 }
 
-unsigned long TcpLwipDataStreamSendQueue::getBytesAvailable() const
+unsigned long TcpLwipByteStreamSendQueue::getBytesAvailable() const
 {
     return byteArrayBufferM.getLength();
 }
 
-TCPSegment* TcpLwipDataStreamSendQueue::createSegmentWithBytes(
+TCPSegment* TcpLwipByteStreamSendQueue::createSegmentWithBytes(
         const void* tcpDataP, unsigned int tcpLengthP)
 {
     ASSERT(tcpDataP);
@@ -100,21 +100,21 @@ TCPSegment* TcpLwipDataStreamSendQueue::createSegmentWithBytes(
     return tcpseg;
 }
 
-void TcpLwipDataStreamSendQueue::discardAckedBytes(unsigned long bytesP)
+void TcpLwipByteStreamSendQueue::discardAckedBytes(unsigned long bytesP)
 {
     // nothing to do here
 }
 
-TcpLwipDataStreamReceiveQueue::TcpLwipDataStreamReceiveQueue()
+TcpLwipByteStreamReceiveQueue::TcpLwipByteStreamReceiveQueue()
 {
 }
 
-TcpLwipDataStreamReceiveQueue::~TcpLwipDataStreamReceiveQueue()
+TcpLwipByteStreamReceiveQueue::~TcpLwipByteStreamReceiveQueue()
 {
     // nothing to do here
 }
 
-void TcpLwipDataStreamReceiveQueue::setConnection(TcpLwipConnection *connP)
+void TcpLwipByteStreamReceiveQueue::setConnection(TcpLwipConnection *connP)
 {
     ASSERT(connP);
 
@@ -122,24 +122,24 @@ void TcpLwipDataStreamReceiveQueue::setConnection(TcpLwipConnection *connP)
     TcpLwipReceiveQueue::setConnection(connP);
 }
 
-void TcpLwipDataStreamReceiveQueue::notifyAboutIncomingSegmentProcessing(
+void TcpLwipByteStreamReceiveQueue::notifyAboutIncomingSegmentProcessing(
         TCPSegment *tcpsegP, uint32 seqno, const void* bufferP, size_t bufferLengthP)
 {
     ASSERT(tcpsegP);
     ASSERT(bufferP);
 }
 
-void TcpLwipDataStreamReceiveQueue::enqueueTcpLayerData(void* dataP, unsigned int dataLengthP)
+void TcpLwipByteStreamReceiveQueue::enqueueTcpLayerData(void* dataP, unsigned int dataLengthP)
 {
     byteArrayBufferM.push(dataP, dataLengthP);
 }
 
-unsigned long TcpLwipDataStreamReceiveQueue::getExtractableBytesUpTo() const
+unsigned long TcpLwipByteStreamReceiveQueue::getExtractableBytesUpTo() const
 {
     return byteArrayBufferM.getLength();
 }
 
-cPacket* TcpLwipDataStreamReceiveQueue::extractBytesUpTo()
+cPacket* TcpLwipByteStreamReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 
@@ -160,22 +160,22 @@ cPacket* TcpLwipDataStreamReceiveQueue::extractBytesUpTo()
     return dataMsg;
 }
 
-uint32 TcpLwipDataStreamReceiveQueue::getAmountOfBufferedBytes() const
+uint32 TcpLwipByteStreamReceiveQueue::getAmountOfBufferedBytes() const
 {
     return byteArrayBufferM.getLength();
 }
 
-uint32 TcpLwipDataStreamReceiveQueue::getQueueLength() const
+uint32 TcpLwipByteStreamReceiveQueue::getQueueLength() const
 {
     return byteArrayBufferM.getLength();
 }
 
-void TcpLwipDataStreamReceiveQueue::getQueueStatus() const
+void TcpLwipByteStreamReceiveQueue::getQueueStatus() const
 {
     // TODO
 }
 
-void TcpLwipDataStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP)
+void TcpLwipByteStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP)
 {
     // nothing to do
 }

@@ -27,20 +27,20 @@
 
 
 /**
- * Send queue that manages "data stream", that is, valid bytes.
+ * Send queue that manages "data stream", that is, actual bytes.
  */
-class INET_API TcpLwipDataStreamSendQueue : public TcpLwipSendQueue
+class INET_API TcpLwipByteStreamSendQueue : public TcpLwipSendQueue
 {
   public:
     /**
      * Ctor.
      */
-    TcpLwipDataStreamSendQueue();
+    TcpLwipByteStreamSendQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TcpLwipDataStreamSendQueue();
+    virtual ~TcpLwipByteStreamSendQueue();
 
     virtual void setConnection(TcpLwipConnection *connP);
 
@@ -61,20 +61,20 @@ class INET_API TcpLwipDataStreamSendQueue : public TcpLwipSendQueue
 };
 
 /**
- * Receive queue that manages "data stream", that is, valid bytes.
+ * Receive queue that manages "data stream", that is, actual bytes.
  */
-class INET_API TcpLwipDataStreamReceiveQueue : public TcpLwipReceiveQueue
+class INET_API TcpLwipByteStreamReceiveQueue : public TcpLwipReceiveQueue
 {
   public:
     /**
      * Ctor.
      */
-    TcpLwipDataStreamReceiveQueue();
+    TcpLwipByteStreamReceiveQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TcpLwipDataStreamReceiveQueue();
+    virtual ~TcpLwipByteStreamReceiveQueue();
 
     // see TcpLwipReceiveQueue
     virtual void setConnection(TcpLwipConnection *connP);

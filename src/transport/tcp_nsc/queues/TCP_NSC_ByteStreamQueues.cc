@@ -17,7 +17,7 @@
 //
 
 
-#include "TCP_NSC_DataStreamQueues.h"
+#include "TCP_NSC_ByteStreamQueues.h"
 
 #include "ByteArrayMessage.h"
 #include "TCPCommand_m.h"
@@ -26,26 +26,26 @@
 #include "TCPSegment.h"
 
 
-Register_Class(TCP_NSC_DataStreamSendQueue);
+Register_Class(TCP_NSC_ByteStreamSendQueue);
 
-Register_Class(TCP_NSC_DataStreamReceiveQueue);
+Register_Class(TCP_NSC_ByteStreamReceiveQueue);
 
 
-TCP_NSC_DataStreamSendQueue::TCP_NSC_DataStreamSendQueue()
+TCP_NSC_ByteStreamSendQueue::TCP_NSC_ByteStreamSendQueue()
 {
 }
 
-TCP_NSC_DataStreamSendQueue::~TCP_NSC_DataStreamSendQueue()
+TCP_NSC_ByteStreamSendQueue::~TCP_NSC_ByteStreamSendQueue()
 {
 }
 
-void TCP_NSC_DataStreamSendQueue::setConnection(TCP_NSC_Connection *connP)
+void TCP_NSC_ByteStreamSendQueue::setConnection(TCP_NSC_Connection *connP)
 {
     byteArrayBufferM.clear();
     TCP_NSC_SendQueue::setConnection(connP);
 }
 
-void TCP_NSC_DataStreamSendQueue::enqueueAppData(cPacket *msgP)
+void TCP_NSC_ByteStreamSendQueue::enqueueAppData(cPacket *msgP)
 {
     ASSERT(msgP);
 
@@ -56,23 +56,23 @@ void TCP_NSC_DataStreamSendQueue::enqueueAppData(cPacket *msgP)
     delete msgP;
 }
 
-int TCP_NSC_DataStreamSendQueue::getBytesForTcpLayer(void* bufferP, int bufferLengthP) const
+int TCP_NSC_ByteStreamSendQueue::getBytesForTcpLayer(void* bufferP, int bufferLengthP) const
 {
     ASSERT(bufferP);
     return byteArrayBufferM.getBytesToBuffer(bufferP, bufferLengthP);
 }
 
-void TCP_NSC_DataStreamSendQueue::dequeueTcpLayerMsg(int msgLengthP)
+void TCP_NSC_ByteStreamSendQueue::dequeueTcpLayerMsg(int msgLengthP)
 {
     byteArrayBufferM.drop(msgLengthP);
 }
 
-ulong TCP_NSC_DataStreamSendQueue::getBytesAvailable() const
+ulong TCP_NSC_ByteStreamSendQueue::getBytesAvailable() const
 {
     return byteArrayBufferM.getLength();
 }
 
-TCPSegment* TCP_NSC_DataStreamSendQueue::createSegmentWithBytes(
+TCPSegment* TCP_NSC_ByteStreamSendQueue::createSegmentWithBytes(
         const void* tcpDataP, int tcpLengthP)
 {
     ASSERT(tcpDataP);
@@ -95,23 +95,23 @@ TCPSegment* TCP_NSC_DataStreamSendQueue::createSegmentWithBytes(
     return tcpseg;
 }
 
-void TCP_NSC_DataStreamSendQueue::discardUpTo(uint32 seqNumP)
+void TCP_NSC_ByteStreamSendQueue::discardUpTo(uint32 seqNumP)
 {
     // nothing to do here
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-TCP_NSC_DataStreamReceiveQueue::TCP_NSC_DataStreamReceiveQueue()
+TCP_NSC_ByteStreamReceiveQueue::TCP_NSC_ByteStreamReceiveQueue()
 {
 }
 
-TCP_NSC_DataStreamReceiveQueue::~TCP_NSC_DataStreamReceiveQueue()
+TCP_NSC_ByteStreamReceiveQueue::~TCP_NSC_ByteStreamReceiveQueue()
 {
     // nothing to do here
 }
 
-void TCP_NSC_DataStreamReceiveQueue::setConnection(TCP_NSC_Connection *connP)
+void TCP_NSC_ByteStreamReceiveQueue::setConnection(TCP_NSC_Connection *connP)
 {
     ASSERT(connP);
 
@@ -119,17 +119,17 @@ void TCP_NSC_DataStreamReceiveQueue::setConnection(TCP_NSC_Connection *connP)
     TCP_NSC_ReceiveQueue::setConnection(connP);
 }
 
-void TCP_NSC_DataStreamReceiveQueue::notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP)
+void TCP_NSC_ByteStreamReceiveQueue::notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP)
 {
     ASSERT(tcpsegP);
 }
 
-void TCP_NSC_DataStreamReceiveQueue::enqueueNscData(void* dataP, int dataLengthP)
+void TCP_NSC_ByteStreamReceiveQueue::enqueueNscData(void* dataP, int dataLengthP)
 {
     byteArrayBufferM.push(dataP, dataLengthP);
 }
 
-cPacket* TCP_NSC_DataStreamReceiveQueue::extractBytesUpTo()
+cPacket* TCP_NSC_ByteStreamReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 
@@ -150,22 +150,22 @@ cPacket* TCP_NSC_DataStreamReceiveQueue::extractBytesUpTo()
     return dataMsg;
 }
 
-uint32 TCP_NSC_DataStreamReceiveQueue::getAmountOfBufferedBytes() const
+uint32 TCP_NSC_ByteStreamReceiveQueue::getAmountOfBufferedBytes() const
 {
     return byteArrayBufferM.getLength();
 }
 
-uint32 TCP_NSC_DataStreamReceiveQueue::getQueueLength() const
+uint32 TCP_NSC_ByteStreamReceiveQueue::getQueueLength() const
 {
     return byteArrayBufferM.getLength();
 }
 
-void TCP_NSC_DataStreamReceiveQueue::getQueueStatus() const
+void TCP_NSC_ByteStreamReceiveQueue::getQueueStatus() const
 {
     // TODO
 }
 
-void TCP_NSC_DataStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP)
+void TCP_NSC_ByteStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP)
 {
     // nothing to do
 }

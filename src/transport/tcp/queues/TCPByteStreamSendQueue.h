@@ -29,7 +29,7 @@
  *
  * @see TCPRcvQueue
  */
-class INET_API TCPDataStreamSendQueue : public TCPSendQueue
+class INET_API TCPByteStreamSendQueue : public TCPSendQueue
 {
   protected:
     ByteArrayBuffer dataBuffer;
@@ -40,12 +40,12 @@ class INET_API TCPDataStreamSendQueue : public TCPSendQueue
     /**
      * Ctor
      */
-    TCPDataStreamSendQueue();
+    TCPByteStreamSendQueue();
 
     /**
      * Virtual dtor.
      */
-    virtual ~TCPDataStreamSendQueue();
+    virtual ~TCPByteStreamSendQueue();
 
     virtual void init(uint32 startSeq);
 

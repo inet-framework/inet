@@ -49,11 +49,10 @@ std::string TCPMsgBasedSendQueue::info() const
 void TCPMsgBasedSendQueue::enqueueAppData(cPacket *msg)
 {
     //tcpEV << "sendQ: " << info() << " enqueueAppData(bytes=" << msg->getByteLength() << ")\n";
-    uint32 newend = end + msg->getByteLength();
-    if (seqLess(newend, begin))
-        throw cRuntimeError("queue is full");
+    end += msg->getByteLength();
+    if (seqLess(end, begin))
+        throw cRuntimeError("Send queue is full");
 
-    end = newend;
     Payload payload;
     payload.endSequenceNo = end;
     payload.msg = msg;
