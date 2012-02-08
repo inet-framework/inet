@@ -122,6 +122,7 @@ uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 {
     Region *region = createRegionFromSegment(tcpseg);
 
+#ifndef NDEBUG
     if (!regionList.empty())
     {
         uint32 ob = regionList.front()->getBegin();
@@ -134,6 +135,7 @@ uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
             throw cRuntimeError("The new segment is [%u, %u) out of the acceptable range at the queue %s",
                     region->getBegin(), region->getEnd(), info().c_str());
     }
+#endif
 
     merge(region);
 
