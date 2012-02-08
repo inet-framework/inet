@@ -128,7 +128,7 @@ void EtherMAC::processConnectionChanged()
             receiveState = RX_RECONNECT_STATE;
             simtime_t reconnectEndTime = simTime() + 8 * (MAX_ETHERNET_FRAME_BYTES + JAM_SIGNAL_BYTES) / curEtherDescr->txrate;
             endRxTimeList.clear();
-            processEndReceptionAtReconnectState(endRxMsg->getTreeId(), reconnectEndTime);
+            addReceptionInReconnectState(endRxMsg->getTreeId(), reconnectEndTime);
         }
     }
 }
@@ -273,7 +273,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
     }
 }
 
-void EtherMAC::processEndReceptionAtReconnectState(long packetTreeId, simtime_t endRxTime)
+void EtherMAC::addReceptionInReconnectState(long packetTreeId, simtime_t endRxTime)
 {
     ASSERT(packetTreeId != 0);
 
@@ -311,7 +311,7 @@ void EtherMAC::processEndReceptionAtReconnectState(long packetTreeId, simtime_t 
     }
 }
 
-void EtherMAC::processEndReception(simtime_t endRxTime)
+void EtherMAC::addReception(simtime_t endRxTime)
 {
     numConcurrentTransmissions++;
 
@@ -363,7 +363,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     if (!duplexMode && receiveState == RX_RECONNECT_STATE)
     {
         long treeId = jamMsg ? jamMsg->getAbortedPkTreeID() : msg->getTreeId();
-        processEndReceptionAtReconnectState(treeId, endRxTime);
+        addReceptionInReconnectState(treeId, endRxTime);
         delete msg;
     }
     else if (!duplexMode && (transmitState == TRANSMITTING_STATE || transmitState == SEND_IFG_STATE))
@@ -375,7 +375,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         // set receive state and schedule end of reception
         receiveState = RX_COLLISION_STATE;
 
-        processEndReception(endRxTime);
+        addReception(endRxTime);
         delete msg;
 
         EV << "Transmission interrupted by incoming frame, handling collision\n";
@@ -428,7 +428,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         else // EtherFrame or EtherPauseFrame
         {
             EV << "Overlapping receptions -- setting collision state\n";
-            processEndReception(endRxTime);
+            addReception(endRxTime);
             // delete collided frames: arrived frame as well as the one we're currently receiving
             delete msg;
             processDetectedCollision();
@@ -572,8 +572,14 @@ void EtherMAC::handleEndTxPeriod()
     backoffs = 0;
 
     // check for and obey received PAUSE frames after each transmission
-    if (checkAndScheduleEndPausePeriod())
+    if (pauseUnitsRequested > 0)
+    {
+        // if we received a PAUSE frame recently, go into PAUSE state
+        EV << "Going to PAUSE mode for " << pauseUnitsRequested << " time units\n";
+        scheduleEndPausePeriod(pauseUnitsRequested);
+        pauseUnitsRequested = 0;
         return;
+    }
 
     beginSendFrames();
 }
@@ -585,7 +591,7 @@ void EtherMAC::scheduleEndRxPeriod(EtherTraffic *frame)
 
     frameBeingReceived = frame;
     receiveState = RECEIVING_STATE;
-    processEndReception(simTime() + frame->getDuration());
+    addReception(simTime() + frame->getDuration());
 }
 
 void EtherMAC::handleEndRxPeriod()
@@ -801,11 +807,7 @@ void EtherMAC::frameReceptionComplete()
 
     if (dynamic_cast<EtherPauseFrame*>(frame) != NULL)
     {
-        int pauseUnits = ((EtherPauseFrame*)frame)->getPauseTime();
-        delete frame;
-        numPauseFramesRcvd++;
-        emit(rxPausePkUnitsSignal, pauseUnits);
-        processPauseCommand(pauseUnits);
+        processReceivedPauseFrame((EtherPauseFrame*)frame);
     }
     else
     {
@@ -830,8 +832,14 @@ void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
     send(frame, "upperLayerOut");
 }
 
-void EtherMAC::processPauseCommand(int pauseUnits)
+void EtherMAC::processReceivedPauseFrame(EtherPauseFrame *frame)
 {
+    int pauseUnits = frame->getPauseTime();
+    delete frame;
+
+    numPauseFramesRcvd++;
+    emit(rxPausePkUnitsSignal, pauseUnits);
+
     if (transmitState == TX_IDLE_STATE)
     {
         EV << "PAUSE frame received, pausing for " << pauseUnitsRequested << " time units\n";
@@ -902,26 +910,9 @@ void EtherMAC::scheduleEndTxPeriod(EtherFrame *frame)
 void EtherMAC::scheduleEndPausePeriod(int pauseUnits)
 {
     // length is interpreted as 512-bit-time units
-    cPacket pause;
-    pause.setBitLength(pauseUnits * PAUSE_UNIT_BITS);
-    simtime_t pausePeriod = transmissionChannel->calculateDuration(&pause);
+    simtime_t pausePeriod = pauseUnits * PAUSE_UNIT_BITS / curEtherDescr->txrate;
     scheduleAt(simTime() + pausePeriod, endPauseMsg);
     transmitState = PAUSE_STATE;
-}
-
-bool EtherMAC::checkAndScheduleEndPausePeriod()
-{
-    if (pauseUnitsRequested > 0)
-    {
-        // if we received a PAUSE frame recently, go into PAUSE state
-        EV << "Going to PAUSE mode for " << pauseUnitsRequested << " time units\n";
-
-        scheduleEndPausePeriod(pauseUnitsRequested);
-        pauseUnitsRequested = 0;
-        return true;
-    }
-
-    return false;
 }
 
 void EtherMAC::beginSendFrames()

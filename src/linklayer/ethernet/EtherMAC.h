@@ -98,17 +98,16 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void scheduleEndTxPeriod(EtherFrame *);
     virtual void scheduleEndRxPeriod(EtherTraffic *);
     virtual void scheduleEndPausePeriod(int pauseUnits);
-    virtual bool checkAndScheduleEndPausePeriod();
     virtual void beginSendFrames();
     virtual void sendJamSignal();
     virtual void startFrameTransmission();
     virtual void frameReceptionComplete();
     virtual void processReceivedDataFrame(EtherFrame *frame);
     virtual void processReceivedJam(EtherJam *jam);
-    virtual void processPauseCommand(int pauseUnits);
+    virtual void processReceivedPauseFrame(EtherPauseFrame *frame);
     virtual void processConnectionChanged();
-    virtual void processEndReception(simtime_t endRxTime);
-    virtual void processEndReceptionAtReconnectState(long id, simtime_t endRxTime);
+    virtual void addReception(simtime_t endRxTime);
+    virtual void addReceptionInReconnectState(long id, simtime_t endRxTime);
     virtual void processDetectedCollision();
 
     virtual void printState();
