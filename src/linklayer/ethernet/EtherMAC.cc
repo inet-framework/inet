@@ -128,7 +128,7 @@ void EtherMAC::processConnectDisconnect()
             receiveState = RX_RECONNECT_STATE;
             simtime_t reconnectEndTime = simTime() + 8 * (MAX_ETHERNET_FRAME_BYTES + JAM_SIGNAL_BYTES) / curEtherDescr->txrate;
             endRxTimeList.clear();
-            addReceptionInReconnectState(endRxMsg->getTreeId(), reconnectEndTime);
+            addReceptionInReconnectState(-1, reconnectEndTime);
         }
     }
 }
@@ -275,16 +275,17 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 
 void EtherMAC::addReceptionInReconnectState(long packetTreeId, simtime_t endRxTime)
 {
-    ASSERT(packetTreeId != 0);
+    // note: packetTreeId==-1 is legal, and represents a special entry that marks the end of the reconnect state
 
-    // remove expired entries from endRxTimeList
+    // housekeeping: remove expired entries from endRxTimeList
     simtime_t now = simTime();
     while (!endRxTimeList.empty() && endRxTimeList.front().endTime <= now)
         endRxTimeList.pop_front();
 
     EndRxTimeList::iterator i;
 
-    // remove old entry with same packet tree ID
+    // remove old entry with same packet tree ID (typically: a frame reception
+    // doesn't go through but is canceled by a jam signal)
     for (i = endRxTimeList.begin(); i != endRxTimeList.end(); i++)
     {
         if (i->packetTreeId == packetTreeId)
@@ -294,17 +295,15 @@ void EtherMAC::addReceptionInReconnectState(long packetTreeId, simtime_t endRxTi
         }
     }
 
-    // find insertion position
+    // find insertion position and insert new entry (list is ordered by endRxTime)
     for (i = endRxTimeList.begin(); i != endRxTimeList.end() && i->endTime <= endRxTime; i++)
         ;
-
-    // insert
     PkIdRxTime item(packetTreeId, endRxTime);
-    i = endRxTimeList.insert(i, item);
+    endRxTimeList.insert(i, item);
 
+    // adjust endRxMsg if needed (we'll exit reconnect mode when endRxMsg expires)
     simtime_t maxRxTime = endRxTimeList.back().endTime;
-    simtime_t oldRxTime = endRxMsg->getArrivalTime();
-    if (oldRxTime < maxRxTime)
+    if (endRxMsg->getArrivalTime() < maxRxTime)
     {
         cancelEvent(endRxMsg);
         scheduleAt(maxRxTime, endRxMsg);

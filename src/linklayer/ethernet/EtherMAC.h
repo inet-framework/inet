@@ -56,10 +56,11 @@ class INET_API EtherMAC : public EtherMACBase
     EtherTraffic *frameBeingReceived;
     cMessage *endRxMsg, *endBackoffMsg, *endJammingMsg;
 
-    // list of receptions during reconnect state
+    // list of receptions during reconnect state; an additional special entry (with packetTreeId=-1)
+    // stores the end time of the reconnect state
     struct PkIdRxTime
     {
-        long packetTreeId;             // tree ID of packet being received.
+        long packetTreeId;             // >=0: tree ID of packet being received; -1: this is a special entry that stores the end time of the reconnect state
         simtime_t endTime;             // end of reception
         PkIdRxTime(long id, simtime_t time) {packetTreeId=id; endTime = time;}
     };
