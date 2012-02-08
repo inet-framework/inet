@@ -399,8 +399,19 @@ void EtherMACBase::refreshConnection()
 
 bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)
 {
-    // If not set to promiscuous = on, then checks if received frame contains destination MAC address
-    // matching port's MAC address, also checks if broadcast bit is set
+    // Current ethernet mac implementation does not support the configuration of multicast
+    // ethernet address groups. We rather accept all multicast frames (just like they were 
+    // broadcasts) and pass it up to the higher layer where they will be dropped
+    // if not needed.
+    //
+    // PAUSE frames must be handled a bit differently because they are processed at
+    // this level. Multicast PAUSE frames should not be processed unless they have a 
+    // destination of MULTICAST_PAUSE_ADDRESS. We drop all PAUSE frames that have a
+    // different muticast destination. (Note: Would the multicast ethernet addressing
+    // implemented, we could also process the PAUSE frames destined to any of our
+    // multicast adresses)
+    // All NON-PAUSE frames must be passed to the upper layer if the interface is 
+    // in promiscuous mode.
 
     if (frame->getDest().equals(address))
         return false;
@@ -410,17 +421,10 @@ bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)
 
     bool isPause = (dynamic_cast<EtherPauseFrame *>(frame) != NULL);
 
-    if (!isPause && promiscuous)
+    if (!isPause && (promiscuous || frame->getDest().isMulticast()))
         return false;
 
     if (isPause && frame->getDest().equals(MACAddress::MULTICAST_PAUSE_ADDRESS))
-        return false;
-
-    // TODO: why don't we check here if a multicast message is really for us? where is that done?
-    // FIXME: Checking of !isPause in next line is a hack.
-    //        Without this condition EtherMAC* accepts and processes all received PAUSE frames to any foreign dest multicast address, too.
-    //        Currently we drops all received PAUSE frames to sent to all multicast addresses except MULTICAST_PAUSE_ADDRESS.
-    if (frame->getDest().isMulticast() && !isPause)
         return false;
 
     EV << "Frame `" << frame->getName() <<"' not destined to us, discarding\n";
