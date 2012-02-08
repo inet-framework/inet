@@ -1,0 +1,63 @@
+<!-- This file is used by the ScenarioManager. -->
+<scenario>
+    <at t="1.4">
+        <disconnect src-module="hostA" src-gate="ethg$o" />
+        <disconnect src-module="hub" src-gate="ethg$o[0]" />
+    </at>
+    <at t="1.5">
+        <connect src-module="hostA" src-gate="ethg"
+                 dest-module="hub" dest-gate="ethg[0]"
+                 channel-type="ned.DatarateChannel" />
+    </at>
+
+    <at t="1.6">
+        <disconnect src-module="hostB" src-gate="ethg$o" />
+        <disconnect src-module="hub" src-gate="ethg$o[1]" />
+    </at>
+    <at t="1.7">
+        <connect src-module="hostB" src-gate="ethg"
+                 dest-module="hub" dest-gate="ethg[1]"
+                 channel-type="ned.DatarateChannel" />
+    </at>
+
+    <at t="1.8">
+        <disconnect src-module="hostC" src-gate="ethg$o" />
+        <disconnect src-module="hub" src-gate="ethg$o[2]" />
+    </at>
+    <at t="1.9">
+        <connect src-module="hostC" src-gate="ethg"
+                 dest-module="hub" dest-gate="ethg[2]"
+                 channel-type="ned.DatarateChannel" />
+    </at>
+
+    <at t="3.4">
+        <disconnect src-module="hostA" src-gate="ethg$o" />
+        <disconnect src-module="hub" src-gate="ethg$o[0]" />
+    </at>
+    <at t="3.5">
+        <connect src-module="hostA" src-gate="ethg"
+                 dest-module="hub" dest-gate="ethg[0]"
+                 channel-type="ned.DatarateChannel" />
+    </at>
+
+    <at t="3.6">
+        <disconnect src-module="hostB" src-gate="ethg$o" />
+        <disconnect src-module="hub" src-gate="ethg$o[1]" />
+    </at>
+    <at t="3.7">
+        <connect src-module="hostB" src-gate="ethg"
+                 dest-module="hub" dest-gate="ethg[1]"
+                 channel-type="ned.DatarateChannel" />
+    </at>
+
+    <at t="3.8">
+        <disconnect src-module="hostC" src-gate="ethg$o" />
+        <disconnect src-module="hub" src-gate="ethg$o[2]" />
+    </at>
+    <at t="3.9">
+        <connect src-module="hostC" src-gate="ethg"
+                 dest-module="hub" dest-gate="ethg[2]"
+                 channel-type="ned.DatarateChannel" />
+    </at>
+</scenario>
+
