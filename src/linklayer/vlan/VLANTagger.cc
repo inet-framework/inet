@@ -117,15 +117,22 @@ void VLANTagger::handleMessage(cMessage *msg)
             if (dynamic_cast<EthernetIIFrame *>(msg) != NULL)
             {
             	MACAddress address = ((EthernetIIFrame *)msg)->getDest();
-                EthernetIIFrameWithVLAN *vlanFrame = TagFrame((EthernetIIFrame *)msg);
-                if (vlanFrame != NULL)
-                {
-                	send(vlanFrame, "relayg$o");
-                }
-                else
-                {
-                	EV << "There is no VID registered/learned for MAC address:" << address << endl;
-                }
+            	VLANFrameVector vlanFrames;
+            	TagFrame((EthernetIIFrame *)msg, vlanFrames);
+//                EthernetIIFrameWithVLAN *vlanFrame = TagFrame((EthernetIIFrame *)msg);
+            	VLANFrameVector::iterator it;
+            	for (it=vlanFrames.begin(); it < vlanFrames.end(); it++)
+            	{
+            	    send(*it, "relayg$o");
+            	}
+//                if (vlanFrame != NULL)
+//                {
+//                	send(vlanFrame, "relayg$o");
+//                }
+//                else
+//                {
+//                	EV << "There is no VID registered/learned for MAC address:" << address << endl;
+//                }
             }
             else
             {
@@ -163,41 +170,45 @@ void VLANTagger::handleMessage(cMessage *msg)
     }
 }
 
-EthernetIIFrameWithVLAN *VLANTagger::TagFrame(EthernetIIFrame *frame)
+void VLANTagger::TagFrame(EthernetIIFrame *frame, VLANFrameVector& vlanFrames)
 {
-	int vid;
+    VIDVector vids;
 
     if (dynamicTagging == true)
-    {
-        // dynamic tagging based on the VLAN address table
-    	vid = relay->getVIDForMACAddress(frame->getDest());
-
-        // FIXME Extend to the case of multiple VIDs for a given MAC address
+    {   // dynamic tagging based on the VLAN address table
+    	int vid = relay->getVIDForMACAddress(frame->getDest());
+        if (vid < 0)
+        {   // either there is no matching VID for the MAC address or the frame is for broadcasting
+            vids = vidSet;
+        }
+        else
+        {
+            vids.push_back(vid);
+        }
     }
     else
-    {
-        // static tagging based on PVID
-        vid = pvid;
+    {   // static tagging based on PVID
+        vids.push_back(pvid);
     }
 
-	if (vid < 0)
-	{
-		// cannot find a VID for the given MAC address
-		delete frame;
-		return NULL;
-	}
-
-	EthernetIIFrameWithVLAN *vlanFrame = new EthernetIIFrameWithVLAN;
+    EthernetIIFrameWithVLAN *vlanFrame = new EthernetIIFrameWithVLAN;
     vlanFrame->setDest(frame->getDest());
     vlanFrame->setSrc(frame->getSrc());
-	vlanFrame->setVid(VID(vid));
     vlanFrame->setEtherType(frame->getEtherType());
     vlanFrame->setByteLength(ETHER_MAC_FRAME_BYTES + ETHER_VLAN_TAG_LENGTH);
     cPacket * temp = frame->decapsulate();
     if (temp != NULL)
         vlanFrame->encapsulate(temp);
     delete frame;
-    return vlanFrame;
+
+    VIDVector::iterator it;
+    for (it = vids.begin(); it < vids.end(); it++)
+    {
+        EthernetIIFrameWithVLAN *vf = vlanFrame->dup();
+        vf->setVid(*it);
+        vlanFrames.push_back(vf);
+    }
+    delete vlanFrame;
 }
 
 EthernetIIFrame *VLANTagger::UntagFrame(EthernetIIFrameWithVLAN *vlanFrame)

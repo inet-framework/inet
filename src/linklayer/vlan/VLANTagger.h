@@ -18,6 +18,7 @@
 
 #include <omnetpp.h>
 #include <string>
+#include <vector>
 #include "Ethernet.h"
 #include "EtherFrame_m.h"
 #include "MACRelayUnitNPWithVLAN.h"
@@ -36,7 +37,9 @@ class VLANTagger : public cSimpleModule
         bool dynamicTagging;    ///< (experimental) dynamic tagging for untagged port based on source & destination MAC addresses of incoming frames
         /* bool verbose; */
         VID pvid;   ///< Port VLAN Identifier (PVID) for untagged port
-        std::vector<VID> vidSet;   ///< set of VIDs for tagged port
+
+        typedef std::vector<VID> VIDVector;
+        VIDVector vidSet;   ///< set of VIDs for tagged port
 
     public:
         VLANTagger();
@@ -44,17 +47,19 @@ class VLANTagger : public cSimpleModule
         bool isTagged() const {return tagged;}
         bool isDynamicTagging() const {return dynamicTagging;}
         VID getPvid() const {return pvid;}
-        std::vector<VID> getVidSet() const {return vidSet;}
+        VIDVector getVidSet() const {return vidSet;}
 
     protected:
         virtual void initialize();
         virtual void handleMessage(cMessage *msg);
 
-        // insert VLAN tag into an Ethernet frame
-        virtual EthernetIIFrameWithVLAN *TagFrame(EthernetIIFrame *msg);
+        typedef std::vector<EthernetIIFrameWithVLAN *> VLANFrameVector;
+
+        // create VLAN-tagged Ethernet frame(s) for a given Ethernet frame
+        virtual void TagFrame(EthernetIIFrame *msg, VLANFrameVector& vlanFrames);
 
         // extract VLAN tag from an Ethernet frame
-        virtual EthernetIIFrame * UntagFrame(EthernetIIFrameWithVLAN *msg);
+        virtual EthernetIIFrame *UntagFrame(EthernetIIFrameWithVLAN *msg);
 };
 
 #endif // __INET_VLAN_TAGGER_H

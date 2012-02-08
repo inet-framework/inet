@@ -42,3 +42,5 @@ doc/doxy
 *.thr
 *.trf
 *.vec
+results/
+/etc/omnetpp-extension/
