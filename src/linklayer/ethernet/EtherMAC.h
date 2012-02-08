@@ -24,6 +24,7 @@
 
 
 class EtherJam;
+class EtherPauseFrame;
 class IPassiveQueue;
 
 /**
