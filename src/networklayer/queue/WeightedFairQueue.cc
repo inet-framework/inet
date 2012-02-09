@@ -32,7 +32,7 @@ WeightedFairQueue::WeightedFairQueue()
     GPS_idle = true;
     numQueues = 0;
     safe_limit = 0.001;
-    lotalLength = 0;
+    totalLength = 0;
 }
 
 WeightedFairQueue::~WeightedFairQueue()
@@ -56,7 +56,7 @@ void WeightedFairQueue::initialize()
     queueLengthSignal = registerSignal("queueLength");
     earlyDropPkBytesSignal = registerSignal("earlyDropPkBytes");
 
-    emit(queueLengthSignal, lotalLength);
+    emit(queueLengthSignal, totalLength);
 
     classifier = check_and_cast<IQoSClassifier*>(createOne(classifierClass));
 
@@ -198,8 +198,8 @@ cMessage *WeightedFairQueue::enqueue(cMessage *msg)
             sum += (double)subqueueData[queueIndex].queueWeight;
         if (fabs(sum) < safe_limit)
             sum = 0;
-        lotalLength++;
-        emit(queueLengthSignal, lotalLength);
+        totalLength++;
+        emit(queueLengthSignal, totalLength);
 
         return false;
     }
@@ -238,8 +238,8 @@ cMessage *WeightedFairQueue::dequeue()
             for (int i = 0; i < numQueues; i++)
                 subqueueData[i].finish_t = 0;
         }
-        lotalLength--;
-        emit(queueLengthSignal, lotalLength);
+        totalLength--;
+        emit(queueLengthSignal, totalLength);
         return (cMessage *)queueArray[selectQueue].pop();
     }
     return NULL;

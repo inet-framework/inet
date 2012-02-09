@@ -68,7 +68,7 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
         }
 
     };
-    long lotalLength;
+    long totalLength;
 
     // statistics
     static simsignal_t queueLengthSignal;
