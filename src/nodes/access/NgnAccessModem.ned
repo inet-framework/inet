@@ -26,9 +26,15 @@ import inet.linklayer.vlan.VLANTagger;
 //
 // Abstract model of a next-generation network (NGN) access modem
 // (e.g., cable modem, xDSL modem, TDM-PON ONU) based on a
-// VLAN-capable Ethernet switch with external output queueing
+// VLAN-capable Ethernet switch with external output queueing,
+// VLAN tagger, frame classifier, and traffic control modules
 // (i.e., EtherSwitch2WithOutputQueueAndVLAN).
-// This module automatically assigns itself a VLAN ID based on its index.
+//
+// <b>VLAN ID Assignment</b>
+//
+// VLAN ID is automatically assigned based on the module index.
+//
+// @see MACRelayUnitNPWithVLAN, VLANTagger, DropTailTBFQueue, VLANClassifier
 //
 module NgnAccessModem
 {
@@ -36,6 +42,7 @@ module NgnAccessModem
         @node();
         @labels(node,ethernet-node);
         @display("i=device/switch");
+        int pvid = default(10);	// port VLAN ID
         string relayUnitType = default("MACRelayUnitNPWithVLAN"); // type of the MACRelayUnit; currently
 			   				   									  // only MACRelayUnitNPWithVLAN is possible
     gates:
@@ -52,12 +59,13 @@ module NgnAccessModem
             parameters:
                 @display("p=94,99");
                 tagged = index == sizeof(ethg)-1 ? true : false;
-                vidSet = string(index+10);
+                minVid = pvid;
+                maxVid = pvid;
         }
         mac[sizeof(ethg)]: EtherMAC2withOutputQueue {
             parameters:
-                promiscuous = true;
                 @display("p=94,184,row;q=queue");
+                promiscuous = true;
         }
     connections:
         for i=0..sizeof(ethg)-1 {

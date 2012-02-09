@@ -36,6 +36,8 @@ class VLANTagger : public cSimpleModule
         bool tagged;    ///< port type
         bool dynamicTagging;    ///< (experimental) dynamic tagging for untagged port based on source & destination MAC addresses of incoming frames
         /* bool verbose; */
+        int minVid; ///< minimum of the range of allowed VID values
+        int maxVid; ///< maximum of the range of allowed VID values
         VID pvid;   ///< Port VLAN Identifier (PVID) for untagged port
 
         typedef std::vector<VID> VIDVector;

@@ -20,10 +20,11 @@
 package inet.examples.ngoa.traffic_control;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
-//import inet.nodes.ethernet.EtherSwitch2WithOutputQueue;
-import inet.nodes.ethernet.EtherSwitch2WithOutputQueueAndVLAN;
+//import inet.nodes.ethernet.EtherSwitch2WithOutputQueueAndVLAN;
+import inet.nodes.access.NgnAccessModem;
+import inet.nodes.access.NgnAccessNode;
+import inet.nodes.access.NgnAccessSplitter;
 import inet.nodes.inet.RouterWithEthernetInterface2;
-//import inet.nodes.ethernet.EtherSwitch3WithPPP2Interface;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
 
@@ -62,21 +63,22 @@ network NgnAccess
             gates:
                 ethg[1];
         }
-        olt: EtherSwitch2WithOutputQueueAndVLAN {
+        olt: NgnAccessNode {
             parameters:
                 @display("p=388,119");
             gates:
                 ethg[2];
         }
-        accessSwitch: EtherSwitch2WithOutputQueueAndVLAN {
+        accessSwitch: NgnAccessSplitter {
             parameters:
                 @display("p=269,119");
             gates:
                 ethg[N+1];
         }
-        onu[N]: EtherSwitch2WithOutputQueueAndVLAN {
+        onu[N]: NgnAccessModem {
             parameters:
                 @display("p=131,119");
+                pvid = index+10;
             gates:
                 ethg[n+1];
         }
