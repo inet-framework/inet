@@ -39,12 +39,8 @@ WeightedFairQueue::~WeightedFairQueue()
 {
     subqueueData.clear();
     for (int i = 0; i < numQueues; i++)
-    {
         while (queueArray[i].length()>0)
-        {
             delete queueArray[i].pop();
-        }
-    }
     queueArray.clear();
 }
 
@@ -159,10 +155,8 @@ bool WeightedFairQueue::RedTest(cMessage *msg, int queueIndex)
     }
 
     // carry out decision
-    if (mark || queueArray[queueIndex].length() >= (*maxth)) // maxth is also the "hard" limit
-        return true;
-    else
-        return false;
+    bool result = mark || queueArray[queueIndex].length() >= (*maxth); // maxth is also the "hard" limit
+    return result;
 }
 
 
@@ -170,7 +164,7 @@ cMessage *WeightedFairQueue::enqueue(cMessage *msg)
 {
     int queueIndex = classifier->classifyPacket(msg);
 
-    if (RedTest(msg,queueIndex))
+    if (RedTest(msg, queueIndex))
     {
         emit(earlyDropPkBytesSignal, (long)(PK(msg)->getByteLength()));
         return msg;
@@ -192,7 +186,7 @@ cMessage *WeightedFairQueue::enqueue(cMessage *msg)
         }
         else
         {
-            virt_time = virt_time+(SIMTIME_DBL(simTime())-last_vt_update)/sum;
+            virt_time += (SIMTIME_DBL(simTime()) - last_vt_update) / sum;
             last_vt_update = SIMTIME_DBL(simTime());
         }
         double pkleng = (double)PK(msg)->getBitLength();
@@ -201,7 +195,7 @@ cMessage *WeightedFairQueue::enqueue(cMessage *msg)
                                             pkleng /(subqueueData[queueIndex].queueWeight*bandwidth);
         subqueueData[queueIndex].time.push(subqueueData[queueIndex].finish_t);
         if ((subqueueData[queueIndex].B++) == 0)
-            sum = sum+(double)subqueueData[queueIndex].queueWeight;
+            sum += (double)subqueueData[queueIndex].queueWeight;
         if (fabs(sum) < safe_limit)
             sum = 0;
         lotalLength++;
@@ -235,7 +229,7 @@ cMessage *WeightedFairQueue::dequeue()
 
         // update sum
         if ((--subqueueData[selectQueue].B) == 0)
-            sum = sum-(double)subqueueData[selectQueue].queueWeight;
+            sum -= (double)subqueueData[selectQueue].queueWeight;
         if (fabs(sum) < safe_limit)
             sum = 0;
         if (sum == 0)
@@ -259,10 +253,8 @@ void WeightedFairQueue::sendOut(cMessage *msg)
 bool WeightedFairQueue::isEmpty()
 {
     for (int i = 0; i < numQueues; i++)
-    {
         if (!queueArray[i].empty())
             return false;
-    }
     return true;
 }
 
