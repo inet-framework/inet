@@ -21,6 +21,7 @@
 #define __INET_DROPTAILVLANTBFQUEUE_H
 
 #include <omnetpp.h>
+#include <sstream>
 #include <vector>
 #include "PassiveQueueBase.h"
 #include "IQoSClassifier.h"
@@ -87,6 +88,11 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
      * Redefined from PassiveQueueBase.
      */
     virtual void handleMessage(cMessage *msg);
+
+    /**
+     * Redefined from PassiveQueueBase.
+     */
+    virtual void finish();
 
     /**
      * Redefined from PassiveQueueBase.
