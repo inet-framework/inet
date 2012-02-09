@@ -25,6 +25,29 @@ Define_Module(WeightedFairQueue);
 simsignal_t WeightedFairQueue::queueLengthSignal = SIMSIGNAL_NULL;
 simsignal_t WeightedFairQueue::earlyDropPkBytesSignal = SIMSIGNAL_NULL;
 
+WeightedFairQueue::WeightedFairQueue()
+{
+    bandwidth = 1e6;
+    virt_time = last_vt_update = sum = 0;
+    GPS_idle = true;
+    numQueues = 0;
+    safe_limit = 0.001;
+    lotalLength = 0;
+}
+
+WeightedFairQueue::~WeightedFairQueue()
+{
+    subqueueData.clear();
+    for (int i = 0; i < numQueues; i++)
+    {
+        while (queueArray[i].length()>0)
+        {
+            delete queueArray[i].pop();
+        }
+    }
+    queueArray.clear();
+}
+
 void WeightedFairQueue::initialize()
 {
     PassiveQueueBase::initialize();

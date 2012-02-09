@@ -92,28 +92,8 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
     bool RedTest(cMessage *msg, int queueIndex);
 
   public:
-    WeightedFairQueue ()
-    {
-        bandwidth = 1e6;
-        virt_time = last_vt_update = sum = 0;
-        GPS_idle = true;
-        numQueues = 0;
-        safe_limit = 0.001;
-        lotalLength = 0;
-    }
-    // Omnet methods
-    ~WeightedFairQueue()
-    {
-        subqueueData.clear();
-        for (int i = 0; i < numQueues; i++)
-        {
-            while (queueArray[i].length()>0)
-            {
-                delete queueArray[i].pop();
-            }
-        }
-        queueArray.clear();
-    }
+    WeightedFairQueue();
+    ~WeightedFairQueue();
 
     virtual void setBandwidth(double val) { bandwidth = val; }
     virtual double getBandwidth() { return bandwidth; }
