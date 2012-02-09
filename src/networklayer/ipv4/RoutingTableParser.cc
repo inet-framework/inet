@@ -283,13 +283,6 @@ void RoutingTableParser::parseMulticastGroups(char *groupStr, InterfaceEntry *it
 {
     IPv4InterfaceData::IPAddressVector mcg = itf->ipv4Data()->getMulticastGroups();
 
-    // add "224.0.0.1" automatically
-    mcg.push_back(IPv4Address::ALL_HOSTS_MCAST);
-
-    // add 224.0.0.2" only if Router (IPv4 forwarding enabled)
-    if (rt->isIPForwardingEnabled())
-        mcg.push_back(IPv4Address::ALL_ROUTERS_MCAST);
-
     // Parse string (IPv4 addresses separated by colons)
     cStringTokenizer tokenizer(groupStr, ":");
     const char *token;

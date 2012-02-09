@@ -271,6 +271,14 @@ void RoutingTable::configureInterfaceForIPv4(InterfaceEntry *ie)
 
     // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
     d->setMetric((int)ceil(2e9/ie->getDatarate())); // use OSPF cost as default
+
+    // join "224.0.0.1" and "224.0.0.2" (if router) multicast groups automatically
+    if (ie->isMulticast())
+    {
+        d->joinMulticastGroup(IPv4Address::ALL_HOSTS_MCAST);
+        if (IPForward)
+            d->joinMulticastGroup(IPv4Address::ALL_ROUTERS_MCAST);
+    }
 }
 
 InterfaceEntry *RoutingTable::getInterfaceByAddress(const IPv4Address& addr) const
