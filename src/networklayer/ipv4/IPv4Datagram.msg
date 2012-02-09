@@ -131,6 +131,8 @@ class IPv4SourceRoutingOption
 //
 packet IPv4Datagram
 {
+    @customize(true);
+
     short version = 4;
     short headerLength = IP_HEADER_BYTES;
 
@@ -144,6 +146,8 @@ packet IPv4Datagram
     bool dontFragment;
     int fragmentOffset;         // bytes, must be multiple of 8
     unsigned char typeOfService;  // ToS byte
+    abstract int diffServCodePoint;  // maps to bits 0-5 of ToS
+    abstract int explicitCongestionNotification;  // maps to bits 6-7 of ToS
 
     int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  //#FIXME modify header length when options are present
                                                          //#FIXME also: the RFC says that more than one IPv4-Option is allowed

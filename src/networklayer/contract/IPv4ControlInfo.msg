@@ -70,6 +70,8 @@ class IPv4ControlInfo
     bool multicastLoop;   // if true, sent multicast datagrams will be looped back
     short protocol enum(IPProtocolId);  // encapsulated protocol
     unsigned char typeOfService;  // Type of Service byte (low 6 bits: DSCP)
+    abstract int diffServCodePoint;  // maps to bits 0-5 of trafficClass
+    abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
     short timeToLive;     // maximum hop count
     bool dontFragment;    // "don't fragment" bit
 

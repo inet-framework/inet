@@ -51,6 +51,26 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
     virtual IPv6Datagram *removeOrigDatagram();
 
     /**
+     * Returns bits 0-5 of the Traffic Class field, a value in the 0..63 range
+     */
+    virtual int getDiffServCodePoint() const { return getTrafficClass() & 0x3f; }
+
+    /**
+     * Sets bits 0-5 of the Traffic Class field; expects a value in the 0..63 range
+     */
+    virtual void setDiffServCodePoint(int dscp)  { setTrafficClass( (getTrafficClass() & 0xc0) | (dscp & 0x3f)); }
+
+    /**
+     * Returns bits 6-7 of the Traffic Class field, a value in the range 0..3
+     */
+    virtual int getExplicitCongestionNotification() const  { return (getTrafficClass() >> 6) & 0x03; }
+
+    /**
+     * Sets bits 6-7 of the Traffic Class field; expects a value in the 0..3 range
+     */
+    virtual void setExplicitCongestionNotification(int ecn)  { setTrafficClass( (getTrafficClass() & 0x3f) | ((ecn & 0x3) << 6)); }
+
+    /**
      * Returns the number of extension headers in this datagram
      */
     virtual unsigned int getExtensionHeaderArraySize() const;

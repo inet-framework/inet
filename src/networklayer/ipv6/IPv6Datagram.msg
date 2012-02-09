@@ -50,6 +50,8 @@ packet IPv6Datagram
     IPv6Address srcAddress;
     IPv6Address destAddress;
     unsigned char trafficClass;
+    abstract int diffServCodePoint;  // maps to bits 0-5 of trafficClass
+    abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
     unsigned int flowLabel;
     short hopLimit = 0;
     int transportProtocol enum(IPProtocolId);
