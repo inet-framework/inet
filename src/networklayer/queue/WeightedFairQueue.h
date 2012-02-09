@@ -41,7 +41,7 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
         unsigned int B;            // set of active queues in the GPS reference system
         // B[]!=0 queue is active, ==0 queue is inactive
 
-        std::queue <double> time;
+        std::queue<double> time;
 
         double wq;    // queue weight
         double minth; // minimum threshold for avg queue length
@@ -57,14 +57,14 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
 
         SubQueueData()
         {
-            finish_t=0;
-            queueMaxRate=0;
-            queueWeight=0;
-            B=0;
-            avg =0;
-            q_time=0; // start of the queue idle time
-            count=0;        // packets since last marked packet
-            numEarlyDrops=0;
+            finish_t = 0;
+            queueMaxRate = 0;
+            queueWeight = 0;
+            B = 0;
+            avg = 0;
+            q_time = 0;
+            count = 0;
+            numEarlyDrops = 0;
         }
 
     };
@@ -77,7 +77,7 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
   protected:
     int frameCapacity;
     std::vector<SubQueueData> subqueueData;
-    std::vector <cQueue>      queueArray;
+    std::vector<cQueue> queueArray;
     int numQueues;
     IQoSClassifier *classifier;
     cGate *outGate;
@@ -85,27 +85,27 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
 
 //  cSubQueue *diffserv_queue;
     double bandwidth; // total link bandwidth
-    double  virt_time, last_vt_update, sum ;
+    double  virt_time, last_vt_update, sum;
     bool GPS_idle;
     double safe_limit;
 
-    bool RedTest(cMessage *msg,int queueIndex);
+    bool RedTest(cMessage *msg, int queueIndex);
 
   public:
     WeightedFairQueue ()
     {
-        bandwidth=1e6;
+        bandwidth = 1e6;
         virt_time = last_vt_update = sum = 0;
         GPS_idle = true;
-        numQueues=0;
+        numQueues = 0;
         safe_limit = 0.001;
-        lotalLength=0;
+        lotalLength = 0;
     }
     // Omnet methods
     ~WeightedFairQueue()
     {
         subqueueData.clear();
-        for (int i=0; i<numQueues; i++)
+        for (int i = 0; i < numQueues; i++)
         {
             while (queueArray[i].length()>0)
             {
@@ -120,14 +120,14 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
 
     virtual void setQueueWeight(int i, double val)
     {
-        if (i>=numQueues)
+        if (i >= numQueues)
             opp_error ("nun queue error");
-        subqueueData[i].queueWeight=val;
+        subqueueData[i].queueWeight = val;
     }
 
     virtual double getQueueWeight(int i)
     {
-        if (i>=numQueues)
+        if (i >= numQueues)
             opp_error ("nun queue error");
         return subqueueData[i].queueWeight;
     }
@@ -138,7 +138,7 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
     /**
      * Redefined from PassiveQueueBase.
      */
-    virtual cMessage* enqueue(cMessage *msg);
+    virtual cMessage *enqueue(cMessage *msg);
 
     /**
      * Redefined from PassiveQueueBase.

@@ -31,7 +31,7 @@ simple WeightedFairQueue like IOutputQueue
         string classifierClass;  // class that inherits from IQoSClassifier
         double Bandwidth @unit(bps) = default(1e6bps);
         string queueWeight = default(""); // by default the queueues have the same Weight
-        bool UseRed=default(false); // the queue use RED policy
+        bool UseRed = default(false); // the queue use RED policy
         double wq = default(0.002);  // queue weight
         double minth = default(5);  // minimum threshold for avg queue length
         double maxth = default(50);  // maximum threshold for avg queue length (=buffer capacity)
