@@ -87,6 +87,9 @@ class INET_API ARP : public cSimpleModule
     IInterfaceTable *ift;
     IRoutingTable *rt;  // for Proxy ARP
 
+    // Maps an IP multicast address to an Ethernet multicast address.
+    MACAddress mapMulticastAddress(IPv4Address addr);
+
   public:
     ARP();
     virtual ~ARP();

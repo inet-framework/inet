@@ -206,30 +206,20 @@ void ARP::processOutboundPacket(cMessage *msg)
         EV << "no next-hop address, using destination address " << nextHopAddr << " (proxy ARP)\n";
     }
 
-    // Handle multicast IPv4 addresses
-    if (nextHopAddr.isMulticast() || nextHopAddr == IPv4Address::ALLONES_ADDRESS ||
+    if (nextHopAddr.isLimitedBroadcastAddress() ||
             nextHopAddr == ie->ipv4Data()->getIPAddress().getBroadcastAddress(ie->ipv4Data()->getNetmask())) // also include the network broadcast
     {
-        // FIXME: we do a simpler solution right now: send to the Broadcast MAC address
-        EV << "destination address is multicast, sending packet to broadcast MAC address\n";
-        static MACAddress broadcastAddr("FF:FF:FF:FF:FF:FF");
-        sendPacketToNIC(msg, ie, broadcastAddr, ETHERTYPE_IPv4);
+        EV << "destination address is broadcast, sending packet to broadcast MAC address\n";
+        sendPacketToNIC(msg, ie, MACAddress::BROADCAST_ADDRESS, ETHERTYPE_IPv4);
         return;
-#if 0
-        // experimental  RFC 1112, section 6.4 code
-        // TBD needs counterpart to be implemented in EtherMAC processReceivedDataFrame().
-        unsigned char macBytes[6];
-        macBytes[0] = 0x01;
-        macBytes[1] = 0x00;
-        macBytes[2] = 0x5e;
-        macBytes[3] = nextHopAddr.getDByte(1) & 0x7f;
-        macBytes[4] = nextHopAddr.getDByte(2);
-        macBytes[5] = nextHopAddr.getDByte(3);
-        MACAddress multicastMacAddr;
-        multicastMacAddr.setAddressBytes(bytes);
-        sendPacketToNIC(msg, ie, multicastMacAddr, ETHERTYPE_IPv4);
+    }
+
+    if (nextHopAddr.isMulticast())
+    {
+        MACAddress macAddr = mapMulticastAddress(nextHopAddr);
+        EV << "destination address is multicast, sending packet to MAC address " << macAddr << "\n";
+        sendPacketToNIC(msg, ie, macAddr, ETHERTYPE_IPv4);
         return;
-#endif
     }
 
     if (globalARP)
@@ -285,6 +275,21 @@ void ARP::processOutboundPacket(cMessage *msg)
         EV << "ARP cache hit, MAC address for " << nextHopAddr << " is " << (*it).second->macAddress << ", sending packet down\n";
         sendPacketToNIC(msg, ie, (*it).second->macAddress, ETHERTYPE_IPv4);
     }
+}
+
+// see  RFC 1112, section 6.4
+MACAddress ARP::mapMulticastAddress(IPv4Address addr)
+{
+    ASSERT(addr.isMulticast());
+
+    MACAddress macAddr;
+    macAddr.setAddressByte(0, 0x01);
+    macAddr.setAddressByte(1, 0x00);
+    macAddr.setAddressByte(2, 0x5e);
+    macAddr.setAddressByte(3, addr.getDByte(1) & 0x7f);
+    macAddr.setAddressByte(4, addr.getDByte(2));
+    macAddr.setAddressByte(5, addr.getDByte(3));
+    return macAddr;
 }
 
 void ARP::initiateARPResolution(ARPCacheEntry *entry)
