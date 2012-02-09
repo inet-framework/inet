@@ -67,6 +67,8 @@ class IPv6ControlInfo
     IPv6Address destAddr; // destination IPv6 address
     IPv6Address srcAddr;  // source IPv6 address
     unsigned char trafficClass;  // Traffic Class byte (low 6 bits: DSCP; highest 2 bits: ECN)
+    abstract int diffServCodePoint;  // maps to bits 0-5 of trafficClass
+    abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
     short hopLimit;       // hop limit
     int interfaceId = -1; // interface on which the datagram was received, or
                           // should be sent (see ~InterfaceTable)
