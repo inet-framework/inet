@@ -83,7 +83,7 @@ void SCTPPeer::initialize()
     // parameters
     const char *addressesString = par("localAddress");
     AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
-    int32 port = par("localPort");
+    int port = par("localPort");
     echo = par("echo");
     delay = par("echoDelay");
     outboundStreams = par("outboundStreams");
@@ -135,12 +135,11 @@ void SCTPPeer::sendOrSchedule(cPacket *msg)
 
 void SCTPPeer::generateAndSend(SCTPConnectInfo *connectInfo)
 {
-uint32 numBytes;
     cPacket* cmsg = new cPacket("CMSG");
     SCTPSimpleMessage* msg = new SCTPSimpleMessage("Server");
-    numBytes = (long)par("requestLength");
+    int numBytes = par("requestLength");
     msg->setDataArraySize(numBytes);
-    for (uint32 i=0; i<numBytes; i++)
+    for (int i=0; i<numBytes; i++)
     {
         msg->setData(i, 's');
     }
@@ -167,8 +166,8 @@ uint32 numBytes;
 void SCTPPeer::connect()
 {
     const char *connectAddress = par("connectAddress");
-    int32 connectPort = par("connectPort");
-    uint32 outStreams = par("outboundStreams");
+    int connectPort = par("connectPort");
+    int outStreams = par("outboundStreams");
     clientSocket.setOutboundStreams(outStreams);
 
     sctpEV3 << "issuing OPEN command\n";
@@ -180,7 +179,7 @@ void SCTPPeer::connect()
 
 void SCTPPeer::handleMessage(cMessage *msg)
 {
-    int32 id;
+    int id = -1;
 
     if (msg->isSelfMessage())
     {
@@ -213,7 +212,6 @@ void SCTPPeer::handleMessage(cMessage *msg)
                 clientSocket.processMessage(PK(msg));
             else
             {
-                int32 count = 0;
                 SCTPConnectInfo *connectInfo = dynamic_cast<SCTPConnectInfo *>(msg->removeControlInfo());
                 numSessions++;
                 serverAssocId = connectInfo->getAssocId();
@@ -258,6 +256,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                         }
                         else if (queueSize>0)
                         {
+                            int count = 0;
                             while (numRequestsToSend > 0 && count++ < queueSize*2)
                             {
                                 generateAndSend(connectInfo);
@@ -437,7 +436,7 @@ void SCTPPeer::handleTimer(cMessage *msg)
 {
     cPacket* cmsg;
     SCTPCommand* cmd;
-    int32 id;
+    int id;
 
     sctpEV3 << "SCTPPeer::handleTimer\n";
 
@@ -560,7 +559,7 @@ void SCTPPeer::sendRequest(bool last)
 
     msg->setDataArraySize(numBytes);
 
-    for (int32 i=0; i<numBytes; i++)
+    for (int i=0; i<numBytes; i++)
     {
         msg->setData(i, 'a');
     }
