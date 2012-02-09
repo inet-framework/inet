@@ -12,11 +12,16 @@ TODO: TCP,UDP,SCTP: Need revision for PORT_ANY usage:
 TODO: Int128/Uint128 code revision / optimisation
       Optimise *= and other operators/functions.
 
+TODO: TCPSocket::readDataTransferModePar(): revise!
+
+TODO: elnevezesi konvencio: "Addr" helyett "Address" legyen mindenhol (msg, cc/h, ned)
+TODO: packetekben a port legyen uint8_t, etc! (control infoban ok az "int", ha a -1 is elfogadhato ertek)
+TODO: atirni mindent szignalra
+TODO: UDP apps: error report packetet (UDP_I_ERROR) emittalni errorPk szignalkent
+
 TODO: IPv4 misfeature: in IPv4::handleMessageFromHL(cPacket *msg), if the packet is already
       an IP datagram, then it does not encapsulate the packet but just routes it!
       Problem: HL cannot control whether it wants IP to route the packet or tunnel (encapsulate) it!!
-
-TODO: fix typos: recived, broadCast
 
 TODO: TCPSegment, UDPPacket: use uint16_t for ports, uint32_t for sequence numbers, etc; also in the code!!!
       hint: first replace it somewhere with a type that CANNOT be cast to integer types, then let compile errors propagate the type change everywhere
@@ -49,7 +54,7 @@ TODO: is the namId needed at StandardHost level? Possibly implement namtrace as 
 TODO: port NAM trace writer to use signals mechanism
 
 TODO: Add ThruputMetering channel (NED definition)
-
+                                                                                                             _
 TODO: remove MobileHost, MFMobileHost and most of the obsolete modules in nosed/wireless
 
 TODO: provide default for RoutingTable.routingTableFile once xmlinline() is implemented in omnet.

@@ -36,7 +36,7 @@
 
 #ifdef WITH_IPv6
 #include "ICMPv6Access.h"
-#include "ICMPv6Message_m.h"
+#include "ICMPv6Message_m.h" //TODO: create a blank ICMPv6Message.h!
 #include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"
 #include "IPv6InterfaceData.h"
@@ -45,6 +45,12 @@
 
 #define EPHEMERAL_PORTRANGE_START 1024
 #define EPHEMERAL_PORTRANGE_END   5000
+
+//FIXME az elso muvelet hozza letre a socketet! de bind() csak akkor lehessen, ha a socket meg nem letezik
+//FIXME currently connect() or bind() is mandatory as the first command, the application cannot send packets or set options otherwise
+//FIXME connect() should allow unspecified dest address and -1 port (interpreted as disconnect())
+//FIXME currently sending broadcast messages is enabled without setting SO_BROADCAST to true, this is not so in UNIX
+//FIXME there should be a separate TTL for multicast (not used for unicast), default value is 1 (see IP_MULTICAST_TTL in `man 7 ip`)
 
 
 Define_Module(UDP);
