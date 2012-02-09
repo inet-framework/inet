@@ -185,7 +185,7 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
         else
         {
             // check for local delivery
-            if (rt->isLocalMulticastAddress(destAddr))
+            if (fromIE->ipv4Data()->isMemberOfMulticastGroup(destAddr))
                 reassembleAndDeliver(datagram->dup());
 
             // don't forward if IP forwarding is off, or if dest address is link-scope

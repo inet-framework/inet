@@ -3,7 +3,7 @@
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  100s,            0cad-2371
 /examples/adhoc/mf80211/,            -f fingerprints.ini -c Ping1 -r 0,             1000s,           a867-4a02
 /examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping1 -r 0,                  2000s,           2613-a4ed
-/examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           dba2-e735
+/examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           ceb1-61c0
 /examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           3fac-2c12
 /examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           5161-8ab8
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           7cba-58e3
