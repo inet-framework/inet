@@ -15,17 +15,16 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
-/***************************************************************************
-
- ***************************************************************************/
-
+//
 
 #ifndef __INET_WEIGHTED_FAIR_QUEUE_H
 #define __INET_WEIGHTED_FAIR_QUEUE_H
-#include <omnetpp.h>
+
 #include <vector>
 #include <queue>
+
+#include "INETDefs.h"
+
 #include "PassiveQueueBase.h"
 #include "IQoSClassifier.h"
 
@@ -36,7 +35,7 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
     class SubQueueData
     {
       public:
-        double finish_t;// for WFQ
+        double finish_t;  // for WFQ
         double queueMaxRate;
         double queueWeight;
         unsigned int B;            // set of active queues in the GPS reference system
@@ -105,46 +104,37 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
     // Omnet methods
     ~WeightedFairQueue()
     {
+        subqueueData.clear();
+        for (int i=0; i<numQueues; i++)
         {
-            subqueueData.clear();
-            for (int i=0; i<numQueues; i++)
+            while (queueArray[i].length()>0)
             {
-                while (queueArray[i].length()>0)
-                {
-                    delete queueArray[i].pop();
-                }
+                delete queueArray[i].pop();
             }
-            queueArray.clear();
         }
+        queueArray.clear();
     }
 
-    virtual void setBandwidth(double val)
-    {
-        bandwidth = val;
-
-    }
-    virtual double getBandwidth()
-    {
-        return bandwidth;
-    }
+    virtual void setBandwidth(double val) { bandwidth = val; }
+    virtual double getBandwidth() { return bandwidth; }
 
     virtual void setQueueWeight(int i, double val)
     {
         if (i>=numQueues)
             opp_error ("nun queue error");
         subqueueData[i].queueWeight=val;
-
-
     }
+
     virtual double getQueueWeight(int i)
     {
         if (i>=numQueues)
             opp_error ("nun queue error");
         return subqueueData[i].queueWeight;
-
     }
+
   protected:
     virtual void initialize();
+
     /**
      * Redefined from PassiveQueueBase.
      */
@@ -159,10 +149,12 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
      * Redefined from PassiveQueueBase.
      */
     virtual void sendOut(cMessage *msg);
+
     /**
      * Redefined from IPassiveQueue.
      */
     virtual bool isEmpty();
 };
+
 #endif
 

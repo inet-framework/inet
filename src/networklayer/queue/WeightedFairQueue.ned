@@ -40,7 +40,7 @@ simple WeightedFairQueue like IOutputQueue
         @display("i=block/queue");
         @statistic[earlyDropPkBytes](title="Early dropped packet bytes"; record=count,sum,vector);
         @statistic[queueLength](title="Queue length"; record=histogram,stats,vector; interpolationmode=sample-hold);
-        
+
     gates:
         input in;
         output out;

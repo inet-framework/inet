@@ -15,10 +15,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
 
-/***************************************************************************/
 
 #include "WeightedFairQueue.h"
+
 Define_Module(WeightedFairQueue);
 
 simsignal_t WeightedFairQueue::queueLengthSignal = SIMSIGNAL_NULL;
@@ -80,25 +81,25 @@ bool WeightedFairQueue::RedTest(cMessage *msg,int queueIndex)
     //            avg <- (1-wq)^m * avg
     //"
 
-	if (!useRed)
-		return false;
+    if (!useRed)
+        return false;
 
 
-	double *wq= &subqueueData[queueIndex].wq;    // queue weight
-	double *minth= &subqueueData[queueIndex].minth; // minimum threshold for avg queue length
-	double *maxth= &subqueueData[queueIndex].maxth; // maximum threshold for avg queue length
-	double *maxp= &subqueueData[queueIndex].maxp;  // maximum value for pb
-	double *pkrate= &subqueueData[queueIndex].pkrate; // number of packets expected to arrive per second (used for f())
+    double *wq= &subqueueData[queueIndex].wq;    // queue weight
+    double *minth= &subqueueData[queueIndex].minth; // minimum threshold for avg queue length
+    double *maxth= &subqueueData[queueIndex].maxth; // maximum threshold for avg queue length
+    double *maxp= &subqueueData[queueIndex].maxp;  // maximum value for pb
+    double *pkrate= &subqueueData[queueIndex].pkrate; // number of packets expected to arrive per second (used for f())
 
-	        // state (see NED file and paper for meaning of RED variables)
-	double *avg= &subqueueData[queueIndex].avg;       // average queue size
-	simtime_t *q_time= &subqueueData[queueIndex].q_time; // start of the queue idle time
-	int *count= &subqueueData[queueIndex].count;        // packets since last marked packet
-	int *numEarlyDrops= &subqueueData[queueIndex].numEarlyDrops;
+            // state (see NED file and paper for meaning of RED variables)
+    double *avg= &subqueueData[queueIndex].avg;       // average queue size
+    simtime_t *q_time= &subqueueData[queueIndex].q_time; // start of the queue idle time
+    int *count= &subqueueData[queueIndex].count;        // packets since last marked packet
+    int *numEarlyDrops= &subqueueData[queueIndex].numEarlyDrops;
 
     if (!queueArray[queueIndex].empty())
     {
-    	(*avg) = (1-(*wq))*(*avg) +(*wq)*queueArray[queueIndex].length();
+        (*avg) = (1-(*wq))*(*avg) +(*wq)*queueArray[queueIndex].length();
     }
     else
     {
@@ -148,8 +149,8 @@ cMessage * WeightedFairQueue::enqueue(cMessage *msg)
 
     if (RedTest(msg,queueIndex))
     {
-    	emit(earlyDropPkBytesSignal, (long)(PK(msg)->getByteLength()));
-    	return msg;
+        emit(earlyDropPkBytesSignal, (long)(PK(msg)->getByteLength()));
+        return msg;
     }
 
     if (frameCapacity && queueArray[queueIndex].length() >= frameCapacity)
@@ -234,7 +235,7 @@ bool WeightedFairQueue::isEmpty()
 {
     for (int i=0; i<numQueues; i++)
     {
-    	if (!queueArray[i].empty())
+        if (!queueArray[i].empty())
             return false;
     }
     return true;
