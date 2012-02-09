@@ -73,6 +73,20 @@ packet EthernetIIFrame extends EtherFrame
 
 
 //
+// Ethernet II frame with VLAN (IEEE 802.1Q) tag.
+//
+// Header length: src(6)+dest(6)+802.1Q(=tpid+pcp+cfi+vid; 4)+etherType/length(2) = 18 bytes
+//
+packet EthernetIIFrameWithVLAN extends EthernetIIFrame
+{
+    // int tpic;   // tag protocol identifier (16 bits; set to 0x8100)
+    int pcp;    // priority code point for IEEE 802.1p priority (3 bits; 0 (lowest) to 7 (highest))
+    // int cfi;    // canonical format indicator (1 bit; 0 for Ethernet switches)
+    int vid;    // VLAN identifier (12 bits; 0x000 and 0xFFF are reserved, which allows up to 4094 VLANs.)
+}
+
+
+//
 // Ethernet frame with 802.3 LLC header.
 //
 // Header length: src(6)+dest(6)+length(2)+ssap(1)+dsap(1)+control(1) = 17 bytes

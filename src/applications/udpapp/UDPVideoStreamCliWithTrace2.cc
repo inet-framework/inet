@@ -1,13 +1,14 @@
 ///
-/// @file   UDPVideoStreamCliWithTrace.cc
+/// @file   UDPVideoStreamCliWithTrace2.cc
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   2010-04-02
+/// @date   2012-02-07
 ///
-/// @brief  Implements UDPVideoStreamCliWithTrace class.
+/// @brief  Implements UDPVideoStreamCliWithTrace2 class.
 ///
 /// @note
 /// This file implements UDPVideoStreamCliWithTrace, modeling a video
-/// streaming client based on trace files from ASU video trace library [1].
+/// streaming client based on trace files from ASU video trace library [1]
+/// with delay to loss conversion based on play-out buffering.
 ///
 /// @par References:
 /// <ol>
@@ -15,7 +16,7 @@
 /// </li>
 /// </ol>
 ///
-/// @remarks Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
+/// @remarks Copyright (C) 2012 Kyeong Soo (Joseph) Kim. All rights reserved.
 ///
 /// @remarks This software is written and distributed under the GNU General
 ///          Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
@@ -23,88 +24,28 @@
 ///
 
 
-#include "UDPVideoStreamCliWithTrace.h"
-#include "IPAddressResolver.h"
+#include "UDPVideoStreamCliWithTrace2.h"
+//#include "IPAddressResolver.h"
 
 
-Define_Module(UDPVideoStreamCliWithTrace);
+Define_Module(UDPVideoStreamCliWithTrace2);
 
 
-long UDPVideoStreamCliWithTrace::frameEncodingNumber(long frameNumber,
-		int numBFrames, FrameType frameType)
+void UDPVideoStreamCliWithTrace2::initialize()
 {
-	long encodingNumber;
+    UDPVideoStreamCliWithTrace::initialize();
 
-	switch (frameType)
-	{
-	case IDR:
-	case I:
-		encodingNumber = frameNumber == 0 ? 0 : frameNumber - numBFrames;
-		break;
-	case P:
-		encodingNumber = frameNumber - numBFrames;
-		break;
-	case B:
-		encodingNumber = frameNumber + 1;
-		break;
-	default:
-		error("%s: Unexpected frame type: %d", getFullPath().c_str(), frameType);
-	} // end of switch ()
-
-	return encodingNumber;
+    firstFrameReceived = false;
 }
 
-void UDPVideoStreamCliWithTrace::initialize()
-{
-	UDPVideoStreamCli::initialize();
-
-	// initialize module parameters
-	startupDelay = par("startupDelay").doubleValue();	///< unit is second
-	numTraceFrames = par("numTraceFrames").longValue();
-	gopSize = par("gopSize").longValue();
-	numBFrames = par("numBFrames").longValue();
-
-	// initialize statistics
-	numPacketsReceived = 0;
-	numPacketsLost = 0;
-    numFramesReceived = 0;
-    numFramesDiscarded = 0;
-
-    // initialize flags and other variables
-    warmupFinished = false;
-}
-
-void UDPVideoStreamCliWithTrace::finish()
-{
-	UDPVideoStreamCli::finish();
-
-	recordScalar("packets received", numPacketsReceived);
-	recordScalar("packets lost", numPacketsLost);
-	recordScalar("frames received", numFramesReceived);
-	recordScalar("frames discarded", numFramesDiscarded);
-	recordScalar("decodable frame rate (Q)",
-                 numFramesReceived/double(numFramesReceived+numFramesDiscarded));
-}
-
-void UDPVideoStreamCliWithTrace::handleMessage(cMessage* msg)
-{
-	if (msg->isSelfMessage())
-	{
-		delete msg;
-		requestStream();
-	}
-	else
-	{
-		receiveStream(check_and_cast<UDPVideoStreamPacket *>(msg));
-	}
-}
-
-void UDPVideoStreamCliWithTrace::receiveStream(UDPVideoStreamPacket *pkt)
+void UDPVideoStreamCliWithTrace2::receiveStream(UDPVideoStreamPacket *pkt)
 {
     EV << "Video stream packet:\n";
 #ifndef NDEBUG
     printPacket(PK(pkt));
 #endif
+
+    // FIXME Delay to loss conversion yet to be implemented in the following
 
     // record vector statistics; note that warm-up period handling is automatically done.
     eed.record(simTime() - pkt->getCreationTime());

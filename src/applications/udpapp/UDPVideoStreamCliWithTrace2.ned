@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2010 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2012 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2005 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -22,12 +22,20 @@ package inet.applications.udpapp;
 //
 // Video streaming client to be used with UDPVideoStreamSvrWithTrace.
 //
-// It reports packet-level as well as frame-level (meaningful only with
-// trace files in <i>verbose</i> format) statistics at the end of simulation.
+// It has a capability to convert delay into loss based on play-out
+// buffering [1] and reports packet-level as well as frame-level (meaningful
+// only with trace files in <i>verbose</i> format) statistics at the end of
+// simulation.
 //
-// @see UDPVideoStreamSvrWithTrace
+// References:
+// -# Jirka Klaue, Berthold Rathke, and Adam Wolisz,
+//    "EvalVid - A framework for video transmission and quality evaluation,"
+//    Computer Performance Evaluation. Modelling Techniques and Tools,
+//    Lecture Notes in Computer Science, vol. 2794, pp. 255-272, 2003.
 //
-simple UDPVideoStreamCliWithTrace like UDPApp
+// @see UDPVideoStreamSvrWithTrace2
+//
+simple UDPVideoStreamCliWithTrace2 like UDPApp
 {
     parameters:
         int localPort;

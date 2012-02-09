@@ -1,0 +1,46 @@
+# ignore generated files
+*_m.h
+*_m.cc
+src/Makefile
+/doc/doxy/
+/doc/neddoc/
+
+# ignore binary files
+out/
+*.so
+*.dylib
+*.dll
+*.a
+*.lib
+*.exe
+*.o
+*.obj
+*.pdb
+*.idb
+*.manifest
+.tkenvrc
+
+# ignore backup and temp files
+*.bak
+backups
+*~
+xxx
+/3rdparty
+/tmp/
+
+# added by Joseph Kim
+doc/doxy
+*.anf
+*.dly
+*.ecr
+*.eps
+*.new
+*.old
+*.org
+*.png
+*.sca
+*.thr
+*.trf
+*.vec
+results/
+/etc/omnetpp-extension/

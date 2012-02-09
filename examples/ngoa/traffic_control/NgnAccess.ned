@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2011 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2012 Kyeong Soo (Joseph) Kim
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,20 +20,22 @@
 package inet.examples.ngoa.traffic_control;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.ethernet.EtherSwitch2WithOutputQueue;
+//import inet.nodes.ethernet.EtherSwitch2WithOutputQueue;
+import inet.nodes.ethernet.EtherSwitch2WithOutputQueueAndVLAN;
+import inet.nodes.inet.RouterWithEthernetInterface2;
 //import inet.nodes.ethernet.EtherSwitch3WithPPP2Interface;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
 
 
 //
-// Defines a test network architecture for a study of next-generation
-// optical access (NGOA) architectures.
+// Defines an abstract model of next-generation network (NGN) shared access architecture
+// based on VLAN-capable Ethernet switches with token bucket filter (TBF) as traffic shaper.
 //
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-// @date   2011-09-30
+// @date   2012-02-06
 //
-network Test
+network NgnAccess
 {
     parameters:
         int N = default(1);	// number of ONUs (subscribers)
@@ -41,11 +43,14 @@ network Test
         double uni_rate @unit(bps) = default(10Gbps);	// transmission rate of ONU Ethernet UNIs
         double uni_delay @unit(s) = default(0s);	// no delay at UNIs
         double distribution_rate @unit(bps) = default(10Gbps);	// transmission rate of distribution fiber (between Onu and OLT)
-        double distribution_delay @unit(s) = default(300us);	// default delay of 300 us corresponds to 60 km fiber;
-        														// note that there is no feeder fiber in dedicated access unlike PONs.
+        double distribution_delay @unit(s) = default(150us);	// default delay of 300 us corresponds to 30 km fiber;
+        double feeder_rate @unit(bps) = default(10Gbps);	// transmission rate of feeder fiber (between Olt and LambdaSplitter)
+        double feeder_delay @unit(s) = default(150us);	// default delay of 150 us corresponds to 30 km fiber
         double backbone_rate @unit(bps) = default(100Gbps);	// transmission rate of backbone link (between Olt and server)
         double backbone_delay @unit(s) = default(4.7ms);	// default delay of 4.7 ms gives total RTT of 10 ms including delays in access
-        @display("bgb=519,184");
+        double backbone_delay1 @unit(s) = default(2.0ms);	// together with backbone_delay2 (i.e. 4.7ms), it gives total RTT of 10 ms including delays in access
+        double backbone_delay2 @unit(s) = default(2.7ms);
+        @display("bgb=684,233");
     submodules:
         configurator: FlatNetworkConfigurator {
             parameters:
@@ -53,35 +58,45 @@ network Test
         }
         server: StandardServerWithEthernetInterface2 {
             parameters:
-                @display("p=464,119;i=device/server_l");
-			gates:
-				ethg[1];
+                @display("p=632,119;i=device/server_l");
+            gates:
+                ethg[1];
         }
-        olt: EtherSwitch2WithOutputQueue {
-//        olt: EtherSwitch3WithPPP2Interface {
+        olt: EtherSwitch2WithOutputQueueAndVLAN {
             parameters:
-                @display("p=300,119");
-			gates:
-				ethg[N+1];
+                @display("p=388,119");
+            gates:
+                ethg[2];
         }
-        onu[N]: EtherSwitch2WithOutputQueue {
+        accessSwitch: EtherSwitch2WithOutputQueueAndVLAN {
+            parameters:
+                @display("p=269,119");
+            gates:
+                ethg[N+1];
+        }
+        onu[N]: EtherSwitch2WithOutputQueueAndVLAN {
             parameters:
                 @display("p=131,119");
-			gates:
-			    ethg[n+1];
+            gates:
+                ethg[n+1];
         }
         host[N*n]: StandardHost3WithEthernetInterface2 {
             parameters:
                 @display("i=device/laptop;p=46,119");
-			gates:
-				ethg[1];
+            gates:
+                ethg[1];
+        }
+        router: RouterWithEthernetInterface2 {
+            @display("p=507,120");
         }
     connections:
         for i=0..N-1, for j=0..n-1 {
-			host[i*n+j].ethg[0] <--> { delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg[j];
-		}
-		for i=0..N-1 {
-			onu[i].ethg[n] <--> { delay = distribution_delay; datarate = distribution_rate; } <--> olt.ethg[i];
+            host[i*n+j].ethg[0] <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg[j];
         }
-        olt.ethg[N] <--> { delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg[0];
+        for i=0..N-1 {
+            onu[i].ethg[n] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> accessSwitch.ethg[i];
+        }
+        accessSwitch.ethg[N] <--> {  delay = feeder_delay; datarate = feeder_rate; } <--> olt.ethg[0];
+        olt.ethg[1] <--> {  delay = backbone_delay1; datarate = backbone_rate; } <--> router.ethg++;
+        router.ethg++ <--> {  delay = backbone_delay2; datarate = backbone_rate; } <--> server.ethg++;
 }

@@ -39,7 +39,7 @@ network MulticastNetwork
         channel dialup extends DatarateChannel
         {
             delay = normal(0.004s, 0.0018s);
-            datarate = 64Kbps;
+            datarate = 64kbps;
         }
         channel fiberrouter extends DatarateChannel
         {

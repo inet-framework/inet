@@ -87,11 +87,11 @@ network HybridPon
         }
     connections:
         for i=0..N-1, for j=0..n-1 {
-			host[i*n+j].ethg[0] <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg[j];
+			host[i*n+j].ethg[0] <--> { delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg[j];
 		}
 		for i=0..N-1 {
-		    onu[i].phyg <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> awg.demuxg[i];
-            awg.muxg[i] <--> {  delay = feeder_delay; datarate = feeder_rate; } <--> olt.phyg[i];
+		    onu[i].phyg <--> { delay = distribution_delay; datarate = distribution_rate; } <--> awg.demuxg[i];
+            awg.muxg[i] <--> { delay = feeder_delay; datarate = feeder_rate; } <--> olt.phyg[i];
         }
-        olt.ethg[0] <--> {  delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg[0];
+        olt.ethg[0] <--> { delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg[0];
 }

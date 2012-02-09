@@ -24,7 +24,8 @@
 #define MAX_PACKETBURST              13
 #define GIGABIT_MAX_BURST_BYTES      8192  /* don't start new frame after 8192 or more bytes already transmitted */
 #define MAX_ETHERNET_DATA            1500  /* including LLC, SNAP etc headers */
-#define MAX_ETHERNET_FRAME           1518  /* excludes preamble and SFD */
+/* #define MAX_ETHERNET_FRAME           1518  /\* excludes preamble and SFD *\/ */
+#define MAX_ETHERNET_FRAME           1522  /* excludes preamble and SFD (now taking into account IEEE 802.1Q tag) */
 #define MIN_ETHERNET_FRAME           64    /* excludes preamble and SFD */
 #define GIGABIT_MIN_FRAME_WITH_EXT   512 /* excludes preamble and SFD, but includes 448 byte extension */
 #define INTERFRAME_GAP_BITS          96
@@ -48,6 +49,7 @@
 #define ETHER_LLC_HEADER_LENGTH      (3) /* ssap(1)+dsap(1)+control(1) */
 #define ETHER_SNAP_HEADER_LENGTH     (5) /* org(3)+local(2) */
 #define ETHER_PAUSE_COMMAND_BYTES    (6) /* FIXME verify */
+#define ETHER_VLAN_TAG_LENGTH        (4) /* tpid(2)+tci(2) */
 
 #endif
 

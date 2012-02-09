@@ -20,7 +20,7 @@
 #include "OnuMacLayer.h"
 
 // Register modules.
-Define_Module(OnuMacLayer)
+Define_Module(OnuMacLayer);
 
 ///
 /// Handles an Ethernet frame from UNI (i.e., Ethernet switch).
