@@ -214,7 +214,7 @@ static struct maint_entry *maint_entry_create(struct dsr_pkt *dp,
         dgram->setSrcAddress(srcAddress_var);
         dgram->setHeaderLength(dp->nh.iph->ihl); // Header length
         dgram->setVersion(dp->nh.iph->version); // Ip version
-        dgram->setDiffServCodePoint(dp->nh.iph->tos); // ToS
+        dgram->setTypeOfService(dp->nh.iph->tos); // ToS
         dgram->setIdentification(dp->nh.iph->id); // Identification
         dgram->setMoreFragments(dp->nh.iph->tos & 0x2000);
         dgram->setDontFragment (dp->nh.iph->frag_off & 0x4000);

@@ -146,7 +146,7 @@ DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
         setSrcAddress(srcAddress_var);
         setHeaderLength(dp->nh.iph->ihl); // Header length
         setVersion(dp->nh.iph->version); // Ip version
-        setDiffServCodePoint(dp->nh.iph->tos); // ToS
+        setTypeOfService(dp->nh.iph->tos); // ToS
         setIdentification(dp->nh.iph->id); // Identification
         setMoreFragments(dp->nh.iph->frag_off & 0x2000);
         setDontFragment(dp->nh.iph->frag_off & 0x4000);
@@ -213,7 +213,7 @@ void DSRPkt::ModOptions(struct dsr_pkt *dp, int interface_id)
         // dp->mac.raw = p->access(hdr_mac::offset_);
         setHeaderLength(dp->nh.iph->ihl); // Header length
         setVersion(dp->nh.iph->version); // Ip version
-        setDiffServCodePoint(dp->nh.iph->tos); // ToS
+        setTypeOfService(dp->nh.iph->tos); // ToS
         setIdentification(dp->nh.iph->id); // Identification
 
         setMoreFragments(dp->nh.iph->frag_off & 0x2000);

@@ -128,6 +128,16 @@ void UDPSocket::setTimeToLive(int ttl)
     sendToUDP(msg);
 }
 
+void UDPSocket::setTypeOfService(unsigned char tos)
+{
+    cMessage *msg = new cMessage("SetTOS", UDP_C_SETOPTION);
+    UDPSetTypeOfServiceCommand *ctrl = new UDPSetTypeOfServiceCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setTos(tos);
+    msg->setControlInfo(ctrl);
+    sendToUDP(msg);
+}
+
 void UDPSocket::setMulticastOutputInterface(int interfaceId)
 {
     cMessage *msg = new cMessage("SetMulticastOutputIf", UDP_C_SETOPTION);

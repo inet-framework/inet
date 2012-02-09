@@ -42,9 +42,8 @@ int BasicDSCPClassifier::classifyPacket(cMessage *msg)
 #ifdef WITH_IPv4
     if (dynamic_cast<IPv4Datagram *>(msg))
     {
-        // IPv4 QoS: map DSCP to queue number
         IPv4Datagram *datagram = (IPv4Datagram *)msg;
-        int dscp = datagram->getDiffServCodePoint();
+        int dscp = datagram->getTypeOfService() & 0x3f; // DSCP is the six least significant bits of ToS
         return classifyByDSCP(dscp);
     }
     else
@@ -52,9 +51,8 @@ int BasicDSCPClassifier::classifyPacket(cMessage *msg)
 #ifdef WITH_IPv6
     if (dynamic_cast<IPv6Datagram *>(msg))
     {
-        // IPv6 QoS: map Traffic Class to queue number
         IPv6Datagram *datagram = (IPv6Datagram *)msg;
-        int dscp = datagram->getTrafficClass();
+        int dscp = datagram->getTrafficClass() & 0x3f; // DSCP is the six least significant bits of Traffic Class
         return classifyByDSCP(dscp);
     }
     else

@@ -502,7 +502,7 @@ IPv4Datagram * DYMOUM::pkt_encapsulate(IPv4Datagram *p, IPv4Address gateway)
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing
     // set other fields
-    datagram->setDiffServCodePoint(p->getDiffServCodePoint());
+    datagram->setTypeOfService(p->getTypeOfService());
     datagram->setIdentification(p->getIdentification());
     datagram->setMoreFragments(false);
     datagram->setDontFragment(p->getDontFragment());

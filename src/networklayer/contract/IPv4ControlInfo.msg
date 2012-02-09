@@ -43,7 +43,7 @@ cplusplus {{
 //
 // Optional fields:
 // - srcAddr: it will be set to the address of the outgoing interface
-// - diffServCodePoint: used in DS_Field (RFC 2474) instead of TOS (default: 0)
+// - typeOfServoce: (default: 0)
 // - timeToLive: default defined as module parameter
 // - dontFragment: default: false
 //
@@ -53,7 +53,7 @@ cplusplus {{
 //
 // When ~IPv4 delivers a packet to higher layers, it also attaches an ~IPv4ControlInfo
 // to it. It fills in the following fields:
-//  - srcAddr, destAddr, protocol, diffServCodePoint: values from the original datagram
+//  - srcAddr, destAddr, protocol, TypeOfService: values from the original datagram
 //  - interfaceId: the interface on which the datagram arrived, or -1 if it was
 //    created locally
 //
@@ -68,15 +68,15 @@ class IPv4ControlInfo
     int interfaceId = -1; // interface on which the datagram was received, or
                           // should be sent (see ~InterfaceTable)
     short protocol enum(IPProtocolId);  // encapsulated protocol
-    unsigned char diffServCodePoint;  // for QoS
+    unsigned char typeOfService;  // Type of Service byte (low 6 bits: DSCP)
     short timeToLive;     // maximum hop count
     bool dontFragment;    // "don't fragment" bit
-//     Used in the DSR protocol
-    IPv4Address nextHopAddr; //Next hop Address (DSR)
-    bool moreFragments;    // more fragment" bit (DSR protocol)
+
+    // The following fields are used in the DSR protocol; TODO revise
+    IPv4Address nextHopAddr; // next hop address (DSR)
+    bool moreFragments;    // "more fragments" bit (DSR protocol)
     MACAddress macSrc;  // src MAC address (can be left empty when sending)
     MACAddress macDest; // dest MAC address
-
 }
 
 

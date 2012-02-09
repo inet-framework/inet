@@ -360,7 +360,7 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
         dp->nh.iph = (struct iphdr *) dp->ip_data;
         dp->nh.iph->ihl= dgram->getHeaderLength(); // Header length
         dp->nh.iph->version= dgram->getVersion(); // Ip version
-        dp->nh.iph->tos= dgram->getDiffServCodePoint(); // ToS
+        dp->nh.iph->tos= dgram->getTypeOfService(); // ToS
         dp->nh.iph->tot_len= dgram->getByteLength(); // Total length
         dp->nh.iph->id= dgram->getIdentification(); // Identification
         dp->nh.iph->frag_off= 0x1FFF & dgram->getFragmentOffset(); //

@@ -143,7 +143,7 @@ packet IPv4Datagram
     bool moreFragments;
     bool dontFragment;
     int fragmentOffset;         // bytes, must be multiple of 8
-    unsigned char diffServCodePoint;
+    unsigned char typeOfService;  // ToS byte
 
     int optionCode enum(IPOption) = IPOPTION_NO_OPTION;  //#FIXME modify header length when options are present
                                                          //#FIXME also: the RFC says that more than one IPv4-Option is allowed

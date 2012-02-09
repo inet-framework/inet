@@ -48,6 +48,7 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base
 
     /** Generated but unused method, should not be called. */
     virtual void setExtensionHeaderArraySize(unsigned int size);
+
     /** Generated but unused method, should not be called. */
     virtual void setExtensionHeader(unsigned int k, const IPv6ExtensionHeaderPtr& extensionHeader_var);
 

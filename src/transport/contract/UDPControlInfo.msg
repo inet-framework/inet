@@ -142,6 +142,7 @@ class UDPDataIndication extends UDPControlInfo
     int destPort;          // destination port of the received packet
     int ttl;               // TTL field of the received packet
     int interfaceId;       // interface on which the packet was received (see ~InterfaceTable)
+    unsigned char typeOfService; // IPv4 Type of Service / IPv6 Traffic Class field of received packet
 }
 
 //
@@ -177,6 +178,21 @@ class UDPSetOptionCommand extends UDPControlInfo
 class UDPSetTimeToLiveCommand extends UDPSetOptionCommand
 {
     int ttl;
+}
+
+//
+// Control info for setting the Type of Service (IPv4) or Traffic Class (IPv6)
+// header field on outgoing IPv4/IPv6 packets sent from an UDP socket.
+// This is an 8-bit field, the lowest 6 bits are the DSCP (DiffServ Code Point)
+// and the highest 2 bits are the ECN (Explicit Congestion Notification).
+// To set the option, send a message to  the ~UDP module with kind=UDP_C_SETOPTION 
+// and an and instance of this control info class attached.
+//
+// @see ~UDPCommandCode
+//
+class UDPSetTypeOfServiceCommand extends UDPSetOptionCommand
+{
+    char tos;  // ToS byte for IPv4/IPv6 
 }
 
 //

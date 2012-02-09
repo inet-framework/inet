@@ -542,7 +542,7 @@ cPacket *IPv4::decapsulate(IPv4Datagram *datagram)
     controlInfo->setProtocol(datagram->getTransportProtocol());
     controlInfo->setSrcAddr(datagram->getSrcAddress());
     controlInfo->setDestAddr(datagram->getDestAddress());
-    controlInfo->setDiffServCodePoint(datagram->getDiffServCodePoint());
+    controlInfo->setTypeOfService(datagram->getTypeOfService());
     controlInfo->setInterfaceId(fromIE ? fromIE->getInterfaceId() : -1);
     controlInfo->setTimeToLive(datagram->getTimeToLive());
 
@@ -663,7 +663,7 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *contr
     }
 
     // set other fields
-    datagram->setDiffServCodePoint(controlInfo->getDiffServCodePoint());
+    datagram->setTypeOfService(controlInfo->getTypeOfService());
 
     datagram->setIdentification(curFragmentId++);
     datagram->setMoreFragments(false);
@@ -679,7 +679,6 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *contr
         ttl = defaultMCTimeToLive;
     else
         ttl = defaultTimeToLive;
-
     datagram->setTimeToLive(ttl);
     datagram->setTransportProtocol(controlInfo->getProtocol());
 

@@ -73,7 +73,7 @@ int IPv4Serializer::serialize(const IPv4Datagram *dgram, unsigned char *buf, uns
 
     ip->ip_hl = IP_HEADER_BYTES >> 2;
     ip->ip_v = dgram->getVersion();
-    ip->ip_tos = dgram->getDiffServCodePoint();
+    ip->ip_tos = dgram->getTypeOfService();
     ip->ip_id = htons(dgram->getIdentification());
     uint16_t ip_off = dgram->getFragmentOffset()/8;
     if (dgram->getMoreFragments())
@@ -153,7 +153,7 @@ void IPv4Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv4D
     dest->setMoreFragments((ip_off & IP_MF) != 0);
     dest->setDontFragment((ip_off & IP_DF) != 0);
     dest->setFragmentOffset((ntohs(ip->ip_off) & IP_OFFMASK)*8);
-    dest->setDiffServCodePoint(ip->ip_tos);
+    dest->setTypeOfService(ip->ip_tos);
     totalLength = ntohs(ip->ip_len);
     headerLength = ip->ip_hl << 2;
 

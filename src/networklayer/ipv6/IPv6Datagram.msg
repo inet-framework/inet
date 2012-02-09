@@ -49,7 +49,7 @@ packet IPv6Datagram
 
     IPv6Address srcAddress;
     IPv6Address destAddress;
-    unsigned int trafficClass;
+    unsigned char trafficClass;
     unsigned int flowLabel;
     short hopLimit = 0;
     int transportProtocol enum(IPProtocolId);

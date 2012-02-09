@@ -15,8 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPDATAGRAM_H
-#define __INET_IPDATAGRAM_H
+
+#ifndef _IPv4DATAGRAM_H_
+#define _IPv4DATAGRAM_H_
 
 #include "IPv4Datagram_m.h"
 
