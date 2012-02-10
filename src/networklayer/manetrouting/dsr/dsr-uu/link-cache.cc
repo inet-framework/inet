@@ -54,7 +54,7 @@ static struct lc_graph LC;
 
 struct lc_node
 {
-    list_t l;
+    dsr_list_t l;
     struct in_addr addr;
     unsigned int links;
     unsigned int cost;  /* Cost estimate from source when running Dijkstra */
@@ -67,7 +67,7 @@ struct lc_node
 
 struct lc_link
 {
-    list_t l;
+    dsr_list_t l;
     struct lc_node *src, *dst;
     int status;
     unsigned int cost;
@@ -616,13 +616,8 @@ lc_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
     {
         addr2 = srt->addrs[i];
 #ifdef OMNETPP
-#ifdef MobilityFramework
-        IPv4Address ipAddr1 = addr1.s_addr;
-        IPv4Address ipAddr2 = addr2.s_addr;
-#else
         IPv4Address ipAddr1((uint32_t)addr1.s_addr);
         IPv4Address ipAddr2((uint32_t)addr2.s_addr);
-#endif
         if (etxActive)
         {
             if (addr1.s_addr==myaddr.s_addr)
@@ -660,13 +655,8 @@ lc_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
 #ifdef OMNETPP
     if (etxActive)
     {
-#ifdef MobilityFramework
-        IPv4Address ipAddr1 = addr1.s_addr;
-        IPv4Address ipAddr2 = addr2.s_addr;
-#else
         IPv4Address ipAddr1((uint32_t)addr1.s_addr);
         IPv4Address ipAddr2((uint32_t)addr2.s_addr);
-#endif
         if (addr1.s_addr==myaddr.s_addr)
             lc_link_add(addr1, addr2, timeout, 0, (unsigned int)getCost(ipAddr2));
         else if (addr2.s_addr==myaddr.s_addr)
@@ -685,13 +675,8 @@ lc_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
 #ifdef OMNETPP
         if (etxActive)
         {
-#ifdef MobilityFramework
-            IPv4Address ipAddr1 = addr1.s_addr;
-            IPv4Address ipAddr2 = addr2.s_addr;
-#else
             IPv4Address ipAddr1((uint32_t)addr1.s_addr);
             IPv4Address ipAddr2((uint32_t)addr2.s_addr);
-#endif
             if (addr1.s_addr==myaddr.s_addr)
                 lc_link_add(addr2, addr1, timeout, 0, (unsigned int)getCost(ipAddr2));
             else if (addr2.s_addr==myaddr.s_addr)
@@ -758,7 +743,7 @@ static char *print_cost(unsigned int cost)
 
 static int lc_print(struct lc_graph *LC, char *buf)
 {
-    list_t *pos;
+    dsr_list_t *pos;
     int len = 0;
     struct timeval now;
 

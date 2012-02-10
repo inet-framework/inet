@@ -33,6 +33,7 @@
 #include "Ieee80211Frame_m.h"
 #include "ICMPAccess.h"
 #include "IMobility.h"
+#include "Ieee80211MgmtAP.h"
 #define IP_DEF_TTL 32
 #define UDP_HDR_LEN 8
 
@@ -76,15 +77,31 @@ void ManetTimer::removeQueueTimer()
 void ManetTimer::resched(double time)
 {
     removeQueueTimer();
+    if (simTime()+time<=simTime())
+        opp_error("ManetTimer::resched message timer in the past");
     agent_->getTimerMultimMap()->insert(std::pair<simtime_t, ManetTimer *>(simTime()+time, this));
 }
 
 void ManetTimer::resched(simtime_t time)
 {
     removeQueueTimer();
+    if (time<=simTime())
+        opp_error("ManetTimer::resched message timer in the past");
     agent_->getTimerMultimMap()->insert(std::pair<simtime_t, ManetTimer *>(time, this));
 }
 
+bool ManetTimer::isScheduled()
+{
+    TimerMultiMap::iterator it;
+    for (it=agent_->getTimerMultimMap()->begin() ; it != agent_->getTimerMultimMap()->end(); it++ )
+    {
+        if (it->second==this)
+        {
+            return true;
+        }
+    }
+    return false;
+}
 
 ManetRoutingBase::ManetRoutingBase()
 {
@@ -97,6 +114,9 @@ ManetRoutingBase::ManetRoutingBase()
     createInternalStore = false;
     routesVector = NULL;
     interfaceVector = new InterfaceVector;
+    staticNode = false;
+    colaborativeProtocol = NULL;
+    arp = NULL;
 }
 
 
@@ -115,7 +135,6 @@ bool ManetRoutingBase::isThisInterfaceRegistered(InterfaceEntry * ie)
 void ManetRoutingBase::registerRoutingModule()
 {
     InterfaceEntry *   ie;
-    InterfaceEntry *   i_face;
     const char *name;
     /* Set host parameters */
     isRegistered = true;
@@ -155,7 +174,6 @@ void ManetRoutingBase::registerRoutingModule()
                 name = ie->getName();
                 if ((strstr(name, interfacePrefix.c_str() )!=NULL) && !isThisInterfaceRegistered(ie))
                 {
-                    i_face = ie;
                     InterfaceIdentification interface;
                     interface.interfacePtr = ie;
                     interface.index = i;
@@ -172,7 +190,6 @@ void ManetRoutingBase::registerRoutingModule()
                 name = ie->getName();
                 if (strcmp(name, token)==0 && !isThisInterfaceRegistered(ie))
                 {
-                    i_face = ie;
                     InterfaceIdentification interface;
                     interface.interfacePtr = ie;
                     interface.index = i;
@@ -241,6 +258,18 @@ void ManetRoutingBase::registerRoutingModule()
             }
         }
     }
+    // register LL-MANET-Routers
+    if (!mac_layer_)
+    {
+        for (unsigned int i = 0; i<interfaceVector->size(); i++)
+        {
+            (*interfaceVector)[i].interfacePtr->ipv4Data()->joinMulticastGroup(IPv4Address::LL_MANET_ROUTERS);
+        }
+        arp = ArpAccess().get();
+    }
+    nb->subscribe(this,NF_L2_AP_DISSOCIATED);
+    nb->subscribe(this,NF_L2_AP_ASSOCIATED);
+
  //   WATCH_MAP(*routesVector);
 }
 
@@ -332,7 +361,16 @@ void ManetRoutingBase::registerPosition()
         opp_error("Manet routing protocol is not register");
     regPosition = true;
     mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
-    getParentModule()->subscribe(mobilityStateChangedSignal, this);
+    cModule *mod;
+    for (mod = getParentModule(); mod != 0; mod = mod->getParentModule()) {
+            cProperties *properties = mod->getProperties();
+            if (properties && properties->getAsBool("node"))
+                break;
+    }
+    if (mod)
+        mod->subscribe(mobilityStateChangedSignal, this);
+    else
+        getParentModule()->subscribe(mobilityStateChangedSignal, this);
 }
 
 void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const Uint128& destAddr, int destPort, int ttl, const Uint128 &interface)
@@ -754,7 +792,6 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     /// Source of route, MANUAL by reading a file,
     /// routing protocol name otherwise
     entry->setSource(routeSource);
-
     inet_rt->addRoute(entry);
 }
 
@@ -790,7 +827,6 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     }
     if (mac_layer_)
         return;
-
     bool found = false;
     IPv4Route *oldentry = NULL;
     for (int i=inet_rt->getNumRoutes(); i>0; --i)
@@ -863,7 +899,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     else
         entry->setSource(IPv4Route::MANET2);
 
-    inet_rt->addRoute(entry);
+        inet_rt->addRoute(entry);
 }
 
 
@@ -946,6 +982,34 @@ void ManetRoutingBase::receiveChangeNotification(int category, const cObject *de
     else if (category == NF_LINK_FULL_PROMISCUOUS)
     {
         processFullPromiscuous(details);
+    }
+    else if(category == NF_L2_AP_DISSOCIATED || category == NF_L2_AP_ASSOCIATED)
+    {
+        Ieee80211MgmtAP::NotificationInfoSta * infoSta = dynamic_cast<Ieee80211MgmtAP::NotificationInfoSta *>(const_cast<cObject*> (details));
+        if (infoSta)
+        {
+            Uint128 addr;
+            if (!mac_layer_ && arp)
+                addr = arp->getInverseAddressResolution(infoSta->getStaAddress()).getInt();
+            else
+                addr = infoSta->getStaAddress().getInt();
+            // sanity check
+            for (unsigned int i = 0; i< proxyAddress.size(); i++)
+            {
+                 if (proxyAddress[i].address == addr)
+                 {
+                     proxyAddress.erase(proxyAddress.begin()+i);
+                     break;
+                 }
+            }
+            if (category == NF_L2_AP_ASSOCIATED)
+            {
+                ManetProxyAddress p;
+                p.address = addr;
+                p.mask = Uint128::UINT128_MAX;
+                proxyAddress.push_back(p);
+            }
+        }
     }
 }
 
@@ -1090,17 +1154,36 @@ void ManetRoutingBase::scheduleEvent()
         return;
     if (!timerMultiMapPtr)
         return;
-
+    if (timerMultiMapPtr->empty()) // nothing to do
+    {
+        if (timerMessagePtr->isScheduled())
+            cancelEvent(timerMessagePtr);
+        return;
+    }
     TimerMultiMap::iterator e = timerMultiMapPtr->begin();
+    while (timerMultiMapPtr->begin()->first<=simTime())
+    {
+        timerMultiMapPtr->erase(e);
+        e->second->expire();
+        if (timerMultiMapPtr->empty())
+            break;
+        e = timerMultiMapPtr->begin();
+    }
+
     if (timerMessagePtr->isScheduled())
     {
-        if (e->first < timerMessagePtr->getArrivalTime())
+        if (e->first <timerMessagePtr->getArrivalTime())
         {
             cancelEvent(timerMessagePtr);
-            scheduleAt(e->first, timerMessagePtr);
+            scheduleAt(e->first,timerMessagePtr);
         }
-        else if (e->first>timerMessagePtr->getArrivalTime())
-            error("timer Queue problem");
+        else if (e->first>timerMessagePtr->getArrivalTime()) // Possible error, or the first event has been canceled
+        {
+            cancelEvent(timerMessagePtr);
+            scheduleAt(e->first,timerMessagePtr);
+            EV << "timer Queue problem";
+            // opp_error("timer Queue problem");
+        }
     }
     else
     {
@@ -1110,22 +1193,25 @@ void ManetRoutingBase::scheduleEvent()
 
 bool ManetRoutingBase::checkTimer(cMessage *msg)
 {
-    if (timerMessagePtr && (msg==timerMessagePtr))
-    {
-        while (timerMultiMapPtr->begin()->first<=simTime())
-        {
-            ManetTimer *timer = timerMultiMapPtr->begin()->second;
-            if (timer==NULL)
-                opp_error("timer ower is bad");
-            else
-            {
-                timerMultiMapPtr->erase(timerMultiMapPtr->begin());
-                timer->expire();
-            }
-        }
+    if (msg != timerMessagePtr)
+        return false;
+    if (timerMessagePtr == NULL)
+        opp_error("ManetRoutingBase::checkTimer error timerMessagePtr doens't exist");
+    if (timerMultiMapPtr->empty())
         return true;
+    TimerMultiMap::iterator it = timerMultiMapPtr->begin();
+    while (it->first <= simTime())
+    {
+        ManetTimer * timer = it->second;
+        if (timer == NULL)
+            opp_error ("timer owner is bad");
+        timerMultiMapPtr->erase(it);
+        timer->expire();
+        if (timerMultiMapPtr->empty())
+            break;
+        it = timerMultiMapPtr->begin();
     }
-    return false;
+    return true;
 }
 
 //
@@ -1134,7 +1220,7 @@ bool ManetRoutingBase::checkTimer(cMessage *msg)
 double ManetRoutingBase::getXPos()
 {
 
-    if (regPosition)
+    if (!regPosition)
         error("this node doesn't have activated the register position");
     return xPosition;
 }
@@ -1142,7 +1228,7 @@ double ManetRoutingBase::getXPos()
 double ManetRoutingBase::getYPos()
 {
 
-    if (regPosition)
+    if (!regPosition)
         error("this node doesn't have activated the register position");
     return yPosition;
 }
@@ -1150,7 +1236,7 @@ double ManetRoutingBase::getYPos()
 double ManetRoutingBase::getSpeed()
 {
 
-    if (regPosition)
+    if (!regPosition)
         error("this node doesn't have activated the register position");
     double x = xPosition-xPositionPrev;
     double y = yPosition-yPositionPrev;
@@ -1161,7 +1247,7 @@ double ManetRoutingBase::getSpeed()
 
 double ManetRoutingBase::getDirection()
 {
-    if (regPosition)
+    if (!regPosition)
         error("this node doesn't have activated the register position");
     double x = xPosition-xPositionPrev;
     double y = yPosition-yPositionPrev;
@@ -1296,7 +1382,6 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
     entry->setSource(IPv4Route::MANUAL);
 
     inet_rt->addRoute(entry);
-    return true;
 }
 
 bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &nextHop, const char *ifaceName, const int &hops, const Uint128 &mask)
@@ -1475,3 +1560,38 @@ bool ManetRoutingBase::getAddressGroup(std::vector<Uint128> &addressGroup, int g
     return true;
 }
 
+
+bool ManetRoutingBase::isAddressInProxyList(const Uint128 & addr)
+{
+    if (!isGateway)
+        return false;
+    for (unsigned int i = 0; i < proxyAddress.size(); i++)
+    {
+        if ((addr & proxyAddress[i].mask) == proxyAddress[i].address)
+            return true;
+    }
+    return false;
+}
+
+void ManetRoutingBase::setAddressInProxyList(const Uint128 & addr,const Uint128 & mask)
+{
+    // search if exist
+    for (unsigned int i = 0; i < proxyAddress.size(); i++)
+    {
+        if ((addr == proxyAddress[i].address) && (mask == proxyAddress[i].mask))
+            return;
+    }
+    ManetProxyAddress val;
+    val.address = addr;
+    val.mask = mask;
+    proxyAddress.push_back(val);
+}
+
+bool ManetRoutingBase::getAddressInProxyList(int i,Uint128 &addr, Uint128 &mask)
+{
+    if (i< 0 || i >= (int)proxyAddress.size())
+        return false;
+    addr = proxyAddress[i].address;
+    mask = proxyAddress[i].mask;
+    return true;
+}

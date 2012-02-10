@@ -147,7 +147,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
 
     if (verdict == PQ_ENC_SEND)
     {
-        gw_addr.s_addr = gateWayAddress->getInt();
+        gw_addr.s_addr =   gateWayAddress->getInt();
         rt = rt_table_find(gw_addr);
     }
     else

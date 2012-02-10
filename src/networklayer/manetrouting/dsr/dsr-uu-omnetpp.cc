@@ -24,15 +24,10 @@
 
 //#include <iostream>
 #include "dsr-uu-omnetpp.h"
-#ifndef MobilityFramework
 #include "IPv4Address.h"
 #include "Ieee802Ctrl_m.h"
 #include "Ieee80211Frame_m.h"
-#else
-#include "LinkBreak.h"
-#include "NetwControlInfo.h"
-#include "SimpleAddress.h"
-#endif
+#include "ICMPMessage_m.h"
 
 unsigned int DSRUU::confvals[CONFVAL_MAX];
 //simtime_t DSRUU::current_time;
@@ -59,7 +54,7 @@ struct iphdr *DSRUU::dsr_build_ip(struct dsr_pkt *dp, struct in_addr src,
     else
     {
         iph->version = 4; //IPVERSION;
-        iph->ihl = 5;
+        iph->ihl = ip_len;
         iph->tos = 0;
         iph->id = 0;
         iph->frag_off = 0;
@@ -120,43 +115,29 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
     if (dp->flags & PKT_XMIT_JITTER)
     {
         /* Broadcast packet */
-        jitter = uniform(0, ((double) ConfVal(BroadCastJitter))/1000);
-        DEBUG("xmit jitter=%f s\n", jitter);
+        jitter=0;
+        if (ConfVal(BroadCastJitter))
+        {
+           jitter = uniform(0, ((double) ConfVal(BroadCastJitter))/1000);
+           DEBUG("xmit jitter=%f s\n", jitter);
+        }
     }
 
     if (dp->dst.s_addr != DSR_BROADCAST)
     {
         /* Get hardware destination address */
-#ifdef MobilityFramework
-        int macAddr = arp->getMacAddr(dp->nxt_hop.s_addr);
-        p->setNextAddress(dp->nxt_hop.s_addr);
-        p->setControlInfo(new MacControlInfo(macAddr));
-#else
         IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(p->getControlInfo());
         IPv4Address nextIp((uint32_t)dp->nxt_hop.s_addr);
         controlInfo->setNextHopAddr(nextIp);
         p->setNextAddress(nextIp);
-#endif
     }
-#ifdef MobilityFramework
-    else
-    {
-        p->setDestAddr(L3BROADCAST);
-        int macAddr = L2BROADCAST;
-        p->setControlInfo(new MacControlInfo(macAddr));
-    }
-#endif
     /*
     if (!ConfVal(UseNetworkLayerAck)) {
         cmh->xmit_failure_ = xmit_failure;
         cmh->xmit_failure_data_ = (void *) this;
     }
     */
-#ifdef MobilityFramework
-    int prev = myaddr_.s_addr;
-#else
     IPv4Address prev((uint32_t)myaddr_.s_addr);
-#endif
     p->setPrevAddress(prev);
     if (jitter)
         sendDelayed(p, jitter, "to_ip");
@@ -171,35 +152,20 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
 
 void DSRUU::omnet_deliver(struct dsr_pkt *dp)
 {
-    int len;
+    int dsr_opts_len = 0;
     if (dp->dh.raw)
-        len = dsr_opt_remove(dp);
-#ifdef MobilityFramework
-    if (dp->dst.s_addr==my_addr().s_addr) // Is for us send to upper layer
     {
-        if (dp->payload)
-        {
-            sendUp(dp->payload);
-            dp->payload = NULL;
-        }
-        dsr_pkt_free(dp);
-        return;
+        dsr_opts_len = dp->dh.opth->p_len + DSR_OPT_HDR_LEN;
+        dsr_opt_remove(dp);
     }
-
-    NetwPkt * dgram = new NetwPkt();
-    dgram->setDestAddr(dp->dst.s_addr);
-    dgram->setSrcAddr(dp->src.s_addr);
-    dgram->setTransportProtocol(dp->encapsulate_protocol); // Transport protocol
-    int macAddr = arp->getMacAddr(dp->dst.s_addr);
-    dgram->setControlInfo(new MacControlInfo(macAddr));
-#else
     IPv4Datagram *dgram;
     dgram = new IPv4Datagram;
+
     IPv4Address destAddress_var((uint32_t)dp->dst.s_addr);
     dgram->setDestAddress(destAddress_var);
     IPv4Address srcAddress_var((uint32_t)dp->src.s_addr);
     dgram->setSrcAddress(srcAddress_var);
-    dgram->setHeaderLength(dp->nh.iph->ihl); // Header length
+    dgram->setHeaderLength(dp->nh.iph->ihl-dsr_opts_len); // Header length
     dgram->setVersion(dp->nh.iph->version); // Ip version
     dgram->setTypeOfService(dp->nh.iph->tos); // ToS
     dgram->setIdentification(dp->nh.iph->id); // Identification
@@ -207,7 +173,7 @@ void DSRUU::omnet_deliver(struct dsr_pkt *dp)
     dgram->setDontFragment(dp->nh.iph->frag_off & 0x4000);
     dgram->setTimeToLive(dp->nh.iph->ttl); // TTL
     dgram->setTransportProtocol(dp->encapsulate_protocol); // Transport protocol
-#endif
+
     if (dp->payload)
         dgram->encapsulate(dp->payload);
     dp->payload = NULL;
@@ -247,9 +213,10 @@ void DSRUU::initialize(int stage)
         confvals[PromiscOperation] = 0;
         confvals[UseNetworkLayerAck] = 0;
         confvals[UseNetworkLayerAck] = 0;
-
+#ifdef DEBUG
         if (par("PrintDebug"))
             confvals[PrintDebug] = 1;
+#endif
         if (par("FlushLinkCache"))
             confvals[FlushLinkCache] = 1;
         if (par("PromiscOperation"))
@@ -337,10 +304,10 @@ void DSRUU::initialize(int stage)
             confvals[RREQMulVisit] = 1;
         else
             confvals[RREQMulVisit] = 0;
-
+#ifdef DEBUG
         /* Default values specific to simulation */
         set_confval(PrintDebug, 1);
-
+#endif
         grat_rrep_tbl_timer.setOwer(this);
         send_buf_timer.setOwer(this);
         neigh_tbl_timer.setOwer(this);
@@ -351,29 +318,9 @@ void DSRUU::initialize(int stage)
     }
 
 
-#ifdef MobilityFramework
-    if (stage==0)
-    {
-        cModule *mod;
-        for (mod = getParentModule(); mod != 0; mod = mod->getParentModule())
-        {
-            if (strstr(mod->getName(), "host") != NULL || strstr(mod->getName(), "Host") != NULL)
-                break;
-        }
-        if (!mod)
-            error("findHost: no host module found!");
-        nb = BlackboardAccess().get();
-        MessagePromiscuous promiscuous;
-        if (get_confval(PromiscOperation))
-            promiscuousCategory = nb->subscribe(this, &promiscuous, mod->getId());
-    }
-#endif
-
-
     if (stage==4)
     {
         /* Search the 80211 interface */
-#ifndef MobilityFramework
         inet_rt = RoutingTableAccess().get();
         inet_ift = InterfaceTableAccess().get();
 
@@ -397,7 +344,6 @@ void DSRUU::initialize(int stage)
             interface80211ptr = i_face;
         else
             opp_error("DSR has found %i 80211 interfaces", num_80211);
-#endif
 
 
         /* Initilize tables */
@@ -415,24 +361,19 @@ void DSRUU::initialize(int stage)
             etxTime = par("ETXHelloInterval");
             etxNumRetry = par("ETXRetryBeforeFail");
             etxWindowSize = etxTime*(unsigned int)par("ETXWindowNumHello");
-            extJitter = 0.1;
+            etxJitter = 0.1;
             etx_timer.init(&DSRUU::EtxMsgSend, 0);
             set_timer(&etx_timer, 0.0);
             //set_timer(&etx_timer, etxTime);
             etxWindow = 0;
             etxSize = 100; // Minimun length
         }
-#ifndef MobilityFramework
         myaddr_.s_addr = interface80211ptr->ipv4Data()->getIPAddress().getInt();
         macaddr_ = interface80211ptr->getMacAddress();
         nb = NotificationBoardAccess().get();
         nb->subscribe(this, NF_LINK_BREAK);
         if (get_confval(PromiscOperation))
             nb->subscribe(this, NF_LINK_PROMISCUOUS);
-#else
-        arp = SimpleArpAccess().get();
-        myaddr_.s_addr = this->getParentModule()->getId();
-#endif
         // clear routing entries related to wlan interfaces and autoassign ip adresses
         bool manetPurgeRoutingTables = (bool) par("manetPurgeRoutingTables");
         if (manetPurgeRoutingTables)
@@ -449,7 +390,7 @@ void DSRUU::initialize(int stage)
                 }
             }
         }
-
+        interface80211ptr->ipv4Data()->joinMulticastGroup(IPv4Address::LL_MANET_ROUTERS);
         is_init = true;
         ev << "Dsr active" << "\n";
     }
@@ -468,11 +409,8 @@ void DSRUU::finish()
     maint_buf_cleanup();
 
 }
-#ifdef MobilityFramework
-DSRUU::DSRUU():cSimpleModule(), ImNotifiable()
-#else
+
 DSRUU::DSRUU():cSimpleModule(), INotifiable()
-#endif
 {
     lifoDsrPkt = NULL;
     lifo_token = 0;
@@ -591,7 +529,6 @@ void DSRUU::handleMessage(cMessage* msg)
         handleTimer(msg);
         return;
     }
-#ifndef MobilityFramework
     /* Control Message decapsulate */
     if (dynamic_cast<ControlManetRouting *>(msg))
     {
@@ -609,23 +546,6 @@ void DSRUU::handleMessage(cMessage* msg)
             return;
         }
     }
-#else
-
-    if (msg->arrivedOn("fromControl"))
-    {
-        if (dynamic_cast<DSRPkt *>(msg->getEncapsulatedMsg()))
-        {
-            DSRPkt *paux = check_and_cast <DSRPkt *> (msg->decapsulate());
-            if (get_confval(UseNetworkLayerAck))
-            {
-                packetFailed(paux);
-            }
-            delete paux;
-        }
-        delete msg;
-        return;
-    }
-#endif
 // Ext messge
     if (dynamic_cast<DSRPktExt*>(msg))
     {
@@ -633,7 +553,6 @@ void DSRUU::handleMessage(cMessage* msg)
         return;
     }
 
-#ifndef MobilityFramework
     IPv4Datagram * ipDgram = NULL;
     if (dynamic_cast<IPv4Datagram *>(msg))
     {
@@ -641,113 +560,26 @@ void DSRUU::handleMessage(cMessage* msg)
     }
     else
     {
-        opp_error("DSR has recived not supported packet");
+        // recapsulate and send
+        if (proccesICMP(msg))
+            return;
+        //EV << "############################################################\n";
+        //EV << "!!WARNING: DSR has received not supported packet, delete it \n";
+        //EV << "############################################################\n";
+        //delete msg;
+        //return;
+        opp_error("DSR has received not supported packet");
     }
     DEBUG("##########\n");
     if (ipDgram->getSrcAddress().isUnspecified())
         ipDgram->setSrcAddress(interface80211ptr->ipv4Data()->getIPAddress());
-#else
-    NetwPkt * ipDgram = NULL;
 
-    if (dynamic_cast<NetwPkt *>(msg))
-    {
-        ipDgram = dynamic_cast<NetwPkt *>(msg);
-        int ttl = ipDgram->getTtl()-1;
-// Check Ttl (Dsr is network layer
-        bool forUs = ((unsigned)ipDgram->getDestAddr() == my_addr().s_addr || (ipDgram->getDestAddr() == L3BROADCAST));
-        if (ttl<=0 )
-        {
-            if (!forUs)
-            {
-                //Before delete check if is for us
-                delete ipDgram;
-                return;
-            }
-        }
-        else
-            ipDgram->setTtl(ttl);
-
-        MacControlInfo* cInfo = static_cast<MacControlInfo*>(ipDgram->removeControlInfo());
-        if (cInfo)
-            delete cInfo;
-    }
-    else
-    {
-        // application message
-        int netwAddr;
-        NetwControlInfo* cInfo = dynamic_cast<NetwControlInfo*>(msg->removeControlInfo());
-        if (cInfo == 0)
-        {
-            ev << "warning: Application layer did not specifiy a destination L3 address\n"
-            << "\tusing broadcast address instead\n";
-            netwAddr = L3BROADCAST;
-        }
-        else
-        {
-            ev <<"CInfo removed, netw addr="<< cInfo->getNetwAddr()<<endl;
-            netwAddr = cInfo->getNetwAddr();
-            delete cInfo;
-        }
-
-        ipDgram = new NetwPkt();
-        ipDgram->setSrcAddr(my_addr().s_addr);
-        ipDgram->setDestAddr(netwAddr);
-        ipDgram->encapsulate(msg);
-        ipDgram->setTtl(IPDEFTTL);
-        if (netwAddr==L3BROADCAST)
-        {
-
-            ipDgram->setControlInfo(new MacControlInfo(L3BROADCAST));
-            sendDelayed(ipDgram, par("broadCastDelay"), "to_ip");
-            return;
-        }
-    }
-// This node is the destination or is broadcast and not the source send up
-    bool forUs = ((unsigned)ipDgram->getDestAddr() == my_addr().s_addr) ||
-                  ((unsigned) ipDgram->getSrcAddr() != my_addr().s_addr && ipDgram->getDestAddr()==L3BROADCAST);
-    if (forUs && ipDgram->getTransportProtocol()!=IP_PROT_DSR)
-    {
-        cMessage * msg = ipDgram->decapsulate();
-        sendUp(msg);
-        delete ipDgram;
-        return;
-    }
-#endif
     // Process a Dsr message
     defaultProcess(ipDgram);
     return;
 }
 
-#ifdef MobilityFramework
-void DSRUU::receiveBBItem(int category, const BBItem *details, int scopeModuleId)
-{
-    ev << "Dsr::receiveBBItem " << details->info() << "\n";
-    if (category == promiscuousCategory)
-    {
-        if (get_confval(PromiscOperation))
-        {
-            Enter_Method("Dsr promisc");
-            cMessage *msg = static_cast<const MessagePromiscuous *> (details)->getMessage();
-            if (!msg)
-                return;
-            if (dynamic_cast<DSRPkt *>(msg))
-            {
-                DSRPkt *paux = check_and_cast <DSRPkt *> (msg);
-                DSRPkt *p = check_and_cast <DSRPkt *> (paux->dup());
-                take(p);
-                /*
-                Ieee802Ctrl *ctrl = new Ieee802Ctrl();
-                //TODO ctrl->setEtherType(...);
-                ctrl->setSrc(frame->getTransmitterAddress());
-                ctrl->setDest(frame->getReceiverAddress());
-                p->setControlInfo(ctrl);
-                */
-                tap(p);
-            }
-        }
-    }
-}
-#else
+
 
 void DSRUU::receiveChangeNotification(int category, const cObject *details)
 {
@@ -765,6 +597,7 @@ void DSRUU::receiveChangeNotification(int category, const cObject *details)
             dgram = check_and_cast<IPv4Datagram *>(frame->getEncapsulatedPacket());
         else
             return;
+
         if (!get_confval(UseNetworkLayerAck))
         {
             packetFailed(dgram);
@@ -781,7 +614,9 @@ void DSRUU::receiveChangeNotification(int category, const cObject *details)
                 Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(details);
                 if (dynamic_cast<DSRPkt *>(frame->getEncapsulatedPacket()))
                 {
+
                     DSRPkt *paux = check_and_cast <DSRPkt *> (frame->getEncapsulatedPacket());
+
                     DSRPkt *p = check_and_cast <DSRPkt *> (paux->dup());
                     take(p);
                     EV << "####################################################\n";
@@ -790,7 +625,6 @@ void DSRUU::receiveChangeNotification(int category, const cObject *details)
                     Ieee802Ctrl *ctrl = new Ieee802Ctrl();
                     ctrl->setSrc(frame->getTransmitterAddress());
                     ctrl->setDest(frame->getReceiverAddress());
-                    //TODO ctrl->setEtherType(...);
                     p->setControlInfo(ctrl);
                     tap(p);
                 }
@@ -798,49 +632,29 @@ void DSRUU::receiveChangeNotification(int category, const cObject *details)
         }
     }
 }
-#endif
 
-#ifdef MobilityFramework
-void DSRUU::packetFailed(NetwPkt * ipDgram)
-#else
 void DSRUU::packetFailed(IPv4Datagram *ipDgram)
-#endif
 {
     struct dsr_pkt *dp;
     struct in_addr dst, nxt_hop;
     struct in_addr prev_hop;
     /* Cast the packet so that we can touch it */
     /* Do nothing for my own packets... */
-#ifdef MobilityFramework
-    if (ipDgram->getTransportProtocol()!=IP_PROT_DSR)
-    {
-        // This shouldn't really happen ?
-        ev << "Data packet from "<< ipDgram->getSrcAddr() <<"without DSR header!n";
-        return;
-    }
-#else
     if (ipDgram->getTransportProtocol()!=IP_PROT_DSR)
     {
         // This shouldn't really happen ?
         ev << "Data packet from "<< ipDgram->getSrcAddress() <<"without DSR header!n";
         return;
     }
-#endif
 
     DSRPkt *p = NULL;
 
     if (dynamic_cast<DSRPkt *>(ipDgram))
     {
         p = check_and_cast <DSRPkt *> (ipDgram->dup());
-#ifdef MobilityFramework
-        prev_hop.s_addr = p->prevAddress();
-        dst.s_addr = p->getDestAddr();
-        nxt_hop.s_addr = p->nextAddress();
-#else
         prev_hop.s_addr = p->prevAddress().getInt();
         dst.s_addr = p->getDestAddress().getInt();
         nxt_hop.s_addr = p->nextAddress().getInt();
-#endif
         DEBUG("Xmit failure for %s nxt_hop=%s\n", print_ip(dst), print_ip(nxt_hop));
 
         if (ConfVal(PathCache))
@@ -889,11 +703,7 @@ void DSRUU::linkFailed(IPv4Address ipAdd)
     struct in_addr nxt_hop;
 
     /* Cast the packet so that we can touch it */
-#ifndef MobilityFramework
     nxt_hop.s_addr = ipAdd.getInt();
-#else
-    nxt_hop.s_addr = ipAdd;
-#endif
     if (ConfVal(PathCache))
         ph_srt_delete_link(my_addr(), nxt_hop);
     else
@@ -908,30 +718,18 @@ void DSRUU::tap(DSRPkt *p)
 {
     struct dsr_pkt *dp;
     struct in_addr next_hop, prev_hop;
-    int transportProtocol;
-
-    /* Cast the packet so that we can touch it */
-
-
-    /* Do nothing for my own packets... */
-#ifdef MobilityFramework
-    next_hop.s_addr = p->nextAddress();
-    prev_hop.s_addr = p->prevAddress();
-    transportProtocol = p->getTransportProtocol();
-#else
     next_hop.s_addr = p->nextAddress().getInt();
     prev_hop.s_addr = p->prevAddress().getInt();
-    transportProtocol = p->getTransportProtocol();
-#endif
+    int transportProtocol = p->getTransportProtocol();
+    /* Cast the packet so that we can touch it */
     dp = dsr_pkt_alloc(p);
     dp->flags |= PKT_PROMISC_RECV;
 
     /* TODO: See if this node is the next hop. In that case do nothing */
-
     switch (transportProtocol)
     {
     case IP_PROT_DSR:
-        if (dp->src.s_addr != myaddr_.s_addr)
+        if (dp->src.s_addr != myaddr_.s_addr) /* Do nothing for my own packets... */
         {
             //DEBUG("DSR packet from %s\n", print_ip(dp->src));
             dsr_recv(dp);
@@ -980,7 +778,6 @@ void DSRUU::EtxMsgSend(unsigned long data)
 {
     EtxList neigh[15];
     DSRPktExt* msg = new DSRPktExt();
-#ifndef MobilityFramework
     IPv4Address destAddress_var(DSR_BROADCAST);
     msg->setDestAddress(destAddress_var);
     IPv4Address srcAddress_var((uint32_t)myaddr_.s_addr);
@@ -994,13 +791,7 @@ void DSRUU::EtxMsgSend(unsigned long data)
     ipControlInfo->setDestAddr(destAddress_var);
     ipControlInfo->setTimeToLive(1);
     msg->setControlInfo(ipControlInfo);
-#else
-    msg->setDestAddr(L3BROADCAST);
-    msg->setSrcAddr(myaddr_.s_addr);
-    int macAddr = L2BROADCAST;
-    msg->setControlInfo(new MacControlInfo(macAddr));
-    msg->setTtl(1); // TTL
-#endif
+
     int numNeighbor = 0;
     for (ETXNeighborTable::iterator iter = etxNeighborTable.begin(); iter!=etxNeighborTable.end();)
     {
@@ -1056,7 +847,7 @@ void DSRUU::EtxMsgSend(unsigned long data)
     if (msg->getByteLength()<etxSize)
         msg->setByteLength(etxSize);
 
-    sendDelayed(msg, uniform(0, extJitter), "to_ip");
+    sendDelayed(msg,uniform(0,etxJitter), "to_ip");
 
     etxWindow += etxTime;
     set_timer(&etx_timer, etxTime+ SIMTIME_DBL(simTime()));
@@ -1070,13 +861,9 @@ void DSRUU::EtxMsgProc(cMessage *m)
     EtxList *list = msg->getExtension();
     int size = msg->getSizeExtension();
 
-#ifndef MobilityFramework
     IPv4Address myAddress((uint32_t)myaddr_.s_addr);
     IPv4Address srcAddress(msg->getSrcAddress());
-#else
-    IPv4Address myAddress = myaddr_.s_addr;
-    IPv4Address srcAddress = msg->getSrcAddr();
-#endif
+
 
     for (int i = 0; i<size; i++)
     {
@@ -1145,22 +932,14 @@ void DSRUU::ExpandCost(struct dsr_pkt *dp)
         return;
     }
     myAddr = my_addr();
-#ifndef MobilityFramework
     IPv4Address myAddress((uint32_t)myAddr.s_addr);
-#else
-    IPv4Address myAddress = myAddr.s_addr;
-#endif
-
     if (dp->costVectorSize==0 && dp->src.s_addr!=myAddr.s_addr)
     {
         dp->costVectorSize++;
         dp->costVector = new EtxCost[1];
         dp->costVector[0].address = myAddress;
-#ifndef MobilityFramework
         double cost = getCost(IPv4Address((uint32_t)dp->src.s_addr));
-#else
-        double cost = getCost(dp->src.s_addr);
-#endif
+
         if (cost<0)
             dp->costVector[0].cost = 1e100;
         else
@@ -1233,17 +1012,45 @@ void DSRUU::AddCost(struct dsr_pkt *dp, struct dsr_srt *srt)
     for (int i=0; i<sizeAddress; i++)
     {
         add = srt->addrs[i];
-#ifndef MobilityFramework
         dp->costVector[i].address = IPv4Address((uint32_t)add.s_addr);
-#else
-        dp->costVector[i].address = add.s_addr;
-#endif
         dp->costVector[i].cost = srt->cost[i];
     }
-#ifndef MobilityFramework
     dp->costVector[srt->cost_size-1].address = IPv4Address((uint32_t)srt->dst.s_addr);
-#else
-    dp->costVector[srt->cost_size-1].address = srt->dst.s_addr;
-#endif
     dp->costVector[srt->cost_size-1].cost = srt->cost[srt->cost_size-1];
 }
+
+
+bool DSRUU::proccesICMP(cMessage *msg)
+{
+    ICMPMessage * pk = dynamic_cast<ICMPMessage *>(msg);
+    if (pk==NULL)
+        return false;
+    // check if
+    // recapsulate and send
+    if (pk->getControlInfo())
+        delete pk->removeControlInfo();
+    DSRPkt *bogusPacket = dynamic_cast<DSRPkt *>(pk->getEncapsulatedPacket());
+    if (bogusPacket==NULL)
+    {
+        delete msg;
+        return true;
+    }
+    // check if is a exclusive DSR packet
+    if (bogusPacket->getEncapProtocol()==0)
+    {
+        // delete all and return
+        delete msg;
+        return true;
+    }
+    if (pk->getControlInfo())
+        delete pk->removeControlInfo();
+    IPv4Datagram *newdgram = new IPv4Datagram();
+    bogusPacket->setTransportProtocol(bogusPacket->getEncapProtocol());
+    IPv4Address dst(this->my_addr().s_addr);
+    newdgram->setDestAddress(dst);
+    newdgram->encapsulate(bogusPacket);
+    newdgram->setTransportProtocol(IP_PROT_ICMP);
+    send(newdgram,"to_ip");
+    return true;
+ }
+

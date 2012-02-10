@@ -36,10 +36,12 @@ AODV_msg& AODV_msg::operator=(const AODV_msg& m)
     return *this;
 }
 
+
 void AODV_msg::copy(const AODV_msg& m)
 {
     type = m.type;
     ttl = m.ttl;
+    prevFix = m.prevFix;
     extensionsize = m.extensionsize;
     if (extensionsize==0)
     {
@@ -83,7 +85,7 @@ AODV_ext * AODV_msg::addExtension(int type, int len, char *data)
     {
         return NULL;
     }
-    extension_aux = new AODV_ext [extensionsize+1];
+    extension_aux =   new AODV_ext [extensionsize+1];
     for (int i=0; i < extensionsize; i++)
     {
         extension_aux[i].type = extension[i].type;
@@ -92,11 +94,11 @@ AODV_ext * AODV_msg::addExtension(int type, int len, char *data)
     }
     if (extensionsize>0)
         delete [] extension;
-    extension = extension_aux;
+    extension =  extension_aux;
     extensionsize++;
     extension[extensionsize-1].type = type;
     extension[extensionsize-1].length = len;
-    extension[extensionsize-1].pointer = new char[len];
+    extension[extensionsize-1].pointer  =  new char[len];
     memcpy(extension_aux[extensionsize-1].pointer, data, len);
     setBitLength(getBitLength()+((AODV_EXT_HDR_SIZE+len) *8));
     return & extension[extensionsize-1];
@@ -159,7 +161,7 @@ void RERR::addUdest(const Uint128 & src_addr, unsigned int udest_seqno)
         temp_udest[i].dest_addr = _udest[i].dest_addr;
         temp_udest[i].dest_seqno = _udest[i].dest_seqno;
     }
-    delete [] _udest;
+    delete []  _udest;
     temp_udest[dest_count].dest_addr = src_addr;
     temp_udest[dest_count].dest_seqno = udest_seqno;
     _udest = temp_udest;
@@ -183,7 +185,7 @@ void RERR::clearUdest()
 {
     if (_udest!=NULL)
     {
-        delete [] _udest;
+        delete []  _udest;
     }
     _udest = NULL;
 }
@@ -215,6 +217,8 @@ void RREP::copy(const RREP& m)
     dest_seqno = m.dest_seqno;
     orig_addr = m.orig_addr;
     lifetime = m.lifetime;
+    cost = m.cost;
+    hopfix = m.hopfix;
 }
 
 std::string RREP::detailedInfo() const
@@ -277,6 +281,8 @@ void RREQ::copy(const RREQ& m)
     dest_seqno = m.dest_seqno;
     orig_addr = m.orig_addr;
     orig_seqno = m.orig_seqno;
+    cost = m.cost;
+    hopfix = m.hopfix;
 }
 
 std::string RREQ::detailedInfo() const
@@ -293,4 +299,5 @@ std::string RREQ::detailedInfo() const
     out <<" hops :"<< hops << "\n";
     return out.str();
 }
+
 

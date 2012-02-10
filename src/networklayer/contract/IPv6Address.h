@@ -86,6 +86,7 @@ class INET_API IPv6Address
 
         /** The link-local prefix (fe80::) */
         static const IPv6Address LINKLOCAL_PREFIX;
+        static const IPv6Address LL_MANET_ROUTERS;
         //@}
 
         /**

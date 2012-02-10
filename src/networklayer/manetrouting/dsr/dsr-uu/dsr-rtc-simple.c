@@ -40,7 +40,7 @@ MODULE_LICENSE("GPL");
  * for adding timers is still here though... - Erik */
 
 struct rtc_entry {
-	list_t l;
+	dsr_list_t l;
 	unsigned long expires;
 	unsigned short flags;
 	struct dsr_srt srt;
@@ -75,7 +75,7 @@ static inline void __dsr_rtc_set_next_timeout(void)
 
 static void dsr_rtc_timeout(unsigned long data)
 {
-	list_t *pos, *tmp;
+	dsr_list_t *pos, *tmp;
 	int time = TimeNow;
 
 	DSR_WRITE_LOCK(&rtc_lock);
@@ -99,7 +99,7 @@ static void dsr_rtc_timeout(unsigned long data)
 
 static inline void __dsr_rtc_flush(void)
 {
-	list_t *pos, *tmp;
+	dsr_list_t *pos, *tmp;
 
 	list_for_each_safe(pos, tmp, &rtc_head) {
 		struct rtc_entry *e = (struct rtc_entry *)pos;
@@ -120,7 +120,7 @@ static inline int __dsr_rtc_add(struct rtc_entry *e)
 	if (list_empty(&rtc_head)) {
 		list_add(&e->l, &rtc_head);
 	} else {
-		list_t *pos;
+		dsr_list_t *pos;
 
 		list_for_each(pos, &rtc_head) {
 			struct rtc_entry *curr = (struct rtc_entry *)pos;
@@ -135,7 +135,7 @@ static inline int __dsr_rtc_add(struct rtc_entry *e)
 
 static inline struct rtc_entry *__dsr_rtc_find(__u32 daddr)
 {
-	list_t *pos;
+	dsr_list_t *pos;
 
 	list_for_each(pos, &rtc_head) {
 		struct rtc_entry *e = (struct rtc_entry *)pos;
@@ -302,7 +302,7 @@ dsr_rtc_update(struct dsr_srt *srt, unsigned long time, unsigned short flags)
 
 static int dsr_rtc_print(char *buf)
 {
-	list_t *pos;
+	dsr_list_t *pos;
 	int len = 0;
 
 	DSR_READ_LOCK(&rtc_lock);

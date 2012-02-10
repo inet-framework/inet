@@ -53,7 +53,7 @@ static unsigned int rreq_seqno;
 
 struct rreq_tbl_entry
 {
-    list_t l;
+    dsr_list_t l;
     int state;
     struct in_addr node_addr;
     int ttl;
@@ -67,7 +67,7 @@ struct rreq_tbl_entry
 
 struct id_entry_route
 {
-    list_t l;
+    dsr_list_t l;
     double cost;
     unsigned int length;
     char * add;
@@ -75,7 +75,7 @@ struct id_entry_route
 
 struct id_entry
 {
-    list_t l;
+    dsr_list_t l;
     struct in_addr trg_addr;
     unsigned short id;
     struct tbl rreq_id_tbl_routes;
@@ -106,7 +106,7 @@ static inline int crit_addr(void *pos, void *data)
 static inline int crit_delete_tbl_enty(void *pos, void *data)
 {
 
-    list_t *p,*tmp;
+    dsr_list_t *p,*tmp;
     struct id_entry *e = (struct id_entry *)pos;
     list_for_each_safe(p,tmp, &e->rreq_id_tbl_routes.head)
     {
@@ -123,7 +123,7 @@ static inline int crit_delete_tbl_enty(void *pos, void *data)
 
 static inline int crit_duplicate_path(struct id_entry *e, struct rreq_tbl_query *q)
 {
-    list_t *p;
+    dsr_list_t *p;
     id_entry_route *worst=NULL;
     list_for_each(p, &e->rreq_id_tbl_routes.head)
     {
@@ -156,14 +156,14 @@ static inline int crit_duplicate_2(void *pos, void *data)
 
     if (e->node_addr.s_addr == q->initiator->s_addr)
     {
-        list_t *p;
+        dsr_list_t *p;
         list_for_each(p, &e->rreq_id_tbl.head)
         {
             struct id_entry *id_e = (struct id_entry *)p;
             if (id_e->trg_addr.s_addr == q->target->s_addr &&
                     id_e->id == *(q->id))
             {
-                list_t *pos;
+                dsr_list_t *pos;
                 list_for_each(pos, &id_e->rreq_id_tbl_routes.head)
                 {
                     struct id_entry_route *id_e_route = (struct id_entry_route *)pos;
@@ -187,7 +187,7 @@ static inline int crit_duplicate(void *pos, void *data)
 
     if (e->node_addr.s_addr == q->initiator->s_addr)
     {
-        list_t *p;
+        dsr_list_t *p;
         list_for_each(p, &e->rreq_id_tbl.head)
         {
             struct id_entry *id_e = (struct id_entry *)p;
@@ -212,7 +212,7 @@ void NSCLASS rreq_tbl_set_max_len(unsigned int max_len)
 #ifdef __KERNEL__
 static int rreq_tbl_print(struct tbl *t, char *buf)
 {
-    list_t *pos1, *pos2;
+    dsr_list_t *pos1, *pos2;
     int len = 0;
     int first = 1;
     struct timeval now;
@@ -403,7 +403,7 @@ rreq_tbl_add_id(struct in_addr initiator, struct in_addr target,
     struct id_entry *id_e;
     struct id_entry *id_entry=NULL;
     int exist=1;
-    list_t *pos;
+    dsr_list_t *pos;
     struct id_entry_route *id_r;
 
     int res = 0;
@@ -979,8 +979,8 @@ void __exit NSCLASS rreq_tbl_cleanup(void)
 #ifdef OMNETPP
 void NSCLASS rreq_timer_test(cMessage *msg)
 {
-    list_t *pos1;
-    list_t *head;
+    dsr_list_t *pos1;
+    dsr_list_t *head;
     head = &rreq_tbl.head;
     list_for_each(pos1, head)
     {

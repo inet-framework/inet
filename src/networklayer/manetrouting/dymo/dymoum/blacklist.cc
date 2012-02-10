@@ -62,7 +62,8 @@ int NS_CLASS blacklist_remove(blacklist_t *entry)
     DymoBlackList::iterator it;
     for (it=dymoBlackList->begin(); it != dymoBlackList->end(); )
     {
-        DymoBlackList::iterator cur = it++;
+        DymoBlackList::iterator cur = it;
+        it++;
         if ((*cur).second==entry)
         {
             timer_remove(&entry->timer);

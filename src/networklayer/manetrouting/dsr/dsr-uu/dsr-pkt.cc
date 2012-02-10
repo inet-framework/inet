@@ -18,11 +18,7 @@
 #endif
 #else
 #include "dsr-uu-omnetpp.h"
-
-#ifndef MobilityFramework
 #include "Ieee802Ctrl_m.h"
-#endif
-
 #endif
 
 #include "debug_dsr.h"
@@ -236,89 +232,6 @@ void dsr_pkt_free(struct dsr_pkt *dp)
 }
 
 #else
-#ifdef MobilityFramework
-
-dsr_pkt * dsr_pkt_alloc(cPacket  * p)
-{
-    struct dsr_pkt *dp;
-    int dsr_opts_len = 0;
-
-
-    // dp = (struct dsr_pkt *)MALLOC(sizeof(struct dsr_pkt), GFP_ATOMIC);
-    if (DSRUU::lifoDsrPkt!=NULL)
-    {
-        dp=DSRUU::lifoDsrPkt;
-        DSRUU::lifoDsrPkt = dp->next;
-        DSRUU::lifo_token++;
-    }
-    else
-        dp = new dsr_pkt;
-
-    if (!dp)
-        return NULL;
-    memset(dp, 0, sizeof(dsr_pkt));
-    if (p)
-    {
-        NetwPkt *dgram = dynamic_cast <NetwPkt *> (p);
-
-        dp->encapsulate_protocol=0;
-        dp->mac.raw = dp->mac_data;
-
-        dp->src.s_addr = dgram->getSrcAddr();
-        dp->dst.s_addr =dgram->getDestAddr();
-        dp->nh.iph = (struct iphdr *) dp->ip_data;
-        dp->nh.iph->tot_len= dgram->getByteLength(); // Total length
-        dp->nh.iph->ttl= dgram->getTtl(); // TTL
-        dp->nh.iph->protocol= dgram->getTransportProtocol(); // Transport protocol
-        dp->nh.iph->saddr= dgram->getSrcAddr();
-        dp->nh.iph->daddr= dgram->getDestAddr();
-        dp->payload = p->decapsulate();
-        dp->encapsulate_protocol = 0;
-
-        if (dp->nh.iph->protocol == IP_PROT_DSR)
-        {
-            struct dsr_opt_hdr *opth;
-            int n;
-            if (dynamic_cast<DSRPkt*> (p))
-            {
-                DSRPkt * dsrpkt = dynamic_cast<DSRPkt*> (p);
-                if (dp->payload)
-                    dp->encapsulate_protocol=dsrpkt->getEncapProtocol();
-                opth =  dsrpkt->getOptions();
-                dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
-                if (!dsr_pkt_alloc_opts(dp, dsr_opts_len))
-                {
-                    FREE(dp);
-                    return NULL;
-                }
-                memcpy(dp->dh.raw, (char *)opth, dsr_opts_len);
-                n = dsr_opt_parse(dp);
-                DEBUG("Packet has %d DSR option(s)\n", n);
-                dp->ip_pkt = dsrpkt;
-                dp->costVector = dsrpkt->getCostVector();
-                dp->costVectorSize = dsrpkt->getCostVectorSize();
-                dsrpkt->resetCostVector();
-                p=NULL;
-            }
-        }
-        else
-        {
-            if (dp->payload)
-                dp->encapsulate_protocol = dgram->getTransportProtocol();
-        }
-
-        if (dp->payload)
-            dp->payload_len = dp->payload->getByteLength();
-        if (dp->payload_len && ConfVal(UseNetworkLayerAck))
-            dp->flags |= PKT_REQUEST_ACK;
-
-    }
-    if (p)
-        delete p;
-    return dp;
-}
-
-#else
 dsr_pkt * dsr_pkt_alloc(cPacket  * p)
 {
     struct dsr_pkt *dp;
@@ -430,7 +343,6 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
     }
     return dp;
 }
-#endif
 
 void dsr_pkt_free(dsr_pkt *dp)
 {

@@ -44,7 +44,7 @@ static int send_buf_print(struct tbl *t, char *buffer);
 
 struct send_buf_entry
 {
-    list_t l;
+    dsr_list_t l;
     struct dsr_pkt *dp;
     struct timeval qtime;
     xmit_fct_t okfn;
@@ -285,7 +285,7 @@ static inline int send_buf_flush(struct tbl *t)
 #ifdef __KERNEL__
 static int send_buf_print(struct tbl *t, char *buffer)
 {
-    list_t *p;
+    dsr_list_t *p;
     int len;
     struct timeval now;
 

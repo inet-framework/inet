@@ -258,8 +258,27 @@ void NS_CLASS dymo_socket_send(struct in_addr dest_addr, struct dev_info *dev,do
     if (send_buf==NULL)
         return;
     DYMO_element *p = send_buf;
+    RE * rePkt=dynamic_cast<RE*>(p);
     send_buf = NULL;
     totalSend++;
+    if (this->isStaticNode())
+    {
+        p->previousStatic=true;
+        if (rePkt)
+        {
+            for (int i=0; i<rePkt->numBlocks(); i++)
+            	rePkt->re_blocks[i].cost += costStatic;
+        }
+    }
+    else
+    {
+        p->previousStatic = false;
+        if (rePkt)
+        {
+            for (int i=0; i<rePkt->numBlocks(); i++)
+            	rePkt->re_blocks[i].cost += costMobile;
+        }
+    }
 
     if (dynamic_cast<RE*>(p))
     {

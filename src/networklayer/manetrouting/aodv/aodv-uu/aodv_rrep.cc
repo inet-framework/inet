@@ -60,6 +60,7 @@ RREP *NS_CLASS rrep_create(u_int8_t flags,
     rrep = (RREP *) aodv_socket_new_msg();
 #else
     rrep =  new RREP("RouteReply");
+    rrep->cost=0;
 #endif
     rrep->type = AODV_RREP;
     rrep->res1 = 0;
@@ -267,6 +268,7 @@ void NS_CLASS rrep_forward(RREP * rrep, int size, rt_table_t * rev_rt,
 #else
     RREP * rrep_new = check_and_cast <RREP *> (rrep->dup());
     rrep_new->hcnt = fwd_rt->hcnt;
+    rrep_new->hopfix = fwd_rt->hopfix;
     totalRrepSend++;
     rrep_new->ttl=ttl;
     aodv_socket_send((AODV_msg *) rrep_new, rev_rt->next_hop, size, 1,
@@ -288,6 +290,8 @@ void NS_CLASS rrep_process(RREP * rrep, int rreplen, struct in_addr ip_src,
     unsigned int extlen = 0;
     int rt_flags = 0;
     struct in_addr rrep_dest, rrep_orig;
+    uint32_t cost;
+    uint8_t  hopfix;
 #ifdef CONFIG_GATEWAY
     struct in_addr inet_dest_addr;
     int inet_rrep = 0;
@@ -300,6 +304,10 @@ void NS_CLASS rrep_process(RREP * rrep, int rreplen, struct in_addr ip_src,
     rrep_lifetime = ntohl(rrep->lifetime);
     /* Increment RREP hop count to account for intermediate node... */
     rrep_new_hcnt = rrep->hcnt + 1;
+    cost = rrep->cost;
+    hopfix = rrep->hopfix;
+    if (this->isStaticNode())
+        hopfix++;
 
     if (rreplen < (int) RREP_SIZE)
     {
@@ -386,20 +394,33 @@ void NS_CLASS rrep_process(RREP * rrep, int rreplen, struct in_addr ip_src,
     {
         /* We didn't have an existing entry, so we insert a new one. */
         fwd_rt = rt_table_insert(rrep_dest, ip_src, rrep_new_hcnt, rrep_seqno,
-                                 rrep_lifetime, VALID, rt_flags, ifindex);
+                                 rrep_lifetime, VALID, rt_flags, ifindex, cost, hopfix);
     }
-    else if (fwd_rt->dest_seqno == 0 ||
+    else if (useHover && (fwd_rt->dest_seqno == 0 ||
              (int32_t) rrep_seqno > (int32_t) fwd_rt->dest_seqno ||
              (rrep_seqno == fwd_rt->dest_seqno &&
               (fwd_rt->state == INVALID || fwd_rt->flags & RT_UNIDIR ||
-               rrep_new_hcnt < fwd_rt->hcnt)))
+               cost < fwd_rt->cost))))
     {
         pre_repair_hcnt = fwd_rt->hcnt;
         pre_repair_flags = fwd_rt->flags;
 
         fwd_rt = rt_table_update(fwd_rt, ip_src, rrep_new_hcnt, rrep_seqno,
                                  rrep_lifetime, VALID,
-                                 rt_flags | fwd_rt->flags);
+                                 rt_flags | fwd_rt->flags, ifindex, cost, hopfix);
+    }
+    else if (!useHover && (fwd_rt->dest_seqno == 0 ||
+             (int32_t) rrep_seqno > (int32_t) fwd_rt->dest_seqno ||
+             (rrep_seqno == fwd_rt->dest_seqno &&
+              (fwd_rt->state == INVALID || fwd_rt->flags & RT_UNIDIR ||
+               rrep_new_hcnt < fwd_rt->hcnt))))
+    {
+        pre_repair_hcnt = fwd_rt->hcnt;
+        pre_repair_flags = fwd_rt->flags;
+
+        fwd_rt = rt_table_update(fwd_rt, ip_src, rrep_new_hcnt, rrep_seqno,
+                                 rrep_lifetime, VALID,
+                                 rt_flags | fwd_rt->flags, ifindex, cost, hopfix);
     }
     else
     {
@@ -453,7 +474,7 @@ void NS_CLASS rrep_process(RREP * rrep, int rreplen, struct in_addr ip_src,
             {
                 rt_table_update(inet_rt, rrep_dest, rrep_new_hcnt, 0,
                                 rrep_lifetime, VALID, RT_INET_DEST |
-                                inet_rt->flags);
+                                inet_rt->flags, ifindex);
             }
             else
             {

@@ -185,6 +185,8 @@ static NS_INLINE int re_numblocks(RE *re)
 
 /* Return the routing information type: self-generated, stale, loop-prone,
    inferior or stale */
+NS_STATIC int re_info_type(struct re_block *b, rtable_entry_t *e, u_int8_t is_rreq);
+#if 0
 NS_STATIC NS_INLINE int re_info_type(struct re_block *b, rtable_entry_t *e, u_int8_t is_rreq)
 {
     u_int32_t node_seqnum;
@@ -230,7 +232,7 @@ NS_STATIC NS_INLINE int re_info_type(struct re_block *b, rtable_entry_t *e, u_in
     }
     return RB_FRESH;
 }
-
+#endif
 
 #endif  /* NS_NO_DECLARATIONS */
 

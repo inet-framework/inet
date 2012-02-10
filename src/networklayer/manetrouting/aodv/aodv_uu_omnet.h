@@ -47,6 +47,14 @@
 #error "To compile the ported version, NS_PORT must be defined!"
 #endif /* NS_PORT */
 
+#ifndef AODV_USE_STL
+#define AODV_USE_STL
+#endif
+
+#ifndef AODV_USE_STL_RT
+#define AODV_USE_STL_RT
+#endif
+
 #define AODV_GLOBAL_STATISTISTIC
 
 /* Global definitions and lib functions */
@@ -59,6 +67,7 @@
 #include "aodv-uu/list.h"
 #include "aodv_msg_struct.h"
 #include "ICMPAccess.h"
+#include "Ieee80211Frame_m.h"
 
 
 /* Forward declaration needed to be able to reference the class */
@@ -107,25 +116,45 @@ class AODVUU : public ManetRoutingBase
 {
 
   private:
-
     char nodeName[50];
     ICMPAccess icmpAccess;
     bool useIndex;
+    bool isRoot;
+    uint32_t costStatic;
+    uint32_t costMobile;
+    bool useHover;
+    bool propagateProactive;
+    struct timer proactive_rreq_timer;
+    long proactive_rreq_timeout;
+    bool isBroadcast (Uint128 add)
+    {
+        if (this->isInMacLayer() && add==MACAddress::BROADCAST_ADDRESS.getInt())
+             return true;
+        if (!this->isInMacLayer() && add==IPv4Address::ALLONES_ADDRESS.getInt())
+        	return true;
+        return false;
+    }
     // cMessage  messageEvent;
+    typedef std::multimap<simtime_t, struct timer*> AodvTimerMap;
+    AodvTimerMap aodvTimerMap;
+    typedef std::map<Uint128, struct rt_table*> AodvRtTableMap;
+    AodvRtTableMap aodvRtTableMap;
+
 
   public:
     static int  log_file_fd;
     static bool log_file_fd_init;
-    AODVUU() {is_init =false; log_file_fd_init=false; sendMessageEvent = new cMessage();/*&messageEvent;*/}
+    AODVUU() {isRoot = false; is_init = false; log_file_fd_init = false; sendMessageEvent = new cMessage();/*&messageEvent;*/}
     ~AODVUU();
 
     void packetFailed(IPv4Datagram *p);
+    void packetFailedMac(Ieee80211DataFrame *);
 
     // Routing information access
     virtual uint32_t getRoute(const Uint128 &,std::vector<Uint128> &);
     virtual bool getNextHop(const Uint128 &,Uint128 &add,int &iface,double &);
     virtual bool isProactive();
-    virtual void setRefreshRoute(const Uint128 &,const Uint128 &,const Uint128 &,const Uint128&);
+    virtual void setRefreshRoute(const Uint128 &destination, const Uint128 & nextHop,bool isReverse);
     virtual bool setRoute(const Uint128 & destination,const Uint128 &nextHop,const int &ifaceIndex,const int &hops,const Uint128 &mask=(Uint128)0);
     virtual bool setRoute(const Uint128 & destination,const Uint128 &nextHop,const char *ifaceName,const int &hops,const Uint128 &mask=(Uint128)0);
 
@@ -243,11 +272,11 @@ class AODVUU : public ManetRoutingBase
     /* From seek_list.c */
     list_t seekHead;
 #define seekhead this->seekHead
-
+#ifndef AODV_USE_STL
     /* From timer_queue_aodv.c */
     list_t timeList;
 #define TQ this->timeList
-
+#endif
     /* From debug.c */
 // int  log_file_fd;
     int log_rt_fd;

@@ -224,7 +224,7 @@ class DSRUU:public cSimpleModule, public INotifiable
     double etxTime;
     double etxWindow;
     double etxWindowSize;
-    double extJitter;
+    double etxJitter;
     struct ETXEntry;
     int etxNumRetry;
 
@@ -266,23 +266,14 @@ class DSRUU:public cSimpleModule, public INotifiable
 
     void drop (cMessage *msg,int code) { delete msg;}
 
-#ifdef MobilityFramework
-    Blackboard *nb;
-    int promiscuousCategory;
-    virtual void receiveBBItem(int category, const BBItem *details, int scopeModuleId);
-    void sendUp(cMessage *msg) {send(msg,"toUp");}
-#else
     NotificationBoard *nb;
     virtual void receiveChangeNotification(int category, const cObject *details);
-#endif
 
   protected:
     struct in_addr ifaddr;
     struct in_addr bcaddr;
     static unsigned int confvals[CONFVAL_MAX];
-#ifndef MobilityFramework
     InterfaceEntry *   interface80211ptr;
-#endif
     void tap(DSRPkt * p);
     void omnet_xmit(struct dsr_pkt *dp);
     void omnet_deliver(struct dsr_pkt *dp);
@@ -292,6 +283,8 @@ class DSRUU:public cSimpleModule, public INotifiable
 
     struct dsr_srt *RouteFind(struct in_addr , struct in_addr);
     int RouteAdd(struct dsr_srt *, unsigned long, unsigned short );
+
+    bool proccesICMP(cMessage *msg);
 
   public:
     virtual void handleMessage(cMessage *msg);
@@ -459,10 +452,8 @@ static inline int omnet_vprintk(const char *fmt, va_list args)
 static inline void omnet_debug(const char *fmt, ...)
 {
     va_list args;
-    int r;
-
     va_start(args, fmt);
-    r = omnet_vprintk(fmt, args);
+    omnet_vprintk(fmt, args);
     va_end(args);
 }
 

@@ -48,12 +48,13 @@ struct DYMO_element : public cPacket
     Uint128 notify_addr; // if M bit set
     Uint128 target_addr; // if not a DYMOcast addr in IP dest addr
     uint8_t blockAddressGroup;
+    bool previousStatic;
 
     //explicit AODV_msg(const char *name="AodvMgs") : cMessage(name) {extensionsize=0;extension=NULL;}
 #ifdef STATIC_BLOCK
-    explicit DYMO_element(const char *name = NULL) : cPacket(name) {setBitLength(0); extensionsize = 0; memset(extension, 0, STATIC_BLOCK_SIZE); blockAddressGroup = 0;}
+    explicit DYMO_element(const char *name = NULL) : cPacket(name) {setBitLength(0); extensionsize = 0; memset(extension, 0, STATIC_BLOCK_SIZE); blockAddressGroup = 0; previousStatic = false;}
 #else
-    explicit DYMO_element(const char *name = NULL) : cPacket(name) {setBitLength(0); extensionsize = 0; extension = NULL; blockAddressGroup = 0;}
+    explicit DYMO_element(const char *name = NULL) : cPacket(name) {setBitLength(0); extensionsize = 0; extension = NULL; blockAddressGroup = 0; previousStatic = false;}
 #endif
     ~DYMO_element();
     DYMO_element(const DYMO_element  &m);
@@ -89,6 +90,9 @@ struct re_block
     Uint128     re_node_addr;
     u_int32_t   re_node_seqnum;
     unsigned char from_proactive;
+    bool        staticNode;
+    uint32_t    cost;
+    uint8_t     re_hopfix;
 };
 
 #define MAX_RERR_BLOCKS 50L

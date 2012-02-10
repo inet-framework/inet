@@ -30,17 +30,45 @@
 typedef struct rt_table rt_table_t;
 
 /* Neighbor struct for active routes in Route Table */
-typedef struct precursor
-{
-    list_t l;
-    struct in_addr neighbor;
-} precursor_t;
-
 #define FIRST_PREC(h) ((precursor_t *)((h).next))
 
 #define seqno_incr(s) ((s == 0) ? 0 : ((s == 0xFFFFFFFF) ? s = 1 : s++))
 
 typedef u_int32_t hash_value;   /* A hash value */
+
+#ifdef AODV_USE_STL_RT
+typedef struct precursor
+{
+    struct in_addr neighbor;
+} precursor_t;
+
+struct rt_table
+{
+    struct in_addr dest_addr;   /* IP address of the destination */
+    u_int32_t dest_seqno;
+    unsigned int ifindex;   /* Network interface index... */
+    struct in_addr next_hop;    /* IP address of the next hop to the dest */
+    u_int8_t hcnt;      /* Distance (in hops) to the destination */
+    u_int16_t flags;        /* Routing flags */
+    u_int8_t state;     /* The state of this entry */
+    uint32_t    cost; // without the last node
+    uint8_t     hopfix;
+
+    struct timer rt_timer;  /* The timer associated with this entry */
+    struct timer ack_timer; /* RREP_ack timer for this destination */
+    struct timer hello_timer;
+    struct timeval last_hello_time;
+    hash_value hash;
+    u_int8_t hello_cnt;
+    int nprec;          /* Number of precursors */
+    std::vector<precursor_t> precursors;      /* List of neighbors using the route */
+};
+#else
+typedef struct precursor
+{
+    list_t l;
+    struct in_addr neighbor;
+} precursor_t;
 
 /* Route table entries */
 struct rt_table
@@ -53,6 +81,9 @@ struct rt_table
     u_int8_t hcnt;      /* Distance (in hops) to the destination */
     u_int16_t flags;        /* Routing flags */
     u_int8_t state;     /* The state of this entry */
+    uint32_t    cost; // without the last node
+    uint8_t     hopfix;
+
     struct timer rt_timer;  /* The timer associated with this entry */
     struct timer ack_timer; /* RREP_ack timer for this destination */
     struct timer hello_timer;
@@ -62,7 +93,7 @@ struct rt_table
     int nprec;          /* Number of precursors */
     list_t precursors;      /* List of neighbors using the route */
 };
-
+#endif
 
 /* Route entry flags */
 #define RT_UNIDIR        0x1
@@ -87,12 +118,11 @@ struct routing_table
     unsigned int num_active;
     list_t tbl[RT_TABLESIZE];
 };
-
 void precursor_list_destroy(rt_table_t * rt);
 #endif              /* NS_NO_GLOBALS */
 
-#ifndef NS_NO_DECLARATIONS
 
+#ifndef NS_NO_DECLARATIONS
 struct routing_table rt_tbl;
 
 void rt_table_init();
@@ -100,14 +130,12 @@ void rt_table_destroy();
 rt_table_t *rt_table_insert(struct in_addr dest, struct in_addr next,
                             u_int8_t hops, u_int32_t seqno, u_int32_t life,
                             u_int8_t state, u_int16_t flags,
-                            unsigned int ifindex);
+                            unsigned int ifindex,
+                            uint32_t cost,uint8_t hopfix);
 rt_table_t *rt_table_update(rt_table_t * rt, struct in_addr next, u_int8_t hops,
                             u_int32_t seqno, u_int32_t lifetime, u_int8_t state,
-                            u_int16_t flags);
-
-rt_table_t *rt_table_update (rt_table_t * rt, struct in_addr next, u_int8_t hops,
-                             u_int32_t seqno, u_int32_t lifetime, u_int8_t state,
-                             u_int16_t flags, int link_break);
+                            u_int16_t flags,int iface,
+                            uint32_t cost,uint8_t hopfix);
 
 NS_INLINE rt_table_t *rt_table_update_timeout(rt_table_t * rt,
         u_int32_t lifetime);

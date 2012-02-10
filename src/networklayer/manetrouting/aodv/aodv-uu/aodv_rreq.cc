@@ -74,6 +74,7 @@ RREQ *NS_CLASS rreq_create(u_int8_t flags,struct in_addr dest_addr,
     rreq = (RREQ *) aodv_socket_new_msg();
 #else
     rreq = new RREQ();
+    rreq->cost=0;
 #endif
     rreq->type = AODV_RREQ;
     rreq->res1 = 0;
@@ -188,6 +189,8 @@ void NS_CLASS rreq_forward(RREQ * rreq, int size, int ttl)
 #else
     rreq->hcnt++;       /* Increase hopcount to account for
                  * intermediate route */
+    if (this->isStaticNode())
+        rreq->hopfix++;
     /* Send out on all interfaces */
     double delay = -1;
     if (par("EqualDelay"))
@@ -219,6 +222,8 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
     unsigned int extlen = 0;
     struct in_addr rreq_dest, rreq_orig;
     unsigned int ifaddr;
+    uint32_t cost;
+    uint8_t  hopfix;
 
     rreq_dest.s_addr = rreq->dest_addr;
     rreq_orig.s_addr = rreq->orig_addr;
@@ -226,6 +231,10 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
     rreq_dest_seqno = ntohl(rreq->dest_seqno);
     rreq_orig_seqno = ntohl(rreq->orig_seqno);
     rreq_new_hcnt = rreq->hcnt + 1;
+    cost = rreq->cost;
+    hopfix = rreq->hopfix;
+    if (this->isStaticNode())
+        hopfix++;
 
 
 
@@ -272,7 +281,51 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
 
     /* Ignore already processed RREQs. */
     if (rreq_record_find(rreq_orig, rreq_id))
-        return;
+    {
+        life = PATH_DISCOVERY_TIME - 2 * rreq_new_hcnt * NODE_TRAVERSAL_TIME;
+#ifdef OMNETPP
+        if (isBroadcast (rreq_dest.s_addr))
+        {
+           rev_rt = rt_table_find(rreq_orig);
+           if (rev_rt == NULL)
+           {
+               rev_rt = rt_table_insert(rreq_orig, ip_src, rreq_new_hcnt, rreq_orig_seqno, life, VALID, 0, ifindex,cost,hopfix);
+               // opp_error("reverse route NULL with RREQ in the processed table" );
+           }
+           if (rev_rt->dest_seqno != 0)
+           {
+               if ((int32_t) rreq_orig_seqno < (int32_t) rev_rt->dest_seqno)
+                   return;
+               if (!useHover && (rreq_orig_seqno == rev_rt->dest_seqno &&
+                   (rev_rt->state != INVALID && rreq_new_hcnt >= rev_rt->hcnt)))
+                   return;
+               if (useHover && (rreq_orig_seqno == rev_rt->dest_seqno &&
+                   (rev_rt->state != INVALID && cost >= rev_rt->cost)))
+                   return;
+           }
+        }
+        else
+#endif
+        {
+            rev_rt = rt_table_find(rreq_orig);
+            if (rev_rt == NULL)
+            {
+                 rev_rt = rt_table_insert(rreq_orig, ip_src, rreq_new_hcnt,rreq_orig_seqno, life, VALID, 0, ifindex,cost,hopfix);
+                 // opp_error("reverse route NULL with RREQ in the processed table" );
+            }
+            if (useHover && (rev_rt->dest_seqno == 0 ||
+                    (int32_t) rreq_orig_seqno > (int32_t) rev_rt->dest_seqno ||
+                    (rreq_orig_seqno == rev_rt->dest_seqno &&
+                     (rev_rt->state == INVALID || cost < rev_rt->cost))))
+            {
+                life = PATH_DISCOVERY_TIME - 2 * rreq_new_hcnt * NODE_TRAVERSAL_TIME;
+                rev_rt = rt_table_update(rev_rt, ip_src, rreq_new_hcnt,
+                                         rreq_orig_seqno, life, VALID,
+                                         rev_rt->flags,ifindex,cost,hopfix);
+            }
+            return;
+        }
+    }
 
     /* Now buffer this RREQ so that we don't process a similar RREQ we
        get within PATH_DISCOVERY_TIME. */
@@ -321,19 +374,31 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
               ip_to_str(rreq_orig));
 
         rev_rt = rt_table_insert(rreq_orig, ip_src, rreq_new_hcnt,
-                                 rreq_orig_seqno, life, VALID, 0, ifindex);
+                                 rreq_orig_seqno, life, VALID, 0, ifindex,cost,hopfix);
     }
     else
     {
-        if (rev_rt->dest_seqno == 0 ||
+        if (!useHover && (rev_rt->dest_seqno == 0 ||
                 (int32_t) rreq_orig_seqno > (int32_t) rev_rt->dest_seqno ||
                 (rreq_orig_seqno == rev_rt->dest_seqno &&
-                 (rev_rt->state == INVALID || rreq_new_hcnt < rev_rt->hcnt)))
+                 (rev_rt->state == INVALID || rreq_new_hcnt < rev_rt->hcnt))))
         {
             rev_rt = rt_table_update(rev_rt, ip_src, rreq_new_hcnt,
                                      rreq_orig_seqno, life, VALID,
-                                     rev_rt->flags);
+                                     rev_rt->flags,ifindex,cost,hopfix);
         }
+
+
+        else if (useHover && (rev_rt->dest_seqno == 0 ||
+                (int32_t) rreq_orig_seqno > (int32_t) rev_rt->dest_seqno ||
+                (rreq_orig_seqno == rev_rt->dest_seqno &&
+                 (rev_rt->state == INVALID || cost < rev_rt->cost))))
+        {
+            rev_rt = rt_table_update(rev_rt, ip_src, rreq_new_hcnt,
+                                     rreq_orig_seqno, life, VALID,
+                                     rev_rt->flags,ifindex,cost,hopfix);
+        }
+
 #ifdef DISABLED
         /* This is a out of draft modification of AODV-UU to prevent
            nodes from creating routing entries to themselves during
@@ -386,6 +451,38 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
         }
     }
 #endif
+
+#ifdef OMNETPP
+    if (getIsGateway())
+    {
+        /* Subnet locality decision */
+        // search address
+        if (isAddressInProxyList(rreq_dest.s_addr))
+        {
+            /* We must increase the gw's sequence number before sending a RREP,
+             * otherwise intermediate nodes will not forward the RREP. */
+            seqno_incr(this_host.seqno);
+            rrep = rrep_create(0, 0, 0, DEV_IFINDEX(rev_rt->ifindex).ipaddr,
+                               this_host.seqno, rev_rt->dest_addr,
+                               ACTIVE_ROUTE_TIMEOUT);
+
+            ext = rrep_add_ext(rrep, RREP_INET_DEST_EXT, rrep_size,
+                               sizeof(struct in_addr), (char *) &rreq_dest);
+
+            rrep_size += AODV_EXT_SIZE(ext);
+
+
+            DEBUG(LOG_DEBUG, 0,
+                  "Responding for INTERNET dest: %s rrep_size=%d",
+                  ip_to_str(rreq_dest), rrep_size);
+
+            rrep_send(rrep, rev_rt, NULL, rrep_size);
+
+            return;
+
+        }
+    }
+#endif
     /* Are we the destination of the RREQ?, if so we should immediately send a
        RREP.. */
 #ifndef OMNETPP
@@ -415,6 +512,31 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
 
         rrep_send(rrep, rev_rt, NULL, RREP_SIZE);
 
+    }
+    else if (isBroadcast (rreq_dest.s_addr))
+    {
+        if(!rreq->d)
+            return;
+        if (!propagateProactive)
+            return;
+
+        /* WE are the RREQ DESTINATION. Update the node's own
+           sequence number to the maximum of the current seqno and the
+           one in the RREQ. */
+        seqno_incr(this_host.seqno);
+        rrep = rrep_create(0, 0, 0, DEV_IFINDEX(rev_rt->ifindex).ipaddr,this_host.seqno, rev_rt->dest_addr, MY_ROUTE_TIMEOUT);
+        EV << " create a rrep" << ip_to_str(DEV_IFINDEX(rev_rt->ifindex).ipaddr) << "seq n" << this_host.seqno << " to " << ip_to_str(rev_rt->dest_addr);
+        rrep_send(rrep, rev_rt, NULL, RREP_SIZE);
+        if (ip_ttl > 0)
+        {
+            rreq_forward(rreq, rreqlen, ip_ttl); // the ttl is decremented for ip layer
+        }
+        else
+        {
+            DEBUG(LOG_DEBUG, 0, "RREQ not forwarded - ttl=0");
+            EV << "RREQ not forwarded - ttl=0";
+        }
+        return;
     }
     else
     {
@@ -478,11 +600,20 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
             {
 //      if (fwd_rt->dest_seqno != 0 &&
 //      (int32_t) fwd_rt->dest_seqno >= (int32_t) rreq_dest_seqno) {
-
+#ifdef AODV_USE_STL
+                if (fwd_rt->state==IMMORTAL)
+                    lifetime = 10000;
+                else
+                {
+                    double val = SIMTIME_DBL(fwd_rt->rt_timer.timeout - simTime());
+                    lifetime = (val * 1000.0);
+                }
+#else
                 if (fwd_rt->state==IMMORTAL)
                     lifetime = 10000;
                 else
                     lifetime = timeval_diff(&fwd_rt->rt_timer.timeout, &now);
+#endif
                 rrep = rrep_create(0, 0, fwd_rt->hcnt, fwd_rt->dest_addr,
                                    fwd_rt->dest_seqno, rev_rt->dest_addr,
                                    lifetime);
@@ -598,9 +729,14 @@ void NS_CLASS rreq_route_discovery(struct in_addr dest_addr, u_int8_t flags,
 
         /* A routing table entry waiting for a RREP should not be expunged
            before 2 * NET_TRAVERSAL_TIME... */
+#ifdef AODV_USE_STL
+        if ((rt->rt_timer.timeout - simTime()) < (2 * NET_TRAVERSAL_TIME))
+            rt_table_update_timeout(rt, 2 * NET_TRAVERSAL_TIME);
+#else
         if (timeval_diff(&rt->rt_timer.timeout, &now) <
                 (2 * NET_TRAVERSAL_TIME))
             rt_table_update_timeout(rt, 2 * NET_TRAVERSAL_TIME);
+#endif
     }
 
     rreq_send(dest_addr, dest_seqno, ttl, flags);
@@ -660,9 +796,13 @@ void NS_CLASS rreq_local_repair(rt_table_t * rt, struct in_addr src_addr,
        local_repair_timeout */
     rt->rt_timer.handler = &NS_CLASS route_expire_timeout;
 
+#ifdef AODV_USE_STL
+    if ((rt->rt_timer.timeout -simTime()) < (2 * NET_TRAVERSAL_TIME))
+        rt_table_update_timeout(rt, 2 * NET_TRAVERSAL_TIME);
+#else
     if (timeval_diff(&rt->rt_timer.timeout, &now) < (2 * NET_TRAVERSAL_TIME))
         rt_table_update_timeout(rt, 2 * NET_TRAVERSAL_TIME);
-
+#endif
 
     rreq_send(rt->dest_addr, rt->dest_seqno, ttl, flags);
 
@@ -680,6 +820,20 @@ void NS_CLASS rreq_local_repair(rt_table_t * rt, struct in_addr src_addr,
     DEBUG(LOG_DEBUG, 0, "Seeking %s ttl=%d", ip_to_str(rt->dest_addr), ttl);
 
     return;
+}
+
+// proactive RREQ
+void NS_CLASS  rreq_proactive (void *arg)
+{
+    struct in_addr dest;
+    if (!isRoot)
+         return;
+    if (this->isInMacLayer())
+         dest.s_addr= MACAddress::BROADCAST_ADDRESS.getInt();
+    else
+         dest.s_addr= IPv4Address::ALLONES_ADDRESS.getInt();
+    rreq_send(dest,0,NET_DIAMETER, RREQ_DEST_ONLY);
+    timer_set_timeout(&proactive_rreq_timer, proactive_rreq_timeout);
 }
 
 NS_STATIC struct rreq_record *NS_CLASS rreq_record_insert(struct in_addr orig_addr,
@@ -737,6 +891,7 @@ void NS_CLASS rreq_record_timeout(void *arg)
     free(rec);
 }
 
+
 struct blacklist *NS_CLASS rreq_blacklist_insert(struct in_addr dest_addr)
 {
 
@@ -763,6 +918,7 @@ struct blacklist *NS_CLASS rreq_blacklist_insert(struct in_addr dest_addr)
     timer_set_timeout(&bl->bl_timer, BLACKLIST_TIMEOUT);
     return bl;
 }
+
 
 struct blacklist *NS_CLASS rreq_blacklist_find(struct in_addr dest_addr)
 {

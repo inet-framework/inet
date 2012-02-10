@@ -107,6 +107,7 @@ struct blacklist *rreq_blacklist_insert(struct in_addr dest_addr);
 void rreq_blacklist_timeout(void *arg);
 void rreq_local_repair(rt_table_t * rt, struct in_addr src_addr,
                        struct ip_data *ipd);
+void rreq_proactive (void *arg);
 
 #ifdef NS_PORT
 struct rreq_record *rreq_record_insert(struct in_addr orig_addr,

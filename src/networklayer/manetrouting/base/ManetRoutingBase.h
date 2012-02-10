@@ -35,6 +35,7 @@
 #include "uint128.h"
 #include "NotifierConsts.h"
 #include "ICMP.h"
+#include "ARP.h"
 #include <vector>
 #include <set>
 
@@ -52,9 +53,9 @@ class ManetTimer :  public cOwnedObject
     virtual void removeTimer();
     virtual void resched(double time);
     virtual void resched(simtime_t time);
+    virtual bool isScheduled();
     virtual ~ManetTimer();
 };
-
 
 typedef std::multimap <simtime_t, ManetTimer *> TimerMultiMap;
 typedef std::set<Uint128> AddressGroup;
@@ -62,6 +63,9 @@ typedef std::set<Uint128>::iterator AddressGroupIterator;
 typedef std::set<Uint128>::const_iterator AddressGroupConstIterator;
 class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, protected cListener
 {
+ public:
+    static IPv4Address  LL_MANET_Routers;
+    static IPv6Address  LL_MANET_RoutersV6;
   private:
     static simsignal_t mobilityStateChangedSignal;
     typedef std::map<Uint128,Uint128> RouteMap;
@@ -87,6 +91,9 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     bool   isRegistered;
     void *commonPtr;
     bool sendToICMP;
+    ManetRoutingBase *colaborativeProtocol;
+
+    ARP *arp;
 
     typedef struct InterfaceIdentification
     {
@@ -105,6 +112,16 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     cMessage *timerMessagePtr;
     std::vector<AddressGroup> addressGroupVector;
     std::vector<int> inAddressGroup;
+    bool staticNode;
+
+    struct ManetProxyAddress
+    {
+            Uint128 mask;
+            Uint128 address;
+    };
+    bool isGateway;
+    std::vector<ManetProxyAddress> proxyAddress;
+
   protected:
     ~ManetRoutingBase();
     ManetRoutingBase();
@@ -228,6 +245,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 // get the i-esime interface
 //
     virtual InterfaceEntry * getInterfaceEntry(int index) const {return inet_ift->getInterface(index);}
+    virtual InterfaceEntry * getInterfaceEntryById(int id) const {return inet_ift->getInterfaceById(id);}
 //
 // Total number of interfaces
 //
@@ -277,6 +295,11 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual double getDirection();
 
   public:
+//
+    virtual void setColaborativeProtocol(cObject *p) {colaborativeProtocol = dynamic_cast<ManetRoutingBase*>(p);}
+    virtual ManetRoutingBase * getColaborativeProtocol() const {return colaborativeProtocol;}
+    virtual void setStaticNode(bool v) {staticNode=v;}
+    virtual bool isStaticNode() {return staticNode;}
 // Routing information access
     virtual void setInternalStore(bool i);
     virtual Uint128 getNextHopInternal(const Uint128 &dest);
@@ -285,7 +308,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     // it should return -1
     virtual uint32_t getRoute(const Uint128 &, std::vector<Uint128> &) = 0;
     virtual bool getNextHop(const Uint128 &, Uint128 &add, int &iface, double &cost) = 0;
-    virtual void setRefreshRoute(const Uint128 &, const Uint128 &, const Uint128&, const Uint128&) = 0;
+    virtual void setRefreshRoute(const Uint128 &destination, const Uint128 & nextHop,bool isReverse) = 0;
     virtual bool setRoute(const Uint128 & destination, const Uint128 &nextHop, const int &ifaceIndex, const int &hops, const Uint128 &mask = (Uint128)0);
     virtual bool setRoute(const Uint128 & destination, const Uint128 &nextHop, const char *ifaceName, const int &hops, const Uint128 &mask = (Uint128)0);
     virtual bool isProactive() = 0;
@@ -303,7 +326,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
         else
             sendToICMP = false;
     }
-    // group address, it's similar to unicast
+    // group address, it's similar to anycast
     virtual int  getNumGroupAddress(){return addressGroupVector.size();}
     virtual int  getNumAddressInAGroups(int group = 0);
     virtual void addInAddressGroup(const Uint128&, int group = 0);
@@ -317,6 +340,18 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual bool getNextHopGroup(const AddressGroup &gr, Uint128 &add, int &iface, Uint128&){opp_error("getNextHopGroup, method is not implemented"); return false;}
     virtual int  getRouteGroup(const Uint128&, std::vector<Uint128> &, Uint128&, bool &, int group = 0){opp_error("getRouteGroup, method is not implemented"); return 0;}
     virtual bool getNextHopGroup(const Uint128&, Uint128 &add, int &iface, Uint128&, bool &, int group = 0){opp_error("getNextHopGroup, method is not implemented"); return false;}
+
+
+    // proxy/gateway methods, this methods help to the reactive protocols to answer the RREQ for a address that are in other subnetwork
+    // Set if the node will work like gateway for address in the list
+    virtual void setIsGateway(bool p) {isGateway = p;}
+    virtual bool getIsGateway() {return isGateway;}
+    // return true if the node must answer because the addres are in the list
+    virtual bool isAddressInProxyList(const Uint128 &);
+    virtual void setAddressInProxyList(const Uint128 &,const Uint128 &);
+    virtual int getNumAddressInProxyList() {return (int)proxyAddress.size();}
+    virtual bool getAddressInProxyList(int,Uint128 &, Uint128 &);
+
 };
 
 #define interface80211ptr getInterfaceWlanByAddress()

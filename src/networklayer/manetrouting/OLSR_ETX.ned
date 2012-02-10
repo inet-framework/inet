@@ -35,7 +35,7 @@ import inet.networklayer.IManetRouting;
 //  - IPv4 address size is assumed in the messages. If you need IPv6, recompile with -DOLSR_IPv6 added to CFLAGS 
 //  - Multiple interfaces per OLSR node is supported only with adding -DMULTIPLE_IFACES_SUPPORT to CFLAGS
 //
-// see: <a>http://www.inf.ufrgs.br/~~wlccordeiro/resources/olsr/README.html</a>
+// see: <a>http://www.inf.ufrgs.br/~wlccordeiro/resources/olsr/README.html</a>
 //
 simple OLSR_ETX extends BaseRouting like IManetRouting
 {
@@ -60,6 +60,20 @@ simple OLSR_ETX extends BaseRouting like IManetRouting
         // 3 disable
         bool Link_delay = default(true);  // Determine whether the link delay extension should be enabled
         double C_alpha = default(0.2);  // Factor that will be used to smooth link delays (0 .. 1)
+        
+        double OLSR_HELLO_INTERVAL @unit("s")=default(2s);
+
+	/// TC messages emission interval.
+	    double OLSR_TC_INTERVAL @unit("s")=default(5s);
+
+	/// MID messages emission interval.
+	    double OLSR_MID_INTERVAL @unit("s")=default(5s);//   OLSR_TC_INTERVAL
+	///
+	/// \brief Period at which a node must cite every link and every neighbor.
+	///
+	/// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
+	///
+	    double OLSR_REFRESH_INTERVAL @unit("s")=default(2s);
     gates:
         input from_ip;
         output to_ip;

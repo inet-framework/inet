@@ -281,6 +281,7 @@ void NS_CLASS aodv_socket_process_packet(AODV_msg * aodv_msg, int len,
         alog(LOG_WARNING, 0, __FUNCTION__,
              "Unknown msg type %u rcvd from %s to %s", aodv_msg->type,
              ip_to_str(src), ip_to_str(dst));
+        break;
     }
 }
 
@@ -582,6 +583,33 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
 //       IPvXAddress destAdd(desAddIp4);
 // In the floading proccess the random delay prevent collision for the synchronization between the nodes.
         Uint128 destAdd;
+        aodv_msg->prevFix=this->isStaticNode();
+
+        if (this->isStaticNode())
+        {
+            if (dynamic_cast<RREP*>(aodv_msg))
+            {
+                dynamic_cast<RREP*>(aodv_msg)->cost += costStatic;
+            }
+            else if (dynamic_cast<RREQ*> (aodv_msg))
+            {
+                dynamic_cast<RREQ*>(aodv_msg)->cost += costStatic;
+            }
+        }
+        else
+        {
+            if (dynamic_cast<RREP*>(aodv_msg))
+            {
+                dynamic_cast<RREP*>(aodv_msg)->cost += costMobile;
+            }
+            else if (dynamic_cast<RREQ*>(aodv_msg))
+            {
+                dynamic_cast<RREQ*>(aodv_msg)->cost += costMobile;
+            }
+        }
+
+
+
         if (dst.s_addr == AODV_BROADCAST)
         {
             destAdd = IPv4Address::ALLONES_ADDRESS.getInt();
@@ -593,16 +621,16 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
         if (delay>0)
         {
             if (useIndex)
-                sendToIp(aodv_msg, 654, destAdd, 654,ttl,delay,dev->ifindex);
+                sendToIp(aodv_msg, 654, destAdd, 654, ttl, delay, dev->ifindex);
             else
-                sendToIp(aodv_msg, 654, destAdd, 654,ttl,delay,dev->ipaddr.s_addr);
+                sendToIp(aodv_msg, 654, destAdd, 654, ttl, delay, dev->ipaddr.s_addr);
         }
         else
         {
             if (useIndex)
-                sendToIp(aodv_msg, 654, destAdd, 654,ttl,  par ("broadCastDelay"),dev->ifindex);
+                sendToIp(aodv_msg, 654, destAdd, 654, ttl, par ("broadCastDelay").doubleValue(), dev->ifindex);
             else
-                sendToIp(aodv_msg, 654, destAdd, 654,ttl,  par ("broadCastDelay"),dev->ipaddr.s_addr);
+                sendToIp(aodv_msg, 654, destAdd, 654, ttl, par ("broadCastDelay").doubleValue(), dev->ipaddr.s_addr);
         }
         totalSend++;
 //       sendToIp(aodv_msg, 654, destAdd, 654,ttl);
@@ -647,9 +675,9 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
             else
             {
                 if (useIndex)
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("broadCastDelay"),dev->ifindex);
+                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("broadCastDelay").doubleValue(),dev->ifindex);
                 else
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("broadCastDelay"),dev->ipaddr.s_addr);
+                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("broadCastDelay").doubleValue(),dev->ipaddr.s_addr);
             }
         }
         else
@@ -665,9 +693,9 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
             else
             {
                 if (useIndex)
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("uniCastDelay"),dev->ifindex);
+                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("uniCastDelay").doubleValue(),dev->ifindex);
                 else
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("uniCastDelay"),dev->ipaddr.s_addr);
+                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("uniCastDelay").doubleValue(),dev->ipaddr.s_addr);
             }
         }
         totalSend++;

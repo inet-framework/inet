@@ -34,7 +34,7 @@
 class OLSR_state : public cObject
 {
     friend class OLSR;
-
+    friend class OLSROPT;
   protected:
     linkset_t   linkset_;   ///< Link Set (RFC 3626, section 4.2.1).
     nbset_t     nbset_;     ///< Neighbor Set (RFC 3626, section 4.3.1).
@@ -56,7 +56,7 @@ class OLSR_state : public cObject
 
     OLSR_mprsel_tuple*  find_mprsel_tuple(const nsaddr_t &);
     void            erase_mprsel_tuple(OLSR_mprsel_tuple*);
-    void            erase_mprsel_tuples(const nsaddr_t &);
+    bool            erase_mprsel_tuples(const nsaddr_t &);
     void            insert_mprsel_tuple(OLSR_mprsel_tuple*);
 
     OLSR_nb_tuple*      find_nb_tuple(const nsaddr_t &);
@@ -68,8 +68,8 @@ class OLSR_state : public cObject
 
     OLSR_nb2hop_tuple*  find_nb2hop_tuple(const nsaddr_t &, const nsaddr_t &);
     void            erase_nb2hop_tuple(OLSR_nb2hop_tuple*);
-    void            erase_nb2hop_tuples(const nsaddr_t &);
-    void            erase_nb2hop_tuples(const nsaddr_t &, const nsaddr_t &);
+    bool            erase_nb2hop_tuples(const nsaddr_t &);
+    bool            erase_nb2hop_tuples(const nsaddr_t &, const nsaddr_t &);
     void            insert_nb2hop_tuple(OLSR_nb2hop_tuple*);
 
     bool            find_mpr_addr(const nsaddr_t&);
@@ -89,6 +89,8 @@ class OLSR_state : public cObject
     OLSR_topology_tuple*    find_newer_topology_tuple(const nsaddr_t &, uint16_t);
     void            erase_topology_tuple(OLSR_topology_tuple*);
     void            erase_older_topology_tuples(const nsaddr_t &, uint16_t);
+    void 			print_topology_tuples_to(const nsaddr_t & dest_addr);
+    void 			print_topology_tuples_across(const nsaddr_t & last_addr);
     void            insert_topology_tuple(OLSR_topology_tuple*);
 
     OLSR_iface_assoc_tuple* find_ifaceassoc_tuple(const nsaddr_t&);

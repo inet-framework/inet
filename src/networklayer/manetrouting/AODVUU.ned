@@ -52,10 +52,17 @@ simple AODVUU extends BaseRouting like IManetRouting
         bool llfeedback = default(false);      // allow layer2 link-detection instead of sending hello messages (section 6.10) 
         int internet_gw_mode = default(0);    // NOT SUPPORTED  (boolean) (run this node as an internet gateway (non RFC parameter))
         string internet_gw_address = default("0.0.0.0"); // NOT SUPPORTED
-        bool EqualDelay = default(true);       // add a bit of delay (jitter) tor brocast operations (RREQ, HELLO broadcast) (non RFC - omnetpp specific)
+        bool EqualDelay = default(true);       // add a jitter to broadcast operations (RREQ, HELLO broadcast) (non RFC - omnetpp specific)
         volatile double broadCastDelay @unit("s") = default(uniform(0s,0.005s));  // the delay added to broadcast operations if EqualDelay is set (used to model processing time) 
         volatile double uniCastDelay @unit("s") = default(0s);  // a delay added to unicast messaged (i.e. data packet forwarding) (used to model processing time)
         bool UseIndex = default(false);         // use the interface index instead the ip to identify the interface
+        bool useHover = default(false);
+        int  costStatic = default(1);
+        int  costMobile = default(4);
+        bool isRoot = default(false); // Proactive RREQ
+        int proactiveRreqTimeout = default(5000);// 5 seconds
+        bool propagateProactive = default(true); // Proactive feedback
+        bool checkNextHop = default(false);
     gates:
         input from_ip;
         output to_ip;

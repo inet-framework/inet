@@ -390,7 +390,7 @@ int prefix_length(int family, void *nm)
 	return 0;
 }
 
-/* Utility function  comes from iproute2. 
+/* Utility function  comes from IPv4Route2. 
    Authors:	Alexey Kuznetsov, <kuznet@ms2.inr.ac.ru> */
 int addattr(struct nlmsghdr *n, int type, void *data, int alen)
 {

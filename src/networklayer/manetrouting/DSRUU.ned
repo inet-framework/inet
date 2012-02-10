@@ -39,7 +39,7 @@ simple DSRUU like IManetRouting
         bool FlushLinkCache = default(true); // ??
         bool PromiscOperation = default(false);  // promiscuous mode is used to discover neighborhood nodes
         bool UseNetworkLayerAck = default(true); // use link layer level acknoledgements (section 8.3.1)
-        int BroadCastJitter = default(10); // (ms) re-broadcast a rout request with an additional jitter (section 8.2.2)
+        int BroadCastJitter = default(0); // (ms) re-broadcast a rout request with an additional jitter (section 8.2.2). If 0 the code will use uniCastDelay and broadCastDelay
         int RouteCacheTimeout = default(300); // (s) timeout for etries in the route cache (section 4.1)
         int SendBufferTimeout = default(30); // (s) how long packets without routes should be kept in the buffer
         int SendBufferSize = default(-1); // size of send buffer. -1 means default (which is 100)

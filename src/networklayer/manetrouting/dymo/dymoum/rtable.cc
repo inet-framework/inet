@@ -81,7 +81,9 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
                                        u_int32_t seqnum,
                                        u_int8_t prefix,
                                        u_int8_t hopcnt,
-                                       u_int8_t is_gw)
+                                       u_int8_t is_gw,
+                                       uint32_t cost,
+                                       uint8_t hopfix)
 {
     rtable_entry_t *entry;
     struct in_addr netmask;
@@ -104,7 +106,9 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
     entry->rt_state     = RT_VALID;
     netmask.s_addr      = 0;
     entry->rt_dest_addr.s_addr  = dest_addr.s_addr;
-    entry->rt_nxthop_addr.s_addr    = nxthop_addr.s_addr;
+    entry->rt_nxthop_addr.s_addr = nxthop_addr.s_addr;
+    entry->cost         = cost;
+    entry->rt_hopfix    = hopfix;
 
     timer_init(&entry->rt_validtimer, &NS_CLASS route_valid_timeout, entry);
     timer_set_timeout(&entry->rt_validtimer, ROUTE_TIMEOUT);
@@ -126,7 +130,8 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
 #else
 #ifdef OMNETPP
     /* Add route to omnet inet routing table ... */
-    netmask.s_addr = IPv4Address::ALLONES_ADDRESS;
+    //netmask.s_addr = IPv4Address((uint32_t)nxthop_addr.s_addr).getNetworkMask().getInt();
+    netmask.s_addr = IPv4Address::ALLONES_ADDRESS.getInt();
     if (useIndex)
         omnet_chg_rte(dest_addr, nxthop_addr, netmask, hopcnt,false,ifindex);
     else
@@ -153,7 +158,9 @@ rtable_entry_t *NS_CLASS rtable_update(rtable_entry_t *entry,
                                        u_int32_t seqnum,
                                        u_int8_t prefix,
                                        u_int8_t hopcnt,
-                                       u_int8_t is_gw)
+                                       u_int8_t is_gw,
+                                       uint32_t cost,
+                                       uint8_t hopfix)
 {
 #ifndef NS_PORT
     struct in_addr netmask;
@@ -182,7 +189,8 @@ rtable_entry_t *NS_CLASS rtable_update(rtable_entry_t *entry,
 #ifdef OMNETPP
     struct in_addr netmask;
     /* Add route to omnet inet routing table ... */
-    netmask.s_addr = IPv4Address::ALLONES_ADDRESS;
+    //netmask.s_addr = IPv4Address((uint32_t)nxthop_addr.s_addr).getNetworkMask().getInt();
+    netmask.s_addr = IPv4Address::ALLONES_ADDRESS.getInt();
     if (useIndex)
         omnet_chg_rte(dest_addr, nxthop_addr, netmask, hopcnt,false,ifindex);
     else
@@ -203,6 +211,8 @@ rtable_entry_t *NS_CLASS rtable_update(rtable_entry_t *entry,
     entry->rt_state     = RT_VALID;
     entry->rt_dest_addr.s_addr  = dest_addr.s_addr;
     entry->rt_nxthop_addr.s_addr    = nxthop_addr.s_addr;
+    entry->cost         = cost;
+    entry->rt_hopfix    = hopfix;
 
     timer_set_timeout(&entry->rt_validtimer, ROUTE_TIMEOUT);
     timer_add(&entry->rt_validtimer);
@@ -231,6 +241,7 @@ void NS_CLASS rtable_delete(rtable_entry_t *entry)
 #ifdef OMNETPP
     struct in_addr netmask;
     /* delete route in the omnet inet routing table ... */
+    netmask.s_addr = IPv4Address::ALLONES_ADDRESS.getInt();
     omnet_chg_rte(entry->rt_dest_addr,entry->rt_nxthop_addr, netmask,0,true);
 #endif
     timer_remove(&entry->rt_deltimer);
@@ -259,6 +270,7 @@ void NS_CLASS rtable_invalidate(rtable_entry_t *entry)
 #ifdef OMNETPP
     struct in_addr netmask;
     /* delete route in the omnet inet routing table ... */
+    netmask.s_addr = IPv4Address::ALLONES_ADDRESS.getInt();
     omnet_chg_rte(entry->rt_dest_addr,entry->rt_nxthop_addr, netmask, 0,true);
 #endif
     entry->rt_state = RT_INVALID;
@@ -364,7 +376,9 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
                                        u_int32_t seqnum,
                                        u_int8_t prefix,
                                        u_int8_t hopcnt,
-                                       u_int8_t is_gw)
+                                       u_int8_t is_gw,
+                                       uint32_t cost,
+                                       uint8_t hopfix)
 {
     rtable_entry_t *entry;
     struct in_addr netmask;
@@ -387,6 +401,8 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
     netmask.s_addr      = 0;
     entry->rt_dest_addr.s_addr  = dest_addr.s_addr;
     entry->rt_nxthop_addr.s_addr    = nxthop_addr.s_addr;
+    entry->cost         = cost;
+    entry->rt_hopfix    = hopfix;
 
     timer_init(&entry->rt_validtimer, &NS_CLASS route_valid_timeout, entry);
     timer_set_timeout(&entry->rt_validtimer, ROUTE_TIMEOUT);
@@ -400,6 +416,7 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
 
     dymoRoutingTable->insert(std::make_pair(dest_addr.s_addr,entry));
     /* Add route to omnet inet routing table ... */
+    //netmask.s_addr = IPv4Address((uint32_t)nxthop_addr.s_addr).getNetworkMask().getInt();
     netmask.s_addr = IPv4Address::ALLONES_ADDRESS.getInt();
     if (useIndex)
         omnet_chg_rte(dest_addr, nxthop_addr, netmask, hopcnt,false,ifindex);
@@ -421,11 +438,14 @@ rtable_entry_t *NS_CLASS rtable_update(rtable_entry_t *entry,
                                        u_int32_t seqnum,
                                        u_int8_t prefix,
                                        u_int8_t hopcnt,
-                                       u_int8_t is_gw)
+                                       u_int8_t is_gw,
+                                       uint32_t cost,
+                                       uint8_t hopfix)
 {
 
     struct in_addr netmask;
     /* Add route to omnet inet routing table ... */
+    //netmask.s_addr = IPv4Address((uint32_t)nxthop_addr.s_addr).getNetworkMask().getInt();
     netmask.s_addr = IPv4Address::ALLONES_ADDRESS.getInt();
     if (useIndex)
         omnet_chg_rte(dest_addr, nxthop_addr, netmask, hopcnt,false,ifindex);
@@ -441,6 +461,8 @@ rtable_entry_t *NS_CLASS rtable_update(rtable_entry_t *entry,
     entry->rt_hopcnt    = hopcnt;
     entry->rt_is_gw     = is_gw;
     entry->rt_state     = RT_VALID;
+    entry->cost         = cost;
+    entry->rt_hopfix    = hopfix;
     if (entry->rt_dest_addr.s_addr  != dest_addr.s_addr)
     {
         DymoRoutingTable::iterator it = dymoRoutingTable->find(entry->rt_dest_addr.s_addr);
@@ -474,6 +496,7 @@ void NS_CLASS rtable_delete(rtable_entry_t *entry)
 
     struct in_addr netmask;
     /* delete route in the omnet inet routing table ... */
+    netmask.s_addr = IPv4Address::ALLONES_ADDRESS.getInt();
     omnet_chg_rte(entry->rt_dest_addr,entry->rt_nxthop_addr, netmask,0,true);
     timer_remove(&entry->rt_deltimer);
     timer_remove(&entry->rt_validtimer);
@@ -499,6 +522,7 @@ void NS_CLASS rtable_invalidate(rtable_entry_t *entry)
 
     struct in_addr netmask;
     /* delete route in the omnet inet routing table ... */
+    netmask.s_addr = IPv4Address::ALLONES_ADDRESS.getInt();
     omnet_chg_rte(entry->rt_dest_addr,entry->rt_nxthop_addr, netmask, 0,true);
     entry->rt_state = RT_INVALID;
 

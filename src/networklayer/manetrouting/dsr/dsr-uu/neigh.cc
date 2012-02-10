@@ -62,7 +62,7 @@ static DSRUUTimer neigh_tbl_timer;
 
 struct neighbor
 {
-    list_t l;
+    dsr_list_t l;
     struct in_addr addr;
     struct sockaddr hw_addr;
     unsigned short id;
@@ -305,7 +305,7 @@ int NSCLASS neigh_tbl_id_inc(struct in_addr neigh_addr)
 #ifdef __KERNEL__
 static int neigh_tbl_print(char *buf)
 {
-    list_t *pos;
+    dsr_list_t *pos;
     int len = 0;
 
     DSR_READ_LOCK(&neigh_tbl.lock);

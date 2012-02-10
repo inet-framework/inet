@@ -95,36 +95,16 @@
 #define OLSR_C      0.0625
 
 
-/********** Intervals **********/
+	/********** Holding times **********/
 
-/// HELLO messages emission interval.
-#define OLSR_HELLO_INTERVAL 2
-
-/// TC messages emission interval.
-#define OLSR_TC_INTERVAL    5
-
-/// MID messages emission interval.
-#define OLSR_MID_INTERVAL   OLSR_TC_INTERVAL
-
-///
-/// \brief Period at which a node must cite every link and every neighbor.
-///
-/// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
-///
-#define OLSR_REFRESH_INTERVAL   2
-
-
-/********** Holding times **********/
-
-/// Neighbor holding time.
+	/// Neighbor holding time.
 #define OLSR_NEIGHB_HOLD_TIME   3*OLSR_REFRESH_INTERVAL
-/// Top holding time.
+	/// Top holding time.
 #define OLSR_TOP_HOLD_TIME  3*OLSR_TC_INTERVAL
-/// Dup holding time.
+	/// Dup holding time.
 #define OLSR_DUP_HOLD_TIME  30
-/// MID holding time.
+	/// MID holding time.
 #define OLSR_MID_HOLD_TIME  3*OLSR_MID_INTERVAL
-
 
 /********** Link types **********/
 
@@ -173,7 +153,6 @@
 #define OLSR_STATUS_SYM     1
 /// Random number between [0-OLSR_MAXJITTER] used to jitter OLSR packet transmission.
 //#define JITTER            (Random::uniform()*OLSR_MAXJITTER)
-#define JITTER (uniform(0,(double)OLSR_MAXJITTER))
 
 class OLSR;         // forward declaration
 
@@ -356,11 +335,33 @@ class OLSR_IfaceAssocTupleTimer : public OLSR_Timer
 /// internal state.
 ///
 
+typedef std::set<OLSR_Timer *> TimerPendingList;
 typedef std::multimap <simtime_t, OLSR_Timer *> TimerQueue;
 
 
 class OLSR : public ManetRoutingBase
 {
+  protected:
+    /********** Intervals **********/
+    /// HELLO messages emission interval.
+    double OLSR_HELLO_INTERVAL;// 2
+
+    /// TC messages emission interval.
+    double OLSR_TC_INTERVAL;//    5
+
+    /// MID messages emission interval.
+    double OLSR_MID_INTERVAL;//   OLSR_TC_INTERVAL
+
+    ///
+    /// \brief Period at which a node must cite every link and every neighbor.
+    ///
+    /// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
+    ///
+    double OLSR_REFRESH_INTERVAL;//   2
+
+    double jitter() {return uniform(0,(double)OLSR_MAXJITTER);}
+#define JITTER jitter()
+
   private:
     friend class OLSR_HelloTimer;
     friend class OLSR_TcTimer;
@@ -376,6 +377,9 @@ class OLSR : public ManetRoutingBase
   protected:
 
     //std::priority_queue<TimerQueueElem> *timerQueuePtr;
+    bool topologyChange;
+    virtual void setTopologyChanged(bool p) {topologyChange = p;}
+    virtual bool getTopologyChanged() {return topologyChange;}
     TimerQueue *timerQueuePtr;
 
     cMessage *timerMessage;
@@ -465,8 +469,8 @@ class OLSR : public ManetRoutingBase
     virtual void        mpr_computation();
     virtual void        rtable_computation();
 
-    virtual void        process_hello(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, const int &);
-    virtual void        process_tc(OLSR_msg&, const nsaddr_t &, const int &);
+    virtual bool        process_hello(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, const int &);
+    virtual bool        process_tc(OLSR_msg&, const nsaddr_t &, const int &);
     virtual void        process_mid(OLSR_msg&, const nsaddr_t &, const int &);
 
     virtual void        forward_default(OLSR_msg&, OLSR_dup_tuple*, const nsaddr_t &, const nsaddr_t &);
@@ -478,34 +482,34 @@ class OLSR : public ManetRoutingBase
     virtual void        send_mid();
     virtual void        send_pkt();
 
-    virtual void        link_sensing(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, const int &);
-    virtual void        populate_nbset(OLSR_msg&);
-    virtual void        populate_nb2hopset(OLSR_msg&);
+    virtual bool        link_sensing(OLSR_msg&, const nsaddr_t &, const nsaddr_t &, const int &);
+    virtual bool        populate_nbset(OLSR_msg&);
+    virtual bool        populate_nb2hopset(OLSR_msg&);
     virtual void        populate_mprselset(OLSR_msg&);
 
     virtual void        set_hello_timer();
     virtual void        set_tc_timer();
     virtual void        set_mid_timer();
 
-    void        nb_loss(OLSR_link_tuple*);
-    void        add_dup_tuple(OLSR_dup_tuple*);
-    void        rm_dup_tuple(OLSR_dup_tuple*);
-    void        add_link_tuple(OLSR_link_tuple*, uint8_t);
-    void        rm_link_tuple(OLSR_link_tuple*);
-    void        updated_link_tuple(OLSR_link_tuple*);
-    void        add_nb_tuple(OLSR_nb_tuple*);
-    void        rm_nb_tuple(OLSR_nb_tuple*);
-    void        add_nb2hop_tuple(OLSR_nb2hop_tuple*);
-    void        rm_nb2hop_tuple(OLSR_nb2hop_tuple*);
-    void        add_mprsel_tuple(OLSR_mprsel_tuple*);
-    void        rm_mprsel_tuple(OLSR_mprsel_tuple*);
-    void        add_topology_tuple(OLSR_topology_tuple*);
-    void        rm_topology_tuple(OLSR_topology_tuple*);
-    void        add_ifaceassoc_tuple(OLSR_iface_assoc_tuple*);
-    void        rm_ifaceassoc_tuple(OLSR_iface_assoc_tuple*);
+    virtual void        nb_loss(OLSR_link_tuple*);
+    virtual void        add_dup_tuple(OLSR_dup_tuple*);
+    virtual void        rm_dup_tuple(OLSR_dup_tuple*);
+    virtual void        add_link_tuple(OLSR_link_tuple*, uint8_t);
+    virtual void        rm_link_tuple(OLSR_link_tuple*);
+    virtual void        updated_link_tuple(OLSR_link_tuple*);
+    virtual void        add_nb_tuple(OLSR_nb_tuple*);
+    virtual void        rm_nb_tuple(OLSR_nb_tuple*);
+    virtual void        add_nb2hop_tuple(OLSR_nb2hop_tuple*);
+    virtual void        rm_nb2hop_tuple(OLSR_nb2hop_tuple*);
+    virtual void        add_mprsel_tuple(OLSR_mprsel_tuple*);
+    virtual void        rm_mprsel_tuple(OLSR_mprsel_tuple*);
+    virtual void        add_topology_tuple(OLSR_topology_tuple*);
+    virtual void        rm_topology_tuple(OLSR_topology_tuple*);
+    virtual void        add_ifaceassoc_tuple(OLSR_iface_assoc_tuple*);
+    virtual void        rm_ifaceassoc_tuple(OLSR_iface_assoc_tuple*);
 
     const nsaddr_t  & get_main_addr(const nsaddr_t&) const;
-    int     degree(OLSR_nb_tuple*);
+    virtual int     degree(OLSR_nb_tuple*);
 
     static bool seq_num_bigger_than(uint16_t, uint16_t);
     virtual int numInitStages() const  {return 5;}
@@ -521,7 +525,7 @@ class OLSR : public ManetRoutingBase
 
   public:
     OLSR() {}
-    ~OLSR();
+    virtual ~OLSR();
 
 
     static double       emf_to_seconds(uint8_t);
@@ -532,7 +536,7 @@ class OLSR : public ManetRoutingBase
     virtual uint32_t getRoute(const Uint128 &, std::vector<Uint128> &);
     virtual bool getNextHop(const Uint128 &, Uint128 &add, int &iface, double &);
     virtual bool isProactive();
-    virtual void setRefreshRoute(const Uint128 &src, const Uint128 &dest, const Uint128 &gtw, const Uint128& prev) {}
+    virtual void setRefreshRoute(const Uint128 &destination, const Uint128 & nextHop,bool isReverse) {}
     virtual bool isOurType(cPacket *);
     virtual bool getDestAddress(cPacket *, Uint128 &);
     virtual int getRouteGroup(const AddressGroup &gr, std::vector<Uint128>&);

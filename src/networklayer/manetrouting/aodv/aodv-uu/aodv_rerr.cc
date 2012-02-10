@@ -169,11 +169,14 @@ void NS_CLASS rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
                                            rt->dest_seqno);
                     DEBUG(LOG_DEBUG, 0, "Added %s as unreachable, seqno=%lu",
                           ip_to_str(rt->dest_addr), rt->dest_seqno);
-
+#ifdef AODV_USE_STL_RT
+                    if (rt->nprec == 1)
+                        rerr_unicast_dest = rt->precursors[0].neighbor;
+#else
                     if (rt->nprec == 1)
                         rerr_unicast_dest =
                             FIRST_PREC(rt->precursors)->neighbor;
-
+#endif
                 }
                 else
                 {
@@ -184,7 +187,20 @@ void NS_CLASS rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
                     DEBUG(LOG_DEBUG, 0, "Added %s as unreachable, seqno=%lu",
                           ip_to_str(rt->dest_addr), rt->dest_seqno);
 
-
+#ifdef AODV_USE_STL_RT
+                    if (rerr_unicast_dest.s_addr)
+                    {
+                        for (unsigned int i = 0; i< rt->precursors.size(); i++)
+                        {
+                            precursor_t *pr = & rt->precursors[i];
+                            if (pr->neighbor.s_addr != rerr_unicast_dest.s_addr)
+                            {
+                                rerr_unicast_dest.s_addr = 0;
+                                break;
+                            }
+                        }
+                    }
+#else
                     if (rerr_unicast_dest.s_addr)
                     {
                         list_t *pos2;
@@ -198,6 +214,7 @@ void NS_CLASS rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
                             }
                         }
                     }
+#endif
                 }
             }
             else
@@ -254,14 +271,14 @@ void NS_CLASS rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
                     continue;
                 dest.s_addr = AODV_BROADCAST;
 #ifdef OMNETPP
-                if (numInterfaces>0)
+                if (numInterfaces>1)
                 {
                     aodv_socket_send((AODV_msg *) new_rerr->dup(), dest,RERR_CALC_SIZE(new_rerr), 1, &DEV_NR(i));
-                    numInterfaces--;
                 }
                 else
 #endif
                     aodv_socket_send((AODV_msg *) new_rerr, dest,RERR_CALC_SIZE(new_rerr), 1, &DEV_NR(i));
+                numInterfaces--;
             }
 
         }

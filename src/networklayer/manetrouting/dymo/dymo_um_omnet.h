@@ -23,6 +23,8 @@
 #ifndef _DYMO_UM_OMNET_H
 #define _DYMO_UM_OMNET_H
 
+#define DYMO_UM_GLOBAL_STATISTISTIC
+
 // This define activate the new queue timer
 #define TIMERMAPLIST
 // This define activate the new routing table
@@ -114,7 +116,7 @@ class DYMOUM;
 class DYMOUM : public ManetRoutingBase
 {
   private:
-
+/*
     struct mac_address
     {
 
@@ -138,10 +140,24 @@ class DYMOUM : public ManetRoutingBase
         }
 
     };
+*/
+
+    void rreq_proactive (void *arg);
+    bool isRoot;
+    struct timer proactive_rreq_timer;
+    long proactive_rreq_timeout;
+    bool isBroadcast (Uint128 add)
+    {
+        if (this->isInMacLayer() && add == MACAddress::BROADCAST_ADDRESS.getInt())
+             return true;
+        if (!this->isInMacLayer() && add == IPv4Address::ALLONES_ADDRESS.getInt())
+        	return true;
+        return false;
+    }
 
     // cMessage messageEvent;
 
-    typedef std::map<mac_address, unsigned int> MacToIpAddress;
+    typedef std::map<MACAddress, unsigned int> MacToIpAddress;
     typedef std::multimap<simtime_t, struct timer*> DymoTimerMap;
     typedef std::map<Uint128, rtable_entry_t *> DymoRoutingTable;
     typedef std::map<Uint128, pending_rreq_t * > DymoPendingRreq;
@@ -204,6 +220,11 @@ class DYMOUM : public ManetRoutingBase
     bool attachPacket;
     bool useIndex;
 
+    uint32_t costStatic;
+    uint32_t costMobile;
+    bool useHover;
+    bool path_acc_proactive;
+    bool propagateProactive;
 
     virtual void processLinkBreak(const cObject *details);
     virtual void processPromiscuous(const cObject *details);
@@ -222,7 +243,7 @@ class DYMOUM : public ManetRoutingBase
     virtual uint32_t getRoute(const Uint128 &, std::vector<Uint128> &);
     virtual bool getNextHop(const Uint128 &, Uint128 &add, int &iface, double &);
     virtual bool isProactive();
-    virtual void setRefreshRoute(const Uint128 &, const Uint128 &, const Uint128 &, const Uint128&);
+    virtual void setRefreshRoute(const Uint128 &destination, const Uint128 &nextHop,bool isReverse);
     virtual bool isOurType(cPacket *);
     virtual bool getDestAddress(cPacket *, Uint128 &);
     virtual int getRouteGroup(const AddressGroup &gr, std::vector<Uint128>&);
@@ -347,7 +368,7 @@ class DYMOUM : public ManetRoutingBase
 #include "dymo_packet_queue_omnet.h"
 
 #undef NS_NO_GLOBALS
-
+#ifdef DYMO_UM_GLOBAL_STATISTISTIC
     static bool iswrite;
     static int totalSend;
     static int totalRreqSend;
@@ -358,6 +379,18 @@ class DYMOUM : public ManetRoutingBase
     static int totalRrepAckRec;
     static int totalRerrSend;
     static int totalRerrRec;
+#else
+    bool iswrite;
+    int totalSend;
+    int totalRreqSend;
+    int totalRreqRec;
+    int totalRrepSend;
+    int totalRrepRec;
+    int totalRrepAckSend;
+    int totalRrepAckRec;
+    int totalRerrSend;
+    int totalRerrRec;
+#endif
 };
 
 #endif /* _DYMO_UM_OMNET_H */

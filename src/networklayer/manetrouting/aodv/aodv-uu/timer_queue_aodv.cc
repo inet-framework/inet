@@ -49,6 +49,121 @@ static void printTQ(list_t * l);
 #endif
 #endif              /* NS_PORT */
 
+
+#ifdef AODV_USE_STL
+int NS_CLASS timer_init(struct timer *t, timeout_func_t f, void *data)
+{
+    if (!t)
+        return -1;
+    t->handler = f;
+    t->data = data;
+    t->timeout = 0;
+    t->used = 0;
+    return 0;
+}
+
+/* Called when a timer should timeout */
+void NS_CLASS timer_timeout(const simtime_t &now)
+{
+
+    while (!aodvTimerMap.empty())
+    {
+        if (aodvTimerMap.begin()->first > now)
+            return;
+        struct timer *t = aodvTimerMap.begin()->second;
+        aodvTimerMap.erase(aodvTimerMap.begin());
+        t->used = 0;
+        /* Execute handler function for expired timer... */
+        if (t->handler)
+        {
+            (*this.*t->handler) (t->data);
+        }
+
+    }
+}
+
+NS_STATIC void NS_CLASS timer_add(struct timer *t)
+{
+    /* Sanity checks: */
+    if (!t)
+    {
+        perror("NULL timer!!!\n");
+        exit(-1);
+    }
+    if (!t->handler)
+    {
+        perror("NULL handler!!!\n");
+        exit(-1);
+    }
+
+    /* Make sure we remove unexpired timers before adding a new timeout... */
+    if (t->used)
+        timer_remove(t);
+
+    t->used = 1;
+    aodvTimerMap.insert(std::make_pair(t->timeout,t));
+    return;
+}
+
+int NS_CLASS timer_remove(struct timer *t)
+{
+    if (!t)
+        return -1;
+
+    t->used = 0;
+    for (AodvTimerMap::iterator it = aodvTimerMap.begin();it != aodvTimerMap.end();it++)
+    {
+        if (it->second == t)
+        {
+            aodvTimerMap.erase(it);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+
+int NS_CLASS timer_timeout_now(struct timer *t)
+{
+    if (timer_remove(t)>0)
+    {
+        (*this.*t->handler) (t->data);
+        return 1;
+    }
+    return -1;
+}
+
+
+void NS_CLASS timer_set_timeout(struct timer *t, long msec)
+{
+    if (t->used)
+    {
+        timer_remove(t);
+    }
+
+
+    if (msec < 0)
+    {
+        DEBUG(LOG_WARNING, 0, "Negative timeout!!!");
+        msec=0;
+    }
+    double auxtime = ((double)msec)/1000.0;
+    t->timeout = simTime() + auxtime;
+    timer_add(t);
+}
+
+simtime_t NS_CLASS timer_age_queue()
+{
+    simtime_t now;
+    simtime_t remaining;
+    now = simTime();
+    timer_timeout(now);
+    if (aodvTimerMap.empty())
+        return remaining;
+    remaining =  aodvTimerMap.begin()->first - now;
+    return remaining;
+}
+#else
 int NS_CLASS timer_init(struct timer *t, timeout_func_t f, void *data)
 {
     if (!t)
@@ -282,4 +397,5 @@ void NS_CLASS printTQ(list_t * l)
         n++;
     }
 }
+#endif
 #endif

@@ -45,6 +45,7 @@ const IPv4Address IPv4Address::ALL_DVMRP_ROUTERS_MCAST("224.0.0.4");
 const IPv4Address IPv4Address::ALL_OSPF_ROUTERS_MCAST("224.0.0.5");
 const IPv4Address IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST("224.0.0.6");
 
+const IPv4Address IPv4Address::LL_MANET_ROUTERS("224.0.0.109");
 
 void IPv4Address::set(int i0, int i1, int i2, int i3)
 {

@@ -4,14 +4,14 @@
 typedef struct list
 {
     struct list *prev, *next;
-} list_t;
+} dsr_list_t;
 
 #define LIST_NULL -1
 #define LIST_SUCCESS 1
 
 #define LIST_INIT_HEAD(name) { &(name), &(name) }
 
-#define LIST(name) list_t name = LIST_INIT_HEAD(name)
+#define LIST(name) dsr_list_t name = LIST_INIT_HEAD(name)
 
 #define INIT_LIST(h) do { \
     (h)->next = (h); (h)->prev = (h); \
@@ -25,7 +25,7 @@ typedef struct list
     (le)->next = NULL; (le)->prev = NULL; \
 } while (0)
 
-static inline int listelm_detach(list_t * prev, list_t * next)
+static inline int listelm_detach(dsr_list_t * prev, dsr_list_t * next)
 {
     next->prev = prev;
     prev->next = next;
@@ -33,7 +33,7 @@ static inline int listelm_detach(list_t * prev, list_t * next)
     return LIST_SUCCESS;
 }
 
-static inline int listelm_add(list_t * le, list_t * prev, list_t * next)
+static inline int listelm_add(dsr_list_t * le, dsr_list_t * prev, dsr_list_t * next)
 {
     prev->next = le;
     le->prev = prev;
@@ -43,7 +43,7 @@ static inline int listelm_add(list_t * le, list_t * prev, list_t * next)
     return LIST_SUCCESS;
 }
 
-static inline int list_add(list_t * le, list_t * head)
+static inline int list_add(dsr_list_t * le, dsr_list_t * head)
 {
 
     if (!head || !le)
@@ -54,7 +54,7 @@ static inline int list_add(list_t * le, list_t * head)
     return LIST_SUCCESS;
 }
 
-static inline int list_add_tail(list_t * le, list_t * head)
+static inline int list_add_tail(dsr_list_t * le, dsr_list_t * head)
 {
 
     if (!head || !le)
@@ -65,7 +65,7 @@ static inline int list_add_tail(list_t * le, list_t * head)
     return LIST_SUCCESS;
 }
 
-static inline int list_detach(list_t * le)
+static inline int list_detach(dsr_list_t * le)
 {
     if (!le)
         return LIST_NULL;

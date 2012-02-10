@@ -53,10 +53,17 @@ simple DYMOUM extends BaseRouting like IManetRouting
         bool intermediateRREP = default(false); // experimental: allow intermediate nodes to reply instead of taget node (see draft7 sect 5.3.3)
         bool RREQattachPacket = default(false); // experimental: whether to attach data packet to the RReq message
 
-        bool EqualDelay = default(true);       // add a bit of delay (jitter) tor brocast operations (RREQ, HELLO broadcast) (non RFC - omnetpp specific)
+        bool EqualDelay = default(true);       // add a bit of delay (jitter) to broadcast operations (RREQ, HELLO broadcast) (non RFC - omnetpp specific)
         volatile double broadCastDelay @unit("s") = default(uniform(0s,0.005s));  // the delay added to broadcast operations if EqualDelay is set (used to model processing time) 
         volatile double uniCastDelay @unit("s") = default(0s);  // a delay added to unicast messaged (i.e. data packet forwarding) (used to model processing time)
         bool UseIndex = default(false);         // use the interface index instead the ip to identify the interface
+        bool useHover = default(false);
+        int  costStatic = default(1);
+        int  costMobile = default(4);
+        bool isRoot = default(false); // Proactive RREQ
+        bool propagateProactive = default(true); // propagate proactive RREQ
+        bool path_acc_proactive = default(false); // proactive acumulate route
+        bool checkNextHop = default(false);
     gates:
         input from_ip;
         output to_ip;

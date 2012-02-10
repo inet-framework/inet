@@ -57,6 +57,8 @@ typedef struct rt_entry
     u_int8_t    rt_is_gw;
     u_int8_t    rt_is_used : 4;
     u_int8_t    rt_state : 4;
+    uint32_t    cost; // without the last node
+    uint8_t     rt_hopfix;
 } rtable_entry_t;
 
 #endif  /* NS_NO_GLOBALS */
@@ -83,7 +85,8 @@ rtable_entry_t *rtable_insert(struct in_addr dest_addr,
                               u_int32_t seqnum,
                               u_int8_t prefix,
                               u_int8_t hopcnt,
-                              u_int8_t is_gw);
+                              u_int8_t is_gw,
+                              uint32_t cost,uint8_t hopfix);
 
 /* Update an existing entry */
 rtable_entry_t *rtable_update(rtable_entry_t *entry,
@@ -93,7 +96,8 @@ rtable_entry_t *rtable_update(rtable_entry_t *entry,
                               u_int32_t seqnum,
                               u_int8_t prefix,
                               u_int8_t hopcnt,
-                              u_int8_t is_gw);
+                              u_int8_t is_gw,
+                              uint32_t cost, uint8_t hopfix);
 
 /* Delete an entry */
 void rtable_delete(rtable_entry_t *entry);

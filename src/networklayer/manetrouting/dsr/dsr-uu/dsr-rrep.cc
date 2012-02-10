@@ -48,7 +48,7 @@ DSRUUTimer grat_rrep_tbl_timer;
 
 struct grat_rrep_entry
 {
-    list_t l;
+    dsr_list_t l;
     struct in_addr src, prev_hop;
     struct timeval expires;
 };
@@ -150,7 +150,7 @@ int NSCLASS grat_rrep_tbl_find(struct in_addr src, struct in_addr prev_hop)
 
 static int grat_rrep_tbl_print(struct tbl *t, char *buf)
 {
-    list_t *pos;
+    dsr_list_t *pos;
     int len = 0;
     struct timeval now;
 

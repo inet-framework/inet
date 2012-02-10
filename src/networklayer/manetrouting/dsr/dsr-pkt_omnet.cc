@@ -21,9 +21,7 @@
  *
  *****************************************************************************/
 #include "dsr-pkt_omnet.h"
-#ifndef MobilityFramework
 #include "IPv4ControlInfo.h"
-#endif
 
 
 
@@ -63,7 +61,6 @@ struct dsr_srt_opt
 };
 
 #define SIZE_COST_BITS 16
-
 DSRPkt::~DSRPkt()
 {
     clean();
@@ -75,10 +72,13 @@ void DSRPkt::clean()
         delete [] this->options;
     if (costVectorSize>0)
         delete [] costVector;
+    this->options = NULL;
+    this->costVectorSize = 0;
 }
 
 DSRPkt::DSRPkt(const DSRPkt& m) : IPv4Datagram(m)
 {
+
     costVector = NULL;
     options = NULL;
     costVectorSize = 0;
@@ -89,11 +89,7 @@ DSRPkt& DSRPkt::operator=(const DSRPkt& m)
 {
     if (this==&m) return *this;
     clean();
-#ifdef MobilityFramework
-    NetwPkt::operator=(m);
-#else
     IPv4Datagram::operator=(m);
-#endif
     copy(m);
     return *this;
 }
@@ -121,7 +117,6 @@ void DSRPkt::copy(const DSRPkt& m)
         memcpy((char*)costVector, (char*)m.costVector, m.costVectorSize*sizeof(EtxCost));
     }
 }
-
 // Constructor
 DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
 {
@@ -134,12 +129,6 @@ DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
 
     if (dp)
     {
-#ifdef MobilityFramework
-        setDestAddr(dp->dst.s_addr);
-        setSrcAddr(dp->src.s_addr);
-        setTtl(dp->nh.iph->ttl); // TTL
-        setTransportProtocol(IP_PROT_DSR); // Transport protocol
-#else
         IPv4Address destAddress_var((uint32_t)dp->dst.s_addr);
         setDestAddress(destAddress_var);
         IPv4Address srcAddress_var((uint32_t)dp->src.s_addr);
@@ -153,7 +142,6 @@ DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
         setTimeToLive(dp->nh.iph->ttl); // TTL
         setTransportProtocol(IP_PROT_DSR); // Transport protocol
         setBitLength(getHeaderLength()*8);
-#endif
         // ¿como gestionar el MAC
         // dp->mac.raw = p->access(hdr_mac::offset_);
 
@@ -165,6 +153,7 @@ DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
 
         memcpy((char*)options, (char*)opth, dsr_pkt_opts_len(dp));
         setBitLength(getBitLength()+((DSR_OPT_HDR_LEN+options->p_len)*8));
+        setHeaderLength(getByteLength());
         if (dp->payload)
         {
             encapsulate(dp->payload);
@@ -172,7 +161,6 @@ DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
             setEncapProtocol((IPProtocolId)dp->encapsulate_protocol);
 
         }
-#ifndef MobilityFramework
         if (interface_id>=0)
         {
             IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
@@ -184,7 +172,6 @@ DSRPkt::DSRPkt(struct dsr_pkt *dp, int interface_id) : IPv4Datagram()
             ipControlInfo->setTimeToLive(dp->nh.iph->ttl);
             setControlInfo(ipControlInfo);
         }
-#endif
         if (dp->costVectorSize>0)
         {
             setCostVector(dp->costVector, dp->costVectorSize);
@@ -199,12 +186,6 @@ void DSRPkt::ModOptions(struct dsr_pkt *dp, int interface_id)
     setEncapProtocol((IPProtocolId)0);
     if (dp)
     {
-#ifdef MobilityFramework
-        setDestAddr(dp->dst.s_addr);
-        setSrcAddr(dp->src.s_addr);
-        setTtl(dp->nh.iph->ttl); // TTL
-        setTransportProtocol(IP_PROT_DSR); // Transport protocol
-#else
         IPv4Address destAddress_var((uint32_t)dp->dst.s_addr);
         setDestAddress(destAddress_var);
         IPv4Address srcAddress_var((uint32_t)dp->src.s_addr);
@@ -221,7 +202,6 @@ void DSRPkt::ModOptions(struct dsr_pkt *dp, int interface_id)
 
         setTimeToLive(dp->nh.iph->ttl); // TTL
         setTransportProtocol(IP_PROT_DSR); // Transport protocol
-#endif
         struct dsr_opt_hdr *opth;
         opth = dp->dh.opth;
         int dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
@@ -245,7 +225,6 @@ void DSRPkt::ModOptions(struct dsr_pkt *dp, int interface_id)
 
         }
 
-#ifndef MobilityFramework
         if (interface_id>=0)
         {
             IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
@@ -259,7 +238,6 @@ void DSRPkt::ModOptions(struct dsr_pkt *dp, int interface_id)
             ipControlInfo->setTimeToLive(dp->nh.iph->ttl);
             setControlInfo(ipControlInfo);
         }
-#endif
         if (costVectorSize>0)
             delete [] costVector;
         costVectorSize = 0;

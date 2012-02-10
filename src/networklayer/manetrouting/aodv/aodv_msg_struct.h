@@ -7,9 +7,6 @@
 //#include <unistd.h>
 //#include <sys/time.h>
 //#include <sys/types.h>
-
-#include "INETDefs.h"
-
 #include "compatibility.h"
 
 
@@ -31,6 +28,7 @@ struct AODV_msg : public cPacket
     explicit AODV_msg(const char *name=NULL) : cPacket(name) {extensionsize=0; extension=NULL;}
     ~AODV_msg ();
     uint8_t ttl;
+    bool prevFix;
     AODV_msg (const AODV_msg  &m);
     AODV_msg &  operator= (const AODV_msg &m);
     virtual AODV_msg *dup() const {return new AODV_msg(*this);}
@@ -107,6 +105,8 @@ struct RREP : public AODV_msg
 //  u_int32_t orig_addr;
     Uint128 orig_addr;
     u_int32_t lifetime;
+    uint32_t cost;
+    uint8_t  hopfix;
     AODV_ext *extension;
     explicit RREP (const char *name="RREPAodvMsg") : AODV_msg (name) {setBitLength(20*8);}
     RREP (const RREP &m);
@@ -146,6 +146,8 @@ struct RREQ : public AODV_msg
 //  u_int32_t orig_addr;
     Uint128 orig_addr;
     u_int32_t orig_seqno;
+    uint32_t   cost;
+    uint8_t  hopfix;
     explicit RREQ(const char *name="RREQAodvMsg") : AODV_msg (name) {setBitLength(24*8);}
     RREQ (const RREQ &m);
     RREQ &  operator= (const RREQ &m);

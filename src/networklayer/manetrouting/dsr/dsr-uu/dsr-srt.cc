@@ -145,11 +145,7 @@ struct dsr_srt *dsr_srt_new(struct in_addr src, struct in_addr dst,
             int size = sizeAdd<sizeEtx?sizeAdd:sizeEtx;
             for (int i=0; i<size; i++)
             {
-#ifdef MobilityFramework
-                addrs1 = cost[i].address;
-#else
-addrs1 = cost[i].address.getInt();
-#endif
+                addrs1 = cost[i].address.getInt();
                 addrs2 = sr->addrs[i].s_addr;
                 if (addrs2 != addrs1)
                 {
@@ -166,17 +162,11 @@ addrs1 = cost[i].address.getInt();
             {
                 for (int i=0; i<size; i++)
                 {
-#ifdef MobilityFramework
-                    if (cost[sizeEtx-1].address==src.s_addr || cost[sizeEtx-1].address==dst.s_addr )
-                        addrs1 = cost[sizeEtx-2-i].address;
+
+                    if (cost[sizeEtx-1].address.getInt()==src.s_addr || cost[sizeEtx-1].address.getInt()==dst.s_addr )
+                        addrs1 = cost[sizeEtx-2-i].address.getInt();
                     else
-                        addrs1 = cost[sizeEtx-1-i].address;
-#else
-if (cost[sizeEtx-1].address.getInt()==src.s_addr || cost[sizeEtx-1].address.getInt()==dst.s_addr )
-    addrs1 = cost[sizeEtx-2-i].address.getInt();
-else
-    addrs1 = cost[sizeEtx-1-i].address.getInt();
-#endif
+                        addrs1 = cost[sizeEtx-1-i].address.getInt();
                     addrs2 = sr->addrs[i].s_addr;
                     if (addrs2 != addrs1)
                         opp_error("Dsr error, Etx address and dsr are different");
@@ -191,11 +181,8 @@ else
             int j=-1;
             for (int i=0; i<sizeEtx; i++)
             {
-#ifdef MobilityFramework
-                if (cost[i].address==src.s_addr)
-#else
-if (cost[i].address.getInt()==src.s_addr)
-#endif
+
+                if (cost[i].address.getInt()==src.s_addr)
                 {
                     j=i;
                     break;
@@ -209,11 +196,8 @@ if (cost[i].address.getInt()==src.s_addr)
                 int l=0;
                 for (int i=j-1; i>=0; i--)
                 {
-#ifdef MobilityFramework
-                    addrs1 = cost[i].address;
-#else
-addrs1 = cost[i].address.getInt();
-#endif
+
+                    addrs1 = cost[i].address.getInt();
                     addrs2 = sr->addrs[l].s_addr;
                     l++;
                     if (addrs2 != addrs1)
@@ -235,11 +219,7 @@ addrs1 = cost[i].address.getInt();
                 {
                     for (int i=0; i<sizeAdd; i++)
                     {
-#ifdef MobilityFramework
-                        addrs1 = cost[j+1+i].address;
-#else
-addrs1 = cost[j+1+i].address.getInt();
-#endif
+                        addrs1 = cost[j+1+i].address.getInt();
                         addrs2 = sr->addrs[i].s_addr;
                         if (addrs2 != addrs1)
                             opp_error("Dsr error, Etx address and dsr are different");
@@ -875,6 +855,9 @@ int NSCLASS dsr_srt_add(struct dsr_pkt *dp)
     tot_len = ntohs(dp->nh.iph->tot_len) + len;
     ttl = dp->nh.iph->ttl;
 #endif
+#ifdef OMNETPP
+    ip_len = dp->nh.iph->ihl;
+#endif
     dp->nh.iph = dsr_build_ip(dp, dp->src, dp->dst, ip_len, tot_len,
                               IPPROTO_DSR, ttl);
 
@@ -955,11 +938,7 @@ int NSCLASS dsr_srt_opt_recv(struct dsr_pkt *dp, struct dsr_srt_opt *srt_opt)
     {
         if (etxActive)
         {
-#ifdef MobilityFramework
-            ph_srt_add_node (dp->prv_hop,ConfValToUsecs(RouteCacheTimeout), 0,(unsigned int)getCost(dp->prv_hop.s_addr));
-#else
             ph_srt_add_node (dp->prv_hop,ConfValToUsecs(RouteCacheTimeout), 0,(unsigned int)getCost(IPv4Address((uint32_t)dp->prv_hop.s_addr)));
-#endif
         }
         else
             ph_srt_add_node (dp->prv_hop,ConfValToUsecs(RouteCacheTimeout), 0,0);
@@ -993,13 +972,8 @@ int NSCLASS dsr_srt_opt_recv(struct dsr_pkt *dp, struct dsr_srt_opt *srt_opt)
     {
         if (etxActive)
         {
-#ifdef MobilityFramework
-            lc_link_add(my_addr(), dp->prv_hop,
-                        ConfValToUsecs(RouteCacheTimeout), 0, (unsigned int)getCost(dp->prv_hop.s_addr));
-#else
             lc_link_add(my_addr(), dp->prv_hop,
                         ConfValToUsecs(RouteCacheTimeout), 0, (unsigned int)getCost(IPv4Address((uint32_t)dp->prv_hop.s_addr)));
-#endif
         }
         else
             lc_link_add(my_addr(), dp->prv_hop,
@@ -1044,13 +1018,8 @@ int NSCLASS dsr_srt_opt_recv(struct dsr_pkt *dp, struct dsr_srt_opt *srt_opt)
                 if (myaddr.s_addr==srt_cut->addrs[i].s_addr)
                     break;
             }
-#ifdef MobilityFramework
-            if (srt_cut->cost_size>j)
-                srt_cut->cost[j] = (unsigned int)getCost(dp->prv_hop.s_addr);
-#else
             if (srt_cut->cost_size>j)
                 srt_cut->cost[j] = (unsigned int)getCost(IPv4Address((uint32_t)dp->prv_hop.s_addr));
-#endif
         }
 #endif
 
@@ -1099,18 +1068,10 @@ int NSCLASS dsr_srt_opt_recv(struct dsr_pkt *dp, struct dsr_srt_opt *srt_opt)
 
         for (i=0 ; i< dp->costVectorSize; i++)
         {
-#ifdef MobilityFramework
-            if (myaddr.s_addr==dp->costVector[i].address)
-#else
             if (myaddr.s_addr==dp->costVector[i].address.getInt())
-#endif
             {
                 if (i==0)
-#ifdef MobilityFramework
-                    dp->costVector[i].cost = getCost(dp->src.s_addr);
-#else
                     dp->costVector[i].cost = getCost(IPv4Address((uint32_t)dp->src.s_addr));
-#endif
                 else
                     dp->costVector[i].cost = getCost(dp->costVector[i-1].address);
                 break;

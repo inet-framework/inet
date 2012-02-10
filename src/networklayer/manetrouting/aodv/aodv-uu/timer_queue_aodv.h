@@ -37,7 +37,15 @@ typedef void (AODVUU::*timeout_func_t) (void *);
 typedef void (*timeout_func_t) (void *);
 #endif
 
-
+#ifdef AODV_USE_STL
+struct timer
+{
+    int used;
+    simtime_t timeout;
+    timeout_func_t handler;
+    void *data;
+};
+#else
 struct timer
 {
     list_t l;
@@ -46,6 +54,7 @@ struct timer
     timeout_func_t handler;
     void *data;
 };
+#endif
 
 static inline long timeval_diff(struct timeval *t1, struct timeval *t2)
 {
@@ -82,13 +91,22 @@ void timer_queue_init();
 int timer_remove(struct timer *t);
 void timer_set_timeout(struct timer *t, long msec);
 int timer_timeout_now(struct timer *t);
+#ifdef AODV_USE_STL
+simtime_t timer_age_queue();
+#else
 struct timeval *timer_age_queue();
+#endif
+
 /* timer_init should be called for every newly allocated timer */
 int timer_init(struct timer *t, timeout_func_t f, void *data);
 
 #ifdef NS_PORT
 void timer_add(struct timer *t);
+#ifdef AODV_USE_STL
+void timer_timeout(const simtime_t &now);
+#else
 void timer_timeout(struct timeval *now);
+#endif
 
 #ifdef DEBUG_TIMER_QUEUE
 void NS_CLASS printTQ();

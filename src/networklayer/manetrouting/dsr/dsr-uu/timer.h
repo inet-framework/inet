@@ -14,7 +14,7 @@
 #endif
 
 #ifdef OMNETPP
-#include "INETDefs.h"
+#include <omnetpp.h>
 #endif
 
 typedef unsigned long usecs_t;
