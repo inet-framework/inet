@@ -98,13 +98,10 @@ void EtherBus::initialize()
         gate(inputGateBaseId + i)->setDeliverOnReceptionStart(true);
     subscribe(POST_MODEL_CHANGE, this);  // we'll need to do the same for dynamically added gates as well
 
-    // To keep the code small, we only check datarates once on startup. If it's important to check
-    // it after dynamic model changes too, it can be done by listening on the POST_MODEL_CHANGE
-    // signal; see EtherMACBase for how it's done.
-    checkConnections();
+    checkConnections(true);
 }
 
-void EtherBus::checkConnections()
+void EtherBus::checkConnections(bool errorWhenAsymmetric)
 {
     int numActiveTaps = 0;
 
@@ -114,8 +111,18 @@ void EtherBus::checkConnections()
     {
         cGate* igate = gate(inputGateBaseId + i);
         cGate* ogate = gate(outputGateBaseId + i);
-        if (!igate->isConnected() || !ogate->isConnected())
+        if (!igate->isConnected() && !ogate->isConnected())
             continue;
+
+        if (!igate->isConnected() || !ogate->isConnected())
+        {
+            // half connected gate
+            if (errorWhenAsymmetric)
+                throw cRuntimeError("The input or output gate not connected at tap %i", i);
+            dataratesDiffer = true;
+            EV << "The input or output gate not connected at tap " << i << ".\n";
+            continue;
+        }
 
         numActiveTaps++;
         double drate = igate->getIncomingTransmissionChannel()->getNominalDatarate();
@@ -123,13 +130,26 @@ void EtherBus::checkConnections()
         if (numActiveTaps == 1)
             datarate = drate;
         else if (datarate != drate)
-            throw cRuntimeError("The input datarate at tap %i differs from datarates of previous taps", i);
+        {
+            if (errorWhenAsymmetric)
+                throw cRuntimeError("The input datarate at tap %i differs from datarates of previous taps", i);
+            dataratesDiffer = true;
+            EV << "The input datarate at tap " << i << " differs from datarates of previous taps.\n";
+        }
 
-        drate = gate("ethg$o", i)->getTransmissionChannel()->getNominalDatarate();
+        cChannel *outTrChannel = ogate->getTransmissionChannel();
+        drate = outTrChannel->getNominalDatarate();
 
         if (datarate != drate)
-            throw cRuntimeError("The output datarate at tap %i differs from datarates of previous taps", i);
+        {
+            if (errorWhenAsymmetric)
+                throw cRuntimeError("The output datarate at tap %i differs from datarates of previous taps", i);
+            dataratesDiffer = true;
+            EV << "The output datarate at tap " << i << " differs from datarates of previous taps.\n";
+        }
 
+        if (!outTrChannel->isSubscribed(POST_MODEL_CHANGE, this))
+            outTrChannel->subscribe(POST_MODEL_CHANGE, this);
     }
 }
 
@@ -146,10 +166,43 @@ void EtherBus::receiveSignal(cComponent *source, simsignal_t signalID, cObject *
         if (strcmp(notif->gateName, "ethg") == 0)
             throw cRuntimeError("EtherBus does not allow adding/removing links dynamically");
     }
+
+    cPostPathCreateNotification *connNotif = dynamic_cast<cPostPathCreateNotification *>(obj);
+    if (connNotif)
+    {
+        if ((this == connNotif->pathStartGate->getOwnerModule()) || (this == connNotif->pathEndGate->getOwnerModule()))
+            checkConnections(false);
+        return;
+    }
+
+    cPostPathCutNotification *cutNotif = dynamic_cast<cPostPathCutNotification *>(obj);
+    if (cutNotif)
+    {
+        if ((this == cutNotif->pathStartGate->getOwnerModule()) || (this == cutNotif->pathEndGate->getOwnerModule()))
+            checkConnections(false);
+        return;
+    }
+
+    // note: we are subscribed to the channel object too
+    cPostParameterChangeNotification *parNotif = dynamic_cast<cPostParameterChangeNotification *>(obj);
+    if (parNotif)
+    {
+        cChannel *channel = dynamic_cast<cDatarateChannel *>(parNotif->par->getOwner());
+        if (channel)
+        {
+            cGate *gate = channel->getSourceGate();
+            if (gate->pathContains(this))
+                checkConnections(false);
+        }
+        return;
+    }
 }
 
 void EtherBus::handleMessage(cMessage *msg)
 {
+    if (dataratesDiffer)
+        checkConnections(true);
+
     if (!msg->isSelfMessage())
     {
         // Handle frame sent down from the network entity
