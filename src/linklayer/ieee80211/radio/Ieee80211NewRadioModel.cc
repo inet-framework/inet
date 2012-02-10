@@ -21,6 +21,8 @@
 #include "Ieee80211NewRadioModel.h"
 #include "Ieee80211Consts.h"
 #include "FWMath.h"
+#include "yans-error-rate-model.h"
+#include "nist-error-rate-model.h"
 #define NS3CALMODE
 
 
@@ -30,6 +32,7 @@ Ieee80211NewRadioModel::~Ieee80211NewRadioModel()
 {
     if (parseTable)
         delete parseTable;
+    delete errorModel;
 }
 
 
@@ -56,10 +59,19 @@ void Ieee80211NewRadioModel::initializeFrom(cModule *radioModule)
     else
         phyOpMode = 'g';
 
+    if (strcmp("YansModel", radioModule->par("ErrorModel").stringValue())==0)
+        errorModel = new YansErrorRateModel();
+    else if (strcmp("NistModel", radioModule->par("ErrorModel").stringValue())==0)
+        errorModel = new NistErrorRateModel();
+    else
+        opp_error("Error %s model is not valid",radioModule->par("ErrorModel").stringValue());
+
+
     btSize = radioModule->par("btSize").longValue();
     autoHeaderSize = radioModule->par("AutoHeaderSize");
 
     useTestFrame = radioModule->par("airtimeLinkComputation").boolValue();
+
     parseTable = NULL;
     PHY_HEADER_LENGTH = 26e-6;
 
@@ -316,13 +328,13 @@ bool Ieee80211NewRadioModel::isPacketOK(double snirMin, int lengthMPDU, double b
         opp_error("Radio model not supported yet, must be a,b,g or p");
     }
 
-    headerNoError = yansModel.GetChunkSuccessRate(modeHeader, snirMin, headerSize);
+    headerNoError = errorModel->GetChunkSuccessRate(modeHeader, snirMin, headerSize);
     // probability of no bit error in the MPDU
     double MpduNoError;
     if (fileBer)
         MpduNoError = 1-parseTable->getPer(bitrate, snirMin, lengthMPDU/8);
     else
-        MpduNoError = yansModel.GetChunkSuccessRate(modeHeader, snirMin, lengthMPDU);
+        MpduNoError = errorModel->GetChunkSuccessRate(modeBody, snirMin, lengthMPDU);
 
     EV << "berHeader: " << berHeader << " berMPDU: " <<berMPDU <<" lengthMPDU: "<<lengthMPDU<<" PER: "<<1-MpduNoError<<endl;
     if (MpduNoError>=1 && headerNoError>=1)

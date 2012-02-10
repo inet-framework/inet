@@ -64,6 +64,9 @@ double IntegralFunction(double x, void *params);
  */
 class DsssErrorRateModel
 {
+private:
+  static const double spectralEfficiency1bit;
+  static const double spectralEfficiency2bit;
 public:
   static double DqpskFunction(double x);
   static double GetDsssDbpskSuccessRate(double sinr, uint32_t nbits);

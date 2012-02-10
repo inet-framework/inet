@@ -20,9 +20,8 @@
 #ifndef YANS_ERROR_RATE_MODEL_H
 #define YANS_ERROR_RATE_MODEL_H
 
-#include "INETDefs.h"
-
 #include "WifiMode.h"
+#include "IErrorModel.h"
 #include "dsss-error-rate-model.h"
 
 
@@ -50,7 +49,7 @@
  *    - More detailed description and validation can be found in
  *      http://www.nsnam.org/~pei/80211b.pdf
  */
-class YansErrorRateModel
+class YansErrorRateModel : public IErrorModel
 {
 public:
   YansErrorRateModel();

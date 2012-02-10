@@ -22,7 +22,8 @@
 
 #include "IRadioModel.h"
 #include "BerParseFile.h"
-#include "yans-error-rate-model.h"
+#include "IErrorModel.h"
+#include "WifiPreambleType.h"
 
 /**
  * Radio model for IEEE 802.11. The implementation is largely based on the
@@ -45,7 +46,7 @@ class INET_API Ieee80211NewRadioModel : public IRadioModel
     char phyOpMode;
 
     double PHY_HEADER_LENGTH;
-    YansErrorRateModel yansModel;
+    IErrorModel * errorModel;
     WifiPreamble wifiPreamble;
     bool  autoHeaderSize;
 
