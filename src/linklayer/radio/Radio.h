@@ -245,6 +245,7 @@ class INET_API Radio : public ChannelAccess, public IPowerControl
      * this variable is used to disconnect the possibility of sent packets to the ChannelControl
      */
     bool transceiverConnect;
+    bool receiverConnect;
 
     // if true draw coverage circles
     bool drawCoverage;

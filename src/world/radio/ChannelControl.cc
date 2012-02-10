@@ -124,6 +124,7 @@ ChannelControl::RadioRef ChannelControl::registerRadio(cModule *radio, cGate *ra
     re.radioInGate = radioInGate->getPathStartGate();
     re.isNeighborListValid = false;
     re.channel = 0;  // for now
+    re.isActive = true;
     radios.push_back(re);
     return &radios.back(); // last element
 }
@@ -297,6 +298,11 @@ void ChannelControl::sendToChannel(RadioRef srcRadio, AirFrame *airFrame)
     for (int i=0; i<n; i++)
     {
         RadioRef r = neighbors[i];
+        if (!r->isActive)
+        {
+            coreEV << "skipping disabled radio interface \n";
+            continue;
+        }
         if (r->channel == channel)
         {
             coreEV << "sending message to radio listening on the same channel\n";
