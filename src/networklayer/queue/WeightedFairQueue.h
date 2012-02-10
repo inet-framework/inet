@@ -29,6 +29,10 @@
 #include "IQoSClassifier.h"
 
 
+/**
+ * Queue module that implements Weighted Fair Queueing (WFQ).
+ * See NED file for more info.
+ */
 class INET_API WeightedFairQueue : public PassiveQueueBase
 {
   protected:
