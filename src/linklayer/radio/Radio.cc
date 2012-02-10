@@ -34,8 +34,10 @@ simsignal_t Radio::bitrateSignal = SIMSIGNAL_NULL;
 simsignal_t Radio::radioStateSignal = SIMSIGNAL_NULL;
 simsignal_t Radio::channelNumberSignal = SIMSIGNAL_NULL;
 simsignal_t Radio::lossRateSignal = SIMSIGNAL_NULL;
+simsignal_t Radio::changeLevelNoise = SIMSIGNAL_NULL;
 
 #define MIN_DISTANCE 0.001 // minimum distance 1 millimeter
+#define BASE_NOISE_LEVEL (noiseGenerator?noiseLevel+noiseGenerator->noiseLevel():noiseLevel)
 
 Define_Module(Radio);
 Radio::Radio() : rs(this->getId())
@@ -46,6 +48,7 @@ Radio::Radio() : rs(this->getId())
     transceiverConnect = true;
     receiverConnect = true;
     updateString = NULL;
+    noiseGenerator = NULL;
 }
 
 void Radio::initialize(int stage)
@@ -74,6 +77,15 @@ void Radio::initialize(int stage)
 
         // initialize noiseLevel
         noiseLevel = thermalNoise;
+        std::string noiseModel =  par("NoiseGenerator").stdstringValue();
+        if (noiseModel!="")
+        {
+            noiseGenerator = (INoiseGenerator *) createOne(noiseModel.c_str());
+            noiseGenerator->initializeFrom(this);
+            // register to get a notification when position changes
+            changeLevelNoise = registerSignal("changeLevelNoise");
+            subscribe(changeLevelNoise, this); // the INoiseGenerator must send a signal to this module
+        }
 
         EV << "Initialized channel with noise: " << noiseLevel << " sensitivity: " << sensitivity <<
         endl;
@@ -92,7 +104,7 @@ void Radio::initialize(int stage)
         // Initialize radio state. If thermal noise is already to high, radio
         // state has to be initialized as RECV
         rs.setState(RadioState::IDLE);
-        if (noiseLevel >= sensitivity)
+        if (BASE_NOISE_LEVEL >= sensitivity)
             rs.setState(RadioState::RECV);
 
         WATCH(noiseLevel);
@@ -165,6 +177,8 @@ Radio::~Radio()
 {
     delete radioModel;
     delete receptionModel;
+    if (noiseGenerator)
+        delete noiseGenerator;
 
     if (updateString)
         cancelAndDelete(updateString);
@@ -458,7 +472,7 @@ void Radio::handleSelfMsg(cMessage *msg)
         // If the noise level is bigger than the sensitivity switch to receive mode,
         // otherwise to idle mode.
         RadioState::State newState;
-        if (noiseLevel < sensitivity)
+        if (BASE_NOISE_LEVEL < sensitivity)
         {
             // set the RadioState to IDLE
             EV << "transmission over, switch to idle mode (state:IDLE)\n";
@@ -593,7 +607,7 @@ void Radio::handleLowerMsgStart(AirFrame* airframe)
 
         // update the RadioState if the noiseLevel exceeded the threshold
         // and the radio is currently not in receive or in send mode
-        if (noiseLevel >= sensitivity && rs.getState() == RadioState::IDLE)
+        if (BASE_NOISE_LEVEL >= sensitivity && rs.getState() == RadioState::IDLE)
         {
             EV << "setting radio state to RECV\n";
             setRadioState(RadioState::RECV);
@@ -627,7 +641,7 @@ void Radio::handleLowerMsgEnd(AirFrame * airframe)
         snrInfo.ptr = NULL;
         snrInfo.sList.clear();
 
-        airframe->setSnr(10*log10(recvBuff[airframe]/ noiseLevel)); //ahmed
+        airframe->setSnr(10*log10(recvBuff[airframe]/ (BASE_NOISE_LEVEL))); //ahmed
         airframe->setLossRate(lossRate);
         // delete the frame from the recvBuff
         recvBuff.erase(airframe);
@@ -681,7 +695,7 @@ void Radio::handleLowerMsgEnd(AirFrame * airframe)
     // change to idle if noiseLevel smaller than threshold and state was
     // not idle before
     // do not change state if currently sending or receiving a message!!!
-    if (noiseLevel < sensitivity && rs.getState() == RadioState::RECV && snrInfo.ptr == NULL)
+    if (BASE_NOISE_LEVEL < sensitivity && rs.getState() == RadioState::RECV && snrInfo.ptr == NULL)
     {
         // publish the new RadioState:
         EV << "new RadioState is IDLE\n";
@@ -693,7 +707,7 @@ void Radio::addNewSnr()
 {
     SnrListEntry listEntry;     // create a new entry
     listEntry.time = simTime();
-    listEntry.snr = snrInfo.rcvdPower / noiseLevel;
+    listEntry.snr = snrInfo.rcvdPower / (BASE_NOISE_LEVEL);
     snrInfo.sList.push_back(listEntry);
 }
 
@@ -940,5 +954,23 @@ double Radio::calcDistFreeSpace()
     double interfDistance = pow(waveLength * waveLength * transmitterPower /
                          (16.0 * M_PI * M_PI * minReceivePower), 1.0 / alpha);
     return interfDistance;
+}
+
+void Radio::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+{
+    ChannelAccess::receiveSignal(source,signalID, obj);
+    if (signalID == changeLevelNoise)
+    {
+        if (BASE_NOISE_LEVEL<sensitivity)
+        {
+            if (rs.getState()==RadioState::RECV && snrInfo.ptr==NULL)
+                setRadioState(RadioState::IDLE);
+        }
+        else
+        {
+            if (rs.getState()!=RadioState::IDLE)
+                setRadioState(RadioState::RECV);
+        }
+    }
 }
 
