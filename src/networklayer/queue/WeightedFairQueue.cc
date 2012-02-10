@@ -103,59 +103,59 @@ bool WeightedFairQueue::RedTest(cMessage *msg, int queueIndex)
 
     if (!useRed)
         return false;
+    // abbreviations
+    double& wq = subqueueData[queueIndex].wq;
+    double& minth = subqueueData[queueIndex].minth;
+    double& maxth = subqueueData[queueIndex].maxth;
+    double& maxp = subqueueData[queueIndex].maxp;
+    double& pkrate = subqueueData[queueIndex].pkrate;
+    double& avg = subqueueData[queueIndex].avg;
+    simtime_t& q_time = subqueueData[queueIndex].q_time;
+    int& count = subqueueData[queueIndex].count;
+    int& numEarlyDrops = subqueueData[queueIndex].numEarlyDrops;
 
-    double *wq = &subqueueData[queueIndex].wq;    // queue weight
-    double *minth = &subqueueData[queueIndex].minth; // minimum threshold for avg queue length
-    double *maxth = &subqueueData[queueIndex].maxth; // maximum threshold for avg queue length
-    double *maxp = &subqueueData[queueIndex].maxp;  // maximum value for pb
-    double *pkrate = &subqueueData[queueIndex].pkrate; // number of packets expected to arrive per second (used for f())
+    int queueLength = queueArray[queueIndex].length();
 
-    // state (see NED file and paper for meaning of RED variables)
-    double *avg = &subqueueData[queueIndex].avg;       // average queue size
-    simtime_t *q_time = &subqueueData[queueIndex].q_time; // start of the queue idle time
-    int *count = &subqueueData[queueIndex].count;        // packets since last marked packet
-    int *numEarlyDrops = &subqueueData[queueIndex].numEarlyDrops;
-
+    // the test
     if (!queueArray[queueIndex].empty())
     {
-        (*avg) = (1-(*wq))*(*avg) +(*wq)*queueArray[queueIndex].length();
+        avg = (1-wq) * avg + wq * queueLength;
     }
     else
     {
         // Note: f() is supposed to estimate the number of packets
         // that could have arrived during the idle interval (see Section 11
         // of the paper). We use pkrate for this purpose.
-        double m = SIMTIME_DBL(simTime()-(*q_time)) * (*pkrate);
-        (*avg) = pow(1-(*wq), m) * (*avg);
+        double m = SIMTIME_DBL(simTime()-q_time) * pkrate;
+        avg = pow(1-wq, m) * avg;
     }
 
     bool mark = false;
-    if (*minth <= *avg && *avg < *maxth)
+    if (minth <= avg && avg < maxth)
     {
-        (*count)++;
-        double pb = (*maxp)*((*avg)-(*minth)) / ((*maxth)-(*minth));
-        double pa = pb / (1-(*count)*pb);
+        count++;
+        double pb = maxp*(avg-minth) / (maxth-minth);
+        double pa = pb / (1-count*pb);
         if (dblrand() < pa)
         {
             EV << "Random early packet drop (avg queue len=" << avg << ", pa=" << pa << ")\n";
             mark = true;
-            (*count) = 0;
-            (*numEarlyDrops)++;
+            count = 0;
+            numEarlyDrops++;
         }
     }
-    else if (*maxth <= *avg)
+    else if (maxth <= avg)
     {
         EV << "Avg queue len " << avg << " >= maxth, dropping packet.\n";
         mark = true;
-        (*count) = 0;
+        count = 0;
     }
     else
     {
-        (*count) = -1;
+        count = -1;
     }
 
-    // carry out decision
-    bool result = mark || queueArray[queueIndex].length() >= (*maxth); // maxth is also the "hard" limit
+    bool result = (mark || queueLength >= maxth); // maxth is also the "hard" limit
     return result;
 }
 
