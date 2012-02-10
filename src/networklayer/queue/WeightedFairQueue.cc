@@ -101,8 +101,6 @@ bool WeightedFairQueue::RedTest(cMessage *msg, int queueIndex)
     //            avg <- (1-wq)^m * avg
     //"
 
-    if (!useRed)
-        return false;
     // abbreviations
     double& wq = subqueueData[queueIndex].wq;
     double& minth = subqueueData[queueIndex].minth;
@@ -164,7 +162,7 @@ cMessage *WeightedFairQueue::enqueue(cMessage *msg)
 {
     int queueIndex = classifier->classifyPacket(msg);
 
-    if (RedTest(msg, queueIndex))
+    if (useRed && RedTest(msg, queueIndex))
     {
         emit(earlyDropPkBytesSignal, (long)(PK(msg)->getByteLength()));
         return msg;
@@ -208,7 +206,7 @@ cMessage *WeightedFairQueue::enqueue(cMessage *msg)
 cMessage *WeightedFairQueue::dequeue()
 {
     int selectQueue = -1;
-    double endTime = 1e20;
+    double endTime = 1e20;  //XXX looks fishy
     for (int i = 0; i < numQueues; i++)
     {
         if (!queueArray[i].empty())
