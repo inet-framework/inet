@@ -62,6 +62,7 @@ class INET_API ChannelAccess : public BasicModule, protected cListener
 
   public:
     ChannelAccess() : cc(NULL), myRadioRef(NULL), hostModule(NULL) {}
+    virtual ~ChannelAccess();
 
     /**
      * @brief Called by the signalling mechanism to inform of changes.
