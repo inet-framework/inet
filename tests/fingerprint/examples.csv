@@ -14,12 +14,12 @@
 /examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            9999-0785
 /examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0, 50s,             08b0-7cc5
 /examples/ethernet/lans/,            -f fingerprints.ini -c MixedLAN1 -r 0,         200s,            ea41-e50e
-/examples/ethernet/lans/,            -f fingerprints-largenet.ini -c LargeNet -r 0, 5s,              5fa2-d654
+/examples/ethernet/lans/,            -f fingerprints-largenet.ini -c LargeNet -r 0, 5s,              9a54-83c1
 /examples/ethernet/lans/,            -f hub.ini -c Hub1 -r 0,                       100s,            4d10-13a7
 /examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0,                       10s,             1da5-f95b
 /examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0,                       100s,            1240-d7aa
 /examples/ethernet/lans/,            -f hub.ini -c Hub4 -r 0,                       100s,            4d10-13a7
-/examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              5fa2-d654
+/examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              9a54-83c1
 /examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            6aaf-80bb
 /examples/ethernet/lans/,            -f omnetpp.ini -c MixedLAN1 -r 0,              500s,            ddf0-1ac5
 /examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0,            5000s,           aeaf-5c29
@@ -75,8 +75,8 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0,     100s,            598e-385a
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSClinux -r 0,     100s,            60fb-4e9a
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSClinux_stream -r 0, 100s,            60fb-4e9a
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_fullduplex -r 0, 3s,              fd89-8f36
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 0, 5s,              9bb4-e099
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_fullduplex -r 0, 3s,              a1d8-ca22
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 0, 5s,              b316-0213
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_internalQueue -r 0, 5s,              da7d-2004
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_fullduplex -r 0, 3s,              0e6e-5f11
 /examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c with_externalqueue -r 0,     5s,              7643-c420
