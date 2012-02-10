@@ -820,7 +820,15 @@ void Ieee80211NewMac::handleLowerMsg(cPacket *msg)
 {
     EV<<"->Enter handleLowerMsg...\n";
     EV << "received message from lower layer: " << msg << endl;
-
+    Radio80211aControlInfo * cinfo = dynamic_cast<Radio80211aControlInfo *>(msg->getControlInfo());
+    if (cinfo && cinfo->getAirtimeMetric())
+    {
+    	double rtsTime = 0;
+    	if (rtsThreshold*8<cinfo->getTestFrameSize())
+             rtsTime=  computeFrameDuration(LENGTH_CTS, basicBitrate) +computeFrameDuration(LENGTH_RTS, basicBitrate);
+        double frameDuration = cinfo->getTestFrameDuration() + computeFrameDuration(LENGTH_ACK, basicBitrate)+rtsTime;
+    	cinfo->setTestFrameDuration(frameDuration);
+    }
     nb->fireChangeNotification(NF_LINK_FULL_PROMISCUOUS, msg);
     validRecMode = false;
     if (msg->getControlInfo() && dynamic_cast<Radio80211aControlInfo *>(msg->getControlInfo()))

@@ -34,12 +34,21 @@
     double snrData;
     double signalPower;
     simtime_t snrTime;
+    bool airtimeMetric;
+    double testFrameDuration;
+    double testFrameError;
+    uint32_t airtimeValue;
+
     SNRDataTime& operator=(const SNRDataTime& other)
     {
         if (this==&other) return *this;
         this->snrData = other.snrData;
         this->snrTime = other.snrTime;
         this->signalPower = other.signalPower;
+        this->airtimeMetric=other.airtimeMetric;
+        this->testFrameDuration=other.testFrameDuration;
+        this->testFrameError=other.testFrameError;
+        this->airtimeValue = other.airtimeValue;
         return *this;
     }
 }; // Store information about the SNR and the time that that measure was store
@@ -52,6 +61,7 @@ class MacEtxNeighbor
     simtime_t  ettTime;
     simtime_t  ett1Time;
     simtime_t  ett2Time;
+    uint32_t   airTimeMetric;
     int     packets;
     int     numFailures;
   public:
@@ -84,6 +94,9 @@ class MacEtxNeighbor
 
     void setPackets(const int &p) {packets = p;}
     int getPackets() const {return packets;}
+
+    uint32_t getAirtimeMetric() const {return airTimeMetric;}
+    void  setAirtimeMetric(uint32_t p) {airTimeMetric = p;}
 };
 
 typedef std::map<MACAddress,MacEtxNeighbor*> NeighborsMap;
@@ -128,6 +141,8 @@ class INET_API Ieee80211Etx : public cSimpleModule, public MacEstimateCostProces
     virtual double getPacketErrorToNeigh(const MACAddress &add);
     virtual double getPacketErrorFromNeigh(const MACAddress &add);
     virtual void getNeighbors(std::vector<MACAddress> &);
+    uint32_t getAirtimeMetric(const MACAddress &addr);
+    void getAirtimeMetricNeighbors(std::vector<MACAddress> &addr, std::vector<uint32_t> &cost);
 
   public:
     Ieee80211Etx() {};

@@ -56,8 +56,10 @@ void Ieee80211NewRadioModel::initializeFrom(cModule *radioModule)
     else
         phyOpMode = 'g';
 
+    btSize = radioModule->par("btSize").longValue();
     autoHeaderSize = radioModule->par("AutoHeaderSize");
 
+    useTestFrame = radioModule->par("airtimeLinkComputation").boolValue();
     parseTable = NULL;
     PHY_HEADER_LENGTH = 26e-6;
 
@@ -75,7 +77,46 @@ void Ieee80211NewRadioModel::initializeFrom(cModule *radioModule)
         fileBer = false;
 }
 
-
+double Ieee80211NewRadioModel::calculateDurationTestFrame(AirFrame *airframe)
+{
+    double duration;
+#ifndef NS3CALMODE
+    if (phyOpMode=='g')
+        duration=4*ceil((16+btSize+6)/(airframe->getBitrate()/1e6*4))*1e-6 + PHY_HEADER_LENGTH;
+    else
+        // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
+        duration=btSize/airframe->getBitrate() + 192/BITRATE_HEADER;
+#else
+    ModulationType modeBody;
+    if (phyOpMode == 'g')
+    {
+        modeBody = WifiModulationType::getMode80211g(airframe->getBitrate());
+        duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(btSize, modeBody, wifiPreamble));
+    }
+    else if (phyOpMode == 'b')
+    {
+        // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
+        modeBody = WifiModulationType::getMode80211b(airframe->getBitrate());
+        duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(btSize, modeBody, wifiPreamble));
+    }
+    else if (phyOpMode == 'a')
+    {
+        // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
+        modeBody = WifiModulationType::getMode80211a(airframe->getBitrate());
+        duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(btSize, modeBody, wifiPreamble));
+    }
+    else if (phyOpMode == 'p')
+    {
+        // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
+        modeBody = WifiModulationType::getMode80211p(airframe->getBitrate());
+        duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(btSize, modeBody, wifiPreamble));
+    }
+    else
+        opp_error("Radio model not supported yet, must be a,b,g or p");
+#endif
+    EV << "Radio:Test frameDuration=" << duration * 1e6 << "us(" << btSize << "bits)" << endl;
+    return duration;
+}
 
 double Ieee80211NewRadioModel::calculateDuration(AirFrame *airframe)
 {
@@ -113,7 +154,8 @@ double Ieee80211NewRadioModel::calculateDuration(AirFrame *airframe)
     }
     else
         opp_error("Radio model not supported yet, must be a,b,g or p");
-    airframe->setModulationType(modeBody);
+
+     airframe->setModulationType(modeBody);
 #endif
     EV<<"Radio:frameDuration="<<duration*1e6<<"us("<<airframe->getBitLength()<<"bits)"<<endl;
     return duration;
@@ -154,6 +196,73 @@ bool Ieee80211NewRadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrLi
         EV << "Packet has BIT ERRORS! It is lost!\n";
         return false;
     }
+}
+
+double Ieee80211NewRadioModel::getTestFrameError(double snirMin, double bitrate)
+{
+    ModulationType modeBody;
+    ModulationType modeHeader;
+
+    WifiPreamble preambleUsed = wifiPreamble;
+    double headerNoError;
+    uint32_t headerSize;
+    if (phyOpMode == 'b')
+        headerSize = HEADER_WITHOUT_PREAMBLE;
+    else
+        headerSize = 24;
+
+    if (phyOpMode == 'g')
+    {
+        modeBody = WifiModulationType::getMode80211g(bitrate);
+        modeHeader = WifiModulationType::getPlcpHeaderMode(modeBody, preambleUsed);
+        if (autoHeaderSize)
+        {
+            ModulationType modeBodyA = WifiModulationType::getMode80211a(bitrate);
+            headerSize = ceil(
+                    SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration (modeBodyA, preambleUsed))
+                            * modeHeader.getDataRate());
+        }
+    }
+    else if (phyOpMode == 'b')
+    {
+        modeBody = WifiModulationType::getMode80211b(bitrate);
+        modeHeader = WifiModulationType::getPlcpHeaderMode(modeBody, preambleUsed);
+        if (autoHeaderSize)
+            headerSize = ceil(
+                    SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration (modeBody, preambleUsed))
+                            * modeHeader.getDataRate());
+    }
+    else if (phyOpMode == 'a')
+    {
+        modeBody = WifiModulationType::getMode80211a(bitrate);
+        modeHeader = WifiModulationType::getPlcpHeaderMode(modeBody, preambleUsed);
+        if (autoHeaderSize)
+            headerSize = ceil(
+                    SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration (modeBody, preambleUsed))
+                            * modeHeader.getDataRate());
+    }
+    else if (phyOpMode == 'p')
+    {
+        modeBody = WifiModulationType::getMode80211p(bitrate);
+        modeHeader = WifiModulationType::getPlcpHeaderMode(modeBody, preambleUsed);
+        if (autoHeaderSize)
+            headerSize = ceil(
+                    SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration (modeBody, preambleUsed))
+                            * modeHeader.getDataRate());
+    }
+    else
+    {
+        opp_error("Radio model not supported yet, must be a,b,g or p");
+    }
+
+    headerNoError = errorModel->GetChunkSuccessRate(modeHeader, snirMin, headerSize);
+    // probability of no bit error in the MPDU
+    double MpduNoError;
+    if (fileBer)
+        MpduNoError = 1 - parseTable->getPer(bitrate, snirMin, btSize / 8);
+    else
+        MpduNoError = errorModel->GetChunkSuccessRate(modeHeader, snirMin, btSize);
+    return (1 - (headerNoError * MpduNoError));
 }
 
 

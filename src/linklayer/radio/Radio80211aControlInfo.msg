@@ -30,6 +30,10 @@ class Radio80211aControlInfo
     double lossRate;
     double recPow;
     ModulationType modulationType;
+    bool airtimeMetric;
+    double testFrameDuration;
+    double testFrameError;
+    int    testFrameSize;
 }
 
 

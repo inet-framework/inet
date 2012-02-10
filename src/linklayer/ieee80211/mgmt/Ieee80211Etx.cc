@@ -444,14 +444,78 @@ void Ieee80211Etx::receiveChangeNotification(int category, const cObject *detail
                 snrDataTime.signalPower = cinfo->getRecPow();
                 snrDataTime.snrData = cinfo->getSnr();
                 snrDataTime.snrTime = simTime();
+                snrDataTime.testFrameDuration = cinfo->getTestFrameDuration();
+                snrDataTime.testFrameError = cinfo->getTestFrameError();
+                snrDataTime.airtimeMetric = cinfo->getAirtimeMetric();
+                if (snrDataTime.airtimeMetric)
+                    snrDataTime.airtimeValue = (uint32_t)ceil((snrDataTime.testFrameDuration/10.24e-6)/(1-snrDataTime.testFrameError));
+                else
+                    snrDataTime.airtimeValue = 0xFFFFFFF;
                 it->second->signalToNoiseAndSignal.push_back(snrDataTime);
-                while ((int)it->second->signalToNoiseAndSignal.size()>powerWindow)
-                    it->second->signalToNoiseAndSignal.erase(it->second->signalToNoiseAndSignal.begin());
-                while (simTime() - it->second->signalToNoiseAndSignal.front().snrTime>powerWindowTime)
-                    it->second->signalToNoiseAndSignal.erase(it->second->signalToNoiseAndSignal.begin());
+                if (snrDataTime.airtimeMetric)
+                {
+                    // found the best
+                    uint32_t cost = 0xFFFFFFFF;
+                    for (unsigned int i = 0; i < it->second->signalToNoiseAndSignal.size(); i++)
+                    {
+                        if (it->second->signalToNoiseAndSignal[i].airtimeMetric && cost > it->second->signalToNoiseAndSignal[i].airtimeValue)
+                            cost = it->second->signalToNoiseAndSignal[i].airtimeValue;
+                    }
+                    it->second->setAirtimeMetric(cost);
+                }
+                else
+                    it->second->setAirtimeMetric(0xFFFFFFF);
             }
         }
     }
 }
 
+
+uint32_t Ieee80211Etx::getAirtimeMetric(const MACAddress &addr)
+{
+    NeighborsMap::iterator it = neighbors.find(addr);
+    if (it != neighbors.end())
+    {
+        while (!it->second->signalToNoiseAndSignal.empty() && (simTime() - it->second->signalToNoiseAndSignal.front().snrTime > powerWindowTime))
+            it->second->signalToNoiseAndSignal.erase(it->second->signalToNoiseAndSignal.begin());
+        if (it->second->signalToNoiseAndSignal.empty() && (simTime() - it->second->getTime() > maxLive))
+        {
+            neighbors.erase(it);
+            return 0xFFFFFFF;
+        }
+        else if (it->second->signalToNoiseAndSignal.empty())
+            return 0xFFFFFFF;
+        else
+            return it->second->getAirtimeMetric();
+    }
+    else
+        return 0xFFFFFFF;
+}
+
+void Ieee80211Etx::getAirtimeMetricNeighbors(std::vector<MACAddress> &addr, std::vector<uint32_t> &cost)
+{
+    addr.clear();
+    cost.clear();
+    for (NeighborsMap::iterator it = neighbors.begin(); it != neighbors.end();)
+    {
+        while (simTime() - it->second->signalToNoiseAndSignal.front().snrTime > powerWindowTime)
+            it->second->signalToNoiseAndSignal.erase(it->second->signalToNoiseAndSignal.begin());
+        if (it->second->signalToNoiseAndSignal.empty() && (simTime() - it->second->getTime() > maxLive))
+        {
+            NeighborsMap::iterator itAux = it;
+            it++;
+            neighbors.erase(itAux);
+        }
+        else if (it->second->signalToNoiseAndSignal.empty())
+        {
+            it++;
+        }
+        else if (it->second->signalToNoiseAndSignal.empty())
+        {
+            addr.push_back(it->first);
+            cost.push_back(it->second->getAirtimeMetric());
+            it++;
+        }
+    }
+}
 
