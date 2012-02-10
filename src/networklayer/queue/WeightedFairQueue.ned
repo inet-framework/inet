@@ -39,8 +39,10 @@ simple WeightedFairQueue like IOutputQueue
         double maxp = default(0.02);  // maximum value for pb
         double pkrate = default(150);  // arrivals per sec (see comment above)
         @display("i=block/queue");
-        @statistic[earlyDropPkBytes](title="Early dropped packet bytes"; record=count,sum,vector);
-        @statistic[queueLength](title="Queue length"; record=histogram,stats,vector; interpolationmode=sample-hold);
+        @signal[queueLength](type=long);
+        @signal[earlyDropPkByQueue](type=cMessage);
+        @statistic[earlyDropPk](title="early dropped packets"; source=earlyDropPkByQueue; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[queueLength](title="queue length"; record=max,timeavg,vector; interpolationmode=sample-hold);
 
     gates:
         input in;

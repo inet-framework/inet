@@ -23,7 +23,7 @@
 Define_Module(WeightedFairQueue);
 
 simsignal_t WeightedFairQueue::queueLengthSignal = SIMSIGNAL_NULL;
-simsignal_t WeightedFairQueue::earlyDropPkBytesSignal = SIMSIGNAL_NULL;
+simsignal_t WeightedFairQueue::earlyDropPkByQueueSignal = SIMSIGNAL_NULL;
 
 WeightedFairQueue::WeightedFairQueue()
 {
@@ -54,7 +54,7 @@ void WeightedFairQueue::initialize()
     bandwidth = par("bandwidth");
 
     queueLengthSignal = registerSignal("queueLength");
-    earlyDropPkBytesSignal = registerSignal("earlyDropPkBytes");
+    earlyDropPkByQueueSignal = registerSignal("earlyDropPkByQueue");
 
     emit(queueLengthSignal, totalLength);
 
@@ -164,7 +164,7 @@ cMessage *WeightedFairQueue::enqueue(cMessage *msg)
 
     if (useRED && REDTest(msg, queueIndex))
     {
-        emit(earlyDropPkBytesSignal, (long)(PK(msg)->getByteLength()));
+        emit(earlyDropPkByQueueSignal, msg);
         return msg;
     }
 

@@ -75,7 +75,7 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
 
     // statistics
     static simsignal_t queueLengthSignal;
-    static simsignal_t earlyDropPkBytesSignal;
+    static simsignal_t earlyDropPkByQueueSignal;
 
   protected:
     int frameCapacity;
