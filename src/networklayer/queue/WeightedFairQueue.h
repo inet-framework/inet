@@ -84,7 +84,7 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
     int numQueues;
     IQoSClassifier *classifier;
     cGate *outGate;
-    bool useRed;
+    bool useRED;
     long totalLength;
 
     double bandwidth; // total link bandwidth
@@ -117,7 +117,7 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
   protected:
     virtual void initialize();
 
-    virtual bool RedTest(cMessage *msg, int queueIndex);
+    virtual bool REDTest(cMessage *msg, int queueIndex);
 
     // methods redefined from PassiveQueueBase:
     virtual cMessage *enqueue(cMessage *msg);

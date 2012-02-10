@@ -51,7 +51,7 @@ void WeightedFairQueue::initialize()
     // configuration
     frameCapacity = par("frameCapacity");
     const char *classifierClass = par("classifierClass");
-    bandwidth = par("Bandwidth");
+    bandwidth = par("bandwidth");
 
     queueLengthSignal = registerSignal("queueLength");
     earlyDropPkBytesSignal = registerSignal("earlyDropPkBytes");
@@ -66,7 +66,7 @@ void WeightedFairQueue::initialize()
     if (numQueues < (int)queueWeight.size())
         numQueues = queueWeight.size();
 
-    useRed = par("UseRed");
+    useRED = par("useRED");
     for (int i = 0; i < numQueues; i++)
     {
         SubQueueData queueData;
@@ -89,7 +89,7 @@ void WeightedFairQueue::initialize()
     }
 }
 
-bool WeightedFairQueue::RedTest(cMessage *msg, int queueIndex)
+bool WeightedFairQueue::REDTest(cMessage *msg, int queueIndex)
 {
     //"
     // for each packet arrival
@@ -162,7 +162,7 @@ cMessage *WeightedFairQueue::enqueue(cMessage *msg)
 {
     int queueIndex = classifier->classifyPacket(msg);
 
-    if (useRed && RedTest(msg, queueIndex))
+    if (useRED && REDTest(msg, queueIndex))
     {
         emit(earlyDropPkBytesSignal, (long)(PK(msg)->getByteLength()));
         return msg;
