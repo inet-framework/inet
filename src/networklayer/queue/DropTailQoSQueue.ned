@@ -23,6 +23,8 @@ package inet.networklayer.queue;
 // Performs priority queueing.
 // Conforms to the ~IOutputQueue interface.
 //
+// @see ~WeightedFairQueue, ~REDQueue, ~DropTailQueue
+//
 simple DropTailQoSQueue like IOutputQueue
 {
     parameters:
