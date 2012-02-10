@@ -30,6 +30,7 @@ class INET_API EtherHub : public cSimpleModule, protected cListener
     int numPorts;         // sizeof(ethg)
     int inputGateBaseId;  // gate id of ethg$i[0]
     int outputGateBaseId; // gate id of ethg$o[0]
+    bool dataratesDiffer;
 
     // statistics
     long numMessages;   // number of messages handled
@@ -41,9 +42,8 @@ class INET_API EtherHub : public cSimpleModule, protected cListener
     virtual void finish();
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
-    virtual void checkConnections();
+    virtual void checkConnections(bool errorWhenAsymmetric);
 };
 
 #endif
-
 
