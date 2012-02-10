@@ -18,6 +18,7 @@
 
 #include "Ieee80211MgmtAPBase.h"
 #include "Ieee802Ctrl_m.h"
+#include <string.h>
 
 #ifdef WITH_ETHERNET
 #include "EtherFrame_m.h"
@@ -26,7 +27,6 @@
 void Ieee80211MgmtAPBase::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
-
     if (stage==0)
     {
         hasRelayUnit = gate("upperLayerOut")->getPathEndGate()->isConnected();

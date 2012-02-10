@@ -57,7 +57,7 @@ simple Ieee80211Mac
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
-        string queueModule = default(""); // name of optional external queue module
+        string queueModule = default("");    // name of optional external queue module
         int maxQueueSize = default(14); // max queue length in frames; only used if queueModule==""
         double bitrate @unit("bps");
         double basicBitrate @unit("bps") = default(2000000bps);

@@ -27,7 +27,7 @@ Register_Class(Ieee80211RadioModel);
 
 void Ieee80211RadioModel::initializeFrom(cModule *radioModule)
 {
-    snirThreshold = dB2fraction(radioModule->par("snirThreshold"));
+    snirThreshold = dB2fraction(radioModule->par("snirThreshold").doubleValue());
 }
 
 double Ieee80211RadioModel::calculateDuration(AirFrame *airframe)
