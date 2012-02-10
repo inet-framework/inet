@@ -55,11 +55,12 @@ void Ieee80211MgmtAP::initialize(int stage)
         WATCH(beaconInterval);
         WATCH(numAuthSteps);
         WATCH_MAP(staList);
+        isConnected = gate("upperLayerOut")->getPathEndGate()->isConnected();
 
         //TBD fill in supportedRates
 
         // subscribe for notifications
-        NotificationBoard *nb = NotificationBoardAccess().get();
+        nb = NotificationBoardAccess().get();
         nb->subscribe(this, NF_RADIO_CHANNEL_CHANGED);
 
         // start beacon timer (randomize startup time)
@@ -113,6 +114,7 @@ void Ieee80211MgmtAP::handleUpperMessage(cPacket *msg)
 
     sendOrEnqueue(frame);
 }
+
 
 void Ieee80211MgmtAP::handleCommand(int msgkind, cObject *ctrl)
 {
@@ -234,6 +236,8 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *fr
     // making the MN STA to start the handover process all over again.
     if (frameAuthSeq == 1)
     {
+        if (sta->status == ASSOCIATED)
+            sendDisAssocNotification(sta->address);
         sta->status = NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
     }
@@ -269,6 +273,8 @@ void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *fr
     // update status
     if (isLast)
     {
+        if (sta->status == ASSOCIATED)
+            sendDisAssocNotification(sta->address);
         sta->status = AUTHENTICATED; // XXX only when ACK of this frame arrives
         EV << "STA authenticated\n";
     }
@@ -289,6 +295,8 @@ void Ieee80211MgmtAP::handleDeauthenticationFrame(Ieee80211DeauthenticationFrame
     if (sta)
     {
         // mark STA as not authenticated; alternatively, it could also be removed from staList
+        if (sta->status == ASSOCIATED)
+            sendDisAssocNotification(sta->address);
         sta->status = NOT_AUTHENTICATED;
         sta->authSeqExpected = 1;
     }
@@ -313,6 +321,8 @@ void Ieee80211MgmtAP::handleAssociationRequestFrame(Ieee80211AssociationRequestF
     delete frame;
 
     // mark STA as associated
+    if (sta->status != ASSOCIATED)
+        sendAssocNotification(sta->address);
     sta->status = ASSOCIATED; // XXX this should only take place when MAC receives the ACK for the response
 
     // send OK response
@@ -371,6 +381,8 @@ void Ieee80211MgmtAP::handleDisassociationFrame(Ieee80211DisassociationFrame *fr
 
     if (sta)
     {
+        if (sta->status == ASSOCIATED)
+            sendDisAssocNotification(sta->address);
         sta->status = AUTHENTICATED;
     }
 }
@@ -408,3 +420,20 @@ void Ieee80211MgmtAP::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *fram
 {
     dropManagementFrame(frame);
 }
+
+void Ieee80211MgmtAP::sendAssocNotification(const MACAddress &addr)
+{
+    NotificationInfoSta notif;
+    notif.setApAddress(myAddress);
+    notif.setStaAddress(addr);
+    nb->fireChangeNotification(NF_L2_AP_ASSOCIATED,&notif);
+}
+
+void Ieee80211MgmtAP::sendDisAssocNotification(const MACAddress &addr)
+{
+    NotificationInfoSta notif;
+    notif.setApAddress(myAddress);
+    notif.setStaAddress(addr);
+    nb->fireChangeNotification(NF_L2_AP_DISSOCIATED,&notif);
+}
+

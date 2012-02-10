@@ -24,6 +24,7 @@
 
 #include "Ieee80211Primitives_m.h"
 #include "NotificationBoard.h"
+#include "InterfaceTable.h"
 
 
 /**
@@ -38,6 +39,9 @@
 class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
 {
   protected:
+    InterfaceEntry *myIface;
+    NotificationBoard *nb;
+    MACAddress prevAP;
     bool activeScan;
     std::vector<int> channelsToScan;
     simtime_t probeDelay;
@@ -45,6 +49,8 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
     simtime_t maxChannelTime;
     simtime_t authenticationTimeout;
     simtime_t associationTimeout;
+
+    std::string default_ssid;
 
     //Statistics:
     static simsignal_t sentRequestSignal;

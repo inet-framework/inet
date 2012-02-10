@@ -27,6 +27,9 @@
 #include "Ieee80211eClassifier.h"
 #include "Ieee80211DataRate.h"
 
+// TODO: 9.3.2.1, If there are buffered multicast or broadcast frames, the PC shall transmit these prior to any unicast frames.
+// TODO: control frames must send before
+
 Define_Module(Ieee80211NewMac);
 
 // don't forget to keep synchronized the C++ enum and the runtime enum definition
@@ -152,8 +155,13 @@ void Ieee80211NewMac::initialize(int stage)
         else
             wifiPreambleType = WIFI_PREAMBLE_LONG;
 
+        useModulationParameters = par("useModulationParameters");
+
+        prioritizeMulticast = par("prioritizeMulticast");
+
         EV<<"Operating mode: 802.11"<<opMode;
         maxQueueSize = par("maxQueueSize");
+        maxCategorieQueueSize = par("maxCategorieQueueSize");
         rtsThreshold = par("rtsThresholdBytes");
 
 #ifdef  USEMULTIQUEUE
@@ -256,6 +264,11 @@ void Ieee80211NewMac::initialize(int stage)
         if (bitrate==-1)
             bitrate = 11e6; //11Mbps
         EV<<" bitrate="<<bitrate/1e6<<"M IDLE="<<IDLE<<" RECEIVE="<<RECEIVE<<endl;
+
+        duplicateDetect = par("duplicateDetectionFilter");
+        purgeOldTuples = par("purgeOldTuples");
+        duplicateTimeOut = par("duplicateTimeOut");
+        lastTimeDelete = 0;
 
         // Auto rate code
         bool found = false;
@@ -636,7 +649,7 @@ void Ieee80211NewMac::registerInterface()
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
     // FIXME: MTU on 802.11 = ?
-    e->setMtu(par("mtu"));
+    e->setMtu(par("mtu").longValue());
 
     // capabilities
     e->setBroadcast(true);
@@ -719,6 +732,7 @@ void Ieee80211NewMac::handleSelfMsg(cMessage *msg)
                 return;
             }
         }
+        currentAC = kind;
     }
     handleWithFSM(msg);
 }
@@ -858,6 +872,8 @@ int Ieee80211NewMac::MappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
             //so for sure we placed it on second place
             p = transmissionQueue()->begin();
             p++;
+            while ((dynamic_cast<Ieee80211DataFrame *> (*p) == NULL) && (p != transmissionQueue()->end())) // search the first not management frame
+                p++;
             transmissionQueue()->insert(p, frame);
         }
     }
@@ -1038,6 +1054,7 @@ void Ieee80211NewMac::receiveChangeNotification(int category, const cObject *det
  */
 void Ieee80211NewMac::handleWithFSM(cMessage *msg)
 {
+    removeOldTuplesFromDuplicateMap();
     // skip those cases where there's nothing to do, so the switch looks simpler
     if (isUpperMsg(msg) && fsm.getState() != IDLE)
     {
@@ -1049,7 +1066,7 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
             scheduleAt(endDIFS->getArrivalTime()+remaint, endAIFS(currentAC));
             cancelEvent(endDIFS);
         }
-        else if (fsm.getState() == BACKOFF && endBackoff(numCategories()-1)->isScheduled() && transmissionQueue(numCategories()-1)->empty())
+        else if (fsm.getState() == BACKOFF && endBackoff(numCategories()-1)->isScheduled() &&  transmissionQueue(numCategories()-1)->empty())
         {
             // a backoff was schedule with all the queues empty
             // reschedule the backoff with the appropriate AC
@@ -1112,7 +1129,8 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
             FSMA_No_Event_Transition(Immediate-Data-Ready,
                                      !transmissionQueueEmpty(),
                                      DEFER,
-                                     invalidateBackoffPeriod();
+                                     if (retryCounter() == 0) //  jesjones patch.  TODO: check this particular case, I haven't been sure about this particular case
+                                        invalidateBackoffPeriod();
                                     );
             FSMA_Event_Transition(Receive,
                                   isLowerMsg(msg),
@@ -1394,6 +1412,22 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
                                   txop = false;
                                   if (endTXOP->isScheduled()) cancelEvent(endTXOP);
                                  );
+            FSMA_Event_Transition(Interrupted-ACK-Failure,
+                                  isLowerMsg(msg) && retryCounter() == transmissionLimit - 1,
+                                  RECEIVE,
+                                  currentAC=oldcurrentAC;
+                                  giveUpCurrentTransmission();
+                                  txop = false;
+                                  if (endTXOP->isScheduled()) cancelEvent(endTXOP);
+                                 );
+            FSMA_Event_Transition(Retry-Interrupted-ACK,
+                                 isLowerMsg(msg),
+                                 RECEIVE,
+                                 currentAC=oldcurrentAC;
+                                 retryCurrentTransmission();
+                                 txop = false;
+                                 if (endTXOP->isScheduled()) cancelEvent(endTXOP);
+                                 );
         }
         // wait until multicast is sent
         FSMA_State(WAITMULTICAST)
@@ -1450,11 +1484,7 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
                                   msg == endSIFS && getFrameReceivedBeforeSIFS()->getType() == ST_ACK,
                                   WAITACK,
                                   sendDataFrame(getCurrentTransmission());
-                                 );
-            FSMA_Event_Transition(Transmit-Data-TXOP,
-                                  msg == endSIFS && getFrameReceivedBeforeSIFS()->getType() == ST_ACK,
-                                  WAITACK,
-                                  sendDataFrame(getCurrentTransmission());
+                                  oldcurrentAC = currentAC;
                                  );
             FSMA_Event_Transition(Transmit-CTS,
                                   msg == endSIFS && getFrameReceivedBeforeSIFS()->getType() == ST_RTS,
@@ -1469,6 +1499,7 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
                                   msg == endSIFS && getFrameReceivedBeforeSIFS()->getType() == ST_CTS,
                                   WAITACK,
                                   sendDataFrameOnEndSIFS(getCurrentTransmission());
+                                  oldcurrentAC = currentAC;
                                  );
             FSMA_Event_Transition(Transmit-ACK,
                                   msg == endSIFS && isDataOrMgmtFrame(getFrameReceivedBeforeSIFS()),
@@ -1578,12 +1609,39 @@ void Ieee80211NewMac::finishReception()
 simtime_t Ieee80211NewMac::getSIFS()
 {
 // TODO:   return aRxRFDelay() + aRxPLCPDelay() + aMACProcessingDelay() + aRxTxTurnaroundTime();
+    if (useModulationParameters)
+    {
+        ModulationType modType;
+        if ((opMode=='b') || (opMode=='g'))
+            modType = WifiModulationType::getMode80211g(bitrate);
+        else if (opMode=='a')
+            modType = WifiModulationType::getMode80211a(bitrate);
+        else if (opMode=='p')
+            modType = WifiModulationType::getMode80211p(bitrate);
+        else
+            opp_error("mode not supported");
+        return WifiModulationType::getSifsTime(modType,wifiPreambleType);
+    }
+
     return SIFS;
 }
 
 simtime_t Ieee80211NewMac::getSlotTime()
 {
 // TODO:   return aCCATime() + aRxTxTurnaroundTime + aAirPropagationTime() + aMACProcessingDelay();
+    if (useModulationParameters)
+    {
+        ModulationType modType;
+        if ((opMode=='b') || (opMode=='g'))
+            modType = WifiModulationType::getMode80211g(bitrate);
+        else if (opMode=='a')
+            modType = WifiModulationType::getMode80211a(bitrate);
+        else if (opMode=='p')
+            modType = WifiModulationType::getMode80211p(bitrate);
+        else
+            opp_error("mode not supported");
+        return WifiModulationType::getSlotDuration(modType,wifiPreambleType);
+    }
     return ST;
 }
 
@@ -1771,10 +1829,29 @@ void Ieee80211NewMac::cancelAIFSPeriod()
 
 void Ieee80211NewMac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
 {
+    double tim;
     if (!endTimeout->isScheduled())
     {
         EV << "scheduling data timeout period\n";
-        double tim = computeFrameDuration(frameToSend) +SIMTIME_DBL( getSIFS()) + computeFrameDuration(LENGTH_ACK, basicBitrate) + MAX_PROPAGATION_DELAY * 2;
+        if (useModulationParameters)
+        {
+            ModulationType modType;
+            if ((opMode=='b') || (opMode=='g'))
+                modType = WifiModulationType::getMode80211g(bitrate);
+            else if (opMode=='a')
+                modType = WifiModulationType::getMode80211a(bitrate);
+            else if (opMode=='p')
+                modType = WifiModulationType::getMode80211p(bitrate);
+            else
+                opp_error("mode not supported");
+            WifiModulationType::getSlotDuration(modType,wifiPreambleType);
+            tim = computeFrameDuration(frameToSend) +SIMTIME_DBL(
+                 WifiModulationType::getSlotDuration(modType,wifiPreambleType) +
+                 WifiModulationType::getSifsTime(modType,wifiPreambleType) +
+                 WifiModulationType::get_aPHY_RX_START_Delay (modType,wifiPreambleType));
+        }
+        else
+            tim = computeFrameDuration(frameToSend) +SIMTIME_DBL( getSIFS()) + computeFrameDuration(LENGTH_ACK, basicBitrate) + MAX_PROPAGATION_DELAY * 2;
         EV<<" time out="<<tim*1e6<<"us"<<endl;
         scheduleAt(simTime() + tim, endTimeout);
     }
@@ -2378,17 +2455,22 @@ void Ieee80211NewMac::logState()
     EV << "\n# retryCounter 0.."<<numCategories()<<" = ";
     for (int i=0; i<numCategories(); i++)
          EV << retryCounter(i) << " ";
-    EV << ", radioState = " << radioState << ", nav = " << nav <<  ",txop is "<< txop << endl;
-    EV << "queue size 0.."<<numCategories()<<" = ";
+    EV << ", radioState = " << radioState << ", nav = " << nav <<  ",txop is "<< txop << "\n";
+    EV << "#queue size 0.."<<numCategories()<<" = ";
     for (int i=0; i<numCategories(); i++)
         EV << transmissionQueue(i)->size() << " ";
-    EV << " medium is " << medium << ", scheduled AIFS are ";
+    EV << ", medium is " << medium << ", scheduled AIFS are ";
     for (int i=0; i<numCategories(); i++)
         EV << i << "(" << a[i] << ")";
     EV << ", scheduled backoff are ";
     for (int i=0; i<numCategories(); i++)
         EV << i << "(" << b[i] << ")";
-    EV << "# currentAC: " << currentAC << ", oldcurrentAC: " << oldcurrentAC << endl;
+    EV << "\n# currentAC: " << currentAC << ", oldcurrentAC: " << oldcurrentAC;
+    if (getCurrentTransmission() != NULL)
+         EV << "\n# current transmission: " << getCurrentTransmission()->getId();
+    else
+        EV << "\n# current transmission: none";
+    EV << endl;
 }
 
 const char *Ieee80211NewMac::modeName(int mode)
@@ -2899,4 +2981,66 @@ Ieee80211NewMac::getControlAnswerMode(ModulationType reqMode)
     }
 
   return mode;
+}
+
+// This methods implemet the duplicate filter
+void Ieee80211NewMac::sendUp(cMessage *msg)
+{
+    EV << "sending up " << msg << "\n";
+
+    if (duplicateDetect) // duplicate detection filter
+    {
+    	Ieee80211DataOrMgmtFrame *frame =dynamic_cast<Ieee80211DataOrMgmtFrame*>(msg);
+        if (frame)
+        {
+            Ieee80211ASFTupleList::iterator it = asfTuplesList.find(frame->getTransmitterAddress());
+            if (it==asfTuplesList.end())
+            {
+                Ieee80211ASFTuple tuple;
+                tuple.receivedTime=simTime();
+                tuple.sequenceNumber= frame->getSequenceNumber();
+                tuple.fragmentNumber=frame->getFragmentNumber();
+                asfTuplesList.insert(std::pair<MACAddress,Ieee80211ASFTuple>(frame->getTransmitterAddress(),tuple));
+            }
+            else
+            {
+            	// check if duplicate
+            	if (it->second.sequenceNumber==frame->getSequenceNumber() && it->second.fragmentNumber==frame->getFragmentNumber())
+            	{
+            	    return;
+            	}
+            	else
+            	{
+                    // actualize
+            	    it->second.sequenceNumber=frame->getSequenceNumber();
+            	    it->second.fragmentNumber=frame->getFragmentNumber();
+            	    it->second.receivedTime=simTime();
+            	}
+            }
+        }
+    }
+
+    if (msg->isPacket())
+        emit(packetSentToUpperSignal, msg);
+
+    send(msg, upperLayerOut);
+}
+
+void Ieee80211NewMac::removeOldTuplesFromDuplicateMap()
+{
+    if (duplicateDetect && lastTimeDelete+duplicateTimeOut>=simTime())
+    {
+        lastTimeDelete=simTime();
+        for (Ieee80211ASFTupleList::iterator it = asfTuplesList.begin();it!=asfTuplesList.begin();)
+        {
+            if (it->second.receivedTime+duplicateTimeOut<simTime())
+            {
+                Ieee80211ASFTupleList::iterator itAux=it;
+                it++;
+                asfTuplesList.erase(itAux);
+            }
+            else
+                it++;
+        }
+    }
 }

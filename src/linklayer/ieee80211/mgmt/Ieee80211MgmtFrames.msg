@@ -21,6 +21,8 @@
 cplusplus {{
 #include "MACAddress.h"
 #include "Ieee80211Frame_m.h"
+#define PREQElemLen 11
+#define PERRElemLen 13
 }}
 
 class noncobject MACAddress;
@@ -42,6 +44,8 @@ struct Ieee80211CapabilityInformation
     bool CFPollable;
     bool CFPollRequest;
     bool privacy;
+    bool DelayedBlockAck;
+    bool InmediateBlockAck;
 }
 
 //
@@ -71,6 +75,21 @@ enum Ieee80211ReasonCode
     RC_NONASS_CLASS3 = 7;
     RC_DIASS_MS_LEAVING = 8;
     RC_NONAUTH_ASS_REQUEST = 9;
+    RC_MESH_PEERING_CANCELLED = 52;
+    RC_MESH_MAX_PEERS = 53;
+    RC_MESH_CONFIGURATION_POLICY_VIOLATION = 54;
+    RC_MESH_CLOSE_RCVD = 55;
+    RC_MESH_MAX_RETRIES = 56;
+    RC_MESH_CONFIRM_TIMEOUT = 57;
+    RC_MESH_INVALID_GTK = 58;
+    RC_MESH_INCONSISTENT_PARAMETERS = 59;
+    RC_MESH_INVALID_SECURITY_CAPABILITY = 60;
+    RC_MESH_PATH_ERROR_NO_PROXY_INFORMATION = 61;
+    RC_MESH_PATH_ERROR_NO_FORWARDING_INFORMATION = 60;
+    RC_MESH_PATH_ERROR_DESTINATION_UNREACHABLE = 63;
+    RC_MAC_ADDRESS_ALREADY_EXISTS_IN_MBSS = 64;
+    RC_MESH_CHANNEL_SWITCH_REGULATORY_REQUIREMENTS = 65;
+    RC_MESH_CHANNEL_SWITCH_UNSPECIFIED = 66;
 }
 
 //
@@ -90,6 +109,18 @@ enum Ieee80211StatusCode
     SC_AUTH_TIMEOUT = 16;
     SC_ASS_TOO_MANY_MS = 17;
     SC_DATARATE_UNSUP = 18;
+    SC_AUTH_REJECT_ANTI_CLOGING = 76;
+    SC_AUTH_REJECT_FINITE_CYC_GROUP_UNS = 77;
+    SC_TBTT_REQUEST = 78;
+}
+
+enum Ieee80211HWMPCode
+{
+    IE11S_GANN = 125;
+    IE11S_RANN = 126;
+    IE11S_PREQ = 130;
+    IE11S_PREP = 131;
+    IE11S_PERR = 132;
 }
 
 //
@@ -212,7 +243,92 @@ class Ieee80211ProbeResponseFrameBody extends Ieee80211BeaconFrameBody
 {
 }
 
+class Ieee80211ActionFrameBody extends Ieee80211FrameBody
+{
+}
 
+class Ieee80211ActionHWMPFrameBody extends Ieee80211ActionFrameBody
+{
+     int id enum(Ieee80211HWMPCode);
+     //unsigned char length; 
+     unsigned char flags = 0;
+     unsigned char hopsCount = 0;
+     unsigned char TTL = 32;
+ }
+
+
+struct PREQElem
+{
+     bool TO = true;
+     bool USN = false;
+     MACAddress targetAddress;
+     unsigned int targetSeqNumber;
+}
+
+struct PERRElem
+{
+     bool RC;
+     bool AE;
+     MACAddress destAddress;
+     unsigned int destSeqNumber;
+     unsigned int destExternalAddress;
+     unsigned short reasonCode;
+}
+
+     
+class Ieee80211ActionRANNFrameBody extends Ieee80211ActionHWMPFrameBody
+{
+     bodyLength = 23;
+     id = IE11S_RANN;
+     MACAddress root;
+     unsigned int seqNumber;
+     unsigned int interval;
+     unsigned int metric = 0;
+}
+
+class  Ieee80211ActionPREQFrameBody extends Ieee80211ActionHWMPFrameBody
+{
+     bodyLength = 26;
+     id = IE11S_PREQ;
+     unsigned int pathDiscoveryId;
+     MACAddress originator;
+     unsigned int originatorSeqNumber;
+     MACAddress originatorExternalAddr;
+     unsigned int lifeTime;
+     unsigned int metric = 0;
+     unsigned char targetCount;
+     PREQElem preqElem[];
+}
+
+class  Ieee80211ActionPREPFrameBody extends Ieee80211ActionHWMPFrameBody
+{
+     bodyLength = 37;
+     id = IE11S_PREP;
+     MACAddress target;
+     unsigned int targetSeqNumber;
+     MACAddress tagetExternalAddr;
+     unsigned int lifeTime;
+     unsigned int metric = 0;
+     MACAddress originator;
+     unsigned int originatorSeqNumber;
+}
+
+class  Ieee80211ActionPERRFrameBody extends Ieee80211ActionHWMPFrameBody
+{
+     bodyLength = 2;
+     id = IE11S_PERR;
+     unsigned char numDestination;
+     PERRElem perrElem[];
+}
+
+class  Ieee80211ActionGANNFrameBody extends Ieee80211ActionHWMPFrameBody
+{
+    bodyLength = 15;
+    id = IE11S_GANN;
+    MACAddress meshGateAddress;
+    unsigned int meshGateSeqNumber;
+    
+}
 //--------------------------------------------------------------
 
 
@@ -315,4 +431,63 @@ packet Ieee80211ProbeResponseFrame extends Ieee80211ManagementFrame
     byteLength = 28+getBody().getBodyLength();
     Ieee80211ProbeResponseFrameBody body;
 }
+
+//
+// Action frames
+//
+packet Ieee80211ActionFrame extends Ieee80211ManagementFrame
+{
+    type = ST_ACTION;
+    byteLength = 28+getBody().getBodyLength();
+    Ieee80211ActionFrameBody body;
+}
+
+//
+//  HWMP action frames
+//
+packet Ieee80211ActionHWMPFrame extends Ieee80211ActionFrame
+{
+    type = ST_ACTION;
+    byteLength = 28+getBody().getBodyLength();
+    Ieee80211ActionHWMPFrameBody body;
+}
+
+
+packet Ieee80211ActionRANNFrame extends Ieee80211ActionHWMPFrame
+{
+    type = ST_ACTION;
+    byteLength = 28+getBody().getBodyLength();
+    Ieee80211ActionRANNFrameBody body;
+}
+
+packet Ieee80211ActionPREQFrame extends Ieee80211ActionHWMPFrame
+{
+    type = ST_ACTION;
+    byteLength = 28+getBody().getBodyLength();
+    Ieee80211ActionPREQFrameBody body;
+}
+
+
+packet Ieee80211ActionPREPFrame extends Ieee80211ActionHWMPFrame
+{
+    type = ST_ACTION;
+    byteLength = 28+getBody().getBodyLength();
+    Ieee80211ActionPREPFrameBody body;
+}
+
+packet Ieee80211ActionPERRFrame extends Ieee80211ActionHWMPFrame
+{
+    type = ST_ACTION;
+    byteLength = 28+getBody().getBodyLength();
+    Ieee80211ActionPERRFrameBody body;
+}
+
+
+packet Ieee80211ActionGANNFrame extends Ieee80211ActionHWMPFrame
+{
+    type = ST_ACTION;
+    byteLength = 28+getBody().getBodyLength();
+    Ieee80211ActionGANNFrameBody body;
+}
+
 

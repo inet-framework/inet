@@ -53,6 +53,11 @@ enum
     NF_MAC_BECAME_IDLE,
     NF_L2_BEACON_LOST,   // missed several consecutive beacons (currently Ieee80211)
     NF_L2_ASSOCIATED,    // successfully associated with an AP (currently Ieee80211)
+    NF_L2_ASSOCIATED_NEWAP,   // successfully associated with an AP (currently Ieee80211)
+    NF_L2_ASSOCIATED_OLDAP,
+    NF_L2_DISSOCIATED,  // same as beacon_loast but used in higher layers
+    NF_L2_AP_ASSOCIATED,  // Emit by the AP, successfully associated with this AP (currently Ieee80211)
+    NF_L2_AP_DISSOCIATED, // Emit by the AP, successfully disassociated with this AP (currently Ieee80211)
 
     NF_LINK_BREAK, // Used for manet link layer feedback
     NF_LINK_PROMISCUOUS, // Used for manet promiscuous mode, the packets that have this node how destination are no promiscuous send

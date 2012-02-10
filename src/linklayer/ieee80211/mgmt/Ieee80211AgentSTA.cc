@@ -19,6 +19,7 @@
 #include "Ieee80211AgentSTA.h"
 #include "Ieee80211Primitives_m.h"
 #include "NotifierConsts.h"
+#include "InterfaceTableAccess.h"
 
 
 Define_Module(Ieee80211AgentSTA);
@@ -45,8 +46,18 @@ void Ieee80211AgentSTA::initialize(int stage)
         while ((token = tokenizer.nextToken())!=NULL)
             channelsToScan.push_back(atoi(token));
 
-        NotificationBoard *nb = NotificationBoardAccess().get();
+        nb = NotificationBoardAccess().get();
         nb->subscribe(this, NF_L2_BEACON_LOST);
+
+        InterfaceTable *ift = (InterfaceTable*)InterfaceTableAccess().getIfExists();
+        myIface = NULL;
+        if (!ift)
+        {
+            myIface = ift->getInterfaceByName(getParentModule()->getFullName());
+        }
+
+        // JcM add: get the default ssid, if there is one.
+        default_ssid = par("default_ssid").stringValue();
 
         //Statistics:
         sentRequestSignal = registerSignal("sentRequest");
@@ -54,7 +65,10 @@ void Ieee80211AgentSTA::initialize(int stage)
         dropConfirmSignal = registerSignal("dropConfirm");
 
         // start up: send scan request
-        scheduleAt(simTime()+uniform(0, maxChannelTime), new cMessage("startUp", MK_STARTUP));
+        if (par("startingTime").doubleValue()>0)
+            scheduleAt(simTime()+par("startingTime").doubleValue(), new cMessage("startUp", MK_STARTUP));
+        else
+            scheduleAt(simTime()+uniform(0, maxChannelTime), new cMessage("startUp", MK_STARTUP));
     }
 }
 
@@ -114,6 +128,7 @@ void Ieee80211AgentSTA::receiveChangeNotification(int category, const cObject *d
         getParentModule()->getParentModule()->bubble("Beacon lost!");
         //sendDisassociateRequest();
         sendScanRequest();
+        nb->fireChangeNotification(NF_L2_DISSOCIATED, myIface);
     }
 }
 
@@ -196,7 +211,29 @@ void Ieee80211AgentSTA::sendDisassociateRequest(const MACAddress& address, int r
 void Ieee80211AgentSTA::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
 {
     // choose best AP
-    int bssIndex = chooseBSS(resp);
+
+    int bssIndex;
+    if (this->default_ssid=="")
+    {
+            // no default ssid, so pick the best one
+            bssIndex = chooseBSS(resp);
+    }
+    else
+    {
+        // search if the default_ssid is in the list, otherwise
+        // keep searching.
+        for (int i=0; i<(int)resp->getBssListArraySize(); i++)
+        {
+            std::string resp_ssid = resp->getBssList(i).getSSID();
+            if (resp_ssid == this->default_ssid)
+            {
+                EV << "found default SSID " << resp_ssid << endl;
+                bssIndex = i;
+                break;
+            }
+        }
+    }
+
     if (bssIndex==-1)
     {
         EV << "No (suitable) AP found, continue scanning\n";
@@ -280,6 +317,13 @@ void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
         emit(acceptConfirmSignal, PR_ASSOCIATE_CONFIRM);
         // we are happy!
         getParentModule()->getParentModule()->bubble("Associated with AP");
+        if(prevAP.isUnspecified() || prevAP != resp->getAddress())
+        {
+            nb->fireChangeNotification(NF_L2_ASSOCIATED_NEWAP, myIface); //XXX detail: InterfaceEntry?
+            prevAP = resp->getAddress();
+        }
+        else
+            nb->fireChangeNotification(NF_L2_ASSOCIATED_OLDAP, myIface);
     }
 }
 
@@ -296,6 +340,7 @@ void Ieee80211AgentSTA::processReassociateConfirm(Ieee80211Prim_ReassociateConfi
     else
     {
         EV << "Reassociation successful\n";
+        nb->fireChangeNotification(NF_L2_ASSOCIATED_OLDAP, myIface); //XXX detail: InterfaceEntry?
         emit(acceptConfirmSignal, PR_REASSOCIATE_CONFIRM);
         // we are happy!
     }

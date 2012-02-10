@@ -46,6 +46,7 @@ enum Ieee80211FrameType
     ST_DISASSOCIATION = 0x0a;
     ST_AUTHENTICATION = 0x0b;
     ST_DEAUTHENTICATION = 0x0c;
+    ST_ACTION = 0x0d;
     ST_NOACKACTION = 0x0e;
 
     // control (CFEND/CFEND_CFACK omitted):

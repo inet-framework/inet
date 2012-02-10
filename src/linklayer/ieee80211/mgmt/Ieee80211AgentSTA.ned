@@ -35,6 +35,8 @@ simple Ieee80211AgentSTA
         double maxChannelTime @unit(s) = default(300ms); // channel time for passive scanning, and max channel time for active scanning
         double authenticationTimeout @unit(s) = default(5s); // timeout for the authentication procedure
         double associationTimeout @unit(s) = default(5s); // timeout for the association procedure
+        double startingTime @unit("s") = default(-1s); // agent starting time.
+        string default_ssid = default(""); // default ssid
         @display("i=block/control");
         @statistic[sentRequest](title="sent requests"; record=count,vector); // ENUM! ~Ieee80211PrimRequestCode
         @statistic[acceptConfirm](title="accepted confirms"; record=count,vector); // ENUM! ~Ieee80211PrimConfirmCode

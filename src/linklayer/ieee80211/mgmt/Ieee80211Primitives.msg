@@ -188,6 +188,7 @@ class Ieee80211Prim_AssociateRequest extends Ieee80211PrimRequest
 //
 class Ieee80211Prim_AssociateConfirm extends Ieee80211PrimConfirm
 {
+    MACAddress address;
 }
 
 //

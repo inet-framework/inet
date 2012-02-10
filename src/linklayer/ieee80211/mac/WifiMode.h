@@ -73,6 +73,9 @@ public:
   static simtime_t getPreambleAndHeader(ModulationType payloadMode, WifiPreamble preamble);
   static simtime_t getPayloadDuration(uint64_t size, ModulationType payloadMode);
   static simtime_t calculateTxDuration(uint64_t size, ModulationType payloadMode, WifiPreamble preamble);
+  static simtime_t getSlotDuration(ModulationType payloadMode, WifiPreamble preamble);
+  static simtime_t getSifsTime(ModulationType payloadMode, WifiPreamble preamble);
+  static simtime_t get_aPHY_RX_START_Delay(ModulationType payloadMode, WifiPreamble preamble);
   static ModulationType getPlcpHeaderMode(ModulationType payloadMode, WifiPreamble preamble);
 };
 #endif

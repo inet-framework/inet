@@ -22,6 +22,7 @@
 #include "PhyControlInfo_m.h"
 #include "RadioState.h"
 #include "ChannelAccess.h"
+#include "Radio80211aControlInfo_m.h"
 
 //TBD supportedRates!
 //TBD use command msg kinds?
@@ -108,6 +109,7 @@ void Ieee80211MgmtSTA::initialize(int stage)
         // determine numChannels (needed when we're told to scan "all" channels)
         IChannelControl *cc = ChannelAccess::getChannelControl();
         numChannels = cc->getNumChannels();
+        nb->subscribe(this, NF_LINK_FULL_PROMISCUOUS);
     }
 }
 
@@ -340,6 +342,21 @@ void Ieee80211MgmtSTA::receiveChangeNotification(int category, const cObject *de
             EV << "busy radio channel detected during scanning\n";
             scanning.busyChannelDetected = true;
         }
+    }
+    else if (category==NF_LINK_FULL_PROMISCUOUS)
+    {
+        Ieee80211DataOrMgmtFrame *frame = dynamic_cast<Ieee80211DataOrMgmtFrame*>(const_cast<cPolymorphic*>(details));
+        if (!frame || frame->getControlInfo()==NULL)
+            return;
+        if (frame->getType()!=ST_BEACON)
+            return;
+        if (dynamic_cast <Radio80211aControlInfo*> (frame->getControlInfo())==NULL)
+            return;
+        Radio80211aControlInfo *ctl= dynamic_cast <Radio80211aControlInfo*> (frame->getControlInfo());
+        Ieee80211BeaconFrame *beacon= (check_and_cast<Ieee80211BeaconFrame *>(frame));
+        APInfo *ap = lookupAP(beacon->getTransmitterAddress());
+        if (ap)
+            ap->rxPower=ctl->getRecPow();
     }
 }
 

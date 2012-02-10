@@ -34,7 +34,7 @@ package inet.linklayer.ieee80211.mgmt;
 // This module checks if there is an other module connected above the management
 // module (e.g. RelayUnit) and sends the frame there if the frame's destination
 // is not on the associated station's list. Multicast frames are broadcasted on
-// the wireless card and a copy sent also up to the relay unit so it can broadcast
+// the wireless card and a copy sent also up to the relay unit so it can broadcast 
 // it on other interfaces.
 //
 // @author Andras Varga
@@ -46,6 +46,7 @@ simple Ieee80211MgmtAP like IIeee80211Mgmt
         double beaconInterval @unit("s") = default(100ms);
         int frameCapacity = default(100); // maximum queue length
         int numAuthSteps = default(4); // use 2 for Open System auth, 4 for WEP
+        bool forceRelayUnit=default(false);
         bool convertToEtherFrame = default(true);   // if true, frames sent up are converted to EthernetIIFrame
         //dataRate: numeric; XXX TBD
         @display("i=block/cogwheel");
