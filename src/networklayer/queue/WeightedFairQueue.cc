@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2001-2006  Sergio Andreozzi
-// Copyright (C) 2009 A. Ariza Universidad de M�laga
+// Copyright (C) 2009 A. Ariza Universidad de Malaga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License

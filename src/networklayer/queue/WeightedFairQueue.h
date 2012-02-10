@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2001-2006  Sergio Andreozzi
-// Copyright (C) 2009 A. Ariza Universidad de M�laga
+// Copyright (C) 2009 A. Ariza Universidad de Malaga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -42,7 +42,7 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
         double finish_t;  // for WFQ
         double queueMaxRate;
         double queueWeight;
-        unsigned int B;            // set of active queues in the GPS reference system
+        unsigned int B;    // set of active queues in the GPS reference system
         // B[]!=0 queue is active, ==0 queue is inactive
 
         std::queue<double> time;
@@ -98,7 +98,7 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
 
     virtual void setBandwidth(double val) { bandwidth = val; }
 
-    virtual double getBandwidth() { return bandwidth; }
+    virtual double getBandwidth() const { return bandwidth; }
 
     virtual void setQueueWeight(int i, double val)
     {
@@ -107,7 +107,7 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
         subqueueData[i].queueWeight = val;
     }
 
-    virtual double getQueueWeight(int i)
+    virtual double getQueueWeight(int i) const
     {
         if (i < 0 || i >= numQueues)
             opp_error("Queue index out of range");

@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2001-2006  Sergio Andreozzi
-// Copyright (C) 2009 A. Ariza Universidad de M�laga
+// Copyright (C) 2009 A. Ariza Universidad de Malaga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,9 +20,10 @@
 package inet.networklayer.queue;
 
 //
-// Drop-tail queue with QoS support, to be used in network interfaces.
-// Performs priority queueing.
-// Conforms to the OutputQueue interface.
+// Queue that implements Weighter Fair Queueing (WFQ), to be used in
+// network interfaces.
+//
+// @see ~REDQueue, ~DropTailQoSQueue, ~DropTailQueue
 //
 simple WeightedFairQueue like IOutputQueue
 {
