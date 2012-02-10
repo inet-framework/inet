@@ -68,7 +68,6 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
         }
 
     };
-    long totalLength;
 
     // statistics
     static simsignal_t queueLengthSignal;
@@ -82,57 +81,44 @@ class INET_API WeightedFairQueue : public PassiveQueueBase
     IQoSClassifier *classifier;
     cGate *outGate;
     bool useRed;
+    long totalLength;
 
-//  cSubQueue *diffserv_queue;
     double bandwidth; // total link bandwidth
     double  virt_time, last_vt_update, sum;
     bool GPS_idle;
     double safe_limit;
-
-    bool RedTest(cMessage *msg, int queueIndex);
 
   public:
     WeightedFairQueue();
     ~WeightedFairQueue();
 
     virtual void setBandwidth(double val) { bandwidth = val; }
+
     virtual double getBandwidth() { return bandwidth; }
 
     virtual void setQueueWeight(int i, double val)
     {
-        if (i >= numQueues)
-            opp_error ("nun queue error");
+        if (i < 0 || i >= numQueues)
+            opp_error("Queue index out of range");
         subqueueData[i].queueWeight = val;
     }
 
     virtual double getQueueWeight(int i)
     {
-        if (i >= numQueues)
-            opp_error ("nun queue error");
+        if (i < 0 || i >= numQueues)
+            opp_error("Queue index out of range");
         return subqueueData[i].queueWeight;
     }
 
   protected:
     virtual void initialize();
 
-    /**
-     * Redefined from PassiveQueueBase.
-     */
+    virtual bool RedTest(cMessage *msg, int queueIndex);
+
+    // methods redefined from PassiveQueueBase:
     virtual cMessage *enqueue(cMessage *msg);
-
-    /**
-     * Redefined from PassiveQueueBase.
-     */
     virtual cMessage *dequeue();
-
-    /**
-     * Redefined from PassiveQueueBase.
-     */
     virtual void sendOut(cMessage *msg);
-
-    /**
-     * Redefined from IPassiveQueue.
-     */
     virtual bool isEmpty();
 };
 
