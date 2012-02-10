@@ -135,6 +135,8 @@ void EtherBus::checkConnections()
 
 void EtherBus::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
+    Enter_Method_Silent();
+
     ASSERT(signalID == POST_MODEL_CHANGE);
 
     // throw error if new gates have been added

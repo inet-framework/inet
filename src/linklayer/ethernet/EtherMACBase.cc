@@ -326,6 +326,8 @@ void EtherMACBase::registerInterface()
 
 void EtherMACBase::receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj)
 {
+    Enter_Method_Silent();
+
     ASSERT(signalId == POST_MODEL_CHANGE);
 
     if (dynamic_cast<cPostPathCreateNotification *>(obj))

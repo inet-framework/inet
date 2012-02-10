@@ -79,6 +79,8 @@ void EtherHub::checkConnections()
 
 void EtherHub::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
+    Enter_Method_Silent();
+
     ASSERT(signalID == POST_MODEL_CHANGE);
 
     // if new gates have been added, we need to call setDeliverOnReceptionStart(true) on them
