@@ -197,7 +197,7 @@ class FingerprintTestCase(SimulationTestCase):
             raise Exception("other")
         elif result.isFingerprintOK == False:
             self.storeFingerprintCallback(result.computedFingerprint)
-            assert False, "fingerprint mismatch; actual: " + str(result.computedFingerprint)
+            assert False, "fingerprint mismatch; actual " + str(result.computedFingerprint)
         else:
             pass
 
