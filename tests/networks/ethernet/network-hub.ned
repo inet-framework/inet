@@ -8,7 +8,6 @@ import ned.DatarateChannel;
 
 network HostsWithHub
 {
-    types:
     submodules:
         hostA: EtherHost2 {
             parameters:
@@ -28,6 +27,7 @@ network HostsWithHub
         }
         scenarioManager: ScenarioManager {
             parameters:
+                script = default(xml("<empty/>"));
                 @display("p=80,40");
         }
     connections:

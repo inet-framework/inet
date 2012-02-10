@@ -34,7 +34,9 @@ network HostsWithBus
                 ethg[3];
         }
         scenarioManager: ScenarioManager {
-            @display("p=184,180");
+            parameters:
+                script = default(xml("<empty/>"));
+                @display("p=184,180");
         }
     connections:
         bus.ethg++ <--> DatarateChannel <--> hostA.ethg;
