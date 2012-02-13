@@ -79,7 +79,6 @@ for (.i in 1:length(.names)) {
     .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
     .p <- ggplot(data=.df, aes(group=dr, colour=factor(dr), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
     .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.i])
-    ## .p <- .p + geom_point(aes(group=dr, colour=factor(dr), x=n, y=mean), size=.pt_size)
     .p <- .p + geom_point(aes(group=dr, shape=factor(dr), x=n, y=mean), size=.pt_size) + scale_shape_manual("Line Rate\n[Gb/s]", values=0:9)
     .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Line Rate\n[Gb/s]")
     .da_nh1_nf0_nv0.plots[[.i]] <- .p
@@ -95,15 +94,37 @@ for (.i in 1:length(.names)) {
 ###        process them separately.
 #################################################################################
 .dr.range <- unique(.da_nh1_nf0_nv0.df$dr)
+.da_nh1_nf0_nv0_tbf.df <- list()
+.da_nh1_nf0_nv0_tbf.plots <- list()
+for (.i in 1:length(.dr.range)) {
+    .file_list <- read.table(paste(.da_nh1_nf0_nv0_tbf.wd, paste("file_list_dr", as.character(.dr.range[.i]), ".txt", sep=""), sep="/"))
+    .df <- loadDataset(as.vector(.file_list$V1))
+    .scalars <- merge(cast(.df$runattrs, runid ~ attrname, value='attrvalue',
+                           subset=attrname %in% c('experiment', 'measurement', 'mr', 'bs', 'n')),
+                      .df$scalars, by='runid',
+                      all.x=TRUE)
+
+    ## collect average session delay, average session throughput, and mean session transfer rate
+    .tmp <- cast(.scalars, experiment+measurement+bs+mr+n+name ~ ., c(mean, ci.width),
+                 subset=grepl('.*\\.httpApp.*', module) &
+                 (name=='average session delay [s]' |
+                  name=='average session throughput [B/s]' |
+                  name=='mean session transfer rate [B/s]'))
+    .tmp <- subset(.tmp, select = c('mr', 'bs', 'n', 'name', 'mean', 'ci.width'))
+
+    ## convert factor columns (i.e., 'dr' and 'n') into numeric ones
+    .tmp <- subset(cbind(.tmp, as.numeric(as.character(.tmp$mr)), as.numeric(as.character(.tmp$bs)), as.numeric(as.character(.tmp$n))), select=c(7, 8, 9, 4, 5, 6))
+    names(.tmp)[1:3]=c('mr', 'bs', 'n')
+    .da_nh1_nf0_nv0_tbf.df[[.i]] <- sort_df(.tmp, vars=c('mr', 'bs', 'n'))
+
     .mr.range <- unique(.da_nh1_nf0_nv0_tbf.df[[.i]]$mr)
     .da_nh1_nf0_nv0_tbf.plots[[.i]] <- list()
-    for (.j in 1:length(.names)) {
-        for (.k in 1:length(.mr.range)) {
-            .df <- subset(.da_nh1_nf0_nv0_tbf.df[[.i]], mr==.mr.range[.k] & name==.names[.j], select=c(2, 3, 5, 6))
+    for (.j in 1:length(.mr.range)) {
+        for (.k in 1:length(.names)) {
+            .df <- subset(.da_nh1_nf0_nv0_tbf.df[[.i]], mr==.mr.range[.j] & name==.names[.k], select=c(2, 3, 5, 6))
             .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
             .p <- ggplot(data=.df, aes(group=bs, colour=factor(bs), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
-            .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.j])
-            ## .p <- .p + geom_point(aes(group=dr, colour=factor(dr), x=n, y=mean), size=.pt_size)
+            .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.k])
             .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[Byte]", values=0:9)
             .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[Byte]")
             .da_nh1_nf0_nv0_tbf.plots[[.i]][[(.j-1)*length(.mr.range)+.k]] <- .p
