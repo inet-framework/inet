@@ -1,3 +1,9 @@
+2012-02-11  Takeover from INETMANET
+
+    Added support for a new MultiQueue QoS packet classifier.
+    It can be activated by defining the USEMULTIQUEUE macro while
+    compiling INET.
+
 2011-12-22  Andras Varga
 
 	EtherMAC: statistics titles changed to lower case; cosmetics

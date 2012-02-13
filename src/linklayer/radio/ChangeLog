@@ -1,3 +1,11 @@
+2012-02-11  Takeover from INETMANET
+
+    Added support for configurable noise generators. It can be configured with
+    the noiseGenerator parameter of the Radio.
+
+    Added support for configurable error models. It can be configured with
+    the errorModel parameter of the Radio.
+
 2011-12-21  Andras Varga
 
 	Radio: statistics revised (titles changed to lower case; added "max"

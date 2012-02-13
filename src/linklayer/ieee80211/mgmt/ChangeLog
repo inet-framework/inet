@@ -1,3 +1,7 @@
+2012-02-11  Takeover from INETMANET
+ 
+    Added duplicate frame detection
+
 2012-01-11  Zoltan Bojthe
 
 	Removed compatibility code for older OMNeT++ versions (INET itself

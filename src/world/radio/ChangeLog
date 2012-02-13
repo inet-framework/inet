@@ -1,3 +1,10 @@
+2012-02-11 Takover from INETMANET
+
+    - Radio reception now can be disabled using enableReception/disableReception
+      on CahnnelControl.
+
+    - ChannelAccess now correctly unregisters the radio when descrtucted.
+
 2011-11-18  ------ INET-1.99.2 released ------
 
 2011-09-16  Levente Meszaros
