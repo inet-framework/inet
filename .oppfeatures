@@ -493,20 +493,6 @@
         linkerFlags = ""
         />
     <feature
-        id="Ieee80211_mesh"
-        name="802.11a/b/g/e (mesh networking mode)"
-        description = "IEEE 802.11a/b/g/e NIC supporting mesh networking"
-        initiallyEnabled = "true"
-        requires = "mobility radio TCP_INET MANET OSPFv2 MPLS UDP IPv4 IPv6"
-        labels = "nic wireless mesh"
-        nedPackages = "
-                       inet.linklayer.ieee80211mesh
-                      "
-        extraSourceFolders = ""
-        compileFlags = ""
-        linkerFlags = ""
-        />
-    <feature
         id="wireless_examples"
         name="wireless examples"
         description = "wireless examples"

@@ -1,6 +1,9 @@
 Recent changes in the INET Framework
 ====================================
 
+- Removed Ieee802.11 Mesh feature. It depended on to many upper layer 
+  protocols and features.
+
 INET-1.99.2 (Nov 18, 2011)
 --------------------------
 
