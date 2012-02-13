@@ -127,7 +127,7 @@ for (.i in 1:length(.dr.range)) {
             .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.k])
             .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[Byte]", values=0:9)
             .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[Byte]")
-            .da_nh1_nf0_nv0_tbf.plots[[.i]][[(.j-1)*length(.mr.range)+.k]] <- .p
+            .da_nh1_nf0_nv0_tbf.plots[[.i]][[(.j-1)*length(.names)+.k]] <- .p
         }
     }
 }
