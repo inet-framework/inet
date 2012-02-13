@@ -24,6 +24,7 @@
 
 // uncomment this if you do not want to log state machine transitions
 #define FSM_DEBUG
+//#define USEMULTIQUEUE
 
 #include "WifiMode.h"
 #include "WirelessMacBase.h"
@@ -34,6 +35,9 @@
 #include "RadioState.h"
 #include "FSMA.h"
 #include "IQoSClassifier.h"
+#ifdef  USEMULTIQUEUE
+#include "MultiQueue.h"
+#endif
 
 /**
  * IEEE 802.11g with e Media Access Control Layer.
@@ -59,8 +63,11 @@
  */
 class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
 {
+#ifdef  USEMULTIQUEUE
+    typedef MultiQueue Ieee80211DataOrMgmtFrameList;
+#else
     typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
-
+#endif
     /**
      * This is used to populate fragments and identify duplicated messages. See spec 9.2.9.
      */
