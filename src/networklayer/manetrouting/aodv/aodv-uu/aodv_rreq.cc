@@ -142,7 +142,7 @@ void NS_CLASS rreq_send(struct in_addr dest_addr, u_int32_t dest_seqno,
 #ifdef OMNETPP
     double delay = -1;
     if (par("EqualDelay"))
-        delay = par("broadCastDelay");
+        delay = par("broadcastDelay");
 #endif
 
     for (i = 0; i < MAX_NR_INTERFACES; i++)
@@ -194,7 +194,7 @@ void NS_CLASS rreq_forward(RREQ * rreq, int size, int ttl)
     /* Send out on all interfaces */
     double delay = -1;
     if (par("EqualDelay"))
-        delay = par("broadCastDelay");
+        delay = par("broadcastDelay");
 
     for (i = 0; i < MAX_NR_INTERFACES; i++)
     {

@@ -116,9 +116,9 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
     {
         /* Broadcast packet */
         jitter=0;
-        if (ConfVal(BroadCastJitter))
+        if (ConfVal(BroadcastJitter))
         {
-           jitter = uniform(0, ((double) ConfVal(BroadCastJitter))/1000);
+           jitter = uniform(0, ((double) ConfVal(BroadcastJitter))/1000);
            DEBUG("xmit jitter=%f s\n", jitter);
         }
     }
@@ -142,9 +142,9 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
     if (jitter)
         sendDelayed(p, jitter, "to_ip");
     else if (dp->dst.s_addr != DSR_BROADCAST)
-        sendDelayed(p, par("uniCastDelay"), "to_ip");
+        sendDelayed(p, par("unicastDelay"), "to_ip");
     else
-        sendDelayed(p, par("broadCastDelay"), "to_ip");
+        sendDelayed(p, par("broadcastDelay"), "to_ip");
     dp->payload = NULL;
     dsr_pkt_free(dp);
 }
@@ -224,9 +224,9 @@ void DSRUU::initialize(int stage)
         if (par("UseNetworkLayerAck"))
             confvals[UseNetworkLayerAck] = 1;
         int aux_var;
-        aux_var = par("BroadCastJitter");
+        aux_var = par("BroadcastJitter");
         if (aux_var!=-1)
-            confvals[BroadCastJitter] = aux_var;
+            confvals[BroadcastJitter] = aux_var;
         aux_var = par("RouteCacheTimeout");
         if (aux_var!=-1)
             confvals[RouteCacheTimeout] = par("RouteCacheTimeout");

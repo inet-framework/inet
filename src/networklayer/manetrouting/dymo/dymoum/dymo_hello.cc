@@ -84,7 +84,7 @@ void NS_CLASS hello_send(void *arg)
     double delay = -1;
     int cont = numInterfacesActive;
     if (par("EqualDelay"))
-        delay = par("broadCastDelay");
+        delay = par("broadcastDelay");
 
 // Send HELLO over all enabled interfaces
     for (i = 0; i < DYMO_MAX_NR_INTERFACES; i++)

@@ -628,9 +628,9 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
         else
         {
             if (useIndex)
-                sendToIp(aodv_msg, 654, destAdd, 654, ttl, par ("broadCastDelay").doubleValue(), dev->ifindex);
+                sendToIp(aodv_msg, 654, destAdd, 654, ttl, par ("broadcastDelay").doubleValue(), dev->ifindex);
             else
-                sendToIp(aodv_msg, 654, destAdd, 654, ttl, par ("broadCastDelay").doubleValue(), dev->ipaddr.s_addr);
+                sendToIp(aodv_msg, 654, destAdd, 654, ttl, par ("broadcastDelay").doubleValue(), dev->ipaddr.s_addr);
         }
         totalSend++;
 //       sendToIp(aodv_msg, 654, destAdd, 654,ttl);
@@ -675,9 +675,9 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
             else
             {
                 if (useIndex)
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("broadCastDelay").doubleValue(),dev->ifindex);
+                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("broadcastDelay").doubleValue(),dev->ifindex);
                 else
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("broadCastDelay").doubleValue(),dev->ipaddr.s_addr);
+                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("broadcastDelay").doubleValue(),dev->ipaddr.s_addr);
             }
         }
         else
@@ -693,9 +693,9 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
             else
             {
                 if (useIndex)
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("uniCastDelay").doubleValue(),dev->ifindex);
+                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("unicastDelay").doubleValue(),dev->ifindex);
                 else
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("uniCastDelay").doubleValue(),dev->ipaddr.s_addr);
+                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("unicastDelay").doubleValue(),dev->ipaddr.s_addr);
             }
         }
         totalSend++;

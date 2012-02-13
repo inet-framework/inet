@@ -212,7 +212,7 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
              *       * which have precursor nodes for the broken route */
             double delay = -1;
             if (par("EqualDelay"))
-                delay = par("broadCastDelay");
+                delay = par("broadcastDelay");
             int cont = getNumWlanInterfaces();
             for (i = 0; i < MAX_NR_INTERFACES; i++)
             {
@@ -374,7 +374,7 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
 #ifdef OMNETPP
             double delay = -1;
             if (par("EqualDelay"))
-                delay = par("broadCastDelay");
+                delay = par("broadcastDelay");
             int cont = getNumWlanInterfaces();
 #endif
             for (i = 0; i < MAX_NR_INTERFACES; i++)

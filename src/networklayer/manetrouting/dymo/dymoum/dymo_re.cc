@@ -564,7 +564,7 @@ void NS_CLASS __re_send(RE *re)
         double delay = -1;
 
         if (par("EqualDelay"))
-            delay = par("broadCastDelay");
+            delay = par("broadcastDelay");
 
         // Send RE over all enabled interfaces
         for (i = 0; i < DYMO_MAX_NR_INTERFACES; i++)

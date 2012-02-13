@@ -211,7 +211,7 @@ void NS_CLASS rerr_forward(RERR *rerr)
 
     double delay = -1;
     if (par("EqualDelay"))
-        delay = par("broadCastDelay");
+        delay = par("broadcastDelay");
 
     rerr->setByteLength(0);
 

@@ -215,9 +215,9 @@ int NSCLASS dsr_ack_req_send(struct dsr_pkt *dp)
     if (dp->flags & PKT_XMIT_JITTER)
     {
         /* Broadcast packet */
-        if (ConfVal(BroadCastJitter)!=0)
+        if (ConfVal(BroadcastJitter)!=0)
         {
-            jitter = uniform(0, ((double) ConfVal(BroadCastJitter))/1000);
+            jitter = uniform(0, ((double) ConfVal(BroadcastJitter))/1000);
             DEBUG("xmit jitter=%f s\n", jitter);
         }
     }
@@ -262,9 +262,9 @@ int NSCLASS dsr_ack_req_send(struct dsr_pkt *dp)
     if (jitter)
         sendDelayed(p, jitter, "to_ip");
     else if (dp->dst.s_addr != DSR_BROADCAST)
-        sendDelayed(p, par("uniCastDelay"), "to_ip");
+        sendDelayed(p, par("unicastDelay"), "to_ip");
     else
-        sendDelayed(p, par ("broadCastDelay"), "to_ip");
+        sendDelayed(p, par ("broadcastDelay"), "to_ip");
     return 1;
 }
 

@@ -120,7 +120,7 @@ void NS_CLASS hello_send(void *arg)
 #ifdef OMNETPP
     double delay = -1;
     if (par("EqualDelay"))
-        delay = par("broadCastDelay");
+        delay = par("broadcastDelay");
 #endif
 
     time_diff = timeval_diff(&now, &this_host.bcast_time);

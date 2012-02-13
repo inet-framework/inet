@@ -39,7 +39,7 @@ simple DSRUU like IManetRouting
         bool FlushLinkCache = default(true); // ??
         bool PromiscOperation = default(false);  // promiscuous mode is used to discover neighborhood nodes
         bool UseNetworkLayerAck = default(true); // use link layer level acknoledgements (section 8.3.1)
-        int BroadCastJitter = default(0); // (ms) re-broadcast a rout request with an additional jitter (section 8.2.2). If 0 the code will use uniCastDelay and broadCastDelay
+        int BroadcastJitter = default(0); // (ms) re-broadcast a rout request with an additional jitter (section 8.2.2). If 0 the code will use unicastDelay and broadcastDelay
         int RouteCacheTimeout = default(300); // (s) timeout for etries in the route cache (section 4.1)
         int SendBufferTimeout = default(30); // (s) how long packets without routes should be kept in the buffer
         int SendBufferSize = default(-1); // size of send buffer. -1 means default (which is 100)
@@ -66,8 +66,8 @@ simple DSRUU like IManetRouting
                          // if don't receive consecutive ETXRetryBeforeFail number detect link break
         bool PathCache = default(true); // (non RFC parameter)
         bool RetryPacket = default(false); // (non RFC parameter)
-        volatile double broadCastDelay @unit("s") = default(uniform(0s,0.005s));  // the delay added to broadcast operations if EqualDelay is set (used to model processing time)
-        volatile double uniCastDelay @unit("s") = default(0s);  // a delay added to unicast messaged (i.e. data packet forwarding) (used to model processing time)
+        volatile double broadcastDelay @unit("s") = default(uniform(0s,0.005s));  // the delay added to broadcast operations if EqualDelay is set (used to model processing time)
+        volatile double unicastDelay @unit("s") = default(0s);  // a delay added to unicast messaged (i.e. data packet forwarding) (used to model processing time)
         bool manetPurgeRoutingTables = default(true);
     gates:
         input from_ip;

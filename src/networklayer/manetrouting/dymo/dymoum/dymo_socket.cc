@@ -360,9 +360,9 @@ void NS_CLASS dymo_socket_send(struct in_addr dest_addr, struct dev_info *dev,do
         else
         {
             if (useIndex)
-                sendToIp(p, DYMO_PORT, destAdd, DYMO_PORT,DYMO_IPTTL,par("broadCastDelay"),dev->ifindex);
+                sendToIp(p, DYMO_PORT, destAdd, DYMO_PORT,DYMO_IPTTL,par("broadcastDelay"),dev->ifindex);
             else
-                sendToIp(p, DYMO_PORT, destAdd, DYMO_PORT,DYMO_IPTTL,par("broadCastDelay"),dev->ipaddr.s_addr);
+                sendToIp(p, DYMO_PORT, destAdd, DYMO_PORT,DYMO_IPTTL,par("broadcastDelay"),dev->ipaddr.s_addr);
         }
     }
     else
@@ -379,9 +379,9 @@ void NS_CLASS dymo_socket_send(struct in_addr dest_addr, struct dev_info *dev,do
         else
         {
             if (useIndex)
-                sendToIp(p, DYMO_PORT, destAdd, DYMO_PORT,DYMO_IPTTL,par("uniCastDelay"),dev->ifindex);
+                sendToIp(p, DYMO_PORT, destAdd, DYMO_PORT,DYMO_IPTTL,par("unicastDelay"),dev->ifindex);
             else
-                sendToIp(p, DYMO_PORT, destAdd, DYMO_PORT,DYMO_IPTTL,par("uniCastDelay"),dev->ipaddr.s_addr);
+                sendToIp(p, DYMO_PORT, destAdd, DYMO_PORT,DYMO_IPTTL,par("unicastDelay"),dev->ipaddr.s_addr);
         }
     }
     totalSend++;
