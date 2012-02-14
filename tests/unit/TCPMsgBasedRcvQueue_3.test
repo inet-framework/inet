@@ -1,5 +1,6 @@
 %description:
 Test TCPMsgBasedSendQueue, TCPMsgBasedRcvQueue classes
+- sending and receiving 2GB data
 
 %includes:
 #include "TCPQueueTesterFunctions.h"
@@ -18,14 +19,10 @@ uint32 seq = 0;
 rq->init(seq);
 ev << rq->info() <<"\n";
 
-enqueue(sq, "msg1", 500000000); //          0..1000000000
-enqueue(sq, "msg2", 500000000); // 1000000000..2000000000
-enqueue(sq, "msg3", 500000000); // 2000000000..3000000000
-enqueue(sq, "msg4", 500000000); // 3000000000..4000000000
-tryenqueue(sq, "msg5", 500000000); // 4000000000.. 705032704
-tryenqueue(sq, "msg6", 500000000); //  705032704..1705032704
-tryenqueue(sq, "msg7", 500000000); // 1705032704..2705032704
-tryenqueue(sq, "msg8", 500000000); // 2705032704..3705032704
+enqueue(sq, "msg1", 500000000); //          0.. 500000000
+enqueue(sq, "msg2", 500000000); //  500000000..1000000000
+enqueue(sq, "msg3", 500000000); // 1000000000..1500000000
+enqueue(sq, "msg4", 500000000); // 1500000000..2000000000
 
 ulong seglen = 250000000;
 seq = sq->getBufferStartSeq();
@@ -56,10 +53,6 @@ SQ:enqueue("msg1", 500000000): --> [0..500000000), 1 packets
 SQ:enqueue("msg2", 500000000): --> [0..1000000000), 2 packets
 SQ:enqueue("msg3", 500000000): --> [0..1500000000), 3 packets
 SQ:enqueue("msg4", 500000000): --> [0..2000000000), 4 packets
-SQ:enqueue("msg5", 500000000): --> Error: queue is full --> [0..2000000000), 4 packets
-SQ:enqueue("msg6", 500000000): --> Error: queue is full --> [0..2000000000), 4 packets
-SQ:enqueue("msg7", 500000000): --> Error: queue is full --> [0..2000000000), 4 packets
-SQ:enqueue("msg8", 500000000): --> Error: queue is full --> [0..2000000000), 4 packets
 SQ:createSegmentWithBytes(0, 250000000):
 RQ:insertSeg [0..250000000) --> rcv_nxt=250000000 [0..250000000) 0 msgs
 SQ:createSegmentWithBytes(250000000, 500000000): msg1[0..500000000)

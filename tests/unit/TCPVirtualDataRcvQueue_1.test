@@ -1,5 +1,8 @@
 %description:
 Test TCPVirtualDataRcvQueue class
+- segments out of order
+- overlapped segments
+- sequence number turn out zero
 
 %includes:
 #include "TCPQueueTesterFunctions.h"

@@ -1,5 +1,6 @@
 %description:
 Test TCPMsgBasedSendQueue, TCPMsgBasedRcvQueue classes
+Similar to TCPMsgBasedRcvQueue_1.test, but sequence number is turn out zero.
 
 %includes:
 #include "TCPQueueTesterFunctions.h"

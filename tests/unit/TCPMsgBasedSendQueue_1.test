@@ -1,5 +1,7 @@
 %description:
 Test TCPMsgBasedSendQueue class
+- segments with/without last byte of msg.
+- enqueueing, create segment, discard up.
 
 %includes:
 #include "TCPQueueTesterFunctions.h"
