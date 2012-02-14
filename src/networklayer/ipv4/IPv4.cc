@@ -313,6 +313,7 @@ void IPv4::handleMessageFromHL(cPacket *msg)
         else
         {
             EV << "No multicast interface, packet dropped\n";
+            numUnroutable++;
             delete datagram;
         }
     }
@@ -479,15 +480,18 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE
     if (!route)
     {
         EV << "No route, packet dropped.\n";
+        numUnroutable++;
         delete datagram;
     }
     else if (fromIE != route->getParent())
     {
         EV << "Did not arrive on parent interface, packet dropped.\n";
+        numDropped++;
         delete datagram;
     }
     else
     {
+        numForwarded++;
         // copy original datagram for multiple destinations
         const IPv4MulticastRoute::ChildInterfaceVector &children = route->getChildren();
         for (unsigned int i=0; i<children.size(); i++)
