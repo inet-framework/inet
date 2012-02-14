@@ -104,9 +104,9 @@
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             c6d3-70d0
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           714b-443f
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           c784-169c
-/examples/manetrouting/fg80211/,     -f omnetpp.ini -c General -r 0,                100s,            b6cf-2d75
-/examples/manetrouting/fg80211/ini/, -f Mob_DSR_omnetpp.ini -c General -r 0,        100s,            ef6d-8002
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c General -r 0,                25s,             0c9c-28e0
+/examples/manetrouting/fg80211/,     -f omnetpp.ini -c General -r 0,                100s,            9cdd-8401
+/examples/manetrouting/fg80211/ini/, -f Mob_DSR_omnetpp.ini -c General -r 0,        100s,            9ac7-badd
+/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c General -r 0,                25s,             b5ad-154c
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c General -r 0,                10s,             9905-ee02
 /examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             05c2-e365
 /examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0,          10000s,          7108-73d8
