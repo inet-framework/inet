@@ -17,9 +17,14 @@
 
 #include "NetAnimTrace.h"
 
+#include "Coord.h"
+#include "MobilityBase.h"
+
+
 Define_Module(NetAnimTrace);
 
 simsignal_t NetAnimTrace::messageSentSignal = SIMSIGNAL_NULL;
+simsignal_t NetAnimTrace::mobilityStateChangedSignal = SIMSIGNAL_NULL;
 
 // TODO: after release of OMNeT++ 4.1 final, update this code to similar class in omnetpp/contrib/util
 
@@ -36,8 +41,10 @@ void NetAnimTrace::initialize()
     dump();
 
     messageSentSignal = registerSignal("messageSent");
+    mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
     simulation.getSystemModule()->subscribe(POST_MODEL_CHANGE, this);
     simulation.getSystemModule()->subscribe(messageSentSignal, this);
+    simulation.getSystemModule()->subscribe(mobilityStateChangedSignal, this);
 }
 
 void NetAnimTrace::handleMessage(cMessage *msg)
@@ -95,6 +102,17 @@ void NetAnimTrace::receiveSignal(cComponent *source, simsignal_t signalID, cObje
             }
         }
     }
+    else if (signalID == mobilityStateChangedSignal)
+    {
+        MobilityBase* mobility = dynamic_cast<MobilityBase*>(source);
+        if (mobility)
+        {
+            Coord c = mobility->getCurrentPosition();
+            cModule *mod = findContainingNode(mobility);
+            if (mod && isRelevantModule(mod))
+                f << simTime() << " N " << mod->getId() << " " << c.x << " " << c.y << "\n";
+        }
+    }
     else if (signalID == POST_MODEL_CHANGE)
     {
         // record dynamic "node created" and "link created" lines.
@@ -131,6 +149,7 @@ void NetAnimTrace::addLink(cGate *gate)
     f << simTime() << " L " << gate->getOwnerModule()->getId() << " " << gate->getNextGate()->getOwnerModule()->getId() << "\n";
 }
 
+namespace {
 double toDouble(const char *s, double defaultValue)
 {
    if (!s || !*s)
@@ -138,6 +157,7 @@ double toDouble(const char *s, double defaultValue)
    char *end;
    double d = strtod(s, &end);
    return (end && *end) ? 0.0 : d; // return 0.0 on error, instead of throwing an exception
+}
 }
 
 void NetAnimTrace::resolveNodeCoordinates(cModule *submod, double& x, double& y)

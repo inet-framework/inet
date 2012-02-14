@@ -32,6 +32,7 @@ class INET_API NetAnimTrace : public cSimpleModule, protected cListener
 {
   protected:
     static simsignal_t messageSentSignal;
+    static simsignal_t mobilityStateChangedSignal;
     std::ofstream f;
   protected:
     virtual void initialize();
