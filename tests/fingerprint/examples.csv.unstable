@@ -1,0 +1,20 @@
+# workingdir,                        args,                                  simtimelimit,    fingerprint
+# repeat 5 times
+/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,        50000s,          6979-289d
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,      50s,             996b-dda2
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,     50s,             20df-9f24
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,       50s,             c965-b6ff
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,     50s,             58aa-c9e9
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,     50s,             33dd-eae7
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,       50s,             d53e-06fd
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,        50s,             439b-6f8f
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,            50s,             de38-b1cd
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,            1000s,           714b-443f
+/examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0,     25s,             e67c-d9a9
+/examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0,    25s,             95d5-4f14
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,            25s,             05c2-e365
+/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,        500s,            079e-7ff8
+/examples/rtp/multicast11/,          -f omnetpp.ini -c General -r 0,        1000s,           2802-b70e
+# repeat 8 times
+/examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,        500s,            d609-7d19
+/examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,        500s,            4493-d000

@@ -1,0 +1,8 @@
+# workingdir,                              args,                               simtimelimit,    fingerprint
+# repeat 4 times
+/examples/manetrouting/net80211_control/,  -f omnetpp.ini -c OLSR_ETX -r 0,    10s,             b9de-4da2
+/examples/manetrouting/grid_aodv/,         -f omnetpp.ini -c AODVUU -r 0,      10s,             f050-0340
+/examples/manetrouting/grid_aodv/,         -f omnetpp.ini -c OLSR_ETX -r 0,    10s,             dcda-dce7
+/examples/manetrouting/net80211_aodv/,     -f omnetpp.ini -c OLSR_ETX -r 0,    5s,              5060-657a
+/examples/manetrouting/fg80211/,           -f omnetpp.ini -c AODVUU -r 0,      100s,            4c75-6345
+/examples/manetrouting/fg80211/,           -f omnetpp.ini -c OLSR_ETX -r 0,    10s,             3fe8-d576
