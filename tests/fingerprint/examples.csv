@@ -149,7 +149,7 @@
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0,                500s,            547e-7401
 /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            4493-d000
 /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                500s,            d609-7d19
-/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            8295-b52f
+/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            e63e-7e08
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            377d-09bd
 /examples/voiptool/VoIPToolLargeNet/, -f omnetpp.ini -c General -r 0,                5s,              18e7-db4a
 /examples/voiptool/VoIPToolTest/,    -f omnetpp.ini -c g711_aLaw -r 0,              5s,              6ab4-6d9c
