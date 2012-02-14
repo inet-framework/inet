@@ -1,0 +1,15 @@
+C++ quirks (to be worked on when SCTP-2.2 is integrated from "master" branch):
+
+- "typedef struct {...} Foo" is a C trick, typedef is not needed in C++
+
+- "inline" keyword unnecessary when the function is defined inside the class declaration (it'll be inline anyway -- or not if the compiler decides so)
+
+- "return (expr)" -- parens not needed
+
+- "const int32" as function argument -- "const" is not very useful here (value cannot be changed by the caller anyway) and certainly not customary, could be removed
+
+- data members of TimeStats start with uppercase
+
+- message files: use "packet" keyword instead of "message Foo extends cPacket"
+
+- cPolymorphic -> cObject
