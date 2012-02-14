@@ -28,7 +28,7 @@ To add new streamSchedulers
     for ROUND_ROBIN.
 
 
-************************************************************/
+ ************************************************************/
 
 #include "SCTPAssociation.h"
 #include <list>
@@ -38,21 +38,21 @@ void SCTPAssociation::initStreams(uint32 inStreams, uint32 outStreams)
 {
     uint32 i;
 
-    sctpEV3<<"initStreams instreams="<<inStreams<<"  outstream="<<outStreams<<"\n";
+    sctpEV3 << "initStreams instreams=" << inStreams << "  outstream=" << outStreams << "\n";
     if (receiveStreams.size()==0 && sendStreams.size()==0)
     {
         for (i=0; i<inStreams; i++)
         {
             SCTPReceiveStream* rcvStream = new SCTPReceiveStream();
 
-            this->receiveStreams[i]=rcvStream;
+            this->receiveStreams[i] = rcvStream;
             rcvStream->setStreamId(i);
-            this->state->numMsgsReq[i]=0;
+            this->state->numMsgsReq[i] = 0;
         }
         for (i=0; i<outStreams; i++)
         {
             SCTPSendStream* sendStream = new SCTPSendStream(i);
-            this->sendStreams[i]=sendStream;
+            this->sendStreams[i] = sendStream;
             sendStream->setStreamId(i);
         }
     }
@@ -63,16 +63,16 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 {
     int32 sid, testsid;
 
-    sctpEV3<<"Stream Scheduler: RoundRobin\n";
+    sctpEV3 << "Stream Scheduler: RoundRobin\n";
 
     sid = -1;
 
     if ((state->ssLastDataChunkSizeSet == false || state->ssNextStream == false) &&
-         (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->length() > 0 ||
-         sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->length() > 0))
+            (sendStreams.find(state->lastStreamScheduled)->second->getUnorderedStreamQ()->length() > 0 ||
+                    sendStreams.find(state->lastStreamScheduled)->second->getStreamQ()->length() > 0))
     {
         sid = state->lastStreamScheduled;
-        sctpEV3<<"Stream Scheduler: again sid " << sid << ".\n";
+        sctpEV3 << "Stream Scheduler: again sid " << sid << ".\n";
         state->ssNextStream = true;
     }
     else
@@ -83,10 +83,10 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
             testsid = (testsid + 1) % outboundStreams;
 
             if (sendStreams.find(testsid)->second->getUnorderedStreamQ()->length() > 0 ||
-                sendStreams.find(testsid)->second->getStreamQ()->length() > 0)
+                    sendStreams.find(testsid)->second->getStreamQ()->length() > 0)
             {
                 sid = testsid;
-                sctpEV3<<"Stream Scheduler: chose sid " << sid << ".\n";
+                sctpEV3 << "Stream Scheduler: chose sid " << sid << ".\n";
 
                 if (!peek)
                     state->lastStreamScheduled = sid;
@@ -95,7 +95,7 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 
     }
 
-    sctpEV3<<"streamScheduler sid="<<sid<<" lastStream="<<state->lastStreamScheduled<<" outboundStreams="<<outboundStreams<<" next="<<state->ssNextStream<<"\n";
+    sctpEV3 << "streamScheduler sid=" << sid << " lastStream=" << state->lastStreamScheduled << " outboundStreams=" << outboundStreams << " next=" << state->ssNextStream << "\n";
 
     state->ssLastDataChunkSizeSet = false;
 
@@ -105,7 +105,7 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 
 int32 SCTPAssociation::numUsableStreams(void)
 {
-    int32 count=0;
+    int32 count = 0;
 
     for (SCTPSendStreamMap::iterator iter=sendStreams.begin(); iter!=sendStreams.end(); iter++)
         if (iter->second->getStreamQ()->length()>0 || iter->second->getUnorderedStreamQ()->length()>0)

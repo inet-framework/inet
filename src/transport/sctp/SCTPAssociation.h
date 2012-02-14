@@ -293,39 +293,39 @@ class INET_API SCTPDataVariables : public cPolymorphic
             initialDestination = path;
         }
         inline const IPvXAddress& getInitialDestination() const {
-            if(initialDestination != NULL) {
-                return(initialDestination->remoteAddress);
+            if (initialDestination != NULL) {
+                return (initialDestination->remoteAddress);
             }
-            return(zeroAddress);
+            return (zeroAddress);
         }
         inline SCTPPathVariables* getInitialDestinationPath() const {
-            return(initialDestination);
+            return (initialDestination);
         }
 
         inline void setLastDestination(SCTPPathVariables* path) {
             lastDestination = path;
         }
         inline const IPvXAddress& getLastDestination() const {
-            if(lastDestination != NULL) {
-                return(lastDestination->remoteAddress);
+            if (lastDestination != NULL) {
+                return (lastDestination->remoteAddress);
             }
-            return(zeroAddress);
+            return (zeroAddress);
         }
         inline SCTPPathVariables* getLastDestinationPath() const {
-            return(lastDestination);
+            return (lastDestination);
         }
 
         inline void setNextDestination(SCTPPathVariables* path) {
             nextDestination = path;
         }
         inline const IPvXAddress& getNextDestination() const {
-            if(nextDestination != NULL) {
-                return(nextDestination->remoteAddress);
+            if (nextDestination != NULL) {
+                return (nextDestination->remoteAddress);
             }
-            return(zeroAddress);
+            return (zeroAddress);
         }
         inline SCTPPathVariables* getNextDestinationPath() const {
-            return(nextDestination);
+            return (nextDestination);
         }
 
         cPacket*            userData;
@@ -374,13 +374,13 @@ class INET_API SCTPStateVariables : public cPolymorphic
             primaryPath = path;
         }
         inline const IPvXAddress& getPrimaryPathIndex() const {
-            if(primaryPath != NULL) {
-                return(primaryPath->remoteAddress);
+            if (primaryPath != NULL) {
+                return (primaryPath->remoteAddress);
             }
-            return(SCTPDataVariables::zeroAddress);
+            return (SCTPDataVariables::zeroAddress);
         }
         inline SCTPPathVariables* getPrimaryPath() const {
-            return(primaryPath);
+            return (primaryPath);
         }
 
         bool                        active;
@@ -508,398 +508,399 @@ class INET_API SCTPAssociation : public cObject
         uint32 bytesToSend;
     } BytesToBeSent;
     typedef struct congestionControlFunctions {
-        void (SCTPAssociation::*ccInitParams)(SCTPPathVariables* path);
-        void (SCTPAssociation::*ccUpdateAfterSack)();
-        void (SCTPAssociation::*ccUpdateAfterCwndTimeout)(SCTPPathVariables* path);
-        void (SCTPAssociation::*ccUpdateAfterRtxTimeout)(SCTPPathVariables* path);
-        void (SCTPAssociation::*ccUpdateMaxBurst)(SCTPPathVariables* path);
-        void (SCTPAssociation::*ccUpdateBytesAcked)(SCTPPathVariables* path, const uint32 ackedBytes, const bool ctsnaAdvanced);
+        void(SCTPAssociation::*ccInitParams)(SCTPPathVariables* path);
+        void(SCTPAssociation::*ccUpdateAfterSack)();
+        void(SCTPAssociation::*ccUpdateAfterCwndTimeout)(SCTPPathVariables* path);
+        void(SCTPAssociation::*ccUpdateAfterRtxTimeout)(SCTPPathVariables* path);
+        void(SCTPAssociation::*ccUpdateMaxBurst)(SCTPPathVariables* path);
+        void(SCTPAssociation::*ccUpdateBytesAcked)(SCTPPathVariables* path, const uint32 ackedBytes, const bool ctsnaAdvanced);
     } CCFunctions;
     typedef std::map<uint32, SCTPSendStream*>       SCTPSendStreamMap;
     typedef std::map<uint32, SCTPReceiveStream*> SCTPReceiveStreamMap;
 
-    public:
-        // connection identification by apps: appgateIndex+assocId
-        int32                   appGateIndex; // Application gate index
-        int32                   assocId;        // Identifies connection within the app
-        IPvXAddress             remoteAddr; // Remote address from last message
-        IPvXAddress             localAddr;      // Local address from last message
-        uint16                  localPort;      // Remote port from last message
-        uint16                  remotePort; // Local port from last message
-        uint32                  localVTag;      // Local verification tag
-        uint32                  peerVTag;       // Remote verification tag
-        bool                    listen;
+  public:
+    // connection identification by apps: appgateIndex+assocId
+    int32                   appGateIndex; // Application gate index
+    int32                   assocId;        // Identifies connection within the app
+    IPvXAddress             remoteAddr; // Remote address from last message
+    IPvXAddress             localAddr;      // Local address from last message
+    uint16                  localPort;      // Remote port from last message
+    uint16                  remotePort; // Local port from last message
+    uint32                  localVTag;      // Local verification tag
+    uint32                  peerVTag;       // Remote verification tag
+    bool                    listen;
 
-        // Timers
-        cMessage*               T1_InitTimer;
-        cMessage*               T2_ShutdownTimer;
-        cMessage*               T5_ShutdownGuardTimer;
-        cMessage*               SackTimer;
-        cMessage*               StartTesting;
+    // Timers
+    cMessage*               T1_InitTimer;
+    cMessage*               T2_ShutdownTimer;
+    cMessage*               T5_ShutdownGuardTimer;
+    cMessage*               SackTimer;
+    cMessage*               StartTesting;
 
-    protected:
-        AddressVector           localAddressList;
-        AddressVector           remoteAddressList;
-        uint32                  numberOfRemoteAddresses;
-        uint32                  inboundStreams;
-        uint32                  outboundStreams;
+  protected:
+    AddressVector           localAddressList;
+    AddressVector           remoteAddressList;
+    uint32                  numberOfRemoteAddresses;
+    uint32                  inboundStreams;
+    uint32                  outboundStreams;
 
-        int32                   status;
-        uint32                  initTsn;
-        uint32                  initPeerTsn;
-        uint32                  sackFrequency;
-        double                  sackPeriod;
-        CCFunctions             ccFunctions;
-        uint16                  ccModule;
+    int32                   status;
+    uint32                  initTsn;
+    uint32                  initPeerTsn;
+    uint32                  sackFrequency;
+    double                  sackPeriod;
+    CCFunctions             ccFunctions;
+    uint16                  ccModule;
 
-        cOutVector*             advRwnd;
-        cOutVector*             cumTsnAck;
-        cOutVector*             sendQueue;
-        cOutVector*             numGapBlocks;
+    cOutVector*             advRwnd;
+    cOutVector*             cumTsnAck;
+    cOutVector*             sendQueue;
+    cOutVector*             numGapBlocks;
 
-        // Variables associated with the state of this association
-        SCTPStateVariables*     state;
-        BytesToBeSent           bytes;
-        SCTP*                   sctpMain;                   // SCTP module
-        cFSM*                   fsm;                            // SCTP state machine
-        SCTPPathMap             sctpPathMap;
-        QueueCounter            qCounter;
-        SCTPQueue*              transmissionQ;
-        SCTPQueue*              retransmissionQ;
-        SCTPSendStreamMap       sendStreams;
-        SCTPReceiveStreamMap    receiveStreams;
-        SCTPAlgorithm*          sctpAlgorithm;
+    // Variables associated with the state of this association
+    SCTPStateVariables*     state;
+    BytesToBeSent           bytes;
+    SCTP*                   sctpMain;                   // SCTP module
+    cFSM*                   fsm;                            // SCTP state machine
+    SCTPPathMap             sctpPathMap;
+    QueueCounter            qCounter;
+    SCTPQueue*              transmissionQ;
+    SCTPQueue*              retransmissionQ;
+    SCTPSendStreamMap       sendStreams;
+    SCTPReceiveStreamMap    receiveStreams;
+    SCTPAlgorithm*          sctpAlgorithm;
 
-    public:
-        /**
-        * Constructor.
-        */
-        SCTPAssociation(SCTP* mod, int32 appGateIndex, int32 assocId);
-        /**
-        * Destructor.
-        */
-        ~SCTPAssociation();
-        /**
-        * Utility: Send data from sendQueue.
-        */
-        void sendOnPath(SCTPPathVariables* pathId, const bool firstPass = true);
-        void sendOnAllPaths(SCTPPathVariables* firstPath);
+  public:
+    /**
+    * Constructor.
+    */
+    SCTPAssociation(SCTP* mod, int32 appGateIndex, int32 assocId);
+    /**
+    * Destructor.
+    */
+    ~SCTPAssociation();
+    /**
+    * Utility: Send data from sendQueue.
+    */
+    void sendOnPath(SCTPPathVariables* pathId, const bool firstPass = true);
+    void sendOnAllPaths(SCTPPathVariables* firstPath);
 
-        /** Utility: returns name of SCTP_I_xxx constants */
-        static const char* indicationName(const int32 code);
+    /** Utility: returns name of SCTP_I_xxx constants */
+    static const char* indicationName(const int32 code);
 
-        /* @name Various getters */
-        //@{
-        inline int32 getFsmState() const { return fsm->getState(); };
-        inline SCTPStateVariables* getState() const { return state; };
-        inline SCTPQueue* getTransmissionQueue() const { return transmissionQ; };
-        inline SCTPQueue* getRetransmissionQueue() const { return retransmissionQ; };
-        inline SCTPAlgorithm* getSctpAlgorithm() const { return sctpAlgorithm; };
-        inline SCTP* getSctpMain() const { return sctpMain; };
-        inline cFSM* getFsm() const { return fsm; };
-        inline cMessage* getInitTimer() const { return T1_InitTimer; };
-        inline cMessage* getShutdownTimer() const { return T2_ShutdownTimer; };
-        inline cMessage* getSackTimer() const { return SackTimer; };
+    /* @name Various getters */
+    //@{
+    inline int32 getFsmState() const { return fsm->getState(); };
+    inline SCTPStateVariables* getState() const { return state; };
+    inline SCTPQueue* getTransmissionQueue() const { return transmissionQ; };
+    inline SCTPQueue* getRetransmissionQueue() const { return retransmissionQ; };
+    inline SCTPAlgorithm* getSctpAlgorithm() const { return sctpAlgorithm; };
+    inline SCTP* getSctpMain() const { return sctpMain; };
+    inline cFSM* getFsm() const { return fsm; };
+    inline cMessage* getInitTimer() const { return T1_InitTimer; };
+    inline cMessage* getShutdownTimer() const { return T2_ShutdownTimer; };
+    inline cMessage* getSackTimer() const { return SackTimer; };
 
-        /** Utility: returns name of SCTP_S_xxx constants */
-        static const char* stateName(const int32 state);
+    /** Utility: returns name of SCTP_S_xxx constants */
+    static const char* stateName(const int32 state);
 
-        static uint32 chunkToInt(const char* type);
+    static uint32 chunkToInt(const char* type);
 
-        /* Process self-messages (timers).
-        * Normally returns true. A return value of false means that the
-        * connection structure must be deleted by the caller (SCTPMain).
-        */
-        bool processTimer(cMessage* msg);
-        /**
-        * Process incoming SCTP segment. Normally returns true. A return value
-        * of false means that the connection structure must be deleted by the
-        * caller (SCTP).
-        */
-        bool processSCTPMessage(SCTPMessage* sctpmsg, const IPvXAddress& srcAddr, const IPvXAddress& destAddr);
-        /**
-        * Process commands from the application.
-        * Normally returns true. A return value of false means that the
-        * connection structure must be deleted by the caller (SCTP).
-        */
-        bool processAppCommand(cPacket* msg);
-        void removePath();
-        void removePath(const IPvXAddress& addr);
-        void deleteStreams();
-        void stopTimer(cMessage* timer);
-        void stopTimers();
-        inline SCTPPathVariables* getPath(const IPvXAddress& pathId) const {
-            SCTPPathMap::const_iterator iterator = sctpPathMap.find(pathId);
-            if (iterator !=sctpPathMap.end()) {
-                return iterator->second;
-            }
-            return NULL;
+    /* Process self-messages (timers).
+    * Normally returns true. A return value of false means that the
+    * connection structure must be deleted by the caller (SCTPMain).
+    */
+    bool processTimer(cMessage* msg);
+    /**
+    * Process incoming SCTP segment. Normally returns true. A return value
+    * of false means that the connection structure must be deleted by the
+    * caller (SCTP).
+    */
+    bool processSCTPMessage(SCTPMessage* sctpmsg, const IPvXAddress& srcAddr, const IPvXAddress& destAddr);
+    /**
+    * Process commands from the application.
+    * Normally returns true. A return value of false means that the
+    * connection structure must be deleted by the caller (SCTP).
+    */
+    bool processAppCommand(cPacket* msg);
+    void removePath();
+    void removePath(const IPvXAddress& addr);
+    void deleteStreams();
+    void stopTimer(cMessage* timer);
+    void stopTimers();
+    inline SCTPPathVariables* getPath(const IPvXAddress& pathId) const {
+        SCTPPathMap::const_iterator iterator = sctpPathMap.find(pathId);
+        if (iterator != sctpPathMap.end()) {
+            return iterator->second;
         }
-        void printSctpPathMap() const;
+        return NULL;
+    }
+    void printSctpPathMap() const;
 
 
-    protected:
-        /** @name FSM transitions: analysing events and executing state transitions */
-        //@{
-        /** Maps app command codes (msg kind of app command msgs) to SCTP_E_xxx event codes */
-        SCTPEventCode preanalyseAppCommandEvent(int32 commandCode);
-        /** Implemements the pure SCTP state machine */
-        bool performStateTransition(const SCTPEventCode& event);
-        void stateEntered(int32 state);
-        //@}
-        /** @name Processing app commands. Invoked from processAppCommand(). */
-        //@{
-        void process_ASSOCIATE(SCTPEventCode& event, SCTPCommand* sctpCommand, cPacket* msg);
-        void process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand* sctpCommand, cPacket* msg);
-        void process_SEND(SCTPEventCode& event, SCTPCommand* sctpCommand, cPacket* msg);
-        void process_CLOSE(SCTPEventCode& event);
-        void process_ABORT(SCTPEventCode& event);
-        void process_STATUS(SCTPEventCode& event, SCTPCommand* sctpCommand, cPacket* msg);
-        void process_RECEIVE_REQUEST(SCTPEventCode& event, SCTPCommand* sctpCommand);
-        void process_PRIMARY(SCTPEventCode& event, SCTPCommand* sctpCommand);
-        //@}
+  protected:
+    /** @name FSM transitions: analysing events and executing state transitions */
+    //@{
+    /** Maps app command codes (msg kind of app command msgs) to SCTP_E_xxx event codes */
+    SCTPEventCode preanalyseAppCommandEvent(int32 commandCode);
+    /** Implemements the pure SCTP state machine */
+    bool performStateTransition(const SCTPEventCode& event);
+    void stateEntered(int32 state);
+    //@}
+    /** @name Processing app commands. Invoked from processAppCommand(). */
+    //@{
+    void process_ASSOCIATE(SCTPEventCode& event, SCTPCommand* sctpCommand, cPacket* msg);
+    void process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand* sctpCommand, cPacket* msg);
+    void process_SEND(SCTPEventCode& event, SCTPCommand* sctpCommand, cPacket* msg);
+    void process_CLOSE(SCTPEventCode& event);
+    void process_ABORT(SCTPEventCode& event);
+    void process_STATUS(SCTPEventCode& event, SCTPCommand* sctpCommand, cPacket* msg);
+    void process_RECEIVE_REQUEST(SCTPEventCode& event, SCTPCommand* sctpCommand);
+    void process_PRIMARY(SCTPEventCode& event, SCTPCommand* sctpCommand);
+    //@}
 
-        /** @name Processing SCTP message arrivals. Invoked from processSCTPMessage(). */
-        //@{
-        bool process_RCV_Message(SCTPMessage* sctpseg, const IPvXAddress& src, const IPvXAddress& dest);
-        /**
-        * Process incoming SCTP packets. Invoked from process_RCV_Message
-        */
-        bool processInitArrived(SCTPInitChunk* initChunk, int32 sport, int32 dport);
-        bool processInitAckArrived(SCTPInitAckChunk* initAckChunk);
-        bool processCookieEchoArrived(SCTPCookieEchoChunk* cookieEcho, IPvXAddress addr);
-        bool processCookieAckArrived();
-        SCTPEventCode processDataArrived(SCTPDataChunk* dataChunk);
-        SCTPEventCode processSackArrived(SCTPSackChunk* sackChunk);
-        SCTPEventCode processHeartbeatAckArrived(SCTPHeartbeatAckChunk* heartbeatack, SCTPPathVariables* path);
-        //@}
+    /** @name Processing SCTP message arrivals. Invoked from processSCTPMessage(). */
+    //@{
+    bool process_RCV_Message(SCTPMessage* sctpseg, const IPvXAddress& src, const IPvXAddress& dest);
+    /**
+    * Process incoming SCTP packets. Invoked from process_RCV_Message
+    */
+    bool processInitArrived(SCTPInitChunk* initChunk, int32 sport, int32 dport);
+    bool processInitAckArrived(SCTPInitAckChunk* initAckChunk);
+    bool processCookieEchoArrived(SCTPCookieEchoChunk* cookieEcho, IPvXAddress addr);
+    bool processCookieAckArrived();
+    SCTPEventCode processDataArrived(SCTPDataChunk* dataChunk);
+    SCTPEventCode processSackArrived(SCTPSackChunk* sackChunk);
+    SCTPEventCode processHeartbeatAckArrived(SCTPHeartbeatAckChunk* heartbeatack, SCTPPathVariables* path);
+    //@}
 
-        /** @name Processing timeouts. Invoked from processTimer(). */
-        //@{
-        int32 process_TIMEOUT_RTX(SCTPPathVariables* path);
-        void process_TIMEOUT_HEARTBEAT(SCTPPathVariables* path);
-        void process_TIMEOUT_HEARTBEAT_INTERVAL(SCTPPathVariables* path, bool force);
-        void process_TIMEOUT_INIT_REXMIT(SCTPEventCode& event);
-        void process_TIMEOUT_PROBING();
-        void process_TIMEOUT_SHUTDOWN(SCTPEventCode& event);
-        int32 updateCounters(SCTPPathVariables* path);
-        //@}
+    /** @name Processing timeouts. Invoked from processTimer(). */
+    //@{
+    int32 process_TIMEOUT_RTX(SCTPPathVariables* path);
+    void process_TIMEOUT_HEARTBEAT(SCTPPathVariables* path);
+    void process_TIMEOUT_HEARTBEAT_INTERVAL(SCTPPathVariables* path, bool force);
+    void process_TIMEOUT_INIT_REXMIT(SCTPEventCode& event);
+    void process_TIMEOUT_PROBING();
+    void process_TIMEOUT_SHUTDOWN(SCTPEventCode& event);
+    int32 updateCounters(SCTPPathVariables* path);
+    //@}
 
-        void startTimer(cMessage* timer, const simtime_t& timeout);
+    void startTimer(cMessage* timer, const simtime_t& timeout);
 
-        /** Utility: clone a listening association. Used for forking. */
-        SCTPAssociation* cloneAssociation();
+    /** Utility: clone a listening association. Used for forking. */
+    SCTPAssociation* cloneAssociation();
 
-        /** Utility: creates send/receive queues and sctpAlgorithm */
-        void initAssociation(SCTPOpenCommand* openCmd);
+    /** Utility: creates send/receive queues and sctpAlgorithm */
+    void initAssociation(SCTPOpenCommand* openCmd);
 
-        /** Methods dealing with the handling of TSNs  **/
-        bool tsnIsDuplicate(const uint32 tsn) const;
-        bool advanceCtsna();
-        bool updateGapList(const uint32 tsn);
-        void removeFromGapList(const uint32 removedTsn);
-        bool makeRoomForTsn(const uint32 tsn, const uint32 length, const bool uBit);
+    /** Methods dealing with the handling of TSNs  **/
+    bool tsnIsDuplicate(const uint32 tsn) const;
+    bool advanceCtsna();
+    bool updateGapList(const uint32 tsn);
+    void removeFromGapList(const uint32 removedTsn);
+    bool makeRoomForTsn(const uint32 tsn, const uint32 length, const bool uBit);
 
-        /** Methods for creating and sending chunks */
-        void sendInit();
-        void sendInitAck(SCTPInitChunk* initchunk);
-        void sendCookieEcho(SCTPInitAckChunk* initackchunk);
-        void sendCookieAck(const IPvXAddress& dest);
-        void sendAbort();
-        void sendHeartbeat(const SCTPPathVariables* path);
-        void sendHeartbeatAck(const SCTPHeartbeatChunk* heartbeatChunk,
-                                     const IPvXAddress&         src,
-                                     const IPvXAddress&         dest);
-        void sendSack();
-        void sendShutdown();
-        void sendShutdownAck(const IPvXAddress& dest);
-        void sendShutdownComplete();
-        SCTPSackChunk* createSack();
-        /** Retransmitting chunks */
-        void retransmitInit();
-        void retransmitCookieEcho();
-        void retransmitShutdown();
-        void retransmitShutdownAck();
+    /** Methods for creating and sending chunks */
+    void sendInit();
+    void sendInitAck(SCTPInitChunk* initchunk);
+    void sendCookieEcho(SCTPInitAckChunk* initackchunk);
+    void sendCookieAck(const IPvXAddress& dest);
+    void sendAbort();
+    void sendHeartbeat(const SCTPPathVariables* path);
+    void sendHeartbeatAck(const SCTPHeartbeatChunk* heartbeatChunk,
+                                 const IPvXAddress&         src,
+                                 const IPvXAddress&         dest);
+    void sendSack();
+    void sendShutdown();
+    void sendShutdownAck(const IPvXAddress& dest);
+    void sendShutdownComplete();
+    SCTPSackChunk* createSack();
+    /** Retransmitting chunks */
+    void retransmitInit();
+    void retransmitCookieEcho();
+    void retransmitShutdown();
+    void retransmitShutdownAck();
 
-        /** Utility: adds control info to message and sends it to IP */
-        void sendToIP(SCTPMessage* sctpmsg, const IPvXAddress& dest, const bool qs = false);
-        inline void sendToIP(SCTPMessage* sctpmsg, const bool qs = false) {
-            sendToIP(sctpmsg, remoteAddr, qs);
+    /** Utility: adds control info to message and sends it to IP */
+    void sendToIP(SCTPMessage* sctpmsg, const IPvXAddress& dest, const bool qs = false);
+    inline void sendToIP(SCTPMessage* sctpmsg, const bool qs = false) {
+        sendToIP(sctpmsg, remoteAddr, qs);
+    }
+    void recordInPathVectors(SCTPMessage* pMsg, const IPvXAddress& rDest);
+    void scheduleSack();
+    /** Utility: signal to user that connection timed out */
+    void signalConnectionTimeout();
+
+    /** Utility: start a timer */
+    inline void scheduleTimeout(cMessage* msg, const simtime_t& timeout) {
+        sctpMain->scheduleAt(simulation.getSimTime() + timeout, msg);
+    }
+
+    /** Utility: cancel a timer */
+    inline cMessage* cancelEvent(cMessage* msg) {
+        return sctpMain->cancelEvent(msg);
+    }
+
+    /** Utility: sends packet to application */
+    void sendToApp(cPacket* msg);
+
+    /** Utility: sends status indication (SCTP_I_xxx) to application */
+    void sendIndicationToApp(const int32 code, const int32 value = 0);
+
+    /** Utility: sends SCTP_I_ESTABLISHED indication with SCTPConnectInfo to application */
+    void sendEstabIndicationToApp();
+    void pushUlp();
+    void sendDataArrivedNotification(uint16 sid);
+    void putInDeliveryQ(uint16 sid);
+    /** Utility: prints local/remote addr/port and app gate index/assocId */
+    void printConnBrief();
+    /** Utility: prints important header fields */
+    static void printSegmentBrief(SCTPMessage* sctpmsg);
+
+
+    /** Utility: returns name of SCTP_E_xxx constants */
+    static const char* eventName(const int32 event);
+
+    void addPath(const IPvXAddress& addr);
+    SCTPPathVariables* getNextPath(const SCTPPathVariables* oldPath) const;
+    inline const IPvXAddress& getNextAddress(const SCTPPathVariables* oldPath) const {
+        const SCTPPathVariables* nextPath = getNextPath(oldPath);
+        if (nextPath != NULL) {
+            return (nextPath->remoteAddress);
         }
-        void recordInPathVectors(SCTPMessage* pMsg, const IPvXAddress& rDest);
-        void scheduleSack();
-        /** Utility: signal to user that connection timed out */
-        void signalConnectionTimeout();
+        return (SCTPDataVariables::zeroAddress);
+    }
+    SCTPPathVariables* getNextDestination(SCTPDataVariables* chunk) const;
 
-        /** Utility: start a timer */
-        inline void scheduleTimeout(cMessage* msg, const simtime_t& timeout) {
-            sctpMain->scheduleAt(simulation.getSimTime() + timeout, msg);
+    void bytesAllowedToSend(SCTPPathVariables* path, const bool firstPass);
+
+    void pathStatusIndication(const SCTPPathVariables* path, const bool status);
+
+    bool allPathsInactive() const;
+
+    /**
+    * Manipulating chunks
+    */
+    SCTPDataChunk* transformDataChunk(SCTPDataVariables* chunk);
+    SCTPDataVariables* makeVarFromMsg(SCTPDataChunk* datachunk);
+
+    /**
+    *Dealing with streams
+    */
+
+    int32 streamScheduler(bool peek);
+    void initStreams(uint32 inStreams, uint32 outStreams);
+    int32 numUsableStreams();
+    typedef struct streamSchedulingFunctions {
+        void(SCTPAssociation::*ssInitStreams)(uint32 inStreams, uint32 outStreams);
+        int32(SCTPAssociation::*ssGetNextSid)(bool peek);
+        int32(SCTPAssociation::*ssUsableStreams)();
+    } SSFunctions;
+    SSFunctions ssFunctions;
+    uint16 ssModule;
+
+    /**
+    *    Queue Management
+    */
+    void process_QUEUE_MSGS_LIMIT(const SCTPCommand* sctpCommand);
+    void process_QUEUE_BYTES_LIMIT(const SCTPCommand* sctpCommand);
+    int32 getOutstandingBytes() const;
+    uint32 dequeueAckedChunks(const uint32          tsna,
+                                      SCTPPathVariables* path,
+                                      simtime_t&            rttEstimation);
+    SCTPDataMsg* peekOutboundDataMsg();
+    SCTPDataVariables* peekAbandonedChunk(const SCTPPathVariables* path);
+    SCTPDataVariables* getOutboundDataChunk(const SCTPPathVariables* path,
+                                                         const int32                  availableSpace,
+                                                         const int32                  availableCwnd);
+    SCTPDataMsg* dequeueOutboundDataMsg(const int32 availableSpace,
+                                                    const int32 availableCwnd);
+    bool nextChunkFitsIntoPacket(int32 bytes);
+    void putInTransmissionQ(uint32 tsn, SCTPDataVariables* chunk);
+    /**
+    * Flow control
+    */
+    void pmStartPathManagement();
+    void pmDataIsSentOn(SCTPPathVariables* path);
+    void pmClearPathCounter(SCTPPathVariables* path);
+    void pmRttMeasurement(SCTPPathVariables* path,
+                                 const simtime_t&     rttEstimation);
+    /**
+    * Compare TSNs
+    */
+    inline static int32 tsnLt(const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)<0); }
+    inline static int32 tsnLe(const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)<=0); }
+    inline static int32 tsnGe(const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)>=0); }
+    inline static int32 tsnGt(const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)>0); }
+    inline static int32 tsnBetween(const uint32 tsn1, const uint32 midtsn, const uint32 tsn2) { return ((tsn2-tsn1)>=(midtsn-tsn1)); }
+
+    inline static int16 ssnGt(const uint16 ssn1, const uint16 ssn2) { return ((int16)(ssn1-ssn2)>0); }
+
+    void disposeOf(SCTPMessage* sctpmsg);
+    void tsnWasReneged(SCTPDataVariables*         chunk,
+                       const int                    type);
+    void printOutstandingTsns();
+
+    /** SCTPCCFunctions **/
+    void initCCParameters(SCTPPathVariables* path);
+    void updateFastRecoveryStatus(const uint32 lastTsnAck);
+    void cwndUpdateAfterSack();
+    void cwndUpdateAfterCwndTimeout(SCTPPathVariables* path);
+    void cwndUpdateAfterRtxTimeout(SCTPPathVariables* path);
+    void cwndUpdateMaxBurst(SCTPPathVariables* path);
+    void cwndUpdateBytesAcked(SCTPPathVariables* path,
+                              const uint32          ackedBytes,
+                              const bool            ctsnaAdvanced);
+
+  private:
+    SCTPDataVariables* makeDataVarFromDataMsg(SCTPDataMsg*       datMsg,
+                                              SCTPPathVariables* path);
+    SCTPPathVariables* choosePathForRetransmission();
+    void timeForSack(bool& sackOnly, bool& sackWithData);
+    void recordCwndUpdate(SCTPPathVariables* path);
+    void handleChunkReportedAsAcked(uint32&             highestNewAck,
+                                    simtime_t&            rttEstimation,
+                                    SCTPDataVariables* myChunk,
+                                    SCTPPathVariables* sackPath);
+    void handleChunkReportedAsMissing(const SCTPSackChunk*    sackChunk,
+                                      const uint32                 highestNewAck,
+                                      SCTPDataVariables*       myChunk,
+                                      const SCTPPathVariables* sackPath);
+    void moveChunkToOtherPath(SCTPDataVariables* chunk,
+                              SCTPPathVariables* newPath);
+    void decreaseOutstandingBytes(SCTPDataVariables* chunk);
+    void increaseOutstandingBytes(SCTPDataVariables* chunk,
+                                  SCTPPathVariables* path);
+    int32 calculateBytesToSendOnPath(const SCTPPathVariables* pathVar);
+    void storePacket(SCTPPathVariables* pathVar,
+                     SCTPMessage*          sctpMsg,
+                     const uint16          chunksAdded,
+                     const uint16          dataChunksAdded,
+                     const uint32          packetBytes,
+                     const bool            authAdded);
+    void loadPacket(SCTPPathVariables* pathVar,
+                    SCTPMessage**        sctpMsg,
+                    uint16*                  chunksAdded,
+                    uint16*                  dataChunksAdded,
+                    uint32*                  packetBytes,
+                    bool*                authAdded);
+    inline void ackChunk(SCTPDataVariables* chunk) {
+        chunk->hasBeenAcked = true;
+    }
+    inline void unackChunk(SCTPDataVariables* chunk) {
+        chunk->hasBeenAcked = false;
+    }
+    inline bool chunkHasBeenAcked(const SCTPDataVariables* chunk) const {
+        return (chunk->hasBeenAcked);
+    }
+    inline bool chunkHasBeenAcked(const uint32 tsn) const {
+        const SCTPDataVariables* chunk = retransmissionQ->getChunk(tsn);
+        if (chunk) {
+            return (chunkHasBeenAcked(chunk));
         }
-
-        /** Utility: cancel a timer */
-        inline cMessage* cancelEvent(cMessage* msg) {
-            return sctpMain->cancelEvent(msg);
-        }
-
-        /** Utility: sends packet to application */
-        void sendToApp(cPacket* msg);
-
-        /** Utility: sends status indication (SCTP_I_xxx) to application */
-        void sendIndicationToApp(const int32 code, const int32 value = 0);
-
-        /** Utility: sends SCTP_I_ESTABLISHED indication with SCTPConnectInfo to application */
-        void sendEstabIndicationToApp();
-        void pushUlp();
-        void sendDataArrivedNotification(uint16 sid);
-        void putInDeliveryQ(uint16 sid);
-        /** Utility: prints local/remote addr/port and app gate index/assocId */
-        void printConnBrief();
-        /** Utility: prints important header fields */
-        static void printSegmentBrief(SCTPMessage* sctpmsg);
-
-
-        /** Utility: returns name of SCTP_E_xxx constants */
-        static const char* eventName(const int32 event);
-
-        void addPath(const IPvXAddress& addr);
-        SCTPPathVariables* getNextPath(const SCTPPathVariables* oldPath) const;
-        inline const IPvXAddress& getNextAddress(const SCTPPathVariables* oldPath) const {
-            const SCTPPathVariables* nextPath = getNextPath(oldPath);
-            if(nextPath != NULL) {
-                return(nextPath->remoteAddress);
-            }
-            return(SCTPDataVariables::zeroAddress);
-        }
-        SCTPPathVariables* getNextDestination(SCTPDataVariables* chunk) const;
-
-        void bytesAllowedToSend(SCTPPathVariables* path, const bool firstPass);
-
-        void pathStatusIndication(const SCTPPathVariables* path, const bool status);
-
-        bool allPathsInactive() const;
-
-        /**
-        * Manipulating chunks
-        */
-        SCTPDataChunk* transformDataChunk(SCTPDataVariables* chunk);
-        SCTPDataVariables* makeVarFromMsg(SCTPDataChunk* datachunk);
-
-        /**
-        *Dealing with streams
-        */
-
-        int32 streamScheduler(bool peek);
-        void initStreams(uint32 inStreams, uint32 outStreams);
-        int32 numUsableStreams();
-        typedef struct streamSchedulingFunctions {
-            void (SCTPAssociation::*ssInitStreams)(uint32 inStreams, uint32 outStreams);
-            int32 (SCTPAssociation::*ssGetNextSid)(bool peek);
-            int32 (SCTPAssociation::*ssUsableStreams)();
-        } SSFunctions;
-        SSFunctions ssFunctions;
-        uint16 ssModule;
-
-        /**
-        *    Queue Management
-        */
-        void process_QUEUE_MSGS_LIMIT(const SCTPCommand* sctpCommand);
-        void process_QUEUE_BYTES_LIMIT(const SCTPCommand* sctpCommand);
-        int32 getOutstandingBytes() const;
-        uint32 dequeueAckedChunks(const uint32          tsna,
-                                          SCTPPathVariables* path,
-                                          simtime_t&            rttEstimation);
-        SCTPDataMsg* peekOutboundDataMsg();
-        SCTPDataVariables* peekAbandonedChunk(const SCTPPathVariables* path);
-        SCTPDataVariables* getOutboundDataChunk(const SCTPPathVariables* path,
-                                                             const int32                  availableSpace,
-                                                             const int32                  availableCwnd);
-        SCTPDataMsg* dequeueOutboundDataMsg(const int32 availableSpace,
-                                                        const int32 availableCwnd);
-        bool nextChunkFitsIntoPacket(int32 bytes);
-        void putInTransmissionQ(uint32 tsn, SCTPDataVariables* chunk);
-        /**
-        * Flow control
-        */
-        void pmStartPathManagement();
-        void pmDataIsSentOn(SCTPPathVariables* path);
-        void pmClearPathCounter(SCTPPathVariables* path);
-        void pmRttMeasurement(SCTPPathVariables* path,
-                                     const simtime_t&     rttEstimation);
-        /**
-        * Compare TSNs
-        */
-        inline static int32 tsnLt (const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)<0); }
-        inline static int32 tsnLe (const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)<=0); }
-        inline static int32 tsnGe (const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)>=0); }
-        inline static int32 tsnGt (const uint32 tsn1, const uint32 tsn2) { return ((int32)(tsn1-tsn2)>0); }
-        inline static int32 tsnBetween (const uint32 tsn1, const uint32 midtsn, const uint32 tsn2) { return ((tsn2-tsn1)>=(midtsn-tsn1)); }
-
-        inline static int16 ssnGt (const uint16 ssn1, const uint16 ssn2) { return ((int16)(ssn1-ssn2)>0); }
-
-        void disposeOf(SCTPMessage* sctpmsg);
-        void tsnWasReneged(SCTPDataVariables*         chunk,
-                                 const int                    type);
-        void printOutstandingTsns();
-
-        /** SCTPCCFunctions **/
-        void initCCParameters(SCTPPathVariables* path);
-        void updateFastRecoveryStatus(const uint32 lastTsnAck);
-        void cwndUpdateAfterSack();
-        void cwndUpdateAfterCwndTimeout(SCTPPathVariables* path);
-        void cwndUpdateAfterRtxTimeout(SCTPPathVariables* path);
-        void cwndUpdateMaxBurst(SCTPPathVariables* path);
-        void cwndUpdateBytesAcked(SCTPPathVariables* path,
-                                          const uint32          ackedBytes,
-                                          const bool            ctsnaAdvanced);
-
-    private:
-        SCTPDataVariables* makeDataVarFromDataMsg(SCTPDataMsg*       datMsg,
-                                                                SCTPPathVariables* path);
-        SCTPPathVariables* choosePathForRetransmission();
-        void timeForSack(bool& sackOnly, bool& sackWithData);
-        void recordCwndUpdate(SCTPPathVariables* path);
-        void handleChunkReportedAsAcked(uint32&             highestNewAck,
-                                                  simtime_t&            rttEstimation,
-                                                  SCTPDataVariables* myChunk,
-                                                  SCTPPathVariables* sackPath);
-        void handleChunkReportedAsMissing(const SCTPSackChunk*    sackChunk,
-                                                     const uint32                 highestNewAck,
-                                                     SCTPDataVariables*       myChunk,
-                                                     const SCTPPathVariables* sackPath);
-        void moveChunkToOtherPath(SCTPDataVariables* chunk,
-                                          SCTPPathVariables* newPath);
-        void decreaseOutstandingBytes(SCTPDataVariables* chunk);
-        void increaseOutstandingBytes(SCTPDataVariables* chunk,
-                                                SCTPPathVariables* path);
-        int32 calculateBytesToSendOnPath(const SCTPPathVariables* pathVar);
-        void storePacket(SCTPPathVariables* pathVar,
-                              SCTPMessage*          sctpMsg,
-                              const uint16          chunksAdded,
-                              const uint16          dataChunksAdded,
-                              const uint32          packetBytes,
-                              const bool            authAdded);
-        void loadPacket(SCTPPathVariables* pathVar,
-                             SCTPMessage**        sctpMsg,
-                             uint16*                  chunksAdded,
-                             uint16*                  dataChunksAdded,
-                             uint32*                  packetBytes,
-                             bool*                authAdded);
-        inline void ackChunk(SCTPDataVariables* chunk) {
-            chunk->hasBeenAcked = true;
-        }
-        inline void unackChunk(SCTPDataVariables* chunk) {
-            chunk->hasBeenAcked = false;
-        }
-        inline bool chunkHasBeenAcked(const SCTPDataVariables* chunk) const {
-            return(chunk->hasBeenAcked);
-        }
-        inline bool chunkHasBeenAcked(const uint32 tsn) const {
-            const SCTPDataVariables* chunk = retransmissionQ->getChunk(tsn);
-            if(chunk) {
-                return(chunkHasBeenAcked(chunk));
-            }
-            return(false);
-        }
+        return (false);
+    }
 };
 
 #endif
+

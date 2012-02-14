@@ -32,24 +32,24 @@ class SCTPDataVariables;
 
 class INET_API SCTPSendStream : public cPolymorphic
 {
-    protected:
-        uint16  streamId;
-        uint16  nextStreamSeqNum;
-        cQueue* streamQ;
-        cQueue* uStreamQ;
-        int32     ssn;
-    public:
+  protected:
+    uint16  streamId;
+    uint16  nextStreamSeqNum;
+    cQueue* streamQ;
+    cQueue* uStreamQ;
+    int32     ssn;
+  public:
 
-        SCTPSendStream(const uint16 id);
-        ~SCTPSendStream();
+    SCTPSendStream(const uint16 id);
+    ~SCTPSendStream();
 
-        inline cQueue* getStreamQ() const { return streamQ; };
-        inline cQueue* getUnorderedStreamQ() const { return uStreamQ; };
-        inline uint32 getNextStreamSeqNum() const { return nextStreamSeqNum; };
-        inline void setNextStreamSeqNum(const uint16 num) { nextStreamSeqNum = num; };
-        inline uint16 getStreamId() const { return streamId; };
-        inline void setStreamId(const uint16 id) { streamId = id; };
-        void deleteQueue();
+    inline cQueue* getStreamQ() const { return streamQ; };
+    inline cQueue* getUnorderedStreamQ() const { return uStreamQ; };
+    inline uint32 getNextStreamSeqNum() const { return nextStreamSeqNum; };
+    inline void setNextStreamSeqNum(const uint16 num) { nextStreamSeqNum = num; };
+    inline uint16 getStreamId() const { return streamId; };
+    inline void setStreamId(const uint16 id) { streamId = id; };
+    void deleteQueue();
 };
 
 #endif
