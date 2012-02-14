@@ -186,6 +186,12 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
      * loopback interface on startup.)
      */
     virtual InterfaceEntry *getFirstLoopbackInterface();
+
+    /**
+     * Returns the first multicast capable interface.
+     * If there is no such interface, then returns NULL.
+     */
+    virtual InterfaceEntry *getFirstMulticastInterface();
 };
 
 #endif

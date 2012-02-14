@@ -283,3 +283,13 @@ InterfaceEntry *InterfaceTable::getFirstLoopbackInterface()
     return NULL;
 }
 
+InterfaceEntry *InterfaceTable::getFirstMulticastInterface()
+{
+    Enter_Method_Silent();
+    int n = idToInterface.size();
+    for (int i=0; i<n; i++)
+        if (idToInterface[i] && idToInterface[i]->isMulticast() && !idToInterface[i]->isLoopback())
+            return idToInterface[i];
+    return NULL;
+}
+

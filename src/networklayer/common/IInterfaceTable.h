@@ -121,6 +121,12 @@ class INET_API IInterfaceTable
      * loopback interface on startup.)
      */
     virtual InterfaceEntry *getFirstLoopbackInterface() = 0;
+
+    /**
+     * Returns the first multicast capable interface.
+     * If there is no such interface, then returns NULL.
+     */
+    virtual InterfaceEntry *getFirstMulticastInterface() = 0;
 };
 
 #endif
