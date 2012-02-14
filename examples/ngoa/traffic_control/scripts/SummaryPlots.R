@@ -29,6 +29,7 @@ ifelse (Sys.getenv("OS") == "Windows_NT",
 ## .da_dr100M_nh1_nf0_nv1.wd <- paste(.base.directory, "results/Dedicated/dr100M_nh1_nf0_nv1", sep="/")
 ## .da_nh1_nf0_nv1_tbf.wd <- paste(.base.directory, "results/Dedicated/nh1_nf0_nv1_tbf", sep="/")
 .da_dr100M_nh1_nf0_nv1_tbf.wd <- paste(.base.directory, "results/Dedicated/dr100M_nh1_nf0_nv1_tbf", sep="/")
+.da_dr1G_nh1_nf0_nv1_tbf.wd <- paste(.base.directory, "results/Dedicated/dr1G_nh1_nf0_nv1_tbf", sep="/")
 .labels.traffic <- c("FTP", "FTP", "FTP", "HTTP", "HTTP", "HTTP", "UDP Streaming Video")
 ## .labels.measure <- c("Average Session Delay [sec]",
 ##                      "Average Session Throughput [Byte/sec]",
