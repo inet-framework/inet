@@ -220,6 +220,20 @@ class UDPSetMulticastInterfaceCommand extends UDPSetOptionCommand
 }
 
 //
+// Control info for setting the multicast loop option for an UDP socket.
+// When the option is true, a copy of the outgoing multicast packet
+// is delivered locally via the loopback interface.
+// To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION
+// and an instance of this control info class attached.
+//
+// @see ~UDPCommandCode
+//
+class UDPSetMulticastLoopCommand extends UDPSetOptionCommand
+{
+    bool loop;
+}
+
+//
 // Control info for letting an UDP socket join multicast groups.
 // To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION
 // and an and instance of this control info class attached.

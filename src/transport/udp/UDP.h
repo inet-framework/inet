@@ -33,6 +33,7 @@ class InterfaceEntry;
 
 const int UDP_HEADER_BYTES = 8;
 
+const bool DEFAULT_MULTICAST_LOOP = true;
 
 /**
  * Implements the UDP protocol: encapsulates/decapsulates user data into/from UDP.
@@ -54,6 +55,7 @@ class INET_API UDP : public cSimpleModule
         int remotePort;
         bool isBroadcast;
         int multicastOutputInterfaceId;
+        bool multicastLoop;
         int ttl;
         unsigned char typeOfService;
         std::map<IPvXAddress,int> multicastAddrs; // key: multicast address; value: output interface Id or -1
@@ -99,6 +101,7 @@ class INET_API UDP : public cSimpleModule
     virtual void setTypeOfService(int sockId, int typeOfService);
     virtual void setBroadcast(int sockId, bool broadcast);
     virtual void setMulticastOutputInterface(int sockId, int interfaceId);
+    virtual void setMulticastLoop(int sockId, bool loop);
     virtual void joinMulticastGroups(int sockId, const std::vector<IPvXAddress>& multicastAddresses, const std::vector<int> interfaceIds);
     virtual void leaveMulticastGroups(int sockId, const std::vector<IPvXAddress>& multicastAddresses);
     virtual void addMulticastAddressToInterface(InterfaceEntry *ie, const IPvXAddress& multicastAddr);
@@ -110,7 +113,7 @@ class INET_API UDP : public cSimpleModule
     virtual std::vector<SockDesc*> findSocketsForMcastBcastPacket(const IPvXAddress& localAddr, ushort localPort, const IPvXAddress& remoteAddr, ushort remotePort, bool isMulticast, bool isBroadcast);
     virtual SockDesc *findSocketByLocalAddress(const IPvXAddress& localAddr, ushort localPort);
     virtual void sendUp(cPacket *payload, SockDesc *sd, const IPvXAddress& srcAddr, ushort srcPort, const IPvXAddress& destAddr, ushort destPort, int interfaceId, int ttl, unsigned char tos);
-    virtual void sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort, const IPvXAddress& destAddr, ushort destPort, int interfaceId, int ttl, unsigned char tos);
+    virtual void sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort, const IPvXAddress& destAddr, ushort destPort, int interfaceId, bool multicastLoop, int ttl, unsigned char tos);
     virtual void processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl);
     virtual void sendUpErrorIndication(SockDesc *sd, const IPvXAddress& localAddr, ushort localPort, const IPvXAddress& remoteAddr, ushort remotePort);
 

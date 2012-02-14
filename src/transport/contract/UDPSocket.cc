@@ -148,6 +148,16 @@ void UDPSocket::setMulticastOutputInterface(int interfaceId)
     sendToUDP(msg);
 }
 
+void UDPSocket::setMulticastLoop(bool value)
+{
+    cMessage *msg = new cMessage("SetMulticastLoop", UDP_C_SETOPTION);
+    UDPSetMulticastLoopCommand *ctrl = new UDPSetMulticastLoopCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setLoop(value);
+    msg->setControlInfo(ctrl);
+    sendToUDP(msg);
+}
+
 void UDPSocket::joinMulticastGroup(const IPvXAddress& multicastAddr, int interfaceId)
 {
     cMessage *msg = new cMessage("JoinMulticastGroups", UDP_C_SETOPTION);

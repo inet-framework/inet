@@ -67,6 +67,7 @@ class IPv4ControlInfo
     IPv4Address srcAddr;    // source IPv4 address
     int interfaceId = -1; // interface on which the datagram was received, or
                           // should be sent (see ~InterfaceTable)
+    bool multicastLoop;   // if true, sent multicast datagrams will be looped back
     short protocol enum(IPProtocolId);  // encapsulated protocol
     unsigned char typeOfService;  // Type of Service byte (low 6 bits: DSCP)
     short timeToLive;     // maximum hop count

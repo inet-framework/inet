@@ -68,6 +68,8 @@ static std::ostream & operator<<(std::ostream & os, const UDP::SockDesc& sd)
         os << " remoteAddr=" << sd.remoteAddr;
     if (sd.multicastOutputInterfaceId!=-1)
         os << " interfaceId=" << sd.multicastOutputInterfaceId;
+    if (sd.multicastLoop != DEFAULT_MULTICAST_LOOP)
+        os << " multicastLoop=" << sd.multicastLoop;
 
     return os;
 }
@@ -89,6 +91,7 @@ UDP::SockDesc::SockDesc(int sockId_, int appGateIndex_) {
     remotePort = -1;
     isBroadcast = false;
     multicastOutputInterfaceId = -1;
+    multicastLoop = DEFAULT_MULTICAST_LOOP;
     ttl = -1;
     typeOfService = 0;
 }
@@ -188,6 +191,8 @@ void UDP::processCommandFromApp(cMessage *msg)
                 setBroadcast(ctrl->getSockId(), ((UDPSetBroadcastCommand*)ctrl)->getBroadcast());
             else if (dynamic_cast<UDPSetMulticastInterfaceCommand*>(ctrl))
                 setMulticastOutputInterface(ctrl->getSockId(), ((UDPSetMulticastInterfaceCommand*)ctrl)->getInterfaceId());
+            else if (dynamic_cast<UDPSetMulticastLoopCommand*>(ctrl))
+                setMulticastLoop(ctrl->getSockId(), ((UDPSetMulticastLoopCommand*)ctrl)->getLoop());
             else if (dynamic_cast<UDPJoinMulticastGroupsCommand*>(ctrl))
             {
                 UDPJoinMulticastGroupsCommand *cmd = (UDPJoinMulticastGroupsCommand*)ctrl;
@@ -239,7 +244,7 @@ void UDP::processPacketFromApp(cPacket *appData)
         std::map<IPvXAddress,int>::iterator it = sd->multicastAddrs.find(destAddr);
         interfaceId = (it != sd->multicastAddrs.end() && it->second != -1) ? it->second : sd->multicastOutputInterfaceId;
     }
-    sendDown(appData, sd->localAddr, sd->localPort, destAddr, destPort, interfaceId, sd->ttl, sd->typeOfService);
+    sendDown(appData, sd->localAddr, sd->localPort, destAddr, destPort, interfaceId, sd->multicastLoop, sd->ttl, sd->typeOfService);
     delete ctrl; // cannot be deleted earlier, due to destAddr
 }
 
@@ -661,7 +666,8 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const IPvXAddress& localAddr, usho
     send(notifyMsg, "appOut", sd->appGateIndex);
 }
 
-void UDP::sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort, const IPvXAddress& destAddr, ushort destPort, int interfaceId, int ttl, unsigned char tos)
+void UDP::sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort, const IPvXAddress& destAddr, ushort destPort,
+                    int interfaceId, bool multicastLoop, int ttl, unsigned char tos)
 {
     if (destAddr.isUnspecified())
         error("send: unspecified destination address");
@@ -685,6 +691,7 @@ void UDP::sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort,
         ipControlInfo->setSrcAddr(srcAddr.get4());
         ipControlInfo->setDestAddr(destAddr.get4());
         ipControlInfo->setInterfaceId(interfaceId);
+        ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setTimeToLive(ttl);
         ipControlInfo->setTypeOfService(tos);
         udpPacket->setControlInfo(ipControlInfo);
@@ -701,6 +708,7 @@ void UDP::sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort,
         ipControlInfo->setSrcAddr(srcAddr.get6());
         ipControlInfo->setDestAddr(destAddr.get6());
         ipControlInfo->setInterfaceId(interfaceId);
+        ipControlInfo->setMulticastLoop(multicastLoop);
         ipControlInfo->setHopLimit(ttl);
         ipControlInfo->setTrafficClass(tos);
         udpPacket->setControlInfo(ipControlInfo);
@@ -746,6 +754,12 @@ void UDP::setMulticastOutputInterface(int sockId, int interfaceId)
 {
     SockDesc *sd = getSocketById(sockId);
     sd->multicastOutputInterfaceId = interfaceId;
+}
+
+void UDP::setMulticastLoop(int sockId, bool loop)
+{
+    SockDesc *sd = getSocketById(sockId);
+    sd->multicastLoop = loop;
 }
 
 void UDP::joinMulticastGroups(int sockId, const std::vector<IPvXAddress>& multicastAddresses, const std::vector<int> interfaceIds)

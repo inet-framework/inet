@@ -278,10 +278,12 @@ void IPv4::handleMessageFromHL(cPacket *msg)
     // extract requested interface and next hop
     InterfaceEntry *destIE = NULL;
     IPv4Address nextHopAddress = IPv4Address::UNSPECIFIED_ADDRESS;
+    bool multicastLoop = true;
     if (controlInfo!=NULL)
     {
         destIE = ift->getInterfaceById(controlInfo->getInterfaceId());
         nextHopAddress = controlInfo->getNextHopAddr();
+        multicastLoop = controlInfo->getMulticastLoop();
     }
 
     delete controlInfo;
@@ -293,8 +295,16 @@ void IPv4::handleMessageFromHL(cPacket *msg)
 
     if (datagram->getDestAddress().isMulticast())
     {
-        // TODO loop back
         destIE = determineOutgoingInterfaceForMulticastDatagram(datagram, destIE);
+
+        // loop back a copy
+        if (multicastLoop && (!destIE || !destIE->isLoopback()))
+        {
+            InterfaceEntry *loopbackIF = ift->getFirstLoopbackInterface();
+            if (loopbackIF)
+                fragmentAndSend(datagram->dup(), loopbackIF, destAddr);
+        }
+
         if (destIE)
         {
             numMulticast++;

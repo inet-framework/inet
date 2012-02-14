@@ -133,6 +133,13 @@ class INET_API UDPSocket
     void setBroadcast(bool broadcast);
 
     /**
+     * The boolean value specifies whether sent multicast packets should be
+     * looped back to the local sockets (like the Unix IP_MULTICAST_LOOP
+     * socket option).
+     */
+    void setMulticastLoop(bool value);
+
+    /**
      * Set the output interface for sending multicast packets (like the Unix
      * IP_MULTICAST_IF socket option). The argument is the interface's ID in
      * InterfaceTable.
