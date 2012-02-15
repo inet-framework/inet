@@ -26,7 +26,6 @@
 #include "PatternMatcher.h"
 #include "stlutils.h"
 
-using inet::PatternMatcher;
 
 Register_Class(Topology);
 
@@ -99,6 +98,8 @@ void Topology::clear()
 
 static bool selectByModulePath(cModule *mod, void *data)
 {
+    using inet::PatternMatcher;
+
     // actually, this is selectByModuleFullPathPattern()
     const std::vector<std::string>& v = *(const std::vector<std::string> *)data;
     std::string path = mod->getFullPath();

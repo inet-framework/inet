@@ -21,7 +21,7 @@
 
 #include "PatternMatcher.h"
 
-using namespace inet;
+namespace inet {
 
 // from common/stringutil.h
 inline bool opp_isdigit(unsigned char c)  {return isdigit(c);}
@@ -373,4 +373,6 @@ bool PatternMatcher::containsWildcards(const char *pattern)
            strchr(pattern,'\\') || strchr(pattern,'{') ||
            strstr(pattern,"..");
 }
+
+};  // namespace
 
