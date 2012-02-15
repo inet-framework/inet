@@ -76,6 +76,9 @@ class INET_API IPv4 : public QueueBase
     // utility: look up interface from getArrivalGate()
     virtual InterfaceEntry *getSourceInterfaceFrom(cPacket *msg);
 
+    // utility: look up route to the source of the datagram and return its interface
+    virtual InterfaceEntry *getShortestPathInterfaceToSource(IPv4Datagram *datagram);
+
     // utility: show current statistics above the icon
     virtual void updateDisplayString();
 

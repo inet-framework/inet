@@ -654,10 +654,7 @@ void RoutingTable::internalAddMulticastRoute(IPv4MulticastRoute *entry)
                 entry->getMulticastGroup().str().c_str());
 
     // check that the interface exists
-    if (!entry->getParent())
-        error("addMulticastRoute(): parent interface cannot be NULL");
-
-    if (!entry->getParent()->isMulticast())
+    if (entry->getParent() && !entry->getParent()->isMulticast())
         error("addMulticastRoute(): parent interface must be multicast capable");
 
     const ChildInterfaceVector &children = entry->getChildren();

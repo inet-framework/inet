@@ -465,9 +465,14 @@ void IPv4::routeLocalBroadcastPacket(IPv4Datagram *datagram, InterfaceEntry *des
     }
 }
 
+InterfaceEntry *IPv4::getShortestPathInterfaceToSource(IPv4Datagram *datagram)
+{
+    return rt->getInterfaceForDestAddr(datagram->getSrcAddress());
+}
 
 void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE)
 {
+    ASSERT(fromIE);
     const IPv4Address &origin = datagram->getSrcAddress();
     const IPv4Address &destAddr = datagram->getDestAddress();
     ASSERT(destAddr.isMulticast());
@@ -483,9 +488,16 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE
         numUnroutable++;
         delete datagram;
     }
-    else if (fromIE != route->getParent())
+    else if (route->getParent() && fromIE != route->getParent())
     {
         EV << "Did not arrive on parent interface, packet dropped.\n";
+        numDropped++;
+        delete datagram;
+    }
+    // backward compatible: no parent means shortest path interface to source (RPB routing)
+    else if (!route->getParent() && fromIE != getShortestPathInterfaceToSource(datagram))
+    {
+        EV << "Did not arrive on shortest path, packet dropped.\n";
         numDropped++;
         delete datagram;
     }
@@ -498,7 +510,8 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE
         {
             InterfaceEntry *destIE = children[i]->getInterface();
             int ttlThreshold = destIE->ipv4Data()->getMulticastTtlThreshold();
-            if (datagram->getTimeToLive() > ttlThreshold &&
+            if (destIE != fromIE &&
+                datagram->getTimeToLive() > ttlThreshold &&
                     (!children[i]->isLeaf() || rt->hasMulticastListeners(destIE, destAddr)))
                 fragmentAndSend(datagram->dup(), destIE, destAddr);
         }
