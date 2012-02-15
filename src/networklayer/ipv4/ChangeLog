@@ -1,3 +1,10 @@
+2012-02-15  Tamas Borbely
+
+	The multicastTtlThreshold field is added to IPv4InterfaceData.
+	If the value is sent on an interface of a multicast router,
+	it limits the scope of the multicast datagrams: datagrams
+	with lower TTLs are not forwarded.
+
 2012-02-14  Tamas Borbely
 
 	Implement IP_MULTICAST_LOOP socket option.
