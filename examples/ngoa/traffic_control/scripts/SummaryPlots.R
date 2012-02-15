@@ -196,7 +196,7 @@ names(.tmp_http)[1:4]=c('dr', 'mr', 'bs', 'n')
                            as.numeric(as.character(.tmp_video$bs)),
                            as.numeric(as.character(.tmp_video$n))),
                      select=c(8, 9, 10, 11, 5, 6, 7))
-names(.tmp_video)[1:2]=c('dr', 'mr', 'bs', 'n')
+names(.tmp_video)[1:4]=c('dr', 'mr', 'bs', 'n')
 .tmp_video <- sort_df(.tmp_video, vars=c('dr', 'mr', 'bs', 'n'))
 .tmp_video$traffic <- rep('video', length(.tmp_video$mean))
 
@@ -209,25 +209,31 @@ names(.tmp_video)[1:2]=c('dr', 'mr', 'bs', 'n')
 .da_nh1_nf5_nv1_tbf.plots <- list()
 for (.i in 1:length(.dr.range)) {
     .da_nh1_nf5_nv1_tbf.plots[[.i]] <- list()
+    .mr.idx <- 0
     for (.j in 1:length(.mr.range)) {
-        .da_nh1_nf5_nv1_tbf.plots[[.i]][[.j]] <- list()
-        for (.k in 1:length(.traffic)) {
-            .df <- subset(.da_nh1_nf5_nv1_tbf.df, .dr==.dr.range[.i] & .mr.range[.j] & name==.measure[.k] & traffic==.traffic[.k], select=c(1, 2, 4, 5))
-            .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
-            .p <- ggplot(data=.df, aes(group=bs, colour=factor(bs), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
-            .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.i])
-            .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[Byte]", values=0:9)
-            .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Line Rate\n[Gb/s]")
-            .da_nh1_nf5_nv1_tbf.plots[[.i]][[.j]][[.k]] <- .p
-    
-            ## save as a PDF file
-            .p
-            ggsave(paste(.da_nh1_nf5_nv1_tbf.wd,
-                         paste("nh1_nf5_nv1-", .traffic[.i], "-", .measure_abbrv[.i], ".pdf", sep=""),
-                         sep="/"))
-        }
-    }
-}
+            if (length(subset(.da_nh1_nf5_nv1_tbf.df, dr==.dr.range[.i] & mr==.mr.range[.j])$mean) > 0) {
+                .mr.idx <- .mr.idx + 1
+                .da_nh1_nf5_nv1_tbf.plots[[.i]][[.mr.idx]] <- list()
+                for (.k in 1:length(.traffic)) {
+                    .df <- subset(.da_nh1_nf5_nv1_tbf.df, dr==.dr.range[.i] & mr==.mr.range[.j] & name==.measure[.k] & traffic==.traffic[.k], select=c(3, 4, 6, 7))
+                    .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
+                    .p <- ggplot(data=.df, aes(group=bs, colour=factor(bs), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
+                    .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.k])
+                    .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[Byte]", values=0:9)
+                    .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[Byte]")
+                    .da_nh1_nf5_nv1_tbf.plots[[.i]][[.mr.idx]][[.k]] <- .p
+
+                    ## save as a PDF file
+                    .p
+                    ggsave(paste(.da_nh1_nf5_nv1_tbf.wd,
+                                 paste("nh1_nf5_nv1_tbf-dr", as.character(.dr.range[.i]),
+                                       "_mr", as.character(.mr.range[.j]),
+                                       "-", .traffic[.k],
+                                       "-", .measure_abbrv[.k], ".pdf", sep=""), sep="/"))
+            }   # end of for(.k)
+        }   # end of if()
+    }   # end of for(.j)
+}   # end of for(.i)
 
 ## save data frame and plots for later use
 save(.da_nh1_nf5_nv1_tbf.df, .da_nh1_nf5_nv1_tbf.plots,
