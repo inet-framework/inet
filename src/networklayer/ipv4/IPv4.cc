@@ -497,7 +497,9 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE
         for (unsigned int i=0; i<children.size(); i++)
         {
             InterfaceEntry *destIE = children[i]->getInterface();
-            if (!children[i]->isLeaf() || rt->hasMulticastListeners(destIE, destAddr))
+            int ttlThreshold = destIE->ipv4Data()->getMulticastTtlThreshold();
+            if (datagram->getTimeToLive() > ttlThreshold &&
+                    (!children[i]->isLeaf() || rt->hasMulticastListeners(destIE, destAddr)))
                 fragmentAndSend(datagram->dup(), destIE, destAddr);
         }
         // only copies sent, delete original datagram

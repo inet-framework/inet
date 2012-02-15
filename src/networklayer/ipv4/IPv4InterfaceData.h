@@ -46,6 +46,7 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
     IPv4Address inetAddr;            ///< IPv4 address of interface
     IPv4Address netmask;             ///< netmask
     int metric;                      ///< link "cost"; see e.g. MS KB article Q299540
+    int multicastTtlThreshold;       ///< multicast ttl threshold, used by multicast routers to limit multicast scope
     IPAddressVector multicastGroups; ///< multicast groups
 
   protected:
@@ -67,6 +68,7 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
     IPv4Address getIPAddress() const {return inetAddr;}
     IPv4Address getNetmask() const {return netmask;}
     int getMetric() const  {return metric;}
+    int getMulticastTtlThreshold() const {return multicastTtlThreshold;}
     const IPAddressVector& getMulticastGroups() const {return multicastGroups;}
     bool isMemberOfMulticastGroup(const IPv4Address& multicastAddress) const;
     //@}
@@ -76,6 +78,7 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
     virtual void setIPAddress(IPv4Address a) {inetAddr = a; changed1();}
     virtual void setNetmask(IPv4Address m) {netmask = m; changed1();}
     virtual void setMetric(int m) {metric = m; changed1();}
+    virtual void setMulticastTtlThreshold(int threshold) {multicastTtlThreshold=threshold; changed1();}
     virtual void setMulticastGroups(const IPAddressVector& v) {multicastGroups = v; changed1();}
     virtual void joinMulticastGroup(const IPv4Address& multicastAddress);
     virtual void leaveMulticastGroup(const IPv4Address& multicastAddress);

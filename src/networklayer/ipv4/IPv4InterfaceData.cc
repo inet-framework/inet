@@ -28,11 +28,9 @@
 
 IPv4InterfaceData::IPv4InterfaceData()
 {
-    static const IPv4Address allOnes("255.255.255.255");
-    netmask = allOnes;
-
+    netmask = IPv4Address::ALLONES_ADDRESS;
     metric = 0;
-
+    multicastTtlThreshold = 0;
     // TBD add default multicast groups!
 }
 
@@ -47,6 +45,8 @@ std::string IPv4InterfaceData::info() const
             if (!getMulticastGroups()[j].isUnspecified())
                 out << (j>0?",":"") << getMulticastGroups()[j];
     }
+    if (multicastTtlThreshold > 0)
+        out << " ttl_threshold:" << multicastTtlThreshold;
     out << "}";
     return out.str();
 }
@@ -55,8 +55,8 @@ std::string IPv4InterfaceData::detailedInfo() const
 {
     std::stringstream out;
     out << "inet addr:" << getIPAddress() << "\tMask: " << getNetmask() << "\n";
-
     out << "Metric: " << getMetric() << "\n";
+    out << "TTL Threshold: " << multicastTtlThreshold << "\n";
 
     out << "Groups:";
     for (unsigned int j=0; j<getMulticastGroups().size(); j++)
