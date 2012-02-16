@@ -191,7 +191,7 @@ class FingerprintTestCase(SimulationTestCase):
             raise Exception("runtime error:" + result.errormsg)
         elif result.cpuTimeLimitReached:
             raise Exception("cpu time limit exceeded")
-        elif result.simulatedTime == 0:
+        elif result.simulatedTime == 0 and self.simtimelimit != '0s':
             raise Exception("zero time simulated")
         elif result.isFingerprintOK is None:
             raise Exception("other")
