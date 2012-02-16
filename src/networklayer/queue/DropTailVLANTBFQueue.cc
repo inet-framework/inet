@@ -301,3 +301,19 @@ void DropTailVLANTBFQueue::dumpTbfStatus(int queueIndex)
     EV << "- Peak rate [bps]: " << peakRate << endl;
     EV << "- Bucket length [bit]: " << peakBucketLength[queueIndex] << endl;
 }
+
+void DropTailVLANTBFQueue::finish()
+{
+    for (int i=0; i < numQueues; i++)
+    {
+        std::stringstream ss_received, ss_dropped, ss_shaped, ss_sent;
+        ss_received << "packets received by per-VLAN queue[" << i << "]";
+        ss_dropped << "packets dropped by per-VLAN queue[" << i << "]";
+        ss_shaped << "packets shaped by per-VLAN queue[" << i << "]";
+        ss_sent << "packets sent by per-VLAN queue[" << i << "]";
+        recordScalar((ss_received.str()).c_str(), numQueueReceived[i]);
+        recordScalar((ss_dropped.str()).c_str(), numQueueDropped[i]);
+        recordScalar((ss_shaped.str()).c_str(), numQueueShaped[i]);
+        recordScalar((ss_sent.str()).c_str(), numQueueSent[i]);
+    }
+}

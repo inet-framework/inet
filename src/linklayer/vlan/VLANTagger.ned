@@ -23,14 +23,13 @@ simple VLANTagger
         @display("i=block/layer;p=92,124");
         bool tagged = default(false);	// untagged port is for access links, while tagged port is for trunk (inter-switch) links
         bool dynamicTagging = default(false);	// (experimental) dynamic tagging for untagged port based on source & destination MAC addresses of incoming frames
-        string vidSet = default("");
-        	// - tagged port: a set of VLAN Identifiers (VIDs) this port belongs to
-        	// - untagged port: PVID for this port (should be a single VID)
-        	// - untagged port with dynamic tagging: a set of PVIDs for this port
-//        int pvid = default(1);	// Port VID (PVID)
-        //string vidSet;	// set of VIDs for Port-and-Protocol-based VLAN classification (not supported yet)
-        //bool verbose = default(false);	// module verbosity
-        //int priority = default(5);
+//        string vidSet = default("");
+        int minVid = default(1);
+        int maxVid = default(1);
+        	// minVid and maxVid specify the range of allowed VID values for a port as follows:
+        	// - tagged port: a range of VLAN Identifiers (VIDs) this port belongs to
+        	// - untagged port: PVID for this port (should be a single VID, i.e., minVid = maxVid)
+        	// - untagged port with dynamic tagging: a range of PVIDs for this port
     gates:
         inout macg;	// interface with Ethernet MAC
         inout relayg;	// interface with relay unit

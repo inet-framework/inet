@@ -24,36 +24,23 @@ import inet.linklayer.vlan.VLANTagger;
 
 
 //
-// Abstract model of a next-generation network (NGN) access node
-// (e.g., CMTS, DSLAM, PON OLT) based on a VLAN-capable Ethernet
-// relay unit with external output queueing, VLAN tagger, frame
-// classifier, and traffic control modules
-// (i.e., EtherSwitch2WithOutputQueueAndVLAN).
-//
-// <b>Traffic Control</b>
-//
-// To model a switching node at the headend of shared access networks
-// like an optical line termination (OLT) in passive optical networks
-// (PONs) or a cable modem termination system (CMTS) in cable
-// networks, classification of frames (e.g., based on MAC addresses or
-// the PCP field of IEEE 802.1Q Tag) and traffic control per class are
-// required. Currently, traffic shaping based on the well-known token
-// bucket filter (TBF) is implemented to control both mean
-// rate/maximum burst and peak rate/MTU through dual TBFs.
+// Abstract model of a next-generation network (NGN) splitter
+// (e.g., shared medium) based on a VLAN-capable Ethernet relay unit
+// with external output queueing, VLAN tagger, frame classifier, and
+// traffic control modules (i.e., EtherSwitch2WithOutputQueueAndVLAN).
 //
 // <b>VLAN ID Assignment</b>
 //
-// VLAN IDs are automatically assigned based on the number of subscribers.
+// VLAN IDs are automatically assigned based on the number of downstream ports.
 //
 // @see MACRelayUnitNPWithVLAN, VLANTagger, DropTailTBFQueue, VLANClassifier
 //
-module NgnAccessNode
+module NgnAccessSplitter
 {
     parameters:
         @node();
         @labels(node,ethernet-node);
         @display("i=device/switch");
-        int numSubscribers = default(1);	// number of subscribers (e.g., ONUs)
         string relayUnitType = default("MACRelayUnitNPWithVLAN"); // type of the MACRelayUnit; currently
 			   				   									  // only MACRelayUnitNPWithVLAN is possible
     gates:
@@ -69,16 +56,14 @@ module NgnAccessNode
         tagger[sizeof(ethg)]: VLANTagger {
             parameters:
                 @display("p=94,99");
-                tagged = index == 0 ? true : false;
-                dynamicTagging = index == 0 ? false : true;
-                minVid = 10;
-                maxVid = 10+(numSubscribers-1);       
+                tagged = true;
+                minVid = index < sizeof(ethg)-1 ? 10+index : 10;
+                maxVid = index < sizeof(ethg)-1 ? this.minVid : 10+(sizeof(ethg)-2);       
         }
         mac[sizeof(ethg)]: EtherMAC2withOutputQueue {
             parameters:
                 @display("p=94,184,row;q=queue");
                 promiscuous = true;
-//                queueType = index == 0 ? "DropTailVLANTBFQueue" : "DropTailQueue";
         }
     connections:
         for i=0..sizeof(ethg)-1 {
