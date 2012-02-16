@@ -244,11 +244,12 @@ void PingApp::finish()
     {
         if (printPing)
             EV << getFullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
-        recordScalar("Pings sent", sendSeqNo);
         return;
     }
 
+    lossCount += sendSeqNo - expectedReplySeqNo;
     // record statistics
+    recordScalar("Pings sent", sendSeqNo);
     recordScalar("ping loss rate (%)", 100 * lossCount / (double)sendSeqNo);
     recordScalar("ping out-of-order rate (%)", 100 * outOfOrderArrivalCount / (double)sendSeqNo);
 
