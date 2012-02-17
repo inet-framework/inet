@@ -22,11 +22,11 @@
 
 SCTPReceiveStream::SCTPReceiveStream()
 {
-    streamId                    = 0;
+    streamId = 0;
     expectedStreamSeqNum = 0;
-    deliveryQ               = new SCTPQueue();
-    orderedQ                    = new SCTPQueue();
-    unorderedQ              = new SCTPQueue();
+    deliveryQ = new SCTPQueue();
+    orderedQ = new SCTPQueue();
+    unorderedQ = new SCTPQueue();
 }
 
 SCTPReceiveStream::~SCTPReceiveStream()
@@ -59,14 +59,14 @@ uint32 SCTPReceiveStream::reassemble(SCTPQueue* queue, uint32 tsn)
             sctpEV3 << "All fragments found, now reassembling..." << endl;
 
             SCTPDataVariables *firstVar = orderedQ->getChunk(begintsn), *processVar;
-            SCTPSimpleMessage* firstSimple=check_and_cast<SCTPSimpleMessage*>(firstVar->userData);
+            SCTPSimpleMessage* firstSimple = check_and_cast<SCTPSimpleMessage*>(firstVar->userData);
 
             sctpEV3 << "First fragment has " << firstVar->len / 8 << " bytes." << endl;
 
             while (++begintsn <= endtsn)
             {
                 processVar = orderedQ->getAndExtractChunk(begintsn);
-                SCTPSimpleMessage* processSimple=check_and_cast<SCTPSimpleMessage*>(processVar->userData);
+                SCTPSimpleMessage* processSimple = check_and_cast<SCTPSimpleMessage*>(processVar->userData);
 
                 sctpEV3 << "Adding fragment with " << processVar->len / 8 << " bytes." << endl;
 
@@ -85,7 +85,7 @@ uint32 SCTPReceiveStream::reassemble(SCTPQueue* queue, uint32 tsn)
 
             firstVar->ebit = 1;
 
-            sctpEV3 << "Reassembly done. Length=" << firstVar->len<<"\n";
+            sctpEV3 << "Reassembly done. Length=" << firstVar->len << "\n";
             return firstVar->tsn;
         }
     }
@@ -98,7 +98,7 @@ uint32 SCTPReceiveStream::enqueueNewDataChunk(SCTPDataVariables* dchunk)
     uint32 delivery = 0;      //0:orderedQ=false && deliveryQ=false; 1:orderedQ=true && deliveryQ=false; 2:oderedQ=true && deliveryQ=true; 3:fragment
 
     SCTPDataVariables* chunk;
-    //sctpEV3 << "Enqueueing NEW data chunk (TSN="<<dchunk->tsn<<") for Stream ID "<<dchunk->sid<<"\n";
+    //sctpEV3 << "Enqueueing NEW data chunk (TSN=" << dchunk->tsn << ") for Stream ID " << dchunk->sid << "\n";
     /* append to the respective queue */
     if (!dchunk->ordered)
     {

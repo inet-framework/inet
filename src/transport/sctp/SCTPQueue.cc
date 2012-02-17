@@ -31,7 +31,7 @@ SCTPQueue::SCTPQueue()
 SCTPQueue::~SCTPQueue()
 {
     for (PayloadQueue::iterator iterator = payloadQueue.begin();
-          iterator != payloadQueue.end(); iterator++) {
+            iterator != payloadQueue.end(); iterator++) {
         SCTPDataVariables* chunk = iterator->second;
         delete chunk->userData;
     }
@@ -59,7 +59,7 @@ SCTPDataVariables* SCTPQueue::extractMessage()
 {
     if (!payloadQueue.empty()) {
         PayloadQueue::iterator iterator = payloadQueue.begin();
-        SCTPDataVariables*    chunk   = iterator->second;
+        SCTPDataVariables*    chunk = iterator->second;
         payloadQueue.erase(iterator);
         return chunk;
     }
@@ -70,7 +70,7 @@ SCTPDataVariables* SCTPQueue::getAndExtractChunk(const uint32 tsn)
 {
     if (!payloadQueue.empty()) {
         PayloadQueue::iterator iterator = payloadQueue.find(tsn);
-        SCTPDataVariables*    chunk   = iterator->second;
+        SCTPDataVariables*    chunk = iterator->second;
         payloadQueue.erase(iterator);
         return chunk;
     }
@@ -81,16 +81,16 @@ void SCTPQueue::printQueue() const
 {
     sctpEV3 << "Queue contents:\n";
     for (PayloadQueue::const_iterator iterator = payloadQueue.begin();
-          iterator != payloadQueue.end(); ++iterator) {
-        const uint32                 key     = iterator->first;
+            iterator != payloadQueue.end(); ++iterator) {
+        const uint32                 key = iterator->first;
         const SCTPDataVariables* chunk = iterator->second;
         sctpEV3 << key << ":\t"
-                  << "lastDestination="             << chunk->getLastDestination()
-                  << " nextDestination="            << chunk->getNextDestination()
-                  << " hasBeenAcked="               << chunk->hasBeenAcked
-                  << " countsAsOutstanding="        << chunk->countsAsOutstanding
-                  << " numberOfRetransmissions=" << chunk->numberOfRetransmissions
-                  << endl;
+                << "lastDestination=" << chunk->getLastDestination()
+                << " nextDestination=" << chunk->getNextDestination()
+                << " hasBeenAcked=" << chunk->hasBeenAcked
+                << " countsAsOutstanding=" << chunk->countsAsOutstanding
+                << " numberOfRetransmissions=" << chunk->numberOfRetransmissions
+                << endl;
     }
     sctpEV3 << endl;
 }
@@ -98,7 +98,7 @@ void SCTPQueue::printQueue() const
 SCTPDataVariables* SCTPQueue::getFirstChunk() const
 {
     PayloadQueue::const_iterator iterator = payloadQueue.begin();
-    SCTPDataVariables* chunk                  = iterator->second;
+    SCTPDataVariables* chunk = iterator->second;
     return chunk;
 }
 
@@ -125,26 +125,26 @@ SCTPDataVariables* SCTPQueue::getChunk(const uint32 tsn) const
 
 SCTPDataVariables* SCTPQueue::getChunkFast(const uint32 tsn, bool& firstTime)
 {
-    if(!firstTime) {
-        if(GetChunkFastIterator != payloadQueue.end()) {
+    if (!firstTime) {
+        if (GetChunkFastIterator != payloadQueue.end()) {
             SCTPDataVariables* chunk = GetChunkFastIterator->second;
-            if(chunk->tsn == tsn) {
+            if (chunk->tsn == tsn) {
                 GetChunkFastIterator++;
-                return(chunk);    // Found the right TSN!
+                return (chunk);    // Found the right TSN!
             }
         }
         // TSN not found -> needs regular TSN lookup.
     }
 
     GetChunkFastIterator = payloadQueue.find(tsn);
-    if(GetChunkFastIterator != payloadQueue.end()) {
+    if (GetChunkFastIterator != payloadQueue.end()) {
         SCTPDataVariables* chunk = GetChunkFastIterator->second;
         GetChunkFastIterator++;
         firstTime = false;
-        return(chunk);
+        return (chunk);
     }
 
-    return(NULL);
+    return (NULL);
 }
 
 
@@ -172,7 +172,7 @@ int32 SCTPQueue::getNumBytes() const
 {
     int32 qb = 0;
     for (PayloadQueue::const_iterator iterator = payloadQueue.begin();
-          iterator != payloadQueue.end(); iterator++) {
+            iterator != payloadQueue.end(); iterator++) {
         qb += (iterator->second->len / 8);
     }
     return qb;
@@ -181,11 +181,11 @@ int32 SCTPQueue::getNumBytes() const
 SCTPDataVariables* SCTPQueue::dequeueChunkBySSN(const uint16 ssn)
 {
     for (PayloadQueue::iterator iterator = payloadQueue.begin();
-          iterator != payloadQueue.end(); iterator++) {
+            iterator != payloadQueue.end(); iterator++) {
         SCTPDataVariables* chunk = iterator->second;
         if ((iterator->second->ssn == ssn) &&
-             (iterator->second->bbit) &&
-             (iterator->second->ebit) ) {
+                (iterator->second->bbit) &&
+                (iterator->second->ebit) ) {
             payloadQueue.erase(iterator);
             return chunk;
         }

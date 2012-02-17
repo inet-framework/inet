@@ -33,7 +33,7 @@
 // <a href="http://mobility-fw.sourceforge.net" target="_blank">Mobility Framework</a>.
 //
 // There are several other bugfixes and improvements as well; see the
-// <tt><a href="../doxy/whatsnew.html">WHATSNEW</a></tt> file in the distribution.
+// <tt><a href="whatsnew.html">WHATSNEW</a></tt> file in the distribution.
 //
 // Introductory material:
 //  - <a href="inet-architecture.html">INET Framework architecture</a>

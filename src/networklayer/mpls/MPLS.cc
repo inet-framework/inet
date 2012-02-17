@@ -91,7 +91,7 @@ void MPLS::processPacketFromL3(cMessage * msg)
     // XXX temporary solution, until TCPSocket and IP are extended to support nam tracing
     if (ipdatagram->getTransportProtocol() == IP_PROT_TCP)
     {
-        TCPSegment *seg = check_and_cast<TCPSegment*>(ipdatagram->getEncapsulatedMsg());
+        TCPSegment *seg = check_and_cast<TCPSegment*>(ipdatagram->getEncapsulatedPacket());
         if (seg->getDestPort() == LDP_PORT || seg->getSrcPort() == LDP_PORT)
         {
             ASSERT(!ipdatagram->hasPar("color"));

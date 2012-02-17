@@ -489,7 +489,7 @@ void AbstractRadio::handleLowerMsgEnd(AirFrame * airframe)
         //    delete airframe;
         if (!radioModel->isReceivedCorrectly(airframe, list))
         {
-            airframe->getEncapsulatedMsg()->setKind(list.size()>1 ? COLLISION : BITERROR);
+            airframe->getEncapsulatedPacket()->setKind(list.size()>1 ? COLLISION : BITERROR);
             airframe->setName(list.size()>1 ? "COLLISION" : "BITERROR");
         }
         sendUp(airframe);

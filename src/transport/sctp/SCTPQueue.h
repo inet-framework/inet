@@ -48,16 +48,16 @@ class SCTPAssociation;
  */
 class INET_API SCTPQueue : public cPolymorphic
 {
-    public:
+  public:
     /**
-      * Constructor.
-      */
-     SCTPQueue();
+     * Constructor.
+     */
+    SCTPQueue();
 
      /**
       * Virtual destructor.
       */
-     ~SCTPQueue();
+    ~SCTPQueue();
 
     bool checkAndInsertChunk(const uint32 key, SCTPDataVariables* chunk);
     /* returns true if new data is inserted and false if data was present */
@@ -87,14 +87,15 @@ class INET_API SCTPQueue : public cPolymorphic
 
 
   public:
-     typedef std::map<uint32, SCTPDataVariables*> PayloadQueue;
-     PayloadQueue payloadQueue;
+    typedef std::map<uint32, SCTPDataVariables*> PayloadQueue;
+    PayloadQueue payloadQueue;
 
   protected:
-     SCTPAssociation* assoc;    // SCTP connection object
+    SCTPAssociation* assoc;    // SCTP connection object
 
   private:
-     PayloadQueue::iterator GetChunkFastIterator;
+    PayloadQueue::iterator GetChunkFastIterator;
 };
 
 #endif
+

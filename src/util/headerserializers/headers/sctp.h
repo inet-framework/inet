@@ -30,7 +30,6 @@
 #define B_FLAG        0x02
 #define M_FLAG        0x01
 
-
 #define CRC32C(c,d) (c=(c>>8)^crc_c[(c^(d))&0xFF])
 static unsigned int crc_c[256] =
 {
@@ -99,7 +98,6 @@ static unsigned int crc_c[256] =
 0x79B737BAL, 0x8BDCB4B9L, 0x988C474DL, 0x6AE7C44EL,
 0xBE2DA0A5L, 0x4C4623A6L, 0x5F16D052L, 0xAD7D5351L,
 };
-
 
 struct common_header {
     unsigned short source_port;
@@ -220,7 +218,6 @@ struct error_chunk {
     unsigned char  error_causes[0];
 };
 
-
 // variable length parameters in INIT chunk:
 #define INIT_PARAM_IPV4 5
 #define INIT_PARAM_IPV6 6
@@ -265,24 +262,22 @@ struct tlv {
     unsigned char value[0];
 };
 
-
 struct supported_address_types_parameter {
     unsigned short type;
     unsigned short length;
     unsigned short address_type;
 };
 
-
 // Heartbeat info TLV:
 struct heartbeat_info {
     unsigned short type;
     unsigned short length;
     union {
-      unsigned char info[];
-      struct {
-        unsigned int addr;
-        unsigned int time;
-      } addr_and_time;
+        unsigned char info[];
+        struct {
+            unsigned int addr;
+            unsigned int time;
+        } addr_and_time;
     } heartbeat_info_union;
 };
 
@@ -307,9 +302,9 @@ struct sack_duptsn {
     unsigned int tsn;
 };
 
-
 struct data_vector {
-unsigned char  data[0];
+    unsigned char data[0];
 };
 
 #endif
+

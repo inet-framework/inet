@@ -15,6 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+// @page whatsnew.html, What's New
+//
+// <pre>
+// <nohtml>
+// @include ../WHATSNEW
+// </nohtml>
+// </pre>
+//
 // @page inet-architecture.html, Architecture of the INET Framework
 //
 // The INET Framework builds upon OMNeT++, and uses the same concept:

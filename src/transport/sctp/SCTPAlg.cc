@@ -37,7 +37,7 @@ SCTPStateVariables *SCTPAlg::createStateVariables()
 {
     ASSERT(state == NULL);
     state = new SCTPAlgStateVariables();
-    return(state);
+    return (state);
 }
 
 void SCTPAlg::established(bool active)
@@ -58,7 +58,7 @@ void SCTPAlg::processTimer(cMessage* timer, SCTPEventCode& event)
 
 void SCTPAlg::sendCommandInvoked(SCTPPathVariables* path)
 {
-        assoc->sendOnPath(path);
+    assoc->sendOnPath(path);
 }
 
 void SCTPAlg::receivedDataAck(uint32)

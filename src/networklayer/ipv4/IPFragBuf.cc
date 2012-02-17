@@ -68,9 +68,9 @@ IPDatagram *IPFragBuf::addFragment(IPDatagram *datagram, simtime_t now)
                                            !datagram->getMoreFragments());
 
     // store datagram. Only one fragment carries the actual modelled
-    // content (getEncapsulatedMsg()), other (empty) ones are only
+    // content (getEncapsulatedPacket()), other (empty) ones are only
     // preserved so that we can send them in ICMP if reassembly times out.
-    if (datagram->getEncapsulatedMsg())
+    if (datagram->getEncapsulatedPacket())
     {
         delete buf->datagram;
         buf->datagram = datagram;
@@ -115,7 +115,7 @@ void IPFragBuf::purgeStaleFragments(simtime_t lastupdate)
             // send ICMP error.
             // Note: receiver MUST NOT call decapsulate() on the datagram fragment,
             // because its length (being a fragment) is smaller than the encapsulated
-            // packet, resulting in "length became negative" error. Use getEncapsulatedMsg().
+            // packet, resulting in "length became negative" error. Use getEncapsulatedPacket().
             EV << "datagram fragment timed out in reassembly buffer, sending ICMP_TIME_EXCEEDED\n";
             icmpModule->sendErrorMessage(buf.datagram, ICMP_TIME_EXCEEDED, 0);
 

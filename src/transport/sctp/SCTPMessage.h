@@ -29,45 +29,45 @@
  */
 class INET_API SCTPMessage : public SCTPMessage_Base
 {
-    protected:
-        std::list<cPacket*> chunkList;
+  protected:
+    std::list<cPacket*> chunkList;
 
-    public:
-        SCTPMessage(const char *name=NULL, int32 kind=0) : SCTPMessage_Base(name,kind) {}
-        SCTPMessage(const SCTPMessage& other) : SCTPMessage_Base(other.getName()) {operator=(other);}
-        ~SCTPMessage();
-        SCTPMessage& operator=(const SCTPMessage& other);
-        virtual SCTPMessage *dup() const {return new SCTPMessage(*this);}
-        /** Generated but unused method, should not be called. */
-        virtual void setChunksArraySize(uint32 size);
-        /** Generated but unused method, should not be called. */
-        virtual void setChunks(uint32 k, const cPacketPtr& chunks_var);
-        /**
-        * Returns the number of chunks in this SCTP packet
-        */
-        virtual uint32 getChunksArraySize() const;
+  public:
+    SCTPMessage(const char *name = NULL, int32 kind = 0) : SCTPMessage_Base(name, kind) {}
+    SCTPMessage(const SCTPMessage& other) : SCTPMessage_Base(other.getName()) {operator=(other);}
+    ~SCTPMessage();
+    SCTPMessage& operator=(const SCTPMessage& other);
+    virtual SCTPMessage *dup() const {return new SCTPMessage(*this);}
+    /** Generated but unused method, should not be called. */
+    virtual void setChunksArraySize(uint32 size);
+    /** Generated but unused method, should not be called. */
+    virtual void setChunks(uint32 k, const cPacketPtr& chunks_var);
+    /**
+    * Returns the number of chunks in this SCTP packet
+    */
+    virtual uint32 getChunksArraySize() const;
 
-        /**
-        * Returns the kth chunk in this SCTP packet
-        */
-        virtual cPacketPtr& getChunks(uint32 k);
-        /**
-        * Adds a message object to the SCTP packet. The packet length will be adjusted
-        */
-        virtual void addChunk(cPacket* msg);
+    /**
+    * Returns the kth chunk in this SCTP packet
+    */
+    virtual cPacketPtr& getChunks(uint32 k);
+    /**
+    * Adds a message object to the SCTP packet. The packet length will be adjusted
+    */
+    virtual void addChunk(cPacket* msg);
 
-        /**
-        * Removes and returns the first message object in this SCTP packet.
-        */
-        virtual cPacket *removeChunk();
-        virtual cPacket *removeLastChunk();
-        virtual cPacket *peekFirstChunk();
-        virtual cPacket *peekLastChunk();
-        /**
-         * Serializes SCTP packet for transmission on the wire,
-         * writes source port into from structure and
-         * returns length of sctp data written into buffer
-         */
+    /**
+    * Removes and returns the first message object in this SCTP packet.
+    */
+    virtual cPacket *removeChunk();
+    virtual cPacket *removeLastChunk();
+    virtual cPacket *peekFirstChunk();
+    virtual cPacket *peekLastChunk();
+    /**
+     * Serializes SCTP packet for transmission on the wire,
+     * writes source port into from structure and
+     * returns length of sctp data written into buffer
+     */
 
 
 };
@@ -97,33 +97,34 @@ class INET_API SCTPMessage : public SCTPMessage_Base
 
 class INET_API SCTPErrorChunk : public SCTPErrorChunk_Base
 {
-    protected:
-        std::list<cPacket*> parameterList;
+  protected:
+    std::list<cPacket*> parameterList;
 
-    public:
-            SCTPErrorChunk(const char *name=NULL, int32 kind=0) : SCTPErrorChunk_Base(name, kind) {};
-            SCTPErrorChunk(const SCTPErrorChunk& other) : SCTPErrorChunk_Base(other.getName()) {operator=(other);};
-        SCTPErrorChunk& operator=(const SCTPErrorChunk& other);
+  public:
+    SCTPErrorChunk(const char *name = NULL, int32 kind = 0) : SCTPErrorChunk_Base(name, kind) {};
+    SCTPErrorChunk(const SCTPErrorChunk& other) : SCTPErrorChunk_Base(other.getName()) {operator=(other);};
+    SCTPErrorChunk& operator=(const SCTPErrorChunk& other);
 
-        virtual SCTPErrorChunk *dup() const {return new SCTPErrorChunk(*this);}
-        virtual void setParametersArraySize(uint32 size);
-            virtual uint32 getParametersArraySize() const;
-                /** Generated but unused method, should not be called. */
-        virtual void setParameters(uint32 k, const cPacketPtr& parameters_var);
+    virtual SCTPErrorChunk *dup() const {return new SCTPErrorChunk(*this);}
+    virtual void setParametersArraySize(uint32 size);
+    virtual uint32 getParametersArraySize() const;
+    /** Generated but unused method, should not be called. */
+    virtual void setParameters(uint32 k, const cPacketPtr& parameters_var);
 
-                /**
-        * Returns the kth parameter in this SCTP Reset Chunk
-        */
-        virtual cPacketPtr& getParameters(uint32 k);
     /**
-        * Adds a message object to the SCTP packet. The packet length will be adjusted
-        */
-        virtual void addParameters(cPacket* msg);
+     * Returns the kth parameter in this SCTP Reset Chunk
+     */
+    virtual cPacketPtr& getParameters(uint32 k);
 
-        /**
-        * Removes and returns the first message object in this SCTP packet.
-        */
-        virtual cPacket *removeParameter();
+    /**
+     * Adds a message object to the SCTP packet. The packet length will be adjusted
+     */
+    virtual void addParameters(cPacket* msg);
+
+    /**
+     * Removes and returns the first message object in this SCTP packet.
+     */
+    virtual cPacket *removeParameter();
 };
 #endif
 

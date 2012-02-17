@@ -458,7 +458,7 @@ void IPv6::handleReceivedICMP(ICMPv6Message *msg)
         case ICMPv6_TIME_EXCEEDED:
         case ICMPv6_PARAMETER_PROBLEM: {
             // ICMP errors are delivered to the appropriate higher layer protocols
-            IPv6Datagram *bogusPacket = check_and_cast<IPv6Datagram *>(msg->getEncapsulatedMsg());
+            IPv6Datagram *bogusPacket = check_and_cast<IPv6Datagram *>(msg->getEncapsulatedPacket());
             int protocol = bogusPacket->getTransportProtocol();
             int gateindex = mapping.getOutputGateForProtocol(protocol);
             send(msg, "transportOut", gateindex);
