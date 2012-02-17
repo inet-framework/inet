@@ -32,9 +32,9 @@ DropTailVLANTBFQueue::~DropTailVLANTBFQueue()
     for (int i=0; i<numQueues; i++)
     {
         delete queues[i];
-        delete conformityTimer[i];
+//        delete conformityTimer[i];
+        cancelAndDelete(conformityTimer[i]);
     }
-//    delete [] queues;
 }
 
 void DropTailVLANTBFQueue::initialize()
