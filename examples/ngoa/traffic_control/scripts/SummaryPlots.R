@@ -34,20 +34,22 @@ ifelse (Sys.getenv("OS") == "Windows_NT",
 ## shared access for n_h=1, n_f=5, n_v=1
 .sa_nh1_nf5_nv1_tbf.wd <- paste(.base.directory, "results/Shared/nh1_nf5_nv1_tbf", sep="/")
 ## for plotting
-.traffic <- c("ftp", "ftp", "ftp", "http", "http", "http", "video")
+.traffic <- c("ftp", "ftp", "ftp", "http", "http", "http", "http", "video")
 .measure <-  c('average session delay [s]',
                'average session throughput [B/s]',
                'mean session transfer rate [B/s]',
                'average session delay [s]',
+               '95th-sessionDelay:percentile',
                'average session throughput [B/s]',
                'mean session transfer rate [B/s]',
                'decodable frame rate (Q)')
-.measure_abbrv <- c('dly', 'thr', 'trf', 'dly', 'thr', 'trf', 'dfr')
-.labels.traffic <- c("FTP", "FTP", "FTP", "HTTP", "HTTP", "HTTP", "UDP Streaming Video")
+.measure_abbrv <- c('dly', 'thr', 'trf', 'dly', '95p-dly', 'thr', 'trf', 'dfr')
+.labels.traffic <- c("FTP", "FTP", "FTP", "HTTP", "HTTP", "HTTP", "HTTP", "UDP Streaming Video")
 .labels.measure <- c("Average Session Delay [sec]",
                      "Average Session Throughput [Byte/sec]",
                      "Mean Session Transfer Rate [Byte/sec]",
                      "Average Session Delay [sec]",
+                     "95-Percentile Session Delay [sec]",
                      "Average Session Throughput [Byte/sec]",
                      "Mean Session Transfer Rate [Byte/sec]",
                      "Average Decodable Frame Rate (Q)")
@@ -93,10 +95,11 @@ if (.resp == 'y') {
     .tmp_ftp <- sort_df(.tmp_ftp, vars=c('dr', 'n'))
     .tmp_ftp$traffic <- rep('ftp', length(.tmp_ftp$mean))
 
-    ## collect average session delay, average session throughput, and mean session transfer rate of HTTP traffic
+    ## collect average & 95-percentile session delay, average session throughput, and mean session transfer rate of HTTP traffic
     .tmp_http <- cast(.scalars, experiment+measurement+dr+n+name ~ ., c(mean, ci.width),
                       subset=grepl('.*\\.httpApp.*', module) &
                       (name=='average session delay [s]' |
+                       name=='95th-sessionDelay:percentile' |
                        name=='average session throughput [B/s]' |
                        name=='mean session transfer rate [B/s]'))
     .tmp_http <- subset(.tmp_http, select = c('dr', 'n', 'name', 'mean', 'ci.width'))
@@ -176,10 +179,11 @@ if (.resp == 'y') {
     .tmp_ftp <- sort_df(.tmp_ftp, vars=c('dr', 'mr', 'bs', 'n'))
     .tmp_ftp$traffic <- rep('ftp', length(.tmp_ftp$mean))
 
-    ## collect average session delay, average session throughput, and mean session transfer rate of HTTP traffic
+    ## collect average & 95-percentile session delay, average session throughput, and mean session transfer rate of HTTP traffic
     .tmp_http <- cast(.scalars, experiment+measurement+dr+mr+bs+n+name ~ ., c(mean, ci.width),
                       subset=grepl('.*\\.httpApp.*', module) &
                       (name=='average session delay [s]' |
+                       name=='95th-sessionDelay:percentile' |
                        name=='average session throughput [B/s]' |
                        name=='mean session transfer rate [B/s]'))
     .tmp_http <- subset(.tmp_http, select = c('dr', 'mr', 'bs', 'n', 'name', 'mean', 'ci.width'))
@@ -292,10 +296,11 @@ if (.resp == 'y') {
         .tmp_ftp <- sort_df(.tmp_ftp, vars=c('N', 'dr', 'mr', 'bs', 'n'))
         .tmp_ftp$traffic <- rep('ftp', length(.tmp_ftp$mean))
 
-        ## collect average session delay, average session throughput, and mean session transfer rate of HTTP traffic
+        ## collect average & 95-percentile session delay, average session throughput, and mean session transfer rate of HTTP traffic
         .tmp_http <- cast(.scalars, experiment+measurement+N+dr+mr+bs+n+name ~ ., c(mean, ci.width),
                           subset=grepl('.*\\.httpApp.*', module) &
                           (name=='average session delay [s]' |
+                           name=='95th-sessionDelay:percentile' |
                            name=='average session throughput [B/s]' |
                            name=='mean session transfer rate [B/s]'))
         .tmp_http <- subset(.tmp_http, select = c('N', 'dr', 'mr', 'bs', 'n', 'name', 'mean', 'ci.width'))
