@@ -80,11 +80,7 @@ Ieee80211NewMac::~Ieee80211NewMac()
         cancelAndDelete(endBackoff(i));
         while (!transmissionQueue(i)->empty())
         {
-#ifdef USEMULTIQUEUE
             Ieee80211Frame *temp = dynamic_cast<Ieee80211Frame *> (transmissionQueue(i)->front());
-#else
-            Ieee80211Frame *temp = transmissionQueue(i)->front();
-#endif
             transmissionQueue(i)->pop_front();
             delete temp;
         }
@@ -146,14 +142,14 @@ void Ieee80211NewMac::initialize(int stage)
         else
             opMode = 'g';
 
-        PHY_HEADER_LENGTH = par("PHY_HEADER_LENGTH"); //26us
+        PHY_HEADER_LENGTH = par("phyHeaderLength"); //26us
 
-        if (strcmp("SHORT", par("WifiPreambleMode").stringValue())==0)
+        if (strcmp("SHORT", par("wifiPreambleMode").stringValue())==0)
             wifiPreambleType = WIFI_PREAMBLE_SHORT;
-        else if (strcmp("LONG", par("WifiPreambleMode").stringValue())==0)
+        else if (strcmp("LONG", par("wifiPreambleMode").stringValue())==0)
             wifiPreambleType = WIFI_PREAMBLE_LONG;
         else
-            wifiPreambleType = WIFI_PREAMBLE_LONG;
+            opp_error("Invalid wifiPreambleType. Must be SHORT or LONG");
 
         useModulationParameters = par("useModulationParameters");
 
@@ -390,7 +386,7 @@ void Ieee80211NewMac::initialize(int stage)
                 basicBitrate = BITRATES_80211p[0];
         }
 
-        // confiure AutoBit Rate
+        // configure AutoBit Rate
         configureAutoBitRate();
 //end auto rate code
         EV<<" bitrate="<<bitrate/1e6<<"M IDLE="<<IDLE<<" RECEIVE="<<RECEIVE<<endl;
@@ -409,7 +405,7 @@ void Ieee80211NewMac::initialize(int stage)
         // subscribe for the information of the carrier sense
         nb->subscribe(this, NF_RADIOSTATE_CHANGED);
 
-        // initalize self messages
+        // initialize self messages
         endSIFS = new cMessage("SIFS");
         endDIFS = new cMessage("DIFS");
         for (int i=0; i<numCategories(); i++)
@@ -553,17 +549,17 @@ void Ieee80211NewMac::initWatches()
 
 void Ieee80211NewMac::configureAutoBitRate()
 {
-    forceBitRate = par("ForceBitRate");
-    minSuccessThreshold = hasPar("minSuccessThreshold") ? par("minSuccessThreshold") : 10;
-    minTimerTimeout = hasPar("minTimerTimeout") ? par("minTimerTimeout") : 15;
-    timerTimeout = hasPar("timerTimeout") ? par("timerTimeout") : minTimerTimeout;
-    successThreshold = hasPar("successThreshold") ? par("successThreshold") : minSuccessThreshold;
-    autoBitrate = hasPar("autoBitrate") ? par("autoBitrate") : 0;
+    forceBitRate = par("forceBitRate");
+    minSuccessThreshold = par("minSuccessThreshold");
+    minTimerTimeout = par("minTimerTimeout");
+    timerTimeout = par("timerTimeout");
+    successThreshold = par("successThreshold");
+    autoBitrate = par("autoBitrate");
     switch (autoBitrate)
     {
     case 0:
         rateControlMode = RATE_CR;
-        EV<<"MAC Transmossion algorithm : Constant Rate"  <<endl;
+        EV<<"MAC Transmission algorithm : Constant Rate"  <<endl;
         break;
     case 1:
         rateControlMode = RATE_ARF;
@@ -571,13 +567,14 @@ void Ieee80211NewMac::configureAutoBitRate()
         break;
     case 2:
         rateControlMode = RATE_AARF;
-        successCoeff = hasPar("successCoeff") ? par("successCoeff") : 2.0;
-        timerCoeff = hasPar("timerCoeff") ? par("timerCoeff") : 2.0;
-        maxSuccessThreshold = hasPar("maxSuccessThreshold") ? par("maxSuccessThreshold") : 60;
+        successCoeff = par("successCoeff");
+        timerCoeff = par("timerCoeff");
+        maxSuccessThreshold = par("maxSuccessThreshold");
         EV<<"MAC Transmission algorithm : AARF Rate"  <<endl;
         break;
     default:
         rateControlMode = RATE_CR;
+        break;
     }
 }
 
@@ -769,9 +766,9 @@ void Ieee80211NewMac::handleUpperMsg(cPacket *msg)
     frame->setSequenceNumber(sequenceNumber);
     sequenceNumber = (sequenceNumber+1) % 4096;  //XXX seqNum must be checked upon reception of frames!
 
-    if (MappingAccessCategory(frame) == 200)
+    if (mappingAccessCategory(frame) == 200)
     {
-        // if function MappingAccessCategory() returns 200, it means transsmissionQueue is full
+        // if function mappingAccessCategory() returns 200, it means transsmissionQueue is full
         return;
     }
     frame->setMACArrive(simTime());
@@ -779,7 +776,7 @@ void Ieee80211NewMac::handleUpperMsg(cPacket *msg)
 }
 
 #ifdef  USEMULTIQUEUE
-int Ieee80211NewMac::MappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
+int Ieee80211NewMac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
 {
     bool isDataFrame = (dynamic_cast<Ieee80211DataFrame *>(frame) != NULL);
 
@@ -810,7 +807,7 @@ int Ieee80211NewMac::MappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
 
 #else
 
-int Ieee80211NewMac::MappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
+int Ieee80211NewMac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
 {
     bool isDataFrame = (dynamic_cast<Ieee80211DataFrame *>(frame) != NULL);
 
@@ -992,9 +989,6 @@ void Ieee80211NewMac::handleLowerMsg(cPacket *msg)
 
     if (!frame)
     {
-#ifdef FRAMETYPESTOP
-        error("message from physical layer (%s)%s is not a subclass of Ieee80211Frame", msg->getClassName(), msg->getName());
-#endif
         EV << "message from physical layer (%s)%s is not a subclass of Ieee80211Frame" << msg->getClassName() << " " << msg->getName() <<  endl;
         delete msg;
         return;
@@ -1008,13 +1002,6 @@ void Ieee80211NewMac::handleLowerMsg(cPacket *msg)
 
     Ieee80211TwoAddressFrame *twoAddressFrame = dynamic_cast<Ieee80211TwoAddressFrame *>(msg);
     ASSERT(!twoAddressFrame || twoAddressFrame->getTransmitterAddress() != address);
-
-#ifdef LWMPLS
-    int msgKind = msg->getKind();
-    if (msgKind != COLLISION && msgKind != BITERROR && twoAddressFrame!=NULL)
-        nb->fireChangeNotification(NF_LINK_REFRESH, twoAddressFrame);
-#endif
-
 
     handleWithFSM(msg);
 
@@ -1688,12 +1675,6 @@ simtime_t Ieee80211NewMac::getAIFS(int AccessCategory)
 simtime_t Ieee80211NewMac::getEIFS()
 {
 // FIXME:   return getSIFS() + getDIFS() + (8 * ACKSize + aPreambleLength + aPLCPHeaderLength) / lowestDatarate;
-#if 0
-    if (opMode=='b')
-        return getSIFS() + getDIFS() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / 1E+6;
-    else
-        return getSIFS() + getDIFS() + (8 * LENGTH_ACK) / 1E+6 + PHY_HEADER_LENGTH;
-#else
     if (PHY_HEADER_LENGTH<0)
     {
         if ((opMode=='b') || (opMode=='g'))
@@ -1705,6 +1686,8 @@ simtime_t Ieee80211NewMac::getEIFS()
     }
     else
     {
+        // FIXME: check how PHY_HEADER_LENGTH is handled. Is that given in bytes or secs ???
+        // what is the rela unit? The use seems to be incosistent betwen b and g modes.
         if (opMode=='b')
             return getSIFS() + getDIFS() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / 1E+6;
         else if (opMode=='g')
@@ -1717,7 +1700,6 @@ simtime_t Ieee80211NewMac::getEIFS()
     // if arrive here there is an error
     opp_error("mode not supported");
     return 0;
-#endif
 }
 
 simtime_t Ieee80211NewMac::computeBackoffPeriod(Ieee80211Frame *msg, int r)
@@ -1758,7 +1740,7 @@ void Ieee80211NewMac::scheduleDIFSPeriod()
 {
     if (lastReceiveFailed)
     {
-        EV << "receiption of last frame failed, scheduling EIFS period\n";
+        EV << "reception of last frame failed, scheduling EIFS period\n";
         scheduleAt(simTime() + getEIFS(), endDIFS);
     }
     else
@@ -1770,7 +1752,7 @@ void Ieee80211NewMac::scheduleDIFSPeriod()
 
 void Ieee80211NewMac::cancelDIFSPeriod()
 {
-    EV << "cancelling DIFS period\n";
+    EV << "canceling DIFS period\n";
     cancelEvent(endDIFS);
 }
 
@@ -1784,7 +1766,7 @@ void Ieee80211NewMac::scheduleAIFSPeriod()
 
             if (lastReceiveFailed)
             {
-                EV << "receiption of last frame failed, scheduling EIFS-DIFS+AIFS period (" << i << ")\n";
+                EV << "reception of last frame failed, scheduling EIFS-DIFS+AIFS period (" << i << ")\n";
                 scheduleAt(simTime() + getEIFS() - getDIFS() + getAIFS(i), endAIFS(i));
             }
             else
@@ -1815,7 +1797,7 @@ void Ieee80211NewMac::rescheduleAIFSPeriod(int AccessCategory)
 
 void Ieee80211NewMac::cancelAIFSPeriod()
 {
-    EV << "cancelling AIFS period\n";
+    EV << "canceling AIFS period\n";
     for (int i = 0; i<numCategories(); i++)
         cancelEvent(endAIFS(i));
     cancelEvent(endDIFS);
@@ -1868,7 +1850,7 @@ void Ieee80211NewMac::scheduleMulticastTimeoutPeriod(Ieee80211DataOrMgmtFrame *f
 
 void Ieee80211NewMac::cancelTimeoutPeriod()
 {
-    EV << "cancelling timeout period\n";
+    EV << "canceling timeout period\n";
     cancelEvent(endTimeout);
 }
 
@@ -2340,11 +2322,7 @@ Ieee80211Frame *Ieee80211NewMac::getFrameReceivedBeforeSIFS()
 void Ieee80211NewMac::popTransmissionQueue()
 {
     EV << "dropping frame from transmission queue\n";
-#ifdef USEMULTIQUEUE
     Ieee80211Frame *temp = dynamic_cast<Ieee80211Frame *>(transmissionQueue()->front());
-#else
-    Ieee80211Frame *temp = transmissionQueue()->front();
-#endif
     ASSERT(!transmissionQueue()->empty());
     transmissionQueue()->pop_front();
     if (queueModule)
@@ -2388,14 +2366,6 @@ double Ieee80211NewMac::computeFrameDuration(Ieee80211Frame *msg)
 double Ieee80211NewMac::computeFrameDuration(int bits, double bitrate)
 {
     double duration;
-#if 0
-    if (opMode=='g')
-        duration = 4*ceil((16+bits+6)/(bitrate/1e6*4))*1e-6 + PHY_HEADER_LENGTH;
-    else if (opMode=='b')
-        duration = bits / bitrate + PHY_HEADER_LENGTH / BITRATE_HEADER;
-    else
-        opp_error("Opmode not supported");
-#else
     if (PHY_HEADER_LENGTH<0)
     {
         ModulationType modType;
@@ -2419,7 +2389,6 @@ double Ieee80211NewMac::computeFrameDuration(int bits, double bitrate)
             opp_error("Opmode not supported");
     }
 
-#endif
     EV<<" duration="<<duration*1e6<<"us("<<bits<<"bits "<<bitrate/1e6<<"Mbps)"<<endl;
     return duration;
 }

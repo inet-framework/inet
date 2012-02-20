@@ -22,8 +22,8 @@
 #ifndef IEEE_80211New_MAC_H
 #define IEEE_80211New_MAC_H
 
-// uncomment this if you do not want to log state machine transitions
-#define FSM_DEBUG
+// un-comment this if you do not want to log state machine transitions
+//#define FSM_DEBUG
 //#define USEMULTIQUEUE
 
 #include "WifiMode.h"
@@ -54,7 +54,7 @@
  * TODO: CF period
  * TODO: pass radio power to upper layer
  * TODO: transmission complete notification to upper layer
- * TODO: STA TCF timer syncronization, see Chapter 11 pp 123
+ * TODO: STA TCF timer synchronization, see Chapter 11 pp 123
  *
  * Parts of the implementation have been taken over from the
  * Mobility Framework's Mac80211 module.
@@ -574,7 +574,7 @@ class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
     virtual unsigned int transmissionQueueSize();
 
     /** @brief Mapping to access categories. */
-    virtual int MappingAccessCategory(Ieee80211DataOrMgmtFrame *frame);
+    virtual int mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame);
 
     /** @brief Send down the change channel message to the physical layer if there is any. */
     virtual void sendDownPendingRadioConfigMsg();

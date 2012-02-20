@@ -41,9 +41,9 @@ void Ieee80211NewRadioModel::initializeFrom(cModule *radioModule)
     snirThreshold = dB2fraction(radioModule->par("snirThreshold").doubleValue());
 
 
-    if (strcmp("SHORT", radioModule->par("WifiPreambleMode").stringValue())==0)
+    if (strcmp("SHORT", radioModule->par("wifiPreambleMode").stringValue())==0)
         wifiPreamble = WIFI_PREAMBLE_SHORT;
-    else if (strcmp("LONG", radioModule->par("WifiPreambleMode").stringValue())==0)
+    else if (strcmp("LONG", radioModule->par("wifiPreambleMode").stringValue())==0)
         wifiPreamble = WIFI_PREAMBLE_LONG;
     else
         wifiPreamble = WIFI_PREAMBLE_LONG;
@@ -59,12 +59,12 @@ void Ieee80211NewRadioModel::initializeFrom(cModule *radioModule)
     else
         phyOpMode = 'g';
 
-    if (strcmp("YansModel", radioModule->par("ErrorModel").stringValue())==0)
+    if (strcmp("YansModel", radioModule->par("errorModel").stringValue())==0)
         errorModel = new YansErrorRateModel();
-    else if (strcmp("NistModel", radioModule->par("ErrorModel").stringValue())==0)
+    else if (strcmp("NistModel", radioModule->par("errorModel").stringValue())==0)
         errorModel = new NistErrorRateModel();
     else
-        opp_error("Error %s model is not valid",radioModule->par("ErrorModel").stringValue());
+        opp_error("Error %s model is not valid",radioModule->par("errorModel").stringValue());
 
 
     btSize = radioModule->par("btSize").longValue();
