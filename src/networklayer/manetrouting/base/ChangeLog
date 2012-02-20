@@ -1,3 +1,7 @@
+2012-02-11  Takeover from INETMANET @ fff5dfd
+
+    Code is synchronized with the INETMANET sources.
+
 2012-01-19  Andras Varga
 
 	ManetRoutingBase: compile fix: a const std::set<> can only be iterated
