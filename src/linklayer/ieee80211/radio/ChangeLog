@@ -1,3 +1,11 @@
+2012-02-11  Takeover from INETMANET
+
+        Airtime Link Metric support added to the radios. Can be turned on by the
+        airtimeLinkComputation parameter
+
+        Error model for radio can be configured using the errorModel parameter.
+        You can choose between NistModel and YansModel.
+
 2011-11-18  ------ INET-1.99.2 released ------
 
 2011-06-03  Rudolf Hornig
