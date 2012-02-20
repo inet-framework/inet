@@ -278,6 +278,32 @@ void RoutingTable::printRoutingTable() const
     EV << "\n";
 }
 
+void RoutingTable::printMulticastRoutingTable() const
+{
+    EV << "-- Multicast routing table --\n";
+    ev.printf("%-16s %-16s %-16s %-6s %-6s %s\n",
+              "Source", "Netmask", "Group", "Metric", "In", "Outs");
+
+    for (int i=0; i<getNumMulticastRoutes(); i++) {
+        IPv4MulticastRoute *route = getMulticastRoute(i);
+        ev.printf("%-16s %-16s %-16s %-6d %-6s ",
+                  route->getOrigin().isUnspecified() ? "*" : route->getOrigin().str().c_str(),
+                  route->getOriginNetmask().isUnspecified() ? "*" : route->getOriginNetmask().str().c_str(),
+                  route->getMulticastGroup().isUnspecified() ? "*" : route->getMulticastGroup().str().c_str(),
+                  route->getMetric(),
+                  !route->getParent() ? "*" : route->getParent()->getName());
+        const ChildInterfaceVector &children = route->getChildren();
+        for (ChildInterfaceVector::const_iterator it = children.begin(); it != children.end(); ++it)
+        {
+            if (it != children.begin())
+                EV << ",";
+            EV << (*it)->getInterface()->getName();
+        }
+        EV << "\n";
+    }
+    EV << "\n";
+}
+
 std::vector<IPv4Address> RoutingTable::gatherAddresses() const
 {
     std::vector<IPv4Address> addressvector;
