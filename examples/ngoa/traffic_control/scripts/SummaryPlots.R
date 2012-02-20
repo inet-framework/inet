@@ -259,9 +259,10 @@ if (.resp == 'y') {
 #################################################################################
 .resp <- readline("Process data from shared access with traffic shaping? (hit y or n) ")
 if (.resp == 'y') {
-    .n_totalFiles <- 1200    # total number of (scalar) files to process
-    .n_steps <- 20  # total number of steps
-    .n_files <- .n_totalFiles / .n_steps   # number of files per step
+    .n_totalFiles <- 1200   # total number of (scalar) files to process
+    .n_repetitions <- 10    # number of repetitions per experiment
+    .n_experiments <- .n_totalFiles / .n_repetitions  # number of experiments
+    .n_files <- .n_totalFiles / .n_experiments  # number of files per step
 
     .dfs <- list()  # list of data frames from steps
     .fileNames <- rep('', .n_files)  # vector of file names
