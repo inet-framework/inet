@@ -55,14 +55,16 @@ int Ieee80211eClassifier::classifyPacket(cMessage *msg)
     cPacket *ipData = NULL;  // must be initialized in case neither IPv4 nor IPv6 is present
 
 #ifdef WITH_IPv4
-    ipData = dynamic_cast<IPv4Datagram *>(PK(msg)->getEncapsulatedPacket());
+    if (msg)
+        ipData = dynamic_cast<IPv4Datagram *>(PK(msg)->getEncapsulatedPacket());
     if (ipData && dynamic_cast<ICMPMessage *>(ipData->getEncapsulatedPacket()))
         return 1;  // ICMP class
 #endif
 
 #ifdef WITH_IPv6
     if (!ipData) {
-        ipData = dynamic_cast<IPv6Datagram *>(PK(msg)->getEncapsulatedPacket());
+        if (msg)
+            ipData = dynamic_cast<IPv6Datagram *>(PK(msg)->getEncapsulatedPacket());
         if (ipData && dynamic_cast<ICMPv6Message *>(ipData->getEncapsulatedPacket()))
             return 1; // ICMPv6 class
     }
