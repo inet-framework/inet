@@ -24,7 +24,7 @@ simple ExtInterface like IExternalNic
     parameters:
         string filterString;
         string device;
-        int mtu = default(1500);
+        int mtu @unit("B") = default(1500B);
     gates:
         input netwIn;
         output netwOut;

@@ -58,7 +58,7 @@ moduleinterface IEtherMAC
         int txQueueLimit;       // maximum number of frames queued up for transmission;
                                 // additional frames are dropped. Only used if queueModule==""
         string queueModule;     // name of optional external queue module
-        int mtu;
+        int mtu @unit("B");
         @display("i=block/rxtx");
     gates:
         input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~MACRelayUnitPP

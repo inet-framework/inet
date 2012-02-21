@@ -65,7 +65,7 @@ simple Ieee80211Mac
         int retryLimit = default(-1); // maximum number of retries per message, -1 means default
         int cwMinData = default(-1); // contention window for normal data frames, -1 means default
         int cwMinMulticast = default(-1); // contention window for multicast messages, -1 means default
-        int mtu = default(1500);
+        int mtu @unit("B") = default(1500B);
         @display("i=block/layer");
         @statistic[state](title="state"; record=vector; interpolationmode=sample-hold); // ENUM!!
         @statistic[radioState](title="radio state"; record=vector; interpolationmode=sample-hold); // ENUM!!

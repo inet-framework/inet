@@ -48,7 +48,7 @@ simple PPP
     parameters:
         int txQueueLimit = default(1000);  // only used if queueModule==""; zero means infinite
         string queueModule = default("");  // name of external (QoS,RED,etc) queue module
-        int mtu = default(4470);
+        int mtu @unit("B") = default(4470B);
         @display("i=block/rxtx");
 
         @signal[txState](type=long);    // 1:transmit, 0:idle

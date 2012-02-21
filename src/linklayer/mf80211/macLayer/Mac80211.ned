@@ -42,7 +42,7 @@ simple Mac80211
         bool rtsCts = default(false);
         double bitrate @unit("bps");
         int broadcastBackoff;
-        int mtu = default(1500);
+        int mtu @unit("B") = default(1500B);
         @display("i=block/layer");
     gates:
         input upperLayerIn @labels(Ieee802Ctrl);
