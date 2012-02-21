@@ -25,8 +25,6 @@
 /**
  * Category constants for NotificationBoard
  */
-// TODO consider: use allocated IDs, like: const int NF_FOO = registerCategory("FOO");
-// or maybe use structs and dynamic_cast? so we can have a hierarchy of notifications
 // TODO document associated notification detail structs
 enum
 {
@@ -55,15 +53,14 @@ enum
     NF_L2_ASSOCIATED,    // successfully associated with an AP (currently Ieee80211)
     NF_L2_ASSOCIATED_NEWAP,   // successfully associated with an AP (currently Ieee80211)
     NF_L2_ASSOCIATED_OLDAP,
-    NF_L2_DISASSOCIATED,  // same as beacon_loast but used in higher layers
-    NF_L2_AP_ASSOCIATED,  // Emit by the AP, successfully associated with this AP (currently Ieee80211)
-    NF_L2_AP_DISASSOCIATED, // Emit by the AP, successfully disassociated with this AP (currently Ieee80211)
+    NF_L2_DISASSOCIATED,  // same as BEACON_LOST but used in higher layers
+    NF_L2_AP_ASSOCIATED,  // emitted by the AP, successfully associated with this AP (currently Ieee80211)
+    NF_L2_AP_DISASSOCIATED, // emitted by the AP, successfully disassociated from this AP (currently Ieee80211)
 
-    NF_LINK_BREAK, // Used for manet link layer feedback
-    NF_LINK_PROMISCUOUS, // Used for manet promiscuous mode, the packets that have this node how destination are no promiscuous send
+    NF_LINK_BREAK, // used for manet link layer feedback
+    NF_LINK_PROMISCUOUS, // used for manet promiscuous mode, the packets that have this node how destination are no promiscuous send
     NF_LINK_FULL_PROMISCUOUS, // Used for manet promiscuous mode, all packets are promiscuous
-    NF_LINK_REFRESH,     // Used for refresh a neigbourd adjacency
-
+    NF_LINK_REFRESH,     // used for refreshing a neigbour adjacency
 
     // - layer 3 (network)
     NF_INTERFACE_CREATED,
