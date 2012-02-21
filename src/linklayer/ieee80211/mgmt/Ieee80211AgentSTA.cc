@@ -128,7 +128,7 @@ void Ieee80211AgentSTA::receiveChangeNotification(int category, const cObject *d
         getParentModule()->getParentModule()->bubble("Beacon lost!");
         //sendDisassociateRequest();
         sendScanRequest();
-        nb->fireChangeNotification(NF_L2_DISSOCIATED, myIface);
+        nb->fireChangeNotification(NF_L2_DISASSOCIATED, myIface);
     }
 }
 
