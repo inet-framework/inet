@@ -61,7 +61,7 @@ simple Ieee80211NewMac
                                           // a generated MAC address in init stage 0.   
         string queueModule = default("");    // name of optional external queue module
         int maxQueueSize = default(50); // max queue length in frames; only used if queueModule==""
-        int maxCategorieQueueSize = default(50); // Max queue length in frames per categorie; only used if queueModule==""
+        int maxCategoryQueueSize = default(50); // Max queue length in frames per category; only used if queueModule==""
         int defaultAC = default(0); // what is default AC category
         int AIFSN0 = default(7); //AIFSN for background
         int AIFSN1 = default(3); //AIFSN for best effort

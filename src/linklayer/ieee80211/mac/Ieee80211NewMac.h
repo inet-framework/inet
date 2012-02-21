@@ -147,7 +147,7 @@ class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
 
     /** Maximum number of frames in the queue; should be set in the omnetpp.ini */
     int maxQueueSize;
-    int maxCategorieQueueSize;
+    int maxCategoryQueueSize;
 
     /**
      * The minimum length of MPDU to use RTS/CTS mechanism. 0 means always, extremely

@@ -157,7 +157,7 @@ void Ieee80211NewMac::initialize(int stage)
 
         EV<<"Operating mode: 802.11"<<opMode;
         maxQueueSize = par("maxQueueSize");
-        maxCategorieQueueSize = par("maxCategorieQueueSize");
+        maxCategoryQueueSize = par("maxCategoryQueueSize");
         rtsThreshold = par("rtsThresholdBytes");
 
 #ifdef  USEMULTIQUEUE
@@ -169,7 +169,7 @@ void Ieee80211NewMac::initialize(int stage)
                 if (numCategories()==1)
                     transmissionQueue(i)->setMaxSize(maxQueueSize);
                 else
-                    transmissionQueue(i)->setMaxSize(maxCategorieQueueSize);
+                    transmissionQueue(i)->setMaxSize(maxCategoryQueueSize);
                 transmissionQueue(i)->setNumStrictPrioritiesQueue(3); // multicast and control
             }
             else
@@ -178,7 +178,7 @@ void Ieee80211NewMac::initialize(int stage)
                 if (numCategories()==1)
                     transmissionQueue(i)->setMaxSize(maxQueueSize);
                 else
-                    transmissionQueue(i)->setMaxSize(maxCategorieQueueSize);
+                    transmissionQueue(i)->setMaxSize(maxCategoryQueueSize);
                 transmissionQueue(i)->setNumStrictPrioritiesQueue(2); // multicast and control
 
             }
@@ -785,7 +785,7 @@ int Ieee80211NewMac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
     else
         currentAC = 0;
         // check for queue overflow
-    if (isDataFrame && maxCategorieQueueSize && (int)transmissionQueue()->size() >= maxCategorieQueueSize)
+    if (isDataFrame && maxCategoryQueueSize && (int)transmissionQueue()->size() >= maxCategoryQueueSize)
     {
         EV << "message " << frame << " received from higher layer but AC queue is full, dropping message\n";
         numDropped()++;
@@ -816,7 +816,7 @@ int Ieee80211NewMac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
     else
         currentAC = 0;
         // check for queue overflow
-    if (isDataFrame && maxCategorieQueueSize && (int)transmissionQueue()->size() >= maxCategorieQueueSize)
+    if (isDataFrame && maxCategoryQueueSize && (int)transmissionQueue()->size() >= maxCategoryQueueSize)
     {
         EV << "message " << frame << " received from higher layer but AC queue is full, dropping message\n";
         numDropped()++;
