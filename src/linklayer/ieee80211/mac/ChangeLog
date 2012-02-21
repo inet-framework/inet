@@ -2,10 +2,6 @@
 
 	Takeover from INETMANET @ fff5dfd
 
-	Added support for a new MultiQueue QoS packet classifier.
-	It can be activated by defining the USEMULTIQUEUE macro while
-	compiling INET.
-
 	Added support to use the modulation parameters to determine
 	slot, diffs and ack timeout. Set the useModulationParameters parameter
 	for the MAC module.
