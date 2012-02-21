@@ -8,7 +8,9 @@
 ###
 
 
+###
 ### load add-on packages and external source files
+###
 library(ggplot2)
 library(omnetpp)
 #library(plyr)
@@ -17,8 +19,10 @@ library(reshape)
 ifelse (Sys.getenv("OS") == "Windows_NT",
         .base.directory <- "E:/tools/omnetpp/inet-hnrl/examples/ngoa/traffic_control",
         .base.directory <- "~/inet-hnrl/examples/ngoa/traffic_control")
-
+source(paste(.base.directory, 'scripts/collectMeasures.R', sep='/'))
+###
 ### define variables
+###
 ## dedicated access for n_h=1, n_f=5, n_v=1
 .da_nh1_nf5_nv1.wd <- paste(.base.directory, "results/Dedicated/nh1_nf5_nv1", sep="/")
 .da_nh1_nf5_nv1_tbf.wd <- paste(.base.directory, "results/Dedicated/nh1_nf5_nv1_tbf", sep="/")
@@ -57,17 +61,20 @@ ifelse (Sys.getenv("OS") == "Windows_NT",
                      "Average Session Throughput [Byte/sec]",
                      "Mean Session Transfer Rate [Byte/sec]",
                      "Average Decodable Frame Rate (Q)")
-
+###
 ### define functions
-ci.width <- conf.int(0.95)                  # for 95% confidence interval
-
+###
+## for 95% confidence interval
+ci.width <- conf.int(0.95)
+## for pause before and after processing
 Pause <- function () {
     cat("Hit <enter> to continue...")
     readline()
     invisible()
 }
-
+###
 ### customize
+###
 .old <- theme_set(theme_bw())
 .pt_size <- 3.5
 
@@ -78,62 +85,54 @@ Pause <- function () {
 #################################################################################
 .resp <- readline("Process data from dedicated access without traffic shaping? (hit y or n) ")
 if (.resp == 'y') {
-    .df <- loadDataset(paste(.da_nh1_nf5_nv1.wd, "*.sca", sep='/'))
-    .scalars <- merge(cast(.df$runattrs, runid ~ attrname, value='attrvalue',
-                           subset=attrname %in% c('experiment', 'measurement', 'dr', 'n')),
-                      .df$scalars, by='runid',
-                      all.x=TRUE)
-
-    ## collect average session delay, average session throughput, and mean session transfer rate of FTP traffic
-    .tmp_ftp <- cast(.scalars, experiment+measurement+dr+n+name ~ ., c(mean, ci.width),
-                     subset=grepl('.*\\.ftpApp.*', module) &
-                     (name=='average session delay [s]' |
-                      name=='average session throughput [B/s]' |
-                      name=='mean session transfer rate [B/s]'))
-    .tmp_ftp <- subset(.tmp_ftp, select = c('dr', 'n', 'name', 'mean', 'ci.width'))
-    .tmp_ftp <- subset(cbind(.tmp_ftp,      ### convert factor columns (i.e., 'dr' and 'n') into numeric ones
-                             as.numeric(as.character(.tmp_ftp$dr)),
-                             as.numeric(as.character(.tmp_ftp$n))),
-                       select=c(6, 7, 3, 4, 5))
-    names(.tmp_ftp)[1:2]=c('dr', 'n')
-    .tmp_ftp <- sort_df(.tmp_ftp, vars=c('dr', 'n'))
-    .tmp_ftp$traffic <- rep('ftp', length(.tmp_ftp$mean))
-
-    ## collect average & percentile session delays, average session throughput, and mean session transfer rate of HTTP traffic
-    .tmp_http <- cast(.scalars, experiment+measurement+dr+n+name ~ ., c(mean, ci.width),
-                      subset=grepl('.*\\.httpApp.*', module) &
-                      (name=='average session delay [s]' |
-                       name=='90th-sessionDelay:percentile' |
-                       name=='95th-sessionDelay:percentile' |
-                       name=='99th-sessionDelay:percentile' |
-                       name=='average session throughput [B/s]' |
-                       name=='mean session transfer rate [B/s]'))
-    .tmp_http <- subset(.tmp_http, select = c('dr', 'n', 'name', 'mean', 'ci.width'))
-    .tmp_http <- subset(cbind(.tmp_http,    ### convert factor columns (i.e., 'dr' and 'n') into numeric ones
-                              as.numeric(as.character(.tmp_http$dr)),
-                              as.numeric(as.character(.tmp_http$n))),
-                        select=c(6, 7, 3, 4, 5))
-    names(.tmp_http)[1:2]=c('dr', 'n')
-    .tmp_http <- sort_df(.tmp_http, vars=c('dr', 'n'))
-    .tmp_http$traffic <- rep('http', length(.tmp_http$mean))
-
-    ## collect decodable frame rate of video traffic
-    .tmp_video <- cast(.scalars, experiment+measurement+dr+n+name ~ ., c(mean, ci.width),
-                       subset=grepl('.*\\.videoApp.*', module) &
-                       name=='decodable frame rate (Q)')
-    .tmp_video <- subset(.tmp_video, select = c('dr', 'n', 'name', 'mean', 'ci.width'))
-    .tmp_video <- subset(cbind(.tmp_video,    ### convert factor columns (i.e., 'dr' and 'n') into numeric ones
-                               as.numeric(as.character(.tmp_video$dr)),
-                               as.numeric(as.character(.tmp_video$n))),
-                         select=c(6, 7, 3, 4, 5))
-    names(.tmp_video)[1:2]=c('dr', 'n')
-    .tmp_video <- sort_df(.tmp_video, vars=c('dr', 'n'))
-    .tmp_video$traffic <- rep('video', length(.tmp_video$mean))
-
-    ## combine the tree data frames into one and sort it
-    .tmp <- rbind(.tmp_ftp, .tmp_http, .tmp_video)
-    .da_nh1_nf5_nv1.df <- sort_df(.tmp, vars=c('dr', 'n'))
-
+    .n_totalFiles <- as.numeric(system(paste('ls -l ', paste(.da_nh1_nf5_nv1.wd, '*.sca', sep='/'), ' | wc -l', sep=''), intern=TRUE))
+                                        # total number of (scalar) files to process
+    .n_repetitions <- 10    # number of repetitions per experiment
+    .n_experiments <- .n_totalFiles / .n_repetitions  # number of experiments
+    .n_files <- .n_totalFiles / .n_experiments  # number of files per experiment
+    .dfs <- list()  # list of data frames from experiments
+    .fileNames <- rep('', .n_files)  # vector of file names
+    for (.i in 1:.n_experiments) {
+        cat(paste("Processing ", as.character(.i), "th experiment ...\n", sep=""))
+        for (.j in 1:.n_files) {
+            .fileNames[.j] <- paste(.da_nh1_nf5_nv1.wd, paste("nh1_nf5_nv1-", as.character((.i-1)*.n_files+.j-1), ".sca", sep=""), sep='/')
+        }
+        .df <- loadDataset(.fileNames)
+        .scalars <- merge(cast(.df$runattrs, runid ~ attrname, value='attrvalue',
+                               subset=attrname %in% c('experiment', 'measurement', 'dr', 'n')),
+                          .df$scalars, by='runid',
+                          all.x=TRUE)
+        ## collect average session delay, average session throughput, and mean session transfer rate of FTP traffic
+        .tmp_ftp <- collectMeasures(.scalars,
+                                    "experiment+measurement+dr+n+name ~ .",
+                                    '.*\\.ftpApp.*',
+                                    '(average session delay|average session throughput|mean session transfer rate)',
+                                    c('dr', 'n'),
+                                    'ftp')
+        ## collect average & percentile session delays, average session throughput, and mean session transfer rate of HTTP traffic
+        .tmp_http <- collectMeasures(.scalars,
+                                     "experiment+measurement+dr+n+name ~ .",
+                                     '.*\\.httpApp.*',
+                                     '(average session delay|average session throughput|mean session transfer rate|90th-sessionDelay:percentile|95th-sessionDelay:percentile|99th-sessionDelay:percentile)',
+                                     c('dr', 'n'),
+                                     'http')
+        ## collect decodable frame rate of video traffic
+        .tmp_video <- collectMeasures(.scalars,
+                                      "experiment+measurement+dr+n+name ~ .",
+                                      '.*\\.videoApp.*',
+                                      'decodable frame rate',
+                                      c('dr', 'n'),
+                                      'video')
+        ## combine the three data frames into one
+        .dfs[[.i]] <- rbind(.tmp_ftp, .tmp_http, .tmp_video)
+    }
+    ## combine the data frames from experiments into one
+    .tmp.df <- .dfs[[1]]
+    for (.i in 2:.n_experiments) {
+        .tmp.df <- rbind(.tmp.df, .dfs[[.i]])
+    }
+    ## sort the resulting data frame
+    .da_nh1_nf5_nv1.df <- sort_df(.tmp.df, vars=c('dr', 'n'))
     .da_nh1_nf5_nv1.plots <- list()
     for (.i in 1:length(.traffic)) {
         .df <- subset(.da_nh1_nf5_nv1.df, name==.measure[.i] & traffic==.traffic[.i], select=c(1, 2, 4, 5))
@@ -143,18 +142,17 @@ if (.resp == 'y') {
         .p <- .p + geom_point(aes(group=dr, shape=factor(dr), x=n, y=mean), size=.pt_size) + scale_shape_manual("Line Rate\n[Gb/s]", values=0:9)
         .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Line Rate\n[Gb/s]")
         .da_nh1_nf5_nv1.plots[[.i]] <- .p
-
         ## save as a PDF file
         .p
         ggsave(paste(.da_nh1_nf5_nv1.wd,
                      paste("nh1_nf5_nv1-", .traffic[.i], "-", .measure_abbrv[.i], ".pdf", sep=""),
                      sep="/"))
     }
-
     ## save data frame and plots for later use
     save(.da_nh1_nf5_nv1.df, .da_nh1_nf5_nv1.plots,
          file=paste(.da_nh1_nf5_nv1.wd, "nh1_nf5_nv1.RData", sep="/"))
 }   # end of if()
+
 
 #################################################################################
 ### summary plots for dedicated architecture with HTTP, FTP, and video traffic
@@ -162,68 +160,54 @@ if (.resp == 'y') {
 #################################################################################
 .resp <- readline("Process data from dedicated access with traffic shaping? (hit y or n) ")
 if (.resp == 'y') {
-    .df <- loadDataset(paste(.da_nh1_nf5_nv1_tbf.wd, "*.sca", sep='/'))
-    .scalars <- merge(cast(.df$runattrs, runid ~ attrname, value='attrvalue',
-                           subset=attrname %in% c('experiment', 'measurement', 'dr', 'mr', 'bs', 'n')),
-                      .df$scalars, by='runid',
-                      all.x=TRUE)
-
-    ## collect average session delay, average session throughput, and mean session transfer rate of FTP traffic
-    .tmp_ftp <- cast(.scalars, experiment+measurement+dr+mr+bs+n+name ~ ., c(mean, ci.width),
-                     subset=grepl('.*\\.ftpApp.*', module) &
-                     (name=='average session delay [s]' |
-                      name=='average session throughput [B/s]' |
-                      name=='mean session transfer rate [B/s]'))
-    .tmp_ftp <- subset(.tmp_ftp, select = c('dr', 'mr', 'bs', 'n', 'name', 'mean', 'ci.width'))
-    .tmp_ftp <- subset(cbind(.tmp_ftp,      ### convert factor columns (i.e., 'dr' and 'n') into numeric ones
-                             as.numeric(as.character(.tmp_ftp$dr)),
-                             as.numeric(as.character(.tmp_ftp$mr)),
-                             as.numeric(as.character(.tmp_ftp$bs)),
-                             as.numeric(as.character(.tmp_ftp$n))),
-                       select=c(8, 9, 10, 11, 5, 6, 7))
-    names(.tmp_ftp)[1:4]=c('dr', 'mr', 'bs', 'n')
-    .tmp_ftp <- sort_df(.tmp_ftp, vars=c('dr', 'mr', 'bs', 'n'))
-    .tmp_ftp$traffic <- rep('ftp', length(.tmp_ftp$mean))
-
-    ## collect average & percentile session delays, average session throughput, and mean session transfer rate of HTTP traffic
-    .tmp_http <- cast(.scalars, experiment+measurement+dr+mr+bs+n+name ~ ., c(mean, ci.width),
-                      subset=grepl('.*\\.httpApp.*', module) &
-                      (name=='average session delay [s]' |
-                       name=='90th-sessionDelay:percentile' |
-                       name=='95th-sessionDelay:percentile' |
-                       name=='99th-sessionDelay:percentile' |
-                       name=='average session throughput [B/s]' |
-                       name=='mean session transfer rate [B/s]'))
-    .tmp_http <- subset(.tmp_http, select = c('dr', 'mr', 'bs', 'n', 'name', 'mean', 'ci.width'))
-    .tmp_http <- subset(cbind(.tmp_http,    ### convert factor columns (i.e., 'dr' and 'n') into numeric ones
-                              as.numeric(as.character(.tmp_http$dr)),
-                              as.numeric(as.character(.tmp_http$mr)),
-                              as.numeric(as.character(.tmp_http$bs)),
-                              as.numeric(as.character(.tmp_http$n))),
-                        select=c(8, 9, 10, 11, 5, 6, 7))
-    names(.tmp_http)[1:4]=c('dr', 'mr', 'bs', 'n')
-    .tmp_http <- sort_df(.tmp_http, vars=c('dr', 'mr', 'bs', 'n'))
-    .tmp_http$traffic <- rep('http', length(.tmp_http$mean))
-
-    ## collect decodable frame rate of video traffic
-    .tmp_video <- cast(.scalars, experiment+measurement+dr+mr+bs+n+name ~ ., c(mean, ci.width),
-                       subset=grepl('.*\\.videoApp.*', module) &
-                       name=='decodable frame rate (Q)')
-    .tmp_video <- subset(.tmp_video, select = c('dr', 'mr', 'bs', 'n', 'name', 'mean', 'ci.width'))
-    .tmp_video <- subset(cbind(.tmp_video,    ### convert factor columns (i.e., 'dr' and 'n') into numeric ones
-                               as.numeric(as.character(.tmp_video$dr)),
-                               as.numeric(as.character(.tmp_video$mr)),
-                               as.numeric(as.character(.tmp_video$bs)),
-                               as.numeric(as.character(.tmp_video$n))),
-                         select=c(8, 9, 10, 11, 5, 6, 7))
-    names(.tmp_video)[1:4]=c('dr', 'mr', 'bs', 'n')
-    .tmp_video <- sort_df(.tmp_video, vars=c('dr', 'mr', 'bs', 'n'))
-    .tmp_video$traffic <- rep('video', length(.tmp_video$mean))
-
-    ## combine the tree data frames into one and sort it
-    .tmp <- rbind(.tmp_ftp, .tmp_http, .tmp_video)
-    .da_nh1_nf5_nv1_tbf.df <- sort_df(.tmp, vars=c('dr', 'mr', 'bs', 'n'))
-
+    .n_totalFiles <- as.numeric(system(paste('ls -l ', paste(.da_nh1_nf5_nv1_tbf.wd, '*.sca', sep='/'), ' | wc -l', sep=''), intern=TRUE))
+                                        # total number of (scalar) files to process
+    .n_repetitions <- 10    # number of repetitions per experiment
+    .n_experiments <- .n_totalFiles / .n_repetitions  # number of experiments
+    .n_files <- .n_totalFiles / .n_experiments  # number of files per experiment
+    .dfs <- list()  # list of data frames from experiments
+    .fileNames <- rep('', .n_files)  # vector of file names
+    for (.i in 1:.n_experiments) {
+        cat(paste("Processing ", as.character(.i), "th experiment ...\n", sep=""))
+        for (.j in 1:.n_files) {
+            .fileNames[.j] <- paste(.da_nh1_nf5_nv1_tbf.wd, paste("nh1_nf5_nv1_tbf-", as.character((.i-1)*.n_files+.j-1), ".sca", sep=""), sep='/')
+        }
+        .df <- loadDataset(.fileNames)
+        .scalars <- merge(cast(.df$runattrs, runid ~ attrname, value='attrvalue',
+                               subset=attrname %in% c('experiment', 'measurement', 'dr', 'mr', 'bs', 'n')),
+                          .df$scalars, by='runid',
+                          all.x=TRUE)
+        ## collect average session delay, average session throughput, and mean session transfer rate of FTP traffic
+        .tmp_ftp <- collectMeasures(.scalars,
+                                    "experiment+measurement+dr+mr+bs+n+name ~ .",
+                                    '.*\\.ftpApp.*',
+                                    '(average session delay|average session throughput|mean session transfer rate)',
+                                    c('dr', 'mr', 'bs', 'n'),
+                                    'ftp')
+        ## collect average & percentile session delays, average session throughput, and mean session transfer rate of HTTP traffic
+        .tmp_http <- collectMeasures(.scalars,
+                                     "experiment+measurement+dr+mr+bs+n+name ~ .",
+                                     '.*\\.httpApp.*',
+                                     '(average session delay|average session throughput|mean session transfer rate|90th-sessionDelay:percentile|95th-sessionDelay:percentile|99th-sessionDelay:percentile)',
+                                     c('dr', 'mr', 'bs', 'n'),
+                                     'http')
+        ## collect decodable frame rate of video traffic
+        .tmp_video <- collectMeasures(.scalars,
+                                      "experiment+measurement+dr+mr+bs+n+name ~ .",
+                                      '.*\\.videoApp.*',
+                                      'decodable frame rate',
+                                      c('dr', 'mr', 'bs', 'n'),
+                                      'video')
+        ## combine the three data frames into one
+        .dfs[[.i]] <- rbind(.tmp_ftp, .tmp_http, .tmp_video)
+    }
+    ## combine the data frames from experiments into one
+    .tmp.df <- .dfs[[1]]
+    for (.i in 2:.n_experiments) {
+        .tmp.df <- rbind(.tmp.df, .dfs[[.i]])
+    }
+    ## sort the resulting data frame
+    .da_nh1_nf5_nv1_tbf.df <- sort_df(.tmp.df, vars=c('dr', 'mr', 'bs', 'n'))
     .dr.range <- unique(.da_nh1_nf5_nv1_tbf.df$dr)
     .mr.range <- unique(.da_nh1_nf5_nv1_tbf.df$mr)
     .da_nh1_nf5_nv1_tbf.plots <- list()
@@ -242,7 +226,6 @@ if (.resp == 'y') {
                     .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[Byte]", values=0:9)
                     .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[Byte]")
                     .da_nh1_nf5_nv1_tbf.plots[[.i]][[.mr.idx]][[.k]] <- .p
-
                     ## save as a PDF file
                     .p
                     ggsave(paste(.da_nh1_nf5_nv1_tbf.wd,
@@ -254,7 +237,6 @@ if (.resp == 'y') {
             }   # end of if()
         }   # end of for(.j)
     }   # end of for(.i)
-
     ## save data frame and plots for later use
     save(.da_nh1_nf5_nv1_tbf.df, .da_nh1_nf5_nv1_tbf.plots,
          file=paste(.da_nh1_nf5_nv1_tbf.wd, "nh1_nf5_nv1_tbf.RData", sep="/"))
@@ -267,99 +249,59 @@ if (.resp == 'y') {
 #################################################################################
 .resp <- readline("Process data from shared access with traffic shaping? (hit y or n) ")
 if (.resp == 'y') {
+    .n_totalFiles <- as.numeric(system(paste('ls -l ', paste(.sa_nh1_nf5_nv1_tbf.wd, '*.sca', sep='/'), ' | wc -l', sep=''), intern=TRUE))
+                                        # total number of (scalar) files to process
     .n_totalFiles <- 1200   # total number of (scalar) files to process
     .n_repetitions <- 10    # number of repetitions per experiment
     .n_experiments <- .n_totalFiles / .n_repetitions  # number of experiments
-    .n_files <- .n_totalFiles / .n_experiments  # number of files per step
-
-    .dfs <- list()  # list of data frames from steps
+    .n_files <- .n_totalFiles / .n_experiments  # number of files per experiment
+    .dfs <- list()  # list of data frames from experiments
     .fileNames <- rep('', .n_files)  # vector of file names
-    for (.i in 1:.n_steps) {
-        cat(paste("Processing ", as.character(.i), "th step ...\n", sep=""))
-
+    for (.i in 1:.n_experiments) {
+        cat(paste("Processing ", as.character(.i), "th experiment ...\n", sep=""))
         for (.j in 1:.n_files) {
             .fileNames[.j] <- paste(.sa_nh1_nf5_nv1_tbf.wd, paste("nh1_nf5_nv1_tbf-", as.character((.i-1)*.n_files+.j-1), ".sca", sep=""), sep='/')
         }
-
         .df <- loadDataset(.fileNames)
         .scalars <- merge(cast(.df$runattrs, runid ~ attrname, value='attrvalue',
                                subset=attrname %in% c('experiment', 'measurement', 'N', 'dr', 'mr', 'bs', 'n')),
                           .df$scalars, by='runid',
                           all.x=TRUE)
-
         ## collect average session delay, average session throughput, and mean session transfer rate of FTP traffic
-        .tmp_ftp <- cast(.scalars, experiment+measurement+N+dr+mr+bs+n+name ~ ., c(mean, ci.width),
-                         subset=grepl('.*\\.ftpApp.*', module) &
-                         (name=='average session delay [s]' |
-                          name=='average session throughput [B/s]' |
-                          name=='mean session transfer rate [B/s]'))
-        .tmp_ftp <- subset(.tmp_ftp, select = c('N', 'dr', 'mr', 'bs', 'n', 'name', 'mean', 'ci.width'))
-        .tmp_ftp <- subset(cbind(.tmp_ftp,      ### convert factor columns (e.g., 'dr' and 'n') into numeric ones
-                                 as.numeric(as.character(.tmp_ftp$N)),
-                                 as.numeric(as.character(.tmp_ftp$dr)),
-                                 as.numeric(as.character(.tmp_ftp$mr)),
-                                 as.numeric(as.character(.tmp_ftp$bs)),
-                                 as.numeric(as.character(.tmp_ftp$n))),
-                           select=c(9, 10, 11, 12, 13, 6, 7, 8))
-        names(.tmp_ftp)[1:5]=c('N', 'dr', 'mr', 'bs', 'n')
-        .tmp_ftp <- sort_df(.tmp_ftp, vars=c('N', 'dr', 'mr', 'bs', 'n'))
-        .tmp_ftp$traffic <- rep('ftp', length(.tmp_ftp$mean))
-
+        .tmp_ftp <- collectMeasures(.scalars,
+                                    "experiment+measurement+N+dr+mr+bs+n+name ~ .",
+                                    '.*\\.ftpApp.*',
+                                    '(average session delay|average session throughput|mean session transfer rate)',
+                                    c('N', 'dr', 'mr', 'bs', 'n'),
+                                    'ftp')
         ## collect average & percentile session delays, average session throughput, and mean session transfer rate of HTTP traffic
-        .tmp_http <- cast(.scalars, experiment+measurement+N+dr+mr+bs+n+name ~ ., c(mean, ci.width),
-                          subset=grepl('.*\\.httpApp.*', module) &
-                          (name=='average session delay [s]' |
-                           name=='90th-sessionDelay:percentile' |
-                           name=='95th-sessionDelay:percentile' |
-                           name=='99th-sessionDelay:percentile' |
-                           name=='average session throughput [B/s]' |
-                           name=='mean session transfer rate [B/s]'))
-        .tmp_http <- subset(.tmp_http, select = c('N', 'dr', 'mr', 'bs', 'n', 'name', 'mean', 'ci.width'))
-        .tmp_http <- subset(cbind(.tmp_http,    ### convert factor columns (e.g., 'dr' and 'n') into numeric ones
-                                  as.numeric(as.character(.tmp_http$N)),
-                                  as.numeric(as.character(.tmp_http$dr)),
-                                  as.numeric(as.character(.tmp_http$mr)),
-                                  as.numeric(as.character(.tmp_http$bs)),
-                                  as.numeric(as.character(.tmp_http$n))),
-                            select=c(9, 10, 11, 12, 13, 6, 7, 8))
-        names(.tmp_http)[1:5]=c('N', 'dr', 'mr', 'bs', 'n')
-        .tmp_http <- sort_df(.tmp_http, vars=c('N', 'dr', 'mr', 'bs', 'n'))
-        .tmp_http$traffic <- rep('http', length(.tmp_http$mean))
-
+        .tmp_http <- collectMeasures(.scalars,
+                                     "experiment+measurement+N+dr+mr+bs+n+name ~ .",
+                                     '.*\\.httpApp.*',
+                                     '(average session delay|average session throughput|mean session transfer rate|90th-sessionDelay:percentile|95th-sessionDelay:percentile|99th-sessionDelay:percentile)',
+                                     c('N', 'dr', 'mr', 'bs', 'n'),
+                                     'http')
         ## collect decodable frame rate of video traffic
-        .tmp_video <- cast(.scalars, experiment+measurement+N+dr+mr+bs+n+name ~ ., c(mean, ci.width),
-                           subset=grepl('.*\\.videoApp.*', module) &
-                           name=='decodable frame rate (Q)')
-        .tmp_video <- subset(.tmp_video, select = c('N', 'dr', 'mr', 'bs', 'n', 'name', 'mean', 'ci.width'))
-        .tmp_video <- subset(cbind(.tmp_video,    ### convert factor columns (e.g., 'dr' and 'n') into numeric ones
-                                   as.numeric(as.character(.tmp_video$N)),
-                                   as.numeric(as.character(.tmp_video$dr)),
-                                   as.numeric(as.character(.tmp_video$mr)),
-                                   as.numeric(as.character(.tmp_video$bs)),
-                                   as.numeric(as.character(.tmp_video$n))),
-                             select=c(9, 10, 11, 12, 13, 6, 7, 8))
-        names(.tmp_video)[1:5]=c('N', 'dr', 'mr', 'bs', 'n')
-        .tmp_video <- sort_df(.tmp_video, vars=c('N', 'dr', 'mr', 'bs', 'n'))
-        .tmp_video$traffic <- rep('video', length(.tmp_video$mean))
-
-        ## combine the tree data frames into one
+        .tmp_video <- collectMeasures(.scalars,
+                                     "experiment+measurement+N+dr+mr+bs+n+name ~ .",
+                                     '.*\\.videoApp.*',
+                                     'decodable frame rate',
+                                     c('N', 'dr', 'mr', 'bs', 'n'),
+                                     'video')
+        ## combine the three data frames into one
         .dfs[[.i]] <- rbind(.tmp_ftp, .tmp_http, .tmp_video)
     }
-
-    ## combine the data frames from steps into one
+    ## combine the data frames from experiments into one
     .tmp.df <- .dfs[[1]]
-    for (.i in 2:.n_steps) {
+    for (.i in 2:.n_experiments) {
         .tmp.df <- rbind(.tmp.df, .dfs[[.i]])
     }
-
     ## sort the resulting data frame
     .sa_nh1_nf5_nv1_tbf.df <- sort_df(.tmp.df, vars=c('N', 'dr', 'mr', 'bs', 'n'))
-
     .N.range <- unique(.sa_nh1_nf5_nv1_tbf.df$N)
     .dr.range <- unique(.sa_nh1_nf5_nv1_tbf.df$dr)
     .mr.range <- unique(.sa_nh1_nf5_nv1_tbf.df$mr)
     .sa_nh1_nf5_nv1_tbf.plots <- list()
-
     for (.i in 1:length(.N.range)) {
         for (.j in 1:length(.dr.range)) {
             .sa_nh1_nf5_nv1_tbf.plots[[.j]] <- list()
@@ -376,7 +318,6 @@ if (.resp == 'y') {
                         .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[Byte]", values=0:9)
                         .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[Byte]")
                         .sa_nh1_nf5_nv1_tbf.plots[[.j]][[.mr.idx]][[.l]] <- .p
-
                         ## save as a PDF file
                         .p
                         ggsave(paste(.sa_nh1_nf5_nv1_tbf.wd,
@@ -390,246 +331,7 @@ if (.resp == 'y') {
             }   # end of for(.k)
         }   # end of for(.j)
     }   # end of for(.i)
-
     ## save data frame and plots for later use
     save(.sa_nh1_nf5_nv1_tbf.df, .sa_nh1_nf5_nv1_tbf.plots,
          file=paste(.sa_nh1_nf5_nv1_tbf.wd, "nh1_nf5_nv1_tbf.RData", sep="/"))
 }   # end of if()
-
-
-## #################################################################################
-## ### summary plots for dedicated architecture with HTTP and video traffic but no
-## ### traffic shaping
-## #################################################################################
-## .df <- loadDataset(paste(.da_nh1_nf0_nv1.wd, "*.sca", sep='/'))
-## .scalars <- merge(cast(.df$runattrs, runid ~ attrname, value='attrvalue', subset=attrname %in% c('experiment', 'measurement', 'dr', 'n')),
-##                   .df$scalars, by='runid',
-##                   all.x=TRUE)
-
-## ## collect average session delay, average session throughput, mean session transfer rate, and decodable frame rate
-## .tmp <- cast(.scalars, experiment+measurement+dr+n+name ~ ., c(mean, ci.width),
-##              subset=(name=='average session delay [s]' |
-##                      name=='average session throughput [B/s]' |
-##                      name=='mean session transfer rate [B/s]' |
-##                      name=='decodable frame rate (Q)'))
-## .tmp <- subset(.tmp, select = c('dr', 'n', 'name', 'mean', 'ci.width'))
-
-## ### convert factor columns (i.e., 'dr' and 'n') into numeric ones
-## .tmp <- subset(cbind(.tmp, as.numeric(as.character(.tmp$dr)), as.numeric(as.character(.tmp$n))), select=c(6, 7, 3, 4, 5))
-## names(.tmp)[1:2]=c('dr', 'n')
-## .da_nh1_nf0_nv1.df <- sort_df(.tmp, vars=c('dr', 'n'))
-
-## ## ## save data into text files for further processing (e.g., plotting by matplotlib)
-## ## .avg_session_dlys <- split(.avg_session_dly, .avg_session_dly$dr) # list of data frames (per 'dr' basis)
-## ## for (.i in 1:length(.avg_session_dlys)) {
-## ##     .file_name <- paste("average_session_delay_dr", as.character(.avg_session_dlys[[.i]]$dr[1]), ".data", sep="")
-## ##     write.table(.avg_session_dlys[[.i]], paste(.da_nh1_nf0_nv0.wd, .file_name, sep='/'), row.names=FALSE)
-## ## }
-
-## .names = c('average session delay [s]', 'average session throughput [B/s]', 'mean session transfer rate [B/s]', 'decodable frame rate (Q)')
-## .short_names = c('dly', 'thr', 'trf', 'dfr')
-## .da_nh1_nf0_nv1.plots <- list()
-## for (.i in 1:length(.names)) {
-##     .df <- subset(.da_nh1_nf0_nv1.df, name==.names[.i], select=c(1, 2, 4, 5))
-##     .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
-##     .p <- ggplot(data=.df, aes(group=dr, colour=factor(dr), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
-##     .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.i])
-##     .p <- .p + geom_point(aes(group=dr, shape=factor(dr), x=n, y=mean), size=.pt_size) + scale_shape_manual("Line Rate\n[Gb/s]", values=0:9)
-##     .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Line Rate\n[Gb/s]")
-##     .da_nh1_nf0_nv1.plots[[.i]] <- .p
-
-##     ## save a plot as a PDF file
-##     .pdf <- paste("nh1_nf0_nv1-", .short_names[.i], ".pdf", sep="")
-##     pdf(paste(.da_nh1_nf0_nv1.wd, .pdf, sep="/"))
-##     .da_nh1_nf0_nv1.plots[[.i]]
-##     dev.off()
-## }
-
-## #################################################################################
-## ### summary plots for dedicated architecture with HTTP traffic and no traffic
-## ### shaping
-## #################################################################################
-## .df <- loadDataset(paste(.da_nh1_nf0_nv0.wd, "*.sca", sep='/'))
-## .scalars <- merge(cast(.df$runattrs, runid ~ attrname, value='attrvalue', subset=attrname %in% c('experiment', 'measurement', 'dr', 'n')),
-##                   .df$scalars, by='runid',
-##                   all.x=TRUE)
-
-## ## collect average session delay, average session throughput, and mean session transfer rate
-## .tmp <- cast(.scalars, experiment+measurement+dr+n+name ~ ., c(mean, ci.width),
-##              subset=grepl('.*\\.httpApp.*', module) &
-##              (name=='average session delay [s]' |
-##               name=='average session throughput [B/s]' |
-##               name=='mean session transfer rate [B/s]'))
-## .tmp <- subset(.tmp, select = c('dr', 'n', 'name', 'mean', 'ci.width'))
-
-## ### convert factor columns (i.e., 'dr' and 'n') into numeric ones
-## .tmp <- subset(cbind(.tmp, as.numeric(as.character(.tmp$dr)), as.numeric(as.character(.tmp$n))), select=c(6, 7, 3, 4, 5))
-## names(.tmp)[1:2]=c('dr', 'n')
-## .da_nh1_nf0_nv0.df <- sort_df(.tmp, vars=c('dr', 'n'))
-
-## ## ## save data into text files for further processing (e.g., plotting by matplotlib)
-## ## .avg_session_dlys <- split(.avg_session_dly, .avg_session_dly$dr) # list of data frames (per 'dr' basis)
-## ## for (.i in 1:length(.avg_session_dlys)) {
-## ##     .file_name <- paste("average_session_delay_dr", as.character(.avg_session_dlys[[.i]]$dr[1]), ".data", sep="")
-## ##     write.table(.avg_session_dlys[[.i]], paste(.da_nh1_nf0_nv0.wd, .file_name, sep='/'), row.names=FALSE)
-## ## }
-
-## .names = c('average session delay [s]', 'average session throughput [B/s]', 'mean session transfer rate [B/s]')
-## .short_names = c('dly', 'thr', 'trf')
-## .da_nh1_nf0_nv0.plots <- list()
-## for (.i in 1:length(.names)) {
-##     .df <- subset(.da_nh1_nf0_nv0.df, name==.names[.i], select=c(1, 2, 4, 5))
-##     .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
-##     .p <- ggplot(data=.df, aes(group=dr, colour=factor(dr), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
-##     .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.i])
-##     .p <- .p + geom_point(aes(group=dr, shape=factor(dr), x=n, y=mean), size=.pt_size) + scale_shape_manual("Line Rate\n[Gb/s]", values=0:9)
-##     .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Line Rate\n[Gb/s]")
-##     .da_nh1_nf0_nv0.plots[[.i]] <- .p
-
-##     ## save a plot as a PDF file
-##     .pdf <- paste("nh1_nf0_nv0-", .short_names[.i], ".pdf", sep="")
-##     pdf(paste(.da_nh1_nf0_nv0.wd, .pdf, sep="/"))
-##     .da_nh1_nf0_nv0.plots[[.i]]
-##     dev.off()
-## }
-
-## #################################################################################
-## ### summary plots for dedicated architecture with HTTP and video traffic but no
-## ### traffic shaping
-## #################################################################################
-## .df <- loadDataset(paste(.da_dr100M_nh1_nf0_nv1.wd, "*.sca", sep='/'))
-## .scalars <- merge(cast(.df$runattrs, runid ~ attrname, value='attrvalue', subset=attrname %in% c('experiment', 'measurement', 'dr', 'n')),
-##                   .df$scalars, by='runid',
-##                   all.x=TRUE)
-
-## ## collect average session delay, average session throughput, mean session transfer rate, and decodable frame rate
-## .tmp <- cast(.scalars, experiment+measurement+dr+n+name ~ ., c(mean, ci.width),
-##              subset=(name=='average session delay [s]' |
-##                      name=='average session throughput [B/s]' |
-##                      name=='mean session transfer rate [B/s]' |
-##                      name=='decodable frame rate (Q)'))
-## .tmp <- subset(.tmp, select = c('dr', 'n', 'name', 'mean', 'ci.width'))
-
-## ### convert factor columns (i.e., 'dr' and 'n') into numeric ones
-## .tmp <- subset(cbind(.tmp, as.numeric(as.character(.tmp$dr)), as.numeric(as.character(.tmp$n))), select=c(6, 7, 3, 4, 5))
-## names(.tmp)[1:2]=c('dr', 'n')
-## .da_dr100M_nh1_nf0_nv1.df <- sort_df(.tmp, vars=c('dr', 'n'))
-
-## ## ## save data into text files for further processing (e.g., plotting by matplotlib)
-## ## .avg_session_dlys <- split(.avg_session_dly, .avg_session_dly$dr) # list of data frames (per 'dr' basis)
-## ## for (.i in 1:length(.avg_session_dlys)) {
-## ##     .file_name <- paste("average_session_delay_dr", as.character(.avg_session_dlys[[.i]]$dr[1]), ".data", sep="")
-## ##     write.table(.avg_session_dlys[[.i]], paste(.da_nh1_nf0_nv0.wd, .file_name, sep='/'), row.names=FALSE)
-## ## }
-
-## .names = c('average session delay [s]', 'average session throughput [B/s]', 'mean session transfer rate [B/s]', 'decodable frame rate (Q)')
-## .short_names = c('dly', 'thr', 'trf', 'dfr')
-## .da_dr100M_nh1_nf0_nv1.plots <- list()
-## for (.i in 1:length(.names)) {
-##     .df <- subset(.da_dr100M_nh1_nf0_nv1.df, name==.names[.i], select=c(1, 2, 4, 5))
-##     .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
-##     .p <- ggplot(data=.df, aes(group=dr, colour=factor(dr), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
-##     .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.i])
-##     .p <- .p + geom_point(aes(group=dr, shape=factor(dr), x=n, y=mean), size=.pt_size) + scale_shape_manual("Line Rate\n[Gb/s]", values=0:9)
-##     .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Line Rate\n[Gb/s]")
-##     .da_dr100M_nh1_nf0_nv1.plots[[.i]] <- .p
-
-##     ## save a plot as a PDF file
-##     .pdf <- paste("dr100M_nh1_nf0_nv1-", .short_names[.i], ".pdf", sep="")
-##     pdf(paste(.da_dr100M_nh1_nf0_nv1.wd, .pdf, sep="/"))
-##     .da_dr100M_nh1_nf0_nv1.plots[[.i]]
-##     dev.off()
-## }
-
-
-## #################################################################################
-## ### summary plots for dedicated architecture with HTTP traffic and traffic
-## ### shaping
-## ###
-## ### Notes: Due to the huge number of files to process (i.e., 4800 in total),
-## ###        we split them into three groups accorindg to the value of 'dr' and
-## ###        process them separately.
-## #################################################################################
-## .dr.range <- unique(.da_nh1_nf0_nv0.df$dr)
-## .da_nh1_nf0_nv0_tbf.df <- list()
-## .da_nh1_nf0_nv0_tbf.plots <- list()
-## for (.i in 1:length(.dr.range)) {
-##     .file_list <- read.table(paste(.da_nh1_nf0_nv0_tbf.wd, paste("file_list_dr", as.character(.dr.range[.i]), ".txt", sep=""), sep="/"))
-##     .df <- loadDataset(as.vector(.file_list$V1))
-##     .scalars <- merge(cast(.df$runattrs, runid ~ attrname, value='attrvalue',
-##                            subset=attrname %in% c('experiment', 'measurement', 'mr', 'bs', 'n')),
-##                       .df$scalars, by='runid',
-##                       all.x=TRUE)
-
-##     ## collect average session delay, average session throughput, and mean session transfer rate
-##     .tmp <- cast(.scalars, experiment+measurement+bs+mr+n+name ~ ., c(mean, ci.width),
-##                  subset=grepl('.*\\.httpApp.*', module) &
-##                  (name=='average session delay [s]' |
-##                   name=='average session throughput [B/s]' |
-##                   name=='mean session transfer rate [B/s]'))
-##     .tmp <- subset(.tmp, select = c('mr', 'bs', 'n', 'name', 'mean', 'ci.width'))
-
-##     ## convert factor columns (i.e., 'mr', 'bs', and 'n') into numeric ones
-##     .tmp <- subset(cbind(.tmp, as.numeric(as.character(.tmp$mr)), as.numeric(as.character(.tmp$bs)), as.numeric(as.character(.tmp$n))), select=c(7, 8, 9, 4, 5, 6))
-##     names(.tmp)[1:3]=c('mr', 'bs', 'n')
-##     .da_nh1_nf0_nv0_tbf.df[[.i]] <- sort_df(.tmp, vars=c('mr', 'bs', 'n'))
-
-##     .mr.range <- unique(.da_nh1_nf0_nv0_tbf.df[[.i]]$mr)
-##     .da_nh1_nf0_nv0_tbf.plots[[.i]] <- list()
-##     for (.j in 1:length(.mr.range)) {
-##         for (.k in 1:length(.names)) {
-##             .df <- subset(.da_nh1_nf0_nv0_tbf.df[[.i]], mr==.mr.range[.j] & name==.names[.k], select=c(2, 3, 5, 6))
-##             .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
-##             .p <- ggplot(data=.df, aes(group=bs, colour=factor(bs), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
-##             .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.k])
-##             .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[Byte]", values=0:9)
-##             .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[Byte]")
-##             .da_nh1_nf0_nv0_tbf.plots[[.i]][[(.j-1)*length(.names)+.k]] <- .p
-##         }
-##     }
-## }
-
-## #################################################################################
-## ### summary plots for dedicated architecture with HTTP and video traffic and
-## ### traffic shaping
-## #################################################################################
-## .df <- loadDataset(paste(.da_dr100M_nh1_nf0_nv1_tbf.wd, "*.sca", sep='/'))
-## .scalars <- merge(cast(.df$runattrs, runid ~ attrname, value='attrvalue',
-##                        subset=attrname %in% c('experiment', 'measurement', 'mr', 'bs', 'n')),
-##                   .df$scalars, by='runid',
-##                   all.x=TRUE)
-
-## ## collect average session delay, average session throughput, mean session transfer rate, and decodable frame rate
-## .tmp <- cast(.scalars, experiment+measurement+bs+mr+n+name ~ ., c(mean, ci.width),
-##              subset=(name=='average session delay [s]' |
-##                      name=='average session throughput [B/s]' |
-##                      name=='mean session transfer rate [B/s]' |
-##                      name=='decodable frame rate (Q)'))
-## .tmp <- subset(.tmp, select = c('mr', 'bs', 'n', 'name', 'mean', 'ci.width'))
-
-## ### convert factor columns (i.e., 'mr', 'bs', and 'n') into numeric ones
-## .tmp <- subset(cbind(.tmp, as.numeric(as.character(.tmp$mr)), as.numeric(as.character(.tmp$bs)), as.numeric(as.character(.tmp$n))), select=c(7, 8, 9, 4, 5, 6))
-## names(.tmp)[1:3]=c('mr', 'bs', 'n')
-## .da_dr100M_nh1_nf0_nv1_tbf.df <- sort_df(.tmp, vars=c('mr', 'bs', 'n'))
-
-## .names = c('average session delay [s]', 'average session throughput [B/s]', 'mean session transfer rate [B/s]', 'decodable frame rate (Q)')
-## .short_names = c('dly', 'thr', 'trf', 'dfr')
-## .mr.range <- unique(.da_dr100M_nh1_nf0_nv1_tbf.df$mr)
-## .da_dr100M_nh1_nf0_nv1_tbf.plots <- list()
-## for (.i in 1:length(.mr.range)) {
-##     for (.j in 1:length(.names)) {
-##         .df <- subset(.da_dr100M_nh1_nf0_nv1_tbf.df, mr==.mr.range[.i] & name==.names[.j], select=c(2, 3, 5, 6))
-##         .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
-##         .p <- ggplot(data=.df, aes(group=bs, colour=factor(bs), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
-##         .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.j])
-##         .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[Byte]", values=0:9)
-##         .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[Byte]")
-##         .da_dr100M_nh1_nf0_nv1_tbf.plots[[(.i-1)*length(.names)+.j]] <- .p
-
-##         ## save a plot as a PDF file
-##         .pdf <- paste("dr100M_nh1_nf0_nv1_tbf_mr", as.character(.mr.range[.i]), "-", .short_names[.j], ".pdf", sep="")
-##         pdf(paste(.da_dr100M_nh1_nf0_nv1_tbf.wd, .pdf, sep="/"))
-##         .da_dr100M_nh1_nf0_nv1_tbf.plots[[(.i-1)*length(.names)+.j]]
-##         dev.off()
-##     }
-## }
