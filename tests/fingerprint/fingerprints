@@ -81,20 +81,27 @@ class FingerprintTestCaseGenerator():
                 ff.close()
                 print "Check " + updatedFile + " for updated fingerprints"
 
+    def escape(self, str):
+        if re.search(r'[\r\n\",]', str):
+            str = '"' + re.sub('"','""',str) + '"'
+        return str
+
     def formatUpdatedSimulationsTable(self, simulations):
         # if there is a computed fingerprint, print that instead of existing one
-        txt = "# workingdir".ljust(35) + ", " + "args".ljust(45) + ", " + "simtimelimit".ljust(15) + ", " + "fingerprint\n"
+        wdlen = 35
+        argslen = 45
+        timelen = 15
+        txt = "# workingdir".ljust(wdlen) + ", " + "args".ljust(argslen) + ", " + "simtimelimit".ljust(timelen) + ", " + "fingerprint\n"
         containsComputedFingerprint = False
         for simulation in simulations:
             fingerprint = simulation['fingerprint']
             if 'computedFingerprint' in simulation:
                 fingerprint = simulation['computedFingerprint']
                 containsComputedFingerprint = True
-            line = '{wd:<35}, {args:<45}, {simtimelimit:<15}, '.format(**simulation) + fingerprint
+            line = self.escape(simulation['wd']).ljust(wdlen) + ", " + self.escape(simulation['args']).ljust(argslen) + ", " + self.escape(simulation['simtimelimit']).ljust(timelen) + ", " + self.escape(fingerprint)
             txt += line + "\n"
         txt = re.sub("( +),", ",\\1", txt)
         return txt if containsComputedFingerprint else None
-
 
 class SimulationResult:
     def __init__(self, command, workingdir, exitcode, errorMsg=None, isFingerprintOK=None, computedFingerprint=None, simulatedTime=None, numEvents=None, elapsedTime=None, cpuTimeLimitReached=None):
