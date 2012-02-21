@@ -130,8 +130,8 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
 
 
     /* Insert first in bucket... */
-    DEBUG(LOG_INFO, 0, "Inserting %s (bucket %d) next hop %s",
-          ip_to_str(dest_addr), index, ip_to_str(next));
+    DEBUG(LOG_INFO, 0, "Inserting %s next hop %s",
+          ip_to_str(dest_addr), ip_to_str(next));
     aodvRtTableMap.insert(std::make_pair(dest,rt));
     rt_tbl.num_entries = (int) aodvRtTableMap.size();
     if (state == INVALID)
@@ -485,7 +485,7 @@ rt_table_t *NS_CLASS modifyAODVTables(struct in_addr dest_addr,
     rt->hello_cnt = 0;
     rt->nprec = 0;
 
-    DEBUG(LOG_INFO, 0, "Inserting %s (bucket %d) next hop %s",ip_to_str(dest_addr), index, ip_to_str(next));
+    DEBUG(LOG_INFO, 0, "Inserting %s next hop %s",ip_to_str(dest_addr), ip_to_str(next));
 
     aodvRtTableMap.insert(std::make_pair(dest,rt));
     rt_tbl.num_entries = (int) aodvRtTableMap.size();

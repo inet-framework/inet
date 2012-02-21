@@ -125,7 +125,7 @@ double NistErrorRateModel::GetFec16QamBer(double snr, uint32_t nbits, uint32_t b
     }
     double pe = CalculatePe(ber, bValue);
     pe = std::min(pe, 1.0);
-    double pms = pow(1 - pe, nbits);
+    double pms = pow(1 - pe, (double)nbits);
     return pms;
 }
 double NistErrorRateModel::GetFec64QamBer(double snr, uint32_t nbits, uint32_t bValue) const
@@ -137,7 +137,7 @@ double NistErrorRateModel::GetFec64QamBer(double snr, uint32_t nbits, uint32_t b
     }
     double pe = CalculatePe(ber, bValue);
     pe = std::min(pe, 1.0);
-    double pms = pow(1 - pe, nbits);
+    double pms = pow(1 - pe, (double)nbits);
     return pms;
 }
 

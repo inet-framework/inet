@@ -153,11 +153,11 @@ class INET_API ChannelControl : public cSimpleModule, public IChannelControl
     /** Returns the maximal interference distance*/
     virtual double getInterferenceRange(RadioRef r) { return maxInterferenceDistance; }
 
-    /** disable the reception in the reference module */
-    virtual bool disableReception(RadioRef r) { r->isActive = false; };
+    /** Disable the reception in the reference module */
+    virtual void disableReception(RadioRef r) { r->isActive = false; };
 
-    /** enable the reception in the reference module */
-    virtual bool enableReception(RadioRef r) { r->isActive = true; };
+    /** Enable the reception in the reference module */
+    virtual void enableReception(RadioRef r) { r->isActive = true; };
 };
 
 #endif
