@@ -1,8 +1,69 @@
 Recent changes in the INET Framework
 ====================================
 
-- Removed Ieee802.11 Mesh feature. It depended on to many upper layer 
+INET-1.99.3 (Feb 22, 2012)
+--------------------------
+
+With this release, we have started a review of all basic protocol modules in
+the INET Framework, fixing bugs, refactoring for clarity and maintainability,
+and implementing commonly needed missing features. A testing framework is also
+falling into place. We have added ChangeLog files in each source directory
+to make it easier to follow things for end users and contributors alike, and
+we'll also be requiring ChangeLog entries from contributors who submit code
+patches. ChangeLogs also include a brief history of the corresponding
+components from the start; if you have fixes or amendments, please contact us.
+This version of INET requires OMNeT++ 4.2 (version 4.2.1 suggested).
+
+- Ethernet model improvements: EtherMAC refactored for better readability;
+  added reconnect support, better PAUSE support, support for 40 Gigabit and
+  100 Gigabit Ethernet; several bugfixes; regression and validation tests
+
+- added predefined Ethernet link types: Eth10M, Eth100M, Eth1G, Eth10G,
+  Eth40G, Eth100G
+
+- IPv4 model improvements: better fragmentation and multicast support; IPv4
+  module refactored for readability and maintainability; several bugfixes
+
+- IPv4 routing table improvements: notification for routing entry changes
+  (routing entry objects no longer need to be immutable); lookup performance
+  optimization (routes are kept in decreasing prefix length order to speed up
+  longest prefix match); cleanup and bugfixes
+
+- IPv6 improvements: implemented Default Router Selection as specified in
+  RFC 4861 6.3.6 (round-robin); tunneling is now available without xMIPv6;
+  implemented datagram fragmentation/reassembly; IPv6 now works over PPP;
+  several other bug fixes
+
+- UDP: better multicast support and DSCP support (apps can specify ToS [IPv4] /
+  Traffic Class [IPv6] byte); bug fixes
+
+- PPPInterface, EthernetInterface: use queueType="" instead of queueType=
+  "NoQueue" to turn off external queue module and use internal queue.
+
+- Ieee80211, MANET routing: updated to latest INETMANET release:
+  radio: added support for noise generators and configurable error models;
+  802.11: Airtime Link Metric support; duplicate frame detection / filtering;
+  support for prioritizing of multicast frames
+
+- added WeightedFairQueue from INETMANET
+
+- removed Ieee802.11 Mesh feature. It depended on too many upper layer
   protocols and features.
+
+- statistics (@statistic properties) cleaned up in all modules: standardized
+  on lower case statistics titles; record packet counts in a less confusing
+  way (NOT as rcvdPkBytes:count); cleaned up recorder lists
+
+- miscellaneous: timer usage optimized in DYMO_FAU; revised PingApp, e.g.
+  printPing is now turned off by default; numerous bug fixes and improvements
+
+- added a test suite (tests/); it contains fingerprint tests (for regression
+  testing); smoke tests (crude regression tests); statistical tests (for
+  validation); unit tests (of classes/modules); and other tests. We make most
+  use of fingerprint tests, so they are probably in the best state.
+
+See ChangeLogs in individual source folders for more information.
+
 
 INET-1.99.2 (Nov 18, 2011)
 --------------------------
