@@ -1,3 +1,8 @@
+2012-01-03  Tamas Borbely
+
+	IPv6: moved tunneling out of the xMIPv6 feature (i.e. now it can be
+	used even if xMIPv6 is disabled)
+
 2011-11-18  ------ INET-1.99.2 released ------
 
 2011-05-30  ------ INET-1.99.1 released ------
@@ -17,4 +22,3 @@
 	https://github.com/zarrar/xMIPv6/commit/affe8fedb87705adaba09bfa30ba3320e3519d6f
 
 	IPv6Tunneling was developed as part of xMIPv6, see xmipv6/ChangeLog
-

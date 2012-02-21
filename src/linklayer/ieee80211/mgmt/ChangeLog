@@ -1,6 +1,19 @@
-2012-02-11  Takeover from INETMANET
- 
-    Added duplicate frame detection
+2012-02-11  Rudolf Hornig
+
+	Takeover from INETMANET @ fff5dfd 
+
+	Airtime Link Metric support added. Can be turned on by the
+	airtimeLinkComputation parameter on the Radio module.
+
+	Added default_ssid parameter for the stations. On association prefer
+	the default ssid. If not specified, it picks the best AP (strongest 
+	signal).
+
+	Added startingTime parameter to specify when the agent actually starts.
+
+	Stations and APs are sending now association and disassociation
+	notifications via the notification board. See src/base/NotificationConsts.h
+	for constant values.
 
 2012-01-11  Zoltan Bojthe
 

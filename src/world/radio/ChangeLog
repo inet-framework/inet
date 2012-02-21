@@ -1,9 +1,11 @@
-2012-02-11 Takover from INETMANET
+2012-02-11 Rudolf hornig
 
-    - Radio reception now can be disabled using enableReception/disableReception
-      on CahnnelControl.
+	Takover from INETMANET @ fff5dfd
 
-    - ChannelAccess now correctly unregisters the radio when descrtucted.
+	Radio reception now can be disabled using enableReception/disableReception
+	on ChannelControl.
+
+	ChannelAccess now correctly unregisters the radio when destructed.
 
 2011-11-18  ------ INET-1.99.2 released ------
 

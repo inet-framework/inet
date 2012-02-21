@@ -1,3 +1,28 @@
+2012-02-11 Rudolf Hornig
+
+	Takeover from INETMANET @ fff5dfd
+
+	Added some notification codes in NotifierConstants.h for Access Point and
+	Station association / disassociation
+
+2012-02-04  Andras Varga
+
+	base: added Topology
+
+	This is a revised and expanded version of the OMNeT++ cTopology class.
+	(Makes it possible to add/remove nodes and links, etc.)  We'll put this
+	enhanced version back into OMNeT++ in the 4.3 version, but until then
+	it's available here in INET.
+
+	Changes:
+	- renamed private data members (underscore to camelcase convention)
+	- switched over to use STL containers internally instead of arrays
+	- getNodeFor(): hand-made binary search replaced by std::lower_bound
+	- new methods: addNode(), deleteNode(), addLink(), deleteLink()
+	- added Node::setPayload()/getPayload() Note: now that nodes/links can
+	be added that are not associated with modules and connections in the
+	network, methods like getModule(), getLocalGate() etc may return NULL.
+
 2012-01-09  Andras Varga
 
 	NotifierConsts: added NF_IPv4_ROUTE_CHANGED and NF_IPv6_ROUTE_CHANGED

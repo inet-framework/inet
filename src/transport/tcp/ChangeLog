@@ -1,8 +1,57 @@
+2012-02-08  Andras Varga
+
+	TCP (INET,lwIP,NSC): renamed DataStreamQueue classes to ByteStreamQueue
+
+2012-02-07  Zoltan Bojthe
+
+	TCP queue: remove space from end of output of info() function
+
+2012-02-07  Zoltan Bojthe
+
+	TCP queues: fix for enqueue: checks  queue size < 2GiB
+
+	need for seqence no comparisons
+
+2012-02-07  Zoltan Bojthe
+
+	TCP queues: fixes/optimizations for merge segments
+
+	- find place of new segment started from end of queue.
+	- add error detection: merge unsuccessful
+
+2012-02-07  Zoltan Bojthe
+
+	TCP queues: use seqMin(), seqMax()
+
+2012-02-07  Zoltan Bojthe
+
+	TCP queues: insertBytesFromSegment(): detect sequence no. overflow and
+	throw error if occured
+
+2012-01-05  Zoltan Bojthe
+
+	TCP msg based receive queues bugfix: seqno used as map index
+
+	replace map<seqno,cPacket> to list<struct {seqno, cpacket}> and rewrite
+	insert/remove algorithms to keep items in order of seqnos
+
+2011-12-20  Zoltan Bojthe
+
+	TCP bugfix: set msg kind in status response to TCP_I_STATUS
+
+2012-01-27  Zoltan Bojthe
+
+	networklayer/ipv4/contract and networklayer/ipv6/contract merged back to
+	networklayer/contract
+
+	Contract is now always available, regardless of feature settings. This
+	reduces the amount of ifdefs needed.
+
+2011-11-18  ------ INET-1.99.2 released ------
+
 2011-11-18  Zoltan Bojthe
 
 	NEDDOC fixes
-
-2011-11-18  ------ INET-1.99.2 released ------
 
 2011-09-15  Zoltan Bojthe
 
@@ -489,4 +538,3 @@
 2003-09-23  Andras Varga
 
 	Check of the original TCP code ("TcpModule") from the Karlsruhe IPSuite
-

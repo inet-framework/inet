@@ -1,3 +1,8 @@
+2012-02-10  Andras Varga
+
+	added WeigthedFairQueue from INETMANET (following some formatting and
+	C++ improvements)
+
 2011-12-22  Andras Varga
 
 	statistics revised:
@@ -6,7 +11,7 @@
 	- changed statistics titles to lowercase
 	- add "max" recording mode to places where "timeavg" was present and
 	  it is appropriate
-	- fix: interpolationmode should be used with @statistic and not with 
+	- fix: interpolationmode should be used with @statistic and not with
 	  @signal
 	- remove "histogram" recording from queue length statistics (makes
 	  no sense), added "timeavg" instead

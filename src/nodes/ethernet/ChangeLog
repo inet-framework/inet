@@ -1,6 +1,11 @@
+2012-01-14  Andras Varga
+
+	Added EtherLink.ned with various predefined Ethernet link types:
+	Eth10M, Eth100M, Eth1G, Eth10G, Eth40G, Eth100G
+
 2011-12-08  Andras Varga
 
-	EtherHost: comment editing; reordering of submodules and connections 
+	EtherHost: comment editing; reordering of submodules and connections
 	for readability
 
 2011-08-31  Zoltan Bojthe

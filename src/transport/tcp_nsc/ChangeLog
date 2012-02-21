@@ -1,3 +1,11 @@
+2012-02-08  Andras Varga
+
+	TCP (INET,lwIP,NSC): renamed DataStreamQueue classes to ByteStreamQueue
+
+2011-12-20  Zoltan Bojthe
+
+	TCP bugfix: set msg kind in status response to TCP_I_STATUS
+
 2012-01-11  Zoltan Bojthe
 
 	remove support for OMNeT++ version 3.x (INET already requires 4.2)

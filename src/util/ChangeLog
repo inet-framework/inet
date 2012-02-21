@@ -1,3 +1,23 @@
+2012-02-14  Zoltan Bojthe
+
+	NetAnimTrace: add node positions to tracefile when position changed
+
+2012-02-04  Andras Varga
+
+	util: added PatternMatcher
+
+	This is a pattern matcher class for inifile-style patterns.
+
+	It's near copy of an OMNeT++ internal class (in src/common/). Since we'd
+	like to use patterns in INET (and this is generally useful
+	functionality), we'll make part of the public OMNeT++ API in the 4.3
+	version; until then we have this copy in inet/src/util/.
+
+2011-11-16  Zoltan Bojthe
+
+	int128/uint128: remove IP address and MAC address related functions
+	from int128/uint128 classes
+
 2012-01-18  Andras Varga
 
 	getAddressLevel() moved from util/common.cc to the SCTP code

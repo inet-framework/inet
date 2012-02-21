@@ -1,3 +1,8 @@
+2012-02-09  Andras Varga
+
+	Added QoS support (Type of Service / Traffic Class) to UDP; see
+	UDPSetTypeOfServiceCommand
+
 2012-01-27  Tamas Borbely
 
 	UDP: generalize UDPJoinMulticastGroupCommand and

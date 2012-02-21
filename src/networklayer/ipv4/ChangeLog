@@ -1,6 +1,14 @@
+2012-02-19  Andras Varga
+
+	IPv4Datagram: diffServCodePoint field has been changed to typeOfService
+
+2012-01-12  Andras Varga
+
+	RoutingTable: added getHostModule() method
+
 2012-01-30  Tamas Borbely
 
-	IPOption values are changed, so they conform to the IP option types
+	IPOption values have been updated to conform to the IP option types
 	specified in RFC 791.
 
 	IPv4: removed loose and strict source routing processing. These

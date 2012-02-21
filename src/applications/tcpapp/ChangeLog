@@ -8,11 +8,11 @@
 	  of packetBytes(rcvdPk):count or rcvdPkBytes:count; total bytes is now
 	  recorded as rcvdPk:sum(packetBytes)
 
+2011-11-18  ------ INET-1.99.2 released ------
+
 2011-11-18  Zoltan Bojthe
 
 	NEDDOC fixes
-
-2011-11-18  ------ INET-1.99.2 released ------
 
 2011-08-15  Andras Varga
 

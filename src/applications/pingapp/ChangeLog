@@ -26,11 +26,11 @@
 	  sense together, as "histogram" already collects count, mean, stddev,
 	  min, max, etc that stats does)
 
+2011-11-18  ------ INET-1.99.2 released ------
+
 2011-11-18  Zoltan Bojthe
 
 	NEDDOC fixes
-
-2011-11-18  ------ INET-1.99.2 released ------
 
 2011-08-04  Zoltan Bojthe
 

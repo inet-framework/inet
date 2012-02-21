@@ -1,3 +1,21 @@
+2012-02-08  Andras Varga
+
+	TCP (INET,lwIP,NSC): renamed DataStreamQueue classes to ByteStreamQueue
+
+2012-01-05  Zoltan Bojthe
+
+	TCP msg based receive queues bugfix: seqno used as map index:
+	Replaced map<seqno,cPacket> with list<struct {seqno, cpacket}> and
+	rewritten insertion and removal to keep items in order of seqnos
+
+2012-01-05  Zoltan Bojthe
+
+	TCP_LWIP: remove unused cOutVectors
+
+2011-12-20  Zoltan Bojthe
+
+	TCP bugfix: set msg kind in status response to TCP_I_STATUS
+
 2011-11-18  ------ INET-1.99.2 released ------
 
 2011-09-15  Zoltan Bojthe
@@ -355,4 +373,3 @@
 2010-03-31  Zoltan Bojthe
 
 	TCP_LWIP initial revision
-

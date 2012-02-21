@@ -1,3 +1,65 @@
+2012-02-10  Rudolf Hornig
+
+	IPv4Address/IPv6Address: added LL_MANET_ROUTERS (224.0.0.109, FF02::6D),
+	used by MANET code [taken from INETMANET]
+
+2012-02-09  Andras Varga
+
+	IPv4/IPv6: added QoS support
+	- IPv4: replaced DSCP with TypeOfService
+	- IPv6: added Traffic Class to packet and controlInfo
+
+2011-12-15  Tamas Borbely
+
+	IPv6Address: added isSolicitedNodeMulticastAddress() method
+
+2012-02-05  Andras Varga
+
+	IPv6Address: fixed UInt128 conversions (assumed wrong word order);
+	comments revised
+
+	The bad Uint128 conversions were added just a few commits earlier.
+
+2012-02-04  Andras Varga
+
+	IPv4Address: keepFirstBits() was bogus, removed; new methods
+
+	keepFirstBits() was actually "keep first 32-n bits"
+
+	New methods:
+	- makeNetmask(int)
+	- isValidNetmask()
+
+	Use isValidNetmask() in RoutingTable
+
+	IPv4Address,RoutingTable: various fixes.
+
+	Fixed IPv4Address::getNetmaskLength, it couldn't return 1. Fixed
+	RoutingTable route validation, it rejected 0.0.0.0/x routes where x is
+	not 0.
+
+2011-11-16  Zoltan Bojthe
+
+	int128/uint128: removed IP address and MAC address related functions
+	from int128/uint128 classes
+
+2012-01-31  Zoltan Bojthe
+
+	IPvXAddressResolver: bugfix: findRoutingTableOf(), findRoutingTable6Of()
+	functions should return NULL if routing table not found
+
+2012-01-27  Zoltan Bojthe
+
+	networklayer/ipv4/contract and networklayer/ipv6/contract merged back to
+	networklayer/contract
+
+	Contract is now always available, regardless of feature settings. This
+	reduces the amount of ifdefs needed.
+
+2012-01-27  Tamas Borbely
+
+	IPv4: add IPv4Address::isLimitedBroadcastAddress()
+
 2012-01-05  Zoltan Bojthe
 
 	IPv4Address: added AddressCategory enum, getAddressCategory() function
@@ -23,8 +85,6 @@
 	IPvXAddress: added isMulticast()
 
 2011-07-19  Andras Varga
-
-	SCTP apps: refactoring: more concise parsing of "localAddress" param
 
 	Use cStringTokenizer and IPvXAddressResolver for parsing.
 
@@ -55,43 +115,13 @@
 
 	Renamed IP... classes to IPv4... or IPvX...
 
-2011-04-20  Rudolf Hornig
-
-	Initial takeover of MANET routing protocols from INETMANET.
-
-2011-04-13  Rudolf Hornig
-
-	Fix for parallel simulation support.
-
 2011-03-30  Zoltan Bojthe
 
 	#include, code style, strtok -> cStringTokenizer
 
 2011-03-18  Zoltan Bojthe
 
-	correcting "#ifdef"-s
-
-2011-03-09  Zoltan Bojthe
-
-	Features: IPv4
-
-2011-03-09  Zoltan Bojthe
-
-	Features: IPv4
-
-2011-03-04  Zoltan Bojthe
-
-	Features: add more features
-
-2011-03-03  Zoltan Bojthe
-
-	features: add *_examples features, add SCTP feature
-
-	correcting some #include, etc
-
-2011-03-03  Zoltan Bojthe
-
-	features: TCP_NSC, TCP_lwip, IPv6 completed
+	correcting #ifdefs
 
 2011-03-03  ------ INET-1.99.0 released ------
 

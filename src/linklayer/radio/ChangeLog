@@ -1,10 +1,15 @@
-2012-02-11  Takeover from INETMANET
+2012-02-11  Rudolf Hornig
 
-    Added support for configurable noise generators. It can be configured with
-    the noiseGenerator parameter of the Radio.
+	Takeover from INETMANET @ fff5dfd 
 
-    Added support for configurable error models. It can be configured with
-    the errorModel parameter of the Radio.
+	Added support for configurable noise generators. It can be configured with
+	the noiseGenerator parameter of the Radio.
+
+	Airtime Link Metric support added to the radios. Can be turned on by the
+	airtimeLinkComputation parameter
+
+	Added support for configurable error models. It can be configured with
+	the errorModel parameter of the Radio.
 
 2011-12-21  Andras Varga
 

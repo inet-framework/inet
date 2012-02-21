@@ -1,3 +1,43 @@
+2012-01-17  Tamas Borbely
+
+	Default Router Selection is implemented as specified in RFC 4861 6.3.6:
+	first the reachable routers are tried in round-robin, then
+	if there are no known reachable routers, then the others are selected
+	in round-robin order.
+
+	Earlier always the first one was selected, that violates the RFC.
+
+2012-01-03  Tamas Borbely
+
+	Fix #476: now IPv6 Neighbour Discovery does not initiate DAD
+	if the dupAddrDetecTransmits variable is set to 0. The autoconfigured
+	addresses become permanent without checking their uniqueness.
+
+2011-12-21  Tamas Borbely
+
+	Fix #492: if a network contained an Ethernet switch, the unsolicited
+	RA messages are sent too often (between 30 and 70ms). This shorter
+	periods was used, because Ethernet switches were mistakenly identified
+	as wireless access points.
+
+        Now the shorter periods are used only if the router has wireless interface
+	or directly attached to a wireless access point.
+
+2011-12-20  Tamas Borbely
+
+	Fix #474: now ICMPv6 error packets are truncated to the minimum MTU.
+	Before this change, they could erronously send large datagrams
+	that could not be delivered to the target without fragmentation.
+
+2011-12-15  Tamas Borbely
+
+	Fix #475: now it is possible to send a ping to a multicast address.
+	The bug was that the source address of the ping reply was always set
+	to the destination of the ping request, but multicast addresses
+	are not allowed as source. Now the ICMPv6 module sets the source
+	address	to the unicast address belonging to the interface on which
+	the echo request was received.
+
 2011-12-21  Andras Varga
 
 	IPv6NeighborDiscovery: added @signal[startDAD]

@@ -1,3 +1,28 @@
+2011-02-10  Zoltan Bojthe
+
+	EtherMAC: checked in a series of commits that implement reconnect
+	support for half-duplex mode. (With full-duplex mode it has already
+	been supported.)
+
+	The problem is that when the link is re-created or re-enabled,
+	the MAC does not know about the ongoing transmissions on the wire
+	(by having missed the corresponding EtherFrame/EtherJam/EtherIFG
+	messages that are sent at the beginning of the transmissions),
+	so it cannot immediately start the CSMA/CD procedure. (Note that
+	this is not a problem in full-duplex mode which doesn't need
+	carrier sense.)
+
+	To solve this, we have introduced a special "reconnect" state
+	(RX_RECONNECT_STATE), during which the MAC listens on the channel
+	in order to pick up the channel state. Transmission may only begin
+	after the reconnect period is over. The length of the reconnect
+	period is the duration of the maximum-size frame. We have assumed
+	that the finite reconnect period is not a problem for most simulation
+	use cases.
+
+	Also, a set of related disconnect/reconnect related improvements
+	were made in EtherHub and EtherBus.
+
 2011-12-22  Andras Varga
 
 	statistics revised:
@@ -102,11 +127,11 @@
 
 	* comments editing, code styling, optimizations, added TODOs
 
+2011-11-18  ------ INET-1.99.2 released ------
+
 2011-11-18  Zoltan Bojthe
 
 	NEDDOC fixes
-
-2011-11-18  ------ INET-1.99.2 released ------
 
 2011-09-14  Zoltan Bojthe
 

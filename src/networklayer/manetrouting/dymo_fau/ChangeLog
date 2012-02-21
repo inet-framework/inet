@@ -1,6 +1,22 @@
-2012-02-11  Takeover from INETMANET @ fff5dfd
+2012-01-17  Zoltan Bojthe
 
-    Code is synchronized with the INETMANET sources.
+	DYMO: redesigned timers:
+
+	The old code generated 5 timer messages for each routing entry, 1 timer
+	message for each RREQ list entry, and 2 timer messages for SeqNumLoss.
+	It was inefficient and also generated a big chaos in elog.
+
+	The new code uses only one periodic timer message that goes off every
+	1 sec, and triggers the expiry check of all entries in the table.
+	(It is enough to check once per second whether a route or RREQ
+	has timed out, because their lifetime is normally several seconds).
+
+	Also: a series of small, cosmetic changes
+
+2012-02-10  Rudolf Hornig
+
+	inetmanet@fff5dfd manetrouting: Full takeover of MANET protocols from
+	the INETMANET repo
 
 2011-11-18  ------ INET-1.99.2 released ------
 
@@ -49,4 +65,3 @@
 2011-04-20  Rudolf Hornig
 
 	Initial takeover of MANET routing protocols from INETMANET.
-

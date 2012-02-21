@@ -1,3 +1,8 @@
+2011-12-07  Tamas Borbely
+
+	MACAddress::formInterfaceIdentifier(): fix #471: 7th bit of the
+	Interface Identifier should be complemented
+
 2011-12-08  Andras Varga
 
 	MACAddress: comment editing
@@ -15,11 +20,11 @@
 
 	PhyControlInfo: spelling (adativeSensitivity -> adaptiveSensitivity), docu
 
+2011-11-18  ------ INET-1.99.2 released ------
+
 2011-11-18  Zoltan Bojthe
 
 	NEDDOC fixes
-
-2011-11-18  ------ INET-1.99.2 released ------
 
 2011-11-15  Andras Varga
 

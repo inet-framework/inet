@@ -1,3 +1,32 @@
+2012-02-09  Andras Varga
+
+	UDPSocket: added support for IPv4 ToS and IPv6 Traffic Class
+
+2012-01-27  Tamas Borbely
+
+	UDPSocket: added joinLocalMulticastGroups() and leaveLocalMulticastGroups()
+
+2012-01-27  Tamas Borbely
+
+	UDP: generalized joinMulticastGroup() and leaveMulticastGroup() to accept
+	more than one address
+
+2012-01-31  Zoltan Bojthe
+
+	TCPSocketMap: bugfix: clear map after deleting sockets
+
+2012-01-31  Zoltan Bojthe
+
+	SCTP: bugfix: inbound/outbound were mixed up
+
+2012-01-31  Zoltan Bojthe
+
+	transport/contract: moved files here from sctp, tcp_common and udp
+	contract folders
+
+	Contract is now always available, regardless of feature settings. This
+	reduces the amount of ifdefs needed.
+
 2011-11-18  ------ INET-1.99.2 released ------
 
 2011-08-03  Tamas Borbely
@@ -66,14 +95,12 @@
 
 2011-07-21  Andras Varga
 
-	UDP, UDPSocket: documentation updated
-
-	Apparently the UDPSocket docu was a copy/paste of TCPSocket docu.
+	UDP, UDPSocket: documentation updated. Apparently the UDPSocket docu
+	was a copy/paste of TCPSocket docu.
 
 2011-07-19  Andras Varga
 
-	UDPSocket: send() and sendTo() to accept cPackets only
-
+	UDPSocket: send() and sendTo() to accept cPackets only.
 	Note: in UDP, cMessage with UDP_C_DATA would cause "cannot cast" anyway.
 
 2011-07-19  Andras Varga
@@ -95,10 +122,70 @@
 
 2011-05-26  Zoltan Bojthe
 
-	Renamed IP... classes to IPv4... or IPvX...
+	Follow change: IPAddress renamed to IPv4Address
 
 2011-03-11  Zoltan Bojthe
 
-	Features: UDP: move files from transport/contract to
-	transport/udp/contract
+	Features: contents of transport/contract/ was distributed to
+	transport/tcp_common/contract, transport/udp/contract, and
+	transport/sctp/contract.
 
+2011-03-03  ------ INET-1.99.0 released ------
+
+2011-02-28  Zoltan Bojthe
+
+	NEDDOC: Fixes in TCP documentation
+
+2011-01-14  Zoltan Bojthe
+
+	TCP datatransfermode fixes
+
+2010-05-25  Zoltan Bojthe
+
+	Reading of "dataTransferMode" NED parameter moved into TCPSocket
+
+2010-05-25  Andras Varga
+
+	use TCPDataTransferMode enum instead of int; comment refinements; other
+	cosmetic changes
+
+2010-05-19  Zoltan Bojthe
+
+	TCPSocket/TCPControlInfo: Added support for TCP transfer modes
+
+2009-06-16  Tamas Borbely
+
+	TCPSocket: added sendQueueClass/receiveQueueClass/tcpAlgorithm parameters
+
+2009-03-25  ------ INET-20090325 released ------
+
+2008-09-25  Irene Ruengeler
+
+	Initial checkin of the SCTP code; SCTPCommand and SCTPSocket added to
+	transport/contract/.
+
+	If you are interested in the early history of the code, change
+	to the project root and type
+
+	$ gitk -- src/transport/contract INET/src/transport/contract
+
+2008-01-01..2009-03-25  Andras Varga, Rudolf Hornig
+
+	Porting of INET to OMNeT++ 4.0, and some general face lift:
+	* better directory structure (names changed to lowercase; moved sources
+	  under src/; better names, e.g. networkinterfaces -> linklayer)
+	* build system to use a deep makefile
+	* updated the C++ code for the 4.0 API (follow name changes; use
+	  int64-based simtime_t; use cPacket; etc.)
+	* NED files converted to 4.0 syntax
+	* make use of new features in NED files (module interfaces, inout
+	  gates, @unit, etc.)
+
+2005-08-04  Andras Varga
+
+	Initial checkin, into transport/contract/.
+
+	If you are interested in the early history of the code, change
+	to the project root and type
+
+	$ gitk -- Transport/Contract INET/src/transport/contract src/transport/contract

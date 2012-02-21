@@ -1,6 +1,6 @@
 2012-01-04  Zoltan Bojthe
 
-	set PAUSE frame length to padded length
+	make use of ETHER_PAUSE_COMMAND_PADDED_BYTES constant
 
 2011-12-20  Andras Varga
 

@@ -1,3 +1,65 @@
+2012-01-17  Tamas Borbely
+
+	Fix #498: IPv6 ping now works on routerless networks.
+	The routing table contains an entry for the link local
+	prefix according to RFC 4861 5.1.
+
+2012-02-01  Tamas Borbely
+
+	Bug #413 is fixed; IPv6 now works with PPP. It is achieved by disabling
+	address resolution on point-to-point links.
+
+2012-02-01  Tamas Borbely
+
+	Fix #496: the destination cache does not return expired routes anymore.
+
+2012-01-03  Tamas Borbely
+
+	IPv6 tunneling is supported. Tunnels can be configured in the
+	routing file, or can be dynamically added by the createTunnel()
+	method of the IPv6Tunneling module.
+
+	Note: IPv6Tunneling was used by xMIPv6, but was disabled when
+	INET was compiled without the WITH_xMIPv6 flag.
+
+2011-12-20  Tamas Borbely
+
+	IPv6 module now ASSERTs that incoming datagrams do not
+	have the errorBit set. It is assumed that those datagrams
+	are dropped in the link layer.
+
+2011-12-15  Tamas Borbely
+
+	Transport layer don't have to specify the source address when
+	sending a multicast datagram; the IPv6 module will use the source
+	address of the outgoing interface. This earlier worked only for
+	unicast datagrams.
+
+	Note: if the destination is a solicited node multicast address (used
+	during DAD), then the datagram can be sent with unspecified source
+	address. Otherwise they are delayed until the interface obtains a
+	non-tentative address.
+
+2011-12-12  Tamas Borbely
+
+	Fragmentation and reassembly of datagrams is implemented in the IPv6
+	module. This fixes #470.
+
+2011-12-07  Tamas Borbely
+
+	Fix #473: ICMP errors are delivered to the higher layer
+	protocol that sent the datagram triggering the error.
+	This enables the UDP module to detect unopened ports.
+	Only ICMP queries are passes to the ICMPv6 module.
+
+2011-12-07  Tamas Borbely
+
+	Fix #471: wrong Interface Identifier was generated from the
+	MAC address.
+
+	Now the 7th bit of the Interface Identifier is complemented to comply
+	with RFC 4291 Appendix A.
+
 2011-08-02  Andras Varga
 
 	Set etherType=ETHERTYPE_IPv6 on outgoing datagrams
