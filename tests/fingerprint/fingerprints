@@ -23,6 +23,7 @@ import subprocess
 import sys
 import time
 import unittest
+import csv
 
 inetRoot = os.path.abspath("../..")
 sep = ";" if sys.platform == 'win32' else ':'
@@ -37,10 +38,9 @@ class FingerprintTestCaseGenerator():
     def generateFromCSV(self, csvFileList, filterRegexList):
         testcases = []
         for csvFile in csvFileList:
-            f = open(csvFile, 'r')
-            contents = f.read()
+            f = open(csvFile, 'rb')
+            simulations = self.parseSimulationsTable(f)
             f.close()
-            simulations = self.parseSimulationsTable(contents)
             self.fileToSimulationsMap[csvFile] = simulations
             testcases.extend(self.generateFromDictList(simulations, filterRegexList))
         return testcases
@@ -60,15 +60,15 @@ class FingerprintTestCaseGenerator():
         return testcases
 
     # parse the CSV into a list of dicts
-    def parseSimulationsTable(self, text):
+    def parseSimulationsTable(self, csvFile):
         simulations = []
-        for line in text.splitlines():
-            line = line.strip()
-            if line != "" and not line.startswith("#"):
-                fields = re.split(", +", line)
-                if len(fields) != 4:
-                    raise Exception("Line must contain 4 items: " + line)
-                simulations.append({'wd': fields[0], 'args': fields[1], 'simtimelimit': fields[2], 'fingerprint': fields[3]})
+        csvReader = csv.reader(csvFile, delimiter=',', quotechar='"', skipinitialspace=True)
+        for fields in csvReader:
+            if (len(fields)==0 or fields[0].startswith("#")):
+                continue        # empty line or comment line
+            if len(fields) < 4 or (len(fields) > 4 and not fields[4].startswith("#")):
+                raise Exception("Line " + str(csvReader.line_num) + " must contain 4 items, but contains " + str(len(fields)) + ": " + '"' + '", "'.join(fields) + '"')
+            simulations.append({'wd': fields[0], 'args': fields[1], 'simtimelimit': fields[2], 'fingerprint': fields[3]})
         return simulations
 
     def writeUpdatedCSVFiles(self):
@@ -333,7 +333,7 @@ if __name__ == "__main__":
 
     if not args.testspecfiles:
         args.testspecfiles = glob.glob('*.csv')
- 
+
     generator = FingerprintTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.match)
 
