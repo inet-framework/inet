@@ -94,8 +94,8 @@ module NetworkLayer
         ip.transportOut[2] --> icmp.localIn;
         ip.transportIn[2] <-- icmp.sendOut;
 
-        ip.transportOut[3] --> igmp.localIn;
-        ip.transportIn[3] <-- igmp.sendOut;
+        ip.transportOut[3] --> igmp.ipIn;
+        ip.transportIn[3] <-- igmp.ipOut;
 
         ip.transportOut[4] --> { @display("m=n"); } --> rsvpOut;
         ip.transportIn[4] <-- { @display("m=n"); } <-- rsvpIn;

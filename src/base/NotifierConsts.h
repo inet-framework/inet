@@ -78,6 +78,8 @@ enum
     NF_IPv4_MROUTE_ADDED,
     NF_IPv4_MROUTE_DELETED,
     NF_IPv4_MROUTE_CHANGED,
+    NF_IGMP_JOIN,
+    NF_IGMP_LEAVE,
 
 
     // layer 3 - IPv6
