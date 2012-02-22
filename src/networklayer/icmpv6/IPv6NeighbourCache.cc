@@ -108,6 +108,9 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addNeighbour(const IPv6Addres
     nbor.nudTimeoutEvent = NULL;
     nbor.numOfARNSSent = 0;
     nbor.routerExpiryTime = 0;
+    nbor.prevDefaultRouter = NULL;
+    nbor.nextDefaultRouter = NULL;
+    nbor.arTimer = NULL;
     return &nbor;
 }
 
@@ -127,6 +130,9 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addNeighbour(
     nbor.numProbesSent = 0;
     nbor.nudTimeoutEvent = NULL;
     nbor.routerExpiryTime = 0;
+    nbor.prevDefaultRouter = NULL;
+    nbor.nextDefaultRouter = NULL;
+    nbor.arTimer = NULL;
     return &nbor;
 }
 
@@ -150,8 +156,10 @@ IPv6NeighbourCache::Neighbour *IPv6NeighbourCache::addRouter(const IPv6Address& 
     nbor.reachabilityExpires = 0;
     nbor.numProbesSent = 0;
     nbor.nudTimeoutEvent = NULL;
-
     nbor.routerExpiryTime = expiryTime;
+    nbor.prevDefaultRouter = NULL;
+    nbor.nextDefaultRouter = NULL;
+    nbor.arTimer = NULL;
 
     defaultRouterList.add(nbor);
 
