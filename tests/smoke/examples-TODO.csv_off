@@ -1,0 +1,31 @@
+# workingdir,                        args,                                          simtimelimit,    fingerprint
+# /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0   # [Config Ping2] # __interactive__
+# /examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping2 -r 0   # [Config Ping2] # __interactive__
+# /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0   # [Config NHosts] # __interactive__
+# /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0   # [Config Streaming2] # __interactive__
+# /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0   # [Config Ping2] # __interactive__
+
+# /examples/ethernet/lans/,            -f defaults.ini -c General -r 0  # Skip this. defaults.ini is just an included file.
+
+# /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility2 -r 0    # this test does not inject any events into the simulation so it stops at T=0s
+# /examples/mobility/,                 -f omnetpp.ini -c StaticGridMobility -r 0  # static test. No events are generated so it stops at T=0s
+# /examples/mobility/,                 -f omnetpp.ini -c StationaryMobility -r 0  # static test. No events are generated so it stops at T=0s
+
+/examples/bgpv4/BGPOpen/,            -f omnetpp.ini -c config1 -r 0  # FAIL (<!> No more events -- simulation ended at event #1, t=0. <!> Error in module (MessageChecker) Net.A.snifferIn (id=8) during finalization). Several message(s) have to be checked.
+/examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0  # FAIL (<!> Simulation time limit reached -- simulation stopped at event #525, t=30. <!> Error in module (MessageChecker) BGPTest.A.snifferIn (id=11) during finalization). Several message(s) have to be checked.
+/examples/emulation/extclient/,      -f omnetpp.ini -c General -r 0   # ext interface tests are not supported as they require pcap drivers and external events
+/examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_Traffic -r 0
+/examples/emulation/extserver/,      -f omnetpp.ini -c Downlink_Traffic -r 0
+/examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_and_Downlink_Traffic -r 0
+/examples/emulation/traceroute/,     -f omnetpp.ini -c General -r 0
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSCfreebsd -r 0   # NSC lwip and freebsd cannot be built on Linux 64-bit platforms
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSCfreebsd__NSCfreebsd -r 0 # NSC lwip and freebsd cannot be built on Linux 64-bit platforms
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClwip__inet -r 0          # NSC lwip and freebsd cannot be built on Linux 64-bit platforms
+/examples/mpls/net37/,               -f omnetpp.ini -c General -r 0   # FAIL (<!> Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #23916, t=45.089338342798). check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
+/examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0   # FAIL (<!> Error in module (TED) RSVPTE4.LSR1.ted (id=20) during network initialization). Model error: ASSERT: condition !remote.isUnspecified() false in function initialize, networklayer/ted/TED.cc line 86.
+/examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0   # FAIL (<!> Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #23916, t=45.089338342798). check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
+/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0   # multi cast routing is not yet implemented
+
+# you must run /examples/wireless/synchronized/generate-routing-files.pl before run these examples:
+/examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0
+/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0

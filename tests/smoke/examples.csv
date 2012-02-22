@@ -1,27 +1,17 @@
 # workingdir,                        args,                                          simtimelimit,    fingerprint
 /examples/adhoc/ieee80211/,          -f fingerprints.ini -c Ping1 -r 0
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0
-# /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0   # [Config Ping2] # __interactive__
 /examples/adhoc/mf80211/,            -f fingerprints.ini -c Ping1 -r 0
 /examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping1 -r 0
-# /examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping2 -r 0   # [Config Ping2] # __interactive__
 /examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0
-/examples/bgpv4/BGPOpen/,            -f omnetpp.ini -c config1 -r 0
-/examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0
-#/examples/emulation/extclient/,      -f omnetpp.ini -c General -r 0   # ext interface tests are not supported as they require pcap drivers and external events
-#/examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_Traffic -r 0
-#/examples/emulation/extserver/,      -f omnetpp.ini -c Downlink_Traffic -r 0
-#/examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_and_Downlink_Traffic -r 0
-#/examples/emulation/traceroute/,     -f omnetpp.ini -c General -r 0
 /examples/ethernet/arptest/,         -f fingerprints.ini -c ARPTest -r 0
 /examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0
 /examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0
 /examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0
-#/examples/ethernet/lans/,            -f defaults.ini -c General -r 0  # Skip this. defaults.ini is just an included file.
 /examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0
 /examples/ethernet/lans/,            -f fingerprints-largenet.ini -c LargeNet -r 0
 /examples/ethernet/lans/,            -f fingerprints.ini -c MixedLAN1 -r 0
@@ -86,9 +76,6 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_stream -r 0
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSClinux -r 0
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSClinux_stream -r 0
-#/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSCfreebsd -r 0   # NSC lwip and freebsd cannot be built on Linux 64-bit platforms
-#/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSCfreebsd__NSCfreebsd -r 0 # NSC lwip and freebsd cannot be built on Linux 64-bit platforms
-#/examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClwip__inet -r 0          # NSC lwip and freebsd cannot be built on Linux 64-bit platforms
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__NSClinux -r 0
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip -r 0
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__inet -r 0
@@ -128,7 +115,6 @@
 /examples/mobileipv6/,               -f omnetpp.ini -c One -r 0
 /examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility1 -r 0
-#/examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility2 -r 0    # this test does not inject any events into the simulation so it stops at T=0s
 /examples/mobility/,                 -f omnetpp.ini -c ChiangMobility -r 0
 /examples/mobility/,                 -f omnetpp.ini -c CircleMobility1 -r 0
 /examples/mobility/,                 -f omnetpp.ini -c CircleMobility2 -r 0
@@ -153,8 +139,6 @@
 /examples/mobility/,                 -f omnetpp.ini -c MoBANMobility2 -r 0
 /examples/mobility/,                 -f omnetpp.ini -c RandomWPMobility -r 0
 /examples/mobility/,                 -f omnetpp.ini -c RectangleMobility -r 0
-#/examples/mobility/,                 -f omnetpp.ini -c StaticGridMobility -r 0  # static test. No events are generated so it stops at T=0s
-#/examples/mobility/,                 -f omnetpp.ini -c StationaryMobility -r 0  # static test. No events are generated so it stops at T=0s
 /examples/mobility/,                 -f omnetpp.ini -c TractorMobility -r 0
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility1 -r 0
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility2 -r 0
@@ -163,17 +147,13 @@
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility5 -r 0
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility6 -r 0
 /examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0
-/examples/mpls/net37/,               -f omnetpp.ini -c General -r 0
 /examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0
-/examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0
 /examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0
 /examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0
 /examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0
-/examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0
 /examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0
-#/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0   # multi cast routing is not yet implemented
 /examples/rtp/multicast11/,          -f omnetpp.ini -c General -r 0
 /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0
 /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0
@@ -188,15 +168,10 @@
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0
-# /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0   # [Config NHosts] # __interactive__
 /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0
-# /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0   # [Config Streaming2] # __interactive__
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0
-# /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0   # [Config Ping2] # __interactive__
 /examples/wireless/multiradio/,      -f omnetpp.ini -c IndependentWlans -r 0
 /examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0
 /examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0
-#/examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0    # this test require 30 routing files generated by a perl script. Can be enabled once autoconfiguration is implemented
-#/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0 # this test require 30 routing files generated by a perl script. Can be enabled once autoconfiguration is implemented
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0
