@@ -36,7 +36,7 @@ class UDPPacket;
  * Utility class that provides tcpdump-like functionality. It prints
  * information about each packet on the given output stream.
  */
-class PacketDump
+class INET_API PacketDump
 {
     protected:
         bool verbose;
