@@ -70,7 +70,7 @@ class INET_API IPv6NeighbourCache
     struct Neighbour
     {
         // Neighbour info
-        const Key *nceKey; //store a pointer back to the key that links to this NCE.-WEI
+        const Key *nceKey; // points back to the key that links to this NCE
         MACAddress macAddress;
         bool isRouter;
         bool isHomeAgent;    //is the router also a Home Agent (RFC 3775-MIPv6)...Zarrar Yousaf 09.03.07
@@ -102,9 +102,16 @@ class INET_API IPv6NeighbourCache
         // for double-linked list of default routers, see DefaultRouterList
         Neighbour *prevDefaultRouter;
         Neighbour *nextDefaultRouter;
+
         // is it on the Default Router List?
         bool isDefaultRouter() const { return prevDefaultRouter && nextDefaultRouter; }
 
+        Neighbour() {
+            nceKey = NULL; isRouter = isHomeAgent = false; reachabilityState = (ReachabilityState)-1 /*=unset*/;
+            reachabilityExpires = 0; numProbesSent = 0; nudTimeoutEvent = NULL;
+            numOfARNSSent = 0; arTimer = NULL; routerExpiryTime = 0;
+            prevDefaultRouter = nextDefaultRouter = NULL;
+        }
     };
 
     // Design note: we could have polymorphic entries in the neighbour cache
