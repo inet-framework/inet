@@ -18,7 +18,8 @@
 #include "NetAnimTrace.h"
 
 #include "Coord.h"
-#include "MobilityBase.h"
+#include "IMobility.h"
+#include "ModuleAccess.h"
 
 
 Define_Module(NetAnimTrace);
@@ -104,11 +105,11 @@ void NetAnimTrace::receiveSignal(cComponent *source, simsignal_t signalID, cObje
     }
     else if (signalID == mobilityStateChangedSignal)
     {
-        MobilityBase* mobility = dynamic_cast<MobilityBase*>(source);
+        IMobility* mobility = dynamic_cast<IMobility*>(source);
         if (mobility)
         {
             Coord c = mobility->getCurrentPosition();
-            cModule *mod = findContainingNode(mobility);
+            cModule *mod = findContainingNode(dynamic_cast<cModule*>(source));
             if (mod && isRelevantModule(mod))
                 f << simTime() << " N " << mod->getId() << " " << c.x << " " << c.y << "\n";
         }
