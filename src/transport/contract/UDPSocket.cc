@@ -169,7 +169,8 @@ void UDPSocket::joinLocalMulticastGroups()
     {
         InterfaceEntry *ie = ift->getInterface(i);
 #ifdef WITH_IPv4
-        numOfAddresses += ie->ipv4Data()->getMulticastGroups().size();
+        if (ie->ipv4Data())
+            numOfAddresses += ie->ipv4Data()->getMulticastGroups().size();
 #endif
     }
 
@@ -186,11 +187,14 @@ void UDPSocket::joinLocalMulticastGroups()
             InterfaceEntry *ie = ift->getInterface(i);
             int interfaceId = ie->getInterfaceId();
 #ifdef WITH_IPv4
-            const IPv4InterfaceData::IPAddressVector &addresses = ie->ipv4Data()->getMulticastGroups();
-            for (unsigned int j = 0; j < addresses.size(); ++j, ++k)
+            if (ie->ipv4Data())
             {
-                ctrl->setMulticastAddr(k, addresses[j]);
-                ctrl->setInterfaceId(k, interfaceId);
+                const IPv4InterfaceData::IPAddressVector &addresses = ie->ipv4Data()->getMulticastGroups();
+                for (unsigned int j = 0; j < addresses.size(); ++j, ++k)
+                {
+                    ctrl->setMulticastAddr(k, addresses[j]);
+                    ctrl->setInterfaceId(k, interfaceId);
+                }
             }
 #endif
         }
@@ -221,7 +225,8 @@ void UDPSocket::leaveLocalMulticastGroups()
     {
         InterfaceEntry *ie = ift->getInterface(i);
 #ifdef WITH_IPv4
-        numOfAddresses += ie->ipv4Data()->getMulticastGroups().size();
+        if (ie->ipv4Data())
+            numOfAddresses += ie->ipv4Data()->getMulticastGroups().size();
 #endif
 #ifdef WITH_IPv6
         // TODO
@@ -239,10 +244,13 @@ void UDPSocket::leaveLocalMulticastGroups()
         {
             InterfaceEntry *ie = ift->getInterface(i);
 #ifdef WITH_IPv4
-            const IPv4InterfaceData::IPAddressVector &addresses = ie->ipv4Data()->getMulticastGroups();
-            for (unsigned int j = 0; j < addresses.size(); ++j, ++k)
+            if (ie->ipv4Data())
             {
-                ctrl->setMulticastAddr(k, addresses[j]);
+                const IPv4InterfaceData::IPAddressVector &addresses = ie->ipv4Data()->getMulticastGroups();
+                for (unsigned int j = 0; j < addresses.size(); ++j, ++k)
+                {
+                    ctrl->setMulticastAddr(k, addresses[j]);
+                }
             }
 #endif
 #ifdef WITH_IPv6
