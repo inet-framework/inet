@@ -24,7 +24,7 @@
 #include "IPv4Address.h"
 #include "IPv4Datagram_m.h"
 #include "TCPSegment.h"
-#include "TCPDump.h"
+#include "PacketDump.h"
 
 
 /**
@@ -36,7 +36,7 @@ class INET_API TCPTesterBase : public cSimpleModule
     int fromASeq;
     int fromBSeq;
 
-    TCPDumper tcpdump;
+    PacketDump tcpdump;
 
   protected:
     void dump(TCPSegment *seg, bool fromA, const char *comment=NULL);
@@ -49,7 +49,7 @@ class INET_API TCPTesterBase : public cSimpleModule
 
 
 /**
- * Dumps every packet using the TCPDumper class, and in addition it can delete,
+ * Dumps every packet using the PacketDump class, and in addition it can delete,
  * delay or duplicate TCP segments, and insert new segments.
  *
  * Script format: see NED documentation.

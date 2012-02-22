@@ -20,7 +20,7 @@
 #include "TCPTester.h"
 #include "IPv4ControlInfo.h"
 
-TCPTesterBase::TCPTesterBase() : cSimpleModule(), tcpdump(ev)
+TCPTesterBase::TCPTesterBase() : cSimpleModule()
 {
 }
 
@@ -28,15 +28,16 @@ void TCPTesterBase::initialize()
 {
     fromASeq = 0;
     fromBSeq = 0;
+    tcpdump.setOutStream(ev.getOStream());
 }
 
 void TCPTesterBase::dump(TCPSegment *seg, bool fromA, const char *comment)
 {
-    if (ev.disabled()) return;
+    if (ev.isDisabled()) return;
 
     char lbl[32];
     sprintf(lbl," %c%03d", fromA ? 'A' : 'B', fromA ? fromASeq : fromBSeq);
-    tcpdump.dump(fromA, lbl, seg, std::string(fromA?"A":"B"),std::string(fromA?"B":"A"), comment);
+    tcpdump.tcpDump(fromA, lbl, seg, std::string(fromA?"A":"B"),std::string(fromA?"B":"A"), comment);
 }
 
 void TCPTesterBase::finish()
@@ -141,7 +142,7 @@ void TCPScriptableTester::handleMessage(cMessage *msg)
 
 void TCPScriptableTester::dispatchSegment(TCPSegment *seg)
 {
-    Command *cmd = (Command *)seg->contextPointer();
+    Command *cmd = (Command *)seg->getContextPointer();
     bool fromA = cmd->fromA;
     bubble("introducing copy");
     dump(seg, fromA, "introducing copy");
@@ -176,9 +177,9 @@ void TCPScriptableTester::processIncomingSegment(TCPSegment *seg, bool fromA)
         dump(seg, fromA, "removing original");
         for (unsigned int i=0; i<cmd->delays.size(); i++)
         {
-            double d = cmd->delays[i];
+            simtime_t d = cmd->delays[i];
             TCPSegment *segcopy = (TCPSegment *)seg->dup();
-            segcopy->setControlInfo(new IPv4ControlInfo(*check_and_cast<IPv4ControlInfo *>(seg->controlInfo())));
+            segcopy->setControlInfo(new IPv4ControlInfo(*check_and_cast<IPv4ControlInfo *>(seg->getControlInfo())));
             if (d==0)
             {
                 bubble("forwarding after 0 delay");
@@ -231,7 +232,7 @@ void TCPRandomTester::handleMessage(cMessage *msg)
 
 void TCPRandomTester::dispatchSegment(TCPSegment *seg)
 {
-    bool fromA = (bool)seg->contextPointer();
+    bool fromA = (bool)seg->getContextPointer();
     bubble("introducing copy");
     dump(seg, fromA, "introducing copy");
     send(seg, fromA ? "out2" : "out1");
@@ -266,7 +267,7 @@ void TCPRandomTester::processIncomingSegment(TCPSegment *seg, bool fromA)
         {
             double d = delay->doubleValue();
             TCPSegment *segcopy = (TCPSegment *)seg->dup();
-            segcopy->setControlInfo(new IPv4ControlInfo(*check_and_cast<IPv4ControlInfo *>(seg->controlInfo())));
+            segcopy->setControlInfo(new IPv4ControlInfo(*check_and_cast<IPv4ControlInfo *>(seg->getControlInfo())));
             segcopy->setContextPointer((void *)fromA);
             scheduleAt(simTime()+d, segcopy);
         }
