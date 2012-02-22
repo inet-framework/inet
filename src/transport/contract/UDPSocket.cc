@@ -284,10 +284,14 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
     IPvXAddress destAddr = ctrl->getDestAddr();
     int srcPort = ctrl->getSrcPort();
     int destPort = ctrl->getDestPort();
+    int interfaceID = ctrl->getInterfaceId();
+    int ttl = ctrl->getTtl();
+    int tos = ctrl->getTypeOfService();
 
     std::stringstream os;
-    os  << pk << "  (" << pk->getByteLength() << " bytes)" << endl;
-    os  << srcAddr << " :" << srcPort << " --> " << destAddr << ":" << destPort << endl;
+    os << pk << " (" << pk->getByteLength() << " bytes) ";
+    os << srcAddr << ":" << srcPort << " --> " << destAddr << ":" << destPort;
+    os << " TTL=" << ttl << " ToS=" << tos << " on ifID=" << interfaceID;
     return os.str();
 }
 
