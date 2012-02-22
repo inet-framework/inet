@@ -50,6 +50,7 @@ class INET_API UDPBasicApp : public cSimpleModule
     virtual cPacket *createPacket();
     virtual void sendPacket();
     virtual void processPacket(cPacket *msg);
+    virtual void setSocketOptions();
 
   protected:
     virtual int numInitStages() const {return 4;}

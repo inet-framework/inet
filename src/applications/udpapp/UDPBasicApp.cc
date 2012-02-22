@@ -20,6 +20,7 @@
 #include "UDPBasicApp.h"
 #include "UDPControlInfo_m.h"
 #include "IPvXAddressResolver.h"
+#include "InterfaceTableAccess.h"
 
 
 Define_Module(UDPBasicApp);
@@ -58,7 +59,7 @@ void UDPBasicApp::initialize(int stage)
 
     socket.setOutputGate(gate("udpOut"));
     socket.bind(localPort);
-    socket.joinLocalMulticastGroups();
+    setSocketOptions();
 
     stopTime = par("stopTime").doubleValue();
     simtime_t startTime = par("startTime").doubleValue();
@@ -73,6 +74,35 @@ void UDPBasicApp::finish()
 {
     recordScalar("packets sent", numSent);
     recordScalar("packets received", numReceived);
+}
+
+void UDPBasicApp::setSocketOptions()
+{
+    int timeToLive = par("timeToLive");
+    if (timeToLive != -1)
+        socket.setTimeToLive(timeToLive);
+
+    int typeOfService = par("typeOfService");
+    if (typeOfService != -1)
+        socket.setTypeOfService(typeOfService);
+
+    const char *multicastInterface = par("multicastInterface");
+    if (multicastInterface[0])
+    {
+        IInterfaceTable *ift = InterfaceTableAccess().get(this);
+        InterfaceEntry *ie = ift->getInterfaceByName(multicastInterface);
+        if (!ie)
+            throw cRuntimeError("Wrong multicastInterface setting: no interface named \"%s\"", multicastInterface);
+        socket.setMulticastOutputInterface(ie->getInterfaceId());
+    }
+
+    bool receiveBroadcast = par("receiveBroadcast");
+    if (receiveBroadcast)
+        socket.setBroadcast(true);
+
+    bool joinLocalMulticastGroups = par("joinLocalMulticastGroups");
+    if (joinLocalMulticastGroups)
+        socket.joinLocalMulticastGroups();
 }
 
 IPvXAddress UDPBasicApp::chooseDestAddr()
