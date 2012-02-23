@@ -317,59 +317,68 @@ void IGMP::deleteRouterGroupData(InterfaceEntry *ie, const IPv4Address &group)
     }
 }
 
-void IGMP::initialize()
+void IGMP::initialize(int stage)
 {
-    ift = InterfaceTableAccess().get();
-    rt = RoutingTableAccess().get();
-    nb = NotificationBoardAccess().get();
+    if (stage == 0)
+    {
+        ift = InterfaceTableAccess().get();
+        rt = RoutingTableAccess().get();
+        nb = NotificationBoardAccess().get();
 
-    nb->subscribe(this, NF_INTERFACE_DELETED);
-    nb->subscribe(this, NF_IPv4_MCAST_JOIN);
-    nb->subscribe(this, NF_IPv4_MCAST_LEAVE);
+        nb->subscribe(this, NF_INTERFACE_DELETED);
+        nb->subscribe(this, NF_IPv4_MCAST_JOIN);
+        nb->subscribe(this, NF_IPv4_MCAST_LEAVE);
 
-    enabled = par("enabled");
-    externalRouter = par("externalRouter");
-    robustness = par("robustnessVariable");
-    queryInterval = par("queryInterval");
-    queryResponseInterval = par("queryResponseInterval");
-    groupMembershipInterval = par("groupMembershipInterval");
-    otherQuerierPresentInterval = par("otherQuerierPresentInterval");
-    startupQueryInterval = par("startupQueryInterval");
-    startupQueryCount = par("startupQueryCount");
-    lastMemberQueryInterval = par("lastMemberQueryInterval");
-    lastMemberQueryCount = par("lastMemberQueryCount");
-    unsolicitedReportInterval = par("unsolicitedReportInterval");
-    //version1RouterPresentInterval = par("version1RouterPresentInterval");
+        enabled = par("enabled");
+        externalRouter = par("externalRouter");
+        robustness = par("robustnessVariable");
+        queryInterval = par("queryInterval");
+        queryResponseInterval = par("queryResponseInterval");
+        groupMembershipInterval = par("groupMembershipInterval");
+        otherQuerierPresentInterval = par("otherQuerierPresentInterval");
+        startupQueryInterval = par("startupQueryInterval");
+        startupQueryCount = par("startupQueryCount");
+        lastMemberQueryInterval = par("lastMemberQueryInterval");
+        lastMemberQueryCount = par("lastMemberQueryCount");
+        unsolicitedReportInterval = par("unsolicitedReportInterval");
+        //version1RouterPresentInterval = par("version1RouterPresentInterval");
 
-    numGroups = 0;
-    numHostGroups = 0;
-    numRouterGroups = 0;
+        numGroups = 0;
+        numHostGroups = 0;
+        numRouterGroups = 0;
 
-    numQueriesSent = 0;
-    numQueriesRecv = 0;
-    numGeneralQueriesSent = 0;
-    numGeneralQueriesRecv = 0;
-    numGroupSpecificQueriesSent = 0;
-    numGroupSpecificQueriesRecv = 0;
-    numReportsSent = 0;
-    numReportsRecv = 0;
-    numLeavesSent = 0;
-    numLeavesRecv = 0;
+        numQueriesSent = 0;
+        numQueriesRecv = 0;
+        numGeneralQueriesSent = 0;
+        numGeneralQueriesRecv = 0;
+        numGroupSpecificQueriesSent = 0;
+        numGroupSpecificQueriesRecv = 0;
+        numReportsSent = 0;
+        numReportsRecv = 0;
+        numLeavesSent = 0;
+        numLeavesRecv = 0;
 
-    WATCH(numGroups);
-    WATCH(numHostGroups);
-    WATCH(numRouterGroups);
+        WATCH(numGroups);
+        WATCH(numHostGroups);
+        WATCH(numRouterGroups);
 
-    WATCH(numQueriesSent);
-    WATCH(numQueriesRecv);
-    WATCH(numGeneralQueriesSent);
-    WATCH(numGeneralQueriesRecv);
-    WATCH(numGroupSpecificQueriesSent);
-    WATCH(numGroupSpecificQueriesRecv);
-    WATCH(numReportsSent);
-    WATCH(numReportsRecv);
-    WATCH(numLeavesSent);
-    WATCH(numLeavesRecv);
+        WATCH(numQueriesSent);
+        WATCH(numQueriesRecv);
+        WATCH(numGeneralQueriesSent);
+        WATCH(numGeneralQueriesRecv);
+        WATCH(numGroupSpecificQueriesSent);
+        WATCH(numGroupSpecificQueriesRecv);
+        WATCH(numReportsSent);
+        WATCH(numReportsRecv);
+        WATCH(numLeavesSent);
+        WATCH(numLeavesRecv);
+    }
+    else if (stage == 1)
+    {
+        for (int i = 0; i < (int)ift->getNumInterfaces(); ++i)
+            configureInterface(ift->getInterface(i));
+        nb->subscribe(this, NF_INTERFACE_CREATED);
+    }
 }
 
 IGMP::~IGMP()
@@ -389,6 +398,10 @@ void IGMP::receiveChangeNotification(int category, const cPolymorphic *details)
     IPv4MulticastGroupInfo *info;
     switch (category)
     {
+        case NF_INTERFACE_CREATED:
+            ie = check_and_cast<InterfaceEntry*>(details);
+            configureInterface(ie);
+            break;
         case NF_INTERFACE_DELETED:
             ie = check_and_cast<InterfaceEntry*>(details);
             interfaceId = ie->getInterfaceId();
@@ -408,8 +421,6 @@ void IGMP::receiveChangeNotification(int category, const cPolymorphic *details)
 
 void IGMP::configureInterface(InterfaceEntry *ie)
 {
-	Enter_Method("configureInterface");
-
 	/// joining to 224.0.0.1 and 224.0.0.2 is done in RoutingTable
 	if (!ie->isLoopback()) {
 	    if (rt->isIPForwardingEnabled()) {

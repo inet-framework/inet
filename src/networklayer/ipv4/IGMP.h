@@ -169,7 +169,8 @@ protected:
 	int numLeavesRecv;
 
 protected:
-	virtual void initialize();
+	virtual int numInitStages() const  {return 2;}
+	virtual void initialize(int stage);
 	virtual void handleMessage(cMessage *msg);
 	virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 
