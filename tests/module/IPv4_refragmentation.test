@@ -31,8 +31,8 @@ cmdenv-express-mode=false
 **.srv.udpApp[0].localPort = 1000
 
 # mtu
-*.r2.ppp[*].ppp.mtu = 1205
-*.r*.ppp[*].ppp.mtu = 2205
+*.r2.ppp[*].ppp.mtu = 1205B
+*.r*.ppp[*].ppp.mtu = 2205B
 
 %contains: stdout
 This fragment completes the datagram.
