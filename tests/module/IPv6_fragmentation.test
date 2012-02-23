@@ -38,4 +38,4 @@ cmdenv-express-mode=false
 %contains: stdout
 This fragment completes the datagram.
 %contains: stdout
-Received packet: (cPacket)UDPBasicAppData-0  (5000 bytes)
+Received packet: (cPacket)UDPBasicAppData-0 (5000 bytes)
