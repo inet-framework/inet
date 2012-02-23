@@ -1,12 +1,19 @@
+2012-02-21  Rudolf Hornig
+
+	ieee802.11: removed forceRelayUnit parameter. It was used only in
+	connection of DHCP in INETMANET.
+
+	DHCP is not yet taken over so the parameter is not needed either.
+
 2012-02-11  Rudolf Hornig
 
-	Takeover from INETMANET @ fff5dfd 
+	Takeover from INETMANET @ fff5dfd
 
 	Airtime Link Metric support added. Can be turned on by the
 	airtimeLinkComputation parameter on the Radio module.
 
 	Added default_ssid parameter for the stations. On association prefer
-	the default ssid. If not specified, it picks the best AP (strongest 
+	the default ssid. If not specified, it picks the best AP (strongest
 	signal).
 
 	Added startingTime parameter to specify when the agent actually starts.

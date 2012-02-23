@@ -9,7 +9,7 @@ import string
 import subprocess
 
 # configuration
-since = '2012-02-20'
+since = '2012-02-23'
 entriesToIgnore = [
 """2012-01-27  Zoltan Bojthe
 
