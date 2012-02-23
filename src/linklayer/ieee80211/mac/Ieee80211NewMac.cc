@@ -107,20 +107,15 @@ void Ieee80211NewMac::initialize(int stage)
     if (stage == 0)
     {
         EV << "Initializing stage 0\n";
-        int numQueue = 1;
+        int numQueues = 1;
         if (par("EDCA"))
         {
-            if (hasPar("classifier"))
-            {
-                 const char *classifierClass = par("classifier");
-                 classifier = check_and_cast<IQoSClassifier*>(createOne(classifierClass));
-            }
-            else
-                 classifier = NULL;
-            if (classifier)
-                 numQueue = classifier->getNumQueues();
+            const char *classifierClass = par("classifier");
+            classifier = check_and_cast<IQoSClassifier*>(createOne(classifierClass));
+            numQueues = classifier->getNumQueues();
         }
-        for (int i=0; i<numQueue; i++)
+
+        for (int i=0; i<numQueues; i++)
         {
             Edca catEdca;
             catEdca.backoff = false;

@@ -59,20 +59,24 @@ simple Ieee80211NewMac
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.
-        string queueModule = default("");  // name of optional external queue module
-        int maxQueueSize = default(50); // max queue length in frames; only used if queueModule==""
-        int defaultAC = default(0); // the default AC category
+        string queueModule = default(""); // name of optional external queue module
+        int maxQueueSize = default(50);   // max queue length in frames; only used if queueModule==""
+        
+        bool EDCA = default(true); // enable Enhanced Distributed Channel Access (802.11e)
+        // parameters for EDCA = true
+        string classifier = default("Ieee80211eClassifier");
+        int defaultAC = default(0); // the default AC category for frames that cannot be classified
         int AIFSN0 = default(7); // AIFSN for background
         int AIFSN1 = default(3); // AIFSN for best effort
         int AIFSN2 = default(2); // AIFSN for video
         int AIFSN3 = default(2); // AIFSN for voice
-        int AIFSN  = default(2); // if only exist 1 AC
         double TXOP0 @unit(s)= default(0s);
         double TXOP1 @unit(s)= default(0s);
         double TXOP2 @unit(s)= default(3.008ms);
         double TXOP3 @unit(s)= default(1.504ms);
-        string classifier = default("Ieee80211eClassifier");
-        bool EDCA = default(true); // enable Enhanced Distributed Channel Access (802.11e)
+        // parameters for EDCA = false 
+        int AIFSN  = default(2); // if there is only one AC (EDCA = false)
+        
         bool useModulationParameters = default(false); // if true, slot time, DIFS, and ACK timeout (aPHY-RX-START-Delay) are function of modulation time (2007 standard)
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
 
@@ -93,7 +97,6 @@ simple Ieee80211NewMac
         double phyHeaderLength = default(-1); // if -1, the MAC will compute it in function of the modulation type
         bool forceBitRate = default(false); // if true, the MAC will force the bitrate to the physical layer
         int autoBitrate @enum(0,1,2) = default(0); // 0 = constant bit rate (autobitrate algorithm disabled), 1 = ARF Rate, 2 = AARF Rate
-
         // parameters used by the autobitrate
         int minTimerTimeout = default(15);
         int timerTimeout = default(minTimerTimeout);
@@ -102,11 +105,12 @@ simple Ieee80211NewMac
         int maxSuccessThreshold = default(60);
         double successCoeff = default(2.0);
         double timerCoeff = default(2.0);
-
-        double throughputTimePeriod @unit("s") = default(0); // period of time used by throughput measurement
+        // duplicate detection
         bool duplicateDetectionFilter = default(true); // whether to detect and filter out duplicate frames
         bool purgeOldTuples = default(true); // delete old tuples in the duplicate list
-        double duplicateTimeOut @unit("s") = default(20s);
+        double duplicateTimeOut @unit("s") = default(20s); // timeout for the duplicate detection
+        // statistics
+        double throughputTimePeriod @unit("s") = default(0); // period of time used by throughput measurement statistic
         @display("i=block/layer");
 
     gates:
