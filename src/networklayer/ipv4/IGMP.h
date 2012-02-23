@@ -53,26 +53,8 @@ enum IGMPHostGroupState
 	IGMP_HGS_IDLE_MEMBER,
 };
 
-class INET_API IPv4InterfaceTimer : public cMessage
-{
-public:
-	InterfaceEntry* ie;
-	simtime_t nextExpiration;
-
-public:
-	IPv4InterfaceTimer(const char* name, InterfaceEntry* ie)
-		: cMessage(name, 0)
-		, ie(ie)
-	{}
-
-	virtual ~IPv4InterfaceTimer() {}
-};
-
-class IPv4InterfaceGroupTimer;
-
 class INET_API IGMP : public cSimpleModule, protected INotifiable
 {
-        friend class IPv4InterfaceGroupTimer;
 protected:
         struct HostGroupData
         {
@@ -80,7 +62,7 @@ protected:
             IPv4Address groupAddr;
             IGMPHostGroupState state;
             bool flag;                // true when we were the last host to send a report for this group
-            IPv4InterfaceGroupTimer *timer;
+            cMessage *timer;
 
             HostGroupData(IGMP *owner, const IPv4Address &group);
             virtual ~HostGroupData();
@@ -92,9 +74,9 @@ protected:
             IGMP *owner;
             IPv4Address groupAddr;
             IGMPRouterGroupState state;
-            IPv4InterfaceGroupTimer *timer;
-            IPv4InterfaceGroupTimer *rexmtTimer;
-            //IPv4InterfaceGroupTimer *v1HostTimer;
+            cMessage *timer;
+            cMessage *rexmtTimer;
+            //cMessage *v1HostTimer;
 
             RouterGroupData(IGMP *owner, const IPv4Address &group);
             virtual ~RouterGroupData();
@@ -116,12 +98,35 @@ protected:
             IGMP *owner;
             GroupToRouterDataMap groups;
             IGMPRouterState igmpRouterState;
-            IPv4InterfaceTimer *igmpQueryTimer;
+            cMessage *igmpQueryTimer;
 
             RouterInterfaceData(IGMP *owner);
             virtual ~RouterInterfaceData();
         };
         typedef std::map<int, RouterInterfaceData*> InterfaceToRouterDataMap;
+
+        // Timers
+        enum IGMPTimerKind
+        {
+            IGMP_QUERY_TIMER,
+            IGMP_HOSTGROUP_TIMER,
+            IGMP_LEAVE_TIMER,
+            IGMP_REXMT_TIMER
+        };
+
+        struct IGMPHostTimerContext
+        {
+            InterfaceEntry *ie;
+            HostGroupData *hostGroup;
+            IGMPHostTimerContext(InterfaceEntry *ie, HostGroupData *hostGroup) : ie(ie), hostGroup(hostGroup) {}
+        };
+
+        struct IGMPRouterTimerContext
+        {
+            InterfaceEntry *ie;
+            RouterGroupData *routerGroup;
+            IGMPRouterTimerContext(InterfaceEntry *ie, RouterGroupData *hostGroup) : ie(ie), routerGroup(routerGroup) {}
+        };
 
 protected:
 	IRoutingTable *rt;     // cached pointer
@@ -188,7 +193,7 @@ private:
     void multicastGroupJoined(InterfaceEntry *ie, const IPv4Address& groupAddr);
     void multicastGroupLeft(InterfaceEntry *ie, const IPv4Address& groupAddr);
 
-	void startTimer(IPv4InterfaceTimer *timer, double interval);
+	void startTimer(cMessage *timer, double interval);
 	void startHostTimer(InterfaceEntry *ie, HostGroupData* group, double maxRespTime);
 
 	void sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr, double maxRespTime);
@@ -196,8 +201,10 @@ private:
 	void sendLeave(InterfaceEntry *ie, HostGroupData* group);
 	void sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& dest);
 
-	void processQueryTimer(IPv4InterfaceTimer *msg);
-	void processGroupTimer(IPv4InterfaceGroupTimer *msg);
+	void processQueryTimer(cMessage *msg);
+	void processHostGroupTimer(cMessage *msg);
+	void processLeaveTimer(cMessage *msg);
+	void processRexmtTimer(cMessage *msg);
 
 	void processIgmpMessage(IGMPMessage *msg);
 	void processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMessage *msg);
@@ -206,27 +213,5 @@ private:
 	void processV2Report(InterfaceEntry *ie, IGMPMessage *msg);
 	void processLeave(InterfaceEntry *ie, IGMPMessage *msg);
 };
-
-class INET_API IPv4InterfaceGroupTimer : public IPv4InterfaceTimer
-{
-public:
-    IGMP::HostGroupData* hostGroup;
-    IGMP::RouterGroupData* routerGroup;
-
-public:
-    IPv4InterfaceGroupTimer(const char* name, InterfaceEntry* ie, IGMP::HostGroupData* group)
-        : IPv4InterfaceTimer(name, ie)
-        , hostGroup(group), routerGroup(NULL)
-    {}
-
-    IPv4InterfaceGroupTimer(const char* name, InterfaceEntry* ie, IGMP::RouterGroupData* group)
-        : IPv4InterfaceTimer(name, ie)
-        , hostGroup(NULL), routerGroup(group)
-    {}
-
-    virtual ~IPv4InterfaceGroupTimer() {}
-};
-
-
 
 #endif

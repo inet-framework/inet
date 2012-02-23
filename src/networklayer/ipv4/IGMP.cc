@@ -146,7 +146,11 @@ IGMP::HostGroupData::HostGroupData(IGMP *owner, const IPv4Address &group)
 
 IGMP::HostGroupData::~HostGroupData()
 {
-    owner->cancelAndDelete(timer);
+    if (timer)
+    {
+        delete (IGMPHostTimerContext*)timer->getContextPointer();
+        owner->cancelAndDelete(timer);
+    }
 }
 
 IGMP::RouterGroupData::RouterGroupData(IGMP *owner, const IPv4Address &group)
@@ -163,9 +167,21 @@ IGMP::RouterGroupData::RouterGroupData(IGMP *owner, const IPv4Address &group)
 
 IGMP::RouterGroupData::~RouterGroupData()
 {
-    owner->cancelAndDelete(timer);
-    owner->cancelAndDelete(rexmtTimer);
-//    owner->cancelAndDelete(v1HostTimer);
+    if (timer)
+    {
+        delete (IGMPRouterTimerContext*)timer->getContextPointer();
+        owner->cancelAndDelete(timer);
+    }
+    if (rexmtTimer)
+    {
+        delete (IGMPRouterTimerContext*)rexmtTimer->getContextPointer();
+        owner->cancelAndDelete(rexmtTimer);
+    }
+//    if (v1HostTimer)
+//    {
+//        delete (IGMPRouterTimerContext*)v1HostTimer->getContextPointer();
+//        owner->cancelAndDelete(v1HostTimer);
+//    }
 }
 
 IGMP::HostInterfaceData::HostInterfaceData(IGMP *owner)
@@ -400,7 +416,8 @@ void IGMP::configureInterface(InterfaceEntry *ie)
 	        if (!externalRouter) {
 				if (enabled) {
 					// start querier on this interface
-				    IPv4InterfaceTimer *timer = new IPv4InterfaceTimer("IGMP query timer", ie);
+				    cMessage *timer = new cMessage("IGMP query timer", IGMP_QUERY_TIMER);
+				    timer->setContextPointer(ie);
                     RouterInterfaceData *routerData = getRouterInterfaceData(ie);
 					routerData->igmpQueryTimer = timer;
 					routerData->igmpRouterState = IGMP_RS_QUERIER;
@@ -421,15 +438,24 @@ void IGMP::handleMessage(cMessage *msg)
 	}
 
 	if (msg->isSelfMessage()) {
-		if (dynamic_cast<IPv4InterfaceGroupTimer *>(msg)) {
-			processGroupTimer((IPv4InterfaceGroupTimer *)msg);
-		}
-		else if (dynamic_cast<IPv4InterfaceTimer *>(msg)) {
-			processQueryTimer((IPv4InterfaceTimer *)msg);
-		}
-		else {
-			ASSERT(false);
-		}
+	    switch (msg->getKind())
+	    {
+	        case IGMP_QUERY_TIMER:
+	            processQueryTimer(msg);
+	            break;
+	        case IGMP_HOSTGROUP_TIMER:
+	            processHostGroupTimer(msg);
+	            break;
+	        case IGMP_LEAVE_TIMER:
+	            processLeaveTimer(msg);
+	            break;
+	        case IGMP_REXMT_TIMER:
+	            processRexmtTimer(msg);
+	            break;
+	        default:
+	            ASSERT(false);
+	            break;
+	    }
 	}
 	else if (!strcmp(msg->getArrivalGate()->getName(), "routerIn")) {
 		send(msg, "ipOut");
@@ -483,18 +509,18 @@ void IGMP::multicastGroupLeft(InterfaceEntry *ie, const IPv4Address& groupAddr)
 	}
 }
 
-void IGMP::startTimer(IPv4InterfaceTimer *timer, double interval)
+void IGMP::startTimer(cMessage *timer, double interval)
 {
 	ASSERT(timer);
 	cancelEvent(timer);
-	timer->nextExpiration = simTime() + interval;
-	scheduleAt(timer->nextExpiration, timer);
+	scheduleAt(simTime() + interval, timer);
 }
 
 void IGMP::startHostTimer(InterfaceEntry *ie, HostGroupData* group, double maxRespTime)
 {
 	if (!group->timer) {
-		group->timer = new IPv4InterfaceGroupTimer("IGMP group timer", ie, group);
+		group->timer = new cMessage("IGMP group timer", IGMP_HOSTGROUP_TIMER);
+		group->timer->setContextPointer(new IGMPHostTimerContext(ie, group));
 	}
 
 	double delay = uniform(0.0, maxRespTime);
@@ -596,47 +622,52 @@ void IGMP::processIgmpMessage(IGMPMessage *msg)
 	}
 }
 
-void IGMP::processQueryTimer(IPv4InterfaceTimer *msg)
+void IGMP::processQueryTimer(cMessage *msg)
 {
-    RouterInterfaceData *interfaceData = getRouterInterfaceData(msg->ie);
+    InterfaceEntry *ie = (InterfaceEntry*)msg->getContextPointer();
+    ASSERT(ie);
+    RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
     IGMPRouterState state = interfaceData->igmpRouterState;
 	if (state == IGMP_RS_QUERIER || state == IGMP_RS_NON_QUERIER) {
 	    interfaceData->igmpRouterState = IGMP_RS_QUERIER;
-		sendQuery(msg->ie, IPv4Address(), queryResponseInterval); // general query
+		sendQuery(ie, IPv4Address(), queryResponseInterval); // general query
 		startTimer(msg, queryInterval);
 	}
 }
 
-void IGMP::processGroupTimer(IPv4InterfaceGroupTimer *msg)
+void IGMP::processHostGroupTimer(cMessage *msg)
 {
-	if (msg->hostGroup && msg == msg->hostGroup->timer) {
-		sendReport(msg->ie, msg->hostGroup);
-		msg->hostGroup->flag = true;
-		msg->hostGroup->state = IGMP_HGS_IDLE_MEMBER;
-	}
-	else if (msg->routerGroup && msg == msg->routerGroup->timer) {
-        // notify IPv4InterfaceData to update its listener list
-        msg->ie->ipv4Data()->removeMulticastListener(msg->routerGroup->groupAddr);
+    IGMPHostTimerContext *ctx = (IGMPHostTimerContext*)msg->getContextPointer();
+    sendReport(ctx->ie, ctx->hostGroup);
+    ctx->hostGroup->flag = true;
+    ctx->hostGroup->state = IGMP_HGS_IDLE_MEMBER;
+}
 
-		IPv4MulticastGroupInfo info(msg->ie, msg->routerGroup->groupAddr);
-		nb->fireChangeNotification(NF_IPv4_MCAST_UNREGISTERED, &info);
-		numRouterGroups--;
+void IGMP::processLeaveTimer(cMessage *msg)
+{
+    IGMPRouterTimerContext *ctx = (IGMPRouterTimerContext*)msg->getContextPointer();
 
-		if (msg->routerGroup->state ==	IGMP_RGS_CHECKING_MEMBERSHIP) {
-			cancelEvent(msg->routerGroup->rexmtTimer);
-		}
-		msg->routerGroup->state = IGMP_RGS_NO_MEMBERS_PRESENT;
-        deleteRouterGroupData(msg->ie, msg->routerGroup->groupAddr);
-        numGroups--;
-	}
-	else if (msg->routerGroup && msg == msg->routerGroup->rexmtTimer) {
-		sendQuery(msg->ie, msg->routerGroup->groupAddr, lastMemberQueryInterval);
-		startTimer(msg->routerGroup->rexmtTimer, lastMemberQueryInterval);
-		msg->routerGroup->state = IGMP_RGS_CHECKING_MEMBERSHIP;
-	}
-	else {
-		opp_error("IGMP: Unknown timer");
-	}
+    // notify IPv4InterfaceData to update its listener list
+    ctx->ie->ipv4Data()->removeMulticastListener(ctx->routerGroup->groupAddr);
+
+    IPv4MulticastGroupInfo info(ctx->ie, ctx->routerGroup->groupAddr);
+    nb->fireChangeNotification(NF_IPv4_MCAST_UNREGISTERED, &info);
+    numRouterGroups--;
+
+    if (ctx->routerGroup->state ==  IGMP_RGS_CHECKING_MEMBERSHIP) {
+        cancelEvent(ctx->routerGroup->rexmtTimer);
+    }
+    ctx->routerGroup->state = IGMP_RGS_NO_MEMBERS_PRESENT;
+    deleteRouterGroupData(ctx->ie, ctx->routerGroup->groupAddr);
+    numGroups--;
+}
+
+void IGMP::processRexmtTimer(cMessage *msg)
+{
+    IGMPRouterTimerContext *ctx = (IGMPRouterTimerContext*)msg->getContextPointer();
+    sendQuery(ctx->ie, ctx->routerGroup->groupAddr, lastMemberQueryInterval);
+    startTimer(ctx->routerGroup->rexmtTimer, lastMemberQueryInterval);
+    ctx->routerGroup->state = IGMP_RGS_CHECKING_MEMBERSHIP;
 }
 
 void IGMP::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMessage *msg)
@@ -683,9 +714,9 @@ void IGMP::processGroupQuery(InterfaceEntry *ie, HostGroupData* group, int maxRe
 	double maxRespTimeSecs = (double)maxRespTime / 10.0;
 
 	if (group->state == IGMP_HGS_DELAYING_MEMBER) {
-		IPv4InterfaceGroupTimer *timer = group->timer;
+		cMessage *timer = group->timer;
 		simtime_t maxAbsoluteRespTime = simTime() + maxRespTimeSecs;
-		if (maxAbsoluteRespTime < timer->nextExpiration) {
+		if (timer->isScheduled() && maxAbsoluteRespTime < timer->getArrivalTime()) {
 			startHostTimer(ie, group, maxRespTimeSecs);
 		}
 	}
@@ -726,9 +757,15 @@ void IGMP::processV2Report(InterfaceEntry *ie, IGMPMessage *msg)
 		}
 
 		if (!routerGroupData->timer)
-		    routerGroupData->timer = new IPv4InterfaceGroupTimer("IGMP leave timer", ie, routerGroupData);
+		{
+		    routerGroupData->timer = new cMessage("IGMP leave timer", IGMP_LEAVE_TIMER);
+		    routerGroupData->timer->setContextPointer(new IGMPRouterTimerContext(ie, routerGroupData));
+		}
 		if (!routerGroupData->rexmtTimer)
-		    routerGroupData->rexmtTimer = new IPv4InterfaceGroupTimer("IGMP rexmt timer", ie, routerGroupData);
+		{
+		    routerGroupData->rexmtTimer = new cMessage("IGMP rexmt timer", IGMP_REXMT_TIMER);
+            routerGroupData->rexmtTimer->setContextPointer(new IGMPRouterTimerContext(ie, routerGroupData));
+		}
 
 		if (routerGroupData->state == IGMP_RGS_NO_MEMBERS_PRESENT) {
 		    // notify IPv4InterfaceData to update its listener list
