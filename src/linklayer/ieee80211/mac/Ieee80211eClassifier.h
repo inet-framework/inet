@@ -22,22 +22,27 @@
 #include "IQoSClassifier.h"
 
 /**
- * Just an example for packet classifiers, based on IPv4 DSCP/IPv6 Traffic
- * class. You'll probably need to implement others if your research interest
- * lies in QoS.
+ * An example packet classifier based on the UDP/TCP port number.
+ * Access point management frames are classified into the 'defaultManagement' class (3 by default).
+ * ICMP messages are classified to: 1
+ * Traffic on TCP/UDP port 21: class 0
+ * Traffic on TCP/UDP port 80: class 1
+ * Traffic on TCP/UDP port 4000: class 2
+ * Traffic on TCP/UDP port 5000: class 3
+ * All other traffic is classified as 'defaultAC' (0 by default)
  */
 class INET_API Ieee80211eClassifier : public IQoSClassifier
 {
   private:
     int defaultAC;
+    int defaultManagement;
   public:
-    /**
-     * Returns the largest value plus one classifyPacket() returns.
-     */
     Ieee80211eClassifier();
     virtual int getNumQueues();
     virtual void setDefaultClass(int i) { defaultAC = i; }
     virtual int getDefaultClass() { return defaultAC; }
+    virtual void setDefaultManagementClass(int i) { defaultManagement = i; }
+    virtual int getDefaultManagementClass() { return defaultManagement; }
 
     /**
      * The method should return the priority (the index of subqueue)
