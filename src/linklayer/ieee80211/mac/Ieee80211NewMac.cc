@@ -752,10 +752,7 @@ int Ieee80211NewMac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
 {
     bool isDataFrame = (dynamic_cast<Ieee80211DataFrame *>(frame) != NULL);
 
-    if (classifier)
-        currentAC = classifier->classifyPacket(frame->getEncapsulatedPacket());
-    else
-        currentAC = 0;
+    currentAC = classifier ? classifier->classifyPacket(frame) : 0;
 
     // check for queue overflow
     if (isDataFrame && maxQueueSize && (int)transmissionQueueSize() >= maxQueueSize)

@@ -20,6 +20,7 @@
 #include "INETDefs.h"
 
 #include "Ieee80211eClassifier.h"
+#include "Ieee80211Frame_m.h"
 #ifdef WITH_IPv4
   #include "IPv4Datagram.h"
   #include "ICMPMessage_m.h"
@@ -50,28 +51,27 @@ int Ieee80211eClassifier::getNumQueues()
     return 4;
 }
 
-int Ieee80211eClassifier::classifyPacket(cMessage *msg)
+int Ieee80211eClassifier::classifyPacket(cMessage *frame)
 {
+    ASSERT(check_and_cast<Ieee80211DataOrMgmtFrame *>(frame));
     cPacket *ipData = NULL;  // must be initialized in case neither IPv4 nor IPv6 is present
 
 #ifdef WITH_IPv4
-    if (msg)
-        ipData = dynamic_cast<IPv4Datagram *>(PK(msg)->getEncapsulatedPacket());
+    ipData = dynamic_cast<IPv4Datagram *>(PK(frame)->getEncapsulatedPacket());
     if (ipData && dynamic_cast<ICMPMessage *>(ipData->getEncapsulatedPacket()))
         return 1;  // ICMP class
 #endif
 
 #ifdef WITH_IPv6
     if (!ipData) {
-        if (msg)
-            ipData = dynamic_cast<IPv6Datagram *>(PK(msg)->getEncapsulatedPacket());
+        ipData = dynamic_cast<IPv6Datagram *>(PK(frame)->getEncapsulatedPacket());
         if (ipData && dynamic_cast<ICMPv6Message *>(ipData->getEncapsulatedPacket()))
             return 1; // ICMPv6 class
     }
 #endif
 
     if (!ipData)
-        return 3; // neither IPv4 nor IPv6 packet = class 3
+        return defaultAC; // neither IPv4 nor IPv6 packet = default
 
 #ifdef WITH_UDP
     UDPPacket *udp = dynamic_cast<UDPPacket *>(ipData->getEncapsulatedPacket());
