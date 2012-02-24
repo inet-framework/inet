@@ -31,11 +31,12 @@
 // for mobility and wireless communication has been derived from the
 // <a href="http://mobility-fw.sourceforge.net" target="_blank">Mobility Framework</a>.
 //
-// There are several other bugfixes and improvements as well; see the
-// <tt><a href="whatsnew.html">WHATSNEW</a></tt> file in the distribution.
+// See the <tt><a href="whatsnew.html">WHATSNEW</a></tt> file in the distribution 
+// for the list of recent changes.
 //
 // Introductory material:
 //  - <a href="inet-architecture.html">INET Framework architecture</a>
+//  - <a href="../inet-manual-draft.pdf">INET Framework Manual (draft) (pdf)</a>
 //  - <a href="../walkthrough/tutorial.html" target="_top">Guided Tour</a>
 //
 // A few useful starting points for browsing the documentation:

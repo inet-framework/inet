@@ -1,5 +1,14 @@
 #!/bin/sh
 
+# before running this script: 
+# 1. build the INET documentation from the IDE:
+#    * be sure to switch off auto linking (i.e. enable tilde linking)
+#    * enable ALL features in the project properties dialog
+#    * be sure to have a 72DPI screen when generating the sources
+#    * after building the documentation grep for 'class="error"' in the neddoc 
+#      folder to be sure that there are no broken tilde links
+# 2. build the inet manual and copy the generated PDF file to the doc directory.
+
 cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; exit 1;}
 INET_ROOT=`pwd`
 
@@ -23,6 +32,7 @@ git checkout-index -a -f --prefix=$INET_ROOT/out/$DIRNAME/ || { echo --- error c
 cp -r doc/doxy $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 cp -r doc/neddoc $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 cp -r doc/index.html $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
+cp -r doc/inet-manual*.pdf $INET_ROOT/out/$DIRNAME/doc || { echo --- error copying generated docs ---; exit 1;}
 
 # switch to the destination dir
 cd $INET_ROOT/out/$DIRNAME
