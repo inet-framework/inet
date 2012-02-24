@@ -1,3 +1,5 @@
+2012-02-24  ------ inet-1.99.3 released ------
+
 2012-02-19  Andras Varga
 
 	IPv4Datagram: diffServCodePoint field has been changed to typeOfService

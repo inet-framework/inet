@@ -1,3 +1,5 @@
+2012-02-24  ------ inet-1.99.3 released ------
+
 2012-02-10  Rudolf Hornig
 
 	IPv4Address/IPv6Address: added LL_MANET_ROUTERS (224.0.0.109, FF02::6D),
