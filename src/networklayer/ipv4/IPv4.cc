@@ -167,7 +167,9 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
     else if (destAddr.isMulticast())
     {
         // check for local delivery
-        if (fromIE->ipv4Data()->isMemberOfMulticastGroup(destAddr))
+        // Note: multicast routers will receive IGMP datagrams even if their interface is not joined to the group
+        if (fromIE->ipv4Data()->isMemberOfMulticastGroup(destAddr) ||
+                (rt->isMulticastForwardingEnabled() && datagram->getTransportProtocol() == IP_PROT_IGMP))
             reassembleAndDeliver(datagram->dup());
 
         // don't forward if IP forwarding is off, or if dest address is link-scope
