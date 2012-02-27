@@ -54,12 +54,12 @@ void UDPBasicApp::initialize(int stage)
     while ((token = tokenizer.nextToken()) != NULL)
         destAddresses.push_back(IPvXAddressResolver().resolve(token));
 
-    if (destAddresses.empty())
-        return;
-
     socket.setOutputGate(gate("udpOut"));
     socket.bind(localPort);
     setSocketOptions();
+
+    if (destAddresses.empty())
+        return;
 
     stopTime = par("stopTime").doubleValue();
     simtime_t startTime = par("startTime").doubleValue();
