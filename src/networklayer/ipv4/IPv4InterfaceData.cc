@@ -29,14 +29,18 @@
 std::string IPv4InterfaceData::HostMulticastData::info()
 {
     std::stringstream out;
-    if (!joinedMulticastGroups.empty())
+    if (!joinedMulticastGroups.empty() &&
+            (joinedMulticastGroups[0]!=IPv4Address::ALL_HOSTS_MCAST || joinedMulticastGroups.size() > 1))
     {
         out << " mcastgrps:";
+        bool addComma = false;
         for (int i = 0; i < (int)joinedMulticastGroups.size(); ++i)
         {
-           if (i > 0)
-               out << ",";
-            out << joinedMulticastGroups[i];
+            if (joinedMulticastGroups[i] != IPv4Address::ALL_HOSTS_MCAST)
+            {
+                out << (addComma?",":"") << joinedMulticastGroups[i];
+                addComma = true;
+            }
         }
     }
     return out.str();
@@ -56,6 +60,12 @@ std::string IPv4InterfaceData::HostMulticastData::detailedInfo()
 std::string IPv4InterfaceData::RouterMulticastData::info()
 {
     std::stringstream out;
+    if (reportedMulticastGroups.size() > 0)
+    {
+        out << " mcast_listeners:";
+        for (int i = 0; i < (int)reportedMulticastGroups.size(); ++i)
+            out << (i>0?",":"") << reportedMulticastGroups[i];
+    }
     if (multicastTtlThreshold > 0)
         out << " ttl_threshold: " << multicastTtlThreshold;
     return out.str();
