@@ -424,18 +424,16 @@ void IGMP::configureInterface(InterfaceEntry *ie)
 	/// joining to 224.0.0.1 and 224.0.0.2 is done in RoutingTable
 	if (!ie->isLoopback()) {
 	    if (rt->isMulticastForwardingEnabled()) {
-	        if (!externalRouter) {
-				if (enabled) {
-					// start querier on this interface
-				    cMessage *timer = new cMessage("IGMP query timer", IGMP_QUERY_TIMER);
-				    timer->setContextPointer(ie);
-                    RouterInterfaceData *routerData = getRouterInterfaceData(ie);
-					routerData->igmpQueryTimer = timer;
-					routerData->igmpRouterState = IGMP_RS_QUERIER;
-					sendQuery(ie, IPv4Address(), queryResponseInterval); // general query
-					startTimer(timer, startupQueryInterval);
-				}
-			}
+            if (enabled) {
+                // start querier on this interface
+                cMessage *timer = new cMessage("IGMP query timer", IGMP_QUERY_TIMER);
+                timer->setContextPointer(ie);
+                RouterInterfaceData *routerData = getRouterInterfaceData(ie);
+                routerData->igmpQueryTimer = timer;
+                routerData->igmpRouterState = IGMP_RS_QUERIER;
+                sendQuery(ie, IPv4Address(), queryResponseInterval); // general query
+                startTimer(timer, startupQueryInterval);
+            }
 		}
 	}
 }
@@ -628,7 +626,13 @@ void IGMP::processIgmpMessage(IGMPMessage *msg)
 		processLeave(ie, msg);
 		break;
 	default:
-		opp_error("IGMP: Unhandled message type");
+		if (externalRouter)
+			send(msg, "routerOut");
+		else
+		{
+			delete msg;
+			opp_error("IGMP: Unhandled message type");
+		}
 		break;
 	}
 }
@@ -705,11 +709,6 @@ void IGMP::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMessa
 	}
 
 	if (rt->isMulticastForwardingEnabled()) {
-		if (externalRouter) {
-			send(msg, "routerOut");
-			return;
-		}
-
 		if (sender < ie->ipv4Data()->getIPAddress()) {
 			RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
 			startTimer(routerInterfaceData->igmpQueryTimer, otherQuerierPresentInterval);
@@ -756,11 +755,6 @@ void IGMP::processV2Report(InterfaceEntry *ie, IGMPMessage *msg)
 	}
 
 	if (rt->isMulticastForwardingEnabled()) {
-		if (externalRouter) {
-			send(msg, "routerOut");
-			return;
-		}
-
 		RouterGroupData* routerGroupData = getRouterGroupData(ie, groupAddr);
 		if (!routerGroupData) {
 		    routerGroupData = createRouterGroupData(ie, groupAddr);
@@ -799,11 +793,6 @@ void IGMP::processLeave(InterfaceEntry *ie, IGMPMessage *msg)
 	numLeavesRecv++;
 
 	if (rt->isMulticastForwardingEnabled()) {
-		if (externalRouter) {
-			send(msg, "routerOut");
-			return;
-		}
-
 		IPv4Address &groupAddr = msg->getGroupAddress();
 		RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
 		RouterGroupData *groupData = getRouterGroupData(ie, groupAddr);
