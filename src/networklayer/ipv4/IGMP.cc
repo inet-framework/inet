@@ -423,7 +423,7 @@ void IGMP::configureInterface(InterfaceEntry *ie)
 {
 	/// joining to 224.0.0.1 and 224.0.0.2 is done in RoutingTable
 	if (!ie->isLoopback()) {
-	    if (rt->isIPForwardingEnabled()) {
+	    if (rt->isMulticastForwardingEnabled()) {
 	        if (!externalRouter) {
 				if (enabled) {
 					// start querier on this interface
@@ -704,7 +704,7 @@ void IGMP::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMessa
 		}
 	}
 
-	if (rt->isIPForwardingEnabled()) {
+	if (rt->isMulticastForwardingEnabled()) {
 		if (externalRouter) {
 			send(msg, "routerOut");
 			return;
@@ -755,7 +755,7 @@ void IGMP::processV2Report(InterfaceEntry *ie, IGMPMessage *msg)
 		}
 	}
 
-	if (rt->isIPForwardingEnabled()) {
+	if (rt->isMulticastForwardingEnabled()) {
 		if (externalRouter) {
 			send(msg, "routerOut");
 			return;
@@ -798,7 +798,7 @@ void IGMP::processLeave(InterfaceEntry *ie, IGMPMessage *msg)
 {
 	numLeavesRecv++;
 
-	if (rt->isIPForwardingEnabled()) {
+	if (rt->isMulticastForwardingEnabled()) {
 		if (externalRouter) {
 			send(msg, "routerOut");
 			return;
