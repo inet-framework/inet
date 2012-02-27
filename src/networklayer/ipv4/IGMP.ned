@@ -49,7 +49,6 @@ simple IGMP
     parameters:
         bool enableLogging = default(false);
         bool enabled = default(true);
-        bool externalRouter = default(false);
         int    robustnessVariable = default(2);
         double queryInterval @unit("s") = default(125s);
         double queryResponseInterval @unit("s") = default(10s);

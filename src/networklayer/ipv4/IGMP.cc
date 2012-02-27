@@ -330,7 +330,7 @@ void IGMP::initialize(int stage)
         nb->subscribe(this, NF_IPv4_MCAST_LEAVE);
 
         enabled = par("enabled");
-        externalRouter = par("externalRouter");
+        externalRouter = gate("routerIn")->isPathOK() && gate("routerOut")->isPathOK();
         robustness = par("robustnessVariable");
         queryInterval = par("queryInterval");
         queryResponseInterval = par("queryResponseInterval");
