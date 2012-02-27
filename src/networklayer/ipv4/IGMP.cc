@@ -441,7 +441,7 @@ void IGMP::configureInterface(InterfaceEntry *ie)
 void IGMP::handleMessage(cMessage *msg)
 {
 	if (!enabled) {
-		opp_error("IGMP: handleMessage> disabled");
+		EV << "IGMP disabled, dropping packet.\n";
 		delete msg;
 		return;
 	}
@@ -631,7 +631,7 @@ void IGMP::processIgmpMessage(IGMPMessage *msg)
 		else
 		{
 			delete msg;
-			opp_error("IGMP: Unhandled message type");
+			throw cRuntimeError("IGMP: Unhandled message type (%dq)", msg->getType());
 		}
 		break;
 	}
