@@ -123,13 +123,15 @@ std::string IPv4InterfaceData::detailedInfo() const
 
 bool IPv4InterfaceData::isMemberOfMulticastGroup(const IPv4Address &multicastAddress) const
 {
-    ASSERT(multicastAddress.isMulticast());
     const IPv4AddressVector &multicastGroups = getJoinedMulticastGroups();
     return find(multicastGroups.begin(), multicastGroups.end(), multicastAddress) != multicastGroups.end();
 }
 
 void IPv4InterfaceData::joinMulticastGroup(const IPv4Address& multicastAddress)
 {
+    if(!multicastAddress.isMulticast())
+        throw cRuntimeError("IPv4InterfaceData::joinMulticastGroup(): multicast address expected, received %s.", multicastAddress.str().c_str());
+
     IPv4AddressVector &multicastGroups = getHostData()->joinedMulticastGroups;
     std::vector<int> &refCounts = getHostData()->refCounts;
     for (int i = 0; i < (int)multicastGroups.size(); ++i)
@@ -154,6 +156,10 @@ void IPv4InterfaceData::joinMulticastGroup(const IPv4Address& multicastAddress)
 
 void IPv4InterfaceData::leaveMulticastGroup(const IPv4Address& multicastAddress)
 {
+    if(!multicastAddress.isMulticast())
+        throw cRuntimeError("IPv4InterfaceData::leaveMulticastGroup(): multicast address expected, received %s.", multicastAddress.str().c_str());
+
+    ASSERT(multicastAddress.isMulticast());
     IPv4AddressVector &multicastGroups = getHostData()->joinedMulticastGroups;
     std::vector<int> &refCounts = getHostData()->refCounts;
     for (int i = 0; i < (int)multicastGroups.size(); ++i)
@@ -178,13 +184,15 @@ void IPv4InterfaceData::leaveMulticastGroup(const IPv4Address& multicastAddress)
 
 bool IPv4InterfaceData::hasMulticastListener(const IPv4Address &multicastAddress) const
 {
-    ASSERT(multicastAddress.isMulticast());
     const IPv4AddressVector &multicastGroups = getRouterData()->reportedMulticastGroups;
     return find(multicastGroups.begin(),  multicastGroups.end(), multicastAddress) != multicastGroups.end();
 }
 
 void IPv4InterfaceData::addMulticastListener(const IPv4Address &multicastAddress)
 {
+    if(!multicastAddress.isMulticast())
+        throw cRuntimeError("IPv4InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
+
     if (!hasMulticastListener(multicastAddress))
     {
         getRouterData()->reportedMulticastGroups.push_back(multicastAddress);
