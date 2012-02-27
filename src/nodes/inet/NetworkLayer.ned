@@ -44,6 +44,7 @@ module NetworkLayer
         input ospfIn @labels(IPv4ControlInfo/down);
         input pingIn[];
         input manetIn;
+        input igmpIn;
         output ifOut[] @labels(IPv4Datagram);
         output tcpOut @labels(TCPSegment,IPv4ControlInfo/up);
         output udpOut @labels(UDPPacket,IPv4ControlInfo/up);
@@ -52,6 +53,7 @@ module NetworkLayer
         output ospfOut @labels(IPv4ControlInfo/up);
         output pingOut[];
         output manetOut;
+        output igmpOut;
 
     submodules:
         ip: IPv4 {
@@ -119,6 +121,9 @@ module NetworkLayer
         icmp.errorOut --> errorHandling.in;
 
         ip.queueOut --> arp.ipIn;
+
+        igmp.routerOut --> igmpOut;
+        igmp.routerIn <-- igmpIn;
 
         for i=0..sizeof(ifIn)-1 {
             ifIn[i] --> { @display("m=s"); } --> ip.queueIn[i];
