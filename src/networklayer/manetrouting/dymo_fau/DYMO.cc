@@ -39,7 +39,6 @@ const int DYMO_RERR_HEADER_LENGTH = 4; /**< length (in bytes) of a DYMO RERR hea
 const int DYMO_UBLOCK_LENGTH = 8; /**< length (in bytes) of one DYMO UBlock */
 const int UDPPort = DYMO_PORT; //9000 /**< UDP Port to listen on (TBD) */
 const double MAXJITTER = 0.001; /**< all messages sent to a lower layer are delayed by 0..MAXJITTER seconds (draft-ietf-manet-jitter-01) */
-const IPv4Address LL_MANET_ROUTERS = "224.0.0.90"; /**< Link-local multicast address of all MANET routers (TBD) */
 }
 
 DYMO::DYMO()
@@ -544,7 +543,7 @@ void DYMO::handleLowerRMForRelay(DYMO_RM *routingMsg)
     }
 
     /* transmit message -- RREP via unicast, RREQ via DYMOcast */
-    sendDown(routingMsg, dynamic_cast<DYMO_RREP*>(routingMsg) ? (entry->routeNextHopAddress).getInt() : LL_MANET_ROUTERS.getInt());
+    sendDown(routingMsg, dynamic_cast<DYMO_RREP*>(routingMsg) ? (entry->routeNextHopAddress).getInt() : IPv4Address::LL_MANET_ROUTERS.getInt());
 
     /* keep statistics */
     if (dynamic_cast<DYMO_RREP*>(routingMsg))
@@ -651,7 +650,7 @@ void DYMO::handleLowerRERR(DYMO_RERR *my_rerr)
     my_rerr->setMsgHdrHopLimit(my_rerr->getMsgHdrHopLimit() - 1);
 
     ev << "send down RERR" << endl;
-    sendDown(my_rerr, LL_MANET_ROUTERS.getInt());
+    sendDown(my_rerr, IPv4Address::LL_MANET_ROUTERS.getInt());
 
     statsRERRFwd++;
 }
@@ -759,7 +758,7 @@ void DYMO::sendDown(cPacket* apMsg, int destAddr)
     // keep statistics
     totalPacketsSent++;
     totalBytesSent += apMsg->getByteLength();
-    if (LL_MANET_ROUTERS.getInt()==(unsigned int)destAddr)
+    if (IPv4Address::LL_MANET_ROUTERS.getInt()==(unsigned int)destAddr)
     {
         destAddr = IPv4Address::ALLONES_ADDRESS.getInt();
         sendToIp(apMsg, UDPPort, destAddr, UDPPort, 1, SIMTIME_DBL(jitter), 0);
@@ -803,7 +802,7 @@ void DYMO::sendRREQ(unsigned int destAddr, int msgHdrHopLimit, unsigned int targ
         return;
     }
 
-    sendDown(my_rreq, LL_MANET_ROUTERS.getInt());
+    sendDown(my_rreq, IPv4Address::LL_MANET_ROUTERS.getInt());
     statsRREQSent++;
 }
 
@@ -942,7 +941,7 @@ void DYMO::sendRERR(unsigned int targetAddr, unsigned int targetSeqNum)
 
     // wrap up and send
     rerr->setUnreachableNodes(unode_vec);
-    sendDown(rerr, LL_MANET_ROUTERS.getInt());
+    sendDown(rerr, IPv4Address::LL_MANET_ROUTERS.getInt());
 
     // keep statistics
     statsRERRSent++;
@@ -1195,7 +1194,7 @@ cModule* DYMO::getRouterByAddress(IPv4Address address)
 void DYMO::packetFailed(const IPv4Datagram *dgram)
 {
     /* We don't care about link failures for broadcast or non-data packets */
-    if (dgram->getDestAddress() == IPv4Address::ALLONES_ADDRESS || dgram->getDestAddress() == LL_MANET_ROUTERS)
+    if (dgram->getDestAddress() == IPv4Address::ALLONES_ADDRESS || dgram->getDestAddress() == IPv4Address::LL_MANET_ROUTERS)
     {
         return;
     }
