@@ -63,7 +63,7 @@ class INET_API MACAddress
      * Constructor which accepts a hex string (12 hex digits, may also
      * contain spaces, hyphens and colons)
      */
-    MACAddress(const char *hexstr) { setAddress(hexstr); }
+    explicit MACAddress(const char *hexstr) { setAddress(hexstr); }
 
     /**
      * Copy constructor.

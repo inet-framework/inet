@@ -59,7 +59,7 @@ class INET_API IPvXAddress
      * notation) and IPv6Address (hex string with colons). Throws an error
      * if the format is not recognized.
      */
-    IPvXAddress(const char *addr) {set(addr);}
+    explicit IPvXAddress(const char *addr) {set(addr);}
 
     /**
      * Copy constructor.

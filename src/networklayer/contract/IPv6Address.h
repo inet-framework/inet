@@ -116,7 +116,7 @@ class INET_API IPv6Address
          * Constructor. Sets the address from the given text representation.
          * See documentation of tryParse() for supported syntax.
          */
-        IPv6Address(const char *addr) {set(addr);}
+        explicit IPv6Address(const char *addr) {set(addr);}
 
         bool operator<(const IPv6Address& addr) const {return compare(addr) < 0;}
         bool operator>(const IPv6Address& addr) const {return compare(addr) > 0;}

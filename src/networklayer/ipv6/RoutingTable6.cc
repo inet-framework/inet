@@ -378,7 +378,7 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
     for (unsigned int k=0; k<addrList.size(); k++)
     {
         cXMLElement *node = addrList[k];
-        IPv6Address address = node->getNodeValue();
+        IPv6Address address = IPv6Address(node->getNodeValue());
         //We can now decide if the address is tentative or not.
         d->assignAddress(address, toBool(getRequiredAttr(node, "tentative")), 0, 0);  // set up with infinite lifetimes
     }

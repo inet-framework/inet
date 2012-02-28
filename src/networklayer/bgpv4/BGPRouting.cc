@@ -557,8 +557,8 @@ std::vector<const char *> BGPRouting::loadASConfig(cXMLElementList& ASConfig)
         if (nodeName == "DenyRoute" || nodeName == "DenyRouteIN" || nodeName == "DenyRouteOUT")
         {
             BGP::RoutingTableEntry* entry = new BGP::RoutingTableEntry();
-            entry->setDestination((*ASConfigIt)->getAttribute("Address"));
-            entry->setNetmask((*ASConfigIt)->getAttribute("Netmask"));
+            entry->setDestination(IPv4Address((*ASConfigIt)->getAttribute("Address")));
+            entry->setNetmask(IPv4Address((*ASConfigIt)->getAttribute("Netmask")));
             if (nodeName == "DenyRouteIN")
             {
                 _prefixListIN.push_back(entry);
@@ -698,7 +698,7 @@ BGP::SessionID BGPRouting::createSession(BGP::type typeSession, const char* peer
     info.peerAddr.set(peerAddr);
     if (typeSession == BGP::EGP)
     {
-        info.linkIntf = _rt->getInterfaceForDestAddr(peerAddr);
+        info.linkIntf = _rt->getInterfaceForDestAddr(info.peerAddr);
         if (info.linkIntf == 0)
         {
             error("BGP Error: No configuration interface for peer address: %s", peerAddr);

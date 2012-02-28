@@ -133,7 +133,7 @@ class INET_API IPv4Address
     /**
      * IPv4 address given as text: "192.66.86.1"
      */
-    IPv4Address(const char *text) {set(text);}
+    explicit IPv4Address(const char *text) {set(text);}
 
     /**
      * Copy constructor
