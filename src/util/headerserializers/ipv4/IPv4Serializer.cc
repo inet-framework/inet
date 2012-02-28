@@ -33,6 +33,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "IPv4Serializer.h"
 
 #include "ICMPSerializer.h"
+#include "IGMPSerializer.h"
 #include "IPProtocolId_m.h"
 
 #ifdef WITH_UDP
@@ -98,6 +99,11 @@ int IPv4Serializer::serialize(const IPv4Datagram *dgram, unsigned char *buf, uns
     {
       case IP_PROT_ICMP:
         packetLength += ICMPSerializer().serialize(check_and_cast<ICMPMessage *>(encapPacket),
+                                                   buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES);
+        break;
+
+      case IP_PROT_IGMP:
+        packetLength += IGMPSerializer().serialize(check_and_cast<IGMPMessage *>(encapPacket),
                                                    buf+IP_HEADER_BYTES, bufsize-IP_HEADER_BYTES);
         break;
 
@@ -173,6 +179,11 @@ void IPv4Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv4D
       case IP_PROT_ICMP:
         encapPacket = new ICMPMessage("icmp-from-wire");
         ICMPSerializer().parse(buf + headerLength, encapLength, (ICMPMessage *)encapPacket);
+        break;
+
+      case IP_PROT_IGMP:
+        encapPacket = new IGMPMessage("igmp-from-wire");
+        IGMPSerializer().parse(buf + headerLength, encapLength, (IGMPMessage *)encapPacket);
         break;
 
 #ifdef WITH_UDP
