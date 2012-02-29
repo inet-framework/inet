@@ -125,7 +125,7 @@ protected:
         {
             InterfaceEntry *ie;
             RouterGroupData *routerGroup;
-            IGMPRouterTimerContext(InterfaceEntry *ie, RouterGroupData *hostGroup) : ie(ie), routerGroup(routerGroup) {}
+            IGMPRouterTimerContext(InterfaceEntry *ie, RouterGroupData *routerGroup) : ie(ie), routerGroup(routerGroup) {}
         };
 
 protected:
