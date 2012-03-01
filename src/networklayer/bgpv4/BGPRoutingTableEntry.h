@@ -33,12 +33,6 @@ public:
     RoutingTableEntry(const IPv4Route* entry);
     virtual ~RoutingTableEntry(void) {}
 
-//    void            setDestinationID(IPv4Address destID)              { dest = destID; }
-//    IPv4Address       getDestinationID(void) const                    { return dest; }
-//    void            setAddressMask(IPv4Address destMask)              { netmask = destMask; }
-//    IPv4Address       getAddressMask(void) const                      { return netmask; }
-    void            setNextHop(NextHop hop)                         { _nextHop = hop; }
-    NextHop         getNextHop(void) const                          { return _nextHop; }
     void            setPathType(RoutingPathType type)               { _pathType = type; }
     RoutingPathType getPathType(void) const                         { return _pathType; }
     void            addAS(ASID newAS)                               { _ASList.push_back(newAS); }
@@ -49,7 +43,6 @@ public:
     // destinationID is RoutingEntry::host
     // addressMask is RoutingEntry::netmask
     RoutingPathType         _pathType;
-    NextHop                 _nextHop;
     std::vector<ASID>       _ASList;
 };
 
@@ -89,7 +82,7 @@ inline std::ostream& operator<<(std::ostream& out, BGP::RoutingTableEntry& entry
     }
 
     out << " , NextHops: "
-        << entry.getNextHop()
+        << entry.getGateway()
         << " , AS: ";
     unsigned int ASCount = entry.getASCount();
     for (unsigned int i = 0; i < ASCount; i++) {

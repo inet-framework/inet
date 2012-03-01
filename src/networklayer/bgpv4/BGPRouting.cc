@@ -293,8 +293,7 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::Rout
     /*If the AS_PATH attribute of a BGP route contains an AS loop, the BGP
     route should be excluded from the decision process. */
     entry->setPathType(msg.getPathAttributeList(0).getOrigin().getValue());
-    entry->setNextHop(msg.getPathAttributeList(0).getNextHop().getValue());
-    entry->setGateway(entry->getNextHop());
+    entry->setGateway(msg.getPathAttributeList(0).getNextHop().getValue());
 
     //if the route already exist in BGP routing table, tieBreakingProcess();
     //(RFC 4271: 9.1.2.2 Breaking Ties)
