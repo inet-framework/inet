@@ -180,9 +180,9 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *,void *), void *dat
     // Loop through all modules and find those that satisfy the criteria
     for (int modId=0; modId<=simulation.getLastModuleId(); modId++)
     {
-        cModule *mod = simulation.getModule(modId);
-        if (mod && predicate(mod,data)) {
-            Node *node = new Node(modId); //TODO factory method
+        cModule *module = simulation.getModule(modId);
+        if (module && predicate(module, data)) {
+            Node *node = createNode(module);
             nodes.push_back(node);
         }
     }
@@ -212,7 +212,7 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *,void *), void *dat
             // if we arrived at a module in the topology, record it.
             if (gate)
             {
-                Link *link = new Link(); //TODO factory method
+                Link *link = createLink();
                 link->srcNode = node;
                 link->srcGateId = srcGate->getId();
                 link->destNode = getNodeFor(gate->getOwnerModule());

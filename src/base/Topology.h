@@ -51,9 +51,8 @@
 
 //TODO doucument: graph may be modified by hand; graph nodes/links may or may not correspond to modules/gates
 //TODO add notes: manually added nodes/links may not have cModule*/cGate* pointers (getModule() etc may be NULL)
-//TODO make methods virtual, factory method for node/link creation
+//TODO make more methods virtual
 //TODO inconsistency: Node takes cModule* in ctor, but Link's srcGate/destGate are set in addLink()!!!
-//TODO add link payloads
 //TODO weight: how to compute automatically from link datarate?
 
 class INET_API Topology : public cOwnedObject
@@ -71,7 +70,6 @@ class INET_API Topology : public cOwnedObject
         friend class Topology;
 
       protected:
-        cObject *payload;
         int moduleId;
         double weight;
         bool enabled;
@@ -87,18 +85,10 @@ class INET_API Topology : public cOwnedObject
          * Constructor
          */
         Node(int moduleId=-1) {this->moduleId=moduleId; weight=0; enabled=true; dist=INFINITY; outPath=NULL;}
+        virtual ~Node() {}
 
         /** @name Node attributes: weight, enabled state, correspondence to modules. */
         //@{
-        /**
-         * TODO document
-         */
-        cObject *getPayload() const {return payload;}
-
-        /**
-         * TODO document
-         */
-        void setPayload(cObject *payload) {this->payload = payload;}
 
         /**
          * Returns the ID of the network module to which this node corresponds.
@@ -209,6 +199,7 @@ class INET_API Topology : public cOwnedObject
          * Constructor.
          */
         Link(double weight=1) {srcNode=destNode=NULL; srcGateId=destGateId=-1; this->weight=weight; enabled=true;}
+        virtual ~Link() {}
 
         /**
          * Returns the weight of this link. Weight is used with the
@@ -575,8 +566,17 @@ class INET_API Topology : public cOwnedObject
      */
     Node *getTargetNode() const {return target;}
     //@}
+
+  protected:
+    /**
+     * Node factory.
+     */
+    virtual Node *createNode(cModule *module) { return new Node(module->getId()); }
+
+    /**
+     * Link factory.
+     */
+    virtual Link *createLink() { return new Link(); }
 };
 
 #endif
-
-
