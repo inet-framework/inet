@@ -294,6 +294,7 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::Rout
     route should be excluded from the decision process. */
     entry->setPathType(msg.getPathAttributeList(0).getOrigin().getValue());
     entry->setNextHop(msg.getPathAttributeList(0).getNextHop().getValue());
+    entry->setGateway(entry->getNextHop());
 
     //if the route already exist in BGP routing table, tieBreakingProcess();
     //(RFC 4271: 9.1.2.2 Breaking Ties)
@@ -314,7 +315,7 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::Rout
     }
 
     //Don't add the route if it exists in IPv4 routing table except if the msg come from IGP session
-    int indexIP = isInIPTable(_rt, entry->getDestination());
+    int indexIP = isInRoutingTable(_rt, entry->getDestination());
     if (indexIP != -1 && _rt->getRoute(indexIP)->getSource() != IPv4Route::BGP )
     {
         if (_BGPSessions[sessionIndex]->getType() != BGP::IGP )
@@ -511,12 +512,12 @@ void BGPRouting::loadSessionConfig(cXMLElementList& sessionList, simtime_t* dela
         IPv4Address routerAddr1 = IPv4Address(exterAddr);
         exterAddr = (*sessionListIt)->getLastChild()->getAttribute("exterAddr");
         IPv4Address routerAddr2 = IPv4Address(exterAddr);
-        if (isInIPTable(_rt, routerAddr1) == -1 && isInIPTable(_rt, routerAddr2) == -1)
+        if (isInInterfaceTable(_inft, routerAddr1) == -1 && isInInterfaceTable(_inft, routerAddr2) == -1)
         {
             continue;
         }
         IPv4Address peerAddr;
-        if (isInIPTable(_rt, routerAddr1) != -1)
+        if (isInInterfaceTable(_inft, routerAddr1) != -1)
         {
             peerAddr = routerAddr2;
             delayTab[3] += atoi((*sessionListIt)->getAttribute("id"));
@@ -548,7 +549,7 @@ std::vector<const char *> BGPRouting::loadASConfig(cXMLElementList& ASConfig)
         std::string nodeName = (*ASConfigIt)->getTagName();
         if (nodeName == "Router")
         {
-            if (isInIPTable(_rt, IPv4Address((*ASConfigIt)->getAttribute("interAddr"))) == -1)
+            if (isInInterfaceTable(_inft, IPv4Address((*ASConfigIt)->getAttribute("interAddr"))) == -1)
             {
                 routerInSameASList.push_back((*ASConfigIt)->getAttribute("interAddr"));
             }
@@ -747,12 +748,24 @@ bool BGPRouting::deleteBGPRoutingEntry(BGP::RoutingTableEntry* entry){
 }
 
 /*return index of the IPv4 table if the route is found, -1 else*/
-int BGPRouting::isInIPTable(IRoutingTable* rtTable, IPv4Address addr)
+int BGPRouting::isInRoutingTable(IRoutingTable* rtTable, IPv4Address addr)
 {
     for (int i = 0; i < rtTable->getNumRoutes(); i++)
     {
         const IPv4Route* entry = rtTable->getRoute(i);
-        if (entry->getDestination().getInt() == addr.getInt())
+        if (IPv4Address::maskedAddrAreEqual(addr, entry->getDestination(), entry->getNetmask()))
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int BGPRouting::isInInterfaceTable(IInterfaceTable* ifTable, IPv4Address addr)
+{
+    for (int i = 0; i < ifTable->getNumInterfaces(); i++)
+    {
+        if (ifTable->getInterface(i)->ipv4Data()->getIPAddress() == addr)
         {
             return i;
         }

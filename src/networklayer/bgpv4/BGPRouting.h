@@ -123,7 +123,8 @@ private:
     void loadTimerConfig(cXMLElementList& timerConfig, simtime_t* delayTab);
     unsigned char asLoopDetection(BGP::RoutingTableEntry* entry, BGP::ASID myAS);
     BGP::SessionID findIdFromPeerAddr(std::map<BGP::SessionID, BGPSession*> sessions, IPv4Address peerAddr);
-    int isInIPTable(IRoutingTable* rtTable, IPv4Address addr);
+    int isInRoutingTable(IRoutingTable* rtTable, IPv4Address addr);
+    int isInInterfaceTable(IInterfaceTable* rtTable, IPv4Address addr);
     BGP::SessionID findIdFromSocketConnId(std::map<BGP::SessionID, BGPSession*> sessions, int connId);
     unsigned int calculateStartDelay(int rtListSize, unsigned char rtPosition, unsigned char rtPeerPosition);
 
