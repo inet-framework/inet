@@ -137,9 +137,14 @@ void HttpClientApp::socketEstablished(int connId, void *ptr)
         sendHtmlRequest();
 
     // start statistics gathering once the warm-up period has passed.
-    if (simTime() >= simulation.getWarmupPeriod())
-	{
-		warmupFinished = true;
+    if (warmupFinished == false)
+    {
+        if (simTime() >= simulation.getWarmupPeriod())
+        {
+            warmupFinished = true;
+            numSessions = 1;
+            numBroken = 0;
+        }
 	}
 }
 
@@ -219,6 +224,7 @@ void HttpClientApp::finish()
         double meanSessionTransferRate = sumSessionTransferRates/numSessionsFinished;
 
         recordScalar("number of finished sessions", numSessionsFinished);
+        recordScalar("number of broken sessions", numBroken);
         recordScalar("average session delay [s]", avgSessionDelay);
         recordScalar("average session throughput [B/s]", avgSessionThroughput);
         recordScalar("mean session transfer rate [B/s]", meanSessionTransferRate);
