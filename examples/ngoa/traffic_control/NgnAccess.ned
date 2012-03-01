@@ -24,7 +24,7 @@ import inet.nodes.access.NgnAccessModem;
 import inet.nodes.access.NgnAccessNode;
 import inet.nodes.access.NgnAccessSplitter;
 import inet.nodes.inet.RouterWithEthernetInterface2;
-import inet.nodes.inet.StandardHost3WithEthernetInterface2;
+import inet.nodes.inet.StandardHost3WithEthernetInterface2WithDLDelayMeter;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
 
 
@@ -81,7 +81,7 @@ network NgnAccess
             gates:
                 ethg[n+1];
         }
-        host[N*n]: StandardHost3WithEthernetInterface2 {
+        host[N*n]: StandardHost3WithEthernetInterface2WithDLDelayMeter {
             parameters:
                 @display("i=device/laptop;p=46,119");
             gates:
