@@ -1,0 +1,215 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Tests the INET framework. Builds specified branches and then the unit, smoke, fingerprint, statistical and module tests.</description>
+  <logRotator>
+    <daysToKeep>-1</daysToKeep>
+    <numToKeep>10</numToKeep>
+    <artifactDaysToKeep>-1</artifactDaysToKeep>
+    <artifactNumToKeep>-1</artifactNumToKeep>
+  </logRotator>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty>
+      <projectUrl>https://github.com/inet-framework/inet/</projectUrl>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>MODE</name>
+          <description>Build mode to test (debug or release)</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>debug</string>
+              <string>release</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>TEST_DEFAULT_MAKEFILE</name>
+          <description>Build the project with the default Makefile to make sure it compiles out of the box.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>RUN_FEATURE_BUILD_TESTS</name>
+          <description>Build all feature combinations</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>BUILD_BEFORE_TESTING</name>
+          <description>If build tests are disabled, it is possible to spare the build step before running fingerprint, statistical etc tests by clearing this checkbox.
+</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>UNIT_TESTS</name>
+          <description>Run unit tests.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>SMOKE_TESTS</name>
+          <description>Run smoke tests on INET (examples run for a few seconds to see if there are crashes)</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>FINGERPRINT_TESTS</name>
+          <description>Run examples and calculate fingerprints. Mismatches will be reported as errors.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>STATISTICAL_TESTS</name>
+          <description>Run statistical tests. Deviations from baseline statistical values will be reported as errors.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>MODULE_TESTS</name>
+          <description>Run module tests.</description>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>OMNETPP_VERSION</name>
+          <description>The version of the omnetpp installation dir in $SHARED_DIR used to build INET. It MUST contain pre-built (debug/release) binaries for OMNeT++. The name of the directory must be omnetpp-$OMNETPP_VERSION</description>
+          <defaultValue>4.2.1</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <name></name>
+        <refspec></refspec>
+        <url>git://github.com/inet-framework/inet.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>origin/integration</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <disableSubmodules>false</disableSubmodules>
+    <recursiveSubmodules>false</recursiveSubmodules>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <authorOrCommitter>false</authorOrCommitter>
+    <clean>false</clean>
+    <wipeOutWorkspace>false</wipeOutWorkspace>
+    <pruneBranches>true</pruneBranches>
+    <remotePoll>false</remotePoll>
+    <buildChooser class="hudson.plugins.git.util.DefaultBuildChooser"/>
+    <gitTool>Default - git</gitTool>
+    <submoduleCfg class="list"/>
+    <relativeTargetDir></relativeTargetDir>
+    <reference></reference>
+    <excludedRegions></excludedRegions>
+    <excludedUsers></excludedUsers>
+    <gitConfigName></gitConfigName>
+    <gitConfigEmail></gitConfigEmail>
+    <skipTag>false</skipTag>
+    <scmName></scmName>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers class="vector">
+    <hudson.triggers.SCMTrigger>
+      <spec>0 22 * * *</spec>
+    </hudson.triggers.SCMTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command># The directory containing shared, precompiled components like OMNeT++ and NSC.
+SHARED_DIR=../../../shared 
+
+echo Starting build...
+ln -sf $SHARED_DIR .
+(cd 3rdparty; ln -sf ../shared/nsc-0.5.2 .)
+pushd shared/omnetpp-$OMNETPP_VERSION
+source setenv
+popd
+
+export LD_LIBRARY_PATH=`pwd`/3rdparty:$LD_LIBRARY_PATH
+
+if [ &quot;$TEST_DEFAULT_MAKEFILE&quot; = &quot;true&quot; ]; then
+  make makefiles
+  make clean
+  make MODE=$MODE
+fi
+
+if [ &quot;$RUN_FEATURE_BUILD_TESTS&quot; = &quot;true&quot; ]; then
+  # build INET with all feature combinations
+  make -f FeatureBuildTest all MODE=$MODE
+fi
+
+#---------------
+
+if [ &quot;$BUILD_BEFORE_TESTING&quot; = &quot;true&quot; -o &quot;$TEST_DEFAULT_MAKEFILE&quot; = &quot;true&quot; -o &quot;$RUN_FEATURE_BUILD_TESTS&quot; = &quot;true&quot; ]; then
+  # build INET with all features enabled
+  make -f FeatureBuildTest all_enabled MODE=$MODE
+fi
+
+#---------------
+
+if [ &quot;$UNIT_TESTS&quot; = &quot;true&quot; ]; then
+  echo Starting unit tests...
+  (cd tests/unit &amp;&amp; ./runtest)
+fi
+
+if [ &quot;$SMOKE_TESTS&quot; = &quot;true&quot; ]; then
+  echo Starting smoke tests...
+  (cd tests/smoke &amp;&amp; ./smoketest)
+fi
+
+if [ &quot;$FINGERPRINT_TESTS&quot; = &quot;true&quot; ]; then
+  echo Starting fingerprint tests...
+  (cd tests/fingerprint &amp;&amp; ./fingerprints)
+fi
+
+if [ &quot;$STATISTICAL_TESTS&quot; = &quot;true&quot; ]; then
+  echo Starting statistical tests...
+  (cd tests/statistical &amp;&amp; ./runtest)
+fi
+
+if [ &quot;$MODULE_TESTS&quot; = &quot;true&quot; ]; then
+  echo Starting module tests...
+  (cd tests/module &amp;&amp; ./runtest)
+fi</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.plugins.warnings.WarningsPublisher>
+      <healthy></healthy>
+      <unHealthy></unHealthy>
+      <thresholdLimit>low</thresholdLimit>
+      <pluginName>[WARNINGS] </pluginName>
+      <defaultEncoding></defaultEncoding>
+      <canRunOnFailed>false</canRunOnFailed>
+      <useDeltaValues>false</useDeltaValues>
+      <thresholds>
+        <unstableTotalAll></unstableTotalAll>
+        <unstableTotalHigh></unstableTotalHigh>
+        <unstableTotalNormal></unstableTotalNormal>
+        <unstableTotalLow></unstableTotalLow>
+        <failedTotalAll></failedTotalAll>
+        <failedTotalHigh></failedTotalHigh>
+        <failedTotalNormal></failedTotalNormal>
+        <failedTotalLow></failedTotalLow>
+      </thresholds>
+      <shouldDetectModules>false</shouldDetectModules>
+      <dontComputeNew>true</dontComputeNew>
+      <parserConfigurations/>
+      <consoleLogParsers>
+        <string>GNU compiler 4 (ld)</string>
+        <string>GNU compiler 4 (gcc)</string>
+      </consoleLogParsers>
+    </hudson.plugins.warnings.WarningsPublisher>
+    <hudson.plugins.logparser.LogParserPublisher>
+      <unstableOnWarning>true</unstableOnWarning>
+      <failBuildOnError>true</failBuildOnError>
+      <parsingRulesPath>/var/lib/jenkins/opp_test_parse_rules</parsingRulesPath>
+    </hudson.plugins.logparser.LogParserPublisher>
+  </publishers>
+  <buildWrappers/>
+</project>
