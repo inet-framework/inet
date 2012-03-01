@@ -121,7 +121,7 @@ extern const struct ip_addr ip_addr_broadcast;
                                 (u32_t)((d) & 0xff))
 
 #define ip_addr_set(dest, src) (dest)->addr = \
-                               ((src) == NULL? 0:\
+                               ((src) == NULL ? IPvXAddress() : \
                                (src)->addr)
 /**
  * Determine if two address are on the same network.
