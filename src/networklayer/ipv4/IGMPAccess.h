@@ -25,7 +25,7 @@
 class INET_API IGMPAccess : public ModuleAccess<IGMP>
 {
 public:
-	IGMPAccess() : ModuleAccess<IGMP>("igmp") {}
+    IGMPAccess() : ModuleAccess<IGMP>("igmp") {}
 };
 
 #endif

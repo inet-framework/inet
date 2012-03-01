@@ -421,11 +421,11 @@ void IGMP::receiveChangeNotification(int category, const cPolymorphic *details)
 
 void IGMP::configureInterface(InterfaceEntry *ie)
 {
-	/// joining to 224.0.0.1 and 224.0.0.2 is done in RoutingTable
-	if (!ie->isLoopback())
-	{
-	    if (rt->isMulticastForwardingEnabled())
-	    {
+    /// joining to 224.0.0.1 and 224.0.0.2 is done in RoutingTable
+    if (!ie->isLoopback())
+    {
+        if (rt->isMulticastForwardingEnabled())
+        {
             if (enabled)
             {
                 // start querier on this interface
@@ -437,75 +437,75 @@ void IGMP::configureInterface(InterfaceEntry *ie)
                 sendQuery(ie, IPv4Address(), queryResponseInterval); // general query
                 startTimer(timer, startupQueryInterval);
             }
-		}
-	}
+        }
+    }
 }
 
 void IGMP::handleMessage(cMessage *msg)
 {
-	if (!enabled)
-	{
-		EV << "IGMP disabled, dropping packet.\n";
-		delete msg;
-		return;
-	}
+    if (!enabled)
+    {
+        EV << "IGMP disabled, dropping packet.\n";
+        delete msg;
+        return;
+    }
 
-	if (msg->isSelfMessage())
-	{
-	    switch (msg->getKind())
-	    {
-	        case IGMP_QUERY_TIMER:
-	            processQueryTimer(msg);
-	            break;
-	        case IGMP_HOSTGROUP_TIMER:
-	            processHostGroupTimer(msg);
-	            break;
-	        case IGMP_LEAVE_TIMER:
-	            processLeaveTimer(msg);
-	            break;
-	        case IGMP_REXMT_TIMER:
-	            processRexmtTimer(msg);
-	            break;
-	        default:
-	            ASSERT(false);
-	            break;
-	    }
-	}
-	else if (!strcmp(msg->getArrivalGate()->getName(), "routerIn"))
-		send(msg, "ipOut");
-	else if (dynamic_cast<IGMPMessage *>(msg))
-		processIgmpMessage((IGMPMessage *)msg);
-	else
-		ASSERT(false);
+    if (msg->isSelfMessage())
+    {
+        switch (msg->getKind())
+        {
+            case IGMP_QUERY_TIMER:
+                processQueryTimer(msg);
+                break;
+            case IGMP_HOSTGROUP_TIMER:
+                processHostGroupTimer(msg);
+                break;
+            case IGMP_LEAVE_TIMER:
+                processLeaveTimer(msg);
+                break;
+            case IGMP_REXMT_TIMER:
+                processRexmtTimer(msg);
+                break;
+            default:
+                ASSERT(false);
+                break;
+        }
+    }
+    else if (!strcmp(msg->getArrivalGate()->getName(), "routerIn"))
+        send(msg, "ipOut");
+    else if (dynamic_cast<IGMPMessage *>(msg))
+        processIgmpMessage((IGMPMessage *)msg);
+    else
+        ASSERT(false);
 }
 
 void IGMP::multicastGroupJoined(InterfaceEntry *ie, const IPv4Address& groupAddr)
 {
     ASSERT(ie);
 
-	HostGroupData *groupData = createHostGroupData(ie, groupAddr);
+    HostGroupData *groupData = createHostGroupData(ie, groupAddr);
 
     numGroups++;
-	numHostGroups++;
+    numHostGroups++;
 
-	if (enabled && 
-		groupAddr != IPv4Address::ALL_ROUTERS_MCAST && 
-		groupAddr != IPv4Address::ALL_HOSTS_MCAST)
-	{
-		sendReport(ie, groupData);
-		groupData->flag = true;
-		startHostTimer(ie, groupData, unsolicitedReportInterval);
-		groupData->state = IGMP_HGS_DELAYING_MEMBER;
-	}
+    if (enabled &&
+        groupAddr != IPv4Address::ALL_ROUTERS_MCAST &&
+        groupAddr != IPv4Address::ALL_HOSTS_MCAST)
+    {
+        sendReport(ie, groupData);
+        groupData->flag = true;
+        startHostTimer(ie, groupData, unsolicitedReportInterval);
+        groupData->state = IGMP_HGS_DELAYING_MEMBER;
+    }
 }
 
 void IGMP::multicastGroupLeft(InterfaceEntry *ie, const IPv4Address& groupAddr)
 {
     ASSERT(ie);
 
-	HostGroupData *groupData = getHostGroupData(ie, groupAddr);
-	if (groupData)
-	{
+    HostGroupData *groupData = getHostGroupData(ie, groupAddr);
+    if (groupData)
+    {
         numHostGroups--;
         if (enabled)
         {
@@ -518,120 +518,120 @@ void IGMP::multicastGroupLeft(InterfaceEntry *ie, const IPv4Address& groupAddr)
 
         deleteHostGroupData(ie, groupAddr);
         numGroups--;
-	}
+    }
 }
 
 void IGMP::startTimer(cMessage *timer, double interval)
 {
-	ASSERT(timer);
-	cancelEvent(timer);
-	scheduleAt(simTime() + interval, timer);
+    ASSERT(timer);
+    cancelEvent(timer);
+    scheduleAt(simTime() + interval, timer);
 }
 
 void IGMP::startHostTimer(InterfaceEntry *ie, HostGroupData* group, double maxRespTime)
 {
-	if (!group->timer)
-	{
-		group->timer = new cMessage("IGMP group timer", IGMP_HOSTGROUP_TIMER);
-		group->timer->setContextPointer(new IGMPHostTimerContext(ie, group));
-	}
+    if (!group->timer)
+    {
+        group->timer = new cMessage("IGMP group timer", IGMP_HOSTGROUP_TIMER);
+        group->timer->setContextPointer(new IGMPHostTimerContext(ie, group));
+    }
 
-	double delay = uniform(0.0, maxRespTime);
-	EV << "setting host timer for " << ie->getName() << " and group " << group->groupAddr.str() << " to " << delay << "\n";
-	startTimer(group->timer, delay);
+    double delay = uniform(0.0, maxRespTime);
+    EV << "setting host timer for " << ie->getName() << " and group " << group->groupAddr.str() << " to " << delay << "\n";
+    startTimer(group->timer, delay);
 }
 
 void IGMP::sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr, double maxRespTime)
 {
-	ASSERT(groupAddr != IPv4Address::ALL_HOSTS_MCAST);
-	ASSERT(groupAddr != IPv4Address::ALL_ROUTERS_MCAST);
+    ASSERT(groupAddr != IPv4Address::ALL_HOSTS_MCAST);
+    ASSERT(groupAddr != IPv4Address::ALL_ROUTERS_MCAST);
 
-	RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
+    RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
 
-	if (interfaceData->igmpRouterState == IGMP_RS_QUERIER)
-	{
-	    if (groupAddr.isUnspecified())
+    if (interfaceData->igmpRouterState == IGMP_RS_QUERIER)
+    {
+        if (groupAddr.isUnspecified())
             EV << "IGMP: sending General Membership Query on iface=" << ie->getName() << "\n";
-	    else
+        else
             EV << "IGMP: sending Membership Query for group=" << groupAddr << " on iface=" << ie->getName() << "\n";
 
-		IGMPMessage *msg = new IGMPMessage("IGMP query");
-		msg->setType(IGMP_MEMBERSHIP_QUERY);
-		msg->setGroupAddress(groupAddr);
-		msg->setMaxRespTime((int)(maxRespTime * 10.0));
-		msg->setByteLength(8);
-		sendToIP(msg, ie, groupAddr.isUnspecified() ? IPv4Address::ALL_HOSTS_MCAST : groupAddr);
+        IGMPMessage *msg = new IGMPMessage("IGMP query");
+        msg->setType(IGMP_MEMBERSHIP_QUERY);
+        msg->setGroupAddress(groupAddr);
+        msg->setMaxRespTime((int)(maxRespTime * 10.0));
+        msg->setByteLength(8);
+        sendToIP(msg, ie, groupAddr.isUnspecified() ? IPv4Address::ALL_HOSTS_MCAST : groupAddr);
 
-		numQueriesSent++;
-		if (groupAddr.isUnspecified())
-			numGeneralQueriesSent++;
-		else
-			numGroupSpecificQueriesSent++;
-	}
+        numQueriesSent++;
+        if (groupAddr.isUnspecified())
+            numGeneralQueriesSent++;
+        else
+            numGroupSpecificQueriesSent++;
+    }
 }
 
 void IGMP::sendReport(InterfaceEntry *ie, HostGroupData* group)
 {
-	ASSERT(group->groupAddr != IPv4Address::ALL_HOSTS_MCAST);
-	ASSERT(group->groupAddr != IPv4Address::ALL_ROUTERS_MCAST);
+    ASSERT(group->groupAddr != IPv4Address::ALL_HOSTS_MCAST);
+    ASSERT(group->groupAddr != IPv4Address::ALL_ROUTERS_MCAST);
 
-	if (!ie->isLoopback())
-	{
-	    EV << "IGMP: sending Membership Report for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
-		IGMPMessage *msg = new IGMPMessage("IGMP report");
-		msg->setType(IGMPV2_MEMBERSHIP_REPORT);
-		msg->setGroupAddress(group->groupAddr);
-		msg->setByteLength(8);
-		sendToIP(msg, ie, group->groupAddr);
-		numReportsSent++;
-	}
+    if (!ie->isLoopback())
+    {
+        EV << "IGMP: sending Membership Report for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
+        IGMPMessage *msg = new IGMPMessage("IGMP report");
+        msg->setType(IGMPV2_MEMBERSHIP_REPORT);
+        msg->setGroupAddress(group->groupAddr);
+        msg->setByteLength(8);
+        sendToIP(msg, ie, group->groupAddr);
+        numReportsSent++;
+    }
 }
 
 void IGMP::sendLeave(InterfaceEntry *ie, HostGroupData* group)
 {
-	ASSERT(group->groupAddr != IPv4Address::ALL_HOSTS_MCAST);
-	ASSERT(group->groupAddr != IPv4Address::ALL_ROUTERS_MCAST);
+    ASSERT(group->groupAddr != IPv4Address::ALL_HOSTS_MCAST);
+    ASSERT(group->groupAddr != IPv4Address::ALL_ROUTERS_MCAST);
 
-	if (!ie->isLoopback())
-	{
+    if (!ie->isLoopback())
+    {
         EV << "IGMP: sending Leave Group for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
-		IGMPMessage *msg = new IGMPMessage("IGMP leave");
-		msg->setType(IGMPV2_LEAVE_GROUP);
-		msg->setGroupAddress(group->groupAddr);
-		msg->setByteLength(8);
-		sendToIP(msg, ie, IPv4Address::ALL_ROUTERS_MCAST);
-		numLeavesSent++;
-	}
+        IGMPMessage *msg = new IGMPMessage("IGMP leave");
+        msg->setType(IGMPV2_LEAVE_GROUP);
+        msg->setGroupAddress(group->groupAddr);
+        msg->setByteLength(8);
+        sendToIP(msg, ie, IPv4Address::ALL_ROUTERS_MCAST);
+        numLeavesSent++;
+    }
 }
 
 void IGMP::sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& dest)
 {
-	ASSERT(!ie->isLoopback());
+    ASSERT(!ie->isLoopback());
 
-	IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-	controlInfo->setProtocol(IP_PROT_IGMP);
-	controlInfo->setInterfaceId(ie->getInterfaceId());
-	controlInfo->setTimeToLive(1);
-	controlInfo->setDestAddr(dest);
-	msg->setControlInfo(controlInfo);
+    IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
+    controlInfo->setProtocol(IP_PROT_IGMP);
+    controlInfo->setInterfaceId(ie->getInterfaceId());
+    controlInfo->setTimeToLive(1);
+    controlInfo->setDestAddr(dest);
+    msg->setControlInfo(controlInfo);
 
-	send(msg, "ipOut");
+    send(msg, "ipOut");
 }
 
 void IGMP::processIgmpMessage(IGMPMessage *msg)
 {
-	IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)msg->getControlInfo();
-	InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
+    IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)msg->getControlInfo();
+    InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
 
-	switch (msg->getType())
-	{
+    switch (msg->getType())
+    {
         case IGMP_MEMBERSHIP_QUERY:
             processQuery(ie, controlInfo->getSrcAddr(), msg);
             break;
         //case IGMPV1_MEMBERSHIP_REPORT:
-        //	processV1Report(ie, msg);
-        //	delete msg;
-        //	break;
+        //    processV1Report(ie, msg);
+        //    delete msg;
+        //    break;
         case IGMPV2_MEMBERSHIP_REPORT:
             processV2Report(ie, msg);
             break;
@@ -647,7 +647,7 @@ void IGMP::processIgmpMessage(IGMPMessage *msg)
                 throw cRuntimeError("IGMP: Unhandled message type (%dq)", msg->getType());
             }
             break;
-	}
+    }
 }
 
 void IGMP::processQueryTimer(cMessage *msg)
@@ -657,12 +657,12 @@ void IGMP::processQueryTimer(cMessage *msg)
     EV << "IGMP: General Query timer expired, iface=" << ie->getName() << "\n";
     RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
     IGMPRouterState state = interfaceData->igmpRouterState;
-	if (state == IGMP_RS_QUERIER || state == IGMP_RS_NON_QUERIER)
-	{
-	    interfaceData->igmpRouterState = IGMP_RS_QUERIER;
-		sendQuery(ie, IPv4Address(), queryResponseInterval); // general query
-		startTimer(msg, queryInterval);
-	}
+    if (state == IGMP_RS_QUERIER || state == IGMP_RS_NON_QUERIER)
+    {
+        interfaceData->igmpRouterState = IGMP_RS_QUERIER;
+        sendQuery(ie, IPv4Address(), queryResponseInterval); // general query
+        startTimer(msg, queryInterval);
+    }
 }
 
 void IGMP::processHostGroupTimer(cMessage *msg)
@@ -707,146 +707,146 @@ void IGMP::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMessa
 {
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
 
-	numQueriesRecv++;
+    numQueriesRecv++;
 
-	IPv4Address &groupAddr = msg->getGroupAddress();
-	if (groupAddr.isUnspecified())
-	{
-	    // general query
-	    EV << "IGMP: received General Membership Query on iface=" << ie->getName() << "\n";
-	    numGeneralQueriesRecv++;
-		for (GroupToHostDataMap::iterator it = interfaceData->groups.begin(); it != interfaceData->groups.end(); ++it)
-			processGroupQuery(ie, it->second, msg->getMaxRespTime());
-	}
-	else
-	{
-		// group-specific query
-	    EV << "IGMP: received Membership Query for group=" << groupAddr << " iface=" << ie->getName() << "\n";
-		numGroupSpecificQueriesRecv++;
-		GroupToHostDataMap::iterator it = interfaceData->groups.find(groupAddr);
-		if (it != interfaceData->groups.end())
-			processGroupQuery(ie, it->second, msg->getMaxRespTime());
-	}
+    IPv4Address &groupAddr = msg->getGroupAddress();
+    if (groupAddr.isUnspecified())
+    {
+        // general query
+        EV << "IGMP: received General Membership Query on iface=" << ie->getName() << "\n";
+        numGeneralQueriesRecv++;
+        for (GroupToHostDataMap::iterator it = interfaceData->groups.begin(); it != interfaceData->groups.end(); ++it)
+            processGroupQuery(ie, it->second, msg->getMaxRespTime());
+    }
+    else
+    {
+        // group-specific query
+        EV << "IGMP: received Membership Query for group=" << groupAddr << " iface=" << ie->getName() << "\n";
+        numGroupSpecificQueriesRecv++;
+        GroupToHostDataMap::iterator it = interfaceData->groups.find(groupAddr);
+        if (it != interfaceData->groups.end())
+            processGroupQuery(ie, it->second, msg->getMaxRespTime());
+    }
 
-	if (rt->isMulticastForwardingEnabled())
-	{
-		if (sender < ie->ipv4Data()->getIPAddress())
-		{
-			RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
-			startTimer(routerInterfaceData->igmpQueryTimer, otherQuerierPresentInterval);
-			routerInterfaceData->igmpRouterState = IGMP_RS_NON_QUERIER;
-		}
-	}
+    if (rt->isMulticastForwardingEnabled())
+    {
+        if (sender < ie->ipv4Data()->getIPAddress())
+        {
+            RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
+            startTimer(routerInterfaceData->igmpQueryTimer, otherQuerierPresentInterval);
+            routerInterfaceData->igmpRouterState = IGMP_RS_NON_QUERIER;
+        }
+    }
 
-	delete msg;
+    delete msg;
 }
 
 void IGMP::processGroupQuery(InterfaceEntry *ie, HostGroupData* group, int maxRespTime)
 {
-	double maxRespTimeSecs = (double)maxRespTime / 10.0;
+    double maxRespTimeSecs = (double)maxRespTime / 10.0;
 
-	if (group->state == IGMP_HGS_DELAYING_MEMBER)
-	{
-		cMessage *timer = group->timer;
-		simtime_t maxAbsoluteRespTime = simTime() + maxRespTimeSecs;
-		if (timer->isScheduled() && maxAbsoluteRespTime < timer->getArrivalTime())
-			startHostTimer(ie, group, maxRespTimeSecs);
-	}
-	else if (group->state == IGMP_HGS_IDLE_MEMBER)
-	{
-		startHostTimer(ie, group, maxRespTimeSecs);
-		group->state = IGMP_HGS_DELAYING_MEMBER;
-	}
-	else
-	{
-		// ignored
-	}
+    if (group->state == IGMP_HGS_DELAYING_MEMBER)
+    {
+        cMessage *timer = group->timer;
+        simtime_t maxAbsoluteRespTime = simTime() + maxRespTimeSecs;
+        if (timer->isScheduled() && maxAbsoluteRespTime < timer->getArrivalTime())
+            startHostTimer(ie, group, maxRespTimeSecs);
+    }
+    else if (group->state == IGMP_HGS_IDLE_MEMBER)
+    {
+        startHostTimer(ie, group, maxRespTimeSecs);
+        group->state = IGMP_HGS_DELAYING_MEMBER;
+    }
+    else
+    {
+        // ignored
+    }
 }
 
 void IGMP::processV2Report(InterfaceEntry *ie, IGMPMessage *msg)
 {
-	IPv4Address &groupAddr = msg->getGroupAddress();
+    IPv4Address &groupAddr = msg->getGroupAddress();
 
-	EV << "IGMP: received V2 Membership Report for group=" << groupAddr << " iface=" << ie->getName() << "\n";
+    EV << "IGMP: received V2 Membership Report for group=" << groupAddr << " iface=" << ie->getName() << "\n";
 
-	numReportsRecv++;
+    numReportsRecv++;
 
     HostGroupData *hostGroupData = getHostGroupData(ie, groupAddr);
-	if (hostGroupData)
-	{
-		if (hostGroupData && hostGroupData->state == IGMP_HGS_IDLE_MEMBER)
-		{
-			cancelEvent(hostGroupData->timer);
-			hostGroupData->flag = false;
-			hostGroupData->state = IGMP_HGS_DELAYING_MEMBER;
-		}
-	}
+    if (hostGroupData)
+    {
+        if (hostGroupData && hostGroupData->state == IGMP_HGS_IDLE_MEMBER)
+        {
+            cancelEvent(hostGroupData->timer);
+            hostGroupData->flag = false;
+            hostGroupData->state = IGMP_HGS_DELAYING_MEMBER;
+        }
+    }
 
-	if (rt->isMulticastForwardingEnabled())
-	{
-		RouterGroupData* routerGroupData = getRouterGroupData(ie, groupAddr);
-		if (!routerGroupData)
-		{
-		    routerGroupData = createRouterGroupData(ie, groupAddr);
-			numGroups++;
-		}
+    if (rt->isMulticastForwardingEnabled())
+    {
+        RouterGroupData* routerGroupData = getRouterGroupData(ie, groupAddr);
+        if (!routerGroupData)
+        {
+            routerGroupData = createRouterGroupData(ie, groupAddr);
+            numGroups++;
+        }
 
-		if (!routerGroupData->timer)
-		{
-		    routerGroupData->timer = new cMessage("IGMP leave timer", IGMP_LEAVE_TIMER);
-		    routerGroupData->timer->setContextPointer(new IGMPRouterTimerContext(ie, routerGroupData));
-		}
-		if (!routerGroupData->rexmtTimer)
-		{
-		    routerGroupData->rexmtTimer = new cMessage("IGMP rexmt timer", IGMP_REXMT_TIMER);
+        if (!routerGroupData->timer)
+        {
+            routerGroupData->timer = new cMessage("IGMP leave timer", IGMP_LEAVE_TIMER);
+            routerGroupData->timer->setContextPointer(new IGMPRouterTimerContext(ie, routerGroupData));
+        }
+        if (!routerGroupData->rexmtTimer)
+        {
+            routerGroupData->rexmtTimer = new cMessage("IGMP rexmt timer", IGMP_REXMT_TIMER);
             routerGroupData->rexmtTimer->setContextPointer(new IGMPRouterTimerContext(ie, routerGroupData));
-		}
+        }
 
-		if (routerGroupData->state == IGMP_RGS_NO_MEMBERS_PRESENT)
-		{
-		    // notify IPv4InterfaceData to update its listener list
-		    ie->ipv4Data()->addMulticastListener(groupAddr);
+        if (routerGroupData->state == IGMP_RGS_NO_MEMBERS_PRESENT)
+        {
+            // notify IPv4InterfaceData to update its listener list
+            ie->ipv4Data()->addMulticastListener(groupAddr);
 
-			IPv4MulticastGroupInfo info(ie, routerGroupData->groupAddr);
-			nb->fireChangeNotification(NF_IPv4_MCAST_REGISTERED, &info);
-			numRouterGroups++;
-		}
+            IPv4MulticastGroupInfo info(ie, routerGroupData->groupAddr);
+            nb->fireChangeNotification(NF_IPv4_MCAST_REGISTERED, &info);
+            numRouterGroups++;
+        }
 
-		startTimer(routerGroupData->timer, groupMembershipInterval);
-		routerGroupData->state = IGMP_RGS_MEMBERS_PRESENT;
-	}
+        startTimer(routerGroupData->timer, groupMembershipInterval);
+        routerGroupData->state = IGMP_RGS_MEMBERS_PRESENT;
+    }
 
-	delete msg;
+    delete msg;
 }
 
 void IGMP::processLeave(InterfaceEntry *ie, IGMPMessage *msg)
 {
     EV << "IGMP: received Leave Group for group=" << msg->getGroupAddress() << " iface=" << ie->getName() << "\n";
 
-	numLeavesRecv++;
+    numLeavesRecv++;
 
-	if (rt->isMulticastForwardingEnabled())
-	{
-		IPv4Address &groupAddr = msg->getGroupAddress();
-		RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
-		RouterGroupData *groupData = getRouterGroupData(ie, groupAddr);
-		if (groupData)
-		{
-			if (groupData->state == IGMP_RGS_MEMBERS_PRESENT)
-			{
-				startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
-				if (interfaceData->igmpRouterState == IGMP_RS_QUERIER)
-					startTimer(groupData->timer, lastMemberQueryInterval * lastMemberQueryCount);
-				else
-				{
-					double maxRespTimeSecs = (double)msg->getMaxRespTime() / 10.0;
-					sendQuery(ie, groupAddr, maxRespTimeSecs * lastMemberQueryCount);
-				}
-				startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
-				groupData->state = IGMP_RGS_CHECKING_MEMBERSHIP;
-			}
-		}
-	}
+    if (rt->isMulticastForwardingEnabled())
+    {
+        IPv4Address &groupAddr = msg->getGroupAddress();
+        RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
+        RouterGroupData *groupData = getRouterGroupData(ie, groupAddr);
+        if (groupData)
+        {
+            if (groupData->state == IGMP_RGS_MEMBERS_PRESENT)
+            {
+                startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
+                if (interfaceData->igmpRouterState == IGMP_RS_QUERIER)
+                    startTimer(groupData->timer, lastMemberQueryInterval * lastMemberQueryCount);
+                else
+                {
+                    double maxRespTimeSecs = (double)msg->getMaxRespTime() / 10.0;
+                    sendQuery(ie, groupAddr, maxRespTimeSecs * lastMemberQueryCount);
+                }
+                startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
+                groupData->state = IGMP_RGS_CHECKING_MEMBERSHIP;
+            }
+        }
+    }
 
-	delete msg;
+    delete msg;
 }
