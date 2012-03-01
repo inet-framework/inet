@@ -17,7 +17,7 @@
 //
 
 
-package module_.lib;
+// package module_.lib;
 
 import inet.applications.ITCPApp;
 
