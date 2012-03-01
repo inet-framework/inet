@@ -1983,7 +1983,8 @@ std::vector<OSPF::NextHop>* OSPF::Area::calculateNextHops(Link& destination, OSP
                 {
                     NextHop nextHop;
                     nextHop.ifIndex = associatedInterfaces[i]->getIfIndex();
-                    nextHop.hopAddress = ipv4AddressFromULong(destination.getLinkID().getInt());
+                    // TODO: this has been commented because the linkID is not a real IP address in this case and we don't know the next hop address here, verify
+                    // nextHop.hopAddress = ipv4AddressFromULong(destination.getLinkID().getInt());
                     nextHop.advertisingRouter = parentRouter->getRouterID();
                     hops->push_back(nextHop);
                     break;

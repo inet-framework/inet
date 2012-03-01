@@ -155,7 +155,9 @@ inline void OSPF::RoutingTableEntry::addNextHop(OSPF::NextHop hop)
         InterfaceEntry*    routingInterface = InterfaceTableAccess().get()->getInterfaceById(hop.ifIndex);
 
         setInterface(routingInterface);
-        //gateway = ulongFromIPv4Address(hop.hopAddress); // TODO: verify this isn't necessary
+        // TODO: this used to be commented out, but it seems we need it
+        // otherwise gateways will never be filled in and gateway is needed for broadcast networks
+        setGateway(ulongFromIPv4Address(hop.hopAddress));
     }
     nextHops.push_back(hop);
 }
