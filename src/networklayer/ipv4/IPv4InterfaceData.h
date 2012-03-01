@@ -108,6 +108,7 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
     int getMetric() const  {return metric;}
     int getMulticastTtlThreshold() const {return getRouterData()->multicastTtlThreshold;}
     const IPv4AddressVector& getJoinedMulticastGroups() const {return getHostData()->joinedMulticastGroups;}
+    const IPv4AddressVector& getReportedMulticastGroups() const {return getRouterData()->reportedMulticastGroups;}
     bool isMemberOfMulticastGroup(const IPv4Address &multicastAddress) const;
     bool hasMulticastListener(const IPv4Address &multicastAddress) const;
     //@}
