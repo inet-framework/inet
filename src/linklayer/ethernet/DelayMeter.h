@@ -28,6 +28,7 @@ class DelayMeter : public cSimpleModule
     simtime_t startTime; // start time
     simsignal_t frameDelaySignal;
     unsigned long numFrames;
+    double sumFrameDelays;
 
   protected:
     virtual void initialize();

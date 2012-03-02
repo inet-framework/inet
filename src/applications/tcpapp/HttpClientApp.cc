@@ -216,7 +216,8 @@ void HttpClientApp::finish()
 	TCPGenericCliAppBase::finish();
 
     // record session statistics
-    if (numSessionsFinished > 0) {
+    if (numSessionsFinished > 0)
+    {
         double avgSessionDelay = sumSessionDelays/double(numSessionsFinished);
         double avgSessionThroughput = sumSessionSizes/sumSessionDelays;
         double meanSessionTransferRate = sumSessionTransferRates/numSessionsFinished;

@@ -49,7 +49,13 @@ source(paste(.base.directory, 'scripts/collectMeasures.R', sep='/'))
                '99th-sessionDelay:percentile',
                'average session throughput [B/s]',
                'mean session transfer rate [B/s]',
-               'decodable frame rate (Q)')
+               'decodable frame rate (Q)',
+               'average frame delay [s]',
+               '90th-frameDelay:percentile',
+               '95th-frameDelay:percentile',
+               '99th-frameDelay:percentile',
+               'packets dropped by per-VLAN queue',
+               'packets shaped by per-VLAN queue')
 .measure_abbrv <- c('dly', 'thr', 'trf', 'dly', '90p-dly', '95p-dly', '99p-dly', 'thr', 'trf', 'dfr')
 .labels.traffic <- c("FTP", "FTP", "FTP", "HTTP", "HTTP", "HTTP", "HTTP", "HTTP", "HTTP", "UDP Streaming Video")
 .labels.measure <- c("Average Session Delay [sec]",
@@ -61,7 +67,14 @@ source(paste(.base.directory, 'scripts/collectMeasures.R', sep='/'))
                      "99-Percentile Session Delay [sec]",
                      "Average Session Throughput [Byte/sec]",
                      "Mean Session Transfer Rate [Byte/sec]",
-                     "Average Decodable Frame Rate (Q)")
+                     "Average Decodable Frame Rate (Q)",
+                     "Average DS Frame Delay [sec]",
+                     "90-Percentile DS Frame Delay [sec]",
+                     "95-Percentile DS Frame Delay [sec]",
+                     "99-Percentile DS Frame Delay [sec]",
+                     "DS Frame Loss Rate",
+                     "DS Frame Shaping Rate"
+                     )
 ###
 ### define functions
 ###

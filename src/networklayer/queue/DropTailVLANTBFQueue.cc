@@ -32,7 +32,6 @@ DropTailVLANTBFQueue::~DropTailVLANTBFQueue()
     for (int i=0; i<numQueues; i++)
     {
         delete queues[i];
-//        delete conformityTimer[i];
         cancelAndDelete(conformityTimer[i]);
     }
 }
@@ -93,14 +92,13 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
             if (msg != NULL)
             {
                 packetRequested--;
-                numQueueSent[queueIndex]++;
+                numQueueSent[currentQueueIndex]++;
                 sendOut(msg);
             }
             else
             {
                 error("%s::handleMessage: Error in round-robin scheduling", getFullPath().c_str());
             }
-//            requestPacket();
         }
     }
     else
@@ -235,6 +233,22 @@ cMessage *DropTailVLANTBFQueue::dequeue()
 void DropTailVLANTBFQueue::sendOut(cMessage *msg)
 {
     send(msg, outGate);
+}
+
+void DropTailVLANTBFQueue::requestPacket()
+{
+    Enter_Method("requestPacket()");
+
+    cMessage *msg = dequeue();
+    if (msg==NULL)
+    {
+        packetRequested++;
+    }
+    else
+    {
+        numQueueSent[currentQueueIndex]++;
+        sendOut(msg);
+    }
 }
 
 bool DropTailVLANTBFQueue::isConformed(int queueIndex, int pktLength)

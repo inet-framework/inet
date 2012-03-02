@@ -110,6 +110,13 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     virtual void sendOut(cMessage *msg);
 
     /**
+     * The queue should send a packet whenever this method is invoked.
+     * If the queue is currently empty, it should send a packet when
+     * when one becomes available.
+     */
+    virtual void requestPacket();
+
+    /**
      * Newly defined.
      */
     virtual bool isConformed(int queueIndex, int pktLength);

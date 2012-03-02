@@ -22,23 +22,34 @@ void DelayMeter::initialize()
 {
     frameDelaySignal = registerSignal("frameDelay");
     numFrames = 0;
+    sumFrameDelays = 0.0;
     WATCH(numFrames);
 }
 
 void DelayMeter::handleMessage(cMessage *msg)
 {
-    // emit statistics signals
-    emit(frameDelaySignal, SIMTIME_DBL(simTime() - ((cPacket *) msg)->getCreationTime()));
+    if (simTime() >= simulation.getWarmupPeriod())
+    {
+        double frameDelay = SIMTIME_DBL(simTime() - ((cPacket *) msg)->getCreationTime());
 
-    // update statistics
-    numFrames++;
+        // emit statistics signals
+        emit(frameDelaySignal, frameDelay);
+
+        // update statistics
+        numFrames++;
+        sumFrameDelays += frameDelay;
+    }
 
     send(msg, "out");
 }
 
 void DelayMeter::finish()
 {
-    recordScalar("number of frames measured", numFrames);
+    // record session statistics
+    if (numFrames > 0)
+    {
+        double avgFrameDelay = sumFrameDelays/double(numFrames);
+        recordScalar("number of frames measured", numFrames);
+        recordScalar("average frame delay [s]", avgFrameDelay);
+    }
 }
-
-
