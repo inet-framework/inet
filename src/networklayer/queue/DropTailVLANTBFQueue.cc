@@ -318,6 +318,10 @@ void DropTailVLANTBFQueue::dumpTbfStatus(int queueIndex)
 
 void DropTailVLANTBFQueue::finish()
 {
+    unsigned long sumQueueReceived = 0;
+    unsigned long sumQueueDropped = 0;
+    unsigned long sumQueueShaped = 0;
+
     for (int i=0; i < numQueues; i++)
     {
         std::stringstream ss_received, ss_dropped, ss_shaped, ss_sent;
@@ -329,5 +333,10 @@ void DropTailVLANTBFQueue::finish()
         recordScalar((ss_dropped.str()).c_str(), numQueueDropped[i]);
         recordScalar((ss_shaped.str()).c_str(), numQueueShaped[i]);
         recordScalar((ss_sent.str()).c_str(), numQueueSent[i]);
+        sumQueueReceived += numQueueReceived[i];
+        sumQueueDropped += numQueueDropped[i];
+        sumQueueShaped += numQueueShaped[i];
     }
+    recordScalar("overall packet loss rate of per-VLAN queues", sumQueueDropped/double(sumQueueReceived));
+    recordScalar("overall packet shaped rate of per-VLAN queues", sumQueueShaped/double(sumQueueReceived));
 }
