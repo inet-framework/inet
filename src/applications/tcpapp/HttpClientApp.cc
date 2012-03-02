@@ -180,23 +180,21 @@ void HttpClientApp::socketClosed(int connId, void *ptr)
 {
     TCPGenericCliAppBase::socketClosed(connId, ptr);
 
-    // emit statistics signals
-    bytesRcvdAtSessionEnd = bytesRcvd;
-    double sessionDelay = SIMTIME_DBL(simTime() - sessionStart);
-    long sessionSize = bytesRcvdAtSessionEnd - bytesRcvdAtSessionStart;
-    emit(sessionDelaySignal, sessionDelay);
-    emit(sessionTransferRateSignal, sessionSize / sessionDelay);
-
     if (warmupFinished == true)
 	{
+        bytesRcvdAtSessionEnd = bytesRcvd;
+        double sessionDelay = SIMTIME_DBL(simTime() - sessionStart);
+        long sessionSize = bytesRcvdAtSessionEnd - bytesRcvdAtSessionStart;
+
 		// update session statistics
 		numSessionsFinished++;
-		// bytesRcvdAtSessionEnd = bytesRcvd;
-		// double sessionDelay = SIMTIME_DBL(simTime() - sessionStart);
-		// long sessionSize = bytesRcvdAtSessionEnd - bytesRcvdAtSessionStart;
 		sumSessionSizes += sessionSize;	///< counting the size of sessions only after the warm-up period
 		sumSessionDelays += sessionDelay;
 		sumSessionTransferRates += sessionSize / sessionDelay;
+
+        // emit statistics signals
+        emit(sessionDelaySignal, sessionDelay);
+        emit(sessionTransferRateSignal, sessionSize / sessionDelay);
 	}
 
     // start another session after a delay
