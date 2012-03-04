@@ -36,6 +36,7 @@ package inet.networklayer.common;
 simple InterfaceTable
 {
     parameters:
+        bool displayAddresses = default(true);  // whether to display IP addresses on links
         @display("i=block/table");
 }
 

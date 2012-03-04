@@ -26,6 +26,13 @@
 #include "InterfaceTable.h"
 #include "NotifierConsts.h"
 
+#ifdef WITH_IPv4
+#include "IPv4InterfaceData.h"
+#endif
+
+#ifdef WITH_IPv6
+#include "IPv6InterfaceData.h"
+#endif
 
 Define_Module( InterfaceTable );
 
@@ -226,6 +233,35 @@ void InterfaceTable::invalidateTmpInterfaceList()
 void InterfaceTable::interfaceChanged(InterfaceEntry *entry, int category)
 {
     nb->fireChangeNotification(category, entry);
+
+    if (ev.isGUI() && par("displayAddresses").boolValue())
+        updateLinkDisplayString(entry);
+}
+
+void InterfaceTable::updateLinkDisplayString(InterfaceEntry *entry)
+{
+    int outputGateId = entry->getNodeOutputGateId();
+    if (outputGateId != -1)
+    {
+        cModule *host = getParentModule();
+        cGate *outputGate = host->gate(outputGateId);
+        cDisplayString& displayString = outputGate->getDisplayString();
+        char buf[128];
+#ifdef WITH_IPv4
+        if (entry->ipv4Data()) {
+            sprintf(buf, "%s\n%s/%d", entry->getFullName(), entry->ipv4Data()->getIPAddress().str().c_str(), entry->ipv4Data()->getNetmask().getNetmaskLength());
+            displayString.setTagArg("t", 0, buf);
+            displayString.setTagArg("t", 1, "l");
+        }
+#endif
+#ifdef WITH_IPv6
+        if (entry->ipv6Data() && entry->ipv6Data()->getNumAddresses() > 0) {
+            sprintf(buf, "%s\n%s", entry->getFullName(), entry->ipv6Data()->getPreferredAddress().str().c_str());
+            displayString.setTagArg("t", 0, buf);
+            displayString.setTagArg("t", 1, "l");
+        }
+#endif
+    }
 }
 
 InterfaceEntry *InterfaceTable::getInterfaceByNodeOutputGateId(int id)
