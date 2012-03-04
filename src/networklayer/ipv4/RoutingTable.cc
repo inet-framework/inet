@@ -567,6 +567,11 @@ bool RoutingTable::routeLessThan(const IPv4Route *a, const IPv4Route *b)
     return a->getMetric() < b->getMetric();
 }
 
+void RoutingTable::setRouterId(IPv4Address a)
+{
+    routerId = a;
+}
+
 void RoutingTable::internalAddRoute(IPv4Route *entry)
 {
     if (!entry->getNetmask().isValidNetmask())

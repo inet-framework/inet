@@ -198,7 +198,7 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     /**
      * Sets routerId.
      */
-    virtual void setRouterId(IPv4Address a)  {routerId = a;}
+    virtual void setRouterId(IPv4Address a);
 
     /** @name Routing functions (query the route table) */
     //@{
