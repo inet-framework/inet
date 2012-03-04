@@ -55,7 +55,7 @@ class INET_API IPvXAddress
     IPvXAddress(const IPv6Address& addr) {set(addr);}
 
     /**
-     * Accepts string representations suuported by IPv4Address (dotted decimal
+     * Accepts string representations supported by IPv4Address (dotted decimal
      * notation) and IPv6Address (hex string with colons). Throws an error
      * if the format is not recognized.
      */
