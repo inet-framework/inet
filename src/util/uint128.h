@@ -133,8 +133,8 @@ class Uint128
     Uint128& operator+=(const Uint128& b);
     Uint128& operator*=(const Uint128& b);
 
-    Uint128& operator>>=(unsigned int n);
-    Uint128& operator<<=(unsigned int n);
+    Uint128& operator>>=(int n);
+    Uint128& operator<<=(int n);
     Uint128& operator|=(const Uint128& b) { hi |= b.hi; lo |= b.lo; return *this; }
 
 
@@ -296,11 +296,11 @@ inline Uint128 operator%(const Uint128& a, const Uint128& b)
     return Uint128(a) %= b;
 }
 
-inline Uint128 operator>>(const Uint128& a, unsigned int n)
+inline Uint128 operator>>(const Uint128& a, int n)
 {
     return Uint128(a) >>= n;
 }
-inline Uint128 operator<<(const Uint128& a, unsigned int n)
+inline Uint128 operator<<(const Uint128& a, int n)
 {
     return Uint128(a) <<= n;
 }

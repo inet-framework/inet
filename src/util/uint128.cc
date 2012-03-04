@@ -226,7 +226,7 @@ Uint128& Uint128::operator*=(const Uint128& b)
     lo = 0ull;
     hi = 0ull;
 
-    for (unsigned int i = 0; i < 128; ++i)
+    for (int i = 0; i < 128; ++i)
     {
         if (t.lo & 1)
             *this += a << i;
@@ -312,7 +312,7 @@ void Uint128::bit(unsigned int n, bool val)
 }
 
 
-Uint128& Uint128::operator>>=(unsigned int n)
+Uint128& Uint128::operator>>=(int n)
 {
     if (n >= 128)
     {
@@ -345,7 +345,7 @@ Uint128& Uint128::operator>>=(unsigned int n)
     return *this;
 }
 
-Uint128& Uint128::operator<<=(unsigned int n)
+Uint128& Uint128::operator<<=(int n)
 {
     if (n >= 128)
     {

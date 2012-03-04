@@ -203,6 +203,7 @@ void IPv6InterfaceData::assignAddress(const IPv6Address& addr, bool tentative,
 #endif /* WITH_xMIPv6 */
 
     choosePreferredAddress();
+    changed1();
 }
 
 void IPv6InterfaceData::updateMatchingAddressExpiryTimes(const IPv6Address& prefix, int length,

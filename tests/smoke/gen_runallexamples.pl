@@ -72,9 +72,9 @@ foreach $fname (@inifiles)
         ($cfg,$comm) = ($conf =~ /^\[Config (\w+)\]\s*(\#.*)?$/g);
         ($dir,$fnameonly) = ($fname =~ /(.*)[\/\\](.*)/);
 
-        $run = "/".$dir.'/'.",";
+        $run = "/".$dir.",";
         $run .= (' 'x(36-length $run)).' ';
-        $run .= "-f $fnameonly -c $cfg -r 0";#.",";
+        $run .= "-f $fnameonly -c $cfg";#.",";
 #        $run .= (' 'x(83-length $run)).' ';
 #        $run .= '---100s'.",";
 #        $run .= (' 'x(100-length $run)).' ';
