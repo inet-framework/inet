@@ -81,6 +81,10 @@ class INET_API IPv4Route : public cObject
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 
+    bool operator==(const IPv4Route& route) const { return equals(route); }
+    bool operator!=(const IPv4Route& route) const { return !equals(route); }
+    bool equals(const IPv4Route& route) const;
+
     /** To be called by the routing table when this route is added or removed from it */
     virtual void setRoutingTable(IRoutingTable *rt) {this->rt = rt;}
     IRoutingTable *getRoutingTable() const {return rt;}
