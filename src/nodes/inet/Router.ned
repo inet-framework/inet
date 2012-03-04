@@ -18,9 +18,10 @@
 package inet.nodes.inet;
 
 //
-// IPv4 router supporting wireless, ethernet, ppp and external interfaces.
-// by default no wireless and external if is configured. The number of
-// ethernet and ppp ports depend on the external connections.
+// IPv4 router that supports wireless, Ethernet, PPP and external interfaces.
+// By default, no wireless and external interfaces are added; the number of
+// Ethernet and PPP ports depends on the external connections.
+//
 // - Can be connected via ethernet interface to other nodes using
 //   the ethg gate. By default full-duplex connections are supported
 //   only (twisted pair). Set **.eth.typename="EthernetInterface" for
