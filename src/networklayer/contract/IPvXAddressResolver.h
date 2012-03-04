@@ -41,12 +41,13 @@ class NotificationBoard;
  *    - literal IPv4 address: "186.54.66.2"
  *    - literal IPv6 address: "3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"
  *    - module name: "server", "subnet.server[3]"
- *    - interface of a host or router: "server/eth0", "subnet.server[3]/eth0"
+ *    - interface of a host or router: "server%eth0", "subnet.server[3]%eth0"
  *    - IPv4 or IPv6 address of a host or router: "server(ipv4)",
  *      "subnet.server[3](ipv6)"
  *    - IPv4 or IPv6 address of an interface of a host or router:
- *      "server/eth0(ipv4)", "subnet.server[3]/eth0(ipv6)"
- *    - routerId: "router1/routerId", "R1/routerId"
+ *      "server%eth0(ipv4)", "subnet.server[3]%eth0(ipv6)"
+ *    - routerId: "router1%routerId", "R1%routerId"
+ *    - interface of a host or router toward defined another node: "client1>router"
  */
 class INET_API IPvXAddressResolver
 {
@@ -112,6 +113,14 @@ class INET_API IPvXAddressResolver
      * Similar to addressOf(), but only looks at the given interface
      */
     virtual IPvXAddress addressOf(cModule *host, const char *ifname, int addrType = ADDR_PREFER_IPv6);
+
+    /**
+     * Returns IPv4 or IPv6 address of the given host or router.
+     *
+     * This function find an interface of host connected to destmod
+     * then invokes getAddressFrom() to extract the IP address.
+     */
+    virtual IPvXAddress addressOf(cModule *host, cModule *destmod, int addrType = ADDR_PREFER_IPv6);
 
     /**
      * Returns the router Id of the given router. Router Id is obtained from

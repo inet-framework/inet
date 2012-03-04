@@ -61,43 +61,72 @@ bool IPvXAddressResolver::tryResolve(const char *s, IPvXAddress& result, int add
     if (result.tryParse(s))
         return true;
 
-    // must be "modulename/interfacename(protocol)" syntax then,
-    // "/interfacename" and "(protocol)" being optional
-    const char *slashp = strchr(s, '/');
-    const char *leftparenp = strchr(s, '(');
-    const char *rightparenp = strchr(s, ')');
-    const char *endp = s+strlen(s);
+    // must be " modulename[ { '%' interfacename | '>' destnode } ] [ '(' protocol ')' ]" syntax
+    // must be "modulename%interfacename(protocol)" syntax then,
+    // "%interfacename" and "(protocol)" being optional
+    std::string modname, ifname, protocol, destnodename;
+    const char *p = s;
+    const char *endp = strchr(p, '\0');
+    const char *nextsep = strpbrk(p,"%>()");
+    if (!nextsep)
+        nextsep = endp;
+    modname.assign(p, nextsep - p);
 
-    // rudimentary syntax check
-    if ((slashp && leftparenp && slashp>leftparenp) ||
-        (leftparenp && !rightparenp) ||
-        (!leftparenp && rightparenp) ||
-        (rightparenp && rightparenp!=endp-1))
+    char c = *nextsep;
+
+    if (c) { p = nextsep + 1; nextsep = strpbrk(p, "%>()"); if (!nextsep) nextsep = endp; }
+
+    if (c == '%')
     {
-        throw cRuntimeError("IPvXAddressResolver: syntax error parsing address spec `%s'", s);
+        ifname.assign(p, nextsep - p);
+        c = *nextsep;
+        if (c) { p = nextsep + 1; nextsep = strpbrk(p, "%>()"); if (!nextsep) nextsep = endp; }
+    }
+    else if (c == '>')
+    {
+        destnodename.assign(p, nextsep - p);
+        c = *nextsep;
+        if (c) { p = nextsep + 1; nextsep = strpbrk(p, "%>()"); if (!nextsep) nextsep = endp; }
     }
 
-    // parse fields: modname, ifname, protocol
-    std::string modname, ifname, protocol;
-    modname.assign(s, (slashp?slashp:leftparenp?leftparenp:endp)-s);
-    if (slashp)
-        ifname.assign(slashp+1, (leftparenp?leftparenp:endp)-slashp-1);
-    if (leftparenp)
-        protocol.assign(leftparenp+1, rightparenp-leftparenp-1);
+    if (c == '(' && *nextsep == ')')
+    {
+        protocol.assign(p, nextsep - p);
+        p = nextsep + 1;
+        nextsep++;
+        c = *nextsep;
+    }
 
-    // find module and check protocol
+    if (c)
+        throw cRuntimeError("IPvXAddressResolver: syntax error parsing address spec `%s'", s);
+
+    // find module
     cModule *mod = simulation.getModuleByPath(modname.c_str());
     if (!mod)
         throw cRuntimeError("IPvXAddressResolver: module `%s' not found", modname.c_str());
 
-    if (!protocol.empty() && protocol!="ipv4" && protocol!="ipv6")
-        throw cRuntimeError("IPvXAddressResolver: error parsing address spec `%s': address type must be `(ipv4)' or `(ipv6)'", s);
 
+    // check protocol
     if (!protocol.empty())
-        addrType = protocol=="ipv4" ? ADDR_IPv4 : ADDR_IPv6;
+    {
+        if (protocol == "ipv4")
+            addrType = ADDR_IPv4;
+        else if (protocol == "ipv6")
+            addrType = ADDR_IPv6;
+        else
+            throw cRuntimeError("IPvXAddressResolver: error parsing address spec `%s': address type must be `(ipv4)' or `(ipv6)'", s);
+    }
 
+    // find interface for dest node
     // get address from the given module/interface
-    if (ifname.empty())
+    if (!destnodename.empty())
+    {
+        cModule *destnode = simulation.getModuleByPath(destnodename.c_str());
+        if (!destnode)
+            throw cRuntimeError("IPvXAddressResolver: destination module `%s' not found", destnodename.c_str());
+        result = addressOf(mod, destnode, addrType);
+    }
+    else if (ifname.empty())
         result = addressOf(mod, addrType);
     else if (ifname == "routerId")
         result = IPvXAddress(routerIdOf(mod)); // addrType is meaningless here, routerId is protocol independent
@@ -127,9 +156,26 @@ IPvXAddress IPvXAddressResolver::addressOf(cModule *host, const char *ifname, in
     IInterfaceTable *ift = interfaceTableOf(host);
     InterfaceEntry *ie = ift->getInterfaceByName(ifname);
     if (!ie)
-        throw cRuntimeError("IPvXAddressResolver: no interface called `%s' in interface table", ifname, ift->getFullPath().c_str());
+        throw cRuntimeError("IPvXAddressResolver: no interface called `%s' in interface table of `%s'", ifname, host->getFullPath().c_str());
 
     return getAddressFrom(ie, addrType);
+}
+
+IPvXAddress IPvXAddressResolver::addressOf(cModule *host, cModule *destmod, int addrType)
+{
+    IInterfaceTable *ift = interfaceTableOf(host);
+    for (int i=0; i < ift->getNumInterfaces(); i++)
+    {
+        InterfaceEntry *ie = ift->getInterface(i);
+        if (ie)
+        {
+            int gateId = ie->getNodeOutputGateId();
+            if (gateId != -1)
+                if (host->gate(gateId)->pathContains(destmod))
+                    return getAddressFrom(ie, addrType);
+        }
+    }
+    throw cRuntimeError("IPvXAddressResolver: no interface connected to `%s' module in interface table of `%s'", destmod->getFullPath().c_str(), host->getFullPath().c_str());
 }
 
 IPvXAddress IPvXAddressResolver::getAddressFrom(IInterfaceTable *ift, int addrType)
