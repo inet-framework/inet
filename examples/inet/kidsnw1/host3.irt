@@ -7,13 +7,13 @@
 ifconfig:
 
 # interface 0 to router
-name: ppp0  inet_addr: 172.1.2.0    MTU: 1500   Metric: 1
+name: ppp0  inet_addr: 172.1.2.1    MTU: 1500   Metric: 1
 
 ifconfigend.
 
 route:
 
-default:        172.1.2.1   0.0.0.0         G   0   ppp0
+default:        172.1.2.2   0.0.0.0         G   0   ppp0
 
 routeend.
 

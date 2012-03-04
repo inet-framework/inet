@@ -1,0 +1,6 @@
+<config>
+    <interface hosts="host1 host2 fhrouter1 irouter bgrouter3"
+        address="10.0.x.x" netmask="255.x.x.0"/>
+    <interface hosts="host3 fhrouter2 bgrouter4"
+        address="10.1.x.x" netmask="255.x.x.0"/>
+</config>

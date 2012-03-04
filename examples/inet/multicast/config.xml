@@ -1,0 +1,80 @@
+<config>
+
+  <interface hosts="host1" towards="router1" address="172.0.0.1" netmask="255.255.255.0" mtu="1500"/>
+  <interface hosts="host2" towards="router1" address="172.0.0.2" netmask="255.255.255.0" mtu="1500"/>
+  <interface hosts="host2" towards="host3" address="172.0.0.4" netmask="255.255.255.0" mtu="1500"/>
+  <interface hosts="host3" towards="router1" address="172.0.0.3" netmask="255.255.255.0" mtu="1500"/>
+  <interface hosts="host3" towards="host2" address="172.0.0.5" netmask="255.255.255.0" mtu="1500"/>
+  <interface hosts="host4" towards="router3" address="172.0.1.1" netmask="255.255.255.0" mtu="1500"/>
+  <interface hosts="host5" towards="router4" address="172.0.2.1" netmask="255.255.255.0" mtu="1500"/>
+  <interface hosts="host6" towards="router4" address="172.0.2.2" netmask="255.255.255.0" mtu="1500"/>
+
+  <interface hosts="router1" towards="host1" address="172.0.0.11" netmask="255.255.255.0" mtu="1500"/>
+  <interface hosts="router1" towards="host2" address="172.0.0.12" netmask="255.255.255.0" mtu="1500"/>
+  <interface hosts="router1" towards="host3" address="172.0.0.13" netmask="255.255.255.0" mtu="1500"/>
+  <interface hosts="router1" towards="router2" address="172.1.0.0" netmask="255.255.255.0" mtu="512000"/>
+  <interface hosts="router2" towards="router1" address="172.1.0.1" netmask="255.255.255.0" mtu="512000"/>
+  <interface hosts="router2" towards="router3" address="172.1.0.2" netmask="255.255.255.0" mtu="512000"/>
+  <interface hosts="router2" towards="router4" address="172.1.0.4" netmask="255.255.255.0" mtu="800"/>
+  <interface hosts="router3" towards="host4" address="172.0.1.2" netmask="255.255.255.0" mtu="1500"/>
+  <interface hosts="router3" towards="router2" address="172.1.0.3" netmask="255.255.255.0" mtu="512000"/>
+  <interface hosts="router4" towards="host5" address="172.0.2.3" netmask="255.255.255.0" mtu="1500"/>
+  <interface hosts="router4" towards="host6" address="172.0.2.4" netmask="255.255.255.0" mtu="1500"/>
+  <interface hosts="router4" towards="router2" address="172.1.0.5" netmask="255.255.255.0" mtu="800"/>
+
+  <multicast-group hosts="host1 host2 host3" towards="router1" address="225.0.0.1"/>
+  <multicast-group hosts="host4" address="225.0.0.2"/>
+  <multicast-group hosts="host5 host6" address="225.0.0.3"/>
+  <multicast-group hosts="host1 host5" address="225.0.1.1"/>
+  <multicast-group hosts="host2 host3" towards="router1" address="225.0.1.2"/> <!-- TODO: join with next one? -->
+  <multicast-group hosts="host4 host6" address="225.0.1.2"/>
+  <multicast-group hosts="host1 host2 host3" towards="router1" address="225.0.2.1"/> <!-- TODO: join with next one? -->
+  <multicast-group hosts="host4 host5 host6" address="225.0.2.1"/>
+
+  <route hosts="host1" destination="*" netmask="/0" gateway="router1" metric="0"/>
+  <route hosts="host2" destination="host3" netmask="/32" metric="0" interface="ppp1"/>
+  <route hosts="host2" destination="172.0.0.5" netmask="/32" metric="0" interface="ppp1"/> <!-- XXX unknown destination-->
+  <route hosts="host2" destination="*" netmask="/0" gateway="10.0.0.12" metric="0" interface="ppp0"/> <!-- unknown gateway -->
+  <route hosts="host3" destination="host2" netmask="/32" metric="0" interface="ppp1"/>
+  <route hosts="host3" destination="172.0.0.4" netmask="/32" metric="0" interface="ppp1"/>
+  <route hosts="host3" destination="*" netmask="/0" gateway="10.0.0.13" metric="0" interface="ppp0"/> <!-- unknown gateway -->
+  <route hosts="host4" destination="*" netmask="/0" gateway="router3" metric="0"/>
+  <route hosts="host5" destination="*" netmask="/0" gateway="router4" metric="0"/>
+  <route hosts="host6" destination="*" netmask="/0" gateway="router4" metric="0"/>
+
+  <route hosts="router1" destination="host1" netmask="/32" metric="0" interface="ppp0"/>
+  <route hosts="router1" destination="host2" netmask="/32" metric="0" interface="ppp1"/>
+  <route hosts="router1" destination="host3" netmask="/32" metric="0" interface="ppp2"/>
+  <route hosts="router1" destination="*" netmask="/0" gateway="router2" metric="0"/>
+  <route hosts="router2" destination="172.0.0.0" netmask="/24" gateway="router1" metric="0" interface="ppp0"/>
+  <route hosts="router2" destination="172.0.1.0" netmask="/24" gateway="router3" metric="0" interface="ppp1"/>
+  <route hosts="router2" destination="172.0.2.0" netmask="/24" gateway="router3" metric="0" interface="ppp2"/>
+  <route hosts="router3" destination="host4" netmask="/32" metric="0" interface="ppp0"/>
+  <route hosts="router3" destination="*" netmask="/0" gateway="router2" metric="0"/>
+  <route hosts="router4" destination="host5" netmask="/32" metric="0" interface="ppp0"/>
+  <route hosts="router4" destination="host6" netmask="/32" metric="0" interface="ppp1"/>
+  <route hosts="router4" destination="*" netmask="/0" gateway="router2" metric="0"/>
+
+  <multicast-route hosts="host2" groups="225.0.0.1 225.0.1.1 225.0.1.2" children=">host3"/>
+  <multicast-route hosts="host2" children=">router1"/>
+  <multicast-route hosts="host3" groups="225.0.0.1 225.0.1.2 225.0.2.1" children=">host2"/>
+  <multicast-route hosts="host3" children=">router1"/>
+  <multicast-route hosts="router1" groups="225.0.0.1" children=">host1 >host2 >host3"/>
+  <multicast-route hosts="router1" groups="225.0.0.2 225.0.0.3" children=">router2"/>
+  <multicast-route hosts="router1" groups="225.0.1.1" children=">host1 >router2"/>
+  <multicast-route hosts="router1" groups="225.0.1.2 225.0.2.1" children=">host2 >host3 >router2"/>
+  <multicast-route hosts="router2" groups="225.0.0.1" children=">router1"/>
+  <multicast-route hosts="router2" groups="225.0.0.2" children=">router3"/>
+  <multicast-route hosts="router2" groups="225.0.0.3" children=">router4"/>
+  <multicast-route hosts="router2" groups="225.0.1.1" children=">router1 >router4"/>
+  <multicast-route hosts="router2" groups="225.0.1.2 225.0.2.1" children="*"/>
+  <multicast-route hosts="router3" groups="225.0.0.2" children=">host4"/>
+  <multicast-route hosts="router3" groups="225.0.0.1 225.0.0.3 225.0.1.1" children=">router2"/>
+  <multicast-route hosts="router3" groups="225.0.1.2" children="*"/>
+  <multicast-route hosts="router4" groups="225.0.0.1 225.0.0.2" children=">router2"/>
+  <multicast-route hosts="router4" groups="225.0.0.3" children=">host5 >host6"/>
+  <multicast-route hosts="router4" groups="225.0.1.1" children=">host5 >router2"/>
+  <multicast-route hosts="router4" groups="225.0.1.2" children=">host6 >router2"/>
+  <multicast-route hosts="router4" groups="225.0.2.1" children="*"/>
+
+</config>

@@ -21,7 +21,7 @@ package inet.examples.inet.pcaprecorder;
 import ned.DatarateChannel;
 import inet.util.NetAnimTrace;
 import inet.nodes.inet.StandardHost;
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 
 network PcapRecorderTest
@@ -46,7 +46,7 @@ network PcapRecorderTest
             parameters:
                 @display("p=260,87;i=device/pc2");
         }
-        configurator: FlatNetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             parameters:
                 @display("p=46,28");
         }

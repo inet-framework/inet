@@ -18,7 +18,7 @@
 
 package inet.examples.inet.nclients;
 
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
@@ -41,7 +41,7 @@ network NClients2
             datarate = 1Gbps;
         }
     submodules:
-        configurator: FlatNetworkConfigurator;
+        configurator: IPv4NetworkConfigurator;
         r[numRouters]: Router;
         cli[numRouters*hostsPerRouter]: StandardHost {
             parameters:

@@ -22,7 +22,7 @@ import ned.DatarateChannel;
 import inet.world.scenario.ScenarioManager;
 import inet.util.NetAnimTrace;
 import inet.nodes.inet.StandardHost;
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 
 network ClientServerWithSM
@@ -43,7 +43,7 @@ network ClientServerWithSM
             parameters:
                 @display("p=181,67;i=device/pc2");
         }
-        configurator: FlatNetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             parameters:
                 @display("p=53,134");
         }

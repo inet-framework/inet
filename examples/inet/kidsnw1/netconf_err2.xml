@@ -1,0 +1,14 @@
+<config>
+    <interface
+        hosts="fhrouter1 irouter bgrouter3" towards="fhrouter1 irouter bgrouter3"
+        address="192.168.1.x" netmask="255.255.255.0"/>
+    <interface
+        hosts="bgrouter3 bgrouter4" towards="bgrouter3 bgrouter4"
+        address="10.3.0.x" netmask="255.255.255.0"/>
+    <interface
+        hosts="host1 host2 fhrouter1" towards="host1 host2 fhrouter1"
+        address="10.1.0.x" netmask="255.255.255.0"/>
+    <interface
+        hosts="host3 fhrouter2 bgrouter4" towards="host3 fhrouter2 bgrouter4"
+        address="10.2.0.x" netmask="255.255.255.0"/>
+</config>

@@ -18,7 +18,7 @@
 
 package inet.examples.wireless.lan80211;
 
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
 import inet.world.radio.ChannelControl;
@@ -41,9 +41,8 @@ network Lan80211
             numChannels = 2;
             @display("p=61,46");
         }
-        configurator: FlatNetworkConfigurator {
-            networkAddress = "145.236.0.0";
-            netmask = "255.255.0.0";
+        configurator: IPv4NetworkConfigurator {
+            config=xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
             @display("p=140,50");
         }
 }

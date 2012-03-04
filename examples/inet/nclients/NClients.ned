@@ -24,7 +24,7 @@ package inet.examples.inet.nclients;
 import inet.util.ThruputMeteringChannel;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 
 network NClients
@@ -45,7 +45,7 @@ network NClients
             thruputDisplayFormat = "u";
         }
     submodules:
-        configurator: FlatNetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             parameters:
                 @display("p=185,50");
         }

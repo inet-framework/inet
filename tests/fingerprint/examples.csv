@@ -8,7 +8,7 @@
 /examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           3401-9c11
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           b775-e0c9
 /examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           5616-a8ba
-/examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            4139-f7b4
+/examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            5063-6a3c
 /examples/ethernet/arptest/,         -f fingerprints.ini -c ARPTest -r 0,           100s,            ce6d-d980
 /examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            ce6d-d980
 /examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            9999-0785
@@ -29,9 +29,9 @@
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted -r 0,               500000s,         8720-fe74
 /examples/httptools/socket/pairsocket/, -f omnetpp.ini -c random -r 0,                 500000s,         10d8-4b74
 /examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted -r 0,               500000s,         bff9-dbf6
-/examples/httptools/socket/simpleddos/, -f omnetpp.ini -c General -r 0,                500000s,         7f31-dd5e
-/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,              50000s,          bdea-d155
-/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,                50000s,          dab5-1531
+/examples/httptools/socket/simpleddos/, -f omnetpp.ini -c General -r 0,                500000s,         14a4-001f
+/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,              50000s,          bfae-f1e3
+/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,                50000s,          f48c-b5b5
 /examples/inet/ber/,                 -f omnetpp.ini -c General -r 0,                20s,             2e35-3638
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c General -r 0,                50s,             9ae3-11d0
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             1b8d-d980
@@ -45,7 +45,7 @@
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c nsc_nsc -r 0,                50s,             8447-cb29
 /examples/inet/flatnet/,             -f fingerprints.ini -c General -r 0,           200s,            42ad-7621
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            42ad-7621
-/examples/inet/kidsnw1/,             -f omnetpp.ini -c General -r 0,                1000s,           1ae8-4425
+/examples/inet/kidsnw1/,             -f omnetpp.ini -c General -r 0,                1000s,           0e68-ccde
 /examples/inet/multicast/,           -f omnetpp.ini -c General -r 0,                2000s,           22c1-fc44
 /examples/inet/nclients/,            -f basicHTTP.ini -c General -r 0,              500000s,         3408-90fc
 /examples/inet/nclients/,            -f filetransfer.ini -c General -r 0,           5s,              650c-f000
@@ -99,7 +99,7 @@
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           9c4f-d757
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c General -r 0,                100s,            af47-aca8
 /examples/manetrouting/fg80211/ini/, -f Mob_DSR_omnetpp.ini -c General -r 0,        100s,            6415-38a7
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c General -r 0,                25s,             c18f-3b15
+/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c General -r 0,                25s,             5289-7d5e
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c General -r 0,                40s,             afe9-2047
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c General -r 0,                10s,             82e9-7b6f
 /examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0,          10000s,          7108-73d8
@@ -152,7 +152,7 @@
 /examples/voiptool/VoIPToolTest/,    -f omnetpp.ini -c g711_muLaw -r 0,             5s,              d29b-3c23
 /examples/voiptool/VoIPToolTest/,    -f omnetpp.ini -c g726 -r 0,                   5s,              0659-e889
 /examples/voiptool/VoIPToolTest/,    -f omnetpp.ini -c pcm_s16le -r 0,              5s,              07e5-0e4b
-/examples/voiptool/VoIPToolTrafficTest/, -f omnetpp.ini -c General -r 0,                2s,              7a08-756e
+/examples/voiptool/VoIPToolTrafficTest/, -f omnetpp.ini -c General -r 0,                2s,              2eda-faf1
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,           461b-e121
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,              7879-1960
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            d308-cd4f

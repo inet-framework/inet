@@ -31,7 +31,7 @@
 
 package inet.examples.httptools.socket.simpleddos;
 
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import inet.world.httptools.HttpController;
@@ -60,12 +60,11 @@ network HttpNnodes
         ////                channelAttrs = "format=u";
         //                @display("p=98,50;i=block/cogwheel_s");
         //        }
-        configurator: FlatNetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             parameters:
                 //                moduleTypes = "Router StandardHost";
                 //                nonIPModuleTypes = "";
-                networkAddress = "145.236.0.0";
-                netmask = "255.255.0.0";
+                config=xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.x.x'/></config>");
                 @display("p=50,64;i=block/cogwheel");
         }
         controller: HttpController {

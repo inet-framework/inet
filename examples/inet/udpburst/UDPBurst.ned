@@ -1,6 +1,6 @@
 package inet.examples.inet.udpburst;
 
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
@@ -29,7 +29,7 @@ network UDPBurst
             parameters:
                 @display("p=178,153");
         }
-        configurator: FlatNetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             parameters:
                 @display("p=62,119");
         }

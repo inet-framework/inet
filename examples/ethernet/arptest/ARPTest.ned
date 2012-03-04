@@ -18,7 +18,7 @@ import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
 import inet.nodes.ethernet.EtherSwitch;
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 
 network ARPTest
@@ -56,7 +56,7 @@ network ARPTest
         server: StandardHost {
             @display("p=512,58;i=device/server_l");
         }
-        configurator: FlatNetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             @display("p=495,160");
         }
     connections:

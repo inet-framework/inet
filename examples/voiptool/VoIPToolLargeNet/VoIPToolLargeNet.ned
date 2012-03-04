@@ -23,7 +23,7 @@ import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.ethernet.EtherSwitch;
 import inet.nodes.ethernet.EtherHost;
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.linklayer.ethernet.EtherHub;
 import inet.linklayer.ethernet.EtherBus;
 
@@ -160,7 +160,7 @@ module VoIPToolLargeLAN
 
 //
 // This is a copy of the LargeNet Ethernet demo simulation in the INET Framework,
-// modified to add a VoIP server and a VoIP client. It can be used to test VoIP 
+// modified to add a VoIP server and a VoIP client. It can be used to test VoIP
 // transmission on a LAN with high background traffic.
 //
 network VoIPToolLargeNet
@@ -211,10 +211,9 @@ network VoIPToolLargeNet
         llanD[dl]: VoIPToolLargeLAN;
         voipClient: StandardHost;
         voipServer: StandardHost;
-        configurator: FlatNetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             parameters:
-                networkAddress = "10.0.0.0";
-                netmask = "255.255.0.0";
+                config=xml("<config><interface hosts='*' address='10.x.x.x' netmask='255.x.x.x'/></config>");
                 @display("p=495,160;i=block/cogwheel_s");
         }
     connections:

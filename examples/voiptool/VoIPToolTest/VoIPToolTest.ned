@@ -16,7 +16,7 @@ package inet.examples.voiptool.VoIPToolTest;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
 import inet.nodes.ethernet.EtherSwitch;
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 
 channel line1 extends ned.DatarateChannel
@@ -57,10 +57,9 @@ network VoIPToolTest
             parameters:
                 @display("p=512,58;i=device/server_l");
         }
-        configurator: FlatNetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             parameters:
-                networkAddress = "10.0.0.0";
-                netmask = "255.255.0.0";
+                config=xml("<config><interface hosts='*' address='10.x.x.x' netmask='255.x.x.x'/></config>");
                 @display("p=495,160;i=block/cogwheel_s");
         }
     connections:

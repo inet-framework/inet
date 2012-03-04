@@ -21,6 +21,7 @@
 
 package inet.examples.inet.kidsnw1;
 
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
@@ -40,51 +41,55 @@ network KIDSNw1
             datarate = 512Mbps;
         }
     submodules:
-        host[3]: StandardHost {
+        host1: StandardHost {
             parameters:
-                IPForward = false;
-                routingFile = (index==0 ? "host1.irt" : (index==1 ? "host2.irt" : (index==2 ? "host3.irt" : "PROBLEM")));
                 @display("p=101,307,row;i=device/pc2");
-
-            gates:
-                pppg[1];
+        }
+        host2: StandardHost {
+            parameters:
+                @display("p=202,307,row;i=device/pc2");
+        }
+        host3: StandardHost {
+            parameters:
+                @display("p=368,307,row;i=device/pc2");
         }
         // First Hop Router
-        fhrouter[2]: Router {
+        fhrouter1: Router {
             parameters:
-                routingFile = (index==0 ? "fhrouter1.irt" : (index==1 ? "fhrouter5.irt" : "PROBLEM"));
-                @display("p=119,222,row,130");
-
-            gates:
-                pppg[(index==0 ? 3 : 2)];
+                @display("p=154,222,row,130");
+        }
+        fhrouter2: Router {
+            parameters:
+                @display("p=358,222,row,130");
         }
         // InteriorRouter
         irouter: Router {
             parameters:
-                routingFile = "irouter2.irt";
-                @display("p=115,144");
-            gates:
-                pppg[2];
+                @display("p=167,142");
         }
         // Border Gateway Router
-        bgrouter[2]: Router {
+        bgrouter3: Router {
             parameters:
-
-                routingFile = (index==0 ? "bgrouter3.irt" : (index==1 ? "bgrouter4.irt" : "PROBLEM"));
-                @display("p=135,64,row");
-            gates:
-                pppg[2];
+                @display("p=193,70,row");
+        }
+        bgrouter4: Router {
+            parameters:
+                @display("p=329,101,row");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                config = xmldoc("netconf_err3.xml");
+                @display("p=93,22");
         }
     connections:
         // host connections
-        host[0].pppg[0] <--> ethernet <--> fhrouter[0].pppg[0];
-        host[1].pppg[0] <--> ethernet <--> fhrouter[0].pppg[1];
-        host[2].pppg[0] <--> ethernet <--> fhrouter[1].pppg[0];
+        host1.pppg++ <--> ethernet <--> fhrouter1.pppg++;
+        host2.pppg++ <--> ethernet <--> fhrouter1.pppg++;
+        host3.pppg++ <--> ethernet <--> fhrouter2.pppg++;
 
         // router connections
-        fhrouter[0].pppg[2] <--> fiberrouterline <--> irouter.pppg[0];
-        irouter.pppg[1] <--> fiberrouterline <--> bgrouter[0].pppg[0];
-        bgrouter[0].pppg[1] <--> fiberrouterline <--> bgrouter[1].pppg[1];
-        bgrouter[1].pppg[0] <--> fiberrouterline <--> fhrouter[1].pppg[1];
+        fhrouter1.pppg++ <--> fiberrouterline <--> irouter.pppg++;
+        irouter.pppg++ <--> fiberrouterline <--> bgrouter3.pppg++;
+        bgrouter3.pppg++ <--> fiberrouterline <--> bgrouter4.pppg++;
+        bgrouter4.pppg++ <--> fiberrouterline <--> fhrouter2.pppg++;
 }
-

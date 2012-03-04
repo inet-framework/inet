@@ -1,7 +1,7 @@
 package inet.examples.rtp.unicast2;
 
 import inet.transport.rtp.RTPHost;
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 
 network RTPUnicast2
@@ -38,7 +38,7 @@ network RTPUnicast2
                 payloadType = 32;
                 @display("p=54,128");
         }
-        configurator: FlatNetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             parameters:
                 @display("p=54,23");
         }
