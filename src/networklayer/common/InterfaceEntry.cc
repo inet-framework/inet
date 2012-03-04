@@ -131,6 +131,10 @@ std::string InterfaceEntry::detailedInfo() const
 
     return out.str();
 }
+std::string InterfaceEntry::getFullPath() const
+{
+    return ownerp == NULL ? getFullName() : ownerp->getHostModule()->getFullPath() + "." + getFullName();
+}
 
 void InterfaceEntry::changed(int category)
 {

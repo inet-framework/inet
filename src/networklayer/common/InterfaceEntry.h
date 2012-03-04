@@ -120,6 +120,7 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual ~InterfaceEntry() {}
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
+    virtual std::string getFullPath() const;
 
     /**
      * Returns the IInterfaceTable this interface is in, or NULL
