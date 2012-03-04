@@ -219,8 +219,9 @@ void RoutingTable::deleteInterfaceRoutes(InterfaceEntry *entry)
         IPv4Route *route = *it;
         if (route->getInterface() == entry)
         {
-            nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, route); // rather: going to be deleted
             it = routes.erase(it);
+            ASSERT(route->getRoutingTable() == this); // still filled in, for the listeners' benefit
+            nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, route);
             delete route;
             changed = true;
         }
@@ -236,8 +237,9 @@ void RoutingTable::deleteInterfaceRoutes(InterfaceEntry *entry)
         IPv4MulticastRoute *route = *it;
         if (route->getParent() == entry)
         {
-            nb->fireChangeNotification(NF_IPv4_MROUTE_DELETED, route); // rather: going to be deleted
             it = multicastRoutes.erase(it);
+            ASSERT(route->getRoutingTable() == this); // still filled in, for the listeners' benefit
+            nb->fireChangeNotification(NF_IPv4_MROUTE_DELETED, route);
             delete route;
             changed = true;
         }
@@ -429,8 +431,9 @@ void RoutingTable::purge()
             ++it;
         else
         {
-            nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, route); // rather: going to be deleted
             it = routes.erase(it);
+            ASSERT(route->getRoutingTable() == this); // still filled in, for the listeners' benefit
+            nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, route);
             delete route;
             deleted = true;
         }
@@ -444,8 +447,9 @@ void RoutingTable::purge()
             ++it;
         else
         {
-            nb->fireChangeNotification(NF_IPv4_MROUTE_DELETED, route); // rather: going to be deleted
             it = multicastRoutes.erase(it);
+            ASSERT(route->getRoutingTable() == this); // still filled in, for the listeners' benefit
+            nb->fireChangeNotification(NF_IPv4_MROUTE_DELETED, route);
             delete route;
             deleted = true;
         }
@@ -611,7 +615,6 @@ IPv4Route *RoutingTable::internalRemoveRoute(IPv4Route *entry)
     if (i!=routes.end())
     {
         routes.erase(i);
-        entry->setRoutingTable(NULL);
         return entry;
     }
     return NULL;
@@ -627,7 +630,9 @@ IPv4Route *RoutingTable::removeRoute(IPv4Route *entry)
     {
         invalidateCache();
         updateDisplayString();
+        ASSERT(entry->getRoutingTable() == this); // still filled in, for the listeners' benefit
         nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, entry);
+        entry->setRoutingTable(NULL);
     }
     return entry;
 }
@@ -642,6 +647,7 @@ bool RoutingTable::deleteRoute(IPv4Route *entry)
     {
         invalidateCache();
         updateDisplayString();
+        ASSERT(entry->getRoutingTable() == this); // still filled in, for the listeners' benefit
         nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, entry);
         delete entry;
     }
@@ -723,7 +729,6 @@ IPv4MulticastRoute *RoutingTable::internalRemoveMulticastRoute(IPv4MulticastRout
     if (i!=multicastRoutes.end())
     {
         multicastRoutes.erase(i);
-        entry->setRoutingTable(NULL);
         return entry;
     }
     return NULL;
@@ -739,7 +744,9 @@ IPv4MulticastRoute *RoutingTable::removeMulticastRoute(IPv4MulticastRoute *entry
     {
         invalidateCache();
         updateDisplayString();
+        ASSERT(entry->getRoutingTable() == this); // still filled in, for the listeners' benefit
         nb->fireChangeNotification(NF_IPv4_MROUTE_DELETED, entry);
+        entry->setRoutingTable(NULL);
     }
     return entry;
 }
@@ -754,6 +761,7 @@ bool RoutingTable::deleteMulticastRoute(IPv4MulticastRoute *entry)
     {
         invalidateCache();
         updateDisplayString();
+        ASSERT(entry->getRoutingTable() == this); // still filled in, for the listeners' benefit
         nb->fireChangeNotification(NF_IPv4_MROUTE_DELETED, entry);
         delete entry;
     }
@@ -793,8 +801,17 @@ void RoutingTable::updateNetmaskRoutes()
 {
     // first, delete all routes with src=IFACENETMASK
     for (unsigned int k=0; k<routes.size(); k++)
+    {
         if (routes[k]->getSource()==IPv4Route::IFACENETMASK)
-            routes.erase(routes.begin()+(k--));  // '--' is necessary because indices shift down
+        {
+            std::vector<IPv4Route *>::iterator it = routes.begin()+(k--);  // '--' is necessary because indices shift down
+            IPv4Route *route = *it;
+            routes.erase(it);
+            ASSERT(route->getRoutingTable() == this); // still filled in, for the listeners' benefit
+            nb->fireChangeNotification(NF_IPv4_ROUTE_DELETED, route);
+            delete route;
+        }
+    }
 
     // then re-add them, according to actual interface configuration
     for (int i=0; i<ift->getNumInterfaces(); i++)
@@ -810,8 +827,10 @@ void RoutingTable::updateNetmaskRoutes()
             route->setGateway(IPv4Address());
             route->setMetric(ie->ipv4Data()->getMetric());
             route->setInterface(ie);
+            route->setRoutingTable(this);
             RouteVector::iterator pos = upper_bound(routes.begin(), routes.end(), route, routeLessThan);
             routes.insert(pos, route);
+            nb->fireChangeNotification(NF_IPv4_ROUTE_ADDED, route);
         }
     }
 
