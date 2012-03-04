@@ -74,14 +74,27 @@ void DropTailVLANTBFQueue::initialize()
     currentQueueIndex = 0;
 
     // statistic
+    warmupFinished = false;
     numQueueReceived.assign(numQueues, 0);
     numQueueDropped.assign(numQueues, 0);
-    numQueueShaped.assign(numQueues, 0);
+//    numQueueShaped.assign(numQueues, 0);
+    numQueueUnshaped.assign(numQueues, 0);
     numQueueSent.assign(numQueues, 0);
 }
 
 void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
 {
+    if (warmupFinished == false)
+    {   // start statistics gathering once the warm-up period has passed.
+        if (simTime() >= simulation.getWarmupPeriod()) {
+            warmupFinished = true;
+            for (int i = 0; i < numQueues; i++)
+            {
+                numQueueReceived[i] = queues[i]->getLength();   // take into account the frames/packets already in queues
+            }
+        }
+    }
+
     if (msg->isSelfMessage())
     {   // Conformity Timer expires
         int queueIndex = msg->getKind();    // message kind carries a queue index
@@ -92,7 +105,10 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
             if (msg != NULL)
             {
                 packetRequested--;
-                numQueueSent[currentQueueIndex]++;
+                if (warmupFinished == true)
+                {
+                    numQueueSent[currentQueueIndex]++;
+                }
                 sendOut(msg);
             }
             else
@@ -105,7 +121,10 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
     {   // a frame arrives
         int queueIndex = classifier->classifyPacket(msg);
         cQueue *queue = queues[queueIndex];
-        numQueueReceived[queueIndex]++;
+        if (warmupFinished == true)
+        {
+            numQueueReceived[queueIndex]++;
+        }
         int pktLength = (check_and_cast<cPacket *>(msg))->getBitLength();
 // DEBUG
         ASSERT(pktLength > 0);
@@ -114,10 +133,17 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
         {
             if (isConformed(queueIndex, pktLength))
             {
+                if (warmupFinished == true)
+                {
+                    numQueueUnshaped[queueIndex]++;
+                }
                 if (packetRequested > 0)
                 {
                     packetRequested--;
-                    numQueueSent[queueIndex]++;
+                    if (warmupFinished == true)
+                    {
+                        numQueueSent[queueIndex]++;
+                    }
                     currentQueueIndex = queueIndex;
                     sendOut(msg);
                 }
@@ -126,7 +152,10 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
                     bool dropped = enqueue(msg);
                     if (dropped)
                     {
-                        numQueueDropped[queueIndex]++;
+                        if (warmupFinished == true)
+                        {
+                            numQueueDropped[queueIndex]++;
+                        }
                     }
                     else
                     {
@@ -136,11 +165,14 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
             }
             else
             {
-                numQueueShaped[queueIndex]++;
+//                numQueueShaped[queueIndex]++;
                 bool dropped = enqueue(msg);
                 if (dropped)
                 {
-                    numQueueDropped[queueIndex]++;
+                    if (warmupFinished == true)
+                    {
+                        numQueueDropped[queueIndex]++;
+                    }
                 }
                 else
                 {
@@ -153,7 +185,12 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
         {
             bool dropped = enqueue(msg);
             if (dropped)
-                numQueueDropped[queueIndex]++;
+            {
+                if (warmupFinished == true)
+                {
+                    numQueueDropped[queueIndex]++;
+                }
+            }
         }
 
         if (ev.isGUI())
@@ -246,7 +283,10 @@ void DropTailVLANTBFQueue::requestPacket()
     }
     else
     {
-        numQueueSent[currentQueueIndex]++;
+        if (warmupFinished == true)
+        {
+            numQueueSent[currentQueueIndex]++;
+        }
         sendOut(msg);
     }
 }
@@ -321,6 +361,7 @@ void DropTailVLANTBFQueue::finish()
     unsigned long sumQueueReceived = 0;
     unsigned long sumQueueDropped = 0;
     unsigned long sumQueueShaped = 0;
+    unsigned long sumQueueUnshaped = 0;
 
     for (int i=0; i < numQueues; i++)
     {
@@ -331,11 +372,11 @@ void DropTailVLANTBFQueue::finish()
         ss_sent << "packets sent by per-VLAN queue[" << i << "]";
         recordScalar((ss_received.str()).c_str(), numQueueReceived[i]);
         recordScalar((ss_dropped.str()).c_str(), numQueueDropped[i]);
-        recordScalar((ss_shaped.str()).c_str(), numQueueShaped[i]);
+        recordScalar((ss_shaped.str()).c_str(), numQueueReceived[i]-numQueueUnshaped[i]);
         recordScalar((ss_sent.str()).c_str(), numQueueSent[i]);
         sumQueueReceived += numQueueReceived[i];
         sumQueueDropped += numQueueDropped[i];
-        sumQueueShaped += numQueueShaped[i];
+        sumQueueShaped += numQueueReceived[i] - numQueueUnshaped[i];
     }
     recordScalar("overall packet loss rate of per-VLAN queues", sumQueueDropped/double(sumQueueReceived));
     recordScalar("overall packet shaped rate of per-VLAN queues", sumQueueShaped/double(sumQueueReceived));

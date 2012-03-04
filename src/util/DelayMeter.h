@@ -25,10 +25,9 @@
 class DelayMeter : public cSimpleModule
 {
   protected:
-    simtime_t startTime; // start time
-    simsignal_t frameDelaySignal;
-    unsigned long numFrames;
-    double sumFrameDelays;
+    simsignal_t packetDelaySignal;
+    unsigned long numPackets;
+    double sumPacketDelays;
 
   protected:
     virtual void initialize();

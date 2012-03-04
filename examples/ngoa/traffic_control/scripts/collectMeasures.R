@@ -3,7 +3,7 @@ collectMeasures <- function(scalars,
                             modulePattern,
                             namePattern,
                             colNames,
-                            trafficName)
+                            measureType)
 {
 ###
 ### Extract performance measures from a given data frame based on
@@ -17,11 +17,11 @@ collectMeasures <- function(scalars,
 ###   modulePattern: a string for a regula expression for module match
 ###   namePattern: a string for a regular expression for name match
 ###   colNames: a vector of column names to appear in the resultilng data frame
-###   trafficName: a string for traffic name for this processing
+###   measureType: a string for measure type for this processing
 ###
 ### Returns:
 ###   a data frame including columns given in 'colNames', 'mean',
-###   'ci.width', and 'traffic'
+###   'ci.width', and 'measure.type'
 ###
     tmp <- cast(scalars, as.formula(formulaString), c(mean, ci.width), subset=grepl(modulePattern, module) & grepl(namePattern, name))
     tmp <- subset(tmp, select = c(colNames, 'name', 'mean', 'ci.width'))
@@ -33,6 +33,6 @@ collectMeasures <- function(scalars,
     tmp <- subset(tmp, select=c(1:numCols+(3+numCols), 1:3+numCols))
     names(tmp)[1:length(colNames)]=colNames
     tmp <- sort_df(tmp, vars=colNames)
-    tmp['traffic'] <- rep(trafficName, length(tmp$mean))
+    tmp['measure.type'] <- rep(measureType, length(tmp$mean))
     return(tmp)
 }

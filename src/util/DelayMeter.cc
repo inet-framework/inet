@@ -20,24 +20,24 @@ Define_Module(DelayMeter);
 
 void DelayMeter::initialize()
 {
-    frameDelaySignal = registerSignal("frameDelay");
-    numFrames = 0;
-    sumFrameDelays = 0.0;
-    WATCH(numFrames);
+    packetDelaySignal = registerSignal("packetDelay");
+    numPackets = 0;
+    sumPacketDelays = 0.0;
+    WATCH(numPackets);
 }
 
 void DelayMeter::handleMessage(cMessage *msg)
 {
     if (simTime() >= simulation.getWarmupPeriod())
     {
-        double frameDelay = SIMTIME_DBL(simTime() - ((cPacket *) msg)->getCreationTime());
+        double packetDelay = SIMTIME_DBL(simTime() - ((cPacket *) msg)->getCreationTime());
 
         // emit statistics signals
-        emit(frameDelaySignal, frameDelay);
+        emit(packetDelaySignal, packetDelay);
 
         // update statistics
-        numFrames++;
-        sumFrameDelays += frameDelay;
+        numPackets++;
+        sumPacketDelays += packetDelay;
     }
 
     send(msg, "out");
@@ -46,10 +46,10 @@ void DelayMeter::handleMessage(cMessage *msg)
 void DelayMeter::finish()
 {
     // record session statistics
-    if (numFrames > 0)
+    if (numPackets > 0)
     {
-        double avgFrameDelay = sumFrameDelays/double(numFrames);
-        recordScalar("number of frames measured", numFrames);
-        recordScalar("average frame delay [s]", avgFrameDelay);
+        double avgPacketDelay = sumPacketDelays/double(numPackets);
+        recordScalar("number of packets measured", numPackets);
+        recordScalar("average packet delay [s]", avgPacketDelay);
     }
 }

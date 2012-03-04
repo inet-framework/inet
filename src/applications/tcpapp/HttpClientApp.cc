@@ -136,9 +136,8 @@ void HttpClientApp::socketEstablished(int connId, void *ptr)
     if (!earlySend)
         sendHtmlRequest();
 
-    // start statistics gathering once the warm-up period has passed.
     if (warmupFinished == false)
-    {
+    {   // start statistics gathering once the warm-up period has passed.
         if (simTime() >= simulation.getWarmupPeriod())
         {
             warmupFinished = true;

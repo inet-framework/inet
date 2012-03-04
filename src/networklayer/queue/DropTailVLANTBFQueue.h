@@ -67,9 +67,11 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     int currentQueueIndex;  // index of a queue whose HOL frame is scheduled for TX during the last RR scheduling
 
     // statistics
+    bool warmupFinished;        ///< if true, start statistics gathering
     IntVector numQueueReceived; // redefined from PassiveQueueBase with 'name hiding'
     IntVector numQueueDropped;  // redefined from PassiveQueueBase with 'name hiding'
-    IntVector numQueueShaped;
+    IntVector numQueueUnshaped;
+//    IntVector numQueueShaped;
     IntVector numQueueSent;
 
     // timer

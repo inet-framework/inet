@@ -1,9 +1,9 @@
 ///
-/// @file   DelayMeter.ned
+/// @file   BurstMeter.ned
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-/// @date   Mar/1/2012
+/// @date   Mar/3/2012
 ///
-/// @brief  DelayMeter module for measuring frame/packet end-to-end delay.
+/// @brief  BurstMeter module for measuring frame/packet bursts
 ///
 /// @remarks Copyright (C) 2012 Kyeong Soo (Joseph) Kim. All rights reserved.
 ///
@@ -12,21 +12,20 @@
 ///          You must not remove this notice, or any other, from this software.
 ///
 
-package inet.linklayer.ethernet;
+package inet.util;
 
 //
-// End-to-end frame/packet delay measurement module.
+// Frame/packet burst measurement module.
 //
-simple DelayMeter
+simple BurstMeter
 {
     parameters:
         @node();
         @display("i=block/timer_vs");
-        @signal[frameDelay](type="double");
-		@statistic[frameDelay](title="frame delay"; record=stats,percentile?);
+        @signal[packetBurst](type="int");
+		@statistic[packetBurst](title="packet burst"; record=stats,percentile?);
+		int maxIFG = default(3);	// maximum number of IFGs allowed between two consecutive Etherent frames of a same burst
     gates:
         input in;
         output out;
 }
-
-
