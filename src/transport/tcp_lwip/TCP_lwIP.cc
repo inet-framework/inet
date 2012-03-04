@@ -22,8 +22,12 @@
 //#include "headers/in_systm.h"
 #include "lwip/ip.h"
 
+#include "ICMPMessage_m.h"
 #include "IPv4ControlInfo.h"
+
+#include "ICMPv6Message_m.h"
 #include "IPv6ControlInfo.h"
+
 #include "headers/tcp.h"
 #include "lwip/tcp.h"
 #include "TCPCommand_m.h"
@@ -454,18 +458,25 @@ void TCP_lwIP::handleMessage(cMessage *msgP)
     }
     else if (msgP->arrivedOn("ipIn") || msgP->arrivedOn("ipv6In"))
     {
-        tcpEV << this << ": handle msg: " << msgP->getName() << "\n";
-        // must be a TCPSegment
-        TCPSegment *tcpseg = dynamic_cast<TCPSegment *>(msgP);
 
-        if (tcpseg)
+        if (false
+#ifdef WITH_IPv4
+                || dynamic_cast<ICMPMessage *>(msgP)
+#endif
+#ifdef WITH_IPv6
+                || dynamic_cast<ICMPv6Message *>(msgP)
+#endif
+        )
         {
-            handleIpInputMessage(tcpseg);
+            tcpEV << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to TCP???
+            delete msgP;
         }
         else
         {
-            //TODO came some other message:
-            //e.g: ICMPMessage
+            tcpEV << this << ": handle msg: " << msgP->getName() << "\n";
+            // must be a TCPSegment
+            TCPSegment *tcpseg = check_and_cast<TCPSegment *>(msgP);
+            handleIpInputMessage(tcpseg);
         }
     }
     else // must be from app
