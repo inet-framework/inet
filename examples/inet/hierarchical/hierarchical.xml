@@ -1,0 +1,7 @@
+<config>
+    <interface hosts="area*.*.*" address="10.0.x.x" netmask="255.255.255.x"/>
+    <interface hosts="area*.*" towards="area*.*.*" address="10.0.x.x" netmask="255.255.255.x"/>
+    <interface hosts="area*.*" address="10.1.x.x" netmask="255.255.x.x"/>
+    <interface hosts="*" towards="area*.*" address="10.1.x.x" netmask="255.255.x.x"/>
+    <interface hosts="*" address="10.2.x.x" netmask="255.x.x.x"/>
+</config>

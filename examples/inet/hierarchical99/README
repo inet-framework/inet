@@ -1,0 +1,3 @@
+Demonstrates hierarchical static routing set up using IPv4Configurator.
+To test reachability, all hosts ping all interface addresses (hosts, routers)
+in the network (using the PingTestApp module).
