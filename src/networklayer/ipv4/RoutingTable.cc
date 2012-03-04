@@ -272,11 +272,20 @@ void RoutingTable::invalidateCache()
 void RoutingTable::printRoutingTable() const
 {
     EV << "-- Routing table --\n";
-    ev.printf("%-16s %-16s %-16s %-3s %s\n",
-              "Destination", "Gateway", "Netmask", "Iface");
+    ev.printf("%-16s %-16s %-16s %-4s %-16s %s\n",
+              "Destination", "Netmask", "Gateway", "Iface", "", "Metric");
 
-    for (int i=0; i<getNumRoutes(); i++)
-        EV << getRoute(i)->detailedInfo() << "\n";
+    for (int i=0; i<getNumRoutes(); i++) {
+        IPv4Route *route = getRoute(i);
+        InterfaceEntry *interfacePtr = route->getInterface();
+        ev.printf("%-16s %-16s %-16s %-4s (%s) %d\n",
+                  route->getDestination().isUnspecified() ? "*" : route->getDestination().str().c_str(),
+                  route->getNetmask().isUnspecified() ? "*" : route->getNetmask().str().c_str(),
+                  route->getGateway().isUnspecified() ? "*" : route->getGateway().str().c_str(),
+                  !interfacePtr ? "*" : interfacePtr->getName(),
+                  !interfacePtr ? "*  " : interfacePtr->ipv4Data()->getIPAddress().str().c_str(),
+                  route->getMetric());
+    }
     EV << "\n";
 }
 
