@@ -213,6 +213,16 @@ IGMP::RouterInterfaceData::~RouterInterfaceData()
         delete it->second;
 }
 
+IGMP::HostInterfaceData *IGMP::createHostInterfaceData()
+{
+    return new HostInterfaceData(this);
+}
+
+IGMP::RouterInterfaceData *IGMP::createRouterInterfaceData()
+{
+    return new RouterInterfaceData(this);
+}
+
 IGMP::HostGroupData *IGMP::createHostGroupData(InterfaceEntry *ie, const IPv4Address &group)
 {
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
@@ -239,7 +249,7 @@ IGMP::HostInterfaceData *IGMP::getHostInterfaceData(InterfaceEntry *ie)
         return it->second;
 
     // create one
-    HostInterfaceData *data = new HostInterfaceData(this);
+    HostInterfaceData *data = createHostInterfaceData();
     hostData[interfaceId] = data;
     return data;
 }
@@ -252,7 +262,7 @@ IGMP::RouterInterfaceData *IGMP::getRouterInterfaceData(InterfaceEntry *ie)
         return it->second;
 
     // create one
-    RouterInterfaceData *data = new RouterInterfaceData(this);
+    RouterInterfaceData *data = createRouterInterfaceData();
     routerData[interfaceId] = data;
     return data;
 }

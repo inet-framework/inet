@@ -173,46 +173,45 @@ class INET_API IGMP : public cSimpleModule, protected INotifiable
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void receiveChangeNotification(int category, const cPolymorphic *details);
-
-  public:
     virtual ~IGMP();
 
-    void configureInterface(InterfaceEntry *ie);
+  protected:
+    virtual HostInterfaceData *createHostInterfaceData();
+    virtual RouterInterfaceData *createRouterInterfaceData();
+    virtual HostGroupData *createHostGroupData(InterfaceEntry *ie, const IPv4Address &group);
+    virtual RouterGroupData *createRouterGroupData(InterfaceEntry *ie, const IPv4Address &group);
+    virtual HostInterfaceData *getHostInterfaceData(InterfaceEntry *ie);
+    virtual RouterInterfaceData *getRouterInterfaceData(InterfaceEntry *ie);
+    virtual HostGroupData *getHostGroupData(InterfaceEntry *ie, const IPv4Address &group);
+    virtual RouterGroupData *getRouterGroupData(InterfaceEntry *ie, const IPv4Address &group);
+    virtual void deleteHostInterfaceData(int interfaceId);
+    virtual void deleteRouterInterfaceData(int interfaceId);
+    virtual void deleteHostGroupData(InterfaceEntry *ie, const IPv4Address &group);
+    virtual void deleteRouterGroupData(InterfaceEntry *ie, const IPv4Address &group);
 
-  private:
-    HostGroupData *createHostGroupData(InterfaceEntry *ie, const IPv4Address &group);
-    RouterGroupData *createRouterGroupData(InterfaceEntry *ie, const IPv4Address &group);
-    HostInterfaceData *getHostInterfaceData(InterfaceEntry *ie);
-    RouterInterfaceData *getRouterInterfaceData(InterfaceEntry *ie);
-    HostGroupData *getHostGroupData(InterfaceEntry *ie, const IPv4Address &group);
-    RouterGroupData *getRouterGroupData(InterfaceEntry *ie, const IPv4Address &group);
-    void deleteHostInterfaceData(int interfaceId);
-    void deleteRouterInterfaceData(int interfaceId);
-    void deleteHostGroupData(InterfaceEntry *ie, const IPv4Address &group);
-    void deleteRouterGroupData(InterfaceEntry *ie, const IPv4Address &group);
+    virtual void configureInterface(InterfaceEntry *ie);
+    virtual void multicastGroupJoined(InterfaceEntry *ie, const IPv4Address& groupAddr);
+    virtual void multicastGroupLeft(InterfaceEntry *ie, const IPv4Address& groupAddr);
 
-    void multicastGroupJoined(InterfaceEntry *ie, const IPv4Address& groupAddr);
-    void multicastGroupLeft(InterfaceEntry *ie, const IPv4Address& groupAddr);
+    virtual void startTimer(cMessage *timer, double interval);
+    virtual void startHostTimer(InterfaceEntry *ie, HostGroupData* group, double maxRespTime);
 
-    void startTimer(cMessage *timer, double interval);
-    void startHostTimer(InterfaceEntry *ie, HostGroupData* group, double maxRespTime);
+    virtual void sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr, double maxRespTime);
+    virtual void sendReport(InterfaceEntry *ie, HostGroupData* group);
+    virtual void sendLeave(InterfaceEntry *ie, HostGroupData* group);
+    virtual void sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& dest);
 
-    void sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr, double maxRespTime);
-    void sendReport(InterfaceEntry *ie, HostGroupData* group);
-    void sendLeave(InterfaceEntry *ie, HostGroupData* group);
-    void sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& dest);
+    virtual void processQueryTimer(cMessage *msg);
+    virtual void processHostGroupTimer(cMessage *msg);
+    virtual void processLeaveTimer(cMessage *msg);
+    virtual void processRexmtTimer(cMessage *msg);
 
-    void processQueryTimer(cMessage *msg);
-    void processHostGroupTimer(cMessage *msg);
-    void processLeaveTimer(cMessage *msg);
-    void processRexmtTimer(cMessage *msg);
-
-    void processIgmpMessage(IGMPMessage *msg);
-    void processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMessage *msg);
-    void processGroupQuery(InterfaceEntry *ie, HostGroupData* group, int maxRespTime);
-    //void processV1Report(InterfaceEntry *ie, IGMPMessage *msg);
-    void processV2Report(InterfaceEntry *ie, IGMPMessage *msg);
-    void processLeave(InterfaceEntry *ie, IGMPMessage *msg);
+    virtual void processIgmpMessage(IGMPMessage *msg);
+    virtual void processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMessage *msg);
+    virtual void processGroupQuery(InterfaceEntry *ie, HostGroupData* group, int maxRespTime);
+    //virtual void processV1Report(InterfaceEntry *ie, IGMPMessage *msg);
+    virtual void processV2Report(InterfaceEntry *ie, IGMPMessage *msg);
+    virtual void processLeave(InterfaceEntry *ie, IGMPMessage *msg);
 };
 
 #endif
