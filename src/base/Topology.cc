@@ -32,14 +32,14 @@ Register_Class(Topology);
 
 Topology::LinkIn *Topology::Node::getLinkIn(int i)
 {
-    if (i<0 || i>=inLinks.size())
+    if (i<0 || i>=(int)inLinks.size())
         throw cRuntimeError("Topology::Node::getLinkIn: invalid link index %d", i);
     return (Topology::LinkIn *)inLinks[i];
 }
 
 Topology::LinkOut *Topology::Node::getLinkOut(int i)
 {
-    if (i<0 || i>=outLinks.size())
+    if (i<0 || i>=(int)outLinks.size())
         throw cRuntimeError("Topology::Node::getLinkOut: invalid index %d", i);
     return (Topology::LinkOut *)outLinks[i];
 }
@@ -85,9 +85,9 @@ Topology& Topology::operator=(const Topology&)
 
 void Topology::clear()
 {
-    for (int i=0; i<nodes.size(); i++)
+    for (int i=0; i<(int)nodes.size(); i++)
     {
-        for (int j=0; j<nodes[i]->outLinks.size(); j++)
+        for (int j=0; j<(int)nodes[i]->outLinks.size(); j++)
             delete nodes[i]->outLinks[j];  // delete links from their source side
         delete nodes[i];
     }
@@ -188,7 +188,7 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *,void *), void *dat
     }
 
     // Discover out neighbors too.
-    for (int k=0; k<nodes.size(); k++)
+    for (int k=0; k<(int)nodes.size(); k++)
     {
         // Loop through all its gates and find those which come
         // from or go to modules included in the topology.
@@ -223,9 +223,9 @@ void Topology::extractFromNetwork(bool (*predicate)(cModule *,void *), void *dat
     }
 
     // fill inLinks vectors
-    for (int k=0; k<nodes.size(); k++)
+    for (int k=0; k<(int)nodes.size(); k++)
     {
-        for (int l=0; l<nodes[k]->outLinks.size(); l++)
+        for (int l=0; l<(int)nodes[k]->outLinks.size(); l++)
         {
             Topology::Link *link = nodes[k]->outLinks[l];
             link->destNode->inLinks.push_back(link);
@@ -253,7 +253,7 @@ int Topology::addNode(Node *node)
 void Topology::deleteNode(Node *node)
 {
     // remove outgoing links
-    for (int i=0; i<node->outLinks.size(); i++) {
+    for (int i=0; i<(int)node->outLinks.size(); i++) {
         Link *link = node->outLinks[i];
         unlinkFromDestNode(link);
         delete link;
@@ -261,7 +261,7 @@ void Topology::deleteNode(Node *node)
     node->outLinks.clear();
 
     // remove incoming links
-    for (int i=0; i<node->inLinks.size(); i++) {
+    for (int i=0; i<(int)node->inLinks.size(); i++) {
         Link *link = node->inLinks[i];
         unlinkFromSourceNode(link);
         delete link;
@@ -344,7 +344,7 @@ void Topology::unlinkFromDestNode(Link *link)
 
 Topology::Node *Topology::getNode(int i)
 {
-    if (i<0 || i>=nodes.size())
+    if (i<0 || i>=(int)nodes.size())
         throw cRuntimeError(this,"invalid node index %d",i);
     return nodes[i];
 }
@@ -366,7 +366,7 @@ void Topology::calculateUnweightedSingleShortestPathsTo(Node *_target)
         throw cRuntimeError(this,"..ShortestPathTo(): target node is NULL");
     target = _target;
 
-    for (int i=0; i<nodes.size(); i++)
+    for (int i=0; i<(int)nodes.size(); i++)
     {
        nodes[i]->dist = INFINITY;
        nodes[i]->outPath = NULL;
@@ -383,7 +383,7 @@ void Topology::calculateUnweightedSingleShortestPathsTo(Node *_target)
        q.pop_front();
 
        // for each w adjacent to v...
-       for (int i=0; i<v->inLinks.size(); i++)
+       for (int i=0; i<(int)v->inLinks.size(); i++)
        {
            if (!v->inLinks[i]->enabled)
                continue;
@@ -409,7 +409,7 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
     target = _target;
 
     // clean path infos
-    for (int i=0; i<nodes.size(); i++)
+    for (int i=0; i<(int)nodes.size(); i++)
     {
        nodes[i]->dist = INFINITY;
        nodes[i]->outPath = NULL;
