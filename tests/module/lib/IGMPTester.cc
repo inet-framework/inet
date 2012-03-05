@@ -45,12 +45,12 @@ void IGMPTester::processCommand(const cXMLElement &node)
   if (!strcmp(tag, "join"))
   {
     const char *group = node.getAttribute("group");
-    ie->ipv4Data()->joinMulticastGroup(group);
+    ie->ipv4Data()->joinMulticastGroup(IPv4Address(group));
   }
   else if (!strcmp(tag, "leave"))
   {
     const char *group = node.getAttribute("group");
-    ie->ipv4Data()->leaveMulticastGroup(group);
+    ie->ipv4Data()->leaveMulticastGroup(IPv4Address(group));
   }
   else if (!strcmp(tag, "check"))
   {
