@@ -354,7 +354,7 @@
         name="OSPFv2 examples"
         description = "Examples for OSPFv2"
         initiallyEnabled = "true"
-        requires = "OSPFv2 UDP IPv4 Ethernet"
+        requires = "OSPFv2 UDP IPv4 PPP Ethernet"
         labels = "routing examples"
         nedPackages = "
                        inet.examples.ospfv2
@@ -383,7 +383,7 @@
         name="BGPv4 examples"
         description = "Examples for BGPv4"
         initiallyEnabled = "true"
-        requires = "BGPv4 TCP_INET UDP IPv4 Ethernet"
+        requires = "BGPv4 TCP_INET UDP IPv4 PPP Ethernet"
         labels = "routing examples"
         nedPackages = "
                        inet.examples.bgpv4
