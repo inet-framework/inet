@@ -164,7 +164,7 @@ void HttpController::registerServer(const char* objectName, const char* wwwName,
         pos = pickList.size()/2;
         pickList.insert(begin+pos, en);
     }
-    else if (rank==INSERT_END || rank>=pickList.size())
+    else if (rank==INSERT_END || rank>=(int)pickList.size())
     {
         pickList.push_back(en);
     }

@@ -199,9 +199,6 @@ cPacket* HttpServerBase::handleReceivedMessage(cMessage *msg)
 
     logRequest(request);
 
-    simtime_t processingDelay = 0;
-
-    bool recipientError = false;
     if (extractServerName(request->targetUrl()) != hostName)
     {
         // This should never happen but lets check

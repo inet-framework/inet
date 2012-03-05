@@ -198,9 +198,9 @@ void UDP::processCommandFromApp(cMessage *msg)
                 UDPJoinMulticastGroupsCommand *cmd = (UDPJoinMulticastGroupsCommand*)ctrl;
                 std::vector<IPvXAddress> addresses;
                 std::vector<int> interfaceIds;
-                for (int i = 0; i < cmd->getMulticastAddrArraySize(); i++)
+                for (int i = 0; i < (int)cmd->getMulticastAddrArraySize(); i++)
                     addresses.push_back(cmd->getMulticastAddr(i));
-                for (int i = 0; i < cmd->getInterfaceIdArraySize(); i++)
+                for (int i = 0; i < (int)cmd->getInterfaceIdArraySize(); i++)
                     interfaceIds.push_back(cmd->getInterfaceId(i));
                 joinMulticastGroups(cmd->getSockId(), addresses, interfaceIds);
             }
@@ -208,7 +208,7 @@ void UDP::processCommandFromApp(cMessage *msg)
             {
                 UDPLeaveMulticastGroupsCommand *cmd = (UDPLeaveMulticastGroupsCommand*)ctrl;
                 std::vector<IPvXAddress> addresses;
-                for (int i = 0; i < cmd->getMulticastAddrArraySize(); i++)
+                for (int i = 0; i < (int)cmd->getMulticastAddrArraySize(); i++)
                     addresses.push_back(cmd->getMulticastAddr(i));
                 leaveMulticastGroups(cmd->getSockId(), addresses);
             }
