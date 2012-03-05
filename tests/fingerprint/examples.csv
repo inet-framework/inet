@@ -3,11 +3,11 @@
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                100s,            0cad-2371
 /examples/adhoc/mf80211/,            -f fingerprints.ini -c Ping1 -r 0,           1000s,           a867-4a02
 /examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping1 -r 0,                2000s,           2613-a4ed
-/examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,              1000s,           05bd-2537
-/examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,              1000s,           f019-995f
-/examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,              1000s,           a8f2-f6e9
-/examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,              1000s,           78d2-a4f4
-/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,              1000s,           304c-4d46
+/examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,              1000s,           7a9c-b2af
+/examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,              1000s,           e031-cfa9
+/examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,              1000s,           82df-a3a9
+/examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,              1000s,           40ba-5bf3
+/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,              1000s,           d9f4-20d3
 /examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,              500s,            ec47-8406
 /examples/ethernet/arptest/,         -f fingerprints.ini -c ARPTest -r 0,         100s,            e1f3-3ca1
 /examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,              500s,            e1f3-3ca1
@@ -144,7 +144,7 @@
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,              50s,             e819-6e6b
 /examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,              1000s,           526c-f918
 /examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,              100s,            9093-0ec2
-/examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0,              500s,            547e-7401
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0,              500s,            6f38-9334
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,              500s,            e63e-7e08
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,              500s,            377d-09bd
 /examples/voiptool/VoIPToolLargeNet/, -f omnetpp.ini -c General -r 0,              5s,              18e7-db4a
