@@ -97,6 +97,6 @@ network PerformanceMonitorTest
         accessSwitch.ethg[1] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> olt.ethg[0];
         olt.ethg[1] <--> {  delay = backbone_delay1; datarate = backbone_rate; } <--> router.ethg++;
         router.ethg$o++ --> {  delay = backbone_delay2; datarate = backbone_rate; } --> server.ethg$i++;
-        router.ethg$i++ <-- burstMeter.out;
-        burstMeter.in <-- {  delay = backbone_delay2; datarate = backbone_rate; } <-- server.ethg$o++;
+        router.ethg$i++ <-- {  delay = 0.5*backbone_delay2; datarate = backbone_rate; } <-- burstMeter.out;
+        burstMeter.in <-- {  delay = 0.5*backbone_delay2; datarate = backbone_rate; } <-- server.ethg$o++;
 }

@@ -22,6 +22,9 @@ void BurstMeter::initialize()
 {
     maxIFG = par(maxIFG).longValue();
 
+    // set "flow-through" reception mode for all input gates
+    gate("in")->setDeliverOnReceptionStart(true);
+
     // initialize maximum frame gap to detect bursts
     cChannel *cIn = gate("in")->getIncomingTransmissionChannel();
     maxFrameGap = maxIFG * INTERFRAME_GAP_BITS / cIn->getNominalDatarate();
@@ -41,8 +44,8 @@ void BurstMeter::handleMessage(cMessage *msg)
     if (simTime() >= simulation.getWarmupPeriod())
     {
         cPacket *pkt = (cPacket *) msg;
-        simtime_t endTime = pkt->getArrivalTime();
-        simtime_t startTime = endTime - pkt->getDuration();
+        simtime_t startTime = pkt->getArrivalTime();
+        simtime_t endTime = startTime + pkt->getDuration();
 
         if (dynamic_cast<EtherFrame *>(msg) != NULL)
         {
