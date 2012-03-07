@@ -455,8 +455,11 @@ void IGMP::handleMessage(cMessage *msg)
 {
     if (!enabled)
     {
-        EV << "IGMP disabled, dropping packet.\n";
-        delete msg;
+        if (!msg->isSelfMessage())
+        {
+            EV << "IGMP disabled, dropping packet.\n";
+            delete msg;
+        }
         return;
     }
 
