@@ -845,17 +845,12 @@ void IGMP::processLeave(InterfaceEntry *ie, IGMPMessage *msg)
         RouterGroupData *groupData = getRouterGroupData(ie, groupAddr);
         if (groupData)
         {
-            if (groupData->state == IGMP_RGS_MEMBERS_PRESENT)
+            if (groupData->state == IGMP_RGS_MEMBERS_PRESENT && interfaceData->igmpRouterState == IGMP_RS_QUERIER)
             {
+                startTimer(groupData->timer, lastMemberQueryInterval * lastMemberQueryCount);
                 startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
-                if (interfaceData->igmpRouterState == IGMP_RS_QUERIER)
-                    startTimer(groupData->timer, lastMemberQueryInterval * lastMemberQueryCount);
-                else
-                {
-                    double maxRespTimeSecs = (double)msg->getMaxRespTime() / 10.0;
-                    sendQuery(ie, groupAddr, maxRespTimeSecs * lastMemberQueryCount);
-                }
-                startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
+                double maxRespTimeSecs = (double)msg->getMaxRespTime() / 10.0;
+                sendQuery(ie, groupAddr, maxRespTimeSecs * lastMemberQueryCount);
                 groupData->state = IGMP_RGS_CHECKING_MEMBERSHIP;
             }
         }
