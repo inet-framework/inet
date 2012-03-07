@@ -386,7 +386,11 @@ void IGMP::initialize(int stage)
     else if (stage == 1)
     {
         for (int i = 0; i < (int)ift->getNumInterfaces(); ++i)
-            configureInterface(ift->getInterface(i));
+        {
+            InterfaceEntry *ie = ift->getInterface(i);
+            if (ie->isMulticast())
+                configureInterface(ie);
+        }
         nb->subscribe(this, NF_INTERFACE_CREATED);
     }
 }
@@ -410,13 +414,17 @@ void IGMP::receiveChangeNotification(int category, const cPolymorphic *details)
     {
         case NF_INTERFACE_CREATED:
             ie = check_and_cast<InterfaceEntry*>(details);
-            configureInterface(ie);
+            if (ie->isMulticast())
+                configureInterface(ie);
             break;
         case NF_INTERFACE_DELETED:
             ie = check_and_cast<InterfaceEntry*>(details);
-            interfaceId = ie->getInterfaceId();
-            deleteHostInterfaceData(interfaceId);
-            deleteRouterInterfaceData(interfaceId);
+            if (ie->isMulticast())
+            {
+                interfaceId = ie->getInterfaceId();
+                deleteHostInterfaceData(interfaceId);
+                deleteRouterInterfaceData(interfaceId);
+            }
             break;
         case NF_IPv4_MCAST_JOIN:
             info = check_and_cast<IPv4MulticastGroupInfo*>(details);
@@ -431,23 +439,16 @@ void IGMP::receiveChangeNotification(int category, const cPolymorphic *details)
 
 void IGMP::configureInterface(InterfaceEntry *ie)
 {
-    /// joining to 224.0.0.1 and 224.0.0.2 is done in RoutingTable
-    if (!ie->isLoopback())
+    if (enabled && rt->isMulticastForwardingEnabled())
     {
-        if (rt->isMulticastForwardingEnabled())
-        {
-            if (enabled)
-            {
-                // start querier on this interface
-                cMessage *timer = new cMessage("IGMP query timer", IGMP_QUERY_TIMER);
-                timer->setContextPointer(ie);
-                RouterInterfaceData *routerData = getRouterInterfaceData(ie);
-                routerData->igmpQueryTimer = timer;
-                routerData->igmpRouterState = IGMP_RS_QUERIER;
-                sendQuery(ie, IPv4Address(), queryResponseInterval); // general query
-                startTimer(timer, startupQueryInterval);
-            }
-        }
+        // start querier on this interface
+        cMessage *timer = new cMessage("IGMP query timer", IGMP_QUERY_TIMER);
+        timer->setContextPointer(ie);
+        RouterInterfaceData *routerData = getRouterInterfaceData(ie);
+        routerData->igmpQueryTimer = timer;
+        routerData->igmpRouterState = IGMP_RS_QUERIER;
+        sendQuery(ie, IPv4Address(), queryResponseInterval); // general query
+        startTimer(timer, startupQueryInterval);
     }
 }
 
@@ -494,7 +495,8 @@ void IGMP::handleMessage(cMessage *msg)
 
 void IGMP::multicastGroupJoined(InterfaceEntry *ie, const IPv4Address& groupAddr)
 {
-    ASSERT(ie);
+    ASSERT(ie && ie->isMulticast());
+    ASSERT(groupAddr.isMulticast());
 
     HostGroupData *groupData = createHostGroupData(ie, groupAddr);
 
@@ -514,7 +516,8 @@ void IGMP::multicastGroupJoined(InterfaceEntry *ie, const IPv4Address& groupAddr
 
 void IGMP::multicastGroupLeft(InterfaceEntry *ie, const IPv4Address& groupAddr)
 {
-    ASSERT(ie);
+    ASSERT(ie && ie->isMulticast());
+    ASSERT(groupAddr.isMulticast());
 
     HostGroupData *groupData = getHostGroupData(ie, groupAddr);
     if (groupData)
@@ -588,16 +591,13 @@ void IGMP::sendReport(InterfaceEntry *ie, HostGroupData* group)
     ASSERT(group->groupAddr != IPv4Address::ALL_HOSTS_MCAST);
     ASSERT(group->groupAddr != IPv4Address::ALL_ROUTERS_MCAST);
 
-    if (!ie->isLoopback())
-    {
-        EV << "IGMP: sending Membership Report for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
-        IGMPMessage *msg = new IGMPMessage("IGMP report");
-        msg->setType(IGMPV2_MEMBERSHIP_REPORT);
-        msg->setGroupAddress(group->groupAddr);
-        msg->setByteLength(8);
-        sendToIP(msg, ie, group->groupAddr);
-        numReportsSent++;
-    }
+    EV << "IGMP: sending Membership Report for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
+    IGMPMessage *msg = new IGMPMessage("IGMP report");
+    msg->setType(IGMPV2_MEMBERSHIP_REPORT);
+    msg->setGroupAddress(group->groupAddr);
+    msg->setByteLength(8);
+    sendToIP(msg, ie, group->groupAddr);
+    numReportsSent++;
 }
 
 void IGMP::sendLeave(InterfaceEntry *ie, HostGroupData* group)
@@ -605,21 +605,18 @@ void IGMP::sendLeave(InterfaceEntry *ie, HostGroupData* group)
     ASSERT(group->groupAddr != IPv4Address::ALL_HOSTS_MCAST);
     ASSERT(group->groupAddr != IPv4Address::ALL_ROUTERS_MCAST);
 
-    if (!ie->isLoopback())
-    {
-        EV << "IGMP: sending Leave Group for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
-        IGMPMessage *msg = new IGMPMessage("IGMP leave");
-        msg->setType(IGMPV2_LEAVE_GROUP);
-        msg->setGroupAddress(group->groupAddr);
-        msg->setByteLength(8);
-        sendToIP(msg, ie, IPv4Address::ALL_ROUTERS_MCAST);
-        numLeavesSent++;
-    }
+    EV << "IGMP: sending Leave Group for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
+    IGMPMessage *msg = new IGMPMessage("IGMP leave");
+    msg->setType(IGMPV2_LEAVE_GROUP);
+    msg->setGroupAddress(group->groupAddr);
+    msg->setByteLength(8);
+    sendToIP(msg, ie, IPv4Address::ALL_ROUTERS_MCAST);
+    numLeavesSent++;
 }
 
 void IGMP::sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& dest)
 {
-    ASSERT(!ie->isLoopback());
+    ASSERT(ie->isMulticast());
 
     IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
     controlInfo->setProtocol(IP_PROT_IGMP);
@@ -635,7 +632,6 @@ void IGMP::processIgmpMessage(IGMPMessage *msg)
 {
     IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)msg->getControlInfo();
     InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
-
     switch (msg->getType())
     {
         case IGMP_MEMBERSHIP_QUERY:
@@ -718,6 +714,8 @@ void IGMP::processRexmtTimer(cMessage *msg)
 
 void IGMP::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMessage *msg)
 {
+    ASSERT(ie->isMulticast());
+
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
 
     numQueriesRecv++;
@@ -789,6 +787,8 @@ void IGMP::processGroupQuery(InterfaceEntry *ie, HostGroupData* group, int maxRe
 
 void IGMP::processV2Report(InterfaceEntry *ie, IGMPMessage *msg)
 {
+    ASSERT(ie->isMulticast());
+
     IPv4Address &groupAddr = msg->getGroupAddress();
 
     EV << "IGMP: received V2 Membership Report for group=" << groupAddr << " iface=" << ie->getName() << "\n";
@@ -845,6 +845,8 @@ void IGMP::processV2Report(InterfaceEntry *ie, IGMPMessage *msg)
 
 void IGMP::processLeave(InterfaceEntry *ie, IGMPMessage *msg)
 {
+    ASSERT(ie->isMulticast());
+
     EV << "IGMP: received Leave Group for group=" << msg->getGroupAddress() << " iface=" << ie->getName() << "\n";
 
     numLeavesRecv++;
