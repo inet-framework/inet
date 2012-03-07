@@ -23,7 +23,7 @@ simple DelayMeter
         @node();
         @display("i=block/timer_vs");
         @signal[packetDelay](type="double");
-		@statistic[packetDelay](title="packet delay"; record=stats,percentile?);
+		@statistic[packetDelay](title="packet delay"; record=stats,vector?,percentile?);
     gates:
         input in;
         output out;
