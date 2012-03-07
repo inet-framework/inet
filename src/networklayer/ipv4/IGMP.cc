@@ -743,11 +743,22 @@ void IGMP::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMessa
 
     if (rt->isMulticastForwardingEnabled())
     {
+        RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
         if (sender < ie->ipv4Data()->getIPAddress())
         {
-            RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
             startTimer(routerInterfaceData->igmpQueryTimer, otherQuerierPresentInterval);
             routerInterfaceData->igmpRouterState = IGMP_RS_NON_QUERIER;
+        }
+
+        if (!groupAddr.isUnspecified() && routerInterfaceData->igmpRouterState == IGMP_RS_NON_QUERIER) // group specific query
+        {
+            RouterGroupData *groupData = getRouterGroupData(ie, groupAddr);
+            if (groupData->state == IGMP_RGS_MEMBERS_PRESENT)
+            {
+                double maxResponseTime = (double)msg->getMaxRespTime() / 10.0;
+                startTimer(groupData->timer, maxResponseTime * lastMemberQueryCount);
+                groupData->state = IGMP_RGS_CHECKING_MEMBERSHIP;
+            }
         }
     }
 
