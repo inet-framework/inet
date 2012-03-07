@@ -849,8 +849,7 @@ void IGMP::processLeave(InterfaceEntry *ie, IGMPMessage *msg)
             {
                 startTimer(groupData->timer, lastMemberQueryInterval * lastMemberQueryCount);
                 startTimer(groupData->rexmtTimer, lastMemberQueryInterval);
-                double maxRespTimeSecs = (double)msg->getMaxRespTime() / 10.0;
-                sendQuery(ie, groupAddr, maxRespTimeSecs * lastMemberQueryCount);
+                sendQuery(ie, groupAddr, lastMemberQueryInterval);
                 groupData->state = IGMP_RGS_CHECKING_MEMBERSHIP;
             }
         }
