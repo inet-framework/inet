@@ -798,11 +798,11 @@ void IGMP::processV2Report(InterfaceEntry *ie, IGMPMessage *msg)
     HostGroupData *hostGroupData = getHostGroupData(ie, groupAddr);
     if (hostGroupData)
     {
-        if (hostGroupData && hostGroupData->state == IGMP_HGS_IDLE_MEMBER)
+        if (hostGroupData && hostGroupData->state == IGMP_HGS_DELAYING_MEMBER)
         {
             cancelEvent(hostGroupData->timer);
             hostGroupData->flag = false;
-            hostGroupData->state = IGMP_HGS_DELAYING_MEMBER;
+            hostGroupData->state = IGMP_HGS_IDLE_MEMBER;
         }
     }
 
