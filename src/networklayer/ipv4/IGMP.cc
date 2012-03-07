@@ -830,11 +830,13 @@ void IGMP::processV2Report(InterfaceEntry *ie, IGMPMessage *msg)
         {
             // notify IPv4InterfaceData to update its listener list
             ie->ipv4Data()->addMulticastListener(groupAddr);
-
+            // notify routing
             IPv4MulticastGroupInfo info(ie, routerGroupData->groupAddr);
             nb->fireChangeNotification(NF_IPv4_MCAST_REGISTERED, &info);
             numRouterGroups++;
         }
+        else if (routerGroupData->state == IGMP_RGS_CHECKING_MEMBERSHIP)
+            cancelEvent(routerGroupData->rexmtTimer);
 
         startTimer(routerGroupData->timer, groupMembershipInterval);
         routerGroupData->state = IGMP_RGS_MEMBERS_PRESENT;
