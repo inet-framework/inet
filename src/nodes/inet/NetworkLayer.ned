@@ -19,7 +19,7 @@
 package inet.nodes.inet;
 
 import inet.networklayer.ipv4.IPv4;
-import inet.networklayer.ipv4.IGMP;
+import inet.networklayer.ipv4.IIGMP;
 import inet.networklayer.ipv4.ICMP;
 import inet.networklayer.ipv4.ErrorHandling;
 import inet.networklayer.arp.ARP;
@@ -35,6 +35,7 @@ module NetworkLayer
     parameters:
         @display("i=block/fork");
         bool proxyARP = default(true);
+        string igmpType = default("IGMP");
     gates:
         input ifIn[] @labels(IPv4Datagram);
         input tcpIn @labels(TCPSegment,IPv4ControlInfo/down);
@@ -76,7 +77,7 @@ module NetworkLayer
             parameters:
                 @display("p=160,63");
         }
-        igmp: IGMP {
+        igmp: <igmpType> like IIGMP {
             parameters:
                 @display("p=39,33");
         }

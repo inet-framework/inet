@@ -100,7 +100,7 @@ package inet.networklayer.ipv4;
 // parameter to false. When disabled, then no IGMP message
 // is generated, and incoming IGMP messages are ignored.
 //
-simple IGMP
+simple IGMP like IIGMP
 {
     parameters:
         bool enabled = default(true);
