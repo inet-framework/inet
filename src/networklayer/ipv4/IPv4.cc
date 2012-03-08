@@ -175,6 +175,11 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
         // don't forward if IP forwarding is off, or if dest address is link-scope
         if (!rt->isIPForwardingEnabled() || destAddr.isLinkLocalMulticast())
             delete datagram;
+        else if (datagram->getTimeToLive() == 0)
+        {
+            EV << "TTL reached 0, dropping datagram.\n";
+            delete datagram;
+        }
         else
             forwardMulticastPacket(datagram, fromIE);
     }
@@ -511,11 +516,19 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE
         for (unsigned int i=0; i<children.size(); i++)
         {
             InterfaceEntry *destIE = children[i]->getInterface();
-            int ttlThreshold = destIE->ipv4Data()->getMulticastTtlThreshold();
-            if (destIE != fromIE &&
-                datagram->getTimeToLive() > ttlThreshold &&
-                    (!children[i]->isLeaf() || rt->hasMulticastListeners(destIE, destAddr)))
-                fragmentAndSend(datagram->dup(), destIE, destAddr);
+            if (destIE != fromIE)
+            {
+                int ttlThreshold = destIE->ipv4Data()->getMulticastTtlThreshold();
+                if (datagram->getTimeToLive() <= ttlThreshold)
+                    EV << "Not forwarding to " << destIE->getName() << " (ttl treshold reached)\n";
+                else if (children[i]->isLeaf() && !rt->hasMulticastListeners(destIE, destAddr))
+                    EV << "Not forwarding to " << destIE->getName() << " (no listeners)\n";
+                else
+                {
+                    EV << "Forwarding to " << destIE->getName() << "\n";
+                    fragmentAndSend(datagram->dup(), destIE, destAddr);
+                }
+            }
         }
         // only copies sent, delete original datagram
         delete datagram;
