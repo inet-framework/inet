@@ -46,7 +46,7 @@
 /examples/inet/flatnet/,             -f fingerprints.ini -c General -r 0,           200s,            42ad-7621
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            42ad-7621
 /examples/inet/kidsnw1/,             -f omnetpp.ini -c General -r 0,                1000s,           0e68-ccde
-/examples/inet/multicast/,           -f omnetpp.ini -c General -r 0,                2000s,           22c1-fc44
+/examples/inet/multicast/,           -f omnetpp.ini -c General -r 0,                2000s,           d95c-fe95
 /examples/inet/nclients/,            -f basicHTTP.ini -c General -r 0,              500000s,         3408-90fc
 /examples/inet/nclients/,            -f filetransfer.ini -c General -r 0,           5s,              650c-f000
 /examples/inet/nclients/,            -f fingerprints2.ini -c General -r 0,          50s,             7164-4203

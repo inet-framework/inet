@@ -17,12 +17,9 @@
 //
 
 
-
-
-
-
 package inet.examples.inet.multicast;
 
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
@@ -50,7 +47,6 @@ network MulticastNetwork
         host1: StandardHost {
             parameters:
                 IPForward = false;
-                routingFile = "mchost1.mrt";
                 @display("p=125,52;i=device/pc2");
             gates:
                 pppg[1];
@@ -59,7 +55,6 @@ network MulticastNetwork
             parameters:
                 IPForward = true;
                 forwardMulticast = true;
-                routingFile = "mchost2.mrt";
                 @display("p=60,244;i=device/pc2");
             gates:
                 pppg[2];
@@ -68,7 +63,6 @@ network MulticastNetwork
             parameters:
                 IPForward = true;
                 forwardMulticast = true;
-                routingFile = "mchost3.mrt";
                 @display("p=196,244;i=device/pc2");
             gates:
                 pppg[2];
@@ -76,7 +70,6 @@ network MulticastNetwork
         host4: StandardHost {
             parameters:
                 IPForward = false;
-                routingFile = "mchost4.mrt";
                 @display("p=406,305;i=device/pc2");
             gates:
                 pppg[1];
@@ -84,7 +77,6 @@ network MulticastNetwork
         host5: StandardHost {
             parameters:
                 IPForward = false;
-                routingFile = "mchost5.mrt";
                 @display("p=492,59;i=device/pc2");
             gates:
                 pppg[1];
@@ -92,14 +84,12 @@ network MulticastNetwork
         host6: StandardHost {
             parameters:
                 IPForward = false;
-                routingFile = "mchost6.mrt";
                 @display("p=492,204;i=device/pc2");
             gates:
                 pppg[1];
         }
         router1: Router {
             parameters:
-                routingFile = "mcrouter1.mrt";
                 forwardMulticast = true;
                 @display("p=124,135");
             gates:
@@ -107,7 +97,6 @@ network MulticastNetwork
         }
         router2: Router {
             parameters:
-                routingFile = "mcrouter2.mrt";
                 forwardMulticast = true;
                 @display("p=292,135");
             gates:
@@ -115,7 +104,6 @@ network MulticastNetwork
         }
         router3: Router {
             parameters:
-                routingFile = "mcrouter3.mrt";
                 forwardMulticast = true;
                 @display("p=292,238");
             gates:
@@ -123,11 +111,13 @@ network MulticastNetwork
         }
         router4: Router {
             parameters:
-                routingFile = "mcrouter4.mrt";
                 forwardMulticast = true;
                 @display("p=408,135");
             gates:
                 pppg[3];
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=275,26");
         }
     connections:
         // * Domain 1 * (172.0.0.x)
@@ -148,4 +138,3 @@ network MulticastNetwork
         router2.pppg[1] <--> fiberrouter <--> router3.pppg[1];
         router2.pppg[2] <--> fiberrouter <--> router4.pppg[2];
 }
-
