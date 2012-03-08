@@ -33,7 +33,6 @@ class InterfaceEntry;
 class IInterfaceTable;
 class InterfaceProtocolData;
 class IPv4InterfaceData;
-class IPv4MulticastData;
 class IPv6InterfaceData;
 
 class INET_API MacEstimateCostProcess
@@ -95,7 +94,6 @@ class INET_API InterfaceEntry : public cNamedObject
     InterfaceToken token; ///< for IPv6 stateless autoconfig (RFC 1971), interface identifier (RFC 2462)
 
     IPv4InterfaceData *ipv4data;   ///< IPv4-specific interface info (IPv4 address, etc)
-    IPv4MulticastData *ipv4multicastdata;
     IPv6InterfaceData *ipv6data;   ///< IPv6-specific interface info (IPv6 addresses, etc)
     InterfaceProtocolData *protocol3data; ///< extension point: data for a 3rd network-layer protocol
     InterfaceProtocolData *protocol4data; ///< extension point: data for a 4th network-layer protocol
@@ -166,7 +164,6 @@ class INET_API InterfaceEntry : public cNamedObject
     /** @name Accessing protocol-specific interface data. Note methods are non-virtual, for performance reasons. */
     //@{
     IPv4InterfaceData *ipv4Data() const {return ipv4data;}
-    IPv4MulticastData *ipv4MulticastData() const {return ipv4multicastdata;}
     IPv6InterfaceData *ipv6Data() const  {return ipv6data;}
     InterfaceProtocolData *getProtocol3Data() const {return protocol3data;}
     InterfaceProtocolData *getProtocol4Data() const {return protocol4data;}
@@ -175,7 +172,6 @@ class INET_API InterfaceEntry : public cNamedObject
     /** @name Installing protocol-specific interface data */
     //@{
     virtual void setIPv4Data(IPv4InterfaceData *p);
-    virtual void setIPv4MulticastData (IPv4MulticastData *p);
     virtual void setIPv6Data(IPv6InterfaceData *p);
     virtual void setProtocol3Data(InterfaceProtocolData *p)  {protocol3data = p; configChanged();}
     virtual void setProtocol4Data(InterfaceProtocolData *p)  {protocol4data = p; configChanged();}

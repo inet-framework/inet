@@ -281,15 +281,11 @@ char *RoutingTableParser::parseEntry(char *ifconfigFile, const char *tokenStr,
 
 void RoutingTableParser::parseMulticastGroups(char *groupStr, InterfaceEntry *itf)
 {
-    IPv4InterfaceData::IPAddressVector mcg = itf->ipv4Data()->getMulticastGroups();
-
     // Parse string (IPv4 addresses separated by colons)
     cStringTokenizer tokenizer(groupStr, ":");
     const char *token;
     while ((token = tokenizer.nextToken())!=NULL)
-        mcg.push_back(IPv4Address(token));
-
-    itf->ipv4Data()->setMulticastGroups(mcg);
+        itf->ipv4Data()->joinMulticastGroup(IPv4Address(token));
 }
 
 void RoutingTableParser::parseRouting(char *routeFile)

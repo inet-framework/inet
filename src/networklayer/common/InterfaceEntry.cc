@@ -29,7 +29,6 @@
 
 #ifdef WITH_IPv4
 #include "IPv4InterfaceData.h"
-#include "IPv4MulticastData.h"
 #endif
 
 #ifdef WITH_IPv6
@@ -151,17 +150,6 @@ void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
     configChanged();
 #else
     throw cRuntimeError(this, "setIPv4Data(): INET was compiled without IPv4 support");
-#endif
-}
-
-void InterfaceEntry::setIPv4MulticastData(IPv4MulticastData *p)
-{
-#ifdef WITH_IPv4
-    ipv4multicastdata = p;
-    p->ownerp = this;
-    configChanged();
-#else
-    throw cRuntimeError(this, "setIPv4MulticastData(): INET was compiled without IPv4 support");
 #endif
 }
 

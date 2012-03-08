@@ -1032,7 +1032,7 @@ void IPv4NetworkConfigurator::dumpConfig(IPv4Topology& topology)
             InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
             InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
             IPv4InterfaceData *interfaceData = interfaceEntry->ipv4Data();
-            const std::vector<IPv4Address>& multicastAddresses = interfaceData->getMulticastGroups();
+            const std::vector<IPv4Address>& multicastAddresses = interfaceData->getJoinedMulticastGroups();
             bool found = false;
             for (int k = 0 ; k < (int)multicastAddresses.size(); k++)
                 if (!multicastAddresses[k].isLinkLocalMulticast())
