@@ -1,0 +1,90 @@
+%description: Tests group specific state transitions of Non-Querier IGMP hosts
+
+RFC 2236 6.:
+
+                              ________________
+                             |                |
+                             |                |
+                   --------->|   Non-Member   |<---------
+                  |          |                |          |
+                  |          |________________|          |
+                  | leave group       | join group       | leave group
+                  | (stop timer,      |(send report,     | (send leave
+                  |  send leave if    | set flag,        |  if flag set)
+                  |  flag set)        | start timer)     |
+          ________|________           |          ________|________
+         |                 |<---------          |                 |
+         |                 |<-------------------|                 |
+         |                 |   query received   |                 |
+         | Delaying Member |    (start timer)   |   Idle Member   |
+    ---->|                 |------------------->|                 |
+   |     |                 |   report received  |                 |
+   |     |                 |    (stop timer,    |                 |
+   |     |                 |     clear flag)    |                 |
+   |     |_________________|------------------->|_________________|
+   | query received    |        timer expired
+   | (reset timer if   |        (send report,
+   |  Max Resp Time    |         set flag)
+   |  < current timer) |
+    -------------------
+    
+This scenario checks the following trajectories:
+
+NON MEMBER --> join group --> DELAYING MEMBER --> timer expired --> IDLE MEMBER --> leave group --> NON MEMBER
+
+NON MEMBER --> join group --> DELAYING MEMBER --> leave group --> NON MEMBER
+
+NON MEMBER --> join group --> DELAYING MEMBER --> timer expired --> IDLE MEMBER --> query received --> DELAYING MEMBER -->
+  --> report received --> IDLE MEMBER -> query received --> DELAYING MEMBER --> query received --> DELAYING MEMBER
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=400s
+cmdenv-express-mode = true
+
+network=IGMPTestNetwork
+**.igmpType = "TestIGMP"
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+**.host.networkLayer.igmp.outputFile = "host-output.txt"
+
+**.router.*.igmp.startupQueryInterval = 500s
+
+%file: scenario.xml
+<scenario>
+
+<!-- 1. join group, wait for timer expiry (max 10s), and leave group -->
+<join t="100" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
+<leave t="111" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
+
+<!-- 2. join group and leave immediately -->
+<join t="200" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.2"/>
+<leave t="200" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.2"/>
+
+<!-- 3. join group, wait for timer expiry, receive query, receive report, receive query, received query -->
+<join t="300" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.3"/>
+<send t="320" module="router.networkLayer.igmp" ifname="eth0" what="query" group="225.0.0.3"/>
+<join t="320" module="host2.networkLayer.igmp" ifname="eth0" group="225.0.0.3"/>
+<send t="350" module="router.networkLayer.igmp" ifname="eth0" what="query" group="225.0.0.3"/>
+<send t="350" module="router.networkLayer.igmp" ifname="eth0" what="query" group="225.0.0.3"/>
+
+</scenario>
+
+%contains-regex: host-output.txt
+t=100 host/eth0/225.0.0.1: NON_MEMBER --> join group <send report> --> DELAYING_MEMBER
+t=.* host/eth0/225.0.0.1: DELAYING_MEMBER --> timer expired <send report> --> IDLE_MEMBER
+t=111 host/eth0/225.0.0.1: IDLE_MEMBER --> leave group <send leave> --> NON_MEMBER
+
+%contains-regex: host-output.txt
+t=200 host/eth0/225.0.0.2: NON_MEMBER --> join group <send report> --> DELAYING_MEMBER
+t=200 host/eth0/225.0.0.2: DELAYING_MEMBER --> leave group <send leave> --> NON_MEMBER
+
+%contains-regex: host-output.txt
+t=300 host/eth0/225.0.0.3: NON_MEMBER --> join group <send report> --> DELAYING_MEMBER
+t=.* host/eth0/225.0.0.3: DELAYING_MEMBER --> timer expired <send report> --> IDLE_MEMBER
+t=320\..* host/eth0/225.0.0.3: IDLE_MEMBER --> query received <> --> DELAYING_MEMBER
+t=320\..* host/eth0/225.0.0.3: DELAYING_MEMBER --> report received <> --> IDLE_MEMBER
+.*
+t=350\..* host/eth0/225.0.0.3: IDLE_MEMBER --> query received <> --> DELAYING_MEMBER
+t=350\..* host/eth0/225.0.0.3: DELAYING_MEMBER --> query received <> --> DELAYING_MEMBER

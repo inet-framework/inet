@@ -1,0 +1,68 @@
+%description: Tests interface state transitions of IGMP routers
+
+                                     --------------------------------
+                              _______|________  gen. query timer      |
+  ---------                  |                |        expired        |
+ | Initial |---------------->|                | (send general query,  |
+  ---------  (send gen. q.,  |                |  set gen. q. timer)   |
+        set initial gen. q.  |                |<----------------------
+              timer)         |    Querier     |
+                             |                |
+                        -----|                |<---
+                       |     |                |    |
+                       |     |________________|    |
+ query received from a |                           | other querier
+ router with a lower   |                           | present timer
+ IP address            |                           | expired
+ (set other querier    |      ________________     | (send general
+  present timer)       |     |                |    |  query,set gen.
+                       |     |                |    |  q. timer)
+                       |     |                |    |
+                        ---->|      Non       |----
+                             |    Querier     |
+                             |                |
+                             |                |
+                        ---->|                |----
+                       |     |________________|    |
+                       | query received from a     |
+                       | router with a lower IP    |
+                       | address                   |
+                       | (set other querier        |
+                       |  present timer)           |
+                        ---------------------------
+
+This scenario checks the following trajectory:
+
+INITIAL --> initialize --> QUERIER --> query received (lower IP) --> NON QUERIER --> 
+  --> query received (lower IP) --> NON QUERIER --> other querier present timer expired --> QUERIER -->
+  --> gen.query timer expired --> QUERIER 
+
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=500s
+cmdenv-express-mode = true
+
+network=IGMPTestNetwork
+**.igmpType = "TestIGMP"
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+**.nqrouter.*.igmp.outputFile = "nqrouter-output.txt"
+
+**.igmp.startupQueryInterval = 100s
+**.igmp.queryInterval = 100s
+
+%file: scenario.xml
+<scenario>
+<disable t="101" module="router.networkLayer.igmp"/>
+</scenario>
+
+%contains-regex: nqrouter-output.txt
+t=0 nqrouter/eth0: INITIAL --> configure interface <send query> --> QUERIER
+
+%contains-regex: nqrouter-output.txt
+t=0.* nqrouter/eth0/<unspec>: QUERIER --> query received <> --> NON_QUERIER
+t=100\..* nqrouter/eth0/<unspec>: NON_QUERIER --> query received <> --> NON_QUERIER
+t=305\..* nqrouter/eth0: NON_QUERIER --> other querier present timer expired <send query> --> QUERIER
+t=405\..* nqrouter/eth0: QUERIER --> gen. query timer expired <send query> --> QUERIER

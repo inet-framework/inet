@@ -1,0 +1,100 @@
+%description: Tests group specific state transitions of Querier IGMP routers
+
+RFC 2236 7.:
+                              ________________
+ ----------------------------|                |<-----------------------
+|                            |                |timer expired           |
+|               timer expired|                |(notify routing -,      |
+|          (notify routing -)|   No Members   |clear rxmt tmr)         |
+|                    ------->|    Present     |<-------                |
+|                   |        |                |       |                |
+|v1 report rec'd    |        |                |       |  ------------  |
+|(notify routing +, |        |________________|       | | rexmt timer| |
+| start timer,      |                    |            | |  expired   | |
+| start v1 host     |  v2 report received|            | | (send g-s  | |
+|  timer)           |  (notify routing +,|            | |  query,    | |
+|                   |        start timer)|            | |  st rxmt   | |
+|         __________|______              |       _____|_|______  tmr)| |
+|        |                 |<------------       |              |     | |
+|        |                 |                    |              |<----- |
+|        |                 | v2 report received |              |       |
+|        |                 | (start timer)      |              |       |
+|        | Members Present |<-------------------|    Checking  |       |
+|  ----->|                 | leave received     |   Membership |       |
+| |      |                 | (start timer*,     |              |       |
+| |      |                 |  start rexmt timer,|              |       |
+| |      |                 |  send g-s query)   |              |       |
+| |  --->|                 |------------------->|              |       |
+| | |    |_________________|                    |______________|       |
+| | |v2 report rec'd |  |                          |                   |
+| | |(start timer)   |  |v1 report rec'd           |v1 report rec'd    |
+| |  ----------------   |(start timer,             |(start timer,      |
+| |v1 host              | start v1 host timer)     | start v1 host     |
+| |tmr    ______________V__                        | timer)            |
+| |exp'd |                 |<----------------------                    |
+|  ------|                 |                                           |
+|        |    Version 1    |timer expired                              |
+|        | Members Present |(notify routing -)                         |
+ ------->|                 |-------------------------------------------
+         |                 |<--------------------
+ ------->|_________________| v1 report rec'd     |
+| v2 report rec'd |   |   (start timer,          |
+| (start timer)   |   |    start v1 host timer)  |
+ -----------------     --------------------------
+
+This scenario checks the following trajectories:
+
+NO MEMBERS PRESENT --> report received --> MEMBERS PRESENT --> report received -> MEMBERS PRESENT -->
+  --> leave received -> CHECKING MEMBERSHIP --> report received -> MEMBERS PRESENT -->
+  --> leave received -> CHECKING MEMBERSHIP --> rexmit timer expired --> CHECKING MEMBERSHIP -->
+  --> timer expired --> NO MEMBERS PRESENT 
+
+NO MEMBERS PRESENT --> report received --> MEMBERS PRESENT --> report received --> MEMBERS PRESENT -->
+  --> timer expired --> NO MEMBERS PRESENT
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=500s
+cmdenv-express-mode = true
+
+network=IGMPTestNetwork
+**.igmpType = "TestIGMP"
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+**.router.*.igmp.outputFile = "router-output.txt"
+
+**.igmp.queryResponseInterval = 6s
+**.igmp.startupQueryInterval = 1000s
+**.igmp.queryInterval = 1000s
+**.igmp.groupMembershipInterval = 100s
+
+%file: scenario.xml
+<scenario>
+
+<join t="100" module="host2.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
+<join t="110" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
+<leave t="120" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
+<leave t="140" module="host2.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
+
+<join t="200" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.2"/>
+
+</scenario>
+
+%contains-regex: router-output.txt
+t=0 router/eth0: INITIAL --> configure interface <send query> --> QUERIER
+
+%contains-regex: router-output.txt
+t=100\..* router/eth0/225.0.0.1: QUERIER NO_MEMBERS_PRESENT NON_MEMBER --> report received <> --> QUERIER MEMBERS_PRESENT NON_MEMBER
+t=10.\..* router/eth0/225.0.0.1: QUERIER MEMBERS_PRESENT NON_MEMBER --> report received <> --> QUERIER MEMBERS_PRESENT NON_MEMBER
+.*
+t=120\..* router/eth0/225.0.0.1: QUERIER MEMBERS_PRESENT NON_MEMBER --> leave received <send query> --> QUERIER CHECKING_MEMBERSHIP NON_MEMBER
+t=12.\..* router/eth0/225.0.0.1: QUERIER CHECKING_MEMBERSHIP NON_MEMBER --> report received <> --> QUERIER MEMBERS_PRESENT NON_MEMBER
+t=140\..* router/eth0/225.0.0.1: QUERIER MEMBERS_PRESENT NON_MEMBER --> leave received <send query> --> QUERIER CHECKING_MEMBERSHIP NON_MEMBER
+t=141\..* router/eth0/225.0.0.1: CHECKING_MEMBERSHIP --> rexmt timer expired <send query> --> CHECKING_MEMBERSHIP
+t=142\..* router/eth0/225.0.0.1: CHECKING_MEMBERSHIP --> timer expired <> --> NO_MEMBERS_PRESENT
+
+%contains-regex: router-output.txt
+t=200\..* router/eth0/225.0.0.2: QUERIER NO_MEMBERS_PRESENT NON_MEMBER --> report received <> --> QUERIER MEMBERS_PRESENT NON_MEMBER
+t=20.\..* router/eth0/225.0.0.2: QUERIER MEMBERS_PRESENT NON_MEMBER --> report received <> --> QUERIER MEMBERS_PRESENT NON_MEMBER
+t=30.\..* router/eth0/225.0.0.2: MEMBERS_PRESENT --> timer expired <> --> NO_MEMBERS_PRESENT

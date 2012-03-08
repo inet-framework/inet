@@ -1,0 +1,53 @@
+%description:
+
+This test checks that:
+
+1. The host joined to the 224.0.0.1 (all-systems) multicast group on startup
+2. The router joined to the 224.0.0.2 (all-routers) group too
+3. When the host joins to 225.0.0.1 on an interface, then 225.0.0.1 appears on the list of joined groups of the host immediately
+4. The router receives an IGMP report from the host and updates its list of listeners in the interface data
+5. When the host leaves the 225.0.0.1 group, then the group is removed from the multicast group list of its interface immediately
+6. The router removes 225.0.0.1 from its listener list after lastMemberQueryCount*lastMemberQueryInterval time elapsed
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=100s
+cmdenv-express-mode = true
+
+network=IGMPTestNetwork
+**.igmpType = "TestIGMP"
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+**.host.networkLayer.igmp.outputFile = "host-output.txt"
+**.router.networkLayer.igmp.outputFile = "router-output.txt"
+
+%file: scenario.xml
+<scenario>
+
+<dump t="1" module="host.networkLayer.igmp" ifname="eth0" what="groups"/>
+<dump t="1" module="router.networkLayer.igmp" ifname="eth0" what="groups"/>
+
+<join t="2" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
+<dump t="2" module="host.networkLayer.igmp" ifname="eth0" what="groups"/>
+<dump t="2.1" module="router.networkLayer.igmp" ifname="eth0" what="listeners"/>
+
+<leave t="3" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
+<dump t="3" module="host.networkLayer.igmp" ifname="eth0" what="groups"/>
+<dump t="5.1" module="router.networkLayer.igmp" node="router" ifname="eth0" what="listeners"/>
+
+</scenario>
+
+%contains-regex: host-output.txt
+t=1 host/eth0: groups = <224.0.0.1>
+.*
+t=2 host/eth0: groups = <224.0.0.1,225.0.0.1>
+.*
+t=3 host/eth0: groups = <224.0.0.1>
+
+%contains-regex: router-output.txt
+t=1 router/eth0: groups = <224.0.0.1,224.0.0.2>
+.*
+t=2\.1 router/eth0: listeners = <225.0.0.1>
+.*
+t=5\.1 router/eth0: listeners = <>

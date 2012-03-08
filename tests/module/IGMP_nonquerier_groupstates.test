@@ -1,0 +1,87 @@
+%description: Tests group specific state transitions of Non-Querier IGMP routers
+
+RFC 2236 7.:
+                              ________________
+                             |                |
+                             |                |
+                timer expired|                |timer expired
+           (notify routing -)|   No Members   |(notify routing -)
+                   --------->|    Present     |<---------
+                  |          |                |          |
+                  |          |                |          |
+                  |          |                |          |
+                  |          |________________|          |
+                  |                   |                  |
+                  |                   |report received   |
+                  |                   |(notify routing +,|
+                  |                   | start timer)     |
+          ________|________           |          ________|________
+         |                 |<---------          |                 |
+         |                 |  report received   |                 |
+         |                 |  (start timer)     |                 |
+         | Members Present |<-------------------|     Checking    |
+         |                 | g-s query rec'd    |    Membership   |
+         |                 | (start timer*)     |                 |
+    ---->|                 |------------------->|                 |
+   |     |_________________|                    |_________________|
+   | report received |
+   | (start timer)   |
+    -----------------
+
+This scenario checks the following trajectories:
+
+NO MEMBERS PRESENT --> report received --> MEMBERS PRESENT --> report received -> MEMBERS PRESENT -->
+  --> g-s query received -> CHECKING MEMBERSHIP --> report received -> MEMBERS PRESENT -->
+  --> g-s query received -> CHECKING MEMBERSHIP --> g-s query received --> CHECKING MEMBERSHIP -->
+  --> timer expired --> NO MEMBERS PRESENT 
+
+NO MEMBERS PRESENT --> report received --> MEMBERS PRESENT --> report received --> MEMBERS PRESENT -->
+  --> timer expired --> NO MEMBERS PRESENT
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=500s
+cmdenv-express-mode = true
+
+network=IGMPTestNetwork
+**.igmpType = "TestIGMP"
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+**.nqrouter.networkLayer.igmp.outputFile = "nqrouter-output.txt"
+
+**.igmp.queryResponseInterval = 6s
+**.igmp.startupQueryInterval = 1000s
+**.igmp.queryInterval = 1000s
+**.igmp.groupMembershipInterval = 200s
+
+%file: scenario.xml
+<scenario>
+
+<join t="100" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
+<send t="120" module="router.networkLayer.igmp" ifname="eth0" what="query" group="225.0.0.1"/>
+<leave t="130" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.1"/>
+
+<disable t="199" module="router.networkLayer.igmp"/>
+<join t="200" module="host.networkLayer.igmp" ifname="eth0" group="225.0.0.2"/>
+
+</scenario>
+
+%contains-regex: nqrouter-output.txt
+t=0\..* nqrouter/eth0/<unspec>: QUERIER --> query received <> --> NON_QUERIER
+
+%contains-regex: nqrouter-output.txt
+t=100\..* nqrouter/eth0/225.0.0.1: NON_QUERIER NO_MEMBERS_PRESENT NON_MEMBER --> report received <> --> NON_QUERIER MEMBERS_PRESENT NON_MEMBER
+t=10.\..* nqrouter/eth0/225.0.0.1: NON_QUERIER MEMBERS_PRESENT NON_MEMBER --> report received <> --> NON_QUERIER MEMBERS_PRESENT NON_MEMBER
+t=120\..* nqrouter/eth0/225.0.0.1: NON_QUERIER MEMBERS_PRESENT NON_MEMBER --> query received <> --> NON_QUERIER CHECKING_MEMBERSHIP NON_MEMBER
+t=.* nqrouter/eth0/225.0.0.1: NON_QUERIER CHECKING_MEMBERSHIP NON_MEMBER --> report received <> --> NON_QUERIER MEMBERS_PRESENT NON_MEMBER
+.*
+t=130\..* nqrouter/eth0/225.0.0.1: NON_QUERIER MEMBERS_PRESENT NON_MEMBER --> query received <> --> NON_QUERIER CHECKING_MEMBERSHIP NON_MEMBER
+t=131\..* nqrouter/eth0/225.0.0.1: NON_QUERIER CHECKING_MEMBERSHIP NON_MEMBER --> query received <> --> NON_QUERIER CHECKING_MEMBERSHIP NON_MEMBER
+t=132\..* nqrouter/eth0/225.0.0.1: CHECKING_MEMBERSHIP --> timer expired <> --> NO_MEMBERS_PRESENT
+
+%contains-regex: nqrouter-output.txt
+t=200\..* nqrouter/eth0/225.0.0.2: NON_QUERIER NO_MEMBERS_PRESENT NON_MEMBER --> report received <> --> NON_QUERIER MEMBERS_PRESENT NON_MEMBER
+t=20.\..* nqrouter/eth0/225.0.0.2: NON_QUERIER MEMBERS_PRESENT NON_MEMBER --> report received <> --> NON_QUERIER MEMBERS_PRESENT NON_MEMBER
+t=40.\..* nqrouter/eth0/225.0.0.2: MEMBERS_PRESENT --> timer expired <> --> NO_MEMBERS_PRESENT
+

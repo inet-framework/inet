@@ -2,7 +2,7 @@ import inet.nodes.ethernet.EtherSwitch;
 import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
-import inet.networklayer.autorouting.ipv4.IPv4Configurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.world.scenario.ScenarioManager;
 
 network IGMPTestNetwork
@@ -14,36 +14,37 @@ network IGMPTestNetwork
             datarate = 10Mbps;
         }
     submodules:
-        configurator: IPv4Configurator
-        {
+        configurator: IPv4NetworkConfigurator {
             config = default(xml("\
                <config>\
                  <interface hosts='*' address='10.x.x.x' netmask='255.0.0.0'/>\
                  <interface hosts='router1' address='10.0.0.1' netmask='255.0.0.0'/>\
                </config>"));
-        };
+            @display("p=347,31");
+        }
         scenarioManager: ScenarioManager {
             @display("p=73,42");
         }
-        tester: IGMPTester {
-            @display("p=178,50");
-        }
         host: StandardHost {
-            @display("p=122,152");
+            @display("p=221,50");
+        }
+        host2: StandardHost {
+            @display("p=81,152");
         }
         // Querier router
         router: Router {
-            @display("p=416,152");
+            @display("p=384,152");
         }
         etherSwitch: EtherSwitch {
-            @display("p=278,151");
+            @display("p=221,151");
         }
         // Non-querier router
         nqrouter: Router {
-            @display("p=278,269");
+            @display("p=221,275");
         }
     connections:
         host.ethg++ <--> ethernetline <--> etherSwitch.ethg++;
+        host2.ethg++ <--> ethernetline <--> etherSwitch.ethg++;
         etherSwitch.ethg++ <--> ethernetline <--> router.ethg++;
         etherSwitch.ethg++ <--> ethernetline <--> nqrouter.ethg++;
 }
