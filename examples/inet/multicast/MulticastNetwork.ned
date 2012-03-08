@@ -58,6 +58,7 @@ network MulticastNetwork
         host2: StandardHost {
             parameters:
                 IPForward = true;
+                forwardMulticast = true;
                 routingFile = "mchost2.mrt";
                 @display("p=60,244;i=device/pc2");
             gates:
@@ -66,6 +67,7 @@ network MulticastNetwork
         host3: StandardHost {
             parameters:
                 IPForward = true;
+                forwardMulticast = true;
                 routingFile = "mchost3.mrt";
                 @display("p=196,244;i=device/pc2");
             gates:
@@ -98,6 +100,7 @@ network MulticastNetwork
         router1: Router {
             parameters:
                 routingFile = "mcrouter1.mrt";
+                forwardMulticast = true;
                 @display("p=124,135");
             gates:
                 pppg[4];
@@ -105,6 +108,7 @@ network MulticastNetwork
         router2: Router {
             parameters:
                 routingFile = "mcrouter2.mrt";
+                forwardMulticast = true;
                 @display("p=292,135");
             gates:
                 pppg[3];
@@ -112,6 +116,7 @@ network MulticastNetwork
         router3: Router {
             parameters:
                 routingFile = "mcrouter3.mrt";
+                forwardMulticast = true;
                 @display("p=292,238");
             gates:
                 pppg[2];
@@ -119,6 +124,7 @@ network MulticastNetwork
         router4: Router {
             parameters:
                 routingFile = "mcrouter4.mrt";
+                forwardMulticast = true;
                 @display("p=408,135");
             gates:
                 pppg[3];
