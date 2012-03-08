@@ -498,15 +498,12 @@ void IGMP::multicastGroupJoined(InterfaceEntry *ie, const IPv4Address& groupAddr
     ASSERT(ie && ie->isMulticast());
     ASSERT(groupAddr.isMulticast());
 
-    HostGroupData *groupData = createHostGroupData(ie, groupAddr);
-
-    numGroups++;
-    numHostGroups++;
-
-    if (enabled &&
-        groupAddr != IPv4Address::ALL_ROUTERS_MCAST &&
-        groupAddr != IPv4Address::ALL_HOSTS_MCAST)
+    if (enabled && !groupAddr.isLinkLocalMulticast())
     {
+        HostGroupData *groupData = createHostGroupData(ie, groupAddr);
+        numGroups++;
+        numHostGroups++;
+
         sendReport(ie, groupData);
         groupData->flag = true;
         startHostTimer(ie, groupData, unsolicitedReportInterval);
@@ -519,11 +516,10 @@ void IGMP::multicastGroupLeft(InterfaceEntry *ie, const IPv4Address& groupAddr)
     ASSERT(ie && ie->isMulticast());
     ASSERT(groupAddr.isMulticast());
 
-    HostGroupData *groupData = getHostGroupData(ie, groupAddr);
-    if (groupData)
+    if (enabled && !groupAddr.isLinkLocalMulticast())
     {
-        numHostGroups--;
-        if (enabled)
+        HostGroupData *groupData = getHostGroupData(ie, groupAddr);
+        if (groupData)
         {
             if (groupData->state == IGMP_HGS_DELAYING_MEMBER)
                 cancelEvent(groupData->timer);
@@ -533,6 +529,7 @@ void IGMP::multicastGroupLeft(InterfaceEntry *ie, const IPv4Address& groupAddr)
         }
 
         deleteHostGroupData(ie, groupAddr);
+        numHostGroups--;
         numGroups--;
     }
 }
@@ -559,8 +556,7 @@ void IGMP::startHostTimer(InterfaceEntry *ie, HostGroupData* group, double maxRe
 
 void IGMP::sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr, double maxRespTime)
 {
-    ASSERT(groupAddr != IPv4Address::ALL_HOSTS_MCAST);
-    ASSERT(groupAddr != IPv4Address::ALL_ROUTERS_MCAST);
+    ASSERT(groupAddr.isUnspecified() || (groupAddr.isMulticast() && !groupAddr.isLinkLocalMulticast()));
 
     RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
 
@@ -588,8 +584,7 @@ void IGMP::sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr, double ma
 
 void IGMP::sendReport(InterfaceEntry *ie, HostGroupData* group)
 {
-    ASSERT(group->groupAddr != IPv4Address::ALL_HOSTS_MCAST);
-    ASSERT(group->groupAddr != IPv4Address::ALL_ROUTERS_MCAST);
+    ASSERT(group->groupAddr.isMulticast() && !group->groupAddr.isLinkLocalMulticast());
 
     EV << "IGMP: sending Membership Report for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
     IGMPMessage *msg = new IGMPMessage("IGMP report");
@@ -602,8 +597,7 @@ void IGMP::sendReport(InterfaceEntry *ie, HostGroupData* group)
 
 void IGMP::sendLeave(InterfaceEntry *ie, HostGroupData* group)
 {
-    ASSERT(group->groupAddr != IPv4Address::ALL_HOSTS_MCAST);
-    ASSERT(group->groupAddr != IPv4Address::ALL_ROUTERS_MCAST);
+    ASSERT(group->groupAddr.isMulticast() && !group->groupAddr.isLinkLocalMulticast());
 
     EV << "IGMP: sending Leave Group for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
     IGMPMessage *msg = new IGMPMessage("IGMP leave");
