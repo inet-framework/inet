@@ -76,7 +76,6 @@ void IGMPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IGMPM
         case IGMP_MEMBERSHIP_QUERY:
             pkt->setType(igmp->igmp_type);
             pkt->setMaxRespTime(igmp->igmp_code);
-            pkt->setChecksum(igmp->igmp_cksum);
             pkt->setGroupAddress(ntohl(igmp->igmp_group.s_addr));
             break;
         default:

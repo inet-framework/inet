@@ -35,6 +35,5 @@ packet IGMPMessage
 {
     int type enum(IGMPType);
     int maxRespTime;
-    short checksum;
     IPv4Address groupAddress;
 }
