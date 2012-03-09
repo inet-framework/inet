@@ -24,7 +24,6 @@
 #include <sstream>
 
 #include "IPv4InterfaceData.h"
-#include "IGMP.h"
 
 std::string IPv4InterfaceData::HostMulticastData::info()
 {

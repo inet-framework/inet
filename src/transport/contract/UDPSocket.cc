@@ -21,7 +21,6 @@
 #include "UDPControlInfo.h"
 #ifdef WITH_IPv4
 #include "IPv4InterfaceData.h"
-#include "IGMP.h"
 #endif
 
 UDPSocket::UDPSocket()

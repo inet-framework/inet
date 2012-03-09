@@ -7,7 +7,7 @@
 #include "IPv4ControlInfo.h"
 #include "IInterfaceTable.h"
 #include "IRoutingTable.h"
-#include "IGMP.h"
+#include "IGMPv2.h"
 
 enum StateKind
 {
@@ -16,7 +16,7 @@ enum StateKind
     ROUTER_IF_STATE = 0x04,
 };
 
-class INET_API TestIGMP : public IGMP, public IScriptable
+class INET_API TestIGMP : public IGMPv2, public IScriptable
 {
   private:
      std::ofstream out;
@@ -61,7 +61,7 @@ void TestIGMP::initialize(int stage)
         }
     }
 
-    IGMP::initialize(stage);
+    IGMPv2::initialize(stage);
 }
 
 void TestIGMP::receiveChangeNotification(int category, const cObject *details)
@@ -72,17 +72,17 @@ void TestIGMP::receiveChangeNotification(int category, const cObject *details)
         case NF_IPv4_MCAST_JOIN:
             info = check_and_cast<IPv4MulticastGroupInfo*>(details);
             startEvent("join group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
-            IGMP::receiveChangeNotification(category, details);
+            IGMPv2::receiveChangeNotification(category, details);
             endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
             break;
         case NF_IPv4_MCAST_LEAVE:
             info = check_and_cast<IPv4MulticastGroupInfo*>(details);
             startEvent("leave group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
-            IGMP::receiveChangeNotification(category, details);
+            IGMPv2::receiveChangeNotification(category, details);
             endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
             break;
         default:
-            IGMP::receiveChangeNotification(category, details);
+            IGMPv2::receiveChangeNotification(category, details);
             break;
     }
 }
@@ -90,7 +90,7 @@ void TestIGMP::receiveChangeNotification(int category, const cObject *details)
 void TestIGMP::configureInterface(InterfaceEntry *ie)
 {
     startEvent("configure interface", ROUTER_IF_STATE, ie);
-    IGMP::configureInterface(ie);
+    IGMPv2::configureInterface(ie);
     endEvent(ROUTER_IF_STATE, ie);
 }
 
@@ -111,21 +111,21 @@ void TestIGMP::processIgmpMessage(IGMPMessage *msg)
     {
         case IGMP_MEMBERSHIP_QUERY:
             startEvent("query received", stateMask, ie, &group);
-            IGMP::processIgmpMessage(msg);
+            IGMPv2::processIgmpMessage(msg);
             endEvent(stateMask, ie, &group);
             break;
         case IGMPV2_MEMBERSHIP_REPORT:
             startEvent("report received", stateMask, ie, &group);
-            IGMP::processIgmpMessage(msg);
+            IGMPv2::processIgmpMessage(msg);
             endEvent(stateMask, ie, &group);
             break;
         case IGMPV2_LEAVE_GROUP:
             startEvent("leave received", stateMask, ie, &group);
-            IGMP::processIgmpMessage(msg);
+            IGMPv2::processIgmpMessage(msg);
             endEvent(stateMask, ie, &group);
             break;
         default:
-            IGMP::processIgmpMessage(msg);
+            IGMPv2::processIgmpMessage(msg);
             break;
     }
 }
@@ -134,7 +134,7 @@ void TestIGMP::processHostGroupTimer(cMessage *msg)
 {
     IGMPHostTimerContext *ctx = (IGMPHostTimerContext*)msg->getContextPointer();
     startEvent("timer expired", HOST_GROUP_STATE, ctx->ie, &ctx->hostGroup->groupAddr);
-    IGMP::processHostGroupTimer(msg);
+    IGMPv2::processHostGroupTimer(msg);
     endEvent(HOST_GROUP_STATE, ctx->ie, &ctx->hostGroup->groupAddr);
 }
 
@@ -145,7 +145,7 @@ void TestIGMP::processQueryTimer(cMessage *msg)
     const char *event = routerData && routerData->igmpRouterState == IGMP_RS_QUERIER ? "gen. query timer expired" :
                                                                                        "other querier present timer expired";
     startEvent(event, ROUTER_IF_STATE, ie);
-    IGMP::processQueryTimer(msg);
+    IGMPv2::processQueryTimer(msg);
     endEvent(ROUTER_IF_STATE, ie);
 }
 
@@ -155,7 +155,7 @@ void TestIGMP::processLeaveTimer(cMessage *msg)
     InterfaceEntry *ie = ctx->ie;
     IPv4Address group = ctx->routerGroup->groupAddr;
     startEvent("timer expired", ROUTER_GROUP_STATE, ie, &group);
-    IGMP::processLeaveTimer(msg);
+    IGMPv2::processLeaveTimer(msg);
     endEvent(ROUTER_GROUP_STATE, ie, &group);
 }
 
@@ -163,7 +163,7 @@ void TestIGMP::processRexmtTimer(cMessage *msg)
 {
     IGMPRouterTimerContext *ctx = (IGMPRouterTimerContext*)msg->getContextPointer();
     startEvent("rexmt timer expired", ROUTER_GROUP_STATE, ctx->ie, &ctx->routerGroup->groupAddr);
-    IGMP::processRexmtTimer(msg);
+    IGMPv2::processRexmtTimer(msg);
     endEvent(ROUTER_GROUP_STATE, ctx->ie, &ctx->routerGroup->groupAddr);
 }
 
@@ -182,7 +182,7 @@ void TestIGMP::sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address&
                 out << "send leave"; break;
         }
     }
-    IGMP::sendToIP(msg, ie, dest);
+    IGMPv2::sendToIP(msg, ie, dest);
 }
 
 void TestIGMP::processCommand(const cXMLElement &node)

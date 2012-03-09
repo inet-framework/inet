@@ -35,7 +35,7 @@ module NetworkLayer
     parameters:
         @display("i=block/fork");
         bool proxyARP = default(true);
-        string igmpType = default("IGMP");
+        string igmpType = default("IGMPv2");
     gates:
         input ifIn[] @labels(IPv4Datagram);
         input tcpIn @labels(TCPSegment,IPv4ControlInfo/down);

@@ -31,76 +31,76 @@ class IInterfaceTable;
 class IRoutingTable;
 class NotificationBoard;
 
-enum IGMPRouterState
-{
-    IGMP_RS_INITIAL,
-    IGMP_RS_QUERIER,
-    IGMP_RS_NON_QUERIER,
-};
-
-enum IGMPRouterGroupState
-{
-    IGMP_RGS_NO_MEMBERS_PRESENT,
-    IGMP_RGS_MEMBERS_PRESENT,
-    IGMP_RGS_V1_MEMBERS_PRESENT,
-    IGMP_RGS_CHECKING_MEMBERSHIP,
-};
-
-enum IGMPHostGroupState
-{
-    IGMP_HGS_NON_MEMBER,
-    IGMP_HGS_DELAYING_MEMBER,
-    IGMP_HGS_IDLE_MEMBER,
-};
-
-class INET_API IGMP : public cSimpleModule, protected INotifiable
+class INET_API IGMPv2 : public cSimpleModule, protected INotifiable
 {
   protected:
+    enum RouterState
+    {
+        IGMP_RS_INITIAL,
+        IGMP_RS_QUERIER,
+        IGMP_RS_NON_QUERIER,
+    };
+
+    enum RouterGroupState
+    {
+        IGMP_RGS_NO_MEMBERS_PRESENT,
+        IGMP_RGS_MEMBERS_PRESENT,
+        IGMP_RGS_V1_MEMBERS_PRESENT,
+        IGMP_RGS_CHECKING_MEMBERSHIP,
+    };
+
+    enum HostGroupState
+    {
+        IGMP_HGS_NON_MEMBER,
+        IGMP_HGS_DELAYING_MEMBER,
+        IGMP_HGS_IDLE_MEMBER,
+    };
+
     struct HostGroupData
     {
-        IGMP *owner;
+        IGMPv2 *owner;
         IPv4Address groupAddr;
-        IGMPHostGroupState state;
+        HostGroupState state;
         bool flag;                // true when we were the last host to send a report for this group
         cMessage *timer;
 
-        HostGroupData(IGMP *owner, const IPv4Address &group);
+        HostGroupData(IGMPv2 *owner, const IPv4Address &group);
         virtual ~HostGroupData();
     };
     typedef std::map<IPv4Address, HostGroupData*> GroupToHostDataMap;
 
     struct RouterGroupData
     {
-        IGMP *owner;
+        IGMPv2 *owner;
         IPv4Address groupAddr;
-        IGMPRouterGroupState state;
+        RouterGroupState state;
         cMessage *timer;
         cMessage *rexmtTimer;
         //cMessage *v1HostTimer;
 
-        RouterGroupData(IGMP *owner, const IPv4Address &group);
+        RouterGroupData(IGMPv2 *owner, const IPv4Address &group);
         virtual ~RouterGroupData();
     };
     typedef std::map<IPv4Address, RouterGroupData*> GroupToRouterDataMap;
 
     struct HostInterfaceData
     {
-        IGMP *owner;
+        IGMPv2 *owner;
         GroupToHostDataMap groups;
 
-        HostInterfaceData(IGMP *owner);
+        HostInterfaceData(IGMPv2 *owner);
         virtual ~HostInterfaceData();
     };
     typedef std::map<int, HostInterfaceData*> InterfaceToHostDataMap;
 
     struct RouterInterfaceData
     {
-        IGMP *owner;
+        IGMPv2 *owner;
         GroupToRouterDataMap groups;
-        IGMPRouterState igmpRouterState;
+        RouterState igmpRouterState;
         cMessage *igmpQueryTimer;
 
-        RouterInterfaceData(IGMP *owner);
+        RouterInterfaceData(IGMPv2 *owner);
         virtual ~RouterInterfaceData();
     };
     typedef std::map<int, RouterInterfaceData*> InterfaceToRouterDataMap;
@@ -173,7 +173,7 @@ class INET_API IGMP : public cSimpleModule, protected INotifiable
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void receiveChangeNotification(int category, const cPolymorphic *details);
-    virtual ~IGMP();
+    virtual ~IGMPv2();
 
   protected:
     virtual HostInterfaceData *createHostInterfaceData();
