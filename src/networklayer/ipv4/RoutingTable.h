@@ -253,12 +253,6 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
      * Returns route for a multicast source and multicast group.
      */
     virtual const IPv4MulticastRoute *findBestMatchingMulticastRoute(const IPv4Address &origin, const IPv4Address& group) const;
-
-    /**
-     * Checks if there are multicast listeners on the specified interface for the given
-     * multicast group.
-     */
-    virtual bool hasMulticastListeners(InterfaceEntry *ie, const IPv4Address &origin) const;
     //@}
 
     /** @name Route table manipulation */

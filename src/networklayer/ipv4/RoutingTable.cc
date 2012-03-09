@@ -537,13 +537,6 @@ const IPv4MulticastRoute *RoutingTable::findBestMatchingMulticastRoute(const IPv
     return NULL;
 }
 
-bool RoutingTable::hasMulticastListeners(InterfaceEntry *ie, const IPv4Address &origin) const
-{
-    // TODO implement IGMP and maintain a list of multicast groups for each interface
-    return true;
-}
-
-
 IPv4Route *RoutingTable::getRoute(int k) const
 {
     if (k < (int)routes.size())

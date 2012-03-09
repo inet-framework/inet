@@ -521,7 +521,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE
                 int ttlThreshold = destIE->ipv4Data()->getMulticastTtlThreshold();
                 if (datagram->getTimeToLive() <= ttlThreshold)
                     EV << "Not forwarding to " << destIE->getName() << " (ttl treshold reached)\n";
-                else if (children[i]->isLeaf() && !rt->hasMulticastListeners(destIE, destAddr))
+                else if (children[i]->isLeaf() && !destIE->ipv4Data()->hasMulticastListener(destAddr))
                     EV << "Not forwarding to " << destIE->getName() << " (no listeners)\n";
                 else
                 {
