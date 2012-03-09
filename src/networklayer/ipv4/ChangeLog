@@ -1,3 +1,38 @@
+2012-03-09  Tamas Borbely
+
+	Adapted the IGMPv2 (RFC 2236) implementation received in bug
+	tracker entry #538 with the following modifications:
+
+	1. The module is renamed to IGMPv2.
+	2. Checksum field is deleted from IGMPMessage. Errors modeled
+           with the errorBit field of packets, and erroneous packets
+	   are already dropped by the link layer.
+	3. The state of the IGMP module (timers, state variables, flags)
+	   are stored in the module itself instead of the IPv4InterfaceData.
+	   Joined multicast groups and multicast listeners can be queried
+	   from the IPv4InterfaceData though.
+	4. cMessages are used as timers.
+	5. Multicast routers connected to the IGMPv2 module will receive
+	   only those IGMP packets not processed by the IGMP module itself.
+	   The 'externalRouter' parameter has been replaced by the check
+	   that routerIn/routerOut gates are connected.
+	6. IGMP reports are not sent when joining or leaving link-local
+	   multicast groups (224.0.0.x). These messages are superfluous,
+	   because link-local multicast datagrams are never forwarded.
+	7. Several bug fixes of state transitions of the hosts and routers.
+
+	Tests for the IGMPv2 module can be found in the tests/module
+	directory.
+
+2012-03-08  Tamas Borbely
+
+	Multicast forwarding is turned off by default ('forwardMulticast'
+	parameter of RoutingTable). Only one example used multicast
+	forwarding, and when turned on routers generate too much
+	uninteresting IGMP traffic. Turn it on in multicast routers
+	if you simulate multicast networks by setting the
+	'forwardMulticast' parameter of Router modules.
+
 2012-02-15  Tamas Borbely
 
 	The multicastTtlThreshold field is added to IPv4InterfaceData.
@@ -47,6 +82,28 @@
 	  Only the (new format) multicast table is used. This new 
 	  multicast routing table can only be configured with 
 	  IPv4NetworkConfigurator, routing files don't support it.
+
+2012-02-09  Tamas Borbely
+
+	Now ARP maps multicast IPv4 addresses to multicast MAC addresses
+	according to RFC 1112 section 6.4. Before this change the ARP
+	translated the multicast addresses to Ethernet broadcast
+	(FF:FF:FF:FF:FF:FF) address. The MAC module does not filter
+	the multicast frames though, so IP modules receives the same
+	number of datagrams as earlier.
+
+2012-02-09  Tamas Borbely
+
+	Fix: if an interface joined to a multicast group, then IP passed up
+        all multicast datagrams that was addressed to that group and reached
+	the node. This is wrong, because only those datagrams should be
+	delivered that arrived on an interface joined to the group.
+
+2012-02-09  Tamas Borbely
+
+	Multicast interfaces always join to the 224.0.0.1 (all systems)
+	link-local multicast group on startup. In routers they join to the
+	224.0.0.2 (all routers) group too. 
 
 2012-02-24  ------ inet-1.99.3 released ------
 
