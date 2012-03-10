@@ -43,6 +43,7 @@ import inet.util.TCPDump;
 
 //
 // \IP host with TCP, UDP layers and applications AND EthernetInterface2WithDLDelayMeter.
+// Note that ping application has been removed from the original StandardHost module.
 //
 module StandardHost3WithEthernetInterface2WithDLDelayMeter
 {
@@ -58,7 +59,7 @@ module StandardHost3WithEthernetInterface2WithDLDelayMeter
         string ftpAppType = default("n/a");
         string httpAppType = default("n/a");
         string udpAppType = default("n/a");
-        string videoAppType = default("n/a");        
+        string videoAppType = default("n/a");
         string sctpAppType = default("n/a");
         string tcpType = default("TCP");  // tcp implementation (e.g. TCP, TCP_old, TCP_NSC)
         bool IPForward = default(false);
@@ -96,9 +97,9 @@ module StandardHost3WithEthernetInterface2WithDLDelayMeter
         }
         ftpApp[numFtpApps]: <ftpAppType> like TCPApp2 {
             parameters:
-				port = index+1024;
+                port = index+1024;
                 @display("p=169,54");
-        }        
+        }
         httpApp[numHttpApps]: <httpAppType> like TCPApp2 {
             parameters:
                 port = index+2048; // TODO: Remove the limit in the max. number of ftpApp's (i.e., 1024)
@@ -126,10 +127,6 @@ module StandardHost3WithEthernetInterface2WithDLDelayMeter
         }
         sctp: SCTP {
             @display("p=681,140;i=block/wheelbarrow");
-        }
-        pingApp: PingApp {
-            parameters:
-                @display("p=635,229");
         }
         networkLayer: NetworkLayer {
             parameters:
@@ -170,7 +167,7 @@ module StandardHost3WithEthernetInterface2WithDLDelayMeter
             ftpApp[i].tcpOut --> tcp.appIn++;
             ftpApp[i].tcpIn <-- tcp.appOut++;
         }
-        
+
         for i=0..numHttpApps-1 {
             httpApp[i].tcpOut --> tcp.appIn++;
             httpApp[i].tcpIn <-- tcp.appOut++;
@@ -198,9 +195,6 @@ module StandardHost3WithEthernetInterface2WithDLDelayMeter
         }
         sctp.to_ip --> networkLayer.sctpIn;
         networkLayer.sctpOut --> sctp.from_ip;
-
-        networkLayer.pingOut --> pingApp.pingIn;
-        networkLayer.pingIn <-- pingApp.pingOut;
 
         // connections to network outside
         for i=0..sizeof(pppg)-1 {
