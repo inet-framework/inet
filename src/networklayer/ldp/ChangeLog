@@ -1,3 +1,13 @@
+2012-03-12  Tamas Borbely
+
+	Adapted to change: IPv4 can send a multicast datagram to one
+	interface only. This interface is specified as a socket option
+	or configured in the routing table.
+
+	The LDP module now creates a separate UDP socket for each
+	multicast interface of the node, sets the multicast interface
+	on them, and sends a copy of LDP-Hellos via each socket.
+
 2012-02-24  ------ inet-1.99.3 released ------
 
 2012-01-19  Andras Varga
