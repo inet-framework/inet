@@ -24,7 +24,7 @@ import inet.nodes.access.NgnAccessModem;
 import inet.nodes.access.NgnAccessNode;
 import inet.nodes.access.NgnAccessSplitter;
 import inet.nodes.inet.RouterWithEthernetInterface2;
-import inet.nodes.inet.StandardHost3WithEthernetInterface2;
+//import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2WithDLDelayMeter;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
 import inet.util.BurstMeter;
@@ -83,7 +83,7 @@ network NgnAccess
             gates:
                 ethg[n+1];
         }
-        host[N*n]: StandardHost3WithEthernetInterface2 {
+        host[N*n]: StandardHost3WithEthernetInterface2WithDLDelayMeter {
             parameters:
                 @display("i=device/laptop;p=46,119");
             gates:
@@ -106,7 +106,7 @@ network NgnAccess
 
 
 //
-// 'NgnAccess' network with DelayMeter and BurstMeter to measure frame/packet-level
+// 'NgnAccess' network with both DelayMeter and BurstMeter to measure frame/packet-level
 // statistics.
 //
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
