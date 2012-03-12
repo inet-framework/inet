@@ -1,0 +1,53 @@
+%description:
+Tests UDPSocket::bind() can not be called more than once on a socket.
+
+%file: TestApp.cc
+#include "UDPSocket.h"
+#include "UDPControlInfo_m.h"
+
+namespace UDPSocket_2 {
+
+class TestApp : public cSimpleModule
+{
+    public:
+       TestApp() : cSimpleModule(65536) {}
+    protected:
+        virtual void activity();
+};
+
+Define_Module(TestApp);
+
+void TestApp::activity()
+{
+  UDPSocket s;
+  s.setOutputGate(gate("udpOut"));
+  s.bind(100);
+  s.bind(200); // will fail
+}
+
+}
+
+%file: TestApp.ned
+import inet.applications.IUDPApp;
+
+simple TestApp like IUDPApp
+{
+    gates:
+        input udpIn;
+        output udpOut;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = SimpleTestNetwork
+cmdenv-express-mode = false
+cmdenv-event-banner-details = true
+cmdenv-module-messages = true
+**.client.numUdpApps = 1
+**.client.udpApp[0].typename = "TestApp"
+
+%exitcode: 1
+
+%contains-regex: stdout
+<!> Error in module \(UDP\) SimpleTestNetwork.client.udp .* bind: socket is already bound

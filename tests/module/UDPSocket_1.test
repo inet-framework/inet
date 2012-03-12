@@ -1,0 +1,69 @@
+%description:
+Tests UDPSocket method calls:
+
+1. Socket options can be set before the bind() or connect() call.
+2. connect() can be called more than once.
+3. bind() can be called after connect().
+
+%file: TestApp.cc
+#include "UDPSocket.h"
+#include "UDPControlInfo_m.h"
+
+namespace UDPSocket_1 {
+
+class TestApp : public cSimpleModule
+{
+    public:
+       TestApp() : cSimpleModule(65536) {}
+    protected:
+        virtual void activity();
+};
+
+Define_Module(TestApp);
+
+void TestApp::activity()
+{
+  UDPSocket s;
+  s.setOutputGate(gate("udpOut"));
+  s.setMulticastLoop(false);
+  s.connect(IPvXAddress("10.0.0.1"), 1000);
+  s.bind(100);
+  s.connect(IPvXAddress("10.0.0.2"), 2000);
+}
+
+}
+
+%file: TestApp.ned
+import inet.applications.IUDPApp;
+
+simple TestApp like IUDPApp
+{
+    gates:
+        input udpIn;
+        output udpOut;
+}
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+network = SimpleTestNetwork
+cmdenv-express-mode = false
+cmdenv-message-trace = true
+**.client.numUdpApps = 1
+**.client.udpApp[0].typename = "TestApp"
+
+%contains-regex: stdout
+SENT:   src=SimpleTestNetwork.client.udpApp\[0\] .*  dest=SimpleTestNetwork.client.udp .*   control info: \(UDPSetMulticastLoopCommand\)
+.*
+SENT:   src=SimpleTestNetwork.client.udpApp\[0\] .*  dest=SimpleTestNetwork.client.udp .*   control info: \(UDPConnectCommand\)
+.*
+SENT:   src=SimpleTestNetwork.client.udpApp\[0\] .*  dest=SimpleTestNetwork.client.udp .*   control info: \(UDPBindCommand\)
+.*
+SENT:   src=SimpleTestNetwork.client.udpApp\[0\] .*  dest=SimpleTestNetwork.client.udp .*   control info: \(UDPConnectCommand\)
+
+%contains-regex: stdout
+Socket created: sockId=2 appGateIndex=0 localPort=1025
+.*
+Socket connected: sockId=2 appGateIndex=0 localPort=1025 remotePort=1000 remoteAddr=10.0.0.1 multicastLoop=0
+.*
+Socket connected: sockId=2 appGateIndex=0 localPort=100 remotePort=2000 remoteAddr=10.0.0.2 multicastLoop=0
