@@ -20,7 +20,7 @@ Define_Module(BurstMeter);
 
 void BurstMeter::initialize()
 {
-    maxIFG = par(maxIFG).longValue();
+    maxIFG = par("maxIFG").longValue();
 
     // set "flow-through" reception mode for all input gates
     gate("in")->setDeliverOnReceptionStart(true);
