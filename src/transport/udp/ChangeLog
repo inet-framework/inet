@@ -1,3 +1,13 @@
+2012-03-12  Tamas Borbely
+
+	Changes in the UDP socket API:
+
+	The first call on an UDP socket do not need to be bind() or connect()
+	anymore. It is possible to create a socket and sending data immediately
+	by calling sendTo(). It is also possible to set socket options before
+	calling connect() or bind(). connect() can be called several times.
+	However the bind() call fails if the socket is already bound.
+
 2012-02-14  Tamas Borbely
 
 	Implement IP_MULTICAST_LOOP socket option for UDP sockets.
