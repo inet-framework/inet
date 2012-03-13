@@ -325,7 +325,7 @@
         name="MPLS examples"
         description = "Examples for MPLS support"
         initiallyEnabled = "true"
-        requires = "MPLS"
+        requires = "MPLS Ethernet PPP"
         labels = "routing examples"
         nedPackages = "
                        inet.examples.mpls
