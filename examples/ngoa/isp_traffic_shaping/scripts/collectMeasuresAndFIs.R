@@ -39,10 +39,12 @@ collectMeasuresAndFIs <- function(scalars,
     tmp1['measure.type'] <- rep(measureType, length(tmp1$mean))
 
     ## second, extract performance measures per module and fairness indexes of their means
-    tmp2 <- calculateFainessIndexes(scalars, formulaString, modulePattern, namePattern, colNames, measureType)
+    tmp2 <- calculateFairnessIndexes(scalars, formulaString, modulePattern, namePattern, colNames, measureType)
 
-    ## combine the two data frames into one
-    tmp <- rbind(tmp1, tmp2)
+    ## combine the two data frames into one after sorting
+    tmp1 <- sort_df(tmp1, vars=c('N', 'dr', 'mr', 'bs', 'n', 'name'))
+    tmp2 <- sort_df(tmp2, vars=c('N', 'dr', 'mr', 'bs', 'n', 'name'))
+    tmp1['fairness.index'] <- tmp2$fairness.index
 
-    return(tmp)
+    return(tmp1)
 }
