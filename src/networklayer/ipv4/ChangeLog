@@ -1,6 +1,17 @@
 2012-02-14  Tamas Borbely
 
+	Implement IP_MULTICAST_LOOP socket option.
+
+	If IPv4ControlInfo.multicastLoop is true, then a copy of the
+	sent multicast datagrams will be looped back to local sockets.
+	The default value of the option is 'true'.
+
+2012-02-14  Tamas Borbely
+
 	Changes in IPv4 multicast routing:
+	- We now use reverse path forwarding (routing entry contains
+	  source address/mask, multicast group, parent (incoming) interface
+	  and the set of child (outgoing) interfaces).
 	- The new routing table enables to specify a separate multicast
 	  routing tree per source network and multicast group. (Old
 	  implementation used a common tree for each source.) The multicast
@@ -13,6 +24,22 @@
 	- When HL does not specify the multicast interface for outgoing
 	  datagrams, then it is selected according to the routing table
 	  or the source address of the datagram.
+
+	Change from previous behavior: 
+	- packets sent to a multicast address from higher layer: it used
+	  to go out on each interface that had a matching route in the
+	  routing table (unless mcast interface was specified by HL).
+	  Now it only goes out on the first match route's interface;
+	  if there's no match it goes out on the 1st multicast interface
+	  (unless mcast interface was specified by HL). If you want to
+	  send on multiple interfaces, you have to send multiple packets
+	  from the higher layer.
+
+	- multicast forwarding: no longer takes into account the routes
+	  in the unticast routing table that have mcast destinations.
+	  Only the (new format) multicast table is used. This new 
+	  multicast routing table can only be configured with 
+	  IPv4NetworkConfigurator, routing files don't support it.
 
 2012-02-24  ------ inet-1.99.3 released ------
 
