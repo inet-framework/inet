@@ -25,15 +25,6 @@
 #include "IRoutingTable.h"
 
 
-IPv4Route::IPv4Route()
-{
-    rt = NULL;
-    interfacePtr = NULL;
-    metric = 0;
-    type = DIRECT;
-    source = MANUAL;
-}
-
 std::string IPv4Route::info() const
 {
     std::stringstream out;
@@ -74,4 +65,96 @@ void IPv4Route::changed(int fieldCode)
 {
     if (rt)
         rt->routeChanged(this, fieldCode);
+}
+
+IPv4MulticastRoute::~IPv4MulticastRoute()
+{
+    for (ChildInterfaceVector::iterator it = children.begin(); it != children.end(); ++it)
+        delete *it;
+    children.clear();
+}
+
+std::string IPv4MulticastRoute::info() const
+{
+    std::stringstream out;
+
+    out << "origin:"; if (origin.isUnspecified()) out << "*  "; else out << origin << "  ";
+    out << "mask:"; if (originNetmask.isUnspecified()) out << "*  "; else out << originNetmask << "  ";
+    out << "group:"; if (group.isUnspecified()) out << "*  "; else out << group << "  ";
+    out << "metric:" << metric << " ";
+    out << "parent:"; if (!parent) out << "*  "; else out << parent->getName() << "  ";
+    out << "children:";
+    for (unsigned int i = 0; i < children.size(); ++i)
+    {
+        if (i > 0)
+            out << ",";
+        out << children[i]->getInterface()->getName();
+    }
+
+    switch (source)
+    {
+        case MANUAL:       out << " MANUAL"; break;
+        case DVMRP:        out << " DVRMP"; break;
+        case PIM_SM:       out << " PIM-SM"; break;
+        default:           out << " ???"; break;
+    }
+
+    return out.str();
+}
+
+std::string IPv4MulticastRoute::detailedInfo() const
+{
+    return info();
+}
+
+
+
+bool IPv4MulticastRoute::addChild(InterfaceEntry *ie, bool isLeaf)
+{
+    ChildInterfaceVector::iterator it;
+    for (it = children.begin(); it != children.end(); ++it)
+    {
+        if ((*it)->getInterface() == ie)
+            break;
+    }
+
+    if (it != children.end())
+    {
+        if ((*it)->isLeaf() != isLeaf)
+        {
+            delete *it;
+            *it = new ChildInterface(ie, isLeaf);
+            changed(F_CHILDREN);
+            return true;
+        }
+        else
+            return false;
+    }
+    else
+    {
+        children.push_back(new ChildInterface(ie, isLeaf));
+        changed(F_CHILDREN);
+        return true;
+    }
+}
+
+bool IPv4MulticastRoute::removeChild(InterfaceEntry *ie)
+{
+    for (ChildInterfaceVector::iterator it = children.begin(); it != children.end(); ++it)
+    {
+        if ((*it)->getInterface() == ie)
+        {
+            delete *it;
+            children.erase(it);
+            changed(F_CHILDREN);
+            return true;
+        }
+    }
+    return false;
+}
+
+void IPv4MulticastRoute::changed(int fieldCode)
+{
+    if (rt)
+        rt->multicastRouteChanged(this, fieldCode);
 }

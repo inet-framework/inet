@@ -79,10 +79,6 @@ class INET_API IPv4 : public QueueBase
     // utility: show current statistics above the icon
     virtual void updateDisplayString();
 
-    // utility: true if the incoming interface is the same as the
-    //          outgoing interface of the shortest path to the source
-    virtual bool receivedOnTheShortestPath(IPv4Datagram *datagram);
-
     /**
      * Encapsulate packet coming from higher layers into IPv4Datagram, using
      * the given control info. Override if you subclassed controlInfo and/or
@@ -130,9 +126,14 @@ class INET_API IPv4 : public QueueBase
     virtual void routeLocalBroadcastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE);
 
     /**
+     * Determines the output interface for the given multicast datagram.
+     */
+    virtual InterfaceEntry *determineOutgoingInterfaceForMulticastDatagram(IPv4Datagram *datagram, InterfaceEntry *multicastIFOption);
+
+    /**
      * Forwards packets to all multicast destinations, using fragmentAndSend().
      */
-    virtual void routeMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE);
+    virtual void forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE);
 
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the

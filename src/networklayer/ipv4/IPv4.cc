@@ -126,13 +126,6 @@ InterfaceEntry *IPv4::getSourceInterfaceFrom(cPacket *msg)
     return g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
 }
 
-bool IPv4::receivedOnTheShortestPath(IPv4Datagram *datagram)
-{
-    InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
-    InterfaceEntry *shortestPathIE = rt->getInterfaceForDestAddr(datagram->getSrcAddress());
-    return (shortestPathIE==NULL || fromIE==shortestPathIE);
-}
-
 void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromIE)
 {
     ASSERT(datagram);
@@ -173,27 +166,15 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
     }
     else if (destAddr.isMulticast())
     {
-        if (!receivedOnTheShortestPath(datagram))
-        {
-            // DVMRP: process datagram only if sent locally or arrived on the shortest
-            // route (provided routing table already contains srcAddr); otherwise
-            // discard and continue.
-            // FIXME count dropped
-            EV << "Packet dropped.\n";
-            delete datagram;
-        }
-        else
-        {
-            // check for local delivery
-            if (fromIE->ipv4Data()->isMemberOfMulticastGroup(destAddr))
-                reassembleAndDeliver(datagram->dup());
+        // check for local delivery
+        if (fromIE->ipv4Data()->isMemberOfMulticastGroup(destAddr))
+            reassembleAndDeliver(datagram->dup());
 
-            // don't forward if IP forwarding is off, or if dest address is link-scope
-            if (!rt->isIPForwardingEnabled() || destAddr.isLinkLocalMulticast())
-                delete datagram;
-            else
-                routeMulticastPacket(datagram, NULL, fromIE);
-        }
+        // don't forward if IP forwarding is off, or if dest address is link-scope
+        if (!rt->isIPForwardingEnabled() || destAddr.isLinkLocalMulticast())
+            delete datagram;
+        else
+            forwardMulticastPacket(datagram, fromIE);
     }
     else
     {
@@ -311,8 +292,21 @@ void IPv4::handleMessageFromHL(cPacket *msg)
     EV << "Sending datagram `" << datagram->getName() << "' with dest=" << destAddr << "\n";
 
     if (datagram->getDestAddress().isMulticast())
-        routeMulticastPacket(datagram, destIE, NULL);
-    else
+    {
+        // TODO loop back
+        destIE = determineOutgoingInterfaceForMulticastDatagram(datagram, destIE);
+        if (destIE)
+        {
+            numMulticast++;
+            fragmentAndSend(datagram, destIE, destAddr);
+        }
+        else
+        {
+            EV << "No multicast interface, packet dropped\n";
+            delete datagram;
+        }
+    }
+    else // unicast and broadcast
     {
 #ifdef WITH_MANET
         if (manetRouting)
@@ -335,6 +329,44 @@ void IPv4::handleMessageFromHL(cPacket *msg)
             routeUnicastPacket(datagram, destIE, nextHopAddress);
     }
 }
+
+/* Choose the outgoing interface for the muticast datagram:
+ *   1. use the interface specified by MULTICAST_IF socket option (received in the control info)
+ *   2. lookup the destination address in the routing table
+ *   3. if no route, choose the interface according to the source address
+ *   4. or if the source address is unspecified, choose the first MULTICAST interface
+ */
+InterfaceEntry *IPv4::determineOutgoingInterfaceForMulticastDatagram(IPv4Datagram *datagram, InterfaceEntry *multicastIFOption)
+{
+    InterfaceEntry *ie = NULL;
+    if (multicastIFOption)
+    {
+        ie = multicastIFOption;
+        EV << "multicast packet routed by socket option via output interface " << ie->getName() << "\n";
+    }
+    if (!ie)
+    {
+        IPv4Route *route = rt->findBestMatchingRoute(datagram->getDestAddress());
+        if (route)
+            ie = route->getInterface();
+        if (ie)
+            EV << "multicast packet routed by routing table via output interface " << ie->getName() << "\n";
+    }
+    if (!ie)
+    {
+        ie = rt->getInterfaceByAddress(datagram->getSrcAddress());
+        if (ie)
+            EV << "multicast packet routed by source address via output interface " << ie->getName() << "\n";
+    }
+    if (!ie)
+    {
+        ie = ift->getFirstMulticastInterface();
+        if (ie)
+            EV << "multicast packet routed via the first multicast interface " << ie->getName() << "\n";
+    }
+    return ie;
+}
+
 
 void IPv4::routeUnicastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, IPv4Address destNextHopAddr)
 {
@@ -423,37 +455,37 @@ void IPv4::routeLocalBroadcastPacket(IPv4Datagram *datagram, InterfaceEntry *des
 }
 
 
-void IPv4::routeMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, InterfaceEntry *fromIE)
+void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE)
 {
-    IPv4Address destAddr = datagram->getDestAddress();
+    const IPv4Address &origin = datagram->getSrcAddress();
+    const IPv4Address &destAddr = datagram->getDestAddress();
     ASSERT(destAddr.isMulticast());
 
-    EV << "Routing multicast datagram `" << datagram->getName() << "' with dest=" << destAddr << "\n";
+    EV << "Forwarding multicast datagram `" << datagram->getName() << "' with dest=" << destAddr << "\n";
 
     numMulticast++;
 
-    // routed explicitly via IP_MULTICAST_IF
-    if (destIE!=NULL)
+    const IPv4MulticastRoute *route = rt->findBestMatchingMulticastRoute(origin, destAddr);
+    if (!route)
     {
-        EV << "multicast packet explicitly routed via output interface " << destIE->getName() << endl;
-        fragmentAndSend(datagram, destIE, destAddr);
+        EV << "No route, packet dropped.\n";
+        delete datagram;
+    }
+    else if (fromIE != route->getParent())
+    {
+        EV << "Did not arrive on parent interface, packet dropped.\n";
+        delete datagram;
     }
     else
     {
         // copy original datagram for multiple destinations
-        MulticastRoutes routes = rt->getMulticastRoutesFor(destAddr);
-        for (unsigned int i=0; i<routes.size(); i++)
+        const IPv4MulticastRoute::ChildInterfaceVector &children = route->getChildren();
+        for (unsigned int i=0; i<children.size(); i++)
         {
-            InterfaceEntry *destIE = routes[i].interf;
-
-            // don't forward to input port
-            if (destIE && destIE!=fromIE)
-            {
-                IPv4Address nextHopAddr = routes[i].gateway;
-                fragmentAndSend(datagram->dup(), destIE, nextHopAddr);
-            }
+            InterfaceEntry *destIE = children[i]->getInterface();
+            if (!children[i]->isLeaf() || rt->hasMulticastListeners(destIE, destAddr))
+                fragmentAndSend(datagram->dup(), destIE, destAddr);
         }
-
         // only copies sent, delete original datagram
         delete datagram;
     }

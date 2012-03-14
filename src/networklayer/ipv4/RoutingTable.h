@@ -79,13 +79,20 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
 
     IPv4Address routerId;
     bool IPForward;
+    bool multicastForward;
 
     //
     // Routes:
     //
     typedef std::vector<IPv4Route *> RouteVector;
     RouteVector routes;          // Unicast route array, sorted by netmask desc, dest asc, metric asc
-    RouteVector multicastRoutes; // Multicast route array
+
+    typedef std::vector<IPv4MulticastRoute*> MulticastRouteVector;
+    MulticastRouteVector multicastRoutes; // Multicast route array, sorted by netmask desc, origin asc, metric asc
+
+    // for convenience
+    typedef IPv4MulticastRoute::ChildInterface ChildInterface;
+    typedef IPv4MulticastRoute::ChildInterfaceVector ChildInterfaceVector;
 
     // routing cache: maps destination address to the route
     typedef std::map<IPv4Address, IPv4Route *> RoutingCache;
@@ -119,12 +126,14 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     // helper for sorting routing table, used by addRoute()
     static bool routeLessThan(const IPv4Route *a, const IPv4Route *b);
 
-    // helper functions:
-    bool deleteInterfaceRoutesFrom(RoutingTable::RouteVector &vector, InterfaceEntry *entry);
-    bool deleteInvalidRoutesFrom(RoutingTable::RouteVector &vector);
+    // helper for sorting multicast routing table, used by addMulticastRoute()
+    static bool multicastRouteLessThan(const IPv4MulticastRoute *a, const IPv4MulticastRoute *b);
 
+    // helper functions:
     void internalAddRoute(IPv4Route *entry);
     IPv4Route *internalRemoveRoute(IPv4Route *entry);
+    void internalAddMulticastRoute(IPv4MulticastRoute *entry);
+    IPv4MulticastRoute *internalRemoveMulticastRoute(IPv4MulticastRoute *entry);
 
   public:
     RoutingTable();
@@ -170,6 +179,11 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
      * IPv4 forwarding on/off
      */
     virtual bool isIPForwardingEnabled()  {return IPForward;}
+
+    /**
+     * IPv4 multicast forwarding on/off
+     */
+    virtual bool isMulticastForwardingEnabled() { return multicastForward; }
 
     /**
      * Returns routerId.
@@ -231,9 +245,15 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     virtual bool isLocalMulticastAddress(const IPv4Address& dest) const;
 
     /**
-     * Returns routes for a multicast address.
+     * Returns route for a multicast source and multicast group.
      */
-    virtual MulticastRoutes getMulticastRoutesFor(const IPv4Address& dest) const;
+    virtual const IPv4MulticastRoute *findBestMatchingMulticastRoute(const IPv4Address &origin, const IPv4Address& group) const;
+
+    /**
+     * Checks if there are multicast listeners on the specified interface for the given
+     * multicast group.
+     */
+    virtual bool hasMulticastListeners(InterfaceEntry *ie, const IPv4Address &origin) const;
     //@}
 
     /** @name Route table manipulation */
@@ -243,7 +263,7 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
      * Returns the total number of routes (unicast, multicast, plus the
      * default route).
      */
-    virtual int getNumRoutes() const;
+    virtual int getNumRoutes() const { return routes.size(); }
 
     /**
      * Returns the kth route.
@@ -276,6 +296,36 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     virtual bool deleteRoute(IPv4Route *entry);
 
     /**
+     * Returns the total number of multicast routes.
+     */
+    virtual int getNumMulticastRoutes() const { return multicastRoutes.size(); }
+
+    /**
+     * Returns the kth multicast route.
+     */
+    virtual IPv4MulticastRoute *getMulticastRoute(int k) const { return k < (int)multicastRoutes.size() ? multicastRoutes[k] : NULL; }
+
+    /**
+     * Adds a multicast route to the routing table. Routes are allowed to be modified
+     * while in the routing table. (There is a notification mechanism that
+     * allows routing table internals to be updated on a routing entry change.)
+     */
+    virtual void addMulticastRoute(IPv4MulticastRoute *entry);
+
+    /**
+     * Removes the given route from the routing table, and returns it.
+     * NULL is returned of the route was not in the routing table.
+     */
+    virtual IPv4MulticastRoute *removeMulticastRoute(IPv4MulticastRoute *entry);
+
+    /**
+     * Deletes the given multicast route from the routing table.
+     * Returns true if the route was deleted, and false if it was
+     * not in the routing table.
+     */
+    virtual bool deleteMulticastRoute(IPv4MulticastRoute *entry);
+
+    /**
      * Deletes invalid routes from the routing table. Invalid routes are those
      * where the isValid() method returns false.
      */
@@ -292,6 +342,13 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
      * notifications.
      */
     virtual void routeChanged(IPv4Route *entry, int fieldCode);
+
+    /**
+     * To be called from multicast route objects whenever a field changes. Used for
+     * maintaining internal data structures and firing "routing table changed"
+     * notifications.
+     */
+    virtual void multicastRouteChanged(IPv4MulticastRoute *entry, int fieldCode);
     //@}
 };
 

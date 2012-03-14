@@ -52,6 +52,7 @@ simple RoutingTable
                           // notation; specify "auto" to select the highest
                           // interface address; should be left empty ("") for hosts
         bool IPForward = default(true);  // turns IP forwarding on/off
+        bool forwardMulticast = default(IPForward); // turns multicast forwarding on/off
         string routingFile = default("");  // routing table file name
         @display("i=block/table");
 }
