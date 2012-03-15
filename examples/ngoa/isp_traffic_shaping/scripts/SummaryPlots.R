@@ -108,7 +108,7 @@ if (.resp == 'y') {
                                         # total number of (scalar) files to process
         .n_repetitions <- 10    # number of repetitions per experiment
         .n_experiments <- ceiling(.n_totalFiles/.n_repetitions)   # number of experiments
-        .n_files <- .n_totalFiles/.n_experiments  # number of files per experiment
+        .n_files <- ceiling(.n_totalFiles/.n_experiments)   # number of files per experiment
         .dfs <- list()  # list of data frames from experiments
         .fileNames <- rep('', .n_files)  # vector of file names
         for (.i in 1:.n_experiments) {
@@ -212,7 +212,7 @@ if (.resp == 'y') {
                                         # total number of (scalar) files to process
         .n_repetitions <- 10    # number of repetitions per experiment
         .n_experiments <- ceiling(.n_totalFiles/.n_repetitions)   # number of experiments
-        .n_files <- .n_totalFiles/.n_experiments  # number of files per experiment
+        .n_files <- ceiling(.n_totalFiles/.n_experiments)   # number of files per experiment
         .dfs <- list()  # list of data frames from experiments
         .fileNames <- rep('', .n_files)  # vector of file names
         for (.i in 1:.n_experiments) {
@@ -348,7 +348,7 @@ if (.resp == 'y') {
                                         # total number of (scalar) files to process
         .n_repetitions <- 10    # number of repetitions per experiment
         .n_experiments <- ceiling(.n_totalFiles/.n_repetitions)   # number of experiments
-        .n_files <- .n_totalFiles/.n_experiments  # number of files per experiment
+        .n_files <- ceiling(.n_totalFiles/.n_experiments)   # number of files per experiment
         .dfs <- list()  # list of data frames from experiments for performances measures
         .dfs_fi <- list()  # list of data frames from experiments for fairness indexes
         .fileNames <- rep('', .n_files)  # vector of file names
