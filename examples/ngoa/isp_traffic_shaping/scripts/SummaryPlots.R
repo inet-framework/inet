@@ -374,7 +374,7 @@ if (.resp == 'y') {
                                         c('N', 'dr', 'mr', 'bs', 'n'),
                                         'ftp')
             .tmp_ftp_fi <- calculateFairnessIndexes(.scalars,
-                                                    "experiment+measurement+N+dr+mr+bs+n+name ~ .",
+                                                    "N+dr+mr+bs+n+name ~ .",
                                                     '.*\\.ftpApp.*',
                                                     '(average session delay|average session throughput|mean session transfer rate|90th-sessionDelay:percentile|95th-sessionDelay:percentile|99th-sessionDelay:percentile)',
                                                     c('N', 'dr', 'mr', 'bs', 'n'),
@@ -387,7 +387,7 @@ if (.resp == 'y') {
                                          c('N', 'dr', 'mr', 'bs', 'n'),
                                          'http')
             .tmp_http_fi <- calculateFairnessIndexes(.scalars,
-                                                     "experiment+measurement+N+dr+mr+bs+n+name ~ .",
+                                                     "N+dr+mr+bs+n+name ~ .",
                                                      '.*\\.httpApp.*',
                                                      '(average session delay|average session throughput|mean session transfer rate|90th-sessionDelay:percentile|95th-sessionDelay:percentile|99th-sessionDelay:percentile)',
                                                      c('N', 'dr', 'mr', 'bs', 'n'),
@@ -400,7 +400,7 @@ if (.resp == 'y') {
                                           c('N', 'dr', 'mr', 'bs', 'n'),
                                           'video')
             .tmp_video_fi <- calculateFairnessIndexes(.scalars,
-                                                      "experiment+measurement+N+dr+mr+bs+n+name ~ .",
+                                                      "N+dr+mr+bs+n+name ~ .",
                                                       '.*\\.videoApp.*',
                                                       'decodable frame rate',
                                                       c('N', 'dr', 'mr', 'bs', 'n'),
