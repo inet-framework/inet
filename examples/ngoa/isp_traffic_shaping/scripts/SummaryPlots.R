@@ -508,7 +508,7 @@ if (.resp == 'y') {
                     .df <- subset(.sa_tbf_fi.df, dr==.dr.range[.i] & mr==.mr.range[.j] & name==.measure[.k] & measure.type==.measure.type[.k], select=c(4, 5, 7))
                     is.na(.df) <- is.na(.df) # remove NaNs
                     ## if (length(.df$fairness.index) > length(unique(.df$bs))) {
-                        .p <- ggplot(data=.df, aes(group=bs, colour=factor(bs), x=n, y=fairness.index)) + geom_line() + scale_y_continuous()
+                        .p <- ggplot(data=.df, aes(group=bs, colour=factor(bs), x=n, y=fairness.index)) + geom_line() + scale_y_continuous(limits=c(0.75, 1))
                     ## }
                     .p <- .p + xlab("Number of Users per ONU (n)") + ylab(paste("Fairness Index of ", .labels.measure[.k], sep=""))
                     .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=fairness.index), size=.pt_size) + scale_shape_manual("Burst Size\n[Byte]", values=0:9)
