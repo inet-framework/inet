@@ -55,7 +55,8 @@ void MovingMobilityBase::initialize(int stage)
 
 void MovingMobilityBase::moveAndUpdate()
 {
-    if (lastUpdate != simTime()) {
+    simtime_t now = simTime();
+    if (nextChange == now || lastUpdate != now) {
         move();
         lastUpdate = simTime();
         emitMobilityStateChangedSignal();
