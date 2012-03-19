@@ -95,7 +95,7 @@ module IPv4MediumLAN
             switch.ethg++ <--> cable <--> host[i].ethg++;
         }
 
-        switch.ethg++ <--> router.ethg++;
+        switch.ethg++ <--> cable <--> router.ethg++;
         router.ethg++ <--> ethg;
 
         for i=0..h-1 {
@@ -158,7 +158,7 @@ module IPv4LargeLAN
             switch.ethg++ <--> cable <--> host[i].ethg++;
         }
 
-        switch.ethg++ <--> router.ethg++;
+        switch.ethg++ <--> cable <--> router.ethg++;
         router.ethg++ <--> ethg;
 
         for i=0..h-1 {
