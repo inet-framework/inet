@@ -137,7 +137,7 @@
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility4 -r 0,        10000s,          5f8d-4970
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility5 -r 0,        10000s,          5f8d-4970
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility6 -r 0,        10000s,          122f-0d91
-/examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             4555-7aca
+/examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             7496-6713
 /examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             8907-2472
 /examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50s,             dcb7-0deb
 /examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             cfa2-62ca

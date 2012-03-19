@@ -129,6 +129,17 @@ void LDP::initialize(int stage)
     // bind UDP socket
     udpSocket.setOutputGate(gate("udpOut"));
     udpSocket.bind(LDP_PORT);
+    for (int i = 0; i < ift->getNumInterfaces(); ++i)
+    {
+        InterfaceEntry *ie = ift->getInterface(i);
+        if (ie->isMulticast())
+        {
+            udpSockets.push_back(UDPSocket());
+            udpSockets.back().setOutputGate(gate("udpOut"));
+            udpSockets.back().setMulticastLoop(false);
+            udpSockets.back().setMulticastOutputInterface(ie->getInterfaceId());
+        }
+    }
 
     // start listening for incoming TCP conns
     EV << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
@@ -410,7 +421,16 @@ void LDP::sendHelloTo(IPv4Address dest)
     //hello->setTbit(...);
     hello->addPar("color") = LDP_HELLO_TRAFFIC;
 
-    udpSocket.sendTo(hello, dest, LDP_PORT);
+    if (dest.isMulticast())
+    {
+        for (int i = 0; i < (int)udpSockets.size(); ++i)
+        {
+            LDPHello *msg = i== (int)udpSockets.size() - 1 ? hello : hello->dup();
+            udpSockets[i].sendTo(msg, dest, LDP_PORT);
+        }
+    }
+    else
+        udpSocket.sendTo(hello, dest, LDP_PORT);
 }
 
 void LDP::processHelloTimeout(cMessage *msg)
