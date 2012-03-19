@@ -1,0 +1,2 @@
+Attempt to create an IPv6NetworkConfigurator by making address size a template parameter.
+Based on an intermediate (read: very out-of-date) snapshot of IPv4NetworkConfigurator.

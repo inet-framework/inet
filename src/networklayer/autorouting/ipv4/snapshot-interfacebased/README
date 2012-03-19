@@ -1,0 +1,2 @@
+A version that builds the graph from network *interfaces* as vertices, not from hosts/routers.
+Based on an intermediate (read: very out-of-date) snapshot of IPv4NetworkConfigurator.
