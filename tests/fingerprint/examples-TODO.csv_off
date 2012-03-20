@@ -13,6 +13,7 @@
 
 ###/examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,           0   ,# not a complete simulations, defaults.ini included by other ini files
 
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0,              1s,              0    # cpu time limit exceeded during network initialization
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSCfreebsd__NSCfreebsd -r 0, 100s,          0   ,# freebsd NSC stack works on 32 bit system only
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSCfreebsd -r 0,   100s,          0   ,# freebsd NSC stack works on 32 bit system only
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClwip__inet -r 0,          100s,          0   ,# lwip NSC stack works on 32 bit system only

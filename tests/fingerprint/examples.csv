@@ -62,6 +62,15 @@
 /examples/inet/flatnet/,             -f fingerprints.ini -c General -r 0,           200s,            42ad-7621
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            42ad-7621
 
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1 -r 0,                 10000s,          784c-9d0e
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts16 -r 0,                10000s,          b1ee-fde9
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts256 -r 0,               20s,             c5af-3388
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1280 -r 0,              1s,              2420-ee34
+# /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0,              1s,              0    # cpu time limit exceeded during 0s simtime
+/examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          fbb1-7e6b
+
+/examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             3175-7dba
+
 /examples/inet/kidsnw1/,             -f omnetpp.ini -c General -r 0,                1000s,           0e68-ccde
 
 /examples/inet/multicast/,           -f omnetpp.ini -c General -r 0,                2000s,           d95c-fe95
