@@ -137,11 +137,7 @@
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           9c4f-d757
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           b2e0-2ac0    # unstable fingerprint
 
-/examples/manetrouting/fg80211/,     -f omnetpp.ini -c General -r 0,                100s,            af47-aca8
-/examples/manetrouting/fg80211/ini/, -f Mob_DSR_omnetpp.ini -c General -r 0,        100s,            6415-38a7
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c General -r 0,                25s,             5289-7d5e
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c General -r 0,                40s,             afe9-2047
-/examples/manetrouting/net80211_control/, -f omnetpp.ini -c General -r 0,                10s,             82e9-7b6f
+### /examples/manetrouting/* : see manet.csv
 
 # /examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    100s,            d809-4d5a    # unstable fingerprint
 
