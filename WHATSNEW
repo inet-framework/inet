@@ -4,6 +4,94 @@ Recent changes in the INET Framework
 INET-1.99.4 (March 20, 2012)
 ----------------------------
 
+This version contains mainly bugfixes, plus some features that did not make
+into the previous release. Requires OMNeT++ 4.2 (version 4.2.1 suggested).
+
+    - Added IPv4NetworkConfigurator, a new network configurator for IPv4
+
+      This is intended to replace both routing files (.irt/.mrt) and
+      specialized network configurators like FlatNetworkConfigurator,
+      and do much more.
+
+      Covers address assignment (manual, automatic), adding manual routes,
+      setting up static routing, optimizing the routing tables, etc.
+      Unlike FlatNetworkConfigurator, it will generate per-interface
+      addresses. Wireless networks are also supported.
+
+    - Added an IGMPv2 implementation, based on code contributed by Jesse Jones
+
+    Changes in IPv4 multicast routing:
+    - We now use reverse path forwarding (routing entry contains
+      source address/mask, multicast group, parent (incoming) interface
+      and the set of child (outgoing) interfaces).
+    - The new routing table enables to specify a separate multicast
+      routing tree per source network and multicast group. (Old
+      implementation used a common tree for each source.) The multicast
+      routing tree is represented by IPv4MulticastRoute entries.
+    - IRoutingTable has been extended with methods manipulating the
+      multicast routing entries. Notifications are generated, when
+      the multicast routing table changes.
+    - IPv4 multicast routing algorithm uses the multicast routes
+      for forwarding decisions.
+    - When HL does not specify the multicast interface for outgoing
+      datagrams, then it is selected according to the routing table
+      or the source address of the datagram.
+
+    Change from previous behavior:
+    - packets sent to a multicast address from higher layer: it used
+      to go out on each interface that had a matching route in the
+      routing table (unless mcast interface was specified by HL).
+      Now it only goes out on the first match route's interface;
+      if there's no match it goes out on the 1st multicast interface
+      (unless mcast interface was specified by HL). If you want to
+      send on multiple interfaces, you have to send multiple packets
+      from the higher layer.
+
+    - multicast forwarding: no longer takes into account the routes
+      in the unticast routing table that have mcast destinations.
+      Only the (new format) multicast table is used. This new
+      multicast routing table can only be configured with
+      IPv4NetworkConfigurator, routing files don't support it.
+    - mobility: fixed infinite loop when nextChange is set to current
+      simulation time
+
+    - base: Added createNode(), createLink() factory methods to Topology class.
+
+    - Enhancements in IPvXAddressResolver. The new resolver allows you
+      to specify an interface based on which module the interface is
+      connected to. 
+
+    - Added a RoutingTableRecorder module that records all the changes
+      in the routing table to a file.
+
+    - OSPF & BGP fix:
+        - gateway is now correcty set on routing table entries.
+        - eliminated redundant nextHop field from routing table entries
+
+    - Fixed routing table change notifications.
+
+    - Added printMulticastRoutingTable() to IRoutingTable
+
+    - Added IPingApp interface and support for more than one PingApp
+      in a host.
+
+    - Changes in the UDP socket API:
+
+      The first call on an UDP socket do not need to be bind() or connect()
+      anymore. It is possible to create a socket and sending data immediately
+      by calling sendTo(). It is also possible to set socket options before
+      calling connect() or bind(). connect() can be called several times.
+      However the bind() call fails if the socket is already bound.
+
+    - LDP: The LDP module now creates a separate UDP socket for each
+      multicast interface of the node, sets the multicast interface
+      on them, and sends a copy of LDP-Hellos via each socket.
+
+    - ICMP messages are correctly handled now in all TCP implementations
+      (in LwIP and NSC, too)
+
+See ChangeLogs in individual source folders for more information.
+
 
 INET-1.99.3 (Feb 22, 2012)
 --------------------------
