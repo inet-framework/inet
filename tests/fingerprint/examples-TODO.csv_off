@@ -1,11 +1,6 @@
 # workingdir,                        args,                                          simtimelimit,  fingerprint
 ###/examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  -1s,           0   ,# interactive config, needed a *.numHosts parameter
 ###/examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping2 -r 0,                  -1s,           0   ,# interactive config, needed a *.numHosts parameter
-###/examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             -1s,           0   ,# interactive config, needed a *.numHosts parameter
-###/examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                  -1s,           0   ,# interactive config, needed a *.numHosts parameter
-###/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   -1s,           0   ,# interactive config, needed a *.numHosts parameter
-###/examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,           0   ,# not a complete simulations, defaults.ini included by other ini files
-###/examples/ipv6/nclients/,            -f omnetpp.ini -c General -r 0,                1000s,         0   ,# not a complete simulations, choose ETH or PPP config
 
 /examples/bgpv4/BGPOpen/,            -f omnetpp.ini -c config1 -r 0,                1000s,         0   ,# <!> Error in module (MessageChecker) Net.A.snifferIn (id=8) during finalization: Several message(s) have to be checked.
 /examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0,                1000s,         0   ,# <!> Error in module (MessageChecker) BGPTest.A.snifferIn (id=11) during finalization: Several message(s) have to be checked.
@@ -16,9 +11,13 @@
 /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_Traffic -r 0,         77.77s,        0   ,# pcap devices not supported
 /examples/emulation/traceroute/,     -f omnetpp.ini -c General -r 0,                77.77s,        0   ,# pcap devices not supported
 
+###/examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,           0   ,# not a complete simulations, defaults.ini included by other ini files
+
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSCfreebsd__NSCfreebsd -r 0, 100s,          0   ,# freebsd NSC stack works on 32 bit system only
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSCfreebsd -r 0,   100s,          0   ,# freebsd NSC stack works on 32 bit system only
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClwip__inet -r 0,          100s,          0   ,# lwip NSC stack works on 32 bit system only
+
+###/examples/ipv6/nclients/,            -f omnetpp.ini -c General -r 0,                1000s,         0   ,# not a complete simulations, choose ETH or PPP config
 
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility2 -r 0,    1000s,         0   ,# CPU time limit # do not move nodes, simtime always 0 at all events
 
@@ -27,5 +26,8 @@
 
 /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                1000s,         0   ,# <!> Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #23916, t=45.089338342798: check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
 
+###/examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             -1s,           0   ,# interactive config, needed a *.numHosts parameter
+###/examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                  -1s,           0   ,# interactive config, needed a *.numHosts parameter
+###/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   -1s,           0   ,# interactive config, needed a *.numHosts parameter
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,      0.25s,           2ef3-dcae    # you must run $INET/examples/wireless/synchronized/generate-routing-files.pl before run this example
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,         0.25s,           ef61-26be    # you must run $INET/examples/wireless/synchronized/generate-routing-files.pl before run this example
