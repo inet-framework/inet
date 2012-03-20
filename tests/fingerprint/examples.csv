@@ -48,7 +48,7 @@
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,              50000s,          bfae-f1e3
 
 /examples/inet/ber/,                 -f omnetpp.ini -c General -r 0,                20s,             2e35-3638
-/examples/inet/bulktransfer/,        -f omnetpp.ini -c General -r 0,                50s,             9ae3-11d0
+
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             1b8d-d980
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           50s,             6900-01b2
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__inet -r 0,             50s,             9ae3-11d0
