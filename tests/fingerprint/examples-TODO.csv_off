@@ -27,6 +27,5 @@
 
 /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                1000s,         0   ,# <!> Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #23916, t=45.089338342798: check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
 
-# you must run /examples/wireless/synchronized/generate-routing-files.pl before run these examples:
-/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,      0.25s,           2ef3-dcae
-/examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,         0.25s,           ef61-26be
+/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,      0.25s,           2ef3-dcae    # you must run $INET/examples/wireless/synchronized/generate-routing-files.pl before run this example
+/examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,         0.25s,           ef61-26be    # you must run $INET/examples/wireless/synchronized/generate-routing-files.pl before run this example
