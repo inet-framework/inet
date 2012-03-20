@@ -1,3 +1,8 @@
+2012-02-09  Tamas Borbely
+
+    mapping an IPv4 multicast address to a multicast MAC address as specified 
+    in RFC112, section 6.4
+
 2012-02-24  ------ inet-1.99.3 released ------
 
 2011-12-15  Zoltan Bojthe

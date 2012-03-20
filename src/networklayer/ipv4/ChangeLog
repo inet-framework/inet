@@ -33,6 +33,20 @@
 	if you simulate multicast networks by setting the
 	'forwardMulticast' parameter of Router modules.
 
+2012-03-04  Andras Varga
+
+    - Added a RoutingTableRecorder module that records all the changes 
+      in the routing table to a file.
+    - Better dump method for routing table.
+
+2012-03-04  Levente Meszaros
+
+    Fixed routing table change notifications.
+
+2012-02-20  Tamas Borbely
+
+    Added printMulticastRoutingTable() to IRoutingTable
+
 2012-02-15  Tamas Borbely
 
 	The multicastTtlThreshold field is added to IPv4InterfaceData.

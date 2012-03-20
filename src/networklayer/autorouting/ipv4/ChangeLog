@@ -1,3 +1,16 @@
+2012-03-04  Levente Meszaros
+
+    Added IPv4Configurator, a new network configurator for IPv4
+
+    This is intended to replace both routing files (.irt/.mrt) and
+    specialized network configurators like FlatNetworkConfigurator,
+    and do much more.
+
+    Covers address assignment (manual, automatic), adding manual routes,
+    setting up static routing, optimizing the routing tables, etc.
+    Unlike FlatNetworkConfigurator, it will generate per-interface
+    addresses. Wireless networks are also supported.
+
 2012-02-24  ------ inet-1.99.3 released ------
 
 2012-01-19  Andras Varga
