@@ -1,3 +1,10 @@
+2012-03-26  Tamas Borbely
+
+	Fix: subnet directed broadcast did not work.
+	When the router of the destination subnet received
+	the datagram, it delivered the datagram locally, but
+	did not forward it with a link layer broadcast.
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-03-09  Tamas Borbely

@@ -99,6 +99,12 @@ class INET_API IRoutingTable
     virtual bool isLocalBroadcastAddress(const IPv4Address& dest) const = 0;
 
     /**
+     * Returns the interface entry having the specified address
+     * as its local broadcast address.
+     */
+    virtual InterfaceEntry *findInterfaceByLocalBroadcastAddress(const IPv4Address& dest) const = 0;
+
+    /**
      * The routing function. Performs longest prefix match for the given
      * destination address, and returns the resulting route. Returns NULL
      * if there is no matching route.

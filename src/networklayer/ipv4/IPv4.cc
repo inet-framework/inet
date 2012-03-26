@@ -189,13 +189,19 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
         if (manetRouting)
             sendRouteUpdateMessageToManet(datagram);
 #endif
+        InterfaceEntry *broadcastIE = NULL;
+
         // check for local delivery
         if (rt->isLocalAddress(destAddr))
         {
             reassembleAndDeliver(datagram);
         }
-        else if (destAddr.isLimitedBroadcastAddress() || rt->isLocalBroadcastAddress(destAddr))
+        else if (destAddr.isLimitedBroadcastAddress() || (broadcastIE=rt->findInterfaceByLocalBroadcastAddress(destAddr)))
         {
+            // broadcast datagram on the target subnet if we are a router
+            if (broadcastIE && fromIE != broadcastIE && rt->isIPForwardingEnabled())
+                fragmentAndSend(datagram->dup(), broadcastIE, IPv4Address::ALLONES_ADDRESS);
+
             EV << "Broadcast received\n";
             reassembleAndDeliver(datagram);
         }

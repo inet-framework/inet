@@ -415,6 +415,19 @@ bool RoutingTable::isLocalBroadcastAddress(const IPv4Address& dest) const
     return it!=localBroadcastAddresses.end();
 }
 
+InterfaceEntry *RoutingTable::findInterfaceByLocalBroadcastAddress(const IPv4Address& dest) const
+{
+    for (int i=0; i<ift->getNumInterfaces(); i++)
+    {
+        InterfaceEntry *ie = ift->getInterface(i);
+        IPv4Address interfaceAddr = ie->ipv4Data()->getIPAddress();
+        IPv4Address broadcastAddr = interfaceAddr.getBroadcastAddress(ie->ipv4Data()->getNetmask());
+        if (broadcastAddr == dest)
+            return ie;
+    }
+    return NULL;
+}
+
 bool RoutingTable::isLocalMulticastAddress(const IPv4Address& dest) const
 {
     Enter_Method("isLocalMulticastAddress(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
