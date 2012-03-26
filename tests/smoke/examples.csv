@@ -43,6 +43,7 @@
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0
 /examples/inet/ber/,                 -f omnetpp.ini -c General -r 0
+/examples/inet/broadcast/,           -f omnetpp.ini -c General -r 0
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__inet -r 0
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0
