@@ -1,0 +1,10 @@
+This example demonstrates network directed broadcast. "client" periodically
+sends UDP packets to the 10.0.1.255 destination address, i.e. to the
+broadcast address of the 10.0.1.x subnet. (Client itself is outside this
+network, because of the way the configurator assigns addresses by default:
+each link, i.e. each LAN, becames a different subnet).
+
+When packets arrive at the router of the 10.0.1.x subnet (R2), the router
+will broadcast the packet on the LAN, and so all "target" hosts will
+receive it.
+

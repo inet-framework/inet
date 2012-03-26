@@ -1,0 +1,4 @@
+<config>
+  <interface hosts='target*' address='10.0.1.x' netmask='255.255.255.0'/>
+  <interface hosts='*' address='10.x.x.x' netmask='255.255.255.0'/>
+</config>
