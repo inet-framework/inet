@@ -1,3 +1,12 @@
+2012-03-28  Tamas Borbely
+
+        IGMPv2: external routers attached to the IGMP module
+	are now responsible for implementing the IGMP router
+	logic (emiting queries and processing group membership
+        reports).
+	In this case the IGMP module passes all incoming IGMP
+        messages to the external router.
+
 2012-03-26  Tamas Borbely
 
 	Fix: subnet directed broadcast did not work.

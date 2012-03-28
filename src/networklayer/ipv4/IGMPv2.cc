@@ -439,7 +439,7 @@ void IGMPv2::receiveChangeNotification(int category, const cPolymorphic *details
 
 void IGMPv2::configureInterface(InterfaceEntry *ie)
 {
-    if (enabled && rt->isMulticastForwardingEnabled())
+    if (enabled && rt->isMulticastForwardingEnabled() && !externalRouter)
     {
         // start querier on this interface
         cMessage *timer = new cMessage("IGMPv2 query timer", IGMP_QUERY_TIMER);
@@ -735,6 +735,12 @@ void IGMPv2::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMes
 
     if (rt->isMulticastForwardingEnabled())
     {
+        if (externalRouter)
+        {
+            send(msg, "routerOut");
+            return;
+        }
+
         RouterInterfaceData *routerInterfaceData = getRouterInterfaceData(ie);
         if (sender < ie->ipv4Data()->getIPAddress())
         {
@@ -802,6 +808,12 @@ void IGMPv2::processV2Report(InterfaceEntry *ie, IGMPMessage *msg)
 
     if (rt->isMulticastForwardingEnabled())
     {
+        if (externalRouter)
+        {
+            send(msg, "routerOut");
+            return;
+        }
+
         RouterGroupData* routerGroupData = getRouterGroupData(ie, groupAddr);
         if (!routerGroupData)
         {
@@ -849,6 +861,12 @@ void IGMPv2::processLeave(InterfaceEntry *ie, IGMPMessage *msg)
 
     if (rt->isMulticastForwardingEnabled())
     {
+        if (externalRouter)
+        {
+            send(msg, "routerOut");
+            return;
+        }
+
         IPv4Address &groupAddr = msg->getGroupAddress();
         RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
         RouterGroupData *groupData = getRouterGroupData(ie, groupAddr);
