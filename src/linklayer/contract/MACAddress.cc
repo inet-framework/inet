@@ -103,6 +103,7 @@ void MACAddress::getAddressBytes(unsigned char *addrbytes) const
 
 void MACAddress::setAddressBytes(unsigned char *addrbytes)
 {
+    address = 0; // clear top 16 bits too that setAddressByte() calls skip
     for (int i = 0; i < MAC_ADDRESS_SIZE; i++)
         setAddressByte(i, addrbytes[i]);
 }
