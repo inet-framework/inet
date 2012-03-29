@@ -22,10 +22,14 @@
 
 #include "headers/defs.h"   // for endian macros
 
+#ifdef WITH_IPv4
 #include "ICMPMessage_m.h"
+#endif
 #include "IPv4ControlInfo.h"
 
+#ifdef WITH_IPv6
 #include "ICMPv6Message_m.h"
+#endif
 #include "IPv6ControlInfo.h"
 
 #include "headers/tcp.h"
