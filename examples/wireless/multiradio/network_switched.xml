@@ -1,0 +1,10 @@
+<config>
+  <interface hosts="host1" address="192.168.1.1" netmask="255.255.255.0" />
+  <interface hosts="host2" address="192.168.2.41" netmask="255.255.255.0" />
+
+  <wireless id="W1" hosts="host1 accessPoint1"/>
+  <wireless id="W2" hosts="host2 accessPoint2"/>
+
+  <route hosts="host1" destination="*" interface="wlan0"/>
+  <route hosts="host2" destination="*" interface="wlan0"/>
+</config>

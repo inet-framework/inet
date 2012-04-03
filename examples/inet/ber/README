@@ -1,5 +1,5 @@
 In this example the network consists of a client and a server.
-IP addresses and routing tables are set up by using mrt files.
+IP addresses and routing tables are set up by IPv4NetworkConfigurator.
 
 The ber (bit error rate) of the channel between client and server
 depends on the selected configuration.

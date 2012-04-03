@@ -2,9 +2,11 @@
 
 package inet.examples.rtp.multicast1;
 
-import ned.DatarateChannel;
-import inet.transport.rtp.RTPHost;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.Router;
+import inet.transport.rtp.RTPHost;
+import ned.DatarateChannel;
+
 
 network RTPMulticast1
 {
@@ -22,7 +24,6 @@ network RTPMulticast1
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
-                routingFile = "host1.mrt";
                 @display("p=150,50");
         }
         host2: RTPHost {
@@ -32,7 +33,6 @@ network RTPMulticast1
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
-                routingFile = "host2.mrt";
                 @display("p=250,150");
         }
         host3: RTPHost {
@@ -42,7 +42,6 @@ network RTPMulticast1
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
-                routingFile = "host3.mrt";
                 @display("p=150,250");
         }
         host4: RTPHost {
@@ -52,21 +51,26 @@ network RTPMulticast1
                 destinationAddress = "225.0.0.1";
                 portNumber = 5004;
                 bandwidth = 8000;
-                routingFile = "host4.mrt";
                 @display("p=50,150");
         }
         router1: Router {
             parameters:
-                routingFile = "router1.mrt";
+                forwardMulticast = true;
                 @display("p=150,150");
             gates:
                 pppg[];
 
+        }
+        configurator: IPv4NetworkConfigurator {
+            config = xml("<config>"
+                +"<interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/>"
+                +"<multicast-group hosts='**' address='225.0.0.1'/>"
+                +"<multicast-route hosts='router1' groups='225.0.0.1' children='ppp*'/>"
+                +"</config>");
         }
     connections:
         host1.pppg++ <--> ethernet <--> router1.pppg++;
         host2.pppg++ <--> ethernet <--> router1.pppg++;
         host3.pppg++ <--> ethernet <--> router1.pppg++;
         host4.pppg++ <--> ethernet <--> router1.pppg++;
-
 }

@@ -1,0 +1,18 @@
+<config>
+  <interface hosts="host1" address="192.168.1.1" netmask="255.255.255.0" />
+  <interface hosts="host2" address="192.168.2.41" netmask="255.255.255.0" />
+  <interface hosts="router" names="wlan0" address="192.168.1.254" netmask="255.255.255.0" />
+  <interface hosts="router" names="wlan1" address="192.168.2.254" netmask="255.255.255.0" />
+
+<!--
+  <wireless id="W1" hosts="host1"/>
+  <wireless id="W1" hosts="router" interfaces="wlan0"/>
+  <wireless id="W2" hosts="host2"/>
+  <wireless id="W2" hosts="router" interfaces="wlan1"/>
+-->
+
+  <route hosts="host1" destination="*" gateway="192.168.1.254" interface="wlan0"/>
+  <route hosts="host2" destination="*" gateway="192.168.2.254" interface="wlan0"/>
+  <route hosts="router" destination="192.168.1.0" gateway="*" netmask="255.255.255.0" interface="wlan0"/>
+  <route hosts="router" destination="192.168.2.0" gateway="*" netmask="255.255.255.0" interface="wlan1"/>
+</config>

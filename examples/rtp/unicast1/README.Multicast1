@@ -1,5 +1,0 @@
-README-Multicast1
-
-This is just a simple RTP multicast example with four hosts and one router
-to connect them. Every host sends an MPEG video file, output names are
-automagically set by the profile modules.

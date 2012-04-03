@@ -19,6 +19,7 @@
 
 package inet.examples.wireless.synchronized;
 
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
 import inet.world.radio.ChannelControl;
 
@@ -29,6 +30,7 @@ network Synchronized
         int nodeCount;
         **.bitrate = 11Mbps;
         **.globalARP = true;
+        @display("bgl=3");
     submodules:
         channelControl: ChannelControl;
         node[nodeCount]: AdhocHost {
@@ -39,6 +41,8 @@ network Synchronized
                 udpApp[0].localPort = 1;
                 udpApp[0].destPort = 1;
                 udpApp[0].messageLength = 100B;
-                routingFile = "node" + string(index) + ".mrt";
+                udpApp[0].joinLocalMulticastGroups = true;
         }
+        configurator: IPv4NetworkConfigurator;
 }
+

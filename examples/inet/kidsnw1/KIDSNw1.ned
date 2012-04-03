@@ -78,7 +78,6 @@ network KIDSNw1
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
-                config = xmldoc("netconf_err3.xml");
                 @display("p=93,22");
         }
     connections:

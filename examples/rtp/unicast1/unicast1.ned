@@ -1,6 +1,6 @@
 
 
-package inet.examples.rtp.multicast11;
+package inet.examples.rtp.unicast1;
 
 import ned.DatarateChannel;
 import inet.transport.rtp.RTPHost;
@@ -8,7 +8,7 @@ import inet.nodes.inet.Router;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 
-network RTPMulticast11
+network RTPUnicast1
 {
     types:
         channel ethernet extends DatarateChannel

@@ -17,9 +17,11 @@
 //
 
 package inet.examples.sctp.multihomed;
-import inet.nodes.inet.StandardHost;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.Router;
+import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
+
 
 network multi
 {
@@ -41,7 +43,6 @@ network multi
         cli1: StandardHost {
             parameters:
                 IPForward = false;
-                routingFile = "cli1.mrt";
                 @display("p=61,142;i=device/laptop");
             gates:
                 pppg[1];
@@ -49,7 +50,6 @@ network multi
         srv1: StandardHost {
             parameters:
                 IPForward = false;
-                routingFile = "srv1.mrt";
                 @display("p=426,135;i=device/server2");
             gates:
                 pppg[1];
@@ -57,31 +57,56 @@ network multi
         }
         router1: Router {
             parameters:
-                routingFile = "router1.mrt";
-                @display("p=p=188,77;i=abstract/router");
+                @display("p=188,77;i=abstract/router");
             gates:
                 pppg[2];
         }
         router2: Router {
             parameters:
-                routingFile = "router2.mrt";
                 @display("p=323,75;i=abstract/router");
             gates:
                 pppg[2];
         }
         router3: Router {
             parameters:
-                routingFile = "router3.mrt";
                 @display("p=188,192;i=abstract/router");
             gates:
                 pppg[2];
         }
         router4: Router {
             parameters:
-                routingFile = "router4.mrt";
                 @display("p=328,188;i=abstract/router");
             gates:
                 pppg[2];
+        }
+        configurator: IPv4NetworkConfigurator {
+            addStaticRoutes = false;
+            config = xml("<config>"+
+                    "<interface hosts='cli1' towards='router1' address='10.1.1.1' netmask='255.255.255.0' />"+
+                    "<interface hosts='cli1' towards='router3' address='10.2.1.1' netmask='255.255.255.0' />"+
+                    "<interface hosts='srv1' towards='router2' address='10.1.3.1' netmask='255.255.255.0' />"+
+                    "<interface hosts='srv1' towards='router4' address='10.2.3.1' netmask='255.255.255.0' />"+
+                    "<interface hosts='router1' towards='cli1' address='10.1.1.254' netmask='255.255.255.0' />"+
+                    "<interface hosts='router1' towards='router2' address='10.1.2.254' netmask='255.255.255.0' />"+
+                    "<interface hosts='router2' towards='router1' address='10.1.2.253' netmask='255.255.255.0' />"+
+                    "<interface hosts='router2' towards='srv1' address='10.1.3.254' netmask='255.255.255.0' />"+
+                    "<interface hosts='router3' towards='cli1' address='10.2.1.254' netmask='255.255.255.0' />"+
+                    "<interface hosts='router3' towards='router4' address='10.2.2.254' netmask='255.255.255.0' />"+
+                    "<interface hosts='router4' towards='router3' address='10.2.2.253' netmask='255.255.255.0' />"+
+                    "<interface hosts='router4' towards='srv1' address='10.2.3.254' netmask='255.255.255.0' />"+
+                    "<route hosts='cli1' destination='10.1.0.0' netmask='/16' gateway='router1' />"+
+                    "<route hosts='cli1' destination='10.2.0.0' netmask='/16' gateway='router3' />"+
+                    "<route hosts='srv1' destination='10.1.0.0' netmask='/16' gateway='router2' />"+
+                    "<route hosts='srv1' destination='10.2.0.0' netmask='/16' gateway='router4' />"+
+                    "<route hosts='router1' destination='10.1.1.1' netmask='/32' gateway='10.1.1.1' />"+
+                    "<route hosts='router1' destination='*' gateway='10.1.2.253' />"+
+                    "<route hosts='router2' destination='10.1.3.1' netmask='/32' gateway='10.1.3.1' />"+
+                    "<route hosts='router2' destination='*' gateway='10.1.2.254' />"+
+                    "<route hosts='router3' destination='10.2.1.1' netmask='/32' gateway='10.2.1.1' />"+
+                    "<route hosts='router3' destination='*' gateway='10.2.2.253' />"+
+                    "<route hosts='router4' destination='10.2.3.1' netmask='/32' gateway='10.2.3.1' />"+
+                    "<route hosts='router4' destination='*' gateway='10.2.2.254' />"+
+                    "</config>");
         }
     connections:
         cli1.pppg++ <--> ppp2line <--> router1.pppg++;
@@ -91,5 +116,4 @@ network multi
         router3.pppg++ <--> ppp1line <--> router4.pppg++;
         router4.pppg++ <--> ppp2line <--> srv1.pppg++;
 }
-
 

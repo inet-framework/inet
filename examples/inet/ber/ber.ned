@@ -4,9 +4,12 @@
 
 package inet.examples.inet.ber;
 
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.StandardHost;
 
-network ber {
+
+network ber
+{
     parameters:
         double n;
         @display("bgb=400,200");
@@ -22,6 +25,9 @@ network ber {
                 @display("p=350,100;i=device/server");
             gates:
                 pppg[1];
+        }
+        configurator: IPv4NetworkConfigurator {
+            @display("p=199,34");
         }
     connections:
         client.pppg[0] <--> {  datarate = 10Mbps; delay = 0.565us; per = 0; ber = n; } <--> server.pppg[0];

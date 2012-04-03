@@ -228,7 +228,7 @@
 /examples/wireless/multiradio/,      -f omnetpp.ini -c IndependentWlans -r 0,       1000s,           3d64-78f9
 /examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          1000s,           5cee-e02f
 /examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0,            1000s,           44b9-299e
-# /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           100s,            0    # you must run $INET/examples/wireless/synchronized/generate-routing-files.pl before run this example
-# /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        100s,            0    # you must run $INET/examples/wireless/synchronized/generate-routing-files.pl before run this example
+/examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           5s,              6f68-a049
+/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        5s,              cee2-100c
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,             36f7-cb04
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             39ea-2016

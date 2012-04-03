@@ -4,11 +4,14 @@
 
 package inet.examples.inet.tcpsack;
 
-import ned.DatarateChannel;
-import inet.nodes.inet.StandardHost;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.Router;
+import inet.nodes.inet.StandardHost;
+import ned.DatarateChannel;
 
-network tcpsack {
+
+network tcpsack
+{
     parameters:
         @display("bgb=400,200");
     submodules:
@@ -30,12 +33,15 @@ network tcpsack {
             gates:
                 pppg[1];
         }
+        networkConfigurator: IPv4NetworkConfigurator {
+        }
     connections:
         router.pppg[0] <--> NormalPath <--> client.pppg[0];
         router.pppg[1] <--> NormalPath <--> server.pppg[0];
 }
 
-channel NormalPath extends DatarateChannel {
+channel NormalPath extends DatarateChannel
+{
     parameters:
         datarate = 100Mbps;
         delay = 0.0565us; // 10m
