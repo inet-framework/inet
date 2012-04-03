@@ -158,7 +158,6 @@ void IPv4InterfaceData::leaveMulticastGroup(const IPv4Address& multicastAddress)
     if(!multicastAddress.isMulticast())
         throw cRuntimeError("IPv4InterfaceData::leaveMulticastGroup(): multicast address expected, received %s.", multicastAddress.str().c_str());
 
-    ASSERT(multicastAddress.isMulticast());
     IPv4AddressVector &multicastGroups = getHostData()->joinedMulticastGroups;
     std::vector<int> &refCounts = getHostData()->refCounts;
     for (int i = 0; i < (int)multicastGroups.size(); ++i)
