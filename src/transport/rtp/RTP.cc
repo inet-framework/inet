@@ -389,6 +389,7 @@ void RTP::createProfile()
 void RTP::createSocket()
 {
     _udpSocket.bind(_port);
+    _udpSocket.joinLocalMulticastGroups(); //TODO make it parameter-dependent
     connectRet();
 }
 
