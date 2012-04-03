@@ -127,7 +127,7 @@ package inet.networklayer.autorouting.ipv4;
 //
 // <pre>
 // <config>
-//   <interface hosts='*' address='10.x.x.x' netmask='255.x.x.x'/>
+//   <interface hosts='**' address='10.x.x.x' netmask='255.x.x.x'/>
 // </config>
 // </pre>
 //
