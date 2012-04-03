@@ -203,8 +203,8 @@
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0,                500s,            c745-6efe
 
 # /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                100s,            a422-b4ed    # unstable fingerprint
-# /examples/rtp/multicast11/,          -f omnetpp.ini -c General -r 0,                100s,            cfaf-783c    # unstable fingerprint
 # /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                100s,            1ef9-fff6    # unstable fingerprint
+# /examples/rtp/unicast1/,          -f omnetpp.ini -c General -r 0,                100s,            cfaf-783c    # unstable fingerprint
 # /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                100s,            f9be-62bb    # unstable fingerprint
 
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            7185-cd44

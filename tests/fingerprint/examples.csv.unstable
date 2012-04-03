@@ -12,6 +12,6 @@
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           b2e0-2ac0
 /examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             05c2-e365
 /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            54b5-a6b3
-/examples/rtp/multicast11/,          -f omnetpp.ini -c General -r 0,                1000s,           cfaf-783c
 /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                500s,            a8ae-e2ce
+/examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           cfaf-783c
 /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            4493-d000
