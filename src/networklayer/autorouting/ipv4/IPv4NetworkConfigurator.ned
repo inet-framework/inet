@@ -198,6 +198,10 @@ package inet.networklayer.autorouting.ipv4;
 //      Optional parameter attribute to set the MTU parameter in the interface.
 //      When unspecified the interface parameter is left unchanged.
 //
+//    - @metric                number
+//      Optional parameter attribute to set the Metric parameter in the interface.
+//      When unspecified the interface parameter is left unchanged.
+//
 //  - <wireless>
 //
 //    - @hosts

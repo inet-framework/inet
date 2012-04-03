@@ -830,6 +830,7 @@ void IPv4NetworkConfigurator::readAddressConfiguration(cXMLElement *root, IPv4To
         const char *addressAttr = interfaceElement->getAttribute("address"); // "10.0.x.x"
         const char *netmaskAttr = interfaceElement->getAttribute("netmask"); // "255.255.x.x"
         const char *mtuAttr = interfaceElement->getAttribute("mtu"); // integer
+        const char *metricAttr = interfaceElement->getAttribute("metric"); // integer
 
         try
         {
@@ -882,6 +883,13 @@ void IPv4NetworkConfigurator::readAddressConfiguration(cXMLElement *root, IPv4To
                             // mtu
                             if (isNotEmpty(mtuAttr))
                                 interfaceInfo->interfaceEntry->setMtu(atoi(mtuAttr));
+
+                            // metric
+                            if (isNotEmpty(metricAttr))
+                            {
+                                ASSERT(interfaceInfo->interfaceEntry->ipv4Data());
+                                interfaceInfo->interfaceEntry->ipv4Data()->setMetric(atoi(metricAttr));
+                            }
 
                             interfacesSeen.insert(interfaceInfo);
                             EV_DEBUG << hostModule->getFullPath() << ":" << interfaceInfo->interfaceEntry->getFullName() << endl;
@@ -1007,7 +1015,9 @@ void IPv4NetworkConfigurator::dumpConfig(IPv4Topology& topology)
             IPv4InterfaceData *interfaceData = interfaceEntry->ipv4Data();
             std::stringstream stream;
             stream << "   <interface hosts=\"" << interfaceInfo->node->module->getFullPath() << "\" names=\"" << interfaceEntry->getName() <<
-                      "\" address=\"" << interfaceData->getIPAddress() << "\" netmask=\"" << interfaceData->getNetmask() << "\"/>" << endl;
+                      "\" address=\"" << interfaceData->getIPAddress() << "\" netmask=\"" << interfaceData->getNetmask() <<
+                      "\" metric=\"" << interfaceData->getMetric() <<
+                      "\"/>" << endl;
             fprintf(f, "%s", stream.str().c_str());
         }
     }
