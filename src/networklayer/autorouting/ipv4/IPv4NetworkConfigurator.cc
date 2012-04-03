@@ -1032,19 +1032,16 @@ void IPv4NetworkConfigurator::dumpConfig(IPv4Topology& topology)
             InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
             IPv4InterfaceData *interfaceData = interfaceEntry->ipv4Data();
             const std::vector<IPv4Address>& multicastAddresses = interfaceData->getJoinedMulticastGroups();
-            bool found = false;
-            for (int k = 0 ; k < (int)multicastAddresses.size(); k++)
-                if (!multicastAddresses[k].isLinkLocalMulticast())
-                    found = true;
-            if (found) {
+
+            if (multicastAddresses.size() > 0)
+            {
                 std::stringstream stream;
                 stream << "   <multicast-group hosts=\"" << interfaceInfo->node->module->getFullPath() << "\" interfaces=\"" << interfaceEntry->getName() << "\" address=\"";
                 for (int k = 0 ; k < (int)multicastAddresses.size(); k++)
                 {
-                    if (k) stream << " ";
                     IPv4Address address = multicastAddresses[k];
-                    if (!address.isLinkLocalMulticast())
-                        stream << address.str();
+                    if (k) stream << " ";
+                    stream << address.str();
                 }
                 stream << "\"/>" << endl;
                 fprintf(f, "%s", stream.str().c_str());
