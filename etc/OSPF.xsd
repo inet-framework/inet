@@ -13,6 +13,17 @@
   </xsd:restriction>
 </xsd:simpleType>
 
+<xsd:simpleType name="InterfaceNameType">
+  <xsd:annotation>
+    <xsd:documentation xml:lang="en">
+      A string containing an interface name.
+    </xsd:documentation>
+  </xsd:annotation>
+
+  <xsd:restriction base="xsd:string">
+  </xsd:restriction>
+</xsd:simpleType>
+
 <xsd:simpleType name="StatusTypeEnum">
   <xsd:annotation>
     <xsd:documentation xml:lang="en">
@@ -148,7 +159,7 @@
   <xsd:annotation>
     <xsd:documentation xml:lang="en">
       Describes the parameters of a point-to-point interface. It is identified
-      in the router by its ifIndex value.
+      in the router by its ifName value.
       HelloInterval and RouterDeadInterval must be the same for all router
       interfaces attached to the same network.
     </xsd:documentation>
@@ -165,7 +176,7 @@
       <xsd:element name="AuthenticationType" type="AuthenticationTypeEnum" minOccurs="1" maxOccurs="1" />
       <xsd:element name="AuthenticationKey" type="AuthenticationKeyType" minOccurs="1" maxOccurs="1" />
     </xsd:sequence>
-    <xsd:attribute name="ifIndex" type="xsd:unsignedByte" use="required" />
+    <xsd:attribute name="ifName" type="InterfaceNameType" use="required" />
   </xsd:complexType>
 </xsd:element>
 
@@ -173,7 +184,7 @@
   <xsd:annotation>
     <xsd:documentation xml:lang="en">
       Describes the parameters of a broadcast interface. It is identified in
-      the router by its ifIndex value.
+      the router by its ifName value.
       HelloInterval and RouterDeadInterval must be the same for all router
       interfaces attached to the same network.
     </xsd:documentation>
@@ -191,7 +202,7 @@
       <xsd:element name="AuthenticationType" type="AuthenticationTypeEnum" minOccurs="1" maxOccurs="1" />
       <xsd:element name="AuthenticationKey" type="AuthenticationKeyType" minOccurs="1" maxOccurs="1" />
     </xsd:sequence>
-    <xsd:attribute name="ifIndex" type="xsd:unsignedByte" use="required" />
+    <xsd:attribute name="ifName" type="InterfaceNameType" use="required" />
   </xsd:complexType>
 </xsd:element>
 
@@ -228,7 +239,7 @@
   <xsd:annotation>
     <xsd:documentation xml:lang="en">
       Describes the parameters of an NBMA interface. It is identified in the
-      router by its ifIndex value.
+      router by its ifName value.
       HelloInterval and RouterDeadInterval must be the same for all router
       interfaces attached to the same network.
     </xsd:documentation>
@@ -248,7 +259,7 @@
       <xsd:element name="PollInterval" type="xsd:unsignedShort" minOccurs="1" maxOccurs="1" />
       <xsd:element ref="NBMANeighborList" minOccurs="1" maxOccurs="1" />
     </xsd:sequence>
-    <xsd:attribute name="ifIndex" type="xsd:unsignedByte" use="required" />
+    <xsd:attribute name="ifName" type="InterfaceNameType" use="required" />
   </xsd:complexType>
 </xsd:element>
 
@@ -270,7 +281,7 @@
   <xsd:annotation>
     <xsd:documentation xml:lang="en">
       Describes the parameters of a point-to-multipoint interface. It is
-      identified in the router by its ifIndex value.
+      identified in the router by its ifName value.
       HelloInterval and RouterDeadInterval must be the same for all router
       interfaces attached to the same network.
     </xsd:documentation>
@@ -288,7 +299,7 @@
       <xsd:element name="AuthenticationKey" type="AuthenticationKeyType" minOccurs="1" maxOccurs="1" />
       <xsd:element ref="PointToMultiPointNeighborList" minOccurs="1" maxOccurs="1" />
     </xsd:sequence>
-    <xsd:attribute name="ifIndex" type="xsd:unsignedByte" use="required" />
+    <xsd:attribute name="ifName" type="InterfaceNameType" use="required" />
   </xsd:complexType>
 </xsd:element>
 
@@ -327,7 +338,7 @@
     <xsd:documentation xml:lang="en">
       Describes the parameters of an external interface. These parameters will
       be advertised in the AS External LSA for this external route. The
-      interface is identified in the router by its ifIndex value.
+      interface is identified in the router by its ifName value.
     </xsd:documentation>
   </xsd:annotation>
 
@@ -338,7 +349,7 @@
       <xsd:element name="ForwardingAddress" type="IPv4AddressType" minOccurs="1" maxOccurs="1" />
       <xsd:element name="ExternalRouteTag" type="ExternalRouteTagType" minOccurs="1" maxOccurs="1" />
     </xsd:sequence>
-    <xsd:attribute name="ifIndex" type="xsd:unsignedByte" use="required" />
+    <xsd:attribute name="ifName" type="InterfaceNameType" use="required" />
   </xsd:complexType>
 </xsd:element>
 
@@ -347,7 +358,7 @@
     <xsd:documentation xml:lang="en">
       Describes the parameters of a host interface (an interface to which a
       single host is attached). The interface is identified in the router by
-      its ifIndex value.
+      its ifName value.
     </xsd:documentation>
   </xsd:annotation>
 
@@ -357,7 +368,7 @@
       <xsd:element name="AttachedHost" type="IPv4AddressType" minOccurs="1" maxOccurs="1" />
       <xsd:element name="LinkCost" type="MetricType" minOccurs="1" maxOccurs="1" />
     </xsd:sequence>
-    <xsd:attribute name="ifIndex" type="xsd:unsignedByte" use="required" />
+    <xsd:attribute name="ifName" type="InterfaceNameType" use="required" />
   </xsd:complexType>
 </xsd:element>
 
@@ -388,7 +399,7 @@
 <xsd:element name="Router">
   <xsd:annotation>
     <xsd:documentation xml:lang="en">
-      Describes an OSPF router with its interfaces. Interface ifIndex values
+      Describes an OSPF router with its interfaces. Interface ifName values
       must be unique within the same router. A router is identified by its
       Router ID, which is given as an IPv4 address (but isn't necessarily one).
     </xsd:documentation>
@@ -411,7 +422,7 @@
   </xsd:complexType>
   <xsd:unique name="IfIndexConstraint">
     <xsd:selector xpath="PointToPointInterface|BroadcastInterface|NBMAInterface|PointToMultiPointInterface|ExternalInterface|HostInterface" />
-    <xsd:field xpath="@ifIndex" />
+    <xsd:field xpath="@ifName" />
   </xsd:unique>
   <xsd:unique name="VirtualLinkEndPointConstraint">
     <xsd:selector xpath="VirtualLink" />
