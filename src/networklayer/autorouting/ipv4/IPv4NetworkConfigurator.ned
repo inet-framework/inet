@@ -228,6 +228,11 @@ package inet.networklayer.autorouting.ipv4;
 //      patterns. Only interfaces with the specified names are affected. The
 //      default value is "*" that matches all interfaces.
 //
+//    - @towards
+//      Optional selector attribute that specifies a list of host name patterns.
+//      Only interfaces connected towards the specified hosts are affected.
+//      The default value is "*".
+//
 //    - @address
 //      Mandatory parameter attribute that specifies a list of multicast group
 //      addresses to be assigned. Values must be selected from the valid range
