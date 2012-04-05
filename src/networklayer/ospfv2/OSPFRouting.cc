@@ -149,7 +149,7 @@ void OSPFRouting::getAreaListFromXML(const cXMLElement& routerNode, std::map<std
             (nodeName == "NBMAInterface") ||
             (nodeName == "PointToMultiPointInterface"))
         {
-            std::string areaId = (*routerConfigIt)->getChildrenByTagName("AreaID")[0]->getNodeValue();
+            std::string areaId = (*routerConfigIt)->getAttribute("AreaID");
             if (areaList.find(areaId) == areaList.end()) {
                 areaList[areaId] = 1;
             }
@@ -184,9 +184,9 @@ void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string
         std::string nodeName = (*arIt)->getTagName();
         if (nodeName == "AddressRange") {
             OSPF::IPv4AddressRange addressRange;
-            addressRange.address = ipv4AddressFromAddressString((*arIt)->getChildrenByTagName("Address")[0]->getNodeValue());
-            addressRange.mask = ipv4AddressFromAddressString((*arIt)->getChildrenByTagName("Mask")[0]->getNodeValue());
-            std::string status = (*arIt)->getChildrenByTagName("Status")[0]->getNodeValue();
+            addressRange.address = ipv4AddressFromAddressString((*arIt)->getAttribute("Address"));
+            addressRange.mask = ipv4AddressFromAddressString((*arIt)->getAttribute("Mask"));
+            std::string status = (*arIt)->getAttribute("Status");
             if (status == "Advertise") {
                 area->addAddressRange(addressRange, true);
             } else {
@@ -195,7 +195,7 @@ void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string
         }
         if ((nodeName == "Stub") && (areaID != "0.0.0.0")) {    // the backbone cannot be configured as a stub
             area->setExternalRoutingCapability(false);
-            area->setStubDefaultCost(atoi((*arIt)->getChildrenByTagName("DefaultCost")[0]->getNodeValue()));
+            area->setStubDefaultCost(atoi((*arIt)->getAttribute("DefaultCost")));
         }
     }
     // Add the Area to the router
@@ -231,66 +231,57 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         error("Loading %s ifIndex[%d] aborted", interfaceType.c_str(), ifIndex);
     }
 
-    OSPF::AreaID areaID = 0;
+    OSPF::AreaID areaID = ulongFromAddressString(ifConfig.getAttribute("AreaID"));
+    intf->setAreaID(areaID);
+
+    intf->setOutputCost(atoi(ifConfig.getAttribute("InterfaceOutputCost")));
+
+    intf->setRetransmissionInterval(atoi(ifConfig.getAttribute("RetransmissionInterval")));
+
+    intf->setTransmissionDelay(atoi(ifConfig.getAttribute("InterfaceTransmissionDelay")));
+
+    if (interfaceType == "BroadcastInterface" || interfaceType == "NBMAInterface")
+        intf->setRouterPriority(atoi(ifConfig.getAttribute("RouterPriority")));
+
+    intf->setHelloInterval(atoi(ifConfig.getAttribute("HelloInterval")));
+
+    intf->setRouterDeadInterval(atoi(ifConfig.getAttribute("RouterDeadInterval")));
+
+    std::string authenticationType = ifConfig.getAttribute("AuthenticationType");
+    if (authenticationType == "SimplePasswordType") {
+        intf->setAuthenticationType(OSPF::SIMPLE_PASSWORD_TYPE);
+    } else if (authenticationType == "CrytographicType") {
+        intf->setAuthenticationType(OSPF::CRYTOGRAPHIC_TYPE);
+    } else {
+        intf->setAuthenticationType(OSPF::NULL_TYPE);
+    }
+
+    std::string key = ifConfig.getAttribute("AuthenticationKey");
+    OSPF::AuthenticationKeyType keyValue;
+    memset(keyValue.bytes, 0, 8 * sizeof(char));
+    int keyLength = key.length();
+    if ((keyLength > 4) && (keyLength <= 18) && (keyLength % 2 == 0) && (key[0] == '0') && (key[1] == 'x')) {
+        for (int i = keyLength; (i > 2); i -= 2) {
+            keyValue.bytes[(i - 2) / 2] = hexPairToByte(key[i - 1], key[i]);
+        }
+    }
+    intf->setAuthenticationKey(keyValue);
+
+    if (interfaceType == "NBMAInterface")
+        intf->setPollInterval(atoi(ifConfig.getAttribute("PollInterval")));
+
     cXMLElementList ifDetails = ifConfig.getChildren();
 
     for (cXMLElementList::iterator ifElemIt = ifDetails.begin(); ifElemIt != ifDetails.end(); ifElemIt++) {
         std::string nodeName = (*ifElemIt)->getTagName();
-        if (nodeName == "AreaID") {
-            areaID = ulongFromAddressString((*ifElemIt)->getNodeValue());
-            intf->setAreaID(areaID);
-        }
-        if (nodeName == "InterfaceOutputCost") {
-            intf->setOutputCost(atoi((*ifElemIt)->getNodeValue()));
-        }
-        if (nodeName == "RetransmissionInterval") {
-            intf->setRetransmissionInterval(atoi((*ifElemIt)->getNodeValue()));
-        }
-        if (nodeName == "InterfaceTransmissionDelay") {
-            intf->setTransmissionDelay(atoi((*ifElemIt)->getNodeValue()));
-        }
-        if (nodeName == "RouterPriority") {
-            intf->setRouterPriority(atoi((*ifElemIt)->getNodeValue()));
-        }
-        if (nodeName == "HelloInterval") {
-            intf->setHelloInterval(atoi((*ifElemIt)->getNodeValue()));
-        }
-        if (nodeName == "RouterDeadInterval") {
-            intf->setRouterDeadInterval(atoi((*ifElemIt)->getNodeValue()));
-        }
-        if (nodeName == "AuthenticationType") {
-            std::string authenticationType = (*ifElemIt)->getNodeValue();
-            if (authenticationType == "SimplePasswordType") {
-                intf->setAuthenticationType(OSPF::SIMPLE_PASSWORD_TYPE);
-            } else if (authenticationType == "CrytographicType") {
-                intf->setAuthenticationType(OSPF::CRYTOGRAPHIC_TYPE);
-            } else {
-                intf->setAuthenticationType(OSPF::NULL_TYPE);
-            }
-        }
-        if (nodeName == "AuthenticationKey") {
-            std::string key = (*ifElemIt)->getNodeValue();
-            OSPF::AuthenticationKeyType keyValue;
-            memset(keyValue.bytes, 0, 8 * sizeof(char));
-            int keyLength = key.length();
-            if ((keyLength > 4) && (keyLength <= 18) && (keyLength % 2 == 0) && (key[0] == '0') && (key[1] == 'x')) {
-                for (int i = keyLength; (i > 2); i -= 2) {
-                    keyValue.bytes[(i - 2) / 2] = hexPairToByte(key[i - 1], key[i]);
-                }
-            }
-            intf->setAuthenticationKey(keyValue);
-        }
-        if (nodeName == "PollInterval") {
-            intf->setPollInterval(atoi((*ifElemIt)->getNodeValue()));
-        }
         if ((interfaceType == "NBMAInterface") && (nodeName == "NBMANeighborList")) {
             cXMLElementList neighborList = (*ifElemIt)->getChildren();
             for (cXMLElementList::iterator neighborIt = neighborList.begin(); neighborIt != neighborList.end(); neighborIt++) {
                 std::string neighborNodeName = (*neighborIt)->getTagName();
                 if (neighborNodeName == "NBMANeighbor") {
                     OSPF::Neighbor* neighbor = new OSPF::Neighbor;
-                    neighbor->setAddress(ipv4AddressFromAddressString((*neighborIt)->getChildrenByTagName("NetworkInterfaceAddress")[0]->getNodeValue()));
-                    neighbor->setPriority(atoi((*neighborIt)->getChildrenByTagName("NeighborPriority")[0]->getNodeValue()));
+                    neighbor->setAddress(ipv4AddressFromAddressString((*neighborIt)->getAttribute("NetworkInterfaceAddress")));
+                    neighbor->setPriority(atoi((*neighborIt)->getAttribute("NeighborPriority")));
                     intf->addNeighbor(neighbor);
                 }
             }
@@ -306,7 +297,6 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
                 }
             }
         }
-
     }
     // add the interface to it's Area
     OSPF::Area* area = ospfRouter->getArea(areaID);
@@ -334,46 +324,37 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
 
     EV << "        loading ExternalInterface " << ifName << " ifIndex[" << ifIndex << "]\n";
 
-    cXMLElementList ifDetails = externalRouteConfig.getChildren();
-    for (cXMLElementList::iterator exElemIt = ifDetails.begin(); exElemIt != ifDetails.end(); exElemIt++) {
-        std::string nodeName = (*exElemIt)->getTagName();
-        if (nodeName == "AdvertisedExternalNetwork") {
-            networkAddress.address = ipv4AddressFromAddressString((*exElemIt)->getChildrenByTagName("Address")[0]->getNodeValue());
-            networkAddress.mask = ipv4AddressFromAddressString((*exElemIt)->getChildrenByTagName("Mask")[0]->getNodeValue());
-            asExternalRoute.setNetworkMask(ulongFromIPv4Address(networkAddress.mask));
-        }
-        if (nodeName == "ExternalInterfaceOutputParameters") {
-            std::string metricType = (*exElemIt)->getChildrenByTagName("ExternalInterfaceOutputType")[0]->getNodeValue();
-            int routeCost = atoi((*exElemIt)->getChildrenByTagName("ExternalInterfaceOutputCost")[0]->getNodeValue());
+    networkAddress.address = ipv4AddressFromAddressString(externalRouteConfig.getAttribute("AdvertisedExternalNetworkAddress"));
+    networkAddress.mask = ipv4AddressFromAddressString(externalRouteConfig.getAttribute("AdvertisedExternalNetworkMask"));
+    asExternalRoute.setNetworkMask(ulongFromIPv4Address(networkAddress.mask));
 
-            asExternalRoute.setRouteCost(routeCost);
-            if (metricType == "Type2") {
-                asExternalRoute.setE_ExternalMetricType(true);
-                externalRoutingEntry.setType2Cost(routeCost);
-                externalRoutingEntry.setPathType(OSPF::RoutingTableEntry::TYPE2_EXTERNAL);
-            } else {
-                asExternalRoute.setE_ExternalMetricType(false);
-                externalRoutingEntry.setCost(routeCost);
-                externalRoutingEntry.setPathType(OSPF::RoutingTableEntry::TYPE1_EXTERNAL);
-            }
-        }
-        if (nodeName == "ForwardingAddress") {
-            asExternalRoute.setForwardingAddress(ulongFromAddressString((*exElemIt)->getNodeValue()));
-        }
-        if (nodeName == "ExternalRouteTag") {
-            std::string externalRouteTag = (*exElemIt)->getNodeValue();
-            char        externalRouteTagValue[4];
+    int routeCost = atoi(externalRouteConfig.getAttribute("ExternalInterfaceOutputCost"));
+    asExternalRoute.setRouteCost(routeCost);
 
-            memset(externalRouteTagValue, 0, 4 * sizeof(char));
-            int externalRouteTagLength = externalRouteTag.length();
-            if ((externalRouteTagLength > 4) && (externalRouteTagLength <= 10) && (externalRouteTagLength % 2 == 0) && (externalRouteTag[0] == '0') && (externalRouteTag[1] == 'x')) {
-                for (int i = externalRouteTagLength; (i > 2); i -= 2) {
-                    externalRouteTagValue[(i - 2) / 2] = hexPairToByte(externalRouteTag[i - 1], externalRouteTag[i]);
-                }
-            }
-            asExternalRoute.setExternalRouteTag((externalRouteTagValue[0] << 24) + (externalRouteTagValue[1] << 16) + (externalRouteTagValue[2] << 8) + externalRouteTagValue[3]);
+    std::string metricType = externalRouteConfig.getAttribute("ExternalInterfaceOutputType");
+    if (metricType == "Type2") {
+        asExternalRoute.setE_ExternalMetricType(true);
+        externalRoutingEntry.setType2Cost(routeCost);
+        externalRoutingEntry.setPathType(OSPF::RoutingTableEntry::TYPE2_EXTERNAL);
+    } else {
+        asExternalRoute.setE_ExternalMetricType(false);
+        externalRoutingEntry.setCost(routeCost);
+        externalRoutingEntry.setPathType(OSPF::RoutingTableEntry::TYPE1_EXTERNAL);
+    }
+
+    asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(externalRouteConfig.getAttribute("ForwardingAddress")));
+
+    std::string externalRouteTag = externalRouteConfig.getAttribute("ExternalRouteTag");
+    char        externalRouteTagValue[4];
+    memset(externalRouteTagValue, 0, 4 * sizeof(char));
+    int externalRouteTagLength = externalRouteTag.length();
+    if ((externalRouteTagLength > 4) && (externalRouteTagLength <= 10) && (externalRouteTagLength % 2 == 0) && (externalRouteTag[0] == '0') && (externalRouteTag[1] == 'x')) {
+        for (int i = externalRouteTagLength; (i > 2); i -= 2) {
+            externalRouteTagValue[(i - 2) / 2] = hexPairToByte(externalRouteTag[i - 1], externalRouteTag[i]);
         }
     }
+    asExternalRoute.setExternalRouteTag((externalRouteTagValue[0] << 24) + (externalRouteTagValue[1] << 16) + (externalRouteTagValue[2] << 8) + externalRouteTagValue[3]);
+
     // add the external route to the OSPF data structure
     ospfRouter->updateExternalRoute(networkAddress.address, asExternalRoute, ifIndex);
 }
@@ -393,24 +374,14 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
 
     EV << "        loading HostInterface " << ifName << " ifIndex[" << static_cast<short> (hostParameters.ifIndex) << "]\n";
 
-    cXMLElementList ifDetails = hostRouteConfig.getChildren();
-    for (cXMLElementList::iterator hostElemIt = ifDetails.begin(); hostElemIt != ifDetails.end(); hostElemIt++) {
-        std::string nodeName = (*hostElemIt)->getTagName();
-        if (nodeName == "AreaID") {
-            hostArea = ulongFromAddressString((*hostElemIt)->getNodeValue());
-        }
-        if (nodeName == "AttachedHost") {
-            hostParameters.address = ipv4AddressFromAddressString((*hostElemIt)->getNodeValue());
-        }
-        if (nodeName == "LinkCost") {
-            hostParameters.linkCost = atoi((*hostElemIt)->getNodeValue());
-        }
-    }
+    hostArea = ulongFromAddressString(hostRouteConfig.getAttribute("AreaID"));
+    hostParameters.address = ipv4AddressFromAddressString(hostRouteConfig.getAttribute("AttachedHost"));
+    hostParameters.linkCost = atoi(hostRouteConfig.getAttribute("LinkCost"));
+
     // add the host route to the OSPF data structure.
     OSPF::Area* area = ospfRouter->getArea(hostArea);
     if (area != NULL) {
         area->addHostRoute(hostParameters);
-
     } else {
         error("Loading HostInterface ifIndex[%d] in Area %d aborted", hostParameters.ifIndex, hostArea);
     }
@@ -433,47 +404,40 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     neighbor->setNeighborID(ulongFromAddressString(endPoint.c_str()));
     intf->addNeighbor(neighbor);
 
-    cXMLElementList ifDetails = virtualLinkConfig.getChildren();
-    for (cXMLElementList::iterator ifElemIt = ifDetails.begin(); ifElemIt != ifDetails.end(); ifElemIt++) {
-        std::string nodeName = (*ifElemIt)->getTagName();
-        if (nodeName == "TransitAreaID") {
-            intf->setTransitAreaID(ulongFromAddressString((*ifElemIt)->getNodeValue()));
-        }
-        if (nodeName == "RetransmissionInterval") {
-            intf->setRetransmissionInterval(atoi((*ifElemIt)->getNodeValue()));
-        }
-        if (nodeName == "InterfaceTransmissionDelay") {
-            intf->setTransmissionDelay(atoi((*ifElemIt)->getNodeValue()));
-        }
-        if (nodeName == "HelloInterval") {
-            intf->setHelloInterval(atoi((*ifElemIt)->getNodeValue()));
-        }
-        if (nodeName == "RouterDeadInterval") {
-            intf->setRouterDeadInterval(atoi((*ifElemIt)->getNodeValue()));
-        }
-        if (nodeName == "AuthenticationType") {
-            std::string authenticationType = (*ifElemIt)->getNodeValue();
-            if (authenticationType == "SimplePasswordType") {
-                intf->setAuthenticationType(OSPF::SIMPLE_PASSWORD_TYPE);
-            } else if (authenticationType == "CrytographicType") {
-                intf->setAuthenticationType(OSPF::CRYTOGRAPHIC_TYPE);
-            } else {
-                intf->setAuthenticationType(OSPF::NULL_TYPE);
-            }
-        }
-        if (nodeName == "AuthenticationKey") {
-            std::string key = (*ifElemIt)->getNodeValue();
-            OSPF::AuthenticationKeyType keyValue;
-            memset(keyValue.bytes, 0, 8 * sizeof(char));
-            int keyLength = key.length();
-            if ((keyLength > 4) && (keyLength <= 18) && (keyLength % 2 == 0) && (key[0] == '0') && (key[1] == 'x')) {
-                for (int i = keyLength; (i > 2); i -= 2) {
-                    keyValue.bytes[(i - 2) / 2] = hexPairToByte(key[i - 1], key[i]);
-                }
-            }
-            intf->setAuthenticationKey(keyValue);
+
+
+
+    intf->setTransitAreaID(ulongFromAddressString(virtualLinkConfig.getAttribute("TransitAreaID")));
+
+    intf->setRetransmissionInterval(atoi(virtualLinkConfig.getAttribute("RetransmissionInterval")));
+
+    intf->setTransmissionDelay(atoi(virtualLinkConfig.getAttribute("InterfaceTransmissionDelay")));
+
+    intf->setHelloInterval(atoi(virtualLinkConfig.getAttribute("HelloInterval")));
+
+    intf->setRouterDeadInterval(atoi(virtualLinkConfig.getAttribute("RouterDeadInterval")));
+
+    std::string authenticationType = virtualLinkConfig.getAttribute("AuthenticationType");
+    if (authenticationType == "SimplePasswordType") {
+        intf->setAuthenticationType(OSPF::SIMPLE_PASSWORD_TYPE);
+    } else if (authenticationType == "CrytographicType") {
+        intf->setAuthenticationType(OSPF::CRYTOGRAPHIC_TYPE);
+    } else if (authenticationType == "NullType") {
+        intf->setAuthenticationType(OSPF::NULL_TYPE);
+    } else {
+        throw cRuntimeError("Invalid AuthenticationType '%s'", authenticationType.c_str());
+    }
+
+    std::string key = virtualLinkConfig.getAttribute("AuthenticationKey");
+    OSPF::AuthenticationKeyType keyValue;
+    memset(keyValue.bytes, 0, 8 * sizeof(char));
+    int keyLength = key.length();
+    if ((keyLength > 4) && (keyLength <= 18) && (keyLength % 2 == 0) && (key[0] == '0') && (key[1] == 'x')) {
+        for (int i = keyLength; (i > 2); i -= 2) {
+            keyValue.bytes[(i - 2) / 2] = hexPairToByte(key[i - 1], key[i]);
         }
     }
+    intf->setAuthenticationKey(keyValue);
 
     // add the virtual link to the OSPF data structure.
     OSPF::Area* transitArea = ospfRouter->getArea(intf->getAreaID());

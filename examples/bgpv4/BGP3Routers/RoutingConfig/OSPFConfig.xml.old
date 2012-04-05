@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="OSPF.xsd">
+    
+    <Area id="0.0.0.1">
+        <AddressRange>
+            <Address>10.10.0.0</Address>
+            <Mask>255.255.0.0</Mask>
+            <Status>Advertise</Status>
+        </AddressRange>
+    </Area>
+    
+    <Area id="0.0.0.2">
+        <AddressRange>
+            <Address>10.20.0.0</Address>
+            <Mask>255.255.0.0</Mask>
+            <Status>Advertise</Status>
+        </AddressRange>
+    </Area>
+    
+    <Area id="0.0.0.3">
+        <AddressRange>
+            <Address>10.30.0.0</Address>
+            <Mask>255.255.0.0</Mask>
+            <Status>Advertise</Status>
+        </AddressRange>
+    </Area>
+    
+    <Router id="192.168.1.254">    <!-- RA1 -->
+        <RFC1583Compatible/>
+        <PointToPointInterface ifName="ppp0">
+            <AreaID>0.0.0.1</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <PointToPointInterface ifName="ppp1">
+            <AreaID>0.0.0.1</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <ExternalInterface ifName="eth0">
+            <AdvertisedExternalNetwork>
+                <Address>192.168.0.0</Address>
+                <Mask>255.255.0.0</Mask>
+            </AdvertisedExternalNetwork>
+            <ExternalInterfaceOutputParameters>
+                <ExternalInterfaceOutputType>Type2</ExternalInterfaceOutputType>
+                <ExternalInterfaceOutputCost>10</ExternalInterfaceOutputCost>
+            </ExternalInterfaceOutputParameters>
+            <ForwardingAddress>0.0.0.0</ForwardingAddress>
+            <ExternalRouteTag>0x00</ExternalRouteTag>
+        </ExternalInterface>
+    </Router>
+    
+    <Router id="192.169.1.254">    <!-- RA2 -->
+        <RFC1583Compatible/>
+        <PointToPointInterface ifName="ppp0">
+            <AreaID>0.0.0.1</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <PointToPointInterface ifName="ppp1">
+            <AreaID>0.0.0.1</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <ExternalInterface ifName="eth0">
+            <AdvertisedExternalNetwork>
+                <Address>192.169.0.0</Address>
+                <Mask>255.255.0.0</Mask>
+            </AdvertisedExternalNetwork>
+            <ExternalInterfaceOutputParameters>
+                <ExternalInterfaceOutputType>Type2</ExternalInterfaceOutputType>
+                <ExternalInterfaceOutputCost>10</ExternalInterfaceOutputCost>
+            </ExternalInterfaceOutputParameters>
+            <ForwardingAddress>0.0.0.0</ForwardingAddress>
+            <ExternalRouteTag>0x00</ExternalRouteTag>
+        </ExternalInterface>
+    </Router>
+    
+    <Router id="10.10.12.1">    <!-- A -->
+        <RFC1583Compatible/>
+        <PointToPointInterface ifName="ppp2">
+            <AreaID>0.0.0.1</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <PointToPointInterface ifName="ppp3">
+            <AreaID>0.0.0.1</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+    </Router>
+    
+    <Router id="192.170.1.254">    <!-- RB1 -->
+        <RFC1583Compatible/>
+        <PointToPointInterface ifName="ppp0">
+            <AreaID>0.0.0.2</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <PointToPointInterface ifName="ppp1">
+            <AreaID>0.0.0.2</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <ExternalInterface ifName="eth0">
+            <AdvertisedExternalNetwork>
+                <Address>192.170.0.0</Address>
+                <Mask>255.255.0.0</Mask>
+            </AdvertisedExternalNetwork>
+            <ExternalInterfaceOutputParameters>
+                <ExternalInterfaceOutputType>Type2</ExternalInterfaceOutputType>
+                <ExternalInterfaceOutputCost>10</ExternalInterfaceOutputCost>
+            </ExternalInterfaceOutputParameters>
+            <ForwardingAddress>0.0.0.0</ForwardingAddress>
+            <ExternalRouteTag>0x00</ExternalRouteTag>
+        </ExternalInterface>
+    </Router>
+    
+    <Router id="192.171.1.254">    <!-- RB2 -->
+        <RFC1583Compatible/>
+        <PointToPointInterface ifName="ppp0">
+            <AreaID>0.0.0.2</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <PointToPointInterface ifName="ppp1">
+            <AreaID>0.0.0.2</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <ExternalInterface ifName="eth0">
+            <AdvertisedExternalNetwork>
+                <Address>192.171.0.0</Address>
+                <Mask>255.255.0.0</Mask>
+            </AdvertisedExternalNetwork>
+            <ExternalInterfaceOutputParameters>
+                <ExternalInterfaceOutputType>Type2</ExternalInterfaceOutputType>
+                <ExternalInterfaceOutputCost>10</ExternalInterfaceOutputCost>
+            </ExternalInterfaceOutputParameters>
+            <ForwardingAddress>0.0.0.0</ForwardingAddress>
+            <ExternalRouteTag>0x00</ExternalRouteTag>
+        </ExternalInterface>
+    </Router>
+  
+    <Router id="10.20.3.2">    <!-- B -->
+        <RFC1583Compatible/>
+        <PointToPointInterface ifName="ppp2">
+            <AreaID>0.0.0.2</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <PointToPointInterface ifName="ppp3">
+            <AreaID>0.0.0.2</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+    </Router>
+    
+    <Router id="192.172.1.254">    <!-- RC1 -->
+        <RFC1583Compatible/>
+        <PointToPointInterface ifName="ppp0">
+            <AreaID>0.0.0.3</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <PointToPointInterface ifName="ppp1">
+            <AreaID>0.0.0.3</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <ExternalInterface ifName="eth0">
+            <AdvertisedExternalNetwork>
+                <Address>192.172.0.0</Address>
+                <Mask>255.255.0.0</Mask>
+            </AdvertisedExternalNetwork>
+            <ExternalInterfaceOutputParameters>
+                <ExternalInterfaceOutputType>Type2</ExternalInterfaceOutputType>
+                <ExternalInterfaceOutputCost>10</ExternalInterfaceOutputCost>
+            </ExternalInterfaceOutputParameters>
+            <ForwardingAddress>0.0.0.0</ForwardingAddress>
+            <ExternalRouteTag>0x00</ExternalRouteTag>
+        </ExternalInterface>
+    </Router>
+    
+    <Router id="192.173.1.254">    <!-- RC2 -->
+        <RFC1583Compatible/>
+        <PointToPointInterface ifName="ppp0">
+            <AreaID>0.0.0.3</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <PointToPointInterface ifName="ppp1">
+            <AreaID>0.0.0.3</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <ExternalInterface ifName="eth0">
+            <AdvertisedExternalNetwork>
+                <Address>192.173.0.0</Address>
+                <Mask>255.255.0.0</Mask>
+            </AdvertisedExternalNetwork>
+            <ExternalInterfaceOutputParameters>
+                <ExternalInterfaceOutputType>Type2</ExternalInterfaceOutputType>
+                <ExternalInterfaceOutputCost>10</ExternalInterfaceOutputCost>
+            </ExternalInterfaceOutputParameters>
+            <ForwardingAddress>0.0.0.0</ForwardingAddress>
+            <ExternalRouteTag>0x00</ExternalRouteTag>
+        </ExternalInterface>
+    </Router>
+  
+    <Router id="10.30.3.2">    <!-- C -->
+        <RFC1583Compatible/>
+        <PointToPointInterface ifName="ppp2">
+            <AreaID>0.0.0.3</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+        <PointToPointInterface ifName="ppp3">
+            <AreaID>0.0.0.3</AreaID>
+            <InterfaceOutputCost>10</InterfaceOutputCost>
+            <RetransmissionInterval>5</RetransmissionInterval>
+            <InterfaceTransmissionDelay>1</InterfaceTransmissionDelay>
+            <HelloInterval>10</HelloInterval>
+            <RouterDeadInterval>40</RouterDeadInterval>
+            <AuthenticationType>NullType</AuthenticationType>
+            <AuthenticationKey>0x00</AuthenticationKey>
+        </PointToPointInterface>
+    </Router>
+        
+</OSPFASConfig>
