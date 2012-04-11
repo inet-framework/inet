@@ -79,6 +79,7 @@ class INET_API InterfaceEntry : public cNamedObject
     friend class InterfaceProtocolData; // to call protocolDataChanged()
   protected:
     IInterfaceTable *ownerp; ///< IInterfaceTable that contains this interface, or NULL
+    cModule *interfaceModule;  ///< interface module, or NULL
     int interfaceId;      ///< identifies the interface in the IInterfaceTable
     int nwLayerGateIndex; ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)
     int nodeOutputGateId; ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
@@ -116,7 +117,7 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual void setInterfaceId(int id) {interfaceId = id;}
 
   public:
-    InterfaceEntry();
+    InterfaceEntry(cModule *interfaceModule);
     virtual ~InterfaceEntry() {}
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
@@ -130,6 +131,7 @@ class INET_API InterfaceEntry : public cNamedObject
     /** @name Field getters. Note they are non-virtual and inline, for performance reasons. */
     //@{
     int getInterfaceId() const        {return interfaceId;}
+    cModule *getInterfaceModule() const  {return interfaceModule;}
     int getNetworkLayerGateIndex() const {return nwLayerGateIndex;}
     int getNodeOutputGateId() const   {return nodeOutputGateId;}
     int getNodeInputGateId() const    {return nodeInputGateId;}

@@ -44,9 +44,10 @@ void InterfaceProtocolData::changed(int category)
 }
 
 
-InterfaceEntry::InterfaceEntry()
+InterfaceEntry::InterfaceEntry(cModule* ifmod)
 {
     ownerp = NULL;
+    interfaceModule = ifmod;
 
     nwLayerGateIndex = -1;
     nodeOutputGateId = -1;

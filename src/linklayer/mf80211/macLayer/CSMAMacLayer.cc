@@ -62,7 +62,7 @@ void CSMAMacLayer::initialize(int stage)
 
 void CSMAMacLayer::registerInterface()
 {
-    InterfaceEntry *e = new InterfaceEntry();
+    InterfaceEntry *e = new InterfaceEntry(this);
 
     // interface name: NIC module's name without special characters ([])
     e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());

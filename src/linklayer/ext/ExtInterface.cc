@@ -82,7 +82,7 @@ void ExtInterface::initialize(int stage)
 
 InterfaceEntry *ExtInterface::registerInterface()
 {
-    InterfaceEntry *e = new InterfaceEntry();
+    InterfaceEntry *e = new InterfaceEntry(this);
 
     // interface name: our module name without special characters ([])
     e->setName(OPP_Global::stripnonalnum(getFullName()).c_str());

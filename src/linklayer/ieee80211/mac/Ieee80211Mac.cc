@@ -190,7 +190,7 @@ void Ieee80211Mac::registerInterface()
     if (!ift)
         return;
 
-    InterfaceEntry *e = new InterfaceEntry();
+    InterfaceEntry *e = new InterfaceEntry(this);
 
     // interface name: NIC module's name without special characters ([])
     e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());

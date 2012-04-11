@@ -67,7 +67,7 @@ void InterfaceTable::initialize(int stage)
         nb = NotificationBoardAccess().get();
 
         // register a loopback interface
-        InterfaceEntry *ie = new InterfaceEntry();
+        InterfaceEntry *ie = new InterfaceEntry(NULL);
         ie->setName("lo0");
         ie->setMtu(3924);
         ie->setLoopback(true);
