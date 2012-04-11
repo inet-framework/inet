@@ -356,7 +356,10 @@ const char *IPv4NetworkConfigurator::getWirelessId(InterfaceEntry *interfaceEntr
     }
 
     // if the mgmt submodule within the wireless NIC has an "ssid" or "accessPointAddress" parameter, we can use that
-    cSimpleModule *mgmtModule = ModuleAccess<cSimpleModule>("mgmt").getIfExists(hostModule);
+    cModule *module = interfaceEntry->getInterfaceModule();
+    if (!module)
+        module = hostModule;
+    cSimpleModule *mgmtModule = ModuleAccess<cSimpleModule>("mgmt").getIfExists(module);
     if (mgmtModule)
     {
         if (mgmtModule->hasPar("ssid"))
