@@ -204,6 +204,9 @@ package inet.networklayer.autorouting.ipv4;
 //
 //  - <wireless>
 //
+//    - @id (optional)
+//      identifies wireless network, unique value used if missed
+//
 //    - @hosts
 //      Optional selector attribute that specifies a list of host name patterns.
 //      Only interfaces in the specified hosts are affected. The default value

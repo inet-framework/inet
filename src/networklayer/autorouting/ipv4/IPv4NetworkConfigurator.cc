@@ -345,7 +345,8 @@ const char *IPv4NetworkConfigurator::getWirelessId(InterfaceEntry *interfaceEntr
             if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str())) &&
                 (interfaceMatcher.matchesAny() || interfaceMatcher.matches(interfaceEntry->getFullName())))
             {
-                return wirelessElement->getSourceLocation();
+                const char *idAttr = wirelessElement->getAttribute("id");  // identifier of wireless connection
+                return idAttr ? idAttr : wirelessElement->getSourceLocation();
             }
         }
         catch (std::exception& e)
