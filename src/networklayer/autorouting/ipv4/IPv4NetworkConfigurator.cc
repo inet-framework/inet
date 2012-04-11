@@ -263,7 +263,7 @@ double IPv4NetworkConfigurator::getChannelWeight(cChannel *transmissionChannel)
  */
 void IPv4NetworkConfigurator::extractWirelessTopology(IPv4Topology& topology)
 {
-    std::map<const char *, LinkInfo *> wirelessIdToLinkInfoMap;  // wireless LANs by name
+    std::map<std::string, LinkInfo *> wirelessIdToLinkInfoMap;  // wireless LANs by name
 
     // iterate through all wireless interfaces and determine the wireless id.
     for (int nodeIndex = 0; nodeIndex < topology.getNumNodes(); nodeIndex++)
@@ -295,7 +295,7 @@ void IPv4NetworkConfigurator::extractWirelessTopology(IPv4Topology& topology)
     }
 
     // add links between all pairs of wireless interfaces (full graph)
-    for (std::map<const char *, LinkInfo *>::iterator it = wirelessIdToLinkInfoMap.begin(); it != wirelessIdToLinkInfoMap.end(); it++)
+    for (std::map<std::string, LinkInfo *>::iterator it = wirelessIdToLinkInfoMap.begin(); it != wirelessIdToLinkInfoMap.end(); it++)
     {
         LinkInfo *linkInfo = it->second;
         for (int i = 0; i < (int)linkInfo->interfaceInfos.size(); i++)
