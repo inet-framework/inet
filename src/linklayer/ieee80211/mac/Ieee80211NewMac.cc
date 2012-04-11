@@ -622,7 +622,7 @@ void Ieee80211NewMac::registerInterface()
     e->setPointToPoint(false);
 
     // add
-    ift->addInterface(e, this);
+    ift->addInterface(e);
 }
 
 void Ieee80211NewMac::initializeQueueModule()

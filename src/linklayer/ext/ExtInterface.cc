@@ -91,7 +91,7 @@ InterfaceEntry *ExtInterface::registerInterface()
     e->setMulticast(true);
     e->setPointToPoint(true);
     IInterfaceTable *ift = InterfaceTableAccess().get();
-    ift->addInterface(e, this);
+    ift->addInterface(e);
     return e;
 }
 

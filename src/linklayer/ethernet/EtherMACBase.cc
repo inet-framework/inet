@@ -329,7 +329,7 @@ void EtherMACBase::registerInterface()
     IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
 
     if (ift)
-        ift->addInterface(interfaceEntry, this);
+        ift->addInterface(interfaceEntry);
 }
 
 void EtherMACBase::receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj)

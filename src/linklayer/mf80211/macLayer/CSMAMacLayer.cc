@@ -95,7 +95,7 @@ void CSMAMacLayer::registerInterface()
 
     // add
     IInterfaceTable *ift = InterfaceTableAccess().get();
-    ift->addInterface(e, this);
+    ift->addInterface(e);
 }
 
 

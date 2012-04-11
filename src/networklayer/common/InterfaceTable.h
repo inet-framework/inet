@@ -86,7 +86,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     virtual void updateLinkDisplayString(InterfaceEntry *entry);
 
     // discover and store which nwlayer/host gates connect to this interface
-    virtual void discoverConnectingGates(InterfaceEntry *entry, cModule *ifmod);
+    virtual void discoverConnectingGates(InterfaceEntry *entry);
 
     // called from InterfaceEntry
     virtual void interfaceChanged(InterfaceEntry *entry, int category);
@@ -121,13 +121,12 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     virtual cModule *getHostModule();
 
     /**
-     * Adds an interface. The second argument should be a module which belongs
-     * to the physical interface (e.g. PPP or EtherMac) -- it will be used
+     * Adds an interface. The entry->getInterfaceModule() will be used
      * to discover and fill in getNetworkLayerGateIndex(), getNodeOutputGateId(),
      * and getNodeInputGateId() in InterfaceEntry. It should be NULL if this is
      * a virtual interface (e.g. loopback).
      */
-    virtual void addInterface(InterfaceEntry *entry, cModule *ifmod);
+    virtual void addInterface(InterfaceEntry *entry);
 
     /**
      * Deletes the given interface from the table. Indices of existing

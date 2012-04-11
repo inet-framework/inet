@@ -208,7 +208,7 @@ void Ieee80211Mac::registerInterface()
     e->setPointToPoint(false);
 
     // add
-    ift->addInterface(e, this);
+    ift->addInterface(e);
 }
 
 void Ieee80211Mac::initializeQueueModule()

@@ -120,7 +120,7 @@ void Mac80211::registerInterface()
 
     // add
     IInterfaceTable *ift = InterfaceTableAccess().get();
-    ift->addInterface(e, this);
+    ift->addInterface(e);
 }
 
 void Mac80211::handleCommand(cMessage *msg)

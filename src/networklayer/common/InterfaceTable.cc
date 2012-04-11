@@ -71,7 +71,7 @@ void InterfaceTable::initialize(int stage)
         ie->setName("lo0");
         ie->setMtu(3924);
         ie->setLoopback(true);
-        addInterface(ie, NULL);
+        addInterface(ie);
     }
     else if (stage==1)
     {
@@ -151,7 +151,7 @@ InterfaceEntry *InterfaceTable::getInterfaceById(int id)
     return (id<0 || id>=(int)idToInterface.size()) ? NULL : idToInterface[id];
 }
 
-void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
+void InterfaceTable::addInterface(InterfaceEntry *entry)
 {
     if (!nb)
         throw cRuntimeError("InterfaceTable must precede all network interface modules in the node's NED definition");
@@ -166,14 +166,17 @@ void InterfaceTable::addInterface(InterfaceEntry *entry, cModule *ifmod)
     invalidateTmpInterfaceList();
 
     // fill in networkLayerGateIndex, nodeOutputGateId, nodeInputGateId
-    if (ifmod)
-        discoverConnectingGates(entry, ifmod);
+    discoverConnectingGates(entry);
 
     nb->fireChangeNotification(NF_INTERFACE_CREATED, entry);
 }
 
-void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry, cModule *ifmod)
+void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
 {
+    cModule *ifmod = entry->getInterfaceModule();
+    if (!ifmod)
+        return;  // virtual interface
+
     // ifmod is something like "host.eth[1].mac"; climb up to find "host.eth[1]" from it
     cModule *host = getParentModule();
     while (ifmod && ifmod->getParentModule()!=host)
