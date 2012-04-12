@@ -187,11 +187,7 @@ void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string
             addressRange.address = ipv4AddressFromAddressString((*arIt)->getAttribute("Address"));
             addressRange.mask = ipv4AddressFromAddressString((*arIt)->getAttribute("Mask"));
             std::string status = (*arIt)->getAttribute("Status");
-            if (status == "Advertise") {
-                area->addAddressRange(addressRange, true);
-            } else {
-                area->addAddressRange(addressRange, false);
-            }
+            area->addAddressRange(addressRange, status == "Advertise");
         }
         if ((nodeName == "Stub") && (areaID != "0.0.0.0")) {    // the backbone cannot be configured as a stub
             area->setExternalRoutingCapability(false);
