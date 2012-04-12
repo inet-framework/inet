@@ -93,7 +93,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
                     this->node = node;
                     this->linkInfo = linkInfo;
                     this->interfaceEntry = interfaceEntry;
-                    configure = true;
+                    configure = false;
                     address = 0;
                     addressSpecifiedBits = 0;
                     netmask = 0;

@@ -108,6 +108,7 @@ void IPv4NetworkConfigurator::initialize(int stage)
 
 void IPv4NetworkConfigurator::extractTopology(IPv4Topology& topology)
 {
+    // TODO: the current topology discovery implementation doesn't support heterogeneous wired and wireless links
     extractWiredTopology(topology);
     extractWirelessTopology(topology);
 
@@ -386,7 +387,7 @@ IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::determineGatewa
             if (!interfaceTable->getInterface(i)->isLoopback())
                 numInterfaces++;
 
-        if (numInterfaces > 1 && routingTable->isIPForwardingEnabled())
+        if (numInterfaces > 1 && routingTable && routingTable->isIPForwardingEnabled())
         {
             // node has at least one more interface, supposedly connecting to another link
             if (gatewayInterfaceInfo)
@@ -563,9 +564,12 @@ void IPv4NetworkConfigurator::assignAddresses(IPv4Topology& topology)
     {
         LinkInfo *selectedLink = topology.linkInfos[linkIndex];
 
+        std::vector<InterfaceInfo *> unconfiguredInterfaces;
+        for (std::vector<InterfaceInfo *>::iterator it = selectedLink->interfaceInfos.begin(); it != selectedLink->interfaceInfos.end(); ++it)
+            if ((*it)->interfaceEntry->ipv4Data())
+                unconfiguredInterfaces.push_back(*it);
         // repeat until all interfaces of the selected link become configured
         // and assign addresses to groups of interfaces having compatible address and netmask specifications
-        std::vector<InterfaceInfo *> unconfiguredInterfaces = selectedLink->interfaceInfos;
         while (unconfiguredInterfaces.size() != 0)
         {
             // STEP 1.
@@ -705,17 +709,18 @@ IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::createInterface
 {
     InterfaceInfo *interfaceInfo = new InterfaceInfo(node, linkInfo, ie);
     IPv4InterfaceData *ipv4Data = ie->ipv4Data();
-    IPv4Address address = ipv4Data->getIPAddress();
-    IPv4Address netmask = ipv4Data->getNetmask();
-    bool addressUnspecified = address.isUnspecified();
-    if (!addressUnspecified)
+    if (ipv4Data)
     {
-        interfaceInfo->address = address.getInt();
-        interfaceInfo->netmask = netmask.getInt();
-        interfaceInfo->addressSpecifiedBits = 0xFFFFFFFF;
-        interfaceInfo->netmaskSpecifiedBits = 0xFFFFFFFF;
+        IPv4Address address = ipv4Data->getIPAddress();
+        IPv4Address netmask = ipv4Data->getNetmask();
+        if (!address.isUnspecified())
+        {
+            interfaceInfo->address = address.getInt();
+            interfaceInfo->addressSpecifiedBits = 0xFFFFFFFF;
+            interfaceInfo->netmask = netmask.getInt();
+            interfaceInfo->netmaskSpecifiedBits = 0xFFFFFFFF;
+        }
     }
-    interfaceInfo->configure = addressUnspecified;
     node->interfaceInfos.push_back(interfaceInfo);
     return interfaceInfo;
 }
@@ -814,22 +819,6 @@ void IPv4NetworkConfigurator::readAddressConfiguration(cXMLElement *root, IPv4To
     std::set<InterfaceInfo *> interfacesSeen;
     cXMLElementList interfaceElements = root->getChildrenByTagName("interface");
 
-    // If there is no XML configuration, all interfaces are configured with some default address range
-    // (see InterfaceInfo ctor); however, if there is at least one <interface> element, then there is
-    // no such default, all interfaces to be configured should be covered with <interface> elements.
-    if (interfaceElements.size() > 0)
-    {
-        // set configure=false for on all interfaces
-        for (int i = 0; i < (int)topology.linkInfos.size(); i++)
-        {
-            LinkInfo *linkInfo = topology.linkInfos[i];
-            for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++)
-            {
-                InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
-                interfaceInfo->configure = false;
-            }
-        }
-    }
     for (int i = 0; i < (int)interfaceElements.size(); i++)
     {
         cXMLElement *interfaceElement = interfaceElements[i];
@@ -1515,6 +1504,8 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
         if (!sourceNode->interfaceTable)
             continue;
         IRoutingTable *sourceRoutingTable = sourceNode->routingTable;
+        if (!sourceRoutingTable)
+            continue;
         //IInterfaceTable *sourceInterfaceTable = sourceNode->interfaceTable;
 
         // calculate shortest paths from everywhere to sourceNode
@@ -1599,9 +1590,11 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
                 for (int j = 0; j < destinationInterfaceTable->getNumInterfaces(); j++)
                 {
                     InterfaceEntry *destinationInterfaceEntry = destinationInterfaceTable->getInterface(j);
+                    if (!destinationInterfaceEntry->ipv4Data())
+                        continue;
                     IPv4Address destinationAddress = destinationInterfaceEntry->ipv4Data()->getIPAddress();
                     IPv4Address destinationNetmask = destinationInterfaceEntry->ipv4Data()->getNetmask();
-                    if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified())
+                    if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->ipv4Data())
                     {
                         IPv4Route *route = new IPv4Route();
                         IPv4Address gatewayAddress = nextHopInterfaceEntry->ipv4Data()->getIPAddress();
