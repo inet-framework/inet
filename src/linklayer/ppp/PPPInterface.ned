@@ -36,8 +36,8 @@ module PPPInterface like IWiredNic
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
     gates:
-        input netwIn;
-        output netwOut;
+        input upperLayerIn;
+        output upperLayerOut;
         inout phys @labels(PPPFrame);
     submodules:
         outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0;
@@ -53,9 +53,9 @@ module PPPInterface like IWiredNic
                 @display("p=98,165");
         }
     connections:
-        netwIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0;
-        netwIn --> { @display("m=n"); } --> queue.in if numOutputHooks == 0 && queueType != "";
-        netwIn --> { @display("m=n"); } --> ppp.netwIn if numOutputHooks == 0 && queueType == "";
+        upperLayerIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0;
+        upperLayerIn --> { @display("m=n"); } --> queue.in if numOutputHooks == 0 && queueType != "";
+        upperLayerIn --> { @display("m=n"); } --> ppp.netwIn if numOutputHooks == 0 && queueType == "";
 
         for i=0..numOutputHooks-2 {
             outputHook[i].out --> outputHook[i+1].in;
@@ -67,12 +67,12 @@ module PPPInterface like IWiredNic
 
         phys <--> { @display("m=s"); } <--> ppp.phys;
 
-        ppp.netwOut --> { @display("m=n"); } --> netwOut if numInputHooks == 0;
+        ppp.netwOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0;
         ppp.netwOut --> inputHook[0].in if numInputHooks > 0;
 
         for i=0..numInputHooks-2 {
             inputHook[i].out --> inputHook[i+1].in;
         }
-        inputHook[numInputHooks-1].out --> { @display("m=n"); } --> netwOut if numInputHooks > 0;
+        inputHook[numInputHooks-1].out --> { @display("m=n"); } --> upperLayerOut if numInputHooks > 0;
 }
 

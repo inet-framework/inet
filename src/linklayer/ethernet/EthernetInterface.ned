@@ -41,8 +41,8 @@ module EthernetInterface like IWiredNic
         int numInputHooks = default(0);
         @display("i=block/ifcard;bgl=2");
     gates:
-        input netwIn;
-        output netwOut;
+        input upperLayerIn;
+        output upperLayerOut;
         inout phys @labels(EtherFrame);
     submodules:
         outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0;
@@ -69,16 +69,16 @@ module EthernetInterface like IWiredNic
         encap.lowerLayerIn <-- mac.upperLayerOut;
         mac.phys <--> { @display("m=s"); } <--> phys;
 
-        netwIn --> { @display("m=n"); } --> encap.upperLayerIn if numOutputHooks == 0;
-        netwOut <-- { @display("m=n"); } <-- encap.upperLayerOut if numInputHooks == 0;
+        upperLayerIn --> { @display("m=n"); } --> encap.upperLayerIn if numOutputHooks == 0;
+        upperLayerOut <-- { @display("m=n"); } <-- encap.upperLayerOut if numInputHooks == 0;
 
         encap.upperLayerOut --> inputHook[0].in if numInputHooks > 0;
         for i=0..numInputHooks-2 {
             inputHook[i].out --> inputHook[i+1].in;
         }
-        inputHook[numInputHooks-1].out --> { @display("m=n"); } --> netwOut if numInputHooks > 0;
+        inputHook[numInputHooks-1].out --> { @display("m=n"); } --> upperLayerOut if numInputHooks > 0;
 
-        netwIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0;
+        upperLayerIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0;
         for i=0..numOutputHooks-2 {
             outputHook[i].out --> outputHook[i+1].in;
         }

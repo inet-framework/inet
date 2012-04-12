@@ -195,17 +195,19 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry, cModule *ifm
             entry->setNodeInputGateId(g->getPreviousGate()->getId());
 
         // find the gate index of networkLayer/networkLayer6/mpls that connects to this interface
-        if (g->getType()==cGate::OUTPUT && g->getNextGate() && g->getNextGate()->isName("ifIn"))
+        if (g->getType()==cGate::OUTPUT && g->getNextGate() && g->isName("upperLayerOut"))
             nwlayerInGate = g->getNextGate();
-        if (g->getType()==cGate::INPUT && g->getPreviousGate() && g->getPreviousGate()->isName("ifOut"))
+        if (g->getType()==cGate::INPUT && g->getPreviousGate() && g->isName("upperLayerIn"))
             nwlayerOutGate = g->getPreviousGate();
     }
 
     // consistency checks
     // note: we don't check nodeOutputGateId/nodeInputGateId, because wireless interfaces
     // are not connected to the host
-    if (!nwlayerInGate || !nwlayerOutGate || nwlayerInGate->getIndex()!=nwlayerOutGate->getIndex())
-        throw cRuntimeError("addInterface(): interface must be connected to network layer's ifIn[]/ifOut[] gates of the same index");
+    if (!nwlayerInGate && !nwlayerOutGate)
+        return;
+    if (!nwlayerInGate || !nwlayerOutGate || nwlayerInGate->getOwnerModule()!=nwlayerOutGate->getOwnerModule() || nwlayerInGate->getIndex()!=nwlayerOutGate->getIndex())
+        throw cRuntimeError("addInterface(): interface must be connected to network layer's in/out gates to lower layer of the same index");
 
     entry->setNetworkLayerGateIndex(nwlayerInGate->getIndex());
 }

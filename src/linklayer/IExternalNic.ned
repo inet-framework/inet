@@ -17,11 +17,7 @@
 
 package inet.linklayer;
 
-moduleinterface IExternalNic
+moduleinterface IExternalNic extends INic
 {
-    gates:
-        input netwIn;
-        output netwOut;
 }
-
 

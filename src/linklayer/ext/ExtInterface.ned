@@ -26,8 +26,8 @@ simple ExtInterface like IExternalNic
         string device;
         int mtu @unit("B") = default(1500B);
     gates:
-        input netwIn;
-        output netwOut;
+        input upperLayerIn;
+        output upperLayerOut;
 }
 
 

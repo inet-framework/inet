@@ -21,13 +21,11 @@ package inet.linklayer;
 //
 // Prototype module for link layer protocols.
 //
-moduleinterface IWiredNic
+moduleinterface IWiredNic extends INic
 {
     parameters:
         @display("i=block/ifcard");
     gates:
-        input netwIn;
-        output netwOut;
         inout phys;
 }
 

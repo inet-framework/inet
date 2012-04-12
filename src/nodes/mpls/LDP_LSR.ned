@@ -118,8 +118,8 @@ module LDP_LSR extends LDP_ROUTER_BASE
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
 
-            ppp[i].netwOut --> mpls.ifIn[i];
-            ppp[i].netwIn <-- mpls.ifOut[i];
+            ppp[i].upperLayerOut --> mpls.ifIn[i];
+            ppp[i].upperLayerIn <-- mpls.ifOut[i];
 
             mpls.netwOut[i] --> networkLayer.ifIn[i];
             mpls.netwIn[i] <-- networkLayer.ifOut[i];

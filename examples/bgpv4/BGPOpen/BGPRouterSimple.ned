@@ -97,8 +97,8 @@ module BGPRouterSimple
         // connections to network outside
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> { @display("m=s"); } <--> ppp[i].phys;
-            ppp[i].netwOut --> networkLayer.ifIn[i];
-            ppp[i].netwIn <-- networkLayer.ifOut[i];
+            ppp[i].upperLayerOut --> networkLayer.ifIn[i];
+            ppp[i].upperLayerIn <-- networkLayer.ifOut[i];
         }
 }
 

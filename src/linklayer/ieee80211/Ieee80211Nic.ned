@@ -50,7 +50,7 @@ module Ieee80211Nic like IWirelessNic
     submodules:
         outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0;
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0;
-        
+
         // optional agent module (can be either 0 or 1 sized vector)
         agent: Ieee80211AgentSTA if _agentNeeded {
             parameters:
