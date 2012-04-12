@@ -35,7 +35,7 @@
 /examples/ethernet/lans/,            -f fingerprints.ini -c MixedLAN1 -r 0,         200s,            ea41-e50e
 /examples/ethernet/lans/,            -f hub.ini -c Hub1 -r 0,                       100s,            4d10-13a7
 /examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0,                       10s,             1da5-f95b
-/examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0,                       100s,            1240-d7aa
+/examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0,                       100s,            4d10-13a7
 /examples/ethernet/lans/,            -f hub.ini -c Hub4 -r 0,                       100s,            4d10-13a7
 /examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              9a54-83c1
 /examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            6aaf-80bb
@@ -124,16 +124,17 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0,     100s,            8d97-f1e2
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0,             100s,            acf7-9b07
 
-/examples/inet/tcpsack/,             -f omnetpp.ini -c One -r 0,                    1.5s,            9d3b-fb8e
-/examples/inet/tcpsack/,             -f omnetpp.ini -c Two -r 0,                    1.5s,            25e0-1d59
-/examples/inet/tcpsack/,             -f omnetpp.ini -c Three -r 0,                  1.5s,            0477-0ae8
-/examples/inet/tcpsack/,             -f omnetpp.ini -c Four -r 0,                   1.5s,            ac85-9ff8
-/examples/inet/tcpsack/,             -f omnetpp.ini -c Five -r 0,                   1.5s,            ef69-f5ca
-/examples/inet/tcpsack/,             -f omnetpp.ini -c Six -r 0,                    1.5s,            7048-47c4
-/examples/inet/tcptimestamps/,       -f omnetpp.ini -c One -r 0,                    1.5s,            056f-10a5
-/examples/inet/tcptimestamps/,       -f omnetpp.ini -c Two -r 0,                    1.5s,            2612-a366
-/examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_disabled -r 0,            1.5s,            4fea-0392
-/examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0,             1.5s,            2d8f-5bab
+/examples/inet/tcpsack/,             -f omnetpp.ini -c One -r 0,                    1.5s,            545e-aa1c
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Two -r 0,                    1.5s,            df3a-e48f
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Three -r 0,                  1.5s,            b3eb-761c
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Four -r 0,                   1.5s,            4526-33ea
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Five -r 0,                   1.5s,            b29f-e0bb
+/examples/inet/tcpsack/,             -f omnetpp.ini -c Six -r 0,                    1.5s,            80c6-1c4b
+
+/examples/inet/tcptimestamps/,       -f omnetpp.ini -c One -r 0,                    1.5s,            fc59-3920
+/examples/inet/tcptimestamps/,       -f omnetpp.ini -c Two -r 0,                    1.5s,            3e5e-a3a1
+/examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_disabled -r 0,            1.5s,            d4db-b9cc
+/examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0,             1.5s,            b6be-e1f5
 /examples/inet/udpburst/,            -f omnetpp.ini -c General -r 0,                1000s,           bc26-623c
 
 # /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                100s,            34b1-536e    # unstable fingerprint
@@ -225,10 +226,10 @@
 # /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   100s,         0   # interactive config, needed a *.numHosts parameter
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  50s,             5069-6864
 # /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                  100s,         0   # interactive config, needed a *.numHosts parameter
-/examples/wireless/multiradio/,      -f omnetpp.ini -c IndependentWlans -r 0,       1000s,           3d64-78f9
-/examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          1000s,           5cee-e02f
-/examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0,            1000s,           44b9-299e
-/examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           5s,              6f68-a049
-/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        5s,              cee2-100c
+/examples/wireless/multiradio/,      -f omnetpp.ini -c IndependentWlans -r 0,       100s,            d1af-b2c1
+/examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          100s,            f78c-8a00
+/examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0,            100s,            310f-a227
+/examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              9d6f-7777
+/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              d2d3-a88a
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,             36f7-cb04
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             39ea-2016
