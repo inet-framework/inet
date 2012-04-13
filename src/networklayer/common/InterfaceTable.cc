@@ -299,6 +299,38 @@ InterfaceEntry *InterfaceTable::getInterfaceByNetworkLayerGateIndex(int index)
     return NULL;
 }
 
+InterfaceEntry *InterfaceTable::getInterfaceByInterfaceModule(cModule *ifmod)
+{
+    // ifmod is something like "host.eth[1].mac"; climb up to find "host.eth[1]" from it
+    cModule *host = getParentModule();
+    while (ifmod && ifmod->getParentModule()!=host)
+        ifmod = ifmod->getParentModule();
+    if (!ifmod)
+        throw cRuntimeError("addInterface(): specified module is not in this host/router");
+
+    int nodeInputGateId = -1, nodeOutputGateId = -1;
+    for (GateIterator i(ifmod); !i.end(); i++)
+    {
+        cGate *g = i();
+        if (!g) continue;
+
+        // find the host/router's gates that internally connect to this interface
+        if (g->getType()==cGate::OUTPUT && g->getNextGate() && g->getNextGate()->getOwnerModule()==host)
+            nodeOutputGateId = g->getNextGate()->getId();
+        if (g->getType()==cGate::INPUT && g->getPreviousGate() && g->getPreviousGate()->getOwnerModule()==host)
+            nodeInputGateId = g->getPreviousGate()->getId();
+    }
+
+    InterfaceEntry *ie = NULL;
+    if (nodeInputGateId >= 0)
+        ie = getInterfaceByNodeInputGateId(nodeInputGateId);
+    if (!ie && nodeOutputGateId >= 0)
+        ie = getInterfaceByNodeOutputGateId(nodeOutputGateId);
+
+    ASSERT(!ie || (ie->getNodeInputGateId() == nodeInputGateId && ie->getNodeOutputGateId() == nodeOutputGateId));
+    return ie;
+}
+
 InterfaceEntry *InterfaceTable::getInterfaceByName(const char *name)
 {
     Enter_Method_Silent();

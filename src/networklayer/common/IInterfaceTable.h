@@ -110,6 +110,12 @@ class INET_API IInterfaceTable
     virtual InterfaceEntry *getInterfaceByNetworkLayerGateIndex(int index) = 0;
 
     /**
+     * Returns an interface by one of its component module (e.g. PPP).
+     * Returns NULL if not found.
+     */
+    virtual InterfaceEntry *getInterfaceByInterfaceModule(cModule *ifmod) = 0;
+
+    /**
      * Returns an interface given by its name. Returns NULL if not found.
      */
     virtual InterfaceEntry *getInterfaceByName(const char *name) = 0;
