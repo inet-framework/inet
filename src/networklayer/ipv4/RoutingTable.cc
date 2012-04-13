@@ -834,6 +834,8 @@ void RoutingTable::updateNetmaskRoutes()
     }
 
     // then re-add them, according to actual interface configuration
+    // TODO: say there's a node somewhere in the network that belongs to the interface's subnet
+    // TODO: and it is not on the same link, and the gateway does not use proxy ARP, how will packets reach that node?
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
