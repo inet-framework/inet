@@ -18,3 +18,26 @@ ifneq ($(NSC_VERSION),)
   CFLAGS += -DWITH_TCP_NSC -I../3rdparty/nsc-$(NSC_VERSION)/sim
   LIBS += -Wl,-rpath,`abspath ../3rdparty/nsc-$(NSC_VERSION)`
 endif
+
+
+ifndef HAVE_PKGCFG
+  HAVE_PKGCFG := $(shell pkg-config --version)
+  ifeq ($(strip $(HAVE_PKGCFG)),)
+    HAVE_PKGCFG := no
+  else
+    HAVE_PKGCFG := yes
+    PKGCFG := $(shell which pkg-config)
+  endif
+endif
+
+ifndef HAVE_GNPLIB
+  ifeq ($(HAVE_PKGCFG), yes)
+    HAVE_GNPLIB := $(shell $(PKGCFG) --exists gnplib && echo yes || echo no)
+    ifeq ($(HAVE_GNPLIB), yes)
+      GNPLIB_LIBS := $(shell $(PKGCFG) --libs gnplib)
+      LIBS += $(GNPLIB_LIBS)
+      CFLAGS += $(shell $(PKGCFG) --cflags gnplib) -DHAVE_GNPLIB
+    endif
+  endif
+endif
+

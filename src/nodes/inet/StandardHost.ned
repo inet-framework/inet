@@ -55,6 +55,7 @@ module StandardHost
         bool IPForward = default(false);
         int namid = default(-1);
         string routingFile = default("");
+        string group = default("");
         int numExtInterfaces = default(0);
     gates:
         inout pppg[] @labels(PPPFrame-conn);
