@@ -38,6 +38,9 @@ class OSPFRouting :  public cSimpleModule
     IRoutingTable*   rt;         ///< Provides access to the IP routing table.
     OSPF::Router*    ospfRouter; ///< Root object of the OSPF data structure.
 
+    int getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
+    const char *getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
+
     int   resolveInterfaceName(const std::string& name) const;
     void  getAreaListFromXML(const cXMLElement& routerNode, std::map<std::string, int>& areaList) const;
     void  loadAreaFromXML(const cXMLElement& asConfig, const std::string& areaID);

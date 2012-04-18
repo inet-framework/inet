@@ -114,9 +114,9 @@
   </xsd:annotation>
 
   <xsd:complexType>
-    <xsd:attribute name="Address" type="IPv4AddressType" use="required" />
-    <xsd:attribute name="Mask" type="IPv4AddressType" use="required" />
-    <xsd:attribute name="Status" type="StatusTypeEnum" use="required" />
+    <xsd:attribute name="address" type="IPv4AddressType" use="required" />
+    <xsd:attribute name="mask" type="IPv4AddressType" use="required" />
+    <xsd:attribute name="status" type="StatusTypeEnum" use="required" />
   </xsd:complexType>
 </xsd:element>
 
@@ -130,7 +130,7 @@
   </xsd:annotation>
 
   <xsd:complexType>
-    <xsd:attribute name="DefaultCost" type="MetricType" use="required" />
+    <xsd:attribute name="defaultCost" type="MetricType" use="required" />
   </xsd:complexType>
 </xsd:element>
 
@@ -163,14 +163,14 @@
 
   <xsd:complexType>
     <xsd:attribute name="ifName" type="InterfaceNameType" use="required" />
-    <xsd:attribute name="AreaID" type="IPv4AddressType" use="required" />
-    <xsd:attribute name="InterfaceOutputCost" type="MetricType" use="required" />
-    <xsd:attribute name="RetransmissionInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="InterfaceTransmissionDelay" type="xsd:unsignedByte" use="required" />
-    <xsd:attribute name="HelloInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="RouterDeadInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="AuthenticationType" type="AuthenticationTypeEnum" use="required" />
-    <xsd:attribute name="AuthenticationKey" type="AuthenticationKeyType" use="required" />
+    <xsd:attribute name="areaID" type="IPv4AddressType" use="optional" />
+    <xsd:attribute name="interfaceOutputCost" type="MetricType" use="optional" />
+    <xsd:attribute name="retransmissionInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="interfaceTransmissionDelay" type="xsd:unsignedByte" use="optional" />
+    <xsd:attribute name="helloInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="routerDeadInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="authenticationType" type="AuthenticationTypeEnum" use="optional" />
+    <xsd:attribute name="authenticationKey" type="AuthenticationKeyType" use="optional" />
   </xsd:complexType>
 </xsd:element>
 
@@ -186,15 +186,15 @@
 
   <xsd:complexType>
     <xsd:attribute name="ifName" type="InterfaceNameType" use="required" />
-    <xsd:attribute name="AreaID" type="IPv4AddressType" use="required" />
-    <xsd:attribute name="InterfaceOutputCost" type="MetricType" use="required" />
-    <xsd:attribute name="RetransmissionInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="InterfaceTransmissionDelay" type="xsd:unsignedByte" use="required" />
-    <xsd:attribute name="RouterPriority" type="xsd:unsignedByte" use="required" />
-    <xsd:attribute name="HelloInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="RouterDeadInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="AuthenticationType" type="AuthenticationTypeEnum" use="required" />
-    <xsd:attribute name="AuthenticationKey" type="AuthenticationKeyType" use="required" />
+    <xsd:attribute name="areaID" type="IPv4AddressType" use="optional" />
+    <xsd:attribute name="interfaceOutputCost" type="MetricType" use="optional" />
+    <xsd:attribute name="retransmissionInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="interfaceTransmissionDelay" type="xsd:unsignedByte" use="optional" />
+    <xsd:attribute name="routerPriority" type="xsd:unsignedByte" use="optional" />
+    <xsd:attribute name="helloInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="routerDeadInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="authenticationType" type="AuthenticationTypeEnum" use="optional" />
+    <xsd:attribute name="authenticationKey" type="AuthenticationKeyType" use="optional" />
   </xsd:complexType>
 </xsd:element>
 
@@ -206,8 +206,8 @@
   </xsd:annotation>
 
   <xsd:complexType>
-    <xsd:attribute name="NetworkInterfaceAddress" type="IPv4AddressType" use="required" />
-    <xsd:attribute name="NeighborPriority" type="xsd:unsignedByte" use="required" />
+    <xsd:attribute name="networkInterfaceAddress" type="IPv4AddressType" use="required" />
+    <xsd:attribute name="neighborPriority" type="xsd:unsignedByte" use="required" />
   </xsd:complexType>
 </xsd:element>
 
@@ -240,16 +240,16 @@
       <xsd:element ref="NBMANeighborList" minOccurs="1" maxOccurs="1" />
     </xsd:sequence>
     <xsd:attribute name="ifName" type="InterfaceNameType" use="required" />
-    <xsd:attribute name="AreaID" type="IPv4AddressType" use="required" />
-    <xsd:attribute name="InterfaceOutputCost" type="MetricType" use="required" />
-    <xsd:attribute name="RetransmissionInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="InterfaceTransmissionDelay" type="xsd:unsignedByte" use="required" />
-    <xsd:attribute name="RouterPriority" type="xsd:unsignedByte" use="required" />
-    <xsd:attribute name="HelloInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="RouterDeadInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="AuthenticationType" type="AuthenticationTypeEnum" use="required" />
-    <xsd:attribute name="AuthenticationKey" type="AuthenticationKeyType" use="required" />
-    <xsd:attribute name="PollInterval" type="xsd:unsignedShort" use="required" />
+    <xsd:attribute name="areaID" type="IPv4AddressType" use="optional" />
+    <xsd:attribute name="interfaceOutputCost" type="MetricType" use="optional" />
+    <xsd:attribute name="retransmissionInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="interfaceTransmissionDelay" type="xsd:unsignedByte" use="optional" />
+    <xsd:attribute name="routerPriority" type="xsd:unsignedByte" use="optional" />
+    <xsd:attribute name="helloInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="routerDeadInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="authenticationType" type="AuthenticationTypeEnum" use="optional" />
+    <xsd:attribute name="authenticationKey" type="AuthenticationKeyType" use="optional" />
+    <xsd:attribute name="pollInterval" type="xsd:unsignedShort" use="optional" />
   </xsd:complexType>
 </xsd:element>
 
@@ -282,14 +282,14 @@
       <xsd:element ref="PointToMultiPointNeighborList" minOccurs="1" maxOccurs="1" />
     </xsd:sequence>
     <xsd:attribute name="ifName" type="InterfaceNameType" use="required" />
-    <xsd:attribute name="AreaID" type="IPv4AddressType" use="required" />
-    <xsd:attribute name="InterfaceOutputCost" type="MetricType" use="required" />
-    <xsd:attribute name="RetransmissionInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="InterfaceTransmissionDelay" type="xsd:unsignedByte" use="required" />
-    <xsd:attribute name="HelloInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="RouterDeadInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="AuthenticationType" type="AuthenticationTypeEnum" use="required" />
-    <xsd:attribute name="AuthenticationKey" type="AuthenticationKeyType" use="required" />
+    <xsd:attribute name="areaID" type="IPv4AddressType" use="optional" />
+    <xsd:attribute name="interfaceOutputCost" type="MetricType" use="optional" />
+    <xsd:attribute name="retransmissionInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="interfaceTransmissionDelay" type="xsd:unsignedByte" use="optional" />
+    <xsd:attribute name="helloInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="routerDeadInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="authenticationType" type="AuthenticationTypeEnum" use="optional" />
+    <xsd:attribute name="authenticationKey" type="AuthenticationKeyType" use="optional" />
   </xsd:complexType>
 </xsd:element>
 
@@ -304,12 +304,12 @@
 
   <xsd:complexType>
     <xsd:attribute name="ifName" type="InterfaceNameType" use="required" />
-    <xsd:attribute name="AdvertisedExternalNetworkAddress" type="IPv4AddressType" use="required" />
-    <xsd:attribute name="AdvertisedExternalNetworkMask" type="IPv4AddressType" use="required" />
-    <xsd:attribute name="ExternalInterfaceOutputType" type="ExternalInterfaceOutputCostType" use="required" />
-    <xsd:attribute name="ExternalInterfaceOutputCost" type="MetricType" use="required" />
-    <xsd:attribute name="ForwardingAddress" type="IPv4AddressType" use="required" />
-    <xsd:attribute name="ExternalRouteTag" type="ExternalRouteTagType" use="required" />
+    <xsd:attribute name="advertisedExternalNetworkAddress" type="IPv4AddressType" use="optional" />
+    <xsd:attribute name="advertisedExternalNetworkMask" type="IPv4AddressType" use="optional" />
+    <xsd:attribute name="externalInterfaceOutputType" type="ExternalInterfaceOutputCostType" use="optional" />
+    <xsd:attribute name="externalInterfaceOutputCost" type="MetricType" use="optional" />
+    <xsd:attribute name="forwardingAddress" type="IPv4AddressType" use="optional" />
+    <xsd:attribute name="externalRouteTag" type="ExternalRouteTagType" use="optional" />
   </xsd:complexType>
 </xsd:element>
 
@@ -324,9 +324,9 @@
 
   <xsd:complexType>
     <xsd:attribute name="ifName" type="InterfaceNameType" use="required" />
-    <xsd:attribute name="AreaID" type="IPv4AddressType" use="required" />
-    <xsd:attribute name="AttachedHost" type="IPv4AddressType" use="required" />
-    <xsd:attribute name="LinkCost" type="MetricType" use="required" />
+    <xsd:attribute name="areaID" type="IPv4AddressType" use="optional" />
+    <xsd:attribute name="attachedHost" type="IPv4AddressType" use="optional" />
+    <xsd:attribute name="linkCost" type="MetricType" use="optional" />
   </xsd:complexType>
 </xsd:element>
 
@@ -341,14 +341,14 @@
   </xsd:annotation>
 
   <xsd:complexType>
-    <xsd:attribute name="endPointRouterID" type="IPv4AddressType" use="required" />
-    <xsd:attribute name="TransitAreaID" type="IPv4AddressType" use="required" />
-    <xsd:attribute name="RetransmissionInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="InterfaceTransmissionDelay" type="xsd:unsignedByte" use="required" />
-    <xsd:attribute name="HelloInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="RouterDeadInterval" type="xsd:unsignedShort" use="required" />
-    <xsd:attribute name="AuthenticationType" type="AuthenticationTypeEnum" use="required" />
-    <xsd:attribute name="AuthenticationKey" type="AuthenticationKeyType" use="required" />
+    <xsd:attribute name="endPointRouterID" type="IPv4AddressType" use="optional" />
+    <xsd:attribute name="transitAreaID" type="IPv4AddressType" use="optional" />
+    <xsd:attribute name="retransmissionInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="interfaceTransmissionDelay" type="xsd:unsignedByte" use="optional" />
+    <xsd:attribute name="helloInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="routerDeadInterval" type="xsd:unsignedShort" use="optional" />
+    <xsd:attribute name="authenticationType" type="AuthenticationTypeEnum" use="optional" />
+    <xsd:attribute name="authenticationKey" type="AuthenticationKeyType" use="optional" />
   </xsd:complexType>
 </xsd:element>
 

@@ -3,21 +3,21 @@
 
   <!-- Areas -->
   <Area id="0.0.0.1">
-    <AddressRange Address="192.168.1.0" Mask="255.255.255.0" Status="Advertise"/>
+    <AddressRange address="192.168.1.0" mask="255.255.255.0" status="Advertise"/>
   </Area>
   <Area id="0.0.0.2">
-    <AddressRange Address="192.168.2.0" Mask="255.255.255.0" Status="Advertise"/>
+    <AddressRange address="192.168.2.0" mask="255.255.255.0" status="Advertise"/>
   </Area>
 
   <!-- Routers -->
   <Router id="192.168.1.254"> <!-- R1 -->
     <RFC1583Compatible/>
-    <BroadcastInterface ifName="eth0" AreaID="0.0.0.1" InterfaceOutputCost="1" RetransmissionInterval="5" InterfaceTransmissionDelay="1" RouterPriority="1" HelloInterval="10" RouterDeadInterval="40" AuthenticationType="NullType" AuthenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
   
   <Router id="192.168.2.254"> <!-- R2 -->
     <RFC1583Compatible/>
-    <BroadcastInterface ifName="eth0" AreaID="0.0.0.2" InterfaceOutputCost="1" RetransmissionInterval="5" InterfaceTransmissionDelay="1" RouterPriority="1" HelloInterval="10" RouterDeadInterval="40" AuthenticationType="NullType" AuthenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
   
 </OSPFASConfig>

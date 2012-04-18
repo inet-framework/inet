@@ -149,7 +149,7 @@ void OSPFRouting::getAreaListFromXML(const cXMLElement& routerNode, std::map<std
             (nodeName == "NBMAInterface") ||
             (nodeName == "PointToMultiPointInterface"))
         {
-            std::string areaId = (*routerConfigIt)->getAttribute("AreaID");
+            std::string areaId = getStrAttrOrPar(**routerConfigIt, "areaID");
             if (areaList.find(areaId) == areaList.end()) {
                 areaList[areaId] = 1;
             }
@@ -184,20 +184,35 @@ void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string
         std::string nodeName = (*arIt)->getTagName();
         if (nodeName == "AddressRange") {
             OSPF::IPv4AddressRange addressRange;
-            addressRange.address = ipv4AddressFromAddressString((*arIt)->getAttribute("Address"));
-            addressRange.mask = ipv4AddressFromAddressString((*arIt)->getAttribute("Mask"));
-            std::string status = (*arIt)->getAttribute("Status");
+            addressRange.address = ipv4AddressFromAddressString((*arIt)->getAttribute("address"));
+            addressRange.mask = ipv4AddressFromAddressString((*arIt)->getAttribute("mask"));
+            std::string status = (*arIt)->getAttribute("status");
             area->addAddressRange(addressRange, status == "Advertise");
         }
         if ((nodeName == "Stub") && (areaID != "0.0.0.0")) {    // the backbone cannot be configured as a stub
             area->setExternalRoutingCapability(false);
-            area->setStubDefaultCost(atoi((*arIt)->getAttribute("DefaultCost")));
+            area->setStubDefaultCost(atoi((*arIt)->getAttribute("defaultCost")));
         }
     }
     // Add the Area to the router
     ospfRouter->addArea(area);
 }
 
+int OSPFRouting::getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const
+{
+    const char* attrStr = ifConfig.getAttribute(name);
+    if (attrStr && *attrStr)
+        return atoi(attrStr);
+    return par(name).longValue();
+}
+
+const char *OSPFRouting::getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const
+{
+    const char* attrStr = ifConfig.getAttribute(name);
+    if (attrStr && *attrStr)
+        return attrStr;
+    return par(name).stringValue();
+}
 
 /**
  * Loads OSPF configuration information for a router interface.
@@ -227,23 +242,23 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         error("Loading %s ifIndex[%d] aborted", interfaceType.c_str(), ifIndex);
     }
 
-    OSPF::AreaID areaID = ulongFromAddressString(ifConfig.getAttribute("AreaID"));
+    OSPF::AreaID areaID = ulongFromAddressString(getStrAttrOrPar(ifConfig, "areaID"));
     intf->setAreaID(areaID);
 
-    intf->setOutputCost(atoi(ifConfig.getAttribute("InterfaceOutputCost")));
+    intf->setOutputCost(getIntAttrOrPar(ifConfig, "interfaceOutputCost"));
 
-    intf->setRetransmissionInterval(atoi(ifConfig.getAttribute("RetransmissionInterval")));
+    intf->setRetransmissionInterval(getIntAttrOrPar(ifConfig, "retransmissionInterval"));
 
-    intf->setTransmissionDelay(atoi(ifConfig.getAttribute("InterfaceTransmissionDelay")));
+    intf->setTransmissionDelay(getIntAttrOrPar(ifConfig, "interfaceTransmissionDelay"));
 
     if (interfaceType == "BroadcastInterface" || interfaceType == "NBMAInterface")
-        intf->setRouterPriority(atoi(ifConfig.getAttribute("RouterPriority")));
+        intf->setRouterPriority(getIntAttrOrPar(ifConfig, "routerPriority"));
 
-    intf->setHelloInterval(atoi(ifConfig.getAttribute("HelloInterval")));
+    intf->setHelloInterval(getIntAttrOrPar(ifConfig, "helloInterval"));
 
-    intf->setRouterDeadInterval(atoi(ifConfig.getAttribute("RouterDeadInterval")));
+    intf->setRouterDeadInterval(getIntAttrOrPar(ifConfig, "routerDeadInterval"));
 
-    std::string authenticationType = ifConfig.getAttribute("AuthenticationType");
+    std::string authenticationType = getStrAttrOrPar(ifConfig, "authenticationType");
     if (authenticationType == "SimplePasswordType") {
         intf->setAuthenticationType(OSPF::SIMPLE_PASSWORD_TYPE);
     } else if (authenticationType == "CrytographicType") {
@@ -252,7 +267,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         intf->setAuthenticationType(OSPF::NULL_TYPE);
     }
 
-    std::string key = ifConfig.getAttribute("AuthenticationKey");
+    std::string key = getStrAttrOrPar(ifConfig, "authenticationKey");
     OSPF::AuthenticationKeyType keyValue;
     memset(keyValue.bytes, 0, 8 * sizeof(char));
     int keyLength = key.length();
@@ -264,7 +279,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
     intf->setAuthenticationKey(keyValue);
 
     if (interfaceType == "NBMAInterface")
-        intf->setPollInterval(atoi(ifConfig.getAttribute("PollInterval")));
+        intf->setPollInterval(getIntAttrOrPar(ifConfig, "pollInterval"));
 
     cXMLElementList ifDetails = ifConfig.getChildren();
 
@@ -276,8 +291,8 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
                 std::string neighborNodeName = (*neighborIt)->getTagName();
                 if (neighborNodeName == "NBMANeighbor") {
                     OSPF::Neighbor* neighbor = new OSPF::Neighbor;
-                    neighbor->setAddress(ipv4AddressFromAddressString((*neighborIt)->getAttribute("NetworkInterfaceAddress")));
-                    neighbor->setPriority(atoi((*neighborIt)->getAttribute("NeighborPriority")));
+                    neighbor->setAddress(ipv4AddressFromAddressString((*neighborIt)->getAttribute("networkInterfaceAddress")));
+                    neighbor->setPriority(atoi((*neighborIt)->getAttribute("neighborPriority")));
                     intf->addNeighbor(neighbor);
                 }
             }
@@ -320,27 +335,29 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
 
     EV << "        loading ExternalInterface " << ifName << " ifIndex[" << ifIndex << "]\n";
 
-    networkAddress.address = ipv4AddressFromAddressString(externalRouteConfig.getAttribute("AdvertisedExternalNetworkAddress"));
-    networkAddress.mask = ipv4AddressFromAddressString(externalRouteConfig.getAttribute("AdvertisedExternalNetworkMask"));
+    networkAddress.address = ipv4AddressFromAddressString(getStrAttrOrPar(externalRouteConfig, "advertisedExternalNetworkAddress"));
+    networkAddress.mask = ipv4AddressFromAddressString(getStrAttrOrPar(externalRouteConfig, "advertisedExternalNetworkMask"));
     asExternalRoute.setNetworkMask(networkAddress.mask);
 
-    int routeCost = atoi(externalRouteConfig.getAttribute("ExternalInterfaceOutputCost"));
+    int routeCost = getIntAttrOrPar(externalRouteConfig, "externalInterfaceOutputCost");
     asExternalRoute.setRouteCost(routeCost);
 
-    std::string metricType = externalRouteConfig.getAttribute("ExternalInterfaceOutputType");
+    std::string metricType = getStrAttrOrPar(externalRouteConfig, "externalInterfaceOutputType");
     if (metricType == "Type2") {
         asExternalRoute.setE_ExternalMetricType(true);
         externalRoutingEntry.setType2Cost(routeCost);
         externalRoutingEntry.setPathType(OSPF::RoutingTableEntry::TYPE2_EXTERNAL);
-    } else {
+    } else if (metricType == "Type1") {
         asExternalRoute.setE_ExternalMetricType(false);
         externalRoutingEntry.setCost(routeCost);
         externalRoutingEntry.setPathType(OSPF::RoutingTableEntry::TYPE1_EXTERNAL);
+    } else {
+        throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface %s", ifName.c_str());
     }
 
-    asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(externalRouteConfig.getAttribute("ForwardingAddress")));
+    asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(getStrAttrOrPar(externalRouteConfig, "forwardingAddress")));
 
-    std::string externalRouteTag = externalRouteConfig.getAttribute("ExternalRouteTag");
+    std::string externalRouteTag = getStrAttrOrPar(externalRouteConfig, "externalRouteTag");
     char        externalRouteTagValue[4];
     memset(externalRouteTagValue, 0, 4 * sizeof(char));
     int externalRouteTagLength = externalRouteTag.length();
@@ -370,9 +387,9 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
 
     EV << "        loading HostInterface " << ifName << " ifIndex[" << static_cast<short> (hostParameters.ifIndex) << "]\n";
 
-    hostArea = ulongFromAddressString(hostRouteConfig.getAttribute("AreaID"));
-    hostParameters.address = ipv4AddressFromAddressString(hostRouteConfig.getAttribute("AttachedHost"));
-    hostParameters.linkCost = atoi(hostRouteConfig.getAttribute("LinkCost"));
+    hostArea = ulongFromAddressString(getStrAttrOrPar(hostRouteConfig, "areaID"));
+    hostParameters.address = ipv4AddressFromAddressString(getStrAttrOrPar(hostRouteConfig, "attachedHost"));
+    hostParameters.linkCost = getIntAttrOrPar(hostRouteConfig, "linkCost");
 
     // add the host route to the OSPF data structure.
     OSPF::Area* area = ospfRouter->getArea(hostArea);
@@ -391,7 +408,7 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
 void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 {
     OSPF::Interface* intf = new OSPF::Interface;
-    std::string endPoint = virtualLinkConfig.getAttribute("endPointRouterID");
+    std::string endPoint = getStrAttrOrPar(virtualLinkConfig, "endPointRouterID");
     OSPF::Neighbor* neighbor = new OSPF::Neighbor;
 
     EV << "        loading VirtualLink to " << endPoint << "\n";
@@ -400,20 +417,17 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     neighbor->setNeighborID(ulongFromAddressString(endPoint.c_str()));
     intf->addNeighbor(neighbor);
 
+    intf->setTransitAreaID(ulongFromAddressString(getStrAttrOrPar(virtualLinkConfig, "transitAreaID")));
 
+    intf->setRetransmissionInterval(getIntAttrOrPar(virtualLinkConfig, "retransmissionInterval"));
 
+    intf->setTransmissionDelay(getIntAttrOrPar(virtualLinkConfig, "interfaceTransmissionDelay"));
 
-    intf->setTransitAreaID(ulongFromAddressString(virtualLinkConfig.getAttribute("TransitAreaID")));
+    intf->setHelloInterval(getIntAttrOrPar(virtualLinkConfig, "helloInterval"));
 
-    intf->setRetransmissionInterval(atoi(virtualLinkConfig.getAttribute("RetransmissionInterval")));
+    intf->setRouterDeadInterval(getIntAttrOrPar(virtualLinkConfig, "routerDeadInterval"));
 
-    intf->setTransmissionDelay(atoi(virtualLinkConfig.getAttribute("InterfaceTransmissionDelay")));
-
-    intf->setHelloInterval(atoi(virtualLinkConfig.getAttribute("HelloInterval")));
-
-    intf->setRouterDeadInterval(atoi(virtualLinkConfig.getAttribute("RouterDeadInterval")));
-
-    std::string authenticationType = virtualLinkConfig.getAttribute("AuthenticationType");
+    std::string authenticationType = getStrAttrOrPar(virtualLinkConfig, "authenticationType");
     if (authenticationType == "SimplePasswordType") {
         intf->setAuthenticationType(OSPF::SIMPLE_PASSWORD_TYPE);
     } else if (authenticationType == "CrytographicType") {
@@ -424,7 +438,7 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
         throw cRuntimeError("Invalid AuthenticationType '%s'", authenticationType.c_str());
     }
 
-    std::string key = virtualLinkConfig.getAttribute("AuthenticationKey");
+    std::string key = getStrAttrOrPar(virtualLinkConfig, "authenticationKey");
     OSPF::AuthenticationKeyType keyValue;
     memset(keyValue.bytes, 0, 8 * sizeof(char));
     int keyLength = key.length();
