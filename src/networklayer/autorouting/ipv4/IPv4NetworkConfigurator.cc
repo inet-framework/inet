@@ -1554,7 +1554,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
             route->setNetmask(IPv4Address::UNSPECIFIED_ADDRESS);
             route->setGateway(gateway);
             route->setInterface(sourceInterfaceEntry);
-            route->setType(IPv4Route::DIRECT);
+            route->setType(gateway.isUnspecified() ? IPv4Route::DIRECT : IPv4Route::REMOTE);
             route->setSource(IPv4Route::MANUAL);
             sourceRoutingTable->addRoute(route);
 
@@ -1622,7 +1622,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
                         route->setInterface(sourceInterfaceEntry);
                         if (gatewayAddress != destinationAddress)
                             route->setGateway(gatewayAddress);
-                        route->setType(IPv4Route::DIRECT);
+                        route->setType(route->getGateway().isUnspecified() ? IPv4Route::DIRECT : IPv4Route::REMOTE);
                         route->setSource(IPv4Route::MANUAL);
                         if (containsRoute(sourceRoutes, route))
                             delete route;
