@@ -3,7 +3,7 @@
 	<fecentry>
 		<id>1</id>
 
-		<destination>10.2.1.1</destination>
+		<destination>host3</destination>
 
 		<tunnel_id>1</tunnel_id>
 		<lspid>100</lspid>

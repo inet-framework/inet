@@ -14,11 +14,11 @@
 
 package inet.examples.mpls.testte_failure2;
 
-import inet.world.scenario.ScenarioManager;
-import inet.nodes.mpls.RSVP_LSR;
-import inet.nodes.inet.StandardHost;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.extras.FailureManager;
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.mpls.RSVP_LSR;
+import inet.world.scenario.ScenarioManager;
 
 
 //
@@ -29,7 +29,7 @@ import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 network RSVPTE4
 {
     submodules:
-        configurator: FlatNetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             parameters:
                 @display("p=115,50");
         }
