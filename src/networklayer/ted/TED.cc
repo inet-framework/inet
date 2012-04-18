@@ -73,22 +73,34 @@ void TED::initialize(int stage)
         // in this model we haven't implemented HELLO but provide peer addresses via
         // preconfigured static host routes in routing table.
         //
-        const IPv4Route *rentry = NULL;
-        for (int j = 0; j < rt->getNumRoutes(); j++)
-        {
-            rentry = rt->getRoute(j);
-            if (rentry->getInterface()==ie && rentry->getType()==IPv4Route::DIRECT)
-                break;
-        }
-        ASSERT(rentry);
-        IPv4Address linkid = rentry->getDestination();
-        IPv4Address remote = rentry->getGateway();
-        ASSERT(!remote.isUnspecified());
-
         // find bandwidth of the link
         cGate *g = getParentModule()->gate(ie->getNodeOutputGateId());
         ASSERT(g);
-        double linkBandwidth = g->getChannel()->par("datarate");
+        double linkBandwidth = g->getChannel()->getNominalDatarate();
+
+        // find destination node for current interface
+        cModule *destNode = NULL;
+        while (g)
+        {
+            g = g->getNextGate();
+            cModule *mod = g->getOwnerModule();
+            cProperties* props = mod->getProperties();
+            if (props && props->getAsBool("node"))
+            {
+                destNode = mod;
+                break;
+            }
+        }
+        if (!g)     // not connected
+            continue;
+        IRoutingTable *destRt = RoutingTableAccess().get(destNode);
+        if (!destRt)    // switch, hub, bus, accesspoint, etc
+            continue;
+        IPv4Address destRouterId = destRt->getRouterId();
+        IInterfaceTable* destIft = InterfaceTableAccess().get(destNode);
+        ASSERT(destIft);
+        InterfaceEntry *destIe = destIft->getInterfaceByNodeInputGateId(g->getId());
+        ASSERT(destIe);
 
         //
         // fill in and insert TED entry
@@ -96,15 +108,15 @@ void TED::initialize(int stage)
         TELinkStateInfo entry;
         entry.advrouter = routerId;
         entry.local = ie->ipv4Data()->getIPAddress();
-        entry.linkid = linkid;
-        entry.remote = remote;
+        entry.linkid = destRouterId;
+        entry.remote = destIe->ipv4Data()->getIPAddress();
         entry.MaxBandwidth = linkBandwidth;
         for (int j = 0; j < 8; j++)
             entry.UnResvBandwidth[j] = entry.MaxBandwidth;
         entry.state = true;
 
         // use g->getChannel()->par("delay").doubleValue() for shortest delay calculation
-        entry.metric = rentry->getInterface()->ipv4Data()->getMetric();
+        entry.metric = ie->ipv4Data()->getMetric();
 
         EV << "metric set to=" << entry.metric << endl;
 
@@ -119,7 +131,8 @@ void TED::initialize(int stage)
     for (int i = 0; i < ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (rt->getInterfaceByAddress(ie->ipv4Data()->getIPAddress()) != ie)
+        InterfaceEntry *ie2 = rt->getInterfaceByAddress(ie->ipv4Data()->getIPAddress());
+        if (ie2 != ie)
             error("MPLS models assume interfaces to have unique addresses, "
                   "but address of '%s' (%s) is not unique",
                   ie->getName(), ie->ipv4Data()->getIPAddress().str().c_str());
