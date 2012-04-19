@@ -642,10 +642,8 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                                 const struct init_ipv4_address_parameter *v4addr;
                                 v4addr = (struct init_ipv4_address_parameter*) (((unsigned char*)init_chunk) + size_init_chunk + parptr);
                                 chunk->setAddressesArraySize(++addrcounter);
-                                IPvXAddress *localv4Addr;
-                                localv4Addr = new IPvXAddress("0.0.0.0");
-                                localv4Addr->set(ntohl(v4addr->address));
-                                chunk->setAddresses(addrcounter-1, *localv4Addr);
+                                IPvXAddress localv4Addr(IPv4Address(ntohl(v4addr->address)));
+                                chunk->setAddresses(addrcounter-1, localv4Addr);
                                 chunklen += 8;
                                 break;
                             }
@@ -656,12 +654,10 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                                 ipv6addr = (struct init_ipv6_address_parameter*) (((unsigned char*)init_chunk) + size_init_chunk + parptr);
                                 IPv6Address ipv6Addr = IPv6Address(ipv6addr->address[0], ipv6addr->address[1],
                                                                     ipv6addr->address[2], ipv6addr->address[3]);
-                                IPvXAddress *localv6Addr;
-                                localv6Addr = new IPvXAddress("0:0:0:0:0:0:0:0");
+                                IPvXAddress localv6Addr(ipv6Addr);
                                 sctpEV3<<"address"<<ipv6Addr<<"\n";
-                                localv6Addr->set(ipv6Addr);
                                 chunk->setAddressesArraySize(++addrcounter);
-                                chunk->setAddresses(addrcounter-1, *localv6Addr);
+                                chunk->setAddresses(addrcounter-1, localv6Addr);
                                 chunklen += 20;
                                 break;
                             }
@@ -733,10 +729,8 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                                 const struct init_ipv4_address_parameter *v4addr;
                                 v4addr = (struct init_ipv4_address_parameter*) (((unsigned char*)iac) + size_init_ack_chunk + parptr);
                                 chunk->setAddressesArraySize(++addrcounter);
-                                IPvXAddress *localv4Addr;
-                                localv4Addr = new IPvXAddress("0.0.0.0");
-                                localv4Addr->set(ntohl(v4addr->address));
-                                chunk->setAddresses(addrcounter-1, *localv4Addr);
+                                IPvXAddress localv4Addr(IPv4Address(ntohl(v4addr->address)));
+                                chunk->setAddresses(addrcounter-1, localv4Addr);
                                 chunklen += 8;
                                 break;
                             }
@@ -747,13 +741,11 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                                 ipv6addr = (struct init_ipv6_address_parameter*) (((unsigned char*)iac) + size_init_chunk + parptr);
                                 IPv6Address ipv6Addr = IPv6Address(ipv6addr->address[0], ipv6addr->address[1],
                                                                     ipv6addr->address[2], ipv6addr->address[3]);
-                                IPvXAddress *localv6Addr;
-                                localv6Addr = new IPvXAddress("0:0:0:0:0:0:0:0");
                                 sctpEV3<<"address"<<ipv6Addr<<"\n";
-                                localv6Addr->set(ipv6Addr);
+                                IPvXAddress localv6Addr(ipv6Addr);
 
                                 chunk->setAddressesArraySize(++addrcounter);
-                                chunk->setAddresses(addrcounter-1, *localv6Addr);
+                                chunk->setAddresses(addrcounter-1, localv6Addr);
                                 chunklen += 20;
                                 break;
                             }
