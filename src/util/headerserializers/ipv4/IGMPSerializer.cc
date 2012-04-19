@@ -76,7 +76,7 @@ void IGMPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IGMPM
         case IGMP_MEMBERSHIP_QUERY:
             pkt->setType(igmp->igmp_type);
             pkt->setMaxRespTime(igmp->igmp_code);
-            pkt->setGroupAddress(ntohl(igmp->igmp_group.s_addr));
+            pkt->setGroupAddress(IPv4Address(ntohl(igmp->igmp_group.s_addr)));
             break;
         default:
             EV << "Can not create IGMP packet: type " << igmp->igmp_type << " not supported.";

@@ -36,7 +36,7 @@ void OSPF::MessageHandler::messageReceived(cMessage* message)
     } else {
         OSPFPacket* packet = check_and_cast<OSPFPacket*> (message);
         EV << "Received packet: (" << packet->getClassName() << ")" << packet->getName() << "\n";
-        if (packet->getRouterID() == router->getRouterID()) {
+        if (packet->getRouterID() == IPv4Address(router->getRouterID())) {
             EV << "This packet is from ourselves, discarding.\n";
             delete message;
         } else {
@@ -273,7 +273,7 @@ void OSPF::MessageHandler::sendPacket(OSPFPacket* packet, IPv4Address destinatio
 {
     IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
     ipControlInfo->setProtocol(IP_PROT_OSPF);
-    ipControlInfo->setDestAddr(ulongFromIPv4Address(destination));
+    ipControlInfo->setDestAddr(destination);
     ipControlInfo->setTimeToLive(ttl);
     ipControlInfo->setInterfaceId(outputIfIndex);
 

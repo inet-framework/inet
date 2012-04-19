@@ -51,7 +51,7 @@ public:
 inline BGP::RoutingTableEntry::RoutingTableEntry(void) :
     IPv4Route(), _pathType(BGP::Incomplete)
 {
-    setNetmask(0xFFFFFFFF);
+    setNetmask(IPv4Address::ALLONES_ADDRESS);
     setMetric(BGP::DEFAULT_COST);
     setSource(IPv4Route::BGP);
 }

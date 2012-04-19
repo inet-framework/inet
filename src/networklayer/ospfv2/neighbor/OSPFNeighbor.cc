@@ -168,8 +168,8 @@ void OSPF::Neighbor::sendDatabaseDescriptionPacket(bool init)
     OSPFDatabaseDescriptionPacket* ddPacket = new OSPFDatabaseDescriptionPacket();
 
     ddPacket->setType(DATABASE_DESCRIPTION_PACKET);
-    ddPacket->setRouterID(parentInterface->getArea()->getRouter()->getRouterID());
-    ddPacket->setAreaID(parentInterface->getArea()->getAreaID());
+    ddPacket->setRouterID(IPv4Address(parentInterface->getArea()->getRouter()->getRouterID()));
+    ddPacket->setAreaID(IPv4Address(parentInterface->getArea()->getAreaID()));
     ddPacket->setAuthenticationType(parentInterface->getAuthenticationType());
     OSPF::AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();
     for (int i = 0; i < 8; i++) {
@@ -313,8 +313,8 @@ void OSPF::Neighbor::sendLinkStateRequestPacket()
     OSPFLinkStateRequestPacket* requestPacket = new OSPFLinkStateRequestPacket();
 
     requestPacket->setType(LINKSTATE_REQUEST_PACKET);
-    requestPacket->setRouterID(parentInterface->getArea()->getRouter()->getRouterID());
-    requestPacket->setAreaID(parentInterface->getArea()->getAreaID());
+    requestPacket->setRouterID(IPv4Address(parentInterface->getArea()->getRouter()->getRouterID()));
+    requestPacket->setAreaID(IPv4Address(parentInterface->getArea()->getAreaID()));
     requestPacket->setAuthenticationType(parentInterface->getAuthenticationType());
     OSPF::AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();
     for (int i = 0; i < 8; i++) {
@@ -586,8 +586,8 @@ void OSPF::Neighbor::retransmitUpdatePacket()
     OSPFLinkStateUpdatePacket* updatePacket = new OSPFLinkStateUpdatePacket();
 
     updatePacket->setType(LINKSTATE_UPDATE_PACKET);
-    updatePacket->setRouterID(parentInterface->getArea()->getRouter()->getRouterID());
-    updatePacket->setAreaID(parentInterface->getArea()->getAreaID());
+    updatePacket->setRouterID(IPv4Address(parentInterface->getArea()->getRouter()->getRouterID()));
+    updatePacket->setAreaID(IPv4Address(parentInterface->getArea()->getAreaID()));
     updatePacket->setAuthenticationType(parentInterface->getAuthenticationType());
     OSPF::AuthenticationKeyType authKey = parentInterface->getAuthenticationKey();
     for (int i = 0; i < 8; i++) {

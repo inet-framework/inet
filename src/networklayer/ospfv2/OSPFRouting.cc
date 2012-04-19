@@ -322,7 +322,7 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
 
     networkAddress.address = ipv4AddressFromAddressString(externalRouteConfig.getAttribute("AdvertisedExternalNetworkAddress"));
     networkAddress.mask = ipv4AddressFromAddressString(externalRouteConfig.getAttribute("AdvertisedExternalNetworkMask"));
-    asExternalRoute.setNetworkMask(ulongFromIPv4Address(networkAddress.mask));
+    asExternalRoute.setNetworkMask(networkAddress.mask);
 
     int routeCost = atoi(externalRouteConfig.getAttribute("ExternalInterfaceOutputCost"));
     asExternalRoute.setRouteCost(routeCost);

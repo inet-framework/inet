@@ -310,8 +310,8 @@ void OSPF::LinkStateUpdateHandler::acknowledgeLSA(OSPFLSAHeader& lsaHeader,
         OSPFLinkStateAcknowledgementPacket* ackPacket = new OSPFLinkStateAcknowledgementPacket();
 
         ackPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);
-        ackPacket->setRouterID(router->getRouterID());
-        ackPacket->setAreaID(intf->getArea()->getAreaID());
+        ackPacket->setRouterID(IPv4Address(router->getRouterID()));
+        ackPacket->setAreaID(IPv4Address(intf->getArea()->getAreaID()));
         ackPacket->setAuthenticationType(intf->getAuthenticationType());
         OSPF::AuthenticationKeyType authKey = intf->getAuthenticationKey();
         for (int i = 0; i < 8; i++) {

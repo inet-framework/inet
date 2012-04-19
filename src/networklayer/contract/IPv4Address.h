@@ -123,7 +123,7 @@ class INET_API IPv4Address
     /**
      * IPv4 address as int
      */
-    IPv4Address(uint32 ip) {addr = ip;}
+    explicit IPv4Address(uint32 ip) {addr = ip;}
 
     /**
      * IPv4 address bytes: "i0.i1.i2.i3" format
@@ -181,7 +181,7 @@ class INET_API IPv4Address
     /**
      * Returns binary AND of the two addresses
      */
-    IPv4Address doAnd(const IPv4Address& ip) const {return addr & ip.addr;}
+    IPv4Address doAnd(const IPv4Address& ip) const {return IPv4Address(addr & ip.addr);}
 
     /**
      * Returns the string representation of the address (e.g. "152.66.86.92")
@@ -320,7 +320,7 @@ class INET_API IPv4Address
      * Creates and returns a netmask with the given length. For example,
      * for length=23 it will return 255.255.254.0.
      */
-    static IPv4Address makeNetmask(int length) {_checkNetmaskLength(length); return _makeNetmask(length);}
+    static IPv4Address makeNetmask(int length) {_checkNetmaskLength(length); return IPv4Address(_makeNetmask(length));}
 };
 
 inline std::ostream& operator<<(std::ostream& os, const IPv4Address& ip)

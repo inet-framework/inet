@@ -86,8 +86,8 @@ void OSPF::Interface::setIfIndex(unsigned char index)
     ifIndex = index;
     if (interfaceType == OSPF::Interface::UNKNOWN_TYPE) {
         InterfaceEntry* routingInterface = InterfaceTableAccess().get()->getInterfaceById(ifIndex);
-        interfaceAddressRange.address = ipv4AddressFromAddressString(routingInterface->ipv4Data()->getIPAddress().str().c_str());
-        interfaceAddressRange.mask = ipv4AddressFromAddressString(routingInterface->ipv4Data()->getNetmask().str().c_str());
+        interfaceAddressRange.address = routingInterface->ipv4Data()->getIPAddress();
+        interfaceAddressRange.mask = routingInterface->ipv4Data()->getNetmask();
         mtu = routingInterface->getMTU();
     }
 }
@@ -126,8 +126,8 @@ void OSPF::Interface::sendHelloPacket(IPv4Address destination, short ttl)
     OSPFHelloPacket* helloPacket = new OSPFHelloPacket();
     std::vector<IPv4Address> neighbors;
 
-    helloPacket->setRouterID(parentArea->getRouter()->getRouterID());
-    helloPacket->setAreaID(parentArea->getAreaID());
+    helloPacket->setRouterID(IPv4Address(parentArea->getRouter()->getRouterID()));
+    helloPacket->setAreaID(IPv4Address(parentArea->getAreaID()));
     helloPacket->setAuthenticationType(authenticationType);
     for (int i = 0; i < 8; i++) {
         helloPacket->setAuthentication(i, authenticationKey.bytes[i]);
@@ -137,9 +137,9 @@ void OSPF::Interface::sendHelloPacket(IPv4Address destination, short ttl)
          (interfaceAddressRange.address == OSPF::NULL_IPV4ADDRESS)) ||
         (interfaceType == VIRTUAL))
     {
-        helloPacket->setNetworkMask(ulongFromIPv4Address(OSPF::NULL_IPV4ADDRESS));
+        helloPacket->setNetworkMask(OSPF::NULL_IPV4ADDRESS);
     } else {
-        helloPacket->setNetworkMask(ulongFromIPv4Address(interfaceAddressRange.mask));
+        helloPacket->setNetworkMask(interfaceAddressRange.mask);
     }
     memset(&options, 0, sizeof(OSPFOptions));
     options.E_ExternalRoutingCapability = parentArea->getExternalRoutingCapability();
@@ -147,8 +147,8 @@ void OSPF::Interface::sendHelloPacket(IPv4Address destination, short ttl)
     helloPacket->setHelloInterval(helloInterval);
     helloPacket->setRouterPriority(routerPriority);
     helloPacket->setRouterDeadInterval(routerDeadInterval);
-    helloPacket->setDesignatedRouter(ulongFromIPv4Address(designatedRouter.ipInterfaceAddress));
-    helloPacket->setBackupDesignatedRouter(ulongFromIPv4Address(backupDesignatedRouter.ipInterfaceAddress));
+    helloPacket->setDesignatedRouter(designatedRouter.ipInterfaceAddress);
+    helloPacket->setBackupDesignatedRouter(backupDesignatedRouter.ipInterfaceAddress);
     long neighborCount = neighboringRouters.size();
     for (long j = 0; j < neighborCount; j++) {
         if (neighboringRouters[j]->getState() >= OSPF::Neighbor::INIT_STATE) {
@@ -158,7 +158,7 @@ void OSPF::Interface::sendHelloPacket(IPv4Address destination, short ttl)
     unsigned int initedNeighborCount = neighbors.size();
     helloPacket->setNeighborArraySize(initedNeighborCount);
     for (unsigned int k = 0; k < initedNeighborCount; k++) {
-        helloPacket->setNeighbor(k, ulongFromIPv4Address(neighbors[k]));
+        helloPacket->setNeighbor(k, neighbors[k]);
     }
 
     helloPacket->setPacketLength(0); // TODO: Calculate correct length
@@ -173,8 +173,8 @@ void OSPF::Interface::sendLSAcknowledgement(OSPFLSAHeader* lsaHeader, IPv4Addres
     OSPFLinkStateAcknowledgementPacket* lsAckPacket = new OSPFLinkStateAcknowledgementPacket();
 
     lsAckPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);
-    lsAckPacket->setRouterID(parentArea->getRouter()->getRouterID());
-    lsAckPacket->setAreaID(parentArea->getAreaID());
+    lsAckPacket->setRouterID(IPv4Address(parentArea->getRouter()->getRouterID()));
+    lsAckPacket->setAreaID(IPv4Address(parentArea->getAreaID()));
     lsAckPacket->setAuthenticationType(authenticationType);
     for (int i = 0; i < 8; i++) {
         lsAckPacket->setAuthentication(i, authenticationKey.bytes[i]);
@@ -424,8 +424,8 @@ OSPFLinkStateUpdatePacket* OSPF::Interface::createUpdatePacket(OSPFLSA* lsa)
         OSPFLinkStateUpdatePacket* updatePacket = new OSPFLinkStateUpdatePacket();
 
         updatePacket->setType(LINKSTATE_UPDATE_PACKET);
-        updatePacket->setRouterID(parentArea->getRouter()->getRouterID());
-        updatePacket->setAreaID(areaID);
+        updatePacket->setRouterID(IPv4Address(parentArea->getRouter()->getRouterID()));
+        updatePacket->setAreaID(IPv4Address(areaID));
         updatePacket->setAuthenticationType(authenticationType);
         for (int j = 0; j < 8; j++) {
             updatePacket->setAuthentication(j, authenticationKey.bytes[j]);
@@ -531,8 +531,8 @@ void OSPF::Interface::sendDelayedAcknowledgements()
                 long packetSize = IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH;
 
                 ackPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);
-                ackPacket->setRouterID(parentArea->getRouter()->getRouterID());
-                ackPacket->setAreaID(areaID);
+                ackPacket->setRouterID(IPv4Address(parentArea->getRouter()->getRouterID()));
+                ackPacket->setAreaID(IPv4Address(areaID));
                 ackPacket->setAuthenticationType(authenticationType);
                 for (int i = 0; i < 8; i++) {
                     ackPacket->setAuthentication(i, authenticationKey.bytes[i]);

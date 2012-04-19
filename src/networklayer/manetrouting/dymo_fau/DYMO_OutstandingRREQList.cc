@@ -75,7 +75,7 @@ DYMO_OutstandingRREQ* DYMO_OutstandingRREQList::getByDestAddr(unsigned int destA
 {
     for (std::vector<DYMO_OutstandingRREQ*>::iterator iter = outstandingRREQs.begin(); iter < outstandingRREQs.end(); iter++)
     {
-        if (IPv4Address(destAddr).prefixMatches((*iter)->destAddr, prefix)) return *iter;
+        if (IPv4Address(destAddr).prefixMatches(IPv4Address((*iter)->destAddr), prefix)) return *iter;
     }
     return 0;
 }

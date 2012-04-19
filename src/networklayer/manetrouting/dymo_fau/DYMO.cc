@@ -448,7 +448,7 @@ void DYMO::handleLowerRMForRelay(DYMO_RM *routingMsg)
     unsigned int targetSeqNum = 0;
 
     // stores route entry of route to destination if a route exists, 0 otherwise
-    DYMO_RoutingEntry* entry = dymo_routingTable->getForAddress(targetAddr);
+    DYMO_RoutingEntry* entry = dymo_routingTable->getForAddress(IPv4Address(targetAddr));
     if (entry)
     {
         targetSeqNum = entry->routeSeqNum;
@@ -589,7 +589,7 @@ void DYMO::handleLowerRERR(DYMO_RERR *my_rerr)
             if (entry->routeBroken) continue;
 
             // skip if this route isn't to the unreachableNode Address mentioned in the RERR
-            if (!entry->routeAddress.prefixMatches(unreachableNode.getAddress(), entry->routePrefix)) continue;
+            if (!entry->routeAddress.prefixMatches(IPv4Address(unreachableNode.getAddress()), entry->routePrefix)) continue;
 
             // skip if route entry isn't via the RERR sender
             if (entry->routeNextHopAddress != sourceAddr) continue;
@@ -812,7 +812,7 @@ void DYMO::sendReply(unsigned int destAddr, unsigned int tSeqNum)
     ev << "send a reply to destination node " << destAddr << endl;
 
     DYMO_RM * rrep = new DYMO_RREP("RREP");
-    DYMO_RoutingEntry *entry = dymo_routingTable->getForAddress(destAddr);
+    DYMO_RoutingEntry *entry = dymo_routingTable->getForAddress(IPv4Address(destAddr));
     if (!entry) error("Tried sending RREP via a route that just vanished");
 
     rrep->setMsgHdrHopLimit(MAX_HOPLIMIT);
@@ -845,7 +845,7 @@ void DYMO::sendReplyAsIntermediateRouter(const DYMO_AddressBlock& origNode, cons
     /** create a new RREP and send it to given destination **/
     ev << "sending a reply to OrigNode " << origNode.getAddress() << endl;
 
-    DYMO_RoutingEntry* routeToOrigNode = dymo_routingTable->getForAddress(origNode.getAddress());
+    DYMO_RoutingEntry* routeToOrigNode = dymo_routingTable->getForAddress(IPv4Address(origNode.getAddress()));
     if (!routeToOrigNode) error("no route to OrigNode found");
 
     // increment ownSeqNum.
@@ -917,7 +917,7 @@ void DYMO::sendRERR(unsigned int targetAddr, unsigned int targetSeqNum)
     rerr->setMsgHdrHopLimit(MAX_HOPLIMIT);
 
     // add additional unreachableNode entries for all route entries that use the same routeNextHopAddress and routeNextHopInterface
-    DYMO_RoutingEntry* brokenEntry = dymo_routingTable->getForAddress(targetAddr);
+    DYMO_RoutingEntry* brokenEntry = dymo_routingTable->getForAddress(IPv4Address(targetAddr));
     if (brokenEntry)
     {
         // sanity check
@@ -971,7 +971,7 @@ simtime_t DYMO::computeBackoff(simtime_t backoff_var)
 
 void DYMO::updateRouteLifetimes(unsigned int targetAddr)
 {
-    DYMO_RoutingEntry* entry = dymo_routingTable->getForAddress(targetAddr);
+    DYMO_RoutingEntry* entry = dymo_routingTable->getForAddress(IPv4Address(targetAddr));
     if (!entry) return;
 
     // TODO: not specified in draft, but seems to make sense
@@ -1020,7 +1020,7 @@ void DYMO::handleRREQTimeout(DYMO_OutstandingRREQ& outstandingRREQ)
 
     if (outstandingRREQ.tries < RREQ_TRIES)
     {
-        DYMO_RoutingEntry* entry = dymo_routingTable->getForAddress(outstandingRREQ.destAddr);
+        DYMO_RoutingEntry* entry = dymo_routingTable->getForAddress(IPv4Address(outstandingRREQ.destAddr));
         if (entry && (!entry->routeBroken))
         {
             /** an entry was found in the routing table -> get control data from the table, encapsulate message **/
@@ -1059,7 +1059,7 @@ void DYMO::handleRREQTimeout(DYMO_OutstandingRREQ& outstandingRREQ)
         std::list<IPv4Datagram*> datagrams;
         // drop packets bound for the expired RREQ's destination
         dymo_routingTable->maintainAssociatedRoutingTable();
-        queuedDataPackets->dropPacketsTo(outstandingRREQ.destAddr, 32, &datagrams);
+        queuedDataPackets->dropPacketsTo(IPv4Address(outstandingRREQ.destAddr), 32, &datagrams);
         while (!datagrams.empty())
         {
             IPv4Datagram* dgram = datagrams.front();
@@ -1092,10 +1092,10 @@ bool DYMO::updateRoutesFromAddressBlock(const DYMO_AddressBlock& ab, bool isRREQ
         ev << "updating routing entry for " << IPv4Address(ab.getAddress()) << endl;
     }
 
-    entry->routeAddress = ab.getAddress();
+    entry->routeAddress = IPv4Address(ab.getAddress());
     entry->routeSeqNum = ab.getSeqNum();
     entry->routeDist = ab.hasDist() ? (ab.getDist() + 1) : 0;  // incremented by one, because draft -10 says to first increment, then compare
-    entry->routeNextHopAddress = nextHopAddress;
+    entry->routeNextHopAddress = IPv4Address(nextHopAddress);
     entry->routeNextHopInterface = nextHopInterface;
     entry->routePrefix = ab.hasPrefix() ? ab.getPrefix() : 32;
     entry->routeBroken = false;
@@ -1157,7 +1157,7 @@ DYMO_RM* DYMO::updateRoutes(DYMO_RM * pkt)
 void DYMO::checkAndSendQueuedPkts(unsigned int destinationAddress, int prefix, unsigned int /*nextHopAddress*/)
 {
     dymo_routingTable->maintainAssociatedRoutingTable();
-    queuedDataPackets->dequeuePacketsTo(destinationAddress, prefix);
+    queuedDataPackets->dequeuePacketsTo(IPv4Address(destinationAddress), prefix);
 
     // clean up outstandingRREQList: remove those with matching destAddr
     DYMO_OutstandingRREQ* o = outstandingRREQList.getByDestAddr(destinationAddress, prefix);

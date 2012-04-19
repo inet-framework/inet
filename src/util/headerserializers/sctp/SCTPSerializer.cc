@@ -882,7 +882,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                         {
                             parptr += sizeof(struct heartbeat_info);
                             parcounter++;
-                            chunk->setRemoteAddr(IPvXAddress(ntohl(HBI_ADDR(hbi))));
+                            chunk->setRemoteAddr(IPvXAddress(IPv4Address(ntohl(HBI_ADDR(hbi)))));
                             chunk->setTimeField(ntohl((uint32)HBI_TIME(hbi)));
                         }
                         else

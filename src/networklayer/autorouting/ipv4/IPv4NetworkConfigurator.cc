@@ -692,8 +692,8 @@ void IPv4NetworkConfigurator::assignAddresses(IPv4Topology& topology)
                 if (compatibleInterface->configure)
                 {
                     IPv4InterfaceData *interfaceData = compatibleInterface->interfaceEntry->ipv4Data();
-                    interfaceData->setIPAddress(completeAddress);
-                    interfaceData->setNetmask(completeNetmask);
+                    interfaceData->setIPAddress(IPv4Address(completeAddress));
+                    interfaceData->setNetmask(IPv4Address(completeNetmask));
                 }
                 compatibleInterface->address = completeAddress;
                 EV_DEBUG << "Selected interface address: " << IPv4Address(completeAddress) << endl;
@@ -1973,8 +1973,8 @@ void IPv4NetworkConfigurator::optimizeRoutes(std::vector<IPv4Route *>& originalR
         RouteInfo *routeInfo = routingTableInfo.routeInfos.at(i);
         IPv4Route *routeColor = colorToRoute[routeInfo->color];
         IPv4Route *optimizedRoute = new IPv4Route();
-        optimizedRoute->setDestination(routeInfo->destination);
-        optimizedRoute->setNetmask(routeInfo->netmask);
+        optimizedRoute->setDestination(IPv4Address(routeInfo->destination));
+        optimizedRoute->setNetmask(IPv4Address(routeInfo->netmask));
         optimizedRoute->setInterface(routeColor->getInterface());
         optimizedRoute->setGateway(routeColor->getGateway());
         optimizedRoute->setSource(routeColor->getSource());

@@ -985,7 +985,7 @@ double DSRUU::PathCost(struct dsr_pkt *dp)
         cost = getCost(dp->costVector[dp->costVectorSize-1].address);
     else
     {
-        cost = getCost(dp->src.s_addr);
+        cost = getCost(IPv4Address(dp->src.s_addr));
     }
 
     if (cost<0)

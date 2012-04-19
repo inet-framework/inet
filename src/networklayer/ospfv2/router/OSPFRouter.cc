@@ -613,7 +613,7 @@ OSPF::ASExternalLSA* OSPF::Router::originateASExternalLSA(OSPF::ASExternalLSA* l
  */
 bool OSPF::Router::isDestinationUnreachable(OSPFLSA* lsa) const
 {
-    IPv4Address destination = lsa->getHeader().getLinkStateID();
+    IPv4Address destination = IPv4Address(lsa->getHeader().getLinkStateID());
 
     OSPFRouterLSA* routerLSA = dynamic_cast<OSPFRouterLSA*> (lsa);
     OSPFNetworkLSA* networkLSA = dynamic_cast<OSPFNetworkLSA*> (lsa);
@@ -638,14 +638,14 @@ bool OSPF::Router::isDestinationUnreachable(OSPFLSA* lsa) const
                 Link& link = routerLSA->getLinks(i);
 
                 if (link.getType() == POINTTOPOINT_LINK) {
-                    if (link.getLinkID() == toRouterLSA->getHeader().getLinkStateID()) {
+                    if (link.getLinkID() == IPv4Address(toRouterLSA->getHeader().getLinkStateID())) {
                         if ((link.getLinkData() & 0xFF000000) == 0) {
                             unnumberedPointToPointLink = true;
                             if (!firstNumberedIfAddress.isUnspecified()) {
                                 break;
                             }
                         } else {
-                            destination = link.getLinkData();
+                            destination = IPv4Address(link.getLinkData());
                             destinationFound = true;
                             break;
                         }
@@ -653,21 +653,21 @@ bool OSPF::Router::isDestinationUnreachable(OSPFLSA* lsa) const
                         if (((link.getLinkData() & 0xFF000000) != 0) &&
                              firstNumberedIfAddress.isUnspecified())
                         {
-                            firstNumberedIfAddress = link.getLinkData();
+                            firstNumberedIfAddress = IPv4Address(link.getLinkData());
                         }
                     }
                 } else if (link.getType() == TRANSIT_LINK) {
                     if (firstNumberedIfAddress.isUnspecified()) {
-                        firstNumberedIfAddress = link.getLinkData();
+                        firstNumberedIfAddress = IPv4Address(link.getLinkData());
                     }
                 } else if (link.getType() == VIRTUAL_LINK) {
-                    if (link.getLinkID() == toRouterLSA->getHeader().getLinkStateID()) {
-                        destination = link.getLinkData();
+                    if (link.getLinkID() == IPv4Address(toRouterLSA->getHeader().getLinkStateID())) {
+                        destination = IPv4Address(link.getLinkData());
                         destinationFound = true;
                         break;
                     } else {
                         if (firstNumberedIfAddress.isUnspecified()) {
-                            firstNumberedIfAddress = link.getLinkData();
+                            firstNumberedIfAddress = IPv4Address(link.getLinkData());
                         }
                     }
                 }
@@ -692,9 +692,9 @@ bool OSPF::Router::isDestinationUnreachable(OSPFLSA* lsa) const
                     Link& link = routerLSA->getLinks(i);
 
                     if ((link.getType() == TRANSIT_LINK) &&
-                        (link.getLinkID() == toNetworkLSA->getHeader().getLinkStateID()))
+                        (link.getLinkID() == IPv4Address(toNetworkLSA->getHeader().getLinkStateID())))
                     {
-                        destination = link.getLinkData();
+                        destination = IPv4Address(link.getLinkData());
                         destinationFound = true;
                         break;
                     }
@@ -708,13 +708,13 @@ bool OSPF::Router::isDestinationUnreachable(OSPFLSA* lsa) const
         }
     }
     if (networkLSA != NULL) {
-        destination = networkLSA->getHeader().getLinkStateID() & networkLSA->getNetworkMask().getInt();
+        destination = IPv4Address(networkLSA->getHeader().getLinkStateID() & networkLSA->getNetworkMask().getInt());
     }
     if ((summaryLSA != NULL) && (summaryLSA->getHeader().getLsType() == SUMMARYLSA_NETWORKS_TYPE)) {
-        destination = summaryLSA->getHeader().getLinkStateID() & summaryLSA->getNetworkMask().getInt();
+        destination = IPv4Address(summaryLSA->getHeader().getLinkStateID() & summaryLSA->getNetworkMask().getInt());
     }
     if (asExternalLSA != NULL) {
-        destination = asExternalLSA->getHeader().getLinkStateID() & asExternalLSA->getContents().getNetworkMask().getInt();
+        destination = IPv4Address(asExternalLSA->getHeader().getLinkStateID() & asExternalLSA->getContents().getNetworkMask().getInt());
     }
 
     if (lookup(destination) == NULL) {
@@ -758,8 +758,8 @@ OSPF::RoutingTableEntry* OSPF::Router::lookup(IPv4Address destination, std::vect
                 {
                     // active area address range
                     OSPF::RoutingTableEntry* discardEntry = new OSPF::RoutingTableEntry;
-                    discardEntry->setDestination(ulongFromIPv4Address(range.address));
-                    discardEntry->setNetmask(ulongFromIPv4Address(range.mask));
+                    discardEntry->setDestination(range.address);
+                    discardEntry->setNetmask(range.mask);
                     discardEntry->setDestinationType(OSPF::RoutingTableEntry::NETWORK_DESTINATION);
                     discardEntry->setPathType(OSPF::RoutingTableEntry::INTERAREA);
                     discardEntry->setArea(areas[i]->getAreaID());
@@ -1110,7 +1110,7 @@ void OSPF::Router::calculateASExternalRoutes(std::vector<OSPF::RoutingTableEntry
             continue;
         }
 
-        IPv4Address destination = currentHeader.getLinkStateID() & currentLSA->getContents().getNetworkMask().getInt();
+        IPv4Address destination = IPv4Address(currentHeader.getLinkStateID() & currentLSA->getContents().getNetworkMask().getInt());
 
         Metric preferredCost = preferredEntry->getCost();
         OSPF::RoutingTableEntry* destinationEntry = lookup(destination, &newRoutingTable);   // (5)
@@ -1120,7 +1120,7 @@ void OSPF::Router::calculateASExternalRoutes(std::vector<OSPF::RoutingTableEntry
             OSPF::RoutingTableEntry* newEntry = new OSPF::RoutingTableEntry;
 
             newEntry->setDestination(destination);
-            newEntry->setNetmask(currentLSA->getContents().getNetworkMask().getInt());
+            newEntry->setNetmask(currentLSA->getContents().getNetworkMask());
             newEntry->setArea(preferredEntry->getArea());
             newEntry->setPathType(type2ExternalMetric ? OSPF::RoutingTableEntry::TYPE2_EXTERNAL : OSPF::RoutingTableEntry::TYPE1_EXTERNAL);
             if (type2ExternalMetric) {
@@ -1295,7 +1295,7 @@ OSPF::LinkStateID OSPF::Router::getUniqueLinkStateID(OSPF::IPv4AddressRange dest
 
             asExternalLSA->getHeader().setLsAge(0);
             asExternalLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
-            asExternalLSA->getContents().setNetworkMask(ulongFromIPv4Address(destination.mask));
+            asExternalLSA->getContents().setNetworkMask(destination.mask);
             asExternalLSA->getContents().setE_ExternalMetricType(externalMetricIsType2);
             asExternalLSA->getContents().setRouteCost(destinationCost);
             asExternalLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
@@ -1558,7 +1558,7 @@ void OSPF::Router::updateExternalRoute(IPv4Address networkAddress, const OSPFASE
     if (!inRoutingTable)
     {
         IPv4Route* entry = new IPv4Route;
-        entry->setDestination(ulongFromIPv4Address(networkAddress));
+        entry->setDestination(networkAddress);
         entry->setNetmask(externalRouteContents.getNetworkMask());
         entry->setInterface(InterfaceTableAccess().get()->getInterfaceById(ifIndex));
         entry->setSource(IPv4Route::MANUAL);
@@ -1572,7 +1572,7 @@ void OSPF::Router::updateExternalRoute(IPv4Address networkAddress, const OSPFASE
     lsaHeader.setLsOptions(lsaOptions);
     lsaHeader.setLsType(AS_EXTERNAL_LSA_TYPE);
     lsaHeader.setLinkStateID(ulongFromIPv4Address(networkAddress));   // TODO: get unique LinkStateID
-    lsaHeader.setAdvertisingRouter(routerID);
+    lsaHeader.setAdvertisingRouter(IPv4Address(routerID));
     lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
 
     asExternalLSA->setContents(externalRouteContents);
@@ -1617,7 +1617,7 @@ void OSPF::Router::addExternalRouteInIPTable(IPv4Address networkAddress, const O
     if (!inRoutingTable)
     {
         IPv4Route* entry = new IPv4Route();
-        entry->setDestination(ulongFromIPv4Address(networkAddress));
+        entry->setDestination(networkAddress);
         entry->setNetmask(externalRouteContents.getNetworkMask());
         entry->setInterface(simInterfaceTable->getInterfaceById(ifIndex));
         entry->setSource(IPv4Route::OSPF);

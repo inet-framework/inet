@@ -353,7 +353,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     memset(data, 0, maxBufferSize);
     uint32_t nscSrcAddr = mapRemote2Nsc(inetSockPair.remoteM.ipAddrM);
     nscSockPair.localM.ipAddrM = localInnerIpS;
-    nscSockPair.remoteM.ipAddrM.set(nscSrcAddr);
+    nscSockPair.remoteM.ipAddrM.set(IPv4Address(nscSrcAddr));
 
     tcpEV << this << ": data arrived for interface of stack "
         << pStackM << "\n" << "src:"<< inetSockPair.remoteM.ipAddrM <<",dest:"<< inetSockPair.localM.ipAddrM <<"\n";
@@ -809,9 +809,9 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     TCP_NSC_Connection::SockPair nscSockPair;
     TCP_NSC_Connection *conn;
 
-    nscSockPair.localM.ipAddrM.set(ntohl(iph->saddr));
+    nscSockPair.localM.ipAddrM.set(IPv4Address(ntohl(iph->saddr)));
     nscSockPair.localM.portM = ntohs(tcph->th_sport);
-    nscSockPair.remoteM.ipAddrM.set(ntohl(iph->daddr));
+    nscSockPair.remoteM.ipAddrM.set(IPv4Address(ntohl(iph->daddr)));
     nscSockPair.remoteM.portM = ntohs(tcph->th_dport);
 
     if (curConnM)
@@ -935,7 +935,7 @@ void TCP_NSC::process_OPEN_ACTIVE(TCP_NSC_Connection& connP, TCPCommand *tcpComm
     nscSockPair.localM.portM = inetSockPair.localM.portM;
     if (nscSockPair.localM.portM == -1)
         nscSockPair.localM.portM = 0; // NSC uses 0 to mean "not specified"
-    nscSockPair.remoteM.ipAddrM.set(nscRemoteAddr);
+    nscSockPair.remoteM.ipAddrM.set(IPv4Address(nscRemoteAddr));
     nscSockPair.remoteM.portM = inetSockPair.remoteM.portM;
 
     changeAddresses(connP, inetSockPair, nscSockPair);

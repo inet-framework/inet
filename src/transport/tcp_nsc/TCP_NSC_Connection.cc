@@ -120,7 +120,7 @@ void TCP_NSC_Connection::connect(INetStack &stackP, SockPair &inetSockPairP, Soc
     struct sockaddr_in sockAddr;
     size_t sockAddrLen = sizeof(sockAddr);
     pNscSocketM->getsockname((sockaddr*)&sockAddr, &sockAddrLen);
-    nscSockPairP.localM.ipAddrM.set(sockAddr.sin_addr.s_addr);
+    nscSockPairP.localM.ipAddrM.set(IPv4Address(sockAddr.sin_addr.s_addr));
     nscSockPairP.localM.portM = ntohs(sockAddr.sin_port);
 /*
     // TODO: getpeername generate an assert!!!
@@ -154,7 +154,7 @@ void TCP_NSC_Connection::listen(INetStack &stackP, SockPair &inetSockPairP, Sock
     size_t sockAddrLen = sizeof(sockAddr);
     pNscSocketM->getsockname((sockaddr*)&sockAddr, &sockAddrLen);
 
-    nscSockPairP.localM.ipAddrM.set(sockAddr.sin_addr.s_addr);
+    nscSockPairP.localM.ipAddrM.set(IPv4Address(sockAddr.sin_addr.s_addr));
     nscSockPairP.localM.portM = ntohs(sockAddr.sin_port);
     nscSockPairP.remoteM.ipAddrM = IPvXAddress();
     nscSockPairP.remoteM.portM = -1;

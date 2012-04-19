@@ -150,8 +150,8 @@ void IPv4Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv4D
 
     dest->setVersion(ip->ip_v);
     dest->setHeaderLength(IP_HEADER_BYTES);
-    dest->setSrcAddress(ntohl(ip->ip_src.s_addr));
-    dest->setDestAddress(ntohl(ip->ip_dst.s_addr));
+    dest->setSrcAddress(IPv4Address(ntohl(ip->ip_src.s_addr)));
+    dest->setDestAddress(IPv4Address(ntohl(ip->ip_dst.s_addr)));
     dest->setTransportProtocol(ip->ip_p);
     dest->setTimeToLive(ip->ip_ttl);
     dest->setIdentification(ntohs(ip->ip_id));

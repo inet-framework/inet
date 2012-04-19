@@ -92,7 +92,7 @@ inline OSPF::RoutingTableEntry::RoutingTableEntry() :
     type2Cost(0),
     linkStateOrigin(NULL)
 {
-    setNetmask(0xFFFFFFFF);
+    setNetmask(IPv4Address::ALLONES_ADDRESS);
     setSource(IPv4Route::OSPF);
     memset(&optionalCapabilities, 0, sizeof(OSPFOptions));
 }
@@ -156,7 +156,7 @@ inline void OSPF::RoutingTableEntry::addNextHop(OSPF::NextHop hop)
         setInterface(routingInterface);
         // TODO: this used to be commented out, but it seems we need it
         // otherwise gateways will never be filled in and gateway is needed for broadcast networks
-        setGateway(ulongFromIPv4Address(hop.hopAddress));
+        setGateway(hop.hopAddress);
     }
     nextHops.push_back(hop);
 }

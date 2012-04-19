@@ -930,7 +930,7 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
         // schedule commit of merging backups too...
         for (unsigned int j = 0; j < RSBList.size(); j++)
         {
-            if (RSBList[j].OI != lspid)
+            if (RSBList[j].OI != IPv4Address(lspid))
                 continue;
 
             scheduleCommitTimer(&RSBList[j]);
