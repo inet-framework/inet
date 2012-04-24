@@ -16,7 +16,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <string>
+#include <map>
+#include <stdlib.h>
+#include <memory.h>
+
 #include "OSPFRouting.h"
+
 #include "IPv4Address.h"
 #include "IPvXAddressResolver.h"
 #include "IPv4ControlInfo.h"
@@ -24,12 +30,9 @@
 #include "OSPFArea.h"
 #include "OSPFInterface.h"
 #include "MessageHandler.h"
+#include "PatternMatcher.h"
 #include "RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
-#include <string>
-#include <map>
-#include <stdlib.h>
-#include <memory.h>
 
 
 Define_Module(OSPFRouting);
@@ -482,20 +485,30 @@ bool OSPFRouting::loadConfigFromXML(const char * filename)
         error("Cannot read AS configuration from file: %s", filename);
     }
 
+    cModule *myNode = findContainingNode(this);
+    ASSERT(myNode);
+    std::string nodeFullPath = myNode->getFullPath();
+    std::string nodeShortenedFullPath = nodeFullPath.substr(nodeFullPath.find('.') + 1);
+
     // load information on this router
-    std::string routerXPath("Router[@id='");
-    IPv4Address routerId(ospfRouter->getRouterID());
-    routerXPath += routerId.str();
-    routerXPath += "']";
-
-    cXMLElement* routerNode = asConfig->getElementByPath(routerXPath.c_str());
+    cXMLElementList routers = asConfig->getElementsByTagName("Router");
+    cXMLElement* routerNode = NULL;
+    for (cXMLElementList::iterator routerIt = routers.begin(); routerIt != routers.end(); routerIt++) {
+        const char* nodeName = (*routerIt)->getAttribute("name");
+        if (!nodeName || !*nodeName)
+            error("attribute 'name' missing from 'Router' node at %s", (*routerIt)->getSourceLocation());
+        inet::PatternMatcher pattern(nodeName, true, true, true);
+        if (pattern.matches(nodeFullPath.c_str()) || pattern.matches(nodeShortenedFullPath.c_str()))   // match Router@name and fullpath of my node
+        {
+            routerNode = *routerIt;
+            break;
+        }
+    }
     if (routerNode == NULL) {
-        error("No configuration for Router ID: %s", routerId.str().c_str());
-    }
-    else {
-        EV << "OSPFRouting: Loading info for Router id = " << routerId.str() << "\n";
+        error("No configuration for Router '%s' in file '%s'", nodeFullPath.c_str(), filename);
     }
 
+    EV << "OSPFRouting: Loading info for Router " << nodeFullPath << "\n";
 
     std::map<std::string, int> areaList;
     getAreaListFromXML(*routerNode, areaList);
