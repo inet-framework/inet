@@ -3,29 +3,29 @@
 
   <!-- Areas -->
   <Area id="0.0.0.0">
-    <AddressRange address="192.168.20.1" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.20.2" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.20.3" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.20.4" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.20.5" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.20.6" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.20.7" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.20.8" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.20.9" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.20.10" mask="255.255.255.255" status="Advertise"/>
+    <AddressRange address="RT3>RT6" mask="RT3>RT6" status="Advertise"/>
+    <AddressRange address="RT4>RT5" mask="RT4>RT5" status="Advertise"/>
+    <AddressRange address="RT5>RT4" mask="RT5>RT4" status="Advertise"/>
+    <AddressRange address="RT5>RT6" mask="RT5>RT6" status="Advertise"/>
+    <AddressRange address="RT5>RT7" mask="RT5>RT7" status="Advertise"/>
+    <AddressRange address="RT6>RT3" mask="RT6>RT3" status="Advertise"/>
+    <AddressRange address="RT6>RT10" mask="RT6>RT10" status="Advertise"/>
+    <AddressRange address="RT6>RT5" mask="RT6>RT5" status="Advertise"/>
+    <AddressRange address="RT7>RT5" mask="RT7>RT5" status="Advertise"/>
+    <AddressRange address="RT10>RT6" mask="RT10>RT6" status="Advertise"/>
   </Area>
 
   <Area id="0.0.0.1">
-    <AddressRange address="192.168.1.0" mask="255.255.255.0" status="Advertise"/>
-    <AddressRange address="192.168.2.0" mask="255.255.255.0" status="Advertise"/>
-    <AddressRange address="192.168.3.0" mask="255.255.255.0" status="Advertise"/>
-    <AddressRange address="192.168.4.0" mask="255.255.255.0" status="Advertise"/>
+    <AddressRange address="Area1.RT1>Area1.N1" mask="Area1.RT1>Area1.N1" status="Advertise"/>
+    <AddressRange address="Area1.RT2>Area1.N2" mask="Area1.RT2>Area1.N2" status="Advertise"/>
+    <AddressRange address="Area1.H5" mask="Area1.H5" status="Advertise"/>
+    <AddressRange address="Area1.H6" mask="Area1.H6" status="Advertise"/>
   </Area>
 
   <Area id="0.0.0.2">
-    <AddressRange address="192.168.6.0" mask="255.255.255.0" status="Advertise"/>
-    <AddressRange address="192.168.7.0" mask="255.255.255.0" status="Advertise"/>
-    <AddressRange address="192.168.8.0" mask="255.255.255.0" status="Advertise"/>
+    <AddressRange address="Area2.RT8>Area2.N6" mask="Area2.RT8>Area2.N6" status="Advertise"/>
+    <AddressRange address="Area2.RT8>Area2.N7" mask="Area2.RT8>Area2.N7" status="Advertise"/>
+    <AddressRange address="Area2.H11" mask="Area2.H11" status="Advertise"/>
   </Area>
 
   <Area id="0.0.0.3">
@@ -60,12 +60,12 @@
 
   <Router name="RT5"> <!-- RT5 -->
     <RFC1583Compatible/>
-    <ExternalInterface ifName="eth0" advertisedExternalNetworkAddress="192.168.13.0" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="8" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
+    <ExternalInterface ifName="eth0" advertisedExternalNetworkAddress="RT5>N13" advertisedExternalNetworkMask="RT5>N13" externalInterfaceOutputCost="8" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
     <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="8" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     <PointToPointInterface ifName="eth2" areaID="0.0.0.0" interfaceOutputCost="7" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     <PointToPointInterface ifName="eth3" areaID="0.0.0.0" interfaceOutputCost="6" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <ExternalInterface ifName="eth4" advertisedExternalNetworkAddress="192.168.12.0" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="8" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
-    <ExternalInterface ifName="eth5" advertisedExternalNetworkAddress="192.168.14.0" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="8" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
+    <ExternalInterface ifName="eth4" advertisedExternalNetworkAddress="RT5>N12" advertisedExternalNetworkMask="RT5>N12" externalInterfaceOutputCost="8" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
+    <ExternalInterface ifName="eth5" advertisedExternalNetworkAddress="RT5>N14" advertisedExternalNetworkMask="RT5>N14" externalInterfaceOutputCost="8" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
   </Router>
 
   <Router name="RT6"> <!-- RT6 -->
@@ -79,8 +79,8 @@
     <RFC1583Compatible/>
     <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="6" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.2" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <ExternalInterface ifName="eth2" advertisedExternalNetworkAddress="192.168.15.0" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="9" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
-    <ExternalInterface ifName="eth3" advertisedExternalNetworkAddress="192.168.12.0" advertisedExternalNetworkMask="255.255.255.0" externalInterfaceOutputCost="2" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
+    <ExternalInterface ifName="eth2" advertisedExternalNetworkAddress="RT7>N15" advertisedExternalNetworkMask="RT7>N15" externalInterfaceOutputCost="9" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
+    <ExternalInterface ifName="eth3" advertisedExternalNetworkAddress="RT7>N12" advertisedExternalNetworkMask="RT7>N12" externalInterfaceOutputCost="2" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
   </Router>
 
   <Router name="Area2.RT8"> <!-- RT8 -->
@@ -107,7 +107,7 @@
     <RFC1583Compatible/>
     <BroadcastInterface ifName="eth0" areaID="0.0.0.3" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.2" interfaceOutputCost="2" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <VirtualLink endPointRouterID="192.168.20.10" transitAreaID="0.0.0.2" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+    <VirtualLink endPointRouterID="RT10%routerId" transitAreaID="0.0.0.2" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
 
   <Router name="Area3.RT12"> <!-- RT12 -->

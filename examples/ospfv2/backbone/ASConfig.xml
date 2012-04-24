@@ -3,12 +3,12 @@
 
   <!-- Areas -->
   <Area id="0.0.0.0">
-    <AddressRange address="192.168.1.0" mask="255.255.255.0" status="Advertise"/>
-    <AddressRange address="192.168.2.0" mask="255.255.255.0" status="Advertise"/>
-    <AddressRange address="192.168.3.0" mask="255.255.255.0" status="Advertise"/>
-    <AddressRange address="192.168.4.0" mask="255.255.255.0" status="Advertise"/>
-    <AddressRange address="192.168.5.0" mask="255.255.255.0" status="Advertise"/>
-    <AddressRange address="192.168.6.0" mask="255.255.255.0" status="Advertise"/>
+    <AddressRange address="R1>N1" mask="R1>N1/" status="Advertise"/>
+    <AddressRange address="R1>N2" mask="R1>N2/" status="Advertise"/>
+    <AddressRange address="R1>N3" mask="R1>N3/" status="Advertise"/>
+    <AddressRange address="R2>N4" mask="R2>N4/" status="Advertise"/>
+    <AddressRange address="R3>N5" mask="R3>N5/" status="Advertise"/>
+    <AddressRange address="R4>N6" mask="R4>N6/" status="Advertise"/>
   </Area>
 
   <!-- Routers -->
