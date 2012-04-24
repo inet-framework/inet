@@ -10,15 +10,15 @@
 
                 <bandwidth>100000</bandwidth>
                 <route>
-                    <node>LSR2/routerId</node>
-                    <node>LSR21/routerId</node>
-                    <node>LSR19/routerId</node>
-                    <node>LSR36/routerId</node>
-                    <node>LSR32/routerId</node>
-                    <node>LSR12/routerId</node>
-                    <node>LSR14/routerId</node>
-                    <node>LSR4/routerId</node>
-                    <node>LSR34/routerId</node>
+                    <node>LSR2%routerId</node>
+                    <node>LSR21%routerId</node>
+                    <node>LSR19%routerId</node>
+                    <node>LSR36%routerId</node>
+                    <node>LSR32%routerId</node>
+                    <node>LSR12%routerId</node>
+                    <node>LSR14%routerId</node>
+                    <node>LSR4%routerId</node>
+                    <node>LSR34%routerId</node>
                 </route>
 
                 <permanent>true</permanent>
