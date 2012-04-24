@@ -268,8 +268,10 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         intf->setAuthenticationType(OSPF::SIMPLE_PASSWORD_TYPE);
     } else if (authenticationType == "CrytographicType") {
         intf->setAuthenticationType(OSPF::CRYTOGRAPHIC_TYPE);
-    } else {
+    } else if (authenticationType == "NullType") {
         intf->setAuthenticationType(OSPF::NULL_TYPE);
+    } else {
+        throw cRuntimeError("Invalid AuthenticationType '%s'", authenticationType.c_str());
     }
 
     std::string key = getStrAttrOrPar(ifConfig, "authenticationKey");
@@ -494,9 +496,6 @@ bool OSPFRouting::loadConfigFromXML(const char * filename)
         EV << "OSPFRouting: Loading info for Router id = " << routerId.str() << "\n";
     }
 
-    if (routerNode->getChildrenByTagName("RFC1583Compatible").size() > 0) {
-        ospfRouter->setRFC1583Compatibility(true);
-    }
 
     std::map<std::string, int> areaList;
     getAreaListFromXML(*routerNode, areaList);
@@ -521,15 +520,23 @@ bool OSPFRouting::loadConfigFromXML(const char * filename)
         {
             loadInterfaceParameters(*(*routerConfigIt));
         }
-        if (nodeName == "ExternalInterface") {
+        else if (nodeName == "ExternalInterface") {
             loadExternalRoute(*(*routerConfigIt));
         }
-        if (nodeName == "HostInterface") {
+        else if (nodeName == "HostInterface") {
             loadHostRoute(*(*routerConfigIt));
         }
-        if (nodeName == "VirtualLink") {
+        else if (nodeName == "VirtualLink") {
             loadVirtualLink(*(*routerConfigIt));
         }
+        else if (nodeName == "RFC1583Compatible") {
+            ospfRouter->setRFC1583Compatibility(true);
+        } else {
+            throw cRuntimeError("Invalid '%s' node in Router '%s' at %s in file '%s'",
+                    nodeName.c_str(), nodeFullPath.c_str(), (*routerConfigIt)->getSourceLocation(), filename);
+        }
+
     }
     return true;
 }
+
