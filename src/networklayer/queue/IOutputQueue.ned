@@ -22,10 +22,13 @@ package inet.networklayer.queue;
 // Prototype for per-NIC output queues. Concrete queues can implement
 // drop-tail, RED etc. policy.
 //
-// Interface to Layer 2 modules: The C++ class implementing the queue
-// must implement (i.e. subclass from) IPassiveQueue, and should
-// send a packet whenever the L2 module asks for one by calling the
-// requestPacket() method.
+// Interface to Layer 2 modules: The implementation of IOutputQueue
+// can be either a simple module whose C++ class implements
+// (i.e. subclass from) IPassiveQueue, or a compound module
+// whose out gate is connected to a simple module implementing
+// the IPassiveQueue interface. The IPassiveQueue component
+// should send a packet whenever the L2 module asks for one
+// by calling the requestPacket() method.
 //
 // @see ~DropTailQueue, ~DropTailQoSQueue, ~REDQueue
 //

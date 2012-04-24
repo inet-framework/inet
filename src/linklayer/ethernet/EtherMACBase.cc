@@ -202,7 +202,15 @@ void EtherMACBase::initializeQueueModule()
     if (par("queueModule").stringValue()[0])
     {
         cModule *module = getParentModule()->getSubmodule(par("queueModule").stringValue());
-        IPassiveQueue *queueModule = check_and_cast<IPassiveQueue *>(module);
+        IPassiveQueue *queueModule;
+        if (module->isSimple())
+            queueModule = check_and_cast<IPassiveQueue *>(module);
+        else
+        {
+            cGate *queueOut = module->gate("out")->getPathStartGate();
+            queueModule = check_and_cast<IPassiveQueue *>(queueOut->getOwnerModule());
+        }
+
         EV << "Requesting first frame from queue module\n";
         txQueue.setExternalQueue(queueModule);
 

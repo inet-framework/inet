@@ -91,7 +91,13 @@ void PPP::initialize(int stage)
         if (par("queueModule").stringValue()[0])
         {
             cModule *mod = getParentModule()->getSubmodule(par("queueModule").stringValue());
-            queueModule = check_and_cast<IPassiveQueue *>(mod);
+            if (mod->isSimple())
+                queueModule = check_and_cast<IPassiveQueue *>(mod);
+            else
+            {
+                cGate *queueOut = mod->gate("out")->getPathStartGate();
+                queueModule = check_and_cast<IPassiveQueue *>(queueOut->getOwnerModule());
+            }
         }
 
         // remember the output gate now, to speed up send()
