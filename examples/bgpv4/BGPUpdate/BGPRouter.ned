@@ -34,6 +34,9 @@ import inet.base.NotificationBoard;
 module BGPRouter
 {
     parameters:
+        @node();
+        @labels(node,ethernet-node);
+        @display("i=abstract/router");
         string routingFile = default("");
         string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC","TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
     gates:
