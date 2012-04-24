@@ -12,44 +12,44 @@
   </Area>
 
   <!-- Routers -->
-  <Router id="192.168.3.1"> <!-- R1 -->
+  <Router name="R1"> <!-- R1 -->
     <RFC1583Compatible/>
     <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     <BroadcastInterface ifName="eth2" areaID="0.0.0.0" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
 
-  <Router id="192.168.4.3"> <!-- R2 -->
+  <Router name="R2"> <!-- R2 -->
     <RFC1583Compatible/>
     <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="2" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="2" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="2" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="2" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
 
-  <Router id="192.168.5.2"> <!-- R3 -->
+  <Router name="R3"> <!-- R3 -->
     <RFC1583Compatible/>
     <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="3" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="3" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="3" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="3" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
 
-  <Router id="192.168.6.2"> <!-- R4 -->
+  <Router name="R4"> <!-- R4 -->
     <RFC1583Compatible/>
     <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="4" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="4" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="4" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="4" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
 
-  <Router id="192.168.5.3"> <!-- R5 -->
+  <Router name="R5"> <!-- R5 -->
     <RFC1583Compatible/>
     <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="5" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="5" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="5" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="5" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
 
-  <Router id="192.168.6.3"> <!-- R6 -->
+  <Router name="R6"> <!-- R6 -->
     <RFC1583Compatible/>
     <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="6" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="6" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="6" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="6" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
 
-  <Router id="192.168.6.1"> <!-- R7 -->
+  <Router name="R7"> <!-- R7 -->
     <RFC1583Compatible/>
     <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="7" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="7" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="7" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="7" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>

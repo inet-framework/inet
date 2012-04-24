@@ -10,14 +10,14 @@
   </Area>
 
   <!-- Routers -->
-  <Router id="192.168.1.254"> <!-- R1 -->
+  <Router name="A">
     <RFC1583Compatible/>
     <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
-  
-  <Router id="192.168.2.254"> <!-- R2 -->
+
+  <Router name="B">
     <RFC1583Compatible/>
     <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
-  
+
 </OSPFASConfig>
