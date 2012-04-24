@@ -8,7 +8,7 @@
 
 /examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           81af-7fad
 /examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           90bf-9c3b
-# /examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           5616-a8ba # example is wrong, broadcast address is assigned to some interfaces, fingerprint is changed by 'IPv4 fix: subnet directed broadcast (e.g. 192.168.1.255) did not work' 
+/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           cdc9-9707
 /examples/bgpv4/BGPOpen/,            -f omnetpp.ini -c config1 -r 0,                  62s,           897c-ff8c   ,# do not change simtime-limit, this example tests all messages
 /examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0,                  30s,           7f80-22ee   ,# do not change simtime-limit, this example tests all messages
 /examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           3401-9c11
