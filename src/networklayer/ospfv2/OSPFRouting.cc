@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2006 Andras Babos and Andras Varga
+// Copyright (C) 2012 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -189,10 +190,14 @@ void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string
             std::string status = (*arIt)->getAttribute("status");
             area->addAddressRange(addressRange, status == "Advertise");
         }
-        if ((nodeName == "Stub") && (areaID != "0.0.0.0")) {    // the backbone cannot be configured as a stub
+        else if (nodeName == "Stub") {
+            if (areaID == "0.0.0.0")
+                error("The backbone cannot be configured as a stub at %s", (*arIt)->getSourceLocation());
             area->setExternalRoutingCapability(false);
             area->setStubDefaultCost(atoi((*arIt)->getAttribute("defaultCost")));
         }
+        else
+            error("Invalid node '%s' at %s", nodeName.c_str(), (*arIt)->getSourceLocation());
     }
     // Add the Area to the router
     ospfRouter->addArea(area);
