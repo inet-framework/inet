@@ -53,22 +53,24 @@ class INET_API IPvXAddressResolver
 {
   protected:
     // internal
-    virtual IPv4Address getIPv4AddressFrom(IInterfaceTable *ift);
+    virtual bool getIPv4AddressFrom(IPvXAddress &retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual IPv6Address getIPv6AddressFrom(IInterfaceTable *ift);
+    virtual bool getIPv6AddressFrom(IPvXAddress &retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    //virtual IPv6Address getIPv6AddressFrom(IInterfaceTable *ift, int scope);
+    virtual bool getInterfaceIPv4Address(IPvXAddress &ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual IPv4Address getInterfaceIPv4Address(InterfaceEntry *ie);
-    // internal
-    virtual IPv6Address getInterfaceIPv6Address(InterfaceEntry *ie);
+    virtual bool getInterfaceIPv6Address(IPvXAddress &ret, InterfaceEntry *ie, bool mask);
 
   public:
     enum {
-        ADDR_PREFER_IPv4,
-        ADDR_PREFER_IPv6,
-        ADDR_IPv4,
-        ADDR_IPv6
+        ADDR_IPv4 = 1,
+        ADDR_IPv6 = 2,
+        ADDR_PREFER = 4,
+        ADDR_MASK = 8
+    };
+    enum {
+        ADDR_PREFER_IPv4 = ADDR_IPv4 | ADDR_PREFER,
+        ADDR_PREFER_IPv6 = ADDR_IPv6 | ADDR_PREFER
     };
 
   public:
