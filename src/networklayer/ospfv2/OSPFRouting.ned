@@ -19,7 +19,7 @@ package inet.networklayer.ospfv2;
 simple OSPFRouting
 {
     parameters:
-        string ospfConfigFile; // xml file containing the full OSPF AS configuration
+        xml ospfConfig; // xml containing the full OSPF AS configuration
 
         // default values for attributes of interface xml entries:
         int helloInterval @unit(s) = default(10s);

@@ -73,9 +73,9 @@ void OSPFRouting::initialize(int stage)
         ospfRouter = new OSPF::Router(rt->getRouterId().getInt(), this);
 
         // read the OSPF AS configuration
-        const char *fileName = par("ospfConfigFile");
-        if (fileName == NULL || (!strcmp(fileName, "")) || !loadConfigFromXML(fileName))
-            error("Error reading AS configuration from file %s", fileName);
+        cXMLElement *ospfConfig = par("ospfConfig").xmlValue();
+        if (!loadConfigFromXML(ospfConfig))
+            error("Error reading AS configuration from %s", ospfConfig->getSourceLocation());
 
         ospfRouter->addWatches();
     }
@@ -480,12 +480,10 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
  * @return True if the configuration was succesfully loaded.
  * @throws an getError() otherwise.
  */
-bool OSPFRouting::loadConfigFromXML(const char * filename)
+bool OSPFRouting::loadConfigFromXML(cXMLElement *asConfig)
 {
-    cXMLElement* asConfig = ev.getXMLDocument(filename);
-    if (asConfig == NULL) {
-        error("Cannot read AS configuration from file: %s", filename);
-    }
+    if (strcmp(asConfig->getTagName(), "OSPFASConfig"))
+        error("Cannot read OSPF configuration, unaccepted '%s' note at %s", asConfig->getTagName(), asConfig->getSourceLocation());
 
     cModule *myNode = findContainingNode(this);
 
@@ -508,7 +506,7 @@ bool OSPFRouting::loadConfigFromXML(const char * filename)
         }
     }
     if (routerNode == NULL) {
-        error("No configuration for Router '%s' in file '%s'", nodeFullPath.c_str(), filename);
+        error("No configuration for Router '%s' at '%s'", nodeFullPath.c_str(), asConfig->getSourceLocation());
     }
 
     EV << "OSPFRouting: Loading info for Router " << nodeFullPath << "\n";
@@ -548,8 +546,8 @@ bool OSPFRouting::loadConfigFromXML(const char * filename)
         else if (nodeName == "RFC1583Compatible") {
             ospfRouter->setRFC1583Compatibility(true);
         } else {
-            throw cRuntimeError("Invalid '%s' node in Router '%s' at %s in file '%s'",
-                    nodeName.c_str(), nodeFullPath.c_str(), (*routerConfigIt)->getSourceLocation(), filename);
+            throw cRuntimeError("Invalid '%s' node in Router '%s' at %s",
+                    nodeName.c_str(), nodeFullPath.c_str(), (*routerConfigIt)->getSourceLocation());
         }
 
     }

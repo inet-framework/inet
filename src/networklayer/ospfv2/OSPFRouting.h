@@ -49,7 +49,7 @@ class OSPFRouting :  public cSimpleModule
     void  loadHostRoute(const cXMLElement& hostRouteConfig);
     void  loadVirtualLink(const cXMLElement& virtualLinkConfig);
 
-    bool  loadConfigFromXML(const char * filename);
+    bool  loadConfigFromXML(cXMLElement *asConfig);
 
   public:
     OSPFRouting();
