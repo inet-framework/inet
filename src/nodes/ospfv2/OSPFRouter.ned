@@ -18,77 +18,27 @@
 
 package inet.nodes.ospfv2;
 
-import inet.nodes.inet.NetworkLayer;
-import inet.networklayer.ospfv2.OSPFRouting;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.IWiredNic;
 import inet.base.NotificationBoard;
+import inet.linklayer.IWiredNic;
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.ospfv2.OSPFRouting;
+import inet.nodes.inet.NetworkLayer;
+import inet.nodes.inet.Router;
 
 
 //
 // An OSPFv2 router.
 //
-module OSPFRouter
+module OSPFRouter extends Router
 {
-    parameters:
-        @node();
-        @labels(node,ethernet-node);
-        @display("i=abstract/router");
-        string routingFile = default("");
-    gates:
-        inout pppg[] @labels(PPPFrame-conn);
-        inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=60,60");
-        }
-        interfaceTable: InterfaceTable {
-            parameters:
-                @display("p=60,140");
-        }
-        routingTable: RoutingTable {
-            parameters:
-                IPForward = true;
-                routerId = "auto";
-                routingFile = routingFile;
-                @display("p=60,220");
-        }
         ospf: OSPFRouting {
             parameters:
-                @display("p=300,140,row");
-        }
-        networkLayer: NetworkLayer {
-            parameters:
-                @display("p=200,140;q=queue");
-            gates:
-                ifIn[sizeof(pppg)+sizeof(ethg)];
-                ifOut[sizeof(pppg)+sizeof(ethg)];
-        }
-        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
-            parameters:
-                @display("p=145,257,row,110;q=l2queue");
-        }
-        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
-            parameters:
-                @display("p=261,257,row,110;q=l2queue");
+                @display("p=465,287,row");
         }
     connections allowunconnected:
         ospf.ipOut --> networkLayer.ospfIn;
         ospf.ipIn <-- networkLayer.ospfOut;
-
-        // connections to network outside
-        for i=0..sizeof(pppg)-1 {
-            pppg[i] <--> ppp[i].phys;
-            ppp[i].upperLayerOut --> networkLayer.ifIn[i];
-            ppp[i].upperLayerIn <-- networkLayer.ifOut[i];
-        }
-
-        for i=0..sizeof(ethg)-1 {
-            ethg[i] <--> eth[i].phys;
-            eth[i].upperLayerOut --> networkLayer.ifIn[sizeof(pppg)+i];
-            eth[i].upperLayerIn <-- networkLayer.ifOut[sizeof(pppg)+i];
-        }
 }
 
