@@ -1,13 +1,20 @@
 /****************************************************************************/
 /// @file    TraCIConstants.h
-/// @author  Axel Wegener <wegener@itm.uni-luebeck.de>
+/// @author  Axel Wegener
+/// @author  Friedemann Wesner
+/// @author  Bjoern Hendriks
+/// @author  Daniel Krajzewicz
+/// @author  Thimor Bohn
+/// @author  Tino Morenz
+/// @author  Michael Behrisch
+/// @author  Christoph Sommer
 /// @date    2007/10/24
 /// @version $Id$
 ///
 /// holds codes used for TraCI
 /****************************************************************************/
 // SUMO, Simulation of Urban MObility; see http://sumo.sourceforge.net/
-// Copyright (C) 2001-2011 DLR (http://www.dlr.de/) and contributors
+// Copyright (C) 2001-2012 DLR (http://www.dlr.de/) and contributors
 /****************************************************************************/
 //
 //   This program is free software; you can redistribute it and/or modify
@@ -19,6 +26,11 @@
 #ifndef TRACICONSTANTS_H
 #define TRACICONSTANTS_H
 
+
+// ****************************************
+// VERSION
+// ****************************************
+#define TRACI_VERSION 3
 
 // ****************************************
 // COMMANDS
@@ -202,35 +214,31 @@
 // ****************************************
 // POSITION REPRESENTATIONS
 // ****************************************
-// Omit position
-#define POSITION_NONE 0x00
+// Position in geo-coordinates
+#define POSITION_LAT_LON 0x00
 // 2D cartesian coordinates
 #define POSITION_2D 0x01
-// 2.5D cartesian coordinates
-#define POSITION_2_5D 0x02
+// Position in geo-coordinates with altitude
+#define POSITION_LAT_LON_ALT 0x02
 // 3D cartesian coordinates
 #define POSITION_3D 0x03
 // Position on road map
 #define POSITION_ROADMAP 0x04
-// Position in geo-coordinates
-#define POSITION_LAT_LON 0x05
-// Position in geo-coordinates with altitude
-#define POSITION_LAT_LON_ALT 0x06
 
 
 
 // ****************************************
 // DATA TYPES
 // ****************************************
-// Boundary Box
+// Boundary Box (4 doubles)
 #define TYPE_BOUNDINGBOX 0x05
-// Polygon
+// Polygon (2*n doubles)
 #define TYPE_POLYGON 0x06
 // unsigned byte
 #define TYPE_UBYTE 0x07
 // signed byte
 #define TYPE_BYTE 0x08
-// 32 bit integer
+// 32 bit signed integer
 #define TYPE_INTEGER 0x09
 // float
 #define TYPE_FLOAT 0x0A
@@ -550,6 +558,9 @@
 // bounding box (get: simulation)
 #define VAR_NET_BOUNDING_BOX 0x7c
 
+// minimum number of expected vehicles (get: simulation)
+#define VAR_MIN_EXPECTED_VEHICLES 0x7d
+
 
 
 // add an instance (poi, polygon, vehicle, route)
@@ -557,6 +568,13 @@
 
 // remove an instance (poi, polygon)
 #define REMOVE 0x81
+
+// vehicle removal reason
+#define NOTIFICATION_TELEPORT 0
+#define NOTIFICATION_PARKING 1
+#define NOTIFICATION_ARRIVED 2
+#define NOTIFICATION_VAPORIZED 3
+#define NOTIFICATION_TELEPORT_ARRIVED 4
 
 // convert coordinates
 #define POSITION_CONVERSION 0x82

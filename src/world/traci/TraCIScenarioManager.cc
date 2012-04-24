@@ -119,10 +119,12 @@ std::string TraCIScenarioManager::receiveTraCIMessage() {
 			int receivedBytes = ::recv(MYSOCKET, reinterpret_cast<char*>(&buf2) + bytesRead, sizeof(uint32_t) - bytesRead, 0);
 			if (receivedBytes > 0) {
 				bytesRead += receivedBytes;
+			} else if (receivedBytes == 0) {
+				error("Connection to TraCI server closed unexpectedly. Check your server's log");
 			} else {
-				if (errno == EINTR) continue;
-				if (errno == EAGAIN) continue;
-				error("Could not read %d bytes from TraCI server, got only %d: %s", sizeof(uint32_t), bytesRead, strerror(sock_errno()));
+				if (sock_errno() == EINTR) continue;
+				if (sock_errno() == EAGAIN) continue;
+				error("Connection to TraCI server lost. Check your server's log. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
 			}
 		}
 		TraCIBuffer(std::string(buf2, sizeof(uint32_t))) >> msgLength;
@@ -137,10 +139,12 @@ std::string TraCIScenarioManager::receiveTraCIMessage() {
 			int receivedBytes = ::recv(MYSOCKET, reinterpret_cast<char*>(&buf) + bytesRead, bufLength - bytesRead, 0);
 			if (receivedBytes > 0) {
 				bytesRead += receivedBytes;
+			} else if (receivedBytes == 0) {
+				error("Connection to TraCI server closed unexpectedly. Check your server's log");
 			} else {
-				if (errno == EINTR) continue;
-				if (errno == EAGAIN) continue;
-				error("Could not read %d bytes from TraCI server, got only %d: %s", bufLength, bytesRead, strerror(errno));
+				if (sock_errno() == EINTR) continue;
+				if (sock_errno() == EAGAIN) continue;
+				error("Connection to TraCI server lost. Check your server's log. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
 			}
 		}
 	}
@@ -154,14 +158,32 @@ void TraCIScenarioManager::sendTraCIMessage(std::string buf) {
 		uint32_t msgLength = sizeof(uint32_t) + buf.length();
 		TraCIBuffer buf2 = TraCIBuffer();
 		buf2 << msgLength;
-		size_t sentBytes = ::send(MYSOCKET, buf2.str().c_str(), sizeof(uint32_t), 0);
-		if (sentBytes != sizeof(uint32_t)) error("Could not write %d bytes to TraCI server, sent only %d: %s", sizeof(uint32_t), sentBytes, strerror(errno));
+		uint32_t bytesWritten = 0;
+		while (bytesWritten < sizeof(uint32_t)) {
+			size_t sentBytes = ::send(MYSOCKET, buf2.str().c_str() + bytesWritten, sizeof(uint32_t) - bytesWritten, 0);
+			if (sentBytes > 0) {
+				bytesWritten += sentBytes;
+			} else {
+				if (sock_errno() == EINTR) continue;
+				if (sock_errno() == EAGAIN) continue;
+				error("Connection to TraCI server lost. Check your server's log. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
+			}
+		}
 	}
 
 	{
 		MYDEBUG << "Writing TraCI message of " << buf.length() << " bytes" << endl;
-		size_t sentBytes = ::send(MYSOCKET, buf.c_str(), buf.length(), 0);
-		if (sentBytes != buf.length()) error("Could not write %d bytes to TraCI server, sent only %d: %s", buf.length(), sentBytes, strerror(errno));
+		uint32_t bytesWritten = 0;
+		while (bytesWritten < buf.length()) {
+			size_t sentBytes = ::send(MYSOCKET, buf.c_str() + bytesWritten, buf.length() - bytesWritten, 0);
+			if (sentBytes > 0) {
+				bytesWritten += sentBytes;
+			} else {
+				if (sock_errno() == EINTR) continue;
+				if (sock_errno() == EAGAIN) continue;
+				error("Connection to TraCI server lost. Check your server's log. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
+			}
+		}
 	}
 }
 
@@ -230,7 +252,9 @@ void TraCIScenarioManager::connect() {
 	MYSOCKET = ::socket(AF_INET, SOCK_STREAM, 0);
 	if (MYSOCKET < 0) error("Could not create socket to connect to TraCI server");
 
-	if (::connect(MYSOCKET, (sockaddr const*) &address, sizeof(address)) < 0) error("Could not connect to TraCI server");
+	if (::connect(MYSOCKET, (sockaddr const*) &address, sizeof(address)) < 0) {
+		error("Could not connect to TraCI server. Make sure it is running and not behind a firewall. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
+	}
 
 	{
 		int x = 1;
@@ -269,7 +293,7 @@ void TraCIScenarioManager::init_traci() {
 
 		netbounds1 = TraCICoord(x1, y1);
 		netbounds2 = TraCICoord(x2, y2);
-		MYDEBUG << "TraCI reports network boundaries (" << x1 << ", " << y1 << ")-("<< x2 << ", " << y2 << ")" << endl;
+		MYDEBUG << "TraCI reports network boundaries (" << x1 << ", " << y1 << ")-(" << x2 << ", " << y2 << ")" << endl;
 	}
 
 	{
@@ -366,6 +390,49 @@ void TraCIScenarioManager::commandSetSpeed(std::string nodeId, double speed) {
 	ASSERT(buf.eof());
 }
 
+void TraCIScenarioManager::commandNewRoute(std::string nodeId, std::string roadId) {
+	uint8_t variableId = LANE_EDGE_ID;
+	uint8_t variableType = TYPE_STRING;
+	TraCIBuffer buf = queryTraCI(CMD_SET_VEHICLE_VARIABLE, TraCIBuffer() << variableId << nodeId << variableType << roadId);
+	ASSERT(buf.eof());
+}
+
+void TraCIScenarioManager::commandSetVehicleParking(std::string nodeId) {
+	uint8_t variableId = REMOVE;
+	uint8_t variableType = TYPE_BYTE;
+	uint8_t value = NOTIFICATION_PARKING;
+	TraCIBuffer buf = queryTraCI(CMD_SET_VEHICLE_VARIABLE, TraCIBuffer() << variableId << nodeId << variableType << value);
+	ASSERT(buf.eof());
+}
+
+std::string TraCIScenarioManager::commandGetEdgeId(std::string nodeId) {
+	return genericGetString(CMD_GET_VEHICLE_VARIABLE, nodeId, VAR_ROAD_ID, RESPONSE_GET_VEHICLE_VARIABLE);
+}
+
+std::string TraCIScenarioManager::commandGetCurrentEdgeOnRoute(std::string nodeId) {
+	return genericGetString(CMD_GET_VEHICLE_VARIABLE, nodeId, LANE_EDGE_ID, RESPONSE_GET_VEHICLE_VARIABLE);
+}
+
+std::string TraCIScenarioManager::commandGetLaneId(std::string nodeId) {
+	return genericGetString(CMD_GET_VEHICLE_VARIABLE, nodeId, VAR_LANE_ID, RESPONSE_GET_VEHICLE_VARIABLE);
+}
+
+double TraCIScenarioManager::commandGetLanePosition(std::string nodeId) {
+	return genericGetDouble(CMD_GET_VEHICLE_VARIABLE, nodeId, VAR_LANEPOSITION, RESPONSE_GET_VEHICLE_VARIABLE);
+}
+
+std::list<std::string> TraCIScenarioManager::commandGetPlannedEdgeIds(std::string nodeId) {
+	return genericGetStringList(CMD_GET_VEHICLE_VARIABLE, nodeId, VAR_EDGES, RESPONSE_GET_VEHICLE_VARIABLE);
+}
+
+std::string TraCIScenarioManager::commandGetRouteId(std::string nodeId) {
+	return genericGetString(CMD_GET_VEHICLE_VARIABLE, nodeId, VAR_ROUTE_ID, RESPONSE_GET_VEHICLE_VARIABLE);
+}
+
+std::list<std::string> TraCIScenarioManager::commandGetRouteEdgeIds(std::string routeId) {
+	return genericGetStringList(CMD_GET_ROUTE_VARIABLE, routeId, VAR_EDGES, RESPONSE_GET_ROUTE_VARIABLE);
+}
+
 void TraCIScenarioManager::commandChangeRoute(std::string nodeId, std::string roadId, double travelTime) {
 	if (travelTime >= 0) {
 		uint8_t variableId = VAR_EDGE_TRAVELTIME;
@@ -442,91 +509,15 @@ void TraCIScenarioManager::commandSetTrafficLightPhaseIndex(std::string trafficL
 }
 
 std::list<std::string> TraCIScenarioManager::commandGetPolygonIds() {
-	std::list<std::string> res;
-
-	std::string objectId = "";
-	TraCIBuffer buf = queryTraCI(CMD_GET_POLYGON_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(ID_LIST) << objectId);
-
-	// read additional RESPONSE_GET_POLYGON_VARIABLE sent back in response
-	uint8_t cmdLength; buf >> cmdLength;
-	if (cmdLength == 0) {
-		uint32_t cmdLengthX;
-		buf >> cmdLengthX;
-	}
-	uint8_t commandId; buf >> commandId;
-	ASSERT(commandId == RESPONSE_GET_POLYGON_VARIABLE);
-	uint8_t varId; buf >> varId;
-	ASSERT(varId == ID_LIST);
-	std::string polyId_r; buf >> polyId_r;
-	uint8_t resType_r; buf >> resType_r;
-	ASSERT(resType_r == TYPE_STRINGLIST);
-	uint32_t count; buf >> count;
-	for (uint32_t i = 0; i < count; i++) {
-		std::string id; buf >> id;
-		res.push_back(id);
-	}
-
-	ASSERT(buf.eof());
-
-	return res;
+	return genericGetStringList(CMD_GET_POLYGON_VARIABLE, "", ID_LIST, RESPONSE_GET_POLYGON_VARIABLE);
 }
 
 std::string TraCIScenarioManager::commandGetPolygonTypeId(std::string polyId) {
-	std::string res;
-
-	TraCIBuffer buf = queryTraCI(CMD_GET_POLYGON_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_TYPE) << polyId);
-
-	// read additional RESPONSE_GET_POLYGON_VARIABLE sent back in response
-	uint8_t cmdLength; buf >> cmdLength;
-	if (cmdLength == 0) {
-		uint32_t cmdLengthX;
-		buf >> cmdLengthX;
-	}
-	uint8_t commandId; buf >> commandId;
-	ASSERT(commandId == RESPONSE_GET_POLYGON_VARIABLE);
-	uint8_t varId; buf >> varId;
-	ASSERT(varId == VAR_TYPE);
-	std::string polyId_r; buf >> polyId_r;
-	ASSERT(polyId_r == polyId);
-	uint8_t resType_r; buf >> resType_r;
-	ASSERT(resType_r == TYPE_STRING);
-	buf >> res;
-
-	ASSERT(buf.eof());
-
-	return res;
+	return genericGetString(CMD_GET_POLYGON_VARIABLE, polyId, VAR_TYPE, RESPONSE_GET_POLYGON_VARIABLE);
 }
 
 std::list<Coord> TraCIScenarioManager::commandGetPolygonShape(std::string polyId) {
-	std::list<Coord> res;
-
-	TraCIBuffer buf = queryTraCI(CMD_GET_POLYGON_VARIABLE, TraCIBuffer() << static_cast<uint8_t>(VAR_SHAPE) << polyId);
-
-	// read additional RESPONSE_GET_POLYGON_VARIABLE sent back in response
-	uint8_t cmdLength; buf >> cmdLength;
-	if (cmdLength == 0) {
-		uint32_t cmdLengthX;
-		buf >> cmdLengthX;
-	}
-	uint8_t commandId; buf >> commandId;
-	ASSERT(commandId == RESPONSE_GET_POLYGON_VARIABLE);
-	uint8_t varId; buf >> varId;
-	ASSERT(varId == VAR_SHAPE);
-	std::string polyId_r; buf >> polyId_r;
-	ASSERT(polyId_r == polyId);
-	uint8_t resType_r; buf >> resType_r;
-	ASSERT(resType_r == TYPE_POLYGON);
-	uint8_t count; buf >> count;
-	for (uint8_t i = 0; i < count; i++) {
-		double x; buf >> x;
-		double y; buf >> y;
-		Coord pos = traci2omnet(TraCICoord(x, y));
-		res.push_back(pos);
-	}
-
-	ASSERT(buf.eof());
-
-	return res;
+	return genericGetCoordList(CMD_GET_POLYGON_VARIABLE, polyId, VAR_SHAPE, RESPONSE_GET_POLYGON_VARIABLE);
 }
 
 void TraCIScenarioManager::commandSetPolygonShape(std::string polyId, std::list<Coord> points) {
@@ -539,6 +530,57 @@ void TraCIScenarioManager::commandSetPolygonShape(std::string polyId, std::list<
 	}
 	TraCIBuffer obuf = queryTraCI(CMD_SET_POLYGON_VARIABLE, buf);
 	ASSERT(obuf.eof());
+}
+
+void TraCIScenarioManager::commandAddPolygon(std::string polyId, std::string polyType, const TraCIScenarioManager::Color& color, bool filled, int32_t layer, std::list<Coord> points) {
+	TraCIBuffer p;
+
+	p << static_cast<uint8_t>(ADD) << polyId;
+	p << static_cast<uint8_t>(TYPE_COMPOUND) << static_cast<int32_t>(5);
+	p << static_cast<uint8_t>(TYPE_STRING) << polyType;
+	p << static_cast<uint8_t>(TYPE_COLOR) << color.red << color.green << color.blue << color.alpha;
+	p << static_cast<uint8_t>(TYPE_UBYTE) << static_cast<uint8_t>(filled);
+	p << static_cast<uint8_t>(TYPE_INTEGER) << layer;
+	p << static_cast<uint8_t>(TYPE_POLYGON) << static_cast<uint8_t>(points.size());
+	for (std::list<Coord>::const_iterator i = points.begin(); i != points.end(); ++i) {
+		TraCICoord pos = omnet2traci(*i);
+		p << static_cast<double>(pos.x) << static_cast<double>(pos.y);
+	}
+
+	TraCIBuffer buf = queryTraCI(CMD_SET_POLYGON_VARIABLE, p);
+	ASSERT(buf.eof());
+}
+
+std::list<std::string> TraCIScenarioManager::commandGetLaneIds() {
+	return genericGetStringList(CMD_GET_LANE_VARIABLE, "", ID_LIST, RESPONSE_GET_LANE_VARIABLE);
+}
+
+std::list<Coord> TraCIScenarioManager::commandGetLaneShape(std::string laneId) {
+	return genericGetCoordList(CMD_GET_LANE_VARIABLE, laneId, VAR_SHAPE, RESPONSE_GET_LANE_VARIABLE);
+}
+
+std::string TraCIScenarioManager::commandGetLaneEdgeId(std::string laneId) {
+	return genericGetString(CMD_GET_LANE_VARIABLE, laneId, LANE_EDGE_ID, RESPONSE_GET_LANE_VARIABLE);
+}
+
+double TraCIScenarioManager::commandGetLaneLength(std::string laneId) {
+	return genericGetDouble(CMD_GET_LANE_VARIABLE, laneId, VAR_LENGTH, RESPONSE_GET_LANE_VARIABLE);
+}
+
+double TraCIScenarioManager::commandGetLaneMaxSpeed(std::string laneId) {
+	return genericGetDouble(CMD_GET_LANE_VARIABLE, laneId, VAR_MAXSPEED, RESPONSE_GET_LANE_VARIABLE);
+}
+
+double TraCIScenarioManager::commandGetLaneMeanSpeed(std::string laneId) {
+	return genericGetDouble(CMD_GET_LANE_VARIABLE, laneId, LAST_STEP_MEAN_SPEED, RESPONSE_GET_LANE_VARIABLE);
+}
+
+std::list<std::string> TraCIScenarioManager::commandGetJunctionIds() {
+	return genericGetStringList(CMD_GET_JUNCTION_VARIABLE, "", ID_LIST, RESPONSE_GET_JUNCTION_VARIABLE);
+}
+
+Coord TraCIScenarioManager::commandGetJunctionPosition(std::string junctionId) {
+	return genericGetCoord(CMD_GET_JUNCTION_VARIABLE, junctionId, VAR_POSITION, RESPONSE_GET_JUNCTION_VARIABLE);
 }
 
 bool TraCIScenarioManager::commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, float emitPosition, float emitSpeed) {
@@ -612,7 +654,7 @@ bool TraCIScenarioManager::isInRegionOfInterest(const TraCICoord& position, std:
 }
 
 uint32_t TraCIScenarioManager::getCurrentTimeMs() {
-	return static_cast<uint32_t>(round((simTime() * 1000).dbl()));
+	return static_cast<uint32_t>(round(simTime().dbl() * 1000));
 }
 
 void TraCIScenarioManager::executeOneTimestep() {
@@ -633,6 +675,154 @@ void TraCIScenarioManager::executeOneTimestep() {
 
 	if (!autoShutdownTriggered) scheduleAt(simTime()+updateInterval, executeOneTimestepTrigger);
 
+}
+
+
+std::string TraCIScenarioManager::genericGetString(uint8_t commandId, std::string objectId, uint8_t variableId, uint8_t responseId) {
+
+	uint8_t resultTypeId = TYPE_STRING;
+	std::string res;
+
+	TraCIBuffer buf = queryTraCI(commandId, TraCIBuffer() << variableId << objectId);
+
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId_r; buf >> commandId_r;
+	ASSERT(commandId_r == responseId);
+	uint8_t varId; buf >> varId;
+	ASSERT(varId == variableId);
+	std::string objectId_r; buf >> objectId_r;
+	ASSERT(objectId_r == objectId);
+	uint8_t resType_r; buf >> resType_r;
+	ASSERT(resType_r == resultTypeId);
+	buf >> res;
+
+	ASSERT(buf.eof());
+
+	return res;
+}
+
+Coord TraCIScenarioManager::genericGetCoord(uint8_t commandId, std::string objectId, uint8_t variableId, uint8_t responseId) {
+
+	uint8_t resultTypeId = POSITION_2D;
+	double x;
+	double y;
+
+	TraCIBuffer buf = queryTraCI(commandId, TraCIBuffer() << variableId << objectId);
+
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId_r; buf >> commandId_r;
+	ASSERT(commandId_r == responseId);
+	uint8_t varId; buf >> varId;
+	ASSERT(varId == variableId);
+	std::string objectId_r; buf >> objectId_r;
+	ASSERT(objectId_r == objectId);
+	uint8_t resType_r; buf >> resType_r;
+	ASSERT(resType_r == resultTypeId);
+	buf >> x;
+	buf >> y;
+
+	ASSERT(buf.eof());
+
+	return traci2omnet(TraCICoord(x, y));
+}
+
+double TraCIScenarioManager::genericGetDouble(uint8_t commandId, std::string objectId, uint8_t variableId, uint8_t responseId) {
+
+	uint8_t resultTypeId = TYPE_DOUBLE;
+	double res;
+
+	TraCIBuffer buf = queryTraCI(commandId, TraCIBuffer() << variableId << objectId);
+
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId_r; buf >> commandId_r;
+	ASSERT(commandId_r == responseId);
+	uint8_t varId; buf >> varId;
+	ASSERT(varId == variableId);
+	std::string objectId_r; buf >> objectId_r;
+	ASSERT(objectId_r == objectId);
+	uint8_t resType_r; buf >> resType_r;
+	ASSERT(resType_r == resultTypeId);
+	buf >> res;
+
+	ASSERT(buf.eof());
+
+	return res;
+}
+
+std::list<std::string> TraCIScenarioManager::genericGetStringList(uint8_t commandId, std::string objectId, uint8_t variableId, uint8_t responseId) {
+
+	uint8_t resultTypeId = TYPE_STRINGLIST;
+	std::list<std::string> res;
+
+	TraCIBuffer buf = queryTraCI(commandId, TraCIBuffer() << variableId << objectId);
+
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId_r; buf >> commandId_r;
+	ASSERT(commandId_r == responseId);
+	uint8_t varId; buf >> varId;
+	ASSERT(varId == variableId);
+	std::string objectId_r; buf >> objectId_r;
+	ASSERT(objectId_r == objectId);
+	uint8_t resType_r; buf >> resType_r;
+	ASSERT(resType_r == resultTypeId);
+	uint32_t count; buf >> count;
+	for (uint32_t i = 0; i < count; i++) {
+		std::string id; buf >> id;
+		res.push_back(id);
+	}
+
+	ASSERT(buf.eof());
+
+	return res;
+}
+
+std::list<Coord> TraCIScenarioManager::genericGetCoordList(uint8_t commandId, std::string objectId, uint8_t variableId, uint8_t responseId) {
+
+	uint8_t resultTypeId = TYPE_POLYGON;
+	std::list<Coord> res;
+
+	TraCIBuffer buf = queryTraCI(commandId, TraCIBuffer() << variableId << objectId);
+
+	uint8_t cmdLength; buf >> cmdLength;
+	if (cmdLength == 0) {
+		uint32_t cmdLengthX;
+		buf >> cmdLengthX;
+	}
+	uint8_t commandId_r; buf >> commandId_r;
+	ASSERT(commandId_r == responseId);
+	uint8_t varId; buf >> varId;
+	ASSERT(varId == variableId);
+	std::string objectId_r; buf >> objectId_r;
+	ASSERT(objectId_r == objectId);
+	uint8_t resType_r; buf >> resType_r;
+	ASSERT(resType_r == resultTypeId);
+	uint8_t count; buf >> count;
+	for (uint32_t i = 0; i < count; i++) {
+		double x; buf >> x;
+		double y; buf >> y;
+		Coord pos = traci2omnet(TraCICoord(x, y));
+		res.push_back(pos);
+	}
+
+	ASSERT(buf.eof());
+
+	return res;
 }
 
 Coord TraCIScenarioManager::traci2omnet(TraCICoord coord) const {
@@ -744,7 +934,7 @@ void TraCIScenarioManager::processSimSubscription(std::string objectId, TraCIBuf
 
 			}
 
-			if ((count > 0) && (count >= activeVehicleCount)) autoShutdownTriggered = true;
+			if ((count > 0) && (count >= activeVehicleCount) && autoShutdown) autoShutdownTriggered = true;
 			activeVehicleCount -= count;
 
 		} else if (variable1_resp == VAR_TIME_STEP) {

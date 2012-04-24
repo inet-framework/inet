@@ -46,6 +46,17 @@
 class INET_API TraCIScenarioManager : public cSimpleModule
 {
 	public:
+		/**
+		 * TraCI compatible color container
+		 */
+		struct Color {
+			Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha) : red(red), green(green), blue(blue), alpha(alpha) {}
+			uint8_t red;
+			uint8_t green;
+			uint8_t blue;
+			uint8_t alpha;
+		};
+
 		~TraCIScenarioManager();
 		virtual int numInitStages() const { return std::max(cSimpleModule::numInitStages(), 2); }
 		virtual void initialize(int stage);
@@ -56,6 +67,15 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		std::pair<uint32_t, std::string> commandGetVersion();
 		void commandSetSpeedMode(std::string nodeId, int32_t bitset);
 		void commandSetSpeed(std::string nodeId, double speed);
+		void commandNewRoute(std::string nodeId, std::string roadId);
+		void commandSetVehicleParking(std::string nodeId);
+		std::string commandGetEdgeId(std::string nodeId);
+		std::string commandGetCurrentEdgeOnRoute(std::string nodeId);
+		std::string commandGetLaneId(std::string nodeId);
+		double commandGetLanePosition(std::string nodeId);
+		std::list<std::string> commandGetPlannedEdgeIds(std::string nodeId);
+		std::string commandGetRouteId(std::string nodeId);
+		std::list<std::string> commandGetRouteEdgeIds(std::string routeId);
 		void commandChangeRoute(std::string nodeId, std::string roadId, double travelTime);
 		double commandDistanceRequest(Coord position1, Coord position2, bool returnDrivingDistance);
 		void commandStopNode(std::string nodeId, std::string roadId, double pos, uint8_t laneid, double radius, double waittime);
@@ -65,6 +85,15 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		std::string commandGetPolygonTypeId(std::string polyId);
 		std::list<Coord> commandGetPolygonShape(std::string polyId);
 		void commandSetPolygonShape(std::string polyId, std::list<Coord> points);
+		void commandAddPolygon(std::string polyId, std::string polyType, const Color& color, bool filled, int32_t layer, std::list<Coord> points);
+		std::list<std::string> commandGetLaneIds();
+		std::list<Coord> commandGetLaneShape(std::string laneId);
+		std::string commandGetLaneEdgeId(std::string laneId);
+		double commandGetLaneLength(std::string laneId);
+		double commandGetLaneMaxSpeed(std::string laneId);
+		double commandGetLaneMeanSpeed(std::string laneId);
+		std::list<std::string> commandGetJunctionIds();
+		Coord commandGetJunctionPosition(std::string junctionId);
 		bool commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, float emitPosition, float emitSpeed);
 
 		const std::map<std::string, cModule*>& getManagedHosts() {
@@ -246,6 +275,15 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		 * receives a message via TraCI (and strips the header)
 		 */
 		std::string receiveTraCIMessage();
+
+		/**
+		 * commonly employed technique to get string values via TraCI
+		 */
+		std::string genericGetString(uint8_t commandId, std::string objectId, uint8_t variableId, uint8_t responseId);
+		Coord genericGetCoord(uint8_t commandId, std::string objectId, uint8_t variableId, uint8_t responseId);
+		double genericGetDouble(uint8_t commandId, std::string objectId, uint8_t variableId, uint8_t responseId);
+		std::list<std::string> genericGetStringList(uint8_t commandId, std::string objectId, uint8_t variableId, uint8_t responseId);
+		std::list<Coord> genericGetCoordList(uint8_t commandId, std::string objectId, uint8_t variableId, uint8_t responseId);
 
 		/**
 		 * convert TraCI coordinates to OMNeT++ coordinates
