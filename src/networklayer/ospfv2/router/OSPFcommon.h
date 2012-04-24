@@ -23,7 +23,7 @@
 #include <functional>
 
 #include "IPv4Address.h"
-
+#include "IPvXAddressResolver.h"
 
 // global constants
 #define LS_REFRESH_TIME                     1800
@@ -189,7 +189,12 @@ inline bool OSPF::LSAKeyType_Less::operator() (OSPF::LSAKeyType leftKey, OSPF::L
 
 inline IPv4Address ipv4AddressFromAddressString(const char* charForm)
 {
-    return IPv4Address(charForm);
+    return IPvXAddressResolver().resolve(charForm, IPvXAddressResolver::ADDR_IPv4).get4();
+}
+
+inline IPv4Address ipv4NetmaskFromAddressString(const char* charForm)
+{
+    return IPvXAddressResolver().resolve(charForm, IPvXAddressResolver::ADDR_IPv4|IPvXAddressResolver::ADDR_MASK).get4();
 }
 
 inline IPv4Address ipv4AddressFromULong(unsigned long longForm)
@@ -204,7 +209,7 @@ inline unsigned long ulongFromIPv4Address(IPv4Address byteForm)
 
 inline unsigned long ulongFromAddressString(const char* charForm)
 {
-    return ulongFromIPv4Address(ipv4AddressFromAddressString(charForm));
+    return ulongFromIPv4Address(IPv4Address(charForm));
 }
 
 inline char* addressStringFromIPv4Address(char* buffer, int bufferLength, IPv4Address byteForm)

@@ -189,7 +189,8 @@ void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string
         if (nodeName == "AddressRange") {
             OSPF::IPv4AddressRange addressRange;
             addressRange.address = ipv4AddressFromAddressString((*arIt)->getAttribute("address"));
-            addressRange.mask = ipv4AddressFromAddressString((*arIt)->getAttribute("mask"));
+            addressRange.mask = ipv4NetmaskFromAddressString((*arIt)->getAttribute("mask"));
+            addressRange.address = addressRange.address & addressRange.mask;
             std::string status = (*arIt)->getAttribute("status");
             area->addAddressRange(addressRange, status == "Advertise");
         }
@@ -346,7 +347,8 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
     EV << "        loading ExternalInterface " << ifName << " ifIndex[" << ifIndex << "]\n";
 
     networkAddress.address = ipv4AddressFromAddressString(getStrAttrOrPar(externalRouteConfig, "advertisedExternalNetworkAddress"));
-    networkAddress.mask = ipv4AddressFromAddressString(getStrAttrOrPar(externalRouteConfig, "advertisedExternalNetworkMask"));
+    networkAddress.mask = ipv4NetmaskFromAddressString(getStrAttrOrPar(externalRouteConfig, "advertisedExternalNetworkMask"));
+    networkAddress.address = networkAddress.address & networkAddress.mask;
     asExternalRoute.setNetworkMask(networkAddress.mask);
 
     int routeCost = getIntAttrOrPar(externalRouteConfig, "externalInterfaceOutputCost");
@@ -424,7 +426,7 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     EV << "        loading VirtualLink to " << endPoint << "\n";
 
     intf->setType(OSPF::Interface::VIRTUAL);
-    neighbor->setNeighborID(ulongFromAddressString(endPoint.c_str()));
+    neighbor->setNeighborID(ulongFromIPv4Address(ipv4AddressFromAddressString(endPoint.c_str())));
     intf->addNeighbor(neighbor);
 
     intf->setTransitAreaID(ulongFromAddressString(getStrAttrOrPar(virtualLinkConfig, "transitAreaID")));
@@ -486,6 +488,7 @@ bool OSPFRouting::loadConfigFromXML(const char * filename)
     }
 
     cModule *myNode = findContainingNode(this);
+
     ASSERT(myNode);
     std::string nodeFullPath = myNode->getFullPath();
     std::string nodeShortenedFullPath = nodeFullPath.substr(nodeFullPath.find('.') + 1);
