@@ -55,7 +55,7 @@ simple BGPRouting like ITCPApp
 {
     parameters:
         @display("i=block/network2");
-        string bgpConfigFile;
+        xml bgpConfig;
         string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
     gates:
         input tcpIn;

@@ -117,7 +117,7 @@ private:
 
     std::vector<const char *> loadASConfig(cXMLElementList& ASConfig);
     void loadSessionConfig(cXMLElementList& sessionList, simtime_t* delayTab);
-    void loadConfigFromXML(const char* filename);
+    void loadConfigFromXML(cXMLElement *bgpConfig);
     BGP::ASID findMyAS(cXMLElementList& ASList, int& outRouterPosition);
     bool ospfExist(IRoutingTable* rtTable);
     void loadTimerConfig(cXMLElementList& timerConfig, simtime_t* delayTab);

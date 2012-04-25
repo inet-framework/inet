@@ -42,10 +42,8 @@ void BGPRouting::initialize(int stage)
         _inft = InterfaceTableAccess().get();
 
         // read BGP configuration
-        const char *fileName = par("bgpConfigFile");
-        if (*fileName == 0)
-            error("BGP configuration file name is empty");
-        loadConfigFromXML(fileName);
+        cXMLElement *bgpConfig = par("bgpConfig").xmlValue();
+        loadConfigFromXML(bgpConfig);
         createWatch("myAutonomousSystem", _myAS);
         WATCH_PTRVECTOR(_BGPRoutingTable);
     }
@@ -597,11 +595,10 @@ std::vector<const char *> BGPRouting::loadASConfig(cXMLElementList& ASConfig)
     return routerInSameASList;
 }
 
-void BGPRouting::loadConfigFromXML(const char * filename)
+void BGPRouting::loadConfigFromXML(cXMLElement *bgpConfig)
 {
-    cXMLElement* bgpConfig = ev.getXMLDocument(filename);
-    if (bgpConfig == NULL)
-        error("Cannot read BGP configuration from file: %s", filename);
+    if (strcmp(bgpConfig->getTagName(), "BGPConfig"))
+        error("Cannot read BGP configuration, unaccepted '%s' node at %s", bgpConfig->getTagName(), bgpConfig->getSourceLocation());
 
     // load bgp timer parameters informations
     simtime_t delayTab[BGP::NB_TIMERS];
