@@ -88,9 +88,6 @@ void OSPFRouting::initialize(int stage)
  */
 void OSPFRouting::handleMessage(cMessage *msg)
 {
-//    if (simulation.getEventNumber() == 90591) {
-//        __asm int 3;
-//    }
     ospfRouter->getMessageHandler()->messageReceived(msg);
 }
 
