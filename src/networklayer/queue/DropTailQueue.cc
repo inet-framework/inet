@@ -29,7 +29,7 @@ void DropTailQueue::initialize()
 {
     PassiveQueueBase::initialize();
 
-    queue.setName("l2queue");
+    queue.setName(par("queueName"));
 
     //statistics
     queueLengthSignal = registerSignal("queueLength");

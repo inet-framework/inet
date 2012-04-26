@@ -91,6 +91,7 @@ simple REDQueue like IOutputQueue
         double maxth = default(50);  // maximum threshold for avg queue length (=buffer capacity)
         double maxp = default(0.02);  // maximum value for pb
         double pkrate = default(150);  // arrivals per sec (see comment above)
+        string queueName = default("l2queue"); // name of the inner cQueue object, used in the 'q' tag of the display string
         @display("i=block/queue");
 
         @signal[enqueuePk](type=cMessage);

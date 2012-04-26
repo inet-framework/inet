@@ -30,7 +30,7 @@ simsignal_t REDQueue::earlyDropPkByQueueSignal = SIMSIGNAL_NULL;
 void REDQueue::initialize()
 {
     PassiveQueueBase::initialize();
-    queue.setName("l2queue");
+    queue.setName(par("queueName"));
 
     //statistics
     queueLengthSignal = registerSignal("queueLength");
