@@ -20,11 +20,9 @@
 
 package inet.linklayer.ethernet;
 
-import inet.networklayer.queue.IOutputQueue;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IEtherMAC;
 import inet.base.IHook;
-
 
 //
 // Ethernet network interface. Complements ~EtherMAC and ~EtherEncap
@@ -36,7 +34,7 @@ module EthernetInterface like IWiredNic
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         bool useSNAP = default(false);  // use EtherFrameWithSNAP instead EthernetIIFrame
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
-        string queueType = default("EthDropTailQoSQueue"); // ~DropTailQueue, ~EthDropTailQoSQueue, or empty for use internal queue
+        string queueType = default(""); // ~DropTailQueue, or a Diffserv queue; set to "" for use of an internal queue
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
         @display("i=block/ifcard;bgl=2");
@@ -47,8 +45,9 @@ module EthernetInterface like IWiredNic
     submodules:
         outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0;
         inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0;
-        queue: <queueType> like IOutputQueue if queueType != "" {
+        queue: EtherQoSQueue if queueType != "" {
             parameters:
+                dataQueueType = queueType;
                 @display("p=53,196;q=l2queue");
         }
         mac: <macType> like IEtherMAC {

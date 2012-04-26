@@ -19,26 +19,22 @@
 #ifndef __INET_ETHERFRAMECLASSIFIER_H
 #define __INET_ETHERFRAMECLASSIFIER_H
 
-#include "IQoSClassifier.h"
+#include "INETDefs.h"
 
 /**
- * Ethernet Frame classifier:
- * The PAUSE frames have higher priority than other frames
+ * Ethernet Frame classifier.
+ *
+ * Ethernet frames are classified as:
+ * - PAUSE frames
+ * - others
  */
-class INET_API EtherFrameClassifier : public IQoSClassifier
+class INET_API EtherFrameClassifier : public cSimpleModule
 {
   public:
     /**
-     * Returns the largest value plus one classifyPacket() returns.
+     * Sends the incoming packet to either pauseOut or defaultOut gate.
      */
-    virtual int getNumQueues();
-
-    /**
-     * The method should return the priority (the index of subqueue)
-     * for the given packet, a value between 0 and getNumQueues()-1
-     * (inclusive).
-     */
-    virtual int classifyPacket(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif

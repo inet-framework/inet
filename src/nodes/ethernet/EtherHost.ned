@@ -18,8 +18,8 @@
 
 package inet.nodes.ethernet;
 
-import inet.networklayer.queue.IOutputQueue;
 import inet.linklayer.ethernet.EtherLLC;
+import inet.linklayer.ethernet.EtherQoSQueue;
 import inet.linklayer.IEtherMAC;
 import inet.applications.ethernet.EtherAppSrv;
 import inet.applications.ethernet.EtherAppCli;
@@ -60,8 +60,9 @@ module EtherHost
                 upperLayerIn[2];
                 upperLayerOut[2];
         }
-        queue: <queueType> like IOutputQueue if queueType != "" {
+        queue: EtherQoSQueue if queueType != "" {
             parameters:
+                dataQueueType = queueType;
                 @display("p=99,201;q=l2queue");
         }
         mac: <macType> like IEtherMAC {

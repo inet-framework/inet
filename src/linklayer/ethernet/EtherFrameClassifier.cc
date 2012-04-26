@@ -21,17 +21,13 @@
 #include "EtherFrame_m.h"
 
 
-Register_Class(EtherFrameClassifier);
+Define_Module(EtherFrameClassifier);
 
-int EtherFrameClassifier::getNumQueues()
-{
-    return 2;
-}
-
-int EtherFrameClassifier::classifyPacket(cMessage *msg)
+void EtherFrameClassifier::handleMessage(cMessage *msg)
 {
     if (dynamic_cast<EtherPauseFrame*>(msg) != NULL)
-        return 0; // highest priority
-    return 1; // lowest priority
+        send(msg, "pauseOut");
+    else
+        send(msg, "defaultOut");
 }
 

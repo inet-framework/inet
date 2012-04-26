@@ -19,8 +19,8 @@ package inet.nodes.ethernet;
 
 import inet.linklayer.ethernet.EtherEncap;
 import inet.applications.ethernet.EtherTrafGen;
-import inet.networklayer.queue.IOutputQueue;
 import inet.linklayer.ethernet.EtherLLC;
+import inet.linklayer.ethernet.EtherQoSQueue;
 import inet.linklayer.IEtherMAC;
 import inet.applications.ethernet.EtherAppSrv;
 import inet.applications.ethernet.EtherAppCli;
@@ -50,8 +50,10 @@ module EtherHost2
         encap: EtherEncap {
             @display("p=155,146");
         }
-        queue: <queueType> like IOutputQueue if queueType != "" {
-            @display("p=87,207;q=l2queue");
+        queue: EtherQoSQueue if queueType != "" {
+            parameters:
+                dataQueueType = queueType;
+                @display("p=87,207;q=l2queue");
         }
         mac: <macType> like IEtherMAC {
             queueModule = (queueType == "" ? "" : "queue");
