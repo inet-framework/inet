@@ -40,6 +40,7 @@ class OSPFRouting :  public cSimpleModule
 
     int getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
     const char *getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
+    const char *getRequiredAttribute(const cXMLElement& node, const char *attr) const;
 
     int   resolveInterfaceName(const std::string& name) const;
     void  getAreaListFromXML(const cXMLElement& routerNode, std::map<std::string, int>& areaList) const;

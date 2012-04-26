@@ -173,7 +173,7 @@ void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string
 
     cXMLElement* areaConfig = asConfig.getElementByPath(areaXPath.c_str());
     if (areaConfig == NULL) {
-        error("No configuration for Area ID: %s", areaID.c_str());
+        error("No configuration for Area ID: %s at %s", areaID.c_str(), asConfig.getSourceLocation());
     }
     else {
         EV << "    loading info for Area id = " << areaID << "\n";
@@ -185,17 +185,17 @@ void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string
         std::string nodeName = (*arIt)->getTagName();
         if (nodeName == "AddressRange") {
             OSPF::IPv4AddressRange addressRange;
-            addressRange.address = ipv4AddressFromAddressString((*arIt)->getAttribute("address"));
-            addressRange.mask = ipv4NetmaskFromAddressString((*arIt)->getAttribute("mask"));
+            addressRange.address = ipv4AddressFromAddressString(getRequiredAttribute(**arIt, "address"));
+            addressRange.mask = ipv4NetmaskFromAddressString(getRequiredAttribute(**arIt, "mask"));
             addressRange.address = addressRange.address & addressRange.mask;
-            std::string status = (*arIt)->getAttribute("status");
+            std::string status = getRequiredAttribute(**arIt, "status");
             area->addAddressRange(addressRange, status == "Advertise");
         }
         else if (nodeName == "Stub") {
             if (areaID == "0.0.0.0")
                 error("The backbone cannot be configured as a stub at %s", (*arIt)->getSourceLocation());
             area->setExternalRoutingCapability(false);
-            area->setStubDefaultCost(atoi((*arIt)->getAttribute("defaultCost")));
+            area->setStubDefaultCost(atoi(getRequiredAttribute(**arIt, "defaultCost")));
         }
         else
             error("Invalid node '%s' at %s", nodeName.c_str(), (*arIt)->getSourceLocation());
@@ -220,6 +220,16 @@ const char *OSPFRouting::getStrAttrOrPar(const cXMLElement& ifConfig, const char
     return par(name).stringValue();
 }
 
+const char *OSPFRouting::getRequiredAttribute(const cXMLElement& node, const char *attr) const
+{
+    const char *s = node.getAttribute(attr);
+    if (!(s && *s))
+        error("required attribute %s of <%s> missing at %s",
+              attr, node.getTagName(), node.getSourceLocation());
+    return s;
+}
+
+
 /**
  * Loads OSPF configuration information for a router interface.
  * Handles POINTTOPOINT, BROADCAST, NBMA and POINTTOMULTIPOINT interfaces.
@@ -228,7 +238,7 @@ const char *OSPFRouting::getStrAttrOrPar(const cXMLElement& ifConfig, const char
 void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
 {
     OSPF::Interface* intf = new OSPF::Interface;
-    std::string ifName = ifConfig.getAttribute("ifName");
+    std::string ifName = getRequiredAttribute(ifConfig, "ifName");
     int ifIndex = resolveInterfaceName(ifName);
     std::string interfaceType = ifConfig.getTagName();
 
@@ -245,7 +255,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         intf->setType(OSPF::Interface::POINTTOMULTIPOINT);
     } else {
         delete intf;
-        error("Loading %s ifIndex[%d] aborted", interfaceType.c_str(), ifIndex);
+        error("Loading %s ifIndex[%d] aborted at %s", interfaceType.c_str(), ifIndex, ifConfig.getSourceLocation());
     }
 
     OSPF::AreaID areaID = ulongFromAddressString(getStrAttrOrPar(ifConfig, "areaID"));
@@ -272,7 +282,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
     } else if (authenticationType == "NullType") {
         intf->setAuthenticationType(OSPF::NULL_TYPE);
     } else {
-        throw cRuntimeError("Invalid AuthenticationType '%s'", authenticationType.c_str());
+        throw cRuntimeError("Invalid AuthenticationType '%s' at %s", authenticationType.c_str(), ifConfig.getSourceLocation());
     }
 
     std::string key = getStrAttrOrPar(ifConfig, "authenticationKey");
@@ -299,8 +309,8 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
                 std::string neighborNodeName = (*neighborIt)->getTagName();
                 if (neighborNodeName == "NBMANeighbor") {
                     OSPF::Neighbor* neighbor = new OSPF::Neighbor;
-                    neighbor->setAddress(ipv4AddressFromAddressString((*neighborIt)->getAttribute("networkInterfaceAddress")));
-                    neighbor->setPriority(atoi((*neighborIt)->getAttribute("neighborPriority")));
+                    neighbor->setAddress(ipv4AddressFromAddressString(getRequiredAttribute(**neighborIt, "networkInterfaceAddress")));
+                    neighbor->setPriority(atoi(getRequiredAttribute(**neighborIt, "neighborPriority")));
                     intf->addNeighbor(neighbor);
                 }
             }
@@ -324,7 +334,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         intf->processEvent(OSPF::Interface::INTERFACE_UP); // notification should come from the blackboard...
     } else {
         delete intf;
-        error("Loading %s ifIndex[%d] in Area %d aborted", interfaceType.c_str(), ifIndex, areaID);
+        error("Loading %s ifIndex[%d] in Area %d aborted at %s", interfaceType.c_str(), ifIndex, areaID, ifConfig.getSourceLocation());
     }
 }
 
@@ -335,7 +345,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
  */
 void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
 {
-    std::string ifName = externalRouteConfig.getAttribute("ifName");
+    std::string ifName = getRequiredAttribute(externalRouteConfig, "ifName");
     int ifIndex = resolveInterfaceName(ifName);
     OSPFASExternalLSAContents asExternalRoute;
     OSPF::RoutingTableEntry externalRoutingEntry; // only used here to keep the path cost calculation in one place
@@ -343,8 +353,8 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
 
     EV << "        loading ExternalInterface " << ifName << " ifIndex[" << ifIndex << "]\n";
 
-    networkAddress.address = ipv4AddressFromAddressString(getStrAttrOrPar(externalRouteConfig, "advertisedExternalNetworkAddress"));
-    networkAddress.mask = ipv4NetmaskFromAddressString(getStrAttrOrPar(externalRouteConfig, "advertisedExternalNetworkMask"));
+    networkAddress.address = ipv4AddressFromAddressString(getRequiredAttribute(externalRouteConfig, "advertisedExternalNetworkAddress"));
+    networkAddress.mask = ipv4NetmaskFromAddressString(getRequiredAttribute(externalRouteConfig, "advertisedExternalNetworkMask"));
     networkAddress.address = networkAddress.address & networkAddress.mask;
     asExternalRoute.setNetworkMask(networkAddress.mask);
 
@@ -361,21 +371,21 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
         externalRoutingEntry.setCost(routeCost);
         externalRoutingEntry.setPathType(OSPF::RoutingTableEntry::TYPE1_EXTERNAL);
     } else {
-        throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface %s", ifName.c_str());
+        throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at ", ifName.c_str(), externalRouteConfig.getSourceLocation());
     }
 
-    asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(getStrAttrOrPar(externalRouteConfig, "forwardingAddress")));
+    asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(getRequiredAttribute(externalRouteConfig, "forwardingAddress")));
 
-    std::string externalRouteTag = getStrAttrOrPar(externalRouteConfig, "externalRouteTag");
-    char        externalRouteTagValue[4];
-    memset(externalRouteTagValue, 0, 4 * sizeof(char));
-    int externalRouteTagLength = externalRouteTag.length();
-    if ((externalRouteTagLength > 4) && (externalRouteTagLength <= 10) && (externalRouteTagLength % 2 == 0) && (externalRouteTag[0] == '0') && (externalRouteTag[1] == 'x')) {
-        for (int i = externalRouteTagLength; (i > 2); i -= 2) {
-            externalRouteTagValue[(i - 2) / 2] = hexPairToByte(externalRouteTag[i - 1], externalRouteTag[i]);
-        }
+    long externalRouteTagVal = 0;   // default value
+    const char *externalRouteTag = externalRouteConfig.getAttribute("externalRouteTag");
+    if (externalRouteTag && *externalRouteTag)
+    {
+        char *endp = NULL;
+        externalRouteTagVal = strtol(externalRouteTag, &endp, 0);
+        if(*endp)
+            throw cRuntimeError("Invalid externalRouteTag='%s' at %s", externalRouteTag, externalRouteConfig.getSourceLocation());
     }
-    asExternalRoute.setExternalRouteTag((externalRouteTagValue[0] << 24) + (externalRouteTagValue[1] << 16) + (externalRouteTagValue[2] << 8) + externalRouteTagValue[3]);
+    asExternalRoute.setExternalRouteTag(externalRouteTagVal);
 
     // add the external route to the OSPF data structure
     ospfRouter->updateExternalRoute(networkAddress.address, asExternalRoute, ifIndex);
@@ -391,13 +401,13 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
     OSPF::HostRouteParameters hostParameters;
     OSPF::AreaID hostArea;
 
-    std::string ifName = hostRouteConfig.getAttribute("ifName");
+    std::string ifName = getRequiredAttribute(hostRouteConfig, "ifName");
     hostParameters.ifIndex = resolveInterfaceName(ifName);
 
     EV << "        loading HostInterface " << ifName << " ifIndex[" << static_cast<short> (hostParameters.ifIndex) << "]\n";
 
     hostArea = ulongFromAddressString(getStrAttrOrPar(hostRouteConfig, "areaID"));
-    hostParameters.address = ipv4AddressFromAddressString(getStrAttrOrPar(hostRouteConfig, "attachedHost"));
+    hostParameters.address = ipv4AddressFromAddressString(getRequiredAttribute(hostRouteConfig, "attachedHost"));
     hostParameters.linkCost = getIntAttrOrPar(hostRouteConfig, "linkCost");
 
     // add the host route to the OSPF data structure.
@@ -405,7 +415,7 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
     if (area != NULL) {
         area->addHostRoute(hostParameters);
     } else {
-        error("Loading HostInterface ifIndex[%d] in Area %d aborted", hostParameters.ifIndex, hostArea);
+        error("Loading HostInterface ifIndex[%d] in Area %d aborted at %s", hostParameters.ifIndex, hostArea, hostRouteConfig.getSourceLocation());
     }
 }
 
@@ -417,7 +427,7 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
 void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 {
     OSPF::Interface* intf = new OSPF::Interface;
-    std::string endPoint = getStrAttrOrPar(virtualLinkConfig, "endPointRouterID");
+    std::string endPoint = getRequiredAttribute(virtualLinkConfig, "endPointRouterID");
     OSPF::Neighbor* neighbor = new OSPF::Neighbor;
 
     EV << "        loading VirtualLink to " << endPoint << "\n";
@@ -426,7 +436,7 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     neighbor->setNeighborID(ulongFromIPv4Address(ipv4AddressFromAddressString(endPoint.c_str())));
     intf->addNeighbor(neighbor);
 
-    intf->setTransitAreaID(ulongFromAddressString(getStrAttrOrPar(virtualLinkConfig, "transitAreaID")));
+    intf->setTransitAreaID(ulongFromAddressString(getRequiredAttribute(virtualLinkConfig, "transitAreaID")));
 
     intf->setRetransmissionInterval(getIntAttrOrPar(virtualLinkConfig, "retransmissionInterval"));
 
@@ -444,7 +454,7 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     } else if (authenticationType == "NullType") {
         intf->setAuthenticationType(OSPF::NULL_TYPE);
     } else {
-        throw cRuntimeError("Invalid AuthenticationType '%s'", authenticationType.c_str());
+        throw cRuntimeError("Invalid AuthenticationType '%s' at %s", authenticationType.c_str(), virtualLinkConfig.getSourceLocation());
     }
 
     std::string key = getStrAttrOrPar(virtualLinkConfig, "authenticationKey");
@@ -466,7 +476,7 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
         backbone->addInterface(intf);
     } else {
         delete intf;
-        error("Loading VirtualLink to %s through Area %d aborted", endPoint.c_str(), intf->getAreaID());
+        error("Loading VirtualLink to %s through Area %d aborted at ", endPoint.c_str(), intf->getAreaID(), virtualLinkConfig.getSourceLocation());
     }
 }
 
@@ -492,9 +502,7 @@ bool OSPFRouting::loadConfigFromXML(cXMLElement *asConfig)
     cXMLElementList routers = asConfig->getElementsByTagName("Router");
     cXMLElement* routerNode = NULL;
     for (cXMLElementList::iterator routerIt = routers.begin(); routerIt != routers.end(); routerIt++) {
-        const char* nodeName = (*routerIt)->getAttribute("name");
-        if (!nodeName || !*nodeName)
-            error("attribute 'name' missing from 'Router' node at %s", (*routerIt)->getSourceLocation());
+        const char* nodeName = getRequiredAttribute(*(*routerIt), "name");
         inet::PatternMatcher pattern(nodeName, true, true, true);
         if (pattern.matches(nodeFullPath.c_str()) || pattern.matches(nodeShortenedFullPath.c_str()))   // match Router@name and fullpath of my node
         {

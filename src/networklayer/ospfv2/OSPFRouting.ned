@@ -29,19 +29,13 @@ simple OSPFRouting
         int interfaceOutputCost = default(1);
         int interfaceTransmissionDelay = default(1);
         int routerPriority = default(1);
-        string authenticationType = default("NullType");
-        string authenticationKey = default("0x00");
-        string areaID = default("0.0.0.0");
-        string advertisedExternalNetworkAddress = default("");
-        string advertisedExternalNetworkMask = default("");
+        string authenticationType = default("NullType");    // SimplePasswordType|CrytographicType|NullType
+        string authenticationKey = default("0x00");         // 0xnn..nn
+        int linkCost = default(1);
+
+        string areaID = default("");
         int externalInterfaceOutputCost = default(1);
         string externalInterfaceOutputType = default("");  // Type1|Type2
-        string externalRouteTag = default("0x00");
-        string forwardingAddress = default("");
-        string attachedHost = default("");
-        int linkCost = default(1);
-        string endPointRouterID = default("");
-        string transitAreaID = default("");
 
         @display("i=block/network2");
     gates:
