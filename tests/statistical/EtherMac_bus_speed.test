@@ -21,7 +21,7 @@ import ned.DatarateChannel;
 module EtherHostQ extends EtherHost
 {
     parameters:
-        queueType = "EthDropTailQoSQueue";
+        queueType = "DropTailQueue";
 }
 
 //

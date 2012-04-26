@@ -24,7 +24,7 @@ import inet.nodes.ethernet.EtherHost;
 module EtherHostFullDuplexQ extends EtherHost
 {
     parameters:
-        queueType = "EthDropTailQoSQueue";
+        queueType = "DropTailQueue";
         macType = "EtherMACFullDuplex";
 }
 
@@ -110,7 +110,7 @@ network = SpeedTest
 *.host_10_F_*.cli.sendInterval   = 0.5ms            # 10.000 / speed [ / 2 when halfduplex]
 
 **.mac.address = "auto"
-**.queue.frameCapacity = 1000
+**.queue.dataQueue.frameCapacity = 1000
 
 # Check: "rx channel idle (%)" <= 2.0
 # Check: "rx channel utilization (%)" >= 98.0

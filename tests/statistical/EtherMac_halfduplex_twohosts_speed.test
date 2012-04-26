@@ -23,7 +23,7 @@ import inet.nodes.ethernet.EtherHost;
 module EtherHostQ extends EtherHost
 {
     parameters:
-        queueType = "EthDropTailQoSQueue";
+        queueType = "DropTailQueue";
         macType = "EtherMAC";
         mac.duplexMode = false;
 }
@@ -109,7 +109,7 @@ network = SpeedTest
 *.host_10_H_*.cli.sendInterval   = 1.0ms            # 10.000 / speed [ / 2 when halfduplex]
 
 **.mac.address = "auto"
-**.queue.frameCapacity = 1000
+**.queue.dataQueue.frameCapacity = 1000
 
 %#--------------------------------------------------------------------------------------------------------------
 %postprocess-script: check.r

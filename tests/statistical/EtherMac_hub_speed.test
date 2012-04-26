@@ -21,7 +21,7 @@ import inet.linklayer.ethernet.EtherHub;
 module EtherHostQ extends EtherHost
 {
     parameters:
-        queueType = "EthDropTailQoSQueue";
+        queueType = "DropTailQueue";
 }
 
 //

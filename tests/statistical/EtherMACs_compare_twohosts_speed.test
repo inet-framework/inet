@@ -40,12 +40,12 @@ network CompareMACs
         }
         host_eq_1_F_A: EtherHost {
             parameters:
-                queueType = "EthDropTailQoSQueue";
+                queueType = "DropTailQueue";
                 @display("p=70,140");
         }
         host_eq_1_F_B: EtherHost {
             parameters:
-                queueType = "EthDropTailQoSQueue";
+                queueType = "DropTailQueue";
                 @display("p=210,140");
         }
         host_iq_2_F_A: EtherHost {
@@ -60,13 +60,13 @@ network CompareMACs
         }
         host_eq_2_F_A: EtherHost {
             parameters:
-                queueType = "EthDropTailQoSQueue";
+                queueType = "DropTailQueue";
                 macType = "EtherMACFullDuplex";
                 @display("p=70,280");
         }
         host_eq_2_F_B: EtherHost {
             parameters:
-                queueType = "EthDropTailQoSQueue";
+                queueType = "DropTailQueue";
                 macType = "EtherMACFullDuplex";
                 @display("p=210,280");
         }
@@ -115,7 +115,7 @@ network = CompareMACs
 
 **.mac.address = "auto"
 *.host_iq_*.mac.txQueueLimit = 100000
-*.host_eq_*.queue.frameCapacity = 100
+*.host_eq_*.queue.dataQueue.frameCapacity = 100
 
 %#--------------------------------------------------------------------------------------------------------------
 %postprocess-script: check.r
@@ -139,7 +139,7 @@ cat("\nOMNETPP TEST RESULT:\n")
 
 cat("\nCHECK SENT PACKETS:\n")
 
-x <- dataset$scalars[dataset$scalars$name == "sentPkBytes:count",]
+x <- dataset$scalars[dataset$scalars$name == "sentPk:sum(packetBytes)",]
 xx <- x[grep("_F_A.cli$",x$module)==1,]
 
 if(length(xx$value) != linecount)

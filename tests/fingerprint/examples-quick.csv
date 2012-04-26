@@ -1,8 +1,8 @@
 # workingdir,                        args,                                          simtimelimit,    fingerprint
-/examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                1s,              b911-a288
-/examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                1s,              d8f4-7434
-/examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                1s,              753e-97fc
-/examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0,                1s,              9460-7beb
+/examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                1s,              3019-7538
+/examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                1s,              005a-d8e2
+/examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                1s,              d2b2-3f8e
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0,                1s,              45de-8912
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1s,              d80e-d966
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            1s,              2518-ae6a
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            1s,              2656-9ced

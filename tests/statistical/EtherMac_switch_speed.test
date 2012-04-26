@@ -24,7 +24,7 @@ import inet.nodes.ethernet.EtherSwitch;
 module EtherHostQ extends EtherHost
 {
     parameters:
-        queueType = "EthDropTailQoSQueue";
+        queueType = "DropTailQueue";
 }
 
 

@@ -35,7 +35,7 @@ cmdenv-express-mode=false
 
 # Ethernet NIC configuration
 **.eth[*].queueType = "DropTailQueue" # in routers
-**.eth[*].queue.frameCapacity = 10  # in routers
+**.eth[*].queue.dataQueue.frameCapacity = 10  # in routers
 **.eth[*].mac.duplexEnabled = true
 
 %contains: stdout
