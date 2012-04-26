@@ -250,6 +250,8 @@ void InterfaceTable::updateLinkDisplayString(InterfaceEntry *entry)
     {
         cModule *host = getParentModule();
         cGate *outputGate = host->gate(outputGateId);
+        if (!outputGate->getChannel())
+            return;
         cDisplayString& displayString = outputGate->getDisplayString();
         char buf[128];
 #ifdef WITH_IPv4
