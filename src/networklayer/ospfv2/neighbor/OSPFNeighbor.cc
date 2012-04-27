@@ -15,13 +15,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <memory.h>
+
 #include "OSPFNeighbor.h"
-#include "OSPFNeighborState.h"
-#include "OSPFNeighborStateDown.h"
+
+#include "IPv4Datagram_m.h"
 #include "MessageHandler.h"
 #include "OSPFArea.h"
+#include "OSPFNeighborState.h"
+#include "OSPFNeighborStateDown.h"
 #include "OSPFRouter.h"
-#include <memory.h>
+
 
 // FIXME!!! Should come from a global unique number generator module.
 unsigned long OSPF::Neighbor::ddSequenceNumberInitSeed = 0;
@@ -189,7 +193,7 @@ void OSPF::Neighbor::sendDatabaseDescriptionPacket(bool init)
 
     ddPacket->setDdSequenceNumber(ddSequenceNumber);
 
-    long maxPacketSize = ((IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_DD_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > parentInterface->getMTU()) ?
+    long maxPacketSize = ((IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH + OSPF_DD_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > parentInterface->getMTU()) ?
                           IPV4_DATAGRAM_LENGTH :
                           parentInterface->getMTU();
 
@@ -198,7 +202,7 @@ void OSPF::Neighbor::sendDatabaseDescriptionPacket(bool init)
     } else {
         // delete included LSAs from summary list
         // (they are still in lastTransmittedDDPacket)
-        long packetSize = IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_DD_HEADER_LENGTH;
+        long packetSize = IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH + OSPF_DD_HEADER_LENGTH;
         while ((!databaseSummaryList.empty()) && (packetSize <= (maxPacketSize - OSPF_LSA_HEADER_LENGTH))) {
             unsigned long headerCount = ddPacket->getLsaHeadersArraySize();
             OSPFLSAHeader* lsaHeader = *(databaseSummaryList.begin());
@@ -321,14 +325,14 @@ void OSPF::Neighbor::sendLinkStateRequestPacket()
         requestPacket->setAuthentication(i, authKey.bytes[i]);
     }
 
-    long maxPacketSize = ((IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_REQUEST_LENGTH) > parentInterface->getMTU()) ?
+    long maxPacketSize = ((IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH + OSPF_REQUEST_LENGTH) > parentInterface->getMTU()) ?
                           IPV4_DATAGRAM_LENGTH :
                           parentInterface->getMTU();
 
     if (linkStateRequestList.empty()) {
         requestPacket->setRequestsArraySize(0);
     } else {
-        long packetSize = IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH;
+        long packetSize = IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH;
         std::list<OSPFLSAHeader*>::iterator it = linkStateRequestList.begin();
 
         while ((it != linkStateRequestList.end()) && (packetSize <= (maxPacketSize - OSPF_REQUEST_LENGTH))) {
@@ -596,7 +600,7 @@ void OSPF::Neighbor::retransmitUpdatePacket()
 
     bool packetFull = false;
     unsigned short lsaCount = 0;
-    unsigned long packetLength = IPV4_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH;
+    unsigned long packetLength = IP_MAX_HEADER_BYTES + OSPF_LSA_HEADER_LENGTH;
     std::list<OSPFLSA*>::iterator it = linkStateRetransmissionList.begin();
 
     while (!packetFull && (it != linkStateRetransmissionList.end())) {

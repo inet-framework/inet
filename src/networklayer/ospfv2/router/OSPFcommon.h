@@ -39,7 +39,6 @@
 #define MAX_SEQUENCE_NUMBER                 2147483647
 
 #define VIRTUAL_LINK_TTL                    32
-#define IPV4_HEADER_LENGTH                  60
 #define IPV4_DATAGRAM_LENGTH                65536
 #define OSPF_HEADER_LENGTH                  24
 #define OSPF_LSA_HEADER_LENGTH              20

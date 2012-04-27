@@ -15,15 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <vector>
+#include <memory.h>
+
 #include "OSPFInterface.h"
+
 #include "OSPFInterfaceStateDown.h"
 #include "InterfaceTableAccess.h"
+#include "IPv4Datagram_m.h"
 #include "IPv4InterfaceData.h"
 #include "MessageHandler.h"
 #include "OSPFArea.h"
 #include "OSPFRouter.h"
-#include <vector>
-#include <memory.h>
+
 
 OSPF::Interface::Interface(OSPF::Interface::OSPFInterfaceType ifType) :
     interfaceType(ifType),
@@ -518,7 +522,7 @@ void OSPF::Interface::addDelayedAcknowledgement(OSPFLSAHeader& lsaHeader)
 void OSPF::Interface::sendDelayedAcknowledgements()
 {
     OSPF::MessageHandler* messageHandler = parentArea->getRouter()->getMessageHandler();
-    long maxPacketSize = ((IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > mtu) ? IPV4_DATAGRAM_LENGTH : mtu;
+    long maxPacketSize = ((IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > mtu) ? IPV4_DATAGRAM_LENGTH : mtu;
 
     for (std::map<IPv4Address, std::list<OSPFLSAHeader>, OSPF::IPv4Address_Less>::iterator delayIt = delayedAcknowledgements.begin();
          delayIt != delayedAcknowledgements.end();
@@ -528,7 +532,7 @@ void OSPF::Interface::sendDelayedAcknowledgements()
         if (ackCount > 0) {
             while (!(delayIt->second.empty())) {
                 OSPFLinkStateAcknowledgementPacket* ackPacket = new OSPFLinkStateAcknowledgementPacket();
-                long packetSize = IPV4_HEADER_LENGTH + OSPF_HEADER_LENGTH;
+                long packetSize = IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH;
 
                 ackPacket->setType(LINKSTATE_ACKNOWLEDGEMENT_PACKET);
                 ackPacket->setRouterID(IPv4Address(parentArea->getRouter()->getRouterID()));
