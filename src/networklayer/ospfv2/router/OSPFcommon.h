@@ -42,6 +42,7 @@
 #define IPV4_DATAGRAM_LENGTH                65536
 #define OSPF_HEADER_LENGTH                  24
 #define OSPF_LSA_HEADER_LENGTH              20
+#define OSPF_HELLO_HEADER_LENGTH            20
 #define OSPF_DD_HEADER_LENGTH               8
 #define OSPF_REQUEST_LENGTH                 12
 #define OSPF_ROUTERLSA_HEADER_LENGTH        4

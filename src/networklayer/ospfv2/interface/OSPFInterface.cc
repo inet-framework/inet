@@ -165,7 +165,7 @@ void OSPF::Interface::sendHelloPacket(IPv4Address destination, short ttl)
         helloPacket->setNeighbor(k, neighbors[k]);
     }
 
-    helloPacket->setPacketLength(0); // TODO: Calculate correct length
+    helloPacket->setPacketLength(OSPF_HEADER_LENGTH + OSPF_HELLO_HEADER_LENGTH + initedNeighborCount*4);
     helloPacket->setChecksum(0); // TODO: Calculate correct cheksum(16-bit one's complement of the entire packet)
 
     parentArea->getRouter()->getMessageHandler()->sendPacket(helloPacket, destination, ifIndex, ttl);
@@ -187,7 +187,7 @@ void OSPF::Interface::sendLSAcknowledgement(OSPFLSAHeader* lsaHeader, IPv4Addres
     lsAckPacket->setLsaHeadersArraySize(1);
     lsAckPacket->setLsaHeaders(0, *lsaHeader);
 
-    lsAckPacket->setPacketLength(0); // TODO: Calculate correct length
+    lsAckPacket->setPacketLength(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH); // TODO: Calculate correct length
     lsAckPacket->setChecksum(0); // TODO: Calculate correct cheksum(16-bit one's complement of the entire packet)
 
     int ttl = (interfaceType == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
