@@ -1,0 +1,6 @@
+OSPFv2 Routing
+
+This example simulation has been used to test the OSPF model during
+development.
+
+Testing: cut off a connection and reconnect it later.
