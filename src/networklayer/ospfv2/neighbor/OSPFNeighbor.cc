@@ -227,7 +227,7 @@ void OSPF::Neighbor::sendDatabaseDescriptionPacket(bool init)
     }
     ddPacket->setDdOptions(ddOptions);
 
-    ddPacket->setPacketLength(packetSize);
+    ddPacket->setByteLength(packetSize);
     ddPacket->setChecksum(0); // TODO: Calculate correct cheksum(16-bit one's complement of the entire packet)
 
     OSPF::MessageHandler* messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
@@ -352,7 +352,7 @@ void OSPF::Neighbor::sendLinkStateRequestPacket()
         }
     }
 
-    requestPacket->setPacketLength(packetSize);
+    requestPacket->setByteLength(packetSize);
     requestPacket->setChecksum(0); // TODO: Calculate correct cheksum(16-bit one's complement of the entire packet)
 
     OSPF::MessageHandler* messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
@@ -720,7 +720,7 @@ void OSPF::Neighbor::retransmitUpdatePacket()
         it++;
     }
 
-    updatePacket->setPacketLength(packetLength - IP_MAX_HEADER_BYTES);
+    updatePacket->setByteLength(packetLength - IP_MAX_HEADER_BYTES);
     updatePacket->setChecksum(0); // TODO: Calculate correct cheksum(16-bit one's complement of the entire packet)
 
     OSPF::MessageHandler* messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();

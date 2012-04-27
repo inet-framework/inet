@@ -51,7 +51,6 @@ packet OSPFPacket
 {
     char version = 2;
     char type enum(OSPFPacketType) = HELLO_PACKET;
-    short packetLength = 0;
 
     IPv4Address routerID;
     IPv4Address areaID;
