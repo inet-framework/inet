@@ -6,13 +6,13 @@
 /examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping1 -r 0,                  2000s,           a2f8-e537
 # /examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping2 -r 0,                  100s,         0   # [Config Ping2]    # interactive config, needed a *.numHosts parameter
 
-/examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           b971-c664
-/examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           5d7f-2c38
-/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           9c9d-71a1
-/examples/bgpv4/BGPOpen/,            -f omnetpp.ini -c config1 -r 0,                62s,             897c-ff8c   ,# do not change simtime-limit, this example tests all messages
-/examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0,                30s,             7f80-22ee   ,# do not change simtime-limit, this example tests all messages
-/examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           707c-5d14
-/examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           963f-1074
+/examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           6ca7-3dc8
+/examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           15f6-e5ef
+/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           5024-4f18
+/examples/bgpv4/BGPOpen/,            -f omnetpp.ini -c config1 -r 0,                62s,             897c-ff8c   
+/examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0,                30s,             9bba-2d95
+/examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           59f7-b523
+/examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           9225-c5e8
 
 /examples/diffserv/onedomain,          -f omnetpp.ini -c Exp11 -r 0,                   10s,         8ef0-801b
 /examples/diffserv/onedomain,          -f omnetpp.ini -c Exp21 -r 0,                   10s,         d471-926e
@@ -198,12 +198,12 @@
 /examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             cfa2-62ca
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             6d61-9a55
 
-/examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                1000s,           e03e-6c8e
+/examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                1000s,           499b-dfd0
 # /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                100s,            0    # <!> Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #23916, t=45.089338342798: check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
-/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c stable -r 0,                 1000s,           e1f5-2eed
-/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0,               1000s,           46d5-c78e
-/examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            3fab-1b3f
-/examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0,                500s,            a2b2-cb70
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c stable -r 0,                 1000s,           52c9-f678
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0,               1000s,           9846-ab54
+/examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            1c46-8cde
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0,                500s,            eaa0-3cb9
 
 # /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                100s,            a422-b4ed    # unstable fingerprint
 # /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                100s,            1ef9-fff6    # unstable fingerprint

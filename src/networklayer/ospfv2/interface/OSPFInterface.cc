@@ -187,7 +187,7 @@ void OSPF::Interface::sendLSAcknowledgement(OSPFLSAHeader* lsaHeader, IPv4Addres
     lsAckPacket->setLsaHeadersArraySize(1);
     lsAckPacket->setLsaHeaders(0, *lsaHeader);
 
-    lsAckPacket->setByteLength(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH); // TODO: Calculate correct length
+    lsAckPacket->setByteLength(OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH);
     lsAckPacket->setChecksum(0); // TODO: Calculate correct cheksum(16-bit one's complement of the entire packet)
 
     int ttl = (interfaceType == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
@@ -426,6 +426,7 @@ OSPFLinkStateUpdatePacket* OSPF::Interface::createUpdatePacket(OSPFLSA* lsa)
         ((lsaType == AS_EXTERNAL_LSA_TYPE) && (asExternalLSA != NULL)))
     {
         OSPFLinkStateUpdatePacket* updatePacket = new OSPFLinkStateUpdatePacket();
+        long packetLength = OSPF_HEADER_LENGTH + sizeof(uint32_t);  // OSPF header + place for number of advertisements
 
         updatePacket->setType(LINKSTATE_UPDATE_PACKET);
         updatePacket->setRouterID(IPv4Address(parentArea->getRouter()->getRouterID()));
@@ -448,6 +449,7 @@ OSPFLinkStateUpdatePacket* OSPF::Interface::createUpdatePacket(OSPFLSA* lsa)
                     } else {
                         updatePacket->getRouterLSAs(0).getHeader().setLsAge(MAX_AGE);
                     }
+                    packetLength += calculateLSASize(routerLSA);
                 }
                 break;
             case NETWORKLSA_TYPE:
@@ -460,6 +462,7 @@ OSPFLinkStateUpdatePacket* OSPF::Interface::createUpdatePacket(OSPFLSA* lsa)
                     } else {
                         updatePacket->getNetworkLSAs(0).getHeader().setLsAge(MAX_AGE);
                     }
+                    packetLength += calculateLSASize(networkLSA);
                 }
                 break;
             case SUMMARYLSA_NETWORKS_TYPE:
@@ -473,6 +476,7 @@ OSPFLinkStateUpdatePacket* OSPF::Interface::createUpdatePacket(OSPFLSA* lsa)
                     } else {
                         updatePacket->getSummaryLSAs(0).getHeader().setLsAge(MAX_AGE);
                     }
+                    packetLength += calculateLSASize(summaryLSA);
                 }
                 break;
             case AS_EXTERNAL_LSA_TYPE:
@@ -485,12 +489,13 @@ OSPFLinkStateUpdatePacket* OSPF::Interface::createUpdatePacket(OSPFLSA* lsa)
                     } else {
                         updatePacket->getAsExternalLSAs(0).getHeader().setLsAge(MAX_AGE);
                     }
+                    packetLength += calculateLSASize(asExternalLSA);
                 }
                 break;
-            default: break;
+            default: throw cRuntimeError("Invalid LSA type: %d", lsaType);
         }
 
-        updatePacket->setByteLength(0); // TODO: Calculate correct length
+        updatePacket->setByteLength(packetLength);
         updatePacket->setChecksum(0); // TODO: Calculate correct cheksum(16-bit one's complement of the entire packet)
 
         return updatePacket;
@@ -550,7 +555,7 @@ void OSPF::Interface::sendDelayedAcknowledgements()
                     packetSize += OSPF_LSA_HEADER_LENGTH;
                 }
 
-                ackPacket->setByteLength(0); // TODO: Calculate correct length
+                ackPacket->setByteLength(packetSize - IP_MAX_HEADER_BYTES);
                 ackPacket->setChecksum(0); // TODO: Calculate correct cheksum(16-bit one's complement of the entire packet)
 
                 int ttl = (interfaceType == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
