@@ -155,58 +155,14 @@ public:
 /**
  * Returns true if leftLSA is older than rightLSA.
  */
-inline bool operator<(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
-{
-    long leftSequenceNumber = leftLSA.getLsSequenceNumber();
-    long rightSequenceNumber = rightLSA.getLsSequenceNumber();
-
-    if (leftSequenceNumber < rightSequenceNumber) {
-        return true;
-    }
-    if (leftSequenceNumber == rightSequenceNumber) {
-        unsigned short leftAge = leftLSA.getLsAge();
-        unsigned short rightAge = rightLSA.getLsAge();
-
-        if ((leftAge != MAX_AGE) && (rightAge == MAX_AGE)) {
-            return true;
-        }
-        if ((abs(leftAge - rightAge) > MAX_AGE_DIFF) && (leftAge > rightAge)) {
-            return true;
-        }
-    }
-    return false;
-}
+bool operator<(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA);
 
 /**
  * Returns true if leftLSA is the same age as rightLSA.
  */
-inline bool operator==(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
-{
-    long           leftSequenceNumber = leftLSA.getLsSequenceNumber();
-    long           rightSequenceNumber = rightLSA.getLsSequenceNumber();
-    unsigned short leftAge = leftLSA.getLsAge();
-    unsigned short rightAge = rightLSA.getLsAge();
+bool operator==(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA);
 
-    if ((leftSequenceNumber == rightSequenceNumber) &&
-        (((leftAge == MAX_AGE) && (rightAge == MAX_AGE)) ||
-         (((leftAge != MAX_AGE) && (rightAge != MAX_AGE)) &&
-          (abs(leftAge - rightAge) <= MAX_AGE_DIFF))))
-    {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
-inline bool operator==(const OSPFOptions& leftOptions, const OSPFOptions& rightOptions)
-{
-    return ((leftOptions.E_ExternalRoutingCapability == rightOptions.E_ExternalRoutingCapability) &&
-            (leftOptions.MC_MulticastForwarding == rightOptions.MC_MulticastForwarding) &&
-            (leftOptions.NP_Type7LSA == rightOptions.NP_Type7LSA) &&
-            (leftOptions.EA_ForwardExternalLSAs == rightOptions.EA_ForwardExternalLSAs) &&
-            (leftOptions.DC_DemandCircuits == rightOptions.DC_DemandCircuits));
-}
+bool operator==(const OSPFOptions& leftOptions, const OSPFOptions& rightOptions);
 
 inline bool operator!=(const OSPFOptions& leftOptions, const OSPFOptions& rightOptions)
 {
@@ -225,58 +181,11 @@ inline bool operator!=(const OSPF::NextHop& leftHop, const OSPF::NextHop& rightH
     return (!(leftHop == rightHop));
 }
 
-inline unsigned int calculateLSASize(const OSPFRouterLSA* routerLSA)
-{
-    unsigned int   lsaLength = OSPF_LSA_HEADER_LENGTH + OSPF_ROUTERLSA_HEADER_LENGTH;
-    unsigned short linkCount = routerLSA->getLinksArraySize();
-
-    for (unsigned short i = 0; i < linkCount; i++) {
-        const Link& link = routerLSA->getLinks(i);
-        lsaLength += OSPF_LINK_HEADER_LENGTH + (link.getTosDataArraySize() * OSPF_TOS_LENGTH);
-    }
-
-    return lsaLength;
-}
-
-inline unsigned int calculateLSASize(const OSPFNetworkLSA* networkLSA)
-{
-    return (OSPF_LSA_HEADER_LENGTH + OSPF_NETWORKLSA_MASK_LENGTH +
-            (networkLSA->getAttachedRoutersArraySize() * OSPF_NETWORKLSA_ADDRESS_LENGTH));
-}
-
-inline unsigned int calculateLSASize(const OSPFSummaryLSA* summaryLSA)
-{
-    return (OSPF_LSA_HEADER_LENGTH + OSPF_SUMMARYLSA_HEADER_LENGTH +
-            (summaryLSA->getTosDataArraySize() * OSPF_TOS_LENGTH));
-}
-
-inline unsigned int calculateLSASize(const OSPFASExternalLSA* asExternalLSA)
-{
-    return (OSPF_LSA_HEADER_LENGTH + OSPF_ASEXTERNALLSA_HEADER_LENGTH +
-            (asExternalLSA->getContents().getExternalTOSInfoArraySize() * OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH));
-}
-
-inline void printLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output) {
-    char addressString[16];
-    output << "LSAHeader: age="
-           << lsaHeader.getLsAge()
-           << ", type=";
-    switch (lsaHeader.getLsType()) {
-        case ROUTERLSA_TYPE:                     output << "RouterLSA";                     break;
-        case NETWORKLSA_TYPE:                    output << "NetworkLSA";                    break;
-        case SUMMARYLSA_NETWORKS_TYPE:           output << "SummaryLSA_Networks";           break;
-        case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE:  output << "SummaryLSA_ASBoundaryRouters";  break;
-        case AS_EXTERNAL_LSA_TYPE:                 output << "ASExternalLSA";                 break;
-        default:                                output << "Unknown";                       break;
-    }
-    output << ", LSID="
-           << addressStringFromULong(addressString, sizeof(addressString), lsaHeader.getLinkStateID());
-    output << ", advertisingRouter="
-           << addressStringFromULong(addressString, sizeof(addressString), lsaHeader.getAdvertisingRouter().getInt())
-           << ", seqNumber="
-           << lsaHeader.getLsSequenceNumber();
-    output << endl;
-}
+unsigned int calculateLSASize(const OSPFRouterLSA* routerLSA);
+unsigned int calculateLSASize(const OSPFNetworkLSA* networkLSA);
+unsigned int calculateLSASize(const OSPFSummaryLSA* summaryLSA);
+unsigned int calculateLSASize(const OSPFASExternalLSA* asExternalLSA);
+void printLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output);
 
 inline std::ostream& operator<<(std::ostream& ostr, OSPFLSA& lsa)
 {
