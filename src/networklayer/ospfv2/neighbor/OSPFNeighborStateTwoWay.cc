@@ -16,13 +16,15 @@
 //
 
 #include "OSPFNeighborStateTwoWay.h"
-#include "OSPFNeighborStateDown.h"
-#include "OSPFNeighborStateInit.h"
-#include "OSPFNeighborStateExchangeStart.h"
+
 #include "MessageHandler.h"
-#include "OSPFInterface.h"
 #include "OSPFArea.h"
+#include "OSPFInterface.h"
+#include "OSPFNeighborStateDown.h"
+#include "OSPFNeighborStateExchangeStart.h"
+#include "OSPFNeighborStateInit.h"
 #include "OSPFRouter.h"
+
 
 void OSPF::NeighborStateTwoWay::processEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
 {

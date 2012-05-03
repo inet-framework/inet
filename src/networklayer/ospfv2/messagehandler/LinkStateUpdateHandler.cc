@@ -15,11 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "LinkStateUpdateHandler.h"
-#include "OSPFcommon.h"
-#include "OSPFRouter.h"
+
 #include "OSPFArea.h"
+#include "OSPFcommon.h"
 #include "OSPFNeighbor.h"
+#include "OSPFRouter.h"
+
 
 class LSAProcessingMarker
 {

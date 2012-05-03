@@ -20,10 +20,12 @@
 
 #include <vector>
 #include <map>
+
+#include "LSA.h"
 #include "OSPFcommon.h"
 #include "OSPFInterface.h"
-#include "LSA.h"
 #include "OSPFRoutingTableEntry.h"
+
 
 namespace OSPF {
 

@@ -18,12 +18,14 @@
 #ifndef __INET_OSPFCOMMON_H
 #define __INET_OSPFCOMMON_H
 
+
 #include <ctype.h>
-#include <stdio.h>
 #include <functional>
+#include <stdio.h>
 
 #include "IPv4Address.h"
 #include "IPvXAddressResolver.h"
+
 
 // global constants
 #define LS_REFRESH_TIME                     1800

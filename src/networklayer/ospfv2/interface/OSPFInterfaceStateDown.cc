@@ -15,14 +15,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "OSPFInterfaceStateDown.h"
+
 #include "MessageHandler.h"
 #include "OSPFArea.h"
-#include "OSPFRouter.h"
-#include "OSPFInterfaceStatePointToPoint.h"
-#include "OSPFInterfaceStateNotDesignatedRouter.h"
-#include "OSPFInterfaceStateWaiting.h"
 #include "OSPFInterfaceStateLoopback.h"
+#include "OSPFInterfaceStateNotDesignatedRouter.h"
+#include "OSPFInterfaceStatePointToPoint.h"
+#include "OSPFInterfaceStateWaiting.h"
+#include "OSPFRouter.h"
+
 
 void OSPF::InterfaceStateDown::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {

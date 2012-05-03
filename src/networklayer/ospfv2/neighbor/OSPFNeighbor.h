@@ -18,11 +18,12 @@
 #ifndef __INET_OSPFNEIGHBOR_H
 #define __INET_OSPFNEIGHBOR_H
 
+#include <list>
+
+#include "LSA.h"
+#include "OSPFcommon.h"
 #include "OSPFPacket_m.h"
 #include "OSPFTimer_m.h"
-#include "OSPFcommon.h"
-#include "LSA.h"
-#include <list>
 
 namespace OSPF {
 

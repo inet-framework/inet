@@ -16,11 +16,13 @@
 //
 
 #include "HelloHandler.h"
+
 #include "IPv4ControlInfo.h"
-#include "OSPFRouter.h"
 #include "OSPFArea.h"
 #include "OSPFInterface.h"
 #include "OSPFNeighbor.h"
+#include "OSPFRouter.h"
+
 
 OSPF::HelloHandler::HelloHandler(OSPF::Router* containingRouter) :
     OSPF::IMessageHandler(containingRouter)

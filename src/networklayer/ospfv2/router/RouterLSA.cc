@@ -15,7 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "LSA.h"
+
 
 bool OSPF::RouterLSA::update(const OSPFRouterLSA* lsa)
 {

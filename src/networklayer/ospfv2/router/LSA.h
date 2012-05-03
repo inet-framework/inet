@@ -18,10 +18,13 @@
 #ifndef __LSA_HPP__
 #define __LSA_HPP__
 
-#include "OSPFPacket_m.h"
-#include "OSPFcommon.h"
-#include <vector>
+
 #include <math.h>
+#include <vector>
+
+#include "OSPFcommon.h"
+#include "OSPFPacket_m.h"
+
 
 namespace OSPF {
 

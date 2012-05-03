@@ -15,12 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "OSPFInterfaceStateWaiting.h"
+
+#include "MessageHandler.h"
+#include "OSPFArea.h"
 #include "OSPFInterfaceStateDown.h"
 #include "OSPFInterfaceStateLoopback.h"
-#include "OSPFArea.h"
 #include "OSPFRouter.h"
-#include "MessageHandler.h"
+
 
 void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {

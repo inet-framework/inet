@@ -16,11 +16,13 @@
 //
 
 #include "OSPFInterfaceStateNotDesignatedRouter.h"
+
+#include "MessageHandler.h"
+#include "OSPFArea.h"
 #include "OSPFInterfaceStateDown.h"
 #include "OSPFInterfaceStateLoopback.h"
-#include "OSPFArea.h"
 #include "OSPFRouter.h"
-#include "MessageHandler.h"
+
 
 void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {

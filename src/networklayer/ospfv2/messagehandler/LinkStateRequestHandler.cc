@@ -15,10 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
+#include <vector>
+
 #include "LinkStateRequestHandler.h"
+
 #include "OSPFNeighbor.h"
 #include "OSPFRouter.h"
-#include <vector>
+
 
 OSPF::LinkStateRequestHandler::LinkStateRequestHandler(OSPF::Router* containingRouter) :
     OSPF::IMessageHandler(containingRouter)

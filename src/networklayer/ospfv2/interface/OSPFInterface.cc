@@ -20,12 +20,12 @@
 
 #include "OSPFInterface.h"
 
-#include "OSPFInterfaceStateDown.h"
 #include "InterfaceTableAccess.h"
 #include "IPv4Datagram_m.h"
 #include "IPv4InterfaceData.h"
 #include "MessageHandler.h"
 #include "OSPFArea.h"
+#include "OSPFInterfaceStateDown.h"
 #include "OSPFRouter.h"
 
 

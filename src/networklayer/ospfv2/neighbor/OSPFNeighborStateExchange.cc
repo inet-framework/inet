@@ -15,17 +15,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "OSPFNeighborStateExchange.h"
+
+#include "MessageHandler.h"
+#include "OSPFArea.h"
+#include "OSPFInterface.h"
 #include "OSPFNeighborStateDown.h"
-#include "OSPFNeighborStateInit.h"
-#include "OSPFNeighborStateTwoWay.h"
 #include "OSPFNeighborStateExchangeStart.h"
 #include "OSPFNeighborStateFull.h"
+#include "OSPFNeighborStateInit.h"
 #include "OSPFNeighborStateLoading.h"
-#include "MessageHandler.h"
-#include "OSPFInterface.h"
-#include "OSPFArea.h"
+#include "OSPFNeighborStateTwoWay.h"
 #include "OSPFRouter.h"
+
 
 void OSPF::NeighborStateExchange::processEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
 {

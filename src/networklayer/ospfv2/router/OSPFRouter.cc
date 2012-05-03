@@ -15,8 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "OSPFRouter.h"
+
 #include "RoutingTableAccess.h"
+
 
 OSPF::Router::Router(OSPF::RouterID id, cSimpleModule* containingModule) :
     routerID(id),

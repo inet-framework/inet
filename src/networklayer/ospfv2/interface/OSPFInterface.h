@@ -18,13 +18,15 @@
 #ifndef __INET_OSPFINTERFACE_H
 #define __INET_OSPFINTERFACE_H
 
-#include "INETDefs.h"
-#include "OSPFcommon.h"
-#include "OSPFTimer_m.h"
-#include "OSPFNeighbor.h"
 #include <map>
 #include <vector>
 #include <list>
+
+#include "INETDefs.h"
+
+#include "OSPFcommon.h"
+#include "OSPFNeighbor.h"
+#include "OSPFTimer_m.h"
 
 namespace OSPF {
 

@@ -15,14 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
+#include <map>
+
 #include "OSPFInterfaceState.h"
-#include "OSPFInterface.h"
+
 #include "OSPFArea.h"
-#include "OSPFRouter.h"
+#include "OSPFInterface.h"
+#include "OSPFInterfaceStateBackup.h"
 #include "OSPFInterfaceStateDesignatedRouter.h"
 #include "OSPFInterfaceStateNotDesignatedRouter.h"
-#include "OSPFInterfaceStateBackup.h"
-#include <map>
+#include "OSPFRouter.h"
+
 
 void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceState* newState, OSPF::InterfaceState* currentState)
 {

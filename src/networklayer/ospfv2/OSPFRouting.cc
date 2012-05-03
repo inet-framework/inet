@@ -23,16 +23,16 @@
 
 #include "OSPFRouting.h"
 
+#include "InterfaceTableAccess.h"
 #include "IPv4Address.h"
-#include "IPvXAddressResolver.h"
 #include "IPv4ControlInfo.h"
-#include "OSPFcommon.h"
-#include "OSPFArea.h"
-#include "OSPFInterface.h"
+#include "IPvXAddressResolver.h"
 #include "MessageHandler.h"
+#include "OSPFArea.h"
+#include "OSPFcommon.h"
+#include "OSPFInterface.h"
 #include "PatternMatcher.h"
 #include "RoutingTableAccess.h"
-#include "InterfaceTableAccess.h"
 
 
 Define_Module(OSPFRouting);

@@ -15,8 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "OSPFInterfaceStateLoopback.h"
+
 #include "OSPFInterfaceStateDown.h"
+
 
 void OSPF::InterfaceStateLoopback::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {

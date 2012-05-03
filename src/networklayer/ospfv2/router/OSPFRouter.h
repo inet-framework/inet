@@ -18,13 +18,17 @@
 #ifndef __INET_OSPFROUTER_H
 #define __INET_OSPFROUTER_H
 
-#include "OSPFcommon.h"
-#include "OSPFArea.h"
-#include "MessageHandler.h"
-#include "OSPFInterface.h"
-#include "LSA.h"
-#include "OSPFRoutingTableEntry.h"
+
 #include <map>
+#include <vector>
+
+#include "LSA.h"
+#include "MessageHandler.h"
+#include "OSPFArea.h"
+#include "OSPFcommon.h"
+#include "OSPFInterface.h"
+#include "OSPFRoutingTableEntry.h"
+
 
 /**
  * All OSPF classes are in this namespace.

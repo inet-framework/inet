@@ -18,14 +18,16 @@
 #ifndef __INET_OSPFROUTING_H
 #define __INET_OSPFROUTING_H
 
+
 #include <vector>
 
 #include "INETDefs.h"
 
-#include "IRoutingTable.h"
 #include "IInterfaceTable.h"
+#include "IRoutingTable.h"
 #include "OSPFPacket_m.h"
 #include "OSPFRouter.h"
+
 
 /**
  * OMNeT++ module class acting as a facade for the OSPF data structure.

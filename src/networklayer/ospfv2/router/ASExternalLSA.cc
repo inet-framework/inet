@@ -15,7 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "LSA.h"
+
 
 bool OSPF::ASExternalLSA::update(const OSPFASExternalLSA* lsa)
 {

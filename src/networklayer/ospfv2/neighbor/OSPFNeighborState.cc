@@ -15,10 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "OSPFNeighborState.h"
-#include "OSPFInterface.h"
+
 #include "OSPFArea.h"
+#include "OSPFInterface.h"
 #include "OSPFRouter.h"
+
 
 void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborState* newState, OSPF::NeighborState* currentState)
 {

@@ -18,10 +18,12 @@
 #ifndef __INET_OSPFROUTINGTABLEENTRY_H
 #define __INET_OSPFROUTINGTABLEENTRY_H
 
-#include "IRoutingTable.h"
-#include "InterfaceTableAccess.h"
-#include "OSPFcommon.h"
+
 #include <memory.h>
+
+#include "InterfaceTableAccess.h"
+#include "IRoutingTable.h"
+#include "OSPFcommon.h"
 
 namespace OSPF {
 
