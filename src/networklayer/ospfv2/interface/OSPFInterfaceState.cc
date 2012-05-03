@@ -59,7 +59,6 @@ void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceSta
                 OSPF::RouterLSA* newLSA = intf->getArea()->originateRouterLSA();
 
                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
-                newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
                 shouldRebuildRoutingTable |= routerLSA->update(newLSA);
                 delete newLSA;
 

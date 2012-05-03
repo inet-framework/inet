@@ -398,7 +398,6 @@ void OSPF::Router::ageDatabase()
                     OSPF::ASExternalLSA* newLSA = originateASExternalLSA(lsa);
 
                     newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
-                    newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
                     shouldRebuildRoutingTable |= lsa->update(newLSA);
                     delete newLSA;
 
@@ -436,7 +435,6 @@ void OSPF::Router::ageDatabase()
                         long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
 
                         newLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
-                        newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
                         shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
 
@@ -1298,7 +1296,6 @@ OSPF::LinkStateID OSPF::Router::getUniqueLinkStateID(OSPF::IPv4AddressRange dest
             asExternalLSA->getContents().setNetworkMask(destination.mask);
             asExternalLSA->getContents().setE_ExternalMetricType(externalMetricIsType2);
             asExternalLSA->getContents().setRouteCost(destinationCost);
-            asExternalLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
 
             lsaToReoriginate = asExternalLSA;
 
@@ -1576,8 +1573,6 @@ void OSPF::Router::updateExternalRoute(IPv4Address networkAddress, const OSPFASE
     lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
 
     asExternalLSA->setContents(externalRouteContents);
-
-    lsaHeader.setLsChecksum(0);    // TODO: calculate correct LS checksum
 
     asExternalLSA->setSource(OSPF::LSATrackingInfo::ORIGINATED);
 

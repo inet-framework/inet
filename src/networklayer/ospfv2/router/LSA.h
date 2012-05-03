@@ -164,22 +164,14 @@ inline bool operator<(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLS
         return true;
     }
     if (leftSequenceNumber == rightSequenceNumber) {
-        unsigned short leftChecksum = leftLSA.getLsChecksum();
-        unsigned short rightChecksum = rightLSA.getLsChecksum();
+        unsigned short leftAge = leftLSA.getLsAge();
+        unsigned short rightAge = rightLSA.getLsAge();
 
-        if (leftChecksum < rightChecksum) {
+        if ((leftAge != MAX_AGE) && (rightAge == MAX_AGE)) {
             return true;
         }
-        if (leftChecksum == rightChecksum) {
-            unsigned short leftAge = leftLSA.getLsAge();
-            unsigned short rightAge = rightLSA.getLsAge();
-
-            if ((leftAge != MAX_AGE) && (rightAge == MAX_AGE)) {
-                return true;
-            }
-            if ((abs(leftAge - rightAge) > MAX_AGE_DIFF) && (leftAge > rightAge)) {
-                return true;
-            }
+        if ((abs(leftAge - rightAge) > MAX_AGE_DIFF) && (leftAge > rightAge)) {
+            return true;
         }
     }
     return false;
@@ -192,13 +184,10 @@ inline bool operator==(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightL
 {
     long           leftSequenceNumber = leftLSA.getLsSequenceNumber();
     long           rightSequenceNumber = rightLSA.getLsSequenceNumber();
-    unsigned short leftChecksum = leftLSA.getLsChecksum();
-    unsigned short rightChecksum = rightLSA.getLsChecksum();
     unsigned short leftAge = leftLSA.getLsAge();
     unsigned short rightAge = rightLSA.getLsAge();
 
     if ((leftSequenceNumber == rightSequenceNumber) &&
-        (leftChecksum == rightChecksum) &&
         (((leftAge == MAX_AGE) && (rightAge == MAX_AGE)) ||
          (((leftAge != MAX_AGE) && (rightAge != MAX_AGE)) &&
           (abs(leftAge - rightAge) <= MAX_AGE_DIFF))))

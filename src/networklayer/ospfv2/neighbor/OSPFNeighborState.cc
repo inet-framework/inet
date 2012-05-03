@@ -43,7 +43,6 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
                 OSPF::RouterLSA* newLSA = neighbor->getInterface()->getArea()->originateRouterLSA();
 
                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
-                newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
                 shouldRebuildRoutingTable |= routerLSA->update(newLSA);
                 delete newLSA;
 
@@ -65,7 +64,6 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
 
                     if (newLSA != NULL) {
                         newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
-                        newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
                         shouldRebuildRoutingTable |= networkLSA->update(newLSA);
                         delete newLSA;
                     } else {    // no neighbors on the network -> old NetworkLSA must be flushed

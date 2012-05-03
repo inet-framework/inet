@@ -374,7 +374,6 @@ void OSPF::Area::ageDatabase()
                     OSPF::RouterLSA* newLSA = originateRouterLSA();
 
                     newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
-                    newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
                     shouldRebuildRoutingTable |= lsa->update(newLSA);
                     delete newLSA;
 
@@ -406,7 +405,6 @@ void OSPF::Area::ageDatabase()
                     long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
 
                     newLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
-                    newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
                     shouldRebuildRoutingTable |= lsa->update(newLSA);
                     delete newLSA;
 
@@ -466,7 +464,6 @@ void OSPF::Area::ageDatabase()
 
                     if (newLSA != NULL) {
                         newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
-                        newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
                         shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
                     } else {    // no neighbors on the network -> old NetworkLSA must be flushed
@@ -503,7 +500,6 @@ void OSPF::Area::ageDatabase()
 
                     if (newLSA != NULL) {
                         newLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
-                        newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
                         shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
 
@@ -557,7 +553,6 @@ void OSPF::Area::ageDatabase()
 
                     if (newLSA != NULL) {
                         newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
-                        newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
                         shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
 
@@ -595,7 +590,6 @@ void OSPF::Area::ageDatabase()
                         long sequenceNumber = lsa->getHeader().getLsSequenceNumber();
 
                         newLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
-                        newLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
                         shouldRebuildRoutingTable |= lsa->update(newLSA);
                         delete newLSA;
 
@@ -919,8 +913,6 @@ OSPF::RouterLSA* OSPF::Area::originateRouterLSA()
         routerLSA->setLinks(linkIndex, stubLink);
     }
 
-    lsaHeader.setLsChecksum(0);    // TODO: calculate correct LS checksum
-
     routerLSA->setSource(OSPF::LSATrackingInfo::ORIGINATED);
 
     return routerLSA;
@@ -956,8 +948,6 @@ OSPF::NetworkLSA* OSPF::Area::originateNetworkLSA(const OSPF::Interface* intf)
         unsigned short netIndex = networkLSA->getAttachedRoutersArraySize();
         networkLSA->setAttachedRoutersArraySize(netIndex + 1);
         networkLSA->setAttachedRouters(netIndex, IPv4Address(parentRouter->getRouterID()));
-
-        lsaHeader.setLsChecksum(0);    // TODO: calculate correct LS checksum
 
         return networkLSA;
     } else {
@@ -1021,7 +1011,6 @@ OSPF::LinkStateID OSPF::Area::getUniqueLinkStateID(OSPF::IPv4AddressRange destin
                 summaryLSA->getHeader().setLsSequenceNumber((sequenceNumber == MAX_SEQUENCE_NUMBER) ? INITIAL_SEQUENCE_NUMBER : sequenceNumber + 1);
                 summaryLSA->setNetworkMask(destination.mask);
                 summaryLSA->setRouteCost(destinationCost);
-                summaryLSA->getHeader().setLsChecksum(0);    // TODO: calculate correct LS checksum
 
                 lsaToReoriginate = summaryLSA;
 
@@ -1077,8 +1066,6 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
             summaryLSA->setRouteCost(entry->getCost());
             summaryLSA->setTosDataArraySize(0);
 
-            lsaHeader.setLsChecksum(0);    // TODO: calculate correct LS checksum
-
             summaryLSA->setSource(OSPF::LSATrackingInfo::ORIGINATED);
 
             return summaryLSA;
@@ -1110,7 +1097,6 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
                     lsaHeader.setLsAge(0);
                     lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
                     lsaHeader.setLinkStateID(newLinkStateID);
-                    lsaHeader.setLsChecksum(0);    // TODO: calculate correct LS checksum
 
                     return summaryLSA;
                 }
@@ -1131,8 +1117,6 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
                 summaryLSA->setNetworkMask(entry->getNetmask());
                 summaryLSA->setRouteCost(entry->getCost());
                 summaryLSA->setTosDataArraySize(0);
-
-                lsaHeader.setLsChecksum(0);    // TODO: calculate correct LS checksum
 
                 summaryLSA->setSource(OSPF::LSATrackingInfo::ORIGINATED);
 
@@ -1170,7 +1154,6 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
                         lsaHeader.setLsAge(0);
                         lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
                         lsaHeader.setLinkStateID(newLinkStateID);
-                        lsaHeader.setLsChecksum(0);    // TODO: calculate correct LS checksum
 
                         return summaryLSA;
                     }
@@ -1191,8 +1174,6 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
                     summaryLSA->setNetworkMask(entry->getNetmask());
                     summaryLSA->setRouteCost(entry->getCost());
                     summaryLSA->setTosDataArraySize(0);
-
-                    lsaHeader.setLsChecksum(0);    // TODO: calculate correct LS checksum
 
                     summaryLSA->setSource(OSPF::LSATrackingInfo::ORIGINATED);
 
@@ -1246,7 +1227,6 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
                         lsaHeader.setLsAge(0);
                         lsaHeader.setLsSequenceNumber(INITIAL_SEQUENCE_NUMBER);
                         lsaHeader.setLinkStateID(newLinkStateID);
-                        lsaHeader.setLsChecksum(0);    // TODO: calculate correct LS checksum
 
                         return summaryLSA;
                     } else {
@@ -1274,8 +1254,6 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
                         summaryLSA->setNetworkMask(entry->getNetmask());
                         summaryLSA->setRouteCost(entry->getCost());
                         summaryLSA->setTosDataArraySize(0);
-
-                        lsaHeader.setLsChecksum(0);    // TODO: calculate correct LS checksum
 
                         summaryLSA->setSource(OSPF::LSATrackingInfo::ORIGINATED);
 

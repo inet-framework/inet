@@ -55,7 +55,6 @@ packet OSPFPacket
     IPv4Address routerID;
     IPv4Address areaID;
 
-    short checksum = 0;
     short authenticationType = 0;
     char authentication[8];
 }
@@ -100,7 +99,6 @@ class OSPFLSAHeader
     unsigned long linkStateID;
     IPv4Address advertisingRouter;
     long lsSequenceNumber = 0;
-    short lsChecksum = 0;
     unsigned short lsaLength = 0;
 }
 
