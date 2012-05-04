@@ -1,11 +1,11 @@
 
 package inet.examples.ospfv2.backbone;
 
-import inet.base.UnimplementedModule;
-import inet.util.ThruputMeteringChannel;
-import inet.nodes.ospfv2.OSPFRouter;
-import inet.nodes.inet.StandardHost;
 import inet.linklayer.ethernet.EtherHub;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.ospfv2.OSPFRouter;
+import inet.util.ThruputMeteringChannel;
 
 
 network Backbone
@@ -110,8 +110,43 @@ network Backbone
             gates:
                 ethg[1];
         }
-        configurator: UnimplementedModule {
-            @display("p=75,43");
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                config = xml("<config>"+
+                            "<interface hosts='R2' towards='N1 R1' address='192.168.1.1' netmask='255.255.255.0' metric='1' />"+
+                            "<interface hosts='R1' towards='N1 R2' address='192.168.1.2' netmask='255.255.255.0' metric='1' />"+
+
+                            "<interface hosts='R3' towards='N2 R1' address='192.168.2.1' netmask='255.255.255.0' metric='2' />"+
+                            "<interface hosts='H1' address='192.168.2.2' netmask='255.255.255.0' metric='1' />"+
+                            "<interface hosts='R1' towards='N2 R3' address='192.168.2.3' netmask='255.255.255.0' metric='2' />"+
+
+                            "<interface hosts='R1' towards='N3 R4' address='192.168.3.1' netmask='255.255.255.0' metric='3' />"+
+                            "<interface hosts='R4' towards='N3 R1' address='192.168.3.2' netmask='255.255.255.0' metric='3' />"+
+
+                            "<interface hosts='H2' address='192.168.4.1' netmask='255.255.255.0' metric='1' />"+
+                            "<interface hosts='R5' towards='N4 H2' address='192.168.4.2' netmask='255.255.255.0' metric='4' />"+
+                            "<interface hosts='R2' towards='N4 H2' address='192.168.4.3' netmask='255.255.255.0' metric='4' />"+
+                            "<interface hosts='R7' towards='N4 H2' address='192.168.4.4' netmask='255.255.255.0' metric='4' />"+
+
+                            "<interface hosts='R6' towards='N5 R5' address='192.168.5.1' netmask='255.255.255.0' metric='5' />"+
+                            "<interface hosts='R3' towards='N5 R5' address='192.168.5.2' netmask='255.255.255.0' metric='5' />"+
+                            "<interface hosts='R5' towards='N5 R6' address='192.168.5.3' netmask='255.255.255.0' metric='5' />"+
+
+                            "<interface hosts='R7' towards='N6 R6' address='192.168.6.1' netmask='255.255.255.0' metric='6' />"+
+                            "<interface hosts='R4' towards='N6 R6' address='192.168.6.2' netmask='255.255.255.0' metric='6' />"+
+                            "<interface hosts='R6' towards='N6 R7' address='192.168.6.3' netmask='255.255.255.0' metric='6' />"+
+
+                            "<multicast-group hosts='R*' address='224.0.0.5 224.0.0.6' />"+
+
+                            "<route hosts='H*' destination='*' netmask='0.0.0.0' interface='eth0' />"+
+
+                            "<route hosts='R*' destination='224.0.0.0' netmask='240.0.0.0' interface='eth0' />"+
+                            "<route hosts='R*' destination='224.0.0.0' netmask='240.0.0.0' interface='eth1' />"+
+                            "<route hosts='R1' destination='224.0.0.0' netmask='240.0.0.0' interface='eth2' />"+
+                            "</config>");
+                addStaticRoutes = false;
+                addDefaultRoutes = false;
+                @display("p=75,43");
         }
     connections:
         R1.ethg[0] <--> C <--> N1.ethg[1];

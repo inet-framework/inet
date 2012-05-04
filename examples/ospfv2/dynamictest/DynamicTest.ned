@@ -62,9 +62,9 @@ network DynamicTest
             parameters:
                 @display("p=94,42");
                 config = xml("<config>"
-                        + "<interface hosts='H1 R1' towards='H1 R1' address='192.168.1.x' netmask='255.255.255.x' />"
-                        + "<interface hosts='H2 R2' towards='H2 R2' address='192.168.2.x' netmask='255.255.255.x' />"
-                        + "<interface hosts='R*' towards='R*' address='10.0.0.x' netmask='255.255.255.x' />"
+                        + "<interface among='H1 R1' address='192.168.1.x' netmask='255.255.255.x' />"
+                        + "<interface among='H2 R2' address='192.168.2.x' netmask='255.255.255.x' />"
+                        + "<interface among='R*' address='10.0.0.x' netmask='255.255.255.x' />"
                         + "<multicast-group hosts='R*' address='224.0.0.5 224.0.0.6' />"
                         + "<route hosts='H1' destination='*' gateway='R1'/>"
                         + "<route hosts='H2' destination='*' gateway='R2'/>"
