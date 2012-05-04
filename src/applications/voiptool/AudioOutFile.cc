@@ -28,11 +28,11 @@
 
 void AudioOutFile::addAudioStream(enum CodecID codec_id, int sampleRate, short int sampleBits)
 {
-//#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
     AVStream *st = av_new_stream(oc, 1);
-//#else
-//    AVStream *st = avformat_new_stream(oc, NULL);
-//#endif
+#else
+    AVStream *st = avformat_new_stream(oc, NULL);
+#endif
     if (!st)
         throw cRuntimeError("Could not alloc stream\n");
 
@@ -83,11 +83,11 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
     if (av_set_parameters(oc, NULL) < 0)
         throw cRuntimeError("Invalid output format parameters");
 
-//#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
     dump_format(oc, 0, resultFile, 1);
-//#else
-//    av_dump_format(oc, 0, resultFile, 1);
-//#endif
+#else
+    av_dump_format(oc, 0, resultFile, 1);
+#endif
 
     /* now that all the parameters are set, we can open the audio and
        video codecs and allocate the necessary encode buffers */
@@ -101,19 +101,31 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
             throw cRuntimeError("Codec %d not found", c->codec_id);
 
         /* open it */
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
         if (avcodec_open(c, avcodec) < 0)
+#else
+        if (avcodec_open2(c, avcodec, NULL) < 0)
+#endif
             throw cRuntimeError("Could not open codec %d", c->codec_id);
     }
 
     /* open the output file, if needed */
     if (!(fmt->flags & AVFMT_NOFILE))
     {
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
         if (url_fopen(&oc->pb, resultFile, URL_WRONLY) < 0)
+#else
+        if (avio_open(&oc->pb, resultFile, URL_WRONLY) < 0)
+#endif
             throw cRuntimeError("Could not open '%s'", resultFile);
     }
 
     // write the stream header
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
     av_write_header(oc);
+#else
+    avformat_write_header(oc, NULL);
+#endif
 }
 
 void AudioOutFile::write(void *decBuf, int pktBytes)
@@ -173,7 +185,11 @@ bool AudioOutFile::close()
     if (!(oc->oformat->flags & AVFMT_NOFILE))
     {
         /* close the output file */
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
         url_fclose(oc->pb);
+#else
+        avio_close(oc->pb);
+#endif
     }
 
     /* free the stream */
