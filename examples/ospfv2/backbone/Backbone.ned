@@ -1,6 +1,7 @@
 
 package inet.examples.ospfv2.backbone;
 
+import inet.base.UnimplementedModule;
 import inet.util.ThruputMeteringChannel;
 import inet.nodes.ospfv2.OSPFRouter;
 import inet.nodes.inet.StandardHost;
@@ -108,6 +109,9 @@ network Backbone
                 @display("p=368,40;i=device/laptop");
             gates:
                 ethg[1];
+        }
+        configurator: UnimplementedModule {
+            @display("p=75,43");
         }
     connections:
         R1.ethg[0] <--> C <--> N1.ethg[1];

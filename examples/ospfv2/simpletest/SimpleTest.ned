@@ -1,10 +1,11 @@
 
 package inet.examples.ospfv2.simpletest;
 
-import inet.util.ThruputMeteringChannel;
-import inet.nodes.ospfv2.OSPFRouter;
-import inet.nodes.inet.StandardHost;
+import inet.base.UnimplementedModule;
 import inet.linklayer.ethernet.EtherHub;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.ospfv2.OSPFRouter;
+import inet.util.ThruputMeteringChannel;
 
 
 network SimpleTest
@@ -54,6 +55,9 @@ network SimpleTest
                 @display("p=660,92;i=device/laptop");
             gates:
                 ethg[1];
+        }
+        configurator: UnimplementedModule {
+            @display("p=75,43");
         }
     connections:
         H1.ethg[0] <--> C <--> N1.ethg[0];

@@ -3,10 +3,11 @@
 
 package inet.examples.ospfv2.fulltest;
 
-import inet.util.ThruputMeteringChannel;
-import inet.nodes.ospfv2.OSPFRouter;
-import inet.nodes.inet.StandardHost;
+import inet.base.UnimplementedModule;
 import inet.linklayer.ethernet.EtherHub;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.ospfv2.OSPFRouter;
+import inet.util.ThruputMeteringChannel;
 
 
 network OSPF_TestNetwork
@@ -128,6 +129,9 @@ network OSPF_TestNetwork
                 @display("p=688,356;i=device/pc_s");
             gates:
                 ethg[1];
+        }
+        configurator: UnimplementedModule {
+            @display("p=75,43");
         }
     connections:
         RT11.ethg[0] <--> C <--> Area3.ethg[0];
