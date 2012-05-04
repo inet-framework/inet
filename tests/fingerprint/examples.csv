@@ -6,13 +6,13 @@
 /examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping1 -r 0,                  2000s,           a2f8-e537
 # /examples/adhoc/mf80211/,            -f omnetpp.ini -c Ping2 -r 0,                  100s,         0   # [Config Ping2]    # interactive config, needed a *.numHosts parameter
 
-/examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           6ca7-3dc8
-/examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           15f6-e5ef
-/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           5024-4f18
+/examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           caa6-8a4b
+/examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           a050-2e15
+/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           f660-37a7
 /examples/bgpv4/BGPOpen/,            -f omnetpp.ini -c config1 -r 0,                62s,             897c-ff8c   
-/examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0,                30s,             9bba-2d95
-/examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           59f7-b523
-/examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           9225-c5e8
+/examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0,                30s,             03f2-0471
+/examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           3755-ec71
+/examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           ae98-2de0
 
 /examples/diffserv/onedomain,          -f omnetpp.ini -c Exp11 -r 0,                   10s,         8ef0-801b
 /examples/diffserv/onedomain,          -f omnetpp.ini -c Exp21 -r 0,                   10s,         d471-926e

@@ -1,10 +1,11 @@
 //
 package inet.examples.bgpv4.BGPandOSPFSimple;
 
-import inet.util.ThruputMeteringChannel;
-import inet.nodes.ospfv2.OSPFRouter;
-import inet.nodes.inet.StandardHost;
+import inet.base.UnimplementedModule;
 import inet.nodes.bgp.BGPRouter;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.ospfv2.OSPFRouter;
+import inet.util.ThruputMeteringChannel;
 
 
 network BGPNet
@@ -56,6 +57,9 @@ network BGPNet
                 @display("p=494,98;i=device/pc");
             gates:
                 ethg[1];
+        }
+        configurator: UnimplementedModule {
+            @display("p=275,23");
         }
     connections:
         //LAN A1 et A2

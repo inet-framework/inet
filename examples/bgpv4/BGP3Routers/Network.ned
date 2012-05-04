@@ -1,11 +1,12 @@
 
 package inet.examples.bgpv4.BGP3Routers;
 
-import inet.util.ThruputMeteringChannel;
-import inet.nodes.ospfv2.OSPFRouter;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.ethernet.EtherSwitch;
+import inet.base.UnimplementedModule;
 import inet.nodes.bgp.BGPRouter;
+import inet.nodes.ethernet.EtherSwitch;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.ospfv2.OSPFRouter;
+import inet.util.ThruputMeteringChannel;
 
 
 network BGPTest
@@ -186,6 +187,9 @@ network BGPTest
                 @display("p=398,428;i=device/pc");
             gates:
                 ethg[1];
+        }
+        configurator: UnimplementedModule {
+            @display("p=78,400");
         }
     connections:
         //LAN A1 et A2
