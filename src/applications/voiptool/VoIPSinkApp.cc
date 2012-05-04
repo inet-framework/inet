@@ -250,11 +250,12 @@ void VoIPSinkApp::decodePacket(VoIPPacket *vp)
         emit(lostPacketsSignal, newSeqNo - (curConn.seqNo + 1));
     if (simTime() > curConn.lastPacketFinish)
     {
-        int lostSamples = (int)SIMTIME_DBL((simTime() - curConn.lastPacketFinish) * curConn.sampleRate);
+        int lostSamples = ceil(SIMTIME_DBL((simTime() - curConn.lastPacketFinish) * curConn.sampleRate));
+        ASSERT(lostSamples > 0);
         ev << "Lost " << lostSamples << " samples\n";
         emit(lostSamplesSignal, lostSamples);
         curConn.writeLostSamples(lostSamples);
-        curConn.lastPacketFinish = simTime();
+        curConn.lastPacketFinish += lostSamples * (1.0 / curConn.sampleRate);
     }
     emit(delaySignal, curConn.lastPacketFinish - vp->getCreationTime());
     curConn.seqNo = newSeqNo;
