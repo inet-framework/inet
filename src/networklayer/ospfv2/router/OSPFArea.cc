@@ -345,10 +345,10 @@ void OSPF::Area::ageDatabase()
     long i;
 
     for (i = 0; i < lsaCount; i++) {
-        unsigned short lsAge = routerLSAs[i]->getHeader().getLsAge();
-        bool selfOriginated = (routerLSAs[i]->getHeader().getAdvertisingRouter().getInt() == parentRouter->getRouterID());
-        bool unreachable = parentRouter->isDestinationUnreachable(routerLSAs[i]);
         OSPF::RouterLSA* lsa = routerLSAs[i];
+        unsigned short lsAge = lsa->getHeader().getLsAge();
+        bool selfOriginated = (lsa->getHeader().getAdvertisingRouter().getInt() == parentRouter->getRouterID());
+        bool unreachable = parentRouter->isDestinationUnreachable(lsa);
 
         if ((selfOriginated && (lsAge < (LS_REFRESH_TIME - 1))) || (!selfOriginated && (lsAge < (MAX_AGE - 1)))) {
             lsa->getHeader().setLsAge(lsAge + 1);

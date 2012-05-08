@@ -229,7 +229,7 @@ void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* un
                                 case OSPF::Interface::BROADCAST:
                                 case OSPF::Interface::NBMA:
                                 case OSPF::Interface::POINTTOMULTIPOINT:
-                                    neighbor = intf->getNeighborByAddress(ipv4AddressFromULong(controlInfo->getSrcAddr().getInt()));
+                                    neighbor = intf->getNeighborByAddress(controlInfo->getSrcAddr());
                                     break;
                                 case OSPF::Interface::POINTTOPOINT:
                                 case OSPF::Interface::VIRTUAL:
