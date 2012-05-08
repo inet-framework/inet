@@ -649,7 +649,8 @@ void IPv4NetworkConfigurator::assignAddresses(IPv4Topology& topology)
                 }
             }
             found: if (netmaskLength < minimumNetmaskLength || netmaskLength > maximumNetmaskLength)
-                throw cRuntimeError("Failed to find address prefix and netmask for %s and %d other interface(s). Please refine your parameters and try again!",
+                throw cRuntimeError("Failed to find address prefix (using %s with specified bits %s) and netmask (length from %d bits to %d bits) for interface %s and %d other interface(s). Please refine your parameters and try again!",
+                    IPv4Address(mergedAddress).str().c_str(), IPv4Address(mergedAddressSpecifiedBits).str().c_str(), minimumNetmaskLength, maximumNetmaskLength,
                     compatibleInterfaces[0]->interfaceEntry->getFullPath().c_str(), compatibleInterfaces.size() - 1);
             EV_DEBUG << "Selected netmask length: " << netmaskLength << endl;
             EV_DEBUG << "Selected network address: " << IPv4Address(networkAddress) << endl;
