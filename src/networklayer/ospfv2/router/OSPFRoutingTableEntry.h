@@ -202,10 +202,10 @@ inline std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry
         if ((entry.getDestinationType() & OSPF::RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) {
             out << "AreaBorderRouter";
         }
-        if ((entry.getDestinationType() & (OSPF::RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION | OSPF::RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION)) != 0) {
-            out << "+";
-        }
         if ((entry.getDestinationType() & OSPF::RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0) {
+            if ((entry.getDestinationType() & OSPF::RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) {
+                out << "+";
+            }
             out << "ASBoundaryRouter";
         }
     }
