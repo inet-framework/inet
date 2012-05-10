@@ -1089,7 +1089,7 @@ OSPF::LinkStateID OSPF::Router::getUniqueLinkStateID(OSPF::IPv4AddressRange dest
     if (foundLSA == NULL) {
         return lsaKey.linkStateID;
     } else {
-        IPv4Address existingMask = ipv4AddressFromULong(foundLSA->getContents().getNetworkMask().getInt());
+        IPv4Address existingMask = foundLSA->getContents().getNetworkMask();
 
         if (destination.mask >= existingMask) {
             return (lsaKey.linkStateID | (~(ulongFromIPv4Address(destination.mask))));
@@ -1202,8 +1202,8 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                     } else {
                         OSPF::IPv4AddressRange destinationAddressRange;
 
-                        destinationAddressRange.address = ipv4AddressFromULong(routingTable[j]->getDestination().getInt());
-                        destinationAddressRange.mask = ipv4AddressFromULong(routingTable[j]->getNetmask().getInt());
+                        destinationAddressRange.address = routingTable[j]->getDestination();
+                        destinationAddressRange.mask = routingTable[j]->getNetmask();
 
                         if ((routingTable[j]->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
                             ((routingTable[j]->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) ||
@@ -1267,8 +1267,8 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
             if (destIt == newTableMap.end()) { // deleted routing entry
                 OSPF::IPv4AddressRange destinationAddressRange;
 
-                destinationAddressRange.address = ipv4AddressFromULong(oldRoutingTable[j]->getDestination().getInt());
-                destinationAddressRange.mask = ipv4AddressFromULong(oldRoutingTable[j]->getNetmask().getInt());
+                destinationAddressRange.address = oldRoutingTable[j]->getDestination();
+                destinationAddressRange.mask = oldRoutingTable[j]->getNetmask();
 
                 if ((oldRoutingTable[j]->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
                     ((oldRoutingTable[j]->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) ||

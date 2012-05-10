@@ -995,7 +995,7 @@ OSPF::LinkStateID OSPF::Area::getUniqueLinkStateID(OSPF::IPv4AddressRange destin
     if (foundLSA == NULL) {
         return lsaKey.linkStateID;
     } else {
-        IPv4Address existingMask = ipv4AddressFromULong(foundLSA->getNetworkMask().getInt());
+        IPv4Address existingMask = foundLSA->getNetworkMask();
 
         if (destination.mask == existingMask) {
             return lsaKey.linkStateID;
@@ -1074,8 +1074,8 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
         if (entry->getPathType() == OSPF::RoutingTableEntry::INTERAREA) {
             OSPF::IPv4AddressRange destinationRange;
 
-            destinationRange.address = ipv4AddressFromULong(entry->getDestination().getInt());
-            destinationRange.mask = ipv4AddressFromULong(entry->getNetmask().getInt());
+            destinationRange.address = entry->getDestination();
+            destinationRange.mask = entry->getNetmask();
 
             OSPF::LinkStateID newLinkStateID = getUniqueLinkStateID(destinationRange, entry->getCost(), lsaToReoriginate);
 
@@ -1125,8 +1125,8 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
         } else {    // entry->getPathType() == OSPF::RoutingTableEntry::INTRAAREA
             OSPF::IPv4AddressRange destinationAddressRange;
 
-            destinationAddressRange.address = ipv4AddressFromULong(entry->getDestination().getInt());
-            destinationAddressRange.mask = ipv4AddressFromULong(entry->getNetmask().getInt());
+            destinationAddressRange.address = entry->getDestination();
+            destinationAddressRange.mask = entry->getNetmask();
 
             bool doAdvertise = false;
             OSPF::IPv4AddressRange containingAddressRange = parentRouter->getContainingAddressRange(destinationAddressRange, &doAdvertise);
@@ -1962,7 +1962,7 @@ std::vector<OSPF::NextHop>* OSPF::Area::calculateNextHops(Link& destination, OSP
                     NextHop nextHop;
                     nextHop.ifIndex = associatedInterfaces[i]->getIfIndex();
                     // TODO: this has been commented because the linkID is not a real IP address in this case and we don't know the next hop address here, verify
-                    // nextHop.hopAddress = ipv4AddressFromULong(destination.getLinkID().getInt());
+                    // nextHop.hopAddress = destination.getLinkID();
                     nextHop.advertisingRouter = parentRouter->getRouterID();
                     hops->push_back(nextHop);
                     break;
@@ -2093,7 +2093,7 @@ bool OSPF::Area::findSameOrWorseCostRoute(const std::vector<OSPF::RoutingTableEn
     OSPF::IPv4AddressRange destination;
 
     destination.address = ipv4AddressFromULong(summaryLSA.getHeader().getLinkStateID());
-    destination.mask = ipv4AddressFromULong(summaryLSA.getNetworkMask().getInt());
+    destination.mask = summaryLSA.getNetworkMask();
 
     for (long j = 0; j < routeCount; j++) {
         OSPF::RoutingTableEntry* routingEntry = newRoutingTable[j];
@@ -2150,7 +2150,7 @@ OSPF::RoutingTableEntry* OSPF::Area::createRoutingTableEntryFromSummaryLSA(const
     OSPF::IPv4AddressRange destination;
 
     destination.address = ipv4AddressFromULong(summaryLSA.getHeader().getLinkStateID());
-    destination.mask = ipv4AddressFromULong(summaryLSA.getNetworkMask().getInt());
+    destination.mask = summaryLSA.getNetworkMask();
 
     OSPF::RoutingTableEntry* newEntry = new OSPF::RoutingTableEntry;
 
@@ -2207,7 +2207,7 @@ void OSPF::Area::calculateInterAreaRoutes(std::vector<OSPF::RoutingTableEntry*>&
         OSPF::IPv4AddressRange destination;
 
         destination.address = ipv4AddressFromULong(currentHeader.getLinkStateID());
-        destination.mask = ipv4AddressFromULong(currentLSA->getNetworkMask().getInt());
+        destination.mask = currentLSA->getNetworkMask();
 
         if ((lsType == SUMMARYLSA_NETWORKS_TYPE) && (parentRouter->hasAddressRange(destination))) { // (3)
             bool foundIntraAreaRoute = false;
@@ -2336,7 +2336,7 @@ void OSPF::Area::recheckSummaryLSAs(std::vector<OSPF::RoutingTableEntry*>& newRo
         OSPF::IPv4AddressRange destination;
 
         destination.address = ipv4AddressFromULong(currentHeader.getLinkStateID());
-        destination.mask = ipv4AddressFromULong(currentLSA->getNetworkMask().getInt());
+        destination.mask = currentLSA->getNetworkMask();
 
         for (j = 0; j < routeCount; j++) {  // (3)
             OSPF::RoutingTableEntry* routingEntry = newRoutingTable[j];
