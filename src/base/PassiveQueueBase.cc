@@ -18,6 +18,7 @@
 
 #include "PassiveQueueBase.h"
 
+simsignal_t PassiveQueueBase::rcvdPkSignal = SIMSIGNAL_NULL;
 simsignal_t PassiveQueueBase::enqueuePkSignal = SIMSIGNAL_NULL;
 simsignal_t PassiveQueueBase::dequeuePkSignal = SIMSIGNAL_NULL;
 simsignal_t PassiveQueueBase::dropPkByQueueSignal = SIMSIGNAL_NULL;
@@ -35,6 +36,7 @@ void PassiveQueueBase::initialize()
     WATCH(numQueueReceived);
     WATCH(numQueueDropped);
 
+    rcvdPkSignal = registerSignal("rcvdPk");
     enqueuePkSignal = registerSignal("enqueuePk");
     dequeuePkSignal = registerSignal("dequeuePk");
     dropPkByQueueSignal = registerSignal("dropPkByQueue");
@@ -47,11 +49,12 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
 {
     numQueueReceived++;
 
-    emit(enqueuePkSignal, msg);
+    emit(rcvdPkSignal, msg);
 
     if (packetRequested > 0)
     {
         packetRequested--;
+        emit(enqueuePkSignal, msg);
         emit(dequeuePkSignal, msg);
         emit(queueingTimeSignal, 0L);
         sendOut(msg);
@@ -60,6 +63,9 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
     {
         msgId2TimeMap[msg->getId()] = simTime();
         cMessage *droppedMsg = enqueue(msg);
+        if (msg != droppedMsg)
+            emit(enqueuePkSignal, msg);
+
         if (droppedMsg)
         {
             numQueueDropped++;
