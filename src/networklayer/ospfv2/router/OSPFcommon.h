@@ -128,8 +128,6 @@ const RouterID              NULL_ROUTERID = 0;
 const AreaID                BACKBONE_AREAID = 0;
 const LinkStateID           NULL_LINKSTATEID = 0;
 const IPv4Address           NULL_IPV4ADDRESS(0, 0, 0, 0);
-const IPv4Address           ALL_SPF_ROUTERS(224, 0, 0, 5);
-const IPv4Address           ALL_D_ROUTERS(224, 0, 0, 6);
 const IPv4AddressRange      NULL_IPV4ADDRESSRANGE = { IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0)};
 const DesignatedRouterID    NULL_DESIGNATEDROUTERID = { 0, IPv4Address(0, 0, 0, 0)};
 

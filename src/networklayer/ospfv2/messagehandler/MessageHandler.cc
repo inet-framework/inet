@@ -167,6 +167,8 @@ void OSPF::MessageHandler::handleTimer(OSPFTimer* timer)
 
 void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* unused1, OSPF::Neighbor* unused2)
 {
+    // see RFC 2328 8.2
+
     // packet version must be OSPF version 2
     if (packet->getVersion() == 2) {
         IPv4ControlInfo* controlInfo = check_and_cast<IPv4ControlInfo *> (packet->getControlInfo());
@@ -204,7 +206,7 @@ void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* un
             }
             if (intf != NULL) {
                 unsigned long destinationAddress = controlInfo->getDestAddr().getInt();
-                unsigned long allDRouters = ulongFromIPv4Address(OSPF::ALL_D_ROUTERS);
+                unsigned long allDRouters = ulongFromIPv4Address(IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
                 OSPF::Interface::InterfaceStateType interfaceState = intf->getState();
 
                 // if destination address is ALL_D_ROUTERS the receiving interface must be in DesignatedRouter or Backup state

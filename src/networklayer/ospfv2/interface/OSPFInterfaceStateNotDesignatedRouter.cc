@@ -39,7 +39,7 @@ void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface* intf
     }
     if (event == OSPF::Interface::HELLO_TIMER) {
         if (intf->getType() == OSPF::Interface::BROADCAST) {
-            intf->sendHelloPacket(OSPF::ALL_SPF_ROUTERS);
+            intf->sendHelloPacket(IPv4Address::ALL_OSPF_ROUTERS_MCAST);
         } else {    // OSPF::Interface::NBMA
             if (intf->getRouterPriority() > 0) {
                 unsigned long neighborCount = intf->getNeighborCount();

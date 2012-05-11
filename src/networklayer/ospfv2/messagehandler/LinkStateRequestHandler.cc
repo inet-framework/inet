@@ -87,13 +87,13 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Inte
                             (intf->getState() == OSPF::Interface::BACKUP_STATE) ||
                             (intf->getDesignatedRouter() == OSPF::NULL_DESIGNATEDROUTERID))
                         {
-                            messageHandler->sendPacket(updatePacket, OSPF::ALL_SPF_ROUTERS, intf->getIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
                         } else {
-                            messageHandler->sendPacket(updatePacket, OSPF::ALL_D_ROUTERS, intf->getIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, intf->getIfIndex(), ttl);
                         }
                     } else {
                         if (intf->getType() == OSPF::Interface::POINTTOPOINT) {
-                            messageHandler->sendPacket(updatePacket, OSPF::ALL_SPF_ROUTERS, intf->getIfIndex(), ttl);
+                            messageHandler->sendPacket(updatePacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
                         } else {
                             messageHandler->sendPacket(updatePacket, neighbor->getAddress(), intf->getIfIndex(), ttl);
                         }

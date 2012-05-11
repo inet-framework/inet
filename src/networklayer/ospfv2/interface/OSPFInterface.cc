@@ -351,7 +351,7 @@ bool OSPF::Interface::floodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
                                 (getState() == OSPF::Interface::BACKUP_STATE) ||
                                 (designatedRouter == OSPF::NULL_DESIGNATEDROUTERID))
                             {
-                                messageHandler->sendPacket(updatePacket, OSPF::ALL_SPF_ROUTERS, ifIndex, ttl);
+                                messageHandler->sendPacket(updatePacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, ifIndex, ttl);
                                 for (long k = 0; k < neighborCount; k++) {
                                     neighboringRouters[k]->addToTransmittedLSAList(lsaKey);
                                     if (!neighboringRouters[k]->isUpdateRetransmissionTimerActive()) {
@@ -359,7 +359,7 @@ bool OSPF::Interface::floodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
                                     }
                                 }
                             } else {
-                                messageHandler->sendPacket(updatePacket, OSPF::ALL_D_ROUTERS, ifIndex, ttl);
+                                messageHandler->sendPacket(updatePacket, IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, ifIndex, ttl);
                                 OSPF::Neighbor* dRouter = getNeighborByID(designatedRouter.routerID);
                                 OSPF::Neighbor* backupDRouter = getNeighborByID(backupDesignatedRouter.routerID);
                                 if (dRouter != NULL) {
@@ -377,7 +377,7 @@ bool OSPF::Interface::floodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
                             }
                         } else {
                             if (interfaceType == OSPF::Interface::POINTTOPOINT) {
-                                messageHandler->sendPacket(updatePacket, OSPF::ALL_SPF_ROUTERS, ifIndex, ttl);
+                                messageHandler->sendPacket(updatePacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, ifIndex, ttl);
                                 if (neighborCount > 0) {
                                     neighboringRouters[0]->addToTransmittedLSAList(lsaKey);
                                     if (!neighboringRouters[0]->isUpdateRetransmissionTimerActive()) {
@@ -507,9 +507,9 @@ void OSPF::Interface::addDelayedAcknowledgement(OSPFLSAHeader& lsaHeader)
             (getState() == OSPF::Interface::BACKUP_STATE) ||
             (designatedRouter == OSPF::NULL_DESIGNATEDROUTERID))
         {
-            delayedAcknowledgements[OSPF::ALL_SPF_ROUTERS].push_back(lsaHeader);
+            delayedAcknowledgements[IPv4Address::ALL_OSPF_ROUTERS_MCAST].push_back(lsaHeader);
         } else {
-            delayedAcknowledgements[OSPF::ALL_D_ROUTERS].push_back(lsaHeader);
+            delayedAcknowledgements[IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST].push_back(lsaHeader);
         }
     } else {
         long neighborCount = neighboringRouters.size();
@@ -561,13 +561,13 @@ void OSPF::Interface::sendDelayedAcknowledgements()
                         (getState() == OSPF::Interface::BACKUP_STATE) ||
                         (designatedRouter == OSPF::NULL_DESIGNATEDROUTERID))
                     {
-                        messageHandler->sendPacket(ackPacket, OSPF::ALL_SPF_ROUTERS, ifIndex, ttl);
+                        messageHandler->sendPacket(ackPacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, ifIndex, ttl);
                     } else {
-                        messageHandler->sendPacket(ackPacket, OSPF::ALL_D_ROUTERS, ifIndex, ttl);
+                        messageHandler->sendPacket(ackPacket, IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, ifIndex, ttl);
                     }
                 } else {
                     if (interfaceType == OSPF::Interface::POINTTOPOINT) {
-                        messageHandler->sendPacket(ackPacket, OSPF::ALL_SPF_ROUTERS, ifIndex, ttl);
+                        messageHandler->sendPacket(ackPacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, ifIndex, ttl);
                     } else {
                         messageHandler->sendPacket(ackPacket, delayIt->first, ifIndex, ttl);
                     }

@@ -41,7 +41,7 @@ void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface* intf, OSPF:
                 intf->sendHelloPacket(intf->getNeighbor(0)->getAddress(), VIRTUAL_LINK_TTL);
             }
         } else {
-            intf->sendHelloPacket(OSPF::ALL_SPF_ROUTERS);
+            intf->sendHelloPacket(IPv4Address::ALL_OSPF_ROUTERS_MCAST);
         }
         intf->getArea()->getRouter()->getMessageHandler()->startTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }

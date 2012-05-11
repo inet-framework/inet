@@ -40,7 +40,7 @@ void OSPF::InterfaceStateBackup::processEvent(OSPF::Interface* intf, OSPF::Inter
     }
     if (event == OSPF::Interface::HELLO_TIMER) {
         if (intf->getType() == OSPF::Interface::BROADCAST) {
-            intf->sendHelloPacket(OSPF::ALL_SPF_ROUTERS);
+            intf->sendHelloPacket(IPv4Address::ALL_OSPF_ROUTERS_MCAST);
         } else {    // OSPF::Interface::NBMA
             unsigned long neighborCount = intf->getNeighborCount();
             int ttl = (intf->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
