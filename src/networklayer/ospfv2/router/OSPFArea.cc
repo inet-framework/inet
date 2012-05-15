@@ -1860,7 +1860,8 @@ std::vector<OSPF::NextHop>* OSPF::Area::calculateNextHops(OSPFLSA* destination, 
                             NextHop nextHop;
 
                             nextHop.ifIndex = associatedInterfaces[i]->getIfIndex();
-                            nextHop.hopAddress = (range.address & range.mask);
+                            //nextHop.hopAddress = (range.address & range.mask); //TODO revise it!
+                            nextHop.hopAddress = IPv4Address::UNSPECIFIED_ADDRESS; //TODO revise it!
                             nextHop.advertisingRouter = destinationNetworkLSA->getHeader().getAdvertisingRouter().getInt();
                             hops->push_back(nextHop);
                         }
