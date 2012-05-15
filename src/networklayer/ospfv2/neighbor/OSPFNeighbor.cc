@@ -162,7 +162,7 @@ const char* OSPF::Neighbor::getStateString(OSPF::Neighbor::NeighborStateType sta
         case EXCHANGE_STATE:       return "Exchange";
         case LOADING_STATE:        return "Loading";
         case FULL_STATE:           return "Full";
-        default:                   ASSERT(false);
+        default:                   ASSERT(false); break;
     }
     return "";
 }

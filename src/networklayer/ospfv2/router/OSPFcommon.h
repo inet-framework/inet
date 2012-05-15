@@ -262,8 +262,9 @@ inline char hexCharToByte(char hex)
         case 'd':   return 13;
         case 'e':   return 14;
         case 'f':   return 15;
-        default:    return 0;
+        default:    break;
     };
+    return 0;
 }
 
 inline char hexPairToByte(char upperHex, char lowerHex)

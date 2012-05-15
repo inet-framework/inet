@@ -375,6 +375,7 @@ void OSPF::MessageHandler::printEvent(const char* eventString, const OSPF::Inter
             case OSPF::Interface::VIRTUAL:           EV << "(Virtual)";
                                                      break;
             default:                                 EV << "(Unknown)";
+                                                     break;
         }
         EV << " (state: "
            << onInterface->getStateString(onInterface->getState())

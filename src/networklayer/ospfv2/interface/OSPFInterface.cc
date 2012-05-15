@@ -240,7 +240,7 @@ const char* OSPF::Interface::getStateString(OSPF::Interface::InterfaceStateType 
         case NOT_DESIGNATED_ROUTER_STATE:  return "NotDesignatedRouter";
         case BACKUP_STATE:               return "Backup";
         case DESIGNATED_ROUTER_STATE:     return "DesignatedRouter";
-        default:                        ASSERT(false);
+        default:                        ASSERT(false); break;
     }
     return "";
 }
