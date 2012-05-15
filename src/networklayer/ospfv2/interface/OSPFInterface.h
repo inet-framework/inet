@@ -70,7 +70,7 @@ private:
     OSPFInterfaceType                                                   interfaceType;
     InterfaceState*                                                     state;
     InterfaceState*                                                     previousState;
-    unsigned char                                                       ifIndex;
+    int                                                                 ifIndex;
     unsigned short                                                      mtu;
     IPv4AddressRange                                                    interfaceAddressRange;
     AreaID                                                              areaID;
@@ -125,8 +125,8 @@ public:
 
     void                    setType(OSPFInterfaceType ifType)  { interfaceType = ifType; }
     OSPFInterfaceType       getType() const  { return interfaceType; }
-    void                    setIfIndex(unsigned char index);
-    unsigned char           getIfIndex() const  { return ifIndex; }
+    void                    setIfIndex(int index);
+    int                     getIfIndex() const  { return ifIndex; }
     void                    setMTU(unsigned short ifMTU)  { mtu = ifMTU; }
     unsigned short          getMTU() const  { return mtu; }
     void                    setAreaID(AreaID areaId)  { areaID = areaId; }

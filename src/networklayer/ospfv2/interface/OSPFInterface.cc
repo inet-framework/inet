@@ -85,7 +85,7 @@ OSPF::Interface::~Interface()
     }
 }
 
-void OSPF::Interface::setIfIndex(unsigned char index)
+void OSPF::Interface::setIfIndex(int index)
 {
     ifIndex = index;
     if (interfaceType == OSPF::Interface::UNKNOWN_TYPE) {

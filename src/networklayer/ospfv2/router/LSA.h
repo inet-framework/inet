@@ -29,7 +29,7 @@
 namespace OSPF {
 
 struct NextHop {
-    unsigned char ifIndex;
+    int           ifIndex;
     IPv4Address   hopAddress;
     RouterID      advertisingRouter;
 };
