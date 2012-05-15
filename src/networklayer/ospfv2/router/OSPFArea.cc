@@ -35,6 +35,7 @@ OSPF::Area::~Area()
     for (int i = 0; i < interfaceNum; i++) {
         delete (associatedInterfaces[i]);
     }
+    associatedInterfaces.clear();
     long lsaCount = routerLSAs.size();
     for (long j = 0; j < lsaCount; j++) {
         delete routerLSAs[j];
@@ -83,7 +84,7 @@ std::string OSPF::Area::detailedInfo() const
     }
     int interfaceNum = associatedInterfaces.size();
     for (i = 0; i < interfaceNum; i++) {
-        out << "    interface[" << i << "]: addressRange: ";
+        out << "    interface[" << i << "]: address: ";
         out << addressStringFromIPv4Address(addressString, 16, associatedInterfaces[i]->getAddressRange().address);
         out << "/" << addressStringFromIPv4Address(addressString, 16, associatedInterfaces[i]->getAddressRange().mask) << "\n";
     }
