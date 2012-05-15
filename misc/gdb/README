@@ -1,0 +1,44 @@
+Activating pretty printing in GDB for INET classes:
+
+Windows:
+  //TODO
+
+Mac OS X:
+  Mac OS comes with gdb 6.2 which does not support gdb pretty printers.
+
+Linux:
+  This directory must be included in the python system path and the pretty printer
+  classes must be registered before starting gdb. This can be done by creating
+  or modify a '.gdbinit' file in the $HOME directory with the following content.
+  Do not forget to edit the path to point to this directory.
+
+$HOME/.gdbinit:
+--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--
+set unwindonsignal on
+
+python
+
+import sys
+
+
+#
+#  other pretty printer initializations
+#
+
+
+# inet pretty printer BEGIN
+
+sys.path.insert(0, '/path/to/inet-dir/misc/gdb')
+
+if 'register_inet_printers' in dir():
+    print 'inet pretty printers already initialized.'
+else:
+    from inet.printers import register_inet_printers
+    register_inet_printers(None)
+    print 'Pretty printers initialized: inet'
+
+# inet pretty printer END
+
+
+end
+--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--8<--
