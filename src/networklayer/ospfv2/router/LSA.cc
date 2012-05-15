@@ -119,7 +119,7 @@ void printLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output) {
     output << ", LSID="
            << addressStringFromULong(addressString, sizeof(addressString), lsaHeader.getLinkStateID());
     output << ", advertisingRouter="
-           << addressStringFromULong(addressString, sizeof(addressString), lsaHeader.getAdvertisingRouter().getInt())
+           << lsaHeader.getAdvertisingRouter()
            << ", seqNumber="
            << lsaHeader.getLsSequenceNumber();
     output << endl;

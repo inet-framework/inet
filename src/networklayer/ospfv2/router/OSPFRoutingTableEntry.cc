@@ -162,9 +162,7 @@ std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry
 
     unsigned int hopCount = entry.getNextHopCount();
     for (unsigned int i = 0; i < hopCount; i++) {
-        char addressString[16];
-        out << addressStringFromIPv4Address(addressString, sizeof(addressString), entry.getNextHop(i).hopAddress)
-            << " ";
+        out << entry.getNextHop(i).hopAddress << " ";
     }
 
     return out;
