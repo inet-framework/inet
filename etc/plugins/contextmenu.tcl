@@ -18,5 +18,12 @@ extendContextMenu {
    {"INET: TCP connections"        "**.tcp"             "tcpAppConnMap"   "*map*"   }
    {"INET: TED database"           "**.ted"             "ted"             "*vector*"}
    {"INET: LIB table"              "**.libTable"        "lib"             "*vector*"}
+
+   {"INET: OSPF areas"             "**"         "**ospf.areas"            "*vector*"}
+   {"INET: OSPF areas"             "**.ospf"    "areas"                   "*vector*"}
+   {"INET: OSPF ASExternalLSA"     "**"         "**ospf.asExternalLSAs"   "*vector*"}
+   {"INET: OSPF ASExternalLSA"     "**.ospf"    "asExternalLSAs"          "*vector*"}
+   {"INET: OSPF RoutingTable"      "**"         "**ospf.routingTable"     "*vector*"}
+   {"INET: OSPF RoutingTable"      "**.ospf"    "routingTable"            "*vector*"}
 }
 
