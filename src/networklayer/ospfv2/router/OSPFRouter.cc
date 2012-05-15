@@ -1337,8 +1337,8 @@ void OSPF::Router::updateExternalRoute(IPv4Address networkAddress, const OSPFASE
     for (unsigned long i = 0; i < routingEntryNumber; i++)
     {
         const IPv4Route *entry = simRoutingTable->getRoute(i);
-        if ((entry->getDestination().getInt() & entry->getNetmask().getInt()) ==
-            (ulongFromIPv4Address(networkAddress) & externalRouteContents.getNetworkMask().getInt()))
+        if ((entry->getDestination() == networkAddress)
+                && (entry->getNetmask() == externalRouteContents.getNetworkMask())) //TODO is it enough?
         {
             inRoutingTable = true;
         }
@@ -1389,7 +1389,9 @@ void OSPF::Router::addExternalRouteInIPTable(IPv4Address networkAddress, const O
 
     // add the external route to the IPv4 routing table if it was not added by another module
     for (int i = 1; i < routingEntryNumber; i++) {
-        if (simRoutingTable->getRoute(i)->getDestination().getInt() == ulongFromIPv4Address(networkAddress))
+        const IPv4Route *entry = simRoutingTable->getRoute(i);
+        if ((entry->getDestination() == networkAddress)
+                && (entry->getNetmask() == externalRouteContents.getNetworkMask())) //TODO is it enough?
         {
             inRoutingTable = true;
             break;

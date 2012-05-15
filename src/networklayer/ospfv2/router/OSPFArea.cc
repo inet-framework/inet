@@ -140,7 +140,7 @@ OSPF::IPv4AddressRange OSPF::Area::getContainingAddressRange(OSPF::IPv4AddressRa
 {
     int addressRangeNum = areaAddressRanges.size();
     for (int i = 0; i < addressRangeNum; i++) {
-        if ((areaAddressRanges[i].address & areaAddressRanges[i].mask) == (addressRange.address & areaAddressRanges[i].mask)) {
+        if (((areaAddressRanges[i].address & areaAddressRanges[i].mask) == (addressRange.address & areaAddressRanges[i].mask)) && (areaAddressRanges[i].mask <= addressRange.mask)) {
             if (advertise != NULL) {
                 std::map<OSPF::IPv4AddressRange, bool, OSPF::IPv4AddressRange_Less>::const_iterator rangeIt = advertiseAddressRanges.find(areaAddressRanges[i]);
                 if (rangeIt != advertiseAddressRanges.end()) {
