@@ -34,6 +34,9 @@ bool operator<(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
         if ((leftAge != MAX_AGE) && (rightAge == MAX_AGE)) {
             return true;
         }
+        if ((leftAge == MAX_AGE) && (rightAge != MAX_AGE)) {
+            return false;
+        }
         if ((abs(leftAge - rightAge) > MAX_AGE_DIFF) && (leftAge > rightAge)) {
             return true;
         }
