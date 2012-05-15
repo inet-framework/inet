@@ -1,5 +1,0 @@
-<!-- this file is read by the ScenarioManager -->
-<scenario>
-    <!-- make channel very unreliable at the middle of the connection -->
-    <set-channel-attr t=".2" src-module="r1" src-gate="out[0]" attr="error" value="1e-3"/>
-</scenario>

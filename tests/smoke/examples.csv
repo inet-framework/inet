@@ -76,9 +76,6 @@
 /examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0
 /examples/inet/nclients/,            -f video.ini -c General -r 0
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0
-/examples/inet/redtest/,             -f omnetpp.ini -c DropTailQueue -r 0
-/examples/inet/redtest/,             -f omnetpp.ini -c REDQueue1 -r 0
-/examples/inet/redtest/,             -f omnetpp.ini -c REDQueue2 -r 0
 /examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 0
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_internalQueue -r 0

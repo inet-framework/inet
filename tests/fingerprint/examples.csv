@@ -92,10 +92,6 @@
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           4b90-c42d
 
-/examples/inet/redtest/,             -f omnetpp.ini -c DropTailQueue -r 0,          100s,            223f-c365
-/examples/inet/redtest/,             -f omnetpp.ini -c REDQueue1 -r 0,              100s,            d026-9b6f
-/examples/inet/redtest/,             -f omnetpp.ini -c REDQueue2 -r 0,              100s,            8d0d-d9cb
-
 /examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0,                100s,            958b-8790
 
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 0, 5s,              050c-381c

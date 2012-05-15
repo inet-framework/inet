@@ -36,7 +36,7 @@ module EtherHost
     parameters:
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
-        string queueType = default(""); // DropTailQueue, DropTailQoSQueue, REDQueue, or empty to use the internal queue
+        string queueType = default(""); // DropTailQueue, DiffServQueue, or empty to use the internal queue
         @node();
         @labels(node,ethernet-node);
         @display("i=device/pc2");

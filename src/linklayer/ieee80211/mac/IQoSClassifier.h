@@ -16,33 +16,31 @@
 //
 
 
-#ifndef __INET_BASICDSCPCLASSIFIER_H
-#define __INET_BASICDSCPCLASSIFIER_H
+#ifndef __INET_IQOSCLASSIFIER_H
+#define __INET_IQOSCLASSIFIER_H
 
-#include "IQoSClassifier.h"
+#include "INETDefs.h"
 
 /**
- * Just an example for packet classifiers, based on IPv4 DSCP/IPv6 Traffic
- * class. You'll probably need to implement others if your research interest
- * lies in QoS.
+ * Abstract interface for QoS classifiers, used in QoS queues.
+ * A QoS classifier looks at a packet, determines its priority,
+ * and eventually returns the index of the subqueue the packet
+ * should be inserted into.
  */
-class INET_API BasicDSCPClassifier : public IQoSClassifier
+class INET_API IQoSClassifier : public cObject
 {
-    // internal: maps IPv4/IPv6 DiffServ Code Point to queue number
-    virtual int classifyByDSCP(int dscp);
-
   public:
     /**
      * Returns the largest value plus one classifyPacket() returns.
      */
-    virtual int getNumQueues();
+    virtual int getNumQueues() = 0;
 
     /**
      * The method should return the priority (the index of subqueue)
      * for the given packet, a value between 0 and getNumQueues()-1
-     * (inclusive).
+     * (inclusive), with 0 representing the highest priority.
      */
-    virtual int classifyPacket(cMessage *msg);
+    virtual int classifyPacket(cMessage *msg) = 0;
 };
 
 #endif

@@ -53,8 +53,7 @@
 //  - transport layer: ~TCP, ~UDP, ~SCTP
 //  - ~InterfaceTable and ~NotificationBoard are there in every
 //    host and router model
-//  - queues in router network interfaces: ~DropTailQueue, ~REDQueue,
-//    ~DropTailQoSQueue.
+//  - queues in router network interfaces: ~DropTailQueue, ~DiffServQueue.
 //  - ~FlatNetworkConfigurator automatically assigns IPv4 addresses and
 //    sets up static routes;
 //  - ~ScenarioManager lets you change things in the model in the middle

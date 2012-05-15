@@ -36,7 +36,7 @@ module EthernetInterface like IWiredNic
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
         bool useSNAP = default(false);  // use EtherFrameWithSNAP instead EthernetIIFrame
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
-        string queueType = default("EthDropTailQoSQueue"); // ~DropTailQueue, ~DropTailQoSQueue, ~EthDropTailQoSQueue, ~REDQueue, or empty for use internal queue
+        string queueType = default("EthDropTailQoSQueue"); // ~DropTailQueue, ~EthDropTailQoSQueue, or empty for use internal queue
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
         @display("i=block/ifcard;bgl=2");
