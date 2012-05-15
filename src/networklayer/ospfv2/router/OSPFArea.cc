@@ -1748,9 +1748,13 @@ void OSPF::Area::calculateShortestPathTree(std::vector<OSPF::RoutingTableEntry*>
                 }
                 if (distance == entryCost) {
                     // no const version from check_and_cast
-                    OSPF::RouterLSA* routerOrigin = check_and_cast<OSPF::RouterLSA*> (const_cast<OSPFLSA*> (entry->getLinkStateOrigin()));
-                    if (routerOrigin->getHeader().getLinkStateID() < routerVertex->getHeader().getLinkStateID()) {
-                        entry->setLinkStateOrigin(routerVertex);
+                    const OSPFLSA *lsOrigin = entry->getLinkStateOrigin();
+                    if (dynamic_cast<const OSPF::RouterLSA*> (lsOrigin)  || dynamic_cast<const OSPF::NetworkLSA*> (lsOrigin)) {
+                        if (lsOrigin->getHeader().getLinkStateID() < routerVertex->getHeader().getLinkStateID()) {
+                            entry->setLinkStateOrigin(routerVertex);
+                        }
+                    } else {
+                        throw cRuntimeError("Can not cast class '%s' to OSPF::RouterLSA or OSPF::NetworkLSA", lsOrigin->getClassName());
                     }
                 }
                 std::vector<OSPF::NextHop>* newNextHops = calculateNextHops(link, routerVertex); // (destination, parent)
