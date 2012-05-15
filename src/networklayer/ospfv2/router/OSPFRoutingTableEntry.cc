@@ -124,11 +124,7 @@ bool OSPF::RoutingTableEntry::operator==(const RoutingTableEntry& entry) const
 
 std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry)
 {
-    out << "Destination: "
-        << entry.getDestination().str()
-        << "/"
-        << entry.getNetmask().str()
-        << " (";
+    out << "Destination: " << entry.getDestination() << "/" << entry.getNetmask() << " (";
     if (entry.getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) {
         out << "Network";
     } else {
@@ -152,10 +148,8 @@ std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry
         case OSPF::RoutingTableEntry::TYPE2_EXTERNAL: out << "Type2External"; break;
         default:                                      out << "Unknown";       break;
     }
-    out << ", Cost: "
-        << entry.getCost()
-        << ", Type2Cost: "
-        << entry.getType2Cost()
+    out << ", Cost: " << entry.getCost()
+        << ", Type2Cost: " << entry.getType2Cost()
         << ", Origin: [";
     printLSAHeader(entry.getLinkStateOrigin()->getHeader(), out);
     out << "], NextHops: ";
