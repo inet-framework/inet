@@ -113,8 +113,8 @@ void printLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output) {
         case NETWORKLSA_TYPE:                    output << "NetworkLSA";                    break;
         case SUMMARYLSA_NETWORKS_TYPE:           output << "SummaryLSA_Networks";           break;
         case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE:  output << "SummaryLSA_ASBoundaryRouters";  break;
-        case AS_EXTERNAL_LSA_TYPE:                 output << "ASExternalLSA";                 break;
-        default:                                output << "Unknown";                       break;
+        case AS_EXTERNAL_LSA_TYPE:               output << "ASExternalLSA";                 break;
+        default:                                 output << "Unknown";                       break;
     }
     output << ", LSID="
            << addressStringFromULong(addressString, sizeof(addressString), lsaHeader.getLinkStateID());
