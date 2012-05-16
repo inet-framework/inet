@@ -54,7 +54,7 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
         }
 
         if (neighbor->getInterface()->getState() == OSPF::Interface::DESIGNATED_ROUTER_STATE) {
-            OSPF::NetworkLSA* networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(ulongFromIPv4Address(neighbor->getInterface()->getAddressRange().address));
+            OSPF::NetworkLSA* networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(neighbor->getInterface()->getAddressRange().address);
 
             if (networkLSA != NULL) {
                 long sequenceNumber = networkLSA->getHeader().getLsSequenceNumber();

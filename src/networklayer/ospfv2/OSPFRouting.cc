@@ -70,7 +70,7 @@ void OSPFRouting::initialize(int stage)
         ift = InterfaceTableAccess().get();
 
         // Get routerId
-        ospfRouter = new OSPF::Router(rt->getRouterId().getInt(), this);
+        ospfRouter = new OSPF::Router(rt->getRouterId(), this);
 
         // read the OSPF AS configuration
         cXMLElement *ospfConfig = par("ospfConfig").xmlValue();
@@ -116,7 +116,7 @@ bool OSPFRouting::checkExternalRoute(const IPv4Address &route)
     for (unsigned long i=1; i < ospfRouter->getASExternalLSACount(); i++)
     {
         OSPF::ASExternalLSA* externalLSA = ospfRouter->getASExternalLSA(i);
-        IPv4Address externalAddr = ipv4AddressFromULong(externalLSA->getHeader().getLinkStateID());
+        IPv4Address externalAddr = externalLSA->getHeader().getLinkStateID();
         if (externalAddr == route) //FIXME was this meant???
             return true;
     }
@@ -179,7 +179,7 @@ void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string
         EV << "    loading info for Area id = " << areaID << "\n";
     }
 
-    OSPF::Area* area = new OSPF::Area(ulongFromAddressString(areaID.c_str()));
+    OSPF::Area* area = new OSPF::Area(IPv4Address(areaID.c_str()));
     cXMLElementList areaDetails = areaConfig->getChildren();
     for (cXMLElementList::iterator arIt = areaDetails.begin(); arIt != areaDetails.end(); arIt++) {
         std::string nodeName = (*arIt)->getTagName();
@@ -258,7 +258,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         error("Loading %s ifIndex[%d] aborted at %s", interfaceType.c_str(), ifIndex, ifConfig.getSourceLocation());
     }
 
-    OSPF::AreaID areaID = ulongFromAddressString(getStrAttrOrPar(ifConfig, "areaID"));
+    OSPF::AreaID areaID = IPv4Address(getStrAttrOrPar(ifConfig, "areaID"));
     intf->setAreaID(areaID);
 
     intf->setOutputCost(getIntAttrOrPar(ifConfig, "interfaceOutputCost"));
@@ -334,7 +334,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         intf->processEvent(OSPF::Interface::INTERFACE_UP); // notification should come from the blackboard...
     } else {
         delete intf;
-        error("Loading %s ifIndex[%d] in Area %d aborted at %s", interfaceType.c_str(), ifIndex, areaID, ifConfig.getSourceLocation());
+        error("Loading %s ifIndex[%d] in Area %s aborted at %s", interfaceType.c_str(), ifIndex, areaID.str().c_str(), ifConfig.getSourceLocation());
     }
 }
 
@@ -406,7 +406,7 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
 
     EV << "        loading HostInterface " << ifName << " ifIndex[" << static_cast<short> (hostParameters.ifIndex) << "]\n";
 
-    hostArea = ulongFromAddressString(getStrAttrOrPar(hostRouteConfig, "areaID"));
+    hostArea = ipv4AddressFromAddressString(getStrAttrOrPar(hostRouteConfig, "areaID"));
     hostParameters.address = ipv4AddressFromAddressString(getRequiredAttribute(hostRouteConfig, "attachedHost"));
     hostParameters.linkCost = getIntAttrOrPar(hostRouteConfig, "linkCost");
 
@@ -415,7 +415,7 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
     if (area != NULL) {
         area->addHostRoute(hostParameters);
     } else {
-        error("Loading HostInterface ifIndex[%d] in Area %d aborted at %s", hostParameters.ifIndex, hostArea, hostRouteConfig.getSourceLocation());
+        error("Loading HostInterface ifIndex[%d] in Area %s aborted at %s", hostParameters.ifIndex, hostArea.str().c_str(), hostRouteConfig.getSourceLocation());
     }
 }
 
@@ -433,10 +433,10 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     EV << "        loading VirtualLink to " << endPoint << "\n";
 
     intf->setType(OSPF::Interface::VIRTUAL);
-    neighbor->setNeighborID(ulongFromIPv4Address(ipv4AddressFromAddressString(endPoint.c_str())));
+    neighbor->setNeighborID(ipv4AddressFromAddressString(endPoint.c_str()));
     intf->addNeighbor(neighbor);
 
-    intf->setTransitAreaID(ulongFromAddressString(getRequiredAttribute(virtualLinkConfig, "transitAreaID")));
+    intf->setTransitAreaID(ipv4AddressFromAddressString(getRequiredAttribute(virtualLinkConfig, "transitAreaID")));
 
     intf->setRetransmissionInterval(getIntAttrOrPar(virtualLinkConfig, "retransmissionInterval"));
 
@@ -476,7 +476,7 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
         backbone->addInterface(intf);
     } else {
         delete intf;
-        error("Loading VirtualLink to %s through Area %d aborted at ", endPoint.c_str(), intf->getAreaID(), virtualLinkConfig.getSourceLocation());
+        error("Loading VirtualLink to %s through Area %s aborted at ", endPoint.c_str(), intf->getAreaID().str().c_str(), virtualLinkConfig.getSourceLocation());
     }
 }
 

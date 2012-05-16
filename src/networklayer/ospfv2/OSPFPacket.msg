@@ -96,7 +96,7 @@ class OSPFLSAHeader
     unsigned short lsAge = 0;
     OSPFOptions lsOptions;
     char lsType enum(LSAType) = ROUTERLSA_TYPE;
-    unsigned long linkStateID;
+    IPv4Address linkStateID;
     IPv4Address advertisingRouter;
     long lsSequenceNumber = 0;
     unsigned short lsaLength = 0;
@@ -223,7 +223,7 @@ packet OSPFDatabaseDescriptionPacket extends OSPFPacket
 struct LSARequest
 {
     unsigned long lsType;
-    unsigned long linkStateID;
+    IPv4Address linkStateID;
     IPv4Address advertisingRouter;
 }
 

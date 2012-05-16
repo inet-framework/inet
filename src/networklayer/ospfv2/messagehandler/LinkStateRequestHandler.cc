@@ -55,13 +55,13 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Inte
             EV << "    LSARequest: type="
                << request.lsType
                << ", LSID="
-               << addressStringFromULong(addressString, sizeof(addressString), request.linkStateID)
+               << request.linkStateID
                << ", advertisingRouter="
-               << addressStringFromULong(addressString, sizeof(addressString), request.advertisingRouter.getInt())
+               << request.advertisingRouter
                << "\n";
 
             lsaKey.linkStateID = request.linkStateID;
-            lsaKey.advertisingRouter = request.advertisingRouter.getInt();
+            lsaKey.advertisingRouter = request.advertisingRouter;
 
             OSPFLSA* lsaInDatabase = router->findLSA(static_cast<LSAType> (request.lsType), lsaKey, intf->getArea()->getAreaID());
 

@@ -104,9 +104,9 @@ struct HostRouteParameters {
     Metric        linkCost;
 };
 
-typedef unsigned long RouterID;
-typedef unsigned long AreaID;
-typedef unsigned long LinkStateID;
+typedef IPv4Address RouterID;
+typedef IPv4Address AreaID;
+typedef IPv4Address LinkStateID;
 
 struct LSAKeyType {
     LinkStateID linkStateID;
@@ -124,12 +124,12 @@ struct DesignatedRouterID {
     IPv4Address ipInterfaceAddress;
 };
 
-const RouterID              NULL_ROUTERID = 0;
-const AreaID                BACKBONE_AREAID = 0;
-const LinkStateID           NULL_LINKSTATEID = 0;
+const RouterID              NULL_ROUTERID(0,0,0,0);
+const AreaID                BACKBONE_AREAID(0,0,0,0);
+const LinkStateID           NULL_LINKSTATEID(0,0,0,0);
 const IPv4Address           NULL_IPV4ADDRESS(0, 0, 0, 0);
 const IPv4AddressRange      NULL_IPV4ADDRESSRANGE = { IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0)};
-const DesignatedRouterID    NULL_DESIGNATEDROUTERID = { 0, IPv4Address(0, 0, 0, 0)};
+const DesignatedRouterID    NULL_DESIGNATEDROUTERID = { IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0)};
 
 } // namespace OSPF
 

@@ -79,7 +79,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     /* If the receiving interface connects to a point-to-point link or a virtual link,
                        the source is identified by the Router ID found in the Hello's OSPF packet header.
                      */
-                    neighbor = intf->getNeighborByID(helloPacket->getRouterID().getInt());
+                    neighbor = intf->getNeighborByID(helloPacket->getRouterID());
                 }
 
                 if (neighbor != NULL) {
@@ -88,9 +88,9 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     IPv4Address designatedAddress = neighbor->getDesignatedRouter().ipInterfaceAddress;
                     IPv4Address backupAddress = neighbor->getBackupDesignatedRouter().ipInterfaceAddress;
                     char newPriority = helloPacket->getRouterPriority();
-                    unsigned long source = controlInfo->getSrcAddr().getInt();
-                    unsigned long newDesignatedRouter = helloPacket->getDesignatedRouter().getInt();
-                    unsigned long newBackupRouter = helloPacket->getBackupDesignatedRouter().getInt();
+                    IPv4Address source = controlInfo->getSrcAddr();
+                    IPv4Address newDesignatedRouter = helloPacket->getDesignatedRouter();
+                    IPv4Address newBackupRouter = helloPacket->getBackupDesignatedRouter();
                     OSPF::DesignatedRouterID dRouterID;
 
                     if ((interfaceType == OSPF::Interface::VIRTUAL) &&
@@ -116,7 +116,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                        scheduled with the event BACKUP_SEEN.
                      */
                     if ((newDesignatedRouter == source) &&
-                        (newBackupRouter == 0) &&
+                        (newBackupRouter == OSPF::NULL_IPV4ADDRESS) &&
                         (intf->getState() == OSPF::Interface::WAITING_STATE))
                     {
                         backupSeen = true;
@@ -128,9 +128,9 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                            NEIGHBOR_CHANGE.
                          */
                         if (((newDesignatedRouter == source) &&
-                             (newDesignatedRouter != ulongFromIPv4Address(designatedAddress))) ||
+                             (newDesignatedRouter != designatedAddress)) ||
                             ((newDesignatedRouter != source) &&
-                             (source == ulongFromIPv4Address(designatedAddress))))
+                             (source == designatedAddress)))
                         {
                             neighborChanged = true;
                             neighborsDRStateChanged = true;
@@ -155,27 +155,27 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                            event NEIGHBOR_CHANGE.
                          */
                         if (((newBackupRouter == source) &&
-                             (newBackupRouter != ulongFromIPv4Address(backupAddress))) ||
+                             (newBackupRouter != backupAddress)) ||
                             ((newBackupRouter != source) &&
-                             (source == ulongFromIPv4Address(backupAddress))))
+                             (source == backupAddress)))
                         {
                             neighborChanged = true;
                         }
                     }
 
-                    neighbor->setNeighborID(helloPacket->getRouterID().getInt());
+                    neighbor->setNeighborID(helloPacket->getRouterID());
                     neighbor->setPriority(newPriority);
                     neighbor->setAddress(srcAddress);
                     dRouterID.routerID = newDesignatedRouter;
-                    dRouterID.ipInterfaceAddress = ipv4AddressFromULong(newDesignatedRouter);
-                    if (newDesignatedRouter != ulongFromIPv4Address(designatedAddress)) {
+                    dRouterID.ipInterfaceAddress = newDesignatedRouter;
+                    if (newDesignatedRouter != designatedAddress) {
                         designatedAddress = dRouterID.ipInterfaceAddress;
                         drChanged = true;
                     }
                     neighbor->setDesignatedRouter(dRouterID);
                     dRouterID.routerID = newBackupRouter;
-                    dRouterID.ipInterfaceAddress = ipv4AddressFromULong(newBackupRouter);
-                    if (newBackupRouter != ulongFromIPv4Address(backupAddress)) {
+                    dRouterID.ipInterfaceAddress = newBackupRouter;
+                    if (newBackupRouter != backupAddress) {
                         backupAddress = dRouterID.ipInterfaceAddress;
                         drChanged = true;
                     }
@@ -211,15 +211,15 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     bool designatedSetUp = false;
                     bool backupSetUp = false;
 
-                    neighbor = new OSPF::Neighbor(helloPacket->getRouterID().getInt());
+                    neighbor = new OSPF::Neighbor(helloPacket->getRouterID());
                     neighbor->setPriority(helloPacket->getRouterPriority());
                     neighbor->setAddress(srcAddress);
                     neighbor->setRouterDeadInterval(helloPacket->getRouterDeadInterval());
 
                     router->getMessageHandler()->printEvent("Hello packet received", intf, neighbor);
 
-                    dRouterID.routerID = helloPacket->getDesignatedRouter().getInt();
-                    dRouterID.ipInterfaceAddress = ipv4AddressFromULong(dRouterID.routerID);
+                    dRouterID.routerID = helloPacket->getDesignatedRouter();
+                    dRouterID.ipInterfaceAddress = dRouterID.routerID;
 
                     OSPF::Neighbor* designated = intf->getNeighborByAddress(dRouterID.ipInterfaceAddress);
 
@@ -232,8 +232,8 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     }
                     neighbor->setDesignatedRouter(dRouterID);
 
-                    dRouterID.routerID = helloPacket->getBackupDesignatedRouter().getInt();
-                    dRouterID.ipInterfaceAddress = ipv4AddressFromULong(dRouterID.routerID);
+                    dRouterID.routerID = helloPacket->getBackupDesignatedRouter();
+                    dRouterID.ipInterfaceAddress = dRouterID.routerID;
 
                     OSPF::Neighbor* backup = intf->getNeighborByAddress(dRouterID.ipInterfaceAddress);
 

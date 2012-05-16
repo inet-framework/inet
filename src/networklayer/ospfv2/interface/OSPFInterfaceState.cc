@@ -89,7 +89,7 @@ void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceSta
             intf->getArea()->floodLSA(newLSA);
             delete newLSA;
         } else {    // no neighbors on the network -> old NetworkLSA must be flushed
-            OSPF::NetworkLSA* oldLSA = intf->getArea()->findNetworkLSA(ulongFromIPv4Address(intf->getAddressRange().address));
+            OSPF::NetworkLSA* oldLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
 
             if (oldLSA != NULL) {
                 oldLSA->getHeader().setLsAge(MAX_AGE);
@@ -100,7 +100,7 @@ void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceSta
     }
 
     if (oldState == OSPF::Interface::DESIGNATED_ROUTER_STATE) {
-        OSPF::NetworkLSA* networkLSA = intf->getArea()->findNetworkLSA(ulongFromIPv4Address(intf->getAddressRange().address));
+        OSPF::NetworkLSA* networkLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
 
         if (networkLSA != NULL) {
             networkLSA->getHeader().setLsAge(MAX_AGE);

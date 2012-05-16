@@ -104,9 +104,7 @@ unsigned int calculateLSASize(const OSPFASExternalLSA* asExternalLSA)
 }
 
 void printLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output) {
-    char addressString[16];
-    output << "LSAHeader: age="
-           << lsaHeader.getLsAge()
+    output << "LSAHeader: age=" << lsaHeader.getLsAge()
            << ", type=";
     switch (lsaHeader.getLsType()) {
         case ROUTERLSA_TYPE:                     output << "RouterLSA";                     break;
@@ -116,12 +114,9 @@ void printLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output) {
         case AS_EXTERNAL_LSA_TYPE:               output << "ASExternalLSA";                 break;
         default:                                 output << "Unknown";                       break;
     }
-    output << ", LSID="
-           << addressStringFromULong(addressString, sizeof(addressString), lsaHeader.getLinkStateID());
-    output << ", advertisingRouter="
-           << lsaHeader.getAdvertisingRouter()
-           << ", seqNumber="
-           << lsaHeader.getLsSequenceNumber();
+    output << ", LSID=" << lsaHeader.getLinkStateID()
+           << ", advertisingRouter=" << lsaHeader.getAdvertisingRouter()
+           << ", seqNumber=" << lsaHeader.getLsSequenceNumber();
     output << endl;
 }
 

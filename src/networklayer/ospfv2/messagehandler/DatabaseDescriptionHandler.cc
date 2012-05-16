@@ -207,7 +207,7 @@ bool OSPF::DatabaseDescriptionHandler::processDDPacket(OSPFDatabaseDescriptionPa
             OSPF::LSAKeyType lsaKey;
 
             lsaKey.linkStateID = currentHeader.getLinkStateID();
-            lsaKey.advertisingRouter = currentHeader.getAdvertisingRouter().getInt();
+            lsaKey.advertisingRouter = currentHeader.getAdvertisingRouter();
 
             OSPFLSA* lsaInDatabase = router->findLSA(lsaType, lsaKey, intf->getArea()->getAreaID());
 

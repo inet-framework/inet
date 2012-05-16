@@ -436,7 +436,7 @@ void OSPF::Neighbor::removeFromRetransmissionList(OSPF::LSAKeyType lsaKey)
     std::list<OSPFLSA*>::iterator it = linkStateRetransmissionList.begin();
     while (it != linkStateRetransmissionList.end()) {
         if (((*it)->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
-            ((*it)->getHeader().getAdvertisingRouter().getInt() == lsaKey.advertisingRouter))
+            ((*it)->getHeader().getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
             delete (*it);
             it = linkStateRetransmissionList.erase(it);
@@ -451,7 +451,7 @@ bool OSPF::Neighbor::isLinkStateRequestListEmpty(OSPF::LSAKeyType lsaKey) const
     for (std::list<OSPFLSA*>::const_iterator it = linkStateRetransmissionList.begin(); it != linkStateRetransmissionList.end(); it++) {
         const OSPFLSA* lsa = *it;
         if ((lsa->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
-            (lsa->getHeader().getAdvertisingRouter().getInt() == lsaKey.advertisingRouter))
+            (lsa->getHeader().getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
             return true;
         }
@@ -463,7 +463,7 @@ OSPFLSA* OSPF::Neighbor::findOnRetransmissionList(OSPF::LSAKeyType lsaKey)
 {
     for (std::list<OSPFLSA*>::iterator it = linkStateRetransmissionList.begin(); it != linkStateRetransmissionList.end(); it++) {
         if (((*it)->getHeader().getLinkStateID() == lsaKey.linkStateID) &&
-            ((*it)->getHeader().getAdvertisingRouter().getInt() == lsaKey.advertisingRouter))
+            ((*it)->getHeader().getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
             return (*it);
         }
@@ -495,7 +495,7 @@ void OSPF::Neighbor::removeFromRequestList(OSPF::LSAKeyType lsaKey)
     std::list<OSPFLSAHeader*>::iterator it = linkStateRequestList.begin();
     while (it != linkStateRequestList.end()) {
         if (((*it)->getLinkStateID() == lsaKey.linkStateID) &&
-            ((*it)->getAdvertisingRouter().getInt() == lsaKey.advertisingRouter))
+            ((*it)->getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
             delete (*it);
             it = linkStateRequestList.erase(it);
@@ -515,7 +515,7 @@ bool OSPF::Neighbor::isLSAOnRequestList(OSPF::LSAKeyType lsaKey) const
     for (std::list<OSPFLSAHeader*>::const_iterator it = linkStateRequestList.begin(); it != linkStateRequestList.end(); it++) {
         const OSPFLSAHeader* lsaHeader = *it;
         if ((lsaHeader->getLinkStateID() == lsaKey.linkStateID) &&
-            (lsaHeader->getAdvertisingRouter().getInt() == lsaKey.advertisingRouter))
+            (lsaHeader->getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
             return true;
         }
@@ -527,7 +527,7 @@ OSPFLSAHeader* OSPF::Neighbor::findOnRequestList(OSPF::LSAKeyType lsaKey)
 {
     for (std::list<OSPFLSAHeader*>::iterator it = linkStateRequestList.begin(); it != linkStateRequestList.end(); it++) {
         if (((*it)->getLinkStateID() == lsaKey.linkStateID) &&
-            ((*it)->getAdvertisingRouter().getInt() == lsaKey.advertisingRouter))
+            ((*it)->getAdvertisingRouter() == lsaKey.advertisingRouter))
         {
             return (*it);
         }

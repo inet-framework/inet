@@ -173,7 +173,7 @@ void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* un
     if (packet->getVersion() == 2) {
         IPv4ControlInfo* controlInfo = check_and_cast<IPv4ControlInfo *> (packet->getControlInfo());
         int interfaceId = controlInfo->getInterfaceId();
-        OSPF::AreaID areaID = packet->getAreaID().getInt();
+        OSPF::AreaID areaID = packet->getAreaID();
         OSPF::Area* area = router->getAreaByID(areaID);
 
         if (area != NULL) {
@@ -185,7 +185,7 @@ void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* un
                 if (areaID == BACKBONE_AREAID) {
                     if (router->getAreaCount() > 1) {
                         // it must be a virtual link and the source router's router ID must be the endpoint of this virtual link and...
-                        intf = area->findVirtualLink(packet->getRouterID().getInt());
+                        intf = area->findVirtualLink(packet->getRouterID());
 
                         if (intf != NULL) {
                             OSPF::Area* virtualLinkTransitArea = router->getAreaByID(intf->getTransitAreaID());
@@ -235,7 +235,7 @@ void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* un
                                     break;
                                 case OSPF::Interface::POINTTOPOINT:
                                 case OSPF::Interface::VIRTUAL:
-                                    neighbor = intf->getNeighborByID(packet->getRouterID().getInt());
+                                    neighbor = intf->getNeighborByID(packet->getRouterID());
                                     break;
                                 default: break;
                             }
@@ -354,7 +354,7 @@ void OSPF::MessageHandler::printEvent(const char* eventString, const OSPF::Inter
     if (forNeighbor != NULL) {
         char addressString[16];
         EV << "neighbor["
-           << addressStringFromULong(addressString, sizeof(addressString), forNeighbor->getNeighborID())
+           << forNeighbor->getNeighborID()
            << "] (state: "
            << forNeighbor->getStateString(forNeighbor->getState())
            << "); ";
@@ -454,7 +454,7 @@ void OSPF::MessageHandler::printLinkStateRequestPacket(const OSPFLinkStateReques
         EV << "  type="
            << request.lsType
            << ", LSID="
-           << addressStringFromULong(addressString, sizeof(addressString), request.linkStateID);
+           << request.linkStateID;
         EV << ", advertisingRouter="
            << addressStringFromULong(addressString, sizeof(addressString), request.advertisingRouter.getInt())
            << "\n";

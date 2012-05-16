@@ -47,7 +47,7 @@ void OSPF::LinkStateAcknowledgementHandler::processPacket(OSPFPacket* packet, OS
             EV << "\n";
 
             lsaKey.linkStateID = lsaHeader.getLinkStateID();
-            lsaKey.advertisingRouter = lsaHeader.getAdvertisingRouter().getInt();
+            lsaKey.advertisingRouter = lsaHeader.getAdvertisingRouter();
 
             if ((lsaOnRetransmissionList = neighbor->findOnRetransmissionList(lsaKey)) != NULL) {
                 if (operator==(lsaHeader, lsaOnRetransmissionList->getHeader())) {

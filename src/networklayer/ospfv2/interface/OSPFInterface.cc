@@ -307,7 +307,7 @@ bool OSPF::Interface::floodLSA(OSPFLSA* lsa, OSPF::Interface* intf, OSPF::Neighb
         OSPF::LSAKeyType lsaKey;
 
         lsaKey.linkStateID = linkStateID;
-        lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter().getInt();
+        lsaKey.advertisingRouter = lsa->getHeader().getAdvertisingRouter();
 
         for (long i = 0; i < neighborCount; i++) {  // (1)
             if (neighboringRouters[i]->getState() < OSPF::Neighbor::EXCHANGE_STATE) {   // (1) (a)
