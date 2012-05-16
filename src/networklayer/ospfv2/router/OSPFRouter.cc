@@ -72,7 +72,7 @@ void OSPF::Router::addArea(OSPF::Area* area)
 }
 
 
-OSPF::Area* OSPF::Router::getArea(OSPF::AreaID areaID)
+OSPF::Area* OSPF::Router::getAreaByID(OSPF::AreaID areaID)
 {
     std::map<OSPF::AreaID, OSPF::Area*>::iterator areaIt = areasByID.find(areaID);
     if (areaIt != areasByID.end()) {
@@ -84,7 +84,7 @@ OSPF::Area* OSPF::Router::getArea(OSPF::AreaID areaID)
 }
 
 
-OSPF::Area* OSPF::Router::getArea(IPv4Address address)
+OSPF::Area* OSPF::Router::getAreaByAddr(IPv4Address address)
 {
     long areaCount = areas.size();
 
@@ -717,7 +717,7 @@ void OSPF::Router::rebuildRoutingTable()
         }
     }
     if (areaCount > 1) {
-        OSPF::Area* backbone = getArea(OSPF::BACKBONE_AREAID);
+        OSPF::Area* backbone = getAreaByID(OSPF::BACKBONE_AREAID);
         if (backbone != NULL) {
             backbone->calculateInterAreaRoutes(newTable);
         }

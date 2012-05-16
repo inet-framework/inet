@@ -52,7 +52,7 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
 
     if (neighbor->getState() >= OSPF::Neighbor::EXCHANGE_STATE) {
         OSPF::AreaID areaID = lsUpdatePacket->getAreaID().getInt();
-        OSPF::Area* area = router->getArea(areaID);
+        OSPF::Area* area = router->getAreaByID(areaID);
         LSAType currentType = ROUTERLSA_TYPE;
         unsigned int currentLSAIndex = 0;
 

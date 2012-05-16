@@ -328,7 +328,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         }
     }
     // add the interface to it's Area
-    OSPF::Area* area = ospfRouter->getArea(areaID);
+    OSPF::Area* area = ospfRouter->getAreaByID(areaID);
     if (area != NULL) {
         area->addInterface(intf);
         intf->processEvent(OSPF::Interface::INTERFACE_UP); // notification should come from the blackboard...
@@ -411,7 +411,7 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
     hostParameters.linkCost = getIntAttrOrPar(hostRouteConfig, "linkCost");
 
     // add the host route to the OSPF data structure.
-    OSPF::Area* area = ospfRouter->getArea(hostArea);
+    OSPF::Area* area = ospfRouter->getAreaByID(hostArea);
     if (area != NULL) {
         area->addHostRoute(hostParameters);
     } else {
@@ -469,8 +469,8 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     intf->setAuthenticationKey(keyValue);
 
     // add the virtual link to the OSPF data structure.
-    OSPF::Area* transitArea = ospfRouter->getArea(intf->getAreaID());
-    OSPF::Area* backbone = ospfRouter->getArea(OSPF::BACKBONE_AREAID);
+    OSPF::Area* transitArea = ospfRouter->getAreaByID(intf->getAreaID());
+    OSPF::Area* backbone = ospfRouter->getAreaByID(OSPF::BACKBONE_AREAID);
 
     if ((backbone != NULL) && (transitArea != NULL) && (transitArea->getExternalRoutingCapability())) {
         backbone->addInterface(intf);

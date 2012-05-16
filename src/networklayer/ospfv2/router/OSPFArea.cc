@@ -699,7 +699,7 @@ OSPF::RouterLSA* OSPF::Area::originateRouterLSA()
 
     routerLSA->setB_AreaBorderRouter(parentRouter->getAreaCount() > 1);
     routerLSA->setE_ASBoundaryRouter((externalRoutingCapability && parentRouter->getASBoundaryRouter()) ? true : false);
-    OSPF::Area* backbone = parentRouter->getArea(OSPF::BACKBONE_AREAID);
+    OSPF::Area* backbone = parentRouter->getAreaByID(OSPF::BACKBONE_AREAID);
     routerLSA->setV_VirtualLinkEndpoint((backbone == NULL) ? false : backbone->hasVirtualLink(areaID));
 
     routerLSA->setNumberOfLinks(0);
@@ -1584,7 +1584,7 @@ void OSPF::Area::calculateShortestPathTree(std::vector<OSPF::RoutingTableEntry*>
 
                     OSPF::Area* backbone;
                     if (areaID != OSPF::BACKBONE_AREAID) {
-                        backbone = parentRouter->getArea(OSPF::BACKBONE_AREAID);
+                        backbone = parentRouter->getAreaByID(OSPF::BACKBONE_AREAID);
                     } else {
                         backbone = this;
                     }

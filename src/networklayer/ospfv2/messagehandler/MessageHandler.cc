@@ -174,7 +174,7 @@ void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* un
         IPv4ControlInfo* controlInfo = check_and_cast<IPv4ControlInfo *> (packet->getControlInfo());
         int interfaceId = controlInfo->getInterfaceId();
         OSPF::AreaID areaID = packet->getAreaID().getInt();
-        OSPF::Area* area = router->getArea(areaID);
+        OSPF::Area* area = router->getAreaByID(areaID);
 
         if (area != NULL) {
             // packet Area ID must either match the Area ID of the receiving interface or...
@@ -188,7 +188,7 @@ void OSPF::MessageHandler::processPacket(OSPFPacket* packet, OSPF::Interface* un
                         intf = area->findVirtualLink(packet->getRouterID().getInt());
 
                         if (intf != NULL) {
-                            OSPF::Area* virtualLinkTransitArea = router->getArea(intf->getTransitAreaID());
+                            OSPF::Area* virtualLinkTransitArea = router->getAreaByID(intf->getTransitAreaID());
 
                             if (virtualLinkTransitArea != NULL) {
                                 // the receiving interface must attach to the virtual link's configured transit area

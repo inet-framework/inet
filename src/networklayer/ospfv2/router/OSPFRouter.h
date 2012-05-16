@@ -98,14 +98,14 @@ public:
      * NULL otherwise.
      * @param areaID [in] The Area identifier.
      */
-    Area*                getArea(AreaID areaID);
+    Area*                getAreaByID(AreaID areaID);
 
     /**
      * Returns the Area pointer from the Area list which contains the input IPv4 address,
      * NULL if there's no such area connected to the Router.
      * @param address [in] The IPv4 address whose containing Area we're looking for.
      */
-    Area*                getArea(IPv4Address address);
+    Area*                getAreaByAddr(IPv4Address address);
 
     /**
      * Returns the pointer of the physical Interface identified by the input interface index,
