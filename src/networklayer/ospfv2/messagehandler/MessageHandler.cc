@@ -408,9 +408,7 @@ void OSPF::MessageHandler::printDatabaseDescriptionPacket(const OSPFDatabaseDesc
        << ((ddOptions.M_More) ? "M " : "_ ")
        << ((ddOptions.MS_MasterSlave) ? "MS" : "__")
        << "\n";
-    EV << "  seqNumber="
-       << ddPacket->getDdSequenceNumber()
-       << "\n";
+    EV << "  seqNumber=" << ddPacket->getDdSequenceNumber() << "\n";
     EV << "  LSA headers:\n";
 
     unsigned int lsaCount = ddPacket->getLsaHeadersArraySize();
@@ -466,11 +464,9 @@ void OSPF::MessageHandler::printLinkStateUpdatePacket(const OSPFLinkStateUpdateP
                 case TRANSIT_LINK:       EV << "Transit";        break;
                 case STUB_LINK:          EV << "Stub";           break;
                 case VIRTUAL_LINK:       EV << "Virtual";        break;
-                default:                EV << "Unknown";        break;
+                default:                 EV << "Unknown";        break;
             }
-            EV << ", cost="
-               << link.getLinkCost()
-               << "\n";
+            EV << ", cost=" << link.getLinkCost() << "\n";
         }
     }
 

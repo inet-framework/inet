@@ -51,12 +51,9 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Inte
             LSARequest& request = lsRequestPacket->getRequests(i);
             OSPF::LSAKeyType lsaKey;
 
-            EV << "    LSARequest: type="
-               << request.lsType
-               << ", LSID="
-               << request.linkStateID
-               << ", advertisingRouter="
-               << request.advertisingRouter
+            EV << "    LSARequest: type=" << request.lsType
+               << ", LSID=" << request.linkStateID
+               << ", advertisingRouter=" << request.advertisingRouter
                << "\n";
 
             lsaKey.linkStateID = request.linkStateID;
