@@ -26,6 +26,7 @@
 #include "InterfaceTableAccess.h"
 #include "IPv4Address.h"
 #include "IPv4ControlInfo.h"
+#include "IPv4InterfaceData.h"
 #include "IPvXAddressResolver.h"
 #include "MessageHandler.h"
 #include "OSPFArea.h"
@@ -196,6 +197,18 @@ const char *OSPFRouting::getRequiredAttribute(const cXMLElement& node, const cha
     return s;
 }
 
+void OSPFRouting::joinMulticastGroups(int interfaceId)
+{
+    InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
+    if (!ie)
+        error("Interface id=%d does not exist", interfaceId);
+    IPv4InterfaceData *ipv4Data = ie->ipv4Data();
+    if (!ipv4Data)
+        error("Interface %s (id=%d) does not have IPv4 data", ie->getName(), interfaceId);
+    ipv4Data->joinMulticastGroup(IPv4Address::ALL_OSPF_ROUTERS_MCAST);
+    ipv4Data->joinMulticastGroup(IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
+}
+
 
 void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
 {
@@ -219,6 +232,8 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         delete intf;
         error("Unknown interface type '%s' for interface %s (ifIndex=%d) at %s", interfaceType.c_str(), ifName.c_str(), ifIndex, ifConfig.getSourceLocation());
     }
+
+    joinMulticastGroups(ifIndex);
 
     OSPF::AreaID areaID = IPv4Address(getStrAttrOrPar(ifConfig, "areaID"));
     intf->setAreaID(areaID);
@@ -311,6 +326,8 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
 
     EV << "        loading ExternalInterface " << ifName << " ifIndex[" << ifIndex << "]\n";
 
+    joinMulticastGroups(ifIndex);
+
     networkAddress.address = ipv4AddressFromAddressString(getRequiredAttribute(externalRouteConfig, "advertisedExternalNetworkAddress"));
     networkAddress.mask = ipv4NetmaskFromAddressString(getRequiredAttribute(externalRouteConfig, "advertisedExternalNetworkMask"));
     networkAddress.address = networkAddress.address & networkAddress.mask;
@@ -359,6 +376,8 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
     hostParameters.ifIndex = resolveInterfaceName(ifName);
 
     EV << "        loading HostInterface " << ifName << " ifIndex[" << static_cast<short> (hostParameters.ifIndex) << "]\n";
+
+    joinMulticastGroups(hostParameters.ifIndex);
 
     hostArea = ipv4AddressFromAddressString(getStrAttrOrPar(hostRouteConfig, "areaID"));
     hostParameters.address = ipv4AddressFromAddressString(getRequiredAttribute(hostRouteConfig, "attachedHost"));

@@ -97,6 +97,8 @@ class OSPFRouting :  public cSimpleModule
      */
     bool  loadConfigFromXML(cXMLElement *asConfig);
 
+    void joinMulticastGroups(int interfaceId);
+
   public:
     OSPFRouting();
     virtual ~OSPFRouting();
