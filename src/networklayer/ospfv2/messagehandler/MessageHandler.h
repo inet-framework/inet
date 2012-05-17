@@ -18,16 +18,15 @@
 #ifndef __INET_MESSAGEHANDLER_H
 #define __INET_MESSAGEHANDLER_H
 
-#include "IMessageHandler.h"
-#include "HelloHandler.h"
 #include "DatabaseDescriptionHandler.h"
+#include "HelloHandler.h"
+#include "IMessageHandler.h"
+#include "IPv4ControlInfo.h"
+#include "LinkStateAcknowledgementHandler.h"
 #include "LinkStateRequestHandler.h"
 #include "LinkStateUpdateHandler.h"
-#include "LinkStateAcknowledgementHandler.h"
-#include "OSPFTimer_m.h"
-#include "IPv4ControlInfo.h"
 #include "OSPFInterface.h"
-//#include "OSPFNeighbor.h"
+#include "OSPFTimer_m.h"
 
 namespace OSPF {
 
