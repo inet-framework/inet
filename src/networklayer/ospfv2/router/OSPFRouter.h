@@ -45,7 +45,7 @@ private:
     std::vector<Area*>                                                 areas;                   ///< A list of the contained areas.
     std::map<LSAKeyType, ASExternalLSA*, LSAKeyType_Less>              asExternalLSAsByID;      ///< A map of the ASExternalLSAs advertised by this router.
     std::vector<ASExternalLSA*>                                        asExternalLSAs;          ///< A list of the ASExternalLSAs advertised by this router.
-    std::map<IPv4Address, OSPFASExternalLSAContents, IPv4Address_Less> externalRoutes;          ///< A map of the external route advertised by this router.
+    std::map<IPv4Address, OSPFASExternalLSAContents>                   externalRoutes;          ///< A map of the external route advertised by this router.
     OSPFTimer*                                                         ageTimer;                ///< Database age timer - fires every second.
     std::vector<RoutingTableEntry*>                                    routingTable;            ///< The OSPF routing table - contains more information than the one in the IP layer.
     MessageHandler*                                                    messageHandler;          ///< The message dispatcher class.

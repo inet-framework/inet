@@ -73,20 +73,6 @@ struct AuthenticationKeyType {
     char    bytes[8];
 };
 
-////FIXME remove this type, use IPv4Address instead
-//struct IPv4Address {
-//    unsigned char   bytes[4];
-//
-//
-//    unsigned int asInt() { return (bytes[0]<<24) | bytes[1]<<16 | bytes[2]<<8 | bytes[3]; }
-//};
-
-class IPv4Address_Less : public std::binary_function <IPv4Address, IPv4Address, bool>
-{
-public:
-    bool operator() (IPv4Address leftAddress, IPv4Address rightAddress) const;
-};
-
 struct IPv4AddressRange {
     IPv4Address address;
     IPv4Address mask;
@@ -167,11 +153,6 @@ inline bool operator==(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID
 inline bool operator!=(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
 {
     return (!(leftID == rightID));
-}
-
-inline bool OSPF::IPv4Address_Less::operator() (IPv4Address leftAddress, IPv4Address rightAddress) const
-{
-    return (leftAddress < rightAddress);
 }
 
 inline bool OSPF::IPv4AddressRange_Less::operator() (OSPF::IPv4AddressRange leftAddressRange, OSPF::IPv4AddressRange rightAddressRange) const

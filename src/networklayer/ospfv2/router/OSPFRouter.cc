@@ -1424,7 +1424,7 @@ void OSPF::Router::removeExternalRoute(IPv4Address networkAddress)
         floodLSA(lsaIt->second, OSPF::BACKBONE_AREAID);
     }
 
-    std::map<IPv4Address, OSPFASExternalLSAContents, OSPF::IPv4Address_Less>::iterator externalIt = externalRoutes.find(networkAddress);
+    std::map<IPv4Address, OSPFASExternalLSAContents>::iterator externalIt = externalRoutes.find(networkAddress);
     if (externalIt != externalRoutes.end()) {
         externalRoutes.erase(externalIt);
     }

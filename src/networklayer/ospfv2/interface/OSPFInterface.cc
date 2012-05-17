@@ -206,7 +206,7 @@ OSPF::Neighbor* OSPF::Interface::getNeighborByID(OSPF::RouterID neighborID)
 
 OSPF::Neighbor* OSPF::Interface::getNeighborByAddress(IPv4Address address)
 {
-    std::map<IPv4Address, OSPF::Neighbor*, OSPF::IPv4Address_Less>::iterator neighborIt =
+    std::map<IPv4Address, OSPF::Neighbor*>::iterator neighborIt =
             neighboringRoutersByAddress.find(address);
 
     if (neighborIt != neighboringRoutersByAddress.end()) {
@@ -526,7 +526,7 @@ void OSPF::Interface::sendDelayedAcknowledgements()
     OSPF::MessageHandler* messageHandler = parentArea->getRouter()->getMessageHandler();
     long maxPacketSize = ((IP_MAX_HEADER_BYTES + OSPF_HEADER_LENGTH + OSPF_LSA_HEADER_LENGTH) > mtu) ? IPV4_DATAGRAM_LENGTH : mtu;
 
-    for (std::map<IPv4Address, std::list<OSPFLSAHeader>, OSPF::IPv4Address_Less>::iterator delayIt = delayedAcknowledgements.begin();
+    for (std::map<IPv4Address, std::list<OSPFLSAHeader> >::iterator delayIt = delayedAcknowledgements.begin();
          delayIt != delayedAcknowledgements.end();
          delayIt++)
     {

@@ -84,9 +84,9 @@ private:
     OSPFTimer*                                                          waitTimer;
     OSPFTimer*                                                          acknowledgementTimer;
     std::map<RouterID, Neighbor*>                                       neighboringRoutersByID;
-    std::map<IPv4Address, Neighbor*, IPv4Address_Less>                  neighboringRoutersByAddress;
+    std::map<IPv4Address, Neighbor*>                                    neighboringRoutersByAddress;
     std::vector<Neighbor*>                                              neighboringRouters;
-    std::map<IPv4Address, std::list<OSPFLSAHeader>, IPv4Address_Less>   delayedAcknowledgements;
+    std::map<IPv4Address, std::list<OSPFLSAHeader> >                    delayedAcknowledgements;
     DesignatedRouterID                                                  designatedRouter;
     DesignatedRouterID                                                  backupDesignatedRouter;
     Metric                                                              interfaceOutputCost;
