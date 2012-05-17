@@ -50,7 +50,6 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Inte
         for (unsigned long i = 0; i < requestCount; i++) {
             LSARequest& request = lsRequestPacket->getRequests(i);
             OSPF::LSAKeyType lsaKey;
-            char addressString[16];
 
             EV << "    LSARequest: type="
                << request.lsType

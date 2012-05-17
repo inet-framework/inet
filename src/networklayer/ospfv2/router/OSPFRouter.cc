@@ -636,7 +636,7 @@ OSPF::RoutingTableEntry* OSPF::Router::lookup(IPv4Address destination, std::vect
                 if (entry->getDestinationType() != OSPF::RoutingTableEntry::NETWORK_DESTINATION) {
                     continue;
                 }
-                if (((entry->getDestination().getInt() & entry->getNetmask().getInt() & ulongFromIPv4Address(range.mask)) == ulongFromIPv4Address(range.address & range.mask)) &&
+                if (((entry->getDestination().getInt() & entry->getNetmask().getInt() & range.mask.getInt()) == (range.address & range.mask).getInt()) &&
                     (entry->getPathType() == OSPF::RoutingTableEntry::INTRAAREA))
                 {
                     // active area address range
@@ -1092,7 +1092,7 @@ OSPF::LinkStateID OSPF::Router::getUniqueLinkStateID(OSPF::IPv4AddressRange dest
         IPv4Address existingMask = foundLSA->getContents().getNetworkMask();
 
         if (destination.mask >= existingMask) {
-            return IPv4Address(lsaKey.linkStateID.getInt() | (~(ulongFromIPv4Address(destination.mask))));
+            return lsaKey.linkStateID.getBroadcastAddress(destination.mask);
         } else {
             OSPF::ASExternalLSA* asExternalLSA = new OSPF::ASExternalLSA(*foundLSA);
 
@@ -1106,7 +1106,7 @@ OSPF::LinkStateID OSPF::Router::getUniqueLinkStateID(OSPF::IPv4AddressRange dest
 
             lsaToReoriginate = asExternalLSA;
 
-            return IPv4Address(lsaKey.linkStateID.getInt() | (~(ulongFromIPv4Address(existingMask))));
+            return lsaKey.linkStateID.getBroadcastAddress(existingMask);
         }
     }
 }
@@ -1221,8 +1221,8 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                         for (k = 0; k < routeCount; k++) {
                             if ((routingTable[k]->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
                                 (routingTable[k]->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) &&
-                                ((routingTable[k]->getDestination().getInt() & routingTable[k]->getNetmask().getInt() & ulongFromIPv4Address(destinationAddressRange.mask)) ==
-                                 ulongFromIPv4Address(destinationAddressRange.address & destinationAddressRange.mask)) &&
+                                ((routingTable[k]->getDestination().getInt() & routingTable[k]->getNetmask().getInt() & destinationAddressRange.mask.getInt()) ==
+                                 (destinationAddressRange.address & destinationAddressRange.mask).getInt()) &&
                                 (routingTable[k]->getCost() > maxRangeCost))
                             {
                                 oneLessCost = maxRangeCost;
@@ -1286,8 +1286,8 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                 for (k = 0; k < newRouteCount; k++) {
                     if ((routingTable[k]->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
                         (routingTable[k]->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) &&
-                        ((routingTable[k]->getDestination().getInt() & routingTable[k]->getNetmask().getInt() & ulongFromIPv4Address(destinationAddressRange.mask)) ==
-                         ulongFromIPv4Address(destinationAddressRange.address & destinationAddressRange.mask)) &&
+                        ((routingTable[k]->getDestination().getInt() & routingTable[k]->getNetmask().getInt() & destinationAddressRange.mask.getInt()) ==
+                         (destinationAddressRange.address & destinationAddressRange.mask).getInt()) &&
                         (routingTable[k]->getCost() > maxRangeCost))
                     {
                         maxRangeCost = routingTable[k]->getCost();

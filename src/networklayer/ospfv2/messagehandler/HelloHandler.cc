@@ -50,7 +50,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
          */
         if (!((interfaceType != OSPF::Interface::POINTTOPOINT) &&
               (interfaceType != OSPF::Interface::VIRTUAL) &&
-              (intf->getAddressRange().mask != ipv4AddressFromULong(helloPacket->getNetworkMask().getInt()))
+              (intf->getAddressRange().mask != helloPacket->getNetworkMask())
              )
            )
         {
@@ -59,7 +59,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
              */
             if (intf->getArea()->getExternalRoutingCapability() == helloPacket->getOptions().E_ExternalRoutingCapability) {
                 IPv4ControlInfo* controlInfo = check_and_cast<IPv4ControlInfo *> (helloPacket->getControlInfo());
-                IPv4Address srcAddress = ipv4AddressFromULong(controlInfo->getSrcAddr().getInt());
+                IPv4Address srcAddress = controlInfo->getSrcAddr();
                 bool neighborChanged = false;
                 bool neighborsDRStateChanged = false;
                 bool drChanged = false;
@@ -259,7 +259,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     intf->sendHelloPacket(neighbor->getAddress());
                 }
 
-                unsigned long interfaceAddress = ulongFromIPv4Address(intf->getAddressRange().address);
+                IPv4Address interfaceAddress = intf->getAddressRange().address;
                 unsigned int neighborsNeighborCount = helloPacket->getNeighborArraySize();
                 unsigned int i;
                 /* The list of neighbors contained in the Hello Packet is
@@ -267,7 +267,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                    neighbor state machine should be executed with the event TWOWAY_RECEIVED.
                  */
                 for (i = 0; i < neighborsNeighborCount; i++) {
-                    if (helloPacket->getNeighbor(i).getInt() == interfaceAddress) {
+                    if (helloPacket->getNeighbor(i) == interfaceAddress) {
                         neighbor->processEvent(OSPF::Neighbor::TWOWAY_RECEIVED);
                         break;
                     }

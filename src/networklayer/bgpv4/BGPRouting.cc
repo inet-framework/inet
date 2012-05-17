@@ -344,8 +344,8 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::Rout
         if (ospfExist(_rt))
         {
             OSPF::IPv4AddressRange  OSPFnetAddr;
-            OSPFnetAddr.address = ipv4AddressFromULong(entry->getDestination().getInt());
-            OSPFnetAddr.mask = ipv4AddressFromULong(entry->getNetmask().getInt());
+            OSPFnetAddr.address = entry->getDestination();
+            OSPFnetAddr.mask = entry->getNetmask();
             OSPFRouting* ospf = OSPFRoutingAccess().getIfExists();
             ospf->insertExternalRoute(entry->getInterfaceName(), OSPFnetAddr);
             simulation.setContext(this);
@@ -446,7 +446,7 @@ void BGPRouting::updateSendProcess(const unsigned char type, BGP::SessionID sess
 bool BGPRouting::checkExternalRoute(const IPv4Route* route)
 {
     IPv4Address OSPFRoute;
-    OSPFRoute = ipv4AddressFromULong(route->getDestination().getInt());
+    OSPFRoute = route->getDestination();
     OSPFRouting* ospf = OSPFRoutingAccess().getIfExists();
     bool returnValue = ospf->checkExternalRoute(OSPFRoute);
     simulation.setContext(this);

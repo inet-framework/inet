@@ -198,45 +198,6 @@ inline IPv4Address ipv4NetmaskFromAddressString(const char* charForm)
     return IPvXAddressResolver().resolve(charForm, IPvXAddressResolver::ADDR_IPv4|IPvXAddressResolver::ADDR_MASK).get4();
 }
 
-inline IPv4Address ipv4AddressFromULong(unsigned long longForm)
-{
-    return IPv4Address(longForm);
-}
-
-inline unsigned long ulongFromIPv4Address(IPv4Address byteForm)
-{
-    return byteForm.getInt();
-}
-
-inline unsigned long ulongFromAddressString(const char* charForm)
-{
-    return ulongFromIPv4Address(IPv4Address(charForm));
-}
-
-inline char* addressStringFromIPv4Address(char* buffer, int bufferLength, IPv4Address byteForm)
-{
-    if (bufferLength < 16)
-        buffer = '\0';
-    else
-        sprintf(buffer, "%s", byteForm.str().c_str());
-
-    return buffer;
-}
-
-inline char* addressStringFromULong(char* buffer, int bufferLength, unsigned long longForm)
-{
-    if (bufferLength < 16) {
-        buffer = '\0';
-    }
-    else {
-        sprintf(buffer, "%d.%d.%d.%d", (int)((longForm & 0xFF000000) >> 24),
-                                        (int)((longForm & 0x00FF0000) >> 16),
-                                        (int)((longForm & 0x0000FF00) >> 8),
-                                        (int)(longForm & 0x000000FF));
-    }
-    return buffer;
-}
-
 inline char hexCharToByte(char hex)
 {
     switch (hex) {

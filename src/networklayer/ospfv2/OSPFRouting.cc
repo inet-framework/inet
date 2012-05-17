@@ -102,7 +102,7 @@ void OSPFRouting::insertExternalRoute(const std::string & ifName, const OSPF::IP
     OSPFASExternalLSAContents newExternalContents;
     newExternalContents.setRouteCost(OSPF_BGP_DEFAULT_COST);
     newExternalContents.setExternalRouteTag(OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP);
-    const IPv4Address netmask(ulongFromIPv4Address(netAddr.mask));
+    const IPv4Address netmask = netAddr.mask;
     newExternalContents.setNetworkMask(netmask);
     ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
 }
