@@ -43,23 +43,12 @@ OSPFRouting::OSPFRouting()
     ospfRouter = NULL;
 }
 
-/**
- * Destructor.
- * Deletes the whole OSPF data structure.
- */
 OSPFRouting::~OSPFRouting()
 {
     delete ospfRouter;
 }
 
 
-/**
- * OMNeT++ init method.
- * Runs at stage 2 after interfaces are registered(stage 0) and the routing
- * table is initialized(stage 1). Loads OSPF configuration information from
- * the config XML.
- * @param stage [in] The initialization stage.
- */
 void OSPFRouting::initialize(int stage)
 {
     // we have to wait for stage 2 until interfaces get registered(stage 0)
@@ -82,19 +71,12 @@ void OSPFRouting::initialize(int stage)
 }
 
 
-/**
- * Forwards OSPF messages to the message handler object of the OSPF data structure.
- * @param msg [in] The OSPF message.
- */
 void OSPFRouting::handleMessage(cMessage *msg)
 {
     ospfRouter->getMessageHandler()->messageReceived(msg);
 }
 
-/**
- * Insert a route learn by BGP in OSPF routingTable as an external route.
- * Used by the BGPRouting module.
- */
+
 void OSPFRouting::insertExternalRoute(const std::string & ifName, const OSPF::IPv4AddressRange &netAddr)
 {
     int ifIndex = resolveInterfaceName(ifName);
@@ -107,10 +89,7 @@ void OSPFRouting::insertExternalRoute(const std::string & ifName, const OSPF::IP
     ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
 }
 
-/**
- * Return true if the route is in OSPF external LSA Table, false else.
- * Used by the BGPRouting module.
- */
+
 bool OSPFRouting::checkExternalRoute(const IPv4Address &route)
 {
     for (unsigned long i=1; i < ospfRouter->getASExternalLSACount(); i++)
@@ -123,9 +102,7 @@ bool OSPFRouting::checkExternalRoute(const IPv4Address &route)
     return false;
 }
 
-/**
- * Looks up the interface name in IInterfaceTable, and returns interfaceId a.k.a ifIndex.
- */
+
 int OSPFRouting::resolveInterfaceName(const std::string& name) const
 {
     InterfaceEntry* ie = ift->getInterfaceByName(name.c_str());
@@ -135,11 +112,7 @@ int OSPFRouting::resolveInterfaceName(const std::string& name) const
     return ie->getInterfaceId();
 }
 
-/**
- * Loads a list of OSPF Areas connected to this router from the config XML.
- * @param routerNode [in]  XML node describing this router.
- * @param areaList   [out] A hash of OSPF Areas connected to this router. The hash key is the Area ID.
- */
+
 void OSPFRouting::getAreaListFromXML(const cXMLElement& routerNode, std::map<std::string, int>& areaList) const
 {
     cXMLElementList routerConfig = routerNode.getChildren();
@@ -159,12 +132,6 @@ void OSPFRouting::getAreaListFromXML(const cXMLElement& routerNode, std::map<std
 }
 
 
-/**
- * Loads basic configuration information for a given area from the config XML.
- * Reads the configured address ranges, and whether this Area should be handled as a stub Area.
- * @param asConfig [in] XML node describing the configuration of the whole Autonomous System.
- * @param areaID   [in] The Area to be added to the OSPF data structure.
- */
 void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string& areaID)
 {
     std::string areaXPath("Area[@id='");
@@ -230,11 +197,6 @@ const char *OSPFRouting::getRequiredAttribute(const cXMLElement& node, const cha
 }
 
 
-/**
- * Loads OSPF configuration information for a router interface.
- * Handles POINTTOPOINT, BROADCAST, NBMA and POINTTOMULTIPOINT interfaces.
- * @param ifConfig [in] XML node describing the configuration of an OSPF interface.
- */
 void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
 {
     OSPF::Interface* intf = new OSPF::Interface;
@@ -242,7 +204,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
     int ifIndex = resolveInterfaceName(ifName);
     std::string interfaceType = ifConfig.getTagName();
 
-    EV << "        loading " << interfaceType << " " << ifName << " ifIndex[" << ifIndex << "]\n";
+    EV << "        loading " << interfaceType << " " << ifName << " (ifIndex=" << ifIndex << ")\n";
 
     intf->setIfIndex(ifIndex);
     if (interfaceType == "PointToPointInterface") {
@@ -255,7 +217,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         intf->setType(OSPF::Interface::POINTTOMULTIPOINT);
     } else {
         delete intf;
-        error("Loading %s ifIndex[%d] aborted at %s", interfaceType.c_str(), ifIndex, ifConfig.getSourceLocation());
+        error("Unknown interface type '%s' for interface %s (ifIndex=%d) at %s", interfaceType.c_str(), ifName.c_str(), ifIndex, ifConfig.getSourceLocation());
     }
 
     OSPF::AreaID areaID = IPv4Address(getStrAttrOrPar(ifConfig, "areaID"));
@@ -339,10 +301,6 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
 }
 
 
-/**
- * Loads the configuration information of a route outside of the Autonomous System(external route).
- * @param externalRouteConfig [in] XML node describing the parameters of an external route.
- */
 void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
 {
     std::string ifName = getRequiredAttribute(externalRouteConfig, "ifName");
@@ -392,10 +350,6 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
 }
 
 
-/**
- * Loads the configuration of a host getRoute(a host directly connected to the router).
- * @param hostRouteConfig [in] XML node describing the parameters of a host route.
- */
 void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
 {
     OSPF::HostRouteParameters hostParameters;
@@ -420,10 +374,6 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
 }
 
 
-/**
- * Loads the configuration of an OSPf virtual link(virtual connection between two backbone routers).
- * @param virtualLinkConfig [in] XML node describing the parameters of a virtual link.
- */
 void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 {
     OSPF::Interface* intf = new OSPF::Interface;
@@ -481,12 +431,6 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 }
 
 
-/**
- * Loads the configuration of the OSPF data structure from the config XML.
- * @param filename [in] The path of the XML config file.
- * @return True if the configuration was succesfully loaded.
- * @throws an getError() otherwise.
- */
 bool OSPFRouting::loadConfigFromXML(cXMLElement *asConfig)
 {
     if (strcmp(asConfig->getTagName(), "OSPFASConfig"))
