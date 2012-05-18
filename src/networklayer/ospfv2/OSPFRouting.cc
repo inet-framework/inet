@@ -310,7 +310,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         intf->processEvent(OSPF::Interface::INTERFACE_UP); // notification should come from the blackboard...
     } else {
         delete intf;
-        error("Loading %s ifIndex[%d] in Area %s aborted at %s", interfaceType.c_str(), ifIndex, areaID.str().c_str(), ifConfig.getSourceLocation());
+        error("Loading %s ifIndex[%d] in Area %s aborted at %s", interfaceType.c_str(), ifIndex, areaID.str(false).c_str(), ifConfig.getSourceLocation());
     }
 }
 
@@ -387,7 +387,7 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
     if (area != NULL) {
         area->addHostRoute(hostParameters);
     } else {
-        error("Loading HostInterface ifIndex[%d] in Area %s aborted at %s", hostParameters.ifIndex, hostArea.str().c_str(), hostRouteConfig.getSourceLocation());
+        error("Loading HostInterface ifIndex[%d] in Area %s aborted at %s", hostParameters.ifIndex, hostArea.str(false).c_str(), hostRouteConfig.getSourceLocation());
     }
 }
 
@@ -443,8 +443,8 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
     if ((backbone != NULL) && (transitArea != NULL) && (transitArea->getExternalRoutingCapability())) {
         backbone->addInterface(intf);
     } else {
+        error("Loading VirtualLink to %s through Area %s aborted at ", endPoint.c_str(), intf->getAreaID().str(false).c_str(), virtualLinkConfig.getSourceLocation());
         delete intf;
-        error("Loading VirtualLink to %s through Area %s aborted at ", endPoint.c_str(), intf->getAreaID().str().c_str(), virtualLinkConfig.getSourceLocation());
     }
 }
 

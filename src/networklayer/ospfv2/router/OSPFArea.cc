@@ -62,7 +62,7 @@ void OSPF::Area::addInterface(OSPF::Interface* intf)
 void OSPF::Area::info(char *buffer)
 {
     std::stringstream out;
-    out << "areaID: " << areaID;
+    out << "areaID: " << areaID.str(false);
     strcpy(buffer, out.str().c_str());
 }
 
@@ -70,21 +70,21 @@ std::string OSPF::Area::detailedInfo() const
 {
     std::stringstream out;
     int i;
-    out << "\n    areaID: " << areaID << ", ";
+    out << "\n    areaID: " << areaID.str(false) << ", ";
     out << "transitCapability: " << (transitCapability ? "true" : "false") << ", ";
     out << "externalRoutingCapability: " << (externalRoutingCapability ? "true" : "false") << ", ";
     out << "stubDefaultCost: " << stubDefaultCost << "\n";
     int addressRangeNum = areaAddressRanges.size();
     for (i = 0; i < addressRangeNum; i++) {
         out << "    addressRanges[" << i << "]: ";
-        out << areaAddressRanges[i].address;
-        out << "/" << areaAddressRanges[i].mask << "\n";
+        out << areaAddressRanges[i].address.str(false);
+        out << "/" << areaAddressRanges[i].mask.str(false) << "\n";
     }
     int interfaceNum = associatedInterfaces.size();
     for (i = 0; i < interfaceNum; i++) {
         out << "    interface[" << i << "]: address: ";
-        out << associatedInterfaces[i]->getAddressRange().address;
-        out << "/" << associatedInterfaces[i]->getAddressRange().mask << "\n";
+        out << associatedInterfaces[i]->getAddressRange().address.str(false);
+        out << "/" << associatedInterfaces[i]->getAddressRange().mask.str(false) << "\n";
     }
 
     out << "\n";

@@ -139,7 +139,7 @@ std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry
         }
     }
     out << "), Area: "
-        << entry.getArea()
+        << entry.getArea().str(false)
         << ", PathType: ";
     switch (entry.getPathType()) {
         case OSPF::RoutingTableEntry::INTRAAREA:      out << "IntraArea";     break;

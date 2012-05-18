@@ -114,8 +114,8 @@ void printLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output) {
         case AS_EXTERNAL_LSA_TYPE:               output << "ASExternalLSA";                 break;
         default:                                 output << "Unknown";                       break;
     }
-    output << ", LSID=" << lsaHeader.getLinkStateID()
-           << ", advertisingRouter=" << lsaHeader.getAdvertisingRouter()
+    output << ", LSID=" << lsaHeader.getLinkStateID().str(false)
+           << ", advertisingRouter=" << lsaHeader.getAdvertisingRouter().str(false)
            << ", seqNumber=" << lsaHeader.getLsSequenceNumber();
     output << endl;
 }
