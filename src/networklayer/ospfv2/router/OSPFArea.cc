@@ -1192,10 +1192,9 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::RoutingTableEntry*
                         const OSPF::RoutingTableEntry* routingEntry = parentRouter->getRoutingTableEntry(i);
 
                         if ((routingEntry->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
-                            (routingEntry->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) &&
-                            ((routingEntry->getDestination().getInt() & routingEntry->getNetmask().getInt() & containingAddressRange.mask.getInt()) ==
-                             (containingAddressRange.address & containingAddressRange.mask).getInt()) &&
-                            (routingEntry->getCost() > maxRangeCost))
+                                (routingEntry->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) &&
+                                containingAddressRange.containsRange(routingEntry->getDestination(), routingEntry->getNetmask()) &&
+                                (routingEntry->getCost() > maxRangeCost))
                         {
                             maxRangeCost = routingEntry->getCost();
                         }

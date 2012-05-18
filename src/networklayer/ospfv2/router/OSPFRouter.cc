@@ -636,7 +636,9 @@ OSPF::RoutingTableEntry* OSPF::Router::lookup(IPv4Address destination, std::vect
                 if (entry->getDestinationType() != OSPF::RoutingTableEntry::NETWORK_DESTINATION) {
                     continue;
                 }
-                if (((entry->getDestination().getInt() & entry->getNetmask().getInt() & range.mask.getInt()) == (range.address & range.mask).getInt()) &&
+//                if (((entry->getDestination().getInt() & entry->getNetmask().getInt() & range.mask.getInt()) == (range.address & range.mask).getInt()) &&
+//                    (entry->getPathType() == OSPF::RoutingTableEntry::INTRAAREA))
+                if (range.containsRange(entry->getDestination(), entry->getNetmask()) &&
                     (entry->getPathType() == OSPF::RoutingTableEntry::INTRAAREA))
                 {
                     // active area address range
