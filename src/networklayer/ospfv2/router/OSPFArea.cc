@@ -1938,23 +1938,24 @@ std::vector<OSPF::NextHop>* OSPF::Area::calculateNextHops(Link& destination, OSP
     } else {
         unsigned long interfaceNum = associatedInterfaces.size();
         for (i = 0; i < interfaceNum; i++) {
-            OSPF::Interface::OSPFInterfaceType intfType = associatedInterfaces[i]->getType();
+            OSPF::Interface *interface = associatedInterfaces[i];
+            OSPF::Interface::OSPFInterfaceType intfType = interface->getType();
 
             if ((intfType == OSPF::Interface::POINTTOPOINT) ||
                 ((intfType == OSPF::Interface::VIRTUAL) &&
-                 (associatedInterfaces[i]->getState() > OSPF::Interface::LOOPBACK_STATE)))
+                 (interface->getState() > OSPF::Interface::LOOPBACK_STATE)))
             {
-                OSPF::Neighbor* neighbor = (associatedInterfaces[i]->getNeighborCount() > 0) ? associatedInterfaces[i]->getNeighbor(0) : NULL;
+                OSPF::Neighbor* neighbor = (interface->getNeighborCount() > 0) ? interface->getNeighbor(0) : NULL;
                 if (neighbor != NULL) {
                     IPv4Address neighborAddress = neighbor->getAddress();
                     if (((neighborAddress != OSPF::NULL_IPV4ADDRESS) &&
                          (neighborAddress == destination.getLinkID())) ||
                         ((neighborAddress == OSPF::NULL_IPV4ADDRESS) &&
-                         (associatedInterfaces[i]->getAddressRange().address == destination.getLinkID()) &&
-                         (associatedInterfaces[i]->getAddressRange().mask.getInt() == destination.getLinkData())))
+                         (interface->getAddressRange().address == destination.getLinkID()) &&
+                         (interface->getAddressRange().mask.getInt() == destination.getLinkData())))
                     {
                         NextHop nextHop;
-                        nextHop.ifIndex = associatedInterfaces[i]->getIfIndex();
+                        nextHop.ifIndex = interface->getIfIndex();
                         nextHop.hopAddress = neighborAddress;
                         nextHop.advertisingRouter = parentRouter->getRouterID();
                         hops->push_back(nextHop);
@@ -1965,11 +1966,11 @@ std::vector<OSPF::NextHop>* OSPF::Area::calculateNextHops(Link& destination, OSP
             if ((intfType == OSPF::Interface::BROADCAST) ||
                 (intfType == OSPF::Interface::NBMA))
             {
-                if ((destination.getLinkID() == (associatedInterfaces[i]->getAddressRange().address & associatedInterfaces[i]->getAddressRange().mask)) &&
-                    (destination.getLinkData() == associatedInterfaces[i]->getAddressRange().mask.getInt()))
+                if ((destination.getLinkID() == (interface->getAddressRange().address & interface->getAddressRange().mask)) &&
+                    (destination.getLinkData() == interface->getAddressRange().mask.getInt()))
                 {
                     NextHop nextHop;
-                    nextHop.ifIndex = associatedInterfaces[i]->getIfIndex();
+                    nextHop.ifIndex = interface->getIfIndex();
                     // TODO: this has been commented because the linkID is not a real IP address in this case and we don't know the next hop address here, verify
                     // nextHop.hopAddress = destination.getLinkID();
                     nextHop.advertisingRouter = parentRouter->getRouterID();
@@ -1979,24 +1980,24 @@ std::vector<OSPF::NextHop>* OSPF::Area::calculateNextHops(Link& destination, OSP
             }
             if (intfType == OSPF::Interface::POINTTOMULTIPOINT) {
                 if (destination.getType() == STUB_LINK) {
-                    if (destination.getLinkID() == associatedInterfaces[i]->getAddressRange().address) {
+                    if (destination.getLinkID() == interface->getAddressRange().address) {
                         // The link contains the router's own interface address and a full mask,
                         // so we insert a next hop pointing to the interface itself. Kind of pointless, but
                         // not much else we could do...
                         // TODO: check what other OSPF implementations do in this situation
                         NextHop nextHop;
-                        nextHop.ifIndex = associatedInterfaces[i]->getIfIndex();
-                        nextHop.hopAddress = associatedInterfaces[i]->getAddressRange().address;
+                        nextHop.ifIndex = interface->getIfIndex();
+                        nextHop.hopAddress = interface->getAddressRange().address;
                         nextHop.advertisingRouter = parentRouter->getRouterID();
                         hops->push_back(nextHop);
                         break;
                     }
                 }
                 if (destination.getType() == POINTTOPOINT_LINK) {
-                    OSPF::Neighbor* neighbor = associatedInterfaces[i]->getNeighborByID(destination.getLinkID());
+                    OSPF::Neighbor* neighbor = interface->getNeighborByID(destination.getLinkID());
                     if (neighbor != NULL) {
                         NextHop nextHop;
-                        nextHop.ifIndex = associatedInterfaces[i]->getIfIndex();
+                        nextHop.ifIndex = interface->getIfIndex();
                         nextHop.hopAddress = neighbor->getAddress();
                         nextHop.advertisingRouter = parentRouter->getRouterID();
                         hops->push_back(nextHop);
