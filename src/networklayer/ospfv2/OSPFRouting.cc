@@ -114,7 +114,7 @@ int OSPFRouting::resolveInterfaceName(const std::string& name) const
 }
 
 
-void OSPFRouting::getAreaListFromXML(const cXMLElement& routerNode, std::map<std::string, int>& areaList) const
+void OSPFRouting::getAreaListFromXML(const cXMLElement& routerNode, std::set<OSPF::AreaID>& areaList) const
 {
     cXMLElementList routerConfig = routerNode.getChildren();
     for (cXMLElementList::iterator routerConfigIt = routerConfig.begin(); routerConfigIt != routerConfig.end(); routerConfigIt++) {
@@ -124,30 +124,29 @@ void OSPFRouting::getAreaListFromXML(const cXMLElement& routerNode, std::map<std
             (nodeName == "NBMAInterface") ||
             (nodeName == "PointToMultiPointInterface"))
         {
-            std::string areaId = getStrAttrOrPar(**routerConfigIt, "areaID");
-            if (areaList.find(areaId) == areaList.end()) {
-                areaList[areaId] = 1;
-            }
+            OSPF::AreaID areaID = IPv4Address(getStrAttrOrPar(**routerConfigIt, "areaID"));
+            if (areaList.find(areaID) == areaList.end())
+                areaList.insert(areaID);
         }
     }
 }
 
 
-void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string& areaID)
+void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, OSPF::AreaID areaID)
 {
     std::string areaXPath("Area[@id='");
-    areaXPath += areaID;
+    areaXPath += areaID.str(false);
     areaXPath += "']";
 
     cXMLElement* areaConfig = asConfig.getElementByPath(areaXPath.c_str());
     if (areaConfig == NULL) {
-        error("No configuration for Area ID: %s at %s", areaID.c_str(), asConfig.getSourceLocation());
+        error("No configuration for Area ID: %s at %s", areaID.str(false).c_str(), asConfig.getSourceLocation());
     }
     else {
-        EV << "    loading info for Area id = " << areaID << "\n";
+        EV << "    loading info for Area id = " << areaID.str(false) << "\n";
     }
 
-    OSPF::Area* area = new OSPF::Area(IPv4Address(areaID.c_str()));
+    OSPF::Area* area = new OSPF::Area(areaID);
     cXMLElementList areaDetails = areaConfig->getChildren();
     for (cXMLElementList::iterator arIt = areaDetails.begin(); arIt != areaDetails.end(); arIt++) {
         std::string nodeName = (*arIt)->getTagName();
@@ -160,7 +159,7 @@ void OSPFRouting::loadAreaFromXML(const cXMLElement& asConfig, const std::string
             area->addAddressRange(addressRange, status == "Advertise");
         }
         else if (nodeName == "Stub") {
-            if (areaID == "0.0.0.0")
+            if (areaID == OSPF::BACKBONE_AREAID)
                 error("The backbone cannot be configured as a stub at %s", (*arIt)->getSourceLocation());
             area->setExternalRoutingCapability(false);
             area->setStubDefaultCost(atoi(getRequiredAttribute(**arIt, "defaultCost")));
@@ -479,16 +478,16 @@ bool OSPFRouting::loadConfigFromXML(cXMLElement *asConfig)
 
     EV << "OSPFRouting: Loading info for Router " << nodeFullPath << "\n";
 
-    std::map<std::string, int> areaList;
+    std::set<OSPF::AreaID> areaList;
     getAreaListFromXML(*routerNode, areaList);
 
-    // load area information
-    for (std::map<std::string, int>::iterator areaIt = areaList.begin(); areaIt != areaList.end(); areaIt++) {
-        loadAreaFromXML(*asConfig, areaIt->first);
-    }
     // if the router is an area border router then it MUST be part of the backbone(area 0)
-    if ((areaList.size() > 1) && (areaList.find("0.0.0.0") == areaList.end())) {
-        loadAreaFromXML(*asConfig, "0.0.0.0");
+    if ((areaList.size() > 1) && (areaList.find(OSPF::BACKBONE_AREAID) == areaList.end())) {
+        areaList.insert(OSPF::BACKBONE_AREAID);
+    }
+    // load area information
+    for (std::set<OSPF::AreaID>::iterator areaIt = areaList.begin(); areaIt != areaList.end(); areaIt++) {
+        loadAreaFromXML(*asConfig, *areaIt);
     }
 
     // load interface information

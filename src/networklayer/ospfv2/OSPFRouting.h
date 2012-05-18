@@ -52,9 +52,9 @@ class OSPFRouting :  public cSimpleModule
     /**
      * Loads a list of OSPF Areas connected to this router from the config XML.
      * @param routerNode [in]  XML node describing this router.
-     * @param areaList   [out] A hash of OSPF Areas connected to this router. The hash key is the Area ID.
+     * @param areaList   [out] A set of OSPF Areas connected to this router.
      */
-    void  getAreaListFromXML(const cXMLElement& routerNode, std::map<std::string, int>& areaList) const;
+    void  getAreaListFromXML(const cXMLElement& routerNode, std::set<OSPF::AreaID>& areaList) const;
 
     /**
      * Loads basic configuration information for a given area from the config XML.
@@ -62,7 +62,7 @@ class OSPFRouting :  public cSimpleModule
      * @param asConfig [in] XML node describing the configuration of the whole Autonomous System.
      * @param areaID   [in] The Area to be added to the OSPF data structure.
      */
-    void  loadAreaFromXML(const cXMLElement& asConfig, const std::string& areaID);
+    void  loadAreaFromXML(const cXMLElement& asConfig, OSPF::AreaID areaID);
 
     /**
      * Loads OSPF configuration information for a router interface.
