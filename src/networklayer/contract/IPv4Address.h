@@ -185,8 +185,9 @@ class INET_API IPv4Address
 
     /**
      * Returns the string representation of the address (e.g. "152.66.86.92")
+     * @param printUnspec: show 0.0.0.0 as "<unspec>" if true
      */
-    std::string str() const;
+    std::string str(bool printUnspec = true) const;
 
     /**
      * Returns the address as an int.

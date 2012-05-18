@@ -104,9 +104,9 @@ void IPv4Address::set(const char *text)
     set(buf[0], buf[1], buf[2], buf[3]);
 }
 
-std::string IPv4Address::str() const
+std::string IPv4Address::str(bool printUnspec /* = true */) const
 {
-    if (isUnspecified())
+    if (printUnspec && isUnspecified())
         return std::string("<unspec>");
 
     char buf[IPADDRESS_STRING_SIZE];
