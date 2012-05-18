@@ -61,8 +61,44 @@ void OSPF::Area::addInterface(OSPF::Interface* intf)
 
 void OSPF::Area::addAddressRange(IPv4AddressRange addressRange, bool advertise)
 {
+    int addressRangeNum = areaAddressRanges.size();
+    bool found = false;
+    bool erased = false;
+
+    for (int i = 0; i < addressRangeNum; i++) {
+        IPv4AddressRange curRange = areaAddressRanges[i];
+        if (curRange.contains(addressRange)) {   // contains or same
+            found = true;
+            if (advertiseAddressRanges[curRange] != advertise) {
+                throw cRuntimeError("Inconsistent advertise settings for %s and %s address ranges in area %s",
+                        addressRange.str().c_str(), curRange.str().c_str(), areaID.str(false).c_str());
+            }
+        }
+        else if (addressRange.contains(curRange)) {
+            if (advertiseAddressRanges[curRange] != advertise) {
+                throw cRuntimeError("Inconsistent advertise settings for %s and %s address ranges in area %s",
+                        addressRange.str().c_str(), curRange.str().c_str(), areaID.str(false).c_str());
+            }
+            advertiseAddressRanges.erase(curRange);
+            areaAddressRanges[i] = NULL_IPV4ADDRESSRANGE;
+            erased = true;
+        }
+    }
+    if (erased && found)  // the found entry contains new entry and new entry contains erased entry ==> the found entry also contains the erased entry
+        throw cRuntimeError("Model error: bad contents in areaAddressRanges vector");
+    if (erased) {
+        std::vector<IPv4AddressRange>::iterator it = areaAddressRanges.begin();
+        while (it != areaAddressRanges.end()) {
+            if (*it == NULL_IPV4ADDRESSRANGE)
+                it = areaAddressRanges.erase(it);
+            else
+                it++;
+        }
+    }
+    if (!found) {
         areaAddressRanges.push_back(addressRange);
         advertiseAddressRanges[addressRange] = advertise;
+    }
 }
 
 std::string OSPF::Area::info() const
