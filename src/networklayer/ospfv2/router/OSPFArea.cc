@@ -65,11 +65,11 @@ void OSPF::Area::addAddressRange(IPv4AddressRange addressRange, bool advertise)
         advertiseAddressRanges[addressRange] = advertise;
 }
 
-void OSPF::Area::info(char *buffer)
+std::string OSPF::Area::info() const
 {
     std::stringstream out;
     out << "areaID: " << areaID.str(false);
-    strcpy(buffer, out.str().c_str());
+    return out.str();
 }
 
 std::string OSPF::Area::detailedInfo() const

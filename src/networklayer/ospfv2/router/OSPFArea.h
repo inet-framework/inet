@@ -117,7 +117,7 @@ public:
     void              calculateInterAreaRoutes(std::vector<RoutingTableEntry*>& newRoutingTable);
     void              recheckSummaryLSAs(std::vector<RoutingTableEntry*>& newRoutingTable);
 
-    void              info(char* buffer);
+    std::string       info() const;
     std::string       detailedInfo() const;
 
 private:
