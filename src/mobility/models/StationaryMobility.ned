@@ -27,9 +27,9 @@ package inet.mobility.models;
 simple StationaryMobility extends MobilityBase
 {
     parameters:
-        double initialX @unit(m) = default(uniform(constraintAreaMinX, constraintAreaMaxX));
-        double initialY @unit(m) = default(uniform(constraintAreaMinY, constraintAreaMaxY));
-        double initialZ @unit(m) = default(uniform(constraintAreaMinZ, constraintAreaMaxZ));
+        double initialX @unit(m) = default(uniform(this.constraintAreaMinX, this.constraintAreaMaxX));
+        double initialY @unit(m) = default(uniform(this.constraintAreaMinY, this.constraintAreaMaxY));
+        double initialZ @unit(m) = default(uniform(this.constraintAreaMinZ, this.constraintAreaMaxZ));
         bool initFromDisplayString = default(true);
         @class(StationaryMobility);
 }
