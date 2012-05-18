@@ -34,7 +34,7 @@ class Router;
 class Area : public cObject {
 private:
     AreaID                                                  areaID;
-    std::map<IPv4AddressRange, bool, IPv4AddressRange_Less> advertiseAddressRanges;
+    std::map<IPv4AddressRange, bool>                        advertiseAddressRanges;
     std::vector<IPv4AddressRange>                           areaAddressRanges;
     std::vector<Interface*>                                 associatedInterfaces;
     std::vector<HostRouteParameters>                        hostRoutes;
@@ -56,7 +56,7 @@ public:
 
     void              setAreaID(AreaID areaId)  { areaID = areaId; }
     AreaID            getAreaID() const  { return areaID; }
-    void              addAddressRange(IPv4AddressRange addressRange, bool advertise) { areaAddressRanges.push_back(addressRange); advertiseAddressRanges[addressRange] = advertise; }
+    void              addAddressRange(IPv4AddressRange addressRange, bool advertise);
     unsigned int      getAddressRangeCount() const  { return areaAddressRanges.size(); }
     IPv4AddressRange  getAddressRange(unsigned int index) const  { return areaAddressRanges[index]; }
     void              addHostRoute(HostRouteParameters& hostRouteParameters)  { hostRoutes.push_back(hostRouteParameters); }

@@ -59,6 +59,12 @@ void OSPF::Area::addInterface(OSPF::Interface* intf)
     associatedInterfaces.push_back(intf);
 }
 
+void OSPF::Area::addAddressRange(IPv4AddressRange addressRange, bool advertise)
+{
+        areaAddressRanges.push_back(addressRange);
+        advertiseAddressRanges[addressRange] = advertise;
+}
+
 void OSPF::Area::info(char *buffer)
 {
     std::stringstream out;
@@ -114,7 +120,7 @@ bool OSPF::Area::containsAddress(IPv4Address address) const
 {
     int addressRangeNum = areaAddressRanges.size();
     for (int i = 0; i < addressRangeNum; i++) {
-        if ((areaAddressRanges[i].address & areaAddressRanges[i].mask) == (address & areaAddressRanges[i].mask)) {
+        if (areaAddressRanges[i].contains(address)) {
             return true;
         }
     }
@@ -125,8 +131,7 @@ bool OSPF::Area::hasAddressRange(OSPF::IPv4AddressRange addressRange) const
 {
     int addressRangeNum = areaAddressRanges.size();
     for (int i = 0; i < addressRangeNum; i++) {
-        if ((areaAddressRanges[i].address == addressRange.address) &&
-            (areaAddressRanges[i].mask == addressRange.mask))
+        if (areaAddressRanges[i] == addressRange)
         {
             return true;
         }
@@ -138,9 +143,9 @@ OSPF::IPv4AddressRange OSPF::Area::getContainingAddressRange(OSPF::IPv4AddressRa
 {
     int addressRangeNum = areaAddressRanges.size();
     for (int i = 0; i < addressRangeNum; i++) {
-        if (((areaAddressRanges[i].address & areaAddressRanges[i].mask) == (addressRange.address & areaAddressRanges[i].mask)) && (areaAddressRanges[i].mask <= addressRange.mask)) {
+        if (areaAddressRanges[i].contains(addressRange)) {
             if (advertise != NULL) {
-                std::map<OSPF::IPv4AddressRange, bool, OSPF::IPv4AddressRange_Less>::const_iterator rangeIt = advertiseAddressRanges.find(areaAddressRanges[i]);
+                std::map<OSPF::IPv4AddressRange, bool>::const_iterator rangeIt = advertiseAddressRanges.find(areaAddressRanges[i]);
                 if (rangeIt != advertiseAddressRanges.end()) {
                     *advertise = rangeIt->second;
                 } else {

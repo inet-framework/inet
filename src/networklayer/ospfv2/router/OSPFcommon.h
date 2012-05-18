@@ -76,13 +76,37 @@ struct AuthenticationKeyType {
 struct IPv4AddressRange {
     IPv4Address address;
     IPv4Address mask;
+    bool operator<(const IPv4AddressRange& other) const {
+        return ((mask > other.mask) || ((mask == other.mask) && (address < other.address)));
+    }
+    bool operator==(const IPv4AddressRange& other) const {
+        return (address == other.address) && (mask == other.mask);
+    }
+    bool contains(const IPv4Address& other) const {
+        return IPv4Address::maskedAddrAreEqual(address, other, mask);
+    }
+    bool contains(const IPv4AddressRange& other) const {
+        return IPv4Address::maskedAddrAreEqual(address, other.address, mask) && (mask <= other.mask);
+    }
+    bool containsRange(const IPv4Address& otherAddress, const IPv4Address& otherMask) const {
+        return IPv4Address::maskedAddrAreEqual(address, otherAddress, mask) && (mask <= otherMask);
+    }
+    bool containedByRange(const IPv4Address& otherAddress, const IPv4Address& otherMask) const {
+        return IPv4Address::maskedAddrAreEqual(otherAddress, address, otherMask) && (otherMask <= mask);
+    }
+    bool operator!=(OSPF::IPv4AddressRange other) const {
+        return (! operator==(other));
+    }
+    std::string str() const;
 };
 
-class IPv4AddressRange_Less : public std::binary_function <IPv4AddressRange, IPv4AddressRange, bool>
+inline std::string IPv4AddressRange::str() const
 {
-public:
-    bool operator() (IPv4AddressRange leftAddressRange, IPv4AddressRange rightAddressRange) const;
-};
+    std::string str(address.str(false));
+    str += "/";
+    str += mask.str(false);
+    return str;
+}
 
 struct HostRouteParameters {
     unsigned char ifIndex;
@@ -133,17 +157,6 @@ inline IPv4Address operator|(IPv4Address address, IPv4Address match)
     return matchAddress;
 }
 
-inline bool operator==(OSPF::IPv4AddressRange leftAddressRange, OSPF::IPv4AddressRange rightAddressRange)
-{
-    return (leftAddressRange.address == rightAddressRange.address &&
-            leftAddressRange.mask == rightAddressRange.mask);
-}
-
-inline bool operator!=(OSPF::IPv4AddressRange leftAddressRange, OSPF::IPv4AddressRange rightAddressRange)
-{
-    return (!(leftAddressRange == rightAddressRange));
-}
-
 inline bool operator==(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
 {
     return (leftID.routerID == rightID.routerID &&
@@ -153,13 +166,6 @@ inline bool operator==(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID
 inline bool operator!=(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
 {
     return (!(leftID == rightID));
-}
-
-inline bool OSPF::IPv4AddressRange_Less::operator() (OSPF::IPv4AddressRange leftAddressRange, OSPF::IPv4AddressRange rightAddressRange) const
-{
-    return ((leftAddressRange.address < rightAddressRange.address) ||
-            ((leftAddressRange.address == rightAddressRange.address) &&
-             (leftAddressRange.mask < rightAddressRange.mask)));
 }
 
 inline bool OSPF::LSAKeyType_Less::operator() (OSPF::LSAKeyType leftKey, OSPF::LSAKeyType rightKey) const
