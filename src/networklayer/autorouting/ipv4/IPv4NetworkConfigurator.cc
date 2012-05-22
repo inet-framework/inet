@@ -831,10 +831,18 @@ void IPv4NetworkConfigurator::readAddressConfiguration(cXMLElement *root, IPv4To
 
         // TODO: "switch" egyebkent sztem nem muxik most, de kellene!
         const char *towardsAttr = interfaceElement->getAttribute("towards"); // neighbor host names, like "ap switch"
+        const char *amongAttr = interfaceElement->getAttribute("among"); // neighbor host names, like "host[*] router1"
         const char *addressAttr = interfaceElement->getAttribute("address"); // "10.0.x.x"
         const char *netmaskAttr = interfaceElement->getAttribute("netmask"); // "255.255.x.x"
         const char *mtuAttr = interfaceElement->getAttribute("mtu"); // integer
         const char *metricAttr = interfaceElement->getAttribute("metric"); // integer
+
+        if (amongAttr && *amongAttr)       // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
+        {
+            if ((hostAttr && *hostAttr) || (towardsAttr && *towardsAttr))
+                throw cRuntimeError("The 'hosts'/'towards' and 'among' attributes are mutually exclusive, at %s", interfaceElement->getSourceLocation());
+            towardsAttr = hostAttr = amongAttr;
+        }
 
         try
         {
@@ -1139,6 +1147,14 @@ void IPv4NetworkConfigurator::addMulticastGroups(cXMLElement *root, IPv4Topology
         const char *interfaceAttr = multicastGroupElement->getAttribute("interfaces");
         const char *addressAttr = multicastGroupElement->getAttribute("address");
         const char *towardsAttr = multicastGroupElement->getAttribute("towards"); // neighbor host names, like "ap switch"
+        const char *amongAttr = multicastGroupElement->getAttribute("among");
+
+        if (amongAttr && *amongAttr)       // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
+        {
+            if ((hostAttr && *hostAttr) || (towardsAttr && *towardsAttr))
+                throw cRuntimeError("The 'hosts'/'towards' and 'among' attributes are mutually exclusive, at %s", multicastGroupElement->getSourceLocation());
+            towardsAttr = hostAttr = amongAttr;
+        }
 
         try
         {
