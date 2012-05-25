@@ -185,7 +185,7 @@ OSPF::IPv4AddressRange OSPF::Area::getContainingAddressRange(OSPF::IPv4AddressRa
                 if (rangeIt != advertiseAddressRanges.end()) {
                     *advertise = rangeIt->second;
                 } else {
-                    *advertise = true;
+                    throw cRuntimeError("Model error: inconsistent contents in areaAddressRanges and advertiseAddressRanges variables");
                 }
             }
             return areaAddressRanges[i];
