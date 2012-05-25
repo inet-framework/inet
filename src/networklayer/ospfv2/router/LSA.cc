@@ -120,3 +120,82 @@ void printLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output) {
     output << endl;
 }
 
+std::ostream& operator<<(std::ostream& ostr, const OSPFNetworkLSA& lsa)
+{
+    ostr << "Mask: " << lsa.getNetworkMask();
+    unsigned int cnt = lsa.getAttachedRoutersArraySize();
+    if (cnt) {
+        ostr << ", Attached routers:";
+        for (unsigned int i = 0; i < cnt; i++) {
+            ostr << " " << lsa.getAttachedRouters(i);
+        }
+    }
+    ostr << ", ";
+    printLSAHeader(lsa.getHeader(), ostr);
+    return ostr;
+}
+
+std::ostream& operator<<(std::ostream& ostr, const TOSData& tos)
+{
+    ostr << "tos: " << (int) tos.tos
+         << "metric:";
+    for (int i=0; i<3; i++) ostr << " " << (int)tos.tosMetric[i];
+    return ostr;
+}
+
+std::ostream& operator<<(std::ostream& ostr, const Link& link)
+{
+    ostr << "ID: " << link.getLinkID().str(false)
+         << ", data: ";
+    unsigned long data = link.getLinkData();
+    if ((data & 0xFF000000) != 0)
+        ostr << IPv4Address(data).str(false);
+    else
+        ostr << data;
+    ostr << ", cost: " << link.getLinkCost();
+    unsigned int cnt = link.getTosDataArraySize();
+    if (cnt)
+    {
+        ostr << ", tos: {";
+        for (unsigned int i = 0; i < cnt; i++) {
+            ostr << " " << link.getTosData(i);
+        }
+        ostr << "}";
+    }
+    return ostr;
+}
+
+std::ostream& operator<<(std::ostream& ostr, const OSPFRouterLSA& lsa)
+{
+    if (lsa.getV_VirtualLinkEndpoint()) ostr << "V, ";
+    if (lsa.getE_ASBoundaryRouter()) ostr << "E, ";
+    if (lsa.getB_AreaBorderRouter()) ostr << "B, ";
+    ostr << "numberOfLinks: " << lsa.getNumberOfLinks() << ", ";
+    unsigned int cnt = lsa.getLinksArraySize();
+    if (cnt) {
+        ostr << "Links: {";
+        for (unsigned int i = 0; i < cnt; i++){
+            ostr << " {" << lsa.getLinks(i) << "}";
+        }
+        ostr << "}, ";
+    }
+    printLSAHeader(lsa.getHeader(), ostr);
+    return ostr;
+}
+
+std::ostream& operator<<(std::ostream& ostr, const OSPFSummaryLSA& lsa)
+{
+    ostr << "Mask: " << lsa.getNetworkMask()
+         << ", Cost: " << lsa.getRouteCost() << ", ";
+    unsigned int cnt = lsa.getTosDataArraySize();
+    if (cnt) {
+        ostr << ", tosData: {";
+        for (unsigned int i = 0; i < cnt; i++) {
+            ostr << " " << lsa.getTosData(i);
+        }
+        ostr << "}, ";
+    }
+    printLSAHeader(lsa.getHeader(), ostr);
+    return ostr;
+}
+
