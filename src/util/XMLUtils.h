@@ -21,6 +21,8 @@ IPv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name,
 double getParameterDoubleValue(const cXMLElement *ptr, const char *name);
 double getParameterDoubleValue(const cXMLElement *ptr, const char *name, double def);
 
+const char *getRequiredAttribute(const cXMLElement& node, const char *attr);
+
 bool parseBool(const char *text);
 
 #endif

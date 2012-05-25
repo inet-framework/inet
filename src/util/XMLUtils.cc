@@ -143,3 +143,13 @@ double getParameterDoubleValue(const cXMLElement *ptr, const char *name)
     const cXMLElement *xvalue = getUniqueChild(ptr, name);
     return strtod(xvalue->getNodeValue(), NULL);
 }
+
+const char *getRequiredAttribute(const cXMLElement& node, const char *attr)
+{
+    const char *s = node.getAttribute(attr);
+    if (!(s && *s))
+        throw cRuntimeError("required attribute %s of <%s> missing at %s",
+                attr, node.getTagName(), node.getSourceLocation());
+    return s;
+}
+

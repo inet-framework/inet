@@ -34,6 +34,7 @@
 #include "OSPFInterface.h"
 #include "PatternMatcher.h"
 #include "RoutingTableAccess.h"
+#include "XMLUtils.h"
 
 
 Define_Module(OSPFRouting);
@@ -185,15 +186,6 @@ const char *OSPFRouting::getStrAttrOrPar(const cXMLElement& ifConfig, const char
     if (attrStr && *attrStr)
         return attrStr;
     return par(name).stringValue();
-}
-
-const char *OSPFRouting::getRequiredAttribute(const cXMLElement& node, const char *attr) const
-{
-    const char *s = node.getAttribute(attr);
-    if (!(s && *s))
-        error("required attribute %s of <%s> missing at %s",
-              attr, node.getTagName(), node.getSourceLocation());
-    return s;
 }
 
 void OSPFRouting::joinMulticastGroups(int interfaceId)

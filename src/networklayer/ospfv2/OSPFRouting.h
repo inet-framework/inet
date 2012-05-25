@@ -42,7 +42,6 @@ class OSPFRouting :  public cSimpleModule
 
     int getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
     const char *getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
-    const char *getRequiredAttribute(const cXMLElement& node, const char *attr) const;
 
     /**
      * Looks up the interface name in IInterfaceTable, and returns interfaceId a.k.a ifIndex.
