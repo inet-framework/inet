@@ -78,7 +78,7 @@ void OSPFRouting::handleMessage(cMessage *msg)
 }
 
 
-void OSPFRouting::insertExternalRoute(const std::string & ifName, const OSPF::IPv4AddressRange &netAddr)
+void OSPFRouting::insertExternalRoute(const std::string &ifName, const OSPF::IPv4AddressRange &netAddr)
 {
     int ifIndex = resolveInterfaceName(ifName);
     simulation.setContext(this);

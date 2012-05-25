@@ -167,8 +167,7 @@ bool OSPF::Area::hasAddressRange(OSPF::IPv4AddressRange addressRange) const
 {
     int addressRangeNum = areaAddressRanges.size();
     for (int i = 0; i < addressRangeNum; i++) {
-        if (areaAddressRanges[i] == addressRange)
-        {
+        if (areaAddressRanges[i] == addressRange) {
             return true;
         }
     }
