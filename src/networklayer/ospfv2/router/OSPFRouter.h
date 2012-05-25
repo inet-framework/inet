@@ -185,7 +185,7 @@ public:
      * input IPv4 address range, false otherwise.
      * @param addressRange [in] The IPv4 address range to look for.
      */
-    bool                 hasAddressRange(IPv4AddressRange addressRange) const;
+    bool                 hasAddressRange(const IPv4AddressRange& addressRange) const;
 
     /**
      * Returns true if the destination described by the input lsa is in the routing table, false otherwise.

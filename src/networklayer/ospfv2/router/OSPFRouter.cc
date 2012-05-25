@@ -472,7 +472,7 @@ bool OSPF::Router::isLocalAddress(IPv4Address address) const
 }
 
 
-bool OSPF::Router::hasAddressRange(OSPF::IPv4AddressRange addressRange) const
+bool OSPF::Router::hasAddressRange(const OSPF::IPv4AddressRange& addressRange) const
 {
     long areaCount = areas.size();
     for (long i = 0; i < areaCount; i++) {
