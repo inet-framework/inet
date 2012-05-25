@@ -49,15 +49,15 @@ void UDPEchoApp::initialize(int stage)
 
 void UDPEchoApp::handleMessage(cMessage *msg)
 {
-    cPacket *pk = PK(msg);
 
-    if (pk->getKind() == UDP_I_ERROR)
+    if (msg->getKind() == UDP_I_ERROR)
     {
         // ICMP error report -- discard it
-        delete pk;
+        delete msg;
     }
-    else if (pk->getKind() == UDP_I_DATA)
+    else if (msg->getKind() == UDP_I_DATA)
     {
+        cPacket *pk = PK(msg);
         // statistics
         numEchoed++;
         emit(pkSignal, pk);
@@ -76,7 +76,7 @@ void UDPEchoApp::handleMessage(cMessage *msg)
     }
     else
     {
-        error("Packet received with unexpected message kind = %d", pk->getKind());
+        error("Message received with unexpected message kind = %d", msg->getKind());
     }
 }
 
