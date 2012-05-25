@@ -2264,9 +2264,7 @@ void OSPF::Area::calculateInterAreaRoutes(std::vector<OSPF::RoutingTableEntry*>&
 
                 if ((routingEntry->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
                     (routingEntry->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) &&
-                    ((routingEntry->getDestination().getInt() &
-                      routingEntry->getNetmask().getInt()   &
-                      destination.mask.getInt()       ) == (destination.address & destination.mask).getInt()))
+                    destination.containedByRange(routingEntry->getDestination(), routingEntry->getNetmask()))
                 {
                     foundIntraAreaRoute = true;
                     break;
