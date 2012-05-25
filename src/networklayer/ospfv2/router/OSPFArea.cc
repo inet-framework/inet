@@ -2146,14 +2146,16 @@ bool OSPF::Area::findSameOrWorseCostRoute(const std::vector<OSPF::RoutingTableEn
 
         if (summaryLSA.getHeader().getLsType() == SUMMARYLSA_NETWORKS_TYPE) {
             if ((routingEntry->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
-                ((destination.address & destination.mask) == routingEntry->getDestination()))
+                ((destination.address & destination.mask) == routingEntry->getDestination()) &&
+                (destination.mask == routingEntry->getNetmask()))           //TODO  or use '<=' ?
             {
                 foundMatching = true;
             }
         } else {
             if ((((routingEntry->getDestinationType() & OSPF::RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) ||
                  ((routingEntry->getDestinationType() & OSPF::RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0)) &&
-                (destination.address == routingEntry->getDestination()))
+                (destination.address == routingEntry->getDestination()) &&
+                (destination.mask == routingEntry->getNetmask()))
             {
                 foundMatching = true;
             }
