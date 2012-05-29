@@ -59,6 +59,7 @@
 #define OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP 179
 #define OSPF_BGP_DEFAULT_COST               1
 
+
 namespace OSPF {
 
 typedef unsigned long Metric;
@@ -76,6 +77,9 @@ struct AuthenticationKeyType {
 struct IPv4AddressRange {
     IPv4Address address;
     IPv4Address mask;
+    IPv4AddressRange() : address(), mask() {}
+    IPv4AddressRange(IPv4Address addressPar, IPv4Address maskPar) : address(addressPar), mask(maskPar) {}
+
     bool operator<(const IPv4AddressRange& other) const {
         return ((mask > other.mask) || ((mask == other.mask) && (address < other.address)));
     }
@@ -138,7 +142,7 @@ const RouterID              NULL_ROUTERID(0,0,0,0);
 const AreaID                BACKBONE_AREAID(0,0,0,0);
 const LinkStateID           NULL_LINKSTATEID(0,0,0,0);
 const IPv4Address           NULL_IPV4ADDRESS(0, 0, 0, 0);
-const IPv4AddressRange      NULL_IPV4ADDRESSRANGE = { IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0)};
+const IPv4AddressRange      NULL_IPV4ADDRESSRANGE(IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0));
 const DesignatedRouterID    NULL_DESIGNATEDROUTERID = { IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0)};
 
 } // namespace OSPF
@@ -155,6 +159,11 @@ inline IPv4Address operator|(IPv4Address address, IPv4Address match)
     IPv4Address matchAddress;
     matchAddress.set(address.getInt() | match.getInt());
     return matchAddress;
+}
+
+inline bool isSameNetwork(IPv4Address address1, IPv4Address mask1, IPv4Address address2, IPv4Address mask2)
+{
+    return (mask1 == mask2) && ((address1 & mask1) == (address2 & mask2));
 }
 
 inline bool operator==(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)

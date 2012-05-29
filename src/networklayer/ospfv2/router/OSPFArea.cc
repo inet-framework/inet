@@ -1319,7 +1319,7 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::SummaryLSA* summar
         if ((lsaHeader.getLsType() == SUMMARYLSA_ASBOUNDARYROUTERS_TYPE) &&
             ((((entry->getDestinationType() & OSPF::RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) ||
               ((entry->getDestinationType() & OSPF::RoutingTableEntry::AS_BOUNDARY_ROUTER_DESTINATION) != 0)) &&
-             ((entry->getDestination() == lsaHeader.getLinkStateID()) &&
+             ((entry->getDestination() == lsaHeader.getLinkStateID()) &&    //FIXME Why not compare network addresses (addr masked with netmask)?
               (entry->getNetmask() == summaryLSA->getNetworkMask()))))
         {
             OSPF::SummaryLSA* returnLSA = originateSummaryLSA(entry, emptyMap, dontReoriginate);
@@ -1333,8 +1333,7 @@ OSPF::SummaryLSA* OSPF::Area::originateSummaryLSA(const OSPF::SummaryLSA* summar
 
         if ((lsaHeader.getLsType() == SUMMARYLSA_NETWORKS_TYPE) &&
             (entry->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
-            (entry->getNetmask() == lsaMask) &&
-            ((entry->getDestination() & lsaMask) == (lsaHeader.getLinkStateID() & lsaMask)))
+            isSameNetwork(entry->getDestination(), entry->getNetmask(), lsaHeader.getLinkStateID(), lsaMask))
         {
             OSPF::SummaryLSA* returnLSA = originateSummaryLSA(entry, emptyMap, dontReoriginate);
             if (dontReoriginate != NULL) {
@@ -2000,8 +1999,7 @@ std::vector<OSPF::NextHop>* OSPF::Area::calculateNextHops(Link& destination, OSP
             if ((intfType == OSPF::Interface::BROADCAST) ||
                 (intfType == OSPF::Interface::NBMA))
             {
-                if ((destination.getLinkID() == (interface->getAddressRange().address & interface->getAddressRange().mask)) &&
-                    (destination.getLinkData() == interface->getAddressRange().mask.getInt()))
+                if (isSameNetwork(destination.getLinkID(), IPv4Address(destination.getLinkData()), interface->getAddressRange().address, interface->getAddressRange().mask))
                 {
                     NextHop nextHop;
                     nextHop.ifIndex = interface->getIfIndex();
@@ -2094,7 +2092,7 @@ bool OSPF::Area::hasLink(OSPFLSA* fromLSA, OSPFLSA* toLSA) const
                         return true;
                     }
                     if ((link.getType() == STUB_LINK) &&
-                        ((link.getLinkID() & IPv4Address(link.getLinkData())) == (toNetworkLSA->getHeader().getLinkStateID() & toNetworkLSA->getNetworkMask())))
+                        ((link.getLinkID() & IPv4Address(link.getLinkData())) == (toNetworkLSA->getHeader().getLinkStateID() & toNetworkLSA->getNetworkMask())))   //FIXME should compare masks?
                     {
                         return true;
                     }
@@ -2145,8 +2143,7 @@ bool OSPF::Area::findSameOrWorseCostRoute(const std::vector<OSPF::RoutingTableEn
 
         if (summaryLSA.getHeader().getLsType() == SUMMARYLSA_NETWORKS_TYPE) {
             if ((routingEntry->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
-                ((destination.address & destination.mask) == routingEntry->getDestination()) &&
-                (destination.mask == routingEntry->getNetmask()))           //TODO  or use '<=' ?
+                isSameNetwork(destination.address, destination.mask, routingEntry->getDestination(), routingEntry->getNetmask()))           //TODO  or use containing ?
             {
                 foundMatching = true;
             }

@@ -1121,19 +1121,20 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
         return;
     }
 
+    typedef std::map<IPv4AddressRange, RoutingTableEntry*> RoutingTableEntryMap;
     unsigned long routeCount = oldRoutingTable.size();
-    std::map<unsigned long, RoutingTableEntry*> oldTableMap;
-    std::map<unsigned long, RoutingTableEntry*> newTableMap;
+    RoutingTableEntryMap oldTableMap;
+    RoutingTableEntryMap newTableMap;
     unsigned long                                 i, j, k;
 
     for (i = 0; i < routeCount; i++) {
-        unsigned long destination = oldRoutingTable[i]->getDestination().getInt() & oldRoutingTable[i]->getNetmask().getInt();
+        IPv4AddressRange destination(oldRoutingTable[i]->getDestination() & oldRoutingTable[i]->getNetmask(), oldRoutingTable[i]->getNetmask());
         oldTableMap[destination] = oldRoutingTable[i];
     }
 
     routeCount = routingTable.size();
     for (i = 0; i < routeCount; i++) {
-        unsigned long destination = routingTable[i]->getDestination().getInt() & routingTable[i]->getNetmask().getInt();
+        IPv4AddressRange destination(routingTable[i]->getDestination() & routingTable[i]->getNetmask(), routingTable[i]->getNetmask());
         newTableMap[destination] = routingTable[i];
     }
 
@@ -1145,8 +1146,8 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
 
         routeCount = routingTable.size();
         for (j = 0; j < routeCount; j++) {
-            unsigned long destination = routingTable[j]->getDestination().getInt() & routingTable[j]->getNetmask().getInt();
-            std::map<unsigned long, RoutingTableEntry*>::iterator destIt = oldTableMap.find(destination);
+            IPv4AddressRange destination(routingTable[j]->getDestination() & routingTable[j]->getNetmask(), routingTable[j]->getNetmask());
+            RoutingTableEntryMap::iterator destIt = oldTableMap.find(destination);
             if (destIt == oldTableMap.end()) { // new routing entry
                 OSPF::SummaryLSA* lsaToReoriginate = NULL;
                 OSPF::SummaryLSA* newLSA = areas[i]->originateSummaryLSA(routingTable[j], originatedLSAMap, lsaToReoriginate);
@@ -1202,10 +1203,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
 
                         delete newLSA;
                     } else {
-                        OSPF::IPv4AddressRange destinationAddressRange;
-
-                        destinationAddressRange.address = routingTable[j]->getDestination();
-                        destinationAddressRange.mask = routingTable[j]->getNetmask();
+                        OSPF::IPv4AddressRange destinationAddressRange(routingTable[j]->getDestination(), routingTable[j]->getNetmask());
 
                         if ((routingTable[j]->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
                             ((routingTable[j]->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) ||
@@ -1264,13 +1262,10 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
 
         routeCount = oldRoutingTable.size();
         for (j = 0; j < routeCount; j++) {
-            unsigned long destination = oldRoutingTable[j]->getDestination().getInt() & oldRoutingTable[j]->getNetmask().getInt();
-            std::map<unsigned long, RoutingTableEntry*>::iterator destIt = newTableMap.find(destination);
+            IPv4AddressRange destination(oldRoutingTable[j]->getDestination() & oldRoutingTable[j]->getNetmask(), oldRoutingTable[j]->getNetmask());
+            RoutingTableEntryMap::iterator destIt = newTableMap.find(destination);
             if (destIt == newTableMap.end()) { // deleted routing entry
-                OSPF::IPv4AddressRange destinationAddressRange;
-
-                destinationAddressRange.address = oldRoutingTable[j]->getDestination();
-                destinationAddressRange.mask = oldRoutingTable[j]->getNetmask();
+                OSPF::IPv4AddressRange destinationAddressRange(oldRoutingTable[j]->getDestination(), oldRoutingTable[j]->getNetmask());
 
                 if ((oldRoutingTable[j]->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
                     ((oldRoutingTable[j]->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) ||
@@ -1289,7 +1284,7 @@ void OSPF::Router::notifyAboutRoutingTableChanges(std::vector<OSPF::RoutingTable
                     if ((routingTable[k]->getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) &&
                         (routingTable[k]->getPathType() == OSPF::RoutingTableEntry::INTRAAREA) &&
                         ((routingTable[k]->getDestination().getInt() & routingTable[k]->getNetmask().getInt() & destinationAddressRange.mask.getInt()) ==
-                         (destinationAddressRange.address & destinationAddressRange.mask).getInt()) &&
+                         (destinationAddressRange.address & destinationAddressRange.mask).getInt()) &&     //FIXME correcting network comparison
                         (routingTable[k]->getCost() > maxRangeCost))
                     {
                         maxRangeCost = routingTable[k]->getCost();
