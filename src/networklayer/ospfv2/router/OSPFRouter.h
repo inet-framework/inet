@@ -217,7 +217,7 @@ public:
      * @return The containing preconfigured address range if found,
      *         OSPF::NULL_IPV4ADDRESSRANGE otherwise.
      */
-    IPv4AddressRange     getContainingAddressRange(IPv4AddressRange addressRange, bool* advertise = NULL) const;
+    IPv4AddressRange     getContainingAddressRange(const IPv4AddressRange& addressRange, bool* advertise = NULL) const;
 
     /**
      * Stores information on an AS External Route in externalRoutes and intalls(or
@@ -309,7 +309,7 @@ private:
      * @sa RFC2328 Appendix E.
      * @sa OSPF::Area::getUniqueLinkStateID
      */
-    LinkStateID          getUniqueLinkStateID(IPv4AddressRange destination,
+    LinkStateID          getUniqueLinkStateID(const IPv4AddressRange& destination,
                                               Metric destinationCost,
                                               OSPF::ASExternalLSA*& lsaToReoriginate,
                                               bool externalMetricIsType2 = false) const;

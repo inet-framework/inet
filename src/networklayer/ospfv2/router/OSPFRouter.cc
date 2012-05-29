@@ -1055,7 +1055,7 @@ void OSPF::Router::calculateASExternalRoutes(std::vector<OSPF::RoutingTableEntry
 }
 
 
-OSPF::IPv4AddressRange OSPF::Router::getContainingAddressRange(OSPF::IPv4AddressRange addressRange, bool* advertise /*= NULL*/) const
+OSPF::IPv4AddressRange OSPF::Router::getContainingAddressRange(const OSPF::IPv4AddressRange& addressRange, bool* advertise /*= NULL*/) const
 {
     unsigned long areaCount = areas.size();
     for (unsigned long i = 0; i < areaCount; i++) {
@@ -1071,7 +1071,7 @@ OSPF::IPv4AddressRange OSPF::Router::getContainingAddressRange(OSPF::IPv4Address
 }
 
 
-OSPF::LinkStateID OSPF::Router::getUniqueLinkStateID(OSPF::IPv4AddressRange destination,
+OSPF::LinkStateID OSPF::Router::getUniqueLinkStateID(const OSPF::IPv4AddressRange& destination,
                                                       OSPF::Metric destinationCost,
                                                       OSPF::ASExternalLSA*& lsaToReoriginate,
                                                       bool externalMetricIsType2 /*= false*/) const
