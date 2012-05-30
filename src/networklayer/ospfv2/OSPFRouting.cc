@@ -200,6 +200,30 @@ void OSPFRouting::joinMulticastGroups(int interfaceId)
     ipv4Data->joinMulticastGroup(IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST);
 }
 
+void OSPFRouting::loadAuthenticationConfig(OSPF::Interface* intf, const cXMLElement& ifConfig)
+{
+    std::string authenticationType = getStrAttrOrPar(ifConfig, "authenticationType");
+    if (authenticationType == "SimplePasswordType") {
+        intf->setAuthenticationType(OSPF::SIMPLE_PASSWORD_TYPE);
+    } else if (authenticationType == "CrytographicType") {
+        intf->setAuthenticationType(OSPF::CRYTOGRAPHIC_TYPE);
+    } else if (authenticationType == "NullType") {
+        intf->setAuthenticationType(OSPF::NULL_TYPE);
+    } else {
+        throw cRuntimeError("Invalid AuthenticationType '%s' at %s", authenticationType.c_str(), ifConfig.getSourceLocation());
+    }
+
+    std::string key = getStrAttrOrPar(ifConfig, "authenticationKey");
+    OSPF::AuthenticationKeyType keyValue;
+    memset(keyValue.bytes, 0, 8 * sizeof(char));
+    int keyLength = key.length();
+    if ((keyLength > 4) && (keyLength <= 18) && (keyLength % 2 == 0) && (key[0] == '0') && (key[1] == 'x')) {
+        for (int i = keyLength; (i > 2); i -= 2) {
+            keyValue.bytes[(i - 2) / 2] = hexPairToByte(key[i - 1], key[i]);
+        }
+    }
+    intf->setAuthenticationKey(keyValue);
+}
 
 void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
 {
@@ -242,27 +266,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
 
     intf->setRouterDeadInterval(getIntAttrOrPar(ifConfig, "routerDeadInterval"));
 
-    std::string authenticationType = getStrAttrOrPar(ifConfig, "authenticationType");
-    if (authenticationType == "SimplePasswordType") {
-        intf->setAuthenticationType(OSPF::SIMPLE_PASSWORD_TYPE);
-    } else if (authenticationType == "CrytographicType") {
-        intf->setAuthenticationType(OSPF::CRYTOGRAPHIC_TYPE);
-    } else if (authenticationType == "NullType") {
-        intf->setAuthenticationType(OSPF::NULL_TYPE);
-    } else {
-        throw cRuntimeError("Invalid AuthenticationType '%s' at %s", authenticationType.c_str(), ifConfig.getSourceLocation());
-    }
-
-    std::string key = getStrAttrOrPar(ifConfig, "authenticationKey");
-    OSPF::AuthenticationKeyType keyValue;
-    memset(keyValue.bytes, 0, 8 * sizeof(char));
-    int keyLength = key.length();
-    if ((keyLength > 4) && (keyLength <= 18) && (keyLength % 2 == 0) && (key[0] == '0') && (key[1] == 'x')) {
-        for (int i = keyLength; (i > 2); i -= 2) {
-            keyValue.bytes[(i - 2) / 2] = hexPairToByte(key[i - 1], key[i]);
-        }
-    }
-    intf->setAuthenticationKey(keyValue);
+    loadAuthenticationConfig(intf, ifConfig);
 
     if (interfaceType == "NBMAInterface")
         intf->setPollInterval(getIntAttrOrPar(ifConfig, "pollInterval"));
@@ -406,27 +410,7 @@ void OSPFRouting::loadVirtualLink(const cXMLElement& virtualLinkConfig)
 
     intf->setRouterDeadInterval(getIntAttrOrPar(virtualLinkConfig, "routerDeadInterval"));
 
-    std::string authenticationType = getStrAttrOrPar(virtualLinkConfig, "authenticationType");
-    if (authenticationType == "SimplePasswordType") {
-        intf->setAuthenticationType(OSPF::SIMPLE_PASSWORD_TYPE);
-    } else if (authenticationType == "CrytographicType") {
-        intf->setAuthenticationType(OSPF::CRYTOGRAPHIC_TYPE);
-    } else if (authenticationType == "NullType") {
-        intf->setAuthenticationType(OSPF::NULL_TYPE);
-    } else {
-        throw cRuntimeError("Invalid AuthenticationType '%s' at %s", authenticationType.c_str(), virtualLinkConfig.getSourceLocation());
-    }
-
-    std::string key = getStrAttrOrPar(virtualLinkConfig, "authenticationKey");
-    OSPF::AuthenticationKeyType keyValue;
-    memset(keyValue.bytes, 0, 8 * sizeof(char));
-    int keyLength = key.length();
-    if ((keyLength > 4) && (keyLength <= 18) && (keyLength % 2 == 0) && (key[0] == '0') && (key[1] == 'x')) {
-        for (int i = keyLength; (i > 2); i -= 2) {
-            keyValue.bytes[(i - 2) / 2] = hexPairToByte(key[i - 1], key[i]);
-        }
-    }
-    intf->setAuthenticationKey(keyValue);
+    loadAuthenticationConfig(intf, virtualLinkConfig);
 
     // add the virtual link to the OSPF data structure.
     OSPF::Area* transitArea = ospfRouter->getAreaByID(intf->getAreaID());

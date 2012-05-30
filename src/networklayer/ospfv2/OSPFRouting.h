@@ -64,6 +64,11 @@ class OSPFRouting :  public cSimpleModule
     void  loadAreaFromXML(const cXMLElement& asConfig, OSPF::AreaID areaID);
 
     /**
+     * Loads authenticationType and authenticationKey attibutes for a router interface
+     */
+    void loadAuthenticationConfig(OSPF::Interface* intf, const cXMLElement& ifConfig);
+
+    /**
      * Loads OSPF configuration information for a router interface.
      * Handles POINTTOPOINT, BROADCAST, NBMA and POINTTOMULTIPOINT interfaces.
      * @param ifConfig [in] XML node describing the configuration of an OSPF interface.
