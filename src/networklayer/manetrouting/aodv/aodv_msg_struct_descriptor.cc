@@ -27,6 +27,10 @@
 
 #include "aodv_msg_struct.h"
 
+#if (OMNETPP_VERSION < 0x0403)
+#define getFieldArraySize    getArraySize
+#endif
+
 // Template rule which fires if a struct or class doesn't have operator<<
 template<typename T>
 std::ostream& operator<<(std::ostream& out,const T&) {return out;}
@@ -59,8 +63,7 @@ class AODV_extDescriptor : public cClassDescriptor
     virtual unsigned int getFieldTypeFlags(void *object, int field) const;
     virtual const char *getFieldTypeString(void *object, int field) const;
     virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
-    virtual int getArraySize(void *object, int field) const;
-
+    virtual int getFieldArraySize(void *object, int field) const;
     virtual std::string getFieldAsString(void *object, int field, int i) const;
     virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
 
@@ -149,11 +152,6 @@ const char *AODV_extDescriptor::getFieldTypeString(void *object, int field) cons
             return basedesc->getFieldTypeString(object, field);
         field -= basedesc->getFieldCount(object);
     }
-    static const char *fieldTypeStrings[] = {
-        "uint8_t",
-        "char",
-    };
-    return (field>=0 && field<2) ? fieldTypeStrings[field] : NULL;
     switch (field) {
         case FLD_type: return "uint8_t";
         case FLD_pointer: return "char";
@@ -174,12 +172,12 @@ const char *AODV_extDescriptor::getFieldProperty(void *object, int field, const 
     }
 }
 
-int AODV_extDescriptor::getArraySize(void *object, int field) const
+int AODV_extDescriptor::getFieldArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
         if (field < basedesc->getFieldCount(object))
-            return basedesc->getArraySize(object, field);
+            return basedesc->getFieldArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
     AODV_ext *pp = (AODV_ext *)object; (void)pp;
@@ -264,8 +262,7 @@ class AODV_msgDescriptor : public cClassDescriptor
     virtual unsigned int getFieldTypeFlags(void *object, int field) const;
     virtual const char *getFieldTypeString(void *object, int field) const;
     virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
-    virtual int getArraySize(void *object, int field) const;
-
+    virtual int getFieldArraySize(void *object, int field) const;
     virtual std::string getFieldAsString(void *object, int field, int i) const;
     virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
 
@@ -379,12 +376,12 @@ const char *AODV_msgDescriptor::getFieldProperty(void *object, int field, const 
     }
 }
 
-int AODV_msgDescriptor::getArraySize(void *object, int field) const
+int AODV_msgDescriptor::getFieldArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
         if (field < basedesc->getFieldCount(object))
-            return basedesc->getArraySize(object, field);
+            return basedesc->getFieldArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
     AODV_msg *pp = (AODV_msg *)object; (void)pp;
@@ -470,7 +467,7 @@ class RERR_udestDescriptor : public cClassDescriptor
     virtual unsigned int getFieldTypeFlags(void *object, int field) const;
     virtual const char *getFieldTypeString(void *object, int field) const;
     virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
-    virtual int getArraySize(void *object, int field) const;
+    virtual int getFieldArraySize(void *object, int field) const;
 
     virtual std::string getFieldAsString(void *object, int field, int i) const;
     virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
@@ -580,12 +577,12 @@ const char *RERR_udestDescriptor::getFieldProperty(void *object, int field, cons
     }
 }
 
-int RERR_udestDescriptor::getArraySize(void *object, int field) const
+int RERR_udestDescriptor::getFieldArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
         if (field < basedesc->getFieldCount(object))
-            return basedesc->getArraySize(object, field);
+            return basedesc->getFieldArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
     RERR_udest *pp = (RERR_udest *)object; (void)pp;
@@ -670,7 +667,7 @@ class RERRDescriptor : public cClassDescriptor
     virtual unsigned int getFieldTypeFlags(void *object, int field) const;
     virtual const char *getFieldTypeString(void *object, int field) const;
     virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
-    virtual int getArraySize(void *object, int field) const;
+    virtual int getFieldArraySize(void *object, int field) const;
 
     virtual std::string getFieldAsString(void *object, int field, int i) const;
     virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
@@ -790,12 +787,12 @@ const char *RERRDescriptor::getFieldProperty(void *object, int field, const char
     }
 }
 
-int RERRDescriptor::getArraySize(void *object, int field) const
+int RERRDescriptor::getFieldArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
         if (field < basedesc->getFieldCount(object))
-            return basedesc->getArraySize(object, field);
+            return basedesc->getFieldArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
     RERR *pp = (RERR *)object; (void)pp;
@@ -885,7 +882,7 @@ class RREPDescriptor : public cClassDescriptor
     virtual unsigned int getFieldTypeFlags(void *object, int field) const;
     virtual const char *getFieldTypeString(void *object, int field) const;
     virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
-    virtual int getArraySize(void *object, int field) const;
+    virtual int getFieldArraySize(void *object, int field) const;
 
     virtual std::string getFieldAsString(void *object, int field, int i) const;
     virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
@@ -1035,12 +1032,12 @@ const char *RREPDescriptor::getFieldProperty(void *object, int field, const char
     }
 }
 
-int RREPDescriptor::getArraySize(void *object, int field) const
+int RREPDescriptor::getFieldArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
         if (field < basedesc->getFieldCount(object))
-            return basedesc->getArraySize(object, field);
+            return basedesc->getFieldArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
     RREP *pp = (RREP *)object; (void)pp;
@@ -1142,7 +1139,7 @@ class RREP_ackDescriptor : public cClassDescriptor
     virtual unsigned int getFieldTypeFlags(void *object, int field) const;
     virtual const char *getFieldTypeString(void *object, int field) const;
     virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
-    virtual int getArraySize(void *object, int field) const;
+    virtual int getFieldArraySize(void *object, int field) const;
 
     virtual std::string getFieldAsString(void *object, int field, int i) const;
     virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
@@ -1247,12 +1244,12 @@ const char *RREP_ackDescriptor::getFieldProperty(void *object, int field, const 
     }
 }
 
-int RREP_ackDescriptor::getArraySize(void *object, int field) const
+int RREP_ackDescriptor::getFieldArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
         if (field < basedesc->getFieldCount(object))
-            return basedesc->getArraySize(object, field);
+            return basedesc->getFieldArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
     RREP_ack *pp = (RREP_ack *)object; (void)pp;
@@ -1335,7 +1332,7 @@ class RREQDescriptor : public cClassDescriptor
     virtual unsigned int getFieldTypeFlags(void *object, int field) const;
     virtual const char *getFieldTypeString(void *object, int field) const;
     virtual const char *getFieldProperty(void *object, int field, const char *propertyname) const;
-    virtual int getArraySize(void *object, int field) const;
+    virtual int getFieldArraySize(void *object, int field) const;
 
     virtual std::string getFieldAsString(void *object, int field, int i) const;
     virtual bool setFieldAsString(void *object, int field, int i, const char *value) const;
@@ -1495,12 +1492,12 @@ const char *RREQDescriptor::getFieldProperty(void *object, int field, const char
     }
 }
 
-int RREQDescriptor::getArraySize(void *object, int field) const
+int RREQDescriptor::getFieldArraySize(void *object, int field) const
 {
     cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
         if (field < basedesc->getFieldCount(object))
-            return basedesc->getArraySize(object, field);
+            return basedesc->getFieldArraySize(object, field);
         field -= basedesc->getFieldCount(object);
     }
     RREQ *pp = (RREQ *)object; (void)pp;

@@ -147,7 +147,11 @@ int MessageChecker::checkFieldArray(void* object, cClassDescriptor* descriptor, 
 
     // check the size of the field array into the client object
     int size = atol(attr["size"].data());
+#if (OMNETPP_VERSION < 0x0403)
     int fieldSize = descriptor->getArraySize(object, field);
+#else
+    int fieldSize = descriptor->getFieldArraySize(object, field);
+#endif
     if (size != fieldSize)
         throw cRuntimeError("Field array \"%s\" contains %d element(s) (and not %d) in message %d",
             attr["name"].data(), fieldSize, size, forwardedMsg);
