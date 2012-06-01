@@ -201,6 +201,8 @@ std::ostream& operator<<(std::ostream& ostr, const TOSData& tos);
 std::ostream& operator<<(std::ostream& ostr, const Link& link);
 std::ostream& operator<<(std::ostream& ostr, const OSPFRouterLSA& lsa);
 std::ostream& operator<<(std::ostream& ostr, const OSPFSummaryLSA& lsa);
+std::ostream& operator<<(std::ostream& ostr, const ExternalTOSInfo& tos);
+std::ostream& operator<<(std::ostream& ostr, const OSPFASExternalLSA& lsa);
 
 #endif // __LSA_HPP__
 

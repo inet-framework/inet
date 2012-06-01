@@ -199,3 +199,32 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFSummaryLSA& lsa)
     return ostr;
 }
 
+std::ostream& operator<<(std::ostream& ostr, const ExternalTOSInfo& tos)
+{
+    ostr << "TOSData: {" << tos.tosData
+         << "}, MetricType: " << tos.E_ExternalMetricType
+         << ", fwAddr: " << tos.forwardingAddress
+         << ", extRouteTag: " << tos.externalRouteTag;
+    return ostr;
+}
+
+std::ostream& operator<<(std::ostream& ostr, const OSPFASExternalLSA& lsa)
+{
+    const OSPFASExternalLSAContents& contents = lsa.getContents();
+    ostr << "Mask: " << contents.getNetworkMask()
+         << ", Cost: " << contents.getRouteCost()
+         << ", MetricType: " << contents.getE_ExternalMetricType()
+         << ", Forward: " << contents.getForwardingAddress()
+         << ", ExtRouteTag: " << contents.getExternalRouteTag()
+         << ", ";
+    unsigned int cnt = contents.getExternalTOSInfoArraySize();
+    if (cnt) {
+        ostr << ", tosData: {";
+        for (unsigned int i = 0; i < cnt; i++) {
+            ostr << " " << contents.getExternalTOSInfo(i);
+        }
+        ostr << "}, ";
+    }
+    printLSAHeader(lsa.getHeader(), ostr);
+    return ostr;
+}
