@@ -293,7 +293,7 @@ void LDP::rebuildFecList()
             continue;
 
         // find out current next hop according to routing table
-        IPv4Address nextHop = (re->getType() == IPv4Route::DIRECT) ? re->getDestination() : re->getGateway();
+        IPv4Address nextHop = (re->getGateway().isUnspecified()) ? re->getDestination() : re->getGateway();
         ASSERT(!nextHop.isUnspecified());
 
         EV << "nextHop <-- " << nextHop << endl;

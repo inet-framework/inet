@@ -329,7 +329,6 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::Rout
             newEntry->setGateway(_rt->getRoute(indexIP)->getGateway());
             newEntry->setInterface(_rt->getRoute(indexIP)->getInterface());
             newEntry->setSource(IPv4Route::BGP);
-            newEntry->setType(_rt->getRoute(indexIP)->getType());
             _rt->deleteRoute(_rt->getRoute(indexIP));
             _rt->addRoute(newEntry);
         }

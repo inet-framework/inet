@@ -62,7 +62,6 @@ inline BGP::RoutingTableEntry::RoutingTableEntry(const IPv4Route* entry)
     setNetmask(entry->getNetmask());
     setGateway(entry->getGateway());
     setInterface(entry->getInterface());
-    setType(entry->getType());
     setMetric(BGP::DEFAULT_COST);
     setSource(IPv4Route::BGP);
 }

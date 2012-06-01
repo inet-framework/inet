@@ -355,7 +355,6 @@ void DSDV_2::handleMessage(cMessage *msg)
                     e->setNetmask(netmask);
                     e->setGateway(next);
                     e->setInterface(interface80211ptr);
-                    e->setType(IPv4Route::REMOTE);
                     e->setSource(IPv4Route::MANET);
                     e->setMetric(numHops);
                     e->setSequencenumber(msgsequencenumber);

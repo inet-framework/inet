@@ -1559,7 +1559,6 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
             route->setGateway(IPv4Address::UNSPECIFIED_ADDRESS);
             route->setNetmask(netmask);
             route->setInterface(sourceInterfaceEntry);
-            route->setType(IPv4Route::DIRECT);
             route->setSource(IPv4Route::MANUAL);
             sourceRoutingTable->addRoute(route);
 
@@ -1570,7 +1569,6 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
             route->setNetmask(IPv4Address::UNSPECIFIED_ADDRESS);
             route->setGateway(gateway);
             route->setInterface(sourceInterfaceEntry);
-            route->setType(gateway.isUnspecified() ? IPv4Route::DIRECT : IPv4Route::REMOTE);
             route->setSource(IPv4Route::MANUAL);
             sourceRoutingTable->addRoute(route);
 
@@ -1638,7 +1636,6 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
                         route->setInterface(sourceInterfaceEntry);
                         if (gatewayAddress != destinationAddress)
                             route->setGateway(gatewayAddress);
-                        route->setType(route->getGateway().isUnspecified() ? IPv4Route::DIRECT : IPv4Route::REMOTE);
                         route->setSource(IPv4Route::MANUAL);
                         if (containsRoute(sourceRoutes, route))
                             delete route;
@@ -1676,7 +1673,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
  */
 bool IPv4NetworkConfigurator::routesHaveSameColor(IPv4Route *route1, IPv4Route *route2)
 {
-    return route1->getType() == route2->getType() && route1->getSource() == route2->getSource() && route1->getMetric() == route2->getMetric() &&
+    return route1->getSource() == route2->getSource() && route1->getMetric() == route2->getMetric() &&
            route1->getGateway() == route2->getGateway() && route1->getInterface() == route2->getInterface();
 }
 
@@ -1980,7 +1977,6 @@ void IPv4NetworkConfigurator::optimizeRoutes(std::vector<IPv4Route *>& originalR
         optimizedRoute->setNetmask(routeInfo->netmask);
         optimizedRoute->setInterface(routeColor->getInterface());
         optimizedRoute->setGateway(routeColor->getGateway());
-        optimizedRoute->setType(routeColor->getType());
         optimizedRoute->setSource(routeColor->getSource());
         optimizedRoute->setMetric(routeColor->getMetric());
         optimizedRoutes.push_back(optimizedRoute);

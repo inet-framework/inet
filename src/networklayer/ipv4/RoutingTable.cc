@@ -842,7 +842,6 @@ void RoutingTable::updateNetmaskRoutes()
         if (ie->ipv4Data()->getNetmask()!=IPv4Address::ALLONES_ADDRESS)
         {
             IPv4Route *route = new IPv4Route();
-            route->setType(IPv4Route::DIRECT);
             route->setSource(IPv4Route::IFACENETMASK);
             route->setDestination(ie->ipv4Data()->getIPAddress().doAnd(ie->ipv4Data()->getNetmask()));
             route->setNetmask(ie->ipv4Data()->getNetmask());

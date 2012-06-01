@@ -34,13 +34,6 @@ class IRoutingTable;
 class INET_API IPv4Route : public cObject
 {
   public:
-    /** Route type */
-    enum RouteType
-    {
-        DIRECT,  ///< Directly attached to the router
-        REMOTE   ///< Reached through another router
-    };
-
     /** Specifies where the route comes from */
     enum RouteSource
     {
@@ -60,7 +53,6 @@ class INET_API IPv4Route : public cObject
     IPv4Address netmask;  ///< Route mask
     IPv4Address gateway;  ///< Next hop
     InterfaceEntry *interfacePtr; ///< interface
-    RouteType type;       ///< direct or remote
     RouteSource source;   ///< manual, routing prot, etc.
     int metric;           ///< Metric ("cost" to reach the destination)
 
@@ -76,7 +68,7 @@ class INET_API IPv4Route : public cObject
     void changed(int fieldCode);
 
   public:
-    IPv4Route() : rt(NULL), interfacePtr(NULL), type(DIRECT), source(MANUAL), metric(0) {}
+    IPv4Route() : rt(NULL), interfacePtr(NULL), source(MANUAL), metric(0) {}
     virtual ~IPv4Route() {}
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
@@ -96,7 +88,6 @@ class INET_API IPv4Route : public cObject
     virtual void setNetmask(IPv4Address _netmask)  { if (netmask != _netmask) {netmask = _netmask; changed(F_NETMASK);} }
     virtual void setGateway(IPv4Address _gateway)  { if (gateway != _gateway) {gateway = _gateway; changed(F_GATEWAY);} }
     virtual void setInterface(InterfaceEntry *_interfacePtr)  { if (interfacePtr != _interfacePtr) {interfacePtr = _interfacePtr; changed(F_IFACE);} }
-    virtual void setType(RouteType _type)  { if (type != _type) {type = _type; changed(F_TYPE);} }
     virtual void setSource(RouteSource _source)  { if (source != _source) {source = _source; changed(F_SOURCE);} }
     virtual void setMetric(int _metric)  { if (metric != _metric) {metric = _metric; changed(F_METRIC);} }
 
@@ -114,9 +105,6 @@ class INET_API IPv4Route : public cObject
 
     /** Convenience method */
     const char *getInterfaceName() const;
-
-    /** Route type: Direct or Remote */
-    RouteType getType() const {return type;}
 
     /** Source of route. MANUAL (read from file), from routing protocol, etc */
     RouteSource getSource() const {return source;}

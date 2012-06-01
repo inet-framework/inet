@@ -111,7 +111,6 @@ inline OSPF::RoutingTableEntry::RoutingTableEntry(const RoutingTableEntry& entry
     setNetmask(entry.getNetmask());
     setGateway(entry.getGateway());
     setInterface(entry.getInterface());
-    setType(entry.getType());
     setSource(entry.getSource());
     setMetric(entry.getMetric());
 }

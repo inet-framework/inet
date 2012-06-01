@@ -264,12 +264,10 @@ void TED::rebuildRoutingTable()
         if (V[i].node == V[nHop].node)
         {
             entry->setGateway(IPv4Address());
-            entry->setType(entry->DIRECT);
         }
         else
         {
             entry->setGateway(V[nHop].node);
-            entry->setType(entry->REMOTE);
         }
         entry->setInterface(rt->getInterfaceByAddress(getInterfaceAddrByPeerAddress(V[nHop].node)));
         entry->setSource(IPv4Route::OSPF);
@@ -290,7 +288,6 @@ void TED::rebuildRoutingTable()
 
         entry->setDestination(getPeerByLocalAddress(interfaceAddrs[i]));
         entry->setGateway(IPv4Address());
-        entry->setType(entry->DIRECT);
         entry->setInterface(rt->getInterfaceByAddress(interfaceAddrs[i]));
         entry->setSource(IPv4Route::OSPF);
 

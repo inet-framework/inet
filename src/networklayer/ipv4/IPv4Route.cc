@@ -35,7 +35,7 @@ std::string IPv4Route::info() const
     out << "mask:"; if (netmask.isUnspecified()) out << "*  "; else out << netmask << "  ";
     out << "metric:" << metric << " ";
     out << "if:"; if (!interfacePtr) out << "*  "; else out << interfacePtr->getName() << "(" << interfacePtr->ipv4Data()->getIPAddress() << ")  ";
-    out << (type==DIRECT ? "DIRECT" : "REMOTE");
+    out << (gateway.isUnspecified() ? "DIRECT" : "REMOTE");
 
 
     switch (source)
@@ -61,7 +61,7 @@ std::string IPv4Route::detailedInfo() const
 bool IPv4Route::equals(const IPv4Route& route) const
 {
     return rt == route.rt && dest == route.dest && netmask == route.netmask && gateway == route.gateway &&
-           interfacePtr == route.interfacePtr && type == route.type && source == route.source && metric == route.metric;
+           interfacePtr == route.interfacePtr && source == route.source && metric == route.metric;
 }
 
 const char *IPv4Route::getInterfaceName() const
