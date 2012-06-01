@@ -22,63 +22,52 @@
     </Area>
 
 
-    <Router name="RA3">    <!-- RA3-->
-        <RFC1583Compatible/>
+    <Router name="RA3" RFC1583Compatible="true">
         <PointToPointInterface ifName="ppp0" areaID="0.0.0.1" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
         <PointToPointInterface ifName="ppp1" areaID="0.0.0.1" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
         <ExternalInterface ifName="eth0" advertisedExternalNetworkAddress="172.1.0.0" advertisedExternalNetworkMask="255.255.0.0" externalInterfaceOutputCost="10" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
     </Router>
 
-    <Router name="A1">    <!-- A 1-->
-        <RFC1583Compatible/>
+    <Router name="A1" RFC1583Compatible="true">
         <PointToPointInterface ifName="ppp1" areaID="0.0.0.1" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     </Router>
 
-    <Router name="A2">    <!-- A 2-->
-        <RFC1583Compatible/>
+    <Router name="A2" RFC1583Compatible="true">
         <PointToPointInterface ifName="ppp1" areaID="0.0.0.1" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     </Router>
 
-    <Router name="B1">    <!-- B1-->
-        <RFC1583Compatible/>
+    <Router name="B1" RFC1583Compatible="true">
         <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     </Router>
 
-    <Router name="RC5">    <!-- RC5 -->
-        <RFC1583Compatible/>
+    <Router name="RC5" RFC1583Compatible="true">
         <PointToPointInterface ifName="ppp0" areaID="0.0.0.3" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
         <PointToPointInterface ifName="ppp1" areaID="0.0.0.3" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
         <PointToPointInterface ifName="ppp2" areaID="0.0.0.3" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
         <PointToPointInterface ifName="ppp3" areaID="0.0.0.3" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     </Router>
 
-    <Router name="C1">    <!-- C1-->
-        <RFC1583Compatible/>
+    <Router name="C1" RFC1583Compatible="true">
         <PointToPointInterface ifName="ppp1" areaID="0.0.0.3" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     </Router>
 
-    <Router name="C2">    <!-- C2-->
-        <RFC1583Compatible/>
+    <Router name="C2" RFC1583Compatible="true">
         <PointToPointInterface ifName="ppp1" areaID="0.0.0.3" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     </Router>
 
-    <Router name="C3">    <!-- C3-->
-        <RFC1583Compatible/>
+    <Router name="C3" RFC1583Compatible="true">
         <PointToPointInterface ifName="ppp1" areaID="0.0.0.3" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     </Router>
 
-    <Router name="C4">    <!-- C4-->
-        <RFC1583Compatible/>
+    <Router name="C4" RFC1583Compatible="true">
         <PointToPointInterface ifName="ppp1" areaID="0.0.0.3" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     </Router>
 
-    <Router name="D1">    <!-- D1-->
-        <RFC1583Compatible/>
+    <Router name="D1" RFC1583Compatible="true">
         <BroadcastInterface ifName="eth0" areaID="0.0.0.4" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     </Router>
 
-    <Router name="E1">    <!-- E1-->
-        <RFC1583Compatible/>
+    <Router name="E1" RFC1583Compatible="true">
         <BroadcastInterface ifName="eth0" areaID="0.0.0.5" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     </Router>
 

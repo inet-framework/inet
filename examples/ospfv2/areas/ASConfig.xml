@@ -3,59 +3,57 @@
 
   <!-- Areas -->
   <Area id="0.0.0.0">
-    <AddressRange address="192.168.13.1" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.14.2" mask="255.255.255.255" status="Advertise"/>
+    <AddressRange address="Area1.R3>Area2.R4" mask="Area1.R3>Area2.R4" status="Advertise"/>
+    <AddressRange address="Area2.R4>Area1.R3" mask="Area2.R4>Area1.R3" status="Advertise"/>
   </Area>
 
   <Area id="0.0.0.1">
-    <AddressRange address="192.168.1.0" mask="255.255.255.0" status="Advertise"/>
-    <AddressRange address="192.168.2.0" mask="255.255.255.0" status="Advertise"/>
-    <AddressRange address="192.168.11.1" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.11.2" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.12.1" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.12.2" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.13.2" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.13.3" mask="255.255.255.255" status="Advertise"/>
+    <AddressRange address="Area1.R1>Area1.N1" mask="Area1.R1>Area1.N1" status="Advertise"/>
+    <AddressRange address="Area1.H1>Area1.N1" mask="Area1.H1>Area1.N1" status="Advertise"/>
+    <AddressRange address="Area1.R2>Area1.N2" mask="Area1.R2>Area1.N2" status="Advertise"/>
+    <AddressRange address="Area1.H2>Area1.N2" mask="Area1.H2>Area1.N2" status="Advertise"/>
+    <AddressRange address="Area1.R1>Area1.R2" mask="Area1.R1>Area1.R2" status="Advertise"/>
+    <AddressRange address="Area1.R2>Area1.R1" mask="Area1.R2>Area1.R1" status="Advertise"/>
+    <AddressRange address="Area1.R1>Area1.R3" mask="Area1.R1>Area1.R3" status="Advertise"/>
+    <AddressRange address="Area1.R3>Area1.R1" mask="Area1.R3>Area1.R1" status="Advertise"/>
+    <AddressRange address="Area1.R2>Area1.R3" mask="Area1.R2>Area1.R3" status="Advertise"/>
+    <AddressRange address="Area1.R3>Area1.R2" mask="Area1.R3>Area1.R2" status="Advertise"/>
   </Area>
 
   <Area id="0.0.0.2">
-    <AddressRange address="192.168.3.0" mask="255.255.255.0" status="Advertise"/>
-    <AddressRange address="192.168.14.1" mask="255.255.255.255" status="Advertise"/>
-    <AddressRange address="192.168.15.2" mask="255.255.255.255" status="Advertise"/>
+    <AddressRange address="Area2.R4>Area2.R5" mask="Area2.R4>Area2.R5" status="Advertise"/>
+    <AddressRange address="Area2.R5>Area2.R4" mask="Area2.R5>Area2.R4" status="Advertise"/>
+    <AddressRange address="Area2.R5>Area2.N3" mask="Area2.R5>Area2.N3" status="Advertise"/>
+    <AddressRange address="Area2.H3>Area2.N3" mask="Area2.H3>Area2.N3" status="Advertise"/>
   </Area>
 
   <!-- Routers -->
-  <Router name="Area1.R1"> <!-- R1 -->
-    <RFC1583Compatible/>
-    <PointToPointInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <PointToPointInterface ifName="eth1" areaID="0.0.0.1" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+  <Router name="Area1.R1" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.1" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     <BroadcastInterface ifName="eth2" areaID="0.0.0.1" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
 
-  <Router name="Area1.R2"> <!-- R2 -->
-    <RFC1583Compatible/>
-    <PointToPointInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="2" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <PointToPointInterface ifName="eth1" areaID="0.0.0.1" interfaceOutputCost="2" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+  <Router name="Area1.R2" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="2" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.1" interfaceOutputCost="2" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
     <BroadcastInterface ifName="eth2" areaID="0.0.0.1" interfaceOutputCost="2" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="2" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
 
-  <Router name="Area1.R3"> <!-- R3 -->
-    <RFC1583Compatible/>
-    <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="3" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <PointToPointInterface ifName="eth1" areaID="0.0.0.1" interfaceOutputCost="3" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <PointToPointInterface ifName="eth2" areaID="0.0.0.1" interfaceOutputCost="3" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+  <Router name="Area1.R3" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="3" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.1" interfaceOutputCost="3" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth2" areaID="0.0.0.1" interfaceOutputCost="3" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
 
-  <Router name="Area2.R4"> <!-- R4 -->
-    <RFC1583Compatible/>
-    <PointToPointInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="4" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="4" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+  <Router name="Area2.R4" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="4" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="4" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
 
-  <Router name="Area2.R5"> <!-- R5 -->
-    <RFC1583Compatible/>
-    <PointToPointInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="5" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <PointToPointInterface ifName="eth1" areaID="0.0.0.2" interfaceOutputCost="5" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+  <Router name="Area2.R5" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="5" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.2" interfaceOutputCost="5" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
 
 </OSPFASConfig>

@@ -41,6 +41,7 @@ class OSPFRouting :  public cSimpleModule
     OSPF::Router*    ospfRouter; ///< Root object of the OSPF data structure.
 
     int getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
+    bool getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
     const char *getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
 
     /**

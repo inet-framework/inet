@@ -39,33 +39,28 @@
   </Area>
 
   <!-- Routers -->
-  <Router name="Area1.RT1"> <!-- RT1 -->
-    <RFC1583Compatible/>
+  <Router name="Area1.RT1" RFC1583Compatible="true">
     <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="3" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.1" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
   </Router>
 
-  <Router name="Area1.RT2"> <!-- RT2 -->
-    <RFC1583Compatible/>
+  <Router name="Area1.RT2" RFC1583Compatible="true">
     <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="3" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.1" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
   </Router>
 
-  <Router name="RT3"> <!-- RT3 -->
-    <RFC1583Compatible/>
+  <Router name="RT3" RFC1583Compatible="true">
     <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.1" interfaceOutputCost="2" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
     <PointToPointInterface ifName="eth2" areaID="0.0.0.0" interfaceOutputCost="8" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40"/>
   </Router>
 
-  <Router name="RT4"> <!-- RT4 -->
-    <RFC1583Compatible/>
+  <Router name="RT4" RFC1583Compatible="true">
     <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
     <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="8" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40"/>
   </Router>
 
-  <Router name="RT5"> <!-- RT5 -->
-    <RFC1583Compatible/>
+  <Router name="RT5" RFC1583Compatible="true">
     <ExternalInterface ifName="eth0" advertisedExternalNetworkAddress="RT5>N13" advertisedExternalNetworkMask="RT5>N13" externalInterfaceOutputCost="8" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
     <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="8" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40"/>
     <PointToPointInterface ifName="eth2" areaID="0.0.0.0" interfaceOutputCost="7" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40"/>
@@ -74,50 +69,43 @@
     <ExternalInterface ifName="eth5" advertisedExternalNetworkAddress="RT5>N14" advertisedExternalNetworkMask="RT5>N14" externalInterfaceOutputCost="8" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
   </Router>
 
-  <Router name="RT6"> <!-- RT6 -->
-    <RFC1583Compatible/>
+  <Router name="RT6" RFC1583Compatible="true">
     <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="6" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40"/>
     <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="7" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40"/>
     <PointToPointInterface ifName="eth2" areaID="0.0.0.0" interfaceOutputCost="6" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40"/>
   </Router>
 
-  <Router name="RT7"> <!-- RT7 -->
-    <RFC1583Compatible/>
+  <Router name="RT7" RFC1583Compatible="true">
     <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="6" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.2" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
     <ExternalInterface ifName="eth2" advertisedExternalNetworkAddress="RT7>N15" advertisedExternalNetworkMask="RT7>N15" externalInterfaceOutputCost="9" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
     <ExternalInterface ifName="eth3" advertisedExternalNetworkAddress="RT7>N12" advertisedExternalNetworkMask="RT7>N12" externalInterfaceOutputCost="2" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
   </Router>
 
-  <Router name="Area2.RT8"> <!-- RT8 -->
-    <RFC1583Compatible/>
+  <Router name="Area2.RT8" RFC1583Compatible="true">
     <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.2" interfaceOutputCost="4" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
   </Router>
 
-  <Router name="Area3.RT9"> <!-- RT9 -->
-    <RFC1583Compatible/>
+  <Router name="Area3.RT9" RFC1583Compatible="true">
     <BroadcastInterface ifName="eth0" areaID="0.0.0.3" interfaceOutputCost="3" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.3" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
   </Router>
 
-  <Router name="RT10"> <!-- RT10 -->
-    <RFC1583Compatible/>
+  <Router name="RT10" RFC1583Compatible="true">
     <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="5" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.2" interfaceOutputCost="3" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
     <BroadcastInterface ifName="eth2" areaID="0.0.0.2" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
     <VirtualLink endPointRouterID="RT11%routerId" transitAreaID="0.0.0.2" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40"/>
   </Router>
 
-  <Router name="RT11"> <!-- RT11 -->
-    <RFC1583Compatible/>
+  <Router name="RT11" RFC1583Compatible="true">
     <BroadcastInterface ifName="eth0" areaID="0.0.0.3" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
     <BroadcastInterface ifName="eth1" areaID="0.0.0.2" interfaceOutputCost="2" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
     <VirtualLink endPointRouterID="RT10%routerId" transitAreaID="0.0.0.2" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40"/>
   </Router>
 
-  <Router name="Area3.RT12"> <!-- RT12 -->
-    <RFC1583Compatible/>
+  <Router name="Area3.RT12" RFC1583Compatible="true">
     <BroadcastInterface ifName="eth0" areaID="0.0.0.3" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40"/>
 <!--    <BroadcastInterface ifName="eth1" areaID="0.0.0.3" linkCost="10"/> -->
     <HostInterface ifName="eth1" areaID="0.0.0.3" attachedHost="Area3.H1" linkCost="10"/>

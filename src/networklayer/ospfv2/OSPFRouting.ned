@@ -32,6 +32,7 @@ simple OSPFRouting
         string authenticationType = default("NullType");    // SimplePasswordType|CrytographicType|NullType
         string authenticationKey = default("0x00");         // 0xnn..nn
         int linkCost = default(1);
+        bool RFC1583Compatible = default(false);
 
         string areaID = default("");
         int externalInterfaceOutputCost = default(1);

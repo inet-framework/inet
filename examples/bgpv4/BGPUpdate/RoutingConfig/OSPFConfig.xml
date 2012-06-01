@@ -10,13 +10,11 @@
   </Area>
 
   <!-- Routers -->
-  <Router name="A">
-    <RFC1583Compatible/>
+  <Router name="A" RFC1583Compatible="true">
     <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
 
-  <Router name="B">
-    <RFC1583Compatible/>
+  <Router name="B" RFC1583Compatible="true">
     <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
   </Router>
 

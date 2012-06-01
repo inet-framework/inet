@@ -180,6 +180,20 @@ int OSPFRouting::getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) 
     return par(name).longValue();
 }
 
+bool OSPFRouting::getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const
+{
+    const char* attrStr = ifConfig.getAttribute(name);
+    if (attrStr && *attrStr)
+    {
+        if (strcmp(attrStr, "true") == 0 || strcmp(attrStr, "1") == 0)
+            return true;
+        if (strcmp(attrStr, "false") == 0 || strcmp(attrStr, "0") == 0)
+            return false;
+        throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, attrStr, ifConfig.getSourceLocation());
+    }
+    return par(name).boolValue();
+}
+
 const char *OSPFRouting::getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const
 {
     const char* attrStr = ifConfig.getAttribute(name);
@@ -454,6 +468,9 @@ bool OSPFRouting::loadConfigFromXML(cXMLElement *asConfig)
 
     EV << "OSPFRouting: Loading info for Router " << nodeFullPath << "\n";
 
+    bool rfc1583Compatible = getBoolAttrOrPar(*routerNode, "RFC1583Compatible");
+    ospfRouter->setRFC1583Compatibility(rfc1583Compatible);
+
     std::set<OSPF::AreaID> areaList;
     getAreaListFromXML(*routerNode, areaList);
 
@@ -485,9 +502,6 @@ bool OSPFRouting::loadConfigFromXML(cXMLElement *asConfig)
         }
         else if (nodeName == "VirtualLink") {
             loadVirtualLink(*(*routerConfigIt));
-        }
-        else if (nodeName == "RFC1583Compatible") {
-            ospfRouter->setRFC1583Compatibility(true);
         } else {
             throw cRuntimeError("Invalid '%s' node in Router '%s' at %s",
                     nodeName.c_str(), nodeFullPath.c_str(), (*routerConfigIt)->getSourceLocation());

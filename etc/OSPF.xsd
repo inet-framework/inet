@@ -385,7 +385,6 @@
 
   <xsd:complexType>
     <xsd:sequence>
-      <xsd:element name="RFC1583Compatible" minOccurs="0" maxOccurs="1" />
       <xsd:choice minOccurs="1" maxOccurs="255">
         <xsd:element ref="PointToPointInterface" />
         <xsd:element ref="BroadcastInterface" />
@@ -397,6 +396,7 @@
       <xsd:element ref="VirtualLink" minOccurs="0" maxOccurs="unbounded" />
     </xsd:sequence>
     <xsd:attribute name="name" type="NodePathType" use="required" />
+    <xsd:attribute name="RFC1583Compatible" type="xsd:boolean" use="optional" />
   </xsd:complexType>
   <xsd:unique name="IfIndexConstraint">
     <xsd:selector xpath="PointToPointInterface|BroadcastInterface|NBMAInterface|PointToMultiPointInterface|ExternalInterface|HostInterface" />

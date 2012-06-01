@@ -224,9 +224,27 @@ usage:
 </xsl:template>
 
 
+<!-- RFC1583Compatible -->
+<xsl:template match="Router/RFC1583Compatible" mode="toAttr">
+  <xsl:attribute name="RFC1583Compatible">true</xsl:attribute>
+</xsl:template>
+<xsl:template match="Router/RFC1583Compatible">
+</xsl:template>
+
+<xsl:template match="Router">
+  <xsl:copy>
+    <xsl:apply-templates  select="@*"/>
+    <xsl:apply-templates  select="RFC1583Compatible" mode="toAttr"/>
+    <xsl:apply-templates  select="node()"/>
+  </xsl:copy>
+</xsl:template>
+
+
+
 <!-- do not convert other nodes to attribute -->
 <xsl:template match="*" mode="toAttr">
 </xsl:template>
+
 
 
 <!-- -->
