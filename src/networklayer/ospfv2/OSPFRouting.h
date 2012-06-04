@@ -50,6 +50,12 @@ class OSPFRouting :  public cSimpleModule
     int   resolveInterfaceName(const std::string& name) const;
 
     /**
+     * Search an InterfaceEntry in IInterfaceTable by interface name or toward module name
+     * an returns the InterfaceEntry pointer or throws an error.
+     */
+    InterfaceEntry *getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig);
+
+    /**
      * Loads a list of OSPF Areas connected to this router from the config XML.
      * @param routerNode [in]  XML node describing this router.
      * @param areaList   [out] A set of OSPF Areas connected to this router.

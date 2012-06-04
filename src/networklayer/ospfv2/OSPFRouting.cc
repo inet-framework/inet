@@ -103,6 +103,34 @@ bool OSPFRouting::checkExternalRoute(const IPv4Address &route)
     return false;
 }
 
+InterfaceEntry *OSPFRouting::getInterfaceByXMLAttributesOf(const cXMLElement& ifConfig)
+{
+    const char *ifName = ifConfig.getAttribute("ifName");
+    if (ifName && *ifName) {
+        InterfaceEntry* ie = ift->getInterfaceByName(ifName);
+        if (!ie)
+            throw cRuntimeError("Error reading XML config: IInterfaceTable contains no interface named '%s' at %s", ifName, ifConfig.getSourceLocation());
+        return ie;
+    }
+
+    const char *toward = getRequiredAttribute(ifConfig, "toward");
+    cModule *destnode = simulation.getModuleByPath(toward);
+    if (!destnode)
+        error("toward module `%s' not found at %s", toward, ifConfig.getSourceLocation());
+
+    cModule *host = ift->getHostModule();
+    for (int i=0; i < ift->getNumInterfaces(); i++)
+    {
+        InterfaceEntry *ie = ift->getInterface(i);
+        if (ie)
+        {
+            int gateId = ie->getNodeOutputGateId();
+            if ((gateId != -1) && (host->gate(gateId)->pathContains(destnode)))
+                return ie;
+        }
+    }
+    throw cRuntimeError("Error reading XML config: IInterfaceTable contains no interface toward '%s' at %s", toward, ifConfig.getSourceLocation());
+}
 
 int OSPFRouting::resolveInterfaceName(const std::string& name) const
 {
@@ -241,11 +269,12 @@ void OSPFRouting::loadAuthenticationConfig(OSPF::Interface* intf, const cXMLElem
 void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
 {
     OSPF::Interface* intf = new OSPF::Interface;
-    std::string ifName = getRequiredAttribute(ifConfig, "ifName");
-    int ifIndex = resolveInterfaceName(ifName);
+    InterfaceEntry *ie = getInterfaceByXMLAttributesOf(ifConfig);
+    int ifIndex = ie->getInterfaceId();
+
     std::string interfaceType = ifConfig.getTagName();
 
-    EV << "        loading " << interfaceType << " " << ifName << " (ifIndex=" << ifIndex << ")\n";
+    EV << "        loading " << interfaceType << " " << ie->getName() << " (ifIndex=" << ifIndex << ")\n";
 
     intf->setIfIndex(ifIndex);
     if (interfaceType == "PointToPointInterface") {
@@ -258,7 +287,8 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         intf->setType(OSPF::Interface::POINTTOMULTIPOINT);
     } else {
         delete intf;
-        error("Unknown interface type '%s' for interface %s (ifIndex=%d) at %s", interfaceType.c_str(), ifName, ifIndex, ifConfig.getSourceLocation());
+        error("Unknown interface type '%s' for interface %s (ifIndex=%d) at %s",
+                interfaceType.c_str(), ie->getName(), ifIndex, ifConfig.getSourceLocation());
     }
 
     joinMulticastGroups(ifIndex);
@@ -326,13 +356,14 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
 
 void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
 {
-    std::string ifName = getRequiredAttribute(externalRouteConfig, "ifName");
-    int ifIndex = resolveInterfaceName(ifName);
+    InterfaceEntry *ie = getInterfaceByXMLAttributesOf(externalRouteConfig);
+    int ifIndex = ie->getInterfaceId();
+
     OSPFASExternalLSAContents asExternalRoute;
     OSPF::RoutingTableEntry externalRoutingEntry; // only used here to keep the path cost calculation in one place
     OSPF::IPv4AddressRange networkAddress;
 
-    EV << "        loading ExternalInterface " << ifName << " ifIndex[" << ifIndex << "]\n";
+    EV << "        loading ExternalInterface " << ie->getName() << " ifIndex[" << ifIndex << "]\n";
 
     joinMulticastGroups(ifIndex);
 
@@ -354,7 +385,7 @@ void OSPFRouting::loadExternalRoute(const cXMLElement& externalRouteConfig)
         externalRoutingEntry.setCost(routeCost);
         externalRoutingEntry.setPathType(OSPF::RoutingTableEntry::TYPE1_EXTERNAL);
     } else {
-        throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at ", ifName.c_str(), externalRouteConfig.getSourceLocation());
+        throw cRuntimeError("Invalid 'externalInterfaceOutputType' at interface '%s' at ", ie->getName(), externalRouteConfig.getSourceLocation());
     }
 
     asExternalRoute.setForwardingAddress(ipv4AddressFromAddressString(getRequiredAttribute(externalRouteConfig, "forwardingAddress")));
@@ -380,10 +411,12 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
     OSPF::HostRouteParameters hostParameters;
     OSPF::AreaID hostArea;
 
-    std::string ifName = getRequiredAttribute(hostRouteConfig, "ifName");
-    hostParameters.ifIndex = resolveInterfaceName(ifName);
+    InterfaceEntry *ie = getInterfaceByXMLAttributesOf(hostRouteConfig);
+    int ifIndex = ie->getInterfaceId();
 
-    EV << "        loading HostInterface " << ifName << " ifIndex[" << static_cast<short> (hostParameters.ifIndex) << "]\n";
+    hostParameters.ifIndex = ifIndex;
+
+    EV << "        loading HostInterface " << ie->getName() << " ifIndex[" << ifIndex << "]\n";
 
     joinMulticastGroups(hostParameters.ifIndex);
 
