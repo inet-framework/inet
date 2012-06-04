@@ -875,6 +875,7 @@ OSPF::RoutingTableEntry* OSPF::Router::selectLeastCostRoutingEntry(std::vector<O
 
 OSPF::RoutingTableEntry* OSPF::Router::getPreferredEntry(const OSPFLSA& lsa, bool skipSelfOriginated, std::vector<OSPF::RoutingTableEntry*>* fromRoutingTable /*= NULL*/)
 {
+    // see RFC 2328 16.3. and 16.4.
     if (fromRoutingTable == NULL) {
         fromRoutingTable = &routingTable;
     }
@@ -924,9 +925,9 @@ OSPF::RoutingTableEntry* OSPF::Router::getPreferredEntry(const OSPFLSA& lsa, boo
     return NULL;
 }
 
-
 void OSPF::Router::calculateASExternalRoutes(std::vector<OSPF::RoutingTableEntry*>& newRoutingTable)
 {
+    // see RFC 2328 16.4.
     unsigned long lsaCount = asExternalLSAs.size();
     unsigned long i;
 
