@@ -14,6 +14,11 @@
 /examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           aa17-f7c7
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           2be6-f6a8
 
+/examples/diffserv/onedomain,          -f omnetpp.ini -c Exp11 -r 0,                   10s,         8ef0-801b
+/examples/diffserv/onedomain,          -f omnetpp.ini -c Exp21 -r 0,                   10s,         d471-926e
+/examples/diffserv/onedomain,          -f omnetpp.ini -c Exp31 -r 0,                   10s,         3105-d9ee
+/examples/diffserv/onedomain,          -f omnetpp.ini -c Exp51 -r 0,                   10s,         cc24-8009
+
 # /examples/emulation/extclient/,      -f omnetpp.ini -c General -r 0,                100s,         0    # pcap devices not supported
 # /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_Traffic -r 0,         100s,         0    # pcap devices not supported
 # /examples/emulation/extserver/,      -f omnetpp.ini -c Downlink_Traffic -r 0,       100s,         0    # pcap devices not supported

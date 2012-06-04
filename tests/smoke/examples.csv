@@ -12,6 +12,10 @@
 /examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0
+/examples/diffserv/onedomain,          -f omnetpp.ini -c Exp11 -r 0
+/examples/diffserv/onedomain,          -f omnetpp.ini -c Exp21 -r 0
+/examples/diffserv/onedomain,          -f omnetpp.ini -c Exp31 -r 0
+/examples/diffserv/onedomain,          -f omnetpp.ini -c Exp51 -r 0
 # /examples/emulation/extclient/,      -f omnetpp.ini -c General -r 0   # ext interface tests are not supported as they require pcap drivers and external events
 # /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_Traffic -r 0   # ext interface tests are not supported as they require pcap drivers and external events
 # /examples/emulation/extserver/,      -f omnetpp.ini -c Downlink_Traffic -r 0   # ext interface tests are not supported as they require pcap drivers and external events
