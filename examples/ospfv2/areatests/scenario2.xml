@@ -1,0 +1,28 @@
+<scenario>
+    <at t="100">
+        <disconnect src-module="Backbone.R[0]" src-gate="ethg$o[1]" />
+        <disconnect src-module="Backbone.B[0]" src-gate="ethg$o[2]" />
+    </at>
+    <at t="200">
+        <connect src-module="Backbone.R[0]" src-gate="ethg[1]"
+                 dest-module="Backbone.B[0]" dest-gate="ethg[2]"
+                 channel-type="inet.util.ThruputMeteringChannel">
+            <param name="delay" value="0.1us" />
+            <param name="datarate" value="100Mbps" />
+            <param name="thruputDisplayFormat" value='"#N"' />
+        </connect>
+    </at>
+    <at t="300">
+        <disconnect src-module="Stub1.R[0]" src-gate="ethg$o[1]" />
+        <disconnect src-module="Stub1.B[0]" src-gate="ethg$o[2]" />
+    </at>
+    <at t="400">
+        <connect src-module="Stub1.R[0]" src-gate="ethg[1]"
+                 dest-module="Stub1.B[0]" dest-gate="ethg[2]"
+                 channel-type="inet.util.ThruputMeteringChannel">
+            <param name="delay" value="0.1us" />
+            <param name="datarate" value="100Mbps" />
+            <param name="thruputDisplayFormat" value='"#N"' />
+        </connect>
+    </at>
+</scenario>

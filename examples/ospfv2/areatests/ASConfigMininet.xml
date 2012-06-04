@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
+
+  <!-- Areas -->
+  <Area id="0.0.0.0">
+    <AddressRange address="BBR[0]%eth0" mask="255.255.255.0" status="Advertise"/>
+  </Area>
+
+  <Area id="0.0.0.1">
+    <AddressRange address="S1R[0]%eth0" mask="S1R[0]%eth0" status="Advertise"/>
+    <AddressRange address="S1R[0]%eth1" mask="S1R[0]%eth1" status="Advertise"/>
+    <AddressRange address="S1R[1]%eth0" mask="S1R[1]%eth0" status="Advertise"/>
+    <AddressRange address="S1R[1]%eth1" mask="S1R[1]%eth1" status="Advertise"/>
+    <AddressRange address="S1R[1]%eth2" mask="S1R[1]%eth2" status="Advertise"/>
+    <AddressRange address="S1R[0]%eth0" mask="255.255.255.0" status="Advertise"/>
+  </Area>
+
+  <Area id="0.0.0.2">
+<!--
+-->
+    <AddressRange address="S2R[0]%eth0" mask="S2R[0]%eth0" status="Advertise"/>
+    <AddressRange address="S2R[0]%eth1" mask="S2R[0]%eth1" status="Advertise"/>
+    <AddressRange address="S2R[1]%eth0" mask="S2R[1]%eth0" status="Advertise"/>
+    <AddressRange address="S2R[1]%eth1" mask="S2R[1]%eth1" status="Advertise"/>
+    <AddressRange address="S2R[1]%eth2" mask="S2R[1]%eth2" status="Advertise"/>
+    <AddressRange address="S2R[0]%eth0" mask="255.255.255.0" status="Advertise"/>
+  </Area>
+
+  <!-- Routers -->
+  <Router name="BBR[*]" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="1" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="1" />
+  </Router>
+
+  <Router name="BBRtoS1" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="1" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.1" interfaceOutputCost="1" /> <!-- Area border router -->
+  </Router>
+
+  <Router name="BBRtoS2" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="1" /> <!-- Area border router -->
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="1" />
+  </Router>
+
+  <Router name="S1R[0]" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="1" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.1" interfaceOutputCost="1" />
+  </Router>
+
+  <Router name="S1R[1]" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="1" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.1" interfaceOutputCost="1" />
+    <BroadcastInterface ifName="eth2" areaID="0.0.0.1" interfaceOutputCost="1" />
+  </Router>
+
+  <Router name="S2R[0]" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="1" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.2" interfaceOutputCost="1" />
+  </Router>
+
+  <Router name="S2R[1]" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="1" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.2" interfaceOutputCost="1" />
+    <BroadcastInterface ifName="eth2" areaID="0.0.0.2" interfaceOutputCost="1" />
+  </Router>
+
+</OSPFASConfig>
