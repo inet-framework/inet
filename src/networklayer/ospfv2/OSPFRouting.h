@@ -111,8 +111,9 @@ class OSPFRouting :  public cSimpleModule
     /**
      * Insert a route learn by BGP in OSPF routingTable as an external route.
      * Used by the BGPRouting module.
+     * @ifIndex: interface ID
      */
-    void insertExternalRoute(const std::string& ifName, const OSPF::IPv4AddressRange& netAddr);
+    void insertExternalRoute(int ifIndex, const OSPF::IPv4AddressRange& netAddr);
 
     /**
      * Return true if the route is in OSPF external LSA Table, false else.

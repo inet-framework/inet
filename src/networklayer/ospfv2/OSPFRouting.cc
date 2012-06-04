@@ -79,9 +79,8 @@ void OSPFRouting::handleMessage(cMessage *msg)
 }
 
 
-void OSPFRouting::insertExternalRoute(const std::string &ifName, const OSPF::IPv4AddressRange &netAddr)
+void OSPFRouting::insertExternalRoute(int ifIndex, const OSPF::IPv4AddressRange &netAddr)
 {
-    int ifIndex = resolveInterfaceName(ifName);
     simulation.setContext(this);
     OSPFASExternalLSAContents newExternalContents;
     newExternalContents.setRouteCost(OSPF_BGP_DEFAULT_COST);
@@ -259,7 +258,7 @@ void OSPFRouting::loadInterfaceParameters(const cXMLElement& ifConfig)
         intf->setType(OSPF::Interface::POINTTOMULTIPOINT);
     } else {
         delete intf;
-        error("Unknown interface type '%s' for interface %s (ifIndex=%d) at %s", interfaceType.c_str(), ifName.c_str(), ifIndex, ifConfig.getSourceLocation());
+        error("Unknown interface type '%s' for interface %s (ifIndex=%d) at %s", interfaceType.c_str(), ifName, ifIndex, ifConfig.getSourceLocation());
     }
 
     joinMulticastGroups(ifIndex);

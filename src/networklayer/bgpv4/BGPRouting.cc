@@ -347,7 +347,10 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::Rout
             OSPFnetAddr.address = entry->getDestination();
             OSPFnetAddr.mask = entry->getNetmask();
             OSPFRouting* ospf = OSPFRoutingAccess().getIfExists();
-            ospf->insertExternalRoute(entry->getInterfaceName(), OSPFnetAddr);
+            InterfaceEntry *ie = entry->getInterface();
+            if (!ie)
+                throw cRuntimeError("Model error: interface entry is NULL");
+            ospf->insertExternalRoute(ie->getInterfaceId(), OSPFnetAddr);
             simulation.setContext(this);
         }
     }
