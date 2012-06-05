@@ -38,6 +38,8 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     typedef std::map<long, simtime_t> MsgId2TimeMap;
     MsgId2TimeMap msgId2TimeMap;
 
+    std::list<IPassiveQueueListener*> listeners;
+
     // state
     int packetRequested;
 
@@ -60,6 +62,8 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
+
+    virtual void notifyListeners();
 
     /**
      * Inserts packet into the queue or the priority queue, or drops it
@@ -94,6 +98,16 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
      * Clear all queued packets and stored requests.
      */
     virtual void clear();
+
+    /**
+     * Implementation of IPassiveQueue::addListener().
+     */
+    virtual void addListener(IPassiveQueueListener *listener);
+
+    /**
+     * Implementation of IPassiveQueue::removeListener().
+     */
+    virtual void removeListener(IPassiveQueueListener *listener);
 };
 
 #endif

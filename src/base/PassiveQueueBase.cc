@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <algorithm>
 
 #include "PassiveQueueBase.h"
 
@@ -73,6 +74,8 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
             msgId2TimeMap.erase(droppedMsg->getId());
             delete droppedMsg;
         }
+        else
+            notifyListeners();
     }
 
     if (ev.isGUI())
@@ -114,5 +117,25 @@ void PassiveQueueBase::clear()
 void PassiveQueueBase::finish()
 {
     msgId2TimeMap.clear();
+}
+
+void PassiveQueueBase::addListener(IPassiveQueueListener *listener)
+{
+    std::list<IPassiveQueueListener*>::iterator it = find(listeners.begin(), listeners.end(), listener);
+    if (it == listeners.end())
+        listeners.push_back(listener);
+}
+
+void PassiveQueueBase::removeListener(IPassiveQueueListener *listener)
+{
+    std::list<IPassiveQueueListener*>::iterator it = find(listeners.begin(), listeners.end(), listener);
+    if (it != listeners.end())
+        listeners.erase(it);
+}
+
+void PassiveQueueBase::notifyListeners()
+{
+    for (std::list<IPassiveQueueListener*>::iterator it = listeners.begin(); it != listeners.end(); ++it)
+        (*it)->packetEnqueued(this);
 }
 

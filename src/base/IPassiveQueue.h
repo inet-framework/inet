@@ -21,6 +21,8 @@
 
 #include "INETDefs.h"
 
+class IPassiveQueueListener;
+
 /**
  * Abstract interface for passive queues.
  */
@@ -50,6 +52,36 @@ class INET_API IPassiveQueue
      * Clear all queued packets and stored requests.
      */
     virtual void clear() = 0;
+
+    /**
+     * Adds a new listener to the listener list.
+     * It does nothing, if the listener list already contains the listener
+     * (by pointer equality).
+     */
+    virtual void addListener(IPassiveQueueListener *listener) = 0;
+
+    /**
+     * Removes a listener from the listener list.
+     * It does nothing if the listener was not found on the listener list.
+     */
+    virtual void removeListener(IPassiveQueueListener *listener) = 0;
+};
+
+/**
+ * Interface for notifying listeners about passive queue events.
+ */
+class INET_API IPassiveQueueListener
+{
+    public:
+
+      virtual ~IPassiveQueueListener() {};
+
+      /**
+       * A packet arrived and it was added to the queue (the queue length
+       * increased by one). Therefore a subsequent requestPacket() call
+       * can deliver a packet immediately.
+       */
+      virtual void packetEnqueued(IPassiveQueue *queue) = 0;
 };
 
 #endif
