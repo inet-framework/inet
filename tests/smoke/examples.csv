@@ -1,4 +1,4 @@
-# workingdir,                        args,                                          simtimelimit,    fingerprint
+# workingdir,                        args
 /examples/adhoc/ieee80211/,          -f fingerprints.ini -c Ping1 -r 0
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0
 # /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0   # [Config Ping2] # __interactive__
@@ -12,10 +12,34 @@
 /examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0
-/examples/diffserv/onedomain,          -f omnetpp.ini -c Exp11 -r 0
-/examples/diffserv/onedomain,          -f omnetpp.ini -c Exp21 -r 0
-/examples/diffserv/onedomain,          -f omnetpp.ini -c Exp31 -r 0
-/examples/diffserv/onedomain,          -f omnetpp.ini -c Exp51 -r 0
+# /examples/diffserv/onedomain/,       -f omnetpp.ini -c Apps -r 0     # __interactive__
+# /examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp1 -r 0     # __interactive__
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp11 -r 0
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp12 -r 0
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp13 -r 0
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp14 -r 0
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp15 -r 0
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp16 -r 0
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp17 -r 0
+# /examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp2 -r 0     # __interactive__
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp21 -r 0
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp22 -r 0
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp23 -r 0
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp24 -r 0
+# /examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp3 -r 0     # (<!> Error in module (cCompoundModule) DiffservNetwork.H1 (id=2) during network setup) Unable to determine type name for submodule udpApp, missing entry DiffservNetwork.H1.udpApp[0].typename and no default value, at /home/zoli/Projects/OMNET/inet/src/nodes/inet/StandardHost.ned:69.
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp31 -r 0
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp32 -r 0
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp33 -r 0
+# /examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp5 -r 0    # Zero time simulation
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp51 -r 0
+/examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp52 -r 0
+/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP -r 0
+/examples/diffserv/simple_/,         -f omnetpp.ini -c WithoutQoS -r 0
+/examples/diffserv/simple_/,         -f omnetpp.ini -c WithPolicing -r 0
+/examples/diffserv/simple_/,         -f omnetpp.ini -c WithQueueing -r 0
+/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithoutQoS -r 0
+/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithPolicing -r 0
+/examples/diffserv/simple_/,         -f omnetpp.ini -c VoIP_WithPolicingAndQueueing -r 0
 # /examples/emulation/extclient/,      -f omnetpp.ini -c General -r 0   # ext interface tests are not supported as they require pcap drivers and external events
 # /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_Traffic -r 0   # ext interface tests are not supported as they require pcap drivers and external events
 # /examples/emulation/extserver/,      -f omnetpp.ini -c Downlink_Traffic -r 0   # ext interface tests are not supported as they require pcap drivers and external events
@@ -207,12 +231,17 @@
 /examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0
 /examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0
-# /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0    #Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #22346, t=40.111838360149) check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandonestub -r 0
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandtwostubs -r 0
+/examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c stable -r 0
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0
 /examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0
 /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0
-/examples/rtp/multicast11/,          -f omnetpp.ini -c General -r 0
 /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0
+/examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0
 /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0
