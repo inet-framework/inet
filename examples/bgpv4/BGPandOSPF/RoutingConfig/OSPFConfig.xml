@@ -2,45 +2,45 @@
 <OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
 
     <Area id="0.0.0.1">
-        <AddressRange address="10.10.0.0" mask="255.255.0.0" status="Advertise"/>
+        <AddressRange address="10.10.0.0" mask="255.255.0.0" status="Advertise" />
     </Area>
 
     <Area id="0.0.0.2">
-        <AddressRange address="10.20.0.0" mask="255.255.0.0" status="Advertise"/>
+        <AddressRange address="10.20.0.0" mask="255.255.0.0" status="Advertise" />
     </Area>
 
     <Router name="RA1" RFC1583Compatible="true">
-        <PointToPointInterface ifName="ppp0" areaID="0.0.0.1" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-        <PointToPointInterface ifName="ppp1" areaID="0.0.0.1" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-        <ExternalInterface ifName="eth0" advertisedExternalNetworkAddress="192.168.0.0" advertisedExternalNetworkMask="255.255.0.0" externalInterfaceOutputCost="10" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
+        <PointToPointInterface ifName="ppp0" areaID="0.0.0.1" interfaceOutputCost="10" />
+        <PointToPointInterface ifName="ppp1" areaID="0.0.0.1" interfaceOutputCost="10" />
+        <ExternalInterface ifName="eth0" advertisedExternalNetworkAddress="192.168.0.0" advertisedExternalNetworkMask="255.255.0.0" externalInterfaceOutputCost="10" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00" />
     </Router>
 
     <Router name="RA2" RFC1583Compatible="true">
-        <PointToPointInterface ifName="ppp0" areaID="0.0.0.1" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-        <PointToPointInterface ifName="ppp1" areaID="0.0.0.1" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-        <ExternalInterface ifName="eth0" advertisedExternalNetworkAddress="192.169.0.0" advertisedExternalNetworkMask="255.255.0.0" externalInterfaceOutputCost="10" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
+        <PointToPointInterface ifName="ppp0" areaID="0.0.0.1" interfaceOutputCost="10" />
+        <PointToPointInterface ifName="ppp1" areaID="0.0.0.1" interfaceOutputCost="10" />
+        <ExternalInterface ifName="eth0" advertisedExternalNetworkAddress="192.169.0.0" advertisedExternalNetworkMask="255.255.0.0" externalInterfaceOutputCost="10" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00" />
     </Router>
 
     <Router name="A" RFC1583Compatible="true">
-        <PointToPointInterface ifName="ppp1" areaID="0.0.0.1" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-        <PointToPointInterface ifName="ppp2" areaID="0.0.0.1" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+        <PointToPointInterface ifName="ppp1" areaID="0.0.0.1" interfaceOutputCost="10" />
+        <PointToPointInterface ifName="ppp2" areaID="0.0.0.1" interfaceOutputCost="10" />
     </Router>
 
     <Router name="RB1" RFC1583Compatible="true">
-        <PointToPointInterface ifName="ppp0" areaID="0.0.0.2" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-        <PointToPointInterface ifName="ppp1" areaID="0.0.0.2" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-        <ExternalInterface ifName="eth0" advertisedExternalNetworkAddress="192.170.0.0" advertisedExternalNetworkMask="255.255.0.0" externalInterfaceOutputCost="10" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
+        <PointToPointInterface ifName="ppp0" areaID="0.0.0.2" interfaceOutputCost="10" />
+        <PointToPointInterface ifName="ppp1" areaID="0.0.0.2" interfaceOutputCost="10" />
+        <ExternalInterface ifName="eth0" advertisedExternalNetworkAddress="192.170.0.0" advertisedExternalNetworkMask="255.255.0.0" externalInterfaceOutputCost="10" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00" />
     </Router>
 
     <Router name="RB2" RFC1583Compatible="true">
-        <PointToPointInterface ifName="ppp0" areaID="0.0.0.2" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-        <PointToPointInterface ifName="ppp1" areaID="0.0.0.2" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-        <ExternalInterface ifName="eth0" advertisedExternalNetworkAddress="192.171.0.0" advertisedExternalNetworkMask="255.255.0.0" externalInterfaceOutputCost="10" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00"/>
+        <PointToPointInterface ifName="ppp0" areaID="0.0.0.2" interfaceOutputCost="10" />
+        <PointToPointInterface ifName="ppp1" areaID="0.0.0.2" interfaceOutputCost="10" />
+        <ExternalInterface ifName="eth0" advertisedExternalNetworkAddress="192.171.0.0" advertisedExternalNetworkMask="255.255.0.0" externalInterfaceOutputCost="10" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00" />
     </Router>
 
     <Router name="B" RFC1583Compatible="true">
-        <PointToPointInterface ifName="ppp1" areaID="0.0.0.2" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-        <PointToPointInterface ifName="ppp2" areaID="0.0.0.2" interfaceOutputCost="10" retransmissionInterval="5" interfaceTransmissionDelay="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+        <PointToPointInterface ifName="ppp1" areaID="0.0.0.2" interfaceOutputCost="10" />
+        <PointToPointInterface ifName="ppp2" areaID="0.0.0.2" interfaceOutputCost="10" />
     </Router>
 
 </OSPFASConfig>

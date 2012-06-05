@@ -3,49 +3,49 @@
 
   <!-- Areas -->
   <Area id="0.0.0.0">
-    <AddressRange address="R1>N1" mask="R1>N1/" status="Advertise"/>
-    <AddressRange address="R1>N2" mask="R1>N2/" status="Advertise"/>
-    <AddressRange address="R1>N3" mask="R1>N3/" status="Advertise"/>
-    <AddressRange address="R2>N4" mask="R2>N4/" status="Advertise"/>
-    <AddressRange address="R3>N5" mask="R3>N5/" status="Advertise"/>
-    <AddressRange address="R4>N6" mask="R4>N6/" status="Advertise"/>
+    <AddressRange address="R1>N1" mask="R1>N1/" status="Advertise" />
+    <AddressRange address="R1>N2" mask="R1>N2/" status="Advertise" />
+    <AddressRange address="R1>N3" mask="R1>N3/" status="Advertise" />
+    <AddressRange address="R2>N4" mask="R2>N4/" status="Advertise" />
+    <AddressRange address="R3>N5" mask="R3>N5/" status="Advertise" />
+    <AddressRange address="R4>N6" mask="R4>N6/" status="Advertise" />
   </Area>
 
   <!-- Routers -->
   <Router name="R1" RFC1583Compatible="true">
-    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <BroadcastInterface ifName="eth2" areaID="0.0.0.0" interfaceOutputCost="1" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="1" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="1" routerPriority="1" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="1" routerPriority="1" />
+    <BroadcastInterface ifName="eth2" areaID="0.0.0.0" interfaceOutputCost="1" routerPriority="1" />
   </Router>
 
   <Router name="R2" RFC1583Compatible="true">
-    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="2" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="2" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="2" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="2" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="2" routerPriority="2" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="2" routerPriority="2" />
   </Router>
 
   <Router name="R3" RFC1583Compatible="true">
-    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="3" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="3" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="3" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="3" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="3" routerPriority="3" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="3" routerPriority="3" />
   </Router>
 
   <Router name="R4" RFC1583Compatible="true">
-    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="4" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="4" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="4" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="4" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="4" routerPriority="4" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="4" routerPriority="4" />
   </Router>
 
   <Router name="R5" RFC1583Compatible="true">
-    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="5" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="5" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="5" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="5" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="5" routerPriority="5" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="5" routerPriority="5" />
   </Router>
 
   <Router name="R6" RFC1583Compatible="true">
-    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="6" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="6" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="6" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="6" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="6" routerPriority="6" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="6" routerPriority="6" />
   </Router>
 
   <Router name="R7" RFC1583Compatible="true">
-    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="7" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="7" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
-    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="7" retransmissionInterval="5" interfaceTransmissionDelay="1" routerPriority="7" helloInterval="10" routerDeadInterval="40" authenticationType="NullType" authenticationKey="0x00"/>
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="7" routerPriority="7" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="7" routerPriority="7" />
   </Router>
 
 </OSPFASConfig>

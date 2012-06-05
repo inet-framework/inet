@@ -3,41 +3,41 @@
 
   <!-- Areas -->
   <Area id="0.0.0.0">
-    <AddressRange address="RA>R1" mask="RA>R1" status="Advertise"/>
-    <AddressRange address="RA>R2" mask="RA>R2" status="Advertise"/>
-    <AddressRange address="RB>R1" mask="RB>R1" status="Advertise"/>
-    <AddressRange address="RB>R2" mask="RB>R2" status="Advertise"/>
+    <AddressRange address="RA>R1" mask="RA>R1" status="Advertise" />
+    <AddressRange address="RA>R2" mask="RA>R2" status="Advertise" />
+    <AddressRange address="RB>R1" mask="RB>R1" status="Advertise" />
+    <AddressRange address="RB>R2" mask="RB>R2" status="Advertise" />
   </Area>
 
   <Area id="0.0.0.1">
-    <AddressRange address="H1" mask="H1" status="Advertise"/>
+    <AddressRange address="H1" mask="H1" status="Advertise" />
   </Area>
 
   <Area id="0.0.0.2">
-    <AddressRange address="H2" mask="H2" status="Advertise"/>
+    <AddressRange address="H2" mask="H2" status="Advertise" />
   </Area>
 
   <!-- Routers -->
   <Router name="R1" RFC1583Compatible="true">
-    <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="1"/>
-    <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="2"/>
-    <PointToPointInterface ifName="eth2" areaID="0.0.0.0" interfaceOutputCost="2"/>
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.1" interfaceOutputCost="1" />
+    <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="2" />
+    <PointToPointInterface ifName="eth2" areaID="0.0.0.0" interfaceOutputCost="2" />
   </Router>
 
   <Router name="R2" RFC1583Compatible="true">
-    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="1"/>
-    <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="2"/>
-    <PointToPointInterface ifName="eth2" areaID="0.0.0.0" interfaceOutputCost="2"/>
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.2" interfaceOutputCost="1" />
+    <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="2" />
+    <PointToPointInterface ifName="eth2" areaID="0.0.0.0" interfaceOutputCost="2" />
   </Router>
 
   <Router name="RA" RFC1583Compatible="true">
-    <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="2"/>
-    <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="2"/>
+    <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="2" />
+    <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="2" />
   </Router>
 
   <Router name="RB" RFC1583Compatible="true">
-    <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="2"/>
-    <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="2"/>
+    <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="2" />
+    <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="2" />
   </Router>
 
 </OSPFASConfig>
