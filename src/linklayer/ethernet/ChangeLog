@@ -1,3 +1,27 @@
+2012-04-27  Tamas Borbely
+
+	Added optional ITrafficConditioner modules into the
+	ingress and egress path of EthernetInterface.
+
+2012-04-26  Tamas Borbely
+
+	EthernetInterface: EthDropTailQosQueue has been replaced with
+	EtherQoSQueue. EtherQosQueue handles PAUSE frames, and can
+	be parametrized with an IOutputQueue module which serves the
+	data frames.
+
+2012-04-26  Tamas Borbely
+
+	EthernetInterface: the inner queue is the default queue.
+	(It was an external DropTailQueue before.)
+
+2012-04-24  Tamas Borbely
+
+	EthernetInterface: compound modules are accepted as external queue
+	module. The module must implement IOutputQueue, and the C++
+	class of the simple module connected to the "out" gate must
+	implement IPassiveQueue.
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-02-24  ------ inet-1.99.3 released ------

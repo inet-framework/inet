@@ -1,13 +1,19 @@
+2012-04-13  Tamas Borbely
+
+	Added getInterfaceByInterfaceModule(cModule*) method to InterfaceTable.
+	It returns the InterfaceEntry* that belongs to the interface
+	containing the specified module.
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-03-04  Levente Meszaros
 
-   Added "displayAddresses" parameter to InterfaceTable. Setting it to true
-   will display all IP addresses on the connected links.
+	Added "displayAddresses" parameter to InterfaceTable. Setting it to true
+	will display all IP addresses on the connected links.
 
 2012-02-14  Tamas Borbely
 
-    Added getFirstMulticastInterface() to the InterfaceTable
+	Added getFirstMulticastInterface() to the InterfaceTable
 
 2012-02-24  ------ inet-1.99.3 released ------
 

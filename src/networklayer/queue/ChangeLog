@@ -1,3 +1,29 @@
+2012-05-16  Tamas Borbely
+
+	Old queuing components has been removed:
+	 - DropTailQosQueue
+	 - REDQueue
+	 - WeightedFairQueue
+	 - IQoSClassifier (moved to linklayer/ieee80211/mac)
+	 - BasicDSCPClassifier
+	Some of them can be substituted by compound modules composed
+	of these newly added components:
+	 - FIFOQueue
+	 - REDDropper
+	 - ThresholdDropper
+	 - PriorityScheduler
+	 - WRRScheduler
+	For example REDQueue is a combination of a REDDropper and a FIFOQueue,
+	and DropTailQosQueue is a combination of some classifier, DropTailQueues,
+	and a PriorityScheduler.
+
+2012-04-26  Tamas Borbely
+
+	DropTailQueue: name of the inner queue can be specified by
+	a parameter. This is useful when a compound module contains
+	multiple queues, and you want to specify one of them in
+	the 'q' tag of the display string.
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-02-24  ------ inet-1.99.3 released ------

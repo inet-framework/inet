@@ -1,3 +1,11 @@
+2012-06-04  Tamas Borbely
+
+	Set icon of UPDBasicBurst application.
+
+2012-05-11  Tamas Borbely
+
+	Added 'endToEndDelay' statistics to UDPSink application.
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-02-27  Tamas Borbely

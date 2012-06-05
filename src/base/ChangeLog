@@ -1,13 +1,25 @@
+2012-05-11  Tamas Borbely
+
+	Add 'rcvdPk' signal to PassiveQueueBase. Now 'enqueuePk' signal
+	is emitted only if the the packet was stored in the queue.
+
+2012-04-26  Tamas Borbely
+
+	IPassiveQueue: added methods to manage queue listeners.
+	Listeners receives notifications about packet arrivals.
+	These notifications are required by schedulers that
+	join multiple queues.
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-03-01  Andras Varga
 
-    Added createNode(), createLink() factory methods to Toplogy class.
+	Added createNode(), createLink() factory methods to Toplogy class.
 
 2012-02-14  Tamas Borbely
 
-    Added "multicast route changed/added/deleted" notification constants 
-    to NotifierConsts.h
+	Added "multicast route changed/added/deleted" notification constants 
+	to NotifierConsts.h
 
 2012-02-24  ------ inet-1.99.3 released ------
 

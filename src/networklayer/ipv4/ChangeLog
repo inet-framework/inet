@@ -1,3 +1,7 @@
+2012-05-15  Tamas Borbely
+
+	Added DSCP and ECN accessors to IPv4Datagram.
+
 2012-03-28  Tamas Borbely
 
         IGMPv2: external routers attached to the IGMP module
