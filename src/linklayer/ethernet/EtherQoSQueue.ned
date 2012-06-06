@@ -18,9 +18,9 @@
 
 package inet.linklayer.ethernet;
 
-import inet.networklayer.queue.IOutputQueue;
-import inet.networklayer.queue.DropTailQueue;
-import inet.networklayer.queue.PriorityScheduler;
+import inet.linklayer.IOutputQueue;
+import inet.linklayer.queue.DropTailQueue;
+import inet.linklayer.queue.PriorityScheduler;
 
 
 //

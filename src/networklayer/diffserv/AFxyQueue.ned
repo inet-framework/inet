@@ -18,8 +18,9 @@
 
 package inet.networklayer.diffserv;
 
-import inet.networklayer.queue.FIFOQueue;
-import inet.networklayer.queue.REDDropper;
+import inet.linklayer.queue.FIFOQueue;
+import inet.linklayer.queue.REDDropper;
+
 
 //
 // This is an example queue, that implements

@@ -16,19 +16,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.networklayer.queue;
+package inet.linklayer.queue;
 
 //
-// This module implements a strict priority scheduler.
+// This module implements weighted round-robin scheduling.
 //
-// Packets arrived at the 0th gate are served first,
-// then the packets arrived at the 1st gates, and so on.
+// There is a weight associated with each input gate.
+// Initially each input gate gets as many tokens as their
+// weight. When a packet is requested then the first input
+// gate is selected that has a packet and enough tokens,
+// and one token is consumed. When there are waiting input
+// packets, but there is no enough tokens to schedule one,
+// then each token bucket is filled up.
 //
-// The module implements the IPassiveQueue C++ interface.
+// This module implements the IPassiveQueue C++ interface,
+// therefore it can be used as the queue component of a NIC,
+// and as the input of another scheduler.
 //
-simple PriorityScheduler
+simple WRRScheduler
 {
-    @display("i=block/server");
+    parameters:
+        string weights;
+        @display("i=block/server");
 
     gates:
         input in[];

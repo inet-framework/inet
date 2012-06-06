@@ -19,10 +19,11 @@
 package inet.networklayer.diffserv;
 
 import inet.base.Sink;
-import inet.networklayer.queue.IOutputQueue;
-import inet.networklayer.queue.PriorityScheduler;
-import inet.networklayer.queue.WRRScheduler;
-import inet.networklayer.queue.DropTailQueue;
+import inet.linklayer.IOutputQueue;
+import inet.linklayer.queue.DropTailQueue;
+import inet.linklayer.queue.PriorityScheduler;
+import inet.linklayer.queue.WRRScheduler;
+
 
 //
 // This is an example queue, that can be used in

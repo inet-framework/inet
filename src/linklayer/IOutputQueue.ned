@@ -16,7 +16,7 @@
 //
 
 
-package inet.networklayer.queue;
+package inet.linklayer;
 
 //
 // Prototype for per-NIC output queues. Concrete queues can implement

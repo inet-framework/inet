@@ -20,9 +20,9 @@
 
 package inet.linklayer.ethernet;
 
-import inet.linklayer.IWiredNic;
-import inet.linklayer.IEtherMAC;
 import inet.base.IHook;
+import inet.linklayer.IEtherMAC;
+import inet.linklayer.IWiredNic;
 import inet.linklayer.ITrafficConditioner;
 
 

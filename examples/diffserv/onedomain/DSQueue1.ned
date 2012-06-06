@@ -18,13 +18,12 @@
 
 package inet.examples.diffserv.onedomain;
 
-import inet.base.Sink;
-import inet.networklayer.queue.FIFOQueue;
-import inet.networklayer.queue.WRRScheduler;
-import inet.networklayer.queue.PriorityScheduler;
-import inet.networklayer.queue.IOutputQueue;
-import inet.networklayer.queue.DropTailQueue;
+import inet.linklayer.IOutputQueue;
+import inet.linklayer.queue.DropTailQueue;
+import inet.linklayer.queue.PriorityScheduler;
+import inet.linklayer.queue.WRRScheduler;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
+
 
 //
 // Diffserv Queue used in Experiment 1.1 - 1.6 and 5.1.

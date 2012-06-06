@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.networklayer.queue;
+package inet.linklayer.queue;
 
 //
 // This module selectively drops packets, based on the available
@@ -43,7 +43,7 @@ simple ThresholdDropper
         int byteCapacity = default(-1);  // if positive, then limits the sum of bytes in the output queues
         @display("i=block/downarrow");
 
-        gates:
+    gates:
         input in[numGates];
         output out[numGates];
 }

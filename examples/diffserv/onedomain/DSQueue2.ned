@@ -18,12 +18,13 @@
 
 package inet.examples.diffserv.onedomain;
 
+import inet.linklayer.IOutputQueue;
+import inet.linklayer.queue.DropTailQueue;
+import inet.linklayer.queue.FIFOQueue;
+import inet.linklayer.queue.REDDropper;
+import inet.linklayer.queue.WRRScheduler;
 import inet.networklayer.diffserv.BehaviorAggregateClassifier;
-import inet.networklayer.queue.FIFOQueue;
-import inet.networklayer.queue.REDDropper;
-import inet.networklayer.queue.WRRScheduler;
-import inet.networklayer.queue.IOutputQueue;
-import inet.networklayer.queue.DropTailQueue;
+
 
 //
 // Diffserv Queue used in Experiment 2.1 - 2.4.
