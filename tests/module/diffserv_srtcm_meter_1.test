@@ -1,0 +1,51 @@
+%description: Simple test for SingleRateThreeColorMeter.
+
+This file implements the test case described in
+  Sanjay Ramroop: Performance evaluation of DiffServ networks using the ns-3 simulator
+
+
+%file: TestNetwork.ned
+
+import inet.networklayer.diffserv.SingleRateThreeColorMeter;
+
+network TestNetwork
+{
+  submodules:
+    app: MeterTestApp { colors = "Green Yellow Red"; }
+    meter: SingleRateThreeColorMeter;
+
+  connections allowunconnected:
+    app.out --> meter.in++;
+    meter.greenOut --> app.in++;
+    meter.yellowOut --> app.in++;
+    meter.redOut --> app.in++;
+}
+
+%inifile: omnetpp.ini
+ned-path = .;../../../../src;../../lib
+sim-time-limit=100s
+cmdenv-express-mode = true
+
+network = TestNetwork
+
+**.app.numPackets = 10
+**.app.iaTime = 0.008192s
+**.app.packetSize = 1052B # 20 + 8 + 1024
+**.app.resultFile = "result.txt"
+
+**.meter.cir = "500kbps"
+**.meter.cbs = 2000B
+**.meter.ebs = 2000B
+
+%contains: result.txt
+Packet      Conformance
+packet-1    Green
+packet-2    Green
+packet-3    Yellow
+packet-4    Green
+packet-5    Red
+packet-6    Green
+packet-7    Red
+packet-8    Green
+packet-9    Red
+packet-10   Green

@@ -1,0 +1,230 @@
+%description: Tests for DSCPMarker
+
+
+%file: TestApp.ned
+
+simple TestApp
+{
+  gates:
+    input in;
+    output out[];
+}
+
+%file: TestApp.cc
+
+#include <fstream>
+#include "INETDefs.h"
+#include "IPv4Datagram.h"
+#include "IPv6Datagram.h"
+
+namespace diffserv_dscpmarker_1
+{
+
+class INET_API TestApp : public cSimpleModule
+{
+    std::ofstream out;
+  protected:
+    void initialize();
+    void finalize();
+    void handleMessage(cMessage *msg);
+};
+
+Define_Module(TestApp);
+
+void TestApp::initialize()
+{
+    out.open("result.txt");
+    if (out.fail())
+      throw cRuntimeError("Can not open output file.");
+
+    char buf[30];
+
+    // send 64 IPv4 datagram
+    for (int i = 0; i < 64; i++)
+    {
+      sprintf(buf, "ipv4-%d", i);
+      IPv4Datagram *datagram = new IPv4Datagram(buf);
+      send(datagram, "out", i);
+    }
+    
+    // send 64 IPv6 datagram
+    for (int i = 0; i < 64; i++)
+    {
+      sprintf(buf, "ipv6-%d", i);
+      IPv6Datagram *datagram = new IPv6Datagram(buf);
+      send(datagram, "out", i);
+    }
+}
+
+void TestApp::finalize()
+{
+    out.close();
+}
+
+void TestApp::handleMessage(cMessage *msg)
+{
+  if (dynamic_cast<IPv4Datagram*>(msg))
+  {
+    IPv4Datagram *datagram = (IPv4Datagram*)msg;
+    out << datagram->getName() << ": " << datagram->getDiffServCodePoint() << "\n";
+    delete datagram;
+  }
+  else if (dynamic_cast<IPv6Datagram*>(msg))
+  {
+    IPv6Datagram *datagram = (IPv6Datagram*)msg;
+    out << datagram->getName() << ": " << datagram->getDiffServCodePoint() << "\n";
+  }
+}
+
+}
+
+%file: TestNetwork.ned
+
+import inet.networklayer.diffserv.DSCPMarker;
+
+network TestNetwork
+{
+  submodules:
+    app: TestApp;
+    marker: DSCPMarker { dscps = "*"; }
+  connections:
+    for i=0..63 {
+      app.out++ --> marker.in++;
+    }
+    marker.out --> app.in;
+}
+
+%inifile: omnetpp.ini
+ned-path = .;../../../../src;../../lib
+sim-time-limit=100s
+cmdenv-express-mode = true
+network = TestNetwork
+
+%contains: result.txt
+ipv4-1: 1
+ipv4-2: 2
+ipv4-3: 3
+ipv4-4: 4
+ipv4-5: 5
+ipv4-6: 6
+ipv4-7: 7
+ipv4-8: 8
+ipv4-9: 9
+ipv4-10: 10
+ipv4-11: 11
+ipv4-12: 12
+ipv4-13: 13
+ipv4-14: 14
+ipv4-15: 15
+ipv4-16: 16
+ipv4-17: 17
+ipv4-18: 18
+ipv4-19: 19
+ipv4-20: 20
+ipv4-21: 21
+ipv4-22: 22
+ipv4-23: 23
+ipv4-24: 24
+ipv4-25: 25
+ipv4-26: 26
+ipv4-27: 27
+ipv4-28: 28
+ipv4-29: 29
+ipv4-30: 30
+ipv4-31: 31
+ipv4-32: 32
+ipv4-33: 33
+ipv4-34: 34
+ipv4-35: 35
+ipv4-36: 36
+ipv4-37: 37
+ipv4-38: 38
+ipv4-39: 39
+ipv4-40: 40
+ipv4-41: 41
+ipv4-42: 42
+ipv4-43: 43
+ipv4-44: 44
+ipv4-45: 45
+ipv4-46: 46
+ipv4-47: 47
+ipv4-48: 48
+ipv4-49: 49
+ipv4-50: 50
+ipv4-51: 51
+ipv4-52: 52
+ipv4-53: 53
+ipv4-54: 54
+ipv4-55: 55
+ipv4-56: 56
+ipv4-57: 57
+ipv4-58: 58
+ipv4-59: 59
+ipv4-60: 60
+ipv4-61: 61
+ipv4-62: 62
+ipv4-63: 63
+ipv6-0: 0
+ipv6-1: 1
+ipv6-2: 2
+ipv6-3: 3
+ipv6-4: 4
+ipv6-5: 5
+ipv6-6: 6
+ipv6-7: 7
+ipv6-8: 8
+ipv6-9: 9
+ipv6-10: 10
+ipv6-11: 11
+ipv6-12: 12
+ipv6-13: 13
+ipv6-14: 14
+ipv6-15: 15
+ipv6-16: 16
+ipv6-17: 17
+ipv6-18: 18
+ipv6-19: 19
+ipv6-20: 20
+ipv6-21: 21
+ipv6-22: 22
+ipv6-23: 23
+ipv6-24: 24
+ipv6-25: 25
+ipv6-26: 26
+ipv6-27: 27
+ipv6-28: 28
+ipv6-29: 29
+ipv6-30: 30
+ipv6-31: 31
+ipv6-32: 32
+ipv6-33: 33
+ipv6-34: 34
+ipv6-35: 35
+ipv6-36: 36
+ipv6-37: 37
+ipv6-38: 38
+ipv6-39: 39
+ipv6-40: 40
+ipv6-41: 41
+ipv6-42: 42
+ipv6-43: 43
+ipv6-44: 44
+ipv6-45: 45
+ipv6-46: 46
+ipv6-47: 47
+ipv6-48: 48
+ipv6-49: 49
+ipv6-50: 50
+ipv6-51: 51
+ipv6-52: 52
+ipv6-53: 53
+ipv6-54: 54
+ipv6-55: 55
+ipv6-56: 56
+ipv6-57: 57
+ipv6-58: 58
+ipv6-59: 59
+ipv6-60: 60
+ipv6-61: 61
+ipv6-62: 62
+ipv6-63: 63

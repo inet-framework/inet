@@ -1,0 +1,206 @@
+%description: Tests for MultiFieldClassifier.
+
+
+%file: TestApp.ned
+
+simple TestApp
+{
+  gates:
+    input in[];
+    input defaultIn;
+    output out;
+}
+
+%file: TestApp.cc
+
+#include <fstream>
+#include "INETDefs.h"
+#include "IPv4Datagram.h"
+#include "IPv6Datagram.h"
+#include "UDPPacket.h"
+
+namespace diffserv_mfclassifier_1
+{
+
+class INET_API TestApp : public cSimpleModule
+{
+    std::ofstream out;
+  protected:
+    void initialize();
+    void finalize();
+    void handleMessage(cMessage *msg);
+};
+
+Define_Module(TestApp);
+
+void TestApp::initialize()
+{
+    out.open("result.txt");
+    if (out.fail())
+      throw cRuntimeError("Can not open output file.");
+
+    IPv4Datagram *ipv4Datagram;
+    IPv6Datagram *ipv6Datagram;
+    UDPPacket *udpPacket;
+
+    ipv4Datagram = new IPv4Datagram("ipv4-1");
+    ipv4Datagram->setSrcAddress(IPv4Address("192.168.1.1"));    
+    send(ipv4Datagram, "out");
+    
+    ipv6Datagram = new IPv6Datagram("ipv6-2");
+    ipv6Datagram->setSrcAddress(IPv6Address("fe80::1122:3344:5566"));
+    send(ipv6Datagram, "out");
+
+    ipv4Datagram = new IPv4Datagram("ipv4-3");
+    ipv4Datagram->setDestAddress(IPv4Address("192.168.1.1"));    
+    send(ipv4Datagram, "out");
+    
+    ipv6Datagram = new IPv6Datagram("ipv6-4");
+    ipv6Datagram->setDestAddress(IPv6Address("fe80::1122:3344:5566"));
+    send(ipv6Datagram, "out");
+    
+    ipv4Datagram = new IPv4Datagram("ipv4-5");
+    udpPacket = new UDPPacket();
+    udpPacket->setSourcePort(1000);
+    ipv4Datagram->encapsulate(udpPacket);
+    send(ipv4Datagram, "out");
+    
+    ipv4Datagram = new IPv4Datagram("ipv4-6");
+    udpPacket = new UDPPacket();
+    udpPacket->setDestinationPort(1000);
+    ipv4Datagram->encapsulate(udpPacket);
+    send(ipv4Datagram, "out");
+
+    ipv4Datagram = new IPv4Datagram("ipv4-7");
+    ipv4Datagram->setTransportProtocol(17);
+    send(ipv4Datagram, "out");
+
+    ipv4Datagram = new IPv4Datagram("ipv4-8");
+    ipv4Datagram->setTypeOfService(0x2e);
+    send(ipv4Datagram, "out");
+
+    ipv6Datagram = new IPv6Datagram("ipv6-9");
+    ipv6Datagram->setTrafficClass(0x2e);
+    send(ipv6Datagram, "out");
+    
+    ipv4Datagram = new IPv4Datagram("ipv4-10");
+    ipv4Datagram->setSrcAddress(IPv4Address("192.168.2.1"));    
+    send(ipv4Datagram, "out");
+    
+    ipv6Datagram = new IPv6Datagram("ipv6-11");
+    ipv6Datagram->setSrcAddress(IPv6Address("fe80::1"));
+    send(ipv6Datagram, "out");
+    
+    ipv4Datagram = new IPv4Datagram("ipv4-12");
+    ipv4Datagram->setDestAddress(IPv4Address("192.168.2.1"));    
+    send(ipv4Datagram, "out");
+    
+    ipv6Datagram = new IPv6Datagram("ipv6-13");
+    ipv6Datagram->setDestAddress(IPv6Address("fe80::1"));
+    send(ipv6Datagram, "out");
+    
+    ipv4Datagram = new IPv4Datagram("ipv4-14");
+    udpPacket = new UDPPacket();
+    udpPacket->setSourcePort(2100);
+    ipv4Datagram->encapsulate(udpPacket);
+    send(ipv4Datagram, "out");
+
+    ipv6Datagram = new IPv6Datagram("ipv6-15");
+    udpPacket = new UDPPacket();
+    udpPacket->setSourcePort(2200);
+    ipv6Datagram->encapsulate(udpPacket);
+    send(ipv6Datagram, "out");
+    
+    ipv4Datagram = new IPv4Datagram("ipv4-16");
+    udpPacket = new UDPPacket();
+    udpPacket->setDestinationPort(2300);
+    ipv4Datagram->encapsulate(udpPacket);
+    send(ipv4Datagram, "out");
+
+    ipv6Datagram = new IPv6Datagram("ipv6-17");
+    udpPacket = new UDPPacket();
+    udpPacket->setDestinationPort(2400);
+    ipv6Datagram->encapsulate(udpPacket);
+    send(ipv6Datagram, "out");
+
+    ipv4Datagram = new IPv4Datagram("ipv4-18");
+    send(ipv4Datagram, "out");
+}
+
+void TestApp::finalize()
+{
+    out.close();
+}
+
+void TestApp::handleMessage(cMessage *msg)
+{
+  cGate *gate = msg->getArrivalGate();
+  out << msg->getName() << ": " << gate->getName() << "[" << gate->getIndex() << "]\n";
+  delete msg;
+}
+
+}
+
+%file: TestNetwork.ned
+
+import inet.networklayer.diffserv.MultiFieldClassifier;
+
+network TestNetwork
+{
+  submodules:
+    app: TestApp;
+    classifier: MultiFieldClassifier { filters = xmldoc("filters.xml"); }
+  connections:
+    app.out --> classifier.in;
+    for i=0..13 {
+      classifier.outs++ --> app.in++;
+    }
+    classifier.defaultOut --> app.defaultIn;
+}
+
+%file: filters.xml
+
+<filters>
+  <filter gate="0" srcAddress="192.168.1.1"/>
+  <filter gate="1" srcAddress="fe80::1122:3344:5566"/>
+  <filter gate="2" destAddress="192.168.1.1"/>
+  <filter gate="3" destAddress="fe80::1122:3344:5566"/>
+  <filter gate="4" srcPort="1000"/>
+  <filter gate="5" destPort="1000"/>
+  <filter gate="6" protocol="17"/>
+  <filter gate="7" tos="0x2e" tosMask="0x3f"/>
+  
+  <filter gate="8" srcAddress="192.168.0.0" srcPrefixLength="16"/>
+  <filter gate="9" srcAddress="fe80::" srcPrefixLength="10"/>
+  <filter gate="10" destAddress="192.168.0.0" destPrefixLength="16"/>
+  <filter gate="11" destAddress="fe80::" destPrefixLength="10"/>
+  <filter gate="12" srcPortMin="2000" srcPortMax="2999"/>
+  <filter gate="13" destPortMin="2000" destPortMax="2999"/>
+</filters>
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=100s
+cmdenv-express-mode = true
+network = TestNetwork
+
+%contains: result.txt
+ipv4-1: in[0]
+ipv6-2: in[1]
+ipv4-3: in[2]
+ipv6-4: in[3]
+ipv4-5: in[4]
+ipv4-6: in[5]
+ipv4-7: in[6]
+ipv4-8: in[7]
+ipv6-9: in[7]
+ipv4-10: in[8]
+ipv6-11: in[9]
+ipv4-12: in[10]
+ipv6-13: in[11]
+ipv4-14: in[12]
+ipv6-15: in[12]
+ipv4-16: in[13]
+ipv6-17: in[13]
+ipv4-18: defaultIn[0]
