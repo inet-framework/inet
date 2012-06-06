@@ -1,0 +1,15 @@
+<filters>
+  <experiment id="default">
+    <filter srcAddress="H1" gate="0"/>
+    <filter srcAddress="H2" gate="1"/>
+    <filter srcAddress="H3" gate="2"/>
+    <filter srcAddress="H4" gate="3"/>
+  </experiment>
+  <experiment id="5.1">
+    <filter destPort='2000' gate='0'/>
+    <filter srcAddress='H1' destPort='1000' gate='1'/>
+    <filter srcAddress='H2' destPort='1000' gate='2'/>
+    <filter srcAddress='H3' destPort='1000' gate='1'/>
+    <filter srcAddress='H4' destPort='1000' gate='2'/>
+  </experiment>
+</filters>

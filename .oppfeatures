@@ -265,6 +265,7 @@
         id="PPP"
         name="PPP"
         description = "PPP protocol"
+        initiallyEnabled = "true"
         requires = ""
         labels = "protocols"
         nedPackages = "
@@ -590,6 +591,20 @@
         labels = ""
         nedPackages = "
                        inet.networklayer.diffserv
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="DiffServ_examples"
+        name="DiffServ examples"
+        description = "DiffServ examples"
+        initiallyEnabled = "true"
+        requires = "DiffServ PPP Ethernet IPv4 UDP"
+        labels = ""
+        nedPackages = "
+                       inet.examples.diffserv
                       "
         extraSourceFolders = ""
         compileFlags = ""

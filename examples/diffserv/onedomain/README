@@ -1,0 +1,14 @@
+Implementation of the test cases described in Sanjay Ramroop: Performance evaluation of DiffServ networks using the ns-3 simulator
+(http://www.eng.uwi.tt/depts/elec/staff/rvadams/sramroop/Report_parts/Sanjay%20Ramroop%20807004374%20ECNG%203020%20Report%20April%204th%20Final.pdf)
+
+Experiment 1
+  Differentiation between forwarding classes
+
+Experiment 2:
+  AF drop precedence
+
+Experiment 3
+  Flow isolation and bandwidth efficiency
+
+Experiment 5
+  Comparison of DiffServ and Best Effort

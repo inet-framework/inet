@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scave:Analysis xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:scave="http://www.omnetpp.org/omnetpp/scave">
+  <inputs>
+    <inputs name="/inet/examples/diffserv/simple_/results/VoIP_WithoutQoS-*.vec"/>
+    <inputs name="/inet/examples/diffserv/simple_/results/VoIP_WithoutQoS-*.sca"/>
+    <inputs name="/inet/examples/diffserv/simple_/results/VoIP_WithPolicing-*.vec"/>
+    <inputs name="/inet/examples/diffserv/simple_/results/VoIP_WithPolicing-*.sca"/>
+    <inputs name="/inet/examples/diffserv/simple_/results/VoIP_WithPolicingAndQueueing-*.vec"/>
+    <inputs name="/inet/examples/diffserv/simple_/results/VoIP_WithPolicingAndQueueing-*.sca"/>
+  </inputs>
+  <datasets>
+    <datasets name="VoIPSink vectors">
+      <items xsi:type="scave:Add" filterPattern="module(DiffservNetwork.server.udpApp[2]) " type="VECTOR"/>
+      <items xsi:type="scave:LineChart" name="lost samples" lineNameFormat="${configname}">
+        <filters xsi:type="scave:Select" filterPattern="name(lostSamples:vector) " type="VECTOR"/>
+        <properties name="Graph.Title" value="Lost Samples"/>
+        <properties name="Graph.Title.Font" value="Arial-regular-18"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Border" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="Line.Name/VoIP_WithoutQoS" value="Without QoS"/>
+        <properties name="Line.Name/VoIP_WithQoS" value="With QoS"/>
+        <properties name="Symbols.Type/VoIP_WithQoS" value="Dot"/>
+        <properties name="Symbols.Size/VoIP_WithQoS" value="8"/>
+        <properties name="Line.Name/VoIP_WithPolicing" value="With Policing"/>
+        <properties name="Line.Name/VoIP_WithPolicingAndQueueing" value="With Policing and Queueing"/>
+      </items>
+      <items xsi:type="scave:LineChart" name="delays" lineNameFormat="${configname}">
+        <filters xsi:type="scave:Select" filterPattern="name(delay:vector) " type="VECTOR"/>
+        <properties name="Graph.Title" value="Delays"/>
+        <properties name="Graph.Title.Font" value="Arial-regular-18"/>
+        <properties name="Legend.Display" value="true"/>
+        <properties name="Legend.Border" value="true"/>
+        <properties name="Legend.Position" value="Inside"/>
+        <properties name="Line.Name/VoIP_WithQoS" value="With Qos"/>
+        <properties name="Line.Name/VoIP_WithoutQoS" value="Without QoS"/>
+        <properties name="Line.Name/VoIP_WithPolicing" value="With Policing"/>
+        <properties name="Line.Name/VoIP_WithPolicingAndQueueing" value="With Policing and Queueing"/>
+      </items>
+    </datasets>
+  </datasets>
+  <chartSheets>
+    <chartSheets name="default" charts="//@datasets/@datasets.0/@items.1 //@datasets/@datasets.0/@items.2"/>
+    <chartSheets name="VoIPSink charts" charts="//@datasets/@datasets.0/@items.2 //@datasets/@datasets.0/@items.1"/>
+  </chartSheets>
+</scave:Analysis>

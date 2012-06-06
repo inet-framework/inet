@@ -1,0 +1,5 @@
+<filters>
+  <filter destAddress="server" protocol="udp" destPort="1000" gate="0"/>
+  <filter destAddress="server" protocol="udp" destPort="5001" gate="1"/>
+  <filter destAddress="server" protocol="udp" destPort="5002" gate="2"/>
+</filters>
