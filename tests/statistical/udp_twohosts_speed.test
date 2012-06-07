@@ -99,7 +99,7 @@ dataset <- loadDataset(scafile)
 cat("\nOMNETPP TEST RESULT:\n")
 
 udpApp <- dataset$scalars[grep("\\.host\\d\\w*\\.udpApp\\[\\d\\]$",dataset$scalars$module),]
-udpSent <- udpApp[udpApp$name == "sentPkBytes:sum",]
+udpSent <- udpApp[udpApp$name == "sentPk:sum(packetBytes)",]
 udpRcvd <- udpApp[udpApp$name == "echoedPk:count",]
 
 cat("  UDP SPEED TEST RESULT:\n")

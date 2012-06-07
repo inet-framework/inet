@@ -139,7 +139,7 @@ cat("\nOMNETPP TEST RESULT:\n")
 
 cat("\nCHECK SENT PACKETS:\n")
 
-x <- dataset$scalars[dataset$scalars$name == "sentPk:sum(packetBytes)",]
+x <- dataset$scalars[dataset$scalars$name == "sentPk:count",]
 xx <- x[grep("_F_A.cli$",x$module)==1,]
 
 if(length(xx$value) != linecount)
