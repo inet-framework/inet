@@ -207,10 +207,10 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
     // consistency checks
     // note: we don't check nodeOutputGateId/nodeInputGateId, because wireless interfaces
     // are not connected to the host
-    if (!nwlayerInGate && !nwlayerOutGate)
+    if (!nwlayerInGate && !nwlayerOutGate)      // Accesspoint does not have a network layer so the NIC is not connected
         return;
     if (!nwlayerInGate || !nwlayerOutGate || nwlayerInGate->getOwnerModule()!=nwlayerOutGate->getOwnerModule() || nwlayerInGate->getIndex()!=nwlayerOutGate->getIndex())
-        throw cRuntimeError("addInterface(): interface must be connected to network layer's in/out gates to lower layer of the same index");
+        throw cRuntimeError("addInterface(): interface must be connected to network layer's in/out gates using the same gate index");
 
     entry->setNetworkLayerGateIndex(nwlayerInGate->getIndex());
 }
