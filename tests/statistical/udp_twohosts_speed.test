@@ -64,8 +64,12 @@ sim-time-limit = 20s
 **.numUdpApps = 2
 **.udpApp[0].typename = "UDPBasicApp"
 **.udpApp[0].destPort = 1234
-**.udpApp[0].sendInterval = 1.7ms
-**.udpApp[0].stopTime = 17s
+#**.udpApp[0].sendInterval = 2ms
+#**.udpApp[0].stopTime = 20s
+**.host*snap.udpApp[0].sendInterval = 1.719ms   #etherframe with snap and gap: 1074 bytes, 2 packets (sent, echoed): 1074*8/10000000*2 = 17.184ms
+**.host*snap.udpApp[0].stopTime = 17.19s
+**.udpApp[0].sendInterval = 1.706ms   #etherframe and gap: 1066 bytes, 2 packets (sent, echoed): 1066*8/10000000*2 = 17.056ms
+**.udpApp[0].stopTime = 17.06s
 **.host1.udpApp[0].destAddresses = "host2"
 **.host2.udpApp[0].destAddresses = "host1"
 **.host1snap.udpApp[0].destAddresses = "host2snap"
@@ -75,6 +79,7 @@ sim-time-limit = 20s
 **.udpApp[1].localPort = 1234
 
 **.host*snap.eth[*].useSNAP = true
+**.host*.eth[*].queue.frameCapacity = 1
 
 *.configurator.networkAddress = "192.168.1.0"
 
@@ -90,7 +95,7 @@ library("omnetpp", warn.conflicts=FALSE)
 scafile <- 'results/General-0.sca'
 linecount <- 4
 sentPk   <- 10000
-echoedPk <-  9990
+echoedPk <- 10000
 
 # begin TEST:
 
