@@ -1,15 +1,22 @@
+2012-06-15  Zoltan Bojthe
+
+	IPv4Route: removed RouteType type field, and getType(), setType()
+	functions, too.
+
+	IPv4InterfaceData: removed unnecessary ASSERT
+
 2012-05-15  Tamas Borbely
 
 	Added DSCP and ECN accessors to IPv4Datagram.
 
 2012-03-28  Tamas Borbely
 
-        IGMPv2: external routers attached to the IGMP module
+	IGMPv2: external routers attached to the IGMP module
 	are now responsible for implementing the IGMP router
 	logic (emiting queries and processing group membership
-        reports).
+	reports).
 	In this case the IGMP module passes all incoming IGMP
-        messages to the external router.
+	messages to the external router.
 
 2012-03-26  Tamas Borbely
 
@@ -27,7 +34,7 @@
 
 	1. The module is renamed to IGMPv2.
 	2. Checksum field is deleted from IGMPMessage. Errors modeled
-           with the errorBit field of packets, and erroneous packets
+	   with the errorBit field of packets, and erroneous packets
 	   are already dropped by the link layer.
 	3. The state of the IGMP module (timers, state variables, flags)
 	   are stored in the module itself instead of the IPv4InterfaceData.
@@ -57,17 +64,17 @@
 
 2012-03-04  Andras Varga
 
-    - Added a RoutingTableRecorder module that records all the changes 
-      in the routing table to a file.
-    - Better dump method for routing table.
+	- Added a RoutingTableRecorder module that records all the changes
+	  in the routing table to a file.
+	- Better dump method for routing table.
 
 2012-03-04  Levente Meszaros
 
-    Fixed routing table change notifications.
+	Fixed routing table change notifications.
 
 2012-02-20  Tamas Borbely
 
-    Added printMulticastRoutingTable() to IRoutingTable
+	Added printMulticastRoutingTable() to IRoutingTable
 
 2012-02-15  Tamas Borbely
 
@@ -103,7 +110,7 @@
 	  datagrams, then it is selected according to the routing table
 	  or the source address of the datagram.
 
-	Change from previous behavior: 
+	Change from previous behavior:
 	- packets sent to a multicast address from higher layer: it used
 	  to go out on each interface that had a matching route in the
 	  routing table (unless mcast interface was specified by HL).
@@ -115,8 +122,8 @@
 
 	- multicast forwarding: no longer takes into account the routes
 	  in the unticast routing table that have mcast destinations.
-	  Only the (new format) multicast table is used. This new 
-	  multicast routing table can only be configured with 
+	  Only the (new format) multicast table is used. This new
+	  multicast routing table can only be configured with
 	  IPv4NetworkConfigurator, routing files don't support it.
 
 2012-02-09  Tamas Borbely
@@ -131,7 +138,7 @@
 2012-02-09  Tamas Borbely
 
 	Fix: if an interface joined to a multicast group, then IP passed up
-        all multicast datagrams that was addressed to that group and reached
+	all multicast datagrams that was addressed to that group and reached
 	the node. This is wrong, because only those datagrams should be
 	delivered that arrived on an interface joined to the group.
 
@@ -139,7 +146,7 @@
 
 	Multicast interfaces always join to the 224.0.0.1 (all systems)
 	link-local multicast group on startup. In routers they join to the
-	224.0.0.2 (all routers) group too. 
+	224.0.0.2 (all routers) group too.
 
 2012-02-24  ------ inet-1.99.3 released ------
 

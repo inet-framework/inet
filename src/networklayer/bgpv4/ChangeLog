@@ -1,9 +1,16 @@
+2012-06-15  Zoltan Bojthe
+
+	BGPRouting: bgpConfigFile string parameter was replaced by bgpConfig xml
+	parameter
+
+	Eliminated some int <--> IPv4Address conversions
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-03-01  Levente Meszaros
 
-    - gateway is now correcty set on routing entries.
-    - eliminated redundant nextHop field from routingtable entries
+	- gateway is now correcty set on routing entries.
+	- eliminated redundant nextHop field from routingtable entries
 
 2012-02-24  ------ inet-1.99.3 released ------
 

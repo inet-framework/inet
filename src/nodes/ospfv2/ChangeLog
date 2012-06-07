@@ -1,3 +1,10 @@
+2012-06-15  Zoltan Bojthe
+
+	NED changes: OSPFRouter extends Router
+
+	Changes in network interfaces:
+	- renamed netwIn, netwOut gates to upperLayerIn, upperLayerOut
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-02-24  ------ inet-1.99.3 released ------

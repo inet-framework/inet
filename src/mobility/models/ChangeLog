@@ -1,8 +1,16 @@
+2012-05-18  Rudolf Hornig
+
+	Mobility models now correctly refer to the constraint area.
+
+2012-04-27  Levente Meszaros
+
+	Mobility: added default icon
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-03-19 Levente Meszaros
 
-    fixed infinite loop when nextChange is set to current simulation time
+	fixed infinite loop when nextChange is set to current simulation time
 
 2012-02-24  ------ inet-1.99.3 released ------
 

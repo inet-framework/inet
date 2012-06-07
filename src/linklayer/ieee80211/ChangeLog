@@ -31,7 +31,7 @@
 	In Ieee80211MgmtSTA, I removed the old solution, and inserted new
 	solution from manet.
 
-2011-07-20  Levente Mészáros
+2011-07-20  Levente Meszaros
 
 	Renamed lowergateIn to lowerLayerIn and lowergateOut to lowerLayerOut.
 	Renamed uppergateIn to upperLayerIn and uppergateOut to upperLayerOut.

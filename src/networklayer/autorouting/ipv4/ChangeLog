@@ -1,17 +1,38 @@
+2012-06-15  Zoltan Bojthe
+
+	IPv4NetworkConfigurator:
+	- XML config changes:
+	  - added @among attribute for interface and multicast-group entries:
+	    "among='X Y Z'"   means   "hosts='X Y Z' towards='X Y Z'"
+	  - added @metric attribute for interface entry in XML
+	  - added @id attribute for wireless entry
+	- bugfixes:
+	  - searching for the mgmnt module must be started from the interface module.
+	    Previously it started from the 'host' so the first mgmnt module was found 
+	    in the host instead of the mgmnt module that belongs to the interface. 
+	  - use string instead char pointer in maps in extractWirelessTopology()
+	  - skip interfaces during configuration if the IPv4Data member is NULL
+	  - configure only the interfaces that were specified in the XML configuration
+	  - skip nodes during configuration if they do not have a RoutingTable
+	  - dumpConfig: dump linklocal multicast addresses, too
+	- documentation fixes:
+	  - @towards was missed from multicast-group
+	  - fixed the default value of the config parameter
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-03-04  Levente Meszaros
 
-    Added IPv4Configurator, a new network configurator for IPv4
+	Added IPv4Configurator, a new network configurator for IPv4
 
-    This is intended to replace both routing files (.irt/.mrt) and
-    specialized network configurators like FlatNetworkConfigurator,
-    and do much more.
+	This is intended to replace both routing files (.irt/.mrt) and
+	specialized network configurators like FlatNetworkConfigurator,
+	and do much more.
 
-    Covers address assignment (manual, automatic), adding manual routes,
-    setting up static routing, optimizing the routing tables, etc.
-    Unlike FlatNetworkConfigurator, it will generate per-interface
-    addresses. Wireless networks are also supported.
+	Covers address assignment (manual, automatic), adding manual routes,
+	setting up static routing, optimizing the routing tables, etc.
+	Unlike FlatNetworkConfigurator, it will generate per-interface
+	addresses. Wireless networks are also supported.
 
 2012-02-24  ------ inet-1.99.3 released ------
 

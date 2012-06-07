@@ -65,4 +65,3 @@
 	@labels(IPControlInfo/up);  @labels(IPDatagram);
 	@labels(IPv6ControlInfo/up); @labels(IPv6ControlInfo/down);
 	@labels(IPv6Datagram)
-

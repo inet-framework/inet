@@ -1,3 +1,17 @@
+2012-06-15  Zoltan Bojthe
+
+	IPv4Address:
+	- added a parameter to str() function that allows choosing 
+	  between "0.0.0.0" and "<unspec>" when the address is unspecified 
+	  (when its value is 0)
+	- made the uint32 constructor explicit
+
+	IPvXAddressResolver: resolving netmask if needed
+	- added support for 'x.x.x.x/' syntax 
+	  (which will return the netmask instead of the ip address)
+	- added ADDR_MASK enum (to get the netmask instead of the address)
+	- NOTE: netmask resolving is implemented only for IPv4
+
 2012-05-15  Tamas Borbely
 
 	Added DSCP and ECN accessors to IPv4/IPv6ControlInfo.
@@ -6,19 +20,19 @@
 
 2012-03-04  Zoltan Bojthe
 
-    IPvXAddressResolver::tryResolve() uses a new syntax:
-    host
-    host(protocol)
-    host%interfacename
-    host%interfacename(protocol)
-    host>destmodule
-    host>destmodule(protocol)
-    address: host [ { '%' interfacename | '>' destmodule } ] [ '(' protocol ')' ]    
-    protocol: { 'ipv4' | 'ipv6' | 'routerId' }
+	IPvXAddressResolver::tryResolve() uses a new syntax:
+	host
+	host(protocol)
+	host%interfacename
+	host%interfacename(protocol)
+	host>destmodule
+	host>destmodule(protocol)
+	address: host [ { '%' interfacename | '>' destmodule } ] [ '(' protocol ')' ]
+	protocol: { 'ipv4' | 'ipv6' | 'routerId' }
 
 2012-02-28  Andras Varga
 
-    'const char*' ctors of IPv4Address/IPv6Address/MACAddress made explicit
+	'const char*' ctors of IPv4Address/IPv6Address/MACAddress made explicit
 
 2012-02-24  ------ inet-1.99.3 released ------
 

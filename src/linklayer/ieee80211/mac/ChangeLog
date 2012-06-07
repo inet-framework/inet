@@ -10,7 +10,7 @@
 	slot, diffs and ack timeout. Set the useModulationParameters parameter
 	for the MAC module.
 
-	Added support to prioritize multicast frames. Set the 
+	Added support to prioritize multicast frames. Set the
 	prioritizeMulticast parameter for the MAC module.
 
 	Added duplicate frame detection (turned on by default). Use

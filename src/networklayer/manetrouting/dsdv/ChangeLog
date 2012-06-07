@@ -8,12 +8,12 @@
 
 2012-01-19  Andras Varga
 
-	Follow IPv4Route change: "host" in IPv4Route was renamed to 
+	Follow IPv4Route change: "host" in IPv4Route was renamed to
 	"destination"
 
 2012-01-19  Zoltan Bojthe
 
-	Follow RoutingTable change: returned IPv4Route pointers are no longer 
+	Follow RoutingTable change: returned IPv4Route pointers are no longer
 	const
 
 2012-01-20  Andras Varga
@@ -24,7 +24,7 @@
 
 	Moved DSDV-related fields/functions from RoutingTable to DSDV_2.
 
-	DSDV route expiry is now implemented with a new isValid() method on 
+	DSDV route expiry is now implemented with a new isValid() method on
 	IPv4Route; RoutingTable will ignore invalid routes (isValid()==false).
 
 	Details:

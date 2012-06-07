@@ -2,7 +2,7 @@
 
 2012-03-04  Zoltan Bojthe
 
-    ICMP messages are correctly handled now.
+	ICMP messages are correctly handled now.
 
 2012-02-24  ------ inet-1.99.3 released ------
 

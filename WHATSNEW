@@ -1,6 +1,15 @@
 Recent changes in the INET Framework
 ====================================
 
+2012-04-12  Zoltan Bojthe
+
+changes in link layer
+    - at network interfaces:
+      - added INic moduleinterface, all other network interface interfacemodules
+        extends it
+      - renamed netwIn, netwOut gates to upperLayerIn, upperLayerOut
+
+
 INET-1.99.4 (March 20, 2012)
 ----------------------------
 

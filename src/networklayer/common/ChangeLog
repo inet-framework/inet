@@ -1,3 +1,18 @@
+2012-06-15  Zoltan Bojthe
+
+	- InterfaceEntry constructor changed: Now it stores a pointer to related 
+	  interface module
+
+	- InterfaceTable uses the stored interfaceModule ptr in InterfaceEntry instead
+	  of taking it as a parameter
+	  
+	- modified gate/connection validation in InterfaceTable
+
+	- bugfix: cGate::getDisplayString() has a side effect by creating an
+	  empty channel when there was no channel attached to the gate previously.
+	  solution: if no channel is connected to the gate do not call the getDisplayString()
+	  method at all.
+
 2012-04-13  Tamas Borbely
 
 	Added getInterfaceByInterfaceModule(cModule*) method to InterfaceTable.
@@ -8,8 +23,8 @@
 
 2012-03-04  Levente Meszaros
 
-	Added "displayAddresses" parameter to InterfaceTable. Setting it to true
-	will display all IP addresses on the connected links.
+   Added "displayAddresses" parameter to InterfaceTable. Setting it to true
+   will display all IP addresses on the connected links.
 
 2012-02-14  Tamas Borbely
 

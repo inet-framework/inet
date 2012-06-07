@@ -1,3 +1,8 @@
+2012-06-15  Zoltan Bojthe
+
+	UDPEchoApp fix: An error was thrown if UDP_I_ERROR was received
+	because it is a cMessage and not a cPacket.
+
 2012-06-04  Tamas Borbely
 
 	Set icon of UPDBasicBurst application.
