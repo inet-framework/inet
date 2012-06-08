@@ -32,7 +32,7 @@
  * @ingroup mobility
  * @author Alfonso Ariza
  */
-class INET_API LinealNodeDistributionMobility : public StationaryMobility
+class INET_API LinearNodeDistributionMobility : public StationaryMobility
 {
   protected:
 
@@ -52,7 +52,7 @@ class INET_API LinealNodeDistributionMobility : public StationaryMobility
     virtual void finish();
 
   public:
-    LinealNodeDistributionMobility();
+    LinearNodeDistributionMobility();
 };
 
 #endif
