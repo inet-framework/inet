@@ -64,6 +64,10 @@
  */
 class INET_API Radio : public ChannelAccess, public IPowerControl
 {
+  protected:
+    typedef std::map<double,double> SensitivityList; // Sensitivity list
+    SensitivityList sensitivityList;
+    virtual void getSensitivityList(cXMLElement* xmlConfig);
   public:
     Radio();
     virtual ~Radio();

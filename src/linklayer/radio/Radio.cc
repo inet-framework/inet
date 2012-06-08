@@ -64,6 +64,8 @@ void Radio::initialize(int stage)
         upperLayerIn = findGate("upperLayerIn");
         upperLayerOut = findGate("upperLayerOut");
 
+        getSensitivityList(par("SensitivityTable").xmlValue());
+
         // read parameters
         transmitterPower = par("transmitterPower");
         if (transmitterPower > (double) (getChannelControlPar("pMax")))
@@ -290,7 +292,7 @@ AirFrame *Radio::encapsulatePacket(cPacket *frame)
     ASSERT(!ctrl || ctrl->getChannelNumber()==-1); // per-packet channel switching not supported
 
     // Note: we don't set length() of the AirFrame, because duration will be used everywhere instead
-    if (ctrl && ctrl->getAdaptiveSensitivity()) updateSensitivity(ctrl->getBitrate());
+    //if (ctrl && ctrl->getAdaptiveSensitivity()) updateSensitivity(ctrl->getBitrate());
     AirFrame *airframe = createAirFrame();
     airframe->setName(frame->getName());
     airframe->setPSend(transmitterPower);
@@ -564,6 +566,7 @@ void Radio::handleLowerMsgStart(AirFrame* airframe)
     airframe->setPowRec(rcvdPower);
     // store the receive power in the recvBuff
     recvBuff[airframe] = rcvdPower;
+    updateSensitivity(airframe->getBitrate());
 
     // if receive power is bigger than sensitivity and if not sending
     // and currently not receiving another message and the message has
@@ -820,12 +823,34 @@ void Radio::setBitrate(double bitrate)
 void Radio::setRadioState(RadioState::State newState)
 {
     if (rs.getState() != newState)
+    {
         emit(radioStateSignal, newState);
+        if (rs.getState() != newState)
+        {
+            emit(radioStateSignal, newState);
+            if (newState == RadioState::SLEEP)
+            {
+                disconnectTransceiver();
+                disconnectReceiver();
+            }
+            else if (rs.getState() == RadioState::SLEEP)
+            {
+                connectTransceiver();
+                connectReceiver(); // the connection change the state
+                if (rs.getState() == newState)
+                {
+                    rs.setState(newState);
+                    nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+                    return;
+                }
+            }
+        }
+    }
 
     rs.setState(newState);
     nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
 }
-
+/*
 void Radio::updateSensitivity(double rate)
 {
     EV<<"bitrate = "<<rate<<endl;
@@ -864,20 +889,21 @@ void Radio::updateSensitivity(double rate)
     }
     EV <<" sensitivity after updateSensitivity: "<<sensitivity<<endl;
 }
+*/
 
-void Radio::disconnectReceiver()
+void Radio::updateSensitivity(double rate)
 {
-        receiverConnect = false; 
-        cc->disableReception(this->myRadioRef);
-        cc->unregisterRadio(myRadioRef);
-}
-
-void Radio::connectReceiver()
-{
-        myRadioRef = cc->registerRadio(this);
-        cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
-        cc->enableReception(this->myRadioRef);
-        receiverConnect = true; 
+    if (sensitivityList.empty())
+    {
+        return;
+    }
+    SensitivityList::iterator it = sensitivityList.find(rate);
+    if (it != sensitivityList.end())
+        sensitivity = it->second;
+    else
+        sensitivity = sensitivityList[0.0];
+    EV<<"bitrate = "<<rate<<endl;
+    EV <<" sensitivity after updateSensitivity: "<<sensitivity<<endl;
 }
 
 void Radio::registerBattery()
@@ -972,5 +998,141 @@ void Radio::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
                 setRadioState(RadioState::RECV);
         }
     }
+}
+
+void Radio::disconnectReceiver()
+{
+    receiverConnect = false;
+    cc->disableReception(this->myRadioRef);
+    if (rs.getState() == RadioState::TRANSMIT)
+        error("changing channel while transmitting is not allowed");
+
+   // Clear the recvBuff
+   for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
+   {
+        AirFrame *airframe = it->first;
+        cMessage *endRxTimer = (cMessage *)airframe->getContextPointer();
+        delete airframe;
+        delete cancelEvent(endRxTimer);
+    }
+    recvBuff.clear();
+
+    // clear snr info
+    snrInfo.ptr = NULL;
+    snrInfo.sList.clear();
+}
+
+void Radio::connectReceiver()
+{
+    receiverConnect = true;
+    cc->enableReception(this->myRadioRef);
+
+    if (rs.getState()!=RadioState::IDLE)
+        rs.setState(RadioState::IDLE); // Force radio to Idle
+
+    cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
+    cModule *myHost = findHost();
+
+    //cGate *radioGate = myHost->gate("radioIn");
+
+    cGate* radioGate = this->gate("radioIn")->getPathStartGate();
+
+    EV << "RadioGate :" << radioGate->getFullPath() << " " << radioGate->getFullName() << endl;
+
+    // pick up ongoing transmissions on the new channel
+    EV << "Picking up ongoing transmissions on new channel:\n";
+    IChannelControl::TransmissionList tlAux = cc->getOngoingTransmissions(rs.getChannelNumber());
+    for (IChannelControl::TransmissionList::const_iterator it = tlAux.begin(); it != tlAux.end(); ++it)
+    {
+        AirFrame *airframe = check_and_cast<AirFrame *> (*it);
+        // time for the message to reach us
+        double distance = getRadioPosition().distance(airframe->getSenderPos());
+        simtime_t propagationDelay = distance / 3.0E+8;
+
+        // if there is a message on the air which will reach us in the future
+        if (airframe->getTimestamp() + propagationDelay >= simTime())
+        {
+            EV << " - (" << airframe->getClassName() << ")" << airframe->getName() << ": ";
+            EV << "will arrive in the future, scheduling it\n";
+
+            // we need to send to each radioIn[] gate of this host
+            //for (int i = 0; i < radioGate->size(); i++)
+            //    sendDirect(airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() + i);
+
+            // JcM Fix: we need to this radio only. no need to send the packet to each radioIn
+            // since other radios might be not in the same channel
+            sendDirect(airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() );
+        }
+        // if we hear some part of the message
+        else if (airframe->getTimestamp() + airframe->getDuration() + propagationDelay > simTime())
+        {
+            EV << "missed beginning of frame, processing it as noise\n";
+
+            AirFrame *frameDup = airframe->dup();
+            frameDup->setArrivalTime(airframe->getTimestamp() + propagationDelay);
+            handleLowerMsgStart(frameDup);
+            bufferMsg(frameDup);
+        }
+    }
+
+    // notify other modules about the channel switch; and actually, radio state has changed too
+    nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+}
+
+
+void Radio::getSensitivityList(cXMLElement* xmlConfig)
+{
+    sensitivityList.empty();
+
+    if (xmlConfig == 0)
+    {
+        sensitivityList[0] = FWMath::dBm2mW(par("sensitivity").doubleValue());
+        return;
+    }
+
+    cXMLElementList sensitivityXmlList = xmlConfig->getElementsByTagName("SensitivityTable");
+
+    if (sensitivityXmlList.empty())
+    {
+        sensitivityList[0] = FWMath::dBm2mW(par("sensitivity").doubleValue());
+        return;
+    }
+
+    // iterate over all AnalogueModel-entries, get a new AnalogueModel instance and add
+    // it to analogueModels
+    for (cXMLElementList::const_iterator it = sensitivityXmlList.begin(); it != sensitivityXmlList.end(); it++)
+    {
+
+        cXMLElement* data = *it;
+
+        cXMLElementList parameters = data->getElementsByTagName("Entry");
+
+        for(cXMLElementList::const_iterator it = parameters.begin();
+            it != parameters.end(); it++)
+        {
+            const char* bitRate = (*it)->getAttribute("BitRate");
+            const char* sensitivity = (*it)->getAttribute("Sensitivity");
+            double rate = atof(bitRate);
+            if (rate == 0)
+                error("invalid bit rate");
+            double sens = atof(sensitivity);
+            sensitivityList[rate] = FWMath::dBm2mW(sens);
+
+        }
+        parameters = data->getElementsByTagName("Default");
+        for(cXMLElementList::const_iterator it = parameters.begin();
+            it != parameters.end(); it++)
+        {
+            const char* sensitivity = (*it)->getAttribute("Sensitivity");
+            double sens = atof(sensitivity);
+            sensitivityList[0.0] = FWMath::dBm2mW(sens);
+        }
+
+        SensitivityList::iterator it = sensitivityList.find(0.0);
+        if (it == sensitivityList.end())
+        {
+            sensitivityList[0] = FWMath::dBm2mW(par("sensitivity").doubleValue());
+        }
+    } // end iterator loop
 }
 

@@ -69,6 +69,7 @@ module Ieee80211NewNic like IWirelessNic
         }
         radio: Ieee80211NewRadio {
             parameters:
+                phyOpMode = opMode;
                 @display("p=96,307");
         }
     connections:
