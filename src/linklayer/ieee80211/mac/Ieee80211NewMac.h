@@ -442,6 +442,7 @@ class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
     virtual void finish();
     virtual void configureAutoBitRate();
     virtual void initWatches();
+    virtual const MACAddress& isInterfaceRegistered();
     //@}
 
   protected:

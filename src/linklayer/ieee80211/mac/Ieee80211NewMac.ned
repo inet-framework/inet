@@ -62,7 +62,7 @@ simple Ieee80211NewMac
         string queueModule = default(""); // name of optional external queue module
         int maxQueueSize = default(50);   // max queue length in frames; only used if queueModule==""
         
-        bool EDCA = default(true); // enable Enhanced Distributed Channel Access (802.11e)
+        bool EDCA = default(false); // enable Enhanced Distributed Channel Access (802.11e)
         // parameters for EDCA = true
         string classifier = default("Ieee80211eClassifier");
         int defaultAC = default(0); // the default AC category for frames that cannot be classified
@@ -111,6 +111,7 @@ simple Ieee80211NewMac
         double duplicateTimeOut @unit("s") = default(20s); // timeout for the duplicate detection
         // statistics
         double throughputTimePeriod @unit("s") = default(0); // period of time used by throughput measurement statistic
+        bool multiMac = default(false); // allows multiples mac interfaces in the same link layer
         @display("i=block/layer");
 
     gates:
