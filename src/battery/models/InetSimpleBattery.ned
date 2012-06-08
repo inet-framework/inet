@@ -23,11 +23,11 @@ import inet.battery.IBattery;
 simple InetSimpleBattery like IBattery
 {
     parameters:
-        double nominal;
-        double capacity;
-        double voltage;
-        double resolution @unit(s);
-        double publishDelta;
-        double publishTime @unit(s);
+        double nominal= default(3800);//mAh
+        double capacity = default(3800);//mAh
+        double voltage = default(12); // 12 volts
+        double resolution @unit(s) = default(1s);
+        double publishDelta = default(1); // between 0..1
+        double publishTime @unit(s) = default(1s);
         bool ConsumedVector = default(false);
 }
