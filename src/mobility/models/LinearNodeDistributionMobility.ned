@@ -16,20 +16,18 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //
 
-
 package inet.mobility.models;
 
-
 //
-// Places all nodes in a rectangular grid.
+// Mobility model which places all hosts at constant distances 
+// in a line with an orientation 
 //
-// @see ~ChannelControl
-// @author Isabel Dietrich
+// @author Alfonso Ariza
 //
-simple LinealNodeDistributionMobility extends StationaryMobility
+simple LinearNodeDistributionMobility extends StationaryMobility
 {
     parameters:
         double separation @unit(m);
         double orientation @unit(deg) = default(0deg);
-        @class(LinealNodeDistributionMobility);
+        @class(LinearNodeDistributionMobility);
 }

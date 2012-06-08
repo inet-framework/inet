@@ -17,13 +17,13 @@
  */
 
 
-#include "LinealNodeDistributionMobility.h"
+#include "LinearNodeDistributionMobility.h"
 
 
-Define_Module(LinealNodeDistributionMobility);
+Define_Module(LinearNodeDistributionMobility);
 
 
-LinealNodeDistributionMobility::LinealNodeDistributionMobility()
+LinearNodeDistributionMobility::LinearNodeDistributionMobility()
 {
     initialX = 0;
     initialY = 0;
@@ -31,7 +31,7 @@ LinealNodeDistributionMobility::LinealNodeDistributionMobility()
     orientation = 0;
 }
 
-void LinealNodeDistributionMobility::initialize(int stage)
+void LinearNodeDistributionMobility::initialize(int stage)
 {
     MobilityBase::initialize(stage);
     EV << "initializing StaticGridMobility stage " << stage << endl;
@@ -44,7 +44,7 @@ void LinealNodeDistributionMobility::initialize(int stage)
     }
 }
 
-void LinealNodeDistributionMobility::initializePosition()
+void LinearNodeDistributionMobility::initializePosition()
 {
     int index = visualRepresentation->getIndex();
     double rad = PI * orientation / 180.0;
@@ -61,7 +61,7 @@ void LinealNodeDistributionMobility::initializePosition()
     lastPosition.z = 0;
 }
 
-void LinealNodeDistributionMobility::finish()
+void LinearNodeDistributionMobility::finish()
 {
     MobilityBase::finish();
     recordScalar("x", lastPosition.x);
