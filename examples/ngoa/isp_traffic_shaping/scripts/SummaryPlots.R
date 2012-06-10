@@ -291,8 +291,8 @@ if (.resp == 'y') {
                     .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
                     .p <- ggplot(data=.df, aes(group=bs, colour=factor(bs), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
                     .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.k])
-                    .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[Byte]", values=0:9)
-                    .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[Byte]")
+                    .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[MB]", values=0:9)
+                    .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[MB]")
                     .plots[[.k]] <- .p
                     ## save each plot as a PDF file
                     .p
@@ -456,8 +456,8 @@ if (.resp == 'y') {
                     .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
                     .p <- ggplot(data=.df, aes(group=bs, colour=factor(bs), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
                     .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.k])
-                    .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[Byte]", values=0:9)
-                    .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[Byte]")
+                    .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[MB]", values=0:9)
+                    .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[MB]")
                     .plots[[.k]] <- .p
                     ## save each plot as a PDF file
                     .p
@@ -511,8 +511,8 @@ if (.resp == 'y') {
                         .p <- ggplot(data=.df, aes(group=bs, colour=factor(bs), x=n, y=fairness.index)) + geom_line() + scale_y_continuous(limits=c(0.75, 1))
                     ## }
                     .p <- .p + xlab("Number of Users per ONU (n)") + ylab(paste("Fairness Index of ", .labels.measure[.k], sep=""))
-                    .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=fairness.index), size=.pt_size) + scale_shape_manual("Burst Size\n[Byte]", values=0:9)
-                    .p <- .p + scale_colour_discrete("Burst Size\n[Byte]")
+                    .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=fairness.index), size=.pt_size) + scale_shape_manual("Burst Size\n[MB]", values=0:9)
+                    .p <- .p + scale_colour_discrete("Burst Size\n[MB]")
                     .plots[[.k]] <- .p
                     ## save each plot as a PDF file
                     .p
@@ -640,8 +640,8 @@ if (.resp == 'y') {
 ##                         .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
 ##                         .p <- ggplot(data=.df, aes(group=bs, colour=factor(bs), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
 ##                         .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.l])
-##                         .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[Byte]", values=0:9)
-##                         .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[Byte]")
+##                         .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[MB]", values=0:9)
+##                         .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[MB]")
 ##                         .plots[[.l]] <- .p
 ##                         ## save each plot as a PDF file
 ##                         .p
