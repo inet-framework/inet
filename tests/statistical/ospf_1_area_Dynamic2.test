@@ -1,0 +1,296 @@
+%description:
+Testing OSPF routing
+    Backbone only with n routers
+    UDP communications through entire backbone
+%#--------------------------------------------------------------------------------------------------------------
+%testprog: opp_run
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.linklayer.ethernet.EtherHub;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.ospfv2.OSPFRouter;
+import inet.util.ThruputMeteringChannel;
+import inet.world.scenario.ScenarioManager;
+
+
+network Test1
+{
+    parameters:
+        int numIRouters = default(0);
+        @display("p=10,10;b=712,152");
+    types:
+        channel C extends ThruputMeteringChannel
+        {
+            delay = 0.1us;
+            datarate = 100Mbps;
+            thruputDisplayFormat = "#N";
+        }
+    submodules:
+        H1: StandardHost {
+            parameters:
+                @display("p=56,92;i=device/laptop");
+            gates:
+                ethg[1];
+        }
+        N1: EtherHub {
+            parameters:
+                @display("p=184,182");
+            gates:
+                ethg[2];
+        }
+        R1A: OSPFRouter {
+            parameters:
+                @display("p=226,132");
+            gates:
+                ethg[3];
+        }
+        RA: OSPFRouter {
+            parameters:
+                @display("p=266,92");
+            gates:
+                ethg[2];
+        }
+        RB: OSPFRouter {
+            parameters:
+                @display("p=266,182");
+            gates:
+                ethg[2];
+        }
+        R1B: OSPFRouter {
+            parameters:
+                @display("p=306,132");
+            gates:
+                ethg[3];
+        }
+        RI[numIRouters]: OSPFRouter {
+            gates:
+                ethg[2];
+        }
+        R2: OSPFRouter {
+            parameters:
+                @display("p=416,92");
+            gates:
+                ethg[2];
+        }
+        N2: EtherHub {
+            parameters:
+                @display("p=532,182");
+            gates:
+                ethg[2];
+        }
+        H2: StandardHost {
+            parameters:
+                @display("p=660,92;i=device/laptop");
+            gates:
+                ethg[1];
+        }
+        scenarioManager: ScenarioManager {
+            parameters:
+                @display("p=594,50");
+                script = xmldoc("scenario.xml");
+//                script = xml("<empty/>");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                config = xml("<config>"+
+                            "<interface among='H1 R1A' address='192.168.1.x' netmask='255.255.255.0' />"+
+                            "<interface among='H2 R2' address='192.168.2.x' netmask='255.255.255.0' />"+
+                            "<interface among='R1A R1B RA RB RI[*] R2' address='192.168.60.x' netmask='255.255.255.x' />"+
+                            "<route hosts='H1 H2' destination='*' netmask='0.0.0.0' interface='eth0' />"+
+                            "</config>");
+                addStaticRoutes = false;
+                addDefaultRoutes = false;
+                @display("p=75,43");
+        }
+    connections:
+        H1.ethg[0] <--> C <--> N1.ethg[0];
+        N1.ethg[1] <--> C <--> R1A.ethg[0];
+
+        R1A.ethg[1] <--> C <--> RA.ethg[0];
+        R1A.ethg[2] <--> C <--> RB.ethg[0];
+        RA.ethg[1] <--> C <--> R1B.ethg[1];
+        RB.ethg[1] <--> C <--> R1B.ethg[2];
+
+        R1B.ethg[0] <--> C <--> R2.ethg[0] if numIRouters == 0;
+        R1B.ethg[0] <--> C <--> RI[0].ethg[0] if numIRouters > 0;
+        for i = 1..numIRouters-1 {
+            RI[i-1].ethg[1] <--> C <--> RI[i].ethg[0];
+        }
+        RI[numIRouters-1].ethg[1] <--> C <--> R2.ethg[0] if numIRouters > 0;
+
+        R2.ethg[1] <--> C <--> N2.ethg[0];
+        N2.ethg[1] <--> C <--> H2.ethg[0];
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+description = "Simple test"
+network = Test1
+tkenv-plugin-path = ../../../etc/plugins
+sim-time-limit = 1200s
+
+**.ospf.ospfConfig = xmldoc("ASConfig.xml")
+
+**.numUdpApps = 2
+**.udpApp[0].typename = "UDPBasicApp"
+**.udpApp[0].destPort = 1234
+**.udpApp[0].messageLength = 32 bytes
+**.udpApp[0].sendInterval = 1s
+**.udpApp[0].startTime = 100s + uniform(-0.2s, 0.2s)
+**.udpApp[0].stopTime = this.startTime + 1000s
+**.H2.udpApp[0].destAddresses = "H1"
+**.H1.udpApp[0].destAddresses = "H2"
+**.udpApp[1].typename = "UDPEchoApp"
+**.udpApp[1].localPort = 1234
+
+**.arp.cacheTimeout = 1s
+
+**.numIRouters = ${3,3,3,3,3,3}
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: ASConfig.xml
+<?xml version="1.0"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
+
+  <!-- Areas -->
+  <Area id="0.0.0.0">
+    <AddressRange address="192.168.1.0" mask="255.255.255.0" status="Advertise" />
+    <AddressRange address="192.168.2.0" mask="255.255.255.0" status="Advertise" />
+    <AddressRange address="192.168.60.0" mask="255.255.255.0" status="Advertise" />
+  </Area>
+
+  <!-- Routers -->
+  <Router name="R1A" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="1" routerPriority="1" />
+    <PointToPointInterface toward="RA" areaID="0.0.0.0" interfaceOutputCost="1" />
+    <PointToPointInterface toward="RB" areaID="0.0.0.0" interfaceOutputCost="2" />
+  </Router>
+
+  <Router name="RA" RFC1583Compatible="true">
+    <PointToPointInterface toward="R1A" areaID="0.0.0.0" interfaceOutputCost="1" />
+    <PointToPointInterface toward="R1B" areaID="0.0.0.0" interfaceOutputCost="1" />
+  </Router>
+
+  <Router name="RB" RFC1583Compatible="true">
+    <PointToPointInterface toward="R1A" areaID="0.0.0.0" interfaceOutputCost="2" />
+    <PointToPointInterface toward="R1B" areaID="0.0.0.0" interfaceOutputCost="2" />
+  </Router>
+
+  <Router name="R1B" RFC1583Compatible="true">
+    <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="2" />
+    <PointToPointInterface toward="RA" areaID="0.0.0.0" interfaceOutputCost="1" />
+    <PointToPointInterface toward="RB" areaID="0.0.0.0" interfaceOutputCost="2" />
+  </Router>
+
+  <Router name="RI[*]" RFC1583Compatible="true">
+    <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="2" />
+    <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="2" />
+  </Router>
+
+  <Router name="R2" RFC1583Compatible="true">
+    <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="2" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="1" routerPriority="2" />
+  </Router>
+
+</OSPFASConfig>
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+<scenario>
+    <at t="350">
+        <disconnect src-module="RA" src-gate="ethg$o[0]" />
+        <disconnect src-module="R1A" src-gate="ethg$o[1]" />
+    </at>
+    <at t="850">
+        <connect src-module="RA" src-gate="ethg[0]"
+                 dest-module="R1A" dest-gate="ethg[1]"
+                 channel-type="inet.util.ThruputMeteringChannel">
+            <param name="delay" value="0.1us" />
+            <param name="datarate" value="100Mbps" />
+            <param name="thruputDisplayFormat" value='"#N"' />
+        </connect>
+    </at>
+</scenario>
+%#--------------------------------------------------------------------------------------------------------------
+%postprocess-script: check.r
+#!/usr/bin/env Rscript
+
+options(echo=FALSE)
+options(width=160)
+library("omnetpp", warn.conflicts=FALSE)
+
+
+#TEST parameters
+runCount <- 6
+hostCount <- 2
+sentPk <- 1000
+echoedPk <- 920
+rcvdPk <- 920
+
+# begin TEST:
+
+cat("\nOMNETPP TEST RESULT:\n")
+
+x <- loadDataset('results/General-*.sca')
+ds <- x$scalars[grep("\\.H\\d\\.udpApp\\[\\d\\]$",x$scalars$module),]
+
+#merge runnumber column to ds:
+y <- subset(x$runattrs, attrname=='runnumber')
+names(y) <- c("runid","runnumber")
+ds <- merge(ds,y)
+
+sent <- ds[ds$name == "sentPk:count",]
+rcvd <- ds[ds$name == "rcvdPk:count",]
+echoed <- ds[ds$name == "echoedPk:count",]
+
+cat("\nOSPF TEST RESULT:\n")
+
+sent$success = (sent$value == sentPk)
+if(length(sent$value) == runCount*hostCount & min(sent$success) == TRUE)
+{
+    cat("SENT OK\n")
+} else {
+    cat("SENT BAD:\n")
+    sent$rate = sent$value*100/sentPk
+    print(sent)
+}
+
+echoed$success = (echoed$value >= echoedPk & echoed$value <= sentPk)
+if(length(echoed$value) == runCount*hostCount & min(echoed$success) == TRUE)
+{
+    cat("ECHOED OK\n")
+} else {
+    cat("ECHOED BAD:\n")
+    echoed$rate = echoed$value*100/sentPk
+    print(echoed)
+}
+
+rcvd$success = ((rcvd$value >= rcvdPk) & (rcvd$value <= sentPk))
+if(length(rcvd$value) == runCount*hostCount & min(rcvd$success) == TRUE)
+{
+    cat("RCVD OK\n")
+} else {
+    cat("RCVD BAD:\n")
+    rcvd$rate = rcvd$value*100/sentPk
+    print(rcvd)
+}
+
+
+cat("\n")
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: check.r.out
+
+OMNETPP TEST RESULT:
+
+OSPF TEST RESULT:
+SENT OK
+ECHOED OK
+RCVD OK
+
+%#--------------------------------------------------------------------------------------------------------------

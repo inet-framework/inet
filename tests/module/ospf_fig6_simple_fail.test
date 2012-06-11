@@ -1,0 +1,293 @@
+%description:
+Testing OSPF routing
+    Detects bugs in OSPF on RFC2328 fig.6. network
+    These UDP communications don't work yet:
+        Area3.N10.host0 <--> N15.host0
+        N12.host0 <--> Area3.H1
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.linklayer.ethernet.EtherHub;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.ospfv2.OSPFRouter;
+import inet.util.ThruputMeteringChannel;
+
+
+channel C extends ThruputMeteringChannel
+{
+    delay = 0.1us;
+    datarate = 100Mbps;
+    thruputDisplayFormat = "#N";
+}
+
+module OspfLan
+{
+    parameters:
+        int h; // number of hosts on the hub
+        @display("i=cloud");
+    gates:
+        inout ethg[];
+    submodules:
+        hub: EtherHub {
+            @display("is=s");
+        }
+        host[h]: StandardHost {
+            @display("is=s");
+        }
+    connections:
+        for i=0..sizeof(ethg)-1 {
+            hub.ethg++ <--> ethg[i];
+        }
+        for i=0..h-1 {
+            hub.ethg++ <--> C <--> host[i].ethg++;
+        }
+}
+
+network Fig6
+{
+    parameters:
+        @display("p=10,10;b=704,560");
+    submodules:
+        RT5: OSPFRouter {
+            parameters:
+                @display("p=496,144");
+            gates:
+                ethg[6];
+        }
+        RT6: OSPFRouter {
+            parameters:
+                @display("p=424,208");
+            gates:
+                ethg[3];
+        }
+        RT7: OSPFRouter {
+            parameters:
+                @display("p=496,328");
+            gates:
+                ethg[4];
+        }
+        RT10: OSPFRouter {
+            parameters:
+                @display("p=424,328");
+            gates:
+                ethg[3];
+        }
+        RT11: OSPFRouter {
+            parameters:
+                @display("p=282,404");
+            gates:
+                ethg[2];
+        }
+        N12: OspfLan {
+            parameters:
+                h = 1;
+                @display("p=620,277");
+        }
+        N15: OspfLan {
+            parameters:
+                h = 1;
+                @display("p=608,356");
+        }
+        Area2_N6: EtherHub {
+            parameters:
+                @display("p=504,467");
+        }
+        Area2_N8: EtherHub {
+            parameters:
+                @display("p=411,467");
+        }
+        Area3_RT12: OSPFRouter {
+            parameters:
+                @display("p=148,360");
+            gates:
+                ethg[3];
+        }
+        Area3_N9: EtherHub {
+            parameters:
+                @display("p=148,284");
+        }
+        Area3_N10: OspfLan {
+            parameters:
+                h = 1;
+                @display("p=148,452");
+        }
+        Area3_H1: StandardHost {
+            parameters:
+                @display("p=64,360;i=device/pc_s");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                config = xml("<config>"+"\n"+
+                            "<interface among='Area2_N8.* RT10 RT11' address='10.2.21.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface hosts='Area2_N6.*' address='10.2.22.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface hosts='RT7 RT10' towards='Area2_N6.*' address='10.2.22.x' netmask='255.255.255.0' />"+"\n"+
+
+                            "<interface among='Area3_N10.* Area3_RT12' address='10.3.31.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface among='Area3_H1 Area3_RT12' address='10.3.33.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface among='Area3_N9 Area3_N9.* Area3_RT* RT11' address='10.3.34.x' netmask='255.255.255.0' />"+"\n"+
+
+                            "<interface hosts='RT5 RT7' towards='N12.*' address='10.99.12.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface hosts='N12.*' address='10.99.12.x' netmask='255.255.255.0' />"+"\n"+
+                            "<interface among='RT5 RT6 RT7 RT10' address='10.0.104.x' netmask='255.255.255.x' />"+"\n"+
+                            "<interface among='RT7 N15.*' address='10.99.15.x' netmask='255.255.255.0' />"+"\n"+
+
+                            "<route hosts='Area3_H1 Area*_N*.host[*] N*.host[*]' destination='*' netmask='0.0.0.0' interface='eth0' />"+"\n"+
+                            "</config>"+"\n");
+                addStaticRoutes = false;
+                addDefaultRoutes = false;
+                @display("p=120,43");
+        }
+    connections allowunconnected:
+        Area3_RT12.ethg[1] <--> C <--> Area3_H1.ethg++;
+        Area3_RT12.ethg[0] <--> C <--> Area3_N9.ethg++;
+        Area3_RT12.ethg[2] <--> C <--> Area3_N10.ethg++;
+        RT11.ethg[0] <--> C <--> Area3_N9.ethg++;
+        Area2_N8.ethg++ <--> C <--> RT11.ethg[1];
+        Area2_N8.ethg++ <--> C <--> RT10.ethg[1];
+        Area2_N6.ethg++ <--> C <--> RT10.ethg[2];
+        Area2_N6.ethg++ <--> C <--> RT7.ethg[1];
+
+        RT5.ethg[3] <--> C <--> RT7.ethg[0];
+        RT5.ethg[2] <--> C <--> RT6.ethg[2];
+        RT5.ethg[4] <--> C <--> N12.ethg++;
+        RT6.ethg[1] <--> C <--> RT10.ethg[0];
+        RT7.ethg[3] <--> C <--> N12.ethg++;
+        RT7.ethg[2] <--> C <--> N15.ethg++;
+}
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+description = "Full network test"
+network = Fig6
+ned-path = .;../../../../src;../../lib
+
+tkenv-plugin-path = ../../../etc/plugins
+
+sim-time-limit = 300s
+
+**.ospf.ospfConfig = xmldoc("ASConfig.xml")
+
+
+**.arp.cacheTimeout = 1s
+
+*.usenew = true
+
+**.Area3_N10.host[0].numUdpApps = 2
+**.N15.host[0].numUdpApps = 2
+**.N12.host[0].numUdpApps = 2
+**.Area3_H1.numUdpApps = 2
+
+**.udpApp[0].typename = "UDPEchoApp"
+**.udpApp[0].localPort = 1234
+
+**.udpApp[1..].typename = "UDPBasicApp"
+**.udpApp[1..].destPort = 1234
+**.udpApp[1..].messageLength = 32 bytes
+**.udpApp[1..].sendInterval = 1s
+**.udpApp[1..].startTime = 100s
+**.udpApp[1..].stopTime = this.startTime + 100s
+
+**.Area3_N10.host[0].udpApp[1].destAddresses = "N15.host[0]"
+**.N15.host[0].udpApp[1].destAddresses = "Area3_N10.host[0]"
+**.N12.host[0].udpApp[1].destAddresses =  "Area3_H1"
+**.Area3_H1.udpApp[1].destAddresses =  "N12.host[0]"
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: ASConfig.xml
+<?xml version="1.0"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
+
+  <!-- Areas -->
+  <Area id="0.0.0.0">
+    <AddressRange address="RT5>RT6" mask="RT5>RT6" status="Advertise" />
+    <AddressRange address="RT5>RT7" mask="RT5>RT7" status="Advertise" />
+    <AddressRange address="RT6>RT10" mask="RT6>RT10" status="Advertise" />
+    <AddressRange address="RT6>RT5" mask="RT6>RT5" status="Advertise" />
+    <AddressRange address="RT7>RT5" mask="RT7>RT5" status="Advertise" />
+    <AddressRange address="RT10>RT6" mask="RT10>RT6" status="Advertise" />
+  </Area>
+
+  <Area id="0.0.0.2">
+    <AddressRange address="RT7>Area2_N6" mask="RT7>Area2_N6" status="Advertise" />
+    <AddressRange address="RT10>Area2_N6" mask="RT10>Area2_N6" status="Advertise" />
+    <AddressRange address="RT10>Area2_N8" mask="RT10>Area2_N8" status="Advertise" />
+    <AddressRange address="RT11>Area2_N8" mask="RT11>Area2_N8" status="Advertise" />
+  </Area>
+
+  <Area id="0.0.0.3">
+    <AddressRange address="RT11>Area3_N9" mask="RT11>Area3_N9" status="Advertise" />
+    <AddressRange address="Area3_RT12>Area3_N9" mask="Area3_RT12>Area3_N9" status="Advertise" />
+    <AddressRange address="Area3_RT12>Area3_H1" mask="Area3_RT12>Area3_H1" status="Advertise" />
+    <AddressRange address="Area3_RT12>Area3_N10" mask="Area3_RT12>Area3_N10" status="Advertise" />
+  </Area>
+
+  <!-- Routers -->
+  <Router name="RT5" RFC1583Compatible="true">
+    <BroadcastInterface toward="RT6" areaID="0.0.0.0" interfaceOutputCost="7" />
+    <BroadcastInterface toward="RT7" areaID="0.0.0.0" interfaceOutputCost="6" />
+    <ExternalInterface toward="N12" advertisedExternalNetworkAddress="RT5>N12" advertisedExternalNetworkMask="RT5>N12" externalInterfaceOutputCost="8" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00" />
+  </Router>
+
+  <Router name="RT6" RFC1583Compatible="true">
+    <BroadcastInterface toward="RT10" areaID="0.0.0.0" interfaceOutputCost="7" />
+    <BroadcastInterface toward="RT5" areaID="0.0.0.0" interfaceOutputCost="6" />
+  </Router>
+
+  <Router name="RT7" RFC1583Compatible="true">
+    <BroadcastInterface toward="RT5" areaID="0.0.0.0" interfaceOutputCost="6" />
+    <BroadcastInterface toward="Area2_N6" areaID="0.0.0.2" interfaceOutputCost="1" routerPriority="1" />
+    <ExternalInterface toward="N15" advertisedExternalNetworkAddress="RT7>N15" advertisedExternalNetworkMask="RT7>N15" externalInterfaceOutputCost="9" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00" />
+    <ExternalInterface toward="N12" advertisedExternalNetworkAddress="RT7>N12" advertisedExternalNetworkMask="RT7>N12" externalInterfaceOutputCost="2" externalInterfaceOutputType="Type2" forwardingAddress="0.0.0.0" externalRouteTag="0x00" />
+  </Router>
+
+  <Router name="RT10" RFC1583Compatible="true">
+    <BroadcastInterface toward="RT6" areaID="0.0.0.0" interfaceOutputCost="5" />
+    <BroadcastInterface toward="Area2_N8" areaID="0.0.0.2" interfaceOutputCost="3" routerPriority="1" />
+    <BroadcastInterface toward="Area2_N6" areaID="0.0.0.2" interfaceOutputCost="1" routerPriority="1" />
+    <VirtualLink endPointRouterID="RT11%routerId" transitAreaID="0.0.0.2" />
+  </Router>
+
+  <Router name="RT11" RFC1583Compatible="true">
+    <BroadcastInterface toward="Area3_N9" areaID="0.0.0.3" interfaceOutputCost="1" routerPriority="1" />
+    <BroadcastInterface toward="Area2_N8" areaID="0.0.0.2" interfaceOutputCost="2" routerPriority="1" />
+    <VirtualLink endPointRouterID="RT10%routerId" transitAreaID="0.0.0.2" />
+  </Router>
+
+  <Router name="Area3_RT12" RFC1583Compatible="true">
+    <BroadcastInterface toward="Area3_N9" areaID="0.0.0.3" interfaceOutputCost="1" routerPriority="1" />
+    <HostInterface toward="Area3_H1" areaID="0.0.0.3" attachedHost="Area3_H1" linkCost="10" />
+    <BroadcastInterface toward="Area3_N10" areaID="0.0.0.3" interfaceOutputCost="2" routerPriority="1" />
+  </Router>
+
+</OSPFASConfig>
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/General-0.sca
+scalar Fig6.N12.host[0].udpApp[0] 	echoedPk:count 	100
+%contains: results/General-0.sca
+scalar Fig6.N12.host[0].udpApp[1] 	sentPk:count 	100
+%contains: results/General-0.sca
+scalar Fig6.N12.host[0].udpApp[1] 	rcvdPk:count 	100
+%contains: results/General-0.sca
+scalar Fig6.N15.host[0].udpApp[0] 	echoedPk:count 	100
+%contains: results/General-0.sca
+scalar Fig6.N15.host[0].udpApp[1] 	sentPk:count 	100
+%contains: results/General-0.sca
+scalar Fig6.N15.host[0].udpApp[1] 	rcvdPk:count 	100
+%contains: results/General-0.sca
+scalar Fig6.Area3_N10.host[0].udpApp[0] 	echoedPk:count 	100
+%contains: results/General-0.sca
+scalar Fig6.Area3_N10.host[0].udpApp[1] 	sentPk:count 	100
+%contains: results/General-0.sca
+scalar Fig6.Area3_N10.host[0].udpApp[1] 	rcvdPk:count 	100
+%contains: results/General-0.sca
+scalar Fig6.Area3_H1.udpApp[0] 	echoedPk:count 	100
+%contains: results/General-0.sca
+scalar Fig6.Area3_H1.udpApp[1] 	sentPk:count 	100
+%contains: results/General-0.sca
+scalar Fig6.Area3_H1.udpApp[1] 	rcvdPk:count 	100
+%#--------------------------------------------------------------------------------------------------------------
