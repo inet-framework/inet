@@ -42,8 +42,9 @@
 #include "IPv4Address.h"
 #include "IPvXAddress.h"
 #include "ControlManetRouting_m.h"
+#ifdef WITH_80211MESH
 #include "LocatorNotificationInfo_m.h"
-
+#endif
 
 const int UDP_HEADER_BYTES = 8;
 typedef std::vector<IPv4Address> IPAddressVector;
@@ -1766,6 +1767,7 @@ int DYMOUM::re_info_type(struct re_block *b, rtable_entry_t *e, u_int8_t is_rreq
 
 void DYMOUM::processLocatorAssoc(const cObject *details)
 {
+#ifdef WITH_80211MESH
     LocatorNotificationInfo *infoLoc = check_and_cast<LocatorNotificationInfo*>(details);
     Uint128 destAddr = infoLoc->getMacAddr().getInt();
     Uint128 apAddr;
@@ -1804,10 +1806,12 @@ void DYMOUM::processLocatorAssoc(const cObject *details)
         }
         return;
     }
+#endif
 }
 
 void DYMOUM::processLocatorDisAssoc(const cObject *details)
 {
+#ifdef WITH_80211MESH
     LocatorNotificationInfo *infoLoc = check_and_cast<LocatorNotificationInfo*>(details);
     Uint128 destAddr = infoLoc->getMacAddr().getInt();
     if (isInMacLayer())
@@ -1826,5 +1830,6 @@ void DYMOUM::processLocatorDisAssoc(const cObject *details)
         rtable_delete(fwd_rt);
         return;
     }
+#endif
 }
 
