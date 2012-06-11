@@ -171,7 +171,9 @@ void DSRUU::omnet_deliver(struct dsr_pkt *dp)
     dgram->setIdentification(dp->nh.iph->id); // Identification
     dgram->setMoreFragments(dp->nh.iph->tos & 0x2000);
     dgram->setDontFragment(dp->nh.iph->frag_off & 0x4000);
+#ifdef NEWFRAGMENT
     dgram->setTotalPayloadLength(dp->totalPayloadLength);
+#endif
     dgram->setTimeToLive(dp->nh.iph->ttl); // TTL
     dgram->setTransportProtocol(dp->encapsulate_protocol); // Transport protocol
 

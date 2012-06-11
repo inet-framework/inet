@@ -33,7 +33,9 @@
 #include "uint128.h"
 #include "NotifierConsts.h"
 #include "ICMP.h"
+#ifdef WITH_80211MESH
 #include "ILocator.h"
+#endif
 #include "ARP.h"
 #include <vector>
 #include <set>
@@ -131,7 +133,9 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     bool isGateway;
     std::vector<ManetProxyAddress> proxyAddress;
 
+#ifdef WITH_80211MESH
     ILocator *locator;
+#endif
 
   protected:
     ~ManetRoutingBase();
