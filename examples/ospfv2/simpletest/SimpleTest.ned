@@ -63,10 +63,7 @@ network SimpleTest
                             "<interface among='H1 R1' address='192.168.1.x' netmask='255.255.255.0' />"+
                             "<interface among='H2 R2' address='192.168.2.x' netmask='255.255.255.0' />"+
                             "<interface among='R1 R2' address='192.168.60.x' netmask='255.255.255.0' />"+
-                            "<multicast-group hosts='R1 R2' address='224.0.0.5' />"+
                             "<route hosts='H1 H2' destination='*' netmask='0.0.0.0' interface='eth0' />"+
-                            "<route hosts='R1 R2' destination='224.0.0.0' netmask='240.0.0.0' interface='eth0' />"+
-                            "<route hosts='R1 R2' destination='224.0.0.0' netmask='240.0.0.0' interface='eth1' />"+
                             "</config>");
                 addStaticRoutes = false;
                 addDefaultRoutes = false;
