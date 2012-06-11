@@ -53,10 +53,15 @@ pending_rreq_t *NS_CLASS pending_rreq_add(struct in_addr dest_addr, u_int32_t se
         exit(EXIT_FAILURE);
     }
 
-    entry->dest_addr.s_addr = dest_addr.s_addr;
+    Uint128 dest = dest_addr.s_addr;
+    Uint128 apAddr;
+    if (getAp(dest,apAddr))
+        dest = apAddr;
+
+    entry->dest_addr.s_addr = dest;
     entry->seqnum       = seqnum;
     entry->tries        = 0;
-    dymoPendingRreq->insert(std::make_pair(dest_addr.s_addr,entry));
+    dymoPendingRreq->insert(std::make_pair(dest, entry));
     return entry;
 }
 
@@ -83,16 +88,21 @@ int NS_CLASS pending_rreq_remove(pending_rreq_t *entry)
 
 pending_rreq_t *NS_CLASS pending_rreq_find(struct in_addr dest_addr)
 {
+    Uint128 dest = dest_addr.s_addr;
+    Uint128 apAddr;
+    if (getAp(dest,apAddr))
+        dest = apAddr;
 
-    DymoPendingRreq::iterator it = dymoPendingRreq->find(dest_addr.s_addr);
+    DymoPendingRreq::iterator it = dymoPendingRreq->find(dest);
     if (it != dymoPendingRreq->end())
     {
         pending_rreq_t *entry = it->second;
-        if (entry->dest_addr.s_addr == dest_addr.s_addr)
+        if (entry->dest_addr.s_addr == dest)
             return entry;
         else
             opp_error("Error in dymoPendingRreq table");
     }
+
     return NULL;
 }
 

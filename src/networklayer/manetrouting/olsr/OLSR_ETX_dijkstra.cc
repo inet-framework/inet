@@ -184,8 +184,8 @@ void Dijkstra::run()
             DijkstraMap::iterator itCurrent = dijkstraMap.find(*current_node);
             if (itCurrent==dijkstraMap.end())
                 opp_error("dijkstraMap error node not found");
-            hop destHop = itDest->second;
-            hop currentHop = itCurrent->second;
+            // hop destHop = itDest->second;
+            // hop currentHop = itCurrent->second;
             if (itDest->second.hop_count() == -1)   // there is not a link to dest_node yet...
             {
                 switch (parameter->link_quality())

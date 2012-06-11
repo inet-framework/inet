@@ -36,6 +36,7 @@
 #include <limits.h>
 
 #include <omnetpp.h>
+#include "IPv4Datagram.h"
 #include "UDPPacket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
@@ -88,6 +89,8 @@ OLSR_ETX::initialize(int stage)
 {
     if (stage==4)
     {
+        if (isInMacLayer())
+            OlsrAddressSize::ADDR_SIZE = 6;
         OLSR_HELLO_INTERVAL = par("OLSR_HELLO_INTERVAL");
 
  	/// TC messages emission interval.
@@ -475,6 +478,24 @@ OLSR_ETX::olsr_r1_mpr_computation()
                 else
                     it2++;
             }
+            int distanceFromEnd = std::distance(it, N2.end());
+            int distance = std::distance(N2.begin(), it);
+            int i = 0;
+            for (nb2hopset_t::iterator it2 = N2.begin(); i < distance; i++) // check now the first section
+            {
+
+                OLSR_nb2hop_tuple* nb2hop_tuple2 = *it2;
+                if (nb2hop_tuple1->nb_main_addr() == nb2hop_tuple2->nb_main_addr())
+                {
+                    deleted_addrs.insert(nb2hop_tuple2->nb2hop_addr());
+                    it2 = N2.erase(it2);
+                }
+                else
+                    it2++;
+
+            }
+            it = N2.end() - distanceFromEnd; // the standard doesn't guarantee that the iterator is valid if we have delete something in the vector, reload the iterator.
+
             it = N2.erase(it);
             increment = false;
         }
@@ -1309,7 +1330,7 @@ OLSR_ETX::rtable_dijkstra_computation()
         if (hopCount == 1)
         {
             // add route...
-            rtable_.add_entry(it->second, it->second, itDij->second.link().last_node(), 1, -1);
+            rtable_.add_entry(it->second, it->second, itDij->second.link().last_node(), 1, -1,itDij->second.link().quality(),itDij->second.link().getDelay());
             omnet_chg_rte(it->second, it->second, netmask, hopCount, false, itDij->second.link().last_node());
         }
         else if (it->first > 1)
@@ -1318,7 +1339,7 @@ OLSR_ETX::rtable_dijkstra_computation()
             OLSR_ETX_rt_entry* entry = rtable_.lookup(itDij->second.link().last_node());
             if (entry==NULL)
                 opp_error("entry not found");
-            rtable_.add_entry(it->second, entry->next_addr(), entry->iface_addr(), hopCount, entry->local_iface_index());
+            rtable_.add_entry(it->second, entry->next_addr(), entry->iface_addr(), hopCount, entry->local_iface_index(),itDij->second.link().quality(),itDij->second.link().getDelay());
             omnet_chg_rte (it->second, entry->next_addr(), netmask, hopCount, false, entry->iface_addr());
         }
         processed_nodes.erase(processed_nodes.begin());
@@ -1388,7 +1409,7 @@ OLSR_ETX::rtable_dijkstra_computation()
         if (entry1 != NULL && entry2 == NULL)
         {
             rtable_.add_entry(tuple->iface_addr(),
-                              entry1->next_addr(), entry1->iface_addr(), entry1->dist(), entry1->local_iface_index());
+                              entry1->next_addr(), entry1->iface_addr(), entry1->dist(), entry1->local_iface_index(),entry1->quality,entry1->delay);
             omnet_chg_rte(tuple->iface_addr(), entry1->next_addr(), netmask, entry1->dist(), false, entry1->iface_addr());
 
         }
@@ -1861,8 +1882,7 @@ OLSR_ETX::send_hello()
 ///
 /// \brief Creates a new %OLSR_ETX TC message which is buffered to be sent later on.
 ///
-void
-OLSR_ETX::send_tc()
+void OLSR_ETX::send_tc()
 {
     OLSR_msg msg;
     msg.msg_type() = OLSR_ETX_TC_MSG;
@@ -1870,7 +1890,7 @@ OLSR_ETX::send_tc()
     msg.orig_addr() = ra_addr();
     if (parameter_.fish_eye())
     {
-        msg.ttl() = tc_msg_ttl_ [tc_msg_ttl_index_];
+        msg.ttl() = tc_msg_ttl_[tc_msg_ttl_index_];
         tc_msg_ttl_index_ = (tc_msg_ttl_index_ + 1) % (MAX_TC_MSG_TTL);
     }
     else
@@ -1885,104 +1905,182 @@ OLSR_ETX::send_tc()
     msg.tc().count = 0;
     msg.tc().set_qos_behaviour(parameter_.link_quality());
 
-    //switch (parameter_.mpr_algorithm()) {
-    //case OLSR_ETX_MPR_OLSRD:
-    // Reported by Mohamed Belhassen
-    switch (parameter_.tc_redundancy())
+    // we have to check which mpr selection algorithm is being used
+    // prior to adding neighbors to the TC message being generated
+    switch (parameter_.mpr_algorithm())
     {
-    case OLSR_ETX_TC_ALL_NEIGHBOR_SET_REDUNDANCY:
-
-        // Report all 1 hop neighbors we have
-        for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
-        {
-            OLSR_ETX_nb_tuple* nb_tuple = *it;
-            int count = msg.tc().count;
-            OLSR_ETX_link_tuple *link_tuple;
-
-            if (nb_tuple->getStatus() == OLSR_ETX_STATUS_SYM)
+        case OLSR_ETX_MPR_OLSRD:
+            // Report all 1 hop neighbors we have
+            for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
             {
-                assert(count >= 0 && count < OLSR_ETX_MAX_ADDRS);
-                // Report link quality and neighbor link quality of the best link that we have
-                // to this node.
-                link_tuple = state_.find_best_sym_link_tuple(nb_tuple->nb_main_addr(), CURRENT_TIME);
-                if (link_tuple != NULL)
-                {
-                    msg.tc().nb_etx_main_addr(count).iface_address() = nb_tuple->nb_main_addr();
-                    msg.tc().nb_etx_main_addr(count).link_quality() = link_tuple->link_quality();
-                    msg.tc().nb_etx_main_addr(count).nb_link_quality() =
-                        link_tuple->nb_link_quality();
-                    /// Link delay extension
-                    msg.tc().nb_etx_main_addr(count).link_delay() = link_tuple->link_delay();
-                    msg.tc().nb_etx_main_addr(count).nb_link_delay() =
-                        link_tuple->nb_link_delay();
-                    msg.tc().count++;
-                }
-            }
-        }
-        break;
-
-    default:
-        //if (parameter_.tc_redundancy() & OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET) {
-        // Reported by Mohamed Belhassen
-        if (parameter_.tc_redundancy()==OLSR_ETX_TC_MPR_PLUS_MPR_SEL_SET_REDUNDANCY)
-        {
-            // Report our MPR selector set
-            for (mprselset_t::iterator it = mprselset().begin(); it != mprselset().end(); it++)
-            {
-                OLSR_ETX_mprsel_tuple* mprsel_tuple = *it;
+                OLSR_nb_tuple* nb_tuple = *it;
                 int count = msg.tc().count;
                 OLSR_ETX_link_tuple *link_tuple;
 
-                assert(count >= 0 && count < OLSR_ETX_MAX_ADDRS);
-                // Report link quality and neighbor link quality of the best link that we have
-                // to this node.
-                link_tuple = state_.find_best_sym_link_tuple(mprsel_tuple->main_addr(), CURRENT_TIME);
-                if (link_tuple != NULL)
+                if (nb_tuple->getStatus() == OLSR_STATUS_SYM)
                 {
-                    msg.tc().nb_etx_main_addr(count).iface_address() = mprsel_tuple->main_addr();
-                    msg.tc().nb_etx_main_addr(count).link_quality() = link_tuple->link_quality();
-                    msg.tc().nb_etx_main_addr(count).nb_link_quality() =
-                        link_tuple->nb_link_quality();
-                    /// Link delay extension
-                    msg.tc().nb_etx_main_addr(count).link_delay() = link_tuple->link_delay();
-                    msg.tc().nb_etx_main_addr(count).nb_link_delay() =
-                        link_tuple->nb_link_delay();
-                    msg.tc().count++;
+                    assert(count >= 0 && count < OLSR_MAX_ADDRS);
+                    link_tuple = state_.find_best_sym_link_tuple(nb_tuple->nb_main_addr(), CURRENT_TIME);
+                    if (link_tuple != NULL)
+                    {
+                        msg.tc().nb_etx_main_addr(count).iface_address() = nb_tuple->nb_main_addr();
+
+                        // Report link quality and link link delay of the best link
+                        // that we have to this node.
+                        msg.tc().nb_etx_main_addr(count).link_quality() = link_tuple->link_quality();
+                        msg.tc().nb_etx_main_addr(count).nb_link_quality() = link_tuple->nb_link_quality();
+                        msg.tc().nb_etx_main_addr(count).link_delay() = link_tuple->link_delay();
+                        msg.tc().nb_etx_main_addr(count).nb_link_delay() = link_tuple->nb_link_delay();
+
+                        msg.tc().count++;
+                    }
                 }
             }
-        }
+            break;
 
-        //  if (parameter_.tc_redundancy() & OLSR_ETX_TC_REDUNDANCY_MPR_SET) {
-        // Reported by Mohamed Belhassen
-        if ((parameter_.tc_redundancy()==OLSR_ETX_TC_MPR_PLUS_MPR_SEL_SET_REDUNDANCY) || (parameter_.tc_redundancy()==OLSR_ETX_TC_MPR_SEL_SET_REDUNDANCY))
-        {
-            // Also report our MPR set
-            for (mprset_t::iterator it = mprset().begin(); it != mprset().end(); it++)
+        default:
+            //if (parameter_.tc_redundancy() & OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET) {
+            // Reported by Mohamed Belhassen
+            // we have to check which mpr selection algorithm is being used
+            // prior to adding neighbors to the TC message being generated
+
+            switch (parameter_.tc_redundancy())
             {
-                nsaddr_t mpr_addr = *it;
-                int count = msg.tc().count;
-                OLSR_ETX_link_tuple *link_tuple;
+                case OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET:
+                    // publish only nodes in mpr sel set (RFC 3626)
+                    for (mprselset_t::iterator it = mprselset().begin(); it != mprselset().end(); it++)
+                    {
+                        OLSR_ETX_mprsel_tuple* mprsel_tuple = *it;
+                        int count = msg.tc().count;
+                        OLSR_ETX_link_tuple *link_tuple;
 
-                assert(count >= 0 && count < OLSR_ETX_MAX_ADDRS);
-                // Report link quality and neighbor link quality of the best link that we have
-                // to this node.
-                link_tuple = state_.find_best_sym_link_tuple(mpr_addr, CURRENT_TIME);
-                if (link_tuple != NULL)
-                {
-                    msg.tc().nb_etx_main_addr(count).iface_address() = mpr_addr;
-                    msg.tc().nb_etx_main_addr(count).link_quality() = link_tuple->link_quality();
-                    msg.tc().nb_etx_main_addr(count).nb_link_quality() =
-                        link_tuple->nb_link_quality();
-                    /// Link delay extension
-                    msg.tc().nb_etx_main_addr(count).link_delay() = link_tuple->link_delay();
-                    msg.tc().nb_etx_main_addr(count).nb_link_delay() =
-                        link_tuple->nb_link_delay();
-                    msg.tc().count++;
-                }
+                        assert(count >= 0 && count < OLSR_MAX_ADDRS);
+                        link_tuple = state_.find_best_sym_link_tuple(mprsel_tuple->main_addr(), CURRENT_TIME);
+                        if (link_tuple != NULL)
+                        {
+                            msg.tc().nb_etx_main_addr(count).iface_address() = mprsel_tuple->main_addr();
+
+                            // Report link quality and link link delay of the best link
+                            // that we have to this node.
+                            msg.tc().nb_etx_main_addr(count).link_quality() = link_tuple->link_quality();
+                            msg.tc().nb_etx_main_addr(count).nb_link_quality() = link_tuple->nb_link_quality();
+                            msg.tc().nb_etx_main_addr(count).link_delay() = link_tuple->link_delay();
+                            msg.tc().nb_etx_main_addr(count).nb_link_delay() = link_tuple->nb_link_delay();
+
+                            msg.tc().count++;
+                        }
+                    }
+
+                    break;
+
+                case OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET_PLUS_MPR_SET:
+                    // publish nodes in mpr sel set plus nodes in mpr set (RFC 3626)
+                    for (mprselset_t::iterator it = mprselset().begin(); it != mprselset().end(); it++)
+                    {
+                        OLSR_mprsel_tuple* mprsel_tuple = *it;
+                        int count = msg.tc().count;
+                        OLSR_ETX_link_tuple *link_tuple;
+
+                        assert(count >= 0 && count < OLSR_MAX_ADDRS);
+                        link_tuple = state_.find_best_sym_link_tuple(mprsel_tuple->main_addr(), CURRENT_TIME);
+                        if (link_tuple != NULL)
+                        {
+                            msg.tc().nb_etx_main_addr(count).iface_address() = mprsel_tuple->main_addr();
+
+                            // Report link quality and link link delay of the best link
+                            // that we have to this node.
+                            msg.tc().nb_etx_main_addr(count).link_quality() = link_tuple->link_quality();
+                            msg.tc().nb_etx_main_addr(count).nb_link_quality() = link_tuple->nb_link_quality();
+                            msg.tc().nb_etx_main_addr(count).link_delay() = link_tuple->link_delay();
+                            msg.tc().nb_etx_main_addr(count).nb_link_delay() = link_tuple->nb_link_delay();
+
+                            msg.tc().count++;
+                        }
+                    }
+
+                    for (mprset_t::iterator it = mprset().begin(); it != mprset().end(); it++)
+                    {
+                        nsaddr_t mpr_addr = *it;
+                        int count = msg.tc().count;
+                        OLSR_ETX_link_tuple *link_tuple;
+
+                        assert(count >= 0 && count < OLSR_MAX_ADDRS);
+                        link_tuple = state_.find_best_sym_link_tuple(mpr_addr, CURRENT_TIME);
+                        if (link_tuple != NULL)
+                        {
+                            msg.tc().nb_etx_main_addr(count).iface_address() = mpr_addr;
+
+                            // Report link quality and link link delay of the best link
+                            // that we have to this node.
+                            msg.tc().nb_etx_main_addr(count).link_quality() = link_tuple->link_quality();
+                            msg.tc().nb_etx_main_addr(count).nb_link_quality() = link_tuple->nb_link_quality();
+                            msg.tc().nb_etx_main_addr(count).link_delay() = link_tuple->link_delay();
+                            msg.tc().nb_etx_main_addr(count).nb_link_delay() = link_tuple->nb_link_delay();
+
+                            msg.tc().count++;
+                        }
+                    }
+
+                    break;
+
+                case OLSR_ETX_TC_REDUNDANCY_FULL:
+                    // publish full neighbor link set (RFC 3626)
+                    for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
+                    {
+                        OLSR_ETX_nb_tuple* nb_tuple = *it;
+                        int count = msg.tc().count;
+                        OLSR_ETX_link_tuple *link_tuple;
+
+                        if (nb_tuple->getStatus() == OLSR_STATUS_SYM)
+                        {
+                            assert(count >= 0 && count < OLSR_MAX_ADDRS);
+                            link_tuple = state_.find_best_sym_link_tuple(nb_tuple->nb_main_addr(), CURRENT_TIME);
+                            if (link_tuple != NULL)
+                            {
+                                msg.tc().nb_etx_main_addr(count).iface_address() = nb_tuple->nb_main_addr();
+
+                                // Report link quality and link link delay of the best link
+                                // that we have to this node.
+                                msg.tc().nb_etx_main_addr(count).link_quality() = link_tuple->link_quality();
+                                msg.tc().nb_etx_main_addr(count).nb_link_quality() = link_tuple->nb_link_quality();
+                                msg.tc().nb_etx_main_addr(count).link_delay() = link_tuple->link_delay();
+                                msg.tc().nb_etx_main_addr(count).nb_link_delay() = link_tuple->nb_link_delay();
+
+                                msg.tc().count++;
+                            }
+                        }
+                    }
+
+                    break;
+                case OLSR_ETX_TC_REDUNDANCY_MPR_SET:
+                    // non-OLSR standard: publish mpr set only
+                    for (mprset_t::iterator it = mprset().begin(); it != mprset().end(); it++)
+                    {
+                        nsaddr_t mpr_addr = *it;
+                        int count = msg.tc().count;
+                        OLSR_ETX_link_tuple *link_tuple;
+
+                        assert(count >= 0 && count < OLSR_MAX_ADDRS);
+                        link_tuple = state_.find_best_sym_link_tuple(mpr_addr, CURRENT_TIME);
+                        if (link_tuple != NULL)
+                        {
+                            msg.tc().nb_etx_main_addr(count).iface_address() = mpr_addr;
+
+                            // Report link quality and link link delay of the best link
+                            // that we have to this node.
+                            msg.tc().nb_etx_main_addr(count).link_quality() = link_tuple->link_quality();
+                            msg.tc().nb_etx_main_addr(count).nb_link_quality() = link_tuple->nb_link_quality();
+                            msg.tc().nb_etx_main_addr(count).link_delay() = link_tuple->link_delay();
+                            msg.tc().nb_etx_main_addr(count).nb_link_delay() = link_tuple->nb_link_delay();
+
+                            msg.tc().count++;
+                        }
+                    }
+                    break;
             }
-        }
-        break;
+            break;
     }
+
     msg.msg_size() = msg.size();
     enque_msg(msg, JITTER);
 }
@@ -2606,3 +2704,53 @@ OLSR_ETX::link_quality()
             tuple->packet_timeout();
     }
 }
+
+bool OLSR_ETX::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &cost)
+{
+    OLSR_ETX_rt_entry* rt_entry = rtable_.lookup(dest);
+    if (!rt_entry)
+    {
+        Uint128 apAddr;
+        if (getAp(dest, apAddr))
+        {
+
+            OLSR_ETX_rt_entry* rt_entry = rtable_.lookup(apAddr);
+            if (!rt_entry)
+                return false;
+            if (rt_entry->route.size())
+                add = rt_entry->route[0];
+            else
+                add = rt_entry->next_addr();
+            OLSR_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
+            if (rt_entry_aux->next_addr() != add)
+                opp_error("OLSR Data base error");
+
+            InterfaceEntry * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
+            iface = ie->getInterfaceId();
+            if (parameter_.link_delay())
+               cost = rt_entry->delay;
+            else
+                cost = rt_entry->quality;
+            return true;
+        }
+        return false;
+    }
+
+    if (rt_entry->route.size())
+        add = rt_entry->route[0];
+    else
+        add = rt_entry->next_addr();
+    OLSR_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
+    if (rt_entry_aux->next_addr() != add)
+        opp_error("OLSR Data base error");
+
+    InterfaceEntry * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
+    iface = ie->getInterfaceId();
+    if (parameter_.link_delay())
+       cost = rt_entry->delay;
+    else
+        cost = rt_entry->quality;
+    return true;
+}
+
+

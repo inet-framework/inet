@@ -32,7 +32,8 @@
 #include "ICMPMessage_m.h"
 #include "ICMPAccess.h"
 #include "NotifierConsts.h"
-
+#include "IPv4Datagram.h"
+#include "IPv4InterfaceData.h"
 
 #include "ProtocolMap.h"
 #include "IPv4Address.h"
@@ -207,7 +208,7 @@ void NS_CLASS initialize(int stage)
 
         NS_DEV_NR = getWlanInterfaceIndexByAddress();
         NS_IFINDEX = getWlanInterfaceIndexByAddress();
-
+#ifndef AODV_USE_STL
         list_t *lista_ptr;
         lista_ptr=&rreq_records;
         INIT_LIST_HEAD(&rreq_records);
@@ -215,7 +216,7 @@ void NS_CLASS initialize(int stage)
         INIT_LIST_HEAD(&rreq_blacklist);
         lista_ptr=&seekhead;
         INIT_LIST_HEAD(&seekhead);
-#ifndef AODV_USE_STL
+
         lista_ptr=&TQ;
         INIT_LIST_HEAD(&TQ);
 #endif
@@ -274,6 +275,7 @@ NS_CLASS ~ AODVUU()
         }
     }
 #endif
+#ifndef AODV_USE_STL
     while (!list_empty(&rreq_records))
     {
         pos = list_first(&rreq_records);
@@ -294,6 +296,25 @@ NS_CLASS ~ AODVUU()
         list_detach(pos);
         if (pos) free(pos);
     }
+#else
+    while (!rreq_records.empty())
+    {
+        free (rreq_records.back());
+        rreq_records.pop_back();
+    }
+
+    while (!rreq_blacklist.empty())
+    {
+        free (rreq_blacklist.begin()->second);
+        rreq_blacklist.erase(rreq_blacklist.begin());
+    }
+
+    while (!seekhead.empty())
+    {
+        delete (seekhead.begin()->second);
+        seekhead.erase(seekhead.begin());
+    }
+#endif
     packet_queue_destroy();
     cancelAndDelete(sendMessageEvent);
     log_cleanup();
@@ -1042,16 +1063,33 @@ bool  NS_CLASS getNextHop(const Uint128 &dest,Uint128 &add, int &iface,double &c
 {
     struct in_addr destAddr;
     destAddr.s_addr = dest;
-    rt_table_t * fwd_rt = rt_table_find(destAddr);
-    if (!fwd_rt)
-        return false;
-    if (!fwd_rt->state != VALID)
-        return false;
-    add = fwd_rt->next_hop.s_addr;
-    InterfaceEntry * ie = getInterfaceEntry (fwd_rt->ifindex);
-    iface = ie->getInterfaceId();
-    cost = fwd_rt->hcnt;
-    return true;
+    Uint128 apAddr;
+    rt_table_t * fwd_rt = this->rt_table_find(destAddr);
+    if (fwd_rt)
+    {
+        if (fwd_rt->state != VALID)
+            return false;
+        add = fwd_rt->next_hop.s_addr;
+        InterfaceEntry * ie = getInterfaceEntry (fwd_rt->ifindex);
+        iface = ie->getInterfaceId();
+        cost = fwd_rt->hcnt;
+        return true;
+    }
+    else if (getAp(dest,apAddr))
+    {
+        destAddr.s_addr = apAddr;
+        fwd_rt = this->rt_table_find(destAddr);
+        if (!fwd_rt)
+            return false;
+        if (fwd_rt->state != VALID)
+            return false;
+        add = fwd_rt->next_hop.s_addr;
+        InterfaceEntry * ie = getInterfaceEntry (fwd_rt->ifindex);
+        iface = ie->getInterfaceId();
+        cost = fwd_rt->hcnt;
+        return true;
+    }
+    return false;
 }
 
 bool NS_CLASS isProactive()

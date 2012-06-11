@@ -22,6 +22,7 @@
 
 #include "ManetRoutingBase.h"
 #include "UDPPacket.h"
+#include "IPv4Datagram_m.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "IPv6ControlInfo.h"
@@ -38,6 +39,8 @@
 #define UDP_HDR_LEN 8
 
 simsignal_t ManetRoutingBase::mobilityStateChangedSignal = SIMSIGNAL_NULL;
+ManetRoutingBase::GlobalRouteMap *ManetRoutingBase::globalRouteMap = NULL;
+bool ManetRoutingBase::createInternalStore = false;
 
 void ManetTimer::removeTimer()
 {
@@ -111,12 +114,17 @@ ManetRoutingBase::ManetRoutingBase()
     timerMessagePtr = NULL;
     timerMultiMapPtr = NULL;
     commonPtr = NULL;
-    createInternalStore = false;
     routesVector = NULL;
     interfaceVector = new InterfaceVector;
     staticNode = false;
     colaborativeProtocol = NULL;
     arp = NULL;
+    locator = NULL;
+    isGateway = false;
+    proxyAddress.clear();
+    addressGroupVector.clear();
+    inAddressGroup.clear();
+
 }
 
 
@@ -139,7 +147,7 @@ void ManetRoutingBase::registerRoutingModule()
     /* Set host parameters */
     isRegistered = true;
     int  num_80211 = 0;
-    inet_rt = RoutingTableAccess().get();
+    inet_rt = RoutingTableAccess().getIfExists();
     inet_ift = InterfaceTableAccess().get();
     nb = NotificationBoardAccess().get();
 
@@ -160,42 +168,69 @@ void ManetRoutingBase::registerRoutingModule()
     cStringTokenizer tokenizerInterfaces(interfaces);
     const char *token;
     const char * prefixName;
-    while ((token = tokenizerInterfaces.nextToken())!=NULL)
+    if (!mac_layer_)
     {
-        if ((prefixName = strstr(token, "prefix"))!=NULL)
+        while ((token = tokenizerInterfaces.nextToken()) != NULL)
         {
-            const char *leftparenp = strchr(prefixName, '(');
-            const char *rightparenp = strchr(prefixName, ')');
-            std::string interfacePrefix;
-            interfacePrefix.assign(leftparenp+1, rightparenp-leftparenp-1);
-            for (int i = 0; i < inet_ift->getNumInterfaces(); i++)
+            if ((prefixName = strstr(token, "prefix")) != NULL)
             {
-                ie = inet_ift->getInterface(i);
-                name = ie->getName();
-                if ((strstr(name, interfacePrefix.c_str() )!=NULL) && !isThisInterfaceRegistered(ie))
+                const char *leftparenp = strchr(prefixName, '(');
+                const char *rightparenp = strchr(prefixName, ')');
+                std::string interfacePrefix;
+                interfacePrefix.assign(leftparenp + 1, rightparenp - leftparenp - 1);
+                for (int i = 0; i < inet_ift->getNumInterfaces(); i++)
                 {
-                    InterfaceIdentification interface;
-                    interface.interfacePtr = ie;
-                    interface.index = i;
-                    num_80211++;
-                    interfaceVector->push_back(interface);
+                    ie = inet_ift->getInterface(i);
+                    name = ie->getName();
+                    if ((strstr(name, interfacePrefix.c_str()) != NULL) && !isThisInterfaceRegistered(ie))
+                    {
+                        InterfaceIdentification interface;
+                        interface.interfacePtr = ie;
+                        interface.index = i;
+                        num_80211++;
+                        interfaceVector->push_back(interface);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < inet_ift->getNumInterfaces(); i++)
+                {
+                    ie = inet_ift->getInterface(i);
+                    name = ie->getName();
+                    if (strcmp(name, token) == 0 && !isThisInterfaceRegistered(ie))
+                    {
+                        InterfaceIdentification interface;
+                        interface.interfacePtr = ie;
+                        interface.index = i;
+                        num_80211++;
+                        interfaceVector->push_back(interface);
+                    }
                 }
             }
         }
-        else
+    }
+    else
+    {
+        cModule *mod = getParentModule()->getParentModule();
+        char *interfaceName = new char[strlen(mod->getFullName()) + 1];
+        char *d = interfaceName;
+        for (const char *s = mod->getFullName(); *s; s++)
+            if (isalnum(*s))
+                *d++ = *s;
+        *d = '\0';
+
+        for (int i = 0; i < inet_ift->getNumInterfaces(); i++)
         {
-            for (int i = 0; i < inet_ift->getNumInterfaces(); i++)
+            ie = inet_ift->getInterface(i);
+            name = ie->getName();
+            if (strcmp(name, interfaceName) == 0 && !isThisInterfaceRegistered(ie))
             {
-                ie = inet_ift->getInterface(i);
-                name = ie->getName();
-                if (strcmp(name, token)==0 && !isThisInterfaceRegistered(ie))
-                {
-                    InterfaceIdentification interface;
-                    interface.interfacePtr = ie;
-                    interface.index = i;
-                    num_80211++;
-                    interfaceVector->push_back(interface);
-                }
+                InterfaceIdentification interface;
+                interface.interfacePtr = ie;
+                interface.index = i;
+                num_80211++;
+                interfaceVector->push_back(interface);
             }
         }
     }
@@ -217,7 +252,8 @@ void ManetRoutingBase::registerRoutingModule()
         }
     }
 
-    routerId = inet_rt->getRouterId().getInt();
+    if (inet_rt)
+        routerId = inet_rt->getRouterId().getInt();
 
     if (interfaceVector->size()==0 || interfaceVector->size() > (unsigned int)maxInterfaces)
         opp_error("Manet routing protocol has found %i wlan interfaces", num_80211);
@@ -270,6 +306,45 @@ void ManetRoutingBase::registerRoutingModule()
     nb->subscribe(this,NF_L2_AP_DISASSOCIATED);
     nb->subscribe(this,NF_L2_AP_ASSOCIATED);
 
+    locator = LocatorModuleAccess().getIfExists();
+    if (locator)
+    {
+        InterfaceEntry *ie = getInterfaceWlanByAddress();
+        if (locator->getIpAddress().isUnspecified() && ie->ipv4Data())
+            locator->setIpAddress(ie->ipv4Data()->getIPAddress());
+        if (locator->getMacAddress().isUnspecified())
+            locator->setMacAddress(ie->getMacAddress());
+        nb->subscribe(this,NF_LOCATOR_ASSOC);
+        nb->subscribe(this,NF_LOCATOR_DISASSOC);
+    }
+
+    if (par("PublicRoutingTables").boolValue())
+    {
+        setInternalStore(true);
+        if (globalRouteMap == NULL)
+        {
+            globalRouteMap = new GlobalRouteMap;
+        }
+
+        GlobalRouteMap::iterator it = globalRouteMap->find(getAddress());
+        if (it == globalRouteMap->end())
+        {
+            ProtocolRoutingData data;
+            ProtocolsRoutes vect;
+            data.isProactive = isProactive();
+            data.routesVector = routesVector;
+            vect.push_back(data);
+            globalRouteMap->insert(std::make_pair<Uint128,ProtocolsRoutes>(getAddress(),vect));
+        }
+        else
+        {
+            ProtocolRoutingData data;
+            data.isProactive = isProactive();
+            data.routesVector = routesVector;
+            it->second.push_back(data);
+        }
+    }
+
  //   WATCH_MAP(*routesVector);
 }
 
@@ -296,6 +371,21 @@ ManetRoutingBase::~ManetRoutingBase()
     {
         delete routesVector;
         routesVector = NULL;
+    }
+    proxyAddress.clear();
+    addressGroupVector.clear();
+    inAddressGroup.clear();
+
+    if (globalRouteMap)
+    {
+        GlobalRouteMap::iterator it = globalRouteMap->find(getAddress());
+        if (it != globalRouteMap->end())
+            globalRouteMap->erase(it);
+        if (globalRouteMap->empty())
+        {
+            delete globalRouteMap;
+            globalRouteMap = NULL;
+        }
     }
 }
 
@@ -379,8 +469,12 @@ void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const Uint128& destAd
 }
 
 void ManetRoutingBase::processLinkBreak(const cObject *details) {return;}
+void ManetRoutingBase::processLinkBreakManagement(const cObject *details) {return;}
 void ManetRoutingBase::processPromiscuous(const cObject *details) {return;}
 void ManetRoutingBase::processFullPromiscuous(const cObject *details) {return;}
+void ManetRoutingBase::processLocatorAssoc(const cObject *details) {return;}
+void ManetRoutingBase::processLocatorDisAssoc(const cObject *details) {return;}
+
 
 void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const Uint128& destAddr, int destPort, int ttl, double delay, const Uint128 &iface)
 {
@@ -744,6 +838,25 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
         }
     }
 
+    if (locator && locator->isApIp(desAddress) && del_entry)
+    {
+        std::vector<IPv4Address> list;
+        locator->getApListIp(desAddress,list);
+        for (unsigned int i = 0; i<list.size(); i++)
+        {
+            for (int i=inet_rt->getNumRoutes(); i>0; --i)
+            {
+                IPv4Route *e = inet_rt->getRoute(i-1);
+                if (list[i] == e->getDestination())
+                {
+                    if (!inet_rt->deleteRoute(e))
+                        opp_error("Aodv omnet_chg_rte can't delete route entry");
+                    else
+                        break;
+                }
+            }
+        }
+    }
     if (del_entry)
         return;
 
@@ -791,6 +904,41 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     /// routing protocol name otherwise
     entry->setSource(routeSource);
     inet_rt->addRoute(entry);
+    if (locator && locator->isApIp(desAddress))
+    {
+        std::vector<IPv4Address> list;
+        locator->getApListIp(desAddress,list);
+        for (unsigned int i = 0; i<list.size(); i++)
+        {
+            IPv4Route *e = inet_rt->findBestMatchingRoute(list[i]);
+            if (e && e->getDestination() == list[i])
+            {
+                if (e->getGateway() == gateway && e->getMetric() == hops && e->getInterface() == ie)
+                    continue;
+            }
+
+            IPv4Route *entry = new IPv4Route();
+
+            /// Destination
+            entry->setDestination(list[i]);
+            /// Route mask
+            entry->setNetmask(netmask);
+            /// Next hop
+            entry->setGateway(gateway);
+            /// Metric ("cost" to reach the destination)
+            entry->setMetric(hops);
+            /// Interface name and pointer
+
+            entry->setInterface(ie);
+
+            /// Route type: Direct or Remote
+            entry->setType(routeType);
+            /// Source of route, MANUAL by reading a file,
+            /// routing protocol name otherwise
+            entry->setSource(routeSource);
+            inet_rt->addRoute(entry);
+        }
+    }
 }
 
 // This methods use the nic index to identify the output nic.
@@ -841,6 +989,26 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
             {
                 found = true;
                 oldentry = e;
+            }
+        }
+    }
+
+    if (locator && locator->isApIp(desAddress) && del_entry)
+    {
+        std::vector<IPv4Address> list;
+        locator->getApListIp(desAddress, list);
+        for (unsigned int i = 0; i < list.size(); i++)
+        {
+            for (int i = inet_rt->getNumRoutes(); i > 0; --i)
+            {
+                IPv4Route *e = inet_rt->getRoute(i - 1);
+                if (list[i] == e->getDestination())
+                {
+                    if (!inet_rt->deleteRoute(e))
+                        opp_error("Aodv omnet_chg_rte can't delete route entry");
+                    else
+                        break;
+                }
             }
         }
     }
@@ -898,6 +1066,42 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
         entry->setSource(IPv4Route::MANET2);
 
         inet_rt->addRoute(entry);
+
+    if (locator && locator->isApIp(desAddress))
+    {
+        std::vector<IPv4Address> list;
+        locator->getApListIp(desAddress, list);
+        for (unsigned int i = 0; i < list.size(); i++)
+        {
+            IPv4Route *e = inet_rt->findBestMatchingRoute(list[i]);
+            if (e && e->getDestination() == list[i])
+            {
+                if (e->getGateway() == gateway && e->getMetric() == hops && e->getInterface() == ie)
+                    continue;
+            }
+
+            e = new IPv4Route();
+
+            /// Destination
+            e->setDestination(list[i]);
+            /// Route mask
+            e->setNetmask(netmask);
+            /// Next hop
+            e->setGateway(gateway);
+            /// Metric ("cost" to reach the destination)
+            e->setMetric(hops);
+            /// Interface name and pointer
+
+            e->setInterface(ie);
+
+            /// Route type: Direct or Remote
+            e->setType(entry->getType());
+            /// Source of route, MANUAL by reading a file,
+            /// routing protocol name otherwise
+            e->setSource(entry->getSource());
+            inet_rt->addRoute(e);
+        }
+    }
 }
 
 
@@ -958,19 +1162,28 @@ void ManetRoutingBase::receiveChangeNotification(int category, const cObject *de
     {
         if (details==NULL)
             return;
-        Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(details);
-        cPacket * pktAux = frame->getEncapsulatedPacket();
-        if (!mac_layer_ && pktAux!=NULL)
+        Ieee80211DataFrame *frame = dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject*>(details));
+        if (frame)
         {
-            cPacket *pkt = pktAux->dup();
-            ControlInfoBreakLink *add = new ControlInfoBreakLink;
-            add->setDest(frame->getReceiverAddress());
-            pkt->setControlInfo(add);
-            processLinkBreak(pkt);
-            delete pkt;
+            cPacket * pktAux = frame->getEncapsulatedPacket();
+            if (!mac_layer_ && pktAux != NULL)
+            {
+                cPacket *pkt = pktAux->dup();
+                ControlInfoBreakLink *add = new ControlInfoBreakLink;
+                add->setDest(frame->getReceiverAddress());
+                pkt->setControlInfo(add);
+                processLinkBreak(pkt);
+                delete pkt;
+            }
+            else
+                processLinkBreak(details);
         }
         else
-            processLinkBreak(details);
+        {
+            Ieee80211ManagementFrame *frame = dynamic_cast<Ieee80211ManagementFrame *>(const_cast<cObject*>(details));
+            if (frame)
+                processLinkBreakManagement(details);
+        }
 
     }
     else if (category == NF_LINK_PROMISCUOUS)
@@ -1009,6 +1222,10 @@ void ManetRoutingBase::receiveChangeNotification(int category, const cObject *de
             }
         }
     }
+    else if(category == NF_LOCATOR_ASSOC)
+        processLocatorAssoc(details);
+    else if(category == NF_LOCATOR_DISASSOC)
+        processLocatorDisAssoc(details);
 }
 
 void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
@@ -1337,6 +1554,26 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
         }
     }
 
+    if (locator && locator->isApIp(desAddress) && del_entry)
+    {
+        std::vector<IPv4Address> list;
+        locator->getApListIp(desAddress, list);
+        for (unsigned int i = 0; i < list.size(); i++)
+        {
+            for (int i = inet_rt->getNumRoutes(); i > 0; --i)
+            {
+                IPv4Route *e = inet_rt->getRoute(i - 1);
+                if (list[i] == e->getDestination())
+                {
+                    if (!inet_rt->deleteRoute(e))
+                        opp_error("Aodv omnet_chg_rte can't delete route entry");
+                    else
+                        break;
+                }
+            }
+        }
+    }
+
     if (del_entry)
         return true;
 
@@ -1380,6 +1617,44 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
     entry->setSource(IPv4Route::MANUAL);
 
     inet_rt->addRoute(entry);
+
+    if (locator && locator->isApIp(desAddress))
+    {
+        std::vector<IPv4Address> list;
+        locator->getApListIp(desAddress, list);
+        for (unsigned int i = 0; i < list.size(); i++)
+        {
+            IPv4Route *e = inet_rt->findBestMatchingRoute(list[i]);
+            if (e && e->getDestination() == list[i])
+            {
+                if (e->getGateway() == gateway && e->getMetric() == hops && e->getInterface() == ie)
+                    continue;
+            }
+
+            e = new IPv4Route();
+
+            /// Destination
+            e->setDestination(list[i]);
+            /// Route mask
+            e->setNetmask(netmask);
+            /// Next hop
+            e->setGateway(gateway);
+            /// Metric ("cost" to reach the destination)
+            e->setMetric(hops);
+            /// Interface name and pointer
+
+            e->setInterface(ie);
+
+            /// Route type: Direct or Remote
+            e->setType(entry->getType());
+            /// Source of route, MANUAL by reading a file,
+            /// routing protocol name otherwise
+            e->setSource(entry->getSource());
+            inet_rt->addRoute(e);
+        }
+    }
+    return true;
+
 }
 
 bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &nextHop, const char *ifaceName, const int &hops, const Uint128 &mask)
@@ -1561,7 +1836,7 @@ bool ManetRoutingBase::getAddressGroup(std::vector<Uint128> &addressGroup, int g
 
 bool ManetRoutingBase::isAddressInProxyList(const Uint128 & addr)
 {
-    if (!isGateway)
+    if (proxyAddress.empty())
         return false;
     for (unsigned int i = 0; i < proxyAddress.size(); i++)
     {
@@ -1592,4 +1867,181 @@ bool ManetRoutingBase::getAddressInProxyList(int i,Uint128 &addr, Uint128 &mask)
     addr = proxyAddress[i].address;
     mask = proxyAddress[i].mask;
     return true;
+}
+
+
+bool ManetRoutingBase::addressIsForUs(const Uint128 &addr) const
+{
+    if (isLocalAddress(addr))
+        return true;
+    if (proxyAddress.empty())
+        return false;
+    for (unsigned int i = 0; i < proxyAddress.size(); i++)
+    {
+        if ((addr & proxyAddress[i].mask) == proxyAddress[i].address)
+            return true;
+    }
+    return false;
+}
+
+bool ManetRoutingBase::getAp(const Uint128 &destination, Uint128& accesPointAddr) const
+{
+    if (locator == NULL)
+        return false;
+    if (isInMacLayer())
+    {
+        MACAddress macAddr = locator->getLocatorMacToMac(MACAddress(destination.getLo()));
+        if (macAddr.isUnspecified())
+            return false;
+        accesPointAddr = macAddr.getInt();
+    }
+    else
+    {
+        IPv4Address ipAddr = locator->getLocatorIpToIp(IPv4Address(destination.getLo()));
+        if (ipAddr.isUnspecified())
+            return false;
+        accesPointAddr = ipAddr.getInt();
+    }
+    return true;
+}
+
+void ManetRoutingBase::getApList(const MACAddress & dest,std::vector<MACAddress>& list)
+{
+    list.clear();
+    if (locator == NULL)
+    {
+        list.push_back(dest);
+        return;
+    }
+    else
+    {
+        MACAddress ap = locator->getLocatorMacToMac(dest);
+        if (!ap.isUnspecified())
+            locator->getApList(ap,list);
+        else
+            locator->getApList(dest,list);
+        list.push_back(dest);
+    }
+}
+
+void ManetRoutingBase::getApListIp(const IPv4Address &dest,std::vector<IPv4Address>& list)
+{
+    list.clear();
+    if (locator == NULL)
+    {
+        list.push_back(dest);
+        return;
+    }
+    else
+    {
+        IPv4Address ap = locator->getLocatorIpToIp(dest);
+        if (!ap.isUnspecified())
+            locator->getApListIp(ap,list);
+        else
+            locator->getApListIp(dest,list);
+        list.push_back(dest);
+    }
+}
+
+void ManetRoutingBase::getListRelatedAp(const Uint128 & add, std::vector<Uint128>& list)
+{
+    if (mac_layer_)
+    {
+        std::vector<MACAddress> listAux;
+        getApList(add.getLo(),listAux);
+        list.clear();
+        for (unsigned int i = 0; i < listAux.size(); i++)
+        {
+            list.push_back(listAux[i].getInt());
+        }
+    }
+    else
+    {
+        std::vector<IPv4Address> listAux;
+        getApListIp(add.getLo(),listAux);
+        list.clear();
+        for (unsigned int i = 0; i < listAux.size(); i++)
+        {
+            list.push_back(listAux[i].getInt());
+        }
+    }
+}
+
+bool ManetRoutingBase::isAp() const
+{
+    if (!locator)
+        return false;
+    if (mac_layer_)
+        return locator->isThisAp();
+    else
+        return locator->isThisApIp();
+}
+
+bool ManetRoutingBase::getRouteFromGlobal(const Uint128 &src, const Uint128 &dest, std::vector<Uint128> &route)
+{
+    if (!createInternalStore || globalRouteMap == NULL)
+        return false;
+    Uint128 next = src;
+    route.clear();
+    route.push_back(src);
+    while (1)
+    {
+        GlobalRouteMap::iterator it = globalRouteMap->find(next);
+        if (it==globalRouteMap->end())
+            return false;
+        if (it->second.empty())
+            return false;
+
+        if (it->second.size() == 1)
+        {
+            RouteMap * rt = it->second[0].routesVector;
+            RouteMap::iterator it2 = rt->find(dest);
+            if (it2 == rt->end())
+                return false;
+            if (it2->second == dest)
+            {
+                route.push_back(dest);
+                return true;
+            }
+            else
+            {
+                route.push_back(it2->second);
+                next = it2->second;
+            }
+        }
+        else
+        {
+            if (it->second.size() > 2)
+                throw cRuntimeError("Number of routing protocols bigger that 2");
+            // if several protocols, search before in the proactive
+            RouteMap * rt;
+            if (it->second[0].isProactive)
+                rt = it->second[0].routesVector;
+            else
+                rt = it->second[1].routesVector;
+            RouteMap::iterator it2 = rt->find(dest);
+            if (it2 == rt->end())
+            {
+                // search in the reactive
+
+                if (it->second[0].isProactive)
+                    rt = it->second[1].routesVector;
+                else
+                    rt = it->second[0].routesVector;
+                it2 = rt->find(dest);
+                if (it2 == rt->end())
+                    return false;
+            }
+            if (it2->second == dest)
+            {
+                route.push_back(dest);
+                return true;
+            }
+            else
+            {
+                route.push_back(it2->second);
+                next = it2->second;
+            }
+        }
+    }
 }

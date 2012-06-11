@@ -86,9 +86,12 @@ char * DYMO_element::addExtension(int len)
     }
 #ifndef STATIC_BLOCK
     extension_aux = new char [extensionsize+len];
+    memset(extension_aux,0,extensionsize+len);
     memcpy(extension_aux, extension, extensionsize);
     delete [] extension;
     extension = extension_aux;
+#else
+    memset(extension+extensionsize, 0, extensionsize-len);
 #endif
     extensionsize += len;
     //setBitLength(getBitLength ()+(len*8));

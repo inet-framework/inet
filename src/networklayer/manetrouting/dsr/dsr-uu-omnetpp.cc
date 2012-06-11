@@ -171,6 +171,7 @@ void DSRUU::omnet_deliver(struct dsr_pkt *dp)
     dgram->setIdentification(dp->nh.iph->id); // Identification
     dgram->setMoreFragments(dp->nh.iph->tos & 0x2000);
     dgram->setDontFragment(dp->nh.iph->frag_off & 0x4000);
+    dgram->setTotalPayloadLength(dp->totalPayloadLength);
     dgram->setTimeToLive(dp->nh.iph->ttl); // TTL
     dgram->setTransportProtocol(dp->encapsulate_protocol); // Transport protocol
 
@@ -815,7 +816,7 @@ void DSRUU::EtxMsgSend(unsigned long data)
 
         if (numNeighbor<15)
         {
-            neigh[numNeighbor].address = (*iter).first;
+            neigh[numNeighbor].address = iter->first;
             neigh[numNeighbor].delivery = delivery; //(uint32_t)(delivery*0xFFFF); // scale
             numNeighbor++;
             if (neigh[numNeighbor-1].delivery <= 0)

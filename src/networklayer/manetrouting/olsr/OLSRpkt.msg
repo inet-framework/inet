@@ -52,11 +52,13 @@ typedef Uint128 nsaddr_t;
 /// sizes. By default IPv4 addresses are supposed, but you can change to
 /// IPv6 ones by recompiling with OLSR_IPv6 constant defined.
 ///
+
 #ifdef OLSR_IPv6
-#define ADDR_SIZE   16
+#define ADDR_SIZE_DEFAULT   16
 #else
-#define ADDR_SIZE   4
+#define ADDR_SIZE_DEFAULT   4
 #endif
+
 
 /// Maximum number of messages per packet.
 #define OLSR_MAX_MSGS       4
@@ -89,7 +91,11 @@ typedef Uint128 nsaddr_t;
 #define OLSR_ETX_TC_HDR_SIZE OLSR_TC_HDR_SIZE
 
 
-
+class OlsrAddressSize
+{
+    public:
+    static uint32_t ADDR_SIZE;
+};
 
 typedef struct OLSR_ETX_iface_address {
 
@@ -157,7 +163,7 @@ typedef struct OLSR_hello_msg {
   inline nsaddr_t  & nb_iface_addr(int i)  { return nb_iface_addrs_[i].iface_address_;}
   inline void set_qos_behaviour(int bh) {for(int i=0;i<OLSR_MAX_ADDRS;i++) nb_iface_addrs_[i].parameter_qos_=bh;}
 
-  inline uint32_t size() { return OLSR_HELLO_MSG_HDR_SIZE + count*ADDR_SIZE; }
+  inline uint32_t size() { return OLSR_HELLO_MSG_HDR_SIZE + count*OlsrAddressSize::ADDR_SIZE; }
 
 } OLSR_ETX_hello_msg;
 
@@ -181,7 +187,7 @@ typedef struct OLSR_hello_msg {
     inline uint16_t&    link_msg_size()     { return link_msg_size_; }
     inline nsaddr_t&    nb_iface_addr(int i)    { return nb_iface_addrs_[i]; }
 
-    inline uint32_t size() { return OLSR_HELLO_MSG_HDR_SIZE + count*ADDR_SIZE; }
+    inline uint32_t size() { return OLSR_HELLO_MSG_HDR_SIZE + count*OlsrAddressSize::ADDR_SIZE; }
 
 } OLSR_hello_msg;
 #endif
@@ -232,7 +238,7 @@ typedef struct OLSR_tc :cObject{
     inline  nsaddr_t&   nb_main_addr(int i) { return nb_main_addrs_[i].iface_address_; }
     inline  OLSR_ETX_iface_address& nb_etx_main_addr(int i) { return nb_main_addrs_[i]; }
     inline void set_qos_behaviour(int bh) {for(int i=0;i<OLSR_MAX_ADDRS;i++) nb_main_addrs_[i].parameter_qos_=bh;}
-    inline  uint32_t size() { return OLSR_TC_HDR_SIZE + count*ADDR_SIZE; }
+    inline  uint32_t size() { return OLSR_TC_HDR_SIZE + count*OlsrAddressSize::ADDR_SIZE; }
 } OLSR_tc;
 
 #if 0
@@ -252,7 +258,7 @@ typedef struct OLSR_tc :cObject{
     inline  uint16_t&   reserved()      { return reserved_; }
     inline  nsaddr_t&   nb_main_addr(int i) { return nb_main_addrs_[i]; }
 
-    inline  uint32_t size() { return OLSR_TC_HDR_SIZE + count*ADDR_SIZE; }
+    inline  uint32_t size() { return OLSR_TC_HDR_SIZE + count*OlsrAddressSize::ADDR_SIZE; }
 
 } OLSR_tc;
 #endif
@@ -268,7 +274,7 @@ typedef struct OLSR_mid :cObject{
     inline nsaddr_t & iface_addr(int i) { return iface_addrs_[i]; }
     void    setIface_addr(int i,nsaddr_t a) {iface_addrs_[i]=a; }
 
-    inline uint32_t size()          { return count*ADDR_SIZE; }
+    inline uint32_t size()          { return count*OlsrAddressSize::ADDR_SIZE; }
 
 } OLSR_mid;
 

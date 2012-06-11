@@ -4,6 +4,7 @@
 #include "batman.h"
 #include "IPv4ControlInfo.h"
 #include "UDPPacket_m.h"
+#include "IPv4InterfaceData.h"
 
 Define_Module(Batman);
 
@@ -533,6 +534,18 @@ uint32_t Batman::getRoute(const Uint128 &dest, std::vector<Uint128> &add)
         add.push_back(node->router->addr);
         return -1;
     }
+    Uint128 apAddr;
+    if (getAp(dest,apAddr))
+    {
+        OrigMap::iterator it = origMap.find(apAddr);
+        if (it != origMap.end())
+        {
+            OrigNode * node = it->second;
+            add.resize(0);
+            add.push_back(node->router->addr);
+            return -1;
+        }
+    }
     return 0;
 }
 
@@ -544,6 +557,17 @@ bool Batman::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &v
         OrigNode * node = it->second;
         add = node->router->addr;
         return true;
+    }
+    Uint128 apAddr;
+    if (getAp(dest,apAddr))
+    {
+        OrigMap::iterator it = origMap.find(apAddr);
+        if (it != origMap.end())
+        {
+            OrigNode * node = it->second;
+            add = node->router->addr;
+            return -1;
+        }
     }
     return false;
 }

@@ -180,6 +180,7 @@ static void netlink_callback(int fd)
 			dlog(LOG_DEBUG, 0, __FUNCTION__,
 				"Got an unknown netlink message: %d\n",
 				type);
+			break;
 		}
 	}
 }

@@ -56,6 +56,7 @@ simple DYMO extends BaseRouting like IManetRouting
         int RREQ_TRIES = default(3); // how many times to retry a routing request before declaring the node unreachable
         int BUFFER_SIZE_PACKETS = default(50); // maximum queue size in packets, -1 for no limit
         int BUFFER_SIZE_BYTES @unit("B") = default(75000B); // maximum queue size in bytes, -1 for no limit
+        bool PublicRoutingTables = default(false);
     gates:
         input from_ip;
         output to_ip;

@@ -298,8 +298,21 @@ void NS_CLASS rrep_process(RREP * rrep, int rreplen, struct in_addr ip_src,
 #endif
 
     /* Convert to correct byte order on affeected fields: */
-    rrep_dest.s_addr = rrep->dest_addr;
-    rrep_orig.s_addr = rrep->orig_addr;
+    Uint128 aux;
+    if (getAp(rrep->dest_addr, aux))
+    {
+        rrep_dest.s_addr = aux;
+    }
+    else
+        rrep_dest.s_addr = rrep->dest_addr;
+
+    if (getAp(rrep->orig_addr, aux))
+    {
+        rrep_orig.s_addr = aux;
+    }
+    else
+        rrep_orig.s_addr = rrep->orig_addr;
+
     rrep_seqno = ntohl(rrep->dest_seqno);
     rrep_lifetime = ntohl(rrep->lifetime);
     /* Increment RREP hop count to account for intermediate node... */
@@ -332,7 +345,7 @@ void NS_CLASS rrep_process(RREP * rrep, int rreplen, struct in_addr ip_src,
 
     if (isLocalAddress (rrep_dest.s_addr))
         return;
-    if (isLocalAddress(rrep_orig.s_addr))
+    if (addressIsForUs(rrep_orig.s_addr))
         DEBUG(LOG_DEBUG, 0, "rrep for us");
 #endif
 

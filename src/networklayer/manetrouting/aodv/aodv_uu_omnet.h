@@ -262,7 +262,7 @@ class AODVUU : public ManetRoutingBase
 
     /* From aodv_hello.c */
     struct timer hello_timer;
-
+#ifndef AODV_USE_STL
     /* From aodv_rreq.c */
     list_t rreqRecords;
 #define rreq_records this->rreqRecords
@@ -272,10 +272,18 @@ class AODVUU : public ManetRoutingBase
     /* From seek_list.c */
     list_t seekHead;
 #define seekhead this->seekHead
-#ifndef AODV_USE_STL
+
     /* From timer_queue_aodv.c */
     list_t timeList;
 #define TQ this->timeList
+#else
+    typedef std::vector <rreq_record *>RreqRecords;
+    typedef std::map <Uint128, struct blacklist *>RreqBlacklist;
+    typedef std::map <Uint128, seek_list_t*>SeekHead;
+
+    RreqRecords rreq_records;
+    RreqBlacklist rreq_blacklist;
+    SeekHead seekhead;
 #endif
     /* From debug.c */
 // int  log_file_fd;

@@ -122,7 +122,14 @@ void NS_CLASS route_discovery_timeout(void *arg)
         }
     }
 #ifdef NS_PORT
-    packet_queue_set_verdict(entry->dest_addr, PQ_DROP);
+    std::vector<Uint128> list;
+    getListRelatedAp(entry->dest_addr.s_addr, list);
+    for (unsigned int i = 0; i < list.size(); i ++)
+    {
+        struct in_addr auxAaddr;
+        auxAaddr.s_addr = list[i];
+        packet_queue_set_verdict(auxAaddr, PQ_DROP);
+    }
 #else
     netlink_no_route_found(entry->dest_addr);
 #endif  /* NS_PORT */

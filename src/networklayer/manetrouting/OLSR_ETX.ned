@@ -35,7 +35,7 @@ import inet.networklayer.IManetRouting;
 //  - IPv4 address size is assumed in the messages. If you need IPv6, recompile with -DOLSR_IPv6 added to CFLAGS 
 //  - Multiple interfaces per OLSR node is supported only with adding -DMULTIPLE_IFACES_SUPPORT to CFLAGS
 //
-// see: <a>http://www.inf.ufrgs.br/~~wlccordeiro/resources/olsr/README.html</a>
+// see: <a>http://www.inf.ufrgs.br/~wlccordeiro/resources/olsr/README.html</a>
 //
 simple OLSR_ETX extends BaseRouting like IManetRouting
 {
@@ -49,17 +49,19 @@ simple OLSR_ETX extends BaseRouting like IManetRouting
         bool UseIndex = default(false); // use the interface index instead the ip to identify the interface (EXPERIMENTAL)
         bool reduceFuncionality = default(false);
         int Mpr_algorithm = default(1); // Indicate which MPR selection algorithm will be used (1:DEFAULT 2:R1 3:R2 4:QOLSR 5:OLSRD)
-        int routing_algorithm = default(1); // Determine which routing algorithm is to be used (1:DEFAULT 2:DIJKSTRA) 
+        int routing_algorithm = default(2); // Determine which routing algorithm is to be used (1:DEFAULT 2:DIJKSTRA) 
         int Link_quality = default(2); // Determines which heuristic (1:NONE 2:ETX 3:ML) should be used for link quality computation
         bool Fish_eye = default(false);  // Determine whether fish eye extension should be used
-        int Tc_redundancy @enum(0,1,2,3) = default(3); // Determine the redundancy level of TC messages (section 15.1)
-        // Reported by Mohamed Belhassen
-        // 0 OLSR_ETX_TC_MPR_SEL_SET_REDUNDANCY
-        // 1 OLSR_ETX_TC_MPR_PLUS_MPR_SEL_SET_REDUNDANCY
-        // 2 OLSR_ETX_TC_ALL_NEIGHBOR_SET_REDUNDANCY
-        // 3 disable
+        int Tc_redundancy @enum(0,1,2,3) = default(1); // Determine the redundancy level of TC messages (section 15.1)
+       //  OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET               0
+        // publish nodes in mpr sel set plus nodes in mpr set (RFC 3626)
+        // OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET_PLUS_MPR_SET  1
+        // publish full neighbor link set (RFC 3626)
+        // OLSR_ETX_TC_REDUNDANCY_FULL                      2
+        // non-OLSR standard: publish mpr set only
+        // OLSR_ETX_TC_REDUNDANCY_MPR_SET                   3
         bool Link_delay = default(true);  // Determine whether the link delay extension should be enabled
-        double C_alpha = default(0.2);  // Factor that will be used to smooth link delays (0 .. 1)
+        double C_alpha = default(0.6);  // Factor that will be used to smooth link delays (0 .. 1)
         
         double OLSR_HELLO_INTERVAL @unit("s")=default(2s);
 
@@ -74,6 +76,7 @@ simple OLSR_ETX extends BaseRouting like IManetRouting
 	/// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
 	///
 	    double OLSR_REFRESH_INTERVAL @unit("s")=default(2s);
+	    bool PublicRoutingTables = default(false);
     gates:
         input from_ip;
         output to_ip;

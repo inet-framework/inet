@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Erik Nordström, <erik.nordstrom@it.uu.se>
+ * Authors: Erik Nordstrï¿½m, <erik.nordstrom@it.uu.se>
  *
  *
  *****************************************************************************/
@@ -52,7 +52,7 @@ static LIST(seekhead);
 void seek_list_print();
 #endif
 #endif              /* NS_PORT */
-
+#ifndef AODV_USE_STL
 seek_list_t *NS_CLASS seek_list_insert(struct in_addr dest_addr,
                                        u_int32_t dest_seqno,
                                        int ttl, u_int8_t flags,
@@ -126,3 +126,78 @@ void NS_CLASS seek_list_print()
     }
 }
 #endif
+#else
+seek_list_t *NS_CLASS seek_list_insert(struct in_addr dest_addr,
+                                       u_int32_t dest_seqno,
+                                       int ttl, u_int8_t flags,
+                                       struct ip_data *ipd)
+{
+    seek_list_t *entry;
+
+    entry = new seek_list_t;
+    if (entry == NULL)
+    {
+        fprintf(stderr, "Failed malloc\n");
+        exit(-1);
+    }
+
+    entry->dest_addr = dest_addr;
+    entry->dest_seqno = dest_seqno;
+    entry->flags = flags;
+    entry->reqs = 0;
+    entry->ttl = ttl;
+    entry->ipd = ipd;
+
+    timer_init(&entry->seek_timer, &NS_CLASS route_discovery_timeout, entry);
+    seekhead.insert(std::make_pair(dest_addr.s_addr,entry));
+
+#ifdef SEEK_LIST_DEBUG
+    seek_list_print();
+#endif
+    return entry;
+}
+
+int NS_CLASS seek_list_remove(seek_list_t * entry)
+{
+    if (!entry)
+        return 0;
+
+    for (SeekHead::iterator it =seekhead.begin();it != seekhead.end(); it++)
+    {
+        if (it->second == entry)
+        {
+            seekhead.erase(it);
+            break;
+        }
+    }
+
+    /* Make sure any timers are removed */
+    timer_remove(&entry->seek_timer);
+
+    if (entry->ipd)
+        free(entry->ipd);
+
+    delete entry;
+    return 1;
+}
+
+seek_list_t *NS_CLASS seek_list_find(struct in_addr dest_addr)
+{
+    SeekHead::iterator it =seekhead.find(dest_addr.s_addr);
+    if (it != seekhead.end())
+        return it->second;
+    return NULL;
+}
+
+#ifdef SEEK_LIST_DEBUG
+void NS_CLASS seek_list_print()
+{
+    for (SeekHead::iterator it =seekhead.begin();it != seekhead.end(); it++)
+    {
+        seek_list_t *entry = it->second;
+        printf("%s %u %d %d\n", ip_to_str(entry->dest_addr),
+                      entry->dest_seqno, entry->reqs, entry->ttl);    }
+}
+#endif
+#endif
+

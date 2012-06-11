@@ -26,15 +26,14 @@
 #include <sys/time.h>
 #endif
 #include "compatibility.h"
-#include "IPv4Datagram.h"
 #include "IRoutingTable.h"
 #include "NotificationBoard.h"
-#include "IPv4InterfaceData.h"
 #include "IInterfaceTable.h"
 #include "IPvXAddress.h"
 #include "uint128.h"
 #include "NotifierConsts.h"
 #include "ICMP.h"
+#include "ILocator.h"
 #include "ARP.h"
 #include <vector>
 #include <set>
@@ -69,8 +68,18 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
   private:
     static simsignal_t mobilityStateChangedSignal;
     typedef std::map<Uint128,Uint128> RouteMap;
+    class ProtocolRoutingData
+    {
+        public:
+            RouteMap* routesVector;
+            bool isProactive;
+    };
+
+    typedef std::vector<ProtocolRoutingData> ProtocolsRoutes;
+    typedef std::map<Uint128,ProtocolsRoutes>GlobalRouteMap;
     RouteMap *routesVector;
-    bool createInternalStore;
+    static bool createInternalStore;
+    static GlobalRouteMap *globalRouteMap;
 
     IRoutingTable *inet_rt;
     IInterfaceTable *inet_ift;
@@ -121,6 +130,8 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     };
     bool isGateway;
     std::vector<ManetProxyAddress> proxyAddress;
+
+    ILocator *locator;
 
   protected:
     ~ManetRoutingBase();
@@ -217,8 +228,11 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
     virtual void receiveChangeNotification(int category, const cObject *details);
     virtual void processLinkBreak(const cObject *details);
+    virtual void processLinkBreakManagement(const cObject *details);
     virtual void processPromiscuous(const cObject *details);
     virtual void processFullPromiscuous(const cObject *details);
+    virtual void processLocatorAssoc(const cObject *details);
+    virtual void processLocatorDisAssoc(const cObject *details);
 
 //
 //  Replacement for gettimeofday(), used for timers.
@@ -294,6 +308,10 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual double getSpeed();
     virtual double getDirection();
 
+    virtual void getApList(const MACAddress &,std::vector<MACAddress>&);
+    virtual void getApListIp(const IPv4Address &,std::vector<IPv4Address>&);
+    virtual void getListRelatedAp(const Uint128 &, std::vector<Uint128>&);
+
   public:
 //
     virtual void setColaborativeProtocol(cObject *p) {colaborativeProtocol = dynamic_cast<ManetRoutingBase*>(p);}
@@ -314,6 +332,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual bool isProactive() = 0;
     virtual bool isOurType(cPacket *) = 0;
     virtual bool getDestAddress(cPacket *, Uint128 &) = 0;
+    virtual bool addressIsForUs(const Uint128 &) const; // return true if the address is local or is in the proxy list
     virtual TimerMultiMap *getTimerMultimMap() const {return timerMultiMapPtr;}
     virtual void setPtr(void *ptr) {commonPtr = ptr;}
     virtual const void * getPtr()const {return commonPtr;}
@@ -350,8 +369,12 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual bool isAddressInProxyList(const Uint128 &);
     virtual void setAddressInProxyList(const Uint128 &,const Uint128 &);
     virtual int getNumAddressInProxyList() {return (int)proxyAddress.size();}
-    virtual bool getAddressInProxyList(int,Uint128 &, Uint128 &);
-
+    virtual bool getAddressInProxyList(int,Uint128 &addr, Uint128 &mask);
+    // access to locator information
+    virtual bool getAp(const Uint128 &, Uint128 &) const;
+    virtual bool isAp() const;
+    //
+    static bool getRouteFromGlobal(const Uint128 &src, const Uint128 &dest, std::vector<Uint128> &route);
 };
 
 #define interface80211ptr getInterfaceWlanByAddress()

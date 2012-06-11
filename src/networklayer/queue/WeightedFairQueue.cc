@@ -66,6 +66,7 @@ void WeightedFairQueue::initialize()
     if (numQueues < (int)queueWeight.size())
         numQueues = queueWeight.size();
 
+    outGate = gate("out");
     useRED = par("useRED");
     for (int i = 0; i < numQueues; i++)
     {

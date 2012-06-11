@@ -173,7 +173,7 @@ void re_answer(RE *re, u_int32_t ifindex);
 void re_answer(RE *re, u_int32_t ifindex) {}
 #endif
 
-static NS_INLINE int re_numblocks(RE *re)
+NS_INLINE int re_numblocks(RE *re)
 {
     assert(re);
 

@@ -310,6 +310,19 @@ void NS_CLASS re_process(RE *re,struct in_addr ip_src, u_int32_t ifindex)
                         this_host.is_gw,
                         NET_DIAMETER,
                         re->re_blocks[0].re_hopcnt);
+                if (isAp() && !isLocalAddress(target_addr.s_addr))
+                {
+                    rrep->re_blocks[0].useAp = 1;
+                    rrep->newBocks(1);
+                    rrep->re_blocks[1].g       = this_host.is_gw;
+                    rrep->re_blocks[1].prefix  = this_host.prefix;
+                    rrep->re_blocks[1].res     = 0;
+                    rrep->re_blocks[1].re_hopcnt = 0;
+                    rrep->re_blocks[1].re_node_seqnum  = this_host.seqnum;
+                    rrep->re_blocks[1].re_node_addr    = DEV_NR(ifindex).ipaddr.s_addr;
+                    rrep->re_blocks[1].from_proactive = 0;
+                    rrep->re_blocks[1].staticNode = isStaticNode();
+                }
                 re_send_rrep(rrep);
             }
             break;
@@ -509,7 +522,8 @@ int NS_CLASS re_process_block(struct re_block *block, u_int8_t is_rreq,
     // Create/update a route towards RENodeAddress
     //if (entry &&  rb_state == RB_PROACTIVE && (((int32_t) seqnum) - ((int32_t) entry->rt_seqnum))<0)
     //  seqnum = entry->rt_seqnum;
-
+    if (block->useAp)
+        return 0;
     if (entry)
         rtable_update(
             entry,            // routing table entry
@@ -740,11 +754,22 @@ void NS_CLASS route_discovery(struct in_addr dest_addr)
 
     // If we are already doing a route discovery for dest_addr,
     // then simply return
+    // Send a RREQ
+
     if (pending_rreq_find(dest_addr))
         return;
 
+    Uint128 apDest;
+    struct in_addr dest;
+    if (getAp(dest_addr.s_addr, apDest))
+    {
+        dest.s_addr = apDest;
+    }
+    else
+        dest.s_addr = dest_addr.s_addr;
+
     // Get info from routing table (if there exists an entry)
-    rtable_entry_t *rt_entry = rtable_find(dest_addr);
+    rtable_entry_t *rt_entry = rtable_find(dest);
     if (rt_entry)
     {
         seqnum  = rt_entry->rt_seqnum;
@@ -761,8 +786,9 @@ void NS_CLASS route_discovery(struct in_addr dest_addr)
         seqnum  = 0;
         thopcnt = 0;
     }
-    // Send a RREQ
-    re_send_rreq(dest_addr, seqnum, thopcnt);
+
+
+    re_send_rreq(dest, seqnum, thopcnt);
 
     // Record information for destination and set a timer
     pending_rreq_t *pend_rreq = pending_rreq_add(dest_addr, seqnum);
@@ -916,7 +942,7 @@ int NS_CLASS re_mustAnswer(RE *re, u_int32_t ifindex)
 
 
     bool haveRoute= false;
-    if (isLocalAddress(re->target_addr))  // If this node is the target, the RE must not be retransmitted
+    if (addressIsForUs(re->target_addr))  // If this node is the target, the RE must not be retransmitted
         return 1;
     if (re->blockAddressGroup && isInAddressGroup(re->blockAddressGroup-1))
         return 1;

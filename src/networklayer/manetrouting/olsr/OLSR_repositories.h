@@ -56,6 +56,8 @@ typedef struct OLSR_rt_entry : public cObject
     nsaddr_t    next_addr_; ///< Address of the next hop.
     nsaddr_t    iface_addr_;    ///< Address of the local interface.
     uint32_t    dist_;      ///< Distance in hops to the destination.
+    double quality;
+    double delay;
     int index;
     inline int & local_iface_index() {return index;}
     PathVector  route;

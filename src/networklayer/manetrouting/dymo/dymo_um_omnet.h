@@ -29,6 +29,7 @@
 #define TIMERMAPLIST
 // This define activate the new routing table
 #define MAPROUTINGTABLE
+#define DYMO_USE_STL
 
 /* Constants for interface queue packet buffering/dropping */
 #define IFQ_BUFFER 0
@@ -229,6 +230,8 @@ class DYMOUM : public ManetRoutingBase
     virtual void processLinkBreak(const cObject *details);
     virtual void processPromiscuous(const cObject *details);
     virtual void processFullPromiscuous(const cObject *details);
+    virtual void processLocatorAssoc(const cObject *details);
+    virtual void processLocatorDisAssoc(const cObject *details);
 
   public:
     static int  log_file_fd;

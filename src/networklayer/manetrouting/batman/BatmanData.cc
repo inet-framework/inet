@@ -22,7 +22,7 @@
 
 #include "BatmanData.h"
 #include "batman.h"
-
+#include "IPv4InterfaceData.h"
 
 OrigNode::OrigNode()
 {
