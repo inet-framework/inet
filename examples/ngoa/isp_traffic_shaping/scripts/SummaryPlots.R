@@ -297,7 +297,7 @@ if (.resp == 'y') {
                     ## save each plot as a PDF file
                     .p
                     ggsave(paste(.da_nh1_nf1_nv1_tbf.wd,
-                                 paste("nh1_nf1_nv1_tbf-dr", as.character(.dr.range[.i]),
+                                 paste("nh1_nf1_nv1_tbf_dr", as.character(.dr.range[.i]),
                                        "_mr", as.character(.mr.range[.j]),
                                        "-", .measure.type[.k],
                                        "-", .measure.abbrv[.k], ".pdf", sep=""), sep="/"))
