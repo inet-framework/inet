@@ -37,14 +37,14 @@ simple DYMOUM extends BaseRouting like IManetRouting
         @class(DYMOUM);
         @reactive;                             // IP module will send control messages when no route is present to the destination 
         bool no_path_acc_ = default(false);  // Disable path accumulation
-        bool reissue_rreq_ = default(false); // Try more route discoveries when it fails the first time
+        bool reissue_rreq_ = default(true); // Try more route discoveries when it fails the first time
         bool s_bit_ = default(false);        // Set S-bit of DYMO header
         int hello_ival_ = default(0);        // (s) hello sending interval. 0 means no hello and uses link layer feedback instead
         int MaxPktSec = default(10);         // limit the rate of dymo packets per sec (max 50/sec)
         int NetDiameter = default(10);       // diameter of the network
         int RouteTimeOut = default(5000);    // timeout for routing entries (ms)
         int RouteDeleteTimeOut = default(5000*5); // 5*RouteTimeOut
-        int RREQWaitTime = default(1000);    // (ms) max wait time for a route request response
+        int RREQWaitTime = default(2000);    // (ms) max wait time for a route request response        
         int RREQTries = default(3);          // Rreq reties before fail and sending unreachable
 
         // Experimental
@@ -61,9 +61,11 @@ simple DYMOUM extends BaseRouting like IManetRouting
         int  costStatic = default(1);
         int  costMobile = default(4);
         bool isRoot = default(false); // Proactive RREQ
+        int proactiveRreqTimeout = default(5000);// 5 seconds
         bool propagateProactive = default(true); // propagate proactive RREQ
         bool path_acc_proactive = default(false); // proactive acumulate route
         bool checkNextHop = default(false);
+        bool PublicRoutingTables = default(false);
     gates:
         input from_ip;
         output to_ip;

@@ -39,6 +39,7 @@ enum
     PQ_ENC_SEND = 2
 };
 
+#ifndef DYMO_USE_STL
 struct q_pkt
 {
     dlist_head_t l;
@@ -54,6 +55,21 @@ struct packet_queue
     unsigned int len;
     struct timer garbage_collect_timer;
 };
+#else
+struct q_pkt
+{
+    struct in_addr  dest_addr;
+    struct timeval q_time;
+    cPacket *p;
+    bool inTransit;
+};
+
+struct packet_queue
+{
+    std::vector<q_pkt *> pkQueue;
+    struct timer garbage_collect_timer;
+};
+#endif
 
 #endif              /* NS_NO_GLOBALS */
 

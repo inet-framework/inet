@@ -27,6 +27,7 @@
 #include "ns/aodv-uu.h"
 #else
 #include "../aodv_uu_omnet.h"
+#include "IPv4InterfaceData.h"
 #endif
 #else
 #include <netdb.h>

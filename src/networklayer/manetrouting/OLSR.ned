@@ -60,6 +60,7 @@ simple OLSR extends BaseRouting like IManetRouting
 	/// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
 	///
 	    double OLSR_REFRESH_INTERVAL @unit("s")=default(2s);
+	    bool PublicRoutingTables = default(false);
 
     gates:
         input from_ip;

@@ -815,7 +815,7 @@ void DSRUU::EtxMsgSend(unsigned long data)
 
         if (numNeighbor<15)
         {
-            neigh[numNeighbor].address = (*iter).first;
+            neigh[numNeighbor].address = iter->first;
             neigh[numNeighbor].delivery = delivery; //(uint32_t)(delivery*0xFFFF); // scale
             numNeighbor++;
             if (neigh[numNeighbor-1].delivery <= 0)

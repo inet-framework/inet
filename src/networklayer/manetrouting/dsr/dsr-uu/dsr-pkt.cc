@@ -290,6 +290,7 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
         // dp->nh.iph->check= p->;                          // Check sum
         dp->nh.iph->saddr= dgram->getSrcAddress().getInt();
         dp->nh.iph->daddr= dgram->getDestAddress().getInt();
+        dp->totalPayloadLength = dgram->getTotalPayloadLength();
         //if (dgram->getFragmentOffset()==0 && !dgram->getMoreFragments())
         dp->payload = p->decapsulate();
         //else

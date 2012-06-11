@@ -35,12 +35,14 @@
 #include "NotifierConsts.h"
 #include "Ieee802Ctrl_m.h"
 #include "Ieee80211Frame_m.h"
+#include "IPv4InterfaceData.h"
 
 
 #include "ProtocolMap.h"
 #include "IPv4Address.h"
 #include "IPvXAddress.h"
 #include "ControlManetRouting_m.h"
+#include "LocatorNotificationInfo_m.h"
 
 
 const int UDP_HEADER_BYTES = 8;
@@ -172,7 +174,8 @@ void DYMOUM::initialize(int stage)
         if ((RREQ_TRIES = (int) par("RREQTries"))==-1)
             RREQ_TRIES = 3;
 
-        ipNodeId = new IPv4Address(interface80211ptr->ipv4Data()->getIPAddress());
+        if (interface80211ptr->ipv4Data())
+            ipNodeId = new IPv4Address(interface80211ptr->ipv4Data()->getIPAddress());
 
         rtable_init();
 
@@ -190,6 +193,7 @@ void DYMOUM::initialize(int stage)
         norouteBehaviour = par("noRouteBehaviour");
         useIndex = par("UseIndex");
         isRoot = par("isRoot");
+        proactive_rreq_timeout= par("proactiveRreqTimeout").longValue();
         if (isRoot)
         {
             timer_init(&proactive_rreq_timer, &DYMOUM::rreq_proactive,NULL);
@@ -250,14 +254,13 @@ DYMOUM::DYMOUM()
 DYMOUM::~ DYMOUM()
 {
 // Clean all internal tables
-    dlist_head_t *pos, *tmp;
-
-    pos = tmp = NULL;
     packet_queue_destroy();
     if (macToIpAdress)
         delete macToIpAdress;
 // Routing table
 #ifndef MAPROUTINGTABLE
+    dlist_head_t *pos, *tmp;
+    pos = tmp = NULL;
     pos = tmp = NULL;
     dlist_for_each_safe(pos, tmp, &rtable.l)
     {
@@ -373,7 +376,7 @@ void DYMOUM::handleMessage(cMessage *msg)
                     processMacPacket(PK(msgAux), control->getDestAddress(), control->getSrcAddress(), NS_IFINDEX);
                 else
                 {
-                    if (!isLocalAddress(control->getSrcAddress()))
+                    if (!addressIsForUs(control->getSrcAddress()))
                     {
                         struct in_addr dest_addr;
                         dest_addr.s_addr = control->getDestAddress();
@@ -697,10 +700,8 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
 void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
 {
     struct in_addr dest_addr, src_addr;
-    struct ip_data *ipd = NULL;
-
-    ipd = NULL;         /* No ICMP messaging */
     bool isLocal = false;
+    IPAddressVector phops;
 
     src_addr.s_addr = p->getSrcAddress().getInt();
     dest_addr.s_addr = p->getDestAddress().getInt();
@@ -798,10 +799,6 @@ void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
 void DYMOUM::processMacPacket(cPacket * p, const Uint128 &dest, const Uint128 &src, int ifindex)
 {
     struct in_addr dest_addr, src_addr;
-    struct ip_data *ipd = NULL;
-
-
-    ipd = NULL;         /* No ICMP messaging */
     bool isLocal = false;
     dest_addr.s_addr = dest;
     src_addr.s_addr = src;
@@ -843,7 +840,7 @@ void DYMOUM::processMacPacket(cPacket * p, const Uint128 &dest, const Uint128 &s
                     Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
                     if (ctrlmac)
                     {
-                        MACAddress macAddressConv = ctrlmac->getSrc(); /* destination eth addr */
+                       // MACAddress macAddressConv = ctrlmac->getSrc(); /* destination eth addr */
                         // ctrlmac->getSrc().getAddressBytes(macAddressConv.address);  /* destination eth addr */
                         // ctrlmac->getDest().getAddressBytes(&dest);   /* destination eth addr */
                         delete ctrl;
@@ -1185,7 +1182,7 @@ void DYMOUM::promiscuous_rrep(RE * dymo_re, struct in_addr ip_src)
 
     for (int i=0; i<num_blk; i++)
     {
-        if (isLocalAddress(dymo_re->re_blocks[i].re_node_addr))
+        if (addressIsForUs(dymo_re->re_blocks[i].re_node_addr))
             return;
     }
 
@@ -1418,7 +1415,10 @@ std::string DYMOUM::detailedInfo() const
 {
     std::stringstream out;
 
-    out << "Node  : "  << *ipNodeId  << "  " << ipNodeId->getInt() << "\n";
+    if (ipNodeId)
+        out << "Node  : "  << *ipNodeId  << "  " << ipNodeId->getInt() << "\n";
+    else
+        out << "Node  : "  << interface80211ptr->getMacAddress() << "  " << interface80211ptr->getMacAddress().getInt() << "\n";
     out << "Seq Num  : "  <<this_host.seqnum  << "\n";
 
     return out.str();
@@ -1433,18 +1433,39 @@ uint32_t DYMOUM::getRoute(const Uint128 &dest, std::vector<Uint128> &add)
 
 bool  DYMOUM::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &cost)
 {
-    struct in_addr destAddr;
-    destAddr.s_addr = dest;
-    rtable_entry_t * fwd_rt = rtable_find(destAddr);
-    if (!fwd_rt )
-        return false;
-    if (fwd_rt->rt_state != RT_VALID)
-        return false;
-    add = fwd_rt->rt_nxthop_addr.s_addr;
-    InterfaceEntry * ie = getInterfaceEntry(fwd_rt->rt_ifindex);
-    iface = ie->getInterfaceId();
-    cost = fwd_rt->rt_hopcnt;
-    return true;
+    Uint128 destAddr = dest;
+    Uint128 apAddr;
+    if (getAp(dest,apAddr))
+    {
+        destAddr = apAddr;
+    }
+    rtable_entry_t * fwd_rt = NULL;
+    DymoRoutingTable::iterator it = dymoRoutingTable->find(destAddr);
+    if (it != dymoRoutingTable->end())
+    {
+          if (it->second)
+          {
+              // sanity check
+              if (it->second->rt_dest_addr.s_addr != destAddr)
+              {
+                  opp_error("Dymo routing data base error");
+              }
+              fwd_rt = it->second;
+          }
+          else
+              opp_error("Dymo routing data base error, NULL entry");
+    }
+    if (fwd_rt)
+    {
+        if (fwd_rt->rt_state != RT_VALID)
+            return false;
+        add = fwd_rt->rt_nxthop_addr.s_addr;
+        InterfaceEntry * ie = getInterfaceEntry(fwd_rt->rt_ifindex);
+        iface = ie->getInterfaceId();
+        cost = fwd_rt->rt_hopcnt;
+        return true;
+    }
+    return false;
 }
 
 bool DYMOUM::isProactive()
@@ -1459,25 +1480,64 @@ void DYMOUM::setRefreshRoute(const Uint128 &destination, const Uint128 & nextHop
     dest_addr.s_addr = destination;
     next_hop.s_addr = nextHop;
 
-
     rtable_entry_t *route = NULL;
     rtable_entry_t *fwd_pre_rt = NULL;
+    Uint128 dest = destination;
+    Uint128 next = nextHop;
 
     bool change = false;
-    if (destination != (Uint128)0)
-        route = rtable_find(dest_addr);
-    if (nextHop != (Uint128)0)
-        fwd_pre_rt = rtable_find(next_hop);
+    Uint128 apAddr;
+    if (getAp(destination,apAddr))
+    {
+        dest = apAddr;
+    }
+    if (getAp(nextHop,apAddr))
+    {
+        next = apAddr;
+    }
+
+    DymoRoutingTable::iterator it = dymoRoutingTable->find(next);
+    if (it != dymoRoutingTable->end())
+    {
+          if (it->second)
+          {
+              // sanity check
+              if (it->second->rt_dest_addr.s_addr != next)
+              {
+                  opp_error("Dymo routing data base error");
+              }
+              route = it->second;
+          }
+          else
+              opp_error("Dymo routing data base error, NULL entry");
+    }
+
+    it = dymoRoutingTable->find(dest);
+    if (it != dymoRoutingTable->end())
+    {
+          if (it->second)
+          {
+              // sanity check
+              if (it->second->rt_dest_addr.s_addr != dest)
+              {
+                  opp_error("Dymo routing data base error");
+              }
+              fwd_pre_rt = it->second;
+          }
+          else
+              opp_error("Dymo routing data base error, NULL entry");
+    }
+
 
     if (par("checkNextHop").boolValue())
     {
-        if (route && (route->rt_nxthop_addr.s_addr == next_hop.s_addr))
+        if (route && (route->rt_nxthop_addr.s_addr == next))
         {
             rtable_update_timeout(route);
             change = true;
         }
 
-        if (fwd_pre_rt && (fwd_pre_rt->rt_nxthop_addr.s_addr == next_hop.s_addr))
+        if (fwd_pre_rt && (fwd_pre_rt->rt_nxthop_addr.s_addr == next))
         {
             rtable_update_timeout(fwd_pre_rt);
             change = true;
@@ -1605,7 +1665,7 @@ bool DYMOUM::getNextHopGroup(const Uint128& dest, Uint128 &next, int &iface, Uin
 
 
 //// End group methods
-
+#ifndef DYMO_USE_STL
 cPacket * DYMOUM::get_packet_queue(struct in_addr dest_addr)
 {
     dlist_head_t *pos;
@@ -1620,7 +1680,21 @@ cPacket * DYMOUM::get_packet_queue(struct in_addr dest_addr)
     }
     return NULL;
 }
-
+#else
+cPacket * DYMOUM::get_packet_queue(struct in_addr dest_addr)
+{
+    for (unsigned int i = 0; i < PQ.pkQueue.size(); i++)
+    {
+        struct q_pkt *qp = PQ.pkQueue[i];
+        if (qp->dest_addr.s_addr == dest_addr.s_addr)
+        {
+            qp->inTransit = true;
+            return qp->p;
+        }
+    }
+    return NULL;
+}
+#endif
 // proactive RREQ
 void DYMOUM::rreq_proactive(void *arg)
 {
@@ -1646,7 +1720,7 @@ int DYMOUM::re_info_type(struct re_block *b, rtable_entry_t *e, u_int8_t is_rreq
 
     // If the block was issued from one interface of the processing node,
     // then the block is considered stale
-    if (isLocalAddress(b->re_node_addr))
+    if (addressIsForUs(b->re_node_addr))
         return RB_SELF_GEN;
 
     if (e)
@@ -1687,5 +1761,70 @@ int DYMOUM::re_info_type(struct re_block *b, rtable_entry_t *e, u_int8_t is_rreq
         }
     }
     return RB_FRESH;
+}
+
+
+void DYMOUM::processLocatorAssoc(const cObject *details)
+{
+    LocatorNotificationInfo *infoLoc = check_and_cast<LocatorNotificationInfo*>(details);
+    Uint128 destAddr = infoLoc->getMacAddr().getInt();
+    Uint128 apAddr;
+    if (isInMacLayer())
+        destAddr = infoLoc->getMacAddr().getInt();
+    else
+    {
+        if (infoLoc->getIpAddr().isUnspecified())
+            return;
+        destAddr = infoLoc->getIpAddr().getInt();
+    }
+
+    if (getAp(destAddr, apAddr))
+    {
+        struct in_addr dest_addrAux;
+        dest_addrAux.s_addr = destAddr;
+        rtable_entry_t * fwd_rt = rtable_find(dest_addrAux);
+        dest_addrAux.s_addr = apAddr;
+        rtable_entry_t * fwd_rt_ap = rtable_find(dest_addrAux);
+
+        if (!fwd_rt_ap && fwd_rt)
+        {
+            rtable_delete(fwd_rt);
+            return;
+        }
+        if (fwd_rt_ap && fwd_rt && memcmp(fwd_rt_ap, fwd_rt_ap, sizeof(rtable_entry_t)) != 0)
+        {
+            dest_addrAux.s_addr = destAddr;
+            if (fwd_rt)
+                rtable_update(fwd_rt, dest_addrAux, fwd_rt_ap->rt_nxthop_addr, fwd_rt_ap->rt_ifindex,
+                        fwd_rt_ap->rt_seqnum, fwd_rt_ap->rt_prefix, fwd_rt_ap->rt_hopcnt, 0, fwd_rt_ap->cost,
+                        fwd_rt_ap->rt_hopfix);
+            else
+                rtable_insert(dest_addrAux, fwd_rt_ap->rt_nxthop_addr, fwd_rt_ap->rt_ifindex, fwd_rt_ap->rt_seqnum,
+                        fwd_rt_ap->rt_prefix, fwd_rt_ap->rt_hopcnt, 0, fwd_rt_ap->cost, fwd_rt_ap->rt_hopfix);
+        }
+        return;
+    }
+}
+
+void DYMOUM::processLocatorDisAssoc(const cObject *details)
+{
+    LocatorNotificationInfo *infoLoc = check_and_cast<LocatorNotificationInfo*>(details);
+    Uint128 destAddr = infoLoc->getMacAddr().getInt();
+    if (isInMacLayer())
+        destAddr = infoLoc->getMacAddr().getInt();
+    else
+    {
+        if (infoLoc->getIpAddr().isUnspecified())
+            return;
+        destAddr = infoLoc->getIpAddr().getInt();
+    }
+    struct in_addr dest_addrAux;
+    dest_addrAux.s_addr = destAddr;
+    rtable_entry_t * fwd_rt = rtable_find(dest_addrAux);
+    if (fwd_rt)
+    {
+        rtable_delete(fwd_rt);
+        return;
+    }
 }
 

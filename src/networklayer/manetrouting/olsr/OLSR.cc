@@ -34,6 +34,7 @@
 #include <limits.h>
 
 #include "UDPPacket.h"
+#include "IPv4Datagram.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "IPv6ControlInfo.h"
@@ -63,7 +64,7 @@
 Define_Module(OLSR);
 
 
-
+uint32 OlsrAddressSize::ADDR_SIZE = ADDR_SIZE_DEFAULT;
 
 /********** Timers **********/
 
@@ -440,6 +441,8 @@ OLSR::initialize(int stage)
     if (stage==4)
     {
 
+       if (isInMacLayer())
+           OlsrAddressSize::ADDR_SIZE = 6;
        OLSR_HELLO_INTERVAL=par("OLSR_HELLO_INTERVAL");
 
 	/// TC messages emission interval.
@@ -714,9 +717,33 @@ OLSR::recv_olsr(cMessage* msg)
     rtable_computation();
 }
 
+
+ void CoverTwoHopNeighbors(const nsaddr_t &neighborMainAddr, nb2hopset_t & N2)
+{ // first gather all 2-hop neighbors to be removed
+    std::set<nsaddr_t> toRemove;
+    for (nb2hopset_t::iterator it = N2.begin(); it != N2.end(); it++)
+    {
+        OLSR_nb2hop_tuple* twoHopNeigh = *it;
+        if (twoHopNeigh->nb_main_addr() == neighborMainAddr)
+        {
+            toRemove.insert(twoHopNeigh->nb2hop_addr());
+        }
+    }
+    // Now remove all matching records from N2
+    for (nb2hopset_t::iterator it = N2.begin(); it != N2.end();)
+    {
+        OLSR_nb2hop_tuple* twoHopNeigh = *it;
+        if (toRemove.find(twoHopNeigh->nb2hop_addr()) != toRemove.end())
+            it = N2.erase(it);
+        else
+            it++;
+    }
+}
+
 ///
 /// \brief Computates MPR set of a node following RFC 3626 hints.
 ///
+#if 0
 void
 OLSR::mpr_computation()
 {
@@ -838,6 +865,24 @@ OLSR::mpr_computation()
                     it2++;
 
             }
+
+            int distanceFromEnd = std::distance(it, N2.end());
+            int distance = std::distance(N2.begin(), it);
+            int i = 0;
+            for (nb2hopset_t::iterator it2 = N2.begin(); i < distance; i++) // check now the first section
+            {
+
+                OLSR_nb2hop_tuple* nb2hop_tuple2 = *it2;
+                if (nb2hop_tuple1->nb_main_addr() == nb2hop_tuple2->nb_main_addr())
+                {
+                    deleted_addrs.insert(nb2hop_tuple2->nb2hop_addr());
+                    it2 = N2.erase(it2);
+                }
+                else
+                    it2++;
+
+            }
+            it = N2.end() - distanceFromEnd; // the standard doesn't guarantee that the iterator is valid if we have delete something in the vector, reload the iterator.
 
             it = N2.erase(it);
             increment = false;
@@ -968,6 +1013,224 @@ OLSR::mpr_computation()
     }
 }
 
+
+#else
+void
+OLSR::mpr_computation()
+{
+    // MPR computation should be done for each interface. See section 8.3.1
+    // (RFC 3626) for details.
+    state_.clear_mprset();
+
+    nbset_t N; nb2hopset_t N2;
+    // N is the subset of neighbors of the node, which are
+    // neighbor "of the interface I"
+    for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
+        if ((*it)->getStatus() == OLSR_STATUS_SYM) // I think that we need this check
+            N.push_back(*it);
+
+    // N2 is the set of 2-hop neighbors reachable from "the interface
+    // I", excluding:
+    // (i)   the nodes only reachable by members of N with willingness WILL_NEVER
+    // (ii)  the node performing the computation
+    // (iii) all the symmetric neighbors: the nodes for which there exists a symmetric
+    //       link to this node on some interface.
+    for (nb2hopset_t::iterator it = nb2hopset().begin(); it != nb2hopset().end(); it++)
+    {
+        OLSR_nb2hop_tuple* nb2hop_tuple = *it;
+        // (ii)  the node performing the computation
+        if (isLocalAddress(nb2hop_tuple->nb2hop_addr()))
+        {
+            continue;
+        }
+        // excluding:
+        // (i) the nodes only reachable by members of N with willingness WILL_NEVER
+        bool ok = false;
+        for (nbset_t::const_iterator it2 = N.begin(); it2 != N.end(); it2++)
+        {
+            OLSR_nb_tuple* neigh = *it2;
+            if (neigh->nb_main_addr() == nb2hop_tuple->nb_main_addr())
+            {
+                if (neigh->willingness() == OLSR_WILL_NEVER)
+                {
+                    ok = false;
+                    break;
+                }
+                else
+                {
+                    ok = true;
+                    break;
+                }
+            }
+        }
+        if (!ok)
+        {
+            continue;
+        }
+
+        // excluding:
+        // (iii) all the symmetric neighbors: the nodes for which there exists a symmetric
+        //       link to this node on some interface.
+        for (nbset_t::iterator it2 = N.begin(); it2 != N.end(); it2++)
+        {
+            OLSR_nb_tuple* neigh = *it2;
+            if (neigh->nb_main_addr() == nb2hop_tuple->nb2hop_addr())
+            {
+                ok = false;
+                break;
+            }
+        }
+        if (ok)
+            N2.push_back(nb2hop_tuple);
+    }
+
+    // 1. Start with an MPR set made of all members of N with
+    // N_willingness equal to WILL_ALWAYS
+    for (nbset_t::iterator it = N.begin(); it != N.end(); it++)
+    {
+        OLSR_nb_tuple* nb_tuple = *it;
+        if (nb_tuple->willingness() == OLSR_WILL_ALWAYS)
+        {
+            state_.insert_mpr_addr(nb_tuple->nb_main_addr());
+            // (not in RFC but I think is needed: remove the 2-hop
+            // neighbors reachable by the MPR from N2)
+            CoverTwoHopNeighbors (nb_tuple->nb_main_addr(), N2);
+        }
+    }
+
+    // 2. Calculate D(y), where y is a member of N, for all nodes in N.
+    // We will do this later.
+
+    // 3. Add to the MPR set those nodes in N, which are the *only*
+    // nodes to provide reachability to a node in N2. Remove the
+    // nodes from N2 which are now covered by a node in the MPR set.
+
+    std::set<nsaddr_t> coveredTwoHopNeighbors;
+    for (nb2hopset_t::iterator it = N2.begin(); it != N2.end(); it++)
+    {
+        OLSR_nb2hop_tuple* twoHopNeigh = *it;
+        bool onlyOne = true;
+        // try to find another neighbor that can reach twoHopNeigh->twoHopNeighborAddr
+        for (nb2hopset_t::const_iterator it2 = N2.begin(); it2 != N2.end(); it2++)
+        {
+            OLSR_nb2hop_tuple* otherTwoHopNeigh = *it2;
+            if (otherTwoHopNeigh->nb2hop_addr() == twoHopNeigh->nb2hop_addr()
+                    && otherTwoHopNeigh->nb_main_addr() != twoHopNeigh->nb_main_addr())
+            {
+                onlyOne = false;
+                break;
+            }
+        }
+        if (onlyOne)
+        {
+            state_.insert_mpr_addr(twoHopNeigh->nb_main_addr());
+
+            // take note of all the 2-hop neighbors reachable by the newly elected MPR
+            for (nb2hopset_t::const_iterator it2 = N2.begin(); it2 != N2.end(); it2++)
+            {
+                OLSR_nb2hop_tuple* otherTwoHopNeigh = *it2;
+                if (otherTwoHopNeigh->nb_main_addr() == twoHopNeigh->nb_main_addr())
+                {
+                    coveredTwoHopNeighbors.insert(otherTwoHopNeigh->nb2hop_addr());
+                }
+            }
+        }
+    }
+    // Remove the nodes from N2 which are now covered by a node in the MPR set.
+    for (nb2hopset_t::iterator it = N2.begin(); it != N2.end();)
+    {
+        OLSR_nb2hop_tuple* twoHopNeigh = *it;
+        if (coveredTwoHopNeighbors.find(twoHopNeigh->nb2hop_addr()) != coveredTwoHopNeighbors.end())
+        {
+            // This works correctly only because it is known that twoHopNeigh is reachable by exactly one neighbor,
+            // so only one record in N2 exists for each of them. This record is erased here.
+            it = N2.erase(it);
+        }
+        else
+        {
+            it++;
+        }
+    }
+    // 4. While there exist nodes in N2 which are not covered by at
+    // least one node in the MPR set:
+
+    while (N2.begin() != N2.end())
+    {
+
+        // 4.1. For each node in N, calculate the reachability, i.e., the
+        // number of nodes in N2 which are not yet covered by at
+        // least one node in the MPR set, and which are reachable
+        // through this 1-hop neighbor
+        std::map<int, std::vector<OLSR_nb_tuple*> > reachability;
+        std::set<int> rs;
+        for (nbset_t::iterator it = N.begin(); it != N.end(); it++)
+        {
+            OLSR_nb_tuple* nb_tuple = *it;
+            int r = 0;
+            for (nb2hopset_t::iterator it2 = N2.begin(); it2 != N2.end(); it2++)
+            {
+                OLSR_nb2hop_tuple* nb2hop_tuple = *it2;
+
+                if (nb_tuple->nb_main_addr() == nb2hop_tuple->nb_main_addr())
+                    r++;
+            }
+            rs.insert(r);
+            reachability[r].push_back(nb_tuple);
+        }
+
+        // 4.2. Select as a MPR the node with highest N_willingness among
+        // the nodes in N with non-zero reachability. In case of
+        // multiple choice select the node which provides
+        // reachability to the maximum number of nodes in N2. In
+        // case of multiple nodes providing the same amount of
+        // reachability, select the node as MPR whose D(y) is
+        // greater. Remove the nodes from N2 which are now covered
+        // by a node in the MPR set.
+        OLSR_nb_tuple *max = NULL;
+        int max_r = 0;
+        for (std::set<int>::iterator it = rs.begin(); it != rs.end(); it++)
+        {
+            int r = *it;
+            if (r == 0)
+            {
+                continue;
+            }
+            for (std::vector<OLSR_nb_tuple *>::iterator it2 = reachability[r].begin();
+                    it2 != reachability[r].end(); it2++)
+            {
+                OLSR_nb_tuple *nb_tuple = *it2;
+                if (max == NULL || nb_tuple->willingness() > max->willingness())
+                {
+                    max = nb_tuple;
+                    max_r = r;
+                }
+                else if (nb_tuple->willingness() == max->willingness())
+                {
+                    if (r > max_r)
+                    {
+                        max = nb_tuple;
+                        max_r = r;
+                    }
+                    else if (r == max_r)
+                    {
+                        if (degree(nb_tuple) > degree(max))
+                        {
+                            max = nb_tuple;
+                            max_r = r;
+                        }
+                    }
+                }
+            }
+        }
+        if (max != NULL)
+        {
+            state_.insert_mpr_addr(max->nb_main_addr());
+            CoverTwoHopNeighbors(max->nb_main_addr(), N2);
+            EV << N2.size () << " 2-hop neighbors left to cover! \n";
+        }
+    }
+}
+#endif
 ///
 /// \brief Creates the routing table of the node following RFC 3626 hints.
 ///
@@ -2338,8 +2601,9 @@ OLSR::degree(OLSR_nb_tuple* tuple)
         OLSR_nb2hop_tuple* nb2hop_tuple = *it;
         if (nb2hop_tuple->nb_main_addr() == tuple->nb_main_addr())
         {
-            OLSR_nb_tuple* nb_tuple =
-                state_.find_nb_tuple(nb2hop_tuple->nb_main_addr());
+            //OLSR_nb_tuple* nb_tuple =
+            //    state_.find_nb_tuple(nb2hop_tuple->nb_main_addr());
+            OLSR_nb_tuple* nb_tuple = state_.find_nb_tuple(nb2hop_tuple->nb2hop_addr());
             if (nb_tuple == NULL)
                 degree++;
         }
@@ -2531,8 +2795,25 @@ uint32_t OLSR::getRoute(const Uint128 &dest, std::vector<Uint128> &add)
 {
     add.clear();
     OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
+    Uint128 apAddr;
     if (!rt_entry)
+    {
+        if (getAp(dest, apAddr))
+        {
+            OLSR_rt_entry* rt_entry = rtable_.lookup(apAddr);
+            if (!rt_entry)
+                return 0;
+            for (int i = 0; i < (int) rt_entry->route.size(); i++)
+                add.push_back(rt_entry->route[i]);
+            add.push_back(apAddr);
+            OLSR_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
+            if (rt_entry_aux->next_addr() != add[0])
+                opp_error("OLSR Data base error");
+            return rt_entry->dist();
+        }
         return 0;
+    }
+
     for (int i=0; i<(int)rt_entry->route.size(); i++)
         add.push_back(rt_entry->route[i]);
     add.push_back(dest);
@@ -2547,7 +2828,30 @@ bool OLSR::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &cos
 {
     OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
     if (!rt_entry)
+    {
+        Uint128 apAddr;
+        if (getAp(dest, apAddr))
+        {
+
+            OLSR_rt_entry* rt_entry = rtable_.lookup(apAddr);
+            if (!rt_entry)
+                return false;
+            if (rt_entry->route.size())
+                add = rt_entry->route[0];
+            else
+                add = rt_entry->next_addr();
+            OLSR_rt_entry* rt_entry_aux = rtable_.find_send_entry(rt_entry);
+            if (rt_entry_aux->next_addr() != add)
+                opp_error("OLSR Data base error");
+
+            InterfaceEntry * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
+            iface = ie->getInterfaceId();
+            cost = rt_entry->route.size();
+            return true;
+        }
         return false;
+    }
+
     if (rt_entry->route.size())
         add = rt_entry->route[0];
     else
@@ -2672,6 +2976,8 @@ int  OLSR::getRouteGroup(const Uint128& dest, std::vector<Uint128> &add, Uint128
     {
         getAddressGroup(gr, group);
         distance = getRouteGroup(gr, add);
+        if (distance == 0)
+            return 0;
         gateway = add.back();
         isGroup = true;
 

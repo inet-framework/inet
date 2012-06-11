@@ -52,6 +52,7 @@ simple Batman extends BaseRouting like IManetRouting
         int MAX_AGGREGATION_BYTES @unit(B) = default(512B);
         double desynchronized @unit(s) = default(0s);
         volatile double broadcastDelay @unit("s") = default(uniform(0s,0.005s));  // the delay added to broadcast operations if EqualDelay is set (used to model processing time)
+        bool PublicRoutingTables = default(false);
     gates:
         input from_ip;
         output to_ip;

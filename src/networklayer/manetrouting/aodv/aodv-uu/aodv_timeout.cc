@@ -119,7 +119,14 @@ void NS_CLASS route_discovery_timeout(void *arg)
         DEBUG(LOG_DEBUG, 0, "NO ROUTE FOUND!");
 
 #ifdef NS_PORT
-        packet_queue_set_verdict(seek_entry->dest_addr, PQ_DROP);
+        std::vector<Uint128> list;
+        getListRelatedAp(seek_entry->dest_addr.s_addr, list);
+        for (unsigned int i = 0; i < list.size();i ++)
+        {
+            struct in_addr auxAaddr;
+            auxAaddr.s_addr = list[i];
+            packet_queue_set_verdict(auxAaddr, PQ_DROP);
+        }
 #else
         nl_send_no_route_found_msg(seek_entry->dest_addr);
 #endif
