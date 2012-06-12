@@ -90,6 +90,17 @@ void UDPSocket::sendTo(cPacket *pk, IPvXAddress destAddr, int destPort)
     sendToUDP(pk);
 }
 
+void UDPSocket::sendTo(cPacket *pk, IPvXAddress destAddr, int destPort, int outInterface)
+{
+    pk->setKind(UDP_C_DATA);
+    UDPSendCommand *ctrl = new UDPSendCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setDestAddr(destAddr);
+    ctrl->setDestPort(destPort);
+    ctrl->setInterfaceId(outInterface);
+    pk->setControlInfo(ctrl);
+    sendToUDP(pk);
+}
 void UDPSocket::send(cPacket *pk)
 {
     pk->setKind(UDP_C_DATA);

@@ -3,6 +3,11 @@
 	Fixed feature-related bugfix: possible memory leak if packet is
 	  multicast and IPv4 or IPv6 feature is disabled
 
+2012-06-12  Rudolf Hornig
+
+    Code takover from INETMANET-2.0:
+    Added the possibility to specify the output interface when
+    sending an UDP packet.
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-03-12  Tamas Borbely

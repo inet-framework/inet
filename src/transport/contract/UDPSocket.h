@@ -176,6 +176,12 @@ class INET_API UDPSocket
      * Sends a data packet to the given address and port.
      */
     void sendTo(cPacket *msg, IPvXAddress destAddr, int destPort);
+  
+    /**
+     * Sends a data packet to the given address and port using the provided
+     * interface.
+     */
+    void sendTo(cPacket *msg, IPvXAddress destAddr, int destPort, int outInterface);
 
     /**
      * Sends a data packet to the address and port specified previously
