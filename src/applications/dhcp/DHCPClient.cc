@@ -203,9 +203,9 @@ void DHCPClient::handleMessage(cMessage *msg)
         {
             EV << "unknown packet, discarding it" << endl;
         }
-        // delete the msg
-        delete msg;
     }
+    // delete the msg
+    delete msg;
 }
 
 void DHCPClient::handleTimer(cMessage* msg)
