@@ -18,6 +18,7 @@
 
 #include "MessageHandler.h"
 
+#include "ICMPMessage.h"
 #include "OSPFRouter.h"
 
 
@@ -36,6 +37,9 @@ void OSPF::MessageHandler::messageReceived(cMessage* message)
 {
     if (message->isSelfMessage()) {
         handleTimer(check_and_cast<OSPFTimer*> (message));
+    } else if (dynamic_cast<ICMPMessage *>(message)) {
+        EV << "ICMP error received -- discarding\n";
+        delete message;
     } else {
         OSPFPacket* packet = check_and_cast<OSPFPacket*> (message);
         EV << "Received packet: (" << packet->getClassName() << ")" << packet->getName() << "\n";
