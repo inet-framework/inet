@@ -429,7 +429,7 @@ void OSPFRouting::loadHostRoute(const cXMLElement& hostRouteConfig)
     if (area != NULL) {
         area->addHostRoute(hostParameters);
     } else {
-        error("Loading HostInterface ifIndex[%d] in Area %s aborted at %s", hostParameters.ifIndex, hostArea.str(false).c_str(), hostRouteConfig.getSourceLocation());
+        error("Loading HostInterface '%s' aborted, unknown area %s at %s", ie->getName(), hostArea.str(false).c_str(), hostRouteConfig.getSourceLocation());
     }
 }
 
