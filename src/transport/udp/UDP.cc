@@ -232,17 +232,22 @@ void UDP::processPacketFromApp(cPacket *appData)
 
     SockDesc *sd = getOrCreateSocket(ctrl->getSockId(), appData->getArrivalGate()->getIndex());
     const IPvXAddress& destAddr = ctrl->getDestAddr().isUnspecified() ? sd->remoteAddr : ctrl->getDestAddr();
-    ushort destPort = ctrl->getDestPort() == -1 ? sd->remotePort : ctrl->getDestPort();
+    int destPort = ctrl->getDestPort() == -1 ? sd->remotePort : ctrl->getDestPort();
     if (destAddr.isUnspecified() || destPort == -1)
         error("send: missing destination address or port when sending over unconnected port");
 
     int interfaceId = -1;
-    if (destAddr.isMulticast())
+    if (ctrl->getInterfaceId() == -1)
     {
-        std::map<IPvXAddress,int>::iterator it = sd->multicastAddrs.find(destAddr);
-        interfaceId = (it != sd->multicastAddrs.end() && it->second != -1) ? it->second : sd->multicastOutputInterfaceId;
+        if (destAddr.isMulticast())
+        {
+            std::map<IPvXAddress,int>::iterator it = sd->multicastAddrs.find(destAddr);
+            interfaceId = (it != sd->multicastAddrs.end() && it->second != -1) ? it->second : sd->multicastOutputInterfaceId;
+        }
+        sendDown(appData, sd->localAddr, sd->localPort, destAddr, destPort, interfaceId, sd->multicastLoop, sd->ttl, sd->typeOfService);
     }
-    sendDown(appData, sd->localAddr, sd->localPort, destAddr, destPort, interfaceId, sd->multicastLoop, sd->ttl, sd->typeOfService);
+    else
+        sendDown(appData, sd->localAddr, sd->localPort, destAddr, destPort, ctrl->getInterfaceId(), sd->multicastLoop, sd->ttl, sd->typeOfService);
     delete ctrl; // cannot be deleted earlier, due to destAddr
 }
 

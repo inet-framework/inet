@@ -1,3 +1,9 @@
+2012-06-12  Rudolf Hornig
+
+    Code takover from INETMANET-2.0:
+    UDPSocket: Added the possibility to specify the output interface when
+               sending an UDP packet.
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-02-24  ------ inet-1.99.3 released ------
