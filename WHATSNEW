@@ -1,10 +1,59 @@
 Recent changes in the INET Framework
 ====================================
 
-2012-04-12  Zoltan Bojthe
+INET-1.99.5 (June, 2012)
+------------------------
 
-changes in link layer
-    - at network interfaces:
+This is the final testing version of the 1.99.x series leading to the 2.0 
+release. Requires OMNeT++ 4.2 (version 4.2.2 suggested).
+
+    - MPLS fixes TODO
+
+    - OSPF fixes, changes in configuration. TODO
+
+    - Brand new Diffserv implementation (using the Queueing framework) TODO
+
+    - Queueing framework: TODO
+
+    - Wireless nodes are using the Ieee80211NewNic now by default. (INETMANET's
+      802.11 implementation). You can use the opMode parameter on the NIC
+      to specify b,g,a and p mode. If you need the old 802.11 implementation
+      speciy **.wlan[*].typename = "Ieee80211Nic" in your INI file.
+
+    - 802.11 implementation of the ancient mobility framework is removed
+      (i.e. the mf80211 directory).
+
+    - New send method on UDPSocket now allows to specify on which interface 
+      the packets should be sent out.
+
+    - Added DHCP protocol implementation by Juan Carlos Maureira
+      taken over from INETMANET-2.0 @ 7fb431b. It can be deployed just
+      like any UDP app.
+
+    - MANET routing protocols updated from INETMANET-2.0 @ 7fb431b
+
+    - Mobility: Added two new mobility models: 
+          o TraCI + TraCIScenarioManager to connect with an external server
+          o LinearNodeDistribution - static hosts in a single line in 
+            ANY direction
+
+    - IGMPv2: external routers attached to the IGMP module are now 
+      responsible for implementing the IGMP router logic (emiting queries 
+      and processing group membership reports). In this case the IGMP 
+      module passes all incoming IGMP messages to the external router.
+
+    - Updated 802.11 model from INETMANET-2.0 @ 7fb431b (minor bugfixes)
+      All files are synced. The following features were omitted:
+      MULTIQUEUES, HWMP and MESH networking related code.
+
+    - IPv4 fix: subnet directed broadcast (e.g. 192.168.1.255) works now:
+      When the datagram reaches the router of the subnet, it should
+      be forwarded as a link layer broadcast.
+
+    - Small fixes in the MACAddress, PPP, IPv4NetworkConfigurator, VoIPTool,
+      Mobility, BatteryModule
+
+   - changes in link layer
       - added INic moduleinterface, all other network interface interfacemodules
         extends it
       - renamed netwIn, netwOut gates to upperLayerIn, upperLayerOut
