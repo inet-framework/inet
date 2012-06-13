@@ -1,9 +1,9 @@
 <scenario>
-    <at t="100">
+    <at t="200">
         <disconnect src-module="RA" src-gate="ethg$o[0]" />
         <disconnect src-module="R1" src-gate="ethg$o[1]" />
     </at>
-    <at t="500">
+    <at t="400">
         <connect src-module="RA" src-gate="ethg[0]"
                  dest-module="R1" dest-gate="ethg[1]"
                  channel-type="inet.util.ThruputMeteringChannel">
