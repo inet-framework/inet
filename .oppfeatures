@@ -479,21 +479,6 @@
         linkerFlags = ""
         />
     <feature
-        id="MF80211"
-        name="802.11b (Mobility Framework)"
-        description = "IEEE 802.11b ad-hoc mode wireless NIC from the Mobility Framework 1.x"
-        initiallyEnabled = "true"
-        requires = "IPv4 mobility radio"
-        labels = "nic wireless"
-        nedPackages = "
-                       inet.linklayer.mf80211
-                       inet.nodes.mf80211
-                      "
-        extraSourceFolders = ""
-        compileFlags = ""
-        linkerFlags = ""
-        />
-    <feature
         id="Ieee80211"
         name="802.11a/b/g/e (ad-hoc and infrastructure mode)"
         description = "IEEE 802.11a/b/g/e ad-hoc and infrastucture mode NIC"
@@ -512,7 +497,7 @@
         name="wireless examples"
         description = "wireless examples"
         initiallyEnabled = "true"
-        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211 MF80211"
+        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211"
         labels = "nic wireless"
         nedPackages = "
                        inet.examples.adhoc
