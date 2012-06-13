@@ -136,7 +136,7 @@ used <- loadDataset(scafile, add(type='scalar', select='name("rx channel utiliza
 
 cat("\nOMNETPP TEST RESULT: ")
 
-if(length(idle$scalars$value) == linecount && max(idle$scalars$value) <= idlelimit)
+if(length(idle$scalars$value) == linecount & max(idle$scalars$value) <= idlelimit)
 {
     cat("IDLE OK\n")
 } else {
@@ -146,7 +146,7 @@ if(length(idle$scalars$value) == linecount && max(idle$scalars$value) <= idlelim
 
 cat("\nOMNETPP TEST RESULT: ")
 
-if(length(used$scalars$value) == linecount && min(used$scalars$value) >= usedlimit)
+if(length(used$scalars$value) == linecount & min(used$scalars$value) >= usedlimit)
 {
     cat("USED OK\n")
 } else {

@@ -111,7 +111,7 @@ cat("  UDP SPEED TEST RESULT:\n")
 
 #print(udpSent)
 cat("    UDP SENT ")
-if(length(udpSent$value) == linecount && min(udpSent$value) >= sentPk)
+if(length(udpSent$value) == linecount & min(udpSent$value) >= sentPk)
 {
     cat("OK\n")
 } else {
@@ -122,7 +122,7 @@ if(length(udpSent$value) == linecount && min(udpSent$value) >= sentPk)
 
 #print(udpRcvd)
 cat("    UDP RCVD ")
-if(length(udpRcvd$value) == linecount && min(udpRcvd$value) >= echoedPk)
+if(length(udpRcvd$value) == linecount & min(udpRcvd$value) >= echoedPk)
 {
     cat("OK\n")
 } else {

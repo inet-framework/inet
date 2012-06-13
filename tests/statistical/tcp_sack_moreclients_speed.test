@@ -166,7 +166,7 @@ srvSent <- srv[srv$name == "bytesSent",]
 srvRcvd <- srv[srv$name == "bytesRcvd",]
 
 cat("\nTCP SPEED TEST RESULT:\n")
-if(length(cliSent$value) == cliCount && min(cliSent$value) == cliSentBytes)
+if(length(cliSent$value) == cliCount & min(cliSent$value) == cliSentBytes)
 {
     cat("CLIENT SENT OK\n")
 } else {
@@ -175,7 +175,7 @@ if(length(cliSent$value) == cliCount && min(cliSent$value) == cliSentBytes)
     print(cliSent[cliSent$value != cliSentBytes,])
 }
 
-if(length(srvRcvd$value) == srvCount && min(srvRcvd$value) == srvRcvdBytes)
+if(length(srvRcvd$value) == srvCount & min(srvRcvd$value) == srvRcvdBytes)
 {
     cat("SERVER RCVD OK\n")
 } else {
@@ -184,7 +184,7 @@ if(length(srvRcvd$value) == srvCount && min(srvRcvd$value) == srvRcvdBytes)
     print(srvRcvd[srvRcvd$value != srvRcvdBytes,])
 }
 
-if(length(srvSent$value) == srvCount && min(srvSent$value) == srvSentBytes)
+if(length(srvSent$value) == srvCount & min(srvSent$value) == srvSentBytes)
 {
     cat("SERVER SENT OK\n")
 } else {
@@ -193,7 +193,7 @@ if(length(srvSent$value) == srvCount && min(srvSent$value) == srvSentBytes)
     print(srvSent[srvSent$value != srvSentBytes,])
 }
 
-if(length(cliRcvd$value) == cliCount && min(cliRcvd$value) == cliRcvdBytes)
+if(length(cliRcvd$value) == cliCount & min(cliRcvd$value) == cliRcvdBytes)
 {
     cat("CLIENT RCVD OK\n")
 } else {
