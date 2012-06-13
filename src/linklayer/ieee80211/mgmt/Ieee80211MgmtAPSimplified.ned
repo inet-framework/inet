@@ -49,6 +49,7 @@ simple Ieee80211MgmtAPSimplified like IIeee80211Mgmt
 {
     parameters:
         int frameCapacity = default(100);
+        bool forceRelayUnit = default(false);
         bool convertToEtherFrame = default(true);   // if true, frames sent up are converted to EthernetIIFrame
         @display("i=block/cogwheel");
         @signal[enqueuePk](type=cMessage);

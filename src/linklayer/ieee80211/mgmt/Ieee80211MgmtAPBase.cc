@@ -27,12 +27,31 @@
 void Ieee80211MgmtAPBase::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
+#ifdef WITH_DHCP
+    // JcM fix: Check if really the module connected in upperLayerOut is a relay unit
+    // or a network layer. This is important to encap/decap the packet correctly in the Mgmt module
+    if (stage==0)
+    {
+        if (gate("upperLayerOut")->getPathEndGate()->isConnected() &&
+                (strcmp(gate("upperLayerOut")->getPathEndGate()->getOwnerModule()->getName(),"relayUnit")==0 || par("forceRelayUnit").boolValue()))
+        {
+            hasRelayUnit = true;
+        }
+        else
+        {
+            hasRelayUnit = false;
+        }
+        convertToEtherFrameFlag = par("convertToEtherFrame").boolValue();
+        WATCH(hasRelayUnit);
+    }
+#else
     if (stage==0)
     {
         hasRelayUnit = gate("upperLayerOut")->getPathEndGate()->isConnected();
         convertToEtherFrameFlag = par("convertToEtherFrame").boolValue();
         WATCH(hasRelayUnit);
     }
+#endif
 }
 
 void Ieee80211MgmtAPBase::distributeReceivedDataFrame(Ieee80211DataFrame *frame)

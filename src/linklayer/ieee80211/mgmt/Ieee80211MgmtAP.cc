@@ -82,6 +82,70 @@ void Ieee80211MgmtAP::handleTimer(cMessage *msg)
     }
 }
 
+#ifdef WITH_DHCP
+void Ieee80211MgmtAP::handleUpperMessage(cPacket *msg)
+{
+    if (hasRelayUnit)
+    {
+        Ieee80211DataFrame *frame = NULL;
+
+#ifdef WITH_ETHERNET
+        EtherFrame *etherframe = dynamic_cast<EtherFrame *>(msg);
+        if (etherframe)
+        {
+            frame = convertFromEtherFrame(etherframe);
+        }
+        else
+#endif
+        {
+            frame = check_and_cast<Ieee80211DataFrame *>(msg);
+        }
+
+        MACAddress macAddr = frame->getReceiverAddress();
+        if (!macAddr.isMulticast())
+        {
+            STAList::iterator it = staList.find(macAddr);
+            if (it == staList.end() || it->second.status != ASSOCIATED)
+            {
+                EV << "STA with MAC address " << macAddr << " not associated with this AP, dropping frame\n";
+                delete msg; // XXX count drops?
+                return;
+            }
+        }
+        sendOrEnqueue(frame);
+    }
+    else
+    {
+        // JcM Add: we assume the packet comes in raw way.
+
+        EV << "Handling upper message from Network Layer" << endl;
+
+        Ieee802Ctrl* ctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
+        if (!ctrl->getDest().isMulticast())
+        {
+            // check if the destination address is our STA (or broadcast)
+            STAList::iterator it = staList.find(ctrl->getDest());
+            if (it==staList.end() || it->second.status!=ASSOCIATED)
+            {
+                EV << "STA with MAC address " << ctrl->getDest() << " not associated with this AP, dropping frame\n";
+                delete msg; // XXX count drops?
+                return;
+            }
+        }
+        Ieee80211DataFrame *frame = new Ieee80211DataFrame(msg->getName());
+        frame->setFromDS(true);
+
+        // copy addresses from ethernet frame (transmitter addr will be set to our addr by MAC)
+        frame->setReceiverAddress(ctrl->getDest());
+        frame->setAddress3(ctrl->getSrc());
+
+        // encapsulate payload
+        frame->encapsulate(msg);
+        sendOrEnqueue(frame);
+    }
+}
+
+#else
 void Ieee80211MgmtAP::handleUpperMessage(cPacket *msg)
 {
     // must be an EtherFrame or Ieee80211DataFrame frame arriving from MACRelayUnit, that is,
@@ -114,6 +178,7 @@ void Ieee80211MgmtAP::handleUpperMessage(cPacket *msg)
 
     sendOrEnqueue(frame);
 }
+#endif
 
 
 void Ieee80211MgmtAP::handleCommand(int msgkind, cObject *ctrl)
@@ -163,6 +228,68 @@ void Ieee80211MgmtAP::sendBeacon()
     sendOrEnqueue(frame);
 }
 
+#ifdef WITH_DHCP
+void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
+{
+    // check toDS bit
+    if (!frame->getToDS())
+    {
+        // looks like this is not for us - discard
+        EV << "Frame is not for us (toDS=false) -- discarding\n";
+        delete frame;
+        return;
+    }
+
+    // handle broadcast/multicast frames
+    if (frame->getAddress3().isMulticast())
+    {
+        EV << "Handling multicast frame\n";
+
+        if (hasRelayUnit)
+            sendToUpperLayer(frame->dup());
+        else if (isConnected)
+        {
+            // JcM add: we dont have a relayunit, so, send the decap packet
+
+            cPacket* payload = frame->getEncapsulatedPacket()->dup();
+            send(payload,"upperLayerOut");
+        }
+
+        distributeReceivedDataFrame(frame);
+        return;
+    }
+
+    // look up destination address in our STA list
+    STAList::iterator it = staList.find(frame->getAddress3());
+    if (it==staList.end())
+    {
+        // not our STA -- pass up frame to relayUnit for LAN bridging if we have one
+        if (hasRelayUnit)
+            sendToUpperLayer(frame);
+        else if (isConnected)
+        {
+            cPacket* payload = frame->decapsulate();
+            delete frame;
+            send(payload,"upperLayerOut");
+        }
+        else
+        {
+            EV << "Frame's destination address is not in our STA list -- dropping frame\n";
+            delete frame;
+        }
+    }
+    else
+    {
+        // dest address is our STA, but is it already associated?
+        if (it->second.status == ASSOCIATED)
+            distributeReceivedDataFrame(frame); // send it out to the destination STA
+        else {
+            EV << "Frame's destination STA is not in associated state -- dropping frame\n";
+            delete frame;
+        }
+    }
+}
+#else
 void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
 {
     // check toDS bit
@@ -210,6 +337,7 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
         }
     }
 }
+#endif
 
 void Ieee80211MgmtAP::handleAuthenticationFrame(Ieee80211AuthenticationFrame *frame)
 {

@@ -232,7 +232,7 @@
     <feature
         id="DHCP"
         name="DHCP"
-        description = "DHCP protovol that can be installed asn UDP application"
+        description = "DHCP protocol that can be installed as an UDP application"
         initiallyEnabled = "true"
         requires = "UDP"
         labels = "protocols dhcp"
@@ -240,7 +240,7 @@
                        inet.applications.dhcp
                       "
         extraSourceFolders = ""
-        compileFlags = ""
+        compileFlags = "-DWITH_DHCP"
         linkerFlags = ""
         />
     <feature

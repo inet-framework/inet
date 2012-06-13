@@ -2,7 +2,7 @@
 
         Takover from INETMANET-2.0 @ 7fb431b (minor bugfixes)
         All files are synced. The following features were omitted:
-        DHCP, MULTIQUEUES, HWMP and MESH networking related code.
+        MULTIQUEUES, HWMP and MESH networking related code.
 
 2012-03-20  ------ inet-1.99.4 released ------
 
