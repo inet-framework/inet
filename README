@@ -56,93 +56,105 @@ Directories of INET framework source are arranged roughly along the OSI layers.
 
 Bottom-up:
 
- src/
-   linklayer/            L2 (data link layer) protocols
-     contract/           API to common L2 functionality
-     ethernet/           Ethernet model (MAC, LLC, Encap)
-     etherswitch/        Ethernet switch (relay unit) model
-     ppp/                basic PPP model (framing only)
-     radio/              //TODO
-     ieee80211/          ieee 802.11 interface //TODO
-     mf80211/            MF's 802.11b ad-hoc mode model (modified)
-     ext/                External interface
-
-   networklayer/         L3 (network layer) protocols
-     common/             InterfaceTable, InterfaceEntry modules //TODO
-     contract/           API to common L3 functionality
-     extras/             FailureManager, Dummy //TODO
-     autorouting/        autoconfiguration of static routes
-     arp/                ARP protocol
-     queue/              router queues (QoS, RED, etc)
-     ipv4/               IPv4 and associated protocols
-     ipv6/               IPv6 implementation (currently in work)
-     icmpv6/             ICMPv6 implementation (currently in work)
-     mpls/               MPLS implementation (will be replaced soon)
-     ldp/                LDP signalling protocol for MPLS
-     rsvp_te/            RSVP-TE signalling protocol for MPLS (will be replaced soon)
-     scenario/           specific for RSVP-TE (will be replaced soon)
-     bgpv4/              BGP V4 protocol (see BGPv4 feature) //TODO
-     ospfv2/             OSPF protocol //TODO
-     ted/                Traffic Engineering Database //TODO
-
-   transport/            transport layer protocols
-     contract/           API to transport layer functionality
-     tcp/                TCP protocol (supporting SACK) (default TCP implementation)
-     tcp_nsc/            TCP protocol using Network Simulation Cradle
-     tcp_old/            TCP old (obsolete) TCP implementation (without SACK) for reference only
-     udp/                UDP protocol
-     rtp/                Realtime Transport Protocol (not yet integrated)
-     sctp/               Stream Control Transmission Protocol
-
-   applications/         application layer
-     tcpapp/             TCP application models
-     udpapp/             UDP application models (VideoStream, etc.)
-     generic/            traffic generators (directly for IP)
-     ethernet/           traffic generators (directly for Ethernet)
-     pingapp/            ping application
-     rtpapp/             RTP application
-     sctpapp/            SCTP applications
-
-   world/                scenario manager, MF channel manager //TODO is here the MF ch.m.?
-
-   nodes/                protocol stacks, host and router models
-     inet/               IP-based components
-     ipv6/               IPv6-based components
-     mpls/               router models with MPLS/LDP/RSVP-TE
-     bgp/                IPv4 router with BGP and OSPF support
-     ethernet/           //TODO
-     mf80211/            host for mf80211
-     ospfv2/             an OSPFv2 router node
-     wireless/           nodes for wireless simulations
-
-   base/                 common header files, base classes
-   util/                 utility classes
-
- examples/               example networks
-   ethernet/             example Ethernet networks
-   inet/                 TCP/IP-based example networks
-   ipv6/                 IPv6-based example networks
-   sctp/                 SCTP examples
-   rtp/                  RTP examples (not yet integrated)
-   emulation/            example networks using external interface to connect with real networks
-   adhoc/                mobile and ad-hoc networks (incomplete)
-   wireless/             IEEE 802.11 examples
-   mpls/                 example networks for MPLS/LDP/RSVP-TE
-   ospfv2/               OSPF examples
-   bgpv4                 BGP examples
+ 3rdparty/               optional 3rd party components like (Network Simulation Cradle etc.)
 
  doc/                    documentation
 
- tests/                  some test
-   ipv4/                 for IPv4 components
-   ipv6/                 for IPv6 components
-   mpls/                 for the MPLS models
-   newtcp/               for the TCP model
-   dlltest/              //TODO
-   performance/          performance tests for Ethernet, TCP, UDP, ieee80211 protocols
+ examples/               example networks for various protocols
 
- 3rdparty/               optional 3rd party components like (Network Simulation Cradle etc.)
+ src/
+   applications/         application layer
+     dhcp/               DHCP protocol (maintainer: JCM, origin: https://github.com/jmaureir/DHCP)
+     ethernet/           traffic generators (directly for Ethernet)
+     generic/            traffic generators (directly for IP)
+     httptools/          HTTP traffic generator (maintainer: KVJ, origin: http://omnet-httptools.googlecode.com/svn/trunk/omnet-httptools-read-only)
+     pingapp/            ping application
+     rtpapp/             RTP (real-time Transport Protocol) application
+     sctpapp/            SCTP applications (maintainer: TD)
+     tcpapp/             TCP application models
+     udpapp/             UDP application models (VideoStream, etc.)
+     voiptool/           VoIP applications (maintainer ZB, origin: http://www.tkn.tu-berlin.de/research/omnetVoipTool)
 
+   base/                 common header files, base classes
+
+   battery/              Battery model (maintainer AAQ, origin: mixim + INETMANET)
+
+   linklayer/            L2 (data link layer) protocols
+     contract/           API to common L2 functionality
+     ethernet/           Ethernet model (MAC, LLC, Encap, Switch)
+     ext/                External interface (allowing the simulation to work with real hardware)
+     ieee80211/          ieee 802.11 interface (maintainer: AAQ origin: https://github.com/aarizaq/inetmanet-2.0)
+     ppp/                basic PPP model (framing only)
+     radio/              common radio infrastructure, propagation models etc.
+     queue/              generic queueing framework (maintainer TB)
+
+   mobility/             Node mobility models (origin: mobility framework + mixim + inetmanet)
+
+   networklayer/         L3 (network layer) protocols
+     arp/                ARP protocol
+     autorouting/        autoconfiguration of static routes
+     bgpv4/              BGP V4 protocol (see BGPv4 feature) //TODO
+     common/             InterfaceTable, InterfaceEntry modules //TODO
+     contract/           API to common L3 functionality
+     icmpv6/             ICMPv6 implementation 
+     ipv4/               IPv4 and associated protocols
+     ipv6/               IPv6 implementation 
+     ipv6tunneling/      IPv6 tunneling support
+     ldp/                LDP signalling protocol for MPLS (maintainer: VJ)
+     manetrouting/       Mobile AdHoc Routing protocols (maintainer: AAQ origin: inetmanet)
+     mpls/               MPLS implementation (maintainer: VJ)
+     ospfv2/             OSPF protocol (maintainer: ???)
+     rsvp_te/            RSVP-TE signalling protocol for MPLS (maintainer: VJ)
+     ted/                Traffic Engineering Database (maintainer: VJ)
+     xmipv6/             mobile IPv6 protocol (maintainer: FZY)
+
+   nodes/                protocol stacks, host and router models
+     bgp/                IPv4 router with BGP and OSPF support
+     ethernet/           nodes allowing direct ethernet communication
+     httptools/          HTTP traffic generator (maintainer: KVJ, origin: http://omnet-httptools.googlecode.com/svn/trunk/omnet-httptools-read-only)
+     inet/               IP-based components
+     ipv6/               IPv6-based components
+     mf80211/            host for mf80211
+     mpls/               router models with MPLS/LDP/RSVP-TE
+     ospfv2/             an OSPFv2 router node
+     wireless/           nodes for wireless simulations
+     xmipv6/             mobile IPv6 nodes (maintainer: FZY)
+
+   transport/            transport layer protocols
+     contract/           API to transport layer functionality
+     rtp/                Realtime Transport Protocol (see AUTHORS file in directory)
+     sctp/               Stream Control Transmission Protocol (maintainer: TD)
+     tcp_common/         Common generic part of the different TCP implementations
+     tcp/                TCP protocol (supporting SACK) (default TCP implementation)
+     tcp_nsc/            TCP protocol using Network Simulation Cradle
+     tcp_lwip/           TCP protocol using Lightweight IP library
+     udp/                UDP protocol
+
+   util/                 various utility classes
+
+   world/                various modules that are used at network level (i.e. global modules)
+     annotations/        allows drawing some additional shapes on the Tkenv canvas (maintainer: CS)
+     httptools/          global components for HTTP traffic generation (maintainer: KVJ, origin: http://omnet-httptools.googlecode.com/svn/trunk/omnet-httptools-read-only)
+     obstacles/          obstacle models that block the radio transmission (maintainer: CS)
+     powercontrol/       enable/disable power control aware modules (maintainer: JCM)
+     radio/              global modules for radio models - radio channel access 
+     scenario/           create sim scenarios, change parameters over time
+     traci/              allows connecting to a TraCI server (maintainer: CS, origin:http://veins.car2x.org)
+
+ tests/                  automatic tests for the INEt framework
+
+
+Maintainers / authors:
+  TD  - "Thomas Dreibholz" <dreibh@iem.uni-due.de>
+  ZB  - "Zoltan Bojthe" 
+  JCM - "Juan-Carlos Maureira" <jmaureir@gmail.com>
+  AAQ - "Alfonso Ariza Quintana" <aarizaq_m@hotmail.com>
+  KVJ - Kristjan V. Jonsson (LDSS) <kristjanvj@gmail.com>
+  TB  - Tamás Borbély <tamas.borbely@omnest.com>
+  LM  - Levente Mészáros <levente.meszaros@omnest.com>
+  FZY - Faqir Zarrar Yousaf
+  VJ  - Vojtech Janota
+  CS  - Christoph Sommer <christoph.sommer@informatik.uni-erlangen.de>
 
 xMIPv6 additions for INET Framework
 =======================================
