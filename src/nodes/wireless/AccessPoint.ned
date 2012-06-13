@@ -60,7 +60,7 @@ module AccessPoint
             parameters:
                 @display("p=151,121");
         }
-        wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
+        wlan[numRadios]: <default("Ieee80211NewNic")> like IWirelessNic {
             parameters:
                 @display("p=89,225;q=queue");
         }
