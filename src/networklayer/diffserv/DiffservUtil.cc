@@ -225,19 +225,19 @@ class ColorAttribute : public cObject
         int color;
     public:
         ColorAttribute(int color) : color(color) {}
-        virtual const char *getName() const  {return "color";}
+        virtual const char *getName() const  {return "dscolor";}
         virtual std::string info() const { return colorToString(color); }
 };
 
 int getColor(cPacket *packet)
 {
-    ColorAttribute *attr = dynamic_cast<ColorAttribute*>(packet->getParList().get("color"));
+    ColorAttribute *attr = dynamic_cast<ColorAttribute*>(packet->getParList().get("dscolor"));
     return attr ? attr->color : -1;
 }
 
 void setColor(cPacket *packet, int color)
 {
-    ColorAttribute *attr = dynamic_cast<ColorAttribute*>(packet->getParList().get("color"));
+    ColorAttribute *attr = dynamic_cast<ColorAttribute*>(packet->getParList().get("dscolor"));
     if (attr)
         attr->color = color;
     else
