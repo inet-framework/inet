@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006-2011 Christoph Sommer <christoph.sommer@uibk.ac.at>
+// Copyright (C) 2006-2012 Christoph Sommer <christoph.sommer@uibk.ac.at>
 //
 // Documentation for these modules is at http://veins.car2x.org/
 //
@@ -155,7 +155,7 @@ void TraCIMobility::preInitialize(std::string external_id, const Coord& position
 	isPreInitialized = true;
 }
 
-void TraCIMobility::nextPosition(const Coord& position, std::string road_id, double speed, double angle)
+void TraCIMobility::nextPosition(const Coord& position, std::string road_id, double speed, double angle, TraCIScenarioManager::VehicleSignal signals)
 {
 	if (debug) EV << "nextPosition " << position.x << " " << position.y << " " << road_id << " " << speed << " " << angle << std::endl;
 	isPreInitialized = false;
@@ -163,6 +163,7 @@ void TraCIMobility::nextPosition(const Coord& position, std::string road_id, dou
 	this->road_id = road_id;
 	this->speed = speed;
 	this->angle = angle;
+	this->signals = signals;
 	move();
 }
 

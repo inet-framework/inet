@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006-2011 Christoph Sommer <christoph.sommer@uibk.ac.at>
+// Copyright (C) 2006-2012 Christoph Sommer <christoph.sommer@uibk.ac.at>
 //
 // Documentation for these modules is at http://veins.car2x.org/
 //
@@ -34,13 +34,19 @@
 
 /**
  * @brief
- * TraCIMobility is a mobility module for hosts controlled by TraCIScenarioManager.
- * It receives position and state updates from an external module and updates
- * the parent module accordingly.
- * See NED file for more info.
+ * Used in modules created by the TraCIScenarioManager.
+ *
+ * This module relies on the TraCIScenarioManager for state updates
+ * and can not be used on its own.
+ *
+ * See the Veins website <a href="http://veins.car2x.org/"> for a tutorial, documentation, and publications </a>.
+ *
+ * @author Christoph Sommer, David Eckhoff, Luca Bedogni, Bastian Halmos
+ *
+ * @see TraCIScenarioManager
+ * @see TraCIScenarioManagerLaunchd
  *
  * @ingroup mobility
- * @author Christoph Sommer
  */
 class INET_API TraCIMobility : public MobilityBase
 {
@@ -75,7 +81,7 @@ class INET_API TraCIMobility : public MobilityBase
 
 		virtual void handleSelfMessage(cMessage *msg);
 		virtual void preInitialize(std::string external_id, const Coord& position, std::string road_id = "", double speed = -1, double angle = -1);
-		virtual void nextPosition(const Coord& position, std::string road_id = "", double speed = -1, double angle = -1);
+		virtual void nextPosition(const Coord& position, std::string road_id = "", double speed = -1, double angle = -1, TraCIScenarioManager::VehicleSignal signals = TraCIScenarioManager::VEH_SIGNAL_UNDEF);
 		virtual void move();
 		virtual void updateDisplayString();
 		virtual void setExternalId(std::string external_id) {
@@ -95,6 +101,10 @@ class INET_API TraCIMobility : public MobilityBase
 		virtual double getSpeed() const {
 			if (speed == -1) throw cRuntimeError("TraCIMobility::getSpeed called with no speed set yet");
 			return speed;
+		}
+		virtual TraCIScenarioManager::VehicleSignal getSignals() const {
+			if (signals == -1) throw cRuntimeError("TraCIMobility::getSignals called with no signals set yet");
+			return signals;
 		}
 		/**
 		 * returns angle in rads, 0 being east, with -M_PI <= angle < M_PI.
@@ -116,6 +126,14 @@ class INET_API TraCIMobility : public MobilityBase
 		void commandChangeRoute(std::string roadId, double travelTime) {
 			getManager()->commandChangeRoute(getExternalId(), roadId, travelTime);
 		}
+
+		void commandNewRoute(std::string roadId) {
+		    getManager()->commandNewRoute(getExternalId(), roadId);
+		}
+		void commandParkVehicle() {
+			getManager()->commandSetVehicleParking(getExternalId());
+		}
+
 		double commandDistanceRequest(Coord position1, Coord position2, bool returnDrivingDistance) {
 			return getManager()->commandDistanceRequest(position1, position2, returnDrivingDistance);
 		}
@@ -159,6 +177,7 @@ class INET_API TraCIMobility : public MobilityBase
 		std::string road_id; /**< updated by nextPosition() */
 		double speed; /**< updated by nextPosition() */
 		double angle; /**< updated by nextPosition() */
+		TraCIScenarioManager::VehicleSignal signals; /**<updated by nextPosition() */
 
 		cMessage* startAccidentMsg;
 		cMessage* stopAccidentMsg;

@@ -2,7 +2,7 @@
 
 #
 # sumo-launchd.py -- SUMO launcher daemon for use with TraCI clients
-# Copyright (C) 2006-2011 Christoph Sommer <christoph.sommer@uibk.ac.at>
+# Copyright (C) 2006-2012 Christoph Sommer <christoph.sommer@uibk.ac.at>
 #
 # Documentation for these modules is at http://veins.car2x.org/
 #
@@ -255,13 +255,16 @@ def run_sumo(runpath, sumo_command, shlex, config_file_name, remote_port, seed, 
             sumo_status = "Undef"
 
     except OSError, e:
-        sumo_status = "Execution failed (%s)" % e
+        sumo_status = "Could not start SUMO (%s): %s" % (" ".join(cmd), e)
 
     except exceptions.SystemExit:
         sumo_status = "Premature launch script exit"
 
     except exceptions.KeyboardInterrupt:
         sumo_status = "Keyboard interrupt."
+
+    except socket.error, e:
+        sumo_status = "Could not connect to SUMO (%s). Might be protected by a personal firewall or crashed before a connection could be established." % e
 
     except:
         raise
