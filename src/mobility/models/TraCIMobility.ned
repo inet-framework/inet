@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006-2011 Christoph Sommer <christoph.sommer@uibk.ac.at>
+// Copyright (C) 2006-2012 Christoph Sommer <christoph.sommer@uibk.ac.at>
 //
 // Documentation for these modules is at http://veins.car2x.org/
 //
@@ -21,9 +21,17 @@
 package inet.mobility.models;
 
 //
-// TraCIMobility is a mobility module for hosts controlled by TraCIScenarioManager.
-// It receives position and state updates from an external module and updates
-// the parent module accordingly.
+// Used in modules created by the TraCIScenarioManager.
+//
+// This module relies on the TraCIScenarioManager for state updates
+// and can not be used on its own.
+//
+// See the Veins website <a href="http://veins.car2x.org/"> for a tutorial, documentation, and publications </a>.
+//
+// @author Christoph Sommer, David Eckhoff, Luca Bedogni, Bastian Halmos
+//
+// @see TraCIScenarioManager
+// @see TraCIScenarioManagerLaunchd
 //
 simple TraCIMobility extends MobilityBase
 {
