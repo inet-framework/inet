@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006-2011 Christoph Sommer <christoph.sommer@uibk.ac.at>
+// Copyright (C) 2006-2012 Christoph Sommer <christoph.sommer@uibk.ac.at>
 //
 // Documentation for these modules is at http://veins.car2x.org/
 //
@@ -34,14 +34,21 @@
 #include "ModuleAccess.h"
 
 /**
- * TraCIScenarioManager connects OMNeT++ to a TraCI server running road traffic simulations.
- * It sets up and controls simulation experiments, moving nodes with the help
- * of a TraCIMobility module.
+ * @brief
+ * Creates and moves nodes controlled by a TraCI server.
  *
- * Last tested with SUMO r5488 (2008-04-30)
- * https://sumo.svn.sourceforge.net/svnroot/sumo/trunk/sumo
+ * If the server is a SUMO road traffic simulation, you can use the
+ * TraCIScenarioManagerLaunchd module and sumo-launchd.py script instead.
  *
- * @author Christoph Sommer
+ * All nodes created thus must have a TraCIMobility submodule.
+ *
+ * See the Veins website <a href="http://veins.car2x.org/"> for a tutorial, documentation, and publications </a>.
+ *
+ * @author Christoph Sommer, David Eckhoff, Falko Dressler, Zheng Yao, Tobias Mayer, Alvaro Torres Cortes, Luca Bedogni
+ *
+ * @see TraCIMobility
+ * @see TraCIScenarioManagerLaunchd
+ *
  */
 class INET_API TraCIScenarioManager : public cSimpleModule
 {
@@ -55,6 +62,25 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 			uint8_t green;
 			uint8_t blue;
 			uint8_t alpha;
+		};
+
+		enum VehicleSignal {
+			VEH_SIGNAL_UNDEF = -1,
+			VEH_SIGNAL_NONE = 0,
+			VEH_SIGNAL_BLINKER_RIGHT = 1,
+			VEH_SIGNAL_BLINKER_LEFT = 2,
+			VEH_SIGNAL_BLINKER_EMERGENCY = 4,
+			VEH_SIGNAL_BRAKELIGHT = 8,
+			VEH_SIGNAL_FRONTLIGHT = 16,
+			VEH_SIGNAL_FOGLIGHT = 32,
+			VEH_SIGNAL_HIGHBEAM = 64,
+			VEH_SIGNAL_BACKDRIVE = 128,
+			VEH_SIGNAL_WIPER = 256,
+			VEH_SIGNAL_DOOR_OPEN_LEFT = 512,
+			VEH_SIGNAL_DOOR_OPEN_RIGHT = 1024,
+			VEH_SIGNAL_EMERGENCY_BLUE = 2048,
+			VEH_SIGNAL_EMERGENCY_RED = 4096,
+			VEH_SIGNAL_EMERGENCY_YELLOW = 8192
 		};
 
 		~TraCIScenarioManager();
@@ -210,7 +236,9 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		};
 
 		bool debug; /**< whether to emit debug messages */
-		simtime_t updateInterval; /**< time interval to update the host's position */
+		simtime_t connectAt; /**< when to connect to TraCI server (must be the initial timestep of the server) */
+		simtime_t firstStepAt; /**< when to start synchronizing with the TraCI server (-1: immediately after connecting) */
+		simtime_t updateInterval; /**< time interval of hosts' position updates */
 		std::string moduleType; /**< module type to be used in the simulation for each managed vehicle */
 		std::string moduleName; /**< module name to be used in the simulation for each managed vehicle */
 		std::string moduleDisplayString; /**< module displayString to be used in the simulation for each managed vehicle */
@@ -218,6 +246,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		int port;
 		bool autoShutdown; /**< Shutdown module as soon as no more vehicles are in the simulation */
 		int margin;
+		double penetrationRate;
 		std::list<std::string> roiRoads; /**< which roads (e.g. "hwy1 hwy2") are considered to consitute the region of interest, if not empty */
 		std::list<std::pair<TraCICoord, TraCICoord> > roiRects; /**< which rectangles (e.g. "0,0-10,10 20,20-30,30) are considered to consitute the region of interest, if not empty */
 
@@ -227,9 +256,11 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 
 		size_t nextNodeVectorIndex; /**< next OMNeT++ module vector index to use */
 		std::map<std::string, cModule*> hosts; /**< vector of all hosts managed by us */
+		std::set<std::string> unEquippedHosts;
 		std::set<std::string> subscribedVehicles; /**< all vehicles we have already subscribed to */
 		uint32_t activeVehicleCount; /**< number of vehicles reported as active by TraCI server */
 		bool autoShutdownTriggered;
+		cMessage* connectAndStartTrigger; /**< self-message scheduled for when to connect to TraCI server and start running */
 		cMessage* executeOneTimestepTrigger; /**< self-message scheduled for when to next call executeOneTimestep */
 
 		IChannelControl* cc;
@@ -244,6 +275,8 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		void addModule(std::string nodeId, std::string type, std::string name, std::string displayString, const Coord& position, std::string road_id = "", double speed = -1, double angle = -1);
 		cModule* getManagedModule(std::string nodeId); /**< returns a pointer to the managed module named moduleName, or 0 if no module can be found */
 		void deleteModule(std::string nodeId);
+
+		bool isModuleUnequipped(std::string nodeId); /**< returns true if this vehicle is Unequipped */
 
 		/**
 		 * returns whether a given position lies within the simulation's region of interest.

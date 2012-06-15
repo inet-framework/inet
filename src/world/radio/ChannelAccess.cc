@@ -33,18 +33,6 @@ static int parseInt(const char *s, int defaultValue)
     return *endptr == '\0' ? value : defaultValue;
 }
 
-// the destructor unregister the radio module
-ChannelAccess::~ChannelAccess()
-{
-    if (cc && myRadioRef)
-    {
-        // check if channel control exist
-        IChannelControl *cc = dynamic_cast<IChannelControl *>(simulation.getModuleByPath("channelControl"));
-        if (cc)
-             cc->unregisterRadio(myRadioRef);
-        myRadioRef = NULL;
-    }
-}
 /**
  * Upon initialization ChannelAccess registers the nic parent module
  * to have all its connections handled by ChannelControl
@@ -87,6 +75,11 @@ void ChannelAccess::initialize(int stage)
         myRadioRef = cc->registerRadio(this);
         cc->setRadioPosition(myRadioRef, radioPos);
     }
+}
+
+void ChannelAccess::finish()
+{
+    cc->unregisterRadio(myRadioRef);
 }
 
 IChannelControl *ChannelAccess::getChannelControl()

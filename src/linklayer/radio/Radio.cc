@@ -173,6 +173,7 @@ void Radio::initialize(int stage)
 
 void Radio::finish()
 {
+    ChannelAccess::finish();
 }
 
 Radio::~Radio()

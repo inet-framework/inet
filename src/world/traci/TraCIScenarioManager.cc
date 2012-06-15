@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006-2011 Christoph Sommer <christoph.sommer@uibk.ac.at>
+// Copyright (C) 2006-2012 Christoph Sommer <christoph.sommer@uibk.ac.at>
 //
 // Documentation for these modules is at http://veins.car2x.org/
 //
@@ -52,11 +52,16 @@ void TraCIScenarioManager::initialize(int stage) {
 		return;
 	}
 
+
 	debug = par("debug");
+	connectAt = par("connectAt");
+	firstStepAt = par("firstStepAt");
 	updateInterval = par("updateInterval");
+	if (firstStepAt == -1) firstStepAt = connectAt + updateInterval;
 	moduleType = par("moduleType").stdstringValue();
 	moduleName = par("moduleName").stdstringValue();
 	moduleDisplayString = par("moduleDisplayString").stdstringValue();
+	penetrationRate = par("penetrationRate").doubleValue();
 	host = par("host").stdstringValue();
 	port = par("port");
 	autoShutdown = par("autoShutdown");
@@ -94,16 +99,17 @@ void TraCIScenarioManager::initialize(int stage) {
 	activeVehicleCount = 0;
 	autoShutdownTriggered = false;
 
-	executeOneTimestepTrigger = new cMessage("step");
-	scheduleAt(0, executeOneTimestepTrigger);
 
 	cc = dynamic_cast<IChannelControl *>(simulation.getModuleByPath("channelControl"));
 	if (cc == 0) error("Could not find a ChannelControl module named channelControl");
 
-	MYDEBUG << "TraCIScenarioManager connecting to TraCI server" << endl;
 	socketPtr = 0;
-	connect();
-	init_traci();
+
+	ASSERT(firstStepAt > connectAt);
+	connectAndStartTrigger = new cMessage("connect");
+	scheduleAt(connectAt, connectAndStartTrigger);
+	executeOneTimestepTrigger = new cMessage("step");
+	scheduleAt(firstStepAt, executeOneTimestepTrigger);
 
 	MYDEBUG << "initialized TraCIScenarioManager" << endl;
 }
@@ -226,6 +232,8 @@ TraCIScenarioManager::TraCIBuffer TraCIScenarioManager::queryTraCIOptional(uint8
 }
 
 void TraCIScenarioManager::connect() {
+	MYDEBUG << "TraCIScenarioManager connecting to TraCI server" << endl;
+
 	if (initsocketlibonce() != 0) error("Could not init socketlib");
 
 	in_addr addr;
@@ -349,6 +357,11 @@ void TraCIScenarioManager::handleMessage(cMessage *msg) {
 }
 
 void TraCIScenarioManager::handleSelfMsg(cMessage *msg) {
+	if (msg == connectAndStartTrigger) {
+		connect();
+		init_traci();
+		return;
+	}
 	if (msg == executeOneTimestepTrigger) {
 		executeOneTimestep();
 		return;
@@ -595,6 +608,14 @@ bool TraCIScenarioManager::commandAddVehicle(std::string vehicleId, std::string 
 void TraCIScenarioManager::addModule(std::string nodeId, std::string type, std::string name, std::string displayString, const Coord& position, std::string road_id, double speed, double angle) {
 	if (hosts.find(nodeId) != hosts.end()) error("tried adding duplicate module");
 
+	double option1 = hosts.size() / (hosts.size() + unEquippedHosts.size() + 1.0);
+	double option2 = (hosts.size() + 1) / (hosts.size() + unEquippedHosts.size() + 1.0);
+
+	if (fabs(option1 - penetrationRate) < fabs(option2 - penetrationRate)) {
+	    unEquippedHosts.insert(nodeId);
+	    return;
+	}
+
 	int32_t nodeVectorIndex = nextNodeVectorIndex++;
 
 	cModule* parentmod = getParentModule();
@@ -625,6 +646,11 @@ void TraCIScenarioManager::addModule(std::string nodeId, std::string type, std::
 cModule* TraCIScenarioManager::getManagedModule(std::string nodeId) {
 	if (hosts.find(nodeId) == hosts.end()) return 0;
 	return hosts[nodeId];
+}
+
+bool TraCIScenarioManager::isModuleUnequipped(std::string nodeId) {
+    if (unEquippedHosts.find(nodeId) == unEquippedHosts.end()) return false;
+    return true;
 }
 
 void TraCIScenarioManager::deleteModule(std::string nodeId) {
@@ -663,7 +689,7 @@ void TraCIScenarioManager::executeOneTimestep() {
 
 	uint32_t targetTime = getCurrentTimeMs();
 
-	if (targetTime > 0) {
+	if (targetTime > round(connectAt.dbl() * 1000)) {
 		TraCIBuffer buf = queryTraCI(CMD_SIMSTEP2, TraCIBuffer() << targetTime);
 
 		uint32_t count; buf >> count;
@@ -868,13 +894,14 @@ void TraCIScenarioManager::subscribeToVehicleVariables(std::string vehicleId) {
 	uint32_t beginTime = 0;
 	uint32_t endTime = 0x7FFFFFFF;
 	std::string objectId = vehicleId;
-	uint8_t variableNumber = 4;
+	uint8_t variableNumber = 5;
 	uint8_t variable1 = VAR_POSITION;
 	uint8_t variable2 = VAR_ROAD_ID;
 	uint8_t variable3 = VAR_SPEED;
 	uint8_t variable4 = VAR_ANGLE;
+	uint8_t variable5 = VAR_SIGNALS;
 
-	TraCIBuffer buf = queryTraCI(CMD_SUBSCRIBE_VEHICLE_VARIABLE, TraCIBuffer() << beginTime << endTime << objectId << variableNumber << variable1 << variable2 << variable3 << variable4);
+	TraCIBuffer buf = queryTraCI(CMD_SUBSCRIBE_VEHICLE_VARIABLE, TraCIBuffer() << beginTime << endTime << objectId << variableNumber << variable1 << variable2 << variable3 << variable4 << variable5);
 	processSubcriptionResult(buf);
 	ASSERT(buf.eof());
 }
@@ -932,6 +959,10 @@ void TraCIScenarioManager::processSimSubscription(std::string objectId, TraCIBuf
 				cModule* mod = getManagedModule(idstring);
 				if (mod) deleteModule(idstring);
 
+				if(unEquippedHosts.find(idstring) != unEquippedHosts.end()) {
+					unEquippedHosts.erase(idstring);
+				}
+
 			}
 
 			if ((count > 0) && (count >= activeVehicleCount) && autoShutdown) autoShutdownTriggered = true;
@@ -958,6 +989,7 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 	std::string edge;
 	double speed;
 	double angle_traci;
+	int signals;
 	int numRead = 0;
 
 	uint8_t variableNumber_resp; buf >> variableNumber_resp;
@@ -1021,6 +1053,11 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 			ASSERT(varType == TYPE_DOUBLE);
 			buf >> angle_traci;
 			numRead++;
+		} else if (variable1_resp == VAR_SIGNALS) {
+			uint8_t varType; buf >> varType;
+			ASSERT(varType == TYPE_INTEGER);
+			buf >> signals;
+			numRead++;
 		} else {
 			error("Received unhandled vehicle subscription result");
 		}
@@ -1029,8 +1066,8 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 	// bail out if we didn't want to receive these subscription results
 	if (!isSubscribed) return;
 
-	// make sure we got updates for all 4 attributes
-	if (numRead != 4) return;
+	// make sure we got updates for all attributes
+	if (numRead != 5) return;
 
 	Coord p = traci2omnet(TraCICoord(px, py));
 	if ((p.x < 0) || (p.y < 0)) error("received bad node position (%.2f, %.2f), translated to (%.2f, %.2f)", px, py, p.x, p.y);
@@ -1046,6 +1083,14 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
 			deleteModule(objectId);
 			MYDEBUG << "Vehicle #" << objectId << " left region of interest" << endl;
 		}
+		else if(unEquippedHosts.find(objectId) != unEquippedHosts.end()) {
+			unEquippedHosts.erase(objectId);
+			MYDEBUG << "Vehicle (unequipped) # " << objectId<< " left region of interest" << endl;
+		}
+		return;
+	}
+
+	if (isModuleUnequipped(objectId)) {
 		return;
 	}
 

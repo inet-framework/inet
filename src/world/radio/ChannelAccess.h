@@ -62,7 +62,6 @@ class INET_API ChannelAccess : public BasicModule, protected cListener
 
   public:
     ChannelAccess() : cc(NULL), myRadioRef(NULL), hostModule(NULL) {}
-    virtual ~ChannelAccess();
 
     /**
      * @brief Called by the signalling mechanism to inform of changes.
@@ -85,6 +84,7 @@ class INET_API ChannelAccess : public BasicModule, protected cListener
     /** Register with ChannelControl and subscribe to hostPos*/
     virtual void initialize(int stage);
     virtual int numInitStages() const { return 3; }
+    virtual void finish();
 };
 
 #endif

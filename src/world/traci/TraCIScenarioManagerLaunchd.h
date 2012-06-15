@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006-2011 Christoph Sommer <christoph.sommer@uibk.ac.at>
+// Copyright (C) 2006-2012 Christoph Sommer <christoph.sommer@uibk.ac.at>
 //
 // Documentation for these modules is at http://veins.car2x.org/
 //
@@ -27,9 +27,21 @@
 #include "world/traci/TraCIScenarioManager.h"
 
 /**
- * A TraCIScenarioManager that interacts with sumo-launchd
+ * @brief
+ * Extends the TraCIScenarioManager for use with sumo-launchd.py and SUMO.
  *
- * @author Christoph Sommer
+ * Connects to a running instance of the sumo-launchd.py script
+ * to automatically launch/kill SUMO when the simulation starts/ends.
+ *
+ * All other functionality is provided by the TraCIScenarioManager.
+ *
+ * See the Veins website <a href="http://veins.car2x.org/"> for a tutorial, documentation, and publications </a>.
+ *
+ * @author Christoph Sommer, David Eckhoff
+ *
+ * @see TraCIMobility
+ * @see TraCIScenarioManager
+ *
  */
 class INET_API TraCIScenarioManagerLaunchd : public TraCIScenarioManager
 {
