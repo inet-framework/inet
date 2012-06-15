@@ -1,0 +1,20 @@
+TODO:
+
+- at kell nezni az osszes network/netmask osszehasonlitast,
+  vannak peldaul (cim1 & mask1 & mask2) == (cim2 & mask2) osszehasonlitasok
+  amik sztem nem pontosan azt csinaljak, mint amit az adott helyen kellene
+
+- at kell nezni a nexthop kitolteset
+  keletkeznek olyan entryk, ahol a nexthop == destination
+
+- az externalnetworknel, ha A-bol es B-bol is elerheto az E, akkor az
+  A-ban az OSPF B fele mutat, B-ben pedig A fele, csak az interface
+  altal generalt routing entry magasabb prioritasu, azert mennek a
+  csomagok jo iranyba (lasd RFC 2328 fig6. peldaban az RT5, RT7, N12 haromszoget)
+
+- a HostRoute bizonyos esetekben nem jol mukodik, valamelyik router lemaszkolja
+  a networkmaskkal, es networkaddress/32 entry keletkezik a hostaddress/32 helyett
+
+- az area IP tartomanyainak kezelese is atnezendo, idonkent nem mindegy, hogy
+  egyenkent felveszunk minden cimtartomanyt az area-bol, vagy lefedjuk egyben
+  egy bovebb netmaskkal
