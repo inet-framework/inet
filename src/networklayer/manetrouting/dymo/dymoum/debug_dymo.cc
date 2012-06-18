@@ -89,7 +89,10 @@ const char *NS_CLASS ip2str(Uint128 &ipaddr)
     if (isInMacLayer())
         return MACAddress(ipaddr.getLo()).str().c_str();
     else
-        return IPv4Address(ipaddr.getLo()).str().c_str();
+    {
+        IPv4Address ipAdr(ipaddr.getLo());
+        return ipAdr.str().c_str();
+    }
 
 }
 
