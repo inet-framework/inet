@@ -18,15 +18,9 @@
 
 package inet.examples.hostautoconf;
 
-import inet.applications.udpapp.UDPBasicApp;
-import inet.base.NotificationBoard;
-import inet.linklayer.mf80211.Nic80211;
-import inet.mobility.models.RandomWPMobility;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.nodes.inet.WirelessHost;
-import inet.transport.udp.UDP;
 import inet.networklayer.autorouting.HostAutoConfigurator;
+import inet.nodes.inet.WirelessHost;
+
 
 //
 // Wireless-enabled Host

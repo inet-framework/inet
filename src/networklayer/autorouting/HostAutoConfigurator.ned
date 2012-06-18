@@ -21,6 +21,10 @@ package inet.networklayer.autorouting;
 
 //
 // HostAutoConfigurator automatically assigns IP addresses and sets up routing table.
+// 
+// This configurator is deprecated. Please use IPv4NetworkCOnfigurator whenever it is possible.
+// This module is kept only because the IPv4networkConfigurator cannot assign IP addresses 
+// to modules that are dynamically created/destroyed. 
 //
 simple HostAutoConfigurator
 {
