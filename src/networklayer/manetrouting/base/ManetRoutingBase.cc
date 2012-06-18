@@ -22,7 +22,7 @@
 
 #include "ManetRoutingBase.h"
 #include "UDPPacket.h"
-#include "IPv4Datagram_m.h"
+#include "IPv4Datagram.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "IPv6ControlInfo.h"
@@ -1958,7 +1958,7 @@ void ManetRoutingBase::getListRelatedAp(const Uint128 & add, std::vector<Uint128
     else
     {
         std::vector<IPv4Address> listAux;
-        getApListIp(add.getLo(),listAux);
+        getApListIp(IPv4Address(add.getLo()),listAux);
         list.clear();
         for (unsigned int i = 0; i < listAux.size(); i++)
         {

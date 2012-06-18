@@ -157,7 +157,6 @@ void DHCPClient::changeFSMState(CLIENT_STATE new_state)
             e->setNetmask(IPv4Address());
             e->setGateway(lease->gateway);
             e->setInterface(this->ie);
-            e->setType(IPv4Route::DIRECT);
             e->setSource(IPv4Route::MANUAL);
             this->irt->addRoute(e);
         }
