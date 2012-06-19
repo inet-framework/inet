@@ -87,8 +87,15 @@ void OSPF::RoutingTableEntry::addNextHop(OSPF::NextHop hop)
 {
     if (nextHops.size() == 0) {
         InterfaceEntry*    routingInterface = InterfaceTableAccess().get()->getInterfaceById(hop.ifIndex);
-
         setInterface(routingInterface);
+        if (!getDestination().isUnspecified() && IPv4Address::maskedAddrAreEqual(getDestination(), hop.hopAddress, getNetmask()))
+        {
+            EV << "BOJTHE: invalid nexthop " << hop.hopAddress << " to " << getDestination() << "/" << getNetmask() << " addresses\n";
+            //throw cRuntimeError("invalid nexthop %s to %s/%s addresses", hop.hopAddress.str().c_str(), getDestination().str().c_str(), getNetmask().str().c_str());
+
+            hop.hopAddress = IPv4Address::UNSPECIFIED_ADDRESS;     //FIXME HACK!!!
+        }
+
         // TODO: this used to be commented out, but it seems we need it
         // otherwise gateways will never be filled in and gateway is needed for broadcast networks
         setGateway(hop.hopAddress);
