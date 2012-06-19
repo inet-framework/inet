@@ -31,7 +31,7 @@ simple Ieee80211Radio extends Radio
 {
     parameters:
         @display("i=block/wrxtx");
-        radioModel = "Ieee80211NewRadioModel";  // specify the radio model responsible for modulation, error correction and frame length calculation
+        radioModel = "Ieee80211RadioModel";  // specify the radio model responsible for modulation, error correction and frame length calculation
         double snirThreshold @unit("dB") = default(4dB); // if signal-noise ratio is below this threshold, frame is considered noise (in dB)
         string berTableFile = default("");
         string phyOpMode @enum("b","g","a","p") = default("g");

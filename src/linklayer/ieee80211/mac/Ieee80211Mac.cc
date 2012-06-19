@@ -400,7 +400,7 @@ void Ieee80211Mac::initialize(int stage)
         initializeQueueModule();
 
         // state variables
-        fsm.setName("Ieee80211NewMac State Machine");
+        fsm.setName("Ieee80211Mac State Machine");
         mode = DCF;
         sequenceNumber = 0;
 
@@ -449,7 +449,7 @@ void Ieee80211Mac::initialize(int stage)
         timeStampLastMessageReceived = 0;
 
         stateVector.setName("State");
-        stateVector.setEnum("Ieee80211NewMac");
+        stateVector.setEnum("Ieee80211Mac");
         radioStateVector.setName("RadioState");
         radioStateVector.setEnum("RadioState");
         for (int i=0; i<numCategories(); i++)
@@ -1733,7 +1733,7 @@ void Ieee80211Mac::cancelAIFSPeriod()
     cancelEvent(endDIFS);
 }
 
-//XXXvoid Ieee80211NewMac::checkInternalColision()
+//XXXvoid Ieee80211Mac::checkInternalColision()
 //{
 //  EV << "We obtain endAIFS, so we have to check if there
 //}
