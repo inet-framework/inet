@@ -61,7 +61,7 @@ simple Ieee80211Mac
                                           // a generated MAC address in init stage 0.
         string queueModule = default(""); // name of optional external queue module
         int maxQueueSize = default(50);   // max queue length in frames; only used if queueModule==""
-        
+
         bool EDCA = default(false); // enable Enhanced Distributed Channel Access (802.11e)
         // parameters for EDCA = true
         string classifier = default("Ieee80211eClassifier");
@@ -70,13 +70,13 @@ simple Ieee80211Mac
         int AIFSN1 = default(3); // AIFSN for best effort
         int AIFSN2 = default(2); // AIFSN for video
         int AIFSN3 = default(2); // AIFSN for voice
-        double TXOP0 @unit(s)= default(0s);
-        double TXOP1 @unit(s)= default(0s);
-        double TXOP2 @unit(s)= default(3.008ms);
-        double TXOP3 @unit(s)= default(1.504ms);
+        double TXOP0 @unit(s) = default(0s);
+        double TXOP1 @unit(s) = default(0s);
+        double TXOP2 @unit(s) = default(3.008ms);
+        double TXOP3 @unit(s) = default(1.504ms);
         // parameters for EDCA = false 
-        int AIFSN  = default(2); // if there is only one AC (EDCA = false)
-        
+        int AIFSN = default(2); // if there is only one AC (EDCA = false)
+
         bool useModulationParameters = default(false); // if true, slot time, DIFS, and ACK timeout (aPHY-RX-START-Delay) are function of modulation time (2007 standard)
         bool prioritizeMulticast = default(false); // if true, prioritize multicast frames (9.3.2.1 Fundamental access)
 

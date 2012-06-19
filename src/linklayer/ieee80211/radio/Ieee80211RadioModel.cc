@@ -18,7 +18,7 @@
 //
 // 2010 Alfoso Ariza (universidad de Málaga), new radio model, inspired in the yans and ns3 models
 
-#include "Ieee80211NewRadioModel.h"
+#include "Ieee80211RadioModel.h"
 #include "Ieee80211Consts.h"
 #include "FWMath.h"
 #include "yans-error-rate-model.h"

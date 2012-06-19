@@ -17,8 +17,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef IEEE80211GRADIOMODEL_H
-#define IEEE80211GRADIOMODEL_H
+#ifndef IEEE80211RADIOMODEL_H
+#define IEEE80211RADIOMODEL_H
 
 #include "IRadioModel.h"
 #include "BerParseFile.h"

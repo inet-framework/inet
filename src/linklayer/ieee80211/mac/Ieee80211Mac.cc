@@ -17,7 +17,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211NewMac.h"
+#include "Ieee80211Mac.h"
 #include "RadioState.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"

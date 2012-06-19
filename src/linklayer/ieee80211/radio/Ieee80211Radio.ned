@@ -37,9 +37,9 @@ simple Ieee80211Radio extends Radio
         string phyOpMode @enum("b","g","a","p") = default("g");
         string wifiPreambleMode @enum("LONG","SHORT") = default("LONG"); // Wifi preambre mode Ieee 2007, 19.3.2
         string errorModel @enum("YansModel","NistModel") = default("NistModel");
-        int    btSize @unit("b") = default(8192b);// test size frame for Airtime Link Metric
-        bool   airtimeLinkComputation = default(false);
-        
+        int btSize @unit("b") = default(8192b);// test size frame for Airtime Link Metric
+        bool airtimeLinkComputation = default(false);
+
         bool AutoHeaderSize = default(false); // in the receiver the radio model compute the header size in function of timers and bitrate
 }
 
