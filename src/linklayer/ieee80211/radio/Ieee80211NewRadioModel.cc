@@ -26,9 +26,9 @@
 #define NS3CALMODE
 
 
-Register_Class(Ieee80211NewRadioModel);
+Register_Class(Ieee80211RadioModel);
 
-Ieee80211NewRadioModel::~Ieee80211NewRadioModel()
+Ieee80211RadioModel::~Ieee80211RadioModel()
 {
     if (parseTable)
         delete parseTable;
@@ -36,7 +36,7 @@ Ieee80211NewRadioModel::~Ieee80211NewRadioModel()
 }
 
 
-void Ieee80211NewRadioModel::initializeFrom(cModule *radioModule)
+void Ieee80211RadioModel::initializeFrom(cModule *radioModule)
 {
     snirThreshold = dB2fraction(radioModule->par("snirThreshold").doubleValue());
 
@@ -89,7 +89,7 @@ void Ieee80211NewRadioModel::initializeFrom(cModule *radioModule)
         fileBer = false;
 }
 
-double Ieee80211NewRadioModel::calculateDurationTestFrame(AirFrame *airframe)
+double Ieee80211RadioModel::calculateDurationTestFrame(AirFrame *airframe)
 {
     double duration;
 #ifndef NS3CALMODE
@@ -130,7 +130,7 @@ double Ieee80211NewRadioModel::calculateDurationTestFrame(AirFrame *airframe)
     return duration;
 }
 
-double Ieee80211NewRadioModel::calculateDuration(AirFrame *airframe)
+double Ieee80211RadioModel::calculateDuration(AirFrame *airframe)
 {
     double duration;
 #ifndef NS3CALMODE
@@ -174,7 +174,7 @@ double Ieee80211NewRadioModel::calculateDuration(AirFrame *airframe)
 }
 
 
-bool Ieee80211NewRadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList)
+bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList)
 {
     // calculate snirMin
     double snirMin = receivedList.begin()->snr;
@@ -210,7 +210,7 @@ bool Ieee80211NewRadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrLi
     }
 }
 
-double Ieee80211NewRadioModel::getTestFrameError(double snirMin, double bitrate)
+double Ieee80211RadioModel::getTestFrameError(double snirMin, double bitrate)
 {
     ModulationType modeBody;
     ModulationType modeHeader;
@@ -278,7 +278,7 @@ double Ieee80211NewRadioModel::getTestFrameError(double snirMin, double bitrate)
 }
 
 
-bool Ieee80211NewRadioModel::isPacketOK(double snirMin, int lengthMPDU, double bitrate)
+bool Ieee80211RadioModel::isPacketOK(double snirMin, int lengthMPDU, double bitrate)
 {
     double berHeader, berMPDU;
     ModulationType modeBody;
@@ -349,7 +349,7 @@ bool Ieee80211NewRadioModel::isPacketOK(double snirMin, int lengthMPDU, double b
         return true; // no error
 }
 
-double Ieee80211NewRadioModel::dB2fraction(double dB)
+double Ieee80211RadioModel::dB2fraction(double dB)
 {
     return pow(10.0, (dB / 10));
 }

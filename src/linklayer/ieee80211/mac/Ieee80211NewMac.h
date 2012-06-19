@@ -57,7 +57,7 @@
  *
  * @ingroup macLayer
  */
-class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
+class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
 {
     typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
     /**
@@ -425,8 +425,8 @@ class INET_API Ieee80211NewMac : public WirelessMacBase, public INotifiable
      * @name Construction functions
      */
     //@{
-    Ieee80211NewMac();
-    virtual ~Ieee80211NewMac();
+    Ieee80211Mac();
+    virtual ~Ieee80211Mac();
     //@}
 
   protected:

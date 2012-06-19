@@ -34,7 +34,7 @@
 
 
 
-class INET_API Ieee80211NewRadioModel : public IRadioModel
+class INET_API Ieee80211RadioModel : public IRadioModel
 {
   protected:
     double snirThreshold;
@@ -59,7 +59,7 @@ class INET_API Ieee80211NewRadioModel : public IRadioModel
     virtual double calculateDuration(AirFrame *airframe);
 
     virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList);
-    ~Ieee80211NewRadioModel();
+    ~Ieee80211RadioModel();
 
     // used by the Airtime Link Metric computation
     virtual bool haveTestFrame() {return useTestFrame;}

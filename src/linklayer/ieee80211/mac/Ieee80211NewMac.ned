@@ -53,7 +53,7 @@ package inet.linklayer.ieee80211.mac;
 // listen interval which is related to power management, capability information
 // which is related to PCF and other non-modelled features).
 //
-simple Ieee80211NewMac
+simple Ieee80211Mac
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or

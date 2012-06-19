@@ -27,7 +27,7 @@ import inet.linklayer.radio.Radio;
 // @see Radio
 // @author Alfonso Ariza Quintana
 //
-simple Ieee80211NewRadio extends Radio
+simple Ieee80211Radio extends Radio
 {
     parameters:
         @display("i=block/wrxtx");

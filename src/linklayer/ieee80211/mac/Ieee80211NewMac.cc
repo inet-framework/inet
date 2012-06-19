@@ -30,19 +30,19 @@
 // TODO: 9.3.2.1, If there are buffered multicast or broadcast frames, the PC shall transmit these prior to any unicast frames.
 // TODO: control frames must send before
 
-Define_Module(Ieee80211NewMac);
+Define_Module(Ieee80211Mac);
 
 // don't forget to keep synchronized the C++ enum and the runtime enum definition
-Register_Enum(Ieee80211NewMac,
-              (Ieee80211NewMac::IDLE,
-               Ieee80211NewMac::DEFER,
-               Ieee80211NewMac::WAITAIFS,
-               Ieee80211NewMac::BACKOFF,
-               Ieee80211NewMac::WAITACK,
-               Ieee80211NewMac::WAITMULTICAST,
-               Ieee80211NewMac::WAITCTS,
-               Ieee80211NewMac::WAITSIFS,
-               Ieee80211NewMac::RECEIVE));
+Register_Enum(Ieee80211Mac,
+              (Ieee80211Mac::IDLE,
+               Ieee80211Mac::DEFER,
+               Ieee80211Mac::WAITAIFS,
+               Ieee80211Mac::BACKOFF,
+               Ieee80211Mac::WAITACK,
+               Ieee80211Mac::WAITMULTICAST,
+               Ieee80211Mac::WAITCTS,
+               Ieee80211Mac::WAITSIFS,
+               Ieee80211Mac::RECEIVE));
 
 // don't forget to keep synchronized the C++ enum and the runtime enum definition
 Register_Enum(RadioState,
@@ -55,7 +55,7 @@ Register_Enum(RadioState,
  * Construction functions.
  */
 
-Ieee80211NewMac::Ieee80211NewMac()
+Ieee80211Mac::Ieee80211Mac()
 {
     endSIFS = NULL;
     endDIFS = NULL;
@@ -66,7 +66,7 @@ Ieee80211NewMac::Ieee80211NewMac()
     classifier = NULL;
 }
 
-Ieee80211NewMac::~Ieee80211NewMac()
+Ieee80211Mac::~Ieee80211Mac()
 {
     cancelAndDelete(endSIFS);
     cancelAndDelete(endDIFS);
@@ -100,7 +100,7 @@ Ieee80211NewMac::~Ieee80211NewMac()
 /****************************************************************
  * Initialization functions.
  */
-void Ieee80211NewMac::initialize(int stage)
+void Ieee80211Mac::initialize(int stage)
 {
     WirelessMacBase::initialize(stage);
 
@@ -482,7 +482,7 @@ void Ieee80211NewMac::initialize(int stage)
     }
 }
 
-void Ieee80211NewMac::initWatches()
+void Ieee80211Mac::initWatches()
 {
 // initialize watches
      WATCH(fsm);
@@ -520,7 +520,7 @@ void Ieee80211NewMac::initWatches()
          WATCH(throughputLastPeriod);
 }
 
-void Ieee80211NewMac::configureAutoBitRate()
+void Ieee80211Mac::configureAutoBitRate()
 {
     forceBitRate = par("forceBitRate");
     minSuccessThreshold = par("minSuccessThreshold");
@@ -551,7 +551,7 @@ void Ieee80211NewMac::configureAutoBitRate()
     }
 }
 
-void Ieee80211NewMac::finish()
+void Ieee80211Mac::finish()
 {
     recordScalar("number of received packets", numReceived);
     recordScalar("number of collisions", numCollision);
@@ -595,7 +595,7 @@ void Ieee80211NewMac::finish()
     }
 }
 
-void Ieee80211NewMac::registerInterface()
+void Ieee80211Mac::registerInterface()
 {
     IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
     if (!ift)
@@ -630,7 +630,7 @@ void Ieee80211NewMac::registerInterface()
     ift->addInterface(e);
 }
 
-void Ieee80211NewMac::initializeQueueModule()
+void Ieee80211Mac::initializeQueueModule()
 {
     // use of external queue module is optional -- find it if there's one specified
     if (par("queueModule").stringValue()[0])
@@ -648,7 +648,7 @@ void Ieee80211NewMac::initializeQueueModule()
 /****************************************************************
  * Message handling functions.
  */
-void Ieee80211NewMac::handleSelfMsg(cMessage *msg)
+void Ieee80211Mac::handleSelfMsg(cMessage *msg)
 {
     if (msg==throughputTimer)
     {
@@ -708,7 +708,7 @@ void Ieee80211NewMac::handleSelfMsg(cMessage *msg)
 }
 
 
-void Ieee80211NewMac::handleUpperMsg(cPacket *msg)
+void Ieee80211Mac::handleUpperMsg(cPacket *msg)
 {
     if (queueModule && numCategories()>1 && (int)transmissionQueueSize() < maxQueueSize)
     {
@@ -748,7 +748,7 @@ void Ieee80211NewMac::handleUpperMsg(cPacket *msg)
     handleWithFSM(frame);
 }
 
-int Ieee80211NewMac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
+int Ieee80211Mac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
 {
     bool isDataFrame = (dynamic_cast<Ieee80211DataFrame *>(frame) != NULL);
 
@@ -809,7 +809,7 @@ int Ieee80211NewMac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
     return true;
 }
 
-void Ieee80211NewMac::handleCommand(cMessage *msg)
+void Ieee80211Mac::handleCommand(cMessage *msg)
 {
     if (msg->getKind()==PHY_C_CONFIGURERADIO)
     {
@@ -851,7 +851,7 @@ void Ieee80211NewMac::handleCommand(cMessage *msg)
     }
 }
 
-void Ieee80211NewMac::handleLowerMsg(cPacket *msg)
+void Ieee80211Mac::handleLowerMsg(cPacket *msg)
 {
     EV<<"->Enter handleLowerMsg...\n";
     EV << "received message from lower layer: " << msg << endl;
@@ -941,7 +941,7 @@ void Ieee80211NewMac::handleLowerMsg(cPacket *msg)
     EV<<"Leave handleLowerMsg...\n";
 }
 
-void Ieee80211NewMac::receiveChangeNotification(int category, const cObject *details)
+void Ieee80211Mac::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);
@@ -969,7 +969,7 @@ void Ieee80211NewMac::receiveChangeNotification(int category, const cObject *det
 /**
  * Msg can be upper, lower, self or NULL (when radio state changes)
  */
-void Ieee80211NewMac::handleWithFSM(cMessage *msg)
+void Ieee80211Mac::handleWithFSM(cMessage *msg)
 {
     removeOldTuplesFromDuplicateMap();
     // skip those cases where there's nothing to do, so the switch looks simpler
@@ -1507,7 +1507,7 @@ void Ieee80211NewMac::handleWithFSM(cMessage *msg)
     }
 }
 
-void Ieee80211NewMac::finishReception()
+void Ieee80211Mac::finishReception()
 {
     if (getCurrentTransmission())
     {
@@ -1523,7 +1523,7 @@ void Ieee80211NewMac::finishReception()
 /****************************************************************
  * Timing functions.
  */
-simtime_t Ieee80211NewMac::getSIFS()
+simtime_t Ieee80211Mac::getSIFS()
 {
 // TODO:   return aRxRFDelay() + aRxPLCPDelay() + aMACProcessingDelay() + aRxTxTurnaroundTime();
     if (useModulationParameters)
@@ -1543,7 +1543,7 @@ simtime_t Ieee80211NewMac::getSIFS()
     return SIFS;
 }
 
-simtime_t Ieee80211NewMac::getSlotTime()
+simtime_t Ieee80211Mac::getSlotTime()
 {
 // TODO:   return aCCATime() + aRxTxTurnaroundTime + aAirPropagationTime() + aMACProcessingDelay();
     if (useModulationParameters)
@@ -1562,12 +1562,12 @@ simtime_t Ieee80211NewMac::getSlotTime()
     return ST;
 }
 
-simtime_t Ieee80211NewMac::getPIFS()
+simtime_t Ieee80211Mac::getPIFS()
 {
     return getSIFS() + getSlotTime();
 }
 
-simtime_t Ieee80211NewMac::getDIFS(int category)
+simtime_t Ieee80211Mac::getDIFS(int category)
 {
     if (category<0 || category>(numCategories()-1))
     {
@@ -1583,7 +1583,7 @@ simtime_t Ieee80211NewMac::getDIFS(int category)
 
 }
 
-simtime_t Ieee80211NewMac::getHeaderTime(double bitrate)
+simtime_t Ieee80211Mac::getHeaderTime(double bitrate)
 {
     ModulationType modType;
     if ((opMode=='b') || (opMode=='g'))
@@ -1597,12 +1597,12 @@ simtime_t Ieee80211NewMac::getHeaderTime(double bitrate)
     return WifiModulationType::getPreambleAndHeader(modType, wifiPreambleType);
 }
 
-simtime_t Ieee80211NewMac::getAIFS(int AccessCategory)
+simtime_t Ieee80211Mac::getAIFS(int AccessCategory)
 {
     return AIFSN(AccessCategory) * getSlotTime() + getSIFS();
 }
 
-simtime_t Ieee80211NewMac::getEIFS()
+simtime_t Ieee80211Mac::getEIFS()
 {
 // FIXME:   return getSIFS() + getDIFS() + (8 * ACKSize + aPreambleLength + aPLCPHeaderLength) / lowestDatarate;
     if (PHY_HEADER_LENGTH<0)
@@ -1632,7 +1632,7 @@ simtime_t Ieee80211NewMac::getEIFS()
     return 0;
 }
 
-simtime_t Ieee80211NewMac::computeBackoffPeriod(Ieee80211Frame *msg, int r)
+simtime_t Ieee80211Mac::computeBackoffPeriod(Ieee80211Frame *msg, int r)
 {
     int cw;
 
@@ -1659,14 +1659,14 @@ simtime_t Ieee80211NewMac::computeBackoffPeriod(Ieee80211Frame *msg, int r)
 /****************************************************************
  * Timer functions.
  */
-void Ieee80211NewMac::scheduleSIFSPeriod(Ieee80211Frame *frame)
+void Ieee80211Mac::scheduleSIFSPeriod(Ieee80211Frame *frame)
 {
     EV << "scheduling SIFS period\n";
     endSIFS->setContextPointer(frame->dup());
     scheduleAt(simTime() + getSIFS(), endSIFS);
 }
 
-void Ieee80211NewMac::scheduleDIFSPeriod()
+void Ieee80211Mac::scheduleDIFSPeriod()
 {
     if (lastReceiveFailed)
     {
@@ -1680,13 +1680,13 @@ void Ieee80211NewMac::scheduleDIFSPeriod()
     }
 }
 
-void Ieee80211NewMac::cancelDIFSPeriod()
+void Ieee80211Mac::cancelDIFSPeriod()
 {
     EV << "canceling DIFS period\n";
     cancelEvent(endDIFS);
 }
 
-void Ieee80211NewMac::scheduleAIFSPeriod()
+void Ieee80211Mac::scheduleAIFSPeriod()
 {
     bool schedule = false;
     for (int i = 0; i<numCategories(); i++)
@@ -1717,7 +1717,7 @@ void Ieee80211NewMac::scheduleAIFSPeriod()
     }
 }
 
-void Ieee80211NewMac::rescheduleAIFSPeriod(int AccessCategory)
+void Ieee80211Mac::rescheduleAIFSPeriod(int AccessCategory)
 {
     ASSERT(1);
     EV << "rescheduling AIFS[" << AccessCategory << "]\n";
@@ -1725,7 +1725,7 @@ void Ieee80211NewMac::rescheduleAIFSPeriod(int AccessCategory)
     scheduleAt(simTime() + getAIFS(AccessCategory), endAIFS(AccessCategory));
 }
 
-void Ieee80211NewMac::cancelAIFSPeriod()
+void Ieee80211Mac::cancelAIFSPeriod()
 {
     EV << "canceling AIFS period\n";
     for (int i = 0; i<numCategories(); i++)
@@ -1739,7 +1739,7 @@ void Ieee80211NewMac::cancelAIFSPeriod()
 //}
 
 
-void Ieee80211NewMac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
+void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     double tim;
     if (!endTimeout->isScheduled())
@@ -1769,7 +1769,7 @@ void Ieee80211NewMac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameT
     }
 }
 
-void Ieee80211NewMac::scheduleMulticastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
+void Ieee80211Mac::scheduleMulticastTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     if (!endTimeout->isScheduled())
     {
@@ -1778,13 +1778,13 @@ void Ieee80211NewMac::scheduleMulticastTimeoutPeriod(Ieee80211DataOrMgmtFrame *f
     }
 }
 
-void Ieee80211NewMac::cancelTimeoutPeriod()
+void Ieee80211Mac::cancelTimeoutPeriod()
 {
     EV << "canceling timeout period\n";
     cancelEvent(endTimeout);
 }
 
-void Ieee80211NewMac::scheduleCTSTimeoutPeriod()
+void Ieee80211Mac::scheduleCTSTimeoutPeriod()
 {
     if (!endTimeout->isScheduled())
     {
@@ -1794,7 +1794,7 @@ void Ieee80211NewMac::scheduleCTSTimeoutPeriod()
     }
 }
 
-void Ieee80211NewMac::scheduleReservePeriod(Ieee80211Frame *frame)
+void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
 {
     simtime_t reserve = frame->getDuration();
 
@@ -1826,24 +1826,24 @@ void Ieee80211NewMac::scheduleReservePeriod(Ieee80211Frame *frame)
     }
 }
 
-void Ieee80211NewMac::invalidateBackoffPeriod()
+void Ieee80211Mac::invalidateBackoffPeriod()
 {
     backoffPeriod() = -1;
 }
 
-bool Ieee80211NewMac::isInvalidBackoffPeriod()
+bool Ieee80211Mac::isInvalidBackoffPeriod()
 {
     return backoffPeriod() == -1;
 }
 
-void Ieee80211NewMac::generateBackoffPeriod()
+void Ieee80211Mac::generateBackoffPeriod()
 {
     backoffPeriod() = computeBackoffPeriod(getCurrentTransmission(), retryCounter());
     ASSERT(backoffPeriod() >= 0);
     EV << "backoff period set to " << backoffPeriod()<< endl;
 }
 
-void Ieee80211NewMac::decreaseBackoffPeriod()
+void Ieee80211Mac::decreaseBackoffPeriod()
 {
     // see spec 9.9.1.5
     // decrase for every EDCAF
@@ -1863,13 +1863,13 @@ void Ieee80211NewMac::decreaseBackoffPeriod()
     }
 }
 
-void Ieee80211NewMac::scheduleBackoffPeriod()
+void Ieee80211Mac::scheduleBackoffPeriod()
 {
     EV << "scheduling backoff period\n";
     scheduleAt(simTime() + backoffPeriod(), endBackoff());
 }
 
-void Ieee80211NewMac::cancelBackoffPeriod()
+void Ieee80211Mac::cancelBackoffPeriod()
 {
     EV << "cancelling Backoff period - only if some is scheduled\n";
     for (int i = 0; i<numCategories(); i++)
@@ -1879,7 +1879,7 @@ void Ieee80211NewMac::cancelBackoffPeriod()
 /****************************************************************
  * Frame sender functions.
  */
-void Ieee80211NewMac::sendACKFrameOnEndSIFS()
+void Ieee80211Mac::sendACKFrameOnEndSIFS()
 {
     Ieee80211Frame *frameToACK = (Ieee80211Frame *)endSIFS->getContextPointer();
     endSIFS->setContextPointer(NULL);
@@ -1887,14 +1887,14 @@ void Ieee80211NewMac::sendACKFrameOnEndSIFS()
     delete frameToACK;
 }
 
-void Ieee80211NewMac::sendACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
+void Ieee80211Mac::sendACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
 {
     EV << "sending ACK frame\n";
     numAckSend++;
     sendDown(setBasicBitrate(buildACKFrame(frameToACK)));
 }
 
-void Ieee80211NewMac::sendDataFrameOnEndSIFS(Ieee80211DataOrMgmtFrame *frameToSend)
+void Ieee80211Mac::sendDataFrameOnEndSIFS(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     Ieee80211Frame *ctsFrame = (Ieee80211Frame *)endSIFS->getContextPointer();
     endSIFS->setContextPointer(NULL);
@@ -1902,7 +1902,7 @@ void Ieee80211NewMac::sendDataFrameOnEndSIFS(Ieee80211DataOrMgmtFrame *frameToSe
     delete ctsFrame;
 }
 
-void Ieee80211NewMac::sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
+void Ieee80211Mac::sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     simtime_t t = 0, time = 0;
     int count = 0;
@@ -1939,19 +1939,19 @@ void Ieee80211NewMac::sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
     sendDown(setBitrateFrame(buildDataFrame(frameToSend)));
 }
 
-void Ieee80211NewMac::sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
+void Ieee80211Mac::sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "sending RTS frame\n";
     sendDown(setBasicBitrate(buildRTSFrame(frameToSend)));
 }
 
-void Ieee80211NewMac::sendMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
+void Ieee80211Mac::sendMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "sending Multicast frame\n";
     sendDown(setBasicBitrate(buildDataFrame(frameToSend)));
 }
 
-void Ieee80211NewMac::sendCTSFrameOnEndSIFS()
+void Ieee80211Mac::sendCTSFrameOnEndSIFS()
 {
     Ieee80211Frame *rtsFrame = (Ieee80211Frame *)endSIFS->getContextPointer();
     endSIFS->setContextPointer(NULL);
@@ -1959,7 +1959,7 @@ void Ieee80211NewMac::sendCTSFrameOnEndSIFS()
     delete rtsFrame;
 }
 
-void Ieee80211NewMac::sendCTSFrame(Ieee80211RTSFrame *rtsFrame)
+void Ieee80211Mac::sendCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
     EV << "sending CTS frame\n";
     sendDown(setBasicBitrate(buildCTSFrame(rtsFrame)));
@@ -1968,7 +1968,7 @@ void Ieee80211NewMac::sendCTSFrame(Ieee80211RTSFrame *rtsFrame)
 /****************************************************************
  * Frame builder functions.
  */
-Ieee80211DataOrMgmtFrame *Ieee80211NewMac::buildDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
+Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
 
@@ -1997,7 +1997,7 @@ Ieee80211DataOrMgmtFrame *Ieee80211NewMac::buildDataFrame(Ieee80211DataOrMgmtFra
     return frame;
 }
 
-Ieee80211ACKFrame *Ieee80211NewMac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
+Ieee80211ACKFrame *Ieee80211Mac::buildACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
 {
     Ieee80211ACKFrame *frame = new Ieee80211ACKFrame("wlan-ack");
     frame->setReceiverAddress(frameToACK->getTransmitterAddress());
@@ -2010,7 +2010,7 @@ Ieee80211ACKFrame *Ieee80211NewMac::buildACKFrame(Ieee80211DataOrMgmtFrame *fram
     return frame;
 }
 
-Ieee80211RTSFrame *Ieee80211NewMac::buildRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
+Ieee80211RTSFrame *Ieee80211Mac::buildRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     Ieee80211RTSFrame *frame = new Ieee80211RTSFrame("wlan-rts");
     frame->setTransmitterAddress(address);
@@ -2022,7 +2022,7 @@ Ieee80211RTSFrame *Ieee80211NewMac::buildRTSFrame(Ieee80211DataOrMgmtFrame *fram
     return frame;
 }
 
-Ieee80211CTSFrame *Ieee80211NewMac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
+Ieee80211CTSFrame *Ieee80211Mac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
     Ieee80211CTSFrame *frame = new Ieee80211CTSFrame("wlan-cts");
     frame->setReceiverAddress(rtsFrame->getTransmitterAddress());
@@ -2031,7 +2031,7 @@ Ieee80211CTSFrame *Ieee80211NewMac::buildCTSFrame(Ieee80211RTSFrame *rtsFrame)
     return frame;
 }
 
-Ieee80211DataOrMgmtFrame *Ieee80211NewMac::buildMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
+Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
 
@@ -2049,7 +2049,7 @@ Ieee80211DataOrMgmtFrame *Ieee80211NewMac::buildMulticastFrame(Ieee80211DataOrMg
     return frame;
 }
 
-Ieee80211Frame *Ieee80211NewMac::setBasicBitrate(Ieee80211Frame *frame)
+Ieee80211Frame *Ieee80211Mac::setBasicBitrate(Ieee80211Frame *frame)
 {
     ASSERT(frame->getControlInfo()==NULL);
     PhyControlInfo *ctrl = new PhyControlInfo();
@@ -2058,7 +2058,7 @@ Ieee80211Frame *Ieee80211NewMac::setBasicBitrate(Ieee80211Frame *frame)
     return frame;
 }
 
-Ieee80211Frame *Ieee80211NewMac::setBitrateFrame(Ieee80211Frame *frame)
+Ieee80211Frame *Ieee80211Mac::setBitrateFrame(Ieee80211Frame *frame)
 {
     if (rateControlMode == RATE_CR && forceBitRate==false)
         return frame;
@@ -2079,13 +2079,13 @@ Ieee80211Frame *Ieee80211NewMac::setBitrateFrame(Ieee80211Frame *frame)
 /****************************************************************
  * Helper functions.
  */
-void Ieee80211NewMac::finishCurrentTransmission()
+void Ieee80211Mac::finishCurrentTransmission()
 {
     popTransmissionQueue();
     resetStateVariables();
 }
 
-void Ieee80211NewMac::giveUpCurrentTransmission()
+void Ieee80211Mac::giveUpCurrentTransmission()
 {
     Ieee80211DataOrMgmtFrame *temp = (Ieee80211DataOrMgmtFrame*) transmissionQueue()->front();
     nb->fireChangeNotification(NF_LINK_BREAK, temp);
@@ -2094,7 +2094,7 @@ void Ieee80211NewMac::giveUpCurrentTransmission()
     numGivenUp()++;
 }
 
-void Ieee80211NewMac::retryCurrentTransmission()
+void Ieee80211Mac::retryCurrentTransmission()
 {
     ASSERT(retryCounter() < transmissionLimit - 1);
     getCurrentTransmission()->setRetry(true);
@@ -2107,12 +2107,12 @@ void Ieee80211NewMac::retryCurrentTransmission()
     generateBackoffPeriod();
 }
 
-Ieee80211DataOrMgmtFrame *Ieee80211NewMac::getCurrentTransmission()
+Ieee80211DataOrMgmtFrame *Ieee80211Mac::getCurrentTransmission()
 {
     return transmissionQueue()->empty() ? NULL : (Ieee80211DataOrMgmtFrame *)transmissionQueue()->front();
 }
 
-void Ieee80211NewMac::sendDownPendingRadioConfigMsg()
+void Ieee80211Mac::sendDownPendingRadioConfigMsg()
 {
     if (pendingRadioConfigMsg != NULL)
     {
@@ -2121,7 +2121,7 @@ void Ieee80211NewMac::sendDownPendingRadioConfigMsg()
     }
 }
 
-void Ieee80211NewMac::setMode(Mode mode)
+void Ieee80211Mac::setMode(Mode mode)
 {
     if (mode == PCF)
         error("PCF mode not yet supported");
@@ -2129,7 +2129,7 @@ void Ieee80211NewMac::setMode(Mode mode)
     this->mode = mode;
 }
 
-void Ieee80211NewMac::resetStateVariables()
+void Ieee80211Mac::resetStateVariables()
 {
     backoffPeriod() = 0;
     if (rateControlMode == RATE_AARF || rateControlMode == RATE_ARF)
@@ -2148,27 +2148,27 @@ void Ieee80211NewMac::resetStateVariables()
     }
 }
 
-bool Ieee80211NewMac::isMediumStateChange(cMessage *msg)
+bool Ieee80211Mac::isMediumStateChange(cMessage *msg)
 {
     return msg == mediumStateChange || (msg == endReserve && radioState == RadioState::IDLE);
 }
 
-bool Ieee80211NewMac::isMediumFree()
+bool Ieee80211Mac::isMediumFree()
 {
     return radioState == RadioState::IDLE && !endReserve->isScheduled();
 }
 
-bool Ieee80211NewMac::isMulticast(Ieee80211Frame *frame)
+bool Ieee80211Mac::isMulticast(Ieee80211Frame *frame)
 {
     return frame && frame->getReceiverAddress().isMulticast();
 }
 
-bool Ieee80211NewMac::isForUs(Ieee80211Frame *frame)
+bool Ieee80211Mac::isForUs(Ieee80211Frame *frame)
 {
     return frame && frame->getReceiverAddress() == address;
 }
 
-bool Ieee80211NewMac::isSentByUs(Ieee80211Frame *frame)
+bool Ieee80211Mac::isSentByUs(Ieee80211Frame *frame)
 {
 
     if (dynamic_cast<Ieee80211DataOrMgmtFrame *>(frame))
@@ -2185,12 +2185,12 @@ bool Ieee80211NewMac::isSentByUs(Ieee80211Frame *frame)
 
 }
 
-bool Ieee80211NewMac::isDataOrMgmtFrame(Ieee80211Frame *frame)
+bool Ieee80211Mac::isDataOrMgmtFrame(Ieee80211Frame *frame)
 {
     return dynamic_cast<Ieee80211DataOrMgmtFrame*>(frame);
 }
 
-bool Ieee80211NewMac::isMsgAIFS(cMessage *msg)
+bool Ieee80211Mac::isMsgAIFS(cMessage *msg)
 {
     for (int i = 0; i<numCategories(); i++)
         if (msg == endAIFS(i))
@@ -2198,12 +2198,12 @@ bool Ieee80211NewMac::isMsgAIFS(cMessage *msg)
     return false;
 }
 
-Ieee80211Frame *Ieee80211NewMac::getFrameReceivedBeforeSIFS()
+Ieee80211Frame *Ieee80211Mac::getFrameReceivedBeforeSIFS()
 {
     return (Ieee80211Frame *)endSIFS->getContextPointer();
 }
 
-void Ieee80211NewMac::popTransmissionQueue()
+void Ieee80211Mac::popTransmissionQueue()
 {
     EV << "dropping frame from transmission queue\n";
     Ieee80211Frame *temp = dynamic_cast<Ieee80211Frame *>(transmissionQueue()->front());
@@ -2228,7 +2228,7 @@ void Ieee80211NewMac::popTransmissionQueue()
     delete temp;
 }
 
-double Ieee80211NewMac::computeFrameDuration(Ieee80211Frame *msg)
+double Ieee80211Mac::computeFrameDuration(Ieee80211Frame *msg)
 {
 
     PhyControlInfo *ctrl;
@@ -2247,7 +2247,7 @@ double Ieee80211NewMac::computeFrameDuration(Ieee80211Frame *msg)
         return computeFrameDuration(msg->getBitLength(), bitrate);
 }
 
-double Ieee80211NewMac::computeFrameDuration(int bits, double bitrate)
+double Ieee80211Mac::computeFrameDuration(int bits, double bitrate)
 {
     double duration;
     if (PHY_HEADER_LENGTH<0)
@@ -2277,7 +2277,7 @@ double Ieee80211NewMac::computeFrameDuration(int bits, double bitrate)
     return duration;
 }
 
-void Ieee80211NewMac::logState()
+void Ieee80211Mac::logState()
 {
     std::string a[10];
     std::string b[10];
@@ -2326,7 +2326,7 @@ void Ieee80211NewMac::logState()
     EV << endl;
 }
 
-const char *Ieee80211NewMac::modeName(int mode)
+const char *Ieee80211Mac::modeName(int mode)
 {
 #define CASE(x) case x: s=#x; break
     const char *s = "???";
@@ -2339,14 +2339,14 @@ const char *Ieee80211NewMac::modeName(int mode)
 #undef CASE
 }
 
-bool Ieee80211NewMac::transmissionQueueEmpty()
+bool Ieee80211Mac::transmissionQueueEmpty()
 {
     for (int i=0; i<numCategories(); i++)
        if (!transmissionQueue(i)->empty()) return false;
     return true;
 }
 
-unsigned int Ieee80211NewMac::transmissionQueueSize()
+unsigned int Ieee80211Mac::transmissionQueueSize()
 {
     unsigned int totalSize=0;
 	for (int i=0; i<numCategories(); i++)
@@ -2354,7 +2354,7 @@ unsigned int Ieee80211NewMac::transmissionQueueSize()
     return totalSize;
 }
 
-void Ieee80211NewMac::reportDataOk()
+void Ieee80211Mac::reportDataOk()
 {
     retryCounter() = 0;
     if (rateControlMode==RATE_CR)
@@ -2380,7 +2380,7 @@ void Ieee80211NewMac::reportDataOk()
     }
 }
 
-void Ieee80211NewMac::reportDataFailed(void)
+void Ieee80211Mac::reportDataFailed(void)
 {
     retryCounter()++;
     if (rateControlMode==RATE_CR)
@@ -2427,34 +2427,34 @@ void Ieee80211NewMac::reportDataFailed(void)
     }
 }
 
-int Ieee80211NewMac::getMinTimerTimeout(void)
+int Ieee80211Mac::getMinTimerTimeout(void)
 {
     return minTimerTimeout;
 }
 
-int Ieee80211NewMac::getMinSuccessThreshold(void)
+int Ieee80211Mac::getMinSuccessThreshold(void)
 {
     return minSuccessThreshold;
 }
 
-int Ieee80211NewMac::getTimerTimeout(void)
+int Ieee80211Mac::getTimerTimeout(void)
 {
     return timerTimeout;
 }
 
-int Ieee80211NewMac::getSuccessThreshold(void)
+int Ieee80211Mac::getSuccessThreshold(void)
 {
     return successThreshold;
 }
 
-void Ieee80211NewMac::setTimerTimeout(int timer_timeout)
+void Ieee80211Mac::setTimerTimeout(int timer_timeout)
 {
     if (timer_timeout >= minTimerTimeout)
         timerTimeout = timer_timeout;
     else
         error("timer_timeout is less than minTimerTimeout");
 }
-void Ieee80211NewMac::setSuccessThreshold(int success_threshold)
+void Ieee80211Mac::setSuccessThreshold(int success_threshold)
 {
     if (success_threshold >= minSuccessThreshold)
         successThreshold = success_threshold;
@@ -2462,7 +2462,7 @@ void Ieee80211NewMac::setSuccessThreshold(int success_threshold)
         error("success_threshold is less than minSuccessThreshold");
 }
 
-void Ieee80211NewMac::reportRecoveryFailure(void)
+void Ieee80211Mac::reportRecoveryFailure(void)
 {
     if (rateControlMode == RATE_AARF)
     {
@@ -2471,7 +2471,7 @@ void Ieee80211NewMac::reportRecoveryFailure(void)
     }
 }
 
-void Ieee80211NewMac::reportFailure(void)
+void Ieee80211Mac::reportFailure(void)
 {
     if (rateControlMode == RATE_AARF)
     {
@@ -2480,7 +2480,7 @@ void Ieee80211NewMac::reportFailure(void)
     }
 }
 
-bool Ieee80211NewMac::needRecoveryFallback(void)
+bool Ieee80211Mac::needRecoveryFallback(void)
 {
     if (retryCounter() == 1)
     {
@@ -2492,7 +2492,7 @@ bool Ieee80211NewMac::needRecoveryFallback(void)
     }
 }
 
-bool Ieee80211NewMac::needNormalFallback(void)
+bool Ieee80211Mac::needNormalFallback(void)
 {
     int retryMod = (retryCounter() - 1) % 2;
     if (retryMod == 1)
@@ -2505,18 +2505,18 @@ bool Ieee80211NewMac::needNormalFallback(void)
     }
 }
 
-double Ieee80211NewMac::getBitrate()
+double Ieee80211Mac::getBitrate()
 {
     return bitrate;
 }
 
-void Ieee80211NewMac::setBitrate(double rate)
+void Ieee80211Mac::setBitrate(double rate)
 {
     bitrate = rate;
 }
 
 
-int Ieee80211NewMac::getMaxBitrate(void)
+int Ieee80211Mac::getMaxBitrate(void)
 {
     if (opMode=='b')
         return (NUM_BITERATES_80211b-1);
@@ -2532,7 +2532,7 @@ int Ieee80211NewMac::getMaxBitrate(void)
     return 0;
 }
 
-int Ieee80211NewMac::getMinBitrate(void)
+int Ieee80211Mac::getMinBitrate(void)
 {
     return 0;
 }
@@ -2542,7 +2542,7 @@ int Ieee80211NewMac::getMinBitrate(void)
 
 
 // methods for access to specific AC data
-bool & Ieee80211NewMac::backoff(int i)
+bool & Ieee80211Mac::backoff(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2551,7 +2551,7 @@ bool & Ieee80211NewMac::backoff(int i)
     return edcCAF[i].backoff;
 }
 
-simtime_t & Ieee80211NewMac::TXOP(int i)
+simtime_t & Ieee80211Mac::TXOP(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2560,7 +2560,7 @@ simtime_t & Ieee80211NewMac::TXOP(int i)
      return edcCAF[i].TXOP;
 }
 
-simtime_t & Ieee80211NewMac::backoffPeriod(int i)
+simtime_t & Ieee80211Mac::backoffPeriod(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2569,7 +2569,7 @@ simtime_t & Ieee80211NewMac::backoffPeriod(int i)
      return edcCAF[i].backoffPeriod;
 }
 
-int & Ieee80211NewMac::retryCounter(int i)
+int & Ieee80211Mac::retryCounter(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2578,7 +2578,7 @@ int & Ieee80211NewMac::retryCounter(int i)
      return edcCAF[i].retryCounter;
 }
 
-int & Ieee80211NewMac::AIFSN(int i)
+int & Ieee80211Mac::AIFSN(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2587,7 +2587,7 @@ int & Ieee80211NewMac::AIFSN(int i)
      return edcCAF[i].AIFSN;
 }
 
-int & Ieee80211NewMac::cwMax(int i)
+int & Ieee80211Mac::cwMax(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2596,7 +2596,7 @@ int & Ieee80211NewMac::cwMax(int i)
      return edcCAF[i].cwMax;
 }
 
-int & Ieee80211NewMac::cwMin(int i)
+int & Ieee80211Mac::cwMin(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2605,7 +2605,7 @@ int & Ieee80211NewMac::cwMin(int i)
      return edcCAF[i].cwMin;
 }
 
-cMessage * Ieee80211NewMac::endAIFS(int i)
+cMessage * Ieee80211Mac::endAIFS(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2614,7 +2614,7 @@ cMessage * Ieee80211NewMac::endAIFS(int i)
      return edcCAF[i].endAIFS;
 }
 
-cMessage * Ieee80211NewMac::endBackoff(int i)
+cMessage * Ieee80211Mac::endBackoff(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2623,7 +2623,7 @@ cMessage * Ieee80211NewMac::endBackoff(int i)
      return edcCAF[i].endBackoff;
 }
 
-const bool Ieee80211NewMac::isBakoffMsg(cMessage *msg)
+const bool Ieee80211Mac::isBakoffMsg(cMessage *msg)
 {
     for (unsigned int i=0; i<edcCAF.size(); i++)
     {
@@ -2634,7 +2634,7 @@ const bool Ieee80211NewMac::isBakoffMsg(cMessage *msg)
 }
 
 // Statistics
-long & Ieee80211NewMac::numRetry(int i)
+long & Ieee80211Mac::numRetry(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2643,7 +2643,7 @@ long & Ieee80211NewMac::numRetry(int i)
      return edcCAF[i].numRetry;
 }
 
-long & Ieee80211NewMac::numSentWithoutRetry(int i)
+long & Ieee80211Mac::numSentWithoutRetry(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2652,7 +2652,7 @@ long & Ieee80211NewMac::numSentWithoutRetry(int i)
      return edcCAF[i].numSentWithoutRetry;
 }
 
-long & Ieee80211NewMac::numGivenUp(int i)
+long & Ieee80211Mac::numGivenUp(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2661,7 +2661,7 @@ long & Ieee80211NewMac::numGivenUp(int i)
      return edcCAF[i].numGivenUp;
 }
 
-long & Ieee80211NewMac::numSent(int i)
+long & Ieee80211Mac::numSent(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2670,7 +2670,7 @@ long & Ieee80211NewMac::numSent(int i)
      return edcCAF[i].numSent;
 }
 
-long & Ieee80211NewMac::numDropped(int i)
+long & Ieee80211Mac::numDropped(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2679,7 +2679,7 @@ long & Ieee80211NewMac::numDropped(int i)
      return edcCAF[i].numDropped;
 }
 
-long & Ieee80211NewMac::bites(int i)
+long & Ieee80211Mac::bites(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2688,7 +2688,7 @@ long & Ieee80211NewMac::bites(int i)
      return edcCAF[i].bites;
 }
 
-simtime_t & Ieee80211NewMac::minjitter(int i)
+simtime_t & Ieee80211Mac::minjitter(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2697,7 +2697,7 @@ simtime_t & Ieee80211NewMac::minjitter(int i)
      return edcCAF[i].minjitter;
 }
 
-simtime_t & Ieee80211NewMac::maxjitter(int i)
+simtime_t & Ieee80211Mac::maxjitter(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2709,7 +2709,7 @@ simtime_t & Ieee80211NewMac::maxjitter(int i)
 // out vectors
 
 
-cOutVector * Ieee80211NewMac::jitter(int i)
+cOutVector * Ieee80211Mac::jitter(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2718,7 +2718,7 @@ cOutVector * Ieee80211NewMac::jitter(int i)
      return edcCAFOutVector[i].jitter;
 }
 
-cOutVector * Ieee80211NewMac::macDelay(int i)
+cOutVector * Ieee80211Mac::macDelay(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2727,7 +2727,7 @@ cOutVector * Ieee80211NewMac::macDelay(int i)
      return edcCAFOutVector[i].macDelay;
 }
 
-cOutVector * Ieee80211NewMac::throughput(int i)
+cOutVector * Ieee80211Mac::throughput(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2736,7 +2736,7 @@ cOutVector * Ieee80211NewMac::throughput(int i)
      return edcCAFOutVector[i].throughput;
 }
 
-Ieee80211NewMac::Ieee80211DataOrMgmtFrameList * Ieee80211NewMac::transmissionQueue(int i)
+Ieee80211Mac::Ieee80211DataOrMgmtFrameList * Ieee80211Mac::transmissionQueue(int i)
 {
     if (i==-1)
         i = currentAC;
@@ -2747,7 +2747,7 @@ Ieee80211NewMac::Ieee80211DataOrMgmtFrameList * Ieee80211NewMac::transmissionQue
 
 
 ModulationType
-Ieee80211NewMac::getControlAnswerMode(ModulationType reqMode)
+Ieee80211Mac::getControlAnswerMode(ModulationType reqMode)
 {
   /**
    * The standard has relatively unambiguous rules for selecting a
@@ -2837,7 +2837,7 @@ Ieee80211NewMac::getControlAnswerMode(ModulationType reqMode)
 }
 
 // This methods implemet the duplicate filter
-void Ieee80211NewMac::sendUp(cMessage *msg)
+void Ieee80211Mac::sendUp(cMessage *msg)
 {
     EV << "sending up " << msg << "\n";
 
@@ -2879,7 +2879,7 @@ void Ieee80211NewMac::sendUp(cMessage *msg)
     send(msg, upperLayerOut);
 }
 
-void Ieee80211NewMac::removeOldTuplesFromDuplicateMap()
+void Ieee80211Mac::removeOldTuplesFromDuplicateMap()
 {
     if (duplicateDetect && lastTimeDelete+duplicateTimeOut>=simTime())
     {
@@ -2898,7 +2898,7 @@ void Ieee80211NewMac::removeOldTuplesFromDuplicateMap()
     }
 }
 
-const MACAddress & Ieee80211NewMac::isInterfaceRegistered()
+const MACAddress & Ieee80211Mac::isInterfaceRegistered()
 {
     if (!par("multiMac").boolValue())
         return MACAddress::UNSPECIFIED_ADDRESS;

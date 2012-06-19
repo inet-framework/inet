@@ -18,12 +18,12 @@
 
 package inet.linklayer.ieee80211;
 
-import inet.linklayer.ieee80211.radio.Ieee80211NewRadio;
-import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
-import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
-import inet.linklayer.ieee80211.mac.Ieee80211NewMac;
-import inet.linklayer.IWirelessNic;
 import inet.base.IHook;
+import inet.linklayer.IWirelessNic;
+import inet.linklayer.ieee80211.mac.Ieee80211Mac;
+import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
+import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
+import inet.linklayer.ieee80211.radio.Ieee80211Radio;
 
 
 //
@@ -36,7 +36,7 @@ import inet.base.IHook;
 // Potential mgmType values: Ieee80211MgmtSTASimplified, Ieee80211MgmtSTA
 // Ieee80211MgmtAP, Ieee80211MgmtAPSimplified, Ieee80211MgmtAdhoc
 //
-module Ieee80211NewNic like IWirelessNic
+module Ieee80211Nic like IWirelessNic
 {
     parameters:
         string mgmtType = default("Ieee80211MgmtSTA"); // name of the management module type (implements IIeee80211Mgmt)
@@ -61,13 +61,13 @@ module Ieee80211NewNic like IWirelessNic
             parameters:
                 @display("p=96,136;q=wlanDataQueue");
         }
-        mac: Ieee80211NewMac {
+        mac: Ieee80211Mac {
             parameters:
                 opMode = opMode;
                 queueModule = "mgmt";
                 @display("p=96,222");
         }
-        radio: Ieee80211NewRadio {
+        radio: Ieee80211Radio {
             parameters:
                 phyOpMode = opMode;
                 @display("p=96,307");
