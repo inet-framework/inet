@@ -1,3 +1,10 @@
+2012-06-18  Rudolf Hornig
+
+    Added HostAutoConfigurator module (as it is required by the TraCI modules/examples)
+    This configurator is deprectaed and should be used ONLY if the hosts are 
+    dynamically created/deleted during the simulation. Otherwise please use the 
+    new IPv4NetworkConfigurator.
+
 2012-06-15  Zoltan Bojthe
 
 	IPv4NetworkConfigurator:
