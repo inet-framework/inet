@@ -99,10 +99,6 @@ void TraCIScenarioManager::initialize(int stage) {
 	activeVehicleCount = 0;
 	autoShutdownTriggered = false;
 
-
-	cc = dynamic_cast<IChannelControl *>(simulation.getModuleByPath("channelControl"));
-	if (cc == 0) error("Could not find a ChannelControl module named channelControl");
-
 	socketPtr = 0;
 
 	ASSERT(firstStepAt > connectAt);

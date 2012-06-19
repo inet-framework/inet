@@ -30,7 +30,6 @@
 #include <omnetpp.h>
 
 #include "INETDefs.h"
-#include "IChannelControl.h"
 #include "ModuleAccess.h"
 
 /**
@@ -262,8 +261,6 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 		bool autoShutdownTriggered;
 		cMessage* connectAndStartTrigger; /**< self-message scheduled for when to connect to TraCI server and start running */
 		cMessage* executeOneTimestepTrigger; /**< self-message scheduled for when to next call executeOneTimestep */
-
-		IChannelControl* cc;
 
 		uint32_t getCurrentTimeMs(); /**< get current simulation time (in ms) */
 
