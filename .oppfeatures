@@ -464,6 +464,36 @@
         linkerFlags = ""
         />
     <feature
+        id="traci"
+        name="TraCI"
+        description = "Integraion modules for TraCI"
+        initiallyEnabled = "true"
+        requires = "IPv4 mobility"
+        labels = ""
+        nedPackages = "
+                       inet.applications.traci
+                       inet.world.traci
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="traci_examples"
+        name="TraCI Examples"
+        description = "Simple examples for TraCI modules"
+        initiallyEnabled = "true"
+        requires = "traci radio Ieee80211 UDP"
+        labels = ""
+        nedPackages = "
+                       inet.examples.traci
+                       inet.examples.traci_launchd
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="radio"
         name="Radio"
         description = "Radio support for wireless simulations"

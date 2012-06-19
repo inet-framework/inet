@@ -21,7 +21,7 @@
 package inet.examples.traci;
 
 import inet.base.NotificationBoard;
-import inet.networklayer.autorouting.HostAutoConfigurator;
+import inet.networklayer.autorouting.ipv4.HostAutoConfigurator;
 import inet.networklayer.common.InterfaceTable;
 import inet.applications.traci.TraCIDemo;
 import inet.mobility.models.TraCIMobility;

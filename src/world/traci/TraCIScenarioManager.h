@@ -30,6 +30,7 @@
 #include <omnetpp.h>
 
 #include "INETDefs.h"
+#include "Coord.h"
 #include "ModuleAccess.h"
 
 /**
