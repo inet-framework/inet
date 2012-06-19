@@ -148,6 +148,7 @@ std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry
         case OSPF::RoutingTableEntry::TYPE2_EXTERNAL: out << "Type2External"; break;
         default:                                      out << "Unknown";       break;
     }
+    out << ", iface: " << entry.getInterfaceName();
     out << ", Cost: " << entry.getCost()
         << ", Type2Cost: " << entry.getType2Cost()
         << ", Origin: [";
