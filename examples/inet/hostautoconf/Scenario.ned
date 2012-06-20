@@ -16,10 +16,10 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package inet.examples.hostautoconf;
+package inet.examples.inet.hostautoconf;
 
-import inet.nodes.ethernet.EtherSwitch;
 import inet.world.radio.ChannelControl;
+
 
 network Scenario
 {

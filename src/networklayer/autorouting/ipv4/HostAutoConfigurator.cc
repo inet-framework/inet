@@ -20,7 +20,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include "networklayer/autorouting/HostAutoConfigurator.h"
+#include "HostAutoConfigurator.h"
 
 #include "IPvXAddressResolver.h"
 #include "IPv4InterfaceData.h"

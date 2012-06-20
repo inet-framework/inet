@@ -16,9 +16,9 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package inet.examples.hostautoconf;
+package inet.examples.inet.hostautoconf;
 
-import inet.networklayer.autorouting.HostAutoConfigurator;
+import inet.networklayer.autorouting.ipv4.HostAutoConfigurator;
 import inet.nodes.inet.WirelessHost;
 
 
