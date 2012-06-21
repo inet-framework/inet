@@ -18,6 +18,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
+#ifdef WITH_TRACI
+
 #include <limits>
 #include <iostream>
 #include <sstream>
@@ -302,3 +304,4 @@ double TraCIMobility::calculateCO2emission(double v, double a) const {
 	return alpha + beta*v*3.6 + delta*v*v*v*(3.6*3.6*3.6) + zeta*a*v;
 }
 
+#endif
