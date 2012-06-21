@@ -233,5 +233,5 @@
 /examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0,            100s,            6e3a-aae1
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              1d1a-6e75
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              897d-1556
-/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,             d783-683e
-/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             1b7d-839f
+/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,             d3e1-ed60
+/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             d849-f755
