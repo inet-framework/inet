@@ -43,7 +43,6 @@ bool isInternetNode(const cModule* module)
     static const cModule* cached;
     if (module == cached)
         return true;
-    //if (dynamic_cast<InternetCloud*>(module)) InternetCloud currently is a CompoundModule
     if (!strcmp(module->getModuleType()->getName(), INTERNET_CLOUD))
     {
         cached = module;
@@ -209,11 +208,7 @@ void InternetCloudNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfo
                     const double upstream_delay_s(netLayer->getAccessLatency()/(2.0*1000.0)); // distribute delay evenly between up- and downstream, ms -> s
                     EV << "Configuring upstream channel with " << upstream_bw_bps << "bps and " << upstream_delay_s << "s wire delay" << endl;
                     internet_uplink->setDatarate(upstream_bw_bps);
-                    //internet_uplink->par("datarate").setDoubleValue(upstream_bw_bps);
                     internet_uplink->setDelay(upstream_delay_s);
-                    //internet_uplink->par("delay").setDoubleValue(upstream_delay_s);
-                    //internet_uplink->finalizeParameters();
-                    //internet_uplink->rereadPars();
                 }
                 else
                 {
@@ -239,7 +234,6 @@ void InternetCloudNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfo
                     EV << "Configuring downstream channel with " << downstream_bw_bps << "bps and " << downstream_delay_s << "s wire delay" << endl;
                     internet_downlink->setDatarate(downstream_bw_bps);
                     internet_downlink->setDelay(downstream_delay_s);
-                    //internet_downlink->finalizeParameters();
                 }
                 else
                 {
