@@ -7,35 +7,76 @@ INET-1.99.5 (June, 2012)
 This is the final testing version of the 1.99.x series leading to the 2.0 
 release. Requires OMNeT++ 4.2 (version 4.2.2 suggested).
 
-    - MPLS fixes TODO
+    - Several OSPF fixes and changes in configuration (see the ChangeLog file 
+      in the OSPF folder for details):
+      - improved error detection in xml config files
+      - replaced the ospfConfigFile string-type ned parameter with ospfConfig parameter (xml type)
+      - uses IPvXAddressResolver for reading IP address and IP netmask values from xml
+      - uses @name instead @id to identify the routers in the xml config
+      - most attributes in xml config became optional, and default values
+          come from ned the parameters of OSPFRouting (with same name)
+      - modified xml schema: converted most subnodes to attributes
+      - Added etc/OSPFold_to_OSPFnew.xsl for converting the old xml format to new, and
+          converted all the ospf config files to the new format in the examples folder
+          (after using the converter you must convert router@id to router@name by hand).
+      - added @toward attribute to XML for easier interface specification
+          old: interfaces were specified by their name (e.g. ifName="eth0"). 
+          new: interfaces can be specified either by their name (e.g. ifName="eth0"), 
+          or by the name of a module the interface is connected to (e.g. toward="Area3.N9")
+      - fixed OSPF.xsd schema
 
-    - OSPF fixes, changes in configuration. TODO
+    - Queueing components
+      - The networklayer/queue folder has moved to linklayer/queue folder as 
+        queues are mostly used in linklayer. This is a new framework that can be
+        used to create more complex systems.
+        Old queuing components has been removed:
+         - DropTailQosQueue, REDQueue, WeightedFairQueue
+         - IQoSClassifier (moved to linklayer/ieee80211/mac)
+         - BasicDSCPClassifier
+        Some of them can be substituted by compound modules composed of these newly 
+        added components:
+         - FIFOQueue
+         - REDDropper
+         - ThresholdDropper
+         - PriorityScheduler
+         - WRRScheduler
+        For example REDQueue is a combination of a REDDropper and a FIFOQueue,
+        and DropTailQosQueue is a combination of some classifier, DropTailQueues,
+        and a PriorityScheduler.
 
-    - Brand new Diffserv implementation (using the Queueing framework) TODO
+        Read the INET Manual (in doc folder) for mor einformation about the usage
+        of these modules.
 
-    - Queueing framework: TODO
+    - Brand new Differentiated Services component (using the Queueing framework)
+      that is implementing the following standards:
+      - RFC 2474: Definition of the Differentiated Services Field (DS Field) in 
+        the IPv4 and IPv6 Headers
+      - RFC 2475: An Architecture for Differentiated Services
+      - RFC 2597: Assured Forwarding PHB Group
+      - RFC 2697: A Single Rate Three Color Marker
+      - RFC 2698: A Two Rate Three Color Marker
+      - RFC 3246: An Expedited Forwarding PHB (Per-Hop Behavior)
+      - RFC 3290: An Informal Management Model for Diffserv Routers
 
-    - Wireless nodes are using the Ieee80211NewNic now by default. (INETMANET's
-      802.11 implementation). You can use the opMode parameter on the NIC
-      to specify b,g,a and p mode. If you need the old 802.11 implementation
-      speciy **.wlan[*].typename = "Ieee80211Nic" in your INI file.
-
-    - 802.11 implementation of the ancient mobility framework is removed
-      (i.e. the mf80211 directory).
 
     - New send method on UDPSocket now allows to specify on which interface 
       the packets should be sent out.
 
     - Added DHCP protocol implementation by Juan Carlos Maureira
       taken over from INETMANET-2.0 @ 7fb431b. It can be deployed just
-      like any UDP app.
+      like any other UDP apps.
 
     - MANET routing protocols updated from INETMANET-2.0 @ 7fb431b
+      The whole manetrouting directory was taken over.
 
     - Mobility: Added two new mobility models: 
           o TraCI + TraCIScenarioManager to connect with an external server
           o LinearNodeDistribution - static hosts in a single line in 
             ANY direction
+
+    - IPv4Route: removed the "type" attribute from the routing entries
+
+    - VoIPTool now compiles with the latest version of ffmpeg libs
 
     - IGMPv2: external routers attached to the IGMP module are now 
       responsible for implementing the IGMP router logic (emiting queries 
@@ -45,18 +86,40 @@ release. Requires OMNeT++ 4.2 (version 4.2.2 suggested).
     - Updated 802.11 model from INETMANET-2.0 @ 7fb431b (minor bugfixes)
       All files are synced. The following features were omitted:
       MULTIQUEUES, HWMP and MESH networking related code.
+      The default wireless NIC is now using the latest 802.11 code from
+      INETMANET. The Ieee80211NewNic was renamed to Ieee80211Nic. With
+      the new NIC it is now possible set the operating mode (a,b,g,p)
+      The original Ieee80211 implementaion was removed to avoid confusion.
+
+    - The ancient 802.11 implementation from the mobility framework was removed
+      (i.e. the mf80211 directory).
+
+    - Added HostAutoConfigurator module (should be added inside a host)
+      This configurator is deprecated and should be used ONLY if the hosts are 
+      dynamically created/deleted during the simulation. Otherwise please use the 
+      new IPv4NetworkConfigurator.
+    
+    - IPv4NetworkConfigurator:
+      Examples have been updated to use this configurator
+      XML configuration format changes:
+        - added @among attribute for interface and multicast-group entries:
+          "among='X Y Z'"   means   "hosts='X Y Z' towards='X Y Z'"
+        - added @metric attribute for interface entry in XML
+        - added @id attribute for wireless entry
+      - several smaller bugfixes and documentation changes (see ChangeLog
+        in the directory)
 
     - IPv4 fix: subnet directed broadcast (e.g. 192.168.1.255) works now:
       When the datagram reaches the router of the subnet, it should
       be forwarded as a link layer broadcast.
 
-    - Small fixes in the MACAddress, PPP, IPv4NetworkConfigurator, VoIPTool,
+    - Small fixes in MACAddress, PPP, IPv4NetworkConfigurator, VoIPTool,
       Mobility, BatteryModule
 
-   - changes in link layer
-      - added INic moduleinterface, all other network interface interfacemodules
-        extends it
-      - renamed netwIn, netwOut gates to upperLayerIn, upperLayerOut
+    - changes in link layer
+      - added INic moduleinterface, all other network interfaces should
+        implement this
+      - renamed the netwIn, netwOut gates to upperLayerIn, upperLayerOut
 
 
 INET-1.99.4 (March 20, 2012)
