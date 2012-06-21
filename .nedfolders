@@ -1,6 +1,5 @@
 examples
 src
--inet.applications.voiptool
+-inet.applications.dhcp
 -inet.transport.tcp_lwip
--inet.examples.voiptool
 -inet.transport.tcp_nsc
