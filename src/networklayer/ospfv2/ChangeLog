@@ -1,17 +1,11 @@
 2012-06-15  Zoltan Bojthe
 
 	- changed the signature of OSPF::insertExternalRoute() 
-	- added some comments, code style chnages, reordering includes
-	- optimizations:
-	  - input argumantes use const reference instead by value
-	  - moved some larger methods from .h to .cc
 	- a single IPv4AddressRange can be added to an Area only once
 	- OSPF IPv4AddressRange changes:
 	    added some functions and operators, removed IPv4AddressRange_Less class
 	- use std::set instead std::map, use type AreaID instead std::string in OSPFRouting
 	- remove IPv4Address_Less, maps can use operator the '<' operator of the IPv4Address
-	- moved documentations from .cc to .h
-	- changes in EV outs, add << operators for more LSA classes
 	- Area::info() fixes
 	- show "0.0.0.0" instead "<unspec>"
 	- the router interfaces will join the OSPF multicast groups automatically 
@@ -23,14 +17,12 @@
 	- bugfix: do not add the network address to the nextHop list
 	- bugfix: OSPFLSAHeader comparator was asimmetric
 	    ( booth operator<(MAX_AGE,0) and operator<(0,MAX_AGE) were true at the same time)
-	- eliminated some compiler and code analysis warnings
 	- changed type of interface index from unsigned char to integer
 	- uses 224.0.0.5 224.0.0.6 constants for the OSPF multicast groups from IPv4Address.h
 	- removed checksum field from the OSPFPacket
 	- uses the byteLength field of cPacket instead packetLength of OSPFPacket
 	- now it calculates the packet length (was missing)
 	- uses IP_MAX_HEADER_BYTES from IPv4Datagram instead IPV4_HEADER_LENGTH from OSPFCommon.h
-	- removed old, commented out code
 
 	XML config changes:
 	- improved error detection in xml config

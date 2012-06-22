@@ -42,6 +42,21 @@ Integration (since 2010)
 Folders that appeared due to the integration of code from external projects
 include:
 
+Added DHCP
++ src/applications/dhcp
+
+Added Traci
++ src/world/traci
++ src/applications/traci
++ examples/traci
++ examples/traci_launchd
+
+Added Diffserv
++ src/networklayer/diffserv
++ examples/diffserv
+
+src/networklayer/queue/                -> src/linklayer/queue/
+
 Added HttpTools:
 + src/world/httptools
 + src/applications/httptools
@@ -85,10 +100,6 @@ Added MANETRouting from INETMANET:
 + examples/manetrouting/multiradio
 + examples/manetrouting/net80211_aodv
 + examples/manetrouting/net80211_control
-
-Added IEEE 802.11 Mesh radio from INETMANET:
-+ src/linklayer/ieee80211mesh
-+ src/linklayer/ieee80211mesh/mgmt
 
 Added xMIPv6:
 + src/networklayer/ipv6tunneling

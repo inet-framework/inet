@@ -1,126 +1,122 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-1.99.5 (June, 2012)
+INET-1.99.5 (June 22, 2012)
 ------------------------
 
 This is the final testing version of the 1.99.x series leading to the 2.0 
 release. Requires OMNeT++ 4.2 (version 4.2.2 suggested).
 
-    - Several OSPF fixes and changes in configuration (see the ChangeLog file 
-      in the OSPF folder for details):
-      - improved error detection in xml config files
-      - replaced the ospfConfigFile string-type ned parameter with ospfConfig parameter (xml type)
-      - uses IPvXAddressResolver for reading IP address and IP netmask values from xml
-      - uses @name instead @id to identify the routers in the xml config
-      - most attributes in xml config became optional, and default values
-          come from ned the parameters of OSPFRouting (with same name)
-      - modified xml schema: converted most subnodes to attributes
-      - Added etc/OSPFold_to_OSPFnew.xsl for converting the old xml format to new, and
-          converted all the ospf config files to the new format in the examples folder
-          (after using the converter you must convert router@id to router@name by hand).
-      - added @toward attribute to XML for easier interface specification
-          old: interfaces were specified by their name (e.g. ifName="eth0"). 
-          new: interfaces can be specified either by their name (e.g. ifName="eth0"), 
-          or by the name of a module the interface is connected to (e.g. toward="Area3.N9")
-      - fixed OSPF.xsd schema
+Several OSPF fixes and changes in configuration (see the ChangeLog file 
+in the OSPF folder for details):
+  - improved error detection in xml config files
+  - replaced the ospfConfigFile string-type ned parameter with ospfConfig parameter (xml type)
+  - uses IPvXAddressResolver for reading IP address and IP netmask values from xml
+  - uses @name instead @id to identify the routers in the xml config
+  - most attributes in xml config became optional, and default values
+      come from ned the parameters of OSPFRouting (with same name)
+  - modified xml schema: converted most subnodes to attributes
+  - Added etc/OSPFold_to_OSPFnew.xsl for converting the old xml format to new, and
+      converted all the ospf config files to the new format in the examples folder
+      (after using the converter you must convert router@id to router@name by hand).
+  - added @toward attribute to XML for easier interface specification
+      old: interfaces were specified by their name (e.g. ifName="eth0"). 
+      new: interfaces can be specified either by their name (e.g. ifName="eth0"), 
+      or by the name of a module the interface is connected to (e.g. toward="Area3.N9")
+  - fixed OSPF.xsd schema
 
-    - Queueing components
-      - The networklayer/queue folder has moved to linklayer/queue folder as 
-        queues are mostly used in linklayer. This is a new framework that can be
-        used to create more complex systems.
-        Old queuing components has been removed:
-         - DropTailQosQueue, REDQueue, WeightedFairQueue
-         - IQoSClassifier (moved to linklayer/ieee80211/mac)
-         - BasicDSCPClassifier
-        Some of them can be substituted by compound modules composed of these newly 
-        added components:
-         - FIFOQueue
-         - REDDropper
-         - ThresholdDropper
-         - PriorityScheduler
-         - WRRScheduler
-        For example REDQueue is a combination of a REDDropper and a FIFOQueue,
-        and DropTailQosQueue is a combination of some classifier, DropTailQueues,
-        and a PriorityScheduler.
+Queueing components:
+  The networklayer/queue folder has moved to linklayer/queue folder as 
+  queues are mostly used in linklayer. This is a new framework that can be
+  used to create more complex systems.
+  Old queuing components has been removed:
+   - DropTailQosQueue, REDQueue, WeightedFairQueue
+   - IQoSClassifier (moved to linklayer/ieee80211/mac)
+   - BasicDSCPClassifier
+  Some of them can be substituted by compound modules composed of these newly 
+  added components:
+   - FIFOQueue
+   - REDDropper
+   - ThresholdDropper
+   - PriorityScheduler
+   - WRRScheduler
+  For example REDQueue is a combination of a REDDropper and a FIFOQueue,
+  and DropTailQosQueue is a combination of some classifier, DropTailQueues,
+  and a PriorityScheduler. Read the INET Manual (in doc folder) for more 
+  information about the usage of these modules.
 
-        Read the INET Manual (in doc folder) for mor einformation about the usage
-        of these modules.
-
-    - Brand new Differentiated Services component (using the Queueing framework)
-      that is implementing the following standards:
-      - RFC 2474: Definition of the Differentiated Services Field (DS Field) in 
-        the IPv4 and IPv6 Headers
-      - RFC 2475: An Architecture for Differentiated Services
-      - RFC 2597: Assured Forwarding PHB Group
-      - RFC 2697: A Single Rate Three Color Marker
-      - RFC 2698: A Two Rate Three Color Marker
-      - RFC 3246: An Expedited Forwarding PHB (Per-Hop Behavior)
-      - RFC 3290: An Informal Management Model for Diffserv Routers
+Brand new Differentiated Services component (using the Queueing framework)
+that is implementing the following standards:
+  - RFC 2474: Definition of the Differentiated Services Field (DS Field) in 
+    the IPv4 and IPv6 Headers
+  - RFC 2475: An Architecture for Differentiated Services
+  - RFC 2597: Assured Forwarding PHB Group
+  - RFC 2697: A Single Rate Three Color Marker
+  - RFC 2698: A Two Rate Three Color Marker
+  - RFC 3246: An Expedited Forwarding PHB (Per-Hop Behavior)
+  - RFC 3290: An Informal Management Model for Diffserv Routers
 
 
-    - New send method on UDPSocket now allows to specify on which interface 
-      the packets should be sent out.
+New send method on UDPSocket now allows to specify on which interface 
+the packets should be sent out.
 
-    - Added DHCP protocol implementation by Juan Carlos Maureira
-      taken over from INETMANET-2.0 @ 7fb431b. It can be deployed just
-      like any other UDP apps.
+Added DHCP protocol implementation by Juan Carlos Maureira
+taken over from INETMANET-2.0 @ 7fb431b. It can be deployed just
+like any other UDP apps.
 
-    - MANET routing protocols updated from INETMANET-2.0 @ 7fb431b
-      The whole manetrouting directory was taken over.
+MANET routing protocols updated from INETMANET-2.0 @ 7fb431b
+The whole manetrouting directory was taken over.
 
-    - Mobility: Added two new mobility models: 
-          o TraCI + TraCIScenarioManager to connect with an external server
-          o LinearNodeDistribution - static hosts in a single line in 
-            ANY direction
+Mobility: Added two new mobility models: 
+  - TraCI + TraCIScenarioManager to connect with an external server
+  - LinearNodeDistribution - static hosts in a single line in 
+    ANY direction
 
-    - IPv4Route: removed the "type" attribute from the routing entries
+IPv4Route: removed the "type" attribute from the routing entries
 
-    - VoIPTool now compiles with the latest version of ffmpeg libs
+VoIPTool: Now compiles with the latest version of ffmpeg libs
 
-    - IGMPv2: external routers attached to the IGMP module are now 
-      responsible for implementing the IGMP router logic (emiting queries 
-      and processing group membership reports). In this case the IGMP 
-      module passes all incoming IGMP messages to the external router.
+IGMPv2: external routers attached to the IGMP module are now 
+responsible for implementing the IGMP router logic (emitting queries 
+and processing group membership reports). In this case the IGMP 
+module passes all incoming IGMP messages to the external router.
 
-    - Updated 802.11 model from INETMANET-2.0 @ 7fb431b (minor bugfixes)
-      All files are synced. The following features were omitted:
-      MULTIQUEUES, HWMP and MESH networking related code.
-      The default wireless NIC is now using the latest 802.11 code from
-      INETMANET. The Ieee80211NewNic was renamed to Ieee80211Nic. With
-      the new NIC it is now possible set the operating mode (a,b,g,p)
-      The original Ieee80211 implementaion was removed to avoid confusion.
+Updated 802.11 model from INETMANET-2.0 @ 7fb431b (minor bugfixes)
+All files are synced. The following features were omitted:
+MULTIQUEUES, HWMP and MESH networking related code.
+The default wireless NIC is now using the latest 802.11 code from
+INETMANET. The Ieee80211NewNic was renamed to Ieee80211Nic. With
+the new NIC it is now possible set the operating mode (a,b,g,p)
+The original Ieee80211 implementation was removed to avoid confusion.
 
-    - The ancient 802.11 implementation from the mobility framework was removed
-      (i.e. the mf80211 directory).
+The ancient 802.11 implementation from the mobility framework was removed
+(i.e. the mf80211 directory).
 
-    - Added HostAutoConfigurator module (should be added inside a host)
-      This configurator is deprecated and should be used ONLY if the hosts are 
-      dynamically created/deleted during the simulation. Otherwise please use the 
-      new IPv4NetworkConfigurator.
-    
-    - IPv4NetworkConfigurator:
-      Examples have been updated to use this configurator
-      XML configuration format changes:
-        - added @among attribute for interface and multicast-group entries:
-          "among='X Y Z'"   means   "hosts='X Y Z' towards='X Y Z'"
-        - added @metric attribute for interface entry in XML
-        - added @id attribute for wireless entry
-      - several smaller bugfixes and documentation changes (see ChangeLog
-        in the directory)
+Added HostAutoConfigurator module (should be added inside a host)
+This configurator is deprecated and should be used ONLY if the hosts are 
+dynamically created/deleted during the simulation. Otherwise please use the 
+new IPv4NetworkConfigurator.
 
-    - IPv4 fix: subnet directed broadcast (e.g. 192.168.1.255) works now:
-      When the datagram reaches the router of the subnet, it should
-      be forwarded as a link layer broadcast.
+IPv4NetworkConfigurator: Examples have been updated to use this configurator.
+XML configuration format changes:
+  - added @among attribute for interface and multicast-group entries:
+    "among='X Y Z'"   means   "hosts='X Y Z' towards='X Y Z'"
+  - added @metric attribute for interface entry in XML
+  - added @id attribute for wireless entry
+  - several smaller bugfixes and documentation changes (see ChangeLog
+    in the directory)
 
-    - Small fixes in MACAddress, PPP, IPv4NetworkConfigurator, VoIPTool,
-      Mobility, BatteryModule
+IPv4 fix: subnet directed broadcast (e.g. 192.168.1.255) works now:
+When the datagram reaches the router of the subnet, it should
+be forwarded as a link layer broadcast.
 
-    - changes in link layer
-      - added INic moduleinterface, all other network interfaces should
-        implement this
-      - renamed the netwIn, netwOut gates to upperLayerIn, upperLayerOut
+Changes in link layer
+  - added INic moduleinterface, all other network interfaces should
+    implement this
+  - renamed the netwIn, netwOut gates to upperLayerIn, upperLayerOut
 
+Small fixes in MACAddress, PPP, IPv4NetworkConfigurator, VoIPTool,
+Mobility, BatteryModule
 
 INET-1.99.4 (March 20, 2012)
 ----------------------------
@@ -128,88 +124,88 @@ INET-1.99.4 (March 20, 2012)
 This version contains mainly bugfixes, plus some features that did not make
 into the previous release. Requires OMNeT++ 4.2 (version 4.2.1 suggested).
 
-    - Added IPv4NetworkConfigurator, a new network configurator for IPv4
+- Added IPv4NetworkConfigurator, a new network configurator for IPv4
 
-      This is intended to replace both routing files (.irt/.mrt) and
-      specialized network configurators like FlatNetworkConfigurator,
-      and do much more.
+  This is intended to replace both routing files (.irt/.mrt) and
+  specialized network configurators like FlatNetworkConfigurator,
+  and do much more.
 
-      Covers address assignment (manual, automatic), adding manual routes,
-      setting up static routing, optimizing the routing tables, etc.
-      Unlike FlatNetworkConfigurator, it will generate per-interface
-      addresses. Wireless networks are also supported.
+  Covers address assignment (manual, automatic), adding manual routes,
+  setting up static routing, optimizing the routing tables, etc.
+  Unlike FlatNetworkConfigurator, it will generate per-interface
+  addresses. Wireless networks are also supported.
 
-    - Added an IGMPv2 implementation, based on code contributed by Jesse Jones
+- Added an IGMPv2 implementation, based on code contributed by Jesse Jones
 
-    Changes in IPv4 multicast routing:
-    - We now use reverse path forwarding (routing entry contains
-      source address/mask, multicast group, parent (incoming) interface
-      and the set of child (outgoing) interfaces).
-    - The new routing table enables to specify a separate multicast
-      routing tree per source network and multicast group. (Old
-      implementation used a common tree for each source.) The multicast
-      routing tree is represented by IPv4MulticastRoute entries.
-    - IRoutingTable has been extended with methods manipulating the
-      multicast routing entries. Notifications are generated, when
-      the multicast routing table changes.
-    - IPv4 multicast routing algorithm uses the multicast routes
-      for forwarding decisions.
-    - When HL does not specify the multicast interface for outgoing
-      datagrams, then it is selected according to the routing table
-      or the source address of the datagram.
+Changes in IPv4 multicast routing:
+- We now use reverse path forwarding (routing entry contains
+  source address/mask, multicast group, parent (incoming) interface
+  and the set of child (outgoing) interfaces).
+- The new routing table enables to specify a separate multicast
+  routing tree per source network and multicast group. (Old
+  implementation used a common tree for each source.) The multicast
+  routing tree is represented by IPv4MulticastRoute entries.
+- IRoutingTable has been extended with methods manipulating the
+  multicast routing entries. Notifications are generated, when
+  the multicast routing table changes.
+- IPv4 multicast routing algorithm uses the multicast routes
+  for forwarding decisions.
+- When HL does not specify the multicast interface for outgoing
+  datagrams, then it is selected according to the routing table
+  or the source address of the datagram.
 
-    Change from previous behavior:
-    - packets sent to a multicast address from higher layer: it used
-      to go out on each interface that had a matching route in the
-      routing table (unless mcast interface was specified by HL).
-      Now it only goes out on the first match route's interface;
-      if there's no match it goes out on the 1st multicast interface
-      (unless mcast interface was specified by HL). If you want to
-      send on multiple interfaces, you have to send multiple packets
-      from the higher layer.
+Change from previous behavior:
+- packets sent to a multicast address from higher layer: it used
+  to go out on each interface that had a matching route in the
+  routing table (unless mcast interface was specified by HL).
+  Now it only goes out on the first match route's interface;
+  if there's no match it goes out on the 1st multicast interface
+  (unless mcast interface was specified by HL). If you want to
+  send on multiple interfaces, you have to send multiple packets
+  from the higher layer.
 
-    - multicast forwarding: no longer takes into account the routes
-      in the unticast routing table that have mcast destinations.
-      Only the (new format) multicast table is used. This new
-      multicast routing table can only be configured with
-      IPv4NetworkConfigurator, routing files don't support it.
-    - mobility: fixed infinite loop when nextChange is set to current
-      simulation time
+- multicast forwarding: no longer takes into account the routes
+  in the unticast routing table that have mcast destinations.
+  Only the (new format) multicast table is used. This new
+  multicast routing table can only be configured with
+  IPv4NetworkConfigurator, routing files don't support it.
+- mobility: fixed infinite loop when nextChange is set to current
+  simulation time
 
-    - base: Added createNode(), createLink() factory methods to Topology class.
+- base: Added createNode(), createLink() factory methods to Topology class.
 
-    - Enhancements in IPvXAddressResolver. The new resolver allows you
-      to specify an interface based on which module the interface is
-      connected to. 
+- Enhancements in IPvXAddressResolver. The new resolver allows you
+  to specify an interface based on which module the interface is
+  connected to. 
 
-    - Added a RoutingTableRecorder module that records all the changes
-      in the routing table to a file.
+- Added a RoutingTableRecorder module that records all the changes
+  in the routing table to a file.
 
-    - OSPF & BGP fix:
-        - gateway is now correcty set on routing table entries.
-        - eliminated redundant nextHop field from routing table entries
+- OSPF & BGP fix:
+    - gateway is now correcty set on routing table entries.
+    - eliminated redundant nextHop field from routing table entries
 
-    - Fixed routing table change notifications.
+- Fixed routing table change notifications.
 
-    - Added printMulticastRoutingTable() to IRoutingTable
+- Added printMulticastRoutingTable() to IRoutingTable
 
-    - Added IPingApp interface and support for more than one PingApp
-      in a host.
+- Added IPingApp interface and support for more than one PingApp
+  in a host.
 
-    - Changes in the UDP socket API:
+- Changes in the UDP socket API:
 
-      The first call on an UDP socket do not need to be bind() or connect()
-      anymore. It is possible to create a socket and sending data immediately
-      by calling sendTo(). It is also possible to set socket options before
-      calling connect() or bind(). connect() can be called several times.
-      However the bind() call fails if the socket is already bound.
+  The first call on an UDP socket do not need to be bind() or connect()
+  anymore. It is possible to create a socket and sending data immediately
+  by calling sendTo(). It is also possible to set socket options before
+  calling connect() or bind(). connect() can be called several times.
+  However the bind() call fails if the socket is already bound.
 
-    - LDP: The LDP module now creates a separate UDP socket for each
-      multicast interface of the node, sets the multicast interface
-      on them, and sends a copy of LDP-Hellos via each socket.
+- LDP: The LDP module now creates a separate UDP socket for each
+  multicast interface of the node, sets the multicast interface
+  on them, and sends a copy of LDP-Hellos via each socket.
 
-    - ICMP messages are correctly handled now in all TCP implementations
-      (in LwIP and NSC, too)
+- ICMP messages are correctly handled now in all TCP implementations
+  (in LwIP and NSC, too)
 
 See ChangeLogs in individual source folders for more information.
 
