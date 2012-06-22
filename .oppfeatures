@@ -234,7 +234,7 @@
         name="DHCP"
         description = "DHCP protocol that can be installed as an UDP application"
         initiallyEnabled = "true"
-        requires = "UDP"
+        requires = "UDP IPv4 Ethernet"
         labels = "protocols dhcp"
         nedPackages = "
                        inet.applications.dhcp

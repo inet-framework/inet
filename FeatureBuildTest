@@ -102,7 +102,7 @@ SCTP_examples_only:
 
 DHCP_only:
 	$(PRINT_BANNER)
-	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -Xapplications/ethernet -Xapplications/httptools -Xapplications/rtpapp -Xapplications/sctpapp -Xapplications/tcpapp -Xapplications/traci -Xapplications/voiptool -Xbattery/models -Xlinklayer/ethernet -Xlinklayer/ext -Xlinklayer/ieee80211 -Xlinklayer/ppp -Xlinklayer/radio -Xmobility/models -Xnetworklayer/arp -Xnetworklayer/autorouting/ipv4 -Xnetworklayer/autorouting/ipv6 -Xnetworklayer/bgpv4 -Xnetworklayer/diffserv -Xnetworklayer/icmpv6 -Xnetworklayer/ipv4 -Xnetworklayer/ipv6 -Xnetworklayer/ipv6tunneling -Xnetworklayer/ldp -Xnetworklayer/manetrouting -Xnetworklayer/mpls -Xnetworklayer/ospfv2 -Xnetworklayer/rsvp_te -Xnetworklayer/ted -Xnetworklayer/xmipv6 -Xnodes/bgp -Xnodes/ethernet -Xnodes/httptools -Xnodes/inet -Xnodes/ipv6 -Xnodes/mpls -Xnodes/ospfv2 -Xnodes/xmipv6 -Xtransport/rtp -Xtransport/sctp -Xtransport/tcp -Xtransport/tcp_common -Xtransport/tcp_lwip -Xtransport/tcp_nsc -Xutil/headerserializers/ipv4 -Xutil/headerserializers/sctp -Xutil/headerserializers/tcp -Xworld/httptools -Xworld/radio -Xworld/traci -DWITH_DHCP -DWITH_UDP
+	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -Xapplications/httptools -Xapplications/rtpapp -Xapplications/sctpapp -Xapplications/tcpapp -Xapplications/traci -Xapplications/voiptool -Xbattery/models -Xlinklayer/ext -Xlinklayer/ieee80211 -Xlinklayer/ppp -Xlinklayer/radio -Xmobility/models -Xnetworklayer/autorouting/ipv6 -Xnetworklayer/bgpv4 -Xnetworklayer/diffserv -Xnetworklayer/icmpv6 -Xnetworklayer/ipv6 -Xnetworklayer/ipv6tunneling -Xnetworklayer/ldp -Xnetworklayer/manetrouting -Xnetworklayer/mpls -Xnetworklayer/ospfv2 -Xnetworklayer/rsvp_te -Xnetworklayer/ted -Xnetworklayer/xmipv6 -Xnodes/bgp -Xnodes/httptools -Xnodes/ipv6 -Xnodes/mpls -Xnodes/ospfv2 -Xnodes/xmipv6 -Xtransport/rtp -Xtransport/sctp -Xtransport/tcp -Xtransport/tcp_common -Xtransport/tcp_lwip -Xtransport/tcp_nsc -Xutil/headerserializers/sctp -Xutil/headerserializers/tcp -Xworld/httptools -Xworld/radio -Xworld/traci -DWITH_DHCP -DWITH_UDP -DWITH_IPv4 -DWITH_ETHERNET
 	$(RUNTEST)
 
 Ethernet_only:
@@ -267,32 +267,32 @@ TCP_NSC_disabled:
 
 IPv4_disabled:
 	$(PRINT_BANNER)
-	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -Xapplications/rtpapp -Xapplications/sctpapp -Xapplications/traci -Xlinklayer/ext -Xnetworklayer/arp -Xnetworklayer/autorouting/ipv4 -Xnetworklayer/bgpv4 -Xnetworklayer/ipv4 -Xnetworklayer/ldp -Xnetworklayer/manetrouting -Xnetworklayer/mpls -Xnetworklayer/ospfv2 -Xnetworklayer/rsvp_te -Xnetworklayer/ted -Xnodes/bgp -Xnodes/inet -Xnodes/mpls -Xnodes/ospfv2 -Xtransport/rtp -Xtransport/sctp -Xutil/headerserializers/ipv4 -Xutil/headerserializers/sctp -Xworld/traci -DWITH_IPv6 -DWITH_xMIPv6 -DWITH_UDP -DWITH_DHCP -DWITH_ETHERNET -DWITH_PPP -DWITH_VOIPTOOL -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_TCP_LWIP -DWITH_TCP_NSC
+	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -Xapplications/dhcp -Xapplications/rtpapp -Xapplications/sctpapp -Xapplications/traci -Xlinklayer/ext -Xnetworklayer/arp -Xnetworklayer/autorouting/ipv4 -Xnetworklayer/bgpv4 -Xnetworklayer/ipv4 -Xnetworklayer/ldp -Xnetworklayer/manetrouting -Xnetworklayer/mpls -Xnetworklayer/ospfv2 -Xnetworklayer/rsvp_te -Xnetworklayer/ted -Xnodes/bgp -Xnodes/inet -Xnodes/mpls -Xnodes/ospfv2 -Xtransport/rtp -Xtransport/sctp -Xutil/headerserializers/ipv4 -Xutil/headerserializers/sctp -Xworld/traci -DWITH_IPv6 -DWITH_xMIPv6 -DWITH_UDP -DWITH_ETHERNET -DWITH_PPP -DWITH_VOIPTOOL -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_TCP_LWIP -DWITH_TCP_NSC
 	$(RUNTEST)
 
 INET_examples_disabled:
 	$(PRINT_BANNER)
-	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -DWITH_IPv6 -DWITH_xMIPv6 -DWITH_UDP -DWITH_DHCP -DWITH_ETHERNET -DWITH_PPP -DWITH_VOIPTOOL -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_TCP_LWIP -DWITH_TCP_NSC -DWITH_IPv4 -DWITH_RTP -DWITH_SCTP -DWITH_EXT_IF -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_MANET -DWITH_TRACI
+	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -DWITH_IPv6 -DWITH_xMIPv6 -DWITH_UDP -DWITH_ETHERNET -DWITH_PPP -DWITH_VOIPTOOL -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_TCP_LWIP -DWITH_TCP_NSC -DWITH_IPv4 -DWITH_RTP -DWITH_SCTP -DWITH_DHCP -DWITH_EXT_IF -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_MANET -DWITH_TRACI
 	$(RUNTEST)
 
 IPv6_disabled:
 	$(PRINT_BANNER)
-	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -Xnetworklayer/autorouting/ipv6 -Xnetworklayer/icmpv6 -Xnetworklayer/ipv6 -Xnetworklayer/ipv6tunneling -Xnetworklayer/manetrouting -Xnetworklayer/xmipv6 -Xnodes/ipv6 -Xnodes/xmipv6 -DWITH_UDP -DWITH_DHCP -DWITH_ETHERNET -DWITH_PPP -DWITH_VOIPTOOL -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_TCP_LWIP -DWITH_TCP_NSC -DWITH_IPv4 -DWITH_RTP -DWITH_SCTP -DWITH_EXT_IF -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_TRACI
+	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -Xnetworklayer/autorouting/ipv6 -Xnetworklayer/icmpv6 -Xnetworklayer/ipv6 -Xnetworklayer/ipv6tunneling -Xnetworklayer/manetrouting -Xnetworklayer/xmipv6 -Xnodes/ipv6 -Xnodes/xmipv6 -DWITH_UDP -DWITH_ETHERNET -DWITH_PPP -DWITH_VOIPTOOL -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_TCP_LWIP -DWITH_TCP_NSC -DWITH_IPv4 -DWITH_RTP -DWITH_SCTP -DWITH_DHCP -DWITH_EXT_IF -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_TRACI
 	$(RUNTEST)
 
 IPv6_examples_disabled:
 	$(PRINT_BANNER)
-	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -DWITH_UDP -DWITH_DHCP -DWITH_ETHERNET -DWITH_PPP -DWITH_VOIPTOOL -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_TCP_LWIP -DWITH_TCP_NSC -DWITH_IPv4 -DWITH_RTP -DWITH_SCTP -DWITH_EXT_IF -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_TRACI -DWITH_IPv6 -DWITH_xMIPv6 -DWITH_MANET
+	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -DWITH_UDP -DWITH_ETHERNET -DWITH_PPP -DWITH_VOIPTOOL -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_TCP_LWIP -DWITH_TCP_NSC -DWITH_IPv4 -DWITH_RTP -DWITH_SCTP -DWITH_DHCP -DWITH_EXT_IF -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_TRACI -DWITH_IPv6 -DWITH_xMIPv6 -DWITH_MANET
 	$(RUNTEST)
 
 xMIPv6_disabled:
 	$(PRINT_BANNER)
-	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -Xnetworklayer/xmipv6 -Xnodes/xmipv6 -DWITH_UDP -DWITH_DHCP -DWITH_ETHERNET -DWITH_PPP -DWITH_VOIPTOOL -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_TCP_LWIP -DWITH_TCP_NSC -DWITH_IPv4 -DWITH_RTP -DWITH_SCTP -DWITH_EXT_IF -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_TRACI -DWITH_IPv6 -DWITH_MANET
+	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -Xnetworklayer/xmipv6 -Xnodes/xmipv6 -DWITH_UDP -DWITH_ETHERNET -DWITH_PPP -DWITH_VOIPTOOL -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_TCP_LWIP -DWITH_TCP_NSC -DWITH_IPv4 -DWITH_RTP -DWITH_SCTP -DWITH_DHCP -DWITH_EXT_IF -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_TRACI -DWITH_IPv6 -DWITH_MANET
 	$(RUNTEST)
 
 xMIPv6_examples_disabled:
 	$(PRINT_BANNER)
-	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -DWITH_UDP -DWITH_DHCP -DWITH_ETHERNET -DWITH_PPP -DWITH_VOIPTOOL -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_TCP_LWIP -DWITH_TCP_NSC -DWITH_IPv4 -DWITH_RTP -DWITH_SCTP -DWITH_EXT_IF -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_TRACI -DWITH_IPv6 -DWITH_MANET -DWITH_xMIPv6
+	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -DWITH_UDP -DWITH_ETHERNET -DWITH_PPP -DWITH_VOIPTOOL -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_TCP_LWIP -DWITH_TCP_NSC -DWITH_IPv4 -DWITH_RTP -DWITH_SCTP -DWITH_DHCP -DWITH_EXT_IF -DWITH_MPLS -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_TRACI -DWITH_IPv6 -DWITH_MANET -DWITH_xMIPv6
 	$(RUNTEST)
 
 UDP_disabled:
@@ -327,7 +327,7 @@ DHCP_disabled:
 
 Ethernet_disabled:
 	$(PRINT_BANNER)
-	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -Xapplications/ethernet -Xlinklayer/ethernet -Xnodes/ethernet -DWITH_PPP -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_TCP_LWIP -DWITH_TCP_NSC -DWITH_IPv4 -DWITH_EXT_IF -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_TRACI -DWITH_IPv6 -DWITH_xMIPv6 -DWITH_UDP -DWITH_MPLS -DWITH_MANET -DWITH_VOIPTOOL -DWITH_RTP -DWITH_SCTP -DWITH_DHCP
+	cd src && $(MAKEMAKE) -f --deep --make-so -o inet -O out -pINET -Xapplications/dhcp -Xapplications/ethernet -Xlinklayer/ethernet -Xnodes/ethernet -DWITH_PPP -DWITH_TCP_COMMON -DWITH_TCP_INET -DWITH_TCP_LWIP -DWITH_TCP_NSC -DWITH_IPv4 -DWITH_EXT_IF -DWITH_OSPFv2 -DWITH_BGPv4 -DWITH_TRACI -DWITH_IPv6 -DWITH_xMIPv6 -DWITH_UDP -DWITH_MPLS -DWITH_MANET -DWITH_VOIPTOOL -DWITH_RTP -DWITH_SCTP
 	$(RUNTEST)
 
 Ethernet_examples_disabled:
