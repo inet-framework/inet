@@ -88,6 +88,12 @@ void DHCPClient::initialize(int stage)
 
     // set client to idle state
     this->client_state = IDLE;
+
+    // FIXME following line is a HACK. It allows to work with all type of interfaces (not just wireless)
+    // a correct fix would need some kind of notification when the wireless interface is associated
+    // or when the eth interface gets connected and would set the INIT state only then. At the moment
+    // there is no such notification in INET.
+    changeFSMState(INIT);
 }
 
 void DHCPClient::changeFSMState(CLIENT_STATE new_state)
