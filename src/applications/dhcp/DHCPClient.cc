@@ -26,13 +26,16 @@ Define_Module(DHCPClient);
 
 void DHCPClient::initialize(int stage)
 {
-    if (stage != 3)
+    if (stage == 0)
     {
         this->timer_t1 = NULL;
         this->timer_t2 = NULL;
         this->timer_to = NULL;
         return;
     }
+
+    if (stage != 3)
+        return;
 
     numSent = 0;
     numReceived = 0;
@@ -54,16 +57,9 @@ void DHCPClient::initialize(int stage)
 
     // get the hostname
     cModule* host = findHost();
-    if (host != NULL)
-    {
-        this->host_name = host->getName();
-    }
+    this->host_name = host->getFullName();
 
     nb = NotificationBoardAccess().get();
-    if (nb == NULL)
-    {
-        error("Notification board not found. DHCP Client needs a notification board to know when the link is done.");
-    }
 
     // for a wireless interface subscribe the association event to start the DHCP protocol
     nb->subscribe(this, NF_L2_ASSOCIATED);
@@ -137,7 +133,7 @@ void DHCPClient::changeFSMState(CLIENT_STATE new_state)
         EV
                 << "Configuring interface : " << this->ie->getName() << " ip:" << this->lease->ip << "/"
                         << this->lease->netmask << " leased time: " << lease->lease_time << " (segs)" << endl;
-        std::cout << "host " << this->host_name << " got ip" << endl;
+        std::cout << "Host " << this->host_name << " got ip: " << this->lease->ip << "/" << this->lease->netmask << endl;
 
         IPv4Route *iroute = NULL;
         for (int i=0;i<this->irt->getNumRoutes();i++)
@@ -202,9 +198,9 @@ void DHCPClient::handleMessage(cMessage *msg)
         {
             EV << "unknown packet, discarding it" << endl;
         }
+        // delete the msg
+        delete msg;
     }
-    // delete the msg
-    delete msg;
 }
 
 void DHCPClient::handleTimer(cMessage* msg)
@@ -369,7 +365,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage* msg)
     }
     else
     {
-        EV << "dhcp message is not 4 us. discarding it" << endl;
+        EV << "dhcp message is not for us. discarding it" << endl;
     }
 }
 

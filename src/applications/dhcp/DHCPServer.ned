@@ -33,7 +33,7 @@ simple DHCPServer like IUDPApp
         int client_num; 	// number of ip to lease
         string gateway;		// gateway to assign
         string dns;			// dns to assign
-        int lease_time;		// lease time in seconds
+        int lease_time @unit(s);    // lease time in seconds
         string iface;		// interface to listen
         @display("i=device/card");
     gates:
