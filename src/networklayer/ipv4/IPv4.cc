@@ -191,8 +191,8 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
 #endif
         InterfaceEntry *broadcastIE = NULL;
 
-        // check for local delivery
-        if (rt->isLocalAddress(destAddr))
+        // check for local delivery; accepts incoming packets from interfaces have unspecified IPv4 address, too
+        if (rt->isLocalAddress(destAddr) || fromIE->ipv4Data()->getIPAddress().isUnspecified())
         {
             reassembleAndDeliver(datagram);
         }
