@@ -244,6 +244,20 @@
         linkerFlags = ""
         />
     <feature
+        id="DHCP_examples"
+        name="DHCP examples (Ethernet)"
+        description = "examples for DHCP protocol"
+        initiallyEnabled = "true"
+        requires = "DHCP Ethernet mobility radio Ieee80211"
+        labels = "protocols dhcp"
+        nedPackages = "
+                       inet.examples.dhcp
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="Ethernet"
         name="Ethernet"
         description = "IEEE 802.3 models (MAC, LLC, Encap) with support for classic

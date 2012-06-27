@@ -1,0 +1,9 @@
+ifconfig:
+name: wlan0	inet_addr: 192.168.0.1 Mask: 255.255.255.0	MTU: 1500	Metric: 1
+name: eth0	inet_addr: 10.0.0.2 Mask: 255.255.255.252	MTU: 1500	Metric: 1
+ifconfigend.
+
+route:
+192.168.0.0	*	255.255.255.0	H	0	wlan0
+default:	10.0.0.1	0.0.0.0 G	0	eth0
+routeend.
