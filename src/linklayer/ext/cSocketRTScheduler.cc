@@ -83,7 +83,7 @@ void cSocketRTScheduler::endRun()
     {
         pcap_stat ps;
         if (pcap_stats(pds.at(i), &ps) < 0)
-            throw cRuntimeError("cSocketRTScheduler::endRun(): Can not get pcap statistics: %s", pcap_geterr(pds.at(i)));
+            throw cRuntimeError("cSocketRTScheduler::endRun(): Cannot query pcap statistics: %s", pcap_geterr(pds.at(i)));
         else
             EV << modules.at(i)->getFullPath() << ": Received Packets: " << ps.ps_recv << " Dropped Packets: " << ps.ps_drop << ".\n";
         pcap_close(pds.at(i));
@@ -118,24 +118,24 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     /* get pcap handle */
     memset(&errbuf, 0, sizeof(errbuf));
     if ((pd = pcap_open_live(dev, PCAP_SNAPLEN, 0, PCAP_TIMEOUT, errbuf)) == NULL)
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Can not open pcap device, error = %s", errbuf);
+        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot open pcap device, error = %s", errbuf);
     else if (strlen(errbuf) > 0)
-        EV << "cSocketRTScheduler::setInterfaceModule: pcap_open_live returned waring: " << errbuf << "\n";
+        EV << "cSocketRTScheduler::setInterfaceModule(): pcap_open_live returned warning: " << errbuf << "\n";
 
     /* compile this command into a filter program */
     if (pcap_compile(pd, &fcode, (char *)filter, 0, 0) < 0)
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Can not compile filter: %s", pcap_geterr(pd));
+        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot compile pcap filter: %s", pcap_geterr(pd));
 
     /* apply the compiled filter to the packet capture device */
     if (pcap_setfilter(pd, &fcode) < 0)
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Can not apply compiled filter: %s", pcap_geterr(pd));
+        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot apply compiled pcap filter: %s", pcap_geterr(pd));
 
     if ((datalink = pcap_datalink(pd)) < 0)
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Can not get datalink: %s", pcap_geterr(pd));
+        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot query pcap link-layer header type: %s", pcap_geterr(pd));
 
 #ifndef LINUX
     if (pcap_setnonblock(pd, 1, errbuf) < 0)
-        throw cRuntimeError("cSocketRTScheduler::pcap_setnonblock(): Can not put pcap device into non-blocking mode, error = %s", errbuf);
+        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot put pcap device into non-blocking mode, error: %s", errbuf);
 #endif
 
     switch (datalink) {
@@ -161,7 +161,7 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
 
     EV << "Opened pcap device " << dev << " with filter " << filter << " and datalink " << datalink << ".\n";
 #else
-    throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): pcap devices not supported");
+    throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): code was compiled without pcap support");
 #endif
 }
 
@@ -244,7 +244,7 @@ bool cSocketRTScheduler::receiveWithTimeout()
             continue;
 #endif
         if ((n = pcap_dispatch(pds.at(i), 1, packet_handler, (uint8 *)&i)) < 0)
-            throw cRuntimeError("cSocketRTScheduler::pcap_dispatch(): An error occired: %s", pcap_geterr(pds.at(i)));
+            throw cRuntimeError("cSocketRTScheduler::pcap_dispatch(): An error occured: %s", pcap_geterr(pds.at(i)));
         if (n > 0)
             found = true;
     }

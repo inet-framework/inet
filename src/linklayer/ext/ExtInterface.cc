@@ -130,7 +130,7 @@ void ExtInterface::handleMessage(cMessage *msg)
             (ipPacket->getTransportProtocol() != IP_PROT_TCP) &&
             (ipPacket->getTransportProtocol() != IP_PROT_UDP))
         {
-            EV << "Can not send packet. Protocol " << ipPacket->getTransportProtocol() << " is not supported.\n";
+            EV << "Cannot send packet. Protocol " << ipPacket->getTransportProtocol() << " is not supported.\n";
             numDropped++;
             delete (msg);
             return;
