@@ -1,0 +1,141 @@
+%description:
+Testing DHCP protocol
+DHCPClient and DHCPServer connected each other directly
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.applications.IUDPApp;
+import inet.applications.dhcp.DHCPClient;
+import inet.applications.dhcp.DHCPServer;
+import inet.base.NotificationBoard;
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.ipv4.RoutingTable;
+
+
+module DHCPNode
+{
+    parameters:
+        @node;
+        string dhcpAppType;
+        @display("bgb=360,325");
+    gates:
+        input dhcpIn;
+        output dhcpOut;
+    submodules:
+        dhcpApp: <dhcpAppType> like IUDPApp {
+            @display("p=217,247");
+        }
+        notificationBoard: NotificationBoard {
+            @display("p=66,65");
+        }
+        interfaceTable: InterfaceTable {
+            @display("p=66,145");
+        }
+        routingTable: RoutingTable {
+            @display("p=68,216");
+        }
+    connections:
+        dhcpApp.udpOut --> dhcpOut;
+        dhcpIn --> dhcpApp.udpIn;
+}
+
+network Dhcptest
+{
+    submodules:
+        dhcpClient: DHCPNode {
+            dhcpAppType = "DHCPClient";
+            @display("p=66,76");
+        }
+        dhcpServer: DHCPNode {
+            dhcpAppType = "DHCPServer";
+            @display("p=277,76");
+        }
+    connections:
+        dhcpClient.dhcpOut --> dhcpServer.dhcpIn;
+        dhcpServer.dhcpOut --> dhcpClient.dhcpIn;
+}
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+
+network = Dhcptest
+
+sim-time-limit = 10500s
+
+**.dhcpClient.dhcpApp.interface="lo0"   # interface to be configured
+
+**.dhcpServer.dhcpApp.typename = "DHCPServer"
+**.dhcpServer.dhcpApp.net = "192.168.1.0"        # IP network to assign
+**.dhcpServer.dhcpApp.mask = "255.255.255.0"        # netmask to assign
+**.dhcpServer.dhcpApp.ipBegin = "192.168.1.100"    # ip to start to lease
+**.dhcpServer.dhcpApp.clientNum = 100     # number of ip to lease
+**.dhcpServer.dhcpApp.gateway = "192.168.1.1"     # gateway to assign
+**.dhcpServer.dhcpApp.dns = ""         # dns to assign
+**.dhcpServer.dhcpApp.leaseTime = 1000s     # lease time in seconds
+**.dhcpServer.dhcpApp.interface="lo0"   # interface to listen
+
+%#--------------------------------------------------------------------------------------------------------------
+%#--------------------------------------------------------------------------------------------------------------
+%contains: stdout
+** Event #1   T=0   Elapsed: 0.000s (0m 00s)  0% completed
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 6   present: 6   in FES: 6
+scheduling process
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+scheduling process
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+** Event #92   T=10500.022   Elapsed: 0.004s (0m 00s)  100% completed
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 136   present: 4   in FES: 3
+
+<!> Simulation time limit reached -- simulation stopped at event #92, t=10500.022.
+
+
+Calling finish() at end of Run #0...
+
+End.
+%#--------------------------------------------------------------------------------------------------------------
