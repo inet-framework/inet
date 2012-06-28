@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "Ieee80211MgmtAPBase.h"
 #include "Ieee802Ctrl_m.h"
 #include <string.h>
@@ -27,11 +26,22 @@
 void Ieee80211MgmtAPBase::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
-    if (stage==0)
+    if (stage == 0)
     {
-        hasRelayUnit = gate("upperLayerOut")->getPathEndGate()->isConnected();
-        convertToEtherFrameFlag = par("convertToEtherFrame").boolValue();
-        WATCH(hasRelayUnit);
+        isConnectedToHL = gate("upperLayerOut")->getPathEndGate()->isConnected();
+        const char * encDec = par("encapDecap").stringValue();
+        if (!encDec)
+            throw cRuntimeError("Missing encapDecap parameter!");
+        if (!strcmp(encDec, "true"))
+            encapDecap = ENCAP_DECAP_TRUE;
+        else if (!strcmp(encDec, "false"))
+            encapDecap = ENCAP_DECAP_FALSE;
+        else if (!strcmp(encDec, "eth"))
+            encapDecap = ENCAP_DECAP_ETH;
+        else
+            throw cRuntimeError("Unknown encapDecap parameter: '%s'!", encDec);
+
+        WATCH(isConnectedToHL);
     }
 }
 
@@ -53,9 +63,38 @@ void Ieee80211MgmtAPBase::distributeReceivedDataFrame(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
 {
-    cPacket *outFrame = frame;
-    if (convertToEtherFrameFlag)
-        outFrame = (cPacket *) convertToEtherFrame(frame);
+    if (!isConnectedToHL)
+    {
+        delete frame;
+        return;
+    }
+    cPacket *outFrame = NULL;
+    switch (encapDecap)
+    {
+        case ENCAP_DECAP_ETH:
+            outFrame = convertToEtherFrame(frame);
+            break;
+        case ENCAP_DECAP_TRUE:
+            {
+                cPacket* payload = frame->decapsulate();
+                Ieee802Ctrl *ctrl = new Ieee802Ctrl();
+                ctrl->setSrc(frame->getTransmitterAddress());
+                ctrl->setDest(frame->getAddress3());
+                Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
+                if (frameWithSNAP)
+                    ctrl->setEtherType(frameWithSNAP->getEtherType());
+                payload->setControlInfo(ctrl);
+                delete frame;
+                outFrame = payload;
+            }
+            break;
+        case ENCAP_DECAP_FALSE:
+            outFrame = frame;
+            break;
+        default:
+            throw cRuntimeError("Unknown encapDecap value: %d", encapDecap);
+            break;
+    }
     send(outFrame, "upperLayerOut");
 }
 
@@ -98,9 +137,9 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::convertFromEtherFrame(EtherFrame *ethfr
 
     // copy EtherType from original frame
     if (dynamic_cast<EthernetIIFrame *>(ethframe))
-        frame->setEtherType(((EthernetIIFrame *)ethframe)->getEtherType());
+        frame->setEtherType(((EthernetIIFrame *) ethframe)->getEtherType());
     else if (dynamic_cast<EtherFrameWithSNAP *>(ethframe))
-        frame->setEtherType(((EtherFrameWithSNAP *)ethframe)->getLocalcode());
+        frame->setEtherType(((EtherFrameWithSNAP *) ethframe)->getLocalcode());
     else
         error("Unaccepted EtherFrame type: %s, contains no EtherType", ethframe->getClassName());
 
@@ -116,5 +155,39 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::convertFromEtherFrame(EtherFrame *ethfr
 #else
     throw cRuntimeError("INET compiled without ETHERNET feature!");
 #endif
+}
+
+Ieee80211DataFrame *Ieee80211MgmtAPBase::encapsulate(cPacket *msg)
+{
+    switch (encapDecap)
+    {
+        case ENCAP_DECAP_ETH:
+            return convertFromEtherFrame(check_and_cast<EtherFrame *>(msg));
+            break;
+        case ENCAP_DECAP_TRUE:
+            {
+                Ieee802Ctrl* ctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
+                Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(msg->getName());
+                frame->setFromDS(true);
+
+                // copy addresses from ethernet frame (transmitter addr will be set to our addr by MAC)
+                frame->setAddress3(ctrl->getSrc());
+                frame->setReceiverAddress(ctrl->getDest());
+                frame->setEtherType(ctrl->getEtherType());
+                delete ctrl;
+
+                // encapsulate payload
+                frame->encapsulate(msg);
+                return frame;
+            }
+            break;
+        case ENCAP_DECAP_FALSE:
+            return check_and_cast<Ieee80211DataFrame *>(msg);
+            break;
+        default:
+            throw cRuntimeError("Unknown encapDecap value: %d", encapDecap);
+            break;
+    }
+    return NULL;
 }
 

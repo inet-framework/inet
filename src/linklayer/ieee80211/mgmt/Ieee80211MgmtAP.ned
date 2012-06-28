@@ -46,7 +46,7 @@ simple Ieee80211MgmtAP like IIeee80211Mgmt
         double beaconInterval @unit("s") = default(100ms);
         int frameCapacity = default(100); // maximum queue length
         int numAuthSteps = default(4); // use 2 for Open System auth, 4 for WEP
-        bool convertToEtherFrame = default(true);   // if true, frames sent up are converted to EthernetIIFrame
+        string encapDecap = default("eth") @enum("true", "false", "eth");   // if "eth", frames sent up are converted to EthernetIIFrame
         //dataRate: numeric; XXX TBD
         @display("i=block/cogwheel");
         @signal[enqueuePk](type=cMessage);

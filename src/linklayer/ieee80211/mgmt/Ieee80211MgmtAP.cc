@@ -55,7 +55,6 @@ void Ieee80211MgmtAP::initialize(int stage)
         WATCH(beaconInterval);
         WATCH(numAuthSteps);
         WATCH_MAP(staList);
-        isConnected = gate("upperLayerOut")->getPathEndGate()->isConnected();
 
         //TBD fill in supportedRates
 
@@ -84,22 +83,7 @@ void Ieee80211MgmtAP::handleTimer(cMessage *msg)
 
 void Ieee80211MgmtAP::handleUpperMessage(cPacket *msg)
 {
-    // must be an EtherFrame or Ieee80211DataFrame frame arriving from MACRelayUnit, that is,
-    // bridged from another interface of the AP (probably Ethernet).
-    Ieee80211DataFrame *frame = NULL;
-
-#ifdef WITH_ETHERNET
-    EtherFrame *etherframe = dynamic_cast<EtherFrame *>(msg);
-    if (etherframe)
-    {
-        frame = convertFromEtherFrame(etherframe);
-    }
-    else
-#endif
-    {
-        frame = check_and_cast<Ieee80211DataFrame *>(msg);
-    }
-
+    Ieee80211DataFrame *frame = encapsulate(msg);
     MACAddress macAddr = frame->getReceiverAddress();
     if (!macAddr.isMulticast())
     {
@@ -178,15 +162,8 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
     {
         EV << "Handling multicast frame\n";
 
-        if (hasRelayUnit)
+        if (isConnectedToHL)
             sendToUpperLayer(frame->dup());
-        else if (isConnected)
-        {
-            // JcM add: we dont have a relayunit, so, send the decap packet
-
-            cPacket* payload = frame->getEncapsulatedPacket()->dup();
-            send(payload,"upperLayerOut");
-        }
 
         distributeReceivedDataFrame(frame);
         return;
@@ -197,13 +174,9 @@ void Ieee80211MgmtAP::handleDataFrame(Ieee80211DataFrame *frame)
     if (it==staList.end())
     {
         // not our STA -- pass up frame to relayUnit for LAN bridging if we have one
-        if (hasRelayUnit)
-            sendToUpperLayer(frame);
-        else if (isConnected)
+        if (isConnectedToHL)
         {
-            cPacket* payload = frame->decapsulate();
-            delete frame;
-            send(payload,"upperLayerOut");
+            sendToUpperLayer(frame);
         }
         else
         {

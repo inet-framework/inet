@@ -34,9 +34,11 @@ class EtherFrame;
  */
 class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
 {
+  public:
+    typedef enum { ENCAP_DECAP_TRUE = 1, ENCAP_DECAP_FALSE, ENCAP_DECAP_ETH} EncapDecap;
   protected:
-    bool hasRelayUnit;
-    bool convertToEtherFrameFlag;
+    bool isConnectedToHL;
+    EncapDecap encapDecap;
 
   protected:
     virtual int numInitStages() const {return 2;}
@@ -48,6 +50,9 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
      * addresses as needed.
      */
     virtual void distributeReceivedDataFrame(Ieee80211DataFrame *frame);
+
+    /** Utility function for handleUpperMessage() */
+    virtual Ieee80211DataFrame *encapsulate(cPacket *msg);
 
     /**
      * Utility function: converts EtherFrame to Ieee80211Frame. This is needed

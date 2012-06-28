@@ -46,7 +46,7 @@ module WirelessAPWithSink
             parameters:
                 @display("p=89,225;q=queue");
                 mgmtType = default("Ieee80211MgmtAPSimplified");
-                mgmt.convertToEtherFrame = false;
+                mgmt.encapDecap = "false";
         }
         notificationBoard: NotificationBoard {
             parameters:

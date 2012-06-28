@@ -41,19 +41,7 @@ void Ieee80211MgmtAPSimplified::handleTimer(cMessage *msg)
 
 void Ieee80211MgmtAPSimplified::handleUpperMessage(cPacket *msg)
 {
-    Ieee80211DataFrame *frame = NULL;
-
-#ifdef WITH_ETHERNET
-    EtherFrame *etherframe = dynamic_cast<EtherFrame *>(msg);
-    if (etherframe)
-    {
-        frame = convertFromEtherFrame(etherframe);
-    }
-    else
-#endif
-    {
-        frame = check_and_cast<Ieee80211DataFrame *>(msg);
-    }
+    Ieee80211DataFrame *frame = encapsulate(msg);
     sendOrEnqueue(frame);
 }
 
@@ -78,7 +66,7 @@ void Ieee80211MgmtAPSimplified::handleDataFrame(Ieee80211DataFrame *frame)
         return;
     }
 
-    if (hasRelayUnit)
+    if (isConnectedToHL)
     {
         // LAN bridging: if we have a relayUnit, send up the frame to it too
         // (relayUnit will skip this port when copying the frame for all ports)
@@ -138,5 +126,4 @@ void Ieee80211MgmtAPSimplified::handleProbeResponseFrame(Ieee80211ProbeResponseF
 {
     dropManagementFrame(frame);
 }
-
 

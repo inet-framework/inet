@@ -78,7 +78,6 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     // state
     STAList staList; ///< list of STAs
     cMessage *beaconTimer;
-    bool isConnected;
 
   protected:
     virtual int numInitStages() const {return 2;}
