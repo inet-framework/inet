@@ -80,10 +80,8 @@ void Ieee80211MgmtAPSimplified::handleDataFrame(Ieee80211DataFrame *frame)
 
     if (hasRelayUnit)
     {
-        // LAN bridging: if we have a relayUnit, send up the frame to it.
-        // We don't need to call distributeReceivedDataFrame() here, because
-        // if the frame needs to be distributed onto the wireless LAN too,
-        // then relayUnit will send a copy back to us.
+        // LAN bridging: if we have a relayUnit, send up the frame to it too
+        // (relayUnit will skip this port when copying the frame for all ports)
         sendToUpperLayer(frame->dup());
     }
 
