@@ -1470,7 +1470,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             FSMA_No_Event_Transition(Immediate-Promiscuous-Data,
                                      isLowerMsg(msg) && !isForUs(frame) && isDataOrMgmtFrame(frame),
                                      IDLE,
-                                     nb->fireChangeNotification(NF_LINK_PROMISCUOUS, frame);
+                                     promiscousFrame(frame);
                                      if (fixFSM)
                                          finishReception();
                                      else
@@ -2844,42 +2844,13 @@ void Ieee80211Mac::sendUp(cMessage *msg)
 {
     EV << "sending up " << msg << "\n";
 
-    if (duplicateDetect) // duplicate detection filter
+    if (!isDuplicated(msg)) // duplicate detection filter
     {
-    	Ieee80211DataOrMgmtFrame *frame =dynamic_cast<Ieee80211DataOrMgmtFrame*>(msg);
-        if (frame)
-        {
-            Ieee80211ASFTupleList::iterator it = asfTuplesList.find(frame->getTransmitterAddress());
-            if (it==asfTuplesList.end())
-            {
-                Ieee80211ASFTuple tuple;
-                tuple.receivedTime=simTime();
-                tuple.sequenceNumber= frame->getSequenceNumber();
-                tuple.fragmentNumber=frame->getFragmentNumber();
-                asfTuplesList.insert(std::pair<MACAddress,Ieee80211ASFTuple>(frame->getTransmitterAddress(),tuple));
-            }
-            else
-            {
-            	// check if duplicate
-            	if (it->second.sequenceNumber==frame->getSequenceNumber() && it->second.fragmentNumber==frame->getFragmentNumber())
-            	{
-            	    return;
-            	}
-            	else
-            	{
-                    // actualize
-            	    it->second.sequenceNumber=frame->getSequenceNumber();
-            	    it->second.fragmentNumber=frame->getFragmentNumber();
-            	    it->second.receivedTime=simTime();
-            	}
-            }
-        }
+        if (msg->isPacket())
+            emit(packetSentToUpperSignal, msg);
+
+        send(msg, upperLayerOut);
     }
-
-    if (msg->isPacket())
-        emit(packetSentToUpperSignal, msg);
-
-    send(msg, upperLayerOut);
 }
 
 void Ieee80211Mac::removeOldTuplesFromDuplicateMap()
@@ -2920,4 +2891,47 @@ const MACAddress & Ieee80211Mac::isInterfaceRegistered()
     if (e)
         return e->getMacAddress();
     return MACAddress::UNSPECIFIED_ADDRESS;
+}
+
+bool Ieee80211Mac::isDuplicated(cMessage *msg)
+{
+    if (duplicateDetect) // duplicate detection filter
+    {
+        Ieee80211DataOrMgmtFrame *frame = dynamic_cast<Ieee80211DataOrMgmtFrame*>(msg);
+        if (frame)
+        {
+            Ieee80211ASFTupleList::iterator it = asfTuplesList.find(frame->getTransmitterAddress());
+            if (it == asfTuplesList.end())
+            {
+                Ieee80211ASFTuple tuple;
+                tuple.receivedTime = simTime();
+                tuple.sequenceNumber = frame->getSequenceNumber();
+                tuple.fragmentNumber = frame->getFragmentNumber();
+                asfTuplesList.insert(std::pair<MACAddress, Ieee80211ASFTuple>(frame->getTransmitterAddress(), tuple));
+            }
+            else
+            {
+                // check if duplicate
+                if (it->second.sequenceNumber == frame->getSequenceNumber()
+                        && it->second.fragmentNumber == frame->getFragmentNumber())
+                {
+                    return true;
+                }
+                else
+                {
+                    // actualize
+                    it->second.sequenceNumber = frame->getSequenceNumber();
+                    it->second.fragmentNumber = frame->getFragmentNumber();
+                    it->second.receivedTime = simTime();
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void Ieee80211Mac::promiscousFrame(cMessage *msg)
+{
+    if (!isDuplicated(msg)) // duplicate detection filter
+        nb->fireChangeNotification(NF_LINK_PROMISCUOUS, msg);
 }

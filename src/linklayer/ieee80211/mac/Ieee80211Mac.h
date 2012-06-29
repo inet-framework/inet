@@ -667,6 +667,10 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     virtual void sendUp(cMessage *msg);
 
     virtual void removeOldTuplesFromDuplicateMap();
+
+    virtual void promiscousFrame(cMessage *msg);
+
+    virtual bool isDuplicated(cMessage *msg);
 };
 
 #endif
