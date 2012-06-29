@@ -56,7 +56,7 @@ package inet.networklayer.internetcloud;
 simple InternetCloudNetworkConfigurator
 {
     parameters:
-	string gnpFile; // Filename of XML file containing embedded hosts and PingEr data
+        string gnpFile; // Filename of XML file containing embedded hosts and PingEr data
         @display("i=block/cogwheel_s");
         @labels(node);
 }

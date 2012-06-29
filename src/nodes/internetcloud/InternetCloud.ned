@@ -18,13 +18,19 @@
 
 // Based on ../../nodes/inet/Router.ned
 
-package inet.world.inet;
+package inet.nodes.internetcloud;
 
 import inet.base.NotificationBoard;
-import inet.linklayer.ethernet.EthernetInterface;
-import inet.linklayer.ppp.PPPInterface;
+import inet.linklayer.IExternalNic;
+import inet.linklayer.IWiredNic;
+import inet.networklayer.arp.ARP;
 import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.ipv4.ErrorHandling;
+import inet.networklayer.ipv4.ICMP;
+import inet.networklayer.ipv4.IPv4;
 import inet.networklayer.ipv4.RoutingTable;
+import inet.util.PcapRecorder;
+
 
 //
 // \InternetCloud
@@ -35,10 +41,93 @@ module InternetCloud
         @node();
         @labels(node,ethernet-node);
         @display("i=misc/cloud");
+        int numExtInterfaces = default(0);
+        int numPcapRecorders = default(0); // no of PcapRecorders.
         string routingFile = default("");
     gates:
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
+    types:
+        simple DelayGenerator
+        {
+            parameters:
+                bool usePingErRttData = default(false);
+                bool useAnalyticalRtt = default(false);
+                bool usePingErJitter = default(false);
+                bool usePingErPacketLoss = default(false);
+                bool useAccessLatency = default(false);
+                @display("i=block/delay");
+            gates:
+                input ipIn;
+                output ipOut;
+        }
+        module InternetCloudNetworkLayer
+        {
+            parameters:
+                bool proxyARP = default(true);
+                bool usePingErRttData = default(false);
+                bool useAnalyticalRtt = default(false);
+                bool usePingErJitter = default(true);
+                bool usePingErPacketLoss = default(false);
+                bool useAccessLatency = default(false);
+                @display("i=block/fork");
+            gates:
+                input ifIn[] @labels(IPDatagram);
+                output ifOut[];
+            submodules:
+                ip: IPv4 {
+                    parameters:
+                        timeToLive = 32;
+                        multicastTimeToLive = 32;
+                        fragmentTimeout = 60s;
+                        protocolMapping = "1:0,138:0";
+                        @display("p=85,95;q=queue");
+                    gates:
+                        transportIn[1];
+                        transportOut[1];
+                        queueIn[sizeof(ifIn)];
+                }
+
+                delayGenerator: DelayGenerator {
+                    parameters:
+                        usePingErRttData = usePingErRttData;
+                        useAnalyticalRtt = useAnalyticalRtt;
+                        usePingErJitter = usePingErJitter;
+                        usePingErPacketLoss = usePingErPacketLoss;
+                        useAccessLatency = useAccessLatency;
+                        @display("p=160,123");
+                }
+                arp: ARP {
+                    parameters:
+                        proxyARP = proxyARP;
+                        @display("p=163,206;q=pendingQueue");
+                    gates:
+                        nicOut[sizeof(ifOut)];
+                }
+                icmp: ICMP {
+                    parameters:
+                        @display("p=160,33");
+                }
+                errorHandling: ErrorHandling {
+                    parameters:
+                        @display("p=239,33");
+                }
+            connections allowunconnected:
+                // transport Layer
+                ip.transportOut[0] --> icmp.localIn;
+                ip.transportIn[0] <-- icmp.sendOut;
+
+                icmp.errorOut --> errorHandling.in;
+
+                ip.queueOut --> delayGenerator.ipIn;
+                delayGenerator.ipOut --> arp.ipIn;
+
+                // L2 interfaces to IP and from ARP
+                for i=0..sizeof(ifOut)-1 {
+                    ifIn[i] --> { @display("m=s"); } --> ip.queueIn[i];
+                    ifOut[i] <-- { @display("m=s"); } <-- arp.nicOut[i];
+                }
+        }
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
@@ -46,42 +135,54 @@ module InternetCloud
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=150,60");
+                @display("p=60,131");
         }
         routingTable: RoutingTable {
             parameters:
                 IPForward = true;
                 routerId = "auto";
                 routingFile = routingFile;
-                @display("p=240,60");
+                @display("p=60,196");
         }
-        networkLayer: InternetLayer {
+        pcapRecorder[numPcapRecorders]: PcapRecorder {
+            @display("p=291,60");
+        }
+        networkLayer: InternetCloudNetworkLayer {
             parameters:
-                @display("p=200,141;q=queue");
+                @display("p=267,157;q=queue");
             gates:
                 ifIn[sizeof(pppg)+sizeof(ethg)];
                 ifOut[sizeof(pppg)+sizeof(ethg)];
         }
-        ppp[sizeof(pppg)]: PPPInterface {
+        ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
-                @display("p=90,257,row,110;q=l2queue");
+                @display("p=125,257,row,110;q=l2queue");
         }
-        eth[sizeof(ethg)]: EthernetInterface {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
-                @display("p=145,257,row,110;q=l2queue");
+                @display("p=267,257,row,110;q=l2queue");
+        }
+        ext[numExtInterfaces]: <default("ExtInterface")> like IExternalNic {
+            parameters:
+                @display("p=423,257,row,90;q=txQueue;i=block/ifcard");
         }
     connections allowunconnected:
         // connections to network outside
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
-            ppp[i].netwOut --> networkLayer.ifIn[i];
-            ppp[i].netwIn <-- networkLayer.ifOut[i];
+            ppp[i].upperLayerOut --> networkLayer.ifIn[i];
+            ppp[i].upperLayerIn <-- networkLayer.ifOut[i];
         }
 
         for i=0..sizeof(ethg)-1 {
             ethg[i] <--> eth[i].phys;
-            eth[i].netwOut --> networkLayer.ifIn[sizeof(pppg)+i];
-            eth[i].netwIn <-- networkLayer.ifOut[sizeof(pppg)+i];
+            eth[i].upperLayerOut --> networkLayer.ifIn[sizeof(pppg)+i];
+            eth[i].upperLayerIn <-- networkLayer.ifOut[sizeof(pppg)+i];
+        }
+
+        for i=0..numExtInterfaces-1 {
+            ext[i].upperLayerOut --> networkLayer.ifIn++;
+            ext[i].upperLayerIn <-- networkLayer.ifOut++;
         }
 }
 
