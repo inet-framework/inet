@@ -118,7 +118,9 @@ void GnpNetworkConfigurator::initialize(int stage)
 }
 
 GnpNetworkConfigurator::~GnpNetworkConfigurator()
-{ }
+{
+    delete netLayerFactoryGnp;
+}
 
 void GnpNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeInfo)
 {
@@ -380,7 +382,7 @@ void GnpNetworkConfigurator::initialize(int stage)
 
 GnpNetworkConfigurator::GnpNetworkConfigurator()
 : netLayerFactoryGnp(new gnplib::impl::network::gnp::GnpNetLayerFactory) {}
-GnpNetworkConfigurator::~GnpNetworkConfigurator() {}
+GnpNetworkConfigurator::~GnpNetworkConfigurator() { delete netLayerFactoryGnp; }
 void GnpNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeInfo) {}
 void GnpNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo) {}
 void GnpNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo) {}

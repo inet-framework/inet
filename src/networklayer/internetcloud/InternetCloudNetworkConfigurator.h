@@ -22,7 +22,6 @@
 #include <omnetpp.h>
 #include "INETDefs.h"
 #include "IPAddress.h"
-#include <boost/scoped_ptr.hpp>
 
 namespace gnplib { namespace impl { namespace network { namespace gnp { class GnpNetLayerFactory; } } } }
 class IInterfaceTable;
@@ -66,7 +65,7 @@ public:
 
 private:
     GnpNetworkConfigurator(const GnpNetworkConfigurator& orig);
-    boost::scoped_ptr<gnplib::impl::network::gnp::GnpNetLayerFactory> netLayerFactoryGnp;
+    gnplib::impl::network::gnp::GnpNetLayerFactory *netLayerFactoryGnp;
 };
 
 #endif
