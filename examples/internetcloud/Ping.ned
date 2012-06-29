@@ -16,11 +16,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.examples.inet.gnpping;
+package inet.examples.internetcloud;
 
-import inet.world.inet.GnpNetworkConfigurator;
-import inet.world.inet.InternetCloud;
+import inet.networklayer.internetcloud.InternetCloudNetworkConfigurator;
 import inet.nodes.inet.StandardHost;
+import inet.nodes.internetcloud.InternetCloud;
+import ned.DatarateChannel;
+
 
 network PingNetwork
 {
@@ -32,8 +34,13 @@ network PingNetwork
         {
             string group = default("");   // group ID for delay/jitter etc. parameter group 
         }
+        channel C extends DatarateChannel
+        {
+            delay = 0;
+            datarate = 100Mbps;
+        }
     submodules:
-        configurator: GnpNetworkConfigurator {
+        configurator: InternetCloudNetworkConfigurator {
             parameters:
                 @display("p=61,163");
         }
@@ -42,8 +49,9 @@ network PingNetwork
         recip: GnpStandardHost;
         internet: InternetCloud;
     connections:
-        recip.pppg++ <--> internet.pppg++;
+        recip.pppg++ <--> C <--> internet.pppg++;
         for i=0..numSenders-1 {
-            sender[i].pppg++ <--> internet.pppg++;
+            sender[i].pppg++ <--> C <--> internet.pppg++;
         }
 }
+
