@@ -19,11 +19,16 @@
 #ifndef __INET_INTERNETCLOUD_NETWORKCONFIGURATOR_H
 #define __INET_INTERNETCLOUD_NETWORKCONFIGURATOR_H
 
-#include <omnetpp.h>
-#include "INETDefs.h"
-#include "IPAddress.h"
+#include <string>
+#include <vector>
 
+#include "INETDefs.h"
+
+#include "IPv4Address.h"
+
+// Forward declarations:
 namespace gnplib { namespace impl { namespace network { namespace gnp { class GnpNetLayerFactory; } } } }
+
 class IInterfaceTable;
 class IRoutingTable;
 
@@ -42,7 +47,7 @@ class INET_API InternetCloudNetworkConfigurator : public cSimpleModule
         bool isIPNode;
         IInterfaceTable *ift;
         IRoutingTable *rt;
-        IPAddress address;
+        IPv4Address address;
         bool usesDefaultRoute;
         std::string group;
     };

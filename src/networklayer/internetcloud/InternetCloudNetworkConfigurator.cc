@@ -28,7 +28,7 @@
 
 #include "IRoutingTable.h"
 #include "IInterfaceTable.h"
-#include "IPAddressResolver.h"
+#include "IPvXAddressResolver.h"
 #include "InterfaceEntry.h"
 #include "IPv4InterfaceData.h"
 
@@ -102,7 +102,7 @@ void InternetCloudNetworkConfigurator::initialize(int stage)
         // isIPNode, rt and ift members of nodeInfo[]
         extractTopology(topo, nodeInfo);
 
-        // assign addresses to IP nodes, and also store result in nodeInfo[].address
+        // assign addresses to IPv4 nodes, and also store result in nodeInfo[].address
         assignAddresses(topo, nodeInfo);
 
         // add default routes to hosts (nodes with a single attachment);
@@ -133,11 +133,11 @@ void InternetCloudNetworkConfigurator::extractTopology(cTopology& topo, NodeInfo
     for (int i=0; i<topo.getNumNodes(); i++)
     {
         cModule *mod = topo.getNode(i)->getModule();
-        nodeInfo[i].isIPNode = IPAddressResolver().findInterfaceTableOf(mod)!=NULL;
+        nodeInfo[i].isIPNode = IPvXAddressResolver().findInterfaceTableOf(mod)!=NULL;
         if (nodeInfo[i].isIPNode)
         {
-            nodeInfo[i].ift = IPAddressResolver().interfaceTableOf(mod);
-            nodeInfo[i].rt = IPAddressResolver().routingTableOf(mod);
+            nodeInfo[i].ift = IPvXAddressResolver().interfaceTableOf(mod);
+            nodeInfo[i].rt = IPvXAddressResolver().routingTableOf(mod);
         }
         if (mod->hasPar("group"))
             nodeInfo[i].group=mod->par("group").stdstringValue();
@@ -161,7 +161,7 @@ void InternetCloudNetworkConfigurator::extractTopology(cTopology& topo, NodeInfo
 
 void InternetCloudNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo)
 {
-    // assign IP addresses
+    // assign IPv4 addresses
     for (int i=0; i<topo.getNumNodes(); i++)
     {
         // skip bus types
@@ -173,7 +173,9 @@ void InternetCloudNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfo
         GnpNetLayer* netLayer=netLayerFactoryGnp->newNetLayer(nodeInfo[i].group); // TODO: This is a memory leak!!!
         uint32 addr=netLayer->getNetID().getID();
 
-        EV << "Assigning " << node->getModule()->getFullName() << " of group \"" << nodeInfo[i].group << "\" IP-Id " << addr << " (pseudo-IP address " << IPAddress(addr) << ")\n";
+        EV << "Assigning " << node->getModule()->getFullName() << " of group \""
+           << nodeInfo[i].group << "\" IP-Id " << addr << " (pseudo-IP address "
+           << IPv4Address(addr) << ")\n";
 
         nodeInfo[i].address.set(addr);
 
@@ -184,8 +186,8 @@ void InternetCloudNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfo
             InterfaceEntry *ie = ift->getInterface(k);
             if (!ie->isLoopback())
             {
-                ie->ipv4Data()->setIPAddress(IPAddress(addr));
-                ie->ipv4Data()->setNetmask(IPAddress::ALLONES_ADDRESS); // full address must match for local delivery
+                ie->ipv4Data()->setIPAddress(IPv4Address(addr));
+                ie->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS); // full address must match for local delivery
             }
         }
 
@@ -276,12 +278,11 @@ void InternetCloudNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInf
            << " has only one (non-loopback) interface, adding default route\n";
 
         // add route
-        IPRoute *e = new IPRoute();
-        e->setHost(IPAddress());
-        e->setNetmask(IPAddress());
+        IPv4Route *e = new IPv4Route();
+        e->setDestination(IPv4Address());
+        e->setNetmask(IPv4Address());
         e->setInterface(ie);
-        e->setType(IPRoute::REMOTE);
-        e->setSource(IPRoute::MANUAL);
+        e->setSource(IPv4Route::MANUAL);
         //e->getMetric() = 1;
         rt->addRoute(e);
     }
@@ -298,7 +299,7 @@ void InternetCloudNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeIn
         if (!nodeInfo[i].isIPNode)
             continue;
 
-        IPAddress destAddr = nodeInfo[i].address;
+        IPv4Address destAddr = nodeInfo[i].address;
         std::string destModName = destNode->getModule()->getFullName();
 
         // calculate shortest paths from everywhere towards destNode
@@ -318,7 +319,7 @@ void InternetCloudNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeIn
             if (nodeInfo[j].usesDefaultRoute)
                 continue; // already added default route here
 
-            IPAddress atAddr = nodeInfo[j].address;
+            IPv4Address atAddr = nodeInfo[j].address;
 
             IInterfaceTable *ift = nodeInfo[j].ift;
 
@@ -327,17 +328,16 @@ void InternetCloudNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeIn
             if (!ie)
                 error("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
 
-            EV << "  from " << atNode->getModule()->getFullName() << "=" << IPAddress(atAddr);
-            EV << " towards " << destModName << "=" << IPAddress(destAddr) << " interface " << ie->getName() << endl;
+            EV << "  from " << atNode->getModule()->getFullName() << "=" << IPv4Address(atAddr);
+            EV << " towards " << destModName << "=" << IPv4Address(destAddr) << " interface " << ie->getName() << endl;
 
             // add route
             IRoutingTable *rt = nodeInfo[j].rt;
-            IPRoute *e = new IPRoute();
-            e->setHost(destAddr);
-            e->setNetmask(IPAddress(255,255,255,255)); // full match needed
+            IPv4Route *e = new IPv4Route();
+            e->setDestination(destAddr);
+            e->setNetmask(IPv4Address(255, 255, 255, 255)); // full match needed
             e->setInterface(ie);
-            e->setType(IPRoute::DIRECT);
-            e->setSource(IPRoute::MANUAL);
+            e->setSource(IPv4Route::MANUAL);
             //e->getMetric() = 1;
             rt->addRoute(e);
         }
@@ -358,7 +358,7 @@ void InternetCloudNetworkConfigurator::setDisplayString(cTopology& topo, NodeInf
 
     // update display string
     char buf[80];
-    sprintf(buf, "%d IP nodes\n%d non-IP nodes", numIPNodes, topo.getNumNodes()-numIPNodes);
-    getDisplayString().setTagArg("t",0,buf);
+    sprintf(buf, "%d IPv4 nodes\n%d non-IPv4 nodes", numIPNodes, topo.getNumNodes()-numIPNodes);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 

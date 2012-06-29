@@ -19,10 +19,10 @@
 #include <gnplib/impl/network/gnp/GeoLocationOracle.h>
 #include <gnplib/impl/network/gnp/GnpLatencyModel.h>
 #include <gnplib/impl/network/IPv4NetID.h>
-#include "IPDatagram.h"
 
 #include "DelayGenerator.h"
 
+#include "IPv4Datagram.h"
 
 
 Define_Module(DelayGenerator);
@@ -38,17 +38,17 @@ void DelayGenerator::initialize(int stage)
         outGateId=findGate("ipOut");
 
         // This must be after stage 0 where GnpNetworkConfigurator creates GnpLatencyModel
-        GeoLocationOracle::lm->setUsePingErJitter(par("usePingErJitter"));
-        GeoLocationOracle::lm->setUsePingErRttData(par("usePingErRttData"));
-        GeoLocationOracle::lm->setUseAnalyticalRtt(par("useAnalyticalRtt"));
-        GeoLocationOracle::lm->setUsePingErPacketLoss(par("usePingErPacketLoss"));
-        GeoLocationOracle::lm->setUseAccessLatency(par("useAccessLatency"));
+        GeoLocationOracle::lm->setUsePingErJitter(par("usePingErJitter").boolValue());
+        GeoLocationOracle::lm->setUsePingErRttData(par("usePingErRttData").boolValue());
+        GeoLocationOracle::lm->setUseAnalyticalRtt(par("useAnalyticalRtt").boolValue());
+        GeoLocationOracle::lm->setUsePingErPacketLoss(par("usePingErPacketLoss").boolValue());
+        GeoLocationOracle::lm->setUseAccessLatency(par("useAccessLatency").boolValue());
     }
 }
 
 void DelayGenerator::handleMessage(cMessage *msg)
 {
-    IPDatagram*pkt(dynamic_cast<IPDatagram*>(msg));
+    IPv4Datagram *pkt(dynamic_cast<IPv4Datagram*>(msg));
     if (pkt)
     {
         const IPv4NetID src(pkt->getSrcAddress().getInt());
