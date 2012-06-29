@@ -46,3 +46,13 @@ ifneq (,$(findstring -DWITH_VOIPTOOL,$(COPTS)))
   endif
 endif
 
+#
+# Internet Cloud feature:
+#
+ifneq (,$(findstring -DWITH_INTERNETCLOUD,$(COPTS)))
+  ifeq ($(HAVE_PKGCFG), yes)
+    # xerces and boost do not support pkg-config
+    LIBS += -lxerces-c -lboost_signals -Wl,-rpath,/usr/lib
+  endif
+endif
+
