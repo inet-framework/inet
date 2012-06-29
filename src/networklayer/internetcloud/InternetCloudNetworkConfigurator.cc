@@ -19,6 +19,7 @@
 
 
 #include <algorithm>
+
 #include <gnplib/impl/network/gnp/GnpLatencyModel.h>
 #include <gnplib/impl/network/gnp/GnpNetLayerFactory.h>
 #include <gnplib/api/common/random/Rng.h>
@@ -26,11 +27,11 @@
 
 #include "InternetCloudNetworkConfigurator.h"
 
-#include "IRoutingTable.h"
 #include "IInterfaceTable.h"
-#include "IPvXAddressResolver.h"
 #include "InterfaceEntry.h"
 #include "IPv4InterfaceData.h"
+#include "IPvXAddressResolver.h"
+#include "IRoutingTable.h"
 
 
 Define_Module(InternetCloudNetworkConfigurator);
@@ -140,19 +141,19 @@ void InternetCloudNetworkConfigurator::extractTopology(cTopology& topo, NodeInfo
             nodeInfo[i].rt = IPvXAddressResolver().routingTableOf(mod);
         }
         if (mod->hasPar("group"))
-            nodeInfo[i].group=mod->par("group").stdstringValue();
+            nodeInfo[i].group = mod->par("group").stdstringValue();
         else
         {
-            const cProperty* prop=mod->getProperties()->get("group");
+            const cProperty* prop = mod->getProperties()->get("group");
             if (prop)
             {
-                nodeInfo[i].group=prop->getValue("");
-                EV<<"mod uses group "<<prop->getValue("")<<endl;
+                nodeInfo[i].group = prop->getValue("");
+                EV << "mod uses group " << prop->getValue("") << endl;
             } else
             {
                 if (!isInternetNode(mod))
                 {
-                    EV<<"Module "<< mod->getFullName() <<" has no GNP group par/property"<<endl;
+                    EV << "Module " << mod->getFullName() << " has no GNP group par/property" << endl;
                 }
             }
         }
@@ -170,8 +171,8 @@ void InternetCloudNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfo
         if (nodeInfo[i].group.empty())
             continue;
         cTopology::Node *node = topo.getNode(i);
-        GnpNetLayer* netLayer=netLayerFactoryGnp->newNetLayer(nodeInfo[i].group); // TODO: This is a memory leak!!!
-        uint32 addr=netLayer->getNetID().getID();
+        GnpNetLayer *netLayer = netLayerFactoryGnp->newNetLayer(nodeInfo[i].group); // TODO: This is a memory leak!!!
+        uint32 addr = netLayer->getNetID().getID();
 
         EV << "Assigning " << node->getModule()->getFullName() << " of group \""
            << nodeInfo[i].group << "\" IP-Id " << addr << " (pseudo-IP address "
@@ -181,7 +182,7 @@ void InternetCloudNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfo
 
         // find interface table and assign address to all (non-loopback) interfaces
         IInterfaceTable *ift = nodeInfo[i].ift;
-        for (int k=0; k<ift->getNumInterfaces(); k++)
+        for (int k=0; k < ift->getNumInterfaces(); k++)
         {
             InterfaceEntry *ie = ift->getInterface(k);
             if (!ie->isLoopback())
@@ -193,7 +194,7 @@ void InternetCloudNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfo
 
         // Parametrize DatarateChannel connected to the Internet with node-specific data
         InterfaceEntry *ie(0);
-        for (int k = 0; k<node->getNumOutLinks(); ++k)
+        for (int k=0; k < node->getNumOutLinks(); ++k)
         {
             cTopology::LinkOut* linkOut = node->getLinkOut(k);
             EV << node->getModule()->getFullName() << " is connected to " << linkOut->getRemoteNode()->getModule()->getModuleType()->getName() << "\n";
@@ -206,8 +207,8 @@ void InternetCloudNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfo
                        throw cRuntimeError("Can't connect %s upstream to the Internet with more than one interface", node->getModule()->getFullName());
                     ie = ift->getInterfaceByNodeOutputGateId(linkOut->getLocalGate()->getId());
 
-                    const double upstream_bw_bps(netLayer->getMaxUploadBandwidth()*8.0); // bytes/s -> bit/s
-                    const double upstream_delay_s(netLayer->getAccessLatency()/(2.0*1000.0)); // distribute delay evenly between up- and downstream, ms -> s
+                    const double upstream_bw_bps(netLayer->getMaxUploadBandwidth() * 8.0); // bytes/s -> bit/s
+                    const double upstream_delay_s(netLayer->getAccessLatency() / (2.0*1000.0)); // distribute delay evenly between up- and downstream, ms -> s
                     EV << "Configuring upstream channel with " << upstream_bw_bps << "bps and " << upstream_delay_s << "s wire delay" << endl;
                     internet_uplink->setDatarate(upstream_bw_bps);
                     internet_uplink->setDelay(upstream_delay_s);
@@ -221,7 +222,7 @@ void InternetCloudNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfo
         }
 
         // Parametrize DatarateChannel connected from the Internet with node-specific data
-        for (int k = 0; k<node->getNumInLinks(); ++k)
+        for (int k=0; k < node->getNumInLinks(); ++k)
         {
             cTopology::LinkIn* linkIn = node->getLinkIn(k);
             if (isInternetNode(linkIn->getRemoteNode()))
@@ -230,9 +231,10 @@ void InternetCloudNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfo
                 if (internet_downlink)
                 {
                     if (linkIn->getLocalGateId() != ie->getNodeInputGateId())
-                         throw cRuntimeError("%s uses different interfaces to connect upstream/downstream to the Internet", node->getModule()->getFullName());
-                    const double downstream_bw_bps(netLayer->getMaxDownloadBandwidth()*8.0); // bytes/s -> bit/s
-                    const double downstream_delay_s(netLayer->getAccessLatency()/(2.0*1000.0)); // distribute delay evenly between up- and downstream, ms -> s
+                        throw cRuntimeError("%s uses different interfaces to connect upstream/downstream to the Internet", node->getModule()->getFullName());
+
+                    const double downstream_bw_bps(netLayer->getMaxDownloadBandwidth() * 8.0); // bytes/s -> bit/s
+                    const double downstream_delay_s(netLayer->getAccessLatency() / (2.0*1000.0)); // distribute delay evenly between up- and downstream, ms -> s
                     EV << "Configuring downstream channel with " << downstream_bw_bps << "bps and " << downstream_delay_s << "s wire delay" << endl;
                     internet_downlink->setDatarate(downstream_bw_bps);
                     internet_downlink->setDelay(downstream_delay_s);
@@ -242,10 +244,8 @@ void InternetCloudNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfo
                     throw cRuntimeError("Please use a DatarateChannel to connect %s downstream from the Internet", node->getModule()->getFullName());
                 }
             }
-
         }
         EV << "Configured internet access from " << node->getModule()->getFullName() << " through " << ie->getName() << "\n";
-
     }
 }
 
@@ -277,7 +277,7 @@ void InternetCloudNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInf
         EV << "  " << node->getModule()->getFullName() << "=" << nodeInfo[i].address
            << " has only one (non-loopback) interface, adding default route\n";
 
-        // add route
+        // add default route
         IPv4Route *e = new IPv4Route();
         e->setDestination(IPv4Address());
         e->setNetmask(IPv4Address());
@@ -309,12 +309,13 @@ void InternetCloudNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeIn
         // (excepting nodes with only one interface -- there we'll set up a default route)
         for (int j=0; j<topo.getNumNodes(); j++)
         {
-            if (i==j) continue;
+            if (i==j)
+                continue;
             if (!nodeInfo[j].isIPNode)
                 continue;
 
             cTopology::Node *atNode = topo.getNode(j);
-            if (atNode->getNumPaths()==0)
+            if (atNode->getNumPaths() == 0)
                 continue; // not connected
             if (nodeInfo[j].usesDefaultRoute)
                 continue; // already added default route here

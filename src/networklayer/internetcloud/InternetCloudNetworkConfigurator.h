@@ -35,7 +35,7 @@ class IRoutingTable;
 
 /**
  * Configures IP addresses and routing tables for a network.
- * IP-Adresses are chosen from a GNP hosts file.
+ * IP-Addresses are chosen from a GNP hosts file.
  *
  * For more info please see the NED file.
  */
@@ -53,9 +53,10 @@ class INET_API InternetCloudNetworkConfigurator : public cSimpleModule
     };
     typedef std::vector<NodeInfo> NodeInfoVector;
 
-public:
+  public:
     InternetCloudNetworkConfigurator();
     virtual ~InternetCloudNetworkConfigurator();
+
   protected:
     virtual int numInitStages() const  {return 3;}
     virtual void initialize(int stage);
@@ -68,7 +69,7 @@ public:
 
     virtual void setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo);
 
-private:
+  private:
     InternetCloudNetworkConfigurator(const InternetCloudNetworkConfigurator& orig);
     gnplib::impl::network::gnp::GnpNetLayerFactory *netLayerFactoryGnp;
 };
