@@ -48,3 +48,11 @@ Requirements:
 --
 Philipp dot Berndt
 at TU-Berlin dot de
+
+
+----
+ gnplib merged to INET
+
+ Required packages (in Ubuntu 12.04):
+     libboost-all-dev libxerces-c2-dev
+
