@@ -15,10 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "InternetPropagationDelayGate.h"
-
-Define_Module(InternetPropagationDelayGate);
-
 #ifdef HAVE_GNPLIB
 
 #include <gnplib/impl/network/gnp/GeoLocationOracle.h>
@@ -26,11 +22,17 @@ Define_Module(InternetPropagationDelayGate);
 #include <gnplib/impl/network/IPv4NetID.h>
 #include "IPDatagram.h"
 
+#include "DelayGenerator.h"
+
+
+
+Define_Module(DelayGenerator);
+
 namespace GeoLocationOracle=gnplib::impl::network::gnp::GeoLocationOracle;
 using gnplib::impl::network::IPv4NetID;
 
 
-void InternetPropagationDelayGate::initialize(int stage)
+void DelayGenerator::initialize(int stage)
 {
     if (stage==1)
     {
@@ -45,7 +47,7 @@ void InternetPropagationDelayGate::initialize(int stage)
     }
 }
 
-void InternetPropagationDelayGate::handleMessage(cMessage *msg)
+void DelayGenerator::handleMessage(cMessage *msg)
 {
     IPDatagram*pkt(dynamic_cast<IPDatagram*>(msg));
     if (pkt)

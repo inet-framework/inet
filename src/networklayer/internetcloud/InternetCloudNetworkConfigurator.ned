@@ -17,7 +17,7 @@
 //
 
 
-package inet.world.inet;
+package inet.networklayer.internetcloud;
 
 //
 // Configures \IP addresses and routing tables from a GNP file.
@@ -53,7 +53,7 @@ package inet.world.inet;
 // interfaces register themselves in the InterfaceTable modules, and
 // in stage 1, routing files are read.)
 //
-simple GnpNetworkConfigurator
+simple InternetCloudNetworkConfigurator
 {
     parameters:
 	string gnpFile; // Filename of XML file containing embedded hosts and PingEr data

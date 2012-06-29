@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_GNPNETWORKCONFIGURATOR_H
-#define __INET_GNPNETWORKCONFIGURATOR_H
+#ifndef __INET_INTERNETCLOUD_NETWORKCONFIGURATOR_H
+#define __INET_INTERNETCLOUD_NETWORKCONFIGURATOR_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"
@@ -34,7 +34,7 @@ class IRoutingTable;
  *
  * For more info please see the NED file.
  */
-class INET_API GnpNetworkConfigurator : public cSimpleModule
+class INET_API InternetCloudNetworkConfigurator : public cSimpleModule
 {
   protected:
     struct NodeInfo {
@@ -49,8 +49,8 @@ class INET_API GnpNetworkConfigurator : public cSimpleModule
     typedef std::vector<NodeInfo> NodeInfoVector;
 
 public:
-    GnpNetworkConfigurator();
-    virtual ~GnpNetworkConfigurator();
+    InternetCloudNetworkConfigurator();
+    virtual ~InternetCloudNetworkConfigurator();
   protected:
     virtual int numInitStages() const  {return 3;}
     virtual void initialize(int stage);
@@ -64,9 +64,9 @@ public:
     virtual void setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo);
 
 private:
-    GnpNetworkConfigurator(const GnpNetworkConfigurator& orig);
+    InternetCloudNetworkConfigurator(const InternetCloudNetworkConfigurator& orig);
     gnplib::impl::network::gnp::GnpNetLayerFactory *netLayerFactoryGnp;
 };
 
-#endif
+#endif  // __INET_INTERNETCLOUD_NETWORKCONFIGURATOR_H
 
