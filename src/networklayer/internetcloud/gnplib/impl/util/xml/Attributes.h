@@ -22,7 +22,7 @@
  */
 
 #include <xercesc/sax2/Attributes.hpp>
-#include <gnplib/impl/util/xml/string.h>
+#include <gnplib/impl/util/xml/gnpstring.h>
 
 
 namespace gnplib { namespace impl { namespace util { namespace xml {

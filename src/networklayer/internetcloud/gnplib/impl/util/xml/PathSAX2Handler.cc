@@ -19,7 +19,7 @@
  */
 
 #include <gnplib/impl/util/xml/PathSAX2Handler.h>
-#include <gnplib/impl/util/xml/string.h>
+#include <gnplib/impl/util/xml/gnpstring.h>
 
 #include <iostream>
 #include <boost/tokenizer.hpp>
