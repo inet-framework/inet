@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifdef HAVE_GNPLIB
 
 #include <gnplib/impl/network/gnp/GeoLocationOracle.h>
 #include <gnplib/impl/network/gnp/GnpLatencyModel.h>
@@ -66,15 +65,3 @@ void DelayGenerator::handleMessage(cMessage *msg)
     }
 }
 
-#else
-
-// gnplib was not found => compile as stub
-
-void InternetPropagationDelayGate::initialize(int stage)
-{
-    error("Please compile INET with gnplib support to use this module!");
-}
-
-void InternetPropagationDelayGate::handleMessage(cMessage *msg) {}
-
-#endif

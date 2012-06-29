@@ -17,7 +17,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifdef HAVE_GNPLIB
 
 #include <algorithm>
 #include <gnplib/impl/network/gnp/GnpLatencyModel.h>
@@ -369,27 +368,3 @@ void InternetCloudNetworkConfigurator::setDisplayString(cTopology& topo, NodeInf
     getDisplayString().setTagArg("t",0,buf);
 }
 
-#else
-
-// gnplib was not found => compile as stub
-
-namespace gnplib { namespace impl { namespace network { namespace gnp {
-    class GnpNetLayerFactory {};
-}}}}
-
-void GnpNetworkConfigurator::initialize(int stage)
-{
-    error("Please compile INET with gnplib support to use this module!");
-}
-
-GnpNetworkConfigurator::GnpNetworkConfigurator()
-: netLayerFactoryGnp(new gnplib::impl::network::gnp::GnpNetLayerFactory) {}
-GnpNetworkConfigurator::~GnpNetworkConfigurator() { delete netLayerFactoryGnp; }
-void GnpNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& nodeInfo) {}
-void GnpNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& nodeInfo) {}
-void GnpNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo) {}
-void GnpNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo) {}
-void GnpNetworkConfigurator::handleMessage(cMessage *msg) {}
-void GnpNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo) {}
-
-#endif
