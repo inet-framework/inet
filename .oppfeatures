@@ -639,4 +639,39 @@
         compileFlags = ""
         linkerFlags = ""
         />
+    <feature
+        id="InternetCloud"
+        name="Internet Cloud"
+        description = "Internet Cloud (was 'Delfoi'). Required external library: gnplib.
+          Install method: create a directory somewhere, cd to it, 
+          svn co https://gnplib.svn.sourceforge.net/svnroot/gnplib gnplib;
+          configure;
+          make;
+          sudo make install;
+        "
+        initiallyEnabled = "false"
+        requires = "IPv4"
+        labels = ""
+        nedPackages = "
+                       inet.networklayer.internetcloud
+                       inet.nodes.internetcloud
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_INTERNETCLOUD"
+        linkerFlags = ""
+        />
+    <feature
+        id="InternetCloud_examples"
+        name="Internet Cloud examples"
+        description = "Internet Cloud eamples."
+        initiallyEnabled = "false"
+        requires = "InternetCloud PPP"
+        labels = ""
+        nedPackages = "
+                       inet.examples.internetcloud
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
 </features>
