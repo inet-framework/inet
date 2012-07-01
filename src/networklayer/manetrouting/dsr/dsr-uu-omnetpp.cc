@@ -620,16 +620,16 @@ void DSRUU::receiveChangeNotification(int category, const cObject *details)
 
                     DSRPkt *paux = check_and_cast <DSRPkt *> (frame->getEncapsulatedPacket());
 
-                    DSRPkt *p = check_and_cast <DSRPkt *> (paux->dup());
-                    take(p);
+                   // DSRPkt *p = check_and_cast <DSRPkt *> (paux->dup());
+                   // take(p);
                     EV << "####################################################\n";
-                    EV << "Dsr protocol received promiscuous packet from " << p->getSrcAddress() << "\n";
+                    EV << "Dsr protocol received promiscuous packet from " << paux->getSrcAddress() << "\n";
                     EV << "#####################################################\n";
                     Ieee802Ctrl *ctrl = new Ieee802Ctrl();
                     ctrl->setSrc(frame->getTransmitterAddress());
                     ctrl->setDest(frame->getReceiverAddress());
-                    p->setControlInfo(ctrl);
-                    tap(p);
+                  //  p->setControlInfo(ctrl);
+                    tap(paux,ctrl);
                 }
             }
         }
@@ -717,7 +717,7 @@ void DSRUU::linkFailed(IPv4Address ipAdd)
 }
 
 
-void DSRUU::tap(DSRPkt *p)
+void DSRUU::tap(DSRPkt *p, cObject *ctrl)
 {
     struct dsr_pkt *dp;
     struct in_addr next_hop, prev_hop;
@@ -725,7 +725,7 @@ void DSRUU::tap(DSRPkt *p)
     prev_hop.s_addr = p->prevAddress().getInt();
     int transportProtocol = p->getTransportProtocol();
     /* Cast the packet so that we can touch it */
-    dp = dsr_pkt_alloc(p);
+    dp = dsr_pkt_alloc2(p, ctrl);
     dp->flags |= PKT_PROMISC_RECV;
 
     /* TODO: See if this node is the next hop. In that case do nothing */

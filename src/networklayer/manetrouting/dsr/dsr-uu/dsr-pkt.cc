@@ -347,6 +347,96 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
     return dp;
 }
 
+
+dsr_pkt * dsr_pkt_alloc2(cPacket  * p, cObject *ctrl)
+{
+    struct dsr_pkt *dp;
+    int dsr_opts_len = 0;
+
+
+    // dp = (struct dsr_pkt *)MALLOC(sizeof(struct dsr_pkt), GFP_ATOMIC);
+    if (DSRUU::lifoDsrPkt!=NULL)
+    {
+        dp=DSRUU::lifoDsrPkt;
+        DSRUU::lifoDsrPkt = dp->next;
+        DSRUU::lifo_token++;
+    }
+    else
+        dp = new dsr_pkt;
+
+    if (!dp)
+        return NULL;
+    memset(dp, 0, sizeof(dsr_pkt));
+    if (p)
+    {
+        IPv4Datagram *dgram = dynamic_cast <IPv4Datagram *> (p);
+        dp->encapsulate_protocol=0;
+        dp->mac.raw = dp->mac_data;
+
+        dp->src.s_addr = dgram->getSrcAddress().getInt();
+        dp->dst.s_addr =dgram->getDestAddress().getInt();
+        dp->nh.iph = (struct iphdr *) dp->ip_data;
+        dp->nh.iph->ihl= dgram->getHeaderLength(); // Header length
+        dp->nh.iph->version= dgram->getVersion(); // Ip version
+        dp->nh.iph->tos= dgram->getTypeOfService(); // ToS
+        dp->nh.iph->tot_len= dgram->getByteLength(); // Total length
+        dp->nh.iph->id= dgram->getIdentification(); // Identification
+        dp->nh.iph->frag_off= 0x1FFF & dgram->getFragmentOffset(); //
+        if (dgram->getMoreFragments())
+            dp->nh.iph->frag_off |= 0x2000;
+        if (dgram->getDontFragment())
+            dp->nh.iph->frag_off |= 0x4000;
+
+        if (ctrl!=NULL)
+        {
+            Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
+            ctrlmac->getDest().getAddressBytes(dp->mac.ethh->h_dest);    /* destination eth addr */
+            ctrlmac->getSrc().getAddressBytes(dp->mac.ethh->h_source);   /* destination eth addr */
+            delete ctrl;
+        }
+
+        dp->moreFragments=dgram->getMoreFragments();
+        dp->fragmentOffset=dgram->getFragmentOffset();
+
+        dp->nh.iph->ttl= dgram->getTimeToLive(); // TTL
+        dp->nh.iph->protocol= dgram->getTransportProtocol(); // Transport protocol
+        // dp->nh.iph->check= p->;                          // Check sum
+        dp->nh.iph->saddr= dgram->getSrcAddress().getInt();
+        dp->nh.iph->daddr= dgram->getDestAddress().getInt();
+#ifdef NEWFRAGMENT
+        dp->totalPayloadLength = dgram->getTotalPayloadLength();
+#endif
+
+        if (dp->nh.iph->protocol == IP_PROT_DSR)
+        {
+            struct dsr_opt_hdr *opth;
+            int n;
+            if (dynamic_cast<DSRPkt*> (p))
+            {
+                DSRPkt * dsrpkt = dynamic_cast<DSRPkt*> (p);
+
+                opth =  dsrpkt->getOptions();
+                dsr_opts_len = opth->p_len + DSR_OPT_HDR_LEN;
+                if (!dsr_pkt_alloc_opts(dp, dsr_opts_len))
+                {
+                    FREE(dp);
+                    return NULL;
+                }
+                if (dp->payload)
+                    dp->encapsulate_protocol=dsrpkt->getEncapProtocol();
+
+                memcpy(dp->dh.raw, (char *)opth, dsr_opts_len);
+                n = dsr_opt_parse(dp);
+                DEBUG("Packet has %d DSR option(s)\n", n);
+                dp->costVector = dsrpkt->getCostVector();
+                dp->costVectorSize = dsrpkt->getCostVectorSize();
+                dsrpkt->resetCostVector();
+            }
+        }
+    }
+    return dp;
+}
+
 void dsr_pkt_free(dsr_pkt *dp)
 {
 

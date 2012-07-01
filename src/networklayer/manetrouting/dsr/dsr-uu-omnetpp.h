@@ -274,7 +274,7 @@ class DSRUU:public cSimpleModule, public INotifiable
     struct in_addr bcaddr;
     static unsigned int confvals[CONFVAL_MAX];
     InterfaceEntry *   interface80211ptr;
-    void tap(DSRPkt * p);
+    void tap(DSRPkt * p,cObject *ctrl);
     void omnet_xmit(struct dsr_pkt *dp);
     void omnet_deliver(struct dsr_pkt *dp);
     void packetFailed(IPv4Datagram *ipDgram);

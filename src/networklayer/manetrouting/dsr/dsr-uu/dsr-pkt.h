@@ -154,6 +154,7 @@ struct dsr_pkt *dsr_pkt_alloc(struct sk_buff *skb);
 #endif
 #else
 struct dsr_pkt *dsr_pkt_alloc(cPacket *p);
+struct dsr_pkt * dsr_pkt_alloc2(cPacket  * p, cObject *ctrl);
 #endif
 
 char *dsr_pkt_alloc_opts(struct dsr_pkt *dp, int len);
