@@ -23,11 +23,3 @@ Features:
 
 
 Note:
-The results from this work are reported in [1].
-
-
-References:
-[1] Kyeong Soo Kim and Karin Ennser, "A user-oriented research
-    framework for the clean-slate design of next-generation optical
-    access," Submitted to IEEE/OSA JOCN Oct. 2011.
-

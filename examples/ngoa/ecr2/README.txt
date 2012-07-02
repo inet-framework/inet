@@ -21,14 +21,16 @@ Features:
 
 
 Note:
-The results from this work are published in [1], [2].
+The results from this work have been submitted in [1]-[3].
 
 
 References:
-[1] Kyeong Soo (Joseph) Kim, "An equivalent circuit rate-based study
-    of 10-Gb/s next-generation optical access architectures,"
-    Submitted to ICC 2011, Sep. 2010.
-[2] Kyeong Soo Kim and Karin Ennser, "A comparison study of
-    10-Gb/s next-generation optical access architectures
-    based on equivalence framework," Submitted to GLOBECOM 2011,
+[1] Kyeong Soo Kim and Karin Ennser, "Elasticity in next-generation optical
+    access architectures: A case study of hybrid TDM/WDM-PON with tunable
+    transceivers," Submitted to GLOBECOM 2011, Apr. 2011.
+[2] Kyeong Soo Kim, "An equivalent circuit rate-based study of 10-Gb/s
+    next-generation optical access architectures," Submitted to IEEE/OSA Journal
+    of Optical Communications and Networking (JOCN), Nov. 2010.
+[3] Kyeong Soo (Joseph) Kim, "An equivalent circuit rate-based study of 10-Gb/s
+    next-generation optical access architectures," Submitted to ICC 2011,
     Sep. 2010.
