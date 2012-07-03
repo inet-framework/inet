@@ -735,6 +735,9 @@ void Radio::changeChannel(int channel)
     snrInfo.ptr = NULL;
     snrInfo.sList.clear();
 
+    // reset the noiseLevel
+    noiseLevel = thermalNoise;
+
     if (rs.getState()!=RadioState::IDLE)
         rs.setState(RadioState::IDLE); // Force radio to Idle
 
