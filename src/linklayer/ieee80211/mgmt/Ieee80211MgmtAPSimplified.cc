@@ -67,11 +67,7 @@ void Ieee80211MgmtAPSimplified::handleDataFrame(Ieee80211DataFrame *frame)
     }
 
     if (isConnectedToHL)
-    {
-        // LAN bridging: if we have a relayUnit, send up the frame to it too
-        // (relayUnit will skip this port when copying the frame for all ports)
         sendToUpperLayer(frame->dup());
-    }
 
     // send it out to the destination STA
     distributeReceivedDataFrame(frame);

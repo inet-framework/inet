@@ -191,7 +191,8 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
 #endif
         InterfaceEntry *broadcastIE = NULL;
 
-        // check for local delivery; accepts incoming packets from interfaces have unspecified IPv4 address, too
+        // check for local delivery; we must accept also packets coming from the interfaces that
+        // do not yet have an IP address assigned. This happens during DHCP requests.
         if (rt->isLocalAddress(destAddr) || fromIE->ipv4Data()->getIPAddress().isUnspecified())
         {
             reassembleAndDeliver(datagram);
