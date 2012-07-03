@@ -70,7 +70,11 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
     switch (encapDecap)
     {
         case ENCAP_DECAP_ETH:
+#ifdef WITH_ETHERNET
             outFrame = convertToEtherFrame(frame);
+#else
+            throw cRuntimeError("INET compiled without ETHERNET feature, but the 'encapDecap' parameter is set to 'eth'!");
+#endif
             break;
         case ENCAP_DECAP_TRUE:
             {
@@ -98,9 +102,9 @@ void Ieee80211MgmtAPBase::sendToUpperLayer(Ieee80211DataFrame *frame)
 
 EtherFrame *Ieee80211MgmtAPBase::convertToEtherFrame(Ieee80211DataFrame *frame_)
 {
+#ifdef WITH_ETHERNET
     Ieee80211DataFrameWithSNAP *frame = check_and_cast<Ieee80211DataFrameWithSNAP *>(frame_);
 
-#ifdef WITH_ETHERNET
     // create a matching ethernet frame
     EthernetIIFrame *ethframe = new EthernetIIFrame(frame->getName()); //TODO option to use EtherFrameWithSNAP instead
     ethframe->setDest(frame->getAddress3());
@@ -160,7 +164,11 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::encapsulate(cPacket *msg)
     switch (encapDecap)
     {
         case ENCAP_DECAP_ETH:
+#ifdef WITH_ETHERNET
             return convertFromEtherFrame(check_and_cast<EtherFrame *>(msg));
+#else
+            throw cRuntimeError("INET compiled without ETHERNET feature, but the 'encapDecap' parameter is set to 'eth'!");
+#endif
             break;
         case ENCAP_DECAP_TRUE:
             {
