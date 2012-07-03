@@ -30,8 +30,6 @@ void Ieee80211MgmtAPBase::initialize(int stage)
     {
         isConnectedToHL = gate("upperLayerOut")->getPathEndGate()->isConnected();
         const char * encDec = par("encapDecap").stringValue();
-        if (!encDec)
-            throw cRuntimeError("Missing encapDecap parameter!");
         if (!strcmp(encDec, "true"))
             encapDecap = ENCAP_DECAP_TRUE;
         else if (!strcmp(encDec, "false"))
@@ -39,7 +37,7 @@ void Ieee80211MgmtAPBase::initialize(int stage)
         else if (!strcmp(encDec, "eth"))
             encapDecap = ENCAP_DECAP_ETH;
         else
-            throw cRuntimeError("Unknown encapDecap parameter: '%s'!", encDec);
+            throw cRuntimeError("Unknown encapDecap parameter value: '%s'! Must be 'true','false' or 'eth'.", encDec);
 
         WATCH(isConnectedToHL);
     }
