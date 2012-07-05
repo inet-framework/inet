@@ -50,30 +50,30 @@ class DHCPOption
     public:
         void set(op_code code, std::string data)
         {
-            this->options[code] = Byte(data);
+            options[code] = Byte(data);
         }
 
         void set(op_code code, int data)
         {
-            this->options[code] = Byte(data);
+            options[code] = Byte(data);
         }
 
         void add(op_code code, int data)
         {
-            if (this->options.find(code) == this->options.end())
+            if (options.find(code) == options.end())
             {
-                this->options[code] = Byte(data);
+                options[code] = Byte(data);
             }
             else
             {
-                this->options[code].concat(Byte(data));
+                options[code].concat(Byte(data));
             }
         }
 
         Byte get(op_code code)
         {
-            DHCPOptionsMap::iterator it = this->options.find(code);
-            if (it != this->options.end())
+            DHCPOptionsMap::iterator it = options.find(code);
+            if (it != options.end())
             {
                 return it->second;
             }
@@ -82,12 +82,12 @@ class DHCPOption
 
         DHCPOptionsMap::iterator begin()
         {
-            return (this->options.begin());
+            return (options.begin());
         }
 
         DHCPOptionsMap::iterator end()
         {
-            return (this->options.end());
+            return (options.end());
         }
 
         friend std::ostream& operator <<(std::ostream& os, DHCPOption& obj)

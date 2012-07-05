@@ -42,7 +42,7 @@ class Byte
         {
             for (int i = 0; i < b.size(); i++)
             {
-                this->theByteArray.push_back(b[i]);
+                theByteArray.push_back(b[i]);
             }
         }
 
@@ -50,42 +50,42 @@ class Byte
         {
             for (unsigned int i = 0; i < s.size(); i++)
             {
-                this->theByteArray.push_back((int) s.at(i));
+                theByteArray.push_back((int) s.at(i));
             }
         }
 
         // 1 byte
         Byte(int num)
         {
-            this->theByteArray.push_back(num);
+            theByteArray.push_back(num);
         }
 
         Byte(char s)
         {
-            this->theByteArray.push_back((int) s);
+            theByteArray.push_back((int) s);
         }
 
         int size() const
         {
-            return (this->theByteArray.size());
+            return (theByteArray.size());
         }
 
         std::vector<int> getByteData()
         {
-            return (this->theByteArray);
+            return (theByteArray);
         }
 
         int intValue()
         {
-            return (this->theByteArray[0]);
+            return (theByteArray[0]);
         }
 
         std::string stringValue()
         {
             std::ostringstream oss;
-            for (unsigned int i = 0; i < this->theByteArray.size(); i++)
+            for (unsigned int i = 0; i < theByteArray.size(); i++)
             {
-                oss << (char) this->theByteArray[i];
+                oss << (char) theByteArray[i];
             }
             return (oss.str());
         }
@@ -94,9 +94,9 @@ class Byte
         {
             std::ostringstream oss;
 
-            for (unsigned int i = 0; i < this->theByteArray.size(); i++)
+            for (unsigned int i = 0; i < theByteArray.size(); i++)
             {
-                oss << std::hex << this->theByteArray[i] << " ";
+                oss << std::hex << theByteArray[i] << " ";
             }
             return (oss.str());
         }
@@ -105,15 +105,15 @@ class Byte
         {
             for (int i = 0; i < b.size(); i++)
             {
-                this->theByteArray.push_back(b[i]);
+                theByteArray.push_back(b[i]);
             }
         }
 
         int operator[](unsigned int pos) const
         {
-            if (pos < this->theByteArray.size())
+            if (pos < theByteArray.size())
             {
-                return (this->theByteArray[pos]);
+                return (theByteArray[pos]);
             }
             return -1;
         }
@@ -125,11 +125,11 @@ class Byte
             {
                 return (*this);
             }
-            this->theByteArray.clear();
+            theByteArray.clear();
             for (int i = 0; i < b.size(); i++)
             {
                 int v = b[i];
-                this->theByteArray.push_back(v);
+                theByteArray.push_back(v);
             }
             return (*this);
         }
@@ -142,11 +142,11 @@ class Byte
         bool operator ==(Byte b)
         {
 
-            if ((int) this->theByteArray.size() == b.size())
+            if ((int) theByteArray.size() == b.size())
             {
-                for (unsigned int i = 0; i < this->theByteArray.size(); i++)
+                for (unsigned int i = 0; i < theByteArray.size(); i++)
                 {
-                    if (this->theByteArray[i] != b[i])
+                    if (theByteArray[i] != b[i])
                     {
                         return (false);
                     }
@@ -159,12 +159,12 @@ class Byte
 
         operator int()
         {
-            return this->intValue();
+            return intValue();
         }
 
         operator std::string()
         {
-            return this->stringValue();
+            return stringValue();
         }
 
         friend std::ostream& operator <<(std::ostream& os, Byte& obj)
