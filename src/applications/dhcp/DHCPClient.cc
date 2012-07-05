@@ -21,6 +21,7 @@
 #include "InterfaceTableAccess.h"
 #include "RoutingTableAccess.h"
 #include "IPv4InterfaceData.h"
+#include "ModuleAccess.h"
 
 Define_Module(DHCPClient);
 
@@ -53,7 +54,7 @@ void DHCPClient::initialize(int stage)
         bootps_port = 67; // server
 
         // get the hostname
-        cModule* host = findHost();
+        cModule* host = getContainingNode();
         this->host_name = host->getFullName();
 
         nb = NotificationBoardAccess().get();
@@ -536,15 +537,12 @@ void DHCPClient::scheduleTimer_T2()
     scheduleAt(simTime() + (this->lease->rebind_time), this->timer_t2); // RFC 2131 4.4.5
 }
 
-cModule *DHCPClient::findHost(void) const
+cModule *DHCPClient::getContainingNode()
 {
-    cModule *mod;
-    for (mod = getParentModule(); mod != 0; mod = mod->getParentModule())
-        if (mod->getSubmodule("notificationBoard"))
-            break;
+    cModule *mod = findContainingNode(this);
 
     if (!mod)
-        error("findHost(): host module not found (it should have a submodule named notificationBoard)");
+        error("getContainingNode(): host module not found");
 
     return mod;
 }
