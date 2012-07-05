@@ -720,9 +720,9 @@ void DSRUU::linkFailed(IPv4Address ipAdd)
 void DSRUU::tap(DSRPkt *p, cObject *ctrl)
 {
     struct dsr_pkt *dp;
-    struct in_addr next_hop, prev_hop;
-    next_hop.s_addr = p->nextAddress().getInt();
-    prev_hop.s_addr = p->prevAddress().getInt();
+    //struct in_addr next_hop, prev_hop;
+    //next_hop.s_addr = p->nextAddress().getInt();
+    //prev_hop.s_addr = p->prevAddress().getInt();
     int transportProtocol = p->getTransportProtocol();
     /* Cast the packet so that we can touch it */
     dp = dsr_pkt_alloc2(p, ctrl);
