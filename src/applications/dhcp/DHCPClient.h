@@ -76,6 +76,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable
             return 4;
         }
         virtual void initialize(int stage);
+        virtual void finish();
         virtual void handleMessage(cMessage *msg);
         virtual void handleTimer(cMessage *msg);
         virtual void handleDHCPMessage(DHCPMessage* msg);
@@ -117,7 +118,8 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable
         }
 
     public:
-
+        DHCPClient();
+        ~DHCPClient();
 };
 
 #endif

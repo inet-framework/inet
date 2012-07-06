@@ -28,6 +28,15 @@
 
 Define_Module(DHCPServer);
 
+DHCPServer::DHCPServer()
+{
+    ie = NULL;
+}
+
+DHCPServer::~DHCPServer()
+{
+}
+
 void DHCPServer::initialize(int stage)
 {
     if (stage == 1)

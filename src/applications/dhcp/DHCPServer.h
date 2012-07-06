@@ -71,6 +71,8 @@ class INET_API DHCPServer : public cSimpleModule
         DHCPLease* getAvailableLease();
 
     public:
+        DHCPServer();
+        ~DHCPServer();
         void handleTimer(cMessage *msg);
         void processPacket(DHCPMessage *packet);
         void sendOffer(DHCPLease* lease);

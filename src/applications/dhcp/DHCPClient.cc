@@ -26,6 +26,24 @@
 
 Define_Module(DHCPClient);
 
+DHCPClient::DHCPClient()
+{
+    timer_t1 = NULL;
+    timer_t2 = NULL;
+    timer_to = NULL;
+    nb = NULL;
+    ie = NULL;
+    irt = NULL;
+    lease = NULL;
+}
+
+DHCPClient::~DHCPClient()
+{
+    cancelTimer_T1();
+    cancelTimer_T2();
+    cancelTimer_TO();
+}
+
 void DHCPClient::initialize(int stage)
 {
     if (stage == 0)
@@ -94,6 +112,13 @@ void DHCPClient::initialize(int stage)
         // there is no such notification in INET.
         changeFSMState(INIT);
     }
+}
+
+void DHCPClient::finish()
+{
+    cancelTimer_T1();
+    cancelTimer_T2();
+    cancelTimer_TO();
 }
 
 void DHCPClient::changeFSMState(CLIENT_STATE new_state)
