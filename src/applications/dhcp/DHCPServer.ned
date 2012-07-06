@@ -29,12 +29,12 @@ simple DHCPServer like IUDPApp
     parameters:
         string net;  		// IP network to assign
         string mask;  		// netmask to assign
-        string ip_begin;	// ip to start to lease
-        int client_num; 	// number of ip to lease
+        string ipBegin;	// ip to start to lease
+        int clientNum; 	// number of ip to lease
         string gateway;		// gateway to assign
         string dns;			// dns to assign
-        int lease_time @unit(s);    // lease time in seconds
-        string iface;		// interface to listen
+        int leaseTime @unit(s);    // lease time in seconds
+        string interface;		// interface to listen on
         @display("i=device/card");
     gates:
         input udpIn @labels(UDPControlInfo/up);

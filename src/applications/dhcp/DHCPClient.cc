@@ -64,7 +64,7 @@ void DHCPClient::initialize(int stage)
 
         // Get the interface to configure
         IInterfaceTable* ift = InterfaceTableAccess().get();
-        this->ie = ift->getInterfaceByName(this->par("iface"));
+        this->ie = ift->getInterfaceByName(this->par("interface"));
 
         if (this->ie == NULL)
         {

@@ -23,7 +23,7 @@ import inet.applications.IUDPApp;
 simple DHCPClient like IUDPApp
 {
     parameters:
-        string iface = default("wlan");
+        string interface;  // which NIC should be configured (i.e. wlan0, eth1 etc.)
         @display("i=device/card");
     gates:
         input udpIn @labels(UDPControlInfo/up);

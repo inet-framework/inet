@@ -47,7 +47,7 @@ void DHCPServer::initialize(int stage)
 
         IInterfaceTable* ift = InterfaceTableAccess().get();
 
-        this->ie = ift->getInterfaceByName(par("iface"));
+        this->ie = ift->getInterfaceByName(par("interface"));
     }
 
     if (stage == 2)
@@ -169,7 +169,7 @@ void DHCPServer::processPacket(cPacket *msg)
                 {
                     EV << "Requesting offered. From now " << lease->ip << " is leased to " << lease->mac << endl;
                     lease->xid = packet->getXid();
-                    lease->lease_time = par("lease_time");
+                    lease->lease_time = par("leaseTime");
                     // TODO: lease the ip
                     this->sendACK(lease);
 
@@ -188,7 +188,7 @@ void DHCPServer::processPacket(cPacket *msg)
                 {
                     EV << "Request for renewal/rebind. extending lease " << lease->ip << " to " << lease->mac << endl;
                     lease->xid = packet->getXid();
-                    lease->lease_time = par("lease_time");
+                    lease->lease_time = par("leaseTime");
                     lease->leased = true;
                     this->sendACK(lease);
                 }
@@ -241,7 +241,7 @@ void DHCPServer::sendACK(DHCPLease* lease)
     ack->getOptions().set(DHCP_MSG_TYPE, DHCPACK);
 
     // add the lease options
-    long lease_time = this->par("lease_time");
+    long lease_time = this->par("leaseTime");
     ack->getOptions().set(SUBNET_MASK, lease->netmask.str());
     ack->getOptions().set(RENEWAL_TIME, lease_time * 0.5); // RFC 4.4.5
     ack->getOptions().set(REBIND_TIME, lease_time * 0.875); // RFC 4.4.5
@@ -284,7 +284,7 @@ void DHCPServer::sendOffer(DHCPLease* lease)
     offer->getOptions().set(DHCP_MSG_TYPE, DHCPOFFER);
 
     // add the offer options
-    long lease_time = this->par("lease_time");
+    long lease_time = this->par("leaseTime");
     offer->getOptions().set(SUBNET_MASK, lease->netmask.str());
     offer->getOptions().set(RENEWAL_TIME, lease_time * 0.5); // RFC 4.4.5
     offer->getOptions().set(REBIND_TIME, lease_time * 0.875); // RFC 4.4.5
@@ -322,9 +322,9 @@ DHCPLease* DHCPServer::getAvailableLease()
     IPv4Address network(par("net").stringValue());
     IPv4Address netmask(par("mask").stringValue());
     IPv4Address gateway(par("gateway").stringValue());
-    IPv4Address begin(par("ip_begin").stringValue());
+    IPv4Address begin(par("ipBegin").stringValue());
 
-    int num_cli = par("client_num");
+    int num_cli = par("clientNum");
 
     int begin_addr_int = begin.getInt();
     for (int i = 0; i < num_cli; i++)
