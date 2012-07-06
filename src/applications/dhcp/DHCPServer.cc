@@ -77,15 +77,22 @@ void DHCPServer::handleMessage(cMessage *msg)
     }
     else
     {
-        handleIncommingPacket((cPacket*) msg);
+        DHCPMessage *dhcpPacket = dynamic_cast<DHCPMessage*>(msg);
+        if (dhcpPacket)
+            handleIncommingPacket(dhcpPacket);
+        else
+        {
+            EV << "unknown packet, discarding it" << endl;
+            delete msg;
+        }
     }
 }
 
-void DHCPServer::handleIncommingPacket(cPacket *pkt)
+void DHCPServer::handleIncommingPacket(DHCPMessage *pkt)
 {
     // schedule the packet processing
     cMessage* proc_delay_timer = new cMessage("PROC_DELAY", PROC_DELAY);
-    proc_delay_timer->addPar("incomming_packet") = pkt;
+    proc_delay_timer->addPar("incomming_packet").setObjectValue(pkt);
     scheduleAt(simTime() + proc_delay, proc_delay_timer);
     std::cout << "scheduling process" << endl;
 }
@@ -94,19 +101,10 @@ void DHCPServer::handleTimer(cMessage *msg)
 {
     if (msg->getKind() == PROC_DELAY)
     {
-        cPacket* pkt = check_and_cast<cPacket*>(msg->par("incomming_packet"));
+        DHCPMessage *pkt = check_and_cast<DHCPMessage*>(msg->par("incomming_packet").getObjectValue());
         cMsgPar* par = (cMsgPar*) msg->removeObject("incomming_packet");
         delete par;
-        delete msg;
-        if (pkt != NULL)
-        {
-            processPacket(pkt);
-            return;
-        }
-        else
-        {
-            EV << "incomming packet null, discarding it" << endl;
-        }
+        processPacket(pkt);
     }
     else
     {
@@ -115,11 +113,9 @@ void DHCPServer::handleTimer(cMessage *msg)
     delete (msg);
 }
 
-void DHCPServer::processPacket(cPacket *msg)
+void DHCPServer::processPacket(DHCPMessage *packet)
 {
     EV << "Received packet: ";
-
-    DHCPMessage* packet = check_and_cast<DHCPMessage*>(msg);
 
     // check the op_code
     if (packet->getOp() == BOOTREQUEST)
@@ -212,8 +208,8 @@ void DHCPServer::processPacket(cPacket *msg)
         EV << "unknown message. dropping it" << endl;
     }
 
-    EV << "deleting " << msg << endl;
-    delete msg;
+    EV << "deleting " << packet << endl;
+    delete packet;
 
     numReceived++;
 }

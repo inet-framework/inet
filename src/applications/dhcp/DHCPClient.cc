@@ -195,10 +195,11 @@ void DHCPClient::handleMessage(cMessage *msg)
     }
     else if (msg->arrivedOn("udpIn"))
     {
+        DHCPMessage *dhcpPacket = dynamic_cast<DHCPMessage*>(msg);
         // check if the message is DHCPMessage
-        if (dynamic_cast<DHCPMessage*>(msg))
+        if (dhcpPacket)
         {
-            handleDHCPMessage(check_and_cast<DHCPMessage*>(msg));
+            handleDHCPMessage(dhcpPacket);
         }
         else
         {
