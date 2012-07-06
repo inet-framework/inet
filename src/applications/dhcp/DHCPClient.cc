@@ -121,6 +121,28 @@ void DHCPClient::finish()
     cancelTimer_TO();
 }
 
+namespace {
+
+inline bool routeMatches(const IPv4Route *entry,
+    const IPv4Address& target, const IPv4Address& nmask,
+    const IPv4Address& gw, int metric, const char *dev)
+{
+    if (!target.isUnspecified() && !target.equals(entry->getDestination()))
+        return false;
+    if (!nmask.isUnspecified() && !nmask.equals(entry->getNetmask()))
+        return false;
+    if (!gw.isUnspecified() && !gw.equals(entry->getGateway()))
+        return false;
+    if (metric && metric!=entry->getMetric())
+        return false;
+    if (dev && strcmp(dev, entry->getInterfaceName()))
+        return false;
+
+    return true;
+}
+
+}
+
 void DHCPClient::changeFSMState(CLIENT_STATE new_state)
 {
     client_state = new_state;
