@@ -1,0 +1,89 @@
+2011-02-25 pberndt
+
+        * [r35] *: * fixed computation of wire_access_latencies
+          * fixed output of bandwidths in write_xml
+          * made db column client_ip_id UNSIGNED
+          * renamed db table access_delays to access_latencies
+          * renamed function compute_wire_access_delays to
+            compute_wire_access_latencies
+          * improved output of database scripts
+          * added constant MAX_LATENCY (Drop outliers where latency exceeds this
+            value (milliseconds))
+          * added constant MIN_CONNECTIVITY (Minimum number of connections
+            required for each client.)
+          * added script to convert a downloaded speedtest.csv file (from
+            www.speedtest.net) to GeoIP enhanced st_net.csv format (used by Ookla)
+          * added example datafile
+
+2011-02-17 pberndt
+
+        * [r23] bin/*: * factored out database config loading
+          * added debug output to make database scripts more fun
+          * remove orphaned records when preparing vibello input
+            and when writing xml
+        
+2011-02-15 pberndt
+
+	* [r22] ../bin, ./bin: * moved bin into vibello/
+
+	* [r21] ../database.conf, ./database.conf: * moved database.conf
+	  to vibello
+
+	* [r20] *: * separated configuration of vibello from gnplib
+
+2011-02-11 pberndt
+
+	* [r17] bin/load_ookla.rb,
+	  bin/load_pinger.rb, bin/write_xml.rb: * added wire access delay
+	  * added bandwidths
+
+2011-02-11 pberndt
+
+	* [r16] bin/load_pinger.rb,
+	  bin/write_xml.rb: * fixed args in load_pinger
+	  * added more groups in write_xml
+	  * fixed coords in write_xml
+	  * fixed PingErLookup and CountryLookup in write_xml
+	  * added missing Makefile rules
+
+2011-02-10 pberndt
+
+	* [r15] bin/load_vibello_results.rb, bin/write_xml.rb: * added
+	  bin/write_xml.rb
+	  * added bin/load_vibello_results.rb
+
+2011-02-09 pberndt
+
+	* [r13,r14] graph.cpp, graph.h, main.cpp,
+          vibello.cpp: * save only client coordinates
+	  * measure time
+	  * added command line parsing --nox --threads=
+	  * fixed ehosts output
+	  * added missing initialization
+
+2011-02-08 pberndt
+
+	* [r12] *: * purified vibello code
+
+2011-02-07 pberndt
+
+	* [r10] *: * added some configure variables
+
+	* vibello.cpp: * check for environment variable CONCURRENCY_LEVEL
+          to set number of threads
+
+2011-01-27 pberndt
+
+	* [r9] bin/create_database.rb, bin/load_ookla.rb,
+	  bin/prepare_vibello_input.rb: * added missing require
+	  * grant FILE privileges to db user
+
+2011-01-15 pberndt
+
+	* [r4] *: * use pthreads to parallelize computation
+
+2011-01-02 pberndt
+
+	* [r3] *: * added delay data preparation
+	  * added vibello code to compute GNP coordinates
+

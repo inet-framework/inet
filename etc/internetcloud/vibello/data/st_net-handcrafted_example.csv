@@ -1,0 +1,15 @@
+test_id,test_date,client_ip_id,download_kbps,upload_kbps,latency,server_name,server_country,server_country_code,server_latitude,server_longitude,user_agent,isp_name,client_net_speed,is_isp,client_country,client_country_code,client_region_name,client_region_code,client_city,client_latitude,client_longitude,miles_between
+2, "2/23/2011 9:35 PM", 1421867768, 2963, 397, 68, "Berlin", "Germany", "DE", 52.5167, 13.4, NULL, NULL, NULL, NULL, "Germany", "DE", "Berlin", "", "Berlin", 52.5167, 13.4, 0
+3, "2/23/2011 9:39 PM", 1421867768, 2933, 396, 68, "Berlin", "Germany", "DE", 52.5167, 13.4, NULL, NULL, NULL, NULL, "Germany", "DE", "Berlin", "", "Berlin", 52.5167, 13.4, 0
+4, "2/23/2011 9:39 PM", 3256738329, 1000000, 1000000, 0, "Berlin", "Germany", "DE", 52.5167, 13.4, NULL, NULL, NULL, NULL, "Germany", "DE", "Berlin", "", "Berlin", 52.5167, 13.4, 0
+5, "2/23/2011 9:44 PM", 1421867768, 2930, 359, 66, "Nuremberg", "Germany", "DE", 51, 9, NULL, NULL, NULL, NULL, "Germany", "DE", "Berlin", "", "Berlin", 52.5167, 13.4, 250
+6, "2/23/2011 9:45 PM", 1421867768, 2927, 360, 66, "Nuremberg", "Germany", "DE", 51, 9, NULL, NULL, NULL, NULL, "Germany", "DE", "Berlin", "", "Berlin", 52.5167, 13.4, 250
+7, "2/23/2011 9:45 PM", 3560932830, 1000000, 1000000, 0, "Nuremberg", "Germany", "DE", 51, 9, NULL, NULL, NULL, NULL, "Germany", "DE", "Nuremberg", "", "Nuremberg", 51, 9, 0
+8, "2/23/2011 9:48 PM", 1421867768, 760, 305, 342, "Hong Kong", "China", "CN", 22.27, 114.15, NULL, NULL, NULL, NULL, "Germany", "DE", "Berlin", "", "Berlin", 52.5167, 13.4, 5450
+9, "2/23/2011 9:48 PM", 3418757032, 1000000, 1000000, 0, "Hong Kong", "China", "CN", 22.27, 114.15, NULL, NULL, NULL, NULL, "China", "CN", "Hong Kong", "", "Hong Kong", 22.27, 114.15, 0
+10, "2/23/2011 9:50 PM", 1421867768, 2836, 367, 157, "New York, NY", "United States", "US", 40.767, -73.5254, NULL, NULL, NULL, NULL, "Germany", "DE", "Berlin", "", "Berlin", 52.5167, 13.4, 3950
+11, "2/23/2011 9:50 PM", 2815297684, 1000000, 1000000, 0, "New York, NY", "United States", "US", 40.767, -73.5254, NULL, NULL, NULL, NULL, "United States", "US", "New York", "", "Hicksville", 40.767, -73.5254, 0
+12, "2/23/2011 9:53 PM", 1421867768, 2395, 339, 379, "Sydney", "Australia", "AU", -27, 133, NULL, NULL, NULL, NULL, "Germany", "DE", "Berlin", "", "Berlin", 52.5167, 13.4, 10000
+13, "2/23/2011 9:53 PM", 3331255300, 1000000, 1000000, 0, "Sydney", "Australia", "AU", -27, 133, NULL, NULL, NULL, NULL, "Australia", "AU", "Sydney", "", "Sydney", -27, 133, 0
+14, "2/23/2011 10:08 PM", 1421867768, 2936, 375, 59, "Norderstedt", "Germany", "DE", 48.5333, 13.0333, NULL, NULL, NULL, NULL, "Germany", "DE", "Berlin", "", "Berlin", 52.5167, 13.4, 150
+15, "2/23/2011 10:08 PM", 3587274010, 1000000, 1000000, 0, "Norderstedt", "Germany", "DE", 48.5333, 13.0333, NULL, NULL, NULL, NULL, "Germany", "DE", "Norderstedt", "", "Wilhelm", 48.5333, 13.0333, 0

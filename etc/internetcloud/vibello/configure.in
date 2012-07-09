@@ -1,0 +1,62 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.61)
+AC_INIT(vibello, 0.1, philipp.berndt@tu-berlin.de)
+AC_CONFIG_SRCDIR([vibello.cpp])
+AC_CONFIG_HEADERS([config.h])
+AM_INIT_AUTOMAKE
+AC_CONFIG_MACRO_DIR([m4])
+
+# Checks for programs.
+AC_PROG_CANONICALIZE
+AC_PROG_CXX
+AC_SYS_INTERPRETER
+#AC_PATH_PROG([RUBY],[ruby])
+#AC_PROG_RUBY_VERSION([1.8.0],true,AC_MSG_ERROR([Need at least ruby 1.8])
+
+AC_CHECK_RUBY_LIB(dbi,DBI,[],AC_MSG_ERROR([Need libdbi-ruby]))
+AC_CHECK_RUBY_LIB(builder,Builder,[],AC_MSG_ERROR([Need libbuilder-ruby]))
+
+# Path to Ookla data file in CSV format
+AC_ARG_VAR(SPEEDTEST_SOURCE, [Path to Ookla data file in CSV format]) 
+test -r "$SPEEDTEST_SOURCE" || AC_MSG_ERROR([Set SPEEDTEST_SOURCE to point to Ookla data file in CSV format])
+AC_SUBST(SPEEDTEST_SOURCE, [AC_CANONICALIZE([$SPEEDTEST_SOURCE])])
+
+AC_ARG_VAR(PINGER_LOOKUP_SOURCE, [Path to XML file with PingER jitter data (data/lookup.xml)]) 
+AS_IF([test "x$PINGER_LOOKUP_SOURCE" = x], [PINGER_LOOKUP_SOURCE="data/lookup.xml"])
+test -r "$PINGER_LOOKUP_SOURCE" || AC_MSG_ERROR([Set PINGER_LOOKUP_SOURCE to point to XML file with PingER jitter data])
+AC_SUBST(PINGER_LOOKUP_SOURCE, [AC_CANONICALIZE([$PINGER_LOOKUP_SOURCE])])
+
+AC_ARG_VAR(COUNTRY_LOOKUP_SOURCE, [Path to XML file with country lookup data (data/lookup.xml)])
+AS_IF([test "x$COUNTRY_LOOKUP_SOURCE" = x], [COUNTRY_LOOKUP_SOURCE="data/lookup.xml"])
+test -r "$COUNTRY_LOOKUP_SOURCE" || AC_MSG_ERROR([Set COUNTRY_LOOKUP_SOURCE to point to XML file with country lookup data])
+AC_SUBST(COUNTRY_LOOKUP_SOURCE, [AC_CANONICALIZE([$COUNTRY_LOOKUP_SOURCE])])
+
+AC_ARG_VAR(GNP_DIMENSIONS, [Dimensionality of GNP space (2)])
+AS_IF([test "x$GNP_DIMENSIONS" = x], [GNP_DIMENSIONS=2])
+AC_DEFINE_UNQUOTED([GNP_DIMENSIONS], [$GNP_DIMENSIONS], [Dimensionality of GNP space])
+#AC_SUBST([GNP_DIMENSIONS], ["$gnp_dimensions"])
+
+
+# Checks for libraries.
+AC_CHECK_LIB([X11], [XOpenDisplay])
+AC_CHECK_LIB([boost_program_options], [_ZN5boost15program_options19options_descriptionC1ERKSsjj])
+AC_CHECK_LIB([boost_thread], [_ZN5boost6thread12start_threadEv])
+
+# Checks for header files.
+AC_PATH_X
+AC_CHECK_HEADERS([stdint.h unistd.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_INLINE
+AC_TYPE_SIZE_T
+AC_TYPE_UINT32_T
+
+# Checks for library functions.
+AC_FUNC_ERROR_AT_LINE
+AC_CHECK_FUNCS([sqrt])
+
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT

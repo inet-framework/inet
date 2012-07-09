@@ -1,0 +1,67 @@
+Vibello
+Copyright (C) 2010,2011 Philipp Berndt <philipp.berndt@tu-berlin.de>
+
+Vibello uses the Vivaldi algorithm[2] to produce a measured_data.xml file from
+latency measurements. The result can be used with gnplib or PeerfactSim.KOM.
+
+In contrast to the measured_data.xml provided with PeerfactSim.KOM,
+the measured_data.xml produced by vibello also contains per host maximum bandwidths
+and wire access delay that occurrs regardless of the distance of any host. This corresponds
+to the "height" value described in [3].
+
+The measurement data can be obtained from Ookla.
+
+The scripts in the bin directory load measurement data into an SQL database
+and prepare it for further processing by the vibello binary.
+Vibello uses pthreads to parallize the computation. Use "--threads=" to set the number of threads.
+Unless "--nox" is specified, a window shows the current GNP space every thousand iterations.
+Another Script loads the vibello results back into the database before the results are written into the final measured_data.xml file.
+Therein hosts are grouped by pingER continental region, country code and MaxMind Geo IP region.
+
+Luckily for you the whole process is automated and takes only three steps:
+
+1. Procure input files
+cp PeerFact.SIM/measured_data.xml data/lookup.xml # Only <PingErLookup> and <CountryLookup> are used.
+
+2. Configure
+$ ./configure SPEEDTEST_SOURCE= PINGER_LOOKUP_SOURCE=data/lookup.xml COUNTRY_LOOKUP_SOURCE=data/lookup.xml GNP_DIMENSIONS=2
+
+(Actually the last three arguments are the defaults and may be omitted.)
+
+  SPEEDTEST_SOURCE
+              Path to Ookla data file in CSV format
+  PINGER_LOOKUP_SOURCE
+              Path to XML file with PingER jitter data (data/lookup.xml)
+  COUNTRY_LOOKUP_SOURCE
+              Path to XML file with country lookup data (data/lookup.xml)
+  GNP_DIMENSIONS
+              Dimensionality of GNP space (2)
+
+3. Make
+$ make
+[ You will be asked for your mysql root password to create a new database. ]
+
+The iterative computation will take several hours, depending on the input data size and power of your machine.
+Once the graph has stabilized the computation terminates.
+Intermediate results will be saved every thousand iterations. So once you are satisfied with the accuracy you may stop the process anytime.
+
+References:
+[1] Vivaldi
+[2] Vivaldi enhanced
+
+
+
+ Vibello is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ as published by the Free Software Foundation; either version 2
+ of the License, or (at your option) any later version.
+
+ Vibello is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+

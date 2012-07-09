@@ -51,8 +51,13 @@ at TU-Berlin dot de
 
 
 ----
- gnplib merged to INET
-
+Opensim Ltd:
+----
+ gnplib merged to INET (to src/internetcloud/gnplib) and .cpp files renamed to .cc
  Required packages (in Ubuntu 12.04):
      libboost-all-dev libxerces-c2-dev
+
+ vibello copied to INET (to etc/internetcloud)
+ it's requires more packages:
+     ruby, ruby-mysql, mysql, etc.
 
