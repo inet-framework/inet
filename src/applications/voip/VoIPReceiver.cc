@@ -82,7 +82,6 @@ void VoIPReceiver::handleMessage(cMessage *msg)
 
 	//emit(mFrameLossSignal,1.0);
 
-	std::cout<< simTime() << ")PACCHETTO ARRIVATO: TALK "<<pPacket->getIDtalk()<<" FRAME "<<pPacket->getIDframe()<<"\n\n";
 	EV<<"PACCHETTO ARRIVATO: TALK "<<pPacket->getIDtalk()<<" FRAME "<<pPacket->getIDframe()<<"\n\n";
 
 	pPacket->setArrivalTime(SIMTIME_DBL(simTime()));
@@ -91,7 +90,6 @@ void VoIPReceiver::handleMessage(cMessage *msg)
 
 void VoIPReceiver::playout(bool finish)
 {
-	std::cout << "PLAYOUT" << endl;
 	if(mPacketsList.empty())
 		return;
 
@@ -141,9 +139,6 @@ void VoIPReceiver::playout(bool finish)
 		last_jitter = pPacket->getArrivalTime() - pPacket->getPlayoutTime();
 		max_jitter  = std::max( max_jitter, last_jitter );
 
-		std::cout<<"MISURATO JITTER PACCHETTO: "<<last_jitter<<" TALK "<<pPacket->getIDtalk()<<" FRAME "
-				<<pPacket->getIDframe()<<"\n\n";
-
 		EV<<"MISURATO JITTER PACCHETTO: "<<last_jitter<<" TALK "<<pPacket->getIDtalk()<<" FRAME "
 				<<pPacket->getIDframe()<<"\n\n";
 
@@ -157,8 +152,6 @@ void VoIPReceiver::playout(bool finish)
 		else if( last_jitter > 0.0 )
 		{
 			++playoutLoss;
-			std::cout<<"PACCHETTO IN RITARDO ELIMINATO: TALK "<<pPacket->getIDtalk()<<" FRAME "
-					<<pPacket->getIDframe()<<"\n\n";
 			EV<<"PACCHETTO IN RITARDO ELIMINATO: TALK "<<pPacket->getIDtalk()<<" FRAME "
 					<<pPacket->getIDframe()<<"\n\n";
 			delete pPacket;
@@ -169,19 +162,12 @@ void VoIPReceiver::playout(bool finish)
 			{
 				++mBufferSpace;
 				//EV<<"RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK "<<mPlayoutQueue.front()->getIDtalk()<<" FRAME "<<mPlayoutQueue.front()->getIDframe()<<"\n";
-//				std::cout<<"RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK "<<mPlayoutQueue.front()->getIDtalk()
-//						<<" FRAME "<<mPlayoutQueue.front()->getIDframe()<<"\n";
 				delete mPlayoutQueue.front();
 				mPlayoutQueue.pop_front();
 			}
 
 			if(mBufferSpace > 0)
 			{
-				std::cout<<"PACCHETTO CAMPIONABILE INSERITO NEL BUFFER: TALK "
-						<<pPacket->getIDtalk()<<" FRAME "<<pPacket->getIDframe()
-						<<" ISTANTE DI ARRIVO "<<pPacket->getArrivalTime()
-						<<" ISTANTE DI CAMPIONAMENTO "<<pPacket->getPlayoutTime()<<"\n\n";
-
 				EV<<"PACCHETTO CAMPIONABILE INSERITO NEL BUFFER: TALK "
 						<<pPacket->getIDtalk()<<" FRAME "<<pPacket->getIDframe()
 						<<" ISTANTE DI ARRIVO "<<pPacket->getArrivalTime()
@@ -195,8 +181,6 @@ void VoIPReceiver::playout(bool finish)
 			else
 			{
 				++tailDropLoss;
-				std::cout<<"BUFFER PIENO PACCHETTO SCARTATO: TALK "<<pPacket->getIDtalk()<<" FRAME "
-						<<pPacket->getIDframe()<<" ISTANTE DI ARRIVO "<<pPacket->getArrivalTime()<<"\n\n";
 				EV<<"BUFFER PIENO PACCHETTO SCARTATO: TALK "<<pPacket->getIDtalk()<<" FRAME "
 						<<pPacket->getIDframe()<<" ISTANTE DI ARRIVO "<<pPacket->getArrivalTime()<<"\n\n";
 				delete pPacket;

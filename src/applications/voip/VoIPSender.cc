@@ -86,7 +86,6 @@ void VoIPSender::talkspurt(double dur)
 	IDtalk++;
 	nframes=(ceil(dur/sampling_time));
 	EV<<"TALKSPURT "<<IDtalk-1<<" Verranno inviati "<<nframes<<" frames\n\n";
-	std::cout <<"TALKSPURT "<<IDtalk-1<<" Verranno inviati "<<nframes<<" frames\n\n";
 
 	IDframe = 0;
 	nframes_tmp=nframes;
@@ -127,7 +126,6 @@ void VoIPSender::sendVoIPPacket()
 	//packet->setSize(size);
 	packet->setByteLength(size);
 	EV<<"TALKSPURT "<<IDtalk-1<<" Invio frame "<<IDframe<<"\n";
-	std::cout << simTime() <<") TALKSPURT "<<IDtalk-1<<" Invio frame "<<IDframe<<"\n";
 
 	socket.sendTo(packet,destAddress, destPort);
 	--nframes_tmp;
