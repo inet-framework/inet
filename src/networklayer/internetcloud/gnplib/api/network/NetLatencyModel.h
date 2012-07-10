@@ -317,6 +317,7 @@ class NetLayer;
 class NetLatencyModel // : public Configurable
 {
 public:
+    virtual ~NetLatencyModel() {}
 
     /**
      * This method is invoked by a given Subnet and calculates the network
