@@ -130,6 +130,7 @@ void RTPProfile::handleMessageFromPayloadSender(cMessage *msg)
 
     default:
         error("Profile received RTPInnerPacket from sender module with wrong type: %d", rinpIn->getType());
+        break;
     }
 }
 

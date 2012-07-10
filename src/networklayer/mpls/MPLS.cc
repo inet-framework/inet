@@ -190,6 +190,7 @@ void MPLS::doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel)
 
             default:
                 error("Unknown MPLS OptCode %d", outLabel[i].optcode);
+                break;
         }
     }
 }

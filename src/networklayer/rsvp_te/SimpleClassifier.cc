@@ -63,7 +63,7 @@ bool SimpleClassifier::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outL
             return false;
 
         default:
-            ;
+            break;
     }
 
     // forwarding decision for non-labeled datagrams

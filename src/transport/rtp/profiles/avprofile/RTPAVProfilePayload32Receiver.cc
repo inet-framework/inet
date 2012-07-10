@@ -136,7 +136,7 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
                     case 2: picture = 'P'; break;
                     case 3: picture = 'B'; break;
                     case 4: picture = 'D'; break;
-                    default: picture = ' ';
+                    default: picture = ' '; break;
                 }
 
                 // create sim line

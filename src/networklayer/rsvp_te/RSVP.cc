@@ -1831,6 +1831,7 @@ void RSVP::processPATH_NOTIFY(PathNotifyMsg* msg)
 
         default:
             ASSERT(false);
+            break;
     }
 
     delete msg;

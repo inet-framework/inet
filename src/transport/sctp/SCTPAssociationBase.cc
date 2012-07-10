@@ -590,7 +590,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                 case SCTP_E_RCV_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 case SCTP_E_RCV_VALID_COOKIE_ECHO: FSM_Goto((*fsm), SCTP_S_ESTABLISHED); break;
                 case SCTP_E_CLOSE: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
-                default:;
+                default: break;
             }
             break;
 
@@ -601,7 +601,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                 case SCTP_E_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 case SCTP_E_RCV_INIT_ACK: FSM_Goto((*fsm), SCTP_S_COOKIE_ECHOED); break;
                 case SCTP_E_RCV_VALID_COOKIE_ECHO: FSM_Goto((*fsm), SCTP_S_ESTABLISHED); break;
-                default:;
+                default: break;
             }
             break;
 
@@ -611,7 +611,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                 case SCTP_E_RCV_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 case SCTP_E_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 case SCTP_E_RCV_COOKIE_ACK:FSM_Goto((*fsm), SCTP_S_ESTABLISHED); break;
-                default:;
+                default: break;
             }
             break;
 
@@ -629,7 +629,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                     break;    //I.R.
                 case SCTP_E_RCV_SHUTDOWN: FSM_Goto((*fsm), SCTP_S_SHUTDOWN_RECEIVED); break;
                 case SCTP_E_CLOSE: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
-                default:;
+                default: break;
             }
             break;
 
@@ -641,7 +641,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                 case SCTP_E_NO_MORE_OUTSTANDING: FSM_Goto((*fsm), SCTP_S_SHUTDOWN_SENT); break;
                 case SCTP_E_RCV_SHUTDOWN: FSM_Goto((*fsm), SCTP_S_SHUTDOWN_RECEIVED); break;
                 case SCTP_E_RCV_SHUTDOWN_ACK: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
-                default:;
+                default: break;
             }
             break;
 
@@ -657,7 +657,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                     sendShutdownAck(remoteAddr);
                     /*FSM_Goto((*fsm), SCTP_S_SHUTDOWN_ACK_SENT);*/
                     break;
-                default:;
+                default: break;
             }
             break;
 
@@ -671,7 +671,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                     sendShutdownAck(remoteAddr);
                     FSM_Goto((*fsm), SCTP_S_SHUTDOWN_ACK_SENT);
                     break;
-                default:;
+                default: break;
             }
             break;
 
@@ -681,7 +681,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                 case SCTP_E_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 case SCTP_E_RCV_ABORT: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 case SCTP_E_RCV_SHUTDOWN_COMPLETE:      FSM_Goto((*fsm), SCTP_S_CLOSED); break;
-                default:;
+                default: break;
             }
             break;
 

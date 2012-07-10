@@ -149,6 +149,7 @@ void ThruputMeteringChannel::updateDisplay()
                 break;
             default:
                 *p++ = *fp;
+                break;
         }
     }
     *p = '\0';

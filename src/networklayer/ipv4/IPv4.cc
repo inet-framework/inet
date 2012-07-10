@@ -254,6 +254,7 @@ void IPv4::handleReceivedICMP(ICMPMessage *msg)
             // ICMP_TIMESTAMP_REQUEST, ICMP_TIMESTAMP_REPLY, etc.
             int gateindex = mapping.getOutputGateForProtocol(IP_PROT_ICMP);
             send(msg, "transportOut", gateindex);
+            break;
         }
     }
 }

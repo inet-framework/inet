@@ -677,6 +677,7 @@ void LDP::processLDPPacketFromTCP(LDPPacket *ldpPacket)
     {
     case HELLO:
         error("Received LDP HELLO over TCP (should arrive over UDP)");
+        break;
 
     case ADDRESS:
         // processADDRESS(ldpPacket);
@@ -710,6 +711,7 @@ void LDP::processLDPPacketFromTCP(LDPPacket *ldpPacket)
 
     default:
         error("LDP PROC DEBUG: Unrecognized LDP Message Type, type is %d", ldpPacket->getType());
+        break;
     }
 }
 
@@ -940,6 +942,7 @@ void LDP::processNOTIFICATION(LDPNotify *packet)
 
         default:
             ASSERT(false);
+            break;
     }
 
     delete packet;

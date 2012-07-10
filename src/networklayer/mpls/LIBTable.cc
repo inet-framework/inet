@@ -224,6 +224,7 @@ std::ostream & operator<<(std::ostream & os, const LabelOpVector& label)
 
             default:
                 ASSERT(false);
+                break;
         }
 
         if (i < label.size() - 1)

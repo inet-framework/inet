@@ -242,6 +242,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
                 return TCP_E_RCV_RST; // this will trigger state transition
 
             default: ASSERT(0);
+                break;
         }
     }
 
