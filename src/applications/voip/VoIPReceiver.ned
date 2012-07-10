@@ -29,12 +29,12 @@ simple VoIPReceiver like IUDPApp
         int dim_buffer = default(20);
         double sampling_time = default(0.02);
 
-        @statistic[VoIPFrameLoss](title="VoIP Frame Loss"; unit="ratio"; source="VoIPFrameLoss"; record=lteAvg);
-        @statistic[VoIPFrameDelay](title="VoIP Frame Delay"; unit="s"; source="VoIPFrameDelay"; record=lteAvg);
-        @statistic[VoIPPlayoutDelay](title="VoIP Playout Delay"; unit="s"; source="VoIPPlayoutDelay"; record=lteAvg);
-        @statistic[VoIPPlayoutLoss](title="VoIP Playout Loss"; unit="ratio"; source="VoIPPlayoutLoss"; record=lteAvg);
-        @statistic[VoIPMosSignal](title="VoIP Mos Signal"; unit="MOS"; source="VoIPMosSignal"; record=lteAvg);
-        @statistic[VoIPTaildropLoss](title="VoIP Tail Drop Loss"; unit="ratio"; source="VoIPTaildropLoss"; record=lteAvg);
+        @statistic[VoIPFrameLoss](title="VoIP Frame Loss"; unit="ratio"; source="VoIPFrameLoss"; record=stats);
+        @statistic[VoIPFrameDelay](title="VoIP Frame Delay"; unit="s"; source="VoIPFrameDelay"; record=stats);
+        @statistic[VoIPPlayoutDelay](title="VoIP Playout Delay"; unit="s"; source="VoIPPlayoutDelay"; record=stats);
+        @statistic[VoIPPlayoutLoss](title="VoIP Playout Loss"; unit="ratio"; source="VoIPPlayoutLoss"; record=stats);
+        @statistic[VoIPMosSignal](title="VoIP Mos Signal"; unit="MOS"; source="VoIPMosSignal"; record=stats);
+        @statistic[VoIPTaildropLoss](title="VoIP Tail Drop Loss"; unit="ratio"; source="VoIPTaildropLoss"; record=stats);
 
         @display("i=block/source");
     gates:

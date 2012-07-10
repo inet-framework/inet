@@ -212,12 +212,11 @@ void VoIPReceiver::playout(bool finish)
 
 	double mos = eModel(mPlayoutDelay, proportionalLoss);
 
-	mTaggedSample->sample = mPlayoutDelay;
-	emit(mPlayoutDelaySignal,mTaggedSample);
+	emit(mPlayoutDelaySignal, mPlayoutDelay);
 	mTaggedSample->sample = ((double)playoutLoss/(double)n_frames);
 	emit(mPlayoutLossSignal, mTaggedSample);
 	mTaggedSample->sample = mos;
-	emit(mMosSignal, mTaggedSample);
+	emit(mMosSignal, mos);
 	mTaggedSample->sample = ((double)tailDropLoss/(double)n_frames);
 	emit(mTaildropLossSignal, mTaggedSample);
 
