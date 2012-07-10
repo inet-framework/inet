@@ -37,7 +37,8 @@ class NistErrorRateModel : public IErrorModel
 {
 public:
 
-  NistErrorRateModel ();
+  NistErrorRateModel();
+  virtual ~NistErrorRateModel();
   virtual double GetChunkSuccessRate (ModulationType mode, double snr, uint32_t nbits) const;
 
 private:

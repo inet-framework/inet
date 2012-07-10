@@ -28,6 +28,8 @@ struct pbuf;
 class LwipTcpStackIf
 {
   public:
+    virtual ~LwipTcpStackIf() {}
+
     /**
      * TCP layer send a packet to IP layer
      * @param pcb:    the lwip pcb or NULL (tipically when send a RESET )

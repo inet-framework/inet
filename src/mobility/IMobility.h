@@ -37,6 +37,8 @@
 class INET_API IMobility
 {
   public:
+    virtual ~IMobility() {}
+
     /** @brief Returns the current position at the current simulation time. */
     virtual Coord getCurrentPosition() = 0;
 

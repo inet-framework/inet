@@ -647,6 +647,8 @@ namespace Macho
 
         static Alias history(const _MachineBase & m);
 
+        virtual ~MachoLink() {}
+
     protected:
         // Needed to perform compile time checks.
         typedef MachoLink<C, P> MLINK;

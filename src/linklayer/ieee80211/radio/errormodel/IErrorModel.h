@@ -20,6 +20,7 @@ class IErrorModel
 {
     public:
         IErrorModel() {};
+        virtual ~IErrorModel() {};
         virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const = 0;
 };
 

@@ -23,6 +23,10 @@ NistErrorRateModel::NistErrorRateModel()
 {
 }
 
+NistErrorRateModel::~NistErrorRateModel()
+{
+}
+
 double NistErrorRateModel::GetBpskBer(double snr) const
 {
     double z = sqrt(snr);

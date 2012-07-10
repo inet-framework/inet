@@ -34,6 +34,8 @@ class IPowerControl
         WATCH(enable);
     }
 
+    virtual ~IPowerControl() {}
+
     virtual bool enableModule()
     {
         if (!this->enable)

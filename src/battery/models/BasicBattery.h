@@ -65,6 +65,8 @@ class DrawAmount
             value(value)
     {}
 
+    virtual ~DrawAmount() {}
+
     /** @brief Returns the type of power drawn as PowerType. */
     virtual int getType() { return type; }
     /** @brief Returns the actual amount of power drawn. */
