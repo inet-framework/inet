@@ -43,6 +43,7 @@
 Define_Module(TraCIScenarioManager);
 
 TraCIScenarioManager::~TraCIScenarioManager() {
+    cancelAndDelete(connectAndStartTrigger);
 	cancelAndDelete(executeOneTimestepTrigger);
 }
 
@@ -329,11 +330,10 @@ void TraCIScenarioManager::init_traci() {
 }
 
 void TraCIScenarioManager::finish() {
-	if (executeOneTimestepTrigger->isScheduled()) {
-		cancelEvent(executeOneTimestepTrigger);
-		delete executeOneTimestepTrigger;
-		executeOneTimestepTrigger = 0;
-	}
+    cancelAndDelete(executeOneTimestepTrigger);
+    executeOneTimestepTrigger = NULL;
+    cancelAndDelete(connectAndStartTrigger);
+    connectAndStartTrigger = NULL;
 	if (socketPtr) {
 		closesocket(MYSOCKET);
 		delete &MYSOCKET;
