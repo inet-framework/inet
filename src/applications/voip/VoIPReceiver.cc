@@ -116,8 +116,8 @@ void VoIPReceiver::playout(bool finish)
     else
     	channelLoss = pPacket->getNframes() - mPacketsList.size();
 
-    mTaggedSample->sample = ((double)channelLoss/(double)n_frames);
-    emit(mFrameLossSignal, mTaggedSample);
+    double frameLossRate = ((double)channelLoss/(double)n_frames);
+    emit(mFrameLossSignal, frameLossRate);
 
     //VETTORE PER GESTIRE DUPLICATI
     bool* isArrived = new bool[pPacket->getNframes()];
@@ -133,8 +133,8 @@ void VoIPReceiver::playout(bool finish)
 	{
 		pPacket =  mPacketsList.front();
 
-		mTaggedSample->sample = pPacket->getArrivalTime()-SIMTIME_DBL(pPacket->getTimestamp());
-		emit(mFrameDelaySignal, mTaggedSample);
+		double delay = pPacket->getArrivalTime()-SIMTIME_DBL(pPacket->getTimestamp());
+		emit(mFrameDelaySignal, delay);
 
 		pPacket->setPlayoutTime(firstPlayoutTime + (pPacket->getIDframe() - firstFrameId)  * mSamplingDelta);
 
@@ -213,12 +213,11 @@ void VoIPReceiver::playout(bool finish)
 	double mos = eModel(mPlayoutDelay, proportionalLoss);
 
 	emit(mPlayoutDelaySignal, mPlayoutDelay);
-	mTaggedSample->sample = ((double)playoutLoss/(double)n_frames);
-	emit(mPlayoutLossSignal, mTaggedSample);
-	mTaggedSample->sample = mos;
+	double lossRate = ((double)playoutLoss/(double)n_frames);
+	emit(mPlayoutLossSignal, lossRate);
 	emit(mMosSignal, mos);
-	mTaggedSample->sample = ((double)tailDropLoss/(double)n_frames);
-	emit(mTaildropLossSignal, mTaggedSample);
+	double tailDropRate = ((double)tailDropLoss/(double)n_frames);
+	emit(mTaildropLossSignal, tailDropRate);
 
 	EV<<"MOS CALCOLATO: eModel( "<<mPlayoutDelay<<" , "<<tailDropLoss<<"+"<<playoutLoss<<"+"
 			<<channelLoss<<" ) = "<<mos<<"\n\n";
