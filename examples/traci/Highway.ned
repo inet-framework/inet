@@ -23,6 +23,7 @@ package inet.examples.traci;
 import inet.world.radio.ChannelControl;
 import inet.world.traci.TraCIScenarioManager;
 
+
 module Highway
 {
     submodules:
