@@ -88,7 +88,7 @@ void VoIPReceiver::handleMessage(cMessage *msg)
 
 	EV<<"PACCHETTO ARRIVATO: TALK "<<pPacket->getIDtalk()<<" FRAME "<<pPacket->getIDframe()<<"\n\n";
 
-	pPacket->setArrivalTime(SIMTIME_DBL(simTime()));
+	pPacket->setArrivalTime(simTime());
 	mPacketsList.push_back(pPacket);
 }
 
@@ -99,7 +99,7 @@ void VoIPReceiver::playout(bool finish)
 
 	VoipPacket* pPacket =  mPacketsList.front();
 
-    double       firstPlayoutTime   = pPacket->getArrivalTime() + mPlayoutDelay;
+    simtime_t    firstPlayoutTime   = pPacket->getArrivalTime() + mPlayoutDelay;
     unsigned int firstFrameId       = pPacket->getIDframe();
     unsigned int n_frames		    = pPacket->getNframes();
     unsigned int playoutLoss 	    = 0;
@@ -128,14 +128,14 @@ void VoIPReceiver::playout(bool finish)
     	isArrived[y] = false;
     }
 
-    double       last_jitter 	    = 0.0;
-    double       max_jitter 		= -1000.0;
+    simtime_t       last_jitter 	    = 0.0;
+    simtime_t       max_jitter 		= -1000.0;
 
 	while( !mPacketsList.empty() /*&& pPacket->getIDtalk() == mCurrentTalkspurt*/ )
 	{
 		pPacket =  mPacketsList.front();
 
-		double delay = pPacket->getArrivalTime()-SIMTIME_DBL(pPacket->getTimestamp());
+		simtime_t delay = pPacket->getArrivalTime() - pPacket->getTimestamp();
 		emit(mFrameDelaySignal, delay);
 
 		pPacket->setPlayoutTime(firstPlayoutTime + (pPacket->getIDframe() - firstFrameId)  * mSamplingDelta);
@@ -198,7 +198,7 @@ void VoIPReceiver::playout(bool finish)
 		EV<<"proportionalLoss "<<proportionalLoss<< "(tailDropLoss="<< tailDropLoss<< " - playoutLoss="<<
 				playoutLoss << " - channelLoss=" << channelLoss<< ")\n\n";
 
-	double mos = eModel(mPlayoutDelay, proportionalLoss);
+	double mos = eModel(SIMTIME_DBL(mPlayoutDelay), proportionalLoss);
 
 	emit(mPlayoutDelaySignal, mPlayoutDelay);
 	double lossRate = ((double)playoutLoss/(double)n_frames);

@@ -59,8 +59,8 @@ void VoIPSender::initialize(int stage)
 	// calculating traffic starting time
 	// TODO correct this conversion
 	//FIXME why need the round() ???
-	double startTime = round((double)par("startTime")*1000)/1000;
-	double offset = startTime + SIMTIME_DBL(simTime());
+	simtime_t startTime = round(par("startTime").doubleValue() * 1000.0) / 1000.0;
+	simtime_t offset = startTime + simTime();
 
 	scheduleAt(offset,selfSource);
 	EV << "\t starting traffic in " << startTime << " s" << endl;

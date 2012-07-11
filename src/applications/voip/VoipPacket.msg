@@ -22,7 +22,8 @@ packet VoipPacket
 	unsigned int nframes;
 	unsigned int IDframe;
 	simtime_t timestamp;
-	double arrivalTime;
-	double playoutTime;
 	unsigned int size;
+    // next fields used by receiver:
+	simtime_t arrivalTime;
+	simtime_t playoutTime;
 }
