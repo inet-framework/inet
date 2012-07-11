@@ -523,6 +523,8 @@ class OLSR : public ManetRoutingBase
     virtual void processLinkBreak(const cObject *details);
     virtual void scheduleNextEvent();
 
+    Uint128 getIfaceAddressFromIndex(int index);
+
   public:
     OLSR() {}
     virtual ~OLSR();

@@ -499,13 +499,11 @@ OLSR::initialize(int stage)
             // own network interfaces, so that GetMainAddress () works to
             // translate the node's own interface addresses into the main address.
             OLSR_iface_assoc_tuple* tuple = new OLSR_iface_assoc_tuple;
-            if (this->isInMacLayer())
-                tuple->iface_addr() = getWlanInterfaceEntry(i)->getMacAddress().getInt();
-            else
-                tuple->iface_addr() = getWlanInterfaceEntry(i)->ipv4Data()->getIPAddress().getInt();
+            int index = getWlanInterfaceIndex(i);
+            tuple->iface_addr() = getIfaceAddressFromIndex(index);
             tuple->main_addr() = ra_addr();
             tuple->time() = simtime_t::getMaxTime().dbl();
-            tuple->local_iface_index() = getWlanInterfaceIndex(i);
+            tuple->local_iface_index() = index;
             add_ifaceassoc_tuple(tuple);
         }
 
@@ -670,6 +668,7 @@ OLSR::recv_olsr(cMessage* msg)
 
 // Process Olsr information
     assert(op->msgArraySize() >= 0 && op->msgArraySize() <= OLSR_MAX_MSGS);
+    nsaddr_t receiverIfaceAddr = getIfaceAddressFromIndex(index);
     for (int i = 0; i < (int) op->msgArraySize(); i++)
     {
         OLSR_msg& msg = op->msg(i);
@@ -684,15 +683,13 @@ OLSR::recv_olsr(cMessage* msg)
         // If the message has been processed it must not be
         // processed again
         bool do_forwarding = true;
+
         OLSR_dup_tuple* duplicated = state_.find_dup_tuple(msg.orig_addr(), msg.msg_seq_num());
         if (duplicated == NULL)
         {
             // Process the message according to its type
             if (msg.msg_type() == OLSR_HELLO_MSG)
-                if (isInMacLayer())
-                    process_hello(msg, getInterfaceEntry(index)->getMacAddress().getInt(), src_addr, index);
-                else
-                    process_hello(msg, getInterfaceEntry(index)->ipv4Data()->getIPAddress().getInt(), src_addr, index);
+                process_hello(msg, receiverIfaceAddr, src_addr, index);
             else if (msg.msg_type() == OLSR_TC_MSG)
                 process_tc(msg, src_addr, index);
             else if (msg.msg_type() == OLSR_MID_MSG)
@@ -714,7 +711,7 @@ OLSR::recv_olsr(cMessage* msg)
                     it != duplicated->iface_list().end();
                     it++)
             {
-                if (*it == ra_addr())
+                if (*it == receiverIfaceAddr)
                 {
                     do_forwarding = false;
                     break;
@@ -728,7 +725,7 @@ OLSR::recv_olsr(cMessage* msg)
             // TC and MID messages are forwarded using the default algorithm.
             // Remaining messages are also forwarded using the default algorithm.
             if (msg.msg_type() != OLSR_HELLO_MSG)
-                forward_default(msg, duplicated, ra_addr(), src_addr);
+                forward_default(msg, duplicated, receiverIfaceAddr, src_addr);
         }
 
     }
@@ -3028,5 +3025,16 @@ bool OLSR::getNextHopGroup(const Uint128& dest, Uint128 &next, int &iface, Uint1
         isGroup = false;
     }
     return find;
+}
+
+
+
+Uint128 OLSR::getIfaceAddressFromIndex(int index)
+{
+    InterfaceEntry * entry = getInterfaceEntry(index);
+    if (this->isInMacLayer())
+        return entry->getMacAddress().getInt();
+    else
+        return entry->ipv4Data()->getIPAddress().getInt();
 }
 

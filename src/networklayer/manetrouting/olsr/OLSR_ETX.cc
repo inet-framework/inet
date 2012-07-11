@@ -168,6 +168,22 @@ OLSR_ETX::initialize(int stage)
         midTimer = new OLSR_MidTimer(); ///< Timer for sending MID messages.
         linkQualityTimer = new OLSR_ETX_LinkQualityTimer();
 
+
+        for (int i = 0; i< getNumWlanInterfaces(); i++)
+        {
+            // Create never expiring interface association tuple entries for our
+            // own network interfaces, so that GetMainAddress () works to
+            // translate the node's own interface addresses into the main address.
+            OLSR_iface_assoc_tuple* tuple = new OLSR_iface_assoc_tuple;
+            int index = getWlanInterfaceIndex(i);
+            tuple->iface_addr() = getIfaceAddressFromIndex(index);
+            tuple->main_addr() = ra_addr();
+            tuple->time() = simtime_t::getMaxTime().dbl();
+            tuple->local_iface_index() = index;
+            add_ifaceassoc_tuple(tuple);
+        }
+
+
         hello_timer_.resched(hello_ival_);
         tc_timer_.resched(hello_ival_);
         mid_timer_.resched(hello_ival_);
@@ -230,6 +246,7 @@ OLSR_ETX::recv_olsr(cMessage* msg)
 
 // Process Olsr information
     assert(op->msgArraySize() >= 0 && op->msgArraySize() <= OLSR_MAX_MSGS);
+    nsaddr_t receiverIfaceAddr = getIfaceAddressFromIndex(index);
     for (int i = 0; i < (int) op->msgArraySize(); i++)
     {
         OLSR_ETX_msg& msg = op->msg(i);
@@ -249,7 +266,7 @@ OLSR_ETX::recv_olsr(cMessage* msg)
         {
             // Process the message according to its type
             if (msg.msg_type() == OLSR_HELLO_MSG)
-                process_hello(msg, ra_addr(), src_addr, op->pkt_seq_num(), index);
+                process_hello(msg, receiverIfaceAddr, src_addr, op->pkt_seq_num(), index);
             else if (msg.msg_type() == OLSR_TC_MSG)
                 process_tc(msg, src_addr, index);
             else if (msg.msg_type() == OLSR_MID_MSG)
@@ -271,7 +288,7 @@ OLSR_ETX::recv_olsr(cMessage* msg)
                     it != duplicated->iface_list().end();
                     it++)
             {
-                if (*it == ra_addr())
+                if (*it == receiverIfaceAddr)
                 {
                     do_forwarding = false;
                     break;
@@ -285,7 +302,7 @@ OLSR_ETX::recv_olsr(cMessage* msg)
             // TC and MID messages are forwarded using the default algorithm.
             // Remaining messages are also forwarded using the default algorithm.
             if (msg.msg_type() != OLSR_HELLO_MSG)
-                forward_default(msg, duplicated, ra_addr(), src_addr);
+                forward_default(msg, duplicated, receiverIfaceAddr, src_addr);
         }
 
     }
