@@ -21,10 +21,10 @@ packet VoipPacket
     unsigned int IDtalk;
 	unsigned int nframes;
 	unsigned int IDframe;
-	simtime_t timestamp;
+	simtime_t sentTime;
     simtime_t timeLength;
 
     // next fields used by receiver:
-	simtime_t arrivalTime;
+	simtime_t arrivedTime;
 	simtime_t playoutTime;
 }

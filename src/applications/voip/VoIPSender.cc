@@ -121,7 +121,7 @@ void VoIPSender::sendVoIPPacket()
 	packet->setIDtalk(IDtalk-1);
 	packet->setNframes(nframes);
 	packet->setIDframe(IDframe);
-	packet->setTimestamp(simTime());
+	packet->setSentTime(simTime());
 	packet->setTimeLength(sampling_time);
 	packet->setByteLength(size);
 	EV<<"TALKSPURT "<<IDtalk-1<<" Invio frame "<<IDframe<<"\n";
