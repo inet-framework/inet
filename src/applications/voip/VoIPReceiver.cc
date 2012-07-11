@@ -112,7 +112,7 @@ void VoIPReceiver::playout(bool finish)
     	unsigned int maxId = 0;
     	for( it = mPacketsList.begin(); it != mPacketsList.end(); it++)
     		maxId = std::max(maxId, (*it)->getIDframe());
-    		channelLoss = maxId + 1 - mPacketsList.size();
+        channelLoss = maxId + 1 - mPacketsList.size();
     }
 
     else

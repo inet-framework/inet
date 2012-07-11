@@ -18,7 +18,10 @@ VoIPSender::VoIPSender()
 
 VoIPSender::~VoIPSender()
 {
-    cancelAndDelete(selfSender);
+	if(selfSender->isScheduled())
+		cancelEvent(selfSender);
+
+	delete selfSender;
 }
 
 void VoIPSender::initialize(int stage)
