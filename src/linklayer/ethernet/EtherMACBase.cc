@@ -246,7 +246,7 @@ void EtherMACBase::initializeFlags()
     duplexMode = true;
 
     // initialize connected flag
-    connected = physOutGate->getPathEndGate()->isConnected();
+    connected = physOutGate->getPathEndGate()->isConnected() && physInGate->getPathStartGate()->isConnected();
 
     if (!connected)
         EV << "MAC not connected to a network.\n";
@@ -451,7 +451,12 @@ void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
 {
     cChannel *outTrChannel = physOutGate->findTransmissionChannel();
     cChannel *inTrChannel = physInGate->findIncomingTransmissionChannel();
-    connected = (outTrChannel != NULL) && (inTrChannel != NULL);
+
+    connected = physOutGate->getPathEndGate()->isConnected() && physInGate->getPathStartGate()->isConnected();
+
+    if (connected && ((!outTrChannel) || (!inTrChannel)))
+        throw cRuntimeError("Ethernet phys gate must be connected using a transmission channel");
+
     double txRate = outTrChannel ? outTrChannel->getNominalDatarate() : 0.0;
     double rxRate = inTrChannel ? inTrChannel->getNominalDatarate() : 0.0;
 

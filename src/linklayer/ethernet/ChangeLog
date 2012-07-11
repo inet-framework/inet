@@ -1,3 +1,12 @@
+2012-07-11  Zoltan Bojthe
+
+    Fixed connection detection:
+    When two modules are connected, EtherMAC now throws error if
+    the phys gates are not connected using a transmission channel.
+    Previously, connection status was set to "not connected" if
+    modules were connected via idealChannel or other non-transmission
+    channel which was very misleading.
+
 2012-06-15  Zoltan Bojthe
 
 	Renamed netwIn, netwOut gates to upperLayerIn, upperLayerOut
