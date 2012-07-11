@@ -19,6 +19,7 @@ VoIPSender::VoIPSender()
 VoIPSender::~VoIPSender()
 {
     cancelAndDelete(selfSender);
+    cancelAndDelete(selfSource);
 }
 
 void VoIPSender::initialize(int stage)
