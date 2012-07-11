@@ -525,6 +525,8 @@ class OLSR : public ManetRoutingBase
 
     Uint128 getIfaceAddressFromIndex(int index);
 
+    const char * getNodeId(const nsaddr_t &addr);
+
   public:
     OLSR() {}
     virtual ~OLSR();
