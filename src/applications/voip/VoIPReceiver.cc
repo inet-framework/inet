@@ -218,7 +218,7 @@ void VoIPReceiver::playout(bool finish)
 
 double VoIPReceiver::eModel (double delay, double loss)
 {
-		double delayms = 1000 * delay;
+		double delayms = 1000.0 * delay;
 
 		// Compute the Id parameter
 		int u = ( (delayms - 177.3) > 0 ? 1: 0 );
@@ -236,18 +236,18 @@ double VoIPReceiver::eModel (double delay, double loss)
 		// Compute the MOS value
 		double mos = 0.0;
 
-		if (Rfactor < 0) {
+		if (Rfactor < 0.0) {
 			mos = 1.0;
 		}
-		else if (Rfactor > 100) {
+		else if (Rfactor > 100.0) {
 			mos = 4.5;
 		}
 		else {
-			mos = 1 + 0.035 * Rfactor + 7 * pow(10, (double)-6) * Rfactor *
-			(Rfactor - 60) * (100 - Rfactor);
+			mos = 1.0 + 0.035 * Rfactor + 7.0 * 1E-6 * Rfactor *
+			(Rfactor - 60.0) * (100.0 - Rfactor);
 		}
 
-		mos = ( mos < 1 ) ? 1 : mos;
+		mos = ( mos < 1.0 ) ? 1.0 : mos;
 
 		return mos;
 }
