@@ -60,13 +60,17 @@ void VoIPReceiver::initialize(int stage)
 
 void VoIPReceiver::handleMessage(cMessage *msg)
 {
-	if (msg->isSelfMessage())
-		return;
+    if (msg->isSelfMessage()) {
+        EV << "VoIPReceiver: Unaccepted self message: " << msg->getName() << endl;
+        delete msg;
+        return;
+    }
 	VoipPacket* pPacket = dynamic_cast<VoipPacket*>(msg);
-	cPacket* pPacket2;
-	if (pPacket==0){
-		pPacket2 = dynamic_cast<cPacket*>(msg);
-	}
+    if (pPacket==0) {
+        EV << "VoIPReceiver: Unaccepted incoming message: " << msg->getName() << endl;
+        delete msg;
+        return;
+    }
 
 	if(mInit)
 	{
