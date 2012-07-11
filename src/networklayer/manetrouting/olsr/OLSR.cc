@@ -51,7 +51,7 @@
 #define RT_PORT 698
 #define IP_DEF_TTL 32
 
-
+#define MULTIPLE_IFACES_SUPPORT
 #define state_      (*state_ptr)
 
 ///
@@ -152,7 +152,7 @@ OLSR_MidTimer::expire()
 #ifdef MULTIPLE_IFACES_SUPPORT
     agent_->send_mid();
 //  agent_->scheduleAt(simTime()+agent_->mid_ival_- JITTER,this);
-    agent_->timerQueue.insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+agent_->mid_ival_- agent_->jitter(), this));
+    agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+agent_->mid_ival_- agent_->jitter(), this));
 #endif
 }
 
@@ -492,6 +492,24 @@ OLSR::initialize(int stage)
 
         state_ptr = new OLSR_state();
 
+
+        for (int i = 0; i< getNumWlanInterfaces(); i++)
+        {
+            // Create never expiring interface association tuple entries for our
+            // own network interfaces, so that GetMainAddress () works to
+            // translate the node's own interface addresses into the main address.
+            OLSR_iface_assoc_tuple* tuple = new OLSR_iface_assoc_tuple;
+            if (this->isInMacLayer())
+                tuple->iface_addr() = getWlanInterfaceEntry(i)->getMacAddress().getInt();
+            else
+                tuple->iface_addr() = getWlanInterfaceEntry(i)->ipv4Data()->getIPAddress().getInt();
+            tuple->main_addr() = ra_addr();
+            tuple->time() = simtime_t::getMaxTime().dbl();
+            tuple->local_iface_index() = getWlanInterfaceIndex(i);
+            add_ifaceassoc_tuple(tuple);
+        }
+
+
         hello_timer_.resched(hello_ival_);
         tc_timer_.resched(hello_ival_);
         mid_timer_.resched(hello_ival_);
@@ -671,7 +689,10 @@ OLSR::recv_olsr(cMessage* msg)
         {
             // Process the message according to its type
             if (msg.msg_type() == OLSR_HELLO_MSG)
-                process_hello(msg, ra_addr(), src_addr, index);
+                if (isInMacLayer())
+                    process_hello(msg, getInterfaceEntry(index)->getMacAddress().getInt(), src_addr, index);
+                else
+                    process_hello(msg, getInterfaceEntry(index)->ipv4Data()->getIPAddress().getInt(), src_addr, index);
             else if (msg.msg_type() == OLSR_TC_MSG)
                 process_tc(msg, src_addr, index);
             else if (msg.msg_type() == OLSR_MID_MSG)
@@ -1796,7 +1817,7 @@ OLSR::send_hello()
     for (linkset_t::iterator it = linkset().begin(); it != linkset().end(); it++)
     {
         OLSR_link_tuple* link_tuple = *it;
-        if (link_tuple->local_iface_addr() == ra_addr() && link_tuple->time() >= now)
+        if (get_main_addr(link_tuple->local_iface_addr()) == ra_addr() && link_tuple->time() >= now)
         {
             uint8_t link_type, nb_type, link_code;
 
@@ -1820,7 +1841,7 @@ OLSR::send_hello()
                         nb_it++)
                 {
                     OLSR_nb_tuple* nb_tuple = *nb_it;
-                    if (nb_tuple->nb_main_addr() == link_tuple->nb_iface_addr())
+                    if (nb_tuple->nb_main_addr() == get_main_addr(link_tuple->nb_iface_addr()))
                     {
                         if (nb_tuple->getStatus() == OLSR_STATUS_SYM)
                             nb_type = OLSR_SYM_NEIGH;
@@ -2067,7 +2088,7 @@ OLSR::populate_nb2hopset(OLSR_msg& msg)
 
                     for (int j = 0; j < hello_msg.count; j++)
                     {
-                        nsaddr_t nb2hop_addr = hello_msg.nb_iface_addr(j);
+                        nsaddr_t nb2hop_addr = get_main_addr(hello_msg.nb_iface_addr(j));
                         if (nt == OLSR_SYM_NEIGH || nt == OLSR_MPR_NEIGH)
                         {
                             // if the main address of the 2-hop
@@ -2145,7 +2166,7 @@ OLSR::populate_mprselset(OLSR_msg& msg)
             assert(hello_msg.count >= 0 && hello_msg.count <= OLSR_MAX_ADDRS);
             for (int j = 0; j < hello_msg.count; j++)
             {
-                if (hello_msg.nb_iface_addr(j) == ra_addr())
+                if (get_main_addr(hello_msg.nb_iface_addr(j)) == ra_addr())
                 {
                     // We must create a new entry into the mpr selector set
                     OLSR_mprsel_tuple* mprsel_tuple =
