@@ -34,8 +34,8 @@ void VoIPReceiver::initialize(int stage)
 	emodel_Ro_  = par("emodel_Ro_");
 
 	mBufferSpace   = par("dim_buffer");
-	mSamplingDelta = par("sampling_time");
-	mPlayoutDelay  = par("playout_delay");
+	mSamplingDelta = par("samplingTime");
+	mPlayoutDelay  = par("playoutDelay");
 
 	mInit = true;
 

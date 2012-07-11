@@ -25,9 +25,9 @@ simple VoIPReceiver like IUDPApp
         int emodel_Bpl_ = default(10);
         int emodel_A_ = default(5);
         double emodel_Ro_ = default(93.2);
-        double playout_delay = default(0);
+        double playoutDelay @unit(s) = default(0);      // delay for begin playout after received first packet
         int dim_buffer = default(20);
-        double sampling_time = default(0.02);
+        double samplingTime @unit(s) = default(20ms);
 
         @statistic[VoIPFrameLoss](title="VoIP Frame Loss"; unit="ratio"; source="VoIPFrameLoss"; record=stats);
         @statistic[VoIPFrameDelay](title="VoIP Frame Delay"; unit="s"; source="VoIPFrameDelay"; record=stats);
