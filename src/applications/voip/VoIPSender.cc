@@ -77,7 +77,7 @@ void VoIPSender::handleMessage(cMessage *msg)
 {
 	if(msg->isSelfMessage())
 	{
-		if(!strcmp(msg->getName(),"selfSender"))
+		if (msg == selfSender)
 			sendVoIPPacket();
 		else
 			selectPeriodTime();
