@@ -2389,15 +2389,8 @@ OLSR::updated_link_tuple(OLSR_link_tuple* tuple, uint8_t willingness)
 
     if (nb_tuple == NULL)
     {
-        // Creates associated neighbor tuple
-        nb_tuple = new OLSR_nb_tuple;
-        nb_tuple->nb_main_addr() = get_main_addr(tuple->nb_iface_addr());
-        nb_tuple->willingness() = willingness;
-        if (tuple->sym_time() >= now)
-            nb_tuple->getStatus() = OLSR_STATUS_SYM;
-        else
-            nb_tuple->getStatus() = OLSR_STATUS_NOT_SYM;
-        add_nb_tuple(nb_tuple);
+        add_link_tuple (tuple, willingness);
+        nb_tuple = state_.find_nb_tuple(get_main_addr(tuple->nb_iface_addr()));
     }
 
     if (nb_tuple != NULL)
