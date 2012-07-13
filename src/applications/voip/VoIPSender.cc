@@ -14,6 +14,8 @@ Define_Module(VoIPSender);
 VoIPSender::VoIPSender()
 {
 	initialized_ = false;
+    selfSender = NULL;
+    selfSource = NULL;
 }
 
 VoIPSender::~VoIPSender()
