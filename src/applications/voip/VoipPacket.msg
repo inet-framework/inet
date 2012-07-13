@@ -16,15 +16,14 @@
 //
 // TODO generated message class
 //
-packet VoipPacket 
+packet VoipPacket
 {
     unsigned int IDtalk;
 	unsigned int nframes;
 	unsigned int IDframe;
-	simtime_t sentTime;
+	simtime_t voipTimestamp;
     simtime_t timeLength;
 
-    // next fields used by receiver:
-	simtime_t arrivedTime;
+    // next field used by receiver:
 	simtime_t playoutTime;
 }
