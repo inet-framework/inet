@@ -30,6 +30,7 @@ simple VoIPSender like IUDPApp
         double scaleSil = default(0.899);
         double samplingTime @unit(s) = default(20ms);   // timelength of sampleframes
         double startTime @unit(s) = default(0);
+        double stopTime @unit(s) = default(0);  // time of finish sending, 0 means forever
 
         @display("i=block/source");
     gates:

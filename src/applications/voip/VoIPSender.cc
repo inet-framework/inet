@@ -63,9 +63,11 @@ void VoIPSender::initialize(int stage)
 	// TODO correct this conversion
 	//FIXME why need the round() ???
 	simtime_t startTime = round(par("startTime").doubleValue() * 1000.0) / 1000.0;
-	simtime_t offset = startTime + simTime();
+    stopTime = par("stopTime").doubleValue();
+    if (stopTime != 0 && stopTime < startTime)
+        throw cRuntimeError("Invalid startTime/stopTime settings: startTime %g s greater than stopTime %g s", SIMTIME_DBL(startTime), SIMTIME_DBL(stopTime));
 
-	scheduleAt(offset,selfSource);
+    scheduleAt(startTime, selfSource);
 	EV << "\t starting traffic in " << startTime << " s" << endl;
 
 	initialized_ = true;
@@ -95,13 +97,19 @@ void VoIPSender::talkspurt(double dur)
 
 void VoIPSender::selectPeriodTime()
 {
+    if (stopTime != 0 && simTime() >= stopTime)
+        return;
+
 	if(isTalk)
 	{
 		durSil=weibull(scaleSil, shapeSil);
 		double durSil2 = round(durSil*1000)/1000;
 		EV<<"PERIODO SILENZIO: "<<"Durata: "<<durSil<<"/" << durSil2<<" secondi\n\n";
 		durSil = durSil2;
-		scheduleAt(simTime()+durSil,selfSource);
+		simtime_t endSilent = simTime() + durSil;
+		if (stopTime != 0 && endSilent > stopTime)
+		    endSilent = stopTime;
+		scheduleAt(endSilent, selfSource);
 		isTalk = false;
 	}
 	else
@@ -110,8 +118,14 @@ void VoIPSender::selectPeriodTime()
 		double durTalk2 = round(durTalk*1000)/1000;
 		EV<<"TALKSPURT: "<<talkID<<" Durata: "<<durTalk<< "/"<< durTalk2<< " secondi\n\n";
 		durTalk = durTalk2;
+        simtime_t endTalk = simTime() + durTalk;
+        if (stopTime != 0 && endTalk > stopTime)
+        {
+            endTalk = stopTime;
+            durTalk = SIMTIME_DBL(stopTime - simTime());
+        }
 		talkspurt(durTalk);
-		scheduleAt(simTime()+durTalk,selfSource);
+		scheduleAt(endTalk, selfSource);
 		isTalk = true;
 	}
 }

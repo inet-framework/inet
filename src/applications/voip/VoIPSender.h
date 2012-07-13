@@ -49,7 +49,7 @@ class VoIPSender : public cSimpleModule
 	int localPort;
 	int destPort;
 	IPvXAddress destAddress;
-
+    simtime_t stopTime;
 
 	void talkspurt(double dur);
 	void selectPeriodTime();
