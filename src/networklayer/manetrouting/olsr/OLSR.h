@@ -496,7 +496,7 @@ class OLSR : public ManetRoutingBase
     virtual void        rm_dup_tuple(OLSR_dup_tuple*);
     virtual void        add_link_tuple(OLSR_link_tuple*, uint8_t);
     virtual void        rm_link_tuple(OLSR_link_tuple*);
-    virtual void        updated_link_tuple(OLSR_link_tuple*);
+    virtual void        updated_link_tuple(OLSR_link_tuple*, uint8_t willingness);
     virtual void        add_nb_tuple(OLSR_nb_tuple*);
     virtual void        rm_nb_tuple(OLSR_nb_tuple*);
     virtual void        add_nb2hop_tuple(OLSR_nb2hop_tuple*);

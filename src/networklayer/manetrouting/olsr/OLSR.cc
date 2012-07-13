@@ -150,6 +150,8 @@ void
 OLSR_MidTimer::expire()
 {
 #ifdef MULTIPLE_IFACES_SUPPORT
+    if (agent_->isInMacLayer())
+        return; // not multi-interface support
     agent_->send_mid();
 //  agent_->scheduleAt(simTime()+agent_->mid_ival_- JITTER,this);
     agent_->timerQueuePtr->insert(std::pair<simtime_t, OLSR_Timer *>(simTime()+agent_->mid_ival_- agent_->jitter(), this));
@@ -1846,9 +1848,7 @@ OLSR::send_hello()
                             nb_type = OLSR_NOT_NEIGH;
                         else
                         {
-                            fprintf(stderr, "There is a neighbor tuple"
-                                    " with an unknown status!\n");
-                            exit(1);
+                            error ("There is a neighbor tuple with an unknown status!");
                         }
                         ok = true;
                         break;
@@ -1856,9 +1856,8 @@ OLSR::send_hello()
                 }
                 if (!ok)
                 {
-                    fprintf(stderr, "Link tuple has no corresponding"
-                            " Neighbor tuple\n");
-                    exit(1);
+                    EV << "I don't know the neighbor " << get_main_addr(link_tuple->nb_iface_addr()) << "!!! \n";
+                    continue;
                 }
             }
 
@@ -1943,6 +1942,13 @@ OLSR::send_mid()
     msg.msg_seq_num() = msg_seq();
 
     msg.mid().count = 0;
+    for (int i = 0; i< getNumWlanInterfaces(); i++)
+    {
+        int index = getWlanInterfaceIndex(i);
+        nsaddr_t addr = getIfaceAddressFromIndex(index);
+        msg.mid().setIface_addr(i,addr);
+        msg.mid().count++;
+    }
     //foreach iface in this_node do
     //  msg.mid().iface_addr(i) = iface
     //  msg.mid().count++
@@ -2027,7 +2033,7 @@ OLSR::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsaddr_t
     link_tuple->time() = MAX(link_tuple->time(), link_tuple->asym_time());
 
     if (updated)
-        updated_link_tuple(link_tuple);
+        updated_link_tuple(link_tuple, hello.willingness());
 
     // Schedules link tuple deletion
     if (created && link_tuple != NULL)
@@ -2268,7 +2274,7 @@ OLSR::nb_loss(OLSR_link_tuple* tuple)
           getNodeId(ra_addr()),
           getNodeId(tuple->nb_iface_addr()));
 
-    updated_link_tuple(tuple);
+    updated_link_tuple(tuple,OLSR_WILL_DEFAULT);
     state_.erase_nb2hop_tuples(get_main_addr(tuple->nb_iface_addr()));
     state_.erase_mprsel_tuples(get_main_addr(tuple->nb_iface_addr()));
 
@@ -2373,13 +2379,27 @@ OLSR::rm_link_tuple(OLSR_link_tuple* tuple)
 /// \param tuple the link tuple which has been updated.
 ///
 void
-OLSR::updated_link_tuple(OLSR_link_tuple* tuple)
+OLSR::updated_link_tuple(OLSR_link_tuple* tuple, uint8_t willingness)
 {
     double now = CURRENT_TIME;
 
     // Each time a link tuple changes, the associated neighbor tuple must be recomputed
     OLSR_nb_tuple* nb_tuple =
         state_.find_nb_tuple(get_main_addr(tuple->nb_iface_addr()));
+
+    if (nb_tuple == NULL)
+    {
+        // Creates associated neighbor tuple
+        nb_tuple = new OLSR_nb_tuple;
+        nb_tuple->nb_main_addr() = get_main_addr(tuple->nb_iface_addr());
+        nb_tuple->willingness() = willingness;
+        if (tuple->sym_time() >= now)
+            nb_tuple->getStatus() = OLSR_STATUS_SYM;
+        else
+            nb_tuple->getStatus() = OLSR_STATUS_NOT_SYM;
+        add_nb_tuple(nb_tuple);
+    }
+
     if (nb_tuple != NULL)
     {
         if (use_mac() && tuple->lost_time() >= now)
@@ -2708,7 +2728,11 @@ OLSR::node_id(const nsaddr_t &addr)
 
 const char * OLSR::getNodeId(const nsaddr_t &addr)
 {
-    return convertAddressToString(addr).c_str();
+    if (isInMacLayer())
+        return MACAddress(addr.getLo()).str().c_str();
+    else
+        return IPv4Address(addr.getLo()).str().c_str();
+
 }
 
 // Interfaces with other Inet

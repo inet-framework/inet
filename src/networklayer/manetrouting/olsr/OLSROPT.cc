@@ -395,7 +395,7 @@ OLSROPT::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsadd
     link_tuple->time() = MAX(link_tuple->time(), link_tuple->asym_time());
 
     if (updated)
-        updated_link_tuple(link_tuple);
+        updated_link_tuple(link_tuple, hello.willingness());
 
     // Schedules link tuple deletion
     if (created && link_tuple != NULL)
@@ -530,7 +530,7 @@ OLSROPT::nb_loss(OLSR_link_tuple* tuple)
           getNodeId(ra_addr()),
           getNodeId(tuple->nb_iface_addr()));
 
-    updated_link_tuple(tuple);
+    updated_link_tuple(tuple, OLSR_WILL_DEFAULT);
     topologychanged += state_.erase_nb2hop_tuples(get_main_addr(tuple->nb_iface_addr()));
     topologychanged += state_.erase_mprsel_tuples(get_main_addr(tuple->nb_iface_addr()));
     mpr_computation();

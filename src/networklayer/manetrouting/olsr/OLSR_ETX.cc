@@ -1817,7 +1817,7 @@ OLSR_ETX::send_hello()
                         nb_it++)
                 {
                     OLSR_nb_tuple* nb_tuple = *nb_it;
-                    if (nb_tuple->nb_main_addr() == link_tuple->nb_iface_addr())
+                    if (nb_tuple->nb_main_addr() == get_main_addr(link_tuple->nb_iface_addr()))
                     {
                         if (nb_tuple->getStatus() == OLSR_STATUS_SYM)
                             nb_type = OLSR_SYM_NEIGH;
@@ -1825,9 +1825,7 @@ OLSR_ETX::send_hello()
                             nb_type = OLSR_NOT_NEIGH;
                         else
                         {
-                            fprintf(stderr, "There is a neighbor tuple"
-                                    " with an unknown status!\n");
-                            exit(1);
+                            error("There is a neighbor tuple with an unknown status!");
                         }
                         ok = true;
                         break;
@@ -1835,9 +1833,8 @@ OLSR_ETX::send_hello()
                 }
                 if (!ok)
                 {
-                    fprintf(stderr, "Link tuple has no corresponding"
-                            " Neighbor tuple\n");
-                    exit(1);
+                    EV << "I don't know the neighbor " << get_main_addr(link_tuple->nb_iface_addr()) << "!!! \n";
+                    continue;
                 }
             }
 
@@ -2232,7 +2229,7 @@ OLSR_ETX::link_sensing
     link_tuple->time() = MAX(link_tuple->time(), link_tuple->asym_time());
 
     if (updated)
-        updated_link_tuple(link_tuple);
+        updated_link_tuple(link_tuple, hello.willingness());
     // Schedules link tuple deletion
     if (created && link_tuple != NULL)
     {
@@ -2446,7 +2443,7 @@ OLSR_ETX::nb_loss(OLSR_link_tuple* tuple)
     debug("%f: Node %s detects neighbor %s loss\n", CURRENT_TIME,
             getNodeId(ra_addr()), getNodeId(tuple->nb_iface_addr()));
 
-    updated_link_tuple(tuple);
+    updated_link_tuple(tuple, OLSR_WILL_DEFAULT);
     state_.erase_nb2hop_tuples(get_main_addr(tuple->nb_iface_addr()));
     state_.erase_mprsel_tuples(get_main_addr(tuple->nb_iface_addr()));
 
