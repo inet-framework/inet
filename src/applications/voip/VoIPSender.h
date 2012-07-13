@@ -26,20 +26,20 @@ class VoIPSender : public cSimpleModule
 	//source
 	double 	  durTalk;
 	double 	  durSil;
-	double 	  scale_talk;
-	double 	  shape_talk;
-	double 	  scale_sil;
-	double 	  shape_sil;
-	bool      is_talk;
+	double 	  scaleTalk;
+	double 	  shapeTalk;
+	double 	  scaleSil;
+	double 	  shapeSil;
+	bool      isTalk;
 	cMessage* selfSource;
 	//sender
 	// FIXME questi non dovrebbero essere interi
-	int    IDtalk;
+	int    talkID;
 	int    nframes;
-	int    IDframe;
+	int    frameID;
 	int    nframes_tmp;
-	int    size;
-	double sampling_time;
+	int    talkFrameSize;
+	double samplingTime;
 
 	// ----------------------------
 
