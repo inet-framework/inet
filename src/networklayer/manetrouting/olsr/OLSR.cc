@@ -2384,14 +2384,7 @@ OLSR::updated_link_tuple(OLSR_link_tuple* tuple, uint8_t willingness)
     double now = CURRENT_TIME;
 
     // Each time a link tuple changes, the associated neighbor tuple must be recomputed
-    OLSR_nb_tuple* nb_tuple =
-        state_.find_nb_tuple(get_main_addr(tuple->nb_iface_addr()));
-
-    if (nb_tuple == NULL)
-    {
-        add_link_tuple (tuple, willingness);
-        nb_tuple = state_.find_nb_tuple(get_main_addr(tuple->nb_iface_addr()));
-    }
+    OLSR_nb_tuple* nb_tuple = find_or_add_nb(tuple, willingness);
 
     if (nb_tuple != NULL)
     {
@@ -2401,13 +2394,33 @@ OLSR::updated_link_tuple(OLSR_link_tuple* tuple, uint8_t willingness)
             nb_tuple->getStatus() = OLSR_STATUS_SYM;
         else
             nb_tuple->getStatus() = OLSR_STATUS_NOT_SYM;
-    }
 
-    debug("%f: Node %s has updated link tuple: nb_addr = %s status = %s\n",
-          now,
-          getNodeId(ra_addr()),
-          getNodeId(tuple->nb_iface_addr()),
-          ((nb_tuple->getStatus() == OLSR_STATUS_SYM) ? "sym" : "not_sym"));
+        debug("%f: Node %s has updated link tuple: nb_addr = %s status = %s\n", now, getNodeId(ra_addr()),
+                getNodeId(tuple->nb_iface_addr()), ((nb_tuple->getStatus() == OLSR_STATUS_SYM) ? "sym" : "not_sym"));
+    }
+}
+// Auxiliary method
+// add NB based in the link tuple information if the Nb doen't exist
+
+OLSR_nb_tuple* OLSR::find_or_add_nb(OLSR_link_tuple* tuple, uint8_t willingness)
+{
+    OLSR_nb_tuple* nb_tuple = state_.find_nb_tuple(get_main_addr(tuple->nb_iface_addr()));
+    if (nb_tuple == NULL)
+    {
+        double now = CURRENT_TIME;
+        state_.erase_nb_tuple(tuple->nb_iface_addr());
+        // Creates associated neighbor tuple
+        nb_tuple = new OLSR_nb_tuple;
+        nb_tuple->nb_main_addr() = get_main_addr(tuple->nb_iface_addr());
+        nb_tuple->willingness() = willingness;
+        if (tuple->sym_time() >= now)
+            nb_tuple->getStatus() = OLSR_STATUS_SYM;
+        else
+            nb_tuple->getStatus() = OLSR_STATUS_NOT_SYM;
+        add_nb_tuple(nb_tuple);
+        nb_tuple = state_.find_nb_tuple(get_main_addr(tuple->nb_iface_addr()));
+    }
+    return nb_tuple;
 }
 
 ///
@@ -2423,7 +2436,7 @@ OLSR::add_nb_tuple(OLSR_nb_tuple* tuple)
           getNodeId(ra_addr()),
           getNodeId(tuple->nb_main_addr()),
           ((tuple->getStatus() == OLSR_STATUS_SYM) ? "sym" : "not_sym"));
-
+    state_.erase_nb_tuple(tuple->nb_main_addr());
     state_.insert_nb_tuple(tuple);
 }
 

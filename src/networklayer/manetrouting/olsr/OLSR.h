@@ -507,6 +507,7 @@ class OLSR : public ManetRoutingBase
     virtual void        rm_topology_tuple(OLSR_topology_tuple*);
     virtual void        add_ifaceassoc_tuple(OLSR_iface_assoc_tuple*);
     virtual void        rm_ifaceassoc_tuple(OLSR_iface_assoc_tuple*);
+    virtual OLSR_nb_tuple*    find_or_add_nb(OLSR_link_tuple*, uint8_t willingness);
 
     const nsaddr_t  & get_main_addr(const nsaddr_t&) const;
     virtual int     degree(OLSR_nb_tuple*);
