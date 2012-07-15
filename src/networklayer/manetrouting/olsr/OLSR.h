@@ -416,6 +416,8 @@ class OLSR : public ManetRoutingBase
     /// Address of the routing agent.
     nsaddr_t ra_addr_;
 
+    bool optimizedMid;
+
   protected:
 // Omnet INET vaiables and functions
     char nodeName[50];

@@ -61,6 +61,8 @@ simple OLSR extends BaseRouting like IManetRouting
 	///
 	    double OLSR_REFRESH_INTERVAL @unit("s")=default(2s);
 	    bool PublicRoutingTables = default(false);
+	    
+	    bool optimizedMid = default(false);// only nodes with more that a interface sends mid messages 
 
     gates:
         input from_ip;

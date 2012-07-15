@@ -486,6 +486,9 @@ OLSR::initialize(int stage)
 
 
         useIndex = par("UseIndex");
+
+        optimizedMid = par("optimizedMid");
+
         // Starts all timers
 
         helloTimer = new OLSR_HelloTimer(); ///< Timer for sending HELLO messages.
@@ -1933,6 +1936,8 @@ OLSR::send_tc()
 void
 OLSR::send_mid()
 {
+    if (getNumWlanInterfaces() <= 1 && optimizedMid)
+        return;
     OLSR_msg msg;
     msg.msg_type() = OLSR_MID_MSG;
     msg.vtime() = OLSR::seconds_to_emf(OLSR_MID_HOLD_TIME);
