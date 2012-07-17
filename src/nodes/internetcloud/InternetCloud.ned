@@ -48,7 +48,7 @@ module InternetCloud
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
     types:
-        simple DelayGenerator
+        simple GnpDelayGenerator
         {
             parameters:
                 bool usePingErRttData = default(false);
@@ -88,7 +88,7 @@ module InternetCloud
                         queueIn[sizeof(ifIn)];
                 }
 
-                delayGenerator: DelayGenerator {
+                delayGenerator: GnpDelayGenerator {
                     parameters:
                         usePingErRttData = usePingErRttData;
                         useAnalyticalRtt = useAnalyticalRtt;

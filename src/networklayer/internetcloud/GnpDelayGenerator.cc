@@ -19,18 +19,18 @@
 #include <gnplib/impl/network/gnp/GnpLatencyModel.h>
 #include <gnplib/impl/network/IPv4NetID.h>
 
-#include "DelayGenerator.h"
+#include "GnpDelayGenerator.h"
 
 #include "IPv4Datagram.h"
 
 
-Define_Module(DelayGenerator);
+Define_Module(GnpDelayGenerator);
 
 namespace GeoLocationOracle=gnplib::impl::network::gnp::GeoLocationOracle;
 using gnplib::impl::network::IPv4NetID;
 
 
-void DelayGenerator::initialize(int stage)
+void GnpDelayGenerator::initialize(int stage)
 {
     if (stage==1)
     {
@@ -45,7 +45,7 @@ void DelayGenerator::initialize(int stage)
     }
 }
 
-void DelayGenerator::handleMessage(cMessage *msg)
+void GnpDelayGenerator::handleMessage(cMessage *msg)
 {
     IPv4Datagram *pkt(dynamic_cast<IPv4Datagram*>(msg));
     if (pkt)

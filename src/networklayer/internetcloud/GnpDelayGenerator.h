@@ -21,7 +21,7 @@
 
 #include "INETDefs.h"
 
-class INET_API DelayGenerator : public cSimpleModule
+class INET_API GnpDelayGenerator : public cSimpleModule
 {
   public:
     inline virtual int numInitStages() const  {return 2;}
