@@ -19,6 +19,7 @@
 
 package inet.networklayer.internetcloud;
 
+//TODO rewrite it!!!
 //
 // Configures \IP addresses and routing tables from a GNP file.
 //

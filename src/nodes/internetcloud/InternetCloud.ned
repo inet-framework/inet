@@ -35,6 +35,8 @@ import inet.util.PcapRecorder;
 //
 // \InternetCloud
 //
+//TODO write me!!!
+//
 module InternetCloud
 {
     parameters:
