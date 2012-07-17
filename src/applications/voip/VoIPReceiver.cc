@@ -137,7 +137,7 @@ void VoIPReceiver::playout(bool finish)
 	{
 		pPacket =  mPacketsList.front();
 
-		pPacket->setPlayoutTime(firstPlayoutTime + (pPacket->getIDframe() - firstFrameId)  * mSamplingDelta);
+		pPacket->setPlayoutTime(firstPlayoutTime + ((int)pPacket->getIDframe() - (int)firstFrameId)  * mSamplingDelta);
 
 		last_jitter = pPacket->getArrivalTime() - pPacket->getPlayoutTime();
 		max_jitter  = std::max( max_jitter, last_jitter );
