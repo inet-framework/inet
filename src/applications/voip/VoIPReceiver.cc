@@ -61,7 +61,7 @@ void VoIPReceiver::initialize(int stage)
 void VoIPReceiver::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
-        EV << "VoIPReceiver: Unaccepted self message: " << msg->getName() << endl;
+        throw cRuntimeError("Unaccepted self message: '%s'", msg->getName());
         delete msg;
         return;
     }
