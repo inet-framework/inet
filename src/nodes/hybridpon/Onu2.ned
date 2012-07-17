@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2010 Kyeong Soo (Joseph) Kim. All rights reserved.
+// Copyright (C) 2012 Kyeong Soo (Joseph) Kim. All rights reserved.
 //
 // This software is written and distributed under the GNU General
 // Public License Version 2 (http://www.gnu.org/licenses/gpl-2.0.html).
@@ -11,21 +11,22 @@ package inet.nodes.hybridpon;
 
 import inet.linklayer.etherswitch.MACRelayUnit;
 import inet.linklayer.ethernet.EtherMAC3;
-import inet.linklayer.hybridpon.OnuMacLayer;
-import inet.linklayer.hybridpon.OnuWdmLayer;
+import inet.linklayer.hybridpon.OnuMacLayer2;
+import inet.linklayer.hybridpon.WdmLayer;
 
 //
-// A laserless/colorless hybrid TDM/WDM-passive optical network (PON) optical
-// network unit (ONU) equipped with RSOA, providing Ethernet user network
-// interfaces (UNIs) with switching capability (through MACRelayUnit).
+// A hybrid TDM/WDM-passive optical network (PON) optical network unit
+// (ONU) equipped with its own light source (i.e., laser), providing
+// Ethernet user network interfaces (UNIs) with switching capability
+// (through MACRelayUnit).
 //
 // Note that the Ethernet interfaces (provided by EtherMAC2) support
 // full duplex mode only.
 //
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-// @date   2010-03-15
+// @date   2012-07-06
 //
-module Onu
+module Onu2
 {
     parameters:
         @node();
@@ -50,11 +51,11 @@ module Onu
                 queueModule = "";
                 @display("p=69,51,row;q=queue");
         }
-        mac: OnuMacLayer {
+        mac: OnuMacLayer2 {
             parameters:
                 @display("p=69,213");
         }
-        wdm: OnuWdmLayer {
+        wdm: WdmLayer {
             parameters:
                 @display("p=69,273");
         }

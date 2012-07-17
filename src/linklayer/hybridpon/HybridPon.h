@@ -73,8 +73,7 @@ const int		MIN_ETH_FRAME_SIZE	= 512;		// 64 octets
 
 // Message types for packets/frames and events
 enum MessageType {
-
-	// Actual messages delievered through channels
+	// Actual messages delivered through channels
 /* 	IP_PACKET			= 100, */
 /* 	ETH_FRAME           = 200, */
 	HYBRID_PON_FRAME	= 300,

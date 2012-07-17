@@ -55,7 +55,6 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     double peakRate;
 
     // state
-//    int numQueues;
     IQoSClassifier *classifier;
     QueueVector queues;
     IntVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
