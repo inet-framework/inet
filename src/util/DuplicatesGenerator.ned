@@ -28,7 +28,6 @@ import inet.base.IHook;
 simple DuplicatesGenerator like IHook
 {
     parameters:
-        @node();
         string duplicatesVector = default(""); // the duplicatesVector format is "<packetNumber>;<packetNumber>;...;"
                                                // packet numbers in ascending order e.g. "5;6;12;13;"
         @display("i=status/busy");

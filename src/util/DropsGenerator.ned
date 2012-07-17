@@ -28,7 +28,6 @@ import inet.base.IHook;
 simple DropsGenerator like IHook
 {
     parameters:
-        @node();
         string dropsVector = default(""); // the dropsVector format is "<packetNumber>;<packetNumber>;...;"
                                           // packet numbers in ascending order e.g. "5;6;12;13;"
         @display("i=status/lightning");
