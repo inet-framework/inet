@@ -47,12 +47,12 @@ class VoIPReceiver : public cSimpleModule
 
 	bool 		mInit;
 
-	simsignal_t mFrameLossSignal;
+	simsignal_t mFrameLossRateSignal;
 	simsignal_t mFrameDelaySignal;
 	simsignal_t mPlayoutDelaySignal;
-	simsignal_t mPlayoutLossSignal;
+	simsignal_t mPlayoutLossRateSignal;
 	simsignal_t mMosSignal;
-	simsignal_t mTaildropLossSignal;
+	simsignal_t mTaildropLossRateSignal;
 
 	TaggedSample* mTaggedSample;
 

@@ -29,12 +29,18 @@ simple VoIPReceiver like IUDPApp
         int dim_buffer = default(20);
         double samplingTime @unit(s) = default(20ms);
 
-        @statistic[VoIPFrameLoss](title="VoIP Frame Loss"; unit="ratio"; source="VoIPFrameLoss"; record=stats,vector);
-        @statistic[VoIPFrameDelay](title="VoIP Frame Delay"; unit="s"; source="VoIPFrameDelay"; record=stats,vector);
+        @signal[VoIPFrameDelay](type="simtime_t");      // when receive a frame
+        @signal[VoIPFrameLossRate](type="double");      // at end of talkspur
+        @signal[VoIPPlayoutDelay](type="simtime_t");    // at end of talkspur
+        @signal[VoIPPlayoutLossRate](type="double");    // at end of talkspur
+        @signal[VoIPMosSignal](type="double");          // at end of talkspur
+        @signal[VoIPTaildropLossRate](type="double");   // at end of talkspur
+        @statistic[VoIPFrameDelay](title="VoIP Frame Delay"; unit="s"; source="VoIPFrameDelay"; record=stats,vector); 
+        @statistic[VoIPFrameLossRate](title="VoIP Frame Loss"; unit="ratio"; source="VoIPFrameLossRate"; record=stats,vector);
         @statistic[VoIPPlayoutDelay](title="VoIP Playout Delay"; unit="s"; source="VoIPPlayoutDelay"; record=stats,vector);
-        @statistic[VoIPPlayoutLoss](title="VoIP Playout Loss"; unit="ratio"; source="VoIPPlayoutLoss"; record=stats,vector);
+        @statistic[VoIPPlayoutLossRate](title="VoIP Playout Loss"; unit="ratio"; source="VoIPPlayoutLossRate"; record=stats,vector);
         @statistic[VoIPMosSignal](title="VoIP Mos Signal"; unit="MOS"; source="VoIPMosSignal"; record=stats,vector);
-        @statistic[VoIPTaildropLoss](title="VoIP Tail Drop Loss"; unit="ratio"; source="VoIPTaildropLoss"; record=stats,vector);
+        @statistic[VoIPTaildropLossRate](title="VoIP Tail Drop Loss"; unit="ratio"; source="VoIPTaildropLossRate"; record=stats,vector);
 
         @display("i=block/source");
     gates:

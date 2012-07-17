@@ -46,12 +46,12 @@ void VoIPReceiver::initialize(int stage)
 	        socket.bind(port);
 	}
 
-	mFrameLossSignal    = registerSignal("VoIPFrameLoss");
+	mFrameLossRateSignal    = registerSignal("VoIPFrameLossRate");
 	mFrameDelaySignal   = registerSignal("VoIPFrameDelay");
 	mPlayoutDelaySignal = registerSignal("VoIPPlayoutDelay");
-	mPlayoutLossSignal  = registerSignal("VoIPPlayoutLoss");
+	mPlayoutLossRateSignal  = registerSignal("VoIPPlayoutLossRate");
 	mMosSignal			= registerSignal("VoIPMosSignal");
-	mTaildropLossSignal	= registerSignal("VoIPTaildropLoss");
+	mTaildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
 
 	mTaggedSample = new TaggedSample();
 	mTaggedSample->module = check_and_cast<cComponent*>(this);;
@@ -121,7 +121,7 @@ void VoIPReceiver::playout(bool finish)
     	channelLoss = pPacket->getNframes() - mPacketsList.size();
 
     double frameLossRate = ((double)channelLoss/(double)n_frames);
-    emit(mFrameLossSignal, frameLossRate);
+    emit(mFrameLossRateSignal, frameLossRate);
 
     //VETTORE PER GESTIRE DUPLICATI
     bool* isArrived = new bool[pPacket->getNframes()];
@@ -201,10 +201,10 @@ void VoIPReceiver::playout(bool finish)
 
 	emit(mPlayoutDelaySignal, mPlayoutDelay);
 	double lossRate = ((double)playoutLoss/(double)n_frames);
-	emit(mPlayoutLossSignal, lossRate);
+	emit(mPlayoutLossRateSignal, lossRate);
 	emit(mMosSignal, mos);
 	double tailDropRate = ((double)tailDropLoss/(double)n_frames);
-	emit(mTaildropLossSignal, tailDropRate);
+	emit(mTaildropLossRateSignal, tailDropRate);
 
 	EV<<"MOS CALCOLATO: eModel( "<<mPlayoutDelay<<" , "<<tailDropLoss<<"+"<<playoutLoss<<"+"
 			<<channelLoss<<" ) = "<<mos<<"\n\n";
