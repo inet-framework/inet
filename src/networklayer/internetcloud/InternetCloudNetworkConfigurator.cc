@@ -245,6 +245,8 @@ void InternetCloudNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfo
                 }
             }
         }
+        // Do not delete netLayer here!
+
         EV << "Configured internet access from " << node->getModule()->getFullName() << " through " << ie->getName() << "\n";
     }
 }
