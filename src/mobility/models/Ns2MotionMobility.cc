@@ -182,6 +182,13 @@ void Ns2MotionMobility::setTargetPosition()
         nextChange = time;
         targetPosition = lastPosition;
     }
+    else if (vec[3] == 0) // the node is stopped
+    {
+        const Ns2MotionFile::Line& vec = ns2File->lines[vecpos+1];
+        double time = vec[0];
+        nextChange = time;
+        targetPosition = lastPosition;
+    }
     else
     {
         targetPosition.x = vec[1]+scrollX;
