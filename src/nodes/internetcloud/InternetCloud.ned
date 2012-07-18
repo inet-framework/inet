@@ -20,11 +20,13 @@
 
 package inet.nodes.internetcloud;
 
+
 import inet.base.NotificationBoard;
 import inet.linklayer.IExternalNic;
 import inet.linklayer.IWiredNic;
 import inet.networklayer.arp.ARP;
 import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.internetcloud.GnpDelayGenerator;
 import inet.networklayer.ipv4.ErrorHandling;
 import inet.networklayer.ipv4.ICMP;
 import inet.networklayer.ipv4.IPv4;
@@ -49,19 +51,6 @@ module InternetCloud
     gates:
         inout pppg[] @labels(PPPFrame-conn);
     types:
-        simple GnpDelayGenerator
-        {
-            parameters:
-                bool usePingErRttData = default(false);
-                bool useAnalyticalRtt = default(false);
-                bool usePingErJitter = default(false);
-                bool usePingErPacketLoss = default(false);
-                bool useAccessLatency = default(false);
-                @display("i=block/delay");
-            gates:
-                input ipIn;
-                output ipOut;
-        }
         module InternetCloudNetworkLayer
         {
             parameters:
