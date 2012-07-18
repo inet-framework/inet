@@ -48,7 +48,6 @@ module InternetCloud
         string routingFile = default("");
     gates:
         inout pppg[] @labels(PPPFrame-conn);
-        inout ethg[] @labels(EtherFrame-conn);
     types:
         simple GnpDelayGenerator
         {
@@ -160,10 +159,6 @@ module InternetCloud
             parameters:
                 @display("p=125,257,row,110;q=l2queue");
         }
-        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
-            parameters:
-                @display("p=267,257,row,110;q=l2queue");
-        }
         ext[numExtInterfaces]: <default("ExtInterface")> like IExternalNic {
             parameters:
                 @display("p=423,257,row,90;q=txQueue;i=block/ifcard");
@@ -174,12 +169,6 @@ module InternetCloud
             pppg[i] <--> ppp[i].phys;
             ppp[i].upperLayerOut --> networkLayer.ifIn[i];
             ppp[i].upperLayerIn <-- networkLayer.ifOut[i];
-        }
-
-        for i=0..sizeof(ethg)-1 {
-            ethg[i] <--> eth[i].phys;
-            eth[i].upperLayerOut --> networkLayer.ifIn[sizeof(pppg)+i];
-            eth[i].upperLayerIn <-- networkLayer.ifOut[sizeof(pppg)+i];
         }
 
         for i=0..numExtInterfaces-1 {
