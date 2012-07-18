@@ -16,8 +16,8 @@
 //
 
 
-#ifndef __INET_DUPLICATESGENERATOR_H
-#define __INET_DUPLICATESGENERATOR_H
+#ifndef __INET_ORDINALBASEDDROPPER_H
+#define __INET_ORDINALBASEDDROPPER_H
 
 #include <vector>
 
@@ -25,20 +25,20 @@
 
 
 /**
- * Duplicates generator.
+ * Ordinal Based Dropper module.
  */
-class INET_API DuplicatesGenerator : public cSimpleModule
+class INET_API OrdinalBasedDropper : public cSimpleModule
 {
   protected:
     unsigned int numPackets;
-    unsigned int numDuplicated;
-    bool generateFurtherDuplicates;
+    unsigned int numDropped;
 
     static simsignal_t rcvdPkSignal;
     static simsignal_t sentPkSignal;
-    static simsignal_t duplPkSignal;
+    static simsignal_t dropPkSignal;
 
-    std::vector<unsigned int> duplicatesVector;
+    bool generateFurtherDrops;
+    std::vector<unsigned int> dropsVector;
 
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);

@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "DuplicatesGenerator.h"
+#include "OrdinalBasedDuplicator.h"
 
-Define_Module(DuplicatesGenerator);
+Define_Module(OrdinalBasedDuplicator);
 
-simsignal_t DuplicatesGenerator::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t DuplicatesGenerator::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t DuplicatesGenerator::duplPkSignal = SIMSIGNAL_NULL;
+simsignal_t OrdinalBasedDuplicator::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t OrdinalBasedDuplicator::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t OrdinalBasedDuplicator::duplPkSignal = SIMSIGNAL_NULL;
 
-void DuplicatesGenerator::initialize()
+void OrdinalBasedDuplicator::initialize()
 {
     numPackets = 0;
     numDuplicated = 0;
@@ -50,7 +50,7 @@ void DuplicatesGenerator::initialize()
     }
 }
 
-void DuplicatesGenerator::handleMessage(cMessage *msg)
+void OrdinalBasedDuplicator::handleMessage(cMessage *msg)
 {
     numPackets++;
 
@@ -78,7 +78,7 @@ void DuplicatesGenerator::handleMessage(cMessage *msg)
     send(msg, "out");
 }
 
-void DuplicatesGenerator::parseVector(const char *vector)
+void OrdinalBasedDuplicator::parseVector(const char *vector)
 {
     const char *v = vector;
     while (*v)
@@ -104,6 +104,6 @@ void DuplicatesGenerator::parseVector(const char *vector)
     }
 }
 
-void DuplicatesGenerator::finish()
+void OrdinalBasedDuplicator::finish()
 {
 }

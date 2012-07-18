@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "DropsGenerator.h"
+#include "OrdinalBasedDropper.h"
 
-Define_Module(DropsGenerator);
+Define_Module(OrdinalBasedDropper);
 
-simsignal_t DropsGenerator::rcvdPkSignal;
-simsignal_t DropsGenerator::sentPkSignal;
-simsignal_t DropsGenerator::dropPkSignal;
+simsignal_t OrdinalBasedDropper::rcvdPkSignal;
+simsignal_t OrdinalBasedDropper::sentPkSignal;
+simsignal_t OrdinalBasedDropper::dropPkSignal;
 
-void DropsGenerator::initialize()
+void OrdinalBasedDropper::initialize()
 {
     numPackets = 0;
     numDropped = 0;
@@ -50,7 +50,7 @@ void DropsGenerator::initialize()
     }
 }
 
-void DropsGenerator::handleMessage(cMessage *msg)
+void OrdinalBasedDropper::handleMessage(cMessage *msg)
 {
     numPackets++;
     emit(rcvdPkSignal, msg);
@@ -76,7 +76,7 @@ void DropsGenerator::handleMessage(cMessage *msg)
     send(msg, "out");
 }
 
-void DropsGenerator::parseVector(const char *vector)
+void OrdinalBasedDropper::parseVector(const char *vector)
 {
     const char *v = vector;
     while (*v)
@@ -102,6 +102,6 @@ void DropsGenerator::parseVector(const char *vector)
     }
 }
 
-void DropsGenerator::finish()
+void OrdinalBasedDropper::finish()
 {
 }
