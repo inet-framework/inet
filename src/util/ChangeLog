@@ -1,3 +1,9 @@
+2012-07-18  Zoltan Bojthe
+
+    Added Delayer
+    Renamed DropsGenerator to OrdinalBasedDropper
+    Renamed DuplicatesGenerator to OrdinalBasedDuplicator
+
 2012-06-15  Zoltan Bojthe
 
 	OMNeT++ 4.3 compatibility fixes - for cClassDescriptor changes:
