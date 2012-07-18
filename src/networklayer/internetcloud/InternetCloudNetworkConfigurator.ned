@@ -19,32 +19,38 @@
 
 package inet.networklayer.internetcloud;
 
-//TODO rewrite it!!!
 //
-// Configures \IP addresses and routing tables from a GNP file.
+// Configures IPv4 addresses and routing tables from a GNP file.
 //
 // This module does't connect to any other modules (it has no gates),
 // and should have only one instance in the whole model. The module
 // will only run once, at the beginning of the simulation.
-// When it runs, it will:
 //
-//   -#  assign \IP addresses to hosts and routers.
+// When it runs, it will:
+//   -#  assign IPv4 addresses to nodes (e.g. hosts and routers).
 //   -#  then it'll discover the topology of the network (using OMNeT++'s
 //       cTopology class), and calculate shortest paths;
 //   -#  finally, it will add routes which correspond to the shortest
 //       paths to the routing tables (see RoutingTable::addRoutingEntry()).
 //
-// How does it know which modules are routers, hosts, et.c that need to
+// How does it know which modules are routers, hosts, etc. that need to
 // be configured, and what is the network topology? The configurator
 // picks all modules which have a @node property and their connections,
 // and builds a graph from it. Then it runs Dijstra's
 // shortest path algorithm on it, and configures all modules which are
 // IP nodes.
 //
+// This module assign IPv4 address to a node only if the node has a 'group' parameter
+// or a @group property: chooses an IP address for node from the selected group
+// from XML file defined in gnpFile parameter.
+// This module configures datarate and delay parameters of channels which
+// connect group-node to InternetCloud module.
+//
 // It is assumed that the routing table (RoutingTable module) is the
 // "routingTable" or "networkLayer.routingTable" submodule in all hosts
-// and routers.
+// and routers (all: not only the group-nodes).
 //
+// FIXME: csak a 'group' definicioval rendelkezo node-okra igaz a kovetkezo:
 // To avoid interference with the above algorithm, it's recommended that
 // no host or router should have its address set explicitly, and
 // no routes are set up manually. Practically, routing files (.irt, .mrt)
