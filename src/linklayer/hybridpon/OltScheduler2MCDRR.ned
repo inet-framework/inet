@@ -46,7 +46,7 @@ simple OltScheduler2MCDRR like IOltScheduler2
     parameters:
         @display("i=block/join");
         double frameCapacity = default(100);	// per-subqueue capacity
-        int quantum = default(100);	// quantum value in DRR scheduling
+        int quantum @unit(byte) = default(100B);	// quantum value in DRR scheduling
     gates:
 		inout ethg[];	// interface with Ethernet switch
 		inout wdmg[];	// interface with WDM Layer		

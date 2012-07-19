@@ -18,9 +18,10 @@
 #define __OLT_SCHEDULER2_H
 
 #include <sstream>
-#include "Ethernet.h"
-#include "EtherFrame_m.h"
-#include "HybridPonFrame_m.h"
+#include "HybridPon.h"
+//#include "Ethernet.h"
+//#include "EtherFrame_m.h"
+//#include "HybridPonFrame_m.h"
 
 ///
 /// @class      OltScheduler2
@@ -31,18 +32,18 @@
 class OltScheduler2 : public cSimpleModule
 {
     protected:
-        // type definitions for member variables
-        typedef std::vector<bool> BoolVector;
-        typedef std::vector<int> IntVector;
-        typedef std::vector<cMessage *> MsgVector;
+//        // type definitions for member variables
+//        typedef std::vector<bool> BoolVector;
+//        typedef std::vector<int> IntVector;
+//        typedef std::vector<cMessage *> MsgVector;
         typedef std::vector<cQueue *> QueueVector;
-        typedef std::vector<simtime_t> TimeVector;
+//        typedef std::vector<simtime_t> TimeVector;
 
-        // self messages
-        enum SchedulerMsgType
-        {
-            MSG_TX_END = 100
-        };
+//        // self messages
+//        enum SchedulerMsgType
+//        {
+//            MSG_TX_END = 100
+//        };
 
     protected:
         // OLT NED parameters
@@ -54,11 +55,11 @@ class OltScheduler2 : public cSimpleModule
         double lineRate;    ///< line rate of optical channel
         int numOnus;    ///< number of ONUs (= number of WDM channels)
 
-        // status variables
-        int numTxsAvailable;    /// number of available tunable transmitters
+        // state
+        int numTxsAvailable;    ///< number of available tunable transmitters
 
-        // self messages with channel (ONU index) information
-        HybridPonMessage *endTxMsg;
+        // message
+        HybridPonMsgVector releaseTxMsg;    ///< vector of self messages with channel (ONU index) information
 
     public:
         OltScheduler2();
@@ -94,15 +95,13 @@ class OltScheduler2MCDRR : public OltScheduler2
         int frameCapacity; ///< per subqueue
 
         // state
-        QueueVector queues;
-
-        // state: scheduler
         bool continued; ///< flag indicating whether the current run is a continuation of the previous one or not
         int currentQueueIndex;  ///< index of a queue whose HOL frame is scheduled for TX during the last scheduling
         BoolVector isChannelAvailable; ///< vector of channel availability
         IntVector deficitCounters;  ///< vector of deficit counters in DRR scheduling
         IntVector quanta;   ///< vector of quantum  in DRR scheduling
         IntList activeList; ///< list of indices of active queues
+        QueueVector queues; ///< VOQs
 
         // statistics
         IntVector numQueueReceived;

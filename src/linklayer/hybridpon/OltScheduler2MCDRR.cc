@@ -66,27 +66,31 @@ bool OltScheduler2MCDRR::enqueue(EtherFrame *frame)
 
 EtherFrame *OltScheduler2MCDRR::dequeue()
 {
-    bool found = false;
-    int startQueueIndex = (currentQueueIndex + 1) % numOnus;    // search from the next queue for a frame to transmit
+    bool found = false; // for non-empty VOQs
+    int startQueueIndex = (currentQueueIndex + 1) % numOnus;    // search from the next VOQ for a frame to transmit
 
-    for (int i = 0; i < numOnus; i++)
+    do
     {
-        int idx = (i + startQueueIndex) % numOnus;
-        if (queues[idx]->isEmpty() == false)
+        for (int i = 0; i < numOnus; i++)
         {
-            deficitCounters[idx] += quanta[idx];
-            if (isChannelAvailable[idx] == true)
+            int idx = (i + startQueueIndex) % numOnus;
+            if (queues[idx]->isEmpty() == false)
             {
-                int pktLength = (check_and_cast<cPacket *>(queues[currentQueueIndex]->front()))->getByteLength();
-                if (deficitCounters[idx] >= pktLength)
+                deficitCounters[idx] += quanta[idx];
+                if (isChannelAvailable[idx] == true)
                 {
-                    currentQueueIndex = idx;
                     found = true;
-                    return((EtherFrame *)queues[idx]->pop());
+                    int pktLength = (check_and_cast<cPacket *>(queues[idx]->front()))->getByteLength();
+                    if (deficitCounters[idx] >= pktLength)
+                    {
+                        currentQueueIndex = idx;
+                        deficitCounters[idx] -= pktLength;
+                        return ((EtherFrame *) queues[idx]->pop());
+                    }
                 }
             }
-        }
-    }   // end of for()
+        } // end of for()
+    } while (found == true);
 
     return(NULL);              // return NULL if there is no frame to send
 }
@@ -107,27 +111,34 @@ void OltScheduler2MCDRR::handleEthernetFrameFromSni(EtherFrame *frame)
 {
     Enter_Method("handleEthernetFrameFromSni()");
 
-	int ch = frame->getArrivalGate()->getIndex();
+    int ch = frame->getArrivalGate()->getIndex();
     cQueue *queue = queues[ch];
     numQueueReceived[ch]++;
 
-    if (numTxsAvailable > 0)
-	{   // transmit the frame immediately
-        ASSERT(queue->isEmpty() == true);
-        scheduleAt(simTime()+(frame->getBitLength()+INTERFRAME_GAP_BITS)/lineRate, endTxMsg);
-        send(frame, "wdmg$o");
-        numTxsAvailable--;
-        isChannelAvailable[ch] = false;
-        currentQueueIndex = ch;
-	}
-	else
-	{   // put the frame into a VOQ
-	    bool dropped = enqueue(frame);
-	    if (dropped)
-	    {
-	        numQueueDropped[ch]++;
-	    }
-	}
+    bool dropped = enqueue(frame);  // enqueue the frame
+    if (dropped)
+    {
+        numQueueDropped[ch]++;
+    }
+    else
+    {
+        if (numTxsAvailable > 0)
+        {   // trigger scheduling
+            EtherFrame *frame = dequeue();
+            if (frame != NULL)
+            {
+                scheduleAt(simTime() + (frame->getBitLength() + INTERFRAME_GAP_BITS) / lineRate, releaseTxMsg[currentQueueIndex]);
+                send(frame, "wdmg$o", currentQueueIndex);
+                isChannelAvailable[currentQueueIndex] = false;
+                numTxsAvailable--;
+                ASSERT(numTxsAvailable >= 0);
+                if (queues[currentQueueIndex]->isEmpty() == true)
+                {   // reset the deficit counter
+                    deficitCounters[currentQueueIndex] = 0;
+                }
+            }
+        }
+    }
 }
 
 ///
@@ -136,21 +147,23 @@ void OltScheduler2MCDRR::handleEthernetFrameFromSni(EtherFrame *frame)
 ///
 void OltScheduler2MCDRR::handleEndTxMsg(HybridPonMessage *msg)
 {
-    ASSERT(numTxsAvailable >= 0);   // check if the number of TXs available is non-negative
-    ASSERT(isChannelAvailable[msg->getOnuIdx()] == false);  // check if the channel is not available
+    ASSERT(isChannelAvailable[msg->getOnuIdx()] == false);
+    isChannelAvailable[msg->getOnuIdx()] = true;
 
     EtherFrame *frame = dequeue();
     if (frame != NULL)
     {
-        scheduleAt(simTime() + (frame->getBitLength() + INTERFRAME_GAP_BITS) / lineRate, endTxMsg);
+        scheduleAt(simTime() + (frame->getBitLength() + INTERFRAME_GAP_BITS) / lineRate, releaseTxMsg[currentQueueIndex]);
         send(frame, "wdmg$o", currentQueueIndex);
+        isChannelAvailable[currentQueueIndex] = false;
+        if (queues[currentQueueIndex]->isEmpty() == true)
+        {   // reset the deficit counter
+            deficitCounters[currentQueueIndex] = 0;
+        }
     }
     else
     {
         numTxsAvailable++;
-        isChannelAvailable[msg->getOnuIdx()] = true;
-
-        // check if the number of TXs available is not greater than the number of TXs
         ASSERT(numTxsAvailable <= numTransmitters);
     }
 }
@@ -165,9 +178,9 @@ void OltScheduler2MCDRR::initialize(void)
 
 	// configuration
 	frameCapacity = par("frameCapacity");
-	int quantum = par("quantum");   // FIXME: Extend it to a vector later!
+	long quantum = par("quantum").longValue();   // FIXME: Extend it to a vector later!
 
-	// set subqueues
+	// set VOQs
 	queues.assign(numOnus, (cQueue *)NULL);
 	for (int i = 0; i < numOnus; i++)
 	{
@@ -197,12 +210,12 @@ void OltScheduler2MCDRR::finish(void)
     for (int i=0; i < numOnus; i++)
     {
         std::stringstream ss_received, ss_dropped, ss_shaped, ss_sent;
-        ss_received << "packets received by per-VLAN queue[" << i << "]";
-        ss_dropped << "packets dropped by per-VLAN queue[" << i << "]";
+        ss_received << "packets received by VOQ[" << i << "]";
+        ss_dropped << "packets dropped by VOQ[" << i << "]";
         recordScalar((ss_received.str()).c_str(), numQueueReceived[i]);
         recordScalar((ss_dropped.str()).c_str(), numQueueDropped[i]);
         sumQueueReceived += numQueueReceived[i];
         sumQueueDropped += numQueueDropped[i];
     }
-    recordScalar("overall packet loss rate of per-VLAN queues", sumQueueDropped/double(sumQueueReceived));
+    recordScalar("overall packet loss rate of VOQs", sumQueueDropped/double(sumQueueReceived));
 }

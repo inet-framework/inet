@@ -19,12 +19,12 @@
 
 package inet.examples.multichannel_scheduling.cdrr;
 
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
+//import inet.networklayer.autorouting.FlatNetworkConfigurator;
 //import inet.world.ChannelInstaller;
-import inet.nodes.inet.StandardHostWithEthernetInterface2;
-import inet.nodes.inet.StandardHost3WithEthernetInterface2;
-import inet.nodes.inet.StandardServerWithEthernetInterface2;
-import inet.nodes.hybridpon.Olt;
+//import inet.nodes.inet.StandardHost3WithEthernetInterface2;
+//import inet.nodes.inet.StandardServerWithEthernetInterface2;
+import inet.nodes.ethernet.EtherHost2;
+import inet.nodes.hybridpon.Olt2;
 import inet.nodes.hybridpon.Onu2;
 import inet.nodes.hybridpon.LambdaSplitter;
 
@@ -50,27 +50,19 @@ network Cdrr
         double backbone_delay @unit(s) = default(4.7ms);	// default delay of 4.7 ms gives total RTT of 10 ms including delays in feeder and distribution fiber
         @display("bgb=519,184");
     submodules:
-        //        channelInstaller: ChannelInstaller {
+        //        configurator: FlatNetworkConfigurator {
         //            parameters:
-        //                channelClass = "ThruputMeteringChannel";
-        //                channelAttrs = "format=u";
-        //                @display("p=62,33");
+        //                @display("p=52,42");
         //        }
-        configurator: FlatNetworkConfigurator {
-            parameters:
-                @display("p=52,42");
-        }
-        server: StandardServerWithEthernetInterface2 {
+        server: EtherHost2 {
             parameters:
                 @display("p=464,119;i=device/server_l");
-			gates:
-				ethg[1];
         }
-        olt: Olt {
+        olt: Olt2 {
             @display("p=355,119");
-			gates:
-				ethg[1];
-				phyg[N];
+            gates:
+                ethg[1];
+                phyg[N];
         }
         awg: LambdaSplitter {
             parameters:
@@ -81,24 +73,21 @@ network Cdrr
         }
         onu[N]: Onu2 {
             parameters:
-            	@display("p=131,119");
-            	wdm.ch = index;
-			gates:
-				ethg[n];            
+                @display("p=131,119");
+                wdm.ch = index;
+            gates:
+                ethg[n];
         }
-        host[N*n]: StandardHost3WithEthernetInterface2 {
-            parameters:
-                @display("i=device/laptop;p=46,119");
-			gates:
-				ethg[1];
+        host[N*n]: EtherHost2 {
+            @display("p=45,120");
         }
     connections:
         for i=0..N-1, for j=0..n-1 {
-			host[i*n+j].ethg[0] <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg[j];
-		}
-		for i=0..N-1 {
-		    onu[i].phyg <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> awg.demuxg[i];
+            host[i*n+j].ethg <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg[j];
+        }
+        for i=0..N-1 {
+            onu[i].phyg <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> awg.demuxg[i];
             awg.muxg[i] <--> {  delay = feeder_delay; datarate = feeder_rate; } <--> olt.phyg[i];
         }
-        olt.ethg[0] <--> {  delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg[0];
+        olt.ethg[0] <--> {  delay = backbone_delay; datarate = backbone_rate; } <--> server.ethg;
 }

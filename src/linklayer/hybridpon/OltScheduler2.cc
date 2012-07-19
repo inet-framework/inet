@@ -21,12 +21,14 @@
 
 OltScheduler2::OltScheduler2()
 {
-    endTxMsg = NULL;
 }
 
 OltScheduler2::~OltScheduler2()
 {
-    cancelAndDelete(endTxMsg);
+    for (int i = 0; i < numOnus; i++)
+    {
+        cancelAndDelete(releaseTxMsg[i]);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -54,10 +56,15 @@ void OltScheduler2::initialize(void)
 	cDatarateChannel *chan = check_and_cast<cDatarateChannel *>(olt->gate("phyg$o", 0)->getChannel());
 	lineRate = chan->getDatarate();
 	numOnus = olt->gateSize("phyg$o");   ///< = number of ONUs (i.e., WDM channels)
-	numTxsAvailable = 0;
+	numTxsAvailable = numTransmitters;
 
-    // initialize self messages
-    endTxMsg = new HybridPonMessage("EndTransmission", MSG_TX_END);
+    // initialize self messagess
+	releaseTxMsg.assign(numOnus, (HybridPonMessage *) NULL);
+    for (int i = 0; i < numOnus; i++)
+    {
+        releaseTxMsg[i] = new HybridPonMessage("Release a transmitter", RELEASE_TX);
+        releaseTxMsg[i]->setOnuIdx(i);
+    }
 }
 
 ///
@@ -72,7 +79,7 @@ void OltScheduler2::handleMessage(cMessage *msg)
     {   // Self message to indicate an event.
         switch (msg->getKind())
         {
-            case MSG_TX_END:
+            case RELEASE_TX:
                 handleEndTxMsg(check_and_cast<HybridPonMessage *>(msg));
                 break;
             default:
