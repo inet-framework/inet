@@ -506,6 +506,7 @@ WifiModulationType::GetOfdmRate13_5MbpsBW5MHz()
 ModulationType
 WifiModulationType:: getMode80211a(double bitrate)
 {
+    //FIXME Refactor! Use concrete bitrates instead table elements!
    if (bitrate == BITRATES_80211a[7])
        return GetOfdmRate54Mbps();
    else if (bitrate == BITRATES_80211a[6])
@@ -530,6 +531,7 @@ WifiModulationType:: getMode80211a(double bitrate)
 ModulationType
 WifiModulationType:: getMode80211g(double bitrate)
 {
+    //FIXME Refactor! Use concrete bitrates instead table elements!
    if (bitrate == BITRATES_80211g[11])
        return GetErpOfdmRate54Mbps();
    else if (bitrate == BITRATES_80211g[10])
@@ -563,6 +565,7 @@ WifiModulationType:: getMode80211g(double bitrate)
 ModulationType
 WifiModulationType:: getMode80211b(double bitrate)
 {
+    //FIXME Refactor! Use concrete bitrates instead table elements!
    if (bitrate == BITRATES_80211b[3])
        return GetDsssRate11Mbps();
    else if (bitrate == BITRATES_80211b[2])
@@ -580,6 +583,7 @@ WifiModulationType:: getMode80211b(double bitrate)
 ModulationType
 WifiModulationType::getMode80211p(double bitrate)
 {
+    //FIXME Refactor! Use concrete bitrates instead table elements!
    if (bitrate == BITRATES_80211p[7])
        return GetOfdmRate27MbpsBW10MHz();
    else if (bitrate == BITRATES_80211p[6])

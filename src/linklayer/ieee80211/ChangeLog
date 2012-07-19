@@ -1,3 +1,11 @@
+2012-07-19  Zoltan Bojthe
+
+        Bugfix for ieee80211:
+        Wrong packet timelength calculation was in 'g' mode with
+        11Mbps or 12Mbps bitrates. Some calculations in 'b' mode
+        was wrong too, because these sometimes also use table of
+        'g' mode. Calculation results for 11M and 12M swapped.
+
 2012-06-08  Rudolf Hornig
 
         Takover from INETMANET-2.0 @ 7fb431b (minor bugfixes)
