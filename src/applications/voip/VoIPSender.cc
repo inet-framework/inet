@@ -133,9 +133,9 @@ void VoIPSender::selectPeriodTime()
 void VoIPSender::sendVoIPPacket()
 {
 	VoipPacket* packet = new VoipPacket("VoIP");
-	packet->setIDtalk(talkID-1);
+	packet->setTalkID(talkID-1);
 	packet->setNframes(nframes);
-	packet->setIDframe(frameID);
+	packet->setFrameID(frameID);
 	packet->setVoipTimestamp(simTime());
 	packet->setTimeLength(samplingTime);
 	packet->setByteLength(talkFrameSize);

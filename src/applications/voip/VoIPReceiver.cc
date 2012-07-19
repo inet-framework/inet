@@ -74,19 +74,19 @@ void VoIPReceiver::handleMessage(cMessage *msg)
 
 	if(mInit)
 	{
-		mCurrentTalkspurt = pPacket->getIDtalk();
+		mCurrentTalkspurt = pPacket->getTalkID();
 		mInit = false;
 	}
 
-	if(mCurrentTalkspurt != pPacket->getIDtalk())
+	if(mCurrentTalkspurt != pPacket->getTalkID())
 	{
 			playout(false);
-			mCurrentTalkspurt = pPacket->getIDtalk();
+			mCurrentTalkspurt = pPacket->getTalkID();
 	}
 
 	//emit(mFrameLossSignal,1.0);
 
-	EV<<"PACCHETTO ARRIVATO: TALK "<<pPacket->getIDtalk()<<" FRAME "<<pPacket->getIDframe()<<"\n\n";
+	EV<<"PACCHETTO ARRIVATO: TALK "<<pPacket->getTalkID()<<" FRAME "<<pPacket->getFrameID()<<"\n\n";
 
 	ASSERT(pPacket->getArrivalTime() == simTime());
     simtime_t delay = pPacket->getArrivalTime() - pPacket->getVoipTimestamp();
@@ -102,7 +102,7 @@ void VoIPReceiver::playout(bool finish)
 	VoipPacket* pPacket =  mPacketsList.front();
 
     simtime_t    firstPlayoutTime   = pPacket->getArrivalTime() + mPlayoutDelay;
-    unsigned int firstFrameId       = pPacket->getIDframe();
+    unsigned int firstFrameId       = pPacket->getFrameID();
     unsigned int n_frames		    = pPacket->getNframes();
     unsigned int playoutLoss 	    = 0;
     unsigned int tailDropLoss       = 0;
@@ -113,7 +113,7 @@ void VoIPReceiver::playout(bool finish)
     	PacketsList::iterator it;
     	unsigned int maxId = 0;
     	for( it = mPacketsList.begin(); it != mPacketsList.end(); it++)
-    		maxId = std::max(maxId, (*it)->getIDframe());
+    		maxId = std::max(maxId, (*it)->getFrameID());
         channelLoss = maxId + 1 - mPacketsList.size();
     }
 
@@ -133,30 +133,30 @@ void VoIPReceiver::playout(bool finish)
     simtime_t       last_jitter 	    = 0.0;
     simtime_t       max_jitter 		= -1000.0;
 
-	while( !mPacketsList.empty() /*&& pPacket->getIDtalk() == mCurrentTalkspurt*/ )
+	while( !mPacketsList.empty() /*&& pPacket->getTalkID() == mCurrentTalkspurt*/ )
 	{
 		pPacket =  mPacketsList.front();
 
-		pPacket->setPlayoutTime(firstPlayoutTime + ((int)pPacket->getIDframe() - (int)firstFrameId)  * mSamplingDelta);
+		pPacket->setPlayoutTime(firstPlayoutTime + ((int)pPacket->getFrameID() - (int)firstFrameId)  * mSamplingDelta);
 
 		last_jitter = pPacket->getArrivalTime() - pPacket->getPlayoutTime();
 		max_jitter  = std::max( max_jitter, last_jitter );
 
-		EV<<"MISURATO JITTER PACCHETTO: "<<last_jitter<<" TALK "<<pPacket->getIDtalk()<<" FRAME "
-				<<pPacket->getIDframe()<<"\n\n";
+		EV<<"MISURATO JITTER PACCHETTO: "<<last_jitter<<" TALK "<<pPacket->getTalkID()<<" FRAME "
+				<<pPacket->getFrameID()<<"\n\n";
 
 		//GESTIONE IN CASO DI DUPLICATI
-		if(isArrived[pPacket->getIDframe()])
+		if(isArrived[pPacket->getFrameID()])
 		{
-					EV<<"PACCHETTO DUPLICATO: TALK "<<pPacket->getIDtalk()<<" FRAME "
-						<<pPacket->getIDframe()<<"\n\n";
+					EV<<"PACCHETTO DUPLICATO: TALK "<<pPacket->getTalkID()<<" FRAME "
+						<<pPacket->getFrameID()<<"\n\n";
 					delete pPacket;
 		}
 		else if( last_jitter > 0.0 )
 		{
 			++playoutLoss;
-			EV<<"PACCHETTO IN RITARDO ELIMINATO: TALK "<<pPacket->getIDtalk()<<" FRAME "
-					<<pPacket->getIDframe()<<"\n\n";
+			EV<<"PACCHETTO IN RITARDO ELIMINATO: TALK "<<pPacket->getTalkID()<<" FRAME "
+					<<pPacket->getFrameID()<<"\n\n";
 			delete pPacket;
 		}
 		else
@@ -164,7 +164,7 @@ void VoIPReceiver::playout(bool finish)
 			while( !mPlayoutQueue.empty() && pPacket->getArrivalTime() > mPlayoutQueue.front()->getPlayoutTime() )
 			{
 				++mBufferSpace;
-				//EV<<"RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK "<<mPlayoutQueue.front()->getIDtalk()<<" FRAME "<<mPlayoutQueue.front()->getIDframe()<<"\n";
+				//EV<<"RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK "<<mPlayoutQueue.front()->getTalkID()<<" FRAME "<<mPlayoutQueue.front()->getFrameID()<<"\n";
 				delete mPlayoutQueue.front();
 				mPlayoutQueue.pop_front();
 			}
@@ -172,20 +172,20 @@ void VoIPReceiver::playout(bool finish)
 			if(mBufferSpace > 0)
 			{
 				EV<<"PACCHETTO CAMPIONABILE INSERITO NEL BUFFER: TALK "
-						<<pPacket->getIDtalk()<<" FRAME "<<pPacket->getIDframe()
+						<<pPacket->getTalkID()<<" FRAME "<<pPacket->getFrameID()
 						<<" ISTANTE DI ARRIVO "<<pPacket->getArrivalTime()
 						<<" ISTANTE DI CAMPIONAMENTO "<<pPacket->getPlayoutTime()<<"\n\n";
 				--mBufferSpace;
 				//GESTIONE DUPLICATI
-				isArrived[pPacket->getIDframe()] = true;
+				isArrived[pPacket->getFrameID()] = true;
 
 				mPlayoutQueue.push_back(pPacket);
 			}
 			else
 			{
 				++tailDropLoss;
-				EV<<"BUFFER PIENO PACCHETTO SCARTATO: TALK "<<pPacket->getIDtalk()<<" FRAME "
-						<<pPacket->getIDframe()<<" ISTANTE DI ARRIVO "<<pPacket->getArrivalTime()<<"\n\n";
+				EV<<"BUFFER PIENO PACCHETTO SCARTATO: TALK "<<pPacket->getTalkID()<<" FRAME "
+						<<pPacket->getFrameID()<<" ISTANTE DI ARRIVO "<<pPacket->getArrivalTime()<<"\n\n";
 				delete pPacket;
 			}
 		}

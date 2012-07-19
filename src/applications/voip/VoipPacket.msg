@@ -18,9 +18,9 @@
 //
 packet VoipPacket
 {
-    unsigned int IDtalk;
+    unsigned int talkID;
 	unsigned int nframes;
-	unsigned int IDframe;
+    unsigned int frameID;
 	simtime_t voipTimestamp;
     simtime_t timeLength;
 
