@@ -350,7 +350,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
     PQ.pkQueue.push_back(qp);
 
     DEBUG(LOG_INFO, 0, "buffered pkt to %s qlen=%u",
-          ip_to_str(dest_addr), PQ.len);
+          ip_to_str(dest_addr), PQ.length());
 }
 
 int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
@@ -461,7 +461,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
         }
 
         DEBUG(LOG_INFO, 0, "SENT %d packets to %s qlen=%u",
-              count, ip_to_str(dest_addr), PQ.len);
+              count, ip_to_str(dest_addr), PQ.length());
     }
     else if (verdict == PQ_DROP)
     {

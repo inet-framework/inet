@@ -52,6 +52,7 @@ struct packet_queue
     list_t head;
     unsigned int len;
     struct timer garbage_collect_timer;
+    unsigned int length() { return len; }
 };
 #else
 struct q_pkt
@@ -65,6 +66,7 @@ struct packet_queue
 {
     std::vector<q_pkt*> pkQueue;
     struct timer garbage_collect_timer;
+    unsigned int length() { return pkQueue.size(); }
 };
 
 #endif
