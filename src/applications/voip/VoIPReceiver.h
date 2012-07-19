@@ -11,12 +11,13 @@
 #define VOIPRECEIVER_H_
 
 #include <string.h>
-#include <omnetpp.h>
+#include <list>
+
+#include "INETDefs.h"
 
 #include "IPvXAddressResolver.h"
 #include "UDPSocket.h"
 #include "VoipPacket_m.h"
-#include <list>
 
 class VoIPReceiver : public cSimpleModule
 {

@@ -11,7 +11,8 @@
 #define VOIPSENDER_H_
 
 #include <string.h>
-#include <omnetpp.h>
+
+#include "INETDefs.h"
 
 #include "UDPSocket.h"
 #include "IPvXAddressResolver.h"
@@ -59,14 +60,10 @@ public:
 	~VoIPSender();
 	VoIPSender();
 
-
-
 protected:
-
 	virtual int numInitStages() const {return 4;}
 	void initialize(int stage);
 	void handleMessage(cMessage *msg);
-
 };
 
 #endif /* VOIPSENDER_H_ */
