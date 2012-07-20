@@ -19,9 +19,6 @@
 
 #include <sstream>
 #include "HybridPon.h"
-//#include "Ethernet.h"
-//#include "EtherFrame_m.h"
-//#include "HybridPonFrame_m.h"
 
 ///
 /// @class      OltScheduler2
@@ -32,24 +29,11 @@
 class OltScheduler2 : public cSimpleModule
 {
     protected:
-//        // type definitions for member variables
-//        typedef std::vector<bool> BoolVector;
-//        typedef std::vector<int> IntVector;
-//        typedef std::vector<cMessage *> MsgVector;
         typedef std::vector<cQueue *> QueueVector;
-//        typedef std::vector<simtime_t> TimeVector;
-
-//        // self messages
-//        enum SchedulerMsgType
-//        {
-//            MSG_TX_END = 100
-//        };
 
     protected:
         // OLT NED parameters
         int numTransmitters; ///< number of tunable transmitters
-
-        // OltScheduler2 NED parameters
 
         // configuration variables
         double lineRate;    ///< line rate of optical channel
@@ -122,8 +106,45 @@ class OltScheduler2MCDRR : public OltScheduler2
 
         // OMNeT++
         virtual void initialize(void);
-//        virtual void handleMessage(cMessage *msg);
         virtual void finish(void);
+};
+
+///
+/// @class      OltScheduler2MCDRRv2
+/// @brief      Implements 'OltScheduler2MCDRRv2' (Multi-Channel Deficit Round-Robin ver. 2)
+///             module for a hybrid TDM/WDM-PON OLT.
+/// @ingroup    hybridpon
+///
+class OltScheduler2MCDRRv2 : public OltScheduler2MCDRR
+{
+    protected:
+        // state
+        IntVector numPktsScheduled;  ///< vector of the number of packets scheduled per channel
+
+    protected:
+        // Misc.
+        /* virtual bool enqueue(EtherFrame *frame); */
+        virtual EtherFrame *dequeue();
+
+        // Event handling
+        /* virtual void handleEthernetFrameFromSni(EtherFrame *frame); */
+        virtual void handleEndTxMsg(HybridPonMessage *msg);
+
+        // OMNeT++
+        virtual void initialize(void);
+};
+
+///
+/// @class      OltScheduler2MCDRRv3
+/// @brief      Implements 'OltScheduler2MCDRRv3' (Multi-Channel Deficit Round-Robin ver. 3)
+///             module for a hybrid TDM/WDM-PON OLT.
+/// @ingroup    hybridpon
+///
+class OltScheduler2MCDRRv3 : public OltScheduler2MCDRRv2
+{
+    protected:
+        // Misc.
+        virtual EtherFrame *dequeue();
 };
 
 #endif  // __OLT_SCHEDULER2_H

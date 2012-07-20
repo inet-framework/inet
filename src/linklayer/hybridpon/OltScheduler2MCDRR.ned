@@ -39,7 +39,7 @@ package inet.linklayer.hybridpon;
 //    vol. 23, no. 11, pp. 3716-3731, Nov. 2005.
 //
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-// @date   2010-07-09
+// @date   2012-07-09
 //
 simple OltScheduler2MCDRR like IOltScheduler2
 {
