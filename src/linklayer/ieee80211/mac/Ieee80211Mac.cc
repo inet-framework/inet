@@ -1743,6 +1743,13 @@ void Ieee80211Mac::cancelAIFSPeriod()
 void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     double tim;
+    double bitRate = bitrate;
+    if (dynamic_cast<PhyControlInfo*> (frameToSend->getControlInfo()))
+    {
+        bitRate = dynamic_cast<PhyControlInfo*> (frameToSend->getControlInfo())->getBitrate();
+        if (bitRate == 0)
+            bitRate = bitrate;
+    }
     if (!endTimeout->isScheduled())
     {
         EV << "scheduling data timeout period\n";
@@ -1750,11 +1757,11 @@ void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSe
         {
             ModulationType modType;
             if ((opMode=='b') || (opMode=='g'))
-                modType = WifiModulationType::getMode80211g(bitrate);
+                modType = WifiModulationType::getMode80211g(bitRate);
             else if (opMode=='a')
-                modType = WifiModulationType::getMode80211a(bitrate);
+                modType = WifiModulationType::getMode80211a(bitRate);
             else if (opMode=='p')
-                modType = WifiModulationType::getMode80211p(bitrate);
+                modType = WifiModulationType::getMode80211p(bitRate);
             else
                 opp_error("mode not supported");
             WifiModulationType::getSlotDuration(modType,wifiPreambleType);
@@ -1937,7 +1944,7 @@ void Ieee80211Mac::sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
         scheduleAt(simTime() + time, endTXOP);
     }
     EV << "sending Data frame\n";
-    sendDown(setBitrateFrame(buildDataFrame(frameToSend)));
+    sendDown(buildDataFrame(dynamic_cast<Ieee80211DataOrMgmtFrame*>(setBitrateFrame(frameToSend))));
 }
 
 void Ieee80211Mac::sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
@@ -1949,7 +1956,9 @@ void Ieee80211Mac::sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 void Ieee80211Mac::sendMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "sending Multicast frame\n";
-    sendDown(setBasicBitrate(buildDataFrame(frameToSend)));
+    if (frameToSend->getControlInfo())
+        delete frameToSend->removeControlInfo();
+    sendDown(buildDataFrame(dynamic_cast<Ieee80211DataOrMgmtFrame*>(setBasicBitrate(frameToSend))));
 }
 
 void Ieee80211Mac::sendCTSFrameOnEndSIFS()
@@ -1973,6 +1982,14 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
 
+    if (frameToSend->getControlInfo()!=NULL)
+    {
+        cObject * ctr = frameToSend->getControlInfo();
+        PhyControlInfo *ctrl = dynamic_cast <PhyControlInfo*> (ctr);
+        if (ctrl == NULL)
+            opp_error("control info is not PhyControlInfo type %s");
+        frame->setControlInfo(ctrl->dup());
+    }
     if (isMulticast(frameToSend))
         frame->setDuration(0);
     else if (!frameToSend->getMoreFragments())
@@ -1983,10 +2000,18 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
             // ++ operation is safe because txop is true
             std::list<Ieee80211DataOrMgmtFrame*>::iterator nextframeToSend;
             nextframeToSend = transmissionQueue()->begin();
-            ASSERT(transmissionQueue()->end() != nextframeToSend);
             nextframeToSend++;
+            ASSERT(transmissionQueue()->end() != nextframeToSend);
+            double bitRate = bitrate;
+            int size = (*nextframeToSend)->getBitLength();
+            if (transmissionQueue()->front()->getControlInfo() && dynamic_cast<PhyControlInfo*>(transmissionQueue()->front()->getControlInfo()))
+            {
+                bitRate = dynamic_cast<PhyControlInfo*>(transmissionQueue()->front()->getControlInfo())->getBitrate();
+                if (bitRate == 0)
+                    bitRate = bitrate;
+            }
             frame->setDuration(3 * getSIFS() + 2 * computeFrameDuration(LENGTH_ACK, basicBitrate)
-                               + computeFrameDuration(*nextframeToSend));
+                               + computeFrameDuration(size,bitRate));
         }
         else
             frame->setDuration(getSIFS() + computeFrameDuration(LENGTH_ACK, basicBitrate));
@@ -2061,8 +2086,12 @@ Ieee80211Frame *Ieee80211Mac::setBasicBitrate(Ieee80211Frame *frame)
 
 Ieee80211Frame *Ieee80211Mac::setBitrateFrame(Ieee80211Frame *frame)
 {
-    if (rateControlMode == RATE_CR && forceBitRate==false)
+    if (rateControlMode == RATE_CR && forceBitRate == false)
+    {
+        if (frame->getControlInfo())
+            delete  frame->removeControlInfo();
         return frame;
+    }
     PhyControlInfo *ctrl = NULL;
     if (frame->getControlInfo()==NULL)
     {
