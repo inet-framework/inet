@@ -2708,14 +2708,7 @@ OLSR::node_id(const nsaddr_t &addr)
 
 const char * OLSR::getNodeId(const nsaddr_t &addr)
 {
-    if (isInMacLayer())
-    {
-        return MACAddress(addr.getLo()).str().c_str();
-    }
-    else
-    {
-        return IPv4Address(addr.getLo()).str().c_str();
-    }
+    return convertAddressToString(addr).c_str();
 }
 
 // Interfaces with other Inet

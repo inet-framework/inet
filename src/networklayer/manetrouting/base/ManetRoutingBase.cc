@@ -35,6 +35,7 @@
 #include "ICMPAccess.h"
 #include "IMobility.h"
 #include "Ieee80211MgmtAP.h"
+
 #define IP_DEF_TTL 32
 #define UDP_HDR_LEN 8
 
@@ -348,6 +349,7 @@ void ManetRoutingBase::registerRoutingModule()
             it->second.push_back(data);
         }
     }
+
 
  //   WATCH_MAP(*routesVector);
 }
@@ -2047,5 +2049,19 @@ bool ManetRoutingBase::getRouteFromGlobal(const Uint128 &src, const Uint128 &des
                 next = it2->second;
             }
         }
+    }
+}
+
+
+// Auxiliary function that return a string with the address
+std::string ManetRoutingBase::convertAddressToString(const Uint128& add)
+{
+    if (mac_layer_)
+    {
+        return MACAddress(add.getLo()).str();
+    }
+    else
+    {
+        return IPv4Address(add.getLo()).str();
     }
 }
