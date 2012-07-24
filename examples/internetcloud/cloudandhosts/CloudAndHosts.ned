@@ -16,6 +16,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+
+
+
 package inet.examples.internetcloud.cloudandhosts;
 
 import inet.networklayer.internetcloud.InternetCloudNetworkConfigurator;
@@ -24,7 +27,7 @@ import inet.nodes.internetcloud.InternetCloud;
 import ned.DatarateChannel;
 
 
-network PingNetwork
+network CloudAndHosts
 {
     parameters:
         int numSenders;
