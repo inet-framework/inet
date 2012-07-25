@@ -1,9 +1,10 @@
 inet-hnrl
 =========
 
-This directory includes scripts to submit array and jobs to a cluster through
-the `Sun Grid Engine (SGE) <http://en.wikipedia.org/wiki/Oracle_Grid_Engine>`_
-and do pre- and post-processing of simulation results.
+This directory includes scripts to submit array and batch jobs to a cluster
+through the `Sun Grid Engine (SGE)
+<http://en.wikipedia.org/wiki/Oracle_Grid_Engine>`_ and do pre- and
+post-processing of simulation results.
 
 
 Simulation run (batch processing)
