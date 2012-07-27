@@ -6,7 +6,6 @@ through the `Sun Grid Engine (SGE)
 <http://en.wikipedia.org/wiki/Oracle_Grid_Engine>`_ and do pre- and
 post-processing of simulation results.
 
-
 Simulation run (batch processing)
 ---------------------------------
 
@@ -15,7 +14,6 @@ Simulation run (batch processing)
     
 	qsub -t 1:50 -o directoryForStandardOutput -j yes arrayrun.sh iniFile
 	configuration
-
 
 Data analysis (pre- and post-processing)
 ----------------------------------------
