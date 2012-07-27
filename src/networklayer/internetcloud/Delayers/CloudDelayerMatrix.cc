@@ -1,0 +1,223 @@
+//
+// Copyright (C) 2012 OpenSim Ltd
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+// @author Zoltan Bojthe
+//
+
+#include "CloudDelayerMatrix.h"
+
+#include "InterfaceTableAccess.h"
+#include "PatternMatcher.h"
+#include "XMLUtils.h"
+
+Define_Module(CloudDelayerMatrix);
+
+namespace {
+
+inline bool isEmpty(const char *s)
+{
+    return !s || !s[0];
+}
+
+//TODO suggestion: add to XMLUtils
+bool getBoolAttribute(const cXMLElement &element, const char *name, const bool *defaultValue = NULL)
+{
+    const char* s = element.getAttribute(name);
+    if (isEmpty(s))
+    {
+        if (defaultValue)
+            return *defaultValue;
+        throw cRuntimeError("Required attribute %s of <%s> missing at %s", name, element.getTagName(),
+                element.getSourceLocation());
+    }
+    if (strcasecmp(s, "true") == 0 || strcmp(s, "1") == 0)
+        return true;
+    if (strcasecmp(s, "false") == 0 || strcmp(s, "0") == 0)
+        return false;
+    throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, s, element.getSourceLocation());
+}
+
+} // namespace
+
+
+//FIXME modified copy of 'Matcher' class from IPv4NetworkConfigurator
+CloudDelayerMatrix::Matcher::Matcher(const char *pattern)
+{
+    matchesany = isEmpty(pattern);
+    if (matchesany)
+        return;
+    cStringTokenizer tokenizer(pattern);
+    while (tokenizer.hasMoreTokens())
+    {
+        const char *token = tokenizer.nextToken();
+        matchers.push_back(new inet::PatternMatcher(token, true, true, true));
+        if (*token != '*')
+        {
+            // add "*.token" too
+            std::string subtoken("*.");
+            subtoken += token;
+            matchers.push_back(new inet::PatternMatcher(subtoken.c_str(), true, true, true));
+        }
+    }
+}
+
+CloudDelayerMatrix::Matcher::~Matcher()
+{
+    for (int i = 0; i < (int) matchers.size(); i++)
+        delete matchers[i];
+}
+
+bool CloudDelayerMatrix::Matcher::matches(const char *s)
+{
+    if (matchesany)
+        return true;
+    for (int i = 0; i < (int) matchers.size(); i++)
+        if (matchers[i]->matches(s))
+            return true;
+    return false;
+}
+
+
+CloudDelayerMatrix::MatrixEntry::MatrixEntry(cXMLElement *trafficEntity, bool defaultSymmetric) :
+        srcMatcher(trafficEntity->getAttribute("src")), destMatcher(trafficEntity->getAttribute("dest"))
+{
+    const char *delayAttr = trafficEntity->getAttribute("delay");
+    const char *dropAttr = trafficEntity->getAttribute("drop");
+    symmetric = getBoolAttribute(*trafficEntity, "symmetric", &defaultSymmetric);
+    delayPar.parse(delayAttr);
+    dropRate.parse(dropAttr);
+}
+
+bool CloudDelayerMatrix::MatrixEntry::matches(const char *src, const char *dest)
+{
+    if (srcMatcher.matches(src) && destMatcher.matches(dest))
+        return true;
+    if (symmetric && srcMatcher.matches(dest) && destMatcher.matches(src))
+        return true;
+    return false;
+}
+
+
+void CloudDelayerMatrix::initialize()
+{
+    host = findContainingNode(this);
+    ift = InterfaceTableAccess().get(this);
+    cXMLElement *configEntity = par("config").xmlValue();
+    // parse XML config
+    if (strcmp(configEntity->getTagName(), "internetCloud"))
+        error("Cannot read internetCloud configuration, unaccepted '%s' entity at %s", configEntity->getTagName(),
+                configEntity->getSourceLocation());
+    bool defaultSymmetric = getBoolAttribute(*configEntity, "symmetric");
+    const cXMLElement *parameterEntity = getUniqueChild(configEntity, "parameters");
+    cXMLElementList trafficEntities = parameterEntity->getChildrenByTagName("traffic");
+    for (int i = 0; i < (int) trafficEntities.size(); i++)
+    {
+        cXMLElement *trafficEntity = trafficEntities[i];
+        MatrixEntry *matrixEntry = new MatrixEntry(trafficEntity, defaultSymmetric);
+        matrixEntries.push_back(matrixEntry);
+    }
+}
+
+void CloudDelayerMatrix::calculateDropAndDelay(const cMessage *msg, int srcID, int destID, bool& isDrop,
+        simtime_t& delay)
+{
+    Descriptor *descriptor = getOrCreateDescriptor(srcID, destID);
+    isDrop = uniform(0, 1) < descriptor->dropRate;
+    delay = SIMTIME_ZERO;
+    if (!isDrop)
+    {
+        delay = descriptor->delayPar->doubleValue(this, "s");
+        ASSERT(delay >= 0);
+        simtime_t curTime = simTime();
+        simtime_t sentTime = curTime + delay;
+        if (sentTime > descriptor->lastSent)
+            descriptor->lastSent = sentTime;
+        else
+            delay = descriptor->lastSent - curTime;
+    }
+}
+
+CloudDelayerMatrix::Descriptor* CloudDelayerMatrix::getOrCreateDescriptor(int srcID, int destID)
+{
+    IDPair idPair(srcID, destID);
+    IDPairToDescriptorMap::iterator it = idPairToDescriptorMap.find(idPair);
+    if (it != idPairToDescriptorMap.end())
+        return &(it->second);
+
+    std::string src = getPathOfConnectedNodeOnIfaceID(srcID);
+    std::string dest = getPathOfConnectedNodeOnIfaceID(destID);
+
+    // find first matching node in XML
+    MatrixEntry *reverseMatrixEntry = NULL;
+    for (unsigned int i = 0; i < matrixEntries.size(); i++)
+    {
+        MatrixEntry *matrixEntry = matrixEntries[i];
+        if (matrixEntry->matches(src.c_str(), dest.c_str()))
+        {
+            CloudDelayerMatrix::Descriptor& descriptor = idPairToDescriptorMap[idPair];
+            descriptor.delayPar = &matrixEntry->delayPar;
+            descriptor.dropRate = matrixEntry->dropRate.doubleValue(this);
+            descriptor.lastSent = simTime();
+            if (matrixEntry->symmetric)
+            {
+                if (reverseMatrixEntry) // existing previous asymmetric entry which matching to (dest,src)
+                    throw cRuntimeError("Inconsistent xml config between '%s' and '%s' nodes (at %s and %s)",
+                            src.c_str(), dest.c_str(), matrixEntry->entity->getSourceLocation(),
+                            reverseMatrixEntry->entity->getSourceLocation());
+                IDPair reverseIdPair(destID, srcID);
+                CloudDelayerMatrix::Descriptor& rdescriptor = idPairToDescriptorMap[reverseIdPair];
+                rdescriptor.delayPar = descriptor.delayPar;
+                rdescriptor.dropRate = descriptor.dropRate;
+                rdescriptor.lastSent = simTime();
+            }
+            if (descriptor.dropRate < 0.0 || descriptor.dropRate > 1.0)
+                throw cRuntimeError("Invalid %g drop rate at traffic %i", descriptor.dropRate, i);
+            return &descriptor;
+        }
+        else if (!matrixEntry->symmetric && !reverseMatrixEntry && matrixEntry->matches(dest.c_str(), src.c_str()))
+        {
+            // store first matched asymmetric reverse entry to reverseMatrixEntry
+            reverseMatrixEntry = matrixEntry;
+        }
+    }
+    throw cRuntimeError("The 'traffic' xml entity not found for communication from '%s' to '%s' node", src.c_str(),
+            dest.c_str());
+}
+
+std::string CloudDelayerMatrix::getPathOfConnectedNodeOnIfaceID(int id)
+{
+    InterfaceEntry *ie = ift->getInterfaceById(id);
+    if (!ie)
+        throw cRuntimeError("The interface id=%i not found in interfacetable", id);
+
+    int gateId;
+    cGate *connectedGate = NULL;
+
+    if ((gateId = ie->getNodeOutputGateId()) != -1)
+        connectedGate = host->gate(gateId)->getPathEndGate();
+    else if ((gateId = ie->getNodeInputGateId()) != -1)
+        connectedGate = host->gate(gateId)->getPathStartGate();
+
+    if (!connectedGate)
+        throw cRuntimeError("Interface '%s' (id=%i) not connected", ie->getFullName(), id);
+
+    cModule *connNode = findContainingNode(connectedGate->getOwnerModule());
+    if (!connNode)
+        throw cRuntimeError("The connected node is unknown at interface '%s' (id=%i)", ie->getFullName(), id);
+
+    return connNode->getFullPath();
+}
+
