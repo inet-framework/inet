@@ -63,7 +63,7 @@ class INET_API DHCPServer : public cSimpleModule
         }
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
-        virtual void handleIncommingPacket(DHCPMessage *pkt);
+        virtual void handleIncomingPacket(DHCPMessage *pkt);
     protected:
         // search for a mac into the leased ip
         DHCPLease* getLeaseByMac(MACAddress mac);

@@ -88,7 +88,7 @@ void DHCPServer::handleMessage(cMessage *msg)
     {
         DHCPMessage *dhcpPacket = dynamic_cast<DHCPMessage*>(msg);
         if (dhcpPacket)
-            handleIncommingPacket(dhcpPacket);
+            handleIncomingPacket(dhcpPacket);
         else
         {
             EV << "unknown packet, discarding it" << endl;
@@ -97,11 +97,11 @@ void DHCPServer::handleMessage(cMessage *msg)
     }
 }
 
-void DHCPServer::handleIncommingPacket(DHCPMessage *pkt)
+void DHCPServer::handleIncomingPacket(DHCPMessage *pkt)
 {
     // schedule the packet processing
     cMessage* proc_delay_timer = new cMessage("PROC_DELAY", PROC_DELAY);
-    proc_delay_timer->addPar("incomming_packet").setObjectValue(pkt);
+    proc_delay_timer->addPar("incoming_packet").setObjectValue(pkt);
     scheduleAt(simTime() + proc_delay, proc_delay_timer);
     std::cout << "scheduling process" << endl;
 }
@@ -110,8 +110,8 @@ void DHCPServer::handleTimer(cMessage *msg)
 {
     if (msg->getKind() == PROC_DELAY)
     {
-        DHCPMessage *pkt = check_and_cast<DHCPMessage*>(msg->par("incomming_packet").getObjectValue());
-        cMsgPar* par = (cMsgPar*) msg->removeObject("incomming_packet");
+        DHCPMessage *pkt = check_and_cast<DHCPMessage*>(msg->par("incoming_packet").getObjectValue());
+        cMsgPar* par = (cMsgPar*) msg->removeObject("incoming_packet");
         delete par;
         processPacket(pkt);
     }
