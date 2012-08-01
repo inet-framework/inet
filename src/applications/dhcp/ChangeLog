@@ -1,8 +1,10 @@
-2012-06-28  Zoltab Bojthe
+2012-06-28  Zoltan Bojthe
 
 	Several fixes to the HDCP application. Added support to 
 	work with both ethernet and wirless interfaces.
 
+2012-06-25  ------ inet-1.99.5 released ------
+	
 2012-06-11  Rudolf Hornig
 
 	Added the DHCP protocol implemantation.

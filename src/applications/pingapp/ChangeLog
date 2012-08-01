@@ -6,6 +6,8 @@
 	sendTime in a circuler buffer so we can get the correct message age
 	when we receive the response.
 
+2012-06-25  ------ inet-1.99.5 released ------
+	
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-03-04  Zoltan Bojthe

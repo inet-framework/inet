@@ -1,3 +1,5 @@
+2012-06-25  ------ inet-1.99.5 released ------
+
 2012-06-15  Zoltan Bojthe
 
 	Renamed netwIn, netwOut gates to upperLayerIn, upperLayerOut

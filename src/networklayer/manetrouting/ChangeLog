@@ -4,6 +4,8 @@
 	(by Alfonso Ariza Quintana) Multiple radios now supported in OLSR.
 	Optimizations in OLSR and DSR.
 
+2012-06-25  ------ inet-1.99.5 released ------
+
 2012-06-15  Zoltan Bojthe
 
 	IPv4Route: removed RouteType type field and getType(), setType()
