@@ -21,6 +21,8 @@
 
 class PingPayload;
 
+// how many ping request's send time is stored
+#define PINGTEST_HISTORY_SIZE 100
 
 /**
  * Generates ping requests and calculates the packet loss and round trip
@@ -61,6 +63,7 @@ class INET_API PingTestApp : public cSimpleModule
     // state
     long sendSeqNo;
     long expectedReplySeqNo;
+    simtime_t sendTimeHistory[PINGTEST_HISTORY_SIZE];
 
     // statistics
     cStdDev rttStat;

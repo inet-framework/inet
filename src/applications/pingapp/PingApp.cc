@@ -123,6 +123,9 @@ void PingApp::sendPing()
     msg->setSeqNo(sendSeqNo);
     msg->setByteLength(packetSize);
 
+    // store the sending time in a circular buffer so we can compute RTT when the packet returns
+    sendTimeHistory[sendSeqNo % PING_HISTORY_SIZE] = simTime();
+
     sendToICMP(msg, destAddr, srcAddr, hopLimit);
     emit(pingTxSeqSignal, sendSeqNo);
     sendSeqNo++;
@@ -185,7 +188,12 @@ void PingApp::processPingResponse(PingPayload *msg)
         msgHopCount = ctrl->getHopLimit();
     }
 
-    simtime_t rtt = simTime() - msg->getCreationTime();
+    // calculate the RTT time by looking up the the send time of the packet
+    // if the send time is no longer available (i.e. the packet is very old and the
+    // sendTime was overwritten in the circular buffer) then we just return a 0
+    // to signal that this value should not be used during the RTT statistics)
+    simtime_t rtt = sendSeqNo - msg->getSeqNo() > PING_HISTORY_SIZE ?
+                       0 : simTime() - sendTimeHistory[msg->getSeqNo() % PING_HISTORY_SIZE];
 
     if (printPing)
     {
@@ -208,8 +216,12 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
 
     numPongs++;
 
-    rttStat.collect(rtt);
-    emit(rttSignal, rtt);
+    // count only non 0 RTT values as 0s are invalid
+    if (rtt > 0)
+    {
+        rttStat.collect(rtt);
+        emit(rttSignal, rtt);
+    }
 
     if (seqNo == expectedReplySeqNo)
     {

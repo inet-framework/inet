@@ -1,3 +1,11 @@
+2012-08-01  Rudolf Hornig
+
+    Fixed an issue when ping replies were coming from "ext" interfaces.
+    Ping was previously using the creation time of the message to
+    calculate the RTT. Now we are storing the last n messages's
+    sendTime in a circuler buffer so we can get the correct message age
+    when we receive the response.
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-03-04  Zoltan Bojthe
