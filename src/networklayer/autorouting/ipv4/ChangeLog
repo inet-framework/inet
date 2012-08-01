@@ -1,9 +1,9 @@
 2012-06-18  Rudolf Hornig
 
-    Added HostAutoConfigurator module (as it is required by the TraCI modules/examples)
-    This configurator is deprectaed and should be used ONLY if the hosts are 
-    dynamically created/deleted during the simulation. Otherwise please use the 
-    new IPv4NetworkConfigurator.
+	Added HostAutoConfigurator module (as it is required by the TraCI modules/examples)
+	This configurator is deprectaed and should be used ONLY if the hosts are
+	dynamically created/deleted during the simulation. Otherwise please use the
+	new IPv4NetworkConfigurator.
 
 2012-06-15  Zoltan Bojthe
 
@@ -15,8 +15,8 @@
 	  - added @id attribute for wireless entry
 	- bugfixes:
 	  - searching for the mgmnt module must be started from the interface module.
-	    Previously it started from the 'host' so the first mgmnt module was found 
-	    in the host instead of the mgmnt module that belongs to the interface. 
+	    Previously it started from the 'host' so the first mgmnt module was found
+	    in the host instead of the mgmnt module that belongs to the interface.
 	  - use string instead char pointer in maps in extractWirelessTopology()
 	  - skip interfaces during configuration if the IPv4Data member is NULL
 	  - configure only the interfaces that were specified in the XML configuration

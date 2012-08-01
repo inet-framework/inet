@@ -1,12 +1,12 @@
 2012-06-19
 
-    Removed unnecessary dependency from the radio feature.
+	Removed unnecessary dependency from the radio feature.
 
 2012-06-18  Rudolf Hornig
 
-    Synchronized with https://github.com/sommer/inet-sommer.git
-    
+	Synchronized with https://github.com/sommer/inet-sommer.git
+
 2012-06-08  Rudolf Hornig
 
-    Initial commit of TRACI scenario mamanger from the 
-    INETMANET project.
+	Initial commit of TRACI scenario mamanger from the
+	INETMANET project.

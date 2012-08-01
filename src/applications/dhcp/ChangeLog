@@ -1,8 +1,13 @@
+2012-06-28  Zoltab Bojthe
+
+	Several fixes to the HDCP application. Added support to 
+	work with both ethernet and wirless interfaces.
+
 2012-06-11  Rudolf Hornig
 
-    Added the DHCP protocol implemantation.
+	Added the DHCP protocol implemantation.
 
-    Code takeover from INETMANET-2.0.
-    The original code is coming from https://github.com/jmaureir/DHCP 
-    written by Juan Carlos Maureira that was merged into 
-    INETMANET 2.0 by Alfonso Ariza Quintana
+	Code takeover from INETMANET-2.0.
+	The original code is coming from https://github.com/jmaureir/DHCP
+	written by Juan Carlos Maureira that was merged into
+	INETMANET 2.0 by Alfonso Ariza Quintana

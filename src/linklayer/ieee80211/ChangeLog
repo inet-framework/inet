@@ -1,16 +1,37 @@
 2012-07-19  Zoltan Bojthe
 
-        Bugfix for ieee80211:
-        Wrong packet timelength calculation was in 'g' mode with
-        11Mbps or 12Mbps bitrates. Some calculations in 'b' mode
-        was wrong too, because these sometimes also use table of
-        'g' mode. Calculation results for 11M and 12M swapped.
+	Bugfix for ieee80211:
+	Packets in 'g' mode with 11Mbps or 12Mbps bitrates were
+	using incorrect air time. Some calculations in 'b' mode
+	was wrong too, because these sometimes also use table of
+	'g' mode. Two values were swapped in the bitrate tables.
+
+2012-06-29  Alfonso Ariza Quintana
+
+	Implemented duplicate frame filtering in promiscuous mode.
+	(Takeover from INETMANET)
+
+	It is now possible to set the bitrate directly in PhyControlInfo
+	so that the given frame will be transmitted with that bitrate
+	independent of the MAC/Radio configuration.
+
+2012-06-28  Zoltan Bojthe
+
+	The convertToEther parameter morphed into encapDecap
+	tri-state enum string parameter in access point management
+	modules. Conversion of packets to/from higher layer depends:
+	- "true": encapsulate/decapsulate
+	- "false": no conversion
+	- "eth": convert to/from EtherFrame
+
+	Fixed issue where etherType was not set in Ieee802Ctrl
+	when the management module decapsulated the message.
 
 2012-06-08  Rudolf Hornig
 
-        Takover from INETMANET-2.0 @ 7fb431b (minor bugfixes)
-        All files are synced. The following features were omitted:
-        MULTIQUEUES, HWMP and MESH networking related code.
+	Takover from INETMANET-2.0 @ 7fb431b (minor bugfixes)
+	All files are synced. The following features were omitted:
+	MULTIQUEUES, HWMP and MESH networking related code.
 
 2012-03-20  ------ inet-1.99.4 released ------
 

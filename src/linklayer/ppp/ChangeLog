@@ -1,10 +1,10 @@
 2012-04-26  Zoltan Bojthe
 
 	PPP: bugfix: use the interface table only if it exists
-	    a runtime error was thrown if no interface table was present in the host
+	a runtime error was thrown if no interface table was present in the host
 
 	PPPInterface:
-        - renamed netwIn, netwOut gates to upperLayerIn, upperLayerOut
+	- renamed netwIn, netwOut gates to upperLayerIn, upperLayerOut
 
 2012-04-24  Tamas Borbely
 

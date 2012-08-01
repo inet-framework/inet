@@ -24,7 +24,7 @@
 	periods was used, because Ethernet switches were mistakenly identified
 	as wireless access points.
 
-        Now the shorter periods are used only if the router has wireless interface
+	    Now the shorter periods are used only if the router has wireless interface
 	or directly attached to a wireless access point.
 
 2011-12-20  Tamas Borbely
