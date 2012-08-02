@@ -90,7 +90,6 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     bool mac_layer_;
     Uint128    hostAddress;
     Uint128    routerId;
-    static const int maxInterfaces = 3;
     double xPosition;
     double yPosition;
     double xPositionPrev;

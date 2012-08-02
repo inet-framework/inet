@@ -258,8 +258,8 @@ void ManetRoutingBase::registerRoutingModule()
     if (inet_rt)
         routerId = inet_rt->getRouterId().getInt();
 
-    if (interfaceVector->size()==0 || interfaceVector->size() > (unsigned int)maxInterfaces)
-        opp_error("Manet routing protocol has found %i wlan interfaces", num_80211);
+    if (interfaceVector->size()==0)
+        opp_error("Manet routing protocol has found no interfaces that can be used for routing.");
     if (mac_layer_)
         hostAddress = interfaceVector->front().interfacePtr->getMacAddress().getInt();
     else
