@@ -41,6 +41,7 @@ module Ieee80211Nic like IWirelessNic
     parameters:
         string mgmtType = default("Ieee80211MgmtSTA"); // name of the management module type (implements IIeee80211Mgmt)
         string opMode @enum("b","g","a","p") = default("g");
+        double bitrate @unit("bps");
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
         bool _agentNeeded = (mgmtType == "Ieee80211MgmtSTA");   // internal par. do not use, shows if optional agent module is needed 
@@ -64,12 +65,14 @@ module Ieee80211Nic like IWirelessNic
         mac: Ieee80211Mac {
             parameters:
                 opMode = opMode;
+                bitrate = bitrate;
                 queueModule = "mgmt";
                 @display("p=96,222");
         }
         radio: Ieee80211Radio {
             parameters:
                 phyOpMode = opMode;
+                bitrate = bitrate;
                 @display("p=96,307");
         }
     connections:

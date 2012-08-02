@@ -1,3 +1,8 @@
+2012-08-02  Zoltan Bojthe
+
+    Added new bitrate parameter to NIC. The Radio and MAC uses
+    this parameter to set their own bitrate parameters.
+
 2012-07-19  Zoltan Bojthe
 
 	Bugfix for ieee80211:
