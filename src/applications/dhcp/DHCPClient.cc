@@ -31,69 +31,67 @@ void DHCPClient::initialize(int stage)
         this->timer_t1 = NULL;
         this->timer_t2 = NULL;
         this->timer_to = NULL;
-        return;
     }
-
-    if (stage != 3)
-        return;
-
-    numSent = 0;
-    numReceived = 0;
-    retry_count = 0;
-    xid = 0;
-
-    retry_max = 10; // Resent attempts
-    response_timeout = 1; // response timeout in seconds;
-
-    WATCH(numSent);
-    WATCH(numReceived);
-    WATCH(retry_count);
-    WATCH(client_state);
-    WATCH(xid);
-
-    // DHCP UDP ports
-    bootpc_port = 68; // client
-    bootps_port = 67; // server
-
-    // get the hostname
-    cModule* host = findHost();
-    this->host_name = host->getFullName();
-
-    nb = NotificationBoardAccess().get();
-
-    // for a wireless interface subscribe the association event to start the DHCP protocol
-    nb->subscribe(this, NF_L2_ASSOCIATED);
-
-    // Get the interface to configure
-    IInterfaceTable* ift = InterfaceTableAccess().get();
-    this->ie = ift->getInterfaceByName(this->par("iface"));
-
-    if (this->ie == NULL)
+    else if (stage == 3)
     {
-        error("DHCP Interface does not exist. aborting.");
-        return;
+        numSent = 0;
+        numReceived = 0;
+        retry_count = 0;
+        xid = 0;
+
+        retry_max = 10; // Resent attempts
+        response_timeout = 1; // response timeout in seconds;
+
+        WATCH(numSent);
+        WATCH(numReceived);
+        WATCH(retry_count);
+        WATCH(client_state);
+        WATCH(xid);
+
+        // DHCP UDP ports
+        bootpc_port = 68; // client
+        bootps_port = 67; // server
+
+        // get the hostname
+        cModule* host = findHost();
+        this->host_name = host->getFullName();
+
+        nb = NotificationBoardAccess().get();
+
+        // for a wireless interface subscribe the association event to start the DHCP protocol
+        nb->subscribe(this, NF_L2_ASSOCIATED);
+
+        // Get the interface to configure
+        IInterfaceTable* ift = InterfaceTableAccess().get();
+        this->ie = ift->getInterfaceByName(this->par("iface"));
+
+        if (this->ie == NULL)
+        {
+            error("DHCP Interface does not exist. aborting.");
+            return;
+        }
+
+        // get the routing table to update and subscribe it to the blackboard
+        this->irt = RoutingTableAccess().get();
+
+        // grab the interface mac address
+        this->client_mac_address = ie->getMacAddress();
+
+        // bind the client to the udp port
+        socket.setOutputGate(gate("udpOut"));
+        socket.bind(bootpc_port);
+        socket.setBroadcast(true);
+        ev << "DHCP Client bond to port " << bootpc_port << " at " << ie->getName() <<  endl;
+
+        // set client to idle state
+        this->client_state = IDLE;
+
+        // FIXME following line is a HACK. It allows to work with all type of interfaces (not just wireless)
+        // a correct fix would need some kind of notification when the wireless interface is associated
+        // or when the eth interface gets connected and would set the INIT state only then. At the moment
+        // there is no such notification in INET.
+        changeFSMState(INIT);
     }
-
-    // get the routing table to update and subscribe it to the blackboard
-    this->irt = RoutingTableAccess().get();
-
-    // grab the interface mac address
-    this->client_mac_address = ie->getMacAddress();
-
-    // bind the client to the udp port
-    socket.setOutputGate(gate("udpOut"));
-    socket.bind(bootpc_port);
-    socket.setBroadcast(true);
-    ev << "DHCP Client bond to port " << bootpc_port << " at " << ie->getName() <<  endl;
-
-    // set client to idle state
-    this->client_state = IDLE;
-
-    // FIXME following line is a HACK. It allows to work with all type of interfaces (not just wireless)
-    // a correct fix would need some kind of notification when the wireless interface is associated
-    // or when the eth interface gets connected and would set the INIT state only then. At the moment
-    // there is no such notification in INET.
-    changeFSMState(INIT);
 }
 
 void DHCPClient::changeFSMState(CLIENT_STATE new_state)
