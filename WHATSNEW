@@ -1,8 +1,47 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-1.99.5 (June 22, 2012)
+INET-2.0.0 (Aug 3, 2012)
 ------------------------
+
+This is the latest stable version of the INET framework. This version
+is now recommended for your further INET based development. It requires 
+OMNeT++ 4.2 (version 4.2.2 is suggested) or later. If you are upgrading 
+from an earlier INET version (i.e. INET 20111118), expect to have to 
+revise your existing omnetpp.ini files and possibly NED/C++ files as well.
+
+Changes since 1.99.5:
+
+The DHCP protocol received several fixes. It is now possible to use DHCP
+with both wired and wireless interfaces.
+
+MANET routing protocols updated from INETMANET-2.0 @ 9a3dc7a
+OLSR protocol received several patches allowing it to work with multiple
+radios. It can work now on both wired and wireless interfaces.
+
+Ieee80211:
+  - bugfix: The latest version of INET (1.99.5) contained a bug where 
+    speed values for 11MBps and 12MBps were swapped.
+  - A new "bitrate" parameter was added to the Ieee80211Nic module.
+    The Radio and MAC module uses this bitrate to set thir own bitrate 
+    value. This can avoid potential configuration inconsitencies.
+    UPDATE all your INI files according to this.
+
+The Ethernet module now throws an error message if two ethernet ports are 
+connected using an IdealChannel. Previously it just silently ignored the 
+connection that was definitely against the "least surprise" principle.
+
+A new "Delayer" module has been added and DropsGenerator and DuplicatesGenerator
+has been renamed to OrdinalBasedDropper and OrdinalBasedDuplicator respectively.
+These modules implement the IHook module interface and can be installed inside 
+hosts to induce different packet errors. IHook modules can be inserted 
+between the network and link layer protocols.
+
+The Ext-interface, TraCI, Mobility and Ping modules received some minor fixes.
+See ChangeLogs in individual source folders for more information.
+
+INET-1.99.5 (June 22, 2012)
+---------------------------
 
 This is the final testing version of the 1.99.x series leading to the 2.0 
 release. Requires OMNeT++ 4.2 (version 4.2.2 suggested).
