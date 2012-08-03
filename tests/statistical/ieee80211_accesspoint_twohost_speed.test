@@ -137,7 +137,7 @@ network = Throughput
 #cmdenv-output-file = omnetpp.log
 #debug-on-errors = true
 tkenv-plugin-path = ../../../etc/plugins
-sim-time-limit = 100s
+sim-time-limit = 50s
 **.vector-recording = false
 
 **.constraintAreaMinX = 0m
