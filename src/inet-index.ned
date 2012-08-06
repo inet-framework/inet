@@ -27,9 +27,7 @@
 // Static routing can be set up using network autoconfigurators, or one can use
 // routing protocol implementations.
 //
-// The INET Framework supports wireless and mobile simulations as well. Support
-// for mobility and wireless communication has been derived from the
-// <a href="http://mobility-fw.sourceforge.net" target="_blank">Mobility Framework</a>.
+// The INET Framework supports wireless and mobile simulations as well.
 //
 // See the <tt><a href="whatsnew.html">WHATSNEW</a></tt> file in the distribution 
 // for the list of recent changes.
@@ -53,8 +51,8 @@
 //  - transport layer: ~TCP, ~UDP, ~SCTP
 //  - ~InterfaceTable and ~NotificationBoard are there in every
 //    host and router model
-//  - queues in router network interfaces: ~DropTailQueue, ~DiffServQueue.
-//  - ~FlatNetworkConfigurator automatically assigns IPv4 addresses and
+//  - queues in router network interfaces: ~DropTailQueue, ~DiffservQueue.
+//  - ~IPv4NetworkConfigurator automatically assigns IPv4 addresses and
 //    sets up static routes;
 //  - ~ScenarioManager lets you change things in the model in the middle
 //    of the simulation to study transient behaviour
@@ -65,7 +63,7 @@
 //  - application models: ~UDPVideoStreamSvr, ~UDPVideoStreamCli, ~UDPBasicApp, ~UDPEchoApp,
 //    ~TCPSessionApp, ~TCPBasicClientApp, ~TCPGenericSrvApp, ~TCPSinkApp,
 //    ~TCPSrvHostApp, ~EtherAppCli, ~EtherAppSrv, ~PingApp, etc.
-//  - wireless support: ~ChannelControl, ~Nic80211
+//  - wireless support: ~ChannelControl, ~Ieee80211Nic
 //  - mobility: ~MobileHost; mobility models such as ~TurtleMobility,
 //    ~BonnMotionMobility, ~ANSimMobility, ~RandomWPMobility, ~MassMobility
 //  - MPLS models: the core modules are ~MPLS, ~LIBTable, ~LDP, ~RSVP, ~TED,
