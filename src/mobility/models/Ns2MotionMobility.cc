@@ -188,6 +188,7 @@ void Ns2MotionMobility::setTargetPosition()
         double time = vec[0];
         nextChange = time;
         targetPosition = lastPosition;
+        vecpos++;
     }
     else
     {
