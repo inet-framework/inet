@@ -1,13 +1,8 @@
-<#if ipv4Layer>
-    <#assign startTime = 0.1> 
-</#if>
-<#if ipv6Layer> 
-    <#assign startTime = 3> 
-</#if>
+<#assign startTime = 0.1> 
 
 [General]
 network = ${targetTypeName}
-total-stack = 7MB
+total-stack = 7MiB
 tkenv-plugin-path = ../../../etc/plugins
 #debug-on-errors = true
 #record-eventlog = true
@@ -17,26 +12,26 @@ tkenv-plugin-path = ../../../etc/plugins
 
 <#if tcpTraffic>
 # TCP Traffic Configuration:
-**.server*.tcpType = "${serverTcpLayer}" # TCP/TCP_old/TCP_NSC
-**.client*.tcpType = "${clientTcpLayer}" # TCP/TCP_old/TCP_NSC
+**.server*.tcpType = "${serverTcpLayer}" # "TCP", "TCP_lwIP", "TCP_NSC"
+**.client*.tcpType = "${clientTcpLayer}" # "TCP", "TCP_lwIP", "TCP_NSC"
 <#assign appIdx = 0 >
 
 <#if tcpDataTraffic>
-**.server*.tcpAppType = "TCPEchoApp"            #//TODO must set only tcpApp[${appIdx}]
+**.server*.tcpApp[${appIdx}].typename = "TCPEchoApp"            #//TODO must set only tcpApp[${appIdx}]
 **.server*.tcpApp[${appIdx}].address = ""
-**.server*.tcpApp[${appIdx}].port = 1000
+**.server*.tcpApp[${appIdx}].localPort = 1000
 **.server*.tcpApp[${appIdx}].echoFactor = 2.0
 **.server*.tcpApp[${appIdx}].echoDelay = 0
 
-**.client*.tcpAppType = "TCPSessionApp"            #//TODO must set only tcpApp[${appIdx}]
+**.client*.tcpApp[${appIdx}].typename = "TCPSessionApp"            #//TODO must set only tcpApp[${appIdx}]
 **.client*.tcpApp[${appIdx}].active = true
 **.client*.tcpApp[${appIdx}].address = ""
-**.client*.tcpApp[${appIdx}].port = -1
+**.client*.tcpApp[${appIdx}].localPort = -1
 **.client*.tcpApp[${appIdx}].connectAddress = "server"
 **.client*.tcpApp[${appIdx}].connectPort = 1000
 **.client*.tcpApp[${appIdx}].tOpen = ${startTime}s
 **.client*.tcpApp[${appIdx}].tSend = ${startTime+0.1}s
-**.client*.tcpApp[${appIdx}].sendBytes = 100MB
+**.client*.tcpApp[${appIdx}].sendBytes = 100MiB
 **.client*.tcpApp[${appIdx}].sendScript = ""
 **.client*.tcpApp[${appIdx}].tClose = 0
 <#assign appIdx = appIdx + 1 >
@@ -44,9 +39,9 @@ tkenv-plugin-path = ../../../etc/plugins
 
 <#if telnetTraffic>
 # tcp apps
-**.client*.tcpAppType = "TelnetApp"            #//TODO must set only tcpApp[${appIdx}]
+**.client*.tcpApp[${appIdx}].typename = "TelnetApp"            #//TODO must set only tcpApp[${appIdx}]
 **.client*.tcpApp[${appIdx}].address = ""
-**.client*.tcpApp[${appIdx}].port = 23
+**.client*.tcpApp[${appIdx}].localPort = 23
 #IP address intentionally set incorrectly
 **.client*.tcpApp[${appIdx}].connectAddress = "server"
 **.client*.tcpApp[${appIdx}].connectPort = 1000
@@ -59,32 +54,11 @@ tkenv-plugin-path = ../../../etc/plugins
 **.client*.tcpApp[${appIdx}].idleInterval = truncnormal(3600s,1200s)
 **.client*.tcpApp[${appIdx}].reconnectInterval = 30s
 
-**.server*.tcpAppType = "TCPGenericSrvApp"     #//TODO must set only tcpApp[${appIdx}]
+**.server*.tcpApp[${appIdx}].typename = "TCPGenericSrvApp"     #//TODO must set only tcpApp[${appIdx}]
 **.server*.tcpApp[${appIdx}].address = ""
-**.server*.tcpApp[${appIdx}].port = -1
+**.server*.tcpApp[${appIdx}].localPort = 1000
 **.server*.tcpApp[${appIdx}].replyDelay = 0
 <#assign appIdx = appIdx + 1 >
-</#if>
-
-# tcp settings for TCP / TCP_old
-<#if serverTcpLayer == "TCP" || serverTcpLayer == "TCP_old" >
-<#if telnetTraffic>
-**.server*.tcp.sendQueueClass = "TCPMsgBasedSendQueue"
-**.server*.tcp.receiveQueueClass = "TCPMsgBasedRcvQueue"
-<#else>
-#**.server*.tcp.sendQueueClass = "TCPVirtualDataSendQueue"
-#**.server*.tcp.receiveQueueClass = "TCPVirtualDataRcvQueue"
-</#if>
-</#if>
-
-<#if clientTcpLayer == "TCP" || clientTcpLayer == "TCP_old" >
-<#if telnetTraffic>
-**.client*.tcp.sendQueueClass = "TCPMsgBasedSendQueue"
-**.client*.tcp.receiveQueueClass = "TCPMsgBasedRcvQueue"
-<#else>
-#**.client*.tcp.sendQueueClass = "TCPVirtualDataSendQueue"
-#**.client*.tcp.receiveQueueClass = "TCPVirtualDataRcvQueue"
-</#if>
 </#if>
 
 **.server*.numTcpApps = ${appIdx}
@@ -96,14 +70,14 @@ tkenv-plugin-path = ../../../etc/plugins
 # Video Stream UDP Traffic Configuration:
 
 **.server*.numUdpApps = 1
-**.server*.udpAppType = "UDPVideoStreamSvr"
-**.server*.udpApp[*].videoSize = 100MB
-**.server*.udpApp[*].serverPort = 3088
-**.server*.udpApp[*].waitInterval = 10ms
+**.server*.udpApp[*].typename = "UDPVideoStreamSvr"
+**.server*.udpApp[*].videoSize = 100MiB
+**.server*.udpApp[*].localPort = 3088
+**.server*.udpApp[*].sendInterval = 10ms
 **.server*.udpApp[*].packetLen = 1000B
 
 **.client*.numUdpApps = 1
-**.client*.udpAppType = "UDPVideoStreamCli"
+**.client*.udpApp[*].typename = "UDPVideoStreamCli"
 **.client*.udpApp[*].serverAddress = "server"
 **.client*.udpApp[*].localPort = 9999
 **.client*.udpApp[*].serverPort = 3088
@@ -114,30 +88,30 @@ tkenv-plugin-path = ../../../etc/plugins
 
 <#if pingTraffic>
 # ping app (server pinged by others)
-**.server*.pingApp.destAddr = ""
-**.client*.pingApp.destAddr = "server"
-**.client*.pingApp.interval = 50ms
-**.client*.pingApp.startTime = ${startTime}s
+**.client*.numPingApps = 1
+**.client*.pingApp[*].destAddr = "server"
+**.client*.pingApp[*].sendInterval = 50ms
+**.client*.pingApp[*].startTime = ${startTime}s
+**.client*.pingApp[*].printPing = true
 </#if>
 
 <#if sctpTraffic && ipv4Layer>
 # SCTP Traffic Configuration:
 
 **.server*.numSctpApps = 1
-**.server*.sctpAppType = "SCTPServer"
+**.server*.sctpApp[*].typename = "SCTPServer"
 **.server*.sctpApp[0].address = ""
-**.server*.sctpApp[0].port = 1000
+**.server*.sctpApp[0].localPort = 1000
 **.server*.sctpApp[0].numPacketsToReceivePerClient = 30
 **.server*.sctpApp[0].echoFactor = 0
 
 **.client*.numSctpApps = 1
-**.client*.sctpAppType = "SCTPClient"
+**.client*.sctpApp[*].typename = "SCTPClient"
 **.client*.sctpApp[0].address = ""
 **.client*.sctpApp[0].connectAddress = "server"
 **.client*.sctpApp[0].primaryPath = "server"
-**.client*.sctpApp[0].port = -1
+**.client*.sctpApp[0].localPort = -1
 **.client*.sctpApp[0].connectPort = 1000
-**.client*.sctpApp[0].startTime = exponential(0.1s)
 **.client*.sctpApp[0].numRequestsPerSession = 30
 **.client*.sctpApp[0].requestLength = 1000
 **.client*.sctpApp[0].thinkTime = exponential(0.1s)
@@ -147,19 +121,7 @@ tkenv-plugin-path = ../../../etc/plugins
 # end of SCTP Traffic Configuration
 </#if>
 
-<#if ipv4Layer> 
-# ppp NIC configuration
-**.ppp[*].queueType = "DropTailQueue" # in routers
-**.ppp[*].queue.frameCapacity = 10  # in routers
-</#if>
-
-<#if ipv6Layer> 
 # ip settings
 
 # Ethernet NIC configuration
 **.eth[*].queueType = "DropTailQueue" # in routers
-**.eth[*].queue.frameCapacity = 10  # in routers
-
-**.eth[*].mac.txrate = 10Mbps
-**.eth[*].mac.duplexEnabled = true
-</#if>

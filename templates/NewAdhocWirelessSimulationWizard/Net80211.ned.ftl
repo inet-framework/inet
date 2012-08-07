@@ -7,9 +7,9 @@ ${bannerComment}
 // parametric: ${parametric?string}
 // static:     ${static?string}
 
-import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.adhoc.MobileHost;
-import inet.world.ChannelControl;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.nodes.inet.AdhocHost;
+import inet.world.radio.ChannelControl;
 
 
 network ${targetTypeName}
@@ -18,19 +18,16 @@ network ${targetTypeName}
 <#if parametric>
         int numHosts;
 </#if>
-        double playgroundSizeX;
-        double playgroundSizeY;
-
     submodules:
 <#if parametric>
-        host[numHosts]: MobileHost
+        host[numHosts]: AdhocHost
         {
             parameters:
                 @display("r=,,#707070");
         }
 <#else>
     <#list 0..numOfHosts?number-1 as i>
-        host${i}: MobileHost
+        host${i}: AdhocHost
         {
             parameters:
                 @display("r=,,#707070");
@@ -38,15 +35,13 @@ network ${targetTypeName}
     </#list>
 </#if>
 
-        channelcontrol: ChannelControl
+        channelControl: ChannelControl
         {
             parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
                 @display("p=60,50");
         }
 
-        configurator: FlatNetworkConfigurator
+        configurator: IPv4NetworkConfigurator
         {
             @display("p=140,50");
         }

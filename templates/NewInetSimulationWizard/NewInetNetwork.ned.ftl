@@ -9,7 +9,8 @@ package ${nedPackageName};
     <#assign inetX = "inet"> 
     <#assign hostModule = "StandardHost"> 
     <#assign routerModule = "Router">
-    <#assign configuratorModule = "FlatNetworkConfigurator">
+    <#assign configuratorModule = "IPv4NetworkConfigurator">
+import inet.networklayer.autorouting.ipv4.${configuratorModule};
 </#if>
 
 <#if ipv6Layer> 
@@ -17,6 +18,7 @@ package ${nedPackageName};
     <#assign hostModule = "StandardHost6"> 
     <#assign routerModule = "Router6"> 
     <#assign configuratorModule = "FlatNetworkConfigurator6">
+import inet.networklayer.autorouting.ipv6.${configuratorModule};
 </#if>
 
 <#if (numClients?number <= 3) >
@@ -25,7 +27,6 @@ package ${nedPackageName};
     <#assign srvXpos = 10+numClients?number*30> 
 </#if>
 
-import inet.networklayer.autorouting.${configuratorModule};
 import inet.nodes.${inetX}.${routerModule};
 import inet.nodes.${inetX}.${hostModule};
 import ned.DatarateChannel;
@@ -35,9 +36,7 @@ network ${targetTypeName}
     types:
         channel Channel extends DatarateChannel
         {
-<#if ipv4Layer>
             datarate = 100Mbps;
-</#if>
             delay = 0.1us;
         }
 
@@ -68,19 +67,9 @@ network ${targetTypeName}
         }
 </#list>
 
-<#if ipv4Layer>
-    connections:
-        server.pppg++  <--> Channel <--> router.pppg++;
-        <#list 1..numClients?number as i>
-        client${i}.pppg++ <--> Channel <--> router.pppg++;
-        </#list>
-</#if>
-
-<#if ipv6Layer>
     connections:
         server.ethg++  <--> Channel <--> router.ethg++;
         <#list 1..numClients?number as i>
         client${i}.ethg++ <--> Channel <--> router.ethg++;
         </#list>
-</#if>
 }

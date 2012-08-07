@@ -69,19 +69,19 @@
           </x:children>
         </group>
 
-        <!-- serverTcpLayer:TCP/TCP_old/TCP_NSC -->
+        <!-- serverTcpLayer: "TCP", "TCP_lwIP", "TCP_NSC"  -->
         <label text="Server TCP layer:"/>
         <combo x:id="serverTcpLayer" x:style="BORDER|READ_ONLY">
           <add x:p0="TCP"/>
-          <add x:p0="TCP_old"/>
+          <add x:p0="TCP_lwIP"/>
           <add x:p0="TCP_NSC"/>
         </combo>
 
-        <!-- clientTcpLayer:TCP/TCP_old/TCP_NSC -->
+        <!-- clientTcpLayer: "TCP", "TCP_lwIP", "TCP_NSC"  -->
         <label text="Client TCP layer:"/>
         <combo x:id="clientTcpLayer" x:style="BORDER|READ_ONLY">
           <add x:p0="TCP"/>
-          <add x:p0="TCP_old"/>
+          <add x:p0="TCP_lwIP"/>
           <add x:p0="TCP_NSC"/>
         </combo>
 

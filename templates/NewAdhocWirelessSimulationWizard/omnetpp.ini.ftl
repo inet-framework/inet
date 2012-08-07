@@ -14,53 +14,54 @@ network = ${targetTypeName}
 
 num-rngs = 3
 **.mobility.rng-0 = 1
-**.wlan.mac.rng-0 = 2
+**.wlan[*].mac.rng-0 = 2
 #debug-on-errors = true
 
 tkenv-plugin-path = ../../../etc/plugins
 
-*.playgroundSizeX = 600
-*.playgroundSizeY = 400
-**.debug = true
-**.coreDebug = false
-**.${host_all}.**.channelNumber = 0
+**.channelNumber = 0
 
 # channel physical parameters
-*.channelcontrol.carrierFrequency = 2.4GHz
-*.channelcontrol.pMax = 2.0mW
-*.channelcontrol.sat = -110dBm
-*.channelcontrol.alpha = 2
-*.channelcontrol.numChannels = 1
+*.channelControl.carrierFrequency = 2.4GHz
+*.channelControl.pMax = 2.0mW
+*.channelControl.sat = -110dBm
+*.channelControl.alpha = 2
+*.channelControl.numChannels = 1
 
 # mobility
-**.${host_all}.mobility.x = -1
-**.${host_all}.mobility.y = -1
-
-**.${host_all}.mobilityType = "inet.mobility.MassMobility"
-**.${host_all}.mobility.changeInterval = truncnormal(2s, 0.5s)
-**.${host_all}.mobility.changeAngleBy = normal(0deg, 30deg)
-**.${host_all}.mobility.speed = truncnormal(20mps, 8mps)
-**.${host_all}.mobility.updateInterval = 100ms
+**.${host_all}.mobilityType = "MassMobility"
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 600m
+**.mobility.constraintAreaMaxY = 400m
+**.mobility.changeInterval = truncnormal(2s, 0.5s)
+**.mobility.changeAngleBy = normal(0deg, 30deg)
+**.mobility.speed = truncnormal(20mps, 8mps)
+**.mobility.updateInterval = 100ms
 
 # ping app (${host_0} pinged by others)
-*.${host_0}.pingApp.destAddr = ""
-*.${host_all}.pingApp.destAddr = "${host_0}"
-**.pingApp.startTime = uniform(1s,5s)
+*.${host_0}.pingApp[0].destAddr = ""
+*.${host_all}.numPingApps = 1
+*.${host_all}.pingApp[0].destAddr = "${host_0}"
+*.${host_all}.pingApp[0].startTime = uniform(1s,5s)
+*.${host_all}.pingApp[0].printPing = true
 
 # nic settings
-**.wlan.mgmt.frameCapacity = 10
-**.wlan.mac.address = "auto"
-**.wlan.mac.maxQueueSize = 14
-**.wlan.mac.rtsThresholdBytes = 3000B
-**.wlan.mac.bitrate = 2Mbps
-**.wlan.mac.retryLimit = 7
-**.wlan.mac.cwMinData = 7
-**.wlan.mac.cwMinBroadcast = 31
+**.wlan[*].bitrate = 2Mbps
 
-**.wlan.radio.bitrate = 2Mbps
-**.wlan.radio.transmitterPower = 2mW
-**.wlan.radio.thermalNoise = -110dBm
-**.wlan.radio.sensitivity = -85mW
-**.wlan.radio.pathLossAlpha = 2
-**.wlan.radio.snirThreshold = 4dB
+**.wlan[*].mgmt.frameCapacity = 10
+**.wlan[*].mac.address = "auto"
+**.wlan[*].mac.maxQueueSize = 14
+**.wlan[*].mac.rtsThresholdBytes = 3000B
+**.wlan[*].mac.retryLimit = 7
+**.wlan[*].mac.cwMinData = 7
+**.wlan[*].mac.cwMinMulticast = 31
+
+**.wlan[*].radio.transmitterPower = 2mW
+**.wlan[*].radio.thermalNoise = -110dBm
+**.wlan[*].radio.sensitivity = -85dBm
+**.wlan[*].radio.pathLossAlpha = 2
+**.wlan[*].radio.snirThreshold = 4dB
 
