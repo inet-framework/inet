@@ -1,3 +1,5 @@
+2012-08-07  ------ inet-2.0.0 released ------
+
 2012-07-18  Alfonso Ariza Quintana
 
 	Bugfix in Ns2MotionMobility when the node is stopped.
