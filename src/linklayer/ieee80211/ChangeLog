@@ -1,7 +1,14 @@
+2012-08-04  Rudolf Hornig
+
+	The "bitrate" parameter now has a default value: it is
+	11Mbps for 802.11b, 27Mbps for 802.11p and 54Mbps for
+	802.11g and 802.11a. (i.e. the default bitrate depends
+	on the opMode parameter)
+
 2012-08-02  Zoltan Bojthe
 
-    Added new bitrate parameter to NIC. The Radio and MAC uses
-    this parameter to set their own bitrate parameters.
+	Added new bitrate parameter to NIC. The Radio and MAC uses
+	this parameter to set their own bitrate parameters.
 
 2012-07-19  Zoltan Bojthe
 

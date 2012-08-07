@@ -1,7 +1,7 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-2.0.0 (Aug 3, 2012)
+INET-2.0.0 (Aug 7, 2012)
 ------------------------
 
 This is the latest stable version of the INET framework. This version
@@ -24,8 +24,10 @@ Ieee80211:
     speed values for 11MBps and 12MBps were swapped.
   - A new "bitrate" parameter was added to the Ieee80211Nic module.
     The Radio and MAC module uses this bitrate to set thir own bitrate 
-    value. This can avoid potential configuration inconsitencies.
-    UPDATE all your INI files according to this.
+    value. Its default value is 11Mbps for 802.11b, 27Mbps for 802.11p 
+    and 54Mbps for 802.11g and  802.11a. (i.e. the default bitrate depends 
+    on the opMode parameter) This can avoid potential configuration 
+    inconsitencies. UPDATE all your INI files accordingly.
 
 The Ethernet module now throws an error message if two ethernet ports are 
 connected using an IdealChannel. Previously it just silently ignored the 
