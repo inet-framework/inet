@@ -13,29 +13,29 @@
 
 package inet.examples.voiptool.VoIPToolTest;
 
-import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.Router;
-import inet.nodes.ethernet.EtherSwitch;
+
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-
-
-channel line1 extends ned.DatarateChannel
-{
-    parameters:
-        delay = 100us;
-        datarate = 100Mbps;
-}
-
-channel line2 extends ned.DatarateChannel
-{
-    parameters:
-        delay = 100us;
-        datarate = 100Mbps;
-}
+import inet.nodes.ethernet.EtherSwitch;
+import inet.nodes.inet.Router;
+import inet.nodes.inet.StandardHost;
 
 
 network VoIPToolTest
 {
+    types:
+        channel line1 extends ned.DatarateChannel
+        {
+            parameters:
+                delay = 100us;
+                datarate = 100Mbps;
+        }
+
+        channel line2 extends ned.DatarateChannel
+        {
+            parameters:
+                delay = 100us;
+                datarate = 100Mbps;
+        }
     submodules:
         client: StandardHost {
             parameters:
@@ -59,7 +59,7 @@ network VoIPToolTest
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
-                config=xml("<config><interface hosts='*' address='10.x.x.x' netmask='255.x.x.x'/></config>");
+                config = xml("<config><interface hosts='*' address='10.x.x.x' netmask='255.x.x.x'/></config>");
                 @display("p=495,160;i=block/cogwheel_s");
         }
     connections:
