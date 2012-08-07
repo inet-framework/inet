@@ -53,7 +53,7 @@ module AccessPoint
         input radioIn[numRadios] @directIn;
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        interfaceTable: InterfaceTable if withInterfaceTable{
+        interfaceTable: InterfaceTable if withInterfaceTable {
             @display("p=59,121");
         }
         relayUnit: <relayUnitType> like IMACRelayUnit if sizeof(ethg)+numRadios>1 {

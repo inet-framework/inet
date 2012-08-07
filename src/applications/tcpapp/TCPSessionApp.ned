@@ -89,7 +89,7 @@ simple TCPSessionApp like ITCPApp
 {
     parameters:
         string localAddress = default("");
-        int localPort;  // local port
+        int localPort = default(-1);  // local port
         bool active = default(true);
         string connectAddress;
         int connectPort = default(1000);
