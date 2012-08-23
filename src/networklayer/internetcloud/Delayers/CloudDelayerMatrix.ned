@@ -34,13 +34,16 @@ import inet.networklayer.internetcloud.ICloudDelayer;
 // A possible xml configuration:
 //    <internetCloud symmetric=”false”>
 //      <parameters name=”good”>
-//        <traffic src=”src_host*” dest=”dest_host*” delay=”0.012s+exponential(0.2s)” drop=”0.005” symmetric=”true”/>
-//        <traffic src=”hosta” dest=”hostb” delay=”0.012s+exponential(0.2s)” drop=”0.005”/>
-//        <traffic src=”hostb” dest=”hosta” delay=”0.010s+exponential(0.2s)” drop=”0.003”/>
-//        <traffic src=”*” dest=”*” delay=”0.02s+exponential(0.5s)” drop=”uniform(0.01,0.03)” />
+//        <traffic src=”src_host*” dest=”dest_host*” delay=”0.012s+exponential(0.2s)” datarate=”uniform(100kbps,1mbps)” drop=”0.005” symmetric=”true”/>
+//        <traffic src=”hosta” dest=”hostb” delay=”0.012s+exponential(0.2s)” datarate=”uniform(500kbps,1mbps)” drop=”0.005”/>
+//        <traffic src=”hostb” dest=”hosta” delay=”0.010s+exponential(0.2s)” datarate=”uniform(100kbps,500kbps)” drop=”0.003”/>
+//        <traffic src=”*” dest=”*” delay=”0.02s+exponential(0.5s)” datarate=”uniform(100kbps,200kbps)” drop=”uniform(0.01,0.03)” />
 //      </parameters>
 //    </internetCloud>
-// 
+//
+//TODO: I think: need a datarate attribute for traffic entries, too
+//      calculated_delay := delay + (8 * packet_length_in_bytes) / datarate_in_bps
+//
 simple CloudDelayerMatrix like ICloudDelayer
 {
     parameters:

@@ -53,6 +53,7 @@ class INET_API CloudDelayerMatrix : public CloudDelayerBase
         Matcher destMatcher;
         bool symmetric;
         cDynamicExpression delayPar;
+        cDynamicExpression dataratePar;
         cDynamicExpression dropRate;
         cXMLElement *entity;
       public:
@@ -65,6 +66,7 @@ class INET_API CloudDelayerMatrix : public CloudDelayerBase
     {
       public:
         cDynamicExpression *delayPar;    // TODO hasznalhatom ugyanazt az expression-t a kulonbozo kapcsolatokhoz???
+        cDynamicExpression *dataratePar;    // TODO hasznalhatom ugyanazt az expression-t a kulonbozo kapcsolatokhoz???
         double dropRate;
         simtime_t lastSent;
       public:

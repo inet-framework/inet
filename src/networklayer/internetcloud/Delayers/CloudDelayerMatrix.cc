@@ -95,9 +95,11 @@ CloudDelayerMatrix::MatrixEntry::MatrixEntry(cXMLElement *trafficEntity, bool de
         srcMatcher(trafficEntity->getAttribute("src")), destMatcher(trafficEntity->getAttribute("dest"))
 {
     const char *delayAttr = trafficEntity->getAttribute("delay");
+    const char *datarateAttr = trafficEntity->getAttribute("datarate");
     const char *dropAttr = trafficEntity->getAttribute("drop");
     symmetric = getBoolAttribute(*trafficEntity, "symmetric", &defaultSymmetric);
     delayPar.parse(delayAttr);
+    dataratePar.parse(datarateAttr);
     dropRate.parse(dropAttr);
 }
 
@@ -140,13 +142,18 @@ void CloudDelayerMatrix::calculateDropAndDelay(const cMessage *msg, int srcID, i
     if (!isDrop)
     {
         delay = descriptor->delayPar->doubleValue(this, "s");
+        double datarate = descriptor->dataratePar->doubleValue(this, "bps");
         ASSERT(delay >= 0);
+        ASSERT(datarate > 0.0);
         simtime_t curTime = simTime();
-        simtime_t sentTime = curTime + delay;
-        if (sentTime > descriptor->lastSent)
-            descriptor->lastSent = sentTime;
-        else
+        if (curTime + delay < descriptor->lastSent)
             delay = descriptor->lastSent - curTime;
+
+        const cPacket *pk = dynamic_cast<const cPacket *>(msg);
+        if (pk)
+            delay += pk->getBitLength() / datarate;
+
+        descriptor->lastSent = curTime + delay;
     }
 }
 
@@ -169,6 +176,7 @@ CloudDelayerMatrix::Descriptor* CloudDelayerMatrix::getOrCreateDescriptor(int sr
         {
             CloudDelayerMatrix::Descriptor& descriptor = idPairToDescriptorMap[idPair];
             descriptor.delayPar = &matrixEntry->delayPar;
+            descriptor.dataratePar = &matrixEntry->dataratePar;
             descriptor.dropRate = matrixEntry->dropRate.doubleValue(this);
             descriptor.lastSent = simTime();
             if (matrixEntry->symmetric)
@@ -179,9 +187,7 @@ CloudDelayerMatrix::Descriptor* CloudDelayerMatrix::getOrCreateDescriptor(int sr
                             reverseMatrixEntry->entity->getSourceLocation());
                 IDPair reverseIdPair(destID, srcID);
                 CloudDelayerMatrix::Descriptor& rdescriptor = idPairToDescriptorMap[reverseIdPair];
-                rdescriptor.delayPar = descriptor.delayPar;
-                rdescriptor.dropRate = descriptor.dropRate;
-                rdescriptor.lastSent = simTime();
+                rdescriptor = descriptor;
             }
             if (descriptor.dropRate < 0.0 || descriptor.dropRate > 1.0)
                 throw cRuntimeError("Invalid %g drop rate at traffic %i", descriptor.dropRate, i);
