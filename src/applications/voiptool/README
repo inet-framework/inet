@@ -44,13 +44,13 @@ played back with delay (by default 20ms), which allows some jitter for the
 incoming packets. The resulting audio file is closed when the simulation
 completes (i.e. in the OMNeT++ finish() function).
 
-VoIPTool requires a "devel" package of the avcodec library (part of FFmpeg) 
-to be installed on your system. On Ubuntu, this package can be installed 
-with the following command:
+VoIPTool requires "devel" packages of the avcodec, avformat and avutil
+libraries (parts of FFmpeg) to be installed on your system. On Ubuntu, these
+packages can be installed with the following command:
 
-$ sudo apt-get install libavcodec-dev
+$ sudo apt-get install libavcodec-dev libavformat-dev libavutil-dev
 
-The package name and installation command may vary for other Linux systems.
+The package names and installation command may vary for other Linux systems.
 
 
 Related publication:
