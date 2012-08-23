@@ -266,3 +266,4 @@
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0
+/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0
