@@ -2824,7 +2824,7 @@ Ieee80211Mac::getControlAnswerMode(ModulationType reqMode)
             thismode = WifiModulationType::getMode80211g(BITRATES_80211g[idx]);
         else if (opMode=='a')
             thismode = WifiModulationType::getMode80211a(BITRATES_80211a[idx]);
-        else if (opMode=='a')
+        else if (opMode=='p')
             thismode = WifiModulationType::getMode80211p(BITRATES_80211p[idx]);
 
       /* If the rate:
