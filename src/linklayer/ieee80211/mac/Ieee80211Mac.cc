@@ -236,126 +236,45 @@ void Ieee80211Mac::initialize(int stage)
         duplicateTimeOut = par("duplicateTimeOut");
         lastTimeDelete = 0;
 
-        //FIXME refactor! copy-pasted code (4 times) with minimal changes
-        // Auto rate code
-        bool found = false;
-        if (opMode == 'b')
-        {
-            rateIndex = 0;
-            for (int i = 0; i < getMaxBitrate(); i++)
-            {
-                if (bitrate == BITRATES_80211b[i])
-                {
-                    found = true;
-                    rateIndex = i;
-                    break;
-                }
-            }
-            if (!found)
-            {
-                bitrate = BITRATES_80211b[getMaxBitrate()-1];
-                rateIndex = getMaxBitrate()-1;
-            }
-            found = false;
-            for (int i = 0; i < getMaxBitrate(); i++)
-            {
-                if (basicBitrate == BITRATES_80211b[i])
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-                basicBitrate = BITRATES_80211b[0];
 
-        }
-        else if (opMode == 'g')
+        bool foundBasicBitrate = false;
+        bool foundBitrate = false;
+        double defaultBasicBitrate = -1.0;
+        int defaultBitrateIdx = -1;
+        for (int i=0; ieee80211Descriptor[i].mode; i++)
         {
-            rateIndex = 0;
-            for (int i = 0; i < getMaxBitrate(); i++)
+            if (ieee80211Descriptor[i].mode == opMode)
             {
-                if (bitrate == BITRATES_80211g[i])
+                double curBitrate = ieee80211Descriptor[i].bitrate;
+                if (defaultBasicBitrate < 0.0)
+                    defaultBasicBitrate = curBitrate;     // first bitrate of mode
+                defaultBitrateIdx = i;     // last bitrate of mode
+
+                if (curBitrate == basicBitrate)
+                    foundBasicBitrate = true;
+
+                if (curBitrate == bitrate)
                 {
-                    found = true;
                     rateIndex = i;
+                    foundBitrate = true;
                     break;
                 }
-            }
-            if (!found)
-            {
-                bitrate = BITRATES_80211g[getMaxBitrate()-1];
-                rateIndex = getMaxBitrate()-1;
-            }
-            found = false;
-            for (int i = 0; i < getMaxBitrate(); i++)
-            {
-                if (basicBitrate == BITRATES_80211g[i])
-                {
-                    found = true;
+                if (curBitrate > bitrate)
                     break;
-                }
             }
-            if (!found)
-                basicBitrate = BITRATES_80211g[0];
+            if (ieee80211Descriptor[i].mode > opMode)
+                break;
         }
-        else if (opMode == 'a')
+
+        if (!foundBitrate)
         {
-            rateIndex = 0;
-            for (int i = 0; i < getMaxBitrate(); i++)
-            {
-                if (bitrate == BITRATES_80211a[i])
-                {
-                    found = true;
-                    rateIndex = i;
-                    break;
-                }
-            }
-            if (!found)
-            {
-                bitrate = BITRATES_80211a[getMaxBitrate()-1];
-                rateIndex = getMaxBitrate()-1;
-            }
-            found = false;
-            for (int i = 0; i < getMaxBitrate(); i++)
-            {
-                if (basicBitrate == BITRATES_80211a[i])
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-                basicBitrate = BITRATES_80211a[0];
+            rateIndex = defaultBitrateIdx;
+            bitrate = ieee80211Descriptor[defaultBitrateIdx].bitrate;
         }
-        else if (opMode == 'p')
-        {
-            rateIndex = 0;
-            for (int i = 0; i < getMaxBitrate(); i++)
-            {
-                if (bitrate == BITRATES_80211p[i])
-                {
-                    found = true;
-                    rateIndex = i;
-                    break;
-                }
-            }
-            if (!found)
-            {
-                bitrate = BITRATES_80211p[getMaxBitrate()-1];
-                rateIndex = getMaxBitrate()-1;
-            }
-            found = false;
-            for (int i = 0; i < getMaxBitrate(); i++)
-            {
-                if (basicBitrate == BITRATES_80211p[i])
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-                basicBitrate = BITRATES_80211p[0];
-        }
+
+        if (!foundBasicBitrate)
+            basicBitrate = defaultBasicBitrate;
+
 
         // configure AutoBit Rate
         configureAutoBitRate();
@@ -2360,15 +2279,10 @@ void Ieee80211Mac::reportDataOk()
     failedCounter = 0;
     recovery = false;
     if ((successCounter == getSuccessThreshold() || timer == getTimerTimeout())
-            && (rateIndex+1 < (getMaxBitrate())))
+            && (ieee80211Descriptor[rateIndex+1].mode == opMode))
     {
         rateIndex++;
-        if (opMode=='b') setBitrate(BITRATES_80211b[rateIndex]);
-        else if (opMode=='g') setBitrate(BITRATES_80211g[rateIndex]);
-        else if (opMode=='a') setBitrate(BITRATES_80211a[rateIndex]);
-        else if (opMode=='p') setBitrate(BITRATES_80211p[rateIndex]);
-        else opp_error("mode not supported");
-
+        setBitrate(ieee80211Descriptor[rateIndex].bitrate);
         timer = 0;
         successCounter = 0;
         recovery = true;
@@ -2388,14 +2302,10 @@ void Ieee80211Mac::reportDataFailed(void)
         if (retryCounter() == 1)
         {
             reportRecoveryFailure();
-            if (rateIndex != getMinBitrate())
+            if (rateIndex > 0 && ieee80211Descriptor[rateIndex-1].mode == opMode)
             {
                 rateIndex--;
-                if (opMode=='b') setBitrate(BITRATES_80211b[rateIndex]);
-                else if (opMode=='g') setBitrate(BITRATES_80211g[rateIndex]);
-                else if (opMode=='a') setBitrate(BITRATES_80211a[rateIndex]);
-                else if (opMode=='p') setBitrate(BITRATES_80211p[rateIndex]);
-                else opp_error("mode not supported");
+                setBitrate(ieee80211Descriptor[rateIndex].bitrate);
             }
         }
         timer = 0;
@@ -2405,14 +2315,10 @@ void Ieee80211Mac::reportDataFailed(void)
         if (needNormalFallback())
         {
             reportFailure();
-            if (rateIndex != getMinBitrate())
+            if (rateIndex > 0 && ieee80211Descriptor[rateIndex-1].mode == opMode)
             {
                 rateIndex--;
-                if (opMode=='b') setBitrate(BITRATES_80211b[rateIndex]);
-                else if (opMode=='g') setBitrate(BITRATES_80211g[rateIndex]);
-                else if (opMode=='a') setBitrate(BITRATES_80211a[rateIndex]);
-                else if (opMode=='p') setBitrate(BITRATES_80211p[rateIndex]);
-                else opp_error("mode not supported");
+                setBitrate(ieee80211Descriptor[rateIndex].bitrate);
             }
         }
         if (retryCounter() >= 2)
@@ -2508,30 +2414,6 @@ double Ieee80211Mac::getBitrate()
 void Ieee80211Mac::setBitrate(double rate)
 {
     bitrate = rate;
-}
-
-
-//FIXME rename it! suggestion: getBitrateArraySize()
-int Ieee80211Mac::getMaxBitrate(void)
-{
-    if (opMode=='b')
-        return (NUM_BITERATES_80211b);
-    else if (opMode=='g')
-        return (NUM_BITERATES_80211g);
-    else if (opMode=='a')
-        return (NUM_BITERATES_80211a);
-    else if (opMode=='p')
-        return (NUM_BITERATES_80211p);
-//
-// If arrives here there is an error
-    opp_error("Mode not supported");
-    return 0;
-}
-
-//FIXME: remove or rename it!
-int Ieee80211Mac::getMinBitrate(void)
-{
-    return 0;
 }
 
 
@@ -2780,17 +2662,12 @@ Ieee80211Mac::getControlAnswerMode(ModulationType reqMode)
    */
     bool found = false;
     ModulationType mode;
-    for (uint32_t idx = 0; idx < (uint32_t)getMaxBitrate(); idx++)
+    for (uint32_t idx = 0; ieee80211Descriptor[idx].mode; idx++)
     {
+        if (ieee80211Descriptor[idx].mode != opMode)
+            continue;
         ModulationType thismode;
-        if (opMode=='b')
-            thismode = WifiModulationType::getModulationType(opMode, BITRATES_80211b[idx]);
-        else if (opMode=='g')
-            thismode = WifiModulationType::getModulationType(opMode, BITRATES_80211g[idx]);
-        else if (opMode=='a')
-            thismode = WifiModulationType::getModulationType(opMode, BITRATES_80211a[idx]);
-        else if (opMode=='p')
-            thismode = WifiModulationType::getModulationType(opMode, BITRATES_80211p[idx]);
+        thismode = WifiModulationType::getModulationType(opMode, ieee80211Descriptor[idx].bitrate);
 
       /* If the rate:
        *

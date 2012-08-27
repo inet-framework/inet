@@ -622,8 +622,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     /** @brief Produce a readable name of the given MAC operation mode */
     //@}
     int getTimeout(void);
-    virtual int getMaxBitrate(void);
-    virtual int getMinBitrate(void);
 
     virtual void reportDataOk(void);
     virtual void reportDataFailed(void);
