@@ -145,6 +145,7 @@ class ModulationType
       dataRate = 0;
       phyRate = 0;
       constellationSize = 0;
+      modulationClass = MOD_CLASS_UNKNOWN;
   }
 private:
   bool isMandatory;
