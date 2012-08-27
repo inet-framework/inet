@@ -2395,15 +2395,13 @@ void Ieee80211Mac::reportDataOk()
     if ((successCounter == getSuccessThreshold() || timer == getTimerTimeout())
             && (rateIndex+1 < (getMaxBitrate())))
     {
-        if (rateControlMode != RATE_CR)
-        {
-            rateIndex++;
-            if (opMode=='b') setBitrate(BITRATES_80211b[rateIndex]);
-            else if (opMode=='g') setBitrate(BITRATES_80211g[rateIndex]);
-            else if (opMode=='a') setBitrate(BITRATES_80211a[rateIndex]);
-            else if (opMode=='p') setBitrate(BITRATES_80211p[rateIndex]);
-            else opp_error("mode not supported");
-        }
+        rateIndex++;
+        if (opMode=='b') setBitrate(BITRATES_80211b[rateIndex]);
+        else if (opMode=='g') setBitrate(BITRATES_80211g[rateIndex]);
+        else if (opMode=='a') setBitrate(BITRATES_80211a[rateIndex]);
+        else if (opMode=='p') setBitrate(BITRATES_80211p[rateIndex]);
+        else opp_error("mode not supported");
+
         timer = 0;
         successCounter = 0;
         recovery = true;
@@ -2423,7 +2421,7 @@ void Ieee80211Mac::reportDataFailed(void)
         if (retryCounter() == 1)
         {
             reportRecoveryFailure();
-            if (rateIndex != getMinBitrate() && rateControlMode != RATE_CR)
+            if (rateIndex != getMinBitrate())
             {
                 rateIndex--;
                 if (opMode=='b') setBitrate(BITRATES_80211b[rateIndex]);
@@ -2440,7 +2438,7 @@ void Ieee80211Mac::reportDataFailed(void)
         if (needNormalFallback())
         {
             reportFailure();
-            if (rateIndex != getMinBitrate() && rateControlMode != RATE_CR)
+            if (rateIndex != getMinBitrate())
             {
                 rateIndex--;
                 if (opMode=='b') setBitrate(BITRATES_80211b[rateIndex]);
