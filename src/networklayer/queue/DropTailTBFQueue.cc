@@ -42,7 +42,7 @@ void DropTailTBFQueue::initialize()
     numQueueSent = 0;
 
     // configuration
-    burstSize = par("burstSize").longValue()*8; // in bit
+    burstSize = par("burstSize").longValue()*8LL; // in bit
     meanRate = par("meanRate"); // in bps
     mtu = par("mtu").longValue()*8; // in bit
     peakRate = par("peakRate"); // in bps
@@ -160,7 +160,7 @@ bool DropTailTBFQueue::isConformed(int pktLength)
     simtime_t now = simTime();
     unsigned long long meanTemp = meanBucketLength + (unsigned long long)(meanRate*(now - lastTime).dbl() + 0.5);
     // unsigned long long meanTemp = meanBucketLength + (unsigned long long)(meanRate*(now - lastTime).dbl());
-    meanBucketLength = int((meanTemp > burstSize) ? burstSize : meanTemp);
+    meanBucketLength = (long long)((meanTemp > burstSize) ? burstSize : meanTemp);
     unsigned long long peakTemp = peakBucketLength + (unsigned long long)(peakRate*(now - lastTime).dbl() + 0.5);
     // unsigned long long peakTemp = peakBucketLength + (unsigned long long)(peakRate*(now - lastTime).dbl());
     peakBucketLength = int((peakTemp > mtu) ? mtu : peakTemp);

@@ -43,7 +43,7 @@ void DropTailVLANTBFQueue::initialize()
     // configuration
     frameCapacity = par("frameCapacity");
     numQueues = par("numQueues");
-    burstSize = par("burstSize").longValue()*8; // in bit
+    burstSize = par("burstSize").longValue()*8LL; // in bit
     meanRate = par("meanRate"); // in bps
     mtu = par("mtu").longValue()*8; // in bit
     peakRate = par("peakRate"); // in bps
@@ -304,7 +304,7 @@ bool DropTailVLANTBFQueue::isConformed(int queueIndex, int pktLength)
     // update states
     simtime_t now = simTime();
     unsigned long long meanTemp = meanBucketLength[queueIndex] + (unsigned long long)(meanRate*(now - lastTime[queueIndex]).dbl() + 0.5);
-    meanBucketLength[queueIndex] = int((meanTemp > burstSize) ? burstSize : meanTemp);
+    meanBucketLength[queueIndex] = (long long)((meanTemp > burstSize) ? burstSize : meanTemp);
     unsigned long long peakTemp = peakBucketLength[queueIndex] + (unsigned long long)(peakRate*(now - lastTime[queueIndex]).dbl() + 0.5);
     peakBucketLength[queueIndex] = int((peakTemp > mtu) ? mtu : peakTemp);
     lastTime[queueIndex] = now;
