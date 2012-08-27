@@ -1530,14 +1530,7 @@ simtime_t Ieee80211Mac::getSIFS()
     if (useModulationParameters)
     {
         ModulationType modType;
-        if ((opMode=='b') || (opMode=='g'))
-            modType = WifiModulationType::getMode80211g(bitrate);
-        else if (opMode=='a')
-            modType = WifiModulationType::getMode80211a(bitrate);
-        else if (opMode=='p')
-            modType = WifiModulationType::getMode80211p(bitrate);
-        else
-            opp_error("mode not supported");
+        modType = WifiModulationType::getModulationType(opMode, bitrate);
         return WifiModulationType::getSifsTime(modType,wifiPreambleType);
     }
 
@@ -1550,14 +1543,7 @@ simtime_t Ieee80211Mac::getSlotTime()
     if (useModulationParameters)
     {
         ModulationType modType;
-        if ((opMode=='b') || (opMode=='g'))
-            modType = WifiModulationType::getMode80211g(bitrate);
-        else if (opMode=='a')
-            modType = WifiModulationType::getMode80211a(bitrate);
-        else if (opMode=='p')
-            modType = WifiModulationType::getMode80211p(bitrate);
-        else
-            opp_error("mode not supported");
+        modType = WifiModulationType::getModulationType(opMode, bitrate);
         return WifiModulationType::getSlotDuration(modType,wifiPreambleType);
     }
     return ST;
@@ -1587,14 +1573,7 @@ simtime_t Ieee80211Mac::getDIFS(int category)
 simtime_t Ieee80211Mac::getHeaderTime(double bitrate)
 {
     ModulationType modType;
-    if ((opMode=='b') || (opMode=='g'))
-        modType = WifiModulationType::getMode80211g(bitrate);
-    else if (opMode=='a')
-        modType = WifiModulationType::getMode80211a(bitrate);
-    else if (opMode=='p')
-        modType = WifiModulationType::getMode80211p(bitrate);
-    else
-        opp_error("mode not supported");
+    modType = WifiModulationType::getModulationType(opMode, bitrate);
     return WifiModulationType::getPreambleAndHeader(modType, wifiPreambleType);
 }
 
@@ -1618,7 +1597,7 @@ simtime_t Ieee80211Mac::getEIFS()
     else
     {
         // FIXME: check how PHY_HEADER_LENGTH is handled. Is that given in bytes or secs ???
-        // what is the rela unit? The use seems to be incosistent betwen b and g modes.
+        // what is the real unit? The use seems to be incosistent betwen b and g modes.
         if (opMode=='b')
             return getSIFS() + getDIFS() + (8 * LENGTH_ACK + PHY_HEADER_LENGTH) / 1E+6;
         else if (opMode=='g')
@@ -1756,14 +1735,7 @@ void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSe
         if (useModulationParameters)
         {
             ModulationType modType;
-            if ((opMode=='b') || (opMode=='g'))
-                modType = WifiModulationType::getMode80211g(bitRate);
-            else if (opMode=='a')
-                modType = WifiModulationType::getMode80211a(bitRate);
-            else if (opMode=='p')
-                modType = WifiModulationType::getMode80211p(bitRate);
-            else
-                opp_error("mode not supported");
+            modType = WifiModulationType::getModulationType(opMode, bitRate);
             WifiModulationType::getSlotDuration(modType,wifiPreambleType);
             tim = computeFrameDuration(frameToSend) +SIMTIME_DBL(
                  WifiModulationType::getSlotDuration(modType,wifiPreambleType) +
@@ -2283,18 +2255,13 @@ double Ieee80211Mac::computeFrameDuration(int bits, double bitrate)
     if (PHY_HEADER_LENGTH<0)
     {
         ModulationType modType;
-        if (opMode=='g' || (opMode=='b'))
-            modType = WifiModulationType::getMode80211g(bitrate);
-        else if (opMode=='a')
-            modType = WifiModulationType::getMode80211a(bitrate);
-        else if (opMode=='p')
-            modType = WifiModulationType::getMode80211p(bitrate);
-        else
-            opp_error("Opmode not supported");
+        modType = WifiModulationType::getModulationType(opMode, bitrate);
         duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(bits, modType, wifiPreambleType));
     }
     else
     {
+        // FIXME: check how PHY_HEADER_LENGTH is handled. Is that given in bytes or secs ???
+        // what is the real unit? The use seems to be incosistent betwen b and g/a/p modes.
         if ((opMode=='g') || (opMode=='a') || (opMode=='p'))
             duration = 4*ceil((16+bits+6)/(bitrate/1e6*4))*1e-6 + PHY_HEADER_LENGTH;
         else if (opMode=='b')
@@ -2817,13 +2784,13 @@ Ieee80211Mac::getControlAnswerMode(ModulationType reqMode)
     {
         ModulationType thismode;
         if (opMode=='b')
-            thismode = WifiModulationType::getMode80211b(BITRATES_80211b[idx]);
+            thismode = WifiModulationType::getModulationType(opMode, BITRATES_80211b[idx]);
         else if (opMode=='g')
-            thismode = WifiModulationType::getMode80211g(BITRATES_80211g[idx]);
+            thismode = WifiModulationType::getModulationType(opMode, BITRATES_80211g[idx]);
         else if (opMode=='a')
-            thismode = WifiModulationType::getMode80211a(BITRATES_80211a[idx]);
+            thismode = WifiModulationType::getModulationType(opMode, BITRATES_80211a[idx]);
         else if (opMode=='p')
-            thismode = WifiModulationType::getMode80211p(BITRATES_80211p[idx]);
+            thismode = WifiModulationType::getModulationType(opMode, BITRATES_80211p[idx]);
 
       /* If the rate:
        *

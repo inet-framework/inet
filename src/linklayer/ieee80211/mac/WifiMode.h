@@ -63,10 +63,7 @@ public:
   static ModulationType GetOfdmRate12MbpsBW5MHz();
   static ModulationType GetOfdmRate13_5MbpsBW5MHz();
 
-  static ModulationType getMode80211a(double bitrate);
-  static ModulationType getMode80211b(double bitrate);
-  static ModulationType getMode80211g(double bitrate);
-  static ModulationType getMode80211p(double bitrate);
+  static ModulationType getModulationType(char mode, double bitrate);
 
   static simtime_t getPlcpHeaderDuration(ModulationType payloadMode, WifiPreamble preamble);
   static simtime_t getPlcpPreambleDuration(ModulationType payloadMode, WifiPreamble preamble);

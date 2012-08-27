@@ -1,6 +1,11 @@
 #ifndef __IEEE80211_DATA_RATES_H__
 #define __IEEE80211_DATA_RATES_H__
 
+#include "INETDefs.h"
+
+#include "ModulationType.h"
+
+
 /** @brief Bit rates for 802.11b */
 const double BITRATES_80211b[] =
 {
@@ -56,5 +61,15 @@ const double BITRATES_80211p[] =
     27000000
 };
 #define NUM_BITERATES_80211p 8
+
+
+struct Ieee80211Descriptor
+{
+    char mode;
+    double bitrate;
+    ModulationType modulationType;
+};
+
+extern const Ieee80211Descriptor ieee80211Descriptor[];
 
 #endif
