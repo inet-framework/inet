@@ -71,5 +71,6 @@ struct Ieee80211Descriptor
 };
 
 extern const Ieee80211Descriptor ieee80211Descriptor[];
+int getIeee80211DescriptorIdx(char mode, double bitrate);
 
 #endif

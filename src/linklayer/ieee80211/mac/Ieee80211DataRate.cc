@@ -66,3 +66,22 @@ const Ieee80211Descriptor ieee80211Descriptor[] =
     {'\0', 0, ModulationType()} // END
 };
 
+int getIeee80211DescriptorIdx(char mode, double bitrate)
+{
+    for (int i=0; ieee80211Descriptor[i].mode; i++)
+    {
+        if (ieee80211Descriptor[i].mode == mode)
+        {
+            if (ieee80211Descriptor[i].bitrate == bitrate)
+                return i;
+            if (ieee80211Descriptor[i].bitrate > bitrate)
+                break;
+        }
+        if (ieee80211Descriptor[i].mode > mode)
+            break;
+    }
+
+    opp_error("mode '%c':%g bps not valid", mode, bitrate);
+    return -1;
+}
+

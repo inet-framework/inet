@@ -506,21 +506,8 @@ WifiModulationType::GetOfdmRate13_5MbpsBW5MHz()
 
 ModulationType WifiModulationType::getModulationType(char mode, double bitrate)
 {
-    for (int i=0; ieee80211Descriptor[i].mode; i++)
-    {
-        if (ieee80211Descriptor[i].mode == mode)
-        {
-            if (ieee80211Descriptor[i].bitrate == bitrate)
-                return ieee80211Descriptor[i].modulationType;
-            if (ieee80211Descriptor[i].bitrate > bitrate)
-                break;
-        }
-        if (ieee80211Descriptor[i].mode > mode)
-            break;
-    }
-
-    opp_error("mode '%c':%g bps not valid", mode, bitrate);
-    return ModulationType();
+    int i = getIeee80211DescriptorIdx(mode, bitrate);
+    return ieee80211Descriptor[i].modulationType;
 }
 
 
