@@ -506,8 +506,8 @@ WifiModulationType::GetOfdmRate13_5MbpsBW5MHz()
 
 ModulationType WifiModulationType::getModulationType(char mode, double bitrate)
 {
-    int i = getIeee80211DescriptorIdx(mode, bitrate);
-    return ieee80211Descriptor[i].modulationType;
+    int i = Ieee80211Descriptor::getIdx(mode, bitrate);
+    return Ieee80211Descriptor::getDescriptor(i).modulationType;
 }
 
 

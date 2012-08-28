@@ -229,44 +229,21 @@ void Ieee80211Mac::initialize(int stage)
         duplicateTimeOut = par("duplicateTimeOut");
         lastTimeDelete = 0;
 
-
-        bool foundBasicBitrate = false;
-        bool foundBitrate = false;
-        double defaultBasicBitrate = -1.0;
-        int defaultBitrateIdx = -1;
-        for (int i=0; ieee80211Descriptor[i].mode; i++)
+        if (bitrate == -1)
         {
-            if (ieee80211Descriptor[i].mode == opMode)
-            {
-                double curBitrate = ieee80211Descriptor[i].bitrate;
-                if (defaultBasicBitrate < 0.0)
-                    defaultBasicBitrate = curBitrate;     // first bitrate of mode
-                defaultBitrateIdx = i;     // last bitrate of mode
-
-                if (curBitrate == basicBitrate)
-                    foundBasicBitrate = true;
-
-                if (curBitrate == bitrate)
-                {
-                    rateIndex = i;
-                    foundBitrate = true;
-                    break;
-                }
-                if (curBitrate > bitrate)
-                    break;
-            }
-            if (ieee80211Descriptor[i].mode > opMode)
-                break;
+            rateIndex = Ieee80211Descriptor::getMaxIdx(opMode);
+            bitrate = Ieee80211Descriptor::getDescriptor(rateIndex).bitrate;
         }
+        else
+            rateIndex = Ieee80211Descriptor::getIdx(opMode, bitrate);
 
-        if (!foundBitrate)
+        if (basicBitrate == -1)
         {
-            rateIndex = defaultBitrateIdx;
-            bitrate = ieee80211Descriptor[defaultBitrateIdx].bitrate;
+            int basicBitrateIdx = Ieee80211Descriptor::getMaxIdx(opMode);
+            basicBitrate = Ieee80211Descriptor::getDescriptor(basicBitrateIdx).bitrate;
         }
-
-        if (!foundBasicBitrate)
-            basicBitrate = defaultBasicBitrate;
+        else
+            Ieee80211Descriptor::getIdx(opMode, basicBitrate);
 
         EV<<" basicBitrate="<<basicBitrate/1e6<<"M";
         EV<<" bitrate="<<bitrate/1e6<<"M IDLE="<<IDLE<<" RECEIVE="<<RECEIVE<<endl;
@@ -2274,10 +2251,9 @@ void Ieee80211Mac::reportDataOk()
     failedCounter = 0;
     recovery = false;
     if ((successCounter == getSuccessThreshold() || timer == getTimerTimeout())
-            && (ieee80211Descriptor[rateIndex+1].mode == opMode))
+            && Ieee80211Descriptor::incIdx(rateIndex))
     {
-        rateIndex++;
-        setBitrate(ieee80211Descriptor[rateIndex].bitrate);
+        setBitrate(Ieee80211Descriptor::getDescriptor(rateIndex).bitrate);
         timer = 0;
         successCounter = 0;
         recovery = true;
@@ -2297,11 +2273,8 @@ void Ieee80211Mac::reportDataFailed(void)
         if (retryCounter() == 1)
         {
             reportRecoveryFailure();
-            if (rateIndex > 0 && ieee80211Descriptor[rateIndex-1].mode == opMode)
-            {
-                rateIndex--;
-                setBitrate(ieee80211Descriptor[rateIndex].bitrate);
-            }
+            if (Ieee80211Descriptor::decIdx(rateIndex))
+                setBitrate(Ieee80211Descriptor::getDescriptor(rateIndex).bitrate);
         }
         timer = 0;
     }
@@ -2310,11 +2283,8 @@ void Ieee80211Mac::reportDataFailed(void)
         if (needNormalFallback())
         {
             reportFailure();
-            if (rateIndex > 0 && ieee80211Descriptor[rateIndex-1].mode == opMode)
-            {
-                rateIndex--;
-                setBitrate(ieee80211Descriptor[rateIndex].bitrate);
-            }
+            if (Ieee80211Descriptor::decIdx(rateIndex))
+                setBitrate(Ieee80211Descriptor::getDescriptor(rateIndex).bitrate);
         }
         if (retryCounter() >= 2)
         {
@@ -2657,12 +2627,12 @@ Ieee80211Mac::getControlAnswerMode(ModulationType reqMode)
    */
     bool found = false;
     ModulationType mode;
-    for (uint32_t idx = 0; ieee80211Descriptor[idx].mode; idx++)
+    for (uint32_t idx = Ieee80211Descriptor::getMinIdx(opMode); idx < Ieee80211Descriptor::size(); idx++)
     {
-        if (ieee80211Descriptor[idx].mode != opMode)
-            continue;
+        if (Ieee80211Descriptor::getDescriptor(idx).mode != opMode)
+            break;
         ModulationType thismode;
-        thismode = WifiModulationType::getModulationType(opMode, ieee80211Descriptor[idx].bitrate);
+        thismode = WifiModulationType::getModulationType(opMode, Ieee80211Descriptor::getDescriptor(idx).bitrate);
 
       /* If the rate:
        *

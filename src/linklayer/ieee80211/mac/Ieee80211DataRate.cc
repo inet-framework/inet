@@ -16,6 +16,7 @@
 // @author: Zoltan Bojthe
 //
 
+#include <algorithm>
 
 #include "Ieee80211DataRate.h"
 
@@ -25,7 +26,7 @@
 /* Bit rates for 802.11b/g/a/p.
  * Must be ordered by mode, bitrate.
  */
-const Ieee80211Descriptor ieee80211Descriptor[] =
+const Ieee80211DescriptorData Ieee80211Descriptor::data[] =
 {
     {'a',  6000000, WifiModulationType::GetOfdmRate6Mbps()},
     {'a',  9000000, WifiModulationType::GetOfdmRate9Mbps()},
@@ -62,26 +63,146 @@ const Ieee80211Descriptor ieee80211Descriptor[] =
     {'p', 18000000, WifiModulationType::GetOfdmRate18MbpsBW10MHz()},
     {'p', 24000000, WifiModulationType::GetOfdmRate24MbpsBW10MHz()},
     {'p', 27000000, WifiModulationType::GetOfdmRate27MbpsBW10MHz()},
-
-    {'\0', 0, ModulationType()} // END
 };
 
-int getIeee80211DescriptorIdx(char mode, double bitrate)
+const int Ieee80211Descriptor::descriptorSize = sizeof(Ieee80211Descriptor::data)/sizeof(Ieee80211Descriptor::data[0]);
+
+#if 0
+// linear search
+
+int Ieee80211Descriptor::findIdx(char mode, double bitrate)
 {
-    for (int i=0; ieee80211Descriptor[i].mode; i++)
+    for (int i=0; i<descriptorSize; i++)
     {
-        if (ieee80211Descriptor[i].mode == mode)
+        if (data[i].mode == mode)
         {
-            if (ieee80211Descriptor[i].bitrate == bitrate)
+            if (data[i].bitrate == bitrate)
                 return i;
-            if (ieee80211Descriptor[i].bitrate > bitrate)
+            if (data[i].bitrate > bitrate)
                 break;
         }
-        if (ieee80211Descriptor[i].mode > mode)
+        if (data[i].mode > mode)
             break;
     }
-
-    opp_error("mode '%c':%g bps not valid", mode, bitrate);
     return -1;
 }
+
+int Ieee80211Descriptor::getMinIdx(char mode)
+{
+    for (int i=0; i<descriptorSize; i++)
+    {
+        if (data[i].mode == mode)
+            return i;
+        if (data[i].mode > mode)
+            break;
+    }
+    throw cRuntimeError("mode '%c' not valid", mode);
+}
+
+int Ieee80211Descriptor::getMaxIdx(char mode)
+{
+    int idx = -1;
+    for (int i=0; i<descriptorSize; i++)
+    {
+        if (data[i].mode == mode)
+            idx = i;
+        if (data[i].mode > mode)
+            break;
+    }
+    if (idx == -1)
+        throw cRuntimeError("mode '%c' not valid", mode);
+    return idx;
+}
+
+#else
+
+namespace
+{
+    bool ieee80211DescriptorCompareModeBitrate(const Ieee80211DescriptorData& a, const Ieee80211DescriptorData& b)
+    {
+        // return a < b;
+        return (a.mode < b.mode) || ((a.mode == b.mode) && (a.bitrate < b.bitrate));
+    }
+
+    bool ieee80211DescriptorCompareMode(const Ieee80211DescriptorData& a, const Ieee80211DescriptorData& b)
+    {
+        // return a < b;
+        return (a.mode < b.mode);
+    }
+}
+
+int Ieee80211Descriptor::findIdx(char mode, double bitrate)
+{
+    Ieee80211DescriptorData d;
+    d.mode = mode;
+    d.bitrate = bitrate;
+
+    const Ieee80211DescriptorData *found = std::lower_bound(data, &data[descriptorSize], d, ieee80211DescriptorCompareModeBitrate);
+    if (found->mode == mode && found->bitrate == bitrate)
+        return (int)(found - data);
+    return -1;
+}
+
+int Ieee80211Descriptor::getMinIdx(char mode)
+{
+    Ieee80211DescriptorData d;
+    d.mode = mode;
+
+    const Ieee80211DescriptorData *found = std::lower_bound(data, &data[descriptorSize], d, ieee80211DescriptorCompareMode);
+    if (found->mode == mode)
+        return (int)(found - data);
+    throw cRuntimeError("mode '%c' not valid", mode);
+}
+
+int Ieee80211Descriptor::getMaxIdx(char mode)
+{
+    Ieee80211DescriptorData d;
+    d.mode = mode;
+
+    const Ieee80211DescriptorData *found = std::upper_bound(data, &data[descriptorSize], d, ieee80211DescriptorCompareMode);
+    if (found > data)
+        --found;
+    if (found->mode == mode)
+        return (int)(found - data);
+    throw cRuntimeError("mode '%c' not valid", mode);
+}
+
+#endif
+
+
+int Ieee80211Descriptor::getIdx(char mode, double bitrate)
+{
+    int idx = findIdx(mode, bitrate);
+    if (idx == -1)
+        throw cRuntimeError("mode '%c':%g bps not valid", mode, bitrate);
+    return idx;
+}
+
+bool Ieee80211Descriptor::incIdx(int& idx)
+{
+    ASSERT(idx >= 0 && idx < descriptorSize);
+
+    if (data[idx].mode != data[idx+1].mode)
+        return false;
+    ++idx;
+    return true;
+}
+
+bool Ieee80211Descriptor::decIdx(int& idx)
+{
+    ASSERT(idx >= 0 && idx < descriptorSize);
+
+    if (idx==0 || data[idx].mode != data[idx-1].mode)
+        return false;
+    --idx;
+    return true;
+}
+
+const Ieee80211DescriptorData& Ieee80211Descriptor::getDescriptor(int idx)
+{
+    ASSERT(idx >= 0 && idx < descriptorSize);
+
+    return data[idx];
+}
+
 
