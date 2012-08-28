@@ -126,16 +126,17 @@ void Ieee80211Mac::initialize(int stage)
         // initialize parameters
         // Variable to apply the fsm fix
         fixFSM = par("fixFSM");
-        if (strcmp("b", par("opMode").stringValue())==0)
+        const char *opModeStr = par("opMode").stringValue();
+        if (strcmp("b", opModeStr)==0)
             opMode = 'b';
-        else if (strcmp("g", par("opMode").stringValue())==0)
+        else if (strcmp("g", opModeStr)==0)
             opMode = 'g';
-        else if (strcmp("a", par("opMode").stringValue())==0)
+        else if (strcmp("a", opModeStr)==0)
             opMode = 'a';
-        else if (strcmp("p", par("opMode").stringValue())==0)
+        else if (strcmp("p", opModeStr)==0)
              opMode = 'p';
         else
-            opMode = 'g';
+            throw cRuntimeError("Invalid opMode='%s'", opModeStr);
 
         PHY_HEADER_LENGTH = par("phyHeaderLength"); //26us
 
@@ -222,15 +223,7 @@ void Ieee80211Mac::initialize(int stage)
         EV<<" slotTime="<<ST*1e6<<"us DIFS="<< getDIFS()*1e6<<"us";
 
         basicBitrate = par("basicBitrate");
-        if (basicBitrate==-1)
-            basicBitrate = 1e6; //1Mbps
-        EV<<" basicBitrate="<<basicBitrate/1e6<<"M";
-
         bitrate = par("bitrate");
-        if (bitrate==-1)
-            bitrate = 11e6; //11Mbps
-        EV<<" bitrate="<<bitrate/1e6<<"M IDLE="<<IDLE<<" RECEIVE="<<RECEIVE<<endl;
-
         duplicateDetect = par("duplicateDetectionFilter");
         purgeOldTuples = par("purgeOldTuples");
         duplicateTimeOut = par("duplicateTimeOut");
@@ -275,10 +268,12 @@ void Ieee80211Mac::initialize(int stage)
         if (!foundBasicBitrate)
             basicBitrate = defaultBasicBitrate;
 
+        EV<<" basicBitrate="<<basicBitrate/1e6<<"M";
+        EV<<" bitrate="<<bitrate/1e6<<"M IDLE="<<IDLE<<" RECEIVE="<<RECEIVE<<endl;
 
         // configure AutoBit Rate
         configureAutoBitRate();
-//end auto rate code
+        //end auto rate code
         EV<<" bitrate="<<bitrate/1e6<<"M IDLE="<<IDLE<<" RECEIVE="<<RECEIVE<<endl;
 
         const char *addressString = par("address");
@@ -466,7 +461,7 @@ void Ieee80211Mac::configureAutoBitRate()
         EV<<"MAC Transmission algorithm : AARF Rate"  <<endl;
         break;
     default:
-        rateControlMode = RATE_CR;
+        throw cRuntimeError("Invalid autoBitrate parameter: '%d'", autoBitrate);
         break;
     }
 }
