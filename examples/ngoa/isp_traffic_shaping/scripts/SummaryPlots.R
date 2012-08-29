@@ -280,7 +280,7 @@ if (.resp == 'y') {
         .scalars_df.name <- paste('.da_scalars_', .config, '.df', sep='')
         .df.name <- paste('.da_', .config, '.df', sep='')
         assign(.scalars_df.name, .scalars_df)
-        assign(.df.name, sort_df(.df, vars=c('dr', 'n')))
+        assign(.df.name, sort_df(.df, vars=c('dr', 'ur', 'n')))
         save(list=c(.scalars_df.name, .df.name), file=paste(.da.wd, .da.rdata, sep="/"))
     }
     else {
@@ -290,14 +290,14 @@ if (.resp == 'y') {
     .da.df <- get(.df.name)
     .plots <- list()
     for (.i in 1:(length(.measure.type)-2)) { # subtract 2 because there are no types for 'queue'
-        .df <- subset(.da.df, name==.measure[.i] & measure.type==.measure.type[.i], select=c(1, 2, 4, 5))
+        .df <- subset(.da.df, name==.measure[.i] & measure.type==.measure.type[.i], select=c(1, 2, 3, 5, 6))
         is.na(.df) <- is.na(.df) # remove NaNs
         .df <- .df[!is.infinite(.df$ci.width),] # remove Infs
         .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
-        .p <- ggplot(data=.df, aes(group=dr, colour=factor(ur), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
+        .p <- ggplot(data=.df, aes(group=ur, colour=factor(ur), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
         .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.i])
-        .p <- .p + geom_point(aes(group=dr, shape=factor(ur), x=n, y=mean), size=.pt_size) + scale_shape_manual("Line Rate\n[Gb/s]", values=0:9)
-        .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Line Rate\n[Gb/s]")
+        .p <- .p + geom_point(aes(group=dr, shape=factor(ur), x=n, y=mean), size=.pt_size) + scale_shape_manual("UNI Rate\n[Gb/s]", values=0:9)
+        .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("UNI Rate\n[Gb/s]")
         .plots[[.i]] <- .p
         ## save each plot as a PDF file
         .p
@@ -478,44 +478,44 @@ if (.resp == 'y') {
             }
             .df <- loadDataset(.fileNames)
             .scalars <- merge(cast(.df$runattrs, runid ~ attrname, value='attrvalue',
-                                   subset=attrname %in% c('experiment', 'measurement', 'dr', 'mr', 'bs', 'n')),
+                                   subset=attrname %in% c('experiment', 'measurement', 'dr', 'ur', 'mr', 'bs', 'n')),
                               .df$scalars, by='runid',
                               all.x=TRUE)
             .scalars_dfs[[.i]] <- .scalars
             ## collect average session delay, average session throughput, and mean session transfer rate of FTP traffic
             .tmp_ftp <- collectMeasures(.scalars,
-                                        "experiment+measurement+dr+mr+bs+n+name ~ .",
+                                        "experiment+measurement+dr+ur+mr+bs+n+name ~ .",
                                         '.*\\.ftpApp.*',
                                         '(average session delay|average session throughput|mean session transfer rate|90th-sessionDelay:percentile|95th-sessionDelay:percentile|99th-sessionDelay:percentile)',
-                                        c('dr', 'mr', 'bs', 'n'),
+                                        c('dr', 'ur', 'mr', 'bs', 'n'),
                                         'ftp')
             ## collect average & percentile session delays, average session throughput, and mean session transfer rate of HTTP traffic
             .tmp_http <- collectMeasures(.scalars,
-                                         "experiment+measurement+dr+mr+bs+n+name ~ .",
+                                         "experiment+measurement+dr+ur+mr+bs+n+name ~ .",
                                          '.*\\.httpApp.*',
                                          '(average session delay|average session throughput|mean session transfer rate|90th-sessionDelay:percentile|95th-sessionDelay:percentile|99th-sessionDelay:percentile)',
-                                         c('dr', 'mr', 'bs', 'n'),
+                                         c('dr', 'ur', 'mr', 'bs', 'n'),
                                          'http')
             ## collect decodable frame rate of video traffic
             .tmp_video <- collectMeasures(.scalars,
-                                          "experiment+measurement+dr+mr+bs+n+name ~ .",
+                                          "experiment+measurement+dr+ur+mr+bs+n+name ~ .",
                                           '.*\\.videoApp.*',
                                           'decodable frame rate',
-                                          c('dr', 'mr', 'bs', 'n'),
+                                          c('dr', 'ur', 'mr', 'bs', 'n'),
                                           'video')
             ## collect average & percentile packet delays from DelayMeter module
             .tmp_packet <- collectMeasures(.scalars,
-                                           "experiment+measurement+dr+mr+bs+n+name ~ .",
+                                           "experiment+measurement+dr+ur+mr+bs+n+name ~ .",
                                            '.*\\.delayMeter.*',
                                            '(average packet delay|90th-packetDelay:percentile|95th-packetDelay:percentile|99th-packetDelay:percentile)',
-                                           c('dr', 'mr', 'bs', 'n'),
+                                           c('dr', 'ur', 'mr', 'bs', 'n'),
                                            'packet')
             ## collect number of packets received, dropped and shaped by per-VLAN queues at OLT
             .tmp_queue <- collectMeasures(.scalars,
-                                          "experiment+measurement+dr+mr+bs+n+name ~ .",
+                                          "experiment+measurement+dr+ur+mr+bs+n+name ~ .",
                                           '.*\\.olt.*',
                                           '(overall packet loss rate of per-VLAN queues|overall packet shaped rate of per-VLAN queues)',
-                                          c('dr', 'mr', 'bs', 'n'),
+                                          c('dr', 'ur', 'mr', 'bs', 'n'),
                                           'queue')
             ## combine the five data frames into one
             .dfs[[.i]] <- rbind(.tmp_ftp, .tmp_http, .tmp_video, .tmp_packet, .tmp_queue)
@@ -531,7 +531,7 @@ if (.resp == 'y') {
         .scalars_df.name <- paste('.da_scalars_', 'nh1_nf1_nv1_tbf_dr1', '.df', sep='')
         .df.name <- paste('.da_', 'nh1_nf1_nv1_tbf_dr1', '.df', sep='')
         assign(.scalars_df.name, .scalars_df)
-        assign(.df.name, sort_df(.df, vars=c('dr', 'mr', 'bs', 'n')))
+        assign(.df.name, sort_df(.df, vars=c('dr', 'ur', 'mr', 'bs', 'n')))
         save(list=c(.scalars_df.name, .df.name), file=paste(.da_nh1_nf1_nv1_tbf_dr1.wd, "nh1_nf1_nv1_tbf_dr1.RData", sep="/"))
     }
     else {
@@ -539,14 +539,14 @@ if (.resp == 'y') {
         load(paste(.da_nh1_nf1_nv1_tbf_dr1.wd, 'nh1_nf1_nv1_tbf_dr1.RData', sep='/'))
     }   # end of if() for the processing of OMNeT++ data files
     .da_nh1_nf1_nv1_tbf_dr1.df <- get(.df.name)
-    .dr.range <- unique(.da_nh1_nf1_nv1_tbf_dr1.df$dr)
+    .ur.range <- unique(.da_nh1_nf1_nv1_tbf_dr1.df$ur)
     .mr.range <- unique(.da_nh1_nf1_nv1_tbf_dr1.df$mr)
-    for (.i in 1:length(.dr.range)) {
+    for (.i in 1:length(.ur.range)) {
         for (.j in 1:length(.mr.range)) {
-            if (length(subset(.da_nh1_nf1_nv1_tbf_dr1.df, dr==.dr.range[.i] & mr==.mr.range[.j])$mean) > 0) {
+            if (length(subset(.da_nh1_nf1_nv1_tbf_dr1.df, ur==.ur.range[.i] & mr==.mr.range[.j])$mean) > 0) {
                 .plots <- list()
                 for (.k in 1:length(.measure.type)) {
-                    .df <- subset(.da_nh1_nf1_nv1_tbf_dr1.df, dr==.dr.range[.i] & mr==.mr.range[.j] & name==.measure[.k] & measure.type==.measure.type[.k], select=c(3, 4, 6, 7))
+                    .df <- subset(.da_nh1_nf1_nv1_tbf_dr1.df, ur==.ur.range[.i] & mr==.mr.range[.j] & name==.measure[.k] & measure.type==.measure.type[.k], select=c(4, 5, 7, 8))
                     is.na(.df) <- is.na(.df) # remove NaNs
                     .df <- .df[!is.infinite(.df$ci.width),] # remove Infs
                     .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
@@ -558,32 +558,32 @@ if (.resp == 'y') {
                     ## save each plot as a PDF file
                     .p
                     ggsave(paste(.da_nh1_nf1_nv1_tbf_dr1.wd,
-                                 paste("nh1_nf1_nv1_tbf_dr", as.character(.dr.range[.i]),
+                                 paste("nh1_nf1_nv1_tbf_dr1_ur", as.character(.ur.range[.i]),
                                        "_mr", as.character(.mr.range[.j]),
                                        "-", .measure.type[.k],
                                        "-", .measure.abbrv[.k], ".pdf", sep=""), sep="/"))
                 }   # end of for(.k)
                 ## save combined plots into a PDF file per measure.type (e.g., ftp, http)
                 pdf(paste(.da_nh1_nf1_nv1_tbf_dr1.wd,
-                          paste("nh1_nf1_nv1_tbf_dr", as.character(.dr.range[.i]),
+                          paste("nh1_nf1_nv1_tbf_dr1_ur", as.character(.ur.range[.i]),
                                 "_mr", as.character(.mr.range[.j]),
                                 "-ftp.pdf", sep=""), sep='/'))
                 grid.arrange(.plots[[1]], .plots[[2]], .plots[[3]], .plots[[4]], .plots[[5]], .plots[[6]])
                 dev.off()
                 pdf(paste(.da_nh1_nf1_nv1_tbf_dr1.wd,
-                          paste("nh1_nf1_nv1_tbf_dr", as.character(.dr.range[.i]),
+                          paste("nh1_nf1_nv1_tbf_dr1_ur", as.character(.ur.range[.i]),
                                 "_mr", as.character(.mr.range[.j]),
                                 "-http.pdf", sep=""), sep='/'))
                 grid.arrange(.plots[[7]], .plots[[8]], .plots[[9]], .plots[[10]], .plots[[11]], .plots[[12]], ncol=2)
                 dev.off()
                 pdf(paste(.da_nh1_nf1_nv1_tbf_dr1.wd,
-                          paste("nh1_nf1_nv1_tbf_dr", as.character(.dr.range[.i]),
+                          paste("nh1_nf1_nv1_tbf_dr1_ur", as.character(.ur.range[.i]),
                                 "_mr", as.character(.mr.range[.j]),
                                 "-packet.pdf", sep=""), sep='/'))
                 grid.arrange(.plots[[14]], .plots[[15]], .plots[[16]], .plots[[17]], ncol=2)
                 dev.off()
                 pdf(paste(.da_nh1_nf1_nv1_tbf_dr1.wd,
-                          paste("nh1_nf1_nv1_tbf_dr", as.character(.dr.range[.i]),
+                          paste("nh1_nf1_nv1_tbf_dr1_ur", as.character(.ur.range[.i]),
                                 "_mr", as.character(.mr.range[.j]),
                                 "-queue.pdf", sep=""), sep='/'))
                 grid.arrange(.plots[[18]], .plots[[19]])
