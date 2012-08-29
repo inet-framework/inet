@@ -653,4 +653,33 @@
         compileFlags = ""
         linkerFlags = ""
         />
+    <feature
+        id="InternetCloud"
+        name="Internet Cloud"
+        description = "Components for simulate internet cloud"
+        initiallyEnabled = "true"
+        requires = "IPv4"
+        labels = ""
+        nedPackages = "
+                       inet.networklayer.internetcloud
+                       inet.nodes.internetcloud
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="InternetCloud_examples"
+        name="Internet Cloud examples"
+        description = "Internet Cloud examples."
+        initiallyEnabled = "true"
+        requires = "InternetCloud PPP Ethernet"
+        labels = ""
+        nedPackages = "
+                       inet.examples.internetcloud
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
 </features>
