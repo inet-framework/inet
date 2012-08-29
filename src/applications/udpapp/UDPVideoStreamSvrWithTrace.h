@@ -62,9 +62,9 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
         double framePeriod;		///< frame period for a video trace
         long currentFrame;		///< frame index (starting from 0) to read from the trace (will be wrapped around);
         long frameNumber;		///< frame number (display order) of the current frame
-        double frameTime;		///< cumulative display time of the current frame
+        double frameTime;		///< cumulative display time of the current frame in millisecond
         FrameType frameType;	///< type of the current frame
-        long frameSize;			///< size (in byte) of the current frame
+        long frameSize;			///< size of the current frame in byte
         long bytesLeft;			///< bytes left to transmit in the current frame
         double pktInterval;		///< interval between consecutive packet transmissions in a given frame
 

@@ -2,9 +2,9 @@
 /// @file   UDPVideoStreamPacket.msg
 /// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 /// @date   2010-03-30
-/// 
+///
 /// @brief  Defines self-messages and frames for hybridpon models.
-/// 
+///
 /// @remarks Copyright (C) 2009-2010 Kyeong Soo (Joseph) Kim. All rights reserved.
 ///
 /// @remarks This software is written and distributed under the GNU General
@@ -37,7 +37,7 @@ packet UDPVideoStreamPacket
 
     // fields not defined in RFC 3894
     long frameNumber;   ///< display order of the current frame
-    double frameTime;	///< cumulative display time of the current frame
+    double frameTime;	///< cumulative display time of the current frame in millisecond
     int frameType enum(FrameType);	///< one of I, P, B and IDR (in case of H.264)
-//    long frameSize;	///< frame size in byte
+//    long frameSize;	///< size of the current frame in byte
 }

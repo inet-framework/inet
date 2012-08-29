@@ -45,10 +45,12 @@ class INET_API UDPVideoStreamCliWithTrace2 : public UDPVideoStreamCliWithTrace
     protected:
         // variables used for delay to loss conversion based on EvalVid algorithm
         bool firstFrameReceived;
-        simtime_t prevFrameArrivalTime;
-        simtime_t prevOrgFrameArrivalTime;
-        simtime_t currFrameArrivalTime;
-        simtime_t currOrgFrameArrivalTime;
+        simtime_t firstFrameArrivalTime;
+        simtime_t firstFrameDisplayTime;    // cumulative display time (frameTime)
+        /* simtime_t prevFrameArrivalTime; */
+        /* simtime_t prevOrgFrameArrivalTime; */
+        /* simtime_t currFrameArrivalTime; */
+        /* simtime_t currOrgFrameArrivalTime; */
 
     protected:
         virtual void initialize();

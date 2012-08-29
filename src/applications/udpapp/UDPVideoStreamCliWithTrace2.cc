@@ -45,7 +45,7 @@ void UDPVideoStreamCliWithTrace2::receiveStream(UDPVideoStreamPacket *pkt)
     printPacket(PK(pkt));
 #endif
 
-    // FIXME Delay to loss conversion yet to be implemented in the following
+    // TODO: Delay to loss conversion yet to be implemented in the following
 
     // record vector statistics; note that warm-up period handling is automatically done.
     eed.record(simTime() - pkt->getCreationTime());
@@ -55,6 +55,7 @@ void UDPVideoStreamCliWithTrace2::receiveStream(UDPVideoStreamPacket *pkt)
 	bool isFragmentStart = pkt->getFragmentStart();
     bool isFragmentEnd = pkt->getFragmentEnd();
     long frameNumber = pkt->getFrameNumber();
+    double frameTime = pkt->getFrameTime(); // cumulative display time of the current frame in millisecond
 	FrameType frameType = FrameType(pkt->getFrameType());
 	long encodingNumber = frameEncodingNumber(frameNumber, numBFrames, frameType);
 
@@ -86,6 +87,11 @@ void UDPVideoStreamCliWithTrace2::receiveStream(UDPVideoStreamPacket *pkt)
             			currentFrameFinished = true;
             			prevIFrameNumber = frameNumber;
             			numFramesReceived++;	///< count the current frame as well
+
+                        // initialize variables for frame delay/loss conversion
+                        firstFrameReceived = true;
+                        firstFrameArrivalTime = simTime();
+                        firstFrameDisplayTime = frameTime / 1000.0; // 'frameTime' is in millisecond
             		}
             		else
             		{
@@ -146,11 +152,30 @@ void UDPVideoStreamCliWithTrace2::receiveStream(UDPVideoStreamPacket *pkt)
         	if (isFragmentStart == true)
         	{
         		if (isFragmentEnd == true)
-        		{
-        			// this frame consists of this packet only
+        		{   // this frame consists of this packet only
+                    if (firstFrameReceived == false)
+                    {   // initialize the simple frame delay/loss conversion
+                        firstFrameReceived = true;
+                        firstFrameArrivalTime = simTime();
+                        firstFrameDisplayTime = frameTime / 1000.0; // 'frameTime' is in millisecond
+
+                        prevIFrameNumber = frameNumber;
+                        numFramesReceived++;	///< count the current frame as well
+                    }
+                    else
+                    {
+                        if (frameTime - firstFrameDisplayTime >= simTime() - firstFrameArrivalTime - startupDelay)
+                        {   // frame delay/loss conversion
+                            currentNumFramesLost++;
+                        }
+                        else
+                        {
+                            prevIFrameNumber = frameNumber;
+                            numFramesReceived++;	///< count the current frame as well
+                        }
+                    }   // end of frame delay/loss conversion processing
+
         			currentFrameFinished = true;
-        			prevIFrameNumber = frameNumber;
-        			numFramesReceived++;	///< count the current frame as well
         		}
         		else
         		{
@@ -168,17 +193,35 @@ void UDPVideoStreamCliWithTrace2::receiveStream(UDPVideoStreamPacket *pkt)
         	{
         		if (isFragmentEnd == true)
             	{
+        			currentFrameFinished = true;
         			if (currentFrameDiscard == false)
-        			{
-        				// the frame has been received and decoded successfully
-            			prevIFrameNumber = currentFrameNumber;
-            			numFramesReceived++;
+        			{   // the frame has been received and decoded successfully
+                        if (firstFrameReceived == false)
+                        {   // initialize the simple frame delay/loss conversion
+                            firstFrameReceived = true;
+                            firstFrameArrivalTime = simTime();
+                            firstFrameDisplayTime = frameTime / 1000.0; // 'frameTime' is in millisecond
+
+                            prevIFrameNumber = currentFrameNumber;
+                            numFramesReceived++;	///< count the current frame as well
+                        }
+                        else
+                        {
+                            if (frameTime - firstFrameDisplayTime >= simTime() - firstFrameArrivalTime - startupDelay)
+                            {   // frame delay/loss conversion
+                                currentNumFramesLost++;
+                            }
+                            else
+                            {
+                                prevIFrameNumber = currentFrameNumber;
+                                numFramesReceived++;	///< count the current frame as well
+                            }
+                        }   // end of frame delay/loss conversion processing
         			}
         			else
         			{
         				currentNumFramesLost++;
         			}
-        			currentFrameFinished = true;
             	}
         	}	// end of processing of the non-first packet of I/IDR frame
         	break;
@@ -190,15 +233,34 @@ void UDPVideoStreamCliWithTrace2::receiveStream(UDPVideoStreamPacket *pkt)
                     prevIFrameNumber == frameNumber - numBFrames - 1 ||
                     prevPFrameNumber == frameNumber - numBFrames - 1
                     )
-				{
-					// I or P frame that the current frame depends on was successfully decoded
+				{   // I or P frame that the current frame depends on was successfully decoded
         			currentFrameDiscard = false;
 
 					if (isFragmentEnd == true)
-					{
+					{   // this frame consists of this packet only
 						currentFrameFinished = true;	/// no more packet in this frame
-						prevPFrameNumber = frameNumber;
-						numFramesReceived++; ///< count the current frame as well
+
+                        if (firstFrameReceived == false)
+                        {   // initialize the simple frame delay/loss conversion
+                            firstFrameReceived = true;
+                            firstFrameArrivalTime = simTime();
+                            firstFrameDisplayTime = frameTime / 1000.0; // 'frameTime' is in millisecond
+
+                            prevPFrameNumber = frameNumber;
+                            numFramesReceived++;	///< count the current frame as well
+                        }
+                        else
+                        {
+                            if (frameTime - firstFrameDisplayTime >= simTime() - firstFrameArrivalTime - startupDelay)
+                            {   // frame delay/loss conversion
+                                currentNumFramesLost++;
+                            }
+                            else
+                            {
+                                prevPFrameNumber = frameNumber;
+                                numFramesReceived++;	///< count the current frame as well
+                            }
+                        }   // end of frame delay/loss conversion processing
 					}
 					else
 					{
@@ -230,17 +292,35 @@ void UDPVideoStreamCliWithTrace2::receiveStream(UDPVideoStreamPacket *pkt)
         	{
         		if (isFragmentEnd == true)
             	{
+        			currentFrameFinished = true;
         			if (currentFrameDiscard == false)
-        			{
-        				// the frame has been received and decoded successfully
-            			prevPFrameNumber = currentFrameNumber;
-            			numFramesReceived++;
+        			{   // the frame has been received and decoded successfully
+                        if (firstFrameReceived == false)
+                        {   // initialize the simple frame delay/loss conversion
+                            firstFrameReceived = true;
+                            firstFrameArrivalTime = simTime();
+                            firstFrameDisplayTime = frameTime / 1000.0; // 'frameTime' is in millisecond
+
+                            prevPFrameNumber = currentFrameNumber;
+                            numFramesReceived++;	///< count the current frame as well
+                        }
+                        else
+                        {
+                            if (frameTime - firstFrameDisplayTime >= simTime() - firstFrameArrivalTime - startupDelay)
+                            {   // frame delay/loss conversion
+                                currentNumFramesLost++;
+                            }
+                            else
+                            {
+                                prevPFrameNumber = currentFrameNumber;
+                                numFramesReceived++;	///< count the current frame as well
+                            }
+                        }   // end of frame delay/loss conversion processing
         			}
         			else
         			{
         				currentNumFramesLost++;
         			}
-        			currentFrameFinished = true;
             	}
         	}	// end of processing of the non-first packet of P frame
         	break;
@@ -279,32 +359,46 @@ void UDPVideoStreamCliWithTrace2::receiveStream(UDPVideoStreamPacket *pkt)
 				if (passedDependency == true)
 				{
 					if (isFragmentEnd == true)
-					{
-						// this frame consists of this packet only
+					{   // this frame consists of this packet only
 						currentFrameFinished = true;
-						numFramesReceived++; ///< count the current frame as well
+
+                        if (firstFrameReceived == false)
+                        {   // initialize the simple frame delay/loss conversion
+                            firstFrameReceived = true;
+                            firstFrameArrivalTime = simTime();
+                            firstFrameDisplayTime = frameTime / 1000.0; // 'frameTime' is in millisecond
+
+                            numFramesReceived++;	///< count the current frame as well
+                        }
+                        else
+                        {
+                            if (frameTime - firstFrameDisplayTime >= simTime() - firstFrameArrivalTime - startupDelay)
+                            {   // frame delay/loss conversion
+                                currentNumFramesLost++;
+                            }
+                            else
+                            {
+                                numFramesReceived++;	///< count the current frame as well
+                            }
+                        }   // end of frame delay/loss conversion processing
 					}
 					else
-					{
-						// more fragments to come!
+					{   // more fragments to come!
 						currentFrameDiscard = false;
 						currentFrameFinished = false;
 					}
 				}
 				else
-				{
-					// the dependency check failed, so the current frame will be discarded
+				{   // the dependency check failed, so the current frame will be discarded
 					currentFrameDiscard = true;
 
 					if (isFragmentEnd == true)
-					{
-						// this frame consists of this packet only
+					{   // this frame consists of this packet only
 						currentFrameFinished = true;
 						currentNumFramesLost++; ///< count the current frame as well
 					}
 					else
-					{
-						// more fragments to come!
+					{   // more fragments to come!
 						currentFrameFinished = false;
 					}
 				}
@@ -318,16 +412,33 @@ void UDPVideoStreamCliWithTrace2::receiveStream(UDPVideoStreamPacket *pkt)
         	{
         		if (isFragmentEnd == true)
             	{
+        			currentFrameFinished = true;
         			if (currentFrameDiscard == false)
-        			{
-        				// the frame has been received and decoded successfully
-            			numFramesReceived++;
+        			{   // the frame has been received and decoded successfully
+                        if (firstFrameReceived == false)
+                        {   // initialize the simple frame delay/loss conversion
+                            firstFrameReceived = true;
+                            firstFrameArrivalTime = simTime();
+                            firstFrameDisplayTime = frameTime / 1000.0; // 'frameTime' is in millisecond
+
+                            numFramesReceived++;	///< count the current frame as well
+                        }
+                        else
+                        {
+                            if (frameTime - firstFrameDisplayTime >= simTime() - firstFrameArrivalTime - startupDelay)
+                            {   // frame delay/loss conversion
+                                currentNumFramesLost++;
+                            }
+                            else
+                            {
+                                numFramesReceived++;	///< count the current frame as well
+                            }
+                        }   // end of frame delay/loss conversion processing
         			}
         			else
         			{
         				currentNumFramesLost++;
         			}
-        			currentFrameFinished = true;
             	}
         	}	// end of processing of the non-first packet of B frame
         	break;

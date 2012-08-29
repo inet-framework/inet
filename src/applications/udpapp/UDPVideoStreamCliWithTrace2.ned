@@ -22,10 +22,11 @@ package inet.applications.udpapp;
 //
 // Video streaming client to be used with UDPVideoStreamSvrWithTrace.
 //
-// It has a capability to convert delay into loss based on play-out
-// buffering [1] and reports packet-level as well as frame-level (meaningful
-// only with trace files in <i>verbose</i> format) statistics at the end of
-// simulation.
+// It has a capability to convert frame delay into frame loss based on the
+// cumulative display time of a frame and simple play-out buffering model (note
+// that it is different from that in [1]) and reports packet-level as well as
+// frame-level (meaningful only with trace files in <i>verbose</i> format)
+// statistics at the end of simulation.
 //
 // References:
 // -# Jirka Klaue, Berthold Rathke, and Adam Wolisz,
