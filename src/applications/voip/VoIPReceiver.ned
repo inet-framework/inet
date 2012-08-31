@@ -17,10 +17,13 @@ package inet.applications.voip;
 import inet.applications.IUDPApp;
 
 
+//
+//FIXME Documentation!!!
+//
 simple VoIPReceiver like IUDPApp
 {
     parameters:
-        int localPort = default(3000);
+        int localPort;
         int emodel_Ie_ = default(5);
         int emodel_Bpl_ = default(10);
         int emodel_A_ = default(5);

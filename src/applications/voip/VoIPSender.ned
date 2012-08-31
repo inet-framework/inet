@@ -17,6 +17,8 @@ package inet.applications.voip;
 import inet.applications.IUDPApp;
 
 //
+//FIXME Translate it!!!
+//
 // VoIPSender
 // A destAddress cimre VoipPacket-eket kuld UDP protokollon keresztul.
 // A talk/silence hosszat es aranyat a shapeTalk, scaleTalk es shapeSil, scaleSil
@@ -30,7 +32,7 @@ simple VoIPSender like IUDPApp
 {
     parameters:
         int localPort = default(-1);
-        int destPort = default(3000);
+        int destPort;
         string destAddress;
         int talkFrameSize @unit(B) = default(40B);     // byte size of talk frames
         double shapeTalk = default(0.824);
