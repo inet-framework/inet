@@ -580,6 +580,34 @@
         linkerFlags = ""
         />
     <feature
+        id="VoIP_LTE"
+        name="VoIP (from LTE)"
+        description = "Voice over IP tool (from LTE model)"
+        initiallyEnabled = "false"
+        requires = "UDP"
+        labels = ""
+        nedPackages = "
+                       inet.applications.voip
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="VoIP_LTE_examples"
+        name="VoIP LTE examples"
+        description = "Example VoIP simulations"
+        initiallyEnabled = "false"
+        requires = "VoIP_LTE IPv4 Ethernet"
+        labels = "examples"
+        nedPackages = "
+                       inet.examples.voip
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="HttpTools"
         name="HttpTools"
         description = "Components for web traffic simulation.
