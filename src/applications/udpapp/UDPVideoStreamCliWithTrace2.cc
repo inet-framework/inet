@@ -65,6 +65,7 @@ int UDPVideoStreamCliWithTrace2::convertFrameDelayIntoLoss(long frameNumber, sim
         numFramesReceived++; ///< count the current frame as well
         switch (frameType)
         {
+        case IDR:
         case I:
             prevIFrameNumber = currentFrameNumber;
             break;
