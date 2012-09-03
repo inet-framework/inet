@@ -21,8 +21,9 @@ import inet.applications.IUDPApp;
 //
 // VoIPSender
 // A destAddress cimre VoipPacket-eket kuld UDP protokollon keresztul.
-// A talk/silence hosszat es aranyat a shapeTalk, scaleTalk es shapeSil, scaleSil
-// parameterekkel lehet beallitani.
+// (VoipPacket and VoIPPacket are differents.)
+// A talk/silence hossza es aranya a shapeTalk, scaleTalk es shapeSil, scaleSil
+// parameterektol fugg.
 // Csak 'talk' allapotban kuld csomagokat, a csomagokba beleteszi, hogy
 // osszesen hany frame-bol all a talk, igy a VoIPReceiver tudja detektalni az utolso
 // csomagok elveszeset is (csak egy teljes talk tud eszrevetlenul elveszni).
