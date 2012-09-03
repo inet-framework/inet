@@ -34,7 +34,7 @@ class VoIPSender : public cSimpleModule
 	bool      isTalk;
 	cMessage* selfSource;
 	//sender
-	// FIXME questi non dovrebbero essere interi
+	// FIXME questi non dovrebbero essere interi     //FIXME Translate!!!
 	int    talkID;
 	int    nframes;
 	int    frameID;
