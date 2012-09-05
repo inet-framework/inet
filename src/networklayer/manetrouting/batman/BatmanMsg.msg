@@ -91,6 +91,13 @@ class BatmanHnaMsg
     }
 };
 
+}}
+
+
+class noncobject IPv4Address;
+class noncobject BatmanHnaMsg;
+class noncobject Uint128;
+
 struct vis_data
 {
     unsigned char type;
@@ -98,13 +105,6 @@ struct vis_data
     Uint128 ip;
 };
 
-}}
-
-
-class noncobject IPv4Address;
-class noncobject BatmanHnaMsg;
-class noncobject Uint128;
-class noncobject vis_data;
 
 packet BatmanPacket
 {
