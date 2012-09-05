@@ -33,7 +33,7 @@ class BatmanHnaMsg
 {
    public:
     Uint128 addr;
-    unsigned char  netmask;
+    uint8_t  netmask;
     BatmanHnaMsg& operator=(const BatmanHnaMsg& m)
     {
            addr=m.addr;
@@ -100,8 +100,8 @@ class noncobject Uint128;
 
 struct vis_data
 {
-    unsigned char type;
-    unsigned char data;
+    uint8_t type;
+    uint8_t data;
     Uint128 ip;
 };
 
@@ -109,16 +109,16 @@ struct vis_data
 packet BatmanPacket
 {
     byteLength = BatPacketSize;
-    unsigned char  version;  // batman version field
-    unsigned char  flags;    // 0x80: UNIDIRECTIONAL link, 0x40: DIRECTLINK flag, ...
-    unsigned char  ttl;
-    unsigned char  gatewayFlags;  // flags related to gateway functions: gateway class
+    uint8_t        version;  // batman version field
+    uint8_t        flags;    // 0x80: UNIDIRECTIONAL link, 0x40: DIRECTLINK flag, ...
+    uint8_t        ttl;
+    uint8_t        gatewayFlags;  // flags related to gateway functions: gateway class
     unsigned short seqNumber;
     unsigned short gatewayPort;
     Uint128        orig;
     Uint128        prevSender;
-    unsigned char  tq;           // Quality
-    unsigned char  hops;
+    uint8_t        tq;           // Quality
+    uint8_t        hops;
     BatmanHnaMsg   hnaMsg[];    ///< Packet body.
 }
 
