@@ -987,15 +987,12 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
     forw_node_new->num_packets = 0;
     forw_node_new->direct_link_flags = 0;
     forw_node_new->pack_buff = buildDefaultBatmanPkt(batman_if);
-    forw_node_new->pack_buff->setHnaLen(0);
 
     /* non-primary interfaces do not send hna information */
     if ((hna_list.size() > 0) && (batman_if->if_num == 0))
     {
         forw_node_new->pack_buff->setHnaMsgArraySize(hna_buff_local.size());
-        forw_node_new->pack_buff->setHnaLen(hna_buff_local.size());
         forw_node_new->pack_buff->setByteLength(forw_node_new->pack_buff->getByteLength()+(hna_buff_local.size() * 5));
-        forw_node_new->pack_buff->setHnaLen(hna_buff_local.size());
         for (unsigned int i = 0; i<hna_buff_local.size(); i++)
         {
             BatmanHnaMsg aux;

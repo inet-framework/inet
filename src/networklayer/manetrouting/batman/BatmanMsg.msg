@@ -119,7 +119,6 @@ packet BatmanPacket
     Uint128        prevSender;
     unsigned char  tq;           // Quality
     unsigned char  hops;
-    unsigned char  hnaLen;
     BatmanHnaMsg   hnaMsg[];    ///< Packet body.
 }
 
