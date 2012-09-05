@@ -16,7 +16,6 @@ void Batman::hna_local_task_add_ip(const Uint128 &ip_addr, uint16_t netmask, uin
 
 void Batman::hna_local_buffer_fill(void)
 {
-
     hna_buff_local.clear();
     if (hna_list.empty())
         return;
@@ -36,7 +35,7 @@ void Batman::hna_local_task_exec(void)
     Hna_local_entry *hna_local_entry;
 
     if (hna_chg_list.empty())
-    return;
+        return;
 
     while (!hna_chg_list.empty())
     {
@@ -84,6 +83,7 @@ void Batman::hna_local_task_exec(void)
     /* rewrite local buffer */
     hna_local_buffer_fill();
 }
+
 /*
 unsigned char *hna_local_update_vis_packet(unsigned char *vis_packet, uint16_t *vis_packet_size)
 {
@@ -111,6 +111,7 @@ unsigned char *hna_local_update_vis_packet(unsigned char *vis_packet, uint16_t *
     return vis_packet;
 }
 */
+
 void Batman::hna_local_update_routes(Hna_local_entry *hna_local_entry, int8_t route_action)
 {
     /* add / delete throw routing entries for own hna */
@@ -155,7 +156,6 @@ void Batman::_hna_global_add(OrigNode *orig_node, Hna_element *hna_element)
             notFound = false;
             break;
         }
-
     }
     /* append the given orig node to the list */
     if (notFound)

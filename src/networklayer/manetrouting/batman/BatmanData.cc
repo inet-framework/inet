@@ -340,11 +340,8 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &n
                 {
                     del_default_route();
                 }
-
             }
-
         }
-
     }
 }
 
@@ -431,7 +428,6 @@ void Batman::purge_orig(const simtime_t &curr_time)
                     }
                     j++;
                 }
-
             }
             if ((neigh_purged) && ((best_neigh_node == NULL) || (orig_node->router == NULL) || (max_tq > orig_node->router->tq_avg)))
             {
@@ -459,7 +455,6 @@ void Batman::purge_orig(const simtime_t &curr_time)
     if ( gw_purged )
         choose_gw();
 }
-
 
 
 void Batman::choose_gw(void)
@@ -535,14 +530,10 @@ void Batman::choose_gw(void)
 
             break;
         }
-
     }
 
-
     if ( curr_gateway != tmp_curr_gw ) {
-
         if ( curr_gateway != NULL ) {
-
 //            if ( tmp_curr_gw != NULL )
 //                debug_output( 3, "Removing default route - better gateway found\n" );
 //            else
@@ -557,7 +548,6 @@ void Batman::choose_gw(void)
 //            addr_to_string( curr_gateway->orig_node->orig, orig_str, ADDR_STR_LEN );
 //            debug_output( 3, "Adding default route to %s (gw_flags: %i, tq: %i, gw_product: %i)\n", orig_str, max_gw_class, max_tq, max_gw_factor );
             add_default_route();
-
         }
     }
 }
@@ -571,12 +561,10 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, BatmanHna
     /* also handles orig_node->router == NULL and neigh_node == NULL */
     if ((orig_node != NULL) && (orig_node->router != neigh_node))
     {
-
         /* adds duplicated code but makes it more readable */
 
         /* new route added */
         if ((orig_node->router == NULL) && (neigh_node != NULL)) {
-
             add_del_route(orig_node->orig, 32, neigh_node->addr,
                     neigh_node->if_incoming->if_index, neigh_node->if_incoming->dev, BATMAN_RT_TABLE_HOSTS, ROUTE_TYPE_UNICAST, ROUTE_ADD);
             orig_node->batmanIf = neigh_node->if_incoming;
@@ -584,12 +572,10 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, BatmanHna
 
             /* add new announced network(s) */
             hna_global_add(orig_node, hna_recv_buff, hna_buff_len);
-
         /* route deleted */
         }
         else if ((orig_node->router != NULL) && (neigh_node == NULL))
         {
-
             EV << "Deleting previous route\n";
 
             /* remove old announced network(s) */
@@ -633,7 +619,6 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, BatmanHna
                  hna_global_update(orig_node, hna_recv_buff, hna_buff_len, old_router);
             }
         }
-
     } else if (orig_node != NULL) {
         hna_global_update(orig_node, hna_recv_buff, hna_buff_len, old_router);
     }
@@ -671,7 +656,6 @@ void Batman::update_gw_list(OrigNode *orig_node, uint8_t new_gwflags, uint16_t g
                 gw_node->orig_node->gwflags = new_gwflags;
                 if (gw_node == curr_gateway)
                     choose_gw();
-
             }
             else
             {
@@ -692,8 +676,6 @@ void Batman::update_gw_list(OrigNode *orig_node, uint8_t new_gwflags, uint16_t g
 }
 
 
-
-
 /* returns the up and downspeeds in kbit, calculated from the class */
 void Batman::get_gw_speeds(unsigned char gw_class, int *down, int *up)
 {
@@ -706,13 +688,11 @@ void Batman::get_gw_speeds(unsigned char gw_class, int *down, int *up)
 }
 
 
-
 /* calculates the gateway class from kbit */
 unsigned char Batman::get_gw_class(int down, int up)
 {
     int mdown = 0, tdown, tup, difference = 0x0FFFFFFF;
     unsigned char gw_class = 0, sbit, part;
-
 
     /* test all downspeeds */
     for (sbit = 0; sbit < 2; sbit++) {
@@ -726,37 +706,27 @@ unsigned char Batman::get_gw_class(int down, int up)
                 gw_class = (sbit << 7) + (part << 3);
                 difference = abs(tdown - down);
                 mdown = tdown;
-
             }
-
         }
-
     }
 
     /* test all upspeeds */
     difference = 0x0FFFFFFF;
 
     for (part = 0; part < 8; part++) {
-
         tup = ((part + 1) * (mdown)) / 8;
-
         if (abs(tup - up) < difference) {
-
             gw_class = (gw_class & 0xF8) | part;
             difference = abs(tup - up);
-
         }
-
     }
 
     return gw_class;
 }
 
 
-
 int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node, BatmanPacket *in, const simtime_t &recv_time, BatmanIf *if_incoming)
 {
-
     NeighNode *neigh_node = NULL, *tmp_neigh_node = NULL;
     uint8_t total_count;
 
@@ -773,18 +743,15 @@ int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node,
             neigh_node = create_neighbor(orig_node, orig_neigh_node, orig_neigh_node->orig, if_incoming);
 
         neigh_node->last_valid = recv_time;
-
     }
     else
     {
-
         /* find packet count of corresponding one hop neighbor */
         for (unsigned int i = 0; i < orig_neigh_node->neigh_list.size(); i++)
         {
             tmp_neigh_node = orig_neigh_node->neigh_list[i];
             if ( ( tmp_neigh_node->addr == orig_neigh_node->orig ) && ( tmp_neigh_node->if_incoming == if_incoming ) )
                 neigh_node = tmp_neigh_node;
-
         }
 
         if ( neigh_node == NULL )
@@ -801,14 +768,11 @@ int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node,
     if ( ( total_count < minimum_send ) || ( neigh_node->real_packet_count < minimum_recv ) )
     {
         orig_neigh_node->tq_own = 0;
-
     }
     else
     {
-
         /* neigh_node->real_packet_count is never zero as we only purge old information when getting new information */
         orig_neigh_node->tq_own = (TQ_MAX_VALUE * total_count) / neigh_node->real_packet_count;
-
     }
 
     /* 1 - ((1-x)** 3), normalized to TQ_MAX_VALUE */
@@ -835,6 +799,7 @@ int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node,
 
     return 0;
 }
+
 #if 0
 static void generate_vis_packet(void)
 {
@@ -861,7 +826,6 @@ static void generate_vis_packet(void)
 
     /* neighbor list */
     while (NULL != (hashit = hash_iterate(orig_hash, hashit))) {
-
         orig_node = hashit->bucket->data;
 
         /* we interested in 1 hop neighbours only */
@@ -878,9 +842,7 @@ static void generate_vis_packet(void)
 
             vis_data->data = orig_node->router->tq_avg;
             vis_data->type = DATA_TYPE_NEIGH;
-
         }
-
     }
 
     /* secondary interfaces */
@@ -922,6 +884,7 @@ static void send_vis_packet(void)
         send_udp_packet(vis_packet, vis_packet_size, vis_if.addr, vis_if.sock, NULL);
 }
 #endif
+
 uint8_t Batman::count_real_packets(BatmanPacket *in, const Uint128 &neigh, BatmanIf *if_incoming)
 {
     OrigNode *orig_node;
@@ -947,7 +910,6 @@ uint8_t Batman::count_real_packets(BatmanPacket *in, const Uint128 &neigh, Batma
 
             bit_get_packet(tmp_neigh_node->real_bits, in->getSeqNumber() - orig_node->last_real_seqno, 1 );
             /*debug_output( 3, "count_real_packets (yes): neigh = %s, is_new = %s, seq = %i, last seq = %i\n", neigh_str, ( is_new_seqno ? "YES" : "NO" ), in->seqno, orig_node->last_real_seqno );*/
-
         }
         else
         {
@@ -960,10 +922,8 @@ uint8_t Batman::count_real_packets(BatmanPacket *in, const Uint128 &neigh, Batma
 
     if ( !is_duplicate )
     {
-
         EV << "updating last_seqno: old" << orig_node->last_real_seqno <<" new "<< in->getSeqNumber() << "\n";
         orig_node->last_real_seqno = in->getSeqNumber();
-
     }
     return is_duplicate;
 }
@@ -1000,7 +960,6 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
             aux.netmask = hna_buff_local[i].netmask;
 
             forw_node_new->pack_buff->setHnaMsg(i, aux);
-
         }
     }
 
@@ -1045,7 +1004,6 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
 }
 
 
-
 void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh, uint8_t directlink, int16_t hna_buff_len, BatmanIf *if_incoming, const simtime_t &curr_time)
 {
     ForwNode *forw_node_new = NULL, *forw_node_aggregate = NULL, *forw_node_pos = NULL;
@@ -1071,13 +1029,11 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
             send_time = curr_time + par("jitter").doubleValue()/2.0;
     }while (simTime()>send_time); // avoid schedule in the past
 
-
     Forwlist::iterator  it;
     for (it=forw_list.begin(); it!=forw_list.end(); it++)
     {
         forw_node_pos = *it;
         if (aggregation_enabled) {
-
             /* don't save aggregation position if aggregation is disabled */
             forw_node_aggregate = forw_node_pos;
 
@@ -1108,12 +1064,10 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
                 /* if the incoming packet is sent via this one interface only - we still can aggregate */
                 if ((directlink) && (in->getTtl() == 2) && (forw_node_pos->if_incoming == if_incoming))
                     break;
-
             }
 
             /* could not find packet to aggregate with */
             forw_node_aggregate = NULL;
-
         }
 
         if ((forw_node_pos->send_time - send_time) > 0)
@@ -1124,7 +1078,6 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
 
     if (forw_node_aggregate == NULL)
     {
-
         forw_node_new = new  ForwNode;
         forw_node_new->pack_buff = in;
         forw_node_new->own = 0;
@@ -1132,7 +1085,6 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
         forw_node_new->num_packets = 0;
         forw_node_new->direct_link_flags = 0;
         forw_node_new->send_time = send_time;
-
     }
     else
     {
@@ -1140,7 +1092,6 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
         appendPacket(forw_node_aggregate->pack_buff, in);
         forw_node_aggregate->num_packets++;
         forw_node_new = forw_node_aggregate;
-
     }
 
     /* save packet direct link flag status */
@@ -1153,17 +1104,14 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
 
     /* rebroadcast tq of our best ranking neighbor to ensure the rebroadcast of our best tq value */
     if ((orig_node->router != NULL) && (orig_node->router->tq_avg != 0)) {
-
         /* rebroadcast ogm of best ranking neighbor as is */
         if (orig_node->router->addr != neigh) {
-
             bat_packet->setTq(orig_node->router->tq_avg);
             bat_packet->setTtl(orig_node->router->last_ttl - 1);
             bat_packet->setHops(orig_node->router->num_hops+1);
         }
 
         tq_avg = orig_node->router->tq_avg;
-
     }
 
     /* apply hop penalty */
@@ -1224,7 +1172,6 @@ void Batman::send_outstanding_packets(const simtime_t &curr_time)
 
     //prof_start(PROF_send_outstanding_packets);
 
-
     while (true)
     {
         forw_node = forw_list.front();
@@ -1250,7 +1197,6 @@ void Batman::send_outstanding_packets(const simtime_t &curr_time)
         if (((directlink) && (bat_packet->getTtl() == 1)) ||
             ((forw_node->own) && (forw_node->if_incoming->if_num > 0)))
         {
-
             //debug_output(4, "%s packet (originator %s, seqno %d, TTL %d) on interface %s\n", (forw_node->own ? "Sending own" : "Forwarding"), orig_str, ntohs(bat_packet->seqno), bat_packet->ttl, forw_node->if_incoming->dev);
 
             if (send_udp_packet(forw_node->pack_buff->dup(), forw_node->pack_buff_len, forw_node->if_incoming->broad, BATMAN_PORT, forw_node->if_incoming) < 0)
@@ -1314,7 +1260,6 @@ int8_t Batman::send_udp_packet(cPacket *packet_buff, int32_t packet_buff_len, co
 
 BatmanIf * Batman::is_batman_if(InterfaceEntry * dev)
 {
-
     for (unsigned int i=0; i<if_list.size(); i++)
     {
         if (if_list[i]->dev==dev)
@@ -1329,7 +1274,6 @@ BatmanIf * Batman::is_batman_if(InterfaceEntry * dev)
 //
 void Batman::add_del_route(const Uint128  & dest, uint8_t netmask, const Uint128  & router, int32_t ifi, InterfaceEntry* dev, uint8_t rt_table, int8_t route_type, int8_t route_action)
 {
-
     if (route_type != ROUTE_TYPE_UNICAST)
         return;
     if (route_action==ROUTE_DEL)
@@ -1352,7 +1296,6 @@ void Batman::add_del_route(const Uint128  & dest, uint8_t netmask, const Uint128
 
 int Batman::add_del_interface_rules(int8_t rule_action)
 {
-
     if (isInMacLayer())
         return 1;
     int if_count = 1;
@@ -1371,10 +1314,8 @@ int Batman::add_del_interface_rules(int8_t rule_action)
         Uint128 netmask = ifr->ipv4Data()->getNetmask().getInt();
         uint8_t mask = ifr->ipv4Data()->getNetmask().getNetmaskLength();
 
-
         Uint128 netaddr = addr&netmask;
         BatmanIf *batman_if;
-
 
         Uint128 ZERO;
         add_del_route(netaddr, mask, ZERO, 0, ifr, BATMAN_RT_TABLE_TUNNEL, ROUTE_TYPE_THROW, rule_action);
@@ -1489,7 +1430,6 @@ char Batman::bit_get_packet( std::vector<TYPE_OF_WORD> &seq_bits, int16_t seq_nu
     int i;
     /* we already got a sequence number higher than this one, so we just mark it. this should wrap around the integer just fine */
     if ((seq_num_diff < 0) && (seq_num_diff >= -local_win_size)) {
-
         if ( set_mark )
             bit_mark( seq_bits, -seq_num_diff );
         return 0;
@@ -1509,14 +1449,12 @@ char Batman::bit_get_packet( std::vector<TYPE_OF_WORD> &seq_bits, int16_t seq_nu
 
         if ( set_mark )
             seq_bits[0] = 1;  /* we only have the latest packet */
-
     }
     else
     {
         bit_shift(seq_bits, seq_num_diff);
         if ( set_mark )
             bit_mark(seq_bits, 0);
-
     }
     return 1;
 }
@@ -1539,7 +1477,6 @@ int Batman::bit_packet_count( std::vector<TYPE_OF_WORD> &seq_bits )
 
 uint8_t Batman::bit_count( int32_t to_count )
 {
-
     uint8_t hamming = 0;
     while ( to_count )
     {
