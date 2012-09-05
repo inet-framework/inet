@@ -219,143 +219,6 @@ if (.resp == 'y') {
     grid.arrange(.plots[[14]], .plots[[15]], .plots[[16]], .plots[[17]], ncol=2)
     dev.off()
 }   # end of if()
-## #################################################################################
-## ### summary plots for dedicated architecture with HTTP, FTP, and video traffic
-## ### and traffic shaping
-## #################################################################################
-## .resp <- readline("Process data from dedicated access with traffic shaping? (hit y or n) ")
-## if (.resp == 'y') {
-##     if (file.exists(paste(.da_nh1_nf1_nv1_tbf.wd, 'nh1_nf1_nv1_tbf.RData', sep='/')) == FALSE) {
-##         ## Do the processing of OMNeT++ data files unless there is 'nh1_nf1_nv1_tbf.RData' in the working directory
-##         .n_totalFiles <- as.numeric(system(paste('ls -l ', paste(.da_nh1_nf1_nv1_tbf.wd, '*.sca', sep='/'), ' | wc -l', sep=''), intern=TRUE))
-##                                         # total number of (scalar) files to process
-##         .n_repetitions <- 10    # number of repetitions per experiment
-##         .n_experiments <- ceiling(.n_totalFiles/.n_repetitions)   # number of experiments
-##         .n_files <- ceiling(.n_totalFiles/.n_experiments)   # number of files per experiment
-##         .scalars_dfs <- list()  # list of OMNeT++ scalar data frames from experiments
-##         .dfs <- list()  # list of processed data frames from experiments
-##         .fileNames <- rep('', .n_files)  # vector of file names
-##         for (.i in 1:.n_experiments) {
-##             cat(paste("Processing ", as.character(.i), "th experiment ...\n", sep=""))
-##             for (.j in 1:.n_files) {
-##                 .fileNames[.j] <- paste(.da_nh1_nf1_nv1_tbf.wd, paste("nh1_nf1_nv1_tbf-", as.character((.i-1)*.n_files+.j-1), ".sca", sep=""), sep='/')
-##             }
-##             .df <- loadDataset(.fileNames)
-##             .scalars <- merge(cast(.df$runattrs, runid ~ attrname, value='attrvalue',
-##                                    subset=attrname %in% c('experiment', 'measurement', 'dr', 'mr', 'bs', 'n')),
-##                               .df$scalars, by='runid',
-##                               all.x=TRUE)
-##             .scalars_dfs[[.i]] <- .scalars
-##             ## collect average session delay, average session throughput, and mean session transfer rate of FTP traffic
-##             .tmp_ftp <- collectMeasures(.scalars,
-##                                         "experiment+measurement+dr+mr+bs+n+name ~ .",
-##                                         '.*\\.ftpApp.*',
-##                                         '(average session delay|average session throughput|mean session transfer rate|90th-sessionDelay:percentile|95th-sessionDelay:percentile|99th-sessionDelay:percentile)',
-##                                         c('dr', 'mr', 'bs', 'n'),
-##                                         'ftp')
-##             ## collect average & percentile session delays, average session throughput, and mean session transfer rate of HTTP traffic
-##             .tmp_http <- collectMeasures(.scalars,
-##                                          "experiment+measurement+dr+mr+bs+n+name ~ .",
-##                                          '.*\\.httpApp.*',
-##                                          '(average session delay|average session throughput|mean session transfer rate|90th-sessionDelay:percentile|95th-sessionDelay:percentile|99th-sessionDelay:percentile)',
-##                                          c('dr', 'mr', 'bs', 'n'),
-##                                          'http')
-##             ## collect decodable frame rate of video traffic
-##             .tmp_video <- collectMeasures(.scalars,
-##                                           "experiment+measurement+dr+mr+bs+n+name ~ .",
-##                                           '.*\\.videoApp.*',
-##                                           'decodable frame rate',
-##                                           c('dr', 'mr', 'bs', 'n'),
-##                                           'video')
-##             ## collect average & percentile packet delays from DelayMeter module
-##             .tmp_packet <- collectMeasures(.scalars,
-##                                            "experiment+measurement+dr+mr+bs+n+name ~ .",
-##                                            '.*\\.delayMeter.*',
-##                                            '(average packet delay|90th-packetDelay:percentile|95th-packetDelay:percentile|99th-packetDelay:percentile)',
-##                                            c('dr', 'mr', 'bs', 'n'),
-##                                            'packet')
-##             ## collect number of packets received, dropped and shaped by per-VLAN queues at OLT
-##             .tmp_queue <- collectMeasures(.scalars,
-##                                           "experiment+measurement+dr+mr+bs+n+name ~ .",
-##                                           '.*\\.olt.*',
-##                                           '(overall packet loss rate of per-VLAN queues|overall packet shaped rate of per-VLAN queues)',
-##                                           c('dr', 'mr', 'bs', 'n'),
-##                                           'queue')
-##             ## combine the five data frames into one
-##             .dfs[[.i]] <- rbind(.tmp_ftp, .tmp_http, .tmp_video, .tmp_packet, .tmp_queue)
-##         }   # end of for(.i)
-##         ## combine the data frames from experiments into one
-##         .scalars_df <- .scalars_dfs[[1]]
-##         .df <- .dfs[[1]]
-##         for (.i in 2:.n_experiments) {
-##             .scalars_df <- rbind(.scalars_df, .scalars_dfs[[.i]])
-##             .df <- rbind(.df, .dfs[[.i]])
-##         }
-##         ## save data frames for later use
-##         .scalars_df.name <- paste('.da_scalars_', 'nh1_nf1_nv1_tbf', '.df', sep='')
-##         .df.name <- paste('.da_', 'nh1_nf1_nv1_tbf', '.df', sep='')
-##         assign(.scalars_df.name, .scalars_df)
-##         assign(.df.name, sort_df(.df, vars=c('dr', 'mr', 'bs', 'n')))
-##         save(list=c(.scalars_df.name, .df.name), file=paste(.da_nh1_nf1_nv1_tbf.wd, "nh1_nf1_nv1_tbf.RData", sep="/"))
-##     }
-##     else {
-##         ## Otherwise, load objects from the saved file
-##         load(paste(.da_nh1_nf1_nv1_tbf.wd, 'nh1_nf1_nv1_tbf.RData', sep='/'))
-##     }   # end of if() for the processing of OMNeT++ data files
-##     .da_nh1_nf1_nv1_tbf.df <- get(.df.name)
-##     .dr.range <- unique(.da_nh1_nf1_nv1_tbf.df$dr)
-##     .mr.range <- unique(.da_nh1_nf1_nv1_tbf.df$mr)
-##     for (.i in 1:length(.dr.range)) {
-##         for (.j in 1:length(.mr.range)) {
-##             if (length(subset(.da_nh1_nf1_nv1_tbf.df, dr==.dr.range[.i] & mr==.mr.range[.j])$mean) > 0) {
-##                 .plots <- list()
-##                 for (.k in 1:length(.measure.type)) {
-##                     .df <- subset(.da_nh1_nf1_nv1_tbf.df, dr==.dr.range[.i] & mr==.mr.range[.j] & name==.measure[.k] & measure.type==.measure.type[.k], select=c(3, 4, 6, 7))
-##                     is.na(.df) <- is.na(.df) # remove NaNs
-##                     .df <- .df[!is.infinite(.df$ci.width),] # remove Infs
-##                     .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
-##                     .p <- ggplot(data=.df, aes(group=bs, colour=factor(bs), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
-##                     .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.k])
-##                     .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[MB]", values=0:9)
-##                     .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[MB]")
-##                     .plots[[.k]] <- .p
-##                     ## save each plot as a PDF file
-##                     .p
-##                     ggsave(paste(.da_nh1_nf1_nv1_tbf.wd,
-##                                  paste("nh1_nf1_nv1_tbf_dr", as.character(.dr.range[.i]),
-##                                        "_mr", as.character(.mr.range[.j]),
-##                                        "-", .measure.type[.k],
-##                                        "-", .measure.abbrv[.k], ".pdf", sep=""), sep="/"))
-##                 }   # end of for(.k)
-##                 ## save combined plots into a PDF file per measure.type (e.g., ftp, http)
-##                 pdf(paste(.da_nh1_nf1_nv1_tbf.wd,
-##                           paste("nh1_nf1_nv1_tbf_dr", as.character(.dr.range[.i]),
-##                                 "_mr", as.character(.mr.range[.j]),
-##                                 "-ftp.pdf", sep=""), sep='/'))
-##                 grid.arrange(.plots[[1]], .plots[[2]], .plots[[3]], .plots[[4]], .plots[[5]], .plots[[6]])
-##                 dev.off()
-##                 pdf(paste(.da_nh1_nf1_nv1_tbf.wd,
-##                           paste("nh1_nf1_nv1_tbf_dr", as.character(.dr.range[.i]),
-##                                 "_mr", as.character(.mr.range[.j]),
-##                                 "-http.pdf", sep=""), sep='/'))
-##                 grid.arrange(.plots[[7]], .plots[[8]], .plots[[9]], .plots[[10]], .plots[[11]], .plots[[12]], ncol=2)
-##                 dev.off()
-##                 pdf(paste(.da_nh1_nf1_nv1_tbf.wd,
-##                           paste("nh1_nf1_nv1_tbf_dr", as.character(.dr.range[.i]),
-##                                 "_mr", as.character(.mr.range[.j]),
-##                                 "-packet.pdf", sep=""), sep='/'))
-##                 grid.arrange(.plots[[14]], .plots[[15]], .plots[[16]], .plots[[17]], ncol=2)
-##                 dev.off()
-##                 pdf(paste(.da_nh1_nf1_nv1_tbf.wd,
-##                           paste("nh1_nf1_nv1_tbf_dr", as.character(.dr.range[.i]),
-##                                 "_mr", as.character(.mr.range[.j]),
-##                                 "-queue.pdf", sep=""), sep='/'))
-##                 grid.arrange(.plots[[18]], .plots[[19]])
-##                 dev.off()
-##             }   # end of if()
-##         }   # end of for(.j)
-##     }   # end of for(.i)
-## }   # end of if()
 #################################################################################
 ### summary plots for dedicated architecture with HTTP, FTP, and video traffic
 ### and traffic shaping
@@ -368,7 +231,7 @@ if (.resp == 'y') {
     .da.wd <- paste(.base.directory, "results/Dedicated", .config, sep="/")
     .da.rdata <- paste(.config, 'RData', sep=".")
     if (file.exists(paste(.da.wd, .da.rdata, sep='/')) == FALSE) {
-        ## Do the processing of OMNeT++ data files unless there is 'nh1_nf1_nv1_tbf_dr1.RData' in the working directory
+        ## Do the processing of OMNeT++ data files unless there is a corresponding RData file in the working directory
         .n_totalFiles <- as.numeric(system(paste('ls -l ', paste(.da.wd, '*.sca', sep='/'), ' | wc -l', sep=''), intern=TRUE))
                                         # total number of (scalar) files to process
         .n_repetitions <- 10    # number of repetitions per experiment
@@ -513,8 +376,10 @@ if (.resp == 'y') {
 #################################################################################
 ### summary plots for shared architecture with HTTP, FTP, and video traffic
 ### and traffic shaping
+###
+### Note: This is for the IEEE Transactions on Networking paper.
 #################################################################################
-.resp <- readline("Process data from shared access with traffic shaping? (hit y or n) ")
+.resp <- readline("Process data from shared access with traffic shaping (for IEEE ToN paper)? (hit y or n) ")
 if (.resp == 'y') {
     .config <- readline("Type OMNeT++ configuration name: ")
     .sa_tbf.wd <- paste(.base.directory, "results/Shared", .config, sep="/")
