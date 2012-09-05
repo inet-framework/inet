@@ -29,6 +29,8 @@ cplusplus {{
 #define BatPacketSize 16
 #endif
 
+#define BATMAN_HNA_MSG_SIZE 5
+
 class BatmanHnaMsg
 {
    public:

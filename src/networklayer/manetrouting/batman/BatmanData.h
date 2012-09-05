@@ -68,7 +68,7 @@ const_simtime_t PURGE_TIMEOUT = 200; // 200000 msec /* purge originators after t
 #define BATMAN_RT_PRIO_TUNNEL BATMAN_RT_PRIO_UNREACH + 100
 
 
-#define SIZE_Hna_element            5
+#define SIZE_Hna_element            BATMAN_HNA_MSG_SIZE
 #define ADDR_STR_LEN 16
 #define BATMAN_PORT 254
 #define MAX_HOPS 0xFF

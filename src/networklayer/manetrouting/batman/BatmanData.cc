@@ -992,7 +992,7 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
     if ((hna_list.size() > 0) && (batman_if->if_num == 0))
     {
         forw_node_new->pack_buff->setHnaMsgArraySize(hna_buff_local.size());
-        forw_node_new->pack_buff->setByteLength(forw_node_new->pack_buff->getByteLength()+(hna_buff_local.size() * 5));
+        forw_node_new->pack_buff->setByteLength(forw_node_new->pack_buff->getByteLength()+(hna_buff_local.size() * BATMAN_HNA_MSG_SIZE));
         for (unsigned int i = 0; i<hna_buff_local.size(); i++)
         {
             BatmanHnaMsg aux;

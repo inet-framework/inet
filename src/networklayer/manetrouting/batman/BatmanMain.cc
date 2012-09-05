@@ -344,7 +344,7 @@ void Batman::handleMessage(cMessage *msg)
 
         has_directlink_flag = (bat_packet->getFlags() & DIRECTLINK ? 1 : 0);
 
-        hna_buff_len = bat_packet->getHnaMsgArraySize() * 5;
+        hna_buff_len = bat_packet->getHnaMsgArraySize() * BATMAN_HNA_MSG_SIZE;
 
 
         unsigned char  hnaLen = bat_packet->getHnaMsgArraySize();
