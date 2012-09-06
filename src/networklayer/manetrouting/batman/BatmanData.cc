@@ -1372,14 +1372,7 @@ int Batman::add_del_interface_rules(int8_t rule_action)
 
         Uint128 addr = ifr->ipv4Data()->getIPAddress().getInt();
         Uint128 netmask = ifr->ipv4Data()->getNetmask().getInt();
-        uint8_t mask = 0;
-        for (unsigned int i=0; i<128; i++)
-        {
-           if (netmask.bit(i))
-               mask++;
-           else
-               break;
-        }
+        uint8_t mask = ifr->ipv4Data()->getNetmask().getNetmaskLength();
 
 
         Uint128 netaddr = addr&netmask;
