@@ -139,17 +139,19 @@ void Batman::_hna_global_add(OrigNode *orig_node, Hna_element *hna_element)
         hna_global_entry->curr_orig_node = NULL;
         hnaMap.insert(std::pair<BatmanHnaMsg,Hna_global_entry*>(*hna_element, hna_global_entry));
     }
+    else
+        hna_global_entry = it->second;
 
     /* the given orig_node already is the current orig node for this HNA */
     if (hna_global_entry->curr_orig_node == orig_node)
         return;
 
-    bool notFound = false;
+    bool notFound = true;
     for (unsigned int i=0; i<hna_global_entry->orig_list.size(); i++)
     {
         if (hna_global_entry->orig_list[i] == orig_node)
         {
-            notFound = true;
+            notFound = false;
             break;
         }
 
@@ -394,7 +396,7 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
     /* changed HNA */
     old_hna = orig_node->hna_buff;
 
-    orig_node->hna_buff.empty();
+    orig_node->hna_buff.clear();
     num_elements = new_hna_len / SIZE_Hna_element;
     for (int i = 0; i < num_elements; i++) {
         BatmanHnaMsg *aux = &new_hna[i];
