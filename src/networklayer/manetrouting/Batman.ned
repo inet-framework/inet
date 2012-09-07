@@ -43,7 +43,7 @@ simple Batman extends BaseRouting like IManetRouting
         double originatorInterval @unit(s) = default(1s);
         string preferedGateWay = default("0.0.0.0");
         int routingClass = default(0);
-        bool agregationEnable = default(true);
+        bool aggregationEnable = default(true);
         int GWClass_download_speed = default(0);
         int GWClass_upload_speed = default(0);
         volatile double jitter @unit(s) = default(uniform (0s,0.1s));

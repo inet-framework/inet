@@ -70,7 +70,7 @@ protected:
     uint8_t global_win_size;
     uint8_t local_win_size;
     uint8_t num_words;
-    uint8_t aggregation_enabled;
+    bool aggregation_enabled;
     uint32_t MAX_AGGREGATION_BYTES;
     cMessage *timer;
 

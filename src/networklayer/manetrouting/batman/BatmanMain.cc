@@ -60,7 +60,7 @@ Batman::Batman()
     global_win_size = TQ_GLOBAL_WINDOW_SIZE;
     local_win_size = TQ_LOCAL_WINDOW_SIZE;
     num_words = (TQ_LOCAL_WINDOW_SIZE / WORD_BIT_SIZE);
-    aggregation_enabled = 1;
+    aggregation_enabled = true;
     timer = NULL;
 
     hna_list.clear();
@@ -164,10 +164,7 @@ void Batman::initialize(int stage)
         vis_server = vis.getInt();
     }
 */
-    if (par("agregationEnable"))
-        aggregation_enabled = 1;
-    else
-        aggregation_enabled = 0;
+    aggregation_enabled = par("aggregationEnable").boolValue();
     disable_client_nat = 1;
 
     download_speed = par("GWClass_download_speed");
