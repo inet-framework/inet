@@ -470,7 +470,8 @@ void Batman::handleMessage(cMessage *msg)
         }
 
         BatmanPacket * bat_packetAux = bat_packet;
-        bat_packet = (BatmanPacket*) bat_packet->decapsulate();
+        cPacket *enc = bat_packet->decapsulate();
+        bat_packet = enc ? check_and_cast<BatmanPacket*>(enc) : NULL;
         schedule_forward_packet(orig_node, bat_packetAux, neigh, 0, hna_buff_len, if_incoming, curr_time);
     }
     sendPackets(curr_time);
