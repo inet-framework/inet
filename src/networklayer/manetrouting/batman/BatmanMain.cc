@@ -281,9 +281,9 @@ void Batman::handleMessage(cMessage *msg)
     //            ((struct forw_node *)forw_list.next)->send_time - curr_time : 10);
 
     IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
-    IPvXAddress srcAddr = ctrl->getSrcAddr();
-    IPvXAddress destAddr = ctrl->getDestAddr();
-    neigh = srcAddr.get4().getInt();
+    IPv4Address srcAddr = ctrl->getSrcAddr();
+    //IPv4Address destAddr = ctrl->getDestAddr();
+    neigh = srcAddr.getInt();
     for (unsigned int i=0; i<if_list.size(); i++)
     {
         if (if_list[i]->dev->getInterfaceId()==ctrl->getInterfaceId())
@@ -293,8 +293,7 @@ void Batman::handleMessage(cMessage *msg)
         }
     }
 
-    if (ctrl)
-        delete ctrl;
+    delete ctrl;
 
     curr_packet_len = 0;
 
