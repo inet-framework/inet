@@ -369,7 +369,7 @@ if (.resp == 'y') {
                           paste(.config, "_ur", as.character(.ur.range[.i]), .ur.unit,
                                 "_mr", as.character(.mr.range[.j]), 'M',
                                 "-queue.pdf", sep=""), sep='/'))
-                grid.arrange(.plots[[18]], .plots[[19]])
+                grid.arrange(.plots[[19]], .plots[[20]])
                 dev.off()
             }   # end of if()
         }   # end of for(.j)
