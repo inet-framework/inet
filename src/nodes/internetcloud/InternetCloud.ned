@@ -51,7 +51,6 @@ module InternetCloud
         @node();
         @labels(node,ethernet-node);
         @display("i=misc/cloud");
-        int numExtInterfaces = default(0);
         int numPcapRecorders = default(0); // no of PcapRecorders.
         string routingFile = default("");
     gates:
@@ -146,21 +145,12 @@ module InternetCloud
             parameters:
                 @display("p=125,257,row,110;q=l2queue");
         }
-        ext[numExtInterfaces]: <default("ExtInterface")> like IExternalNic {
-            parameters:
-                @display("p=423,257,row,90;q=txQueue;i=block/ifcard");
-        }
     connections allowunconnected:
         // connections to network outside
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
             ppp[i].upperLayerOut --> networkLayer.ifIn[i];
             ppp[i].upperLayerIn <-- networkLayer.ifOut[i];
-        }
-
-        for i=0..numExtInterfaces-1 {
-            ext[i].upperLayerOut --> networkLayer.ifIn++;
-            ext[i].upperLayerIn <-- networkLayer.ifOut++;
         }
 }
 
