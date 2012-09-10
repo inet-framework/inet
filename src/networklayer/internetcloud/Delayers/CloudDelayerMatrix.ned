@@ -35,9 +35,9 @@ import inet.networklayer.internetcloud.ICloudDelayer;
 //    <internetCloud symmetric="false">
 //      <parameters name="good">
 //        <traffic src="src_host*" dest="dest_host*" delay="0.012s+exponential(0.2s)" datarate="uniform(100kbps,1mbps)" drop="0.005" symmetric="true"/>
-//        <traffic src="hosta" dest="hostb" delay="0.012s+exponential(0.2s)" datarate="uniform(500kbps,1mbps)" drop="0.005"/>
-//        <traffic src="hostb" dest="hosta" delay="0.010s+exponential(0.2s)" datarate="uniform(100kbps,500kbps)" drop="0.003"/>
-//        <traffic src="*" dest="*" delay="0.02s+exponential(0.5s)" datarate="uniform(100kbps,200kbps)" drop="uniform(0.01,0.03)" />
+//        <traffic src="hosta" dest="hostb" delay="0.012s+exponential(0.2s)" datarate="uniform(500kbps,1mbps)" drop="uniform(0,1) &lt; 0.005"/>
+//        <traffic src="hostb" dest="hosta" delay="0.010s+exponential(0.2s)" datarate="uniform(100kbps,500kbps)" drop="uniform(0,1) &lt; 0.003"/>
+//        <traffic src="*" dest="*" delay="0.02s+exponential(0.5s)" datarate="uniform(100kbps,200kbps)" drop="uniform(0,1) &lt; uniform(0.01,0.03)" />
 //      </parameters>
 //    </internetCloud>
 //

@@ -54,7 +54,7 @@ class INET_API CloudDelayerMatrix : public CloudDelayerBase
         bool symmetric;
         cDynamicExpression delayPar;
         cDynamicExpression dataratePar;
-        cDynamicExpression dropRate;
+        cDynamicExpression dropPar;
         cXMLElement *entity;
       public:
         MatrixEntry(cXMLElement *trafficEntity, bool defaultSymmetric);
@@ -67,10 +67,10 @@ class INET_API CloudDelayerMatrix : public CloudDelayerBase
       public:
         cDynamicExpression *delayPar;    // TODO hasznalhatom ugyanazt az expression-t a kulonbozo kapcsolatokhoz???
         cDynamicExpression *dataratePar;    // TODO hasznalhatom ugyanazt az expression-t a kulonbozo kapcsolatokhoz???
-        double dropRate;
+        cDynamicExpression *dropPar;
         simtime_t lastSent;
       public:
-        Descriptor() : delayPar(NULL), dataratePar(NULL), dropRate(0.0), lastSent(SIMTIME_ZERO) {}
+        Descriptor() : delayPar(NULL), dataratePar(NULL), dropPar(NULL), lastSent(SIMTIME_ZERO) {}
     };
 
     typedef std::pair<int,int> IDPair;

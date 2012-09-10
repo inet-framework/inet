@@ -100,7 +100,7 @@ CloudDelayerMatrix::MatrixEntry::MatrixEntry(cXMLElement *trafficEntity, bool de
     symmetric = getBoolAttribute(*trafficEntity, "symmetric", &defaultSymmetric);
     delayPar.parse(delayAttr);
     dataratePar.parse(datarateAttr);
-    dropRate.parse(dropAttr);
+    dropPar.parse(dropAttr);
 }
 
 bool CloudDelayerMatrix::MatrixEntry::matches(const char *src, const char *dest)
@@ -144,7 +144,7 @@ void CloudDelayerMatrix::calculateDropAndDelay(const cMessage *msg, int srcID, i
         simtime_t& delay)
 {
     Descriptor *descriptor = getOrCreateDescriptor(srcID, destID);
-    isDrop = uniform(0, 1) < descriptor->dropRate;
+    isDrop = descriptor->dropPar->boolValue(this);
     delay = SIMTIME_ZERO;
     if (!isDrop)
     {
@@ -184,7 +184,7 @@ CloudDelayerMatrix::Descriptor* CloudDelayerMatrix::getOrCreateDescriptor(int sr
             CloudDelayerMatrix::Descriptor& descriptor = idPairToDescriptorMap[idPair];
             descriptor.delayPar = &matrixEntry->delayPar;
             descriptor.dataratePar = &matrixEntry->dataratePar;
-            descriptor.dropRate = matrixEntry->dropRate.doubleValue(this);
+            descriptor.dropPar = &matrixEntry->dropPar;
             descriptor.lastSent = simTime();
             if (matrixEntry->symmetric)
             {
@@ -196,8 +196,6 @@ CloudDelayerMatrix::Descriptor* CloudDelayerMatrix::getOrCreateDescriptor(int sr
                 CloudDelayerMatrix::Descriptor& rdescriptor = idPairToDescriptorMap[reverseIdPair];
                 rdescriptor = descriptor;
             }
-            if (descriptor.dropRate < 0.0 || descriptor.dropRate > 1.0)
-                throw cRuntimeError("Invalid %g drop rate at traffic %i", descriptor.dropRate, i);
             return &descriptor;
         }
         else if (!matrixEntry->symmetric && !reverseMatrixEntry && matrixEntry->matches(dest.c_str(), src.c_str()))
