@@ -62,16 +62,16 @@ ned-path = .;../../../../src;../../lib
 
 <internetCloud symmetric="true">
   <parameters name="good">
-    <traffic src="sender[0]" dest="recip" delay="100ms" datarate="1000bps" drop="0" />
-    <traffic src="sender[1]" dest="recip" delay="100ms" datarate="1200bps" drop="0" />
-    <traffic src="sender[2]" dest="recip" delay="100ms" datarate="1400bps" drop="0" />
-    <traffic src="sender[3]" dest="recip" delay="100ms" datarate="1600bps" drop="0" />
-    <traffic src="sender[4]" dest="recip" delay="100ms" datarate="1800bps" drop="0" />
-    <traffic src="sender[5]" dest="recip" delay="100ms" datarate="2000bps" drop="0" />
-    <traffic src="sender[6]" dest="recip" delay="100ms" datarate="2200bps" drop="0" />
-    <traffic src="sender[7]" dest="recip" delay="100ms" datarate="2400bps" drop="0" />
-    <traffic src="sender[8]" dest="recip" delay="100ms" datarate="2600bps" drop="0" />
-    <traffic src="sender[9]" dest="recip" delay="100ms" datarate="2800bps" drop="0" />
+    <traffic src="sender[0]" dest="recip" delay="100ms" datarate="1000bps" drop="false" />
+    <traffic src="sender[1]" dest="recip" delay="100ms" datarate="1200bps" drop="false" />
+    <traffic src="sender[2]" dest="recip" delay="100ms" datarate="1400bps" drop="false" />
+    <traffic src="sender[3]" dest="recip" delay="100ms" datarate="1600bps" drop="false" />
+    <traffic src="sender[4]" dest="recip" delay="100ms" datarate="1800bps" drop="false" />
+    <traffic src="sender[5]" dest="recip" delay="100ms" datarate="2000bps" drop="false" />
+    <traffic src="sender[6]" dest="recip" delay="100ms" datarate="2200bps" drop="false" />
+    <traffic src="sender[7]" dest="recip" delay="100ms" datarate="2400bps" drop="false" />
+    <traffic src="sender[8]" dest="recip" delay="100ms" datarate="2600bps" drop="false" />
+    <traffic src="sender[9]" dest="recip" delay="100ms" datarate="2800bps" drop="false" />
 <!--
     <traffic src="**" dest="**" delay="10ms+truncnormal(100ms,20ms)" datarate="uniform(100kbps,500kbps)" drop="uniform(0.01, 0.05)" />
 -->

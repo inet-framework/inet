@@ -62,16 +62,16 @@ ned-path = .;../../../../src;../../lib
 
 <internetCloud symmetric="true">
   <parameters name="good">
-    <traffic src="sender[0]" dest="recip" delay="900ms" datarate="1Mbps" drop="0" />
-    <traffic src="sender[1]" dest="recip" delay="850ms" datarate="1Mbps" drop="0" />
-    <traffic src="sender[2]" dest="recip" delay="800ms" datarate="1Mbps" drop="0" />
-    <traffic src="sender[3]" dest="recip" delay="750ms" datarate="1Mbps" drop="0" />
-    <traffic src="sender[4]" dest="recip" delay="700ms" datarate="1Mbps" drop="0" />
-    <traffic src="sender[5]" dest="recip" delay="650ms" datarate="1Mbps" drop="0" />
-    <traffic src="sender[6]" dest="recip" delay="600ms" datarate="1Mbps" drop="0" />
-    <traffic src="sender[7]" dest="recip" delay="550ms" datarate="1Mbps" drop="0" />
-    <traffic src="sender[8]" dest="recip" delay="500ms" datarate="1Mbps" drop="0" />
-    <traffic src="sender[9]" dest="recip" delay="450ms" datarate="1Mbps" drop="0" />
+    <traffic src="sender[0]" dest="recip" delay="900ms" datarate="1Mbps" drop="false" />
+    <traffic src="sender[1]" dest="recip" delay="850ms" datarate="1Mbps" drop="false" />
+    <traffic src="sender[2]" dest="recip" delay="800ms" datarate="1Mbps" drop="false" />
+    <traffic src="sender[3]" dest="recip" delay="750ms" datarate="1Mbps" drop="false" />
+    <traffic src="sender[4]" dest="recip" delay="700ms" datarate="1Mbps" drop="false" />
+    <traffic src="sender[5]" dest="recip" delay="650ms" datarate="1Mbps" drop="false" />
+    <traffic src="sender[6]" dest="recip" delay="600ms" datarate="1Mbps" drop="false" />
+    <traffic src="sender[7]" dest="recip" delay="550ms" datarate="1Mbps" drop="false" />
+    <traffic src="sender[8]" dest="recip" delay="500ms" datarate="1Mbps" drop="false" />
+    <traffic src="sender[9]" dest="recip" delay="450ms" datarate="1Mbps" drop="false" />
 <!--
     <traffic src="**" dest="**" delay="10ms+truncnormal(100ms,20ms)" datarate="uniform(100kbps,500kbps)" drop="uniform(0.01, 0.05)" />
 -->

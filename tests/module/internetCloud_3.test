@@ -62,26 +62,26 @@ ned-path = .;../../../../src;../../lib
 
 <internetCloud symmetric="false">
   <parameters name="good">
-    <traffic src="sender[0]" dest="recip" delay="100ms+280ms" datarate="1Mbps" drop="0" />
-    <traffic src="sender[1]" dest="recip" delay="150ms"       datarate="1Mbps" drop="0" />
-    <traffic src="sender[2]" dest="recip" delay="200ms+240ms" datarate="1Mbps" drop="0" />
-    <traffic src="sender[3]" dest="recip" delay="250ms"       datarate="1Mbps" drop="0" />
-    <traffic src="sender[4]" dest="recip" delay="300ms+200ms" datarate="1Mbps" drop="0" />
-    <traffic src="sender[5]" dest="recip" delay="350ms"       datarate="1Mbps" drop="0" />
-    <traffic src="sender[6]" dest="recip" delay="400ms+160ms" datarate="1Mbps" drop="0" />
-    <traffic src="sender[7]" dest="recip" delay="450ms"       datarate="1Mbps" drop="0" />
-    <traffic src="sender[8]" dest="recip" delay="500ms+120ms" datarate="1Mbps" drop="0" />
-    <traffic src="sender[9]" dest="recip" delay="550ms"       datarate="1Mbps" drop="0" />
-    <traffic src="recip" dest="sender[0]" delay="600ms"       datarate="1Mbps" drop="0" />
-    <traffic src="recip" dest="sender[1]" delay="550ms+260ms" datarate="1Mbps" drop="0" />
-    <traffic src="recip" dest="sender[2]" delay="500ms"       datarate="1Mbps" drop="0" />
-    <traffic src="recip" dest="sender[3]" delay="450ms+220ms" datarate="1Mbps" drop="0" />
-    <traffic src="recip" dest="sender[4]" delay="400ms"       datarate="1Mbps" drop="0" />
-    <traffic src="recip" dest="sender[5]" delay="350ms+180ms" datarate="1Mbps" drop="0" />
-    <traffic src="recip" dest="sender[6]" delay="300ms"       datarate="1Mbps" drop="0" />
-    <traffic src="recip" dest="sender[7]" delay="250ms+140ms" datarate="1Mbps" drop="0" />
-    <traffic src="recip" dest="sender[8]" delay="200ms"       datarate="1Mbps" drop="0" />
-    <traffic src="recip" dest="sender[9]" delay="150ms+100ms" datarate="1Mbps" drop="0" />
+    <traffic src="sender[0]" dest="recip" delay="100ms+280ms" datarate="1Mbps" drop="false" />
+    <traffic src="sender[1]" dest="recip" delay="150ms"       datarate="1Mbps" drop="false" />
+    <traffic src="sender[2]" dest="recip" delay="200ms+240ms" datarate="1Mbps" drop="false" />
+    <traffic src="sender[3]" dest="recip" delay="250ms"       datarate="1Mbps" drop="false" />
+    <traffic src="sender[4]" dest="recip" delay="300ms+200ms" datarate="1Mbps" drop="false" />
+    <traffic src="sender[5]" dest="recip" delay="350ms"       datarate="1Mbps" drop="false" />
+    <traffic src="sender[6]" dest="recip" delay="400ms+160ms" datarate="1Mbps" drop="false" />
+    <traffic src="sender[7]" dest="recip" delay="450ms"       datarate="1Mbps" drop="false" />
+    <traffic src="sender[8]" dest="recip" delay="500ms+120ms" datarate="1Mbps" drop="false" />
+    <traffic src="sender[9]" dest="recip" delay="550ms"       datarate="1Mbps" drop="false" />
+    <traffic src="recip" dest="sender[0]" delay="600ms"       datarate="1Mbps" drop="false" />
+    <traffic src="recip" dest="sender[1]" delay="550ms+260ms" datarate="1Mbps" drop="false" />
+    <traffic src="recip" dest="sender[2]" delay="500ms"       datarate="1Mbps" drop="false" />
+    <traffic src="recip" dest="sender[3]" delay="450ms+220ms" datarate="1Mbps" drop="false" />
+    <traffic src="recip" dest="sender[4]" delay="400ms"       datarate="1Mbps" drop="false" />
+    <traffic src="recip" dest="sender[5]" delay="350ms+180ms" datarate="1Mbps" drop="false" />
+    <traffic src="recip" dest="sender[6]" delay="300ms"       datarate="1Mbps" drop="false" />
+    <traffic src="recip" dest="sender[7]" delay="250ms+140ms" datarate="1Mbps" drop="false" />
+    <traffic src="recip" dest="sender[8]" delay="200ms"       datarate="1Mbps" drop="false" />
+    <traffic src="recip" dest="sender[9]" delay="150ms+100ms" datarate="1Mbps" drop="false" />
 <!--
     <traffic src="**" dest="**" delay="10ms+truncnormal(100ms,20ms)" datarate="uniform(100kbps,500kbps)" drop="uniform(0.01, 0.05)" />
 -->
