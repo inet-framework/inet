@@ -41,7 +41,8 @@ import inet.util.PcapRecorder;
 // This module similar to NodeBase. Changes: 
 //   - NetworkLayer replaced to InternetCloudNetworkLayer,
 //   - mobility module removed,
-//   - removed wlan and eth interfaces.
+//   - removed wlan, eth and ext interfaces,
+//   - idealchannels from interfaces to IP layer replaced to InternetCloudTaggerChannel.
 //
 // @see InternetCloudNetwokConfigurator
 //
