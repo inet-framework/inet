@@ -70,7 +70,7 @@ class INET_API CloudDelayerMatrix : public CloudDelayerBase
         double dropRate;
         simtime_t lastSent;
       public:
-        Descriptor() : dropRate(0.0), lastSent(SIMTIME_ZERO) {}
+        Descriptor() : delayPar(NULL), dataratePar(NULL), dropRate(0.0), lastSent(SIMTIME_ZERO) {}
     };
 
     typedef std::pair<int,int> IDPair;
