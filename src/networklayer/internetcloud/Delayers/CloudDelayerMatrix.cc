@@ -113,6 +113,13 @@ bool CloudDelayerMatrix::MatrixEntry::matches(const char *src, const char *dest)
 }
 
 
+CloudDelayerMatrix::~CloudDelayerMatrix()
+{
+    for (MatrixEntryPtrVector::iterator i=matrixEntries.begin(); i != matrixEntries.end(); ++i)
+        delete *i;
+    matrixEntries.clear();
+}
+
 void CloudDelayerMatrix::initialize()
 {
     host = findContainingNode(this);
