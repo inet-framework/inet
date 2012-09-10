@@ -551,7 +551,9 @@ void IPv4NetworkConfigurator::collectCompatibleInterfaces(const std::vector<Inte
         compatibleInterfaces.push_back(candidateInterface);
         EV_DEBUG << "Merged address specification: " << IPv4Address(mergedAddress) << " / " << IPv4Address(mergedAddressSpecifiedBits) << " / " << IPv4Address(mergedAddressIncompatibleBits) << endl;
         EV_DEBUG << "Merged netmask specification: " << IPv4Address(mergedNetmask) << " / " << IPv4Address(mergedNetmaskSpecifiedBits) << " / " << IPv4Address(mergedNetmaskIncompatibleBits) << endl;
+
     }
+    // TODO: sort compatibleInterfaces putting the most limited interfaces first
     EV_DEBUG << "Found " << compatibleInterfaces.size() << " compatible interfaces" << endl;
 }
 
@@ -690,6 +692,7 @@ void IPv4NetworkConfigurator::assignAddresses(IPv4Topology& topology)
                 assignedInterfaceAddresses.push_back(completeAddress);
 
                 // configure interface with the selected address and netmask
+                // TODO: make it possible that unconfigured interfaces don't get allocated IP addresses
                 if (compatibleInterface->configure)
                 {
                     IPv4InterfaceData *interfaceData = compatibleInterface->interfaceEntry->ipv4Data();
