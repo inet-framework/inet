@@ -1,7 +1,7 @@
 /*
   */
 #include "ManetRoutingBase.h"
-#include "batman.h"
+#include "BatmanMain.h"
 #include "IPv4ControlInfo.h"
 #include "UDPPacket_m.h"
 #include "IPv4InterfaceData.h"

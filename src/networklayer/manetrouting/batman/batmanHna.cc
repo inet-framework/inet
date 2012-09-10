@@ -1,4 +1,4 @@
-#include "batman.h"
+#include "BatmanMain.h"
 
 /* this function can be called when the daemon starts or at runtime */
 void Batman::hna_local_task_add_ip(const Uint128 &ip_addr, uint16_t netmask, uint8_t route_action)
