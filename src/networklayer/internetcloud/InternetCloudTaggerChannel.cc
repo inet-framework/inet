@@ -27,8 +27,8 @@ void InternetCloudTaggerChannel::initialize(int stage)
 {
     if (stage == 1)
     {
-        IInterfaceTable *ift = InterfaceTableAccess().get(this->getParentModule());
-        ie = ift->getInterfaceByNetworkLayerGateIndex(this->srcgatep->getPathEndGate()->getIndex());
+        IInterfaceTable *ift = InterfaceTableAccess().get(getParentModule());
+        ie = ift->getInterfaceByNetworkLayerGateIndex(getSourceGate()->getPathEndGate()->getIndex());
     }
 }
 
