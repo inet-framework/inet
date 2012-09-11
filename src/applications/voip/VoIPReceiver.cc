@@ -54,7 +54,9 @@ void VoIPReceiver::initialize(int stage)
 	mTaildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
 
 	mTaggedSample = new TaggedSample();
+    // FIXME: I believe this check_and_cast is superfluous
 	mTaggedSample->module = check_and_cast<cComponent*>(this);;
+    // FIXME: this-> is not needed, getId() is not ambiguous
 	mTaggedSample->id = this->getId();
 }
 
@@ -62,19 +64,23 @@ void VoIPReceiver::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         throw cRuntimeError("Unaccepted self message: '%s'", msg->getName());
+        // FIXME: there are no continuable exceptions in C++ (as opposed to in common lisp), so this is dead code
         delete msg;
         return;
     }
 	VoipPacket* pPacket = dynamic_cast<VoipPacket*>(msg);
     if (pPacket==0) {
+        // FIXME: it should rather say unknown incoming message type (not VoipPacket)
         EV << "VoIPReceiver: Unaccepted incoming message: " << msg->getName() << endl;
         delete msg;
         return;
     }
 
+    // FIXME: what does this mInit mean? does it mean initialized? if so, how could it be false here? and more importantly why do we set it back to false? this is confusing
 	if(mInit)
 	{
 		mCurrentTalkspurt = pPacket->getTalkID();
+        // FIXME: so now we are uninitialized?
 		mInit = false;
 	}
 
@@ -88,12 +94,14 @@ void VoIPReceiver::handleMessage(cMessage *msg)
 
 	EV<<"PACCHETTO ARRIVATO: TALK "<<pPacket->getTalkID()<<" FRAME "<<pPacket->getFrameID()<<"\n\n";     //FIXME Translate!!!
 
+    // FXIME: maybe the simulation kernel got it wrong? this is a useless assert
 	ASSERT(pPacket->getArrivalTime() == simTime());
     simtime_t delay = pPacket->getArrivalTime() - pPacket->getVoipTimestamp();
     emit(mFrameDelaySignal, delay);
 	mPacketsList.push_back(pPacket);
 }
 
+// FIXME: this should rather be called evaluateTalkspurt, because all it does is that it gathers some statistics
 void VoIPReceiver::playout(bool finish)
 {
 	if(mPacketsList.empty())
@@ -124,6 +132,7 @@ void VoIPReceiver::playout(bool finish)
     emit(mFrameLossRateSignal, frameLossRate);
 
     //VETTORE PER GESTIRE DUPLICATI     //FIXME Translate!!!
+    // FIXME: what is actually arrived here?
     bool* isArrived = new bool[pPacket->getNframes()];
     for(unsigned int y = 0; y < pPacket->getNframes(); y++)
     {
@@ -133,12 +142,14 @@ void VoIPReceiver::playout(bool finish)
     simtime_t       last_jitter 	    = 0.0;
     simtime_t       max_jitter 		= -1000.0;
 
+    // FIXME: what is the idea here? what does it compute? from what data does it compute? write something about the algorithm
 	while( !mPacketsList.empty() /*&& pPacket->getTalkID() == mCurrentTalkspurt*/ )
 	{
 		pPacket =  mPacketsList.front();
-
+        // FIXME: why do we modify a packet in the receiver?
 		pPacket->setPlayoutTime(firstPlayoutTime + ((int)pPacket->getFrameID() - (int)firstFrameId)  * mSamplingDelta);
 
+        // FIXME: is this really a jitter? positive means the packet is too late
 		last_jitter = pPacket->getArrivalTime() - pPacket->getPlayoutTime();
 		max_jitter  = std::max( max_jitter, last_jitter );
 
@@ -161,6 +172,7 @@ void VoIPReceiver::playout(bool finish)
 		}
 		else
 		{
+            // FIXME: is this the place where we actually play the packets?
 			while( !mPlayoutQueue.empty() && pPacket->getArrivalTime() > mPlayoutQueue.front()->getPlayoutTime() )
 			{
 				++mBufferSpace;
@@ -219,23 +231,26 @@ void VoIPReceiver::playout(bool finish)
 	delete[] isArrived;
 }
 
+// FIXME: a reference to a paper, article, whatever that describes the model used here would be great!
 double VoIPReceiver::eModel (double delay, double loss)
 {
 		double delayms = 1000.0 * delay;
 
+        // FIXME: useless comment
 		// Compute the Id parameter
 		int u = ( (delayms - 177.3) > 0 ? 1: 0 );
-		double id = 0.0;
-		id = 0.024 * delayms + 0.11 * (delayms - 177.3) * u;
+		double id = 0.024 * delayms + 0.11 * (delayms - 177.3) * u;
 
 		// Packet loss p in %
 		double p = loss * 100;
 		// Compute the Ie,eff parameter
 		double ie_eff = emodel_Ie_ + (95 - emodel_Ie_) * p / (p + emodel_Bpl_);
 
+        // FIXME: useless comment
 		// Compute the R factor
 		double Rfactor = emodel_Ro_ - id - ie_eff + emodel_A_;
 
+        // FIXME: useless comment
 		// Compute the MOS value
 		double mos = 0.0;
 
@@ -247,7 +262,7 @@ double VoIPReceiver::eModel (double delay, double loss)
 		}
 		else {
 			mos = 1.0 + 0.035 * Rfactor + 7.0 * 1E-6 * Rfactor *
-			(Rfactor - 60.0) * (100.0 - Rfactor);
+			    (Rfactor - 60.0) * (100.0 - Rfactor);
 		}
 
 		mos = ( mos < 1.0 ) ? 1.0 : mos;

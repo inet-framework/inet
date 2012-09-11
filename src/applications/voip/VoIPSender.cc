@@ -92,6 +92,7 @@ void VoIPSender::talkspurt(double dur)
 
     frameID = 0;
 	nframes_tmp=nframes;
+    // FIXME: why do we schedule a message for the current simulation time? why don't we rather call the method directly?
 	scheduleAt(simTime(), selfSender);
 }
 

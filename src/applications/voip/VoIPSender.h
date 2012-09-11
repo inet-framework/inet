@@ -25,6 +25,7 @@ class VoIPSender : public cSimpleModule
 	bool initialized_;
 
 	//source
+    // FIXME: use volatile parameters for talk and silence duration
 	double 	  durTalk;
 	double 	  durSil;
 	double 	  scaleTalk;
@@ -32,6 +33,8 @@ class VoIPSender : public cSimpleModule
 	double 	  scaleSil;
 	double 	  shapeSil;
 	bool      isTalk;
+
+    // FIXME: be more specific with the name of this self message
 	cMessage* selfSource;
 	//sender
 	// FIXME questi non dovrebbero essere interi     //FIXME Translate!!!
@@ -43,7 +46,7 @@ class VoIPSender : public cSimpleModule
 	double samplingTime;
 
 	// ----------------------------
-
+    // FIXME: it is unclear what is this self message used for
 	cMessage *selfSender;
 
 	simtime_t timestamp;

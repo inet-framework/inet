@@ -33,12 +33,14 @@ class VoIPReceiver : public cSimpleModule
 
 	~VoIPReceiver();
 
+    // FIXME: avoid _ characters
 	int 	 	emodel_Ie_;
 	int 	    emodel_Bpl_;
 	int 		emodel_A_;
 	double 		emodel_Ro_;
 
 	typedef std::list<VoipPacket*> PacketsList;
+    // FIXME: welcome to Microsoft naming conventions... mFooBar -> fooBar
 	PacketsList  mPacketsList;
 	PacketsList  mPlayoutQueue;
 	unsigned int mCurrentTalkspurt;
