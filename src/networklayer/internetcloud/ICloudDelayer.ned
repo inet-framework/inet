@@ -22,13 +22,10 @@ package inet.networklayer.internetcloud;
 //
 // Delay module interface for InternetCloudNetworkLayer
 //
-// Calculates delay for incoming packets based on src and dest interfaces
-// and send packet with calculated delay. The src info was set by TaggerChannel
-// between INICs and NetworkLayer.
-// Should use TaggerChannel for connect interfaces for network layer.
+// Delays and/or drops the packets based on what interface card 
+// the packet has arrived on and on what interface it is leaving the cloud. 
 //
-// @see InternetCloudNetwokLayer, InternetCloud, InternetCloudNetworkConfigurator
-//
+// @see InternetCloudNetwokLayer, InternetCloud
 moduleinterface ICloudDelayer
 {
     parameters:

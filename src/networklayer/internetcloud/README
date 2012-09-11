@@ -1,0 +1,60 @@
+InternetCloud
+=============
+
+This component can be used to model the throughput, packet delay and packet drop of 
+the Internet or other large scale networks.
+
+The idea behind this component is loosely based on the DELFOI component originally
+developed by Philipp Berndt.
+
+The cloud component is actually a "router" component with some special abilities 
+to introduce processing delay and limit the darate between its ports. Routing tables
+and IP addresses for the interfaces must be configured by the IPv4NetworkConfigurator
+module.      
+
+The component can model the packet delay and packet drop behavior of the 
+internet by specifying the packet delay, datarate and packet loss parameters 
+for each in- and outbound connection pair (path) in an XML configuration file. 
+
+Path parameters my contain NED expressions containing random variables. They are
+re-evaluated each time a packet is processed (i.e. they behave as 'volatile' 
+parameters). This allows the specification of random delay and datarate values.
+
+Path parameters are configured by the <traffic> elements in the configuration file.
+A <traffic> element can specify match expressions for its source and destination endpoints
+in addition to the base path parameters. Whenever a packet arrives, the parameters from the
+first matching <traffic> element will be used to determine the parameter values.
+
+The Internet is modeled as independent paths connecting the input and output gates 
+in the cloud. In real life, a packet travels through several routers where each router 
+introduces a processing delay. Additionally links between the routers limit the
+maximum throughput possible along the path.
+
+IN ------> R1 ------> R2 ------> R3 ------> OUT 
+     R1    D1    R2   D2    R3   D3    R4
+     
+The total processing delay is: Dpath = sum(D1,D2,D3)
+
+The maximum usable datarate on the path is Rpath = min(R1,R2,R3,R4)
+(i.e. the bottleneck on the path)
+
+Limitations:
+     
+ - In a real life scenario, routers and links are shared among different paths (i.e. 
+   delay values on different paths are not independent of each other because they share
+   links between, and queues inside the routers). This is NOT modeled in the current 
+   implementation.
+
+Future enhancements:
+
+ - At the moment the the configuration must be created manually as an XML file. 
+   In future it would be possible to create the configuration, based on data 
+   derived from real measurement of the internet. (i.e. using a script to convert 
+   speedtest.net data to the correct configuration file format)
+   
+ - The model can be extended in future to handle several different states of the 
+   "internet" allowing to implement a state model. The configuration format 
+   supports several independent "parameter sets" but only the first set is used
+   at the moment.
+   Later  
+   
