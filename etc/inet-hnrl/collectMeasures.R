@@ -28,7 +28,8 @@ collectMeasures <- function(scalars,
     numCols <- length(colNames)
     for (i in 1:numCols) {
         ## convert factor columns (e.g., 'dr' and 'n') into numeric ones
-        tmp <- cbind(tmp, as.numeric(as.character(eval(parse(text=paste('tmp$', colNames[i], sep=''))))))
+        tmp <- cbind(tmp, eval(parse(text=as.character(eval(parse(text=paste('tmp$', colNames[i], sep='')))))))
+        ## tmp <- cbind(tmp, as.numeric(as.character(eval(parse(text=paste('tmp$', colNames[i], sep=''))))))
     }
     tmp <- subset(tmp, select=c(1:numCols+(3+numCols), 1:3+numCols))
     names(tmp)[1:length(colNames)]=colNames
