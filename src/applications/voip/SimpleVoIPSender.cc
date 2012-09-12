@@ -122,6 +122,7 @@ void SimpleVoIPSender::selectPeriodTime()
 
 void SimpleVoIPSender::sendVoIPPacket()
 {
+    //FIXME use >>> packet->setVoipTimestamp(simTime() - packetizationInterval); <<<
     SimpleVoIPPacket* packet = new SimpleVoIPPacket("VoIP");
     packet->setTalkspurtID(talkspurtID-1);
     packet->setTalkspurtNumPackets(talkspurtNumPackets);
