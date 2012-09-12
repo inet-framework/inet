@@ -13,13 +13,13 @@ Define_Module(SimpleVoIPReceiver);
 
 SimpleVoIPReceiver::~SimpleVoIPReceiver()
 {
-    while ( !playoutQueue.empty() )
+    while (!playoutQueue.empty())
     {
         delete playoutQueue.front();
         playoutQueue.pop_front();
     }
 
-    while ( !packetsList.empty() )
+    while (!packetsList.empty())
     {
         delete packetsList.front();
         packetsList.pop_front();
@@ -28,7 +28,7 @@ SimpleVoIPReceiver::~SimpleVoIPReceiver()
 
 void SimpleVoIPReceiver::initialize(int stage)
 {
-    if (stage!=3)
+    if (stage != 3)
         return;
 
     emodel_Ie = par("emodel_Ie");
@@ -41,7 +41,7 @@ void SimpleVoIPReceiver::initialize(int stage)
 
     int port = par("localPort");
     EV << "VoIPReceiver::initialize - binding to port: local:" << port << endl;
-    if (port!=-1) {
+    if (port != -1) {
             socket.setOutputGate(gate("udpOut"));
             socket.bind(port);
     }
@@ -114,7 +114,6 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
             maxId = std::max(maxId, (*it)->getPacketID());
         channelLoss = maxId + 1 - packetsList.size();
     }
-
     else
         channelLoss = pPacket->getTalkspurtNumPackets() - packetsList.size();
 
@@ -129,11 +128,11 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
         isArrived[y] = false;
     }
 
-    simtime_t       last_jitter = 0.0;
-    simtime_t       max_jitter = -1000.0;
+    simtime_t last_jitter = 0.0;
+    simtime_t max_jitter = -1000.0;
 
     // FIXME: what is the idea here? what does it compute? from what data does it compute? write something about the algorithm
-    while ( !packetsList.empty() /*&& pPacket->getTalkID() == mCurrentTalkspurt*/ )
+    while (!packetsList.empty() /*&& pPacket->getTalkID() == mCurrentTalkspurt*/)
     {
         pPacket = packetsList.front();
         // FIXME: why do we modify a packet in the receiver?
@@ -148,10 +147,10 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
         //GESTIONE IN CASO DI DUPLICATI     //FIXME Translate!!!
         if (isArrived[pPacket->getPacketID()])
         {
-                    EV << "PACCHETTO DUPLICATO: TALK " << pPacket->getTalkspurtID() << " PACKET " << pPacket->getPacketID() << "\n\n";     //FIXME Translate!!!
-                    delete pPacket;
+            EV << "PACCHETTO DUPLICATO: TALK " << pPacket->getTalkspurtID() << " PACKET " << pPacket->getPacketID() << "\n\n";     //FIXME Translate!!!
+            delete pPacket;
         }
-        else if ( last_jitter > 0.0 )
+        else if (last_jitter > 0.0)
         {
             ++playoutLoss;
             EV << "PACCHETTO IN RITARDO ELIMINATO: TALK " << pPacket->getTalkspurtID() << " PACKET " << pPacket->getPacketID() << "\n\n";     //FIXME Translate!!!
@@ -160,7 +159,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
         else
         {
             // FIXME: is this the place where we actually play the packets?
-            while ( !playoutQueue.empty() && pPacket->getArrivalTime() > playoutQueue.front()->getPlayoutTime() )
+            while (!playoutQueue.empty() && pPacket->getArrivalTime() > playoutQueue.front()->getPlayoutTime())
             {
                 ++bufferSpace;
                 //EV << "RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK " << mPlayoutQueue.front()->getTalkspurtID() << " PACKET " << mPlayoutQueue.front()->getPacketID() << "\n";     //FIXME Translate!!!
@@ -210,7 +209,8 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
     EV << "PLAYOUT DELAY ADAPTATION \n" << "OLD PLAYOUT DELAY: " << playoutDelay << "\nMAX JITTER MESEAURED: " << max_jitter << "\n\n";
 
     playoutDelay += max_jitter;
-    if (playoutDelay < 0.0) playoutDelay = 0.0;
+    if (playoutDelay < 0.0)
+        playoutDelay = 0.0;
     EV << "NEW PLAYOUT DELAY: " << playoutDelay << "\n\n";
 
     delete [] isArrived;
@@ -224,7 +224,7 @@ double SimpleVoIPReceiver::eModel(double delay, double loss)
 
     // FIXME: useless comment
     // Compute the Id parameter
-    int u = ( (delayms - alpha3) > 0 ? 1: 0 );
+    int u = (delayms - alpha3) > 0 ? 1 : 0;
     double id = 0.024 * delayms + 0.11 * (delayms - alpha3) * u;
 
     // Packet loss p in %
@@ -247,11 +247,10 @@ double SimpleVoIPReceiver::eModel(double delay, double loss)
         mos = 4.5;
     }
     else {
-        mos = 1.0 + 0.035 * Rfactor + 7.0 * 1E-6 * Rfactor *
-                (Rfactor - 60.0) * (100.0 - Rfactor);
+        mos = 1.0 + 0.035 * Rfactor + 7.0 * 1E-6 * Rfactor * (Rfactor - 60.0) * (100.0 - Rfactor);
     }
 
-    mos = ( mos < 1.0 ) ? 1.0 : mos;
+    mos = (mos < 1.0) ? 1.0 : mos;
 
     return mos;
 }
