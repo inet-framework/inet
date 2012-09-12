@@ -62,10 +62,8 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         throw cRuntimeError("Unaccepted self message: '%s'", msg->getName());
-        // FIXME: there are no continuable exceptions in C++ (as opposed to in common lisp), so this is dead code
-        delete msg;
-        return;
     }
+
     SimpleVoIPPacket* pPacket = dynamic_cast<SimpleVoIPPacket*>(msg);
     if (pPacket==0) {
         // FIXME: it should rather say unknown incoming message type (not VoipPacket)
