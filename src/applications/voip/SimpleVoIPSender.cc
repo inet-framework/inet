@@ -36,13 +36,9 @@ void SimpleVoIPSender::initialize(int stage)
     if (stage != 3)
         return;
 
-    durTalk = 0;
-    durSil = 0;
+    talkDuration = 0;
+    silenceDuration = 0;
     selfSource = new cMessage("selfSource");
-    scaleTalk = par("scaleTalk");
-    shapeTalk = par("shapeTalk");
-    scaleSil = par("scaleSil");
-    shapeSil = par("shapeSil");
     isTalk = false;
     talkspurtID = 0;
     talkspurtNumPackets = 0;
@@ -103,11 +99,11 @@ void SimpleVoIPSender::selectPeriodTime()
 
     if (isTalk)
     {
-        durSil = weibull(scaleSil, shapeSil);
-        double durSil2 = round(durSil*1000)/1000;
-        EV << "PERIODO SILENZIO: " << "Durata: " << durSil << "/" << durSil2 << " secondi\n\n";     //FIXME Translate!!!
-        durSil = durSil2;
-        simtime_t endSilent = simTime() + durSil;
+        silenceDuration = par("silenceDuration").doubleValue();
+        double durSil2 = round(silenceDuration*1000)/1000;
+        EV << "PERIODO SILENZIO: " << "Durata: " << silenceDuration << "/" << durSil2 << " secondi\n\n";     //FIXME Translate!!!
+        silenceDuration = durSil2;
+        simtime_t endSilent = simTime() + silenceDuration;
         if (stopTime != 0 && endSilent > stopTime)
             endSilent = stopTime;
         scheduleAt(endSilent, selfSource);
@@ -115,17 +111,17 @@ void SimpleVoIPSender::selectPeriodTime()
     }
     else
     {
-        durTalk = weibull(scaleTalk, shapeTalk);
-        double durTalk2 = round(durTalk*1000)/1000;
-        EV << "TALKSPURT: " << talkspurtID << " Durata: " << durTalk << "/" << durTalk2 << " secondi\n\n";     //FIXME Translate!!!
-        durTalk = durTalk2;
-        simtime_t endTalk = simTime() + durTalk;
+        talkDuration = par("talkDuration").doubleValue();
+        double durTalk2 = round(talkDuration*1000)/1000;
+        EV << "TALKSPURT: " << talkspurtID << " Durata: " << talkDuration << "/" << durTalk2 << " secondi\n\n";     //FIXME Translate!!!
+        talkDuration = durTalk2;
+        simtime_t endTalk = simTime() + talkDuration;
         if (stopTime != 0 && endTalk > stopTime)
         {
             endTalk = stopTime;
-            durTalk = SIMTIME_DBL(stopTime - simTime());
+            talkDuration = SIMTIME_DBL(stopTime - simTime());
         }
-        talkspurt(durTalk);
+        talkspurt(talkDuration);
         scheduleAt(endTalk, selfSource);
         isTalk = true;
     }

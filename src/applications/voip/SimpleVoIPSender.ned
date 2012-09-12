@@ -38,10 +38,8 @@ simple SimpleVoIPSender like IUDPApp
         int talkFrameSize @unit(B) = default(40B);     // byte size of talk frames
         // FIXME: delete shape and scale parameters and use volatile random variables for talk and silence duration
         // FIXME: for the god's sake is it worth abbreviating silence as sil?
-        double shapeTalk = default(0.824);
-        double scaleTalk = default(1.423);
-        double shapeSil = default(1.089);
-        double scaleSil = default(0.899);
+        volatile double talkDuration @unit(s) = default(weibull(1.423s, 0.824s));
+        volatile double silenceDuration @unit(s) = default(weibull(0.899s, 1.089s));
         // FIXME: the standard terminology is packetization interval, it would be better
         double packetizationInterval @unit(s) = default(20ms);   // timelength of samplepackets
         double startTime @unit(s) = default(0);

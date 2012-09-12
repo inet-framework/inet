@@ -23,12 +23,8 @@ class SimpleVoIPSender : public cSimpleModule
 
     //source
     // FIXME: use volatile parameters for talk and silence duration
-    double    durTalk;
-    double    durSil;
-    double    scaleTalk;
-    double    shapeTalk;
-    double    scaleSil;
-    double    shapeSil;
+    double    talkDuration;
+    double    silenceDuration;
     bool      isTalk;
 
     // FIXME: be more specific with the name of this self message
