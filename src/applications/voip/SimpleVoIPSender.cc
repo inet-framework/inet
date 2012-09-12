@@ -12,8 +12,6 @@
 #include "SimpleVoIPPacket_m.h"
 
 
-#define round(x) floor((x) + 0.5)
-
 Define_Module(SimpleVoIPSender);
 
 SimpleVoIPSender::SimpleVoIPSender()
@@ -60,8 +58,7 @@ void SimpleVoIPSender::initialize(int stage)
 
     // calculating traffic starting time
     // TODO correct this conversion
-    //FIXME why need the round() ???
-    simtime_t startTime = round(par("startTime").doubleValue() * 1000.0) / 1000.0;
+    simtime_t startTime = par("startTime").doubleValue();
     stopTime = par("stopTime").doubleValue();
     if (stopTime != 0 && stopTime < startTime)
         throw cRuntimeError("Invalid startTime/stopTime settings: startTime %g s greater than stopTime %g s", SIMTIME_DBL(startTime), SIMTIME_DBL(stopTime));
@@ -100,9 +97,7 @@ void SimpleVoIPSender::selectPeriodTime()
     if (isTalk)
     {
         silenceDuration = par("silenceDuration").doubleValue();
-        double durSil2 = round(silenceDuration*1000)/1000;
-        EV << "PERIODO SILENZIO: " << "Durata: " << silenceDuration << "/" << durSil2 << " secondi\n\n";     //FIXME Translate!!!
-        silenceDuration = durSil2;
+        EV << "PERIODO SILENZIO: " << "Durata: " << silenceDuration << "/" << silenceDuration << " secondi\n\n";     //FIXME Translate!!!
         simtime_t endSilent = simTime() + silenceDuration;
         if (stopTime != 0 && endSilent > stopTime)
             endSilent = stopTime;
@@ -112,9 +107,7 @@ void SimpleVoIPSender::selectPeriodTime()
     else
     {
         talkDuration = par("talkDuration").doubleValue();
-        double durTalk2 = round(talkDuration*1000)/1000;
-        EV << "TALKSPURT: " << talkspurtID << " Durata: " << talkDuration << "/" << durTalk2 << " secondi\n\n";     //FIXME Translate!!!
-        talkDuration = durTalk2;
+        EV << "TALKSPURT: " << talkspurtID << " Durata: " << talkDuration << "/" << talkDuration << " secondi\n\n";     //FIXME Translate!!!
         simtime_t endTalk = simTime() + talkDuration;
         if (stopTime != 0 && endTalk > stopTime)
         {
