@@ -34,7 +34,6 @@ void VoIPReceiver::initialize(int stage)
     emodel_Ro_  = par("emodel_Ro_");
 
     mBufferSpace   = par("dim_buffer");
-    mSamplingDelta = par("samplingTime");
     mPlayoutDelay  = par("playoutDelay");
 
     mInit = true;
@@ -73,6 +72,8 @@ void VoIPReceiver::handleMessage(cMessage *msg)
         delete msg;
         return;
     }
+
+    // FIXME add a check: the voiceDuration value does not change in same talkspurt
 
     // FIXME: what does this mInit mean? does it mean initialized? if so, how could it be false here? and more importantly why do we set it back to false? this is confusing
     if(mInit)
@@ -145,7 +146,7 @@ void VoIPReceiver::playout(bool finish)
     {
         pPacket =  mPacketsList.front();
         // FIXME: why do we modify a packet in the receiver?
-        pPacket->setPlayoutTime(firstPlayoutTime + ((int)pPacket->getFrameID() - (int)firstFrameId)  * mSamplingDelta);
+        pPacket->setPlayoutTime(firstPlayoutTime + ((int)pPacket->getFrameID() - (int)firstFrameId)  * pPacket->getVoiceDuration());
 
         // FIXME: is this really a jitter? positive means the packet is too late
         last_jitter = pPacket->getArrivalTime() - pPacket->getPlayoutTime();

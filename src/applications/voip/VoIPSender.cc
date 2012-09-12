@@ -138,7 +138,7 @@ void VoIPSender::sendVoIPPacket()
     packet->setNframes(nframes);
     packet->setFrameID(frameID);
     packet->setVoipTimestamp(simTime());
-    packet->setTimeLength(samplingTime);
+    packet->setVoiceDuration(samplingTime);
     packet->setByteLength(talkFrameSize);
     EV<<"TALKSPURT "<<talkID-1<<" Invio frame "<<frameID<<"\n";     //FIXME Translate!!!
 

@@ -26,7 +26,7 @@ packet VoipPacket
     // FIXME: this name is pretty meaningless. does it contain the sending time or what? be more specific
     simtime_t voipTimestamp;
     // FIXME: is this a duration? if so, then call it duration
-    simtime_t timeLength;
+    simtime_t voiceDuration;
 
     // next field used by receiver:
     // FIXME: this name is also quite meaningless. is it the time when the packet was played at the receiver? why do we put it in the packet then? it looks like as if it would have been sent over the wire

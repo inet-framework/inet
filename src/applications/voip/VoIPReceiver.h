@@ -45,7 +45,6 @@ class VoIPReceiver : public cSimpleModule
     PacketsList  mPlayoutQueue;
     unsigned int mCurrentTalkspurt;
     unsigned int mBufferSpace;
-    simtime_t    mSamplingDelta;
     simtime_t    mPlayoutDelay;
 
     bool        mInit;

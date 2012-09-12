@@ -31,8 +31,6 @@ simple VoIPReceiver like IUDPApp
         double emodel_Ro_ = default(93.2);
         double playoutDelay @unit(s) = default(0);      // delay for begin playout after received first packet
         int dim_buffer = default(20);
-        // FIXME: packetization interval again
-        double samplingTime @unit(s) = default(20ms);
 
         @signal[VoIPFrameDelay](type="simtime_t");      // when receive a frame
         @signal[VoIPFrameLossRate](type="double");      // at end of talkspur
