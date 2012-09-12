@@ -21,8 +21,6 @@
 class VoIPSender : public cSimpleModule
 {
     UDPSocket socket;
-    //has the sender been initialized?
-    bool initialized_;
 
     //source
     // FIXME: use volatile parameters for talk and silence duration

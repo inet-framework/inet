@@ -13,7 +13,6 @@ Define_Module(VoIPSender);
 
 VoIPSender::VoIPSender()
 {
-    initialized_ = false;
     selfSender = NULL;
     selfSource = NULL;
 }
@@ -26,10 +25,10 @@ VoIPSender::~VoIPSender()
 
 void VoIPSender::initialize(int stage)
 {
-    EV << "VoIP Sender initialize: stage " << stage << " - initialize=" << initialized_ << endl;
+    EV << "VoIP Sender initialize: stage " << stage << endl;
 
     // avoid multiple initializations
-    if (stage!=3 || initialized_)
+    if (stage != 3)
         return;
 
     durTalk = 0;
@@ -68,8 +67,6 @@ void VoIPSender::initialize(int stage)
 
     scheduleAt(startTime, selfSource);
     EV << "\t starting traffic in " << startTime << " s" << endl;
-
-    initialized_ = true;
 }
 
 void VoIPSender::handleMessage(cMessage *msg)
