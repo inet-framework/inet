@@ -31,10 +31,10 @@ void SimpleVoIPReceiver::initialize(int stage)
     if (stage!=3)
         return;
 
-    emodel_Ie_ = par("emodel_Ie_");
-    emodel_Bpl_ = par("emodel_Bpl_");
-    emodel_A_ = par("emodel_A_");
-    emodel_Ro_ = par("emodel_Ro_");
+    emodel_Ie = par("emodel_Ie");
+    emodel_Bpl = par("emodel_Bpl");
+    emodel_A = par("emodel_A");
+    emodel_Ro = par("emodel_Ro");
 
     bufferSpace = par("bufferSpace");
     playoutDelay = par("playoutDelay");
@@ -232,11 +232,11 @@ double SimpleVoIPReceiver::eModel(double delay, double loss)
     // Packet loss p in %
     double p = loss * 100;
     // Compute the Ie,eff parameter
-    double ie_eff = emodel_Ie_ + (95 - emodel_Ie_) * p / (p + emodel_Bpl_);
+    double ie_eff = emodel_Ie + (95 - emodel_Ie) * p / (p + emodel_Bpl);
 
     // FIXME: useless comment
     // Compute the R factor
-    double Rfactor = emodel_Ro_ - id - ie_eff + emodel_A_;
+    double Rfactor = emodel_Ro - id - ie_eff + emodel_A;
 
     // FIXME: useless comment
     // Compute the MOS value

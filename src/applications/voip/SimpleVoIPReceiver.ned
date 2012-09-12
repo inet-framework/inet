@@ -27,10 +27,10 @@ simple SimpleVoIPReceiver like IUDPApp
 
         // FIXME: parameter names should not end with _, in fact I believe they should not even contain any _ character
         // e-model defined in ITU-T G.107 standard
-        int emodel_Ie_ = default(5);        // Equipment impairment factor
-        int emodel_Bpl_ = default(10);      // Packet-loss robustness factor
-        int emodel_A_ = default(5);         // Advantage factor
-        double emodel_Ro_ = default(93.2);  // Basic signal-to-noise ratio
+        int emodel_Ie = default(5);        // Equipment impairment factor
+        int emodel_Bpl = default(10);      // Packet-loss robustness factor
+        int emodel_A = default(5);         // Advantage factor
+        double emodel_Ro = default(93.2);  // Basic signal-to-noise ratio
 
         double playoutDelay @unit(s) = default(0);      // delay for begin playout after received first packet
         int bufferSpace = default(20);      // buffer size (max number of packets in buffer)

@@ -35,10 +35,10 @@ class SimpleVoIPReceiver : public cSimpleModule
     ~SimpleVoIPReceiver();
 
     // FIXME: avoid _ characters
-    int         emodel_Ie_;
-    int         emodel_Bpl_;
-    int         emodel_A_;
-    double      emodel_Ro_;
+    int         emodel_Ie;
+    int         emodel_Bpl;
+    int         emodel_A;
+    double      emodel_Ro;
 
     typedef std::list<SimpleVoIPPacket*> PacketsList;
     // FIXME: welcome to Microsoft naming conventions... mFooBar -> fooBar
