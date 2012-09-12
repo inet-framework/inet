@@ -17,7 +17,7 @@
 // @author Zoltan Bojthe
 //
 
-package inet.networklayer.internetcloud.Delayers;
+package inet.networklayer.internetcloud;
 
 import inet.networklayer.internetcloud.ICloudDelayer;
 
@@ -44,7 +44,7 @@ import inet.networklayer.internetcloud.ICloudDelayer;
 //TODO: I think: need a datarate attribute for traffic entries, too
 //      calculated_delay := delay + (8 * packet_length_in_bytes) / datarate_in_bps
 //
-simple CloudDelayerMatrix like ICloudDelayer
+simple MatrixCloudDelayer like ICloudDelayer
 {
     parameters:
         xml config;

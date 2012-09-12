@@ -82,7 +82,7 @@ module InternetCloud
                         queueIn[sizeof(ifIn)];
                 }
 
-                delayer: <default("CloudNopDelayer")> like ICloudDelayer {
+                delayer: <default("MatrixCloudDelayer")> like ICloudDelayer {
                     @display("p=160,123");
                 }
                 arp: ARP {

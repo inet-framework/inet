@@ -64,9 +64,9 @@ void CloudDelayerBase::handleMessage(cMessage *msg)
     }
 }
 
-void CloudDelayerBase::calculateDropAndDelay(const cMessage *msg, int srcID, int destID, bool& isDrop, simtime_t& delay)
+void CloudDelayerBase::calculateDropAndDelay(const cMessage *msg, int srcID, int destID, bool& outDrop, simtime_t& outDelay)
 {
-    isDrop = false;
-    delay = SIMTIME_ZERO;
+    outDrop = false;
+    outDelay = SIMTIME_ZERO;
 }
 

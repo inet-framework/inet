@@ -17,13 +17,13 @@
 // @author Zoltan Bojthe
 //
 
-#include "CloudDelayerMatrix.h"
+#include "MatrixCloudDelayer.h"
 
 #include "InterfaceTableAccess.h"
 #include "PatternMatcher.h"
 #include "XMLUtils.h"
 
-Define_Module(CloudDelayerMatrix);
+Define_Module(MatrixCloudDelayer);
 
 namespace {
 
@@ -54,7 +54,7 @@ bool getBoolAttribute(const cXMLElement &element, const char *name, const bool *
 
 
 //FIXME modified copy of 'Matcher' class from IPv4NetworkConfigurator
-CloudDelayerMatrix::Matcher::Matcher(const char *pattern)
+MatrixCloudDelayer::Matcher::Matcher(const char *pattern)
 {
     matchesany = isEmpty(pattern);
     if (matchesany)
@@ -74,13 +74,13 @@ CloudDelayerMatrix::Matcher::Matcher(const char *pattern)
     }
 }
 
-CloudDelayerMatrix::Matcher::~Matcher()
+MatrixCloudDelayer::Matcher::~Matcher()
 {
     for (int i = 0; i < (int) matchers.size(); i++)
         delete matchers[i];
 }
 
-bool CloudDelayerMatrix::Matcher::matches(const char *s)
+bool MatrixCloudDelayer::Matcher::matches(const char *s)
 {
     if (matchesany)
         return true;
@@ -91,7 +91,7 @@ bool CloudDelayerMatrix::Matcher::matches(const char *s)
 }
 
 
-CloudDelayerMatrix::MatrixEntry::MatrixEntry(cXMLElement *trafficEntity, bool defaultSymmetric) :
+MatrixCloudDelayer::MatrixEntry::MatrixEntry(cXMLElement *trafficEntity, bool defaultSymmetric) :
         srcMatcher(trafficEntity->getAttribute("src")), destMatcher(trafficEntity->getAttribute("dest"))
 {
     const char *delayAttr = trafficEntity->getAttribute("delay");
@@ -103,7 +103,7 @@ CloudDelayerMatrix::MatrixEntry::MatrixEntry(cXMLElement *trafficEntity, bool de
     dropPar.parse(dropAttr);
 }
 
-bool CloudDelayerMatrix::MatrixEntry::matches(const char *src, const char *dest)
+bool MatrixCloudDelayer::MatrixEntry::matches(const char *src, const char *dest)
 {
     if (srcMatcher.matches(src) && destMatcher.matches(dest))
         return true;
@@ -113,14 +113,14 @@ bool CloudDelayerMatrix::MatrixEntry::matches(const char *src, const char *dest)
 }
 
 
-CloudDelayerMatrix::~CloudDelayerMatrix()
+MatrixCloudDelayer::~MatrixCloudDelayer()
 {
     for (MatrixEntryPtrVector::iterator i=matrixEntries.begin(); i != matrixEntries.end(); ++i)
         delete *i;
     matrixEntries.clear();
 }
 
-void CloudDelayerMatrix::initialize()
+void MatrixCloudDelayer::initialize()
 {
     host = findContainingNode(this);
     ift = InterfaceTableAccess().get(this);
@@ -140,31 +140,31 @@ void CloudDelayerMatrix::initialize()
     }
 }
 
-void CloudDelayerMatrix::calculateDropAndDelay(const cMessage *msg, int srcID, int destID, bool& isDrop,
-        simtime_t& delay)
+void MatrixCloudDelayer::calculateDropAndDelay(const cMessage *msg, int srcID, int destID,
+        bool& outDrop, simtime_t& outDelay)
 {
     Descriptor *descriptor = getOrCreateDescriptor(srcID, destID);
-    isDrop = descriptor->dropPar->boolValue(this);
-    delay = SIMTIME_ZERO;
-    if (!isDrop)
+    outDrop = descriptor->dropPar->boolValue(this);
+    outDelay = SIMTIME_ZERO;
+    if (!outDrop)
     {
-        delay = descriptor->delayPar->doubleValue(this, "s");
+        outDelay = descriptor->delayPar->doubleValue(this, "s");
         double datarate = descriptor->dataratePar->doubleValue(this, "bps");
-        ASSERT(delay >= 0);
+        ASSERT(outDelay >= 0);
         ASSERT(datarate > 0.0);
         simtime_t curTime = simTime();
-        if (curTime + delay < descriptor->lastSent)
-            delay = descriptor->lastSent - curTime;
+        if (curTime + outDelay < descriptor->lastSent)
+            outDelay = descriptor->lastSent - curTime;
 
         const cPacket *pk = dynamic_cast<const cPacket *>(msg);
         if (pk)
-            delay += pk->getBitLength() / datarate;
+            outDelay += pk->getBitLength() / datarate;
 
-        descriptor->lastSent = curTime + delay;
+        descriptor->lastSent = curTime + outDelay;
     }
 }
 
-CloudDelayerMatrix::Descriptor* CloudDelayerMatrix::getOrCreateDescriptor(int srcID, int destID)
+MatrixCloudDelayer::Descriptor* MatrixCloudDelayer::getOrCreateDescriptor(int srcID, int destID)
 {
     IDPair idPair(srcID, destID);
     IDPairToDescriptorMap::iterator it = idPairToDescriptorMap.find(idPair);
@@ -181,7 +181,7 @@ CloudDelayerMatrix::Descriptor* CloudDelayerMatrix::getOrCreateDescriptor(int sr
         MatrixEntry *matrixEntry = matrixEntries[i];
         if (matrixEntry->matches(src.c_str(), dest.c_str()))
         {
-            CloudDelayerMatrix::Descriptor& descriptor = idPairToDescriptorMap[idPair];
+            MatrixCloudDelayer::Descriptor& descriptor = idPairToDescriptorMap[idPair];
             descriptor.delayPar = &matrixEntry->delayPar;
             descriptor.dataratePar = &matrixEntry->dataratePar;
             descriptor.dropPar = &matrixEntry->dropPar;
@@ -193,7 +193,7 @@ CloudDelayerMatrix::Descriptor* CloudDelayerMatrix::getOrCreateDescriptor(int sr
                             src.c_str(), dest.c_str(), matrixEntry->entity->getSourceLocation(),
                             reverseMatrixEntry->entity->getSourceLocation());
                 IDPair reverseIdPair(destID, srcID);
-                CloudDelayerMatrix::Descriptor& rdescriptor = idPairToDescriptorMap[reverseIdPair];
+                MatrixCloudDelayer::Descriptor& rdescriptor = idPairToDescriptorMap[reverseIdPair];
                 rdescriptor = descriptor;
             }
             return &descriptor;
@@ -208,7 +208,7 @@ CloudDelayerMatrix::Descriptor* CloudDelayerMatrix::getOrCreateDescriptor(int sr
             dest.c_str());
 }
 
-std::string CloudDelayerMatrix::getPathOfConnectedNodeOnIfaceID(int id)
+std::string MatrixCloudDelayer::getPathOfConnectedNodeOnIfaceID(int id)
 {
     InterfaceEntry *ie = ift->getInterfaceById(id);
     if (!ie)

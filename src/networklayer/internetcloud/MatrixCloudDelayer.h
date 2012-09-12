@@ -17,8 +17,8 @@
 // @author Zoltan Bojthe
 //
 
-#ifndef __INET_INTERNETCLOUD_CLOUDDELAYERMATRIX_H
-#define __INET_INTERNETCLOUD_CLOUDDELAYERMATRIX_H
+#ifndef __INET_INTERNETCLOUD_MATRIXCLOUDDELAYER_H
+#define __INET_INTERNETCLOUD_MATRIXCLOUDDELAYER_H
 
 
 #include "INETDefs.h"
@@ -30,7 +30,7 @@ class IInterfaceTable;
 namespace inet { class PatternMatcher; }
 
 
-class INET_API CloudDelayerMatrix : public CloudDelayerBase
+class INET_API MatrixCloudDelayer : public CloudDelayerBase
 {
   protected:
     //FIXME The 'Matcher' class copied from IPv4NetworkConfigurator
@@ -84,20 +84,20 @@ class INET_API CloudDelayerMatrix : public CloudDelayerBase
     cModule *host;
 
   protected:
-    ~CloudDelayerMatrix();
+    ~MatrixCloudDelayer();
     virtual void initialize();
 
     /**
      * returns isDrop and delay for this msg
      */
-    virtual void calculateDropAndDelay(const cMessage *msg, int srcID, int destID, bool& isDrop, simtime_t& delay);
+    virtual void calculateDropAndDelay(const cMessage *msg, int srcID, int destID, bool& outDrop, simtime_t& outDelay);
 
-    CloudDelayerMatrix::Descriptor* getOrCreateDescriptor(int srcID, int destID);
+    MatrixCloudDelayer::Descriptor* getOrCreateDescriptor(int srcID, int destID);
 
     /// returns path of connected node for the interface specified by 'id'
     std::string getPathOfConnectedNodeOnIfaceID(int id);
 };
 
 
-#endif  // __INET_INTERNETCLOUD_CLOUDDELAYERMATRIX_H
+#endif  // __INET_INTERNETCLOUD_MATRIXCLOUDDELAYER_H
 

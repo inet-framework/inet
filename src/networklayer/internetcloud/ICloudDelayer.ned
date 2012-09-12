@@ -34,12 +34,3 @@ moduleinterface ICloudDelayer
         input ipIn;
         output ipOut;
 }
-
-module CloudNopDelayer like ICloudDelayer
-{
-    gates:
-        input ipIn;
-        output ipOut;
-    connections:
-        ipIn --> ipOut;
-}

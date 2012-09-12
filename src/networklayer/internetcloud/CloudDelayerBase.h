@@ -31,7 +31,7 @@ class INET_API CloudDelayerBase : public cSimpleModule
     /**
      * returns isDrop and delay for this msg
      */
-    virtual void calculateDropAndDelay(const cMessage *msg, int srcID, int destID, bool& isDrop, simtime_t& delay);
+    virtual void calculateDropAndDelay(const cMessage *msg, int srcID, int destID, bool& outDrop, simtime_t& delay);
 };
 
 #endif  // __INET_INTERNETCLOUD_CLOUDDELAYERBASE_H
