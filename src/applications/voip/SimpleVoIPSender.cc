@@ -42,7 +42,7 @@ void SimpleVoIPSender::initialize(int stage)
     talkspurtNumPackets = 0;
     packetID = 0;
     timestamp = 0;
-    talkFrameSize = par("talkFrameSize");
+    talkPacketSize = par("talkPacketSize");
     packetizationInterval = par("packetizationInterval");
     selfSender = new cMessage("selfSender");
     localPort = par("localPort");
@@ -129,8 +129,8 @@ void SimpleVoIPSender::sendVoIPPacket()
     packet->setPacketID(packetID);
     packet->setVoipTimestamp(simTime());
     packet->setVoiceDuration(packetizationInterval);
-    packet->setByteLength(talkFrameSize);
-    EV << "TALKSPURT " << talkspurtID-1 << " Invio frame " << packetID << "\n";     //FIXME Translate!!!
+    packet->setByteLength(talkPacketSize);
+    EV << "TALKSPURT " << talkspurtID-1 << " Invio packet " << packetID << "\n";     //FIXME Translate!!!
 
     socket.sendTo(packet, destAddress, destPort);
     ++packetID;

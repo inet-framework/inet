@@ -30,16 +30,16 @@ simple SimpleVoIPReceiver like IUDPApp
         int emodel_A_ = default(5);
         double emodel_Ro_ = default(93.2);
         double playoutDelay @unit(s) = default(0);      // delay for begin playout after received first packet
-        int dim_buffer = default(20);
+        int bufferSpace = default(20);      // buffer size (max number of packets in buffer)
 
-        @signal[VoIPFrameDelay](type="simtime_t");      // when receive a frame
-        @signal[VoIPFrameLossRate](type="double");      // at end of talkspur
+        @signal[VoIPPacketDelay](type="simtime_t");      // when receive a frame
+        @signal[VoIPPacketLossRate](type="double");      // at end of talkspur
         @signal[VoIPPlayoutDelay](type="simtime_t");    // at end of talkspur
         @signal[VoIPPlayoutLossRate](type="double");    // at end of talkspur
         @signal[VoIPMosSignal](type="double");          // at end of talkspur
         @signal[VoIPTaildropLossRate](type="double");   // at end of talkspur
-        @statistic[VoIPFrameDelay](title="VoIP Frame Delay"; unit="s"; source="VoIPFrameDelay"; record=stats,vector); 
-        @statistic[VoIPFrameLossRate](title="VoIP Frame Loss"; unit="ratio"; source="VoIPFrameLossRate"; record=stats,vector);
+        @statistic[VoIPPacketDelay](title="VoIP Packet Delay"; unit="s"; source="VoIPPacketDelay"; record=stats,vector); 
+        @statistic[VoIPPacketLossRate](title="VoIP Packet Loss"; unit="ratio"; source="VoIPPacketLossRate"; record=stats,vector);
         @statistic[VoIPPlayoutDelay](title="VoIP Playout Delay"; unit="s"; source="VoIPPlayoutDelay"; record=stats,vector);
         @statistic[VoIPPlayoutLossRate](title="VoIP Playout Loss"; unit="ratio"; source="VoIPPlayoutLossRate"; record=stats,vector);
         @statistic[VoIPMosSignal](title="VoIP Mos Signal"; unit="MOS"; source="VoIPMosSignal"; record=stats,vector);

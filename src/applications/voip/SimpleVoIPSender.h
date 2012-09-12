@@ -34,7 +34,7 @@ class SimpleVoIPSender : public cSimpleModule
     int    talkspurtID;
     int    talkspurtNumPackets;
     int    packetID;
-    int    talkFrameSize;
+    int    talkPacketSize;
     double packetizationInterval;
 
     // ----------------------------

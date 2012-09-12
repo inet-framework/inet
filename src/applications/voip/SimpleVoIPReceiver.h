@@ -42,22 +42,20 @@ class SimpleVoIPReceiver : public cSimpleModule
 
     typedef std::list<SimpleVoIPPacket*> PacketsList;
     // FIXME: welcome to Microsoft naming conventions... mFooBar -> fooBar
-    PacketsList  mPacketsList;
-    PacketsList  mPlayoutQueue;
-    unsigned int mCurrentTalkspurt;
-    unsigned int mBufferSpace;
-    simtime_t    mPlayoutDelay;
+    PacketsList  packetsList;
+    PacketsList  playoutQueue;
+    unsigned int currentTalkspurt;
+    unsigned int bufferSpace;
+    simtime_t    playoutDelay;
 
-    bool        mInit;
+    simsignal_t packetLossRateSignal;
+    simsignal_t packetDelaySignal;
+    simsignal_t playoutDelaySignal;
+    simsignal_t playoutLossRateSignal;
+    simsignal_t mosSignal;
+    simsignal_t taildropLossRateSignal;
 
-    simsignal_t mFrameLossRateSignal;
-    simsignal_t mFrameDelaySignal;
-    simsignal_t mPlayoutDelaySignal;
-    simsignal_t mPlayoutLossRateSignal;
-    simsignal_t mMosSignal;
-    simsignal_t mTaildropLossRateSignal;
-
-    TaggedSample* mTaggedSample;
+    TaggedSample* taggedSample;
 
     virtual void finish();
 
@@ -66,7 +64,7 @@ class SimpleVoIPReceiver : public cSimpleModule
     void initialize(int stage);
     void handleMessage(cMessage *msg);
     double eModel(double delay, double loss);
-    void playout(bool finish);
+    void evaluateTalkspurt(bool finish);
 };
 
 

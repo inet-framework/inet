@@ -35,7 +35,7 @@ simple SimpleVoIPSender like IUDPApp
         int localPort = default(-1);
         int destPort;
         string destAddress;
-        int talkFrameSize @unit(B) = default(40B);     // byte size of talk frames
+        int talkPacketSize @unit(B) = default(40B);     // byte size of talk frames
         // FIXME: delete shape and scale parameters and use volatile random variables for talk and silence duration
         // FIXME: for the god's sake is it worth abbreviating silence as sil?
         volatile double talkDuration @unit(s) = default(weibull(1.423s, 0.824s));
