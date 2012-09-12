@@ -43,7 +43,7 @@ simple VoIPSender like IUDPApp
         double shapeSil = default(1.089);
         double scaleSil = default(0.899);
         // FIXME: the standard terminology is packetization interval, it would be better
-        double samplingTime @unit(s) = default(20ms);   // timelength of sampleframes
+        double packetizationInterval @unit(s) = default(20ms);   // timelength of samplepackets
         double startTime @unit(s) = default(0);
         double stopTime @unit(s) = default(0);  // time of finish sending, 0 means forever
 

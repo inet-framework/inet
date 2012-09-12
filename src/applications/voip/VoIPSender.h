@@ -38,12 +38,11 @@ class VoIPSender : public cSimpleModule
     cMessage* selfSource;
     //sender
     // FIXME questi non dovrebbero essere interi     //FIXME Translate!!!
-    int    talkID;
-    int    nframes;
-    int    frameID;
-    int    nframes_tmp;
+    int    talkspurtID;
+    int    talkspurtNumPackets;
+    int    packetID;
     int    talkFrameSize;
-    double samplingTime;
+    double packetizationInterval;
 
     // ----------------------------
     // FIXME: it is unclear what is this self message used for

@@ -78,20 +78,20 @@ void VoIPReceiver::handleMessage(cMessage *msg)
     // FIXME: what does this mInit mean? does it mean initialized? if so, how could it be false here? and more importantly why do we set it back to false? this is confusing
     if (mInit)
     {
-        mCurrentTalkspurt = pPacket->getTalkID();
+        mCurrentTalkspurt = pPacket->getTalkspurtID();
         // FIXME: so now we are uninitialized?
         mInit = false;
     }
 
-    if (mCurrentTalkspurt != pPacket->getTalkID())
+    if (mCurrentTalkspurt != pPacket->getTalkspurtID())
     {
             playout(false);
-            mCurrentTalkspurt = pPacket->getTalkID();
+            mCurrentTalkspurt = pPacket->getTalkspurtID();
     }
 
     //emit(mFrameLossSignal,1.0);
 
-    EV << "PACCHETTO ARRIVATO: TALK " << pPacket->getTalkID() << " FRAME " << pPacket->getFrameID() << "\n\n";     //FIXME Translate!!!
+    EV << "PACCHETTO ARRIVATO: TALK " << pPacket->getTalkspurtID() << " FRAME " << pPacket->getPacketID() << "\n\n";     //FIXME Translate!!!
 
     // FXIME: maybe the simulation kernel got it wrong? this is a useless assert
     ASSERT(pPacket->getArrivalTime() == simTime());
@@ -109,8 +109,8 @@ void VoIPReceiver::playout(bool finish)
     VoipPacket* pPacket = mPacketsList.front();
 
     simtime_t    firstPlayoutTime = pPacket->getArrivalTime() + mPlayoutDelay;
-    unsigned int firstFrameId = pPacket->getFrameID();
-    unsigned int n_frames = pPacket->getNframes();
+    unsigned int firstFrameId = pPacket->getPacketID();
+    unsigned int n_frames = pPacket->getTalkspurtNumPackets();
     unsigned int playoutLoss = 0;
     unsigned int tailDropLoss = 0;
     unsigned int channelLoss;
@@ -120,20 +120,20 @@ void VoIPReceiver::playout(bool finish)
         PacketsList::iterator it;
         unsigned int maxId = 0;
         for ( it = mPacketsList.begin(); it != mPacketsList.end(); it++)
-            maxId = std::max(maxId, (*it)->getFrameID());
+            maxId = std::max(maxId, (*it)->getPacketID());
         channelLoss = maxId + 1 - mPacketsList.size();
     }
 
     else
-        channelLoss = pPacket->getNframes() - mPacketsList.size();
+        channelLoss = pPacket->getTalkspurtNumPackets() - mPacketsList.size();
 
     double frameLossRate = ((double)channelLoss/(double)n_frames);
     emit(mFrameLossRateSignal, frameLossRate);
 
     //VETTORE PER GESTIRE DUPLICATI     //FIXME Translate!!!
     // FIXME: what is actually arrived here?
-    bool* isArrived = new bool[pPacket->getNframes()];
-    for (unsigned int y = 0; y < pPacket->getNframes(); y++)
+    bool* isArrived = new bool[pPacket->getTalkspurtNumPackets()];
+    for (unsigned int y = 0; y < pPacket->getTalkspurtNumPackets(); y++)
     {
         isArrived[y] = false;
     }
@@ -146,24 +146,24 @@ void VoIPReceiver::playout(bool finish)
     {
         pPacket = mPacketsList.front();
         // FIXME: why do we modify a packet in the receiver?
-        pPacket->setPlayoutTime(firstPlayoutTime + ((int)pPacket->getFrameID() - (int)firstFrameId)  * pPacket->getVoiceDuration());
+        pPacket->setPlayoutTime(firstPlayoutTime + ((int)pPacket->getPacketID() - (int)firstFrameId)  * pPacket->getVoiceDuration());
 
         // FIXME: is this really a jitter? positive means the packet is too late
         last_jitter = pPacket->getArrivalTime() - pPacket->getPlayoutTime();
         max_jitter = std::max( max_jitter, last_jitter );
 
-        EV << "MISURATO JITTER PACCHETTO: " << last_jitter << " TALK " << pPacket->getTalkID() << " FRAME " << pPacket->getFrameID() << "\n\n";     //FIXME Translate!!!
+        EV << "MISURATO JITTER PACCHETTO: " << last_jitter << " TALK " << pPacket->getTalkspurtID() << " FRAME " << pPacket->getPacketID() << "\n\n";     //FIXME Translate!!!
 
         //GESTIONE IN CASO DI DUPLICATI     //FIXME Translate!!!
-        if (isArrived[pPacket->getFrameID()])
+        if (isArrived[pPacket->getPacketID()])
         {
-                    EV << "PACCHETTO DUPLICATO: TALK " << pPacket->getTalkID() << " FRAME " << pPacket->getFrameID() << "\n\n";     //FIXME Translate!!!
+                    EV << "PACCHETTO DUPLICATO: TALK " << pPacket->getTalkspurtID() << " FRAME " << pPacket->getPacketID() << "\n\n";     //FIXME Translate!!!
                     delete pPacket;
         }
         else if ( last_jitter > 0.0 )
         {
             ++playoutLoss;
-            EV << "PACCHETTO IN RITARDO ELIMINATO: TALK " << pPacket->getTalkID() << " FRAME " << pPacket->getFrameID() << "\n\n";     //FIXME Translate!!!
+            EV << "PACCHETTO IN RITARDO ELIMINATO: TALK " << pPacket->getTalkspurtID() << " FRAME " << pPacket->getPacketID() << "\n\n";     //FIXME Translate!!!
             delete pPacket;
         }
         else
@@ -172,7 +172,7 @@ void VoIPReceiver::playout(bool finish)
             while ( !mPlayoutQueue.empty() && pPacket->getArrivalTime() > mPlayoutQueue.front()->getPlayoutTime() )
             {
                 ++mBufferSpace;
-                //EV << "RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK " << mPlayoutQueue.front()->getTalkID() << " FRAME " << mPlayoutQueue.front()->getFrameID() << "\n";     //FIXME Translate!!!
+                //EV << "RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK " << mPlayoutQueue.front()->getTalkspurtID() << " FRAME " << mPlayoutQueue.front()->getPacketID() << "\n";     //FIXME Translate!!!
                 delete mPlayoutQueue.front();
                 mPlayoutQueue.pop_front();
             }
@@ -180,20 +180,20 @@ void VoIPReceiver::playout(bool finish)
             if (mBufferSpace > 0)
             {
                 EV << "PACCHETTO CAMPIONABILE INSERITO NEL BUFFER: TALK "
-                        << pPacket->getTalkID() << " FRAME " << pPacket->getFrameID()
+                        << pPacket->getTalkspurtID() << " FRAME " << pPacket->getPacketID()
                         << " ISTANTE DI ARRIVO " << pPacket->getArrivalTime()
                         << " ISTANTE DI CAMPIONAMENTO " << pPacket->getPlayoutTime() << "\n\n";     //FIXME Translate!!!
                 --mBufferSpace;
                 //GESTIONE DUPLICATI     //FIXME Translate!!!
-                isArrived[pPacket->getFrameID()] = true;
+                isArrived[pPacket->getPacketID()] = true;
 
                 mPlayoutQueue.push_back(pPacket);
             }
             else
             {
                 ++tailDropLoss;
-                EV << "BUFFER PIENO PACCHETTO SCARTATO: TALK " << pPacket->getTalkID() << " FRAME "
-                        << pPacket->getFrameID() << " ISTANTE DI ARRIVO " << pPacket->getArrivalTime() << "\n\n";     //FIXME Translate!!!
+                EV << "BUFFER PIENO PACCHETTO SCARTATO: TALK " << pPacket->getTalkspurtID() << " FRAME "
+                        << pPacket->getPacketID() << " ISTANTE DI ARRIVO " << pPacket->getArrivalTime() << "\n\n";     //FIXME Translate!!!
                 delete pPacket;
             }
         }

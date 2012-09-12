@@ -19,10 +19,10 @@
 // FIXME: this name is almost the same as in voiptool (except case), so it is more than confusing
 packet VoipPacket
 {
-    unsigned int talkID;
+    unsigned int talkspurtID;
     // FIXME: the naming convention uses numFrames. anyway this is probably rather numSamples, what would number of frames mean?
-    unsigned int nframes;
-    unsigned int frameID;
+    unsigned int talkspurtNumPackets;
+    unsigned int packetID;
     // FIXME: this name is pretty meaningless. does it contain the sending time or what? be more specific
     simtime_t voipTimestamp;
     // FIXME: is this a duration? if so, then call it duration
