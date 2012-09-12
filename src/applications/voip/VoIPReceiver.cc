@@ -54,10 +54,8 @@ void VoIPReceiver::initialize(int stage)
 	mTaildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
 
 	mTaggedSample = new TaggedSample();
-    // FIXME: I believe this check_and_cast is superfluous
-	mTaggedSample->module = check_and_cast<cComponent*>(this);;
-    // FIXME: this-> is not needed, getId() is not ambiguous
-	mTaggedSample->id = this->getId();
+    mTaggedSample->module = this;
+    mTaggedSample->id = getId();
 }
 
 void VoIPReceiver::handleMessage(cMessage *msg)
