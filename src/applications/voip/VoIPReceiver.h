@@ -6,7 +6,6 @@
  */
 
 
-
 #ifndef VOIPRECEIVER_H_
 #define VOIPRECEIVER_H_
 
@@ -21,59 +20,54 @@
 
 class VoIPReceiver : public cSimpleModule
 {
-	class TaggedSample : public cObject
-	{
-		public:
-			double sample;
-			unsigned int id;
-			// the emitting cComponent (module)
-			cComponent* module;
-	};
-	UDPSocket socket;
+    class TaggedSample : public cObject
+    {
+      public:
+        double sample;
+        unsigned int id;
+        // the emitting cComponent (module)
+        cComponent* module;
+    };
 
-	~VoIPReceiver();
+    UDPSocket socket;
+
+    ~VoIPReceiver();
 
     // FIXME: avoid _ characters
-	int 	 	emodel_Ie_;
-	int 	    emodel_Bpl_;
-	int 		emodel_A_;
-	double 		emodel_Ro_;
+    int         emodel_Ie_;
+    int         emodel_Bpl_;
+    int         emodel_A_;
+    double      emodel_Ro_;
 
-	typedef std::list<VoipPacket*> PacketsList;
+    typedef std::list<VoipPacket*> PacketsList;
     // FIXME: welcome to Microsoft naming conventions... mFooBar -> fooBar
-	PacketsList  mPacketsList;
-	PacketsList  mPlayoutQueue;
-	unsigned int mCurrentTalkspurt;
-	unsigned int mBufferSpace;
-	simtime_t    mSamplingDelta;
-	simtime_t    mPlayoutDelay;
+    PacketsList  mPacketsList;
+    PacketsList  mPlayoutQueue;
+    unsigned int mCurrentTalkspurt;
+    unsigned int mBufferSpace;
+    simtime_t    mSamplingDelta;
+    simtime_t    mPlayoutDelay;
 
-	bool 		mInit;
+    bool        mInit;
 
-	simsignal_t mFrameLossRateSignal;
-	simsignal_t mFrameDelaySignal;
-	simsignal_t mPlayoutDelaySignal;
-	simsignal_t mPlayoutLossRateSignal;
-	simsignal_t mMosSignal;
-	simsignal_t mTaildropLossRateSignal;
+    simsignal_t mFrameLossRateSignal;
+    simsignal_t mFrameDelaySignal;
+    simsignal_t mPlayoutDelaySignal;
+    simsignal_t mPlayoutLossRateSignal;
+    simsignal_t mMosSignal;
+    simsignal_t mTaildropLossRateSignal;
 
-	TaggedSample* mTaggedSample;
+    TaggedSample* mTaggedSample;
 
-	virtual void finish();
+    virtual void finish();
 
-protected:
-
-	virtual int numInitStages() const {return 4;}
-	void initialize(int stage);
-	void handleMessage(cMessage *msg);
-	double eModel (double delay, double loss);
-	void playout(bool finish);
-
-
+  protected:
+    virtual int numInitStages() const {return 4;}
+    void initialize(int stage);
+    void handleMessage(cMessage *msg);
+    double eModel (double delay, double loss);
+    void playout(bool finish);
 };
 
 
-
 #endif /* VOIPRECEIVER_H_ */
-
-
