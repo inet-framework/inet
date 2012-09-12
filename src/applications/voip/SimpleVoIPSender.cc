@@ -4,8 +4,13 @@
  *  Created on: 25/gen/2011
  *      Author: Adriano
  */
+
+#include <cmath>
+
 #include "SimpleVoIPSender.h"
-#include "cmath"
+
+#include "SimpleVoIPPacket_m.h"
+
 
 #define round(x) floor((x) + 0.5)
 

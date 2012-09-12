@@ -16,7 +16,8 @@
 
 #include "IPvXAddressResolver.h"
 #include "UDPSocket.h"
-#include "SimpleVoIPPacket_m.h"
+
+class SimpleVoIPPacket;
 
 class SimpleVoIPReceiver : public cSimpleModule
 {

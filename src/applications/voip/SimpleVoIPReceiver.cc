@@ -4,7 +4,10 @@
  *  Created on: 01/feb/2011
  *      Author: Adriano
  */
+
 #include "SimpleVoIPReceiver.h"
+
+#include "SimpleVoIPPacket_m.h"
 
 Define_Module(SimpleVoIPReceiver);
 
