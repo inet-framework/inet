@@ -32,25 +32,25 @@ void VoIPSender::initialize(int stage)
     if (stage!=3 || initialized_)
         return;
 
-    durTalk       = 0;
-    durSil        = 0;
-    selfSource    = new cMessage("selfSource");
-    scaleTalk    = par("scaleTalk");
-    shapeTalk    = par("shapeTalk");
-    scaleSil     = par("scaleSil");
-    shapeSil     = par("shapeSil");
-    isTalk       = false;
-    talkID        = 0;
-    nframes       = 0;
-    nframes_tmp   = 0;
-    frameID       = 0;
-    timestamp     = 0;
+    durTalk = 0;
+    durSil = 0;
+    selfSource = new cMessage("selfSource");
+    scaleTalk = par("scaleTalk");
+    shapeTalk = par("shapeTalk");
+    scaleSil = par("scaleSil");
+    shapeSil = par("shapeSil");
+    isTalk = false;
+    talkID = 0;
+    nframes = 0;
+    nframes_tmp = 0;
+    frameID = 0;
+    timestamp = 0;
     talkFrameSize = par("talkFrameSize");
-    samplingTime  = par("samplingTime");
-    selfSender    = new cMessage("selfSender");
-    localPort     = par("localPort");
-    destPort      = par("destPort");
-    destAddress   = IPvXAddressResolver().resolve(par("destAddress").stringValue());
+    samplingTime = par("samplingTime");
+    selfSender = new cMessage("selfSender");
+    localPort = par("localPort");
+    destPort = par("destPort");
+    destAddress = IPvXAddressResolver().resolve(par("destAddress").stringValue());
 
 
     socket.setOutputGate(gate("udpOut"));
@@ -75,7 +75,7 @@ void VoIPSender::initialize(int stage)
 
 void VoIPSender::handleMessage(cMessage *msg)
 {
-    if(msg->isSelfMessage())
+    if (msg->isSelfMessage())
     {
         if (msg == selfSender)
             sendVoIPPacket();
@@ -87,11 +87,11 @@ void VoIPSender::handleMessage(cMessage *msg)
 void VoIPSender::talkspurt(double dur)
 {
     talkID++;
-    nframes=(ceil(dur/samplingTime));
+    nframes = (ceil(dur/samplingTime));
     EV<<"TALKSPURT "<<talkID-1<<" Verranno inviati "<<nframes<<" frames\n\n";     //FIXME Translate!!!
 
     frameID = 0;
-    nframes_tmp=nframes;
+    nframes_tmp = nframes;
     // FIXME: why do we schedule a message for the current simulation time? why don't we rather call the method directly?
     scheduleAt(simTime(), selfSender);
 }
@@ -101,9 +101,9 @@ void VoIPSender::selectPeriodTime()
     if (stopTime != 0 && simTime() >= stopTime)
         return;
 
-    if(isTalk)
+    if (isTalk)
     {
-        durSil=weibull(scaleSil, shapeSil);
+        durSil = weibull(scaleSil, shapeSil);
         double durSil2 = round(durSil*1000)/1000;
         EV<<"PERIODO SILENZIO: "<<"Durata: "<<durSil<<"/" << durSil2<<" secondi\n\n";     //FIXME Translate!!!
         durSil = durSil2;
@@ -115,7 +115,7 @@ void VoIPSender::selectPeriodTime()
     }
     else
     {
-        durTalk=weibull(scaleTalk, shapeTalk);
+        durTalk = weibull(scaleTalk, shapeTalk);
         double durTalk2 = round(durTalk*1000)/1000;
         EV<<"TALKSPURT: "<<talkID<<" Durata: "<<durTalk<< "/"<< durTalk2<< " secondi\n\n";     //FIXME Translate!!!
         durTalk = durTalk2;
@@ -142,10 +142,10 @@ void VoIPSender::sendVoIPPacket()
     packet->setByteLength(talkFrameSize);
     EV<<"TALKSPURT "<<talkID-1<<" Invio frame "<<frameID<<"\n";     //FIXME Translate!!!
 
-    socket.sendTo(packet,destAddress, destPort);
+    socket.sendTo(packet, destAddress, destPort);
     --nframes_tmp;
     ++frameID;
 
-    if(nframes_tmp > 0 ) scheduleAt(simTime()+samplingTime,selfSender);
+    if (nframes_tmp > 0 ) scheduleAt(simTime()+samplingTime, selfSender);
 }
 

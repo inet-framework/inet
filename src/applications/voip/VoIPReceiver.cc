@@ -28,13 +28,13 @@ void VoIPReceiver::initialize(int stage)
     if (stage!=3)
         return;
 
-    emodel_Ie_  = par("emodel_Ie_");
+    emodel_Ie_ = par("emodel_Ie_");
     emodel_Bpl_ = par("emodel_Bpl_");
-    emodel_A_   = par("emodel_A_");
-    emodel_Ro_  = par("emodel_Ro_");
+    emodel_A_ = par("emodel_A_");
+    emodel_Ro_ = par("emodel_Ro_");
 
-    mBufferSpace   = par("dim_buffer");
-    mPlayoutDelay  = par("playoutDelay");
+    mBufferSpace = par("dim_buffer");
+    mPlayoutDelay = par("playoutDelay");
 
     mInit = true;
 
@@ -45,11 +45,11 @@ void VoIPReceiver::initialize(int stage)
             socket.bind(port);
     }
 
-    mFrameLossRateSignal    = registerSignal("VoIPFrameLossRate");
-    mFrameDelaySignal   = registerSignal("VoIPFrameDelay");
+    mFrameLossRateSignal = registerSignal("VoIPFrameLossRate");
+    mFrameDelaySignal = registerSignal("VoIPFrameDelay");
     mPlayoutDelaySignal = registerSignal("VoIPPlayoutDelay");
-    mPlayoutLossRateSignal  = registerSignal("VoIPPlayoutLossRate");
-    mMosSignal          = registerSignal("VoIPMosSignal");
+    mPlayoutLossRateSignal = registerSignal("VoIPPlayoutLossRate");
+    mMosSignal = registerSignal("VoIPMosSignal");
     mTaildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
 
     mTaggedSample = new TaggedSample();
@@ -76,14 +76,14 @@ void VoIPReceiver::handleMessage(cMessage *msg)
     // FIXME add a check: the voiceDuration value does not change in same talkspurt
 
     // FIXME: what does this mInit mean? does it mean initialized? if so, how could it be false here? and more importantly why do we set it back to false? this is confusing
-    if(mInit)
+    if (mInit)
     {
         mCurrentTalkspurt = pPacket->getTalkID();
         // FIXME: so now we are uninitialized?
         mInit = false;
     }
 
-    if(mCurrentTalkspurt != pPacket->getTalkID())
+    if (mCurrentTalkspurt != pPacket->getTalkID())
     {
             playout(false);
             mCurrentTalkspurt = pPacket->getTalkID();
@@ -103,23 +103,23 @@ void VoIPReceiver::handleMessage(cMessage *msg)
 // FIXME: this should rather be called evaluateTalkspurt, because all it does is that it gathers some statistics
 void VoIPReceiver::playout(bool finish)
 {
-    if(mPacketsList.empty())
+    if (mPacketsList.empty())
         return;
 
-    VoipPacket* pPacket =  mPacketsList.front();
+    VoipPacket* pPacket = mPacketsList.front();
 
-    simtime_t    firstPlayoutTime   = pPacket->getArrivalTime() + mPlayoutDelay;
-    unsigned int firstFrameId       = pPacket->getFrameID();
-    unsigned int n_frames           = pPacket->getNframes();
-    unsigned int playoutLoss        = 0;
-    unsigned int tailDropLoss       = 0;
+    simtime_t    firstPlayoutTime = pPacket->getArrivalTime() + mPlayoutDelay;
+    unsigned int firstFrameId = pPacket->getFrameID();
+    unsigned int n_frames = pPacket->getNframes();
+    unsigned int playoutLoss = 0;
+    unsigned int tailDropLoss = 0;
     unsigned int channelLoss;
 
     if (finish)
     {
         PacketsList::iterator it;
         unsigned int maxId = 0;
-        for( it = mPacketsList.begin(); it != mPacketsList.end(); it++)
+        for ( it = mPacketsList.begin(); it != mPacketsList.end(); it++)
             maxId = std::max(maxId, (*it)->getFrameID());
         channelLoss = maxId + 1 - mPacketsList.size();
     }
@@ -133,36 +133,36 @@ void VoIPReceiver::playout(bool finish)
     //VETTORE PER GESTIRE DUPLICATI     //FIXME Translate!!!
     // FIXME: what is actually arrived here?
     bool* isArrived = new bool[pPacket->getNframes()];
-    for(unsigned int y = 0; y < pPacket->getNframes(); y++)
+    for (unsigned int y = 0; y < pPacket->getNframes(); y++)
     {
         isArrived[y] = false;
     }
 
-    simtime_t       last_jitter         = 0.0;
-    simtime_t       max_jitter      = -1000.0;
+    simtime_t       last_jitter = 0.0;
+    simtime_t       max_jitter = -1000.0;
 
     // FIXME: what is the idea here? what does it compute? from what data does it compute? write something about the algorithm
-    while( !mPacketsList.empty() /*&& pPacket->getTalkID() == mCurrentTalkspurt*/ )
+    while ( !mPacketsList.empty() /*&& pPacket->getTalkID() == mCurrentTalkspurt*/ )
     {
-        pPacket =  mPacketsList.front();
+        pPacket = mPacketsList.front();
         // FIXME: why do we modify a packet in the receiver?
         pPacket->setPlayoutTime(firstPlayoutTime + ((int)pPacket->getFrameID() - (int)firstFrameId)  * pPacket->getVoiceDuration());
 
         // FIXME: is this really a jitter? positive means the packet is too late
         last_jitter = pPacket->getArrivalTime() - pPacket->getPlayoutTime();
-        max_jitter  = std::max( max_jitter, last_jitter );
+        max_jitter = std::max( max_jitter, last_jitter );
 
         EV<<"MISURATO JITTER PACCHETTO: "<<last_jitter<<" TALK "<<pPacket->getTalkID()<<" FRAME "
                 <<pPacket->getFrameID()<<"\n\n";     //FIXME Translate!!!
 
         //GESTIONE IN CASO DI DUPLICATI     //FIXME Translate!!!
-        if(isArrived[pPacket->getFrameID()])
+        if (isArrived[pPacket->getFrameID()])
         {
                     EV<<"PACCHETTO DUPLICATO: TALK "<<pPacket->getTalkID()<<" FRAME "
                         <<pPacket->getFrameID()<<"\n\n";     //FIXME Translate!!!
                     delete pPacket;
         }
-        else if( last_jitter > 0.0 )
+        else if ( last_jitter > 0.0 )
         {
             ++playoutLoss;
             EV<<"PACCHETTO IN RITARDO ELIMINATO: TALK "<<pPacket->getTalkID()<<" FRAME "
@@ -172,7 +172,7 @@ void VoIPReceiver::playout(bool finish)
         else
         {
             // FIXME: is this the place where we actually play the packets?
-            while( !mPlayoutQueue.empty() && pPacket->getArrivalTime() > mPlayoutQueue.front()->getPlayoutTime() )
+            while ( !mPlayoutQueue.empty() && pPacket->getArrivalTime() > mPlayoutQueue.front()->getPlayoutTime() )
             {
                 ++mBufferSpace;
                 //EV<<"RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK "<<mPlayoutQueue.front()->getTalkID()<<" FRAME "<<mPlayoutQueue.front()->getFrameID()<<"\n";     //FIXME Translate!!!
@@ -180,7 +180,7 @@ void VoIPReceiver::playout(bool finish)
                 mPlayoutQueue.pop_front();
             }
 
-            if(mBufferSpace > 0)
+            if (mBufferSpace > 0)
             {
                 EV<<"PACCHETTO CAMPIONABILE INSERITO NEL BUFFER: TALK "
                         <<pPacket->getTalkID()<<" FRAME "<<pPacket->getFrameID()
@@ -224,14 +224,14 @@ void VoIPReceiver::playout(bool finish)
             <<max_jitter<<"\n\n";
 
     mPlayoutDelay += max_jitter;
-    if(mPlayoutDelay < 0.0) mPlayoutDelay = 0.0;
+    if (mPlayoutDelay < 0.0) mPlayoutDelay = 0.0;
     EV<<"NEW PLAYOUT DELAY: "<<mPlayoutDelay<<"\n\n";
 
-    delete[] isArrived;
+    delete [] isArrived;
 }
 
 // FIXME: a reference to a paper, article, whatever that describes the model used here would be great!
-double VoIPReceiver::eModel (double delay, double loss)
+double VoIPReceiver::eModel(double delay, double loss)
 {
     double delayms = 1000.0 * delay;
 
