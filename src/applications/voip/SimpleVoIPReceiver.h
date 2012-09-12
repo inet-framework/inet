@@ -16,9 +16,9 @@
 
 #include "IPvXAddressResolver.h"
 #include "UDPSocket.h"
-#include "VoipPacket_m.h"
+#include "SimpleVoIPPacket_m.h"
 
-class VoIPReceiver : public cSimpleModule
+class SimpleVoIPReceiver : public cSimpleModule
 {
     class TaggedSample : public cObject
     {
@@ -31,7 +31,7 @@ class VoIPReceiver : public cSimpleModule
 
     UDPSocket socket;
 
-    ~VoIPReceiver();
+    ~SimpleVoIPReceiver();
 
     // FIXME: avoid _ characters
     int         emodel_Ie_;
@@ -39,7 +39,7 @@ class VoIPReceiver : public cSimpleModule
     int         emodel_A_;
     double      emodel_Ro_;
 
-    typedef std::list<VoipPacket*> PacketsList;
+    typedef std::list<SimpleVoIPPacket*> PacketsList;
     // FIXME: welcome to Microsoft naming conventions... mFooBar -> fooBar
     PacketsList  mPacketsList;
     PacketsList  mPlayoutQueue;

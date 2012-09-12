@@ -20,7 +20,7 @@ import inet.applications.IUDPApp;
 //
 //FIXME Documentation!!!
 //
-simple VoIPReceiver like IUDPApp
+simple SimpleVoIPReceiver like IUDPApp
 {
     parameters:
         int localPort;

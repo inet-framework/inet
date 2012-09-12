@@ -4,11 +4,11 @@
  *  Created on: 01/feb/2011
  *      Author: Adriano
  */
-#include "VoIPReceiver.h"
+#include "SimpleVoIPReceiver.h"
 
-Define_Module(VoIPReceiver);
+Define_Module(SimpleVoIPReceiver);
 
-VoIPReceiver::~VoIPReceiver()
+SimpleVoIPReceiver::~SimpleVoIPReceiver()
 {
     while ( !mPlayoutQueue.empty() )
     {
@@ -23,7 +23,7 @@ VoIPReceiver::~VoIPReceiver()
     }
 }
 
-void VoIPReceiver::initialize(int stage)
+void SimpleVoIPReceiver::initialize(int stage)
 {
     if (stage!=3)
         return;
@@ -57,7 +57,7 @@ void VoIPReceiver::initialize(int stage)
     mTaggedSample->id = getId();
 }
 
-void VoIPReceiver::handleMessage(cMessage *msg)
+void SimpleVoIPReceiver::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         throw cRuntimeError("Unaccepted self message: '%s'", msg->getName());
@@ -65,7 +65,7 @@ void VoIPReceiver::handleMessage(cMessage *msg)
         delete msg;
         return;
     }
-    VoipPacket* pPacket = dynamic_cast<VoipPacket*>(msg);
+    SimpleVoIPPacket* pPacket = dynamic_cast<SimpleVoIPPacket*>(msg);
     if (pPacket==0) {
         // FIXME: it should rather say unknown incoming message type (not VoipPacket)
         EV << "VoIPReceiver: Unaccepted incoming message: " << msg->getName() << endl;
@@ -101,12 +101,12 @@ void VoIPReceiver::handleMessage(cMessage *msg)
 }
 
 // FIXME: this should rather be called evaluateTalkspurt, because all it does is that it gathers some statistics
-void VoIPReceiver::playout(bool finish)
+void SimpleVoIPReceiver::playout(bool finish)
 {
     if (mPacketsList.empty())
         return;
 
-    VoipPacket* pPacket = mPacketsList.front();
+    SimpleVoIPPacket* pPacket = mPacketsList.front();
 
     simtime_t    firstPlayoutTime = pPacket->getArrivalTime() + mPlayoutDelay;
     unsigned int firstFrameId = pPacket->getPacketID();
@@ -226,7 +226,7 @@ void VoIPReceiver::playout(bool finish)
 }
 
 // FIXME: a reference to a paper, article, whatever that describes the model used here would be great!
-double VoIPReceiver::eModel(double delay, double loss)
+double SimpleVoIPReceiver::eModel(double delay, double loss)
 {
     double delayms = 1000.0 * delay;
 
@@ -264,7 +264,7 @@ double VoIPReceiver::eModel(double delay, double loss)
     return mos;
 }
 
-void VoIPReceiver::finish()
+void SimpleVoIPReceiver::finish()
 {
     // last talkspurt playout
     playout(true);

@@ -16,8 +16,7 @@
 //
 // TODO generated message class
 //
-// FIXME: this name is almost the same as in voiptool (except case), so it is more than confusing
-packet VoipPacket
+packet SimpleVoIPPacket
 {
     unsigned int talkspurtID;
     // FIXME: the naming convention uses numFrames. anyway this is probably rather numSamples, what would number of frames mean?

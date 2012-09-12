@@ -16,9 +16,9 @@
 
 #include "UDPSocket.h"
 #include "IPvXAddressResolver.h"
-#include "VoipPacket_m.h"
+#include "SimpleVoIPPacket_m.h"
 
-class VoIPSender : public cSimpleModule
+class SimpleVoIPSender : public cSimpleModule
 {
     UDPSocket socket;
 
@@ -57,8 +57,8 @@ class VoIPSender : public cSimpleModule
     void sendVoIPPacket();
 
   public:
-    ~VoIPSender();
-    VoIPSender();
+    ~SimpleVoIPSender();
+    SimpleVoIPSender();
 
   protected:
     virtual int numInitStages() const {return 4;}

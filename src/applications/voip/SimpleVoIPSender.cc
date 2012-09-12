@@ -4,26 +4,26 @@
  *  Created on: 25/gen/2011
  *      Author: Adriano
  */
-#include "VoIPSender.h"
+#include "SimpleVoIPSender.h"
 #include "cmath"
 
 #define round(x) floor((x) + 0.5)
 
-Define_Module(VoIPSender);
+Define_Module(SimpleVoIPSender);
 
-VoIPSender::VoIPSender()
+SimpleVoIPSender::SimpleVoIPSender()
 {
     selfSender = NULL;
     selfSource = NULL;
 }
 
-VoIPSender::~VoIPSender()
+SimpleVoIPSender::~SimpleVoIPSender()
 {
     cancelAndDelete(selfSender);
     cancelAndDelete(selfSource);
 }
 
-void VoIPSender::initialize(int stage)
+void SimpleVoIPSender::initialize(int stage)
 {
     EV << "VoIP Sender initialize: stage " << stage << endl;
 
@@ -69,7 +69,7 @@ void VoIPSender::initialize(int stage)
     EV << "\t starting traffic in " << startTime << " s" << endl;
 }
 
-void VoIPSender::handleMessage(cMessage *msg)
+void SimpleVoIPSender::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
@@ -80,7 +80,7 @@ void VoIPSender::handleMessage(cMessage *msg)
     }
 }
 
-void VoIPSender::talkspurt(double dur)
+void SimpleVoIPSender::talkspurt(double dur)
 {
     talkspurtID++;
     talkspurtNumPackets = (ceil(dur/packetizationInterval));
@@ -91,7 +91,7 @@ void VoIPSender::talkspurt(double dur)
     scheduleAt(simTime(), selfSender);
 }
 
-void VoIPSender::selectPeriodTime()
+void SimpleVoIPSender::selectPeriodTime()
 {
     if (stopTime != 0 && simTime() >= stopTime)
         return;
@@ -126,9 +126,9 @@ void VoIPSender::selectPeriodTime()
     }
 }
 
-void VoIPSender::sendVoIPPacket()
+void SimpleVoIPSender::sendVoIPPacket()
 {
-    VoipPacket* packet = new VoipPacket("VoIP");
+    SimpleVoIPPacket* packet = new SimpleVoIPPacket("VoIP");
     packet->setTalkspurtID(talkspurtID-1);
     packet->setTalkspurtNumPackets(talkspurtNumPackets);
     packet->setPacketID(packetID);

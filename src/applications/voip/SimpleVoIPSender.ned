@@ -29,7 +29,7 @@ import inet.applications.IUDPApp;
 // csomagok elveszeset is (csak egy teljes talk tud eszrevetlenul elveszni).
 // 
 //
-simple VoIPSender like IUDPApp
+simple SimpleVoIPSender like IUDPApp
 {
     parameters:
         int localPort = default(-1);
