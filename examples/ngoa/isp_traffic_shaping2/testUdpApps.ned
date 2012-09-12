@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2010 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2012 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -21,27 +21,29 @@
 package inet.examples.ngoa.isp_traffic_shaping2;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
+import inet.nodes.ethernet.EtherSwitch2WithOutputQueue;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
-import inet.util.fifo.Fifo;
+import ned.DatarateChannel;
 
 
 //
-// Defines a test network for UDP video streaming model.
+// Defines a test network for UDP applications.
 //
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-// @date   2010-08-31
+// @date   2010-09-12
 //
-network testVideo
+network testUdpApps
 {
     parameters:
+         int n = default(1);	// number of hosts
         @display("bgb=519,193");
     submodules:
         configurator: FlatNetworkConfigurator {
             parameters:
                 @display("p=52,42");
         }
-        host: StandardHost3WithEthernetInterface2 {
+        host[n]: StandardHost3WithEthernetInterface2 {
             parameters:
                 @display("i=device/laptop;p=46,119");
         }
@@ -49,15 +51,12 @@ network testVideo
             parameters:
                 @display("p=464,119;i=device/server_l");
         }
-        fifo: Fifo {
-            parameters:
-                @display("i=queue_l;p=236,119");
+        switch: EtherSwitch2WithOutputQueue {
+            @display("p=249,119");
         }
     connections:
-        //        host.ethg++ <--> { datarate = 100Mbps; delay = 10ms; per = 1e-3; } <--> server.ethg++;
-        //        host.ethg++ <--> { datarate = 100Mbps; delay = 10ms; per = 0.0; } <--> server.ethg++;
-        //        host.ethg++ <--> { datarate = 100Mbps; delay = uniform(0.0s, 0.7s); per = 0.0; } <--> server.ethg++;
-        host.ethg$o++ --> {datarate = 100Mbps;} --> server.ethg$i++;
-        host.ethg$i++ <-- {datarate=100Mbps;} <-- fifo.out;
-		fifo.in <-- {datarate = 100Mbps;} <-- server.ethg$o++;
+        for i=0..n-1 {
+        	host[i].ethg++ <--> {datarate = 100Mbps; delay = 1ms;} <--> switch.ethg++;
+        	switch.ethg++ <--> {datarate = 100Mbps; delay = 1ms;} <--> server.ethg++;
+        }
 }
