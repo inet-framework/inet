@@ -91,7 +91,7 @@ void VoIPReceiver::handleMessage(cMessage *msg)
 
     //emit(mFrameLossSignal,1.0);
 
-    EV<<"PACCHETTO ARRIVATO: TALK "<<pPacket->getTalkID()<<" FRAME "<<pPacket->getFrameID()<<"\n\n";     //FIXME Translate!!!
+    EV << "PACCHETTO ARRIVATO: TALK " << pPacket->getTalkID() << " FRAME " << pPacket->getFrameID() << "\n\n";     //FIXME Translate!!!
 
     // FXIME: maybe the simulation kernel got it wrong? this is a useless assert
     ASSERT(pPacket->getArrivalTime() == simTime());
@@ -152,21 +152,18 @@ void VoIPReceiver::playout(bool finish)
         last_jitter = pPacket->getArrivalTime() - pPacket->getPlayoutTime();
         max_jitter = std::max( max_jitter, last_jitter );
 
-        EV<<"MISURATO JITTER PACCHETTO: "<<last_jitter<<" TALK "<<pPacket->getTalkID()<<" FRAME "
-                <<pPacket->getFrameID()<<"\n\n";     //FIXME Translate!!!
+        EV << "MISURATO JITTER PACCHETTO: " << last_jitter << " TALK " << pPacket->getTalkID() << " FRAME " << pPacket->getFrameID() << "\n\n";     //FIXME Translate!!!
 
         //GESTIONE IN CASO DI DUPLICATI     //FIXME Translate!!!
         if (isArrived[pPacket->getFrameID()])
         {
-                    EV<<"PACCHETTO DUPLICATO: TALK "<<pPacket->getTalkID()<<" FRAME "
-                        <<pPacket->getFrameID()<<"\n\n";     //FIXME Translate!!!
+                    EV << "PACCHETTO DUPLICATO: TALK " << pPacket->getTalkID() << " FRAME " << pPacket->getFrameID() << "\n\n";     //FIXME Translate!!!
                     delete pPacket;
         }
         else if ( last_jitter > 0.0 )
         {
             ++playoutLoss;
-            EV<<"PACCHETTO IN RITARDO ELIMINATO: TALK "<<pPacket->getTalkID()<<" FRAME "
-                    <<pPacket->getFrameID()<<"\n\n";     //FIXME Translate!!!
+            EV << "PACCHETTO IN RITARDO ELIMINATO: TALK " << pPacket->getTalkID() << " FRAME " << pPacket->getFrameID() << "\n\n";     //FIXME Translate!!!
             delete pPacket;
         }
         else
@@ -175,17 +172,17 @@ void VoIPReceiver::playout(bool finish)
             while ( !mPlayoutQueue.empty() && pPacket->getArrivalTime() > mPlayoutQueue.front()->getPlayoutTime() )
             {
                 ++mBufferSpace;
-                //EV<<"RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK "<<mPlayoutQueue.front()->getTalkID()<<" FRAME "<<mPlayoutQueue.front()->getFrameID()<<"\n";     //FIXME Translate!!!
+                //EV << "RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK " << mPlayoutQueue.front()->getTalkID() << " FRAME " << mPlayoutQueue.front()->getFrameID() << "\n";     //FIXME Translate!!!
                 delete mPlayoutQueue.front();
                 mPlayoutQueue.pop_front();
             }
 
             if (mBufferSpace > 0)
             {
-                EV<<"PACCHETTO CAMPIONABILE INSERITO NEL BUFFER: TALK "
-                        <<pPacket->getTalkID()<<" FRAME "<<pPacket->getFrameID()
-                        <<" ISTANTE DI ARRIVO "<<pPacket->getArrivalTime()
-                        <<" ISTANTE DI CAMPIONAMENTO "<<pPacket->getPlayoutTime()<<"\n\n";     //FIXME Translate!!!
+                EV << "PACCHETTO CAMPIONABILE INSERITO NEL BUFFER: TALK "
+                        << pPacket->getTalkID() << " FRAME " << pPacket->getFrameID()
+                        << " ISTANTE DI ARRIVO " << pPacket->getArrivalTime()
+                        << " ISTANTE DI CAMPIONAMENTO " << pPacket->getPlayoutTime() << "\n\n";     //FIXME Translate!!!
                 --mBufferSpace;
                 //GESTIONE DUPLICATI     //FIXME Translate!!!
                 isArrived[pPacket->getFrameID()] = true;
@@ -195,8 +192,8 @@ void VoIPReceiver::playout(bool finish)
             else
             {
                 ++tailDropLoss;
-                EV<<"BUFFER PIENO PACCHETTO SCARTATO: TALK "<<pPacket->getTalkID()<<" FRAME "
-                        <<pPacket->getFrameID()<<" ISTANTE DI ARRIVO "<<pPacket->getArrivalTime()<<"\n\n";     //FIXME Translate!!!
+                EV << "BUFFER PIENO PACCHETTO SCARTATO: TALK " << pPacket->getTalkID() << " FRAME "
+                        << pPacket->getFrameID() << " ISTANTE DI ARRIVO " << pPacket->getArrivalTime() << "\n\n";     //FIXME Translate!!!
                 delete pPacket;
             }
         }
@@ -205,8 +202,8 @@ void VoIPReceiver::playout(bool finish)
     }
 
     double proportionalLoss = ((double)tailDropLoss+(double)playoutLoss+(double)channelLoss)/(double)n_frames;
-    EV<<"proportionalLoss "<<proportionalLoss<< "(tailDropLoss="<< tailDropLoss<< " - playoutLoss="<<
-            playoutLoss << " - channelLoss=" << channelLoss<< ")\n\n";
+    EV << "proportionalLoss " << proportionalLoss << "(tailDropLoss=" << tailDropLoss << " - playoutLoss="
+            << playoutLoss << " - channelLoss=" << channelLoss << ")\n\n";
 
     double mos = eModel(SIMTIME_DBL(mPlayoutDelay), proportionalLoss);
 
@@ -217,15 +214,13 @@ void VoIPReceiver::playout(bool finish)
     double tailDropRate = ((double)tailDropLoss/(double)n_frames);
     emit(mTaildropLossRateSignal, tailDropRate);
 
-    EV<<"MOS CALCOLATO: eModel( "<<mPlayoutDelay<<" , "<<tailDropLoss<<"+"<<playoutLoss<<"+"
-            <<channelLoss<<" ) = "<<mos<<"\n\n";     //FIXME Translate!!!
+    EV << "MOS CALCOLATO: eModel( " << mPlayoutDelay << " , " << tailDropLoss << "+" << playoutLoss << "+" << channelLoss << " ) = " << mos << "\n\n";     //FIXME Translate!!!
 
-    EV<<"PLAYOUT DELAY ADAPTATION \n"<<"OLD PLAYOUT DELAY: "<<mPlayoutDelay<<"\nMAX JITTER MESEAURED: "
-            <<max_jitter<<"\n\n";
+    EV << "PLAYOUT DELAY ADAPTATION \n" << "OLD PLAYOUT DELAY: " << mPlayoutDelay << "\nMAX JITTER MESEAURED: " << max_jitter << "\n\n";
 
     mPlayoutDelay += max_jitter;
     if (mPlayoutDelay < 0.0) mPlayoutDelay = 0.0;
-    EV<<"NEW PLAYOUT DELAY: "<<mPlayoutDelay<<"\n\n";
+    EV << "NEW PLAYOUT DELAY: " << mPlayoutDelay << "\n\n";
 
     delete [] isArrived;
 }

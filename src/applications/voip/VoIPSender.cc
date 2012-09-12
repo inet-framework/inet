@@ -26,7 +26,7 @@ VoIPSender::~VoIPSender()
 
 void VoIPSender::initialize(int stage)
 {
-    EV<<"VoIP Sender initialize: stage "<<stage<< " - initialize=" << initialized_ << endl;
+    EV << "VoIP Sender initialize: stage " << stage << " - initialize=" << initialized_ << endl;
 
     // avoid multiple initializations
     if (stage!=3 || initialized_)
@@ -56,7 +56,7 @@ void VoIPSender::initialize(int stage)
     socket.setOutputGate(gate("udpOut"));
     socket.bind(localPort);
 
-    EV << "VoIPSender::initialize - binding to port: local:" << localPort << " , dest:"<< destPort << endl;
+    EV << "VoIPSender::initialize - binding to port: local:" << localPort << " , dest:" << destPort << endl;
 
 
     // calculating traffic starting time
@@ -88,7 +88,7 @@ void VoIPSender::talkspurt(double dur)
 {
     talkID++;
     nframes = (ceil(dur/samplingTime));
-    EV<<"TALKSPURT "<<talkID-1<<" Verranno inviati "<<nframes<<" frames\n\n";     //FIXME Translate!!!
+    EV << "TALKSPURT " << talkID-1 << " Verranno inviati " << nframes << " frames\n\n";     //FIXME Translate!!!
 
     frameID = 0;
     nframes_tmp = nframes;
@@ -105,7 +105,7 @@ void VoIPSender::selectPeriodTime()
     {
         durSil = weibull(scaleSil, shapeSil);
         double durSil2 = round(durSil*1000)/1000;
-        EV<<"PERIODO SILENZIO: "<<"Durata: "<<durSil<<"/" << durSil2<<" secondi\n\n";     //FIXME Translate!!!
+        EV << "PERIODO SILENZIO: " << "Durata: " << durSil << "/" << durSil2 << " secondi\n\n";     //FIXME Translate!!!
         durSil = durSil2;
         simtime_t endSilent = simTime() + durSil;
         if (stopTime != 0 && endSilent > stopTime)
@@ -117,7 +117,7 @@ void VoIPSender::selectPeriodTime()
     {
         durTalk = weibull(scaleTalk, shapeTalk);
         double durTalk2 = round(durTalk*1000)/1000;
-        EV<<"TALKSPURT: "<<talkID<<" Durata: "<<durTalk<< "/"<< durTalk2<< " secondi\n\n";     //FIXME Translate!!!
+        EV << "TALKSPURT: " << talkID << " Durata: " << durTalk << "/" << durTalk2 << " secondi\n\n";     //FIXME Translate!!!
         durTalk = durTalk2;
         simtime_t endTalk = simTime() + durTalk;
         if (stopTime != 0 && endTalk > stopTime)
@@ -140,7 +140,7 @@ void VoIPSender::sendVoIPPacket()
     packet->setVoipTimestamp(simTime());
     packet->setVoiceDuration(samplingTime);
     packet->setByteLength(talkFrameSize);
-    EV<<"TALKSPURT "<<talkID-1<<" Invio frame "<<frameID<<"\n";     //FIXME Translate!!!
+    EV << "TALKSPURT " << talkID-1 << " Invio frame " << frameID << "\n";     //FIXME Translate!!!
 
     socket.sendTo(packet, destAddress, destPort);
     --nframes_tmp;
