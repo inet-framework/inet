@@ -36,18 +36,18 @@ package inet.applications.udpapp;
 //
 // Note that, unlike 'UDPBasicApp', 'UDPBurstApp' can properly handle
 // 'messageLength' longer than the maximum size of UDP packet,
-// i.e., 65,507 bytes (= 65,535 �닋 8 byte UDP header �닋 20 byte IP header).
+// i.e., 65,507 bytes (= 65,535 �닋 8 byte UDP header �닋 20 byte IP header).
 //
 simple UDPBurstApp like UDPApp
 {
     parameters:
         int localPort; // if -1, app doesn't bind in UDP
         int destPort;
-        volatile int messageLength @unit("B");	// length of messages to generate, in bytes
-        volatile double messageFreq @unit("s");	// should usually be a random value, e.g. exponential(1)
-		double interSegmentTime @unit("s") = default(1ms);	// interval between	consecutive UDP segments generated during the burst
+        volatile int messageLength @unit(B);	// length of messages to generate, in bytes
+        volatile double messageFreq @unit(s);	// should usually be a random value, e.g. exponential(1)
         string destAddresses = default("");	// list of \IP addresses, separated by spaces
-        double startTime @unit("s") = default(1s);
+        double startTime @unit(s) = default(1s);
+		double lineRate @unit(bps) = default(100Mbps);	// line rate of physical interface
         @display("i=block/app");
     gates:
         input udpIn @labels(UDPControlInfo/up);

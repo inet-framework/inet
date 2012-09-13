@@ -24,7 +24,7 @@
 #include "UDPBasicApp.h"
 
 
-const int UDP_MAX_PAYLOAD = 65507; // = 65,535 - 8-byte UDP header - 20-byte IP header
+const int UDP_MAX_PAYLOAD = 1472; // = 1500-byte MTU of Ethernet - 8-byte UDP header - 20-byte IP header
 
 
 /**
@@ -33,7 +33,7 @@ const int UDP_MAX_PAYLOAD = 65507; // = 65,535 - 8-byte UDP header - 20-byte IP 
 class INET_API UDPBurstApp : public UDPBasicApp
 {
 protected:
-    double interSegmentTime;
+    double lineRate;
     
     virtual cPacket *createPacket(int payloadLength);
     virtual void sendPacket();

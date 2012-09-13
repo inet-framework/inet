@@ -40,7 +40,7 @@ void UDPBurstApp::initialize(int stage)
 
     localPort = par("localPort");
     destPort = par("destPort");
-    interSegmentTime = par("interSegmentTime").doubleValue();
+    lineRate = par("lineRate").doubleValue();
 
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
@@ -70,9 +70,6 @@ cPacket *UDPBurstApp::createPacket(int payloadLength)
 void UDPBurstApp::sendPacket()
 {
     int messageLength = par("messageLength").longValue();
-    // DEBUG
-    double currentTime;
-    // DEBUG
 
     do
     {
@@ -80,11 +77,7 @@ void UDPBurstApp::sendPacket()
         messageLength -= payloadLength;
         cPacket *payload = createPacket(payloadLength);
         IPvXAddress destAddr = chooseDestAddr();
-        sendToUDPDelayed(payload, localPort, destAddr, destPort, interSegmentTime);
-
-        // DEBUG
-        currentTime = simTime().dbl();
-        // DEBUG
+        sendToUDPDelayed(payload, localPort, destAddr, destPort, payloadLength*8/lineRate);
 
         numSent++;
     } while (messageLength > 0);
