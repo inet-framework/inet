@@ -198,6 +198,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
                 playoutQueue.push_back(&(*packet));
             }
             else
+            {   // buffer full
                 ++tailDropLoss;
                 EV << "BUFFER PIENO PACCHETTO SCARTATO: TALK " << currentTalkspurt.talkspurtID << " PACKET "
                         << packet->packetID << " ISTANTE DI ARRIVO " << packet->arrivalTime << "\n\n";     //FIXME Translate!!!
