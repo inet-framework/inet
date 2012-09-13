@@ -35,7 +35,6 @@ class INET_API HostAutoConfigurator : public cSimpleModule
         virtual int numInitStages() const {return 3;}
 
         virtual void handleMessage(cMessage *msg);
-        virtual void handleSelfMsg(cMessage *msg);
 
     protected:
         void setupNetworkLayer();

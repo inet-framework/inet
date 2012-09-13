@@ -46,9 +46,6 @@ void HostAutoConfigurator::finish() {
 void HostAutoConfigurator::handleMessage(cMessage* apMsg) {
 }
 
-void HostAutoConfigurator::handleSelfMsg(cMessage* apMsg) {
-}
-
 void HostAutoConfigurator::setupNetworkLayer()
 {
     EV << "host auto configuration started" << std::endl;
@@ -59,24 +56,28 @@ void HostAutoConfigurator::setupNetworkLayer()
     std::string mcastGroups = par("mcastGroups").stringValue();
     IPv4Address myAddress = IPv4Address(addressBase.getInt() + uint32(getParentModule()->getId()));
 
+    // address test
+    if (!IPv4Address::maskedAddrAreEqual(myAddress, addressBase, netmask))
+        throw cRuntimeError("Generated IP address is out of specified address range");
+
     // get our host module
     cModule* host = getParentModule();
-    if (!host) throw std::runtime_error("No parent module found");
+    if (!host) throw cRuntimeError("No parent module found");
 
     // get our routing table
     IRoutingTable* routingTable = IPvXAddressResolver().routingTableOf(host);
-    if (!routingTable) throw std::runtime_error("No routing table found");
+    if (!routingTable) throw cRuntimeError("No routing table found");
 
     // get our interface table
     IInterfaceTable *ift = IPvXAddressResolver().interfaceTableOf(host);
-    if (!ift) throw std::runtime_error("No interface table found");
+    if (!ift) throw cRuntimeError("No interface table found");
 
     // look at all interface table entries
     cStringTokenizer interfaceTokenizer(interfaces.c_str());
     const char *ifname;
     while ((ifname = interfaceTokenizer.nextToken()) != NULL) {
         InterfaceEntry* ie = ift->getInterfaceByName(ifname);
-        if (!ie) throw std::runtime_error("No such interface");
+        if (!ie) throw cRuntimeError("No such interface '%s'", ifname);
 
         // assign IP Address to all connected interfaces
         if (ie->isLoopback()) {
