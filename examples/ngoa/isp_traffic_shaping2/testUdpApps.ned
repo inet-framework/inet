@@ -36,7 +36,7 @@ import ned.DatarateChannel;
 network testUdpApps
 {
     parameters:
-         int n = default(1);	// number of hosts
+         int n = default(1);	// number of host/server pairs
         @display("bgb=519,193");
     submodules:
         configurator: FlatNetworkConfigurator {
@@ -47,7 +47,7 @@ network testUdpApps
             parameters:
                 @display("i=device/laptop;p=46,119");
         }
-        server: StandardServerWithEthernetInterface2 {
+        server[n]: StandardServerWithEthernetInterface2 {
             parameters:
                 @display("p=464,119;i=device/server_l");
         }
@@ -57,6 +57,6 @@ network testUdpApps
     connections:
         for i=0..n-1 {
         	host[i].ethg++ <--> {datarate = 100Mbps; delay = 1ms;} <--> switch.ethg++;
-        	switch.ethg++ <--> {datarate = 100Mbps; delay = 1ms;} <--> server.ethg++;
+        	switch.ethg++ <--> {datarate = 100Mbps; delay = 1ms;} <--> server[i].ethg++;
         }
 }

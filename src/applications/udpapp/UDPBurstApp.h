@@ -24,7 +24,7 @@
 #include "UDPBasicApp.h"
 
 
-const int UDP_MAX_PAYLOAD = 65507; // = 65,535 − 8 byte UDP header − 20 byte IP header
+const int UDP_MAX_PAYLOAD = 65507; // = 65,535 - 8-byte UDP header - 20-byte IP header
 
 
 /**
@@ -32,9 +32,15 @@ const int UDP_MAX_PAYLOAD = 65507; // = 65,535 − 8 byte UDP header − 20 byte
  */
 class INET_API UDPBurstApp : public UDPBasicApp
 {
-  protected:
+protected:
+    double interSegmentTime;
+    
     virtual cPacket *createPacket(int payloadLength);
     virtual void sendPacket();
+    virtual void sendToUDPDelayed(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort, double delay);
+
+protected:
+    virtual void initialize(int stage);
 };
 
 #endif

@@ -1,4 +1,5 @@
 //
+// copyright (C) 2012 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2004 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -33,20 +34,22 @@ package inet.applications.udpapp;
 // The peer can be UDPSink or another UDPBasicApp (it handles received packets
 // exactly like UDPSink).
 //
-simple UDPBasicApp like UDPApp
+// Note that, unlike 'UDPBasicApp', 'UDPBurstApp' can properly handle
+// 'messageLength' longer than the maximum size of UDP packet,
+// i.e., 65,507 bytes (= 65,535 βλ‹‹ 8 byte UDP header βλ‹‹ 20 byte IP header).
+//
+simple UDPBurstApp like UDPApp
 {
     parameters:
         int localPort; // if -1, app doesn't bind in UDP
         int destPort;
-        volatile int messageLength @unit("B"); // length of messages to generate, in bytes
-        volatile double messageFreq @unit("s"); // should usually be a random value, e.g. exponential(1)
-        string destAddresses = default(""); // list of \IP addresses, separated by spaces
+        volatile int messageLength @unit("B");	// length of messages to generate, in bytes
+        volatile double messageFreq @unit("s");	// should usually be a random value, e.g. exponential(1)
+		double interSegmentTime @unit("s") = default(1ms);	// interval between	consecutive UDP segments generated during the burst
+        string destAddresses = default("");	// list of \IP addresses, separated by spaces
         double startTime @unit("s") = default(1s);
         @display("i=block/app");
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);
 }
-
-
-

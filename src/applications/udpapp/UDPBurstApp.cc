@@ -40,6 +40,7 @@ void UDPBurstApp::initialize(int stage)
 
     localPort = par("localPort");
     destPort = par("destPort");
+    interSegmentTime = par("interSegmentTime").doubleValue();
 
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
@@ -53,7 +54,7 @@ void UDPBurstApp::initialize(int stage)
     bindToPort(localPort);
 
     cMessage *timer = new cMessage("sendTimer");
-    scheduleAt((double)par("startupTime"), timer);
+    scheduleAt((double)par("startTime"), timer);
 }
 
 cPacket *UDPBurstApp::createPacket(int payloadLength)
@@ -69,15 +70,39 @@ cPacket *UDPBurstApp::createPacket(int payloadLength)
 void UDPBurstApp::sendPacket()
 {
     int messageLength = par("messageLength").longValue();
-    
+    // DEBUG
+    double currentTime;
+    // DEBUG
+
     do
     {
         int payloadLength = (messageLength > UDP_MAX_PAYLOAD) ? UDP_MAX_PAYLOAD : messageLength;
         messageLength -= payloadLength;
         cPacket *payload = createPacket(payloadLength);
         IPvXAddress destAddr = chooseDestAddr();
-        sendToUDP(payload, localPort, destAddr, destPort);
+        sendToUDPDelayed(payload, localPort, destAddr, destPort, interSegmentTime);
+
+        // DEBUG
+        currentTime = simTime().dbl();
+        // DEBUG
 
         numSent++;
     } while (messageLength > 0);
+}
+
+void UDPBurstApp::sendToUDPDelayed(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort, double delay)
+{
+    // send message to UDP, with the appropriate control info attached after a given delay
+    msg->setKind(UDP_C_DATA);
+
+    UDPControlInfo *ctrl = new UDPControlInfo();
+    ctrl->setSrcPort(srcPort);
+    ctrl->setDestAddr(destAddr);
+    ctrl->setDestPort(destPort);
+    msg->setControlInfo(ctrl);
+
+    EV << "Sending packet: ";
+    printPacket(msg);
+
+    sendDelayed(msg, delay, "udpOut");
 }

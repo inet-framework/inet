@@ -1,5 +1,4 @@
 //
-// copyright (C) 2012 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2004 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -34,11 +33,7 @@ package inet.applications.udpapp;
 // The peer can be UDPSink or another UDPBasicApp (it handles received packets
 // exactly like UDPSink).
 //
-// Note that, unlike 'UDPBasicApp', 'UDPBurstApp' can properly handle
-// 'messageLength' longer than the maximum size of UDP packet,
-// i.e., 65,507 bytes (= 65,535 − 8 byte UDP header − 20 byte IP header).
-//
-simple UDPBurstApp like UDPApp
+simple UDPBasicApp like UDPApp
 {
     parameters:
         int localPort; // if -1, app doesn't bind in UDP
@@ -51,3 +46,6 @@ simple UDPBurstApp like UDPApp
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);
 }
+
+
+
