@@ -32,7 +32,7 @@ channel EtherLink extends DatarateChannel
 //
 // 10 megabit/sec Ethernet link
 //
-channel Eth10M extends EtherLink 
+channel Eth10M extends EtherLink
 {
     datarate = 10Mbps;
 }
@@ -40,7 +40,7 @@ channel Eth10M extends EtherLink
 //
 // 100 megabit/sec Ethernet link
 //
-channel Eth100M extends EtherLink 
+channel Eth100M extends EtherLink
 {
     datarate = 100Mbps;
 }
@@ -48,7 +48,7 @@ channel Eth100M extends EtherLink
 //
 // 1 gigabit/sec Ethernet link
 //
-channel Eth1G extends EtherLink 
+channel Eth1G extends EtherLink
 {
     datarate = 1Gbps;
 }
@@ -56,7 +56,7 @@ channel Eth1G extends EtherLink
 //
 // 10 gigabit/sec Ethernet link
 //
-channel Eth10G extends EtherLink 
+channel Eth10G extends EtherLink
 {
     datarate = 10Gbps;
 }
@@ -64,7 +64,7 @@ channel Eth10G extends EtherLink
 //
 // 40 gigabit/sec Ethernet link
 //
-channel Eth40G extends EtherLink 
+channel Eth40G extends EtherLink
 {
     datarate = 40Gbps;
 }
@@ -72,7 +72,7 @@ channel Eth40G extends EtherLink
 //
 // 100 gigabit/sec Ethernet link
 //
-channel Eth100G extends EtherLink 
+channel Eth100G extends EtherLink
 {
     datarate = 100Gbps;
 }

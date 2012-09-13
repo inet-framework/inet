@@ -37,67 +37,67 @@ TraCIScenarioManagerLaunchd::~TraCIScenarioManagerLaunchd()
 
 void TraCIScenarioManagerLaunchd::initialize(int stage)
 {
-	if (stage != 1) {
-		TraCIScenarioManager::initialize(stage);
-		return;
-	}
-	launchConfig = par("launchConfig").xmlValue();
-	seed = par("seed");
-	cXMLElementList basedir_nodes = launchConfig->getElementsByTagName("basedir");
-	if (basedir_nodes.size() == 0) {
-		// default basedir is where current network file was loaded from
-		std::string basedir = cSimulation::getActiveSimulation()->getEnvir()->getConfig()->getConfigEntry("network").getBaseDirectory();
-		cXMLElement* basedir_node = new cXMLElement("basedir", __FILE__, launchConfig);
-		basedir_node->setAttribute("path", basedir.c_str());
-		launchConfig->appendChild(basedir_node);
-	}
-	cXMLElementList seed_nodes = launchConfig->getElementsByTagName("seed");
-	if (seed_nodes.size() == 0) {
-		if (seed == -1) {
-			// default seed is current repetition
-			const char* seed_s = cSimulation::getActiveSimulation()->getEnvir()->getConfigEx()->getVariable(CFGVAR_RUNNUMBER);
-			seed = atoi(seed_s);
-		}
-		std::stringstream ss; ss << seed;
-		cXMLElement* seed_node = new cXMLElement("seed", __FILE__, launchConfig);
-		seed_node->setAttribute("value", ss.str().c_str());
-		launchConfig->appendChild(seed_node);
-	}
-	TraCIScenarioManager::initialize(stage);
+    if (stage != 1) {
+        TraCIScenarioManager::initialize(stage);
+        return;
+    }
+    launchConfig = par("launchConfig").xmlValue();
+    seed = par("seed");
+    cXMLElementList basedir_nodes = launchConfig->getElementsByTagName("basedir");
+    if (basedir_nodes.size() == 0) {
+        // default basedir is where current network file was loaded from
+        std::string basedir = cSimulation::getActiveSimulation()->getEnvir()->getConfig()->getConfigEntry("network").getBaseDirectory();
+        cXMLElement* basedir_node = new cXMLElement("basedir", __FILE__, launchConfig);
+        basedir_node->setAttribute("path", basedir.c_str());
+        launchConfig->appendChild(basedir_node);
+    }
+    cXMLElementList seed_nodes = launchConfig->getElementsByTagName("seed");
+    if (seed_nodes.size() == 0) {
+        if (seed == -1) {
+            // default seed is current repetition
+            const char* seed_s = cSimulation::getActiveSimulation()->getEnvir()->getConfigEx()->getVariable(CFGVAR_RUNNUMBER);
+            seed = atoi(seed_s);
+        }
+        std::stringstream ss; ss << seed;
+        cXMLElement* seed_node = new cXMLElement("seed", __FILE__, launchConfig);
+        seed_node->setAttribute("value", ss.str().c_str());
+        launchConfig->appendChild(seed_node);
+    }
+    TraCIScenarioManager::initialize(stage);
 }
 
 void TraCIScenarioManagerLaunchd::finish()
 {
-	TraCIScenarioManager::finish();
+    TraCIScenarioManager::finish();
 }
 
 void TraCIScenarioManagerLaunchd::init_traci() {
-	{
-		std::pair<uint32_t, std::string> version = TraCIScenarioManager::commandGetVersion();
-		uint32_t apiVersion = version.first;
-		std::string serverVersion = version.second;
+    {
+        std::pair<uint32_t, std::string> version = TraCIScenarioManager::commandGetVersion();
+        uint32_t apiVersion = version.first;
+        std::string serverVersion = version.second;
 
-		ASSERT(apiVersion == 1);
+        ASSERT(apiVersion == 1);
 
-		MYDEBUG << "TraCI launchd reports version \"" << serverVersion << "\"" << endl;
-	}
+        MYDEBUG << "TraCI launchd reports version \"" << serverVersion << "\"" << endl;
+    }
 
-	std::string contents = launchConfig->tostr(0);
+    std::string contents = launchConfig->tostr(0);
 
-	TraCIBuffer buf;
-	buf << std::string("sumo-launchd.launch.xml") << contents;
-	sendTraCIMessage(makeTraCICommand(CMD_FILE_SEND, buf));
+    TraCIBuffer buf;
+    buf << std::string("sumo-launchd.launch.xml") << contents;
+    sendTraCIMessage(makeTraCICommand(CMD_FILE_SEND, buf));
 
-	TraCIBuffer obuf(receiveTraCIMessage());
-	uint8_t cmdLength; obuf >> cmdLength;
-	uint8_t commandResp; obuf >> commandResp; if (commandResp != CMD_FILE_SEND) error("Expected response to command %d, but got one for command %d", CMD_FILE_SEND, commandResp);
-	uint8_t result; obuf >> result;
-	std::string description; obuf >> description;
-	if (result != RTYPE_OK) {
-		EV << "Warning: Received non-OK response from TraCI server to command " << CMD_FILE_SEND << ":" << description.c_str() << std::endl;
-	}
+    TraCIBuffer obuf(receiveTraCIMessage());
+    uint8_t cmdLength; obuf >> cmdLength;
+    uint8_t commandResp; obuf >> commandResp; if (commandResp != CMD_FILE_SEND) error("Expected response to command %d, but got one for command %d", CMD_FILE_SEND, commandResp);
+    uint8_t result; obuf >> result;
+    std::string description; obuf >> description;
+    if (result != RTYPE_OK) {
+        EV << "Warning: Received non-OK response from TraCI server to command " << CMD_FILE_SEND << ":" << description.c_str() << std::endl;
+    }
 
-	TraCIScenarioManager::init_traci();
+    TraCIScenarioManager::init_traci();
 }
 
 

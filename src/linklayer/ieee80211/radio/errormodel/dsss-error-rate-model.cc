@@ -37,7 +37,7 @@ const double DsssErrorRateModel::spectralEfficiency1bit=2000000.0 / 1000000.0; /
 const double DsssErrorRateModel::spectralEfficiency2bit=2000000.0 / 1000000.0/2.0; // 2 bits per symbol, 1 MSPS
 #endif
 
-double 
+double
 DsssErrorRateModel::DqpskFunction(double x)
 {
   return ((sqrt(2.0) + 1.0) / sqrt(8.0*3.1415926*sqrt(2.0)))

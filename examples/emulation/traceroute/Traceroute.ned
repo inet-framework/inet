@@ -35,7 +35,7 @@ network Traceroute
             delay = 100ms;
             datarate = 1 Gbps;
         }
-        
+
         channel ethline extends DatarateChannel
         {
             delay = 100ms;

@@ -74,7 +74,7 @@ simple Ieee80211Mac
         double TXOP1 @unit(s) = default(0s);
         double TXOP2 @unit(s) = default(3.008ms);
         double TXOP3 @unit(s) = default(1.504ms);
-        // parameters for EDCA = false 
+        // parameters for EDCA = false
         int AIFSN = default(2); // if there is only one AC (EDCA = false)
 
         bool useModulationParameters = default(false); // if true, slot time, DIFS, and ACK timeout (aPHY-RX-START-Delay) are function of modulation time (2007 standard)

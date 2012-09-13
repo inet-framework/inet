@@ -279,7 +279,7 @@ network SwitchedDuplexLAN
             parameters:
                 csmacdSupport = false;
         }
-        
+
         module EtherSwitchFullDuplex extends EtherSwitch
         {
             parameters:

@@ -29,7 +29,7 @@ import inet.linklayer.ieee80211.radio.Ieee80211Radio;
 //
 // This NIC implements an 802.11 network interface card.
 // It can be configured via the mgmtType parameter to act
-// as an AP or a STA, or for ad-hoc mode. 
+// as an AP or a STA, or for ad-hoc mode.
 //
 // Potential mgmType values: Ieee80211MgmtSTASimplified, Ieee80211MgmtSTA
 // Ieee80211MgmtAP, Ieee80211MgmtAPSimplified, Ieee80211MgmtAdhoc
@@ -42,7 +42,7 @@ module Ieee80211Nic like IWirelessNic
         double bitrate @unit("bps") = default(opMode == "b" ? 11Mbps : opMode == "p" ? 27Mbps : 54Mbps);
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
-        bool _agentNeeded = (mgmtType == "Ieee80211MgmtSTA");   // internal par. do not use, shows if optional agent module is needed 
+        bool _agentNeeded = (mgmtType == "Ieee80211MgmtSTA");   // internal par. do not use, shows if optional agent module is needed
         @display("i=block/ifcard;bgb=259,357");
     gates:
         input upperLayerIn; // to upper layers

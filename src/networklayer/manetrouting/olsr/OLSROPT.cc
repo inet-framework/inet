@@ -116,7 +116,7 @@ OLSROPT::recv_olsr(cMessage* msg)
                 recalculateRoutes += process_hello(msg, ra_addr(), src_addr, index);
             }
             else if (msg.msg_type() == OLSR_TC_MSG){
-            	recalculateRoutes += process_tc(msg, src_addr, index);
+                recalculateRoutes += process_tc(msg, src_addr, index);
             }
             else if (msg.msg_type() == OLSR_MID_MSG)
                 process_mid(msg, src_addr, index);
@@ -159,7 +159,7 @@ OLSROPT::recv_olsr(cMessage* msg)
 
     // After processing all OLSR messages, we must recompute routing table
     if (recalculateRoutes || getTopologyChanged()){
-    	rtable_computation();
+        rtable_computation();
     }
 
 }
@@ -185,9 +185,9 @@ OLSROPT::process_hello(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsad
     bool ret1 = populate_nb2hopset(msg);
 
     if (ret1 || ret2)
-    	mpr_computation();
+        mpr_computation();
 
-	populate_mprselset(msg);
+    populate_mprselset(msg);
     return (ret1 || ret2);
 }
 
@@ -222,21 +222,21 @@ OLSROPT::process_tc(OLSR_msg& msg, const nsaddr_t &sender_iface, const int &inde
         state_.find_newer_topology_tuple(msg.orig_addr(), tc.ansn());
     if (topology_tuple != NULL)
         return false;
-  	return update_topology_tuples(msg, index);
+      return update_topology_tuples(msg, index);
 }
 
 int
 OLSROPT::update_topology_tuples(OLSR_msg msg, int index)
 {
 
-	double now = CURRENT_TIME;
-	OLSR_tc& tc = msg.tc();
-	if (tc.count == 0)
-		return 0;
-	int changedTuples = 0; // needed to know if we have to recalculate the routes
-	std::set<int> tccounter;
-	/* Standard says:
-	 *  3    All tuples in the topology set where:
+    double now = CURRENT_TIME;
+    OLSR_tc& tc = msg.tc();
+    if (tc.count == 0)
+        return 0;
+    int changedTuples = 0; // needed to know if we have to recalculate the routes
+    std::set<int> tccounter;
+    /* Standard says:
+     *  3    All tuples in the topology set where:
 
                T_last_addr == originator address AND
 
@@ -267,56 +267,56 @@ OLSROPT::update_topology_tuples(OLSR_msg msg, int index)
                     T_seq       = ANSN,
 
                     T_time      = current time + validity time.
-	 *
-	 * This shoud achieve the same but with less erase&add.
-	 *
-	 */
-	for (std::vector<OLSR_topology_tuple*>::iterator it = topologyset().begin(); it != topologyset().end();)
-	{
-		bool foundTuple = 0;
-		if ((*it)->last_addr_ == msg.orig_addr()){ // for any tuple in the list that is
-			// passing for this node
-			for (int i = 0; i < tc.count; i++)
-			{
-				assert(i >= 0 && i < OLSR_MAX_ADDRS);
-				nsaddr_t addr = tc.nb_main_addr(i);
-				if((*it)->dest_addr() == addr){ // found a tuple to be updated
-					(*it)->time() = now + OLSROPT::emf_to_seconds(msg.vtime());
-					(*it)->seq() = tc.ansn();
-					foundTuple = 1;
-					tccounter.insert(i);
-				}
-			}
-			if (!foundTuple){ // the tuple was not in present in the TC, erase it
-				changedTuples++;
-				it = topologyset().erase(it); // erase and increment iterator
-				continue;
-			}else{
-				it++;
-				continue;
-			}
-		}
-		it++; // did not enter the main if, increment iterator
-	}
-	for (int i = 0; i < tc.count; i++)
-	{
-		if(tccounter.find(i) == tccounter.end()){ // we did not update this, let's add it
-			nsaddr_t addr = tc.nb_main_addr(i);
-			OLSR_topology_tuple* topology_tuple = new OLSR_topology_tuple;
-			topology_tuple->dest_addr() = addr;
-			topology_tuple->last_addr() = msg.orig_addr();
-			topology_tuple->seq() = tc.ansn();
-			topology_tuple->time() = now + OLSROPT::emf_to_seconds(msg.vtime());
-			topology_tuple->local_iface_index() = index;
-			add_topology_tuple(topology_tuple);
-			// Schedules topology tuple deletion
-			OLSR_TopologyTupleTimer* topology_timer =
-					new OLSR_TopologyTupleTimer(this, topology_tuple);
-			topology_timer->resched(DELAY(topology_tuple->time()));
-			changedTuples++;
-		}
-	}
-	return changedTuples;
+     *
+     * This shoud achieve the same but with less erase&add.
+     *
+     */
+    for (std::vector<OLSR_topology_tuple*>::iterator it = topologyset().begin(); it != topologyset().end();)
+    {
+        bool foundTuple = 0;
+        if ((*it)->last_addr_ == msg.orig_addr()){ // for any tuple in the list that is
+            // passing for this node
+            for (int i = 0; i < tc.count; i++)
+            {
+                assert(i >= 0 && i < OLSR_MAX_ADDRS);
+                nsaddr_t addr = tc.nb_main_addr(i);
+                if((*it)->dest_addr() == addr){ // found a tuple to be updated
+                    (*it)->time() = now + OLSROPT::emf_to_seconds(msg.vtime());
+                    (*it)->seq() = tc.ansn();
+                    foundTuple = 1;
+                    tccounter.insert(i);
+                }
+            }
+            if (!foundTuple){ // the tuple was not in present in the TC, erase it
+                changedTuples++;
+                it = topologyset().erase(it); // erase and increment iterator
+                continue;
+            }else{
+                it++;
+                continue;
+            }
+        }
+        it++; // did not enter the main if, increment iterator
+    }
+    for (int i = 0; i < tc.count; i++)
+    {
+        if(tccounter.find(i) == tccounter.end()){ // we did not update this, let's add it
+            nsaddr_t addr = tc.nb_main_addr(i);
+            OLSR_topology_tuple* topology_tuple = new OLSR_topology_tuple;
+            topology_tuple->dest_addr() = addr;
+            topology_tuple->last_addr() = msg.orig_addr();
+            topology_tuple->seq() = tc.ansn();
+            topology_tuple->time() = now + OLSROPT::emf_to_seconds(msg.vtime());
+            topology_tuple->local_iface_index() = index;
+            add_topology_tuple(topology_tuple);
+            // Schedules topology tuple deletion
+            OLSR_TopologyTupleTimer* topology_timer =
+                    new OLSR_TopologyTupleTimer(this, topology_tuple);
+            topology_timer->resched(DELAY(topology_tuple->time()));
+            changedTuples++;
+        }
+    }
+    return changedTuples;
 }
 
 
@@ -361,7 +361,7 @@ OLSROPT::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsadd
         OLSR_hello_msg& hello_msg = hello.hello_msg(i);
         int lt = hello_msg.link_code() & 0x03;
         int nt = hello_msg.link_code() >> 2;
-        
+
         // We must not process invalid advertised links
         if ((lt == OLSR_SYM_LINK && nt == OLSR_NOT_NEIGH) ||
                 (nt != OLSR_SYM_NEIGH && nt != OLSR_MPR_NEIGH
@@ -380,7 +380,7 @@ OLSROPT::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsadd
                 }
                 else if (lt == OLSR_SYM_LINK || lt == OLSR_ASYM_LINK)
                 {
-                	link_tuple->sym_time() =
+                    link_tuple->sym_time() =
                         now + OLSROPT::emf_to_seconds(msg.vtime());
                     link_tuple->time() =
                         link_tuple->sym_time() + OLSR_NEIGHB_HOLD_TIME;
@@ -420,7 +420,7 @@ OLSROPT::populate_nbset(OLSR_msg& msg)
 
     OLSR_nb_tuple* nb_tuple = state_.find_nb_tuple(msg.orig_addr());
     if (nb_tuple != NULL){ // it was already present
-    	nb_tuple->willingness() = hello.willingness();
+        nb_tuple->willingness() = hello.willingness();
     }
     return true; // added a new neighbor
 
@@ -502,9 +502,9 @@ OLSROPT::populate_nb2hopset(OLSR_msg& msg)
                             // N_neighbor_main_addr == Originator
                             // Address AND N_2hop_addr  == main address
                             // of the 2-hop neighbor are deleted.
-                        	if(state_.erase_nb2hop_tuples(msg.orig_addr(),
+                            if(state_.erase_nb2hop_tuples(msg.orig_addr(),
                                                        nb2hop_addr))
-                        		changedTopology = true;
+                                changedTopology = true;
                         }
                     }
                 }
@@ -524,7 +524,7 @@ OLSROPT::populate_nb2hopset(OLSR_msg& msg)
 void
 OLSROPT::nb_loss(OLSR_link_tuple* tuple)
 {
-	bool topologychanged = false;
+    bool topologychanged = false;
     debug("%f: Node %s detects neighbor %s loss\n",
           CURRENT_TIME,
           getNodeId(ra_addr()),

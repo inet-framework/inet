@@ -58,7 +58,7 @@ packet AirFrame
     double powRec; // Power in the receiver
     Coord senderPos;
     // multi gate support
-    double carrierFrequency; // 
+    double carrierFrequency; //
     double bandwidth;
     ModulationType modulationType;
 }
@@ -67,7 +67,7 @@ packet AirFrame
 //
 //packet AirFrameExtended extends AirFrame
 //{
-//   double carrierFrequency; // 
+//   double carrierFrequency; //
 //   double bandwidth;
 //   ModulationType modulationType;
 //}

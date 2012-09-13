@@ -35,9 +35,9 @@ import inet.world.httptools.HttpController;
 
 
 //
-// Flash crowd simulation 
+// Flash crowd simulation
 //
-// This is an example of a popularity modification event employed to simulate 
+// This is an example of a popularity modification event employed to simulate
 // a flashcrowd. Direct message passing. This scenario is similar to the 10servers
 // scenario used to demonstrate the sockets components.
 //

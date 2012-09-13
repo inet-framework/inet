@@ -51,7 +51,7 @@ enum DHCP_TYPE
 }
 
 //
-// DHCP Messages 
+// DHCP Messages
 //
 // To be used by the DHCP client and server
 //

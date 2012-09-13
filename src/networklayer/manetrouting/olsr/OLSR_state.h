@@ -89,8 +89,8 @@ class OLSR_state : public cObject
     OLSR_topology_tuple*    find_newer_topology_tuple(const nsaddr_t &, uint16_t);
     void            erase_topology_tuple(OLSR_topology_tuple*);
     void            erase_older_topology_tuples(const nsaddr_t &, uint16_t);
-    void 			print_topology_tuples_to(const nsaddr_t & dest_addr);
-    void 			print_topology_tuples_across(const nsaddr_t & last_addr);
+    void             print_topology_tuples_to(const nsaddr_t & dest_addr);
+    void             print_topology_tuples_across(const nsaddr_t & last_addr);
     void            insert_topology_tuple(OLSR_topology_tuple*);
 
     OLSR_iface_assoc_tuple* find_ifaceassoc_tuple(const nsaddr_t&);

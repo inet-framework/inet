@@ -1,19 +1,19 @@
 //
 //   Copyright (C) 2009 by Alfonso Ariza
-//   Malaga University 
+//   Malaga University
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 package inet.networklayer.manetrouting;
 
@@ -22,18 +22,18 @@ import inet.networklayer.IManetRouting;
 
 
 //
-// Optimized Link State Routing Protocol 
+// Optimized Link State Routing Protocol
 //
 // Implements core functionality as described in rfc3626 chapter 2.1.
 // Supports optional Link Layer feedback (see the use_mac parameter).
 // Auxiliary functions are NOT supported.
 //
-// NOTE: 
+// NOTE:
 //  - The initialization of the routing component is done in stage=4
 //  - hello, tc, mid intervals accept INTEGER values only
-//  - IPv4 addresses are assumed in the messages. If you need IPv6 recompile with -DOLSR_IPv6 added to CFLAGS 
+//  - IPv4 addresses are assumed in the messages. If you need IPv6 recompile with -DOLSR_IPv6 added to CFLAGS
 //  - Multiple interfaces per OLSR node is supported only with adding -DMULTIPLE_IFACES_SUPPORT to CFLAGS
-// 
+//
 simple OLSR extends BaseRouting like IManetRouting
 {
     parameters:
@@ -48,21 +48,21 @@ simple OLSR extends BaseRouting like IManetRouting
         // OLSR timers
         double OLSR_HELLO_INTERVAL @unit("s")=default(2s);
 
-	/// TC messages emission interval.
-	    double OLSR_TC_INTERVAL @unit("s")=default(5s);
+    /// TC messages emission interval.
+        double OLSR_TC_INTERVAL @unit("s")=default(5s);
 
-	/// MID messages emission interval.
-	    double OLSR_MID_INTERVAL @unit("s")=default(5s);//   OLSR_TC_INTERVAL
+    /// MID messages emission interval.
+        double OLSR_MID_INTERVAL @unit("s")=default(5s);//   OLSR_TC_INTERVAL
 
-	///
-	/// \brief Period at which a node must cite every link and every neighbor.
-	///
-	/// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
-	///
-	    double OLSR_REFRESH_INTERVAL @unit("s")=default(2s);
-	    bool PublicRoutingTables = default(false);
-	    
-	    bool optimizedMid = default(false);// only nodes with more that a interface sends mid messages 
+    ///
+    /// \brief Period at which a node must cite every link and every neighbor.
+    ///
+    /// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
+    ///
+        double OLSR_REFRESH_INTERVAL @unit("s")=default(2s);
+        bool PublicRoutingTables = default(false);
+
+        bool optimizedMid = default(false);// only nodes with more that a interface sends mid messages
 
     gates:
         input from_ip;

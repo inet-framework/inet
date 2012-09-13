@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2012 Opensim Ltd.
-// Author: Tamas Borbely 
+// Author: Tamas Borbely
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License

@@ -447,18 +447,18 @@ OLSR::initialize(int stage)
            OlsrAddressSize::ADDR_SIZE = 6;
        OLSR_HELLO_INTERVAL=par("OLSR_HELLO_INTERVAL");
 
-	/// TC messages emission interval.
-	    OLSR_TC_INTERVAL=par("OLSR_TC_INTERVAL");
+    /// TC messages emission interval.
+        OLSR_TC_INTERVAL=par("OLSR_TC_INTERVAL");
 
-	/// MID messages emission interval.
-	    OLSR_MID_INTERVAL=par("OLSR_MID_INTERVAL");//   OLSR_TC_INTERVAL
+    /// MID messages emission interval.
+        OLSR_MID_INTERVAL=par("OLSR_MID_INTERVAL");//   OLSR_TC_INTERVAL
 
-	///
-	/// \brief Period at which a node must cite every link and every neighbor.
-	///
-	/// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
-	///
-	    OLSR_REFRESH_INTERVAL=par("OLSR_REFRESH_INTERVAL");
+    ///
+    /// \brief Period at which a node must cite every link and every neighbor.
+    ///
+    /// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
+    ///
+        OLSR_REFRESH_INTERVAL=par("OLSR_REFRESH_INTERVAL");
 
         //
         // Do some initializations

@@ -1,6 +1,6 @@
 //
 // This program is property of its copyright holder. All rights reserved.
-// 
+//
 package inet.util;
 
 //
@@ -8,7 +8,7 @@ package inet.util;
 // A cDatarateChannel extended with throughput calculation. Values
 // get displayed on the link, using the connection's "t=" display
 // string tag.
-// 
+//
 // The display can be customized with the "format" attribute.
 // In the format string, the following characters will get expanded:
 //   - 'N': number of packets
@@ -20,7 +20,7 @@ package inet.util;
 //   - 'B': average bandwidth on [0,now)
 //   - 'U': average channel utilization (%) on [0,now)
 // Other characters are copied verbatim.
-// 
+//
 // "Current" actually means the last measurement interval, which is
 // 10 packets or 0.1s, whichever comes first.
 //

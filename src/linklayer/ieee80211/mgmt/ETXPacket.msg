@@ -26,9 +26,9 @@ cplusplus
 class noncobject MACAddress;
 
 
-packet ETXBasePacket 
+packet ETXBasePacket
 {
-     MACAddress source; 
+     MACAddress source;
      MACAddress dest;
 }
 

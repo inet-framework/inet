@@ -37,7 +37,7 @@ WifiModulationType::GetDsssRate1Mbps()
 ModulationType
 WifiModulationType::GetDsssRate2Mbps()
 {
- 
+
    ModulationType mode;
    mode.setModulationClass(MOD_CLASS_DSSS);
    mode.setBandwidth(22000000);
@@ -650,7 +650,7 @@ WifiModulationType::getPlcpHeaderDuration(ModulationType payloadMode, WifiPreamb
     }
 }
 
-simtime_t 
+simtime_t
 WifiModulationType::getPlcpPreambleDuration(ModulationType payloadMode, WifiPreamble preamble)
 {
     switch (payloadMode.getModulationClass())
@@ -696,7 +696,7 @@ WifiModulationType::getPlcpPreambleDuration(ModulationType payloadMode, WifiPrea
 //
 // Compute the Payload duration in function of the modulation type
 //
-simtime_t 
+simtime_t
 WifiModulationType::getPayloadDuration(uint64_t size, ModulationType payloadMode)
 {
     simtime_t val;

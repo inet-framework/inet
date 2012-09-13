@@ -11,7 +11,7 @@ simple RTPApplication
         @display("i=block/app");
         string commonName;  // the common name (CNAME) of this host
         string profileName;  // which rtp profile is to be used (usually RTPAVProfile)
-        double bandwidth;  // bandwidth in bytes per second for this session 
+        double bandwidth;  // bandwidth in bytes per second for this session
         string destinationAddress;  // destination address (the IPvXAddressResolver class is used to resolve the address)
         int portNumber;  // used port
         string fileName;    // fileName of file to be transmitted, "" means this system acts only as a receiver

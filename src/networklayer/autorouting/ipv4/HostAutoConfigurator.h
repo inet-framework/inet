@@ -1,5 +1,4 @@
 /*
- * HostAutoConfigurator - automatically assigns IP addresses and sets up routing table
  * Copyright (C) 2009 Christoph Sommer <christoph.sommer@informatik.uni-erlangen.de>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,18 +29,18 @@
  */
 class INET_API HostAutoConfigurator : public cSimpleModule
 {
-	public:
-		virtual void initialize(int stage);
-		virtual void finish();
-		virtual int numInitStages() const {return 3;}
+    public:
+        virtual void initialize(int stage);
+        virtual void finish();
+        virtual int numInitStages() const {return 3;}
 
-		virtual void handleMessage(cMessage *msg);
-		virtual void handleSelfMsg(cMessage *msg);
+        virtual void handleMessage(cMessage *msg);
+        virtual void handleSelfMsg(cMessage *msg);
 
-	protected:
-		void setupNetworkLayer();
+    protected:
+        void setupNetworkLayer();
 
-		bool debug; /**< whether to emit debug messages */
+        bool debug; /**< whether to emit debug messages */
 };
 
 #endif

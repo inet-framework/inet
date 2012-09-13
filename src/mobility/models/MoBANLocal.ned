@@ -28,15 +28,15 @@
 //* In Proc. of the 4th Int'l Conf. on Simulation Tools and Techniques, SIMUTools 2011, Barcelona, Spain, 2011.
 //*
 //* BibTeX:
-//*	@inproceedings{MoBAN,
-//* 	author = "M. Nabi and M. Geilen and T. Basten.",
-//* 	title = "{MoBAN}: A Configurable Mobility Model for Wireless Body Area Networks.",
-//*    	booktitle = "Proceedings of the 4th Int'l Conf. on Simulation Tools and Techniques.",
-//*    	series = {SIMUTools '11},
-//*    	isbn = {978-963-9799-41-7},
-//*	year = {2011},
-//*    	location = {Barcelona, Spain},
-//*	publisher = {ICST} }
+//*    @inproceedings{MoBAN,
+//*     author = "M. Nabi and M. Geilen and T. Basten.",
+//*     title = "{MoBAN}: A Configurable Mobility Model for Wireless Body Area Networks.",
+//*        booktitle = "Proceedings of the 4th Int'l Conf. on Simulation Tools and Techniques.",
+//*        series = {SIMUTools '11},
+//*        isbn = {978-963-9799-41-7},
+//*    year = {2011},
+//*        location = {Barcelona, Spain},
+//*    publisher = {ICST} }
 //*
 //**************************************************************************/
 

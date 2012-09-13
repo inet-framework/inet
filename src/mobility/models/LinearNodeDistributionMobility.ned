@@ -19,8 +19,8 @@
 package inet.mobility.models;
 
 //
-// Mobility model which places all hosts at constant distances 
-// in a line with an orientation 
+// Mobility model which places all hosts at constant distances
+// in a line with an orientation
 //
 // @author Alfonso Ariza
 //

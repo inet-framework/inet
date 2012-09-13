@@ -859,11 +859,11 @@ void Ieee80211Mac::handleLowerMsg(cPacket *msg)
     Radio80211aControlInfo * cinfo = dynamic_cast<Radio80211aControlInfo *>(msg->getControlInfo());
     if (cinfo && cinfo->getAirtimeMetric())
     {
-    	double rtsTime = 0;
-    	if (rtsThreshold*8<cinfo->getTestFrameSize())
+        double rtsTime = 0;
+        if (rtsThreshold*8<cinfo->getTestFrameSize())
              rtsTime=  computeFrameDuration(LENGTH_CTS, basicBitrate) +computeFrameDuration(LENGTH_RTS, basicBitrate);
         double frameDuration = cinfo->getTestFrameDuration() + computeFrameDuration(LENGTH_ACK, basicBitrate)+rtsTime;
-    	cinfo->setTestFrameDuration(frameDuration);
+        cinfo->setTestFrameDuration(frameDuration);
     }
     nb->fireChangeNotification(NF_LINK_FULL_PROMISCUOUS, msg);
     validRecMode = false;
@@ -2379,8 +2379,8 @@ bool Ieee80211Mac::transmissionQueueEmpty()
 unsigned int Ieee80211Mac::transmissionQueueSize()
 {
     unsigned int totalSize=0;
-	for (int i=0; i<numCategories(); i++)
-	    totalSize+=transmissionQueue(i)->size();
+    for (int i=0; i<numCategories(); i++)
+        totalSize+=transmissionQueue(i)->size();
     return totalSize;
 }
 

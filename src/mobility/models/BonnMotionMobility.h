@@ -47,7 +47,7 @@ class INET_API BonnMotionMobility : public LineSegmentsMobilityBase
 
     /** @brief Overridden from LineSegmentsMobilityBase. */
     virtual void setTargetPosition();
-    
+
     /** @brief Overridden from LineSegmentsMobilityBase. */
     virtual void move();
 

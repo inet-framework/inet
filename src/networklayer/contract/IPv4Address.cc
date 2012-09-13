@@ -248,7 +248,7 @@ int IPv4Address::getNetmaskLength() const
 void IPv4Address::_checkNetmaskLength(int length)
 {
     if (length < 0 || length > 32)
-    	throw cRuntimeError("IPv4Address: wrong netmask length %d (not in 0..32)", length);
+        throw cRuntimeError("IPv4Address: wrong netmask length %d (not in 0..32)", length);
 }
 
 bool IPv4Address::maskedAddrAreEqual(const IPv4Address& addr1,

@@ -29,7 +29,7 @@
 //
 // The INET Framework supports wireless and mobile simulations as well.
 //
-// See the <tt><a href="whatsnew.html">WHATSNEW</a></tt> file in the distribution 
+// See the <tt><a href="whatsnew.html">WHATSNEW</a></tt> file in the distribution
 // for the list of recent changes.
 //
 // Introductory material:

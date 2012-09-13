@@ -208,7 +208,7 @@ void NS_CLASS re_process(RE *re,struct in_addr ip_src, u_int32_t ifindex)
                 0,      // prefix
                 1,      // hop count
                 0,     // is gw
-                cost, 
+                cost,
                 fixhop);
         icmp_reply_send(ip_src, &DEV_IFINDEX(ifindex));
     }
@@ -546,7 +546,7 @@ int NS_CLASS re_process_block(struct re_block *block, u_int8_t is_rreq,
             block->re_hopcnt,  // hop count
             block->g,          // is gw
             block->cost,
-            block->re_hopfix);   
+            block->re_hopfix);
 
     return 0;
 }

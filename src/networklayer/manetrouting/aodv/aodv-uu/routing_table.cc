@@ -726,7 +726,7 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
                               ifindex);
 #else
 #ifdef OMNETPP
-        /* Add route to omnet inet routing table ... */        
+        /* Add route to omnet inet routing table ... */
         nm.s_addr = IPv4Address::ALLONES_ADDRESS;
         if (useIndex)
             omnet_chg_rte(dest_addr, next, nm, hops,false,ifindex);

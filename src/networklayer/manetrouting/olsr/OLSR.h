@@ -95,15 +95,15 @@
 #define OLSR_C      0.0625
 
 
-	/********** Holding times **********/
+    /********** Holding times **********/
 
-	/// Neighbor holding time.
+    /// Neighbor holding time.
 #define OLSR_NEIGHB_HOLD_TIME   3*OLSR_REFRESH_INTERVAL
-	/// Top holding time.
+    /// Top holding time.
 #define OLSR_TOP_HOLD_TIME  3*OLSR_TC_INTERVAL
-	/// Dup holding time.
+    /// Dup holding time.
 #define OLSR_DUP_HOLD_TIME  30
-	/// MID holding time.
+    /// MID holding time.
 #define OLSR_MID_HOLD_TIME  3*OLSR_MID_INTERVAL
 
 /********** Link types **********/

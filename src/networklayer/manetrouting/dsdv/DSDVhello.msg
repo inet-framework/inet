@@ -1,6 +1,6 @@
 cplusplus {{
 /*
- * Copyright (C) 2008 
+ * Copyright (C) 2008
  * DSDV simple example for INET (add-on)
  * Version 1.0
  * Diogo Ant�o & Pedro Menezes

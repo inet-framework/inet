@@ -45,25 +45,25 @@
  */
 class INET_API TraCIScenarioManagerLaunchd : public TraCIScenarioManager
 {
-	public:
+    public:
 
-		virtual ~TraCIScenarioManagerLaunchd();
-		virtual int numInitStages() const { return std::max(TraCIScenarioManager::numInitStages(), 2); }
-		virtual void initialize(int stage);
-		virtual void finish();
+        virtual ~TraCIScenarioManagerLaunchd();
+        virtual int numInitStages() const { return std::max(TraCIScenarioManager::numInitStages(), 2); }
+        virtual void initialize(int stage);
+        virtual void finish();
 
-	protected:
+    protected:
 
-		cXMLElement* launchConfig; /**< launch configuration to send to sumo-launchd */
-		int seed; /**< seed value to set in launch configuration, if missing (-1: current run number) */
+        cXMLElement* launchConfig; /**< launch configuration to send to sumo-launchd */
+        int seed; /**< seed value to set in launch configuration, if missing (-1: current run number) */
 
-		virtual void init_traci();
+        virtual void init_traci();
 };
 
 class TraCIScenarioManagerLaunchdAccess : public ModuleAccess<TraCIScenarioManagerLaunchd>
 {
-	public:
-		TraCIScenarioManagerLaunchdAccess() : ModuleAccess<TraCIScenarioManagerLaunchd>("manager") {};
+    public:
+        TraCIScenarioManagerLaunchdAccess() : ModuleAccess<TraCIScenarioManagerLaunchd>("manager") {};
 };
 
 #endif

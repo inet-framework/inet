@@ -620,7 +620,7 @@ void DYMOUM::getMacAddress(IPv4Datagram *dgram)
         if (ctrl!=NULL)
         {
             Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
-            macAddressConv = ctrlmac->getSrc();            
+            macAddressConv = ctrlmac->getSrc();
             // memcpy (&dest,ctrlmac->getDest().getAddressBytes(),6);   /* destination eth addr */
             delete ctrl;
             MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
@@ -757,7 +757,7 @@ void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
                 {
                     Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
                     if (ctrlmac)
-                    {                        
+                    {
                         MACAddress macAddressConv = ctrlmac->getSrc(); /* destination eth addr */
                         // ctrlmac->getSrc().getAddressBytes(macAddressConv.address);  /* destination eth addr */
                         // memcpy (&dest,ctrlmac->getDest().getAddressBytes(),6);   /* destination eth addr */
@@ -1088,7 +1088,7 @@ void DYMOUM::processFullPromiscuous(const cObject *details)
         twoAddressFrame = check_and_cast<Ieee80211TwoAddressFrame *>(details);
         if (!isInMacLayer())
         {
-            macAddressConv = twoAddressFrame->getTransmitterAddress();            
+            macAddressConv = twoAddressFrame->getTransmitterAddress();
             MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
             if (it!=macToIpAdress->end())
                 addr.s_addr = (*it).second;
@@ -1345,9 +1345,9 @@ void DYMOUM::packetFailedMac(Ieee80211DataFrame *dgram)
 
     if (isStaticNode() && getColaborativeProtocol())
     {
-    	Uint128 next;
-    	int iface;
-    	double cost;
+        Uint128 next;
+        int iface;
+        double cost;
         if (getColaborativeProtocol()->getNextHop(next_hop.s_addr, next, iface, cost))
             if(next == next_hop.s_addr) return; // both nodes are static, do nothing
     }

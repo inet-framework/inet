@@ -267,7 +267,7 @@ void NS_CLASS dymo_socket_send(struct in_addr dest_addr, struct dev_info *dev,do
         if (rePkt)
         {
             for (int i=0; i<rePkt->numBlocks(); i++)
-            	rePkt->re_blocks[i].cost += costStatic;
+                rePkt->re_blocks[i].cost += costStatic;
         }
     }
     else
@@ -276,7 +276,7 @@ void NS_CLASS dymo_socket_send(struct in_addr dest_addr, struct dev_info *dev,do
         if (rePkt)
         {
             for (int i=0; i<rePkt->numBlocks(); i++)
-            	rePkt->re_blocks[i].cost += costMobile;
+                rePkt->re_blocks[i].cost += costMobile;
         }
     }
 

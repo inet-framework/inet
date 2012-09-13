@@ -452,8 +452,8 @@ void IPv6::routeMulticastPacket(IPv6Datagram *datagram, InterfaceEntry *destIE, 
 void IPv6::localDeliver(IPv6Datagram *datagram)
 {
     // Defragmentation. skip defragmentation if datagram is not fragmented
-	IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader*>(datagram->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
-	if (fh)
+    IPv6FragmentHeader *fh = dynamic_cast<IPv6FragmentHeader*>(datagram->findExtensionHeaderByType(IP_PROT_IPv6EXT_FRAGMENT));
+    if (fh)
     {
         EV << "Datagram fragment: offset=" << fh->getFragmentOffset()
            << ", MORE=" << (fh->getMoreFragments() ? "true" : "false") << ".\n";
@@ -552,25 +552,25 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
 
 void IPv6::handleReceivedICMP(ICMPv6Message *msg)
 {
-	int type = msg->getType();
-	if (type < 128)
-	{
+    int type = msg->getType();
+    if (type < 128)
+    {
         // ICMP errors are delivered to the appropriate higher layer protocols
         EV << "ICMPv6 packet: passing it to higher layer\n";
         IPv6Datagram *bogusPacket = check_and_cast<IPv6Datagram *>(msg->getEncapsulatedPacket());
         int protocol = bogusPacket->getTransportProtocol();
         int gateindex = mapping.getOutputGateForProtocol(protocol);
         send(msg, "transportOut", gateindex);
-	}
-	else
-	{
+    }
+    else
+    {
         // all others are delivered to ICMP:
         // ICMPv6_ECHO_REQUEST, ICMPv6_ECHO_REPLY, ICMPv6_MLD_QUERY, ICMPv6_MLD_REPORT,
         // ICMPv6_MLD_DONE, ICMPv6_ROUTER_SOL, ICMPv6_ROUTER_AD, ICMPv6_NEIGHBOUR_SOL,
         // ICMPv6_NEIGHBOUR_AD, ICMPv6_MLDv2_REPORT
         EV << "ICMPv6 packet: passing it to ICMPv6 module\n";
         send(msg, "icmpOut");
-	}
+    }
 }
 
 cPacket *IPv6::decapsulate(IPv6Datagram *datagram)
@@ -659,30 +659,30 @@ void IPv6::fragmentAndSend(IPv6Datagram *datagram, InterfaceEntry *ie, const MAC
         return;
     }
 
-	// ensure source address is filled
-	if (fromHL && datagram->getSrcAddress().isUnspecified() &&
-			!datagram->getDestAddress().isSolicitedNodeMulticastAddress())
-	{
-		// source address can be unspecified during DAD
-		const IPv6Address& srcAddr = ie->ipv6Data()->getPreferredAddress();
-		ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
-		datagram->setSrcAddress(srcAddr);
-	#ifdef WITH_xMIPv6
-		// if the datagram has a tentative address as source we have to reschedule it
-		// as it can not be sent before the address' tentative status is cleared - CB
-		if (ie->ipv6Data()->isTentativeAddress(srcAddr))
-		{
-			EV << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
-			ScheduledDatagram* sDgram = new ScheduledDatagram();
-			sDgram->datagram = datagram;
-			sDgram->ie = ie;
-			sDgram->macAddr = nextHopAddr;
-			sDgram->fromHL = fromHL;
-			queue.insert(sDgram);
-			return;
-		}
-	#endif /* WITH_xMIPv6 */
-	}
+    // ensure source address is filled
+    if (fromHL && datagram->getSrcAddress().isUnspecified() &&
+            !datagram->getDestAddress().isSolicitedNodeMulticastAddress())
+    {
+        // source address can be unspecified during DAD
+        const IPv6Address& srcAddr = ie->ipv6Data()->getPreferredAddress();
+        ASSERT(!srcAddr.isUnspecified()); // FIXME what if we don't have an address yet?
+        datagram->setSrcAddress(srcAddr);
+    #ifdef WITH_xMIPv6
+        // if the datagram has a tentative address as source we have to reschedule it
+        // as it can not be sent before the address' tentative status is cleared - CB
+        if (ie->ipv6Data()->isTentativeAddress(srcAddr))
+        {
+            EV << "Source address is tentative - enqueueing datagram for later resubmission." << endl;
+            ScheduledDatagram* sDgram = new ScheduledDatagram();
+            sDgram->datagram = datagram;
+            sDgram->ie = ie;
+            sDgram->macAddr = nextHopAddr;
+            sDgram->fromHL = fromHL;
+            queue.insert(sDgram);
+            return;
+        }
+    #endif /* WITH_xMIPv6 */
+    }
 
     int mtu = ie->getMTU();
 

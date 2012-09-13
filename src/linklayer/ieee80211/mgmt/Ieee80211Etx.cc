@@ -229,7 +229,7 @@ double Ieee80211Etx::getEtx(const MACAddress &add, const int &iface)
 double Ieee80211Etx::getEtt(const MACAddress &add, const int &iface)
 {
     if (ettInterval<=0 || ettSize1 <= 0 || ettSize2<=0)
-	    return -1;
+        return -1;
 
     NeighborsMap::iterator it = neighbors[iface].find(add);
     MacEtxNeighbor *neig;

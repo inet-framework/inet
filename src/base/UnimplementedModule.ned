@@ -19,7 +19,7 @@ package inet.base;
 
 //
 // A module that does nothing, apart from throwing a "not implemented"
-// exception when it receives any message. Can be used as implementation 
+// exception when it receives any message. Can be used as implementation
 // for dummy modules.
 //
 simple UnimplementedModule

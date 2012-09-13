@@ -32,7 +32,7 @@ simple DSCPMarker
         string dscps; // space separated list if dscp values; both names (e.g. AF11, EF) and numbers (0x0A,0b101110) can be used
 
         @display("i=block/star");
-        
+
         @signal[markPk](type=cPacket);
         @statistic[markPk](title="packets marked"; source=markPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:

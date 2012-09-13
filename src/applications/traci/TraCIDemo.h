@@ -30,28 +30,28 @@
  * Small IVC Demo
  */
 class TraCIDemo : public cSimpleModule, protected cListener {
-	public:
-		virtual int numInitStages() const {
-			return std::max(4, cSimpleModule::numInitStages());
-		}
-		virtual void initialize(int);
-		virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-		virtual void handleMessage(cMessage* msg);
+    public:
+        virtual int numInitStages() const {
+            return std::max(4, cSimpleModule::numInitStages());
+        }
+        virtual void initialize(int);
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+        virtual void handleMessage(cMessage* msg);
 
-	protected:
-		bool debug;
-		TraCIMobility* traci;
-		bool sentMessage;
-		UDPSocket socket;
-		simsignal_t mobilityStateChangedSignal;
+    protected:
+        bool debug;
+        TraCIMobility* traci;
+        bool sentMessage;
+        UDPSocket socket;
+        simsignal_t mobilityStateChangedSignal;
 
-	protected:
-		void setupLowerLayer();
-		virtual void handleSelfMsg(cMessage* apMsg);
-		virtual void handleLowerMsg(cMessage* apMsg);
+    protected:
+        void setupLowerLayer();
+        virtual void handleSelfMsg(cMessage* apMsg);
+        virtual void handleLowerMsg(cMessage* apMsg);
 
-		virtual void sendMessage();
-		virtual void handlePositionUpdate();
+        virtual void sendMessage();
+        virtual void handlePositionUpdate();
 };
 
 #endif

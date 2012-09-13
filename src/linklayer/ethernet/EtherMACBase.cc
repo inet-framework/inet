@@ -413,17 +413,17 @@ void EtherMACBase::refreshConnection()
 bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)
 {
     // Current ethernet mac implementation does not support the configuration of multicast
-    // ethernet address groups. We rather accept all multicast frames (just like they were 
+    // ethernet address groups. We rather accept all multicast frames (just like they were
     // broadcasts) and pass it up to the higher layer where they will be dropped
     // if not needed.
     //
     // PAUSE frames must be handled a bit differently because they are processed at
-    // this level. Multicast PAUSE frames should not be processed unless they have a 
+    // this level. Multicast PAUSE frames should not be processed unless they have a
     // destination of MULTICAST_PAUSE_ADDRESS. We drop all PAUSE frames that have a
     // different muticast destination. (Note: Would the multicast ethernet addressing
     // implemented, we could also process the PAUSE frames destined to any of our
     // multicast adresses)
-    // All NON-PAUSE frames must be passed to the upper layer if the interface is 
+    // All NON-PAUSE frames must be passed to the upper layer if the interface is
     // in promiscuous mode.
 
     if (frame->getDest().equals(address))

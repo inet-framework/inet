@@ -28,15 +28,15 @@
  * In Proc. of the 4th Int'l Conf. on Simulation Tools and Techniques, SIMUTools 2011, Barcelona, Spain, 2011.
  *
  * BibTeX:
- *		@inproceedings{MoBAN,
- * 		author = "M. Nabi and M. Geilen and T. Basten.",
- * 	 	title = "{MoBAN}: A Configurable Mobility Model for Wireless Body Area Networks.",
- *    	booktitle = "Proceedings of the 4th Int'l Conf. on Simulation Tools and Techniques.",
- *    	series = {SIMUTools '11},
- *    	isbn = {978-963-9799-41-7},
- *	    year = {2011},
- *    	location = {Barcelona, Spain},
- *	    publisher = {ICST} }
+ *        @inproceedings{MoBAN,
+ *         author = "M. Nabi and M. Geilen and T. Basten.",
+ *          title = "{MoBAN}: A Configurable Mobility Model for Wireless Body Area Networks.",
+ *        booktitle = "Proceedings of the 4th Int'l Conf. on Simulation Tools and Techniques.",
+ *        series = {SIMUTools '11},
+ *        isbn = {978-963-9799-41-7},
+ *        year = {2011},
+ *        location = {Barcelona, Spain},
+ *        publisher = {ICST} }
  *
  **************************************************************************/
 
@@ -67,19 +67,19 @@
  */
 class PostureTransition {
   protected:
-	/** @brief Number of postures. */
-	int numPos;
+    /** @brief Number of postures. */
+    int numPos;
 
-	/** @brief The index of the default (base) transition matrix. If no default is set, the first matrix is supposed as the default.
-	 * Default matrix is used for the cases that a time or space domain does not lie in any given area types or time domains.
-	 * It is also used for generating the transition matrix in the case that a steady state vector is given for a space-time domain.
+    /** @brief The index of the default (base) transition matrix. If no default is set, the first matrix is supposed as the default.
+     * Default matrix is used for the cases that a time or space domain does not lie in any given area types or time domains.
+     * It is also used for generating the transition matrix in the case that a steady state vector is given for a space-time domain.
     */
-	int defaultMatrixID;
+    int defaultMatrixID;
 
     /** @brief Data type for one instance of Markov transition matrix. */
     typedef struct{
-    	std::string name;
-    	double** matrix;
+        std::string name;
+        double** matrix;
     }TransMatrix;
 
     /** @brief Data type for a list of Markov transition matrices. */
@@ -90,14 +90,14 @@ class PostureTransition {
 
     /** @brief Data type for one instance of the area (space) boundary. */
     typedef struct{
-    	Coord low;
-    	Coord high;
+        Coord low;
+        Coord high;
     }AreaBound;
 
     /** @brief Data type for one instance of area type. */
     typedef struct{
-     	std::string name;
-      	std::vector<AreaBound*> boundries;
+         std::string name;
+          std::vector<AreaBound*> boundries;
     }AreaType;
 
     /** @brief Data type for the list of area types. */
@@ -108,14 +108,14 @@ class PostureTransition {
 
     /** @brief Data type for one instance of the time boundary. */
     typedef struct{
-		simtime_t low;
-		simtime_t high;
+        simtime_t low;
+        simtime_t high;
     }TimeBound;
 
     /** @brief Data type for one instance of time domain. */
     typedef struct{
-       	std::string name;
-       	std::vector<TimeBound*> boundries;
+           std::string name;
+           std::vector<TimeBound*> boundries;
     }TimeDomainType;
 
     /** @brief Data type for the list of time domains. */
@@ -171,36 +171,36 @@ class PostureTransition {
     void multVector(double*, double**);
 
   public:
-	/** @brief Construct a posture transition object. The parameter is the number of postures which is
-	 * the dimension of all matrices
-	*/
-	PostureTransition(int);
+    /** @brief Construct a posture transition object. The parameter is the number of postures which is
+     * the dimension of all matrices
+    */
+    PostureTransition(int);
 
     /** @brief Receives a transition matrix and add to the list. */
-	int addMatrix(std::string, double**, bool);
+    int addMatrix(std::string, double**, bool);
 
     /** @brief Receives a steady state vector, extracts the corresponding transition matrix
      * considering the default matrix, and add to the list of given matrices
     */
-	int addSteadyState(std::string, double*);
+    int addSteadyState(std::string, double*);
 
     /** @brief Adds a area type to the list with the given name and returns the index of this area type in the list. */
-	int addAreaType(std::string);
+    int addAreaType(std::string);
 
     /** @brief Adds the given boundary to the existing area type specified by the given ID . */
-	bool setAreaBoundry(int, Coord, Coord);
+    bool setAreaBoundry(int, Coord, Coord);
 
     /** @brief Adds a time domain to the list with the given name  and returns the index of the this time domain in the list. */
-	int addTimeDomain(std::string);
+    int addTimeDomain(std::string);
 
-	/** @brief Adds the given boundary to the existing time domain specified by the given ID . */
-	bool setTimeBoundry(int, simtime_t, simtime_t);
+    /** @brief Adds the given boundary to the existing time domain specified by the given ID . */
+    bool setTimeBoundry(int, simtime_t, simtime_t);
 
     /** @brief Adds a space-time combination to the list. */
-	bool addCombination(std::string, std::string, std::string);
+    bool addCombination(std::string, std::string, std::string);
 
     /** @brief Gets a time and location, and returns the corresponding Markov transition matrix. */
-	double** getMatrix(simtime_t, Coord);
+    double** getMatrix(simtime_t, Coord);
 };
 
 #endif

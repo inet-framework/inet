@@ -28,15 +28,15 @@
  * In Proc. of the 4th Int'l Conf. on Simulation Tools and Techniques, SIMUTools 2011, Barcelona, Spain, 2011.
  *
  * BibTeX:
- *		@inproceedings{MoBAN,
- * 		author = "M. Nabi and M. Geilen and T. Basten.",
- * 	 	title = "{MoBAN}: A Configurable Mobility Model for Wireless Body Area Networks.",
- *    	booktitle = "Proceedings of the 4th Int'l Conf. on Simulation Tools and Techniques.",
- *    	series = {SIMUTools '11},
- *    	isbn = {978-963-9799-41-7},
- *	    year = {2011},
- *    	location = {Barcelona, Spain},
- *	    publisher = {ICST} }
+ *        @inproceedings{MoBAN,
+ *         author = "M. Nabi and M. Geilen and T. Basten.",
+ *          title = "{MoBAN}: A Configurable Mobility Model for Wireless Body Area Networks.",
+ *        booktitle = "Proceedings of the 4th Int'l Conf. on Simulation Tools and Techniques.",
+ *        series = {SIMUTools '11},
+ *        isbn = {978-963-9799-41-7},
+ *        year = {2011},
+ *        location = {Barcelona, Spain},
+ *        publisher = {ICST} }
  *
  **************************************************************************/
 
@@ -55,8 +55,8 @@
 */
 PostureTransition::PostureTransition(int numPosture)
 {
-	numPos = numPosture;
-	defaultMatrixID = 0; // if no default matrix found, the first one will be supposed as the default matrix.
+    numPos = numPosture;
+    defaultMatrixID = 0; // if no default matrix found, the first one will be supposed as the default matrix.
 }
 
 /**
@@ -66,42 +66,42 @@ PostureTransition::PostureTransition(int numPosture)
 int PostureTransition::addMatrix(std::string name, double** matrix, bool thisDefault)
 {
 
-	//check if the name is repetitive
-	TransMatrixList::const_iterator matrixIt;
-	for (matrixIt = matrixList.begin(); matrixIt != matrixList.end(); matrixIt++)
-	{
-		if ((*matrixIt)->name == name )
-		{
-			std::string str = "There are multiple matrices with the same name: " + name + " in the configuration file!";
-			opp_error (str.c_str());
-		}
-	}
+    //check if the name is repetitive
+    TransMatrixList::const_iterator matrixIt;
+    for (matrixIt = matrixList.begin(); matrixIt != matrixList.end(); matrixIt++)
+    {
+        if ((*matrixIt)->name == name )
+        {
+            std::string str = "There are multiple matrices with the same name: " + name + " in the configuration file!";
+            opp_error (str.c_str());
+        }
+    }
 
 
-	// verify if the given matrix is Markovian
-	if ( !isMarkovian(matrix) )
-	{
-		std::string str = "Given transition matrix " + name + " is not Markovian!";
-		opp_error (str.c_str());
-	}
+    // verify if the given matrix is Markovian
+    if ( !isMarkovian(matrix) )
+    {
+        std::string str = "Given transition matrix " + name + " is not Markovian!";
+        opp_error (str.c_str());
+    }
 
-	TransMatrix* mat = new TransMatrix;
+    TransMatrix* mat = new TransMatrix;
 
-	mat->name = name;
-	mat->matrix = new double* [numPos];
-	for (int i=0;i<numPos;++i)
-	{
-		mat->matrix[i] = new double [numPos];
-		for (int j=0;j<numPos;++j)
-			mat->matrix[i][j] = matrix[i][j];
-	}
+    mat->name = name;
+    mat->matrix = new double* [numPos];
+    for (int i=0;i<numPos;++i)
+    {
+        mat->matrix[i] = new double [numPos];
+        for (int j=0;j<numPos;++j)
+            mat->matrix[i][j] = matrix[i][j];
+    }
 
-	matrixList.push_back(mat);
+    matrixList.push_back(mat);
 
-	if (thisDefault)
-		defaultMatrixID = matrixList.size()-1;
+    if (thisDefault)
+        defaultMatrixID = matrixList.size()-1;
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -111,36 +111,36 @@ int PostureTransition::addMatrix(std::string name, double** matrix, bool thisDef
 */
 int PostureTransition::addSteadyState(std::string name, double* iVector)
 {
-	//check if the name is repetitive
-	TransMatrixList::const_iterator matrixIt;
-	for (matrixIt = matrixList.begin(); matrixIt != matrixList.end(); matrixIt++)
-	{
-		if ((*matrixIt)->name == name )
-		{
-			std::string str = "There are multiple matrices with the same name: " + name + " in the configuration file!";
-			opp_error (str.c_str());
-		}
-	}
+    //check if the name is repetitive
+    TransMatrixList::const_iterator matrixIt;
+    for (matrixIt = matrixList.begin(); matrixIt != matrixList.end(); matrixIt++)
+    {
+        if ((*matrixIt)->name == name )
+        {
+            std::string str = "There are multiple matrices with the same name: " + name + " in the configuration file!";
+            opp_error (str.c_str());
+        }
+    }
 
-	// check if the given matrix is Markovian
-	if ( !isMarkovian(iVector) )
-	{
-		std::string str = "Given steady state vector " + name + " cannot be true!";
-		opp_error (str.c_str());
-	}
+    // check if the given matrix is Markovian
+    if ( !isMarkovian(iVector) )
+    {
+        std::string str = "Given steady state vector " + name + " cannot be true!";
+        opp_error (str.c_str());
+    }
 
-	// make a local copy of the input steady state vector
-	double *steady = new double[numPos];
-	for (int i=0; i < numPos; ++i)
-		steady[i] = iVector[i];
+    // make a local copy of the input steady state vector
+    double *steady = new double[numPos];
+    for (int i=0; i < numPos; ++i)
+        steady[i] = iVector[i];
 
-	TransMatrix* mat = new TransMatrix;
-	mat->name = name;
-	mat->matrix = extractMatrixFromSteadyState(steady);
+    TransMatrix* mat = new TransMatrix;
+    mat->name = name;
+    mat->matrix = extractMatrixFromSteadyState(steady);
 
-	matrixList.push_back(mat);
+    matrixList.push_back(mat);
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -150,21 +150,21 @@ int PostureTransition::addSteadyState(std::string name, double* iVector)
 int PostureTransition::addAreaType(std::string name)
 {
 
-	//Check if the name is repetitive
-	AreaTypeList::const_iterator areaIt;
-	for (areaIt = areaTypeList.begin(); areaIt != areaTypeList.end(); areaIt++)
-	{
-		if ((*areaIt)->name == name )
-		{
-			std::string str = "There are multiple area types with the same name: " + name + " in the configuration file!";
-			opp_error (str.c_str());
-		}
-	}
+    //Check if the name is repetitive
+    AreaTypeList::const_iterator areaIt;
+    for (areaIt = areaTypeList.begin(); areaIt != areaTypeList.end(); areaIt++)
+    {
+        if ((*areaIt)->name == name )
+        {
+            std::string str = "There are multiple area types with the same name: " + name + " in the configuration file!";
+            opp_error (str.c_str());
+        }
+    }
 
-	AreaType* area = new AreaType;
-	area->name = name;
-	areaTypeList.push_back(area);
-	return areaTypeList.size()-1;
+    AreaType* area = new AreaType;
+    area->name = name;
+    areaTypeList.push_back(area);
+    return areaTypeList.size()-1;
 }
 
 /**
@@ -172,13 +172,13 @@ int PostureTransition::addAreaType(std::string name)
 */
 bool PostureTransition::setAreaBoundry(int id, Coord lowBound, Coord highBound)
 {
-	AreaBound* bound=new AreaBound;
-	bound->low = lowBound;
-	bound->high = highBound;
+    AreaBound* bound=new AreaBound;
+    bound->low = lowBound;
+    bound->high = highBound;
 
-	areaTypeList.at(id)->boundries.push_back(bound);
+    areaTypeList.at(id)->boundries.push_back(bound);
 
-	return true;
+    return true;
 }
 
 /**
@@ -187,21 +187,21 @@ bool PostureTransition::setAreaBoundry(int id, Coord lowBound, Coord highBound)
 */
 int PostureTransition::addTimeDomain(std::string name)
 {
-	//Check if the name is repetitive
-	TimeDomainList::const_iterator timeIt;
-	for (timeIt = timeDomainList.begin(); timeIt != timeDomainList.end(); timeIt++)
-	{
-		if ((*timeIt)->name == name )
-		{
-			std::string str = "There are multiple time domains with the same name: " + name + " in the configuration file!";
-			opp_error (str.c_str());
-		}
-	}
+    //Check if the name is repetitive
+    TimeDomainList::const_iterator timeIt;
+    for (timeIt = timeDomainList.begin(); timeIt != timeDomainList.end(); timeIt++)
+    {
+        if ((*timeIt)->name == name )
+        {
+            std::string str = "There are multiple time domains with the same name: " + name + " in the configuration file!";
+            opp_error (str.c_str());
+        }
+    }
 
-	TimeDomainType* time = new TimeDomainType;
-	time->name = name;
-	timeDomainList.push_back(time);
-	return timeDomainList.size()-1;
+    TimeDomainType* time = new TimeDomainType;
+    time->name = name;
+    timeDomainList.push_back(time);
+    return timeDomainList.size()-1;
 }
 
 /**
@@ -209,13 +209,13 @@ int PostureTransition::addTimeDomain(std::string name)
 */
 bool PostureTransition::setTimeBoundry(int id, simtime_t lowBound, simtime_t highBound)
 {
-	TimeBound* bound=new TimeBound;
-	bound->low = lowBound;
-	bound->high = highBound;
+    TimeBound* bound=new TimeBound;
+    bound->low = lowBound;
+    bound->high = highBound;
 
-	timeDomainList.at(id)->boundries.push_back(bound);
+    timeDomainList.at(id)->boundries.push_back(bound);
 
-	return true;
+    return true;
 }
 
 /**
@@ -226,73 +226,73 @@ bool PostureTransition::setTimeBoundry(int id, simtime_t lowBound, simtime_t hig
 */
 bool PostureTransition::addCombination(std::string areaName,std::string timeName,std::string matrixName)
 {
-	int thisID;
-	CombinationType* comb = new CombinationType;
-	comb->areaID = -1;
-	comb->timeID = -1;
-	comb->matrixID = -1;
+    int thisID;
+    CombinationType* comb = new CombinationType;
+    comb->areaID = -1;
+    comb->timeID = -1;
+    comb->matrixID = -1;
 
-	// look for matching area type name.
-	thisID = 0;
-	AreaTypeList::const_iterator areaIt;
-	for (areaIt = areaTypeList.begin(); areaIt != areaTypeList.end(); areaIt++)
-	{
-		if (areaName == (*areaIt)->name )
-		{
-			comb->areaID = thisID;
-			break;
-		}
-		++thisID;
-	}
+    // look for matching area type name.
+    thisID = 0;
+    AreaTypeList::const_iterator areaIt;
+    for (areaIt = areaTypeList.begin(); areaIt != areaTypeList.end(); areaIt++)
+    {
+        if (areaName == (*areaIt)->name )
+        {
+            comb->areaID = thisID;
+            break;
+        }
+        ++thisID;
+    }
 
-	// in the input name is empty, it means that no area type is specified for this combination.
-	if (comb->areaID == -1 && !areaName.empty())
-	{
-		std::string str = "Undefined area type name is given in a combinations: " + areaName + ", " + timeName + ", " + matrixName;
-		opp_error (str.c_str());
-	}
-
-
-	// look for matching time domain name.
-	thisID = 0;
-	TimeDomainList::const_iterator timeIt;
-	for (timeIt = timeDomainList.begin(); timeIt != timeDomainList.end(); timeIt++)
-	{
-		if (timeName == (*timeIt)->name )
-		{
-			comb->timeID = thisID;
-			break;
-		}
-		++thisID;
-	}
-	if (comb->timeID == -1 && !timeName.empty())
-	{
-		std::string str = "Undefined time domain name is given in a combinations: " + areaName + ", " + timeName + ", " + matrixName;
-		opp_error (str.c_str());
-	}
+    // in the input name is empty, it means that no area type is specified for this combination.
+    if (comb->areaID == -1 && !areaName.empty())
+    {
+        std::string str = "Undefined area type name is given in a combinations: " + areaName + ", " + timeName + ", " + matrixName;
+        opp_error (str.c_str());
+    }
 
 
-	if (comb->areaID == -1 && comb->timeID == -1)
-		opp_error ("Both area type and time domain is unspecified in a combination." );
+    // look for matching time domain name.
+    thisID = 0;
+    TimeDomainList::const_iterator timeIt;
+    for (timeIt = timeDomainList.begin(); timeIt != timeDomainList.end(); timeIt++)
+    {
+        if (timeName == (*timeIt)->name )
+        {
+            comb->timeID = thisID;
+            break;
+        }
+        ++thisID;
+    }
+    if (comb->timeID == -1 && !timeName.empty())
+    {
+        std::string str = "Undefined time domain name is given in a combinations: " + areaName + ", " + timeName + ", " + matrixName;
+        opp_error (str.c_str());
+    }
 
-	// look for matching transition matrix name.
-	thisID = 0;
-	TransMatrixList::const_iterator matrixIt;
-	for (matrixIt = matrixList.begin(); matrixIt != matrixList.end(); matrixIt++)
-	{
-		if (matrixName == (*matrixIt)->name )
-		{
-			comb->matrixID = thisID;
-			break;
-		}
-		++thisID;
-	}
-	if (comb->matrixID == -1)
-		opp_error ("Undefined matrix name is given in the combinations" );
 
-	combinationList.push_back(comb);
+    if (comb->areaID == -1 && comb->timeID == -1)
+        opp_error ("Both area type and time domain is unspecified in a combination." );
 
-	return true;
+    // look for matching transition matrix name.
+    thisID = 0;
+    TransMatrixList::const_iterator matrixIt;
+    for (matrixIt = matrixList.begin(); matrixIt != matrixList.end(); matrixIt++)
+    {
+        if (matrixName == (*matrixIt)->name )
+        {
+            comb->matrixID = thisID;
+            break;
+        }
+        ++thisID;
+    }
+    if (comb->matrixID == -1)
+        opp_error ("Undefined matrix name is given in the combinations" );
+
+    combinationList.push_back(comb);
+
+    return true;
 }
 
 /**
@@ -302,27 +302,27 @@ bool PostureTransition::addCombination(std::string areaName,std::string timeName
 */
 double** PostureTransition::getMatrix(simtime_t iTime, Coord iLocation)
 {
-	int timeID,locationID,matrixID;
+    int timeID,locationID,matrixID;
 
-	timeID = findTimeDomain(iTime);
-	locationID = findAreaType(iLocation);
+    timeID = findTimeDomain(iTime);
+    locationID = findAreaType(iLocation);
 
 
-	matrixID = defaultMatrixID;
+    matrixID = defaultMatrixID;
 
-	CombinationList::const_iterator combIt;
-	for (combIt = combinationList.begin(); combIt != combinationList.end(); combIt++)
-	{
-		if ( (*combIt)->timeID == timeID && (*combIt)->areaID == locationID)
-		{
-			matrixID = (*combIt)->matrixID;
-			break;
-		}
-	}
+    CombinationList::const_iterator combIt;
+    for (combIt = combinationList.begin(); combIt != combinationList.end(); combIt++)
+    {
+        if ( (*combIt)->timeID == timeID && (*combIt)->areaID == locationID)
+        {
+            matrixID = (*combIt)->matrixID;
+            break;
+        }
+    }
 
-	EV << "The corresponding Markov matrix for time" << iTime.dbl() <<" and location " << iLocation.info() << " is: " << matrixList.at(matrixID)->name << endl;
+    EV << "The corresponding Markov matrix for time" << iTime.dbl() <<" and location " << iLocation.info() << " is: " << matrixList.at(matrixID)->name << endl;
 
-	return matrixList.at(matrixID)->matrix;
+    return matrixList.at(matrixID)->matrix;
 }
 
 /**
@@ -331,22 +331,22 @@ double** PostureTransition::getMatrix(simtime_t iTime, Coord iLocation)
 */
 int PostureTransition::findTimeDomain(simtime_t iTime)
 {
-	int timeID=0;
-	TimeDomainList::const_iterator timeIt;
-	for (timeIt = timeDomainList.begin(); timeIt != timeDomainList.end(); timeIt++)
-	{
-		std::vector<TimeBound*> boundList = (*timeIt)->boundries;
+    int timeID=0;
+    TimeDomainList::const_iterator timeIt;
+    for (timeIt = timeDomainList.begin(); timeIt != timeDomainList.end(); timeIt++)
+    {
+        std::vector<TimeBound*> boundList = (*timeIt)->boundries;
 
-		std::vector<TimeBound*>::const_iterator bound;
-		for (bound = boundList.begin(); bound != boundList.end(); bound++)
-		{
-			if ( iTime >= (*bound)->low && iTime < (*bound)->high)
-				return timeID;
-		}
-		++timeID;
-	}
-	EV << "Time domain not found" << endl;
-	return -1;
+        std::vector<TimeBound*>::const_iterator bound;
+        for (bound = boundList.begin(); bound != boundList.end(); bound++)
+        {
+            if ( iTime >= (*bound)->low && iTime < (*bound)->high)
+                return timeID;
+        }
+        ++timeID;
+    }
+    EV << "Time domain not found" << endl;
+    return -1;
 }
 
 /**
@@ -355,22 +355,22 @@ int PostureTransition::findTimeDomain(simtime_t iTime)
 */
 int PostureTransition::findAreaType(Coord iLocation)
 {
-	int locationID=0;
-	AreaTypeList::const_iterator areaIt;
-	for (areaIt = areaTypeList.begin(); areaIt != areaTypeList.end(); areaIt++)
-	{
-		std::vector<AreaBound*> boundList = (*areaIt)->boundries;
+    int locationID=0;
+    AreaTypeList::const_iterator areaIt;
+    for (areaIt = areaTypeList.begin(); areaIt != areaTypeList.end(); areaIt++)
+    {
+        std::vector<AreaBound*> boundList = (*areaIt)->boundries;
 
-		std::vector<AreaBound*>::const_iterator bound;
-		for (bound = boundList.begin(); bound != boundList.end(); bound++)
-		{
-			if ( iLocation.isInBoundary( (*bound)->low ,(*bound)->high ) )
-				return locationID;
-		}
-		++locationID;
-	}
-	EV << "Area Type not found" << endl;
-	return -1;
+        std::vector<AreaBound*>::const_iterator bound;
+        for (bound = boundList.begin(); bound != boundList.end(); bound++)
+        {
+            if ( iLocation.isInBoundary( (*bound)->low ,(*bound)->high ) )
+                return locationID;
+        }
+        ++locationID;
+    }
+    EV << "Area Type not found" << endl;
+    return -1;
 }
 
 /**
@@ -379,22 +379,22 @@ int PostureTransition::findAreaType(Coord iLocation)
 */
 bool PostureTransition::isMarkovian(double** matrix)
 {
-	double sumCol;
-	for (int j=0;j<numPos;++j)
-	{
-		sumCol = 0;
-		for (int i=0;i<numPos;++i)
-		{
-			if (matrix[i][j] < 0 || matrix[i][j] > 1)
-				return false;
-			sumCol += matrix[i][j];
-		}
+    double sumCol;
+    for (int j=0;j<numPos;++j)
+    {
+        sumCol = 0;
+        for (int i=0;i<numPos;++i)
+        {
+            if (matrix[i][j] < 0 || matrix[i][j] > 1)
+                return false;
+            sumCol += matrix[i][j];
+        }
 
-		if (!FWMath::close(sumCol , 1.0 ))
-			return false;
-	}
+        if (!FWMath::close(sumCol , 1.0 ))
+            return false;
+    }
 
-	return true;
+    return true;
 }
 
 /**
@@ -403,18 +403,18 @@ bool PostureTransition::isMarkovian(double** matrix)
 */
 bool PostureTransition::isMarkovian(double* vec)
 {
-	double sumCol=0;
-	for (int i=0;i<numPos;++i)
-	{
-		if (vec[i] < 0 || vec[i]> 1)
-			return false;
-		sumCol += vec[i];
-	}
+    double sumCol=0;
+    for (int i=0;i<numPos;++i)
+    {
+        if (vec[i] < 0 || vec[i]> 1)
+            return false;
+        sumCol += vec[i];
+    }
 
-	if ( !FWMath::close(sumCol , 1.0 ) )
-		return false;
-	else
-		return true;
+    if ( !FWMath::close(sumCol , 1.0 ) )
+        return false;
+    else
+        return true;
 }
 
 /**
@@ -423,16 +423,16 @@ bool PostureTransition::isMarkovian(double* vec)
 void PostureTransition::multMatrix(double** mat1, double** mat2,double** res)
 {
 
-	int i,j,l;
-	for(i=0; i < numPos; i++)
-	{
-		for(j=0; j < numPos ; j++)
-		{
-			res[i][j]=0;
-			for(l=0; l < numPos ; l++)
-				res[i][j] += mat1[i][l] * mat2[l][j];
-		}
-	}
+    int i,j,l;
+    for(i=0; i < numPos; i++)
+    {
+        for(j=0; j < numPos ; j++)
+        {
+            res[i][j]=0;
+            for(l=0; l < numPos ; l++)
+                res[i][j] += mat1[i][l] * mat2[l][j];
+        }
+    }
 
 }
 
@@ -441,12 +441,12 @@ void PostureTransition::multMatrix(double** mat1, double** mat2,double** res)
 */
 void PostureTransition::addMatrix(double** mat1, double** mat2,double** res)
 {
-	int i,j;
-	for(i=0; i < numPos; i++)
-	{
-		for(j=0; j < numPos ; j++)
-			res[i][j] = mat1[i][j] + mat2[i][j];
-	}
+    int i,j;
+    for(i=0; i < numPos; i++)
+    {
+        for(j=0; j < numPos ; j++)
+            res[i][j] = mat1[i][j] + mat2[i][j];
+    }
 
 }
 
@@ -455,12 +455,12 @@ void PostureTransition::addMatrix(double** mat1, double** mat2,double** res)
 */
 void PostureTransition::subtractMatrix(double** mat1, double** mat2,double** res)
 {
-	int i,j;
-	for(i=0; i < numPos; i++)
-	{
-		for(j=0; j < numPos ; j++)
-			res[i][j] = mat1[i][j] - mat2[i][j];
-	}
+    int i,j;
+    for(i=0; i < numPos; i++)
+    {
+        for(j=0; j < numPos ; j++)
+            res[i][j] = mat1[i][j] - mat2[i][j];
+    }
 
 }
 
@@ -469,12 +469,12 @@ void PostureTransition::subtractMatrix(double** mat1, double** mat2,double** res
 */
 void PostureTransition::multVector(double* vec,double** res)
 {
-	int i,j;
-	for(i=0; i < numPos; i++)
-	{
-		for(j=0; j < numPos ; j++)
-			res[i][j] = vec[i] * vec[j];
-	}
+    int i,j;
+    for(i=0; i < numPos; i++)
+    {
+        for(j=0; j < numPos ; j++)
+            res[i][j] = vec[i] * vec[j];
+    }
 
 }
 
@@ -484,119 +484,119 @@ void PostureTransition::multVector(double* vec,double** res)
 */
 double** PostureTransition::extractMatrixFromSteadyState(double* vec)
 {
-	int i,j;
-	double** dafaultMat;
+    int i,j;
+    double** dafaultMat;
 
-	//make output matrix and an identity matrix and a temp
-	double** mat= new double* [numPos];
-	double** temp1= new double* [numPos];
-	double** temp2= new double* [numPos];
-	double** temp3= new double* [numPos];
-	double** identity = new double* [numPos];
-	int** change = new int* [numPos];
-	for (int i=0;i<numPos;++i)
-	{
-		mat[i] = new double [numPos];
-		temp1[i] = new double [numPos];
-		temp2[i] = new double [numPos];
-		temp3[i] = new double [numPos];
-		identity[i] = new double [numPos];
-		change[i] = new int [numPos];
+    //make output matrix and an identity matrix and a temp
+    double** mat= new double* [numPos];
+    double** temp1= new double* [numPos];
+    double** temp2= new double* [numPos];
+    double** temp3= new double* [numPos];
+    double** identity = new double* [numPos];
+    int** change = new int* [numPos];
+    for (int i=0;i<numPos;++i)
+    {
+        mat[i] = new double [numPos];
+        temp1[i] = new double [numPos];
+        temp2[i] = new double [numPos];
+        temp3[i] = new double [numPos];
+        identity[i] = new double [numPos];
+        change[i] = new int [numPos];
 
-	}
+    }
 
-	for(i=0; i < numPos; i++)
-		for(j=0; j < numPos ; j++)
-			if (i==j)
-				identity[i][j] = 1;
-			else
-				identity[i][j] = 0;
-
-
-	double* sum= new double [numPos];
-	int* changeSum= new int [numPos];
+    for(i=0; i < numPos; i++)
+        for(j=0; j < numPos ; j++)
+            if (i==j)
+                identity[i][j] = 1;
+            else
+                identity[i][j] = 0;
 
 
-	dafaultMat = matrixList.at(defaultMatrixID)->matrix;
+    double* sum= new double [numPos];
+    int* changeSum= new int [numPos];
 
 
-	for (int numTry=0;numTry<400;++numTry)
-	{
-		subtractMatrix(identity,dafaultMat,temp1);
-		multVector(vec,temp2);
-		multMatrix(temp1,temp2,temp3);
-		addMatrix(dafaultMat,temp3,mat);
-
-		//remember if it has not changed
-		for(i=0; i < numPos; i++)
-			for(j=0; j < numPos ; j++)
-				change[i][j] = 1;
-
-		for(j=0; j < numPos; j++)
-			for(i=0; i < numPos ; i++)
-			{
-				if ( mat[i][j] < 0 ){
-					mat[i][j] = 0;
-					change[i][j]=0;
-				}
-				if ( mat[i][j] > 1 ){
-					mat[i][j] = 1;
-					change[i][j]=0;
-				}
-			}
+    dafaultMat = matrixList.at(defaultMatrixID)->matrix;
 
 
-		for(j=0; j < numPos; j++)
-		{
-			sum[j] = 0;
-			changeSum[j]=0;
-			for(i=0; i < numPos ; i++)
-			{
-				sum[j] += mat[i][j];
-				changeSum[j] += change[i][j];
-			}
-		}
+    for (int numTry=0;numTry<400;++numTry)
+    {
+        subtractMatrix(identity,dafaultMat,temp1);
+        multVector(vec,temp2);
+        multMatrix(temp1,temp2,temp3);
+        addMatrix(dafaultMat,temp3,mat);
 
-		for(j=0; j < numPos; j++)
-			for(i=0; i < numPos ; i++)
-			{
-				if (change[i][j] == 1)
-					mat[i][j] = mat[i][j]+ (1-sum[j])/changeSum[j];
-			}
+        //remember if it has not changed
+        for(i=0; i < numPos; i++)
+            for(j=0; j < numPos ; j++)
+                change[i][j] = 1;
 
-		dafaultMat = mat;
-	}
-
-	for(j=0; j < numPos; j++)
-		for(i=0; i < numPos ; i++)
-		{
-			if ( mat[i][j] < 0 )
-				mat[i][j] = 0;
-			if ( mat[i][j] > 1 )
-				mat[i][j] = 1;
-		}
+        for(j=0; j < numPos; j++)
+            for(i=0; i < numPos ; i++)
+            {
+                if ( mat[i][j] < 0 ){
+                    mat[i][j] = 0;
+                    change[i][j]=0;
+                }
+                if ( mat[i][j] > 1 ){
+                    mat[i][j] = 1;
+                    change[i][j]=0;
+                }
+            }
 
 
-	EV << "Generated Markov matrix from the steady state: "<< endl;
-	for (int k=0;k < numPos; ++k)
-	{
-		for (int f=0; f<numPos ;++f)
-			EV << mat[k][f]<<"       ";
-		EV << endl;
-	}
+        for(j=0; j < numPos; j++)
+        {
+            sum[j] = 0;
+            changeSum[j]=0;
+            for(i=0; i < numPos ; i++)
+            {
+                sum[j] += mat[i][j];
+                changeSum[j] += change[i][j];
+            }
+        }
 
-	for (int i=0;i<numPos;++i)
-	{
-		delete temp1[i]; delete temp2[i]; delete temp3[i];
-		delete identity[i];
-		delete change[i];
-	}
-	delete temp1; delete temp2; delete temp3;
-	delete identity;
-	delete change;
-	delete sum;
-	delete changeSum;
+        for(j=0; j < numPos; j++)
+            for(i=0; i < numPos ; i++)
+            {
+                if (change[i][j] == 1)
+                    mat[i][j] = mat[i][j]+ (1-sum[j])/changeSum[j];
+            }
+
+        dafaultMat = mat;
+    }
+
+    for(j=0; j < numPos; j++)
+        for(i=0; i < numPos ; i++)
+        {
+            if ( mat[i][j] < 0 )
+                mat[i][j] = 0;
+            if ( mat[i][j] > 1 )
+                mat[i][j] = 1;
+        }
 
 
-	return mat;
+    EV << "Generated Markov matrix from the steady state: "<< endl;
+    for (int k=0;k < numPos; ++k)
+    {
+        for (int f=0; f<numPos ;++f)
+            EV << mat[k][f]<<"       ";
+        EV << endl;
+    }
+
+    for (int i=0;i<numPos;++i)
+    {
+        delete temp1[i]; delete temp2[i]; delete temp3[i];
+        delete identity[i];
+        delete change[i];
+    }
+    delete temp1; delete temp2; delete temp3;
+    delete identity;
+    delete change;
+    delete sum;
+    delete changeSum;
+
+
+    return mat;
 }

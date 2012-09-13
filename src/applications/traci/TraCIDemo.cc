@@ -26,60 +26,60 @@
 Define_Module(TraCIDemo);
 
 void TraCIDemo::initialize(int stage) {
-	cSimpleModule::initialize(stage);
-	if (stage == 3) {
-		debug = par("debug");
+    cSimpleModule::initialize(stage);
+    if (stage == 3) {
+        debug = par("debug");
 
-		mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
-		traci = TraCIMobilityAccess().get();
-		traci->subscribe(mobilityStateChangedSignal, this);
+        mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
+        traci = TraCIMobilityAccess().get();
+        traci->subscribe(mobilityStateChangedSignal, this);
 
-		sentMessage = false;
+        sentMessage = false;
 
-		setupLowerLayer();
-	}
+        setupLowerLayer();
+    }
 }
 
 void TraCIDemo::setupLowerLayer() {
-	socket.setOutputGate(gate("udp$o"));
-	socket.joinLocalMulticastGroups();
-	socket.bind(12345);
-	socket.setBroadcast(true);
+    socket.setOutputGate(gate("udp$o"));
+    socket.joinLocalMulticastGroups();
+    socket.bind(12345);
+    socket.setBroadcast(true);
 }
 
 void TraCIDemo::handleMessage(cMessage* msg) {
-	if (msg->isSelfMessage()) {
-		handleSelfMsg(msg);
-	} else {
-		handleLowerMsg(msg);
-	}
+    if (msg->isSelfMessage()) {
+        handleSelfMsg(msg);
+    } else {
+        handleLowerMsg(msg);
+    }
 }
 
 void TraCIDemo::handleSelfMsg(cMessage* msg) {
 }
 
 void TraCIDemo::handleLowerMsg(cMessage* msg) {
-	if (!sentMessage) sendMessage();
-	delete msg;
+    if (!sentMessage) sendMessage();
+    delete msg;
 }
 
 void TraCIDemo::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) {
-	Enter_Method_Silent();
-	if (signalID == mobilityStateChangedSignal) {
-		handlePositionUpdate();
-	}
+    Enter_Method_Silent();
+    if (signalID == mobilityStateChangedSignal) {
+        handlePositionUpdate();
+    }
 }
 
 void TraCIDemo::sendMessage() {
-	sentMessage = true;
+    sentMessage = true;
 
-	cPacket* newMessage = new cPacket();
+    cPacket* newMessage = new cPacket();
 
-	socket.sendTo(newMessage, IPv4Address::ALL_HOSTS_MCAST, 12345);
+    socket.sendTo(newMessage, IPv4Address::ALL_HOSTS_MCAST, 12345);
 }
 
 void TraCIDemo::handlePositionUpdate() {
-	if (traci->getPosition().x < 7350) {
-		if (!sentMessage) sendMessage();
-	}
+    if (traci->getPosition().x < 7350) {
+        if (!sentMessage) sendMessage();
+    }
 }

@@ -119,25 +119,25 @@ void EtherTrafGen::sendBurstPackets()
     int n = numPacketsPerBurst->longValue();
     for (int i = 0; i < n; i++)
     {
-    	seqNum++;
+        seqNum++;
 
-    	char msgname[40];
-    	sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
-    	EV << "Generating packet `" << msgname << "'\n";
+        char msgname[40];
+        sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
+        EV << "Generating packet `" << msgname << "'\n";
 
-    	cPacket *datapacket = new cPacket(msgname, IEEE802CTRL_DATA);
+        cPacket *datapacket = new cPacket(msgname, IEEE802CTRL_DATA);
 
-    	long len = packetLength->longValue();
-    	datapacket->setByteLength(len);
+        long len = packetLength->longValue();
+        datapacket->setByteLength(len);
 
-    	Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-    	etherctrl->setEtherType(etherType);
-    	etherctrl->setDest(destMACAddress);
-    	datapacket->setControlInfo(etherctrl);
+        Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
+        etherctrl->setEtherType(etherType);
+        etherctrl->setDest(destMACAddress);
+        datapacket->setControlInfo(etherctrl);
 
-    	emit(sentPkSignal, datapacket);
-    	send(datapacket, "out");
-    	packetsSent++;
+        emit(sentPkSignal, datapacket);
+        send(datapacket, "out");
+        packetsSent++;
     }
 }
 

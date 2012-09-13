@@ -59,7 +59,7 @@ simple Radio like IRadio
         // misc
         bool drawCoverage = default(true);  // draw the coverage area in Tkenv
         int refreshCoverageInterval @unit("s") = default(0s);  // update period in simulation time for coverage redraw
-        
+
         xml SensitivityTable = default(xml("<NoSensitivityTable> </NoSensitivityTable>"));
 
         @signal[bitrate](type="double";unit=bps); // current transmit bitrate

@@ -29,7 +29,7 @@ simple GenericRadio extends Radio
 {
     parameters:
         @display("i=block/wrxtx");
-        
+
         radioModel = "GenericRadioModel";  // specify the radio model responsible for modulation, error correction and frame length calculation
         double snirThreshold @unit("dB") = default(4dB); // if signal-noise ratio is below this threshold, frame is considered noise (in dB)
         int headerLengthBits @unit(b); // length of physical layer framing (preamble, etc)

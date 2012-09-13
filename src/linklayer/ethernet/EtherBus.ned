@@ -25,13 +25,13 @@ package inet.linklayer.ethernet;
 // travel on the bus on both directions, and copies of it are sent out
 // on every other tap after delays proportional to their distances.
 //
-// For the model to work correctly, all connecting links (both incoming 
+// For the model to work correctly, all connecting links (both incoming
 // and outgoing ones) must have the same datarate.
 //
 // Messages are not interpreted by the bus model in any way, thus the bus
 // model is not specific to Ethernet.
 //
-// It is allowed to disconnect/reconnect links at runtime. However, 
+// It is allowed to disconnect/reconnect links at runtime. However,
 // the model does not support changing the tap positions or adding/removing
 // taps at runtime.
 //

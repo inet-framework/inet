@@ -250,7 +250,7 @@ class Ieee80211ActionFrameBody extends Ieee80211FrameBody
 class Ieee80211ActionHWMPFrameBody extends Ieee80211ActionFrameBody
 {
      int id enum(Ieee80211HWMPCode);
-     //unsigned char length; 
+     //unsigned char length;
      unsigned char flags = 0;
      unsigned char hopsCount = 0;
      unsigned char TTL = 32;
@@ -275,7 +275,7 @@ struct PERRElem
      unsigned short reasonCode;
 }
 
-     
+
 class Ieee80211ActionRANNFrameBody extends Ieee80211ActionHWMPFrameBody
 {
      bodyLength = 23;
@@ -327,7 +327,7 @@ class  Ieee80211ActionGANNFrameBody extends Ieee80211ActionHWMPFrameBody
     id = IE11S_GANN;
     MACAddress meshGateAddress;
     unsigned int meshGateSeqNumber;
-    
+
 }
 //--------------------------------------------------------------
 

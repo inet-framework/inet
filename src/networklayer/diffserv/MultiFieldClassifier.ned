@@ -34,7 +34,7 @@ simple MultiFieldClassifier
     parameters:
         xml filters = default(xml("<filters/>"));
         @display("i=block/classifier");
-        
+
         @signal[pkClass](type=integer);
         @statistic[pkClass](title="packet class"; source=pkClass; record=vector; interpolationmode=none);
     gates:

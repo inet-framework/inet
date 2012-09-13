@@ -27,15 +27,15 @@
  * In Proc. of the 4th Int'l Conf. on Simulation Tools and Techniques, SIMUTools 2011, Barcelona, Spain, 2011.
  *
  * BibTeX:
- *		@inproceedings{MoBAN,
- * 		author = "M. Nabi and M. Geilen and T. Basten.",
- * 	 	title = "{MoBAN}: A Configurable Mobility Model for Wireless Body Area Networks.",
- *    	booktitle = "Proceedings of the 4th Int'l Conf. on Simulation Tools and Techniques.",
- *    	series = {SIMUTools '11},
- *    	isbn = {978-963-9799-41-7},
- *	    year = {2011},
- *    	location = {Barcelona, Spain},
- *	    publisher = {ICST} }
+ *        @inproceedings{MoBAN,
+ *         author = "M. Nabi and M. Geilen and T. Basten.",
+ *          title = "{MoBAN}: A Configurable Mobility Model for Wireless Body Area Networks.",
+ *        booktitle = "Proceedings of the 4th Int'l Conf. on Simulation Tools and Techniques.",
+ *        series = {SIMUTools '11},
+ *        isbn = {978-963-9799-41-7},
+ *        year = {2011},
+ *        location = {Barcelona, Spain},
+ *        publisher = {ICST} }
  *
  **************************************************************************/
 
@@ -124,10 +124,10 @@ class MoBANCoordinator: public LineSegmentsMobilityBase
 
     /** @brief Data type for one instance of mobility pattern. */
     typedef struct pattern{
-    	unsigned int postureID;
-    	Coord targetPos;
-    	double speed;
-    	simtime_t duration;
+        unsigned int postureID;
+        Coord targetPos;
+        double speed;
+        simtime_t duration;
     }Pattern;
 
     /** @brief The mobility pattern data base. */
@@ -149,7 +149,7 @@ class MoBANCoordinator: public LineSegmentsMobilityBase
     /** @brief Possible (supported) strategies for posture selection. */
     enum posture_sel_type {
       UNIFORM_RANDOM = 0,   // uniform random posture selection. No correlation is applied.
-      MARKOV_BASE		    // Either a Markov model matrix or a steady state vector is given for space-time domains
+      MARKOV_BASE            // Either a Markov model matrix or a steady state vector is given for space-time domains
     };
 
     /** @brief The requested strategy for posture selection. To be given through configuration file. */

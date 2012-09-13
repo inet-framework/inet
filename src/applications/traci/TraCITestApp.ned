@@ -23,11 +23,11 @@ package inet.applications.traci;
 
 simple TraCITestApp
 {
-	parameters:
-		bool debug = default(false);  // output debugging information
-		int testNumber;  // number of test to run (-1: no test)
+    parameters:
+        bool debug = default(false);  // output debugging information
+        int testNumber;  // number of test to run (-1: no test)
 
-		@display("i=block/app2");
-	gates:
+        @display("i=block/app2");
+    gates:
 
 }

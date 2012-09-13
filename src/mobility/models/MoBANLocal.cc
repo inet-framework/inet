@@ -27,15 +27,15 @@
  * In Proc. of the 4th Int'l Conf. on Simulation Tools and Techniques, SIMUTools 2011, Barcelona, Spain, 2011.
  *
  * BibTeX:
- *		@inproceedings{MoBAN,
- * 		author = "M. Nabi and M. Geilen and T. Basten.",
- * 	 	title = "{MoBAN}: A Configurable Mobility Model for Wireless Body Area Networks.",
- *    	booktitle = "Proceedings of the 4th Int'l Conf. on Simulation Tools and Techniques.",
- *    	series = {SIMUTools '11},
- *    	isbn = {978-963-9799-41-7},
- *	    year = {2011},
- *    	location = {Barcelona, Spain},
- *	    publisher = {ICST} }
+ *        @inproceedings{MoBAN,
+ *         author = "M. Nabi and M. Geilen and T. Basten.",
+ *          title = "{MoBAN}: A Configurable Mobility Model for Wireless Body Area Networks.",
+ *        booktitle = "Proceedings of the 4th Int'l Conf. on Simulation Tools and Techniques.",
+ *        series = {SIMUTools '11},
+ *        isbn = {978-963-9799-41-7},
+ *        year = {2011},
+ *        location = {Barcelona, Spain},
+ *        publisher = {ICST} }
  *
  **************************************************************************/
 
@@ -68,28 +68,28 @@ void MoBANLocal::initializePosition()
 
 void MoBANLocal::setTargetPosition()
 {
-	if (speed != 0)
-	{
-		// find a uniformly random position within a sphere around the reference point
-		double x = uniform(-radius, radius);
-		double y = uniform(-radius, radius);
-		double z = uniform(-radius, radius);
-		while (x * x + y * y + z * z > radius * radius)
-		{
-			x = uniform(-radius, radius);
-			y = uniform(-radius, radius);
-			z = uniform(-radius, radius);
-		}
+    if (speed != 0)
+    {
+        // find a uniformly random position within a sphere around the reference point
+        double x = uniform(-radius, radius);
+        double y = uniform(-radius, radius);
+        double z = uniform(-radius, radius);
+        while (x * x + y * y + z * z > radius * radius)
+        {
+            x = uniform(-radius, radius);
+            y = uniform(-radius, radius);
+            z = uniform(-radius, radius);
+        }
 
-		targetPosition = referencePosition + Coord(x, y, z);
-	    Coord positionDelta = targetPosition - lastPosition;
-	    double distance = positionDelta.length();
-	    nextChange = simTime() + distance / speed;
-	}
-	else {
-	    targetPosition = lastPosition;
-	    nextChange = -1;
-	}
+        targetPosition = referencePosition + Coord(x, y, z);
+        Coord positionDelta = targetPosition - lastPosition;
+        double distance = positionDelta.length();
+        nextChange = simTime() + distance / speed;
+    }
+    else {
+        targetPosition = lastPosition;
+        nextChange = -1;
+    }
 }
 
 void MoBANLocal::updateVisualRepresentation()

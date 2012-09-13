@@ -22,7 +22,7 @@ package inet.linklayer.ethernet;
 // A generic wiring hub model.
 //
 // ethg[i] gates represent ports. Messages arriving on a port are broadcast
-// to every other port. For the model to work correctly, all connecting 
+// to every other port. For the model to work correctly, all connecting
 // links (both incoming and outgoing ones) must have the same datarate.
 //
 // Messages are not interpreted by the hub model in any way, thus the hub

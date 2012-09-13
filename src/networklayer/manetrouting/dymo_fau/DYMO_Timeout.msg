@@ -17,7 +17,7 @@
 //
 
 //
-// Signals some kind of timeout. 
+// Signals some kind of timeout.
 //
 message DYMO_Timeout
 {

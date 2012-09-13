@@ -138,7 +138,7 @@ enum TCPDataTransferMode
 //
 // The dataTransferMode and tcpAlgorithmClass fields
 // allow per-connection TCP configuration.
-// The dataTransferMode field set the 
+// The dataTransferMode field set the
 // The tcpAlgorithmClass field may contain name of class subclassed from
 // TCPAlgorithm, respectively.
 // If not set, module parameters with similar names are used.

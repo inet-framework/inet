@@ -158,7 +158,7 @@ class INET_API Radio : public ChannelAccess, public IPowerControl
     double calcDistFreeSpace();
 
   protected:
-	// Support of noise generators, the noise generators allow that the radio can change between  RECV <-->IDLE without to receive a frame
+    // Support of noise generators, the noise generators allow that the radio can change between  RECV <-->IDLE without to receive a frame
     static simsignal_t changeLevelNoise;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 

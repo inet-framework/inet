@@ -186,14 +186,14 @@ class UDPSetTimeToLiveCommand extends UDPSetOptionCommand
 // header field on outgoing IPv4/IPv6 packets sent from an UDP socket.
 // This is an 8-bit field, the lowest 6 bits are the DSCP (DiffServ Code Point)
 // and the highest 2 bits are the ECN (Explicit Congestion Notification).
-// To set the option, send a message to  the ~UDP module with kind=UDP_C_SETOPTION 
+// To set the option, send a message to  the ~UDP module with kind=UDP_C_SETOPTION
 // and an and instance of this control info class attached.
 //
 // @see ~UDPCommandCode
 //
 class UDPSetTypeOfServiceCommand extends UDPSetOptionCommand
 {
-    char tos;  // ToS byte for IPv4/IPv6 
+    char tos;  // ToS byte for IPv4/IPv6
 }
 
 //

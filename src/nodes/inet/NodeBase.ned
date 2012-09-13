@@ -29,8 +29,8 @@ import inet.base.NotificationBoard;
 
 //
 // Contains the common lower layers (linklayer and networklayer)
-// of Router, StandardHost, WirelessHost etc. 
-// 
+// of Router, StandardHost, WirelessHost etc.
+//
 // NOTE:
 //    - IPForward is turned on by default.
 //    - use this model only as a base type. In simulations use ~Router,
