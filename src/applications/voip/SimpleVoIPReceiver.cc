@@ -216,7 +216,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
     delete [] isArrived;
 }
 
-// FIXME: a reference to a paper, article, whatever that describes the model used here would be great!
+// e-model described in ITU-T G.107 standard
 double SimpleVoIPReceiver::eModel(double delay, double lossRate)
 {
     static const double alpha3 = 177.3; //ms
@@ -257,7 +257,7 @@ double SimpleVoIPReceiver::eModel(double delay, double lossRate)
 
 void SimpleVoIPReceiver::finish()
 {
-    // last talkspurt playout
+    // evaluate last talkspurt
     evaluateTalkspurt(true);
 }
 
