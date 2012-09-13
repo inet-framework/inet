@@ -154,7 +154,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
     simtime_t max_jitter = -1000.0;
 
     // FIXME: what is the idea here? what does it compute? from what data does it compute? write something about the algorithm
-    for ( PacketsVector::iterator packet = currentTalkspurt.packets.begin(); packet != currentTalkspurt.packets.end(); packet++)
+    for ( PacketsVector::iterator packet = currentTalkspurt.packets.begin(); packet != currentTalkspurt.packets.end(); ++packet)
     {
         packet->playoutTime = (firstPlayoutTime + ((int)packet->packetID - (int)firstPacketId) * currentTalkspurt.voiceDuration);
 
