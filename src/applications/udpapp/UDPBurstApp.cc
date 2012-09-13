@@ -53,8 +53,9 @@ void UDPBurstApp::initialize(int stage)
 
     bindToPort(localPort);
 
-    cMessage *timer = new cMessage("sendTimer");
-    scheduleAt((double)par("startTime"), timer);
+    burstTimer = new cMessage("burstTimer", 0);
+    messageTimer = new cMessage("messageTimer", 1);
+    scheduleAt((double)par("startTime"), burstTimer);
 }
 
 cPacket *UDPBurstApp::createPacket(int payloadLength)
@@ -67,35 +68,56 @@ cPacket *UDPBurstApp::createPacket(int payloadLength)
     return payload;
 }
 
-void UDPBurstApp::sendPacket()
-{
-    int messageLength = par("messageLength").longValue();
+void UDPBurstApp::sendPacket() {
+    int payloadLength = (messageLength > UDP_MAX_PAYLOAD) ? UDP_MAX_PAYLOAD : messageLength;
+    messageLength -= payloadLength;
+    cPacket *payload = createPacket(payloadLength);
+    IPvXAddress destAddr = chooseDestAddr();
+    sendToUDP(payload, localPort, destAddr, destPort);
+    numSent++;
+    if (messageLength > 0) {
+        scheduleAt(simTime()+ double(payloadLength*8/lineRate), messageTimer);
+    }
+}
 
-    do
+void UDPBurstApp::handleMessage(cMessage *msg)
+{
+    if (msg->isSelfMessage())
     {
-        int payloadLength = (messageLength > UDP_MAX_PAYLOAD) ? UDP_MAX_PAYLOAD : messageLength;
-        messageLength -= payloadLength;
-        cPacket *payload = createPacket(payloadLength);
-        IPvXAddress destAddr = chooseDestAddr();
-        sendToUDPDelayed(payload, localPort, destAddr, destPort, payloadLength*8/lineRate);
+        if (msg->getKind() == 0)
+        {   // start of a new burst; reset messageLength
+            messageLength = par("messageLength").longValue();
+            scheduleAt(simTime()+(double)par("messageFreq"), msg);
+        }
+        sendPacket();
+    }
+    else
+    {
+        // process incoming packet
+        processPacket(PK(msg));
+    }
 
-        numSent++;
-    } while (messageLength > 0);
+    if (ev.isGUI())
+    {
+        char buf[40];
+        sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
+        getDisplayString().setTagArg("t",0,buf);
+    }
 }
 
-void UDPBurstApp::sendToUDPDelayed(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort, double delay)
-{
-    // send message to UDP, with the appropriate control info attached after a given delay
-    msg->setKind(UDP_C_DATA);
-
-    UDPControlInfo *ctrl = new UDPControlInfo();
-    ctrl->setSrcPort(srcPort);
-    ctrl->setDestAddr(destAddr);
-    ctrl->setDestPort(destPort);
-    msg->setControlInfo(ctrl);
-
-    EV << "Sending packet: ";
-    printPacket(msg);
-
-    sendDelayed(msg, delay, "udpOut");
-}
+//void UDPBurstApp::sendToUDPDelayed(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort, double delay)
+//{
+//    // send message to UDP, with the appropriate control info attached after a given delay
+//    msg->setKind(UDP_C_DATA);
+//
+//    UDPControlInfo *ctrl = new UDPControlInfo();
+//    ctrl->setSrcPort(srcPort);
+//    ctrl->setDestAddr(destAddr);
+//    ctrl->setDestPort(destPort);
+//    msg->setControlInfo(ctrl);
+//
+//    EV << "Sending packet: ";
+//    printPacket(msg);
+//
+//    sendDelayed(msg, delay, "udpOut");
+//}

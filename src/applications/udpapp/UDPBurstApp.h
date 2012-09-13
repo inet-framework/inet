@@ -33,14 +33,17 @@ const int UDP_MAX_PAYLOAD = 1472; // = 1500-byte MTU of Ethernet - 8-byte UDP he
 class INET_API UDPBurstApp : public UDPBasicApp
 {
 protected:
+    cMessage *burstTimer, *messageTimer;
+    int messageLength;
     double lineRate;
     
     virtual cPacket *createPacket(int payloadLength);
     virtual void sendPacket();
-    virtual void sendToUDPDelayed(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort, double delay);
+//    virtual void sendToUDPDelayed(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort, double delay);
 
 protected:
     virtual void initialize(int stage);
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif
