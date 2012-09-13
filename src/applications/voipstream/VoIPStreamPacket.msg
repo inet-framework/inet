@@ -18,7 +18,7 @@
 
 cplusplus {{
 #ifndef HAVE_FFMPEG
-#error Please install libavcodec, libavformat, libavutil or disable 'VoIPTool' feature.
+#error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature.
 #endif
 
 #include "ByteArrayMessage.h"
@@ -29,7 +29,7 @@ class ByteArrayMessage;
 //
 // For the type field of VoIPPacket
 //
-enum VoIPPacketType
+enum VoIPStreamPacketType
 {
     VOICE = 1;
     SILENCE = 2;
@@ -38,9 +38,9 @@ enum VoIPPacketType
 //
 // Packet type used by VoIPSourceApp and VoIPSinkApp
 //
-packet VoIPPacket extends ByteArrayMessage
+packet VoIPStreamPacket extends ByteArrayMessage
 {
-    int type @enum(VoIPPacketType);
+    int type @enum(VoIPStreamPacketType);
 
     int codec;  // FFmpeg identifier of the codec
     short sampleBits;

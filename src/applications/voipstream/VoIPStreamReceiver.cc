@@ -17,27 +17,27 @@
 //
 
 
-#include "VoIPSinkApp.h"
+#include "VoIPStreamReceiver.h"
 
 #include "INETEndians.h"
 
 
-Define_Module(VoIPSinkApp);
+Define_Module(VoIPStreamReceiver);
 
-simsignal_t VoIPSinkApp::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t VoIPSinkApp::lostSamplesSignal = SIMSIGNAL_NULL;
-simsignal_t VoIPSinkApp::lostPacketsSignal = SIMSIGNAL_NULL;
-simsignal_t VoIPSinkApp::dropPkSignal = SIMSIGNAL_NULL;
-simsignal_t VoIPSinkApp::packetHasVoiceSignal = SIMSIGNAL_NULL;
-simsignal_t VoIPSinkApp::connStateSignal = SIMSIGNAL_NULL;
-simsignal_t VoIPSinkApp::delaySignal = SIMSIGNAL_NULL;
+simsignal_t VoIPStreamReceiver::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t VoIPStreamReceiver::lostSamplesSignal = SIMSIGNAL_NULL;
+simsignal_t VoIPStreamReceiver::lostPacketsSignal = SIMSIGNAL_NULL;
+simsignal_t VoIPStreamReceiver::dropPkSignal = SIMSIGNAL_NULL;
+simsignal_t VoIPStreamReceiver::packetHasVoiceSignal = SIMSIGNAL_NULL;
+simsignal_t VoIPStreamReceiver::connStateSignal = SIMSIGNAL_NULL;
+simsignal_t VoIPStreamReceiver::delaySignal = SIMSIGNAL_NULL;
 
-VoIPSinkApp::~VoIPSinkApp()
+VoIPStreamReceiver::~VoIPStreamReceiver()
 {
     closeConnection();
 }
 
-void VoIPSinkApp::initSignals()
+void VoIPStreamReceiver::initSignals()
 {
     rcvdPkSignal = registerSignal("rcvdPk");
     lostSamplesSignal = registerSignal("lostSamples");
@@ -48,7 +48,7 @@ void VoIPSinkApp::initSignals()
     delaySignal = registerSignal("delay");
 }
 
-void VoIPSinkApp::initialize()
+void VoIPStreamReceiver::initialize()
 {
     initSignals();
 
@@ -70,7 +70,7 @@ void VoIPSinkApp::initialize()
     socket.bind(localPort);
 }
 
-void VoIPSinkApp::handleMessage(cMessage *msg)
+void VoIPStreamReceiver::handleMessage(cMessage *msg)
 {
     if (msg->getKind() == UDP_I_ERROR)
     {
@@ -78,7 +78,7 @@ void VoIPSinkApp::handleMessage(cMessage *msg)
         return;
     }
 
-    VoIPPacket *vp = check_and_cast<VoIPPacket *>(msg);
+    VoIPStreamPacket *vp = check_and_cast<VoIPStreamPacket *>(msg);
     bool ok = true;
     if (curConn.offline)
         createConnection(vp);
@@ -98,7 +98,7 @@ void VoIPSinkApp::handleMessage(cMessage *msg)
     delete msg;
 }
 
-void VoIPSinkApp::Connection::openAudio(const char *fileName)
+void VoIPStreamReceiver::Connection::openAudio(const char *fileName)
 {
 /*
     AVCodecContext *c;
@@ -118,7 +118,7 @@ void VoIPSinkApp::Connection::openAudio(const char *fileName)
     outFile.open(fileName, sampleRate, av_get_bits_per_sample_format(decCtx->sample_fmt));
 }
 
-void VoIPSinkApp::Connection::writeLostSamples(int sampleCount)
+void VoIPStreamReceiver::Connection::writeLostSamples(int sampleCount)
 {
     int pktBytes = sampleCount * av_get_bits_per_sample_format(decCtx->sample_fmt) / 8;
     if (outFile.isOpen())
@@ -129,7 +129,7 @@ void VoIPSinkApp::Connection::writeLostSamples(int sampleCount)
     }
 }
 
-void VoIPSinkApp::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes)
+void VoIPStreamReceiver::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes)
 {
     AVPacket avpkt;
     av_init_packet(&avpkt);
@@ -149,12 +149,12 @@ void VoIPSinkApp::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes)
     delete [] decBuf;
 }
 
-void VoIPSinkApp::Connection::closeAudio()
+void VoIPStreamReceiver::Connection::closeAudio()
 {
     outFile.close();
 }
 
-void VoIPSinkApp::createConnection(VoIPPacket *vp)
+void VoIPStreamReceiver::createConnection(VoIPStreamPacket *vp)
 {
     ASSERT(curConn.offline);
 
@@ -198,7 +198,7 @@ void VoIPSinkApp::createConnection(VoIPPacket *vp)
     emit(connStateSignal, 1);
 }
 
-void VoIPSinkApp::checkSourceAndParameters(VoIPPacket *vp)
+void VoIPStreamReceiver::checkSourceAndParameters(VoIPStreamPacket *vp)
 {
     ASSERT(!curConn.offline);
 
@@ -219,7 +219,7 @@ void VoIPSinkApp::checkSourceAndParameters(VoIPPacket *vp)
         throw cRuntimeError("Cannot change voice encoding parameters a during session");
 }
 
-void VoIPSinkApp::closeConnection()
+void VoIPStreamReceiver::closeConnection()
 {
     if (!curConn.offline)
     {
@@ -230,7 +230,7 @@ void VoIPSinkApp::closeConnection()
     }
 }
 
-void VoIPSinkApp::decodePacket(VoIPPacket *vp)
+void VoIPStreamReceiver::decodePacket(VoIPStreamPacket *vp)
 {
     switch (vp->getType())
     {
@@ -243,7 +243,7 @@ void VoIPSinkApp::decodePacket(VoIPPacket *vp)
             break;
 
         default:
-            error("The received VoIPPacket has unknown type %d", vp->getType());
+            error("The received VoIPStreamPacket has unknown type %d", vp->getType());
             return;
     }
     uint16_t newSeqNo = vp->getSeqNo();
@@ -267,7 +267,7 @@ void VoIPSinkApp::decodePacket(VoIPPacket *vp)
     curConn.writeAudioFrame(buff, len);
 }
 
-void VoIPSinkApp::finish()
+void VoIPStreamReceiver::finish()
 {
     ev << "Sink finish()" << endl;
     closeConnection();

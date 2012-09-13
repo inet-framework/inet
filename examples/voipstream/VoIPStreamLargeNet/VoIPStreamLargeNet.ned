@@ -17,7 +17,7 @@
 //
 
 
-package inet.examples.voiptool.VoIPToolLargeNet;
+package inet.examples.voipstream.VoIPStreamLargeNet;
 
 import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
@@ -39,7 +39,7 @@ channel cable extends DatarateChannel
 //
 // Several hosts on an Ethernet hub
 //
-module VoIPToolSmallLAN
+module VoIPStreamSmallLAN
 {
     parameters:
         int h; // number of hosts on the hub
@@ -64,7 +64,7 @@ module VoIPToolSmallLAN
 //
 // Several hosts and an Ethernet hub on a switch
 //
-module VoIPToolMediumLAN
+module VoIPStreamMediumLAN
 {
     parameters:
         int n; // number of hosts on the switch
@@ -105,7 +105,7 @@ module VoIPToolMediumLAN
 // Several hosts and an Ethernet hub on a switch. One port of the hub
 // connect to a 10Base2 segment.
 //
-module VoIPToolLargeLAN
+module VoIPStreamLargeLAN
 {
     parameters:
         int n; // number of hosts on the switch
@@ -163,7 +163,7 @@ module VoIPToolLargeLAN
 // modified to add a VoIP server and a VoIP client. It can be used to test VoIP
 // transmission on a LAN with high background traffic.
 //
-network VoIPToolLargeNet
+network VoIPStreamLargeNet
 {
     parameters:
         int n;   // length of the "backbone" (n>5!)
@@ -186,34 +186,34 @@ network VoIPToolLargeNet
         switchBB[n]: EtherSwitch {
             @display("is=s");
         }
-        slanBB[n*bbs]: VoIPToolSmallLAN;
-        mlanBB[n*bbm]: VoIPToolMediumLAN;
-        llanBB[n*bbl]: VoIPToolLargeLAN;
+        slanBB[n*bbs]: VoIPStreamSmallLAN;
+        mlanBB[n*bbm]: VoIPStreamMediumLAN;
+        llanBB[n*bbl]: VoIPStreamLargeLAN;
         switchA: EtherSwitch;
         serverA: EtherHost;
-        slanA[as]: VoIPToolSmallLAN;
-        mlanA[am]: VoIPToolMediumLAN;
-        llanA[al]: VoIPToolLargeLAN;
+        slanA[as]: VoIPStreamSmallLAN;
+        mlanA[am]: VoIPStreamMediumLAN;
+        llanA[al]: VoIPStreamLargeLAN;
         switchB: EtherSwitch;
         serverB: EtherHost;
-        slanB[bs]: VoIPToolSmallLAN;
-        mlanB[bm]: VoIPToolMediumLAN;
-        llanB[bl]: VoIPToolLargeLAN;
+        slanB[bs]: VoIPStreamSmallLAN;
+        mlanB[bm]: VoIPStreamMediumLAN;
+        llanB[bl]: VoIPStreamLargeLAN;
         switchC: EtherSwitch;
         serverC: EtherHost;
-        slanC[cs]: VoIPToolSmallLAN;
-        mlanC[cm]: VoIPToolMediumLAN;
-        llanC[cl]: VoIPToolLargeLAN;
+        slanC[cs]: VoIPStreamSmallLAN;
+        mlanC[cm]: VoIPStreamMediumLAN;
+        llanC[cl]: VoIPStreamLargeLAN;
         switchD: EtherSwitch;
         serverD: EtherHost;
-        slanD[ds]: VoIPToolSmallLAN;
-        mlanD[dm]: VoIPToolMediumLAN;
-        llanD[dl]: VoIPToolLargeLAN;
+        slanD[ds]: VoIPStreamSmallLAN;
+        mlanD[dm]: VoIPStreamMediumLAN;
+        llanD[dl]: VoIPStreamLargeLAN;
         voipClient: StandardHost;
         voipServer: StandardHost;
         configurator: IPv4NetworkConfigurator {
             parameters:
-                config=xml("<config><interface hosts='*' address='10.x.x.x' netmask='255.x.x.x'/></config>");
+                config = xml("<config><interface hosts='*' address='10.x.x.x' netmask='255.x.x.x'/></config>");
                 @display("p=495,160;i=block/cogwheel_s");
         }
     connections:

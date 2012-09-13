@@ -11,7 +11,7 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-package inet.examples.voiptool.VoIPToolTest;
+package inet.examples.voipstream.VoIPStreamTest;
 
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
@@ -20,7 +20,7 @@ import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 
 
-network VoIPToolTest
+network VoIPStreamTest
 {
     types:
         channel line1 extends ned.DatarateChannel

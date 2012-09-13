@@ -16,21 +16,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "VoIPSourceApp.h"
+#include "VoIPStreamSender.h"
 
 #include "UDPControlInfo_m.h"
 
-Define_Module(VoIPSourceApp);
+Define_Module(VoIPStreamSender);
 
 
-simsignal_t VoIPSourceApp::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t VoIPStreamSender::sentPkSignal = SIMSIGNAL_NULL;
 
-VoIPSourceApp::~VoIPSourceApp()
+VoIPStreamSender::~VoIPStreamSender()
 {
     cancelAndDelete(timer);
 }
 
-VoIPSourceApp::Buffer::Buffer() :
+VoIPStreamSender::Buffer::Buffer() :
     samples(NULL),
     bufferSize(0),
     readOffset(0),
@@ -38,12 +38,12 @@ VoIPSourceApp::Buffer::Buffer() :
 {
 }
 
-VoIPSourceApp::Buffer::~Buffer()
+VoIPStreamSender::Buffer::~Buffer()
 {
     delete [] samples;
 }
 
-void VoIPSourceApp::Buffer::clear(int framesize)
+void VoIPStreamSender::Buffer::clear(int framesize)
 {
     delete samples;
     bufferSize = BUFSIZE + framesize;
@@ -52,7 +52,7 @@ void VoIPSourceApp::Buffer::clear(int framesize)
     writeOffset = 0;
 }
 
-void VoIPSourceApp::initialize(int stage)
+void VoIPStreamSender::initialize(int stage)
 {
     if (stage != 3)  //wait until stage 3 - The Address resolver does not work before that!
         return;
@@ -111,11 +111,11 @@ void VoIPSourceApp::initialize(int stage)
     sentPkSignal = registerSignal("sentPk");
 }
 
-void VoIPSourceApp::handleMessage(cMessage *msg)
+void VoIPStreamSender::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-        VoIPPacket *packet;
+        VoIPStreamPacket *packet;
 
         if (msg == timer)
         {
@@ -140,7 +140,7 @@ void VoIPSourceApp::handleMessage(cMessage *msg)
         }
         else
         {
-            packet = check_and_cast<VoIPPacket *>(msg);
+            packet = check_and_cast<VoIPStreamPacket *>(msg);
             emit(sentPkSignal, packet);
             socket.sendTo(packet, destAddress, destPort);
         }
@@ -149,7 +149,7 @@ void VoIPSourceApp::handleMessage(cMessage *msg)
         delete msg;
 }
 
-void VoIPSourceApp::finish()
+void VoIPStreamSender::finish()
 {
     av_free_packet(&packet);
     outFile.close();
@@ -187,7 +187,7 @@ static void choose_sample_fmt(AVStream *st, AVCodec *codec)
 }
 */
 
-void VoIPSourceApp::openSoundFile(const char *name)
+void VoIPStreamSender::openSoundFile(const char *name)
 {
     int ret = av_open_input_file(&pFormatCtx, name, NULL, 0, NULL);
 
@@ -265,7 +265,7 @@ void VoIPSourceApp::openSoundFile(const char *name)
     sampleBuffer.clear(samplesPerPacket * av_get_bits_per_sample_format(pEncoderCtx->sample_fmt) / 8);
 }
 
-VoIPPacket* VoIPSourceApp::generatePacket()
+VoIPStreamPacket* VoIPStreamSender::generatePacket()
 {
     readFrame();
 
@@ -276,7 +276,7 @@ VoIPPacket* VoIPSourceApp::generatePacket()
     short int bitsPerOutSample = av_get_bits_per_sample(pEncoderCtx->codec->id);
     int samples = std::min(sampleBuffer.length() / (bitsPerInSample/8), samplesPerPacket);
     bool isSilent = checkSilence(pEncoderCtx->sample_fmt, sampleBuffer.readPtr(), samples);
-    VoIPPacket *vp = new VoIPPacket();
+    VoIPStreamPacket *vp = new VoIPStreamPacket();
     int outByteCount = 0;
     uint8_t *outBuf = NULL;
 
@@ -342,7 +342,7 @@ VoIPPacket* VoIPSourceApp::generatePacket()
     return vp;
 }
 
-bool VoIPSourceApp::checkSilence(enum SampleFormat sampleFormat, void* _buf, int samples)
+bool VoIPStreamSender::checkSilence(enum SampleFormat sampleFormat, void* _buf, int samples)
 {
     int max = 0;
     int i;
@@ -394,7 +394,7 @@ bool VoIPSourceApp::checkSilence(enum SampleFormat sampleFormat, void* _buf, int
     return max < voipSilenceThreshold;
 }
 
-void VoIPSourceApp::Buffer::align()
+void VoIPStreamSender::Buffer::align()
 {
     if (readOffset)
     {
@@ -405,7 +405,7 @@ void VoIPSourceApp::Buffer::align()
     }
 }
 
-void VoIPSourceApp::readFrame()
+void VoIPStreamSender::readFrame()
 {
     short int inBytesPerSample = av_get_bits_per_sample_format(pEncoderCtx->sample_fmt) / 8;
     if (sampleBuffer.length() >= samplesPerPacket * inBytesPerSample)

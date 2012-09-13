@@ -17,11 +17,11 @@
 //
 
 
-#ifndef VOIPTOOL_VOIPSINKAPP_H
-#define VOIPTOOL_VOIPSINKAPP_H
+#ifndef VOIPSTREAM_VOIPSTREAMRECEIVER_H
+#define VOIPSTREAM_VOIPSTREAMRECEIVER_H
 
 #ifndef HAVE_FFMPEG
-#error Please install libavcodec, libavformat, libavutil or disable 'VoIPTool' feature
+#error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature
 #endif
 
 
@@ -41,25 +41,25 @@ extern "C" {
 #include "UDPControlInfo_m.h"
 #include "UDPSocket.h"
 
-#include "VoIPPacket_m.h"
+#include "VoIPStreamPacket_m.h"
 
 #include "AudioOutFile.h"
 
-class VoIPSinkApp : public cSimpleModule
+class VoIPStreamReceiver : public cSimpleModule
 {
   public:
-    VoIPSinkApp() { resultFile = ""; }
-    ~VoIPSinkApp();
+    VoIPStreamReceiver() { resultFile = ""; }
+    ~VoIPStreamReceiver();
 
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
-    virtual void createConnection(VoIPPacket *vp);
-    virtual void checkSourceAndParameters(VoIPPacket *vp);
+    virtual void createConnection(VoIPStreamPacket *vp);
+    virtual void checkSourceAndParameters(VoIPStreamPacket *vp);
     virtual void closeConnection();
-    virtual void decodePacket(VoIPPacket *vp);
+    virtual void decodePacket(VoIPStreamPacket *vp);
     static void initSignals();
 
     class Connection
@@ -112,4 +112,4 @@ class VoIPSinkApp : public cSimpleModule
     static simsignal_t delaySignal;
 };
 
-#endif // VOIPTOOL_VOIPSINKAPP_H
+#endif // VOIPSTREAM_VOIPSTREAMRECEIVER_H

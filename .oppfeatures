@@ -552,28 +552,28 @@
         linkerFlags = ""
         />
     <feature
-        id="VoIPTool"
-        name="VoIPTool"
+        id="VoIPStream"
+        name="VoIPStream"
         description = "Voice over IP tool. Required external libraries: libavcodec, libavformat libavutil"
         initiallyEnabled = "false"
         requires = "UDP"
         labels = ""
         nedPackages = "
-                       inet.applications.voiptool
+                       inet.applications.voipstream
                       "
         extraSourceFolders = ""
-        compileFlags = "-DWITH_VOIPTOOL"
+        compileFlags = "-DWITH_VOIPSTREAM"
         linkerFlags = ""
         />
     <feature
-        id="VoIPTool_examples"
-        name="VoIP examples"
+        id="VoIPStream_examples"
+        name="VoIPStream examples"
         description = "Example VoIP simulations"
         initiallyEnabled = "false"
-        requires = "VoIPTool IPv4 Ethernet"
+        requires = "VoIPStream IPv4 Ethernet"
         labels = "examples"
         nedPackages = "
-                       inet.examples.voiptool
+                       inet.examples.voipstream
                       "
         extraSourceFolders = ""
         compileFlags = ""

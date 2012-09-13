@@ -11,7 +11,7 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-package inet.examples.voiptool.VoIPToolTrafficTest;
+package inet.examples.voipstream.VoIPStreamTrafficTest;
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.ethernet.EtherSwitch;
@@ -22,7 +22,7 @@ import ned.DatarateChannel;
 
 
 
-network VoIPToolTrafficTest
+network VoIPStreamTrafficTest
 {
     @display("bgb=750,447");
     types:

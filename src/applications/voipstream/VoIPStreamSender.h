@@ -17,11 +17,11 @@
 //
 
 
-#ifndef VOIPTOOL_VOIPSOURCEAPP_H
-#define VOIPTOOL_VOIPSOURCEAPP_H
+#ifndef VOIPSTREAM_VOIPSTREAMSENDER_H
+#define VOIPSTREAM_VOIPSTREAMSENDER_H
 
 #ifndef HAVE_FFMPEG
-#error Please install libavcodec, libavformat, libavutil or disable 'VoIPTool' feature
+#error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature
 #endif
 
 #include <fnmatch.h>
@@ -39,14 +39,14 @@ extern "C" {
 #include "AudioOutFile.h"
 #include "IPvXAddressResolver.h"
 #include "UDPSocket.h"
-#include "VoIPPacket_m.h"
+#include "VoIPStreamPacket_m.h"
 
 //using namespace std;
 
-class INET_API VoIPSourceApp : public cSimpleModule
+class INET_API VoIPStreamSender : public cSimpleModule
 {
   public:
-    ~VoIPSourceApp();
+    ~VoIPStreamSender();
 
   protected:
     virtual void initialize(int stage);
@@ -55,7 +55,7 @@ class INET_API VoIPSourceApp : public cSimpleModule
     virtual void finish();
 
     virtual void openSoundFile(const char *name);
-    virtual VoIPPacket* generatePacket();
+    virtual VoIPStreamPacket* generatePacket();
     virtual bool checkSilence(enum SampleFormat sampleFormat, void* _buf, int samples);
     virtual void readFrame();
 
@@ -124,4 +124,4 @@ class INET_API VoIPSourceApp : public cSimpleModule
     static simsignal_t sentPkSignal;
 };
 
-#endif //VOIPTOOL_VOIPSOURCEAPP_H
+#endif //VOIPSTREAM_VOIPSTREAMSENDER_H

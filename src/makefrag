@@ -34,9 +34,9 @@ else
 endif
 
 #
-# VoipTool feature:
+# VoipStream feature:
 #
-ifneq (,$(findstring -DWITH_VOIPTOOL,$(COPTS)))
+ifneq (,$(findstring -DWITH_VOIPSTREAM,$(COPTS)))
   ifeq ($(HAVE_PKGCFG), yes)
     HAVE_FFMPEG := $(shell $(PKGCFG) --exists libavcodec libavformat libavutil && echo yes || echo no)
     ifeq ($(HAVE_FFMPEG), yes)

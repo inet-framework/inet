@@ -17,13 +17,13 @@
 //
 
 
-package inet.applications.voiptool;
+package inet.applications.voipstream;
 
 import inet.applications.IUDPApp;
 
 
 //
-// VoIPSourceApp accepts an audio file and a destination IP address/port as
+// VoIPStreamSender accepts an audio file and a destination IP address/port as
 // input, and will transmit the file's contents as voice traffic over UDP n
 // times (by default once). For transmission, the audio is resampled at the
 // specified frequency and depth, and encoded with the specified codec at the
@@ -34,7 +34,7 @@ import inet.applications.IUDPApp;
 // does not simulate any particular VoIP protocol (e.g. RTP), but instead
 // accepts a "header size" parameter that can be set accordingly.
 //
-simple VoIPSourceApp like IUDPApp
+simple VoIPStreamSender like IUDPApp
 {
     parameters:
         int localPort;

@@ -16,13 +16,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.applications.voiptool;
+package inet.applications.voipstream;
 
 import inet.applications.IUDPApp;
 
 
 //
-// VoIPSinkApp listens on an UDP port, and expects to receive VoIP packets on
+// VoIPStreamReceiver listens on an UDP port, and expects to receive VoIP packets on
 // it. The received voice is then saved into a result audio file that can be
 // compared with the original for further evaluation. VoIP packets are
 // numbered, and out-of-order packets are discarded (the corresponding voice
@@ -33,7 +33,7 @@ import inet.applications.IUDPApp;
 // completes (i.e. in the OMNeT++ finish() function). Only one voice session
 // ("call") may be underway at a time.
 //
-simple VoIPSinkApp like IUDPApp
+simple VoIPStreamReceiver like IUDPApp
 {
     parameters:
         int localPort;
@@ -52,7 +52,7 @@ simple VoIPSinkApp like IUDPApp
         @statistic[lostPackets](title="lost packets"; interpolationmode=none; record=vector,stats);
         @statistic[packetHasVoice](title="voice or silence packet"; record=mean,vector; interpolationmode=none);
         @statistic[delay](title="delay"; unit=s; record=vector,histogram; interpolationmode=none);
-        @statistic[numActiveSessions](title="number of active sessions"; source="sum(connState)"; record=max,timeavg,vector; interpolationmode=sample-hold;);
+        @statistic[numActiveSessions](title="number of active sessions"; source="sum(connState)"; record=max,timeavg,vector; interpolationmode=sample-hold; );
         @statistic[numSessions](title="total number of sessions"; source="sum(connState+1)/2"; record=last);
         @display("i=block/arrival");
     gates:
