@@ -52,10 +52,6 @@ void SimpleVoIPReceiver::initialize(int stage)
     playoutLossRateSignal = registerSignal("VoIPPlayoutLossRate");
     mosSignal = registerSignal("VoIPMosSignal");
     taildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
-
-    taggedSample = new TaggedSample();
-    taggedSample->module = this;
-    taggedSample->id = getId();
 }
 
 void SimpleVoIPReceiver::handleMessage(cMessage *msg)

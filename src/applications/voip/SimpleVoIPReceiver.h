@@ -21,15 +21,6 @@ class SimpleVoIPPacket;
 
 class SimpleVoIPReceiver : public cSimpleModule
 {
-    class TaggedSample : public cObject
-    {
-      public:
-        double sample;
-        unsigned int id;
-        // the emitting cComponent (module)
-        cComponent* module;
-    };
-
     UDPSocket socket;
 
     ~SimpleVoIPReceiver();
@@ -54,8 +45,6 @@ class SimpleVoIPReceiver : public cSimpleModule
     simsignal_t playoutLossRateSignal;
     simsignal_t mosSignal;
     simsignal_t taildropLossRateSignal;
-
-    TaggedSample* taggedSample;
 
     virtual void finish();
 
