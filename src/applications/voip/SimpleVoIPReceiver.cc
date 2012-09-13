@@ -204,7 +204,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
     double tailDropRate = ((double)tailDropLoss/(double)talkspurtNumPackets);
     emit(taildropLossRateSignal, tailDropRate);
 
-    EV << "MOS CALCOLATO: eModel( " << playoutDelay << " , " << tailDropLoss << "+" << playoutLoss << "+" << channelLoss << " ) = " << mos << "\n\n";     //FIXME Translate!!!
+    EV << "CALCULATED MOS: eModel( " << playoutDelay << " , " << tailDropLoss << "+" << playoutLoss << "+" << channelLoss << " ) = " << mos << "\n\n";
 
     EV << "PLAYOUT DELAY ADAPTATION \n" << "OLD PLAYOUT DELAY: " << playoutDelay << "\nMAX JITTER MESEAURED: " << max_jitter << "\n\n";
 
