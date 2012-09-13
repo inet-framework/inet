@@ -16,24 +16,17 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package inet.examples.inet.hostautoconf;
+package inet.examples.adhoc.hostautoconf;
 
-import inet.networklayer.autorouting.ipv4.HostAutoConfigurator;
-import inet.nodes.inet.WirelessHost;
+import inet.world.radio.ChannelControl;
 
 
-//
-// Wireless-enabled Host
-//
-module Host extends WirelessHost
+network Scenario
 {
     parameters:
-        @display("i=device/cellphone");
+        double hosts;
 
     submodules:
-        ac_wlan: HostAutoConfigurator {
-            @display("p=171,335");
-        }
-
+        channelControl: ChannelControl;
+        host[hosts]: Host;
 }
-
