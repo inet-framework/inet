@@ -21,6 +21,31 @@ class SimpleVoIPPacket;
 
 class SimpleVoIPReceiver : public cSimpleModule
 {
+    class VoIPPacketInfo
+    {
+      public:
+        unsigned int packetID;
+        simtime_t creationTime;
+        simtime_t arrivalTime;
+        simtime_t playoutTime;
+    };
+
+    typedef std::list<VoIPPacketInfo*> PacketsList;
+    typedef std::vector<VoIPPacketInfo> PacketsVector;
+
+    class TalkspurtInfo
+    {
+      public:
+        unsigned int talkspurtID;
+        unsigned int talkspurtNumPackets;
+        simtime_t voiceDuration;
+        PacketsVector  packets;
+      public:
+        void startTalkspurt(SimpleVoIPPacket *pk);
+        bool checkPacket(SimpleVoIPPacket *pk);
+        void addPacket(SimpleVoIPPacket *pk);
+    };
+
     UDPSocket socket;
 
     ~SimpleVoIPReceiver();
@@ -31,11 +56,9 @@ class SimpleVoIPReceiver : public cSimpleModule
     int         emodel_A;
     double      emodel_Ro;
 
-    typedef std::list<SimpleVoIPPacket*> PacketsList;
-    // FIXME: welcome to Microsoft naming conventions... mFooBar -> fooBar
-    PacketsList  packetsList;
+
     PacketsList  playoutQueue;
-    unsigned int currentTalkspurt;
+    TalkspurtInfo currentTalkspurt;
     unsigned int bufferSpace;
     simtime_t    playoutDelay;
 
