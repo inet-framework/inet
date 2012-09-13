@@ -191,7 +191,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
         packetsList.pop_front();
     }
 
-    double proportionalLossRate = ((double)tailDropLoss+(double)playoutLoss+(double)channelLoss)/(double)talkspurtNumPackets;
+    double proportionalLossRate = (double)(tailDropLoss+playoutLoss+channelLoss) / (double)talkspurtNumPackets;
     EV << "proportionalLossRate " << proportionalLossRate << "(tailDropLoss=" << tailDropLoss << " - playoutLoss="
             << playoutLoss << " - channelLoss=" << channelLoss << ")\n\n";
 
