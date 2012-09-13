@@ -177,27 +177,25 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
         else
         {
             // FIXME: is this the place where we actually play the packets?
-            while (!playoutQueue.empty() && packet->arrivalTime > playoutQueue.front()->playoutTime)
+            // remove packets from queue
+            while (!playoutQueue.empty() && playoutQueue.front()->playoutTime < packet->arrivalTime)
             {
-                ++bufferSpace;
                 //EV << "RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK " << mPlayoutQueue.front()->getTalkspurtID() << " PACKET " << mPlayoutQueue.front()->packetID << "\n";     //FIXME Translate!!!
                 playoutQueue.pop_front();
             }
 
-            if (bufferSpace > 0)
+            if (playoutQueue.size() < bufferSpace)
             {
                 EV << "PACCHETTO CAMPIONABILE INSERITO NEL BUFFER: TALK "
                         << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID
                         << " ISTANTE DI ARRIVO " << packet->arrivalTime
                         << " ISTANTE DI CAMPIONAMENTO " << packet->playoutTime << "\n\n";     //FIXME Translate!!!
-                --bufferSpace;
                 //GESTIONE DUPLICATI     //FIXME Translate!!!
                 isArrived[packet->packetID] = true;
 
                 playoutQueue.push_back(&(*packet));
             }
             else
-            {
                 ++tailDropLoss;
                 EV << "BUFFER PIENO PACCHETTO SCARTATO: TALK " << currentTalkspurt.talkspurtID << " PACKET "
                         << packet->packetID << " ISTANTE DI ARRIVO " << packet->arrivalTime << "\n\n";     //FIXME Translate!!!
