@@ -191,11 +191,11 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
         packetsList.pop_front();
     }
 
-    double proportionalLoss = ((double)tailDropLoss+(double)playoutLoss+(double)channelLoss)/(double)talkspurtNumPackets;
-    EV << "proportionalLoss " << proportionalLoss << "(tailDropLoss=" << tailDropLoss << " - playoutLoss="
+    double proportionalLossRate = ((double)tailDropLoss+(double)playoutLoss+(double)channelLoss)/(double)talkspurtNumPackets;
+    EV << "proportionalLossRate " << proportionalLossRate << "(tailDropLoss=" << tailDropLoss << " - playoutLoss="
             << playoutLoss << " - channelLoss=" << channelLoss << ")\n\n";
 
-    double mos = eModel(SIMTIME_DBL(playoutDelay), proportionalLoss);
+    double mos = eModel(SIMTIME_DBL(playoutDelay), proportionalLossRate);
 
     emit(playoutDelaySignal, playoutDelay);
     double lossRate = ((double)playoutLoss/(double)talkspurtNumPackets);
@@ -217,7 +217,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 }
 
 // FIXME: a reference to a paper, article, whatever that describes the model used here would be great!
-double SimpleVoIPReceiver::eModel(double delay, double loss)
+double SimpleVoIPReceiver::eModel(double delay, double lossRate)
 {
     static const double alpha3 = 177.3; //ms
     double delayms = 1000.0 * delay;
@@ -228,7 +228,7 @@ double SimpleVoIPReceiver::eModel(double delay, double loss)
     double id = 0.024 * delayms + 0.11 * (delayms - alpha3) * u;
 
     // Packet loss p in %
-    double p = loss * 100;
+    double p = lossRate * 100;
     // Compute the Ie,eff parameter
     double ie_eff = emodel_Ie + (95 - emodel_Ie) * p / (p + emodel_Bpl);
 
