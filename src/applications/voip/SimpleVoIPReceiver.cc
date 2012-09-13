@@ -138,6 +138,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
     }
     else
         channelLoss = currentTalkspurt.talkspurtNumPackets - currentTalkspurt.packets.size();
+    //FIXME Translate:  a duplikalt packetek elfednek egy-egy elveszett packetet a fenti channelLoss szamitasban, ezt korrigaljuk lejjebb a duplikalt packet detektalasnal.
 
     double packetLossRate = ((double)channelLoss/(double)talkspurtNumPackets);
     emit(packetLossRateSignal, packetLossRate);
@@ -167,6 +168,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
         //GESTIONE IN CASO DI DUPLICATI     //FIXME Translate!!!
         if (isArrived[packet->packetID])
         {
+            ++channelLoss; // a duplikalt packetek elfednek egy-egy elveszett packetet a fenti channelLoss szamitasban, ezt korrigaljuk itt.
             EV << "PACCHETTO DUPLICATO: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";     //FIXME Translate!!!
         }
         else if (last_jitter > 0.0)
