@@ -18,13 +18,10 @@
 //
 packet SimpleVoIPPacket
 {
-    unsigned int talkspurtID;
-    // FIXME: the naming convention uses numFrames. anyway this is probably rather numSamples, what would number of frames mean?
-    unsigned int talkspurtNumPackets;
-    unsigned int packetID;
-    // FIXME: this name is pretty meaningless. does it contain the sending time or what? be more specific
+    unsigned int talkspurtID;           // identifies talkspurt
+    unsigned int talkspurtNumPackets;   // number of all packets of current talkspurt
+    unsigned int packetID;              // 0..talkspurtNumPackets-1
     simtime_t voipTimestamp;
-    // FIXME: is this a duration? if so, then call it duration
     simtime_t voiceDuration;
 }
 
