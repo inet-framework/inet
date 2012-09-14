@@ -124,7 +124,7 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
         currentTalkspurt.startTalkspurt(packet);
     }
 
-    //emit(mPacketLossSignal,1.0);
+    //emit(packetLossSignal,1.0);
 
     EV << "PACKET ARRIVED: TALKSPURT " << packet->getTalkspurtID() << " PACKET " << packet->getPacketID() << "\n\n";
 
@@ -206,7 +206,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
             {
                 if ((*qi)->playoutTime < packet->arrivalTime)
                 {
-                    //EV << "RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK " << mPlayoutQueue.front()->getTalkspurtID() << " PACKET " << mPlayoutQueue.front()->packetID << "\n";     //FIXME Translate!!!
+                    // EV << "RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK " << currentTalkspurt.talkspurtID << " PACKET " << (*qi)->packetID << "\n";     //FIXME Translate!!!
                     qi = playoutQueue.erase(qi);
                 }
                 else
