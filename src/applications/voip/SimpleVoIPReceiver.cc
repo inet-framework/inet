@@ -164,8 +164,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
     double packetLossRate = ((double)channelLoss/(double)talkspurtNumPackets);
     emit(packetLossRateSignal, packetLossRate);
 
-    //VETTORE PER GESTIRE DUPLICATI     //FIXME Translate!!!
-    // FIXME: what is actually arrived here?
+    //VECTOR TO MANAGE DUPLICATED PACKETS
     bool* isArrived = new bool[talkspurtNumPackets];
     for (unsigned int y = 0; y < talkspurtNumPackets; y++)
     {
@@ -185,18 +184,18 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
         if (max_lateness < last_lateness)
             max_lateness = last_lateness;
 
-        EV << "MISURATO JITTER PACCHETTO: " << last_lateness << " TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";     //FIXME Translate!!!
+        EV << "MEASURED PACKET JITTER: " << last_lateness << " TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";     //FIXME Jitter???
 
-        //GESTIONE IN CASO DI DUPLICATI     //FIXME Translate!!!
+        //MANAGEMENT OF DUPLICATED PACKETS
         if (isArrived[packet->packetID])
         {
             ++channelLoss; // a duplikalt packetek elfednek egy-egy elveszett packetet a fenti channelLoss szamitasban, ezt korrigaljuk itt.
-            EV << "PACCHETTO DUPLICATO: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";     //FIXME Translate!!!
+            EV << "DUPLICATED PACKET: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";
         }
         else if (last_lateness > 0.0)
         {
             ++playoutLoss;
-            EV << "PACCHETTO IN RITARDO ELIMINATO: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";     //FIXME Translate!!!
+            EV << "LATE PACKAGE REMOVED: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";
         }
         else
         {
@@ -207,7 +206,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
             {
                 if ((*qi)->playoutTime < packet->arrivalTime)
                 {
-                    // EV << "RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK " << currentTalkspurt.talkspurtID << " PACKET " << (*qi)->packetID << "\n";     //FIXME Translate!!!
+                    // EV << "REPRODUCED AND EXTRACT FROM BUFFER: TALK " << currentTalkspurt.talkspurtID << " PACKET " << (*qi)->packetID << "\n";
                     qi = playoutQueue.erase(qi);
                 }
                 else
@@ -216,11 +215,11 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 
             if (playoutQueue.size() < bufferSpace)
             {
-                EV << "PACCHETTO CAMPIONABILE INSERITO NEL BUFFER: TALK "
+                EV << "PACKET INSERTED TO PLAYOUT BUFFER: TALK "
                         << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID
-                        << " ISTANTE DI ARRIVO " << packet->arrivalTime
-                        << " ISTANTE DI CAMPIONAMENTO " << packet->playoutTime << "\n\n";     //FIXME Translate!!!
-                //GESTIONE DUPLICATI     //FIXME Translate!!!
+                        << ", MOMENT OF ARRIVAL " << packet->arrivalTime
+                        << "s, MOMENT OF PLAYOUT " << packet->playoutTime << "s\n\n";
+                //MANAGEMENT OF DUPLICATED PACKETS
                 isArrived[packet->packetID] = true;
 
                 playoutQueue.push_back(&(*packet));
@@ -228,8 +227,8 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
             else
             {   // buffer full
                 ++tailDropLoss;
-                EV << "BUFFER PIENO PACCHETTO SCARTATO: TALK " << currentTalkspurt.talkspurtID << " PACKET "
-                        << packet->packetID << " ISTANTE DI ARRIVO " << packet->arrivalTime << "\n\n";     //FIXME Translate!!!
+                EV << "BUFFER FULL, PACKET DISCARDED: TALK " << currentTalkspurt.talkspurtID << " PACKET "
+                        << packet->packetID << " MOMENT OF ARRIVAL " << packet->arrivalTime << "s\n\n";     //FIXME Translate!!!
             }
         }
     }

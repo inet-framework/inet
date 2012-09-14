@@ -94,7 +94,7 @@ void SimpleVoIPSender::talkspurt(double dur)
 {
     talkspurtID++;
     talkspurtNumPackets = (ceil(dur/packetizationInterval));
-    EV << "TALKSPURT " << talkspurtID-1 << " Verranno inviati " << talkspurtNumPackets << " packets\n\n";     //FIXME Translate!!!
+    EV << "TALKSPURT " << talkspurtID-1 << " will be sent " << talkspurtNumPackets << " packets\n\n";
 
     packetID = 0;
     // FIXME: why do we schedule a message for the current simulation time? why don't we rather call the method directly?
@@ -109,7 +109,7 @@ void SimpleVoIPSender::selectPeriodTime()
     if (isTalk)
     {
         silenceDuration = par("silenceDuration").doubleValue();
-        EV << "PERIODO SILENZIO: " << "Durata: " << silenceDuration << "/" << silenceDuration << " secondi\n\n";     //FIXME Translate!!!
+        EV << "SILENCE: " << "Duration: " << silenceDuration << " seconds\n\n";
         simtime_t endSilent = simTime() + silenceDuration;
         if (stopTime != 0 && endSilent > stopTime)
             endSilent = stopTime;
@@ -119,7 +119,7 @@ void SimpleVoIPSender::selectPeriodTime()
     else
     {
         talkDuration = par("talkDuration").doubleValue();
-        EV << "TALKSPURT: " << talkspurtID << " Durata: " << talkDuration << "/" << talkDuration << " secondi\n\n";     //FIXME Translate!!!
+        EV << "TALKSPURT: " << talkspurtID << " Duration: " << talkDuration << " seconds\n\n";
         simtime_t endTalk = simTime() + talkDuration;
         if (stopTime != 0 && endTalk > stopTime)
         {
@@ -141,7 +141,7 @@ void SimpleVoIPSender::sendVoIPPacket()
     packet->setVoipTimestamp(simTime() - packetizationInterval);    // start time of voice in this packet
     packet->setVoiceDuration(packetizationInterval);
     packet->setByteLength(talkPacketSize);
-    EV << "TALKSPURT " << talkspurtID-1 << " Invio packet " << packetID << "\n";     //FIXME Translate!!!
+    EV << "TALKSPURT " << talkspurtID-1 << " sending packet " << packetID << "\n";
 
     socket.sendTo(packet, destAddress, destPort);
     ++packetID;
