@@ -172,8 +172,8 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
         isArrived[y] = false;
     }
 
-    simtime_t last_jitter = 0.0;
-    simtime_t max_jitter = -1000.0;
+    simtime_t last_lateness = -playoutDelay;     // arrival time - playout time
+    simtime_t max_lateness = -playoutDelay;
 
     // FIXME: what is the idea here? what does it compute? from what data does it compute? write something about the algorithm
     for ( PacketsVector::iterator packet = currentTalkspurt.packets.begin(); packet != currentTalkspurt.packets.end(); ++packet)
@@ -181,10 +181,11 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
         packet->playoutTime = (firstPlayoutTime + ((int)packet->packetID - (int)firstPacketId) * currentTalkspurt.voiceDuration);
 
         // FIXME: is this really a jitter? positive means the packet is too late
-        last_jitter = packet->arrivalTime - packet->playoutTime;
-        max_jitter = std::max(max_jitter, last_jitter);
+        last_lateness = packet->arrivalTime - packet->playoutTime;
+        if (max_lateness < last_lateness)
+            max_lateness = last_lateness;
 
-        EV << "MISURATO JITTER PACCHETTO: " << last_jitter << " TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";     //FIXME Translate!!!
+        EV << "MISURATO JITTER PACCHETTO: " << last_lateness << " TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";     //FIXME Translate!!!
 
         //GESTIONE IN CASO DI DUPLICATI     //FIXME Translate!!!
         if (isArrived[packet->packetID])
@@ -192,7 +193,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
             ++channelLoss; // a duplikalt packetek elfednek egy-egy elveszett packetet a fenti channelLoss szamitasban, ezt korrigaljuk itt.
             EV << "PACCHETTO DUPLICATO: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";     //FIXME Translate!!!
         }
-        else if (last_jitter > 0.0)
+        else if (last_lateness > 0.0)
         {
             ++playoutLoss;
             EV << "PACCHETTO IN RITARDO ELIMINATO: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";     //FIXME Translate!!!
@@ -254,9 +255,9 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 
     EV << "CALCULATED MOS: eModel( " << playoutDelay << " , " << tailDropLoss << "+" << playoutLoss << "+" << channelLoss << " ) = " << mos << "\n\n";
 
-    EV << "PLAYOUT DELAY ADAPTATION \n" << "OLD PLAYOUT DELAY: " << playoutDelay << "\nMAX JITTER MEASURED: " << max_jitter << "\n\n";
+    EV << "PLAYOUT DELAY ADAPTATION \n" << "OLD PLAYOUT DELAY: " << playoutDelay << "\nMAX JITTER MEASURED: " << max_lateness << "\n\n";
 
-    playoutDelay += max_jitter;
+    playoutDelay += max_lateness;
     if (playoutDelay < 0.0)
         playoutDelay = 0.0;
     EV << "NEW PLAYOUT DELAY: " << playoutDelay << "\n\n";
