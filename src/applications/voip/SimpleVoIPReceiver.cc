@@ -89,14 +89,18 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
         return;
     }
 
-    if (currentTalkspurt.packets.size() > 0 && currentTalkspurt.talkspurtID == packet->getTalkspurtID())
-    {
+    if (currentTalkspurt.packets.empty())
+    {   // first packet
+        currentTalkspurt.startTalkspurt(packet);
+    }
+    else if (currentTalkspurt.talkspurtID == packet->getTalkspurtID())
+    {   // talkspurt continued
         if (!currentTalkspurt.checkPacket(packet))
             throw cRuntimeError("Talkspurt parameters not equals");
         currentTalkspurt.addPacket(packet);
     }
     else
-    {
+    {   // old talkspurt finished, new talkspurt started
         evaluateTalkspurt(false);
         currentTalkspurt.startTalkspurt(packet);
     }
@@ -114,8 +118,7 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
 // FIXME: this should rather be called evaluateTalkspurt, because all it does is that it gathers some statistics
 void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 {
-    if (currentTalkspurt.packets.empty())
-        return;
+    ASSERT(!currentTalkspurt.packets.empty());
 
     VoIPPacketInfo firstPacket = currentTalkspurt.packets.front();
 
@@ -280,6 +283,7 @@ double SimpleVoIPReceiver::eModel(double delay, double lossRate)
 void SimpleVoIPReceiver::finish()
 {
     // evaluate last talkspurt
-    evaluateTalkspurt(true);
+    if (!currentTalkspurt.packets.empty())
+        evaluateTalkspurt(true);
 }
 
