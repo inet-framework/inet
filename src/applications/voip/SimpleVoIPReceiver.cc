@@ -83,9 +83,8 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
     }
 
     SimpleVoIPPacket* packet = dynamic_cast<SimpleVoIPPacket*>(msg);
-    if (packet==0) {
-        // FIXME: it should rather say unknown incoming message type (not VoipPacket)
-        EV << "VoIPReceiver: Unaccepted incoming message: " << msg->getClassName() << endl;
+    if (packet==NULL) {
+        EV << "VoIPReceiver: Unknown incoming message: " << msg->getClassName() << endl;
         delete msg;
         return;
     }
