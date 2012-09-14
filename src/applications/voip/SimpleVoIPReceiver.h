@@ -48,19 +48,27 @@ class SimpleVoIPReceiver : public cSimpleModule
     class TalkspurtInfo
     {
       public:
+        enum Status {
+            EMPTY,
+            ACTIVE,
+            FINISHED
+        };
+        Status  status;
         unsigned int talkspurtID;
         unsigned int talkspurtNumPackets;
         simtime_t voiceDuration;
         PacketsVector  packets;
       public:
+        TalkspurtInfo() : status(EMPTY), talkspurtID(-1) {}
         void startTalkspurt(SimpleVoIPPacket *pk);
+        void finishTalkspurt() { status = FINISHED; packets.clear(); }
         bool checkPacket(SimpleVoIPPacket *pk);
         void addPacket(SimpleVoIPPacket *pk);
+        bool isActive() { return (status == ACTIVE); }
     };
 
     UDPSocket socket;
 
-    ~SimpleVoIPReceiver();
 
     // FIXME: avoid _ characters
     int         emodel_Ie;
@@ -68,6 +76,7 @@ class SimpleVoIPReceiver : public cSimpleModule
     int         emodel_A;
     double      emodel_Ro;
 
+    cMessage* selfTalkspurtFinished;
 
     PacketsList  playoutQueue;
     TalkspurtInfo currentTalkspurt;
@@ -83,12 +92,17 @@ class SimpleVoIPReceiver : public cSimpleModule
 
     virtual void finish();
 
+  public:
+    SimpleVoIPReceiver();
+    ~SimpleVoIPReceiver();
+
   protected:
     virtual int numInitStages() const {return 4;}
     void initialize(int stage);
     void handleMessage(cMessage *msg);
     double eModel(double delay, double loss);
     void evaluateTalkspurt(bool finish);
+    void startTalkspurt(SimpleVoIPPacket* packet);
 };
 
 

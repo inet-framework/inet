@@ -25,6 +25,7 @@ Define_Module(SimpleVoIPReceiver);
 
 void SimpleVoIPReceiver::TalkspurtInfo::startTalkspurt(SimpleVoIPPacket *pk)
 {
+    status = ACTIVE;
     talkspurtID = pk->getTalkspurtID();
     talkspurtNumPackets = pk->getTalkspurtNumPackets();
     voiceDuration = pk->getVoiceDuration();
@@ -49,13 +50,15 @@ void SimpleVoIPReceiver::TalkspurtInfo::addPacket(SimpleVoIPPacket *pk)
     packets.push_back(packet);
 }
 
+SimpleVoIPReceiver::SimpleVoIPReceiver()
+{
+    selfTalkspurtFinished = NULL;
+}
+
 SimpleVoIPReceiver::~SimpleVoIPReceiver()
 {
-    while (!playoutQueue.empty())
-    {
-        delete playoutQueue.front();
-        playoutQueue.pop_front();
-    }
+    cancelAndDelete(selfTalkspurtFinished);
+    playoutQueue.clear();
 }
 
 void SimpleVoIPReceiver::initialize(int stage)
@@ -79,6 +82,7 @@ void SimpleVoIPReceiver::initialize(int stage)
     }
 
     currentTalkspurt.talkspurtID = -1;
+    selfTalkspurtFinished = new cMessage("selfTalkspurtFinished");
 
     packetLossRateSignal = registerSignal("VoIPPacketLossRate");
     packetDelaySignal = registerSignal("VoIPPacketDelay");
@@ -88,10 +92,20 @@ void SimpleVoIPReceiver::initialize(int stage)
     taildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
 }
 
+void SimpleVoIPReceiver::startTalkspurt(SimpleVoIPPacket* packet)
+{
+    currentTalkspurt.startTalkspurt(packet);
+    //TODO Should be use spare time at the end of talkspurt?
+    simtime_t endTime = simTime() + playoutDelay + (currentTalkspurt.talkspurtNumPackets - packet->getPacketID()) * currentTalkspurt.voiceDuration;
+    scheduleAt(endTime, selfTalkspurtFinished);
+}
+
 void SimpleVoIPReceiver::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage()) {
-        throw cRuntimeError("Unaccepted self message: '%s'", msg->getName());
+    if (msg->isSelfMessage())
+    { // selfTalkspurtFinished
+        evaluateTalkspurt(false);
+        return;
     }
 
     SimpleVoIPPacket* packet = dynamic_cast<SimpleVoIPPacket*>(msg);
@@ -101,27 +115,31 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
         return;
     }
 
-    if (currentTalkspurt.packets.empty())
-    {   // first packet
-        currentTalkspurt.startTalkspurt(packet);
+    if (currentTalkspurt.status == TalkspurtInfo::EMPTY)
+    {   // first talkspurt
+        startTalkspurt(packet);
     }
-    else if (currentTalkspurt.talkspurtID == packet->getTalkspurtID())
+    else if (packet->getTalkspurtID() > currentTalkspurt.talkspurtID)
+    {   // old talkspurt finished, new talkspurt started
+        if (currentTalkspurt.isActive())
+        {
+            cancelEvent(selfTalkspurtFinished);
+            evaluateTalkspurt(false);
+        }
+        startTalkspurt(packet);
+    }
+    else if (currentTalkspurt.talkspurtID == packet->getTalkspurtID() && currentTalkspurt.status == TalkspurtInfo::ACTIVE)
     {   // talkspurt continued
         if (!currentTalkspurt.checkPacket(packet))
             throw cRuntimeError("Talkspurt parameters not equals");
         currentTalkspurt.addPacket(packet);
     }
-    else if (packet->getTalkspurtID() < currentTalkspurt.talkspurtID)
+    else
     {
         // packet from older talkspurt, ignore
-        EV << "PACKET ARRIVED: TALKSPURT " << packet->getTalkspurtID() << " PACKET " << packet->getPacketID() << ", IGNORED (OLDER TALKSPURT)\n\n";
+        EV << "PACKET LATE ARRIVED: TALKSPURT " << packet->getTalkspurtID() << " PACKET " << packet->getPacketID() << ", IGNORED\n\n";
         delete msg;
         return;
-    }
-    else
-    {   // old talkspurt finished, new talkspurt started
-        evaluateTalkspurt(false);
-        currentTalkspurt.startTalkspurt(packet);
     }
 
     EV << "PACKET ARRIVED: TALKSPURT " << packet->getTalkspurtID() << " PACKET " << packet->getPacketID() << "\n\n";
@@ -136,6 +154,7 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
 void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 {
     ASSERT(!currentTalkspurt.packets.empty());
+    ASSERT(currentTalkspurt.isActive());
 
     VoIPPacketInfo firstPacket = currentTalkspurt.packets.front();
 
@@ -157,7 +176,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
     }
     else
         channelLoss = currentTalkspurt.talkspurtNumPackets - currentTalkspurt.packets.size();
-    //FIXME Translate:  a duplikalt packetek elfednek egy-egy elveszett packetet a fenti channelLoss szamitasban, ezt korrigaljuk lejjebb a duplikalt packet detektalasnal.
+    //FIXME Translate: a duplikalt packetek elfednek egy-egy elveszett packetet a fenti channelLoss szamitasban, ezt korrigaljuk lejjebb a duplikalt packet detektalasnal.
 
     double packetLossRate = ((double)channelLoss/(double)talkspurtNumPackets);
     emit(packetLossRateSignal, packetLossRate);
@@ -261,7 +280,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 
     delete [] isArrived;
     playoutQueue.clear();
-    currentTalkspurt.packets.clear();
+    currentTalkspurt.finishTalkspurt();
 }
 
 // The E Model was originally developed within ETSI as a transmission planning tool,
@@ -309,7 +328,8 @@ double SimpleVoIPReceiver::eModel(double delay, double lossRate)
 void SimpleVoIPReceiver::finish()
 {
     // evaluate last talkspurt
-    if (!currentTalkspurt.packets.empty())
+    cancelEvent(selfTalkspurtFinished);
+    if (currentTalkspurt.isActive())
         evaluateTalkspurt(true);
 }
 
