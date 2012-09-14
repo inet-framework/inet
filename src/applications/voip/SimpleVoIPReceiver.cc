@@ -111,6 +111,13 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
             throw cRuntimeError("Talkspurt parameters not equals");
         currentTalkspurt.addPacket(packet);
     }
+    else if (packet->getTalkspurtID() < currentTalkspurt.talkspurtID)
+    {
+        // packet from older talkspurt, ignore
+        EV << "PACKET ARRIVED: TALKSPURT " << packet->getTalkspurtID() << " PACKET " << packet->getPacketID() << ", IGNORED (OLDER TALKSPURT)\n\n";
+        delete msg;
+        return;
+    }
     else
     {   // old talkspurt finished, new talkspurt started
         evaluateTalkspurt(false);
