@@ -124,8 +124,6 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
         currentTalkspurt.startTalkspurt(packet);
     }
 
-    //emit(packetLossSignal,1.0);
-
     EV << "PACKET ARRIVED: TALKSPURT " << packet->getTalkspurtID() << " PACKET " << packet->getPacketID() << "\n\n";
 
     simtime_t delay = packet->getArrivalTime() - packet->getVoipTimestamp();

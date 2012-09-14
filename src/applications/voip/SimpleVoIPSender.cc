@@ -147,6 +147,6 @@ void SimpleVoIPSender::sendVoIPPacket()
     ++packetID;
 
     if (packetID < talkspurtNumPackets)
-        scheduleAt(simTime()+packetizationInterval, selfSender);
+        scheduleAt(simTime() + packetizationInterval, selfSender);
 }
 
