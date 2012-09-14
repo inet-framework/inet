@@ -224,6 +224,12 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
     double lossRate = ((double)playoutLoss/(double)talkspurtNumPackets);
     emit(playoutLossRateSignal, lossRate);
     emit(mosSignal, mos);
+
+    // add calculated mos to fingerprint
+    cHasher *hasher = simulation.getHasher();
+    if (hasher)
+        hasher->add(mos);
+
     double tailDropRate = ((double)tailDropLoss/(double)talkspurtNumPackets);
     emit(taildropLossRateSignal, tailDropRate);
 
