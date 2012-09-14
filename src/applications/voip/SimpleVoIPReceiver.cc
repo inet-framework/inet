@@ -180,10 +180,16 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
         {
             // FIXME: is this the place where we actually play the packets?
             // remove packets from queue
-            while (!playoutQueue.empty() && playoutQueue.front()->playoutTime < packet->arrivalTime)
+            PacketsList::iterator qi=playoutQueue.begin();
+            while (qi != playoutQueue.end())
             {
-                //EV << "RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK " << mPlayoutQueue.front()->getTalkspurtID() << " PACKET " << mPlayoutQueue.front()->packetID << "\n";     //FIXME Translate!!!
-                playoutQueue.pop_front();
+                if ((*qi)->playoutTime < packet->arrivalTime)
+                {
+                    //EV << "RIPRODOTTO ED ESTRATTO DAL BUFFER: TALK " << mPlayoutQueue.front()->getTalkspurtID() << " PACKET " << mPlayoutQueue.front()->packetID << "\n";     //FIXME Translate!!!
+                    qi = playoutQueue.erase(qi);
+                }
+                else
+                    ++qi;
             }
 
             if (playoutQueue.size() < bufferSpace)
