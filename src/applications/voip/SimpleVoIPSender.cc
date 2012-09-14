@@ -134,12 +134,11 @@ void SimpleVoIPSender::selectPeriodTime()
 
 void SimpleVoIPSender::sendVoIPPacket()
 {
-    //FIXME use >>> packet->setVoipTimestamp(simTime() - packetizationInterval); <<<
     SimpleVoIPPacket* packet = new SimpleVoIPPacket("VoIP");
     packet->setTalkspurtID(talkspurtID-1);
     packet->setTalkspurtNumPackets(talkspurtNumPackets);
     packet->setPacketID(packetID);
-    packet->setVoipTimestamp(simTime());
+    packet->setVoipTimestamp(simTime() - packetizationInterval);    // start time of voice in this packet
     packet->setVoiceDuration(packetizationInterval);
     packet->setByteLength(talkPacketSize);
     EV << "TALKSPURT " << talkspurtID-1 << " Invio packet " << packetID << "\n";     //FIXME Translate!!!
