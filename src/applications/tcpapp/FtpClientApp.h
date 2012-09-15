@@ -1,6 +1,6 @@
 //
-// Copyright (C) 2009 Kyeong Soo (Joseph) Kim
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2012 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2004-2009 Andras Varga
 //
 // This library is free software, you can redistribute it and/or modify
 // it under  the terms of the GNU Lesser General Public License
@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __INET_HTTPCLIENTAPP_H
-#define __INET_HTTPCLIENTAPP_H
+#ifndef __INET_FTPCLIENTAPP_H
+#define __INET_FTPCLIENTAPP_H
 
 #include <omnetpp.h>
 #include "TCPGenericCliAppBase.h"
@@ -21,9 +21,9 @@
 
 
 /**
- * An example request-reply based HTTP client application.
+ * An example request-reply based FTP client application that can handle very large-size files.
  */
-class INET_API HttpClientApp : public TCPGenericCliAppBase
+class INET_API FtpClientApp : public TCPGenericCliAppBase
 {
   protected:
     simsignal_t sessionDelaySignal;
@@ -31,9 +31,7 @@ class INET_API HttpClientApp : public TCPGenericCliAppBase
     
     cMessage *timeoutMsg;
     bool earlySend;	///< if true, don't wait with sendRequest() until established()
-    bool htmlObjectRcvd;	///< if true, response to HTML object (i.e., 1st request) has been received
     bool warmupFinished;	///< if true, start statistics gathering
-    int numEmbeddedObjects;	///< number of embedded objects per HTML object
     int numSessionsFinished;    ///< number of sessions finished (not just started)
     int bytesRcvdAtSessionStart;    ///< number of bytes received (so far) at the start of a session
 									///< this is used to calculate session size and session transfer rate
@@ -45,15 +43,12 @@ class INET_API HttpClientApp : public TCPGenericCliAppBase
     double sumSessionSizes; ///< sum of session sizes in bytes
     double sumSessionTransferRates; ///< sum of session transfer rates in bytes/second
 
-    /** Utility: sends a request to the server */
+    /** Utility: sends a request for a file to download to the server */
     virtual void sendRequest();
 
-    /** Utility: sends an HTML request (1st of a session) to the server */
-    virtual void sendHtmlRequest();
-
   public:
-    HttpClientApp();
-    virtual ~HttpClientApp();
+    FtpClientApp();
+    virtual ~FtpClientApp();
 
   protected:
     /** Redefined to schedule a connect(). */
