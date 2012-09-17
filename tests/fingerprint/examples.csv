@@ -216,12 +216,13 @@
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            f252-459d
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            d999-82c6
 
-/examples/voipstream/VoIPStreamLargeNet/, -f omnetpp.ini -c General -r 0,                5s,              d535-b1ff
-/examples/voipstream/VoIPStreamTest/,    -f omnetpp.ini -c g726 -r 0,                   5s,              f0e7-8839
-/examples/voipstream/VoIPStreamTest/,    -f omnetpp.ini -c g711_aLaw -r 0,              5s,              b3f2-edae
-/examples/voipstream/VoIPStreamTest/,    -f omnetpp.ini -c g711_muLaw -r 0,             5s,              b3f2-edae
-/examples/voipstream/VoIPStreamTest/,    -f omnetpp.ini -c pcm_s16le -r 0,              5s,              1a6d-102c
-/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,                2s,              9617-db37
+/examples/voipstream/VoIPStreamLargeNet/, -f omnetpp.ini -c General -r 0,                5s,              efd9-bec0
+/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g726 -r 0,                   5s,              4058-6015
+/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_aLaw -r 0,              5s,              47f1-5bf8
+/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_muLaw -r 0,             5s,              4621-67d9
+/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c pcm_s16le -r 0,              5s,              aad3-4d08
+/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,                2s,              c034-2bd0
+
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,           61db-0a60
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,              7bcb-0f6e
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            6c1b-1738
