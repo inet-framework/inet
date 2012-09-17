@@ -22,7 +22,6 @@ class SimpleVoIPSender : public cSimpleModule
     UDPSocket socket;
 
     //source
-    // FIXME: use volatile parameters for talk and silence duration
     simtime_t talkspurtDuration;
     double    silenceDuration;
     bool      isTalk;
