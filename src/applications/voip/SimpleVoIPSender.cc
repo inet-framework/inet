@@ -69,7 +69,6 @@ void SimpleVoIPSender::initialize(int stage)
 
 
     // calculating traffic starting time
-    // TODO correct this conversion
     simtime_t startTime = par("startTime").doubleValue();
     stopTime = par("stopTime").doubleValue();
     if (stopTime != 0 && stopTime < startTime)
@@ -94,8 +93,9 @@ void SimpleVoIPSender::talkspurt(simtime_t dur)
 {
     simtime_t curTime = simTime();
     simtime_t startTime = curTime;
-    if (selfSender->isScheduled())  // silence was too short, overlapped talkspurts
+    if (selfSender->isScheduled())
     {
+        // silence was too short, detected overlapped talkspurts
         simtime_t delta = selfSender->getArrivalTime() - curTime;
         startTime += delta;
         dur -= SIMTIME_DBL(delta);

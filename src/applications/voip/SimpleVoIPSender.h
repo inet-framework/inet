@@ -27,9 +27,8 @@ class SimpleVoIPSender : public cSimpleModule
     bool      isTalk;
 
     // FIXME: be more specific with the name of this self message
-    cMessage* selfSource;
-    //sender
-    // FIXME questi non dovrebbero essere interi     //FIXME Translate!!!
+    cMessage* selfSource;   // timer for changing talkspurt/silence periods
+
     int    talkspurtID;
     int    talkspurtNumPackets;
     int    packetID;
@@ -37,8 +36,7 @@ class SimpleVoIPSender : public cSimpleModule
     simtime_t packetizationInterval;
 
     // ----------------------------
-    // FIXME: it is unclear what is this self message used for
-    cMessage *selfSender;
+    cMessage *selfSender;   // timer for sending packets
 
     simtime_t timestamp;
     int localPort;

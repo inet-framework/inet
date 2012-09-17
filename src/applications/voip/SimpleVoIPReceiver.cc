@@ -150,7 +150,6 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
     delete msg;
 }
 
-// FIXME: this should rather be called evaluateTalkspurt, because all it does is that it gathers some statistics
 void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 {
     ASSERT(!currentTalkspurt.packets.empty());
@@ -206,7 +205,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
         //MANAGEMENT OF DUPLICATED PACKETS
         if (isArrived[packet->packetID])
         {
-            ++channelLoss; // a duplikalt packetek elfednek egy-egy elveszett packetet a fenti channelLoss szamitasban, ezt korrigaljuk itt.
+            ++channelLoss; // a duplikalt packetek elfednek egy-egy elveszett packetet a fenti channelLoss szamitasban, ezt korrigaljuk itt. //FIXME Translate
             EV << "DUPLICATED PACKET: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";
         }
         else if (last_lateness > 0.0)
@@ -261,7 +260,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
     emit(playoutLossRateSignal, lossRate);
     emit(mosSignal, mos);
 
-    // add calculated mos to fingerprint
+    // add calculated mos value to fingerprint
     cHasher *hasher = simulation.getHasher();
     if (hasher)
         hasher->add(mos);
@@ -271,7 +270,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 
     EV << "CALCULATED MOS: eModel( " << playoutDelay << " , " << tailDropLoss << "+" << playoutLoss << "+" << channelLoss << " ) = " << mos << "\n\n";
 
-    EV << "PLAYOUT DELAY ADAPTATION \n" << "OLD PLAYOUT DELAY: " << playoutDelay << "\nMAX JITTER MEASURED: " << max_lateness << "\n\n";
+    EV << "PLAYOUT DELAY ADAPTATION \n" << "OLD PLAYOUT DELAY: " << playoutDelay << "\nMAX JITTER MEASURED: " << max_lateness << "\n\n"; //FIXME JITTER???
 
     playoutDelay += max_lateness;
     if (playoutDelay < 0.0)
@@ -292,21 +291,18 @@ double SimpleVoIPReceiver::eModel(double delay, double lossRate)
     static const double alpha3 = 177.3; //ms
     double delayms = 1000.0 * delay;
 
-    // FIXME: useless comment
     // Compute the Id parameter
     int u = (delayms - alpha3) > 0 ? 1 : 0;
     double id = 0.024 * delayms + 0.11 * (delayms - alpha3) * u;
 
-    // Packet loss p in %
+    // p: Packet loss rate in %
     double p = lossRate * 100;
     // Compute the Ie,eff parameter
     double ie_eff = emodel_Ie + (95 - emodel_Ie) * p / (p + emodel_Bpl);
 
-    // FIXME: useless comment
     // Compute the R factor
     double Rfactor = emodel_Ro - id - ie_eff + emodel_A;
 
-    // FIXME: useless comment
     // Compute the MOS value
     double mos = 0.0;
 
