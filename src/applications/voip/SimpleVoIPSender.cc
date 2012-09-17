@@ -55,7 +55,7 @@ void SimpleVoIPSender::initialize(int stage)
     packetID = 0;
     timestamp = 0;
     talkPacketSize = par("talkPacketSize");
-    packetizationInterval = par("packetizationInterval");
+    packetizationInterval = par("packetizationInterval").doubleValue();
     selfSender = new cMessage("selfSender");
     localPort = par("localPort");
     destPort = par("destPort");
@@ -104,7 +104,7 @@ void SimpleVoIPSender::talkspurt(simtime_t dur)
 
     talkspurtID++;
     packetID = 0;
-    talkspurtNumPackets = (ceil(SIMTIME_DBL(dur)/packetizationInterval));
+    talkspurtNumPackets = (ceil(dur / packetizationInterval));
     EV << "TALKSPURT " << talkspurtID-1 << " will be sent " << talkspurtNumPackets << " packets\n\n";
 
     scheduleAt(startTime + packetizationInterval, selfSender);

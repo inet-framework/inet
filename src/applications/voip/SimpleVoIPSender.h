@@ -23,7 +23,7 @@ class SimpleVoIPSender : public cSimpleModule
 
     //source
     simtime_t talkspurtDuration;
-    double    silenceDuration;
+    simtime_t silenceDuration;
     bool      isTalk;
 
     // FIXME: be more specific with the name of this self message
@@ -34,7 +34,7 @@ class SimpleVoIPSender : public cSimpleModule
     int    talkspurtNumPackets;
     int    packetID;
     int    talkPacketSize;
-    double packetizationInterval;
+    simtime_t packetizationInterval;
 
     // ----------------------------
     // FIXME: it is unclear what is this self message used for
