@@ -90,7 +90,9 @@ class SimpleVoIPReceiver : public cSimpleModule
     simsignal_t mosSignal;
     simsignal_t taildropLossRateSignal;
 
-    virtual void finish();
+    double eModel(double delay, double loss);
+    void evaluateTalkspurt(bool finish);
+    void startTalkspurt(SimpleVoIPPacket* packet);
 
   public:
     SimpleVoIPReceiver();
@@ -100,9 +102,7 @@ class SimpleVoIPReceiver : public cSimpleModule
     virtual int numInitStages() const {return 4;}
     void initialize(int stage);
     void handleMessage(cMessage *msg);
-    double eModel(double delay, double loss);
-    void evaluateTalkspurt(bool finish);
-    void startTalkspurt(SimpleVoIPPacket* packet);
+    virtual void finish();
 };
 
 
