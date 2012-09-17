@@ -46,7 +46,7 @@ void SimpleVoIPSender::initialize(int stage)
     if (stage != 3)
         return;
 
-    talkDuration = 0;
+    talkspurtDuration = 0;
     silenceDuration = 0;
     selfSource = new cMessage("selfSource");
     isTalk = false;
@@ -90,15 +90,24 @@ void SimpleVoIPSender::handleMessage(cMessage *msg)
     }
 }
 
-void SimpleVoIPSender::talkspurt(double dur)
+void SimpleVoIPSender::talkspurt(simtime_t dur)
 {
+    simtime_t curTime = simTime();
+    simtime_t startTime = curTime;
+    if (selfSender->isScheduled())  // silence was too short, overlapped talkspurts
+    {
+        simtime_t delta = selfSender->getArrivalTime() - curTime;
+        startTime += delta;
+        dur -= SIMTIME_DBL(delta);
+        cancelEvent(selfSender);
+    }
+
     talkspurtID++;
-    talkspurtNumPackets = (ceil(dur/packetizationInterval));
+    packetID = 0;
+    talkspurtNumPackets = (ceil(SIMTIME_DBL(dur)/packetizationInterval));
     EV << "TALKSPURT " << talkspurtID-1 << " will be sent " << talkspurtNumPackets << " packets\n\n";
 
-    packetID = 0;
-    // FIXME: why do we schedule a message for the current simulation time? why don't we rather call the method directly?
-    scheduleAt(simTime(), selfSender);
+    scheduleAt(startTime + packetizationInterval, selfSender);
 }
 
 void SimpleVoIPSender::selectPeriodTime()
@@ -118,15 +127,15 @@ void SimpleVoIPSender::selectPeriodTime()
     }
     else
     {
-        talkDuration = par("talkDuration").doubleValue();
-        EV << "TALKSPURT: " << talkspurtID << " Duration: " << talkDuration << " seconds\n\n";
-        simtime_t endTalk = simTime() + talkDuration;
+        talkspurtDuration = par("talkspurtDuration").doubleValue();
+        EV << "TALKSPURT: " << talkspurtID << " Duration: " << talkspurtDuration << " seconds\n\n";
+        simtime_t endTalk = simTime() + talkspurtDuration;
         if (stopTime != 0 && endTalk > stopTime)
         {
             endTalk = stopTime;
-            talkDuration = SIMTIME_DBL(stopTime - simTime());
+            talkspurtDuration = stopTime - simTime();
         }
-        talkspurt(talkDuration);
+        talkspurt(talkspurtDuration);
         scheduleAt(endTalk, selfSource);
         isTalk = true;
     }

@@ -23,7 +23,7 @@ class SimpleVoIPSender : public cSimpleModule
 
     //source
     // FIXME: use volatile parameters for talk and silence duration
-    double    talkDuration;
+    simtime_t talkspurtDuration;
     double    silenceDuration;
     bool      isTalk;
 
@@ -47,7 +47,7 @@ class SimpleVoIPSender : public cSimpleModule
     IPvXAddress destAddress;
     simtime_t stopTime;
 
-    void talkspurt(double dur);
+    void talkspurt(simtime_t dur);
     void selectPeriodTime();
     void sendVoIPPacket();
 

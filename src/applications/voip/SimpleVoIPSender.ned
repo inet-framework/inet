@@ -34,7 +34,7 @@ simple SimpleVoIPSender like IUDPApp
         int destPort;
         string destAddress;
         int talkPacketSize @unit(B) = default(40B);     // size of talk packets in bytes
-        volatile double talkDuration @unit(s) = default(weibull(1.423s, 0.824s));
+        volatile double talkspurtDuration @unit(s) = default(weibull(1.423s, 0.824s));
         volatile double silenceDuration @unit(s) = default(weibull(0.899s, 1.089s));
         double packetizationInterval @unit(s) = default(20ms);   // timelength of samplepackets
         double startTime @unit(s) = default(0);   // time of start sending
