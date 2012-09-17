@@ -34,6 +34,7 @@ simple SimpleVoIPReceiver like IUDPApp
 
         double playoutDelay @unit(s) = default(0);      // delay for begin playout after received first packet
         int bufferSpace = default(20);      // buffer size (max number of packets in buffer)
+        double mosSpareTime @unit(s) = default(1s); // spare time before calculating MOS (after calculated playout time of last packet)
 
         @signal[VoIPPacketDelay](type="simtime_t");      // when receive a frame
         @signal[VoIPPacketLossRate](type="double");      // at end of talkspur

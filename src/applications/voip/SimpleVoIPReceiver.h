@@ -82,6 +82,7 @@ class SimpleVoIPReceiver : public cSimpleModule
     TalkspurtInfo currentTalkspurt;
     unsigned int bufferSpace;
     simtime_t    playoutDelay;
+    simtime_t    mosSpareTime; // spare time before calculating MOS (after calculated playout time of last packet)
 
     simsignal_t packetLossRateSignal;
     simsignal_t packetDelaySignal;

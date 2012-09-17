@@ -73,6 +73,7 @@ void SimpleVoIPReceiver::initialize(int stage)
 
     bufferSpace = par("bufferSpace");
     playoutDelay = par("playoutDelay");
+    mosSpareTime = par("mosSpareTime");
 
     int port = par("localPort");
     EV << "VoIPReceiver::initialize - binding to port: local:" << port << endl;
@@ -95,8 +96,7 @@ void SimpleVoIPReceiver::initialize(int stage)
 void SimpleVoIPReceiver::startTalkspurt(SimpleVoIPPacket* packet)
 {
     currentTalkspurt.startTalkspurt(packet);
-    //TODO Should be use spare time at the end of talkspurt?
-    simtime_t endTime = simTime() + playoutDelay + (currentTalkspurt.talkspurtNumPackets - packet->getPacketID()) * currentTalkspurt.voiceDuration;
+    simtime_t endTime = simTime() + playoutDelay + (currentTalkspurt.talkspurtNumPackets - packet->getPacketID()) * currentTalkspurt.voiceDuration + mosSpareTime;
     scheduleAt(endTime, selfTalkspurtFinished);
 }
 
