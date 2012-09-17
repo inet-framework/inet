@@ -211,7 +211,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
         else if (last_lateness > 0.0)
         {
             ++playoutLoss;
-            EV << "LATE PACKAGE REMOVED: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";
+            EV << "LATE PACKAGE REMOVED: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << ", LATENESS " << last_lateness*1000.0 << "ms\n\n";
         }
         else
         {

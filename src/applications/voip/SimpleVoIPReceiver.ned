@@ -37,11 +37,11 @@ simple SimpleVoIPReceiver like IUDPApp
         double mosSpareTime @unit(s) = default(1s); // spare time before calculating MOS (after calculated playout time of last packet)
 
         @signal[VoIPPacketDelay](type="simtime_t");      // when receive a frame
-        @signal[VoIPPacketLossRate](type="double");      // at end of talkspur
-        @signal[VoIPPlayoutDelay](type="simtime_t");    // at end of talkspur
-        @signal[VoIPPlayoutLossRate](type="double");    // at end of talkspur
-        @signal[VoIPMosSignal](type="double");          // at end of talkspur
-        @signal[VoIPTaildropLossRate](type="double");   // at end of talkspur
+        @signal[VoIPPacketLossRate](type="double");      // at end of talkspurt
+        @signal[VoIPPlayoutDelay](type="simtime_t");    // at end of talkspurt
+        @signal[VoIPPlayoutLossRate](type="double");    // at end of talkspurt
+        @signal[VoIPMosSignal](type="double");          // at end of talkspurt
+        @signal[VoIPTaildropLossRate](type="double");   // at end of talkspurt
         @statistic[VoIPPacketDelay](title="VoIP Packet Delay"; unit="s"; source="VoIPPacketDelay"; record=stats,vector); 
         @statistic[VoIPPacketLossRate](title="VoIP Packet Loss"; unit="ratio"; source="VoIPPacketLossRate"; record=stats,vector);
         @statistic[VoIPPlayoutDelay](title="VoIP Playout Delay"; unit="s"; source="VoIPPlayoutDelay"; record=stats,vector);
