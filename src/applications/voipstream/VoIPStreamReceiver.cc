@@ -61,7 +61,7 @@ void VoIPStreamReceiver::initialize()
     // read parameters
     localPort = par("localPort");
     resultFile = par("resultFile");
-    playOutDelay = par("delay");
+    playoutDelay = par("playoutDelay");
 
     // initialize avcodec library
     av_register_all();
@@ -172,7 +172,7 @@ void VoIPStreamReceiver::createConnection(VoIPStreamPacket *vp)
     curConn.sampleRate = vp->getSampleRate();
     curConn.transmitBitrate = vp->getTransmitBitrate();
     curConn.samplesPerPacket = vp->getSamplesPerPacket();
-    curConn.lastPacketFinish = simTime() + playOutDelay;
+    curConn.lastPacketFinish = simTime() + playoutDelay;
 
     curConn.pCodecDec = avcodec_find_decoder(curConn.codec);
     if (curConn.pCodecDec == NULL)

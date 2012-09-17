@@ -96,7 +96,7 @@ class VoIPStreamReceiver : public cSimpleModule
 
   protected:
     int localPort;
-    simtime_t playOutDelay;
+    simtime_t playoutDelay;
     const char *resultFile;
 
     UDPSocket socket;
