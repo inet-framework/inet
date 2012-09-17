@@ -87,7 +87,7 @@ void UDPBurstApp::handleMessage(cMessage *msg)
         if (msg->getKind() == 0)
         {   // start of a new burst; reset messageLength
             messageLength = par("messageLength").longValue();
-            scheduleAt(simTime()+(double)par("messageFreq"), msg);
+            scheduleAt(simTime()+(double)par("messagePeriod"), msg);
         }
         sendPacket();
     }
