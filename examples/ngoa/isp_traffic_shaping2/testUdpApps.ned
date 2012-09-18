@@ -21,10 +21,13 @@
 package inet.examples.ngoa.isp_traffic_shaping2;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
-import inet.nodes.ethernet.EtherSwitch2WithOutputQueue;
+import inet.nodes.access.NgnAccessModem;
+import inet.nodes.access.NgnAccessNode;
+import inet.nodes.access.NgnAccessSplitter;
+import inet.nodes.inet.RouterWithEthernetInterface2;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
-import ned.DatarateChannel;
+import inet.nodes.inet.UDPBurstSourceWithEthernetInterface2;
 
 
 //
@@ -36,27 +39,64 @@ import ned.DatarateChannel;
 network testUdpApps
 {
     parameters:
-         int n = default(1);	// number of host/server pairs
+		int numWcts = default(1);
+		double uni_rate @unit(bps) = default(100Mbps);
+		double uni_delay @unit(s) = default(0s);
+		double distribution_rate @unit(bps) = default(100Mbps);
+		double distribution_delay @unit(s) = default(150us);
+        // double backbone_rate @unit(bps) = default(100Gbps);
+        double backbone_rate @unit(bps) = default(100Mbps);
+        double backbone_delay1 @unit(s) = default(2.0ms);
+        double backbone_delay2 @unit(s) = default(2.7ms);
         @display("bgb=519,193");
     submodules:
         configurator: FlatNetworkConfigurator {
             parameters:
                 @display("p=52,42");
         }
-        host[n]: StandardHost3WithEthernetInterface2 {
+        wct_source[numWcts]: UDPBurstSourceWithEthernetInterface2 {
+            parameters:
+				destAddresses = "wct_sink[" + string(index) + "]";
+                @display("p=632,199;i=device/server_l");
+            gates:
+                ethg[1];
+        }
+        router: RouterWithEthernetInterface2 {
+            @display("p=507,119");
+        }
+        olt: NgnAccessNode {
+            parameters:
+                @display("p=388,119");
+            gates:
+                ethg[2];
+        }
+        accessSwitch: NgnAccessSplitter {
+            parameters:
+                @display("p=269,119");
+            gates:
+                ethg[numWcts+1];
+        }
+        onu[numWcts]: NgnAccessModem {
+            parameters:
+                @display("p=131,119");
+                pvid = index+10;
+            gates:
+                ethg[2];
+        }
+        wct_sink[numWcts]: StandardHost3WithEthernetInterface2 {
             parameters:
                 @display("i=device/laptop;p=46,119");
-        }
-        server[n]: StandardServerWithEthernetInterface2 {
-            parameters:
-                @display("p=464,119;i=device/server_l");
-        }
-        switch: EtherSwitch2WithOutputQueue {
-            @display("p=249,119");
+			gates:
+				ethg[1];
         }
     connections:
-        for i=0..n-1 {
-        	host[i].ethg++ <--> {datarate = 100Mbps; delay = 1ms;} <--> switch.ethg++;
-        	switch.ethg++ <--> {datarate = 100Mbps; delay = 1ms;} <--> server[i].ethg++;
-        }
+        for i=0..numWcts-1 {
+        	wct_sink[i].ethg[0] <--> {datarate = uni_rate; delay = uni_delay;} <--> onu[i].ethg[0];
+			onu[i].ethg[1] <--> {datarate = distribution_rate; delay = distribution_delay;} <--> accessSwitch.ethg[i];
+		}
+		accessSwitch.ethg[numWcts] <--> {datarate = distribution_rate; delay = distribution_delay;} <--> olt.ethg[0];
+		olt.ethg[1] <--> {datarate = backbone_rate; delay = backbone_delay1;} <--> router.ethg++;
+		for i=0..numWcts-1 {
+			router.ethg++ <--> {datarate = backbone_rate; delay = backbone_delay2;} <--> wct_source[i].ethg[0];
+		}
 }
