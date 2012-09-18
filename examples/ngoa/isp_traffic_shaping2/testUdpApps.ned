@@ -28,6 +28,7 @@ import inet.nodes.inet.RouterWithEthernetInterface2;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
 import inet.nodes.inet.UDPBurstSourceWithEthernetInterface2;
+import inet.util.BurstMeter;
 
 
 //
@@ -89,13 +90,23 @@ network testUdpApps
 			gates:
 				ethg[1];
         }
+        burstMeter1: BurstMeter {
+            @display("i=block/timer_vs;p=572,167;is=vs");
+        }
+        burstMeter2: BurstMeter {
+            @display("i=block/timer_vs;p=572,167;is=vs");
+        }
     connections:
         for i=0..numWcts-1 {
         	wct_sink[i].ethg[0] <--> {datarate = uni_rate; delay = uni_delay;} <--> onu[i].ethg[0];
 			onu[i].ethg[1] <--> {datarate = distribution_rate; delay = distribution_delay;} <--> accessSwitch.ethg[i];
 		}
-		accessSwitch.ethg[numWcts] <--> {datarate = distribution_rate; delay = distribution_delay;} <--> olt.ethg[0];
-		olt.ethg[1] <--> {datarate = backbone_rate; delay = backbone_delay1;} <--> router.ethg++;
+		accessSwitch.ethg$o[numWcts] --> {datarate = distribution_rate; delay = distribution_delay;} --> olt.ethg$i[0];
+		accessSwitch.ethg$i[numWcts] <-- {datarate = distribution_rate; delay = 0.5*distribution_delay;} <-- burstMeter1.out;
+		burstMeter1.in <-- {datarate = distribution_rate; delay = 0.5*distribution_delay;} <-- olt.ethg$o[0];
+		olt.ethg$o[1] --> {datarate = backbone_rate; delay = backbone_delay1;} --> router.ethg$i++;
+		olt.ethg$i[1] <-- {datarate = backbone_rate; delay = 0.5*backbone_delay1;} <-- burstMeter2.out;
+		burstMeter2.in <-- {datarate = backbone_rate; delay = 0.5*backbone_delay1;} <-- router.ethg$o++;
 		for i=0..numWcts-1 {
 			router.ethg++ <--> {datarate = backbone_rate; delay = backbone_delay2;} <--> wct_source[i].ethg[0];
 		}

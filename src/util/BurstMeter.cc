@@ -56,11 +56,12 @@ void BurstMeter::handleMessage(cMessage *msg)
             }
             else
             { // detect a new burst
-              // emit signal and update statistics for the existing burst
-                emit(packetBurstSignal, burst);
-                numBursts++;
-                sumBursts += burst;
-
+                if (burst > 0)
+                {   // emit signal and update statistics for the existing burst
+                    emit(packetBurstSignal, burst);
+                    numBursts++;
+                    sumBursts += burst;
+                }
                 // initialize for the new burst
                 burst = 1;
                 macAddress = newAddress;
@@ -77,6 +78,14 @@ void BurstMeter::handleMessage(cMessage *msg)
 
 void BurstMeter::finish()
 {
+    // emit signal and update statistics for the current burst first
+    if (burst > 0)
+    {
+        emit(packetBurstSignal, burst);
+        numBursts++;
+        sumBursts += burst;
+    }
+
     // record session statistics
     if (numBursts > 0)
     {
