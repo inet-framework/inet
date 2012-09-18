@@ -98,9 +98,17 @@ MatrixCloudDelayer::MatrixEntry::MatrixEntry(cXMLElement *trafficEntity, bool de
     const char *datarateAttr = trafficEntity->getAttribute("datarate");
     const char *dropAttr = trafficEntity->getAttribute("drop");
     symmetric = getBoolAttribute(*trafficEntity, "symmetric", &defaultSymmetric);
-    delayPar.parse(delayAttr);
-    dataratePar.parse(datarateAttr);
-    dropPar.parse(dropAttr);
+    try {
+        delayPar.parse(delayAttr);
+    } catch (std::exception& e) { throw cRuntimeError("parser error '%s' in 'delay' attribute of '%s' entity at %s", e.what(), trafficEntity->getTagName(), trafficEntity->getSourceLocation()); }
+
+    try {
+        dataratePar.parse(datarateAttr);
+    } catch (std::exception& e) { throw cRuntimeError("parser error '%s' in 'datarate' attribute of '%s' entity at %s", e.what(), trafficEntity->getTagName(), trafficEntity->getSourceLocation()); }
+
+    try {
+        dropPar.parse(dropAttr);
+    } catch (std::exception& e) { throw cRuntimeError("parser error '%s' in 'drop' attribute of '%s' entity at %s", e.what(), trafficEntity->getTagName(), trafficEntity->getSourceLocation()); }
 }
 
 bool MatrixCloudDelayer::MatrixEntry::matches(const char *src, const char *dest)
