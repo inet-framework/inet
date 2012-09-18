@@ -33,7 +33,7 @@ namespace inet { class PatternMatcher; }
 class INET_API MatrixCloudDelayer : public CloudDelayerBase
 {
   protected:
-    //FIXME The 'Matcher' class copied from IPv4NetworkConfigurator
+    //FIXME modified copy of 'Matcher' class from IPv4NetworkConfigurator
     class Matcher
     {
       private:
@@ -65,8 +65,8 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
     class Descriptor
     {
       public:
-        cDynamicExpression *delayPar;    // TODO hasznalhatom ugyanazt az expression-t a kulonbozo kapcsolatokhoz???
-        cDynamicExpression *dataratePar;    // TODO hasznalhatom ugyanazt az expression-t a kulonbozo kapcsolatokhoz???
+        cDynamicExpression *delayPar;
+        cDynamicExpression *dataratePar;
         cDynamicExpression *dropPar;
         simtime_t lastSent;
       public:
