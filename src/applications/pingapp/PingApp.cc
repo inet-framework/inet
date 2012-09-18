@@ -273,7 +273,7 @@ void PingApp::finish()
         cout << "--------------------------------------------------------" << endl;
         cout << "\t" << getFullPath() << endl;
         cout << "--------------------------------------------------------" << endl;
-
+        cout << "ping " << par("destAddr").stringValue() << " (" << destAddr << "):" << endl;
         cout << "sent: " << sendSeqNo << "   received: " << numPongs << "   loss rate (%): " << (100 * lossCount / (double) sendSeqNo) << endl;
         cout << "round-trip min/avg/max (ms): " << (rttStat.getMin() * 1000.0) << "/"
              << (rttStat.getMean() * 1000.0) << "/" << (rttStat.getMax() * 1000.0) << endl;
