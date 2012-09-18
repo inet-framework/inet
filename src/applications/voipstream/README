@@ -1,5 +1,5 @@
-VoIPTool 2.0
-============
+VoIPStream
+==========
 
 This is the OMNeT++ 4.x port and complete rewrite (by Zoltan Bojthe)
 of the TKN VoIPTool, http://www.tkn.tu-berlin.de/research/omnetVoipTool/
@@ -16,13 +16,13 @@ Moreover, by applying ITU-T's perceptual evaluation of speech quality
 stream can be determined.
 
 This library is an add-on to the INET Framework, http://inet.omnetpp.org.
-It provides two modules: VoIPSourceApp and VoIPSinkApp. Both are
+It provides two modules: VoIPStreamSender and VoIPStreamReceiver. Both are
 application-layer modules that operate over UDP, and can be used in INET's
 StandardHost very much like other UDP traffic generators and sinks (see the
 udpApp[] submodule vector, numUdpApps parameter, etc. in StandardHost.)
 
-VoIPSourceApp accepts an audio file and a destination IP address/port as
-input, and will transmit the file's contents as voice traffic over UDP n
+VoIPStreamSender app accepts an audio file and a destination IP address/port
+as input, and will transmit the file's contents as voice traffic over UDP n
 times (by default once). For transmission, the audio is resampled at the
 given frequency (by default 8KHz) and depth (by default 16 bits), and
 encoded with the given codec (by default G.726) at the given bit rate (by
@@ -34,8 +34,8 @@ special "silence" packets. The module does not simulate any particular VoIP
 protocol (e.g. RTP), but instead accepts a "header size" parameter that
 can be set accordingly.
 
-VoIPSinkApp listens on an UDP port, and expects to receive VoIP packets on
-it. The received voice is then saved into a result audio file that can be
+VoIPStreamReceiver listens on an UDP port, and expects to receive VoIP packets
+on it. The received voice is then saved into a result audio file that can be
 compared with the original for further evaluation. VoIP packets are
 numbered, and out-of-order packets are discarded (the corresponding voice
 interval will be recorded as silence into the file). VoIP packets that miss
@@ -44,7 +44,7 @@ played back with delay (by default 20ms), which allows some jitter for the
 incoming packets. The resulting audio file is closed when the simulation
 completes (i.e. in the OMNeT++ finish() function).
 
-VoIPTool requires "devel" packages of the avcodec, avformat and avutil
+VoIPStream requires "devel" packages of the avcodec, avformat and avutil
 libraries (parts of FFmpeg) to be installed on your system. On Ubuntu, these
 packages can be installed with the following command:
 
