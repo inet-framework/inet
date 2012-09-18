@@ -168,7 +168,7 @@ static void choose_sample_fmt(AVStream *st, AVCodec *codec)
 {
     if (codec && codec->sample_fmts)
     {
-        const enum AVSampleFormat *p = codec->sample_fmts;
+        const AVSampleFormat *p = codec->sample_fmts;
         for (; *p != -1; p++)
         {
             if (*p == st->codec->sample_fmt)
@@ -342,7 +342,7 @@ VoIPStreamPacket* VoIPStreamSender::generatePacket()
     return vp;
 }
 
-bool VoIPStreamSender::checkSilence(enum SampleFormat sampleFormat, void* _buf, int samples)
+bool VoIPStreamSender::checkSilence(SampleFormat sampleFormat, void* _buf, int samples)
 {
     int max = 0;
     int i;

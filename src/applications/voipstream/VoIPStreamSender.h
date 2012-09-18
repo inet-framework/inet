@@ -56,7 +56,7 @@ class INET_API VoIPStreamSender : public cSimpleModule
 
     virtual void openSoundFile(const char *name);
     virtual VoIPStreamPacket* generatePacket();
-    virtual bool checkSilence(enum SampleFormat sampleFormat, void* _buf, int samples);
+    virtual bool checkSilence(SampleFormat sampleFormat, void* _buf, int samples);
     virtual void readFrame();
 
   protected:
