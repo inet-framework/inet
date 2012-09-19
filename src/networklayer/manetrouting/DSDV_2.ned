@@ -37,6 +37,7 @@ import inet.networklayer.IManetRouting;
 simple DSDV_2 like IManetRouting
 {
     parameters:
+        @display("i=block/routing");
         double hellomsgperiod_DSDV @unit("s") = default(5s);  // how often hello messages should be sent out
         string netmask = default("255.255.0.0");  // netmask for the ad-hoc network
         int RNGseed_DSDV = default(1); // WARNING: this is not a seed. It is the RNG which will be used

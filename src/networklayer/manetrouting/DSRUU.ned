@@ -34,6 +34,7 @@ import inet.networklayer.IManetRouting;
 simple DSRUU like IManetRouting
 {
     parameters:
+        @display("i=block/routing");
         @reactive;                             // IP module will send control messages when no route is present to the destination
         bool PrintDebug = default(false);  // print protocol depcific debugging information // (non RFC parameter)
         bool FlushLinkCache = default(true); // ??
