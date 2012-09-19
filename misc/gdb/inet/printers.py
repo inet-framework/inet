@@ -81,8 +81,9 @@ class InetPrinter(object):
 
         #print "lookup printer for '%s' type" % (typename)
         if typename in self.lookup:
-            if val.type.code == gdb.TYPE_CODE_REF or val.type.code == gdb.TYPE_CODE_PTR:
-                if (long(val) == 0):
+#            if val.type.code == gdb.TYPE_CODE_REF or val.type.code == gdb.TYPE_CODE_PTR:
+            if val.type.code == gdb.TYPE_CODE_PTR:
+                if (long(val.address) == 0):
                     return None
                 val = val.dereference()
             return self.lookup[typename].invoke(val)
