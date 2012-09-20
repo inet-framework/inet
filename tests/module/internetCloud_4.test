@@ -52,7 +52,7 @@ ned-path = .;../../../../src;../../lib
 *.sender[*].pingApp[0].sendInterval = 1s
 *.sender[*].pingApp[0].printPing = true
 
-**.internet.networkLayer.delayer.typename = "CloudDelayerMatrix"
+**.internet.networkLayer.delayer.typename = "MatrixCloudDelayer"
 **.internet.networkLayer.delayer.config = xmldoc("internetCloud.xml")
 
 **.numSenders = 10

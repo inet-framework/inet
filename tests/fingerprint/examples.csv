@@ -140,9 +140,9 @@
 /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c simple -r 0,                 100s,            ba3f-82ec
 /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c two_senders -r 0,            100s,            4c30-7368
 /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c ten_senders -r 0,            100s,            a056-296a
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c simple -r 0,                 100s,            4fb1-4ffc
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c two_senders -r 0,            100s,            f633-e059
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            d2ff-4cda
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c simple -r 0,                 100s,            656d-0608
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c two_senders -r 0,            100s,            9ea7-49c9
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            aa6f-2a01
 /examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            c5f9-2538
 
 # /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                100s,            34b1-536e    # unstable fingerprint
