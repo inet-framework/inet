@@ -61,6 +61,7 @@ void VoIPSinkApp::initialize()
     // read parameters
     localPort = par("localPort");
     resultFile = par("resultFile");
+    playOutDelay = par("delay");
 
     // initialize avcodec library
     av_register_all();
