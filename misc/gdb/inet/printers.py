@@ -26,11 +26,97 @@ class IPv4AddressPrinter:
     def __init__(self, val):
         self.val = val
 
-    def to_string(self):
-        addr = self.val['addr']
+    @staticmethod
+    def addrToString(addr):
         if (addr == 0):
             return "<unspec>"
         return str((addr >> 24)&0xFF) + "." + str((addr >> 16)&0xFF) + "." + str((addr >> 8)&0xFF) + "." + str(addr&0xFF)
+
+    def to_string(self):
+        addr = self.val['addr']
+        return self.addrToString(addr)
+
+
+class IPv6AddressPrinter:
+    "Print an IPv6Address"
+
+    def __init__(self, val):
+        self.val = val
+
+    @staticmethod
+    def addrToString(d):
+        if ((d[0]|d[1]|d[2]|d[3]) == 0):
+            return "<unspec>"
+
+        # convert to 16-bit groups
+        groups = [ (d[0]>>16)&0xffff, d[0]&0xffff, (d[1]>>16)&0xffff, d[1]&0xffff, (d[2]>>16)&0xffff, d[2]&0xffff, (d[3]>>16)&0xffff, d[3]&0xffff ]
+
+        # find longest sequence of zeros in groups[]
+        start = end = 0
+        beg = -1
+        for i in range(0, 8):
+            if (beg==-1 and groups[i]==0):
+                # begin counting
+                beg = i
+            else:
+                if (beg != -1 and groups[i] != 0):
+                    # end counting
+                    if (i-beg >= 2 and i-beg > end-start):
+                        start = beg
+                        end = i
+                    beg = -1
+
+        # check last zero-seq
+        if (beg!=-1 and beg<=6 and 8-beg > end-start):
+            start = beg
+            end = 8
+
+        if (start==0 and end==8):
+            return "::0";  # the unspecified address is a special case
+
+        # print groups, replacing gap with "::"
+        os = "";
+        for i in range(0, start):
+            if i != 0:
+                os  += ":"
+            os += "%x" % (groups[i])
+        if (start != end):
+            os += "::"
+        for j in range(end, 8):
+            if j != end:
+                os  += ":"
+            os += "%x" % (groups[j])
+        return os
+
+    def to_string(self):
+        d = self.val['d']
+        return self.addrToString(d)
+
+
+class IPvXAddressPrinter:
+    "Print an IPvXAddress"
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        isv6 = self.val['isv6']
+        d = self.val['d']
+        if (isv6):
+            return IPv6AddressPrinter.addrToString(d)
+        return IPv4AddressPrinter.addrToString(d[0])
+
+
+class MACAddressPrinter:
+    "Print a MACAddress"
+
+    def __init__(self, val):
+        self.val = val
+
+    def to_string(self):
+        addr = self.val['address']
+        return "%02X:%02X:%02X:%02X:%02X:%02X" % ((addr >> 40)&0xFF, (addr >> 32)&0xFF, (addr >> 24)&0xFF, (addr >> 16)&0xFF, (addr >> 8)&0xFF, addr&0xFF)
+
 
 
 #########################################################################################
@@ -115,6 +201,9 @@ def build_inet_dictionary():
     inet_printer = InetPrinter("inet")
 
     inet_printer.add('IPv4Address', IPv4AddressPrinter)
+    inet_printer.add('IPv6Address', IPv6AddressPrinter)
+    inet_printer.add('IPvXAddress', IPvXAddressPrinter)
+    inet_printer.add('MACAddress', MACAddressPrinter)
 
 
 build_inet_dictionary()
