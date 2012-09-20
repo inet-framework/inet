@@ -1,0 +1,28 @@
+<internetCloud symmetric="true">
+  <parameters name="good">
+
+    <traffic src="africa.*"        dest="asia.*"          delay="max(221ms,truncnormal(530ms,114ms))"   datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 3.4" />
+    <traffic src="africa.*"        dest="australia.*"     delay="max(237ms,truncnormal(447ms,88ms))"    datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 3.21" />
+    <traffic src="africa.*"        dest="europe.*"        delay="max(123ms,truncnormal(806ms,137ms))"   datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 12.73" />
+    <traffic src="africa.*"        dest="northAmerica.*"  delay="max(159ms,truncnormal(470ms,74ms))"    datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 7.22" />
+    <traffic src="africa.*"        dest="southAmerica.*"  delay="max(196ms,truncnormal(415ms,69ms))"    datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 3.99" />
+
+    <traffic src="asia.*"          dest="australia.*"     delay="max(132ms,truncnormal(139ms,2.15ms))"  datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 0.3" />
+    <traffic src="asia.*"          dest="europe.*"        delay="max(141ms,truncnormal(146ms,1.19ms))"  datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 1.23" />
+    <traffic src="asia.*"          dest="northAmerica.*"  delay="max( 97ms,truncnormal(101ms,1.33ms))"  datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 1.18" />
+    <traffic src="asia.*"          dest="southAmerica.*"  delay="max(170ms,truncnormal(209ms,14.16ms))" datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 1.08" />
+
+    <traffic src="australia.*"     dest="europe.*"        delay="max(151ms,truncnormal(158ms,7.54ms))"  datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 6.35" />
+    <traffic src="australia.*"     dest="northAmerica.*"  delay="max(100ms,truncnormal(103ms,0.73ms))"  datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 0.38" />
+    <traffic src="australia.*"     dest="southAmerica.*"  delay="max(192ms,truncnormal(218ms,4.4ms))"   datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 0.48" />
+
+    <traffic src="europe.*"        dest="northAmerica.*"  delay="max(75ms,truncnormal(77ms,2ms))"       datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 5.91" />
+    <traffic src="europe.*"        dest="southAmerica.*"  delay="max(126ms,truncnormal(154ms,14ms))"    datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 6.1" />
+
+    <traffic src="northAmerica.*"  dest="southAmerica.*"  delay="max(97ms,truncnormal(121ms,10.78ms))"  datarate="uniform(10Mbps,100Mbps)"  drop="uniform(0,100) &lt; 0.78" />
+
+<!--
+    <traffic src="**"  dest="**"  delay="max(10ms,truncnormal(100ms,20ms))"  datarate="uniform(1Mbps,50Mbps)"  drop="uniform(0,100) &lt; uniform(1,5)" />
+-->
+  </parameters>
+</internetCloud>
