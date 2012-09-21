@@ -1,10 +1,11 @@
 /*
   */
-#include "ManetRoutingBase.h"
 #include "BatmanMain.h"
+
 #include "IPv4ControlInfo.h"
-#include "UDPPacket_m.h"
 #include "IPv4InterfaceData.h"
+#include "IPvXAddressResolver.h"
+#include "UDPPacket_m.h"
 
 Define_Module(Batman);
 
@@ -114,8 +115,6 @@ void Batman::initialize(int stage)
         return;
 
     int32_t download_speed = 0, upload_speed = 0;
-    char routing_class_opt = 0, pref_gw_opt = 0;
-    char purge_timeout_opt = 0;
     found_ifs = 0;
 
     registerRoutingModule();
@@ -125,36 +124,21 @@ void Batman::initialize(int stage)
     if ( debug_level > debug_level_max ) {
             opp_error( "Invalid debug level: %i\nDebug level has to be between 0 and %i.\n", debug_level, debug_level_max );
     }
-    simtime_t purge = par("purgeTimeout");
-    if (SIMTIME_RAW(purge)>0)
-    {
-        purge_timeout = purge;
-        purge_timeout_opt = 1;
-    }
-    else
-        purge_timeout = PURGE_TIMEOUT;
+    purge_timeout = par("purgeTimeout");
+    if (purge_timeout <= SIMTIME_ZERO)
+        throw cRuntimeError("Invalid 'purgeTimeout' parameter");
 
-    simtime_t  originator_i = par("originatorInterval");
+    originator_interval = par("originatorInterval");
 
-    if (SIMTIME_DBL(originator_i)>0.001)
-    {
-        originator_interval = originator_i;
-    }
-    else
-        originator_interval = 1; // 1000 msec
+    if (originator_interval < 0.001)
+        throw cRuntimeError("Invalid 'originatorInterval' parameter");
 
     const char *preferedGateWay = par("preferedGateWay");
-    IPv4Address tmp_ip_holder(preferedGateWay);
-    if (!tmp_ip_holder.isUnspecified())
-    {
-        pref_gateway = tmp_ip_holder.getInt();
-        pref_gw_opt = 1;
-    }
+    pref_gateway =  IPvXAddressResolver().resolve(preferedGateWay).get4().getInt();
+
     routing_class = par("routingClass");
-    if (routing_class > 0)
-        routing_class_opt = 1;
-    else
-        routing_class = 0;
+    if (routing_class < 0)
+        throw cRuntimeError("Invalid 'routingClass' parameter");
 
 /*
     IPv4Address vis = par("visualizationServer");
