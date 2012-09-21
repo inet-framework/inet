@@ -20,7 +20,7 @@
  */
 
 
-#include "BatmanData.h"
+#include "batman.h"
 #include "BatmanMain.h"
 #include "IPv4InterfaceData.h"
 

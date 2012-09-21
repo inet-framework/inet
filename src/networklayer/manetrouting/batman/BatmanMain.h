@@ -9,7 +9,7 @@
 #define __BATMAN_H_
 
 #include "ManetRoutingBase.h"
-#include "BatmanData.h"
+#include "batman.h"
 
 class BatmanTimer :ManetTimer
 {
