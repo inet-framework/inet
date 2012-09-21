@@ -567,7 +567,7 @@ bool Batman::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &v
         {
             OrigNode * node = it->second;
             add = node->router->addr;
-            return -1;
+            return true;
         }
     }
     return false;
