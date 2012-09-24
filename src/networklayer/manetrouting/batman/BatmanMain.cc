@@ -209,6 +209,25 @@ void Batman::initialize(int stage)
     }
     log_facility_active = 1;
 
+    // parse announcedNetworks parameter
+    const char *announcedNetworks = par("announcedNetworks");
+    cStringTokenizer tokenizer(announcedNetworks);
+    const char *token;
+    while ((token = tokenizer.nextToken()) != NULL)
+    {
+        std::vector<std::string> addrPair = cStringTokenizer(token, "/").asVector();
+        if (addrPair.size() != 2)
+            throw cRuntimeError("invalid 'announcedNetworks' parameter content: '%s'", token);
+
+        IPv4Address addr = IPvXAddressResolver().resolve(addrPair[0].c_str()).get4();
+        IPv4Address mask = IPvXAddressResolver().resolve(addrPair[1].c_str(), IPvXAddressResolver::ADDR_MASK).get4();
+        addr.doAnd(mask);
+
+        // add to HNA:
+        hna_local_task_add_ip(Uint128(addr.getInt()), mask.getNetmaskLength(), ROUTE_ADD);
+    }
+
+
     /* add rule for hna networks */
     //add_del_rule(0, 0, BATMAN_RT_TABLE_NETWORKS, BATMAN_RT_PRIO_UNREACH - 1, 0, RULE_TYPE_DST, RULE_ADD);
 
