@@ -40,16 +40,16 @@ import inet.util.BurstMeter;
 network testUdpApps
 {
     parameters:
-		int numWcts = default(1);
-		double uni_rate @unit(bps) = default(100Mbps);
-		double uni_delay @unit(s) = default(0s);
-		double distribution_rate @unit(bps) = default(100Mbps);
-		double distribution_delay @unit(s) = default(150us);
+        int numWcts = default(1);
+        double uni_rate @unit(bps) = default(100Mbps);
+        double uni_delay @unit(s) = default(0s);
+        double distribution_rate @unit(bps) = default(100Mbps);
+        double distribution_delay @unit(s) = default(150us);
         // double backbone_rate @unit(bps) = default(100Gbps);
         double backbone_rate @unit(bps) = default(100Mbps);
         double backbone_delay1 @unit(s) = default(2.0ms);
         double backbone_delay2 @unit(s) = default(2.7ms);
-        @display("bgb=519,193");
+        @display("bgb=732,234");
     submodules:
         configurator: FlatNetworkConfigurator {
             parameters:
@@ -57,8 +57,8 @@ network testUdpApps
         }
         wct_source[numWcts]: UDPBurstSourceWithEthernetInterface2 {
             parameters:
-				destAddresses = "wct_sink[" + string(index) + "]";
-                @display("p=632,199;i=device/server_l");
+                destAddresses = "wct_sink[" + string(index) + "]";
+                @display("p=641,120;i=device/server_l");
             gates:
                 ethg[1];
         }
@@ -87,27 +87,27 @@ network testUdpApps
         wct_sink[numWcts]: StandardHost3WithEthernetInterface2 {
             parameters:
                 @display("i=device/laptop;p=46,119");
-			gates:
-				ethg[1];
+            gates:
+                ethg[1];
         }
         burstMeter1: BurstMeter {
-            @display("i=block/timer_vs;p=572,167;is=vs");
+            @display("i=block/timer_vs;p=325,179;is=vs");
         }
         burstMeter2: BurstMeter {
-            @display("i=block/timer_vs;p=572,167;is=vs");
+            @display("i=block/timer_vs;p=449,179;is=vs");
         }
     connections:
         for i=0..numWcts-1 {
-        	wct_sink[i].ethg[0] <--> {datarate = uni_rate; delay = uni_delay;} <--> onu[i].ethg[0];
-			onu[i].ethg[1] <--> {datarate = distribution_rate; delay = distribution_delay;} <--> accessSwitch.ethg[i];
-		}
-		accessSwitch.ethg$o[numWcts] --> {datarate = distribution_rate; delay = distribution_delay;} --> olt.ethg$i[0];
-		accessSwitch.ethg$i[numWcts] <-- {datarate = distribution_rate; delay = 0.5*distribution_delay;} <-- burstMeter1.out;
-		burstMeter1.in <-- {datarate = distribution_rate; delay = 0.5*distribution_delay;} <-- olt.ethg$o[0];
-		olt.ethg$o[1] --> {datarate = backbone_rate; delay = backbone_delay1;} --> router.ethg$i++;
-		olt.ethg$i[1] <-- {datarate = backbone_rate; delay = 0.5*backbone_delay1;} <-- burstMeter2.out;
-		burstMeter2.in <-- {datarate = backbone_rate; delay = 0.5*backbone_delay1;} <-- router.ethg$o++;
-		for i=0..numWcts-1 {
-			router.ethg++ <--> {datarate = backbone_rate; delay = backbone_delay2;} <--> wct_source[i].ethg[0];
-		}
+            wct_sink[i].ethg[0] <--> {  datarate = uni_rate; delay = uni_delay; } <--> onu[i].ethg[0];
+            onu[i].ethg[1] <--> {  datarate = distribution_rate; delay = distribution_delay; } <--> accessSwitch.ethg[i];
+        }
+        accessSwitch.ethg$o[numWcts] --> {  datarate = distribution_rate; delay = distribution_delay; } --> olt.ethg$i[0];
+        accessSwitch.ethg$i[numWcts] <-- {  datarate = distribution_rate; delay = 0.5*distribution_delay; } <-- burstMeter1.out;
+        burstMeter1.in <-- {  datarate = distribution_rate; delay = 0.5*distribution_delay; } <-- olt.ethg$o[0];
+        olt.ethg$o[1] --> {  datarate = backbone_rate; delay = backbone_delay1; } --> router.ethg$i++;
+        olt.ethg$i[1] <-- {  datarate = backbone_rate; delay = 0.5*backbone_delay1; } <-- burstMeter2.out;
+        burstMeter2.in <-- {  datarate = backbone_rate; delay = 0.5*backbone_delay1; } <-- router.ethg$o++;
+        for i=0..numWcts-1 {
+            router.ethg++ <--> {  datarate = backbone_rate; delay = backbone_delay2; } <--> wct_source[i].ethg[0];
+        }
 }
