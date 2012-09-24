@@ -82,7 +82,6 @@ protected:
 
 private:
     void sendPackets(const simtime_t &curr_time);
-    OrigNode  * getOrigNode(const Uint128 &addr);
     NeighNode * create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const Uint128 &neigh, BatmanIf *if_incoming);
     OrigNode * get_orig_node(const Uint128 &addr );
     void update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh, BatmanIf *if_incoming, BatmanHnaMsg *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time );

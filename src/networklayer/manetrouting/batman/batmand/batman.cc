@@ -200,7 +200,7 @@ NeighNode::NeighNode(OrigNode* origNode, OrigNode *orig_neigh_node, const Uint12
 
 
 /* this function finds or creates an originator entry for the given address if it does not exits */
-OrigNode  * Batman::getOrigNode(const Uint128 &addr)
+OrigNode  * Batman::get_orig_node(const Uint128 &addr)
 {
     OrigNode *orig_node;
     OrigMap::iterator it;
@@ -220,11 +220,6 @@ OrigNode  * Batman::getOrigNode(const Uint128 &addr)
 NeighNode * Batman::create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const Uint128 &neigh, BatmanIf* if_incoming)
 {
     return new NeighNode(orig_node, orig_neigh_node, neigh, if_incoming, num_words, global_win_size);
-}
-
-OrigNode * Batman::get_orig_node(const Uint128 &addr )
-{
-    return getOrigNode(addr);
 }
 
 void Batman::ring_buffer_set(std::vector<uint8_t> &tq_recv, uint8_t &tq_index, uint8_t value)
@@ -881,7 +876,7 @@ uint8_t Batman::count_real_packets(BatmanPacket *in, const Uint128 &neigh, Batma
     NeighNode *tmp_neigh_node;
     uint8_t is_duplicate = 0;
 
-    orig_node = getOrigNode(in->getOrig());
+    orig_node = get_orig_node(in->getOrig());
 
     /*char orig_str[ADDR_STR_LEN], neigh_str[ADDR_STR_LEN];
 
