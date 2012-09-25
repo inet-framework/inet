@@ -61,7 +61,6 @@ void Batman::hna_local_task_exec(void)
         }
 
         if (!found) {
-
             if (hna_task->route_action == ROUTE_ADD) {
                 //debug_output(3, "Adding HNA to announce network list: %s/%i\n", hna_addr_str, hna_task->netmask);
 
@@ -164,7 +163,6 @@ void Batman::_hna_global_add(OrigNode *orig_node, Hna_element *hna_element)
     /* our TQ value towards the HNA is better */
     if ((!hna_global_entry->curr_orig_node) ||
         (orig_node->router->tq_avg > hna_global_entry->curr_orig_node->router->tq_avg)) {
-
         old_orig_node = hna_global_entry->curr_orig_node;
         hna_global_entry->curr_orig_node = orig_node;
 
@@ -291,7 +289,7 @@ void Batman::hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t 
         /*
         addr_to_string(e->addr, hna_str, sizeof(hna_str));
 
-        if ((e->netmask > 0 ) && (e->netmask < 33))
+        if ((e->netmask > 0) && (e->netmask < 33))
             debug_output(4, "hna: %s/%i\n", hna_str, e->netmask);
         else
             debug_output(4, "hna: %s/%i -> ignoring (invalid netmask) \n", hna_str, e->netmask);
@@ -350,7 +348,6 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
             if (it == hnaMap.end())
                 return;
             hna_global_entry = it->second;
-
 
             if (!hna_global_entry)
                 continue;

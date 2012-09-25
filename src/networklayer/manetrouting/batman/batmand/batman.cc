@@ -38,16 +38,16 @@ void Batman::choose_gw(void)
         return;
     }
 
-    if ( gw_list.empty() ) {
-        if ( curr_gateway != NULL ) {
-            //debug_output( 3, "Removing default route - no gateway in range\n" );
+    if (gw_list.empty()) {
+        if (curr_gateway != NULL) {
+            //debug_output(3, "Removing default route - no gateway in range\n");
 
             del_default_route();
         }
         return;
     }
 
-    for (unsigned int i = 0; i<gw_list.size(); i++ )
+    for (unsigned int i = 0; i<gw_list.size(); i++)
     {
         gw_node = gw_list[i];
 
@@ -58,17 +58,17 @@ void Batman::choose_gw(void)
                 continue;
         }
 
-        if ( gw_node->orig_node->router == NULL )
+        if (gw_node->orig_node->router == NULL)
             continue;
 
-        if ( gw_node->deleted > 0)
+        if (gw_node->deleted > 0)
             continue;
 
-        switch ( routing_class ) {
+        switch (routing_class) {
             case 1: /* fast connection */
-                get_gw_speeds( gw_node->orig_node->gwflags, &download_speed, &upload_speed );
+                get_gw_speeds(gw_node->orig_node->gwflags, &download_speed, &upload_speed);
 
-                if (((tmp_gw_factor = (((gw_node->orig_node->router->tq_avg * 100 ) / local_win_size) *
+                if (((tmp_gw_factor = (((gw_node->orig_node->router->tq_avg * 100) / local_win_size) *
                                   ((gw_node->orig_node->router->tq_avg * 100) / local_win_size) *
                                      (download_speed / 64))) > max_gw_factor) ||
                                   ((tmp_gw_factor == max_gw_factor) && (gw_node->orig_node->router->tq_avg > max_tq)))
@@ -83,40 +83,40 @@ void Batman::choose_gw(void)
                 break;
         }
 
-        if ( gw_node->orig_node->gwflags > max_gw_class )
+        if (gw_node->orig_node->gwflags > max_gw_class)
             max_gw_class = gw_node->orig_node->gwflags;
 
         if (gw_node->orig_node->router->tq_avg > max_tq)
             max_tq = gw_node->orig_node->router->tq_avg;
 
-        if ( tmp_gw_factor > max_gw_factor )
+        if (tmp_gw_factor > max_gw_factor)
             max_gw_factor = tmp_gw_factor;
 
-        if ( ( pref_gateway != 0 ) && ( pref_gateway == gw_node->orig_node->orig ) ) {
+        if ((pref_gateway != 0) && (pref_gateway == gw_node->orig_node->orig)) {
             tmp_curr_gw = gw_node;
 
-//            addr_to_string( tmp_curr_gw->orig_node->orig, orig_str, ADDR_STR_LEN );
-//            debug_output( 3, "Preferred gateway found: %s (gw_flags: %i, tq: %i, gw_product: %i)\n", orig_str, gw_node->orig_node->gwflags, gw_node->orig_node->router->tq_avg, tmp_gw_factor );
+//            addr_to_string(tmp_curr_gw->orig_node->orig, orig_str, ADDR_STR_LEN);
+//            debug_output(3, "Preferred gateway found: %s (gw_flags: %i, tq: %i, gw_product: %i)\n", orig_str, gw_node->orig_node->gwflags, gw_node->orig_node->router->tq_avg, tmp_gw_factor);
 
             break;
         }
     }
 
-    if ( curr_gateway != tmp_curr_gw ) {
-        if ( curr_gateway != NULL ) {
-//            if ( tmp_curr_gw != NULL )
-//                debug_output( 3, "Removing default route - better gateway found\n" );
+    if (curr_gateway != tmp_curr_gw) {
+        if (curr_gateway != NULL) {
+//            if (tmp_curr_gw != NULL)
+//                debug_output(3, "Removing default route - better gateway found\n");
 //            else
-//                debug_output( 3, "Removing default route - no gateway in range\n" );
+//                debug_output(3, "Removing default route - no gateway in range\n");
             del_default_route();
         }
 
         curr_gateway = tmp_curr_gw;
 
         /* may be the last gateway is now gone */
-        if ( ( curr_gateway != NULL ) && ( !is_aborted() ) ) {
-//            addr_to_string( curr_gateway->orig_node->orig, orig_str, ADDR_STR_LEN );
-//            debug_output( 3, "Adding default route to %s (gw_flags: %i, tq: %i, gw_product: %i)\n", orig_str, max_gw_class, max_tq, max_gw_factor );
+        if ((curr_gateway != NULL) && (!is_aborted())) {
+//            addr_to_string(curr_gateway->orig_node->orig, orig_str, ADDR_STR_LEN);
+//            debug_output(3, "Adding default route to %s (gw_flags: %i, tq: %i, gw_product: %i)\n", orig_str, max_gw_class, max_tq, max_gw_factor);
             add_default_route();
         }
     }
@@ -217,14 +217,14 @@ void Batman::update_gw_list(OrigNode *orig_node, uint8_t new_gwflags, uint16_t g
 {
     GwNode *gw_node;
 
-    for (unsigned int i = 0; i<gw_list.size(); i++ )
+    for (unsigned int i = 0; i<gw_list.size(); i++)
     {
         gw_node = gw_list[i];
-        if ( gw_node->orig_node == orig_node ) {
-            if ( new_gwflags == 0 ) {
+        if (gw_node->orig_node == orig_node) {
+            if (new_gwflags == 0) {
                 gw_node->deleted = getTime();
                 gw_node->orig_node->gwflags = new_gwflags;
-                //debug_output( 3, "Gateway %s removed from gateway list\n", orig_str );
+                //debug_output(3, "Gateway %s removed from gateway list\n", orig_str);
 
                 if (gw_node == curr_gateway)
                     choose_gw();
@@ -267,7 +267,7 @@ unsigned char Batman::get_gw_class(int down, int up)
         for (part = 0; part < 16; part++) {
             tdown = 32 * (sbit + 2) * (1 << part);
 
-            if ( abs(tdown - down) < difference) {
+            if (abs(tdown - down) < difference) {
                 gw_class = (sbit << 7) + (part << 3);
                 difference = abs(tdown - down);
                 mdown = tdown;
@@ -296,14 +296,14 @@ int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node,
     NeighNode *neigh_node = NULL, *tmp_neigh_node = NULL;
     uint8_t total_count;
 
-    if ( orig_node == orig_neigh_node ) {
-        for (unsigned int i = 0; i < orig_node->neigh_list.size(); i++ ) {
+    if (orig_node == orig_neigh_node) {
+        for (unsigned int i = 0; i < orig_node->neigh_list.size(); i++) {
             tmp_neigh_node = orig_node->neigh_list[i];
-            if ( ( tmp_neigh_node->addr == orig_neigh_node->orig ) && ( tmp_neigh_node->if_incoming == if_incoming ) )
+            if ((tmp_neigh_node->addr == orig_neigh_node->orig) && (tmp_neigh_node->if_incoming == if_incoming))
                 neigh_node = tmp_neigh_node;
         }
 
-        if ( neigh_node == NULL )
+        if (neigh_node == NULL)
             neigh_node = create_neighbor(orig_node, orig_neigh_node, orig_neigh_node->orig, if_incoming);
 
         neigh_node->last_valid = recv_time;
@@ -312,22 +312,22 @@ int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node,
         for (unsigned int i = 0; i < orig_neigh_node->neigh_list.size(); i++) {
             tmp_neigh_node = orig_neigh_node->neigh_list[i];
 
-            if ( ( tmp_neigh_node->addr == orig_neigh_node->orig ) && ( tmp_neigh_node->if_incoming == if_incoming ) )
+            if ((tmp_neigh_node->addr == orig_neigh_node->orig) && (tmp_neigh_node->if_incoming == if_incoming))
                 neigh_node = tmp_neigh_node;
         }
 
-        if ( neigh_node == NULL )
+        if (neigh_node == NULL)
             neigh_node = create_neighbor(orig_neigh_node, orig_neigh_node, orig_neigh_node->orig, if_incoming);
     }
 
     orig_node->last_valid = recv_time;
 
     /* pay attention to not get a value bigger than 100 % */
-    total_count = ( orig_neigh_node->bcast_own_sum[if_incoming->if_num] > neigh_node->real_packet_count ? neigh_node->real_packet_count : orig_neigh_node->bcast_own_sum[if_incoming->if_num] );
+    total_count = (orig_neigh_node->bcast_own_sum[if_incoming->if_num] > neigh_node->real_packet_count ? neigh_node->real_packet_count : orig_neigh_node->bcast_own_sum[if_incoming->if_num]);
 
     /* if we have too few packets (too less data) we set tq_own to zero */
     /* if we receive too few packets it is not considered bidirectional */
-    if ( ( total_count < minimum_send ) || ( neigh_node->real_packet_count < minimum_recv ) ) {
+    if ((total_count < minimum_send) || (neigh_node->real_packet_count < minimum_recv)) {
         orig_neigh_node->tq_own = 0;
     } else {
         /* neigh_node->real_packet_count is never zero as we only purge old information when getting new information */
@@ -346,8 +346,8 @@ int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node,
 
     in->setTq((in->getTq() * orig_neigh_node->tq_own * orig_neigh_node->tq_asym_penalty) / (TQ_MAX_VALUE *  TQ_MAX_VALUE));
 /*
-    addr_to_string( orig_node->orig, orig_str, ADDR_STR_LEN );
-    addr_to_string( orig_neigh_node->orig, neigh_str, ADDR_STR_LEN );
+    addr_to_string(orig_node->orig, orig_str, ADDR_STR_LEN);
+    addr_to_string(orig_neigh_node->orig, neigh_str, ADDR_STR_LEN);
 
     debug_output(4, "bidirectional: orig = %-15s neigh = %-15s => own_bcast = %2i, real recv = %2i, local tq: %3i, asym_penalty: %3i, total tq: %3i \n",
               orig_str, neigh_str, total_count, neigh_node->real_packet_count, orig_neigh_node->tq_own, orig_neigh_node->tq_asym_penalty, in->tq);
@@ -438,7 +438,7 @@ static void send_vis_packet(void)
 {
     generate_vis_packet();
 
-    if ( vis_packet != NULL )
+    if (vis_packet != NULL)
         send_udp_packet(vis_packet, vis_packet_size, &vis_if.addr, vis_if.sock, NULL);
 }
 #endif
@@ -453,30 +453,30 @@ uint8_t Batman::count_real_packets(BatmanPacket *in, const Uint128 &neigh, Batma
 
     /*char orig_str[ADDR_STR_LEN], neigh_str[ADDR_STR_LEN];
 
-    addr_to_string( in->orig, orig_str, ADDR_STR_LEN );
-    addr_to_string( neigh, neigh_str, ADDR_STR_LEN );
+    addr_to_string(in->orig, orig_str, ADDR_STR_LEN);
+    addr_to_string(neigh, neigh_str, ADDR_STR_LEN);
 
-    debug_output( 3, "count_real_packets: orig = %s, neigh = %s, seq = %i, last seq = %i\n", orig_str, neigh_str, in->seqno, orig_node->last_real_seqno );*/
+    debug_output(3, "count_real_packets: orig = %s, neigh = %s, seq = %i, last seq = %i\n", orig_str, neigh_str, in->seqno, orig_node->last_real_seqno);*/
 
     for (unsigned int i = 0; i<orig_node->neigh_list.size(); i++)
     {
         tmp_neigh_node = orig_node->neigh_list[i];
 
-        if ( !is_duplicate )
-            is_duplicate = get_bit_status(tmp_neigh_node->real_bits, orig_node->last_real_seqno, in->getSeqNumber() );
+        if (!is_duplicate)
+            is_duplicate = get_bit_status(tmp_neigh_node->real_bits, orig_node->last_real_seqno, in->getSeqNumber());
 
-        if ( ( tmp_neigh_node->addr == neigh ) && ( tmp_neigh_node->if_incoming == if_incoming ) ) {
-            bit_get_packet(tmp_neigh_node->real_bits, in->getSeqNumber() - orig_node->last_real_seqno, 1 );
-            /*debug_output( 3, "count_real_packets (yes): neigh = %s, is_new = %s, seq = %i, last seq = %i\n", neigh_str, ( is_new_seqno ? "YES" : "NO" ), in->seqno, orig_node->last_real_seqno );*/
+        if ((tmp_neigh_node->addr == neigh) && (tmp_neigh_node->if_incoming == if_incoming)) {
+            bit_get_packet(tmp_neigh_node->real_bits, in->getSeqNumber() - orig_node->last_real_seqno, 1);
+            /*debug_output(3, "count_real_packets (yes): neigh = %s, is_new = %s, seq = %i, last seq = %i\n", neigh_str, (is_new_seqno ? "YES" : "NO"), in->seqno, orig_node->last_real_seqno);*/
         } else {
-            bit_get_packet(tmp_neigh_node->real_bits, in->getSeqNumber() - orig_node->last_real_seqno, 0 );
-            /*debug_output( 3, "count_real_packets (no): neigh = %s, is_new = %s, seq = %i, last seq = %i\n", neigh_str, ( is_new_seqno ? "YES" : "NO" ), in->seqno, orig_node->last_real_seqno );*/
+            bit_get_packet(tmp_neigh_node->real_bits, in->getSeqNumber() - orig_node->last_real_seqno, 0);
+            /*debug_output(3, "count_real_packets (no): neigh = %s, is_new = %s, seq = %i, last seq = %i\n", neigh_str, (is_new_seqno ? "YES" : "NO"), in->seqno, orig_node->last_real_seqno);*/
         }
 
         tmp_neigh_node->real_packet_count = bit_packet_count(tmp_neigh_node->real_bits);
     }
 
-    if ( !is_duplicate ) {
+    if (!is_duplicate) {
         EV << "updating last_seqno: old" << orig_node->last_real_seqno <<" new "<< in->getSeqNumber() << "\n";
         orig_node->last_real_seqno = in->getSeqNumber();
     }
@@ -546,21 +546,21 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
     for (OrigMap::iterator it = origMap.begin(); it!=origMap.end(); it++)
     {
         orig_node = it->second;
-        //debug_output( 4, "count own bcast (schedule_own_packet): old = %i, ", orig_node->bcast_own_sum[batman_if->if_num] );
+        //debug_output(4, "count own bcast (schedule_own_packet): old = %i, ", orig_node->bcast_own_sum[batman_if->if_num]);
 
         std::vector<TYPE_OF_WORD>vectorAux;
         for (unsigned int i=0; i<num_words; i++)
         {
             vectorAux.push_back(orig_node->bcast_own[(batman_if->if_num * num_words)+i]);
         }
-        bit_get_packet(vectorAux, 1, 0 );
+        bit_get_packet(vectorAux, 1, 0);
         orig_node->bcast_own_sum[batman_if->if_num] = bit_packet_count(vectorAux);
         for (unsigned int i=0; i<num_words; i++)
         {
             orig_node->bcast_own[(batman_if->if_num * num_words)+i] = vectorAux[i];
         }
         vectorAux.clear();
-        //debug_output( 4, "new = %i \n", orig_node->bcast_own_sum[batman_if->if_num] );
+        //debug_output(4, "new = %i \n", orig_node->bcast_own_sum[batman_if->if_num]);
     }
 }
 
@@ -605,7 +605,6 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
              */
             if ((forw_node_pos->send_time < send_time) &&
                 (forw_node_pos->pack_buff->getByteLength() + in->getByteLength() <= MAX_AGGREGATION_BYTES)) {
-
                 bat_packet = forw_node_pos->pack_buff;
 
                 /**
@@ -687,7 +686,6 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
 
     /* if the packet was not aggregated */
     if (forw_node_aggregate == NULL) {
-
         /* if the packet should go somewhere in the queue */
         if (it!=forw_list.end())
             forw_list.insert(it, forw_node_new);
@@ -902,7 +900,7 @@ void Batman::add_del_rule(const Uint128& network, uint8_t netmask, int8_t rt_tab
 
 // Bits methods
 /* clear the bits */
-void Batman::bit_init( std::vector<TYPE_OF_WORD> &seq_bits )
+void Batman::bit_init(std::vector<TYPE_OF_WORD> &seq_bits)
 {
     for (int i = 0; i < (int)num_words; i++)
     {
@@ -911,17 +909,17 @@ void Batman::bit_init( std::vector<TYPE_OF_WORD> &seq_bits )
 }
 
 /* returns true if corresponding bit in given seq_bits indicates so and curr_seqno is within range of last_seqno */
-uint8_t Batman::get_bit_status( std::vector<TYPE_OF_WORD> &seq_bits, uint16_t last_seqno, uint16_t curr_seqno ) {
+uint8_t Batman::get_bit_status(std::vector<TYPE_OF_WORD> &seq_bits, uint16_t last_seqno, uint16_t curr_seqno) {
     int16_t diff, word_offset, word_num;
     diff = last_seqno- curr_seqno;
     if (diff < 0 || diff >= local_win_size)
         return 0;
     else
     {
-        word_offset = ( last_seqno - curr_seqno ) % WORD_BIT_SIZE;    /* which position in the selected word */
-        word_num = ( last_seqno - curr_seqno ) / WORD_BIT_SIZE;    /* which word */
+        word_offset = (last_seqno - curr_seqno) % WORD_BIT_SIZE;    /* which position in the selected word */
+        word_num = (last_seqno - curr_seqno) / WORD_BIT_SIZE;    /* which word */
 
-        if ( seq_bits[word_num] & 1<<word_offset )   /* get position status */
+        if (seq_bits[word_num] & 1<<word_offset)   /* get position status */
             return 1;
         else
             return 0;
@@ -929,7 +927,7 @@ uint8_t Batman::get_bit_status( std::vector<TYPE_OF_WORD> &seq_bits, uint16_t la
 }
 
 /* turn corresponding bit on, so we can remember that we got the packet */
-void Batman::bit_mark( std::vector<TYPE_OF_WORD> &seq_bits, int32_t n )
+void Batman::bit_mark(std::vector<TYPE_OF_WORD> &seq_bits, int32_t n)
 {
     int32_t word_offset, word_num;
     if (n<0 || n >= local_win_size) {            /* if too old, just drop it */
@@ -943,18 +941,18 @@ void Batman::bit_mark( std::vector<TYPE_OF_WORD> &seq_bits, int32_t n )
 }
 
 /* shift the packet array p by n places. */
-void Batman::bit_shift( std::vector<TYPE_OF_WORD> &seq_bits, int32_t n ) {
+void Batman::bit_shift(std::vector<TYPE_OF_WORD> &seq_bits, int32_t n) {
     int32_t word_offset, word_num;
     int32_t i;
 
-/*    bit_print( seq_bits );*/
-    if ( n<=0 )
+/*    bit_print(seq_bits);*/
+    if (n<=0)
         return;
 
     word_offset = n%WORD_BIT_SIZE;    /* shift how much inside each word */
     word_num = n/WORD_BIT_SIZE;    /* shift over how much (full) words */
 
-    for (i=num_words-1; i>word_num; i-- )
+    for (i=num_words-1; i>word_num; i--)
     {
         /* going from old to new, so we can't overwrite the data we copy from. *
           * left is high, right is low: FEDC BA98 7654 3210
@@ -981,18 +979,18 @@ void Batman::bit_shift( std::vector<TYPE_OF_WORD> &seq_bits, int32_t n ) {
     i--;
     for (; i>=0; i--)
         seq_bits[i] = 0;
-/*    bit_print( seq_bits ); */
+/*    bit_print(seq_bits); */
 }
 
 
 /* receive and process one packet, returns 1 if received seq_num is considered new, 0 if old  */
-char Batman::bit_get_packet( std::vector<TYPE_OF_WORD> &seq_bits, int16_t seq_num_diff, int8_t set_mark )
+char Batman::bit_get_packet(std::vector<TYPE_OF_WORD> &seq_bits, int16_t seq_num_diff, int8_t set_mark)
 {
     int i;
     /* we already got a sequence number higher than this one, so we just mark it. this should wrap around the integer just fine */
     if ((seq_num_diff < 0) && (seq_num_diff >= -local_win_size)) {
-        if ( set_mark )
-            bit_mark( seq_bits, -seq_num_diff );
+        if (set_mark)
+            bit_mark(seq_bits, -seq_num_diff);
         return 0;
     }
 
@@ -1008,20 +1006,20 @@ char Batman::bit_get_packet( std::vector<TYPE_OF_WORD> &seq_bits, int16_t seq_nu
         for (i=0; i<num_words; i++)
             seq_bits[i] = 0;
 
-        if ( set_mark )
+        if (set_mark)
             seq_bits[0] = 1;  /* we only have the latest packet */
     }
     else
     {
         bit_shift(seq_bits, seq_num_diff);
-        if ( set_mark )
+        if (set_mark)
             bit_mark(seq_bits, 0);
     }
     return 1;
 }
 
 /* count the hamming weight, how many good packets did we receive? just count the 1's ... */
-int Batman::bit_packet_count( std::vector<TYPE_OF_WORD> &seq_bits )
+int Batman::bit_packet_count(std::vector<TYPE_OF_WORD> &seq_bits)
 {
     int i, hamming = 0;
     TYPE_OF_WORD word;
@@ -1036,10 +1034,10 @@ int Batman::bit_packet_count( std::vector<TYPE_OF_WORD> &seq_bits )
     return (hamming);
 }
 
-uint8_t Batman::bit_count( int32_t to_count )
+uint8_t Batman::bit_count(int32_t to_count)
 {
     uint8_t hamming = 0;
-    while ( to_count )
+    while (to_count)
     {
         to_count &= to_count-1;   /* see http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetKernighan */
         hamming++;

@@ -73,9 +73,8 @@ std::string OrigNode::info() const
     for (unsigned int i = 0; i < neigh_list.size(); i++)
     {
         NeighNode * tmp_neigh_node = neigh_list[i];
-        if (tmp_neigh_node->addr == orig )
+        if (tmp_neigh_node->addr == orig)
             neigh_node = tmp_neigh_node;
-
     }
     if (!neigh_node)
         out << "*";
@@ -198,7 +197,6 @@ NeighNode::NeighNode(OrigNode* origNode, OrigNode *orig_neigh_node, const Uint12
 }
 
 
-
 /* this function finds or creates an originator entry for the given address if it does not exits */
 OrigNode  *Batman::get_orig_node(const Uint128 &addr) {
     OrigNode *orig_node;
@@ -246,28 +244,26 @@ uint8_t Batman::ring_buffer_avg(std::vector<uint8_t> &tq_recv)
 }
 
 
-void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh, BatmanIf *if_incoming, BatmanHnaMsg *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time ) {
+void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh, BatmanIf *if_incoming, BatmanHnaMsg *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time) {
     GwNode *gw_node;
     NeighNode *neigh_node = NULL, *tmp_neigh_node = NULL, *best_neigh_node = NULL;
     uint8_t max_bcast_own = 0, max_tq = 0;
 
-
-    //debug_output( 4, "update_originator(): Searching and updating originator entry of received packet,  \n" );
-
+    //debug_output(4, "update_originator(): Searching and updating originator entry of received packet,  \n");
 
     for (unsigned int i=0; i<orig_node->neigh_list.size(); i++) {
         tmp_neigh_node = orig_node->neigh_list[i];
 
-        if ( ( tmp_neigh_node->addr == neigh ) && ( tmp_neigh_node->if_incoming == if_incoming ) ) {
+        if ((tmp_neigh_node->addr == neigh) && (tmp_neigh_node->if_incoming == if_incoming)) {
             neigh_node = tmp_neigh_node;
         } else {
-            if ( !is_duplicate ) {
+            if (!is_duplicate) {
                 ring_buffer_set(tmp_neigh_node->tq_recv, tmp_neigh_node->tq_index, 0);
                 tmp_neigh_node->tq_avg = ring_buffer_avg(tmp_neigh_node->tq_recv);
             }
 
             /* if we got have a better tq value via this neighbour or same tq value if it is currently our best neighbour (to avoid route flipping) */
-            if ( ( tmp_neigh_node->tq_avg > max_tq ) || ( ( tmp_neigh_node->tq_avg == max_tq ) && ( tmp_neigh_node->orig_node->bcast_own_sum[if_incoming->if_num] > max_bcast_own ) ) || ( ( orig_node->router == tmp_neigh_node ) && ( tmp_neigh_node->tq_avg == max_tq ) ) ) {
+            if ((tmp_neigh_node->tq_avg > max_tq) || ((tmp_neigh_node->tq_avg == max_tq) && (tmp_neigh_node->orig_node->bcast_own_sum[if_incoming->if_num] > max_bcast_own)) || ((orig_node->router == tmp_neigh_node) && (tmp_neigh_node->tq_avg == max_tq))) {
                 max_tq = tmp_neigh_node->tq_avg;
                 max_bcast_own = tmp_neigh_node->orig_node->bcast_own_sum[if_incoming->if_num];
                 best_neigh_node = tmp_neigh_node;
@@ -275,10 +271,10 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &n
         }
     }
 
-    if ( neigh_node == NULL ) {
+    if (neigh_node == NULL) {
         neigh_node = new NeighNode(orig_node, get_orig_node(neigh), neigh, if_incoming, num_words, global_win_size);
     } else {
-        //debug_output( 4, "Updating existing last-hop neighbour of originator\n" );
+        //debug_output(4, "Updating existing last-hop neighbour of originator\n");
     }
 
     neigh_node->last_valid = curr_time;
@@ -286,26 +282,25 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &n
     ring_buffer_set(neigh_node->tq_recv, neigh_node->tq_index, in->getTq());
     neigh_node->tq_avg = ring_buffer_avg(neigh_node->tq_recv);
 
-/*     is_new_seqno = bit_get_packet( neigh_node->seq_bits, in->seqno - orig_node->last_seqno, 1 );
-     is_new_seqno = ! get_bit_status( neigh_node->real_bits, orig_node->last_real_seqno, in->seqno ); */
+/*     is_new_seqno = bit_get_packet(neigh_node->seq_bits, in->seqno - orig_node->last_seqno, 1);
+     is_new_seqno = ! get_bit_status(neigh_node->real_bits, orig_node->last_real_seqno, in->seqno); */
 
-
-    if ( !is_duplicate )
+    if (!is_duplicate)
     {
         orig_node->last_ttl = in->getTtl();
         neigh_node->last_ttl = in->getTtl();
         neigh_node->num_hops = in->getHops();
     }
 
-    if ( ( neigh_node->tq_avg > max_tq ) || ( ( neigh_node->tq_avg == max_tq ) && ( neigh_node->orig_node->bcast_own_sum[if_incoming->if_num] > max_bcast_own ) ) || ( ( orig_node->router == neigh_node ) && ( neigh_node->tq_avg == max_tq ) ) ) {
+    if ((neigh_node->tq_avg > max_tq) || ((neigh_node->tq_avg == max_tq) && (neigh_node->orig_node->bcast_own_sum[if_incoming->if_num] > max_bcast_own)) || ((orig_node->router == neigh_node) && (neigh_node->tq_avg == max_tq))) {
         best_neigh_node = neigh_node;
     }
 
     /* update routing table and check for changed hna announcements */
-    update_routes( orig_node, best_neigh_node, hna_recv_buff, hna_buff_len );
+    update_routes(orig_node, best_neigh_node, hna_recv_buff, hna_buff_len);
 
-    if ( orig_node->gwflags != in->getGatewayFlags() )
-        update_gw_list( orig_node, in->getGatewayFlags(), in->getGatewayPort());
+    if (orig_node->gwflags != in->getGatewayFlags())
+        update_gw_list(orig_node, in->getGatewayFlags(), in->getGatewayPort());
 
     orig_node->gwflags = in->getGatewayFlags();
     hna_global_check_tq(orig_node);
@@ -354,8 +349,8 @@ void Batman::purge_orig(const simtime_t &curr_time)
         orig_node = it->second;
 
         if (curr_time > (orig_node->last_valid + (2 * purge_timeout))) {
-            //addr_to_string( orig_node->orig, orig_str, ADDR_STR_LEN );
-            //debug_output( 4, "Originator timeout: originator %s, last_valid %u \n", orig_str, orig_node->last_valid );
+            //addr_to_string(orig_node->orig, orig_str, ADDR_STR_LEN);
+            //debug_output(4, "Originator timeout: originator %s, last_valid %u \n", orig_str, orig_node->last_valid);
 
             if (it != origMap.begin()) {
                 OrigMap::iterator itAux = it;
@@ -381,9 +376,9 @@ void Batman::purge_orig(const simtime_t &curr_time)
                 if (gw_node->deleted.raw())
                     continue;
 
-                if ( gw_node->orig_node == orig_node ) {
-                    //addr_to_string( gw_node->orig_node->orig, orig_str, ADDR_STR_LEN );
-                    //debug_output( 3, "Removing gateway %s from gateway list \n", orig_str );
+                if (gw_node->orig_node == orig_node) {
+                    //addr_to_string(gw_node->orig_node->orig, orig_str, ADDR_STR_LEN);
+                    //debug_output(3, "Removing gateway %s from gateway list \n", orig_str);
 
                     gw_node->deleted = getTime();
                     gw_purged = 1;
@@ -392,7 +387,7 @@ void Batman::purge_orig(const simtime_t &curr_time)
                 }
             }
 
-            update_routes( orig_node, NULL, NULL, 0 );
+            update_routes(orig_node, NULL, NULL, 0);
 
             delete orig_node;
             continue;
@@ -407,7 +402,7 @@ void Batman::purge_orig(const simtime_t &curr_time)
                 if (curr_time > (neigh_node->last_valid + purge_timeout)) {
                     if (orig_node->router == neigh_node) {
                         /* we have to delete the route towards this node before it gets purged */
-                        //debug_output( 4, "Deleting previous route \n" );
+                        //debug_output(4, "Deleting previous route \n");
 
                         /* remove old announced network(s) */
                         hna_global_del(orig_node);
@@ -455,7 +450,7 @@ void Batman::purge_orig(const simtime_t &curr_time)
         i++;
     }
 
-    if ( gw_purged )
+    if (gw_purged)
         choose_gw();
 }
 
