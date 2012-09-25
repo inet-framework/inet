@@ -56,6 +56,12 @@ void UDPBurstApp::initialize(int stage)
     burstTimer = new cMessage("burstTimer", 0);
     messageTimer = new cMessage("messageTimer", 1);
     scheduleAt((double)par("startTime"), burstTimer);
+
+    // send a small packet to trigger ARP process
+    cPacket *payload = new cPacket("Triggering ARP process");
+    payload->setByteLength(0);  // no payload
+    IPvXAddress destAddr = chooseDestAddr();
+    sendToUDP(payload, localPort, destAddr, destPort);
 }
 
 cPacket *UDPBurstApp::createPacket(int payloadLength)
