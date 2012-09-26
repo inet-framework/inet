@@ -184,13 +184,6 @@ class GwClient //:public cObject
     uint8_t nat_warn;
 };
 
-class FreeIp
-{
-  public:
-    Uint128 addr;
-};
-
-
 class HnaTask
 {
   public:
@@ -238,22 +231,6 @@ inline bool operator==(const HnaGlobalEntry& a, const HnaGlobalEntry& b)
     return (a.addr==b.addr && a.netmask==b.netmask);
 }
 
-class curr_gw_data
-{
-  public:
-    unsigned int orig;
-    GwNode *gw_node;
-    BatmanIf *batmanIf;
-};
-
-class batgat_ioc_args
-{
-  public:
-    char dev_name[16];
-    unsigned char exists;
-    uint32_t universal;
-    uint32_t ifindex;
-};
 
 #define HnaElement BatmanHnaMsg
 
