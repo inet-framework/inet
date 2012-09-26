@@ -199,11 +199,7 @@ class Hna_task
     uint8_t route_action;
 
   public:
-    Hna_task()
-    {
-       netmask = route_action = 0;
-       addr = (Uint128)0;
-    }
+    Hna_task() : addr(0), netmask(0), route_action(0) {}
 };
 
 class Hna_local_entry
@@ -234,18 +230,12 @@ class Hna_global_entry
 
 inline bool operator<(const Hna_global_entry& a, const Hna_global_entry& b)
 {
-    if (a.addr==b.addr)
-    {
-        return a.netmask<b.netmask;
-    }
-    return a.addr<b.addr;
+    return (a.addr < b.addr) || (a.addr == b.addr && a.netmask < b.netmask);
 }
 
 inline bool operator==(const Hna_global_entry& a, const Hna_global_entry& b)
 {
-    if (a.addr==b.addr && a.netmask==b.netmask)
-        return true;
-    return false;
+    return (a.addr==b.addr && a.netmask==b.netmask);
 }
 
 class curr_gw_data
