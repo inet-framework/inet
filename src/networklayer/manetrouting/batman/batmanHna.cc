@@ -279,7 +279,8 @@ void Batman::hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t 
     }
 
     /* add new routes */
-    num_elements = new_hna_len;
+    num_elements = new_hna_len / SIZE_Hna_element;
+
     //debug_output(4, "HNA information received (%i HNA network%s): \n", num_elements, (num_elements > 1 ? "s": ""));
     for (i = 0; i < num_elements; i++) {
         e = new_hna[i].dup();
