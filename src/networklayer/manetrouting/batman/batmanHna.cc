@@ -44,15 +44,16 @@ void Batman::hna_local_task_exec(void)
         hna_local_entry = NULL;
         bool found = false;
 
-        for (HnaLocalEntryList::iterator it=hna_list.begin(); it!=hna_list.end(); it++)
-        {
-            hna_local_entry = &(*it);
+        for (unsigned int hna_pos = 0; hna_pos < hna_list.size(); hna_pos++) {
+            hna_local_entry = &(hna_list[hna_pos]);
+
             if ((hna_task->addr == hna_local_entry->addr) && (hna_task->netmask == hna_local_entry->netmask)) {
                 found = true;
                 if (hna_task->route_action == ROUTE_DEL) {
                     // EV << "Deleting HNA from announce network list: %s/%i\n", hna_addr_str, hna_task->netmask);
                     hna_local_update_routes(hna_local_entry, ROUTE_DEL);
-                    hna_list.erase(it);
+                    hna_list.erase(hna_list.begin()+hna_pos);
+                    --hna_pos;
                 } else {
                     // debug_output(3, "Can't add HNA - already announcing network: %s/%i\n", hna_addr_str, hna_task->netmask);
                 }
