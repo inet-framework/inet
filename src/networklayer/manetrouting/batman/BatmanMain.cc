@@ -246,7 +246,7 @@ void Batman::handleMessage(cMessage *msg)
     Uint128 neigh;
     simtime_t vis_timeout, select_timeout, curr_time;
 
-    BatmanHnaMsg *hna_recv_buff;
+    HnaElement *hna_recv_buff;
     //char orig_str[ADDR_STR_LEN], neigh_str[ADDR_STR_LEN], ifaddr_str[ADDR_STR_LEN], prev_sender_str[ADDR_STR_LEN];
     int16_t hna_buff_len, curr_packet_len;
     uint8_t is_my_addr, is_my_orig, is_my_oldorig, is_broadcast, is_duplicate, is_bidirectional, has_directlink_flag;

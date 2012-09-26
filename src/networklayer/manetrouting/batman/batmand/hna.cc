@@ -170,7 +170,7 @@ void Batman::hna_local_buffer_fill(void)
         return;
 
     for (unsigned int list_pos = 0; list_pos < hna_list.size(); list_pos++) {
-        BatmanHnaMsg aux;
+        HnaElement aux;
         aux.addr = hna_list[list_pos].addr;
         aux.netmask = hna_list[list_pos].netmask;
         hna_buff_local.push_back(aux);
@@ -280,7 +280,7 @@ void Batman::_hna_global_add(OrigNode *orig_node, HnaElement *hna_element)
     HnaGlobalEntry *hna_global_entry;
     OrigNode *old_orig_node = NULL;
 
-    std::map<BatmanHnaMsg,HnaGlobalEntry*>::iterator it;
+    std::map<HnaElement,HnaGlobalEntry*>::iterator it;
     it = hnaMap.find(*hna_element);
 
     /* add the hna node if it does not exist */
@@ -290,7 +290,7 @@ void Batman::_hna_global_add(OrigNode *orig_node, HnaElement *hna_element)
         hna_global_entry->addr = hna_element->addr;
         hna_global_entry->netmask = hna_element->netmask;
         hna_global_entry->curr_orig_node = NULL;
-        hnaMap.insert(std::pair<BatmanHnaMsg,HnaGlobalEntry*>(*hna_element, hna_global_entry));
+        hnaMap.insert(std::pair<HnaElement,HnaGlobalEntry*>(*hna_element, hna_global_entry));
     }
     else
         hna_global_entry = it->second;
@@ -345,7 +345,7 @@ void Batman::_hna_global_del(OrigNode *orig_node, HnaElement *hna_element)
     HnaGlobalEntry *hna_global_entry;
     OrigNode *orig_ptr = NULL;
 
-    std::map<BatmanHnaMsg,HnaGlobalEntry*>::iterator it;
+    std::map<HnaElement,HnaGlobalEntry*>::iterator it;
     it = hnaMap.find(*hna_element);
 
     /* add the hna node if it does not exist */
@@ -417,7 +417,7 @@ int Batman::hna_buff_delete(std::vector<HnaElement> &buf, int *buf_len, HnaEleme
     return 0;
 }
 
-void Batman::hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t new_hna_len)
+void Batman::hna_global_add(OrigNode *orig_node, HnaElement *new_hna, int16_t new_hna_len)
 {
     HnaElement *e;
     int i, num_elements;
@@ -459,12 +459,12 @@ void Batman::hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t 
  * before delting the old ones so that the kernel will not experience
  * a situation where no route is present.
  */
-void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t new_hna_len, NeighNode *old_router)
+void Batman::hna_global_update(OrigNode *orig_node, HnaElement *new_hna, int16_t new_hna_len, NeighNode *old_router)
 {
     HnaElement *e;
     HnaGlobalEntry *hna_global_entry;
     int i, num_elements, old_hna_len;
-    std::vector<BatmanHnaMsg> old_hna;
+    std::vector<HnaElement> old_hna;
 
     /* orig node stopped announcing any networks */
     if ((!orig_node->hna_buff.empty()) && ((new_hna == NULL) || (new_hna_len == 0))) {
@@ -492,7 +492,7 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
             if ((e->netmask < 1) || (e->netmask > 32))
                 continue;
 
-            std::map<BatmanHnaMsg,HnaGlobalEntry*>::iterator it;
+            std::map<HnaElement,HnaGlobalEntry*>::iterator it;
             it = hnaMap.find(*e);
 
             /* add the hna node if it does not exist */
@@ -549,7 +549,7 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
     orig_node->hna_buff.clear();
     num_elements = new_hna_len / SIZE_Hna_element;
     for (int i = 0; i < num_elements; i++) {
-        BatmanHnaMsg *aux = &new_hna[i];
+        HnaElement *aux = &new_hna[i];
         orig_node->hna_buff.push_back(*e);
     }
 
@@ -572,7 +572,7 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
     num_elements = old_hna_len / SIZE_Hna_element;
 
     for (unsigned int i = 0; i < old_hna.size(); i++) {
-        BatmanHnaMsg *e = &old_hna[i];
+        HnaElement *e = &old_hna[i];
 
         if ((e->netmask > 0) && (e->netmask <= 32))
             _hna_global_del(orig_node, e);
@@ -598,7 +598,7 @@ void Batman::hna_global_check_tq(OrigNode *orig_node)
         if ((e->netmask < 1) || (e->netmask > 32))
             continue;
 
-        std::map<BatmanHnaMsg,HnaGlobalEntry*>::iterator it;
+        std::map<HnaElement,HnaGlobalEntry*>::iterator it;
         it = hnaMap.find(*e);
 
         if (it==hnaMap.end())

@@ -82,7 +82,7 @@ OrigNode *Batman::get_orig_node(const Uint128 &addr) {
     return orig_node;
 }
 
-void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh, BatmanIf *if_incoming, BatmanHnaMsg *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time) {
+void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh, BatmanIf *if_incoming, HnaElement *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time) {
     GwNode *gw_node;
     NeighNode *neigh_node = NULL, *tmp_neigh_node = NULL, *best_neigh_node = NULL;
     uint8_t max_bcast_own = 0, max_tq = 0;
@@ -268,7 +268,7 @@ void Batman::purge_orig(const simtime_t &curr_time)
 
             if ((neigh_purged) && ((best_neigh_node == NULL) || (orig_node->router == NULL) || (max_tq > orig_node->router->tq_avg)))
             {
-                BatmanHnaMsg * buffer = new BatmanHnaMsg[orig_node->hna_buff.size()];
+                HnaElement * buffer = new HnaElement[orig_node->hna_buff.size()];
                 for (unsigned int i=0; i<orig_node->hna_buff.size(); i++)
                     buffer[i] = (orig_node->hna_buff[i]);
                 update_routes(orig_node, best_neigh_node, buffer, orig_node->hna_buff.size());

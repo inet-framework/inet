@@ -53,7 +53,7 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
         forw_node_new->pack_buff->setByteLength(forw_node_new->pack_buff->getByteLength()+(hna_buff_local.size() * BATMAN_HNA_MSG_SIZE));
         for (unsigned int i = 0; i<hna_buff_local.size(); i++)
         {
-            BatmanHnaMsg aux;
+            HnaElement aux;
             aux.addr = hna_buff_local[i].addr;
             aux.netmask = hna_buff_local[i].netmask;
 

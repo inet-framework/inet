@@ -297,7 +297,7 @@ void Batman::choose_gw(void)
     }
 }
 
-void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, BatmanHnaMsg *hna_recv_buff, int16_t hna_buff_len)
+void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElement *hna_recv_buff, int16_t hna_buff_len)
 {
     NeighNode *old_router;
     //debug_output(4, "update_routes() \n");

@@ -31,19 +31,19 @@ cplusplus {{
 
 #define BATMAN_HNA_MSG_SIZE 5
 
-class BatmanHnaMsg
+class HnaElement
 {
    public:
     Uint128 addr;
     uint8_t  netmask;
-    BatmanHnaMsg& operator=(const BatmanHnaMsg& m)
+    HnaElement& operator=(const HnaElement& m)
     {
            addr=m.addr;
            netmask=m.netmask;
            return *this;
     }
 
-    bool operator < (BatmanHnaMsg const &o) const
+    bool operator < (HnaElement const &o) const
     {
         if (addr < o.addr)
             return true;
@@ -58,7 +58,7 @@ class BatmanHnaMsg
             return false;
     }
 
-    bool operator > (BatmanHnaMsg const &o) const
+    bool operator > (HnaElement const &o) const
     {
         if (addr > o.addr)
             return true;
@@ -72,14 +72,14 @@ class BatmanHnaMsg
         else
             return false;
     }
-    bool operator == (BatmanHnaMsg const &o) const
+    bool operator == (HnaElement const &o) const
     {
         if (addr == o.addr && netmask == o.netmask)
             return true;
         else
             return false;
     }
-    bool operator != (BatmanHnaMsg const &o) const
+    bool operator != (HnaElement const &o) const
     {
         if (addr == o.addr && netmask == o.netmask)
             return false;
@@ -87,9 +87,9 @@ class BatmanHnaMsg
             return true;
     }
 
-    BatmanHnaMsg * dup()
+    HnaElement * dup()
     {
-        BatmanHnaMsg *aux = new BatmanHnaMsg;
+        HnaElement *aux = new HnaElement;
         *aux=*this;
         return aux;
     }
@@ -99,7 +99,7 @@ class BatmanHnaMsg
 
 
 class noncobject IPv4Address;
-class noncobject BatmanHnaMsg;
+class noncobject HnaElement;
 class noncobject Uint128;
 
 struct vis_data
@@ -123,7 +123,7 @@ packet BatmanPacket
     Uint128        prevSender;
     uint8_t        tq;           // Quality
     uint8_t        hops;
-    BatmanHnaMsg   hnaMsg[];    ///< Packet body.
+    HnaElement   hnaMsg[];    ///< Packet body.
 }
 
 

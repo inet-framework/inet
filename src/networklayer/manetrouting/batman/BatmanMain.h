@@ -74,18 +74,18 @@ class Batman : public ManetRoutingBase
 
     HnaLocalEntryList hna_list;
     HnaTaskList hna_chg_list;
-    std::map<BatmanHnaMsg,HnaGlobalEntry*> hnaMap;
-    std::vector<BatmanHnaMsg> hna_buff_local;
+    std::map<HnaElement,HnaGlobalEntry*> hnaMap;
+    std::vector<HnaElement> hna_buff_local;
 
   // methods
   private:
     void sendPackets(const simtime_t &curr_time);
     NeighNode *create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const Uint128 &neigh, BatmanIf *if_incoming);
     OrigNode *get_orig_node(const Uint128 &addr );
-    void update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh, BatmanIf *if_incoming, BatmanHnaMsg *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time );
+    void update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh, BatmanIf *if_incoming, HnaElement *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time );
     void purge_orig(const simtime_t &curr_time);
     void choose_gw(void);
-    void update_routes(OrigNode *orig_node, NeighNode *, BatmanHnaMsg * hna_recv_buff, int16_t hna_buff_len);
+    void update_routes(OrigNode *orig_node, NeighNode *, HnaElement * hna_recv_buff, int16_t hna_buff_len);
     void get_gw_speeds(unsigned char gw_class, int *down, int *up);
     void update_gw_list(OrigNode *orig_node, uint8_t new_gwflags, uint16_t gw_port);
     unsigned char get_gw_class(int down, int up);
@@ -103,8 +103,8 @@ class Batman : public ManetRoutingBase
     void _hna_global_add(OrigNode *orig_node, HnaElement *hna_element);
     void _hna_global_del(OrigNode *orig_node, HnaElement *hna_element);
     int hna_buff_delete(std::vector<HnaElement> &buf, int *buf_len, HnaElement *e);
-    void hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t new_hna_len);
-    void hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t new_hna_len, NeighNode *);
+    void hna_global_add(OrigNode *orig_node, HnaElement *new_hna, int16_t new_hna_len);
+    void hna_global_update(OrigNode *orig_node, HnaElement *new_hna, int16_t new_hna_len, NeighNode *);
     void hna_global_check_tq(OrigNode *orig_node);
     void hna_global_del(OrigNode *orig_node);
     void hna_free(void);
