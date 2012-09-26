@@ -440,7 +440,7 @@ void Batman::hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t 
     for (i = 0; i < num_elements; i++) {
         e = new_hna[i].dup();
         orig_node->hna_buff.push_back(e);
-        /*
+/*
         addr_to_string(e->addr, hna_str, sizeof(hna_str));
 
         if ((e->netmask > 0) && (e->netmask < 33))
@@ -448,6 +448,7 @@ void Batman::hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t 
         else
             debug_output(4, "hna: %s/%i -> ignoring (invalid netmask) \n", hna_str, e->netmask);
 */
+
         if ((e->netmask > 0) && (e->netmask <= 32))
             _hna_global_add(orig_node, e);
     }
