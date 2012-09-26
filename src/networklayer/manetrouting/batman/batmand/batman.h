@@ -75,7 +75,7 @@ const_simtime_t PURGE_TIMEOUT = 200; // 200000 msec /* purge originators after t
 
 class BatmanIf
 {
-    public:
+  public:
     InterfaceEntry* dev;
     int32_t udp_send_sock;
     int32_t udp_recv_sock;
@@ -98,36 +98,38 @@ class BatmanIf
 };
 
 
-
 class NeighNode;
-class OrigNode:  public cObject
+
+class OrigNode : public cObject
 {
-    public:
-        Uint128 orig;
-        uint32_t totalRec;
-        NeighNode *router;
-        BatmanIf* batmanIf;
-        std::vector<TYPE_OF_WORD> bcast_own;
-        std::vector<uint8_t> bcast_own_sum;
-        uint8_t tq_own;
-        int tq_asym_penalty;
-        simtime_t last_valid;        /* when last packet from this node was received */
-        uint8_t  gwflags;      /* flags related to gateway functions: gateway class */
-        std::vector<BatmanHnaMsg *>hna_buff;
-        uint16_t last_real_seqno;   /* last and best known squence number */
-        uint8_t last_ttl;         /* ttl of last received packet */
-        uint8_t num_hops;
-        std::vector<NeighNode *> neigh_list;
-        void clear();
-        OrigNode();
-        ~OrigNode();
-        virtual std::string info() const;
+  public:
+    Uint128 orig;
+    uint32_t totalRec;
+    NeighNode *router;
+    BatmanIf* batmanIf;
+    std::vector<TYPE_OF_WORD> bcast_own;
+    std::vector<uint8_t> bcast_own_sum;
+    uint8_t tq_own;
+    int tq_asym_penalty;
+    simtime_t last_valid;        /* when last packet from this node was received */
+    uint8_t  gwflags;      /* flags related to gateway functions: gateway class */
+    std::vector<BatmanHnaMsg *>hna_buff;
+    uint16_t last_real_seqno;   /* last and best known squence number */
+    uint8_t last_ttl;         /* ttl of last received packet */
+    uint8_t num_hops;
+    std::vector<NeighNode *> neigh_list;
+
+  public:
+    void clear();
+    OrigNode();
+    ~OrigNode();
+    virtual std::string info() const;
 };
 
 
-class NeighNode:  public cObject
+class NeighNode : public cObject
 {
-public:
+  public:
     Uint128 addr;
     uint8_t real_packet_count;
     std::vector <uint8_t> tq_recv;
@@ -143,26 +145,26 @@ public:
     void clear();
     ~NeighNode();
     NeighNode() {clear();}
-    NeighNode(OrigNode *, OrigNode*, const Uint128 &, BatmanIf *, const uint32_t&, const uint32_t&);
+    NeighNode(OrigNode *, OrigNode *, const Uint128 &, BatmanIf *, const uint32_t&, const uint32_t&);
     virtual std::string info() const;
 };
 
 
 class ForwNode //:  public cObject              /* structure for forw_list maintaining packets to be send/forwarded */
 {
-public:
+  public:
     simtime_t send_time;
     uint8_t   own;
     BatmanPacket *pack_buff;
     uint16_t  pack_buff_len;
     uint32_t direct_link_flags;
     uint8_t num_packets;
-    BatmanIf * if_incoming;
+    BatmanIf *if_incoming;
 };
 
 class GwNode // : public cObject
 {
-public:
+  public:
     OrigNode *orig_node;
     uint16_t gw_port;
     uint16_t gw_failure;
@@ -174,7 +176,7 @@ public:
 
 class GwClient //:public cObject
 {
-   public:
+  public:
     Uint128 wip_addr;
     Uint128 vip_addr;
     uint16_t client_port;
@@ -184,17 +186,19 @@ class GwClient //:public cObject
 
 class FreeIp
 {
-   public:
+  public:
     Uint128 addr;
 };
 
 
 class Hna_task
 {
-   public:
+  public:
     Uint128 addr;
     uint8_t netmask;
     uint8_t route_action;
+
+  public:
     Hna_task()
     {
        netmask = route_action = 0;
@@ -204,7 +208,7 @@ class Hna_task
 
 class Hna_local_entry
 {
-   public:
+  public:
     Uint128 addr;
     uint8_t netmask;
     int idIface;
@@ -212,7 +216,7 @@ class Hna_local_entry
 
 class Hna_global_entry
 {
-   public:
+  public:
     Uint128 addr;
     uint8_t netmask;
     OrigNode *curr_orig_node;
@@ -220,15 +224,15 @@ class Hna_global_entry
     Hna_global_entry() { curr_orig_node = NULL; }
     ~Hna_global_entry() { orig_list.clear(); }
 
-   private:     // noncopyable
+  private:     // noncopyable
     Hna_global_entry(const Hna_global_entry& m);
     Hna_global_entry& operator=(const Hna_global_entry& m);
-   public:
-    friend bool operator<(const Hna_global_entry &, const Hna_global_entry &);
-    friend bool operator==(const Hna_global_entry &, const Hna_global_entry &);
+  public:
+    friend bool operator<(const Hna_global_entry&, const Hna_global_entry&);
+    friend bool operator==(const Hna_global_entry&, const Hna_global_entry&);
 };
 
-inline bool operator<(const Hna_global_entry & a, const Hna_global_entry & b)
+inline bool operator<(const Hna_global_entry& a, const Hna_global_entry& b)
 {
     if (a.addr==b.addr)
     {
@@ -237,22 +241,24 @@ inline bool operator<(const Hna_global_entry & a, const Hna_global_entry & b)
     return a.addr<b.addr;
 }
 
-inline bool operator==(const Hna_global_entry & a, const Hna_global_entry & b)
+inline bool operator==(const Hna_global_entry& a, const Hna_global_entry& b)
 {
     if (a.addr==b.addr && a.netmask==b.netmask)
         return true;
     return false;
 }
 
-class curr_gw_data {
-   public:
+class curr_gw_data
+{
+  public:
     unsigned int orig;
     GwNode *gw_node;
     BatmanIf *batmanIf;
 };
 
-class batgat_ioc_args {
-   public:
+class batgat_ioc_args
+{
+  public:
     char dev_name[16];
     unsigned char exists;
     uint32_t universal;
