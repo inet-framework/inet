@@ -270,7 +270,7 @@ void Batman::purge_orig(const simtime_t &curr_time)
             {
                 BatmanHnaMsg * buffer = new BatmanHnaMsg[orig_node->hna_buff.size()];
                 for (unsigned int i=0; i<orig_node->hna_buff.size(); i++)
-                    buffer[i] = *(orig_node->hna_buff[i]);
+                    buffer[i] = (orig_node->hna_buff[i]);
                 update_routes(orig_node, best_neigh_node, buffer, orig_node->hna_buff.size());
                 delete [] buffer;
             }
@@ -408,12 +408,8 @@ OrigNode::~OrigNode()
         node->owner_node = NULL;
         delete node;
     }
-    while (!hna_buff.empty())
-    {
-        BatmanHnaMsg * aux = hna_buff.back();
-        hna_buff.pop_back();
-        delete aux;
-    }
+
+    hna_buff.clear();
 }
 
 void NeighNode::clear()

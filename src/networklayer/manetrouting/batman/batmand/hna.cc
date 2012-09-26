@@ -403,10 +403,10 @@ void Batman::_hna_global_del(OrigNode *orig_node, HnaElement *hna_element)
  * if found, delete it from the buf and return 1.
  * if not found, return 0.
  */
-int Batman::hna_buff_delete(std::vector<HnaElement *> &buf, int *buf_len, HnaElement *e)
+int Batman::hna_buff_delete(std::vector<HnaElement> &buf, int *buf_len, HnaElement *e)
 {
     for (unsigned int i = 0; i < buf.size(); i++) {
-        if (*(buf[i]) == *e) {
+        if ((buf[i]) == *e) {
             /* move last element forward */
             buf.erase(buf.begin()+i);
             *buf_len -= SIZE_Hna_element;
@@ -422,11 +422,7 @@ void Batman::hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t 
     HnaElement *e;
     int i, num_elements;
     // clean buffer
-    while (!orig_node->hna_buff.empty())
-    {
-        delete orig_node->hna_buff.back();
-        orig_node->hna_buff.pop_back();
-    }
+    orig_node->hna_buff.clear();
 
     if ((new_hna == NULL) || (new_hna_len == 0)) {
         return;
@@ -438,8 +434,8 @@ void Batman::hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t 
     //debug_output(4, "HNA information received (%i HNA network%s): \n", num_elements, (num_elements > 1 ? "s": ""));
 
     for (i = 0; i < num_elements; i++) {
-        e = new_hna[i].dup();
-        orig_node->hna_buff.push_back(e);
+        e = &new_hna[i];
+        orig_node->hna_buff.push_back(*e);
 /*
         addr_to_string(e->addr, hna_str, sizeof(hna_str));
 
@@ -468,7 +464,7 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
     HnaElement *e;
     HnaGlobalEntry *hna_global_entry;
     int i, num_elements, old_hna_len;
-    std::vector<BatmanHnaMsg *> old_hna;
+    std::vector<BatmanHnaMsg> old_hna;
 
     /* orig node stopped announcing any networks */
     if ((!orig_node->hna_buff.empty()) && ((new_hna == NULL) || (new_hna_len == 0))) {
@@ -491,7 +487,7 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
         num_elements = orig_node->hna_buff.size();
 
         for (unsigned int i = 0; i < orig_node->hna_buff.size(); i++) {
-            e = orig_node->hna_buff[i];
+            e = &orig_node->hna_buff[i];
 
             if ((e->netmask < 1) || (e->netmask > 32))
                 continue;
@@ -537,7 +533,7 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
     {
         for (unsigned int i=0; i<orig_node->hna_buff.size(); i++)
         {
-            if (*(orig_node->hna_buff[i]) != new_hna[i])
+            if ((orig_node->hna_buff[i]) != new_hna[i])
             {
                 change = true;
                 break;
@@ -554,13 +550,12 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
     num_elements = new_hna_len / SIZE_Hna_element;
     for (int i = 0; i < num_elements; i++) {
         BatmanHnaMsg *aux = &new_hna[i];
-        BatmanHnaMsg *e = aux->dup();
-        orig_node->hna_buff.push_back(e);
+        orig_node->hna_buff.push_back(*e);
     }
 
     /* add new routes and keep old routes */
     for (i = 0; i < num_elements; i++) {
-        e = orig_node->hna_buff[i];
+        e = &orig_node->hna_buff[i];
 
         /**
          * if the router is the same, and the announcement was already in the old
@@ -577,17 +572,14 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
     num_elements = old_hna_len / SIZE_Hna_element;
 
     for (unsigned int i = 0; i < old_hna.size(); i++) {
-        BatmanHnaMsg *e = old_hna[i];
+        BatmanHnaMsg *e = &old_hna[i];
 
         if ((e->netmask > 0) && (e->netmask <= 32))
             _hna_global_del(orig_node, e);
     }
 
     /* dispose old hna buffer now. */
-    while (!old_hna.empty()) {
-        delete old_hna.back();
-        old_hna.pop_back();
-    }
+    old_hna.clear();
 }
 
 void Batman::hna_global_check_tq(OrigNode *orig_node)
@@ -601,7 +593,7 @@ void Batman::hna_global_check_tq(OrigNode *orig_node)
 
     num_elements = orig_node->hna_buff.size();
     for (i = 0; i < num_elements; i++) {
-        e = orig_node->hna_buff[i];
+        e = &orig_node->hna_buff[i];
 
         if ((e->netmask < 1) || (e->netmask > 32))
             continue;
@@ -646,7 +638,7 @@ set_orig_node:
 
 void Batman::hna_global_del(OrigNode *orig_node)
 {
-    HnaElement *e;
+    HnaElement e;
 
     if (orig_node->hna_buff.empty())
         return;
@@ -657,9 +649,8 @@ void Batman::hna_global_del(OrigNode *orig_node)
         orig_node->hna_buff.pop_back();
 
         /* not found / deleted, need to add this new route */
-        if ((e->netmask > 0) && (e->netmask <= 32))
-            _hna_global_del(orig_node, e);
-        delete e;
+        if ((e.netmask > 0) && (e.netmask <= 32))
+            _hna_global_del(orig_node, &e);
     }
 }
 

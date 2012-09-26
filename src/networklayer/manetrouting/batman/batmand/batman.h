@@ -113,7 +113,7 @@ class OrigNode : public cObject
     int tq_asym_penalty;
     simtime_t last_valid;        /* when last packet from this node was received */
     uint8_t  gwflags;      /* flags related to gateway functions: gateway class */
-    std::vector<BatmanHnaMsg *>hna_buff;
+    std::vector<BatmanHnaMsg> hna_buff;
     uint16_t last_real_seqno;   /* last and best known squence number */
     uint8_t last_ttl;         /* ttl of last received packet */
     uint8_t num_hops;

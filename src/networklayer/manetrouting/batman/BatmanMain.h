@@ -102,7 +102,7 @@ class Batman : public ManetRoutingBase
     void hna_local_update_routes(HnaLocalEntry *hna_local_entry, int8_t route_action);
     void _hna_global_add(OrigNode *orig_node, HnaElement *hna_element);
     void _hna_global_del(OrigNode *orig_node, HnaElement *hna_element);
-    int hna_buff_delete(std::vector<HnaElement *> &buf, int *buf_len, HnaElement *e);
+    int hna_buff_delete(std::vector<HnaElement> &buf, int *buf_len, HnaElement *e);
     void hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t new_hna_len);
     void hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t new_hna_len, NeighNode *);
     void hna_global_check_tq(OrigNode *orig_node);
