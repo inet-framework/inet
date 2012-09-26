@@ -187,6 +187,7 @@ void Batman::hna_local_task_exec(void)
 
     while (!hna_chg_list.empty()) {
         hna_task = hna_chg_list.front();
+
         hna_local_entry = NULL;
         bool found = false;
 
@@ -196,12 +197,13 @@ void Batman::hna_local_task_exec(void)
             if ((hna_task->addr == hna_local_entry->addr) && (hna_task->netmask == hna_local_entry->netmask)) {
                 found = true;
                 if (hna_task->route_action == ROUTE_DEL) {
-                    // EV << "Deleting HNA from announce network list: %s/%i\n", hna_addr_str, hna_task->netmask);
+                    //debug_output(3, "Deleting HNA from announce network list: %s/%i\n", hna_addr_str, hna_task->netmask);
+
                     hna_local_update_routes(hna_local_entry, ROUTE_DEL);
                     hna_list.erase(hna_list.begin()+hna_pos);
                     --hna_pos;
                 } else {
-                    // debug_output(3, "Can't add HNA - already announcing network: %s/%i\n", hna_addr_str, hna_task->netmask);
+                    //debug_output(3, "Can't add HNA - already announcing network: %s/%i\n", hna_addr_str, hna_task->netmask);
                 }
                 break;
             }
@@ -220,7 +222,7 @@ void Batman::hna_local_task_exec(void)
                 hna_local_update_routes(&hna_local_entry, ROUTE_ADD);
                 hna_list.push_back(hna_local_entry);
             } else {
-                EV << "Can't delete HNA - network is not announced: ";
+                EV << "Can't delete HNA - network is not announced: " << hna_task->addr << "/" << hna_task->netmask << endl;
             }
         }
 
@@ -660,6 +662,24 @@ void Batman::hna_global_del(OrigNode *orig_node)
     }
 }
 
+#if 0
+static void _hna_global_hash_del(void *data)
+{
+    HnaGlobalEntry *hna_global_entry = data;
+    struct hna_orig_ptr *hna_orig_ptr = NULL;
+    struct list_head *list_pos, *list_pos_tmp;
+
+    list_for_each_safe(list_pos, list_pos_tmp, &hna_global_entry->orig_list) {
+        hna_orig_ptr = list_entry(list_pos, struct hna_orig_ptr, list);
+
+        list_del((struct list_head *)&hna_global_entry->orig_list, list_pos, &hna_global_entry->orig_list);
+        delete hna_orig_ptr;
+    }
+
+    delete hna_global_entry;
+}
+#endif
+
 void Batman::hna_free(void)
 {
     HnaLocalEntry *hna_local_entry;
@@ -668,13 +688,16 @@ void Batman::hna_free(void)
     while (!hna_list.empty()) {
         hna_local_entry = &hna_list.back();
         hna_local_update_routes(hna_local_entry, ROUTE_DEL);
+
         hna_list.pop_back();
     }
 
+    hna_buff_local.clear();
+
+
+    /* hna global */
     while (!hnaMap.empty()) {
         delete hnaMap.begin()->second;
         hnaMap.erase(hnaMap.begin());
     }
-
-    hna_buff_local.clear();
 }
