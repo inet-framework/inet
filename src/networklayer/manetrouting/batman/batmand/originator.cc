@@ -322,7 +322,7 @@ std::string OrigNode::info() const
 {
     std::stringstream out;
     out << "orig:"  << IPv4Address(orig.getLo()) << "  ";
-    out << "totalRec:"  << this->totalRec << "  ";
+    out << "totalRec:"  << totalRec << "  ";
     if (bcast_own[0])
       out << "bcast_own:" << bcast_own[0]<< "  ";
     else
@@ -439,13 +439,13 @@ NeighNode::~NeighNode()
 {
     tq_recv.clear();
     real_bits.clear();
-    if (this->owner_node)
+    if (owner_node)
     {
-        for (unsigned int i=0; i<this->owner_node->neigh_list.size(); i++)
+        for (unsigned int i=0; i<owner_node->neigh_list.size(); i++)
         {
-            if (this == this->owner_node->neigh_list[i])
+            if (this == owner_node->neigh_list[i])
             {
-                this->owner_node->neigh_list.erase(this->owner_node->neigh_list.begin()+i);
+                owner_node->neigh_list.erase(owner_node->neigh_list.begin()+i);
                 return;
             }
         }
@@ -458,10 +458,10 @@ NeighNode::NeighNode(OrigNode* origNode, OrigNode *orig_neigh_node, const Uint12
     tq_recv.resize(sizeof(uint16_t) * global_win_size);
     real_bits.resize(num_words);
     clear();
-    this->addr = neigh;
-    this->orig_node = orig_neigh_node;
-    this->if_incoming = ifIncoming;
-    this->owner_node = origNode;
+    addr = neigh;
+    orig_node = orig_neigh_node;
+    if_incoming = ifIncoming;
+    owner_node = origNode;
     origNode->neigh_list.push_back(this);
 }
 
