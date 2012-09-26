@@ -25,8 +25,8 @@ class Batman : public ManetRoutingBase
     typedef std::vector<GwNode*> Gwlist;
     typedef std::vector<ForwNode*> Forwlist;
 
-    typedef std::vector<Hna_local_entry> HnaLocalEntryList;
-    typedef std::vector<Hna_task*> HnaTaskList;
+    typedef std::vector<HnaLocalEntry> HnaLocalEntryList;
+    typedef std::vector<HnaTask*> HnaTaskList;
 
     //hna_global_hash = hash_new(128, compare_hna, choose_hna);
 
@@ -74,7 +74,7 @@ class Batman : public ManetRoutingBase
 
     HnaLocalEntryList hna_list;
     HnaTaskList hna_chg_list;
-    std::map<BatmanHnaMsg,Hna_global_entry*> hnaMap;
+    std::map<BatmanHnaMsg,HnaGlobalEntry*> hnaMap;
     std::vector<BatmanHnaMsg> hna_buff_local;
 
   // methods
@@ -99,10 +99,10 @@ class Batman : public ManetRoutingBase
     void hna_local_task_add_ip(const Uint128 &ip_addr, uint16_t netmask, uint8_t route_action);
     void hna_local_buffer_fill(void);
     void hna_local_task_exec(void);
-    void hna_local_update_routes(Hna_local_entry *hna_local_entry, int8_t route_action);
-    void _hna_global_add(OrigNode *orig_node, Hna_element *hna_element);
-    void _hna_global_del(OrigNode *orig_node, Hna_element *hna_element);
-    int hna_buff_delete(std::vector<Hna_element *> &buf, int *buf_len, Hna_element *e);
+    void hna_local_update_routes(HnaLocalEntry *hna_local_entry, int8_t route_action);
+    void _hna_global_add(OrigNode *orig_node, HnaElement *hna_element);
+    void _hna_global_del(OrigNode *orig_node, HnaElement *hna_element);
+    int hna_buff_delete(std::vector<HnaElement *> &buf, int *buf_len, HnaElement *e);
     void hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t new_hna_len);
     void hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t new_hna_len, NeighNode *);
     void hna_global_check_tq(OrigNode *orig_node);

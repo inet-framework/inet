@@ -87,9 +87,9 @@ void hna_init(void)
 /* this function can be called when the daemon starts or at runtime */
 void Batman::hna_local_task_add_ip(const Uint128 &ip_addr, uint16_t netmask, uint8_t route_action)
 {
-    Hna_task *hna_task;
+    HnaTask *hna_task;
 
-    hna_task = new Hna_task();
+    hna_task = new HnaTask();
 
     hna_task->addr = ip_addr;
     hna_task->netmask = netmask;
@@ -179,8 +179,8 @@ void Batman::hna_local_buffer_fill(void)
 
 void Batman::hna_local_task_exec(void)
 {
-    Hna_task *hna_task;
-    Hna_local_entry *hna_local_entry;
+    HnaTask *hna_task;
+    HnaLocalEntry *hna_local_entry;
 
     if (hna_chg_list.empty())
         return;
@@ -212,7 +212,7 @@ void Batman::hna_local_task_exec(void)
                 //debug_output(3, "Adding HNA to announce network list: %s/%i\n", hna_addr_str, hna_task->netmask);
 
                 /* add node */
-                Hna_local_entry hna_local_entry;
+                HnaLocalEntry hna_local_entry;
 
                 hna_local_entry.addr = hna_task->addr;
                 hna_local_entry.netmask = hna_task->netmask;
@@ -260,7 +260,7 @@ unsigned char *hna_local_update_vis_packet(unsigned char *vis_packet, uint16_t *
 }
 #endif
 
-void Batman::hna_local_update_routes(Hna_local_entry *hna_local_entry, int8_t route_action)
+void Batman::hna_local_update_routes(HnaLocalEntry *hna_local_entry, int8_t route_action)
 {
     /* add / delete throw routing entries for own hna */
     //add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_THROW, route_action);
@@ -273,22 +273,22 @@ void Batman::hna_local_update_routes(Hna_local_entry *hna_local_entry, int8_t ro
     //hna_local_update_nat(hna_local_entry->addr, hna_local_entry->netmask, route_action);
 }
 
-void Batman::_hna_global_add(OrigNode *orig_node, Hna_element *hna_element)
+void Batman::_hna_global_add(OrigNode *orig_node, HnaElement *hna_element)
 {
-    Hna_global_entry *hna_global_entry;
+    HnaGlobalEntry *hna_global_entry;
     OrigNode *old_orig_node = NULL;
 
-    std::map<BatmanHnaMsg,Hna_global_entry*>::iterator it;
+    std::map<BatmanHnaMsg,HnaGlobalEntry*>::iterator it;
     it = hnaMap.find(*hna_element);
 
     /* add the hna node if it does not exist */
     if (it == hnaMap.end())
     {
-        hna_global_entry = new Hna_global_entry();
+        hna_global_entry = new HnaGlobalEntry();
         hna_global_entry->addr = hna_element->addr;
         hna_global_entry->netmask = hna_element->netmask;
         hna_global_entry->curr_orig_node = NULL;
-        hnaMap.insert(std::pair<BatmanHnaMsg,Hna_global_entry*>(*hna_element, hna_global_entry));
+        hnaMap.insert(std::pair<BatmanHnaMsg,HnaGlobalEntry*>(*hna_element, hna_global_entry));
     }
     else
         hna_global_entry = it->second;
@@ -338,12 +338,12 @@ void Batman::_hna_global_add(OrigNode *orig_node, Hna_element *hna_element)
     }
 }
 
-void Batman::_hna_global_del(OrigNode *orig_node, Hna_element *hna_element)
+void Batman::_hna_global_del(OrigNode *orig_node, HnaElement *hna_element)
 {
-    Hna_global_entry *hna_global_entry;
+    HnaGlobalEntry *hna_global_entry;
     OrigNode *orig_ptr = NULL;
 
-    std::map<BatmanHnaMsg,Hna_global_entry*>::iterator it;
+    std::map<BatmanHnaMsg,HnaGlobalEntry*>::iterator it;
     it = hnaMap.find(*hna_element);
 
     /* add the hna node if it does not exist */
@@ -401,7 +401,7 @@ void Batman::_hna_global_del(OrigNode *orig_node, Hna_element *hna_element)
  * if found, delete it from the buf and return 1.
  * if not found, return 0.
  */
-int Batman::hna_buff_delete(std::vector<Hna_element *> &buf, int *buf_len, Hna_element *e)
+int Batman::hna_buff_delete(std::vector<HnaElement *> &buf, int *buf_len, HnaElement *e)
 {
     for (unsigned int i = 0; i < buf.size(); i++) {
         if (*(buf[i]) == *e) {
@@ -417,7 +417,7 @@ int Batman::hna_buff_delete(std::vector<Hna_element *> &buf, int *buf_len, Hna_e
 
 void Batman::hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t new_hna_len)
 {
-    Hna_element *e;
+    HnaElement *e;
     int i, num_elements;
     // clean buffer
     while (!orig_node->hna_buff.empty())
@@ -462,8 +462,8 @@ void Batman::hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t 
  */
 void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t new_hna_len, NeighNode *old_router)
 {
-    Hna_element *e;
-    Hna_global_entry *hna_global_entry;
+    HnaElement *e;
+    HnaGlobalEntry *hna_global_entry;
     int i, num_elements, old_hna_len;
     std::vector<BatmanHnaMsg *> old_hna;
 
@@ -493,7 +493,7 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
             if ((e->netmask < 1) || (e->netmask > 32))
                 continue;
 
-            std::map<BatmanHnaMsg,Hna_global_entry*>::iterator it;
+            std::map<BatmanHnaMsg,HnaGlobalEntry*>::iterator it;
             it = hnaMap.find(*e);
 
             /* add the hna node if it does not exist */
@@ -589,8 +589,8 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
 
 void Batman::hna_global_check_tq(OrigNode *orig_node)
 {
-    Hna_element *e;
-    Hna_global_entry *hna_global_entry;
+    HnaElement *e;
+    HnaGlobalEntry *hna_global_entry;
     int i, num_elements;
 
     if (orig_node->hna_buff.empty())
@@ -603,7 +603,7 @@ void Batman::hna_global_check_tq(OrigNode *orig_node)
         if ((e->netmask < 1) || (e->netmask > 32))
             continue;
 
-        std::map<BatmanHnaMsg,Hna_global_entry*>::iterator it;
+        std::map<BatmanHnaMsg,HnaGlobalEntry*>::iterator it;
         it = hnaMap.find(*e);
 
         if (it==hnaMap.end())
@@ -643,7 +643,7 @@ set_orig_node:
 
 void Batman::hna_global_del(OrigNode *orig_node)
 {
-    Hna_element *e;
+    HnaElement *e;
 
     if (orig_node->hna_buff.empty())
         return;
@@ -662,7 +662,7 @@ void Batman::hna_global_del(OrigNode *orig_node)
 
 void Batman::hna_free(void)
 {
-    Hna_local_entry *hna_local_entry;
+    HnaLocalEntry *hna_local_entry;
 
     /* hna local */
     while (!hna_list.empty()) {

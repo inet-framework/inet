@@ -191,7 +191,7 @@ class FreeIp
 };
 
 
-class Hna_task
+class HnaTask
 {
   public:
     Uint128 addr;
@@ -199,10 +199,10 @@ class Hna_task
     uint8_t route_action;
 
   public:
-    Hna_task() : addr(0), netmask(0), route_action(0) {}
+    HnaTask() : addr(0), netmask(0), route_action(0) {}
 };
 
-class Hna_local_entry
+class HnaLocalEntry
 {
   public:
     Uint128 addr;
@@ -210,30 +210,30 @@ class Hna_local_entry
     int idIface;
 };
 
-class Hna_global_entry
+class HnaGlobalEntry
 {
   public:
     Uint128 addr;
     uint8_t netmask;
     OrigNode *curr_orig_node;
     std::vector<OrigNode *> orig_list;
-    Hna_global_entry() { curr_orig_node = NULL; }
-    ~Hna_global_entry() { orig_list.clear(); }
+    HnaGlobalEntry() { curr_orig_node = NULL; }
+    ~HnaGlobalEntry() { orig_list.clear(); }
 
   private:     // noncopyable
-    Hna_global_entry(const Hna_global_entry& m);
-    Hna_global_entry& operator=(const Hna_global_entry& m);
+    HnaGlobalEntry(const HnaGlobalEntry& m);
+    HnaGlobalEntry& operator=(const HnaGlobalEntry& m);
   public:
-    friend bool operator<(const Hna_global_entry&, const Hna_global_entry&);
-    friend bool operator==(const Hna_global_entry&, const Hna_global_entry&);
+    friend bool operator<(const HnaGlobalEntry&, const HnaGlobalEntry&);
+    friend bool operator==(const HnaGlobalEntry&, const HnaGlobalEntry&);
 };
 
-inline bool operator<(const Hna_global_entry& a, const Hna_global_entry& b)
+inline bool operator<(const HnaGlobalEntry& a, const HnaGlobalEntry& b)
 {
     return (a.addr < b.addr) || (a.addr == b.addr && a.netmask < b.netmask);
 }
 
-inline bool operator==(const Hna_global_entry& a, const Hna_global_entry& b)
+inline bool operator==(const HnaGlobalEntry& a, const HnaGlobalEntry& b)
 {
     return (a.addr==b.addr && a.netmask==b.netmask);
 }
@@ -255,6 +255,6 @@ class batgat_ioc_args
     uint32_t ifindex;
 };
 
-#define Hna_element BatmanHnaMsg
+#define HnaElement BatmanHnaMsg
 
 #endif /* __BATMANDATA_H__ */
