@@ -79,6 +79,7 @@ class Batman : public ManetRoutingBase
 
   // methods
   private:
+    void parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPacket *bat_packet);
     void sendPackets(const simtime_t &curr_time);
     NeighNode *create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const Uint128 &neigh, BatmanIf *if_incoming);
     OrigNode *get_orig_node(const Uint128 &addr );

@@ -241,15 +241,9 @@ void Batman::initialize(int stage)
 
 void Batman::handleMessage(cMessage *msg)
 {
-    OrigNode *orig_neigh_node, *orig_node;
     BatmanIf *if_incoming;
     Uint128 neigh;
     simtime_t vis_timeout, select_timeout, curr_time;
-
-    HnaElement *hna_recv_buff;
-    //char orig_str[ADDR_STR_LEN], neigh_str[ADDR_STR_LEN], ifaddr_str[ADDR_STR_LEN], prev_sender_str[ADDR_STR_LEN];
-    int16_t hna_buff_len, curr_packet_len;
-    uint8_t is_my_addr, is_my_orig, is_my_oldorig, is_broadcast, is_duplicate, is_bidirectional, has_directlink_flag;
 
     curr_time = getTime();
     check_active_inactive_interfaces();
@@ -279,8 +273,6 @@ void Batman::handleMessage(cMessage *msg)
 
     delete ctrl;
 
-    curr_packet_len = 0;
-
     BatmanPacket *bat_packet = NULL;
     UDPPacket *udpPacket = dynamic_cast<UDPPacket*>(msg);
     if (udpPacket)
@@ -309,141 +301,8 @@ void Batman::handleMessage(cMessage *msg)
     //addr_to_string(neigh, neigh_str, sizeof(neigh_str));
     //addr_to_string(if_incoming->addr.sin_addr.s_addr, ifaddr_str, sizeof(ifaddr_str));
 
-    while (bat_packet) {
-        //addr_to_string(bat_packet->orig, orig_str, sizeof(orig_str));
-        //addr_to_string(bat_packet->prev_sender, prev_sender_str, sizeof(prev_sender_str));
-        if (isInMacLayer())
-            EV << "packet receive from :" <<MACAddress(bat_packet->getOrig().getLo()) << endl;
-        else
-            EV << "packet receive from :" <<IPv4Address(bat_packet->getOrig().getLo()) << endl;
-        is_my_addr = is_my_orig = is_my_oldorig = is_broadcast = 0;
+    parseIncomingPacket(neigh, if_incoming, bat_packet);
 
-        has_directlink_flag = (bat_packet->getFlags() & DIRECTLINK ? 1 : 0);
-
-        hna_buff_len = bat_packet->getHnaMsgArraySize() * BATMAN_HNA_MSG_SIZE;
-
-        unsigned char  hnaLen = bat_packet->getHnaMsgArraySize();
-        if (hnaLen!=0)
-            hna_recv_buff = &bat_packet->getHnaMsg(0);
-        else
-            hna_recv_buff = NULL;
-
-        if (isLocalAddress(neigh))
-            is_my_addr = 1;
-        if (isLocalAddress(bat_packet->getOrig()))
-            is_my_orig = 1;
-        if (isMulticastAddress(neigh))
-            is_broadcast = 1;
-        if (isLocalAddress(bat_packet->getPrevSender()))
-            is_my_oldorig = 1;
-
-        if (bat_packet->getVersion() != 0) {
-            EV << "Drop packet: incompatible batman version "<< bat_packet->getVersion() <<endl;
-            delete bat_packet;
-            break;
-        }
-
-        if (is_my_addr) {
-            EV << "Drop packet: received my own broadcast sender:" << srcAddr <<endl;
-            delete bat_packet;
-            break;
-        }
-
-        if (is_broadcast) {
-            EV<< "Drop packet: ignoring all packets with broadcast source IP sender: " << srcAddr <<endl;
-            delete bat_packet;
-            break;
-        }
-
-        if (is_my_orig) {
-            orig_neigh_node = get_orig_node(neigh);
-            bool sameIf = false;
-            if (if_incoming->dev->ipv4Data()->getIPAddress().getInt() == bat_packet->getOrig().getLo())
-                sameIf = true;
-
-            if ((has_directlink_flag) && (sameIf) && (bat_packet->getSeqNumber() - if_incoming->seqno + 2 == 0))
-            {
-                std::vector<TYPE_OF_WORD>vectorAux;
-                for (unsigned int i=0; i<num_words; i++)
-                {
-                    vectorAux.push_back(orig_neigh_node->bcast_own[(if_incoming->if_num * num_words)+i]);
-                }
-                bit_mark(vectorAux, 0);
-                orig_neigh_node->bcast_own_sum[if_incoming->if_num] = bit_packet_count(vectorAux);
-                for (unsigned int i=0; i<num_words; i++)
-                {
-                    orig_neigh_node->bcast_own[(if_incoming->if_num * num_words)+i] = vectorAux[i];
-                }
-                EV<< "count own bcast (is_my_orig): old = " << orig_neigh_node->bcast_own_sum[if_incoming->if_num]<<endl;
-            }
-            EV << "Drop packet: originator packet from myself (via neighbour) \n";
-            delete bat_packet;
-            break;
-        }
-
-        if (bat_packet->getTq() == 0) {
-            count_real_packets(bat_packet, neigh, if_incoming);
-
-            EV<< "Drop packet: originator packet with tq is 0 \n";
-            delete bat_packet;
-            break;
-        }
-
-        if (is_my_oldorig) {
-            EV << "Drop packet: ignoring all rebroadcast echos sender: " << srcAddr << endl;
-            delete bat_packet;
-            break;
-        }
-
-        is_duplicate = count_real_packets(bat_packet, neigh, if_incoming);
-
-        orig_node = get_orig_node(bat_packet->getOrig());
-
-        /* if sender is a direct neighbor the sender ip equals originator ip */
-        orig_neigh_node = (bat_packet->getOrig() == neigh ? orig_node : get_orig_node(neigh));
-
-        /* drop packet if sender is not a direct neighbor and if we no route towards it */
-        if ((bat_packet->getOrig() != neigh) && (orig_neigh_node->router == NULL))
-        {
-            delete bat_packet;
-            break;
-        }
-        orig_node->totalRec++;
-        is_bidirectional = isBidirectionalNeigh(orig_node, orig_neigh_node, bat_packet, curr_time, if_incoming);
-
-        /* update ranking if it is not a duplicate or has the same seqno and similar ttl as the non-duplicate */
-        if ((is_bidirectional) && ((!is_duplicate) ||
-             ((orig_node->last_real_seqno == bat_packet->getSeqNumber()) &&
-             (orig_node->last_ttl - 3 <= bat_packet->getTtl()))))
-            update_orig(orig_node, bat_packet, neigh, if_incoming, hna_recv_buff, hna_buff_len, is_duplicate, curr_time);
-
-            /* is single hop (direct) neighbour */
-        if (bat_packet->getOrig() == neigh) {
-                /* mark direct link on incoming interface */
-            schedule_forward_packet(orig_node, bat_packet, neigh, 1, hna_buff_len, if_incoming, curr_time);
-            //delete bat_packet;
-            EV << "Forward packet: rebroadcast neighbour packet with direct link flag \n";
-            break;
-        }
-
-            /* multihop originator */
-        if (!is_bidirectional) {
-            EV << "Drop packet: not received via bidirectional link\n";
-            delete bat_packet;
-            break;
-        }
-
-        if (is_duplicate) {
-            EV << "Drop packet: duplicate packet received\n";
-            delete bat_packet;
-            break;
-        }
-
-        BatmanPacket * bat_packetAux = bat_packet;
-        cPacket *enc = bat_packet->decapsulate();
-        bat_packet = enc ? check_and_cast<BatmanPacket*>(enc) : NULL;
-        schedule_forward_packet(orig_node, bat_packetAux, neigh, 0, hna_buff_len, if_incoming, curr_time);
-    }
     sendPackets(curr_time);
     numOrig = origMap.size();
 }
