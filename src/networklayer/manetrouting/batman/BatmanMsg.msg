@@ -47,54 +47,22 @@ class HnaElement
 
     bool operator < (HnaElement const &o) const
     {
-        if (addr < o.addr)
-            return true;
-        else if (addr == o.addr)
-        {
-            if (netmask < o.netmask)
-                return true;
-            else
-                return false;
-        }
-        else
-            return false;
+        return (addr < o.addr) || (addr == o.addr && netmask < o.netmask);
     }
 
     bool operator > (HnaElement const &o) const
     {
-        if (addr > o.addr)
-            return true;
-        else if (addr == o.addr)
-        {
-            if (netmask > o.netmask)
-                return true;
-            else
-                return false;
-        }
-        else
-            return false;
+        return (addr > o.addr) || (addr == o.addr && netmask > o.netmask);
     }
 
     bool operator == (HnaElement const &o) const
     {
-        if (addr == o.addr && netmask == o.netmask)
-            return true;
-        else
-            return false;
-    }
-    bool operator != (HnaElement const &o) const
-    {
-        if (addr == o.addr && netmask == o.netmask)
-            return false;
-        else
-            return true;
+        return (addr == o.addr && netmask == o.netmask);
     }
 
-    HnaElement * dup()
+    bool operator != (HnaElement const &o) const
     {
-        HnaElement *aux = new HnaElement;
-        *aux=*this;
-        return aux;
+        return !(addr == o.addr && netmask == o.netmask);
     }
 };
 

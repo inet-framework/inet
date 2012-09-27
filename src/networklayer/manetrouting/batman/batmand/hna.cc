@@ -544,7 +544,7 @@ void Batman::hna_global_update(OrigNode *orig_node, HnaElement *new_hna, int16_t
         return;    /* nothing to do */
 
     /* changed HNA */
-    old_hna = orig_node->hna_buff;
+    old_hna.swap(orig_node->hna_buff);
 
     orig_node->hna_buff.clear();
     num_elements = new_hna_len / SIZE_Hna_element;
