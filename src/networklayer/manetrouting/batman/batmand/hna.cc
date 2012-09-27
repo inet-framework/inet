@@ -549,7 +549,7 @@ void Batman::hna_global_update(OrigNode *orig_node, HnaElement *new_hna, int16_t
     orig_node->hna_buff.clear();
     num_elements = new_hna_len / SIZE_Hna_element;
     for (int i = 0; i < num_elements; i++) {
-        HnaElement *aux = &new_hna[i];
+        e = &new_hna[i];
         orig_node->hna_buff.push_back(*e);
     }
 
@@ -572,7 +572,7 @@ void Batman::hna_global_update(OrigNode *orig_node, HnaElement *new_hna, int16_t
     num_elements = old_hna_len / SIZE_Hna_element;
 
     for (unsigned int i = 0; i < old_hna.size(); i++) {
-        HnaElement *e = &old_hna[i];
+        e = &old_hna[i];
 
         if ((e->netmask > 0) && (e->netmask <= 32))
             _hna_global_del(orig_node, e);
