@@ -596,7 +596,7 @@ static void generate_vis_packet(void)
 
     /* secondary interfaces */
     if (found_ifs > 1) {
-        for (unsigned int list_pos = 0; list_pos < if_list.size(); list_pos++ ) {
+        for (unsigned int list_pos = 0; list_pos < if_list.size(); list_pos++) {
             batman_if = list_entry(list_pos, BatmanIf, list);
 
             if (((struct vis_packet *)vis_packet)->sender_ip == batman_if->addr.sin_addr.s_addr)

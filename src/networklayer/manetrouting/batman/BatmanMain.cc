@@ -121,7 +121,7 @@ void Batman::initialize(int stage)
     //createTimerQueue();
 
     debug_level = par("debugLevel");
-    if ( debug_level > debug_level_max ) {
+    if (debug_level > debug_level_max) {
             opp_error( "Invalid debug level: %i\nDebug level has to be between 0 and %i.\n", debug_level, debug_level_max );
     }
     purge_timeout = par("purgeTimeout");
@@ -155,7 +155,7 @@ void Batman::initialize(int stage)
     upload_speed = par("GWClass_upload_speed");
     MAX_AGGREGATION_BYTES = par("MAX_AGGREGATION_BYTES");
 
-    if ( ( download_speed > 0 ) && ( upload_speed == 0 ) )
+    if ((download_speed > 0) && (upload_speed == 0))
         upload_speed = download_speed / 5;
 
     if (download_speed > 0) {
@@ -163,16 +163,16 @@ void Batman::initialize(int stage)
         get_gw_speeds(gateway_class, &download_speed, &upload_speed);
     }
 
-    if ( ( gateway_class != 0 ) && ( routing_class != 0 ) ) {
+    if ((gateway_class != 0) && (routing_class != 0)) {
         opp_error("Error - routing class can't be set while gateway class is in use !\n");
     }
 
-    if ( ( gateway_class != 0 ) && ( pref_gateway != 0 ) ) {
+    if ((gateway_class != 0) && (pref_gateway != 0)) {
         opp_error("Error - preferred gateway can't be set while gateway class is in use !\n" );
     }
 
     /* use routing class 1 if none specified */
-    if ( ( routing_class == 0 ) && ( pref_gateway != 0 ) )
+    if ((routing_class == 0) && (pref_gateway != 0))
         routing_class = DEFAULT_ROUTING_CLASS;
 
     //if (((routing_class != 0 ) || ( gateway_class != 0 ))&& (!probe_tun(1)))
@@ -270,7 +270,7 @@ void Batman::handleMessage(cMessage *msg)
     neigh = srcAddr.getInt();
     for (unsigned int i=0; i<if_list.size(); i++)
     {
-        if (if_list[i]->dev->getInterfaceId()==ctrl->getInterfaceId())
+        if (if_list[i]->dev->getInterfaceId() == ctrl->getInterfaceId())
         {
             if_incoming = if_list[i];
             break;
@@ -281,8 +281,8 @@ void Batman::handleMessage(cMessage *msg)
 
     curr_packet_len = 0;
 
-    BatmanPacket * bat_packet = NULL;
-    UDPPacket * udpPacket = dynamic_cast<UDPPacket*>(msg);
+    BatmanPacket *bat_packet = NULL;
+    UDPPacket *udpPacket = dynamic_cast<UDPPacket*>(msg);
     if (udpPacket)
     {
         if (udpPacket->getDestinationPort() != BATMAN_PORT)
@@ -291,6 +291,7 @@ void Batman::handleMessage(cMessage *msg)
             sendPackets(curr_time);
             return;
         }
+
         cMessage* msg_aux = udpPacket->decapsulate();
         bat_packet = dynamic_cast <BatmanPacket*>(msg_aux);
         if (!bat_packet)
@@ -301,6 +302,7 @@ void Batman::handleMessage(cMessage *msg)
             numOrig = origMap.size();
             return;
         }
+
         delete msg;
     }
 

@@ -33,14 +33,16 @@ cplusplus {{
 
 class HnaElement
 {
-   public:
+  public:
     Uint128 addr;
     uint8_t  netmask;
+
+  public:
     HnaElement& operator=(const HnaElement& m)
     {
-           addr=m.addr;
-           netmask=m.netmask;
-           return *this;
+        addr = m.addr;
+        netmask = m.netmask;
+        return *this;
     }
 
     bool operator < (HnaElement const &o) const
@@ -72,6 +74,7 @@ class HnaElement
         else
             return false;
     }
+
     bool operator == (HnaElement const &o) const
     {
         if (addr == o.addr && netmask == o.netmask)
