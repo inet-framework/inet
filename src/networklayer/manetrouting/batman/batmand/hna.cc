@@ -483,7 +483,7 @@ void Batman::hna_global_update(OrigNode *orig_node, HnaElement *new_hna, int16_t
     if (old_router != orig_node->router) {
         num_elements = orig_node->hna_buff.size();
 
-        for (unsigned int i = 0; i < orig_node->hna_buff.size(); i++) {
+        for (i = 0; i < num_elements; i++) {
             e = &orig_node->hna_buff[i];
 
             if ((e->netmask < 1) || (e->netmask > 32))
@@ -545,7 +545,7 @@ void Batman::hna_global_update(OrigNode *orig_node, HnaElement *new_hna, int16_t
 
     orig_node->hna_buff.clear();
     num_elements = new_hna_len / SIZE_Hna_element;
-    for (int i = 0; i < num_elements; i++) {
+    for (i = 0; i < num_elements; i++) {
         e = &new_hna[i];
         orig_node->hna_buff.push_back(*e);
     }

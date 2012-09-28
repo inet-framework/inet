@@ -89,8 +89,8 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &n
 
     //debug_output(4, "update_originator(): Searching and updating originator entry of received packet,  \n");
 
-    for (unsigned int i=0; i<orig_node->neigh_list.size(); i++) {
-        tmp_neigh_node = orig_node->neigh_list[i];
+    for (unsigned int list_pos = 0; list_pos < orig_node->neigh_list.size(); list_pos++) {
+        tmp_neigh_node = orig_node->neigh_list[list_pos];
 
         if ((tmp_neigh_node->addr == neigh) && (tmp_neigh_node->if_incoming == if_incoming)) {
             neigh_node = tmp_neigh_node;
@@ -153,8 +153,8 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &n
             if ((pref_gateway == orig_node->orig) || (routing_class == 3) || (orig_node->router->tq_avg - curr_gateway->orig_node->router->tq_avg >= routing_class)) {
                 gw_node = NULL;
 
-                for (unsigned int i = 0; i<gw_list.size(); i++) {
-                    gw_node = gw_list[i];
+                for (unsigned int list_pos = 0; list_pos < gw_list.size(); list_pos++) {
+                    gw_node = gw_list[list_pos];
 
                     if (gw_node->orig_node == orig_node)
                         break;
