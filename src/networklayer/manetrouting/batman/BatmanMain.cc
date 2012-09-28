@@ -175,7 +175,7 @@ void Batman::initialize(int stage)
     //    opp_error("");
 
     for (int i = 0; i<getNumWlanInterfaces(); i++) {
-        InterfaceEntry * iEntry = getWlanInterfaceEntry(i);
+        InterfaceEntry *iEntry = getWlanInterfaceEntry(i);
 
         BatmanIf *batman_if;
         batman_if = new BatmanIf();
@@ -241,7 +241,7 @@ void Batman::initialize(int stage)
 
     for (unsigned int i = 0; i < if_list.size(); i++)
     {
-        BatmanIf * batman_if = if_list[i];
+        BatmanIf *batman_if = if_list[i];
         schedule_own_packet(batman_if);
     }
 
@@ -347,7 +347,7 @@ void Batman::sendPackets(const simtime_t &curr_time)
 
 void Batman::scheduleNextEvent()
 {
-     simtime_t select_timeout = forw_list[0]->send_time > 0 ?forw_list[0]->send_time : getTime()+10;
+     simtime_t select_timeout = forw_list[0]->send_time > 0 ? forw_list[0]->send_time : getTime()+10;
      if (timer->isScheduled())
      {
          if (timer->getArrivalTime()>select_timeout)
@@ -373,7 +373,7 @@ uint32_t Batman::getRoute(const Uint128 &dest, std::vector<Uint128> &add)
     OrigMap::iterator it = origMap.find(dest);
     if (it != origMap.end())
     {
-        OrigNode * node = it->second;
+        OrigNode *node = it->second;
         add.resize(0);
         add.push_back(node->router->addr);
         return -1;
@@ -384,7 +384,7 @@ uint32_t Batman::getRoute(const Uint128 &dest, std::vector<Uint128> &add)
         OrigMap::iterator it = origMap.find(apAddr);
         if (it != origMap.end())
         {
-            OrigNode * node = it->second;
+            OrigNode *node = it->second;
             add.resize(0);
             add.push_back(node->router->addr);
             return -1;
@@ -398,7 +398,7 @@ bool Batman::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &v
     OrigMap::iterator it = origMap.find(dest);
     if (it != origMap.end())
     {
-        OrigNode * node = it->second;
+        OrigNode *node = it->second;
         add = node->router->addr;
         return true;
     }
@@ -408,7 +408,7 @@ bool Batman::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &v
         OrigMap::iterator it = origMap.find(apAddr);
         if (it != origMap.end())
         {
-            OrigNode * node = it->second;
+            OrigNode *node = it->second;
             add = node->router->addr;
             return true;
         }
@@ -416,7 +416,7 @@ bool Batman::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &v
     return false;
 }
 
-void Batman::appendPacket(cPacket *oldPacket, cPacket * packetToAppend)
+void Batman::appendPacket(cPacket *oldPacket, cPacket *packetToAppend)
 {
     if (oldPacket->getEncapsulatedPacket()==NULL)
     {
@@ -424,7 +424,7 @@ void Batman::appendPacket(cPacket *oldPacket, cPacket * packetToAppend)
         return;
     }
     std::vector<cPacket*> vectorPacket;
-    cPacket * pkt = oldPacket;
+    cPacket *pkt = oldPacket;
     while (pkt->getEncapsulatedPacket())
     {
         vectorPacket.push_back(pkt->decapsulate());
@@ -444,7 +444,7 @@ void Batman::appendPacket(cPacket *oldPacket, cPacket * packetToAppend)
 BatmanPacket *Batman::buildDefaultBatmanPkt(const BatmanIf *batman_if)
 {
     std::string str = "BatmanPkt:" + (IPv4Address(batman_if->address.getLo())).str();
-    BatmanPacket * pkt = new BatmanPacket(str.c_str());
+    BatmanPacket *pkt = new BatmanPacket(str.c_str());
 
     pkt->setVersion(0);
     pkt->setFlags(0x00);

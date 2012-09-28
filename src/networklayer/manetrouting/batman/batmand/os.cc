@@ -44,7 +44,7 @@ int8_t Batman::send_udp_packet(cPacket *packet_buff, int32_t packet_buff_len, co
 // modification routing tables methods
 //
 //
-void Batman::add_del_route(const Uint128  & dest, uint8_t netmask, const Uint128  & router, int32_t ifi, InterfaceEntry* dev, uint8_t rt_table, int8_t route_type, int8_t route_action)
+void Batman::add_del_route(const Uint128 &dest, uint8_t netmask, const Uint128 &router, int32_t ifi, InterfaceEntry* dev, uint8_t rt_table, int8_t route_type, int8_t route_action)
 {
     if (route_type != ROUTE_TYPE_UNICAST)
         return;
