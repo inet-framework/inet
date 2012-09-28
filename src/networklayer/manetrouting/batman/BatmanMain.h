@@ -26,7 +26,7 @@ class Batman : public ManetRoutingBase
     typedef std::vector<ForwNode*> Forwlist;
 
     typedef std::vector<HnaLocalEntry> HnaLocalEntryList;
-    typedef std::vector<HnaTask*> HnaTaskList;
+    typedef std::vector<HnaTask> HnaTaskList;
 
     //hna_global_hash = hash_new(128, compare_hna, choose_hna);
 

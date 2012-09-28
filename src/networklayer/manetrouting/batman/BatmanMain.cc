@@ -101,11 +101,7 @@ Batman::~Batman()
     }
     hna_list.clear();
     hna_buff_local.clear();
-    while (!hna_chg_list.empty())
-    {
-        delete hna_chg_list.back();
-        hna_chg_list.pop_back();
-    }
+    hna_chg_list.clear();
 }
 
 

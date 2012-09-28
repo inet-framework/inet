@@ -87,13 +87,11 @@ void hna_init(void)
 /* this function can be called when the daemon starts or at runtime */
 void Batman::hna_local_task_add_ip(const Uint128 &ip_addr, uint16_t netmask, uint8_t route_action)
 {
-    HnaTask *hna_task;
+    HnaTask hna_task;
 
-    hna_task = new HnaTask();
-
-    hna_task->addr = ip_addr;
-    hna_task->netmask = netmask;
-    hna_task->route_action = route_action;
+    hna_task.addr = ip_addr;
+    hna_task.netmask = netmask;
+    hna_task.route_action = route_action;
 
     hna_chg_list.push_back(hna_task);
 }
@@ -186,7 +184,7 @@ void Batman::hna_local_task_exec(void)
         return;
 
     while (!hna_chg_list.empty()) {
-        hna_task = hna_chg_list.front();
+        hna_task = &hna_chg_list.front();
 
         hna_local_entry = NULL;
         bool found = false;
@@ -227,7 +225,6 @@ void Batman::hna_local_task_exec(void)
         }
 
         hna_chg_list.erase(hna_chg_list.begin());
-        delete hna_task;
     }
 
     /* rewrite local buffer */
