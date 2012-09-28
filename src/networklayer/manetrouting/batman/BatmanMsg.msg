@@ -31,46 +31,10 @@ cplusplus {{
 
 #define BATMAN_HNA_MSG_SIZE 5
 
-class HnaElement
-{
-  public:
-    Uint128 addr;
-    uint8_t  netmask;
-
-  public:
-    HnaElement& operator=(const HnaElement& m)
-    {
-        addr = m.addr;
-        netmask = m.netmask;
-        return *this;
-    }
-
-    bool operator < (HnaElement const &o) const
-    {
-        return (addr < o.addr) || (addr == o.addr && netmask < o.netmask);
-    }
-
-    bool operator > (HnaElement const &o) const
-    {
-        return (addr > o.addr) || (addr == o.addr && netmask > o.netmask);
-    }
-
-    bool operator == (HnaElement const &o) const
-    {
-        return (addr == o.addr && netmask == o.netmask);
-    }
-
-    bool operator != (HnaElement const &o) const
-    {
-        return !(addr == o.addr && netmask == o.netmask);
-    }
-};
-
 }}
 
 
 class noncobject IPv4Address;
-class noncobject HnaElement;
 class noncobject Uint128;
 
 struct vis_data
@@ -80,6 +44,11 @@ struct vis_data
     Uint128 ip;
 };
 
+struct HnaElement
+{
+    Uint128 addr;
+    uint8_t  netmask;
+};
 
 packet BatmanPacket
 {
