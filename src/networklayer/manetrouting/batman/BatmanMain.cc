@@ -265,7 +265,6 @@ void Batman::handleMessage(cMessage *msg)
     if (timer == msg)
     {
         sendPackets(curr_time);
-        numOrig = origMap.size();
         return;
     }
 
@@ -306,7 +305,6 @@ void Batman::handleMessage(cMessage *msg)
             delete msg;
             delete msg_aux;
             sendPackets(curr_time);
-            numOrig = origMap.size();
             return;
         }
 
@@ -319,7 +317,6 @@ void Batman::handleMessage(cMessage *msg)
     parseIncomingPacket(neigh, if_incoming, bat_packet);
 
     sendPackets(curr_time);
-    numOrig = origMap.size();
 }
 
 void Batman::sendPackets(const simtime_t &curr_time)
