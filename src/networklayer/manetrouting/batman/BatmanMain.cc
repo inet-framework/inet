@@ -311,9 +311,6 @@ void Batman::handleMessage(cMessage *msg)
         delete msg;
     }
 
-    //addr_to_string(neigh, neigh_str, sizeof(neigh_str));
-    //addr_to_string(if_incoming->addr.sin_addr.s_addr, ifaddr_str, sizeof(ifaddr_str));
-
     parseIncomingPacket(neigh, if_incoming, bat_packet);
 
     sendPackets(curr_time);
