@@ -214,7 +214,7 @@ void Batman::choose_gw(void)
 
     if (gw_list.empty()) {
         if (curr_gateway != NULL) {
-            //debug_output(3, "Removing default route - no gateway in range\n");
+            debug_output(3) << "Removing default route - no gateway in range\n";
 
             del_default_route();
         }
@@ -269,7 +269,7 @@ void Batman::choose_gw(void)
             tmp_curr_gw = gw_node;
 
 //            addr_to_string(tmp_curr_gw->orig_node->orig, orig_str, ADDR_STR_LEN);
-//            debug_output(3, "Preferred gateway found: %s (gw_flags: %i, tq: %i, gw_product: %i)\n", orig_str, gw_node->orig_node->gwflags, gw_node->orig_node->router->tq_avg, tmp_gw_factor);
+            debug_output(3) << "Preferred gateway found: " << tmp_curr_gw->orig_node->orig << " (gw_flags: " << gw_node->orig_node->gwflags << ", tq: " << gw_node->orig_node->router->tq_avg << ", gw_product: " << tmp_gw_factor << ")\n";
 
             break;
         }
@@ -277,10 +277,10 @@ void Batman::choose_gw(void)
 
     if (curr_gateway != tmp_curr_gw) {
         if (curr_gateway != NULL) {
-//            if (tmp_curr_gw != NULL)
-//                debug_output(3, "Removing default route - better gateway found\n");
-//            else
-//                debug_output(3, "Removing default route - no gateway in range\n");
+            if (tmp_curr_gw != NULL)
+                debug_output(3) << "Removing default route - better gateway found\n";
+            else
+                debug_output(3) << "Removing default route - no gateway in range\n";
 
             del_default_route();
         }
@@ -290,7 +290,7 @@ void Batman::choose_gw(void)
         /* may be the last gateway is now gone */
         if ((curr_gateway != NULL) && (!is_aborted())) {
 //            addr_to_string(curr_gateway->orig_node->orig, orig_str, ADDR_STR_LEN);
-//            debug_output(3, "Adding default route to %s (gw_flags: %i, tq: %i, gw_product: %i)\n", orig_str, max_gw_class, max_tq, max_gw_factor);
+            debug_output(3) << "Adding default route to " << curr_gateway->orig_node->orig << " (gw_flags: " << max_gw_class << ", tq: " << max_tq << ", gw_product: " << max_gw_factor << ")\n";
 
             add_default_route();
         }
@@ -300,23 +300,23 @@ void Batman::choose_gw(void)
 void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElement *hna_recv_buff, int16_t hna_buff_len)
 {
     NeighNode *old_router;
-    //debug_output(4, "update_routes() \n");
+    debug_output(4) << "update_routes() \n";
 
     old_router = orig_node->router;
 
     /* also handles orig_node->router == NULL and neigh_node == NULL */
     if ((orig_node != NULL) && (orig_node->router != neigh_node)) {
-        //if ((orig_node != NULL) && (neigh_node != NULL)) {
+        if ((orig_node != NULL) && (neigh_node != NULL)) {
         //    addr_to_string(orig_node->orig, orig_str, ADDR_STR_LEN);
         //    addr_to_string(neigh_node->addr, next_str, ADDR_STR_LEN);
-        //    debug_output(4, "Route to %s via %s\n", orig_str, next_str);
-        //}
+            debug_output(4) << "Route to " << orig_node->orig << " via " << neigh_node->addr << "\n";
+        }
 
         /* adds duplicated code but makes it more readable */
 
         /* new route added */
         if ((orig_node->router == NULL) && (neigh_node != NULL)) {
-            //debug_output(4, "Adding new route\n");
+            debug_output(4) << "Adding new route\n";
 
             add_del_route(orig_node->orig, 32, neigh_node->addr,
                     neigh_node->if_incoming->if_index, neigh_node->if_incoming->dev, BATMAN_RT_TABLE_HOSTS, ROUTE_TYPE_UNICAST, ROUTE_ADD);
@@ -329,7 +329,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElemen
 
         /* route deleted */
         } else if ((orig_node->router != NULL) && (neigh_node == NULL)) {
-            EV << "Deleting previous route\n";
+            debug_output(4) << "Deleting previous route\n";
 
             /* remove old announced network(s) */
             hna_global_del(orig_node);
@@ -350,7 +350,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElemen
 
         /* route changed */
         } else {
-            //debug_output(4, "Route changed\n");
+            debug_output(4), "Route changed\n";
 
             /* add new route */
             add_del_route(orig_node->orig, 32, neigh_node->addr,
@@ -396,18 +396,19 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElemen
 void Batman::update_gw_list(OrigNode *orig_node, uint8_t new_gwflags, uint16_t gw_port)
 {
     GwNode *gw_node;
+    int download_speed, upload_speed;
 
     for (unsigned int i = 0; i<gw_list.size(); i++) {
         gw_node = gw_list[i];
 
         if (gw_node->orig_node == orig_node) {
             //addr_to_string(gw_node->orig_node->orig, orig_str, ADDR_STR_LEN);
-            //debug_output(3, "Gateway class of originator %s changed from %i to %i\n", orig_str, gw_node->orig_node->gwflags, new_gwflags);
+            debug_output(3) << "Gateway class of originator " << gw_node->orig_node->orig << " changed from " << gw_node->orig_node->gwflags << " to " << new_gwflags << "\n";
 
             if (new_gwflags == 0) {
                 gw_node->deleted = getTime();
                 gw_node->orig_node->gwflags = new_gwflags;
-                //debug_output(3, "Gateway %s removed from gateway list\n", orig_str);
+                debug_output(3) << "Gateway " << gw_node->orig_node->orig << " removed from gateway list\n";
 
                 if (gw_node == curr_gateway)
                     choose_gw();
@@ -420,9 +421,9 @@ void Batman::update_gw_list(OrigNode *orig_node, uint8_t new_gwflags, uint16_t g
     }
 
     //addr_to_string(orig_node->orig, orig_str, ADDR_STR_LEN);
-    //get_gw_speeds(new_gwflags, &download_speed, &upload_speed);
+    get_gw_speeds(new_gwflags, &download_speed, &upload_speed);
 
-    //debug_output(3, "Found new gateway %s -> class: %i - %i%s/%i%s\n", orig_str, new_gwflags, (download_speed > 2048 ? download_speed / 1024 : download_speed), (download_speed > 2048 ? "MBit" : "KBit"), (upload_speed > 2048 ? upload_speed / 1024 : upload_speed), (upload_speed > 2048 ? "MBit" : "KBit"));
+    debug_output(3) << "Found new gateway " << orig_node->orig << " -> class: " << new_gwflags << " - " << download_speed << "KBit/" << upload_speed << "KBit\n";
 
     gw_node = new GwNode();
     gw_node->orig_node = orig_node;
@@ -540,8 +541,7 @@ int Batman::isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node,
 
     /*debug_output(3, "bidirectional: orig = %-15s neigh = %-15s => own_bcast = %2i, real recv = %2i, local tq: %3i, asym_penalty: %3i, total tq: %3i \n",
     orig_str, neigh_str, total_count, neigh_node->real_packet_count, orig_neigh_node->tq_own, orig_neigh_node->tq_asym_penalty, in->tq);*/
-    //debug_output(4, "bidirectional: orig = %-15s neigh = %-15s => own_bcast = %2i, real recv = %2i, local tq: %3i, asym_penalty: %3i, total tq: %3i \n",
-    //          orig_str, neigh_str, total_count, neigh_node->real_packet_count, orig_neigh_node->tq_own, orig_neigh_node->tq_asym_penalty, in->tq);
+    debug_output(4) << "bidirectional: orig = " << orig_node->orig << " neigh = " << orig_neigh_node->orig << " => own_bcast = " << total_count << ", real recv = " << neigh_node->real_packet_count << ", local tq: " << orig_neigh_node->tq_own << ", asym_penalty: " << orig_neigh_node->tq_asym_penalty << ", total tq: " << in->getTq() << "\n";
 
     /* if link has the minimum required transmission quality consider it bidirectional */
     if (in->getTq() >= TQ_TOTAL_BIDRECT_LIMIT)
@@ -667,7 +667,7 @@ uint8_t Batman::count_real_packets(BatmanPacket *in, const Uint128 &neigh, Batma
     }
 
     if (!is_duplicate) {
-        EV << "updating last_seqno: old" << orig_node->last_real_seqno <<" new "<< in->getSeqNumber() << "\n";
+        debug_output(4) << "updating last_seqno: old" << orig_node->last_real_seqno <<" new "<< in->getSeqNumber() << "\n";
         orig_node->last_real_seqno = in->getSeqNumber();
     }
 
@@ -785,7 +785,7 @@ void Batman::parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPac
 
             has_directlink_flag = (bat_packet->getFlags() & DIRECTLINK ? 1 : 0);
 
-            //debug_output(4, "Received BATMAN packet via NB: %s, IF: %s %s (from OG: %s, via old OG: %s, seqno %d, tq %d, TTL %d, V %d, IDF %d) \n", neigh_str, if_incoming->dev, ifaddr_str, orig_str, prev_sender_str, bat_packet->seqno, bat_packet->tq, bat_packet->ttl, bat_packet->version, has_directlink_flag);
+            debug_output(4) << "Received BATMAN packet via NB: " << neigh << ", IF: " << if_incoming->dev << " (from OG: " << IPv4Address(bat_packet->getOrig().getLo()) << ", via old OG: " << IPv4Address(bat_packet->getPrevSender().getLo()) << ", seqno " << bat_packet->getSeqNumber() << ", tq " << bat_packet->getTq() << ", TTL " << bat_packet->getTtl() << ", V " << bat_packet->getVersion() << ", IDF " << has_directlink_flag << ")\n";
 
             hna_buff_len = bat_packet->getHnaMsgArraySize() * BATMAN_HNA_MSG_SIZE;
             unsigned int  hnaLen = bat_packet->getHnaMsgArraySize();
@@ -810,19 +810,19 @@ void Batman::parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPac
                 EV << "Is an internet gateway (class " << bat_packet->getGatewayFlags() << ") \n";
 
             if (bat_packet->getVersion() != 0) {
-                EV << "Drop packet: incompatible batman version "<< bat_packet->getVersion() << endl;
+                debug_output(4) << "Drop packet: incompatible batman version "<< bat_packet->getVersion() << endl;
                 delete bat_packet;
                 break;
             }
 
             if (is_my_addr) {
-                EV << "Drop packet: received my own broadcast sender:" << srcAddr <<endl;
+                debug_output(4) << "Drop packet: received my own broadcast sender:" << srcAddr <<endl;
                 delete bat_packet;
                 break;
             }
 
             if (is_broadcast) {
-                EV<< "Drop packet: ignoring all packets with broadcast source IP (sender: " << srcAddr << ")\n";
+                debug_output(4) << "Drop packet: ignoring all packets with broadcast source IP (sender: " << srcAddr << ")\n";
                 delete bat_packet;
                 break;
             }
@@ -834,7 +834,7 @@ void Batman::parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPac
                     sameIf = true;
 
                 if ((has_directlink_flag) && (sameIf) && (bat_packet->getSeqNumber() - if_incoming->seqno + 2 == 0)) {
-                    EV << "count own bcast (is_my_orig): old = " << orig_neigh_node->bcast_own_sum[if_incoming->if_num] << endl;
+                    debug_output(4) << "count own bcast (is_my_orig): old = " << orig_neigh_node->bcast_own_sum[if_incoming->if_num] << endl;
 
                     std::vector<TYPE_OF_WORD>vectorAux;
                     for (unsigned int i=0; i<num_words; i++)
@@ -846,7 +846,7 @@ void Batman::parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPac
                     for (unsigned int i=0; i<num_words; i++)
                         orig_neigh_node->bcast_own[(if_incoming->if_num * num_words)+i] = vectorAux[i];
 
-                    EV << "new = " << orig_neigh_node->bcast_own_sum[if_incoming->if_num] << endl;
+                    debug_output(4) << "new = " << orig_neigh_node->bcast_own_sum[if_incoming->if_num] << endl;
                 }
 
                 EV << "Drop packet: originator packet from myself (via neighbour) \n";
@@ -877,7 +877,7 @@ void Batman::parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPac
 
             /* drop packet if sender is not a direct neighbor and if we no route towards it */
             if ((bat_packet->getOrig() != neigh) && (orig_neigh_node->router == NULL)) {
-                //debug_output(4, "Drop packet: OGM via unknown neighbor! \n");
+                debug_output(4) << "Drop packet: OGM via unknown neighbor! \n";
                 delete bat_packet;
                 break;
             }
@@ -896,27 +896,27 @@ void Batman::parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPac
                 /* mark direct link on incoming interface */
                 schedule_forward_packet(orig_node, bat_packet, neigh, 1, hna_buff_len, if_incoming, curr_time);
 
-                EV << "Forward packet: rebroadcast neighbour packet with direct link flag \n";
+                debug_output(4) << "Forward packet: rebroadcast neighbour packet with direct link flag \n";
                 // forwarded, do not delete bat_packet;
                 break;
             }
 
             /* multihop originator */
             if (!is_bidirectional) {
-                EV << "Drop packet: not received via bidirectional link\n";
+                debug_output(4) << "Drop packet: not received via bidirectional link\n";
                 delete bat_packet;
                 break;
             }
 
             if (is_duplicate) {
-                EV << "Drop packet: duplicate packet received\n";
+                debug_output(4) << "Drop packet: duplicate packet received\n";
                 delete bat_packet;
                 break;
             }
 
             cPacket *enc = bat_packet->decapsulate();
 
-            EV << "Forward packet: rebroadcast originator packet \n";
+            debug_output(4) << "Forward packet: rebroadcast originator packet\n";
 
             schedule_forward_packet(orig_node, bat_packet, neigh, 0, hna_buff_len, if_incoming, curr_time);
             bat_packet = enc ? check_and_cast<BatmanPacket*>(enc) : NULL;

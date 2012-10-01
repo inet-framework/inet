@@ -125,11 +125,11 @@ char Batman::bit_get_packet(std::vector<TYPE_OF_WORD> &seq_bits, int16_t seq_num
 
     if ((seq_num_diff > local_win_size) || (seq_num_diff < -local_win_size)) {        /* it seems we missed a lot of packets or the other host restarted */
 
-//        if (seq_num_diff > local_win_size)
-//            debug_output(4, "It seems we missed a lot of packets (%i) !\n",  seq_num_diff-1);
+        if (seq_num_diff > local_win_size)
+            debug_output(4) << "It seems we missed a lot of packets (" << seq_num_diff-1 << ") !\n";
 
-//        if (-seq_num_diff > local_win_size)
-//            debug_output(4, "Other host probably restarted !\n");
+        if (-seq_num_diff > local_win_size)
+            debug_output(4) << "Other host probably restarted !\n";
 
         for (i=0; i<num_words; i++)
             seq_bits[i] = 0;

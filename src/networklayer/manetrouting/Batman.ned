@@ -33,7 +33,7 @@ simple Batman extends BaseRouting like IManetRouting
 {
     parameters:
         @class(Batman);
-        int debugLevel = default(1);
+        int debugLevel = default(4);
         double purgeTimeout @unit(s) = default(200s);
         double originatorInterval @unit(s) = default(1s);   // originator message interval
         string preferedGateWay = default("0.0.0.0");
