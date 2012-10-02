@@ -413,18 +413,15 @@ void IPv4::routeUnicastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, IP
         {
             // if the interface is broadcast we must search the next hop
             const IPv4Route *re = rt->findBestMatchingRoute(destAddr);
-            if (re && (re->getSource() != IPv4Route::MANET || re->getDestination()==destAddr) &&
-                    re->getInterface() == destIE)
+            if (re && re->getInterface() == destIE)
                 nextHopAddr = re->getGateway();
         }
     }
     else
     {
         // use IPv4 routing (lookup in routing table)
-        //    FIXME MANET routes should use 255.255.255.255 netmask,
-        //          to eliminate the equality check below.
         const IPv4Route *re = rt->findBestMatchingRoute(destAddr);
-        if (re && (re->getSource() != IPv4Route::MANET || re->getDestination() == destAddr))
+        if (re)
         {
             destIE = re->getInterface();
             nextHopAddr = re->getGateway();
