@@ -161,7 +161,7 @@ class ForwNode //:  public cObject              /* structure for forw_list maint
     BatmanPacket *pack_buff;
     uint16_t  pack_buff_len;
     uint32_t direct_link_flags;
-    uint8_t num_packets;
+    short unsigned int num_packets;
     BatmanIf *if_incoming;
 };
 
@@ -191,8 +191,8 @@ class HnaTask
 {
   public:
     Uint128 addr;
-    uint8_t netmask;
-    uint8_t route_action;
+    short unsigned int netmask;
+    short unsigned int route_action;
 
   public:
     HnaTask() : addr(0), netmask(0), route_action(0) {}
@@ -202,7 +202,7 @@ class HnaLocalEntry
 {
   public:
     Uint128 addr;
-    uint8_t netmask;
+    short unsigned int netmask;
     int idIface;
 };
 
@@ -210,7 +210,7 @@ class HnaGlobalEntry
 {
   public:
     Uint128 addr;
-    uint8_t netmask;
+    short unsigned int netmask;
     OrigNode *curr_orig_node;
     std::vector<OrigNode *> orig_list;
     HnaGlobalEntry() { curr_orig_node = NULL; }

@@ -436,9 +436,9 @@ void Batman::hna_global_add(OrigNode *orig_node, HnaElement *new_hna, int16_t ne
         //addr_to_string(e->addr, hna_str, sizeof(hna_str));
 
         if ((e->netmask > 0) && (e->netmask < 33))
-            debug_output(4) << "hna: " << e->addr << "/" << e->netmask << "\n";
+            debug_output(4) << "hna: " << e->addr << "/" << (unsigned int)(e->netmask) << "\n";
         else
-            debug_output(4) << "hna: " << e->addr << "/" << e->netmask << " -> ignoring (invalid netmask) \n";
+            debug_output(4) << "hna: " << e->addr << "/" << (unsigned int)(e->netmask) << " -> ignoring (invalid netmask) \n";
 
         if ((e->netmask > 0) && (e->netmask <= 32))
             _hna_global_add(orig_node, e);
