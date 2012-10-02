@@ -216,14 +216,7 @@ class Hna_global_entry
     OrigNode *curr_orig_node;
     std::vector<OrigNode *> orig_list;
     Hna_global_entry() { curr_orig_node = NULL; }
-    ~Hna_global_entry()
-    {
-        while (!orig_list.empty())
-        {
-            delete orig_list.back();
-            orig_list.pop_back();
-        }
-    }
+    ~Hna_global_entry() { orig_list.clear(); }
 
    private:     // noncopyable
     Hna_global_entry(const Hna_global_entry& m);
