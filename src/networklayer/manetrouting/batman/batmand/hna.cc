@@ -322,19 +322,21 @@ void Batman::_hna_global_add(OrigNode *orig_node, HnaElement *hna_element)
             (hna_global_entry->curr_orig_node->router->addr == old_orig_node->router->addr))
             return;
 
+        /* delete previous route */
+        // should delete before add, see ManetRoutingBase::setRoute()
+        if (old_orig_node) {
+            add_del_route(hna_element->addr, hna_element->netmask, old_orig_node->router->addr,
+                        old_orig_node->router->if_incoming->if_index,
+                        old_orig_node->router->if_incoming->dev,
+                        BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_DEL);
+        }
+
         add_del_route(hna_element->addr, hna_element->netmask, orig_node->router->addr,
                     orig_node->router->if_incoming->if_index,
                     orig_node->router->if_incoming->dev,
                     BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_ADD);
     }
 
-    /* delete previous route */
-    if (old_orig_node) {
-        add_del_route(hna_element->addr, hna_element->netmask, old_orig_node->router->addr,
-                    old_orig_node->router->if_incoming->if_index,
-                    old_orig_node->router->if_incoming->dev,
-                    BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_DEL);
-    }
 }
 
 void Batman::_hna_global_del(OrigNode *orig_node, HnaElement *hna_element)
@@ -376,17 +378,20 @@ void Batman::_hna_global_del(OrigNode *orig_node, HnaElement *hna_element)
          */
         if (hna_global_entry->curr_orig_node->router->addr == orig_node->router->addr)
             return;
+    }
 
+    // should delete before add, see ManetRoutingBase::setRoute()
+    add_del_route(hna_element->addr, hna_element->netmask, orig_node->router->addr,
+                orig_node->router->if_incoming->if_index,
+                orig_node->router->if_incoming->dev,
+                BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_DEL);
+
+    if (hna_global_entry->curr_orig_node) {
         add_del_route(hna_element->addr, hna_element->netmask, hna_global_entry->curr_orig_node->router->addr,
                     hna_global_entry->curr_orig_node->router->if_incoming->if_index,
                     hna_global_entry->curr_orig_node->router->if_incoming->dev,
                     BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_ADD);
     }
-
-    add_del_route(hna_element->addr, hna_element->netmask, orig_node->router->addr,
-                orig_node->router->if_incoming->if_index,
-                orig_node->router->if_incoming->dev,
-                BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_DEL);
 
     /* if no alternative route is available remove the HNA entry completely */
     if (!hna_global_entry->curr_orig_node) {
@@ -502,15 +507,16 @@ void Batman::hna_global_update(OrigNode *orig_node, HnaElement *new_hna, int16_t
             if (hna_global_entry->curr_orig_node != orig_node)
                 continue;
 
+            // should delete before add, see ManetRoutingBase::setRoute()
+            add_del_route(e->addr, e->netmask, old_router->addr,
+                    old_router->if_incoming->if_index,
+                    old_router->if_incoming->dev,
+                    BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_DEL);
+
             add_del_route(e->addr, e->netmask, orig_node->router->addr,
                     orig_node->router->if_incoming->if_index,
                     orig_node->router->if_incoming->dev,
                     BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_ADD);
-
-            add_del_route(e->addr, e->netmask, old_router->addr,
-                old_router->if_incoming->if_index,
-                old_router->if_incoming->dev,
-                BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_DEL);
         }
 
         return;
@@ -616,15 +622,16 @@ void Batman::hna_global_check_tq(OrigNode *orig_node)
         if (hna_global_entry->curr_orig_node->router->addr == orig_node->router->addr)
             goto set_orig_node;
 
-        add_del_route(e->addr, e->netmask, orig_node->router->addr,
-                orig_node->router->if_incoming->if_index,
-                orig_node->router->if_incoming->dev,
-                BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_ADD);
-
+        // should delete before add, see ManetRoutingBase::setRoute()
         add_del_route(e->addr, e->netmask, hna_global_entry->curr_orig_node->router->addr,
                 hna_global_entry->curr_orig_node->router->if_incoming->if_index,
                 hna_global_entry->curr_orig_node->router->if_incoming->dev,
                 BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_DEL);
+
+        add_del_route(e->addr, e->netmask, orig_node->router->addr,
+                orig_node->router->if_incoming->if_index,
+                orig_node->router->if_incoming->dev,
+                BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_ADD);
 
 set_orig_node:
         hna_global_entry->curr_orig_node = orig_node;

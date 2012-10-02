@@ -48,11 +48,6 @@ void Batman::add_del_route(const Uint128 &dest, uint8_t netmask, const Uint128 &
 {
     if (route_type != ROUTE_TYPE_UNICAST)
         return;
-    if (route_action==ROUTE_DEL)
-    {
-       setRoute(dest, 0, 0, 0, 0);
-       return;
-    }
     int index = -1;
     for (int i=0; i<getNumInterfaces(); i++)
     {
@@ -62,8 +57,18 @@ void Batman::add_del_route(const Uint128 &dest, uint8_t netmask, const Uint128 &
             break;
         }
     }
-    if (index>=0)
-       setRoute(dest, router, index, -1, Uint128::UINT128_MAX);
+    if (index < 0)
+        return;
+
+    Uint128 nmask = IPv4Address::makeNetmask(netmask).getInt();
+    if (route_action==ROUTE_DEL)
+    {
+       setRoute(dest, 0, index, 0, nmask);
+       return;
+    }
+
+    // if (route_action==ROUTE_ADD)
+    setRoute(dest, router, index, -1, nmask);
 }
 
 int Batman::add_del_interface_rules(int8_t rule_action)
