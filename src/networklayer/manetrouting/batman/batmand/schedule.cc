@@ -162,10 +162,13 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
             break;
     }
 
+    bat_packet = in->dup();
+    delete bat_packet->decapsulate();
+
     /* nothing to aggregate with - either aggregation disabled or no suitable aggregation packet found */
     if (forw_node_aggregate == NULL) {
         forw_node_new = new ForwNode();
-        forw_node_new->pack_buff = in;
+        forw_node_new->pack_buff = bat_packet;
 
         forw_node_new->own = 0;
         forw_node_new->if_incoming = if_incoming;
@@ -175,7 +178,7 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
         forw_node_new->send_time = send_time;
     } else {
         // It's necessary decapsulate and recapsulate the packets
-        appendPacket(forw_node_aggregate->pack_buff, in);
+        appendPacket(forw_node_aggregate->pack_buff, bat_packet);
         forw_node_aggregate->num_packets++;
 
         forw_node_new = forw_node_aggregate;
@@ -185,7 +188,6 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
     if (directlink)
         forw_node_new->direct_link_flags = forw_node_new->direct_link_flags | (1 << forw_node_new->num_packets);
 
-    bat_packet = in;
     bat_packet->setTtl(bat_packet->getTtl()-1);
     bat_packet->setHops(bat_packet->getHops()+1);
     bat_packet->setPrevSender(neigh);

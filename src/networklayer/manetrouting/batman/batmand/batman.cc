@@ -897,7 +897,7 @@ void Batman::parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPac
                 schedule_forward_packet(orig_node, bat_packet, neigh, 1, hna_buff_len, if_incoming, curr_time);
 
                 debug_output(4) << "Forward packet: rebroadcast neighbour packet with direct link flag \n";
-                // forwarded, do not delete bat_packet;
+                delete bat_packet;
                 break;
             }
 
@@ -919,6 +919,7 @@ void Batman::parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPac
             debug_output(4) << "Forward packet: rebroadcast originator packet\n";
 
             schedule_forward_packet(orig_node, bat_packet, neigh, 0, hna_buff_len, if_incoming, curr_time);
+            delete bat_packet;
             bat_packet = enc ? check_and_cast<BatmanPacket*>(enc) : NULL;
         }
     }
