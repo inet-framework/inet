@@ -380,7 +380,7 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
      */
 
     bool change = false;
-    if ((int)orig_node->hna_buff.size() != new_hna_len)
+    if ((int)orig_node->hna_buff.size() * SIZE_Hna_element != new_hna_len)
         change = true;
     else
     {
@@ -393,7 +393,6 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
             }
         }
     }
-
     if (!change)
         return;    /* nothing to do */
 
