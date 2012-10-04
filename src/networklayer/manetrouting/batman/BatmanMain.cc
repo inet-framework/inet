@@ -255,9 +255,8 @@ void Batman::initialize(int stage)
     timer = new cMessage();
     WATCH_PTRMAP(origMap);
 
-    //simtime_t curr_time = simTime();
-    //simtime_t select_timeout = (forw_list[0]->send_time - curr_time) > 0 ?forw_list[0]->send_time - curr_time : 10;
-    simtime_t select_timeout = forw_list[0]->send_time > 0 ?forw_list[0]->send_time : 10;
+    simtime_t curr_time = simTime();
+    simtime_t select_timeout = forw_list[0]->send_time > curr_time ? forw_list[0]->send_time : curr_time+10;
     scheduleAt(select_timeout, timer);
 
 }
