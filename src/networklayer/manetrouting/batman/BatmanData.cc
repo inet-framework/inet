@@ -938,7 +938,7 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
     do
     {
        forw_node_new->send_time = getTime() + originator_interval + par("jitter2");
-    } while (forw_node_new->send_time < simTime()); // avoid schedule in the past
+    } while (forw_node_new->send_time < simTime()); // avoid schedule in the past  // FIXME handle this correctly. this can lead to infinite loop
 
     EV << "Send own packet in "<< forw_node_new->send_time <<endl;
 
