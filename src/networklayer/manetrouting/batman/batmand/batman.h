@@ -148,7 +148,7 @@ public:
 };
 
 
-class ForwNode :  public cObject              /* structure for forw_list maintaining packets to be send/forwarded */
+class ForwNode //:  public cObject              /* structure for forw_list maintaining packets to be send/forwarded */
 {
 public:
     simtime_t send_time;
@@ -160,7 +160,7 @@ public:
     BatmanIf * if_incoming;
 };
 
-class GwNode:public cObject
+class GwNode // : public cObject
 {
 public:
     OrigNode *orig_node;
@@ -170,7 +170,7 @@ public:
     simtime_t deleted;
 };
 
-class GwClient :public cObject
+class GwClient //:public cObject
 {
    public:
     Uint128 wip_addr;
