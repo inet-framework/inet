@@ -1365,7 +1365,7 @@ int Batman::add_del_interface_rules(int8_t rule_action)
 
         if (ifr->ipv4Data()==NULL) // no ipv4
             continue;
-
+        if (ifr->isLoopback())      //FIXME What would be the correct conditions here? The isLoopback() used below.
             continue;
         if (ifr->isDown())
             continue;
