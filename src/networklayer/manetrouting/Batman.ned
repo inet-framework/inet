@@ -22,17 +22,12 @@ import inet.networklayer.IManetRouting;
 
 
 //
-// Optimized Link State Routing Protocol
+// Better Approach To Mobile Ad-hoc Networking (B.A.T.M.A.N.) Routing Protocol
 //
-// Implements core functionality as described in rfc3626 chapter 2.1.
-// Supports optional Link Layer feedback (see the use_mac parameter).
-// Auxiliary functions are NOT supported.
+// @see http://open-mesh.org/projects/batmand
 //
-// NOTE:
+// NOTE: 
 //  - The initialization of the routing component is done in stage=4
-//  - hello, tc, mid intervals accept INTEGER values only
-//  - IPv4 addresses are assumed in the messages. If you need IPv6 recompile with -DOLSR_IPv6 added to CFLAGS
-//  - Multiple interfaces per OLSR node is supported only with adding -DMULTIPLE_IFACES_SUPPORT to CFLAGS
 //
 simple Batman extends BaseRouting like IManetRouting
 {
@@ -40,12 +35,16 @@ simple Batman extends BaseRouting like IManetRouting
         @class(Batman);
         int debugLevel = default(1);
         double purgeTimeout @unit(s) = default(200s);
-        double originatorInterval @unit(s) = default(1s);
+        double originatorInterval @unit(s) = default(1s);   // originator message interval
         string preferedGateWay = default("0.0.0.0");
-        int routingClass = default(0);
-        bool aggregationEnable = default(true);
-        int GWClass_download_speed = default(0);
-        int GWClass_upload_speed = default(0);
+        int routingClass = default(0);      // this parameter is used to set the routing behaviour
+                                            // *  0: set no default route
+                                            // *  1: use fast internet connection (gw_flags * TQ)
+                                            // *  2: use stable internet connection (TQ)
+                                            // *  3: use fast-switch internet connection (TQ but switch as soon as a better gateway appears)
+        bool aggregationEnable = default(true);     // enable/disable multiple batman packet sending/receiving in one UDP packet
+        int GWClass_download_speed @unit(kbps) = default(0);    // internet access download speed on preferedGateway, 0 means: this node doesn't have direct internet access
+        int GWClass_upload_speed @unit(kbps) = default(0);      // internet access upload speed on preferedGateway, 0 means download speed / 5
         volatile double jitter @unit(s) = default(uniform (0s,0.1s));
         volatile double jitter2 @unit(s) = default(uniform (-0.1s,0.1s));
         double MAX_AGGREGATION_MS @unit(s) = default(0.1s);
@@ -57,6 +56,4 @@ simple Batman extends BaseRouting like IManetRouting
         input from_ip;
         output to_ip;
 }
-
-
 
