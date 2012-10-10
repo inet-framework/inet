@@ -540,3 +540,49 @@ bool Batman::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &v
     return false;
 }
 
+void Batman::appendPacket(cPacket *oldPacket, cPacket * packetToAppend)
+{
+    if (oldPacket->getEncapsulatedPacket()==NULL)
+    {
+        oldPacket->encapsulate(packetToAppend);
+        return;
+    }
+    std::vector<cPacket*> vectorPacket;
+    cPacket * pkt = oldPacket;
+    while (pkt->getEncapsulatedPacket())
+    {
+        vectorPacket.push_back(pkt->decapsulate());
+        pkt = vectorPacket.back();
+    }
+    pkt = packetToAppend;
+    while (!vectorPacket.empty())
+    {
+          cPacket *pktAux = vectorPacket.back();
+          pktAux->encapsulate(pkt);
+          pkt = pktAux;
+          vectorPacket.pop_back();
+    }
+    oldPacket->encapsulate(pkt);
+}
+
+BatmanPacket *Batman::buildDefaultBatmanPkt(const BatmanIf *batman_if)
+{
+    std::string str = "BatmanPkt:" + (IPv4Address(batman_if->address.getLo())).str();
+    BatmanPacket * pkt = new BatmanPacket(str.c_str());
+
+    pkt->setVersion(0);
+    pkt->setFlags(0x00);
+    pkt->setTtl((batman_if->if_num > 0 ? 2 : TTL));
+    pkt->setGatewayFlags(batman_if->if_num > 0 ? 0 : gateway_class);
+    pkt->setSeqNumber(batman_if->seqno);
+    pkt->setGatewayPort(GW_PORT);
+    pkt->setTq(TQ_MAX_VALUE);
+    if (batman_if->if_active)
+    {
+       pkt->setOrig(batman_if->address);
+       pkt->setPrevSender(batman_if->address);
+    }
+    return pkt;
+}
+
+

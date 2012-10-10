@@ -1,30 +1,178 @@
+/*
+ * Copyright (C) 2006-2009 B.A.T.M.A.N. contributors:
+ *
+ * Simon Wunderlich, Marek Lindner
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of version 2 of the GNU General Public
+ * License as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301, USA
+ *
+ */
+
+
 #include "BatmanMain.h"
+
+
+#if 0
+#include "hna.h"
+#include "os.h"
+#include "hash.h"
+
+#include <errno.h>
+#include <stdlib.h>
+#include <arpa/inet.h>
+
+
+unsigned char *hna_buff_local = NULL;
+uint8_t num_hna_local = 0;
+
+struct list_head_first hna_list;
+struct list_head_first hna_chg_list;
+
+static pthread_mutex_t hna_chg_list_mutex;
+static struct hashtable_t *hna_global_hash = NULL;
+
+int compare_hna(void *data1, void *data2)
+{
+    return (memcmp(data1, data2, 5) == 0 ? 1 : 0);
+}
+
+int choose_hna(void *data, int32_t size)
+{
+    unsigned char *key= data;
+    uint32_t hash = 0;
+    size_t i;
+
+    for (i = 0; i < 5; i++) {
+        hash += key[i];
+        hash += (hash << 10);
+        hash ^= (hash >> 6);
+    }
+
+    hash += (hash << 3);
+    hash ^= (hash >> 11);
+    hash += (hash << 15);
+
+    return (hash % size);
+}
+
+void hna_init(void)
+{
+    /* hna local */
+    INIT_LIST_HEAD_FIRST(hna_list);
+    INIT_LIST_HEAD_FIRST(hna_chg_list);
+
+    pthread_mutex_init(&hna_chg_list_mutex, NULL);
+
+    /* hna global */
+    hna_global_hash = hash_new(128, compare_hna, choose_hna);
+
+    if (hna_global_hash == NULL) {
+        printf("Error - Could not create hna_global_hash (out of memory?)\n");
+        exit(EXIT_FAILURE);
+    }
+}
+#endif
 
 /* this function can be called when the daemon starts or at runtime */
 void Batman::hna_local_task_add_ip(const Uint128 &ip_addr, uint16_t netmask, uint8_t route_action)
 {
     Hna_task *hna_task;
 
-    hna_task = new Hna_task;
+    hna_task = new Hna_task();
 
     hna_task->addr = ip_addr;
     hna_task->netmask = netmask;
     hna_task->route_action = route_action;
+
     hna_chg_list.push_back(hna_task);
 }
 
+#if 0
+/* this function can be called when the daemon starts or at runtime */
+void hna_local_task_add_str(char *hna_string, uint8_t route_action, uint8_t runtime)
+{
+    struct in_addr tmp_ip_holder;
+    uint16_t netmask;
+    char *slash_ptr;
+
+    if ((slash_ptr = strchr(hna_string, '/')) == NULL) {
+        if (runtime) {
+            debug_output(3, "Invalid announced network (netmask is missing): %s\n", hna_string);
+            return;
+        }
+
+        printf("Invalid announced network (netmask is missing): %s\n", hna_string);
+        exit(EXIT_FAILURE);
+    }
+
+    *slash_ptr = '\0';
+
+    if (inet_pton(AF_INET, hna_string, &tmp_ip_holder) < 1) {
+        *slash_ptr = '/';
+
+        if (runtime) {
+            debug_output(3, "Invalid announced network (IP is invalid): %s\n", hna_string);
+            return;
+        }
+
+        printf("Invalid announced network (IP is invalid): %s\n", hna_string);
+        exit(EXIT_FAILURE);
+    }
+
+    errno = 0;
+    netmask = strtol(slash_ptr + 1, NULL, 10);
+
+    if ((errno == ERANGE) || (errno != 0 && netmask == 0)) {
+        *slash_ptr = '/';
+
+        if (runtime)
+            return;
+
+        perror("strtol");
+        exit(EXIT_FAILURE);
+    }
+
+    if (netmask < 1 || netmask > 32) {
+        *slash_ptr = '/';
+
+        if (runtime) {
+            debug_output(3, "Invalid announced network (netmask is invalid): %s\n", hna_string);
+            return;
+        }
+
+        printf("Invalid announced network (netmask is invalid): %s\n", hna_string);
+        exit(EXIT_FAILURE);
+    }
+
+    *slash_ptr = '/';
+
+    tmp_ip_holder.s_addr = (tmp_ip_holder.s_addr & htonl(0xFFFFFFFF << (32 - netmask)));
+    hna_local_task_add_ip(tmp_ip_holder.s_addr, netmask, route_action);
+}
+#endif
 
 void Batman::hna_local_buffer_fill(void)
 {
     hna_buff_local.clear();
+
     if (hna_list.empty())
         return;
 
-    for (unsigned int i=0; i < hna_list.size(); i++)
-    {
+    for (unsigned int list_pos = 0; list_pos < hna_list.size(); list_pos++) {
         BatmanHnaMsg aux;
-        aux.addr = hna_list[i].addr;
-        aux.netmask = hna_list[i].netmask;
+        aux.addr = hna_list[list_pos].addr;
+        aux.netmask = hna_list[list_pos].netmask;
         hna_buff_local.push_back(aux);
     }
 }
@@ -37,8 +185,7 @@ void Batman::hna_local_task_exec(void)
     if (hna_chg_list.empty())
         return;
 
-    while (!hna_chg_list.empty())
-    {
+    while (!hna_chg_list.empty()) {
         hna_task = hna_chg_list.front();
         hna_local_entry = NULL;
         bool found = false;
@@ -65,10 +212,11 @@ void Batman::hna_local_task_exec(void)
                 //debug_output(3, "Adding HNA to announce network list: %s/%i\n", hna_addr_str, hna_task->netmask);
 
                 /* add node */
-                //hna_local_entry = debugMalloc(sizeof(struct hna_local_entry), 702);
                 Hna_local_entry hna_local_entry;
+
                 hna_local_entry.addr = hna_task->addr;
                 hna_local_entry.netmask = hna_task->netmask;
+
                 hna_local_update_routes(&hna_local_entry, ROUTE_ADD);
                 hna_list.push_back(hna_local_entry);
             } else {
@@ -79,11 +227,12 @@ void Batman::hna_local_task_exec(void)
         hna_chg_list.erase(hna_chg_list.begin());
         delete hna_task;
     }
+
     /* rewrite local buffer */
     hna_local_buffer_fill();
 }
 
-/*
+#if 0
 unsigned char *hna_local_update_vis_packet(unsigned char *vis_packet, uint16_t *vis_packet_size)
 {
     struct list_head *list_pos;
@@ -109,16 +258,17 @@ unsigned char *hna_local_update_vis_packet(unsigned char *vis_packet, uint16_t *
 
     return vis_packet;
 }
-*/
+#endif
 
 void Batman::hna_local_update_routes(Hna_local_entry *hna_local_entry, int8_t route_action)
 {
     /* add / delete throw routing entries for own hna */
-//    add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_THROW, route_action);
-//    add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_HOSTS, ROUTE_TYPE_THROW, route_action);
-//    add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_UNREACH, ROUTE_TYPE_THROW, route_action);
-//    add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_TUNNEL, ROUTE_TYPE_THROW, route_action);
+    //add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_THROW, route_action);
+    //add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_HOSTS, ROUTE_TYPE_THROW, route_action);
+    //add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_UNREACH, ROUTE_TYPE_THROW, route_action);
+    //add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_TUNNEL, ROUTE_TYPE_THROW, route_action);
     add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, NULL, BATMAN_RT_TABLE_TUNNEL, ROUTE_TYPE_THROW, route_action);
+
     /* do not NAT HNA networks automatically */
     //hna_local_update_nat(hna_local_entry->addr, hna_local_entry->netmask, route_action);
 }
@@ -134,7 +284,7 @@ void Batman::_hna_global_add(OrigNode *orig_node, Hna_element *hna_element)
     /* add the hna node if it does not exist */
     if (it == hnaMap.end())
     {
-        hna_global_entry = new Hna_global_entry;
+        hna_global_entry = new Hna_global_entry();
         hna_global_entry->addr = hna_element->addr;
         hna_global_entry->netmask = hna_element->netmask;
         hna_global_entry->curr_orig_node = NULL;
@@ -148,14 +298,13 @@ void Batman::_hna_global_add(OrigNode *orig_node, Hna_element *hna_element)
         return;
 
     bool notFound = true;
-    for (unsigned int i=0; i<hna_global_entry->orig_list.size(); i++)
-    {
-        if (hna_global_entry->orig_list[i] == orig_node)
-        {
+    for (unsigned int list_pos = 0; list_pos < hna_global_entry->orig_list.size(); list_pos++) {
+        if (hna_global_entry->orig_list[list_pos] == orig_node) {
             notFound = false;
             break;
         }
     }
+
     /* append the given orig node to the list */
     if (notFound)
         hna_global_entry->orig_list.push_back(orig_node);
@@ -192,7 +341,7 @@ void Batman::_hna_global_add(OrigNode *orig_node, Hna_element *hna_element)
 void Batman::_hna_global_del(OrigNode *orig_node, Hna_element *hna_element)
 {
     Hna_global_entry *hna_global_entry;
-    OrigNode * orig_ptr = NULL;
+    OrigNode *orig_ptr = NULL;
 
     std::map<BatmanHnaMsg,Hna_global_entry*>::iterator it;
     it = hnaMap.find(*hna_element);
@@ -200,12 +349,13 @@ void Batman::_hna_global_del(OrigNode *orig_node, Hna_element *hna_element)
     /* add the hna node if it does not exist */
     if (it == hnaMap.end())
         return;
+
     hna_global_entry = it->second;
     hna_global_entry->curr_orig_node = NULL;
 
-    for (unsigned int i=0; i<hna_global_entry->orig_list.size();)
-    {
+    for (unsigned int i=0; i<hna_global_entry->orig_list.size(); ) {
         orig_ptr = hna_global_entry->orig_list[i];
+
         /* delete old entry in orig list */
         if (orig_ptr == orig_node) {
             hna_global_entry->orig_list.erase(hna_global_entry->orig_list.begin()+i);
@@ -254,10 +404,11 @@ void Batman::_hna_global_del(OrigNode *orig_node, Hna_element *hna_element)
 int Batman::hna_buff_delete(std::vector<Hna_element *> &buf, int *buf_len, Hna_element *e)
 {
     for (unsigned int i = 0; i < buf.size(); i++) {
-        if (*(buf[i])==*e) {
+        if (*(buf[i]) == *e) {
             /* move last element forward */
             buf.erase(buf.begin()+i);
             *buf_len -= SIZE_Hna_element;
+
             return 1;
         }
     }
@@ -274,8 +425,8 @@ void Batman::hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t 
         delete orig_node->hna_buff.back();
         orig_node->hna_buff.pop_back();
     }
-    if ((new_hna == NULL) || (new_hna_len == 0))
-    {
+
+    if ((new_hna == NULL) || (new_hna_len == 0)) {
         return;
     }
 
@@ -283,6 +434,7 @@ void Batman::hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t 
     num_elements = new_hna_len / SIZE_Hna_element;
 
     //debug_output(4, "HNA information received (%i HNA network%s): \n", num_elements, (num_elements > 1 ? "s": ""));
+
     for (i = 0; i < num_elements; i++) {
         e = new_hna[i].dup();
         orig_node->hna_buff.push_back(e);
@@ -298,7 +450,7 @@ void Batman::hna_global_add(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16_t 
             _hna_global_add(orig_node, e);
     }
 }
-// HNA methods
+
 /**
  * hna_global_update() replaces the old add_del_hna function. This function
  * updates the new hna buffer for the supplied orig node and
@@ -375,7 +527,6 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
      * update the routes. if the router changed, then we have to update all the routes
      * NOTE: no NULL pointer checking here because memcmp() just returns if n == 0
      */
-
     bool change = false;
     if ((int)orig_node->hna_buff.size() * SIZE_Hna_element != new_hna_len)
         change = true;
@@ -407,6 +558,7 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
     /* add new routes and keep old routes */
     for (i = 0; i < num_elements; i++) {
         e = orig_node->hna_buff[i];
+
         /**
          * if the router is the same, and the announcement was already in the old
          * buffer, we can keep the route.
@@ -420,15 +572,16 @@ void Batman::hna_global_update(OrigNode *orig_node, BatmanHnaMsg *new_hna, int16
 
     /* old routes which are not to be kept are deleted now. */
     num_elements = old_hna_len / SIZE_Hna_element;
+
     for (unsigned int i = 0; i < old_hna.size(); i++) {
-        BatmanHnaMsg *e = (old_hna[i]);
+        BatmanHnaMsg *e = old_hna[i];
+
         if ((e->netmask > 0) && (e->netmask <= 32))
             _hna_global_del(orig_node, e);
     }
 
     /* dispose old hna buffer now. */
-    while (!old_hna.empty())
-    {
+    while (!old_hna.empty()) {
         delete old_hna.back();
         old_hna.pop_back();
     }
@@ -457,6 +610,7 @@ void Batman::hna_global_check_tq(OrigNode *orig_node)
             continue;
 
         hna_global_entry = it->second;
+
         /* if the given orig node is not in use no routes need to change */
         if (hna_global_entry->curr_orig_node == orig_node)
             continue;
@@ -469,18 +623,20 @@ void Batman::hna_global_check_tq(OrigNode *orig_node)
          * if we change the orig node towards the HNA we may still route via the same next hop
          * which does not require any routing table changes
          */
-        if (hna_global_entry->curr_orig_node->router->addr != orig_node->router->addr)
-        {
-            add_del_route(e->addr, e->netmask, orig_node->router->addr,
-                    orig_node->router->if_incoming->if_index,
-                    orig_node->router->if_incoming->dev,
-                    BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_ADD);
+        if (hna_global_entry->curr_orig_node->router->addr == orig_node->router->addr)
+            goto set_orig_node;
 
-            add_del_route(e->addr, e->netmask, hna_global_entry->curr_orig_node->router->addr,
-                    hna_global_entry->curr_orig_node->router->if_incoming->if_index,
-                    hna_global_entry->curr_orig_node->router->if_incoming->dev,
-                    BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_DEL);
-        }
+        add_del_route(e->addr, e->netmask, orig_node->router->addr,
+                orig_node->router->if_incoming->if_index,
+                orig_node->router->if_incoming->dev,
+                BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_ADD);
+
+        add_del_route(e->addr, e->netmask, hna_global_entry->curr_orig_node->router->addr,
+                hna_global_entry->curr_orig_node->router->if_incoming->if_index,
+                hna_global_entry->curr_orig_node->router->if_incoming->dev,
+                BATMAN_RT_TABLE_NETWORKS, ROUTE_TYPE_UNICAST, ROUTE_DEL);
+
+set_orig_node:
         hna_global_entry->curr_orig_node = orig_node;
     }
 }
@@ -493,10 +649,10 @@ void Batman::hna_global_del(OrigNode *orig_node)
         return;
 
     /* delete routes */
-    while (!orig_node->hna_buff.empty())
-    {
+    while (!orig_node->hna_buff.empty()) {
         e = orig_node->hna_buff.back();
         orig_node->hna_buff.pop_back();
+
         /* not found / deleted, need to add this new route */
         if ((e->netmask > 0) && (e->netmask <= 32))
             _hna_global_del(orig_node, e);
@@ -509,16 +665,16 @@ void Batman::hna_free(void)
     Hna_local_entry *hna_local_entry;
 
     /* hna local */
-    while (!hna_list.empty())
-    {
+    while (!hna_list.empty()) {
         hna_local_entry = &hna_list.back();
         hna_local_update_routes(hna_local_entry, ROUTE_DEL);
         hna_list.pop_back();
     }
-    while (!hnaMap.empty())
-    {
+
+    while (!hnaMap.empty()) {
         delete hnaMap.begin()->second;
         hnaMap.erase(hnaMap.begin());
     }
+
     hna_buff_local.clear();
 }

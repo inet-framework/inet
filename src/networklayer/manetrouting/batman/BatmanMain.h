@@ -1,26 +1,26 @@
 /*
- * BatmanData.h
+ * BatmanMain.h
  *
  *  Created on: Nov 29, 2011
  *      Author: alfonso
  */
 
-#ifndef __BATMAN_H_
-#define __BATMAN_H_
+#ifndef __INET_BATMANMAIN_H
+#define __INET_BATMANMAIN_H
 
 #include "ManetRoutingBase.h"
 #include "batman.h"
 
-class BatmanTimer :ManetTimer
+class BatmanTimer : ManetTimer
 {
-public:
+  public:
     virtual void expire();
 };
 
 class Batman : public ManetRoutingBase
 {
-private:
-    typedef std::map<Uint128,OrigNode*>  OrigMap;
+  private:
+    typedef std::map<Uint128,OrigNode*> OrigMap;
     typedef std::vector<BatmanIf*> Interfacelist;
     typedef std::vector<GwNode*> Gwlist;
     typedef std::vector<ForwNode*> Forwlist;
@@ -28,10 +28,9 @@ private:
     typedef std::vector<Hna_local_entry> HnaLocalEntryList;
     typedef std::vector<Hna_task*> HnaTaskList;
 
-//    hna_global_hash = hash_new(128, compare_hna, choose_hna);
+    //hna_global_hash = hash_new(128, compare_hna, choose_hna);
 
-
-protected:
+  protected:
     uint8_t debug_level;
     uint8_t debug_level_max;
     uint8_t gateway_class;
@@ -60,7 +59,6 @@ protected:
     Forwlist forw_list;
     // struct vis_if vis_if;
 
-
     uint8_t tunnel_running;
 
     uint8_t hop_penalty;
@@ -78,12 +76,12 @@ protected:
     HnaTaskList hna_chg_list;
     std::map<BatmanHnaMsg,Hna_global_entry*> hnaMap;
     std::vector<BatmanHnaMsg> hna_buff_local;
-// methods
 
-private:
+  // methods
+  private:
     void sendPackets(const simtime_t &curr_time);
-    NeighNode * create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const Uint128 &neigh, BatmanIf *if_incoming);
-    OrigNode * get_orig_node(const Uint128 &addr );
+    NeighNode *create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const Uint128 &neigh, BatmanIf *if_incoming);
+    OrigNode *get_orig_node(const Uint128 &addr );
     void update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh, BatmanIf *if_incoming, BatmanHnaMsg *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time );
     void purge_orig(const simtime_t &curr_time);
     void choose_gw(void);
@@ -114,15 +112,18 @@ private:
     BatmanIf * is_batman_if(InterfaceEntry * dev);
     void ring_buffer_set(std::vector<uint8_t> &tq_recv, uint8_t &tq_index, uint8_t value);
     uint8_t ring_buffer_avg(std::vector<uint8_t> &tq_recv);
-// Routing table modification
+
+    // Routing table modification
     void add_del_route(const Uint128  &, uint8_t netmask, const Uint128  &, int32_t, InterfaceEntry *dev, uint8_t rt_table, int8_t route_type, int8_t route_action);
     void add_del_rule(const Uint128& network, uint8_t netmask, int8_t rt_table, uint32_t prio, InterfaceEntry *dev, int8_t rule_type, int8_t rule_action);
     int add_del_interface_rules(int8_t rule_action);
-//
-// Default routes methods
-//
+
+    //
+    // Default routes methods
+    //
     virtual void del_default_route(){}
     virtual void add_default_route(){}
+
     // Bits methods
     virtual void bit_init(std::vector<TYPE_OF_WORD> &);
     virtual uint8_t get_bit_status(std::vector<TYPE_OF_WORD> &seq_bits, uint16_t last_seqno, uint16_t curr_seqno );
@@ -138,13 +139,14 @@ private:
     virtual void check_active_inactive_interfaces(void);
     virtual void check_active_interfaces(void);
     virtual void check_inactive_interfaces(void);
+
     //build packets
     virtual BatmanPacket *buildDefaultBatmanPkt(const BatmanIf *);
+
     // get timer
     virtual simtime_t getTime();
 
-
-protected:
+  protected:
     virtual void handleMessage(cMessage *msg);
     virtual int numInitStages() const  {return 5;}
     virtual void initialize(int stage);
@@ -152,7 +154,7 @@ protected:
     virtual void packetFailed(IPv4Datagram *dgram) {}
     virtual void scheduleNextEvent();
 
-public:
+  public:
     Batman();
     ~Batman();
     virtual uint32_t getRoute(const Uint128 &, std::vector<Uint128> &add);
@@ -168,8 +170,9 @@ public:
         else
             return false;
     };
+
     virtual bool getDestAddress(cPacket *, Uint128 &) {return false;};
 };
 
 
-#endif /* BATMANDATA_H_ */
+#endif  // __INET_BATMANMAIN_H
