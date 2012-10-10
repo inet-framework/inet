@@ -168,6 +168,8 @@ public:
     uint16_t gw_failure;
     simtime_t last_failure;
     simtime_t deleted;
+  public:
+    GwNode() : orig_node(NULL), gw_port(0), gw_failure(0), last_failure(0), deleted(0) {}
 };
 
 class GwClient //:public cObject

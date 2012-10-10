@@ -669,8 +669,6 @@ void Batman::update_gw_list(OrigNode *orig_node, uint8_t new_gwflags, uint16_t g
     }
 
     gw_node = new GwNode();
-    memset(gw_node, 0, sizeof(GwNode));
-
     gw_node->orig_node = orig_node;
     gw_node->gw_port = gw_port;
     gw_node->last_failure = getTime();
