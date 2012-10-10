@@ -489,8 +489,8 @@ void Batman::choose_gw(void)
 
         /* ignore this gateway if recent connection attempts were unsuccessful */
         /* if it is our only gateway retry immediately */
-        if (gw_list.size()) {
-            if (current_time < (gw_node->last_failure + 30))
+        if (gw_list.size() > 1) {
+            if (current_time < (gw_node->last_failure + 30.000))
                 continue;
         }
 
