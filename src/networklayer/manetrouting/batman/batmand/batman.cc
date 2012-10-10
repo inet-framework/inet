@@ -589,6 +589,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, BatmanHna
 
         /* route changed */
         } else {
+            // __USE_MINHOP__ and OrigNode::num_hops is extension
             bool Change = true;
 #ifdef __USE_MINHOP__
             if (orig_node->router->num_hops<neigh_node->num_hops)
@@ -624,6 +625,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, BatmanHna
         hna_global_update(orig_node, hna_recv_buff, hna_buff_len, old_router);
     }
     // Sanity check
+    // ez itt miert kell???? nincs az eredetiben...
     if (!isInMacLayer())
     {
         Uint128 next = omnet_exist_rte(orig_node->orig);
