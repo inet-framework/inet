@@ -111,6 +111,7 @@ void PcapRecorder::handleMessage(cMessage *msg)
 
 void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
+    Enter_Method_Silent();
     cPacket *packet = dynamic_cast<cPacket *>(obj);
 
     if (packet)
