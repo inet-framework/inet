@@ -221,6 +221,7 @@ class INET_API IPv6Address
          * to an array of four 32-bit words, most significant word first.
          */
         static void constructMask(int prefixLength, uint32* mask);
+        static IPv6Address constructMask(int prefixLength);
 
         /**
          * Get the IPv6 first prefixLength bits of the address, with

@@ -300,6 +300,13 @@ void IPv6Address::constructMask(int prefixLength, uint32 *mask)
     }
 }
 
+IPv6Address IPv6Address::constructMask(int prefixLength)
+{
+    IPv6Address ret;
+    constructMask(prefixLength, ret.d);
+    return ret;
+}
+
 IPv6Address IPv6Address::getPrefix(int prefixLength) const
 {
     // First we construct a mask.
