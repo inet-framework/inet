@@ -123,7 +123,7 @@ void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceE
     default: throw cRuntimeError("Unexpected notification category %d", category);
     }
 
-    // time, moduleId, ifname, address
+    // action, eventNo, simtime, moduleId, ifname, address
     ensureRoutingLogFileOpen();
     fprintf(routingLogFile, "%s  %"LL"d  %s  %d  %s %s\n",
             tag,
@@ -148,7 +148,7 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IPv4Route *rou
     default: throw cRuntimeError("Unexpected notification category %d", category);
     }
 
-    // time, moduleId, routerID, dest, dest netmask, nexthop
+    // action, eventNo, simtime, moduleId, routerID, dest, dest netmask, nexthop
     ensureRoutingLogFileOpen();
     fprintf(routingLogFile, "%s %"LL"d  %s  %d  %s  %s  %s  %s\n",
             tag,
