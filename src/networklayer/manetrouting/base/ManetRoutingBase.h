@@ -160,13 +160,13 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 //   encapsulate messages and send to the next layer
 //
 /////////////////////////////////////
-    virtual void sendToIp(cPacket *, int, const Uint128 &, int, int, double, const Uint128 & iface = 0);
-    virtual void sendToIp(cPacket *p, int port, int dest, int porDest, int ttl, double delay, int iface = 0)
+    virtual void sendToIp(cPacket *pk, int srcPort, const Uint128& destAddr, int destPort, int ttl, double delay, const Uint128& ifaceAddr = 0);
+    virtual void sendToIp(cPacket *pk, int srcPort, int destAddr, int destPort, int ttl, double delay, uint32_t ifaceIPv4Addr = 0)
     {
-        sendToIp(p, port, (Uint128) dest, porDest, ttl, delay, (Uint128) iface);
+        sendToIp(pk, srcPort, (Uint128) destAddr, destPort, ttl, delay, (Uint128)ifaceIPv4Addr);
     }
-    virtual void sendToIp(cPacket *, int, const Uint128 &, int, int, const Uint128 &iface = 0);
-    virtual void sendToIp(cPacket *, int, const Uint128 &, int, int, double, int index = -1);
+    virtual void sendToIp(cPacket *pk, int srcPort, const Uint128& destAddr, int destPort, int ttl, const Uint128& ifaceAddr = 0);
+    virtual void sendToIp(cPacket *pk, int srcPort, const Uint128& destAddr, int destPort, int ttl, double delay, int ifaceIndex = -1);
 /////////////////////////////////
 //
 //   Ip4 routing table access routines
