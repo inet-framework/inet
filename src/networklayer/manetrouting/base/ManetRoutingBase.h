@@ -160,12 +160,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 //   encapsulate messages and send to the next layer
 //
 /////////////////////////////////////
-    virtual void sendToIp(cPacket *pk, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, const ManetAddress& ifaceAddr = ManetAddress::ZERO);
-    virtual void sendToIp(cPacket *pk, int srcPort, int destAddr, int destPort, int ttl, double delay, uint32_t ifaceIPv4Addr = 0)
-    {
-        sendToIp(pk, srcPort, ManetAddress(IPv4Address(destAddr)), destPort, ttl, delay, ManetAddress(IPv4Address(ifaceIPv4Addr)));
-    }
-    virtual void sendToIp(cPacket *pk, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, const ManetAddress& ifaceAddr = ManetAddress::ZERO);
+    virtual void sendToIp(cPacket *pk, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, const ManetAddress& ifaceAddr);
     virtual void sendToIp(cPacket *pk, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, int ifaceIndex = -1);
 /////////////////////////////////
 //

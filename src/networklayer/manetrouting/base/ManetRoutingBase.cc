@@ -469,11 +469,6 @@ void ManetRoutingBase::registerPosition()
         getParentModule()->subscribe(mobilityStateChangedSignal, this);
 }
 
-void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, const ManetAddress &interface)
-{
-    sendToIp(msg, srcPort, destAddr, destPort, ttl, 0, interface);
-}
-
 void ManetRoutingBase::processLinkBreak(const cObject *details) {return;}
 void ManetRoutingBase::processLinkBreakManagement(const cObject *details) {return;}
 void ManetRoutingBase::processPromiscuous(const cObject *details) {return;}

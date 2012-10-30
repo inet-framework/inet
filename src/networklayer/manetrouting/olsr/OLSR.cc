@@ -1791,7 +1791,7 @@ OLSR::send_pkt()
             it = msgs_.erase(it);
         }
 
-        sendToIp(op, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, ManetAddress::ZERO);
+        sendToIp(op, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, 0.0, ManetAddress::ZERO);
     }
 }
 

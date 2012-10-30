@@ -761,11 +761,11 @@ void DYMO::sendDown(cPacket* apMsg, int destAddr)
     if (IPv4Address::LL_MANET_ROUTERS.getInt()==(unsigned int)destAddr)
     {
         destAddr = IPv4Address::ALLONES_ADDRESS.getInt();
-        sendToIp(apMsg, UDPPort, destAddr, UDPPort, 1, SIMTIME_DBL(jitter), 0);
+        sendToIp(apMsg, UDPPort, ManetAddress(IPv4Address(destAddr)), UDPPort, 1, SIMTIME_DBL(jitter));
     }
     else
     {
-        sendToIp(apMsg, UDPPort, destAddr, UDPPort, 1, 0);
+        sendToIp(apMsg, UDPPort, ManetAddress(IPv4Address(destAddr)), UDPPort, 1, 0.0);
     }
 }
 

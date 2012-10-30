@@ -1736,9 +1736,9 @@ OLSR_ETX::send_pkt()
             if (i == 0)
                 op2->setSend_time(op1->send_time());
             // Sending packet pair
-            sendToIp(op1, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, ManetAddress::ZERO);
+            sendToIp(op1, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, 0.0, ManetAddress::ZERO);
             if (i == 0)
-                sendToIp(op2, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, ManetAddress::ZERO);
+                sendToIp(op2, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, 0.0, ManetAddress::ZERO);
         }
         else
         {
@@ -1758,7 +1758,7 @@ OLSR_ETX::send_pkt()
 
                 it = msgs_.erase(it);
             }
-            sendToIp(op, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, ManetAddress::ZERO);
+            sendToIp(op, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, 0.0, ManetAddress::ZERO);
 
         }
     }
