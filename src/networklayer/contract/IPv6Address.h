@@ -192,7 +192,7 @@ class INET_API IPv6Address
         /**
          * Converts to Uint128.
          */
-        operator Uint128()  {return (Uint128(d[0])<<96u) + (Uint128(d[1])<<64u) + (Uint128(d[2])<<32u) + Uint128(d[3]);}
+        Uint128 toUint128() const {return (Uint128(d[0])<<96u) + (Uint128(d[1])<<64u) + (Uint128(d[2])<<32u) + Uint128(d[3]);}
 
         /**
          * Returns a pointer to the internal binary representation of the address:
