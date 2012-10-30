@@ -143,7 +143,7 @@ class DYMO : public ManetRoutingBase
     simtime_t computeBackoff(simtime_t);
 
     /** @brief updates the lifetime (validTimeout) of a route */
-    void updateRouteLifetimes(unsigned int destAddr);
+    void updateRouteLifetimes(const Uint128& destAddr);
 
     /** @brief generates and sends down a new rreq for given destination address */
     void sendRREQ(unsigned int destAddr, int msgHdrHopLimit, unsigned int targetSeqNum, unsigned int targetHopCnt);
