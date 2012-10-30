@@ -713,7 +713,7 @@ void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
 
     }
     InterfaceEntry *   ie = getInterfaceEntry(ifindex);
-    bool isMcast = ie->ipv4Data()->isMemberOfMulticastGroup(IPv4Address(dest_addr.s_addr));
+    bool isMcast = ie->ipv4Data()->isMemberOfMulticastGroup(IPv4Address(dest_addr.s_addr.toUint()));
 
     /* If the packet is not interesting we just let it go through... */
     if (dest_addr.s_addr == DYMO_BROADCAST || isMcast)

@@ -117,7 +117,7 @@ private:
     uint8_t ring_buffer_avg(std::vector<uint8_t> &tq_recv);
 // Routing table modification
     void add_del_route(const Uint128  &, uint8_t netmask, const Uint128  &, int32_t, InterfaceEntry *dev, uint8_t rt_table, int8_t route_type, int8_t route_action);
-    void add_del_rule(uint32_t network, uint8_t netmask, int8_t rt_table, uint32_t prio, InterfaceEntry *dev, int8_t rule_type, int8_t rule_action);
+    void add_del_rule(const Uint128& network, uint8_t netmask, int8_t rt_table, uint32_t prio, InterfaceEntry *dev, int8_t rule_type, int8_t rule_action);
     int add_del_interface_rules(int8_t rule_action);
 //
 // Default routes methods

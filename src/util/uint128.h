@@ -101,7 +101,7 @@ class Uint128
     Uint128(const double& a);
     Uint128(const long double& a);
 
-    Uint128(const char *sz) {set(sz);}
+    explicit Uint128(const char *sz) {set(sz);}
 
     // TODO: Consider creation of operator= to eliminate
     //       the need of intermediate objects during assignments.
@@ -169,19 +169,6 @@ class Uint128
     float toFloat() const;
     double toDouble() const;
     long double toLongDouble() const;
-
-    operator double() const {return toDouble(); }
-    operator int() const {return toUint();}
-    operator uint32_t() const { return toUint();}
-    operator uint64_t() const {return toUint64();}
-    operator int64_t() const {return toUint64();}
-
-    operator bool()
-    {
-        if (lo==0 && hi == 0)
-            return false;
-        return true;
-    }
 
     // Arithmetic methods
     Uint128  div(const Uint128&, Uint128&) const;

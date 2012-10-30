@@ -175,7 +175,7 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
                 {
                     /* Decide whether new precursors make this a non unicast RERR */
                     rerr_add_udest(rerr, rt_u->dest_addr, rt_u->dest_seqno);
-                    if (rerr_unicast_dest.s_addr)
+                    if (rerr_unicast_dest.s_addr != 0)
                     {
                         for (unsigned int i = 0; i< rt_u->precursors.size(); i++)
                         {

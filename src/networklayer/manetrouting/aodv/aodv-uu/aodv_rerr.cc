@@ -188,7 +188,7 @@ void NS_CLASS rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
                           ip_to_str(rt->dest_addr), rt->dest_seqno);
 
 #ifdef AODV_USE_STL_RT
-                    if (rerr_unicast_dest.s_addr)
+                    if (rerr_unicast_dest.s_addr != 0)
                     {
                         for (unsigned int i = 0; i< rt->precursors.size(); i++)
                         {

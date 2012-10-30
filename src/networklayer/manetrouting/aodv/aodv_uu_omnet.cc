@@ -867,7 +867,7 @@ void NS_CLASS processPacket(IPv4Datagram * p,unsigned int ifindex)
 
     /* If this is a TCP packet and we don't have a route, we should
        set the gratuituos flag in the RREQ. */
-    bool isMcast = ie->ipv4Data()->isMemberOfMulticastGroup(IPv4Address(dest_addr.s_addr));
+    bool isMcast = ie->ipv4Data()->isMemberOfMulticastGroup(IPv4Address(dest_addr.s_addr.toUint()));
 
     /* If the packet is not interesting we just let it go through... */
     if (dest_addr.s_addr == AODV_BROADCAST ||isMcast)

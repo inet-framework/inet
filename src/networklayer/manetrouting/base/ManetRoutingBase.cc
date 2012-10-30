@@ -791,7 +791,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
         opp_error("Manet routing protocol is not register");
 
     /* Add route to kernel routing table ... */
-    IPv4Address desAddress((uint32_t)dst);
+    IPv4Address desAddress(dst.toUint());
     if (!createInternalStore && routesVector)
     {
         delete routesVector;
@@ -868,8 +868,8 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     if (del_entry)
         return;
 
-    IPv4Address netmask((uint32_t)netm);
-    IPv4Address gateway((uint32_t)gtwy);
+    IPv4Address netmask(netm.toUint());
+    IPv4Address gateway(gtwy.toUint());
 
     // The default mask is for manet routing is  IPv4Address::ALLONES_ADDRESS
     if (netm==0)
@@ -961,7 +961,7 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
         opp_error("Manet routing protocol is not register");
 
     /* Add route to kernel routing table ... */
-    IPv4Address desAddress((uint32_t)dst);
+    IPv4Address desAddress(dst.toUint());
     if (!createInternalStore && routesVector)
     {
          delete routesVector;
@@ -1023,8 +1023,8 @@ void ManetRoutingBase::omnet_chg_rte(const Uint128 &dst, const Uint128 &gtwy, co
     if (del_entry)
         return;
 
-    IPv4Address netmask((uint32_t)netm);
-    IPv4Address gateway((uint32_t)gtwy);
+    IPv4Address netmask(netm.toUint());
+    IPv4Address gateway(gtwy.toUint());
     if (netm==0)
         netmask = IPv4Address::ALLONES_ADDRESS;
 
@@ -1117,7 +1117,7 @@ Uint128 ManetRoutingBase::omnet_exist_rte(Uint128 dst)
         opp_error("Manet routing protocol is not register");
 
     /* Add route to kernel routing table ... */
-    IPv4Address desAddress((uint32_t)dst);
+    IPv4Address desAddress(dst.toUint());
     const IPv4Route *e = NULL;
     if (mac_layer_)
         return (Uint128) 0;
@@ -1508,7 +1508,7 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
         opp_error("Manet routing protocol is not register");
 
     /* Add route to kernel routing table ... */
-    IPv4Address desAddress((uint32_t)destination);
+    IPv4Address desAddress(destination.toUint());
     bool del_entry = (nextHop == (Uint128)0);
 
     if (!createInternalStore && routesVector)
@@ -1582,8 +1582,8 @@ bool ManetRoutingBase::setRoute(const Uint128 & destination, const Uint128 &next
     if (del_entry)
         return true;
 
-    IPv4Address netmask((uint32_t)mask);
-    IPv4Address gateway((uint32_t)nextHop);
+    IPv4Address netmask(mask.toUint());
+    IPv4Address gateway(nextHop.toUint());
     if (mask==(Uint128)0)
         netmask = IPv4Address::ALLONES_ADDRESS;
     InterfaceEntry *ie = getInterfaceEntry(ifaceIndex);

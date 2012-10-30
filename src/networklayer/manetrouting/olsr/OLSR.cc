@@ -2725,7 +2725,7 @@ OLSR::emf_to_seconds(uint8_t olsr_format)
 int
 OLSR::node_id(const nsaddr_t &addr)
 {
-    return addr;
+    return addr.toUint();
     /*
         // Preventing a bad use for this function
             if ((uint32_t)addr == IP_BROADCAST)

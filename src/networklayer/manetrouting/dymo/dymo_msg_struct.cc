@@ -349,7 +349,7 @@ std::string DYMO_element::detailedInfo() const
     }
     else if (rerr_type)
     {
-        IPv4Address naddr((uint32_t) notify_addr);
+        IPv4Address naddr(notify_addr.toUint());
         out << " Notify address " << naddr << "\n"; // Khmm
         for (int i = 0; i < rerr_type->numBlocks(); i++)
         {

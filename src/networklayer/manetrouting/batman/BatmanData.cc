@@ -1392,7 +1392,7 @@ int Batman::add_del_interface_rules(int8_t rule_action)
         if ((batman_if = is_batman_if(ifr))==NULL)
             continue;
 
-        add_del_rule(netaddr, netmask, BATMAN_RT_TABLE_TUNNEL, (rule_action == RULE_DEL ? 0 : BATMAN_RT_PRIO_TUNNEL + if_count), 0, RULE_TYPE_SRC, rule_action);
+        add_del_rule(netaddr, mask, BATMAN_RT_TABLE_TUNNEL, (rule_action == RULE_DEL ? 0 : BATMAN_RT_PRIO_TUNNEL + if_count), 0, RULE_TYPE_SRC, rule_action);
 
         if (ifr->isLoopback())
             add_del_rule(0, 0, BATMAN_RT_TABLE_TUNNEL, BATMAN_RT_PRIO_TUNNEL, ifr, RULE_TYPE_IIF, rule_action);
@@ -1402,7 +1402,7 @@ int Batman::add_del_interface_rules(int8_t rule_action)
     return 1;
 }
 
-void Batman::add_del_rule(uint32_t network, uint8_t netmask, int8_t rt_table, uint32_t prio, InterfaceEntry *iif, int8_t rule_type, int8_t rule_action)
+void Batman::add_del_rule(const Uint128& network, uint8_t netmask, int8_t rt_table, uint32_t prio, InterfaceEntry *iif, int8_t rule_type, int8_t rule_action)
 {
     return;
 }

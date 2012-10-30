@@ -253,7 +253,7 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
     /* Ignore RREQ's that originated from this node. Either we do this
        or we buffer our own sent RREQ's as we do with others we
        receive. */
-    ifaddr = DEV_IFINDEX(ifindex).ipaddr.s_addr;
+    ifaddr = DEV_IFINDEX(ifindex).ipaddr.s_addr.toUint();
 #ifndef OMNETPP
     if (rreq_orig.s_addr == DEV_IFINDEX(ifindex).ipaddr.s_addr)
         return;
