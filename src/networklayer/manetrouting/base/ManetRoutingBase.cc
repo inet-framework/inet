@@ -1951,7 +1951,7 @@ void ManetRoutingBase::getListRelatedAp(const Uint128 & add, std::vector<Uint128
     if (mac_layer_)
     {
         std::vector<MACAddress> listAux;
-        getApList(add.getLo(),listAux);
+        getApList(MACAddress(add.getLo()),listAux);
         list.clear();
         for (unsigned int i = 0; i < listAux.size(); i++)
         {

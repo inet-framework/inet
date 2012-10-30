@@ -57,7 +57,7 @@ class INET_API MACAddress
     /**
      * Initializes the address from the lower 48 bits of the 64-bit argument
      */
-    MACAddress(uint64 bits) { address = bits & MAC_ADDRESS_MASK; }
+    explicit MACAddress(uint64 bits) { address = bits & MAC_ADDRESS_MASK; }
 
     /**
      * Constructor which accepts a hex string (12 hex digits, may also
