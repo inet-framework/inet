@@ -66,6 +66,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
     else if (msg->getKind() == TCP_I_PEER_CLOSED)
     {
         // we'll close too
+        msg->setName("close");
         msg->setKind(TCP_C_CLOSE);
 
         if (delay == 0)

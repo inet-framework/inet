@@ -43,6 +43,7 @@ void TCPSinkApp::handleMessage(cMessage *msg)
     if (msg->getKind() == TCP_I_PEER_CLOSED)
     {
         // we close too
+        msg->setName("close");
         msg->setKind(TCP_C_CLOSE);
         send(msg, "tcpOut");
     }

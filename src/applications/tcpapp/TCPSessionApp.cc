@@ -251,6 +251,8 @@ void TCPSessionApp::activity()
         cMessage *msg = receive();
         count(msg);
         socket.processMessage(msg);
+        if (ev.isGUI())
+            getDisplayString().setTagArg("t", 0, TCPSocket::stateName(socket.getState()));
     }
 }
 
