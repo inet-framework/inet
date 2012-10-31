@@ -382,7 +382,7 @@ class INET_API TCPConnection
     /** Implemements the pure TCP state machine */
     virtual bool performStateTransition(const TCPEventCode& event);
     /** Perform cleanup necessary when entering a new state, e.g. cancelling timers */
-    virtual void stateEntered(int state);
+    virtual void stateEntered(int state, int oldState, TCPEventCode event);
     //@}
 
     /** @name Processing app commands. Invoked from processAppCommand(). */

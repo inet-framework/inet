@@ -549,7 +549,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
         testingEV << tcpMain->getName() << ": " << stateName(oldState) << " --> " << stateName(fsm.getState()) << "  (on " << eventName(event) << ")\n";
 
         // cancel timers, etc.
-        stateEntered(fsm.getState());
+        stateEntered(fsm.getState(), oldState, event);
     }
     else
     {
@@ -559,7 +559,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
     return fsm.getState() != TCP_S_CLOSED;
 }
 
-void TCPConnection::stateEntered(int state)
+void TCPConnection::stateEntered(int state, int oldState, TCPEventCode event)
 {
     // cancel timers
     switch (state)
@@ -588,13 +588,19 @@ void TCPConnection::stateEntered(int state)
         case TCP_S_FIN_WAIT_1:
         case TCP_S_FIN_WAIT_2:
         case TCP_S_CLOSING:
-        case TCP_S_TIME_WAIT:
+            if (state == TCP_S_CLOSE_WAIT)
+                sendIndicationToApp(TCP_I_PEER_CLOSED);
             // whether connection setup succeeded (ESTABLISHED) or not (others),
             // cancel these timers
             if (connEstabTimer) cancelEvent(connEstabTimer);
             if (synRexmitTimer) cancelEvent(synRexmitTimer);
             break;
+        case TCP_S_TIME_WAIT:
+            sendIndicationToApp(TCP_I_CLOSED);
+            break;
         case TCP_S_CLOSED:
+            if (oldState != TCP_S_TIME_WAIT && event != TCP_E_ABORT)
+                sendIndicationToApp(TCP_I_CLOSED);
             // all timers need to be cancelled
             if (the2MSLTimer)   cancelEvent(the2MSLTimer);
             if (connEstabTimer) cancelEvent(connEstabTimer);
