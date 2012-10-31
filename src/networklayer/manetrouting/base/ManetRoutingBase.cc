@@ -477,28 +477,22 @@ void ManetRoutingBase::processLocatorAssoc(const cObject *details) {return;}
 void ManetRoutingBase::processLocatorDisAssoc(const cObject *details) {return;}
 
 
-void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, const ManetAddress &iface)
+void ManetRoutingBase::sendToIpOnIface(cPacket *msg, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, InterfaceEntry  *ie)
 {
     if (!isRegistered)
         opp_error("Manet routing protocol is not register");
 
-    InterfaceEntry  *ie = NULL;
-    if (mac_layer_)
+    if (destAddr.getType() == ManetAddress::MAC_ADDRESS)
     {
         Ieee802Ctrl *ctrl = new Ieee802Ctrl;
         //TODO ctrl->setEtherType(...);
         MACAddress macadd = destAddr.getMAC();
-        //IPv4Address add = destAddr.getIPv4();
-        if (!iface.isUnspecified())
-        {
-            ie = getInterfaceWlanByAddress(iface); // The user want to use a pre-defined interface
-        }
-        else
-            ie = interfaceVector->back().interfacePtr;
-
         ctrl->setDest(macadd);
 
-        if (ctrl->getDest()==MACAddress::BROADCAST_ADDRESS)
+        if (ie == NULL)
+            ie = interfaceVector->back().interfacePtr;
+
+        if (macadd == MACAddress::BROADCAST_ADDRESS)
         {
             for (unsigned int i = 0; i<interfaceVector->size()-1; i++)
             {
@@ -538,155 +532,7 @@ void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const ManetAddress& d
     udpPacket->setSourcePort(srcPort);
     udpPacket->setDestinationPort(destPort);
 
-
-    if (!iface.isUnspecified())
-    {
-        ie = getInterfaceWlanByAddress(iface); // The user want to use a pre-defined interface
-    }
-
-    //if (!destAddr.isIPv6())
-    if (true)
-    {
-        // send to IPv4
-        IPv4Address add = IPv4Address(destAddr.getIPv4());
-        IPv4Address srcadd;
-
-
-// If found interface We use the address of interface
-        if (ie)
-            srcadd = ie->ipv4Data()->getIPAddress();
-        else
-            srcadd = hostAddress.getIPv4();
-
-        EV << "Sending app packet " << msg->getName() << " over IPv4." << " from " <<
-        srcadd.str() << " to " << add.str() << "\n";
-        IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
-        ipControlInfo->setDestAddr(add);
-        //ipControlInfo->setProtocol(IP_PROT_UDP);
-        ipControlInfo->setProtocol(IP_PROT_MANET);
-
-        ipControlInfo->setTimeToLive(ttl);
-        udpPacket->setControlInfo(ipControlInfo);
-
-        if (ie!=NULL)
-            ipControlInfo->setInterfaceId(ie->getInterfaceId());
-
-        if (add == IPv4Address::ALLONES_ADDRESS && ie == NULL)
-        {
-// In this case we send a broadcast packet per interface
-            for (unsigned int i = 0; i<interfaceVector->size()-1; i++)
-            {
-                ie = (*interfaceVector)[i].interfacePtr;
-                srcadd = ie->ipv4Data()->getIPAddress();
-// It's necessary to duplicate the the control info message and include the information relative to the interface
-                IPv4ControlInfo *ipControlInfoAux = new IPv4ControlInfo(*ipControlInfo);
-                if (ipControlInfoAux->getOrigDatagram())
-                    delete ipControlInfoAux->removeOrigDatagram();
-                ipControlInfoAux->setInterfaceId(ie->getInterfaceId());
-                ipControlInfoAux->setSrcAddr(srcadd);
-                UDPPacket *udpPacketAux = udpPacket->dup();
-// Set the control info to the duplicate udp packet
-                udpPacketAux->setControlInfo(ipControlInfoAux);
-                sendDelayed(udpPacketAux, delay, "to_ip");
-            }
-            ie = interfaceVector->back().interfacePtr;
-            srcadd = ie->ipv4Data()->getIPAddress();
-            ipControlInfo->setInterfaceId(ie->getInterfaceId());
-        }
-        ipControlInfo->setSrcAddr(srcadd);
-        sendDelayed(udpPacket, delay, "to_ip");
-    }
-    else
-    {
-        // send to IPv6
-        EV << "Sending app packet " << msg->getName() << " over IPv6.\n";
-        IPv6ControlInfo *ipControlInfo = new IPv6ControlInfo();
-        // ipControlInfo->setProtocol(IP_PROT_UDP);
-        ipControlInfo->setProtocol(IP_PROT_MANET);
-        ipControlInfo->setSrcAddr(hostAddress.getIPv6());
-        ipControlInfo->setDestAddr(destAddr.getIPv6());
-        ipControlInfo->setHopLimit(ttl);
-        // ipControlInfo->setInterfaceId(udpCtrl->InterfaceId()); FIXME extend IPv6 with this!!!
-        udpPacket->setControlInfo(ipControlInfo);
-        sendDelayed(udpPacket, delay, "to_ip");
-    }
-    // totalSend++;
-}
-
-
-
-void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, int index)
-{
-    if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
-
-    InterfaceEntry  *ie = NULL;
-    if (mac_layer_)
-    {
-        Ieee802Ctrl *ctrl = new Ieee802Ctrl;
-        //TODO ctrl->setEtherType(...);
-        MACAddress macadd = destAddr.getMAC();
-        IPv4Address add = destAddr.getIPv4();
-        if (index!=-1)
-        {
-            ie = getInterfaceEntry(index); // The user want to use a pre-defined interface
-        }
-        else
-            ie = interfaceVector->back().interfacePtr;
-
-        if (IPv4Address::ALLONES_ADDRESS==add)
-            ctrl->setDest(MACAddress::BROADCAST_ADDRESS);
-        else
-            ctrl->setDest(macadd);
-
-        if (ctrl->getDest()==MACAddress::BROADCAST_ADDRESS)
-        {
-            for (unsigned int i = 0; i<interfaceVector->size()-1; i++)
-            {
-// It's necessary to duplicate the the control info message and include the information relative to the interface
-                Ieee802Ctrl *ctrlAux = ctrl->dup();
-                ie = (*interfaceVector)[i].interfacePtr;
-                cPacket *msgAux = msg->dup();
-// Set the control info to the duplicate packet
-                if (ie)
-                    ctrlAux->setInputPort(ie->getInterfaceId());
-                msgAux->setControlInfo(ctrlAux);
-                sendDelayed(msgAux, delay, "to_ip");
-
-            }
-            ie = interfaceVector->back().interfacePtr;
-        }
-
-        if (ie)
-            ctrl->setInputPort(ie->getInterfaceId());
-        msg->setControlInfo(ctrl);
-        sendDelayed(msg, delay, "to_ip");
-        return;
-    }
-
-    UDPPacket *udpPacket = new UDPPacket(msg->getName());
-    udpPacket->setByteLength(UDP_HDR_LEN);
-    udpPacket->encapsulate(msg);
-    //IPvXAddress srcAddr = interfaceWlanptr->ipv4Data()->getIPAddress();
-
-    if (ttl==0)
-    {
-        // delete and return
-        delete msg;
-        return;
-    }
-    // set source and destination port
-    udpPacket->setSourcePort(srcPort);
-    udpPacket->setDestinationPort(destPort);
-
-
-    if (index!=-1)
-    {
-        ie = getInterfaceEntry(index); // The user want to use a pre-defined interface
-    }
-
-    //if (!destAddr.isIPv6())
-    if (true)
+    if (destAddr.getType() == ManetAddress::IPv4_ADDRESS)
     {
         // send to IPv4
         IPv4Address add(destAddr.getIPv4());
@@ -699,7 +545,7 @@ void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const ManetAddress& d
             srcadd = hostAddress.getIPv4();
 
         EV << "Sending app packet " << msg->getName() << " over IPv4." << " from " <<
-        add.str() << " to " << add.str() << "\n";
+        srcadd.str() << " to " << add.str() << "\n";
         IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
         ipControlInfo->setDestAddr(add);
         //ipControlInfo->setProtocol(IP_PROT_UDP);
@@ -736,7 +582,7 @@ void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const ManetAddress& d
         ipControlInfo->setSrcAddr(srcadd);
         sendDelayed(udpPacket, delay, "to_ip");
     }
-    else
+    else if (destAddr.getType() == ManetAddress::IPv6_ADDRESS)
     {
         // send to IPv6
         EV << "Sending app packet " << msg->getName() << " over IPv6.\n";
@@ -750,11 +596,36 @@ void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const ManetAddress& d
         udpPacket->setControlInfo(ipControlInfo);
         sendDelayed(udpPacket, delay, "to_ip");
     }
+    else
+    {
+        throw cRuntimeError("Unaccepted ManetAddress type: %d", destAddr.getType());
+    }
     // totalSend++;
 }
 
+void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, const ManetAddress &iface)
+{
+    if (!isRegistered)
+        opp_error("Manet routing protocol is not register");
 
+    InterfaceEntry  *ie = NULL;
+    if (!iface.isUnspecified())
+        ie = getInterfaceWlanByAddress(iface); // The user want to use a pre-defined interface
 
+    sendToIpOnIface(msg, srcPort, destAddr, destPort, ttl, delay, ie);
+}
+
+void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, int index)
+{
+    if (!isRegistered)
+        opp_error("Manet routing protocol is not register");
+
+    InterfaceEntry  *ie = NULL;
+    if (index!=-1)
+        ie = getInterfaceEntry(index); // The user want to use a pre-defined interface
+
+    sendToIpOnIface(msg, srcPort, destAddr, destPort, ttl, delay, ie);
+}
 
 
 void ManetRoutingBase::omnet_chg_rte(const struct in_addr &dst, const struct in_addr &gtwy, const struct in_addr &netm,
