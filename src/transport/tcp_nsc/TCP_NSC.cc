@@ -436,6 +436,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
                 int newConnId = ev.getUniqueNumber();
                 // add into appConnMap
                 conn = &tcpAppConnMapM[newConnId];
+                conn->tcpNscM = this;
                 conn->connIdM = newConnId;
                 conn->appGateIndexM = c.appGateIndexM;
                 conn->pNscSocketM = sock;
@@ -568,6 +569,7 @@ void TCP_NSC::handleAppMessage(cMessage *msgP)
 
         // add into appConnMap
         conn = &tcpAppConnMapM[connId];
+        conn->tcpNscM = this;
         conn->connIdM = connId;
         conn->appGateIndexM = msgP->getArrivalGate()->getIndex();
         conn->pNscSocketM = NULL;  // will be filled in within processAppCommand()
