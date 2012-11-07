@@ -52,6 +52,13 @@ std::string Sack::str() const
 
 Register_Class(TCPSegment);
 
+
+uint32_t TCPSegment::getSegLen()
+{
+    return payloadLength_var + (finBit_var ? 1:0) + (synBit_var ? 1:0);
+}
+
+
 void TCPSegment::truncateSegment(uint32 firstSeqNo, uint32 endSeqNo)
 {
     ASSERT(payloadLength_var > 0);

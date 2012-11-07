@@ -103,6 +103,14 @@ class INET_API TCPSegment : public TCPSegment_Base
     virtual cPacket *removeFirstPayloadMessage(uint32& outEndSequenceNo);
 
     /**
+     * Returns RFC 793 specified SEG.LEN:
+     *     SEG.LEN = the number of octets occupied by the data in the segment
+     *               (counting SYN and FIN)
+     *
+     */
+    virtual uint32_t getSegLen();
+
+    /**
      * Truncate segment.
      * @param firstSeqNo: sequence no of new first byte
      * @param endSeqNo: sequence no of new last byte + 1

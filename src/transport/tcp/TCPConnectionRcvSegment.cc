@@ -62,6 +62,11 @@ void TCPConnection::segmentArrivalWhileClosed(TCPSegment *tcpseg, IPvXAddress sr
     // If the ACK bit is on,
     //
     //    <SEQ=SEG.ACK><CTL=RST>
+    //
+    // ...
+    //
+    //    SEG.LEN = the number of octets occupied by the data in the segment
+    //              (counting SYN and FIN)
     //"
     if (tcpseg->getRstBit())
     {
@@ -72,7 +77,7 @@ void TCPConnection::segmentArrivalWhileClosed(TCPSegment *tcpseg, IPvXAddress sr
     if (!tcpseg->getAckBit())
     {
         tcpEV << "ACK bit not set: sending RST+ACK\n";
-        uint32 ackNo = tcpseg->getSequenceNo() + (uint32)tcpseg->getPayloadLength();
+        uint32 ackNo = tcpseg->getSequenceNo() + tcpseg->getSegLen();
         sendRstAck(0, ackNo, destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());
     }
     else
