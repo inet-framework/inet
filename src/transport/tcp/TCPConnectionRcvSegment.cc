@@ -927,9 +927,13 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddr
     {
         if (seqLE(tcpseg->getAckNo(), state->iss) || seqGreater(tcpseg->getAckNo(), state->snd_nxt))
         {
-            tcpEV << "ACK bit set but wrong AckNo, sending RST\n";
-            sendRst(tcpseg->getAckNo(), destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());
-
+            if (tcpseg->getRstBit())
+                tcpEV << "ACK+RST bit set but wrong AckNo, ignored\n";
+            else
+            {
+                tcpEV << "ACK bit set but wrong AckNo, sending RST\n";
+                sendRst(tcpseg->getAckNo(), destAddr, srcAddr, tcpseg->getDestPort(), tcpseg->getSrcPort());
+            }
             return TCP_E_IGNORE;
         }
 
