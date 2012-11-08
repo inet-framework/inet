@@ -146,7 +146,6 @@ void Active::HoldTimer_Expires()
     BGPSession& session = TopState::box().getModule();
     //In response to any other event (Events 8, 10-11, 13, 19, 23, 25-28), the local system:
     //- sets the ConnectRetryTimer to zero,
-    session._connectRetryTime = 0;
     session.restartsConnectRetryTimer(false);
     //- releases all BGP resources,
     //- drops the TCP connection,
@@ -168,7 +167,6 @@ void Active::TcpConnectionConfirmed()
     //In response to the success of a TCP connection (Event 16 or Event
     //17), the local system :
     //- sets the ConnectRetryTimer to zero,
-    session._connectRetryTime = 0;
     session.restartsConnectRetryTimer(false);
     //- sends the OPEN message to its peer,
     session.sendOpenMessage();
