@@ -101,6 +101,7 @@ class INET_API TCP_NSC_Connection
 
     bool sentEstablishedM;
     bool onCloseM;
+    bool disconnectCalledM;
     bool isListenerM;
 
     // TCP Windows Size

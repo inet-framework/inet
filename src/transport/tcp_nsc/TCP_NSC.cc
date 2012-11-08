@@ -46,6 +46,8 @@
 #include "TCP_NSC_VirtualDataQueues.h"
 #include "TCP_NSC_ByteStreamQueues.h"
 
+#include <sim_errno.h>
+
 Define_Module(TCP_NSC);
 
 
@@ -457,9 +459,10 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
                 sendEstablishedMsg(*conn);
             }
         }
-        else if (c.pNscSocketM && c.pNscSocketM->is_connected() ) // not listener
+        else if (c.pNscSocketM && !c.disconnectCalledM && c.pNscSocketM->is_connected() ) // not listener
         {
             bool hasData = false;
+            int err = NSC_EAGAIN;
             tcpEV << this << ": NSC: attempting to read from socket " << c.pNscSocketM << "\n";
 
             if ((!c.sentEstablishedM) && c.pNscSocketM->is_connected())
@@ -476,7 +479,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
 
                 int buflen = sizeof(buf);
 
-                int err = c.pNscSocketM->read_data(buf, &buflen);
+                err = c.pNscSocketM->read_data(buf, &buflen);
 
                 tcpEV << this << ": NSC: read: err " << err << " , buflen " << buflen << "\n";
 
@@ -494,6 +497,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
                     c.pNscSocketM->getpeername((sockaddr*)&peerAddr, &peerAddrLen);
                     c.pNscSocketM->getsockname((sockaddr*)&sockAddr, &sockAddrLen);
 */
+                    err = NSC_EAGAIN;
                 }
                 else
                     break;
@@ -518,6 +522,35 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
 
                 ++changes;
                 changeAddresses(c, inetSockPair, nscSockPair);
+            }
+
+            {
+                int code = -1;
+                const char *name;
+                switch (err) {
+                    case 0:
+                        code = TCP_I_PEER_CLOSED; name = "PEER_CLOSED"; break;
+                    case NSC_ECONNREFUSED:
+                        code = TCP_I_CONNECTION_REFUSED; name = "CONNECTION_REFUSED"; break;
+                    case NSC_ECONNRESET:
+                        code = TCP_I_CONNECTION_RESET; name = "CONNECTION_RESET"; break;
+                    case NSC_ETIMEDOUT:
+                        code = TCP_I_TIMED_OUT; name = "TIMED_OUT"; break;
+
+                    case NSC_EAGAIN:
+                        code = -1; name = ""; break;
+                    default:
+                        throw cRuntimeError("Unknown NSC error returned by read_data(): %d", err); break;
+                }
+                if (code != -1)
+                {
+                    cMessage *msg = new cMessage(name);
+                    msg->setKind(code);
+                    TCPCommand *ind = new TCPCommand();
+                    ind->setConnId(c.connIdM);
+                    msg->setControlInfo(ind);
+                    send(msg, "appOut", c.appGateIndexM);
+                }
             }
         }
     }

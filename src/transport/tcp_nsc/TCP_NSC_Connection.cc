@@ -69,6 +69,7 @@ TCP_NSC_Connection::TCP_NSC_Connection()
     pNscSocketM(NULL),
     sentEstablishedM(false),
     onCloseM(false),
+    disconnectCalledM(false),
     isListenerM(false),
     tcpWinSizeM(65536),
     tcpNscM(NULL),
@@ -197,6 +198,18 @@ void TCP_NSC_Connection::do_SEND()
             }
         }
 //        tcpEV << "do_SEND(): " << connIdM << " sent:" << allsent << ", unsent:" << sendQueueM->getBytesAvailable() << "\n";
+        if (onCloseM && sendQueueM->getBytesAvailable()==0 && !disconnectCalledM)
+        {
+            disconnectCalledM = true;
+            pNscSocketM->disconnect();
+            cMessage *msg = new cMessage("CLOSED");
+            msg->setKind(TCP_I_CLOSED);
+            TCPCommand *ind = new TCPCommand();
+            ind->setConnId(connIdM);
+            msg->setControlInfo(ind);
+            tcpNscM->send(msg, "appOut", appGateIndexM);
+            //FIXME this connection never will be deleted, stayed in tcpNscM. Should delete later!
+        }
     }
 }
 
@@ -207,6 +220,7 @@ void TCP_NSC_Connection::close()
 
 void TCP_NSC_Connection::abort()
 {
+    sendQueueM->dequeueTcpLayerMsg(sendQueueM->getBytesAvailable());
     close();
 }
 
