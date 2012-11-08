@@ -283,7 +283,7 @@ void TCPSocket::processMessage(cMessage *msg)
              break;
 
         case TCP_I_PEER_CLOSED:
-             sockstate = sockstate==CONNECTED ? PEER_CLOSED : CLOSED;
+             sockstate = PEER_CLOSED;
              delete msg;
 
              if (cb)
