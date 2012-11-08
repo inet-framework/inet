@@ -465,15 +465,15 @@ void BGPRouting::loadTimerConfig(cXMLElementList& timerConfig, simtime_t* delayT
         {
             delayTab[0] = (double)atoi((*timerElemIt)->getNodeValue());
         }
-        if (nodeName == "holdTime")
+        else if (nodeName == "holdTime")
         {
             delayTab[1] = (double)atoi((*timerElemIt)->getNodeValue());
         }
-        if (nodeName == "keepAliveTime")
+        else if (nodeName == "keepAliveTime")
         {
             delayTab[2] = (double)atoi((*timerElemIt)->getNodeValue());
         }
-        if (nodeName == "startDelay")
+        else if (nodeName == "startDelay")
         {
             delayTab[3] = (double)atoi((*timerElemIt)->getNodeValue());
         }
