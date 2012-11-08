@@ -40,9 +40,9 @@ package inet.transport;
 // (see the dataTransferMode field in ~TCPOpenCommand).
 // Note: Not implemented all ~TCPDataTransferMode in all TCP implementations.
 //
-// The client app can send data by assigning the TCP_C_SEND message kind
+// The app can send data by assigning the TCP_C_SEND message kind
 // and attaching a ~TCPSendCommand control info object to the data packet,
-// and sending it to TCP. The server app will receive data as messages
+// and sending it to TCP. The app will receive data as messages
 // with the TCP_I_DATA message kind and ~TCPSendCommand control info.
 // The data transmission mode is based on selected ~TCPDataTransferMode:
 //   - TCP_TRANSFER_BYTECOUNT:
