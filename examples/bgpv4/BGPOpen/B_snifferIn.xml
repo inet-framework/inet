@@ -11,5 +11,7 @@
         <fieldValue name="holdTime" value="180"/>
         <fieldValue name="BGPIdentifier" value="10.10.10.1"/>
     </message>
-    <message occurence="1"/> <!--keepAlive & update -->
+    <message occurence="1">
+        <fieldValue name="className" value="BGPKeepAliveMessage"/>
+    </message>
 </checker>

@@ -3,7 +3,13 @@
 <!-- checker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="MessageChecker.xsd" -->
 <checker>
-    <message occurence="3"/> <!-- msg tcp connect ok , open, keepAlive-->
+    <message occurence="3"/> <!-- CONNECTION_RESET, CLOSED, ESTABLISHED -->
+    <message occurence="1">
+        <fieldValue name="className" value="BGPOpenMessage"/>
+    </message>
+    <message occurence="1">
+        <fieldValue name="className" value="BGPKeepAliveMessage"/>
+    </message>
     <message occurence="1">
         <fieldValue name="className" value="BGPUpdate"/>
     </message>

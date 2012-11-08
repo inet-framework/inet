@@ -3,8 +3,15 @@
 <!-- checker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="MessageChecker.xsd" -->
 <checker>
-   <message occurence="5"/> <!-- msg tcp listen/connect/abort , open, KeepAlive-->
-   <message occurence="1">
-       <fieldValue name="className" value="BGPUpdate"/>
-   </message>
+    <message occurence="2"/> <!-- PassiveOPEN, ActiveOPEN -->
+    <message occurence="1">
+        <fieldValue name="className" value="BGPOpenMessage"/>
+    </message>
+    <message occurence="1"/> <!-- ABORT -->
+    <message occurence="1">
+        <fieldValue name="className" value="BGPKeepAliveMessage"/>
+    </message>
+    <message occurence="1">
+        <fieldValue name="className" value="BGPUpdate"/>
+    </message>
 </checker>

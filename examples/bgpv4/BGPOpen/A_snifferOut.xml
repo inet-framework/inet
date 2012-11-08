@@ -3,7 +3,7 @@
 <!-- checker xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="MessageChecker.xsd" -->
 <checker>
-    <message occurence="3"/> <!-- msg tcp listen/connect/abort -->
+    <message occurence="2"/> <!-- tcp: PassiveOPEN, ActiveOPEN -->
     <message occurence="1">
         <fieldValue name="className" value="BGPOpenMessage"/>
         <fieldValue name="byteLength" value="29"/>
@@ -11,5 +11,8 @@
         <fieldValue name="holdTime" value="180"/>
         <fieldValue name="BGPIdentifier" value="10.10.10.1"/>
     </message>
-    <message occurence="2"/> <!--abort / keepAlive & update -->
+    <message occurence="1"/> <!-- tcp: ABORT -->
+    <message occurence="1">
+        <fieldValue name="className" value="BGPKeepAliveMessage"/>
+    </message>
 </checker>
