@@ -1,0 +1,30 @@
+%description:
+Test using a long transmission and lossy channel (TCPRandomTester).
+Here: packet loss only.
+
+%inifile: {}.ini
+[General]
+#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+ned-path = .;../../../../src;../../lib
+network=TcpTestNet2
+
+#[Cmdenv]
+cmdenv-express-mode=false
+#cmdenv-event-banners=false
+#cmdenv-module-messages=false
+
+#[Parameters]
+*.testing=true
+
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=655360B  # 640K
+
+*.tcptester.pdelete=0.05
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+TcpTestNet2.cli_app: received 0 bytes in 0 packets
+TcpTestNet2.srv_app: received 655360 bytes in 542 packets
+[31.064] tcpdump finished, A:689 B:383 segments
+

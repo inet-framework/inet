@@ -1,0 +1,31 @@
+%description:
+Test retransmission
+
+%inifile: {}.ini
+[General]
+#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+ned-path = .;../../../../src;../../lib
+
+#[Cmdenv]
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+#[Parameters]
+*.testing=true
+
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=100B
+
+*.tcptester.script="b2 delete"  # delete ACK to force retransmission
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[1.001 A003] A.1000 > B.2000: A 1:101(100) ack 501 win 16384
+[1.203 B002] A.1000 < B.2000: A ack 101 win 16384 # deleting
+[4.001 A004] A.1000 > B.2000: A 1:101(100) ack 501 win 16384
+[4.003 B003] A.1000 < B.2000: A ack 101 win 16384
+
+%contains: stdout
+[4.004] tcpdump finished, A:4 B:3 segments
+

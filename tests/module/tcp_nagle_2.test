@@ -1,0 +1,39 @@
+%description:
+Test Nagle's algorithm: full segment-sized packets should not be delayed.
+(MSS=1024 should be chosen for this test.)
+
+Output is not fully OK -- every socket write causes sending a new segment
+which contradicts with the slow start algorithm...
+
+%inifile: {}.ini
+[General]
+#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+ned-path = .;../../../../src;../../lib
+
+#[Cmdenv]
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+#[Parameters]
+*.testing=true
+
+# script format: "time numbytes; time numbytes; ..."
+*.cli_app.sendScript="1.00 1; 1.00 2; 1.01 1022; 1.02 1324; 1.03 300; 1.04 400; 1.04 25;"
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[1.001 A003] A.1000 > B.2000: A 1:2(1) ack 501 win 16384
+[1.003 B002] A.1000 < B.2000: A ack 2 win 16384
+[1.005 A004] A.1000 > B.2000: A 2:4(2) ack 501 win 16384
+[1.021 A005] A.1000 > B.2000: A 4:1028(1024) ack 501 win 16384
+[1.207 B003] A.1000 < B.2000: A ack 1028 win 16384
+[1.209 A006] A.1000 > B.2000: A 1028:2052(1024) ack 501 win 16384
+[1.209 A007] A.1000 > B.2000: A 2052:3075(1023) ack 501 win 16384
+[1.411 B004] A.1000 < B.2000: A ack 3075 win 16384
+
+%contains: stdout
+TcpTestNet1.cli_app: received 0 bytes in 0 packets
+TcpTestNet1.srv_app: received 3074 bytes in 5 packets
+[1.412] tcpdump finished, A:7 B:4 segments
+

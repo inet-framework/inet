@@ -33,11 +33,12 @@ simple TcpTestClient like ITCPApp
         bool active;
         string connectAddress;
         int connectPort;
-        double tOpen;
-        double tSend;
-        int sendBytes;
+        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
+        double tOpen @unit(s);
+        double tSend @unit(s);
+        int sendBytes @unit(B);
         string sendScript;
-        double tClose;
+        double tClose @unit(s);
         @display("i=block/app");
     gates:
         input tcpIn;

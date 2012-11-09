@@ -1,0 +1,55 @@
+%description:
+Test connection setup: A performs active open, and B's SYN+ACK always gets lost.
+
+Test that:
+- initial RTO is 3s
+- it doubles with each retransmission
+- after some time, CONN-ESTAB timer goes off, and game over
+
+Note: results are a bit weird, because both sides try very hard...
+
+%inifile: {}.ini
+[General]
+#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+ned-path = .;../../../../src;../../lib
+
+#[Cmdenv]
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+#[Parameters]
+*.testing=true
+
+*.cli_app.tOpen=0s
+*.srv_app.tOpen=0s
+
+# delete SYN segments to force their retransmission
+*.tcptester.script="b1 delete;b2 delete;b3 delete;b4 delete;b5 delete;b6 delete;b7 delete;b8 delete;b9 delete;b10 delete"
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+cli_tcp: INIT --> SYN_SENT  (on OPEN_ACTIVE)
+srv_tcp: INIT --> LISTEN  (on OPEN_PASSIVE)
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384 # deleting
+[3.001 A002] A.1000 > B.2000: S 0:0(0) win 16384
+[3.003 B002] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384 # deleting
+[3.003 B003] A.1000 < B.2000: A ack 1 win 16384 # deleting
+[9.001 A003] A.1000 > B.2000: S 0:0(0) win 16384
+[9.003 B004] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384 # deleting
+[9.003 B005] A.1000 < B.2000: A ack 1 win 16384 # deleting
+[21.001 A004] A.1000 > B.2000: S 0:0(0) win 16384
+[21.003 B006] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384 # deleting
+[21.003 B007] A.1000 < B.2000: A ack 1 win 16384 # deleting
+[45.001 A005] A.1000 > B.2000: S 0:0(0) win 16384
+[45.003 B008] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384 # deleting
+[45.003 B009] A.1000 < B.2000: A ack 1 win 16384 # deleting
+cli_tcp: SYN_SENT --> CLOSED  (on TIMEOUT_CONN_ESTAB)
+srv_tcp: SYN_RCVD --> LISTEN  (on TIMEOUT_CONN_ESTAB)
+
+%contains: stdout
+TcpTestNet1.cli_app: received 0 bytes in 0 packets
+TcpTestNet1.srv_app: received 0 bytes in 0 packets
+[75.002] tcpdump finished, A:5 B:9 segments

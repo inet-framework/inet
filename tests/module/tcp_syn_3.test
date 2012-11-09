@@ -1,0 +1,36 @@
+%description:
+Test connection setup: A performs active open and SYN gets lost.
+A must retransmit.
+
+%inifile: {}.ini
+[General]
+#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+ned-path = .;../../../../src;../../lib
+
+#[Cmdenv]
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+#[Parameters]
+*.testing=true
+
+*.cli_app.tOpen=0s
+*.srv_app.tOpen=0s
+
+*.tcptester.script="a1 delete"  # delete SYN to force retransmission
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+cli_tcp: INIT --> SYN_SENT  (on OPEN_ACTIVE)
+srv_tcp: INIT --> LISTEN  (on OPEN_PASSIVE)
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384 # deleting
+[3.001 A002] A.1000 > B.2000: S 0:0(0) win 16384
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[3.003 B001] A.1000 < B.2000: A S 750500:750500(0) ack 1 win 16384
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[3.005 A003] A.1000 > B.2000: A ack 750501 win 16384
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+
+%contains: stdout
+[3.006] tcpdump finished, A:3 B:1 segments

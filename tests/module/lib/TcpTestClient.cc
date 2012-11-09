@@ -31,19 +31,28 @@ class INET_API TcpTestClient : public cSimpleModule
         simtime_t tSend;
         int numBytes;
     };
-    typedef std::vector<Command> CommandVector;
-    CommandVector commands;
+    typedef std::list<Command> Commands;
+    Commands commands;
 
-    cQueue queue;
+    enum { TEST_OPEN, TEST_SEND, TEST_CLOSE };
 
     int ctr;
+
+    TCPSocket socket;
+
+    // statistics
+    int64_t rcvdBytes;
+    int rcvdPackets;
 
   protected:
     void parseScript(const char *script);
     std::string makeMsgName();
+    void handleSelfMessage(cMessage *msg);
+    void scheduleNextSend();
 
   protected:
-    virtual void activity();
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
     virtual void finish();
 };
 
@@ -92,92 +101,99 @@ std::string TcpTestClient::makeMsgName()
     return std::string(buf);
 }
 
-void TcpTestClient::activity()
+void TcpTestClient::initialize()
 {
+    rcvdBytes = 0;
+
     // parameters
-    const char *localAddress = par("localAddress");
-    int localPort = par("localPort");
-    const char *connectAddress = par("connectAddress");
-    int connectPort = par("connectPort");
-
-    bool active = par("active");
     simtime_t tOpen = par("tOpen");
-    simtime_t tSend = par("tSend");
-    long sendBytes = par("sendBytes");
+    Command cmd;
+    cmd.tSend = par("tSend");
+    cmd.numBytes = par("sendBytes");
     simtime_t tClose = par("tClose");
-
     const char *script = par("sendScript");
+
+    if (cmd.numBytes > 0)
+        commands.push_back(cmd);
+
     parseScript(script);
-    if (sendBytes>0 && commands.size()>0)
+    if (cmd.numBytes > 0 && commands.size() > 1)
         throw cRuntimeError("cannot use both sendScript and tSend+sendBytes");
 
-    TCPSocket socket;
+    socket.readDataTransferModePar(*this);
     socket.setOutputGate(gate("tcpOut"));
-    queue.setName("queue");
 
     ctr = 0;
 
-    // open
-    waitAndEnqueue(tOpen-simTime(), &queue);
+    scheduleAt(tOpen, new cMessage("Open", TEST_OPEN));
+    if (tClose > 0)
+        scheduleAt(tClose, new cMessage("Close", TEST_CLOSE));
+}
 
-    socket.bind(*localAddress ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
-
-    if (active)
-        socket.connect(IPvXAddress(connectAddress), connectPort);
-    else
-        socket.listen();
-
-    // send
-    if (sendBytes>0)
+void TcpTestClient::handleMessage(cMessage *msg)
+{
+    if (msg->isSelfMessage())
     {
-        waitAndEnqueue(tSend-simTime(), &queue);
-
-        cPacket *msg = new cPacket(makeMsgName().c_str());
-        msg->setByteLength(sendBytes);
-        socket.send(msg);
-    }
-    for (CommandVector::iterator i=commands.begin(); i!=commands.end(); ++i)
-    {
-        waitAndEnqueue(i->tSend-simTime(), &queue);
-
-        cPacket *msg = new cPacket(makeMsgName().c_str());
-        msg->setByteLength(i->numBytes);
-        socket.send(msg);
+        handleSelfMessage(msg);
+        return;
     }
 
-    // close
-    if (tClose>=0)
+    //ev << fullPath() << ": received " << msg->name() << ", " << msg->byteLength() << " bytes\n";
+    if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
     {
-        waitAndEnqueue(tClose-simTime(), &queue);
-        socket.close();
+        rcvdPackets++;
+        rcvdBytes += PK(msg)->getByteLength();
     }
+    socket.processMessage(msg);
+}
 
-    while (true)
+void TcpTestClient::handleSelfMessage(cMessage *msg)
+{
+    switch (msg->getKind())
     {
-        cPacket *msg = (cPacket *)receive();
-        queue.insert(msg);
+        case TEST_OPEN:
+        {
+            const char *localAddress = par("localAddress");
+            int localPort = par("localPort");
+            const char *connectAddress = par("connectAddress");
+            int connectPort = par("connectPort");
+
+            socket.bind(*localAddress ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
+
+            if (par("active").boolValue())
+                socket.connect(IPvXAddress(par("connectAddress")), connectPort);
+            else
+                socket.listenOnce();
+            scheduleNextSend();
+            delete msg;
+            break;
+        }
+        case TEST_SEND:
+            socket.send(msg);
+            scheduleNextSend();
+            break;
+        case TEST_CLOSE:
+            socket.close();
+            delete msg;
+            break;
+        default:
+            throw cRuntimeError("Unknown self message!");
+            break;
     }
+}
+
+void TcpTestClient::scheduleNextSend()
+{
+    if (commands.empty())
+        return;
+    Command cmd = commands.front();
+    commands.pop_front();
+    cPacket *msg = new cPacket(makeMsgName().c_str(),TEST_SEND);
+    msg->setByteLength(cmd.numBytes);
+    scheduleAt(cmd.tSend, msg);
 }
 
 void TcpTestClient::finish()
 {
-    int n = 0;
-    int bytes = 0;
-    int nind = 0;
-    while (!queue.empty())
-    {
-        cPacket *msg = (cPacket *)queue.pop();
-        //ev << fullPath() << ": received " << msg->name() << ", " << msg->byteLength() << " bytes\n";
-        if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
-        {
-            n++;
-            bytes+=msg->getByteLength();
-        }
-        else
-        {
-            nind++;
-        }
-        delete msg;
-    }
-    EV << getFullPath() << ": received " << bytes << " bytes in " << n << " packets\n";
+    EV << getFullPath() << ": received " << rcvdBytes << " bytes in " << rcvdPackets << " packets\n";
 }

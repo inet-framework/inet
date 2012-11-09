@@ -1,0 +1,39 @@
+%description:
+What if the SEND command is issued during connection setup.
+
+%inifile: {}.ini
+[General]
+#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+ned-path = .;../../../../src;../../lib
+
+#[Cmdenv]
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+#[Parameters]
+*.testing=true
+
+*.cli_app.tOpen=0s
+*.srv_app.tOpen=0s
+
+*.cli_app.tSend=0s
+*.cli_app.sendBytes=100B
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+cli_tcp: INIT --> SYN_SENT  (on OPEN_ACTIVE)
+srv_tcp: INIT --> LISTEN  (on OPEN_PASSIVE)
+[0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384
+srv_tcp: LISTEN --> SYN_RCVD  (on RCV_SYN)
+[0.003 B001] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384
+cli_tcp: SYN_SENT --> ESTABLISHED  (on RCV_SYN_ACK)
+[0.005 A002] A.1000 > B.2000: A 1:101(100) ack 501 win 16384
+srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
+[0.207 B002] A.1000 < B.2000: A ack 101 win 16384
+
+%contains: stdout
+TcpTestNet1.cli_app: received 0 bytes in 0 packets
+TcpTestNet1.srv_app: received 100 bytes in 1 packets
+[0.208] tcpdump finished, A:2 B:2 segments
+

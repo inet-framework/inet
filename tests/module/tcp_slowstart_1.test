@@ -1,0 +1,54 @@
+%description:
+Test slow-start algorithm: every acked segment increases window by 1 segment,
+that is, cwnd=1,2,4,8,...
+
+%inifile: {}.ini
+[General]
+#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+ned-path = .;../../../../src;../../lib
+
+#[Cmdenv]
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+#[Parameters]
+*.testing=true
+
+*.cli_app.tSend=1s
+*.cli_app.sendBytes=16384B # sixteen 1024-byte segments
+
+include ../../lib/defaults.ini
+
+
+%contains: stdout
+[1.001 A003] A.1000 > B.2000: A 1:1025(1024) ack 501 win 16384
+[1.203 B002] A.1000 < B.2000: A ack 1025 win 16384
+[1.205 A004] A.1000 > B.2000: A 1025:2049(1024) ack 501 win 16384
+[1.205 A005] A.1000 > B.2000: A 2049:3073(1024) ack 501 win 16384
+[1.207 B003] A.1000 < B.2000: A ack 3073 win 16384
+[1.209 A006] A.1000 > B.2000: A 3073:4097(1024) ack 501 win 16384
+[1.209 A007] A.1000 > B.2000: A 4097:5121(1024) ack 501 win 16384
+[1.209 A008] A.1000 > B.2000: A 5121:6145(1024) ack 501 win 16384
+[1.211 B004] A.1000 < B.2000: A ack 5121 win 16384
+[1.213 A009] A.1000 > B.2000: A 6145:7169(1024) ack 501 win 16384
+[1.213 A010] A.1000 > B.2000: A 7169:8193(1024) ack 501 win 16384
+[1.213 A011] A.1000 > B.2000: A 8193:9217(1024) ack 501 win 16384
+[1.215 B005] A.1000 < B.2000: A ack 7169 win 16384
+[1.215 B006] A.1000 < B.2000: A ack 9217 win 16384
+[1.217 A012] A.1000 > B.2000: A 9217:10241(1024) ack 501 win 16384
+[1.217 A013] A.1000 > B.2000: A 10241:11265(1024) ack 501 win 16384
+[1.217 A014] A.1000 > B.2000: A 11265:12289(1024) ack 501 win 16384
+[1.217 A015] A.1000 > B.2000: A 12289:13313(1024) ack 501 win 16384
+[1.217 A016] A.1000 > B.2000: A 13313:14337(1024) ack 501 win 16384
+[1.217 A017] A.1000 > B.2000: A 14337:15361(1024) ack 501 win 16384
+[1.219 B007] A.1000 < B.2000: A ack 11265 win 16384
+[1.219 B008] A.1000 < B.2000: A ack 13313 win 16384
+[1.219 B009] A.1000 < B.2000: A ack 15361 win 16384
+[1.221 A018] A.1000 > B.2000: A 15361:16385(1024) ack 501 win 16384
+[1.423 B010] A.1000 < B.2000: A ack 16385 win 16384
+
+%contains: stdout
+TcpTestNet1.cli_app: received 0 bytes in 0 packets
+TcpTestNet1.srv_app: received 16384 bytes in 16 packets
+[1.424] tcpdump finished, A:18 B:10 segments
+

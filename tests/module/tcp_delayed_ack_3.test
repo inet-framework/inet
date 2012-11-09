@@ -1,0 +1,31 @@
+%description:
+Test delayed ack: ack is sent after 200ms
+
+
+%inifile: {}.ini
+[General]
+#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+ned-path = .;../../../../src;../../lib
+
+#[Cmdenv]
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+#[Parameters]
+*.testing=true
+
+*.cli_app.sendScript="1.0 110; 2.0 120; 3.0 130"
+
+include ../../lib/defaults.ini
+
+%contains: stdout
+[1.001 A003] A.1000 > B.2000: A 1:111(110) ack 501 win 16384
+[1.203 B002] A.1000 < B.2000: A ack 111 win 16384
+[2.001 A004] A.1000 > B.2000: A 111:231(120) ack 501 win 16384
+[2.203 B003] A.1000 < B.2000: A ack 231 win 16384
+[3.001 A005] A.1000 > B.2000: A 231:361(130) ack 501 win 16384
+[3.203 B004] A.1000 < B.2000: A ack 361 win 16384
+
+
+%contains: stdout
+[3.204] tcpdump finished, A:5 B:4 segments
