@@ -145,6 +145,47 @@ class INET_API TCPSocket
     };
 
     enum State {NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR};
+    /**
+     * action/state matrix:
+     *
+     * constructor()
+     *      -> NOT_BOUND ; create new connId
+     * constructor(msg)
+     *      -> CONNECTED ; get connId from msg
+     * bind()
+     *      NOT_BOUND -> BOUND
+     *      else -> error
+     * listen()
+     *      BOUND -> LISTENING ; send:TCP_C_OPEN_PASSIVE
+     *      else -> error
+     * connect()
+     *      NOT_BOUND, BOUND -> CONNECTING ; send:TCP_C_OPEN_ACTIVE
+     *      else -> error
+     * send()
+     *      CONNECTED, CONNECTING, PEER_CLOSED -> not changed ; send:TCP_C_SEND
+     *      else -> error
+     * close()
+     *      PEER_CLOSED, CONNECTING, LISTENING -> CLOSED ; send: TCP_C_CLOSE
+     *      CONNECTED -> LOCALLY_CLOSED ; send: TCP_C_CLOSE
+     * abort()
+     *      NOT_BOUND, BOUND, CLOSED, SOCKERROR -> CLOSED
+     *      else -> CLOSED ; send TCP_C_ABORT
+     * status()
+     *      * -> not changed ; send: TCP_C_STATUS
+     * renewSocket()
+     *      * -> NOT_BOUND ; create new connId
+     *
+     *
+     * processMessage()
+     *    TCP_I_DATA -> not changed ; call socketDataArrived()
+     *    TCP_I_URGENT_DATA -> not changed ; call socketDataArrived()
+     *    TCP_I_ESTABLISHED -> CONNECTED ; call socketEstablished()
+     *    TCP_I_PEER_CLOSED -> PEER_CLOSED ; call socketPeerClosed()
+     *    TCP_I_CLOSED -> CLOSED ; call socketClosed()
+     *    TCP_I_CONNECTION_REFUSED, TCP_I_CONNECTION_RESET, TCP_I_TIMED_OUT -> SOCKERROR ; call socketFailure()
+     *    TCP_I_STATUS -> not changed ; call socketStatusArrived()
+     *    else -> error
+     */
 
   protected:
     int connId;

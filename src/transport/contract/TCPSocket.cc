@@ -62,6 +62,7 @@ TCPSocket::TCPSocket(cMessage *msg)
         localPrt = connectInfo->getLocalPort();
         remotePrt = connectInfo->getRemotePort();
     }
+    //FIXME revise: another msg kind checks, sockstate setting based on msg kind
 }
 
 const char *TCPSocket::stateName(int state)
@@ -92,6 +93,7 @@ void TCPSocket::sendToTCP(cMessage *msg)
     check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->send(msg, gateToTcp);
 }
 
+//FIXME case of lPort==-1 are differs in bind() functions
 void TCPSocket::bind(int lPort)
 {
     if (sockstate!=NOT_BOUND)
@@ -248,6 +250,7 @@ void TCPSocket::processMessage(cMessage *msg)
     switch (msg->getKind())
     {
         case TCP_I_DATA:
+            //FIXME sockstate check missing
              if (cb)
                  cb->socketDataArrived(connId, yourPtr, PK(msg), false);
              else
@@ -256,6 +259,7 @@ void TCPSocket::processMessage(cMessage *msg)
              break;
 
         case TCP_I_URGENT_DATA:
+            //FIXME sockstate check missing
              if (cb)
                  cb->socketDataArrived(connId, yourPtr, PK(msg), true);
              else
@@ -264,11 +268,14 @@ void TCPSocket::processMessage(cMessage *msg)
              break;
 
         case TCP_I_ESTABLISHED:
-             // Note: this code is only for sockets doing active open, and nonforking
+            // Note: this code is only for sockets doing active open, and nonforking
              // listening sockets. For a forking listening sockets, TCP_I_ESTABLISHED
              // carries a new connId which won't match the connId of this TCPSocket,
              // so you won't get here. Rather, when you see TCP_I_ESTABLISHED, you'll
              // want to create a new TCPSocket object via new TCPSocket(msg).
+
+            //FIXME sockstate check missing
+
              sockstate = CONNECTED;
              connectInfo = dynamic_cast<TCPConnectInfo *>(msg->getControlInfo());
              localAddr = connectInfo->getLocalAddr();
@@ -283,6 +290,7 @@ void TCPSocket::processMessage(cMessage *msg)
              break;
 
         case TCP_I_PEER_CLOSED:
+            //FIXME sockstate check missing
              sockstate = PEER_CLOSED;
              delete msg;
 
@@ -292,6 +300,7 @@ void TCPSocket::processMessage(cMessage *msg)
              break;
 
         case TCP_I_CLOSED:
+            //FIXME sockstate check missing
              sockstate = CLOSED;
              delete msg;
 
@@ -303,6 +312,7 @@ void TCPSocket::processMessage(cMessage *msg)
         case TCP_I_CONNECTION_REFUSED:
         case TCP_I_CONNECTION_RESET:
         case TCP_I_TIMED_OUT:
+            //FIXME sockstate check missing
              sockstate = SOCKERROR;
 
              if (cb)
