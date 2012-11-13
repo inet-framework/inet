@@ -703,8 +703,7 @@ bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
         effectiveMaxBytesSend -= TCP_OPTION_TS_SIZE;
 
     // last segment could be less than state->snd_mss (or less than snd_mss - TCP_OPTION_TS_SIZE if using TS option)
-    if (fullSegmentsOnly && buffered > (ulong)effectiveWin &&
-            (bytesToSend < (effectiveMaxBytesSend)))
+    if (fullSegmentsOnly && (bytesToSend < (effectiveMaxBytesSend)))
     {
         tcpEV << "Cannot send, not enough data for a full segment (SMSS=" << state->snd_mss
             << ", effectiveWindow=" << effectiveWin << ", bytesToSend=" << bytesToSend << ", in buffer " << buffered << ")\n";
