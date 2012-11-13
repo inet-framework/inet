@@ -125,11 +125,11 @@ const char *TCPConnection::optionName(int option)
 
 void TCPConnection::printConnBrief() const
 {
-    tcpEV << "Connection ";
-    tcpEV << localAddr << ":" << localPort << " to " << remoteAddr << ":" << remotePort;
-    tcpEV << "  on app[" << appGateIndex << "],connId=" << connId;
-    tcpEV << "  in " << stateName(fsm.getState());
-    tcpEV << "  (ptr=0x" << this << ")\n";
+    tcpEV << "Connection "
+          << localAddr << ":" << localPort << " to " << remoteAddr << ":" << remotePort
+          << "  on app[" << appGateIndex << "], connId=" << connId
+          << "  in " << stateName(fsm.getState())
+          << "\n";
 }
 
 void TCPConnection::printSegmentBrief(TCPSegment *tcpseg)
