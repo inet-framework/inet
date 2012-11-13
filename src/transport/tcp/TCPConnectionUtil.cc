@@ -300,7 +300,7 @@ void TCPConnection::sendIndicationToApp(int code)
     TCPCommand *ind = new TCPCommand();
     ind->setConnId(connId);
     msg->setControlInfo(ind);
-    tcpMain->send(msg, "appOut", appGateIndex);
+    sendToApp(msg);
 }
 
 void TCPConnection::sendEstabIndicationToApp()
@@ -317,7 +317,7 @@ void TCPConnection::sendEstabIndicationToApp()
     ind->setRemotePort(remotePort);
 
     msg->setControlInfo(ind);
-    tcpMain->send(msg, "appOut", appGateIndex);
+    sendToApp(msg);
 }
 
 void TCPConnection::sendToApp(cMessage *msg)
