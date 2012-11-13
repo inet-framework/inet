@@ -655,20 +655,17 @@ void PacketDump::tcpDump(bool l2r, const char *label, TCPSegment *tcpseg,
     // options present?
     if (tcpseg->getHeaderLength() > 20)
     {
-        std::string direction = "sent";
-
-        if (l2r) // change direction
-            {direction = "received";}
+        const char *direction = l2r ? "sent" : "received";
 
         unsigned short numOptions = tcpseg->getOptionsArraySize();
-        out << "\nTCP Header Option(s) " << direction << ":\n";
+        out << "\n  TCP Header Option(s) " << direction << ":\n";
 
         for (int i=0; i<numOptions; i++)
         {
             TCPOption option = tcpseg->getOptions(i);
             unsigned short kind = option.getKind();
             unsigned short length = option.getLength();
-            out << (i+1) << ". option kind=" << kind << " length=" << length << "\n";
+            out << "    " << (i+1) << ". option kind=" << kind << " length=" << length << "\n";
         }
     }
 #endif
