@@ -49,5 +49,5 @@ void TCPNoCongestionControl::receivedDataAck(uint32 firstSeqAcked)
     TCPBaseAlg::receivedDataAck(firstSeqAcked);
 
     // ack may have freed up some room in the window, try sending
-    sendData();
+    sendData(false);
 }

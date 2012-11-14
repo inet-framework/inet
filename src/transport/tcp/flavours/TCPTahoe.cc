@@ -116,7 +116,7 @@ void TCPTahoe::receivedDataAck(uint32 firstSeqAcked)
     }
 
     // ack and/or cwnd increase may have freed up some room in the window, try sending
-    sendData();
+    sendData(false);
 }
 
 void TCPTahoe::receivedDuplicateAck()

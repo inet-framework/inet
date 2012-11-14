@@ -202,7 +202,7 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
     // inappropriate during slow start after an RTO).  A relatively
     // straightforward approach to "filling in" the sequence space reported
     // as missing should be a reasonable approach."
-    sendData();
+    sendData(false);
 }
 
 void TCPReno::receivedDuplicateAck()
@@ -302,7 +302,7 @@ void TCPReno::receivedDuplicateAck()
         }
 
         // try to transmit new segments (RFC 2581)
-        sendData();
+        sendData(false);
     }
     else if (state->dupacks > DUPTHRESH) // DUPTHRESH = 3
     {
@@ -331,6 +331,6 @@ void TCPReno::receivedDuplicateAck()
         // inappropriate during slow start after an RTO).  A relatively
         // straightforward approach to "filling in" the sequence space reported
         // as missing should be a reasonable approach."
-        sendData();
+        sendData(false);
     }
 }

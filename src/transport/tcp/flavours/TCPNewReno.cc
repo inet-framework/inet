@@ -190,7 +190,7 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
             }
 
             // try to send a new segment if permitted by the new value of cwnd
-            sendData();
+            sendData(false);
 
             // reset REXMIT timer for the first partial ACK that arrives during Fast Recovery
             if (state->lossRecovery)
@@ -267,7 +267,7 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
         state->recover = (state->snd_una - 2);
     }
 
-    sendData();
+    sendData(false);
 }
 
 void TCPNewReno::receivedDuplicateAck()
@@ -326,7 +326,7 @@ void TCPNewReno::receivedDuplicateAck()
                 // "4) Fast Recovery, continued:
                 // Transmit a segment, if allowed by the new value of cwnd and the
                 // receiver's advertised window."
-                sendData();
+                sendData(false);
             }
             else
             {
@@ -363,7 +363,7 @@ void TCPNewReno::receivedDuplicateAck()
             // "4) Fast Recovery, continued:
             // Transmit a segment, if allowed by the new value of cwnd and the
             // receiver's advertised window."
-            sendData();
+            sendData(false);
         }
     }
 }

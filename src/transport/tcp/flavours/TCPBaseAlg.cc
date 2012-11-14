@@ -197,7 +197,7 @@ void TCPBaseAlg::established(bool active)
     {
         // finish connection setup with ACK (possibly piggybacked on data)
         tcpEV << "Completing connection setup by sending ACK (possibly piggybacked on data)\n";
-        if (!sendData()) // FIXME TODO - This condition is never true because the buffer is empty (at this time) therefore the first ACK is never piggyback on data
+        if (!sendData(false)) // FIXME TODO - This condition is never true because the buffer is empty (at this time) therefore the first ACK is never piggyback on data
             conn->sendAck();
     }
 }
@@ -425,7 +425,7 @@ void TCPBaseAlg::rttMeasurementCompleteUsingTS(uint32 echoedTS)
     rttMeasurementComplete(tSent, tAcked);
 }
 
-bool TCPBaseAlg::sendData()
+bool TCPBaseAlg::sendData(bool sendCommandInvoked)
 {
     //
     // Nagle's algorithm: when a TCP connection has outstanding data that has not
@@ -437,7 +437,7 @@ bool TCPBaseAlg::sendData()
     // "b) a segment that can be sent is at least half the size of
     // the largest window ever advertised by the receiver"
 
-    bool fullSegmentsOnly = state->nagle_enabled && state->snd_una != state->snd_max;
+    bool fullSegmentsOnly = sendCommandInvoked && state->nagle_enabled && state->snd_una != state->snd_max;
 
     if (fullSegmentsOnly)
         tcpEV << "Nagle is enabled and there's unacked data: only full segments will be sent\n";
@@ -478,7 +478,7 @@ bool TCPBaseAlg::sendData()
 void TCPBaseAlg::sendCommandInvoked()
 {
     // try sending
-    sendData();
+    sendData(true);
 }
 
 void TCPBaseAlg::receivedOutOfOrderSegment()

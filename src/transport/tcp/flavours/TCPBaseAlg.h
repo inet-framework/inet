@@ -148,7 +148,7 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
     /**
      * Send data, observing Nagle's algorithm and congestion window
      */
-    virtual bool sendData();
+    virtual bool sendData(bool sendCommandInvoked);
 
     /** Utility function */
     cMessage *cancelEvent(cMessage *msg) {return conn->getTcpMain()->cancelEvent(msg);}
