@@ -225,8 +225,11 @@ void TcpLwipConnection::connect(IPvXAddress& localAddr, unsigned short localPort
         IPvXAddress& remoteAddr, unsigned short remotePort)
 {
     onCloseM = false;
+    struct ip_addr src_addr;
+    src_addr.addr = localAddr;
     struct ip_addr dest_addr;
     dest_addr.addr = remoteAddr;
+    tcpLwipM.getLwipTcpLayer()->tcp_bind(pcbM, &src_addr, localPort);
     tcpLwipM.getLwipTcpLayer()->tcp_connect(pcbM, &dest_addr, (u16_t)remotePort, NULL);
     totalSentM = 0;
 }

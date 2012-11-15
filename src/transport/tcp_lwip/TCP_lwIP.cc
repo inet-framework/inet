@@ -686,6 +686,9 @@ void TCP_lwIP::process_OPEN_ACTIVE(TcpLwipConnection& connP, TCPOpenCommand *tcp
 
     ASSERT(pLwipTcpLayerM);
 
+    int localPort = tcpCommandP->getLocalPort();
+    if (localPort == -1)
+        localPort = 0;
     connP.connect(tcpCommandP->getLocalAddr(), tcpCommandP->getLocalPort(),
             tcpCommandP->getRemoteAddr(), tcpCommandP->getRemotePort());
 
