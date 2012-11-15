@@ -657,15 +657,18 @@ void PacketDump::tcpDump(bool l2r, const char *label, TCPSegment *tcpseg,
     {
         const char *direction = l2r ? "sent" : "received";
 
-        unsigned short numOptions = tcpseg->getOptionsArraySize();
-        out << "\n  TCP Header Option(s) " << direction << ":\n";
-
-        for (int i=0; i<numOptions; i++)
+        if (verbose)
         {
-            TCPOption option = tcpseg->getOptions(i);
-            unsigned short kind = option.getKind();
-            unsigned short length = option.getLength();
-            out << "    " << (i+1) << ". option kind=" << kind << " length=" << length << "\n";
+            unsigned short numOptions = tcpseg->getOptionsArraySize();
+            out << "\n  TCP Header Option(s) " << direction << ":\n";
+
+            for (int i=0; i<numOptions; i++)
+            {
+                TCPOption option = tcpseg->getOptions(i);
+                unsigned short kind = option.getKind();
+                unsigned short length = option.getLength();
+                out << "    " << (i+1) << ". option kind=" << kind << " length=" << length << "\n";
+            }
         }
     }
 #endif
