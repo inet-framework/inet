@@ -769,7 +769,10 @@ void Batman::parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPac
         //addr_to_string(neigh, neigh_str, sizeof(neigh_str));
         //addr_to_string(if_incoming->addr.sin_addr.s_addr, ifaddr_str, sizeof(ifaddr_str));
 
-        while (bat_packet) {
+        cPacket *next_packet = NULL;
+        for ( ; bat_packet; bat_packet = next_packet ? check_and_cast<BatmanPacket*>(next_packet) : NULL) {
+            next_packet = bat_packet->decapsulate();
+
             if (isInMacLayer())
                 EV << "packet receive from :" << MACAddress(bat_packet->getOrig().getLo()) << endl;
             else
@@ -812,19 +815,19 @@ void Batman::parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPac
             if (bat_packet->getVersion() != 0) {
                 debug_output(4) << "Drop packet: incompatible batman version "<< (unsigned)(bat_packet->getVersion()) << endl;
                 delete bat_packet;
-                break;
+                break;  // drop entire packet. In real life, we don't know where begins the next batman packet
             }
 
             if (is_my_addr) {
                 debug_output(4) << "Drop packet: received my own broadcast sender:" << srcAddr << endl;
                 delete bat_packet;
-                break;
+                break;  // the condition same as on the entire udp packet
             }
 
             if (is_broadcast) {
                 debug_output(4) << "Drop packet: ignoring all packets with broadcast source IP (sender: " << srcAddr << ")\n";
                 delete bat_packet;
-                break;
+                break;  // the condition same as on the entire udp packet
             }
 
             if (is_my_orig) {
@@ -851,7 +854,7 @@ void Batman::parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPac
 
                 EV << "Drop packet: originator packet from myself (via neighbour) \n";
                 delete bat_packet;
-                break;
+                continue;
             }
 
             if (bat_packet->getTq() == 0) {
@@ -859,13 +862,13 @@ void Batman::parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPac
 
                 EV << "Drop packet: originator packet with tq is 0 \n";
                 delete bat_packet;
-                break;
+                continue;
             }
 
             if (is_my_oldorig) {
                 EV << "Drop packet: ignoring all rebroadcast echos (sender: " << srcAddr << ")\n";
                 delete bat_packet;
-                break;
+                continue;
             }
 
             is_duplicate = count_real_packets(bat_packet, neigh, if_incoming);
@@ -879,7 +882,7 @@ void Batman::parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPac
             if ((bat_packet->getOrig() != neigh) && (orig_neigh_node->router == NULL)) {
                 debug_output(4) << "Drop packet: OGM via unknown neighbor! \n";
                 delete bat_packet;
-                break;
+                continue;
             }
 
             orig_node->totalRec++;
@@ -898,30 +901,30 @@ void Batman::parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPac
 
                 debug_output(4) << "Forward packet: rebroadcast neighbour packet with direct link flag \n";
                 delete bat_packet;
-                break;
+                continue;
             }
 
             /* multihop originator */
             if (!is_bidirectional) {
                 debug_output(4) << "Drop packet: not received via bidirectional link\n";
                 delete bat_packet;
-                break;
+                continue;
             }
 
             if (is_duplicate) {
                 debug_output(4) << "Drop packet: duplicate packet received\n";
                 delete bat_packet;
-                break;
+                continue;
             }
 
-            cPacket *enc = bat_packet->decapsulate();
 
             debug_output(4) << "Forward packet: rebroadcast originator packet\n";
 
             schedule_forward_packet(orig_node, bat_packet, neigh, 0, hna_buff_len, if_incoming, curr_time);
             delete bat_packet;
-            bat_packet = enc ? check_and_cast<BatmanPacket*>(enc) : NULL;
+            bat_packet = next_packet ? check_and_cast<BatmanPacket*>(next_packet) : NULL;
         }
+        delete next_packet;
     }
 }
 
