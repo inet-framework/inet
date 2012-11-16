@@ -113,6 +113,22 @@ void TCPBasicClientApp::socketEstablished(int connId, void *ptr)
     numRequestsToSend--;
 }
 
+void TCPBasicClientApp::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
+{
+    cancelEvent(timeoutMsg);
+
+    if (stopTime == 0 || stopTime > d)
+    {
+        timeoutMsg->setKind(msgKind);
+        scheduleAt(d, timeoutMsg);
+    }
+    else
+    {
+        delete timeoutMsg;
+        timeoutMsg = NULL;
+    }
+}
+
 void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
 {
     TCPGenericCliAppBase::socketDataArrived(connId, ptr, msg, urgent);
@@ -123,19 +139,8 @@ void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, cPacket *msg, b
 
         if (timeoutMsg)
         {
-            ASSERT(timeoutMsg->isScheduled());
-
             simtime_t d = simTime() + (simtime_t) par("thinkTime");
-            if (stopTime == 0 || stopTime > d)
-            {
-                timeoutMsg->setKind(MSGKIND_SEND);
-                scheduleAt(d, timeoutMsg);
-            }
-            else
-            {
-                delete timeoutMsg;
-                timeoutMsg = NULL;
-            }
+            rescheduleOrDeleteTimer(d, MSGKIND_SEND);
         }
     }
     else
@@ -152,19 +157,8 @@ void TCPBasicClientApp::socketClosed(int connId, void *ptr)
     // start another session after a delay
     if (timeoutMsg)
     {
-        ASSERT(!timeoutMsg->isScheduled());
-
         simtime_t d = simTime() + (simtime_t) par("idleInterval");
-        if (stopTime == 0 || stopTime > d)
-        {
-            timeoutMsg->setKind(MSGKIND_CONNECT);
-            scheduleAt(d, timeoutMsg);
-        }
-        else
-        {
-            delete timeoutMsg;
-            timeoutMsg = NULL;
-        }
+        rescheduleOrDeleteTimer(d, MSGKIND_CONNECT);
     }
 }
 
@@ -175,19 +169,8 @@ void TCPBasicClientApp::socketFailure(int connId, void *ptr, int code)
     // reconnect after a delay
     if (timeoutMsg)
     {
-        ASSERT(timeoutMsg->isScheduled());
-
         simtime_t d = simTime() + (simtime_t) par("reconnectInterval");
-        if (stopTime == 0 || stopTime > d)
-        {
-            timeoutMsg->setKind(MSGKIND_CONNECT);
-            scheduleAt(d, timeoutMsg);
-        }
-        else
-        {
-            delete timeoutMsg;
-            timeoutMsg = NULL;
-        }
+        rescheduleOrDeleteTimer(d, MSGKIND_CONNECT);
     }
 }
 

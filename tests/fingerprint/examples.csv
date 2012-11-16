@@ -87,6 +87,7 @@
 /examples/inet/nclients/,            -f fingerprints2.ini -c General -r 0,          50s,             97bb-ed54
 /examples/inet/nclients/,            -f fingerprints.ini -c General -r 0,           50s,             dfc6-b593
 /examples/inet/nclients/,            -f nclients2.ini -c General -r 0,              50s,             fb10-9c93
+/examples/inet/nclients/,            -f nclients2.ini -c General -r 1,              50s,             6285-b647
 /examples/inet/nclients/,            -f omnetpp.ini -c General -r 0,                3000s,           16cf-492f
 /examples/inet/nclients/,            -f omnetpp.ini -c inet__inet -r 0,             200s,            4aad-47b7
 /examples/inet/nclients/,            -f omnetpp.ini -c inet__lwip -r 0,             200s,            88b4-3724

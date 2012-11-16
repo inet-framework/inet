@@ -33,6 +33,10 @@ class INET_API TCPBasicClientApp : public TCPGenericCliAppBase
     /** Utility: sends a request to the server */
     virtual void sendRequest();
 
+    /** Utility: cancel msgTimer and if d is smaller than stopTime, then schedule it to d,
+     * otherwise delete msgTimer */
+    virtual void rescheduleOrDeleteTimer(simtime_t d, short int msgKind);
+
   public:
     TCPBasicClientApp();
     virtual ~TCPBasicClientApp();

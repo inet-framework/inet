@@ -97,6 +97,7 @@
 /examples/inet/nclients/,            -f fingerprints.ini -c General -r 0
 /examples/inet/nclients/,            -f fingerprints2.ini -c General -r 0
 /examples/inet/nclients/,            -f nclients2.ini -c General -r 0
+/examples/inet/nclients/,            -f nclients2.ini -c General -r 1
 /examples/inet/nclients/,            -f omnetpp-ping.ini -c General -r 0
 /examples/inet/nclients/,            -f omnetpp.ini -c inet__inet -r 0
 /examples/inet/nclients/,            -f omnetpp.ini -c lwip__lwip -r 0
