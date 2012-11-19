@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# script for modify orig batmand codes for compare with inet version
+# script for modifying the original batmand code to be able to better compare to the inet version
 
-# copy next files from batmand to this folder and renamed to *.c.txt, *.h.txt
+# copy the following files from batmand to this folder and rename them to *.c.txt, *.h.txt
 #   batman.c
 #   batman.h
 #   bitarray.c

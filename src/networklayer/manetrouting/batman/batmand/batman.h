@@ -153,7 +153,7 @@ class NeighNode : public cObject
 };
 
 
-class ForwNode //:  public cObject              /* structure for forw_list maintaining packets to be send/forwarded */
+class ForwNode                       /* structure for forw_list maintaining packets to be send/forwarded */
 {
   public:
     simtime_t send_time;
@@ -165,7 +165,7 @@ class ForwNode //:  public cObject              /* structure for forw_list maint
     BatmanIf *if_incoming;
 };
 
-class GwNode // : public cObject
+class GwNode
 {
   public:
     OrigNode *orig_node;
@@ -177,7 +177,7 @@ class GwNode // : public cObject
     GwNode() : orig_node(NULL), gw_port(0), gw_failure(0), last_failure(0), deleted(0) {}
 };
 
-class GwClient //:public cObject
+class GwClient
 {
   public:
     Uint128 wip_addr;

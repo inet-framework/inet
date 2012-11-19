@@ -373,7 +373,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElemen
         hna_global_update(orig_node, hna_recv_buff, hna_buff_len, old_router);
     }
     // Sanity check
-    // ez itt miert kell???? nincs az eredetiben...
+    // XXX why is this needed? This check is not present in the original batman code.
     if (!isInMacLayer())
     {
         Uint128 next = omnet_exist_rte(orig_node->orig);

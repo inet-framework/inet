@@ -1,3 +1,14 @@
+2012-11-19  Zoltan Bojthe 
+
+	Batman:
+	- Fixed several memory leaks
+	- Fixed routing table corruption and possible crash when multiple 
+	  radios were used in a single host
+	- Added HNA support. Nodes can advertise external networks,
+	  so traffic towards those networks can be routed correctly.
+	  Use the announcedNetworks parameter to specufy multiple connected
+	  external networks.
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-07-08  Rudolf Hornig
@@ -21,6 +32,7 @@
 	Code taken over from the INETMAMNET-2.0 repository.
 	Some IFDEFs were added to make it compile without the
 	80211MESH module which is not present in INET.
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-02-24  ------ inet-1.99.3 released ------
