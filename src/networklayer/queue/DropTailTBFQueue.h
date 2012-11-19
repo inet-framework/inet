@@ -36,7 +36,7 @@ class INET_API DropTailTBFQueue : public DropTailQueue
 {
   protected:
     // configuration
-    long long burstSize;    // in bit; note that the corresponding parameter in NED/INI is in byte.
+    long long bucketSize;   // in bit; note that the corresponding parameter in NED/INI is in byte.
     double meanRate;
     int mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
     double peakRate;

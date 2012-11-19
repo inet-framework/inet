@@ -43,7 +43,7 @@ void DropTailVLANTBFQueue::initialize()
     // configuration
     frameCapacity = par("frameCapacity");
     numQueues = par("numQueues");
-    burstSize = par("burstSize").longValue()*8LL; // in bit
+    bucketSize = par("bucketSize").longValue()*8LL; // in bit
     meanRate = par("meanRate"); // in bps
     mtu = par("mtu").longValue()*8; // in bit
     peakRate = par("peakRate"); // in bps
@@ -57,7 +57,7 @@ void DropTailVLANTBFQueue::initialize()
 
     // set subqueues
     queues.assign(numQueues, (cQueue *)NULL);
-    meanBucketLength.assign(numQueues, burstSize);
+    meanBucketLength.assign(numQueues, bucketSize);
     peakBucketLength.assign(numQueues, mtu);
     lastTime.assign(numQueues, simTime());
     conformityFlag.assign(numQueues, false);
@@ -304,7 +304,7 @@ bool DropTailVLANTBFQueue::isConformed(int queueIndex, int pktLength)
     // update states
     simtime_t now = simTime();
     unsigned long long meanTemp = meanBucketLength[queueIndex] + (unsigned long long)(meanRate*(now - lastTime[queueIndex]).dbl() + 0.5);
-    meanBucketLength[queueIndex] = (long long)((meanTemp > burstSize) ? burstSize : meanTemp);
+    meanBucketLength[queueIndex] = (long long)((meanTemp > bucketSize) ? bucketSize : meanTemp);
     unsigned long long peakTemp = peakBucketLength[queueIndex] + (unsigned long long)(peakRate*(now - lastTime[queueIndex]).dbl() + 0.5);
     peakBucketLength[queueIndex] = int((peakTemp > mtu) ? mtu : peakTemp);
     lastTime[queueIndex] = now;
@@ -347,7 +347,7 @@ void DropTailVLANTBFQueue::dumpTbfStatus(int queueIndex)
     EV << "Last Time = " << lastTime[queueIndex] << endl;
     EV << "Current Time = " << simTime() << endl;
     EV << "Token bucket for mean rate/burst control " << endl;
-    EV << "- Burst size [bit]: " << burstSize << endl;
+    EV << "- Bucket size [bit]: " << bucketSize << endl;
     EV << "- Mean rate [bps]: " << meanRate << endl;
     EV << "- Bucket length [bit]: " << meanBucketLength[queueIndex] << endl;
     EV << "Token bucket for peak rate/MTU control " << endl;
