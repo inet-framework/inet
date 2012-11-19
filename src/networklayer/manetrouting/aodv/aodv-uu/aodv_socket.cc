@@ -582,7 +582,7 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
 //       IPv4Address   desAddIp4(dst.s_addr);
 //       IPvXAddress destAdd(desAddIp4);
 // In the floading proccess the random delay prevent collision for the synchronization between the nodes.
-        Uint128 destAdd;
+        ManetAddress destAdd;
         aodv_msg->prevFix=this->isStaticNode();
 
         if (this->isStaticNode())
@@ -661,7 +661,7 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
 #else
         // IPv4Address   desAddIp4(dst.s_addr);
         // IPvXAddress destAdd(desAddIp4);
-        Uint128 destAdd;
+        ManetAddress destAdd;
         if (dst.s_addr == AODV_BROADCAST)
         {
             destAdd = IPv4Address::ALLONES_ADDRESS.getInt();

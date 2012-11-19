@@ -561,7 +561,7 @@ const char *RERR_udestDescriptor::getFieldTypeString(void *object, int field) co
         field -= basedesc->getFieldCount(object);
     }
     switch (field) {
-        case FLD_dest_addr: return "Uint128";
+        case FLD_dest_addr: return "ManetAddress";
         case FLD_dest_seqno: return "uint32_t";
         default: return NULL;
     }
@@ -634,7 +634,7 @@ const char *RERR_udestDescriptor::getFieldStructName(void *object, int field) co
         field -= basedesc->getFieldCount(object);
     }
     switch (field) {
-        case FLD_dest_addr: return "Uint128";
+        case FLD_dest_addr: return "ManetAddress";
         default: return NULL;
     }
 }
@@ -1014,9 +1014,9 @@ const char *RREPDescriptor::getFieldTypeString(void *object, int field) const
         case FLD_prefix: return "uint16_t";
         case FLD_res2: return "uint16_t";
         case FLD_hcnt: return "uint8_t";
-        case FLD_dest_addr: return "Uint128";
+        case FLD_dest_addr: return "ManetAddress";
         case FLD_dest_seqno: return "uint32_t";
-        case FLD_orig_addr: return "Uint128";
+        case FLD_orig_addr: return "ManetAddress";
         case FLD_lifetime: return "uint32_t";
         default: return NULL;
     }
@@ -1104,8 +1104,8 @@ const char *RREPDescriptor::getFieldStructName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     switch (field) {
-        case FLD_dest_addr: return "Uint128";
-        case FLD_orig_addr: return "Uint128";
+        case FLD_dest_addr: return "ManetAddress";
+        case FLD_orig_addr: return "ManetAddress";
         default: return NULL;
     }
 }
@@ -1474,9 +1474,9 @@ const char *RREQDescriptor::getFieldTypeString(void *object, int field) const
         case FLD_res2: return "uint8_t";
         case FLD_hcnt: return "uint8_t";
         case FLD_rreq_id: return "uint32_t";
-        case FLD_dest_addr: return "Uint128";
+        case FLD_dest_addr: return "ManetAddress";
         case FLD_dest_seqno: return "uint32_t";
-        case FLD_orig_addr: return "Uint128";
+        case FLD_orig_addr: return "ManetAddress";
         case FLD_orig_seqno: return "uint32_t";
         default: return NULL;
     }
@@ -1568,8 +1568,8 @@ const char *RREQDescriptor::getFieldStructName(void *object, int field) const
         field -= basedesc->getFieldCount(object);
     }
     switch (field) {
-        case FLD_dest_addr: return "Uint128";
-        case FLD_orig_addr: return "Uint128";
+        case FLD_dest_addr: return "ManetAddress";
+        case FLD_orig_addr: return "ManetAddress";
         default: return NULL;
     }
 }

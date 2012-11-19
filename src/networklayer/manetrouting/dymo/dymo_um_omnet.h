@@ -147,7 +147,7 @@ class DYMOUM : public ManetRoutingBase
     bool isRoot;
     struct timer proactive_rreq_timer;
     long proactive_rreq_timeout;
-    bool isBroadcast (Uint128 add)
+    bool isBroadcast (ManetAddress add)
     {
         if (this->isInMacLayer() && add == MACAddress::BROADCAST_ADDRESS.getInt())
              return true;
@@ -160,13 +160,13 @@ class DYMOUM : public ManetRoutingBase
 
     typedef std::map<MACAddress, unsigned int> MacToIpAddress;
     typedef std::multimap<simtime_t, struct timer*> DymoTimerMap;
-    typedef std::map<Uint128, rtable_entry_t *> DymoRoutingTable;
-    typedef std::map<Uint128, pending_rreq_t * > DymoPendingRreq;
+    typedef std::map<ManetAddress, rtable_entry_t *> DymoRoutingTable;
+    typedef std::map<ManetAddress, pending_rreq_t * > DymoPendingRreq;
     typedef std::vector<nb_t *> DymoNbList;
-    typedef std::map<Uint128, blacklist *> DymoBlackList;
+    typedef std::map<ManetAddress, blacklist *> DymoBlackList;
 
     // this static map simulate the exchange of seq num by the proactive protocol.
-    static std::map<Uint128,u_int32_t *> mapSeqNum;
+    static std::map<ManetAddress,u_int32_t *> mapSeqNum;
 
     MacToIpAddress *macToIpAdress;
     DymoTimerMap *dymoTimerList;
@@ -243,16 +243,16 @@ class DYMOUM : public ManetRoutingBase
     virtual std::string detailedInfo() const;
 
     // Routing information access
-    virtual uint32_t getRoute(const Uint128 &, std::vector<Uint128> &);
-    virtual bool getNextHop(const Uint128 &, Uint128 &add, int &iface, double &);
+    virtual uint32_t getRoute(const ManetAddress &, std::vector<ManetAddress> &);
+    virtual bool getNextHop(const ManetAddress &, ManetAddress &add, int &iface, double &);
     virtual bool isProactive();
-    virtual void setRefreshRoute(const Uint128 &destination, const Uint128 &nextHop,bool isReverse);
+    virtual void setRefreshRoute(const ManetAddress &destination, const ManetAddress &nextHop,bool isReverse);
     virtual bool isOurType(cPacket *);
-    virtual bool getDestAddress(cPacket *, Uint128 &);
-    virtual int getRouteGroup(const AddressGroup &gr, std::vector<Uint128>&);
-    virtual bool getNextHopGroup(const AddressGroup &gr, Uint128 &add, int &iface, Uint128&);
-    virtual int  getRouteGroup(const Uint128&, std::vector<Uint128> &, Uint128&, bool &, int group = 0);
-    virtual bool getNextHopGroup(const Uint128&, Uint128 &add, int &iface, Uint128&, bool &, int group = 0);
+    virtual bool getDestAddress(cPacket *, ManetAddress &);
+    virtual int getRouteGroup(const AddressGroup &gr, std::vector<ManetAddress>&);
+    virtual bool getNextHopGroup(const AddressGroup &gr, ManetAddress &add, int &iface, ManetAddress&);
+    virtual int  getRouteGroup(const ManetAddress&, std::vector<ManetAddress> &, ManetAddress&, bool &, int group = 0);
+    virtual bool getNextHopGroup(const ManetAddress&, ManetAddress &add, int &iface, ManetAddress&, bool &, int group = 0);
 
   protected:
     void drop(cPacket *p, int cause = 0)
@@ -271,7 +271,7 @@ class DYMOUM : public ManetRoutingBase
     void initialize(int stage);
     void recvDYMOUMPacket(cMessage * p);
     void processPacket(IPv4Datagram *, unsigned int);
-    void processMacPacket(cPacket * p, const Uint128 &, const Uint128 &, int);
+    void processMacPacket(cPacket * p, const ManetAddress &, const ManetAddress &, int);
     void getMacAddress(IPv4Datagram *);
 
     cPacket * get_packet_queue(struct in_addr dest_addr);

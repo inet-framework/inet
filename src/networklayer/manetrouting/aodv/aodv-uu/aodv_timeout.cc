@@ -119,7 +119,7 @@ void NS_CLASS route_discovery_timeout(void *arg)
         DEBUG(LOG_DEBUG, 0, "NO ROUTE FOUND!");
 
 #ifdef NS_PORT
-        std::vector<Uint128> list;
+        std::vector<ManetAddress> list;
         getListRelatedAp(seek_entry->dest_addr.s_addr, list);
         for (unsigned int i = 0; i < list.size();i ++)
         {

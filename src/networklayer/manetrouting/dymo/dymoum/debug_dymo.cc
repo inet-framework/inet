@@ -84,7 +84,7 @@ void NS_CLASS dlog(int pri, int errnum, const char *func, const char *format, ..
 #endif
 }
 #ifdef OMNETPP
-const char *NS_CLASS ip2str(Uint128 &ipaddr)
+const char *NS_CLASS ip2str(ManetAddress &ipaddr)
 {
     if (isInMacLayer())
         return MACAddress(ipaddr.getLo()).str().c_str();

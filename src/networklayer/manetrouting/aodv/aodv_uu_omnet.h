@@ -126,7 +126,7 @@ class AODVUU : public ManetRoutingBase
     bool propagateProactive;
     struct timer proactive_rreq_timer;
     long proactive_rreq_timeout;
-    bool isBroadcast (Uint128 add)
+    bool isBroadcast (ManetAddress add)
     {
         if (this->isInMacLayer() && add==MACAddress::BROADCAST_ADDRESS.getInt())
              return true;
@@ -137,7 +137,7 @@ class AODVUU : public ManetRoutingBase
     // cMessage  messageEvent;
     typedef std::multimap<simtime_t, struct timer*> AodvTimerMap;
     AodvTimerMap aodvTimerMap;
-    typedef std::map<Uint128, struct rt_table*> AodvRtTableMap;
+    typedef std::map<ManetAddress, struct rt_table*> AodvRtTableMap;
     AodvRtTableMap aodvRtTableMap;
 
 
@@ -151,12 +151,12 @@ class AODVUU : public ManetRoutingBase
     void packetFailedMac(Ieee80211DataFrame *);
 
     // Routing information access
-    virtual uint32_t getRoute(const Uint128 &,std::vector<Uint128> &);
-    virtual bool getNextHop(const Uint128 &,Uint128 &add,int &iface,double &);
+    virtual uint32_t getRoute(const ManetAddress &,std::vector<ManetAddress> &);
+    virtual bool getNextHop(const ManetAddress &,ManetAddress &add,int &iface,double &);
     virtual bool isProactive();
-    virtual void setRefreshRoute(const Uint128 &destination, const Uint128 & nextHop,bool isReverse);
-    virtual bool setRoute(const Uint128 & destination,const Uint128 &nextHop,const int &ifaceIndex,const int &hops,const Uint128 &mask=(Uint128)0);
-    virtual bool setRoute(const Uint128 & destination,const Uint128 &nextHop,const char *ifaceName,const int &hops,const Uint128 &mask=(Uint128)0);
+    virtual void setRefreshRoute(const ManetAddress &destination, const ManetAddress & nextHop,bool isReverse);
+    virtual bool setRoute(const ManetAddress & destination,const ManetAddress &nextHop,const int &ifaceIndex,const int &hops,const ManetAddress &mask=(ManetAddress)0);
+    virtual bool setRoute(const ManetAddress & destination,const ManetAddress &nextHop,const char *ifaceName,const int &hops,const ManetAddress &mask=(ManetAddress)0);
 
   protected:
     bool is_init;
@@ -278,8 +278,8 @@ class AODVUU : public ManetRoutingBase
 #define TQ this->timeList
 #else
     typedef std::vector <rreq_record *>RreqRecords;
-    typedef std::map <Uint128, struct blacklist *>RreqBlacklist;
-    typedef std::map <Uint128, seek_list_t*>SeekHead;
+    typedef std::map <ManetAddress, struct blacklist *>RreqBlacklist;
+    typedef std::map <ManetAddress, seek_list_t*>SeekHead;
 
     RreqRecords rreq_records;
     RreqBlacklist rreq_blacklist;
@@ -328,7 +328,7 @@ class AODVUU : public ManetRoutingBase
     virtual void processLinkBreak(const cObject *details);
     //virtual void processFullPromiscuous(const cObject *details){}
     virtual bool isOurType(cPacket *);
-    virtual bool getDestAddress(cPacket *,Uint128 &);
+    virtual bool getDestAddress(cPacket *,ManetAddress &);
 
 
 };

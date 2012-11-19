@@ -35,18 +35,18 @@ cplusplus {{
 
 
 class noncobject IPv4Address;
-class noncobject Uint128;
+class noncobject ManetAddress;
 
 struct vis_data
 {
     uint8_t type;
     uint8_t data;
-    Uint128 ip;
+    ManetAddress ip;
 };
 
 struct HnaElement
 {
-    Uint128 addr;
+    ManetAddress addr;
     uint8_t  netmask;
 };
 
@@ -59,8 +59,8 @@ packet BatmanPacket
     uint8_t        gatewayFlags;  // flags related to gateway functions: gateway class
     unsigned short seqNumber;
     unsigned short gatewayPort;
-    Uint128        orig;
-    Uint128        prevSender;
+    ManetAddress        orig;
+    ManetAddress        prevSender;
     uint8_t        tq;           // Quality
     uint8_t        hops;
     HnaElement   hnaMsg[];    ///< Packet body.
@@ -68,7 +68,7 @@ packet BatmanPacket
 
 
 packet visPacket {
-    Uint128 senderIp;
+    ManetAddress senderIp;
     unsigned char version;
     unsigned char gwClass;
     unsigned char tqMax;

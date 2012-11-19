@@ -143,7 +143,7 @@ class DYMO : public ManetRoutingBase
     simtime_t computeBackoff(simtime_t);
 
     /** @brief updates the lifetime (validTimeout) of a route */
-    void updateRouteLifetimes(const Uint128& destAddr);
+    void updateRouteLifetimes(const ManetAddress& destAddr);
 
     /** @brief generates and sends down a new rreq for given destination address */
     void sendRREQ(unsigned int destAddr, int msgHdrHopLimit, unsigned int targetSeqNum, unsigned int targetHopCnt);
@@ -252,9 +252,9 @@ class DYMO : public ManetRoutingBase
     int BUFFER_SIZE_BYTES; /**< NED configuration parameter: maximum total size of queued packets, -1 for no limit */
 
 
-    virtual uint32_t getRoute(const Uint128 &, std::vector<Uint128> &add) {return 0;};
-    virtual bool getNextHop(const Uint128 &, Uint128 &add, int &iface, double &val) {return false;};
-    virtual void setRefreshRoute(const Uint128 &destination, const Uint128 & nextHop,bool isReverse) {};
+    virtual uint32_t getRoute(const ManetAddress &, std::vector<ManetAddress> &add) {return 0;};
+    virtual bool getNextHop(const ManetAddress &, ManetAddress &add, int &iface, double &val) {return false;};
+    virtual void setRefreshRoute(const ManetAddress &destination, const ManetAddress & nextHop,bool isReverse) {};
     virtual bool isProactive() {return false;};
     virtual bool isOurType(cPacket * msg)
     {
@@ -265,7 +265,7 @@ class DYMO : public ManetRoutingBase
         else
             return false;
     };
-    virtual bool getDestAddress(cPacket *, Uint128 &) {return false;};
+    virtual bool getDestAddress(cPacket *, ManetAddress &) {return false;};
 
     virtual void processLinkBreak(const cObject *details);
     void packetFailed(const IPv4Datagram *dgram);

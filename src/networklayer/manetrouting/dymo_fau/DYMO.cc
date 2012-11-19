@@ -969,7 +969,7 @@ simtime_t DYMO::computeBackoff(simtime_t backoff_var)
     return backoff_var * 2;
 }
 
-void DYMO::updateRouteLifetimes(const Uint128& targetAddr)
+void DYMO::updateRouteLifetimes(const ManetAddress& targetAddr)
 {
     DYMO_RoutingEntry* entry = dymo_routingTable->getForAddress(IPv4Address(targetAddr.toUint()));
     if (!entry) return;

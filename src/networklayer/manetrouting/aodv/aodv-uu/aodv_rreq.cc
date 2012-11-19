@@ -225,7 +225,7 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
     uint32_t cost;
     uint8_t  hopfix;
 
-    Uint128 aux;
+    ManetAddress aux;
     if (getAp(rreq->dest_addr, aux) && !isBroadcast(rreq->dest_addr))
     {
         rreq_dest.s_addr = aux;

@@ -187,13 +187,13 @@ void Batman::initialize(int stage)
         batman_if->if_active = true;
         if (isInMacLayer())
         {
-            batman_if->address = (Uint128)iEntry->getMacAddress().getInt();
-            batman_if->broad = (Uint128)MACAddress::BROADCAST_ADDRESS.getInt();
+            batman_if->address = (ManetAddress)iEntry->getMacAddress().getInt();
+            batman_if->broad = (ManetAddress)MACAddress::BROADCAST_ADDRESS.getInt();
         }
         else
         {
-            batman_if->address = (Uint128)iEntry->ipv4Data()->getIPAddress().getInt();
-            batman_if->broad = (Uint128)IPv4Address::ALLONES_ADDRESS.getInt();
+            batman_if->address = (ManetAddress)iEntry->ipv4Data()->getIPAddress().getInt();
+            batman_if->broad = (ManetAddress)IPv4Address::ALLONES_ADDRESS.getInt();
         }
 
         batman_if->if_rp_filter_old = -1;
@@ -220,7 +220,7 @@ void Batman::initialize(int stage)
         addr.doAnd(mask);
 
         // add to HNA:
-        hna_local_task_add_ip(Uint128(addr.getInt()), mask.getNetmaskLength(), ROUTE_ADD);
+        hna_local_task_add_ip(ManetAddress(addr.getInt()), mask.getNetmaskLength(), ROUTE_ADD);
     }
 
 
@@ -257,7 +257,7 @@ void Batman::initialize(int stage)
 void Batman::handleMessage(cMessage *msg)
 {
     BatmanIf *if_incoming;
-    Uint128 neigh;
+    ManetAddress neigh;
     simtime_t vis_timeout, select_timeout, curr_time;
 
     curr_time = getTime();
@@ -362,7 +362,7 @@ void Batman::scheduleNextEvent()
      }
 }
 
-uint32_t Batman::getRoute(const Uint128 &dest, std::vector<Uint128> &add)
+uint32_t Batman::getRoute(const ManetAddress &dest, std::vector<ManetAddress> &add)
 {
     OrigMap::iterator it = origMap.find(dest);
     if (it != origMap.end())
@@ -372,7 +372,7 @@ uint32_t Batman::getRoute(const Uint128 &dest, std::vector<Uint128> &add)
         add.push_back(node->router->addr);
         return -1;
     }
-    Uint128 apAddr;
+    ManetAddress apAddr;
     if (getAp(dest,apAddr))
     {
         OrigMap::iterator it = origMap.find(apAddr);
@@ -387,7 +387,7 @@ uint32_t Batman::getRoute(const Uint128 &dest, std::vector<Uint128> &add)
     return 0;
 }
 
-bool Batman::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &val)
+bool Batman::getNextHop(const ManetAddress &dest, ManetAddress &add, int &iface, double &val)
 {
     OrigMap::iterator it = origMap.find(dest);
     if (it != origMap.end())
@@ -396,7 +396,7 @@ bool Batman::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &v
         add = node->router->addr;
         return true;
     }
-    Uint128 apAddr;
+    ManetAddress apAddr;
     if (getAp(dest,apAddr))
     {
         OrigMap::iterator it = origMap.find(apAddr);

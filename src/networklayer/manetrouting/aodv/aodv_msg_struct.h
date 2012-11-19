@@ -57,7 +57,7 @@ typedef AODV_msg hdr_aodvuu;    // Name convention for headers
 typedef struct
 {
     // u_int32_t dest_addr;
-    Uint128 dest_addr;
+    ManetAddress dest_addr;
     u_int32_t dest_seqno;
 } RERR_udest;
 //#define RERR_UDEST_SIZE sizeof(RERR_udest)
@@ -77,7 +77,7 @@ struct RERR : public AODV_msg
     explicit RERR(const char *name="RERRAodvMsg") : AODV_msg (name) {setBitLength(12*8); dest_count=0; _udest=NULL;}
     ~RERR ();
     RERR (const RERR &m);
-    void addUdest(const Uint128 &,unsigned int);
+    void addUdest(const ManetAddress &,unsigned int);
     void clearUdest();
     RERR_udest * getUdest(int);
     RERR &  operator= (const RERR &m);
@@ -100,10 +100,10 @@ struct RREP : public AODV_msg
     u_int16_t res2;
     u_int8_t hcnt;
 //  u_int32_t dest_addr;
-    Uint128 dest_addr;
+    ManetAddress dest_addr;
     u_int32_t dest_seqno;
 //  u_int32_t orig_addr;
-    Uint128 orig_addr;
+    ManetAddress orig_addr;
     u_int32_t lifetime;
     uint32_t cost;
     uint8_t  hopfix;
@@ -141,10 +141,10 @@ struct RREQ : public AODV_msg
     u_int8_t hcnt;
     u_int32_t rreq_id;
 //  u_int32_t dest_addr;
-    Uint128 dest_addr;
+    ManetAddress dest_addr;
     u_int32_t dest_seqno;
 //  u_int32_t orig_addr;
-    Uint128 orig_addr;
+    ManetAddress orig_addr;
     u_int32_t orig_seqno;
     uint32_t   cost;
     uint8_t  hopfix;

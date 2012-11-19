@@ -759,7 +759,7 @@ void NS_CLASS route_discovery(struct in_addr dest_addr)
     if (pending_rreq_find(dest_addr))
         return;
 
-    Uint128 apDest;
+    ManetAddress apDest;
     struct in_addr dest;
     if (getAp(dest_addr.s_addr, apDest))
     {

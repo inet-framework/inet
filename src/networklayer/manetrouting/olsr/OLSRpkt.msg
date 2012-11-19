@@ -20,11 +20,11 @@
 
 cplusplus {{
 #include "OLSR_ETX_parameter.h"
-#include "uint128.h"
+#include "ManetAddress.h"
 #include <string.h>
 
 #ifndef nsaddr_t
-typedef Uint128 nsaddr_t;
+typedef ManetAddress nsaddr_t;
 #endif
 
 /********** Message types **********/

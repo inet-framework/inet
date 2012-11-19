@@ -1767,7 +1767,7 @@ OLSR::send_pkt()
     int num_pkts = (num_msgs%OLSR_MAX_MSGS == 0) ? num_msgs/OLSR_MAX_MSGS :
                    (num_msgs/OLSR_MAX_MSGS + 1);
 
-    Uint128 destAdd = IPv4Address::ALLONES_ADDRESS.getInt();
+    ManetAddress destAdd = IPv4Address::ALLONES_ADDRESS.getInt();
 
     for (int i = 0; i < num_pkts; i++)
     {
@@ -2218,7 +2218,7 @@ OLSR::mac_failed(IPv4Datagram* p)
     ev <<"Node " << OLSR::node_id(ra_addr()) << "MAC Layer detects a breakage on link to "  <<
     OLSR::node_id(dest_addr);
 
-    if (dest_addr == (Uint128)IP_BROADCAST)
+    if (dest_addr == (ManetAddress)IP_BROADCAST)
     {
         return;
     }
@@ -2848,11 +2848,11 @@ OLSR::~OLSR()
 }
 
 
-uint32_t OLSR::getRoute(const Uint128 &dest, std::vector<Uint128> &add)
+uint32_t OLSR::getRoute(const ManetAddress &dest, std::vector<ManetAddress> &add)
 {
     add.clear();
     OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
-    Uint128 apAddr;
+    ManetAddress apAddr;
     if (!rt_entry)
     {
         if (getAp(dest, apAddr))
@@ -2881,12 +2881,12 @@ uint32_t OLSR::getRoute(const Uint128 &dest, std::vector<Uint128> &add)
 }
 
 
-bool OLSR::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &cost)
+bool OLSR::getNextHop(const ManetAddress &dest, ManetAddress &add, int &iface, double &cost)
 {
     OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
     if (!rt_entry)
     {
-        Uint128 apAddr;
+        ManetAddress apAddr;
         if (getAp(dest, apAddr))
         {
 
@@ -2937,7 +2937,7 @@ bool OLSR::isOurType(cPacket * msg)
     return false;
 }
 
-bool OLSR::getDestAddress(cPacket *msg, Uint128 &dest)
+bool OLSR::getDestAddress(cPacket *msg, ManetAddress &dest)
 {
     return false;
 }
@@ -2963,14 +2963,14 @@ void OLSR::scheduleNextEvent()
 
 
 // Group methods, allow the anycast procedure
-int OLSR::getRouteGroup(const AddressGroup &gr, std::vector<Uint128> &add)
+int OLSR::getRouteGroup(const AddressGroup &gr, std::vector<ManetAddress> &add)
 {
 
     int distance = 1000;
     add.clear();
     for (AddressGroupConstIterator it = gr.begin(); it!=gr.end(); it++)
     {
-        Uint128 dest = *it;
+        ManetAddress dest = *it;
         OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
         if (!rt_entry)
             continue;
@@ -2992,13 +2992,13 @@ int OLSR::getRouteGroup(const AddressGroup &gr, std::vector<Uint128> &add)
     return distance;
 }
 
-bool OLSR::getNextHopGroup(const AddressGroup &gr, Uint128 &add, int &iface, Uint128 &gw)
+bool OLSR::getNextHopGroup(const AddressGroup &gr, ManetAddress &add, int &iface, ManetAddress &gw)
 {
 
     int distance = 1000;
     for (AddressGroupConstIterator it = gr.begin(); it!=gr.end(); it++)
     {
-        Uint128 dest = *it;
+        ManetAddress dest = *it;
         OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
         if (!rt_entry)
             continue;
@@ -3025,7 +3025,7 @@ bool OLSR::getNextHopGroup(const AddressGroup &gr, Uint128 &add, int &iface, Uin
 
 
 
-int  OLSR::getRouteGroup(const Uint128& dest, std::vector<Uint128> &add, Uint128& gateway, bool &isGroup, int group)
+int  OLSR::getRouteGroup(const ManetAddress& dest, std::vector<ManetAddress> &add, ManetAddress& gateway, bool &isGroup, int group)
 {
     AddressGroup gr;
     int distance = 0;
@@ -3047,7 +3047,7 @@ int  OLSR::getRouteGroup(const Uint128& dest, std::vector<Uint128> &add, Uint128
     return distance;
 }
 
-bool OLSR::getNextHopGroup(const Uint128& dest, Uint128 &next, int &iface, Uint128& gw, bool &isGroup, int group)
+bool OLSR::getNextHopGroup(const ManetAddress& dest, ManetAddress &next, int &iface, ManetAddress& gw, bool &isGroup, int group)
 {
     AddressGroup gr;
     bool find = false;
@@ -3068,7 +3068,7 @@ bool OLSR::getNextHopGroup(const Uint128& dest, Uint128 &next, int &iface, Uint1
 
 
 
-Uint128 OLSR::getIfaceAddressFromIndex(int index)
+ManetAddress OLSR::getIfaceAddressFromIndex(int index)
 {
     InterfaceEntry * entry = getInterfaceEntry(index);
     if (this->isInMacLayer())

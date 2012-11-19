@@ -298,7 +298,7 @@ void NS_CLASS rrep_process(RREP * rrep, int rreplen, struct in_addr ip_src,
 #endif
 
     /* Convert to correct byte order on affeected fields: */
-    Uint128 aux;
+    ManetAddress aux;
     if (getAp(rrep->dest_addr, aux))
     {
         rrep_dest.s_addr = aux;

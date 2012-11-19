@@ -154,7 +154,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
     else
         rt = rt_table_find(dest_addr);
 
-    std::vector<Uint128> list;
+    std::vector<ManetAddress> list;
     if (isInMacLayer())
     {
         std::vector<MACAddress> listMac;
@@ -370,7 +370,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
     else
         rt = rt_table_find(dest_addr);
 
-    std::vector<Uint128> list;
+    std::vector<ManetAddress> list;
     if (isInMacLayer())
     {
         std::vector<MACAddress> listMac;

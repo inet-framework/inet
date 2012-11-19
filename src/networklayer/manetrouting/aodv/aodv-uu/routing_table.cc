@@ -80,7 +80,7 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
 {
     rt_table_t *rt;
     struct in_addr nm;
-    Uint128 dest;
+    ManetAddress dest;
     nm.s_addr = 0;
 
     dest = dest_addr.s_addr;
@@ -93,7 +93,7 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
         return NULL;
     }
 
-    Uint128 apAdd;
+    ManetAddress apAdd;
     if (getAp(dest, apAdd))
     {
         struct in_addr dest_addrAux;
@@ -194,7 +194,7 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
 //#endif
     /* In case there are buffered packets for this destination, we
      * send them on the new route. */
-    std::vector<Uint128> list;
+    std::vector<ManetAddress> list;
     getListRelatedAp(dest_addr.s_addr, list);
     for (unsigned int i = 0; i < list.size(); i++)
     {
@@ -232,7 +232,7 @@ rt_table_t *NS_CLASS rt_table_find(struct in_addr dest_addr)
         return it->second;
     else
     {
-        Uint128 apAdd;
+        ManetAddress apAdd;
         if (getAp(dest_addr.s_addr, apAdd))
         {
             it = aodvRtTableMap.find(apAdd);
@@ -412,7 +412,7 @@ void NS_CLASS rt_table_delete(rt_table_t * rt)
         return;
     }
 
-    Uint128 dest = rt->dest_addr.s_addr;
+    ManetAddress dest = rt->dest_addr.s_addr;
     AodvRtTableMap::iterator it = aodvRtTableMap.find(dest);
     if (it != aodvRtTableMap.end())
     {
@@ -492,7 +492,7 @@ rt_table_t *NS_CLASS modifyAODVTables(struct in_addr dest_addr,
     struct in_addr nm;
     nm.s_addr = 0;
 
-    Uint128 dest = dest_addr.s_addr;
+    ManetAddress dest = dest_addr.s_addr;
 
     DEBUG(LOG_INFO, 0, "modifyAODVTables");
     /* Check if we already have an entry for dest_addr */
@@ -556,7 +556,7 @@ rt_table_t *NS_CLASS modifyAODVTables(struct in_addr dest_addr,
     /* In case there are buffered packets for this destination, we
      * send them on the new route. */
 
-    std::vector<Uint128> list;
+    std::vector<ManetAddress> list;
     getListRelatedAp(dest_addr.s_addr, list);
 
     for (unsigned int i = 0; i < list.size(); i++)
@@ -750,7 +750,7 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
 //#endif
     /* In case there are buffered packets for this destination, we
      * send them on the new route. */
-    std::vector<Uint128> list;
+    std::vector<ManetAddress> list;
     getListRelatedAp(dest_addr.s_addr, list);
     for (unsigned int i = 0; i < list.size(); i++)
     {
@@ -1209,7 +1209,7 @@ rt_table_t *NS_CLASS modifyAODVTables(struct in_addr dest_addr,
 //#endif
     /* In case there are buffered packets for this destination, we
      * send them on the new route. */
-    std::vector<Uint128> list;
+    std::vector<ManetAddress> list;
     getListRelatedAp(dest_addr.s_addr, list);
     for (unsigned int i = 0; i < list.size(); i++)
     {
@@ -1345,7 +1345,7 @@ rt_table_t *NS_CLASS rt_table_update(rt_table_t * rt, struct in_addr next,
 
     /* In case there are buffered packets for this destination, we send
      * them on the new route. */
-    std::vector<Uint128> list;
+    std::vector<ManetAddress> list;
     getListRelatedAp(rt->dest_addr.s_addr, list);
     for (unsigned int i = 0; i < list.size(); i++)
     {

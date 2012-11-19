@@ -1674,7 +1674,7 @@ OLSR_ETX::send_pkt()
     if (num_msgs == 0)
         return;
 
-    Uint128 destAdd;
+    ManetAddress destAdd;
     destAdd = IPv4Address::ALLONES_ADDRESS.getInt();
     // Calculates the number of needed packets
     int num_pkts = (num_msgs % OLSR_ETX_MAX_MSGS == 0) ? num_msgs / OLSR_ETX_MAX_MSGS :
@@ -2719,12 +2719,12 @@ OLSR_ETX::link_quality()
     }
 }
 
-bool OLSR_ETX::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &cost)
+bool OLSR_ETX::getNextHop(const ManetAddress &dest, ManetAddress &add, int &iface, double &cost)
 {
     OLSR_ETX_rt_entry* rt_entry = rtable_.lookup(dest);
     if (!rt_entry)
     {
-        Uint128 apAddr;
+        ManetAddress apAddr;
         if (getAp(dest, apAddr))
         {
 

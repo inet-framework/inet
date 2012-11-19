@@ -345,7 +345,7 @@ void NS_CLASS dymo_socket_send(struct in_addr dest_addr, struct dev_info *dev,do
     Scheduler::getInstance().schedule(target_, p, 0.0);
 #else
 
-    Uint128 destAdd;
+    ManetAddress destAdd;
     if (dest_addr.s_addr == DYMO_BROADCAST)
     {
         destAdd = IPv4Address::ALLONES_ADDRESS.getInt();

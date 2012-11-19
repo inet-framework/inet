@@ -497,7 +497,7 @@ void NS_CLASS handleMessage (cMessage *msg)
                 if (dynamic_cast<Ieee802Ctrl*> (ctrl))
                 {
                     Ieee802Ctrl *ieeectrl = dynamic_cast<Ieee802Ctrl*> (ctrl);
-                    Uint128 address = ieeectrl->getDest().getInt();
+                    ManetAddress address = ieeectrl->getDest().getInt();
                     int index = getWlanInterfaceIndexByAddress(address);
                     if (index!=-1)
                         ifindex = index;
@@ -825,7 +825,7 @@ void NS_CLASS recvAODVUUPacket(cMessage * msg)
         }
         else
         {
-            Uint128 add = ie->getMacAddress().getInt();
+            ManetAddress add = ie->getMacAddress().getInt();
             if (add== src.s_addr)
             {
                 delete   aodv_msg;
@@ -1053,17 +1053,17 @@ void NS_CLASS finish()
 }
 
 
-uint32_t NS_CLASS getRoute(const Uint128 &dest,std::vector<Uint128> &add)
+uint32_t NS_CLASS getRoute(const ManetAddress &dest,std::vector<ManetAddress> &add)
 {
     return 0;
 }
 
 
-bool  NS_CLASS getNextHop(const Uint128 &dest,Uint128 &add, int &iface,double &cost)
+bool  NS_CLASS getNextHop(const ManetAddress &dest,ManetAddress &add, int &iface,double &cost)
 {
     struct in_addr destAddr;
     destAddr.s_addr = dest;
-    Uint128 apAddr;
+    ManetAddress apAddr;
     rt_table_t * fwd_rt = this->rt_table_find(destAddr);
     if (fwd_rt)
     {
@@ -1097,7 +1097,7 @@ bool NS_CLASS isProactive()
     return false;
 }
 
-void NS_CLASS setRefreshRoute(const Uint128 &destination, const Uint128 & nextHop,bool isReverse)
+void NS_CLASS setRefreshRoute(const ManetAddress &destination, const ManetAddress & nextHop,bool isReverse)
 {
     struct in_addr dest_addr, next_hop;
     dest_addr.s_addr = destination;
@@ -1106,7 +1106,7 @@ void NS_CLASS setRefreshRoute(const Uint128 &destination, const Uint128 & nextHo
 
     if(par ("checkNextHop").boolValue())
     {
-        if (nextHop == (Uint128)0)
+        if (nextHop == (ManetAddress)0)
            return;
         if (!isReverse)
         {
@@ -1137,7 +1137,7 @@ void NS_CLASS setRefreshRoute(const Uint128 &destination, const Uint128 & nextHo
         }
 
 
-        if (isReverse && !route && nextHop != (Uint128)0)
+        if (isReverse && !route && nextHop != (ManetAddress)0)
         {
             // Gratuitous Return Path
             struct in_addr node_addr;
@@ -1164,7 +1164,7 @@ bool NS_CLASS isOurType(cPacket * msg)
     return false;
 }
 
-bool NS_CLASS getDestAddress(cPacket *msg,Uint128 &dest)
+bool NS_CLASS getDestAddress(cPacket *msg,ManetAddress &dest)
 {
     RREQ *rreq = dynamic_cast <RREQ *>(msg);
     if (!rreq)
@@ -1174,7 +1174,7 @@ bool NS_CLASS getDestAddress(cPacket *msg,Uint128 &dest)
 
 }
 #ifdef AODV_USE_STL_RT
-bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &ifaceIndex,const int &hops,const Uint128 &mask)
+bool  NS_CLASS setRoute(const ManetAddress &dest,const ManetAddress &add, const int &ifaceIndex,const int &hops,const ManetAddress &mask)
 {
     Enter_Method_Silent();
     struct in_addr destAddr;
@@ -1183,7 +1183,7 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &iface
     destAddr.s_addr = dest;
     nextAddr.s_addr = add;
     bool status=true;
-    bool delEntry = (add == (Uint128)0);
+    bool delEntry = (add == (ManetAddress)0);
 
     DEBUG(LOG_DEBUG, 0, "setRoute %s next hop %s",ip_to_str(destAddr),ip_to_str(nextAddr));
 
@@ -1203,7 +1203,7 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &iface
             aodv_socket_send((AODV_msg *) rerr, rerr_dest,RERR_CALC_SIZE(rerr),
                              1, &DEV_IFINDEX(NS_IFINDEX));
         }
-        Uint128 dest = fwd_rt->dest_addr.s_addr;
+        ManetAddress dest = fwd_rt->dest_addr.s_addr;
         AodvRtTableMap::iterator it = aodvRtTableMap.find(dest);
         if (it != aodvRtTableMap.end())
         {
@@ -1237,7 +1237,7 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &iface
 }
 
 
-bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const char  *ifaceName,const int &hops,const Uint128 &mask)
+bool  NS_CLASS setRoute(const ManetAddress &dest,const ManetAddress &add, const char  *ifaceName,const int &hops,const ManetAddress &mask)
 {
     Enter_Method_Silent();
     struct in_addr destAddr;
@@ -1247,7 +1247,7 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const char  *ifa
     nextAddr.s_addr = add;
     bool status=true;
     int index;
-    bool delEntry = (add == (Uint128)0);
+    bool delEntry = (add == (ManetAddress)0);
 
     DEBUG(LOG_DEBUG, 0, "setRoute %s next hop %s",ip_to_str(destAddr),ip_to_str(nextAddr));
     rt_table_t * fwd_rt = rt_table_find(destAddr);
@@ -1266,7 +1266,7 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const char  *ifa
             aodv_socket_send((AODV_msg *) rerr, rerr_dest,RERR_CALC_SIZE(rerr),
                              1, &DEV_IFINDEX(NS_IFINDEX));
         }
-        Uint128 dest = fwd_rt->dest_addr.s_addr;
+        ManetAddress dest = fwd_rt->dest_addr.s_addr;
         AodvRtTableMap::iterator it = aodvRtTableMap.find(dest);
         if (it != aodvRtTableMap.end())
         {
@@ -1305,7 +1305,7 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const char  *ifa
 }
 #else
 
-bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &ifaceIndex,const int &hops,const Uint128 &mask)
+bool  NS_CLASS setRoute(const ManetAddress &dest,const ManetAddress &add, const int &ifaceIndex,const int &hops,const ManetAddress &mask)
 {
     Enter_Method_Silent();
     struct in_addr destAddr;
@@ -1314,7 +1314,7 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &iface
     destAddr.s_addr = dest;
     nextAddr.s_addr = add;
     bool status=true;
-    bool delEntry = (add == (Uint128)0);
+    bool delEntry = (add == (ManetAddress)0);
 
     DEBUG(LOG_DEBUG, 0, "setRoute %s next hop %s",ip_to_str(destAddr),ip_to_str(nextAddr));
 
@@ -1361,7 +1361,7 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const int &iface
     return status;
 }
 
-bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const char  *ifaceName,const int &hops,const Uint128 &mask)
+bool  NS_CLASS setRoute(const ManetAddress &dest,const ManetAddress &add, const char  *ifaceName,const int &hops,const ManetAddress &mask)
 {
     Enter_Method_Silent();
     struct in_addr destAddr;
@@ -1371,7 +1371,7 @@ bool  NS_CLASS setRoute(const Uint128 &dest,const Uint128 &add, const char  *ifa
     nextAddr.s_addr = add;
     bool status=true;
     int index;
-    bool delEntry = (add == (Uint128)0);
+    bool delEntry = (add == (ManetAddress)0);
 
     DEBUG(LOG_DEBUG, 0, "setRoute %s next hop %s",ip_to_str(destAddr),ip_to_str(nextAddr));
     rt_table_t * fwd_rt = rt_table_find(destAddr);

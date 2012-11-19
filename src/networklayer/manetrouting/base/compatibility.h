@@ -7,7 +7,7 @@
 //#include <sys/types.h>
 //#endif
 #include <omnetpp.h>
-#include "uint128.h"
+#include "ManetAddress.h"
 
 #ifndef u_int8_t
 typedef uint8_t u_int8_t;
@@ -50,11 +50,11 @@ typedef uint32_t in_addr_t;
 //#ifdef _WIN32
 struct In_addr
 {
-    Uint128 S_addr;
+    ManetAddress S_addr;
 #undef s_addr
 #define s_addr S_addr
     In_addr(const In_addr & addr) {S_addr = addr.S_addr;}
-    In_addr() {S_addr = (Uint128) 0;}
+    In_addr() {S_addr = (ManetAddress) 0;}
     In_addr & operator=(const In_addr &other) {if (this==&other) return *this; S_addr = other.S_addr; return *this;}
 };
 

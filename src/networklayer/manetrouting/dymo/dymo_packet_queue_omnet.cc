@@ -209,7 +209,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                     if (isInMacLayer())
                     {
                         Ieee802Ctrl *ctrl = new Ieee802Ctrl();
-                        Uint128 nextHop;
+                        ManetAddress nextHop;
                         int iface;
                         double cost;
                         getNextHop(dest_addr.s_addr, nextHop, iface, cost);
@@ -365,7 +365,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
     else
         rt = rtable_find(dest_addr);
 
-    std::vector<Uint128> list;
+    std::vector<ManetAddress> list;
     if (isInMacLayer())
     {
         std::vector<MACAddress> listMac;
@@ -441,7 +441,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                             if (isInMacLayer())
                             {
                                 Ieee802Ctrl *ctrl = new Ieee802Ctrl();
-                                Uint128 nextHop;
+                                ManetAddress nextHop;
                                 int iface;
                                 double cost;
                                 getNextHop(dest_addr.s_addr, nextHop, iface, cost);

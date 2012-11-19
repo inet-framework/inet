@@ -96,8 +96,8 @@ class BatmanIf
     //uint8_t wifi_if;
     uint16_t seqno;
     bool wifi_if;
-    Uint128 address;
-    Uint128 broad;
+    ManetAddress address;
+    ManetAddress broad;
 };
 
 
@@ -106,7 +106,7 @@ class NeighNode;
 class OrigNode : public cObject
 {
   public:
-    Uint128 orig;
+    ManetAddress orig;
     uint32_t totalRec;
     NeighNode *router;
     BatmanIf* batmanIf;
@@ -133,7 +133,7 @@ class OrigNode : public cObject
 class NeighNode : public cObject
 {
   public:
-    Uint128 addr;
+    ManetAddress addr;
     uint8_t real_packet_count;
     std::vector <uint8_t> tq_recv;
     uint8_t tq_index;
@@ -148,7 +148,7 @@ class NeighNode : public cObject
     void clear();
     ~NeighNode();
     NeighNode() {clear();}
-    NeighNode(OrigNode *, OrigNode *, const Uint128 &, BatmanIf *, const uint32_t&, const uint32_t&);
+    NeighNode(OrigNode *, OrigNode *, const ManetAddress &, BatmanIf *, const uint32_t&, const uint32_t&);
     virtual std::string info() const;
 };
 
@@ -180,8 +180,8 @@ class GwNode
 class GwClient
 {
   public:
-    Uint128 wip_addr;
-    Uint128 vip_addr;
+    ManetAddress wip_addr;
+    ManetAddress vip_addr;
     uint16_t client_port;
     simtime_t last_keep_alive;
     uint8_t nat_warn;
@@ -190,7 +190,7 @@ class GwClient
 class HnaTask
 {
   public:
-    Uint128 addr;
+    ManetAddress addr;
     short unsigned int netmask;
     short unsigned int route_action;
 
@@ -201,7 +201,7 @@ class HnaTask
 class HnaLocalEntry
 {
   public:
-    Uint128 addr;
+    ManetAddress addr;
     short unsigned int netmask;
     int idIface;
 };
@@ -209,7 +209,7 @@ class HnaLocalEntry
 class HnaGlobalEntry
 {
   public:
-    Uint128 addr;
+    ManetAddress addr;
     short unsigned int netmask;
     OrigNode *curr_orig_node;
     std::vector<OrigNode *> orig_list;

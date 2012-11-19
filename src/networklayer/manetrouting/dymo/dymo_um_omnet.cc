@@ -67,7 +67,7 @@ int DYMOUM::totalRrepAckRec = 0;
 int DYMOUM::totalRerrSend = 0;
 int DYMOUM::totalRerrRec = 0;
 #endif
-std::map<Uint128,u_int32_t *> DYMOUM::mapSeqNum;
+std::map<ManetAddress,u_int32_t *> DYMOUM::mapSeqNum;
 
 void DYMOUM::initialize(int stage)
 {
@@ -797,7 +797,7 @@ void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
 }
 
 
-void DYMOUM::processMacPacket(cPacket * p, const Uint128 &dest, const Uint128 &src, int ifindex)
+void DYMOUM::processMacPacket(cPacket * p, const ManetAddress &dest, const ManetAddress &src, int ifindex)
 {
     struct in_addr dest_addr, src_addr;
     bool isLocal = false;
@@ -939,7 +939,7 @@ void DYMOUM::processPromiscuous(const cObject *details)
     IPv4Datagram * ip_msg = NULL;
     struct in_addr source;
 
-    source.s_addr = (Uint128)0;
+    source.s_addr = (ManetAddress)0;
 
     if (dynamic_cast<Ieee80211DataOrMgmtFrame *>(const_cast<cObject*> (details)))
     {
@@ -1345,7 +1345,7 @@ void DYMOUM::packetFailedMac(Ieee80211DataFrame *dgram)
 
     if (isStaticNode() && getColaborativeProtocol())
     {
-        Uint128 next;
+        ManetAddress next;
         int iface;
         double cost;
         if (getColaborativeProtocol()->getNextHop(next_hop.s_addr, next, iface, cost))
@@ -1426,16 +1426,16 @@ std::string DYMOUM::detailedInfo() const
 }
 
 
-uint32_t DYMOUM::getRoute(const Uint128 &dest, std::vector<Uint128> &add)
+uint32_t DYMOUM::getRoute(const ManetAddress &dest, std::vector<ManetAddress> &add)
 {
     return 0;
 }
 
 
-bool  DYMOUM::getNextHop(const Uint128 &dest, Uint128 &add, int &iface, double &cost)
+bool  DYMOUM::getNextHop(const ManetAddress &dest, ManetAddress &add, int &iface, double &cost)
 {
-    Uint128 destAddr = dest;
-    Uint128 apAddr;
+    ManetAddress destAddr = dest;
+    ManetAddress apAddr;
     if (getAp(dest,apAddr))
     {
         destAddr = apAddr;
@@ -1474,7 +1474,7 @@ bool DYMOUM::isProactive()
     return false;
 }
 
-void DYMOUM::setRefreshRoute(const Uint128 &destination, const Uint128 & nextHop,bool isReverse)
+void DYMOUM::setRefreshRoute(const ManetAddress &destination, const ManetAddress & nextHop,bool isReverse)
 {
     struct in_addr dest_addr, next_hop;
 
@@ -1483,11 +1483,11 @@ void DYMOUM::setRefreshRoute(const Uint128 &destination, const Uint128 & nextHop
 
     rtable_entry_t *route = NULL;
     rtable_entry_t *fwd_pre_rt = NULL;
-    Uint128 dest = destination;
-    Uint128 next = nextHop;
+    ManetAddress dest = destination;
+    ManetAddress next = nextHop;
 
     bool change = false;
-    Uint128 apAddr;
+    ManetAddress apAddr;
     if (getAp(destination,apAddr))
     {
         dest = apAddr;
@@ -1565,7 +1565,7 @@ void DYMOUM::setRefreshRoute(const Uint128 &destination, const Uint128 & nextHop
     }
     return;
     /*
-    if (isReverse && !route && nextHop!=(Uint128)0)
+    if (isReverse && !route && nextHop!=(ManetAddress)0)
     {
     // Gratuitous Return Path
 
@@ -1594,7 +1594,7 @@ bool DYMOUM::isOurType(cPacket * msg)
     return false;
 }
 
-bool DYMOUM::getDestAddress(cPacket *msg, Uint128 &dest)
+bool DYMOUM::getDestAddress(cPacket *msg, ManetAddress &dest)
 {
     RE *re = dynamic_cast <RE *>(msg);
     if (!re)
@@ -1609,17 +1609,17 @@ bool DYMOUM::getDestAddress(cPacket *msg, Uint128 &dest)
 }
 
 // Group methods, allow the anycast procedure
-int DYMOUM::getRouteGroup(const AddressGroup &gr, std::vector<Uint128> &addr)
+int DYMOUM::getRouteGroup(const AddressGroup &gr, std::vector<ManetAddress> &addr)
 {
     return 0;
 }
 
-int  DYMOUM::getRouteGroup(const Uint128& dest, std::vector<Uint128> &add, Uint128& gateway, bool &isGroup, int group)
+int  DYMOUM::getRouteGroup(const ManetAddress& dest, std::vector<ManetAddress> &add, ManetAddress& gateway, bool &isGroup, int group)
 {
     return 0;
 }
 
-bool DYMOUM::getNextHopGroup(const AddressGroup &gr, Uint128 &add, int &iface, Uint128& gw)
+bool DYMOUM::getNextHopGroup(const AddressGroup &gr, ManetAddress &add, int &iface, ManetAddress& gw)
 {
     int distance = 1000;
     for (AddressGroupConstIterator it = gr.begin(); it!=gr.end(); it++)
@@ -1644,7 +1644,7 @@ bool DYMOUM::getNextHopGroup(const AddressGroup &gr, Uint128 &add, int &iface, U
     return true;
 }
 
-bool DYMOUM::getNextHopGroup(const Uint128& dest, Uint128 &next, int &iface, Uint128& gw, bool &isGroup, int group)
+bool DYMOUM::getNextHopGroup(const ManetAddress& dest, ManetAddress &next, int &iface, ManetAddress& gw, bool &isGroup, int group)
 {
     AddressGroup gr;
     bool find = false;
@@ -1769,8 +1769,8 @@ void DYMOUM::processLocatorAssoc(const cObject *details)
 {
 #ifdef WITH_80211MESH
     LocatorNotificationInfo *infoLoc = check_and_cast<LocatorNotificationInfo*>(details);
-    Uint128 destAddr = infoLoc->getMacAddr().getInt();
-    Uint128 apAddr;
+    ManetAddress destAddr = infoLoc->getMacAddr().getInt();
+    ManetAddress apAddr;
     if (isInMacLayer())
         destAddr = infoLoc->getMacAddr().getInt();
     else
@@ -1813,7 +1813,7 @@ void DYMOUM::processLocatorDisAssoc(const cObject *details)
 {
 #ifdef WITH_80211MESH
     LocatorNotificationInfo *infoLoc = check_and_cast<LocatorNotificationInfo*>(details);
-    Uint128 destAddr = infoLoc->getMacAddr().getInt();
+    ManetAddress destAddr = infoLoc->getMacAddr().getInt();
     if (isInMacLayer())
         destAddr = infoLoc->getMacAddr().getInt();
     else

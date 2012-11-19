@@ -36,9 +36,9 @@
 
 #include "INETDefs.h"
 
-#include "uint128.h"
+#include "ManetAddress.h"
 
-typedef Uint128 nsaddr_t;
+typedef ManetAddress nsaddr_t;
 
 //#ifndef nsaddr_t
 //typedef int64_t nsaddr_t;

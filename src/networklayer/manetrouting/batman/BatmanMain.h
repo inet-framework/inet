@@ -20,7 +20,7 @@ class BatmanTimer : ManetTimer
 class Batman : public ManetRoutingBase
 {
   private:
-    typedef std::map<Uint128,OrigNode*> OrigMap;
+    typedef std::map<ManetAddress,OrigNode*> OrigMap;
     typedef std::vector<BatmanIf*> Interfacelist;
     typedef std::vector<GwNode*> Gwlist;
     typedef std::vector<ForwNode*> Forwlist;
@@ -37,7 +37,7 @@ class Batman : public ManetRoutingBase
     uint8_t routing_class;
     simtime_t originator_interval;
     simtime_t debug_timeout;
-    Uint128 pref_gateway;
+    ManetAddress pref_gateway;
 
     int nat_tool_avail;
     int8_t disable_client_nat;
@@ -78,11 +78,11 @@ class Batman : public ManetRoutingBase
 
   // methods
   private:
-    void parseIncomingPacket(Uint128 neigh, BatmanIf *if_incoming, BatmanPacket *bat_packet);
+    void parseIncomingPacket(ManetAddress neigh, BatmanIf *if_incoming, BatmanPacket *bat_packet);
     void sendPackets(const simtime_t &curr_time);
-    NeighNode *create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const Uint128 &neigh, BatmanIf *if_incoming);
-    OrigNode *get_orig_node(const Uint128 &addr );
-    void update_orig(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh, BatmanIf *if_incoming, HnaElement *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time );
+    NeighNode *create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const ManetAddress &neigh, BatmanIf *if_incoming);
+    OrigNode *get_orig_node(const ManetAddress &addr );
+    void update_orig(OrigNode *orig_node, BatmanPacket *in, const ManetAddress &neigh, BatmanIf *if_incoming, HnaElement *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time );
     void purge_orig(const simtime_t &curr_time);
     void choose_gw(void);
     void update_routes(OrigNode *orig_node, NeighNode *, HnaElement * hna_recv_buff, int16_t hna_buff_len);
@@ -90,13 +90,13 @@ class Batman : public ManetRoutingBase
     void update_gw_list(OrigNode *orig_node, uint8_t new_gwflags, uint16_t gw_port);
     unsigned char get_gw_class(int down, int up);
     int isBidirectionalNeigh(OrigNode *orig_node, OrigNode *orig_neigh_node, BatmanPacket *in, const simtime_t &recv_time, BatmanIf *if_incoming);
-    uint8_t count_real_packets(BatmanPacket *in, const Uint128 &neigh, BatmanIf *if_incoming);
+    uint8_t count_real_packets(BatmanPacket *in, const ManetAddress &neigh, BatmanIf *if_incoming);
     void schedule_own_packet(BatmanIf *batman_if);
-    void schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, const Uint128 &neigh, uint8_t directlink, int16_t hna_buff_len, BatmanIf *if_incoming, const simtime_t &curr_time);
+    void schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, const ManetAddress &neigh, uint8_t directlink, int16_t hna_buff_len, BatmanIf *if_incoming, const simtime_t &curr_time);
     void appendPacket(cPacket *oldPacket, cPacket * packetToAppend);
     void send_outstanding_packets(const simtime_t &);
-    int8_t send_udp_packet(cPacket *, int32_t, const Uint128 &, int32_t send_sock, BatmanIf *batman_if);
-    void hna_local_task_add_ip(const Uint128 &ip_addr, uint16_t netmask, uint8_t route_action);
+    int8_t send_udp_packet(cPacket *, int32_t, const ManetAddress &, int32_t send_sock, BatmanIf *batman_if);
+    void hna_local_task_add_ip(const ManetAddress &ip_addr, uint16_t netmask, uint8_t route_action);
     void hna_local_buffer_fill(void);
     void hna_local_task_exec(void);
     void hna_local_update_routes(HnaLocalEntry *hna_local_entry, int8_t route_action);
@@ -114,8 +114,8 @@ class Batman : public ManetRoutingBase
     uint8_t ring_buffer_avg(std::vector<uint8_t> &tq_recv);
 
     // Routing table modification
-    void add_del_route(const Uint128  &, uint8_t netmask, const Uint128  &, int32_t, InterfaceEntry *dev, uint8_t rt_table, int8_t route_type, int8_t route_action);
-    void add_del_rule(const Uint128& network, uint8_t netmask, int8_t rt_table, uint32_t prio, InterfaceEntry *dev, int8_t rule_type, int8_t rule_action);
+    void add_del_route(const ManetAddress  &, uint8_t netmask, const ManetAddress  &, int32_t, InterfaceEntry *dev, uint8_t rt_table, int8_t route_type, int8_t route_action);
+    void add_del_rule(const ManetAddress& network, uint8_t netmask, int8_t rt_table, uint32_t prio, InterfaceEntry *dev, int8_t rule_type, int8_t rule_action);
     int add_del_interface_rules(int8_t rule_action);
 
     //
@@ -157,9 +157,9 @@ class Batman : public ManetRoutingBase
   public:
     Batman();
     ~Batman();
-    virtual uint32_t getRoute(const Uint128 &, std::vector<Uint128> &add);
-    virtual bool getNextHop(const Uint128 &, Uint128 &add, int &iface, double &val);
-    virtual void setRefreshRoute(const Uint128 &destination, const Uint128 & nextHop, bool isReverse) {};
+    virtual uint32_t getRoute(const ManetAddress &, std::vector<ManetAddress> &add);
+    virtual bool getNextHop(const ManetAddress &, ManetAddress &add, int &iface, double &val);
+    virtual void setRefreshRoute(const ManetAddress &destination, const ManetAddress & nextHop, bool isReverse) {};
     virtual bool isProactive() {return true;};
     virtual bool isOurType(cPacket * msg)
     {
@@ -171,7 +171,7 @@ class Batman : public ManetRoutingBase
             return false;
     };
 
-    virtual bool getDestAddress(cPacket *, Uint128 &) {return false;};
+    virtual bool getDestAddress(cPacket *, ManetAddress &) {return false;};
 };
 
 
