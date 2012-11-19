@@ -6,14 +6,14 @@
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c DSRUU -r 0,                  100s,            ad28-1605
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c OLSR -r 0,                   20s,             0d0f-9c30
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c DSDV_2 -r 0,                 10s,             3b54-f14c
-/examples/manetrouting/fg80211/,     -f omnetpp.ini -c Batman -r 0,                 10s,             0d82-8d15
+/examples/manetrouting/fg80211/,     -f omnetpp.ini -c Batman -r 0,                 10s,             4206-f8aa
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c General -r 0,                10s,             0ebe-c4d1
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DYMO -r 0,                   10s,             f834-c608
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DYMOUM -r 0,                 10s,             c609-6aa3
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DSRUU -r 0,                  10s,             f83f-5148
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c OLSR -r 0,                   10s,             cdec-2b52
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DSDV_2 -r 0,                 5s,              59af-0ac0
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c Batman -r 0,                 10s,             0568-9675
+/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c Batman -r 0,                 10s,             1b24-37ef
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c General -r 0,                40s,             1743-53be
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0,                 100s,            1bc1-43a7
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMO -r 0,                   100s,            8fb7-d199
@@ -29,4 +29,4 @@
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c OLSR -r 0,                   10s,             6fbb-3dd9
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c DSDV_2 -r 0,                 3s,              1d43-4971
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c DYMO -r 0,                   10s,             cc58-905d
-/examples/manetrouting/net80211_control/, -f omnetpp.ini -c Batman -r 0,                 10s,             5330-94ac
+/examples/manetrouting/net80211_control/, -f omnetpp.ini -c Batman -r 0,                 10s,             40e7-047b
