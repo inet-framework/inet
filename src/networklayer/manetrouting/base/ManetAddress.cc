@@ -53,6 +53,8 @@ IPv4Address ManetAddress::getIPv4() const
 {
     if (addrType == IPv4_ADDRESS)
         return _getIPv4();
+    if (addrType == UNDEFINED)
+        return IPv4Address::UNSPECIFIED_ADDRESS;
     throw cRuntimeError("ManetAddress is not an IPv4Address");
 }
 
@@ -60,6 +62,8 @@ IPv6Address ManetAddress::getIPv6() const
 {
     if (addrType == IPv6_ADDRESS)
         return _getIPv6();
+    if (addrType == UNDEFINED)
+        return IPv6Address::UNSPECIFIED_ADDRESS;
     throw cRuntimeError("ManetAddress is not an IPv6Address");
 }
 
@@ -69,6 +73,8 @@ IPvXAddress ManetAddress::getIPvX() const
         return IPvXAddress(_getIPv4());
     if (addrType == IPv6_ADDRESS)
         return IPvXAddress(_getIPv6());
+    if (addrType == UNDEFINED)
+        return IPvXAddress(IPv4Address::UNSPECIFIED_ADDRESS);
     throw cRuntimeError("ManetAddress is not an IPvXAddress");
 }
 
@@ -76,6 +82,8 @@ MACAddress ManetAddress::getMAC() const
 {
     if (addrType == MAC_ADDRESS)
         return _getMAC();
+    if (addrType == UNDEFINED)
+        return MACAddress::UNSPECIFIED_ADDRESS;
     throw cRuntimeError("ManetAddress is not a MACAddress");
 }
 
