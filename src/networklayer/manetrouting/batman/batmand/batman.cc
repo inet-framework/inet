@@ -350,7 +350,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElemen
 
         /* route changed */
         } else {
-            debug_output(4), "Route changed\n";
+            debug_output(4) << "Route changed\n";
 
             /* add new route */
             add_del_route(orig_node->orig, 32, neigh_node->addr,
