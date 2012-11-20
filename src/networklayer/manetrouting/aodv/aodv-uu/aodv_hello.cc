@@ -206,7 +206,7 @@ void NS_CLASS hello_send(void *arg)
 
 #endif
             }
-            dest.s_addr = AODV_BROADCAST;
+            dest.s_addr = ManetAddress(IPv4Address(AODV_BROADCAST));
 #ifdef OMNETPP
             rrep->ttl=1;
             aodv_socket_send((AODV_msg *) rrep, dest, msg_size, 1, &DEV_NR(i),delay);
@@ -306,7 +306,7 @@ void NS_CLASS hello_process(RREP * hello, int rreplen, unsigned int ifindex)
             for (i = 0; i < ext->length; i = i + 4)
             {
                 ext_neighbor.s_addr =
-                    *(in_addr_t *) ((char *) AODV_EXT_DATA(ext) + i);
+                        ManetAddress(IPv4Address(*(in_addr_t *) ((char *) AODV_EXT_DATA(ext) + i)));
 
                 if (ext_neighbor.s_addr == DEV_IFINDEX(ifindex).ipaddr.s_addr)
                     flags &= ~RT_UNIDIR;

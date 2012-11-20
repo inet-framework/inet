@@ -148,7 +148,7 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const ManetAddre
         /* if the node is not our current gateway and
            we have preferred gateray disabled and a better tq value or we found our preferred gateway */
         if ((curr_gateway->orig_node != orig_node) &&
-                   (((pref_gateway == 0) && (orig_node->router->tq_avg > curr_gateway->orig_node->router->tq_avg)) || (pref_gateway == orig_node->orig))) {
+                   ((pref_gateway.isUnspecified() && (orig_node->router->tq_avg > curr_gateway->orig_node->router->tq_avg)) || (pref_gateway == orig_node->orig))) {
             /* it is our preferred gateway or we have fast switching or the tq is $routing_class better than our old tq */
             if ((pref_gateway == orig_node->orig) || (routing_class == 3) || (orig_node->router->tq_avg - curr_gateway->orig_node->router->tq_avg >= routing_class)) {
                 gw_node = NULL;
@@ -321,7 +321,7 @@ void OrigNode::clear()
 std::string OrigNode::info() const
 {
     std::stringstream out;
-    out << "orig:"  << IPv4Address(orig.getLo()) << "  ";
+    out << "orig:"  << orig << "  ";
     out << "totalRec:"  << totalRec << "  ";
     if (bcast_own[0])
       out << "bcast_own:" << bcast_own[0]<< "  ";
@@ -352,7 +352,7 @@ std::string OrigNode::info() const
 
     for (unsigned int i = 0; i < neigh_list.size(); i++)
     {
-        out << "list neig :" << IPv4Address(neigh_list[i]->addr.getLo()) << " ";
+        out << "list neig :" << neigh_list[i]->addr << " ";
     }
 
     out << "\n router info:"; if (router==NULL) out << "*  "; else out << router->info() << "  ";
@@ -362,14 +362,14 @@ std::string OrigNode::info() const
 std::string NeighNode::info() const
 {
     std::stringstream out;
-    out << "addr:"  << IPv4Address(addr.getLo()) << "  ";
+    out << "addr:"  << addr << "  ";
     out << "real_packet_count:" << real_packet_count<< "  ";
     out <<  "last_ttl:" << last_ttl<< "  ";
     out <<  "num_hops:" << num_hops<< "  ";
     out <<  "last_valid:" << last_valid<< "  ";            /* when last packet via this neighbour was received */
     out <<  "real_bits:" << real_bits[0]<< "  ";
-    out <<  "orig_node :" << IPv4Address(orig_node->orig.getLo())<< "  ";
-    out <<  "owner_node :" << IPv4Address(owner_node->orig.getLo())<< "  ";
+    out <<  "orig_node :" << orig_node->orig << "  ";
+    out <<  "owner_node :" << owner_node->orig << "  ";
     return out.str();
 }
 /*
@@ -414,7 +414,7 @@ OrigNode::~OrigNode()
 
 void NeighNode::clear()
 {
-    addr = (ManetAddress)0;
+    addr = ManetAddress::ZERO;
     real_packet_count = 0;
     for (unsigned int i=0; i<tq_recv.size(); i++)
          tq_recv[i] = 0;

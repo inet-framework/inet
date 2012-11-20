@@ -149,9 +149,9 @@ class DYMOUM : public ManetRoutingBase
     long proactive_rreq_timeout;
     bool isBroadcast (ManetAddress add)
     {
-        if (this->isInMacLayer() && add == MACAddress::BROADCAST_ADDRESS.getInt())
+        if (this->isInMacLayer() && add.getMAC() == MACAddress::BROADCAST_ADDRESS)
              return true;
-        if (!this->isInMacLayer() && add == IPv4Address::ALLONES_ADDRESS.getInt())
+        if (!this->isInMacLayer() && add.getIPv4() == IPv4Address::ALLONES_ADDRESS)
             return true;
         return false;
     }

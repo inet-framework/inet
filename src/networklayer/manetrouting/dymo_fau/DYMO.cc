@@ -128,7 +128,7 @@ void DYMO::initialize(int aStage)
 
         registerRoutingModule();
         // setSendToICMP(true);
-        myAddr = getAddress().toUint();
+        myAddr = getAddress().getIPv4().getInt();   //FIXME
         linkLayerFeeback();
         timerMsg = new cMessage("DYMO_scheduler");
     }
@@ -242,7 +242,7 @@ void DYMO::handleMessage(cMessage* apMsg)
             msg_aux = udpPacket->decapsulate();
 
             IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(udpPacket->removeControlInfo());
-            if (isLocalAddress(controlInfo->getSrcAddr().getInt()) || controlInfo->getSrcAddr().isUnspecified())
+            if (isLocalAddress(ManetAddress(controlInfo->getSrcAddr())) || controlInfo->getSrcAddr().isUnspecified())
             {
                 // local address delete packet
                 delete msg_aux;
@@ -971,7 +971,7 @@ simtime_t DYMO::computeBackoff(simtime_t backoff_var)
 
 void DYMO::updateRouteLifetimes(const ManetAddress& targetAddr)
 {
-    DYMO_RoutingEntry* entry = dymo_routingTable->getForAddress(IPv4Address(targetAddr.toUint()));
+    DYMO_RoutingEntry* entry = dymo_routingTable->getForAddress(targetAddr.getIPv4());
     if (!entry) return;
 
     // TODO: not specified in draft, but seems to make sense

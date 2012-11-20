@@ -266,7 +266,7 @@ void Batman::hna_local_update_routes(HnaLocalEntry *hna_local_entry, int8_t rout
     //add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_HOSTS, ROUTE_TYPE_THROW, route_action);
     //add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_UNREACH, ROUTE_TYPE_THROW, route_action);
     //add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_TUNNEL, ROUTE_TYPE_THROW, route_action);
-    add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, NULL, BATMAN_RT_TABLE_TUNNEL, ROUTE_TYPE_THROW, route_action);
+    add_del_route(hna_local_entry->addr, hna_local_entry->netmask, ManetAddress::ZERO, 0, NULL, BATMAN_RT_TABLE_TUNNEL, ROUTE_TYPE_THROW, route_action);
 
     /* do not NAT HNA networks automatically */
     //hna_local_update_nat(hna_local_entry->addr, hna_local_entry->netmask, route_action);

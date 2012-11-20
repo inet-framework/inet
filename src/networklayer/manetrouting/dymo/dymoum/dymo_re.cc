@@ -569,7 +569,7 @@ void NS_CLASS __re_send(RE *re)
     // If it is a RREQ
     if (re->a)
     {
-        dest_addr.s_addr = DYMO_BROADCAST;
+        dest_addr.s_addr = ManetAddress(IPv4Address(DYMO_BROADCAST));
 
         // Queue the new RE
 
@@ -653,7 +653,7 @@ void NS_CLASS re_send_rreq(struct in_addr dest_addr, u_int32_t seqnum,
     dlog(LOG_DEBUG, 0, __FUNCTION__, "sending RREQ to find %s",
          ip2str(dest_addr.s_addr));
 
-    bcast_addr.s_addr = DYMO_BROADCAST;
+    bcast_addr.s_addr = ManetAddress(IPv4Address(DYMO_BROADCAST));
 
     INC_SEQNUM(this_host.seqnum);
     for (i = 0; i < DYMO_MAX_NR_INTERFACES; i++)
@@ -697,7 +697,7 @@ void NS_CLASS re_forward_rreq_path_acc(RE *rreq, int blindex)
     dlog(LOG_DEBUG, 0, __FUNCTION__, "forwarding RREQ to find %s",
          ip2str(rreq->target_addr));
 
-    bcast_addr.s_addr = DYMO_BROADCAST;
+    bcast_addr.s_addr = ManetAddress(IPv4Address(DYMO_BROADCAST));
 
 #ifdef OMNETPP
 
@@ -802,10 +802,7 @@ void NS_CLASS re_intermediate_rrep (struct in_addr src_addr,struct in_addr dest_
 {
     /** create a new RREP and send it to given destination **/
 #ifdef OMNETPP
-    if (isInMacLayer())
-        ev << "sending a reply to OrigNode " <<  MACAddress(src_addr.s_addr.getLo()) << endl;
-    else
-        ev << "sending a reply to OrigNode " <<  IPv4Address(src_addr.s_addr.getLo()) << endl;
+    ev << "sending a reply to OrigNode " <<  src_addr.s_addr << endl;
 #endif
     rtable_entry_t *rev_rt  = rtable_find(src_addr);
 

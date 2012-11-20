@@ -33,9 +33,9 @@ int8_t Batman::send_udp_packet(cPacket *packet_buff, int32_t packet_buff_len, co
         return 0;
     }
     if (batman_if)
-        sendToIp(packet_buff, BATMAN_PORT, destAdd, BATMAN_PORT, 1, par("broadcastDelay").doubleValue(), ManetAddress(batman_if->dev->ipv4Data()->getIPAddress().getInt()));
+        sendToIp(packet_buff, BATMAN_PORT, destAdd, BATMAN_PORT, 1, par("broadcastDelay").doubleValue(), ManetAddress(batman_if->dev->ipv4Data()->getIPAddress()));
     else
-        sendToIp(packet_buff, BATMAN_PORT, destAdd, BATMAN_PORT, 1, par("broadcastDelay").doubleValue(), (ManetAddress)0);
+        sendToIp(packet_buff, BATMAN_PORT, destAdd, BATMAN_PORT, 1, par("broadcastDelay").doubleValue(), ManetAddress::ZERO);
     return 0;
 }
 
@@ -60,10 +60,10 @@ void Batman::add_del_route(const ManetAddress &dest, uint8_t netmask, const Mane
     if (index < 0)
         return;
 
-    ManetAddress nmask = IPv4Address::makeNetmask(netmask).getInt();
+    ManetAddress nmask(IPv4Address::makeNetmask(netmask));
     if (route_action==ROUTE_DEL)
     {
-       setRoute(dest, 0, index, 0, nmask);
+       setRoute(dest, ManetAddress::ZERO, index, 0, nmask);
        return;
     }
 
@@ -87,11 +87,11 @@ int Batman::add_del_interface_rules(int8_t rule_action)
         if (ifr->isDown())
             continue;
 
-        ManetAddress addr = ifr->ipv4Data()->getIPAddress().getInt();
-        ManetAddress netmask = ifr->ipv4Data()->getNetmask().getInt();
+        ManetAddress addr(ifr->ipv4Data()->getIPAddress());
+        ManetAddress netmask(ifr->ipv4Data()->getNetmask());
         uint8_t mask = ifr->ipv4Data()->getNetmask().getNetmaskLength();
 
-        ManetAddress netaddr = addr&netmask;
+        ManetAddress netaddr(ifr->ipv4Data()->getIPAddress(), mask);// addr&netmask;
         BatmanIf *batman_if;
 
         ManetAddress ZERO;
@@ -103,7 +103,7 @@ int Batman::add_del_interface_rules(int8_t rule_action)
         add_del_rule(netaddr, mask, BATMAN_RT_TABLE_TUNNEL, (rule_action == RULE_DEL ? 0 : BATMAN_RT_PRIO_TUNNEL + if_count), 0, RULE_TYPE_SRC, rule_action);
 
         if (ifr->isLoopback())
-            add_del_rule(0, 0, BATMAN_RT_TABLE_TUNNEL, BATMAN_RT_PRIO_TUNNEL, ifr, RULE_TYPE_IIF, rule_action);
+            add_del_rule(ManetAddress::ZERO, 0, BATMAN_RT_TABLE_TUNNEL, BATMAN_RT_PRIO_TUNNEL, ifr, RULE_TYPE_IIF, rule_action);
         if_count++;
     }
 

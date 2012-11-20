@@ -104,7 +104,7 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
     struct in_addr rerr_unicast_dest;
     int i;
 
-    rerr_unicast_dest.s_addr = 0;
+    rerr_unicast_dest.s_addr = ManetAddress::ZERO;
 
     if (!rt)
         return;
@@ -175,14 +175,14 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
                 {
                     /* Decide whether new precursors make this a non unicast RERR */
                     rerr_add_udest(rerr, rt_u->dest_addr, rt_u->dest_seqno);
-                    if (rerr_unicast_dest.s_addr != 0)
+                    if (!rerr_unicast_dest.s_addr.isUnspecified())
                     {
                         for (unsigned int i = 0; i< rt_u->precursors.size(); i++)
                         {
                             precursor_t pr = rt_u->precursors[i];
                             if (pr.neighbor.s_addr != rerr_unicast_dest.s_addr)
                             {
-                                rerr_unicast_dest.s_addr = 0;
+                                rerr_unicast_dest.s_addr = ManetAddress::ZERO;
                                 break;
                             }
                         }
@@ -200,7 +200,7 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
 
         rt_u = rt_table_find(rerr_unicast_dest);
 
-        if (rt_u && rerr->dest_count == 1 && (rerr_unicast_dest.s_addr!=0))
+        if (rt_u && rerr->dest_count == 1 && (!rerr_unicast_dest.s_addr.isUnspecified()))
             aodv_socket_send((AODV_msg *) rerr,
                              rerr_unicast_dest,
                              RERR_CALC_SIZE(rerr), 1,
@@ -219,7 +219,7 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
                 struct in_addr dest;
                 if (!DEV_NR(i).enabled)
                     continue;
-                dest.s_addr = AODV_BROADCAST;
+                dest.s_addr = ManetAddress(IPv4Address(AODV_BROADCAST));
                 if (cont>1)
                     aodv_socket_send((AODV_msg *) rerr->dup(), dest,
                                      RERR_CALC_SIZE(rerr), 1, &DEV_NR(i),delay);

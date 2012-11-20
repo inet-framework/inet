@@ -192,7 +192,7 @@ void NS_CLASS rrep_send(RREP * rrep, rt_table_t * rev_rt,
     if (!omnet_exist_rte (rev_rt->next_hop))
     {
         struct in_addr nm;
-        nm.s_addr = IPv4Address::ALLONES_ADDRESS.getInt();
+        nm.s_addr = ManetAddress(IPv4Address::ALLONES_ADDRESS);
         if (useIndex)
             omnet_chg_rte(rev_rt->next_hop,rev_rt->next_hop, nm, 1,false,rev_rt->ifindex);
         else
@@ -510,7 +510,7 @@ void NS_CLASS rrep_process(RREP * rrep, int rreplen, struct in_addr ip_src,
                 u_int8_t rerr_flags = 0;
                 struct in_addr dest;
 
-                dest.s_addr = AODV_BROADCAST;
+                dest.s_addr = ManetAddress(IPv4Address(AODV_BROADCAST));
                 rerr_flags |= RERR_NODELETE;
 
 #ifdef OMNETPP

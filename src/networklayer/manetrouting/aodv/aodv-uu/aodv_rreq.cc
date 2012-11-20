@@ -133,7 +133,7 @@ void NS_CLASS rreq_send(struct in_addr dest_addr, u_int32_t dest_seqno,
     RREQ *rreq;
     struct in_addr dest;
     int i;
-    dest.s_addr = AODV_BROADCAST;
+    dest.s_addr = ManetAddress(IPv4Address(AODV_BROADCAST));
     /* Check if we should force the gratuitous flag... (-g option). */
     if (rreq_gratuitous)
         flags |= RREQ_GRATUITOUS;
@@ -167,7 +167,7 @@ void NS_CLASS rreq_forward(RREQ * rreq, int size, int ttl)
     struct in_addr dest, orig;
     int i;
 
-    dest.s_addr = AODV_BROADCAST;
+    dest.s_addr = ManetAddress(IPv4Address(AODV_BROADCAST));
     orig.s_addr = rreq->orig_addr;
 
     /* FORWARD the RREQ if the TTL allows it. */
@@ -253,7 +253,7 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
     /* Ignore RREQ's that originated from this node. Either we do this
        or we buffer our own sent RREQ's as we do with others we
        receive. */
-    ifaddr = DEV_IFINDEX(ifindex).ipaddr.s_addr.toUint();
+    ifaddr = DEV_IFINDEX(ifindex).ipaddr.s_addr.getIPv4().getInt();
 #ifndef OMNETPP
     if (rreq_orig.s_addr == DEV_IFINDEX(ifindex).ipaddr.s_addr)
         return;
@@ -841,9 +841,9 @@ void NS_CLASS  rreq_proactive (void *arg)
     if (!isRoot)
          return;
     if (this->isInMacLayer())
-         dest.s_addr= MACAddress::BROADCAST_ADDRESS.getInt();
+         dest.s_addr= ManetAddress(MACAddress::BROADCAST_ADDRESS);
     else
-         dest.s_addr= IPv4Address::ALLONES_ADDRESS.getInt();
+         dest.s_addr= ManetAddress(IPv4Address::ALLONES_ADDRESS);
     rreq_send(dest,0,NET_DIAMETER, RREQ_DEST_ONLY);
     timer_set_timeout(&proactive_rreq_timer, proactive_rreq_timeout);
 }

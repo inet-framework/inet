@@ -473,7 +473,7 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
     entry->rt_is_gw     = is_gw;
     entry->rt_is_used   = 0;
     entry->rt_state     = RT_VALID;
-    netmask.s_addr      = 0;
+    netmask.s_addr      = ManetAddress::ZERO;
     entry->rt_dest_addr.s_addr  = dest_addr.s_addr;
     entry->rt_nxthop_addr.s_addr    = nxthop_addr.s_addr;
     entry->cost         = cost;
@@ -492,7 +492,7 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
     dymoRoutingTable->insert(std::make_pair(dest_addr.s_addr,entry));
     /* Add route to omnet inet routing table ... */
     //netmask.s_addr = IPv4Address((uint32_t)nxthop_addr.s_addr).getNetworkMask().getInt();
-    netmask.s_addr = IPv4Address::ALLONES_ADDRESS.getInt();
+    netmask.s_addr.set(IPv4Address::ALLONES_ADDRESS);
     if (useIndex)
         omnet_chg_rte(dest_addr, nxthop_addr, netmask, hopcnt,false,ifindex);
     else
@@ -553,7 +553,7 @@ rtable_entry_t *NS_CLASS rtable_update(rtable_entry_t *entry,
     struct in_addr netmask;
     /* Add route to omnet inet routing table ... */
     //netmask.s_addr = IPv4Address((uint32_t)nxthop_addr.s_addr).getNetworkMask().getInt();
-    netmask.s_addr = IPv4Address::ALLONES_ADDRESS.getInt();
+    netmask.s_addr.set(IPv4Address::ALLONES_ADDRESS);
     if (useIndex)
         omnet_chg_rte(dest_addr, nxthop_addr, netmask, hopcnt,false,ifindex);
     else
@@ -601,7 +601,7 @@ void NS_CLASS rtable_delete(rtable_entry_t *entry)
 
     struct in_addr netmask;
     /* delete route in the omnet inet routing table ... */
-    netmask.s_addr = IPv4Address::ALLONES_ADDRESS.getInt();
+    netmask.s_addr.set(IPv4Address::ALLONES_ADDRESS);
     omnet_chg_rte(entry->rt_dest_addr,entry->rt_nxthop_addr, netmask,0,true);
     timer_remove(&entry->rt_deltimer);
     timer_remove(&entry->rt_validtimer);
@@ -627,7 +627,7 @@ void NS_CLASS rtable_invalidate(rtable_entry_t *entry)
 
     struct in_addr netmask;
     /* delete route in the omnet inet routing table ... */
-    netmask.s_addr = IPv4Address::ALLONES_ADDRESS.getInt();
+    netmask.s_addr.set(IPv4Address::ALLONES_ADDRESS);
     omnet_chg_rte(entry->rt_dest_addr,entry->rt_nxthop_addr, netmask, 0,true);
     entry->rt_state = RT_INVALID;
 

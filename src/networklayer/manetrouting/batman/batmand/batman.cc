@@ -265,7 +265,7 @@ void Batman::choose_gw(void)
         if (tmp_gw_factor > max_gw_factor)
             max_gw_factor = tmp_gw_factor;
 
-        if ((pref_gateway != 0) && (pref_gateway == gw_node->orig_node->orig)) {
+        if ((!pref_gateway.isUnspecified()) && (pref_gateway == gw_node->orig_node->orig)) {
             tmp_curr_gw = gw_node;
 
 //            addr_to_string(tmp_curr_gw->orig_node->orig, orig_str, ADDR_STR_LEN);
@@ -385,7 +385,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElemen
         }
         else
         {
-            if (next.getLo() != IPv4Address::ALLONES_ADDRESS.getInt())
+            if (next.getIPv4() != IPv4Address::ALLONES_ADDRESS)
                 add_del_route(orig_node->orig, 32, next, orig_node->batmanIf->if_index,
                       orig_node->batmanIf->dev, BATMAN_RT_TABLE_HOSTS, ROUTE_TYPE_UNICAST, ROUTE_DEL);
         }
@@ -756,7 +756,7 @@ int8_t batman(void)
 void Batman::parseIncomingPacket(ManetAddress neigh, BatmanIf *if_incoming, BatmanPacket *bat_packet)
 {
     OrigNode *orig_neigh_node, *orig_node;
-    IPv4Address srcAddr(neigh.getLo());
+    IPv4Address srcAddr(neigh.getIPv4());
     simtime_t curr_time;
     HnaElement *hna_recv_buff;
     //char orig_str[ADDR_STR_LEN], neigh_str[ADDR_STR_LEN], ifaddr_str[ADDR_STR_LEN], prev_sender_str[ADDR_STR_LEN];
@@ -773,10 +773,7 @@ void Batman::parseIncomingPacket(ManetAddress neigh, BatmanIf *if_incoming, Batm
         for ( ; bat_packet; bat_packet = next_packet ? check_and_cast<BatmanPacket*>(next_packet) : NULL) {
             next_packet = bat_packet->decapsulate();
 
-            if (isInMacLayer())
-                EV << "packet receive from :" << MACAddress(bat_packet->getOrig().getLo()) << endl;
-            else
-                EV << "packet receive from :" << IPv4Address(bat_packet->getOrig().getLo()) << endl;
+            EV << "packet receive from :" << bat_packet->getOrig() << endl;
 
             /* network to host order for our 16bit seqno */
             //bat_packet->seqno = ntohs(bat_packet->seqno);
@@ -788,7 +785,11 @@ void Batman::parseIncomingPacket(ManetAddress neigh, BatmanIf *if_incoming, Batm
 
             has_directlink_flag = (bat_packet->getFlags() & DIRECTLINK ? 1 : 0);
 
-            debug_output(4) << "Received BATMAN packet via NB: " << IPv4Address(neigh.getLo()) << ", IF: " << if_incoming->dev << " (from OG: " << IPv4Address(bat_packet->getOrig().getLo()) << ", via old OG: " << IPv4Address(bat_packet->getPrevSender().getLo()) << ", seqno " << bat_packet->getSeqNumber() << ", tq " << (unsigned)(bat_packet->getTq()) << ", TTL " << (unsigned)(bat_packet->getTtl()) << ", V " << (unsigned)(bat_packet->getVersion()) << ", IDF " << (unsigned)(has_directlink_flag) << ")\n";
+            debug_output(4) << "Received BATMAN packet via NB: " << neigh << ", IF: " << if_incoming->dev
+                    << " (from OG: " << bat_packet->getOrig() << ", via old OG: " << bat_packet->getPrevSender()
+                    << ", seqno " << bat_packet->getSeqNumber() << ", tq " << (unsigned)(bat_packet->getTq())
+                    << ", TTL " << (unsigned)(bat_packet->getTtl()) << ", V " << (unsigned)(bat_packet->getVersion())
+                    << ", IDF " << (unsigned)(has_directlink_flag) << ")\n";
 
             hna_buff_len = bat_packet->getHnaMsgArraySize() * BATMAN_HNA_MSG_SIZE;
             unsigned int  hnaLen = bat_packet->getHnaMsgArraySize();
@@ -833,7 +834,7 @@ void Batman::parseIncomingPacket(ManetAddress neigh, BatmanIf *if_incoming, Batm
             if (is_my_orig) {
                 orig_neigh_node = get_orig_node(neigh);
                 bool sameIf = false;
-                if (if_incoming->dev->ipv4Data()->getIPAddress().getInt() == bat_packet->getOrig().getLo())
+                if (if_incoming->dev->ipv4Data()->getIPAddress() == bat_packet->getOrig().getIPv4())
                     sameIf = true;
 
                 if ((has_directlink_flag) && (sameIf) && (bat_packet->getSeqNumber() - if_incoming->seqno + 2 == 0)) {

@@ -333,8 +333,7 @@ std::string DYMO_element::detailedInfo() const
 
     if (re_type)
     {
-        IPv4Address addr = IPv4Address(re_type->target_addr.getLo());
-        out << " target :" << addr <<"  " << addr.getInt() <<"\n";
+        out << " target :" << re_type->target_addr <<"\n";
         for (int i = 0; i < re_type->numBlocks(); i++)
         {
             out << " --------------- block : " <<  i << "------------------ \n";
@@ -342,19 +341,16 @@ std::string DYMO_element::detailedInfo() const
             out << "prefix : " <<re_type->re_blocks[i].prefix<< "\n";
             out << "res : " <<re_type->re_blocks[i].res<< "\n";
             out << "re_hopcnt : " <<re_type->re_blocks[i].re_hopcnt<< "\n";
-            IPv4Address addr = IPv4Address(re_type->re_blocks[i].re_node_addr.getLo());
-            out << "re_node_addr : " << addr << "  " << addr.getInt() << "\n";
+            out << "re_node_addr : " << re_type->re_blocks[i].re_node_addr << "\n";
             out << "re_node_seqnum : " << re_type->re_blocks[i].re_node_seqnum << "\n";
         }
     }
     else if (rerr_type)
     {
-        IPv4Address naddr(notify_addr.toUint());
-        out << " Notify address " << naddr << "\n"; // Khmm
+        out << " Notify address " << notify_addr << "\n"; // Khmm
         for (int i = 0; i < rerr_type->numBlocks(); i++)
         {
-            IPv4Address addr = IPv4Address(rerr_type->rerr_blocks[i].unode_addr.getLo());
-            out << "unode_addr : " <<addr << "\n";
+            out << "unode_addr : " << rerr_type->rerr_blocks[i].unode_addr << "\n";
             out << "unode_seqnum : " << rerr_type->rerr_blocks[i].unode_seqnum << "\n";
         }
     }

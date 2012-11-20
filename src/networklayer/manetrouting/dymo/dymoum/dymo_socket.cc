@@ -346,9 +346,9 @@ void NS_CLASS dymo_socket_send(struct in_addr dest_addr, struct dev_info *dev,do
 #else
 
     ManetAddress destAdd;
-    if (dest_addr.s_addr == DYMO_BROADCAST)
+    if (dest_addr.s_addr == ManetAddress(IPv4Address(DYMO_BROADCAST)))
     {
-        destAdd = IPv4Address::ALLONES_ADDRESS.getInt();
+        destAdd.set(IPv4Address::ALLONES_ADDRESS);
         if (delay>0)
         {
             if (useIndex)

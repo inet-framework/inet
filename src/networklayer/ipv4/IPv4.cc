@@ -800,8 +800,8 @@ void IPv4::sendRouteUpdateMessageToManet(IPv4Datagram *datagram)
     {
         ControlManetRouting *control = new ControlManetRouting();
         control->setOptionCode(MANET_ROUTE_UPDATE);
-        control->setSrcAddress(datagram->getSrcAddress().getInt());
-        control->setDestAddress(datagram->getDestAddress().getInt());
+        control->setSrcAddress(ManetAddress(datagram->getSrcAddress()));
+        control->setDestAddress(ManetAddress(datagram->getDestAddress()));
         sendToManet(control);
     }
 }
@@ -816,8 +816,8 @@ void IPv4::sendNoRouteMessageToManet(IPv4Datagram *datagram)
     {
         ControlManetRouting *control = new ControlManetRouting();
         control->setOptionCode(MANET_ROUTE_NOROUTE);
-        control->setSrcAddress(datagram->getSrcAddress().getInt());
-        control->setDestAddress(datagram->getDestAddress().getInt());
+        control->setSrcAddress(ManetAddress(datagram->getSrcAddress()));
+        control->setDestAddress(ManetAddress(datagram->getDestAddress()));
         control->encapsulate(datagram);
         sendToManet(control);
     }

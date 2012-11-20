@@ -364,7 +364,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
 
     if (verdict == PQ_ENC_SEND)
     {
-        gw_addr.s_addr =   gateWayAddress->getInt();
+        gw_addr.s_addr = ManetAddress(*gateWayAddress);
         rt = rt_table_find(gw_addr);
     }
     else
@@ -374,20 +374,20 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
     if (isInMacLayer())
     {
         std::vector<MACAddress> listMac;
-        getApList(MACAddress(dest_addr.s_addr.getLo()),listMac);
+        getApList(dest_addr.s_addr.getMAC(),listMac);
         while (!listMac.empty())
         {
-            list.push_back(listMac.back().getInt());
+            list.push_back(ManetAddress(listMac.back()));
             listMac.pop_back();
         }
     }
     else
     {
         std::vector<IPv4Address> listIp;
-        getApListIp(IPv4Address(dest_addr.s_addr.getLo()),listIp);
+        getApListIp(dest_addr.s_addr.getIPv4(),listIp);
         while (!listIp.empty())
         {
-            list.push_back(listIp.back().getInt());
+            list.push_back(ManetAddress(listIp.back()));
             listIp.pop_back();
         }
     }

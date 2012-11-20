@@ -160,12 +160,12 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 //   encapsulate messages and send to the next layer
 //
 /////////////////////////////////////
-    virtual void sendToIp(cPacket *pk, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, const ManetAddress& ifaceAddr = 0);
+    virtual void sendToIp(cPacket *pk, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, const ManetAddress& ifaceAddr = ManetAddress::ZERO);
     virtual void sendToIp(cPacket *pk, int srcPort, int destAddr, int destPort, int ttl, double delay, uint32_t ifaceIPv4Addr = 0)
     {
-        sendToIp(pk, srcPort, (ManetAddress) destAddr, destPort, ttl, delay, (ManetAddress)ifaceIPv4Addr);
+        sendToIp(pk, srcPort, ManetAddress(IPv4Address(destAddr)), destPort, ttl, delay, ManetAddress(IPv4Address(ifaceIPv4Addr)));
     }
-    virtual void sendToIp(cPacket *pk, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, const ManetAddress& ifaceAddr = 0);
+    virtual void sendToIp(cPacket *pk, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, const ManetAddress& ifaceAddr = ManetAddress::ZERO);
     virtual void sendToIp(cPacket *pk, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, int ifaceIndex = -1);
 /////////////////////////////////
 //
@@ -176,7 +176,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 //
 // delete/actualize/insert and record in the routing table
 //
-    virtual void omnet_chg_rte(const ManetAddress &dst, const ManetAddress &gtwy, const ManetAddress &netm, short int hops, bool del_entry, const ManetAddress &iface = 0);
+    virtual void omnet_chg_rte(const ManetAddress &dst, const ManetAddress &gtwy, const ManetAddress &netm, short int hops, bool del_entry, const ManetAddress &iface = ManetAddress::ZERO);
     virtual void omnet_chg_rte(const struct in_addr &dst, const struct in_addr &gtwy, const struct in_addr &netm, short int hops, bool del_entry);
     virtual void omnet_chg_rte(const struct in_addr &, const struct in_addr &, const struct in_addr &, short int, bool, const struct in_addr &);
     virtual void omnet_chg_rte(const ManetAddress &dst, const ManetAddress &gtwy, const ManetAddress &netm, short int hops, bool del_entry, int);
@@ -184,7 +184,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 
 
     virtual void deleteIpEntry(const ManetAddress &dst) {omnet_chg_rte(dst, dst, dst, 0, true);}
-    virtual void setIpEntry(const ManetAddress &dst, const ManetAddress &gtwy, const ManetAddress &netm, short int hops, const ManetAddress &iface = 0) {omnet_chg_rte(dst, gtwy, netm, hops, false, iface);}
+    virtual void setIpEntry(const ManetAddress &dst, const ManetAddress &gtwy, const ManetAddress &netm, short int hops, const ManetAddress &iface = ManetAddress::ZERO) {omnet_chg_rte(dst, gtwy, netm, hops, false, iface);}
 //
 // Check if it exists in the ip4 routing table the address dst
 // if it doesn't exist return ALLONES_ADDRESS
@@ -281,12 +281,12 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 //
 // Get the index of interface with the same address that add
 //
-    virtual int getWlanInterfaceIndexByAddress(ManetAddress = 0);
+    virtual int getWlanInterfaceIndexByAddress(ManetAddress = ManetAddress::ZERO);
 
 //
 // Get the interface with the same address that add
 //
-    virtual InterfaceEntry * getInterfaceWlanByAddress(ManetAddress = 0) const;
+    virtual InterfaceEntry * getInterfaceWlanByAddress(ManetAddress = ManetAddress::ZERO) const;
 
 //
 // get number wlan interfaces
@@ -331,8 +331,8 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual uint32_t getRoute(const ManetAddress &, std::vector<ManetAddress> &) = 0;
     virtual bool getNextHop(const ManetAddress &, ManetAddress &add, int &iface, double &cost) = 0;
     virtual void setRefreshRoute(const ManetAddress &destination, const ManetAddress & nextHop,bool isReverse) = 0;
-    virtual bool setRoute(const ManetAddress & destination, const ManetAddress &nextHop, const int &ifaceIndex, const int &hops, const ManetAddress &mask = (ManetAddress)0);
-    virtual bool setRoute(const ManetAddress & destination, const ManetAddress &nextHop, const char *ifaceName, const int &hops, const ManetAddress &mask = (ManetAddress)0);
+    virtual bool setRoute(const ManetAddress & destination, const ManetAddress &nextHop, const int &ifaceIndex, const int &hops, const ManetAddress &mask = ManetAddress::ZERO);
+    virtual bool setRoute(const ManetAddress & destination, const ManetAddress &nextHop, const char *ifaceName, const int &hops, const ManetAddress &mask = ManetAddress::ZERO);
     virtual bool isProactive() = 0;
     virtual bool isOurType(cPacket *) = 0;
     virtual bool getDestAddress(cPacket *, ManetAddress &) = 0;

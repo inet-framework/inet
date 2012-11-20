@@ -248,7 +248,7 @@ void NS_CLASS aodv_socket_process_packet(AODV_msg * aodv_msg, int len,
     }
 #else
     if ((aodv_msg->type == AODV_RREP && ttl == 0 && // ttl is decremented for ip layer before send to aodv
-            dst.s_addr == AODV_BROADCAST))
+            dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST))))
     {
         hello_process((RREP *) aodv_msg, len, ifindex);
         return;
@@ -570,7 +570,7 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
 
     /* If we broadcast this message we update the time of last broadcast
        to prevent unnecessary broadcasts of HELLO msg's */
-    if (dst.s_addr == AODV_BROADCAST)
+    if (dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))
     {
         gettimeofday(&this_host.bcast_time, NULL);
 
@@ -610,9 +610,9 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
 
 
 
-        if (dst.s_addr == AODV_BROADCAST)
+        if (dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))
         {
-            destAdd = IPv4Address::ALLONES_ADDRESS.getInt();
+            destAdd = ManetAddress(IPv4Address::ALLONES_ADDRESS);
         }
         else
         {
@@ -662,9 +662,9 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
         // IPv4Address   desAddIp4(dst.s_addr);
         // IPvXAddress destAdd(desAddIp4);
         ManetAddress destAdd;
-        if (dst.s_addr == AODV_BROADCAST)
+        if (dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))
         {
-            destAdd = IPv4Address::ALLONES_ADDRESS.getInt();
+            destAdd = ManetAddress(IPv4Address::ALLONES_ADDRESS);
             if (delay>0)
             {
                 if (useIndex)
@@ -714,7 +714,7 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
     }
 
     /* Do not print hello msgs... */
-    if (!(aodv_msg->type == AODV_RREP && (dst.s_addr == AODV_BROADCAST)))
+    if (!(aodv_msg->type == AODV_RREP && (dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))))
         DEBUG(LOG_INFO, 0, "AODV msg to %s ttl=%d retval=%u size=%u",
               ip_to_str(dst), ttl, retval, len);
 

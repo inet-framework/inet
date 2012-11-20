@@ -195,7 +195,7 @@ class HnaTask
     short unsigned int route_action;
 
   public:
-    HnaTask() : addr(0), netmask(0), route_action(0) {}
+    HnaTask() : netmask(0), route_action(0) {}
 };
 
 class HnaLocalEntry

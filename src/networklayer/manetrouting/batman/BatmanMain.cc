@@ -30,7 +30,7 @@ Batman::Batman()
     routing_class = 0;
     originator_interval = 1;
     debug_timeout = 0;
-    pref_gateway = 0;
+    pref_gateway = ManetAddress::ZERO;
 
     nat_tool_avail = 0;
     disable_client_nat = 0;
@@ -130,7 +130,7 @@ void Batman::initialize(int stage)
         throw cRuntimeError("Invalid 'originatorInterval' parameter");
 
     const char *preferedGateWay = par("preferedGateWay");
-    pref_gateway =  IPvXAddressResolver().resolve(preferedGateWay).get4().getInt();
+    pref_gateway =  ManetAddress(IPvXAddressResolver().resolve(preferedGateWay, IPvXAddressResolver::ADDR_IPv4));
 
     routing_class = par("routingClass");
     if (routing_class < 0)
@@ -163,12 +163,12 @@ void Batman::initialize(int stage)
         opp_error("Error - routing class can't be set while gateway class is in use !\n");
     }
 
-    if ((gateway_class != 0) && (pref_gateway != 0)) {
+    if ((gateway_class != 0) && (!pref_gateway.isUnspecified())) {
         opp_error("Error - preferred gateway can't be set while gateway class is in use !\n" );
     }
 
     /* use routing class 1 if none specified */
-    if ((routing_class == 0) && (pref_gateway != 0))
+    if ((routing_class == 0) && (!pref_gateway.isUnspecified()))
         routing_class = DEFAULT_ROUTING_CLASS;
 
     //if (((routing_class != 0 ) || ( gateway_class != 0 ))&& (!probe_tun(1)))
@@ -187,13 +187,13 @@ void Batman::initialize(int stage)
         batman_if->if_active = true;
         if (isInMacLayer())
         {
-            batman_if->address = (ManetAddress)iEntry->getMacAddress().getInt();
-            batman_if->broad = (ManetAddress)MACAddress::BROADCAST_ADDRESS.getInt();
+            batman_if->address = ManetAddress(iEntry->getMacAddress());
+            batman_if->broad = ManetAddress(MACAddress::BROADCAST_ADDRESS);
         }
         else
         {
-            batman_if->address = (ManetAddress)iEntry->ipv4Data()->getIPAddress().getInt();
-            batman_if->broad = (ManetAddress)IPv4Address::ALLONES_ADDRESS.getInt();
+            batman_if->address = ManetAddress(iEntry->ipv4Data()->getIPAddress());
+            batman_if->broad = ManetAddress(IPv4Address::ALLONES_ADDRESS);
         }
 
         batman_if->if_rp_filter_old = -1;
@@ -220,7 +220,7 @@ void Batman::initialize(int stage)
         addr.doAnd(mask);
 
         // add to HNA:
-        hna_local_task_add_ip(ManetAddress(addr.getInt()), mask.getNetmaskLength(), ROUTE_ADD);
+        hna_local_task_add_ip(ManetAddress(addr), mask.getNetmaskLength(), ROUTE_ADD);
     }
 
 
@@ -273,9 +273,9 @@ void Batman::handleMessage(cMessage *msg)
     //            ((struct forw_node *)forw_list.next)->send_time - curr_time : 10);
 
     IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
-    IPv4Address srcAddr = ctrl->getSrcAddr();
-    //IPv4Address destAddr = ctrl->getDestAddr();
-    neigh = srcAddr.getInt();
+    IPvXAddress srcAddr = ctrl->getSrcAddr();
+    IPvXAddress destAddr = ctrl->getDestAddr();
+    neigh = ManetAddress(srcAddr);
     for (unsigned int i=0; i<if_list.size(); i++)
     {
         if (if_list[i]->dev->getInterfaceId() == ctrl->getInterfaceId())
@@ -437,7 +437,7 @@ void Batman::appendPacket(cPacket *oldPacket, cPacket *packetToAppend)
 
 BatmanPacket *Batman::buildDefaultBatmanPkt(const BatmanIf *batman_if)
 {
-    std::string str = "BatmanPkt:" + (IPv4Address(batman_if->address.getLo())).str();
+    std::string str = "BatmanPkt:" + batman_if->address.str();
     BatmanPacket *pkt = new BatmanPacket(str.c_str());
 
     pkt->setVersion(0);

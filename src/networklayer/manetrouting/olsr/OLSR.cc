@@ -586,7 +586,7 @@ OLSR::check_packet(cPacket* msg, nsaddr_t &src_addr, int &index)
                 return NULL;
             }
             Ieee802Ctrl* ctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
-            src_addr = ctrl->getSrc().getInt();
+            src_addr = ManetAddress(ctrl->getSrc());
             delete ctrl;
             return dynamic_cast<OLSR_pkt  *>(msg);
         }
@@ -624,7 +624,7 @@ OLSR::check_packet(cPacket* msg, nsaddr_t &src_addr, int &index)
         return NULL;
     }
     IPv4ControlInfo* controlInfo = check_and_cast<IPv4ControlInfo*>(msg->removeControlInfo());
-    src_addr = controlInfo->getSrcAddr().getInt();
+    src_addr = ManetAddress(controlInfo->getSrcAddr());
     index = -1;
     InterfaceEntry * ie;
 
@@ -1266,7 +1266,7 @@ OLSR::rtable_computation()
 
     // 2. The new routing entries are added starting with the
     // symmetric neighbors (h=1) as the destination nodes.
-    nsaddr_t netmask(IPv4Address::ALLONES_ADDRESS.getInt());
+    nsaddr_t netmask(IPv4Address::ALLONES_ADDRESS);
     for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
     {
         OLSR_nb_tuple* nb_tuple = *it;
@@ -1767,7 +1767,7 @@ OLSR::send_pkt()
     int num_pkts = (num_msgs%OLSR_MAX_MSGS == 0) ? num_msgs/OLSR_MAX_MSGS :
                    (num_msgs/OLSR_MAX_MSGS + 1);
 
-    ManetAddress destAdd = IPv4Address::ALLONES_ADDRESS.getInt();
+    ManetAddress destAdd(IPv4Address::ALLONES_ADDRESS);
 
     for (int i = 0; i < num_pkts; i++)
     {
@@ -1791,7 +1791,7 @@ OLSR::send_pkt()
             it = msgs_.erase(it);
         }
 
-        sendToIp(op, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, (nsaddr_t)0);
+        sendToIp(op, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, ManetAddress::ZERO);
     }
 }
 
@@ -2213,12 +2213,12 @@ OLSR::mac_failed(IPv4Datagram* p)
     double now = CURRENT_TIME;
 
 
-    nsaddr_t dest_addr = p->getDestAddress().getInt();
+    nsaddr_t dest_addr = ManetAddress(p->getDestAddress());
 
     ev <<"Node " << OLSR::node_id(ra_addr()) << "MAC Layer detects a breakage on link to "  <<
     OLSR::node_id(dest_addr);
 
-    if (dest_addr == (ManetAddress)IP_BROADCAST)
+    if (dest_addr == ManetAddress(IPv4Address(IP_BROADCAST)))
     {
         return;
     }
@@ -2725,7 +2725,7 @@ OLSR::emf_to_seconds(uint8_t olsr_format)
 int
 OLSR::node_id(const nsaddr_t &addr)
 {
-    return addr.toUint();
+    return addr.getIPv4().getInt();
     /*
         // Preventing a bad use for this function
             if ((uint32_t)addr == IP_BROADCAST)
@@ -2739,11 +2739,7 @@ OLSR::node_id(const nsaddr_t &addr)
 
 const char * OLSR::getNodeId(const nsaddr_t &addr)
 {
-    if (isInMacLayer())
-        return MACAddress(addr.getLo()).str().c_str();
-    else
-        return IPv4Address(addr.getLo()).str().c_str();
-
+    return addr.str().c_str();
 }
 
 // Interfaces with other Inet
@@ -3072,8 +3068,8 @@ ManetAddress OLSR::getIfaceAddressFromIndex(int index)
 {
     InterfaceEntry * entry = getInterfaceEntry(index);
     if (this->isInMacLayer())
-        return entry->getMacAddress().getInt();
+        return ManetAddress(entry->getMacAddress());
     else
-        return entry->ipv4Data()->getIPAddress().getInt();
+        return ManetAddress(entry->ipv4Data()->getIPAddress());
 }
 

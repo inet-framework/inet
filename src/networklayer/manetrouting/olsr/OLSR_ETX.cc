@@ -1212,7 +1212,7 @@ OLSR_ETX::rtable_dijkstra_computation()
     // All the entries from the routing table are removed.
     rtable_.clear();
     omnet_clean_rte();
-    nsaddr_t netmask (IPv4Address::ALLONES_ADDRESS.getInt());
+    nsaddr_t netmask(IPv4Address::ALLONES_ADDRESS);
 
     debug("Current node %s:\n", getNodeId(ra_addr()));
     // Iterate through all out 1 hop neighbors
@@ -1675,7 +1675,7 @@ OLSR_ETX::send_pkt()
         return;
 
     ManetAddress destAdd;
-    destAdd = IPv4Address::ALLONES_ADDRESS.getInt();
+    destAdd = ManetAddress(IPv4Address::ALLONES_ADDRESS);
     // Calculates the number of needed packets
     int num_pkts = (num_msgs % OLSR_ETX_MAX_MSGS == 0) ? num_msgs / OLSR_ETX_MAX_MSGS :
                    (num_msgs / OLSR_ETX_MAX_MSGS + 1);
@@ -1736,9 +1736,9 @@ OLSR_ETX::send_pkt()
             if (i == 0)
                 op2->setSend_time(op1->send_time());
             // Sending packet pair
-            sendToIp(op1, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, (nsaddr_t)0);
+            sendToIp(op1, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, ManetAddress::ZERO);
             if (i == 0)
-                sendToIp(op2, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, (nsaddr_t)0);
+                sendToIp(op2, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, ManetAddress::ZERO);
         }
         else
         {
@@ -1758,7 +1758,7 @@ OLSR_ETX::send_pkt()
 
                 it = msgs_.erase(it);
             }
-            sendToIp(op, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, (nsaddr_t)0);
+            sendToIp(op, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, ManetAddress::ZERO);
 
         }
     }

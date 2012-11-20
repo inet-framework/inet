@@ -19,7 +19,7 @@
 // ***************************************************************************
 
 cplusplus {{
-#include "uint128.h"
+#include "ManetAddress.h"
 #define DIRECTLINK 0x40
 #define UNIDIRECTIONAL 0x80
 

@@ -128,9 +128,9 @@ class AODVUU : public ManetRoutingBase
     long proactive_rreq_timeout;
     bool isBroadcast (ManetAddress add)
     {
-        if (this->isInMacLayer() && add==MACAddress::BROADCAST_ADDRESS.getInt())
+        if (this->isInMacLayer() && add==ManetAddress(MACAddress::BROADCAST_ADDRESS))
              return true;
-        if (!this->isInMacLayer() && add==IPv4Address::ALLONES_ADDRESS.getInt())
+        if (!this->isInMacLayer() && add==ManetAddress(IPv4Address::ALLONES_ADDRESS))
             return true;
         return false;
     }
@@ -155,8 +155,8 @@ class AODVUU : public ManetRoutingBase
     virtual bool getNextHop(const ManetAddress &,ManetAddress &add,int &iface,double &);
     virtual bool isProactive();
     virtual void setRefreshRoute(const ManetAddress &destination, const ManetAddress & nextHop,bool isReverse);
-    virtual bool setRoute(const ManetAddress & destination,const ManetAddress &nextHop,const int &ifaceIndex,const int &hops,const ManetAddress &mask=(ManetAddress)0);
-    virtual bool setRoute(const ManetAddress & destination,const ManetAddress &nextHop,const char *ifaceName,const int &hops,const ManetAddress &mask=(ManetAddress)0);
+    virtual bool setRoute(const ManetAddress & destination,const ManetAddress &nextHop,const int &ifaceIndex,const int &hops,const ManetAddress &mask=ManetAddress::ZERO);
+    virtual bool setRoute(const ManetAddress & destination,const ManetAddress &nextHop,const char *ifaceName,const int &hops,const ManetAddress &mask=ManetAddress::ZERO);
 
   protected:
     bool is_init;

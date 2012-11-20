@@ -56,9 +56,9 @@ UERR *NS_CLASS uerr_create(struct in_addr target_addr,
     uerr->uerr_node_addr    = (u_int32_t) uerr_node_addr.s_addr;
     uerr->uelem_target_addr = (u_int32_t) uelem_target_addr.s_addr;
 #else
-    uerr->target_addr   = target_addr.s_addr.toUint();
-    uerr->uerr_node_addr    = uerr_node_addr.s_addr.toUint();
-    uerr->uelem_target_addr = uelem_target_addr.s_addr.toUint();
+    uerr->target_addr   = target_addr.s_addr;
+    uerr->uerr_node_addr    = uerr_node_addr.s_addr;
+    uerr->uelem_target_addr = uelem_target_addr.s_addr;
 #endif
     uerr->uelem_type    = uelem_type;
 
