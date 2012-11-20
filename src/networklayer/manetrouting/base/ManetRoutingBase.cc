@@ -62,7 +62,7 @@ ManetTimer::ManetTimer() : cOwnedObject("ManetTimer")
 {
     agent_ = dynamic_cast <ManetRoutingBase*> (this->getOwner());
     if (agent_==NULL)
-        opp_error("timer ower is bad");
+        opp_error("timer owner is bad");
 }
 
 void ManetTimer::removeQueueTimer()
