@@ -103,17 +103,14 @@ int NS_CLASS locality(struct in_addr dest, unsigned int ifindex)
 #else
     InterfaceEntry *   ie;
     ie = getInterfaceEntry (ifindex);
-    struct in_addr mask;
     struct in_addr dstnet;
     struct in_addr subnet;
     struct in_addr interface;
-    ie->ipv4Data()->getIPAddress().getInt();
-    mask.s_addr = ManetAddress(ie->ipv4Data()->getNetmask());
+
     int masklen = ie->ipv4Data()->getNetmask().getNetmaskLength();
-    dstnet.s_addr = dest.s_addr;
-    dstnet.s_addr.setPrefixLen(masklen);   // dstnet.s_addr = dest.s_addr & mask.s_addr;
+    dstnet.s_addr = ManetAddress(dest.s_addr); dstnet.s_addr.setPrefix(masklen);   // dstnet.s_addr = dest.s_addr & mask.s_addr;
     interface.s_addr = ManetAddress(ie->ipv4Data()->getIPAddress());
-    subnet.s_addr = ManetAddress(ie->ipv4Data()->getIPAddress(), masklen);    //interface.s_addr & mask.s_addr;
+    subnet.s_addr = interface.s_addr; subnet.s_addr.setPrefix(masklen);    //interface.s_addr & mask.s_addr;
     if (!subnet.s_addr.isUnspecified())
     {
         if (!dstnet.s_addr.isUnspecified())
