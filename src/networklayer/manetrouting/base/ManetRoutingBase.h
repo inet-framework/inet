@@ -25,6 +25,7 @@
 #ifndef _MSC_VER
 #include <sys/time.h>
 #endif
+
 #include "compatibility.h"
 #include "IRoutingTable.h"
 #include "NotificationBoard.h"
@@ -33,28 +34,57 @@
 #include "ManetAddress.h"
 #include "NotifierConsts.h"
 #include "ICMP.h"
+
 #ifdef WITH_80211MESH
 #include "ILocator.h"
 #endif
+
 #include "ARP.h"
+
 #include <vector>
 #include <set>
 
 class ManetRoutingBase;
 
+
+/**
+ * ManetTimer abstract base class
+ *
+ * Timer for a ManetRoutingBase agent
+ *
+ * This class uses *timerMultiMapPtr from ManetRoutingBase
+ */
 class ManetTimer :  public cOwnedObject
 {
   protected:
     ManetRoutingBase *      agent_; ///< OLSR agent which created the timer.
   public:
+    /// Constructor: uses owner as agent, owner of class must be a ManetRoutingBase module
     ManetTimer();
+
+    /// Constructor with specified agent
     ManetTimer(ManetRoutingBase* agent);
+
     virtual void expire() = 0;
+
+    //FIXME remove one of the next two functions, or define any different of functions
+
+    /// Remove timer from agent's timerMultiMap queue
     virtual void removeQueueTimer();
+
+    /// Remove timer from agent's timerMultiMap queue, alias for removeQueueTimer()
     virtual void removeTimer();
-    virtual void resched(double time);
+
+    /// Reschedule timer in agent, time is relative to current simtime
+    virtual void resched(double time);  //FIXME rename it, two functions with same name but absolute/relative time parameters is dangerous
+
+    /// Reschedule timer in agent, time is absolute simtime
     virtual void resched(simtime_t time);
+
+    /// is scheduled this timer in agent?
     virtual bool isScheduled();
+
+    /// Destructor
     virtual ~ManetTimer();
 };
 
@@ -62,14 +92,21 @@ typedef std::multimap <simtime_t, ManetTimer *> TimerMultiMap;
 typedef std::set<ManetAddress> AddressGroup;
 typedef std::set<ManetAddress>::iterator AddressGroupIterator;
 typedef std::set<ManetAddress>::const_iterator AddressGroupConstIterator;
+
+/**
+ * Base class for Manet Routing
+ */
 class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, protected cListener
 {
- public:
+  public:
     static IPv4Address  LL_MANET_Routers;
     static IPv6Address  LL_MANET_RoutersV6;
+
   private:
     static simsignal_t mobilityStateChangedSignal;
+
     typedef std::map<ManetAddress,ManetAddress> RouteMap;
+
     class ProtocolRoutingData
     {
         public:
@@ -79,6 +116,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 
     typedef std::vector<ProtocolRoutingData> ProtocolsRoutes;
     typedef std::map<ManetAddress,ProtocolsRoutes>GlobalRouteMap;
+
     RouteMap *routesVector;
     static bool createInternalStore;
     static GlobalRouteMap *globalRouteMap;
@@ -117,9 +155,13 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
         }
     } InterfaceIdentification;
     typedef std::vector <InterfaceIdentification> InterfaceVector;
+
     InterfaceVector * interfaceVector;
+
+    // variables for ManetTimer class
     TimerMultiMap *timerMultiMapPtr;
     cMessage *timerMessagePtr;
+
     std::vector<AddressGroup> addressGroupVector;
     std::vector<int> inAddressGroup;
     bool staticNode;
@@ -148,10 +190,26 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 /////////////////////////////////////////////
     virtual void registerRoutingModule();
 
+/////////////////////////////////
 //
+// functions for ManetTimer class
 //
+/////////////////////////////////
+    /// initialize timer queue
     virtual void createTimerQueue();
+
+    /**
+     * Cancel timer if already scheduled.
+     * Remove expired timers from queue and calls theirs expire() function.
+     * schedule first timer.
+     * //FIXME rename to rescheduleEvent() ???
+     */
     virtual void scheduleEvent();
+
+    /**
+     * Checks msg is equals to timerMessagePtr and returns false if not.
+     * Remove expired timers from queue and calls theirs expire() function, and returns true.
+     */
     virtual bool checkTimer(cMessage *msg);
 
 
@@ -163,6 +221,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     void sendToIpOnIface(cPacket *pk, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, InterfaceEntry *iface);
     virtual void sendToIp(cPacket *pk, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, const ManetAddress& ifaceAddr);
     virtual void sendToIp(cPacket *pk, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, int ifaceIndex = -1);
+
 /////////////////////////////////
 //
 //   Ip4 routing table access routines
@@ -172,25 +231,28 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 //
 // delete/actualize/insert and record in the routing table
 //
+    //FIXME reduce these variations
     virtual void omnet_chg_rte(const ManetAddress &dst, const ManetAddress &gtwy, const ManetAddress &netm, short int hops, bool del_entry, const ManetAddress &iface = ManetAddress::ZERO);
     virtual void omnet_chg_rte(const struct in_addr &dst, const struct in_addr &gtwy, const struct in_addr &netm, short int hops, bool del_entry);
-    virtual void omnet_chg_rte(const struct in_addr &, const struct in_addr &, const struct in_addr &, short int, bool, const struct in_addr &);
-    virtual void omnet_chg_rte(const ManetAddress &dst, const ManetAddress &gtwy, const ManetAddress &netm, short int hops, bool del_entry, int);
-    virtual void omnet_chg_rte(const struct in_addr &, const struct in_addr &, const struct in_addr &, short int, bool, int);
+    virtual void omnet_chg_rte(const struct in_addr &dst, const struct in_addr &gtwy, const struct in_addr &netm, short int hops, bool del_entry, const struct in_addr &iface);
+    virtual void omnet_chg_rte(const ManetAddress &dst, const ManetAddress &gtwy, const ManetAddress &netm, short int hops, bool del_entry, int index);
+    virtual void omnet_chg_rte(const struct in_addr &dst, const struct in_addr &gtwy, const struct in_addr &netm, short int hops, bool del_entry, int index);
 
 
     virtual void deleteIpEntry(const ManetAddress &dst) {omnet_chg_rte(dst, dst, dst, 0, true);}
     virtual void setIpEntry(const ManetAddress &dst, const ManetAddress &gtwy, const ManetAddress &netm, short int hops, const ManetAddress &iface = ManetAddress::ZERO) {omnet_chg_rte(dst, gtwy, netm, hops, false, iface);}
-//
-// Check if it exists in the ip4 routing table the address dst
-// if it doesn't exist return ALLONES_ADDRESS
-//
+
+    /**
+     * Check if it exists in the ip4 routing table the address dst
+     * if it exist return gateway address
+     * if it doesn't exist return ALLONES_ADDRESS
+     */
     virtual ManetAddress omnet_exist_rte(ManetAddress dst);
 
-//
-// Check if it exists in the ip4 routing table the address dst
-// if it doesn't exist return false
-//
+    /**
+     * Check if it exists in the ip4 routing table the address dst
+     * if it doesn't exist return false
+     */
     virtual bool omnet_exist_rte(struct in_addr dst);
     virtual void omnet_clean_rte();
 
@@ -198,22 +260,19 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 //  Cross layer routines
 /////////////////////////
 
-//
-// Activate the LLF break
-//
+    /// Activate the LLF break
     virtual void linkLayerFeeback();
-//
-//      activate the promiscuous option
-//
+
+    /// activate the promiscuous option
     virtual void linkPromiscuous();
 
-//      activate the full promiscuous option
-//
+    /// Activate the full promiscuous option
     virtual void linkFullPromiscuous();
-//
-//     activate the register position. For position protocols
-//     this method must be activated in the stage 0 to register the initial node position
-//
+
+    /**
+     * activate the register position. For position protocols
+     * this method must be activated in the stage 0 to register the initial node position
+     */
     virtual void registerPosition();
 
 //
@@ -249,55 +308,45 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 //
     virtual ManetAddress getAddress() const {return hostAddress;}
     virtual ManetAddress getRouterId() const {return routerId;}
-//
-// Return true if the routing protocols is execure in the mac layer
-//
+
+    /// Return true if the routing protocols is execute in the mac layer
     virtual bool isInMacLayer() const {return mac_layer_;}
 
-//
-// get the i-esime interface
-//
+    /// get the i-esime interface
     virtual InterfaceEntry * getInterfaceEntry(int index) const {return inet_ift->getInterface(index);}
     virtual InterfaceEntry * getInterfaceEntryById(int id) const {return inet_ift->getInterfaceById(id);}
-//
-// Total number of interfaces
-//
+
+    /// Total number of interfaces
     virtual int getNumInterfaces() const {return inet_ift->getNumInterfaces();}
 
-// Check if the address is local
+    // Check if the address is local
     virtual bool isIpLocalAddress(const IPv4Address& dest) const;
     virtual bool isLocalAddress(const ManetAddress& dest) const;
-// Check if the address is multicast
+
+    // Check if the address is multicast
     virtual bool isMulticastAddress(const ManetAddress& dest) const;
 
 ///////////////
 // wlan Interface access routines
 //////////////////
 
-//
-// Get the index of interface with the same address that add
-//
+    /// Get the index of interface with the same address that add
     virtual int getWlanInterfaceIndexByAddress(ManetAddress = ManetAddress::ZERO);
 
-//
-// Get the interface with the same address that add
-//
+    /// Get the interface with the same address that add
     virtual InterfaceEntry * getInterfaceWlanByAddress(ManetAddress = ManetAddress::ZERO) const;
 
-//
-// get number wlan interfaces
-//
+    /// get number of wlan interfaces
     virtual int getNumWlanInterfaces() const {return interfaceVector->size();}
-//
-// Get the index used in the general interface table
-//
+
+    /// Get the index used in the general interface table
     virtual int getWlanInterfaceIndex(int i) const;
-//
-// Get the i-esime wlan interface
-//
+
+    /// Get the i-esime wlan interface
     virtual InterfaceEntry *getWlanInterfaceEntry(int i) const;
 
-    virtual bool isThisInterfaceRegistered(InterfaceEntry *);
+    /// Returns true if ie found in the general interface table
+    virtual bool isThisInterfaceRegistered(InterfaceEntry *ie);
 
 //
 //     Access to the node position
@@ -327,8 +376,13 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual uint32_t getRoute(const ManetAddress &, std::vector<ManetAddress> &) = 0;
     virtual bool getNextHop(const ManetAddress &, ManetAddress &add, int &iface, double &cost) = 0;
     virtual void setRefreshRoute(const ManetAddress &destination, const ManetAddress & nextHop,bool isReverse) = 0;
+
+    // set/delete routing entry
+    //FIXME nextHop.isUnspecified() means: need delete entry. Should add a new parameter for choose set/delete, should rename function
+    //FIXME setRoute() vs omnet_chg_rte()
     virtual bool setRoute(const ManetAddress & destination, const ManetAddress &nextHop, const int &ifaceIndex, const int &hops, const ManetAddress &mask = ManetAddress::ZERO);
     virtual bool setRoute(const ManetAddress & destination, const ManetAddress &nextHop, const char *ifaceName, const int &hops, const ManetAddress &mask = ManetAddress::ZERO);
+
     virtual bool isProactive() = 0;
     virtual bool isOurType(cPacket *) = 0;
     virtual bool getDestAddress(cPacket *, ManetAddress &) = 0;
@@ -369,7 +423,10 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual bool isAddressInProxyList(const ManetAddress &);
     virtual void setAddressInProxyList(const ManetAddress &,const ManetAddress &);
     virtual int getNumAddressInProxyList() {return (int)proxyAddress.size();}
-    virtual bool getAddressInProxyList(int,ManetAddress &addr, ManetAddress &mask);
+
+    /// get i-th address/mask pair from proxyAddress vector
+    virtual bool getAddressInProxyList(int, ManetAddress &addr, ManetAddress &mask);
+
     // access to locator information
     virtual bool getAp(const ManetAddress &, ManetAddress &) const;
     virtual bool isAp() const;
