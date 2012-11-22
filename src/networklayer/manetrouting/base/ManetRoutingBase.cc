@@ -48,7 +48,7 @@ void ManetTimer::removeTimer()
     removeQueueTimer();
 }
 
-ManetTimer::ManetTimer(ManetRoutingBase* agent) : cOwnedObject("ManetTimer")
+ManetTimer::ManetTimer(ManetRoutingBase *agent) : cOwnedObject("ManetTimer")
 {
     agent_ = agent;
 }
@@ -131,7 +131,7 @@ ManetRoutingBase::ManetRoutingBase()
 }
 
 
-bool ManetRoutingBase::isThisInterfaceRegistered(InterfaceEntry * ie)
+bool ManetRoutingBase::isThisInterfaceRegistered(InterfaceEntry *ie)
 {
     if (!isRegistered)
         opp_error("Manet routing protocol is not register");
@@ -145,7 +145,7 @@ bool ManetRoutingBase::isThisInterfaceRegistered(InterfaceEntry * ie)
 
 void ManetRoutingBase::registerRoutingModule()
 {
-    InterfaceEntry *   ie;
+    InterfaceEntry *ie;
     const char *name;
     /* Set host parameters */
     isRegistered = true;
@@ -170,7 +170,7 @@ void ManetRoutingBase::registerRoutingModule()
     const char *interfaces = par("interfaces");
     cStringTokenizer tokenizerInterfaces(interfaces);
     const char *token;
-    const char * prefixName;
+    const char *prefixName;
     if (!mac_layer_)
     {
         while ((token = tokenizerInterfaces.nextToken()) != NULL)
@@ -366,7 +366,7 @@ ManetRoutingBase::~ManetRoutingBase()
     {
         while (timerMultiMapPtr->size()>0)
         {
-            ManetTimer * timer = timerMultiMapPtr->begin()->second;
+            ManetTimer *timer = timerMultiMapPtr->begin()->second;
             timerMultiMapPtr->erase(timerMultiMapPtr->begin());
             delete timer;
         }
@@ -401,7 +401,7 @@ bool ManetRoutingBase::isLocalAddress(const ManetAddress& dest) const
         opp_error("Manet routing protocol is not register");
     if (!mac_layer_)
         return inet_rt->isLocalAddress(dest.getIPv4());
-    InterfaceEntry *   ie;
+    InterfaceEntry *ie;
     for (int i = 0; i < inet_ift->getNumInterfaces(); i++)
     {
         ie = inet_ift->getInterface(i);
@@ -1021,7 +1021,7 @@ void ManetRoutingBase::receiveChangeNotification(int category, const cObject *de
         Ieee80211DataFrame *frame = dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject*>(details));
         if (frame)
         {
-            cPacket * pktAux = frame->getEncapsulatedPacket();
+            cPacket *pktAux = frame->getEncapsulatedPacket();
             if (!mac_layer_ && pktAux != NULL)
             {
                 cPacket *pkt = pktAux->dup();
@@ -1052,7 +1052,7 @@ void ManetRoutingBase::receiveChangeNotification(int category, const cObject *de
     }
     else if(category == NF_L2_AP_DISASSOCIATED || category == NF_L2_AP_ASSOCIATED)
     {
-        Ieee80211MgmtAP::NotificationInfoSta * infoSta = dynamic_cast<Ieee80211MgmtAP::NotificationInfoSta *>(const_cast<cObject*> (details));
+        Ieee80211MgmtAP::NotificationInfoSta *infoSta = dynamic_cast<Ieee80211MgmtAP::NotificationInfoSta *>(const_cast<cObject*> (details));
         if (infoSta)
         {
             ManetAddress addr;
@@ -1155,7 +1155,7 @@ int ManetRoutingBase::getWlanInterfaceIndexByAddress(ManetAddress add)
 //
 // Get the interface with the same address that add
 //
-InterfaceEntry * ManetRoutingBase::getInterfaceWlanByAddress(ManetAddress add) const
+InterfaceEntry *ManetRoutingBase::getInterfaceWlanByAddress(ManetAddress add) const
 {
     if (!isRegistered)
         opp_error("Manet routing protocol is not register");
@@ -1196,7 +1196,7 @@ int ManetRoutingBase::getWlanInterfaceIndex(int i) const
 //
 // Get the i-esime wlan interface
 //
-InterfaceEntry * ManetRoutingBase::getWlanInterfaceEntry(int i) const
+InterfaceEntry *ManetRoutingBase::getWlanInterfaceEntry(int i) const
 {
     if (!isRegistered)
         opp_error("Manet routing protocol is not register");
@@ -1275,7 +1275,7 @@ bool ManetRoutingBase::checkTimer(cMessage *msg)
     TimerMultiMap::iterator it = timerMultiMapPtr->begin();
     while (it->first <= simTime())
     {
-        ManetTimer * timer = it->second;
+        ManetTimer *timer = it->second;
         if (timer == NULL)
             opp_error ("timer owner is bad");
         timerMultiMapPtr->erase(it);
@@ -1532,7 +1532,7 @@ bool ManetRoutingBase::setRoute(const ManetAddress & destination, const ManetAdd
     return setRoute(destination, nextHop, index, hops, mask);
 };
 
-void ManetRoutingBase::sendICMP(cPacket* pkt)
+void ManetRoutingBase::sendICMP(cPacket *pkt)
 {
     if (pkt==NULL)
         return;
@@ -1554,7 +1554,7 @@ void ManetRoutingBase::sendICMP(cPacket* pkt)
         }
     }
 
-    IPv4Datagram* datagram = dynamic_cast<IPv4Datagram*>(pkt);
+    IPv4Datagram *datagram = dynamic_cast<IPv4Datagram*>(pkt);
     if (datagram==NULL)
     {
         delete pkt;
@@ -1857,7 +1857,7 @@ bool ManetRoutingBase::getRouteFromGlobal(const ManetAddress &src, const ManetAd
 
         if (it->second.size() == 1)
         {
-            RouteMap * rt = it->second[0].routesVector;
+            RouteMap *rt = it->second[0].routesVector;
             RouteMap::iterator it2 = rt->find(dest);
             if (it2 == rt->end())
                 return false;
@@ -1877,7 +1877,7 @@ bool ManetRoutingBase::getRouteFromGlobal(const ManetAddress &src, const ManetAd
             if (it->second.size() > 2)
                 throw cRuntimeError("Number of routing protocols bigger that 2");
             // if several protocols, search before in the proactive
-            RouteMap * rt;
+            RouteMap *rt;
             if (it->second[0].isProactive)
                 rt = it->second[0].routesVector;
             else

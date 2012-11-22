@@ -57,13 +57,13 @@ class ManetRoutingBase;
 class ManetTimer :  public cOwnedObject
 {
   protected:
-    ManetRoutingBase *      agent_; ///< OLSR agent which created the timer.
+    ManetRoutingBase *agent_; ///< OLSR agent which created the timer.
   public:
     /// Constructor: uses owner as agent, owner of class must be a ManetRoutingBase module
     ManetTimer();
 
     /// Constructor with specified agent
-    ManetTimer(ManetRoutingBase* agent);
+    ManetTimer(ManetRoutingBase *agent);
 
     virtual void expire() = 0;
 
@@ -104,7 +104,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     class ProtocolRoutingData
     {
         public:
-            RouteMap* routesVector;
+            RouteMap *routesVector;
             bool isProactive;
     };
 
@@ -118,7 +118,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     IRoutingTable *inet_rt;
     IInterfaceTable *inet_ift;
     NotificationBoard *nb;
-    ICMP * icmpModule;
+    ICMP *icmpModule;
     bool mac_layer_;
     ManetAddress    hostAddress;
     ManetAddress    routerId;
@@ -139,7 +139,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 
     typedef struct InterfaceIdentification
     {
-        InterfaceEntry* interfacePtr;
+        InterfaceEntry *interfacePtr;
         int index;
         inline  InterfaceIdentification & operator=(const  InterfaceIdentification& b)
         {
@@ -150,7 +150,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     } InterfaceIdentification;
     typedef std::vector <InterfaceIdentification> InterfaceVector;
 
-    InterfaceVector * interfaceVector;
+    InterfaceVector *interfaceVector;
 
     // variables for ManetTimer class
     TimerMultiMap *timerMultiMapPtr;
@@ -308,8 +308,8 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual bool isInMacLayer() const {return mac_layer_;}
 
     /// get the i-esime interface
-    virtual InterfaceEntry * getInterfaceEntry(int index) const {return inet_ift->getInterface(index);}
-    virtual InterfaceEntry * getInterfaceEntryById(int id) const {return inet_ift->getInterfaceById(id);}
+    virtual InterfaceEntry *getInterfaceEntry(int index) const {return inet_ift->getInterface(index);}
+    virtual InterfaceEntry *getInterfaceEntryById(int id) const {return inet_ift->getInterfaceById(id);}
 
     /// Total number of interfaces
     virtual int getNumInterfaces() const {return inet_ift->getNumInterfaces();}
@@ -326,7 +326,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual int getWlanInterfaceIndexByAddress(ManetAddress = ManetAddress::ZERO);
 
     /// Get the interface with the same address that add
-    virtual InterfaceEntry * getInterfaceWlanByAddress(ManetAddress = ManetAddress::ZERO) const;
+    virtual InterfaceEntry *getInterfaceWlanByAddress(ManetAddress = ManetAddress::ZERO) const;
 
     /// get number of wlan interfaces
     virtual int getNumWlanInterfaces() const {return interfaceVector->size();}
@@ -354,10 +354,9 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual void getListRelatedAp(const ManetAddress &, std::vector<ManetAddress>&);
 
   public:
-    //
     std::string convertAddressToString(const ManetAddress&);
     virtual void setColaborativeProtocol(cObject *p) {colaborativeProtocol = dynamic_cast<ManetRoutingBase*>(p);}
-    virtual ManetRoutingBase * getColaborativeProtocol() const {return colaborativeProtocol;}
+    virtual ManetRoutingBase *getColaborativeProtocol() const {return colaborativeProtocol;}
     virtual void setStaticNode(bool v) {staticNode=v;}
     virtual bool isStaticNode() {return staticNode;}
 
@@ -384,7 +383,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual bool addressIsForUs(const ManetAddress &) const; // return true if the address is local or is in the proxy list
     virtual TimerMultiMap *getTimerMultimMap() const {return timerMultiMapPtr;}
     virtual void setPtr(void *ptr) {commonPtr = ptr;}
-    virtual const void * getPtr()const {return commonPtr;}
+    virtual const void *getPtr()const {return commonPtr;}
     virtual void sendICMP(cPacket*);
     virtual bool getSendToICMP() {return sendToICMP;}
     virtual void setSendToICMP(bool val)
