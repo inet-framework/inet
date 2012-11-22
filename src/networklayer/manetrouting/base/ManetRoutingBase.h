@@ -279,12 +279,13 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 // Link layer feedback routines
 //
     /**
-     * @brief Called by the signalling mechanism to inform of changes.
+     * @brief Called by the signaling mechanism to inform of changes.
      *
      * ManetRoutingBase is subscribed to position changes.
      */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
     virtual void receiveChangeNotification(int category, const cObject *details);
+
     virtual void processLinkBreak(const cObject *details);
     virtual void processLinkBreakManagement(const cObject *details);
     virtual void processPromiscuous(const cObject *details);
@@ -292,21 +293,16 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual void processLocatorAssoc(const cObject *details);
     virtual void processLocatorDisAssoc(const cObject *details);
 
-//
-//  Replacement for gettimeofday(), used for timers.
-//  The timeval should only be interpreted as number of seconds and
-//  fractions of seconds since the start of the simulation.
-//
+    /**
+     *  Replacement for gettimeofday(), used for timers.
+     *  The timeval should only be interpreted as number of seconds and
+     *  fractions of seconds since the start of the simulation.
+     */
     virtual int gettimeofday(struct timeval *, struct timezone *);
 
-////////////////////////
-//   Information access routines
-////////////////////////
-
-//
-//      get the address of the first wlan interface
-//
+    /// Get the address of the first wlan interface
     virtual ManetAddress getAddress() const {return hostAddress;}
+
     virtual ManetAddress getRouterId() const {return routerId;}
 
     /// Return true if the routing protocols is execute in the mac layer
@@ -319,17 +315,15 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     /// Total number of interfaces
     virtual int getNumInterfaces() const {return inet_ift->getNumInterfaces();}
 
-    // Check if the address is local
+    /// Check if the address is local
     virtual bool isIpLocalAddress(const IPv4Address& dest) const;
     virtual bool isLocalAddress(const ManetAddress& dest) const;
 
-    // Check if the address is multicast
+    /// Check if the address is multicast
     virtual bool isMulticastAddress(const ManetAddress& dest) const;
 
-///////////////
-// wlan Interface access routines
-//////////////////
-
+    /// @name wlan interface access routines
+    //@{
     /// Get the index of interface with the same address that add
     virtual int getWlanInterfaceIndexByAddress(ManetAddress = ManetAddress::ZERO);
 
@@ -347,30 +341,33 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 
     /// Returns true if ie found in the general interface table
     virtual bool isThisInterfaceRegistered(InterfaceEntry *ie);
+    //@}
 
-//
-//     Access to the node position
-//
+    /// @name Access to the node position
+    //@{
     virtual double getXPos();
     virtual double getYPos();
     virtual double getSpeed();
     virtual double getDirection();
+    //@}
 
     virtual void getApList(const MACAddress &,std::vector<MACAddress>&);
     virtual void getApListIp(const IPv4Address &,std::vector<IPv4Address>&);
     virtual void getListRelatedAp(const ManetAddress &, std::vector<ManetAddress>&);
 
   public:
-//
+    //
     std::string convertAddressToString(const ManetAddress&);
     virtual void setColaborativeProtocol(cObject *p) {colaborativeProtocol = dynamic_cast<ManetRoutingBase*>(p);}
     virtual ManetRoutingBase * getColaborativeProtocol() const {return colaborativeProtocol;}
     virtual void setStaticNode(bool v) {staticNode=v;}
     virtual bool isStaticNode() {return staticNode;}
-// Routing information access
+
+    // Routing information access
     virtual void setInternalStore(bool i);
     virtual ManetAddress getNextHopInternal(const ManetAddress &dest);
     virtual bool getInternalStore() const { return createInternalStore;}
+
     // it should return 0 if not route, if complete route number of hops and, if only next hop
     // it should return -1
     virtual uint32_t getRoute(const ManetAddress &, std::vector<ManetAddress> &) = 0;
@@ -416,19 +413,25 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 
 
     // proxy/gateway methods, this methods help to the reactive protocols to answer the RREQ for a address that are in other subnetwork
-    // Set if the node will work like gateway for address in the list
+
+    /// Set if the node will work like gateway for address in the list
     virtual void setIsGateway(bool p) {isGateway = p;}
+
     virtual bool getIsGateway() {return isGateway;}
-    // return true if the node must answer because the addres are in the list
-    virtual bool isAddressInProxyList(const ManetAddress &);
-    virtual void setAddressInProxyList(const ManetAddress &,const ManetAddress &);
+
+    /// return true if the node must answer because the address are in the list
+    virtual bool isAddressInProxyList(const ManetAddress& addr);
+
+    virtual void setAddressInProxyList(const ManetAddress& addr, const ManetAddress& mask);
     virtual int getNumAddressInProxyList() {return (int)proxyAddress.size();}
 
     /// get i-th address/mask pair from proxyAddress vector
-    virtual bool getAddressInProxyList(int, ManetAddress &addr, ManetAddress &mask);
+    virtual bool getAddressInProxyList(int i, ManetAddress &outAddr, ManetAddress &outMask);
 
-    // access to locator information
-    virtual bool getAp(const ManetAddress &, ManetAddress &) const;
+    /**
+     * access to locator information
+     */
+    virtual bool getAp(const ManetAddress& destination, ManetAddress& outAccesPointAddr) const;
     virtual bool isAp() const;
     //
     static bool getRouteFromGlobal(const ManetAddress &src, const ManetAddress &dest, std::vector<ManetAddress> &route);
