@@ -301,7 +301,7 @@ void DYMO::processPacket(const IPv4Datagram* datagram)
         TargetHopCount = entry->routeDist;
     }
 
-    if (!datagram->getSrcAddress().isUnspecified() && !isIpLocalAddress(datagram->getSrcAddress()))
+    if (!datagram->getSrcAddress().isUnspecified() && !isLocalAddress(ManetAddress(datagram->getSrcAddress())))
     {
         // It's not a packet of this node, send error to source
         sendRERR(destAddr.getInt(), TargetSeqNum);

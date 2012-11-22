@@ -312,7 +312,6 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual int getNumInterfaces() const {return inet_ift->getNumInterfaces();}
 
     /// Check if the address is local
-    virtual bool isIpLocalAddress(const IPv4Address& dest) const;
     virtual bool isLocalAddress(const ManetAddress& dest) const;
 
     /// Check if the address is multicast

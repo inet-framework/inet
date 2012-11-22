@@ -395,15 +395,6 @@ ManetRoutingBase::~ManetRoutingBase()
     }
 }
 
-bool ManetRoutingBase::isIpLocalAddress(const IPv4Address& dest) const
-{
-    if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
-    return inet_rt->isLocalAddress(dest);
-}
-
-
-
 bool ManetRoutingBase::isLocalAddress(const ManetAddress& dest) const
 {
     if (!isRegistered)
