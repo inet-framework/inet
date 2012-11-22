@@ -67,7 +67,7 @@ class ManetTimer :  public cOwnedObject
 
     virtual void expire() = 0;
 
-    //FIXME remove one of the next two functions, or define any different of functions
+    //FIXME remove one of the next two functions, or define any different of these functions
 
     /// Remove timer from agent's timerMultiMap queue
     virtual void removeQueueTimer();
@@ -222,9 +222,10 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 //
 /////////////////////////////////////
 
-//
-// delete/actualize/insert and record in the routing table
-//
+    /**
+     *  @name delete/actualize/insert and record in the routing table
+     */
+    //@{
     //FIXME reduce these variations
     virtual void omnet_chg_rte(const ManetAddress &dst, const ManetAddress &gtwy, const ManetAddress &netm, short int hops, bool del_entry, const ManetAddress &iface = ManetAddress::ZERO);
     virtual void omnet_chg_rte(const struct in_addr &dst, const struct in_addr &gtwy, const struct in_addr &netm, short int hops, bool del_entry);
@@ -232,9 +233,9 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual void omnet_chg_rte(const ManetAddress &dst, const ManetAddress &gtwy, const ManetAddress &netm, short int hops, bool del_entry, int index);
     virtual void omnet_chg_rte(const struct in_addr &dst, const struct in_addr &gtwy, const struct in_addr &netm, short int hops, bool del_entry, int index);
 
-
     virtual void deleteIpEntry(const ManetAddress &dst) {omnet_chg_rte(dst, dst, dst, 0, true);}
     virtual void setIpEntry(const ManetAddress &dst, const ManetAddress &gtwy, const ManetAddress &netm, short int hops, const ManetAddress &iface = ManetAddress::ZERO) {omnet_chg_rte(dst, gtwy, netm, hops, false, iface);}
+    //@}
 
     /**
      * Check if it exists in the ip4 routing table the address dst
@@ -250,9 +251,10 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual bool omnet_exist_rte(struct in_addr dst);
     virtual void omnet_clean_rte();
 
-/////////////////////////
-//  Cross layer routines
-/////////////////////////
+    /**
+     *  @name Cross layer routines
+     */
+    //@{
 
     /// Activate the LLF break
     virtual void linkLayerFeeback();
@@ -268,10 +270,12 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
      * this method must be activated in the stage 0 to register the initial node position
      */
     virtual void registerPosition();
+    //@}
 
-//
-// Link layer feedback routines
-//
+    /**
+     * Link layer feedback routines
+     */
+    //@{
     /**
      * @brief Called by the signaling mechanism to inform of changes.
      *
@@ -286,6 +290,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual void processFullPromiscuous(const cObject *details);
     virtual void processLocatorAssoc(const cObject *details);
     virtual void processLocatorDisAssoc(const cObject *details);
+    //@}
 
     /**
      *  Replacement for gettimeofday(), used for timers.
