@@ -797,7 +797,7 @@ void NS_CLASS rreq_local_repair(rt_table_t * rt, struct in_addr src_addr,
     src_entry = rt_table_find(src_addr);
 
     if (src_entry)
-        ttl = (int) (max(rt->hcnt, 0.5 * src_entry->hcnt) + LOCAL_ADD_TTL);
+        ttl = max((int)rt->hcnt, (int)(0.5 * src_entry->hcnt)) + LOCAL_ADD_TTL;
     else
         ttl = rt->hcnt + LOCAL_ADD_TTL;
 

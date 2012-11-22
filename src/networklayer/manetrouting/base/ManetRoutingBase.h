@@ -27,6 +27,7 @@
 #endif
 
 #include "compatibility.h"
+#include "Coord.h"
 #include "IRoutingTable.h"
 #include "NotificationBoard.h"
 #include "IInterfaceTable.h"
@@ -122,12 +123,9 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     bool mac_layer_;
     ManetAddress    hostAddress;
     ManetAddress    routerId;
-    double xPosition;   //FIXME use Coord for store positions and speed
-    double yPosition;
-    double xPositionPrev;
-    double yPositionPrev;
+    Coord curPosition;
+    Coord curSpeed;
     simtime_t posTimer;
-    simtime_t posTimerPrev;
     bool   regPosition;
     bool   usetManetLabelRouting;
     bool   isRegistered;
@@ -347,10 +345,11 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 
     /// @name Access to the node position
     //@{
-    virtual double getXPos();   //FIXME replace to const Coord& getCoord()
-    virtual double getYPos();
+    virtual const Coord& getPosition();
+    virtual double getXPos();   //FIXME remove it
+    virtual double getYPos();   //FIXME remove it
     virtual double getSpeed();
-    virtual double getDirection();  //FIXME remove it or replace return value to Coord
+    virtual const Coord& getDirection();  //FIXME rename?
     //@}
 
     //FIXME 3 variations for do the same, reduce it

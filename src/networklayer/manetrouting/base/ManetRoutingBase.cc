@@ -1091,12 +1091,8 @@ void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t signalID, c
     if (signalID == mobilityStateChangedSignal)
     {
         IMobility *mobility = check_and_cast<IMobility*>(obj);
-        Coord pos = mobility->getCurrentPosition();
-        xPositionPrev = xPosition;
-        yPositionPrev = yPosition;
-        posTimerPrev = posTimer;
-        xPosition = pos.x;
-        yPosition = pos.y;
+        curPosition = mobility->getCurrentPosition();
+        curSpeed = mobility->getCurrentSpeed();
         posTimer = simTime();
     }
 }
@@ -1290,12 +1286,19 @@ bool ManetRoutingBase::checkTimer(cMessage *msg)
 //
 // Access to node position
 //
+const Coord& ManetRoutingBase::getPosition()
+{
+    if (!regPosition)
+        error("this node doesn't have activated the register position");
+    return curPosition;
+}
+
 double ManetRoutingBase::getXPos()
 {
 
     if (!regPosition)
         error("this node doesn't have activated the register position");
-    return xPosition;
+    return curPosition.x;
 }
 
 double ManetRoutingBase::getYPos()
@@ -1303,29 +1306,21 @@ double ManetRoutingBase::getYPos()
 
     if (!regPosition)
         error("this node doesn't have activated the register position");
-    return yPosition;
+    return curPosition.y;
 }
 
 double ManetRoutingBase::getSpeed()
 {
-
     if (!regPosition)
         error("this node doesn't have activated the register position");
-    double x = xPosition-xPositionPrev;
-    double y = yPosition-yPositionPrev;
-    double time = SIMTIME_DBL(posTimer-posTimerPrev);
-    double distance = sqrt((x*x)+(y*y));
-    return distance/time;
+    return curSpeed.length();
 }
 
-double ManetRoutingBase::getDirection()
+const Coord& ManetRoutingBase::getDirection()
 {
     if (!regPosition)
         error("this node doesn't have activated the register position");
-    double x = xPosition-xPositionPrev;
-    double y = yPosition-yPositionPrev;
-    double angle = atan(y/x);
-    return angle;
+    return curSpeed;
 }
 
 void ManetRoutingBase::setInternalStore(bool i)
