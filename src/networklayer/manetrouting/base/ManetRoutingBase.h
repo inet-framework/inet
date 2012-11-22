@@ -354,7 +354,6 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual void getListRelatedAp(const ManetAddress &, std::vector<ManetAddress>&);
 
   public:
-    std::string convertAddressToString(const ManetAddress&);
     virtual void setColaborativeProtocol(cObject *p) {colaborativeProtocol = dynamic_cast<ManetRoutingBase*>(p);}
     virtual ManetRoutingBase *getColaborativeProtocol() const {return colaborativeProtocol;}
     virtual void setStaticNode(bool v) {staticNode=v;}

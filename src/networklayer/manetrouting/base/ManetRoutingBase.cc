@@ -1909,9 +1909,3 @@ bool ManetRoutingBase::getRouteFromGlobal(const ManetAddress &src, const ManetAd
     }
 }
 
-
-// Auxiliary function that return a string with the address
-std::string ManetRoutingBase::convertAddressToString(const ManetAddress& add)
-{
-    return add.str();
-}
