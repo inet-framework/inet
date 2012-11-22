@@ -73,25 +73,32 @@ class INET_API ModuleAccess
     ModuleAccess(const char *n) {name = n; p = NULL;}
     virtual ~ModuleAccess() {}
 
-    virtual T *get(cModule *from = simulation.getContextModule())
+    virtual T *get()
     {
         if (!p)
-        {
-            cModule *m = findModuleWhereverInNode(name, from);
-            if (!m) opp_error("Module (%s)%s not found", opp_typename(typeid(T)), name);
-            p = check_and_cast<T*>(m);
-        }
+            p = get(simulation.getContextModule());
         return p;
     }
 
-    virtual T *getIfExists(cModule *from = simulation.getContextModule())
+    virtual T *get(cModule *from)
+    {
+        T *m = getIfExists(from);
+        if (!m) opp_error("Module (%s)%s not found", opp_typename(typeid(T)), name);
+        return m;
+    }
+
+    virtual T *getIfExists()
     {
         if (!p)
-        {
-            cModule *m = findModuleWhereverInNode(name, from);
-            p = dynamic_cast<T*>(m);
-        }
+            p = getIfExists(simulation.getContextModule());
         return p;
+    }
+
+    virtual T *getIfExists(cModule *from)
+    {
+        if (!from) opp_error("Invalid argument: module must not be NULL");
+        cModule *m = findModuleWhereverInNode(name, from);
+        return dynamic_cast<T*>(m);
     }
 };
 
