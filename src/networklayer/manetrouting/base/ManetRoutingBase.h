@@ -90,8 +90,6 @@ class ManetTimer :  public cOwnedObject
 
 typedef std::multimap <simtime_t, ManetTimer *> TimerMultiMap;
 typedef std::set<ManetAddress> AddressGroup;
-typedef std::set<ManetAddress>::iterator AddressGroupIterator;
-typedef std::set<ManetAddress>::const_iterator AddressGroupConstIterator;
 
 /**
  * Base class for Manet Routing

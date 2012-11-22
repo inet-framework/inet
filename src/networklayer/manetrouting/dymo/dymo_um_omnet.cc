@@ -1622,7 +1622,7 @@ int  DYMOUM::getRouteGroup(const ManetAddress& dest, std::vector<ManetAddress> &
 bool DYMOUM::getNextHopGroup(const AddressGroup &gr, ManetAddress &add, int &iface, ManetAddress& gw)
 {
     int distance = 1000;
-    for (AddressGroupConstIterator it = gr.begin(); it!=gr.end(); it++)
+    for (AddressGroup::const_iterator it = gr.begin(); it!=gr.end(); it++)
     {
         struct in_addr destAddr;
         destAddr.s_addr = *it;

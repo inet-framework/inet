@@ -2964,7 +2964,7 @@ int OLSR::getRouteGroup(const AddressGroup &gr, std::vector<ManetAddress> &add)
 
     int distance = 1000;
     add.clear();
-    for (AddressGroupConstIterator it = gr.begin(); it!=gr.end(); it++)
+    for (AddressGroup::const_iterator it = gr.begin(); it!=gr.end(); it++)
     {
         ManetAddress dest = *it;
         OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
@@ -2992,7 +2992,7 @@ bool OLSR::getNextHopGroup(const AddressGroup &gr, ManetAddress &add, int &iface
 {
 
     int distance = 1000;
-    for (AddressGroupConstIterator it = gr.begin(); it!=gr.end(); it++)
+    for (AddressGroup::const_iterator it = gr.begin(); it!=gr.end(); it++)
     {
         ManetAddress dest = *it;
         OLSR_rt_entry* rt_entry = rtable_.lookup(dest);

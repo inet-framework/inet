@@ -1626,7 +1626,7 @@ bool ManetRoutingBase::delInAddressGroup(const ManetAddress& addr, int group)
     if (isLocalAddress(addr))
     {
         // check if other address is in the group
-        for (AddressGroupIterator it = addressGroupVector[group].begin(); it!=addressGroupVector[group].end(); it++)
+        for (AddressGroup::iterator it = addressGroupVector[group].begin(); it!=addressGroupVector[group].end(); it++)
             if (isLocalAddress(*it)) return true;
         for (unsigned int i=0; i<inAddressGroup.size(); i++)
         {
@@ -1687,7 +1687,7 @@ bool ManetRoutingBase::getAddressGroup(std::vector<ManetAddress> &addressGroup, 
     if ((int)addressGroupVector.size()<=group)
         return false;
     addressGroup.clear();
-    for (AddressGroupIterator it=addressGroupVector[group].begin(); it!=addressGroupVector[group].end(); it++)
+    for (AddressGroup::iterator it=addressGroupVector[group].begin(); it!=addressGroupVector[group].end(); it++)
         addressGroup.push_back(*it);
     return true;
 }
