@@ -48,48 +48,7 @@
 class ManetRoutingBase;
 
 
-/**
- * ManetTimer abstract base class
- *
- * Timer for a ManetRoutingBase agent
- *
- * This class uses *timerMultiMapPtr from ManetRoutingBase
- */
-class ManetTimer :  public cOwnedObject
-{
-  protected:
-    ManetRoutingBase *agent_; ///< OLSR agent which created the timer.
-  public:
-    /// Constructor: uses owner as agent, owner of class must be a ManetRoutingBase module
-    ManetTimer();
 
-    /// Constructor with specified agent
-    ManetTimer(ManetRoutingBase *agent);
-
-    virtual void expire() = 0;
-
-    //FIXME remove one of the next two functions, or define any different of these functions
-
-    /// Remove timer from agent's timerMultiMap queue
-    virtual void removeQueueTimer();
-
-    /// Remove timer from agent's timerMultiMap queue, alias for removeQueueTimer()
-    virtual void removeTimer();
-
-    /// Reschedule timer in agent, time is relative to current simtime
-    virtual void resched(double time);  //FIXME rename it, two functions with same name but absolute/relative time parameters is dangerous
-
-    /// Reschedule timer in agent, time is absolute simtime
-    virtual void resched(simtime_t time);
-
-    /// is scheduled this timer in agent?
-    virtual bool isScheduled();
-
-    /// Destructor
-    virtual ~ManetTimer();
-};
-
-typedef std::multimap <simtime_t, ManetTimer *> TimerMultiMap;
 typedef std::set<ManetAddress> AddressGroup;
 
 /**
@@ -150,10 +109,6 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 
     InterfaceVector *interfaceVector;
 
-    // variables for ManetTimer class
-    TimerMultiMap *timerMultiMapPtr;
-    cMessage *timerMessagePtr;
-
     std::vector<AddressGroup> addressGroupVector;
     std::vector<int> inAddressGroup;
     bool staticNode;
@@ -183,29 +138,6 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 /////////////////////////////////////////////
 /////////////////////////////////////////////
     virtual void registerRoutingModule();
-
-/////////////////////////////////
-//
-// functions for ManetTimer class
-//
-/////////////////////////////////
-    /// initialize timer queue
-    virtual void createTimerQueue();
-
-    /**
-     * Cancel timer if already scheduled.
-     * Remove expired timers from queue and calls theirs expire() function.
-     * schedule first timer.
-     * //FIXME rename to rescheduleEvent() ???
-     */
-    virtual void scheduleEvent();
-
-    /**
-     * Checks msg is equals to timerMessagePtr and returns false if not.
-     * Remove expired timers from queue and calls theirs expire() function, and returns true.
-     */
-    virtual bool checkTimer(cMessage *msg);
-
 
 /////////////////////////////////
 //
@@ -415,8 +347,6 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 
     /// Returns true if the address is local or is in the proxy list
     virtual bool addressIsForUs(const ManetAddress &) const;
-
-    virtual TimerMultiMap *getTimerMultimMap() const {return timerMultiMapPtr;}
 
     /// set/get commonPtr member.
     virtual void setPtr(void *ptr) {commonPtr = ptr;}

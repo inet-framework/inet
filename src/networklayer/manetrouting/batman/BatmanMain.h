@@ -11,12 +11,6 @@
 #include "ManetRoutingBase.h"
 #include "batman.h"
 
-class BatmanTimer : ManetTimer
-{
-  public:
-    virtual void expire();
-};
-
 class Batman : public ManetRoutingBase
 {
   private:
