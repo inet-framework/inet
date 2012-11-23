@@ -1135,22 +1135,6 @@ const Coord& ManetRoutingBase::getPosition()
     return curPosition;
 }
 
-double ManetRoutingBase::getXPos()
-{
-
-    if (!regPosition)
-        error("this node doesn't have activated the register position");
-    return curPosition.x;
-}
-
-double ManetRoutingBase::getYPos()
-{
-
-    if (!regPosition)
-        error("this node doesn't have activated the register position");
-    return curPosition.y;
-}
-
 double ManetRoutingBase::getSpeed()
 {
     if (!regPosition)

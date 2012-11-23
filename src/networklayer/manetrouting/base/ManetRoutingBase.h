@@ -278,8 +278,6 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     /// @name Access to the node position
     //@{
     virtual const Coord& getPosition();
-    virtual double getXPos();   //FIXME remove it
-    virtual double getYPos();   //FIXME remove it
     virtual double getSpeed();
     virtual const Coord& getDirection();  //FIXME rename?
     //@}
