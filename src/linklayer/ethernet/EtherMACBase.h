@@ -142,7 +142,7 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     InterfaceEntry *interfaceEntry; // the associated entry in IInterfaceTable
 
     // state
-    bool dataratesDiffer;           // true when tx rate and rx rate differ (configuration error, or between datarate changes of tx/rx channels)
+    bool channelsDiffer;            // true when tx and rx channels differ (existing only one, or 'datarate' or 'disable' parameters differ) (configuration error, or between changes of tx/rx channels)
     MACTransmitState transmitState; // "transmit state" of the MAC
     MACReceiveState receiveState;   // "receive state" of the MAC
     simtime_t lastTxFinishTime;     // time of finishing the last transmission

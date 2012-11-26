@@ -182,7 +182,7 @@ void EtherMAC::handleSelfMessage(cMessage *msg)
 
 void EtherMAC::handleMessage(cMessage *msg)
 {
-    if (dataratesDiffer)
+    if (channelsDiffer)
         readChannelParameters(true);
 
     printState();
