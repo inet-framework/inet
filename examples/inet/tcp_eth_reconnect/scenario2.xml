@@ -1,0 +1,29 @@
+<!-- This file is used by the ScenarioManager. -->
+<scenario>
+    <at t="0.5">
+        <set-channel-attr src-module="server" src-gate="ethg$o[0]" attr="disabled" value="true"/>
+        <set-channel-attr src-module="client1" src-gate="ethg$o[0]" attr="disabled" value="true"/>
+    </at>
+    <at t="1.7">
+        <set-channel-attr src-module="server" src-gate="ethg$o[0]" attr="disabled" value="false"/>
+        <set-channel-attr src-module="client1" src-gate="ethg$o[0]" attr="disabled" value="false"/>
+        <set-channel-attr src-module="server" src-gate="ethg$o[0]" attr="datarate" value="10Mbps"/>
+        <set-channel-attr src-module="client1" src-gate="ethg$o[0]" attr="datarate" value="10Mbps"/>
+    </at>
+    <at t="2">
+        <set-channel-attr src-module="server" src-gate="ethg$o[0]" attr="datarate" value="100Mbps"/>
+        <set-channel-attr src-module="client1" src-gate="ethg$o[0]" attr="datarate" value="100Mbps"/>
+    </at>
+    <at t="3.3">
+        <set-channel-attr src-module="server" src-gate="ethg$o[0]" attr="disabled" value="true"/>
+    </at>
+    <at t="3.32">
+        <set-channel-attr src-module="client1" src-gate="ethg$o[0]" attr="disabled" value="true"/>
+    </at>
+    <at t="4.7">
+        <set-channel-attr src-module="server" src-gate="ethg$o[0]" attr="disabled" value="false"/>
+        <set-channel-attr src-module="client1" src-gate="ethg$o[0]" attr="disabled" value="false"/>
+        <set-channel-attr src-module="server" src-gate="ethg$o[0]" attr="datarate" value="10Mbps"/>
+        <set-channel-attr src-module="client1" src-gate="ethg$o[0]" attr="datarate" value="10Mbps"/>
+    </at>
+</scenario>

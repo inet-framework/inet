@@ -30,7 +30,7 @@ sep = ";" if sys.platform == 'win32' else ':'
 nedPath = inetRoot + "/src" + sep + inetRoot + "/examples" + sep + inetRoot + "/tests/networks"
 inetLib = inetRoot + "/src/inet"
 opp_run = "opp_run"
-cpuTimeLimit = "10s"
+cpuTimeLimit = "30s"
 logFile = "test.out"
 
 class FingerprintTestCaseGenerator():
