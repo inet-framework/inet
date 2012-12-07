@@ -34,7 +34,7 @@ Register_GlobalConfigOption(CFGID_SQLITEOUTVECTORMGR_CONNECTIONNAME, "sqliteoutp
 Register_GlobalConfigOption(CFGID_SQLITEOUTVECTORMGR_COMMIT_FREQ, "sqliteoutputvectormanager-commit-freq", CFG_INT, "50", "COMMIT every n INSERTs, default=50");
 
 
-Register_PerObjectConfigOption(CFGID_SQLITE_DB,         "sqlite-database",     KIND_NONE, CFG_STRING,   "\"\"",  "Database name");
+Register_PerObjectConfigOption(CFGID_SQLITE_VECTOR_DB, "sqlite-vector-database", KIND_NONE, CFG_STRING, "\"\"", "Output vector database name");
 //Register_PerObjectConfigOption(CFGID_SQLITE_OPT_FILE,   "sqlite-options-file", KIND_NONE, CFG_FILENAME, "",      "Options file for sqlite server");
 
 
@@ -58,7 +58,7 @@ void cSQLiteOutputVectorManager::openDB()
     if (cfgobj.empty())
         cfgobj = "sqlite";
 
-    std::string db_name = (ev.getConfig())->getAsString(cfgobj.c_str(), CFGID_SQLITE_DB, NULL);
+    std::string db_name = (ev.getConfig())->getAsString(cfgobj.c_str(), CFGID_SQLITE_VECTOR_DB, NULL);
 
     // TODO: Implement option processing
     // unsigned int clientflag = (unsigned int) cfg->getAsInt(cfgobj, CFGID_SQLITE_CLIENTFLAG, 0);
@@ -79,7 +79,7 @@ void cSQLiteOutputVectorManager::openDB()
     commitFreq = ev.getConfig()->getAsInt(CFGID_SQLITEOUTVECTORMGR_COMMIT_FREQ);
     insertCount = 0;
 
-    // prepare SQL statements; note that SQLite doesn't support "binding variables"
+    // prepare SQL statements; note that SQLite doesn't support 'binding variables'
     if (sqlite3_prepare_v2(db, SQL_INSERT_VECTOR, strlen(SQL_INSERT_VECTOR)+1, &insertVectorStmt, NULL) != SQLITE_OK)
         throw cRuntimeError("SQLite error: prepare statement for 'insertVectorStmt' failed: %s", sqlite3_errmsg(db));
     if (sqlite3_prepare_v2(db, SQL_INSERT_VECATTR, strlen(SQL_INSERT_VECATTR)+1, &insertVecAttrStmt, NULL) != SQLITE_OK)
@@ -132,10 +132,9 @@ void cSQLiteOutputVectorManager::initVector(sVectorData *vp)
         throw cRuntimeError("SQLite error: INSERT failed with 'insertVectorStmt': %s", sqlite3_errmsg(db));
     sqlite3_reset(insertVectorStmt);    
 
-    // query the automatic vectorid from the newly inserted row; note that runid
-    // starts from 0 while rowid from 1
+    // query the automatic vectorid from the newly inserted row
     // Note: this INSERT must not be DELAYED, otherwise we get zero here.
-    vp->id = long(sqlite3_last_insert_rowid(db) - 1);
+    vp->id = long(sqlite3_last_insert_rowid(db));
 
     // write attributes:
     sqlite3_bind_int(insertVecAttrStmt, 1, vp->id);
@@ -185,9 +184,8 @@ void cSQLiteOutputVectorManager::insertRunIntoDB()
             throw cRuntimeError("SQLite error: INSERT failed for 'vrun' table: %s", sqlite3_errmsg(db));
         sqlite3_reset(stmt);
 
-        // query the automatic runid from the newly inserted row; note that
-        // runid starts from 0 while rowid from 1
-        runId = long(sqlite3_last_insert_rowid(db) - 1);
+        // query the automatic runid from the newly inserted row
+        runId = long(sqlite3_last_insert_rowid(db));
 
         // begin transaction for faster inserts
         beginTransaction();

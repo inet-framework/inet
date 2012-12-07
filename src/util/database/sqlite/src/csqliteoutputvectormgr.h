@@ -23,7 +23,7 @@
 
 
 /**
- * An Output Vector Manager that writes into a SQLite database instead of
+ * An Output Vector Manager that writes into an SQLite database instead of
  * a .vec file.
  *
  * It expects to find two tables in the database: VECTOR and VECDATA.
