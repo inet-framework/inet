@@ -8,19 +8,21 @@
 //
 
 
-#ifndef __FIFO_H
-#define __FIFO_H
+#ifndef __FIFOQUEUE_H
+#define __FIFOQUEUE_H
 
-#include "AbstractFifo.h"
+#include "AbstractFifoQueue.h"
+
 
 /**
  * Single-server queue with a given service time.
  */
-class Fifo : public AbstractFifo
+class FifoQueue : public AbstractFifoQueue
 {
   protected:
     virtual simtime_t startService(cMessage *msg);
     virtual void endService(cMessage *msg);
 };
+
 
 #endif

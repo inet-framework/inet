@@ -7,12 +7,14 @@
 // `license' for details on this and other legal matters.
 //
 
+
 package inet.util.fifo;
+
 
 //
 // Single-server queue, service rate independent of message length
 //
-simple Fifo
+simple FifoQueue
 {
     parameters:
         volatile double serviceTime @unit(s);

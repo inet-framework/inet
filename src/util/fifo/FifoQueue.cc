@@ -8,18 +8,21 @@
 //
 
 
-#include "Fifo.h"
+#include "FifoQueue.h"
 
-Define_Module(Fifo);
 
-simtime_t Fifo::startService(cMessage *msg)
+Define_Module(FifoQueue);
+
+simtime_t FifoQueue::startService(cMessage *msg)
 {
     EV << "Starting service of " << msg->getName() << endl;
     return par("serviceTime");
 }
 
-void Fifo::endService(cMessage *msg)
+void FifoQueue::endService(cMessage *msg)
 {
     EV << "Completed service of " << msg->getName() << endl;
     send( msg, "out" );
 }
+
+

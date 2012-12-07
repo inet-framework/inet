@@ -8,17 +8,18 @@
 //
 
 
-#ifndef __ABSTRACTFIFO_H
-#define __ABSTRACTFIFO_H
+#ifndef __ABSTRACTFIFOQUEUE_H
+#define __ABSTRACTFIFOQUEUE_H
 
 #include <omnetpp.h>
+
 
 /**
  * Abstract base class for single-server queues. Subclasses should
  * define startService() and endService(), and may override other
  * virtual functions.
  */
-class AbstractFifo : public cSimpleModule
+class AbstractFifoQueue : public cSimpleModule
 {
   protected:
     cMessage *msgServiced;
@@ -29,8 +30,8 @@ class AbstractFifo : public cSimpleModule
     simsignal_t queueingTimeSignal;
 
   public:
-    AbstractFifo();
-    virtual ~AbstractFifo();
+    AbstractFifoQueue();
+    virtual ~AbstractFifoQueue();
 
   protected:
     virtual void initialize();
@@ -41,5 +42,6 @@ class AbstractFifo : public cSimpleModule
     virtual simtime_t startService(cMessage *msg) = 0;
     virtual void endService(cMessage *msg) = 0;
 };
+
 
 #endif

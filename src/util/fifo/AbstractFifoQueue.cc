@@ -8,20 +8,21 @@
 //
 
 
-#include "AbstractFifo.h"
+#include "AbstractFifoQueue.h"
 
-AbstractFifo::AbstractFifo()
+
+AbstractFifoQueue::AbstractFifoQueue()
 {
     msgServiced = endServiceMsg = NULL;
 }
 
-AbstractFifo::~AbstractFifo()
+AbstractFifoQueue::~AbstractFifoQueue()
 {
     delete msgServiced;
     cancelAndDelete(endServiceMsg);
 }
 
-void AbstractFifo::initialize()
+void AbstractFifoQueue::initialize()
 {
     endServiceMsg = new cMessage("end-service");
     queue.setName("queue");
@@ -33,7 +34,7 @@ void AbstractFifo::initialize()
     emit(busySignal, 0);
 }
 
-void AbstractFifo::handleMessage(cMessage *msg)
+void AbstractFifoQueue::handleMessage(cMessage *msg)
 {
     if (msg==endServiceMsg)
     {
