@@ -23,7 +23,7 @@ package inet.examples.ngoa.isp_traffic_shaping2;
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
-import inet.util.fifo.Fifo;
+import inet.util.fifo.FifoQueue;
 
 
 //
@@ -49,7 +49,7 @@ network testVideo
             parameters:
                 @display("p=464,119;i=device/server_l");
         }
-        fifo: Fifo {
+        fifo: FifoQueue {
             parameters:
                 @display("i=queue_l;p=236,119");
         }
