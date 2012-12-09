@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?>
-
-<cproject>
+<?fileVersion 4.0.0?><cproject>
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="org.omnetpp.cdt.gnu.config.debug.200906710">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.omnetpp.cdt.gnu.config.debug.200906710" moduleId="org.eclipse.cdt.core.settings" name="gcc-debug">
@@ -36,6 +34,7 @@
 									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/src/common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/src/envir&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/include/platdep&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../${SQLITE_INC}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1857212190" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -46,6 +45,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.689340442" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
 								<option id="gnu.cpp.link.option.paths.1992307611" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/usr/local/lib"/>
+									<listOptionValue builtIn="false" value="&quot;../${SQLITE_LIB}&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.815983402" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.382634038" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
