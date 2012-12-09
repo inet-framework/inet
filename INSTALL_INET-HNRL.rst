@@ -12,31 +12,39 @@ prerequsites mentioned there.
 You should also install `SQLite <http://www.sqlite.org>`_ library and header
 files to support writing scalar and vector outputs to SQLite databases.
 
-Note that, before taking the building steps described in the INSTALL_ document,
-you should set paths for (1) root directory of OMNeT++ installation, (2)
-directory for the SQLite header file, and (3) directory for the SQLite library
-file as follows:
+Before taking the building steps described in the INSTALL_ document, you should
+set paths for a root directory of OMNeT++ installation, a directory for SQLite
+header file, and a directory for SQLite library file as described in the
+following sections for command line and IDE installations.
 
 If you are building from command line:
 --------------------------------------
-Set environment variables as follows:
+- **OMNETPP_ROOT**: You should set this environment variable for the root
+  directory of OMNeT++ installation (without a trailing slash (Unix/Linux) or
+  backslash (Windows)); 'Makefile' is prepared based on this environment
+  variable and wouldn't work properly without it. Note that this step is needed
+  in order to set the directories for unexposed header files of the current
+  version of OMNeT++ (4.1+) in the top-level "Makefile" of INET-HNRL until the
+  next version of OMNeT++ exposes them.
 
-- **OMNETPP_ROOT**: Root directory of OMNeT++ installation (without a trailing
-  slash (Unix/Linux) or backslash (Windows)). This step is needed in order to
-  set the directories for unexposed header files of the current version of
-  OMNeT++ (4.1+) in the top-level "Makefile" of INET-HNRL until the next version
-  of OMNeT++ exposes them.
-
-- **SQLITE_INC**: Directory for SQLite header file.
-
-- **SQLITE_LIB**: Directory for SQLite library file.
+- If you install SQLite in one of the standard places (e.g., '/usr' or
+  '/usr/local'), you can skip this step. Otherwise, you should add
+  '-ISQLITE_INC' and '-LSQLITE_LIB' options to opp_makemake in the 'Makefile',
+  where 'SQLITE_INC' and 'SQLITE_LIB' denote directories for SQLite header and
+  SQLite library, respectively.
 
 If you are using the IDE:
 -------------------------
-Set linked resource variables for the workspace as follows:
+- **OMNETPP_ROOT**: You should set this linked resource variable for the root
+  directory of OMNeT++ installation as follows:
+  - Open the OMNeT++ IDE.
+  - Go to "Window->Preferences->General->Workspace->Linked resources" and define
+    the path variable.
 
-- Open the OMNeT++ IDE.
-
-- Go to "Window->Preferences->General->Workspace->Linked resources" and define
-  three path variables -- i.e., OMNETPP_ROOT, SQLITE_INC, SQLITE_LIB -- as for
-  the environment variables.
+- If you install SQLite in one of the standard places (e.g., '/usr' or
+  '/usr/local'), you can skip step. Otherwise, you should add directories for
+  SQLite header and SQLite library as follows:
+  - Open the OMNeT++ IDE.
+  - Click 'inet-hnrl' in the 'Project Explorer' panel and go to 'Properties' by right clicking.
+  - Go to "C/C++ General->Paths and Symbols" and add the said directories for
+    SQLite in the 'Includes' and 'Library Paths' panels.

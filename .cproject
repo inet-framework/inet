@@ -34,7 +34,6 @@
 									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/src/common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/src/envir&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/include/platdep&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;../${SQLITE_INC}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1857212190" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -45,7 +44,6 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.689340442" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
 								<option id="gnu.cpp.link.option.paths.1992307611" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/usr/local/lib"/>
-									<listOptionValue builtIn="false" value="&quot;../${SQLITE_LIB}&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.815983402" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.382634038" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
@@ -110,7 +108,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.1739567433" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1753147613" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
 								<option id="gnu.cpp.link.option.libs.1601643908" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs"/>
-								<option id="gnu.cpp.link.option.paths.1493770304" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+								<option id="gnu.cpp.link.option.paths.1493770304" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/usr/local/lib"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1742251575" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
