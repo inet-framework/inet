@@ -23,12 +23,6 @@ General
    archiver has bugs and cannot extract the file correctly. Use some other archiver
    or do it from command line (tar xvfz inet-yyyymmdd-opp4-src.tgz)
 
-3. (* Specific to INET-HNRL *) Set an environment variable "OMNETPP_ROOT" to specify
-   the root directory of OMNeT++ installation (without a trailing slash (Unix/Linux)
-   or backslash (Windows)). This additional step is needed in order to set the
-   directories for unexposed header files of the current version of OMNeT++ (4.1) in
-   the top-level "Makefile" of INET until the next version of OMNeT++ exposes them.
-
 If you are building from command line:
 --------------------------------------
 3. Change to the INET directory.
