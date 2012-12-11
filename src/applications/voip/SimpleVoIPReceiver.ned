@@ -56,12 +56,12 @@ simple SimpleVoIPReceiver like IUDPApp
         @signal[VoIPPlayoutLossRate](type="double");    // at end of talkspurt
         @signal[VoIPMosSignal](type="double");          // at end of talkspurt
         @signal[VoIPTaildropLossRate](type="double");   // at end of talkspurt
-        @statistic[VoIPPacketDelay](title="VoIP Packet Delay"; unit="s"; source="VoIPPacketDelay"; record=stats,vector); 
-        @statistic[VoIPPacketLossRate](title="VoIP Packet Loss"; unit="ratio"; source="VoIPPacketLossRate"; record=stats,vector);
-        @statistic[VoIPPlayoutDelay](title="VoIP Playout Delay"; unit="s"; source="VoIPPlayoutDelay"; record=stats,vector);
-        @statistic[VoIPPlayoutLossRate](title="VoIP Playout Loss"; unit="ratio"; source="VoIPPlayoutLossRate"; record=stats,vector);
-        @statistic[VoIPMosSignal](title="VoIP Mos Signal"; unit="MOS"; source="VoIPMosSignal"; record=stats,vector);
-        @statistic[VoIPTaildropLossRate](title="VoIP Tail Drop Loss"; unit="ratio"; source="VoIPTaildropLossRate"; record=stats,vector);
+        @statistic[endToEndDelay](title="VoIP Packet End-to-End Delay"; unit="s"; source="VoIPPacketDelay"; record=stats,vector); 
+        @statistic[packetLossRate](title="VoIP Packet Loss"; unit="ratio"; source="VoIPPacketLossRate"; record=stats,vector);
+        @statistic[playoutDelay](title="VoIP Playout Delay"; unit="s"; source="VoIPPlayoutDelay"; record=stats,vector);
+        @statistic[playoutLossRate](title="VoIP Playout Loss Rate"; unit="ratio"; source="VoIPPlayoutLossRate"; record=stats,vector);
+        @statistic[MOS](title="VoIP MOS"; unit="MOS"; source="VoIPMosSignal"; record=stats,vector);
+        @statistic[taildropLossRate](title="VoIP Tail Drop Loss Rate"; unit="ratio"; source="VoIPTaildropLossRate"; record=stats,vector);
 
         @display("i=block/source");
     gates:
