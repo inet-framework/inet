@@ -230,6 +230,10 @@
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            f252-459d
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            d999-82c6
 
+/examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            d0bc-3b11
+/examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            67fd-2373
+/examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            647c-190a
+
 /examples/voipstream/VoIPStreamLargeNet/, -f omnetpp.ini -c General -r 0,                5s,              efd9-bec0
 /examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g726 -r 0,                   5s,              4058-6015
 /examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_aLaw -r 0,              5s,              47f1-5bf8
