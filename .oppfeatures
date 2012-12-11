@@ -580,10 +580,10 @@
         linkerFlags = ""
         />
     <feature
-        id="VoIP_LTE"
-        name="VoIP (from LTE)"
-        description = "Voice over IP tool (from LTE model)"
-        initiallyEnabled = "false"
+        id="SimpleVoIP"
+        name="SimpleVoIP"
+        description = "A simplified VoIP model with MOS measurement capability"
+        initiallyEnabled = "true"
         requires = "UDP"
         labels = ""
         nedPackages = "
@@ -594,11 +594,11 @@
         linkerFlags = ""
         />
     <feature
-        id="VoIP_LTE_examples"
-        name="VoIP LTE examples"
+        id="SimpleVoIP_examples"
+        name="SimpleVoIP examples"
         description = "Example VoIP simulations"
-        initiallyEnabled = "false"
-        requires = "VoIP_LTE IPv4 Ethernet"
+        initiallyEnabled = "true"
+        requires = "SimpleVoIP IPv4 Ethernet"
         labels = "examples"
         nedPackages = "
                        inet.examples.voip

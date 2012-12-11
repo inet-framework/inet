@@ -1,24 +1,22 @@
 //
-// VoIPReceiver.cc
-//
-// Created on: 01/feb/2011
-//    Author: Adriano
+// Copyright (C) 2011 Adriano (University of Pisa)
+// Copyright (C) 2012 Opensim Ltd.
 //
 // This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License version 3
-// as published by the Free Software Foundation.
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
+// You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
 #include "SimpleVoIPReceiver.h"
-
 #include "SimpleVoIPPacket_m.h"
 
 Define_Module(SimpleVoIPReceiver);
@@ -36,7 +34,7 @@ void SimpleVoIPReceiver::TalkspurtInfo::startTalkspurt(SimpleVoIPPacket *pk)
 
 bool SimpleVoIPReceiver::TalkspurtInfo::checkPacket(SimpleVoIPPacket *pk)
 {
-    return     talkspurtID == pk->getTalkspurtID()
+    return    talkspurtID == pk->getTalkspurtID()
             && talkspurtNumPackets == pk->getTalkspurtNumPackets()
             && voiceDuration == pk->getVoiceDuration();
 }
@@ -58,7 +56,6 @@ SimpleVoIPReceiver::SimpleVoIPReceiver()
 SimpleVoIPReceiver::~SimpleVoIPReceiver()
 {
     cancelAndDelete(selfTalkspurtFinished);
-    playoutQueue.clear();
 }
 
 void SimpleVoIPReceiver::initialize(int stage)
@@ -78,8 +75,8 @@ void SimpleVoIPReceiver::initialize(int stage)
     int port = par("localPort");
     EV << "VoIPReceiver::initialize - binding to port: local:" << port << endl;
     if (port != -1) {
-            socket.setOutputGate(gate("udpOut"));
-            socket.bind(port);
+        socket.setOutputGate(gate("udpOut"));
+        socket.bind(port);
     }
 
     currentTalkspurt.talkspurtID = -1;
@@ -103,24 +100,28 @@ void SimpleVoIPReceiver::startTalkspurt(SimpleVoIPPacket* packet)
 void SimpleVoIPReceiver::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
-    { // selfTalkspurtFinished
+    {
+        // selfTalkspurtFinished
         evaluateTalkspurt(false);
         return;
     }
 
     SimpleVoIPPacket* packet = dynamic_cast<SimpleVoIPPacket*>(msg);
-    if (packet==NULL) {
+    if (packet==NULL)
+    {
         EV << "VoIPReceiver: Unknown incoming message: " << msg->getClassName() << endl;
         delete msg;
         return;
     }
 
     if (currentTalkspurt.status == TalkspurtInfo::EMPTY)
-    {   // first talkspurt
+    {
+        // first talkspurt
         startTalkspurt(packet);
     }
     else if (packet->getTalkspurtID() > currentTalkspurt.talkspurtID)
-    {   // old talkspurt finished, new talkspurt started
+    {
+        // old talkspurt finished, new talkspurt started
         if (currentTalkspurt.isActive())
         {
             cancelEvent(selfTalkspurtFinished);
@@ -129,7 +130,8 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
         startTalkspurt(packet);
     }
     else if (currentTalkspurt.talkspurtID == packet->getTalkspurtID() && currentTalkspurt.status == TalkspurtInfo::ACTIVE)
-    {   // talkspurt continued
+    {
+        // talkspurt continued
         if (!currentTalkspurt.checkPacket(packet))
             throw cRuntimeError("Talkspurt parameters not equals");
         currentTalkspurt.addPacket(packet);
@@ -137,7 +139,7 @@ void SimpleVoIPReceiver::handleMessage(cMessage *msg)
     else
     {
         // packet from older talkspurt, ignore
-        EV << "PACKET LATE ARRIVED: TALKSPURT " << packet->getTalkspurtID() << " PACKET " << packet->getPacketID() << ", IGNORED\n\n";
+        EV << "PACKET ARRIVED TOO LATE: TALKSPURT " << packet->getTalkspurtID() << " PACKET " << packet->getPacketID() << ", IGNORED\n\n";
         delete msg;
         return;
     }
@@ -157,8 +159,8 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 
     VoIPPacketInfo firstPacket = currentTalkspurt.packets.front();
 
-    simtime_t    firstPlayoutTime = firstPacket.arrivalTime + playoutDelay;
-    simtime_t    mouthToEarDelay = firstPlayoutTime - firstPacket.creationTime;
+    simtime_t firstPlayoutTime = firstPacket.arrivalTime + playoutDelay;
+    simtime_t mouthToEarDelay = firstPlayoutTime - firstPacket.creationTime;
     unsigned int firstPacketId = firstPacket.packetID;
     unsigned int talkspurtNumPackets = currentTalkspurt.talkspurtNumPackets;
     unsigned int playoutLoss = 0;
@@ -175,49 +177,50 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
     }
     else
         channelLoss = currentTalkspurt.talkspurtNumPackets - currentTalkspurt.packets.size();
-    //FIXME Translate: a duplikalt packetek elfednek egy-egy elveszett packetet a fenti channelLoss szamitasban, ezt korrigaljuk lejjebb a duplikalt packet detektalasnal.
+
+    // Note: duplicate packets may shadow lost packets in the above channel loss calculation,
+    // we'll correct that in the code below when we detect duplicates.
 
     double packetLossRate = ((double)channelLoss/(double)talkspurtNumPackets);
     emit(packetLossRateSignal, packetLossRate);
 
-    //VECTOR TO MANAGE DUPLICATED PACKETS
+    // vector to manage duplicated packets
     bool* isArrived = new bool[talkspurtNumPackets];
     for (unsigned int y = 0; y < talkspurtNumPackets; y++)
-    {
         isArrived[y] = false;
-    }
 
-    simtime_t last_lateness = -playoutDelay;     // arrival time - playout time
-    simtime_t max_lateness = -playoutDelay;
+    simtime_t lastLateness = -playoutDelay;     // arrival time - playout time
+    simtime_t maxLateness = -playoutDelay;
 
-    // FIXME: what is the idea here? what does it compute? from what data does it compute? write something about the algorithm
-    for ( PacketsVector::iterator packet = currentTalkspurt.packets.begin(); packet != currentTalkspurt.packets.end(); ++packet)
+    // compute channelLoss, playoutLoss and tailDropLoss, needed for MOS and statistics
+    PacketsList playoutQueue;
+    for (PacketsVector::iterator packet = currentTalkspurt.packets.begin(); packet != currentTalkspurt.packets.end(); ++packet)
     {
         packet->playoutTime = (firstPlayoutTime + ((int)packet->packetID - (int)firstPacketId) * currentTalkspurt.voiceDuration);
 
-        // FIXME: is this really a jitter? positive means the packet is too late
-        last_lateness = packet->arrivalTime - packet->playoutTime;
-        if (max_lateness < last_lateness)
-            max_lateness = last_lateness;
+        lastLateness = packet->arrivalTime - packet->playoutTime;  // >0: packet is too late (missed its playout time)
+        if (maxLateness < lastLateness)
+            maxLateness = lastLateness;
 
-        EV << "MEASURED PACKET JITTER: " << last_lateness << " TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";     //FIXME Jitter???
+        EV << "MEASURED PACKET LATENESS: " << lastLateness << " TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";
 
-        //MANAGEMENT OF DUPLICATED PACKETS
+        // Management of duplicated packets
         if (isArrived[packet->packetID])
         {
-            ++channelLoss; // a duplikalt packetek elfednek egy-egy elveszett packetet a fenti channelLoss szamitasban, ezt korrigaljuk itt. //FIXME Translate
+            ++channelLoss; // duplicate packets may shadow lost packets in the channel loss calculation above, we correct that here.
             EV << "DUPLICATED PACKET: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << "\n\n";
         }
-        else if (last_lateness > 0.0)
+        else if (lastLateness > 0.0)
         {
             ++playoutLoss;
-            EV << "LATE PACKAGE REMOVED: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << ", LATENESS " << last_lateness*1000.0 << "ms\n\n";
+            EV << "REMOVED LATE PACKET: TALK " << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << ", LATENESS " << lastLateness*1000.0 << "ms\n\n";
         }
         else
         {
-            // FIXME: is this the place where we actually play the packets?
+            // insert packet into playout buffer (if there is room in it)
+
             // remove packets from queue
-            PacketsList::iterator qi=playoutQueue.begin();
+            PacketsList::iterator qi = playoutQueue.begin();
             while (qi != playoutQueue.end())
             {
                 if ((*qi)->playoutTime < packet->arrivalTime)
@@ -231,27 +234,28 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 
             if (playoutQueue.size() < bufferSpace)
             {
-                EV << "PACKET INSERTED TO PLAYOUT BUFFER: TALK "
-                        << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID
-                        << ", MOMENT OF ARRIVAL " << packet->arrivalTime
-                        << "s, MOMENT OF PLAYOUT " << packet->playoutTime << "s\n\n";
-                //MANAGEMENT OF DUPLICATED PACKETS
-                isArrived[packet->packetID] = true;
+                EV << "PACKET INSERTED INTO PLAYOUT BUFFER: TALK "
+                   << currentTalkspurt.talkspurtID << " PACKET " << packet->packetID << ", "
+                   << "ARRIVAL TIME " << packet->arrivalTime << "s, "
+                   << "PLAYOUT TIME " << packet->playoutTime << "s\n\n";
+
+                isArrived[packet->packetID] = true;  // isArrived[] is needed for detecting duplicate packets
 
                 playoutQueue.push_back(&(*packet));
             }
             else
-            {   // buffer full
+            {
+                // buffer full
                 ++tailDropLoss;
                 EV << "BUFFER FULL, PACKET DISCARDED: TALK " << currentTalkspurt.talkspurtID << " PACKET "
-                        << packet->packetID << " MOMENT OF ARRIVAL " << packet->arrivalTime << "s\n\n";     //FIXME Translate!!!
+                   << packet->packetID << " ARRIVAL TIME " << packet->arrivalTime << "s\n\n";
             }
         }
     }
 
     double proportionalLossRate = (double)(tailDropLoss+playoutLoss+channelLoss) / (double)talkspurtNumPackets;
-    EV << "proportionalLossRate " << proportionalLossRate << "(tailDropLoss=" << tailDropLoss << " - playoutLoss="
-            << playoutLoss << " - channelLoss=" << channelLoss << ")\n\n";
+    EV << "proportionalLossRate " << proportionalLossRate << "(tailDropLoss=" << tailDropLoss
+       << " - playoutLoss=" << playoutLoss << " - channelLoss=" << channelLoss << ")\n\n";
 
     double mos = eModel(SIMTIME_DBL(mouthToEarDelay), proportionalLossRate);
 
@@ -260,7 +264,7 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
     emit(playoutLossRateSignal, lossRate);
     emit(mosSignal, mos);
 
-    // add calculated mos value to fingerprint
+    // add calculated MOS value to fingerprint
     cHasher *hasher = simulation.getHasher();
     if (hasher)
         hasher->add(mos);
@@ -270,15 +274,14 @@ void SimpleVoIPReceiver::evaluateTalkspurt(bool finish)
 
     EV << "CALCULATED MOS: eModel( " << playoutDelay << " , " << tailDropLoss << "+" << playoutLoss << "+" << channelLoss << " ) = " << mos << "\n\n";
 
-    EV << "PLAYOUT DELAY ADAPTATION \n" << "OLD PLAYOUT DELAY: " << playoutDelay << "\nMAX JITTER MEASURED: " << max_lateness << "\n\n"; //FIXME JITTER???
+    EV << "PLAYOUT DELAY ADAPTATION \n" << "OLD PLAYOUT DELAY: " << playoutDelay << "\nMAX LATENESS MEASURED: " << maxLateness << "\n\n";
 
-    playoutDelay += max_lateness;
+    playoutDelay += maxLateness;
     if (playoutDelay < 0.0)
         playoutDelay = 0.0;
     EV << "NEW PLAYOUT DELAY: " << playoutDelay << "\n\n";
 
     delete [] isArrived;
-    playoutQueue.clear();
     currentTalkspurt.finishTalkspurt();
 }
 
