@@ -8,6 +8,7 @@ package inet.examples.voip;
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.StandardHost;
+import inet.nodes.internetcloud.InternetCloud;
 import ned.DatarateChannel;
 
 
@@ -16,6 +17,7 @@ import ned.DatarateChannel;
 //
 network Voip
 {
+    @display("bgb=327,282");
     types:
         channel C extends DatarateChannel
         {
@@ -34,6 +36,10 @@ network Voip
         iPv4NetworkConfigurator: IPv4NetworkConfigurator {
             @display("p=126,20");
         }
+        internetCloud: InternetCloud {
+            @display("p=157,218");
+        }
     connections:
-        senderHost.ethg++ <--> C <--> receiverHost.ethg++;
+        senderHost.pppg++ <--> C <--> internetCloud.pppg++;
+        internetCloud.pppg++ <--> C <--> receiverHost.pppg++;
 }
