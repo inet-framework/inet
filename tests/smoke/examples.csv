@@ -176,6 +176,9 @@
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c OLSR_ETX -r 0
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DSDV_2 -r 0
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c Batman -r 0
+/examples/manetrouting/hna/,         -f omnetpp.ini -c single_radio -r 0
+/examples/manetrouting/hna/,         -f omnetpp.ini -c multi_radio -r 0
+/examples/manetrouting/manetMultiradio/, -f 3_nodes.ini -c MultiRadio -r 0
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0
