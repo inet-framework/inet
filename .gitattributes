@@ -2,9 +2,13 @@
 * text=auto
 
 # for OMNeT++
-*.ini	test
-*.ned	text
-*.sql	text
+Makefile*	text
+makefile*	text
+run*		text
+*.cmd		text
+*.ini		text
+*.ned		text
+*.sql		text
 
 # Custom for Visual Studio
 *.cs     diff=csharp
