@@ -25,11 +25,12 @@
 
 #include "CloudDelayerBase.h"
 
-// Foreign classes:
 class IInterfaceTable;
 namespace inet { class PatternMatcher; }
 
-
+/**
+ * Implementation of MatrixCloudDelayer. See NED file for details.
+ */
 class INET_API MatrixCloudDelayer : public CloudDelayerBase
 {
   protected:

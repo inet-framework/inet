@@ -15,36 +15,36 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 // @author Zoltan Bojthe
-
-// Based on ../../nodes/inet/Router.ned
+//
 
 package inet.nodes.internetcloud;
 
 
 import inet.base.NotificationBoard;
-import inet.linklayer.IExternalNic;
 import inet.linklayer.IWiredNic;
 import inet.networklayer.arp.ARP;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.internetcloud.ICloudDelayer;
+import inet.networklayer.internetcloud.InternetCloudTaggerChannel;
 import inet.networklayer.ipv4.ErrorHandling;
 import inet.networklayer.ipv4.ICMP;
 import inet.networklayer.ipv4.IPv4;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.util.PcapRecorder;
 
-
 //
-// InternetCloud
+// This module is an IPv4 router that can delay or drop packets (while retaining their order) 
+// based on which interface card the packet arrived on and on which interface 
+// it is leaving the cloud. The delayer module is replacable. 
 //
-// This module simulates an internet cloud (for IPv4).
-// This module similar to NodeBase. Changes: 
-//   - NetworkLayer replaced to InternetCloudNetworkLayer,
-//   - mobility module removed,
-//   - removed wlan, eth and ext interfaces,
-//   - idealchannels from interfaces to IP layer replaced to InternetCloudTaggerChannel.
-//
-// @see InternetCloudNetwokConfigurator
+// By default the delayer module is ~MatrixCloudDelayer which lets you configure
+// the delay, drop and datarate parameters in an XML file. Packet flows, as defined 
+// by incoming and outgoing interface pairs, are independent of each other.
+// 
+// The ~InternetCloud module can be used only to model the delay between two hops, but
+// it is possible to build more complex networks using several ~InternetCloud modules.
+//   
+// @see MatrixCloudDelayer 
 //
 module InternetCloud
 {
@@ -57,9 +57,6 @@ module InternetCloud
     gates:
         inout pppg[] @labels(PPPFrame-conn);
     types:
-        channel InternetCloudTaggerChannel
-        {
-        }
         module InternetCloudNetworkLayer
         {
             parameters:

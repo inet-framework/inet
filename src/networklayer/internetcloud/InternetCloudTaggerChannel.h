@@ -21,16 +21,16 @@
 
 #include "INETDefs.h"
 
-// foreign declarations:
 class InterfaceEntry;
 
+/**
+ * Implementation of InternetCloudTaggerChannel. See NED file for details.
+ */
 class InternetCloudTaggerChannel : public cIdealChannel
 {
     InterfaceEntry *ie;
 
   public:
-    /** @name Constructors, destructor */
-    //@{
     /**
      * Constructor. This is only for internal purposes, and should not
      * be used when creating channels dynamically; use the create()
@@ -44,8 +44,6 @@ class InternetCloudTaggerChannel : public cIdealChannel
      */
     virtual ~InternetCloudTaggerChannel() {}
 
-    /** @name Redefined cIdealChannel member functions. */
-    //@{
     /**
      * The implementation of this method adds incoming interfaceId to msg as par("incomingInterfaceID").
      */

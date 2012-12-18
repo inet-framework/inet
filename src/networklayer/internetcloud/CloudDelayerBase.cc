@@ -45,7 +45,8 @@ void CloudDelayerBase::handleMessage(cMessage *msg)
         destID = (dynamic_cast<IPv4RoutingDecision*>(ci))->getInterfaceId();
     else if (dynamic_cast<IPv6ControlInfo*>(ci))
         destID = (dynamic_cast<IPv6ControlInfo*>(ci))->getInterfaceId();
-    //TODO any other variations????
+    else
+        throw cRuntimeError("Cannot determine destination interface id from packet");
 
     simtime_t propDelay;
     bool isDrop;

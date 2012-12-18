@@ -62,7 +62,7 @@ Possible enhancements:
    
  - The model can be extended to handle several "different states" of the 
    Internet by implementing a state model and changing the actual path parameters
-   based on the global inernet state. The configuration format supports several 
+   based on the global internet state. The configuration format supports several 
    independent "parameter sets" to support this scenario.  Only the first parameter 
    set is used at the moment.  
    

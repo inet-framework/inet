@@ -20,18 +20,9 @@
 package inet.networklayer.internetcloud;
 
 //
-// Delay module interface for InternetCloud.
+// Utility channel for ~InternetCloud.
+// Tags packets with an "incomingInterfaceID" parameter. 
 //
-// Delays or drops the packets based on which interface card the packet 
-// has arrived on and on which interface it is leaving the cloud. 
-//
-// @see InternetCloud
-//
-moduleinterface ICloudDelayer
+channel InternetCloudTaggerChannel
 {
-    parameters:
-        @display("i=block/delay");
-    gates:
-        input ipIn;
-        output ipOut;
 }

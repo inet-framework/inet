@@ -1,0 +1,7 @@
+2012-09-07  Zoltan Bojthe
+
+	Initial implementation of the internet cloud node. The component can
+	be configured to model packet delay, datarate and drop probability
+	between each input-output interface pair. The parameter matrix
+	is provided as an XML configuration file. See the README file
+	in src/nodes/internetcloud for further details.
