@@ -17,6 +17,7 @@ class FifoSink : public cSimpleModule
 {
   private:
     simsignal_t lifetimeSignal;
+    double timeScale;
 
   protected:
     virtual void initialize();
@@ -28,12 +29,14 @@ Define_Module( FifoSink );
 void FifoSink::initialize()
 {
     lifetimeSignal = registerSignal("lifetime");
+    timeScale = par("timeScale").doubleValue();
 }
 
 void FifoSink::handleMessage(cMessage *msg)
 {
     simtime_t lifetime = simTime() - msg->getCreationTime();
     EV << "Received " << msg->getName() << ", lifetime: " << lifetime << "s" << endl;
-    emit(lifetimeSignal, lifetime);
+    cTimestampedValue tmp(timeScale*simTime(), lifetime);
+    emit(lifetimeSignal, &tmp);
     delete msg;
 }

@@ -20,6 +20,7 @@ simple FifoSink
         @display("i=block/sink");
         @signal[lifetime](type="simtime_t");
         @statistic[lifetime](title="lifetime of arrived jobs"; unit=s; record=vector,mean,max; interpolationmode=none);
+        double timeScale = default(1.0);	// time scale factor for output vector recording
     gates:
         input in;
 }
