@@ -31,12 +31,14 @@ package inet.applications.udpapp;
 simple UDPVideoStreamCliWithSCFR like UDPApp
 {
     parameters:
+        @display("i=block/app");
+        @signal[measuredClockRatio](type="double");
+        @statistic[measuredClockRatio](title="measured clock ratio between source and receiver"; record=vector; interpolationmode=none);
         int localPort;
         string serverAddress;
         int serverPort;
         double startTime @unit("s") = default(1s);
-        double clockFrequency @unit("Hz");	// frequency of a local clock
-        @display("i=block/app");
+        double clockFrequency @unit("Hz") = default(90000Hz);	// frequency of a local clock; default is for MPEG audio/video
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);

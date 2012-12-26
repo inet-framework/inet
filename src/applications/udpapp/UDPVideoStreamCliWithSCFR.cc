@@ -20,6 +20,10 @@
 // based on the video streaming app of the similar name by Johnny Lai
 //
 
+#ifndef UINT32_MAX
+#define UINT32_MAX (0xffffffff)
+#endif
+
 #include "UDPVideoStreamCliWithSCFR.h"
 #include "IPAddressResolver.h"
 
@@ -29,20 +33,16 @@ Define_Module(UDPVideoStreamCliWithSCFR);
 
 void UDPVideoStreamCliWithSCFR::initialize()
 {
-    // from the base class initialization
-    simtime_t startTime = par("startTime");
-    if (startTime>=0)
-        scheduleAt(startTime, new cMessage("UDPVideoStreamStart"));
+    UDPVideoStreamCli::initialize();
 
     // initialize module parameters
     clockFrequency = par("clockFrequency").doubleValue();
 
     // initialize status variables
-    prevArrivalTime = -1L;
-    prevTimestamp = -1L;
+    prevTimestampReceived = false;
 
     // initialize statistics
-    estimatedClockRatioSignal = registerSignal("estimated ratio of clock frequencies between source and receiver");
+    measuredClockRatioSignal = registerSignal("measuredClockRatio");
 }
 
 void UDPVideoStreamCliWithSCFR::handleMessage(cMessage* msg)
@@ -60,36 +60,42 @@ void UDPVideoStreamCliWithSCFR::handleMessage(cMessage* msg)
 
 void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
 {
-    EV << "Video stream packet:\n";
-    printPacket(msg);
-
 //    EV << "Received " << msg->getName() << ", lifetime: " << lifetime << "s" << endl;
 
-    if (prevArrivalTime < 0L)
+//    // DEBUG
+//    double currTime = simTime().dbl();
+//    uint32_t counterValue = uint32_t(clockFrequency * currTime);
+//    uint64_t max_tmp = UINT32_MAX + 1LL;
+//    double double_tmp = fmod(clockFrequency*currTime, UINT32_MAX+1LL);
+//    uint32_t int_tmp = uint32_t(double_tmp);
+//    // DEBUG
+
+    if (prevTimestampReceived == false)
     { // not initialized yet
-        prevArrivalTime = uint32_t(clockFrequency * simTime().dbl()); // value of latched counter driven by a local clock
-        prevTimestamp = ((UDPVideoStreamPacket *) msg)->getTimestamp();
+        prevArrivalTime = uint32_t(fmod(clockFrequency*simTime().dbl(), UINT32_MAX+1LL));   // value of a latched counter driven by a local clock
+        prevTimestamp = ((UDPVideoStreamPacket *)msg)->getTimestamp();
+        prevTimestampReceived = true;
     }
     else
     {
-        uint32_t currArrivalTime = uint32_t(fmod(clockFrequency*simTime().dbl(), UINT32_MAX+1));
+        uint32_t currArrivalTime = uint32_t(fmod(clockFrequency*simTime().dbl(), UINT32_MAX+1LL));
         uint32_t currTimestamp = ((UDPVideoStreamPacket *)msg)->getTimestamp();
 
-        double arrivalTimeDifference = currArrivalTime - prevArrivalTime;
+        int64_t arrivalTimeDifference = int64_t(currArrivalTime) - int64_t(prevArrivalTime);
         if (currArrivalTime <= prevArrivalTime)
         {   // handling wrap around
-            arrivalTimeDifference += UINT32_MAX + 1.0;
+            arrivalTimeDifference += UINT32_MAX + 1LL;
         }
-        double timestampDifference = currTimestamp - prevTimestamp;
+        int64_t timestampDifference = int64_t(currTimestamp) - int64_t(prevTimestamp);
         if (currTimestamp <= prevTimestamp)
         {   // handling wrap around
-            timestampDifference += UINT32_MAX + 1.0;
+            timestampDifference += UINT32_MAX + 1LL;
         }
-        emit(estimatedClockRatioSignal, arrivalTimeDifference / timestampDifference);
+        emit(measuredClockRatioSignal, double(arrivalTimeDifference)/double(timestampDifference));
 
         prevArrivalTime = currArrivalTime;
         prevTimestamp = currTimestamp;
     }
 
-    delete msg;
+    UDPVideoStreamCli::receiveStream(msg);  // 'msg' is deleted in this function
 }

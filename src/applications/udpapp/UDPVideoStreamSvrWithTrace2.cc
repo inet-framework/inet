@@ -35,9 +35,15 @@
 ///
 
 
-//#include <iostream>
-#include <fstream>
+#ifndef UINT16_MAX
+#define UINT16_MAX (0xffff)
+#endif
+#ifndef UINT32_MAX
+#define UINT32_MAX (0xffffffff)
+#endif
+
 #include <cstdio>
+#include <fstream>
 #include "UDPVideoStreamSvrWithTrace2.h"
 #include "UDPControlInfo_m.h"
 #include "UDPVideoStreamPacket_m.h"
@@ -217,7 +223,7 @@ void UDPVideoStreamSvrWithTrace2::sendStreamData(cMessage *pktTimer)
 	long payloadSize = (d->bytesLeft >= maxPayloadSize) ? maxPayloadSize : d->bytesLeft;
 	pkt->setByteLength(payloadSize + appOverhead);
 	pkt->setSequenceNumber(d->currentSequenceNumber);	///< 16-bit RTP sequence number
-	pkt->setTimestamp(uint32_t(fmod(clockFrequency*simTime().dbl(), UINT32_MAX+1)));    ///< 32-bit RTP timestamp (wrap-arounded)
+	pkt->setTimestamp(uint32_t(fmod(clockFrequency*simTime().dbl(), UINT32_MAX+1LL)));  ///< 32-bit RTP timestamp (wrap-arounded)
 	pkt->setFragmentStart(d->bytesLeft == d->frameSize ? true : false);	///< in FU header in RTP payload
 	pkt->setFragmentEnd(d->bytesLeft == payloadSize ? true : false);	///< in FU header in RTP payload
 	pkt->setFrameNumber(d->frameNumber);	///< non-RTP field
@@ -228,7 +234,7 @@ void UDPVideoStreamSvrWithTrace2::sendStreamData(cMessage *pktTimer)
 	// update the session VideoStreamData and global statistics
 	d->bytesLeft -= payloadSize;
 	d->numPktSent++;
-	d->currentSequenceNumber = (d->currentSequenceNumber  + 1) % UINT16_MAX+1;  ///> wrap around to zero if it reaches the maximum value (65535)
+	d->currentSequenceNumber = (d->currentSequenceNumber  + 1) % (UINT16_MAX + 1L);  ///> wrap around to zero if it reaches the maximum value (65535)
 	numPktSent++;
 
 	// reschedule timer if there are bytes left to send

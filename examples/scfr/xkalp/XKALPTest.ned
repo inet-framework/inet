@@ -45,12 +45,14 @@ network XKALPTest
         double uni_delay @unit(s) = default(0s);	// no delay at UNIs
         double distribution_rate @unit(bps) = default(10Gbps);	// transmission rate of distribution fiber (between Onu and OLT)
         double distribution_delay @unit(s) = default(150us);	// default delay of 300 us corresponds to 30 km fiber;
-        // double feeder_rate @unit(bps) = default(10Gbps);	// transmission rate of feeder fiber (between Olt and LambdaSplitter)
-        // double feeder_delay @unit(s) = default(150us);	// default delay of 150 us corresponds to 30 km fiber
+        //double feeder_rate @unit(bps) = default(10Gbps);	// transmission rate of feeder fiber (between Olt and LambdaSplitter)
+        //double feeder_delay @unit(s) = default(150us);	// default delay of 150 us corresponds to 30 km fiber
         double backbone_rate @unit(bps) = default(100Gbps);	// transmission rate of backbone link (between Olt and server)
-        double backbone_delay @unit(s) = default(4.7ms);	// default delay of 4.7 ms gives total RTT of 10 ms including delays in access
-        double backbone_delay1 @unit(s) = default(2.0ms);	// together with backbone_delay2 (i.e. 4.7ms), it gives total RTT of 10 ms including delays in access
-        double backbone_delay2 @unit(s) = default(2.7ms);
+        //double backbone_delay @unit(s) = default(4.7ms);	// default delay of 4.7 ms gives total RTT of 10 ms including delays in access
+        double backbone_delay1 @unit(s) = default(1.0ms);	// together with backbone_delay2/3/4 (i.e. 4.7ms), it gives total RTT of 10 ms including delays in access
+        double backbone_delay2 @unit(s) = default(1.0ms);
+        double backbone_delay3 @unit(s) = default(1.7ms);
+        double backbone_delay4 @unit(s) = default(1.0ms);
         @display("bgb=830,317");
     submodules:
         configurator: FlatNetworkConfigurator {
@@ -106,7 +108,7 @@ network XKALPTest
         }
         accessSwitch.ethg[N] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> olt.ethg[0];
         olt.ethg[1] <--> {  delay = backbone_delay1; datarate = backbone_rate; } <--> router1.ethg++;
-        router1.ethg++ <--> {  delay = backbone_delay1; datarate = backbone_rate; } <--> router2.ethg++;
-        router2.ethg++ <--> {  delay = backbone_delay1; datarate = backbone_rate; } <--> router3.ethg++;
-        router3.ethg++ <--> {  delay = backbone_delay2; datarate = backbone_rate; } <--> server.ethg++;
+        router1.ethg++ <--> {  delay = backbone_delay2; datarate = backbone_rate; } <--> router2.ethg++;
+        router2.ethg++ <--> {  delay = backbone_delay3; datarate = backbone_rate; } <--> router3.ethg++;
+        router3.ethg++ <--> {  delay = backbone_delay4; datarate = backbone_rate; } <--> server.ethg++;
 }

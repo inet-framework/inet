@@ -20,7 +20,6 @@
 #ifndef UDPVIDEOSTREAMSVR_WITH_TRACE2_H
 #define UDPVIDEOSTREAMSVR_WITH_TRACE2_H
 
-#include <climits>
 #include "UDPVideoStreamSvrWithTrace.h"
 
 
