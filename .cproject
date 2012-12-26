@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?><cproject>
+<?fileVersion 4.0.0?>
+
+<cproject>
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="org.omnetpp.cdt.gnu.config.debug.200906710">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.omnetpp.cdt.gnu.config.debug.200906710" moduleId="org.eclipse.cdt.core.settings" name="gcc-debug">
@@ -34,6 +36,8 @@
 									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/src/common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/src/envir&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/include/platdep&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/mingw/lib/gcc/mingw32/4.6.1/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/mingw/lib/gcc/mingw32/4.6.1/include/c++&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1857212190" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

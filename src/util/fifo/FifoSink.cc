@@ -28,8 +28,8 @@ Define_Module( FifoSink );
 
 void FifoSink::initialize()
 {
-    lifetimeSignal = registerSignal("lifetime");
     timeScale = par("timeScale").doubleValue();
+    lifetimeSignal = registerSignal("lifetime");
 }
 
 void FifoSink::handleMessage(cMessage *msg)

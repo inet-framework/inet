@@ -29,8 +29,8 @@ enum FrameType;
 packet UDPVideoStreamPacket
 {
     // RTP header fields
-    unsigned short sequenceNumber;	///< 16-bit packet sequence number
-    double timeStamp;	///< 32-bit timestamp
+    uint16_t sequenceNumber;	///< 16-bit packet sequence number
+    uint32_t timestamp;			///< 32-bit timestamp
 
     // part of fragmentation unit (FU) header (1 octet) in RTP payload
     bool fragmentStart; ///< indicating the start of fragemented NAL units
