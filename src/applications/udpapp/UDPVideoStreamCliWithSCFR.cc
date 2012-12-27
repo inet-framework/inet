@@ -20,9 +20,6 @@
 // based on the video streaming app of the similar name by Johnny Lai
 //
 
-#ifndef UINT32_MAX
-#define UINT32_MAX (0xffffffff)
-#endif
 
 #include "UDPVideoStreamCliWithSCFR.h"
 #include "IPAddressResolver.h"
@@ -62,34 +59,32 @@ void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
 {
 //    EV << "Received " << msg->getName() << ", lifetime: " << lifetime << "s" << endl;
 
-//    // DEBUG
-//    double currTime = simTime().dbl();
-//    uint32_t counterValue = uint32_t(clockFrequency * currTime);
-//    uint64_t max_tmp = UINT32_MAX + 1LL;
-//    double double_tmp = fmod(clockFrequency*currTime, UINT32_MAX+1LL);
-//    uint32_t int_tmp = uint32_t(double_tmp);
-//    // DEBUG
+    // DEBUG
+    double dbg_time = simTime().dbl();
+    uint64_t dbg_ctrValue = uint64_t(clockFrequency*dbg_time);
+    uint32_t dbg_wrappedCtrValue = uint32_t(dbg_ctrValue%0x100000000LL);
+    // DEBUG
 
     if (prevTimestampReceived == false)
     { // not initialized yet
-        prevArrivalTime = uint32_t(fmod(clockFrequency*simTime().dbl(), UINT32_MAX+1LL));   // value of a latched counter driven by a local clock
+        prevArrivalTime = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);   // value of a latched counter driven by a local clock
         prevTimestamp = ((UDPVideoStreamPacket *)msg)->getTimestamp();
         prevTimestampReceived = true;
     }
     else
     {
-        uint32_t currArrivalTime = uint32_t(fmod(clockFrequency*simTime().dbl(), UINT32_MAX+1LL));
+        uint32_t currArrivalTime = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);
         uint32_t currTimestamp = ((UDPVideoStreamPacket *)msg)->getTimestamp();
 
         int64_t arrivalTimeDifference = int64_t(currArrivalTime) - int64_t(prevArrivalTime);
         if (currArrivalTime <= prevArrivalTime)
         {   // handling wrap around
-            arrivalTimeDifference += UINT32_MAX + 1LL;
+            arrivalTimeDifference += 0x100000000LL;
         }
         int64_t timestampDifference = int64_t(currTimestamp) - int64_t(prevTimestamp);
         if (currTimestamp <= prevTimestamp)
         {   // handling wrap around
-            timestampDifference += UINT32_MAX + 1LL;
+            timestampDifference += 0x100000000LL;
         }
         emit(measuredClockRatioSignal, double(arrivalTimeDifference)/double(timestampDifference));
 
