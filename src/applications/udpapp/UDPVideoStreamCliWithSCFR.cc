@@ -59,21 +59,25 @@ void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
 {
 //    EV << "Received " << msg->getName() << ", lifetime: " << lifetime << "s" << endl;
 
-    // DEBUG
-    double dbg_time = simTime().dbl();
-    uint64_t dbg_ctrValue = uint64_t(clockFrequency*dbg_time);
-    uint32_t dbg_wrappedCtrValue = uint32_t(dbg_ctrValue%0x100000000LL);
-    // DEBUG
+//    // DEBUG
+//    double dbg_time = simTime().dbl();
+//    uint64_t dbg_raw_time = simTime().raw();
+//    uint64_t dbg_time_scale = simTime().getScale();
+//    uint64_t dbg_ctrValue = uint64_t(clockFrequency)*simTime().raw()/simTime().getScale();
+//    uint32_t dbg_wrappedCtrValue = uint32_t(dbg_ctrValue%0x100000000LL);
+//    // DEBUG
 
     if (prevTimestampReceived == false)
     { // not initialized yet
-        prevArrivalTime = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);   // value of a latched counter driven by a local clock
+         prevArrivalTime = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);   // value of a latched counter driven by a local clock
+//        prevArrivalTime = uint32_t((uint64_t(clockFrequency)*simTime().raw()/simTime().getScale())%0x100000000LL);    // value of a latched counter driven by a local clock
         prevTimestamp = ((UDPVideoStreamPacket *)msg)->getTimestamp();
         prevTimestampReceived = true;
     }
     else
     {
         uint32_t currArrivalTime = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);
+//        uint32_t currArrivalTime = uint32_t((uint64_t(clockFrequency)*simTime().raw()/simTime().getScale())%0x100000000LL);    // value of a latched counter driven by a local clock
         uint32_t currTimestamp = ((UDPVideoStreamPacket *)msg)->getTimestamp();
 
         int64_t arrivalTimeDifference = int64_t(currArrivalTime) - int64_t(prevArrivalTime);

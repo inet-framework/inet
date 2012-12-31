@@ -46,7 +46,7 @@ simple UDPVideoStreamSvrWithTrace2 like UDPApp
         int appOverhead @unit(byte) = default(12B);	// size of application layer overhead (e.g., RTP header)	
         int maxPayloadSize @unit(byte) = default(1460B);	// maximum size of payload to be carried in RTP packets;
 															// default of 1460B is MTU of 1500B minus RTP (12B), UDP (8B), and IP (20B) headers.
-		double clockFrequency @unit("Hz");	// frequency of a local clock											
+		double clockFrequency @unit("Hz") = default(90000Hz);	// frequency of a local clock											
         string traceFile;	// name of a video trace file in ASU format
         @display("i=block/app");
     gates:
