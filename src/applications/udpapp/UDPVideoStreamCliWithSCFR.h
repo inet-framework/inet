@@ -59,25 +59,23 @@ class INET_API UDPVideoStreamCliWithSCFR : public UDPVideoStreamCli
     double clockFrequency;  ///< frequency of a local clock
 
     // status
-    bool prevTimestampReceived;    ///< if true, start clock ratio measurement
-    uint32_t prevArrivalTime;   ///< arrival time of a previous packet
-    uint32_t prevTimestamp;     ///< timestamp of a previous packet
+    bool prevTimestampReceived;     ///< if true, start clock ratio measurement
+    uint32_t prevArrivalTime;       ///< arrival time of a previous packet
+    uint32_t prevTimestamp;         ///< timestamp of a previous packet
 
     // statistics
-    //    cOutVector eed;
-//    cTimestampedValue tsArrivalTime;    ///< arrival time of a packet and its timestamp
-    simsignal_t measuredClockRatioSignal;    ///< estimated ratio of clock frequencies between source and receiver
+    simsignal_t interArrivalTimeSignal;     ///< interarrival times (based on receiver clock)
+    simsignal_t interDepartureTimeSignal;   ///< interdeparture times (based on source clock)
+    simsignal_t measuredClockRatioSignal;   ///< measured ratio of clock frequencies between receiver and source
 
   protected:
     ///@name Overridden cSimpleModule functions
     //@{
     virtual void initialize();
-//    virtual void finish();
     virtual void handleMessage(cMessage *msg);
     //@}
 
 //  protected:
-//    virtual void requestStream();
     virtual void receiveStream(cPacket *msg);
 };
 

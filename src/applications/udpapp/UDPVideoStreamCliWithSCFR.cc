@@ -39,6 +39,8 @@ void UDPVideoStreamCliWithSCFR::initialize()
     prevTimestampReceived = false;
 
     // initialize statistics
+    interArrivalTimeSignal = registerSignal("interArrivalTime");
+    interDepartureTimeSignal = registerSignal("interDepartureTime");
     measuredClockRatioSignal = registerSignal("measuredClockRatio");
 }
 
@@ -80,17 +82,19 @@ void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
 //        uint32_t currArrivalTime = uint32_t((uint64_t(clockFrequency)*simTime().raw()/simTime().getScale())%0x100000000LL);    // value of a latched counter driven by a local clock
         uint32_t currTimestamp = ((UDPVideoStreamPacket *)msg)->getTimestamp();
 
-        int64_t arrivalTimeDifference = int64_t(currArrivalTime) - int64_t(prevArrivalTime);
+        int64_t interArrivalTime = int64_t(currArrivalTime) - int64_t(prevArrivalTime);
         if (currArrivalTime <= prevArrivalTime)
         {   // handling wrap around
-            arrivalTimeDifference += 0x100000000LL;
+            interArrivalTime += 0x100000000LL;
         }
-        int64_t timestampDifference = int64_t(currTimestamp) - int64_t(prevTimestamp);
+        int64_t interDepartureTime = int64_t(currTimestamp) - int64_t(prevTimestamp);
         if (currTimestamp <= prevTimestamp)
         {   // handling wrap around
-            timestampDifference += 0x100000000LL;
+            interDepartureTime += 0x100000000LL;
         }
-        emit(measuredClockRatioSignal, double(arrivalTimeDifference)/double(timestampDifference));
+        emit(interArrivalTimeSignal, interArrivalTime);
+        emit(interDepartureTimeSignal, interDepartureTime);
+        emit(measuredClockRatioSignal, double(interArrivalTime)/double(interDepartureTime));
 
         prevArrivalTime = currArrivalTime;
         prevTimestamp = currTimestamp;
