@@ -64,6 +64,7 @@ class INET_API UDPVideoStreamCliWithSCFR : public UDPVideoStreamCli
     uint32_t prevTimestamp;         ///< timestamp of a previous packet
 
     // statistics
+    simsignal_t fragmentStartSignal;        ///< indicators for start of fragment (used by SCFR for periodic streams)
     simsignal_t interArrivalTimeSignal;     ///< interarrival times (based on receiver clock)
     simsignal_t interDepartureTimeSignal;   ///< interdeparture times (based on source clock)
     simsignal_t measuredClockRatioSignal;   ///< measured ratio of clock frequencies between receiver and source

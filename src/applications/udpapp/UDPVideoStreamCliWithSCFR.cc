@@ -39,6 +39,7 @@ void UDPVideoStreamCliWithSCFR::initialize()
     prevTimestampReceived = false;
 
     // initialize statistics
+    fragmentStartSignal = registerSignal("fragmentStart");
     interArrivalTimeSignal = registerSignal("interArrivalTime");
     interDepartureTimeSignal = registerSignal("interDepartureTime");
     measuredClockRatioSignal = registerSignal("measuredClockRatio");
@@ -69,6 +70,8 @@ void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
 //    uint32_t dbg_wrappedCtrValue = uint32_t(dbg_ctrValue%0x100000000LL);
 //    // DEBUG
 
+    emit(fragmentStartSignal, int(((UDPVideoStreamPacket *)msg)->getFragmentStart()));
+
     if (prevTimestampReceived == false)
     { // not initialized yet
          prevArrivalTime = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);   // value of a latched counter driven by a local clock
@@ -92,8 +95,8 @@ void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
         {   // handling wrap around
             interDepartureTime += 0x100000000LL;
         }
-        emit(interArrivalTimeSignal, interArrivalTime);
-        emit(interDepartureTimeSignal, interDepartureTime);
+        emit(interArrivalTimeSignal, double(interArrivalTime));
+        emit(interDepartureTimeSignal, double(interDepartureTime));
         emit(measuredClockRatioSignal, double(interArrivalTime)/double(interDepartureTime));
 
         prevArrivalTime = currArrivalTime;

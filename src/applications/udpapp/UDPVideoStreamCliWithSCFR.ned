@@ -32,7 +32,7 @@ simple UDPVideoStreamCliWithSCFR like UDPApp
 {
     parameters:
         @display("i=block/app");
-        @signal[measuredClockRatio](type="double");
+        @statistic[fragmentStart](title="indicators for start of fragment"; record=vector; interpolationmode=none);
         @statistic[interArrivalTime](title="interarrival times (based on receiver clock)"; record=vector; interpolationmode=none);
         @statistic[interDepartureTime](title="interdeparture times (based on source clock)"; record=vector; interpolationmode=none);
         @statistic[measuredClockRatio](title="measured clock ratio between receiver and source"; record=vector; interpolationmode=none);
