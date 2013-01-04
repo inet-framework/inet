@@ -32,10 +32,18 @@ simple UDPVideoStreamCliWithSCFR like UDPApp
 {
     parameters:
         @display("i=block/app");
+		// statistics: common
         @statistic[fragmentStart](title="indicators for start of fragment"; record=vector; interpolationmode=none);
-        @statistic[interArrivalTime](title="interarrival times (based on receiver clock)"; record=vector; interpolationmode=none);
-        @statistic[interDepartureTime](title="interdeparture times (based on source clock)"; record=vector; interpolationmode=none);
-        @statistic[measuredClockRatio](title="measured clock ratio between receiver and source"; record=vector; interpolationmode=none);
+		// statistics: aperiodic (i.e., for all packets)
+        @statistic[endToEndDelayAperiodic](title="end-to-end delay (based on reference clock) of all packets"; record=vector; interpolationmode=none);
+        @statistic[interArrivalTimeAperiodic](title="interarrival times (based on receiver clock) of all packets"; record=vector; interpolationmode=none);
+        @statistic[interDepartureTimeAperiodic](title="interdeparture times (based on source clock) of all packets"; record=vector; interpolationmode=none);
+        @statistic[clockFrequencyRatioAperiodic](title="measured clock frequency ratio between receiver and source based on all packets"; record=vector; interpolationmode=none);
+		// statistics: periodic (i.e., for the first packets of frames)
+        @statistic[endToEndDelayPeriodic](title="end-to-end delay (based on reference clock) of first packets of frames"; record=vector; interpolationmode=none);
+        @statistic[interArrivalTimePeriodic](title="interarrival times (based on receiver clock) of first packets of frames"; record=vector; interpolationmode=none);
+        @statistic[interDepartureTimePeriodic](title="interdeparture times (based on source clock) of first packets of frames"; record=vector; interpolationmode=none);
+        @statistic[clockFrequencyRatioPeriodic](title="measured clock ratio between receiver and source based on first packets of frames"; record=vector; interpolationmode=none);
         int localPort;
         string serverAddress;
         int serverPort;

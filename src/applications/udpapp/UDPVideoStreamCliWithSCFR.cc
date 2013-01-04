@@ -30,23 +30,32 @@ Define_Module(UDPVideoStreamCliWithSCFR);
 
 void UDPVideoStreamCliWithSCFR::initialize()
 {
-    UDPVideoStreamCli::initialize();
-
     // initialize module parameters
+    simtime_t startTime = par("startTime");
     clockFrequency = par("clockFrequency").doubleValue();
 
     // initialize status variables
     prevTsReceivedAperiodic = false;
     prevTsReceivedPeriodic = false;
 
-    // initialize statistics
+    // initialize statistics: common
     fragmentStartSignal = registerSignal("fragmentStart");
+
+    // initialize statistics: aperiodic
+    eedAperiodicSignal = registerSignal("endToEndDelayAperiodic");
     iatAperiodicSignal = registerSignal("interArrivalTimeAperiodic");
     idtAperiodicSignal = registerSignal("interDepartureTimeAperiodic");
-    cfrAperiodicSignal = registerSignal("ClockFrequencyRatioAperiodic");
+    cfrAperiodicSignal = registerSignal("clockFrequencyRatioAperiodic");
+
+    // initialize statistics: periodic
+    eedPeriodicSignal = registerSignal("endToEndDelayPeriodic");
     iatPeriodicSignal = registerSignal("interArrivalTimePeriodic");
     idtPeriodicSignal = registerSignal("interDepartureTimePeriodic");
-    cfrPeriodicSignal = registerSignal("ClockFrequencyRatioPeriodic");
+    cfrPeriodicSignal = registerSignal("clockFrequencyRatioPeriodic");
+
+    // schedule the start of video streaming
+    if (startTime>=0)
+        scheduleAt(startTime, new cMessage("UDPVideoStreamStart"));
 }
 
 void UDPVideoStreamCliWithSCFR::handleMessage(cMessage* msg)
@@ -64,7 +73,8 @@ void UDPVideoStreamCliWithSCFR::handleMessage(cMessage* msg)
 
 void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
 {
-//    EV << "Received " << msg->getName() << ", lifetime: " << lifetime << "s" << endl;
+    EV << "Video stream packet:\n";
+    printPacket(msg);
 
 //    // DEBUG
 //    double dbg_time = simTime().dbl();
@@ -78,6 +88,7 @@ void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
     emit(fragmentStartSignal, int(fragmentStart));
 
     // processing for all packets (i.e., aperiodic case)
+    emit(eedAperiodicSignal, simTime() - msg->getCreationTime());
     if (prevTsReceivedAperiodic == false)
     { // not initialized yet
          prevAtAperiodic = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);   // value of a latched counter driven by a local clock
@@ -109,7 +120,8 @@ void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
 
     // processing for the first packets of frames (i.e., periodic case)
     if (fragmentStart == true)
-    {        
+    {
+        emit(eedPeriodicSignal, simTime() - msg->getCreationTime());
         if (prevTsReceivedPeriodic == false)
         { // not initialized yet
             prevAtPeriodic = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);   // value of a latched counter driven by a local clock
@@ -140,5 +152,5 @@ void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
         }
     }
 
-    UDPVideoStreamCli::receiveStream(msg);  // 'msg' is deleted in this function
+    delete msg;
 }

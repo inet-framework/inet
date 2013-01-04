@@ -67,16 +67,18 @@ class INET_API UDPVideoStreamCliWithSCFR : public UDPVideoStreamCli
     uint32_t prevAtPeriodic;        ///< arrival time of a previous first packet of frame
     uint32_t prevTsPeriodic;        ///< timestamp of a previous first packet of frame
 
-    // statistics: Common
+    // statistics: common
     simsignal_t fragmentStartSignal;    ///< indicators for start of fragment (used by SCFR for periodic streams)
-    // statistics: Aperiodic (i.e., for all packets)
+    // statistics: aperiodic (i.e., for all packets)
+    simsignal_t eedAperiodicSignal;     ///< end-to-end delay (based on reference clock)
     simsignal_t iatAperiodicSignal;     ///< interarrival times (based on receiver clock)
     simsignal_t idtAperiodicSignal;     ///< interdeparture times (based on source clock)
     simsignal_t cfrAperiodicSignal;     ///< measured clock frequency ratio between receiver and source
-    // statistics: Periodic (i.e., for the first packets of frames
+    // statistics: periodic (i.e., for the first packets of frames
+    simsignal_t eedPeriodicSignal;      ///< end-to-end delay (based on reference clock)
     simsignal_t iatPeriodicSignal;      ///< interarrival times (based on receiver clock)
-    simsignal_t idtPeriodicSignal;     ///< interdeparture times (based on source clock)
-    simsignal_t cfrPeriodicSignal;     ///< measured clock frequency ratio between receiver and source
+    simsignal_t idtPeriodicSignal;      ///< interdeparture times (based on source clock)
+    simsignal_t cfrPeriodicSignal;      ///< measured clock frequency ratio between receiver and source
 
   protected:
     ///@name Overridden cSimpleModule functions
