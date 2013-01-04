@@ -58,16 +58,25 @@ class INET_API UDPVideoStreamCliWithSCFR : public UDPVideoStreamCli
     // module parameters
     double clockFrequency;  ///< frequency of a local clock
 
-    // status
-    bool prevTimestampReceived;     ///< if true, start clock ratio measurement
-    uint32_t prevArrivalTime;       ///< arrival time of a previous packet
-    uint32_t prevTimestamp;         ///< timestamp of a previous packet
+    // status: Aperiodic (i.e., for all packets)
+    bool prevTsReceivedAperiodic;   ///< if true, start clock ratio measurement
+    uint32_t prevAtAperiodic;       ///< arrival time of a previous packet
+    uint32_t prevTsAperiodic;       ///< timestamp of a previous packet
+    // status: Periodic (i.e., for the first packets of frames)
+    bool prevTsReceivedPeriodic;    ///< if true, start clock ratio measurement
+    uint32_t prevAtPeriodic;        ///< arrival time of a previous first packet of frame
+    uint32_t prevTsPeriodic;        ///< timestamp of a previous first packet of frame
 
-    // statistics
-    simsignal_t fragmentStartSignal;        ///< indicators for start of fragment (used by SCFR for periodic streams)
-    simsignal_t interArrivalTimeSignal;     ///< interarrival times (based on receiver clock)
-    simsignal_t interDepartureTimeSignal;   ///< interdeparture times (based on source clock)
-    simsignal_t measuredClockRatioSignal;   ///< measured ratio of clock frequencies between receiver and source
+    // statistics: Common
+    simsignal_t fragmentStartSignal;    ///< indicators for start of fragment (used by SCFR for periodic streams)
+    // statistics: Aperiodic (i.e., for all packets)
+    simsignal_t iatAperiodicSignal;     ///< interarrival times (based on receiver clock)
+    simsignal_t idtAperiodicSignal;     ///< interdeparture times (based on source clock)
+    simsignal_t cfrAperiodicSignal;     ///< measured clock frequency ratio between receiver and source
+    // statistics: Periodic (i.e., for the first packets of frames
+    simsignal_t iatPeriodicSignal;      ///< interarrival times (based on receiver clock)
+    simsignal_t idtPeriodicSignal;     ///< interdeparture times (based on source clock)
+    simsignal_t cfrPeriodicSignal;     ///< measured clock frequency ratio between receiver and source
 
   protected:
     ///@name Overridden cSimpleModule functions

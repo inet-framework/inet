@@ -36,13 +36,17 @@ void UDPVideoStreamCliWithSCFR::initialize()
     clockFrequency = par("clockFrequency").doubleValue();
 
     // initialize status variables
-    prevTimestampReceived = false;
+    prevTsReceivedAperiodic = false;
+    prevTsReceivedPeriodic = false;
 
     // initialize statistics
     fragmentStartSignal = registerSignal("fragmentStart");
-    interArrivalTimeSignal = registerSignal("interArrivalTime");
-    interDepartureTimeSignal = registerSignal("interDepartureTime");
-    measuredClockRatioSignal = registerSignal("measuredClockRatio");
+    iatAperiodicSignal = registerSignal("interArrivalTimeAperiodic");
+    idtAperiodicSignal = registerSignal("interDepartureTimeAperiodic");
+    cfrAperiodicSignal = registerSignal("ClockFrequencyRatioAperiodic");
+    iatPeriodicSignal = registerSignal("interArrivalTimePeriodic");
+    idtPeriodicSignal = registerSignal("interDepartureTimePeriodic");
+    cfrPeriodicSignal = registerSignal("ClockFrequencyRatioPeriodic");
 }
 
 void UDPVideoStreamCliWithSCFR::handleMessage(cMessage* msg)
@@ -70,37 +74,70 @@ void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
 //    uint32_t dbg_wrappedCtrValue = uint32_t(dbg_ctrValue%0x100000000LL);
 //    // DEBUG
 
-    emit(fragmentStartSignal, int(((UDPVideoStreamPacket *)msg)->getFragmentStart()));
+    bool fragmentStart = ((UDPVideoStreamPacket *)msg)->getFragmentStart();
+    emit(fragmentStartSignal, int(fragmentStart));
 
-    if (prevTimestampReceived == false)
+    // processing for all packets (i.e., aperiodic case)
+    if (prevTsReceivedAperiodic == false)
     { // not initialized yet
-         prevArrivalTime = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);   // value of a latched counter driven by a local clock
-//        prevArrivalTime = uint32_t((uint64_t(clockFrequency)*simTime().raw()/simTime().getScale())%0x100000000LL);    // value of a latched counter driven by a local clock
-        prevTimestamp = ((UDPVideoStreamPacket *)msg)->getTimestamp();
-        prevTimestampReceived = true;
+         prevAtAperiodic = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);   // value of a latched counter driven by a local clock
+        prevTsAperiodic = ((UDPVideoStreamPacket *)msg)->getTimestamp();
+        prevTsReceivedAperiodic = true;
     }
     else
     {
         uint32_t currArrivalTime = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);
-//        uint32_t currArrivalTime = uint32_t((uint64_t(clockFrequency)*simTime().raw()/simTime().getScale())%0x100000000LL);    // value of a latched counter driven by a local clock
         uint32_t currTimestamp = ((UDPVideoStreamPacket *)msg)->getTimestamp();
 
-        int64_t interArrivalTime = int64_t(currArrivalTime) - int64_t(prevArrivalTime);
-        if (currArrivalTime <= prevArrivalTime)
+        int64_t interArrivalTime = int64_t(currArrivalTime) - int64_t(prevAtAperiodic);
+        if (currArrivalTime <= prevAtAperiodic)
         {   // handling wrap around
             interArrivalTime += 0x100000000LL;
         }
-        int64_t interDepartureTime = int64_t(currTimestamp) - int64_t(prevTimestamp);
-        if (currTimestamp <= prevTimestamp)
+        int64_t interDepartureTime = int64_t(currTimestamp) - int64_t(prevTsAperiodic);
+        if (currTimestamp <= prevTsAperiodic)
         {   // handling wrap around
             interDepartureTime += 0x100000000LL;
         }
-        emit(interArrivalTimeSignal, double(interArrivalTime));
-        emit(interDepartureTimeSignal, double(interDepartureTime));
-        emit(measuredClockRatioSignal, double(interArrivalTime)/double(interDepartureTime));
+        emit(iatAperiodicSignal, double(interArrivalTime));
+        emit(idtAperiodicSignal, double(interDepartureTime));
+        emit(cfrAperiodicSignal, double(interArrivalTime)/double(interDepartureTime));
 
-        prevArrivalTime = currArrivalTime;
-        prevTimestamp = currTimestamp;
+        prevAtAperiodic = currArrivalTime;
+        prevTsAperiodic = currTimestamp;
+    }
+
+    // processing for the first packets of frames (i.e., periodic case)
+    if (fragmentStart == true)
+    {        
+        if (prevTsReceivedPeriodic == false)
+        { // not initialized yet
+            prevAtPeriodic = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);   // value of a latched counter driven by a local clock
+            prevTsPeriodic = ((UDPVideoStreamPacket *)msg)->getTimestamp();
+            prevTsReceivedPeriodic = true;
+        }
+        else
+        {
+            uint32_t currArrivalTime = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);
+            uint32_t currTimestamp = ((UDPVideoStreamPacket *)msg)->getTimestamp();
+
+            int64_t interArrivalTime = int64_t(currArrivalTime) - int64_t(prevAtPeriodic);
+            if (currArrivalTime <= prevAtPeriodic)
+            {   // handling wrap around
+                interArrivalTime += 0x100000000LL;
+            }
+            int64_t interDepartureTime = int64_t(currTimestamp) - int64_t(prevTsPeriodic);
+            if (currTimestamp <= prevTsPeriodic)
+            {   // handling wrap around
+                interDepartureTime += 0x100000000LL;
+            }
+            emit(iatPeriodicSignal, double(interArrivalTime));
+            emit(idtPeriodicSignal, double(interDepartureTime));
+            emit(cfrPeriodicSignal, double(interArrivalTime)/double(interDepartureTime));
+
+            prevAtPeriodic = currArrivalTime;
+            prevTsPeriodic = currTimestamp;
+        }
     }
 
     UDPVideoStreamCli::receiveStream(msg);  // 'msg' is deleted in this function
