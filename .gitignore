@@ -34,6 +34,7 @@ doc/doxy
 *.RData
 *.Rhistory
 *.anf
+*.db
 *.dly
 *.ecr
 *.eps
