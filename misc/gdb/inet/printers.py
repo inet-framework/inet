@@ -19,6 +19,8 @@ try:
 except ImportError:
     _use_gdb_pp = False
 
+# initially enabled/disabled the inet pretty printers
+inet_pp_enabled = True
 
 class IPv4AddressPrinter:
     "Print an IPv4Address"
@@ -125,10 +127,11 @@ class MACAddressPrinter:
 # "SubPrettyPrinter" protocol from gdb.printing.
 class InetSubPrinter(object):
     def __init__(self, name, function):
+        global inet_pp_enabled
         super(InetSubPrinter, self).__init__()
         self.name = name
         self.function = function
-        self.enabled = True
+        self.enabled = inet_pp_enabled
 
     def invoke(self, value):
         if not self.enabled:
@@ -139,13 +142,16 @@ class InetSubPrinter(object):
 # gdb.printing.  It can also be used directly as an old-style printer.
 class InetPrinter(object):
     def __init__(self, name):
+        global inet_pp_enabled
         super(InetPrinter, self).__init__()
         self.name = name
+        self.subprinters = []   # used by 'gdb command: info pretty-printer'
         self.lookup = {}
-        self.enabled = True
+        self.enabled = inet_pp_enabled
 
     def add(self, name, function):
         printer = InetSubPrinter(name, function)
+        self.subprinters.append(printer)
         self.lookup[name] = printer
 
     @staticmethod
