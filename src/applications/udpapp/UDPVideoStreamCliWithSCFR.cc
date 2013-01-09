@@ -25,6 +25,10 @@
 #include "IPAddressResolver.h"
 
 
+#define MODULO_32 0x100000000LL     // modulo for 32-bit counter
+#define MODULO_48 0x1000000000000LL // module for 48-bit counter
+
+
 Define_Module(UDPVideoStreamCliWithSCFR);
 
 
@@ -81,7 +85,7 @@ void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
 //    uint64_t dbg_raw_time = simTime().raw();
 //    uint64_t dbg_time_scale = simTime().getScale();
 //    uint64_t dbg_ctrValue = uint64_t(clockFrequency)*simTime().raw()/simTime().getScale();
-//    uint32_t dbg_wrappedCtrValue = uint32_t(dbg_ctrValue%0x100000000LL);
+//    uint64_t dbg_wrappedCtrValue = dbg_ctrValue%MODULO_48;
 //    // DEBUG
 
     bool fragmentStart = ((UDPVideoStreamPacket *)msg)->getFragmentStart();
@@ -91,24 +95,24 @@ void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
     emit(eedAperiodicSignal, simTime() - msg->getCreationTime());
     if (prevTsReceivedAperiodic == false)
     { // not initialized yet
-         prevAtAperiodic = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);   // value of a latched counter driven by a local clock
+         prevAtAperiodic = uint64_t(clockFrequency*simTime().dbl())%MODULO_48;  // latched value of a 48-bit counter driven by a local clock
         prevTsAperiodic = ((UDPVideoStreamPacket *)msg)->getTimestamp();
         prevTsReceivedAperiodic = true;
     }
     else
     {
-        uint32_t currArrivalTime = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);
+        uint64_t currArrivalTime = uint64_t(clockFrequency*simTime().dbl())%MODULO_48;
         uint32_t currTimestamp = ((UDPVideoStreamPacket *)msg)->getTimestamp();
 
-        int64_t interArrivalTime = int64_t(currArrivalTime) - int64_t(prevAtAperiodic);
+        int64_t interArrivalTime = currArrivalTime - prevAtAperiodic;
         if (currArrivalTime <= prevAtAperiodic)
         {   // handling wrap around
-            interArrivalTime += 0x100000000LL;
+            interArrivalTime += MODULO_48;
         }
         int64_t interDepartureTime = int64_t(currTimestamp) - int64_t(prevTsAperiodic);
         if (currTimestamp <= prevTsAperiodic)
         {   // handling wrap around
-            interDepartureTime += 0x100000000LL;
+            interDepartureTime += MODULO_32;
         }
         emit(iatAperiodicSignal, double(interArrivalTime));
         emit(idtAperiodicSignal, double(interDepartureTime));
@@ -124,24 +128,24 @@ void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
         emit(eedPeriodicSignal, simTime() - msg->getCreationTime());
         if (prevTsReceivedPeriodic == false)
         { // not initialized yet
-            prevAtPeriodic = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);   // value of a latched counter driven by a local clock
+            prevAtPeriodic = uint64_t(clockFrequency*simTime().dbl())%MODULO_48;    // latched value of a 48-bit counter driven by a local clock
             prevTsPeriodic = ((UDPVideoStreamPacket *)msg)->getTimestamp();
             prevTsReceivedPeriodic = true;
         }
         else
         {
-            uint32_t currArrivalTime = uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL);
+            uint64_t currArrivalTime = uint64_t(clockFrequency*simTime().dbl())%MODULO_48;
             uint32_t currTimestamp = ((UDPVideoStreamPacket *)msg)->getTimestamp();
 
-            int64_t interArrivalTime = int64_t(currArrivalTime) - int64_t(prevAtPeriodic);
+            int64_t interArrivalTime = currArrivalTime - prevAtPeriodic;
             if (currArrivalTime <= prevAtPeriodic)
             {   // handling wrap around
-                interArrivalTime += 0x100000000LL;
+                interArrivalTime += MODULO_48;
             }
             int64_t interDepartureTime = int64_t(currTimestamp) - int64_t(prevTsPeriodic);
             if (currTimestamp <= prevTsPeriodic)
             {   // handling wrap around
-                interDepartureTime += 0x100000000LL;
+                interDepartureTime += MODULO_32;
             }
             emit(iatPeriodicSignal, double(interArrivalTime));
             emit(idtPeriodicSignal, double(interDepartureTime));

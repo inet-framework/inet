@@ -60,11 +60,11 @@ class INET_API UDPVideoStreamCliWithSCFR : public UDPVideoStreamCli
 
     // status: Aperiodic (i.e., for all packets)
     bool prevTsReceivedAperiodic;   ///< if true, start clock ratio measurement
-    uint32_t prevAtAperiodic;       ///< arrival time of a previous packet
-    uint32_t prevTsAperiodic;       ///< timestamp of a previous packet
+    uint64_t prevAtAperiodic;       ///< arrival time (48-bit counter value) of a previous packet
+    uint32_t prevTsAperiodic;       ///< 32-bit timestamp value of a previous packet
     // status: Periodic (i.e., for the first packets of frames)
     bool prevTsReceivedPeriodic;    ///< if true, start clock ratio measurement
-    uint32_t prevAtPeriodic;        ///< arrival time of a previous first packet of frame
+    uint64_t prevAtPeriodic;        ///< arrival time (48-bit counter value) of a previous packet
     uint32_t prevTsPeriodic;        ///< timestamp of a previous first packet of frame
 
     // statistics: common

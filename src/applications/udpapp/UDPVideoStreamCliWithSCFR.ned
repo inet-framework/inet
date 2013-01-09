@@ -22,9 +22,10 @@ package inet.applications.udpapp;
 //
 // Video streaming client with source clock frequency recovery (SCFR) capability.
 //
-// It measures arrival times of video stream packets with RTP timestamps and
-// estimates the ratio of source and receiver clock frequency, which is recorded
-// as an output vector and used by SCFR algorithms.
+// It measures arrival times of video stream packets using a 48-bit counter
+// driven by a high-speed local clock (~ MHz) and estimates the ratio of source
+// and receiver clock frequency together with RTP 32-bit timestamps, which is
+// recorded as an output vector and used by SCFR algorithms.
 //
 // @see UDPVideoStreamSvrWithTrace2
 //
@@ -48,7 +49,7 @@ simple UDPVideoStreamCliWithSCFR like UDPApp
         string serverAddress;
         int serverPort;
         double startTime @unit("s") = default(1s);
-        double clockFrequency @unit("Hz") = default(90000Hz);	// frequency of a local clock; default is for MPEG audio/video
+        double clockFrequency @unit("Hz") = default(16MHz); // frequency of a local clock; default from Arduino board
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);
