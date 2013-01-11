@@ -209,7 +209,7 @@ void EtherMAC::handleMessage(cMessage *msg)
 void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 {
     if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
-        throw cRuntimeError("Ethernet frame too short, must be at least 64 bytes (padding should be done at encapsulation)");
+        frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);  // "padding"
 
     frame->setFrameByteLength(frame->getByteLength());
 
