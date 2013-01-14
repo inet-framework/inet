@@ -190,10 +190,8 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
 
 int EtherLLC::findPortForSAP(int dsap)
 {
-    // here we actually do two lookups, but what the hell...
-    if (dsapToPort.find(dsap) == dsapToPort.end())
-        return -1;
-    return dsapToPort[dsap];
+    DsapToPortMap::iterator it = dsapToPort.find(dsap);
+    return (it == dsapToPort.end()) ? -1 : it->second;
 }
 
 void EtherLLC::handleRegisterSAP(cMessage *msg)

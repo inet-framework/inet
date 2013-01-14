@@ -31,7 +31,8 @@ class INET_API EtherLLC : public cSimpleModule
 {
   protected:
     int seqNum;
-    std::map<int,int> dsapToPort;  // DSAP registration table
+    typedef std::map<int,int> DsapToPortMap;  // DSAP registration table
+    DsapToPortMap dsapToPort;  // DSAP registration table
 
     // statistics
     long dsapsRegistered;       // number DSAPs (higher layers) registered
