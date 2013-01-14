@@ -17,7 +17,7 @@
 
 package inet.nodes.ethernet;
 
-import inet.linklayer.ethernet.EtherEncap;
+import inet.linklayer.ethernet.IEtherEncap;
 import inet.applications.ethernet.EtherTrafGen;
 import inet.linklayer.ethernet.EtherLLC;
 import inet.linklayer.ethernet.EtherQoSQueue;
@@ -47,7 +47,7 @@ module EtherHost2
         app: EtherTrafGen {
             @display("p=155,59");
         }
-        encap: EtherEncap {
+        encap: <default("EtherEncap")> like IEtherEncap {
             @display("p=155,146");
         }
         queue: EtherQoSQueue if queueType != "" {

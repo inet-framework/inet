@@ -37,7 +37,7 @@ package inet.linklayer.ethernet;
 // - Ethernet frames arriving from MAC will be decapsulated, and sent up to the
 //   higher layers. Accepts ~EtherFrameWithLLC and ~EtherFrameWithSNAP too.
 //
-simple EtherEncap
+simple EtherEncap like IEtherEncap
 {
     parameters:
         bool useSNAP = default(false);  // create EtherFrameWithSNAP frames instead of EthernetIIFrame

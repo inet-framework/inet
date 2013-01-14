@@ -70,7 +70,7 @@ module EthernetInterface like IWiredNic
                 txQueueLimit = (queueType == "" ? 10000 : 1); // queue sends one packet at a time
                 @display("p=182,321");
         }
-        encap: EtherEncap {
+        encap: <default("EtherEncap")> like IEtherEncap {
             parameters:
                 useSNAP = useSNAP;
                 @display("p=182,205");
