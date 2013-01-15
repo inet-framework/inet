@@ -1,0 +1,80 @@
+<!-- Message kinds 
+0=BPDU
+1=MVRPDU
+2=ETHII
+3=ETH1Q
+4=ETH1AD
+5=ETH1AH
+-->
+
+<!-- Message definition 
+<Message>
+	<Time>0.5</Time>
+	<Type>5</Type>
+	<Params... Defined later  >
+</Message>
+
+-->
+
+
+
+<!-- BPDU params -->
+<Params>
+	<RootP></RootP>
+	<RootMAC></RootMAC>
+	<RPC></RPC>
+	<SrcP></SrcP>
+	<SrcMAC></SrcMAC>
+	<PortP></PortP>
+	<Port></Port>
+	<DestMAC></DestMAC>
+	<TC></TC>
+</Params>
+
+<!-- MVRPDU -->
+<Params>
+	<DestMAC></DestMAC>
+	<SrcMAC></SrcMAC>
+	<VIDs>
+		<VID></VID>
+		<VID></VID>
+		<VID></VID>
+	</VIDs>
+</Params>
+
+<!-- EthernetII -->
+<Params>
+	<DestMAC></DestMAC>
+	<SrcMAC></SrcMAC>
+	<ByteLength></ByteLength>
+</Params>
+
+<!-- Ethernet1Q -->
+<Params>
+	<DestMAC></DestMAC>
+	<SrcMAC></SrcMAC>
+	<ByteLength></ByteLength>
+	<VID></VID>
+</Params>
+
+<!-- Ethernet1ad -->
+<Params>
+	<DestMAC></DestMAC>
+	<SrcMAC></SrcMAC>
+	<CVID></CVID>
+	<SVID></SVID>
+		<ByteLength></ByteLength>
+</Params>
+
+<!-- Ethernet1ah -->
+<Params>
+	<DestMAC></DestMAC>
+	<SrcMAC></SrcMAC>
+	<CVID></CVID>
+	<SVID></SVID>
+	<BVID></BVID>
+	<ISID></ISID>
+	<DestBMAC></DestBMAC>
+	<SrcBMAC></SrcBMAC>
+</Params>
+

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!-- Up time events example -->
+<Events>
+	<Event>
+		<Type>False</Type>  <!-- Comming Down -->
+		<Time>2.7</Time>
+	</Event>
+
+
+	<Event>
+		<Type>True</Type>  <!-- Comming UP -->
+		<Time>2.7</Time>
+	</Event>
+	<!-- Other events -->
+	<!-- Other events -->
+</Events>
