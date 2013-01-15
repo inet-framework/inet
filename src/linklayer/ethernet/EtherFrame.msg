@@ -88,6 +88,7 @@ packet EtherFrame extends EtherTraffic
 //
 packet EthernetIIFrame extends EtherFrame
 {
+    string displayString = "b=,,,#00ff00";		// Mod1. Enables display string modification.
     int etherType enum (EtherType);
 }
 
@@ -132,3 +133,23 @@ packet EtherPauseFrame extends EtherFrame
     int pauseTime; // in 512 bit-time units
 }
 
+// Mod1
+// Ethernet 802.1Q Tag. VLAN
+//
+//
+packet Ethernet1QTag
+{
+    string displayString = "b=,,,#a5ffa5";
+    int VID=0; // VID Outter VID tag.
+}
+
+
+// Mod1
+// Ethernet 802.1ah header.
+//
+//
+packet Ethernet1ahITag
+{
+    string displayString = "b=,,,#3ea53e";
+    int ISid=0; // ISID
+}
