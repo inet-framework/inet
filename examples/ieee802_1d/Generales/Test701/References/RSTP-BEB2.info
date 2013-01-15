@@ -1,0 +1,20 @@
+BEB2
+Priority 128
+Local Address 0A-AA-00-00-00-04
+Root Gate 0
+*******ROOT BPDU INFO***********
+Root Priority 128
+Root MAC 0A-AA-00-00-00-01
+Cost 1
+Src Priority 128
+Src MAC 0A-AA-00-00-00-01
+Src Tx Gate Priority 0
+Src Tx Gate 2
+********************************
+***********PORTSTATE************
+Root / Forwarding
+Best BPDU: Root 0A-AA-00-00-00-01  / Src 0A-AA-00-00-00-01
+
+Designated / Forwarding
+Designated / Forwarding
+Designated / Forwarding

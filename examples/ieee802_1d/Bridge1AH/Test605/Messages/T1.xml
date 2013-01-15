@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<Tests>
+	<Message>
+		<Type>1</Type>
+		<Time>6.6</Time>
+		<DestMAC>01-80-C2-00-00-0D</DestMAC>
+		<SrcMAC>A0-00-00-00-00-02</SrcMAC>
+		<VIDs>
+			<VID>5</VID>
+		</VIDs>
+	</Message>
+	<Message>
+		<Type>5</Type>
+		<Time>8</Time>
+		<DestMAC>AA-00-00-00-00-03</DestMAC>
+		<SrcMAC>AA-00-00-00-00-02</SrcMAC>
+		<CVID>4</CVID>
+		<SVID>5</SVID>
+		<BVID>5</BVID>
+		<ISID>6</ISID>
+		<DestBMAC>A0-00-00-00-00-03</DestBMAC>
+		<SrcBMAC>A0-00-00-00-00-02</SrcBMAC>
+		<ByteLength>300</ByteLength>
+	</Message>
+</Tests>

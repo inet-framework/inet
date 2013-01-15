@@ -1,0 +1,10 @@
+TC0
+Sent messages 0
+Received messages 6
+BPDU 0
+MVRP 5
+Eth2 0
+Eth1Q 0
+Eth1ad 1
+   Last message: S-Vid:5 Vlan:4 Src:AA-00-00-00-00-02  Dest:AA-00-00-00-00-03 Size:326
+Eth1ah 0

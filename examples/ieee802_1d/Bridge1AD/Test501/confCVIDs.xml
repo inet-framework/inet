@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<CVIDstab>
+	<PortFilt>
+		<index>0</index>
+		<CVids>
+			<CVid>4</CVid>
+		</CVids>
+	</PortFilt>
+	<PortFilt>
+		<index>2</index>
+		<CVids>
+			<CVid>6</CVid>
+		</CVids>
+	</PortFilt>
+</CVIDstab>

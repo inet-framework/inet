@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<Tests>
+	<Message>
+		<Type>0</Type>
+		<Time>1.8</Time>
+		<RootP>127</RootP>
+		<RootMAC>00-00-00-00-00-01</RootMAC>
+		<RPC>0</RPC>
+		<SrcP>128</SrcP>
+		<SrcMAC>00-00-00-00-00-06</SrcMAC>
+		<PortP>1</PortP>
+		<Port>0</Port>
+		<DestMAC>01-80-C2-00-00-00</DestMAC>
+		<TC>false</TC>
+	</Message>
+	<Message>
+		<Time>3</Time>
+		<Type>1</Type>
+		<DestMAC>01-80-C2-00-00-0D</DestMAC>
+		<SrcMAC>00-00-00-00-00-06</SrcMAC>
+		<VIDs>
+			<VID>2</VID>
+		</VIDs>
+	</Message>
+</Tests>

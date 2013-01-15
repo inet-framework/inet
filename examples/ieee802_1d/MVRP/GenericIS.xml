@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<isidtab>
+	<IComp>
+		<index>0</index>
+		<ISid>
+			<vid>1</vid>
+			<Gate>
+				<index>0</index>
+				<svid>0</svid>
+			</Gate>
+		</ISid>
+	</IComp>
+	<IComp>
+		<index>1</index>
+		<ISid>
+			<vid>2</vid>
+			<Gate>
+				<index>0</index>
+				<svid>1</svid>
+			</Gate>
+		</ISid>
+	</IComp>
+</isidtab>

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<Events>
+	<Event>
+		<Type>0</Type>
+		<Time>100</Time>
+	</Event> 
+	<Event>
+		<Type>1</Type>
+		<Time>180</Time>
+	</Event> 
+	<!-- FALLING DOWN EXAMPLE
+	<Event>
+		<Type>0</Type>
+		<Time>5</Time>
+	</Event> 
+	 -->
+	<!-- GET UP EXAMPLE
+	<Event>
+		<Type>1</Type>
+		<Time>7.3</Time>
+	</Event> 
+	 -->
+</Events>

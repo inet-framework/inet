@@ -1,0 +1,10 @@
+T2
+Sent messages 1
+Received messages 9
+BPDU 5
+MVRP 3
+Eth2 0
+Eth1Q 0
+Eth1ad 0
+Eth1ah 1
+   Last message: B-Vid:3  B-Src:00-00-00-00-00-01  B-Dest:00-1E-83-00-00-06  S-Vid:3 Vlan:4 Src:AA-00-00-00-00-02  Dest:AA-00-00-00-00-03 Size:354

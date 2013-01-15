@@ -1,0 +1,20 @@
+Bridge
+Priority 128
+Local Address 00-00-00-00-00-08
+Root Gate 1
+*******ROOT BPDU INFO***********
+Root Priority 127
+Root MAC 00-00-00-00-00-02
+Cost 1
+Src Priority 127
+Src MAC 00-00-00-00-00-02
+Src Tx Gate Priority 0
+Src Tx Gate 0
+********************************
+***********PORTSTATE************
+Designated / Forwarding (Client)
+Root / Forwarding
+Best BPDU: Root 00-00-00-00-00-02  / Src 00-00-00-00-00-02
+
+Designated / Forwarding (Client)
+Designated / Discarding

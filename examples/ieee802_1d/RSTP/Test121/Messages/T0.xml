@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<Tests>
+	<Message>
+		<Type>0</Type>
+		<Time>2.5</Time>
+		<RootP>128</RootP>
+		<RootMAC>00-00-00-00-00-05</RootMAC>
+		<RPC>0</RPC>
+		<SrcP>128</SrcP>
+		<SrcMAC>00-00-00-00-00-05</SrcMAC>
+		<PortP>0</PortP>
+		<Port>3</Port>
+		<DestMAC>01-80-C2-00-00-00</DestMAC>
+		<TC>False</TC>
+	</Message>
+</Tests>

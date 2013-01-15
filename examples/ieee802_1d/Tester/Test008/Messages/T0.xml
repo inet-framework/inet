@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<Tests>
+	<Message>
+		<Type>5</Type>
+		<Time>2.6</Time>
+		<DestMAC>AA-00-00-00-00-05</DestMAC>
+		<SrcMAC>AA-00-00-00-00-06</SrcMAC>
+		<CVID>7</CVID>
+		<SVID>8</SVID>
+		<BVID>9</BVID>
+		<ISID>10</ISID>
+		<DestBMAC>A0-00-00-00-00-11</DestBMAC>
+		<SrcBMAC>A0-00-00-00-00-12</SrcBMAC>
+		<ByteLength>300</ByteLength>
+	</Message>
+</Tests>

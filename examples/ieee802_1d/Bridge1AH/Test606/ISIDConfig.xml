@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<isidConfig>
+	<Port>
+		<index>0</index>
+		<ISids>
+			<ISid>1</ISid>
+		</ISids>
+	</Port>
+	<Port>
+		<index>1</index>
+		<ISids>
+			<ISid>6</ISid>
+		</ISids>
+	</Port>
+	<Port>
+		<index>2</index>
+		<ISids>
+			<ISid>6</ISid>
+		</ISids>
+	</Port>
+</isidConfig>

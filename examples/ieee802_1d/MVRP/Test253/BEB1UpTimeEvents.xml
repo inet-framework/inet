@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<Events>
+	<Event>
+		<Type>0</Type> 	<!-- FALLING DOWN -->
+		<Time>1</Time>
+	</Event> 
+</Events>

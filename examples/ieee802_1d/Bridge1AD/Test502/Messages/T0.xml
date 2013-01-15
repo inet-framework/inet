@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<Tests>
+	<Message>
+		<Type>3</Type>
+		<Time>7</Time>
+		<DestMAC>A0-00-00-00-00-01</DestMAC>
+		<SrcMAC>A0-00-00-00-00-02</SrcMAC>
+		<VID>4</VID>
+		<ByteLength>300</ByteLength>
+	</Message>
+</Tests>
