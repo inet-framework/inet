@@ -5,5 +5,5 @@ ls | egrep '^Test[0-9]+$' | ./CompareLauncher.sh
 elif [ $1 = "clean" ]; then
 echo "Cleaning results"
 rm -f results/*
-ls --hide="[^Test]*" | ./Cleaner.sh
+ls | egrep '^Test[0-9]+$' | ./Cleaner.sh
 fi
