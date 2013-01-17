@@ -103,6 +103,16 @@ public:
 class RSTP: public cSimpleModule
 {
   protected:
+    /* kind codes for self messages */
+    enum SelfKinds
+    {
+        SELF_HELLOTIME = 1,
+        SELF_UPGRADE,
+        SELF_TIMETODESIGNATE,
+        SELF_UPTIMEEVENT_UP,
+        SELF_UPTIMEEVENT_DOWN
+    };
+
 	  /*Dynamic data.*/
 
 	int MaxAge;

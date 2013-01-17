@@ -23,9 +23,9 @@
 Define_Module (RSTP);
 RSTP::RSTP()
 {
-	helloM = new cMessage("itshellotime");
-	forwardM=new cMessage("upgrade");
-	migrateM=new cMessage("timetodesignate");
+	helloM = new cMessage("itshellotime", SELF_HELLOTIME);
+	forwardM = new cMessage("upgrade", SELF_UPGRADE);
+	migrateM = new cMessage("timetodesignate", SELF_TIMETODESIGNATE);
 }
 
 RSTP::~RSTP()
@@ -213,25 +213,30 @@ void RSTP::handleMessage(cMessage *msg)
 {//It can receive BPDU or self messages. Self messages are hello time, time to switch to designated, or status upgrade time.
 	if(msg->isSelfMessage())
 	{
-		if(strcmp(msg->getName(),"itshellotime")==0)
-		{
-			handleHelloTime(msg);
-		}
-		else if(strcmp(msg->getName(),"upgrade")==0)
-		{// Designated ports state upgrading. discarding-->learning. learning-->forwarding
-			handleUpgrade(msg);
-		}
-		else if(strcmp(msg->getName(),"timetodesignate")==0)
-		{// Not asigned ports switch to designated.
-			handleMigrate(msg);
-		}
-		else if(strcmp(msg->getName(),"UpTimeEvent")==0)
-		{
-			handleUpTimeEvent(msg);  //Handling UP or DOWN event.
-		}
-		else
-		{
-			error("Unknown self message");
+        switch (msg->getKind())
+        {
+            case SELF_HELLOTIME:
+                handleHelloTime(msg);
+                break;
+
+            case SELF_UPGRADE:
+                // Designated ports state upgrading. discarding-->learning. learning-->forwarding
+                handleUpgrade(msg);
+                break;
+
+            case SELF_TIMETODESIGNATE:
+                // Not asigned ports switch to designated.
+                handleMigrate(msg);
+                break;
+
+            case SELF_UPTIMEEVENT_UP:
+            case SELF_UPTIMEEVENT_DOWN:
+                handleUpTimeEvent(msg);  //Handling UP or DOWN event.
+                break;
+
+            default:
+                error("Unknown self message");
+                break;
 		}
 	}
 	else
@@ -1308,7 +1313,7 @@ void PortStatus::updatePortVector(BPDUieee8021D *frame,int arrival)
 void RSTP::scheduleUpTimeEvent(cXMLElement * event)
 {//Schedule "UPTimeEvents". Falling nodes or links.
 	simtime_t temp=(simtime_t) getParameterDoubleValue(event,"Time");
-	int EventType=getParameterBoolValue(event,"Type");
+	short EventType = getParameterBoolValue(event,"Type") ? SELF_UPTIMEEVENT_UP : SELF_UPTIMEEVENT_DOWN;
 	cMessage * msg=new cMessage("UpTimeEvent",EventType);
 	//cXMLElementList list;
 	scheduleAt(temp,msg);
@@ -1317,12 +1322,12 @@ void RSTP::scheduleUpTimeEvent(cXMLElement * event)
 void RSTP::handleUpTimeEvent(cMessage * msg)
 {//Handles scheduled "UPTimeEvents"
 
-	if(msg->getKind()==UP)
+	if(msg->getKind()==SELF_UPTIMEEVENT_UP)
 	{
 		initPorts();
 		up=true;
 	}
-	else if(msg->getKind()==DOWN)
+	else if(msg->getKind()==SELF_UPTIMEEVENT_DOWN)
 	{
 		for(unsigned int i=0;i<Puertos.size();i++)
 		{
