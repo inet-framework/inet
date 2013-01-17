@@ -23,13 +23,9 @@
 Define_Module (RSTP);
 RSTP::RSTP()
 {
-	helloM = new cMessage();
-	helloM->setName("itshellotime");
-	forwardM=new cMessage();
-	forwardM->setName("upgrade");
-	migrateM=new cMessage();
-	migrateM->setName("timetodesignate");
-
+	helloM = new cMessage("itshellotime");
+	forwardM=new cMessage("upgrade");
+	migrateM=new cMessage("timetodesignate");
 }
 
 RSTP::~RSTP()
@@ -59,12 +55,11 @@ void RSTP::initialize(int stage)
 		if(admac==NULL)
 			error("Relay module not found");
 
-
 		//Gets the backbone mac address
-		cModule * macUnit=check_and_cast<cModule *>(Parent)->getSubmodule("macB",0);
+		cModule * macUnit = Parent->getSubmodule("macB",0);
 		if(macUnit==NULL)
 		{
-			macUnit=check_and_cast<cModule *>(Parent)->getSubmodule("mac",0);
+			macUnit = Parent->getSubmodule("mac",0);
 		}
 		if(macUnit!=NULL)
 		{
@@ -1270,16 +1265,15 @@ int RSTP::getBestAlternate()
 				candidato=j; //New candidate
 			}
 		}
-
 	}
 	return candidato;
 }
-
 
 bool RSTP::isEdge(int index)
 {
 	return Puertos[index].Edge;
 }
+
 
 PortStatus::PortStatus()
 {//PortStatus constructor
@@ -1294,7 +1288,6 @@ PortStatus::PortStatus()
 	TCWhile=0;		//This port will send TC=true until this time has been overtaken.
 
 	portfilt=NULL;
-
 }
 
 void PortStatus::updatePortVector(BPDUieee8021D *frame,int arrival)
@@ -1310,8 +1303,6 @@ void PortStatus::updatePortVector(BPDUieee8021D *frame,int arrival)
 	this->PortRstpVector.arrivalPort=arrival;
 	this->LostBPDU=0;
 }
-
-
 
 
 void RSTP::scheduleUpTimeEvent(cXMLElement * event)
