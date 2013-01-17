@@ -10,7 +10,7 @@ class noncobject EtherFrame;
 
 cplusplus {{
 #include "MACAddress.h"
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "8021Q.h"
 }}
 

@@ -12,7 +12,7 @@
 #define __A_RELAY1Q_H
 
 #include "MACAddress.h"
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "BPDU.h"
 #include "RSTP.h"
 #include "MVRP.h"

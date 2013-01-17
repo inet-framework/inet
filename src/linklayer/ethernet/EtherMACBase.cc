@@ -18,7 +18,7 @@
 
 #include "EtherMACBase.h"
 
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "Ethernet.h"
 #include "InterfaceEntry.h"
 #include "InterfaceTableAccess.h"

@@ -9,7 +9,7 @@
 ******************************************************/
 #include "RSTP.h"
 #include "Ethernet.h"
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "MACRelayUnitBase.h"
 #include "Admacrelay.h"
 #include "EtherMAC.h"

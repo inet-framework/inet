@@ -11,7 +11,7 @@
 #define __INET_PortFilt1AD_H
 
 #include "Ethernet.h"
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "8021Q.h"
 #include "PortFilt.h"
 

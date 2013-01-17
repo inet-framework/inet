@@ -22,7 +22,7 @@
 #include "Ieee802Ctrl_m.h"
 
 #ifdef WITH_ETHERNET
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #endif
 
 #include "NotifierConsts.h"

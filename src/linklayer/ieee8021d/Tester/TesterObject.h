@@ -11,7 +11,7 @@
 
 #include "BPDU.h"
 #include "MACAddress.h"
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 
 //Parsing definitions
 enum

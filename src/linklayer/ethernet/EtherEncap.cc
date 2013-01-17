@@ -19,7 +19,7 @@
 
 #include "EtherEncap.h"
 
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "IInterfaceTable.h"
 
 

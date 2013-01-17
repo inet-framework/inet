@@ -16,7 +16,7 @@
 */
 
 #include "MACRelayUnitNP.h"
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "Ethernet.h"
 #include "MACAddress.h"
 

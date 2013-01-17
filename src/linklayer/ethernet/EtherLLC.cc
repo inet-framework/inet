@@ -17,7 +17,7 @@
 
 #include "EtherLLC.h"
 
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "Ethernet.h"
 #include "Ieee802Ctrl_m.h"
 #include "ModuleAccess.h"

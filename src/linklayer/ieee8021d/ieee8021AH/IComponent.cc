@@ -9,7 +9,7 @@
 ******************************************************/
 
 #include "IComponent.h"
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "Ethernet.h"
 #include "EtherMAC.h"
 #include "MVRP.h"

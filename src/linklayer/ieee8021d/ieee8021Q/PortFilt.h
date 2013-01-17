@@ -10,7 +10,7 @@
 #define __INET_PortFilt1Q_H
 
 #include "Ethernet.h"
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "8021Q.h"
 
 

@@ -12,7 +12,7 @@
 
 #include "MACAddress.h"
 #include "ITagTableAccess.h"
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "8021Q.h"
 
 

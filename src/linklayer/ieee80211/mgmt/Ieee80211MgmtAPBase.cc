@@ -20,7 +20,7 @@
 #include <string.h>
 
 #ifdef WITH_ETHERNET
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #endif
 
 void Ieee80211MgmtAPBase::initialize(int stage)

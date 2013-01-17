@@ -12,7 +12,7 @@
 #define __A_ADMACRELAY_H
 
 #include "MACAddress.h"
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "Cache1AHAccess.h"
 #include "BPDU_m.h"
 #include "RSTP.h"
