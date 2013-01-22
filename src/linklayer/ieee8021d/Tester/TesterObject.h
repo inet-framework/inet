@@ -63,7 +63,7 @@ class TesterObject: public cSimpleModule
 	  int ReceivedTCNs;
 
   public:
-    TesterObject() {}
+    TesterObject() { LastMVRPDU = NULL; LastEthII = NULL; LastEth1Q = NULL; LastEth1ad = NULL; LastEth1ah = NULL; }
     virtual ~TesterObject();
     virtual void finish();
     virtual void printState();

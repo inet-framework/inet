@@ -15,7 +15,7 @@
 
 Define_Module( Cache1AH );
 
-Cache1AH::Cache1AH(){}
+Cache1AH::Cache1AH() { admac = NULL; }
 
 Cache1AH::~Cache1AH(){}
 

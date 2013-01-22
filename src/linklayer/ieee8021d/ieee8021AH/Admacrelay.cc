@@ -19,7 +19,7 @@
 
 Define_Module( Admacrelay );
 
-Admacrelay::Admacrelay(){}
+Admacrelay::Admacrelay() { cache = NULL; }
 Admacrelay::~Admacrelay(){}
 
 void Admacrelay::initialize(int stage)

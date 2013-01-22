@@ -22,6 +22,9 @@ Define_Module( Relay1Q );
 
 Relay1Q::Relay1Q()
 {
+    cache = NULL;
+    rstpModule = NULL;
+    mvrpModule = NULL;
 }
 
 Relay1Q::~Relay1Q()

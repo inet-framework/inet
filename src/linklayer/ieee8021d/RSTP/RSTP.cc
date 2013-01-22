@@ -25,6 +25,9 @@ Define_Module (RSTP);
 
 RSTP::RSTP()
 {
+    Parent = NULL;
+    admac = NULL;
+    sw = NULL;
 	helloM = new cMessage("itshellotime", SELF_HELLOTIME);
 	forwardM = new cMessage("upgrade", SELF_UPGRADE);
 	migrateM = new cMessage("timetodesignate", SELF_TIMETODESIGNATE);

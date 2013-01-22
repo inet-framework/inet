@@ -50,7 +50,7 @@ class MVRP: public cSimpleModule
 	  bool testing;			/// Saves testing data
 
   public:
-	MVRP() {}
+	MVRP() { rstpModule = NULL; }
 	virtual int numInitStages() const {return 3;}
 
 	/**

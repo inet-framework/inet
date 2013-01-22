@@ -22,7 +22,7 @@ Define_Module( IComponent );
 
 
 IComponent::IComponent()
-{}
+{ it = NULL; }
 
 IComponent::~IComponent(){}
 
