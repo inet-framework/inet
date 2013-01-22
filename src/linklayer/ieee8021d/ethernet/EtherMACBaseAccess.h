@@ -21,10 +21,10 @@
 /**
  * @brief Gives access to the EtherMAC
  */
-class EtherMACAccess : public ModuleAccess<EtherMAC>
+class EtherMACBaseAccess : public ModuleAccess<EtherMACBase>
 {
     public:
-    	 EtherMACAccess() : ModuleAccess<EtherMAC>("mac") {}
+    	 EtherMACBaseAccess() : ModuleAccess<EtherMACBase>("mac") {}
 };
 
 #endif

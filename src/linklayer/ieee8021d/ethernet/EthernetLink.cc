@@ -13,15 +13,18 @@
 ******************************************************/
 
 #include "EthernetLink.h"
+
 #include "Ieee802Ctrl_m.h"
 #include "8021Q.h"
-#include "EtherMACAccess.h"
+#include "EtherMACBaseAccess.h"
 #include "MVRPDU.h"
 
 
 Define_Module(EthernetLink);
+
 EthernetLink::EthernetLink()
 {}
+
 EthernetLink::~EthernetLink()
 {}
 
@@ -51,8 +54,8 @@ void EthernetLink::initialize(int stage)
 			scheduleAt(simTime()+0.000001,mvrpTime);
 		}
 		//Get module mac address.
-		cModule * mac=check_and_cast<EtherMAC *>(EtherMACAccess().get());
-		address.setAddress(mac->par("address"));
+		EtherMACBase *mac=check_and_cast<EtherMACBase *>(EtherMACBaseAccess().get());
+		address = mac->getMACAddress();
 
 		//Init counters
 		WATCH(seqNum);
