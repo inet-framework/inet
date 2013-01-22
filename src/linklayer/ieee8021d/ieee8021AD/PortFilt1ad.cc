@@ -8,6 +8,7 @@
 * @date Feb 2011
 ******************************************************/
 #include "PortFilt1ad.h"
+
 #include "PortFilt.h"
 #include "MVRPDU.h"
 #include "BPDU.h"
@@ -19,6 +20,7 @@ Define_Module(PortFilt1ad);
 
 PortFilt1ad::PortFilt1ad()
 {}
+
 PortFilt1ad::~PortFilt1ad()
 {}
 
@@ -36,6 +38,7 @@ void PortFilt1ad::initialize()
 		}
 	}
 }
+
 /*
  * Reading from xml.
  */
@@ -127,6 +130,7 @@ void PortFilt1ad::handleMessage(cMessage *msg)
 				}
 			}
 			break;
+
 		case 1:  //Arrival = 1 Going out of the bridge.
 			if(tagged)
 			{
@@ -177,6 +181,7 @@ void PortFilt1ad::handleMessage(cMessage *msg)
 				}
 			}
 			break;
+
 		default:
 			error("Unknown arrival gate");
 		}
@@ -233,6 +238,4 @@ void PortFilt1ad::processUntaggedFrame (EthernetIIFrame *frame)
 		delete frame;
 	}
 }
-
-
 

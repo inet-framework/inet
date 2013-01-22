@@ -9,14 +9,12 @@
 * @date Feb 2011
 ******************************************************/
 #include "Admacrelay.h"
+
 #include "Ethernet.h"
 #include "EtherMAC.h"
 #include "Delivery_m.h"
 #include "RSTPAccess.h"
 #include "MVRPAccess.h"
-
-
-
 
 
 Define_Module( Admacrelay );
@@ -61,7 +59,6 @@ bool Admacrelay::isISidBroadcast(MACAddress mac, int ISid)
 	}
 	return result;
 }
-
 
 void Admacrelay::handleEtherFrame(EthernetIIFrame *frame)
 {//Specific 802.1ah handler.
@@ -153,6 +150,4 @@ void Admacrelay::relayMsg(cMessage * msg,std::vector <int> outputPorts)
 	}
 	delete msg;
 }
-
-
 

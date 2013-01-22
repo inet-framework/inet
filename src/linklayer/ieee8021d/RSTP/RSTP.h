@@ -284,11 +284,7 @@ class RSTP: public cSimpleModule
 	 * @brief Handles the switch to backup in one of the ports
 	 */
 	virtual void handleBK(BPDUieee8021D * frame, int arrival);
-
-
 };
-
-
 
 
 #endif

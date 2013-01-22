@@ -9,15 +9,17 @@
 ******************************************************/
 
 #include "PortFilt1ah.h"
+
 #include "MVRPDU.h"
 #include "BPDU.h"
 #include <XMLUtils.h>
 
 
-
 Define_Module(PortFilt1ah);
 
+
 PortFilt1ah::PortFilt1ah(){}
+
 PortFilt1ah::~PortFilt1ah(){}
 
 void PortFilt1ah::initialize()
@@ -47,6 +49,7 @@ void PortFilt1ah::handleMessage(cMessage *msg)
 			delete msg;
 		}
 		break;
+
 	case 1:
 		if((dynamic_cast<EthernetIIFrame *> (msg)!=NULL)
 				||(dynamic_cast<MVRPDU *>(msg)!=NULL)
@@ -61,6 +64,7 @@ void PortFilt1ah::handleMessage(cMessage *msg)
 			delete msg;
 		}
 		break;
+
 	default:
 		error("Unknown arrival gate");
 	}
@@ -87,6 +91,4 @@ bool PortFilt1ah::isEdge()
 	error("Wrong connection. PortFilt could not determine if this is an edge port.");
 	return false;
 }
-
-
 

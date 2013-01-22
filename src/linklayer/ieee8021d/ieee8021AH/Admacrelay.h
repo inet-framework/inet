@@ -36,8 +36,6 @@ class Admacrelay : public Relay1Q
 	    virtual void initialize(int stage);
 	    virtual int numInitStages() const {return 3;}
 
-
-
 	/**
 	 * 802.1ah handler. Determines correct output gate and calls relayMsg.
 	 */

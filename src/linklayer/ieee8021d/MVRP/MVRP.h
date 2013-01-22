@@ -30,7 +30,6 @@ class PortMVRPStatus
 {
 public:
 	std::vector <vid_time> registered;	/// Registered VLANs vids
-
 };
 
 /**
@@ -102,9 +101,6 @@ class MVRP: public cSimpleModule
 	 */
 	virtual void finish();
 };
-
-
-
 
 #endif
 

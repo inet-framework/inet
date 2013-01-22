@@ -8,12 +8,13 @@
 ******************************************************/
 
 #include "PortFilt.h"
+
 #include "MVRPDU.h"
 #include "BPDU.h"
 
 
-
 Define_Module(PortFilt);
+
 PortFilt::PortFilt()
 {
 }
@@ -102,6 +103,7 @@ void PortFilt::handleMessage(cMessage *msg)
 				}
 			}
 			break;
+
 		case 1:  //Arrival = 1 Going out of the bridge.
 			if(tagged)
 			{
@@ -127,12 +129,12 @@ void PortFilt::handleMessage(cMessage *msg)
 				}
 			}
 			break;
+
 		default:
 			error("Unknown arrival gate");
 		}
 	}
 }
-
 
 void PortFilt::updateDisplayString()
 {  //Tkenv shows port type.
@@ -199,7 +201,9 @@ int PortFilt::getPriority()
 {// Returns RSTP port priority.
 	return priority;
 }
+
 bool PortFilt::isEdge()
 {// Returns RSTP port type.
 	return !tagged;
 }
+

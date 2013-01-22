@@ -27,6 +27,7 @@ class PortFilt1ad : public PortFilt
   public:
     PortFilt1ad();
     ~PortFilt1ad();
+
   protected:
     virtual void initialize(); // Base class initialization. Adding CVIDs reading.
     virtual void handleMessage(cMessage *msg);

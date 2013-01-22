@@ -7,7 +7,9 @@
 * @version 1.0
 * @date Feb 2011
 ******************************************************/
+
 #include "RSTP.h"
+
 #include "Ethernet.h"
 #include "EtherFrame.h"
 #include "MACRelayUnitBase.h"
@@ -19,8 +21,8 @@
 #include "Relay1QAccess.h"
 
 
-
 Define_Module (RSTP);
+
 RSTP::RSTP()
 {
 	helloM = new cMessage("itshellotime", SELF_HELLOTIME);
@@ -33,7 +35,6 @@ RSTP::~RSTP()
 	cancelAndDelete(helloM);
 	cancelAndDelete(forwardM);
 	cancelAndDelete(migrateM);
-
 }
 
 void RSTP::initialize(int stage)
@@ -94,8 +95,6 @@ void RSTP::initialize(int stage)
 		forwardDelay=(simtime_t)par("forwardDelay");
 		migrateTime=(simtime_t) par ("migrateTime");  //Time the bridge waits for a better root info. After migrateTime time it swiches all ports which are not bk or alternate to designated.
 
-
-
 		//RSTP module initialization. Puertos will save per port RSTP info.
 		for(int i=0;i<(admac->gateSize("GatesOut"));i++)
 		{
@@ -122,7 +121,6 @@ void RSTP::initialize(int stage)
 			{
 				error("PortFilt not initialized");
 			}
-
 		}
 		double waitTime=0.000001;  //Now
 		//Programming next auto-messages.
@@ -208,7 +206,6 @@ void RSTP::finish()
 	}
 }
 
-
 void RSTP::handleMessage(cMessage *msg)
 {//It can receive BPDU or self messages. Self messages are hello time, time to switch to designated, or status upgrade time.
 	if(msg->isSelfMessage())
@@ -265,7 +262,6 @@ void RSTP::handleMigrate(cMessage * msg)
 	scheduleAt(simTime()+migrateTime, msg);  //Programming next switch to designate
 }
 
-
 void RSTP::handleUpgrade(cMessage * msg)
 {
 	for(unsigned int i=0;i<Puertos.size();i++)
@@ -277,6 +273,7 @@ void RSTP::handleUpgrade(cMessage * msg)
 				case DISCARDING:
 					Puertos[i].PortState=LEARNING;
 					break;
+
 				case LEARNING:
 					Puertos[i].PortState=FORWARDING;
 					//Flushing other ports
@@ -291,6 +288,7 @@ void RSTP::handleUpgrade(cMessage * msg)
 						}
 					}
 					break;
+
 				case FORWARDING:
 					break;
 			}
@@ -368,6 +366,7 @@ void RSTP::handleHelloTime(cMessage * msg)
 	}
 	scheduleAt(simTime()+hellotime, msg); //Programming next hello time.
 }
+
 void RSTP::checkTC(BPDUieee8021D * frame, int arrival)
 {
 	if((frame->getTC()==true)&&(Puertos[arrival].PortState==FORWARDING))
@@ -423,7 +422,6 @@ void RSTP::handleBK(BPDUieee8021D * frame, int arrival)
 
 void RSTP::handleIncomingFrame(Delivery *frame2)
 {  //Incoming BPDU handling
-
 	if(verbose==true)
 	{
 		printState();
@@ -485,7 +483,6 @@ void RSTP::handleIncomingFrame(Delivery *frame2)
 					switch(caso2)
 					{
 						case 0: //Double link to the same port of the root source.Tie breaking. Better local port first.
-
 							if((Puertos[r].PortPriority<Puertos[arrival].PortPriority)
 									||((Puertos[r].PortPriority==Puertos[arrival].PortPriority)&&(r<arrival)))
 							{
@@ -524,12 +521,10 @@ void RSTP::handleIncomingFrame(Delivery *frame2)
 								sw->cpCache(r,arrival); //Copy cache from old to new root.
 
 								//The change does not deserve flooding
-
 							}
 							break;
 
 						case 1:   //New port rstp info is better than the root in another gate. Root change.
-
 							for(unsigned int i=0;i<Puertos.size();i++)
 							{
 								if(Puertos[i].Edge==false)   //Avoiding clients reseting
@@ -593,12 +588,12 @@ void RSTP::handleIncomingFrame(Delivery *frame2)
 								Puertos[r].PortRole=DESIGNATED;
 							}
 							Puertos[r].PortState=DISCARDING;
-
 							break;
 
 						case -1: //Worse Root
 							sendBPDU(arrival);	//BPDU to show him a better Root as soon as possible
 							break;
+
 						case -2: //Same Root but worse RPC
 						case -3: //Same Root RPC but worse source
 						case -4: //Same Root RPC Source but worse port
@@ -626,16 +621,15 @@ void RSTP::handleIncomingFrame(Delivery *frame2)
 			else if((frame->getSrc().compareTo(Puertos[arrival].PortRstpVector.srcAddress)==0) //Worse or similar, but the same source
 					&&(frame->getRootMAC().compareTo(address)!=0))   // Root will not participate
 			{//Source has updated BPDU information.
-
 				switch(caso)
 				{
 				case 0:
 					Puertos[arrival].LostBPDU=0;   // Same BPDU. Not updated.
 					break;
+
 				case -1://Worse Root
 					if(Puertos[arrival].PortRole==ROOT)
 					{
-
 						int alternative=getBestAlternate(); //Searching old alternate
 						if(alternative>=0)
 						{
@@ -687,6 +681,7 @@ void RSTP::handleIncomingFrame(Delivery *frame2)
 						sendBPDU(arrival); //Show him a better Root as soon as possible
 					}
 					break;
+
 				case -2:
 				case -3:
 				case -4: //Same Root.Worse source
@@ -806,11 +801,8 @@ void RSTP::sendTCNtoRoot()
 	}
 }
 
-
-
 void RSTP::sendBPDUs()
 {//Send BPDUs through all ports if they are required.
-
 	for(unsigned int i=0;i<Puertos.size();i++)
 	{
 		if((Puertos[i].PortRole!=ROOT)&&(Puertos[i].PortRole!=ALTERNATE_PORT)&&(Puertos[i].PortRole!=DISABLED)&&(Puertos[i].Edge!=true))
@@ -819,6 +811,7 @@ void RSTP::sendBPDUs()
 		}
 	}
 }
+
 void RSTP::sendBPDU(int port)
 {//Send a BPDU throuth port.
 	if(Puertos[port].PortRole!=DISABLED)
@@ -848,12 +841,10 @@ void RSTP::sendBPDU(int port)
 		frame2->encapsulate(frame);
 		send(frame2,"RSTPPort$o");
 	}
-
 }
 
 void RSTP::colorRootPorts()
 {//Gives color to the root link, or module border if it is root.
-
 	bool found=false;
 	for(unsigned int l=0;l<Puertos.size();l++)
 	{//Marking port state
@@ -952,7 +943,6 @@ void RSTP::colorRootPorts()
 			char buf[50];
 			sprintf(buf,"Root: %s",address.str().c_str());
 			getDisplayString().setTagArg("t",0,buf);
-
 		}
 		else
 		{ //Remove possible root mark
@@ -961,8 +951,6 @@ void RSTP::colorRootPorts()
 		}
 	}
 }
-
-
 
 void RSTP::printState()
 {// Prints current database info
@@ -1022,6 +1010,7 @@ void RSTP::printState()
 		ev<<Puertos[i].PortRstpVector.RootMAC.str()<<"/"<<Puertos[i].PortRstpVector.srcAddress.str()<<endl;
 	}
 }
+
 void RSTP::initPorts()
 { //Initialize RSTP dynamic information.
 	for(unsigned int j=0;j<Puertos.size();j++)
@@ -1055,9 +1044,7 @@ void RSTP::initPorts()
 				if(gate!=NULL)
 					Puertos[j].portfilt=check_and_cast<PortFilt *>(gate->getOwner());
 			}
-
 		}
-
 	}
 }
 
@@ -1066,6 +1053,7 @@ PortRoleT RSTP::getPortRole(int index)
 	Enter_Method("Get rol");
 	return Puertos[index].PortRole;
 }
+
 PortStateT RSTP::getPortState(int index)
 {
 	Enter_Method("Get State");
@@ -1099,7 +1087,6 @@ RSTPVector RSTP::getRootRstpVector()
 	    return RootVect;
 	}
 }
-
 
 int RSTP::contestRstpVector(RSTPVector vect2,int v2Port)
 {//Compares vect2 with the vector that would be sent if this were the root node for the arrival LAN.
@@ -1137,10 +1124,6 @@ int RSTP::contestRstpVector(BPDUieee8021D* msg,int arrival)
 	result=vect.compareRstpVector(msg,0);
 	return result;
 }
-
-
-
-
 
 int RSTPVector::compareRstpVector(BPDUieee8021D * msg,int PortCost)
 {//Compares msg with vect. >0 if msg better than vect. =0 if they are similar.
@@ -1279,7 +1262,6 @@ bool RSTP::isEdge(int index)
 	return Puertos[index].Edge;
 }
 
-
 PortStatus::PortStatus()
 {//PortStatus constructor
 	Edge=false;		 // It indicates that this is a client port.
@@ -1308,7 +1290,6 @@ void PortStatus::updatePortVector(BPDUieee8021D *frame,int arrival)
 	this->PortRstpVector.arrivalPort=arrival;
 	this->LostBPDU=0;
 }
-
 
 void RSTP::scheduleUpTimeEvent(cXMLElement * event)
 {//Schedule "UPTimeEvents". Falling nodes or links.

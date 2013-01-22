@@ -16,8 +16,6 @@
 
 class ITagTable: public cSimpleModule
 {
-
-
     protected:
     	simtime_t agingTime;   // max idle time for address table entries
 								// (when it expires, entry is removed from the table)
@@ -57,9 +55,7 @@ class ITagTable: public cSimpleModule
     	virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
 
-
     public:
-
     	/**
     	 * @brief Saves a new CMAC to an ISid local info or refreshes the insertion time.
     	 * @note Towards backbone.
@@ -70,7 +66,6 @@ class ITagTable: public cSimpleModule
     	 * @return True for a new entry. False if refreshing.
     	 */
         virtual bool registerCMAC (vid ISid, int Gate, vid SVid, MACAddress CMACs);
-
 
     	/**
     	 * @brief Is ISID associated to a known SVid/Gate
@@ -95,8 +90,6 @@ class ITagTable: public cSimpleModule
     	 */
         virtual bool resolveBMAC(vid ISid, MACAddress CMACd, MACAddress * BMACd);
 
-
-
     	/**
     	 * @brief Registers/Refreshes a new remote entry with data from the other side of the BB
     	 * @note Towards client network
@@ -115,12 +108,10 @@ class ITagTable: public cSimpleModule
     	 */
     	virtual bool resolveGate (vid ISid, MACAddress CMAC, std::vector <int> * Gate, std::vector <int> * SVid);
 
-
     	/**
     	 * @brief Prints all cached information and some module identification data.
     	 */
         virtual void printState();
-
 
         /**
          * @brief Creates a new ISid at isidtable
@@ -134,4 +125,6 @@ class ITagTable: public cSimpleModule
          */
         virtual bool asociateSVid(vid ISid, unsigned int Gate, vid SVid);
 };
+
 #endif
+

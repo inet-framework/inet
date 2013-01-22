@@ -17,14 +17,13 @@
 #include "Relay1Q.h"
 
 
-
-
-
 Define_Module( Relay1Q );
+
 
 Relay1Q::Relay1Q()
 {
 }
+
 Relay1Q::~Relay1Q()
 {
 }
@@ -47,7 +46,6 @@ void Relay1Q::initialize(int stage)
 			ev<<"Bridge MAC address "<<address.str()<<endl;
 	}
 }
-
 
 void Relay1Q::handleMessage(cMessage *msg){
 	ev << "New message"<<endl;
@@ -126,7 +124,6 @@ void Relay1Q::handleIncomingFrame(Delivery *frame)
 	}
 	delete frame;
 }
-
 
 /*
  *  Specific BPDU handler
@@ -219,7 +216,6 @@ void Relay1Q::relayMsg(cMessage * msg, std::vector<int> outputPorts)
 	delete msg;
 }
 
-
 /*
  *  Specific MVRPDU handler
  */
@@ -235,13 +231,9 @@ void Relay1Q::handleIncomingFrame(MVRPDU *frame)
 		}
 	else
 		delete frame;
-
 }
 
 void Relay1Q::finish()
 {
-
 }
-
-
 

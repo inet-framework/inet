@@ -8,12 +8,17 @@
 ******************************************************/
 
 #include "Cache1AH.h"
+
 #include "XMLUtils.h"
 #include "AdmacrelayAccess.h"
 
+
 Define_Module( Cache1AH );
+
 Cache1AH::Cache1AH(){}
+
 Cache1AH::~Cache1AH(){}
+
 void Cache1AH::initialize()
 {
 	Cache1Q::initialize();

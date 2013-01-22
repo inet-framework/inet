@@ -9,6 +9,7 @@
 ******************************************************/
 
 #include "IComponent.h"
+
 #include "EtherFrame.h"
 #include "Ethernet.h"
 #include "EtherMAC.h"
@@ -22,6 +23,7 @@ Define_Module( IComponent );
 
 IComponent::IComponent()
 {}
+
 IComponent::~IComponent(){}
 
 void IComponent::initialize(int stage)
@@ -86,7 +88,6 @@ void IComponent::initialize(int stage)
 			scheduleAt(simTime()+0.00001,msg);
 		}
 	}
-
 }
 
 void IComponent::sendMVRPDUs(cMessage *msg)
@@ -114,7 +115,6 @@ void IComponent::sendMVRPDUs(cMessage *msg)
 	}
 	scheduleAt(simTime()+interFrameTime,msg);
 }
-
 
 void IComponent::readconfigfromXML(const cXMLElement * isidtab)
 {// Reads itagtable info from configIS xml.
@@ -152,7 +152,6 @@ void IComponent::readconfigfromXML(const cXMLElement * isidtab)
 
 void IComponent::handleMessage(cMessage *msg)
 {// Handling messages
-
 	if(msg->arrivedOn("CGatesIn"))
 	{//Coming from client network
 		ev<<"From Client network"<<endl;
@@ -198,7 +197,6 @@ void IComponent::handleMessage(cMessage *msg)
 	}
 }
 
-
 void IComponent::handle1QFrame(EthernetIIFrame *frame)
 {//Handling 802.1Q Frame.
 	Ethernet1QTag * STag=NULL;
@@ -233,6 +231,7 @@ void IComponent::handle1QFrame(EthernetIIFrame *frame)
 		delete frame;
 	}
 }
+
 void IComponent::handle1adFrame(EthernetIIFrame *frame)
 {
 	EthernetIIFrame * frameAH=NULL;
@@ -325,9 +324,7 @@ void IComponent::handle1adFrame(EthernetIIFrame *frame)
 		send(frameAH,"IGatesOut");
 		ev<<"Frame sent."<<endl;
 	}
-
 }
-
 
 void IComponent::handleEtherIIFrame(EthernetIIFrame *frame)
 {//Handling EthernetII frame from client network
@@ -349,8 +346,8 @@ void IComponent::handleEtherIIFrame(EthernetIIFrame *frame)
 		error("Unexpected frame type. outputFrame was EthernetII");
 		delete frame;
 	}
-
 }
+
 bool IComponent::isISidBroadcast(MACAddress mac, int ISid)
 {
 	bool result=false;
@@ -477,10 +474,7 @@ void IComponent::handle1AHFrame(EthernetIIFrame *frame)
 	delete frame;
 }
 
-
 void IComponent::finish()
 {
 }
-
-
 

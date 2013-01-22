@@ -8,15 +8,16 @@
 ******************************************************/
 
 #include "ITagTable.h"
+
 #include "XMLUtils.h"
 #include <simtime.h>
-
 
 
 Define_Module(ITagTable);
 
 
 ITagTable::ITagTable(){}
+
 ITagTable::~ITagTable(){}
 
 void ITagTable::initialize(int stage)
@@ -30,7 +31,6 @@ void ITagTable::handleMessage(cMessage *)
 	return;
 }
 
-
 std::vector<vid> ITagTable::getSVids(std::vector<vid> ISids,int Gate)
 {//Gets SVids associated to a Gate.
 	std::vector<vid> SVids;
@@ -38,7 +38,6 @@ std::vector<vid> ITagTable::getSVids(std::vector<vid> ISids,int Gate)
 	{
 		for(unsigned int i=0;i<ISids.size();i++)  //For requested ISids
 		{
-
 			for(unsigned int j=0;j<isidtable.size();j++) //Look for them in isidtable
 			{
 				if(isidtable[j].ISid==ISids[i])
@@ -61,9 +60,6 @@ std::vector<vid> ITagTable::getSVids(std::vector<vid> ISids,int Gate)
 	return SVids;
 }
 
-
-
-
 bool ITagTable::registerCMAC(vid ISid, int Gate, vid SVid, MACAddress CMACs)
 {////TOWARDS BB. Saves a new CMAC to an ISid local info or refreshes the insertion time.
  //It returns True if the Gate,SVid, CMAC were not in the table. If they weren't, they are registered.
@@ -74,7 +70,6 @@ bool ITagTable::registerCMAC(vid ISid, int Gate, vid SVid, MACAddress CMACs)
 	{ //Looks for the entry
 		if(isidtable[i].ISid==ISid)
 		{
-
 			for(unsigned int j=0;j<isidtable[i].local[Gate].cache.size();j++)
 			{
 				if(isidtable[i].local[Gate].cache[j].CMAC==CMACs)
@@ -181,7 +176,6 @@ bool ITagTable::registerBMAC (vid ISid, MACAddress CMACs, MACAddress BMACs)
 				a.inserted=simulation.getSimTime();
 				isidtable[i].remote.push_back(a);
 			}
-
 		}
 	}
 	return !found;
@@ -229,7 +223,6 @@ bool ITagTable::resolveGate (vid ISid, MACAddress CMAC, std::vector <int> * Gate
 	return found;
 }
 
-
 void ITagTable::printState()
 {//Prints known data.
 
@@ -255,9 +248,6 @@ void ITagTable::printState()
 	ev<<"************************"<<endl;
 }
 
-/**
-
-*/
 bool ITagTable::createISid(vid ISid,unsigned int GateSize)
 {// Creates a new ISid at isidtable
  //Used during initialization
@@ -274,7 +264,6 @@ bool ITagTable::createISid(vid ISid,unsigned int GateSize)
 	isidtable.push_back(a);
 	return true;
 }
-
 
 bool ITagTable::asociateSVid(vid ISid, unsigned int Gate, vid SVid)
 {//Adds the asociation ISid/SVid
@@ -297,5 +286,4 @@ bool ITagTable::asociateSVid(vid ISid, unsigned int Gate, vid SVid)
 	}
 	return result;
 }
-
 

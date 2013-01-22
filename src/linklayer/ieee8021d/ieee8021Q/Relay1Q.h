@@ -29,10 +29,10 @@ protected:
   RSTP * rstpModule; /// RSTP module pointer. Updated every time the admcarelay module is accessed.
   MVRP * mvrpModule; /// MVRP module pointer. Updated every time the admcarelay module is accessed.
   bool verbose;  /// It sets module verbosity
+
 public:
 	Relay1Q();
 	~Relay1Q();
-
 
 protected:
 	MACAddress address;
@@ -46,8 +46,6 @@ protected:
 	virtual void handleEtherFrame(EthernetIIFrame *frame);  /// 802.1Q handler. Does the relaying task
 	virtual void finish();
 	virtual void relayMsg(cMessage * msg,std::vector <int> outputPorts);
-
-
 };
 
 #endif

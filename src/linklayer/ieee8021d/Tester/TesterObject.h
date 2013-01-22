@@ -43,7 +43,6 @@ class TesterObject: public cSimpleModule
 	  bool detailedEth1ad;
 	  bool detailedEth1ah;
 
-
 	  //Statistics
 	  int ReceivedMessages;
 	  int SentMessages;
@@ -96,10 +95,7 @@ class TesterObject: public cSimpleModule
      * Message scheduler
      */
     virtual void scheduleMessage(cXMLElement *);
-
 };
-
-
 
 
 #endif

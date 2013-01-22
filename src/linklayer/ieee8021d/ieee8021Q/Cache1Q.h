@@ -36,10 +36,8 @@ class Cache1Q: public cSimpleModule
         virtual void initialize();
         virtual void handleMessage(cMessage *msg);
 
-
     public:
         // Table management
-
 
     	/**
     	 * @brief For a known arriving port, V-TAG and destination MAC. It finds out the port where relay component should deliver the message
@@ -75,6 +73,7 @@ class Cache1Q: public cSimpleModule
          * @brief Clean aged entries
          */
         virtual void cleanAgedEntries();
-
 };
+
 #endif
+

@@ -6,35 +6,31 @@
 * @version 1.0
 * @date Feb 2011
 ******************************************************/
-#include "Cache1Q.h"
-#include "XMLUtils.h"
 
+#include "Cache1Q.h"
+
+#include "XMLUtils.h"
 
 
 Define_Module( Cache1Q );
 
 
-
 Cache1Q::Cache1Q(){
 }
+
 Cache1Q::~Cache1Q(){
 }
-
 
 void Cache1Q::initialize()
 {
 	agingTime=(simtime_t) par("agingTime");
 	verbose=(bool) par ("verbose");
-
 }
 
 void Cache1Q::handleMessage(cMessage *)
 {
         opp_error("This module doesn't process messages");
 }
-
-
-
 
 /*
  * RESOLVEMAC
@@ -59,7 +55,6 @@ bool Cache1Q::resolveMAC(vid Vid, MACAddress MACDest,std::vector<int> * outputPo
 	}
 	return result;
 }
-
 
 /*
  * REGISTERMAC
@@ -93,7 +88,6 @@ bool Cache1Q::registerMAC (vid Vid, MACAddress MAC, int Gate)
 	return exists;
 }
 
-
 /*
  * Clears gate MAC cache.
  */
@@ -115,7 +109,6 @@ void Cache1Q::flush(int Gate)
 /*
  * Prints verbose information
  */
-
 void Cache1Q::printState()
 {
 	ev<<endl<<"RelayTable"<<endl;
@@ -125,7 +118,6 @@ void Cache1Q::printState()
 		ev<<RelayTable[i].Vid<<"   "<<RelayTable[i].MAC<<"    "<<RelayTable[i].Gate<<"    "<<RelayTable[i].inserted<<endl;
 	}
 }
-
 
 void Cache1Q::cpCache(int a, int b)
 { //Copy from a to b
@@ -155,6 +147,5 @@ void Cache1Q::cleanAgedEntries()
 			i--;
 		}
 	}
-
 }
 

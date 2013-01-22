@@ -4,7 +4,6 @@
 //
 
 
-
 class noncobject MACAddress;
 class noncobject EtherFrame;
 
@@ -13,10 +12,6 @@ cplusplus {{
 #include "EtherFrame.h"
 #include "8021Q.h"
 }}
-
-
-
-
 
 
 //
@@ -29,5 +24,4 @@ packet MVRPDU extends EtherFrame
     unsigned int VIDS [];	//Registrated VLANS
     unsigned int PortIndex;  //Output port if an outgoing frame. Input port if an ingoing frame.
 }
-
 

@@ -8,15 +8,15 @@
 * @date Feb 2011
 ******************************************************/
 #include "MVRP.h"
+
 #include <algorithm>  // Needed for std::sort
 #include "RSTPAccess.h"
 #include "AdmacrelayAccess.h"
 #include "Relay1QAccess.h"
 
 
-
-
 Define_Module (MVRP);
+
 void MVRP::initialize(int stage)
 {
 	if(stage==2) // rstp initialization takes place in stage 1
@@ -85,8 +85,6 @@ void MVRP::finish()
 	}
 }
 
-
-
 void MVRP::handleMessage(cMessage *msg)
 {	//MVRPDU and selfMessages can be received. SelfMessages indicate that it is time to send a new MVRPDU
 //
@@ -95,7 +93,6 @@ void MVRP::handleMessage(cMessage *msg)
 		if(strcmp(msg->getName(),"itsMVRPDUtime")==0)
 		{
 			handleMVRPDUtime(msg);
-
 		}
 		else
 		{
@@ -123,7 +120,6 @@ void MVRP::handleMVRPDUtime(cMessage * msg)
 	{//Generates a new MVRPDU for every forwarding gate. Just for backbone gates.
 		if(!rstpModule->isEdge(i))
 		{//If it is not a client gate cleans the old ones.
-
 			if(rstpModule->getPortState(i)==FORWARDING)
 			{
 				std::vector <vid> VIDS;
@@ -183,7 +179,6 @@ void MVRP::cleanAgedEntries()
 	{// Just for backbone gates.
 		if(!rstpModule->isEdge(i))
 		{//If it is not a client gate cleans the old ones.
-
 			for(unsigned int j=0;j<Puertos[i]->registered.size();j++)
 			{
 				if((simulation.getSimTime()-(SimTime)(Puertos[i]->registered[j].inserted)) > (SimTime) agingTime)
@@ -196,9 +191,7 @@ void MVRP::cleanAgedEntries()
 			}
 		}
 	}
-
 }
-
 
 void MVRP::handleIncomingFrame(Delivery *frame2)
 {//It registers the new vid contained in the MVRPDU at the arrival gate.
@@ -233,7 +226,6 @@ void MVRP::handleIncomingFrame(Delivery *frame2)
 	}
 }
 
-
 bool MVRP::registerVLAN(int port,vid vlan)
 {//Registers vlan into the port info.
 	bool found=false;
@@ -256,8 +248,6 @@ bool MVRP::registerVLAN(int port,vid vlan)
 	return found;
 }
 
-
-
 void MVRP::printState()
 {// Prints basic module information and MVRP registered info.
 	cleanAgedEntries();
@@ -274,7 +264,6 @@ void MVRP::printState()
 		}
 	}
 }
-
 
 bool MVRP::resolveVLAN(vid VID, std::vector<int> * gates)
 {//Gets VID associated ports. Outter modules should avoid duplication.
