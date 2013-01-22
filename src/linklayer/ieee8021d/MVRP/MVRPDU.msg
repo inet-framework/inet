@@ -19,8 +19,8 @@ cplusplus {{
 //
 packet MVRPDU extends EtherFrame
 {
+    byteLength = 35;
     string displayString = "b=,,,#ffa5a5";
-    @customize(true);			//Allows BPDU_m.cc customization. Generator will create BPDU_Base
     unsigned int VIDS [];	//Registrated VLANS
     unsigned int PortIndex;  //Output port if an outgoing frame. Input port if an ingoing frame.
 }
