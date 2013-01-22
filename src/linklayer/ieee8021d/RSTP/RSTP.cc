@@ -1142,84 +1142,36 @@ int RSTPVector::compareRstpVector(BPDUieee8021D * msg,int PortCost)
 }
 
 int RSTPVector::compareRstpVector(RSTPVector vect2)
-{//Compares msg with vect. >0 if msg better than vect. =0 if they are similar.
-	// -4=Worse Port  -3=Worse Src -2=Worse RPC -1=Worse Root  0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
-	int result=0;
-	if((vect2.RootPriority<this->RootPriority)
-			||((vect2.RootPriority==this->RootPriority)
-					&&(vect2.RootMAC.compareTo(this->RootMAC)<0)))
-	{
-		result=1;   //Better Root
-	}
-	else if ((vect2.RootPriority==this->RootPriority)
-			&&(vect2.RootMAC.compareTo(this->RootMAC)==0)
-			&&(vect2.RootPathCost<this->RootPathCost))
-	{
-		result=2;  //Better RPC
-	}
-	else if ((vect2.RootPriority==this->RootPriority)
-			&&(vect2.RootMAC.compareTo(this->RootMAC)==0)
-			&&(vect2.RootPathCost==this->RootPathCost)
-			&&((vect2.srcPriority<this->srcPriority)
-					||((vect2.srcPriority==this->srcPriority)
-							&&(vect2.srcAddress.compareTo(this->srcAddress)<0))))
-	{
-		result=3;	//Better Src
-	}
-	else if ((vect2.RootPriority==this->RootPriority)
-			&&(vect2.RootMAC.compareTo(this->RootMAC)==0)
-			&&(vect2.RootPathCost==this->RootPathCost)
-			&&(vect2.srcPriority==this->srcPriority)
-			&&(vect2.srcAddress.compareTo(this->srcAddress)==0)
-			&&((vect2.srcPortPriority<this->srcPortPriority)
-					||((vect2.srcPortPriority==this->srcPortPriority)
-							&&(vect2.srcPort<this->srcPort))))
-	{
-		result=4;  //Better Src port
-	}
-	else if ((vect2.RootPriority==this->RootPriority)
-			&&(vect2.RootMAC.compareTo(this->RootMAC)==0)
-			&&(vect2.RootPathCost==this->RootPathCost)
-			&&(vect2.srcPriority==this->srcPriority)
-			&&(vect2.srcAddress.compareTo(this->srcAddress)==0)
-			&&(vect2.srcPortPriority==this->srcPortPriority)
-			&&(vect2.srcPort==this->srcPort))
-	{
-		result=0;  // Same BPDU
-	}
-	else if((vect2.RootPriority>this->RootPriority)
-			||((vect2.RootPriority == this->RootPriority)
-					&&(vect2.RootMAC.compareTo(this->RootMAC)>0)))
-	{
-		result=-1;  // Worse Root
-	}
-	else if ((vect2.RootPriority==this->RootPriority)
-				&&(vect2.RootMAC.compareTo(this->RootMAC)==0)
-				&&(vect2.RootPathCost>this->RootPathCost)>0)
-		{
-			result=-2;  //Worse RPC
-		}
-	else if ((vect2.RootPriority==this->RootPriority)
-			&&(vect2.RootMAC.compareTo(this->RootMAC)==0)
-			&&(vect2.RootPathCost==this->RootPathCost)
-			&&((vect2.srcPriority>this->srcPriority)
-					||((vect2.srcPriority==this->srcPriority)
-							&&(vect2.srcAddress.compareTo(this->srcAddress)>0))))
-		{
-			result=-3;	//Worse Src
-		}
-		else if ((vect2.RootPriority==this->RootPriority)
-				&&(vect2.RootMAC.compareTo(this->RootMAC)==0)
-				&&(vect2.RootPathCost==this->RootPathCost)
-				&&(vect2.srcPriority==this->srcPriority)
-				&&(vect2.srcAddress.compareTo(this->srcAddress)==0)
-				&&((vect2.srcPortPriority>this->srcPortPriority)
-						||((vect2.srcPortPriority==this->srcPortPriority)
-								&&(vect2.srcPort>this->srcPort))))
-		{
-			result=-4;  //Worse Src port
-		}
-	return result;
+{//Compares this vect with vect2. <0 if this better than vect2, =0 if they are similar.
+    // 4=Worse Port  3=Worse Src  2=Worse RPC  1=Worse Root  0=Similar  -1=Better Root  -2=Better RPC  -3=Better Src  -4=Better Port
+
+    if(RootPriority != vect2.RootPriority)
+        return (RootPriority < vect2.RootPriority) ? -1 : 1;
+    // RootPriority == vect2.RootPriority
+    int c = RootMAC.compareTo(vect2.RootMAC);
+    if (c != 0)
+        return (c < 0) ? -1 : 1;
+
+    // RootMAC == vect2.RootMAC
+    if (RootPathCost != vect2.RootPathCost)
+        return (RootPathCost < vect2.RootPathCost) ? -2 : 2;
+
+    // RootPathCost == vect2.RootPathCost
+    if(srcPriority != vect2.srcPriority)
+        return (srcPriority < vect2.srcPriority) ? -3 : 3;
+    // srcPriority == vect2.srcPriority
+    c = srcAddress.compareTo(vect2.srcAddress);
+    if (c != 0)
+        return (c < 0) ? -3 : 3;
+
+    // srcAddress == vect2.srcAddress
+    if (srcPortPriority != vect2.srcPortPriority)
+        return (srcPortPriority < vect2.srcPortPriority) ? -4 : 4;
+    // srcPortPriority == vect2.srcPortPriority
+    if (srcPort != vect2.srcPort)
+        return (srcPort < vect2.srcPort) ? -4 : 4;
+
+    return 0;
 }
 
 int RSTP::getRootIndex()
