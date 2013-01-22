@@ -207,7 +207,7 @@ void IComponent::handle1QFrame(EthernetIIFrame *frame)
 		CTag=check_and_cast<Ethernet1QTag *>(frame->decapsulate());
 		//Handling 1Q frame from client network
 		if((unsigned)CTag->getVID()==requestVID)
-			{
+		{
 			if(verbose==true)
 				ev << "802.1Q at Aditagger. Generating 802.1AD frame"<<endl;
 			STag=new Ethernet1QTag("8021ad");
@@ -217,13 +217,13 @@ void IComponent::handle1QFrame(EthernetIIFrame *frame)
 			frame->encapsulate(STag);
 			frame->setDisplayString(ETHER_1AD_DISPLAY_STRING);
 			handle1adFrame(frame);
-			}
-			else
-			{
-				if(verbose==true)
-					ev<<"C-Vlan not requested."<<endl;
-				delete frame;
-			}
+		}
+		else
+		{
+			if(verbose==true)
+				ev<<"C-Vlan not requested."<<endl;
+			delete frame;
+		}
 	}
 	else
 	{

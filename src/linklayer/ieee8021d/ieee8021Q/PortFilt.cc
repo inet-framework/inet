@@ -31,11 +31,10 @@ void PortFilt::initialize()
     interFrameTime=(simtime_t) par("interFrameTime");
     int dV=par("defaultVID");
     if(tagged)
-    	{
-
-			if(dV>=0)
-				error("defaultVID can not be set for a tagged port.");
-    	}
+    {
+		if(dV>=0)
+			error("defaultVID can not be set for a tagged port.");
+    }
     else
     {
     	if(dV==-1)
@@ -150,8 +149,8 @@ void PortFilt::updateDisplayString()
 void PortFilt::processTaggedFrame (cMessage *msg)
 { //Just relay
 	int arrival=msg->getArrivalGate()->getIndex();
-   switch(arrival)
-   {
+    switch(arrival)
+    {
 	   case 0:
 		   send(msg,"GatesOut",1);
 		   break;
@@ -162,7 +161,7 @@ void PortFilt::processTaggedFrame (cMessage *msg)
 		   error("Unknown arrival gate");
 		   delete msg;
 		   break;
-   }
+    }
 }
 
 void PortFilt::TagFrame (EthernetIIFrame *frame)

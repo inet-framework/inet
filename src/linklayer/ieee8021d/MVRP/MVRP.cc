@@ -260,7 +260,7 @@ void MVRP::printState()
 		ev<<i<<endl;
 		for(unsigned int j=0;j<Puertos[i]->registered.size();j++)
 		{
-				ev<<Puertos[i]->registered[j].VID<<"   "<<Puertos[i]->registered[j].inserted<<endl;
+			ev<<Puertos[i]->registered[j].VID<<"   "<<Puertos[i]->registered[j].inserted<<endl;
 		}
 	}
 }
@@ -272,15 +272,15 @@ bool MVRP::resolveVLAN(vid VID, std::vector<int> * gates)
 	gates->clear();
 	for(unsigned int i=0;i<Puertos.size();i++)
 	{//Looking for the info.
-			for(unsigned int j=0;j<Puertos[i]->registered.size();j++)
+		for(unsigned int j=0;j<Puertos[i]->registered.size();j++)
+		{
+			if(Puertos[i]->registered[j].VID==VID)
 			{
-				if(Puertos[i]->registered[j].VID==VID)
-				{
-					found=true;
-					gates->push_back(i);
-					break;
-				}
+				found=true;
+				gates->push_back(i);
+				break;
 			}
+		}
 	}
 	return found;
 }

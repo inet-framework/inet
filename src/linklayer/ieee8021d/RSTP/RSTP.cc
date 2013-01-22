@@ -143,8 +143,8 @@ void RSTP::finish()
 		char buff[50];
 		sprintf(buff,"results/RSTP-%s.info",getParentModule()->getName());
 		pFile = fopen (buff,"w");
-		  if (pFile!=NULL)
-		  {
+		if (pFile!=NULL)
+		{
 			int r=getRootIndex();
 			fprintf(pFile,"%s\n",getParentModule()->getName());
 			fprintf(pFile,"Priority %d\n",priority);
@@ -202,7 +202,7 @@ void RSTP::finish()
 				}
 			}
 			fclose (pFile);
-		  }
+		}
 	}
 }
 
@@ -389,35 +389,34 @@ void RSTP::checkTC(BPDUieee8021D * frame, int arrival)
 void RSTP::handleBK(BPDUieee8021D * frame, int arrival)
 {
 	if((frame->getPortPriority()<Puertos[arrival].PortPriority)
-						||((frame->getPortPriority()==Puertos[arrival].PortPriority)&&(frame->getPortNumber()<arrival)))
-				{
-					//Flushing this port
-					Puertos[arrival].Flushed++;
-					sw->flush(arrival);
-					Puertos[arrival].PortRole=BACKUP;
-					Puertos[arrival].PortState=DISCARDING;
-					Puertos[arrival].LostBPDU=0;
-				}
-				else if((frame->getPortPriority()>Puertos[arrival].PortPriority)
-						||((frame->getPortPriority()==Puertos[arrival].PortPriority)&&(frame->getPortNumber()>arrival)))
-				{
-					//Flushing that port
-					Puertos[frame->getPortNumber()].Flushed++;
-					sw->flush(frame->getPortNumber());  //PortNumber is sender port number. It is not arrival port.
-					Puertos[frame->getPortNumber()].PortRole=BACKUP;
-					Puertos[frame->getPortNumber()].PortState=DISCARDING;
-					Puertos[frame->getPortNumber()].LostBPDU=0;
-
-				}
-				else
-				{//Unavoidable loop. Received its own message at the same port.Switch to disabled.
-					ev<<"Unavoidable loop. Received its own message at the same port. To disabled."<<endl;
-					//Flushing that port
-					Puertos[frame->getPortNumber()].Flushed++;
-					sw->flush(frame->getPortNumber());  //PortNumber is sender port number. It is not arrival port.
-					Puertos[frame->getPortNumber()].PortRole=DISABLED;
-					Puertos[frame->getPortNumber()].PortState=DISCARDING;
-				}
+			||((frame->getPortPriority()==Puertos[arrival].PortPriority)&&(frame->getPortNumber()<arrival)))
+	{
+		//Flushing this port
+		Puertos[arrival].Flushed++;
+		sw->flush(arrival);
+		Puertos[arrival].PortRole=BACKUP;
+		Puertos[arrival].PortState=DISCARDING;
+		Puertos[arrival].LostBPDU=0;
+	}
+	else if((frame->getPortPriority()>Puertos[arrival].PortPriority)
+			||((frame->getPortPriority()==Puertos[arrival].PortPriority)&&(frame->getPortNumber()>arrival)))
+	{
+		//Flushing that port
+		Puertos[frame->getPortNumber()].Flushed++;
+		sw->flush(frame->getPortNumber());  //PortNumber is sender port number. It is not arrival port.
+		Puertos[frame->getPortNumber()].PortRole=BACKUP;
+		Puertos[frame->getPortNumber()].PortState=DISCARDING;
+		Puertos[frame->getPortNumber()].LostBPDU=0;
+	}
+	else
+	{//Unavoidable loop. Received its own message at the same port.Switch to disabled.
+		ev<<"Unavoidable loop. Received its own message at the same port. To disabled."<<endl;
+		//Flushing that port
+		Puertos[frame->getPortNumber()].Flushed++;
+		sw->flush(frame->getPortNumber());  //PortNumber is sender port number. It is not arrival port.
+		Puertos[frame->getPortNumber()].PortRole=DISABLED;
+		Puertos[frame->getPortNumber()].PortState=DISCARDING;
+	}
 }
 
 void RSTP::handleIncomingFrame(Delivery *frame2)
@@ -973,37 +972,37 @@ void RSTP::printState()
 	}
 	ev<<"Port State/Role: "<<endl;
 	for(unsigned int i=0;i<Puertos.size();i++)
+	{
+		ev<<Puertos[i].PortState<<" ";
+		if(Puertos[i].PortState==DISCARDING)
 		{
-			ev<<Puertos[i].PortState<<" ";
-			if(Puertos[i].PortState==DISCARDING)
-			{
-				ev<<"Discarding";
-			}
-			else if (Puertos[i].PortState==LEARNING)
-			{
-				ev<<"Learning";
-			}
-			else if (Puertos[i].PortState==FORWARDING)
-			{
-				ev<<"Forwarding";
-			}
-			ev<<"  ";
-			if(Puertos[i].PortRole==ROOT)
-				ev<<"Root";
-			else if (Puertos[i].PortRole==DESIGNATED)
-				ev<<"Designated";
-			else if (Puertos[i].PortRole==BACKUP)
-				ev<<"Backup";
-			else if (Puertos[i].PortRole==ALTERNATE_PORT)
-				ev<<"Alternate";
-			else if (Puertos[i].PortRole==DISABLED)
-				ev<<"Disabled";
-			else if (Puertos[i].PortRole==NOTASIGNED)
-				ev<<"Not assigned";
-			if(Puertos[i].Edge==true)
-				ev<<" (Client)";
-			ev<<endl;
+			ev<<"Discarding";
 		}
+		else if (Puertos[i].PortState==LEARNING)
+		{
+			ev<<"Learning";
+		}
+		else if (Puertos[i].PortState==FORWARDING)
+		{
+			ev<<"Forwarding";
+		}
+		ev<<"  ";
+		if(Puertos[i].PortRole==ROOT)
+			ev<<"Root";
+		else if (Puertos[i].PortRole==DESIGNATED)
+			ev<<"Designated";
+		else if (Puertos[i].PortRole==BACKUP)
+			ev<<"Backup";
+		else if (Puertos[i].PortRole==ALTERNATE_PORT)
+			ev<<"Alternate";
+		else if (Puertos[i].PortRole==DISABLED)
+			ev<<"Disabled";
+		else if (Puertos[i].PortRole==NOTASIGNED)
+			ev<<"Not assigned";
+		if(Puertos[i].Edge==true)
+			ev<<" (Client)";
+		ev<<endl;
+	}
 	ev<<"Per port best source. Root/Src"<<endl;
 	for(unsigned int i=0;i<Puertos.size();i++)
 	{

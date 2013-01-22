@@ -25,10 +25,10 @@
 class Relay1Q : public cSimpleModule
 {
 protected:
-  Cache1Q *cache;   /// SwTable module pointer. Updated every time the admcarelay module is accessed.
-  RSTP * rstpModule; /// RSTP module pointer. Updated every time the admcarelay module is accessed.
-  MVRP * mvrpModule; /// MVRP module pointer. Updated every time the admcarelay module is accessed.
-  bool verbose;  /// It sets module verbosity
+    Cache1Q *cache;   /// SwTable module pointer. Updated every time the admcarelay module is accessed.
+    RSTP * rstpModule; /// RSTP module pointer. Updated every time the admcarelay module is accessed.
+    MVRP * mvrpModule; /// MVRP module pointer. Updated every time the admcarelay module is accessed.
+    bool verbose;  /// It sets module verbosity
 
 public:
 	Relay1Q();

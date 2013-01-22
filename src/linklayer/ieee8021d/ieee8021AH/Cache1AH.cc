@@ -22,54 +22,54 @@ Cache1AH::~Cache1AH(){}
 void Cache1AH::initialize()
 {
 	Cache1Q::initialize();
-		admac=AdmacrelayAccess().getIfExists();
-		if(admac!=NULL)
+	admac=AdmacrelayAccess().getIfExists();
+	if(admac!=NULL)
+	{
+		for(int i=0;i<(admac->gateSize("GatesOut"));i++)
 		{
-			for(int i=0;i<(admac->gateSize("GatesOut"));i++)
-			{
-				ISIDregisterTable.push_back(* new ISIDregister());
-			}
+			ISIDregisterTable.push_back(* new ISIDregister());
 		}
-		else
-		{
-			error("Admacrelay module not found.");
-		}
+	}
+	else
+	{
+		error("Admacrelay module not found.");
+	}
 
-		//Reading ISID configuration.
-		readconfigfromXML(par("ISIDConfig").xmlValue());
-		if(verbose==true)
-			printState();
+	//Reading ISID configuration.
+	readconfigfromXML(par("ISIDConfig").xmlValue());
+	if(verbose==true)
+		printState();
 }
 
 void Cache1AH::readconfigfromXML(const cXMLElement* isidConfig)
 {// Reads ISID info from ISIDConfig xml.
-	    ASSERT(isidConfig);
-		ASSERT(!strcmp(isidConfig->getTagName(), "isidConfig"));
-		checkTags(isidConfig, "Port");
-		cXMLElementList list = isidConfig->getChildrenByTagName("Port");
-		//Looking for the IComponent info using the index number.
-		for (cXMLElementList::iterator iter=list.begin(); iter != list.end(); iter++)
+	ASSERT(isidConfig);
+	ASSERT(!strcmp(isidConfig->getTagName(), "isidConfig"));
+	checkTags(isidConfig, "Port");
+	cXMLElementList list = isidConfig->getChildrenByTagName("Port");
+	//Looking for the IComponent info using the index number.
+	for (cXMLElementList::iterator iter=list.begin(); iter != list.end(); iter++)
+	{
+		const cXMLElement& Port = **iter;
+		int ind=getParameterIntValue(&Port, "index");
+		if((unsigned) ind<ISIDregisterTable.size())
 		{
-			const cXMLElement& Port = **iter;
-			int ind=getParameterIntValue(&Port, "index");
-			if((unsigned) ind<ISIDregisterTable.size())
+			ev<<endl<<endl<<"Reading Port "<<ind<<" info"<<endl;
+			cXMLElement * ISids = Port.getFirstChildWithTag("ISids");
+			cXMLElementList ISidList=ISids->getChildrenByTagName("ISid");
+			//Getting ISid info
+			for(unsigned int k=0;k<ISidList.size();k++)
 			{
-				ev<<endl<<endl<<"Reading Port "<<ind<<" info"<<endl;
-				cXMLElement * ISids = Port.getFirstChildWithTag("ISids");
-				cXMLElementList ISidList=ISids->getChildrenByTagName("ISid");
-				//Getting ISid info
-				for(unsigned int k=0;k<ISidList.size();k++)
-				{
-					int ISid=atoi(ISidList[k]->getNodeValue());
-					ev<<"Register."<<ISid<<endl;
-					ISIDregisterTable[ind].push_back(ISid);
-				}
-			}
-			else
-			{
-				ev<<"Index out of bounds"<<endl;
+				int ISid=atoi(ISidList[k]->getNodeValue());
+				ev<<"Register."<<ISid<<endl;
+				ISIDregisterTable[ind].push_back(ISid);
 			}
 		}
+		else
+		{
+			ev<<"Index out of bounds"<<endl;
+		}
+	}
 }
 
 void Cache1AH::flush(int Gate)

@@ -249,95 +249,99 @@ void TesterObject::finish()
 		char buff[50];
 		sprintf(buff,"results/TESTER-%s.info",getParentModule()->getName());
 		pFile = fopen (buff,"w");
-		  if (pFile!=NULL)
-		  {
-			 //Basic trace
-				fprintf(pFile,"%s\n",getParentModule()->getName());
-				fprintf(pFile,"Sent messages %d\n",SentMessages);
-				fprintf(pFile,"Received messages %d\n",ReceivedMessages);
-				fprintf(pFile,"BPDU %d\n",ReceivedBPDUs);
+		if (pFile!=NULL)
+		{
+			//Basic trace
+			fprintf(pFile,"%s\n",getParentModule()->getName());
+			fprintf(pFile,"Sent messages %d\n",SentMessages);
+			fprintf(pFile,"Received messages %d\n",ReceivedMessages);
+			fprintf(pFile,"BPDU %d\n",ReceivedBPDUs);
 
 			// RSTP detailed info
-				if(detailedRSTP==true)
-				{
-					fprintf(pFile,"   TCNs %d\n",ReceivedTCNs);
-				}
+			if(detailedRSTP==true)
+			{
+				fprintf(pFile,"   TCNs %d\n",ReceivedTCNs);
+			}
+
 			//MVRP
-				fprintf(pFile,"MVRP %d\n",ReceivedMVRPDUs);
-				//detailed info
-				if((detailedMVRP==true)&&(LastMVRPDU!=NULL))
+			fprintf(pFile,"MVRP %d\n",ReceivedMVRPDUs);
+			//detailed info
+			if((detailedMVRP==true)&&(LastMVRPDU!=NULL))
+			{
+				fprintf(pFile,"   Last MVRPDU:  Src:%s",LastMVRPDU->getSrc().str().c_str());
+				fprintf(pFile,"   Dest:%s", LastMVRPDU->getDest().str().c_str());
+				fprintf(pFile,"   VIDs:");
+				int Size=LastMVRPDU->getVIDSArraySize();
+				std::vector<vid> VIDS;
+				for(int i=0;i<Size;i++)
 				{
-					fprintf(pFile,"   Last MVRPDU:  Src:%s",LastMVRPDU->getSrc().str().c_str());
-					fprintf(pFile,"   Dest:%s", LastMVRPDU->getDest().str().c_str());
-					fprintf(pFile,"   VIDs:");
-					int Size=LastMVRPDU->getVIDSArraySize();
-					std::vector<vid> VIDS;
-					for(int i=0;i<Size;i++)
-					{
-						VIDS.push_back(LastMVRPDU->getVIDS(i));
-					}
-					std::sort(VIDS.begin(),VIDS.end());
-					for(int i=0;i<Size;i++)
-					{
-						fprintf(pFile,"   %d",VIDS[i]);
-					}
-					fprintf(pFile,"\n");
+					VIDS.push_back(LastMVRPDU->getVIDS(i));
 				}
+				std::sort(VIDS.begin(),VIDS.end());
+				for(int i=0;i<Size;i++)
+				{
+					fprintf(pFile,"   %d",VIDS[i]);
+				}
+				fprintf(pFile,"\n");
+			}
+
 			//ETHII
-				fprintf(pFile,"Eth2 %d\n",ReceivedEthernetII);
-				//detailed info
-				if((detailedEthII==true)&&(LastEthII!=NULL))
-				{
-					fprintf(pFile,"   Last message: Src:%s",LastEthII->getSrc().str().c_str());
-					fprintf(pFile,"  Dest:%s",LastEthII->getDest().str().c_str());
-					fprintf(pFile," Size:%ld\n",(long int)LastEthII->getByteLength());
-				}
+			fprintf(pFile,"Eth2 %d\n",ReceivedEthernetII);
+			//detailed info
+			if((detailedEthII==true)&&(LastEthII!=NULL))
+			{
+				fprintf(pFile,"   Last message: Src:%s",LastEthII->getSrc().str().c_str());
+				fprintf(pFile,"  Dest:%s",LastEthII->getDest().str().c_str());
+				fprintf(pFile," Size:%ld\n",(long int)LastEthII->getByteLength());
+			}
+
 			//802.1Q
-				fprintf(pFile,"Eth1Q %d\n",ReceivedEthernet1Q);
-				//detailed info
-				if((detailedEth1Q==true)&&(LastEth1Q!=NULL))
-				{
-					Ethernet1QTag * CTag=check_and_cast<Ethernet1QTag *>(LastEth1Q->getEncapsulatedPacket());
-					fprintf(pFile,"   Last message: Vlan:%d",CTag->getVID());
-					fprintf(pFile," Src:%s",LastEth1Q->getSrc().str().c_str());
-					fprintf(pFile,"  Dest:%s",LastEth1Q->getDest().str().c_str());
-					fprintf(pFile," Size:%ld\n",(long int)LastEth1Q->getByteLength());
-				}
+			fprintf(pFile,"Eth1Q %d\n",ReceivedEthernet1Q);
+			//detailed info
+			if((detailedEth1Q==true)&&(LastEth1Q!=NULL))
+			{
+				Ethernet1QTag * CTag=check_and_cast<Ethernet1QTag *>(LastEth1Q->getEncapsulatedPacket());
+				fprintf(pFile,"   Last message: Vlan:%d",CTag->getVID());
+				fprintf(pFile," Src:%s",LastEth1Q->getSrc().str().c_str());
+				fprintf(pFile,"  Dest:%s",LastEth1Q->getDest().str().c_str());
+				fprintf(pFile," Size:%ld\n",(long int)LastEth1Q->getByteLength());
+			}
+
 			//802.1ad
-				fprintf(pFile,"Eth1ad %d\n",ReceivedEthernet1AD);
-				//detailed info
-				if((detailedEth1ad==true)&&(LastEth1ad!=NULL))
-				{
-					Ethernet1QTag * STag=check_and_cast<Ethernet1QTag *>(LastEth1ad->getEncapsulatedPacket());
-					Ethernet1QTag * CTag=check_and_cast<Ethernet1QTag *>(STag->getEncapsulatedPacket());
-					fprintf(pFile,"   Last message: S-Vid:%d",STag->getVID());
-					fprintf(pFile," Vlan:%d",CTag->getVID());
-					fprintf(pFile," Src:%s",LastEth1ad->getSrc().str().c_str());
-					fprintf(pFile,"  Dest:%s",LastEth1ad->getDest().str().c_str());
-					fprintf(pFile," Size:%ld\n",(long int)LastEth1ad->getByteLength());
-				}
+			fprintf(pFile,"Eth1ad %d\n",ReceivedEthernet1AD);
+			//detailed info
+			if((detailedEth1ad==true)&&(LastEth1ad!=NULL))
+			{
+				Ethernet1QTag * STag=check_and_cast<Ethernet1QTag *>(LastEth1ad->getEncapsulatedPacket());
+				Ethernet1QTag * CTag=check_and_cast<Ethernet1QTag *>(STag->getEncapsulatedPacket());
+				fprintf(pFile,"   Last message: S-Vid:%d",STag->getVID());
+				fprintf(pFile," Vlan:%d",CTag->getVID());
+				fprintf(pFile," Src:%s",LastEth1ad->getSrc().str().c_str());
+				fprintf(pFile,"  Dest:%s",LastEth1ad->getDest().str().c_str());
+				fprintf(pFile," Size:%ld\n",(long int)LastEth1ad->getByteLength());
+			}
 			//802.1ah
-				fprintf(pFile,"Eth1ah %d\n",ReceivedEthernet1AH);
-				//detailed info
-				if((detailedEth1ah==true)&&(LastEth1ah!=NULL))
-				{
-					Ethernet1QTag * BTag=check_and_cast<Ethernet1QTag *>(LastEth1ah->getEncapsulatedPacket());
-					Ethernet1ahITag * ITag=check_and_cast<Ethernet1ahITag *>(BTag->getEncapsulatedPacket());
-					EthernetIIFrame * EthIITemp=check_and_cast<EthernetIIFrame *>(ITag->getEncapsulatedPacket());
-					Ethernet1QTag * STag=check_and_cast<Ethernet1QTag *>(EthIITemp->getEncapsulatedPacket());
-					Ethernet1QTag * CTag=check_and_cast<Ethernet1QTag *>(STag->getEncapsulatedPacket());
-					fprintf(pFile,"   Last message: B-Vid:%d",BTag->getVID());
-					fprintf(pFile,"  B-Src:%s",LastEth1ah->getSrc().str().c_str());
-					fprintf(pFile,"  B-Dest:%s",LastEth1ah->getDest().str().c_str());
-					fprintf(pFile,"  S-Vid:%d",STag->getVID());
-					fprintf(pFile," Vlan:%d",CTag->getVID());
-					fprintf(pFile," Src:%s",EthIITemp->getSrc().str().c_str());
-					fprintf(pFile,"  Dest:%s",EthIITemp->getDest().str().c_str());
-					fprintf(pFile," Size:%ld\n",(long int)LastEth1ah->getByteLength());
-				}
-		  }
-		  else
-			  error("Could not open %s file.",buff);
+			fprintf(pFile,"Eth1ah %d\n",ReceivedEthernet1AH);
+			//detailed info
+			if((detailedEth1ah==true)&&(LastEth1ah!=NULL))
+			{
+				Ethernet1QTag * BTag=check_and_cast<Ethernet1QTag *>(LastEth1ah->getEncapsulatedPacket());
+				Ethernet1ahITag * ITag=check_and_cast<Ethernet1ahITag *>(BTag->getEncapsulatedPacket());
+				EthernetIIFrame * EthIITemp=check_and_cast<EthernetIIFrame *>(ITag->getEncapsulatedPacket());
+				Ethernet1QTag * STag=check_and_cast<Ethernet1QTag *>(EthIITemp->getEncapsulatedPacket());
+				Ethernet1QTag * CTag=check_and_cast<Ethernet1QTag *>(STag->getEncapsulatedPacket());
+				fprintf(pFile,"   Last message: B-Vid:%d",BTag->getVID());
+				fprintf(pFile,"  B-Src:%s",LastEth1ah->getSrc().str().c_str());
+				fprintf(pFile,"  B-Dest:%s",LastEth1ah->getDest().str().c_str());
+				fprintf(pFile,"  S-Vid:%d",STag->getVID());
+				fprintf(pFile," Vlan:%d",CTag->getVID());
+				fprintf(pFile," Src:%s",EthIITemp->getSrc().str().c_str());
+				fprintf(pFile,"  Dest:%s",EthIITemp->getDest().str().c_str());
+				fprintf(pFile," Size:%ld\n",(long int)LastEth1ah->getByteLength());
+			}
+		}
+		else
+			error("Could not open %s file.",buff);
 	}
 }
 
@@ -459,33 +463,34 @@ void TesterObject::handleIncomingFrame(EthernetIIFrame *msg)
 	switch(kind)
 	{
 	case 3:
-			ReceivedEthernet1AH++; //Counting.
-			if(verbose==true)
-			{//Print message.
-				ev<<endl<<getParentModule()->getName()<<"-Received message"<<endl;
-				Ethernet1QTag * BTag=check_and_cast<Ethernet1QTag *>(msg->getEncapsulatedPacket());
-				Ethernet1ahITag * ITag=check_and_cast<Ethernet1ahITag *>(BTag->getEncapsulatedPacket());
-				EthernetIIFrame * EthIITemp=check_and_cast<EthernetIIFrame *>(ITag->getEncapsulatedPacket());
-				Ethernet1QTag * STag=check_and_cast<Ethernet1QTag *>(EthIITemp->getEncapsulatedPacket());
-				Ethernet1QTag * CTag=check_and_cast<Ethernet1QTag *>(STag->getEncapsulatedPacket());
+		ReceivedEthernet1AH++; //Counting.
+		if(verbose==true)
+		{//Print message.
+			ev<<endl<<getParentModule()->getName()<<"-Received message"<<endl;
+			Ethernet1QTag * BTag=check_and_cast<Ethernet1QTag *>(msg->getEncapsulatedPacket());
+			Ethernet1ahITag * ITag=check_and_cast<Ethernet1ahITag *>(BTag->getEncapsulatedPacket());
+			EthernetIIFrame * EthIITemp=check_and_cast<EthernetIIFrame *>(ITag->getEncapsulatedPacket());
+			Ethernet1QTag * STag=check_and_cast<Ethernet1QTag *>(EthIITemp->getEncapsulatedPacket());
+			Ethernet1QTag * CTag=check_and_cast<Ethernet1QTag *>(STag->getEncapsulatedPacket());
 
-				ev<<"Src:"<<EthIITemp->getSrc().str()<<endl;
-				ev<<"Dest:"<<EthIITemp->getDest().str()<<endl;
-				ev<<"ByteLength:"<<msg->getByteLength()<<endl;
-				ev<<"CVID:"<<CTag->getVID()<<endl;
-				ev<<"SVID:"<<STag->getVID()<<endl;
-				ev<<"BVID:"<<BTag->getVID()<<endl;
-				ev<<"ISID:"<<ITag->getISid()<<endl;
-				ev<<"DestBMAC:"<<msg->getDest().str()<<endl;
-				ev<<"SrcBMAC:"<<msg->getSrc().str()<<endl;
-			}
-			delete LastEth1ah;
-			LastEth1ah=msg;  //Remember last received 802.1ah message.
-			break;
+			ev<<"Src:"<<EthIITemp->getSrc().str()<<endl;
+			ev<<"Dest:"<<EthIITemp->getDest().str()<<endl;
+			ev<<"ByteLength:"<<msg->getByteLength()<<endl;
+			ev<<"CVID:"<<CTag->getVID()<<endl;
+			ev<<"SVID:"<<STag->getVID()<<endl;
+			ev<<"BVID:"<<BTag->getVID()<<endl;
+			ev<<"ISID:"<<ITag->getISid()<<endl;
+			ev<<"DestBMAC:"<<msg->getDest().str()<<endl;
+			ev<<"SrcBMAC:"<<msg->getSrc().str()<<endl;
+		}
+		delete LastEth1ah;
+		LastEth1ah=msg;  //Remember last received 802.1ah message.
+		break;
+
 	case 2:
-			ReceivedEthernet1AD++; //Counting.
-			if(verbose==true)
-			{ //Print message.
+		ReceivedEthernet1AD++; //Counting.
+		if(verbose==true)
+		{ //Print message.
 			ev<<endl<<getParentModule()->getName()<<"-Received message"<<endl;
 			Ethernet1QTag * STag=check_and_cast<Ethernet1QTag *>(msg->getEncapsulatedPacket());
 			Ethernet1QTag * CTag=check_and_cast<Ethernet1QTag *>(STag->getEncapsulatedPacket());
@@ -495,15 +500,15 @@ void TesterObject::handleIncomingFrame(EthernetIIFrame *msg)
 			ev<<"ByteLength:"<<msg->getByteLength()<<endl;
 			ev<<"CVID:"<<CTag->getVID()<<endl;
 			ev<<"SVID:"<<STag->getVID()<<endl;
-			}
-			delete LastEth1ad;
-			LastEth1ad=msg;  //Remember last received 802.1ad message.
-			break;
+		}
+		delete LastEth1ad;
+		LastEth1ad=msg;  //Remember last received 802.1ad message.
+		break;
 
 	case 1:
-			ReceivedEthernet1Q++; //Counting.
-			if(verbose==true)
-			{ //Print message.
+		ReceivedEthernet1Q++; //Counting.
+		if(verbose==true)
+		{ //Print message.
 			ev<<endl<<getParentModule()->getName()<<"-Received message"<<endl;
 			Ethernet1QTag * CTag=check_and_cast<Ethernet1QTag *>(msg->getEncapsulatedPacket());
 			EthernetIIFrame * EthIITemp=msg;
@@ -511,10 +516,10 @@ void TesterObject::handleIncomingFrame(EthernetIIFrame *msg)
 			ev<<"Dest:"<<EthIITemp->getDest().str()<<endl;
 			ev<<"ByteLength:"<<msg->getByteLength()<<endl;
 			ev<<"VID:"<<CTag->getVID()<<endl;
-			}
-			delete LastEth1Q;
-			LastEth1Q=msg;  //Remember last received 802.1Q message.
-			break;
+		}
+		delete LastEth1Q;
+		LastEth1Q=msg;  //Remember last received 802.1Q message.
+		break;
 
 	default:
 		ReceivedEthernetII++; //Counting.
