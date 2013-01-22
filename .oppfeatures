@@ -729,4 +729,35 @@
         compileFlags = ""
         linkerFlags = ""
         />
+
+    <feature
+        id="Ieee8021d"
+        name="Ieee802.1d Ieee802.1Q Ieee802.1AH protocols"
+        description = "Ieee802.1d Ieee802.1Q Ieee802.1AH protocols"
+        initiallyEnabled = "false"
+        requires = "Ethernet"
+        labels = ""
+        nedPackages = "
+                       inet.linklayer.ieee8021d
+                       inet.nodes.Ieee8021d
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="Ieee8021d_examples"
+        name="Ieee802.1d Ieee802.1Q Ieee802.1AH protocols Examples"
+        description = "Ieee802.1d Ieee802.1Q Ieee802.1AH protocols Examples"
+        initiallyEnabled = "false"
+        requires = "Ethernet Ieee8021d UDP IPv4"
+        labels = ""
+        nedPackages = "
+                       inet.examples.ieee802_1d
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+
 </features>
