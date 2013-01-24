@@ -1,0 +1,54 @@
+%description:
+
+Carrier sense test for Ieee80211 out of range concurrent and synchronized mutual transmission.
+
+%file: test.ned
+
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.nodes.inet.AdhocHost;
+import inet.world.radio.ChannelControl;
+
+network Test
+{
+    submodules:
+        channelControl: ChannelControl;
+        configurator: IPv4NetworkConfigurator;
+        host1: AdhocHost;
+        host2: AdhocHost;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 100us
+record-eventlog = true
+ned-path = .;../../../../src
+
+**.globalARP = true
+
+**.host*.mobilityType = "StationaryMobility"
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+
+# ping app
+*.host*.numPingApps = 1
+*.host*.pingApp[0].count = 1
+*.host*.pingApp[0].printPing = true
+*.host1.pingApp[0].destAddr = "host2"
+*.host2.pingApp[0].destAddr = "host1"
+
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+        
+**.host1.mobility.initialX = 100m
+**.host2.mobility.initialX = 900m
+*.host*.pingApp[0].startTime = 0s
+
+%contains: results/General-0.elog
+- reception of noise message over, removing recvdPower from noiseLevel....
