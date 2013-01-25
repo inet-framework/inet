@@ -74,6 +74,7 @@ class IPv4ControlInfo
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
     short timeToLive;     // maximum hop count
     bool dontFragment;    // "don't fragment" bit
+    int options;          // The "options" header field
 
     // The following fields are used in the DSR protocol; TODO revise
     IPv4Address nextHopAddr; // next hop address (DSR)

@@ -96,4 +96,6 @@ simple IPv4
         output transportOut[] @labels(IPv4ControlInfo/up,TCPSegment,UDPPacket);
         input queueIn[] @labels(IPv4Datagram);
         output queueOut @labels(IPv4Datagram);
+        output routerAlertOut @labels(IPv4Datagram);
+        input routerAlertReturn @labels(IPv4Datagram);
 }

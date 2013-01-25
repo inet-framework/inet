@@ -45,6 +45,7 @@ void IPvXTrafGen::initialize(int stage)
     stopTime = par("stopTime");
     if (stopTime != 0 && stopTime <= startTime)
         error("Invalid startTime/stopTime parameters");
+    optionCode = par("optionCode");
 
     const char *destAddrs = par("destAddresses");
     cStringTokenizer tokenizer(destAddrs);
@@ -92,6 +93,7 @@ void IPvXTrafGen::sendPacket()
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
         controlInfo->setDestAddr(destAddr.get4());
         controlInfo->setProtocol(protocol);
+        controlInfo->setOptions(optionCode);
         payload->setControlInfo(controlInfo);
         gate = "ipOut";
     }
