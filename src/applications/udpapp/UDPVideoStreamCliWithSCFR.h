@@ -84,7 +84,6 @@ class INET_API UDPVideoStreamCliWithSCFR : public UDPVideoStreamCli
     ///@name Overridden cSimpleModule functions
     //@{
     virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
     //@}
 
 //  protected:

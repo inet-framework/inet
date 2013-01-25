@@ -62,19 +62,6 @@ void UDPVideoStreamCliWithSCFR::initialize()
         scheduleAt(startTime, new cMessage("UDPVideoStreamStart"));
 }
 
-void UDPVideoStreamCliWithSCFR::handleMessage(cMessage* msg)
-{
-    if (msg->isSelfMessage())
-    {
-        delete msg;
-        requestStream();
-    }
-    else
-    {
-        receiveStream(PK(msg));
-    }
-}
-
 void UDPVideoStreamCliWithSCFR::receiveStream(cPacket *msg)
 {
     EV << "Video stream packet:\n";
