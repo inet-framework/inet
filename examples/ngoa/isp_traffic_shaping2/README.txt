@@ -1,7 +1,7 @@
-isp_traffic_shaping
-===================
+isp_traffic_shaping2
+====================
 
-Shortdesc:	'isp_traffic_shaping' is a set of simulation models and scenarios
+Shortdesc:	'isp_traffic_shaping2' is a set of simulation models and scenarios
             for the investigation of the effect of ISP traffic shaping on
 			user-perceived performances in next-generation access networks
             based on OMNeT++ and INET.
@@ -10,11 +10,11 @@ License:	GPL
 Requires:	OMNeT++ 4.2.2 or later version with INET-HNRL
 
 
-The 'isp_traffic_shaping' is a set of simulation models and scenarios
-for the investigation of the effect of ISP traffic shaping on
-user-perceived performances in next-generation access networks based
-on OMNeT++ and INET, which implements token-bucket filter (TBF) and
-VLAN-based abstract models of access switches and nodes.
+The 'isp_traffic_shaping2' is a set of simulation models and scenarios for the
+investigation of the effect of ISP traffic shaping on user-perceived
+performances in next-generation access networks based on OMNeT++ and INET, which
+implements token-bucket filter (TBF) and VLAN-based abstract models of access
+switches and nodes.
 
 
 Features:
