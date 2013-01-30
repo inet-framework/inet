@@ -21,7 +21,6 @@
 
 #include "INETDefs.h"
 
-#include "uint128.h"
 #include "IInterfaceTable.h"
 #include "ETXPacket_m.h"
 #include "NotificationBoard.h"
