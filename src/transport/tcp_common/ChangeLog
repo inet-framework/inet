@@ -1,3 +1,5 @@
+2013-01-30  ------ inet-2.1.0 released ------
+
 2012-11-07  Zoltan Bojthe
 
 	Bugfix: bad ack_num in sent in RST packet when connection closed.

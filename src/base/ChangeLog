@@ -1,3 +1,5 @@
+2013-01-30  ------ inet-2.1.0 released ------
+
 2012-11-22  Rudolf Hornig
 
 	base: fixed bug #620. The module pointer returned by a ModuleAccess

@@ -1,3 +1,5 @@
+2013-01-30  ------ inet-2.1.0 released ------
+
 2012-11-16  Zoltan Bojthe
 
 	TCPBasicClientApp: bugfix for #611: simulation generated an ASSERT if
