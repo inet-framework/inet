@@ -100,6 +100,7 @@ bool IPvXAddressResolver::tryResolve(const char *s, IPvXAddress& result, int add
         if (c == ')')
         {
             { p = nextsep + 1; nextsep = p; }
+            c = *nextsep;
         }
     }
 
