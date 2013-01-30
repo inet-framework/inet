@@ -1,3 +1,8 @@
+2012-10-30  Zoltan Bojthe
+
+	MACAddress: made the constructor explicit so we will not see
+	unexpected implicit conversions in future
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

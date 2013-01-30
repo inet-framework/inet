@@ -1,3 +1,11 @@
+2012-11-08  Zoltan Bojthe
+
+	Fixes for sending notifications to application layer
+
+2012-11-06  Zoltan Bojthe
+
+	Bugfix: TCP_NSC pointer in TCP_NSC_Connection was NULL
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

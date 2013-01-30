@@ -1,3 +1,31 @@
+2012-11-19  Zoltan Bojthe
+
+	Batman:
+	- Updated and expanded documantation
+	- Updated the code to the lates available Batman version.
+	- Numerous optimizations.
+	- Fixed several memory leaks
+	- Fixed routing table corruption and possible crash when multiple
+	  radios were used in a single host
+	- Fixed decapsulation of incoming packets. Now it checks for the 
+	  type of decapsulated packet.
+	- Fix for a problem when aggregated batman packets were
+	  dropped erronously.
+	- Added HNA support. Nodes can advertise external networks,
+	  so traffic towards those networks can be routed correctly.
+	  Use the announcedNetworks parameter to specufy multiple connected
+	  external networks.
+
+2012-10-10  Zoltan Bojthe
+
+	Batman: added SourceModifier script for converting from the
+	original batmand code.
+	 - fixes spaces, tabs and empty lines
+	 - replaces some c-style structs to c++-style classes
+	 - replaces some batmand specified list manipulators to c++ code
+	 - replaces batmand specified malloc/free to new/delete
+	 - removes prof_start()/prof_stop() calls
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------
@@ -49,4 +77,3 @@
 2011-04-20  Rudolf Hornig
 
 	Initial takeover of MANET routing protocols from INETMANET.
-

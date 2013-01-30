@@ -1,3 +1,9 @@
+2012-09-18  Zoltan Bojthe
+
+	A new module to model an "internet cloud". The module can be used 
+	to model the throughput, packet delay and packet drop of the 
+	Internet or other large scale networks.
+	
 2012-09-07  Zoltan Bojthe
 
 	Initial implementation of the internet cloud node. The component can

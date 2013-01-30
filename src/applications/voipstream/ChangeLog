@@ -1,11 +1,23 @@
+2012-09-18  Zoltan Bojthe
+
+	- voiptool/voipstream: removed unnecessary "enum" in front of
+	  "SampleFormat"
+	- voiptool/voipstream: rename in README
+	- voiptool/voipstream: receiver: fingerprint: added info about decoded
+	  packets
+	- voiptool/voipstream: receiver: delay/playOutDelay renamed to
+	  playoutDelay
+
 2012-09-13  Zoltan Bojthe
 
-    Renamed feature to VoIPStream.
-    Renamed classes, modules, messages, files:
-      - VoIPPacket to VoIPStreamPacket
-      - VoIPSourceApp to VoIPStreamSender
-      - VoIPSinkApp to VoIPStreamReceiver
-      - example folders and modules
+	voiptool/voipstream: renamed files/folders to VoIPStream 
+
+	Renamed feature to VoIPStream. Renamed classes, modules, messages,
+	files:
+	 - VoIPPacket to VoIPStreamPacket
+	 - VoIPSourceApp to VoIPStreamSender
+	 - VoIPSinkApp to VoIPStreamReceiver
+	 - example folders and modules
 
 2012-08-07  ------ inet-2.0.0 released ------
 

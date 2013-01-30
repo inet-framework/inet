@@ -1,3 +1,8 @@
+2012-09-13  Zoltan Bojthe
+
+	HostAutoConfigurator:
+	Added check for detecting too small netmask parameter value
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

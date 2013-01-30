@@ -1,3 +1,8 @@
+2012-08-28  Zoltan Bojthe
+
+	- Refactored how WifiModulationType::getMode80211a/b/g/p()
+	  is used. 
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------
@@ -88,4 +93,3 @@
 2011-03-08  Rudolf Hornig
 
 	mf80211, ieee80211 and mobility feature
-

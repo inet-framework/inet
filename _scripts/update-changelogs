@@ -9,11 +9,11 @@ import string
 import subprocess
 
 # configuration
-since = '2012-02-23'
+since = '2012-08-07'
 entriesToIgnore = [
-"""2012-01-27  Zoltan Bojthe
+"""2012-09-13  Zoltan Bojthe
 
-	replaced #include <omnetpp.h> with #include "INETDefs.h"
+	tab to space, remove trailing spaces
 
 """,
 ]

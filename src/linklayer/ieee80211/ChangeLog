@@ -42,7 +42,7 @@
 	when the management module decapsulated the message.
 
 2012-06-25  ------ inet-1.99.5 released ------
-	
+
 2012-06-08  Rudolf Hornig
 
 	Takover from INETMANET-2.0 @ 7fb431b (minor bugfixes)

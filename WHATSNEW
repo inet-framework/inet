@@ -1,14 +1,132 @@
 Recent changes in the INET Framework
 ====================================
 
+
+INET-2.1.0 (Jan 31, 2013)
+------------------------
+
+This is the latest stable version of the INET Framework. This version
+is now recommended for your further INET based development. It requires 
+OMNeT++ 4.2 (version 4.2.2 or later is suggested.) 
+
+NEW:
+
+  - Added a new module to model an "internet cloud". The component can
+    be configured to model packet delay, datarate and drop probability
+    between each input-output interface pair. The parameter matrix
+    is provided as an XML configuration file. See the README file
+    in src/nodes/internetcloud for further details.
+  - New SimpleVoIPReceiver/Sender applications that gather MOS (Mean
+    Opinion Score) for measuring voice quality.
+  - Added HNA support to the Batman protocol (MANET)
+
+CHANGED:
+
+Applications:
+  - PingApp: Shows the configured destination address at the end of the 
+    simulation.
+  - TCPBasicClientApp: bugfix #611: simulation generated an ASSERT if
+    numRequestsPerSession parameter value larger than 1.
+  - TcpApp: socket state is now shown on the GUI (in Echo, Sink and Session apps.)
+  - VoipTool: was renamed to VoIPStream (The actual module names are
+    VoIPStreamSender/Receiver.)
+
+Ethernet:
+  - Transmission channel's 'disabled' parameter is now correctly handled in 
+    EtherMacBase.
+
+Ieee80211Mac:
+  - Better parameter processing in MAC: error is thrown if an undefined value 
+    is specified for the opmode or autoBitrate parameters.
+  - Added the Ieee80211Descriptor class to assign modulation speed
+    and type for the different opModes.
+  - Bugfix: Default bitrate for opMode 'p' was incorrectly set.
+
+BGP:
+  - Minor optimizations
+  - Bugfix: The text in specification "sets the ConnectRetryTimer to zero" means: 
+    restart this timer. The _connectRetryTime member now stores the timeout value.
+
+Manetrouting:
+  - updated documentation
+  - replaced Uint128 with ManetNetworkAddress
+  - removed:
+      - unused ManetTimer and BatmanTimer class
+      - unused static variables
+      - isIpLocalAddress(), uses isLocalAddress()
+      - convertAddressToString()
+      - getXPos(), getYPos() functions, you should use getPosition() 
+        instead.
+  - redesigned coordinate and speed storage and access.
+    replaced double x,y with a Coord.  getDirection() now returns the 
+    speed vector (as a Coord)
+  - getters returns UNSPECIFIED_ADDRESS if addrType==UNDEFINED
+  - merged sendToIp() code into a common base function sendToIpOnIface()
+
+AODV:
+  - AODV's hand-written descriptors were replaced with generated ones
+    [with A.Varga]
+  - aodv_msg_struct.h: added getter methods expected by the generated
+    descriptors removed hand-written aodv_msg_struct_descriptor.cc
+
+Batman:
+  - Updated and expanded documentation
+  - Updated the code to match the latest available "batmand" version.
+  - Numerous optimizations
+  - Fixed several memory leaks
+  - Fixed routing table corruption and possible crash when multiple
+    radios were used in a single host
+  - Fixed decapsulation of incoming packets. Now it checks for the 
+    type of decapsulated packet.
+  - Fix for a problem when aggregated batman packets were
+    dropped erronously.
+  - Added HNA support. Nodes can advertise external networks,
+    so traffic towards those networks can be routed correctly.
+    Use the announcedNetworks parameter to specify multiple connected
+    external networks.
+  - Added SourceModifier script to help the conversion from the original 
+    batmand code.
+    - fixes spaces, tabs and empty lines
+    - replaces some c-style structs to c++-style classes
+    - replaces some batmand specified list manipulators with c++ code
+    - replaces malloc/free with new/delete
+    - removes prof_start()/prof_stop() calls
+
+Examples:
+  - Added a new simulation with wired and wireless hosts exchanging UDP
+    data via an AccessPoint. It shows how to use the IPv4NetworkConfigurator
+    to mix wired and wireless networks.
+  - Fixes for BGP examples.
+  - New example to demonstrate HNA support in Batman.
+  - Hostautoconf examample moved to the adhoc folder.
+
+Other changes:
+  - Uint128 class was removed. Use ManetNetworkAddress class instead.
+  - Visual changes in StandardHost/NodeBase: utility module icons are 
+    now smaller and wlan[]/PingApp[] modules are displayed in a row.
+  - NodeBase: it is possible to use mobility module even if numRadios = 0
+  - Added check for detecting too small netmask parameter value in 
+    HostAutoConfigurator
+  - PacketDump: TCP header option fix (dumped only in verbose mode.)
+  - Bugfix #620. The module pointer returned by a ModuleAccess class is 
+    now cached only if get() was used. For get(module) no caching is done.
+  - MACAddress: made the constructor explicit so we will not see
+    unexpected implicit conversions in future
+  - IPv6Address: removed Uint128 related functions and added an 
+    additional constructMask() method
+  - headerserializers: compile fix for Visual C++ 10.0 and later
+  - Pcap now records on ALL interfaces by default (including external IFs).
+    Added Enter_Method for better error reporting if a packet cannot be
+    serialized. Also added an icon for PcapRecorder.
+  - Several TCP related fixes.
+  
+
 INET-2.0.0 (Aug 7, 2012)
 ------------------------
 
-This is the latest stable version of the INET framework. This version
-is now recommended for your further INET based development. It requires 
-OMNeT++ 4.2 (version 4.2.2 is suggested) or later. If you are upgrading 
-from an earlier INET version (i.e. INET 20111118), expect to have to 
-revise your existing omnetpp.ini files and possibly NED/C++ files as well.
+If you are upgrading from an earlier INET version (i.e. INET 20111118), 
+expect to have to revise your existing omnetpp.ini files and possibly 
+NED/C++ files as well.
 
 Changes since 1.99.5:
 

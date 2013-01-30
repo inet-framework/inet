@@ -1,3 +1,14 @@
+2012-08-28  Zoltan Bojthe
+
+	- Better parameter processing: error is thrown if an undefined value 
+	  is specified in opmode or autoBitrate
+	- Refactored how WifiModulationType::getMode80211a/b/g/p()
+	  is used. 
+	- Added the Ieee80211Descriptor class to assign modulation speed
+	  and type for the different opModes.
+
+	Bugfix: Bitrate for opMode 'p' was incorrectly set.
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

@@ -1,3 +1,11 @@
+2012-11-20  Zoltan Bojthe
+
+	Replaced Uint128 with ManetAddress
+
+2012-10-02  Zoltan Bojthe
+
+	Removed MANET specific code from the routing functions
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

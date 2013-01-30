@@ -1,3 +1,7 @@
+2012-08-27  Zoltan Bojthe
+
+	Bugfix for radio ModulationType: modulationClass member was uninitialized.
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------
@@ -8,7 +12,7 @@
 
 2012-02-11  Rudolf Hornig
 
-	Takeover from INETMANET @ fff5dfd 
+	Takeover from INETMANET @ fff5dfd
 
 	Added support for configurable noise generators. It can be configured with
 	the noiseGenerator parameter of the Radio.

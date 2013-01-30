@@ -1,3 +1,16 @@
+2012-11-14  Zoltan Bojthe
+
+	Fix for the nagle algorithm: should send data from queue if received any ACK
+
+2012-11-07  Zoltan Bojthe
+
+	Bugfix for syn-sent issue: do not send RST when received ACK+RST
+	Bugfix: bad ack_num in sent in RST packet when connection closed.
+
+2012-10-31  Zoltan Bojthe
+
+	Fixed TCP_I_CLOSED, TCP_I_PEER_CLOSED notifications sending
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

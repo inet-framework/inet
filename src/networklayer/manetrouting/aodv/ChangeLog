@@ -1,3 +1,11 @@
+2012-11-19  Zoltan Bojthe
+
+	- AODV's hand-written descriptors were replaced with generated ones
+	  [with A.Varga]
+	- aodv_msg_struct.h: added getter methods expected by the generated
+	  descriptors removed hand-written aodv_msg_struct_descriptor.cc
+	- now using std::max instead of a macro in aodv-uu
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

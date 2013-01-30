@@ -1,3 +1,13 @@
+2012-09-19  Zoltan Bojthe
+
+	Visual changes for StandardHost/NodeBase:
+	- utility module icons are now smaller
+	- wlan[] and PingApp[] modules are displayed in row
+
+2012-08-24  Zoltan Bojthe
+
+	NodeBase: enabled mobility module even if numRadios = 0
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

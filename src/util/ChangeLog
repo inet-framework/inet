@@ -1,3 +1,30 @@
+2012-11-15  Zoltan Bojthe
+
+	PacketDump: 
+	- Fix for TCP header options
+	- Dump TCP header options in verbose mode only.
+
+2012-10-30  Zoltan Bojthe
+
+	- Removed conversion operators from Uint128
+	- Added 'explicit' for Uint128 constructor by char string uses explicit
+	conversions in manetrouting code
+
+2012-10-25  Tamas Borbely
+
+	headerserializers: compile fix for Visual C++ 10.0 and later
+	they finally have <stdint.h>
+
+2012-10-18  Rudolf Hornig
+
+	Pcap now records by default on ALL interfaces (including external IFs).
+	Added Enter_Method for better error reporting if a packet cannot be
+	serialized.
+
+2012-09-19  Zoltan Bojthe
+ 
+	Added an icon  to PcapRecorder
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------
