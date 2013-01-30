@@ -134,7 +134,7 @@ MACAddress MACAddress::generateAutoAddress()
 {
     ++autoAddressCtr;
 
-    uint64 intAddr = 0x0AAA00000000L + (autoAddressCtr & 0xffffffffL);
+    uint64 intAddr = 0x0AAA00000000ULL + (autoAddressCtr & 0xffffffffUL);
     MACAddress addr(intAddr);
     return addr;
 }

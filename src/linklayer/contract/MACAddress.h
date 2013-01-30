@@ -25,7 +25,7 @@
 
 
 #define MAC_ADDRESS_SIZE 6
-#define MAC_ADDRESS_MASK 0xffffffffffffL
+#define MAC_ADDRESS_MASK 0xffffffffffffULL
 
 
 class InterfaceToken;
