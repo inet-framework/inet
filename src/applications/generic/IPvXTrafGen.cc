@@ -47,21 +47,12 @@ void IPvXTrafGen::initialize(int stage)
         error("Invalid startTime/stopTime parameters");
     optionCode = par("optionCode");
 
-    const char *destAddrs = par("destAddresses");
-    cStringTokenizer tokenizer(destAddrs);
-    const char *token;
-    while ((token = tokenizer.nextToken()) != NULL)
-        destAddresses.push_back(IPvXAddressResolver().resolve(token));
-
     packetLengthPar = &par("packetLength");
 
     counter = 0;
 
     numSent = 0;
     WATCH(numSent);
-
-    if (destAddresses.empty())
-        return;
 
     if (numPackets > 0)
     {
@@ -80,6 +71,22 @@ void IPvXTrafGen::sendPacket()
 {
     char msgName[32];
     sprintf(msgName, "appData-%d", counter++);
+
+    // lazy initialization of the destination addresses
+    if (destAddresses.size() == 0)
+    {
+        const char *destAddrs = par("destAddresses");
+        cStringTokenizer tokenizer(destAddrs);
+        const char *token;
+        while ((token = tokenizer.nextToken()) != NULL)
+            destAddresses.push_back(IPvXAddressResolver().resolve(token));
+    }
+
+    if (destAddresses.size() == 0)
+    {
+        EV << "IPvXTrafGen: Destination address array is empty. Cannot send any data.\n";
+        return;
+    }
 
     cPacket *payload = new cPacket(msgName);
     payload->setByteLength(packetLengthPar->longValue());
