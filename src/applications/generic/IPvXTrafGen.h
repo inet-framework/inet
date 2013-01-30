@@ -39,7 +39,6 @@ class INET_API IPvXTrafGen : public IPvXTrafSink
     simtime_t stopTime;
     std::vector<IPvXAddress> destAddresses;
     cPar *packetLengthPar;  // volatile packetLength parameter
-    int optionCode;
 
     static int counter; // counter for generating a global number for each packet
 

@@ -23,12 +23,28 @@ cplusplus {{
 #include "IPProtocolId_m.h"
 
 #define IPv6_FRAGMENT_HEADER_LENGTH 8
+class IPv6Option;
+typedef IPv6Option *IPv6OptionPtr;
 }}
 
 
 class noncobject IPv6Address;
 
 class noncobject IPv6ExtensionHeader;
+
+class noncobject IPv6OptionPtr;
+
+class IPv6Option
+{
+    unsigned char optionType;
+    unsigned char optionLength;
+}
+
+class IPv6OptionRouterAlert extends IPv6Option
+{
+    optionType = 5; // FIXME use symbolic constant
+    optionLength = 2;
+}
 
 //
 // Hop-by-Hop Options Header.
@@ -37,8 +53,10 @@ class noncobject IPv6ExtensionHeader;
 //
 class IPv6HopByHopOptionsHeader extends IPv6ExtensionHeader
 {
+    @customize(true);
     extensionType = IP_PROT_IPv6EXT_HOP;
     byteLength = 8; // FIXME verify
+    IPv6OptionPtr options[];
 }
 
 //

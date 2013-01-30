@@ -19,13 +19,13 @@
 //
 package inet.nodes.ipv6;
 
-import inet.networklayer.ipv6.IPv6ErrorHandling;
-import inet.networklayer.ipv6.IPv6;
-import inet.networklayer.icmpv6.IPv6NeighbourDiscovery;
-import inet.networklayer.icmpv6.ICMPv6;
-import inet.networklayer.IxMIPv6Support;
 import inet.networklayer.IIPv6Tunneling;
-import inet.base.IHook;
+import inet.networklayer.IxMIPv6Support;
+import inet.networklayer.common.IRouterAlertHandler;
+import inet.networklayer.icmpv6.ICMPv6;
+import inet.networklayer.icmpv6.IPv6NeighbourDiscovery;
+import inet.networklayer.ipv6.IPv6;
+import inet.networklayer.ipv6.IPv6ErrorHandling;
 
 
 //
@@ -38,6 +38,7 @@ module NetworkLayer6
 {
     parameters:
         bool xMIPv6Support = default(false);
+        string routerAlertHandlerType = default("");
         @display("i=block/fork");
     gates:
         input ifIn[] @labels(IPv6Datagram);
@@ -84,6 +85,9 @@ module NetworkLayer6
         mipv6support: <default(xMIPv6Support?"xMIPv6Support":"xMIPv6Support_None")> like IxMIPv6Support {
             parameters:
                 @display("p=44,79");
+        }
+        routerAlertHandler: <routerAlertHandlerType> like IRouterAlertHandler if routerAlertHandlerType != "" {
+            @display("p=189,254");
         }
     connections allowunconnected:  // FIXME remove 'nocheck'!
         // IPv6 to transport Layer
@@ -137,6 +141,11 @@ module NetworkLayer6
         }
         for i=0..sizeof(ifOut)-1 {
             ipv6.queueOut[i] --> { @display("m=s"); } --> ifOut[i];
+        }
+
+        if routerAlertHandlerType != "" {
+            ipv6.routerAlertOut --> routerAlertHandler.routerAlertIn;
+            routerAlertHandler.routerAlertReturn --> ipv6.routerAlertReturn;
         }
 }
 
