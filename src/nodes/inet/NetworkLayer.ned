@@ -37,6 +37,9 @@ module NetworkLayer
         @display("i=block/fork");
         bool proxyARP = default(true);
         string igmpType = default("IGMPv2");
+        // router alert handler type. Put here a string naming the type of router alert handler
+        // module that you want to use (if any). The network layer will then instantiate and
+        // connect the respective module automatically.
         string routerAlertHandlerType = default("");
     gates:
         input ifIn[] @labels(IPv4Datagram);

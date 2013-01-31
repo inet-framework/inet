@@ -38,6 +38,9 @@ module NetworkLayer6
 {
     parameters:
         bool xMIPv6Support = default(false);
+        // router alert handler type. Put here a string naming the type of router alert handler
+        // module that you want to use (if any). The network layer will then instantiate and
+        // connect the respective module automatically.
         string routerAlertHandlerType = default("");
         @display("i=block/fork");
     gates:
