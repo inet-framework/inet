@@ -1,5 +1,5 @@
---- a/nsc-0.5.2/linux-2.6.26/nsc/sim_support.cpp	2010-08-12 22:38:44.000000000 +0200
-+++ b/nsc-0.5.2/linux-2.6.26/nsc/sim_support.cpp	2011-02-18 16:13:01.198735996 +0100
+--- a/nsc-0.5.3/linux-2.6.26/nsc/sim_support.cpp	2010-08-12 22:38:44.000000000 +0200
++++ b/nsc-0.5.3/linux-2.6.26/nsc/sim_support.cpp	2011-02-18 16:13:01.198735996 +0100
 @@ -428,9 +428,9 @@
      {
          // net/core/wmem_default = 106496

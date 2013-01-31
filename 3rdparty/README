@@ -7,18 +7,18 @@ Supported software:
 
   Download NSC from: http://www.wand.net.nz/~stj2/nsc/
 
-  Extract the 'nsc-0.5.2.tar.bz2' tarball in this directory and build it.
+  Extract the 'nsc-0.5.3.tar.bz2' tarball in this directory and build it.
 
-  $ tar xvfj nsc-0.5.2.tar.bz2
+  $ tar xvfj nsc-0.5.3.tar.bz2
 
-  When you use it on a 64 bit system, you must use the 'patch_for_nsc-0.5.2-amd64.txt'.
+  When you use it on a 64 bit system, you must use the 'patch_for_nsc-0.5.3-amd64.txt'.
   The NSC works with this patch on 32 bit system, too.
 
-  $ patch -p 1 <patch_for_nsc-0.5.2-amd64.txt
+  $ cd nsc-0.5.3
+  $ patch -p 2 <../patch_for_nsc-0.5.3-amd64.txt
 
-  Build the 'nsc-0.5.2'.
+  Build the NSC libraries.
 
-  $ cd nsc-0.5.2
   $ python scons.py
 
   This should generate libfreebsd5.3.so, liblinux2.6.10.so, liblinux2.6.18.so,
@@ -26,7 +26,18 @@ Supported software:
   When you use it on a 64 bit system, the generated libraries are
   liblinux2.6.18.so and liblinux2.6.26.so only.
 
-  Then rebuild INET.
+  To rebuild INET:
+
+  - Start the IDE and open the INET project in the project explorer.
+  - Right click on the INET project and choose Properties.
+  - On the OMNeT++/Project Features page, enable the Tcp (NSC) feature.
+  - Press Ok and rebuild INET.
+
+  NOTE: Building INET from the command line will not work because the default
+  makefile will be created with the NSC feature turned off. If you want to build
+  INET from command line, edit the Makefile in the root folder and change the 
+  command in the 'makemake' target: Replace the '-Xtransport/tcp_nsc' with 
+  '-DWITH_TCP_NSC' then:
 
   $ make cleanall
   $ make makefiles
