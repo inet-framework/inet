@@ -35,7 +35,7 @@ import inet.networklayer.IManetRouting;
 //  - IPv4 address size is assumed in the messages. If you need IPv6, recompile with -DOLSR_IPv6 added to CFLAGS
 //  - Multiple interfaces per OLSR node is supported only with adding -DMULTIPLE_IFACES_SUPPORT to CFLAGS
 //
-// see: <a>http://www.inf.ufrgs.br/~wlccordeiro/resources/olsr/README.html</a>
+// see: <a>http://www.inf.ufrgs.br/~~wlccordeiro/resources/olsr/README.html</a>
 //
 simple OLSR_ETX extends BaseRouting like IManetRouting
 {

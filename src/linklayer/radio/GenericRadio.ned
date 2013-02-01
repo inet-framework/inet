@@ -20,7 +20,7 @@ package inet.linklayer.radio;
 
 //
 // Generic radio module. The implementation is largely based on the
-// Mobility Framework's ~SnrEval and Decider modules.
+// Mobility Framework's SnrEval and Decider modules.
 //
 // @see ~IRadio
 // @author Andras Varga
