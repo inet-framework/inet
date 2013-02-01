@@ -290,7 +290,7 @@ void ARP::processOutboundPacket(cMessage *msg)
     }
 
     if (nextHopAddr.isLimitedBroadcastAddress() ||
-            nextHopAddr == ie->ipv4Data()->getIPAddress().getBroadcastAddress(ie->ipv4Data()->getNetmask())) // also include the network broadcast
+            nextHopAddr == ie->ipv4Data()->getIPAddress().makeBroadcastAddress(ie->ipv4Data()->getNetmask())) // also include the network broadcast
     {
         EV << "destination address is broadcast, sending packet to broadcast MAC address\n";
         sendPacketToNIC(msg, ie, MACAddress::BROADCAST_ADDRESS, ETHERTYPE_IPv4);

@@ -1095,7 +1095,7 @@ OSPF::LinkStateID OSPF::Router::getUniqueLinkStateID(const OSPF::IPv4AddressRang
         IPv4Address existingMask = foundLSA->getContents().getNetworkMask();
 
         if (destination.mask >= existingMask) {
-            return lsaKey.linkStateID.getBroadcastAddress(destination.mask);
+            return lsaKey.linkStateID.makeBroadcastAddress(destination.mask);
         } else {
             OSPF::ASExternalLSA* asExternalLSA = new OSPF::ASExternalLSA(*foundLSA);
 
@@ -1109,7 +1109,7 @@ OSPF::LinkStateID OSPF::Router::getUniqueLinkStateID(const OSPF::IPv4AddressRang
 
             lsaToReoriginate = asExternalLSA;
 
-            return lsaKey.linkStateID.getBroadcastAddress(existingMask);
+            return lsaKey.linkStateID.makeBroadcastAddress(existingMask);
         }
     }
 }

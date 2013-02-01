@@ -267,7 +267,7 @@ bool IPv4Address::isWellFormed(const char *text)
 }
 
 
-IPv4Address IPv4Address::getBroadcastAddress(IPv4Address netmask)
+IPv4Address IPv4Address::makeBroadcastAddress(IPv4Address netmask) const
 {
    IPv4Address br(getInt() | ~(netmask.getInt()));
    return br;

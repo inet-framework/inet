@@ -305,7 +305,7 @@ void DHCPServer::sendACK(DHCPLease* lease)
     // register the lease time
     lease->lease_time = simTime();
 
-    sendToUDP(ack, bootps_port, lease->ip.getBroadcastAddress(lease->netmask), bootpc_port);
+    sendToUDP(ack, bootps_port, lease->ip.makeBroadcastAddress(lease->netmask), bootpc_port);
 }
 
 void DHCPServer::sendOffer(DHCPLease* lease)
@@ -347,7 +347,7 @@ void DHCPServer::sendOffer(DHCPLease* lease)
     // register the offering time
     lease->lease_time = simTime();
 
-    sendToUDP(offer, 67, lease->ip.getBroadcastAddress(lease->netmask), 68);
+    sendToUDP(offer, 67, lease->ip.makeBroadcastAddress(lease->netmask), 68);
 }
 
 DHCPLease* DHCPServer::getLeaseByMac(MACAddress mac)

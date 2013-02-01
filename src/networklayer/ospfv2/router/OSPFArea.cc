@@ -1040,7 +1040,7 @@ OSPF::LinkStateID OSPF::Area::getUniqueLinkStateID(OSPF::IPv4AddressRange destin
             return lsaKey.linkStateID;
         } else {
             if (destination.mask >= existingMask) {
-                return lsaKey.linkStateID.getBroadcastAddress(destination.mask);
+                return lsaKey.linkStateID.makeBroadcastAddress(destination.mask);
             } else {
                 OSPF::SummaryLSA* summaryLSA = new OSPF::SummaryLSA(*foundLSA);
 
@@ -1053,7 +1053,7 @@ OSPF::LinkStateID OSPF::Area::getUniqueLinkStateID(OSPF::IPv4AddressRange destin
 
                 lsaToReoriginate = summaryLSA;
 
-                return lsaKey.linkStateID.getBroadcastAddress(existingMask);
+                return lsaKey.linkStateID.makeBroadcastAddress(existingMask);
             }
         }
     }

@@ -284,9 +284,9 @@ class INET_API IPv4Address
                                    const IPv4Address& netmask);
 
     /**
-      * Returns the broadcast address for the given netmask
-      */
-    IPv4Address getBroadcastAddress(IPv4Address netmask);
+     * Returns the broadcast address for the given netmask
+     */
+    IPv4Address makeBroadcastAddress(IPv4Address netmask) const;
 
     /**
      * Returns equals(addr).
