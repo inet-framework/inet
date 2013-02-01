@@ -77,7 +77,15 @@ package inet.networklayer.ipv4;
 // method which determines processing time for a packet, or (2) use a
 // different base class.
 //
-// @see ~RoutingTable, ~IPv4ControlInfo, ~IPv4RoutingDecision, ~ARP
+// <b>Packet interception</p>
+//
+// Implementers interested in intercepting packets that pass through the IP layer
+// can hook a ~IRouterAlertHandler-like module to the routerAlertOut gate. The
+// IP module will then hand over all packets carrying the router alert option field
+// to this module for detailled processing. In order to carry on with normal routing,
+// packets must be returned using the routerAlertReturn gate.
+//
+// @see ~RoutingTable, ~IPv4ControlInfo, ~IPv4RoutingDecision, ~ARP, ~IRouterAlertHandler
 //
 // @author Andras Varga
 //
@@ -96,4 +104,6 @@ simple IPv4
         output transportOut[] @labels(IPv4ControlInfo/up,TCPSegment,UDPPacket);
         input queueIn[] @labels(IPv4Datagram);
         output queueOut @labels(IPv4Datagram);
+        output routerAlertOut @labels(IPv4Datagram);
+        input routerAlertReturn @labels(IPv4Datagram);
 }

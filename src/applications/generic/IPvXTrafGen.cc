@@ -22,6 +22,8 @@
 #include "IPvXAddressResolver.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
+#include "IPv6ExtensionHeaders.h"
+#include "IPv4Datagram.h"
 
 
 Define_Module(IPvXTrafGen);
@@ -46,21 +48,12 @@ void IPvXTrafGen::initialize(int stage)
     if (stopTime != 0 && stopTime <= startTime)
         error("Invalid startTime/stopTime parameters");
 
-    const char *destAddrs = par("destAddresses");
-    cStringTokenizer tokenizer(destAddrs);
-    const char *token;
-    while ((token = tokenizer.nextToken()) != NULL)
-        destAddresses.push_back(IPvXAddressResolver().resolve(token));
-
     packetLengthPar = &par("packetLength");
 
     counter = 0;
 
     numSent = 0;
     WATCH(numSent);
-
-    if (destAddresses.empty())
-        return;
 
     if (numPackets > 0)
     {
@@ -80,6 +73,22 @@ void IPvXTrafGen::sendPacket()
     char msgName[32];
     sprintf(msgName, "appData-%d", counter++);
 
+    // lazy initialization of the destination addresses
+    if (destAddresses.size() == 0)
+    {
+        const char *destAddrs = par("destAddresses");
+        cStringTokenizer tokenizer(destAddrs);
+        const char *token;
+        while ((token = tokenizer.nextToken()) != NULL)
+            destAddresses.push_back(IPvXAddressResolver().resolve(token));
+    }
+
+    if (destAddresses.size() == 0)
+    {
+        EV << "IPvXTrafGen: Destination address array is empty. Cannot send any data.\n";
+        return;
+    }
+
     cPacket *payload = new cPacket(msgName);
     payload->setByteLength(packetLengthPar->longValue());
 
@@ -92,6 +101,11 @@ void IPvXTrafGen::sendPacket()
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
         controlInfo->setDestAddr(destAddr.get4());
         controlInfo->setProtocol(protocol);
+        if (par("routerAlert").boolValue() == true)
+        {
+            controlInfo->setOptions(IPOPTION_ROUTER_ALERT);
+        }
+        controlInfo->setOptions(148);
         payload->setControlInfo(controlInfo);
         gate = "ipOut";
     }
@@ -101,6 +115,14 @@ void IPvXTrafGen::sendPacket()
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
         controlInfo->setDestAddr(destAddr.get6());
         controlInfo->setProtocol(protocol);
+        if (par("routerAlert").boolValue() == true)
+        {
+            // TODO how do we do this extension header handling elegantly?
+            IPv6HopByHopOptionsHeader *hdr = new IPv6HopByHopOptionsHeader();
+            hdr->setOptionsArraySize(1);
+            hdr->setOptions(0, new IPv6OptionRouterAlert());
+            controlInfo->addExtensionHeader(hdr);
+        }
         payload->setControlInfo(controlInfo);
         gate = "ipv6Out";
     }
