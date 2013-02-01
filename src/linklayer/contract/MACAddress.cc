@@ -19,6 +19,7 @@
 #include <ctype.h>
 #include "MACAddress.h"
 #include "InterfaceToken.h"
+#include "IPv4Address.h"
 
 unsigned int MACAddress::autoAddressCtr;
 
@@ -137,4 +138,19 @@ MACAddress MACAddress::generateAutoAddress()
     uint64 intAddr = 0x0AAA00000000ULL + (autoAddressCtr & 0xffffffffUL);
     MACAddress addr(intAddr);
     return addr;
+}
+
+// see  RFC 1112, section 6.4
+MACAddress MACAddress::makeMulticastAddress(IPv4Address addr)
+{
+    ASSERT(addr.isMulticast());
+
+    MACAddress macAddr;
+    macAddr.setAddressByte(0, 0x01);
+    macAddr.setAddressByte(1, 0x00);
+    macAddr.setAddressByte(2, 0x5e);
+    macAddr.setAddressByte(3, addr.getDByte(1) & 0x7f);
+    macAddr.setAddressByte(4, addr.getDByte(2));
+    macAddr.setAddressByte(5, addr.getDByte(3));
+    return macAddr;
 }

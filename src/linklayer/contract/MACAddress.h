@@ -28,6 +28,7 @@
 #define MAC_ADDRESS_MASK 0xffffffffffffULL
 
 
+class IPv4Address;
 class InterfaceToken;
 
 /**
@@ -175,6 +176,11 @@ class INET_API MACAddress
      * suffix.
      */
     static MACAddress generateAutoAddress();
+
+    /**
+     * Form a MAC address for a multicast IPv4 address, see  RFC 1112, section 6.4
+     */
+    static MACAddress makeMulticastAddress(IPv4Address addr);
 
     bool operator<(const MACAddress& other) const { return address < other.address; }
 
