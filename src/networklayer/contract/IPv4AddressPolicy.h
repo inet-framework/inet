@@ -34,6 +34,7 @@ class INET_API IPv4AddressPolicy : public IAddressPolicy
         IPv4AddressPolicy() { }
         virtual ~IPv4AddressPolicy() { }
 
+        virtual int getMaxPrefixLength() const { return 32; }
         virtual Address getLinkLocalManetRoutersMulticastAddress() const { return IPv4Address::LL_MANET_ROUTERS; }
         virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ALL_RIP_ROUTERS_MCAST; }
         virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const { return new IPv4ControlInfo(); }

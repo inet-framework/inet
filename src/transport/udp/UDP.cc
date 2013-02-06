@@ -26,6 +26,7 @@
 #include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
+#include "GenericNetworkProtocolControlInfo.h"
 #include "IAddressPolicy.h"
 
 #ifdef WITH_IPv4
@@ -326,6 +327,17 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         isMulticast = ctrl6->getDestAddr().isMulticast();
         isBroadcast = false;  // IPv6 has no broadcast, just various multicasts
     }
+    else if (dynamic_cast<GenericNetworkProtocolControlInfo *>(ctrl)!=NULL)
+    {
+        GenericNetworkProtocolControlInfo *ctrlGeneric = (GenericNetworkProtocolControlInfo *)ctrl;
+        srcAddr = ctrlGeneric->getSourceAddress();
+        destAddr = ctrlGeneric->getDestinationAddress();
+        interfaceId = ctrlGeneric->getInterfaceId();
+        ttl = ctrlGeneric->getHopLimit();
+        tos = 0; // TODO: ctrlGeneric->getTrafficClass();
+        isMulticast = ctrlGeneric->getDestinationAddress().isMulticast();
+        isBroadcast = false;  // IPv6 has no broadcast, just various multicasts
+    }
     else if (ctrl == NULL)
     {
         error("(%s)%s arrived from lower layer without control info",
@@ -475,6 +487,10 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
         else
 #endif
             delete udpPacket;
+    }
+    else if (dynamic_cast<GenericNetworkProtocolControlInfo *>(ctrl) != NULL)
+    {
+        delete udpPacket;
     }
     else if (ctrl == NULL)
     {

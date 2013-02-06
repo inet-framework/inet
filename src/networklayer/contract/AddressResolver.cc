@@ -23,6 +23,10 @@
 #include "IInterfaceTable.h"
 #include "NotificationBoard.h"
 
+#include "ModulePathAddress.h"
+#include "ModuleIdAddress.h"
+#include "GenericNetworkProtocolInterfaceData.h"
+
 #ifdef WITH_IPv4
 #include "IPv4NetworkConfigurator.h"
 #include "IIPv4RoutingTable.h"
@@ -126,6 +130,12 @@ bool AddressResolver::tryResolve(const char *s, Address& result, int addrType)
             addrType = ADDR_IPv4;
         else if (protocol == "ipv6")
             addrType = ADDR_IPv6;
+        else if (protocol == "mac")
+            addrType = ADDR_MAC;
+        else if (protocol == "modulepath")
+            addrType = ADDR_MODULEPATH;
+        else if (protocol == "moduleid")
+            addrType = ADDR_MODULEID;
         else
             throw cRuntimeError("AddressResolver: error parsing address spec `%s': address type must be `(ipv4)' or `(ipv6)'", s);
     }
@@ -201,6 +211,12 @@ Address AddressResolver::getAddressFrom(IInterfaceTable *ift, int addrType)
         return ret;
     else if ((addrType & ADDR_IPv6) && getIPv6AddressFrom(ret, ift, netmask))
         return ret;
+    else if ((addrType & ADDR_MAC) && getMACAddressFrom(ret, ift, netmask))
+        return ret;
+    else if ((addrType & ADDR_MODULEPATH) && getModulePathAddressFrom(ret, ift, netmask))
+        return ret;
+    else if ((addrType & ADDR_MODULEID) && getModuleIdAddressFrom(ret, ift, netmask))
+        return ret;
     else
         throw cRuntimeError("AddressResolver: unknown addrType %d", addrType);
     return ret;
@@ -214,6 +230,12 @@ Address AddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
     if ((addrType & ADDR_IPv4) && getInterfaceIPv4Address(ret, ie, mask))
         return ret;
     else if ((addrType & ADDR_IPv6) && getInterfaceIPv6Address(ret, ie, mask))
+        return ret;
+    else if ((addrType & ADDR_MAC) && getInterfaceMACAddress(ret, ie, mask))
+        return ret;
+    else if ((addrType & ADDR_MODULEPATH) && getInterfaceModulePathAddress(ret, ie, mask))
+        return ret;
+    else if ((addrType & ADDR_MODULEID) && getInterfaceModuleIdAddress(ret, ie, mask))
         return ret;
     else
         throw cRuntimeError("AddressResolver: unknown addrType %d", addrType);
@@ -271,6 +293,60 @@ bool AddressResolver::getIPv6AddressFrom(Address& retAddr, IInterfaceTable *ift,
 #endif
 }
 
+bool AddressResolver::getMACAddressFrom(Address& retAddr, IInterfaceTable *ift, bool netmask)
+{
+    if (ift->getNumInterfaces()==0)
+        throw cRuntimeError("AddressResolver: interface table `%s' has no interface registered "
+                  "(yet? try in a later init stage!)", ift->getFullPath().c_str());
+
+    // choose first usable interface address (configured for generic, non-loopback if, addr non-null)
+    for (int i=0; i < ift->getNumInterfaces(); i++)
+    {
+        InterfaceEntry *ie = ift->getInterface(i);
+        if (!ie->getGenericNetworkProtocolData() || ie->isLoopback())
+            continue;
+        if (getInterfaceMACAddress(retAddr, ie, netmask))
+            return true;
+    }
+    return false;
+}
+
+bool AddressResolver::getModulePathAddressFrom(Address& retAddr, IInterfaceTable *ift, bool netmask)
+{
+    if (ift->getNumInterfaces()==0)
+        throw cRuntimeError("AddressResolver: interface table `%s' has no interface registered "
+                  "(yet? try in a later init stage!)", ift->getFullPath().c_str());
+
+    // choose first usable interface address (configured for generic, non-loopback if, addr non-null)
+    for (int i=0; i < ift->getNumInterfaces(); i++)
+    {
+        InterfaceEntry *ie = ift->getInterface(i);
+        if (!ie->getGenericNetworkProtocolData() || ie->isLoopback())
+            continue;
+        if (getInterfaceModulePathAddress(retAddr, ie, netmask))
+            return true;
+    }
+    return false;
+}
+
+bool AddressResolver::getModuleIdAddressFrom(Address& retAddr, IInterfaceTable *ift, bool netmask)
+{
+    if (ift->getNumInterfaces()==0)
+        throw cRuntimeError("AddressResolver: interface table `%s' has no interface registered "
+                  "(yet? try in a later init stage!)", ift->getFullPath().c_str());
+
+    // choose first usable interface address (configured for generic, non-loopback if, addr non-null)
+    for (int i=0; i < ift->getNumInterfaces(); i++)
+    {
+        InterfaceEntry *ie = ift->getInterface(i);
+        if (!ie->getGenericNetworkProtocolData() || ie->isLoopback())
+            continue;
+        if (getInterfaceModuleIdAddress(retAddr, ie, netmask))
+            return true;
+    }
+    return false;
+}
+
 bool AddressResolver::getInterfaceIPv6Address(Address &ret, InterfaceEntry *ie, bool netmask)
 {
 #ifdef WITH_IPv6
@@ -310,6 +386,50 @@ bool AddressResolver::getInterfaceIPv4Address(Address &ret, InterfaceEntry *ie, 
             return configurator->getInterfaceIPv4Address(ret, ie, netmask);
     }
 #endif
+    return false;
+}
+
+bool AddressResolver::getInterfaceMACAddress(Address &ret, InterfaceEntry *ie, bool netmask)
+{
+    if (ie->getGenericNetworkProtocolData())
+    {
+        Address addr = ie->getGenericNetworkProtocolData()->getAddress();
+        if (!addr.isUnspecified() && addr.getType() == Address::MAC)
+        {
+            ret = addr;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool AddressResolver::getInterfaceModulePathAddress(Address &ret, InterfaceEntry *ie, bool netmask)
+{
+    if (ie->getGenericNetworkProtocolData())
+    {
+        Address addr = ie->getGenericNetworkProtocolData()->getAddress();
+        if (!addr.isUnspecified() && addr.getType() == Address::MODULEPATH)
+        {
+            ret = addr;
+            return true;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool AddressResolver::getInterfaceModuleIdAddress(Address &ret, InterfaceEntry *ie, bool netmask)
+{
+    if (ie->getGenericNetworkProtocolData())
+    {
+        Address addr = ie->getGenericNetworkProtocolData()->getAddress();
+        if (!addr.isUnspecified() && addr.getType() == Address::MODULEID)
+        {
+            ret = addr;
+            return true;
+        }
+        return true;
+    }
     return false;
 }
 

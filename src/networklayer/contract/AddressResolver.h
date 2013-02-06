@@ -34,7 +34,7 @@ class IIPv4RoutingTable;
 class IPv6RoutingTable;
 class NotificationBoard;
 
-#define DEFAULT_ADDR_TYPE (ADDR_IPv4 | ADDR_IPv6)
+#define DEFAULT_ADDR_TYPE (ADDR_IPv4 | ADDR_IPv6 | ADDR_MAC | ADDR_MODULEPATH | ADDR_MODULEID)
 
 /**
  * Utility class for finding IPv4 or IPv6 address of a host or router.
@@ -59,14 +59,29 @@ class INET_API AddressResolver
     // internal
     virtual bool getIPv6AddressFrom(Address &retAddr, IInterfaceTable *ift, bool netmask);
     // internal
+    virtual bool getMACAddressFrom(Address &retAddr, IInterfaceTable *ift, bool netmask);
+    // internal
+    virtual bool getModulePathAddressFrom(Address &retAddr, IInterfaceTable *ift, bool netmask);
+    // internal
+    virtual bool getModuleIdAddressFrom(Address &retAddr, IInterfaceTable *ift, bool netmask);
+    // internal
     virtual bool getInterfaceIPv4Address(Address &ret, InterfaceEntry *ie, bool mask);
     // internal
     virtual bool getInterfaceIPv6Address(Address &ret, InterfaceEntry *ie, bool mask);
+    // internal
+    virtual bool getInterfaceMACAddress(Address &ret, InterfaceEntry *ie, bool mask);
+    // internal
+    virtual bool getInterfaceModulePathAddress(Address &ret, InterfaceEntry *ie, bool mask);
+    // internal
+    virtual bool getInterfaceModuleIdAddress(Address &ret, InterfaceEntry *ie, bool mask);
 
   public:
     enum {
         ADDR_IPv4 = 1,
         ADDR_IPv6 = 2,
+        ADDR_MAC = 4,
+        ADDR_MODULEPATH = 8,
+        ADDR_MODULEID = 16,
         ADDR_MASK = 32
     };
 

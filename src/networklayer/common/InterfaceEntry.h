@@ -32,6 +32,7 @@
 class InterfaceEntry;
 class IInterfaceTable;
 class InterfaceProtocolData;
+class GenericNetworkProtocolInterfaceData;
 class IPv4InterfaceData;
 class IPv6InterfaceData;
 class TRILLInterfaceData;
@@ -102,6 +103,7 @@ class INET_API InterfaceEntry : public cNamedObject
 
     IPv4InterfaceData *ipv4data;   ///< IPv4-specific interface info (IPv4 address, etc)
     IPv6InterfaceData *ipv6data;   ///< IPv6-specific interface info (IPv6 addresses, etc)
+    GenericNetworkProtocolInterfaceData *genericNetworkProtocolData; ///< GenericNetworkProtocol-specific interface info (Address, etc)
     ISISInterfaceData *isisdata; ///< ISIS-specific interface info
     TRILLInterfaceData *trilldata; ///< TRILL-specific interface info
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
@@ -184,6 +186,7 @@ class INET_API InterfaceEntry : public cNamedObject
     //@{
     IPv4InterfaceData *ipv4Data() const {return ipv4data;}
     IPv6InterfaceData *ipv6Data() const  {return ipv6data;}
+    GenericNetworkProtocolInterfaceData *getGenericNetworkProtocolData() const {return genericNetworkProtocolData;}
     TRILLInterfaceData *trillData() const {return trilldata;}
     ISISInterfaceData *isisData() const {return isisdata;}
     //@}
@@ -192,6 +195,7 @@ class INET_API InterfaceEntry : public cNamedObject
     //@{
     virtual void setIPv4Data(IPv4InterfaceData *p);
     virtual void setIPv6Data(IPv6InterfaceData *p);
+    virtual void setGenericNetworkProtocolData(GenericNetworkProtocolInterfaceData *p);
     virtual void setTRILLInterfaceData(TRILLInterfaceData *p);
     virtual void setISISInterfaceData(ISISInterfaceData *p);
     //@}

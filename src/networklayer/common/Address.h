@@ -23,6 +23,8 @@
 #include "IPv4Address.h"
 #include "IPv6Address.h"
 #include "MACAddress.h"
+#include "ModuleIdAddress.h"
+#include "ModulePathAddress.h"
 
 class IAddressPolicy;
 
@@ -36,30 +38,44 @@ class INET_API Address
             NONE,
             IPv4,
             IPv6,
+            MAC,
+            MODULEPATH,
+            MODULEID
         };
     private:
         AddressType type;
         //XXX this is a simplistic temporary implementation; TODO implement in 128 bits, using magic (use a reserved IPv6 range to store non-IPv6 addresses)
         IPv4Address ipv4;
         IPv6Address ipv6;
+        MACAddress mac;
+        ModuleIdAddress moduleId;
+        ModulePathAddress modulePath;
     public:
         Address() : type(NONE) {}
         Address(const char *str) { tryParse(str); }
         Address(const IPv4Address& addr) {set(addr);}
         Address(const IPv6Address& addr) {set(addr);}
+        Address(const MACAddress& addr) {set(addr);}
+        Address(const ModuleIdAddress& addr) {set(addr);}
+        Address(const ModulePathAddress& addr) {set(addr);}
 
         void set(const IPv4Address& addr) { type = IPv4; ipv4 = addr; }
         void set(const IPv6Address& addr) { type = IPv6; ipv6 = addr; }
+        void set(const MACAddress& addr) { type = MAC; mac = addr; }
+        void set(const ModuleIdAddress& addr) { type = MODULEID;  moduleId = addr; }
+        void set(const ModulePathAddress& addr) { type = MODULEPATH;  modulePath = addr; }
 
         IPv4Address toIPv4() const {return ipv4;}   //XXX names are inconsistent with Address (rename Address methods?)
         IPv6Address toIPv6() const {return ipv6;}
+        MACAddress toMAC() const {return mac;}  // IEU-48
+        ModuleIdAddress toModuleId() const {return moduleId;}
+        ModulePathAddress toModulePath() const {return modulePath;}
 
         //TODO add more functions: getType(), prefix matching, etc
         AddressType getType() const { return type; }
         IAddressPolicy * getAddressPolicy() const;
         bool tryParse(const char *addr);
 
-        int getPrefixLength() const { return 32; } //FIXME not good, remove!!!!!! IT DOES NOT DO WHAT YOU EXPECT
         bool isUnspecified() const;
         bool isUnicast() const;
         bool isMulticast() const;
