@@ -29,20 +29,25 @@
  * Stores an IPv4 or an IPv6 address. This class should be used everywhere
  * in transport layer and up, to guarantee IPv4/IPv6 transparency.
  *
- * Storage is efficient: an object occupies size of an IPv6 address
- * (128 bits=16 bytes) plus a bool.
+ * Storage: an object occupies size of an IPv6 address
+ * (128 bits=16 bytes) plus an int.
  */
 class INET_API Address
 {
-  protected:
+  public:
+    enum AddressType {
+        IPv4,
+        IPv6,
+    };
+  private:
     uint32 d[4];
-    bool isv6;
+    AddressType type;
 
   public:
     /**
      * Constructor for IPv4 addresses.
      */
-    Address() {isv6 = false; d[0] = 0;}
+    Address() {type = IPv4; d[0] = 0;}
 
     /**
      * Constructor for IPv4 addresses.
@@ -72,16 +77,16 @@ class INET_API Address
     ~Address() {}
 
     /**
-     * Is this an IPv6 address?
+     * Return address type
      */
-    bool isIPv6() const {return isv6;}
+    AddressType getType() const {return type;}
 
     /**
      * Get IPv4 address. Throws exception if this is an IPv6 address.
      */
     IPv4Address toIPv4() const
     {
-        if (isv6)
+        if (type == IPv6)
             throw cRuntimeError("Address: cannot return IPv6 address %s as IPv4", str().c_str());
 
         return IPv4Address(d[0]);
@@ -92,7 +97,7 @@ class INET_API Address
      */
     IPv6Address toIPv6() const
     {
-        if (!isv6)
+        if (type == IPv4)
         {
             if (d[0] == 0) // allow null address to be returned as IPv6
                 return IPv6Address();
@@ -108,7 +113,7 @@ class INET_API Address
      */
     void set(const IPv4Address& addr)
     {
-        isv6 = false;
+        type = IPv4;
         d[0] = addr.getInt();
     }
 
@@ -120,11 +125,11 @@ class INET_API Address
         if (addr.isUnspecified())
         {
             // we always represent nulls as IPv4 null
-            isv6 = false; d[0] = 0;
+            type = IPv4; d[0] = 0;
             return;
         }
 
-        isv6 = true;
+        type = IPv6;
         const uint32 *w = addr.words();
         d[0] = w[0]; d[1] = w[1]; d[2] = w[2]; d[3] = w[3];
     }
@@ -134,10 +139,10 @@ class INET_API Address
      */
     void set(const Address& addr)
     {
-        isv6 = addr.isv6;
+        type = addr.type;
         d[0] = addr.d[0];
 
-        if (isv6)
+        if (type == IPv6)
         {
             d[1] = addr.d[1]; d[2] = addr.d[2]; d[3] = addr.d[3];
         }
@@ -176,7 +181,7 @@ class INET_API Address
      */
     std::string str() const
     {
-        if (isv6)
+        if (type == IPv6)
         {
             return toIPv6().str();
         }
@@ -195,7 +200,7 @@ class INET_API Address
      */
     bool isUnspecified() const
     {
-        return !isv6 && d[0] == 0;
+        return type == IPv4 && d[0] == 0;
     }
 
     /**
@@ -203,14 +208,14 @@ class INET_API Address
      */
     bool isMulticast() const
     {
-        return isv6 ? toIPv6().isMulticast() : toIPv4().isMulticast();
+        return type==IPv6 ? toIPv6().isMulticast() : toIPv4().isMulticast();
     }
 
     /**
      * Returns length of internal binary representation of address,
      * (count of 32-bit unsigned integers.)
      */
-    int wordCount() const {return isv6 ? 4 : 1;}
+    int wordCount() const {return type==IPv6 ? 4 : 1;}
 
     /**
      * Returns pointer to internal binary representation of address,
@@ -222,7 +227,7 @@ class INET_API Address
      * Returns true if the two addresses are equal
      */
     bool equals(const IPv4Address& addr) const {
-        return !isv6 && d[0] == addr.getInt();
+        return type == IPv4 && d[0] == addr.getInt();
     }
 
     /**
@@ -231,7 +236,7 @@ class INET_API Address
     bool equals(const IPv6Address& addr) const
     {
         const uint32 *w = addr.words();
-        return isv6 ? (d[3] == w[3] && d[2] == w[2] && d[1] == w[1] && d[0] == w[0]) : (isUnspecified() && addr.isUnspecified());
+        return type==IPv6 ? (d[3] == w[3] && d[2] == w[2] && d[1] == w[1] && d[0] == w[0]) : (isUnspecified() && addr.isUnspecified());
     }
 
     /**
@@ -239,8 +244,8 @@ class INET_API Address
      */
     bool equals(const Address& addr) const
     {
-        return (isv6 == addr.isv6) && (d[0] == addr.d[0])
-                && (!isv6 || (d[3] == addr.d[3] && d[2] == addr.d[2] && d[1] == addr.d[1]));
+        return (type == addr.type) && (d[0] == addr.d[0])
+                && (type == IPv4 || (d[3] == addr.d[3] && d[2] == addr.d[2] && d[1] == addr.d[1]));
     }
 
     /**
@@ -278,9 +283,9 @@ class INET_API Address
      */
     bool operator<(const Address& addr) const
     {
-        if (isv6 != addr.isv6)
-            return !isv6;
-        else if (!isv6)
+        if (type != addr.type)
+            return type == IPv4;
+        else if (type == IPv4)
             return d[0] < addr.d[0];
         else
             return memcmp(&d, &addr.d, 16) < 0;  // this provides an ordering, though not surely the one one would expect
@@ -294,7 +299,7 @@ inline std::ostream& operator<<(std::ostream& os, const Address& ip)
 
 inline void doPacking(cCommBuffer *buf, const Address& addr)
 {
-    if (buf->packFlag(addr.isIPv6()))
+    if (buf->packFlag(addr.getType()==Address::IPv6))
         doPacking(buf, addr.toIPv6());
     else
         doPacking(buf, addr.toIPv4());

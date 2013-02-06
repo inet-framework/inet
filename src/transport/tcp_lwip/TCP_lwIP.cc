@@ -623,7 +623,7 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, Address const& srcP,
 
     const char* output = "";
 
-    if (!destP.isIPv6())
+    if (destP.getType() == Address::IPv4)
     {
         // send over IPv4
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
@@ -634,7 +634,7 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, Address const& srcP,
 
         output = "ipOut";
     }
-    else
+    else if (destP.getType() == Address::IPv6)
     {
         // send over IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
@@ -646,6 +646,8 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, Address const& srcP,
         output = "ipv6Out";
         // send over IPv6
     }
+    else
+        throw cRuntimeError("Unknown address type");
 
     if (conn)
     {

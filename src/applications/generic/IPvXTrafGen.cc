@@ -187,7 +187,7 @@ void IPvXTrafGen::sendPacket()
     Address destAddr = chooseDestAddr();
     const char *gate;
 
-    if (!destAddr.isIPv6())
+    if (destAddr.getType() == Address::IPv4)
     {
         // send to IPv4
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
@@ -196,7 +196,7 @@ void IPvXTrafGen::sendPacket()
         payload->setControlInfo(controlInfo);
         gate = "ipOut";
     }
-    else
+    else if (destAddr.getType() == Address::IPv6)
     {
         // send to IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
@@ -205,6 +205,8 @@ void IPvXTrafGen::sendPacket()
         payload->setControlInfo(controlInfo);
         gate = "ipv6Out";
     }
+    else
+        throw cRuntimeError("Unknown address type");
     EV << "Sending packet: ";
     printPacket(payload);
     emit(sentPkSignal, payload);

@@ -66,7 +66,7 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
     EV << "Sending: ";
     //printSegmentBrief(tcpseg);
 
-    if (!dest.isIPv6())
+    if (dest.getType() == Address::IPv4)
     {
         // send over IPv4
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
@@ -78,7 +78,7 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
         emit(sentPkSignal, tcpseg);
         send(tcpseg, "ipv4Out");
     }
-    else
+    else if (dest.getType() == Address::IPv6)
     {
         // send over IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
@@ -90,6 +90,8 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
         emit(sentPkSignal, tcpseg);
         send(tcpseg, "ipv6Out");
     }
+    else
+        throw cRuntimeError("Unknown address type");
 }
 
 unsigned long TCPSpoof::chooseInitialSeqNum()

@@ -44,9 +44,9 @@ using namespace DiffservUtil;
 #ifdef WITH_IPv4
 bool MultiFieldClassifier::Filter::matches(IPv4Datagram *datagram)
 {
-    if (srcPrefixLength > 0 && (srcAddr.isIPv6() || !datagram->getSrcAddress().prefixMatches(srcAddr.toIPv4(), srcPrefixLength)))
+    if (srcPrefixLength > 0 && (srcAddr.getType() != Address::IPv4 || !datagram->getSrcAddress().prefixMatches(srcAddr.toIPv4(), srcPrefixLength)))
         return false;
-    if (destPrefixLength > 0 && (destAddr.isIPv6() || !datagram->getDestAddress().prefixMatches(destAddr.toIPv4(), destPrefixLength)))
+    if (destPrefixLength > 0 && (destAddr.getType() != Address::IPv4 || !datagram->getDestAddress().prefixMatches(destAddr.toIPv4(), destPrefixLength)))
         return false;
     if (protocol >= 0 && datagram->getTransportProtocol() != protocol)
         return false;
@@ -86,9 +86,9 @@ bool MultiFieldClassifier::Filter::matches(IPv4Datagram *datagram)
 #ifdef WITH_IPv6
 bool MultiFieldClassifier::Filter::matches(IPv6Datagram *datagram)
 {
-    if (srcPrefixLength > 0 && (!srcAddr.isIPv6() || !datagram->getSrcAddress().matches(srcAddr.toIPv6(), srcPrefixLength)))
+    if (srcPrefixLength > 0 && (srcAddr.getType() != Address::IPv6 || !datagram->getSrcAddress().matches(srcAddr.toIPv6(), srcPrefixLength)))
         return false;
-    if (destPrefixLength > 0 && (!destAddr.isIPv6() || !datagram->getDestAddress().matches(destAddr.toIPv6(), destPrefixLength)))
+    if (destPrefixLength > 0 && (destAddr.getType() != Address::IPv6  || !datagram->getDestAddress().matches(destAddr.toIPv6(), destPrefixLength)))
         return false;
     if (protocol >= 0 && datagram->getTransportProtocol() != protocol)
         return false;
@@ -202,11 +202,11 @@ void MultiFieldClassifier::addFilter(const Filter &filter)
 {
     if (filter.gateIndex < 0 || filter.gateIndex >= numOutGates)
         throw cRuntimeError("no output gate for gate index %d", filter.gateIndex);
-    if (!filter.srcAddr.isUnspecified() && ((filter.srcAddr.isIPv6() && filter.srcPrefixLength > 128) ||
-                                            (!filter.srcAddr.isIPv6() && filter.srcPrefixLength > 32)))
+    if (!filter.srcAddr.isUnspecified() && ((filter.srcAddr.getType() == Address::IPv6 && filter.srcPrefixLength > 128) ||
+                                            (filter.srcAddr.getType() == Address::IPv4 && filter.srcPrefixLength > 32)))
         throw cRuntimeError("srcPrefixLength is invalid");
-    if (!filter.destAddr.isUnspecified() && ((filter.destAddr.isIPv6() && filter.destPrefixLength > 128) ||
-                                             (!filter.destAddr.isIPv6() && filter.destPrefixLength > 32)))
+    if (!filter.destAddr.isUnspecified() && ((filter.destAddr.getType() == Address::IPv6 && filter.destPrefixLength > 128) ||
+                                             (filter.destAddr.getType() == Address::IPv4 && filter.destPrefixLength > 32)))
         throw cRuntimeError("srcPrefixLength is invalid");
     if (filter.protocol != -1 && (filter.protocol < 0 || filter.protocol > 0xff))
         throw cRuntimeError("protocol is not a valid protocol number");
@@ -261,13 +261,13 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
             if (srcPrefixLengthAttr)
                 filter.srcPrefixLength = parseIntAttribute(srcPrefixLengthAttr, "srcPrefixLength");
             else if (srcAddrAttr)
-                filter.srcPrefixLength = filter.srcAddr.isIPv6() ? 128 : 32;
+                filter.srcPrefixLength = filter.srcAddr.getType() == Address::IPv6 ? 128 : 32;
             if (destAddrAttr)
                 filter.destAddr = addressResolver.resolve(destAddrAttr);
             if (destPrefixLengthAttr)
                 filter.destPrefixLength = parseIntAttribute(destPrefixLengthAttr, "destPrefixLength");
             else if (destAddrAttr)
-                filter.destPrefixLength = filter.destAddr.isIPv6() ? 128 : 32;
+                filter.destPrefixLength = filter.destAddr.getType() == Address::IPv6 ? 128 : 32;
             if (protocolAttr)
                 filter.protocol = parseProtocol(protocolAttr, "protocol");
             if (tosAttr)

@@ -221,7 +221,7 @@ void PingApp::sendPingRequest()
 
 void PingApp::sendToICMP(cMessage *msg, const Address& destAddr, const Address& srcAddr, int hopLimit)
 {
-    if (!destAddr.isIPv6())
+    if (destAddr.getType() == Address::IPv4)
     {
         // send to IPv4
         IPv4ControlInfo *ctrl = new IPv4ControlInfo();

@@ -231,7 +231,7 @@ void PingTestApp::scheduleNextPing(cMessage *timer)
 
 void PingTestApp::sendToICMP(cMessage *msg, const Address& destAddr, const Address& srcAddr, int hopLimit)
 {
-    if (!destAddr.isIPv6())
+    if (destAddr.getType() == Address::IPv4)
     {
 #ifdef WITH_IPv4
         // send to IPv4
@@ -245,7 +245,7 @@ void PingTestApp::sendToICMP(cMessage *msg, const Address& destAddr, const Addre
         throw cRuntimeError("INET compiled without IPv4 features!");
 #endif
     }
-    else
+    else if (destAddr.getType() == Address::IPv6)
     {
 #ifdef WITH_IPv6
         // send to IPv6
@@ -259,6 +259,8 @@ void PingTestApp::sendToICMP(cMessage *msg, const Address& destAddr, const Addre
         throw cRuntimeError("INET compiled without IPv6 features!");
 #endif
     }
+    else
+        throw cRuntimeError("Unknown address type");
 }
 
 void PingTestApp::processPingResponse(PingPayload *msg)

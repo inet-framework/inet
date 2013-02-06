@@ -743,7 +743,7 @@ void UDP::sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, con
     udpPacket->setSourcePort(srcPort);
     udpPacket->setDestinationPort(destPort);
 
-    if (!destAddr.isIPv6())
+    if (destAddr.getType() == Address::IPv4)
     {
         // send to IPv4
         EV << "Sending app packet " << appData->getName() << " over IPv4.\n";
@@ -760,7 +760,7 @@ void UDP::sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, con
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipOut");
     }
-    else
+    else if (destAddr.getType() == Address::IPv6)
     {
         // send to IPv6
         EV << "Sending app packet " << appData->getName() << " over IPv6.\n";
@@ -867,13 +867,13 @@ void UDP::joinMulticastGroups(SockDesc *sd, const std::vector<Address>& multicas
 
 void UDP::addMulticastAddressToInterface(InterfaceEntry *ie, const Address& multicastAddr)
 {
-    if (!multicastAddr.isIPv6())
+    if (multicastAddr.getType() == Address::IPv4)
     {
 #ifdef WITH_IPv4
         ie->ipv4Data()->joinMulticastGroup(multicastAddr.toIPv4());
 #endif
     }
-    else
+    else if (multicastAddr.getType() == Address::IPv6)
     {
 #ifdef WITH_IPv6
         ie->ipv6Data()->assignAddress(multicastAddr.toIPv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());

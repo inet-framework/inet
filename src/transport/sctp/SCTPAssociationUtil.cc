@@ -302,7 +302,7 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
         sctpMain->udpSocket.sendTo(sctpmsg, remoteAddr, SCTP_UDP_PORT);
     }
     else {
-        if (dest.isIPv6()) {
+        if (dest.getType() == Address::IPv6) {
             IPv6ControlInfo* controlInfo = new IPv6ControlInfo();
             controlInfo->setProtocol(IP_PROT_SCTP);
             controlInfo->setSrcAddr(IPv6Address());
@@ -310,7 +310,7 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
             sctpmsg->setControlInfo(controlInfo);
             sctpMain->send(sctpmsg, "to_ipv6");
         }
-        else {
+        else if (dest.getType() == Address::IPv4) {
             IPv4ControlInfo* controlInfo = new IPv4ControlInfo();
             controlInfo->setProtocol(IP_PROT_SCTP);
             controlInfo->setSrcAddr(IPv4Address("0.0.0.0"));
@@ -504,7 +504,7 @@ void SCTPAssociation::sendInit()
     }
     uint32 addrNum = 0;
     bool friendly = false;
-    if (remoteAddr.isIPv6())
+    if (remoteAddr.getType() == Address::IPv6)
     {
         for (AddressVector::iterator i=adv.begin(); i!=adv.end(); ++i)
         {
@@ -520,7 +520,7 @@ void SCTPAssociation::sendInit()
                 localAddr = (*i);
         }
     }
-    else
+    else if (remoteAddr.getType() == Address::IPv4)
     {
         int rlevel = getAddressLevel(remoteAddr);
         sctpEV3<<"level of remote address="<<rlevel<<"\n";
@@ -2592,7 +2592,7 @@ void SCTPAssociation::disposeOf(SCTPMessage* sctpmsg)
 
 int SCTPAssociation::getAddressLevel(const Address& addr)
 {
-    if (addr.isIPv6())
+    if (addr.getType() == Address::IPv6)
     {
         switch(addr.toIPv6().getScope())
         {
@@ -2616,7 +2616,7 @@ int SCTPAssociation::getAddressLevel(const Address& addr)
                 throw cRuntimeError("Unknown IPv6 scope: %d", (int)(addr.toIPv6().getScope()));
         }
     }
-    else
+    else if (addr.getType() == Address::IPv4)
     {
         switch(addr.toIPv4().getAddressCategory())
         {

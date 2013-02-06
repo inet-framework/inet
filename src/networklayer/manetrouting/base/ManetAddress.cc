@@ -32,7 +32,7 @@ void ManetAddress::set(const IPv6Address& addr)
 
 void ManetAddress::set(const Address& addr)
 {
-    if (addr.isIPv6())
+    if (addr.getType() == Address::IPv6)
         set(addr.toIPv6());
     else
         set(addr.toIPv4());
@@ -172,7 +172,7 @@ void ManetNetworkAddress::set(const IPv6Address& addr, short unsigned int maskle
 
 void ManetNetworkAddress::set(const Address& addr)
 {
-    if (addr.isIPv6())
+    if (addr.getType() == Address::IPv6)
         set(addr.toIPv6());
     else
         set(addr.toIPv4());
@@ -180,7 +180,7 @@ void ManetNetworkAddress::set(const Address& addr)
 
 void ManetNetworkAddress::set(const Address& addr, short unsigned int masklen)
 {
-    if (addr.isIPv6())
+    if (addr.getType() == Address::IPv6)
         set(addr.toIPv6(), masklen);
     else
         set(addr.toIPv4(), masklen);

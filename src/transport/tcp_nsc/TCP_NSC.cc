@@ -905,7 +905,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
 
     const char* output;
 
-    if (!dest.isIPv6())
+    if (dest.getType() == Address::IPv4)
     {
         // send over IPv4
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
@@ -916,7 +916,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
 
         output = "ipOut";
     }
-    else
+    else if (dest.getType() == Address::IPv6)
     {
         // send over IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
@@ -927,6 +927,8 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
 
         output = "ipv6Out";
     }
+    else
+        throw cRuntimeError("Unknown address type");
 
     if (conn)
     {

@@ -229,7 +229,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
 
     // TBD reuse next function for sending
 
-    if (!remoteAddr.isIPv6())
+    if (remoteAddr.getType() == Address::IPv4)
     {
         // send over IPv4
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
@@ -240,7 +240,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
 
         tcpMain->send(tcpseg, "ipOut");
     }
-    else
+    else if (remoteAddr.getType() == Address::IPv6)
     {
         // send over IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
@@ -251,6 +251,8 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
 
         tcpMain->send(tcpseg, "ipv6Out");
     }
+    else
+        throw cRuntimeError("Unknown address type");
 }
 
 void TCPConnection::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
@@ -258,7 +260,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
     tcpEV << "Sending: ";
     printSegmentBrief(tcpseg);
 
-    if (!dest.isIPv6())
+    if (dest.getType() == Address::IPv4)
     {
         // send over IPv4
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
@@ -269,7 +271,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
 
         check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg, "ipOut");
     }
-    else
+    else if (dest.getType() == Address::IPv6)
     {
         // send over IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
@@ -280,6 +282,8 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
 
         check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg, "ipv6Out");
     }
+    else
+        throw cRuntimeError("Unknown address type");
 }
 
 TCPSegment *TCPConnection::createTCPSegment(const char *name)

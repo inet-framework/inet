@@ -571,7 +571,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
             for (uint32 j=0; j<initchunk->getAddressesArraySize(); j++)
             {
                 // skip IPv6 because we can't send to them yet
-                if (initchunk->getAddresses(j).isIPv6())
+                if (initchunk->getAddresses(j).getType() == Address::IPv6)
                     continue;
                 // set path variables for this pathlocalAddresses
                 if (!getPath(initchunk->getAddresses(j)))
@@ -670,7 +670,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
         bool addressPresent = false;
         for (uint32 j=0; j<initchunk->getAddressesArraySize(); j++)
         {
-            if (initchunk->getAddresses(j).isIPv6())
+            if (initchunk->getAddresses(j).getType() == Address::IPv6)
                 continue;
             for (AddressVector::iterator k=remoteAddressList.begin(); k!=remoteAddressList.end(); ++k)
             {
@@ -730,7 +730,7 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk* initAckChunk)
             sctpEV3<<"number of remote addresses in initAck="<<numberOfRemoteAddresses<<"\n";
             for (uint32 j=0; j<numberOfRemoteAddresses; j++)
             {
-                if (initAckChunk->getAddresses(j).isIPv6())
+                if (initAckChunk->getAddresses(j).getType() == Address::IPv6)
                     continue;
                 for (AddressVector::iterator k=state->localAddresses.begin(); k!=state->localAddresses.end(); ++k)
                 {
