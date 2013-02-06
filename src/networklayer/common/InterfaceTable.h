@@ -161,6 +161,11 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     virtual InterfaceEntry *getInterfaceById(int id);
 
     /**
+     * Returns the biggest interface Id.
+     */
+    virtual int getBiggestInterfaceId();
+
+    /**
      * Returns an interface given by its getNodeOutputGateId().
      * Returns NULL if not found.
      */

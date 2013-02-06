@@ -91,6 +91,11 @@ class INET_API IInterfaceTable
     virtual InterfaceEntry *getInterfaceById(int id) = 0;
 
     /**
+     * Returns the biggest interface Id.
+     */
+    virtual int getBiggestInterfaceId() = 0;
+
+    /**
      * Returns an interface given by its getNodeOutputGateId().
      * Returns NULL if not found.
      */

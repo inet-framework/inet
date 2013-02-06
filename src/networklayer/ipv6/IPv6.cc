@@ -314,7 +314,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     interfaceId = tunneling->getVIfIndexForDest(destAddress, IPv6Tunneling::NORMAL);
 #endif /* WITH_xMIPv6 */
 
-    if (interfaceId > ift->getNumInterfaces())
+    if (interfaceId > ift->getBiggestInterfaceId())
     {
         // a virtual tunnel interface provides a path to the destination: do tunneling
         EV << "tunneling: src addr=" << datagram->getSrcAddress() << ", dest addr=" << destAddress << std::endl;
@@ -342,7 +342,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
          if (datagram->getSrcAddress() == ie->ipv6Data()->getMNHomeAddress()
                  && !ie->ipv6Data()->getGlobalAddress(IPv6InterfaceData::CoA).isUnspecified())
          {
-              EV << "Using HoA instead of CoA... dropping datagram" << endl;
+             EV << "Using HoA instead of CoA... dropping datagram" << endl;
              delete datagram;
              numDropped++;
              return;

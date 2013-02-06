@@ -63,7 +63,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle
 #ifdef WITH_xMIPv6
     // 28.9.07 - CB
     // datagrams that are supposed to be sent with a tentative IPv6 address
-    // are resscheduled for later resubmission.
+    // are rescheduled for later resubmission.
     class ScheduledDatagram : public cPacket
     {
       public:
