@@ -1,0 +1,94 @@
+//
+// Copyright (C) 2004 Andras Varga
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+//
+
+cplusplus {{
+#include "Address.h"
+#include "DYMOdefs.h"
+}}
+
+class noncobject Address;
+
+class noncobject DYMOSequenceNumber;
+
+class noncobject DYMOMetricType;
+
+namespace DYMO;
+
+//
+// classes
+//
+
+class AddressBlock {
+    Address address;
+    int prefixLength;
+    bool hasValidityTime;
+    simtime_t validityTime;
+    bool hasMetric;
+    double metric;
+    bool hasMetricType;
+    DYMOMetricType metricType;
+    bool hasSequenceNumber;
+    DYMOSequenceNumber sequenceNumber;
+}
+
+//
+// timer messages
+//
+
+message RREQTimer {
+    Address target;
+}
+
+message RREQWaitRREPTimer extends RREQTimer {
+    int retryCount;
+}
+
+message RREQBackoffTimer extends RREQTimer {
+    int retryCount;
+}
+
+message RREQHolddownTimer extends RREQTimer {
+}
+
+//
+// DYMO packets
+//
+
+packet DYMOPacket {
+    int hopLimit;
+}
+
+packet RteMsg extends DYMOPacket {
+    int hopCount;
+    AddressBlock originatorNode;
+    AddressBlock targetNode;
+    AddressBlock addedNode[];
+}
+
+packet RREQ extends RteMsg {
+}
+
+packet RREP extends RteMsg {
+}
+
+packet RREP_ACK extends DYMOPacket {
+}
+
+packet RERR extends DYMOPacket {
+    AddressBlock unreachableNode[];
+}

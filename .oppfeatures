@@ -431,6 +431,7 @@
         labels = "routing manet"
         nedPackages = "
                        inet.networklayer.manetrouting
+                       inet.networklayer.routing.dymo
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_MANET"
