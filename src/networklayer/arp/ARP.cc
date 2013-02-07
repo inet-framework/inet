@@ -83,7 +83,7 @@ void ARP::initialize(int stage)
     if (stage==4)
     {
         ift = InterfaceTableAccess().get();
-        rt = IPv4RoutingTableAccess().get();
+        rt = check_and_cast<IIPv4RoutingTable *>(findModuleWhereverInNode(par("routingTableModuleName"), this));
 
         retryTimeout = par("retryTimeout");
         retryCount = par("retryCount");

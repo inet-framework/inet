@@ -30,6 +30,8 @@ import inet.networklayer.IIPv6Tunneling;
 //
 simple IPv6Tunneling like IIPv6Tunneling
 {
+    parameters:
+        string routingTableModuleName = default("routingTable");
         @display("i=block/tunnel");
     gates:
         input upperLayerIn;

@@ -29,6 +29,7 @@ package inet.networklayer.icmpv6;
 simple IPv6NeighbourDiscovery
 {
     parameters:
+        string routingTableModuleName = default("routingTable");
         double minIntervalBetweenRAs @unit(s) = default(30ms); //minRtrAdvInterval:  0.03 sec for MIPv6 , declared as parameter to facilitate testing without recompiling (Zarrar 15.07.07)
         double maxIntervalBetweenRAs @unit(s) = default(70ms);  //MaxrtrAdvInterval: 0.07 sec for MIPv6, declared as parameter to facilitate testing without recompiling (Zarrar 15.07.07)
         @display("i=block/network");

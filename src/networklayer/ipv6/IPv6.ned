@@ -77,6 +77,7 @@ package inet.networklayer.ipv6;
 simple IPv6
 {
     parameters:
+        string routingTableModuleName = default("routingTable");
         double procDelay @unit("s") = default(0s);
         @display("i=block/network2");
     gates:

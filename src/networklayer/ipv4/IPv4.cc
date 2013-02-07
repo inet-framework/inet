@@ -49,7 +49,7 @@ void IPv4::initialize(int stage)
         QueueBase::initialize();
 
         ift = InterfaceTableAccess().get();
-        rt = IPv4RoutingTableAccess().get();
+        rt = check_and_cast<IIPv4RoutingTable *>(findModuleWhereverInNode(par("routingTableModuleName"), this));
         nb = NotificationBoardAccess().getIfExists(); // needed only for multicast forwarding
         arp = ARPCacheAccess().get();
 
