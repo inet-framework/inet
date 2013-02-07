@@ -9,6 +9,7 @@ src/Makefile.vc
 /examples/*/*/results/
 /examples/*/*/*/results/
 /tests/*/work/
+*.pyc
 *.pcap
 *.sca
 *.vec

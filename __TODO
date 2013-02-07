@@ -92,7 +92,8 @@ TODO: labelling:
 
 
 TODO:  finish making gate names consistent! around the SCTP and RTP modules
-TODO:  PingApp is strange; it should send payload+controlInfo instead of ICMP packet
+TODO:  PingApp is strange; it should send payload+controlInfo instead of ICMP packet, 
+       the word ping should not occur in ICMP code, move identifier, sequence number from PingPayload into ICMPControlInfo
 
 TODO: eliminate ARP overhead for PPP interfaces; 
 
