@@ -1,0 +1,230 @@
+%description:
+EtherMAC module: tests framebursting in half duplex mode on gigabit ethernet
+
+
+%inifile: {}.ini
+[General]
+#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+ned-path = .;../../../../src;../../lib
+network = EthTestNetwork
+
+record-eventlog = true
+
+#[Cmdenv]
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+#[Parameters]
+
+**.ethch*.datarate = 1Gbps
+
+*.host1.app.destAddr = "AA-00-00-00-00-02"
+*.host1.app.script = "10:80 10:214 10:214 10:980 10:980 10:980 10:980 10:980 10:980 10:980 10:980 10:980 20:80 20:214 20:214 20:980 20:980 20:980 20:980 20:980 20:980 20:980 20:980 20:980"
+*.host1.mac.address = "AA-00-00-00-00-01"
+
+
+*.host2.app.destAddr = "AA-00-00-00-00-01"
+*.host2.app.script = ""
+*.host2.mac.address = "AA-00-00-00-00-02"
+
+*.host*.macType = "EtherMAC"    # ${"EtherMAC","EtherMACFullDuplex"}
+*.host*.queueType = ${queue="", "DropTailQueue"}
+*.host*.mac.duplexMode = false     # Half duplex
+*.host*.mac.frameBursting = true
+
+#*.host1.ethg$o.channel.logfile="logfile-${runnumber}.txt"
+**.ethch2.logfile="logfile-${runnumber}.txt"
+
+
+# these contains are for omnetpp 5.0. (rounding when converting double to simtime)
+# TODO activate for omnetpp 5.0!
+# logfile-*.txt are same!!!
+
+#%contains: logfile-0.txt
+##1:10000000000000: 'PK at 10: 80 Bytes' (EtherFrame) sent:10000000000000 (520 byte) discard:0, delay:0, duration:4160000
+##2:10000004160000: 'IFG' (EtherIFG) sent:10000004160000 (12 byte) discard:0, delay:0, duration:96000
+##3:10000004256000: 'PK at 10: 214 Bytes' (EtherFrame) sent:10000004256000 (222 byte) discard:0, delay:0, duration:1776000
+##4:10000006032000: 'IFG' (EtherIFG) sent:10000006032000 (12 byte) discard:0, delay:0, duration:96000
+##5:10000006128000: 'PK at 10: 214 Bytes' (EtherFrame) sent:10000006128000 (222 byte) discard:0, delay:0, duration:1776000
+##6:10000007904000: 'IFG' (EtherIFG) sent:10000007904000 (12 byte) discard:0, delay:0, duration:96000
+##7:10000008000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000008000000 (988 byte) discard:0, delay:0, duration:7904000
+##8:10000015904000: 'IFG' (EtherIFG) sent:10000015904000 (12 byte) discard:0, delay:0, duration:96000
+##9:10000016000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000016000000 (988 byte) discard:0, delay:0, duration:7904000
+##10:10000023904000: 'IFG' (EtherIFG) sent:10000023904000 (12 byte) discard:0, delay:0, duration:96000
+##11:10000024000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000024000000 (988 byte) discard:0, delay:0, duration:7904000
+##12:10000031904000: 'IFG' (EtherIFG) sent:10000031904000 (12 byte) discard:0, delay:0, duration:96000
+##13:10000032000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000032000000 (988 byte) discard:0, delay:0, duration:7904000
+##14:10000039904000: 'IFG' (EtherIFG) sent:10000039904000 (12 byte) discard:0, delay:0, duration:96000
+##15:10000040000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000040000000 (988 byte) discard:0, delay:0, duration:7904000
+##16:10000047904000: 'IFG' (EtherIFG) sent:10000047904000 (12 byte) discard:0, delay:0, duration:96000
+##17:10000048000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000048000000 (988 byte) discard:0, delay:0, duration:7904000
+##18:10000055904000: 'IFG' (EtherIFG) sent:10000055904000 (12 byte) discard:0, delay:0, duration:96000
+##19:10000056000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000056000000 (988 byte) discard:0, delay:0, duration:7904000
+##20:10000064000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000064000000 (988 byte) discard:0, delay:0, duration:7904000
+##21:10000071904000: 'IFG' (EtherIFG) sent:10000071904000 (12 byte) discard:0, delay:0, duration:96000
+##22:10000072000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000072000000 (988 byte) discard:0, delay:0, duration:7904000
+##23:20000000000000: 'PK at 20: 80 Bytes' (EtherFrame) sent:20000000000000 (520 byte) discard:0, delay:0, duration:4160000
+##24:20000004160000: 'IFG' (EtherIFG) sent:20000004160000 (12 byte) discard:0, delay:0, duration:96000
+##25:20000004256000: 'PK at 20: 214 Bytes' (EtherFrame) sent:20000004256000 (222 byte) discard:0, delay:0, duration:1776000
+##26:20000006032000: 'IFG' (EtherIFG) sent:20000006032000 (12 byte) discard:0, delay:0, duration:96000
+##27:20000006128000: 'PK at 20: 214 Bytes' (EtherFrame) sent:20000006128000 (222 byte) discard:0, delay:0, duration:1776000
+##28:20000007904000: 'IFG' (EtherIFG) sent:20000007904000 (12 byte) discard:0, delay:0, duration:96000
+##29:20000008000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000008000000 (988 byte) discard:0, delay:0, duration:7904000
+##30:20000015904000: 'IFG' (EtherIFG) sent:20000015904000 (12 byte) discard:0, delay:0, duration:96000
+##31:20000016000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000016000000 (988 byte) discard:0, delay:0, duration:7904000
+##32:20000023904000: 'IFG' (EtherIFG) sent:20000023904000 (12 byte) discard:0, delay:0, duration:96000
+##33:20000024000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000024000000 (988 byte) discard:0, delay:0, duration:7904000
+##34:20000031904000: 'IFG' (EtherIFG) sent:20000031904000 (12 byte) discard:0, delay:0, duration:96000
+##35:20000032000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000032000000 (988 byte) discard:0, delay:0, duration:7904000
+##36:20000039904000: 'IFG' (EtherIFG) sent:20000039904000 (12 byte) discard:0, delay:0, duration:96000
+##37:20000040000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000040000000 (988 byte) discard:0, delay:0, duration:7904000
+##38:20000047904000: 'IFG' (EtherIFG) sent:20000047904000 (12 byte) discard:0, delay:0, duration:96000
+##39:20000048000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000048000000 (988 byte) discard:0, delay:0, duration:7904000
+##40:20000055904000: 'IFG' (EtherIFG) sent:20000055904000 (12 byte) discard:0, delay:0, duration:96000
+##41:20000056000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000056000000 (988 byte) discard:0, delay:0, duration:7904000
+##42:20000064000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000064000000 (988 byte) discard:0, delay:0, duration:7904000
+##43:20000071904000: 'IFG' (EtherIFG) sent:20000071904000 (12 byte) discard:0, delay:0, duration:96000
+##44:20000072000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000072000000 (988 byte) discard:0, delay:0, duration:7904000
+#
+#%contains: logfile-1.txt
+##1:10000000000000: 'PK at 10: 80 Bytes' (EtherFrame) sent:10000000000000 (520 byte) discard:0, delay:0, duration:4160000
+##2:10000004160000: 'IFG' (EtherIFG) sent:10000004160000 (12 byte) discard:0, delay:0, duration:96000
+##3:10000004256000: 'PK at 10: 214 Bytes' (EtherFrame) sent:10000004256000 (222 byte) discard:0, delay:0, duration:1776000
+##4:10000006032000: 'IFG' (EtherIFG) sent:10000006032000 (12 byte) discard:0, delay:0, duration:96000
+##5:10000006128000: 'PK at 10: 214 Bytes' (EtherFrame) sent:10000006128000 (222 byte) discard:0, delay:0, duration:1776000
+##6:10000007904000: 'IFG' (EtherIFG) sent:10000007904000 (12 byte) discard:0, delay:0, duration:96000
+##7:10000008000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000008000000 (988 byte) discard:0, delay:0, duration:7904000
+##8:10000015904000: 'IFG' (EtherIFG) sent:10000015904000 (12 byte) discard:0, delay:0, duration:96000
+##9:10000016000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000016000000 (988 byte) discard:0, delay:0, duration:7904000
+##10:10000023904000: 'IFG' (EtherIFG) sent:10000023904000 (12 byte) discard:0, delay:0, duration:96000
+##11:10000024000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000024000000 (988 byte) discard:0, delay:0, duration:7904000
+##12:10000031904000: 'IFG' (EtherIFG) sent:10000031904000 (12 byte) discard:0, delay:0, duration:96000
+##13:10000032000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000032000000 (988 byte) discard:0, delay:0, duration:7904000
+##14:10000039904000: 'IFG' (EtherIFG) sent:10000039904000 (12 byte) discard:0, delay:0, duration:96000
+##15:10000040000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000040000000 (988 byte) discard:0, delay:0, duration:7904000
+##16:10000047904000: 'IFG' (EtherIFG) sent:10000047904000 (12 byte) discard:0, delay:0, duration:96000
+##17:10000048000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000048000000 (988 byte) discard:0, delay:0, duration:7904000
+##18:10000055904000: 'IFG' (EtherIFG) sent:10000055904000 (12 byte) discard:0, delay:0, duration:96000
+##19:10000056000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000056000000 (988 byte) discard:0, delay:0, duration:7904000
+##20:10000064000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000064000000 (988 byte) discard:0, delay:0, duration:7904000
+##21:10000071904000: 'IFG' (EtherIFG) sent:10000071904000 (12 byte) discard:0, delay:0, duration:96000
+##22:10000072000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000072000000 (988 byte) discard:0, delay:0, duration:7904000
+##23:20000000000000: 'PK at 20: 80 Bytes' (EtherFrame) sent:20000000000000 (520 byte) discard:0, delay:0, duration:4160000
+##24:20000004160000: 'IFG' (EtherIFG) sent:20000004160000 (12 byte) discard:0, delay:0, duration:96000
+##25:20000004256000: 'PK at 20: 214 Bytes' (EtherFrame) sent:20000004256000 (222 byte) discard:0, delay:0, duration:1776000
+##26:20000006032000: 'IFG' (EtherIFG) sent:20000006032000 (12 byte) discard:0, delay:0, duration:96000
+##27:20000006128000: 'PK at 20: 214 Bytes' (EtherFrame) sent:20000006128000 (222 byte) discard:0, delay:0, duration:1776000
+##28:20000007904000: 'IFG' (EtherIFG) sent:20000007904000 (12 byte) discard:0, delay:0, duration:96000
+##29:20000008000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000008000000 (988 byte) discard:0, delay:0, duration:7904000
+##30:20000015904000: 'IFG' (EtherIFG) sent:20000015904000 (12 byte) discard:0, delay:0, duration:96000
+##31:20000016000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000016000000 (988 byte) discard:0, delay:0, duration:7904000
+##32:20000023904000: 'IFG' (EtherIFG) sent:20000023904000 (12 byte) discard:0, delay:0, duration:96000
+##33:20000024000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000024000000 (988 byte) discard:0, delay:0, duration:7904000
+##34:20000031904000: 'IFG' (EtherIFG) sent:20000031904000 (12 byte) discard:0, delay:0, duration:96000
+##35:20000032000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000032000000 (988 byte) discard:0, delay:0, duration:7904000
+##36:20000039904000: 'IFG' (EtherIFG) sent:20000039904000 (12 byte) discard:0, delay:0, duration:96000
+##37:20000040000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000040000000 (988 byte) discard:0, delay:0, duration:7904000
+##38:20000047904000: 'IFG' (EtherIFG) sent:20000047904000 (12 byte) discard:0, delay:0, duration:96000
+##39:20000048000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000048000000 (988 byte) discard:0, delay:0, duration:7904000
+##40:20000055904000: 'IFG' (EtherIFG) sent:20000055904000 (12 byte) discard:0, delay:0, duration:96000
+##41:20000056000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000056000000 (988 byte) discard:0, delay:0, duration:7904000
+##42:20000064000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000064000000 (988 byte) discard:0, delay:0, duration:7904000
+##43:20000071904000: 'IFG' (EtherIFG) sent:20000071904000 (12 byte) discard:0, delay:0, duration:96000
+##44:20000072000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000072000000 (988 byte) discard:0, delay:0, duration:7904000
+
+
+# these contains are for omnetpp 4.x. (no rounding when converting double to simtime)
+# logfile-*.txt are same!!!
+
+%contains: logfile-0.txt
+#1:10000000000000: 'PK at 10: 80 Bytes' (EtherFrame) sent:10000000000000 (520 byte) discard:0, delay:0, duration:4160000
+#2:10000004160000: 'IFG' (EtherIFG) sent:10000004160000 (12 byte) discard:0, delay:0, duration:96000
+#3:10000004256000: 'PK at 10: 214 Bytes' (EtherFrame) sent:10000004256000 (222 byte) discard:0, delay:0, duration:1776000
+#4:10000006032000: 'IFG' (EtherIFG) sent:10000006032000 (12 byte) discard:0, delay:0, duration:96000
+#5:10000006128000: 'PK at 10: 214 Bytes' (EtherFrame) sent:10000006128000 (222 byte) discard:0, delay:0, duration:1776000
+#6:10000007904000: 'IFG' (EtherIFG) sent:10000007904000 (12 byte) discard:0, delay:0, duration:96000
+#7:10000008000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000008000000 (988 byte) discard:0, delay:0, duration:7903999
+#8:10000015903999: 'IFG' (EtherIFG) sent:10000015903999 (12 byte) discard:0, delay:0, duration:96000
+#9:10000015999999: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000015999999 (988 byte) discard:0, delay:0, duration:7903999
+#10:10000023903998: 'IFG' (EtherIFG) sent:10000023903998 (12 byte) discard:0, delay:0, duration:96000
+#11:10000023999998: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000023999998 (988 byte) discard:0, delay:0, duration:7903999
+#12:10000031903997: 'IFG' (EtherIFG) sent:10000031903997 (12 byte) discard:0, delay:0, duration:96000
+#13:10000031999997: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000031999997 (988 byte) discard:0, delay:0, duration:7903999
+#14:10000039903996: 'IFG' (EtherIFG) sent:10000039903996 (12 byte) discard:0, delay:0, duration:96000
+#15:10000039999996: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000039999996 (988 byte) discard:0, delay:0, duration:7903999
+#16:10000047903995: 'IFG' (EtherIFG) sent:10000047903995 (12 byte) discard:0, delay:0, duration:96000
+#17:10000047999995: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000047999995 (988 byte) discard:0, delay:0, duration:7903999
+#18:10000055903994: 'IFG' (EtherIFG) sent:10000055903994 (12 byte) discard:0, delay:0, duration:96000
+#19:10000055999994: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000055999994 (988 byte) discard:0, delay:0, duration:7903999
+#20:10000063999993: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000063999993 (988 byte) discard:0, delay:0, duration:7903999
+#21:10000071903992: 'IFG' (EtherIFG) sent:10000071903992 (12 byte) discard:0, delay:0, duration:96000
+#22:10000071999992: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000071999992 (988 byte) discard:0, delay:0, duration:7903999
+#23:20000000000000: 'PK at 20: 80 Bytes' (EtherFrame) sent:20000000000000 (520 byte) discard:0, delay:0, duration:4160000
+#24:20000004160000: 'IFG' (EtherIFG) sent:20000004160000 (12 byte) discard:0, delay:0, duration:96000
+#25:20000004256000: 'PK at 20: 214 Bytes' (EtherFrame) sent:20000004256000 (222 byte) discard:0, delay:0, duration:1776000
+#26:20000006032000: 'IFG' (EtherIFG) sent:20000006032000 (12 byte) discard:0, delay:0, duration:96000
+#27:20000006128000: 'PK at 20: 214 Bytes' (EtherFrame) sent:20000006128000 (222 byte) discard:0, delay:0, duration:1776000
+#28:20000007904000: 'IFG' (EtherIFG) sent:20000007904000 (12 byte) discard:0, delay:0, duration:96000
+#29:20000008000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000008000000 (988 byte) discard:0, delay:0, duration:7903999
+#30:20000015903999: 'IFG' (EtherIFG) sent:20000015903999 (12 byte) discard:0, delay:0, duration:96000
+#31:20000015999999: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000015999999 (988 byte) discard:0, delay:0, duration:7903999
+#32:20000023903998: 'IFG' (EtherIFG) sent:20000023903998 (12 byte) discard:0, delay:0, duration:96000
+#33:20000023999998: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000023999998 (988 byte) discard:0, delay:0, duration:7903999
+#34:20000031903997: 'IFG' (EtherIFG) sent:20000031903997 (12 byte) discard:0, delay:0, duration:96000
+#35:20000031999997: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000031999997 (988 byte) discard:0, delay:0, duration:7903999
+#36:20000039903996: 'IFG' (EtherIFG) sent:20000039903996 (12 byte) discard:0, delay:0, duration:96000
+#37:20000039999996: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000039999996 (988 byte) discard:0, delay:0, duration:7903999
+#38:20000047903995: 'IFG' (EtherIFG) sent:20000047903995 (12 byte) discard:0, delay:0, duration:96000
+#39:20000047999995: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000047999995 (988 byte) discard:0, delay:0, duration:7903999
+#40:20000055903994: 'IFG' (EtherIFG) sent:20000055903994 (12 byte) discard:0, delay:0, duration:96000
+#41:20000055999994: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000055999994 (988 byte) discard:0, delay:0, duration:7903999
+#42:20000063999993: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000063999993 (988 byte) discard:0, delay:0, duration:7903999
+#43:20000071903992: 'IFG' (EtherIFG) sent:20000071903992 (12 byte) discard:0, delay:0, duration:96000
+#44:20000071999992: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000071999992 (988 byte) discard:0, delay:0, duration:7903999
+
+%contains: logfile-1.txt
+#1:10000000000000: 'PK at 10: 80 Bytes' (EtherFrame) sent:10000000000000 (520 byte) discard:0, delay:0, duration:4160000
+#2:10000004160000: 'IFG' (EtherIFG) sent:10000004160000 (12 byte) discard:0, delay:0, duration:96000
+#3:10000004256000: 'PK at 10: 214 Bytes' (EtherFrame) sent:10000004256000 (222 byte) discard:0, delay:0, duration:1776000
+#4:10000006032000: 'IFG' (EtherIFG) sent:10000006032000 (12 byte) discard:0, delay:0, duration:96000
+#5:10000006128000: 'PK at 10: 214 Bytes' (EtherFrame) sent:10000006128000 (222 byte) discard:0, delay:0, duration:1776000
+#6:10000007904000: 'IFG' (EtherIFG) sent:10000007904000 (12 byte) discard:0, delay:0, duration:96000
+#7:10000008000000: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000008000000 (988 byte) discard:0, delay:0, duration:7903999
+#8:10000015903999: 'IFG' (EtherIFG) sent:10000015903999 (12 byte) discard:0, delay:0, duration:96000
+#9:10000015999999: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000015999999 (988 byte) discard:0, delay:0, duration:7903999
+#10:10000023903998: 'IFG' (EtherIFG) sent:10000023903998 (12 byte) discard:0, delay:0, duration:96000
+#11:10000023999998: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000023999998 (988 byte) discard:0, delay:0, duration:7903999
+#12:10000031903997: 'IFG' (EtherIFG) sent:10000031903997 (12 byte) discard:0, delay:0, duration:96000
+#13:10000031999997: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000031999997 (988 byte) discard:0, delay:0, duration:7903999
+#14:10000039903996: 'IFG' (EtherIFG) sent:10000039903996 (12 byte) discard:0, delay:0, duration:96000
+#15:10000039999996: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000039999996 (988 byte) discard:0, delay:0, duration:7903999
+#16:10000047903995: 'IFG' (EtherIFG) sent:10000047903995 (12 byte) discard:0, delay:0, duration:96000
+#17:10000047999995: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000047999995 (988 byte) discard:0, delay:0, duration:7903999
+#18:10000055903994: 'IFG' (EtherIFG) sent:10000055903994 (12 byte) discard:0, delay:0, duration:96000
+#19:10000055999994: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000055999994 (988 byte) discard:0, delay:0, duration:7903999
+#20:10000063999993: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000063999993 (988 byte) discard:0, delay:0, duration:7903999
+#21:10000071903992: 'IFG' (EtherIFG) sent:10000071903992 (12 byte) discard:0, delay:0, duration:96000
+#22:10000071999992: 'PK at 10: 980 Bytes' (EtherFrame) sent:10000071999992 (988 byte) discard:0, delay:0, duration:7903999
+#23:20000000000000: 'PK at 20: 80 Bytes' (EtherFrame) sent:20000000000000 (520 byte) discard:0, delay:0, duration:4160000
+#24:20000004160000: 'IFG' (EtherIFG) sent:20000004160000 (12 byte) discard:0, delay:0, duration:96000
+#25:20000004256000: 'PK at 20: 214 Bytes' (EtherFrame) sent:20000004256000 (222 byte) discard:0, delay:0, duration:1776000
+#26:20000006032000: 'IFG' (EtherIFG) sent:20000006032000 (12 byte) discard:0, delay:0, duration:96000
+#27:20000006128000: 'PK at 20: 214 Bytes' (EtherFrame) sent:20000006128000 (222 byte) discard:0, delay:0, duration:1776000
+#28:20000007904000: 'IFG' (EtherIFG) sent:20000007904000 (12 byte) discard:0, delay:0, duration:96000
+#29:20000008000000: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000008000000 (988 byte) discard:0, delay:0, duration:7903999
+#30:20000015903999: 'IFG' (EtherIFG) sent:20000015903999 (12 byte) discard:0, delay:0, duration:96000
+#31:20000015999999: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000015999999 (988 byte) discard:0, delay:0, duration:7903999
+#32:20000023903998: 'IFG' (EtherIFG) sent:20000023903998 (12 byte) discard:0, delay:0, duration:96000
+#33:20000023999998: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000023999998 (988 byte) discard:0, delay:0, duration:7903999
+#34:20000031903997: 'IFG' (EtherIFG) sent:20000031903997 (12 byte) discard:0, delay:0, duration:96000
+#35:20000031999997: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000031999997 (988 byte) discard:0, delay:0, duration:7903999
+#36:20000039903996: 'IFG' (EtherIFG) sent:20000039903996 (12 byte) discard:0, delay:0, duration:96000
+#37:20000039999996: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000039999996 (988 byte) discard:0, delay:0, duration:7903999
+#38:20000047903995: 'IFG' (EtherIFG) sent:20000047903995 (12 byte) discard:0, delay:0, duration:96000
+#39:20000047999995: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000047999995 (988 byte) discard:0, delay:0, duration:7903999
+#40:20000055903994: 'IFG' (EtherIFG) sent:20000055903994 (12 byte) discard:0, delay:0, duration:96000
+#41:20000055999994: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000055999994 (988 byte) discard:0, delay:0, duration:7903999
+#42:20000063999993: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000063999993 (988 byte) discard:0, delay:0, duration:7903999
+#43:20000071903992: 'IFG' (EtherIFG) sent:20000071903992 (12 byte) discard:0, delay:0, duration:96000
+#44:20000071999992: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000071999992 (988 byte) discard:0, delay:0, duration:7903999
+

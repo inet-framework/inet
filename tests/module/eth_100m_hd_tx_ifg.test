@@ -1,0 +1,70 @@
+%description:
+EtherMAC module: tests IFG in half duplex mode
+
+
+%inifile: {}.ini
+[General]
+#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+ned-path = .;../../../../src;../../lib
+network = EthTestNetwork
+
+record-eventlog = true
+
+#[Cmdenv]
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+#[Parameters]
+
+**.ethch*.datarate = 100Mbps
+
+*.host1.app.destAddr = "AA-00-00-00-00-02"
+*.host1.app.script = "10:92 10:92 20:92 20:92"
+*.host1.mac.address = "AA-00-00-00-00-01"
+
+
+*.host2.app.destAddr = "AA-00-00-00-00-01"
+*.host2.app.script = ""
+*.host2.mac.address = "AA-00-00-00-00-02"
+
+*.host*.macType = "EtherMAC"    # ${"EtherMAC","EtherMACFullDuplex"}
+*.host*.queueType = ${"", "DropTailQueue"}
+*.host*.mac.duplexMode = false     # Half duplex
+
+#*.host1.ethg$o.channel.logfile="logfile-${runnumber}.txt"
+**.ethch2.logfile="logfile-${runnumber}.txt"
+
+
+# these contains are for omnetpp 5.0. (rounding when converting double to simtime)
+# TODO activate for omnetpp 5.0!
+# logfile-*.txt are same!!!
+
+#%contains: logfile-0.txt
+##1:10000000000000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:8000000
+##2:10000008960000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000008960000 (100 byte) discard:0, delay:0, duration:8000000
+##3:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:8000000
+##4:20000008960000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000008960000 (100 byte) discard:0, delay:0, duration:8000000
+#
+#%contains: logfile-1.txt
+##1:10000000000000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:8000000
+##2:10000008960000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000008960000 (100 byte) discard:0, delay:0, duration:8000000
+##3:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:8000000
+##4:20000008960000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000008960000 (100 byte) discard:0, delay:0, duration:8000000
+
+
+# these contains are for omnetpp 4.x. (no rounding when converting double to simtime)
+# logfile-*.txt are same!!!
+
+%contains: logfile-0.txt
+#1:10000000000000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:8000000
+#2:10000008959999: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000008959999 (100 byte) discard:0, delay:0, duration:8000000
+#3:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:8000000
+#4:20000008959999: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000008959999 (100 byte) discard:0, delay:0, duration:8000000
+
+%contains: logfile-1.txt
+#1:10000000000000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:8000000
+#2:10000008959999: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000008959999 (100 byte) discard:0, delay:0, duration:8000000
+#3:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:8000000
+#4:20000008959999: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000008959999 (100 byte) discard:0, delay:0, duration:8000000
+
+

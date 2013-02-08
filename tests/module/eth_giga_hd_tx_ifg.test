@@ -1,0 +1,69 @@
+%description:
+EtherMAC module: tests IFG and framebursting in half duplex mode
+
+
+%inifile: {}.ini
+[General]
+#preload-ned-files = *.ned ../../*.ned @../../../../nedfiles.lst
+ned-path = .;../../../../src;../../lib
+network = EthTestNetwork
+
+record-eventlog = true
+
+#[Cmdenv]
+cmdenv-event-banners=false
+cmdenv-express-mode=false
+
+#[Parameters]
+
+**.ethch*.datarate = 1Gbps
+
+*.host1.app.destAddr = "AA-00-00-00-00-02"
+*.host1.app.script = "10:92 10:92 20:92 20:92"
+*.host1.mac.address = "AA-00-00-00-00-01"
+
+
+*.host2.app.destAddr = "AA-00-00-00-00-01"
+*.host2.app.script = ""
+*.host2.mac.address = "AA-00-00-00-00-02"
+
+*.host*.macType = "EtherMAC"    # ${"EtherMAC","EtherMACFullDuplex"}
+*.host*.queueType = ${queue="", "DropTailQueue"}
+*.host*.mac.duplexMode = false     # Half duplex
+*.host*.mac.frameBursting = ${burst=true,false}
+
+#*.host1.ethg$o.channel.logfile="logfile-${runnumber}.txt"
+**.ethch2.logfile="logfile-${runnumber}.txt"
+
+
+# logfile-0.txt and logfile-2.txt are same!!!
+# logfile-1.txt and logfile-3.txt are same!!!
+
+%contains: logfile-0.txt
+#1:10000000000000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000000000 (520 byte) discard:0, delay:0, duration:4160000
+#2:10000004160000: 'IFG' (EtherIFG) sent:10000004160000 (12 byte) discard:0, delay:0, duration:96000
+#3:10000004256000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000004256000 (100 byte) discard:0, delay:0, duration:800000
+#4:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (520 byte) discard:0, delay:0, duration:4160000
+#5:20000004160000: 'IFG' (EtherIFG) sent:20000004160000 (12 byte) discard:0, delay:0, duration:96000
+#6:20000004256000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000004256000 (100 byte) discard:0, delay:0, duration:800000
+
+%contains: logfile-1.txt
+#1:10000000000000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000000000 (520 byte) discard:0, delay:0, duration:4160000
+#2:10000004256000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000004256000 (520 byte) discard:0, delay:0, duration:4160000
+#3:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (520 byte) discard:0, delay:0, duration:4160000
+#4:20000004256000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000004256000 (520 byte) discard:0, delay:0, duration:4160000
+
+%contains: logfile-2.txt
+#1:10000000000000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000000000 (520 byte) discard:0, delay:0, duration:4160000
+#2:10000004160000: 'IFG' (EtherIFG) sent:10000004160000 (12 byte) discard:0, delay:0, duration:96000
+#3:10000004256000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000004256000 (100 byte) discard:0, delay:0, duration:800000
+#4:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (520 byte) discard:0, delay:0, duration:4160000
+#5:20000004160000: 'IFG' (EtherIFG) sent:20000004160000 (12 byte) discard:0, delay:0, duration:96000
+#6:20000004256000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000004256000 (100 byte) discard:0, delay:0, duration:800000
+
+%contains: logfile-3.txt
+#1:10000000000000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000000000 (520 byte) discard:0, delay:0, duration:4160000
+#2:10000004256000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000004256000 (520 byte) discard:0, delay:0, duration:4160000
+#3:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (520 byte) discard:0, delay:0, duration:4160000
+#4:20000004256000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000004256000 (520 byte) discard:0, delay:0, duration:4160000
+
