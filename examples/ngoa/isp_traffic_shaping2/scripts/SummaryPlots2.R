@@ -26,15 +26,16 @@ ifelse (Sys.getenv("OS") == "Windows_NT",
 ###
 ### source scripts
 ###
-source(paste(.script.directory, 'collectMeasures.R', sep='/'))
 source(paste(.script.directory, 'calculateFairnessIndexes.R', sep='/'))
+source(paste(.script.directory, 'collectMeasures.R', sep='/'))
 source(paste(.script.directory, 'collectMeasuresAndFIs.R', sep='/'))
+source(paste(.script.directory, 'confidenceInterval.R', sep='/'))
 source('./Configurations.R')
 ###
 ### define new functions
 ###
 ## 95% confidence interval
-ci.width <- conf.int(0.95)
+ci.width <- confidenceInterval(0.95)
 ## pause before and after processing
 Pause <- function () {
     cat("Hit <enter> to continue...")
@@ -197,11 +198,12 @@ if (.resp == 'y') {
         .df <- subset(.da.df, name==.measure[.i] & measure.type==.measure.type[.i], select=c(1, 2, 3, 5, 6))
         is.na(.df) <- is.na(.df) # remove NaNs
         .df <- .df[!is.infinite(.df$ci.width),] # remove Infs
-        .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
+        .limits <- aes(ymin = mean - ci.width, ymax = mean + ci.width)
         .p <- ggplot(data=.df, aes(group=dr, colour=factor(dr), x=n, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
         .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.i])
         .p <- .p + geom_point(aes(group=dr, shape=factor(dr), x=n, y=mean), size=.pt_size) + scale_shape_manual("Line Rate\n[Mb/s]", values=0:9)
         .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Line Rate\n[Mb/s]")
+        #.p <- .p + stat_summary(fun.data=mean_cl_boot, geom='errorbar', width=0.1) + scale_colour_discrete("Line Rate\n[Mb/s]")
         .plots[[.i]] <- .p
         ## save each plot as a PDF file
         .p
@@ -326,6 +328,7 @@ if (.resp == 'y') {
                     .p <- .p + xlab("Number of Users per ONU (n)") + ylab(.labels.measure[.k])
                     .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=n, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[MB]", values=0:9)
                     .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[MB]")
+                    #.p <- .p + stat_summary(fun.data=mean_cl_boot, geom='errorbar', width=0.1) + scale_colour_discrete("Burst Size\n[MB]")
                     .plots[[.k]] <- .p
                     ## save each plot as a PDF file
                     .p
@@ -651,7 +654,7 @@ if (.resp == 'y') {
             if (length(subset(.sa_tbf.df, ur==.ur.range[.i] & mr==.mr.range[.j])$mean) > 0) {
                 .plots <- list()
                 ## for (.k in 1:length(.measure.type)) {
-                for (.k in 1:(length(.measure.type)-6)) { # subtract 6 because we do not include 'packet' and 'queue' in the processing
+                for (.k in 1:(length(.measure.type)-7)) { # subtract 7 because we do not include 'packet' and 'queue' in the processing
                     .df <- subset(.sa_tbf.df, ur==.ur.range[.i] & mr==.mr.range[.j] & name==.measure[.k] & measure.type==.measure.type[.k], select=c(1, 5, 8, 9))
                     is.na(.df) <- is.na(.df) # remove NaNs
                     .df <- .df[!is.infinite(.df$ci.width),] # remove Infs
@@ -660,8 +663,8 @@ if (.resp == 'y') {
                     .p <- ggplot(data=.df, aes(group=bs, linetype=factor(bs), x=N, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
                     .p <- .p + xlab("Number of Subscribers (N)") + ylab(.labels.measure[.k])
                     .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=N, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[MB]", values=0:9)
-                    ## .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[MB]")
-                    .p <- .p + geom_errorbar(.limits, width=0.1) + scale_linetype_discrete("Burst Size\n[MB]")
+                    .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[MB]")
+                    #.p <- .p + stat_summary(fun.data=mean_cl_boot, geom='errorbar', width=0.1) + scale_linetype_discrete("Burst Size\n[MB]")
                     .plots[[.k]] <- .p
                     ## save each plot as a PDF file
                     .p
