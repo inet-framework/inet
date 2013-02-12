@@ -86,7 +86,7 @@ IPv6InterfaceData::IPv6InterfaceData()
     routerMcastData = NULL;
     nb = NULL;
 #ifdef WITH_xMIPv6
-    rt6 = IPv6RoutingTableAccess().get();
+    // rt6 = IPv6RoutingTableAccess().get();
 #endif /* WITH_xMIPv6 */
     /*******************Setting host/node/router Protocol Constants************/
     routerConstants.maxInitialRtrAdvertInterval = IPv6_MAX_INITIAL_RTR_ADVERT_INTERVAL;
