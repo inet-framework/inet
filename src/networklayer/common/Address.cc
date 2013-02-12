@@ -22,8 +22,41 @@
 #include "ModuleIdAddressPolicy.h"
 #include "ModulePathAddressPolicy.h"
 
-IAddressPolicy * Address::getAddressPolicy() const {
-    switch (type) {
+#define RESERVED_IPV6_ADDRESS_RANGE 0x8000 // IETF reserved address range 8000::/16 (extended)
+
+inline uint64 Address::get(AddressType type) const
+{
+    if (getType() == type)
+        return lo;
+    else
+        throw cRuntimeError("Address is not of the given type");
+}
+
+inline void Address::set(AddressType type, uint64 lo)
+{
+    this->hi = ((uint64)RESERVED_IPV6_ADDRESS_RANGE << 48) + (uint64)type;
+    this->lo = lo;
+}
+
+inline void Address::set(const IPv6Address& addr) {
+    const uint32 *words = addr.words();
+    hi = ((uint64)*(words + 0) << 32) + *(words + 1);
+    lo = ((uint64)*(words + 2) << 32) + *(words + 3);
+    if (getType() != IPv6)
+        throw cRuntimeError("Cannot set IPv6 address");
+}
+
+inline Address::AddressType Address::getType() const
+{
+    if (hi >> 48 == RESERVED_IPV6_ADDRESS_RANGE)
+        return (AddressType)(hi & 0xFF);
+    else
+        return Address::IPv6;
+}
+
+IAddressPolicy * Address::getAddressPolicy() const
+{
+    switch (getType()) {
         case Address::NONE:
             throw cRuntimeError("Address contains no value");
         case Address::IPv4:
@@ -41,8 +74,9 @@ IAddressPolicy * Address::getAddressPolicy() const {
     }
 }
 
-std::string Address::str() const {
-    switch (type) {
+std::string Address::str() const
+{
+    switch (getType()) {
         case Address::NONE:
             return "<none>";
         case Address::IPv4:
@@ -62,46 +96,40 @@ std::string Address::str() const {
 
 bool Address::tryParse(const char *addr)
 {
-    if (IPv4Address::isWellFormed(addr)) {
-        type = IPv4;
+    IPv6Address ipv6;
+    MACAddress mac;
+    ModuleIdAddress moduleId;
+    ModulePathAddress modulePath;
+    if (IPv4Address::isWellFormed(addr))
         set(IPv4Address(addr));
-        return true;
-    }
-    else if (ipv6.tryParse(addr)) {
-        type = IPv6;
-        return true;
-    }
-    else if (mac.tryParse(addr)) {
-        type = MAC;
-        return true;
-    }
-    else if (moduleId.tryParse(addr)) {
-        type = MODULEID;
-        return true;
-    }
-    else if (modulePath.tryParse(addr)) {
-        type = MODULEPATH;
-        return true;
-    }
+    else if (ipv6.tryParse(addr))
+        set(ipv6);
+    else if (mac.tryParse(addr))
+        set(mac);
+    else if (moduleId.tryParse(addr))
+        set(moduleId);
+    else if (modulePath.tryParse(addr))
+        set(modulePath);
     else
         return false;
+    return true;
 }
 
 bool Address::isUnspecified() const
 {
-    switch (type) {
+    switch (getType()) {
         case Address::NONE:
             return true;
         case Address::IPv4:
-            return ipv4.isUnspecified();
+            return toIPv4().isUnspecified();
         case Address::IPv6:
-            return ipv6.isUnspecified();
+            return toIPv6().isUnspecified();
         case Address::MAC:
-            return mac.isUnspecified();
+            return toMAC().isUnspecified();
         case Address::MODULEID:
-            return moduleId.isUnspecified();
+            return toModuleId().isUnspecified();
         case Address::MODULEPATH:
-            return modulePath.isUnspecified();
+            return toModulePath().isUnspecified();
         default:
             throw cRuntimeError("Unknown type");
     }
@@ -109,19 +137,19 @@ bool Address::isUnspecified() const
 
 bool Address::isUnicast() const
 {
-    switch (type) {
+    switch (getType()) {
         case Address::NONE:
             throw cRuntimeError("Address contains no value");
         case Address::IPv4:
-            return !ipv4.isMulticast() && !ipv4.isLimitedBroadcastAddress();
+            return !toIPv4().isMulticast() && !toIPv4().isLimitedBroadcastAddress();  // TODO: move to IPv4Address
         case Address::IPv6:
-            return ipv6.isUnicast();
+            return toIPv6().isUnicast();
         case Address::MAC:
-            return !mac.isBroadcast() && !mac.isMulticast();
+            return !toMAC().isBroadcast() && !toMAC().isMulticast(); // TODO: move to MACAddress
         case Address::MODULEID:
-            return moduleId.isUnicast();
+            return toModuleId().isUnicast();
         case Address::MODULEPATH:
-            return modulePath.isUnicast();
+            return toModulePath().isUnicast();
         default:
             throw cRuntimeError("Unknown type");
     }
@@ -129,19 +157,19 @@ bool Address::isUnicast() const
 
 bool Address::isMulticast() const
 {
-    switch (type) {
+    switch (getType()) {
         case Address::NONE:
             throw cRuntimeError("Address contains no value");
         case Address::IPv4:
-            return ipv4.isMulticast();
+            return toIPv4().isMulticast();
         case Address::IPv6:
-            return ipv6.isMulticast();
+            return toIPv6().isMulticast();
         case Address::MAC:
-            return mac.isMulticast();
+            return toMAC().isMulticast();
         case Address::MODULEID:
-            return moduleId.isMulticast();
+            return toModuleId().isMulticast();
         case Address::MODULEPATH:
-            return modulePath.isMulticast();
+            return toModulePath().isMulticast();
         default:
             throw cRuntimeError("Unknown type");
     }
@@ -149,92 +177,96 @@ bool Address::isMulticast() const
 
 bool Address::isBroadcast() const
 {
-    switch (type) {
+    switch (getType()) {
         case Address::NONE:
             throw cRuntimeError("Address contains no value");
         case Address::IPv4:
-            return ipv4.isLimitedBroadcastAddress();
+            return toIPv4().isLimitedBroadcastAddress();
         case Address::IPv6:
-            throw cRuntimeError("IPv6 isBroadcast() unimplemented");
+            return false;
+            //throw cRuntimeError("IPv6 isBroadcast() unimplemented");
         case Address::MAC:
-            return mac.isBroadcast();
+            return toMAC().isBroadcast();
         case Address::MODULEID:
-            return moduleId.isBroadcast();
+            return toModuleId().isBroadcast();
         case Address::MODULEPATH:
-            return modulePath.isBroadcast();
+            return toModulePath().isBroadcast();
         default:
             throw cRuntimeError("Unknown type");
     }
 }
 
-bool Address::operator<(const Address& address) const
+bool Address::operator<(const Address& other) const
 {
-    if (type != address.type)
-        return type < address.type;
+    AddressType type = getType();
+    AddressType otherType = other.getType();
+    if (type != otherType)
+        return type < otherType;
     else {
         switch (type) {
             case Address::NONE:
                 throw cRuntimeError("Address contains no value");
             case Address::IPv4:
-                return ipv4 < address.ipv4;
+                return toIPv4() < other.toIPv4();
             case Address::IPv6:
-                return ipv6 < address.ipv6;
+                return toIPv6() < other.toIPv6();
             case Address::MAC:
-                return mac < address.mac;
+                return toMAC() < other.toMAC();
             case Address::MODULEID:
-                return moduleId < address.moduleId;
+                return toModuleId() < other.toModuleId();
             case Address::MODULEPATH:
-                return modulePath < address.modulePath;
+                return toModulePath() < other.toModulePath();
             default:
                 throw cRuntimeError("Unknown type");
         }
     }
 }
 
-bool Address::operator==(const Address& address) const
+bool Address::operator==(const Address& other) const
 {
-    if (type != address.type)
+    AddressType type = getType();
+    if (type != other.getType())
         return false;
     else {
         switch (type) {
             case Address::NONE:
                 return true;
             case Address::IPv4:
-                return ipv4 == address.ipv4;
+                return toIPv4() == other.toIPv4();
             case Address::IPv6:
-                return ipv6 == address.ipv6;
+                return toIPv6() == other.toIPv6();
             case Address::MAC:
-                return mac == address.mac;
+                return toMAC() == other.toMAC();
             case Address::MODULEID:
-                return moduleId == address.moduleId;
+                return toModuleId() == other.toModuleId();
             case Address::MODULEPATH:
-                return modulePath == address.modulePath;
+                return toModulePath() == other.toModulePath();
             default:
                 throw cRuntimeError("Unknown type");
         }
     }
 }
 
-bool Address::operator!=(const Address& address) const
+bool Address::operator!=(const Address& other) const
 {
-    return !operator==(address);
+    return !operator==(other);
 }
 
 bool Address::matches(const Address& other, int prefixLength) const
 {
-    switch (type) {
+    switch (getType()) {
         case Address::NONE:
             throw cRuntimeError("Address contains no value");
         case Address::IPv4:
-            return IPv4Address::maskedAddrAreEqual(ipv4, other.ipv4, IPv4Address::makeNetmask(prefixLength)); //FIXME !!!!!
+            return IPv4Address::maskedAddrAreEqual(toIPv4(), other.toIPv4(), IPv4Address::makeNetmask(prefixLength)); //FIXME !!!!!
         case Address::IPv6:
-            return ipv6.matches(other.ipv6, prefixLength);
+            return toIPv6().matches(other.toIPv6(), prefixLength);
         case Address::MAC:
-            return mac == other.mac;
+            return toMAC() == other.toMAC();
         case Address::MODULEID:
-            return moduleId == other.moduleId;
+            return toModuleId() == other.toModuleId();
         case Address::MODULEPATH:
-            return ModulePathAddress::maskedAddrAreEqual(modulePath, other.modulePath, prefixLength);
+            return ModulePathAddress::maskedAddrAreEqual(toModulePath(), other.toModulePath(), prefixLength);
         default:
             throw cRuntimeError("Unknown type");
     }

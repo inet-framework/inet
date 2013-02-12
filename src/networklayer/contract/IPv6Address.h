@@ -95,6 +95,17 @@ class INET_API IPv6Address
         IPv6Address()  {d[0] = d[1] = d[2] = d[3] = 0;}
 
         /**
+         * Constructs an IPv6 address from two 64-bit integers.
+         */
+        IPv6Address(uint64 hi, uint64 lo) {
+            uint32 mask = 0xFFFFFFFF;
+            d[0] = (hi >> 32) & mask;
+            d[1] = hi & mask;
+            d[2] = (lo >> 32) & mask;
+            d[3] = lo & mask;
+        }
+
+        /**
          * Constructs an IPv6 address from four 32-bit integers. The most significant
          * word should be passed in the first argument.
          */
