@@ -20,6 +20,7 @@
 
 #include "INETDefs.h"
 
+#include "Address.h"
 #include "InterfaceEntry.h"  // not strictly required, but clients will need it anyway
 
 
@@ -51,6 +52,16 @@ class INET_API IInterfaceTable
      * Returns the host or router this interface table lives in.
      */
     virtual cModule *getHostModule() = 0;
+
+    /**
+     * Checks if the address is a local one, i.e. one of the host's.
+     */
+    virtual bool isLocalAddress(const Address& address) const = 0;
+
+    /**
+     * Returns an interface given by its address. Returns NULL if not found.
+     */
+    virtual InterfaceEntry *findInterfaceByAddress(const Address& address) const = 0;
 
     /**
      * Adds an interface. The entry->getInterfaceModule() will be used

@@ -123,6 +123,16 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     virtual cModule *getHostModule();
 
     /**
+     * Checks if the address is a local one, i.e. one of the host's.
+     */
+    virtual bool isLocalAddress(const Address& address) const;
+
+    /**
+     * Returns an interface given by its address. Returns NULL if not found.
+     */
+    virtual InterfaceEntry *findInterfaceByAddress(const Address& address) const;
+
+    /**
      * Adds an interface. The entry->getInterfaceModule() will be used
      * to discover and fill in getNetworkLayerGateIndex(), getNodeOutputGateId(),
      * and getNodeInputGateId() in InterfaceEntry. It should be NULL if this is
