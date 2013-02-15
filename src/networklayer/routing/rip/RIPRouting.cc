@@ -20,6 +20,7 @@
 
 #include "IAddressType.h"
 #include "InterfaceTableAccess.h"
+#include "IPv4InterfaceData.h" // XXX temporarily
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 #include "UDP.h"
@@ -48,9 +49,25 @@ inline int prefixLength(const Address &netmask)
     return netmask.getType() == Address::IPv4 ? netmask.toIPv4().getNetmaskLength() : 32; // XXX IPv4 only
 }
 
+// TODO move this to InterfaceEntry?
 bool RIPRouting::isNeighbourAddress(const Address &address)
 {
-    return true; // TODO
+    if (address.getType() != Address::IPv4)
+        return true; // XXX
+
+    IPv4Address ipv4Address = address.toIPv4();
+    for (int i=0; i<ift->getNumInterfaces(); i++)
+    {
+        InterfaceEntry *ie = ift->getInterface(i);
+        if (!ie->isLoopback())
+        {
+            IPv4Address interfaceAddress = ie->ipv4Data()->getIPAddress();
+            IPv4Address netmask = ie->ipv4Data()->getNetmask();
+            if (ipv4Address != interfaceAddress && IPv4Address::maskedAddrAreEqual(ipv4Address, interfaceAddress,netmask))
+                return true;
+        }
+    }
+    return false;
 }
 
 std::ostream& operator<<(std::ostream& os, const RIPRoute& e)
