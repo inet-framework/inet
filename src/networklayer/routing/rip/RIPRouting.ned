@@ -29,7 +29,6 @@ simple RIPRouting
 {
     parameters:
         string routingTableModule = default("^.routingTable");
-        bool usePoisonedSplitHorizon = default(true);
         xml ripConfig = default(xml("<config><interface metric='1'/></config>"));
     gates:
         input udpIn @labels(UDPControlInfo/up);

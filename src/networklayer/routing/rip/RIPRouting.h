@@ -79,11 +79,19 @@ struct RIPRoute : public cObject
     virtual std::string info() const;
 };
 
+enum SplitHorizonMode
+{
+    NO_SPLIT_HORIZON = 0,
+    SPLIT_HORIZON,
+    SPLIT_HORIZON_POISONED_REVERSE
+};
+
 struct RIPInterfaceEntry
 {
     InterfaceEntry *ie;
     int metric;
-    RIPInterfaceEntry(InterfaceEntry *ie, int metric) : ie(ie), metric(metric) {}
+    SplitHorizonMode splitHorizonMode;
+    RIPInterfaceEntry(InterfaceEntry *ie, int metric, SplitHorizonMode mode) : ie(ie), metric(metric), splitHorizonMode(mode) {}
 };
 
 /**
@@ -104,7 +112,7 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     cMessage *triggeredUpdateTimer; // scheduled when there are pending changes
     Address allRipRoutersGroup;     // multicast address, e.g. 224.0.0.9 or FF02::9
     // parameters
-    bool usePoisonedSplitHorizon;
+    //bool usePoisonedSplitHorizon;
   public:
     RIPRouting();
     ~RIPRouting();
@@ -114,7 +122,7 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     RIPRoute *findLocalInterfaceRoute(IRoute *route);
     bool isNeighbourAddress(const Address &address);
     bool isOwnAddress(const Address &address);
-    void addInterface(InterfaceEntry *ie, int metric);
+    void addInterface(InterfaceEntry *ie, int metric, SplitHorizonMode mode);
     void deleteInterface(InterfaceEntry *ie);
     void invalidateRoutes(InterfaceEntry *ie);
     void deleteRoute(IRoute *route);
@@ -168,7 +176,7 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
      * Split Horizon check is performed by this method.
      * It can send multiple RIPPackets.
      */
-    virtual void sendRoutes(const Address &address, int port, InterfaceEntry *ie, bool changedOnly);
+    virtual void sendRoutes(const Address &address, int port, const RIPInterfaceEntry &ripInterface, bool changedOnly);
 
     /**
      * Processes a RIP response, i.e. updates the routing table with the learned routes.

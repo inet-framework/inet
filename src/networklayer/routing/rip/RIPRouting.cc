@@ -110,7 +110,6 @@ RIPRouting::~RIPRouting()
 void RIPRouting::initialize(int stage)
 {
     if (stage == 0) {
-        usePoisonedSplitHorizon = par("usePoisonedSplitHorizon");
         host = findContainingNode(this);
         ift = InterfaceTableAccess().get();
         rt = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
@@ -167,10 +166,19 @@ void RIPRouting::configureInterfaces(cXMLElement *config)
                 cXMLElement *interfaceElement = interfaceElements[i];
 
                 const char *metricAttr = interfaceElement->getAttribute("metric"); // integer
-                //const char *splitHorizonModeAttr = element->getAttribute("split-horizon-mode"); // enum
+                const char *splitHorizonModeAttr = interfaceElement->getAttribute("split-horizon-mode"); // enum
 
                 int metric = isNotEmpty(metricAttr) ? atoi(metricAttr) : 1;
-                addInterface(ie, metric);
+                SplitHorizonMode mode = !splitHorizonModeAttr ? SPLIT_HORIZON_POISONED_REVERSE :
+                                        strcmp(splitHorizonModeAttr, "NoSplitHorizon") == 0 ? NO_SPLIT_HORIZON :
+                                        strcmp(splitHorizonModeAttr, "SplitHorizon") == 0 ? SPLIT_HORIZON :
+                                        strcmp(splitHorizonModeAttr, "SplitHorizonPoisonedReverse") == 0 ? SPLIT_HORIZON_POISONED_REVERSE :
+                                        (SplitHorizonMode)-1;
+                if (mode == -1)
+                    throw cRuntimeError("RIP: invalid split-horizon-mode attribute in <interface> element at %s: %s",
+                            interfaceElement->getSourceLocation(), splitHorizonModeAttr);
+
+                addInterface(ie, metric, mode);
             }
         }
     }
@@ -208,7 +216,7 @@ void RIPRouting::receiveChangeNotification(int category, const cObject *details)
             // TODO configure RIP interfaces and their metrics
             ie = const_cast<InterfaceEntry*>(check_and_cast<const InterfaceEntry*>(details));
             if (ie->isMulticast())
-                addInterface(ie, 1);
+                addInterface(ie, 1, SPLIT_HORIZON_POISONED_REVERSE);
             break;
         case NF_INTERFACE_DELETED:
             // delete interfaces and routes referencing the deleted interface
@@ -319,7 +327,7 @@ void RIPRouting::processRegularUpdate()
 {
     RIP_EV << "sending updates on all interfaces\n";
     for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
-        sendRoutes(allRipRoutersGroup, RIP_UDP_PORT, it->ie, false);
+        sendRoutes(allRipRoutersGroup, RIP_UDP_PORT, *it, false);
 
     // XXX clear route changed flags?
 }
@@ -328,7 +336,7 @@ void RIPRouting::processTriggeredUpdate()
 {
     RIP_EV << "sending triggered updates on all interfaces.\n";
     for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
-        sendRoutes(allRipRoutersGroup, RIP_UDP_PORT, it->ie, true);
+        sendRoutes(allRipRoutersGroup, RIP_UDP_PORT, *it, true);
 
     // clear changed flags
     for (RouteVector::iterator it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
@@ -357,8 +365,9 @@ void RIPRouting::processRequest(RIPPacket *packet)
             case RIP_AF_NONE:
                 if (numEntries == 1 && entry.metric == RIP_INFINITE_METRIC)
                 {
-                    InterfaceEntry *ie = ift->getInterfaceById(ctrlInfo->getInterfaceId());
-                    sendRoutes(ctrlInfo->getSrcAddr(), ctrlInfo->getSrcPort(), ie, false);
+                    RIPInterfaceEntry *ripInterface = findInterfaceEntryById(ctrlInfo->getInterfaceId());
+                    if (ripInterface)
+                        sendRoutes(ctrlInfo->getSrcAddr(), ctrlInfo->getSrcPort(), *ripInterface, false);
                     delete ctrlInfo;
                     delete packet;
                     return;
@@ -387,7 +396,7 @@ void RIPRouting::processRequest(RIPPacket *packet)
  * This method is called by regular updates (every 30s), triggered updates (when some route changed),
  * and when RIP requests are processed.
  */
-void RIPRouting::sendRoutes(const Address &address, int port, InterfaceEntry *ie, bool changedOnly)
+void RIPRouting::sendRoutes(const Address &address, int port, const RIPInterfaceEntry &ripInterface, bool changedOnly)
 {
     RIPPacket *packet = new RIPPacket("RIP response");
     packet->setCommand(RIP_RESPONSE);
@@ -410,11 +419,11 @@ void RIPRouting::sendRoutes(const Address &address, int port, InterfaceEntry *ie
         // Split Horizon with Poisoned Reverse:
         //   Do include such routes in updates, but sets their metrics to infinity.
         int metric = ripRoute->metric;
-        if (route->getInterface() == ie)
+        if (route->getInterface() == ripInterface.ie)
         {
-            if (!usePoisonedSplitHorizon)
+            if (ripInterface.splitHorizonMode == SPLIT_HORIZON)
                 continue;
-            else
+            else if (ripInterface.splitHorizonMode == SPLIT_HORIZON_POISONED_REVERSE)
                 metric = RIP_INFINITE_METRIC;
         }
 
@@ -430,7 +439,7 @@ void RIPRouting::sendRoutes(const Address &address, int port, InterfaceEntry *ie
         // if packet is full, then send it and allocate a new one
         if (k >= MAX_RIP_ENTRIES)
         {
-            sendPacket(packet, address, port, ie);
+            sendPacket(packet, address, port, ripInterface.ie);
             packet = new RIPPacket("RIP response");
             packet->setCommand(RIP_RESPONSE);
             packet->setEntryArraySize(MAX_RIP_ENTRIES);
@@ -442,7 +451,7 @@ void RIPRouting::sendRoutes(const Address &address, int port, InterfaceEntry *ie
     if (k > 0)
     {
         packet->setEntryArraySize(k);
-        sendPacket(packet, address, port, ie);
+        sendPacket(packet, address, port, ripInterface.ie);
     }
     else
         delete packet;
@@ -712,9 +721,9 @@ void RIPRouting::sendPacket(RIPPacket *packet, const Address &address, int port,
 /*----------------------------------------
  *
  *----------------------------------------*/
-void RIPRouting::addInterface(InterfaceEntry *ie, int metric)
+void RIPRouting::addInterface(InterfaceEntry *ie, int metric, SplitHorizonMode mode)
 {
-    ripInterfaces.push_back(RIPInterfaceEntry(ie, metric));
+    ripInterfaces.push_back(RIPInterfaceEntry(ie, metric, mode));
 }
 
 void RIPRouting::deleteInterface(InterfaceEntry *ie)
