@@ -23,7 +23,8 @@
 
 Define_Module(MultiNetworkLayerLowerMultiplexer);
 
-void MultiNetworkLayerLowerMultiplexer::handleMessage(cMessage * message) {
+void MultiNetworkLayerLowerMultiplexer::handleMessage(cMessage * message)
+{
     cGate * arrivalGate = message->getArrivalGate();
     const char * arrivalGateName = arrivalGate->getBaseName();
     if (!strcmp(arrivalGateName, "ifUpperIn"))
@@ -34,11 +35,13 @@ void MultiNetworkLayerLowerMultiplexer::handleMessage(cMessage * message) {
         throw cRuntimeError("Unknown arrival gate");
 }
 
-int MultiNetworkLayerLowerMultiplexer::getProtocolCount() {
+int MultiNetworkLayerLowerMultiplexer::getProtocolCount()
+{
     return 3;
 }
 
-int MultiNetworkLayerLowerMultiplexer::getProtocolIndex(cMessage * message) {
+int MultiNetworkLayerLowerMultiplexer::getProtocolIndex(cMessage * message)
+{
     // TODO: handle the case when some network protocols are disabled
     if (dynamic_cast<IPv4Datagram *>(message) || dynamic_cast<ARPPacket *>(message))
         return 0;

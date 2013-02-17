@@ -25,7 +25,8 @@
 
 Define_Module(NetworkDatagramMultiplexer);
 
-void NetworkDatagramMultiplexer::handleMessage(cMessage * message) {
+void NetworkDatagramMultiplexer::handleMessage(cMessage * message)
+{
     cGate * arrivalGate = message->getArrivalGate();
     const char * arrivalGateName = arrivalGate->getBaseName();
     if (!strcmp(arrivalGateName, "upperIn"))
@@ -36,7 +37,8 @@ void NetworkDatagramMultiplexer::handleMessage(cMessage * message) {
         throw cRuntimeError("Unknown arrival gate");
 }
 
-int NetworkDatagramMultiplexer::getProtocolIndex(cMessage * message) {
+int NetworkDatagramMultiplexer::getProtocolIndex(cMessage * message)
+{
     cPacket * packet = check_and_cast<cPacket *>(message);
     cObject * controlInfo = packet->getControlInfo();
     // TODO: handle the case when some network protocols are disabled

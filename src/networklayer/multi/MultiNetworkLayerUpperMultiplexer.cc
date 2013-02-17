@@ -22,7 +22,8 @@
 
 Define_Module(MultiNetworkLayerUpperMultiplexer);
 
-void MultiNetworkLayerUpperMultiplexer::handleMessage(cMessage * message) {
+void MultiNetworkLayerUpperMultiplexer::handleMessage(cMessage * message)
+{
     cGate * arrivalGate = message->getArrivalGate();
     const char * arrivalGateName = arrivalGate->getBaseName();
     if (!strcmp(arrivalGateName, "transportUpperIn")) {
@@ -48,11 +49,13 @@ void MultiNetworkLayerUpperMultiplexer::handleMessage(cMessage * message) {
         throw cRuntimeError("Unknown arrival gate");
 }
 
-int MultiNetworkLayerUpperMultiplexer::getProtocolCount() {
+int MultiNetworkLayerUpperMultiplexer::getProtocolCount()
+{
     return 3;
 }
 
-int MultiNetworkLayerUpperMultiplexer::getProtocolIndex(cMessage * message) {
+int MultiNetworkLayerUpperMultiplexer::getProtocolIndex(cMessage * message)
+{
     cPacket * packet = check_and_cast<cPacket *>(message);
     cObject * controlInfo = packet->getControlInfo();
     // TODO: handle the case when some network protocols are disabled

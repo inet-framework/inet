@@ -18,7 +18,8 @@
 #include "IPSocket.h"
 #include "IPProtocolId_m.h"
 
-void IPSocket::registerProtocol(int protocol) {
+void IPSocket::registerProtocol(int protocol)
+{
     if (gateToIP && gateToIP->isConnected()) {
         IPRegisterProtocolCommand * controlInfo = new IPRegisterProtocolCommand();
         controlInfo->setProtocol(protocol);

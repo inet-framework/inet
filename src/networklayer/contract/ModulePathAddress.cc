@@ -20,7 +20,8 @@
 #include "InterfaceTableAccess.h"
 
 
-bool ModulePathAddress::tryParse(const char *addr) {
+bool ModulePathAddress::tryParse(const char *addr)
+{
     cModule * module = NULL;
     try
     {
@@ -43,7 +44,8 @@ bool ModulePathAddress::tryParse(const char *addr) {
     return false;
 }
 
-std::string ModulePathAddress::str() const {
+std::string ModulePathAddress::str() const
+{
     cModule * module = simulation.getModule(id);
     std::string fullPath = module->getFullPath();
     return strchr(fullPath.c_str(), '.') + 1;
