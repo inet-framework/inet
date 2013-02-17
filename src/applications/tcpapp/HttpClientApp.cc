@@ -87,13 +87,13 @@ void HttpClientApp::sendHtmlRequest()
 
 void HttpClientApp::connect()
 {
-	TCPGenericCliAppBase::connect();
-
 	// Initialise per session.
 	// Note that session delays will include connection (i.e., socket) set up time as well.
 	// To exclude connection set up time, initialise this variable in "socketEstablished()".
 	sessionStart = simTime();
 	bytesRcvdAtSessionStart = bytesRcvd;
+
+	TCPGenericCliAppBase::connect();
 }
 
 void HttpClientApp::handleTimer(cMessage *msg)
