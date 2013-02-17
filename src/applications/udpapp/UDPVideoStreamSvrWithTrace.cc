@@ -130,6 +130,7 @@ void UDPVideoStreamSvrWithTrace::initialize()
 	serverPort = par("serverPort");
 	appOverhead = par("appOverhead").longValue();
 	maxPayloadSize = par("maxPayloadSize").longValue();
+    trafficShaping = par("trafficShaping").boolValue();
 	framePeriod = 1.0 / par("fps").longValue();
 	numFrames = 0;
 
@@ -285,7 +286,14 @@ void UDPVideoStreamSvrWithTrace::readFrameData(cMessage *frameTimer)
 	d->frameType = frameTypeVector[d->currentFrame];
 	d->frameSize = frameSizeVector[d->currentFrame];
 	d->bytesLeft = d->frameSize;
-	d->pktInterval = d->framePeriod / ceil(d->bytesLeft / double(maxPayloadSize));	///> spread out packet transmissions over the frame period
+    if (trafficShaping)
+    {
+        d->pktInterval = d->framePeriod / ceil(d->bytesLeft / double(maxPayloadSize));	///> spread out packet transmissions over a frame period
+    }
+    else
+    {
+        d->pktInterval = 0.0;
+    }
 
 	// schedule next frame start
 	scheduleAt(simTime() + framePeriod, frameTimer);

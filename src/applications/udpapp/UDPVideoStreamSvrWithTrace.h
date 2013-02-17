@@ -84,6 +84,7 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
     int serverPort;
     int appOverhead;
     int maxPayloadSize;
+    bool trafficShaping;
 
     // variables for a trace file
     TraceFormat traceFormat;	///< file format of trace file

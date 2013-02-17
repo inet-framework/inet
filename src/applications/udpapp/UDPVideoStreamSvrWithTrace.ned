@@ -46,6 +46,7 @@ simple UDPVideoStreamSvrWithTrace like UDPApp
         int appOverhead @unit(byte) = default(12B);	// size of application layer overhead (e.g., RTP header)	
         int maxPayloadSize @unit(byte) = default(1460B);	// maximum size of payload to be carried in RTP packets;
 															// default of 1460B is MTU of 1500B minus RTP (12B), UDP (8B), and IP (20B) headers.											
+		bool trafficShaping = default(true);				// if true, spread frame packets over a frame period
         string traceFile;	// name of a video trace file in ASU format
         @display("i=block/app");
     gates:
