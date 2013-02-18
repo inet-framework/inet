@@ -778,7 +778,10 @@ void xDYMO::processRREP(RREP * rrepIncoming)
                 sendRREP(rrepOutgoing);
             else {
                 IRoute * route = routingTable->findBestMatchingRoute(originator);
-                sendRREP(rrepOutgoing, route);
+                if (route)
+                    sendRREP(rrepOutgoing, route);
+                else
+                    DYMO_EV << "No route found toward originator, dropping RREP: originator = " << originator << ", target = " << target << endl;
             }
         }
     }
@@ -1358,10 +1361,12 @@ void xDYMO::receiveChangeNotification(int category, const cObject *details)
                 // TODO: get nexthop and interface from the packet
                 // INetworkProtocolControlInfo * networkProtocolControlInfo = dynamic_cast<INetworkProtocolControlInfo *>(datagram->getControlInfo());
                 const Address & destination = datagram->getDestinationAddress();
-                IRoute * route = routingTable->findBestMatchingRoute(destination);
-                if (route) {
-                    const Address & nextHop = route->getNextHopAsGeneric();
-                    sendRERRForBrokenLink(route->getInterface(), nextHop);
+                if (destination.getAddressPolicy() == addressPolicy) {
+                    IRoute * route = routingTable->findBestMatchingRoute(destination);
+                    if (route) {
+                        const Address & nextHop = route->getNextHopAsGeneric();
+                        sendRERRForBrokenLink(route->getInterface(), nextHop);
+                    }
                 }
             }
         }
