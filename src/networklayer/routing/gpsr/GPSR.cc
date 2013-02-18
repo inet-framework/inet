@@ -89,9 +89,6 @@ void GPSR::initialize(int stage)
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             InterfaceEntry * interfaceEntry = interfaceTable->getInterface(i);
             if (interfaceEntry->isMulticast() && interfaceMatcher.matches(interfaceEntry->getName()))
-                // Most AODVv2 messages are sent with the IP destination address set to the link-local
-                // multicast address LL-MANET-Routers [RFC5498] unless otherwise specified. Therefore,
-                // all AODVv2 routers MUST subscribe to LL-MANET-Routers [RFC5498] to receiving AODVv2 messages.
                 addressPolicy->joinMulticastGroup(interfaceEntry, addressPolicy->getLinkLocalManetRoutersMulticastAddress());
         }
         // hook to netfilter
@@ -596,5 +593,6 @@ void GPSR::receiveChangeNotification(int category, const cObject *details)
     Enter_Method("receiveChangeNotification");
     if (category == NF_LINK_BREAK) {
         GPSR_EV << "Received link break" << endl;
+        // TODO: shall we remove the neighbor?
     }
 }
