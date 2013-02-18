@@ -53,7 +53,7 @@ module IPv4NetworkLayer
         }
         ip: IPv4 {
             parameters:
-                useProxyARP = proxyARP;
+                useProxyARP = true; // as routes with unspecified next-hop addr are quite common 
                 @display("p=85,95;q=queue");
             gates:
                 queueIn[sizeof(ifIn)];
