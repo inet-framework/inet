@@ -126,9 +126,8 @@ void IPv6RoutingTable::initialize(int stage)
 
 void IPv6RoutingTable::parseXMLConfigFile()
 {
-    // TODO to be revised by Andras
     // configure interfaces from XML config file
-    cXMLElement *config = par("routingTable");
+    cXMLElement *config = par("routes");
     for (cXMLElement *child=config->getFirstChild(); child; child = child->getNextSibling())
     {
         //std::cout << "configuring interfaces from XML file." << endl;

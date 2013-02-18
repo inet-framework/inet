@@ -45,7 +45,7 @@ module NodeBase6
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
         string mobilityType = default("StationaryMobility");
-        xml routingTable = default(xml("<routingTable/>"));
+        xml routes = default(xml("<routingTable/>"));
         bool IPForward = default(true);
     gates:
         input radioIn[numRadios] @directIn;
@@ -72,11 +72,11 @@ module NodeBase6
                 @display("p=329,287;q=queue");
         }
 
-        routingTable6: IPv6RoutingTable {
+        routingTable: IPv6RoutingTable {
             parameters:
                 @display("p=53,225;is=s");
                 isRouter = IPForward;
-                routingTable = routingTable;
+                routes = routes;
         }
 
         // linklayer

@@ -33,7 +33,7 @@ simple IPv6RoutingTable like IRoutingTable
 {
     parameters:
         @display("i=block/table");
-        xml routingTable = default(xml("<routingTable/>"));
+        xml routes = default(xml("<routingTable/>"));
         bool isRouter = default(false);
         bool forwardMulticast = default(false);
 }

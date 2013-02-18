@@ -459,7 +459,7 @@ IPv6RoutingTable *AddressResolver::routingTable6Of(cModule *host)
     IPv6RoutingTable *mod = findRoutingTable6Of(host);
     if (!mod)
         throw cRuntimeError("AddressResolver: IPv6RoutingTable not found as submodule "
-                  " `routingTable6' in host/router `%s'", host->getFullPath().c_str());
+                  " `routingTable' in host/router `%s'", host->getFullPath().c_str());
     return mod;
 }
 
@@ -496,7 +496,7 @@ IPv6RoutingTable *AddressResolver::findRoutingTable6Of(cModule *host)
 {
 #ifdef WITH_IPv6
     // KLUDGE: TODO: look deeper temporarily
-    IPv6RoutingTable *rt = dynamic_cast<IPv6RoutingTable *>(host->getSubmodule("routingTable6"));
+    IPv6RoutingTable *rt = dynamic_cast<IPv6RoutingTable *>(host->getSubmodule("routingTable"));
     if (!rt) rt = dynamic_cast<IPv6RoutingTable *>(host->getModuleByPath(".routingTable.ipv6"));
     return rt;
 #else
