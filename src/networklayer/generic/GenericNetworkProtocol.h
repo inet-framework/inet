@@ -31,7 +31,7 @@
 #include "ProtocolMap.h"
 
 /**
- * Implements a simple network protocol.
+ * Implements a generic network protocol.
  */
 class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter
 {
@@ -54,8 +54,8 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter
         const INetfilter::IHook::Type hookType;
     };
 
-    GenericRoutingTable *rt;  //TODO change to IRoutingTable?
-    IInterfaceTable *ift;
+    IInterfaceTable *interfaceTable;
+    GenericRoutingTable *routingTable;
     cGate *queueOutGate;
 
     // config
@@ -76,28 +76,10 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter
 
   protected:
     // utility: look up interface from getArrivalGate()
-    virtual const InterfaceEntry *getSourceInterfaceFrom(cPacket *msg);
+    virtual const InterfaceEntry *getSourceInterfaceFrom(cPacket *packet);
 
     // utility: show current statistics above the icon
     virtual void updateDisplayString();
-
-    /**
-     * Encapsulate packet coming from higher layers into GenericDatagram, using
-     * the control info attached to the packet.
-     */
-    virtual GenericDatagram *encapsulate(cPacket *transportPacket, const InterfaceEntry *&destIE);
-
-    /**
-     * Encapsulate packet coming from higher layers into GenericDatagram, using
-     * the given control info. Override if you subclassed controlInfo and/or
-     * want to add options etc to the datagram.
-     */
-    virtual GenericDatagram *encapsulate(cPacket *transportPacket, const InterfaceEntry *&destIE, GenericNetworkProtocolControlInfo *controlInfo);
-
-    /**
-     * Creates a blank Generic datagram. Override when subclassing GenericDatagram is needed
-     */
-    virtual GenericDatagram *createGenericDatagram(const char *name);
 
     /**
      * Handle GenericDatagram messages arriving from lower layer.
@@ -109,37 +91,36 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter
      * Handle messages (typically packets to be send in Generic) from transport or ICMP.
      * Invokes encapsulate(), then routePacket().
      */
-    virtual void handleMessageFromHL(cPacket *msg);
+    virtual void handleMessageFromHL(cPacket *packet);
 
     /**
      * Performs routing. Based on the routing decision, it dispatches to
-     * reassembleAndDeliver() for local packets, to fragmentAndSend() for forwarded packets,
+     * sendDatagramToHL() for local packets, to sendDatagramToOutput() for forwarded packets,
      * to handleMulticastPacket() for multicast packets, or drops the packet if
      * it's unroutable or forwarding is off.
      */
     virtual void routePacket(GenericDatagram *datagram, const InterfaceEntry *destIE, const Address & nextHop, bool fromHL);
 
     /**
-     * Forwards packets to all multicast destinations, using fragmentAndSend().
+     * Forwards packets to all multicast destinations, using sendDatagramToOutput().
      */
     virtual void routeMulticastPacket(GenericDatagram *datagram, const InterfaceEntry *destIE, const InterfaceEntry *fromIE);
 
     /**
-     * Perform reassembly of fragmented datagrams, then send them up to the
-     * higher layers using sendToHL().
+     * Encapsulate packet coming from higher layers into GenericDatagram, using
+     * the control info attached to the packet.
      */
-    virtual void reassembleAndDeliver(GenericDatagram *datagram);
+    virtual GenericDatagram *encapsulate(cPacket *transportPacket, const InterfaceEntry *&destIE);
 
     /**
      * Decapsulate and return encapsulated packet after attaching GenericNetworkProtocolControlInfo.
      */
-    virtual cPacket *decapsulateGeneric(GenericDatagram *datagram);
+    virtual cPacket *decapsulate(GenericDatagram *datagram);
 
     /**
-     * Fragment packet if needed, then send it to the selected interface using
-     * sendDatagramToOutput().
+     * Send datagrams up to the higher layers.
      */
-    virtual void fragmentAndSend(GenericDatagram *datagram, const InterfaceEntry *ie, const Address & nextHop);
+    virtual void sendDatagramToHL(GenericDatagram *datagram);
 
     /**
      * Last TTL check, then send datagram on the given interface.
@@ -173,13 +154,13 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter
     /**
      * Handle message.
      */
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *message);
 
     /**
-     * Processing of Generic datagrams. Called when a datagram reaches the front
+     * Processing of generic datagrams. Called when a datagram reaches the front
      * of the queue.
      */
-    virtual void endService(cPacket *pk);
+    virtual void endService(cPacket *packet);
 };
 
 #endif

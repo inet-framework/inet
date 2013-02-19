@@ -30,13 +30,11 @@ void GenericNetworkProtocol::initialize()
 {
     QueueBase::initialize();
 
-    ift = InterfaceTableAccess().get();
-    rt = check_and_cast<GenericRoutingTable *>(getModuleByPath(par("routingTableModule")));
+    interfaceTable = InterfaceTableAccess().get();
+    routingTable = check_and_cast<GenericRoutingTable *>(getModuleByPath(par("routingTableModule")));
 
     queueOutGate = gate("queueOut");
-
     defaultHopLimit = par("hopLimit");
-
     numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
     WATCH(numLocalDeliver);
@@ -82,21 +80,15 @@ void GenericNetworkProtocol::endService(cPacket *pk)
 const InterfaceEntry *GenericNetworkProtocol::getSourceInterfaceFrom(cPacket *msg)
 {
     cGate *g = msg->getArrivalGate();
-    return g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
+    return g ? interfaceTable->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
 }
 
 void GenericNetworkProtocol::handlePacketFromNetwork(GenericDatagram *datagram)
 {
-    //
-    // "Prerouting"
-    //
-
-    // check for header biterror
     if (datagram->hasBitError()) {
         //TODO discard
     }
 
-    // remove control info
     delete datagram->removeControlInfo();
 
     // hop counter decrement; FIXME but not if it will be locally delivered
@@ -111,19 +103,10 @@ void GenericNetworkProtocol::handlePacketFromNetwork(GenericDatagram *datagram)
     datagramPreRouting(datagram, inIE, destIE, nextHop);
 }
 
-void GenericNetworkProtocol::datagramPreRouting(GenericDatagram* datagram, const InterfaceEntry * inIE, const InterfaceEntry * destIE, const Address & nextHop)
-{
-    // route packet
-    if (!datagram->getDestinationAddress().isMulticast())
-        routePacket(datagram, destIE, nextHop, false);
-    else
-        routeMulticastPacket(datagram, destIE, inIE);
-}
-
 void GenericNetworkProtocol::handleMessageFromHL(cPacket *msg)
 {
     // if no interface exists, do not send datagram
-    if (ift->getNumInterfaces() == 0)
+    if (interfaceTable->getNumInterfaces() == 0)
     {
         EV << "No interfaces exist, dropping packet\n";
         delete msg;
@@ -150,7 +133,7 @@ void GenericNetworkProtocol::routePacket(GenericDatagram *datagram, const Interf
     EV << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddr << ": ";
 
     // check for local delivery
-    if (rt->isLocalAddress(destAddr))
+    if (routingTable->isLocalAddress(destAddr))
     {
         EV << "local delivery\n";
         if (datagram->getSourceAddress().isUnspecified())
@@ -160,12 +143,12 @@ void GenericNetworkProtocol::routePacket(GenericDatagram *datagram, const Interf
         if (datagramLocalInHook(datagram, getSourceInterfaceFrom(datagram)) != INetfilter::IHook::ACCEPT)
             return;
 
-        reassembleAndDeliver(datagram);
+        sendDatagramToHL(datagram);
         return;
     }
 
     // if datagram arrived from input gate and Generic_FORWARD is off, delete datagram
-    if (!fromHL && !rt->isForwardingEnabled())
+    if (!fromHL && !routingTable->isForwardingEnabled())
     {
         EV << "forwarding off, dropping packet\n";
         numDropped++;
@@ -184,7 +167,7 @@ void GenericNetworkProtocol::routePacket(GenericDatagram *datagram, const Interf
     else
     {
         // use GenericNetworkProtocol routing (lookup in routing table)
-        const GenericRoute *re = rt->findBestMatchingRoute(destAddr);
+        const GenericRoute *re = routingTable->findBestMatchingRoute(destAddr);
 
         // error handling: destination address does not exist in routing table:
         // throw packet away and continue
@@ -209,10 +192,7 @@ void GenericNetworkProtocol::routePacket(GenericDatagram *datagram, const Interf
     EV << "output interface is " << destIE->getName() << ", next-hop address: " << nextHop << "\n";
     numForwarded++;
 
-    //
-    // fragment and send the packet
-    //
-    fragmentAndSend(datagram, destIE, nextHop);
+    sendDatagramToOutput(datagram, destIE, nextHop);
 }
 
 void GenericNetworkProtocol::routeMulticastPacket(GenericDatagram *datagram, const InterfaceEntry *destIE, const InterfaceEntry *fromIE)
@@ -222,8 +202,8 @@ void GenericNetworkProtocol::routeMulticastPacket(GenericDatagram *datagram, con
     if (fromIE!=NULL)
     {
         // check for local delivery
-        if (rt->isLocalMulticastAddress(destAddr))
-            reassembleAndDeliver(datagram);
+        if (routingTable->isLocalMulticastAddress(destAddr))
+            sendDatagramToHL(datagram);
 //
 //        // don't forward if GenericNetworkProtocol forwarding is off
 //        if (!rt->isGenericForwardingEnabled())
@@ -241,10 +221,10 @@ void GenericNetworkProtocol::routeMulticastPacket(GenericDatagram *datagram, con
     }
     else {
         //TODO
-        for (int i=0; i<ift->getNumInterfaces(); ++i) {
-            const InterfaceEntry * destIE = ift->getInterface(i);
+        for (int i=0; i<interfaceTable->getNumInterfaces(); ++i) {
+            const InterfaceEntry * destIE = interfaceTable->getInterface(i);
             if (!destIE->isLoopback())
-                fragmentAndSend(datagram->dup(), destIE, datagram->getDestinationAddress());
+                sendDatagramToOutput(datagram->dup(), destIE, datagram->getDestinationAddress());
         }
         delete datagram;
     }
@@ -308,7 +288,7 @@ void GenericNetworkProtocol::routeMulticastPacket(GenericDatagram *datagram, con
 //            datagram->setSourceAddress(destIE->ipv4Data()->getGenericAddress());
 //
 //        // send
-//        fragmentAndSend(datagram, destIE, datagram->getDestinationAddress());
+//        sendDatagramToOutput(datagram, destIE, datagram->getDestinationAddress());
 //
 //        return;
 //    }
@@ -338,7 +318,7 @@ void GenericNetworkProtocol::routeMulticastPacket(GenericDatagram *datagram, con
 //
 //                // send
 //                Address nextHop = routes[i].gateway;
-//                fragmentAndSend(datagramCopy, destIE, nextHop);
+//                sendDatagramToOutput(datagramCopy, destIE, nextHop);
 //            }
 //        }
 //
@@ -347,30 +327,7 @@ void GenericNetworkProtocol::routeMulticastPacket(GenericDatagram *datagram, con
 //    }
 }
 
-void GenericNetworkProtocol::reassembleAndDeliver(GenericDatagram *datagram)
-{
-    int protocol = datagram->getTransportProtocol();
-
-    int gateindex = mapping.findOutputGateForProtocol(protocol);
-    // check if the transportOut port are connected, otherwise discard the packet
-    if (gateindex >= 0)
-    {
-        cGate* outGate = gate("transportOut", gateindex);
-        if (outGate->isPathOK())
-        {
-            // decapsulate and send on appropriate output gate
-            cPacket *packet = decapsulateGeneric(datagram);
-            delete datagram;
-            send(packet, "transportOut", gateindex);
-            return;
-        }
-    }
-
-    //TODO send an ICMP error: protocol unreachable
-    delete datagram;
-}
-
-cPacket *GenericNetworkProtocol::decapsulateGeneric(GenericDatagram *datagram)
+cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
 {
     // decapsulate transport packet
     const InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
@@ -390,27 +347,10 @@ cPacket *GenericNetworkProtocol::decapsulateGeneric(GenericDatagram *datagram)
     return packet;
 }
 
-
-void GenericNetworkProtocol::fragmentAndSend(GenericDatagram *datagram, const InterfaceEntry *ie, const Address & nextHop)
-{
-    if (datagram->getByteLength() > ie->getMTU())
-        error("datagram too large"); //TODO refine
-
-    sendDatagramToOutput(datagram, ie, nextHop);
-}
-
-
 GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, const InterfaceEntry *&destIE)
 {
     GenericNetworkProtocolControlInfo *controlInfo = check_and_cast<GenericNetworkProtocolControlInfo*>(transportPacket->removeControlInfo());
-    GenericDatagram *datagram = encapsulate(transportPacket, destIE, controlInfo);
-    delete controlInfo;
-    return datagram;
-}
-
-GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, const InterfaceEntry *&destIE, GenericNetworkProtocolControlInfo *controlInfo)
-{
-    GenericDatagram *datagram = createGenericDatagram(transportPacket->getName());
+    GenericDatagram *datagram = new GenericDatagram(transportPacket->getName());
 //    datagram->setByteLength(HEADER_BYTES); //TODO parameter
     datagram->encapsulate(transportPacket);
 
@@ -419,7 +359,7 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
     datagram->setDestinationAddress(dest);
 
     // Generic_MULTICAST_IF option, but allow interface selection for unicast packets as well
-    destIE = ift->getInterfaceById(controlInfo->getInterfaceId());
+    destIE = interfaceTable->getInterfaceById(controlInfo->getInterfaceId());
 
     Address src = controlInfo->getSourceAddress();
 
@@ -428,7 +368,7 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
     if (!src.isUnspecified())
     {
         // if interface parameter does not match existing interface, do not send datagram
-        if (rt->getInterfaceByAddress(src)==NULL)
+        if (routingTable->getInterfaceByAddress(src)==NULL)
             opp_error("Wrong source address %s in (%s)%s: no interface with such address",
                       src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
         datagram->setSourceAddress(src);
@@ -448,19 +388,39 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
 
     // setting GenericNetworkProtocol options is currently not supported
 
+    delete controlInfo;
     return datagram;
 }
 
-GenericDatagram *GenericNetworkProtocol::createGenericDatagram(const char *name)
+void GenericNetworkProtocol::sendDatagramToHL(GenericDatagram *datagram)
 {
-    return new GenericDatagram(name);
+    int protocol = datagram->getTransportProtocol();
+    int gateIndex = mapping.findOutputGateForProtocol(protocol);
+    // check if the transportOut port are connected, otherwise discard the packet
+    if (gateIndex >= 0)
+    {
+        cGate* outGate = gate("transportOut", gateIndex);
+        if (outGate->isPathOK())
+        {
+            // decapsulate and send on appropriate output gate
+            cPacket *packet = decapsulate(datagram);
+            delete datagram;
+            send(packet, "transportOut", gateIndex);
+            return;
+        }
+    }
+
+    //TODO send an ICMP error: protocol unreachable
+    delete datagram;
 }
 
 void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, const InterfaceEntry *ie, const Address & nextHop)
 {
+    if (datagram->getByteLength() > ie->getMTU())
+        error("datagram too large"); //TODO refine
+
     // hop counter check
-    if (datagram->getHopLimit() <= 0)
-    {
+    if (datagram->getHopLimit() <= 0) {
         EV << "datagram hopLimit reached zero, discarding\n";
         delete datagram;  //TODO stats counter???
         return;
@@ -475,9 +435,18 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
     send(datagram, queueOutGate);
 }
 
+void GenericNetworkProtocol::datagramPreRouting(GenericDatagram* datagram, const InterfaceEntry * inIE, const InterfaceEntry * destIE, const Address & nextHop)
+{
+    // route packet
+    if (!datagram->getDestinationAddress().isMulticast())
+        routePacket(datagram, destIE, nextHop, false);
+    else
+        routeMulticastPacket(datagram, destIE, inIE);
+}
+
 void GenericNetworkProtocol::datagramLocalIn(GenericDatagram* datagram, const InterfaceEntry * inIE)
 {
-    reassembleAndDeliver(datagram);
+    sendDatagramToHL(datagram);
 }
 
 void GenericNetworkProtocol::datagramLocalOut(GenericDatagram* datagram, const InterfaceEntry * destIE, const Address & nextHop)
