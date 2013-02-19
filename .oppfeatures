@@ -180,6 +180,7 @@
         nedPackages = "
                        inet.applications.rtpapp
                        inet.transport.rtp
+                       inet.nodes.rtp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_RTP"

@@ -1,13 +1,17 @@
 // the original file was included in the ~UDP sockets example
 
-package inet.transport.rtp;
+package inet.nodes.rtp;
 
 import inet.applications.rtpapp.RTPApplication;
 import inet.nodes.inet.StandardHost;
-import inet.transport.udp.UDP;
+import inet.transport.rtp.RTCP;
+import inet.transport.rtp.RTP;
 import ned.IdealChannel;
 
 
+//
+// TODO document!
+//
 module RTPHost extends StandardHost
 {
     parameters:
