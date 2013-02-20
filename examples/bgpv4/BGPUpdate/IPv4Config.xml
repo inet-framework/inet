@@ -1,0 +1,9 @@
+<config>
+  <interface hosts='A' names='ppp0' address='10.10.10.1' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <interface hosts='A' names='eth0' address='192.168.1.254' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <interface hosts='B' names='ppp0' address='10.10.10.2' netmask='255.255.255.0'/>
+  <interface hosts='B' names='eth0' address='192.168.2.254' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <interface hosts='H1' names='eth0' address='192.168.1.1' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <interface hosts='H2' names='eth0' address='192.168.2.1' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <route hosts='H*' destination='*' netmask='*' interface='eth0'/>
+</config>

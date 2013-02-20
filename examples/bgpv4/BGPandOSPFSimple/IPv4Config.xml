@@ -1,0 +1,13 @@
+<config>
+  <interface hosts='A' names='ppp0' address='10.10.10.1' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='A' names='ppp1' address='10.10.1.2' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='B' names='ppp0' address='10.10.10.2' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='B' names='ppp1' address='10.20.1.2' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='RA1' names='ppp0' address='10.10.1.1' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='RA1' names='eth0' address='192.168.1.254' netmask='255.255.255.0' metric='1'/>
+  <interface hosts='RB1' names='ppp0' address='10.20.1.1' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='RB1' names='eth0' address='192.170.1.254' netmask='255.255.255.0' metric='1'/>
+  <interface hosts='HA11' names='eth0' address='192.168.1.1' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <interface hosts='HB11' names='eth0' address='192.170.1.1' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <route hosts='H*' destination='*' netmask='*' interface='eth0'/>
+</config>

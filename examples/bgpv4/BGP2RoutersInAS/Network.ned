@@ -1,6 +1,6 @@
 package inet.examples.bgpv4.BGP2RoutersInAS;
 
-import inet.base.UnimplementedModule;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.bgp.BGPRouter;
 import inet.nodes.ethernet.EtherSwitch;
 import inet.nodes.inet.StandardHost;
@@ -155,8 +155,14 @@ network BGPTest
             gates:
                 ethg[1];
         }
-        configurator: UnimplementedModule {
+        configurator: IPv4NetworkConfigurator {
             @display("p=71,374");
+            config = xmldoc("IPv4Config.xml");
+            //assignAddresses = false;
+            //assignDisjunctSubnetAddresses = false;
+            addStaticRoutes = false;
+            addDefaultRoutes = false;
+            addSubnetRoutes = false;
         }
     connections:
         //LAN RA3

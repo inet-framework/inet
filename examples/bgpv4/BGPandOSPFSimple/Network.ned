@@ -1,7 +1,7 @@
 //
 package inet.examples.bgpv4.BGPandOSPFSimple;
 
-import inet.base.UnimplementedModule;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.bgp.BGPRouter;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.ospfv2.OSPFRouter;
@@ -58,8 +58,14 @@ network BGPNet
             gates:
                 ethg[1];
         }
-        configurator: UnimplementedModule {
+        configurator: IPv4NetworkConfigurator {
             @display("p=275,23");
+            config = xmldoc("IPv4Config.xml");
+            //assignAddresses = false;
+            //assignDisjunctSubnetAddresses = false;
+            addStaticRoutes = false;
+            addDefaultRoutes = false;
+            addSubnetRoutes = false;
         }
     connections:
         //LAN A1 et A2

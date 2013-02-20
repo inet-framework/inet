@@ -1,7 +1,7 @@
 package inet.examples.bgpv4.BGPOpen;
 
 
-import inet.base.UnimplementedModule;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 
 network Net
@@ -23,8 +23,14 @@ network Net
             parameters:
                 @display("p=200,60");
         }
-        configurator: UnimplementedModule {
+        configurator: IPv4NetworkConfigurator {
             @display("p=62,127");
+            config = xmldoc("IPv4Config.xml");
+            //assignAddresses = false;
+            //assignDisjunctSubnetAddresses = false;
+            addStaticRoutes = false;
+            addDefaultRoutes = false;
+            addSubnetRoutes = false;
         }
     connections:
         A.pppg++ <--> LINK_100 <--> B.pppg++;
