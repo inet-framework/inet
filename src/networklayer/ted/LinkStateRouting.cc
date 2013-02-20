@@ -97,7 +97,7 @@ void LinkStateRouting::receiveChangeNotification(int category, const cObject *de
 
     EV << "TED changed\n";
 
-    TEDChangeInfo *d = check_and_cast<TEDChangeInfo *>(details);
+    const TEDChangeInfo *d = check_and_cast<const TEDChangeInfo *>(details);
 
     unsigned int k = d->getTedLinkIndicesArraySize();
 

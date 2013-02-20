@@ -215,7 +215,7 @@ void InetSimpleBattery::receiveChangeNotification(int aCategory, const cObject* 
     //EV << "[Battery]: receiveChangeNotification" << endl;
     if (aCategory == NF_RADIOSTATE_CHANGED)
     {
-        RadioState *rs = check_and_cast <RadioState *>(aDetails);
+        const RadioState *rs = check_and_cast<const RadioState *>(aDetails);
 
         DeviceEntryMap::iterator it = deviceEntryMap.find(rs->getRadioId());
         if (it==deviceEntryMap.end())

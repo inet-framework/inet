@@ -2749,7 +2749,7 @@ void OLSR:: processLinkBreak(const cObject *details)
     {
         if (dynamic_cast<IPv4Datagram *>(const_cast<cObject*>(details)))
         {
-            IPv4Datagram * dgram = check_and_cast<IPv4Datagram *>(details);
+            IPv4Datagram * dgram = const_cast<IPv4Datagram *>(check_and_cast<const IPv4Datagram *>(details));
             mac_failed(dgram);
             return;
         }

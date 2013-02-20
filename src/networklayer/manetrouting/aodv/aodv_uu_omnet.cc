@@ -1018,7 +1018,7 @@ void NS_CLASS processLinkBreak(const cPolymorphic *details)
     {
         if (dynamic_cast<IPv4Datagram *>(const_cast<cPolymorphic*> (details)))
         {
-            dgram = check_and_cast<IPv4Datagram *>(details);
+            dgram = const_cast<IPv4Datagram *>(check_and_cast<const IPv4Datagram *>(details));
             packetFailed(dgram);
             return;
         }

@@ -95,7 +95,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
     bool dataChunkDelivered = false;
     bool shutdownCalled = false;
     for (uint32 i = 0; i < numberOfChunks; i++) {
-        const SCTPChunk* header = (const SCTPChunk*)(sctpmsg->removeChunk());
+        SCTPChunk* header = (SCTPChunk*)(sctpmsg->removeChunk());
         const uint8       type = header->getChunkType();
 
         if ((type != INIT) &&

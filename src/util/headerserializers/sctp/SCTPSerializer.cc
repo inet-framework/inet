@@ -68,7 +68,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
     int32 noChunks = msg->getChunksArraySize();
         for (int32 cc = 0; cc < noChunks; cc++)
         {
-            const SCTPChunk *chunk = check_and_cast<SCTPChunk *>(((SCTPMessage *)msg)->getChunks(cc));
+            SCTPChunk *chunk = const_cast<SCTPChunk*>(check_and_cast<const SCTPChunk *>(((SCTPMessage *)msg)->getChunks(cc)));
             unsigned char chunkType = chunk->getChunkType();
             switch (chunkType)
             {

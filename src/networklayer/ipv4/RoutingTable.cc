@@ -185,7 +185,7 @@ void RoutingTable::receiveChangeNotification(int category, const cObject *detail
     else if (category==NF_INTERFACE_DELETED)
     {
         // remove all routes that point to that interface
-        InterfaceEntry *entry = check_and_cast<InterfaceEntry*>(details);
+        InterfaceEntry *entry = const_cast<InterfaceEntry*>(check_and_cast<const InterfaceEntry*>(details));
         deleteInterfaceRoutes(entry);
     }
     else if (category==NF_INTERFACE_STATE_CHANGED)

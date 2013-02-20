@@ -948,7 +948,7 @@ void DYMOUM::processPromiscuous(const cObject *details)
         struct in_addr addr;
         struct in_addr gatewayAddr;
 
-        frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(details);
+        frame = const_cast<Ieee80211DataOrMgmtFrame *>(check_and_cast<const Ieee80211DataOrMgmtFrame *>(details));
         if (!isInMacLayer())
             ip_msg = dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedPacket());
         /////////////////////////////////////
@@ -1085,7 +1085,7 @@ void DYMOUM::processFullPromiscuous(const cObject *details)
     {
         MACAddress macAddressConv;
         struct in_addr addr;
-        twoAddressFrame = check_and_cast<Ieee80211TwoAddressFrame *>(details);
+        twoAddressFrame = const_cast<Ieee80211TwoAddressFrame *>(check_and_cast<const Ieee80211TwoAddressFrame *>(details));
         if (!isInMacLayer())
         {
             macAddressConv = twoAddressFrame->getTransmitterAddress();

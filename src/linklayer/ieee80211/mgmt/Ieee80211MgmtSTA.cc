@@ -336,7 +336,7 @@ void Ieee80211MgmtSTA::receiveChangeNotification(int category, const cObject *de
     // Note that we are only subscribed during scanning!
     if (category==NF_RADIOSTATE_CHANGED)
     {
-        RadioState::State radioState = check_and_cast<RadioState *>(details)->getState();
+        const RadioState::State radioState = check_and_cast<const RadioState *>(details)->getState();
         if (radioState==RadioState::RECV)
         {
             EV << "busy radio channel detected during scanning\n";
