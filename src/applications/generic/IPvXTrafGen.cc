@@ -72,8 +72,6 @@ void IPvXTrafGen::initialize(int stage)
 
     IPSocket ipSocket(gate("ipOut"));
     ipSocket.registerProtocol(protocol);
-    IPSocket ipv6Socket(gate("ipv6Out"));
-    ipv6Socket.registerProtocol(protocol);
 
     if (isNodeUp() && isEnabled())
         scheduleNextPacket(-1);
@@ -185,7 +183,6 @@ void IPvXTrafGen::sendPacket()
     payload->setByteLength(packetLengthPar->longValue());
 
     Address destAddr = chooseDestAddr();
-    const char *gate;
 
     if (destAddr.getType() == Address::IPv4)
     {
@@ -194,7 +191,6 @@ void IPvXTrafGen::sendPacket()
         controlInfo->setDestAddr(destAddr.toIPv4());
         controlInfo->setProtocol(protocol);
         payload->setControlInfo(controlInfo);
-        gate = "ipOut";
     }
     else if (destAddr.getType() == Address::IPv6)
     {
@@ -203,13 +199,12 @@ void IPvXTrafGen::sendPacket()
         controlInfo->setDestAddr(destAddr.toIPv6());
         controlInfo->setProtocol(protocol);
         payload->setControlInfo(controlInfo);
-        gate = "ipv6Out";
     }
     else
         throw cRuntimeError("Unknown address type");
     EV << "Sending packet: ";
     printPacket(payload);
     emit(sentPkSignal, payload);
-    send(payload, gate);
+    send(payload, "ipOut");
     numSent++;
 }

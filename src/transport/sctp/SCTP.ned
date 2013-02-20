@@ -107,9 +107,7 @@ simple SCTP like ISCTP
     gates:
         input from_appl[];
         input from_ip;
-        input from_ipv6;
         output to_appl[];
         output to_ip;
-        output to_ipv6;
 }
 

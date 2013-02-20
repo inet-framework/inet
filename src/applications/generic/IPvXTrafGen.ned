@@ -48,9 +48,7 @@ simple IPvXTrafGen like IIPvXTrafficGenerator
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);
     gates:
-        input ipIn @labels(IPv4ControlInfo/up);
-        input ipv6In @labels(IPv6ControlInfo/up);
-        output ipOut @labels(IPv4ControlInfo/down);
-        output ipv6Out @labels(IPv6ControlInfo/down);
+        input ipIn @labels(IPv4ControlInfo/up,IPv6ControlInfo/up);
+        output ipOut @labels(IPv4ControlInfo/down,IPv6ControlInfo/down);
 }
 

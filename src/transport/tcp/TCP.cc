@@ -107,8 +107,6 @@ void TCP::initialize(int stage)
 
     IPSocket ipSocket(gate("ipOut"));
     ipSocket.registerProtocol(IP_PROT_TCP);
-    IPSocket ipv6Socket(gate("ipv6Out"));
-    ipv6Socket.registerProtocol(IP_PROT_TCP);
   }
 }
 
@@ -138,7 +136,7 @@ void TCP::handleMessage(cMessage *msg)
         if (!ret)
             removeConnection(conn);
     }
-    else if (msg->arrivedOn("ipIn") || msg->arrivedOn("ipv6In"))
+    else if (msg->arrivedOn("ipIn"))
     {
         if (false
 #ifdef WITH_IPv4

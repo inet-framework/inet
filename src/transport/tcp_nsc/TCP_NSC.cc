@@ -254,8 +254,6 @@ void TCP_NSC::initialize(int stage)
 
     IPSocket ipSocket(gate("ipOut"));
     ipSocket.registerProtocol(IP_PROT_TCP);
-    IPSocket ipv6Socket(gate("ipv6Out"));
-    ipv6Socket.registerProtocol(IP_PROT_TCP);
 
     isAliveM = true;
   }
@@ -670,7 +668,7 @@ void TCP_NSC::handleMessage(cMessage *msgP)
             scheduleAt(msgP->getArrivalTime() + 1.0 / (double)pStackM->get_hz(), msgP);
         }
     }
-    else if (msgP->arrivedOn("ipIn") || msgP->arrivedOn("ipv6In"))
+    else if (msgP->arrivedOn("ipIn"))
     {
         if (false
 #ifdef WITH_IPv4
@@ -903,8 +901,6 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     tcpEV << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP << " from " << src
        << " to " << dest << "\n";
 
-    const char* output;
-
     if (dest.getType() == Address::IPv4)
     {
         // send over IPv4
@@ -913,8 +909,6 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         controlInfo->setSrcAddr(src.toIPv4());
         controlInfo->setDestAddr(dest.toIPv4());
         tcpseg->setControlInfo(controlInfo);
-
-        output = "ipOut";
     }
     else if (dest.getType() == Address::IPv6)
     {
@@ -924,8 +918,6 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         controlInfo->setSrcAddr(src.toIPv6());
         controlInfo->setDestAddr(dest.toIPv6());
         tcpseg->setControlInfo(controlInfo);
-
-        output = "ipv6Out";
     }
     else
         throw cRuntimeError("Unknown address type");
@@ -942,7 +934,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     if (sndAckVector)
         sndAckVector->record(tcpseg->getAckNo());
 
-    send(tcpseg, output);
+    send(tcpseg, "ipOut");
 }
 
 void TCP_NSC::processAppCommand(TCP_NSC_Connection& connP, cMessage *msgP)

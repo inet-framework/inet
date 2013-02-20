@@ -68,9 +68,7 @@ simple UDP like IUDP
 
     gates:
         input appIn[] @labels(UDPControlInfo/down);
-        input ipIn @labels(UDPPacket,IPv4ControlInfo/up);
-        input ipv6In @labels(UDPPacket,IPv6ControlInfo/up);
+        input ipIn @labels(UDPPacket,IPv4ControlInfo/up,IPv6ControlInfo/up);
         output appOut[] @labels(UDPControlInfo/up);
-        output ipOut @labels(UDPPacket,IPv4ControlInfo/down);
-        output ipv6Out @labels(UDPPacket,IPv6ControlInfo/down);
+        output ipOut @labels(UDPPacket,IPv4ControlInfo/down,IPv6ControlInfo/down);
 }

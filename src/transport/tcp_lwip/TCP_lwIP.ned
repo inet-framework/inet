@@ -38,8 +38,6 @@ simple TCP_lwIP like ITCP
     gates:
         input appIn[];
         input ipIn;
-        input ipv6In;
         output appOut[];
         output ipOut;
-        output ipv6Out;
 }

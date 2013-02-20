@@ -42,8 +42,6 @@ void IPvXTrafSink::initialize(int stage)
         int protocol = par("protocol");
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(protocol);
-        IPSocket ipv6Socket(gate("ipv6Out"));
-        ipv6Socket.registerProtocol(protocol);
     }
     else if (stage == 1)
     {

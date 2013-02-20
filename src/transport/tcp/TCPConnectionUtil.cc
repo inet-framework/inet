@@ -249,7 +249,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
         controlInfo->setDestAddr(remoteAddr.toIPv6());
         tcpseg->setControlInfo(controlInfo);
 
-        tcpMain->send(tcpseg, "ipv6Out");
+        tcpMain->send(tcpseg, "ipOut");
     }
     else
         throw cRuntimeError("Unknown address type");
@@ -280,7 +280,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
         controlInfo->setDestAddr(dest.toIPv6());
         tcpseg->setControlInfo(controlInfo);
 
-        check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg, "ipv6Out");
+        check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg, "ipOut");
     }
     else
         throw cRuntimeError("Unknown address type");

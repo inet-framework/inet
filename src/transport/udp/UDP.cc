@@ -144,8 +144,6 @@ void UDP::initialize(int stage)
 
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(IP_PROT_UDP);
-        IPSocket ipv6Socket(gate("ipv6Out"));
-        ipv6Socket.registerProtocol(IP_PROT_UDP);
     }
     else if (stage == 1)
     {
@@ -160,7 +158,7 @@ void UDP::handleMessage(cMessage *msg)
         throw cRuntimeError("Message '%s' received when UDP is OFF", msg->getName());
 
     // received from IP layer
-    if (msg->arrivedOn("ipIn") || msg->arrivedOn("ipv6In"))
+    if (msg->arrivedOn("ipIn"))
     {
         if (dynamic_cast<UDPPacket *>(msg) != NULL)
             processUDPPacket((UDPPacket *)msg);
@@ -792,11 +790,11 @@ void UDP::sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, con
         udpPacket->setControlInfo(ipControlInfo);
 
         emit(sentPkSignal, udpPacket);
-        send(udpPacket, "ipv6Out");
+        send(udpPacket, "ipOut");
     }
     else
     {
-        // send to IPv6
+        // send to generic
         EV << "Sending app packet " << appData->getName() << endl;
         IAddressPolicy * addressPolicy = destAddr.getAddressPolicy();
         INetworkProtocolControlInfo *ipControlInfo = addressPolicy->createNetworkProtocolControlInfo();

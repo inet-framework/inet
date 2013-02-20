@@ -217,9 +217,7 @@ simple TCP like ITCP
         @display("i=block/wheelbarrow");
     gates:
         input appIn[] @labels(TCPCommand/down);
-        input ipIn @labels(TCPSegment,IPv4ControlInfo/up);
-        input ipv6In @labels(TCPSegment,IPv6ControlInfo/up);
+        input ipIn @labels(TCPSegment,IPv4ControlInfo/up,IPv6ControlInfo/up);
         output appOut[] @labels(TCPCommand/up);
-        output ipOut @labels(TCPSegment,IPv4ControlInfo/down);
-        output ipv6Out @labels(TCPSegment,IPv6ControlInfo/down);
+        output ipOut @labels(TCPSegment,IPv4ControlInfo/down,IPv6ControlInfo/down);
 }
