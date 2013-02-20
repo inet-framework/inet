@@ -66,7 +66,7 @@ void FlatNetworkConfigurator6::setDisplayString(int numIPNodes, int numNonIPNode
 
 bool FlatNetworkConfigurator6::isIPNode(cTopology::Node *node)
 {
-    return AddressResolver().findRoutingTable6Of(node->getModule()) != NULL
+    return AddressResolver().findIPv6RoutingTableOf(node->getModule()) != NULL
             && AddressResolver().findInterfaceTableOf(node->getModule()) != NULL;
 }
 

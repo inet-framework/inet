@@ -38,6 +38,8 @@
 #include "IPv6RoutingTable.h"
 #endif
 
+#include "GenericRoutingTable.h"
+
 Address AddressResolver::resolve(const char *s, int addrType)
 {
     Address addr;
@@ -446,7 +448,7 @@ IInterfaceTable *AddressResolver::interfaceTableOf(cModule *host)
 
 IIPv4RoutingTable *AddressResolver::routingTableOf(cModule *host)
 {
-    IIPv4RoutingTable *mod = findRoutingTableOf(host);
+    IIPv4RoutingTable *mod = findIPv4RoutingTableOf(host);
     if (!mod)
         throw cRuntimeError("AddressResolver: IIPv4RoutingTable not found as submodule "
                   " `routingTable' in host/router `%s'", host->getFullPath().c_str());
@@ -456,7 +458,7 @@ IIPv4RoutingTable *AddressResolver::routingTableOf(cModule *host)
 IPv6RoutingTable *AddressResolver::routingTable6Of(cModule *host)
 {
     // find IPv6RoutingTable
-    IPv6RoutingTable *mod = findRoutingTable6Of(host);
+    IPv6RoutingTable *mod = findIPv6RoutingTableOf(host);
     if (!mod)
         throw cRuntimeError("AddressResolver: IPv6RoutingTable not found as submodule "
                   " `routingTable' in host/router `%s'", host->getFullPath().c_str());
@@ -480,7 +482,7 @@ IInterfaceTable *AddressResolver::findInterfaceTableOf(cModule *host)
     return dynamic_cast<IInterfaceTable *>(mod);
 }
 
-IIPv4RoutingTable *AddressResolver::findRoutingTableOf(cModule *host)
+IIPv4RoutingTable *AddressResolver::findIPv4RoutingTableOf(cModule *host)
 {
 #ifdef WITH_IPv4
     // KLUDGE: TODO: look deeper temporarily
@@ -492,7 +494,7 @@ IIPv4RoutingTable *AddressResolver::findRoutingTableOf(cModule *host)
 #endif
 }
 
-IPv6RoutingTable *AddressResolver::findRoutingTable6Of(cModule *host)
+IPv6RoutingTable *AddressResolver::findIPv6RoutingTableOf(cModule *host)
 {
 #ifdef WITH_IPv6
     // KLUDGE: TODO: look deeper temporarily
@@ -502,6 +504,14 @@ IPv6RoutingTable *AddressResolver::findRoutingTable6Of(cModule *host)
 #else
     return NULL;
 #endif
+}
+
+GenericRoutingTable *AddressResolver::findGenericRoutingTableOf(cModule *host)
+{
+    // KLUDGE: TODO: look deeper temporarily
+    GenericRoutingTable *rt = dynamic_cast<GenericRoutingTable *>(host->getSubmodule("routingTable"));
+    if (!rt) rt = dynamic_cast<GenericRoutingTable *>(host->getModuleByPath(".routingTable.generic"));
+    return rt;
 }
 
 NotificationBoard *AddressResolver::findNotificationBoardOf(cModule *host)

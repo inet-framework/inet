@@ -32,6 +32,7 @@ class IInterfaceTable;
 class InterfaceEntry;
 class IIPv4RoutingTable;
 class IPv6RoutingTable;
+class GenericRoutingTable;
 class NotificationBoard;
 
 #define DEFAULT_ADDR_TYPE (ADDR_IPv4 | ADDR_IPv6 | ADDR_MAC | ADDR_MODULEPATH | ADDR_MODULEID)
@@ -189,12 +190,17 @@ class INET_API AddressResolver
     /**
      * Like routingTableOf(), but doesn't throw error if not found.
      */
-    virtual IIPv4RoutingTable *findRoutingTableOf(cModule *host);
+    virtual IIPv4RoutingTable *findIPv4RoutingTableOf(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */
-    virtual IPv6RoutingTable *findRoutingTable6Of(cModule *host);
+    virtual IPv6RoutingTable *findIPv6RoutingTableOf(cModule *host);
+
+    /**
+     * Like interfaceTableOf(), but doesn't throw error if not found.
+     */
+    virtual GenericRoutingTable *findGenericRoutingTableOf(cModule *host);
 
     /**
      * Like notificationBoardOf(), but doesn't throw error if not found.

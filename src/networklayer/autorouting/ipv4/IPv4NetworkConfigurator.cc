@@ -243,7 +243,7 @@ void IPv4NetworkConfigurator::extractTopology(IPv4Topology& topology)
         cModule *module = node->getModule();
         node->module = module;
         node->interfaceTable = AddressResolver().findInterfaceTableOf(module);
-        node->routingTable = AddressResolver().findRoutingTableOf(module);
+        node->routingTable = AddressResolver().findIPv4RoutingTableOf(module);
         if (node->routingTable && !node->routingTable->isForwardingEnabled())
             node->setWeight(DBL_MAX);
     }
