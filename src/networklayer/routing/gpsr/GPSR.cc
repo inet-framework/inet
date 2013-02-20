@@ -87,7 +87,7 @@ void GPSR::initialize(int stage)
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             InterfaceEntry * interfaceEntry = interfaceTable->getInterface(i);
             if (interfaceEntry->isMulticast() && interfaceMatcher.matches(interfaceEntry->getName()))
-                addressPolicy->joinMulticastGroup(interfaceEntry, addressPolicy->getLinkLocalManetRoutersMulticastAddress());
+                interfaceEntry->joinMulticastGroup(addressPolicy->getLinkLocalManetRoutersMulticastAddress());
         }
         // hook to netfilter
         networkProtocol->registerHook(0, this);

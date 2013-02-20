@@ -33,7 +33,6 @@ class INET_API IAddressPolicy
         virtual int getMaxPrefixLength() const = 0;
         virtual Address getLinkLocalManetRoutersMulticastAddress() const = 0;
         virtual Address getLinkLocalRIPRoutersMulticastAddress() const = 0;
-        virtual void joinMulticastGroup(InterfaceEntry * interfaceEntry, const Address & address) const = 0; // TODO: move to interface entry?
         virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const = 0; // TODO: move, where?
 };
 

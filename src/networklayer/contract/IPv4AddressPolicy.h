@@ -22,7 +22,6 @@
 #include "IAddressPolicy.h"
 #include "IPv4Address.h"
 #include "IPv4ControlInfo.h"
-#include "IPv4InterfaceData.h"
 
 class INET_API IPv4AddressPolicy : public IAddressPolicy
 {
@@ -38,7 +37,6 @@ class INET_API IPv4AddressPolicy : public IAddressPolicy
         virtual Address getLinkLocalManetRoutersMulticastAddress() const { return IPv4Address::LL_MANET_ROUTERS; }
         virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ALL_RIP_ROUTERS_MCAST; }
         virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const { return new IPv4ControlInfo(); }
-        virtual void joinMulticastGroup(InterfaceEntry * interfaceEntry, const Address & address) const { interfaceEntry->ipv4Data()->joinMulticastGroup(address.toIPv4()); }
 };
 
 #endif

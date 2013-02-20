@@ -22,7 +22,6 @@
 #include "IAddressPolicy.h"
 #include "ModulePathAddress.h"
 #include "GenericNetworkProtocolControlInfo.h"
-#include "GenericNetworkProtocolInterfaceData.h"
 
 class INET_API ModulePathAddressPolicy : public IAddressPolicy
 {
@@ -37,7 +36,6 @@ class INET_API ModulePathAddressPolicy : public IAddressPolicy
         virtual Address getLinkLocalManetRoutersMulticastAddress() const { return ModulePathAddress(-109); } // TODO: constant
         virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ModulePathAddress(-9); } // TODO: constant
         virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const { return new GenericNetworkProtocolControlInfo(); }
-        virtual void joinMulticastGroup(InterfaceEntry * interfaceEntry, const Address & address) const { interfaceEntry->getGenericNetworkProtocolData()->joinMulticastGroup(address); }
 };
 
 #endif

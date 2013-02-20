@@ -16,10 +16,17 @@
 //
 
 #include "NetworkDatagramMultiplexer.h"
+
+#ifdef WITH_IPv4
 #include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
+#endif
+
+#ifdef WITH_IPv6
 #include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"
+#endif
+
 #include "GenericNetworkProtocolControlInfo.h"
 #include "GenericDatagram.h"
 
@@ -42,10 +49,15 @@ int NetworkDatagramMultiplexer::getProtocolIndex(cMessage * message)
     cPacket * packet = check_and_cast<cPacket *>(message);
     cObject * controlInfo = packet->getControlInfo();
     // TODO: handle the case when some network protocols are disabled
-    if (dynamic_cast<IPv4ControlInfo *>(controlInfo) || dynamic_cast<IPv4Datagram *>(message))
+    if (false) ;
+#ifdef WITH_IPv4
+    else if (dynamic_cast<IPv4ControlInfo *>(controlInfo) || dynamic_cast<IPv4Datagram *>(message))
         return 0;
+#endif
+#ifdef WITH_IPv6
     else if (dynamic_cast<IPv6ControlInfo *>(controlInfo) || dynamic_cast<IPv6Datagram *>(message))
         return 1;
+#endif
     else if (dynamic_cast<GenericNetworkProtocolControlInfo *>(controlInfo) || dynamic_cast<GenericDatagram *>(message))
         return 2;
     else

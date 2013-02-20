@@ -22,6 +22,7 @@
 
 #include "INETDefs.h"
 
+#include "Address.h"
 #include "MACAddress.h"
 #include "InterfaceToken.h"
 #include "NotifierConsts.h"
@@ -190,6 +191,8 @@ class INET_API InterfaceEntry : public cNamedObject
     TRILLInterfaceData *trillData() const {return trilldata;}
     ISISInterfaceData *isisData() const {return isisdata;}
     //@}
+
+    virtual void joinMulticastGroup(const Address & address) const;
 
     /** @name Installing protocol-specific interface data */
     //@{

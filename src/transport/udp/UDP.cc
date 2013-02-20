@@ -913,7 +913,7 @@ void UDP::addMulticastAddressToInterface(InterfaceEntry *ie, const Address& mult
 #endif
     }
     else
-        multicastAddr.getAddressPolicy()->joinMulticastGroup(ie, multicastAddr);
+        ie->joinMulticastGroup(multicastAddr);
 }
 
 void UDP::leaveMulticastGroups(SockDesc *sd, const std::vector<Address>& multicastAddresses)

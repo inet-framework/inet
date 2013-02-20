@@ -16,9 +16,16 @@
 //
 
 #include "MultiNetworkLayerLowerMultiplexer.h"
+
+#ifdef WITH_IPv4
 #include "ARPPacket_m.h"
 #include "IPv4Datagram.h"
+#endif
+
+#ifdef WITH_IPv6
 #include "IPv6Datagram.h"
+#endif
+
 #include "GenericDatagram.h"
 
 Define_Module(MultiNetworkLayerLowerMultiplexer);
@@ -43,10 +50,15 @@ int MultiNetworkLayerLowerMultiplexer::getProtocolCount()
 int MultiNetworkLayerLowerMultiplexer::getProtocolIndex(cMessage * message)
 {
     // TODO: handle the case when some network protocols are disabled
+    if (false) ;
+#ifdef WITH_IPv4
     if (dynamic_cast<IPv4Datagram *>(message) || dynamic_cast<ARPPacket *>(message))
         return 0;
+#endif
+#ifdef WITH_IPv6
     else if (dynamic_cast<IPv6Datagram *>(message))
         return 1;
+#endif
     else if (dynamic_cast<GenericDatagram *>(message))
         return 2;
     else

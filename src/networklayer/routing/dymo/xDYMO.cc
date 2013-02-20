@@ -112,7 +112,7 @@ void xDYMO::initialize(int stage)
                 // Most AODVv2 messages are sent with the IP destination address set to the link-local
                 // multicast address LL-MANET-Routers [RFC5498] unless otherwise specified. Therefore,
                 // all AODVv2 routers MUST subscribe to LL-MANET-Routers [RFC5498] to receiving AODVv2 messages.
-                addressPolicy->joinMulticastGroup(interfaceEntry, addressPolicy->getLinkLocalManetRoutersMulticastAddress());
+                interfaceEntry->joinMulticastGroup(addressPolicy->getLinkLocalManetRoutersMulticastAddress());
         }
         // hook to netfilter
         networkProtocol->registerHook(0, this);

@@ -262,3 +262,19 @@ MacEstimateCostProcess* InterfaceEntry::getEstimateCostProcess(int position)
     return NULL;
 }
 
+void InterfaceEntry::joinMulticastGroup(const Address & address) const {
+    switch (address.getType()) {
+#ifdef WITH_IPv4
+        case Address::IPv4:
+            ipv4Data()->joinMulticastGroup(address.toIPv4());
+            break;
+#endif
+        case Address::MAC:
+        case Address::MODULEID:
+        case Address::MODULEPATH:
+            getGenericNetworkProtocolData()->joinMulticastGroup(address);
+            break;
+        default:
+            throw cRuntimeError("Unknown address type");
+    }
+}
