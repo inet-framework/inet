@@ -1,6 +1,9 @@
 package inet.examples.bgpv4.BGPOpen;
 
 
+import inet.base.UnimplementedModule;
+
+
 network Net
 {
     types:
@@ -19,6 +22,9 @@ network Net
         B: BGPRouterSimple {
             parameters:
                 @display("p=200,60");
+        }
+        configurator: UnimplementedModule {
+            @display("p=62,127");
         }
     connections:
         A.pppg++ <--> LINK_100 <--> B.pppg++;
