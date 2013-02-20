@@ -49,7 +49,7 @@ Pause <- function () {
 .da_unshaped_dr1G.wd <- paste(.base.directory, "results/Dedicated/unshaped_dr1G", sep="/")
 .da_shaped_dr100M.wd <- paste(.base.directory, "results/Dedicated/shaped_dr100M", sep="/")
 .da_shaped_dr1G.wd <- paste(.base.directory, "results/Dedicated/shaped_dr1G", sep="/")
-.sa_shaped_dr100M.wd <- paste(.base.directory, "results/Shared/shaped__dr100M", sep="/")
+.sa_shaped_dr100M.wd <- paste(.base.directory, "results/Shared/shaped_dr100M", sep="/")
 ## .sa_N10_nh1_nf1_nv1_tbf.wd <- paste(.base.directory, "results/Shared/test/N10_nh1_nf1_nv1_tbf-test", sep="/")
 ## for plotting
 .measure <-  c('average session delay [s]',
