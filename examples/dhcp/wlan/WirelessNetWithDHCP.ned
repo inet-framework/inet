@@ -56,6 +56,8 @@ network WirelessNetWithDHCP
             routingFile = "wirelessRouter.rt";
             numUdpApps = 1;
             udpApp[0].typename = "DHCPServer";
+            IPForward = true;
+            networkLayer.proxyARP = true;
             wlan[0].mgmtType = default("Ieee80211MgmtAP");
             wlan[0].mgmt.encapDecap = "true";
         }
