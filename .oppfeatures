@@ -423,6 +423,48 @@
         linkerFlags = ""
         />
     <feature
+        id="DYMO"
+        name="DYMO"
+        description = "Dynamic MANET On-demand Routing"
+        initiallyEnabled = "true"
+        requires = "UDP Ieee80211"
+        labels = "routing"
+        nedPackages = "
+                       inet.networklayer.routing.dymo
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="GPSR"
+        name="GPSR"
+        description = "Greedy Perimeter Stateless Routing for Wireless Networks"
+        initiallyEnabled = "true"
+        requires = "UDP"
+        labels = "routing"
+        nedPackages = "
+                       inet.networklayer.routing.gpsr
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="RIP"
+        name="RIP"
+        description = "Routing Information Protocol"
+        initiallyEnabled = "true"
+        requires = "UDP"
+        labels = "routing"
+        nedPackages = "
+                       inet.networklayer.routing.rip
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="MANET"
         name="MANET routing"
         description = "AdHoc MANET routing support (AODV, BATMAN, DSR, DSDV, DYMO, DYMO_FAU, OLSR)"
@@ -431,7 +473,6 @@
         labels = "routing manet"
         nedPackages = "
                        inet.networklayer.manetrouting
-                       inet.networklayer.routing.dymo
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_MANET"
