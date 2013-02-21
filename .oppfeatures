@@ -451,6 +451,20 @@
         linkerFlags = ""
         />
     <feature
+        id="RIP"
+        name="RIP"
+        description = "Routing Information Protocol"
+        initiallyEnabled = "true"
+        requires = "UDP"
+        labels = "routing"
+        nedPackages = "
+                       inet.networklayer.routing.rip
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="MANET"
         name="MANET routing"
         description = "AdHoc MANET routing support (AODV, BATMAN, DSR, DSDV, DYMO, DYMO_FAU, OLSR)"
