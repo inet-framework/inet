@@ -68,7 +68,7 @@ void DHCPServer::initialize(int stage)
             socket.setOutputGate(gate("udpOut"));
             socket.bind(bootps_port);
             socket.setBroadcast(true);
-            ev << "DHCP Server bond to port " << bootps_port << " at " << ie <<  endl;
+            ev << "DHCP Server bound to port " << bootps_port << " at " << ie <<  endl;
         }
         else
         {

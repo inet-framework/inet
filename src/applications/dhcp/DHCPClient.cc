@@ -101,7 +101,7 @@ void DHCPClient::initialize(int stage)
         socket.setOutputGate(gate("udpOut"));
         socket.bind(bootpc_port);
         socket.setBroadcast(true);
-        ev << "DHCP Client bond to port " << bootpc_port << " at " << ie->getName() <<  endl;
+        ev << "DHCP Client bound to port " << bootpc_port << " at " << ie->getName() <<  endl;
 
         // set client to idle state
         client_state = IDLE;
