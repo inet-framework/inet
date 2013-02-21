@@ -31,7 +31,10 @@
 #include "ProtocolMap.h"
 
 /**
- * Implements a generic network protocol.
+ * Implements a generic network protocol that routes generic datagrams through the network.
+ * Routing decisions are based on a generic routing table, but it also supports the netfilter
+ * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
+ * and reassembling.
  */
 class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter
 {

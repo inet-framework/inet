@@ -47,7 +47,7 @@ class AddressBlock {
 }
 
 //
-// timer messages
+// DYMO timer messages
 //
 
 message RREQTimer {
@@ -80,15 +80,27 @@ packet RteMsg extends DYMOPacket {
     AddressBlock addedNode[];
 }
 
+//
+// DYMO RREQ packet
+//
 packet RREQ extends RteMsg {
 }
 
+//
+// DYMO RREP packet
+//
 packet RREP extends RteMsg {
 }
 
+//
+// DYMO RREP ACK packet
+//
 packet RREP_ACK extends DYMOPacket {
 }
 
+//
+// DYMO RERR packet
+//
 packet RERR extends DYMOPacket {
     AddressBlock unreachableNode[];
 }

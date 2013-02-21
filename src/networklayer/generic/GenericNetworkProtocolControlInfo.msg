@@ -27,37 +27,8 @@ cplusplus {{
 }}
 
 
-//TODO update comments
-
 //
-// Control information for sending/receiving packets over IPv4.
-//
-// To send a packet over IPv4, fill in an ~IPv4ControlInfo object,
-// attach it to the packet with the C++ method setControlInfo(),
-// the send it to the ~IPv4 module.
-//
-// When sending, the following fields are required:
-// - protocol: a value from ~IPProtocolId
-// - destAddr
-//
-// Optional fields:
-// - srcAddr: it will be set to the address of the outgoing interface
-// - typeOfServoce: (default: 0)
-// - timeToLive: default defined as module parameter
-// - dontFragment: default: false
-//
-// Not supported:
-// - options: IPv4 Options currently not used
-// - Identifier is currently always chosen by the IPv4 layer
-//
-// When ~IPv4 delivers a packet to higher layers, it also attaches an ~IPv4ControlInfo
-// to it. It fills in the following fields:
-//  - srcAddr, destAddr, protocol, TypeOfService: values from the original datagram
-//  - interfaceId: the interface on which the datagram arrived, or -1 if it was
-//    created locally
-//
-// ~IPv4 also puts the original datagram object into the control info, because
-// it may be needed by higher layers (for example, by ~ICMP for error reporting).
+// Control information for sending/receiving packets over the generic network protocol.
 //
 class GenericNetworkProtocolControlInfo  //TODO rename!!!!
 {
@@ -72,19 +43,14 @@ class GenericNetworkProtocolControlInfo  //TODO rename!!!!
 
 
 //
-// Control info attached to packets sent from ~IPv4 to ~ARP.
+// Control info attached to packets sent from ~GenericNetworkProtocol to ~GlobalARP.
 //
 // Next hop address is used on a LAN to determine the MAC destination
 // address (and it may be used on other multicast networks for similar
 // addressing purpose).
-//
-//
-// TODO
 //
 class GenericRoutingDecision
 {
     int interfaceId = -1; 
     Address nextHop;
 }
-
-

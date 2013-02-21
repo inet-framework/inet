@@ -20,6 +20,10 @@
 
 #include "INETDefs.h"
 
+/**
+ * This class provides network datagram multiplexing based on the the datagram
+ * runtime type or on the type of attached control info.
+ */
 class NetworkDatagramMultiplexer : public cSimpleModule {
   public:
     NetworkDatagramMultiplexer() { }

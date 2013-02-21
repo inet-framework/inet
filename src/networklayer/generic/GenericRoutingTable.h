@@ -33,7 +33,6 @@ class NotificationBoard;
 /**
  * A C++ interface to abstract the functionality of a routing table, regardless of address type.
  */
-//TODO the "Generic" can be dropped from the name, once IPv4RoutingTable[6] is renamed to IPv[4|6]IPv4RoutingTable
 class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable, public INotifiable
 {
     private:
@@ -41,7 +40,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
         NotificationBoard *nb; // cached pointer
 
         Address routerId;
-        Address::AddressType addressType; // TODO: create separate routing tables for all kind of addresses
+        Address::AddressType addressType;
         bool forwardingEnabled;
         bool multicastForwardingEnabled;
 

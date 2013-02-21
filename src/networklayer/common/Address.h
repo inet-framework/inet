@@ -29,7 +29,12 @@
 class IAddressType;
 
 /**
- * TODO
+ * This class provides the generic interface for network addresses. For efficiency reasons the
+ * implementation uses a 128 bits integer to represent all kinds of network addresses. The
+ * different address implementations should not subclass this class, they should rather provide
+ * conversions to and from this class.
+ *
+ * @see IPv4Address, IPv6Address, MACAddress, ModulePathAddress, ModuleIdAddress
  */
 class INET_API Address
 {

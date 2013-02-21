@@ -27,7 +27,7 @@ class InterfaceEntry;
 class IRoutingTable;
 
 /**
- * TODO
+ * A generic route that uses generic addresses as destination and next hop.
  */
 class INET_API GenericRoute : public cObject, public IRoute
 {

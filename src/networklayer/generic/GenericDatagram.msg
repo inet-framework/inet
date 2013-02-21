@@ -24,7 +24,7 @@ cplusplus {{
 }}
 
 //
-// Represents a generic datagram.
+// Represents a generic network datagram with generic network addresses. 
 //
 packet GenericDatagram
 {

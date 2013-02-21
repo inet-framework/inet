@@ -25,6 +25,9 @@
 #include "Address.h"
 #include "Coord.h"
 
+/**
+ * This class provides a mapping between node addresses and their positions.
+ */
 class INET_API PositionTable {
     private:
         typedef std::pair<simtime_t, Coord> AddressToPositionMapValue;

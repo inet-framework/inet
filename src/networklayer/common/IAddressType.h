@@ -22,6 +22,9 @@
 #include "Address.h"
 #include "INetworkProtocolControlInfo.h"
 
+/**
+ * This class provides the abstract interface for different address types.
+ */
 class INET_API IAddressType
 {
     public:

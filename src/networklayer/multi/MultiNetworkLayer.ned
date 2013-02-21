@@ -22,7 +22,25 @@ import inet.networklayer.generic.GenericNetworkLayer;
 import inet.networklayer.ipv4.IPv4NetworkLayer;
 import inet.networklayer.ipv6.IPv6NetworkLayer;
 
+//
+// This module provides network protocol specific multiplexing.
+//
+simple NetworkDatagramMultiplexer
+{
+    parameters:
+        @display("i=block/fork");
 
+    gates:
+        input upperIn;
+        output upperOut;
+        input lowerIn[];
+        output lowerOut[];
+}
+
+//
+// This module provides network protocol specific multiplexing.
+// It's part of MultiNetworkLayer and it's meant to be used there.
+//
 simple MultiNetworkLayerUpperMultiplexer
 {
     parameters:
@@ -39,6 +57,10 @@ simple MultiNetworkLayerUpperMultiplexer
         output pingLowerOut[];
 }
 
+//
+// This module provides network protocol specific multiplexing.
+// It's part of MultiNetworkLayer and it's meant to be used there.
+//
 simple MultiNetworkLayerLowerMultiplexer
 {
     parameters:
@@ -51,20 +73,12 @@ simple MultiNetworkLayerLowerMultiplexer
         output ifLowerOut[] @labels(INetworkDatagram);
 }
 
-simple NetworkDatagramMultiplexer
-{
-    parameters:
-        @display("i=block/fork");
-
-    gates:
-        input upperIn;
-        output upperOut;
-        input lowerIn[];
-        output lowerOut[];
-}
-
 //
 // This module supports multiple different network layers simultaneously.
+// Packets received through the transport gates are handed over to the
+// corresponding network layer based on the attached control info.
+// Packets received from the interface gates are also handed over to the
+// corresponding network layer based on their runtime type.
 //
 module MultiNetworkLayer like INetworkLayer
 {

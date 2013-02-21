@@ -24,6 +24,8 @@ import inet.networklayer.ipv6.IPv6RoutingTable;
 
 //
 // This module supports multiple different routing tables simultaneously.
+// The actual routes are stored in the submodule routing tables and they
+// are accessed directly by modules.
 //
 module MultiRoutingTable like IRoutingTable
 {

@@ -20,7 +20,9 @@ package inet.networklayer.routing.gpsr;
 
 import inet.networklayer.multi.NetworkDatagramMultiplexer;
 
-
+//
+// This module interface is used by GPSR implementations. 
+//
 moduleinterface IGPSR
 {
     parameters:
@@ -31,6 +33,10 @@ moduleinterface IGPSR
 }
 
 //
+// This module provides Greedy Perimeter Stateless Routing for Wireless Networks.
+// The implementation supports both GG and RNG planarization algorithms.
+//
+// For more information on the routing algorithm, see the GPSR paper
 // http://www.eecs.harvard.edu/~htk/publication/2000-mobi-karp-kung.pdf
 //
 simple GPSR like IGPSR
@@ -43,7 +49,7 @@ simple GPSR like IGPSR
         string routingTableModule = default("^.routingTable");
         string networkProtocolModule = default("^.networkLayer.ip");
 
-        // gpsr parameters
+        // GPSR parameters
         int planarizationMode @enum(0,1) = default(0); // 0 for GG, 1 for RNG
         string interfaces = default("*");
         double beaconInterval @unit("s") = default(10s);
@@ -55,6 +61,9 @@ simple GPSR like IGPSR
         output ipOut;
 }
 
+//
+// This module provides GPSR routing for multiple network protocols simultaneously.
+//
 module MultiGPSR like IGPSR
 {
     parameters:
@@ -74,7 +83,6 @@ module MultiGPSR like IGPSR
         output ipOut;
 
     submodules:
-        // TODO: simplify names to ipv4, ipv6, generic once looking up modules support paths
         ipv4: GPSR if enableIPv4 {
             @display("p=100,100");
         }

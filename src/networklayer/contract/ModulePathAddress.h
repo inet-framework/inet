@@ -24,7 +24,9 @@
 #include "INETDefs.h"
 
 /**
- * TODO: support partial paths for routing
+ * This class provides network addresses using the module path to interface modules.
+ * The module path address supports unspecified, broadcast and multicast addresses too.
+ * TODO: add support for partial module paths addresses to allow prefix routing
  */
 class INET_API ModulePathAddress
 {

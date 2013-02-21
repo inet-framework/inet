@@ -20,6 +20,9 @@ package inet.networklayer.routing.dymo;
 
 import inet.networklayer.multi.NetworkDatagramMultiplexer;
 
+//
+// This module interface is used by DYMO implementations.
+//
 moduleinterface IDYMO
 {
     parameters:
@@ -30,12 +33,11 @@ moduleinterface IDYMO
 }
 
 //
-// Dynamic MANET On-demand (DYMO also known as AODVv2) Routing 
-// based on draft-ietf-manet-dymo-24.
+// This module provides Dynamic MANET On-demand (DYMO also known as AODVv2) Routing
+// based on the IETF draft at http://tools.ietf.org/html/draft-ietf-manet-dymo-24.
 //
-// Module parameters are copied from the IETF draft and renamed
-// for consistency with INET naming conventions. Some parameters
-// are not yet implemented.
+// Module parameters are copied from the IETF draft and renamed for consistency with
+// INET naming conventions. Some parameters are not yet implemented.
 //
 simple xDYMO like IDYMO
 {
@@ -86,6 +88,9 @@ simple xDYMO like IDYMO
         output ipOut;
 }
 
+//
+// This module provides DYMO routing for multiple network protocols simultaneously.
+//
 module MultiDYMO like IDYMO
 {
     parameters:

@@ -22,7 +22,7 @@ import inet.networklayer.contract.INetworkLayer;
 
 
 //
-// TODO
+// This module provides the generic network layer.
 //
 module GenericNetworkLayer like INetworkLayer
 {

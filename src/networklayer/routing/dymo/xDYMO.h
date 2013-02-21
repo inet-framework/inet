@@ -35,8 +35,8 @@
 DYMO_NAMESPACE_BEGIN
 
 /**
- * Dynamic MANET On-demand (DYMO also known as AODVv2) Routing
- * based on draft-ietf-manet-dymo-24.
+ * This class provides Dynamic MANET On-demand (DYMO also known as AODVv2) Routing
+ * based on the IETF draft at http://tools.ietf.org/html/draft-ietf-manet-dymo-24.
  *
  * Optional features implemented:
  *  - 7.1. Route Discovery Retries and Buffering

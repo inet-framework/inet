@@ -58,7 +58,7 @@ GPSR::~GPSR()
 void GPSR::initialize(int stage)
 {
     if (stage == 0) {
-        // gpsr parameters
+        // GPSR parameters
         planarizationMode = (GPSRPlanarizationMode)(int)par("planarizationMode");
         interfaces = par("interfaces");
         beaconInterval = par("beaconInterval");

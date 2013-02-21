@@ -32,15 +32,20 @@
 #include "GPSR_m.h"
 
 /**
+ * This class implements the Greedy Perimeter Stateless Routing for Wireless Networks.
+ * The implementation supports both GG and RNG planarization algorithms.
+ *
+ * For more information on the routing algorithm, see the GPSR paper
  * http://www.eecs.harvard.edu/~htk/publication/2000-mobi-karp-kung.pdf
  */
 // TODO: optimize internal data structures for performance to use less lookups and be more prepared for routing a packet
-// KLUDGE: the GPSR packet is now used to wrap the content of the IP datagram
-// KLUDGE: we should rather add these fields as IP header extension
+// KLUDGE: implement position registry protocol instead of using a global variable
+// KLUDGE: the GPSR packet is now used to wrap the content of network datagrams
+// KLUDGE: we should rather add these fields as header extensions
 class INET_API GPSR : public cSimpleModule, public INotifiable, public INetfilter::IHook
 {
     private:
-        // gpsr parameters
+        // GPSR parameters
         GPSRPlanarizationMode planarizationMode;
         const char * interfaces;
         simtime_t beaconInterval;

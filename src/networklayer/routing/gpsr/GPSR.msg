@@ -29,7 +29,7 @@ class noncobject Coord;
 class noncobject GPSRForwardingMode;
 
 //
-// GPSR beacon packet is sent periodically by all GPSR routers to notify
+// The GPSR beacon packet is sent periodically by all GPSR routers to notify
 // the neighbors about the router's address and position. 
 //
 packet GPSRBeacon {
@@ -38,11 +38,12 @@ packet GPSRBeacon {
 }
 
 //
-// GPSR packet is used to add extra routing information for routed packets.
-// KLUDGE: this packet is now used to wrap the content of the IP datagram
-// KLUDGE: we should rather add these fields as IP header extension
+// The GPSR packet is used to add extra routing information for network datagrams.
 //
-// For more information, see the GPSR paper at
+// KLUDGE: this packet is now used to wrap the content of  network datagram
+// KLUDGE: we should rather add these fields as header extensions
+//
+// For more information, see the GPSR paper
 // http://www.eecs.harvard.edu/~htk/publication/2000-mobi-karp-kung.pdf
 //
 packet GPSRPacket {
@@ -52,5 +53,5 @@ packet GPSRPacket {
     Coord perimeterRoutingForwardPosition;   // Lf
     Address currentFaceFirstSenderAddress;   // e0
     Address currentFaceFirstReceiverAddress; // e0
-    Address senderAddress; // TODO: this field is not strictly needed by GPSR (eliminate)
+    Address senderAddress; // TODO: this field is not strictly needed by GPSR (should be eliminated)
 }

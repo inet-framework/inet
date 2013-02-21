@@ -18,7 +18,8 @@
 package inet.networklayer.generic;
 
 //
-// TODO
+// This module provides a mechanism to test network layer connectivity
+// using echo request/response messages similar to that of ICMP.
 //
 simple EchoProtocol
 {

@@ -32,7 +32,7 @@ class INET_API ModulePathAddressType : public IAddressType
         ModulePathAddressType() { }
         virtual ~ModulePathAddressType() { }
 
-        virtual int getMaxPrefixLength() const { return 0; }
+        virtual int getMaxPrefixLength() const { return 0; } // TODO: support address prefixes
         virtual Address getLinkLocalManetRoutersMulticastAddress() const { return ModulePathAddress(-109); } // TODO: constant
         virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ModulePathAddress(-9); } // TODO: constant
         virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const { return new GenericNetworkProtocolControlInfo(); }

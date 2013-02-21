@@ -20,7 +20,7 @@ import inet.networklayer.contract.IRoutingTable;
 
 
 //
-// TODO
+// This module stores generic routes used by the generic network protocol.
 //
 simple GenericRoutingTable like IRoutingTable
 {

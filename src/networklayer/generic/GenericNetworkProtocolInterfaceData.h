@@ -27,7 +27,7 @@
 #include "Address.h"
 
 /**
- * TODO
+ * Generic network protocol specific data for an InterfaceEntry, stores generic network address.
  *
  * @see InterfaceEntry
  */

@@ -20,7 +20,7 @@ cplusplus {{
 }}
 
 //
-// TODO
+// Determines the packet type.
 //
 enum EchoProtocolType
 {
@@ -29,8 +29,7 @@ enum EchoProtocolType
 }
 
 //
-// Simple Control Message Protocol
-// TODO
+// Generic network protocol packet for testing network connectivity.
 //
 packet EchoPacket
 {

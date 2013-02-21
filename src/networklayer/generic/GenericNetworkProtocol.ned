@@ -18,7 +18,8 @@
 package inet.networklayer.generic;
 
 //
-// TODO
+// This module is a simplified generic network protocol that routes
+// generic datagrams using different kind of network addresses. 
 //
 // @author Andras Varga
 //
