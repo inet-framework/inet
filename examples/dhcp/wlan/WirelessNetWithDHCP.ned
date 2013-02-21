@@ -16,6 +16,7 @@
 //
 
 package inet.examples.dhcp.wlan;
+import inet.base.UnimplementedModule;
 import inet.nodes.ethernet.Eth100M;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
@@ -58,6 +59,7 @@ network WirelessNetWithDHCP
             wlan[0].mgmtType = default("Ieee80211MgmtAP");
             wlan[0].mgmt.encapDecap = "true";
         }
+        configurator: UnimplementedModule;
     connections:
         standardHost.ethg++ <--> Eth100M <--> router.ethg++;
         wirelessRouter.ethg++ <--> Eth100M <--> router.ethg++;
