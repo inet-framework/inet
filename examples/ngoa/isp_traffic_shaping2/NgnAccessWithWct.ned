@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2012 Kyeong Soo (Joseph) Kim
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -27,23 +27,24 @@ import inet.nodes.inet.RouterWithEthernetInterface2;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2WithDLDelayMeter;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
+import inet.nodes.inet.UDPBurstSourceWithEthernetInterface2;
 import inet.util.BurstMeter;
 
 
 //
 // Defines an abstract model of next-generation network (NGN) shared access architecture
-// based on VLAN-capable Ethernet switches with token bucket filter (TBF) as traffic shaper.
+// based on VLAN-capable Ethernet switches with token bucket filter (TBF) as traffic shaper
+// for unbalanced subscriber configurations with worst-case traffic (WCT) generators.
 //
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-// @date   2013-02-20
+// @date   2012-09-17
 //
-network NgnAccessUnbalanced
+network NgnAccessWithWctGenerators
 {
     parameters:
-        int N1 = default(1);	// number of ONUs for group 1 (subscribers)
-        int N2 = default(1);	// number of ONUs for group 2 (subscribers)
-        int n1 = default(1);	// number of hosts (users) per ONU for group 1 (subscriber)
-        int n2 = default(1);	// number of hosts (users) per ONU for group 2 (subscriber)
+        int N = default(1);	// number of ONUs (subscribers)
+        int n = default(1);	// number of hosts (users) per ONU (subscriber)
+		int numWcts = default(1);	// number of WCT generators
         double uni_rate @unit(bps) = default(100Mbps);	// transmission rate of ONU Ethernet UNIs
         double uni_delay @unit(s) = default(0s);	// no delay at UNIs
         double distribution_rate @unit(bps) = default(10Gbps);	// transmission rate of distribution fiber (between Onu and OLT)
@@ -51,10 +52,10 @@ network NgnAccessUnbalanced
         // double feeder_rate @unit(bps) = default(10Gbps);	// transmission rate of feeder fiber (between Olt and LambdaSplitter)
         // double feeder_delay @unit(s) = default(150us);	// default delay of 150 us corresponds to 30 km fiber
         double backbone_rate @unit(bps) = default(100Gbps);	// transmission rate of backbone link (between Olt and server)
-        // double backbone_delay @unit(s) = default(4.7ms);	// default delay of 4.7 ms gives total RTT of 10 ms including delays in access
+        double backbone_delay @unit(s) = default(4.7ms);	// default delay of 4.7 ms gives total RTT of 10 ms including delays in access
         double backbone_delay1 @unit(s) = default(2.0ms);	// together with backbone_delay2 (i.e. 4.7ms), it gives total RTT of 10 ms including delays in access
         double backbone_delay2 @unit(s) = default(2.7ms);
-        @display("bgb=684,233");
+        @display("bgb=700,260");
     submodules:
         configurator: FlatNetworkConfigurator {
             parameters:
@@ -62,65 +63,75 @@ network NgnAccessUnbalanced
         }
         server: StandardServerWithEthernetInterface2 {
             parameters:
-                @display("p=631,136;i=device/server_l");
+                @display("p=632,119;i=device/server_l");
+            gates:
+                ethg[1];
+        }
+        wct_source[numWcts]: UDPBurstSourceWithEthernetInterface2 {
+            parameters:
+				destAddresses = "wct_sink[" + string(index) + "]";
+                @display("p=632,199;i=device/server_l");
             gates:
                 ethg[1];
         }
         olt: NgnAccessNode {
             parameters:
-                @display("p=387,136");
+                @display("p=388,119");
             gates:
                 ethg[2];
         }
         accessSwitch: NgnAccessSplitter {
             parameters:
-                @display("p=268,136");
+                @display("p=269,119");
             gates:
-                ethg[N1+N2+1];
+                ethg[N+numWcts+1];
         }
-        onu1[N1]: NgnAccessModem {
+        onu[N]: NgnAccessModem {
             parameters:
-                @display("p=130,106");
+                @display("p=131,119");
                 pvid = index+10;
             gates:
-                ethg[n1+1];
+                ethg[n+1];
         }
-        onu2[N2]: NgnAccessModem {
+		onu_wct[numWcts]: NgnAccessModem {
             parameters:
-                @display("p=130,166");
-                pvid = index+10;
+                @display("p=181,199");
+                pvid = index+N+10;
             gates:
-                ethg[n2+1];
+                ethg[2];
         }
-        host1[N1*n1]: StandardHost3WithEthernetInterface2 {
+        host[N*n]: StandardHost3WithEthernetInterface2 {
             parameters:
-                @display("i=device/laptop;p=45,106");
+                @display("i=device/laptop;p=46,119");
             gates:
                 ethg[1];
         }
-        host2[N2*n2]: StandardHost3WithEthernetInterface2 {
+		wct_sink[numWcts]: StandardHost3WithEthernetInterface2 {
             parameters:
-                @display("i=device/laptop;p=45,166");
+                @display("i=device/laptop;p=66,199");
             gates:
                 ethg[1];
         }
         router: RouterWithEthernetInterface2 {
-            @display("p=506,137");
+            @display("p=507,119");
         }
     connections:
-        for i=0..N1-1, for j=0..n1-1 {
-            host1[i*n1+j].ethg[0] <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu1[i].ethg[j];
+        for i=0..N-1, for j=0..n-1 {
+            host[i*n+j].ethg[0] <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu[i].ethg[j];
         }
-        for i=0..N2-1, for j=0..n2-1 {
-            host2[i*n2+j].ethg[0] <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu2[i].ethg[j];
+		for i=0..numWcts-1 {
+            wct_sink[i].ethg[0] <--> {  delay = uni_delay; datarate = uni_rate; } <--> onu_wct[i].ethg[0];
+		}
+        for i=0..N-1 {
+            onu[i].ethg[n] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> accessSwitch.ethg[i];
         }
-        for i=0..N1-1 {
-            onu1[i].ethg[n1] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> accessSwitch.ethg[i];
+        for i=0..numWcts-1 {
+            onu_wct[i].ethg[1] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> accessSwitch.ethg[N+i];
         }
-        for i=0..N2-1 {
-            onu2[i].ethg[n2] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> accessSwitch.ethg[i+N1];
-        }
-        accessSwitch.ethg[N1+N2] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> olt.ethg[0];
+        accessSwitch.ethg[N+numWcts] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> olt.ethg[0];
         olt.ethg[1] <--> {  delay = backbone_delay1; datarate = backbone_rate; } <--> router.ethg++;
         router.ethg++ <--> {  delay = backbone_delay2; datarate = backbone_rate; } <--> server.ethg++;
+		for i=0..numWcts-1 {
+			router.ethg++ <--> {  delay = backbone_delay2; datarate = backbone_rate; } <--> wct_source[i].ethg[0];
+		}
 }
