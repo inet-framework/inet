@@ -840,6 +840,7 @@ void IPv4NetworkConfigurator::readAddressConfiguration(cXMLElement *root, IPv4To
         const char *netmaskAttr = interfaceElement->getAttribute("netmask"); // "255.255.x.x"
         const char *mtuAttr = interfaceElement->getAttribute("mtu"); // integer
         const char *metricAttr = interfaceElement->getAttribute("metric"); // integer
+        const char *groupsAttr = interfaceElement->getAttribute("groups"); // list of multicast addresses
 
         if (amongAttr && *amongAttr)       // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
         {
@@ -905,6 +906,17 @@ void IPv4NetworkConfigurator::readAddressConfiguration(cXMLElement *root, IPv4To
                             {
                                 ASSERT(interfaceInfo->interfaceEntry->ipv4Data());
                                 interfaceInfo->interfaceEntry->ipv4Data()->setMetric(atoi(metricAttr));
+                            }
+
+                            // groups
+                            if (isNotEmpty(groupsAttr))
+                            {
+                                ASSERT(interfaceInfo->interfaceEntry->ipv4Data());
+                                cStringTokenizer tokenizer(groupsAttr);
+                                while (tokenizer.hasMoreTokens()) {
+                                    IPv4Address address(tokenizer.nextToken());
+                                    interfaceInfo->interfaceEntry->ipv4Data()->joinMulticastGroup(address);
+                                }
                             }
 
                             interfacesSeen.insert(interfaceInfo);

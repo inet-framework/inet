@@ -208,6 +208,11 @@ package inet.networklayer.autorouting.ipv4;
 //      Optional parameter attribute to set the Metric parameter in the interface.
 //      When unspecified the interface parameter is left unchanged.
 //
+//    - @groups
+//      Optional parameter attribute; it may contain a list of (multicast)
+//      IP addresses that will be added to the multicast groups of the interface.
+//      See also the <multicast-group> element.
+//
 //  - <wireless>
 //
 //    - @id (optional)
