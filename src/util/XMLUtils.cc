@@ -118,7 +118,7 @@ IPv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name,
 {
     const cXMLElement *xvalue = getUniqueChildIfExists(ptr, name);
     if (xvalue)
-        return IPv4Address(xvalue->getNodeValue());
+        return IPvXAddressResolver().resolve(xvalue->getNodeValue()).get4();
     else
         return def;
 }
