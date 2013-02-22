@@ -645,6 +645,15 @@ if (.resp == 'y') {
     }   # end of if() for the processing of OMNeT++ data files
     .sa_tbf.df <- get(.df.name)
     .sa_tbf_fi.df <- get(.fi_df.name)
+    ##
+    ## prefilerting for proper data sets
+    ##
+    .max_n = 4  # select it for S_1,6
+    .sa_tbf.df <- subset(.sa_tbf.df, (mr==10 & bs==100 & n==.max_n) | (mr!=10 | bs!=100))
+    .sa_tbf_fi.df <- subset(.sa_tbf_fi.df, (mr==10 & bs==100 & n==.max_n) | (mr!=10 | bs!=100))
+    ##
+    ## end of prefiltering
+    ##
     .ur.range <- unique(.sa_tbf.df$ur)
     .mr.range <- unique(.sa_tbf.df$mr)
     for (.i in 1:length(.ur.range)) {
