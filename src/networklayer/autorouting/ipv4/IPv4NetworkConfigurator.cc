@@ -873,7 +873,7 @@ void IPv4NetworkConfigurator::readAddressConfiguration(cXMLElement *root, IPv4To
                 for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++)
                 {
                     InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
-                    if (interfacesSeen.count(interfaceInfo) == 0)
+                    if (interfacesSeen.count(interfaceInfo) == 0)   //TODO leave this out! then we can specify mtu/metric/groups/netmask together for even all interfaces
                     {
                         cModule *hostModule = interfaceInfo->interfaceEntry->getInterfaceTable()->getHostModule();
                         std::string hostFullPath = hostModule->getFullPath();
@@ -885,6 +885,7 @@ void IPv4NetworkConfigurator::readAddressConfiguration(cXMLElement *root, IPv4To
                             (towardsMatcher.matchesAny() || linkContainsMatchingHostExcept(linkInfo, &towardsMatcher, hostModule)))
                         {
                             // unicast address constraints
+                            //TODO if address/netmask are fully specified, set them right away and leave 'configure'=false
                             interfaceInfo->configure = haveAddressConstraint;
                             if (interfaceInfo->configure)
                             {
