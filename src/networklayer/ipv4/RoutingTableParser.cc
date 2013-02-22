@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <sstream>
 
 #include "RoutingTableParser.h"
 
@@ -165,21 +166,28 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 {
     char buf[MAX_ENTRY_STRING_SIZE];
     int charpointer = 0;
-    InterfaceEntry *ie;
+    InterfaceEntry *ie = NULL;
+
+    std::stringstream os;
 
     // parsing of entries in interface definition
     while (ifconfigFile[charpointer] != '\0')
     {
         // name entry
         if (streq(ifconfigFile + charpointer, "name:")) {
+            if (ie)
+                os << "/>\n";
+
             // find existing interface with this name
             char *name = parseEntry(ifconfigFile, "name:", charpointer, buf);
             ie = ift->getInterfaceByName(name);
             if (!ie)
                 throw cRuntimeError("Error in routing file: interface name `%s' not registered by any L2 module", name);
-
+            const char *hostname = findContainingNode(dynamic_cast<cModule*>(ift))->getFullName();
+            os << "  <interface hosts='" << hostname << "' names='" << name << "'";
             continue;
         }
+
 
         // encap entry
         if (streq(ifconfigFile + charpointer, "encap:")) {
@@ -198,6 +206,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
         // inet_addr entry
         if (streq(ifconfigFile + charpointer, "inet_addr:")) {
             ie->ipv4Data()->setIPAddress(IPv4Address(parseEntry(ifconfigFile, "inet_addr:", charpointer, buf)));
+            os << " address='" << ie->ipv4Data()->getIPAddress().str() << "'";
             continue;
         }
 
@@ -211,6 +220,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
         // Mask entry
         if (streq(ifconfigFile + charpointer, "Mask:")) {
             ie->ipv4Data()->setNetmask(IPv4Address(parseEntry(ifconfigFile, "Mask:", charpointer, buf)));
+            os << " netmask='" << ie->ipv4Data()->getNetmask().str() << "'";
             continue;
         }
 
@@ -218,18 +228,26 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
         if (streq(ifconfigFile + charpointer, "Groups:")) {
             char *grStr = parseEntry(ifconfigFile, "Groups:", charpointer, buf);
             parseMulticastGroups(grStr, ie);
+
+            IPv4InterfaceData::IPv4AddressVector groups = ie->ipv4Data()->getJoinedMulticastGroups();
+            os << " groups='";
+            for (int i = 0; i < (int)groups.size(); i++) os << (i==0?"":" ") << groups[i].str();
+            os << "'";
+
             continue;
         }
 
         // MTU entry
         if (streq(ifconfigFile + charpointer, "MTU:")) {
             ie->setMtu(atoi(parseEntry(ifconfigFile, "MTU:", charpointer, buf)));
+            os << " mtu='" << ie->getMTU() << "'";
             continue;
         }
 
         // Metric entry
         if (streq(ifconfigFile + charpointer, "Metric:")) {
             ie->ipv4Data()->setMetric(atoi(parseEntry(ifconfigFile, "Metric:", charpointer, buf)));
+            os << " metric='" << ie->ipv4Data()->getMetric() << "'";
             continue;
         }
 
@@ -260,6 +278,10 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
         // no entry discovered: move charpointer on
         charpointer++;
     }
+    if (ie)
+        os << "/>\n";
+
+    printf("%s", os.str().c_str());
 }
 
 
@@ -290,12 +312,17 @@ void RoutingTableParser::parseMulticastGroups(char *groupStr, InterfaceEntry *it
 
 void RoutingTableParser::parseRouting(char *routeFile)
 {
+    std::stringstream os;
+
     char *str = new char[MAX_ENTRY_STRING_SIZE];
 
     int pos = strlen(ROUTE_START_TOKEN);
     skipBlanks(routeFile, pos);
     while (routeFile[pos] != '\0')
     {
+        const char *hostname = findContainingNode(dynamic_cast<cModule*>(ift))->getFullName();
+        os << "  <route hosts='" << hostname << "'";
+
         // 1st entry: Host
         pos += strcpyword(str, routeFile + pos);
         skipBlanks(routeFile, pos);
@@ -307,6 +334,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
                 throw cRuntimeError("Syntax error in routing file: `%s' on 1st column should be `default:' or a valid IPv4 address", str);
 
             e->setDestination(IPv4Address(str));
+            os << " destination='" << str << "'";
         }
 
         // 2nd entry: Gateway
@@ -322,6 +350,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
                 throw cRuntimeError("Syntax error in routing file: `%s' on 2nd column should be `*' or a valid IPv4 address", str);
 
             e->setGateway(IPv4Address(str));
+            os << " gateway='" << str << "'";
         }
 
         // 3rd entry: Netmask
@@ -331,6 +360,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
             throw cRuntimeError("Syntax error in routing file: `%s' on 3rd column should be a valid IPv4 address", str);
 
         e->setNetmask(IPv4Address(str));
+        os << " netmask='" << str << "'";
 
         // 4th entry: flags
         pos += strcpyword(str, routeFile + pos);
@@ -355,6 +385,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
             throw cRuntimeError("Syntax error in routing file: 5th column should be numeric not `%s'", str);
 
         e->setMetric(metric);
+        os << " metric='" << metric << "'";
 
         // 6th entry: interface
         opp_string interfaceName;
@@ -366,8 +397,11 @@ void RoutingTableParser::parseRouting(char *routeFile)
             throw cRuntimeError("Syntax error in routing file: 6th column: `%s' is not an existing interface", interfaceName.c_str());
 
         e->setInterface(ie);
+        os << " interface='" << interfaceName << "'";
+        os << "/>\n";
 
         // add entry
         rt->addRoute(e);
     }
+    printf("%s", os.str().c_str());
 }
