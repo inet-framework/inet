@@ -40,7 +40,7 @@ void SimpleClassifier::initialize(int stage)
     RSVPAccess rsvpAccess;
     rsvp = rsvpAccess.get();
 
-    readTableFromXML(par("conf").xmlValue());
+    readTableFromXML(par("config").xmlValue());
 
     WATCH_VECTOR(bindings);
 }

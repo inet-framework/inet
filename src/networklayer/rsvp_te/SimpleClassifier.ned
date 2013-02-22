@@ -21,6 +21,6 @@ package inet.networklayer.rsvp_te;
 simple SimpleClassifier
 {
     parameters:
-        xml conf;
+        xml config = default(xml("<fectable/>"));
         @display("i=block/classifier");
 }
