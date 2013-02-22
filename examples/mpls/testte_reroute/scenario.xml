@@ -2,7 +2,7 @@
 <scenario>
 	<at t="2s">
 		<add-session module="LSR1.rsvp">
-			<endpoint>10.2.1.1</endpoint>
+			<endpoint>host3</endpoint>
 			<tunnel_id>1</tunnel_id>
 
 			<paths>
@@ -11,10 +11,10 @@
 
 					<bandwidth>400000</bandwidth>
 					<route>
-						<node>10.1.1.1</node>
-						<node>10.1.2.1</node>
-						<node>10.1.4.1</node>
-						<node>10.1.5.1</node>
+						<node>LSR1%routerId</node>
+						<node>LSR2%routerId</node>
+						<node>LSR4%routerId</node>
+						<node>LSR5%routerId</node>
 					</route>
 
 					<color>100</color>
@@ -25,15 +25,15 @@
 	<at t="2.2s">
 		<bind-fec module="LSR1.classifier">
 			<id>1</id>
-			<endpoint>10.2.1.1</endpoint>
+			<endpoint>host3</endpoint>
 			<tunnel_id>1</tunnel_id>
-			<destination>10.2.1.1</destination>
+			<destination>host3</destination>
 			<lspid>101</lspid>
 		</bind-fec>
 	</at>
 	<at t="2.4s">
 		<del-session module="LSR1.rsvp">
-			<endpoint>10.2.1.1</endpoint>
+			<endpoint>host3</endpoint>
 			<tunnel_id>1</tunnel_id>
 
 			<paths>

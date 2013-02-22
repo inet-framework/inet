@@ -2,12 +2,12 @@
 <fectable>
 	<fecentry>
 		<id>1</id>
-		<destination>10.2.1.1</destination>
+		<destination>host3</destination>
 		<label>1</label>
 	</fecentry>
 	<fecentry>
 		<id>2</id>
-		<destination>10.2.2.1</destination>
+		<destination>host4</destination>
 		<label>2</label>
 	</fecentry>
 </fectable>
