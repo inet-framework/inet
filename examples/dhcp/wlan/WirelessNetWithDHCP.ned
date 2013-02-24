@@ -64,7 +64,9 @@ network WirelessNetWithDHCP
                 "  <interface hosts='router' towards='standardHost' address='10.0.1.2'/>\n" +
                 "  <interface hosts='router' towards='wirelessRouter' address='10.0.0.1'/>\n" +
                 "  <interface hosts='wirelessRouter' towards='router' address='10.0.0.2' netmask='255.255.255.252'/>\n" +
-                "  <interface hosts='wirelessRouter' names='wlan0' address='192.168.0.1' netmask='255.255.255.0'/>\n" +
+                "  <interface hosts='wirelessRouter' names='wlan0' address='192.168.0.1' netmask='255.255.255.0'/>\n" + //FIXME ez utkozik wirelessHost[0].wlan0-val, meg akkor is, ha azt be se kell konfiguralni!!!
+                "  <interface hosts='wirelessHost[*]' names='wlan0'/>\n" + //FIXME hiba, hamis cimutkozes a routerrel, pedig ezt be se kell konfiguralni! es jobb is lenne egy explicit configure='false' flag
+                "  <interface hosts='wirelessHost[*]' names='wlan0' address='0.0.0.0' netmask='0.0.0.0'/>\n" + //FIXME igy se jo 
                 "  <route hosts='standardHost' destination='*' netmask='*' gateway='router'/>\n" +
                 "  <route hosts='router' destination='192.168.0.0' netmask='255.255.255.0' gateway='wirelessRouter'/>\n" +
                 "  <route hosts='wirelessRouter' destination='192.168.0.0' netmask='255.255.255.0' interface='wlan0'/>\n" +
