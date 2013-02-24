@@ -106,7 +106,16 @@ network RSVPTE4
             parameters:
                 @display("p=500,50");
         }
-        configurator: UnimplementedModule;
+        //TODO main problem: configurator doesn't configure dynamically created nodes! I.e. LSR2 remains unconfigured after scenarioManager recreates it at t=4s.
+        configurator: IPv4NetworkConfigurator { }  // a) version: automatic addresses
+        //configurator: IPv4NetworkConfigurator {  // b) version: manual addresses like the original example
+        //    @display("p=71,374");
+        //    config = xmldoc("IPv4Config.xml");
+        //    assignAddresses = false;   <---- XXX this turns off processing of <interface> elements? if so, then what is its point? (I could simply not write those elements into the file!)
+        //    addStaticRoutes = false;   <---- XXX this does not affect processing of <route> elements, only generation of shortest path, right?
+        //    addDefaultRoutes = false;
+        //    addSubnetRoutes = false;
+        //}
     connections:
         LSR1.pppg[0] <--> {  delay = 15ms; datarate = 600kbps; } <--> LSR2.pppg[0];
         LSR1.pppg[1] <--> {  delay = 5ms; datarate = 600kbps; } <--> LSR3.pppg[0];
