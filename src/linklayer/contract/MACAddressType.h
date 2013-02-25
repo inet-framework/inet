@@ -33,6 +33,7 @@ class INET_API MACAddressType : public IAddressType
         virtual ~MACAddressType() { }
 
         virtual int getMaxPrefixLength() const { return 0; }
+        virtual Address getUnspecifiedAddress() const { return MACAddress::UNSPECIFIED_ADDRESS; }
         virtual Address getLinkLocalManetRoutersMulticastAddress() const { return MACAddress(-109); } // TODO: constant
         virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return MACAddress(-9); } // TODO: constant
         virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const { return new GenericNetworkProtocolControlInfo(); }
