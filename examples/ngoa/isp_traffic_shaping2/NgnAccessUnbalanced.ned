@@ -88,7 +88,7 @@ network NgnAccessUnbalanced
         onu2[N2]: NgnAccessModem {
             parameters:
                 @display("p=130,166");
-                pvid = index+10;
+                pvid = index+10+N1;
             gates:
                 ethg[n2+1];
         }
