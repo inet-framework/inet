@@ -275,6 +275,9 @@
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownAndRestart -r 0,     500s,            646a-bfc5
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,        500s,            646a-bfc5
 
+/examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            0857-5914
+/examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            fa37-2b54
+
 # /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                100s,            a422-b4ed    # unstable fingerprint
 # /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                100s,            1ef9-fff6    # unstable fingerprint
 # /examples/rtp/unicast1/,          -f omnetpp.ini -c General -r 0,                100s,            cfaf-783c    # unstable fingerprint
