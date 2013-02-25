@@ -49,27 +49,6 @@ inline int prefixLength(const Address &netmask)
     return netmask.getType() == Address::IPv4 ? netmask.toIPv4().getNetmaskLength() : 32; // XXX IPv4 only
 }
 
-// TODO move this to InterfaceEntry?
-bool RIPRouting::isNeighbourAddress(const Address &address)
-{
-    if (address.getType() != Address::IPv4)
-        return true; // XXX
-
-    IPv4Address ipv4Address = address.toIPv4();
-    for (int i=0; i<ift->getNumInterfaces(); i++)
-    {
-        InterfaceEntry *ie = ift->getInterface(i);
-        if (!ie->isLoopback())
-        {
-            IPv4Address interfaceAddress = ie->ipv4Data()->getIPAddress();
-            IPv4Address netmask = ie->ipv4Data()->getNetmask();
-            if (ipv4Address != interfaceAddress && IPv4Address::maskedAddrAreEqual(ipv4Address, interfaceAddress,netmask))
-                return true;
-        }
-    }
-    return false;
-}
-
 std::ostream& operator<<(std::ostream& os, const RIPRoute& e)
 {
     os << e.info();
@@ -545,17 +524,17 @@ bool RIPRouting::isValidResponse(RIPPacket *packet)
         return false;
     }
 
-    // check that source is on a directly connected network
-    if (!isNeighbourAddress(ctrlInfo->getSrcAddr()))
-    {
-        RIP_EV << "source is not directly connected " << ctrlInfo->getSrcAddr() << "\n";
-        return false;
-    }
-
     // check that it is not our response (received own multicast message)
     if (rt->isLocalAddress(ctrlInfo->getSrcAddr()))
     {
         RIP_EV << "received own response\n";
+        return false;
+    }
+
+    // check that source is on a directly connected network
+    if (!ift->isNeighborAddress(ctrlInfo->getSrcAddr()))
+    {
+        RIP_EV << "source is not directly connected " << ctrlInfo->getSrcAddr() << "\n";
         return false;
     }
 

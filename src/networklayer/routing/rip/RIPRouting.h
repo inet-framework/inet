@@ -120,7 +120,6 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     RIPInterfaceEntry *findInterfaceEntryById(int interfaceId);
     RIPRoute *findRoute(const Address &destAddress, const Address &subnetMask);
     RIPRoute *findLocalInterfaceRoute(IRoute *route);
-    bool isNeighbourAddress(const Address &address);
     bool isOwnAddress(const Address &address);
     void addInterface(InterfaceEntry *ie, int metric, SplitHorizonMode mode);
     void deleteInterface(InterfaceEntry *ie);

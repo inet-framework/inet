@@ -151,6 +151,57 @@ InterfaceEntry *InterfaceTable::findInterfaceByAddress(const Address& address) c
     return NULL;
 }
 
+bool InterfaceTable::isNeighborAddress(const Address &address) const
+{
+    if (address.isUnspecified())
+        return false;
+
+    switch(address.getType())
+    {
+#ifdef WITH_IPv4
+        case Address::IPv4:
+            for (int i = 0; i < (int)idToInterface.size(); i++)
+            {
+                InterfaceEntry *ie = idToInterface[i];
+                if (ie && ie->ipv4Data())
+                {
+                    IPv4Address ipv4Addr = ie->ipv4Data()->getIPAddress();
+                    IPv4Address netmask = ie->ipv4Data()->getNetmask();
+                    if (IPv4Address::maskedAddrAreEqual(address.toIPv4(), ipv4Addr, netmask))
+                        return address != ipv4Addr;
+                }
+            }
+            break;
+#endif
+#ifdef WITH_IPv6
+        case Address::IPv6:
+            for (int i = 0; i < (int)idToInterface.size(); i++)
+            {
+                InterfaceEntry *ie = idToInterface[i];
+                if (ie && ie->ipv6Data())
+                {
+                    IPv6InterfaceData *ipv6Data = ie->ipv6Data();
+                    for (int j = 0; j < ipv6Data->getNumAdvPrefixes(); j++)
+                    {
+                        const IPv6InterfaceData::AdvPrefix &advPrefix = ipv6Data->getAdvPrefix(j);
+                        if (address.toIPv6().matches(advPrefix.prefix, advPrefix.prefixLength))
+                            return address != advPrefix.prefix;
+                    }
+                }
+            }
+            break;
+#endif
+        case Address::MAC:
+        case Address::MODULEPATH:
+        case Address::MODULEID:
+            // TODO
+            break;
+        default:
+            throw cRuntimeError("Unknown address type");
+    }
+    return false;
+}
+
 int InterfaceTable::getNumInterfaces()
 {
     if (tmpNumInterfaces == -1)
