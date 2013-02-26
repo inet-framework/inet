@@ -87,10 +87,11 @@ enum SplitHorizonMode
 
 struct RIPInterfaceEntry
 {
-    InterfaceEntry *ie;
+    const InterfaceEntry *ie;
     int metric;
     SplitHorizonMode splitHorizonMode;
-    RIPInterfaceEntry(InterfaceEntry *ie, int metric, SplitHorizonMode mode) : ie(ie), metric(metric), splitHorizonMode(mode) {}
+    RIPInterfaceEntry(const InterfaceEntry *ie);
+    void configure(cXMLElement *config);
 };
 
 /**
@@ -120,13 +121,13 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     RIPRoute *findRoute(const Address &destAddress, int prefixLength);
     RIPRoute *findLocalInterfaceRoute(IRoute *route);
     bool isOwnAddress(const Address &address);
-    void addInterface(InterfaceEntry *ie, int metric, SplitHorizonMode mode);
-    void deleteInterface(InterfaceEntry *ie);
-    void invalidateRoutes(InterfaceEntry *ie);
-    void deleteRoute(IRoute *route);
-    bool isLoopbackInterfaceRoute(IRoute *route);
-    bool isLocalInterfaceRoute(IRoute *route);
-    bool isDefaultRoute(IRoute *route);
+    void addInterface(const InterfaceEntry *ie, cXMLElement *config);
+    void deleteInterface(const InterfaceEntry *ie);
+    void invalidateRoutes(const InterfaceEntry *ie);
+    void deleteRoute(const IRoute *route);
+    bool isLoopbackInterfaceRoute(const IRoute *route);
+    bool isLocalInterfaceRoute(const IRoute *route);
+    bool isDefaultRoute(const IRoute *route);
     void addLocalInterfaceRoute(IRoute *route);
     void addDefaultRoute(IRoute *route);
     void addStaticRoute(IRoute *route);
@@ -189,14 +190,14 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     /**
      * Add the new entry to the routing table and triggers an update.
      */
-    virtual void addRoute(const Address &dest, int prefixLength, InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from);
+    virtual void addRoute(const Address &dest, int prefixLength, const InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from);
 
     /**
      * Updates an existing route with the information learned from a RIP packet.
      * If the metric is infinite (16), then the route is invalidated.
      * It triggers an update, so neighbor routers are notified about the change.
      */
-    virtual void updateRoute(RIPRoute *route, InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from);
+    virtual void updateRoute(RIPRoute *route, const InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from);
 
     /**
      * Sets the update timer to trigger an update in the [1s,5s] interval.
@@ -225,7 +226,7 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
      * Sends the packet to the specified UDP dest/port.
      * If the dest is a multicast address, then the outgoing interface must be specified.
      */
-    virtual void sendPacket(RIPPacket *packet, const Address &dest, int port, InterfaceEntry *ie);
+    virtual void sendPacket(RIPPacket *packet, const Address &dest, int port, const InterfaceEntry *ie);
 };
 
 #endif

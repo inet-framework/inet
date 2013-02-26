@@ -72,6 +72,37 @@ std::string RIPRoute::info() const
     return out.str();
 }
 
+RIPInterfaceEntry::RIPInterfaceEntry(const InterfaceEntry *ie)
+    : ie(ie), metric(1), splitHorizonMode(SPLIT_HORIZON_POISONED_REVERSE)
+{
+    ASSERT(!ie->isLoopback());
+    ASSERT(ie->isMulticast());
+}
+
+void RIPInterfaceEntry::configure(cXMLElement *config)
+{
+    const char *metricAttr = config->getAttribute("metric");
+
+    if (metricAttr)
+    {
+        int metric = atoi(metricAttr);
+        if (metric == 0)
+            throw cRuntimeError("RIP: invalid metric in <interface> element at %s: %s", config->getSourceLocation(), metricAttr);
+        this->metric = metric;
+    }
+
+    const char *splitHorizonModeAttr = config->getAttribute("split-horizon-mode");
+    SplitHorizonMode mode = !splitHorizonModeAttr ? SPLIT_HORIZON_POISONED_REVERSE :
+                            strcmp(splitHorizonModeAttr, "NoSplitHorizon") == 0 ? NO_SPLIT_HORIZON :
+                            strcmp(splitHorizonModeAttr, "SplitHorizon") == 0 ? SPLIT_HORIZON :
+                            strcmp(splitHorizonModeAttr, "SplitHorizonPoisonedReverse") == 0 ? SPLIT_HORIZON_POISONED_REVERSE :
+                            (SplitHorizonMode)-1;
+    if (mode == -1)
+        throw cRuntimeError("RIP: invalid split-horizon-mode attribute in <interface> element at %s: %s",
+                config->getSourceLocation(), splitHorizonModeAttr);
+    this->splitHorizonMode = mode;
+}
+
 std::ostream& operator<<(std::ostream &os, const RIPInterfaceEntry &e)
 {
     os << "if:" << e.ie->getName() << "  ";
@@ -133,8 +164,6 @@ void RIPRouting::initialize(int stage)
     }
 }
 
-inline bool isNotEmpty(const char *s) {return s && s[0];}
-
 void RIPRouting::configureInterfaces(cXMLElement *config)
 {
     cXMLElementList interfaceElements = config->getChildrenByTagName("interface");
@@ -147,24 +176,7 @@ void RIPRouting::configureInterfaces(cXMLElement *config)
         {
             int i = matcher.findMatchingSelector(ie);
             if (i >= 0)
-            {
-                cXMLElement *interfaceElement = interfaceElements[i];
-
-                const char *metricAttr = interfaceElement->getAttribute("metric"); // integer
-                const char *splitHorizonModeAttr = interfaceElement->getAttribute("split-horizon-mode"); // enum
-
-                int metric = isNotEmpty(metricAttr) ? atoi(metricAttr) : 1;
-                SplitHorizonMode mode = !splitHorizonModeAttr ? SPLIT_HORIZON_POISONED_REVERSE :
-                                        strcmp(splitHorizonModeAttr, "NoSplitHorizon") == 0 ? NO_SPLIT_HORIZON :
-                                        strcmp(splitHorizonModeAttr, "SplitHorizon") == 0 ? SPLIT_HORIZON :
-                                        strcmp(splitHorizonModeAttr, "SplitHorizonPoisonedReverse") == 0 ? SPLIT_HORIZON_POISONED_REVERSE :
-                                        (SplitHorizonMode)-1;
-                if (mode == -1)
-                    throw cRuntimeError("RIP: invalid split-horizon-mode attribute in <interface> element at %s: %s",
-                            interfaceElement->getSourceLocation(), splitHorizonModeAttr);
-
-                addInterface(ie, metric, mode);
-            }
+                addInterface(ie, interfaceElements[i]);
         }
     }
 }
@@ -188,31 +200,35 @@ void RIPRouting::configureInitialRoutes()
 // keep our data structures consistent with interface table and routing table
 void RIPRouting::receiveChangeNotification(int category, const cObject *details)
 {
-//    if (simulation.getContextType()==CTX_INITIALIZE)
-//        return;  // ignore notifications during initialize
-
     IRoute *route;
-    InterfaceEntry *ie;
+    const InterfaceEntry *ie;
 
     switch (category)
     {
         case NF_INTERFACE_CREATED:
             // use RIP by default on multicast interfaces
             // TODO configure RIP interfaces and their metrics
-            ie = const_cast<InterfaceEntry*>(check_and_cast<const InterfaceEntry*>(details));
-            if (ie->isMulticast())
-                addInterface(ie, 1, SPLIT_HORIZON_POISONED_REVERSE);
+            ie = check_and_cast<const InterfaceEntry*>(details);
+            if (ie->isMulticast() && !ie->isLoopback())
+            {
+                cXMLElementList config = par("ripConfig").xmlValue()->getChildrenByTagName("interface");
+                int i = InterfaceMatcher(config).findMatchingSelector(ie);
+                if (i >= 0)
+                    addInterface(ie, config[i]);
+            }
             break;
         case NF_INTERFACE_DELETED:
             // delete interfaces and routes referencing the deleted interface
-            ie = const_cast<InterfaceEntry*>(check_and_cast<const InterfaceEntry*>(details));
+            ie = check_and_cast<const InterfaceEntry*>(details);
             deleteInterface(ie);
             break;
         case NF_INTERFACE_STATE_CHANGED:
             // if the interface is down, invalidate routes via that interface
             ie = const_cast<InterfaceEntry*>(check_and_cast<const InterfaceEntry*>(details));
             if (!ie->isUp())
+            {
                 invalidateRoutes(ie);
+            }
             break;
         case NF_ROUTE_DELETED:
             // remove references to the deleted route and invalidate the RIP route
@@ -577,13 +593,13 @@ RIPRoute *RIPRouting::findRoute(const Address &destination, int prefixLength)
  * - Set the route change flag
  * - Signal the output process to trigger an update
  */
-void RIPRouting::addRoute(const Address &dest, int prefixLength, InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from)
+void RIPRouting::addRoute(const Address &dest, int prefixLength, const InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from)
 {
     IRoute *route = rt->createRoute();
     route->setSource(this);
     route->setDestination(dest);
     route->setPrefixLength(prefixLength);
-    route->setInterface(ie);
+    route->setInterface(const_cast<InterfaceEntry*>(ie));
     route->setNextHop(nextHop);
     route->setMetric(metric);
     RIPRoute *ripRoute = new RIPRoute(route, RIPRoute::RIP_ROUTE_RTE/*XXX*/, metric);
@@ -608,11 +624,11 @@ void RIPRouting::addRoute(const Address &dest, int prefixLength, InterfaceEntry 
  *  - If the new metric is infinity, start the deletion process
  *    (described above); otherwise, re-initialize the timeout
  */
-void RIPRouting::updateRoute(RIPRoute *ripRoute, InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from)
+void RIPRouting::updateRoute(RIPRoute *ripRoute, const InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from)
 {
     if (ripRoute->route)
     {
-        ripRoute->route->setInterface(ie);
+        ripRoute->route->setInterface(const_cast<InterfaceEntry*>(ie));
         ripRoute->route->setNextHop(nextHop);
         ripRoute->route->setMetric(metric);
     }
@@ -694,7 +710,7 @@ void RIPRouting::purgeRoute(RIPRoute *ripRoute)
     delete ripRoute;
 }
 
-void RIPRouting::sendPacket(RIPPacket *packet, const Address &address, int port, InterfaceEntry *ie)
+void RIPRouting::sendPacket(RIPPacket *packet, const Address &address, int port, const InterfaceEntry *ie)
 {
     packet->setByteLength(4 + 20 * packet->getEntryArraySize()); // XXX compute from address lengths
 // XXX it seems that setMulticastOutputInterface() has no effect
@@ -710,12 +726,14 @@ void RIPRouting::sendPacket(RIPPacket *packet, const Address &address, int port,
 /*----------------------------------------
  *
  *----------------------------------------*/
-void RIPRouting::addInterface(InterfaceEntry *ie, int metric, SplitHorizonMode mode)
+void RIPRouting::addInterface(const InterfaceEntry *ie, cXMLElement *config)
 {
-    ripInterfaces.push_back(RIPInterfaceEntry(ie, metric, mode));
+    RIPInterfaceEntry ripInterface(ie);
+    ripInterface.configure(config);
+    ripInterfaces.push_back(ripInterface);
 }
 
-void RIPRouting::deleteInterface(InterfaceEntry *ie)
+void RIPRouting::deleteInterface(const InterfaceEntry *ie)
 {
     // delete interfaces and routes referencing ie
     for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); )
@@ -734,33 +752,33 @@ void RIPRouting::deleteInterface(InterfaceEntry *ie)
     }
 }
 
-void RIPRouting::invalidateRoutes(InterfaceEntry *ie)
+void RIPRouting::invalidateRoutes(const InterfaceEntry *ie)
 {
     for (RouteVector::iterator it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
         if ((*it)->route && (*it)->route->getInterface() == ie)
             invalidateRoute(*it);
 }
 
-void RIPRouting::deleteRoute(IRoute *route)
+void RIPRouting::deleteRoute(const IRoute *route)
 {
     for (RouteVector::iterator it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
         if ((*it)->route == route)
             (*it)->route = NULL;
 }
 
-bool RIPRouting::isLoopbackInterfaceRoute(IRoute *route)
+bool RIPRouting::isLoopbackInterfaceRoute(const IRoute *route)
 {
     InterfaceEntry *ie = dynamic_cast<InterfaceEntry*>(route->getSource());
     return ie && ie->isLoopback();
 }
 
-bool RIPRouting::isLocalInterfaceRoute(IRoute *route)
+bool RIPRouting::isLocalInterfaceRoute(const IRoute *route)
 {
     InterfaceEntry *ie = dynamic_cast<InterfaceEntry*>(route->getSource());
     return ie && !ie->isLoopback();
 }
 
-bool RIPRouting::isDefaultRoute(IRoute *route)
+bool RIPRouting::isDefaultRoute(const IRoute *route)
 {
     return route->getPrefixLength() == 0;
 }
