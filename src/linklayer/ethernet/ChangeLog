@@ -1,3 +1,14 @@
+
+2013-02-26  Zoltan Bojthe
+
+    Fixed IFG sending:
+    Wait IFG only between frames instead always wait IFG before send a frame.
+
+    Bugfix in EtherMacFullDuplex: if uses external queue and
+    received a Pause frame, sending was stopped sometimes.
+
+    Added tests.
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-11-26  Zoltan Bojthe
