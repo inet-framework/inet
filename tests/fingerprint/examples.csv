@@ -4,20 +4,20 @@
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  100s,            a5fc-5578
 # /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,         0   # [Config Ping2]    # interactive config, needed a *.numHosts parameter
 
-/examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           289f-e57a
-/examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           8250-81d2
-/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           391e-62ba
+/examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           b5f8-f942
+/examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           60b8-1f27
+/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           8c22-fc43
 /examples/bgpv4/BGPOpen/,            -f omnetpp.ini -c config1 -r 0,                62s,             fe39-8683
 /examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0,                30s,             5b39-1dd6
-/examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           0017-879f
+/examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           e46b-fc8c
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           fdcf-cf59
 
-/examples/dhcp/eth/,                 -f omnetpp.ini -c General -r 0,                5000s,           72b5-e19f
+/examples/dhcp/eth/,                 -f omnetpp.ini -c General -r 0,                5000s,           46c5-7158
 /examples/dhcp/wlan/,                -f omnetpp.ini -c General -r 0,                20s,             a7bf-e53a
-/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             8ef0-801b
-/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp21 -r 0,                  10s,             d471-926e
-/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp31 -r 0,                  10s,             3105-d9ee
-/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp51 -r 0,                  10s,             cc24-8009
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             20d0-ef1f
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp21 -r 0,                  10s,             448b-f6cb
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp31 -r 0,                  10s,             5dd4-3d74
+/examples/diffserv/onedomain,        -f omnetpp.ini -c Exp51 -r 0,                  10s,             8c1a-38c5
 
 # /examples/emulation/extclient/,      -f omnetpp.ini -c General -r 0,                100s,         0    # pcap devices not supported
 # /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_Traffic -r 0,         100s,         0    # pcap devices not supported
@@ -25,36 +25,37 @@
 # /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_and_Downlink_Traffic -r 0, 100s,    0    # pcap devices not supported
 # /examples/emulation/traceroute/,     -f omnetpp.ini -c General -r 0,                100s,         0    # pcap devices not supported
 
-/examples/ethernet/arptest/,         -f fingerprints.ini -c ARPTest -r 0,           100s,            6180-7a11
-/examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            6180-7a11
-/examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            0051-1423
-/examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            9999-0785
+/examples/ethernet/arptest/,         -f fingerprints.ini -c ARPTest -r 0,           100s,            a1a8-9f9d
+/examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            a1a8-9f9d
+/examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            8c24-3bd1
+/examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            93ec-3339
 # /examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,           0   ,# not a complete simulations, defaults.ini included by other ini files
-/examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0, 50s,             08b0-7cc5
-/examples/ethernet/lans/,            -f fingerprints-largenet.ini -c LargeNet -r 0, 5s,              9a54-83c1
-/examples/ethernet/lans/,            -f fingerprints.ini -c MixedLAN1 -r 0,         200s,            ea41-e50e
-/examples/ethernet/lans/,            -f hub.ini -c Hub1 -r 0,                       100s,            4d10-13a7
-/examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0,                       10s,             1da5-f95b
-/examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0,                       100s,            4d10-13a7
-/examples/ethernet/lans/,            -f hub.ini -c Hub4 -r 0,                       100s,            4d10-13a7
-/examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              9a54-83c1
-/examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            6aaf-80bb
-/examples/ethernet/lans/,            -f omnetpp.ini -c MixedLAN1 -r 0,              500s,            ddf0-1ac5
-/examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0,            5000s,           aeaf-5c29
-/examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0,             200s,            c5c7-44f9
+
+/examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0, 50s,             12b3-1063
+/examples/ethernet/lans/,            -f fingerprints-largenet.ini -c LargeNet -r 0, 5s,              7555-872b
+/examples/ethernet/lans/,            -f fingerprints.ini -c MixedLAN1 -r 0,         200s,            a3b5-73a9
+/examples/ethernet/lans/,            -f hub.ini -c Hub1 -r 0,                       100s,            fb08-035e
+/examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0,                       10s,             c638-351d
+/examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0,                       100s,            fb08-035e
+/examples/ethernet/lans/,            -f hub.ini -c Hub4 -r 0,                       100s,            fb08-035e
+/examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              7555-872b
+/examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            9ee0-a008
+/examples/ethernet/lans/,            -f omnetpp.ini -c MixedLAN1 -r 0,              500s,            9609-a430
+/examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0,            5000s,           9125-cffe
+/examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0,             200s,            69f7-9cda
 
 /examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0,                500000s,         25e4-59d6
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c random -r 0,                 500000s,         b6c9-6992
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted -r 0,               500000s,         8720-fe74
-/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c random -r 0,                 500000s,         07a8-fa54
-/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted -r 0,               500000s,         8384-9ff6
-/examples/httptools/socket/simpleddos/, -f omnetpp.ini -c General -r 0,                500000s,         2d1e-1e09
-/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,                50000s,          a748-4c32
-/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,              50000s,          cd03-10ec
+/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c random -r 0,                 500000s,         2534-63cc
+/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted -r 0,               500000s,         2d7a-5cb5
+/examples/httptools/socket/simpleddos/, -f omnetpp.ini -c General -r 0,                500000s,         86e0-8217
+/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,                50000s,          117b-5a06
+/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,              50000s,          8d75-8a7a
 
 /examples/inet/ber/,                 -f omnetpp.ini -c General -r 0,                20s,             5fa7-14d7
 
-/examples/inet/broadcast/,           -f omnetpp.ini -c General -r 0,                20s,             1c71-a2e8
+/examples/inet/broadcast/,           -f omnetpp.ini -c General -r 0,                20s,             4dc5-b050
 
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             2e9f-1b1c
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           50s,             1b03-dd7a
@@ -69,14 +70,15 @@
 /examples/inet/flatnet/,             -f fingerprints.ini -c General -r 0,           200s,            28b5-b7be
 /examples/inet/flatnet/,             -f omnetpp.ini -c General -r 0,                200s,            28b5-b7be
 
-/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1 -r 0,                 10000s,          6d86-96d5
-/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts16 -r 0,                10000s,          9d54-de55
-/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts256 -r 0,               20s,             9663-b000
-/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1280 -r 0,              1s,              2f53-5d34
-# /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0,              1s,              0    # cpu time limit exceeded during 0s simtime
-/examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          640a-289d
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1 -r 0,                 10000s,          e1c9-53e0
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts16 -r 0,                10000s,          374b-55d4
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts256 -r 0,               20s,             7475-4e73
+/examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1280 -r 0,              1s,              b059-0d11
 
-/examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             189b-8711
+# /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0,              1s,              0    # cpu time limit exceeded during 0s simtime
+
+/examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          52e4-13b9
+/examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             b125-affd
 
 /examples/inet/kidsnw1/,             -f omnetpp.ini -c General -r 0,                1000s,           77aa-05b5
 
@@ -96,22 +98,22 @@
 /examples/inet/nclients/,            -f omnetpp-ping.ini -c General -r 0,           10s,             db01-1564
 /examples/inet/nclients/,            -f video.ini -c General -r 0,                  50s,             ce35-a5d1
 
-/examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           ad1d-44bb
+/examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           958a-1614
 
 /examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0,                100s,            958b-8790
 
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 0, 5s,              22f6-f8bb
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_internalQueue -r 0, 5s,              c9c5-0a0b
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_fullduplex -r 0, 3s,              6b43-3f7b
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_fullduplex -r 0, 3s,              dbe1-11a1
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_halfduplex -r 0, 2s,              e538-2528
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_halfduplex -r 0, 2s,              18a9-1aa7
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 1, 5s,              22f6-f8bb
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_internalQueue -r 1, 5s,              c9c5-0a0b
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_fullduplex -r 1, 5s,              f4fe-1339
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_fullduplex -r 1, 5s,              666c-4d6f
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_halfduplex -r 1, 5s,              66c8-5782
-/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_halfduplex -r 1, 5s,              e3cf-f23a
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 0, 5s,              9053-5ec1
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_internalQueue -r 0, 5s,              3735-6a7d
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_fullduplex -r 0, 3s,              796c-51c3
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_fullduplex -r 0, 3s,              3e4d-ef71
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_halfduplex -r 0, 2s,              79eb-9a7f
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_halfduplex -r 0, 2s,              2390-ecd9
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 1, 5s,              9053-5ec1
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_internalQueue -r 1, 5s,              3735-6a7d
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_fullduplex -r 1, 5s,              9223-059b
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_fullduplex -r 1, 5s,              cf2e-d8b9
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_halfduplex -r 1, 5s,              04cd-3422
+/examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_internalQueue_halfduplex -r 1, 5s,              b4c3-89a2
 /examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c with_externalqueue -r 0,     5s,              acc6-2eb2
 /examples/inet/tcp_ppp_reconnect/,   -f omnetpp.ini -c with_internalQueue -r 0,     5s,              88b2-2ac2
 
@@ -147,10 +149,10 @@
 /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c simple -r 0,                 100s,            ba3f-82ec
 /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c two_senders -r 0,            100s,            4c30-7368
 /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c ten_senders -r 0,            100s,            a056-296a
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c simple -r 0,                 100s,            656d-0608
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c two_senders -r 0,            100s,            9ea7-49c9
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            aa6f-2a01
-/examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            c5f9-2538
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c simple -r 0,                 100s,            42e0-0107
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c two_senders -r 0,            100s,            a95b-26b8
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            dd6e-59d7
+/examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            4c90-6505
 
 # /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                100s,            34b1-536e    # unstable fingerprint
 # /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              100s,            c980-8b04    # unstable fingerprint
@@ -161,8 +163,10 @@
 # /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,             100s,            856e-1e06    # unstable fingerprint
 # /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,             100s,            49ad-4191    # unstable fingerprint
 # /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             f906-03ca    # unstable fingerprint
+
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             f182-5384
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           aec7-7524
+
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           b2e0-2ac0    # unstable fingerprint
 
 ### /examples/manetrouting/* : see manet.csv
@@ -207,21 +211,25 @@
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility6 -r 0,        10000s,          122f-0d91
 
 /examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             4009-ecd0
+
 # /examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            0    # <!> Error in module (TED) R37.LSR0.ted (id=45) during network initialization: Model error: ASSERT: condition !remote.isUnspecified() false in function initialize, networklayer/ted/TED.cc line 86.
+
 /examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             b8d2-5dcd
 /examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50s,             8a30-2a4c
 /examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             47dd-5f14
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             f8dd-cc0b
 
-/examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                500s,            6aee-7a00
-/examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0,               100s,            acd0-064a
-/examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandonestub -r 0,     100s,            133f-6c8a
-/examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandtwostubs -r 0,    100s,            10e6-f3b7
+/examples/ospfv2/areas/,             -f omnetpp.ini -c General -r 0,                500s,            f32a-cf65
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0,               100s,            8d9e-ef8c
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandonestub -r 0,     100s,            47b2-7e76
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandtwostubs -r 0,    100s,            ed8c-e101
+
 # /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                100s,            0    # <!> Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #23916, t=45.089338342798: check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
-/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c stable -r 0,                 1000s,           f030-0270
-/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0,               1000s,           a307-65a8
-/examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            e843-8517
-/examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0,                500s,            334e-74f4
+
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c stable -r 0,                 1000s,           5f0c-f56a
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0,               1000s,           71e4-cd34
+/examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            0484-23fb
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0,                500s,            1085-d930
 
 # /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                100s,            a422-b4ed    # unstable fingerprint
 # /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                100s,            1ef9-fff6    # unstable fingerprint
@@ -235,25 +243,29 @@
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            67fd-2373
 /examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            647c-190a
 
-/examples/voipstream/VoIPStreamLargeNet/, -f omnetpp.ini -c General -r 0,                5s,              efd9-bec0
-/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g726 -r 0,                   5s,              4058-6015
-/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_aLaw -r 0,              5s,              47f1-5bf8
-/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_muLaw -r 0,             5s,              4621-67d9
-/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c pcm_s16le -r 0,              5s,              aad3-4d08
-/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,                2s,              c034-2bd0
+/examples/voipstream/VoIPStreamLargeNet/, -f omnetpp.ini -c General -r 0,                5s,              2463-1573
+/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g726 -r 0,                   5s,              acd7-4adc
+/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_aLaw -r 0,              5s,              5950-be98
+/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_muLaw -r 0,             5s,              24b7-8419
+/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c pcm_s16le -r 0,              5s,              16c3-a0a6
+/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,                2s,              416d-db05
 
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,           61db-0a60
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,              7bcb-0f6e
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            6c1b-1738
+
 # /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             100s,         0   # interactive config, needed a *.numHosts parameter
+
 /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             8e7c-9b87
+
 # /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   100s,         0   # interactive config, needed a *.numHosts parameter
+
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  25s,             6686-2f0d
 /examples/wireless/multiradio/,      -f omnetpp.ini -c IndependentWlans -r 0,       100s,            555a-a608
-/examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          100s,            22dd-b4d6
+/examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          100s,            2437-62b7
 /examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0,            100s,            4edf-7f83
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              9590-8db3
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              da44-c60b
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,             e023-1ed2
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             8a77-7fb2
-/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,            b457-7c3c
+/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,            9d07-8c05
