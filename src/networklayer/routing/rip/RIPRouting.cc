@@ -405,7 +405,10 @@ void RIPRouting::sendRoutes(const Address &address, int port, const RIPInterface
 
     for (RouteVector::iterator it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
     {
-        RIPRoute *ripRoute = *it;
+        RIPRoute *ripRoute = checkRoute(*it);
+        if (!ripRoute)
+            continue;
+
         IRoute *route = ripRoute->route;
         ASSERT(route != NULL);
 
@@ -661,16 +664,19 @@ void RIPRouting::triggerUpdate()
 
 RIPRoute *RIPRouting::checkRoute(RIPRoute *route)
 {
-    simtime_t now = simTime();
-    if (route->purgeTime > 0 && now > route->purgeTime)
+    if (route->type == RIPRoute::RIP_ROUTE_RTE)
     {
-        purgeRoute(route);
-        return NULL;
-    }
-    if (now > route->expiryTime)
-    {
-        invalidateRoute(route);
-        return NULL;
+        simtime_t now = simTime();
+        if (route->purgeTime > 0 && now > route->purgeTime)
+        {
+            purgeRoute(route);
+            return NULL;
+        }
+        if (route->expiryTime > 0 && now > route->expiryTime)
+        {
+            invalidateRoute(route);
+            return NULL;
+        }
     }
     return route;
 }
@@ -695,9 +701,12 @@ void RIPRouting::invalidateRoute(RIPRoute *ripRoute)
 
 void RIPRouting::purgeRoute(RIPRoute *ripRoute)
 {
-    ripRoute->route->setProtocolData(NULL);
-    // XXX should set isExpired() to true, and let rt->purge() to do the work
-    rt->deleteRoute(ripRoute->route);
+    if (ripRoute->route)
+    {
+        ripRoute->route->setProtocolData(NULL);
+        // XXX should set isExpired() to true, and let rt->purge() to do the work
+        rt->deleteRoute(ripRoute->route);
+    }
 
     RouteVector::iterator end = std::remove(ripRoutes.begin(), ripRoutes.end(), ripRoute);
     if (end != ripRoutes.end())
