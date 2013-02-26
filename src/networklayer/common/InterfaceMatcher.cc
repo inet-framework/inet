@@ -60,7 +60,7 @@ InterfaceMatcher::Selector::Selector(const char *hostPattern, const char *namePa
 }
 
 // Note: "hosts", "interfaces" and "towards" must ALL match on the interface
-bool InterfaceMatcher::Selector::matches(InterfaceEntry *ie)
+bool InterfaceMatcher::Selector::matches(const InterfaceEntry *ie)
 {
     cModule *hostModule = ie->getInterfaceTable()->getHostModule();
     std::string hostFullPath = hostModule->getFullPath();
@@ -109,7 +109,7 @@ InterfaceMatcher::~InterfaceMatcher()
 /**
  * Returns the index of the first selector that matches the interface.
  */
-int InterfaceMatcher::findMatchingSelector(InterfaceEntry *ie)
+int InterfaceMatcher::findMatchingSelector(const InterfaceEntry *ie)
 {
     for (int i = 0; i < (int)selectors.size(); i++)
         if (selectors[i]->matches(ie))
@@ -131,7 +131,7 @@ static cGate *findRemoteGate(cGate *startGate)
     return NULL;
 }
 
-bool InterfaceMatcher::linkContainsMatchingHost(InterfaceEntry *ie, const Matcher &hostMatcher) const
+bool InterfaceMatcher::linkContainsMatchingHost(const InterfaceEntry *ie, const Matcher &hostMatcher) const
 {
     int outGateId = ie->getNodeOutputGateId();
     cModule *node = ie->getInterfaceTable()->getHostModule();

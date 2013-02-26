@@ -64,17 +64,17 @@ class INET_API InterfaceMatcher
            Matcher towardsMatcher;
            const InterfaceMatcher *parent;
            Selector(const char *hostPattern, const char *namePattern, const char *towardsPattern, const InterfaceMatcher *parent);
-           bool matches(InterfaceEntry *ie);
+           bool matches(const InterfaceEntry *ie);
         };
     private:
         std::vector<Selector*> selectors;
     public:
         InterfaceMatcher(const cXMLElementList &selectors);
         ~InterfaceMatcher();
-        int findMatchingSelector(InterfaceEntry *ie);
+        int findMatchingSelector(const InterfaceEntry *ie);
 
     private:
-        bool linkContainsMatchingHost(InterfaceEntry *ie, const Matcher &hostMatcher) const;
+        bool linkContainsMatchingHost(const InterfaceEntry *ie, const Matcher &hostMatcher) const;
         void collectNeighbors(cGate *outGate, std::vector<cModule*> &hostNodes, std::vector<cModule*> &deviceNodes) const;
 };
 
