@@ -71,11 +71,10 @@ struct RIPRoute : public cObject
     int metric;
     uint16 tag;
     bool changed;
-    simtime_t expiryTime;
-    simtime_t purgeTime;
+    simtime_t lastUpdateTime;
 
     RIPRoute(IRoute *route, RouteType type, int metric)
-        : route(route), type(type), ie(NULL), metric(metric), tag(0), changed(false), expiryTime(0), purgeTime(0) {}
+        : route(route), type(type), ie(NULL), metric(metric), tag(0), changed(false), lastUpdateTime(0) {}
     virtual std::string info() const;
 };
 

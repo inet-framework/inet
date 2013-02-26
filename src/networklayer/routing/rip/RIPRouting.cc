@@ -58,6 +58,7 @@ std::string RIPRoute::info() const
         out << "gw:"; if (gateway.isUnspecified()) out << "*  "; else out << gateway << "  ";
         out << "metric:" << metric << " ";
         out << "if:"; if (!interfacePtr) out << "*  "; else out << interfacePtr->getName() << "  ";
+        out << "upd:" << lastUpdateTime << "s  ";
         switch (type)
         {
             case RIP_ROUTE_INTERFACE: out << "INTERFACE"; break;
@@ -487,7 +488,7 @@ void RIPRouting::processResponse(RIPPacket *packet)
         if (ripRoute)
         {
             if (ripRoute->from == from)
-                ripRoute->expiryTime = simTime() + RIP_ROUTE_EXPIRY_TIME;
+                ripRoute->lastUpdateTime = simTime();
             if ((ripRoute->from == from && ripRoute->metric != metric) || metric < ripRoute->metric)
                 updateRoute(ripRoute, incomingIe->ie, nextHop, metric, from);
         }
@@ -587,8 +588,7 @@ void RIPRouting::addRoute(const Address &dest, int prefixLength, InterfaceEntry 
     route->setMetric(metric);
     RIPRoute *ripRoute = new RIPRoute(route, RIPRoute::RIP_ROUTE_RTE/*XXX*/, metric);
     ripRoute->from = from;
-    ripRoute->expiryTime = simTime() + RIP_ROUTE_EXPIRY_TIME;
-    ripRoute->purgeTime = 0;
+    ripRoute->lastUpdateTime = simTime();
     ripRoute->changed = true;
     route->setProtocolData(ripRoute);
     rt->addRoute(route);
@@ -630,10 +630,8 @@ void RIPRouting::updateRoute(RIPRoute *ripRoute, InterfaceEntry *ie, const Addre
 
     if (metric == RIP_INFINITE_METRIC)
         invalidateRoute(ripRoute);
-    else {
-        ripRoute->expiryTime = simTime() + RIP_ROUTE_EXPIRY_TIME;
-        ripRoute->purgeTime = 0;
-    }
+    else
+        ripRoute->lastUpdateTime = simTime();
 }
 
 void RIPRouting::triggerUpdate()
@@ -650,12 +648,12 @@ RIPRoute *RIPRouting::checkRoute(RIPRoute *route)
     if (route->type == RIPRoute::RIP_ROUTE_RTE)
     {
         simtime_t now = simTime();
-        if (route->purgeTime > 0 && now > route->purgeTime)
+        if (now >= route->lastUpdateTime + RIP_ROUTE_EXPIRY_TIME + RIP_ROUTE_PURGE_TIME)
         {
             purgeRoute(route);
             return NULL;
         }
-        if (route->expiryTime > 0 && now > route->expiryTime)
+        if (now >= route->lastUpdateTime + RIP_ROUTE_EXPIRY_TIME)
         {
             invalidateRoute(route);
             return NULL;
@@ -677,7 +675,6 @@ void RIPRouting::invalidateRoute(RIPRoute *ripRoute)
     ripRoute->route->setMetric(RIP_INFINITE_METRIC);
     ripRoute->route->setEnabled(false);
     ripRoute->metric = RIP_INFINITE_METRIC;
-    ripRoute->purgeTime = ripRoute->expiryTime + RIP_ROUTE_PURGE_TIME;
     ripRoute->changed = true;
     triggerUpdate();
 }
