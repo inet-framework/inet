@@ -129,6 +129,11 @@ void RIPRouting::initialize(int stage)
         host = findContainingNode(this);
         ift = InterfaceTableAccess().get();
         rt = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
+
+        updateInterval = par("updateInterval").doubleValue();
+        routeExpiryTime = par("routeExpiryTime").doubleValue();
+        routePurgeTime = par("routePurgeTime").doubleValue();
+
         updateTimer = new cMessage("RIP-timer");
         triggeredUpdateTimer = new cMessage("RIP-trigger");
         socket.setOutputGate(gate("udpOut"));
@@ -160,7 +165,7 @@ void RIPRouting::initialize(int stage)
         sendInitialRequests();
 
         // set update timer
-        scheduleAt(RIP_UPDATE_INTERVAL, updateTimer);
+        scheduleAt(updateInterval, updateTimer);
     }
 }
 
@@ -299,7 +304,7 @@ void RIPRouting::handleMessage(cMessage *msg)
         if (msg == updateTimer)
         {
             processRegularUpdate();
-            scheduleAt(simTime() + RIP_UPDATE_INTERVAL, msg);
+            scheduleAt(simTime() + updateInterval, msg);
         }
         else if (msg == triggeredUpdateTimer)
         {
@@ -654,7 +659,7 @@ void RIPRouting::triggerUpdate()
 {
     if (!triggeredUpdateTimer->isScheduled())
     {
-        double delay = uniform(RIP_TRIGGERED_UPDATE_DELAY_MIN, RIP_TRIGGERED_UPDATE_DELAY_MAX);
+        double delay = par("triggeredUpdateDelay");
         scheduleAt(simTime() + delay, triggeredUpdateTimer);
     }
 }
@@ -664,12 +669,12 @@ RIPRoute *RIPRouting::checkRoute(RIPRoute *route)
     if (route->type == RIPRoute::RIP_ROUTE_RTE)
     {
         simtime_t now = simTime();
-        if (now >= route->lastUpdateTime + RIP_ROUTE_EXPIRY_TIME + RIP_ROUTE_PURGE_TIME)
+        if (now >= route->lastUpdateTime + routeExpiryTime + routePurgeTime)
         {
             purgeRoute(route);
             return NULL;
         }
-        if (now >= route->lastUpdateTime + RIP_ROUTE_EXPIRY_TIME)
+        if (now >= route->lastUpdateTime + routeExpiryTime)
         {
             invalidateRoute(route);
             return NULL;

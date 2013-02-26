@@ -26,13 +26,8 @@
 #include "UDPSocket.h"
 
 #define RIP_INFINITE_METRIC 16
-#define RIP_UPDATE_INTERVAL 30
 #define RIP_UDP_PORT 520
 #define RIP_IPV4_MULTICAST_ADDRESS "224.0.0.9"
-#define RIP_ROUTE_EXPIRY_TIME 180
-#define RIP_ROUTE_PURGE_TIME 120
-#define RIP_TRIGGERED_UPDATE_DELAY_MIN 1
-#define RIP_TRIGGERED_UPDATE_DELAY_MAX 5
 
 /* RIPRoute:
  *   destination address
@@ -80,7 +75,7 @@ struct RIPRoute : public cObject
 
 enum SplitHorizonMode
 {
-    NO_SPLIT_HORIZON = 0,
+    NO_SPLIT_HORIZON,
     SPLIT_HORIZON,
     SPLIT_HORIZON_POISONED_REVERSE
 };
@@ -112,7 +107,11 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     cMessage *triggeredUpdateTimer; // scheduled when there are pending changes
     Address allRipRoutersGroup;     // multicast address, e.g. 224.0.0.9 or FF02::9
     // parameters
-    //bool usePoisonedSplitHorizon;
+    simtime_t updateInterval;
+    simtime_t routeExpiryTime;
+    simtime_t routePurgeTime;
+    // statistics
+
   public:
     RIPRouting();
     ~RIPRouting();
