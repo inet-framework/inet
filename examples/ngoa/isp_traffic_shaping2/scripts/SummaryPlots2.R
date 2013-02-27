@@ -192,8 +192,8 @@ if (.resp == 'y') {
         ## Otherwise, load objects from the saved file
         load(paste(.da.wd, .da.rdata, sep='/'))
         .df.name <- paste('.da_', .config, '.df', sep='')
-        .da.df <- get(.df.name)
     }   # end of if() for the processing of OMNeT++ data files
+    .da.df <- get(.df.name)
     .plots <- list()
     for (.i in 1:(length(.measure.type)-2)) { # subtract 2 because there are no types for 'queue'
         .df <- subset(.da.df, name==.measure[.i] & measure.type==.measure.type[.i], select=c(1, 2, 3, 5, 6))
@@ -312,8 +312,8 @@ if (.resp == 'y') {
         ## Otherwise, load objects from the saved file
         load(paste(.da.wd, .da.rdata, sep='/'))
         .df.name <- paste('.da_', .config, '.df', sep='')
-        .da.df <- get(.df.name)
     }   # end of if() for the processing of OMNeT++ data files
+    .da.df <- get(.df.name)
     .ur.range <- unique(.da.df$ur)
     .ur.unit <- ''
     .mr.range <- unique(.da.df$mr)
@@ -467,8 +467,8 @@ if (.resp == 'y') {
         ## Otherwise, load objects from the saved file
         load(paste(.da.wd, .da.rdata, sep='/'))
         .df.name <- paste('.da_', .config, '.df', sep='')
-        .da.df <- get(.df.name)
     }   # end of if() for the processing of OMNeT++ data files
+    .da.df <- get(.df.name)
     ## .ur.range <- unique(.da.df$ur)
     ## .ur.unit <- ''
     ## .mr.range <- unique(.da.df$mr)
@@ -647,9 +647,9 @@ if (.resp == 'y') {n
         load(paste(.sa_tbf.wd, .sa_tbf.rdata, sep='/'))
         .df.name <- paste('.sa_tbf_', .config, '.df', sep='')
         .fi_df.name <- paste('.sa_tbf_fi_', .config, '.df', sep='')
-        .sa_tbf.df <- get(.df.name)
-        .sa_tbf_fi.df <- get(.fi_df.name)
     }   # end of if() for the processing of OMNeT++ data files
+    .sa_tbf.df <- get(.df.name)
+    .sa_tbf_fi.df <- get(.fi_df.name)
     ##
     ## prefilerting for proper data sets
     ##
@@ -846,8 +846,8 @@ if (.resp == 'y') {
         ## Otherwise, load objects from the saved file
         load(paste(.su_tbf.wd, .su_tbf.rdata, sep='/'))
         .df.name <- paste('.su_tbf_', .config, '.df', sep='')
-        .su_tbf.df <- get(.df.name)
     }   # end of if() for the processing of OMNeT++ data files
+    .su_tbf.df <- get(.df.name)
     .ur.range <- unique(.su_tbf.df$ur)
     .mr.range <- unique(.su_tbf.df$mr)
     for (.i in 1:length(.ur.range)) {
