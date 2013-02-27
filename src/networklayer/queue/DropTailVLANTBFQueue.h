@@ -40,6 +40,7 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
 {
     // type definitions for member variables
     typedef std::vector<bool> BoolVector;
+    typedef std::vector<double> DoubleVector;
     typedef std::vector<int> IntVector;
     typedef std::vector<long long> LongLongVector;
     typedef std::vector<cMessage *> MsgVector;
@@ -68,10 +69,10 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
 
     // statistics
     bool warmupFinished;        ///< if true, start statistics gathering
+    DoubleVector numBitsSent;
     IntVector numQueueReceived; // redefined from PassiveQueueBase with 'name hiding'
     IntVector numQueueDropped;  // redefined from PassiveQueueBase with 'name hiding'
     IntVector numQueueUnshaped;
-//    IntVector numQueueShaped;
     IntVector numQueueSent;
 
     // timer
