@@ -35,6 +35,15 @@ simple RIPRouting
         volatile double triggeredUpdateDelay @unit(s) = uniform(1s,5s);
         double routeExpiryTime @unit(s) = 180s;
         double routePurgeTime @unit(s) = 120s;
+        @signal[sentRequest](type=cPacket);
+        @signal[sentUpdate](type=cPacket);
+        @signal[rcvdResponse](type=cPacket);
+        @signal[badResponse](type=cPacket);
+        @statistic[sentRequest](title="request sent"; source=sentRequest; record=count,"vector(constant1)"; interpolationmode=none);
+        @statistic[sentUpdate](title="update sent"; source=sentUpdate; record=count,"vector(constant1)"; interpolationmode=none);
+        @statistic[rcvdResponse](title="response received"; source=rcvdResponse; record=count,"vector(constant1)"; interpolationmode=none);
+        @statistic[badResponse](title="bad response received"; source=badResponse; record=count,"vector(constant1)"; interpolationmode=none);
+        @statistic[numRoutes](title="number of routes"; source=numRoutes; record=last,vector; interpolationmode=none);
     gates:
         input udpIn @labels(UDPControlInfo/up);
         output udpOut @labels(UDPControlInfo/down);

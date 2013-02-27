@@ -96,10 +96,11 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
 {
     typedef std::vector<RIPInterfaceEntry> InterfaceVector;
     typedef std::vector<RIPRoute*> RouteVector;
-
+    // environment
     cModule *host;
     IInterfaceTable *ift;
     IRoutingTable *rt;
+    // state
     InterfaceVector ripInterfaces;
     RouteVector ripRoutes;
     UDPSocket socket;               // bound to RIP_UDP_PORT
@@ -110,8 +111,12 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     simtime_t updateInterval;
     simtime_t routeExpiryTime;
     simtime_t routePurgeTime;
-    // statistics
-
+    // signals
+    static simsignal_t sentRequestSignal;
+    static simsignal_t sentUpdateSignal;
+    static simsignal_t rcvdResponseSignal;
+    static simsignal_t badResponseSignal;
+    static simsignal_t numRoutesSignal;
   public:
     RIPRouting();
     ~RIPRouting();
@@ -130,6 +135,7 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     void addLocalInterfaceRoute(IRoute *route);
     void addDefaultRoute(IRoute *route);
     void addStaticRoute(IRoute *route);
+    void addRoute(RIPRoute* route);
     std::string getHostName();
   protected:
     virtual int numInitStages() const  {return 5;}
