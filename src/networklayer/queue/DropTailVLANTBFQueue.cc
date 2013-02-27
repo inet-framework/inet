@@ -102,8 +102,10 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
 
         // update TBF status
         int pktLength = (check_and_cast<cPacket *>(queues[queueIndex]->front()))->getBitLength();
-        ASSERT(isConformed(queueIndex, pktLength));
-
+        bool conformance = isConformed(queueIndex, pktLength);
+// DEBUG
+        ASSERT(conformance == true);
+// DEBUG
         if (packetRequested > 0)
         {
             cPacket *pkt = check_and_cast<cPacket *>(dequeue());
