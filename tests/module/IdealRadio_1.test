@@ -1,0 +1,88 @@
+%description:
+Testing IdealRadio, IdealChannelModel, IdealWirelessMac, IdealWirelessNic modules
+3 hosts pings host0: inside, on border, outside of transmitRange, pong host1 and host2 only
+%#--------------------------------------------------------------------------------------------------------------
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../lib
+network = NetIdealRadios
+#record-eventlog = true
+#eventlog-message-detail-pattern = *:(not declaredOn(cMessage) and not declaredOn(cNamedObject) and not declaredOn(cObject))
+
+num-rngs = 3
+**.mobility.rng-0 = 1
+**.wlan[*].mac.rng-0 = 2
+#debug-on-errors = true
+
+tkenv-plugin-path = ../../../etc/plugins
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 600m
+**.constraintAreaMaxY = 400m
+**.constraintAreaMaxZ = 0m
+**.debug = true
+**.coreDebug = false
+
+# nic settings
+**.wlan[*].typename = "IdealWirelessNic"
+**.wlan[*].bitrate = 2Mbps
+**.wlan[*].mac.address = "auto"
+**.wlan[*].mac.headerLength = 22B
+**.wlan[*].radio.transmissionRange = 100m
+
+description = "3 hosts pings host0: inside, on border, outside of transmitRange, pong host1, host2"
+
+*.numHosts = 4
+
+# ping app (host[0] pinged by others)
+*.host[1..3].numPingApps = 1
+*.host[1..3].pingApp[0].destAddr = "host[0]"
+*.host[1..3].pingApp[0].startTime = 1s
+*.host[1..3].pingApp[0].stopTime = 101s-1us
+*.host[1..3].pingApp[0].printPing = true
+
+# mobility
+*.host[*].mobility.initFromDisplayString = false
+*.host[*].mobilityType = "StationaryMobility"
+*.host[*].mobility.initialY = 200m
+*.host[*].mobility.initialZ = 0m
+
+*.host[0].mobility.initialX = 300m
+*.host[1].mobility.initialX = 200m+1mm    # inside
+*.host[2].mobility.initialX = 200m      # on border
+*.host[3].mobility.initialX = 200m-1mm    # outside
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/General-0.sca
+scalar NetIdealRadios.host[1].pingApp[0] 	"Pings sent" 	100
+scalar NetIdealRadios.host[1].pingApp[0] 	"ping loss rate (%)" 	0
+scalar NetIdealRadios.host[1].pingApp[0] 	"ping out-of-order rate (%)" 	0
+%contains: results/General-0.sca
+scalar NetIdealRadios.host[1].pingApp[0] 	pingRxSeq:count 	100
+%contains: results/General-0.sca
+scalar NetIdealRadios.host[1].pingApp[0] 	pingTxSeq:count 	100
+
+%contains: results/General-0.sca
+scalar NetIdealRadios.host[2].pingApp[0] 	"Pings sent" 	100
+scalar NetIdealRadios.host[2].pingApp[0] 	"ping loss rate (%)" 	0
+scalar NetIdealRadios.host[2].pingApp[0] 	"ping out-of-order rate (%)" 	0
+%contains: results/General-0.sca
+scalar NetIdealRadios.host[2].pingApp[0] 	pingRxSeq:count 	100
+%contains: results/General-0.sca
+scalar NetIdealRadios.host[2].pingApp[0] 	pingTxSeq:count 	100
+
+%contains: results/General-0.sca
+scalar NetIdealRadios.host[3].pingApp[0] 	"Pings sent" 	100
+scalar NetIdealRadios.host[3].pingApp[0] 	"ping loss rate (%)" 	100
+scalar NetIdealRadios.host[3].pingApp[0] 	"ping out-of-order rate (%)" 	0
+%contains: results/General-0.sca
+scalar NetIdealRadios.host[3].pingApp[0] 	pingRxSeq:count 	0
+%contains: results/General-0.sca
+scalar NetIdealRadios.host[3].pingApp[0] 	pingTxSeq:count 	100
+%#--------------------------------------------------------------------------------------------------------------

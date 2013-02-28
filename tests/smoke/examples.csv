@@ -1,5 +1,7 @@
 # workingdir,                        args
 /examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0
+/examples/adhoc/idealradio/,         -f omnetpp.ini -c Ping1 -r 0
+#/examples/adhoc/idealradio/,         -f omnetpp.ini -c Ping2 -r 0    # interactive config, needed a *.numHosts parameter
 /examples/adhoc/ieee80211/,          -f fingerprints.ini -c Ping1 -r 0
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0
 # /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0   # [Config Ping2] # __interactive__

@@ -1,0 +1,9 @@
+2013-03-08  Zoltan Bojthe
+
+    Added IdealWirelessMac, IdealWirelessNic modules and IdealWirelessFrame msg.
+
+    This module works with IdealChannelModel, IdealChannelModelAccess and
+    IdealWirelessMac, IdealWirelessNic.
+    IdealRadio is a fullduplex, collision-free and interference-free wireless
+    radio with parameter specified transmit range (in meter).
+

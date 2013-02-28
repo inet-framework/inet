@@ -537,11 +537,26 @@
         linkerFlags = ""
         />
     <feature
+        id="idealwireless"
+        name="Ideal Wireless Communication"
+        description = "Ideal Wireless Communication
+                       (full-duplex, collision-free, parallel transmit/receive, transmit range specified in meter)"
+        initiallyEnabled = "true"
+        requires = "mobility radio"
+        labels = "nic wireless"
+        nedPackages = "
+                       inet.linklayer.idealwireless
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="wireless_examples"
         name="wireless examples"
         description = "wireless examples"
         initiallyEnabled = "true"
-        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211"
+        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211 idealwireless"
         labels = "nic wireless"
         nedPackages = "
                        inet.examples.adhoc

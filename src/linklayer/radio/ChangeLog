@@ -1,3 +1,12 @@
+2013-03-08  Zoltan Bojthe
+
+    Added IdealRadio module and IdealAirFrame msg.
+
+    This module works with IdealChannelModel, IdealChannelModelAccess and
+    IdealWirelessMac, IdealWirelessNic.
+    IdealRadio is a fullduplex, collision-free and interference-free wireless
+    radio with parameter specified transmit range (in meter).
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-08-27  Zoltan Bojthe
