@@ -55,7 +55,7 @@ void Radio::initialize(int stage)
 {
     ChannelAccess::initialize(stage);
 
-    EV << "Initializing AbstractRadio, stage=" << stage << endl;
+    EV << "Initializing Radio, stage=" << stage << endl;
 
     if (stage == 0)
     {
@@ -457,7 +457,7 @@ void Radio::handleCommand(int msgkind, cObject *ctrl)
 
 void Radio::handleSelfMsg(cMessage *msg)
 {
-    EV<<"AbstractRadio::handleSelfMsg"<<msg->getKind()<<endl;
+    EV<<"Radio::handleSelfMsg"<<msg->getKind()<<endl;
     if (msg->getKind()==MK_RECEPTION_COMPLETE)
     {
         EV << "frame is completely received now\n";
@@ -517,7 +517,7 @@ void Radio::handleSelfMsg(cMessage *msg)
     {
         error("Internal error: unknown self-message `%s'", msg->getName());
     }
-    EV<<"AbstractRadio::handleSelfMsg END"<<endl;
+    EV<<"Radio::handleSelfMsg END"<<endl;
 }
 
 
