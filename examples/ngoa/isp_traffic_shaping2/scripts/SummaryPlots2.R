@@ -539,7 +539,7 @@ if (.resp == 'y') {
 ### Note: This is for the IEEE Transactions on Networking paper.
 #################################################################################
 .resp <- readline("Process data from shared access with traffic shaping? (hit y or n) ")
-if (.resp == 'y') {n
+if (.resp == 'y') {
     .config <- readline("Type OMNeT++ configuration name: ")
     .sa_tbf.wd <- paste(.base.directory, "results/Shared", .config, sep="/")
     .sa_tbf.rdata <- paste(.config, 'RData', sep=".")
