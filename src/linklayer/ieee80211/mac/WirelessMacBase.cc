@@ -54,18 +54,23 @@ void WirelessMacBase::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
         handleSelfMsg(msg);
-    else if (!msg->isPacket())
-        handleCommand(msg);
     else if (msg->getArrivalGateId()==upperLayerIn)
     {
-        emit(packetReceivedFromUpperSignal, msg);
-        handleUpperMsg(PK(msg));
+        if (!msg->isPacket())
+            handleCommand(msg);
+        else
+        {
+            emit(packetReceivedFromUpperSignal, msg);
+            handleUpperMsg(PK(msg));
+        }
     }
-    else
+    else if (msg->getArrivalGateId()==lowerLayerIn)
     {
         emit(packetReceivedFromLowerSignal, msg);
         handleLowerMsg(PK(msg));
     }
+    else
+        throw cRuntimeError("Message '%s' received on unexpected gate '%s'", msg->getName(), msg->getArrivalGate()->getFullName());
 }
 
 bool WirelessMacBase::isUpperMsg(cMessage *msg)
