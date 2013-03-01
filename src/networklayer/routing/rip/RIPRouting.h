@@ -37,18 +37,43 @@ struct RIPRoute : public cObject
       RIP_ROUTE_INTERFACE       // route belongs to a local interface
     };
 
-    IRoute *route;         // the route in the host routing table that is associated with this route, may be NULL
+    private:
     RouteType type;        // the type of the route
-    InterfaceEntry *ie;    // only for INTERFACE routes
+    IRoute *route;         // the route in the host routing table that is associated with this route, may be NULL if deleted
+    Address dest;          // destination of the route
+    int prefixLength;      // prefix length of the destination
+    Address nextHop;       // next hop of the route
+    InterfaceEntry *ie;    // outgoing interface of the route
     Address from;          // only for RTE routes
     int metric;            // the metric of this route, or infinite (16) if invalid
     uint16 tag;            // route tag, only for REDISTRIBUTE routes
     bool changed;          // true if the route has changed since the update
-    simtime_t lastUpdateTime; // time of the last change
+    simtime_t lastUpdateTime; // time of the last change, only for RTE routes
 
-    RIPRoute(IRoute *route, RouteType type, int metric)
-        : route(route), type(type), ie(NULL), metric(metric), tag(0), changed(false), lastUpdateTime(0) {}
+    public:
+    RIPRoute(IRoute *route, RouteType type, int metric);
     virtual std::string info() const;
+
+    RouteType getType() const { return type; }
+    IRoute *getRoute() const { return route; }
+    Address getDestination() const { return dest; }
+    int getPrefixLength() const { return prefixLength; }
+    Address getNextHop() const { return nextHop; }
+    InterfaceEntry *getInterface() const { return ie; }
+    Address getFrom() const { return from; }
+    int getMetric() const { return metric; }
+    uint16 getRouteTag() const { return tag; }
+    bool isChanged() const { return changed; }
+    simtime_t getLastUpdateTime() const { return lastUpdateTime; }
+    void setRoute(IRoute *route) { this->route = route; }
+    void setDestination(const Address &dest) { this->dest = dest; }
+    void setPrefixLength(int prefixLength) { this->prefixLength = prefixLength; }
+    void setNextHop(const Address &nextHop) { this->nextHop = nextHop; if (route && type == RIP_ROUTE_RTE) route->setNextHop(nextHop); }
+    void setInterface(InterfaceEntry *ie) { this->ie = ie; if(route && type == RIP_ROUTE_RTE) route->setInterface(ie); }
+    void setMetric(int metric) { this->metric = metric; if (route && type == RIP_ROUTE_RTE) route->setMetric(metric); }
+    void setFrom(const Address &from) { this->from = from; }
+    void setChanged(bool changed) { this->changed = changed; }
+    void setLastUpdateTime(simtime_t time) { lastUpdateTime = time; }
 };
 
 /**
@@ -121,6 +146,7 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     RIPInterfaceEntry *findInterfaceById(int interfaceId);
     RIPRoute *findRoute(const Address &destAddress, int prefixLength);
     RIPRoute *findRoute(const Address &destination, int prefixLength, RIPRoute::RouteType type);
+    RIPRoute *findRoute(const IRoute *route);
     RIPRoute *findRoute(const InterfaceEntry *ie, RIPRoute::RouteType type);
     void addInterface(const InterfaceEntry *ie, cXMLElement *config);
     void deleteInterface(const InterfaceEntry *ie);
