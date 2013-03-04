@@ -130,7 +130,7 @@ void UDPVideoStreamSvrWithTrace::initialize()
 	serverPort = par("serverPort");
 	appOverhead = par("appOverhead").longValue();
 	maxPayloadSize = par("maxPayloadSize").longValue();
-    trafficShaping = par("trafficShaping").boolValue();
+    frameSpreading = par("frameSpreading").boolValue();
 	framePeriod = 1.0 / par("fps").longValue();
 	numFrames = 0;
 
@@ -257,9 +257,9 @@ void UDPVideoStreamSvrWithTrace::processStreamRequest(cMessage *msg)
 	d->currentSequenceNumber = intuniform(0, 65535);	///< made random according to RFC 3550
 	d->numPktSent = 0;
 	d->numFrames = numFrames;
+    d->numFramesSent = 0;
 	d->framePeriod = framePeriod;
-//	d->currentFrame = intuniform(1, numFrames); ///< start frame is randomly selected; here we assume sizeof(int) = sizeof(long)
-	d->currentFrame = intuniform(0, numFrames-1); ///< start frame is randomly selected; here we assume sizeof(int) = sizeof(long)
+	d->currentFrame = intuniform(0, d->numFrames-1); ///< start frame is randomly selected; here we assume sizeof(int) = sizeof(long)
 	streamVector.push_back(d);
 
 	// initialize self messages
@@ -279,14 +279,21 @@ void UDPVideoStreamSvrWithTrace::readFrameData(cMessage *frameTimer)
 {
 	VideoStreamData *d = (VideoStreamData *) frameTimer->getContextPointer();
 
-//	d->currentFrame = (d->currentFrame < numFrames) ? d->currentFrame + 1 : 1; ///> wrap around to the first frame if it reaches the last one
-	d->currentFrame = (d->currentFrame + 1) % numFrames; ///> wrap around to the first frame if it reaches the last one
+    if (d->numFramesSent == d->numFrames)
+    {   // sent the whole frames in the trace file; reset the frame counter
+        d->numFramesSent = 0;
+        d->currentFrame = intuniform(0, d->numFrames-1); ///< start frame is randomly selected; here we assume sizeof(int) = sizeof(long)
+    }
+    else {
+        d->numFramesSent++;
+    }
+	d->currentFrame = (d->currentFrame + 1) % d->numFrames; ///> wrap around to the first frame if it reaches the last one
 	d->frameNumber = frameNumberVector[d->currentFrame];
 	d->frameTime = frameTimeVector[d->currentFrame];
 	d->frameType = frameTypeVector[d->currentFrame];
 	d->frameSize = frameSizeVector[d->currentFrame];
 	d->bytesLeft = d->frameSize;
-    if (trafficShaping)
+    if (frameSpreading)
     {
         d->pktInterval = d->framePeriod / ceil(d->bytesLeft / double(maxPayloadSize));	///> spread out packet transmissions over a frame period
     }
