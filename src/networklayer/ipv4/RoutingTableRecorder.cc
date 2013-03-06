@@ -100,9 +100,9 @@ void RoutingTableRecorder::receiveChangeNotification(NotificationBoard *nb, int 
 {
     cModule *host = nb->getParentModule();
     if (category==NF_ROUTE_ADDED || category==NF_ROUTE_DELETED || category==NF_ROUTE_CHANGED)
-        recordRoute(host, check_and_cast<IRoute *>(details), category);
+        recordRoute(host, check_and_cast<const IRoute *>(details), category);
     else if (category==NF_INTERFACE_CREATED || category==NF_INTERFACE_DELETED || category==NF_INTERFACE_CONFIG_CHANGED || category==NF_INTERFACE_IPv4CONFIG_CHANGED)
-        recordInterface(host, check_and_cast<InterfaceEntry *>(details), category);
+        recordInterface(host, check_and_cast<const InterfaceEntry *>(details), category);
 }
 
 void RoutingTableRecorder::recordSnapshot()
@@ -142,7 +142,7 @@ void RoutingTableRecorder::recordSnapshot()
     }
 }
 
-void RoutingTableRecorder::recordInterface(cModule *host, InterfaceEntry *interface, int category)
+void RoutingTableRecorder::recordInterface(cModule *host, const InterfaceEntry *interface, int category)
 {
     cEnvir* envir = simulation.getEnvir();
     // moduleId, ifname, address
@@ -171,7 +171,7 @@ void RoutingTableRecorder::recordInterface(cModule *host, InterfaceEntry *interf
     }
 }
 
-void RoutingTableRecorder::recordRoute(cModule *host,  IRoute *route, int category)
+void RoutingTableRecorder::recordRoute(cModule *host, const IRoute *route, int category)
 {
     cEnvir* envir = simulation.getEnvir();
     // moduleId, dest, dest netmask, nexthop

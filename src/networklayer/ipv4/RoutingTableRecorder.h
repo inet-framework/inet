@@ -57,8 +57,8 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cIndexedEvent
 
     long interfaceKey;
     long routeKey;
-    std::map<InterfaceEntry *, long> interfaceEntryToKey;
-    std::map<IRoute *, long> routeToKey;
+    std::map<const InterfaceEntry *, long> interfaceEntryToKey;
+    std::map<const IRoute *, long> routeToKey;
 
   public:
     RoutingTableRecorder();
@@ -72,8 +72,8 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cIndexedEvent
     virtual void receiveChangeNotification(NotificationBoard *nb, int category, const cObject *details);
     virtual void recordSnapshot();
     virtual void recordIndex() {}
-    virtual void recordInterface(cModule *host, InterfaceEntry *ie, int category);
-    virtual void recordRoute(cModule *host, IRoute *route, int category);
+    virtual void recordInterface(cModule *host, const InterfaceEntry *ie, int category);
+    virtual void recordRoute(cModule *host, const IRoute *route, int category);
 };
 
 
