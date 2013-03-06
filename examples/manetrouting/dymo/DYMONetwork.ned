@@ -4,10 +4,12 @@
 
 package inet.examples.manetrouting.dymo;
 
+import inet.base.LifecycleController;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.nodes.dymo.DYMORouter;
 import inet.world.radio.ChannelControl;
+import inet.world.scenario.ScenarioManager;
 
 
 //
@@ -30,6 +32,15 @@ network DYMONetwork
         routingTableRecorder: RoutingTableRecorder {
             parameters:
                 @display("p=50,150");
+        }
+        lifecycleController: LifecycleController {
+            parameters:
+                @display("p=50,200");
+        }
+        scenarioManager: ScenarioManager {
+            parameters:
+                script = default(xml("<scenario/>"));
+                @display("p=50,250");
         }
         host[numHosts]: DYMORouter {
             parameters:
