@@ -28,7 +28,6 @@
 // Forward declarations
 class AirFrame;
 
-#define LIGHT_SPEED 3.0E+8
 #define TRANSMISSION_PURGE_INTERVAL 1.0
 
 /**
