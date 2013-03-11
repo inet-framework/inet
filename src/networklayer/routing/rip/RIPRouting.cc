@@ -91,7 +91,7 @@ void RIPInterfaceEntry::configure(cXMLElement *config)
     if (metricAttr)
     {
         int metric = atoi(metricAttr);
-        if (metric == 0)
+        if (metric < 1 || metric >= RIP_INFINITE_METRIC)
             throw cRuntimeError("RIP: invalid metric in <interface> element at %s: %s", config->getSourceLocation(), metricAttr);
         this->metric = metric;
     }
@@ -229,6 +229,8 @@ void RIPRouting::configureInitialRoutes()
 
 RIPRoute* RIPRouting::importRoute(IRoute *route, RIPRoute::RouteType type, int metric)
 {
+    ASSERT(metric < RIP_INFINITE_METRIC);
+
     RIPRoute *ripRoute = new RIPRoute(route, type, metric);
     if (type == RIPRoute::RIP_ROUTE_INTERFACE)
     {
@@ -615,9 +617,13 @@ void RIPRouting::processResponse(RIPPacket *packet)
         int metric = std::min((int)entry.metric + incomingIe->metric, RIP_INFINITE_METRIC);
         Address nextHop = entry.nextHop.isUnspecified() ? srcAddr : entry.nextHop;
 
-        RIPRoute *ripRoute = findRoute(entry.address, entry.prefixLength, RIPRoute::RIP_ROUTE_RTE);
+        RIPRoute *ripRoute = findRoute(entry.address, entry.prefixLength);
         if (ripRoute)
         {
+            RIPRoute::RouteType routeType = ripRoute->getType();
+            int routeMetric = ripRoute->getMetric();
+            if ((routeType == RIPRoute::RIP_ROUTE_STATIC || routeType == RIPRoute::RIP_ROUTE_DEFAULT) && routeMetric != RIP_INFINITE_METRIC)
+                continue;
             if (ripRoute->getFrom() == srcAddr)
                 ripRoute->setLastUpdateTime(simTime());
             if ((ripRoute->getFrom() == srcAddr && ripRoute->getMetric() != metric) || metric < ripRoute->getMetric())
@@ -702,20 +708,12 @@ void RIPRouting::addRoute(const Address &dest, int prefixLength, const Interface
     RIP_DEBUG << "Add route to " << dest << "/" << prefixLength << ": "
               << "nextHop=" << nextHop << " metric=" << metric << std::endl;
 
-    IRoute *route = rt->createRoute();
-    route->setSource(this);
-    route->setDestination(dest);
-    route->setPrefixLength(prefixLength);
-    route->setInterface(const_cast<InterfaceEntry*>(ie));
-    route->setNextHop(nextHop);
-    route->setMetric(metric);
+    IRoute *route = addRoute(dest, prefixLength, ie, nextHop, metric);
 
     RIPRoute *ripRoute = new RIPRoute(route, RIPRoute::RIP_ROUTE_RTE, metric);
     ripRoute->setFrom(from);
     ripRoute->setLastUpdateTime(simTime());
     ripRoute->setChanged(true);
-    route->setProtocolData(ripRoute);
-    rt->addRoute(route);
     ripRoutes.push_back(ripRoute);
     emit(numRoutesSignal, ripRoutes.size());
     triggerUpdate();
@@ -739,31 +737,47 @@ void RIPRouting::addRoute(const Address &dest, int prefixLength, const Interface
  */
 void RIPRouting::updateRoute(RIPRoute *ripRoute, const InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from)
 {
-    ASSERT(ripRoute && ripRoute->getType() == RIPRoute::RIP_ROUTE_RTE);
-    ASSERT(!ripRoute->getRoute() || ripRoute->getRoute()->getSource() == this);
+    //ASSERT(ripRoute && ripRoute->getType() == RIPRoute::RIP_ROUTE_RTE);
+    //ASSERT(!ripRoute->getRoute() || ripRoute->getRoute()->getSource() == this);
 
-    if (!ripRoute->getRoute())
-    {
-        IRoute *route = rt->createRoute();
-        route->setSource(this);
-        route->setDestination(ripRoute->getDestination());
-        route->setPrefixLength(ripRoute->getPrefixLength());
-        route->setInterface(const_cast<InterfaceEntry*>(ie));
-        route->setNextHop(nextHop);
-        route->setMetric(metric);
-        rt->addRoute(route);
-        ripRoute->setRoute(route);
-    }
+    RIP_DEBUG << "Updating route to " << ripRoute->getDestination() << "/" << ripRoute->getPrefixLength() << ": "
+              << "nextHop=" << nextHop << " metric=" << metric << std::endl;
 
+    int oldMetric = ripRoute->getMetric();
     ripRoute->setInterface(const_cast<InterfaceEntry*>(ie));
-    ripRoute->setNextHop(nextHop);
     ripRoute->setMetric(metric);
     ripRoute->setFrom(from);
+    // TODO update tag
+
+    if (oldMetric == RIP_INFINITE_METRIC && metric < RIP_INFINITE_METRIC)
+    {
+        ASSERT(!ripRoute->getRoute());
+        ripRoute->setType(RIPRoute::RIP_ROUTE_RTE);
+        ripRoute->setNextHop(nextHop);
+
+        IRoute *route = addRoute(ripRoute->getDestination(), ripRoute->getPrefixLength(), ie, nextHop, metric);
+        ripRoute->setRoute(route);
+    }
+    if (oldMetric != RIP_INFINITE_METRIC)
+    {
+        IRoute *route = ripRoute->getRoute();
+        ASSERT(route);
+
+        ripRoute->setRoute(NULL);
+        deleteRoute(route);
+
+        ripRoute->setNextHop(nextHop);
+        if (metric < RIP_INFINITE_METRIC)
+        {
+            route = addRoute(ripRoute->getDestination(), ripRoute->getPrefixLength(), ie, nextHop, metric);
+            ripRoute->setRoute(route);
+        }
+    }
 
     ripRoute->setChanged(true);
     triggerUpdate();
 
-    if (metric == RIP_INFINITE_METRIC)
+    if (metric == RIP_INFINITE_METRIC && oldMetric != RIP_INFINITE_METRIC)
         invalidateRoute(ripRoute);
     else
         ripRoute->setLastUpdateTime(simTime());
@@ -822,8 +836,7 @@ void RIPRouting::invalidateRoute(RIPRoute *ripRoute)
     if (route)
     {
         ripRoute->setRoute(NULL);
-        route->setProtocolData(NULL);
-        rt->deleteRoute(route);
+        deleteRoute(route);
     }
     ripRoute->setMetric(RIP_INFINITE_METRIC);
     ripRoute->setChanged(true);
@@ -841,8 +854,7 @@ void RIPRouting::purgeRoute(RIPRoute *ripRoute)
     if (route)
     {
         ripRoute->setRoute(NULL);
-        route->setProtocolData(NULL);
-        rt->deleteRoute(route);
+        deleteRoute(route);
     }
 
     RouteVector::iterator end = std::remove(ripRoutes.begin(), ripRoutes.end(), ripRoute);
@@ -952,6 +964,24 @@ void RIPRouting::invalidateRoutes(const InterfaceEntry *ie)
     for (RouteVector::iterator it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
         if ((*it)->getInterface() == ie)
             invalidateRoute(*it);
+}
+
+IRoute *RIPRouting::addRoute(const Address &dest, int prefixLength, const InterfaceEntry *ie, const Address &nextHop, int metric)
+{
+    IRoute *route = rt->createRoute();
+    route->setSource(this);
+    route->setDestination(dest);
+    route->setPrefixLength(prefixLength);
+    route->setInterface(const_cast<InterfaceEntry*>(ie));
+    route->setNextHop(nextHop);
+    route->setMetric(metric);
+    rt->addRoute(route);
+    return route;
+}
+
+void RIPRouting::deleteRoute(IRoute *route)
+{
+    rt->deleteRoute(route);
 }
 
 bool RIPRouting::isLoopbackInterfaceRoute(const IRoute *route)

@@ -65,6 +65,7 @@ struct RIPRoute : public cObject
     uint16 getRouteTag() const { return tag; }
     bool isChanged() const { return changed; }
     simtime_t getLastUpdateTime() const { return lastUpdateTime; }
+    void setType(RouteType type) { this->type = type; }
     void setRoute(IRoute *route) { this->route = route; }
     void setDestination(const Address &dest) { this->dest = dest; }
     void setPrefixLength(int prefixLength) { this->prefixLength = prefixLength; }
@@ -151,6 +152,8 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     void addInterface(const InterfaceEntry *ie, cXMLElement *config);
     void deleteInterface(const InterfaceEntry *ie);
     void invalidateRoutes(const InterfaceEntry *ie);
+    IRoute *addRoute(const Address &dest, int prefixLength, const InterfaceEntry *ie, const Address &nextHop, int metric);
+    void deleteRoute(IRoute *route);
     bool isLoopbackInterfaceRoute(const IRoute *route);
     bool isLocalInterfaceRoute(const IRoute *route);
     bool isDefaultRoute(const IRoute *route) { return route->getPrefixLength() == 0; }
