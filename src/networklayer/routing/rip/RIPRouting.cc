@@ -31,6 +31,8 @@
 Define_Module(RIPRouting);
 
 #define RIP_EV EV << "RIP at " << getHostName() << " "
+#define RIP_DEBUG EV << "RIP at " << getHostName() << " "
+
 
 std::ostream& operator<<(std::ostream& os, const RIPRoute& e)
 {
@@ -486,6 +488,8 @@ void RIPRouting::processRequest(RIPPacket *packet)
  */
 void RIPRouting::sendRoutes(const Address &address, int port, const RIPInterfaceEntry &ripInterface, bool changedOnly)
 {
+    RIP_DEBUG << "Sending " << (changedOnly ? "changed" : "all") << " routes on " << ripInterface.ie->getFullName() << std::endl;
+
     RIPPacket *packet = new RIPPacket("RIP response");
     packet->setCommand(RIP_RESPONSE);
     packet->setEntryArraySize(MAX_RIP_ENTRIES);
@@ -514,6 +518,9 @@ void RIPRouting::sendRoutes(const Address &address, int port, const RIPInterface
             else if (ripInterface.splitHorizonMode == SPLIT_HORIZON_POISONED_REVERSE)
                 metric = RIP_INFINITE_METRIC;
         }
+
+        RIP_DEBUG << "Add entry for " << ripRoute->getDestination() << "/" << ripRoute->getPrefixLength() << ": "
+                  << " metric=" << metric << std::endl;
 
         // fill next entry
         RIPEntry &entry = packet->getEntry(k++);
@@ -692,6 +699,9 @@ bool RIPRouting::isValidResponse(RIPPacket *packet)
  */
 void RIPRouting::addRoute(const Address &dest, int prefixLength, const InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from)
 {
+    RIP_DEBUG << "Add route to " << dest << "/" << prefixLength << ": "
+              << "nextHop=" << nextHop << " metric=" << metric << std::endl;
+
     IRoute *route = rt->createRoute();
     route->setSource(this);
     route->setDestination(dest);
