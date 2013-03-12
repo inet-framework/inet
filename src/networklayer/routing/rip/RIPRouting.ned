@@ -28,6 +28,8 @@ package inet.networklayer.routing.rip;
 simple RIPRouting
 {
     parameters:
+        @display("i=block/network2");
+
         string routingTableModule = default("^.routingTable");
         xml ripConfig = default(xml("<config><interface metric='1'/></config>"));
 
