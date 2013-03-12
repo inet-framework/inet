@@ -196,9 +196,9 @@ void RIPRouting::configureInterfaces(cXMLElement *config)
     cXMLElementList interfaceElements = config->getChildrenByTagName("interface");
     InterfaceMatcher matcher(interfaceElements);
 
-    for (int i = 0; i < ift->getNumInterfaces(); ++i)
+    for (int k = 0; k < ift->getNumInterfaces(); ++k)
     {
-        InterfaceEntry *ie = ift->getInterface(i);
+        InterfaceEntry *ie = ift->getInterface(k);
         if (ie->isMulticast() && !ie->isLoopback())
         {
             int i = matcher.findMatchingSelector(ie);
