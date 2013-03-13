@@ -75,7 +75,7 @@ class INET_API InterfaceMatcher
 
     private:
         bool linkContainsMatchingHost(const InterfaceEntry *ie, const Matcher &hostMatcher) const;
-        void collectNeighbors(cGate *outGate, std::vector<cModule*> &hostNodes, std::vector<cModule*> &deviceNodes) const;
+        void collectNeighbors(cGate *outGate, std::vector<cModule*> &hostNodes, std::vector<cModule*> &deviceNodes, cModule *exludedNode) const;
 };
 
 #endif /* INTERFACEMATCHER_H_ */

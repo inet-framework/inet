@@ -139,7 +139,7 @@ bool InterfaceMatcher::linkContainsMatchingHost(const InterfaceEntry *ie, const 
 
     std::vector<cModule*> hostNodes;
     std::vector<cModule*> deviceNodes;
-    collectNeighbors(outGate, hostNodes, deviceNodes);
+    collectNeighbors(outGate, hostNodes, deviceNodes, node);
 
     for (std::vector<cModule*>::iterator it = hostNodes.begin(); it != hostNodes.end(); ++it)
     {
@@ -155,7 +155,7 @@ bool InterfaceMatcher::linkContainsMatchingHost(const InterfaceEntry *ie, const 
 }
 
 
-void InterfaceMatcher::collectNeighbors(cGate *outGate, std::vector<cModule*> &hostNodes, std::vector<cModule*> &deviceNodes) const
+void InterfaceMatcher::collectNeighbors(cGate *outGate, std::vector<cModule*> &hostNodes, std::vector<cModule*> &deviceNodes, cModule *excludedNode) const
 {
     cGate *neighborGate = findRemoteGate(outGate);
     if (!neighborGate)
@@ -165,7 +165,7 @@ void InterfaceMatcher::collectNeighbors(cGate *outGate, std::vector<cModule*> &h
     if (hasInterfaceTable(neighborNode))
     {
         // neighbor is a host or router
-        if (!contains(hostNodes, neighborNode))
+        if (neighborNode != excludedNode && !contains(hostNodes, neighborNode))
             hostNodes.push_back(neighborNode);
     }
     else
@@ -173,12 +173,13 @@ void InterfaceMatcher::collectNeighbors(cGate *outGate, std::vector<cModule*> &h
         // assume that neighbor is an L2 or L1 device (bus/hub/switch/bridge/access point/etc); visit all its output links
         if (!contains(deviceNodes, neighborNode))
         {
-            deviceNodes.push_back(neighborNode);
+            if (neighborNode != excludedNode)
+                deviceNodes.push_back(neighborNode);
             for (cModule::GateIterator it(neighborNode); !it.end(); it++)
             {
                 cGate *gate = it();
                 if (gate->getType() == cGate::OUTPUT)
-                    collectNeighbors(gate, hostNodes, deviceNodes);
+                    collectNeighbors(gate, hostNodes, deviceNodes, excludedNode);
             }
         }
     }
