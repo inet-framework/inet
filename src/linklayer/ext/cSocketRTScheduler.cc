@@ -275,20 +275,29 @@ int32 cSocketRTScheduler::receiveUntil(const timeval& targetTime)
     return 0;
 }
 
+#if OMNETPP_VERSION >= 0x0500
+cEvent *cSocketRTScheduler::guessNextEvent()
+{
+    return sim->msgQueue.peekFirst();
+}
+cEvent *cSocketRTScheduler::takeNextEvent()
+#else
 cMessage *cSocketRTScheduler::getNextEvent()
+#define cEvent cMessage
+#endif
 {
     timeval targetTime, curTime, diffTime;
 
     // calculate target time
-    cMessage *msg = sim->msgQueue.peekFirst();
-    if (!msg)
+    cEvent *event = sim->msgQueue.peekFirst();
+    if (!event)
     {
         targetTime.tv_sec = LONG_MAX;
         targetTime.tv_usec = 0;
     }
     else
     {
-        simtime_t eventSimtime = msg->getArrivalTime();
+        simtime_t eventSimtime = event->getArrivalTime();
         targetTime = timeval_add(baseTime, eventSimtime.dbl());
     }
 
@@ -299,7 +308,7 @@ cMessage *cSocketRTScheduler::getNextEvent()
         if (status == -1)
             return NULL; // interrupted by user
         if (status == 1)
-            msg = sim->msgQueue.peekFirst(); // received something
+            event = sim->msgQueue.peekFirst(); // received something
     }
     else
     {
@@ -308,8 +317,9 @@ cMessage *cSocketRTScheduler::getNextEvent()
         diffTime = timeval_substract(curTime, targetTime);
         EV << "We are behind: " << diffTime.tv_sec + diffTime.tv_usec * 1e-6 << " seconds\n";
     }
-    return msg;
+    return event;
 }
+#undef cEvent
 
 void cSocketRTScheduler::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr *to, socklen_t addrlen)
 {
