@@ -81,8 +81,9 @@ struct RIPRoute : public cObject
  * Enumerated parameter to control how the RIPRouting module
  * advertises the routes to its neighbors.
  */
-enum SplitHorizonMode
+enum RIPMode
 {
+    NO_RIP,               // no RIP messages sent
     NO_SPLIT_HORIZON,     // every route is sent to the neighbor
     SPLIT_HORIZON,        // do not send routes to the neighbor it was learnt from
     SPLIT_HORIZON_POISONED_REVERSE // send the route to the neighbor it was learnt from with infinite metric (16)
@@ -99,7 +100,7 @@ struct RIPInterfaceEntry
 {
     const InterfaceEntry *ie;           // the associated interface entry
     int metric;                         // metric of this interface
-    SplitHorizonMode splitHorizonMode;  // RIP mode of this interface
+    RIPMode mode;                       // RIP mode of this interface
 
     RIPInterfaceEntry(const InterfaceEntry *ie);
     void configure(cXMLElement *config);

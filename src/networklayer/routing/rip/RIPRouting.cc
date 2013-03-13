@@ -74,7 +74,7 @@ std::string RIPRoute::info() const
 }
 
 RIPInterfaceEntry::RIPInterfaceEntry(const InterfaceEntry *ie)
-    : ie(ie), metric(1), splitHorizonMode(SPLIT_HORIZON_POISONED_REVERSE)
+    : ie(ie), metric(1), mode(NO_RIP)
 {
     ASSERT(!ie->isLoopback());
     ASSERT(ie->isMulticast());
@@ -96,22 +96,32 @@ void RIPInterfaceEntry::configure(cXMLElement *config)
         this->metric = metric;
     }
 
-    const char *splitHorizonModeAttr = config->getAttribute("split-horizon-mode");
-    SplitHorizonMode mode = !splitHorizonModeAttr ? SPLIT_HORIZON_POISONED_REVERSE :
-                            strcmp(splitHorizonModeAttr, "NoSplitHorizon") == 0 ? NO_SPLIT_HORIZON :
-                            strcmp(splitHorizonModeAttr, "SplitHorizon") == 0 ? SPLIT_HORIZON :
-                            strcmp(splitHorizonModeAttr, "SplitHorizonPoisonedReverse") == 0 ? SPLIT_HORIZON_POISONED_REVERSE :
-                            (SplitHorizonMode)-1;
+    const char *ripModeAttr = config->getAttribute("mode");
+    RIPMode mode = !ripModeAttr ? SPLIT_HORIZON_POISONED_REVERSE :
+                   strcmp(ripModeAttr, "NoRIP") == 0 ? NO_RIP :
+                   strcmp(ripModeAttr, "NoSplitHorizon") == 0 ? NO_SPLIT_HORIZON :
+                   strcmp(ripModeAttr, "SplitHorizon") == 0 ? SPLIT_HORIZON :
+                   strcmp(ripModeAttr, "SplitHorizonPoisonedReverse") == 0 ? SPLIT_HORIZON_POISONED_REVERSE :
+                   (RIPMode)-1;
     if (mode == -1)
         throw cRuntimeError("RIP: invalid split-horizon-mode attribute in <interface> element at %s: %s",
-                config->getSourceLocation(), splitHorizonModeAttr);
-    this->splitHorizonMode = mode;
+                config->getSourceLocation(), ripModeAttr);
+    this->mode = mode;
 }
 
 std::ostream& operator<<(std::ostream &os, const RIPInterfaceEntry &e)
 {
     os << "if:" << e.ie->getName() << "  ";
-    os << "metric:" << e.metric;
+    os << "metric:" << e.metric << "  ";
+    os << "mode: ";
+    switch (e.mode)
+    {
+        case NO_RIP: os << "NoRIP"; break;
+        case NO_SPLIT_HORIZON: os << "NoSplitHorizon"; break;
+        case SPLIT_HORIZON: os << "SplitHorizon"; break;
+        case SPLIT_HORIZON_POISONED_REVERSE: os << "SplitHorizonPoisenedReverse"; break;
+        default: os << "<unknown>"; break;
+    }
     return os;
 }
 
@@ -170,7 +180,8 @@ void RIPRouting::initialize(int stage)
         socket.setMulticastLoop(false);
         socket.bind(ripUdpPort);
         for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
-            socket.joinMulticastGroup(addressType->getLinkLocalRIPRoutersMulticastAddress(), it->ie->getInterfaceId());
+            if (it->mode != NO_RIP)
+                socket.joinMulticastGroup(addressType->getLinkLocalRIPRoutersMulticastAddress(), it->ie->getInterfaceId());
 
         // subscribe to notifications
         NotificationBoard *nb = NotificationBoardAccess().get();
@@ -202,8 +213,7 @@ void RIPRouting::configureInterfaces(cXMLElement *config)
         if (ie->isMulticast() && !ie->isLoopback())
         {
             int i = matcher.findMatchingSelector(ie);
-            if (i >= 0)
-                addInterface(ie, interfaceElements[i]);
+            addInterface(ie, i >= 0 ? interfaceElements[i] : NULL);
         }
     }
 }
@@ -253,14 +263,17 @@ void RIPRouting::sendInitialRequests()
 {
     for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
     {
-        RIPPacket *packet = new RIPPacket("RIP request");
-        packet->setCommand(RIP_REQUEST);
-        packet->setEntryArraySize(1);
-        RIPEntry &entry = packet->getEntry(0);
-        entry.addressFamilyId = RIP_AF_NONE;
-        entry.metric = RIP_INFINITE_METRIC;
-        emit(sentRequestSignal, packet);
-        sendPacket(packet, addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, it->ie);
+        if (it->mode != NO_RIP)
+        {
+            RIPPacket *packet = new RIPPacket("RIP request");
+            packet->setCommand(RIP_REQUEST);
+            packet->setEntryArraySize(1);
+            RIPEntry &entry = packet->getEntry(0);
+            entry.addressFamilyId = RIP_AF_NONE;
+            entry.metric = RIP_INFINITE_METRIC;
+            emit(sentRequestSignal, packet);
+            sendPacket(packet, addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, it->ie);
+        }
     }
 }
 
@@ -402,7 +415,8 @@ void RIPRouting::processUpdate(bool triggered)
         RIP_EV << "sending regular updates on all interfaces\n";
 
     for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
-        sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, *it, triggered);
+        if (it->mode != NO_RIP)
+            sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, *it, triggered);
 
     // clear changed flags
     for (RouteVector::iterator it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
@@ -515,9 +529,9 @@ void RIPRouting::sendRoutes(const Address &address, int port, const RIPInterface
         int metric = ripRoute->getMetric();
         if (ripRoute->getInterface() == ripInterface.ie)
         {
-            if (ripInterface.splitHorizonMode == SPLIT_HORIZON)
+            if (ripInterface.mode == SPLIT_HORIZON)
                 continue;
-            else if (ripInterface.splitHorizonMode == SPLIT_HORIZON_POISONED_REVERSE)
+            else if (ripInterface.mode == SPLIT_HORIZON_POISONED_REVERSE)
                 metric = RIP_INFINITE_METRIC;
         }
 
@@ -930,7 +944,8 @@ RIPRoute *RIPRouting::findRoute(const InterfaceEntry *ie, RIPRoute::RouteType ty
 void RIPRouting::addInterface(const InterfaceEntry *ie, cXMLElement *config)
 {
     RIPInterfaceEntry ripInterface(ie);
-    ripInterface.configure(config);
+    if (config)
+        ripInterface.configure(config);
     ripInterfaces.push_back(ripInterface);
 }
 
