@@ -865,6 +865,21 @@ void TCPConnection::retransmitData()
     state->snd_nxt = state->snd_una;
 
     uint32 bytesToSend = state->snd_max - state->snd_nxt;
+
+    // FIN (without user data) needs to be resent
+    if (bytesToSend == 0 && state->send_fin && state->snd_fin_seq == sendQueue->getBufferEndSeq())
+    {
+        state->snd_max = sendQueue->getBufferEndSeq();
+        tcpEV << "No outstanding DATA, resending FIN, advancing snd_nxt over the FIN\n";
+        state->snd_nxt = state->snd_max;
+        sendFin();
+        state->snd_max = ++state->snd_nxt;
+
+        if (unackedVector)
+            unackedVector->record(state->snd_max - state->snd_una);
+        return;
+    }
+
     ASSERT(bytesToSend != 0);
 
     // TBD - avoid to send more than allowed - check cwnd and rwnd before retransmitting data!
