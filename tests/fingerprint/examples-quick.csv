@@ -3,7 +3,7 @@
 /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                1s,              ab28-c0d2
 /examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                1s,              9278-0332
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0,                1s,              2cbd-c3f3
-/examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1s,              d738-a222
-/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            1s,              7aa0-19cb
-/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            1s,              8e23-398d
-/examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            1s,              fe1c-afe4
+/examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1s,              87ec-dc54
+/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            1s,              a1bc-2e93
+/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            1s,              9f33-b96b
+/examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            1s,              137f-e459
