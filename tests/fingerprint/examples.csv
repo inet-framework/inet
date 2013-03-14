@@ -8,9 +8,9 @@
 /examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           60b8-1f27
 /examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           8c22-fc43
 /examples/bgpv4/BGPOpen/,            -f omnetpp.ini -c config1 -r 0,                62s,             fe39-8683
-/examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0,                30s,             5b39-1dd6
+/examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0,                30s,             2ca8-a1cb
 /examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           e46b-fc8c
-/examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           fdcf-cf59
+/examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           ffff-148b
 
 /examples/dhcp/eth/,                 -f omnetpp.ini -c General -r 0,                5000s,           46c5-7158
 /examples/dhcp/wlan/,                -f omnetpp.ini -c General -r 0,                20s,             a7bf-e53a
