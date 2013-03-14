@@ -301,7 +301,7 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
 	}
 		
 	//Try to send more data
-    sendData();
+    sendData(false);
 }
 
 
@@ -370,7 +370,7 @@ void TCPVegas::receivedDuplicateAck()
 	}
 	
 	// try to send more data
-	sendData();
+    sendData(false);
 }
 
 void TCPVegas::dataSent(uint32 fromseq) {

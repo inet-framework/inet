@@ -204,7 +204,7 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
         }
     }
 
-    sendData();
+    sendData(false);
 }
 
 void TCPWestwood::receivedDuplicateAck()
@@ -274,7 +274,7 @@ void TCPWestwood::receivedDuplicateAck()
         conn->retransmitOneSegment(false);
 		
 
-        sendData();
+        sendData(false);
     }
 
 	// Behavior like Reno:
@@ -288,7 +288,7 @@ void TCPWestwood::receivedDuplicateAck()
         if (cwndVector)
             cwndVector->record(state->snd_cwnd);
 
-        sendData();
+        sendData(false);
     }
 }
 
