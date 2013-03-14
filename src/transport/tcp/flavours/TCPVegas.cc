@@ -9,7 +9,7 @@ TCPVegasStateVariables::TCPVegasStateVariables()
 {
     ssthresh = 65535;
     v_recoverypoint = 0;
-    v_last_cwnd_action = 0;
+//    v_last_cwnd_action = 0;
     v_cwnd_changed = 0;
     
     v_baseRTT = 0x7fffffff;
