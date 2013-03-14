@@ -24,7 +24,10 @@ TCPVegasStateVariables::TCPVegasStateVariables()
 	v_begtime = 0;
 	v_cntRTT = 0;
 	v_sumRTT = 0.;
-	v_rtt_timeout = 1000.;
+	v_rtt_timeout = 1000.0;
+
+	v_sendtime = NULL;
+	v_maxwnd = 0;
 }
 
 std::string TCPVegasStateVariables::info() const
@@ -119,6 +122,7 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
 {
 	TCPBaseAlg::receivedDataAck(firstSeqAcked);
 
+	//FIXME: sometimes the v_sendtime is uninitialized here!!! ---> crash
 	simtime_t tSent = state->v_sendtime[(firstSeqAcked - (state->iss+1)) % state->v_maxwnd];    
 	simtime_t currentTime = simTime();
 
