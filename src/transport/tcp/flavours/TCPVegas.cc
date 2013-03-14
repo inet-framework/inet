@@ -23,7 +23,7 @@ TCPVegasStateVariables::TCPVegasStateVariables()
 	v_begseq = 0;
 	v_begtime = 0;
 	v_cntRTT = 0;
-	v_sumRTT = 0.;
+	v_sumRTT = 0.0;
 	v_rtt_timeout = 1000.0;
 
 	v_sendtime = NULL;
@@ -134,7 +134,7 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
 		state->v_baseRTT = currentTime - tSent;
 		state->v_sa = state->v_baseRTT * 8;
 		state->v_sd = state->v_baseRTT;
-		state->v_rtt_timeout = ((state->v_sa / 4.) + state->v_sd) / 2.;
+		state->v_rtt_timeout = ((state->v_sa / 4.0) + state->v_sd) / 2.0;
 		tcpEV << "Vegas: initialization" << "\n";
 	}
 	
@@ -332,7 +332,7 @@ void TCPVegas::receivedDuplicateAck()
 			if (num_transmits > 1)
 				state->v_rtt_timeout *= 2; // exp. Backoff
 			else
-				state->v_rtt_timeout += (state->v_rtt_timeout / 8.);
+				state->v_rtt_timeout += (state->v_rtt_timeout / 8.0);
 						
 			
 			// Vegas reduces cwnd if retransmitted segment rtx. was sent after last cwnd reduction
