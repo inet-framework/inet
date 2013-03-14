@@ -535,6 +535,11 @@ static uint32 setPackedBits(uint32 value, uint32 valueMask, uint32 packedValue)
     return value;
 }
 
+bool compareInterfaceInfos(IPv4NetworkConfigurator::InterfaceInfo *i, IPv4NetworkConfigurator::InterfaceInfo *j)
+{
+    return i->addressSpecifiedBits > j->addressSpecifiedBits;
+}
+
 /**
  * Returns a subset of the given interfaces that have compatible address and netmask specifications.
  * Determine the merged address and netmask specifications according to the following table.
@@ -602,7 +607,8 @@ void IPv4NetworkConfigurator::collectCompatibleInterfaces(const std::vector<Inte
         EV_DEBUG << "Merged netmask specification: " << IPv4Address(mergedNetmask) << " / " << IPv4Address(mergedNetmaskSpecifiedBits) << " / " << IPv4Address(mergedNetmaskIncompatibleBits) << endl;
 
     }
-    // TODO: sort compatibleInterfaces putting the most limited interfaces first
+    // sort compatibleInterfaces moving the most constrained interfaces first
+    std::sort(compatibleInterfaces.begin(), compatibleInterfaces.end(), compareInterfaceInfos);
     EV_DEBUG << "Found " << compatibleInterfaces.size() << " compatible interfaces" << endl;
 }
 
