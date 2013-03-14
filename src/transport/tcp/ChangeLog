@@ -1,3 +1,10 @@
+2013-03-14  Zoltan Bojthe
+
+    Added Vegas and Westwood algorithms:
+    https://github.com/maferhe2/TCP-Vegas-Westwood 5cae09feea84bd85b9d657833de90f4beae1de25
+    http://www.omnet-workshop.org/2013/uploads/slides/OMNeT-Workshop2013-SP-4.pdf
+    María Fernández, Carlos Calafate, Juan-Carlos Cano and Pietro Manzoni.
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-11-14  Zoltan Bojthe
