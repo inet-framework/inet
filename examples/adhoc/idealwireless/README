@@ -1,0 +1,5 @@
+Network for testing IdealWirelessNic. IdealWirelessNic provides a simple
+(~dummy) wireless interface that consists of a unit disk radio and no real
+MAC protocol. It offers simplicity scenarios where Layer 1 and 2 effects
+can be completely ignored.
+
