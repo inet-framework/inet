@@ -21,11 +21,7 @@
 package inet.linklayer.radio;
 
 //
-// Implements a radio model suitable for use in  ~IdealWirelessNic.
-//
-// Due to the extremely abstracted nature of the radio communication model
-// provided by ~IdealWirelessNic, this module does not need to implement
-// any physical layer modeling apart from range checking.
+// Implements a unit disk radio for use in ~IdealWirelessNic.
 //
 // See ~IdealWirelessNic for rationale and details.
 //

@@ -1,10 +1,7 @@
 2013-03-08  Zoltan Bojthe
 
-    Added IdealChannelModel and IdealChannelModelAccess.
-
-    These modules work with IdealRadio. IdealRadio is a fullduplex,
-    collision-free and interference-free wireless radio with parameter
-    specified transmit range (in meter).
+	Added IdealChannelModel and IdealChannelModelAccess, to be used with 
+	IdealWirelessNic. See IdealWirelessNic for details.
 
 2013-01-30  ------ inet-2.1.0 released ------
 

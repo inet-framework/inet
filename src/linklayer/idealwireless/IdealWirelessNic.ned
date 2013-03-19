@@ -28,26 +28,18 @@ import inet.linklayer.radio.IdealRadio;
 
 
 //
-// Implements a completely abstract wireless interface, suitable in simulation
-// scenarios when it only matters that transmitted frames reach the node's 
-// neighbours, but all other details such as channel utilization, end-to-end
-// delay, etc. are completely unimportant. In such simulations, this model
-// provides simple parameterization (transmission range only, instead of
-// milliwatts, decibels and channel model constants) and predictability.
-//
-// Since this model does not perform realistic radio transmission and 
-// throughput modeling, it is only applicable for simulation studies
-// where those aspects are unimportant. An example for such scenario is
-// testing the basic functionality of an ad-hoc routing protocol, 
-// disregarding the constraints of radio communication.
+// Highly abstracted wireless NIC that consists of a unit disk radio and a dummy
+// MAC protocol. It offers simplicity for scenarios where Layer 1 and 2 effects
+// can be completely ignored, for example testing the basic functionality
+// of a wireless ad-hoc routing protocol.
 //
 // The most important parameter this model accepts is the transmission range.
 // When a radio transmits a frame, all other radios within transmission range
-// will receive the frame correctly, and radios out of range will not be 
-// affected at all. There are no collisions -- a radio can simultaneously 
-// receive any number of frames, and also transmit a single frame at the same time. 
+// will receive the frame correctly, and radios out of range will not be
+// affected at all. There are no collisions -- a radio can simultaneously
+// receive any number of frames, and also transmit a single frame at the same time.
 //
-// This module requires an ~IdealChannelModel instance in the network 
+// This module requires an ~IdealChannelModel instance in the network
 // as channel control module.
 //
 module IdealWirelessNic like IWirelessNic
