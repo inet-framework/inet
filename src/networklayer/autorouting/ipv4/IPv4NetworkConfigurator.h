@@ -108,11 +108,10 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
          */
         class LinkInfo : public cObject {
             public:
-                bool isWireless;
                 std::vector<InterfaceInfo *> interfaceInfos; // interfaces on that LAN or point-to-point link
                 InterfaceInfo* gatewayInterfaceInfo; // non-NULL if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
 
-                LinkInfo(bool isWireless) { this->isWireless = isWireless; gatewayInterfaceInfo = NULL; }
+                LinkInfo() { gatewayInterfaceInfo = NULL; }
                 ~LinkInfo() { for (int i = 0; i < (int)interfaceInfos.size(); i++) delete interfaceInfos[i]; }
         };
 
@@ -251,11 +250,12 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
         virtual void dumpConfig(IPv4Topology& topology);
 
         // helper functions
-        virtual void extractWiredTopology(IPv4Topology& topology);
-        virtual void extractWiredNeighbors(Topology::LinkOut *linkOut, LinkInfo* linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
-        virtual void extractWirelessTopology(IPv4Topology& topology);
+        virtual void extractWiredNeighbors(IPv4Topology& topology, Topology::LinkOut *linkOut, LinkInfo* linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
+        virtual void extractWirelessNeighbors(IPv4Topology& topology, const char *wirelessId, LinkInfo* linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
+        virtual void extractDeviceNeighbors(IPv4Topology& topology, Node *node, LinkInfo* linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited);
         virtual InterfaceInfo *determineGatewayForLink(LinkInfo *linkInfo);
         virtual double getChannelWeight(cChannel *transmissionChannel);
+        virtual bool isBridgeNode(Node *node);
         virtual bool isWirelessInterface(InterfaceEntry *interfaceEntry);
         virtual const char *getWirelessId(InterfaceEntry *interfaceEntry);
         virtual InterfaceInfo *createInterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
