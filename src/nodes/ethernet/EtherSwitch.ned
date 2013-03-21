@@ -61,7 +61,7 @@ module EtherSwitch
                 lowerLayerIn[sizeof(ethg)];
                 lowerLayerOut[sizeof(ethg)];
         }
-        mac[sizeof(ethg)]: <macType> like IEtherMAC {
+        eth[sizeof(ethg)]: <macType> like IEtherMAC {
             parameters:
                 promiscuous = true;
                 queueModule = "";
@@ -69,8 +69,8 @@ module EtherSwitch
         }
     connections:
         for i=0..sizeof(ethg)-1 {
-            mac[i].upperLayerIn <-- relayUnit.lowerLayerOut[i];
-            mac[i].upperLayerOut --> relayUnit.lowerLayerIn[i];
-            mac[i].phys <--> ethg[i];
+            eth[i].upperLayerIn <-- relayUnit.lowerLayerOut[i];
+            eth[i].upperLayerOut --> relayUnit.lowerLayerIn[i];
+            eth[i].phys <--> ethg[i];
         }
 }
