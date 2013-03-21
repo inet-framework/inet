@@ -65,9 +65,13 @@ void IPv4NetworkConfigurator::initialize(int stage)
         // extract topology into the IPv4Topology object, then fill in a LinkInfo[] vector
         T(extractTopology(topology));
 
-        // dump the result if requested
+        // print topology to module output
         if (par("dumpTopology").boolValue())
             T(dumpTopology(topology));
+
+        // print links to module output
+        if (par("dumpLinks").boolValue())
+            T(dumpLinks(topology));
 
         // read the configuration from XML; it will serve as input for address assignment
         T(readAddressConfiguration(par("config").xmlValue(), topology));
@@ -93,7 +97,7 @@ void IPv4NetworkConfigurator::initialize(int stage)
         if (par("addStaticRoutes").boolValue())
             T(addStaticRoutes(topology));
 
-        // dump routes to module output
+        // print routes to module output
         if (par("dumpRoutes").boolValue())
             T(dumpRoutes(topology));
 
@@ -987,6 +991,20 @@ void IPv4NetworkConfigurator::dumpTopology(IPv4Topology& topology)
             ASSERT(linkIn->getLocalNode() == node);
             Node *remoteNode = (Node *)linkIn->getRemoteNode();
             EV_INFO << "     <- " << remoteNode->module->getFullPath() << " " << linkIn->getWeight() << endl;
+        }
+    }
+}
+
+void IPv4NetworkConfigurator::dumpLinks(IPv4Topology& topology)
+{
+    for (int i = 0; i < (int)topology.linkInfos.size(); i++)
+    {
+        EV_INFO << "Link " << i << endl;
+        LinkInfo *linkInfo = topology.linkInfos[i];
+        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++)
+        {
+            InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
+            EV_INFO << "     " << interfaceInfo->interfaceEntry->getFullPath() << endl;
         }
     }
 }

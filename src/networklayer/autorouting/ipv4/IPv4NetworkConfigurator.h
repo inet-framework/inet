@@ -245,6 +245,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
         virtual void optimizeRoutes(std::vector<IPv4Route *> &routes);
 
         virtual void dumpTopology(IPv4Topology& topology);
+        virtual void dumpLinks(IPv4Topology& topology);
         virtual void dumpAddresses(IPv4Topology& topology);
         virtual void dumpRoutes(IPv4Topology& topology);
         virtual void dumpConfig(IPv4Topology& topology);
