@@ -18,8 +18,11 @@
 
 package inet.nodes.ethernet;
 
-import inet.linklayer.IMACRelayUnit;
+import inet.base.NotificationBoard;
 import inet.linklayer.IEtherMAC;
+import inet.linklayer.IMACRelayUnit;
+import inet.networklayer.common.InterfaceTable;
+
 
 //
 // Model of an Ethernet switch.
@@ -44,6 +47,13 @@ module EtherSwitch
     gates:
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
+        interfaceTable: InterfaceTable {
+            @display("p=59,121");
+        }
+        notificationBoard: NotificationBoard {
+            parameters:
+                @display("p=59,43");
+        }
         relayUnit: <relayUnitType> like IMACRelayUnit {
             parameters:
                 @display("p=200,50");

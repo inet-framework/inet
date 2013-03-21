@@ -15,11 +15,11 @@
 
 package inet.nodes.wireless;
 
-import inet.mobility.IMobility;
-import inet.linklayer.IWirelessNic;
-import inet.linklayer.IMACRelayUnit;
-import inet.linklayer.IEtherMAC;
 import inet.base.NotificationBoard;
+import inet.linklayer.IEtherMAC;
+import inet.linklayer.IMACRelayUnit;
+import inet.linklayer.IWirelessNic;
+import inet.mobility.IMobility;
 import inet.networklayer.common.InterfaceTable;
 
 
@@ -47,14 +47,21 @@ module AccessPoint
         string mobilityType = default("StationaryMobility"); // how the node moves around. see: inet.mobility
         string relayUnitType = default(haveClass("MACRelayUnitNP")?"MACRelayUnitNP":"MACRelayUnit_None"); // type of the IMACRelayUnit (MACRelayUnitNP, MACRelayUnitPP, etc)
         int numRadios = default(1);               // the number of radios in the access point
-        bool withInterfaceTable = default(false);    // module has interfaceTable if enabled
         wlan[*].mgmtType = default("Ieee80211MgmtAP");
     gates:
         input radioIn[numRadios] @directIn;
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        interfaceTable: InterfaceTable if withInterfaceTable {
+        interfaceTable: InterfaceTable {
             @display("p=59,121");
+        }
+        notificationBoard: NotificationBoard {
+            parameters:
+                @display("p=59,43");
+        }
+        mobility: <mobilityType> like IMobility {
+            parameters:
+                @display("p=169,43");
         }
         relayUnit: <relayUnitType> like IMACRelayUnit if sizeof(ethg)+numRadios>1 {
             parameters:
@@ -70,14 +77,6 @@ module AccessPoint
                 txQueueLimit = 1000; // increase if needed
                 queueModule = "";
                 @display("p=208,225,row;q=txQueue");
-        }
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=59,43");
-        }
-        mobility: <mobilityType> like IMobility {
-            parameters:
-                @display("p=169,43");
         }
     connections allowunconnected:
         // connections to network outside
