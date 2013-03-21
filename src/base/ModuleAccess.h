@@ -56,6 +56,11 @@ bool isNode(cModule *mod);
  */
 INET_API cModule *findContainingNode(cModule *from);
 
+/**
+ * Find the ancestor module under the node containing the given module.
+ * Returns NULL, if no such node found.
+ */
+INET_API cModule *findModuleUnderContainingNode(cModule *from);
 
 /**
  * Finds and returns the pointer to a module of type T and name N.

@@ -80,3 +80,15 @@ cModule *findContainingNode(cModule *from)
     }
     return NULL;
 }
+
+cModule *findModuleUnderContainingNode(cModule *from)
+{
+    cModule *prevmod = NULL;
+    for (cModule *curmod=from; curmod; curmod=curmod->getParentModule())
+    {
+        if (_isNode(curmod))
+            return prevmod;
+        prevmod = curmod;
+    }
+    return NULL;
+}
