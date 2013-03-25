@@ -165,22 +165,19 @@ void DHCPClient::changeFSMState(CLIENT_STATE new_state)
 
         changeFSMState(SELECTING);
     }
-
-    if (new_state == SELECTING)
+    else if (new_state == SELECTING)
     {
         // the selected lease is in lease
         sendDiscover();
         scheduleTimer_TO(WAIT_OFFER);
     }
-
-    if (new_state == REQUESTING)
+    else if (new_state == REQUESTING)
     {
         // the selected lease is in lease
         sendRequest();
         scheduleTimer_TO(WAIT_ACK);
     }
-
-    if (new_state == BOUND)
+    else if (new_state == BOUND)
     {
         cancelTimer_TO();
         scheduleTimer_T1();
@@ -223,15 +220,13 @@ void DHCPClient::changeFSMState(CLIENT_STATE new_state)
         nb->fireChangeNotification(NF_INTERFACE_IPv4CONFIG_CHANGED, ie);
         EV << "publishing the configuration change into the blackboard" << endl;
     }
-
-    if (new_state == RENEWING)
+    else if (new_state == RENEWING)
     {
         // asking for lease renewal
         sendRequest();
         scheduleTimer_TO(WAIT_ACK);
     }
-
-    if (new_state == REBINDING)
+    else if (new_state == REBINDING)
     {
         // asking for lease rebinding
         cancelTimer_T1();
@@ -241,7 +236,6 @@ void DHCPClient::changeFSMState(CLIENT_STATE new_state)
         sendRequest();
         scheduleTimer_TO(WAIT_ACK);
     }
-
 }
 
 void DHCPClient::handleMessage(cMessage *msg)
@@ -647,3 +641,4 @@ bool DHCPClient::handleOperationStage(LifecycleOperation *operation, int stage, 
     else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
+
