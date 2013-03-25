@@ -480,7 +480,7 @@
     <feature
         id="traci"
         name="TraCI"
-        description = "Integraion modules for TraCI"
+        description = "Integration modules for TraCI, see http://veins.car2x.org"
         initiallyEnabled = "true"
         requires = "IPv4 mobility"
         labels = ""
