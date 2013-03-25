@@ -46,7 +46,7 @@ class INET_API TCPVegasStateVariables : public TCPBaseAlgStateVariables
 class INET_API TCPVegas : public TCPBaseAlg
 {
 protected:
-    TCPVegasStateVariables *&state; // alias to TCLAlgorithm's 'state'
+    TCPVegasStateVariables *&state; // alias to TCPAlgorithm's 'state'
 
     /** Create and return a TCPvegasStateVariables object. */
     virtual TCPStateVariables *createStateVariables() {
