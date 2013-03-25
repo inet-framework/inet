@@ -123,6 +123,11 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
 	TCPBaseAlg::receivedDataAck(firstSeqAcked);
 
 	//FIXME: sometimes the v_sendtime is uninitialized here!!! ---> crash
+if (state->v_sendtime == NULL) {
+    EV << "Received ACK, but v_sendtime is NULL";
+}
+else
+{
 	simtime_t tSent = state->v_sendtime[(firstSeqAcked - (state->iss+1)) % state->v_maxwnd];    
 	simtime_t currentTime = simTime();
 
@@ -303,6 +308,8 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
 		else
 			state->v_worried = 0;
 	}
+
+} // Closes if v_sendtime != NULL
 		
 	//Try to send more data
     sendData(false);
