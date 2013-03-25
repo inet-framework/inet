@@ -36,14 +36,9 @@ simsignal_t PingApp::outOfOrderArrivalsSignal = SIMSIGNAL_NULL;
 simsignal_t PingApp::pingTxSeqSignal = SIMSIGNAL_NULL;
 simsignal_t PingApp::pingRxSeqSignal = SIMSIGNAL_NULL;
 
-void PingApp::initialize(int stage)
+void PingApp::initialize()
 {
-    cSimpleModule::initialize(stage);
-
-    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
-    // address auto-assignment takes place etc.
-    if (stage != 3)
-        return;
+    cSimpleModule::initialize();
 
     // read params
     // (defer reading srcAddr/destAddr to when ping starts, maybe

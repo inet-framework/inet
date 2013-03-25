@@ -45,14 +45,9 @@ simsignal_t PingTestApp::pingTxSeqSignal = SIMSIGNAL_NULL;
 simsignal_t PingTestApp::pingRxSeqSignal = SIMSIGNAL_NULL;
 
 
-void PingTestApp::initialize(int stage)
+void PingTestApp::initialize()
 {
-    cSimpleModule::initialize(stage);
-
-    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
-    // address auto-assignment takes place etc.
-    if (stage != 3)
-        return;
+    cSimpleModule::initialize();
 
     // read params
     // (defer reading srcAddr/destAddr to when ping starts, maybe
@@ -88,7 +83,6 @@ void PingTestApp::initialize(int stage)
 
     if (strcmp(par("destAddresses").stringValue(), ""))
     {
-        srcAddr = IPvXAddressResolver().resolve(par("srcAddr"));
         // schedule first ping (use empty destAddr to disable)
         cMessage *msg = new cMessage("sendPing");
         scheduleAt(startTime, msg);
@@ -101,6 +95,7 @@ void PingTestApp::handleMessage(cMessage *msg)
     {
         if (sendSeqNo == 0)
         {
+            srcAddr = IPvXAddressResolver().resolve(par("srcAddr"));
             const char *destAddrs = par("destAddresses");
             if (!strcmp(destAddrs, "*"))
             {
