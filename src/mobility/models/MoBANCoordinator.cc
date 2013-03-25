@@ -54,6 +54,9 @@ void MoBANCoordinator::initialize(int stage) {
     LineSegmentsMobilityBase::initialize(stage);
     EV << "initializing MoBANCoordinator stage " << stage << endl;
     if (stage == 0) {
+        //FIXME calls some functions on other modules, but initialization stage of other modules are not guaranteed.
+        // The initialize(0) not called yet on some other modules.
+        // Should be redesigned stages in MoBANCoordinator/MoBANLocal modules.
         useMobilityPattern = par("useMobilityPattern").boolValue();
         collectLocalModules(getParentModule());
 
