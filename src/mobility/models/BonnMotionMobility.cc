@@ -40,7 +40,7 @@ void BonnMotionMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
     EV << "initializing BonnMotionMobility stage " << stage << endl;
-    if (stage == 0)
+    if (stage == STAGE_LOCAL_BEGIN)
     {
         is3D  = par("is3D").boolValue();
         int nodeId = par("nodeId");

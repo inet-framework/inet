@@ -34,7 +34,7 @@ void RectangleMobility::initialize(int stage)
 {
     MovingMobilityBase::initialize(stage);
     EV << "initializing RectangleMobility stage " << stage << endl;
-    if (stage == 0)
+    if (stage == STAGE_LOCAL_BEGIN)
     {
         speed = par("speed");
         stationary = (speed == 0);

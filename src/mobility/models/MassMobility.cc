@@ -37,7 +37,7 @@ void MassMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
     EV << "initializing MassMobility stage " << stage << endl;
-    if (stage == 0)
+    if (stage == STAGE_LOCAL_BEGIN)
     {
         angle = par("startAngle").doubleValue();
         changeIntervalParameter = &par("changeInterval");

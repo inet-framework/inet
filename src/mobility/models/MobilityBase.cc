@@ -58,7 +58,7 @@ MobilityBase::MobilityBase()
 void MobilityBase::initialize(int stage)
 {
     EV << "initializing MobilityBase stage " << stage << endl;
-    if (stage == 0)
+    if (stage == STAGE_LOCAL_BEGIN)
     {
         mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
         constraintAreaMin.x = par("constraintAreaMinX");
@@ -75,7 +75,7 @@ void MobilityBase::initialize(int stage)
                       " (3rd argument of 'p' tag) from '@display' attribute.", visualRepresentation->getFullPath().c_str());
         }
     }
-    else if (stage == 1)
+    else if (stage == STAGE_MOBILITY_INITIALIZE_POSITION)
     {
         initializePosition();
         if (!isFiniteNumber(lastPosition.x) || !isFiniteNumber(lastPosition.y) || !isFiniteNumber(lastPosition.z))

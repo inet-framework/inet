@@ -35,7 +35,7 @@ void LinearMobility::initialize(int stage)
 {
     MovingMobilityBase::initialize(stage);
     EV << "initializing LinearMobility stage " << stage << endl;
-    if (stage == 0)
+    if (stage == STAGE_LOCAL_BEGIN)
     {
         speed = par("speed");
         angle = fmod((double)par("angle"), 360);

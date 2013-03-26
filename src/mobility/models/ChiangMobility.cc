@@ -42,7 +42,7 @@ void ChiangMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
     EV << "initializing ChiangMobility stage " << stage << endl;
-    if (stage == 0)
+    if (stage == STAGE_LOCAL_BEGIN)
     {
         stateTransitionUpdateInterval = par("stateTransitionUpdateInterval");
         speed = par("speed");

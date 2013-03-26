@@ -29,7 +29,7 @@ void LineSegmentsMobilityBase::initialize(int stage)
 {
     MovingMobilityBase::initialize(stage);
     EV << "initializing LineSegmentsMobilityBase stage " << stage << endl;
-    if (stage == 1)
+    if (stage == STAGE_MOBILITY_INITIALIZE_POSITION)
     {
         if (!stationary) {
             setTargetPosition();

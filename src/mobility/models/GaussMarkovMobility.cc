@@ -39,7 +39,7 @@ void GaussMarkovMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
     EV << "initializing GaussMarkovMobility stage " << stage << endl;
-    if (stage == 0)
+    if (stage == STAGE_LOCAL_BEGIN)
     {
         speedMean = par("speed");
         angleMean = par("angle");

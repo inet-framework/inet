@@ -35,7 +35,7 @@ void TurtleMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
     EV << "initializing TurtleMobility stage " << stage << endl;
-    if (stage == 0)
+    if (stage == STAGE_LOCAL_BEGIN)
     {
         WATCH(speed);
         WATCH(angle);

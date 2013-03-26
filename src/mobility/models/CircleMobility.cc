@@ -39,7 +39,7 @@ void CircleMobility::initialize(int stage)
 {
     MovingMobilityBase::initialize(stage);
     EV << "initializing CircleMobility stage " << stage << endl;
-    if (stage == 0)
+    if (stage == STAGE_LOCAL_BEGIN)
     {
         cx = par("cx");
         cy = par("cy");

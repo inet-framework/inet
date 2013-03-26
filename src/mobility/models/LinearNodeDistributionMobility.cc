@@ -35,7 +35,7 @@ void LinearNodeDistributionMobility::initialize(int stage)
 {
     MobilityBase::initialize(stage);
     EV << "initializing LinearNodeDistributionMobility stage " << stage << endl;
-    if (stage == 0)
+    if (stage == STAGE_LOCAL_BEGIN)
     {
         initialX = par("initialX").doubleValue();
         initialY = par("initialY").doubleValue();

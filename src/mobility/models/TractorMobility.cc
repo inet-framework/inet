@@ -39,7 +39,7 @@ void TractorMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
     EV << "initializing TractorMobility stage " << stage << endl;
-    if (stage == 0)
+    if (stage == STAGE_LOCAL_BEGIN)
     {
         speed = par("speed");
         x1 = par("x1");

@@ -31,7 +31,7 @@ RandomWPMobility::RandomWPMobility()
 void RandomWPMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
-    if (stage == 0)
+    if (stage == STAGE_LOCAL_BEGIN)
         stationary = (par("speed").getType()=='L' || par("speed").getType()=='D') && (double)par("speed") == 0;
 }
 
