@@ -13,6 +13,7 @@ class INET_API TCPWestwoodStateVariables : public TCPBaseAlgStateVariables
 {
   public:
     TCPWestwoodStateVariables();
+    ~TCPWestwoodStateVariables();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
     

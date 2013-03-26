@@ -15,7 +15,15 @@ TCPWestwoodStateVariables::TCPWestwoodStateVariables()
 	w_lastAckTime = 0;
 	w_bwe = 0;
 	w_sample_bwe = 0;
-	
+	w_sendtime = NULL;
+	w_transmits = NULL;
+	w_maxwnd = 0;
+}
+
+TCPWestwoodStateVariables::~TCPWestwoodStateVariables()
+{
+    delete [] w_sendtime;
+    delete [] w_transmits;
 }
 
 std::string TCPWestwoodStateVariables::info() const
@@ -110,6 +118,12 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
 {
     TCPBaseAlg::receivedDataAck(firstSeqAcked);
 
+if (state->w_sendtime == NULL)
+{
+    EV << "Received ACK, but w_sendtime is NULL";
+}
+else
+{
 	simtime_t tSent = state->w_sendtime[(firstSeqAcked - (state->iss+1)) % state->w_maxwnd];    
 	simtime_t currentTime = simTime();
 	simtime_t newRTT = currentTime - tSent;
@@ -135,6 +149,7 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
 		cumul_ack = 2 * state->snd_mss;
 	
 	recalculateBWE(cumul_ack);
+} // Closes if w_sendtime != NULL
 
 	// Same behavior of Reno during fast recovery, slow start and cong. avoidance
 
@@ -211,15 +226,22 @@ void TCPWestwood::receivedDuplicateAck()
 {
     TCPBaseAlg::receivedDuplicateAck();
 
-	simtime_t tSent = state->w_sendtime[(state->snd_una - (state->iss+1)) % state->w_maxwnd];    
-	simtime_t currentTime = simTime();
-	simtime_t newRTT = currentTime - tSent;
-	int num_transmits = state->w_transmits[(state->snd_una - (state->iss+1)) % state->w_maxwnd];
+if (state->w_sendtime == NULL)
+{
+    EV << "Received ACK, but w_sendtime is NULL";
+}
+else
+{
+	//simtime_t tSent = state->w_sendtime[(state->snd_una - (state->iss+1)) % state->w_maxwnd];
+	//simtime_t currentTime = simTime();
+	//simtime_t newRTT = currentTime - tSent;
+	//int num_transmits = state->w_transmits[(state->snd_una - (state->iss+1)) % state->w_maxwnd];
 
 
 	// BWE calculation: dupack counts 1
 	uint32 cumul_ack = state->snd_mss;
 	recalculateBWE(cumul_ack);
+} // Closes if w_sendtime != NULL
 
     if (state->dupacks == DUPTHRESH) // DUPTHRESH = 3
     {
@@ -297,14 +319,14 @@ void TCPWestwood::dataSent(uint32 fromseq) {
 	TCPBaseAlg::dataSent(fromseq);
 	
 	// If 1st packet, initialization
-	if (fromseq == state->iss+1) {
+	if (state->w_sendtime == NULL) {
 	
 		// rcv_wnd: max capacity of the receiver buffer
 		state->w_maxwnd = state->rcv_wnd; 
 		
 		state->w_sendtime = new simtime_t[state->w_maxwnd];
 		state->w_transmits = new int[state->w_maxwnd]; 
-		for(int i = 0; i < state->w_maxwnd; i++) {
+		for(unsigned int i = 0; i < state->w_maxwnd; i++) {
 			state->w_sendtime[i] = -1;
 			state->w_transmits[i] = 0;		
 		}
