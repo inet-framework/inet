@@ -129,7 +129,6 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
 {
 	TCPBaseAlg::receivedDataAck(firstSeqAcked);
 
-	//FIXME: sometimes the v_sendtime is uninitialized here!!! ---> crash
 if (state->v_sendtime == NULL) {
     EV << "Received ACK, but v_sendtime is NULL";
 }
@@ -142,6 +141,7 @@ else
 	uint32 v_alpha = 2 * state->snd_mss;
 	uint32 v_gamma = 1 * state->snd_mss;	
 	
+	//TODO: When should do it: when received first ACK, or when received ACK of 1st sent packet???
 	if (firstSeqAcked == state->iss+1) { // Inicialization
 		state->v_baseRTT = currentTime - tSent;
 		state->v_sa = state->v_baseRTT * 8;
