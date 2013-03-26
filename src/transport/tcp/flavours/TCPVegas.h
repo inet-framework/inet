@@ -13,6 +13,7 @@ class INET_API TCPVegasStateVariables : public TCPBaseAlgStateVariables
 {
   public:
     TCPVegasStateVariables();
+    ~TCPVegasStateVariables();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
     
