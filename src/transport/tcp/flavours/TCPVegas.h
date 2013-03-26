@@ -39,7 +39,7 @@ class INET_API TCPVegasStateVariables : public TCPBaseAlgStateVariables
 	
     bool v_inc_flag; // for slow start: "exponential growth only every other RTT" 
 	bool v_incr_ss; // to control no incr. cwnd if during slowstart ssthresh has been exceeded before the rtt is over
-	uint32 v_incr;	// incr/decr	
+	int32 v_incr;	// incr/decr
     uint32 v_worried; // pkts a to retransmit due to vegas fine-grained timeout 
 
 };
