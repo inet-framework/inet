@@ -396,7 +396,7 @@ void TCPVegas::dataSent(uint32 fromseq) {
 	TCPBaseAlg::dataSent(fromseq);
 	
 	// If 1st packet, initialization
-	if (fromseq == state->iss+1) {
+	if (state->v_sendtime == NULL) {
 		// rcv_wnd: max capacity of the receiver buffer
 		state->v_maxwnd = state->rcv_wnd; 
 		
