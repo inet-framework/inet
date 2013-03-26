@@ -126,7 +126,10 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, IPvXAddress 
 bool TCPConnection::hasEnoughSpaceForSegmentInReceiveQueue(TCPSegment *tcpseg)
 {
     //TODO must rewrite it
-    return (state->freeRcvBuffer >= tcpseg->getPayloadLength()); // enough freeRcvBuffer in rcvQueue for new segment?
+    //return (state->freeRcvBuffer >= tcpseg->getPayloadLength()); // enough freeRcvBuffer in rcvQueue for new segment?
+
+    uint32 firstSeq = receiveQueue->getFirstSeqNo();
+    return seqLE(firstSeq, tcpseg->getSequenceNo()) && seqLE(tcpseg->getSequenceNo()+tcpseg->getPayloadLength(), firstSeq + state->maxRcvBuffer);
 }
 
 TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
