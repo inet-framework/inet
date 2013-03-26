@@ -50,7 +50,7 @@ void ANSimMobility::initialize(int stage)
     {
         nodeId = par("nodeId");
         if (nodeId == -1)
-            nodeId = getParentModule()->getIndex();
+            nodeId = findContainingNode(this)->getIndex();
 
         // get script: param should point to <simulation> element
         cXMLElement *rootElem = par("ansimTrace");

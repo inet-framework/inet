@@ -136,7 +136,7 @@ void Ns2MotionMobility::initialize(int stage)
         scrollY = par("scrollY");
         nodeId = par("nodeId");
         if (nodeId == -1)
-            nodeId = getParentModule()->getIndex();
+            nodeId = findContainingNode(this)->getIndex();
         const char *fname = par("traceFile");
         ns2File = new Ns2MotionFile;
         parseFile(fname);
