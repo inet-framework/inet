@@ -27,7 +27,14 @@ TCPVegasStateVariables::TCPVegasStateVariables()
 	v_rtt_timeout = 1000.0;
 
 	v_sendtime = NULL;
+	v_transmits = NULL;
 	v_maxwnd = 0;
+}
+
+TCPVegasStateVariables::~TCPVegasStateVariables()
+{
+    delete [] v_sendtime;
+    delete [] v_transmits;
 }
 
 std::string TCPVegasStateVariables::info() const
