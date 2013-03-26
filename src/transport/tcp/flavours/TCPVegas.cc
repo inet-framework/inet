@@ -402,7 +402,7 @@ void TCPVegas::dataSent(uint32 fromseq) {
 		
 		state->v_sendtime = new simtime_t[state->v_maxwnd];
 		state->v_transmits = new int[state->v_maxwnd]; 
-		for(int i = 0; i < state->v_maxwnd; i++) {
+		for(unsigned int i = 0; i < state->v_maxwnd; i++) {
 			state->v_sendtime[i] = -1;
 			state->v_transmits[i] = 0;		
 		}
