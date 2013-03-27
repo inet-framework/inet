@@ -135,6 +135,12 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__msg -r 0
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 0-6
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 0-6
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 0-6
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 0-6
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 0-6
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 0-6
 /examples/inet/tcpsack/,             -f omnetpp.ini -c One -r 0
 /examples/inet/tcpsack/,             -f omnetpp.ini -c Two -r 0
 /examples/inet/tcpsack/,             -f omnetpp.ini -c Three -r 0
