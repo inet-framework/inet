@@ -1,6 +1,8 @@
+
 #include <algorithm>   // min,max
-#include "TCPWestwood.h"
+
 #include "TCP.h"
+#include "TCPWestwood.h"
 
 
 Register_Class(TCPWestwood);
@@ -8,16 +10,15 @@ Register_Class(TCPWestwood);
 
 TCPWestwoodStateVariables::TCPWestwoodStateVariables()
 {
-
-	ssthresh = 65535;
-	w_RTTmin = 0x7fffffff;
-	w_a = 1;
-	w_lastAckTime = 0;
-	w_bwe = 0;
-	w_sample_bwe = 0;
-	w_sendtime = NULL;
-	w_transmits = NULL;
-	w_maxwnd = 0;
+    ssthresh = 65535;
+    w_RTTmin = 0x7fffffff;
+    w_a = 1;
+    w_lastAckTime = 0;
+    w_bwe = 0;
+    w_sample_bwe = 0;
+    w_sendtime = NULL;
+    w_transmits = NULL;
+    w_maxwnd = 0;
 }
 
 TCPWestwoodStateVariables::~TCPWestwoodStateVariables()
@@ -39,13 +40,12 @@ std::string TCPWestwoodStateVariables::detailedInfo() const
     std::stringstream out;
     out << TCPBaseAlgStateVariables::detailedInfo();
     out << "ssthresh = " << ssthresh << "\n";
-	out << "w_RTTmin = " << w_RTTmin << "\n";
+    out << "w_RTTmin = " << w_RTTmin << "\n";
     return out.str();
 }
 
-
-TCPWestwood::TCPWestwood() : TCPBaseAlg(),
-  state((TCPWestwoodStateVariables *&)TCPAlgorithm::state)
+TCPWestwood::TCPWestwood()
+    : TCPBaseAlg(), state((TCPWestwoodStateVariables *&)TCPAlgorithm::state)
 {
 }
 
@@ -56,24 +56,24 @@ void TCPWestwood::recalculateSlowStartThreshold()
     if (ssthreshVector)
         ssthreshVector->record(state->ssthresh);
 
-	tcpEV << "recalculateSlowStartThreshold(), ssthresh=" << state->ssthresh << "\n";
+    tcpEV << "recalculateSlowStartThreshold(), ssthresh=" << state->ssthresh << "\n";
 }
 
-void TCPWestwood::recalculateBWE(uint32 cumul_ack) {
-	simtime_t currentTime = simTime();
+void TCPWestwood::recalculateBWE(uint32 cumul_ack)
+{
+    simtime_t currentTime = simTime();
+    simtime_t timeAck = currentTime - state->w_lastAckTime;
 
-	simtime_t timeAck = currentTime - state->w_lastAckTime;
-
-	// Update BWE
-	if(timeAck > 0) {		
-		double old_sample_bwe = state->w_sample_bwe;
-		double old_bwe = state->w_bwe;
-		state->w_sample_bwe = (cumul_ack) / timeAck;
-		state->w_bwe = 0.9047*old_bwe + 0.5*(1.0-0.9047)*(state->w_sample_bwe + old_sample_bwe);    //TODO use parameter instead constant 0.9047
-		tcpEV << "recalculateBWE(), nuevo w_bwe=" << state->w_bwe << "\n";
-	}
-	state->w_lastAckTime = currentTime;
-
+    // Update BWE
+    if (timeAck > 0)
+    {
+        double old_sample_bwe = state->w_sample_bwe;
+        double old_bwe = state->w_bwe;
+        state->w_sample_bwe = (cumul_ack) / timeAck;
+        state->w_bwe = 0.9047 * old_bwe + 0.5 * (1.0 - 0.9047) * (state->w_sample_bwe + old_sample_bwe); //TODO use parameter instead constant 0.9047
+        tcpEV << "recalculateBWE(), nuevo w_bwe=" << state->w_bwe << "\n";
+    }
+    state->w_lastAckTime = currentTime;
 }
 
 void TCPWestwood::processRexmitTimer(TCPEventCode& event)
@@ -83,33 +83,33 @@ void TCPWestwood::processRexmitTimer(TCPEventCode& event)
     if (event == TCP_E_ABORT)
         return;
 
-	// TCP Westwood: congestion controlw with faster recovery. S. Mascolo, C. Casetti, M. Gerla, S.S. Lee, M. Sanadidi
+    // TCP Westwood: congestion controlw with faster recovery. S. Mascolo, C. Casetti, M. Gerla, S.S. Lee, M. Sanadidi
     // After REXMIT timeout in TCP Westwood: a increases from 1 to 4, in steps of 1 during slow start,
-	// and is set to 1 in cong. avoidance.
-	// the cong. window is reset to 1 after a timeout, as is done by TCP Reno. Conservative. Reaseon: fairness.
+    // and is set to 1 in cong. avoidance.
+    // the cong. window is reset to 1 after a timeout, as is done by TCP Reno. Conservative. Reaseon: fairness.
 
-    if (state->snd_cwnd < state->ssthresh) { // Slow start
-		state->w_a = state->w_a + 1;
-		if (state->w_a > 4)
-			state->w_a = 4;
-	}
-		
-	else { // Cong. avoidance
-		state->w_a = 1;
-	}
-	
-	recalculateSlowStartThreshold();
-	if (state->ssthresh < 2 * state->snd_mss) {
-		state->ssthresh = 2 * state->snd_mss;
-		
-	}
-	state->snd_cwnd = state->snd_mss;
+    if (state->snd_cwnd < state->ssthresh)
+    { // Slow start
+        state->w_a = state->w_a + 1;
+        if (state->w_a > 4)
+            state->w_a = 4;
+    }
+    else
+    { // Cong. avoidance
+        state->w_a = 1;
+    }
+
+    recalculateSlowStartThreshold();
+    if (state->ssthresh < 2 * state->snd_mss)
+        state->ssthresh = 2 * state->snd_mss;
+
+    state->snd_cwnd = state->snd_mss;
 
     if (cwndVector)
         cwndVector->record(state->snd_cwnd);
 
     state->afterRto = true;
-	++state->w_transmits[(state->snd_una - (state->iss+1)) % state->w_maxwnd];
+    ++state->w_transmits[(state->snd_una - (state->iss+1)) % state->w_maxwnd];
     conn->retransmitOneSegment(true);
 }
 
@@ -117,40 +117,37 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
 {
     TCPBaseAlg::receivedDataAck(firstSeqAcked);
 
-if (state->w_sendtime == NULL)
-{
-    EV << "Received ACK, but w_sendtime is NULL";
-}
-else
-{
-	simtime_t tSent = state->w_sendtime[(firstSeqAcked - (state->iss+1)) % state->w_maxwnd];    
-	simtime_t currentTime = simTime();
-	simtime_t newRTT = currentTime - tSent;
-	int num_transmits = state->w_transmits[(firstSeqAcked - (state->iss+1)) % state->w_maxwnd];
+    if (state->w_sendtime == NULL)
+    {
+        EV << "Received ACK, but w_sendtime is NULL";
+    }
+    else
+    {
+        simtime_t tSent = state->w_sendtime[(firstSeqAcked - (state->iss+1)) % state->w_maxwnd];
+        simtime_t currentTime = simTime();
+        simtime_t newRTT = currentTime - tSent;
+        int num_transmits = state->w_transmits[(firstSeqAcked - (state->iss+1)) % state->w_maxwnd];
 
-	// Update RTTmin
-	if (newRTT < state->w_RTTmin && newRTT > 0 && num_transmits == 1) {
-		state->w_RTTmin = newRTT;
-	}
+        // Update RTTmin
+        if (newRTT < state->w_RTTmin && newRTT > 0 && num_transmits == 1)
+            state->w_RTTmin = newRTT;
 
-	// cumul_ack: cumulative ack's that acks 2 or more pkts count 1, 
-	// because DUPACKs count them
-	uint32 cumul_ack = state->snd_una - firstSeqAcked; // acked bytes
-	if ((state->dupacks * state->snd_mss) >= cumul_ack) {
-		cumul_ack = state->snd_mss; // cumul_ack = 1:
-	}
-	else {
-		cumul_ack -= (state->dupacks * state->snd_mss);
-	}
-	
-	// security check: if previous steps are right cumul_ack shoudl be > 2:
-	if (cumul_ack > (2 * state->snd_mss))
-		cumul_ack = 2 * state->snd_mss;
-	
-	recalculateBWE(cumul_ack);
-} // Closes if w_sendtime != NULL
+        // cumul_ack: cumulative ack's that acks 2 or more pkts count 1,
+        // because DUPACKs count them
+        uint32 cumul_ack = state->snd_una - firstSeqAcked;// acked bytes
+        if ((state->dupacks * state->snd_mss) >= cumul_ack)
+            cumul_ack = state->snd_mss; // cumul_ack = 1:
+        else
+            cumul_ack -= (state->dupacks * state->snd_mss);
 
-	// Same behavior of Reno during fast recovery, slow start and cong. avoidance
+        // security check: if previous steps are right cumul_ack shoudl be > 2:
+        if (cumul_ack > (2 * state->snd_mss))
+            cumul_ack = 2 * state->snd_mss;
+
+        recalculateBWE(cumul_ack);
+    }   // Closes if w_sendtime != NULL
+
+    // Same behavior of Reno during fast recovery, slow start and cong. avoidance
 
     if (state->dupacks >= DUPTHRESH) // DUPTHRESH = 3
     {
@@ -162,7 +159,6 @@ else
 
         if (cwndVector)
             cwndVector->record(state->snd_cwnd);
-	
     }
     else
     {
@@ -225,64 +221,63 @@ void TCPWestwood::receivedDuplicateAck()
 {
     TCPBaseAlg::receivedDuplicateAck();
 
-if (state->w_sendtime == NULL)
-{
-    EV << "Received ACK, but w_sendtime is NULL";
-}
-else
-{
-	//simtime_t tSent = state->w_sendtime[(state->snd_una - (state->iss+1)) % state->w_maxwnd];
-	//simtime_t currentTime = simTime();
-	//simtime_t newRTT = currentTime - tSent;
-	//int num_transmits = state->w_transmits[(state->snd_una - (state->iss+1)) % state->w_maxwnd];
+    if (state->w_sendtime == NULL)
+    {
+        EV<< "Received ACK, but w_sendtime is NULL";
+    }
+    else
+    {
+        //simtime_t tSent = state->w_sendtime[(state->snd_una - (state->iss+1)) % state->w_maxwnd];
+        //simtime_t currentTime = simTime();
+        //simtime_t newRTT = currentTime - tSent;
+        //int num_transmits = state->w_transmits[(state->snd_una - (state->iss+1)) % state->w_maxwnd];
 
-
-	// BWE calculation: dupack counts 1
-	uint32 cumul_ack = state->snd_mss;
-	recalculateBWE(cumul_ack);
-} // Closes if w_sendtime != NULL
+        // BWE calculation: dupack counts 1
+        uint32 cumul_ack = state->snd_mss;
+        recalculateBWE(cumul_ack);
+    }   // Closes if w_sendtime != NULL
 
     if (state->dupacks == DUPTHRESH) // DUPTHRESH = 3
     {
         tcpEV << "Westwood on dupAcks == DUPTHRESH(=3): Faster Retransmit \n";
 
-  
-		// TCP Westwood: congestion controlw with faster recovery. S. Mascolo, C. Casetti, M. Gerla, S.S. Lee, M. Sanadidi
-		// During the cong. avoidance phase we are probing for extra available bandwidth.
-		// Therefore, when n DUPACKS are received, it means that we have hit the network
-		// capacity. Thus, the slow start threshold is set equal to the available pipe size
-		// (BWE*RTTmin), the cong. window is set equal to ssthresh and the cong. avoidance phase
-		// is entered again to gently probe for new available bandwitdh.
+        // TCP Westwood: congestion controlw with faster recovery. S. Mascolo, C. Casetti, M. Gerla, S.S. Lee, M. Sanadidi
+        // During the cong. avoidance phase we are probing for extra available bandwidth.
+        // Therefore, when n DUPACKS are received, it means that we have hit the network
+        // capacity. Thus, the slow start threshold is set equal to the available pipe size
+        // (BWE*RTTmin), the cong. window is set equal to ssthresh and the cong. avoidance phase
+        // is entered again to gently probe for new available bandwitdh.
 
-		// During the slow start phase we are still probing for the available bandwidth.
-		// Therefore the BWE we obtain after n duplicate ACKs is used to set the slow start threshold.
-		// After ssthresh has been set, the cong. window is set equal to the slow start theshold only
-		// if cwin>ssthresh. In other words, during slow start, cwin still features an exponential
-		// increase as in the current implementation of TCP Reno.
+        // During the slow start phase we are still probing for the available bandwidth.
+        // Therefore the BWE we obtain after n duplicate ACKs is used to set the slow start threshold.
+        // After ssthresh has been set, the cong. window is set equal to the slow start theshold only
+        // if cwin>ssthresh. In other words, during slow start, cwin still features an exponential
+        // increase as in the current implementation of TCP Reno.
 
-		// a increases from 1 to 4 in steps of 0.25 every time 3 DUPACKS are received in slow start.
-		// while is set to 1 in cong. avoidance. (is initialized as 1).
-		// The purpose of the theshold reduction factor a is to dampen a possible overestimation of
-		// the available bandwidth. the more frequently a triple DUPACK is received during slow start,
-		// the bigger the reduction factor becomes.
-		// a is restored to 1 in cong. avoidance: ssthresh was set correctly and there is no need to reduce
-		// the impact of BWE 
+        // a increases from 1 to 4 in steps of 0.25 every time 3 DUPACKS are received in slow start.
+        // while is set to 1 in cong. avoidance. (is initialized as 1).
+        // The purpose of the theshold reduction factor a is to dampen a possible overestimation of
+        // the available bandwidth. the more frequently a triple DUPACK is received during slow start,
+        // the bigger the reduction factor becomes.
+        // a is restored to 1 in cong. avoidance: ssthresh was set correctly and there is no need to reduce
+        // the impact of BWE
 
-		if (state->snd_cwnd < state->ssthresh) { // Slow start
-			state->w_a = state->w_a + 0.25;
-			if (state->w_a > 4)
-				state->w_a = 4;	
-		}
-		
-		else { // Cong. avoidance
-			state->w_a = 1;
-		}
+        if (state->snd_cwnd < state->ssthresh)
+        { // Slow start
+            state->w_a = state->w_a + 0.25;
+            if (state->w_a > 4)
+                state->w_a = 4;
+        }
+        else
+        { // Cong. avoidance
+            state->w_a = 1;
+        }
 
-		recalculateSlowStartThreshold();
-		// reset cwnd to ssthresh, if larger
-		if (state->snd_cwnd > state->ssthresh)
-			state->snd_cwnd = state->ssthresh;		
-		
+        recalculateSlowStartThreshold();
+        // reset cwnd to ssthresh, if larger
+        if (state->snd_cwnd > state->ssthresh)
+            state->snd_cwnd = state->ssthresh;
+
         if (cwndVector)
             cwndVector->record(state->snd_cwnd);
 
@@ -290,19 +285,16 @@ else
 
         // Fast Retransmission: retransmit missing segment without waiting
         // for the REXMIT timer to expire
-		++state->w_transmits[(state->snd_una - (state->iss+1)) % state->w_maxwnd];
-		restartRexmitTimer();
+        ++state->w_transmits[(state->snd_una - (state->iss + 1)) % state->w_maxwnd];
+        restartRexmitTimer();
         conn->retransmitOneSegment(false);
-		
 
         sendData(false);
     }
-
-	// Behavior like Reno:
+    // Behavior like Reno:
     else if (state->dupacks > DUPTHRESH) // DUPTHRESH = 3
     {
-
-		// Westwood: like Reno
+        // Westwood: like Reno
         state->snd_cwnd += state->snd_mss;
         tcpEV << "Westwood on dupAcks > DUPTHRESH(=3): Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
 
@@ -313,35 +305,37 @@ else
     }
 }
 
-void TCPWestwood::dataSent(uint32 fromseq) {
+void TCPWestwood::dataSent(uint32 fromseq)
+{
+    TCPBaseAlg::dataSent(fromseq);
 
-	TCPBaseAlg::dataSent(fromseq);
-	
-	// If 1st packet, initialization
-	if (state->w_sendtime == NULL) {
-	
-		// rcv_wnd: max capacity of the receiver buffer
-		state->w_maxwnd = state->rcv_wnd; 
-		
-		state->w_sendtime = new simtime_t[state->w_maxwnd];
-		state->w_transmits = new int[state->w_maxwnd]; 
-		for(unsigned int i = 0; i < state->w_maxwnd; i++) {
-			state->w_sendtime[i] = -1;
-			state->w_transmits[i] = 0;		
-		}
-	}
-	
-	// save time when packet is sent
-	// fromseq is the seq number of the 1st sent byte
-	// we need this value, based on iss=0 (to store it the right way on the vector),
-	// but iss is not a constant value (ej: iss=0), so it needs to be detemined each time 
-	// (this is why it is used: fromseq-state->iss)
+    // If 1st packet, initialization
+    if (state->w_sendtime == NULL)
+    {
+        // rcv_wnd: max capacity of the receiver buffer
+        state->w_maxwnd = state->rcv_wnd;
 
-	simtime_t sendtime = simTime();
-	for(uint32 i = fromseq; i < state->snd_max; i++) {
-		int index = (i - (state->iss+1)) % state->w_maxwnd;
-		state->w_sendtime[index] = sendtime;
-		++state->w_transmits[index];
-	}
-	
+        state->w_sendtime = new simtime_t[state->w_maxwnd];
+        state->w_transmits = new int[state->w_maxwnd];
+        for (unsigned int i = 0; i < state->w_maxwnd; i++)
+        {
+            state->w_sendtime[i] = -1;
+            state->w_transmits[i] = 0;
+        }
+    }
+
+    // save time when packet is sent
+    // fromseq is the seq number of the 1st sent byte
+    // we need this value, based on iss=0 (to store it the right way on the vector),
+    // but iss is not a constant value (ej: iss=0), so it needs to be detemined each time
+    // (this is why it is used: fromseq-state->iss)
+
+    simtime_t sendtime = simTime();
+    for (uint32 i = fromseq; i < state->snd_max; i++)
+    {
+        int index = (i - (state->iss + 1)) % state->w_maxwnd;
+        state->w_sendtime[index] = sendtime;
+        ++state->w_transmits[index];
+    }
 }
+
