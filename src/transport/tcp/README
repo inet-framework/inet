@@ -28,3 +28,9 @@ for example in StandardHost. Check the StandardHost module and the tcpType param
 to configure the TCP implementation in a host. It is possible to use TCP_old in some
 modules while using TCP for others in the same simulation.
 
+
+If you are interested in the early history of the TCP code, change
+to the project root folder and type
+
+$ gitk -- Transport/NewTCP Transport/TCP INET/src/transport/tcp src/transport/tcp
+
