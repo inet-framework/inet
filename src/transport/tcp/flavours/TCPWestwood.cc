@@ -51,8 +51,7 @@ TCPWestwood::TCPWestwood() : TCPBaseAlg(),
 
 void TCPWestwood::recalculateSlowStartThreshold()
 {
-    double RTTmin_double = conn->convertSimtimeToTS(state->w_RTTmin); //convert w_RTTmin to double
-	state->ssthresh = (uint32)(state->w_bwe * (RTTmin_double/1000)) / (state->w_a);
+    state->ssthresh = (uint32)((state->w_bwe * SIMTIME_DBL(state->w_RTTmin)) / (state->w_a));
 
     if (ssthreshVector)
         ssthreshVector->record(state->ssthresh);
