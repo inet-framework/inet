@@ -186,10 +186,7 @@ else
 			expected = (uint32)((state->snd_nxt - firstSeqAcked) + std::min(state->snd_mss - acked, (uint32)0)) / state->v_baseRTT;
 		   
 			// diff = expected - actual
-			uint32 diff;
-			double baseRTT_double = conn->convertSimtimeToTS(state->v_baseRTT); 
-			// convert v_baseRTT to double
-			diff = (uint32)(expected - actual) * (baseRTT_double/1000) + 0.5;
+			uint32 diff = (uint32)((expected - actual) * SIMTIME_DBL(state->v_baseRTT) + 0.5);
 	
 			tcpEV << "Vegas: expected: " << expected << "\n"
           		<< ", actual =" << actual << "\n"
