@@ -196,6 +196,26 @@ bool Address::isBroadcast() const
     }
 }
 
+bool Address::isLinkLocal() const
+{
+    switch (getType()) {
+        case Address::NONE:
+            throw cRuntimeError("Address contains no value");
+        case Address::IPv4:
+            return false;
+        case Address::IPv6:
+            return toIPv6().isLinkLocal();
+        case Address::MAC:
+            return true;
+        case Address::MODULEID:
+            return false;
+        case Address::MODULEPATH:
+            return false;
+        default:
+            throw cRuntimeError("Unknown type");
+    }
+}
+
 bool Address::operator<(const Address& other) const
 {
     AddressType type = getType();

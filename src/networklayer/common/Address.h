@@ -86,6 +86,7 @@ class INET_API Address
         bool isUnicast() const;
         bool isMulticast() const;
         bool isBroadcast() const;
+        bool isLinkLocal() const;
 
         bool operator<(const Address& other) const;
         bool operator==(const Address& other) const;
