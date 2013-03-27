@@ -69,7 +69,7 @@ void TCPWestwood::recalculateBWE(uint32 cumul_ack) {
 		double old_sample_bwe = state->w_sample_bwe;
 		double old_bwe = state->w_bwe;
 		state->w_sample_bwe = (cumul_ack) / timeAck;
-		state->w_bwe = 0.9047*old_bwe + 0.0476*(state->w_sample_bwe + old_sample_bwe);
+		state->w_bwe = 0.9047*old_bwe + 0.5*(1.0-0.9047)*(state->w_sample_bwe + old_sample_bwe);    //TODO use parameter instead constant 0.9047
 		tcpEV << "recalculateBWE(), nuevo w_bwe=" << state->w_bwe << "\n";
 	}
 	state->w_lastAckTime = currentTime;
