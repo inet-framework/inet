@@ -32,7 +32,6 @@
 /examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            8c24-3bd1
 /examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            93ec-3339
 # /examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,           0   ,# not a complete simulations, defaults.ini included by other ini files
-
 /examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0, 50s,             12b3-1063
 /examples/ethernet/lans/,            -f fingerprints-largenet.ini -c LargeNet -r 0, 5s,              7555-872b
 /examples/ethernet/lans/,            -f fingerprints.ini -c MixedLAN1 -r 0,         200s,            a3b5-73a9
@@ -55,7 +54,8 @@
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,                50000s,          117b-5a06
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,              50000s,          8d75-8a7a
 
-/examples/inet/ber/,                 -f omnetpp.ini -c General -r 0,                20s,             5fa7-14d7
+/examples/inet/ber/,                 -f omnetpp.ini -c ber-sack-experiment -r 0,    20s,             054e-c470
+/examples/inet/ber/,                 -f omnetpp.ini -c ber-flavour-experiment -r 0, 20s,             5fa7-14d7
 
 /examples/inet/broadcast/,           -f omnetpp.ini -c General -r 0,                20s,             4dc5-b050
 
@@ -165,10 +165,8 @@
 # /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,             100s,            856e-1e06    # unstable fingerprint
 # /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,             100s,            49ad-4191    # unstable fingerprint
 # /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             f906-03ca    # unstable fingerprint
-
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             f182-5384
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           aec7-7524
-
 # /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           b2e0-2ac0    # unstable fingerprint
 
 ### /examples/manetrouting/* : see manet.csv
@@ -177,7 +175,7 @@
 
 /examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0,          10000s,          7108-73d8
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility1 -r 0,    10000s,          1764-abd7
-# /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility2 -r 0,    10000s,         0    # CPU time limit # do not move nodes, simtime always 0 at all events
+/examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility2 -r 0,    10000s,          3409-cc0d      # do not move nodes simtime always 0 at all events
 /examples/mobility/,                 -f omnetpp.ini -c ChiangMobility -r 0,         10000s,          f77a-858e
 /examples/mobility/,                 -f omnetpp.ini -c CircleMobility1 -r 0,        10000s,          1869-7cb5
 /examples/mobility/,                 -f omnetpp.ini -c CircleMobility2 -r 0,        10000s,          1869-7cb5
@@ -213,10 +211,9 @@
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility6 -r 0,        10000s,          122f-0d91
 
 /examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             4009-ecd0
-
 # /examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            0    # <!> Error in module (TED) R37.LSR0.ted (id=45) during network initialization: Model error: ASSERT: condition !remote.isUnspecified() false in function initialize, networklayer/ted/TED.cc line 86.
-
 /examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             b8d2-5dcd
+#/examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                ---100s,         0
 /examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50s,             8a30-2a4c
 /examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             47dd-5f14
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             f8dd-cc0b
@@ -225,9 +222,9 @@
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0,               100s,            8d9e-ef8c
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandonestub -r 0,     100s,            47b2-7e76
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandtwostubs -r 0,    100s,            ed8c-e101
-
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-A -r 0,              100s,            cc87-83aa
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-B -r 0,              100s,            1015-ae17
 # /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                100s,            0    # <!> Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #23916, t=45.089338342798: check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
-
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c stable -r 0,                 1000s,           5f0c-f56a
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0,               1000s,           71e4-cd34
 /examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            0484-23fb
@@ -240,6 +237,9 @@
 
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            f252-459d
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            d999-82c6
+
+#/examples/traci/,                    -f omnetpp.ini -c accident -r 0,               ---100s,         0
+#/examples/traci_launchd/,            -f omnetpp.ini -c accident -r 0,               ---100s,         0
 
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            d0bc-3b11
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            67fd-2373
@@ -255,14 +255,11 @@
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,           426e-ac53
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,              158c-c304
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            7af4-8a96
-
 # /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             100s,         0   # interactive config, needed a *.numHosts parameter
-
 /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             a872-7e41
-
 # /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   100s,         0   # interactive config, needed a *.numHosts parameter
-
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  25s,             f9cb-b066
+# /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                  ---100s,         0   # [Config Ping2] # __interactive__
 /examples/wireless/multiradio/,      -f omnetpp.ini -c IndependentWlans -r 0,       100s,            2b43-5335
 /examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          100s,            f484-f93f
 /examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0,            100s,            b133-eba8

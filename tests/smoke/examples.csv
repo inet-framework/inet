@@ -67,8 +67,12 @@
 /examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c random -r 0
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted -r 0
+/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted-bad -r 0
+/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted-cross -r 0
 /examples/httptools/socket/pairsocket/, -f omnetpp.ini -c random -r 0
 /examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted -r 0
+/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted-bad -r 0
+/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted-cross -r 0
 /examples/httptools/socket/simpleddos/, -f omnetpp.ini -c General -r 0
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0
@@ -181,6 +185,10 @@
 /examples/manetrouting/hna/,         -f omnetpp.ini -c single_radio -r 0
 /examples/manetrouting/hna/,         -f omnetpp.ini -c multi_radio -r 0
 /examples/manetrouting/manetMultiradio/, -f 3_nodes.ini -c MultiRadio -r 0
+/examples/manetrouting/manetMultiradio/, -f 4_nodes.ini -c MultiRadio -r 0
+/examples/manetrouting/manetMultiradio/, -f 4_nodes.ini -c SingleRadio -r 0
+/examples/manetrouting/manetMultiradio/, -f omnetpp.ini -c MultiRadio -r 0
+/examples/manetrouting/manetMultiradio/, -f omnetpp.ini -c SingleRadio -r 0
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0
@@ -247,6 +255,8 @@
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandonestub -r 0
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandtwostubs -r 0
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-A -r 0
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-B -r 0
 /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c stable -r 0
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0
@@ -258,6 +268,8 @@
 /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0
+#/examples/traci/,                    -f omnetpp.ini -c accident -r 0
+#/examples/traci_launchd/,            -f omnetpp.ini -c accident -r 0
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0
 /examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0
