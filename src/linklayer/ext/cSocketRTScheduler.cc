@@ -321,6 +321,13 @@ cMessage *cSocketRTScheduler::getNextEvent()
 }
 #undef cEvent
 
+#if OMNETPP_VERSION >= 0x0500
+void cSocketRTScheduler::putBackEvent(cEvent *event)
+{
+    sim->msgQueue.putBackFirst(event);
+}
+#endif
+
 void cSocketRTScheduler::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr *to, socklen_t addrlen)
 {
     if (fd == INVALID_SOCKET)
