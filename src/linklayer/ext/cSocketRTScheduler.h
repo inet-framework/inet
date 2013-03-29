@@ -93,6 +93,11 @@ class cSocketRTScheduler : public cScheduler
          * Scheduler function -- it comes from the cScheduler interface.
          */
         virtual cEvent *takeNextEvent();
+
+        /**
+         * Scheduler function -- it comes from the cScheduler interface.
+         */
+        virtual void putBackEvent(cEvent *event);
 #else
         /**
          * Scheduler function -- it comes from cScheduler interface.
