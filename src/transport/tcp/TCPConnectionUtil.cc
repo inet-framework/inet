@@ -828,6 +828,7 @@ void TCPConnection::retransmitOneSegment(bool called_at_rto)
         tcpEV << "No outstanding DATA, resending FIN, advancing snd_nxt over the FIN\n";
         state->snd_nxt = state->snd_max;
         sendFin();
+        tcpAlgorithm->segmentRetransmitted(state->snd_nxt, state->snd_nxt+1);
         state->snd_max = ++state->snd_nxt;
 
         if (unackedVector)
@@ -838,6 +839,7 @@ void TCPConnection::retransmitOneSegment(bool called_at_rto)
         ASSERT(bytes != 0);
 
         sendSegment(bytes);
+        tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
 
         if (!called_at_rto)
         {
@@ -896,6 +898,7 @@ void TCPConnection::retransmitData()
 
         bytesToSend -= state->sentBytes;
     }
+    tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
 }
 
 void TCPConnection::readHeaderOptions(TCPSegment *tcpseg)

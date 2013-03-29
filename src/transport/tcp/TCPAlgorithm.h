@@ -166,6 +166,13 @@ class INET_API TCPAlgorithm : public cObject
     virtual void dataSent(uint32 fromseq) = 0;
 
     /**
+     * Called after we retransmitted segment.
+     * The argument fromseq is the seqno of the first byte sent.
+     * The argument toseq is the seqno of the last byte sent+1.
+     */
+    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq) = 0;
+
+    /**
      * Restart REXMIT timer.
      */
     virtual void restartRexmitTimer() = 0;

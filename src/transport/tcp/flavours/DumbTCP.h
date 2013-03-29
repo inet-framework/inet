@@ -83,6 +83,8 @@ class INET_API DumbTCP : public TCPAlgorithm
 
     virtual void dataSent(uint32 fromseq);
 
+    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq);
+
     virtual void restartRexmitTimer();
 
     virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS);
