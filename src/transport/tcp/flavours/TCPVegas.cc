@@ -11,7 +11,6 @@ TCPVegasStateVariables::TCPVegasStateVariables()
 {
     ssthresh = 65535;
     v_recoverypoint = 0;
-//    v_last_cwnd_action = 0;
     v_cwnd_changed = 0;
 
     v_baseRTT = 0x7fffffff;
@@ -27,16 +26,10 @@ TCPVegasStateVariables::TCPVegasStateVariables()
     v_cntRTT = 0;
     v_sumRTT = 0.0;
     v_rtt_timeout = 1000.0;
-
-    v_sendtime = NULL;
-    v_transmits = NULL;
-    v_maxwnd = 0;
 }
 
 TCPVegasStateVariables::~TCPVegasStateVariables()
 {
-    delete [] v_sendtime;
-    delete [] v_transmits;
 }
 
 std::string TCPVegasStateVariables::info() const
@@ -66,14 +59,16 @@ bool TCPVegas::checkRTTTimer()
 {
     // Check if time since oldest segment (snd_una) was sent exceeds
     // Vegas timeout
-    simtime_t tSent = state->v_sendtime[(state->snd_una - (state->iss + 1)) % state->v_maxwnd];
+    simtime_t tSent;
+    int numTransmits;
+    bool found = state->regions.get(state->snd_una, tSent, numTransmits);
+    if (!found)
+        return false;
+
     simtime_t currentTime = simTime();
 
     simtime_t elapse = currentTime - tSent;
-    if (elapse >= state->v_rtt_timeout)
-        return true;
-    else
-        return false;
+    return (elapse >= state->v_rtt_timeout);
 }
 
 // Same as TCPReno
@@ -118,7 +113,7 @@ void TCPVegas::processRexmitTimer(TCPEventCode& event)
     state->v_cwnd_changed = simTime(); // Save time when cwdn changes due to rtx
 
     state->afterRto = true;
-    ++state->v_transmits[(state->snd_una - (state->iss + 1)) % state->v_maxwnd];
+
     conn->retransmitOneSegment(true); //retransmit one segment from snd_una
 }
 
@@ -127,13 +122,14 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
 {
     TCPBaseAlg::receivedDataAck(firstSeqAcked);
 
-    if (state->v_sendtime == NULL)
+    simtime_t tSent;
+    int num_transmits;
+
+    bool found = state->regions.get(firstSeqAcked, tSent, num_transmits);
+    state->regions.clearTo(state->snd_una);
+
+    if (found)
     {
-        EV<< "Received ACK, but v_sendtime is NULL";
-    }
-    else
-    {
-        simtime_t tSent = state->v_sendtime[(firstSeqAcked - (state->iss+1)) % state->v_maxwnd];
         simtime_t currentTime = simTime();
 
         uint32 v_beta = 4 * state->snd_mss; // Value in bytes is needed, instead ofnum. packets
@@ -276,15 +272,6 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
             tcpEV << "Vegas: decr cwnd linearly, to " << state->snd_cwnd << "\n";
         }
 
-        int num_transmits = state->v_transmits[(firstSeqAcked - (state->iss+1)) % state->v_maxwnd];
-        // reset v_sendtime for acked segments
-        uint32 range = state->snd_una - firstSeqAcked;
-        for (uint32 k = firstSeqAcked; k < state->snd_una && range > 0; k++, range--)
-        {
-            state->v_sendtime[(k - (state->iss+1)) % state->v_maxwnd] = -1;
-            state->v_transmits[(k - (state->iss+1)) % state->v_maxwnd] = 0;
-        }
-
         // update vegas fine-grained timeout value (retransmitted packets do not count)
         if (tSent != 0 && num_transmits == 1)
         {
@@ -318,7 +305,6 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
             if (expired && (state->snd_max - state->snd_una > 0))
             {
                 state->dupacks = DUPTHRESH;
-                ++state->v_transmits[(state->snd_una - (state->iss+1)) % state->v_maxwnd];
                 tcpEV << "Vegas: retransmission (v_rtt_timeout) " << "\n";
                 conn->retransmitOneSegment(false); //retransmit one segment from snd_una
             }
@@ -335,49 +321,53 @@ void TCPVegas::receivedDuplicateAck()
 {
     TCPBaseAlg::receivedDuplicateAck();
 
-    simtime_t tSent = state->v_sendtime[(state->snd_una - (state->iss + 1)) % state->v_maxwnd];
+    simtime_t tSent;
+    int num_transmits;
     simtime_t currentTime = simTime();
-    int num_transmits = state->v_transmits[(state->snd_una - (state->iss + 1)) % state->v_maxwnd];
+    bool found = state->regions.get(state->snd_una, tSent, num_transmits);
+    state->regions.clearTo(state->snd_una);
 
     // check Vegas timeout
     bool expired = checkRTTTimer();
 
     // rtx if Vegas timeout || 3 dupacks
-    if (expired || state->dupacks == DUPTHRESH)
+    if ((found && expired) || state->dupacks == DUPTHRESH)
     { //DUPTHRESH = 3
         uint32 win = std::min(state->snd_cwnd, state->snd_wnd);
         state->v_worried = std::min((uint32) 2 * state->snd_mss, state->snd_nxt - state->snd_una);
 
-        if (num_transmits > 1)
-            state->v_rtt_timeout *= 2; // exp. Backoff
-        else
-            state->v_rtt_timeout += (state->v_rtt_timeout / 8.0);
-
-        // Vegas reduces cwnd if retransmitted segment rtx. was sent after last cwnd reduction
-        if (state->v_cwnd_changed < tSent)
+        if (found)
         {
-            win = win / state->snd_mss;
-            if (win <= 3)
-                win = 2;
-            else if (num_transmits > 1)
-                win = win / 2; //win <<= 1
+            if (num_transmits > 1)
+                state->v_rtt_timeout *= 2; // exp. Backoff
             else
-                win -= win / 4; // win -= (win >>2)
+                state->v_rtt_timeout += (state->v_rtt_timeout / 8.0);
 
-            state->snd_cwnd = win * state->snd_mss + 3 * state->snd_mss;
-            state->v_cwnd_changed = currentTime;
+            // Vegas reduces cwnd if retransmitted segment rtx. was sent after last cwnd reduction
+            if (state->v_cwnd_changed < tSent)
+            {
+                win = win / state->snd_mss;
+                if (win <= 3)
+                    win = 2;
+                else if (num_transmits > 1)
+                    win = win / 2; //win <<= 1
+                else
+                    win -= win / 4; // win -= (win >>2)
 
-            if (cwndVector) cwndVector->record(state->snd_cwnd);
+                state->snd_cwnd = win * state->snd_mss + 3 * state->snd_mss;
+                state->v_cwnd_changed = currentTime;
 
-            // reset rtx. timer
-            restartRexmitTimer();
+                if (cwndVector) cwndVector->record(state->snd_cwnd);
+
+                // reset rtx. timer
+                restartRexmitTimer();
+            }
         }
 
         // retransmit one segment from snd_una
-        ++state->v_transmits[(state->snd_una - (state->iss + 1)) % state->v_maxwnd];
         conn->retransmitOneSegment(false);
 
-        if (num_transmits == 1)
+        if (found && num_transmits == 1)
             state->dupacks = DUPTHRESH;
     }
     //else if dupacks > duphtresh, cwnd+1
@@ -395,21 +385,6 @@ void TCPVegas::dataSent(uint32 fromseq)
 {
     TCPBaseAlg::dataSent(fromseq);
 
-    // If 1st packet, initialization
-    if (state->v_sendtime == NULL)
-    {
-        // rcv_wnd: max capacity of the receiver buffer
-        state->v_maxwnd = state->rcv_wnd;
-
-        state->v_sendtime = new simtime_t[state->v_maxwnd];
-        state->v_transmits = new int[state->v_maxwnd];
-        for (unsigned int i = 0; i < state->v_maxwnd; i++)
-        {
-            state->v_sendtime[i] = -1;
-            state->v_transmits[i] = 0;
-        }
-    }
-
     // save time when packet is sent
     // fromseq is the seq number of the 1st sent byte
     // we need this value, based on iss=0 (to store it the right way on the vector),
@@ -417,17 +392,14 @@ void TCPVegas::dataSent(uint32 fromseq)
     // (this is why it is used: fromseq-state->iss)
 
     simtime_t sendtime = simTime();
-    for (uint32 i = fromseq; i < state->snd_max; i++)
-    {
-        int index = (i - (state->iss + 1)) % state->v_maxwnd;
-        state->v_sendtime[index] = sendtime;
-        ++state->v_transmits[index];
-    }
+    state->regions.clearTo(state->snd_una);
+    state->regions.set(fromseq, state->snd_max, sendtime);
 }
 
 void TCPVegas::segmentRetransmitted(uint32 fromseq, uint32 toseq)
 {
     TCPBaseAlg::segmentRetransmitted(fromseq, toseq);
 
+    state->regions.set(fromseq, toseq, simTime());
 }
 

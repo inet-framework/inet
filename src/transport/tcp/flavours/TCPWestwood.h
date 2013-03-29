@@ -5,6 +5,7 @@
 #include "INETDefs.h"
 
 #include "TCPBaseAlg.h"
+#include "TCPSegmentTransmitInfoList.h"
 
 /**
  * State variables for TCPWestwood.
@@ -27,9 +28,7 @@ class INET_API TCPWestwoodStateVariables : public TCPBaseAlgStateVariables
     double w_bwe;
     double w_sample_bwe;
 
-    simtime_t* w_sendtime; // each unacked pkt send time is registered
-    uint32 w_maxwnd; // max window size for v_sendtime
-    int* w_transmits; // # transmissions of each packet
+    TCPSegmentTransmitInfoList regions;
 };
 
 class INET_API TCPWestwood : public TCPBaseAlg
