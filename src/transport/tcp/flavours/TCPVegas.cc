@@ -425,3 +425,9 @@ void TCPVegas::dataSent(uint32 fromseq)
     }
 }
 
+void TCPVegas::segmentRetransmitted(uint32 fromseq, uint32 toseq)
+{
+    TCPBaseAlg::segmentRetransmitted(fromseq, toseq);
+
+}
+
