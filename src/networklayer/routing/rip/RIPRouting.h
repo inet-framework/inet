@@ -117,6 +117,7 @@ struct RIPInterfaceEntry
  */
 class INET_API RIPRouting : public cSimpleModule, protected INotifiable
 {
+    enum Mode { RIPv2, RIPng };
     typedef std::vector<RIPInterfaceEntry> InterfaceVector;
     typedef std::vector<RIPRoute*> RouteVector;
     // environment
@@ -131,6 +132,7 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     cMessage *updateTimer;          // for sending unsolicited Response messages in every ~30 seconds.
     cMessage *triggeredUpdateTimer; // scheduled when there are pending changes
     // parameters
+    Mode mode;
     int ripUdpPort;                 // UDP port RIP routers (usually 520)
     simtime_t updateInterval;       // time between regular updates
     simtime_t routeExpiryTime;      // learned routes becomes invalid if no update received in this period of time

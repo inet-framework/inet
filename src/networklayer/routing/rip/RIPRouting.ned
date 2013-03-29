@@ -18,22 +18,40 @@
 package inet.networklayer.routing.rip;
 
 //
-// Routing Information Protocol v2 (RFC 2453).
+// Routing Information Protocol.
 //
-// distance vector routing
+// This module implements distance vector routing as
+// specified in RFC 2453 (RIPv2) and RFC 2080 (RIPng).
+// The routing protocol uses the Bellman-Ford algorithm to compute
+// the optimal routes. Each router periodically sends its
+// routes to the neighboring routers. This update message
+// contains the destination (address, netmask) and metric
+// of each route. When a router receives an update message,
+// it adds the cost of the incoming interface
+// to the cost of the received route and if it is smaller than the metric
+// of its current route then it updates the current route.
 //
-// limitations:
-//   the metric diameter of the network must be smaller than 16
+// Limitations of the protocol:
+//   - only the hop-count metric is supported
+//   - the metric diameter of the network must be smaller than 16
+//   - the protocol depends on "counting to infinity" to recover
+//     from routing loops
+//
+// The module has the following parameters:
+//   - mode: either "RIPv2" (RFC 2453) or "RIPng" (RFC 2080)
+//   - routingTableModule: path to the routing table module
+//   - ripConfig: an XML configuration file containing per-interface parameters
 //
 simple RIPRouting
 {
     parameters:
         @display("i=block/network2");
 
+        string mode @enum("RIPv2", "RIPng") = default("RIPv2");
         string routingTableModule = default("^.routingTable");
         xml ripConfig = default(xml("<config><interface metric='1'/></config>"));
 
-        int udpPort = 520;
+        int udpPort = (mode == "RIPng" ? 521 : 520);
         double updateInterval @unit(s) = 30s;
         volatile double triggeredUpdateDelay @unit(s) = uniform(1s,5s);
         double routeExpiryTime @unit(s) = 180s;

@@ -20,7 +20,8 @@ class noncobject Address;
 cplusplus {{
 #include "Address.h"
 
-const int MAX_RIP_ENTRIES = 25;
+const int RIP_HEADER_SIZE = 4;
+const int RIP_RTE_SIZE = 20;
 }}
 
 //

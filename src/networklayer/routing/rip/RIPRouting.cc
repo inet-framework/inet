@@ -151,6 +151,16 @@ void RIPRouting::initialize(int stage)
         ift = InterfaceTableAccess().get();
         rt = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
 
+        const char *m = par("mode");
+        if (!m)
+            throw cRuntimeError("Missing 'mode' parameter.");
+        else if (!strcmp(m, "RIPv2"))
+            mode = RIPv2;
+        else if (!strcmp(m, "RIPng"))
+            mode = RIPng;
+        else
+            throw cRuntimeError("Unrecognized 'mode' parameter: %s", m);
+
         ripUdpPort = par("udpPort");
         updateInterval = par("updateInterval").doubleValue();
         routeExpiryTime = par("routeExpiryTime").doubleValue();
@@ -232,8 +242,12 @@ void RIPRouting::configureInitialRoutes()
             importRoute(route, RIPRoute::RIP_ROUTE_INTERFACE);
         else if (isDefaultRoute(route))
             importRoute(route, RIPRoute::RIP_ROUTE_DEFAULT);
-        else if (!route->getDestinationAsGeneric().isMulticast())
-            importRoute(route, RIPRoute::RIP_ROUTE_STATIC);
+        else
+        {
+            const Address &destAddr = route->getDestinationAsGeneric();
+            if (!destAddr.isMulticast() && !destAddr.isLinkLocal())
+                importRoute(route, RIPRoute::RIP_ROUTE_STATIC);
+        }
     }
 }
 
@@ -506,9 +520,11 @@ void RIPRouting::sendRoutes(const Address &address, int port, const RIPInterface
 {
     RIP_DEBUG << "Sending " << (changedOnly ? "changed" : "all") << " routes on " << ripInterface.ie->getFullName() << std::endl;
 
+    int maxEntries = mode == RIPv2 ? 25 : (ripInterface.ie->getMTU() - 40/*IPv6_HEADER_BYTES*/ - UDP_HEADER_BYTES - RIP_HEADER_SIZE) / RIP_RTE_SIZE;
+
     RIPPacket *packet = new RIPPacket("RIP response");
     packet->setCommand(RIP_RESPONSE);
-    packet->setEntryArraySize(MAX_RIP_ENTRIES);
+    packet->setEntryArraySize(maxEntries);
     int k = 0; // index into RIP entries
 
     for (RouteVector::iterator it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
@@ -548,13 +564,13 @@ void RIPRouting::sendRoutes(const Address &address, int port, const RIPInterface
         entry.metric = metric;
 
         // if packet is full, then send it and allocate a new one
-        if (k >= MAX_RIP_ENTRIES)
+        if (k >= maxEntries)
         {
             emit(sentUpdateSignal, packet);
             sendPacket(packet, address, port, ripInterface.ie);
             packet = new RIPPacket("RIP response");
             packet->setCommand(RIP_RESPONSE);
-            packet->setEntryArraySize(MAX_RIP_ENTRIES);
+            packet->setEntryArraySize(maxEntries);
             k = 0;
         }
     }
@@ -642,6 +658,8 @@ void RIPRouting::processResponse(RIPPacket *packet)
                 ripRoute->setLastUpdateTime(simTime());
             if ((ripRoute->getFrom() == srcAddr && ripRoute->getMetric() != metric) || metric < ripRoute->getMetric())
                 updateRoute(ripRoute, incomingIe->ie, nextHop, metric, srcAddr);
+            // TODO RIPng: if the metric is the same as the old one, and the old route is aboute to expire (i.e. at least halfway to the expiration point)
+            //             then update the old route with the new RTE
         }
         else
         {
@@ -671,11 +689,27 @@ bool RIPRouting::isValidResponse(RIPPacket *packet)
         return false;
     }
 
-    // check that source is on a directly connected network
-    if (!ift->isNeighborAddress(ctrlInfo->getSrcAddr()))
+    if (mode == RIPng)
     {
-        RIP_EV << "source is not directly connected " << ctrlInfo->getSrcAddr() << "\n";
-        return false;
+        if (!ctrlInfo->getSrcAddr().isLinkLocal())
+        {
+            RIP_EV << "source address is not link-local: " << ctrlInfo->getSrcAddr() << "\n";
+            return false;
+        }
+        if (ctrlInfo->getTtl() != 255)
+        {
+            RIP_EV << "ttl is not 255";
+            return false;
+        }
+    }
+    else
+    {
+        // check that source is on a directly connected network
+        if (!ift->isNeighborAddress(ctrlInfo->getSrcAddr()))
+        {
+            RIP_EV << "source is not directly connected " << ctrlInfo->getSrcAddr() << "\n";
+            return false;
+        }
     }
 
     // validate entries
@@ -697,6 +731,20 @@ bool RIPRouting::isValidResponse(RIPPacket *packet)
         {
             RIP_EV << "destination address of an entry is not unicast: " << entry.address << "\n";
             return false;
+        }
+
+        if (mode == RIPng)
+        {
+            if (entry.address.isLinkLocal())
+            {
+                RIP_EV << "destination address of an entry is link-local: " << entry.address << "\n";
+                return false;
+            }
+            if (entry.prefixLength < 0 || entry.prefixLength > addressType->getMaxPrefixLength())
+            {
+                RIP_EV << "prefixLength is outside of the [0," << addressType->getMaxPrefixLength() << "] interval\n";
+                return false;
+            }
         }
     }
 
@@ -806,6 +854,8 @@ void RIPRouting::triggerUpdate()
     if (!triggeredUpdateTimer->isScheduled())
     {
         double delay = par("triggeredUpdateDelay");
+        // Triggered updates may be suppressed if a regular
+        // update is due by the time the triggered update would be sent.
         scheduleAt(simTime() + delay, triggeredUpdateTimer);
     }
 }
@@ -885,13 +935,18 @@ void RIPRouting::purgeRoute(RIPRoute *ripRoute)
  */
 void RIPRouting::sendPacket(RIPPacket *packet, const Address &destAddr, int destPort, const InterfaceEntry *destInterface)
 {
-    packet->setByteLength(4 + 20 * packet->getEntryArraySize()); // XXX compute from address lengths
+    packet->setByteLength(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()); // XXX compute from address lengths
 // XXX it seems that setMulticastOutputInterface() has no effect
 //    if (destAddr.isMulticast())
 //        socket.setMulticastOutputInterface(destInterface->getInterfaceId());
 //    socket.sendTo(packet, destAddress, destPort);
     if (destAddr.isMulticast())
+    {
+        // TODO RIPng: use a link-local source address
+        if (mode == RIPng)
+            socket.setTimeToLive(255);
         socket.sendTo(packet, destAddr, destPort, destInterface->getInterfaceId());
+    }
     else
         socket.sendTo(packet, destAddr, destPort);
 }
