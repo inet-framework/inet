@@ -104,6 +104,16 @@ void UDPBasicApp::setSocketOptions()
 Address UDPBasicApp::chooseDestAddr()
 {
     int k = intrand(destAddresses.size());
+    if (destAddresses[k].isLinkLocal()) // KLUDGE for IPv6
+    {
+        const char *destAddrs = par("destAddresses");
+        cStringTokenizer tokenizer(destAddrs);
+        const char *token;
+
+        for (int i = 0; i <= k; ++i)
+            token = tokenizer.nextToken();
+        destAddresses[k] = AddressResolver().resolve(token);
+    }
     return destAddresses[k];
 }
 
