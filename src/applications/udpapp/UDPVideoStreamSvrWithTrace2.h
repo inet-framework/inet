@@ -120,4 +120,4 @@ class INET_API UDPVideoStreamSvrWithTrace2 : public UDPVideoStreamSvrWithTrace
 };
 
 
-#endif	// UDPVIDEOSTREAMSVR_WITH_TRACE_H
+#endif	// UDPVIDEOSTREAMSVR_WITH_TRACE2_H

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2012 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2013 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2005 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -20,25 +20,24 @@
 package inet.applications.udpapp;
 
 //
-// Video streaming server based on trace files from ASU video trace library [1].
+// Video streaming server based on trace files from ASU video trace library [1]
+// for the source clock frequency recovery with jitter time-stamp approach [2].
 // To be used with UDPVideoStreamCliWithSCFR.
 //
-// The server will wait for incoming "video streaming requests".
-// When a request arrives, it starts streaming to the client using a trace file.
-// During streaming, it will send \UDP packets whose sizes and intervals are
-// calculated based on the frame size and the frame period from the trace file.
-//
-// The server can serve several clients, and several streams per client.
-//
-// @see UDPVideoStreamCliWithSCFR
+// @see UDPVideoStreamSvrWithTrace, UDPVideoStreamSvrWithTrace2, UDPVideoStreamCliWithSCFR
 //
 // @par References:
 // <ol>
 // <li><a href="http://trace.eas.asu.edu/">Video trace library, Arizona State University</a>
 // </li>
+// <li>W. Su and I. F. Akyildiz,
+//     "The jitter time-stamp approach for clock recovery of real-time variable
+//     bit-rate traffic," IEEE/ACM Trans. Networking, vol. 9., no. 6,
+//     Dec. 2001, pp. 746-754.
+// </li>
 // </ol>
 //
-simple UDPVideoStreamSvrWithTrace2 like UDPApp
+simple UDPVideoStreamSvrWithTrace3 like UDPApp
 {
     parameters:
         int serverPort; // port to listen on
@@ -46,9 +45,10 @@ simple UDPVideoStreamSvrWithTrace2 like UDPApp
         int appOverhead @unit(byte) = default(12B);	// size of application layer overhead (e.g., RTP header)	
         int maxPayloadSize @unit(byte) = default(1460B);	// maximum size of payload to be carried in RTP packets;
 															// default of 1460B is MTU of 1500B minus RTP (12B), UDP (8B), and IP (20B) headers.
-		double clockFrequency @unit("Hz") = default(90000Hz);	// frequency of a local clock											
+		int timingPktPeriod = default(1);					// period of timing packets
+		double clockFrequency @unit("Hz") = default(90000Hz);	// frequency of a local reference clock ('f_r' in [2])
         string traceFile;	// name of a video trace file in ASU format
-		bool frameSpreading = default(true);	// if true, spread frame packets over a frame period
+		bool frameSpreading = default(false);	// if true, spread frame packets over a frame period
         @display("i=block/app");
     gates:
         input udpIn @labels(UDPControlInfo/up);
