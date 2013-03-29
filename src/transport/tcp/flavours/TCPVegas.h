@@ -5,6 +5,7 @@
 #include "INETDefs.h"
 
 #include "TCPBaseAlg.h"
+#include "TCPSegmentTransmitInfoList.h"
 
 
 /**
@@ -31,10 +32,7 @@ class INET_API TCPVegasStateVariables : public TCPBaseAlgStateVariables
     simtime_t v_sa; // average for vegas fine-grained timeout
     simtime_t v_sd; // deviation for vegas fine-grained timeout
 
-    //TODO it's too expensive: array size of v_sendtime and v_transmits is the initial rcv_wnd
-    simtime_t* v_sendtime; // each unacked pkt send time is registered
-    uint32 v_maxwnd; // max window size for v_sendtime
-    int* v_transmits; // # transmissions of each packet
+    TCPSegmentTransmitInfoList regions;
 
     uint32 ssthresh; ///< slow start threshold
 

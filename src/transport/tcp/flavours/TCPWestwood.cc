@@ -16,15 +16,10 @@ TCPWestwoodStateVariables::TCPWestwoodStateVariables()
     w_lastAckTime = 0;
     w_bwe = 0;
     w_sample_bwe = 0;
-    w_sendtime = NULL;
-    w_transmits = NULL;
-    w_maxwnd = 0;
 }
 
 TCPWestwoodStateVariables::~TCPWestwoodStateVariables()
 {
-    delete [] w_sendtime;
-    delete [] w_transmits;
 }
 
 std::string TCPWestwoodStateVariables::info() const
@@ -116,16 +111,16 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
 {
     TCPBaseAlg::receivedDataAck(firstSeqAcked);
 
-    if (state->w_sendtime == NULL)
+    simtime_t tSent;
+    int num_transmits;
+
+    bool found = state->regions.get(firstSeqAcked, tSent, num_transmits);
+    state->regions.clearTo(state->snd_una);
+
+    if (found)
     {
-        EV << "Received ACK, but w_sendtime is NULL";
-    }
-    else
-    {
-        simtime_t tSent = state->w_sendtime[(firstSeqAcked - (state->iss+1)) % state->w_maxwnd];
         simtime_t currentTime = simTime();
         simtime_t newRTT = currentTime - tSent;
-        int num_transmits = state->w_transmits[(firstSeqAcked - (state->iss+1)) % state->w_maxwnd];
 
         // Update RTTmin
         if (newRTT < state->w_RTTmin && newRTT > 0 && num_transmits == 1)
@@ -145,6 +140,7 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
 
         recalculateBWE(cumul_ack);
     }   // Closes if w_sendtime != NULL
+
 
     // Same behavior of Reno during fast recovery, slow start and cong. avoidance
 
@@ -220,17 +216,7 @@ void TCPWestwood::receivedDuplicateAck()
 {
     TCPBaseAlg::receivedDuplicateAck();
 
-    if (state->w_sendtime == NULL)
     {
-        EV<< "Received ACK, but w_sendtime is NULL";
-    }
-    else
-    {
-        //simtime_t tSent = state->w_sendtime[(state->snd_una - (state->iss+1)) % state->w_maxwnd];
-        //simtime_t currentTime = simTime();
-        //simtime_t newRTT = currentTime - tSent;
-        //int num_transmits = state->w_transmits[(state->snd_una - (state->iss+1)) % state->w_maxwnd];
-
         // BWE calculation: dupack counts 1
         uint32 cumul_ack = state->snd_mss;
         recalculateBWE(cumul_ack);
@@ -307,46 +293,18 @@ void TCPWestwood::dataSent(uint32 fromseq)
 {
     TCPBaseAlg::dataSent(fromseq);
 
-    // If 1st packet, initialization
-    if (state->w_sendtime == NULL)
-    {
-        // rcv_wnd: max capacity of the receiver buffer
-        state->w_maxwnd = state->rcv_wnd;
-
-        state->w_sendtime = new simtime_t[state->w_maxwnd];
-        state->w_transmits = new int[state->w_maxwnd];
-        for (unsigned int i = 0; i < state->w_maxwnd; i++)
-        {
-            state->w_sendtime[i] = -1;
-            state->w_transmits[i] = 0;
-        }
-    }
-
     // save time when packet is sent
     // fromseq is the seq number of the 1st sent byte
-    // we need this value, based on iss=0 (to store it the right way on the vector),
-    // but iss is not a constant value (ej: iss=0), so it needs to be detemined each time
-    // (this is why it is used: fromseq-state->iss)
 
     simtime_t sendtime = simTime();
-    for (uint32 i = fromseq; i < state->snd_max; i++)
-    {
-        int index = (i - (state->iss + 1)) % state->w_maxwnd;
-        state->w_sendtime[index] = sendtime;
-        ++state->w_transmits[index];
-    }
+    state->regions.clearTo(state->snd_una);
+    state->regions.set(fromseq, state->snd_max, sendtime);
 }
 
 void TCPWestwood::segmentRetransmitted(uint32 fromseq, uint32 toseq)
 {
     TCPBaseAlg::segmentRetransmitted(fromseq, toseq);
 
-    simtime_t sendtime = simTime();
-    for (uint32 i = fromseq; i < toseq; i++)
-    {
-        int index = (i - (state->iss + 1)) % state->w_maxwnd;
-        state->w_sendtime[index] = sendtime;
-        ++state->w_transmits[index];
-    }
+    state->regions.set(fromseq, toseq, simTime());
 }
 
