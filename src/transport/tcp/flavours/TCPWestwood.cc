@@ -109,7 +109,6 @@ void TCPWestwood::processRexmitTimer(TCPEventCode& event)
         cwndVector->record(state->snd_cwnd);
 
     state->afterRto = true;
-    ++state->w_transmits[(state->snd_una - (state->iss+1)) % state->w_maxwnd];
     conn->retransmitOneSegment(true);
 }
 
@@ -285,7 +284,6 @@ void TCPWestwood::receivedDuplicateAck()
 
         // Fast Retransmission: retransmit missing segment without waiting
         // for the REXMIT timer to expire
-        ++state->w_transmits[(state->snd_una - (state->iss + 1)) % state->w_maxwnd];
         restartRexmitTimer();
         conn->retransmitOneSegment(false);
 
@@ -342,5 +340,13 @@ void TCPWestwood::dataSent(uint32 fromseq)
 void TCPWestwood::segmentRetransmitted(uint32 fromseq, uint32 toseq)
 {
     TCPBaseAlg::segmentRetransmitted(fromseq, toseq);
+
+    simtime_t sendtime = simTime();
+    for (uint32 i = fromseq; i < toseq; i++)
+    {
+        int index = (i - (state->iss + 1)) % state->w_maxwnd;
+        state->w_sendtime[index] = sendtime;
+        ++state->w_transmits[index];
+    }
 }
 
