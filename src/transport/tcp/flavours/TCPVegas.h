@@ -77,6 +77,8 @@ class INET_API TCPVegas : public TCPBaseAlg
 
     /** Called after we send data */
     virtual void dataSent(uint32 fromseq);
+
+    virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq);
 };
 
 #endif
