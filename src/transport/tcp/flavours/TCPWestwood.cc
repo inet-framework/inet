@@ -339,3 +339,8 @@ void TCPWestwood::dataSent(uint32 fromseq)
     }
 }
 
+void TCPWestwood::segmentRetransmitted(uint32 fromseq, uint32 toseq)
+{
+    TCPBaseAlg::segmentRetransmitted(fromseq, toseq);
+}
+
