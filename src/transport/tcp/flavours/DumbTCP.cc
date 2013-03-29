@@ -122,6 +122,10 @@ void DumbTCP::dataSent(uint32 fromseq)
     conn->scheduleTimeout(rexmitTimer, REXMIT_TIMEOUT);
 }
 
+void DumbTCP::segmentRetransmitted(uint32 fromseq, uint32 toseq)
+{
+}
+
 void DumbTCP::restartRexmitTimer()
 {
 }

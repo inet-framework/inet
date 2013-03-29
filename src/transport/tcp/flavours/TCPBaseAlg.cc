@@ -690,6 +690,10 @@ void TCPBaseAlg::dataSent(uint32 fromseq)
     state->time_last_data_sent = simTime();
 }
 
+void TCPBaseAlg::segmentRetransmitted(uint32 fromseq, uint32 toseq)
+{
+}
+
 void TCPBaseAlg::restartRexmitTimer()
 {
     if (rexmitTimer->isScheduled())
