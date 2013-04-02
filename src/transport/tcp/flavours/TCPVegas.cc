@@ -113,10 +113,6 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
     {
         simtime_t currentTime = simTime();
 
-        uint32 v_beta = 4 * state->snd_mss; // Value in bytes is needed, instead of num. packets
-        uint32 v_alpha = 2 * state->snd_mss;
-        uint32 v_gamma = 1 * state->snd_mss;
-
         //TODO: When should do it: when received first ACK, or when received ACK of 1st sent packet???
         if (firstSeqAcked == state->iss+1)
         { // Initialization
@@ -183,7 +179,7 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
                     }
                     else
                     {
-                        if (diff > v_gamma)
+                        if (diff > 1 * state->snd_mss)      // gamma
                         {
                             /* When actual rate falls below expected rate a certain value (gamma threshold)
                              Vegas changes from slow start to linear incr/decr */
@@ -210,11 +206,11 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
                     // Cong. avoidance
                     tcpEV << "Vegas: Congestion avoidance: " << "\n";
 
-                    if (diff > v_beta)
+                    if (diff > 4 * state->snd_mss)      // beta
                     {
                         state->v_incr = -state->snd_mss;
                     }
-                    else if (diff < v_alpha)
+                    else if (diff < 2 * state->snd_mss)     // alpha
                     {
                         state->v_incr = state->snd_mss;
                     }
