@@ -60,9 +60,6 @@ class INET_API TCPVegas : public TCPBaseAlg
     /** Redefine what should happen on retransmission */
     virtual void processRexmitTimer(TCPEventCode& event);
 
-    /** Utility function to check if RTT timeout should happen */
-    virtual bool checkRTTTimer();
-
   public:
     /** Ctor */
     TCPVegas();
