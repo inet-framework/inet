@@ -316,7 +316,7 @@ void TCPVegas::receivedDuplicateAck()
     bool expired = found && ((currentTime - tSent) >= state->v_rtt_timeout);
 
     // rtx if Vegas timeout || 3 dupacks
-    if ((found && expired) || state->dupacks == DUPTHRESH)
+    if (expired || state->dupacks == DUPTHRESH)
     { //DUPTHRESH = 3
         uint32 win = std::min(state->snd_cwnd, state->snd_wnd);
         state->v_worried = std::min((uint32) 2 * state->snd_mss, state->snd_nxt - state->snd_una);
