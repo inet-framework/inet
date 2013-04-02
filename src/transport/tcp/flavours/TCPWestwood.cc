@@ -66,7 +66,7 @@ void TCPWestwood::recalculateBWE(uint32 cumul_ack)
         double old_bwe = state->w_bwe;
         state->w_sample_bwe = (cumul_ack) / timeAck;
         state->w_bwe = 0.9047 * old_bwe + 0.5 * (1.0 - 0.9047) * (state->w_sample_bwe + old_sample_bwe); //TODO use parameter instead constant 0.9047
-        tcpEV << "recalculateBWE(), nuevo w_bwe=" << state->w_bwe << "\n";
+        tcpEV << "recalculateBWE(), new w_bwe=" << state->w_bwe << "\n";
     }
     state->w_lastAckTime = currentTime;
 }
@@ -78,7 +78,7 @@ void TCPWestwood::processRexmitTimer(TCPEventCode& event)
     if (event == TCP_E_ABORT)
         return;
 
-    // TCP Westwood: congestion controlw with faster recovery. S. Mascolo, C. Casetti, M. Gerla, S.S. Lee, M. Sanadidi
+    // TCP Westwood: congestion control with faster recovery. S. Mascolo, C. Casetti, M. Gerla, S.S. Lee, M. Sanadidi
     // After REXMIT timeout in TCP Westwood: a increases from 1 to 4, in steps of 1 during slow start,
     // and is set to 1 in cong. avoidance.
     // the cong. window is reset to 1 after a timeout, as is done by TCP Reno. Conservative. Reaseon: fairness.
@@ -226,7 +226,7 @@ void TCPWestwood::receivedDuplicateAck()
     {
         tcpEV << "Westwood on dupAcks == DUPTHRESH(=3): Faster Retransmit \n";
 
-        // TCP Westwood: congestion controlw with faster recovery. S. Mascolo, C. Casetti, M. Gerla, S.S. Lee, M. Sanadidi
+        // TCP Westwood: congestion control with faster recovery. S. Mascolo, C. Casetti, M. Gerla, S.S. Lee, M. Sanadidi
         // During the cong. avoidance phase we are probing for extra available bandwidth.
         // Therefore, when n DUPACKS are received, it means that we have hit the network
         // capacity. Thus, the slow start threshold is set equal to the available pipe size

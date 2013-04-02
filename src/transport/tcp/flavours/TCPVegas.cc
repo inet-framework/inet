@@ -93,7 +93,6 @@ void TCPVegas::recalculateSlowStartThreshold()
         ssthreshVector->record(state->ssthresh);
 }
 
-
 //Process rexmit timer
 void TCPVegas::processRexmitTimer(TCPEventCode& event)
 {
@@ -110,13 +109,12 @@ void TCPVegas::processRexmitTimer(TCPEventCode& event)
     tcpEV << "RXT Timeout in Vegas: resetting cwnd to " << state->snd_cwnd << "\n"
           << ", ssthresh=" << state->ssthresh << "\n";
 
-    state->v_cwnd_changed = simTime(); // Save time when cwdn changes due to rtx
+    state->v_cwnd_changed = simTime(); // Save time when cwnd changes due to rtx
 
     state->afterRto = true;
 
     conn->retransmitOneSegment(true); //retransmit one segment from snd_una
 }
-
 
 void TCPVegas::receivedDataAck(uint32 firstSeqAcked) 
 {
@@ -132,13 +130,13 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
     {
         simtime_t currentTime = simTime();
 
-        uint32 v_beta = 4 * state->snd_mss; // Value in bytes is needed, instead ofnum. packets
+        uint32 v_beta = 4 * state->snd_mss; // Value in bytes is needed, instead of num. packets
         uint32 v_alpha = 2 * state->snd_mss;
         uint32 v_gamma = 1 * state->snd_mss;
 
         //TODO: When should do it: when received first ACK, or when received ACK of 1st sent packet???
         if (firstSeqAcked == state->iss+1)
-        { // Inicialization
+        { // Initialization
             state->v_baseRTT = currentTime - tSent;
             state->v_sa = state->v_baseRTT * 8;
             state->v_sd = state->v_baseRTT;
@@ -166,7 +164,7 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
             // decide if incr/decr cwnd
             if (newRTT > 0)
             {
-                // rttLen: bytes transmitted since a segment is sent and its ack is received
+                // rttLen: bytes transmitted since a segment is sent and its ACK is received
                 uint32 rttLen = state->snd_nxt - state->v_begseq;
 
                 // If only one packet in transit: update baseRTT
@@ -205,7 +203,7 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
                         if (diff > v_gamma)
                         {
                             /* When actual rate falls below expected rate a certain value (gamma threshold)
-                             Vegas changes from slow start to linear incr/decr*/
+                             Vegas changes from slow start to linear incr/decr */
 
                             recalculateSlowStartThreshold(); // to enter again in cong. avoidance
                             state->snd_cwnd -= (state->snd_cwnd / 8);
