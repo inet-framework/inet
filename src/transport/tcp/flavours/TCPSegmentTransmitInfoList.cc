@@ -40,14 +40,15 @@ void TCPSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentT
         ASSERT(seqLE(i->beg, beg));
         if (beg != i->beg)
         {
-            regions.insert(i, TCPSegmentTransmitInfo(i->beg, beg, i->senttime, i->transmits));
+            regions.insert(i, TCPSegmentTransmitInfo(i->beg, beg, i->firstSentTime, i->transmitCount));
             i->beg = beg;
         }
         while (i != regions.end() && seqLE(i->end, end))
         {
             ASSERT(beg == i->beg);
-////            i->senttime = sentTime;
-            i->transmits++;
+            if (i->firstSentTime > sentTime)
+                i->firstSentTime = sentTime;
+            i->transmitCount++;
             beg = i->end;
             ++i;
         }
@@ -57,8 +58,10 @@ void TCPSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentT
             if (i != regions.end())
             {
                 ASSERT(beg == i->beg);
-////            regions.insert(i, TCPSegmentTransmitInfo(beg, end, sentTime, i->transmits + 1));
-                regions.insert(i, TCPSegmentTransmitInfo(beg, end, i->senttime, i->transmits + 1));
+                simtime_t sent = i->firstSentTime;
+                if (sent > sentTime)
+                    sent = sentTime;
+                regions.insert(i, TCPSegmentTransmitInfo(beg, end, sent, i->transmitCount + 1));
                 i->beg = end;
             }
             else
@@ -75,8 +78,8 @@ bool TCPSegmentTransmitInfoList::get(uint32_t seq, simtime_t &sentTimeOut, int &
             break;
         if (seqLE(i->beg, seq) && seqLess(seq, i->end))
         {
-            sentTimeOut = i->senttime;
-            transmitsOut = i->transmits;
+            sentTimeOut = i->firstSentTime;
+            transmitsOut = i->transmitCount;
             return true;
         }
     }

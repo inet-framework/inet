@@ -33,10 +33,10 @@ class TCPSegmentTransmitInfoList
       public:
         uint32_t beg;       // segment [begin, end)
         uint32_t end;
-        simtime_t senttime; // time of first sending
-        int transmits;      // num of transmissions
+        simtime_t firstSentTime; // time of first sending
+        int transmitCount;      // num of transmissions
       public:
-        TCPSegmentTransmitInfo(uint32_t beg, uint32_t end, simtime_t senttime, int transmits) : beg(beg), end(end), senttime(senttime), transmits(transmits) {}
+        TCPSegmentTransmitInfo(uint32_t beg, uint32_t end, simtime_t senttime, int transmits) : beg(beg), end(end), firstSentTime(senttime), transmitCount(transmits) {}
     };
     typedef std::list<TCPSegmentTransmitInfo> TCPSegmentTransmitInfoItems;
     TCPSegmentTransmitInfoItems   regions;   // region[i].end == region[i+1].beg
