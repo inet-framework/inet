@@ -139,7 +139,7 @@ void TcpTestClient::handleMessage(cMessage *msg)
         return;
     }
 
-    //ev << fullPath() << ": received " << msg->name() << ", " << msg->byteLength() << " bytes\n";
+    //EV << fullPath() << ": received " << msg->name() << ", " << msg->byteLength() << " bytes\n";
     if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
     {
         rcvdPackets++;
