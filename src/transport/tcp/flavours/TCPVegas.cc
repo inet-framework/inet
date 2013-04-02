@@ -54,23 +54,6 @@ TCPVegas::TCPVegas()
 {
 }
 
-// Check rtt timer to see if should rtx or not (when an ack is received)
-bool TCPVegas::checkRTTTimer()
-{
-    // Check if time since oldest segment (snd_una) was sent exceeds
-    // Vegas timeout
-    simtime_t tSent;
-    int numTransmits;
-    bool found = state->regions.get(state->snd_una, tSent, numTransmits);
-    if (!found)
-        return false;
-
-    simtime_t currentTime = simTime();
-
-    simtime_t elapse = currentTime - tSent;
-    return (elapse >= state->v_rtt_timeout);
-}
-
 // Same as TCPReno
 void TCPVegas::recalculateSlowStartThreshold()
 {
@@ -297,7 +280,11 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
         if (state->v_worried > 0)
         {
             state->v_worried -= state->snd_mss;
-            bool expired = checkRTTTimer();
+            simtime_t unaSent;
+            int unaTransmitCnt;
+            bool unaFound = state->regions.get(state->snd_una, unaSent, unaTransmitCnt);
+            bool expired = unaFound && ((currentTime - unaSent) >= state->v_rtt_timeout);
+
             // added comprobation to check that received ACK do not acks all outstanding data. If not,
             // TCPConnection::retransmitOneSegment will fail: ASSERT(bytes!=0), line 839), because bytes = snd_max-snd_una
             if (expired && (state->snd_max - state->snd_una > 0))
@@ -326,7 +313,7 @@ void TCPVegas::receivedDuplicateAck()
     state->regions.clearTo(state->snd_una);
 
     // check Vegas timeout
-    bool expired = checkRTTTimer();
+    bool expired = found && ((currentTime - tSent) >= state->v_rtt_timeout);
 
     // rtx if Vegas timeout || 3 dupacks
     if ((found && expired) || state->dupacks == DUPTHRESH)
