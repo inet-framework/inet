@@ -24,7 +24,7 @@ enum FrameType;
 //
 // Message class representing application layer (i.e., RTP) packet for
 // UDP video streaming application. Partial implementation of RFC
-// 3894.
+// 6184.
 //
 packet UDPVideoStreamPacket
 {
