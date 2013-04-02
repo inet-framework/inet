@@ -128,7 +128,7 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
         }
 
         // Once per RTT
-        if (state->snd_una > state->v_begseq)
+        if (seqGreater(state->snd_una, state->v_begseq))
         {
             simtime_t newRTT;
             if(state->v_cntRTT > 0)
