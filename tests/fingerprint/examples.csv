@@ -161,14 +161,14 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 3,             500s,            00a0-2c26
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 4,             500s,            e494-8ece
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 5,             500s,            8cb9-a7ad
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 6,             500s,            f59e-2793
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 6,             500s,            ee9e-2a6c
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 0,          500s,            c729-7f48
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 1,          500s,            517b-8b2d
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 2,          500s,            b383-c637
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 3,          500s,            43ce-f13e
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 4,          500s,            12be-5715
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 5,          500s,            5dd8-317d
-/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 6,          500s,            4a60-b683
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 6,          500s,            31c7-6bb4
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 0,              500s,            dae5-e7f7
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 1,              500s,            33f8-2070
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 2,              500s,            0201-c9ab
