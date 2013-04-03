@@ -111,19 +111,16 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
 {
     TCPBaseAlg::receivedDataAck(firstSeqAcked);
 
-    simtime_t tSent;
-    int num_transmits;
-
-    bool found = state->regions.get(firstSeqAcked, tSent, num_transmits);
+    const TCPSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
     state->regions.clearTo(state->snd_una);
 
-    if (found)
+    if (found != NULL)
     {
         simtime_t currentTime = simTime();
-        simtime_t newRTT = currentTime - tSent;
+        simtime_t newRTT = currentTime - found->getFirstSentTime();
 
         // Update RTTmin
-        if (newRTT < state->w_RTTmin && newRTT > 0 && num_transmits == 1)
+        if (newRTT < state->w_RTTmin && newRTT > 0 && found->getTransmitCount() == 1)
             state->w_RTTmin = newRTT;
 
         // cumul_ack: cumulative ack's that acks 2 or more pkts count 1,
