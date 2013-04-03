@@ -107,7 +107,6 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
     int num_transmits;
 
     bool found = state->regions.get(firstSeqAcked, tSent, num_transmits);
-    state->regions.clearTo(state->snd_una);
 
     if (found)
     {
@@ -294,6 +293,7 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
         }
     }   // Closes if v_sendtime != NULL
 
+    state->regions.clearTo(state->snd_una);
     //Try to send more data
     sendData(false);
 }
