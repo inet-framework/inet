@@ -271,7 +271,7 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
             }
         }
 
-        // check 1st and 2nd ack adter a rtx
+        // check 1st and 2nd ack after a rtx
         if (state->v_worried > 0)
         {
             state->v_worried -= state->snd_mss;
