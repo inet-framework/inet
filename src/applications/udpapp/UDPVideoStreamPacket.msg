@@ -29,6 +29,7 @@ enum FrameType;
 packet UDPVideoStreamPacket
 {
     // RTP header fields
+    bool Marker;                ///< 1-bit marker (e.g., indicating the last packet of a frame)
     uint16_t sequenceNumber;	///< 16-bit packet sequence number
     uint32_t timestamp;			///< 32-bit timestamp
 

@@ -215,11 +215,12 @@ void UDPVideoStreamSvrWithTrace2::sendStreamData(cMessage *pktTimer)
 	UDPVideoStreamPacket *pkt = new UDPVideoStreamPacket("UDPVideoStreamPacket");
 	long payloadSize = (d->bytesLeft >= maxPayloadSize) ? maxPayloadSize : d->bytesLeft;
 	pkt->setByteLength(payloadSize + appOverhead);
+	pkt->setMarker(d->bytesLeft == payloadSize ? true : false); ///< indicator for the last packet of a frame
 	pkt->setSequenceNumber(d->currentSequenceNumber);	///< 16-bit RTP sequence number
 	pkt->setTimestamp(uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL));    ///< 32-bit RTP timestamp (wrap-arounded)
 //    pkt->setTimestamp(uint32_t((uint64_t(clockFrequency)*simTime().raw()/simTime().getScale())%0x100000000LL));    ///< 32-bit RTP timestamp (wrap-arounded)
 	pkt->setFragmentStart(d->bytesLeft == d->frameSize ? true : false);	///< in FU header in RTP payload
-	pkt->setFragmentEnd(d->bytesLeft == payloadSize ? true : false);	///< in FU header in RTP payload
+	pkt->setFragmentEnd(pkt->getMarker);    ///< in FU header in RTP payload
 	pkt->setFrameNumber(d->frameNumber);	///< non-RTP field
 	pkt->setFrameTime(d->frameTime);	///< non-RTP field
 	pkt->setFrameType(d->frameType);	///> non-RTP field

@@ -26,6 +26,8 @@ package inet.applications.udpapp;
 //
 // @see UDPVideoStreamSvrWithTrace, UDPVideoStreamSvrWithTrace2, UDPVideoStreamCliWithSCFR
 //
+// @note All generated RTP packets have the same payload size (including the last fragment).
+//
 // @par References:
 // <ol>
 // <li><a href="http://trace.eas.asu.edu/">Video trace library, Arizona State University</a>
@@ -45,8 +47,9 @@ simple UDPVideoStreamSvrWithTrace3 like UDPApp
         int appOverhead @unit(byte) = default(12B);	// size of application layer overhead (e.g., RTP header)	
         int maxPayloadSize @unit(byte) = default(1460B);	// maximum size of payload to be carried in RTP packets;
 															// default of 1460B is MTU of 1500B minus RTP (12B), UDP (8B), and IP (20B) headers.
-		int timingPktPeriod = default(1);					// period of timing packets
-		double clockFrequency @unit("Hz") = default(90000Hz);	// frequency of a local reference clock ('f_r' in [2])
+		double clockFrequency @unit("Hz") = default(90000Hz);	// frequency of a local clock
+		int N = default(10);	// ratio bewteen frequencies of local clock and reference clock ('f_r' in [2])
+		int timingPktPeriod = default(1);	// period of timing packets
         string traceFile;	// name of a video trace file in ASU format
 		bool frameSpreading = default(false);	// if true, spread frame packets over a frame period
         @display("i=block/app");

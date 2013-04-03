@@ -49,8 +49,9 @@ void UDPVideoStreamSvrWithTrace3::initialize()
 {
     UDPVideoStreamSvrWithTrace2::initialize();
 
+    N = par("N").longValue();
     timingPktPeriod = par("timingPktPeriod").longValue();
-    pktInterval = 1.0 / clockFrequency;
+    pktInterval = N / clockFrequency;
 }
 
 void UDPVideoStreamSvrWithTrace3::sendStreamData(cMessage *pktTimer)
@@ -61,20 +62,22 @@ void UDPVideoStreamSvrWithTrace3::sendStreamData(cMessage *pktTimer)
 
 	// generate and send a packet
 	UDPVideoStreamPacket *pkt = new UDPVideoStreamPacket("UDPVideoStreamPacket");
-	long payloadSize = (d->bytesLeft >= maxPayloadSize) ? maxPayloadSize : d->bytesLeft;
+	long payloadSize = maxPayloadSize;  ///< every RTP packet has the same size in JTS SCFR algorithm
+	// long payloadSize = (d->bytesLeft >= maxPayloadSize) ? maxPayloadSize : d->bytesLeft;
 	pkt->setByteLength(payloadSize + appOverhead);
+	pkt->setMarker(d->bytesLeft <= maxPayloadSize ? true : false);  ///< indicator for the last packet of a frame
 	pkt->setSequenceNumber(d->currentSequenceNumber);	///< 16-bit RTP sequence number
 	pkt->setTimestamp(uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL));    ///< 32-bit RTP timestamp (wrap-arounded)
 //    pkt->setTimestamp(uint32_t((uint64_t(clockFrequency)*simTime().raw()/simTime().getScale())%0x100000000LL));    ///< 32-bit RTP timestamp (wrap-arounded)
 	pkt->setFragmentStart(d->bytesLeft == d->frameSize ? true : false);	///< in FU header in RTP payload
-	pkt->setFragmentEnd(d->bytesLeft == payloadSize ? true : false);	///< in FU header in RTP payload
+	pkt->setFragmentEnd(pkt->getMarker);    ///< in FU header in RTP payload
 	pkt->setFrameNumber(d->frameNumber);	///< non-RTP field
 	pkt->setFrameTime(d->frameTime);	///< non-RTP field
 	pkt->setFrameType(d->frameType);	///> non-RTP field
 	sendToUDP(pkt, serverPort, d->clientAddr, d->clientPort);
 
 	// update the session VideoStreamData and global statistics
-	d->bytesLeft -= payloadSize;
+    d-bytesLeft = (d->bytesLeft > payloadSize) ? (d->bytesLeft - payloadSize) : 0; // take into account the case when d->bytesLeft < payloadSize
 	d->numPktSent++;
 	d->currentSequenceNumber = (d->currentSequenceNumber  + 1) % 0x10000L;  ///> wrap around to zero if it reaches the maximum value (65535)
 	numPktSent++;
