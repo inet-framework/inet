@@ -70,14 +70,14 @@ void UDPVideoStreamSvrWithTrace3::sendStreamData(cMessage *pktTimer)
 	pkt->setTimestamp(uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL));    ///< 32-bit RTP timestamp (wrap-arounded)
 //    pkt->setTimestamp(uint32_t((uint64_t(clockFrequency)*simTime().raw()/simTime().getScale())%0x100000000LL));    ///< 32-bit RTP timestamp (wrap-arounded)
 	pkt->setFragmentStart(d->bytesLeft == d->frameSize ? true : false);	///< in FU header in RTP payload
-	pkt->setFragmentEnd(pkt->getMarker);    ///< in FU header in RTP payload
+	pkt->setFragmentEnd(pkt->getMarker());    ///< in FU header in RTP payload
 	pkt->setFrameNumber(d->frameNumber);	///< non-RTP field
 	pkt->setFrameTime(d->frameTime);	///< non-RTP field
 	pkt->setFrameType(d->frameType);	///> non-RTP field
 	sendToUDP(pkt, serverPort, d->clientAddr, d->clientPort);
 
 	// update the session VideoStreamData and global statistics
-    d-bytesLeft = (d->bytesLeft > payloadSize) ? (d->bytesLeft - payloadSize) : 0; // take into account the case when d->bytesLeft < payloadSize
+    d->bytesLeft = (d->bytesLeft > payloadSize) ? (d->bytesLeft - payloadSize) : 0; // take into account the case when d->bytesLeft < payloadSize
 	d->numPktSent++;
 	d->currentSequenceNumber = (d->currentSequenceNumber  + 1) % 0x10000L;  ///> wrap around to zero if it reaches the maximum value (65535)
 	numPktSent++;

@@ -220,7 +220,7 @@ void UDPVideoStreamSvrWithTrace2::sendStreamData(cMessage *pktTimer)
 	pkt->setTimestamp(uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL));    ///< 32-bit RTP timestamp (wrap-arounded)
 //    pkt->setTimestamp(uint32_t((uint64_t(clockFrequency)*simTime().raw()/simTime().getScale())%0x100000000LL));    ///< 32-bit RTP timestamp (wrap-arounded)
 	pkt->setFragmentStart(d->bytesLeft == d->frameSize ? true : false);	///< in FU header in RTP payload
-	pkt->setFragmentEnd(pkt->getMarker);    ///< in FU header in RTP payload
+	pkt->setFragmentEnd(pkt->getMarker());    ///< in FU header in RTP payload
 	pkt->setFrameNumber(d->frameNumber);	///< non-RTP field
 	pkt->setFrameTime(d->frameTime);	///< non-RTP field
 	pkt->setFrameType(d->frameType);	///> non-RTP field

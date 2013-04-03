@@ -320,7 +320,7 @@ void UDPVideoStreamSvrWithTrace::sendStreamData(cMessage *pktTimer)
 	pkt->setMarker(d->bytesLeft == payloadSize ? true : false); ///< indicator for the last packet of a frame
 	pkt->setSequenceNumber(d->currentSequenceNumber);	///< in RTP header
 	pkt->setFragmentStart(d->bytesLeft == d->frameSize ? true : false);	///< in FU header in RTP payload
-	pkt->setFragmentEnd(pkt->getMarker);    ///< in FU header in RTP payload
+	pkt->setFragmentEnd(pkt->getMarker());    ///< in FU header in RTP payload
 	pkt->setFrameNumber(d->frameNumber);	///< non-RTP field
 	pkt->setFrameTime(d->frameTime);	///< non-RTP field
 	pkt->setFrameType(d->frameType);	///> non-RTP field
