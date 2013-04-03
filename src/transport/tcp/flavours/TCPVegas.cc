@@ -103,14 +103,12 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
 {
     TCPBaseAlg::receivedDataAck(firstSeqAcked);
 
-    simtime_t tSent;
-    int num_transmits;
-
-    bool found = state->regions.get(firstSeqAcked, tSent, num_transmits);
-
+    const TCPSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
     if (found)
     {
         simtime_t currentTime = simTime();
+        simtime_t tSent = found->getFirstSentTime();
+        int num_transmits = found->getTransmitCount();
 
         //TODO: When should do it: when received first ACK, or when received ACK of 1st sent packet???
         if (firstSeqAcked == state->iss+1)
@@ -275,10 +273,9 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
         if (state->v_worried > 0)
         {
             state->v_worried -= state->snd_mss;
-            simtime_t unaSent;
-            int unaTransmitCnt;
-            bool unaFound = state->regions.get(state->snd_una, unaSent, unaTransmitCnt);
-            bool expired = unaFound && ((currentTime - unaSent) >= state->v_rtt_timeout);
+            const TCPSegmentTransmitInfoList::Item *unaFound = state->regions.get(state->snd_una);
+            //bool expired = unaFound && ((currentTime - unaFound->getLastSentTime()) >= state->v_rtt_timeout);
+            bool expired = unaFound && ((currentTime - unaFound->getFirstSentTime()) >= state->v_rtt_timeout);
 
             // added comprobation to check that received ACK do not acks all outstanding data. If not,
             // TCPConnection::retransmitOneSegment will fail: ASSERT(bytes!=0), line 839), because bytes = snd_max-snd_una
@@ -294,6 +291,7 @@ void TCPVegas::receivedDataAck(uint32 firstSeqAcked)
     }   // Closes if v_sendtime != NULL
 
     state->regions.clearTo(state->snd_una);
+
     //Try to send more data
     sendData(false);
 }
@@ -302,10 +300,15 @@ void TCPVegas::receivedDuplicateAck()
 {
     TCPBaseAlg::receivedDuplicateAck();
 
-    simtime_t tSent;
-    int num_transmits;
     simtime_t currentTime = simTime();
-    bool found = state->regions.get(state->snd_una, tSent, num_transmits);
+    simtime_t tSent = 0;
+    int num_transmits = 0;
+    const TCPSegmentTransmitInfoList::Item *found = state->regions.get(state->snd_una);
+    if (found)
+    {
+        tSent = found->getFirstSentTime();
+        num_transmits = found->getTransmitCount();
+    }
     state->regions.clearTo(state->snd_una);
 
     // check Vegas timeout
