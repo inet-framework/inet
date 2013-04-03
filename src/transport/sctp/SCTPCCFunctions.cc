@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005-2010 Irene Ruengeler
-// Copyright (C) 2009-2010 Thomas Dreibholz
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -38,7 +38,7 @@ void SCTPAssociation::recordCwndUpdate(SCTPPathVariables* path)
 
 void SCTPAssociation::initCCParameters(SCTPPathVariables* path)
 {
-        path->cwnd = (int32)min(4 * path->pmtu, max(2 * path->pmtu, 4380));
+    path->cwnd = (int32)min(4 * path->pmtu, max(2 * path->pmtu, 4380));
     path->ssthresh = state->peerRwnd;
     recordCwndUpdate(path);
 
@@ -64,13 +64,13 @@ void SCTPAssociation::cwndUpdateAfterSack()
                                                   4 * (int32)path->pmtu);
                       path->cwnd = path->ssthresh;
 
-                      sctpEV3 << "\t=>\tsst=" << path->ssthresh << " cwnd=" << path->cwnd << endl;
+                 sctpEV3 << "\t=>\tsst=" << path->ssthresh << " cwnd=" << path->cwnd << endl;
                  recordCwndUpdate(path);
                  path->partialBytesAcked = 0;
 
 
-                 // ====== Fast Recovery ========================================
-                 if (state->fastRecoverySupported) {
+                // ====== Fast Recovery ========================================
+                if (state->fastRecoverySupported) {
                     uint32 highestAckOnPath = state->lastTsnAck;
                     for (SCTPQueue::PayloadQueue::iterator pq = retransmissionQ->payloadQueue.begin();
                          pq != retransmissionQ->payloadQueue.end(); pq++) {
@@ -96,9 +96,9 @@ void SCTPAssociation::cwndUpdateAfterSack()
             for (SCTPPathMap::iterator iter = sctpPathMap.begin(); iter != sctpPathMap.end(); iter++) {
                 SCTPPathVariables* path = iter->second;
                 if (path->fastRecoveryActive) {
-                    sctpEV3 << simTime() << ":\tCC [cwndUpdateAfterSack] Still in Fast Recovery on path "
-                              << path->remoteAddress
-                              << ", exit point is " << path->fastRecoveryExitPoint << endl;
+                    sctpEV3 << assocId << ": " << simTime() << ":\tCC [cwndUpdateAfterSack] Still in Fast Recovery on path "
+                            << path->remoteAddress
+                            << ", exit point is " << path->fastRecoveryExitPoint << endl;
                 }
             }
         }
@@ -144,7 +144,7 @@ void SCTPAssociation::cwndUpdateBytesAcked(SCTPPathVariables* path,
 
     if (path->fastRecoveryActive == false) {
         // T.D. 21.11.09: Increasing cwnd is only allowed when not being in
-        //                      Fast Recovery mode!
+        //                Fast Recovery mode!
 
         // ====== Slow Start ==================================================
         if (path->cwnd <= path->ssthresh)  {
@@ -165,7 +165,7 @@ void SCTPAssociation::cwndUpdateBytesAcked(SCTPPathVariables* path,
 
             // ------ No need to increase Congestion Window --------------------
             else {
-                sctpEV3 << simTime() << ":\tCC "
+                sctpEV3 << assocId << ": " << simTime() << ":\tCC "
                         << "Not increasing cwnd of path " << path->remoteAddress << " in slow start:\t"
                         << "ctsnaAdvanced="       << ((ctsnaAdvanced == true) ? "yes" : "no") << "\t"
                         << "cwnd="                    << path->cwnd                              << "\t"
@@ -184,9 +184,8 @@ void SCTPAssociation::cwndUpdateBytesAcked(SCTPPathVariables* path,
             // ------ Increase PartialBytesAcked counter -----------------------
             path->partialBytesAcked += ackedBytes;
 
-            double increaseFactor = 1.0;
-
             // ------ Increase Congestion Window -------------------------------
+            double increaseFactor = 1.0;
             if ( (path->partialBytesAcked >= path->cwnd) &&
                   (ctsnaAdvanced == true) &&
                   (path->outstandingBytesBeforeUpdate >= path->cwnd) ) {
@@ -204,7 +203,7 @@ void SCTPAssociation::cwndUpdateBytesAcked(SCTPPathVariables* path,
 
             // ------ No need to increase Congestion Window -------------------
             else {
-                sctpEV3 << simTime() << ":\tCC "
+                sctpEV3 << assocId << ": " << simTime() << ":\tCC "
                         << "Not increasing cwnd of path " << path->remoteAddress << " in congestion avoidance: "
                         << "ctsnaAdvanced="       << ((ctsnaAdvanced == true) ? "yes" : "no") << "\t"
                         << "cwnd="                    << path->cwnd                              << "\t"
@@ -226,7 +225,7 @@ void SCTPAssociation::cwndUpdateBytesAcked(SCTPPathVariables* path,
         }
     }
     else {
-        sctpEV3 << simTime() << ":\tCC "
+        sctpEV3 << assocId << ": " << simTime() << ":\tCC "
                 << "Not increasing cwnd of path " << path->remoteAddress
                 << " during Fast Recovery" << endl;
     }

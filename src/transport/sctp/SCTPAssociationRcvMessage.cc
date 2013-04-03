@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005-2010 Irene Ruengeler
-// Copyright (C) 2009-2010 Thomas Dreibholz
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -336,6 +336,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
     bool trans = false;
     InterfaceTableAccess interfaceTableAccess;
     AddressVector adv;
+
     sctpEV3<<"processInitArrived\n";
     if (fsm->getState() == SCTP_S_CLOSED)
     {
@@ -669,7 +670,7 @@ bool SCTPAssociation::processCookieAckArrived()
         trans = performStateTransition(SCTP_E_RCV_COOKIE_ACK);
         if (state->cookieChunk->getCookieArraySize()==0)
         {
-                delete state->cookieChunk->getStateCookie();
+            delete state->cookieChunk->getStateCookie();
         }
         delete state->cookieChunk;
         return trans;
@@ -726,13 +727,13 @@ void SCTPAssociation::tsnWasReneged(SCTPDataVariables*       chunk,
 SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 {
     simtime_t            rttEstimation = MAXTIME;
-    bool                     ctsnaAdvanced = false;
-    SCTPPathVariables* path = getPath(remoteAddr);    // Path for *this* SACK!
+    bool                 ctsnaAdvanced = false;
+    SCTPPathVariables*   path = getPath(remoteAddr);    // Path for *this* SACK!
     const uint64         arwnd = sackChunk->getA_rwnd();
     const uint32         tsna = sackChunk->getCumTsnAck();
     uint32               highestNewAck = tsna;   // Highest newly acked TSN
     const uint16         numGaps = sackChunk->getNumGaps();
-    bool                     getChunkFastFirstTime = true;
+    bool                 getChunkFastFirstTime = true;
 
     // ====== Print some information =========================================
     sctpEV3 << "##### SACK Processing: TSNa=" << tsna << " #####" << endl;
@@ -752,7 +753,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
         SCTPPathVariables* myPath = piter->second;
         // T.D. 26.03.09: Remember outstanding bytes before this update
         // Values are necessary for updating the congestion window!
-        myPath->outstandingBytesBeforeUpdate = myPath->outstandingBytes;     // T.D. 14.11.09: Bugfix - copy from myPath, not from path!
+        myPath->outstandingBytesBeforeUpdate = myPath->outstandingBytes;     // copy from myPath, not from path!
         myPath->requiresRtx = false;
         myPath->lowestTSNRetransmitted = false;
         myPath->findLowestTSN = true;
@@ -772,7 +773,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 
 
     // #######################################################################
-    // #### Processing of CumAck                                                         ####
+    // #### Processing of CumAck                                          ####
     // #######################################################################
 
     if (tsnGt(tsna, state->lastTsnAck)) {    // Handle new CumAck
@@ -808,8 +809,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
             SCTPDataVariables* myChunk = retransmissionQ->getChunk(i);
             if (myChunk) {
                 if (chunkHasBeenAcked(myChunk)) {
-                    tsnWasReneged(myChunk,
-                                      0);
+                    tsnWasReneged(myChunk, 0);
                 }
             }
             i--;
@@ -819,7 +819,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 
 
     // #######################################################################
-    // #### Processing of GapAcks                                                        ####
+    // #### Processing of GapAcks                                         ####
     // #######################################################################
 
     if ((numGaps > 0) && (!retransmissionQ->payloadQueue.empty()) ) {
@@ -847,8 +847,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
                 if (myChunk) {
                     if (chunkHasBeenAcked(myChunk)) {
                         sctpEV3 << "TSN " << i << " was found. It has been un-acked." << endl;
-                        tsnWasReneged(myChunk,
-                                          2);
+                        tsnWasReneged(myChunk, 2);
                         sctpEV3 << "highestTsnAcked now " << state->highestTsnAcked << endl;
                     }
                 }
@@ -919,7 +918,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 
 
     // #######################################################################
-    // #### Receiver Window Management                                               ####
+    // #### Receiver Window Management                                    ####
     // #######################################################################
 
     const uint32 osb = getOutstandingBytes();
@@ -943,9 +942,6 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
         state->peerWindowFull = false;
         state->zeroWindowProbing = false;
     }
-#ifdef PVIATE
-    advancePeerTsn();
-#endif
 
     // ====== Need for zero-window probing? ==================================
     if (osb == 0) {
@@ -955,7 +951,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 
 
     // #######################################################################
-    // #### Congestion Window Management                                             ####
+    // #### Congestion Window Management                                  ####
     // #######################################################################
 
     sctpEV3 << "Before ccUpdateBytesAcked: ";
@@ -984,7 +980,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 
 
     // #######################################################################
-    // #### Path Management                                                              ####
+    // #### Path Management                                               ####
     // #######################################################################
 
     // ====== Need to stop or restart T3 timer? ==============================
@@ -1083,18 +1079,6 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk*      sac
                   << " countsAsOutstanding=" << myChunk->countsAsOutstanding << endl;
         const uint32 chunkReportedAsMissing = (highestNewAck > myChunk->tsn) ? 1 : 0;
         if (chunkReportedAsMissing > 0) {
-            // T.D. 15.04.09: Increase gapReports by chunkReportedAsMissing.
-            // Fixed bug here: gapReports += chunkReportedAsMissing instead of gapReports = chunkReportedAsMissing.
-            /*
-            printf("GapReports for TSN %u [ret=%d,fast=%s] at t=%s:  %d --> %d by %d\n",
-                        myChunk->tsn,
-                        myChunk->numberOfRetransmissions,
-                        (myChunk->hasBeenFastRetransmitted == true) ? "YES" : "no",
-                        simTime().str().c_str(),
-                        myChunk->gapReports,
-                        myChunk->gapReports + chunkReportedAsMissing,
-                        chunkReportedAsMissing);
-            */
             myChunk->gapReports += chunkReportedAsMissing;
 
             myChunkLastPath->gapNAcksInLastSACK++;
@@ -1158,8 +1142,7 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk*      sac
     else {
         // Reneging, type 1:
         // A chunk in the gap blocks has been un-acked => reneg it.
-                    tsnWasReneged(myChunk,
-                                      1);
+        tsnWasReneged(myChunk, 1);
     }
 }
 
@@ -1180,6 +1163,8 @@ uint32 SCTPAssociation::dequeueAckedChunks(const uint32       tsna,
     while (iterator != retransmissionQ->payloadQueue.end()) {
         SCTPDataVariables* chunk = iterator->second;
         if (tsnGe(tsna, chunk->tsn)) {
+            sctpEV3 << simTime() << ": CumAcked TSN " << chunk->tsn
+                    << " on path " << chunk->getLastDestination() << endl;
             // Dequeue chunk, cause it has been acked
             if (transmissionQ->getChunk(chunk->tsn)) {
                 transmissionQ->removeMsg(chunk->tsn);
@@ -1198,9 +1183,6 @@ uint32 SCTPAssociation::dequeueAckedChunks(const uint32       tsna,
 
             if (!chunkHasBeenAcked(chunk)) {
                 newlyAckedBytes += (chunk->booksize);
-
-                sctpEV3 << simTime() << ": CumAcked TSN " << chunk->tsn
-                          << " on path " << chunk->getLastDestination() << endl;
 
                 lastPath->newlyAckedBytes += (chunk->booksize);
 
@@ -1271,12 +1253,12 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
     SCTPSimpleMessage* smsg = check_and_cast <SCTPSimpleMessage*>(dataChunk->decapsulate());
     dataChunk->setBitLength(SCTP_DATA_CHUNK_LENGTH*8);
     dataChunk->encapsulate(smsg);
-    const uint32 payloadLength = dataChunk->getBitLength()/8-SCTP_DATA_CHUNK_LENGTH;
+    const uint32 payloadLength = dataChunk->getByteLength()-SCTP_DATA_CHUNK_LENGTH;
     sctpEV3 << "state->bytesRcvd=" << state->bytesRcvd << endl;
     state->bytesRcvd += payloadLength;
     sctpEV3 << "state->bytesRcvd now=" << state->bytesRcvd << endl;
     SCTP::AssocStatMap::iterator iter = sctpMain->assocStatMap.find(assocId);
-    iter->second.rcvdBytes += dataChunk->getBitLength()/8-SCTP_DATA_CHUNK_LENGTH;
+    iter->second.rcvdBytes += dataChunk->getByteLength()-SCTP_DATA_CHUNK_LENGTH;
 
     if (state->numGaps == 0) {
         state->highestTsnReceived = state->cTsnAck;
@@ -1345,6 +1327,7 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
     sctpEV3 << "cTsnAck=" << state->cTsnAck
               << " highestTsnReceived=" << state->highestTsnReceived << endl;
 
+    // ====== Enqueue new chunk ==============================================
     SCTPEventCode event = SCTP_E_SEND;
     if (state->newChunkReceived) {
         SCTPReceiveStreamMap::iterator iter = receiveStreams.find(dataChunk->getSid());
@@ -1484,13 +1467,13 @@ void SCTPAssociation::process_TIMEOUT_HEARTBEAT(SCTPPathVariables* path)
     bool oldState;
 
     /* check if error counters must be increased */
-      if (path->activePath)
-      {
-             state->errorCount++;
-             path->pathErrorCount++;
+    if (path->activePath)
+    {
+        state->errorCount++;
+        path->pathErrorCount++;
 
-             sctpEV3<<"HB timeout timer expired for path "<<path->remoteAddress<<" --> Increase Error Counters (Assoc: "<<state->errorCount<<", Path: "<<path->pathErrorCount<<")\n";
-      }
+        sctpEV3<<"HB timeout timer expired for path "<<path->remoteAddress<<" --> Increase Error Counters (Assoc: "<<state->errorCount<<", Path: "<<path->pathErrorCount<<")\n";
+    }
 
     /* RTO must be doubled for this path ! */
     path->pathRto = (simtime_t)min(2 * path->pathRto.dbl(), sctpMain->par("rtoMax"));
@@ -1603,7 +1586,7 @@ int32 SCTPAssociation::updateCounters(SCTPPathVariables* path)
 
 
 
-int32 SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
+void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
 {
     sctpEV3 << "Processing retransmission timeout ..." << endl;
 
@@ -1629,8 +1612,7 @@ int32 SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
         sendIndicationToApp(SCTP_I_CONN_LOST);
         sendAbort();
         sctpMain->removeAssociation(this);
-        return 0;
-
+        return;
     }
     else {
         if (path->pathErrorCount > (uint32)sctpMain->par("pathMaxRetrans")) {
@@ -1655,7 +1637,7 @@ int32 SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
                 sendIndicationToApp(SCTP_I_CONN_LOST);
                 sendAbort();
                 sctpMain->removeAssociation(this);
-                return 0;
+                return;
             }
             else if (notifyUlp) {
                 // Send notification to the application
@@ -1698,7 +1680,6 @@ int32 SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
     sctpEV3 << "TimeoutRTX: sendOnAllPaths()" << endl;
     sendOnAllPaths(nextPath);
 
-    return 0;
 }
 
 

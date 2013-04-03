@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2008 Irene Ruengeler
+// Copyright (C) 2008-2009 Irene Ruengeler
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -67,37 +68,7 @@ class INET_API SCTPMessage : public SCTPMessage_Base
         virtual cPacket *removeLastChunk();
         virtual cPacket *peekFirstChunk();
         virtual cPacket *peekLastChunk();
-        /**
-         * Serializes SCTP packet for transmission on the wire,
-         * writes source port into from structure and
-         * returns length of sctp data written into buffer
-         */
-
-
 };
-
-/*class SCTPErrorChunk : public SCTPErrorChunk_Base
-{
-    protected:
-        std::list<cPacket*> parameterList;
-
-    public:
-            SCTPErrorChunk(const char *name=NULL, int32 kind=0) : SCTPErrorChunk_Base(name, kind) {};
-            SCTPErrorChunk(const SCTPErrorChunk& other) : SCTPErrorChunk_Base(other.name()) {operator=(other);};
-        SCTPErrorChunk& operator=(const SCTPErrorChunk& other);
-
-        virtual cObject *dup() const {return new SCTPErrorChunk(*this);}
-        virtual void setParametersArraySize(uint32 size);
-            virtual uint32 getParametersArraySize() const;
-        virtual void setParameters(uint32 k, const cPacketPtr& parameters_var);
-
-
-        virtual cPacketPtr& getParameters(uint32 k);
-
-        virtual void addParameter(cPacket* msg);
-
-        virtual cPacket *removeParameter();
-};*/
 
 class INET_API SCTPErrorChunk : public SCTPErrorChunk_Base
 {
@@ -116,15 +87,16 @@ class INET_API SCTPErrorChunk : public SCTPErrorChunk_Base
 
         virtual SCTPErrorChunk *dup() const {return new SCTPErrorChunk(*this);}
         virtual void setParametersArraySize(uint32 size);
-            virtual uint32 getParametersArraySize() const;
-                /** Generated but unused method, should not be called. */
+        virtual uint32 getParametersArraySize() const;
+        /** Generated but unused method, should not be called. */
         virtual void setParameters(uint32 k, const cPacketPtr& parameters_var);
 
-                /**
+        /**
         * Returns the kth parameter in this SCTP Reset Chunk
         */
         virtual cPacketPtr& getParameters(uint32 k);
-    /**
+        
+        /**
         * Adds a message object to the SCTP packet. The packet length will be adjusted
         */
         virtual void addParameters(cPacket* msg);

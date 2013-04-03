@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005-2010 Irene Ruengeler
-// Copyright (C) 2009-2010 Thomas Dreibholz
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -59,6 +59,7 @@ simple SCTP like ISCTP
         string sctpAlgorithmClass = default("SCTPAlg");
         int ccModule = default(0);           // RFC4960=0
 
+        //#====== Other Parameters ============================================
         int ssModule = default(0);           // ROUND_ROBIN=0
         int arwnd = default(65535);
         int swsLimit = default(3000);        // Limit for SWS

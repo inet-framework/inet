@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005-2010 by Irene Ruengeler
-// Copyright (C) 2009-2010 by Thomas Dreibholz
+// Copyright (C) 2009-2012 by Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -135,91 +135,93 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
     SCTP::AssocStatMap::iterator iter = sctpMain->assocStatMap.find(assocId);
     iter->second.sentBytes += smsg->getBitLength() / 8;
 
-  // ------ Prepare SCTPDataMsg -----------------------------------------
-  const uint32 streamId = sendCommand->getSid();
-  const uint32 sendUnordered = sendCommand->getSendUnordered();
-  const uint32 ppid = sendCommand->getPpid();
-  SCTPSendStream* stream = NULL;
-  SCTPSendStreamMap::iterator associter = sendStreams.find(streamId);
-  if (associter != sendStreams.end()) {
-     stream = associter->second;
-  }
-  else {
-     throw cRuntimeError("Stream with id %d not found", streamId);
-  }
+    // ------ Prepare SCTPDataMsg -----------------------------------------
+    const uint32 streamId = sendCommand->getSid();
+    const uint32 sendUnordered = sendCommand->getSendUnordered();
+    const uint32 ppid = sendCommand->getPpid();
+    SCTPSendStream* stream = NULL;
+    SCTPSendStreamMap::iterator associter = sendStreams.find(streamId);
+    if (associter != sendStreams.end()) {
+       stream = associter->second;
+    }
+    else {
+        throw cRuntimeError("Stream with id %d not found", streamId);
+    }
 
-  char name[64];
-  snprintf(name, sizeof(name), "SDATA-%d-%d", streamId, state->msgNum);
-  smsg->setName(name);
+    char name[64];
+    snprintf(name, sizeof(name), "SDATA-%d-%d", streamId, state->msgNum);
+    smsg->setName(name);
 
-  SCTPDataMsg* datMsg = new SCTPDataMsg();
-  datMsg->encapsulate(smsg);
-  datMsg->setSid(streamId);
-  datMsg->setPpid(ppid);
-  datMsg->setEnqueuingTime(simulation.getSimTime());
+    SCTPDataMsg* datMsg = new SCTPDataMsg();
+    datMsg->encapsulate(smsg);
+    datMsg->setSid(streamId);
+    datMsg->setPpid(ppid);
+    datMsg->setEnqueuingTime(simulation.getSimTime());
 
-  // ------ Set initial destination address -----------------------------
-  if (sendCommand->getPrimary()) {
-     if (sendCommand->getRemoteAddr() == IPvXAddress("0.0.0.0")) {
+    // ------ Set initial destination address -----------------------------
+    if (sendCommand->getPrimary()) {
+        if (sendCommand->getRemoteAddr() == IPvXAddress("0.0.0.0")) {
             datMsg->setInitialDestination(remoteAddr);
-     }
-     else {
-        datMsg->setInitialDestination(sendCommand->getRemoteAddr());
-     }
-  }
-  else {
-     datMsg->setInitialDestination(state->getPrimaryPathIndex());
-  }
+        }
+        else {
+            datMsg->setInitialDestination(sendCommand->getRemoteAddr());
+        }
+    }
+    else {
+        datMsg->setInitialDestination(state->getPrimaryPathIndex());
+    }
 
-  // ------ Optional padding and size calculations ----------------------
-     datMsg->setBooksize(smsg->getBitLength() / 8 + state->header);
-     qCounter.roomSumSendStreams += ADD_PADDING(smsg->getBitLength() / 8 + SCTP_DATA_CHUNK_LENGTH);
-     qCounter.bookedSumSendStreams += datMsg->getBooksize();
-     state->sendBuffer += smsg->getByteLength();
+    // ------ Optional padding and size calculations ----------------------
+    datMsg->setBooksize(smsg->getBitLength() / 8 + state->header);
+    qCounter.roomSumSendStreams += ADD_PADDING(smsg->getBitLength() / 8 + SCTP_DATA_CHUNK_LENGTH);
+    qCounter.bookedSumSendStreams += datMsg->getBooksize();
+    // Add chunk size to sender buffer size
+    state->sendBuffer += smsg->getByteLength();
 
-  datMsg->setMsgNum(++state->msgNum);
+    datMsg->setMsgNum(++state->msgNum);
 
-  // ------ Ordered/Unordered modes -------------------------------------
-  if (sendUnordered == 1) {
-     datMsg->setOrdered(false);
-     stream->getUnorderedStreamQ()->insert(datMsg);
-  }
-  else {
-     datMsg->setOrdered(true);
-     stream->getStreamQ()->insert(datMsg);
+    // ------ Ordered/Unordered modes -------------------------------------
+    if (sendUnordered == 1) {
+        datMsg->setOrdered(false);
+        stream->getUnorderedStreamQ()->insert(datMsg);
+    }
+    else {
+        datMsg->setOrdered(true);
+        stream->getStreamQ()->insert(datMsg);
 
-     if ((state->appSendAllowed) &&
-          (state->sendQueueLimit > 0) &&
-          ((uint64)state->sendBuffer >= state->sendQueueLimit) ) {
-        sendIndicationToApp(SCTP_I_SENDQUEUE_FULL);
-        state->appSendAllowed = false;
-     }
-     sendQueue->record(stream->getStreamQ()->getLength());
-  }
+        // ------ Send buffer full? -------------------------------------------
+        if ((state->appSendAllowed) &&
+            (state->sendQueueLimit > 0) &&
+            ((uint64)state->sendBuffer >= state->sendQueueLimit) ) {
+            sendIndicationToApp(SCTP_I_SENDQUEUE_FULL);
+            state->appSendAllowed = false;
+        }
+        sendQueue->record(stream->getStreamQ()->getLength());
+    }
 
-  state->queuedMessages++;
-  if ((state->queueLimit > 0) && (state->queuedMessages > state->queueLimit)) {
-     state->queueUpdate = false;
-  }
-  sctpEV3 << "process_SEND:"
-             << " last="         << sendCommand->getLast()
-             <<"    queueLimit=" << state->queueLimit << endl;
+    state->queuedMessages++;
+    if ((state->queueLimit > 0) && (state->queuedMessages > state->queueLimit)) {
+        state->queueUpdate = false;
+    }
+    sctpEV3 << "process_SEND:"
+            << " last="         << sendCommand->getLast()
+            <<"    queueLimit=" << state->queueLimit << endl;
 
-  // ------ Call sendCommandInvoked() to send message -------------------
-  // sendCommandInvoked() itself will call sendOnAllPaths() ...
-  if (sendCommand->getLast() == true) {
-     if (sendCommand->getPrimary()) {
-        sctpAlgorithm->sendCommandInvoked(NULL);
-     }
-     else {
-        sctpAlgorithm->sendCommandInvoked(getPath(datMsg->getInitialDestination()));
-     }
-  }
+    // ------ Call sendCommandInvoked() to send message -------------------
+    // sendCommandInvoked() itself will call sendOnAllPaths() ...
+    if (sendCommand->getLast() == true) {
+        if (sendCommand->getPrimary()) {
+            sctpAlgorithm->sendCommandInvoked(NULL);
+        }
+        else {
+            sctpAlgorithm->sendCommandInvoked(getPath(datMsg->getInitialDestination()));
+        }
+    }
 }
 
 void SCTPAssociation::process_RECEIVE_REQUEST(SCTPEventCode& event, SCTPCommand *sctpCommand)
 {
-     SCTPSendCommand *sendCommand = check_and_cast<SCTPSendCommand *>(sctpCommand);
+    SCTPSendCommand *sendCommand = check_and_cast<SCTPSendCommand *>(sctpCommand);
     if ((uint32)sendCommand->getSid() > inboundStreams || sendCommand->getSid() < 0)
     {
         sctpEV3<<"Application tries to read from invalid stream id....\n";

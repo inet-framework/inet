@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005-2010 Irene Ruengeler
-// Copyright (C) 2009-2010 Thomas Dreibholz
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -33,8 +33,7 @@
 
 SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* assoc)
 {
-    InterfaceTableAccess interfaceTableAccess;
-
+    // ====== Path Variable Initialization ===================================
     association = assoc;
     remoteAddress = addr;
     activePath = true;
@@ -76,7 +75,6 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     cwndTimeout = pathRto;
     cwnd = 0;
     ssthresh = 0;
-    updateTime = 0.0;
     fastRecoveryExitPoint = 0;
     fastRecoveryActive = false;
 
@@ -87,6 +85,11 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     numberOfHeartbeatAcksSent = 0;
     numberOfHeartbeatAcksRcvd = 0;
 
+    // ====== Path Info ======================================================
+    SCTPPathInfo* pinfo = new SCTPPathInfo("pinfo");
+    pinfo->setRemoteAddress(addr);
+
+    // ====== Timers =========================================================
     char str[128];
     snprintf(str, sizeof(str), "HB_TIMER %d:%s", assoc->assocId, addr.str().c_str());
     HeartbeatTimer = new cMessage(str);
@@ -100,6 +103,10 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     HeartbeatIntervalTimer->setContextPointer(association);
     CwndTimer->setContextPointer(association);
     T3_RtxTimer->setContextPointer(association);
+    T3_RtxTimer->setControlInfo(pinfo);
+    HeartbeatTimer->setControlInfo(pinfo->dup());
+    HeartbeatIntervalTimer->setControlInfo(pinfo->dup());
+    CwndTimer->setControlInfo(pinfo->dup());
 
     snprintf(str, sizeof(str), "RTO %d:%s", assoc->assocId, addr.str().c_str());
     statisticsPathRTO = new cOutVector(str);
@@ -124,16 +131,6 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     pathRcvdHb = new cOutVector(str);
     snprintf(str, sizeof(str), "HB ACK Received %d:%s", assoc->assocId, addr.str().c_str());
     pathRcvdHbAck = new cOutVector(str);
-
-
-
-    SCTPPathInfo* pinfo = new SCTPPathInfo("pinfo");
-    pinfo->setRemoteAddress(addr);
-    T3_RtxTimer->setControlInfo(pinfo);
-    HeartbeatTimer->setControlInfo(pinfo->dup());
-    HeartbeatIntervalTimer->setControlInfo(pinfo->dup());
-    CwndTimer->setControlInfo(pinfo->dup());
-
 }
 
 SCTPPathVariables::~SCTPPathVariables()
@@ -171,7 +168,6 @@ SCTPDataVariables::SCTPDataVariables()
     gapReports = 0;
     enqueuingTime = 0;
     sendTime = 0;
-    ackTime = 0;
     expiryTime = 0;
     enqueuedInTransmissionQ = false;
     hasBeenAcked = false;
@@ -303,10 +299,6 @@ SCTPAssociation::SCTPAssociation(SCTP* _module, int32 _appGateIndex, int32 _asso
     sctpAlgorithm = NULL;
     state = NULL;
     sackPeriod = SACK_DELAY;
-/*
-    totalCwndAdjustmentTime         = simTime();
-    lastTotalSSthresh                   = ~0;
-    lastTotalCwnd                       = ~0;*/
 
     cumTsnAck = NULL;
     sendQueue = NULL;
@@ -475,7 +467,7 @@ bool SCTPAssociation::processSCTPMessage(SCTPMessage* sctpmsg,
                                          const IPvXAddress& msgSrcAddr,
                                          const IPvXAddress& msgDestAddr)
 {
-    printConnBrief();
+    printAssocBrief();
 
     localAddr = msgDestAddr;
     localPort = sctpmsg->getDestPort();
@@ -509,7 +501,7 @@ SCTPEventCode SCTPAssociation::preanalyseAppCommandEvent(int32 commandCode)
 
 bool SCTPAssociation::processAppCommand(cPacket *msg)
 {
-    printConnBrief();
+    printAssocBrief();
 
     // first do actions
     SCTPCommand *sctpCommand = (SCTPCommand *)(msg->removeControlInfo());
@@ -544,17 +536,11 @@ bool SCTPAssociation::processAppCommand(cPacket *msg)
                 sctpEV3 << "send shutdown ack\n";
                 sendShutdownAck(remoteAddr);
             }
-            break;  //I.R.
+            break;
 
         case SCTP_E_STOP_SENDING: break;
 
-        case SCTP_E_SEND_SHUTDOWN_ACK:
-            /*if (fsm->getState()==SCTP_S_SHUTDOWN_RECEIVED && getOutstandingBytes()==0
-                && qCounter.roomSumSendStreams==0 && transmissionQ->getQueueSize()==0)
-            {
-                sendShutdownAck(state->primaryPathIndex);
-            }*/
-            break;
+        case SCTP_E_SEND_SHUTDOWN_ACK: break;
 
         default: throw cRuntimeError("Wrong event code");
     }
@@ -626,7 +612,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                     FSM_Goto((*fsm), SCTP_S_SHUTDOWN_PENDING);
                     state->stopSending = true;
                     state->lastTSN = state->nextTSN - 1;
-                    break;    //I.R.
+                    break;
                 case SCTP_E_RCV_SHUTDOWN: FSM_Goto((*fsm), SCTP_S_SHUTDOWN_RECEIVED); break;
                 case SCTP_E_CLOSE: FSM_Goto((*fsm), SCTP_S_CLOSED); break;
                 default: break;
@@ -655,7 +641,6 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
                     break;
                 case SCTP_E_SHUTDOWN:
                     sendShutdownAck(remoteAddr);
-                    /*FSM_Goto((*fsm), SCTP_S_SHUTDOWN_ACK_SENT);*/
                     break;
                 default: break;
             }
@@ -831,7 +816,6 @@ void SCTPAssociation::removePath()
         stopTimer(path->HeartbeatTimer);
         delete path->HeartbeatTimer;
         stopTimer(path->HeartbeatIntervalTimer);
-        sctpEV3 << "delete timer " << path->HeartbeatIntervalTimer->getName() << endl;
         delete path->HeartbeatIntervalTimer;
         stopTimer(path->T3_RtxTimer);
         delete path->T3_RtxTimer;

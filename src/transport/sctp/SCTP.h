@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
-// Copyright (C) 2009 Thomas Dreibholz
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -50,19 +50,19 @@ class SCTPMessage;
  * The SCTP protocol implementation is composed of several classes (discussion
  * follows below):
  *   - SCTP: the module class
- *   - SCTPAssociation: manages a connection
+ *   - SCTPAssociation: manages an association
  *   - SCTPSendQueue, SCTPReceiveQueue: abstract base classes for various types
  *      of send and receive queues
  *   - SCTPAlgorithm: abstract base class for SCTP algorithms
  *
- * SCTP subclassed from cSimpleModule. It manages socketpair-to-connection
+ * SCTP subclassed from cSimpleModule. It manages socketpair-to-association
  * mapping, and dispatches segments and user commands to the appropriate
  * SCTPAssociation object.
  *
- * SCTPAssociation manages the connection, with the help of other objects.
+ * SCTPAssociation manages the association, with the help of other objects.
  * SCTPAssociation itself implements the basic SCTP "machinery": takes care
  * of the state machine, stores the state variables (TCB), sends/receives
- *   etc.
+ * etc.
  *
  * SCTPAssociation internally relies on 3 objects. The first two are subclassed
  * from SCTPSendQueue and SCTPReceiveQueue. They manage the actual data stream,
@@ -81,18 +81,18 @@ class SCTPMessage;
  * from SCTPAssociation into SCTPAlgorithm: delayed acks, slow start, fast rexmit,
  * etc. are all implemented in SCTPAlgorithm subclasses.
  *
- * The concrete SCTPAlgorithm class to use can be chosen per connection (in OPEN)
+ * The concrete SCTPAlgorithm class to use can be chosen per association (in OPEN)
  * or in a module parameter.
  */
 class INET_API SCTP : public cSimpleModule
 {
     public:
-        struct AppConnKey
+        struct AppAssocKey
         {
             int32 appGateIndex;
             int32 assocId;
 
-            inline bool operator<(const AppConnKey& b) const
+            inline bool operator<(const AppAssocKey& b) const
             {
                 if (appGateIndex!=b.appGateIndex)
                     return appGateIndex<b.appGateIndex;
@@ -126,16 +126,6 @@ class INET_API SCTP : public cSimpleModule
             uint32 localVTag;
             uint16 localPort;
             uint16 remotePort;
-
-            /*inline bool operator<(const VTagPair& b) const
-            {
-                if (peerVTag!=b.peerVTag)
-                    return peerVTag<b.peerVTag;
-                else if (remotePort!=b.remotePort)
-                    return remotePort<b.remotePort;
-                else
-                    return localPort<b.localPort;
-            }*/
         };
         typedef struct
         {
@@ -161,18 +151,18 @@ class INET_API SCTP : public cSimpleModule
         SctpVTagMap sctpVTagMap;
 
 
-        typedef std::map<AppConnKey,SCTPAssociation*> SctpAppConnMap;
-        typedef std::map<SockPair,SCTPAssociation*> SctpConnMap;
+        typedef std::map<AppAssocKey,SCTPAssociation*> SctpAppAssocMap;
+        typedef std::map<SockPair,SCTPAssociation*> SctpAssocMap;
 
-        SctpAppConnMap sctpAppConnMap;
-        SctpConnMap sctpConnMap;
+        SctpAppAssocMap sctpAppAssocMap;
+        SctpAssocMap sctpAssocMap;
         std::list<SCTPAssociation*>assocList;
 
         UDPSocket udpSocket;
 
     protected:
-        int32 sizeConnMap;
-        static int32 nextConnId;
+        int32 sizeAssocMap;
+        static int32 nextAssocId;
 
         uint16 nextEphemeralPort;
 
@@ -185,7 +175,7 @@ class INET_API SCTP : public cSimpleModule
     public:
         static bool testing;         // switches between sctpEV and testingEV
         static bool logverbose;  // if !testing, turns on more verbose logging
-        void printInfoConnMap();
+        void printInfoAssocMap();
         void printVTagMap();
 
         void removeAssociation(SCTPAssociation *assoc);
@@ -193,9 +183,8 @@ class INET_API SCTP : public cSimpleModule
         uint32 numGapReports;
         uint32 numPacketsReceived;
         uint32 numPacketsDropped;
-        //double failover();
+
     public:
-        //Module_Class_Members(SCTP, cSimpleModule, 0);
         virtual ~SCTP();
         virtual void initialize();
         virtual void handleMessage(cMessage *msg);
@@ -213,11 +202,11 @@ class INET_API SCTP : public cSimpleModule
         * To be called from SCTPAssociation when socket pair    changes
         */
         void updateSockPair(SCTPAssociation *assoc, IPvXAddress localAddr, IPvXAddress remoteAddr, int32 localPort, int32 remotePort);
-        void addLocalAddress(SCTPAssociation *conn, IPvXAddress address);
-        void addLocalAddressToAllRemoteAddresses(SCTPAssociation *conn, IPvXAddress address, std::vector<IPvXAddress> remAddresses);
-        void addRemoteAddress(SCTPAssociation *conn, IPvXAddress localAddress, IPvXAddress remoteAddress);
-        void removeLocalAddressFromAllRemoteAddresses(SCTPAssociation *conn, IPvXAddress address, std::vector<IPvXAddress> remAddresses);
-        void removeRemoteAddressFromAllConnections(SCTPAssociation *conn, IPvXAddress address, std::vector<IPvXAddress> locAddresses);
+        void addLocalAddress(SCTPAssociation *assoc, IPvXAddress address);
+        void addLocalAddressToAllRemoteAddresses(SCTPAssociation *assoc, IPvXAddress address, std::vector<IPvXAddress> remAddresses);
+        void addRemoteAddress(SCTPAssociation *assoc, IPvXAddress localAddress, IPvXAddress remoteAddress);
+        void removeLocalAddressFromAllRemoteAddresses(SCTPAssociation *assoc, IPvXAddress address, std::vector<IPvXAddress> remAddresses);
+        void removeRemoteAddressFromAllAssociations(SCTPAssociation *assoc, IPvXAddress address, std::vector<IPvXAddress> locAddresses);
         /**
         * Update assocs socket pair, and register newAssoc (which'll keep LISTENing).
         * Also, assoc will get a new assocId (and newAssoc will live on with its old assocId).
@@ -233,7 +222,7 @@ class INET_API SCTP : public cSimpleModule
         * Generates a new integer, to be used as assocId. (assocId is part of the key
         * which associates connections with their apps).
         */
-        static int32 getNewConnId() {return ++nextConnId;}
+        static int32 getNewAssocId() {return ++nextAssocId;}
 
         SCTPAssociation* getAssoc(int32 assocId);
         SCTPAssociation *findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uint32 localPort);
@@ -243,6 +232,3 @@ class INET_API SCTP : public cSimpleModule
 };
 
 #endif
-
-
-

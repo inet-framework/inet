@@ -1,5 +1,7 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
+// Copyright (C) 2010 Robin Seggelmann
+// Copyright (C) 2010-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -52,8 +54,8 @@ void SCTPAssociation::initStreams(uint32 inStreams, uint32 outStreams)
         for (i=0; i<outStreams; i++)
         {
             SCTPSendStream* sendStream = new SCTPSendStream(i);
-            this->sendStreams[i] = sendStream;
             sendStream->setStreamId(i);
+            this->sendStreams[i] = sendStream;
         }
     }
 }
@@ -97,7 +99,8 @@ int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data 
 
     sctpEV3<<"streamScheduler sid="<<sid<<" lastStream="<<state->lastStreamScheduled<<" outboundStreams="<<outboundStreams<<" next="<<state->ssNextStream<<"\n";
 
-    state->ssLastDataChunkSizeSet = false;
+    if (sid >= 0 && !peek)
+        state->ssLastDataChunkSizeSet = false;
 
     return sid;
 }

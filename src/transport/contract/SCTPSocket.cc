@@ -28,10 +28,10 @@
 #define sctpEV3 EV
 #endif
 
-static inline int32_t getNewConnId()
+static inline int32_t getNewAssocId()
 {
 #ifdef WITH_SCTP
-    return SCTP::getNewConnId();
+    return SCTP::getNewAssocId();
 #else
     return -1;
 #endif
@@ -48,7 +48,7 @@ SCTPSocket::SCTPSocket(bool type)
     lastStream = -1;
     oneToOne = type;
     if (oneToOne)
-        assocId = getNewConnId();
+        assocId = getNewAssocId();
     else
         assocId = 0;
     sctpEV3<<"sockstate="<<sockstate<<"\n";
@@ -140,7 +140,7 @@ void SCTPSocket::listen(bool fork, uint32 requests, uint32 messagesToPush)
     if (oneToOne)
         openCmd->setAssocId(assocId);
     else
-        openCmd->setAssocId(getNewConnId());
+        openCmd->setAssocId(getNewAssocId());
     openCmd->setFork(fork);
     openCmd->setInboundStreams(inboundStreams);
     openCmd->setOutboundStreams(outboundStreams);
@@ -169,7 +169,7 @@ void SCTPSocket::connect(IPvXAddress remoteAddress, int32 remotePort, uint32 num
     if (oneToOne)
         openCmd->setAssocId(assocId);
     else
-        openCmd->setAssocId(getNewConnId());
+        openCmd->setAssocId(getNewAssocId());
     sctpEV3<<"Socket connect. Assoc="<<openCmd->getAssocId()<<", sockstate="<<stateName(sockstate)<<"\n";
     //openCmd->setAssocId(assocId);
     openCmd->setLocalAddresses(localAddresses);

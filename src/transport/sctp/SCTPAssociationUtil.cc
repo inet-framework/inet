@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005-2010 Irene Ruengeler
-// Copyright (C) 2009-2010 Thomas Dreibholz
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -155,10 +155,10 @@ uint32 SCTPAssociation::chunkToInt(const char* type)
     if (strcmp(type, "COOKIE_ACK")==0) return 11;
     if (strcmp(type, "SHUTDOWN_COMPLETE")==0) return 14;
     sctpEV3<<"ChunkConversion not successful\n";
-    return 0;
+    return (0xffffffff);
 }
 
-void SCTPAssociation::printConnBrief()
+void SCTPAssociation::printAssocBrief()
 {
     sctpEV3 << "Connection " << this << " ";
     sctpEV3 << localAddr << ":" << localPort << " to " << remoteAddr << ":" << remotePort;
@@ -193,7 +193,7 @@ SCTPAssociation* SCTPAssociation::cloneAssociation()
     assoc->localAddressList = localAddressList;
 
     FSM_Goto((*assoc->fsm), SCTP_S_CLOSED);
-    sctpMain->printInfoConnMap();
+    sctpMain->printInfoAssocMap();
     return assoc;
 }
 
@@ -222,13 +222,13 @@ void SCTPAssociation::recordInPathVectors(SCTPMessage* pMsg,
 }
 
 void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
-                                         const IPvXAddress& dest,
-                                         const bool           qs)
+                                         const IPvXAddress& dest)
 {
     // Final touches on the segment before sending
     sctpmsg->setSrcPort(localPort);
     sctpmsg->setDestPort(remotePort);
     sctpmsg->setChecksumOk(true);
+    sctpEV3<<"SendToIP: localPort="<<localPort<<" remotePort="<<remotePort<<" dest="<<dest<<"\n";
     const SCTPChunk* chunk = (const SCTPChunk*)(sctpmsg->peekFirstChunk());
     if (chunk->getChunkType() == ABORT) {
         const SCTPAbortChunk* abortChunk = check_and_cast<const SCTPAbortChunk *>(chunk);
@@ -329,6 +329,7 @@ void SCTPAssociation::initAssociation(SCTPOpenCommand *openCmd)
     transmissionQ = check_and_cast<SCTPQueue *>(createOne(queueClass));
 
     retransmissionQ = check_and_cast<SCTPQueue *>(createOne(queueClass));
+    inboundStreams = openCmd->getInboundStreams();
     outboundStreams = openCmd->getOutboundStreams();
     // create algorithm
     const char *sctpAlgorithmClass = openCmd->getSctpAlgorithmClass();
@@ -344,7 +345,6 @@ void SCTPAssociation::initAssociation(SCTPOpenCommand *openCmd)
 
 void SCTPAssociation::sendInit()
 {
-    //RoutingTableAccess routingTableAccess;
     InterfaceTableAccess interfaceTableAccess;
     AddressVector adv;
     uint32 length = SCTP_INIT_CHUNK_LENGTH;
@@ -450,7 +450,7 @@ void SCTPAssociation::sendInit()
             }
         }
     }
-    sctpMain->printInfoConnMap();
+    sctpMain->printInfoAssocMap();
     initChunk->setBitLength(length*8);
     sctpmsg->addChunk(initChunk);
     // set path variables
@@ -622,7 +622,6 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
     else
     {
         sendToIP(sctpinitack);
-
     }
     sctpMain->assocList.push_back(this);
     printSctpPathMap();
@@ -667,9 +666,9 @@ void SCTPAssociation::sendCookieEcho(SCTPInitAckChunk* initAckChunk)
     if (len==0)
     {
         state->cookieChunk->setStateCookie(initAckChunk->getStateCookie()->dup());
-            }
+    }
     sctpcookieecho->addChunk(cookieEchoChunk);
-        sendToIP(sctpcookieecho);
+    sendToIP(sctpcookieecho);
 }
 
 
@@ -898,15 +897,18 @@ SCTPSackChunk* SCTPAssociation::createSack()
 {
     uint32 key = 0, arwnd = 0;
 
-    sctpEV3<<"SCTPAssociationUtil:createSACK localAddress="<<localAddr<<"  remoteAddress="<<remoteAddr<<"\n";
+    sctpEV3<<simTime()<<"SCTPAssociationUtil:createSACK localAddress="<<localAddr<<"  remoteAddress="<<remoteAddr<<"\n";
 
     sctpEV3<<" localRwnd="<<state->localRwnd<<" queuedBytes="<<state->queuedReceivedBytes<<"\n";
+    
+    // ====== Receiver buffer is full =====================================
     if ((int32)(state->localRwnd - state->queuedReceivedBytes) <= 0)
     {
         arwnd = 0;
         if (state->swsLimit > 0)
             state->swsAvoidanceInvoked = true;
     }
+    // ====== Silly window syndrome avoidance =============================
     else if (state->localRwnd - state->queuedReceivedBytes < state->swsLimit || state->swsAvoidanceInvoked == true)
     {
         arwnd = 1;
@@ -914,12 +916,15 @@ SCTPSackChunk* SCTPAssociation::createSack()
             state->swsAvoidanceInvoked = true;
         sctpEV3<<"arwnd=1; createSack : SWS Avoidance ACTIVE !!!\n";
     }
+    // ====== There is space in the receiver buffer =======================
     else
     {
         arwnd = state->localRwnd - state->queuedReceivedBytes;
         sctpEV3<<simTime()<<" arwnd = "<<state->localRwnd<<" - "<<state->queuedReceivedBytes<<" = "<<arwnd<<"\n";
     }
     advRwnd->record(arwnd);
+
+    // ====== Create SACK chunk ==============================================
     SCTPSackChunk* sackChunk = new SCTPSackChunk("SACK");
     sackChunk->setChunkType(SACK);
     sackChunk->setCumTsnAck(state->cTsnAck);
@@ -1041,9 +1046,8 @@ void SCTPAssociation::putInDeliveryQ(uint16 sid)
                       << state->queuedReceivedBytes << " will be reduced by "
                       << chunk->len/8 << endl;
             state->queuedReceivedBytes -= chunk->len/8;
-
-
             qCounter.roomSumRcvStreams -= ADD_PADDING(chunk->len/8 + SCTP_DATA_CHUNK_LENGTH);
+
             if (rStream->getDeliveryQ()->checkAndInsertChunk(chunk->tsn, chunk)) {
                 state->queuedReceivedBytes += chunk->len/8;
 
@@ -1248,6 +1252,8 @@ bool SCTPAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, cons
                 chunk = stream->getChunk(high);
                 delQ = true;
             }
+
+            // ====== A chunk has been found -> drop it ========================
             if (chunk != NULL) {
                 sum += chunk->len;
                 if (stream->deleteMsg(high)) {
@@ -1600,6 +1606,7 @@ SCTPDataVariables* SCTPAssociation::getOutboundDataChunk(const SCTPPathVariables
             }
         }
     }
+    sctpEV3 << "no chunk found in transmissionQ\n";
     return NULL;
 }
 
@@ -1802,11 +1809,6 @@ SCTPDataMsg* SCTPAssociation::dequeueOutboundDataMsg(const int32 availableSpace,
                 if ((b <= availableSpace) &&
                      ( (int32)((SCTPDataMsg*)streamQ->front())->getBooksize() <= availableCwnd)) {
                     datMsg = (SCTPDataMsg*)streamQ->pop();
-                    /*if (!state->appSendAllowed && streamQ->getLength()<=state->sendQueueLimit)
-                    {
-                        state->appSendAllowed = true;
-                        sendIndicationToApp(SCTP_I_SENDQUEUE_ABATED);
-                    }*/
                     sendQueue->record(streamQ->getLength());
 
                     if (!datMsg->getFragment())
@@ -1989,7 +1991,7 @@ void SCTPAssociation::pmStartPathManagement()
         path->srtt = path->pathRto;
         path->rttvar = SIMTIME_ZERO;
         /* from now on we may have one update per RTO/SRTT */
-        path->updateTime = SIMTIME_ZERO;
+        path->rttUpdateTime = SIMTIME_ZERO;
 
 
         path->partialBytesAcked = 0;
@@ -2054,8 +2056,8 @@ void SCTPAssociation::pmRttMeasurement(SCTPPathVariables* path,
                                                     const simtime_t&     rttEstimation)
 {
     if (rttEstimation < MAXTIME) {
-        if (simTime() > path->updateTime) {
-            if (path->updateTime == SIMTIME_ZERO) {
+        if (simTime() > path->rttUpdateTime) {
+            if (path->rttUpdateTime == SIMTIME_ZERO) {
                 path->rttvar = rttEstimation.dbl() / 2;
                 path->srtt = rttEstimation;
                 path->pathRto = 3.0 * rttEstimation.dbl();
@@ -2071,16 +2073,9 @@ void SCTPAssociation::pmRttMeasurement(SCTPPathVariables* path,
                 path->pathRto = max(min(path->pathRto.dbl(), (double)sctpMain->par("rtoMax")),
                                           (double)sctpMain->par("rtoMin"));
             }
-/*
-            std::cout << simTime() << ": Updating timer values for path " << path->remoteAddress << ":"
-                      << " RTO="              << path->pathRto
-                      << " rttEstimation=" << rttEstimation
-                      << " SRTT="             << path->srtt
-                      << " -->  RTTVAR="      << path->rttvar << endl;
-*/
             // RFC 2960, sect. 6.3.1: new RTT measurements SHOULD be made no more
             //                                than once per round-trip.
-            path->updateTime = simTime() + path->srtt;
+            path->rttUpdateTime = simTime() + path->srtt;
             path->statisticsPathRTO->record(path->pathRto);
             path->statisticsPathRTT->record(rttEstimation);
         }

@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005-2010 Irene Ruengeler
-// Copyright (C) 2009-2010 Thomas Dreibholz
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -53,9 +53,9 @@ typedef std::vector<IPvXAddress> AddressVector;
 
 enum SctpState
 {
-    SCTP_S_CLOSED                = 0,
-    SCTP_S_COOKIE_WAIT           = FSM_Steady(1),
-    SCTP_S_COOKIE_ECHOED         = FSM_Steady(2),
+    SCTP_S_CLOSED               = 0,
+    SCTP_S_COOKIE_WAIT          = FSM_Steady(1),
+    SCTP_S_COOKIE_ECHOED        = FSM_Steady(2),
     SCTP_S_ESTABLISHED          = FSM_Steady(3),
     SCTP_S_SHUTDOWN_PENDING     = FSM_Steady(4),
     SCTP_S_SHUTDOWN_SENT        = FSM_Steady(5),
@@ -115,15 +115,14 @@ enum SCTPChunkTypes
     ERRORTYPE           = 9,
     COOKIE_ECHO         = 10,
     COOKIE_ACK          = 11,
-    SHUTDOWN_COMPLETE   = 14,
-
+    SHUTDOWN_COMPLETE   = 14
 };
 
 
 enum SCTPParameterTypes
 {
     UNRECOGNIZED_PARAMETER          = 8,
-    SUPPORTED_ADDRESS_TYPES         = 12,
+    SUPPORTED_ADDRESS_TYPES         = 12
 };
 
 
@@ -245,7 +244,7 @@ class INET_API SCTPPathVariables : public cObject
         simtime_t           heartbeatIntervalTimeout;
         simtime_t           rtxTimeout;
         simtime_t           cwndTimeout;
-        simtime_t           updateTime;
+        simtime_t           rttUpdateTime;
         simtime_t           lastAckTime;
         simtime_t           pathRto;
         simtime_t           srtt;
@@ -322,12 +321,14 @@ class INET_API SCTPDataVariables : public cObject
             return (nextDestination);
         }
 
+        // ====== Chunk Data Management =======================================
         cPacket*            userData;
         uint32              len;                                 // Different from wire
         uint32              booksize;
         uint32              tsn;
         uint16              sid;
         uint16              ssn;
+        uint32              ppid;
         bool                enqueuedInTransmissionQ;     // In transmissionQ? Otherwise, it is just in retransmissionQ.
         bool                countsAsOutstanding;         // Is chunk outstanding?
         bool                hasBeenFastRetransmitted;
@@ -337,11 +338,11 @@ class INET_API SCTPDataVariables : public cObject
         bool                bbit;
         bool                ebit;
         bool                ordered;
-        uint32              ppid;
+
+        // ====== Retransmission Management ===================================
         uint32              gapReports;
         simtime_t           enqueuingTime;
         simtime_t           sendTime;
-        simtime_t           ackTime;
         simtime_t           expiryTime;
         uint32              numberOfRetransmissions;
         uint32              numberOfTransmissions;
@@ -350,6 +351,7 @@ class INET_API SCTPDataVariables : public cObject
     public:
         static const IPvXAddress zeroAddress;
 
+        // ====== Private Control Information =================================
     private:
         SCTPPathVariables* initialDestination;
         SCTPPathVariables* lastDestination;
@@ -407,7 +409,7 @@ class INET_API SCTPStateVariables : public cObject
         IPvXAddress                 initialPrimaryPath;
         IPvXAddress                 lastDataSourceAddress;
         AddressVector               localAddresses;
-        std::list<uint32>           dupList;
+        std::list<uint32>           dupList;              // Duplicates list for incoming DATA chunks
         uint32                      errorCount;           // overall error counter
         uint64                      peerRwnd;
         uint64                      initialPeerRwnd;
@@ -509,7 +511,7 @@ class INET_API SCTPAssociation : public cObject
         void(SCTPAssociation::*ccUpdateMaxBurst)(SCTPPathVariables* path);
         void(SCTPAssociation::*ccUpdateBytesAcked)(SCTPPathVariables* path, const uint32 ackedBytes, const bool ctsnaAdvanced);
     } CCFunctions;
-    typedef std::map<uint32, SCTPSendStream*>       SCTPSendStreamMap;
+    typedef std::map<uint32, SCTPSendStream*>    SCTPSendStreamMap;
     typedef std::map<uint32, SCTPReceiveStream*> SCTPReceiveStreamMap;
 
     public:
@@ -673,7 +675,8 @@ class INET_API SCTPAssociation : public cObject
 
         /** @name Processing timeouts. Invoked from processTimer(). */
         //@{
-        int32 process_TIMEOUT_RTX(SCTPPathVariables* path);
+        void process_TIMEOUT_RTX(SCTPPathVariables* path);
+
         void process_TIMEOUT_HEARTBEAT(SCTPPathVariables* path);
         void process_TIMEOUT_HEARTBEAT_INTERVAL(SCTPPathVariables* path, bool force);
         void process_TIMEOUT_INIT_REXMIT(SCTPEventCode& event);
@@ -719,9 +722,9 @@ class INET_API SCTPAssociation : public cObject
         void retransmitShutdownAck();
 
         /** Utility: adds control info to message and sends it to IP */
-        void sendToIP(SCTPMessage* sctpmsg, const IPvXAddress& dest, const bool qs = false);
-        inline void sendToIP(SCTPMessage* sctpmsg, const bool qs = false) {
-            sendToIP(sctpmsg, remoteAddr, qs);
+        void sendToIP(SCTPMessage* sctpmsg, const IPvXAddress& dest);
+        inline void sendToIP(SCTPMessage* sctpmsg) {
+            sendToIP(sctpmsg, remoteAddr);
         }
         void recordInPathVectors(SCTPMessage* pMsg, const IPvXAddress& rDest);
         void scheduleSack();
@@ -750,7 +753,7 @@ class INET_API SCTPAssociation : public cObject
         void sendDataArrivedNotification(uint16 sid);
         void putInDeliveryQ(uint16 sid);
         /** Utility: prints local/remote addr/port and app gate index/assocId */
-        void printConnBrief();
+        void printAssocBrief();
         /** Utility: prints important header fields */
         static void printSegmentBrief(SCTPMessage* sctpmsg);
 

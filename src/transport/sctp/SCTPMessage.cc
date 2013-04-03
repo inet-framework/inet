@@ -1,6 +1,6 @@
 //
-// Copyright (C) 2008 Irene Ruengeler
-// Copyright (C) 2010 Thomas Dreibholz
+// Copyright (C) 2008-2009 Irene Ruengeler
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -133,8 +133,6 @@ cPacket *SCTPMessage::peekLastChunk()
     cPacket *msg = chunkList.back();
     return msg;
 }
-
-
 
 
 Register_Class(SCTPErrorChunk);
