@@ -164,8 +164,7 @@ void IPv4NetworkConfigurator::extractWiredTopology(IPv4Topology& topology)
     for (int i = 0; i < topology.getNumNodes(); i++)
     {
         Node *node = (Node *)topology.getNode(i);
-        cModule *module = node->getModule();
-        IInterfaceTable *interfaceTable = IPvXAddressResolver().findInterfaceTableOf(module);
+        IInterfaceTable *interfaceTable = node->interfaceTable;
         if (interfaceTable)
         {
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++)
@@ -219,9 +218,8 @@ void IPv4NetworkConfigurator::extractWiredNeighbors(Topology::LinkOut *linkOut, 
         linkOut->setWeight(getChannelWeight(transmissionChannel));
 
     Node *neighborNode = (Node *)linkOut->getRemoteNode();
-    cModule *neighborModule = neighborNode->getModule();
     int neighborInputGateId = linkOut->getRemoteGateId();
-    IInterfaceTable *neighborInterfaceTable = IPvXAddressResolver().findInterfaceTableOf(neighborModule);
+    IInterfaceTable *neighborInterfaceTable = neighborNode->interfaceTable;
     if (neighborInterfaceTable)
     {
         // neighbor is a host or router, just add the interface
@@ -269,8 +267,7 @@ void IPv4NetworkConfigurator::extractWirelessTopology(IPv4Topology& topology)
     for (int nodeIndex = 0; nodeIndex < topology.getNumNodes(); nodeIndex++)
     {
         Node *node = (Node *)topology.getNode(nodeIndex);
-        cModule *module = node->getModule();
-        IInterfaceTable *interfaceTable = IPvXAddressResolver().findInterfaceTableOf(module);
+        IInterfaceTable *interfaceTable = node->interfaceTable;
         if (interfaceTable)
         {
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++)
