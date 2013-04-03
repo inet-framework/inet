@@ -372,9 +372,8 @@ void TCPVegas::dataSent(uint32 fromseq)
     // but iss is not a constant value (ej: iss=0), so it needs to be detemined each time
     // (this is why it is used: fromseq-state->iss)
 
-    simtime_t sendtime = simTime();
     state->regions.clearTo(state->snd_una);
-    state->regions.set(fromseq, state->snd_max, sendtime);
+    state->regions.set(fromseq, state->snd_max, simTime());
 }
 
 void TCPVegas::segmentRetransmitted(uint32 fromseq, uint32 toseq)
