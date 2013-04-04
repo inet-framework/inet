@@ -49,15 +49,8 @@
 class INET_API BasicModule: public cSimpleModule, public INotifiable
 {
   protected:
-    /** @brief Log name of the host module*/
-    std::string loggingName;
-
-  protected:
     /** @brief Function to get a pointer to the host module*/
     virtual cModule *findHost(bool errorIfNotFound = true) const;
-
-    /** @brief Function to get the logging name of id*/
-    const char* getLogName(int);
 
   protected:
     /** @brief Basic initialization for all modules */
@@ -73,18 +66,6 @@ class INET_API BasicModule: public cSimpleModule, public INotifiable
      * when everyone interested in them has already subscribed.
      */
     virtual int numInitStages() const {return 2;}
-
-    /**
-     * @brief Function to get the logging name of the host
-     *
-     * The logging name is the ned module name of the host (unless the
-     * host ned variable loggingName is specified). It can be used for
-     * logging messages to simplify debugging in TKEnv.
-     */
-    const char* logName(void) const
-    {
-      return loggingName.c_str();
-    };
 
     /**
      * @brief Called by the NotificationBoard whenever a change of a category occurs

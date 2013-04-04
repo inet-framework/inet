@@ -31,21 +31,6 @@
  */
 void BasicModule::initialize(int stage)
 {
-    cModule *host = findHost(false);
-
-    if (stage == 0)
-    {
-        if (host) {
-            // get the logging name of the host
-            if (host->hasPar("logName"))
-                loggingName = host->par("logName").stringValue();
-            else
-                loggingName = host->getName();
-            char tmp[8];
-            sprintf(&tmp[0], "[%d]", host->getIndex());
-            loggingName += tmp;
-        }
-    }
 }
 
 cModule *BasicModule::findHost(bool errorIfNotFound) const
@@ -61,29 +46,3 @@ cModule *BasicModule::findHost(bool errorIfNotFound) const
 
     return mod;
 }
-
-/**
- * This function returns the logging name of the module with the
- * specified id. It can be used for logging messages to simplify
- * debugging in TKEnv.
- *
- * Only supports ids from simple module derived from the BasicModule
- * or the nic compound module id.
- *
- * @param id Id of the module for the desired logging name
- * @return logging name of module id or NULL if not found
- * @sa logName
- */
-const char *BasicModule::getLogName(int id)
-{
-    BasicModule *mod;
-    mod = (BasicModule *) simulation.getModule(id);
-    if (mod->isSimple())
-        return mod->logName();
-    else if (mod->getSubmodule("snrEval"))
-        return ((BasicModule *) mod->getSubmodule("snrEval"))->logName();
-    else if (mod->getSubmodule("phy"))
-        return ((BasicModule *) mod->getSubmodule("phy"))->logName();
-    else
-        return NULL;
-};
