@@ -59,21 +59,26 @@ class FingerprintTestCaseGenerator():
                 testcases.append(FingerprintTestCase(title, simulation['wd'], simulation['args'], simulation['simtimelimit'], simulation['fingerprint'], StoreFingerprintCallback(simulation)))
         return testcases
 
+    def commentRemover(self, csvData):
+        p = re.compile('#.*$')
+        for line in csvData:
+            yield p.sub('',line)
+
     # parse the CSV into a list of dicts
     def parseSimulationsTable(self, csvFile):
         simulations = []
-        csvReader = csv.reader(csvFile, delimiter=',', quotechar='"', skipinitialspace=True)
+        csvReader = csv.reader(self.commentRemover(csvFile), delimiter=',', quotechar='"', skipinitialspace=True)
         for fields in csvReader:
-            if (len(fields)==0 or fields[0].startswith("#")):
-                continue        # empty line or comment line
-            if len(fields) < 4 or (len(fields) > 4 and not fields[4].startswith("#")):
+            if len(fields) == 0:
+                continue        # empty line
+            if len(fields) != 4:
                 raise Exception("Line " + str(csvReader.line_num) + " must contain 4 items, but contains " + str(len(fields)) + ": " + '"' + '", "'.join(fields) + '"')
-            simulations.append({'wd': fields[0], 'args': fields[1], 'simtimelimit': fields[2], 'fingerprint': fields[3]})
+            simulations.append({'line' : csvReader.line_num, 'wd': fields[0], 'args': fields[1], 'simtimelimit': fields[2], 'fingerprint': fields[3]})
         return simulations
 
     def writeUpdatedCSVFiles(self):
         for csvFile, simulations in self.fileToSimulationsMap.iteritems():
-            updatedContents = self.formatUpdatedSimulationsTable(simulations)
+            updatedContents = self.formatUpdatedSimulationsTable(csvFile, simulations)
             if updatedContents:
                 updatedFile = csvFile + ".UPDATED"
                 ff = open(updatedFile, 'w')
@@ -86,22 +91,27 @@ class FingerprintTestCaseGenerator():
             str = '"' + re.sub('"','""',str) + '"'
         return str
 
-    def formatUpdatedSimulationsTable(self, simulations):
+    def formatUpdatedSimulationsTable(self, csvFile, simulations):
         # if there is a computed fingerprint, print that instead of existing one
-        wdlen = 35
-        argslen = 45
-        timelen = 15
-        txt = "# workingdir".ljust(wdlen) + ", " + "args".ljust(argslen) + ", " + "simtimelimit".ljust(timelen) + ", " + "fingerprint\n"
+        ff = open(csvFile, 'r')
+        lines = ff.readlines()
+        ff.close()
+        lines.insert(0, '')     # csv line count is 1..n; insert an empty item --> lines[1] is the first line
+
         containsComputedFingerprint = False
         for simulation in simulations:
-            fingerprint = simulation['fingerprint']
             if 'computedFingerprint' in simulation:
-                fingerprint = simulation['computedFingerprint']
+                oldFingerprint = simulation['fingerprint']
+                newFingerprint = simulation['computedFingerprint']
                 containsComputedFingerprint = True
-            line = self.escape(simulation['wd']).ljust(wdlen) + ", " + self.escape(simulation['args']).ljust(argslen) + ", " + self.escape(simulation['simtimelimit']).ljust(timelen) + ", " + self.escape(fingerprint)
-            txt += line + "\n"
-        txt = re.sub("( +),", ",\\1", txt)
-        return txt if containsComputedFingerprint else None
+                line = simulation['line']
+                pattern = "\\b" + oldFingerprint + "\\b"
+                (newLine, cnt) = re.subn(pattern, newFingerprint, lines[line])
+                if (cnt == 1):
+                    lines[line] = newLine
+                else:
+                    print "ERROR: Cannot replace fingerprint '%s' to '%s' at '%s' line %d:\n     %s" % (oldFingerprint, newFingerprint, csvFile, line, lines[line])
+        return ''.join(lines) if containsComputedFingerprint else None
 
 class SimulationResult:
     def __init__(self, command, workingdir, exitcode, errorMsg=None, isFingerprintOK=None, computedFingerprint=None, simulatedTime=None, numEvents=None, elapsedTime=None, cpuTimeLimitReached=None):
