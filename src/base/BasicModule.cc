@@ -22,8 +22,6 @@
 #include <iostream>
 #include "BasicModule.h"
 
-#define coreEV (ev.isDisabled()||!coreDebug) ? (std::ostream&)ev : EV << loggingName << "::BasicModule: "
-
 /**
  * Subscription to NotificationBoard should be in stage==0, and firing
  * notifications in stage==1 or later.
@@ -37,11 +35,6 @@ void BasicModule::initialize(int stage)
 
     if (stage == 0)
     {
-
-        if (hasPar("coreDebug"))
-            coreDebug = par("coreDebug").boolValue();
-        else
-            coreDebug = false;
         if (hasPar("debug"))
             debug = par("debug").boolValue();
         else

@@ -82,9 +82,6 @@ class INET_API ChannelControl : public cSimpleModule, public IChannelControl
     friend std::ostream& operator<<(std::ostream&, const RadioEntry&);
     friend std::ostream& operator<<(std::ostream&, const TransmissionList&);
 
-    /** Set debugging for the basic module*/
-    bool coreDebug;
-
     /** the biggest interference distance in the network.*/
     double maxInterferenceDistance;
 

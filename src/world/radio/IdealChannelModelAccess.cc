@@ -22,9 +22,6 @@
 
 #include "IMobility.h"
 
-
-#define coreEV (ev.isDisabled()||!coreDebug) ? EV : EV << logName() << "::IdealChannelModelAccess: "
-
 simsignal_t IdealChannelModelAccess::mobilityStateChangedSignal = SIMSIGNAL_NULL;
 
 // the destructor unregister the radio module
@@ -80,7 +77,7 @@ void IdealChannelModelAccess::initialize(int stage)
  */
 void IdealChannelModelAccess::sendToChannel(IdealAirFrame *msg)
 {
-    coreEV << "sendToChannel: sending to gates\n";
+    EV << "sendToChannel: sending to gates\n";
 
     // delegate it to ChannelControl
     cc->sendToChannel(myRadioRef, msg);

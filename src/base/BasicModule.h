@@ -54,9 +54,6 @@
 class INET_API BasicModule: public cSimpleModule, public INotifiable
 {
   protected:
-    /** @brief Debug switch for the core modules*/
-    bool coreDebug;
-
     /** @brief Debug switch for all other modules*/
     bool debug;
 

@@ -38,7 +38,6 @@ package inet.world.radio;
 simple ChannelControl
 {
     parameters:
-        bool coreDebug = default(false); // debug switch for core framework
         double pMax @unit("mW") = default(20mW); // maximum sending power used for this network (in mW)
         double sat @unit("dBm") = default(-110dBm); // signal attenuation threshold (in dBm)
         double alpha = default(2); // path loss coefficient

@@ -38,7 +38,6 @@ simple DYMO extends BaseRouting like IManetRouting
     parameters:
         @class(DYMO);
         @reactive;                             // IP module will send control messages when no route is present to the destination
-        bool coreDebug = default(false); // debug switch for the core framework
 
         int RESPONSIBLE_ADDRESSES_PREFIX = default(-1); // netmask of network this DYMO router is responsible for, -1 for self only
         //        string DYMO_INTERFACES = default("wlan"); // list of interfaces to run DYMO on, separated by a single space character

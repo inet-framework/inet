@@ -19,8 +19,6 @@
 #include "ChannelAccess.h"
 #include "IMobility.h"
 
-#define coreEV (ev.isDisabled()||!coreDebug) ? EV : EV << logName() << "::ChannelAccess: "
-
 simsignal_t ChannelAccess::mobilityStateChangedSignal = SIMSIGNAL_NULL;
 
 static int parseInt(const char *s, int defaultValue)
@@ -107,7 +105,7 @@ IChannelControl *ChannelAccess::getChannelControl()
  */
 void ChannelAccess::sendToChannel(AirFrame *msg)
 {
-    coreEV << "sendToChannel: sending to gates\n";
+    EV << "sendToChannel: sending to gates\n";
 
     // delegate it to ChannelControl
     cc->sendToChannel(myRadioRef, msg);
