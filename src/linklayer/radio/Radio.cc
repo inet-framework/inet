@@ -818,7 +818,7 @@ void Radio::changeChannel(int channel)
 
     cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
 
-    cModule *myHost = findHost();
+    cModule *myHost = findContainingNode(this, true);
 
     //cGate *radioGate = myHost->gate("radioIn");
 
@@ -1099,7 +1099,7 @@ void Radio::connectReceiver()
         rs.setState(RadioState::IDLE); // Force radio to Idle
 
     cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
-    cModule *myHost = findHost();
+    cModule *myHost = findContainingNode(this, true);
 
     //cGate *radioGate = myHost->gate("radioIn");
 

@@ -105,7 +105,7 @@ class INET_API MobilityBase : public BasicModule, public IMobility
     virtual Coord getRandomPosition();
 
     /** @brief Returns the module that represents the object moved by this mobility module. */
-    virtual cModule *findVisualRepresentation() { return findHost(); }
+    virtual cModule *findVisualRepresentation() { return findContainingNode(this, true); }
 
     /** @brief Returns true if the mobility is outside of the constraint area. */
     virtual bool isOutside();

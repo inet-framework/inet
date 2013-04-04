@@ -71,13 +71,15 @@ cModule *findModuleSomewhereUp(const char *name, cModule *from)
     return mod;
 }
 
-cModule *findContainingNode(cModule *from)
+cModule *findContainingNode(cModule *from, bool errorIfNotFound)
 {
     for (cModule *curmod=from; curmod; curmod=curmod->getParentModule())
     {
         if (_isNetworkNode(curmod))
             return curmod;
     }
+    if (errorIfNotFound)
+        throw cRuntimeError("findContainingNode(): node module not found (it should have a property named node)");
     return NULL;
 }
 

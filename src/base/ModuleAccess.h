@@ -59,7 +59,7 @@ bool isNetworkNode(cModule *mod);
  * Find the node containing the given module.
  * Returns NULL, if no containing node.
  */
-INET_API cModule *findContainingNode(cModule *from);
+INET_API cModule *findContainingNode(cModule *from, bool errorIfNotFound = false);
 
 /**
  * Find the ancestor module under the node containing the given module.
