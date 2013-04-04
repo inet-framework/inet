@@ -32,7 +32,7 @@ namespace inet { class PatternMatcher; }
 
 // compile time macros to disable or enable logging
 #define EV_ENABLED EV
-#define EV_DISABLED true?ev:ev
+#define EV_DISABLED true?EV:EV
 
 // compile time log levels
 #define EV_DEBUG EV_DISABLED
