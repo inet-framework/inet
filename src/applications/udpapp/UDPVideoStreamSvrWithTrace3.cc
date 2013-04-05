@@ -49,11 +49,10 @@ void UDPVideoStreamSvrWithTrace3::initialize()
 {
     UDPVideoStreamSvrWithTrace2::initialize();
 
-    N = par("N").longValue();
+    pktInterval = par("pktInterval");
     timingPktPeriod = par("timingPktPeriod").longValue();
-    f_r = clockFrequency / N;   // reference clock frequency
-    pktInterval = 1.0 / f_r;
-
+    // f_r = clockFrequency / N;   // reference clock frequency
+    // N = par("N").longValue();
 }
 
 void UDPVideoStreamSvrWithTrace3::sendStreamData(cMessage *pktTimer)
@@ -69,8 +68,7 @@ void UDPVideoStreamSvrWithTrace3::sendStreamData(cMessage *pktTimer)
 	pkt->setByteLength(payloadSize + appOverhead);
 	pkt->setMarker(d->bytesLeft <= maxPayloadSize ? true : false);  ///< indicator for the last packet of a frame
 	pkt->setSequenceNumber(d->currentSequenceNumber);	///< 16-bit RTP sequence number
-	pkt->setTimestamp(uint32_t(uint64_t(f_r*simTime().dbl())%0x100000000LL));   ///< 32-bit RTP timestamp (wrap-arounded)
-//    pkt->setTimestamp(uint32_t((uint64_t(clockFrequency)*simTime().raw()/simTime().getScale())%0x100000000LL));    ///< 32-bit RTP timestamp (wrap-arounded)
+	pkt->setTimestamp(uint32_t(uint64_t(clockFrequency*simTime().dbl())%0x100000000LL));   ///< 32-bit RTP timestamp (wrap-arounded)
 	pkt->setFragmentStart(d->bytesLeft == d->frameSize ? true : false);	///< in FU header in RTP payload
 	pkt->setFragmentEnd(pkt->getMarker());    ///< in FU header in RTP payload
 	pkt->setFrameNumber(d->frameNumber);	///< non-RTP field
