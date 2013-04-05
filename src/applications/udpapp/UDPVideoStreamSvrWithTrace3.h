@@ -47,7 +47,8 @@ class INET_API UDPVideoStreamSvrWithTrace3 : public UDPVideoStreamSvrWithTrace2
   protected:
     int N;
     int timingPktPeriod;
-    double pktInterval;     // based on clockFrequency (i.e., 'f_r' in [2])
+    double f_r;             // reference clock frequency (i.e., 'f_r' in [2])
+    double pktInterval;     // based on reference clockFrequency 
 
   protected:
     // send a packet of the given video stream
