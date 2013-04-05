@@ -16,21 +16,26 @@
 #
 
 import argparse
+import copy
+import csv
+import glob
+import multiprocessing
 import os
 import re
-import glob
 import subprocess
 import sys
+import threading
 import time
 import unittest
-import csv
+from StringIO import StringIO
+
 
 inetRoot = os.path.abspath("../..")
 sep = ";" if sys.platform == 'win32' else ':'
 nedPath = inetRoot + "/src" + sep + inetRoot + "/examples" + sep + inetRoot + "/tests/networks"
 inetLib = inetRoot + "/src/inet"
 opp_run = "opp_run"
-cpuTimeLimit = "30s"
+cpuTimeLimit = "90s"
 logFile = "test.out"
 
 class FingerprintTestCaseGenerator():
@@ -56,7 +61,8 @@ class FingerprintTestCaseGenerator():
         for simulation in simulations:
             title = simulation['wd'] + " " + simulation['args']
             if not filterRegexList or ['x' for regex in filterRegexList if re.search(regex, title)]: # if any regex matches title
-                testcases.append(FingerprintTestCase(title, simulation['wd'], simulation['args'], simulation['simtimelimit'], simulation['fingerprint'], StoreFingerprintCallback(simulation)))
+                testcases.append(FingerprintTestCase(title, simulation['wd'], simulation['args'],
+                        simulation['simtimelimit'], simulation['fingerprint'], StoreFingerprintCallback(simulation)))
         return testcases
 
     def commentRemover(self, csvData):
@@ -113,8 +119,10 @@ class FingerprintTestCaseGenerator():
                     print "ERROR: Cannot replace fingerprint '%s' to '%s' at '%s' line %d:\n     %s" % (oldFingerprint, newFingerprint, csvFile, line, lines[line])
         return ''.join(lines) if containsComputedFingerprint else None
 
+
 class SimulationResult:
-    def __init__(self, command, workingdir, exitcode, errorMsg=None, isFingerprintOK=None, computedFingerprint=None, simulatedTime=None, numEvents=None, elapsedTime=None, cpuTimeLimitReached=None):
+    def __init__(self, command, workingdir, exitcode, errorMsg=None, isFingerprintOK=None,
+            computedFingerprint=None, simulatedTime=None, numEvents=None, elapsedTime=None, cpuTimeLimitReached=None):
         self.command = command
         self.workingdir = workingdir
         self.exitcode = exitcode
@@ -126,22 +134,25 @@ class SimulationResult:
         self.elapsedTime = elapsedTime
         self.cpuTimeLimitReached = cpuTimeLimitReached
 
+
 class SimulationTestCase(unittest.TestCase):
     def runSimulation(self, title, command, workingdir):
         global logFile
 
         # run the program and log the output
-        FILE = open(logFile, "a")
-        FILE.write("------------------------------------------------------\n")
-        FILE.write("Running: " + title + "\n\n")
-        FILE.write("$ cd " + workingdir + "\n");
-        FILE.write("$ " + command + "\n\n");
         t0 = time.time()
+
         (exitcode, out) = self.runProgram(command, workingdir)
+
         elapsedTime = time.time() - t0
-        FILE.write(out.strip() + "\n\n")
-        FILE.write("Exit code: " + str(exitcode) + "\n")
-        FILE.write("Elapsed time:  " + str(round(elapsedTime,2)) + "s\n\n")
+        FILE = open(logFile, "a")
+        FILE.write("------------------------------------------------------\n"
+                 + "Running: " + title + "\n\n"
+                 + "$ cd " + workingdir + "\n"
+                 + "$ " + command + "\n\n"
+                 + out.strip() + "\n\n"
+                 + "Exit code: " + str(exitcode) + "\n"
+                 + "Elapsed time:  " + str(round(elapsedTime,2)) + "s\n\n")
         FILE.close()
 
         result = SimulationResult(command, workingdir, exitcode, elapsedTime=elapsedTime)
@@ -178,6 +189,7 @@ class SimulationTestCase(unittest.TestCase):
         out = process.communicate()[0]
         out = re.sub("\r", "", out)
         return (process.returncode, out)
+
 
 class FingerprintTestCase(SimulationTestCase):
     def __init__(self, title, wd, args, simtimelimit, fingerprint, storeFingerprintCallback):
@@ -221,12 +233,105 @@ class FingerprintTestCase(SimulationTestCase):
     def __str__(self):
         return self.title
 
+class ThreadSafeIter:
+    """Takes an iterator/generator and makes it thread-safe by
+    serializing call to the `next` method of given iterator/generator.
+    """
+    def __init__(self, it):
+        self.it = it
+        self.lock = threading.Lock()
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        with self.lock:
+            return self.it.next()
+
+
+
+class ThreadedTestSuite(unittest.BaseTestSuite):
+    """ runs toplevel tests in n threads
+    """
+
+    # How many test process at the time.
+    thread_count = multiprocessing.cpu_count()
+
+    def run(self, result):
+        it = ThreadSafeIter(self.__iter__())
+
+        result.buffered = True
+
+        threads = []
+
+        for i in range(self.thread_count):
+            # Create self.thread_count number of threads that together will
+            # cooperate removing every ip in the list. Each thread will do the
+            # job as fast as it can.
+            t = threading.Thread(target=self.runThread, args=(result, it))
+            t.start()
+            threads.append(t)
+
+        # Wait until all the threads are done. .join() is blocking.
+        for t in threads:
+            t.join()
+        return result
+
+    def runThread(self, result, it):
+        tresult = result.startThread()
+        for test in it:
+            if result.shouldStop:
+                break
+            test(tresult)
+        tresult.stopThread()
+
+
+class ThreadedTestResult(unittest.TestResult):
+    """TestResult with threads
+    """
+
+    def __init__(self, stream=None, descriptions=None, verbosity=None):
+        super(ThreadedTestResult, self).__init__()
+        self.parent = None
+        self.lock = threading.Lock()
+
+    def startThread(self):
+        ret = copy.copy(self)
+        ret.parent = self
+        return ret
+
+    def stop():
+        super(ThreadedTestResult, self).stop()
+        if self.parent:
+            self.parent.stop()
+
+    def stopThread(self):
+        if self.parent == None:
+            return 0
+        self.parent.testsRun += self.testsRun
+        return 1
+
+    def startTest(self, test):
+        "Called when the given test is about to be run"
+        super(ThreadedTestResult, self).startTest(test)
+        self.oldstream = self.stream
+        self.stream = StringIO()
+
+    def stopTest(self, test):
+        """Called when the given test has been run"""
+        super(ThreadedTestResult, self).stopTest(test)
+        out = self.stream.getvalue()
+        with self.lock:
+            self.stream = self.oldstream
+            self.stream.write(out)
+
+
 #
 # Copy/paste of TextTestResult, with minor modifications in the output:
 # we want to print the error text after ERROR and FAIL, but we don't want
 # to print stack traces.
 #
-class SimulationTextTestResult(unittest.TestResult):
+class SimulationTextTestResult(ThreadedTestResult):
     """A test result class that can print formatted text results to a stream.
 
     Used by TextTestRunner.
@@ -258,7 +363,7 @@ class SimulationTextTestResult(unittest.TestResult):
     def addSuccess(self, test):
         super(SimulationTextTestResult, self).addSuccess(test)
         if self.showAll:
-            self.stream.writeln(": PASS")
+            self.stream.write(": PASS\n")
         elif self.dots:
             self.stream.write('.')
             self.stream.flush()
@@ -269,9 +374,10 @@ class SimulationTextTestResult(unittest.TestResult):
         self.errors[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
             (cause, detail) = self._splitMsg(err[1])
-            self.stream.writeln(": ERROR (%s)" % cause)
+            self.stream.write(": ERROR (%s)\n" % cause)
             if detail:
-                self.stream.writeln(detail)
+                self.stream.write(detail)
+                self.stream.write("\n")
         elif self.dots:
             self.stream.write('E')
             self.stream.flush()
@@ -282,9 +388,10 @@ class SimulationTextTestResult(unittest.TestResult):
         self.failures[-1] = (test, err[1])  # super class method inserts stack trace; we don't need that, so overwrite it
         if self.showAll:
             (cause, detail) = self._splitMsg(err[1])
-            self.stream.writeln(": FAIL (%s)" % cause)
+            self.stream.write(": FAIL (%s)\n" % cause)
             if detail:
-                self.stream.writeln(detail)
+                self.stream.write(detail)
+                self.stream.write("\n")
         elif self.dots:
             self.stream.write('F')
             self.stream.flush()
@@ -292,7 +399,8 @@ class SimulationTextTestResult(unittest.TestResult):
     def addSkip(self, test, reason):
         super(SimulationTextTestResult, self).addSkip(test, reason)
         if self.showAll:
-            self.stream.writeln(": skipped {0!r}".format(reason))
+            self.stream.write(": skipped {0!r}".format(reason))
+            self.stream.write("\n")
         elif self.dots:
             self.stream.write("s")
             self.stream.flush()
@@ -300,7 +408,7 @@ class SimulationTextTestResult(unittest.TestResult):
     def addExpectedFailure(self, test, err):
         super(SimulationTextTestResult, self).addExpectedFailure(test, err)
         if self.showAll:
-            self.stream.writeln(": expected failure")
+            self.stream.write(": expected failure\n")
         elif self.dots:
             self.stream.write("x")
             self.stream.flush()
@@ -308,7 +416,7 @@ class SimulationTextTestResult(unittest.TestResult):
     def addUnexpectedSuccess(self, test):
         super(SimulationTextTestResult, self).addUnexpectedSuccess(test)
         if self.showAll:
-            self.stream.writeln(": unexpected success")
+            self.stream.write(": unexpected success\n")
         elif self.dots:
             self.stream.write("u")
             self.stream.flush()
@@ -316,16 +424,16 @@ class SimulationTextTestResult(unittest.TestResult):
     def printErrors(self):
         # modified
         if self.dots or self.showAll:
-            self.stream.writeln()
+            self.stream.write("\n")
         self.printErrorList('Errors', self.errors)
         self.printErrorList('Failures', self.failures)
 
     def printErrorList(self, flavour, errors):
         # modified
         if errors:
-            self.stream.writeln("%s:" % flavour)
+            self.stream.write("%s:\n" % flavour)
         for test, err in errors:
-            self.stream.writeln("  %s (%s)" % (self.getDescription(test), self._splitMsg(err)[0]))
+            self.stream.write("  %s (%s)\n" % (self.getDescription(test), self._splitMsg(err)[0]))
 
     def _splitMsg(self, msg):
         cause = str(msg)
@@ -342,6 +450,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run the fingerprint tests specified in the input files.')
     parser.add_argument('testspecfiles', nargs='*', metavar='testspecfile', help='CSV files that contain the tests to run (default: *.csv). Expected CSV file columns: workingdir, args, simtimelimit, fingerprint')
     parser.add_argument('-m', '--match', nargs='*', metavar='regex', help='Line filter: a line (more precisely, workingdir+SPACE+args) must match any of the regular expressions in order for that test case to be run')
+    parser.add_argument('-t', '--threads', type=int, default=multiprocessing.cpu_count(), help='number of parallel threads (default: number of CPUs, currently '+str(multiprocessing.cpu_count())+')')
     args = parser.parse_args()
 
     if os.path.isfile(logFile):
@@ -354,8 +463,9 @@ if __name__ == "__main__":
     generator = FingerprintTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.match)
 
-    testSuite = unittest.TestSuite()
+    testSuite = ThreadedTestSuite()
     testSuite.addTests(testcases)
+    testSuite.thread_count = args.threads
 
     testRunner = unittest.TextTestRunner(stream=sys.stdout, verbosity=9, resultclass=SimulationTextTestResult)
 
