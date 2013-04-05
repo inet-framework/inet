@@ -49,10 +49,8 @@ void UDPVideoStreamSvrWithTrace3::initialize()
 {
     UDPVideoStreamSvrWithTrace2::initialize();
 
-    pktInterval = par("pktInterval");
-    timingPktPeriod = par("timingPktPeriod").longValue();
-    // f_r = clockFrequency / N;   // reference clock frequency
-    // N = par("N").longValue();
+    r = par("r").longValue();
+    pktInterval = r / clockFrequency;
 }
 
 void UDPVideoStreamSvrWithTrace3::sendStreamData(cMessage *pktTimer)

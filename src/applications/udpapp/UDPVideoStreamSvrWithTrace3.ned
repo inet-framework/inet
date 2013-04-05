@@ -48,10 +48,7 @@ simple UDPVideoStreamSvrWithTrace3 like UDPApp
         int maxPayloadSize @unit(byte) = default(1460B);	// maximum size of payload to be carried in RTP packets;
 															// default of 1460B is MTU of 1500B minus RTP (12B), UDP (8B), and IP (20B) headers.
 		double clockFrequency @unit(Hz) = default(90000Hz);	// frequency of	a local clock for RTP timestamps
-		double pktInterval @unit(s) = default(1s/9000.0);	// packet inter-departure time
-		// double f_r @unit("Hz") = default(9000Hz);	// frequency of reference clock for packet transmission ('f_r' in [2])
-		// int N = default(10);	// ratio bewteen frequencies of local clock and reference clock ('f_r' in [2])
-		int timingPktPeriod = default(1);	// period of timing packets
+		int r = default(10);	// ratio bewteen local clock frequency and packet transmission rate during ON period (i.e., 'f_r' in [2])
         string traceFile;	// name of a video trace file in ASU format
 		bool frameSpreading = default(false);	// if true, spread frame packets over a frame period
         @display("i=block/app");
