@@ -26,6 +26,7 @@
 #include "INotifiable.h"
 #include "ILifecycle.h"
 #include "NodeStatus.h"
+#include "MACBase.h"
 
 class InterfaceEntry;
 class IPassiveQueue;
@@ -34,7 +35,7 @@ class NotificationBoard;
 /**
  * PPP implementation.
  */
-class INET_API PPP : public cSimpleModule, public INotifiable, public cListener, public ILifecycle
+class INET_API PPP : public MACBase, public cListener
 {
   protected:
     long txQueueLimit;
@@ -45,13 +46,7 @@ class INET_API PPP : public cSimpleModule, public INotifiable, public cListener,
     cMessage *endTransmissionEvent;
     IPassiveQueue *queueModule;
 
-    NodeStatus *nodeStatus;
-
-    InterfaceEntry *interfaceEntry;  // points into IInterfaceTable
-
-    NotificationBoard *nb;
     TxNotifDetails notifDetails;
-    bool hasSubscribers; // only notify if somebody is listening
 
     std::string oldConnColor;
 
@@ -71,23 +66,21 @@ class INET_API PPP : public cSimpleModule, public INotifiable, public cListener,
     static simsignal_t packetReceivedFromUpperSignal;
 
   protected:
-    virtual InterfaceEntry *registerInterface(double datarate);
+    virtual InterfaceEntry *createInterfaceEntry();
     virtual void startTransmitting(cPacket *msg);
     virtual PPPFrame *encapsulate(cPacket *msg);
     virtual cPacket *decapsulate(PPPFrame *pppFrame);
     virtual void displayBusy();
     virtual void displayIdle();
     virtual void updateDisplayString();
-    virtual void updateHasSubcribers();
-    virtual void receiveChangeNotification(int category, const cObject *details);
     virtual void receiveSignal(cComponent *src, simsignal_t id, cObject *obj);
     virtual void refreshOutGateConnection(bool connected);
+    virtual bool isUpperMsg(cMessage *msg) {return msg->arrivedOn("netwIn");}
+    virtual void flushQueue();
 
   public:
     PPP();
     virtual ~PPP();
-
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     virtual int numInitStages() const {return 4;}

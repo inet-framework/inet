@@ -28,6 +28,7 @@
 
 #include "INETDefs.h"
 
+#include "MACBase.h"
 #include "ExtFrame_m.h"
 #include "cSocketRTScheduler.h"
 
@@ -35,14 +36,21 @@
 class InterfaceEntry;
 
 
-class ExtInterface : public cSimpleModule
+/**
+ * Implements an interface that corresponds to a real interface
+ * on the host running the simulation. Suitable for hardware-in-the-loop
+ * simulations.
+ *
+ * Requires cSocketRTScheduler to be configured as scheduler in omnetpp.ini.
+ *
+ * See NED file for more details.
+ */
+class ExtInterface : public MACBase
 {
   protected:
     bool connected;
     uint8 buffer[1<<16];
     const char *device;
-
-    InterfaceEntry *interfaceEntry;  // points into RoutingTable
 
     // statistics
     int numSent;
@@ -52,18 +60,19 @@ class ExtInterface : public cSimpleModule
     // access to real network interface via Scheduler class:
     cSocketRTScheduler *rtScheduler;
 
-    InterfaceEntry *registerInterface();
+  protected:
+    InterfaceEntry *createInterfaceEntry();
     void displayBusy();
     void displayIdle();
     void updateDisplayString();
+    virtual void flushQueue();
+    virtual bool isUpperMsg(cMessage *msg) {return msg->arrivedOn("upperLayerIn");}
 
   private:
     const char *tag_color;
     const char *tag_width;
 
   public:
-   // Module_Class_Members(ExtInterface, cSimpleModule, 0);
-
     virtual int numInitStages() const {return 4;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);

@@ -39,6 +39,8 @@ Define_Module(ExtInterface);
 
 void ExtInterface::initialize(int stage)
 {
+    MACBase::initialize(stage);
+
     // subscribe at scheduler for external messages
     if (stage == 0)
     {
@@ -62,8 +64,7 @@ void ExtInterface::initialize(int stage)
         WATCH(numRcvd);
         WATCH(numDropped);
 
-        // register our interface entry in RoutingTable
-        interfaceEntry = registerInterface();
+        registerInterface();
 
         // if not connected, make it gray
         if (ev.isGUI() && !connected)
@@ -80,7 +81,7 @@ void ExtInterface::initialize(int stage)
     }
 }
 
-InterfaceEntry *ExtInterface::registerInterface()
+InterfaceEntry *ExtInterface::createInterfaceEntry()
 {
     InterfaceEntry *e = new InterfaceEntry(this);
 
@@ -90,13 +91,17 @@ InterfaceEntry *ExtInterface::registerInterface()
     e->setMtu(par("mtu"));
     e->setMulticast(true);
     e->setPointToPoint(true);
-    IInterfaceTable *ift = InterfaceTableAccess().get();
-    ift->addInterface(e);
+
     return e;
 }
 
 void ExtInterface::handleMessage(cMessage *msg)
 {
+    if (!isOperational)
+    {
+        handleMessageWhenDown(msg);
+        return;
+    }
 
     if (dynamic_cast<ExtFrame *>(msg) != NULL)
     {
@@ -205,3 +210,6 @@ void ExtInterface::finish()
             numRcvd << " packets received, " << numDropped <<" packets dropped.\n";
 }
 
+void ExtInterface::flushQueue()
+{
+}

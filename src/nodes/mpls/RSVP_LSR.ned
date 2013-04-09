@@ -46,7 +46,6 @@ module RSVP_LSR extends RSVP_ROUTER_BASE
             parameters:
                 IPForward = true;
                 routerId = routerId;
-                routingFile = routingFile;
                 @display("p=68,138");
         }
         interfaceTable: InterfaceTable {

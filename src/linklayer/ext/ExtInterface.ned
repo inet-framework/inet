@@ -19,6 +19,13 @@ package inet.linklayer.ext;
 
 import inet.linklayer.IExternalNic;
 
+//
+// Implements an interface that corresponds to a real interface
+// on the host running the simulation. Suitable for hardware-in-the-loop
+// simulations.
+// 
+// Requires cSocketRTScheduler to be configured as scheduler in omnetpp.ini.
+//
 simple ExtInterface like IExternalNic
 {
     parameters:

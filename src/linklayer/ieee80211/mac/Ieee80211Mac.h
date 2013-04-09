@@ -57,7 +57,7 @@
  *
  * @ingroup macLayer
  */
-class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
+class INET_API Ieee80211Mac : public WirelessMacBase
 {
     typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
     /**
@@ -437,7 +437,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     /** @brief Initialization of the module and its variables */
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
-    virtual void registerInterface();
+    virtual InterfaceEntry *createInterfaceEntry();
     virtual void initializeQueueModule();
     virtual void finish();
     virtual void configureAutoBitRate();
@@ -564,6 +564,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     virtual void retryCurrentTransmission();
     virtual bool transmissionQueueEmpty();
     virtual unsigned int transmissionQueueSize();
+    virtual void flushQueue();
 
     /** @brief Mapping to access categories. */
     virtual int mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame);

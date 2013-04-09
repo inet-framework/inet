@@ -41,7 +41,7 @@ class INET_API EtherMAC : public EtherMACBase
     virtual ~EtherMAC();
 
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
     virtual void initializeFlags();
     virtual void initializeStatistics();
     virtual void handleMessage(cMessage *msg);

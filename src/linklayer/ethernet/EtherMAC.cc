@@ -58,21 +58,24 @@ EtherMAC::~EtherMAC()
     cancelAndDelete(endJammingMsg);
 }
 
-void EtherMAC::initialize()
+void EtherMAC::initialize(int stage)
 {
-    EtherMACBase::initialize();
+    EtherMACBase::initialize(stage);
 
-    endRxMsg = new cMessage("EndReception", ENDRECEPTION);
-    endBackoffMsg = new cMessage("EndBackoff", ENDBACKOFF);
-    endJammingMsg = new cMessage("EndJamming", ENDJAMMING);
+    if (stage == 0)
+    {
+        endRxMsg = new cMessage("EndReception", ENDRECEPTION);
+        endBackoffMsg = new cMessage("EndBackoff", ENDBACKOFF);
+        endJammingMsg = new cMessage("EndJamming", ENDJAMMING);
 
-    // initialize state info
-    backoffs = 0;
-    numConcurrentTransmissions = 0;
-    currentSendPkTreeID = 0;
+        // initialize state info
+        backoffs = 0;
+        numConcurrentTransmissions = 0;
+        currentSendPkTreeID = 0;
 
-    WATCH(backoffs);
-    WATCH(numConcurrentTransmissions);
+        WATCH(backoffs);
+        WATCH(numConcurrentTransmissions);
+    }
 }
 
 void EtherMAC::initializeStatistics()
@@ -183,17 +186,10 @@ void EtherMAC::handleSelfMessage(cMessage *msg)
 
 void EtherMAC::handleMessage(cMessage *msg)
 {
-    bool isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-    bool isInterfaceUp = !interfaceEntry || interfaceEntry->getState() == InterfaceEntry::UP;
-    if (!isNodeUp || !isInterfaceUp)
+    if (!isOperational)
     {
-        if (msg->getArrivalGate() == upperLayerInGate || msg->isSelfMessage())  //FIXME remove 1st part -- it is not possible to ensure that no msg is sent by upper layer (race condition!!!)
-            throw cRuntimeError("Interface is turned off");
-        else {
-            EV << "Interface is turned off, dropping packet\n";
-            delete msg;
-            return;
-        }
+        handleMessageWhenDown(msg);
+        return;
     }
 
     if (channelsDiffer)
