@@ -69,7 +69,6 @@ package inet.world.httptools;
 simple HttpController
 {
     parameters:
-        int logLevel = default(0);            // The log level: 2: Debug, 1: Info; 0: Errors and warnings only.
         string events = default("");          // Popularity modification events defintion file.
         string eventsSection = default("");   // Section within the popularity modification file, if one is defined.
         xml config;                           // XML configuration file.

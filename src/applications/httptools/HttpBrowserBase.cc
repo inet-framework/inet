@@ -61,8 +61,6 @@ void HttpBrowserBase::initialize(int stage)
 {
     if (stage==0)
     {
-        ll = par("logLevel");
-
         EV_DEBUG << "Initializing base HTTP browser component -- phase 0\n";
 
         cXMLElement *rootelement = par("config").xmlValue();
@@ -190,14 +188,14 @@ void HttpBrowserBase::initialize(int stage)
 
 void HttpBrowserBase::finish()
 {
-    EV_SUMMARY << "Sessions: " << sessionCount << endl;
-    EV_SUMMARY << "HTML requested " << htmlRequested << "\n";
-    EV_SUMMARY << "HTML received " << htmlReceived << "\n";
-    EV_SUMMARY << "HTML errors received " << htmlErrorsReceived << "\n";
-    EV_SUMMARY << "Image resources requested " << imgResourcesRequested << "\n";
-    EV_SUMMARY << "Image resources received " << imgResourcesReceived << "\n";
-    EV_SUMMARY << "Text resources requested " << textResourcesRequested << "\n";
-    EV_SUMMARY << "Text resources received " << textResourcesReceived << "\n";
+    EV_INFO << "Sessions: " << sessionCount << endl;
+    EV_INFO << "HTML requested " << htmlRequested << "\n";
+    EV_INFO << "HTML received " << htmlReceived << "\n";
+    EV_INFO << "HTML errors received " << htmlErrorsReceived << "\n";
+    EV_INFO << "Image resources requested " << imgResourcesRequested << "\n";
+    EV_INFO << "Image resources received " << imgResourcesReceived << "\n";
+    EV_INFO << "Text resources requested " << textResourcesRequested << "\n";
+    EV_INFO << "Text resources received " << textResourcesReceived << "\n";
 
     recordScalar("session.count", sessionCount);
     recordScalar("html.requested", htmlRequested);

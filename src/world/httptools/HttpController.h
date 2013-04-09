@@ -39,7 +39,6 @@
 
 #include "INETDefs.h"
 
-#include "HttpLogdefs.h"
 #include "HttpUtils.h"
 #include "HttpRandom.h"
 #include "HttpEventMessages_m.h"
@@ -87,8 +86,6 @@ class HttpController : public cSimpleModule
         };
 
     protected:
-        int ll; ///< The log level
-
         std::map<std::string,WebServerEntry*> webSiteList;  ///< A list of registered web sites (server objects)
         std::vector<WebServerEntry*> pickList;   ///< The picklist used to select sites at random.
         std::list<WebServerEntry*> specialList;  ///< The special list -- contains sites with active popularity modification events.

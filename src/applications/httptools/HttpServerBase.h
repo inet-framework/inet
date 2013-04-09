@@ -40,12 +40,6 @@
 #define MSGKIND_NEXT_MESSAGE  1
 #define MSGKIND_SCRIPT_EVENT  2
 
-// Log level definitions
-#define LL_NONE 0
-#define LL_INFO 1
-#define LL_DEBUG 2
-
-
 /**
  * Web server base class.
  *

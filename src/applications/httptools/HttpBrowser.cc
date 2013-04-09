@@ -55,8 +55,8 @@ void HttpBrowser::finish()
     HttpBrowserBase::finish();
 
     // Report sockets related statistics.
-    EV_SUMMARY << "Sockets opened: " << socketsOpened << endl;
-    EV_SUMMARY << "Broken connections: " << numBroken << endl;
+    EV_INFO << "Sockets opened: " << socketsOpened << endl;
+    EV_INFO << "Broken connections: " << numBroken << endl;
     // Record the sockets related statistics
     recordScalar("sock.opened", socketsOpened);
     recordScalar("sock.broken", numBroken);

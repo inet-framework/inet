@@ -60,8 +60,8 @@ void HttpServer::finish()
 {
     HttpServerBase::finish();
 
-    EV_SUMMARY << "Sockets opened: " << socketsOpened << endl;
-    EV_SUMMARY << "Broken connections: " << numBroken << endl;
+    EV_INFO << "Sockets opened: " << socketsOpened << endl;
+    EV_INFO << "Broken connections: " << numBroken << endl;
 
     recordScalar("sock.opened", socketsOpened);
     recordScalar("sock.broken", numBroken);
