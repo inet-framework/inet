@@ -46,6 +46,11 @@ IdealWirelessMac::~IdealWirelessMac()
 {
 }
 
+void IdealWirelessMac::flushQueue()
+{
+    //FIXME implementation!!!!
+}
+
 void IdealWirelessMac::initialize(int stage)
 {
     WirelessMacBase::initialize(stage);
@@ -60,7 +65,6 @@ void IdealWirelessMac::initialize(int stage)
         headerLength = par("headerLength").longValue();
         promiscuous = par("promiscuous");
 
-        interfaceEntry = NULL;
         radioStateSignal = registerSignal("radioState");
         dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
 
@@ -77,7 +81,7 @@ void IdealWirelessMac::initialize(int stage)
         initializeMACAddress();
 
         // register our interface entry in IInterfaceTable
-        interfaceEntry = registerInterface(bitrate);
+        registerInterface();
     }
 }
 
@@ -99,7 +103,7 @@ void IdealWirelessMac::initializeMACAddress()
     }
 }
 
-InterfaceEntry *IdealWirelessMac::registerInterface(double datarate)
+InterfaceEntry *IdealWirelessMac::createInterfaceEntry()
 {
     InterfaceEntry *e = new InterfaceEntry(this);
 
@@ -107,7 +111,7 @@ InterfaceEntry *IdealWirelessMac::registerInterface(double datarate)
     e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
 
     // data rate
-    e->setDatarate(datarate);
+    e->setDatarate(bitrate);
 
     // generate a link-layer address to be used as interface token for IPv6
     e->setMACAddress(address);
@@ -120,11 +124,6 @@ InterfaceEntry *IdealWirelessMac::registerInterface(double datarate)
     // capabilities
     e->setMulticast(true);
     e->setBroadcast(true);
-
-    // add
-    IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
-    if (ift)
-        ift->addInterface(e);
 
     return e;
 }

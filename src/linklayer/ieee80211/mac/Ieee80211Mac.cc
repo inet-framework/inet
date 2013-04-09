@@ -26,6 +26,7 @@
 #include "Radio80211aControlInfo_m.h"
 #include "Ieee80211eClassifier.h"
 #include "Ieee80211DataRate.h"
+#include "opp_utils.h"
 
 // TODO: 9.3.2.1, If there are buffered multicast or broadcast frames, the PC shall transmit these prior to any unicast frames.
 // TODO: control frames must send before
@@ -286,7 +287,7 @@ void Ieee80211Mac::initialize(int stage)
         mediumStateChange = new cMessage("MediumStateChange");
 
         // interface
-        if (isInterfaceRegistered().isUnspecified())
+        if (isInterfaceRegistered().isUnspecified()) //TODO do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras
             registerInterface();
 
         // obtain pointer to external queue
@@ -488,24 +489,13 @@ void Ieee80211Mac::finish()
     }
 }
 
-void Ieee80211Mac::registerInterface()
+InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
 {
-    IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
-    if (!ift)
-        return;
-
     InterfaceEntry *e = new InterfaceEntry(this);
 
     // interface name: NetworkInterface module's name without special characters ([])
-    char *interfaceName = new char[strlen(getParentModule()->getFullName()) + 1];
-    char *d = interfaceName;
-    for (const char *s = getParentModule()->getFullName(); *s; s++)
-        if (isalnum(*s))
-            *d++ = *s;
-    *d = '\0';
-
-    e->setName(interfaceName);
-    delete [] interfaceName;
+    std::string interfaceName = OPP_Global::stripnonalnum(getParentModule()->getFullName());
+    e->setName(interfaceName.c_str());
 
     // address
     e->setMACAddress(address);
@@ -519,9 +509,7 @@ void Ieee80211Mac::registerInterface()
     e->setMulticast(true);
     e->setPointToPoint(false);
 
-    // add
-    ift->addInterface(e);
-    interfaceEntry = e;
+    return e;
 }
 
 void Ieee80211Mac::initializeQueueModule()
@@ -838,6 +826,8 @@ void Ieee80211Mac::handleLowerMsg(cPacket *msg)
 void Ieee80211Mac::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method_Silent();
+    MACBase::receiveChangeNotification(category, details);
+
     printNotificationBanner(category, details);
 
     if (category == NF_RADIOSTATE_CHANGED)
@@ -2242,6 +2232,30 @@ unsigned int Ieee80211Mac::transmissionQueueSize()
     for (int i=0; i<numCategories(); i++)
         totalSize+=transmissionQueue(i)->size();
     return totalSize;
+}
+
+void Ieee80211Mac::flushQueue()
+{
+    if (queueModule) {
+        while (!queueModule->isEmpty())
+        {
+            cMessage *msg = queueModule->pop();
+            //TODO emit(dropPkIfaceDownSignal, msg); -- 'pkDropped' signals are missing in this module!
+            delete msg;
+        }
+        queueModule->clear(); // clear request count
+    }
+
+    for (int i=0; i<numCategories(); i++)
+    {
+        while (!transmissionQueue(i)->empty())
+        {
+            cMessage *msg = transmissionQueue(i)->front();
+            transmissionQueue(i)->pop_front();
+            //TODO emit(dropPkIfaceDownSignal, msg); -- 'pkDropped' signals are missing in this module!
+            delete msg;
+        }
+    }
 }
 
 void Ieee80211Mac::reportDataOk()

@@ -23,6 +23,7 @@
 #include "INETDefs.h"
 
 #include "IPassiveQueue.h"
+#include "MACBase.h"
 #include "MACAddress.h"
 #include "ILifecycle.h"
 #include "NodeStatus.h"
@@ -35,7 +36,7 @@ class InterfaceEntry;
 /**
  * Base class for Ethernet MAC implementations.
  */
-class INET_API EtherMACBase : public cSimpleModule, public cListener, public ILifecycle
+class INET_API EtherMACBase : public MACBase, public cListener
 {
   protected:
     enum MACTransmitState
@@ -141,17 +142,14 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener, public ILi
     cGate *physInGate;              // pointer to the "phys$i" gate
     cGate *physOutGate;             // pointer to the "phys$o" gate
     cGate *upperLayerInGate;        // pointer to the "upperLayerIn" gate
-    InterfaceEntry *interfaceEntry; // the associated entry in IInterfaceTable
 
     // state
-    bool channelsDiffer;            // true when tx and rx channels differ (existing only one, or 'datarate' or 'disable' parameters differ) (configuration error, or between changes of tx/rx channels)
+    bool channelsDiffer;            // true when tx and rx channels differ (only one of them exists, or 'datarate' or 'disable' parameters differ) (configuration error, or between changes of tx/rx channels)
     MACTransmitState transmitState; // "transmit state" of the MAC
     MACReceiveState receiveState;   // "receive state" of the MAC
     simtime_t lastTxFinishTime;     // time of finishing the last transmission
     int pauseUnitsRequested;        // requested pause duration, or zero -- examined at endTx
     EtherFrame *curTxFrame;         // frame being transmitted
-
-    NodeStatus *nodeStatus;
 
     // self messages
     cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;
@@ -197,16 +195,15 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener, public ILi
     double getTxRate() { return curEtherDescr->txrate; }
     bool isActive() { return connected && !disabled; }
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-
   protected:
     //  initialization
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const {return 1;}
     virtual void initializeFlags();
     virtual void initializeMACAddress();
     virtual void initializeQueueModule();
     virtual void initializeStatistics();
-    virtual void registerInterface();
+    virtual InterfaceEntry *createInterfaceEntry();
 
     // finish
     virtual void finish();
@@ -225,6 +222,8 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener, public ILi
     virtual void getNextFrameFromQueue();
     virtual void requestNextFrameFromExtQueue();
     virtual void processConnectDisconnect();
+    virtual void flushQueue();
+    virtual bool isUpperMsg(cMessage *msg) {return msg->getArrivalGate() == upperLayerInGate;}
 
     // display
     virtual void updateDisplayString();

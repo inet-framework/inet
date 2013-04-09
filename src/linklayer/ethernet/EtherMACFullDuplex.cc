@@ -33,13 +33,17 @@ EtherMACFullDuplex::EtherMACFullDuplex()
 {
 }
 
-void EtherMACFullDuplex::initialize()
+void EtherMACFullDuplex::initialize(int stage)
 {
-    EtherMACBase::initialize();
-    if (!par("duplexMode").boolValue())
-        throw cRuntimeError("Half duplex operation is not supported by EtherMACFullDuplex, use the EtherMAC module for that! (Please enable csmacdSupport on EthernetInterface)");
+    EtherMACBase::initialize(stage);
 
-    beginSendFrames();
+    if (stage == 0)
+    {
+        if (!par("duplexMode").boolValue())
+            throw cRuntimeError("Half duplex operation is not supported by EtherMACFullDuplex, use the EtherMAC module for that! (Please enable csmacdSupport on EthernetInterface)");
+
+        beginSendFrames();
+    }
 }
 
 void EtherMACFullDuplex::initializeStatistics()
@@ -60,17 +64,10 @@ void EtherMACFullDuplex::initializeFlags()
 
 void EtherMACFullDuplex::handleMessage(cMessage *msg)
 {
-    bool isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-    bool isInterfaceUp = !interfaceEntry || interfaceEntry->getState() == InterfaceEntry::UP;
-    if (!isNodeUp || !isInterfaceUp)
+    if (!isOperational)
     {
-        if (msg->getArrivalGate() == upperLayerInGate || msg->isSelfMessage()) //FIXME remove 1st part -- it is not possible to ensure that no msg is sent by upper layer (race condition!!!)
-            throw cRuntimeError("Interface is turned off");
-        else {
-            EV << "Interface is turned off, dropping packet\n";
-            delete msg;
-            return;
-        }
+        handleMessageWhenDown(msg);
+        return;
     }
 
     if (channelsDiffer)

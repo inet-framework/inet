@@ -382,14 +382,13 @@ bool InterfaceTable::handleOperationStage(LifecycleOperation *operation, int sta
     if (dynamic_cast<InterfaceDownOperation *>(operation))
     {
         InterfaceEntry *ie = dynamic_cast<InterfaceDownOperation *>(operation)->getInterface();
+        ASSERT(ie->getInterfaceTable()==this);
         switch (stage) {
             case InterfaceDownOperation::STAGE_LOCAL:
-                ASSERT(ie->getInterfaceTable()==this);
                 ASSERT(ie->getState()==InterfaceEntry::UP);
                 ie->setState(InterfaceEntry::GOING_DOWN);
                 break;
             case InterfaceDownOperation::STAGE_LAST:
-                ASSERT(ie->getInterfaceTable()==this);
                 ASSERT(ie->getState() == InterfaceEntry::GOING_DOWN);
                 ie->setState(InterfaceEntry::DOWN);
                 //TODO ikon
@@ -398,7 +397,19 @@ bool InterfaceTable::handleOperationStage(LifecycleOperation *operation, int sta
     }
     else if (dynamic_cast<InterfaceUpOperation *>(operation))
     {
-        //TODO copypasta from above
+        InterfaceEntry *ie = dynamic_cast<InterfaceUpOperation *>(operation)->getInterface();
+        ASSERT(ie->getInterfaceTable()==this);
+        switch (stage) {
+            case InterfaceUpOperation::STAGE_LOCAL:
+                ASSERT(ie->getState()==InterfaceEntry::DOWN);
+                ie->setState(InterfaceEntry::GOING_UP);
+                break;
+            case InterfaceUpOperation::STAGE_LAST:
+                ASSERT(ie->getState() == InterfaceEntry::GOING_UP);
+                ie->setState(InterfaceEntry::UP);
+                //TODO ikon
+                break;
+        }
     }
     else if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_LINK_LAYER)
