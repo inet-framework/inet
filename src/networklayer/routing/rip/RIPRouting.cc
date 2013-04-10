@@ -271,7 +271,7 @@ RIPRoute* RIPRouting::importRoute(IRoute *route, RIPRoute::RouteType type, int m
 }
 
 /**
- * Requests the whole routing table from all neighboring RIP routers.
+ * Sends RIP requests to each neighbor routers.
  */
 void RIPRouting::sendInitialRequests()
 {
@@ -421,6 +421,10 @@ void RIPRouting::handleMessage(cMessage *msg)
     }
 }
 
+/**
+ * This method called when a triggered or regular update timer expired.
+ * It either sends the changed/all routes to neighbors.
+ */
 void RIPRouting::processUpdate(bool triggered)
 {
     if (triggered)
@@ -935,11 +939,7 @@ void RIPRouting::purgeRoute(RIPRoute *ripRoute)
  */
 void RIPRouting::sendPacket(RIPPacket *packet, const Address &destAddr, int destPort, const InterfaceEntry *destInterface)
 {
-    packet->setByteLength(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize()); // XXX compute from address lengths
-// XXX it seems that setMulticastOutputInterface() has no effect
-//    if (destAddr.isMulticast())
-//        socket.setMulticastOutputInterface(destInterface->getInterfaceId());
-//    socket.sendTo(packet, destAddress, destPort);
+    packet->setByteLength(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize());
     if (destAddr.isMulticast())
     {
         // TODO RIPng: use a link-local source address

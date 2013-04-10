@@ -42,6 +42,24 @@ package inet.networklayer.routing.rip;
 //   - routingTableModule: path to the routing table module
 //   - ripConfig: an XML configuration file containing per-interface parameters
 //
+// The configuration file specifies the per interface parameters.
+// Each <interface> element configures one or more interfaces;
+// the @hosts, @names, @towards, @among attributes select the
+// configured interfaces (see ~IPv4NetworkConfigurator).
+// The other attributes sets parameters of the selected interfaces:
+//
+// - @metric: metric assigned to the link, default value is 1.
+//            This value is added to the metric of a learned route,
+//            received on this interface. It must be an integer in
+//            the [1,15] interval.
+// - @mode: mode of the interface; an enumerated value, default is
+//          'SplitHorizonPoisonedReverse'. Accepted values are:
+//     - 'NoRIP': no RIP messages are sent or received on this interface
+//     - 'NoSplitHorizon': no split horizon filtering; send all routes to
+//                         neighbors.
+//     - 'SplitHorizon':   do not sent routes whose next hop is the neighbor
+//     - 'SplitHorizonPoisenedReverse': if the next hop is the neighbor, then
+//                         set the metric of the route to infinity.
 simple RIPRouting
 {
     parameters:
