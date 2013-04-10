@@ -267,13 +267,10 @@ GenericRoute* GenericRoutingTable::findBestMatchingRoute(const Address& dest) co
     for (RouteVector::const_iterator i=routes.begin(); i!=routes.end(); ++i)
     {
         GenericRoute *e = *i;
-        if (e->isEnabled() && !e->isExpired())
+        if (dest.matches(e->getDestinationAsGeneric(), e->getPrefixLength()))
         {
-            if (dest.matches(e->getDestinationAsGeneric(), e->getPrefixLength()))
-            {
-                bestRoute = const_cast<GenericRoute *>(e);
-                break;
-            }
+            bestRoute = const_cast<GenericRoute *>(e);
+            break;
         }
     }
     return bestRoute;
@@ -320,10 +317,7 @@ IRoute* GenericRoutingTable::getDefaultRoute() const
 {
     // if there is a default route entry, it is the last valid entry
     for (RouteVector::const_reverse_iterator i=routes.rbegin(); i!=routes.rend() && (*i)->getPrefixLength() == 0; ++i)
-    {
-        if ((*i)->isEnabled() && !(*i)->isExpired())
-            return *i;
-    }
+        return *i;
     return NULL;
 }
 

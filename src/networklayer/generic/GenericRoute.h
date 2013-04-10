@@ -33,7 +33,6 @@ class INET_API GenericRoute : public cObject, public IRoute
 {
     private:
         IRoutingTable *owner;
-        bool enabled;
         int prefixLength;
         Address destination;
         Address nextHop;
@@ -43,7 +42,7 @@ class INET_API GenericRoute : public cObject, public IRoute
         int metric;
 
     public:
-        GenericRoute() : owner(NULL), enabled(true), prefixLength(0), interface(NULL), source(NULL), protocolData(NULL), metric(0) {}
+        GenericRoute() : owner(NULL), prefixLength(0), interface(NULL), source(NULL), protocolData(NULL), metric(0) {}
         virtual ~GenericRoute() {}
 
         virtual std::string info() const;
@@ -52,7 +51,6 @@ class INET_API GenericRoute : public cObject, public IRoute
         bool equals(const IRoute& route) const;
 
         virtual void setRoutingTable(IRoutingTable *owner) {this->owner = owner;}
-        virtual void setEnabled(bool enabled) {this->enabled = enabled;}
         virtual void setDestination(const Address& dest) {this->destination = dest;}
         virtual void setPrefixLength(int l) {this->prefixLength = l;}
         virtual void setNextHop(const Address& nextHop) {this->nextHop = nextHop;}
@@ -63,12 +61,6 @@ class INET_API GenericRoute : public cObject, public IRoute
 
         /** The routing table in which this route is inserted, or NULL. */
         virtual IRoutingTable *getRoutingTableAsGeneric() const {return owner;}
-
-        /** Disabled entries are ignored by routing until the became enabled again. */
-        virtual bool isEnabled() const {return enabled;}
-
-        /** Expired entries are ignored by routing, and may be periodically purged. */
-        virtual bool isExpired() const {return false;}
 
         /** Destination address prefix to match */
         virtual Address getDestinationAsGeneric() const {return destination;}

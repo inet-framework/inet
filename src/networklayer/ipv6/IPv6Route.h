@@ -130,14 +130,11 @@ class INET_API IPv6Route : public cObject, public IRoute
 
     virtual IRoutingTable *getRoutingTableAsGeneric() const {return NULL; /*TODO: getRoutingTable();*/}
 
-    virtual void setEnabled(bool enabled) {/*TODO: setEnabled(enabled);*/}
     virtual void setDestination(const Address& dest) {/*TODO: setDestination(dest.toIPv6());*/}
     virtual void setPrefixLength(int len) {/*TODO: setPrefixLength(len));*/}
     virtual void setNextHop(const Address& nextHop) {setNextHop(nextHop.toIPv6());}
     virtual void setSource(cObject *source) {/*TODO: setSource(source);*/}
 
-    virtual bool isEnabled() const {return true; /*TODO: isEnabled();*/}
-    virtual bool isExpired() const {return false; /*isExpired();*/}
     virtual Address getDestinationAsGeneric() const {return getDestPrefix();} //TODO rename IPv6 method
     virtual Address getNextHopAsGeneric() const {return getNextHop();}
     virtual InterfaceEntry *getInterface() const {return NULL; /*TODO getInterface();*/} //TODO change IPv6Route API from interfaceID to interface ptr

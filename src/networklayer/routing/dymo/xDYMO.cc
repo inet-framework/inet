@@ -882,7 +882,8 @@ void xDYMO::sendRERRForBrokenLink(const InterfaceEntry * interfaceEntry, const A
             if (routeState != BROKEN && route->getInterface() == interfaceEntry && route->getNextHopAsGeneric() == nextHop)
             {
                 DYMO_EV << "Marking route as broken: " << route << endl;
-                route->setEnabled(false);
+                // TODO delete route, but save its data for later update
+                // route->setEnabled(false);
                 routeData->setBroken(true);
                 unreachableAddresses.push_back(route->getDestinationAsGeneric());
             }
@@ -933,7 +934,8 @@ void xDYMO::processRERR(RERR * rerrIncoming)
                         // If the route satisfies all of the above conditions, HandlingRtr sets
                         // the Route.Broken flag for that route.
                         DYMO_EV << "Marking route as broken: " << route << endl;
-                        route->setEnabled(false);
+                        // TODO delete route, but save its data for later update
+                        // route->setEnabled(false);
                         routeData->setBroken(true);
                         unreachableAddresses.push_back(unreachableAddress);
                     }
@@ -1105,7 +1107,6 @@ void xDYMO::updateRoute(RteMsg * rteMsg, AddressBlock & addressBlock, IRoute * r
     if (interfaceEntry)
         route->setInterface(interfaceEntry);
     // Route.Broken flag := FALSE
-    route->setEnabled(true);
     routeData->setBroken(false);
     // If RteMsg.MetricType is included, then Route.MetricType := RteMsg.MetricType.  Otherwise, Route.MetricType := DEFAULT_METRIC_TYPE.
     // Route.MetricType := RteMsg.MetricType

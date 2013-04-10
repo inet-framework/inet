@@ -46,19 +46,12 @@ class INET_API IRoute
         /** The routing table in which this route is inserted, or NULL. */
         virtual IRoutingTable *getRoutingTableAsGeneric() const = 0;
 
-        virtual void setEnabled(bool enabled) = 0;
         virtual void setDestination(const Address& dest) = 0;
         virtual void setPrefixLength(int l) = 0;
         virtual void setNextHop(const Address& nextHop) = 0;
         virtual void setInterface(InterfaceEntry *ie) = 0;
         virtual void setSource(cObject *source) = 0;
         virtual void setMetric(int metric) = 0;  //XXX double?
-
-        /** Disabled entries are ignored by routing until the became enabled again. */
-        virtual bool isEnabled() const = 0;
-
-        /** Expired entries are ignored by routing, and may be periodically purged. */
-        virtual bool isExpired() const = 0;
 
         /** Destination address prefix to match */
         virtual Address getDestinationAsGeneric() const = 0;

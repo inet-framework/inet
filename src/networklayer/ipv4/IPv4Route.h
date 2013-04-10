@@ -152,13 +152,10 @@ class INET_API IPv4Route : public cObject, public IRoute
     void setProtocolData(cObject *protocolData) { this->protocolData = protocolData; }
 
     virtual IRoutingTable *getRoutingTableAsGeneric() const;
-    virtual void setEnabled(bool enabled) {/*TODO: setEnabled(enabled);*/}
     virtual void setDestination(const Address& dest) {setDestination(dest.toIPv4());}
     virtual void setPrefixLength(int len) {setNetmask(IPv4Address::makeNetmask(len));}
     virtual void setNextHop(const Address& nextHop) {setGateway(nextHop.toIPv4());}  //TODO rename IPv4 method
 
-    virtual bool isEnabled() const {return true; /*TODO: isEnabled();*/}
-    virtual bool isExpired() const {return !isValid();}  //TODO rename IPv4 method
     virtual Address getDestinationAsGeneric() const {return getDestination();}
     virtual int getPrefixLength() const {return getNetmask().getNetmaskLength();}
     virtual Address getNextHopAsGeneric() const {return getGateway();} //TODO rename IPv4 method
