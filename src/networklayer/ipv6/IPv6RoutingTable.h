@@ -82,7 +82,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
 
   protected:
     // creates a new empty route, factory method overriden in subclasses that use custom routes
-    virtual IPv6Route *createNewRoute(IPv6Address destPrefix, int prefixLength, IPv6Route::RouteSrc src);
+    virtual IPv6Route *createNewRoute(IPv6Address destPrefix, int prefixLength, IRoute::SourceType src);
 
     // internal: routes of different type can only be added via well-defined functions
     virtual void addRoute(IPv6Route *route);
@@ -378,7 +378,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry) {/*TODO removeMulticastRoute(entry);*/ return entry;}
     virtual bool deleteMulticastRoute(IMulticastRoute *entry) {return false; /*TODO: deleteMulticastRoute(entry);*/}
     virtual void purgeExpiredRoutes() {/*TODO purge();*/}  //XXX inconsistent names
-    virtual IRoute *createRoute() { return new IPv6Route(IPv6Address(), 0, IPv6Route::STATIC); }
+    virtual IRoute *createRoute() { return new IPv6Route(IPv6Address(), 0, IRoute::MANUAL); }
 };
 
 #endif

@@ -52,7 +52,7 @@ IPv6RoutingTable::~IPv6RoutingTable()
         delete routeList[i];
 }
 
-IPv6Route *IPv6RoutingTable::createNewRoute(IPv6Address destPrefix, int prefixLength, IPv6Route::RouteSrc src)
+IPv6Route *IPv6RoutingTable::createNewRoute(IPv6Address destPrefix, int prefixLength, IRoute::SourceType src)
 {
     return new IPv6Route(destPrefix, prefixLength, src);
 }
@@ -509,7 +509,7 @@ const IPv6Route *IPv6RoutingTable::doLongestPrefixMatch(const IPv6Address& dest)
         {
             if (simTime() > (*it)->getExpiryTime() && (*it)->getExpiryTime() != 0)//since 0 represents infinity.
             {
-                if ( (*it)->getSrc()==IPv6Route::FROM_RA )
+                if ( (*it)->getSourceType()==IRoute::ROUTER_ADVERTISEMENT )
                 {
                     EV << "Expired prefix detected!!" << endl;
                     it = routeList.erase(it);
@@ -594,7 +594,7 @@ void IPv6RoutingTable::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, in
     IPv6Route *route = NULL;
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
-        if ((*it)->getSrc()==IPv6Route::FROM_RA && (*it)->getDestPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
+        if ((*it)->getSourceType()==IRoute::ROUTER_ADVERTISEMENT && (*it)->getDestPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
         {
             route = *it;
             break;
@@ -604,7 +604,7 @@ void IPv6RoutingTable::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, in
     if (route==NULL)
     {
         // create new route object
-        IPv6Route *route = createNewRoute(destPrefix, prefixLength, IPv6Route::FROM_RA);
+        IPv6Route *route = createNewRoute(destPrefix, prefixLength, IRoute::ROUTER_ADVERTISEMENT);
         route->setInterfaceId(interfaceId);
         route->setExpiryTime(expiryTime);
         route->setMetric(0);
@@ -634,7 +634,7 @@ void IPv6RoutingTable::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, in
     IPv6Route *route = NULL;
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
-        if ((*it)->getSrc()==IPv6Route::OWN_ADV_PREFIX && (*it)->getDestPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
+        if ((*it)->getSourceType()==IRoute::OWN_ADV_PREFIX && (*it)->getDestPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
         {
             route = *it;
             break;
@@ -644,7 +644,7 @@ void IPv6RoutingTable::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, in
     if (route==NULL)
     {
         // create new route object
-        IPv6Route *route = createNewRoute(destPrefix, prefixLength, IPv6Route::OWN_ADV_PREFIX);
+        IPv6Route *route = createNewRoute(destPrefix, prefixLength, IRoute::OWN_ADV_PREFIX);
         route->setInterfaceId(interfaceId);
         route->setExpiryTime(expiryTime);
         route->setMetric(0);
@@ -670,7 +670,7 @@ void IPv6RoutingTable::removeOnLinkPrefix(const IPv6Address& destPrefix, int pre
     // scan the routing table for this prefix and remove it
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
-        if ((*it)->getSrc()==IPv6Route::FROM_RA && (*it)->getDestPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
+        if ((*it)->getSourceType()==IRoute::ROUTER_ADVERTISEMENT && (*it)->getDestPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
         {
             routeList.erase(it);
             return; // there can be only one such route, addOrUpdateOnLinkPrefix() guarantees that
@@ -685,7 +685,7 @@ void IPv6RoutingTable::addStaticRoute(const IPv6Address& destPrefix, int prefixL
                     int metric)
 {
     // create route object
-    IPv6Route *route = createNewRoute(destPrefix, prefixLength, IPv6Route::STATIC);
+    IPv6Route *route = createNewRoute(destPrefix, prefixLength, IRoute::MANUAL);
     route->setInterfaceId(interfaceId);
     route->setNextHop(nextHop);
     if (metric==0)
@@ -701,7 +701,7 @@ void IPv6RoutingTable::addDefaultRoute(const IPv6Address& nextHop, unsigned int 
         simtime_t routerLifetime)
 {
     // create route object
-    IPv6Route *route = createNewRoute(IPv6Address(), 0, IPv6Route::FROM_RA);
+    IPv6Route *route = createNewRoute(IPv6Address(), 0, IRoute::ROUTER_ADVERTISEMENT);
     route->setInterfaceId(ifID);
     route->setNextHop(nextHop);
     route->setMetric(10); //FIXME:should be filled from interface metric
@@ -717,7 +717,7 @@ void IPv6RoutingTable::addDefaultRoute(const IPv6Address& nextHop, unsigned int 
 
 void IPv6RoutingTable::addRoutingProtocolRoute(IPv6Route *route)
 {
-    ASSERT(route->getSrc()==IPv6Route::ROUTING_PROT);
+    // TODO ASSERT(route->getSrc()==IPv6Route::ROUTING_PROT);
     addRoute(route);
 }
 

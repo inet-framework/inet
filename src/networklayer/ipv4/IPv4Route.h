@@ -36,19 +36,6 @@ class IIPv4RoutingTable;
 class INET_API IPv4Route : public cObject, public IRoute
 {
   public:
-    /** Specifies where the route comes from */
-    enum RouteSource
-    {
-        MANUAL,       ///< manually added static route
-        IFACENETMASK, ///< comes from an interface's netmask
-        RIP,          ///< managed by the given routing protocol
-        OSPF,         ///< managed by the given routing protocol
-        BGP,          ///< managed by the given routing protocol
-        ZEBRA,        ///< managed by the Quagga/Zebra based model
-        MANET,        ///< managed by manet, search exact address
-        MANET2,       ///< managed by manet, search approximate address
-    };
-
     /** Cisco like administrative distances */
     enum RouteAdminDist
     {
@@ -75,7 +62,7 @@ class INET_API IPv4Route : public cObject, public IRoute
     IPv4Address netmask;  ///< Route mask
     IPv4Address gateway;  ///< Next hop
     InterfaceEntry *interfacePtr; ///< interface
-    RouteSource sourceType;   ///< manual, routing prot, etc.
+    SourceType sourceType;   ///< manual, routing prot, etc.
     unsigned int adminDist; ///< Cisco like administrative distance
     int metric;           ///< Metric ("cost" to reach the destination)
     cObject *source;   ///< Object identifying the source
@@ -117,7 +104,7 @@ class INET_API IPv4Route : public cObject, public IRoute
     virtual void setNetmask(IPv4Address _netmask)  { if (netmask != _netmask) {netmask = _netmask; changed(F_NETMASK);} }
     virtual void setGateway(IPv4Address _gateway)  { if (gateway != _gateway) {gateway = _gateway; changed(F_GATEWAY);} }
     virtual void setInterface(InterfaceEntry *_interfacePtr)  { if (interfacePtr != _interfacePtr) {interfacePtr = _interfacePtr; changed(F_IFACE);} }
-    virtual void setSourceType(RouteSource _source)  { if (sourceType != _source) {sourceType = _source; changed(F_SOURCE);} }
+    virtual void setSourceType(SourceType _source)  { if (sourceType != _source) {sourceType = _source; changed(F_SOURCE);} }
     virtual void setAdminDist(unsigned int _adminDist)  { if (adminDist != _adminDist) { adminDist = _adminDist; changed(F_ADMINDIST);} }
     virtual void setMetric(int _metric)  { if (metric != _metric) {metric = _metric; changed(F_METRIC);} }
 
@@ -137,7 +124,7 @@ class INET_API IPv4Route : public cObject, public IRoute
     const char *getInterfaceName() const;
 
     /** Source of route. MANUAL (read from file), from routing protocol, etc */
-    RouteSource getSourceType() const {return sourceType;}
+    SourceType getSourceType() const {return sourceType;}
 
     /** Route source specific preference value */
     unsigned int getAdminDist() const  { return adminDist; }
@@ -145,7 +132,7 @@ class INET_API IPv4Route : public cObject, public IRoute
     /** "Cost" to reach the destination */
     int getMetric() const {return metric;}
 
-    void setSource(cObject *_source) { source = _source; }
+    void setSource(cObject *_source) { source = _source; } // TODO call changed()
     cObject *getSource() const { return source; }
 
     cObject *getProtocolData() const { return protocolData; }
@@ -186,16 +173,6 @@ class INET_API IPv4Route : public cObject, public IRoute
  */
 class INET_API IPv4MulticastRoute : public cObject, public IMulticastRoute
 {
-  public:
-    /** Specifies where the route comes from */
-    enum RouteSource
-    {
-        MANUAL,       ///< manually added static route
-        DVMRP,        ///< managed by DVMRP router
-        PIM_DM,       ///< managed by PIM-DM router
-        PIM_SM,       ///< managed by PIM-SM router
-    };
-
   private:
     IIPv4RoutingTable *rt;             ///< the routing table in which this route is inserted, or NULL
     IPv4Address origin;            ///< Source network
@@ -203,7 +180,7 @@ class INET_API IPv4MulticastRoute : public cObject, public IMulticastRoute
     IPv4Address group;             ///< Multicast group, if unspecified then matches any
     InInterface *inInterface;      ///< In interface (upstream)
     OutInterfaceVector outInterfaces; ///< Out interfaces (downstream)
-    RouteSource sourceType;            ///< manual, routing prot, etc.
+    SourceType sourceType;            ///< manual, routing prot, etc.
     cObject *source;               ///< Object identifying the source
     int metric;                    ///< Metric ("cost" to reach the source)
     IMulticastRoute *adapter;
@@ -247,7 +224,7 @@ class INET_API IPv4MulticastRoute : public cObject, public IMulticastRoute
     virtual void addOutInterface(OutInterface *outInterface);
     virtual bool removeOutInterface(const InterfaceEntry *ie);
     virtual void removeOutInterface(unsigned int i);
-    virtual void setSourceType(RouteSource _source)  { if (sourceType != _source) {sourceType = _source; changed(F_SOURCE);} }
+    virtual void setSourceType(SourceType _source)  { if (sourceType != _source) {sourceType = _source; changed(F_SOURCE);} }
     virtual void setMetric(int _metric)  { if (metric != _metric) {metric = _metric; changed(F_METRIC);} }
 
     /** Source address prefix to match */
@@ -269,7 +246,7 @@ class INET_API IPv4MulticastRoute : public cObject, public IMulticastRoute
     OutInterface *getOutInterface(unsigned int k) const {return outInterfaces.at(k); }
 
     /** Source of route. MANUAL (read from file), from routing protocol, etc */
-    RouteSource getSourceType() const {return sourceType;}
+    SourceType getSourceType() const {return sourceType;}
 
     /** "Cost" to reach the destination */
     int getMetric() const {return metric;}

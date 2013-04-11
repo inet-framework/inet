@@ -33,6 +33,23 @@ class IRoutingTable;
 class INET_API IRoute
 {
     public:
+        /** Specifies where the route comes from */
+        enum SourceType
+        {
+            MANUAL,               ///< manually added static route
+            IFACENETMASK,         ///< comes from an interface's netmask
+            ROUTER_ADVERTISEMENT, ///< on-link prefix, from Router Advertisement
+            OWN_ADV_PREFIX,       ///< on routers: on-link prefix that the router **itself** advertises on the link
+            ICMP_REDIRECT,        ///< ICMP redirect message
+            RIP,          ///< managed by the given routing protocol
+            OSPF,         ///< managed by the given routing protocol
+            BGP,          ///< managed by the given routing protocol
+            ZEBRA,        ///< managed by the Quagga/Zebra based model
+            MANET,        ///< managed by manet, search exact address
+            MANET2,       ///< managed by manet, search approximate address
+        };
+
+
 //TODO maybe:
 //    virtual std::string info() const;
 //    virtual std::string detailedInfo() const;
@@ -51,6 +68,7 @@ class INET_API IRoute
         virtual void setNextHop(const Address& nextHop) = 0;
         virtual void setInterface(InterfaceEntry *ie) = 0;
         virtual void setSource(cObject *source) = 0;
+        virtual void setSourceType(SourceType type) = 0;
         virtual void setMetric(int metric) = 0;  //XXX double?
 
         /** Destination address prefix to match */
@@ -68,11 +86,16 @@ class INET_API IRoute
         /** Source of route */
         virtual cObject *getSource() const = 0;
 
+        /** Source type of the route */
+        virtual SourceType getSourceType() const = 0;
+
         /** Cost to reach the destination */
         virtual int getMetric() const = 0;
 
         virtual cObject *getProtocolData() const = 0;
         virtual void setProtocolData(cObject *protocolData) = 0;
+
+        static const char *sourceTypeName(SourceType sourceType);
 };
 
 // TODO: move into info()?
@@ -139,6 +162,14 @@ class INET_API IMulticastRoute
 
     typedef std::vector<OutInterface*> OutInterfaceVector;
 
+        /** Specifies where the route comes from */
+        enum SourceType
+        {
+            MANUAL,       ///< manually added static route
+            DVMRP,        ///< managed by DVMRP router
+            PIM_SM,       ///< managed by PIM-SM router
+        };
+
 //TODO maybe:
 //    virtual std::string info() const;
 //    virtual std::string detailedInfo() const;
@@ -158,6 +189,7 @@ class INET_API IMulticastRoute
         virtual bool removeOutInterface(const InterfaceEntry *ie) = 0;
         virtual void removeOutInterface(unsigned int i) = 0;
         virtual void setSource(cObject *source) = 0;
+        virtual void setSourceType(SourceType type) = 0;
         virtual void setMetric(int metric) = 0;
 
         /** Disabled entries are ignored by routing until the became enabled again. */
@@ -178,8 +210,13 @@ class INET_API IMulticastRoute
         /** Source of route */
         virtual cObject *getSource() const = 0;
 
+        /** Source type of the route */
+        virtual SourceType getSourceType() const = 0;
+
         /** Cost to reach the destination */
         virtual int getMetric() const = 0;
+
+        static const char *sourceTypeName(SourceType sourceType);
 };
 
 #endif

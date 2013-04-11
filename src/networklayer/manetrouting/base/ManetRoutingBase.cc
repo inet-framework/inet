@@ -604,7 +604,7 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
         netmask = IPv4Address::ALLONES_ADDRESS;
 
     InterfaceEntry *ie = getInterfaceWlanByAddress(iface);
-    IPv4Route::RouteSource routeSource = useManetLabelRouting ? IPv4Route::MANET : IPv4Route::MANET2;
+    IRoute::SourceType sourceType = useManetLabelRouting ? IRoute::MANET : IRoute::MANET2;
 
     if (found)
     {
@@ -613,7 +613,7 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
                 && oldentry->getGateway() == gateway
                 && oldentry->getMetric() == hops
                 && oldentry->getInterface() == ie
-                && oldentry->getSourceType() == routeSource)
+                && oldentry->getSourceType() == sourceType)
             return;
         inet_rt->deleteRoute(oldentry);
     }
@@ -634,7 +634,7 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
 
     /// Source of route, MANUAL by reading a file,
     /// routing protocol name otherwise
-    entry->setSourceType(routeSource);
+    entry->setSourceType(sourceType);
     inet_rt->addRoute(entry);
 }
 
@@ -686,7 +686,7 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
         netmask = IPv4Address::ALLONES_ADDRESS;
 
     InterfaceEntry *ie = getInterfaceEntry(index);
-    IPv4Route::RouteSource routeSource = useManetLabelRouting ? IPv4Route::MANET : IPv4Route::MANET2;
+    IRoute::SourceType sourceType = useManetLabelRouting ? IRoute::MANET : IRoute::MANET2;
 
     if (found)
     {
@@ -695,7 +695,7 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
                 && oldentry->getGateway() == gateway
                 && oldentry->getMetric() == hops
                 && oldentry->getInterface() == ie
-                && oldentry->getSourceType() == routeSource)
+                && oldentry->getSourceType() == sourceType)
             return;
         inet_rt->deleteRoute(oldentry);
     }
@@ -718,9 +718,9 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
     /// routing protocol name otherwise
 
     if (useManetLabelRouting)
-        entry->setSourceType(IPv4Route::MANET);
+        entry->setSourceType(IRoute::MANET);
     else
-        entry->setSourceType(IPv4Route::MANET2);
+        entry->setSourceType(IRoute::MANET2);
 
         inet_rt->addRoute(entry);
 
@@ -1100,8 +1100,8 @@ bool ManetRoutingBase::setRoute(const ManetAddress & destination, const ManetAdd
 
     /// Source of route, MANUAL by reading a file,
     /// routing protocol name otherwise
-    IPv4Route::RouteSource routeSource = useManetLabelRouting ? IPv4Route::MANET : IPv4Route::MANET2;
-    entry->setSourceType(routeSource);
+    IRoute::SourceType sourceType = useManetLabelRouting ? IRoute::MANET : IRoute::MANET2;
+    entry->setSourceType(sourceType);
 
     inet_rt->addRoute(entry);
 

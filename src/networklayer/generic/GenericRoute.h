@@ -29,6 +29,7 @@ class IRoutingTable;
 /**
  * A generic route that uses generic addresses as destination and next hop.
  */
+// TODO change notifications
 class INET_API GenericRoute : public cObject, public IRoute
 {
     private:
@@ -37,6 +38,7 @@ class INET_API GenericRoute : public cObject, public IRoute
         Address destination;
         Address nextHop;
         InterfaceEntry *interface;
+        SourceType sourceType;
         cObject *source;
         cObject *protocolData;
         int metric;
@@ -55,6 +57,7 @@ class INET_API GenericRoute : public cObject, public IRoute
         virtual void setPrefixLength(int l) {this->prefixLength = l;}
         virtual void setNextHop(const Address& nextHop) {this->nextHop = nextHop;}
         virtual void setInterface(InterfaceEntry *ie) {this->interface = ie;}
+        virtual void setSourceType(SourceType sourceType)  {this->sourceType = sourceType; }
         virtual void setSource(cObject *source) {this->source = source;}
         virtual void setMetric(int metric) {this->metric = metric;}
         virtual void setProtocolData(cObject *protocolData) {this->protocolData = protocolData;}
@@ -73,6 +76,9 @@ class INET_API GenericRoute : public cObject, public IRoute
 
         /** Next hop interface */
         virtual InterfaceEntry *getInterface() const {return interface;}
+
+        /** Source type of the route */
+        SourceType getSourceType() const {return sourceType;}
 
         /** Source of route */
         virtual cObject *getSource() const {return source;}

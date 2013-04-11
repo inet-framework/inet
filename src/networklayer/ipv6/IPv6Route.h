@@ -32,18 +32,10 @@ class IPv6RoutingTable;
  * Represents a route in the route table. Routes with src=FROM_RA represent
  * on-link prefixes advertised by routers.
  */
+// TODO change notifications
 class INET_API IPv6Route : public cObject, public IRoute
 {
   public:
-    /** Specifies where the route comes from */
-    enum RouteSrc
-    {
-        FROM_RA,        ///< on-link prefix, from Router Advertisement
-        OWN_ADV_PREFIX, ///< on routers: on-link prefix that the router **itself** advertises on the link
-        STATIC,         ///< static route
-        ROUTING_PROT,   ///< route is managed by a routing protocol (OSPF,BGP,etc)
-    };
-
     /** Cisco like administrative distances (includes IPv4 protocols)*/
     enum RouteAdminDist
     {
@@ -78,7 +70,7 @@ class INET_API IPv6Route : public cObject, public IRoute
     IPv6RoutingTable *_rt;     ///< the routing table in which this route is inserted, or NULL
     IPv6Address _destPrefix;
     short _length;
-    RouteSrc _src;
+    SourceType _sourceType;
     int _interfaceID;      //XXX IPv4 IIPv4RoutingTable uses interface pointer
     IPv6Address _nextHop;  // unspecified means "direct"
     simtime_t _expiryTime; // if route is an advertised prefix: prefix lifetime
@@ -92,11 +84,11 @@ class INET_API IPv6Route : public cObject, public IRoute
      * Constructor. The destination prefix and the route source is passed
      * to the constructor and cannot be changed afterwards.
      */
-    IPv6Route(IPv6Address destPrefix, int length, RouteSrc src) {
+    IPv6Route(IPv6Address destPrefix, int length, SourceType sourceType) {
         _rt = NULL;
         _destPrefix = destPrefix;
         _length = length;
-        _src = src;
+        _sourceType = sourceType;
         _interfaceID = -1;
         _expiryTime = 0;
         _metric = 0;
@@ -111,7 +103,6 @@ class INET_API IPv6Route : public cObject, public IRoute
 
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
-    static const char *routeSrcName(RouteSrc src);
 
     void setInterfaceId(int interfaceId)  { if (interfaceId != _interfaceID) { _interfaceID = interfaceId; changed(F_IFACE);} }
     void setNextHop(const IPv6Address& nextHop)  {if (nextHop != _nextHop) { _nextHop = nextHop; changed(F_NEXTHOP);} }
@@ -120,21 +111,20 @@ class INET_API IPv6Route : public cObject, public IRoute
     void setAdminDist(unsigned int adminDist)  { if (adminDist != _adminDist) { _adminDist = adminDist; changed(F_ADMINDIST);} }
 
     const IPv6Address& getDestPrefix() const {return _destPrefix;}
-    int getPrefixLength() const  {return _length;}
-    RouteSrc getSrc() const  {return _src;}
+    virtual int getPrefixLength() const  {return _length;}
+    virtual SourceType getSourceType() const { return _sourceType; }
     int getInterfaceId() const  {return _interfaceID;}
     const IPv6Address& getNextHop() const  {return _nextHop;}
     simtime_t getExpiryTime() const  {return _expiryTime;}
-    int getMetric() const  {return _metric;}
+    virtual int getMetric() const  {return _metric;}
     unsigned int getAdminDist() const  { return _adminDist; }
-
     virtual IRoutingTable *getRoutingTableAsGeneric() const {return NULL; /*TODO: getRoutingTable();*/}
 
     virtual void setDestination(const Address& dest) {/*TODO: setDestination(dest.toIPv6());*/}
     virtual void setPrefixLength(int len) {/*TODO: setPrefixLength(len));*/}
     virtual void setNextHop(const Address& nextHop) {setNextHop(nextHop.toIPv6());}
     virtual void setSource(cObject *source) {/*TODO: setSource(source);*/}
-
+    virtual void setSourceType(SourceType type) { _sourceType = type; }
     virtual Address getDestinationAsGeneric() const {return getDestPrefix();} //TODO rename IPv6 method
     virtual Address getNextHopAsGeneric() const {return getNextHop();}
     virtual InterfaceEntry *getInterface() const {return NULL; /*TODO getInterface();*/} //TODO change IPv6Route API from interfaceID to interface ptr
