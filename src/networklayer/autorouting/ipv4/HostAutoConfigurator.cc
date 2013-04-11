@@ -32,10 +32,7 @@ Define_Module(HostAutoConfigurator);
 void HostAutoConfigurator::initialize(int stage) {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0) {
-        debug = par("debug").boolValue();
-    }
-    else if (stage == 2) {
+    if (stage == 2) {
         setupNetworkLayer();
     }
 }

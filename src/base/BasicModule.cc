@@ -35,11 +35,6 @@ void BasicModule::initialize(int stage)
 
     if (stage == 0)
     {
-        if (hasPar("debug"))
-            debug = par("debug").boolValue();
-        else
-            debug = false;
-
         if (host) {
             // get the logging name of the host
             if (host->hasPar("logName"))

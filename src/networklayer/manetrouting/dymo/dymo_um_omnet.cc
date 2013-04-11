@@ -99,8 +99,6 @@ void DYMOUM::initialize(int stage)
         /* From debug.c */
         /* Note: log_nmsgs was never used anywhere */
 
-        debug = 0;
-
         gateWayAddress = new IPv4Address("0.0.0.0");
         /* Set host parameters */
         memset(&this_host, 0, sizeof(struct host_info));

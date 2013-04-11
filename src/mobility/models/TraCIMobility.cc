@@ -75,7 +75,6 @@ void TraCIMobility::Statistics::recordScalars(cSimpleModule& module)
 void TraCIMobility::initialize(int stage)
 {
     if (stage == 0) {
-        debug = par("debug");
         accidentCount = par("accidentCount");
 
         currentPosXVec.setName("posx");

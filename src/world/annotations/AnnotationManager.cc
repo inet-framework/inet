@@ -31,8 +31,6 @@ AnnotationManager::~AnnotationManager()
 
 void AnnotationManager::initialize()
 {
-    debug = par("debug");
-
     annotations.clear();
     groups.clear();
 

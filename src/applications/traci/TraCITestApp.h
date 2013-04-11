@@ -45,7 +45,6 @@ class TraCITestApp : public cSimpleModule, protected cListener, public ILifecycl
 
     protected:
         // module parameters
-        bool debug;
         int testNumber;
 
         TraCIMobility* traci;

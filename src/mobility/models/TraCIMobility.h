@@ -158,7 +158,6 @@ class INET_API TraCIMobility : public MobilityBase
         }
 
     protected:
-        bool debug; /**< whether to emit debug messages */
         int accidentCount; /**< number of accidents */
 
         cOutVector currentPosXVec; /**< vector plotting posx */

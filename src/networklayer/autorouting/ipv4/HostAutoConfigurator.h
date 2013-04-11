@@ -38,8 +38,6 @@ class INET_API HostAutoConfigurator : public cSimpleModule
 
     protected:
         void setupNetworkLayer();
-
-        bool debug; /**< whether to emit debug messages */
 };
 
 #endif

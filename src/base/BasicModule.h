@@ -27,11 +27,6 @@
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 
-#ifndef EV
-#define EV (ev.isDisabled()||!debug) ? (std::ostream&)ev : EV << logName() << "::" << getClassName() << ": "
-#endif
-
-
 /**
  * @brief Base class for all simple modules of a host that want to have
  * access to the NotificationBoard module.
@@ -54,9 +49,6 @@
 class INET_API BasicModule: public cSimpleModule, public INotifiable
 {
   protected:
-    /** @brief Debug switch for all other modules*/
-    bool debug;
-
     /** @brief Log name of the host module*/
     std::string loggingName;
 

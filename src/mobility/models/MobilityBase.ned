@@ -30,7 +30,6 @@ simple MobilityBase like IMobility
 {
     parameters:
         @display("i=block/cogwheel");
-        bool debug = default(false);
         double constraintAreaMinX @unit(m) = default(-1m/0); // min x position of the constraint area, unconstrained by default (negative infinity)
         double constraintAreaMinY @unit(m) = default(-1m/0); // min y position of the constraint area, unconstrained by default (negative infinity)
         double constraintAreaMinZ @unit(m) = default(-1m/0); // min z position of the constraint area, unconstrained by default (negative infinity)

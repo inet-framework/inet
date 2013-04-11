@@ -29,7 +29,6 @@ Define_Module(TraCITestApp);
 void TraCITestApp::initialize(int stage) {
     cSimpleModule::initialize(stage);
     if (stage == 0) {
-        debug = par("debug");
         testNumber = par("testNumber");
 
         mobilityStateChangedSignal = registerSignal("mobilityStateChanged");

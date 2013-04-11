@@ -37,9 +37,8 @@ void TraCIDemo::initialize(int stage) {
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
-    else if (stage == 3) {
-        debug = par("debug");
-
+    else if (stage == 3)
+    {
         mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
         traci = TraCIMobilityAccess().get();
         traci->subscribe(mobilityStateChangedSignal, this);
