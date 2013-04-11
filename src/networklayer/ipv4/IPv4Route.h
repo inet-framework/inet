@@ -67,7 +67,6 @@ class INET_API IPv4Route : public cObject, public IRoute
     int metric;           ///< Metric ("cost" to reach the destination)
     cObject *source;   ///< Object identifying the source
     cObject *protocolData; ///< Routing Protocol specific data
-    IRoute *adapter;
 
   public:
     // field codes for changed()
@@ -84,7 +83,7 @@ class INET_API IPv4Route : public cObject, public IRoute
 
   public:
     IPv4Route() : rt(NULL), interfacePtr(NULL), sourceType(MANUAL), adminDist(dUnknown),
-                  metric(0), source(NULL), protocolData(NULL), adapter(NULL) {}
+                  metric(0), source(NULL), protocolData(NULL) {}
     virtual ~IPv4Route();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
@@ -183,7 +182,6 @@ class INET_API IPv4MulticastRoute : public cObject, public IMulticastRoute
     SourceType sourceType;            ///< manual, routing prot, etc.
     cObject *source;               ///< Object identifying the source
     int metric;                    ///< Metric ("cost" to reach the source)
-    IMulticastRoute *adapter;
 
   public:
     // field codes for changed()
@@ -198,7 +196,7 @@ class INET_API IPv4MulticastRoute : public cObject, public IMulticastRoute
     IPv4MulticastRoute& operator=(const IPv4MulticastRoute& obj);
 
   public:
-    IPv4MulticastRoute() : rt(NULL), inInterface(NULL), sourceType(MANUAL), metric(0), adapter(NULL) {}
+    IPv4MulticastRoute() : rt(NULL), inInterface(NULL), sourceType(MANUAL), metric(0) {}
     virtual ~IPv4MulticastRoute();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
