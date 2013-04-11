@@ -56,12 +56,10 @@ IPv4RoutingTable::IPv4RoutingTable()
 {
     ift = NULL;
     nb = NULL;
-    adapter = NULL;
 }
 
 IPv4RoutingTable::~IPv4RoutingTable()
 {
-    delete adapter;
     for (unsigned int i=0; i<routes.size(); i++)
         delete routes[i];
     for (unsigned int i=0; i<multicastRoutes.size(); i++)
