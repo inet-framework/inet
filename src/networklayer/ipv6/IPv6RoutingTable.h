@@ -102,6 +102,8 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     // internal
     virtual void configureTunnelFromXML(cXMLElement* cfg);
 
+    RouteList::iterator internalDeleteRoute(RouteList::iterator it);
+
   protected:
     // displays summary above the icon
     virtual void updateDisplayString();
@@ -257,7 +259,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * NOTE: This method does NOT remove the matching addresses from the
      * IInterfaceTable (see IPv6InterfaceData); that has to be done separately.
      */
-    virtual void removeOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength);
+    virtual void deleteOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength);
 
     /**
      * Add route of type OWN_ADV_PREFIX. This is a prefix that *this* router
@@ -289,9 +291,21 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual void addRoutingProtocolRoute(IPv6Route *route);
 
     /**
-     * Deletes the given route from the route table.
+     * Removes the given route from the routing table, and returns it.
+     * NULL is returned if the route was not in the routing table.
      */
     virtual IPv6Route *removeRoute(IPv6Route *route);
+
+    /**
+     * Deletes the given route from the route table.
+     * Returns true, if it was deleted, false if it was not found in the routing table.
+     */
+    virtual bool deleteRoute(IPv6Route *route);
+
+    /**
+     * Deletes the routes that are using the specified interface.
+     */
+    virtual void deleteInterfaceRoutes(const InterfaceEntry *entry);
 
     /**
      * Return the number of routes.
@@ -318,19 +332,19 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     bool isHomeAddress(const IPv6Address& addr);
 
     /**
-     * Removes the current default routes for the given interface.
+     * Deletes the current default routes for the given interface.
      */
-    void removeDefaultRoutes(int interfaceID);
+    void deleteDefaultRoutes(int interfaceID);
 
     /**
-     * Removes all routes from the routing table.
+     * Deletes all routes from the routing table.
      */
-    void removeAllRoutes();
+    void deleteAllRoutes();
 
     /**
-     * Removes all prefixes registered for the given interface.
+     * Deletes all prefixes registered for the given interface.
      */
-    void removePrefixes(int interfaceID);
+    void deletePrefixes(int interfaceID);
 
     /**
      * Can be used to check whether this node supports MIPv6 or not
@@ -370,8 +384,8 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual IMulticastRoute *findBestMatchingMulticastRoute(const Address &origin, const Address& group) const {return NULL; /*TODO findBestMatchingMulticastRoute(origin.toIPv6(), group.toIPv6());*/}
     virtual IRoute *getDefaultRoute() const {return NULL; /*TODO getDefaultRoute();*/}
     virtual void addRoute(IRoute *entry) {addRoutingProtocolRoute(check_and_cast<IPv6Route *>(entry));} //XXX contrast that with addStaticRoute()!
-    virtual IRoute *removeRoute(IRoute *entry) { return removeRoute(check_and_cast<IPv6Route *>(entry)); }
-    virtual bool deleteRoute(IRoute *entry) {removeRoute(check_and_cast<IPv6Route *>(entry)); return true; /*TODO retval!*/}
+    virtual IRoute *removeRoute(IRoute *entry) { return removeRoute(check_and_cast<IPv6Route *>(entry));}
+    virtual bool deleteRoute(IRoute *entry) { return deleteRoute(check_and_cast<IPv6Route *>(entry));}
     virtual IMulticastRoute *getMulticastRoute(int i) const {return NULL; /*TODO*/}
     virtual int getNumMulticastRoutes() const {return 0; /*TODO getNumMulticastRoutes();*/}
     virtual void addMulticastRoute(IMulticastRoute *entry) {/*TODO addMulticastRoute(entry);*/}

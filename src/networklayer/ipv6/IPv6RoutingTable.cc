@@ -193,10 +193,9 @@ void IPv6RoutingTable::receiveChangeNotification(int category, const cObject *de
     }
     else if (category==NF_INTERFACE_DELETED)
     {
-        //TODO remove all routes that point to that interface (?)
-        const InterfaceEntry *interfaceEntry = check_and_cast<const InterfaceEntry*>(details);
-        int interfaceEntryId = interfaceEntry->getInterfaceId();
-        purgeDestCacheForInterfaceID(interfaceEntryId);
+        // remove all routes that point to that interface
+        const InterfaceEntry *entry = check_and_cast<const InterfaceEntry*>(details);
+        deleteInterfaceRoutes(entry);
     }
     else if (category==NF_INTERFACE_STATE_CHANGED)
     {
@@ -501,7 +500,6 @@ const IPv6Route *IPv6RoutingTable::doLongestPrefixMatch(const IPv6Address& dest)
     // we'll just stop at the first match, because the table is sorted
     // by prefix lengths and metric (see addRoute())
 
-    // bugfix - CB
     RouteList::iterator it = routeList.begin();
     while (it!=routeList.end())
     {
@@ -512,9 +510,7 @@ const IPv6Route *IPv6RoutingTable::doLongestPrefixMatch(const IPv6Address& dest)
                 if ( (*it)->getSourceType()==IRoute::ROUTER_ADVERTISEMENT )
                 {
                     EV << "Expired prefix detected!!" << endl;
-                    it = routeList.erase(it);
-                    //RouteList::iterator oldIt = it++;
-                    //removeOnLinkPrefix((*oldIt)->getDestPrefix(), (*oldIt)->getPrefixLength());
+                    it = internalDeleteRoute(it); // TODO update display string
                 }
             }
             else
@@ -605,7 +601,7 @@ void IPv6RoutingTable::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, in
     {
         // create new route object
         IPv6Route *route = createNewRoute(destPrefix, prefixLength, IRoute::ROUTER_ADVERTISEMENT);
-        route->setInterfaceId(interfaceId);
+        route->setInterface(ift->getInterfaceById(interfaceId));
         route->setExpiryTime(expiryTime);
         route->setMetric(0);
         route->setAdminDist(IPv6Route::dDirectlyConnected);
@@ -617,7 +613,7 @@ void IPv6RoutingTable::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, in
     {
         // update existing one; notification-wise, we pretend the route got removed then re-added
         nb->fireChangeNotification(NF_ROUTE_DELETED, route);
-        route->setInterfaceId(interfaceId);
+        route->setInterface(ift->getInterfaceById(interfaceId));
         route->setExpiryTime(expiryTime);
         nb->fireChangeNotification(NF_ROUTE_ADDED, route);
     }
@@ -645,7 +641,7 @@ void IPv6RoutingTable::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, in
     {
         // create new route object
         IPv6Route *route = createNewRoute(destPrefix, prefixLength, IRoute::OWN_ADV_PREFIX);
-        route->setInterfaceId(interfaceId);
+        route->setInterface(ift->getInterfaceById(interfaceId));
         route->setExpiryTime(expiryTime);
         route->setMetric(0);
         route->setAdminDist(IPv6Route::dDirectlyConnected);
@@ -657,7 +653,7 @@ void IPv6RoutingTable::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, in
     {
         // update existing one; notification-wise, we pretend the route got removed then re-added
         nb->fireChangeNotification(NF_ROUTE_DELETED, route);
-        route->setInterfaceId(interfaceId);
+        route->setInterface(ift->getInterfaceById(interfaceId));
         route->setExpiryTime(expiryTime);
         nb->fireChangeNotification(NF_ROUTE_ADDED, route);
     }
@@ -665,14 +661,14 @@ void IPv6RoutingTable::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, in
     updateDisplayString();
 }
 
-void IPv6RoutingTable::removeOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength)
+void IPv6RoutingTable::deleteOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength)
 {
     // scan the routing table for this prefix and remove it
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
     {
         if ((*it)->getSourceType()==IRoute::ROUTER_ADVERTISEMENT && (*it)->getDestPrefix()==destPrefix && (*it)->getPrefixLength()==prefixLength)
         {
-            routeList.erase(it);
+            internalDeleteRoute(it);
             return; // there can be only one such route, addOrUpdateOnLinkPrefix() guarantees that
         }
     }
@@ -686,7 +682,7 @@ void IPv6RoutingTable::addStaticRoute(const IPv6Address& destPrefix, int prefixL
 {
     // create route object
     IPv6Route *route = createNewRoute(destPrefix, prefixLength, IRoute::MANUAL);
-    route->setInterfaceId(interfaceId);
+    route->setInterface(ift->getInterfaceById(interfaceId));
     route->setNextHop(nextHop);
     if (metric==0)
         metric = 10; // TBD should be filled from interface metric
@@ -702,7 +698,7 @@ void IPv6RoutingTable::addDefaultRoute(const IPv6Address& nextHop, unsigned int 
 {
     // create route object
     IPv6Route *route = createNewRoute(IPv6Address(), 0, IRoute::ROUTER_ADVERTISEMENT);
-    route->setInterfaceId(ifID);
+    route->setInterface(ift->getInterfaceById(ifID));
     route->setNextHop(nextHop);
     route->setMetric(10); //FIXME:should be filled from interface metric
     route->setAdminDist(IPv6Route::dStatic);
@@ -739,8 +735,10 @@ bool IPv6RoutingTable::routeLessThan(const IPv6Route *a, const IPv6Route *b)
 
 void IPv6RoutingTable::addRoute(IPv6Route *route)
 {
-    route->setRoutingTable(this);
+    ASSERT(route->getRoutingTable() == NULL);
+
     routeList.push_back(route);
+    route->setRoutingTable(this);
 
     // we keep entries sorted by prefix length in routeList, so that we can
     // stop at the first match when doing the longest prefix matching
@@ -757,20 +755,40 @@ void IPv6RoutingTable::addRoute(IPv6Route *route)
 IPv6Route *IPv6RoutingTable::removeRoute(IPv6Route *route)
 {
     RouteList::iterator it = std::find(routeList.begin(), routeList.end(), route);
-    ASSERT(it!=routeList.end());
-
-    nb->fireChangeNotification(NF_ROUTE_DELETED, route); // rather: going to be deleted
+    if (it == routeList.end())
+        return NULL;
 
     routeList.erase(it);
-    delete route;
-
-    /*XXX: this deletes some cache entries we want to keep, but the node MUST update
-     the Destination Cache in such a way that all entries using the next-hop from
-     the deleted route perform next-hop determination again rather than continue
-     sending traffic using that deleted route next-hop.*/
-    purgeDestCache();
     updateDisplayString();
+    // TODO purge cache?
+
+    ASSERT(route->getRoutingTable() == this);
+    nb->fireChangeNotification(NF_ROUTE_DELETED, route); // rather: going to be deleted
+    route->setRoutingTable(NULL);
+
     return route;
+}
+
+IPv6RoutingTable::RouteList::iterator IPv6RoutingTable::internalDeleteRoute(RouteList::iterator it)
+{
+    ASSERT(it != routeList.end());
+    IPv6Route *route = *it;
+    it = routeList.erase(it);
+    nb->fireChangeNotification(NF_ROUTE_DELETED, route);
+    // TODO purge cache?
+    delete route;
+    return it;
+}
+
+bool IPv6RoutingTable::deleteRoute(IPv6Route *route)
+{
+    RouteList::iterator it = std::find(routeList.begin(), routeList.end(), route);
+    if (it == routeList.end())
+        return false;
+
+    internalDeleteRoute(it);
+    updateDisplayString();
+    return true;
 }
 
 int IPv6RoutingTable::getNumRoutes() const
@@ -815,15 +833,18 @@ bool IPv6RoutingTable::isHomeAddress(const IPv6Address& addr)
 }
 
 // Added by CB
-void IPv6RoutingTable::removeDefaultRoutes(int interfaceID)
+void IPv6RoutingTable::deleteDefaultRoutes(int interfaceID)
 {
+    ASSERT(interfaceID >= 0);
+
     EV << "/// Removing default route for interface=" << interfaceID << endl;
 
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); )
     {
         // default routes have prefix length 0
-        if ( (((*it)->getInterfaceId()) == interfaceID) && ((*it)->getPrefixLength() == 0)  )
-            it = routeList.erase(it);
+        if ( (*it)->getInterface() && (*it)->getInterface()->getInterfaceId() == interfaceID &&
+             (*it)->getPrefixLength() == 0  )
+            it = internalDeleteRoute(it);
         else
             ++it;
     }
@@ -832,31 +853,66 @@ void IPv6RoutingTable::removeDefaultRoutes(int interfaceID)
 }
 
 // Added by CB
-void IPv6RoutingTable::removeAllRoutes()
+void IPv6RoutingTable::deleteAllRoutes()
 {
     EV << "/// Removing all routes from rt6 " << endl;
 
     for (unsigned int i=0; i<routeList.size(); i++)
+    {
+        nb->fireChangeNotification(NF_ROUTE_DELETED, routeList[i]);
         delete routeList[i];
+    }
 
     routeList.clear();
+    // TODO purge cache?
 
     updateDisplayString();
 }
 
 // 4.9.07 - Added by CB
-void IPv6RoutingTable::removePrefixes(int interfaceID)
+void IPv6RoutingTable::deletePrefixes(int interfaceID)
 {
+    ASSERT(interfaceID >= 0);
+
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); )
     {
         // "real" prefixes have a length of larger then 0
-        if ( (((*it)->getInterfaceId()) == interfaceID) && ((*it)->getPrefixLength() > 0)  )
-            it = routeList.erase(it);
+        if ( (*it)->getInterface() && (*it)->getInterface()->getInterfaceId() == interfaceID &&
+             (*it)->getPrefixLength() > 0 )
+            it = internalDeleteRoute(it);
         else
             ++it;
     }
 
     updateDisplayString();
+}
+
+void IPv6RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
+{
+    bool changed = false;
+
+    // delete unicast routes using this interface
+    for (RouteList::iterator it = routeList.begin(); it != routeList.end(); )
+    {
+        IPv6Route *route = *it;
+        if (route->getInterface() == entry)
+        {
+            it = internalDeleteRoute(it);
+            changed = true;
+        }
+        else
+            ++it;
+    }
+
+    // TODO delete or update multicast routes:
+    //   1. delete routes has entry as parent
+    //   2. remove entry from children list
+
+    if (changed)
+    {
+        // invalidateCache();
+        updateDisplayString();
+    }
 }
 
 bool IPv6RoutingTable::isOnLinkAddress(const IPv6Address& address)

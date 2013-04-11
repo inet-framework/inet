@@ -1192,7 +1192,7 @@ void xDYMO::expungeRoutes()
                 (simTime() >= routeData->getExpirationTime()))
             {
                 DYMO_EV << "Expunging route: " << route << endl;
-                routingTable->removeRoute(route);
+                routingTable->deleteRoute(route);
                 i--;
             }
         }

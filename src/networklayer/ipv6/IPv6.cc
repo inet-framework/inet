@@ -859,7 +859,7 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
             }
             return false;
         }
-        interfaceId = route->getInterfaceId();
+        interfaceId = route->getInterface() ? route->getInterface()->getInterfaceId() : -1;
         nextHop = route->getNextHop();
         if (nextHop.isUnspecified())
             nextHop = destAddress;  // next hop is the host itself

@@ -445,7 +445,7 @@ IPv6Address IPv6NeighbourDiscovery::determineNextHop(
     if (route != NULL)
     {
         expiryTime = route->getExpiryTime();
-        outIfID = route->getInterfaceId();
+        outIfID = route->getInterface() ? route->getInterface()->getInterfaceId() : -1;
 
         //If the destination is on-link, the next-hop address is the same as the
         //packet's destination address.
@@ -624,7 +624,7 @@ void IPv6NeighbourDiscovery::timeoutPrefixEntry(const IPv6Address& destPrefix,
     //RFC 2461: Section 6.3.5
     /*Whenever the invalidation timer expires for a Prefix List entry, that
     entry is discarded.*/
-    rt6->removeOnLinkPrefix(destPrefix, prefixLength);
+    rt6->deleteOnLinkPrefix(destPrefix, prefixLength);
     //hmmm... should the unicast address associated with this prefix be deleted
     //as well?-TODO: The address should be timeout/deleted as well!!
 
@@ -1583,7 +1583,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
             if (validLifetime == 0)
             {
                 EV << "Prefix Info's valid lifetime is 0, time-out prefix\n";
-                rt6->removeOnLinkPrefix(prefix, prefixLength);
+                rt6->deleteOnLinkPrefix(prefix, prefixLength);
                 return;
             }
 
@@ -2659,8 +2659,8 @@ void IPv6NeighbourDiscovery::routersUnreachabilityDetection(const InterfaceEntry
     // invalidate entries in the destination cache for this interface
     //neighbourCache.invalidateEntriesForInterfaceID( ie->interfaceId() );
     // remove default routes on this interface
-    rt6->removeDefaultRoutes( ie->getInterfaceId() );
-    rt6->removePrefixes( ie->getInterfaceId() );
+    rt6->deleteDefaultRoutes( ie->getInterfaceId() );
+    rt6->deletePrefixes( ie->getInterfaceId() );
 
     for (IPv6NeighbourCache::iterator it = neighbourCache.begin(); it != neighbourCache.end(); )
     {
