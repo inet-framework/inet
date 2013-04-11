@@ -216,12 +216,6 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
          * not in the routing table.
          */
         virtual bool deleteMulticastRoute(IMulticastRoute *entry);
-
-        /**
-         * Deletes invalid routes from the routing table. Invalid routes are those
-         * where the isValid() method returns false.
-         */
-        virtual void purgeExpiredRoutes();
         //@}
 
         virtual IRoute *createRoute();

@@ -394,10 +394,6 @@ bool GenericRoutingTable::deleteMulticastRoute(IMulticastRoute* entry)
     return false; //TODO
 }
 
-void GenericRoutingTable::purgeExpiredRoutes()
-{
-}
-
 IRoute* GenericRoutingTable::createRoute()
 {
     return new GenericRoute();

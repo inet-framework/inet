@@ -377,7 +377,6 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual void addMulticastRoute(IMulticastRoute *entry) {/*TODO addMulticastRoute(entry);*/}
     virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry) {/*TODO removeMulticastRoute(entry);*/ return entry;}
     virtual bool deleteMulticastRoute(IMulticastRoute *entry) {return false; /*TODO: deleteMulticastRoute(entry);*/}
-    virtual void purgeExpiredRoutes() {/*TODO purge();*/}  //XXX inconsistent names
     virtual IRoute *createRoute() { return new IPv6Route(IPv6Address(), 0, IRoute::MANUAL); }
 };
 

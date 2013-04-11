@@ -378,7 +378,6 @@ class INET_API IPv4RoutingTable: public cSimpleModule, public IIPv4RoutingTable,
     virtual Address getNextHopForDestination(const Address& dest) const {return getGatewayForDestAddr(dest.toIPv4());}  //XXX inconsistent names
     virtual bool isLocalMulticastAddress(const Address& dest) const {return isLocalMulticastAddress(dest.toIPv4());}
     virtual IMulticastRoute *findBestMatchingMulticastRoute(const Address &origin, const Address& group) const {return const_cast<IPv4MulticastRoute*>(findBestMatchingMulticastRoute(origin.toIPv4(), group.toIPv4()));} //XXX remove 'const' from IPv4 method?
-    virtual void purgeExpiredRoutes() {purge();}  //XXX inconsistent names
     virtual IRoute *createRoute() { return new IPv4Route(); }
 
 
