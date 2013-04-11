@@ -79,7 +79,7 @@ void TraCIScenarioManagerLaunchd::init_traci() {
 
         ASSERT(apiVersion == 1);
 
-        MYDEBUG << "TraCI launchd reports version \"" << serverVersion << "\"" << endl;
+        EV_DEBUG << "TraCI launchd reports version \"" << serverVersion << "\"" << endl;
     }
 
     std::string contents = launchConfig->tostr(0);
