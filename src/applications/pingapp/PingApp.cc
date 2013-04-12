@@ -38,6 +38,18 @@ simsignal_t PingApp::outOfOrderArrivalsSignal = SIMSIGNAL_NULL;
 simsignal_t PingApp::pingTxSeqSignal = SIMSIGNAL_NULL;
 simsignal_t PingApp::pingRxSeqSignal = SIMSIGNAL_NULL;
 
+
+PingApp::PingApp()
+{
+    sendIntervalp = NULL;
+    timer = NULL;
+}
+
+PingApp::~PingApp()
+{
+    cancelAndDelete(timer);
+}
+
 void PingApp::initialize()
 {
     cSimpleModule::initialize();
@@ -113,12 +125,19 @@ bool PingApp::handleOperationStage(LifecycleOperation *operation, int stage, IDo
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
-            scheduleAt(simTime() + startTime, timer);   // TODO: startTime should be absolute, not after each node startup; if it's DOWN at startTime --> ERROR!
+        {
+            simtime_t start = std::max(startTime, simTime());
+            if (stopTime == 0 || stopTime > start)
+                scheduleAt(start, timer);
+            //TODO reset statistics?  statistics v.s. more than one lifecycle??? see also shutdown/finish
+            //TODO could be re-read startTime,stopTime,count,... parameters??? need volatile???
+        }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
             if (timer)
                 cancelEvent(timer);
+            //TODO statistics?  statistics v.s. more than one lifecycle???
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeCrashOperation::STAGE_CRASH)
@@ -154,8 +173,6 @@ void PingApp::scheduleNextPing()
 
     if ((count == 0 || sendSeqNo < count) && (stopTime == 0 || nextPing < stopTime))
         scheduleAt(nextPing, timer);
-    else
-        delete timer;
 }
 
 void PingApp::sendToICMP(cMessage *msg, const IPvXAddress& destAddr, const IPvXAddress& srcAddr, int hopLimit)
