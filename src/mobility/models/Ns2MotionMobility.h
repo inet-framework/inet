@@ -66,7 +66,7 @@ class INET_API Ns2MotionMobility : public LineSegmentsMobilityBase
     virtual void initialize(int stage);
 
     /** @brief Initializes the position according to the mobility model. */
-    virtual void initializePosition();
+    virtual void setInitialPosition();
 
     /** @brief Overridden from LineSegmentsMobilityBase.*/
     virtual void setTargetPosition();

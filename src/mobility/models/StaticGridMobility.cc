@@ -24,7 +24,7 @@
 Define_Module(StaticGridMobility);
 
 
-void StaticGridMobility::initializePosition()
+void StaticGridMobility::setInitialPosition()
 {
     int numHosts = par("numHosts");
     double marginX = par("marginX");

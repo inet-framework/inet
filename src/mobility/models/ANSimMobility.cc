@@ -64,7 +64,7 @@ void ANSimMobility::initialize(int stage)
     }
 }
 
-void ANSimMobility::initializePosition()
+void ANSimMobility::setInitialPosition()
 {
     cXMLElement *firstPositionChange = findNextPositionChange(nextPositionChange);
     if (firstPositionChange)

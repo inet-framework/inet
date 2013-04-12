@@ -44,7 +44,7 @@ class TractorMobility : public LineSegmentsMobilityBase
     virtual void initialize(int);
 
     /** @brief Initializes the position according to the mobility model. */
-    virtual void initializePosition();
+    virtual void setInitialPosition();
 
     /** @brief Calculate a new target position to move to. */
     void setTargetPosition();

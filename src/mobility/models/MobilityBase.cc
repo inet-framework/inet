@@ -77,7 +77,7 @@ void MobilityBase::initialize(int stage)
     }
     else if (stage == STAGE_MOBILITY_INITIALIZE_POSITION)
     {
-        initializePosition();
+        setInitialPosition();
         if (!isFiniteNumber(lastPosition.x) || !isFiniteNumber(lastPosition.y) || !isFiniteNumber(lastPosition.z))
             throw cRuntimeError("Mobility position is not a finite number after initialize (x=%g,y=%g,z=%g)", lastPosition.x, lastPosition.y, lastPosition.z);
         if (isOutside())
@@ -91,7 +91,7 @@ void MobilityBase::initialize(int stage)
     }
 }
 
-void MobilityBase::initializePosition()
+void MobilityBase::setInitialPosition()
 {
     // reading the coordinates from omnetpp.ini makes predefined scenarios a lot easier
     bool filled = false;

@@ -70,7 +70,7 @@ class INET_API TraCIMobility : public MobilityBase
 
         TraCIMobility() : MobilityBase(), isPreInitialized(false) {}
         virtual void initialize(int stage);
-        virtual void initializePosition();
+        virtual void setInitialPosition();
         virtual void finish();
         virtual Coord getCurrentPosition() {
             return getPosition();

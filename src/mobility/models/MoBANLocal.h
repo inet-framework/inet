@@ -76,7 +76,7 @@ class MoBANLocal : public LineSegmentsMobilityBase
   protected:
     virtual void initialize(int);
 
-    virtual void initializePosition();
+    virtual void setInitialPosition();
 
     virtual void setTargetPosition();
 

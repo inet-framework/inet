@@ -43,9 +43,9 @@ void TurtleMobility::initialize(int stage)
     }
 }
 
-void TurtleMobility::initializePosition()
+void TurtleMobility::setInitialPosition()
 {
-    LineSegmentsMobilityBase::initializePosition();
+    LineSegmentsMobilityBase::setInitialPosition();
 
     turtleScript = par("turtleScript");
     nextStatement = turtleScript->getFirstChild();

@@ -161,7 +161,7 @@ class MoBANCoordinator: public LineSegmentsMobilityBase
   protected:
     virtual void initialize(int);
 
-    virtual void initializePosition();
+    virtual void setInitialPosition();
 
     /** @brief Set a new target position from the next posture. */
     virtual void setTargetPosition();

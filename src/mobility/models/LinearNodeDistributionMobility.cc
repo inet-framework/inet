@@ -44,7 +44,7 @@ void LinearNodeDistributionMobility::initialize(int stage)
     }
 }
 
-void LinearNodeDistributionMobility::initializePosition()
+void LinearNodeDistributionMobility::setInitialPosition()
 {
     int index = visualRepresentation->getIndex();
     double rad = PI * orientation / 180.0;

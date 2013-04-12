@@ -110,7 +110,7 @@ void TraCIMobility::initialize(int stage)
     MobilityBase::initialize(stage);
 }
 
-void TraCIMobility::initializePosition() {
+void TraCIMobility::setInitialPosition() {
     ASSERT(isPreInitialized);
     isPreInitialized = false;
 }

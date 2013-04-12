@@ -51,7 +51,7 @@ void TractorMobility::initialize(int stage)
     }
 }
 
-void TractorMobility::initializePosition()
+void TractorMobility::setInitialPosition()
 {
     lastPosition.x = x1;
     lastPosition.y = y1;

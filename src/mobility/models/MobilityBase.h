@@ -88,7 +88,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     virtual void initialize(int stage);
 
     /** @brief Initializes the position from the display string or from module parameters. */
-    virtual void initializePosition();
+    virtual void setInitialPosition();
 
     /** @brief This modules should only receive self-messages. */
     virtual void handleMessage(cMessage *msg);

@@ -46,7 +46,7 @@ class INET_API LinearNodeDistributionMobility : public StationaryMobility
     virtual void initialize(int stage);
 
     /** @brief Initializes the position according to the mobility model. */
-    virtual void initializePosition();
+    virtual void setInitialPosition();
 
     /** @brief Save the host position. */
     virtual void finish();

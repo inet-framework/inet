@@ -61,7 +61,7 @@ void MoBANLocal::initialize(int stage)
         updateVisualRepresentation();
 }
 
-void MoBANLocal::initializePosition()
+void MoBANLocal::setInitialPosition()
 {
     lastPosition = referencePosition;
 }

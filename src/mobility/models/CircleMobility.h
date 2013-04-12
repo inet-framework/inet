@@ -50,7 +50,7 @@ class INET_API CircleMobility : public MovingMobilityBase
     virtual void initialize(int stage);
 
     /** @brief Initializes the position according to the mobility model. */
-    virtual void initializePosition();
+    virtual void setInitialPosition();
 
     /** @brief Move the host according to the current simulation time. */
     virtual void move();
