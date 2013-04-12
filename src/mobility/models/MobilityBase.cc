@@ -75,20 +75,17 @@ void MobilityBase::initialize(int stage)
                       " (3rd argument of 'p' tag) from '@display' attribute.", visualRepresentation->getFullPath().c_str());
         }
     }
+    // initial position is set in stage 1 to allow subscribers to start listening in stage 0
     else if (stage == STAGE_MOBILITY_INITIALIZE_POSITION)
-    {
-        setInitialPosition();
-        if (!isFiniteNumber(lastPosition.x) || !isFiniteNumber(lastPosition.y) || !isFiniteNumber(lastPosition.z))
-            throw cRuntimeError("Mobility position is not a finite number after initialize (x=%g,y=%g,z=%g)", lastPosition.x, lastPosition.y, lastPosition.z);
-        if (isOutside())
-            throw cRuntimeError("Mobility position (x=%g,y=%g,z=%g) is outside the constraint area (%g,%g,%g - %g,%g,%g)",
-                  lastPosition.x, lastPosition.y, lastPosition.z,
-                  constraintAreaMin.x, constraintAreaMin.y, constraintAreaMin.z,
-                  constraintAreaMax.x, constraintAreaMax.y, constraintAreaMax.z);
-        EV << "initial position. x = " << lastPosition.x << " y = " << lastPosition.y << " z = " << lastPosition.z << endl;
-        emitMobilityStateChangedSignal();
-        updateVisualRepresentation();
-    }
+        initializePosition();
+}
+
+void MobilityBase::initializePosition()
+{
+    setInitialPosition();
+    checkPosition();
+    emitMobilityStateChangedSignal();
+    updateVisualRepresentation();
 }
 
 void MobilityBase::setInitialPosition()
@@ -113,6 +110,17 @@ void MobilityBase::setInitialPosition()
     }
     if (!filled)
         lastPosition = getRandomPosition();
+}
+
+void MobilityBase::checkPosition()
+{
+    if (!isFiniteNumber(lastPosition.x) || !isFiniteNumber(lastPosition.y) || !isFiniteNumber(lastPosition.z))
+        throw cRuntimeError("Mobility position is not a finite number after initialize (x=%g,y=%g,z=%g)", lastPosition.x, lastPosition.y, lastPosition.z);
+    if (isOutside())
+        throw cRuntimeError("Mobility position (x=%g,y=%g,z=%g) is outside the constraint area (%g,%g,%g - %g,%g,%g)",
+              lastPosition.x, lastPosition.y, lastPosition.z,
+              constraintAreaMin.x, constraintAreaMin.y, constraintAreaMin.z,
+              constraintAreaMax.x, constraintAreaMax.y, constraintAreaMax.z);
 }
 
 void MobilityBase::handleMessage(cMessage * message)

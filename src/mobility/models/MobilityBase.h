@@ -84,11 +84,17 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief Returns the required number of initialize stages. */
     virtual int numInitStages() const {return 2;}
 
-    /** @brief Initializes mobility model parameters in 4 stages. */
+    /** @brief Initializes mobility model parameters. */
     virtual void initialize(int stage);
+
+    /** @brief Initializes mobility position. */
+    virtual void initializePosition();
 
     /** @brief Initializes the position from the display string or from module parameters. */
     virtual void setInitialPosition();
+
+    /** @brief Checks whether the position is valid or not. */
+    virtual void checkPosition();
 
     /** @brief This modules should only receive self-messages. */
     virtual void handleMessage(cMessage *msg);
