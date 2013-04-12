@@ -320,7 +320,7 @@ double** PostureTransition::getMatrix(simtime_t iTime, Coord iLocation)
         }
     }
 
-    EV << "The corresponding Markov matrix for time" << iTime.dbl() <<" and location " << iLocation.info() << " is: " << matrixList.at(matrixID)->name << endl;
+    EV_DEBUG << "The corresponding Markov matrix for time" << iTime.dbl() <<" and location " << iLocation.info() << " is: " << matrixList.at(matrixID)->name << endl;
 
     return matrixList.at(matrixID)->matrix;
 }
@@ -345,7 +345,7 @@ int PostureTransition::findTimeDomain(simtime_t iTime)
         }
         ++timeID;
     }
-    EV << "Time domain not found" << endl;
+    EV_DEBUG << "Time domain not found" << endl;
     return -1;
 }
 
@@ -369,7 +369,7 @@ int PostureTransition::findAreaType(Coord iLocation)
         }
         ++locationID;
     }
-    EV << "Area Type not found" << endl;
+    EV_DEBUG << "Area Type not found" << endl;
     return -1;
 }
 
@@ -577,12 +577,12 @@ double** PostureTransition::extractMatrixFromSteadyState(double* vec)
         }
 
 
-    EV << "Generated Markov matrix from the steady state: "<< endl;
+    EV_DEBUG << "Generated Markov matrix from the steady state: "<< endl;
     for (int k=0;k < numPos; ++k)
     {
         for (int f=0; f<numPos ;++f)
-            EV << mat[k][f]<<"       ";
-        EV << endl;
+            EV_DEBUG << mat[k][f]<<"       ";
+        EV_DEBUG << endl;
     }
 
     for (int i=0;i<numPos;++i)

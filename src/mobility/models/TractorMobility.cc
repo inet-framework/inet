@@ -38,7 +38,7 @@ TractorMobility::TractorMobility()
 void TractorMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
-    EV << "initializing TractorMobility stage " << stage << endl;
+    EV_TRACE << "initializing TractorMobility stage " << stage << endl;
     if (stage == 0)
     {
         speed = par("speed");

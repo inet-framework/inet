@@ -238,7 +238,7 @@ public:
 
 inline std::ostream& operator<<(std::ostream& os, const Coord& coord)
 {
-    return os << "(" << coord.x << "," << coord.y << "," << coord.z << ")";
+    return os << "(" << coord.x << ", " << coord.y << ", " << coord.z << ")";
 }
 
 inline std::string Coord::info() const {

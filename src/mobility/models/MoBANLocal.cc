@@ -56,7 +56,7 @@ MoBANLocal::MoBANLocal()
 void MoBANLocal::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
-    EV << "initializing MoBANLocal stage " << stage << endl;
+    EV_TRACE << "initializing MoBANLocal stage " << stage << endl;
     if (stage == 2)
         updateVisualRepresentation();
 }
