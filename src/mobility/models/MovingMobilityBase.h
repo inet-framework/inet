@@ -68,9 +68,11 @@ class INET_API MovingMobilityBase : public MobilityBase
 
     virtual int numInitStages() const {return 3;}
 
-    void initialize(int stage);
+    virtual void initialize(int stage);
 
-    void handleSelfMessage(cMessage *message);
+    virtual void initializePosition();
+
+    virtual void handleSelfMessage(cMessage *message);
 
     /** @brief Schedules the move timer that will update the mobility state. */
     void scheduleUpdate();

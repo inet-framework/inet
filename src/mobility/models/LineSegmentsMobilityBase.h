@@ -41,10 +41,8 @@ class INET_API LineSegmentsMobilityBase : public MovingMobilityBase
     Coord targetPosition;
 
   protected:
-    /** @brief Initializes mobility model parameters. */
-    virtual void initialize(int stage);
+    virtual void initializePosition();
 
-    /** @brief Move the host according to the current simulation time. */
     virtual void move();
 
     /**

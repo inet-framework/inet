@@ -25,17 +25,16 @@ LineSegmentsMobilityBase::LineSegmentsMobilityBase()
     targetPosition = Coord::ZERO;
 }
 
-void LineSegmentsMobilityBase::initialize(int stage)
+void LineSegmentsMobilityBase::initializePosition()
 {
-    MovingMobilityBase::initialize(stage);
-    EV << "initializing LineSegmentsMobilityBase stage " << stage << endl;
-    if (stage == STAGE_MOBILITY_INITIALIZE_POSITION)
-    {
-        if (!stationary) {
-            setTargetPosition();
-            lastSpeed = (targetPosition - lastPosition) / (nextChange - simTime()).dbl();
-        }
+    MobilityBase::initializePosition();
+    if (!stationary) {
+        setTargetPosition();
+        EV_INFO << "current target position = " << targetPosition << ", next change = " << nextChange << endl;
+        lastSpeed = (targetPosition - lastPosition) / (nextChange - simTime()).dbl();
     }
+    lastUpdate = simTime();
+    scheduleUpdate();
 }
 
 void LineSegmentsMobilityBase::move()

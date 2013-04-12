@@ -47,10 +47,12 @@ void MovingMobilityBase::initialize(int stage)
         moveTimer = new cMessage("move");
         updateInterval = par("updateInterval");
     }
-    else if (stage == 2) {
-        lastUpdate = simTime();
-        scheduleUpdate();
-    }
+}
+
+void MovingMobilityBase::initializePosition() {
+    MobilityBase::initializePosition();
+    lastUpdate = simTime();
+    scheduleUpdate();
 }
 
 void MovingMobilityBase::moveAndUpdate()
