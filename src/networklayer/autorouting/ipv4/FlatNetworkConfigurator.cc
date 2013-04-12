@@ -70,7 +70,7 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
     for (int i=0; i<topo.getNumNodes(); i++)
     {
         cModule *mod = topo.getNode(i)->getModule();
-        nodeInfo[i].isIPNode = IPvXAddressResolver().findInterfaceTableOf(mod)!=NULL;
+        nodeInfo[i].isIPNode = IPvXAddressResolver().findRoutingTableOf(mod)!=NULL && IPvXAddressResolver().findInterfaceTableOf(mod)!=NULL;
         if (nodeInfo[i].isIPNode)
         {
             nodeInfo[i].ift = IPvXAddressResolver().interfaceTableOf(mod);

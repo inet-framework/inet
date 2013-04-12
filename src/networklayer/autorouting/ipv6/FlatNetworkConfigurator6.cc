@@ -66,7 +66,8 @@ void FlatNetworkConfigurator6::setDisplayString(int numIPNodes, int numNonIPNode
 
 bool FlatNetworkConfigurator6::isIPNode(cTopology::Node *node)
 {
-    return IPvXAddressResolver().findInterfaceTableOf(node->getModule()) != NULL;
+    return IPvXAddressResolver().findRoutingTable6Of(node->getModule()) != NULL
+            && IPvXAddressResolver().findInterfaceTableOf(node->getModule()) != NULL;
 }
 
 void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
