@@ -35,6 +35,8 @@ class PingPayload;
 class INET_API PingApp : public cSimpleModule, public ILifecycle
 {
   public:
+    PingApp();
+    virtual ~PingApp();
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
