@@ -38,7 +38,7 @@ GaussMarkovMobility::GaussMarkovMobility()
 void GaussMarkovMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
-    EV << "initializing GaussMarkovMobility stage " << stage << endl;
+    EV_TRACE << "initializing GaussMarkovMobility stage " << stage << endl;
     if (stage == STAGE_LOCAL_BEGIN)
     {
         speedMean = par("speed");
@@ -105,7 +105,6 @@ void GaussMarkovMobility::setTargetPosition()
     nextChange = simTime() + updateInterval;
     targetPosition = lastPosition + direction * speed * updateInterval.dbl();
 
-    EV << " speed= " << speed << " angle= " << angle << endl;
-    EV << " mspeed= " << speedMean << " mangle " << angleMean << endl;
-    EV << " xpos= " << lastPosition.x << " ypos=" << lastPosition.y << endl;
+    EV_DEBUG << " speed = " << speed << " angle = " << angle << endl;
+    EV_DEBUG << " mspeed = " << speedMean << " mangle = " << angleMean << endl;
 }

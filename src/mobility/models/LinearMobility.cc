@@ -34,7 +34,7 @@ LinearMobility::LinearMobility()
 void LinearMobility::initialize(int stage)
 {
     MovingMobilityBase::initialize(stage);
-    EV << "initializing LinearMobility stage " << stage << endl;
+    EV_TRACE << "initializing LinearMobility stage " << stage << endl;
     if (stage == STAGE_LOCAL_BEGIN)
     {
         speed = par("speed");
@@ -63,5 +63,4 @@ void LinearMobility::move()
         speed = 0;
         stationary = true;
     }
-    EV << " t= " << SIMTIME_STR(simTime()) << " xpos= " << lastPosition.x << " ypos=" << lastPosition.y << " speed=" << speed << endl;
 }

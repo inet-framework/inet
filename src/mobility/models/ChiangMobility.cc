@@ -41,7 +41,7 @@ ChiangMobility::ChiangMobility()
 void ChiangMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
-    EV << "initializing ChiangMobility stage " << stage << endl;
+    EV_TRACE << "initializing ChiangMobility stage " << stage << endl;
     if (stage == STAGE_LOCAL_BEGIN)
     {
         stateTransitionUpdateInterval = par("stateTransitionUpdateInterval");
@@ -63,7 +63,7 @@ int ChiangMobility::getNextStateIndex(int currentState)
         if (sum >= randomValue)
             return i;
     }
-    EV << " getNextStateIndex error! currentState= " << currentState << " value= " << randomValue << endl;
+    EV_DEBUG << " getNextStateIndex error! currentState= " << currentState << " value= " << randomValue << endl;
     return currentState;
 }
 

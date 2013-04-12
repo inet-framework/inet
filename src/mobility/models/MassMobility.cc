@@ -36,7 +36,7 @@ MassMobility::MassMobility()
 void MassMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
-    EV << "initializing MassMobility stage " << stage << endl;
+    EV_TRACE << "initializing MassMobility stage " << stage << endl;
     if (stage == STAGE_LOCAL_BEGIN)
     {
         angle = par("startAngle").doubleValue();
@@ -49,11 +49,11 @@ void MassMobility::initialize(int stage)
 void MassMobility::setTargetPosition()
 {
     angle += changeAngleByParameter->doubleValue();
-    EV << "angle: " << angle << endl;
+    EV_DEBUG << "angle: " << angle << endl;
     double rad = PI * angle / 180.0;
     Coord direction(cos(rad), sin(rad));
     simtime_t nextChangeInterval = changeIntervalParameter->doubleValue();
-    EV << "interval: " << nextChangeInterval << endl;
+    EV_DEBUG << "interval: " << nextChangeInterval << endl;
     targetPosition = lastPosition + direction * speedParameter->doubleValue() * nextChangeInterval.dbl();
     nextChange = simTime() + nextChangeInterval;
 }

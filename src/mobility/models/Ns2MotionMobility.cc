@@ -129,7 +129,7 @@ void Ns2MotionMobility::parseFile(const char *filename)
 void Ns2MotionMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
-    EV << "initializing Ns2MotionMobility stage " << stage << endl;
+    EV_TRACE << "initializing Ns2MotionMobility stage " << stage << endl;
     if (stage == STAGE_LOCAL_BEGIN)
     {
         scrollX = par("scrollX");
@@ -200,7 +200,6 @@ void Ns2MotionMobility::setTargetPosition()
         nextChange = now + travelTime;
         vecpos++;
     }
-    EV << "TARGET: t=" << nextChange << " (" << targetPosition.x << "," << targetPosition.y << ")\n";
 }
 
 void Ns2MotionMobility::move()

@@ -57,7 +57,7 @@ MobilityBase::MobilityBase()
 
 void MobilityBase::initialize(int stage)
 {
-    EV << "initializing MobilityBase stage " << stage << endl;
+    EV_TRACE << "initializing MobilityBase stage " << stage << endl;
     if (stage == STAGE_LOCAL_BEGIN)
     {
         mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
@@ -125,9 +125,9 @@ void MobilityBase::handleMessage(cMessage * message)
 
 void MobilityBase::updateVisualRepresentation()
 {
+    EV_INFO << "current position = " << lastPosition << endl;
     if (ev.isGUI() && visualRepresentation)
     {
-        EV << "visual position. x = " << lastPosition.x << " y = " << lastPosition.y << " z = " << lastPosition.z << endl;
         visualRepresentation->getDisplayString().setTagArg("p", 0, (long)lastPosition.x);
         visualRepresentation->getDisplayString().setTagArg("p", 1, (long)lastPosition.y);
     }

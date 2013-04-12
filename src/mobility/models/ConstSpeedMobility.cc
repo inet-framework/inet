@@ -33,7 +33,7 @@ ConstSpeedMobility::ConstSpeedMobility()
 void ConstSpeedMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
-    EV << "initializing ConstSpeedMobility stage " << stage << endl;
+    EV_TRACE << "initializing ConstSpeedMobility stage " << stage << endl;
     if (stage == STAGE_LOCAL_BEGIN)
     {
         speed = par("speed");
@@ -47,5 +47,4 @@ void ConstSpeedMobility::setTargetPosition()
     Coord positionDelta = targetPosition - lastPosition;
     double distance = positionDelta.length();
     nextChange = simTime() + distance / speed;
-    EV << "new target set. distance=" << distance << " xpos= " << targetPosition.x << " ypos=" << targetPosition.y << " nextChange=" << nextChange;
 }

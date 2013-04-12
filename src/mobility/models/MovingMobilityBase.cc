@@ -42,7 +42,7 @@ MovingMobilityBase::~MovingMobilityBase()
 void MovingMobilityBase::initialize(int stage)
 {
     MobilityBase::initialize(stage);
-    EV << "initializing MovingMobilityBase stage " << stage << endl;
+    EV_TRACE << "initializing MovingMobilityBase stage " << stage << endl;
     if (stage == STAGE_LOCAL_BEGIN) {
         moveTimer = new cMessage("move");
         updateInterval = par("updateInterval");

@@ -43,13 +43,13 @@ void LineSegmentsMobilityBase::move()
     simtime_t now = simTime();
     if (now == nextChange) {
         lastPosition = targetPosition;
-        EV << "destination reached. x = " << lastPosition.x << " y = " << lastPosition.y << " z = " << lastPosition.z << endl;
+        EV_INFO << "reached current target position = " << lastPosition << endl;
         setTargetPosition();
+        EV_INFO << "new target position = " << targetPosition << ", next change = " << nextChange << endl;
         lastSpeed = (targetPosition - lastPosition) / (nextChange - simTime()).dbl();
     }
     else if (now > lastUpdate) {
         ASSERT(nextChange == -1 || now < nextChange);
         lastPosition += lastSpeed * (now - lastUpdate).dbl();
-        EV << "going forward. x = " << lastPosition.x << " y = " << lastPosition.y << " z = " << lastPosition.z << endl;
     }
 }

@@ -39,7 +39,7 @@ BonnMotionMobility::~BonnMotionMobility()
 void BonnMotionMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
-    EV << "initializing BonnMotionMobility stage " << stage << endl;
+    EV_TRACE << "initializing BonnMotionMobility stage " << stage << endl;
     if (stage == STAGE_LOCAL_BEGIN)
     {
         is3D  = par("is3D").boolValue();
@@ -80,7 +80,6 @@ void BonnMotionMobility::setTargetPosition()
     targetPosition.y = vec[currentLine+2];
     targetPosition.z = is3D ? vec[currentLine+3] : 0;
     currentLine += (is3D ? 4 : 3);
-    EV << "TARGET: t=" << nextChange << " (" << targetPosition.x << "," << targetPosition.y << ")\n";
 }
 
 void BonnMotionMobility::move()

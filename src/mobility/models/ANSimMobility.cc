@@ -45,7 +45,7 @@ ANSimMobility::ANSimMobility()
 void ANSimMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
-    EV << "initializing ANSimMobility stage " << stage << endl;
+    EV_TRACE << "initializing ANSimMobility stage " << stage << endl;
     if (stage == STAGE_LOCAL_BEGIN)
     {
         nodeId = par("nodeId");

@@ -38,7 +38,7 @@ CircleMobility::CircleMobility()
 void CircleMobility::initialize(int stage)
 {
     MovingMobilityBase::initialize(stage);
-    EV << "initializing CircleMobility stage " << stage << endl;
+    EV_TRACE << "initializing CircleMobility stage " << stage << endl;
     if (stage == STAGE_LOCAL_BEGIN)
     {
         cx = par("cx");
@@ -70,5 +70,4 @@ void CircleMobility::move()
     // do something if we reach the wall
     Coord dummyCoord; double dummyAngle;
     handleIfOutside(REFLECT, dummyCoord, dummyCoord, dummyAngle);
-    EV << " xpos = " << lastPosition.x << " ypos =" << lastPosition.y << " zpos =" << lastPosition.z << endl;
 }

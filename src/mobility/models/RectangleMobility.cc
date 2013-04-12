@@ -33,7 +33,7 @@ RectangleMobility::RectangleMobility()
 void RectangleMobility::initialize(int stage)
 {
     MovingMobilityBase::initialize(stage);
-    EV << "initializing RectangleMobility stage " << stage << endl;
+    EV_TRACE << "initializing RectangleMobility stage " << stage << endl;
     if (stage == STAGE_LOCAL_BEGIN)
     {
         speed = par("speed");
@@ -102,6 +102,4 @@ void RectangleMobility::move()
         lastPosition.x = constraintAreaMin.x;
         lastPosition.y = constraintAreaMax.y - d + corner3;
     }
-
-    EV << " xpos= " << lastPosition.x << " ypos=" << lastPosition.y << " speed=" << speed << endl;
 }
