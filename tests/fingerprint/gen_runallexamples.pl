@@ -78,7 +78,7 @@ foreach $fname (@inifiles)
         $run .= (' 'x(83-length $run)).' ';
         $run .= '---100s'.",";
         $run .= (' 'x(100-length $run)).' ';
-        $run .= '0'; # intentionally no "-r 0" -- test should do all runs if fits into the time limit...
+        $run .= '0000-0000';
 
         $x = "$run";
 
