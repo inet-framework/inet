@@ -34,9 +34,9 @@ void UDPVideoStreamCliWithSCFR2::initialize()
     simtime_t startTime = par("startTime");
 
     // initialize statistics
-    fragmentStartSignal = registerSignal("fragmentStart");
-    eedSignal = registerSignal("endToEndDelay");
+    departureTimeSignal = registerSignal("departureTime");
     timestampSignal = registerSignal("timestamp");
+    fragmentStartSignal = registerSignal("fragmentStart");
 
     // schedule the start of video streaming
     if (startTime>=0)
@@ -48,10 +48,11 @@ void UDPVideoStreamCliWithSCFR2::receiveStream(cPacket *msg)
     EV << "Video stream packet:\n";
     printPacket(msg);
 
+    emit(departureTimeSignal, msg->getCreationTime());
+    emit(timestampSignal, ((UDPVideoStreamPacket *)msg)->getTimestamp());
     bool fragmentStart = ((UDPVideoStreamPacket *)msg)->getFragmentStart();
     emit(fragmentStartSignal, int(fragmentStart));
-    emit(eedSignal, simTime() - msg->getCreationTime());
-    emit(timestampSignal, ((UDPVideoStreamPacket *)msg)->getTimestamp());
+    // emit(eedSignal, simTime() - msg->getCreationTime());
 
     delete msg;
 }

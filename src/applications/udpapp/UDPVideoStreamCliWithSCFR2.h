@@ -57,10 +57,10 @@ class INET_API UDPVideoStreamCliWithSCFR2 : public UDPVideoStreamCli
 {
   protected:
 
-    // statistics
-    simsignal_t fragmentStartSignal;    ///< indicators for start of fragment (used by SCFR for periodic streams)
-    simsignal_t eedSignal;              ///< end-to-end delay (based on reference clock)
-    simsignal_t timestampSignal;        ///< received timestamps
+    // statistics: RTP packets
+    simsignal_t departureTimeSignal;    ///< departure time
+    simsignal_t timestampSignal;        ///< received timestamp
+    simsignal_t fragmentStartSignal;    ///< fragment start indicator
 
   protected:
     ///@name Overridden cSimpleModule functions

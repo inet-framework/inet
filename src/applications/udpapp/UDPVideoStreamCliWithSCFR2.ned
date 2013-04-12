@@ -32,9 +32,9 @@ simple UDPVideoStreamCliWithSCFR2 like UDPApp
     parameters:
         @display("i=block/app");
 		// statistics: common
-        @statistic[fragmentStart](title="indicators for start of fragment"; record=vector; interpolationmode=none);
-        @statistic[endToEndDelay](title="end-to-end delay (based on reference clock) of RTP packets"; record=vector; interpolationmode=none);
-        @statistic[timestamp](title="timestamp of RTP packets"; record=vector; interpolationmode=none);
+        @statistic[departureTime](title="departure (creation) times of RTP packets"; record=vector; interpolationmode=none);
+        @statistic[timestamp](title="received timestamps of RTP packets"; record=vector; interpolationmode=none);
+        @statistic[fragmentStart](title="fragment start indicators of RTP packets"; record=vector; interpolationmode=none);
         int localPort;
         string serverAddress;
         int serverPort;
