@@ -110,6 +110,11 @@ void PassiveQueueBase::clear()
     packetRequested = 0;
 }
 
+cMessage *PassiveQueueBase::pop()
+{
+    return dequeue();
+}
+
 void PassiveQueueBase::finish()
 {
 }

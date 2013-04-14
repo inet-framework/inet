@@ -110,6 +110,14 @@ void SchedulerBase::clear()
     packetsToBeRequestedFromInputs = 0;
 }
 
+cMessage *SchedulerBase::pop()
+{
+    for (std::vector<IPassiveQueue*>::iterator it = inputQueues.begin(); it != inputQueues.end(); ++it)
+        if (!(*it)->isEmpty())
+            return (*it)->pop();
+    return NULL;
+}
+
 void SchedulerBase::addListener(IPassiveQueueListener *listener)
 {
     std::list<IPassiveQueueListener*>::iterator it = find(listeners.begin(), listeners.end(), listener);

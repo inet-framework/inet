@@ -97,6 +97,11 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     virtual void clear();
 
     /**
+     * Return a packet from the queue directly.
+     */
+    virtual cMessage *pop();
+
+    /**
      * Implementation of IPassiveQueue::addListener().
      */
     virtual void addListener(IPassiveQueueListener *listener);
