@@ -54,6 +54,12 @@ class INET_API IPassiveQueue
     virtual void clear() = 0;
 
     /**
+     * Returns a packet directly from the queue, bypassing the primary,
+     * send-on-request mechanism. Returns NULL if the queue is empty.
+     */
+    virtual cMessage *pop() = 0;
+
+    /**
      * Adds a new listener to the listener list.
      * It does nothing, if the listener list already contains the listener
      * (by pointer equality).
