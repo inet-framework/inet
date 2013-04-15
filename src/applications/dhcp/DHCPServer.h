@@ -25,11 +25,14 @@
 #include "DHCP_m.h"
 #include "DHCPOptions.h"
 #include "DHCPLease.h"
+#include "ILifecycle.h"
 #include "InterfaceTable.h"
 #include "ARP.h"
 #include "UDPSocket.h"
 
-class INET_API DHCPServer : public cSimpleModule
+class NotificationBoard;
+
+class INET_API DHCPServer : public cSimpleModule, public ILifecycle, public INotifiable
 {
 
     public:
@@ -54,6 +57,7 @@ class INET_API DHCPServer : public cSimpleModule
         simtime_t proc_delay; // process delay
 
         InterfaceEntry* ie; // interface to listen
+        NotificationBoard* nb;
         UDPSocket socket;
 
     protected:
@@ -64,11 +68,16 @@ class INET_API DHCPServer : public cSimpleModule
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
         virtual void handleIncomingPacket(DHCPMessage *pkt);
+
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+        virtual void openSocket();
+
     protected:
         // search for a mac into the leased ip
         DHCPLease* getLeaseByMac(MACAddress mac);
         // get the next available lease to be assigned
         DHCPLease* getAvailableLease();
+        void receiveChangeNotification(int category, const cPolymorphic *details);
 
     public:
         DHCPServer();
