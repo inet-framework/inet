@@ -27,6 +27,7 @@
 #include "SignallingMsg_m.h"
 #include "IRSVPClassifier.h"
 #include "NotificationBoard.h"
+#include "ILifecycle.h"
 
 class SimpleClassifier;
 class IRoutingTable;
@@ -38,7 +39,7 @@ class LIBTable;
 /**
  * TODO documentation
  */
-class INET_API RSVP : public cSimpleModule, public IScriptable
+class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycle
 {
   protected:
 
@@ -234,6 +235,7 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
 
     virtual void setupHello();
     virtual void startHello(IPv4Address peer, simtime_t delay);
+    virtual void removeHello(HelloState_t* h);
 
     virtual void recoveryEvent(IPv4Address peer);
 
@@ -285,6 +287,9 @@ class INET_API RSVP : public cSimpleModule, public IScriptable
     virtual int numInitStages() const  {return 5;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
+
+    virtual void clear();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node);

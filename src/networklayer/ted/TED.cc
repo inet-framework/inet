@@ -23,6 +23,7 @@
 #include "RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
 #include "NotificationBoard.h"
+#include "NodeOperations.h"
 
 #define LS_INFINITY   1e16
 
@@ -50,9 +51,15 @@ void TED::initialize(int stage)
     nb = NotificationBoardAccess().get();
 
     maxMessageId = 0;
-
     ASSERT(!routerId.isUnspecified());
 
+    initializeTED();
+
+    WATCH_VECTOR(ted);
+}
+
+void TED::initializeTED()
+{
     //
     // Extract initial TED contents from the routing table.
     //
@@ -141,8 +148,6 @@ void TED::initialize(int stage)
     }
 
     rebuildRoutingTable();
-
-    WATCH_VECTOR(ted);
 }
 
 void TED::handleMessage(cMessage * msg)
@@ -498,5 +503,24 @@ IPv4Address TED::getPeerByLocalAddress(IPv4Address localInf)
     return ted[index].linkid;
 }
 
-
-
+bool TED::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+            initializeTED();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+            ted.clear();
+            interfaceAddrs.clear();
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            ted.clear();
+            interfaceAddrs.clear();
+        }
+    }
+    return true;
+}
