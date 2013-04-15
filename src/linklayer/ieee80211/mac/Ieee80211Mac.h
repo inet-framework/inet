@@ -226,7 +226,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
         long numGivenUp;
         long numSent;
         long numDropped;
-        long bites;
+        long bits;
         simtime_t minjitter;
         simtime_t maxjitter;
     };
@@ -262,15 +262,15 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     virtual long & numGivenUp(int i = -1);
     virtual long & numSent(int i = -1);
     virtual long & numDropped(int i = -1);
-    virtual long & bites(int i = -1);
-    virtual simtime_t & minjitter(int i = -1);
-    virtual simtime_t & maxjitter(int i = -1);
+    virtual long & bits(int i = -1);
+    virtual simtime_t & minJitter(int i = -1);
+    virtual simtime_t & maxJitter(int i = -1);
 // out vectors
     virtual cOutVector * jitter(int i = -1);
     virtual cOutVector * macDelay(int i = -1);
     virtual cOutVector * throughput(int i = -1);
     inline const int numCategories(){return edcCAF.size();}
-    virtual const bool isBakoffMsg(cMessage *msg);
+    virtual const bool isBackoffMsg(cMessage *msg);
 
     const char *modeName(int mode);
 
@@ -401,7 +401,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     long numCollision;
     long numInternalCollision;
     // long numSent[4];
-    long numBites;
+    long numBits;
     long numSentTXOP;
     long numReceived;
     long numSentMulticast;
@@ -411,7 +411,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase, public INotifiable
     long numAckSend;
     cOutVector stateVector;
     simtime_t  last;
-    // long bites[4];
+    // long bits[4];
     // simtime_t minjitter[4];
     // simtime_t maxjitter[4];
     // cOutVector jitter[4];
