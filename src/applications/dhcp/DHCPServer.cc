@@ -25,6 +25,10 @@
 #include "DHCPServer.h"
 
 #include "DHCP_m.h"
+#include "NodeOperations.h"
+#include "NotificationBoard.h"
+#include "NotifierConsts.h"
+
 
 Define_Module(DHCPServer);
 
@@ -57,24 +61,51 @@ void DHCPServer::initialize(int stage)
         IInterfaceTable* ift = InterfaceTableAccess().get();
 
         ie = ift->getInterfaceByName(par("interface"));
+
+        nb = NotificationBoardAccess().get();
+        nb->subscribe(this, NF_INTERFACE_CREATED);
+        nb->subscribe(this, NF_INTERFACE_DELETED);
     }
 
     if (stage == 2)
     {
-        if (ie != NULL)
-        {
-            // bind the client to the udp port
-            // bindToPort(bootps_port);
-            socket.setOutputGate(gate("udpOut"));
-            socket.bind(bootps_port);
-            socket.setBroadcast(true);
-            ev << "DHCP Server bound to port " << bootps_port << " at " << ie <<  endl;
-        }
-        else
-        {
-            error("Interface to listen does not exist. aborting");
-            return;
-        }
+        openSocket();
+    }
+}
+
+void DHCPServer::openSocket()
+{
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(bootps_port);
+    socket.setBroadcast(true);
+    ev << "DHCP Server bound to port " << bootps_port << endl;
+}
+
+void DHCPServer::receiveChangeNotification(int category, const cPolymorphic *details)
+{
+    Enter_Method_Silent();
+
+    InterfaceEntry *nie;
+    switch (category)
+    {
+        case NF_INTERFACE_CREATED:
+            nie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
+            if (!ie && !strcmp(nie->getName(), par("interface").stringValue()))
+            {
+                ie = nie;
+            }
+            break;
+
+        case NF_INTERFACE_DELETED:
+            nie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
+            if (ie == nie)
+            {
+                ie = NULL;
+            }
+            break;
+
+        default:
+            throw cRuntimeError("Unaccepted notification category: %d", category);
     }
 }
 
@@ -369,3 +400,35 @@ void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAdd
     //send(msg, "udpOut");
     socket.sendTo(msg, destAddr, destPort, ie->getInterfaceId());
 }
+
+bool DHCPServer::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
+            openSocket();
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+            socket.close();
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            //FIXME implementation
+            // socket???
+        }
+    }
+    else
+    {
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    }
+
+    return true;
+}
+
