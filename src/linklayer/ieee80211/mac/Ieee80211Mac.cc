@@ -320,9 +320,9 @@ void Ieee80211Mac::initialize(int stage)
             numSentWithoutRetry(i) = 0;
             numGivenUp(i) = 0;
             numSent(i) = 0;
-            bites(i) = 0;
-            maxjitter(i) = 0;
-            minjitter(i) = 0;
+            bits(i) = 0;
+            maxJitter(i) = 0;
+            minJitter(i) = 0;
         }
 
         numCollision = 0;
@@ -330,7 +330,7 @@ void Ieee80211Mac::initialize(int stage)
         numReceived = 0;
         numSentMulticast = -1; //sorin
         numReceivedMulticast = 0;
-        numBites = 0;
+        numBits = 0;
         numSentTXOP = 0;
         numReceivedOther = 0;
         numAckSend = 0;
@@ -401,7 +401,7 @@ void Ieee80211Mac::initWatches()
      WATCH(numCollision);
      for (int i=0; i<numCategories(); i++)
          WATCH(edcCAF[i].numSent);
-     WATCH(numBites);
+     WATCH(numBits);
      WATCH(numSentTXOP);
      WATCH(numReceived);
      WATCH(numSentMulticast);
@@ -455,7 +455,7 @@ void Ieee80211Mac::finish()
         std::string th = "number of retry for AC "+os.str();
         recordScalar(th.c_str(), numRetry(i));
     }
-    recordScalar("sent and receive bites", numBites);
+    recordScalar("sent and received bits", numBits);
     for (int i=0; i<numCategories(); i++)
     {
         std::stringstream os;
@@ -563,7 +563,7 @@ void Ieee80211Mac::handleSelfMsg(cMessage *msg)
         EV << "Changing currentAC to " << msg->getKind() << endl;
         currentAC = msg->getKind();
     }
-    //check internal colision
+    //check internal collision
     if ((strcmp(msg->getName(), "Backoff") == 0) || (strcmp(msg->getName(), "AIFS")==0))
     {
         int kind;
@@ -1125,7 +1125,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   cancelBackoffPeriod();
                                  );
             FSMA_Event_Transition(Backoff-Idle,
-                                  isBakoffMsg(msg) && transmissionQueueEmpty(),
+                                  isBackoffMsg(msg) && transmissionQueueEmpty(),
                                   IDLE,
                                   resetStateVariables();
                                   );
@@ -1148,15 +1148,15 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   if (retryCounter() == 0) numSentWithoutRetry()++;
                                   numSent()++;
                                   fr = getCurrentTransmission();
-                                  numBites += fr->getBitLength();
-                                  bites() += fr->getBitLength();
+                                  numBits += fr->getBitLength();
+                                  bits() += fr->getBitLength();
 
 
                                   macDelay()->record(simTime() - fr->getMACArrive());
-                                  if (maxjitter() == 0 || maxjitter() < (simTime() - fr->getMACArrive()))
-                                      maxjitter() = simTime() - fr->getMACArrive();
-                                  if (minjitter() == 0 || minjitter() > (simTime() - fr->getMACArrive()))
-                                      minjitter() = simTime() - fr->getMACArrive();
+                                  if (maxJitter() == 0 || maxJitter() < (simTime() - fr->getMACArrive()))
+                                      maxJitter() = simTime() - fr->getMACArrive();
+                                  if (minJitter() == 0 || minJitter() > (simTime() - fr->getMACArrive()))
+                                      minJitter() = simTime() - fr->getMACArrive();
                                   EV << "record macDelay AC" << currentAC << " value " << simTime() - fr->getMACArrive() <<endl;
                                   numSentTXOP++;
                                   cancelTimeoutPeriod();
@@ -1171,7 +1171,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   numSent[currentAC]++;
                                   fr=getCurrentTransmission();
                                   numBites += fr->getBitLength();
-                                  bites[currentAC] += fr->getBitLength();
+                                  bits[currentAC] += fr->getBitLength();
 
                                   macDelay[currentAC].record(simTime() - fr->getMACArrive());
                                   if (maxjitter[currentAC] == 0 || maxjitter[currentAC] < (simTime() - fr->getMACArrive())) maxjitter[currentAC]=simTime() - fr->getMACArrive();
@@ -1192,14 +1192,14 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                       numSentWithoutRetry()++;
                                   numSent()++;
                                   fr = getCurrentTransmission();
-                                  numBites += fr->getBitLength();
-                                  bites() += fr->getBitLength();
+                                  numBits += fr->getBitLength();
+                                  bits() += fr->getBitLength();
 
                                   macDelay()->record(simTime() - fr->getMACArrive());
-                                  if (maxjitter() == 0 || maxjitter() < (simTime() - fr->getMACArrive()))
-                                      maxjitter() = simTime() - fr->getMACArrive();
-                                  if (minjitter() == 0 || minjitter() > (simTime() - fr->getMACArrive()))
-                                      minjitter() = simTime() - fr->getMACArrive();
+                                  if (maxJitter() == 0 || maxJitter() < (simTime() - fr->getMACArrive()))
+                                      maxJitter() = simTime() - fr->getMACArrive();
+                                  if (minJitter() == 0 || minJitter() > (simTime() - fr->getMACArrive()))
+                                      minJitter() = simTime() - fr->getMACArrive();
                                   EV << "record macDelay AC" << currentAC << " value " << simTime() - fr->getMACArrive() <<endl;
                                   cancelTimeoutPeriod();
                                   finishCurrentTransmission();
@@ -1257,8 +1257,8 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   DEFER,
                                   currentAC = oldcurrentAC;
                                   fr = getCurrentTransmission();
-                                  numBites += fr->getBitLength();
-                                  bites() += fr->getBitLength();
+                                  numBits += fr->getBitLength();
+                                  bits() += fr->getBitLength();
                                   finishCurrentTransmission();
                                   numSentMulticast++;
                                   resetCurrentBackOff();
@@ -1386,13 +1386,13 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
     {
         for (int i = 0; i<numCategories(); i++)
         {
-            throughput(i)->record(bites(i)/(simTime()-last));
-            bites(i) = 0;
-            if (maxjitter(i) > 0 && minjitter(i) > 0)
+            throughput(i)->record(bits(i)/(simTime()-last));
+            bits(i) = 0;
+            if (maxJitter(i) > 0 && minJitter(i) > 0)
             {
-                jitter(i)->record(maxjitter(i)-minjitter(i));
-                maxjitter(i) = 0;
-                minjitter(i) = 0;
+                jitter(i)->record(maxJitter(i)-minJitter(i));
+                maxJitter(i) = 0;
+                minJitter(i) = 0;
             }
         }
         last = simTime();
@@ -2467,7 +2467,7 @@ cMessage * Ieee80211Mac::endBackoff(int i)
      return edcCAF[i].endBackoff;
 }
 
-const bool Ieee80211Mac::isBakoffMsg(cMessage *msg)
+const bool Ieee80211Mac::isBackoffMsg(cMessage *msg)
 {
     for (unsigned int i=0; i<edcCAF.size(); i++)
     {
@@ -2523,16 +2523,16 @@ long & Ieee80211Mac::numDropped(int i)
      return edcCAF[i].numDropped;
 }
 
-long & Ieee80211Mac::bites(int i)
+long & Ieee80211Mac::bits(int i)
 {
     if (i==-1)
          i = currentAC;
     if (i>=(int)edcCAF.size())
          opp_error("AC doesn't exist");
-     return edcCAF[i].bites;
+     return edcCAF[i].bits;
 }
 
-simtime_t & Ieee80211Mac::minjitter(int i)
+simtime_t & Ieee80211Mac::minJitter(int i)
 {
     if (i==-1)
          i = currentAC;
@@ -2541,7 +2541,7 @@ simtime_t & Ieee80211Mac::minjitter(int i)
      return edcCAF[i].minjitter;
 }
 
-simtime_t & Ieee80211Mac::maxjitter(int i)
+simtime_t & Ieee80211Mac::maxJitter(int i)
 {
     if (i==-1)
          i = currentAC;
