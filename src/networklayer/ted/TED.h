@@ -19,6 +19,7 @@
 
 #include "TED_m.h"
 #include "IntServ.h"
+#include "ILifecycle.h"
 
 class IRoutingTable;
 class IInterfaceTable;
@@ -32,7 +33,7 @@ class NotificationBoard;
  *
  * See NED file for more info.
  */
-class TED : public cSimpleModule
+class TED : public cSimpleModule, public ILifecycle
 {
   public:
     /**
@@ -71,6 +72,8 @@ class TED : public cSimpleModule
     virtual int numInitStages() const  {return 5;}
     virtual void handleMessage(cMessage *msg);
 
+    virtual void initializeTED();
+
     virtual IPAddressVector calculateShortestPath(IPAddressVector dest,
         const TELinkStateInfoVector& topology, double req_bandwidth, int priority);
 
@@ -89,6 +92,8 @@ class TED : public cSimpleModule
 
     virtual void rebuildRoutingTable();
     //@}
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     IRoutingTable *rt;
