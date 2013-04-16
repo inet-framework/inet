@@ -25,19 +25,15 @@
 #include "DHCP_m.h"
 #include "DHCPOptions.h"
 #include "DHCPLease.h"
-#include "ILifecycle.h"
 #include "InterfaceTable.h"
 #include "ARP.h"
 #include "UDPSocket.h"
 
 class NotificationBoard;
 
-class INET_API DHCPServer : public cSimpleModule, public ILifecycle, public INotifiable
+class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILifecycle
 {
-
-    public:
     protected:
-
         // Transmission Timer
         enum TIMER_TYPE
         {
@@ -47,6 +43,8 @@ class INET_API DHCPServer : public cSimpleModule, public ILifecycle, public INot
         // list of leased ip
         typedef std::map<IPv4Address, DHCPLease> DHCPLeased;
         DHCPLeased leased;
+
+        std::vector<cMessage *> messagesBeingProcessed;
 
         int numSent;
         int numReceived;
@@ -61,32 +59,29 @@ class INET_API DHCPServer : public cSimpleModule, public ILifecycle, public INot
         UDPSocket socket;
 
     protected:
-        virtual int numInitStages() const
-        {
-            return 4;
-        }
+        virtual int numInitStages() const { return 4; }
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
         virtual void handleIncomingPacket(DHCPMessage *pkt);
-
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
         virtual void openSocket();
 
-    protected:
+        virtual void cancelMessagesBeingProcessed();
         // search for a mac into the leased ip
-        DHCPLease* getLeaseByMac(MACAddress mac);
+        virtual DHCPLease* getLeaseByMac(MACAddress mac);
         // get the next available lease to be assigned
-        DHCPLease* getAvailableLease();
-        void receiveChangeNotification(int category, const cPolymorphic *details);
+        virtual DHCPLease* getAvailableLease();
+        virtual void handleTimer(cMessage *msg);
+        virtual void processPacket(DHCPMessage *packet);
+        virtual void sendOffer(DHCPLease* lease);
+        virtual void sendACK(DHCPLease* lease);
+        virtual void sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort);
+        virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 
     public:
         DHCPServer();
-        ~DHCPServer();
-        void handleTimer(cMessage *msg);
-        void processPacket(DHCPMessage *packet);
-        void sendOffer(DHCPLease* lease);
-        void sendACK(DHCPLease* lease);
-        virtual void sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort);
+        virtual ~DHCPServer();
+
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
 #endif
