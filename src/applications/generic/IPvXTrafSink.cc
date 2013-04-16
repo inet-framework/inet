@@ -22,7 +22,7 @@
 #include "IPvXAddressResolver.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
-
+#include "NodeOperations.h"
 
 Define_Module(IPvXTrafSink);
 
@@ -46,6 +46,16 @@ void IPvXTrafSink::handleMessage(cMessage *msg)
         sprintf(buf, "rcvd: %d pks", numReceived);
         getDisplayString().setTagArg("t", 0, buf);
     }
+}
+
+bool IPvXTrafSink::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) ;
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) ;
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) ;
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
 }
 
 void IPvXTrafSink::printPacket(cPacket *msg)

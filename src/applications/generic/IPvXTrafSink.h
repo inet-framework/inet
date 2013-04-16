@@ -23,14 +23,14 @@
 #include <vector>
 
 #include "INETDefs.h"
-
 #include "IPvXAddress.h"
+#include "ILifecycle.h"
 
 
 /**
  * Consumes and prints packets received from the IP module. See NED for more info.
  */
-class INET_API IPvXTrafSink : public cSimpleModule
+class INET_API IPvXTrafSink : public cSimpleModule, public ILifecycle
 {
   protected:
     int numReceived;
@@ -38,6 +38,9 @@ class INET_API IPvXTrafSink : public cSimpleModule
 
     virtual void printPacket(cPacket *msg);
     virtual void processPacket(cPacket *msg);
+
+  public:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     virtual void initialize();
