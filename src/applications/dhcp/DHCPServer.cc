@@ -17,13 +17,13 @@
 //
 
 
+#include <algorithm>
 #include "UDPControlInfo_m.h"
 #include "IPvXAddressResolver.h"
 #include "InterfaceTableAccess.h"
 #include "InterfaceTable.h"
 #include "IPv4InterfaceData.h"
 #include "DHCPServer.h"
-
 #include "DHCP_m.h"
 #include "NodeOperations.h"
 #include "NotificationBoard.h"
@@ -58,8 +58,9 @@ void DHCPServer::initialize(int stage)
         // process delay
         proc_delay = 0.001; // 100ms
 
-        IInterfaceTable* ift = InterfaceTableAccess().get();
+        //TODO should check nodeStatus
 
+        IInterfaceTable* ift = InterfaceTableAccess().get();
         ie = ift->getInterfaceByName(par("interface"));
 
         nb = NotificationBoardAccess().get();
@@ -69,16 +70,19 @@ void DHCPServer::initialize(int stage)
 
     if (stage == 2)
     {
-        openSocket();
+        if (ie != NULL)    //FIXME: if (nodeUP)
+            openSocket();
     }
 }
 
 void DHCPServer::openSocket()
 {
+    if (!ie)
+        error("Interface to listen does not exist. aborting");
     socket.setOutputGate(gate("udpOut"));
     socket.bind(bootps_port);
     socket.setBroadcast(true);
-    ev << "DHCP Server bound to port " << bootps_port << endl;
+    ev << "DHCP Server bound to port " << bootps_port << " at " << ie << endl;
 }
 
 void DHCPServer::receiveChangeNotification(int category, const cPolymorphic *details)
@@ -134,6 +138,7 @@ void DHCPServer::handleIncomingPacket(DHCPMessage *pkt)
     cMessage* proc_delay_timer = new cMessage("PROC_DELAY", PROC_DELAY);
     proc_delay_timer->addPar("incoming_packet").setObjectValue(pkt);
     scheduleAt(simTime() + proc_delay, proc_delay_timer);
+    messagesBeingProcessed.push_back(proc_delay_timer);
     std::cout << "scheduling process" << endl;
 }
 
@@ -145,6 +150,7 @@ void DHCPServer::handleTimer(cMessage *msg)
         cMsgPar* par = (cMsgPar*) msg->removeObject("incoming_packet");
         delete par;
         processPacket(pkt);
+        messagesBeingProcessed.erase(std::find(messagesBeingProcessed.begin(), messagesBeingProcessed.end(), msg));
     }
     else
     {
@@ -401,34 +407,40 @@ void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAdd
     socket.sendTo(msg, destAddr, destPort, ie->getInterfaceId());
 }
 
+void DHCPServer::cancelMessagesBeingProcessed()
+{
+    for (std::vector<cMessage *>::iterator it = messagesBeingProcessed.begin(); it != messagesBeingProcessed.end(); it++)
+        cancelAndDelete(*it);
+}
+
 bool DHCPServer::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-
-    if (dynamic_cast<NodeStartOperation *>(operation))
-    {
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
+            IInterfaceTable* ift = InterfaceTableAccess().get();
+            ie = ift->getInterfaceByName(par("interface"));
             openSocket();
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
-    {
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
-            socket.close();
+            cancelMessagesBeingProcessed();
+            messagesBeingProcessed.clear();
+            leased.clear();
+            ie = NULL;
+            //socket.close();
         }
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
-    {
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeCrashOperation::STAGE_CRASH) {
-            //FIXME implementation
+            cancelMessagesBeingProcessed();
+            messagesBeingProcessed.clear();
+            leased.clear();
+            ie = NULL;
             // socket???
         }
     }
-    else
-    {
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-    }
-
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
-

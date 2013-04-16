@@ -1,0 +1,95 @@
+%description:
+
+Test for basic DHCP lifecycle handling.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+sim-time-limit = 1000s
+record-eventlog = true
+
+**.hasStatus = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+**.numUdpApps = 1
+
+**.client.udpApp[0].typename = "DHCPClient"
+**.client.udpApp[0].interface = "eth0"
+
+**.server.udpApp[0].typename = "DHCPServer"
+**.server.udpApp[0].net = "192.168.1.0"
+**.server.udpApp[0].mask = "255.255.255.0"
+**.server.udpApp[0].ipBegin = "192.168.1.100"
+**.server.udpApp[0].clientNum = 100
+**.server.udpApp[0].gateway = "192.168.1.1"
+**.server.udpApp[0].dns = ""
+**.server.udpApp[0].leaseTime = 100s
+**.server.udpApp[0].interface = "eth0"
+
+%file: test.ned
+
+import inet.nodes.ethernet.Eth10M;
+import inet.nodes.inet.StandardHost;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.base.LifecycleController;
+import inet.world.scenario.ScenarioManager;
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        lifecycleController: LifecycleController;
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+        }
+        client: StandardHost;
+        server: StandardHost;
+    connections:
+        client.ethg++ <--> Eth10M <--> server.ethg++;
+}
+
+%file: scenario.xml
+ 
+<scenario>
+    <at t="1.0">
+        <tell module="lifecycleController" target="client" operation="NodeShutdownOperation"/>
+    </at>
+    <at t="2.0">
+        <tell module="lifecycleController" target="client" operation="NodeStartOperation"/>
+    </at>
+    <at t="3.0">
+        <tell module="lifecycleController" target="server" operation="NodeShutdownOperation"/>
+    </at>
+    <at t="4.0">
+        <tell module="lifecycleController" target="server" operation="NodeStartOperation"/>
+    </at> -->
+</scenario>
+
+%contains-regex: stdout
+
+Host client got ip: 192\.168\.1\.100/255\.255\.255\.0
+.*
+Test.client shutting down
+.*
+Test.client shut down
+.*
+Test.client starting up
+.*
+Test.client started
+.*
+Host client got ip: 192\.168\.1\.100/255\.255\.255\.0
+.*
+Test.server shutting down
+.*
+Test.server shut down
+.*
+Test.server starting up
+.*
+Test.server started
+.*
+Host client got ip: 192\.168\.1\.100/255\.255\.255\.0

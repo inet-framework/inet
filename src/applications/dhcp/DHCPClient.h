@@ -28,8 +28,9 @@
 #include "RoutingTable.h"
 #include "UDPSocket.h"
 #include "INotifiable.h"
+#include "ILifecycle.h"
 
-class INET_API DHCPClient : public cSimpleModule, public INotifiable
+class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILifecycle
 {
     protected:
         int bootps_port; // server
@@ -102,7 +103,9 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable
 
     public:
         DHCPClient();
-        ~DHCPClient();
+        virtual ~DHCPClient();
+
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
 #endif

@@ -23,6 +23,7 @@
 #include "ModuleAccess.h"
 #include "NotifierConsts.h"
 #include "RoutingTableAccess.h"
+#include "NodeOperations.h"
 
 Define_Module(DHCPClient);
 
@@ -177,15 +178,15 @@ void DHCPClient::changeFSMState(CLIENT_STATE new_state)
         scheduleTimer_T2();
 
         // Assign the IP to the interface
+        // TODO: client must remove the configured IP address when the lease expires
         ie->ipv4Data()->setIPAddress(lease->ip);
         ie->ipv4Data()->setNetmask(lease->netmask);
 
         std::string banner = "Got IP " + lease->ip.str();
         getContainingNode()->bubble(banner.c_str());
 
-        EV
-                << "Configuring interface : " << ie->getName() << " ip:" << lease->ip << "/"
-                        << lease->netmask << " leased time: " << lease->lease_time << " (segs)" << endl;
+        EV << "Configuring interface : " << ie->getName() << " ip:" << lease->ip << "/"
+           << lease->netmask << " leased time: " << lease->lease_time << " (secs)" << endl;
         std::cout << "Host " << host_name << " got ip: " << lease->ip << "/" << lease->netmask << endl;
 
         IPv4Route *iroute = NULL;
@@ -560,7 +561,6 @@ void DHCPClient::cancelTimer_TO()
 {
     cancelTimer(timer_to);
     timer_to = NULL;
-
 }
 
 void DHCPClient::scheduleTimer_TO(TIMER_TYPE type)
@@ -605,4 +605,36 @@ void DHCPClient::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAdd
 
    // emit(sentPkSignal, msg);
     socket.sendTo(msg, destAddr, destPort, ie->getInterfaceId());
+}
+
+bool DHCPClient::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
+            IInterfaceTable* ift = InterfaceTableAccess().get();
+            ie = ift->getInterfaceByName(par("interface"));
+            socket.bind(bootpc_port);
+            changeFSMState(INIT);
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+            cancelTimer_T1();
+            cancelTimer_T2();
+            cancelTimer_TO();
+            // TODO: socket.close();
+            ie = NULL;
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            cancelTimer_T1();
+            cancelTimer_T2();
+            cancelTimer_TO();
+            ie = NULL;
+        }
+    }
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
 }
