@@ -480,6 +480,7 @@ void PPP::flushQueue()
             delete msg;
         }
         queueModule->clear(); // clear request count
+        queueModule->requestPacket();
     }
     else
     {
