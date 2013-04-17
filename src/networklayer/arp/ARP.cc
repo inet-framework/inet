@@ -28,6 +28,8 @@
 #include "ARPPacket_m.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
+#include "NodeOperations.h"
+#include "NodeStatus.h"
 
 
 simsignal_t ARP::sentReqSignal = SIMSIGNAL_NULL;
@@ -92,6 +94,8 @@ void ARP::initialize(int stage)
 
         pendingQueue.setName("pendingQueue");
 
+        isUp = isNodeUp();
+
         // init statistics
         numRequestsSent = numRepliesSent = 0;
         numResolutions = numFailedResolutions = 0;
@@ -103,7 +107,7 @@ void ARP::initialize(int stage)
         WATCH_PTRMAP(arpCache);
         WATCH_PTRMAP(globalArpCache);
 
-        // initialize global cache
+        // register our addresses in the global cache (even if globalARP is locally turned off)
         for (int i=0; i<ift->getNumInterfaces(); i++)
         {
             InterfaceEntry *ie = ift->getInterface(i);
@@ -148,6 +152,12 @@ ARP::~ARP()
 
 void ARP::handleMessage(cMessage *msg)
 {
+    if (!isUp)
+    {
+        handleMessageWhenDown(msg);
+        return;
+    }
+
     if (msg->isSelfMessage())
     {
         requestTimedOut(msg);
@@ -163,6 +173,77 @@ void ARP::handleMessage(cMessage *msg)
     }
     if (ev.isGUI())
         updateDisplayString();
+}
+
+void ARP::handleMessageWhenDown(cMessage *msg)
+{
+    if (msg->isSelfMessage())
+        throw cRuntimeError("Model error: self msg '%s' received when protocol is down", msg->getName());
+    EV << "Protocol is turned off, dropping '" << msg->getName() << "' message\n";
+    delete msg;
+}
+
+bool ARP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_NETWORK_LAYER)
+            start();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_NETWORK_LAYER)
+            stop();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            stop();
+    }
+    else
+    {
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    }
+    return true;
+}
+
+void ARP::start()
+{
+    ASSERT(pendingQueue.isEmpty());
+    ASSERT(arpCache.empty());
+    isUp = true;
+}
+
+void ARP::stop()
+{
+    isUp = false;
+    flush();
+}
+
+void ARP::flush()
+{
+    while (!arpCache.empty())
+    {
+        ARPCache::iterator i = arpCache.begin();
+        ARPCacheEntry *entry = i->second;
+        if (entry->timer) {
+            delete cancelEvent(entry->timer);
+            entry->timer = NULL;
+        }
+        delete entry;
+        arpCache.erase(i);
+    }
+
+    pendingQueue.clear();
+}
+
+
+bool ARP::isNodeUp()
+{
+    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
 void ARP::updateDisplayString()

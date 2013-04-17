@@ -28,6 +28,7 @@
 #include "MACAddress.h"
 #include "ModuleAccess.h"
 #include "IPv4Address.h"
+#include "ILifecycle.h"
 
 // Forward declarations:
 class ARPPacket;
@@ -38,7 +39,7 @@ class IRoutingTable;
 /**
  * ARP implementation.
  */
-class INET_API ARP : public cSimpleModule
+class INET_API ARP : public cSimpleModule, public ILifecycle
 {
   public:
     struct ARPCacheEntry;
@@ -77,6 +78,7 @@ class INET_API ARP : public cSimpleModule
     static simsignal_t failedResolutionSignal;
     static simsignal_t initiatedResolutionSignal;
 
+    bool isUp;
     ARPCache arpCache;
     static ARPCache globalArpCache;
     static int globalArpCacheRefCnt;
@@ -101,7 +103,14 @@ class INET_API ARP : public cSimpleModule
   protected:
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
+    virtual void handleMessageWhenDown(cMessage *msg);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
     virtual void finish();
+
+    virtual bool isNodeUp();
+    virtual void stop();
+    virtual void start();
+    virtual void flush();
 
     virtual void processOutboundPacket(cMessage *msg);
     virtual void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress, int etherType);
