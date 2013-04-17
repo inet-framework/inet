@@ -1,0 +1,50 @@
+%description:
+
+Test crash and startup operations on StandardHost.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+
+**.hasStatus = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%file: test.ned
+
+import inet.nodes.inet.StandardHost;
+import inet.base.LifecycleController;
+import inet.status.NodeStatus;
+import inet.world.scenario.ScenarioManager;
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        lifecycleController: LifecycleController;
+        host: StandardHost;
+}
+
+%file: scenario.xml
+
+<scenario>
+    <at t="1.0">
+        <tell module="lifecycleController" target="host" operation="NodeCrashOperation"/>
+    </at>
+    <at t="2.0">
+        <tell module="lifecycleController" target="host" operation="NodeStartOperation"/>
+    </at>
+</scenario>
+
+%contains-regex: stdout
+
+Test.host crashing
+.*
+Test.host crashed
+.*
+Test.host starting up
+.*
+Test.host started
