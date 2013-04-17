@@ -118,6 +118,13 @@ void PingApp::handleMessage(cMessage *msg)
         // process ping response
         processPingResponse(check_and_cast<PingPayload *>(msg));
     }
+
+    if (ev.isGUI())
+    {
+        char buf[40];
+        sprintf(buf, "sent: %ld pks\nrcvd: %ld pks", sendSeqNo, numPongs);
+        getDisplayString().setTagArg("t", 0, buf);
+    }
 }
 
 bool PingApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
