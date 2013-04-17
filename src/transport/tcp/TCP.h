@@ -24,6 +24,7 @@
 
 #include "INETDefs.h"
 
+#include "ILifecycle.h"
 #include "IPvXAddress.h"
 #include "TCPCommand_m.h"
 
@@ -99,7 +100,7 @@ class TCPReceiveQueue;
  * The concrete TCPAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
  */
-class INET_API TCP : public cSimpleModule
+class INET_API TCP : public cSimpleModule, public ILifecycle
 {
   public:
     struct AppConnKey  // XXX this class is redundant since connId is already globally unique
@@ -162,13 +163,15 @@ class INET_API TCP : public cSimpleModule
     static bool logverbose; // if !testing, turns on more verbose logging
 
     bool recordStatistics;  // output vectors on/off
+    bool isOperational;     // lifecycle: node is up/down
 
   public:
     TCP() {}
     virtual ~TCP();
 
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
@@ -205,6 +208,12 @@ class INET_API TCP : public cSimpleModule
      * To be called from TCPConnection: create a new receive queue.
      */
     virtual TCPReceiveQueue* createReceiveQueue(TCPDataTransferMode transferModeP);
+
+    // ILifeCycle:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
+    // called at shutdown/crash
+    virtual void reset();
 };
 
 #endif

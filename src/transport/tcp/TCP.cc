@@ -20,6 +20,10 @@
 
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
+#include "LifecycleOperation.h"
+#include "ModuleAccess.h"
+#include "NodeOperations.h"
+#include "NodeStatus.h"
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
@@ -70,8 +74,10 @@ static std::ostream& operator<<(std::ostream& os, const TCPConnection& conn)
 }
 
 
-void TCP::initialize()
+void TCP::initialize(int stage)
 {
+  if (stage == 0)
+  {
     const char *q;
     q = par("sendQueueClass");
     if (*q != '\0')
@@ -92,6 +98,12 @@ void TCP::initialize()
     cModule *netw = simulation.getSystemModule();
     testing = netw->hasPar("testing") && netw->par("testing").boolValue();
     logverbose = !testing && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
+  }
+  else if (stage == 1)
+  {
+    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+    isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+  }
 }
 
 TCP::~TCP()
@@ -99,14 +111,21 @@ TCP::~TCP()
     while (!tcpAppConnMap.empty())
     {
         TcpAppConnMap::iterator i = tcpAppConnMap.begin();
-        delete (*i).second;
+        delete i->second;
         tcpAppConnMap.erase(i);
     }
 }
 
 void TCP::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage())
+    if (!isOperational)
+    {
+        if (msg->isSelfMessage())
+            throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
+        EV << "TCP is turned off, dropping '" << msg->getName() << "' message\n";
+        delete msg;
+    }
+    else if (msg->isSelfMessage())
     {
         TCPConnection *conn = (TCPConnection *) msg->getContextPointer();
         bool ret = conn->processTimer(msg);
@@ -224,6 +243,11 @@ void TCP::updateDisplayString()
     //char buf[40];
     //sprintf(buf,"%d conns", tcpAppConnMap.size());
     //getDisplayString().setTagArg("t",0,buf);
+    if (isOperational)
+        getDisplayString().removeTag("i2");
+    else
+        getDisplayString().setTagArg("i2", 0, "status/cross");
+
 
     int numINIT = 0, numCLOSED = 0, numLISTEN = 0, numSYN_SENT = 0, numSYN_RCVD = 0,
         numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
@@ -471,3 +495,52 @@ TCPReceiveQueue* TCP::createReceiveQueue(TCPDataTransferMode transferModeP)
         default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
     }
 }
+
+bool TCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
+            //FIXME implementation
+            isOperational = true;
+            updateDisplayString();
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER) {
+            //FIXME close connections???
+            reset();
+            isOperational = false;
+            updateDisplayString();
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            //FIXME implementation
+            reset();
+            isOperational = false;
+            updateDisplayString();
+        }
+    }
+    else
+    {
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    }
+
+    return true;
+}
+
+void TCP::reset()
+{
+    for (TcpAppConnMap::iterator it = tcpAppConnMap.begin(); it != tcpAppConnMap.end(); ++it)
+        delete it->second;
+    tcpAppConnMap.clear();
+    tcpConnMap.clear();
+    usedEphemeralPorts.clear();
+    lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+}
+
