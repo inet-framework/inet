@@ -25,6 +25,7 @@
 
 #include "INETDefs.h"
 
+#include "ILifecycle.h"
 #include "IPvXAddress.h"
 #include "TCPCommand_m.h"
 #include "lwip/tcp.h"
@@ -43,7 +44,7 @@ class TcpLwipSendQueue;
  * Encapsulates a Network Simulation Cradle (NSC) instance.
  */
 
-class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf
+class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public ILifecycle
 {
   public:
     TCP_lwIP();
@@ -52,7 +53,8 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf
   protected:
     // called by the OMNeT++ simulation kernel:
 
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msgP);
     virtual void finish();
 
@@ -117,6 +119,9 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf
 
     // send a connection established msg to application layer
     void sendEstablishedMsg(TcpLwipConnection &connP);
+
+    // ILifeCycle:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   public:
     LwipTcpLayer * getLwipTcpLayer() { return pLwipTcpLayerM; }

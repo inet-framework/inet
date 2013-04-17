@@ -32,6 +32,7 @@
 
 #include <sim_interface.h> // NSC. We need this here to derive from classes
 
+#include "ILifecycle.h"
 #include "IPvXAddress.h"
 #include "TCPCommand_m.h"
 #include "TCP_NSC_Connection.h"
@@ -45,7 +46,7 @@ class TCP_NSC_ReceiveQueue;
 /**
  * Encapsulates a Network Simulation Cradle (NSC) instance.
  */
-class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
+class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback, public ILifecycle
 {
   protected:
     enum {MAX_SEND_BYTES = 500000};
@@ -66,7 +67,8 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
   protected:
     // called by the OMNeT++ simulation kernel:
 
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msgP);
     virtual void finish();
 
@@ -135,6 +137,9 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
      * To be called from TCPConnection: create a new receive queue.
      */
     virtual TCP_NSC_ReceiveQueue* createReceiveQueue(TCPDataTransferMode transferModeP);
+
+    // ILifeCycle:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     typedef std::map<int,TCP_NSC_Connection> TcpAppConnMap; // connId-to-TCP_NSC_Connection
