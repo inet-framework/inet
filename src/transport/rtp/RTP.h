@@ -21,6 +21,8 @@
 
 
 #include "INETDefs.h"
+
+#include "ILifecycle.h"
 #include "IPvXAddress.h"
 #include "RTPInnerPacket.h"
 #include "RTPInterfacePacket_m.h"
@@ -33,13 +35,15 @@
  * and forwards messages.
  * It also communicates with the application.
  */
-class INET_API RTP : public cSimpleModule
+class INET_API RTP : public cSimpleModule, public ILifecycle
 {
   protected:
     /**
      * Initializes variables.
      */
-    virtual void initialize();
+    virtual void initialize(int stage);
+
+    virtual int numInitStages() const { return 2; }
 
     /**
      * Handles incoming messages.
@@ -156,7 +160,15 @@ class INET_API RTP : public cSimpleModule
     */
     virtual int resolveMTU();
 
+    void updateDisplayString();
+
+    // ILifeCycle:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    void reset();
+
   protected:
+    /// for LifeCycle: store UP/DOWN state
+    bool isOperational;
     /**
      * The CNAME of this end system.
      */

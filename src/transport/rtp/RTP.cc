@@ -20,6 +20,9 @@
 
 #include "InterfaceEntry.h"
 #include "IPv4Address.h"
+#include "LifecycleOperation.h"
+#include "NodeOperations.h"
+#include "NodeStatus.h"
 #include "RoutingTableAccess.h"
 #include "RTPInnerPacket.h"
 #include "RTPInterfacePacket_m.h"
@@ -38,8 +41,10 @@ simsignal_t RTP::rcvdPkSignal = SIMSIGNAL_NULL;
 // methods inherited from cSimpleModule
 //
 
-void RTP::initialize()
+void RTP::initialize(int stage)
 {
+  if (stage == 0)
+  {
     _leaveSession = false;
     appInGate = findGate("appIn");
     profileInGate = findGate("profileIn");
@@ -48,11 +53,24 @@ void RTP::initialize()
     _udpSocket.setOutputGate(gate("udpOut"));
 
     rcvdPkSignal = registerSignal("rcvdPk");
+  }
+  else if (stage == 1)
+  {
+      NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+      isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+  }
 }
 
 void RTP::handleMessage(cMessage *msg)
 {
-    if (msg->getArrivalGateId() == appInGate)
+    if (!isOperational)
+    {
+        if (msg->isSelfMessage())
+            throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
+        EV << "RTP is turned off, dropping '" << msg->getName() << "' message\n";
+        delete msg;
+    }
+    else if (msg->getArrivalGateId() == appInGate)
     {
         handleMessageFromApp(msg);
     }
@@ -407,3 +425,59 @@ void RTP::initializeRTCP()
     rinp->setInitializeRTCPPkt(_commonName, _mtu, _bandwidth, _rtcpPercentage, _destinationAddress, rtcpPort);
     send(rinp, "rtcpOut");
 }
+
+void RTP::updateDisplayString()
+{
+}
+
+void RTP::reset()
+{
+    // delete profile modul:
+    cGate *profileOutGate = gate("profileOut");
+    if (profileOutGate->isConnected())
+    {
+        RTPProfile *profile = check_and_cast<RTPProfile *>(profileOutGate->getPathEndGate()->getOwnerModule());
+        profile->gate("rtpOut")->disconnect();  // profile.rtpOut --> this.profileIn
+        profileOutGate->disconnect();           // this.profileOut --> profile.rtpIn
+        delete profile;
+    }
+}
+
+bool RTP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
+            //FIXME implementation
+            isOperational = true;
+            updateDisplayString();
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER) {
+            //FIXME close connections???
+            reset();
+            isOperational = false;
+            updateDisplayString();
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            //FIXME implementation
+            reset();
+            isOperational = false;
+            updateDisplayString();
+        }
+    }
+    else
+    {
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    }
+
+    return true;
+}
+

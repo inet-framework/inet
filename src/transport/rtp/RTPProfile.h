@@ -60,6 +60,7 @@ class INET_API RTPProfile : public cSimpleModule
 
   public:
     RTPProfile();
+    virtual ~RTPProfile();
 
   protected:
     /**
@@ -67,7 +68,6 @@ class INET_API RTPProfile : public cSimpleModule
      */
     virtual void initialize();
 
-    virtual ~RTPProfile();
 
     /**
      * Creates and removes payload sender and receiver modules on demand.
