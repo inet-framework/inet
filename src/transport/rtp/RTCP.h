@@ -20,6 +20,8 @@
 
 
 #include "INETDefs.h"
+
+#include "ILifecycle.h"
 #include "IPv4Address.h"
 #include "UDPSocket.h"
 
@@ -41,7 +43,7 @@ class RTPSenderInfo;
  * processing of rtcp packets. It also keeps track of this and other
  * RTP end systems.
  */
-class INET_API RTCP : public cSimpleModule
+class INET_API RTCP : public cSimpleModule, public ILifecycle
 {
   public:
     RTCP();
@@ -167,7 +169,16 @@ class INET_API RTCP : public cSimpleModule
      */
     virtual void calculateAveragePacketSize(int size);
 
+    virtual void updateDisplayString();
+
+    // ILifeCycle:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    void reset();
+
   protected:
+    /// for LifeCycle: store UP/DOWN state
+    bool isOperational;
+
     /**
      * The maximum size an RTCPCompundPacket can have.
      */

@@ -169,6 +169,7 @@ class INET_API RTP : public cSimpleModule, public ILifecycle
   protected:
     /// for LifeCycle: store UP/DOWN state
     bool isOperational;
+
     /**
      * The CNAME of this end system.
      */

@@ -19,6 +19,7 @@
 #include "RTCP.h"
 
 #include "IPv4Address.h"
+#include "NodeOperations.h"
 #include "RTCPPacket.h"
 #include "RTPInnerPacket.h"
 #include "RTPParticipantInfo.h"
@@ -60,8 +61,15 @@ RTCP::~RTCP()
 
 void RTCP::handleMessage(cMessage *msg)
 {
+    if (!isOperational)
+    {
+        if (msg->isSelfMessage())
+            throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
+        EV << "RTP is turned off, dropping '" << msg->getName() << "' message\n";
+        //delete msg;
+    }
     // first distinguish incoming messages by arrival gate
-    if (msg->isSelfMessage())
+    else if (msg->isSelfMessage())
     {
         handleSelfMessage(msg);
     }
@@ -563,3 +571,50 @@ void RTCP::calculateAveragePacketSize(int size)
     _averagePacketSize += ((double)(size + 20 + 8) - _averagePacketSize) / (double)(++_packetsCalculated);
 #endif
 }
+
+void RTCP::updateDisplayString()
+{
+}
+
+void RTCP::reset()
+{
+}
+
+bool RTCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
+            //FIXME implementation
+            isOperational = true;
+            updateDisplayString();
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER) {
+            //FIXME close connections???
+            reset();
+            isOperational = false;
+            updateDisplayString();
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            //FIXME implementation
+            reset();
+            isOperational = false;
+            updateDisplayString();
+        }
+    }
+    else
+    {
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    }
+
+    return true;
+}
+
