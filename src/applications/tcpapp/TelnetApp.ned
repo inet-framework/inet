@@ -68,7 +68,7 @@ simple TelnetApp like ITCPApp
         int connectPort = default(1000); // port number to connect to
         string dataTransferMode = default("bytecount");
         double startTime @unit(s) = default(1s); // time first session begins
-        double stopTime @unit(s) = default(0);  // time of finish sending, 0 means infinity
+        double stopTime @unit(s) = default(-1s);  // time of finish sending, -1 means infinity
         volatile int numCommands = default(exponential(10)); // user types this many commands in a session
         volatile int commandLength @unit(B) = default(10B); // commands are this many characters (plus Enter)
         volatile double keyPressDelay @unit(s) = default(exponential(0.1s)); // delay between keypresses

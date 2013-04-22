@@ -34,7 +34,7 @@ TelnetApp::~TelnetApp()
 
 int TelnetApp::checkedScheduleAt(simtime_t t, cMessage *msg)
 {
-    if (stopTime == 0 || t < stopTime)
+    if (stopTime == -1 || t < stopTime)
         return scheduleAt(t, msg);
     return 0;
 }
@@ -52,7 +52,7 @@ void TelnetApp::initialize(int stage)
 
     simtime_t startTime = par("startTime");
     stopTime = par("stopTime");
-    if (stopTime != 0 && stopTime <= startTime)
+    if (stopTime != -1 && stopTime < startTime)
         error("Invalid startTime/stopTime parameters");
 
     timeoutMsg = new cMessage("timer");

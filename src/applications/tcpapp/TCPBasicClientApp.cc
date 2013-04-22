@@ -48,7 +48,7 @@ void TCPBasicClientApp::initialize(int stage)
 
     simtime_t startTime = par("startTime");
     stopTime = par("stopTime");
-    if (stopTime != 0 && stopTime <= startTime)
+    if (stopTime != -1 && stopTime < startTime)
         error("Invalid startTime/stopTime parameters");
 
     timeoutMsg = new cMessage("timer");
@@ -117,7 +117,7 @@ void TCPBasicClientApp::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
 {
     cancelEvent(timeoutMsg);
 
-    if (stopTime == 0 || stopTime > d)
+    if (stopTime == -1 || stopTime > d)
     {
         timeoutMsg->setKind(msgKind);
         scheduleAt(d, timeoutMsg);

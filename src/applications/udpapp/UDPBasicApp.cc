@@ -61,7 +61,7 @@ void UDPBasicApp::initialize(int stage)
         destPort = par("destPort");
         startTime = par("startTime").doubleValue();
         stopTime = par("stopTime").doubleValue();
-        if (stopTime != 0 && stopTime <= startTime)
+        if (stopTime != -1 && stopTime <= startTime)
             error("Invalid startTime/stopTime parameters");
         selfMsg = new cMessage("sendTimer");
     }
@@ -149,7 +149,7 @@ void UDPBasicApp::processStart()
     }
     else
     {
-        if (stopTime != 0)
+        if (stopTime != -1)
         {
             selfMsg->setKind(STOP);
             scheduleAt(stopTime, selfMsg);
@@ -161,7 +161,7 @@ void UDPBasicApp::processSend()
 {
     sendPacket();
     simtime_t d = simTime() + par("sendInterval").doubleValue();
-    if (stopTime == 0 || d < stopTime)
+    if (stopTime == -1 || d < stopTime)
     {
         selfMsg->setKind(SEND);
         scheduleAt(d, selfMsg);
@@ -224,7 +224,7 @@ void UDPBasicApp::processPacket(cPacket *pk)
 bool UDPBasicApp::startApp(IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
-    if (stopTime != 0 && stopTime <= start)
+    if (stopTime != -1 && stopTime <= start)
         return true;
 
     selfMsg->setKind(START);

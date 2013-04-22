@@ -40,7 +40,7 @@ simple VoIPStreamSender like IUDPApp
         int localPort;
         int destPort;
         string destAddress;
-        double startTime @unit(s) = default(0);
+        double startTime @unit(s) = default(0s);
         int voipHeaderSize @unit(B);
         int voipSilenceThreshold;
         int sampleRate @unit(Hz) = default(8000Hz);

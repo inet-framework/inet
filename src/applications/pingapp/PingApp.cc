@@ -62,7 +62,7 @@ void PingApp::initialize()
     count = par("count");
     startTime = par("startTime");
     stopTime = par("stopTime");
-    if (stopTime != 0 && stopTime < startTime)
+    if (stopTime != -1 && stopTime < startTime)
         error("Invalid startTime/stopTime parameters");
     printPing = (bool)par("printPing");
 
@@ -157,7 +157,7 @@ void PingApp::scheduleNextPingRequest(simtime_t previous)
         next = simTime() <= startTime ? startTime : simTime();
     else
         next = previous + sendIntervalPar->doubleValue();
-    if (stopTime == 0  || next <= stopTime)
+    if (stopTime == -1  || next <= stopTime)
         scheduleAt(next, timer);
 }
 

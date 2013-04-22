@@ -49,7 +49,7 @@ simple SCTPClient like ISCTPApp
         double streamRequestTime @unit(s) = default(0s);
         int streamResetType = default(5);  //NO_RESET=5, RESET_OUTGOING=6, RESET_INCOMING=7, RESET_BOTH=8, SSN_TSN=9
         bool streamAnswer = default(false);
-        double stopTime @unit(s) = default(0s);
+        double stopTime @unit(s) = default(-1s);
         double primaryTime @unit(s) = default(0s);
         string newPrimary = default("");
         string streamRequestLengths = default("");

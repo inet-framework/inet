@@ -48,7 +48,7 @@ simple PingTestApp like IPingApp
         double hopLimit = default(32); // TTL or hopLimit for IP packets
         double count = default(1);     // number of pings requests sent to a single destination address (must be > 0)
         double startTime @unit("s") = default(uniform(0s,this.sleepDuration)); // send first ping at startTime
-        double stopTime @unit("s") = default(0s); // time to finish sending, 0 means forever
+        double stopTime @unit("s") = default(-1s); // time to finish sending, -1 means forever
         volatile double sleepDuration @unit(s) = default(0s); // time spent in sleep between switching destinations
         bool continuous = default(false);  // whether to continuously ping the destinations in a round-robin fashion
         bool printPing = default(false); // log to stdout
