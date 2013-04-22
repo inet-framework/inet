@@ -30,8 +30,8 @@
 simple MeterTestApp
 {
   parameters:
-    double startTime @unit(s) = default(0);
-    double stopTime @unit(s) = default(0);
+    double startTime @unit(s) = default(0s);
+    double stopTime @unit(s) = default(-1s);
     int numPackets = default(0); // 0 = unlimited
     volatile double iaTime @unit(s);
     volatile int packetSize @unit(B);

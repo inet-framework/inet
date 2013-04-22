@@ -80,7 +80,7 @@ void SCTPClient::initialize()
     sendAllowed = true;
     bufferSize = 0;
 
-    if ((simtime_t)par("stopTime")!=0)
+    if ((simtime_t)par("stopTime") != -1)
     {
         stopTimer = new cMessage("StopTimer");
         stopTimer->setKind(MSGKIND_STOP);

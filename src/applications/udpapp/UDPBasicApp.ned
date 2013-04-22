@@ -47,7 +47,7 @@ simple UDPBasicApp like IUDPApp
         int destPort;
         volatile int messageLength @unit(B); // length of messages to generate, in bytes
         double startTime @unit(s) = default(this.sendInterval); // application start time (start of the first packet)
-        double stopTime @unit(s) = default(0);  // time of finish sending, 0 means forever
+        double stopTime @unit(s) = default(-1s);  // time of finish sending, -1s means forever
         volatile double sendInterval @unit(s); // should usually be a random value, e.g. exponential(1)
         int timeToLive = default(-1); // if not -1, set the TTL (IPv4) or Hop Limit (IPv6) field of sent packets to this value
         int typeOfService = default(-1); // if not -1, set the ToS (IPv4) or Traffic Class (IPv6) field of sent packets to this value
