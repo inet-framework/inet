@@ -202,7 +202,9 @@ void RIPRouting::initialize(int stage)
         nb->subscribe(this, NF_ROUTE_ADDED);
         nb->subscribe(this, NF_ROUTE_CHANGED);
 
-        sendInitialRequests();
+        for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
+            if (it->mode != NO_RIP)
+                sendRIPRequest(*it);
 
         // set update timer
         scheduleAt(updateInterval, updateTimer);
@@ -271,31 +273,28 @@ RIPRoute* RIPRouting::importRoute(IRoute *route, RIPRoute::RouteType type, int m
 }
 
 /**
- * Sends RIP requests to each neighbor routers.
+ * Sends a RIP request to routers on the specified link.
  */
-void RIPRouting::sendInitialRequests()
+void RIPRouting::sendRIPRequest(const RIPInterfaceEntry &ripInterface)
 {
-    for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
-    {
-        if (it->mode != NO_RIP)
-        {
-            RIPPacket *packet = new RIPPacket("RIP request");
-            packet->setCommand(RIP_REQUEST);
-            packet->setEntryArraySize(1);
-            RIPEntry &entry = packet->getEntry(0);
-            entry.addressFamilyId = RIP_AF_NONE;
-            entry.metric = RIP_INFINITE_METRIC;
-            emit(sentRequestSignal, packet);
-            sendPacket(packet, addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, it->ie);
-        }
-    }
+    RIPPacket *packet = new RIPPacket("RIP request");
+    packet->setCommand(RIP_REQUEST);
+    packet->setEntryArraySize(1);
+    RIPEntry &entry = packet->getEntry(0);
+    entry.addressFamilyId = RIP_AF_NONE;
+    entry.metric = RIP_INFINITE_METRIC;
+    emit(sentRequestSignal, packet);
+    sendPacket(packet, addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, ripInterface.ie);
 }
+
 
 /**
  * Listen on interface/route changes and update private data structures.
  */
 void RIPRouting::receiveChangeNotification(int category, const cObject *details)
 {
+    Enter_Method_Silent("RIPRouting::receiveChangeNotification(%s)", notificationCategoryName(category));
+
     IRoute *route;
     const InterfaceEntry *ie;
 
@@ -318,11 +317,18 @@ void RIPRouting::receiveChangeNotification(int category, const cObject *details)
             deleteInterface(ie);
             break;
         case NF_INTERFACE_STATE_CHANGED:
+            // XXX it is assumed that the only state change is the change of the 'down' flag
             // if the interface is down, invalidate routes via that interface
             ie = const_cast<InterfaceEntry*>(check_and_cast<const InterfaceEntry*>(details));
             if (!ie->isUp())
             {
                 invalidateRoutes(ie);
+            }
+            else
+            {
+                RIPInterfaceEntry *ripInterfacePtr = findInterfaceById(ie->getInterfaceId());
+                if (ripInterfacePtr && ripInterfacePtr->mode != NO_RIP)
+                    sendRIPRequest(*ripInterfacePtr);
             }
             break;
         case NF_ROUTE_DELETED:

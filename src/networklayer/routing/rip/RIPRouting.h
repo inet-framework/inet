@@ -170,7 +170,7 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     virtual void configureInterfaces(cXMLElement *config);
     virtual void configureInitialRoutes();
     virtual RIPRoute* importRoute(IRoute *route, RIPRoute::RouteType type, int metric = 1);
-    virtual void sendInitialRequests();
+    virtual void sendRIPRequest(const RIPInterfaceEntry &ripInterface);
 
     virtual void processRequest(RIPPacket *packet);
     virtual void processUpdate(bool triggered);
