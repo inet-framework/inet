@@ -50,6 +50,18 @@ class INET_API IRoute
             DYMO,         ///< managed by DYMO routing
         };
 
+        /** Field codes for NB_ROUTE_CHANGED notifications */
+        enum {
+            F_DESTINATION,
+            F_PREFIX_LENGTH,
+            F_NEXTHOP,
+            F_IFACE,
+            F_SOURCE,
+            F_TYPE,
+            F_ADMINDIST,
+            F_METRIC,
+            F_LAST
+        };
 
 //TODO maybe:
 //    virtual std::string info() const;

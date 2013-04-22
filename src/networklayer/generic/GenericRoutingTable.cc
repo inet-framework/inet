@@ -125,6 +125,20 @@ void GenericRoutingTable::receiveChangeNotification(int category, const cObject 
     // TODO:
 }
 
+void GenericRoutingTable::routeChanged(GenericRoute *entry, int fieldCode)
+{
+    if (fieldCode==IRoute::F_DESTINATION || fieldCode==IRoute::F_PREFIX_LENGTH || fieldCode==IRoute::F_METRIC) // our data structures depend on these fields
+    {
+        entry = internalRemoveRoute(entry);
+        ASSERT(entry != NULL);  // failure means inconsistency: route was not found in this routing table
+        internalAddRoute(entry);
+
+        //invalidateCache();
+        updateDisplayString();
+    }
+    nb->fireChangeNotification(NF_ROUTE_CHANGED, entry); // TODO include fieldCode in the notification
+}
+
 void GenericRoutingTable::configureRouterId()
 {
     if (routerId.isUnspecified())  // not yet configured
@@ -331,15 +345,9 @@ void GenericRoutingTable::addRoute(IRoute* route)
     if (!entry->getInterface())
         error("addRoute(): interface cannot be NULL");
 
-    // add to tables
-    // we keep entries sorted, so that we can stop at the first match when doing the longest prefix matching
-    RouteVector::iterator pos = upper_bound(routes.begin(), routes.end(), entry, routeLessThan);
-    routes.insert(pos, entry);
-
-    entry->setRoutingTable(this);
+    internalAddRoute(entry);
 
     updateDisplayString();
-
     nb->fireChangeNotification(NF_ROUTE_ADDED, entry);
 }
 
@@ -347,19 +355,14 @@ IRoute* GenericRoutingTable::removeRoute(IRoute* route)
 {
     Enter_Method("removeRoute(...)");
 
-    GenericRoute* entry = dynamic_cast<GenericRoute*>(route);
-
-    RouteVector::iterator i = std::find(routes.begin(), routes.end(), entry);
-    if (i!=routes.end())
+    GenericRoute* entry = internalRemoveRoute(check_and_cast<GenericRoute*>(route));
+    if (entry)
     {
-        routes.erase(i);
         updateDisplayString();
-        ASSERT(entry->getRoutingTableAsGeneric() == this); // still filled in, for the listeners' benefit
         nb->fireChangeNotification(NF_ROUTE_DELETED, entry);
-        entry->setRoutingTable(NULL);
-        return entry;
     }
-    return NULL;
+
+    return entry;
 }
 
 bool GenericRoutingTable::deleteRoute(IRoute* entry)
@@ -367,6 +370,31 @@ bool GenericRoutingTable::deleteRoute(IRoute* entry)
     IRoute *route = removeRoute(entry);
     delete route;
     return route != NULL;
+}
+
+void GenericRoutingTable::internalAddRoute(GenericRoute *route)
+{
+    ASSERT(route->getRoutingTableAsGeneric() == NULL);
+
+    // add to tables
+    // we keep entries sorted, so that we can stop at the first match when doing the longest prefix matching
+    RouteVector::iterator pos = upper_bound(routes.begin(), routes.end(), route, routeLessThan);
+    routes.insert(pos, route);
+
+    route->setRoutingTable(this);
+}
+
+GenericRoute *GenericRoutingTable::internalRemoveRoute(GenericRoute *route)
+{
+    RouteVector::iterator i = std::find(routes.begin(), routes.end(), route);
+    if (i!=routes.end())
+    {
+        ASSERT(route->getRoutingTableAsGeneric() == this);
+        routes.erase(i);
+        route->setRoutingTable(NULL);
+        return route;
+    }
+    return NULL;
 }
 
 int GenericRoutingTable::getNumMulticastRoutes() const

@@ -16,6 +16,7 @@
 //
 
 #include "GenericRoute.h"
+#include "GenericRoutingTable.h"
 
 std::string GenericRoute::info() const
 {
@@ -30,6 +31,17 @@ std::string GenericRoute::detailedInfo() const
 bool GenericRoute::equals(const IRoute& route) const
 {
     return false; //TODO
+}
+
+void GenericRoute::changed(int fieldCode)
+{
+    if (owner)
+        owner->routeChanged(this, fieldCode);
+}
+
+IRoutingTable *GenericRoute::getRoutingTableAsGeneric() const
+{
+    return owner;
 }
 
 //---

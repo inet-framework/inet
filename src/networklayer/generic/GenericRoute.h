@@ -25,15 +25,15 @@
 
 class InterfaceEntry;
 class IRoutingTable;
+class GenericRoutingTable;
 
 /**
  * A generic route that uses generic addresses as destination and next hop.
  */
-// TODO change notifications
 class INET_API GenericRoute : public cObject, public IRoute
 {
     private:
-        IRoutingTable *owner;
+        GenericRoutingTable *owner;
         int prefixLength;
         Address destination;
         Address nextHop;
@@ -42,6 +42,9 @@ class INET_API GenericRoute : public cObject, public IRoute
         cObject *source;
         cObject *protocolData;
         int metric;
+
+    protected:
+      void changed(int fieldCode);
 
     public:
         GenericRoute() : owner(NULL), prefixLength(0), interface(NULL), sourceType(IRoute::MANUAL),
@@ -53,18 +56,18 @@ class INET_API GenericRoute : public cObject, public IRoute
 
         bool equals(const IRoute& route) const;
 
-        virtual void setRoutingTable(IRoutingTable *owner) {this->owner = owner;}
-        virtual void setDestination(const Address& dest) {this->destination = dest;}
-        virtual void setPrefixLength(int l) {this->prefixLength = l;}
-        virtual void setNextHop(const Address& nextHop) {this->nextHop = nextHop;}
-        virtual void setInterface(InterfaceEntry *ie) {this->interface = ie;}
-        virtual void setSourceType(SourceType sourceType)  {this->sourceType = sourceType; }
-        virtual void setSource(cObject *source) {this->source = source;}
-        virtual void setMetric(int metric) {this->metric = metric;}
+        virtual void setRoutingTable(GenericRoutingTable *owner) {this->owner = owner;}
+        virtual void setDestination(const Address& dest) {if (destination!=dest) {this->destination = dest; changed(F_DESTINATION);}}
+        virtual void setPrefixLength(int l) {if (prefixLength!=l) {this->prefixLength = l; changed(F_PREFIX_LENGTH);}}
+        virtual void setNextHop(const Address& nextHop) {if (this->nextHop!=nextHop) {this->nextHop = nextHop;changed(F_NEXTHOP);}}
+        virtual void setInterface(InterfaceEntry *ie) {if (interface!=ie) {this->interface = ie; changed(F_IFACE);}}
+        virtual void setSourceType(SourceType sourceType)  {if (this->sourceType!=sourceType) {this->sourceType = sourceType; changed(F_TYPE);}}
+        virtual void setSource(cObject *source) {if (this->source!=source) {this->source = source; changed(F_SOURCE);}}
+        virtual void setMetric(int metric) {if (this->metric!=metric) {this->metric = metric; changed(F_METRIC);}}
         virtual void setProtocolData(cObject *protocolData) {this->protocolData = protocolData;}
 
         /** The routing table in which this route is inserted, or NULL. */
-        virtual IRoutingTable *getRoutingTableAsGeneric() const {return owner;}
+        virtual IRoutingTable *getRoutingTableAsGeneric() const;
 
         /** Destination address prefix to match */
         virtual Address getDestinationAsGeneric() const {return destination;}

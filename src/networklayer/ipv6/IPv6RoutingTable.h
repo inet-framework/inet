@@ -102,6 +102,8 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     // internal
     virtual void configureTunnelFromXML(cXMLElement* cfg);
 
+    void internalAddRoute(IPv6Route *route);
+    IPv6Route *internalRemoveRoute(IPv6Route *route);
     RouteList::iterator internalDeleteRoute(RouteList::iterator it);
 
   protected:

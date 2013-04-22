@@ -821,7 +821,7 @@ bool IPv4RoutingTable::deleteMulticastRoute(IPv4MulticastRoute *entry)
 
 void IPv4RoutingTable::routeChanged(IPv4Route *entry, int fieldCode)
 {
-    if (fieldCode==IPv4Route::F_DESTINATION || fieldCode==IPv4Route::F_NETMASK || fieldCode==IPv4Route::F_METRIC) // our data structures depend on these fields
+    if (fieldCode==IPv4Route::F_DESTINATION || fieldCode==IPv4Route::F_PREFIX_LENGTH || fieldCode==IPv4Route::F_METRIC) // our data structures depend on these fields
     {
         entry = internalRemoveRoute(entry);
         ASSERT(entry != NULL);  // failure means inconsistency: route was not found in this routing table

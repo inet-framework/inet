@@ -48,3 +48,4 @@ IRoutingTable *IPv6Route::getRoutingTableAsGeneric() const
 {
     return getRoutingTable();
 }
+

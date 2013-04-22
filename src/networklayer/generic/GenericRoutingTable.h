@@ -75,6 +75,9 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
 
         static bool routeLessThan(const GenericRoute *a, const GenericRoute *b);
 
+        void internalAddRoute(GenericRoute *route);
+        GenericRoute *internalRemoveRoute(GenericRoute *route);
+
     public:
         GenericRoutingTable();
         virtual ~GenericRoutingTable();
@@ -105,6 +108,13 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
          * Returns an interface given by its address. Returns NULL if not found.
          */
         virtual InterfaceEntry *getInterfaceByAddress(const Address& address) const;   //XXX should be find..., see next one
+
+        /**
+         * To be called from route objects whenever a field changes. Used for
+         * maintaining internal data structures and firing "routing table changed"
+         * notifications.
+         */
+        virtual void routeChanged(GenericRoute *entry, int fieldCode);
         //@}
 
         /** @name Routing functions (query the route table) */
