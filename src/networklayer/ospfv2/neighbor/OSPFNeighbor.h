@@ -23,7 +23,7 @@
 #include "LSA.h"
 #include "OSPFcommon.h"
 #include "OSPFPacket_m.h"
-#include "OSPFTimer_m.h"
+#include "OSPFTimer.h"
 
 namespace OSPF {
 
@@ -86,12 +86,12 @@ private:
 private:
     NeighborState*                      state;
     NeighborState*                      previousState;
-    OSPFTimer*                          inactivityTimer;
-    OSPFTimer*                          pollTimer;
-    OSPFTimer*                          ddRetransmissionTimer;
-    OSPFTimer*                          updateRetransmissionTimer;
+    cMessage*                           inactivityTimer;
+    cMessage*                           pollTimer;
+    cMessage*                           ddRetransmissionTimer;
+    cMessage*                           updateRetransmissionTimer;
     bool                                updateRetransmissionTimerActive;
-    OSPFTimer*                          requestRetransmissionTimer;
+    cMessage*                           requestRetransmissionTimer;
     bool                                requestRetransmissionTimerActive;
     DatabaseExchangeRelationshipType    databaseExchangeRelationship;
     bool                                firstAdjacencyInited;
@@ -178,10 +178,10 @@ public:
     Interface*          getInterface()  { return parentInterface; }
     const Interface*    getInterface() const  { return parentInterface; }
 
-    OSPFTimer*          getInactivityTimer()  { return inactivityTimer; }
-    OSPFTimer*          getPollTimer()  { return pollTimer; }
-    OSPFTimer*          getDDRetransmissionTimer()  { return ddRetransmissionTimer; }
-    OSPFTimer*          getUpdateRetransmissionTimer()  { return updateRetransmissionTimer; }
+    cMessage*           getInactivityTimer()  { return inactivityTimer; }
+    cMessage*           getPollTimer()  { return pollTimer; }
+    cMessage*           getDDRetransmissionTimer()  { return ddRetransmissionTimer; }
+    cMessage*           getUpdateRetransmissionTimer()  { return updateRetransmissionTimer; }
     bool                isUpdateRetransmissionTimerActive() const  { return updateRetransmissionTimerActive; }
     bool                isRequestRetransmissionTimerActive() const  { return requestRetransmissionTimerActive; }
     bool                isFirstAdjacencyInited() const  { return firstAdjacencyInited; }

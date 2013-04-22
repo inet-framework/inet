@@ -26,8 +26,8 @@ OSPF::Router::Router(OSPF::RouterID id, cSimpleModule* containingModule) :
     rfc1583Compatibility(false)
 {
     messageHandler = new OSPF::MessageHandler(this, containingModule);
-    ageTimer = new OSPFTimer();
-    ageTimer->setTimerKind(DATABASE_AGE_TIMER);
+    ageTimer = new cMessage();
+    ageTimer->setKind(DATABASE_AGE_TIMER);
     ageTimer->setContextPointer(this);
     ageTimer->setName("OSPF::Router::DatabaseAgeTimer");
     messageHandler->startTimer(ageTimer, 1.0);

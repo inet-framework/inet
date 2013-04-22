@@ -26,7 +26,7 @@
 #include "LinkStateRequestHandler.h"
 #include "LinkStateUpdateHandler.h"
 #include "OSPFInterface.h"
-#include "OSPFTimer_m.h"
+#include "OSPFTimer.h"
 
 namespace OSPF {
 
@@ -44,13 +44,13 @@ public:
     MessageHandler(Router* containingRouter, cSimpleModule* containingModule);
 
     void    messageReceived(cMessage* message);
-    void    handleTimer(OSPFTimer* timer);
+    void    handleTimer(cMessage*  timer);
 
     void    processPacket(OSPFPacket* packet, Interface* unused1 = NULL, Neighbor* unused2 = NULL);
 
     void    sendPacket(OSPFPacket* packet, IPv4Address destination, int outputIfIndex, short ttl = 1);
-    void    clearTimer(OSPFTimer* timer);
-    void    startTimer(OSPFTimer* timer, simtime_t delay);
+    void    clearTimer(cMessage*  timer);
+    void    startTimer(cMessage*  timer, simtime_t delay);
 
     void    printEvent(const char* eventString, const Interface* onInterface = NULL, const Neighbor* forNeighbor = NULL) const;
     void    printHelloPacket(const OSPFHelloPacket* helloPacket, IPv4Address destination, int outputIfIndex) const;
