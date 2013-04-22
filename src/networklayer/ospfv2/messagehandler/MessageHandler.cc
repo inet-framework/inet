@@ -36,7 +36,7 @@ OSPF::MessageHandler::MessageHandler(OSPF::Router* containingRouter, cSimpleModu
 void OSPF::MessageHandler::messageReceived(cMessage* message)
 {
     if (message->isSelfMessage()) {
-        handleTimer(check_and_cast<OSPFTimer*> (message));
+        handleTimer(message);
     } else if (dynamic_cast<ICMPMessage *>(message)) {
         EV << "ICMP error received -- discarding\n";
         delete message;
@@ -52,9 +52,9 @@ void OSPF::MessageHandler::messageReceived(cMessage* message)
     }
 }
 
-void OSPF::MessageHandler::handleTimer(OSPFTimer* timer)
+void OSPF::MessageHandler::handleTimer(cMessage* timer)
 {
-    switch (timer->getTimerKind()) {
+    switch (timer->getKind()) {
         case INTERFACE_HELLO_TIMER:
             {
                 OSPF::Interface* intf;
@@ -339,12 +339,12 @@ void OSPF::MessageHandler::sendPacket(OSPFPacket* packet, IPv4Address destinatio
     ospfModule->send(packet, "ipOut");
 }
 
-void OSPF::MessageHandler::clearTimer(OSPFTimer* timer)
+void OSPF::MessageHandler::clearTimer(cMessage* timer)
 {
     ospfModule->cancelEvent(timer);
 }
 
-void OSPF::MessageHandler::startTimer(OSPFTimer* timer, simtime_t delay)
+void OSPF::MessageHandler::startTimer(cMessage* timer, simtime_t delay)
 {
     ospfModule->scheduleAt(simTime() + delay, timer);
 }
