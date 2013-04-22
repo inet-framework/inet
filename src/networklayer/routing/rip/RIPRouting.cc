@@ -1039,6 +1039,7 @@ void RIPRouting::invalidateRoutes(const InterfaceEntry *ie)
 IRoute *RIPRouting::addRoute(const Address &dest, int prefixLength, const InterfaceEntry *ie, const Address &nextHop, int metric)
 {
     IRoute *route = rt->createRoute();
+    route->setSourceType(IRoute::RIP);
     route->setSource(this);
     route->setDestination(dest);
     route->setPrefixLength(prefixLength);

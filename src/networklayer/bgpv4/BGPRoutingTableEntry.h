@@ -53,7 +53,7 @@ inline BGP::RoutingTableEntry::RoutingTableEntry(void) :
 {
     setNetmask(IPv4Address::ALLONES_ADDRESS);
     setMetric(BGP::DEFAULT_COST);
-    setSourceType(IPv4Route::BGP);
+    setSourceType(IRoute::BGP);
 }
 
 inline BGP::RoutingTableEntry::RoutingTableEntry(const IPv4Route* entry)
@@ -63,7 +63,7 @@ inline BGP::RoutingTableEntry::RoutingTableEntry(const IPv4Route* entry)
     setGateway(entry->getGateway());
     setInterface(entry->getInterface());
     setMetric(BGP::DEFAULT_COST);
-    setSourceType(IPv4Route::BGP);
+    setSourceType(IRoute::BGP);
 }
 
 inline std::ostream& operator<<(std::ostream& out, BGP::RoutingTableEntry& entry)

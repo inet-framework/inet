@@ -1466,6 +1466,7 @@ void IPv4NetworkConfigurator::readManualRouteConfiguration(IPv4Topology& topolog
 
                         // create and add route
                         IPv4Route *route = new IPv4Route();
+                        route->setSourceType(IRoute::MANUAL);
                         route->setDestination(destination);
                         route->setNetmask(netmask);
                         route->setGateway(gateway); // may be unspecified
@@ -1566,6 +1567,7 @@ void IPv4NetworkConfigurator::readManualMulticastRouteConfiguration(IPv4Topology
                         {
                             // create and add route
                             IPv4MulticastRoute *route = new IPv4MulticastRoute();
+                            route->setSourceType(IMulticastRoute::MANUAL);
                             route->setOrigin(source);
                             route->setOriginNetmask(netmask);
                             route->setMulticastGroup(groups[j]);
@@ -1740,6 +1742,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
             InterfaceInfo *sourceInterfaceInfo = sourceNode->interfaceInfos[0];
             InterfaceEntry *sourceInterfaceEntry = sourceInterfaceInfo->interfaceEntry;
             InterfaceInfo *gatewayInterfaceInfo = sourceInterfaceInfo->linkInfo->gatewayInterfaceInfo;
+        InterfaceEntry *gatewayInterfaceEntry = gatewayInterfaceInfo->interfaceEntry;
 
             // add a network route for the local network using ARP
             IPv4Route *route = new IPv4Route();

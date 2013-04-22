@@ -28,7 +28,7 @@ OSPF::RoutingTableEntry::RoutingTableEntry() :
     linkStateOrigin(NULL)
 {
     setNetmask(IPv4Address::ALLONES_ADDRESS);
-    setSourceType(IPv4Route::OSPF);
+    setSourceType(IRoute::OSPF);
     memset(&optionalCapabilities, 0, sizeof(OSPFOptions));
 }
 

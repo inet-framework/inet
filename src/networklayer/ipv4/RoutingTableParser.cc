@@ -366,6 +366,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
             throw cRuntimeError("Syntax error in routing file: 6th column: `%s' is not an existing interface", interfaceName.c_str());
 
         e->setInterface(ie);
+        e->setSourceType(IRoute::MANUAL);
 
         // add entry
         rt->addRoute(e);

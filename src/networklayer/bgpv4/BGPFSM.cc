@@ -388,16 +388,16 @@ void Established::entry()
     {
         rtEntry = IPRoutingTable->getRoute(i);
         if (rtEntry->getNetmask() == IPv4Address::ALLONES_ADDRESS ||
-            rtEntry->getSourceType() == IPv4Route::IFACENETMASK ||
-            rtEntry->getSourceType() == IPv4Route::MANUAL ||
-            rtEntry->getSourceType() == IPv4Route::BGP)
+            rtEntry->getSourceType() == IRoute::IFACENETMASK ||
+            rtEntry->getSourceType() == IRoute::MANUAL ||
+            rtEntry->getSourceType() == IRoute::BGP)
         {
             continue;
         }
 
         if (session.getType() == BGP::EGP)
         {
-            if (rtEntry->getSourceType() == IPv4Route::OSPF && session.checkExternalRoute(rtEntry))
+            if (rtEntry->getSourceType() == IRoute::OSPF && session.checkExternalRoute(rtEntry))
             {
                 continue;
             }

@@ -44,7 +44,8 @@ class INET_API GenericRoute : public cObject, public IRoute
         int metric;
 
     public:
-        GenericRoute() : owner(NULL), prefixLength(0), interface(NULL), source(NULL), protocolData(NULL), metric(0) {}
+        GenericRoute() : owner(NULL), prefixLength(0), interface(NULL), sourceType(IRoute::MANUAL),
+                            source(NULL), protocolData(NULL), metric(0) {}
         virtual ~GenericRoute() {}
 
         virtual std::string info() const;

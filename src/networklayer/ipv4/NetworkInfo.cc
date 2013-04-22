@@ -112,7 +112,7 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
             }
 
             line.width(7);
-            if (compat && rt->getRoute(i)->getSourceType() == IPv4Route::IFACENETMASK)
+            if (compat && rt->getRoute(i)->getSourceType() == IRoute::IFACENETMASK)
                 metric = 0;
             line << metric;
 

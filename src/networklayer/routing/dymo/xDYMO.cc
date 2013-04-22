@@ -1079,6 +1079,7 @@ void xDYMO::updateRoutes(RteMsg * rteMsg, AddressBlock & addressBlock)
 IRoute * xDYMO::createRoute(RteMsg * rteMsg, AddressBlock & addressBlock)
 {
     IRoute * route = routingTable->createRoute();
+    route->setSourceType(IRoute::DYMO);
     route->setSource(this);
     route->setProtocolData(new DYMORouteData());
     updateRoute(rteMsg, addressBlock, route);

@@ -511,6 +511,7 @@ void GenericNetworkConfigurator::addStaticRoutes(GenericTopology& topology)
                 {
                     GenericRoute *route = new GenericRoute();
                     Address nextHopAddress = nextHopInterfaceEntry->getGenericNetworkProtocolData()->getAddress();
+                    route->setSourceType(IRoute::MANUAL);
                     route->setDestination(destinationAddress);
                     route->setInterface(sourceInterfaceEntry);
                     if (nextHopAddress != destinationAddress)
