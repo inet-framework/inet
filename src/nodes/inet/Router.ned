@@ -17,6 +17,12 @@
 
 package inet.nodes.inet;
 
+import inet.networklayer.bgpv4.BGPRouting;
+import inet.networklayer.ospfv2.OSPFRouting;
+import inet.networklayer.routing.rip.RIPRouting;
+import inet.transport.ITCP;
+import inet.transport.IUDP;
+
 //
 // IPv4 router that supports wireless, Ethernet, PPP and external interfaces.
 // By default, no wireless and external interfaces are added; the number of
@@ -37,9 +43,58 @@ package inet.nodes.inet;
 // - If wireless card is present, node mobility can be set using **.mobility.typename
 //   see: inet.mobility and ~IMobility
 //
+// By default, dynamic routing is not supported. Specific routing protocols can
+// be added by setting the hasOSPF/hasRIP/hasBGP parameters.
+//
 module Router extends NodeBase
 {
     parameters:
         @display("i=abstract/router");
         IPForward = true;
+        bool hasOSPF = default(false);
+        bool hasRIP = default(false);
+        bool hasBGP = default(false);
+        string tcpType = default(firstAvailable("TCP", "TCP_lwIP", "TCP_NSC", "TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
+        string udpType = default("UDP");
+    submodules:
+        ospf: OSPFRouting if hasOSPF {
+            parameters:
+                @display("p=465,287,row");
+        }
+        bgp: BGPRouting if hasBGP {
+            parameters:
+                @display("p=214,80;i=block/network");
+        }
+        tcp: <tcpType> like ITCP if hasBGP {
+            parameters:
+                @display("p=214,180;i=block/transport");
+        }
+        rip: RIPRouting if hasRIP {
+            @display("p=404,80");
+        }
+        udp: <udpType> like IUDP if hasRIP {
+            @display("p=404,180");
+        }
+    connections allowunconnected:
+
+        if hasOSPF {
+            ospf.ipOut --> networkLayer.transportIn++;
+            ospf.ipIn <-- networkLayer.transportOut++;
+        }
+
+        if hasBGP {
+            bgp.tcpOut --> tcp.appIn++;
+            bgp.tcpIn <-- tcp.appOut++;
+
+            tcp.ipOut --> networkLayer.transportIn++;
+            tcp.ipIn <-- networkLayer.transportOut++;
+        }
+
+        if hasRIP {
+            rip.udpOut --> udp.appIn++;
+            rip.udpIn <-- udp.appOut++;
+
+            udp.ipOut --> networkLayer.transportIn++;
+            udp.ipIn <-- networkLayer.transportOut++;
+        }
 }

@@ -18,10 +18,7 @@
 
 package inet.nodes.rip;
 
-import inet.networklayer.routing.rip.RIPRouting;
 import inet.nodes.inet.Router;
-import inet.transport.IUDP;
-
 
 //
 // An RIPv2 router.
@@ -29,20 +26,6 @@ import inet.transport.IUDP;
 module RIPRouter extends Router
 {
     parameters:
-        string udpType = default("UDP");
-    submodules:
-        rip: RIPRouting {
-            @display("p=329,80");
-        }
-        udp: <udpType> like IUDP {
-            @display("p=329,180");
-        }
-    connections allowunconnected:
-
-        rip.udpOut --> udp.appIn++;
-        rip.udpIn <-- udp.appOut++;
-
-        udp.ipOut --> networkLayer.transportIn++;
-        udp.ipIn <-- networkLayer.transportOut++;
+        hasRIP = true;
 }
 

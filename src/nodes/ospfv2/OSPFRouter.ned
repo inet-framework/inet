@@ -18,12 +18,6 @@
 
 package inet.nodes.ospfv2;
 
-import inet.base.NotificationBoard;
-import inet.linklayer.IWiredNic;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.IPv4RoutingTable;
-import inet.networklayer.ospfv2.OSPFRouting;
-import inet.networklayer.ipv4.IPv4NetworkLayer;
 import inet.nodes.inet.Router;
 
 
@@ -32,13 +26,7 @@ import inet.nodes.inet.Router;
 //
 module OSPFRouter extends Router
 {
-    submodules:
-        ospf: OSPFRouting {
-            parameters:
-                @display("p=465,287,row");
-        }
-    connections allowunconnected:
-        ospf.ipOut --> networkLayer.transportIn++;
-        ospf.ipIn <-- networkLayer.transportOut++;
+    parameters:
+        hasOSPF = true;
 }
 

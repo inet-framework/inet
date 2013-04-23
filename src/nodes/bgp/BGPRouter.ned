@@ -17,32 +17,16 @@
 
 package inet.nodes.bgp;
 
-import inet.transport.ITCP;
-import inet.nodes.ospfv2.OSPFRouter;
-import inet.networklayer.bgpv4.BGPRouting;
+import inet.nodes.inet.Router;
 
 
 //
 // IP router with BGPv4 and OSPFv4 support.
 //
-module BGPRouter extends OSPFRouter
+module BGPRouter extends Router
 {
     parameters:
-        string tcpType = default(firstAvailable("TCP", "TCP_lwIP", "TCP_NSC", "TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
-    submodules:
-        bgp: BGPRouting {
-            parameters:
-                @display("p=239,33;i=block/network");
-        }
-        tcp: <tcpType> like ITCP {
-            parameters:
-                @display("p=161,72;i=block/transport");
-        }
-    connections allowunconnected:
-        bgp.tcpOut --> tcp.appIn++;
-        bgp.tcpIn <-- tcp.appOut++;
-
-        tcp.ipOut --> networkLayer.transportIn++;
-        tcp.ipIn <-- networkLayer.transportOut++;
+        hasBGP = true;
+        hasOSPF = true;
 }
 
