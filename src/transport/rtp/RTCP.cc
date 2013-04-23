@@ -19,7 +19,9 @@
 #include "RTCP.h"
 
 #include "IPv4Address.h"
+#include "ModuleAccess.h"
 #include "NodeOperations.h"
+#include "NodeStatus.h"
 #include "RTCPPacket.h"
 #include "RTPInnerPacket.h"
 #include "RTPParticipantInfo.h"
@@ -36,10 +38,13 @@ simsignal_t RTCP::rcvdPkSignal = SIMSIGNAL_NULL;
 RTCP::RTCP()
 {
     _senderInfo = NULL;
+    isOperational = false;
 }
 
-void RTCP::initialize()
+void RTCP::initialize(int stage)
 {
+  if (stage == 0)
+  {
     // initialize variables
     _ssrcChosen = false;
     _leaveSession = false;
@@ -51,6 +56,11 @@ void RTCP::initialize()
     _participantInfos.setName("ParticipantInfos");
 
     rcvdPkSignal = registerSignal("rcvdPk");
+  }
+  else if (stage == 1) {
+      NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+      isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+  }
 }
 
 RTCP::~RTCP()
@@ -65,8 +75,7 @@ void RTCP::handleMessage(cMessage *msg)
     {
         if (msg->isSelfMessage())
             throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
-        EV << "RTP is turned off, dropping '" << msg->getName() << "' message\n";
-        //delete msg;
+        EV << "RTCP is turned off, dropping '" << msg->getName() << "' message\n";
     }
     // first distinguish incoming messages by arrival gate
     else if (msg->isSelfMessage())

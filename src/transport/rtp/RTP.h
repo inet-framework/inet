@@ -37,6 +37,10 @@
  */
 class INET_API RTP : public cSimpleModule, public ILifecycle
 {
+  public:
+    RTP() { _commonName = NULL; isOperational = false; }
+    virtual ~RTP() {};
+
   protected:
     /**
      * Initializes variables.

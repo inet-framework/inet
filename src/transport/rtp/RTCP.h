@@ -53,7 +53,8 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
     /**
      * Initializes variables.
      */
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
 
     /**
      * Message handling. Dispatches messages by arrival gate.
