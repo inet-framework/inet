@@ -175,7 +175,7 @@ void RTP::handleMessagefromUDP(cMessage *msg)
 
 void RTP::enterSession(RTPCIEnterSession *rifp)
 {
-    _profileName = rifp->getProfileName();
+    const char *profileName = rifp->getProfileName();
     _commonName = rifp->getCommonName();
     _bandwidth = rifp->getBandwidth();
     _destinationAddress = rifp->getDestinationAddress();
@@ -186,7 +186,7 @@ void RTP::enterSession(RTPCIEnterSession *rifp)
 
     _mtu = resolveMTU();
 
-    createProfile();
+    createProfile(profileName);
     initializeProfile();
     delete rifp;
 }
@@ -367,11 +367,11 @@ int RTP::resolveMTU()
     return pmtu - 20 - 8;
 }
 
-void RTP::createProfile()
+void RTP::createProfile(const char *profileName)
 {
-    cModuleType *moduleType = cModuleType::find(_profileName);
+    cModuleType *moduleType = cModuleType::find(profileName);
     if (moduleType == NULL)
-        error("Profile type `%s' not found", _profileName);
+        error("Profile type `%s' not found", profileName);
 
     RTPProfile *profile = check_and_cast<RTPProfile *>(moduleType->create("Profile", this));
     profile->finalizeParameters();

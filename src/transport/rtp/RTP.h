@@ -116,7 +116,7 @@ class INET_API RTP : public cSimpleModule
     /**
      * Creates the profile module.
      */
-    virtual void createProfile();
+    virtual void createProfile(const char *profileName);
 
     /**
      * Requests a server socket from the UDP layer.
@@ -161,11 +161,6 @@ class INET_API RTP : public cSimpleModule
      * The CNAME of this end system.
      */
     const char *_commonName;
-
-    /**
-     * The name of the profile used in this session.
-     */
-    const char *_profileName;
 
     /**
      * The available bandwidth for this session.
