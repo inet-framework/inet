@@ -195,6 +195,8 @@ class INET_API EtherMACBase : public MACBase, public cListener
     double getTxRate() { return curEtherDescr->txrate; }
     bool isActive() { return connected && !disabled; }
 
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
   protected:
     //  initialization
     virtual void initialize(int stage);

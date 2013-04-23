@@ -333,6 +333,34 @@ InterfaceEntry *EtherMACBase::createInterfaceEntry()
     return interfaceEntry;
 }
 
+bool EtherMACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_LINK_LAYER) {
+            initializeFlags();
+            initializeMACAddress();
+            initializeQueueModule();
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_LINK_LAYER) {
+            connected = false;
+            processConnectDisconnect();
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            connected = false;
+            processConnectDisconnect();
+        }
+    }
+    return MACBase::handleOperationStage(operation, stage, doneCallback);
+}
+
 void EtherMACBase::receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj)
 {
     Enter_Method_Silent();
