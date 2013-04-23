@@ -1,0 +1,77 @@
+%description:
+
+Test for basic TCP application lifecycle handling.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+sim-time-limit = 10s
+record-eventlog = true
+
+**.hasStatus = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+# tcp apps
+**.numTcpApps = 1
+**.client.tcpApp[0].typename = "TCPBasicClientApp"
+**.client.tcpApp[0].localPort = -1
+**.client.tcpApp[0].connectAddress = "server"
+**.client.tcpApp[0].connectPort = 1000
+**.client.tcpApp[0].numRequestsPerSession = 1000
+**.client.tcpApp[0].requestLength = 100B
+**.client.tcpApp[0].idleInterval = 100000s
+**.client.tcpApp[0].thinkTime = 0s
+
+**.server.tcpApp[0].typename = "TCPEchoApp"
+**.server.tcpApp[0].localPort = 1000
+
+**.tcpApp[0].dataTransferMode = "bytecount"
+
+%file: test.ned
+
+import inet.nodes.ethernet.Eth10M;
+import inet.nodes.inet.StandardHost;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.base.LifecycleController;
+import inet.world.scenario.ScenarioManager;
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        lifecycleController: LifecycleController;
+        configurator: IPv4NetworkConfigurator;
+        client: StandardHost;
+        server: StandardHost;
+    connections:
+        client.ethg++ <--> Eth10M <--> server.ethg++;
+}
+
+%file: scenario.xml
+ 
+<scenario>
+    <at t="1.1">
+        <tell module="lifecycleController" target="client" operation="NodeShutdownOperation"/>
+    </at>
+    <at t="1.2">
+        <tell module="lifecycleController" target="client" operation="NodeStartOperation"/>
+    </at>
+    <at t="1.3">
+        <tell module="lifecycleController" target="server" operation="NodeShutdownOperation"/>
+    </at>
+    <at t="1.4">
+        <tell module="lifecycleController" target="server" operation="NodeStartOperation"/>
+    </at> -->
+</scenario>
+
+%contains: stdout
+Calling finish() at end of Run #0...
+Test.client.tcpApp[0]: opened 2 sessions
+Test.client.tcpApp[0]: sent 125000 bytes in 1250 packets
+Test.client.tcpApp[0]: received 124900 bytes in 1249 packets
+Test.client.tcp: finishing with 0 connections open.
+Test.server.tcp: finishing with 1 connections open.

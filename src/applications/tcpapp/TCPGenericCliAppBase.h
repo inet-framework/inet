@@ -15,9 +15,7 @@
 #define __INET_TCPGENERICCLIAPPBASE_H
 
 #include "INETDefs.h"
-
 #include "TCPSocket.h"
-
 
 /**
  * Base class for clients app for TCP-based request-reply protocols or apps.

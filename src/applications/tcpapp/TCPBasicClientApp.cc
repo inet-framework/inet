@@ -17,7 +17,8 @@
 
 
 #include "TCPBasicClientApp.h"
-
+#include "NodeOperations.h"
+#include "ModuleAccess.h"
 
 #define MSGKIND_CONNECT  0
 #define MSGKIND_SEND     1
@@ -46,14 +47,48 @@ void TCPBasicClientApp::initialize(int stage)
     WATCH(numRequestsToSend);
     WATCH(earlySend);
 
-    simtime_t startTime = par("startTime");
+    startTime = par("startTime");
     stopTime = par("stopTime");
     if (stopTime != -1 && stopTime < startTime)
         error("Invalid startTime/stopTime parameters");
 
     timeoutMsg = new cMessage("timer");
-    timeoutMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(startTime, timeoutMsg);
+    nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+
+    if (isNodeUp()) {
+        timeoutMsg->setKind(MSGKIND_CONNECT);
+        scheduleAt(startTime, timeoutMsg);
+    }
+}
+
+bool TCPBasicClientApp::isNodeUp()
+{
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+}
+
+bool TCPBasicClientApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
+            simtime_t now = simTime();
+            timeoutMsg->setKind(MSGKIND_CONNECT);
+            scheduleAt(now < startTime ? startTime : now, timeoutMsg);
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+            cancelEvent(timeoutMsg);
+            close();
+            // TODO: wait until socket is closed
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            cancelEvent(timeoutMsg);
+    }
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
 }
 
 void TCPBasicClientApp::sendRequest()
@@ -143,7 +178,7 @@ void TCPBasicClientApp::socketDataArrived(int connId, void *ptr, cPacket *msg, b
             rescheduleOrDeleteTimer(d, MSGKIND_SEND);
         }
     }
-    else
+    else if (socket.getState() != TCPSocket::LOCALLY_CLOSED)
     {
         EV << "reply to last request arrived, closing session\n";
         close();

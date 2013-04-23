@@ -17,9 +17,8 @@
 #include <vector>
 
 #include "INETDefs.h"
-
 #include "TCPSocket.h"
-
+#include "ILifecycle.h"
 
 /**
  * Single-connection TCP application.

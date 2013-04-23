@@ -15,10 +15,9 @@
 #define __INET_TCPSRVHOSTAPP_H
 
 #include "INETDefs.h"
-
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"
-
+#include "ILifecycle.h"
 
 //forward declaration:
 class TCPServerThreadBase;
