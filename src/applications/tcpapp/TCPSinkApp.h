@@ -15,7 +15,7 @@
 #define __INET_TCPSINKAPP_H
 
 #include "INETDefs.h"
-
+#include "ILifecycle.h"
 
 /**
  * Accepts any number of incoming connections, and discards whatever arrives

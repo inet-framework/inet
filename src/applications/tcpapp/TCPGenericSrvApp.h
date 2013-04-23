@@ -15,7 +15,7 @@
 #define __INET_TCPGENERICSRVAPP_H
 
 #include "INETDefs.h"
-
+#include "ILifecycle.h"
 
 /**
  * Generic server application. It serves requests coming in GenericAppMsg

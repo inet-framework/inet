@@ -15,9 +15,9 @@
 #include "TCPEchoApp.h"
 
 #include "ByteArrayMessage.h"
-#include "TCPSocket.h"
 #include "TCPCommand_m.h"
-
+#include "ModuleAccess.h"
+#include "NodeOperations.h"
 
 Define_Module(TCPEchoApp);
 
@@ -27,8 +27,6 @@ simsignal_t TCPEchoApp::sentPkSignal = SIMSIGNAL_NULL;
 void TCPEchoApp::initialize()
 {
     cSimpleModule::initialize();
-    const char *localAddress = par("localAddress");
-    int localPort = par("localPort");
     delay = par("echoDelay");
     echoFactor = par("echoFactor");
 
@@ -39,11 +37,32 @@ void TCPEchoApp::initialize()
     rcvdPkSignal = registerSignal("rcvdPk");
     sentPkSignal = registerSignal("sentPk");
 
-    TCPSocket socket;
     socket.setOutputGate(gate("tcpOut"));
     socket.readDataTransferModePar(*this);
+
+    nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+
+    if (isNodeUp())
+        startListening();
+}
+
+bool TCPEchoApp::isNodeUp()
+{
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+}
+
+void TCPEchoApp::startListening()
+{
+    const char *localAddress = par("localAddress");
+    int localPort = par("localPort");
+    socket.renewSocket();
     socket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
     socket.listen();
+}
+
+void TCPEchoApp::stopListening()
+{
+    socket.close();
 }
 
 void TCPEchoApp::sendDown(cMessage *msg)
@@ -59,6 +78,8 @@ void TCPEchoApp::sendDown(cMessage *msg)
 
 void TCPEchoApp::handleMessage(cMessage *msg)
 {
+    if (!isNodeUp())
+        throw cRuntimeError("Application is not running");
     if (msg->isSelfMessage())
     {
         sendDown(msg);
@@ -132,6 +153,23 @@ void TCPEchoApp::handleMessage(cMessage *msg)
         sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", bytesRcvd, bytesSent);
         getDisplayString().setTagArg("t", 0, buf);
     }
+}
+
+bool TCPEchoApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+            startListening();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
+            // TODO: wait until socket is closed
+            stopListening();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) ;
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
 }
 
 void TCPEchoApp::finish()

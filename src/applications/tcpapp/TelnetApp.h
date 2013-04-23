@@ -15,7 +15,7 @@
 #define __INET_TELNETAPP_H
 
 #include "TCPGenericCliAppBase.h"
-
+#include "ILifecycle.h"
 
 /**
  * An example Telnet client application. The server app should be TCPGenericSrvApp.
