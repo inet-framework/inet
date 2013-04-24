@@ -26,13 +26,15 @@
 #include <map>
 
 #include "INETDefs.h"
+
+#include "AppBase.h"
 #include "UDPSocket.h"
 
 
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UDPBasicBurst : public cSimpleModule
+class INET_API UDPBasicBurst : public AppBase
 {
   public:
     enum ChooseDestAddrMode
@@ -55,6 +57,7 @@ class INET_API UDPBasicBurst : public cSimpleModule
     SourceSequence sourceSequence;
     simtime_t delayLimit;
     cMessage *timerNext;
+    simtime_t startTime;
     simtime_t stopTime;
     simtime_t nextPkt;
     simtime_t nextBurst;
@@ -91,12 +94,17 @@ class INET_API UDPBasicBurst : public cSimpleModule
   protected:
     virtual int numInitStages() const {return 4;}
     virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessageWhenUp(cMessage *msg);
     virtual void finish();
 
     virtual void processStart();
     virtual void processSend();
     virtual void processStop();
+
+    //AppBase:
+    virtual bool startApp(IDoneCallback *doneCallback);
+    virtual bool stopApp(IDoneCallback *doneCallback);
+    virtual bool crashApp(IDoneCallback *doneCallback);
 
   public:
     UDPBasicBurst();

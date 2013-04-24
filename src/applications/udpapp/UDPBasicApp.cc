@@ -18,9 +18,11 @@
 
 
 #include "UDPBasicApp.h"
-#include "UDPControlInfo_m.h"
-#include "IPvXAddressResolver.h"
+
 #include "InterfaceTableAccess.h"
+#include "IPvXAddressResolver.h"
+#include "NodeOperations.h"
+#include "UDPControlInfo_m.h"
 
 
 Define_Module(UDPBasicApp);
@@ -29,38 +31,47 @@ int UDPBasicApp::counter;
 simsignal_t UDPBasicApp::sentPkSignal = SIMSIGNAL_NULL;
 simsignal_t UDPBasicApp::rcvdPkSignal = SIMSIGNAL_NULL;
 
+UDPBasicApp::UDPBasicApp()
+{
+    selfMsg = NULL;
+}
+
+UDPBasicApp::~UDPBasicApp()
+{
+    cancelAndDelete(selfMsg);
+}
+
 void UDPBasicApp::initialize(int stage)
 {
+    AppBase::initialize(stage);
+
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage != 3)
-        return;
+    if (stage == 0)
+    {
+        counter = 0;
+        numSent = 0;
+        numReceived = 0;
+        WATCH(numSent);
+        WATCH(numReceived);
+        sentPkSignal = registerSignal("sentPk");
+        rcvdPkSignal = registerSignal("rcvdPk");
 
-    counter = 0;
-    numSent = 0;
-    numReceived = 0;
-    WATCH(numSent);
-    WATCH(numReceived);
-    sentPkSignal = registerSignal("sentPk");
-    rcvdPkSignal = registerSignal("rcvdPk");
-
-    localPort = par("localPort");
-    destPort = par("destPort");
-
-    stopTime = par("stopTime").doubleValue();
-    simtime_t startTime = par("startTime").doubleValue();
-    if (stopTime != 0 && stopTime <= startTime)
-        error("Invalid startTime/stopTime parameters");
-
-    cMessage *timerMsg = new cMessage("UDPBasicApp-Timer");
-    timerMsg->setKind(START);
-    scheduleAt(startTime, timerMsg);
+        localPort = par("localPort");
+        destPort = par("destPort");
+        startTime = par("startTime").doubleValue();
+        stopTime = par("stopTime").doubleValue();
+        if (stopTime != 0 && stopTime <= startTime)
+            error("Invalid startTime/stopTime parameters");
+        selfMsg = new cMessage("sendTimer");
+    }
 }
 
 void UDPBasicApp::finish()
 {
     recordScalar("packets sent", numSent);
     recordScalar("packets received", numReceived);
+    AppBase::finish();
 }
 
 void UDPBasicApp::setSocketOptions()
@@ -118,7 +129,7 @@ void UDPBasicApp::sendPacket()
     numSent++;
 }
 
-void UDPBasicApp::processStart(cMessage *msg)
+void UDPBasicApp::processStart()
 {
     socket.setOutputGate(gate("udpOut"));
     socket.bind(localPort);
@@ -133,49 +144,50 @@ void UDPBasicApp::processStart(cMessage *msg)
 
     if (!destAddresses.empty())
     {
-        msg->setKind(SEND);
-        processSend(msg);
+        selfMsg->setKind(SEND);
+        processSend();
     }
     else
     {
-        if (stopTime == 0)
-            delete msg;
-        else
+        if (stopTime != 0)
         {
-            msg->setKind(STOP);
-            scheduleAt(stopTime, msg);
+            selfMsg->setKind(STOP);
+            scheduleAt(stopTime, selfMsg);
         }
     }
 }
 
-void UDPBasicApp::processSend(cMessage *msg)
+void UDPBasicApp::processSend()
 {
     sendPacket();
     simtime_t d = simTime() + par("sendInterval").doubleValue();
     if (stopTime == 0 || d < stopTime)
-        scheduleAt(d, msg);
+    {
+        selfMsg->setKind(SEND);
+        scheduleAt(d, selfMsg);
+    }
     else
     {
-        msg->setKind(STOP);
-        scheduleAt(stopTime, msg);
+        selfMsg->setKind(STOP);
+        scheduleAt(stopTime, selfMsg);
     }
 }
 
-void UDPBasicApp::processStop(cMessage *msg)
+void UDPBasicApp::processStop()
 {
     socket.close();
-    delete msg;
 }
 
-void UDPBasicApp::handleMessage(cMessage *msg)
+void UDPBasicApp::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-        switch (msg->getKind()) {
-            case START: processStart(msg); break;
-            case SEND:  processSend(msg); break;
-            case STOP:  processStop(msg); break;
-            default: throw cRuntimeError("Invalid kind %d in self message", (int)msg->getKind());
+        ASSERT(msg == selfMsg);
+        switch (selfMsg->getKind()) {
+            case START: processStart(); break;
+            case SEND:  processSend(); break;
+            case STOP:  processStop(); break;
+            default: throw cRuntimeError("Invalid kind %d in self message", (int)selfMsg->getKind());
         }
     }
     else if (msg->getKind() == UDP_I_DATA)
@@ -207,5 +219,31 @@ void UDPBasicApp::processPacket(cPacket *pk)
     EV << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
     delete pk;
     numReceived++;
+}
+
+bool UDPBasicApp::startApp(IDoneCallback *doneCallback)
+{
+    simtime_t start = std::max(startTime, simTime());
+    if (stopTime != 0 && stopTime <= start)
+        return true;
+
+    selfMsg->setKind(START);
+    scheduleAt(start, selfMsg);
+    return true;
+}
+
+bool UDPBasicApp::stopApp(IDoneCallback *doneCallback)
+{
+    if (selfMsg)
+        cancelEvent(selfMsg);
+    //TODO if(socket.isOpened()) socket.close();
+    return true;
+}
+
+bool UDPBasicApp::crashApp(IDoneCallback *doneCallback)
+{
+    if (selfMsg)
+        cancelEvent(selfMsg);
+    return true;
 }
 

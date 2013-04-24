@@ -27,24 +27,16 @@ simsignal_t UDPSink::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void UDPSink::initialize(int stage)
 {
+    AppBase::initialize(stage);
     if (stage == 0)
     {
         numReceived = 0;
         WATCH(numReceived);
         rcvdPkSignal = registerSignal("rcvdPk");
-
-
-    }
-    else if (stage == 3)
-    {
-        int localPort = par("localPort");
-        socket.setOutputGate(gate("udpOut"));
-        socket.bind(localPort);
-        socket.joinLocalMulticastGroups();
     }
 }
 
-void UDPSink::handleMessage(cMessage *msg)
+void UDPSink::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->getKind() == UDP_I_DATA)
     {
@@ -71,6 +63,7 @@ void UDPSink::handleMessage(cMessage *msg)
 
 void UDPSink::finish()
 {
+    AppBase::finish();
 }
 
 void UDPSink::processPacket(cPacket *pk)
@@ -80,5 +73,25 @@ void UDPSink::processPacket(cPacket *pk)
     delete pk;
 
     numReceived++;
+}
+
+bool UDPSink::startApp(IDoneCallback *doneCallback)
+{
+    socket.setOutputGate(gate("udpOut"));
+    int localPort = par("localPort");
+    socket.bind(localPort);
+    socket.joinLocalMulticastGroups();
+    return true;
+}
+
+bool UDPSink::stopApp(IDoneCallback *doneCallback)
+{
+    //TODO if(socket.isOpened()) socket.close();
+    return true;
+}
+
+bool UDPSink::crashApp(IDoneCallback *doneCallback)
+{
+    return true;
 }
 

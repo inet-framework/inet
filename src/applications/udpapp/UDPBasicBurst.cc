@@ -62,9 +62,9 @@ UDPBasicBurst::~UDPBasicBurst()
 
 void UDPBasicBurst::initialize(int stage)
 {
-    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
-    // address auto-assignment takes place etc.
-    if (stage == 3)
+    AppBase::initialize(stage);
+
+    if (stage == 0)
     {
         counter = 0;
         numSent = 0;
@@ -73,8 +73,10 @@ void UDPBasicBurst::initialize(int stage)
         numDuplicated = 0;
 
         delayLimit = par("delayLimit");
-        simtime_t startTime = par("startTime");
+        startTime = par("startTime");
         stopTime = par("stopTime");
+        if (stopTime > 0 && stopTime <= startTime)
+            error("Invalid startTime/stopTime parameters");
 
         messageLengthPar = &par("messageLength");
         burstDurationPar = &par("burstDuration");
@@ -100,8 +102,6 @@ void UDPBasicBurst::initialize(int stage)
         destPort = par("destPort");
 
         timerNext = new cMessage("UDPBasicBurstTimer");
-        timerNext->setKind(START);
-        scheduleAt(startTime, timerNext);
 
         sentPkSignal = registerSignal("sentPk");
         rcvdPkSignal = registerSignal("rcvdPk");
@@ -168,6 +168,11 @@ void UDPBasicBurst::processStart()
         }
     }
 
+    nextSleep = simTime();
+    nextBurst = simTime();
+    nextPkt = simTime();
+    activeBurst = false;
+
     isSource = !destAddresses.empty();
 
     if (isSource)
@@ -196,7 +201,7 @@ void UDPBasicBurst::processStop()
     socket.close();
 }
 
-void UDPBasicBurst::handleMessage(cMessage *msg)
+void UDPBasicBurst::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
@@ -326,7 +331,7 @@ void UDPBasicBurst::generateBurst()
     if (activeBurst && nextPkt >= nextSleep)
         nextPkt = nextBurst;
 
-    if (stopTime != 0 && nextPkt > stopTime)
+    if (stopTime > 0 && nextPkt > stopTime)
     {
         timerNext->setKind(STOP);
         nextPkt = stopTime;
@@ -339,5 +344,36 @@ void UDPBasicBurst::finish()
     recordScalar("Total sent", numSent);
     recordScalar("Total received", numReceived);
     recordScalar("Total deleted", numDeleted);
+    AppBase::finish();
+}
+
+bool UDPBasicBurst::startApp(IDoneCallback *doneCallback)
+{
+    simtime_t start = std::max(startTime, simTime());
+
+    if (stopTime > 0 && stopTime <= start)
+        return true;
+
+    timerNext->setKind(START);
+    scheduleAt(start, timerNext);
+
+    return true;
+}
+
+bool UDPBasicBurst::stopApp(IDoneCallback *doneCallback)
+{
+    if (timerNext)
+        cancelEvent(timerNext);
+    activeBurst = false;
+    //TODO if(socket.isOpened()) socket.close();
+    return true;
+}
+
+bool UDPBasicBurst::crashApp(IDoneCallback *doneCallback)
+{
+    if (timerNext)
+        cancelEvent(timerNext);
+    activeBurst = false;
+    return true;
 }
 

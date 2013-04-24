@@ -19,26 +19,32 @@
 #ifndef __INET_UDPECHOAPP_H
 #define __INET_UDPECHOAPP_H
 
-#include <vector>
 #include "INETDefs.h"
+
+#include "AppBase.h"
 #include "UDPSocket.h"
 
 /**
  * UDP application. See NED for more info.
  */
-class UDPEchoApp : public cSimpleModule
+class UDPEchoApp : public AppBase
 {
-    protected:
-        UDPSocket socket;
-        int numEchoed;  // just for WATCH
-        static simsignal_t pkSignal;
+  protected:
+    UDPSocket socket;
+    int numEchoed;  // just for WATCH
+    static simsignal_t pkSignal;
 
-    protected:
-        virtual int numInitStages() const {return 4;}
-        virtual void initialize(int stage);
-        virtual void handleMessage(cMessage *msg);
-        virtual void finish();
-        virtual void updateDisplay();
+  protected:
+    virtual int numInitStages() const {return 4;}
+    virtual void initialize(int stage);
+    virtual void handleMessageWhenUp(cMessage *msg);
+    virtual void finish();
+    virtual void updateDisplay();
+
+    //AppBase:
+    bool startApp(IDoneCallback *doneCallback);
+    bool stopApp(IDoneCallback *doneCallback);
+    bool crashApp(IDoneCallback *doneCallback);
 };
 
 #endif
