@@ -30,15 +30,20 @@ Define_Module(UDPVideoStreamCli);
 
 simsignal_t UDPVideoStreamCli::rcvdPkSignal = SIMSIGNAL_NULL;
 
-void UDPVideoStreamCli::initialize()
+void UDPVideoStreamCli::initialize(int stage)
 {
-    // statistics
-    rcvdPkSignal = registerSignal("rcvdPk");
+    if (stage == 0)
+    {
+        // statistics
+        rcvdPkSignal = registerSignal("rcvdPk");
+    }
+    else if (stage == 3)
+    {
+        simtime_t startTime = par("startTime");
 
-    simtime_t startTime = par("startTime");
-
-    if (startTime >= 0)
-        scheduleAt(startTime, new cMessage("UDPVideoStreamStart"));
+        if (startTime >= 0)
+            scheduleAt(startTime, new cMessage("UDPVideoStreamStart"));
+    }
 }
 
 void UDPVideoStreamCli::finish()
