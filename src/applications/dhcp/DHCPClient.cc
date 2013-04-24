@@ -195,6 +195,9 @@ void DHCPClient::changeFSMState(CLIENT_STATE new_state)
            << lease->netmask << " leased time: " << lease->lease_time << " (secs)" << endl;
         std::cout << "Host " << host_name << " got ip: " << lease->ip << "/" << lease->netmask << endl;
 
+        // XXX this code probably want to add a default route if there is no default route.
+        //     However routeMatches() does not compare unspecified addresses, so in the loop
+        //     we will find the first route via the gateway.
         IPv4Route *iroute = NULL;
         for (int i=0;i<irt->getNumRoutes();i++)
         {
@@ -216,9 +219,6 @@ void DHCPClient::changeFSMState(CLIENT_STATE new_state)
             e->setSourceType(IRoute::MANUAL);
             irt->addRoute(e);
         }
-        // update the routing table
-        nb->fireChangeNotification(NF_INTERFACE_IPv4CONFIG_CHANGED, ie);
-        EV << "publishing the configuration change into the blackboard" << endl;
     }
     else if (new_state == RENEWING)
     {
