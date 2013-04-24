@@ -42,7 +42,22 @@ namespace inet { class PatternMatcher; }
  * This module configures IPv4 addresses and routing tables for a network.
  *
  * For more info please see the NED file.
+ *
  */
+// TODO: The network configurator should be able to build a topology that is independent from the
+// TODO: current up/down state of nodes in the network (without InterfaceEntry). It's like a database
+// TODO: that contains the statically assigned IP addresses and statically added routes calculated
+// TODO: by the network administrator. The database may specify these for all or only some nodes in
+// TODO: the network. It should also be incremental in the sense that if network topology changes,
+// TODO: then it follows with the least number of possible changes. The network configurator isn't
+// TODO: responsible for actually setting any of these configured settings in the network nodes. In
+// TODO: fact it should be the opposite. It means that nodes should query the network configurator for
+// TODO: statically assigned information when needed (e.g. startup). One way to do this is to add
+// TODO: a static routing module for each node that needs to fill its routing tables statically. Nodes
+// TODO: would also require some module (e.g. a static node configuration module similar to DHCP) that
+// TODO: would be responsible for setting the statically assigned IP addresses using the network
+// TODO: configurator database. These two modules may be merged into one and could be called node
+// TODO: configurator or something like that.
 class INET_API IPv4NetworkConfigurator : public cSimpleModule
 {
     public:

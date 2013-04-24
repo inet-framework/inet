@@ -277,7 +277,10 @@ void IPv4NetworkConfigurator::extractWiredNeighbors(IPv4Topology& topology, Topo
     if (!isBridgeNode(node))
     {
         InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceByNodeInputGateId(inputGateId);
-        if (interfacesSeen.count(interfaceEntry) == 0)
+        if (!interfaceEntry) {
+            // no such interface (node is probably down); we should probably get the information from our (future) internal database
+        }
+        else if (interfacesSeen.count(interfaceEntry) == 0)
         {
             InterfaceInfo *neighborInterfaceInfo = createInterfaceInfo(node, linkInfo, interfaceEntry);
             linkInfo->interfaceInfos.push_back(neighborInterfaceInfo);
