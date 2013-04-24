@@ -3,11 +3,11 @@ Recent changes in the INET Framework
 
 
 INET-2.1.0 (Jan 31, 2013)
-------------------------
+-------------------------
 
 This is the latest stable version of the INET Framework. This version
 is now recommended for your further INET based development. It requires 
-OMNeT++ 4.2 (version 4.2.2 or later is suggested.) 
+OMNeT++ 4.2 or 4.3.
 
 NEW:
 
