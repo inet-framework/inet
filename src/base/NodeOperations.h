@@ -48,6 +48,7 @@ class INET_API NodeStartOperation : public NodeOperation
       STAGE_LINK_LAYER,
       STAGE_NETWORK_LAYER,
       STAGE_TRANSPORT_LAYER,
+      STAGE_ROUTING_PROTOCOLS,
       STAGE_APPLICATION_LAYER,
       STAGE_LAST
     };
@@ -66,7 +67,8 @@ class INET_API NodeShutdownOperation : public NodeOperation {
   public:
     enum Stage {
       STAGE_LOCAL, // for changes that don't depend on other modules
-      STAGE_APPLICATION_LAYER, // note: there is no separate STAGE_ROUTING; use STAGE_APPLICATION_LAYER in routing protocols
+      STAGE_APPLICATION_LAYER,
+      STAGE_ROUTING_PROTOCOLS,
       STAGE_TRANSPORT_LAYER,
       STAGE_NETWORK_LAYER,
       STAGE_LINK_LAYER,
