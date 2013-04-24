@@ -64,50 +64,50 @@ void UDPBasicBurst::initialize(int stage)
 {
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage != 3)
-        return;
+    if (stage == 3)
+    {
+        counter = 0;
+        numSent = 0;
+        numReceived = 0;
+        numDeleted = 0;
+        numDuplicated = 0;
 
-    counter = 0;
-    numSent = 0;
-    numReceived = 0;
-    numDeleted = 0;
-    numDuplicated = 0;
+        delayLimit = par("delayLimit");
+        simtime_t startTime = par("startTime");
+        stopTime = par("stopTime");
 
-    delayLimit = par("delayLimit");
-    simtime_t startTime = par("startTime");
-    stopTime = par("stopTime");
+        messageLengthPar = &par("messageLength");
+        burstDurationPar = &par("burstDuration");
+        sleepDurationPar = &par("sleepDuration");
+        sendIntervalPar = &par("sendInterval");
+        nextSleep = startTime;
+        nextBurst = startTime;
+        nextPkt = startTime;
 
-    messageLengthPar = &par("messageLength");
-    burstDurationPar = &par("burstDuration");
-    sleepDurationPar = &par("sleepDuration");
-    sendIntervalPar = &par("sendInterval");
-    nextSleep = startTime;
-    nextBurst = startTime;
-    nextPkt = startTime;
+        destAddrRNG = par("destAddrRNG");
+        const char *addrModeStr = par("chooseDestAddrMode").stringValue();
+        int addrMode = cEnum::get("ChooseDestAddrMode")->lookup(addrModeStr);
+        if (addrMode == -1)
+            throw cRuntimeError("Invalid chooseDestAddrMode: '%s'", addrModeStr);
+        chooseDestAddrMode = (ChooseDestAddrMode)addrMode;
 
-    destAddrRNG = par("destAddrRNG");
-    const char *addrModeStr = par("chooseDestAddrMode").stringValue();
-    int addrMode = cEnum::get("ChooseDestAddrMode")->lookup(addrModeStr);
-    if (addrMode == -1)
-        throw cRuntimeError("Invalid chooseDestAddrMode: '%s'", addrModeStr);
-    chooseDestAddrMode = (ChooseDestAddrMode)addrMode;
+        WATCH(numSent);
+        WATCH(numReceived);
+        WATCH(numDeleted);
+        WATCH(numDuplicated);
 
-    WATCH(numSent);
-    WATCH(numReceived);
-    WATCH(numDeleted);
-    WATCH(numDuplicated);
+        localPort = par("localPort");
+        destPort = par("destPort");
 
-    localPort = par("localPort");
-    destPort = par("destPort");
+        timerNext = new cMessage("UDPBasicBurstTimer");
+        timerNext->setKind(START);
+        scheduleAt(startTime, timerNext);
 
-    timerNext = new cMessage("UDPBasicBurstTimer");
-    timerNext->setKind(START);
-    scheduleAt(startTime, timerNext);
-
-    sentPkSignal = registerSignal("sentPk");
-    rcvdPkSignal = registerSignal("rcvdPk");
-    outOfOrderPkSignal = registerSignal("outOfOrderPk");
-    dropPkSignal = registerSignal("dropPk");
+        sentPkSignal = registerSignal("sentPk");
+        rcvdPkSignal = registerSignal("rcvdPk");
+        outOfOrderPkSignal = registerSignal("outOfOrderPk");
+        dropPkSignal = registerSignal("dropPk");
+    }
 }
 
 IPvXAddress UDPBasicBurst::chooseDestAddr()
