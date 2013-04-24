@@ -297,6 +297,7 @@ void RIPRouting::receiveChangeNotification(int category, const cObject *details)
 
     IRoute *route;
     const InterfaceEntry *ie;
+    const InterfaceEntryChangeDetails *change;
 
     switch (category)
     {
@@ -317,18 +318,20 @@ void RIPRouting::receiveChangeNotification(int category, const cObject *details)
             deleteInterface(ie);
             break;
         case NF_INTERFACE_STATE_CHANGED:
-            // XXX it is assumed that the only state change is the change of the 'down' flag
-            // if the interface is down, invalidate routes via that interface
-            ie = const_cast<InterfaceEntry*>(check_and_cast<const InterfaceEntry*>(details));
-            if (!ie->isUp())
+            change = check_and_cast<const InterfaceEntryChangeDetails*>(details);
+            if (change->getFieldId() == InterfaceEntry::F_CARRIER || change->getFieldId() == InterfaceEntry::F_STATE)
             {
-                invalidateRoutes(ie);
-            }
-            else
-            {
-                RIPInterfaceEntry *ripInterfacePtr = findInterfaceById(ie->getInterfaceId());
-                if (ripInterfacePtr && ripInterfacePtr->mode != NO_RIP)
-                    sendRIPRequest(*ripInterfacePtr);
+                ie = change->getInterfaceEntry();
+                if (!ie->isUp())
+                {
+                    invalidateRoutes(ie);
+                }
+                else
+                {
+                    RIPInterfaceEntry *ripInterfacePtr = findInterfaceById(ie->getInterfaceId());
+                    if (ripInterfacePtr && ripInterfacePtr->mode != NO_RIP)
+                        sendRIPRequest(*ripInterfacePtr);
+                }
             }
             break;
         case NF_ROUTE_DELETED:

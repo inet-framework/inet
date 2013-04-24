@@ -39,8 +39,12 @@ class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolDat
 
     NotificationBoard *nb; // cached pointer
 
+  public:
+    // field ids for change notifications
+    enum {F_ADDRESS, F_METRIC};
+
   protected:
-    void changed1() {changed(NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED);}
+    void changed1(int fieldId) {changed(NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED, fieldId);}
 
   private:
     // copying not supported: following are private and also left undefined
@@ -61,8 +65,8 @@ class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolDat
 
     /** @name Setters */
     //@{
-    virtual void setAddress(Address a) {inetAddr = a; changed1();}
-    virtual void setMetric(int m) {metric = m; changed1();}
+    virtual void setAddress(Address a) {inetAddr = a; changed1(F_ADDRESS);}
+    virtual void setMetric(int m) {metric = m; changed1(F_METRIC);}
     //@}
 
     virtual void joinMulticastGroup(Address address) { }

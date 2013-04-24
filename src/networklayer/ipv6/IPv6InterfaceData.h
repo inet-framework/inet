@@ -436,7 +436,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
   protected:
     int findAddress(const IPv6Address& addr) const;
     void choosePreferredAddress();
-    void changed1() {changed(NF_INTERFACE_IPv6CONFIG_CHANGED);}
+    void changed1(int fieldId) {changed(NF_INTERFACE_IPv6CONFIG_CHANGED, fieldId);}
     HostMulticastData *getHostData() { if (!hostMcastData) hostMcastData = new HostMulticastData(); return hostMcastData; }
     const HostMulticastData *getHostData() const { return const_cast<IPv6InterfaceData*>(this)->getHostData(); }
     RouterMulticastData *getRouterData() { if (!routerMcastData) routerMcastData = new RouterMulticastData(); return routerMcastData; }
