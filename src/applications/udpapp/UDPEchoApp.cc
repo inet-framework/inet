@@ -29,21 +29,21 @@ void UDPEchoApp::initialize(int stage)
     if (stage == 0)
     {
         // set up UDP socket
-        socket.setOutputGate(gate("udpOut"));
-        int localPort = par("localPort");
-        socket.bind(localPort);
 
         // init statistics
         pkSignal = registerSignal("pk");
         numEchoed = 0;
         WATCH(numEchoed);
-
-        if (ev.isGUI())
-            updateDisplay();
     }
     else if (stage == 3)
     {
+        socket.setOutputGate(gate("udpOut"));
+        int localPort = par("localPort");
+        socket.bind(localPort);
         socket.joinLocalMulticastGroups();
+
+        if (ev.isGUI())
+            updateDisplay();
     }
 }
 

@@ -23,6 +23,10 @@
 
 #include "UDPControlInfo_m.h"
 #include "IPvXAddressResolver.h"
+#include "IRoutingTable.h"
+#include "RoutingTableAccess.h"
+#include "RoutingTable6.h"
+#include "RoutingTable6Access.h"
 
 
 EXECUTE_ON_STARTUP(
@@ -96,38 +100,9 @@ void UDPBasicBurst::initialize(int stage)
     localPort = par("localPort");
     destPort = par("destPort");
 
-    socket.setOutputGate(gate("udpOut"));
-    socket.bind(localPort);
-
-    const char *destAddrs = par("destAddresses");
-    cStringTokenizer tokenizer(destAddrs);
-    const char *token;
-
-    IPvXAddress myAddr = IPvXAddressResolver().resolve(this->getParentModule()->getFullPath().c_str());
-    while ((token = tokenizer.nextToken()) != NULL)
-    {
-        if (strstr(token, "Broadcast") != NULL)
-            destAddresses.push_back(IPv4Address::ALLONES_ADDRESS);
-        else
-        {
-            IPvXAddress addr = IPvXAddressResolver().resolve(token);
-            if (addr != myAddr)
-                destAddresses.push_back(addr);
-        }
-    }
-
-    isSource = !destAddresses.empty();
-
-    if (isSource)
-    {
-        if (chooseDestAddrMode == ONCE)
-            destAddr = chooseDestAddr();
-
-        activeBurst = true;
-
-        timerNext = new cMessage("UDPBasicBurstTimer");
-        scheduleAt(startTime, timerNext);
-    }
+    timerNext = new cMessage("UDPBasicBurstTimer");
+    timerNext->setKind(START);
+    scheduleAt(startTime, timerNext);
 
     sentPkSignal = registerSignal("sentPk");
     rcvdPkSignal = registerSignal("rcvdPk");
@@ -157,15 +132,79 @@ cPacket *UDPBasicBurst::createPacket()
     return payload;
 }
 
+void UDPBasicBurst::processStart()
+{
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(localPort);
+
+    const char *destAddrs = par("destAddresses");
+    cStringTokenizer tokenizer(destAddrs);
+    const char *token;
+    bool excludeLocalDestAddresses = par("excludeLocalDestAddresses").boolValue();
+
+#ifdef WITH_IPv4
+    IRoutingTable *rt = RoutingTableAccess().getIfExists();
+#endif
+#ifdef WITH_IPv6
+    RoutingTable6 *rt6 = RoutingTable6Access().getIfExists();
+#endif
+
+    while ((token = tokenizer.nextToken()) != NULL)
+    {
+        if (strstr(token, "Broadcast") != NULL)
+            destAddresses.push_back(IPv4Address::ALLONES_ADDRESS);
+        else
+        {
+            IPvXAddress addr = IPvXAddressResolver().resolve(token);
+#ifdef WITH_IPv4
+            if (excludeLocalDestAddresses && rt && rt->isLocalAddress(addr.get4()))
+                continue;
+#endif
+#ifdef WITH_IPv6
+            if (excludeLocalDestAddresses && rt6 && rt6->isLocalAddress(addr.get6()))
+                continue;
+#endif
+            destAddresses.push_back(addr);
+        }
+    }
+
+    isSource = !destAddresses.empty();
+
+    if (isSource)
+    {
+        if (chooseDestAddrMode == ONCE)
+            destAddr = chooseDestAddr();
+
+        activeBurst = true;
+    }
+    timerNext->setKind(SEND);
+    processSend();
+}
+
+void UDPBasicBurst::processSend()
+{
+    if (stopTime <= 0 || simTime() < stopTime)
+    {
+        // send and reschedule next sending
+        if (isSource) // if the node is a sink, don't generate messages
+            generateBurst();
+    }
+}
+
+void UDPBasicBurst::processStop()
+{
+    socket.close();
+}
+
 void UDPBasicBurst::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-        if (stopTime <= 0 || simTime() < stopTime)
-        {
-            // send and reschedule next sending
-            if (isSource) // if the node is a sink, don't generate messages
-                generateBurst();
+        switch (msg->getKind()) {
+            case START: processStart(); break;
+            case SEND:  processSend(); break;
+            case STOP:  processStop(); break;
+            default: throw cRuntimeError("Invalid kind %d in self message", (int)msg->getKind());
         }
     }
     else if (msg->getKind() == UDP_I_DATA)
@@ -287,6 +326,11 @@ void UDPBasicBurst::generateBurst()
     if (activeBurst && nextPkt >= nextSleep)
         nextPkt = nextBurst;
 
+    if (stopTime != 0 && nextPkt > stopTime)
+    {
+        timerNext->setKind(STOP);
+        nextPkt = stopTime;
+    }
     scheduleAt(nextPkt, timerNext);
 }
 

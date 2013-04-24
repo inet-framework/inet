@@ -31,6 +31,8 @@
 class INET_API UDPBasicApp : public cSimpleModule
 {
   protected:
+    enum SelfMsgKinds { START = 1, SEND, STOP };
+
     UDPSocket socket;
     int localPort, destPort;
     std::vector<IPvXAddress> destAddresses;
@@ -57,6 +59,10 @@ class INET_API UDPBasicApp : public cSimpleModule
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
+
+    virtual void processStart(cMessage *msg);
+    virtual void processSend(cMessage *msg);
+    virtual void processStop(cMessage *msg);
 };
 
 #endif
