@@ -22,6 +22,8 @@
 
 #include <map>
 #include <list>
+
+#include "ILifecycle.h"
 #include "UDPControlInfo.h"
 
 class IPv4ControlInfo;
@@ -40,7 +42,7 @@ const bool DEFAULT_MULTICAST_LOOP = true;
  *
  * More info in the NED file.
  */
-class INET_API UDP : public cSimpleModule
+class INET_API UDP : public cSimpleModule, public ILifecycle
 {
   public:
     struct SockDesc
@@ -82,6 +84,8 @@ class INET_API UDP : public cSimpleModule
     int numDroppedWrongPort;
     int numDroppedBadChecksum;
 
+    bool isOperational;
+
     static simsignal_t rcvdPkSignal;
     static simsignal_t sentPkSignal;
     static simsignal_t passedUpPkSignal;
@@ -99,6 +103,7 @@ class INET_API UDP : public cSimpleModule
     virtual void bind(int sockId, int gateIndex, const IPvXAddress& localAddr, int localPort);
     virtual void connect(int sockId, int gateIndex, const IPvXAddress& remoteAddr, int remotePort);
     virtual void close(int sockId);
+    virtual void clearAllSockets();
     virtual void setTimeToLive(SockDesc *sd, int ttl);
     virtual void setTypeOfService(SockDesc *sd, int typeOfService);
     virtual void setBroadcast(SockDesc *sd, bool broadcast);
@@ -134,12 +139,16 @@ class INET_API UDP : public cSimpleModule
     // create a blank UDP packet; override to subclass UDPPacket
     virtual UDPPacket *createUDPPacket(const char *name);
 
+    // ILifeCycle:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
   public:
-    UDP() {}
+    UDP();
     virtual ~UDP();
 
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msg);
 };
 

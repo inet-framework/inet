@@ -42,6 +42,8 @@
 #include "IPv6InterfaceData.h"
 #endif
 
+#include "NodeOperations.h"
+#include "NodeStatus.h"
 
 #define EPHEMERAL_PORTRANGE_START 1024
 #define EPHEMERAL_PORTRANGE_END   5000
@@ -97,39 +99,57 @@ UDP::SockDesc::SockDesc(int sockId_, int appGateIndex_) {
 }
 
 //--------
+UDP::UDP()
+{
+    isOperational = false;
+    icmp = NULL;
+    icmpv6 = NULL;
+}
 
 UDP::~UDP()
 {
-    for (SocketsByIdMap::iterator i=socketsByIdMap.begin(); i!=socketsByIdMap.end(); ++i)
-        delete i->second;
+    clearAllSockets();
 }
 
-void UDP::initialize()
+void UDP::initialize(int stage)
 {
-    WATCH_PTRMAP(socketsByIdMap);
-    WATCH_MAP(socketsByPortMap);
+    if (stage == 0)
+    {
+        WATCH_PTRMAP(socketsByIdMap);
+        WATCH_MAP(socketsByPortMap);
 
-    lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
-    icmp = NULL;
-    icmpv6 = NULL;
+        lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+        icmp = NULL;
+        icmpv6 = NULL;
 
-    numSent = 0;
-    numPassedUp = 0;
-    numDroppedWrongPort = 0;
-    numDroppedBadChecksum = 0;
-    WATCH(numSent);
-    WATCH(numPassedUp);
-    WATCH(numDroppedWrongPort);
-    WATCH(numDroppedBadChecksum);
-    rcvdPkSignal = registerSignal("rcvdPk");
-    sentPkSignal = registerSignal("sentPk");
-    passedUpPkSignal = registerSignal("passedUpPk");
-    droppedPkWrongPortSignal = registerSignal("droppedPkWrongPort");
-    droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");
+        numSent = 0;
+        numPassedUp = 0;
+        numDroppedWrongPort = 0;
+        numDroppedBadChecksum = 0;
+        WATCH(numSent);
+        WATCH(numPassedUp);
+        WATCH(numDroppedWrongPort);
+        WATCH(numDroppedBadChecksum);
+        rcvdPkSignal = registerSignal("rcvdPk");
+        sentPkSignal = registerSignal("sentPk");
+        passedUpPkSignal = registerSignal("passedUpPk");
+        droppedPkWrongPortSignal = registerSignal("droppedPkWrongPort");
+        droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");
+
+        isOperational = false;
+    }
+    else if (stage == 1)
+    {
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+    }
 }
 
 void UDP::handleMessage(cMessage *msg)
 {
+    if (!isOperational)
+        throw cRuntimeError("Message '%s' received when UDP is OFF", msg->getName());
+
     // received from IP layer
     if (msg->arrivedOn("ipIn") || msg->arrivedOn("ipv6In"))
     {
@@ -550,6 +570,20 @@ void UDP::close(int sockId)
     delete sd;
 }
 
+void UDP::clearAllSockets()
+{
+    EV << "Clear all sockets\n";
+
+    for (SocketsByPortMap::iterator it = socketsByPortMap.begin(); it != socketsByPortMap.end(); ++it)
+    {
+        it->second.clear();
+    }
+    socketsByPortMap.clear();
+    for (SocketsByIdMap::iterator it = socketsByIdMap.begin(); it != socketsByIdMap.end(); ++it)
+        delete it->second;
+    socketsByIdMap.clear();
+}
+
 ushort UDP::getEphemeralPort()
 {
     // start at the last allocated port number + 1, and search for an unused one
@@ -830,5 +864,43 @@ void UDP::leaveMulticastGroups(SockDesc *sd, const std::vector<IPvXAddress>& mul
     for (unsigned int i = 0; i < multicastAddresses.size(); i++)
         sd->multicastAddrs.erase(multicastAddresses[i]);
     // note: we cannot remove the address from the interface, because someone else may still use it
+}
+
+bool UDP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
+            icmp = NULL;
+            icmpv6 = NULL;
+            isOperational = true;
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER) {
+            clearAllSockets();
+            icmp = NULL;
+            icmpv6 = NULL;
+            isOperational = false;
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            clearAllSockets();
+            icmp = NULL;
+            icmpv6 = NULL;
+            isOperational = false;
+        }
+    }
+    else
+    {
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    }
+
+    return true;
 }
 
