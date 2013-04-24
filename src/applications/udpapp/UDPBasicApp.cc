@@ -47,26 +47,13 @@ void UDPBasicApp::initialize(int stage)
     localPort = par("localPort");
     destPort = par("destPort");
 
-    const char *destAddrs = par("destAddresses");
-    cStringTokenizer tokenizer(destAddrs);
-    const char *token;
-
-    while ((token = tokenizer.nextToken()) != NULL)
-        destAddresses.push_back(IPvXAddressResolver().resolve(token));
-
-    socket.setOutputGate(gate("udpOut"));
-    socket.bind(localPort);
-    setSocketOptions();
-
-    if (destAddresses.empty())
-        return;
-
     stopTime = par("stopTime").doubleValue();
     simtime_t startTime = par("startTime").doubleValue();
     if (stopTime != 0 && stopTime <= startTime)
         error("Invalid startTime/stopTime parameters");
 
-    cMessage *timerMsg = new cMessage("sendTimer");
+    cMessage *timerMsg = new cMessage("UDPBasicApp-Timer");
+    timerMsg->setKind(START);
     scheduleAt(startTime, timerMsg);
 }
 
@@ -131,17 +118,65 @@ void UDPBasicApp::sendPacket()
     numSent++;
 }
 
+void UDPBasicApp::processStart(cMessage *msg)
+{
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(localPort);
+    setSocketOptions();
+
+    const char *destAddrs = par("destAddresses");
+    cStringTokenizer tokenizer(destAddrs);
+    const char *token;
+
+    while ((token = tokenizer.nextToken()) != NULL)
+        destAddresses.push_back(IPvXAddressResolver().resolve(token));
+
+    if (!destAddresses.empty())
+    {
+        msg->setKind(SEND);
+        processSend(msg);
+    }
+    else
+    {
+        if (stopTime == 0)
+            delete msg;
+        else
+        {
+            msg->setKind(STOP);
+            scheduleAt(stopTime, msg);
+        }
+    }
+}
+
+void UDPBasicApp::processSend(cMessage *msg)
+{
+    sendPacket();
+    simtime_t d = simTime() + par("sendInterval").doubleValue();
+    if (stopTime == 0 || d < stopTime)
+        scheduleAt(d, msg);
+    else
+    {
+        msg->setKind(STOP);
+        scheduleAt(stopTime, msg);
+    }
+}
+
+void UDPBasicApp::processStop(cMessage *msg)
+{
+    socket.close();
+    delete msg;
+}
+
 void UDPBasicApp::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-        // send, then reschedule next sending
-        sendPacket();
-        simtime_t d = simTime() + par("sendInterval").doubleValue();
-        if (stopTime == 0 || d < stopTime)
-            scheduleAt(d, msg);
-        else
-            delete msg;
+        switch (msg->getKind()) {
+            case START: processStart(msg); break;
+            case SEND:  processSend(msg); break;
+            case STOP:  processStop(msg); break;
+            default: throw cRuntimeError("Invalid kind %d in self message", (int)msg->getKind());
+        }
     }
     else if (msg->getKind() == UDP_I_DATA)
     {

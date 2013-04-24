@@ -33,13 +33,13 @@ void UDPSink::initialize(int stage)
         WATCH(numReceived);
         rcvdPkSignal = registerSignal("rcvdPk");
 
-        socket.setOutputGate(gate("udpOut"));
 
-        int localPort = par("localPort");
-        socket.bind(localPort);
     }
     else if (stage == 3)
     {
+        int localPort = par("localPort");
+        socket.setOutputGate(gate("udpOut"));
+        socket.bind(localPort);
         socket.joinLocalMulticastGroups();
     }
 }

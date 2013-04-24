@@ -48,8 +48,10 @@ UDPVideoStreamSvr::~UDPVideoStreamSvr()
         delete streamVector[i];
 }
 
-void UDPVideoStreamSvr::initialize()
+void UDPVideoStreamSvr::initialize(int stage)
 {
+  if (stage == 0)
+  {
     sendInterval = &par("sendInterval");
     packetLen = &par("packetLen");
     videoSize = &par("videoSize");
@@ -62,9 +64,12 @@ void UDPVideoStreamSvr::initialize()
     sentPkSignal = registerSignal("sentPk");
 
     WATCH_PTRVECTOR(streamVector);
-
+  }
+  else if (stage == 1)
+  {
     socket.setOutputGate(gate("udpOut"));
     socket.bind(localPort);
+  }
 }
 
 void UDPVideoStreamSvr::finish()

@@ -41,6 +41,8 @@ class INET_API UDPBasicBurst : public cSimpleModule
     };
 
   protected:
+    enum SelfMsgKinds { START = 1, SEND, STOP };
+
     UDPSocket socket;
     int localPort, destPort;
 
@@ -91,6 +93,10 @@ class INET_API UDPBasicBurst : public cSimpleModule
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
+
+    virtual void processStart();
+    virtual void processSend();
+    virtual void processStop();
 
   public:
     UDPBasicBurst();
