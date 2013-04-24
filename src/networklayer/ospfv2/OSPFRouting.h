@@ -27,14 +27,16 @@
 #include "IRoutingTable.h"
 #include "OSPFPacket_m.h"
 #include "OSPFRouter.h"
+#include "ILifecycle.h"
 
 
 /**
  * Implements the OSPFv2 routing protocol. See the NED file for more information.
  */
-class OSPFRouting :  public cSimpleModule
+class OSPFRouting :  public cSimpleModule, public ILifecycle
 {
   private:
+    bool isUp;
     OSPF::Router *ospfRouter; // root object of the OSPF data structure
 
   public:
@@ -58,6 +60,10 @@ class OSPFRouting :  public cSimpleModule
     virtual int numInitStages() const  {return 5;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
+    virtual void handleMessageWhenDown(cMessage *msg);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual void createOspfRouter();
+    virtual bool isNodeUp();
 };
 
 #endif  // __INET_OSPFROUTING_H

@@ -23,15 +23,11 @@
 
 #include "OSPFRouting.h"
 
-#include "InterfaceTableAccess.h"
-#include "IPv4Address.h"
-#include "IPv4ControlInfo.h"
-#include "IPv4InterfaceData.h"
-#include "IPvXAddressResolver.h"
 #include "MessageHandler.h"
 #include "OSPFConfigReader.h"
 #include "RoutingTableAccess.h"
-#include "XMLUtils.h"
+#include "NodeOperations.h"
+#include "NodeStatus.h"
 
 
 Define_Module(OSPFRouting);
@@ -39,6 +35,7 @@ Define_Module(OSPFRouting);
 
 OSPFRouting::OSPFRouting()
 {
+    isUp = false;
     ospfRouter = NULL;
 }
 
@@ -54,25 +51,84 @@ void OSPFRouting::initialize(int stage)
     // and routerId is assigned (stage 3)
     if (stage == 4)
     {
-        IRoutingTable *rt = RoutingTableAccess().get();
-        ospfRouter = new OSPF::Router(rt->getRouterId(), this);
-
-        // read the OSPF AS configuration
-        cXMLElement *ospfConfig = par("ospfConfig").xmlValue();
-        OSPFConfigReader configReader(this);
-        if (!configReader.loadConfigFromXML(ospfConfig, ospfRouter))
-            throw cRuntimeError("Error reading AS configuration from %s", ospfConfig->getSourceLocation());
-
-        ospfRouter->addWatches();
+        isUp = isNodeUp();
+        if (isUp)
+            createOspfRouter();
     }
 }
 
+void OSPFRouting::createOspfRouter()
+{
+    IRoutingTable *rt = RoutingTableAccess().get();
+    ospfRouter = new OSPF::Router(rt->getRouterId(), this);
+
+    // read the OSPF AS configuration
+    cXMLElement *ospfConfig = par("ospfConfig").xmlValue();
+    OSPFConfigReader configReader(this);
+    if (!configReader.loadConfigFromXML(ospfConfig, ospfRouter))
+        throw cRuntimeError("Error reading AS configuration from %s", ospfConfig->getSourceLocation());
+
+    ospfRouter->addWatches();
+}
 
 void OSPFRouting::handleMessage(cMessage *msg)
 {
-    ospfRouter->getMessageHandler()->messageReceived(msg);
+    if (!isUp)
+        handleMessageWhenDown(msg);
+    else
+        ospfRouter->getMessageHandler()->messageReceived(msg);
 }
 
+void OSPFRouting::handleMessageWhenDown(cMessage *msg)
+{
+    if (msg->isSelfMessage())
+        throw cRuntimeError("Model error: self msg '%s' received when protocol is down", msg->getName());
+    EV << "Protocol is turned off, dropping '" << msg->getName() << "' message\n";
+    delete msg;
+}
+
+bool OSPFRouting::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
+            ASSERT(ospfRouter == NULL);
+            isUp = true;
+            createOspfRouter();
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
+            ASSERT(ospfRouter);
+            isUp = false;
+            delete ospfRouter;
+            ospfRouter = NULL;
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            ASSERT(ospfRouter);
+            isUp = false;
+            delete ospfRouter;
+            ospfRouter = NULL;
+        }
+    }
+    else
+    {
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    }
+    return true;
+}
+
+bool OSPFRouting::isNodeUp()
+{
+    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+}
 
 void OSPFRouting::insertExternalRoute(int ifIndex, const OSPF::IPv4AddressRange &netAddr)
 {
@@ -84,7 +140,6 @@ void OSPFRouting::insertExternalRoute(int ifIndex, const OSPF::IPv4AddressRange 
     newExternalContents.setNetworkMask(netmask);
     ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
 }
-
 
 bool OSPFRouting::checkExternalRoute(const IPv4Address &route)
 {
