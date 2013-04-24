@@ -21,14 +21,17 @@
 #define __INET_UDPBASICAPP_H
 
 #include <vector>
+
 #include "INETDefs.h"
+
+#include "AppBase.h"
 #include "UDPSocket.h"
 
 
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UDPBasicApp : public cSimpleModule
+class INET_API UDPBasicApp : public AppBase
 {
   protected:
     enum SelfMsgKinds { START = 1, SEND, STOP };
@@ -36,7 +39,9 @@ class INET_API UDPBasicApp : public cSimpleModule
     UDPSocket socket;
     int localPort, destPort;
     std::vector<IPvXAddress> destAddresses;
+    simtime_t startTime;
     simtime_t stopTime;
+    cMessage *selfMsg;
 
     static int counter; // counter for generating a global number for each packet
 
@@ -54,15 +59,24 @@ class INET_API UDPBasicApp : public cSimpleModule
     virtual void processPacket(cPacket *msg);
     virtual void setSocketOptions();
 
+  public:
+    UDPBasicApp();
+    ~UDPBasicApp();
+
   protected:
     virtual int numInitStages() const {return 4;}
     virtual void initialize(int stage);
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessageWhenUp(cMessage *msg);
     virtual void finish();
 
-    virtual void processStart(cMessage *msg);
-    virtual void processSend(cMessage *msg);
-    virtual void processStop(cMessage *msg);
+    virtual void processStart();
+    virtual void processSend();
+    virtual void processStop();
+
+    //AppBase:
+    bool startApp(IDoneCallback *doneCallback);
+    bool stopApp(IDoneCallback *doneCallback);
+    bool crashApp(IDoneCallback *doneCallback);
 };
 
 #endif

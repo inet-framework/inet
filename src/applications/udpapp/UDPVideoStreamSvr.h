@@ -24,9 +24,11 @@
 #define __INET_UDPVIDEOSTREAMSVR_H
 
 
-#include <vector>
+#include <map>
 
 #include "INETDefs.h"
+
+#include "AppBase.h"
 #include "UDPSocket.h"
 
 
@@ -37,7 +39,7 @@
  * and UDPVideoStreamSvr starts streaming to them. Capable of handling
  * streaming to multiple clients.
  */
-class INET_API UDPVideoStreamSvr : public cSimpleModule
+class INET_API UDPVideoStreamSvr : public AppBase
 {
   public:
     /**
@@ -45,16 +47,18 @@ class INET_API UDPVideoStreamSvr : public cSimpleModule
      */
     struct VideoStreamData
     {
+        cMessage *timer;          ///< self timer msg
         IPvXAddress clientAddr;   ///< client address
         int clientPort;           ///< client UDP port
         long videoSize;           ///< total size of video
         long bytesLeft;           ///< bytes left to transmit
         long numPkSent;           ///< number of packets sent
+        VideoStreamData() { timer = NULL; clientPort = 0; videoSize = bytesLeft = 0; numPkSent = 0; }
     };
 
   protected:
-    typedef std::vector<VideoStreamData *> VideoStreamVector;
-    VideoStreamVector streamVector;
+    typedef std::map<long int, VideoStreamData> VideoStreamMap;
+    VideoStreamMap streams;
     UDPSocket socket;
 
     // module parameters
@@ -84,10 +88,16 @@ class INET_API UDPVideoStreamSvr : public cSimpleModule
     ///@name Overridden cSimpleModule functions
     //@{
     virtual void initialize(int stage);
-    virtual int numInitStages() const { return 2; }
     virtual void finish();
-    virtual void handleMessage(cMessage* msg);
+    virtual void handleMessageWhenUp(cMessage* msg);
     //@}
+
+    virtual void clearStreams();
+
+    //AppBase:
+    virtual bool startApp(IDoneCallback *doneCallback);
+    virtual bool stopApp(IDoneCallback *doneCallback);
+    virtual bool crashApp(IDoneCallback *doneCallback);
 };
 
 #endif

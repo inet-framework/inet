@@ -24,6 +24,8 @@
 #define __INET_UDPVIDEOSTREAMCLI_H
 
 #include "INETDefs.h"
+
+#include "AppBase.h"
 #include "UDPSocket.h"
 
 /**
@@ -32,26 +34,35 @@
  * Basic video stream application. Clients connect to server and get a stream of
  * video back.
  */
-class INET_API UDPVideoStreamCli : public cSimpleModule
+class INET_API UDPVideoStreamCli : public AppBase
 {
   protected:
     UDPSocket socket;
+    cMessage *selfMsg;
 
     // statistics
     static simsignal_t rcvdPkSignal;
+
+  public:
+    UDPVideoStreamCli() { selfMsg = NULL; }
+    virtual ~UDPVideoStreamCli() { cancelAndDelete(selfMsg); }
 
   protected:
     ///@name Overridden cSimpleModule functions
     //@{
     virtual void initialize(int stage);
-    virtual int numInitStages() const { return 4; }
     virtual void finish();
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessageWhenUp(cMessage *msg);
     //@}
 
   protected:
     virtual void requestStream();
     virtual void receiveStream(cPacket *msg);
+
+    //AppBase:
+    virtual bool startApp(IDoneCallback *doneCallback);
+    virtual bool stopApp(IDoneCallback *doneCallback);
+    virtual bool crashApp(IDoneCallback *doneCallback);
 };
 
 #endif

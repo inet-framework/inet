@@ -44,39 +44,35 @@ UDPVideoStreamSvr::UDPVideoStreamSvr()
 
 UDPVideoStreamSvr::~UDPVideoStreamSvr()
 {
-    for (unsigned int i=0; i < streamVector.size(); i++)
-        delete streamVector[i];
+    for(VideoStreamMap::iterator it = streams.begin(); it  != streams.end(); ++it)
+        cancelAndDelete(it->second.timer);
 }
 
 void UDPVideoStreamSvr::initialize(int stage)
 {
-  if (stage == 0)
-  {
-    sendInterval = &par("sendInterval");
-    packetLen = &par("packetLen");
-    videoSize = &par("videoSize");
-    localPort = par("localPort");
+    AppBase::initialize(stage);
+    if (stage == 0)
+    {
+        sendInterval = &par("sendInterval");
+        packetLen = &par("packetLen");
+        videoSize = &par("videoSize");
+        localPort = par("localPort");
 
-    // statistics
-    numStreams = 0;
-    numPkSent = 0;
-    reqStreamBytesSignal = registerSignal("reqStreamBytes");
-    sentPkSignal = registerSignal("sentPk");
+        // statistics
+        numStreams = 0;
+        numPkSent = 0;
+        reqStreamBytesSignal = registerSignal("reqStreamBytes");
+        sentPkSignal = registerSignal("sentPk");
 
-    WATCH_PTRVECTOR(streamVector);
-  }
-  else if (stage == 1)
-  {
-    socket.setOutputGate(gate("udpOut"));
-    socket.bind(localPort);
-  }
+        WATCH_MAP(streams);
+    }
 }
 
 void UDPVideoStreamSvr::finish()
 {
 }
 
-void UDPVideoStreamSvr::handleMessage(cMessage *msg)
+void UDPVideoStreamSvr::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
@@ -104,28 +100,31 @@ void UDPVideoStreamSvr::processStreamRequest(cMessage *msg)
     // register video stream...
     UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(msg->getControlInfo());
 
-    VideoStreamData *d = new VideoStreamData;
+    cMessage *timer = new cMessage("VideoStreamTmr");
+    VideoStreamData *d = &streams[timer->getId()];
+    d->timer = timer;
     d->clientAddr = ctrl->getSrcAddr();
     d->clientPort = ctrl->getSrcPort();
     d->videoSize = (*videoSize);
     d->bytesLeft = d->videoSize;
     d->numPkSent = 0;
-    streamVector.push_back(d);
+    ASSERT(d->videoSize > 0);
     delete msg;
-
-    cMessage *timer = new cMessage("VideoStreamTmr");
-    timer->setContextPointer(d);
-
-    // ... then transmit first packet right away
-    sendStreamData(timer);
 
     numStreams++;
     emit(reqStreamBytesSignal, d->videoSize);
+
+    // ... then transmit first packet right away
+    sendStreamData(timer);
 }
 
 void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
 {
-    VideoStreamData *d = (VideoStreamData *) timer->getContextPointer();
+    VideoStreamMap::iterator it = streams.find(timer->getId());
+    if (it == streams.end())
+        throw cRuntimeError("Model error: Stream not found for timer");
+
+    VideoStreamData *d = &(it->second);
 
     // generate and send a packet
     cPacket *pkt = new cPacket("VideoStrmPk");
@@ -143,15 +142,43 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
     numPkSent++;
 
     // reschedule timer if there's bytes left to send
-    if (d->bytesLeft != 0)
+    if (d->bytesLeft > 0)
     {
         simtime_t interval = (*sendInterval);
         scheduleAt(simTime()+interval, timer);
     }
     else
     {
+        streams.erase(it);
         delete timer;
-        // TBD find VideoStreamData in streamVector and delete it
     }
+}
+
+void UDPVideoStreamSvr::clearStreams()
+{
+    for(VideoStreamMap::iterator it = streams.begin(); it  != streams.end(); ++it)
+        cancelAndDelete(it->second.timer);
+    streams.clear();
+}
+
+bool UDPVideoStreamSvr::startApp(IDoneCallback *doneCallback)
+{
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(localPort);
+
+    return true;
+}
+
+bool UDPVideoStreamSvr::stopApp(IDoneCallback *doneCallback)
+{
+    clearStreams();
+    //TODO if(socket.isOpened()) socket.close();
+    return true;
+}
+
+bool UDPVideoStreamSvr::crashApp(IDoneCallback *doneCallback)
+{
+    clearStreams();
+    return true;
 }
 
