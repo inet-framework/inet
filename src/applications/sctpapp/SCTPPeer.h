@@ -19,16 +19,17 @@
 #define __SCTPPEER_H_
 
 #include "INETDefs.h"
-
 #include "SCTPAssociation.h"
 #include "SCTPSocket.h"
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 class SCTPConnectInfo;
 
 /**
  * Implements the SCTPPeer simple module. See the NED file for more info.
  */
-class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInterface
+class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInterface, public ILifecycle
 {
     protected:
         int32 notifications;
@@ -95,6 +96,9 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
     public:
         SCTPPeer();
         ~SCTPPeer();
+
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+        { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     protected:
         void initialize();

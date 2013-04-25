@@ -18,6 +18,7 @@
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"
 #include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 //forward declaration:
 class TCPServerThreadBase;
@@ -27,7 +28,7 @@ class TCPServerThreadBase;
  * is a sSimpleModule). Creates one instance (using dynamic module creation)
  * for each incoming connection. More info in the corresponding NED file.
  */
-class INET_API TCPSrvHostApp : public cSimpleModule
+class INET_API TCPSrvHostApp : public cSimpleModule, public ILifecycle
 {
   protected:
     TCPSocket serverSocket;
@@ -42,6 +43,9 @@ class INET_API TCPSrvHostApp : public cSimpleModule
 
   public:
     virtual void removeThread(TCPServerThreadBase *thread);
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
 
 /**

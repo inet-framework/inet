@@ -40,16 +40,19 @@ extern "C" {
 #include "IPvXAddressResolver.h"
 #include "UDPControlInfo_m.h"
 #include "UDPSocket.h"
-
 #include "VoIPStreamPacket_m.h"
-
 #include "AudioOutFile.h"
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
-class VoIPStreamReceiver : public cSimpleModule
+class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
 {
   public:
     VoIPStreamReceiver() { resultFile = ""; }
     ~VoIPStreamReceiver();
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   protected:
     virtual void initialize();

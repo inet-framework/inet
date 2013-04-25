@@ -40,13 +40,18 @@ extern "C" {
 #include "IPvXAddressResolver.h"
 #include "UDPSocket.h"
 #include "VoIPStreamPacket_m.h"
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 //using namespace std;
 
-class INET_API VoIPStreamSender : public cSimpleModule
+class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
 {
   public:
     ~VoIPStreamSender();
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   protected:
     virtual void initialize(int stage);

@@ -23,11 +23,13 @@
 #include "INETDefs.h"
 #include "UDPSocket.h"
 #include "IPvXAddressResolver.h"
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 /**
  * Implements a simple VoIP source. See the NED file for more information.
  */
-class SimpleVoIPSender : public cSimpleModule
+class SimpleVoIPSender : public cSimpleModule, public ILifecycle
 {
   private:
     UDPSocket socket;
@@ -62,6 +64,9 @@ class SimpleVoIPSender : public cSimpleModule
   public:
     ~SimpleVoIPSender();
     SimpleVoIPSender();
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   protected:
     virtual int numInitStages() const {return 4;}

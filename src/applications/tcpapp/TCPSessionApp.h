@@ -19,11 +19,12 @@
 #include "INETDefs.h"
 #include "TCPSocket.h"
 #include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 /**
  * Single-connection TCP application.
  */
-class INET_API TCPSessionApp : public cSimpleModule
+class INET_API TCPSessionApp : public cSimpleModule, public ILifecycle
 {
   protected:
     struct Command
@@ -47,6 +48,9 @@ class INET_API TCPSessionApp : public cSimpleModule
 
   public:
     TCPSessionApp() : cSimpleModule(65536) {}
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   protected:
     virtual void parseScript(const char *script);

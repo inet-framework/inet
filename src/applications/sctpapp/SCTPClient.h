@@ -20,15 +20,16 @@
 #define __SCTPCLIENT_H_
 
 #include "INETDefs.h"
-
 #include "SCTPSocket.h"
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 class SCTPAssociation;
 
 /**
  * Implements the SCTPClient simple module. See the NED file for more info.
  */
-class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInterface
+class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInterface, public ILifecycle
 {
     protected:
         SCTPSocket socket;
@@ -76,6 +77,10 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         typedef std::map<IPvXAddress,pathStatus> SCTPPathStatus;
         SCTPPathStatus sctpPathStatus;
 
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+        { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
+    protected:
         /**
          * Initialization.
          */
