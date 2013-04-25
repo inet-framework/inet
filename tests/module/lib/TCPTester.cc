@@ -18,6 +18,7 @@
 
 
 #include "TCPTester.h"
+#include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 
 TCPTesterBase::TCPTesterBase() : cSimpleModule()
@@ -127,6 +128,12 @@ void TCPScriptableTester::parseScript(const char *script)
 
 void TCPScriptableTester::handleMessage(cMessage *msg)
 {
+    if (msg->getKind() == IP_C_REGISTER_PROTOCOL)
+    {
+        delete msg;
+        return;
+    }
+
     if (msg->isSelfMessage())
     {
         TCPSegment *seg = check_and_cast<TCPSegment *>(msg);
@@ -217,6 +224,12 @@ void TCPRandomTester::initialize()
 
 void TCPRandomTester::handleMessage(cMessage *msg)
 {
+    if (msg->getKind() == IP_C_REGISTER_PROTOCOL)
+    {
+        delete msg;
+        return;
+    }
+
     if (msg->isSelfMessage())
     {
         TCPSegment *seg = check_and_cast<TCPSegment *>(msg);
