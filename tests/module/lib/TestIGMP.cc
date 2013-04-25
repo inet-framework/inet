@@ -66,17 +66,17 @@ void TestIGMP::initialize(int stage)
 
 void TestIGMP::receiveChangeNotification(int category, const cObject *details)
 {
-    IPv4MulticastGroupInfo *info;
+    const IPv4MulticastGroupInfo *info;
     switch (category)
     {
         case NF_IPv4_MCAST_JOIN:
-            info = check_and_cast<IPv4MulticastGroupInfo*>(const_cast<cObject *>(details));
+            info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
             startEvent("join group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
             IGMPv2::receiveChangeNotification(category, details);
             endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
             break;
         case NF_IPv4_MCAST_LEAVE:
-            info = check_and_cast<IPv4MulticastGroupInfo*>(const_cast<cObject *>(details));
+            info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
             startEvent("leave group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
             IGMPv2::receiveChangeNotification(category, details);
             endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
