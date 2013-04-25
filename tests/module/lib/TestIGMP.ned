@@ -3,6 +3,7 @@ import inet.networklayer.ipv4.IIGMP;
 simple TestIGMP like IIGMP
 {
     parameters:
+        string routingTableModule;
         bool enabled = default(true);
         int    robustnessVariable = default(2); // IGMP is roboust to (roboustnessVariable-1) packet loss
         double queryInterval @unit("s") = default(125s);
