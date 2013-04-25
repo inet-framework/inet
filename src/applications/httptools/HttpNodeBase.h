@@ -39,7 +39,8 @@
 #include <fstream>
 
 #include "INETDefs.h"
-
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 #include "HttpController.h"
 #include "HttpMessages_m.h"
 #include "HttpRandom.h"
@@ -64,7 +65,7 @@ enum LOG_FORMAT {lf_short, lf_long};
  * @author Kristjan V. Jonsson (kristjanvj@gmail.com)
  * @version 1.0
  */
-class HttpNodeBase : public cSimpleModule
+class HttpNodeBase : public cSimpleModule, public ILifecycle
 {
     protected:
         /** Log level 2: Debug, 1: Info; 0: Errors and warnings only */
@@ -89,6 +90,9 @@ class HttpNodeBase : public cSimpleModule
 
     public:
         HttpNodeBase();
+
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+        { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     protected:
         /** @name Direct message passing utilities */

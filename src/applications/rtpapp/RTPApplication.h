@@ -18,21 +18,25 @@
 #define __INET_RTPAPPLICATION_H
 
 #include "INETDefs.h"
-
 #include "IPv4Address.h"
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 /**
  * The class RTPApplication is just a very simple sample for an application
  * which uses RTP. It acts as a sender if the omnet parameter fileName is
  * set, and as a receiver if the parameter is empty.
  */
-class INET_API RTPApplication : public cSimpleModule
+class INET_API RTPApplication : public cSimpleModule, public ILifecycle
 {
     public:
         /**
          * Constructor, with activity() stack size.
          */
         RTPApplication() : cSimpleModule() {}
+
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+        { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     protected:
         /**

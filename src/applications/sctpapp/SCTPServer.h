@@ -20,15 +20,15 @@
 #define __SCTPSERVER_H_
 
 #include "INETDefs.h"
-
 #include "SCTPAssociation.h"
 #include "SCTPSocket.h"
-
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 /**
  * Implements the SCTPServer simple module. See the NED file for more info.
  */
-class INET_API SCTPServer : public cSimpleModule
+class INET_API SCTPServer : public cSimpleModule, public ILifecycle
 {
     protected:
         int32 notifications;
@@ -92,6 +92,11 @@ class INET_API SCTPServer : public cSimpleModule
 
     public:
         virtual ~SCTPServer();
+
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+        { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
+    protected:
         void initialize();
         void handleMessage(cMessage *msg);
         void finish();

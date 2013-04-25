@@ -16,11 +16,12 @@
 
 #include "TCPGenericCliAppBase.h"
 #include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 /**
  * An example Telnet client application. The server app should be TCPGenericSrvApp.
  */
-class INET_API TelnetApp : public TCPGenericCliAppBase
+class INET_API TelnetApp : public TCPGenericCliAppBase, public ILifecycle
 {
   protected:
     cMessage *timeoutMsg;
@@ -31,6 +32,9 @@ class INET_API TelnetApp : public TCPGenericCliAppBase
   public:
     TelnetApp();
     virtual ~TelnetApp();
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   protected:
     /** Redefined initialize(int stage). Number of stages used from TCPgenericCliAppBase. */
