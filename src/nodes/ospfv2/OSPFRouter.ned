@@ -23,7 +23,7 @@ import inet.linklayer.IWiredNic;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.networklayer.ospfv2.OSPFRouting;
-import inet.nodes.inet.NetworkLayer;
+import inet.networklayer.ipv4.IPv4NetworkLayer;
 import inet.nodes.inet.Router;
 
 

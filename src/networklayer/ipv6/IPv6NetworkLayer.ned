@@ -17,15 +17,12 @@
 //
 // Edited with OMNeT++ Academic/Noncommercial Edition.
 //
-package inet.nodes.ipv6;
+package inet.networklayer.ipv6;
 
-import inet.networklayer.ipv6.IPv6ErrorHandling;
-import inet.networklayer.ipv6.IPv6;
-import inet.networklayer.icmpv6.IPv6NeighbourDiscovery;
-import inet.networklayer.icmpv6.ICMPv6;
-import inet.networklayer.IxMIPv6Support;
 import inet.networklayer.IIPv6Tunneling;
-import inet.base.IHook;
+import inet.networklayer.IxMIPv6Support;
+import inet.networklayer.icmpv6.ICMPv6;
+import inet.networklayer.icmpv6.IPv6NeighbourDiscovery;
 
 
 //
@@ -34,7 +31,7 @@ import inet.base.IHook;
 // The module has ports to connect to a higher layer (TCP, UDP) and
 // several network interfaces.
 //
-module NetworkLayer6
+module IPv6NetworkLayer
 {
     parameters:
         bool xMIPv6Support = default(false);
@@ -44,7 +41,7 @@ module NetworkLayer6
         output ifOut[] @labels(INetworkDatagram);
         input transportIn[] @labels(IPv4ControlInfo/down);
         output transportOut[] @labels(IPv4ControlInfo/up);
-        input pingIn[]@labels(PingPayload/down);
+        input pingIn[] @labels(PingPayload/down);
         output pingOut[] @labels(PingPayload/up);
     submodules:
         // TODO: rename to ip

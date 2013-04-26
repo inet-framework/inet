@@ -19,7 +19,7 @@ package inet.examples.bgpv4.BGPUpdate;
 
 import inet.util.MessageChecker;
 import inet.transport.ITCP;
-import inet.nodes.inet.NetworkLayer;
+import inet.networklayer.ipv4.IPv4NetworkLayer;
 import inet.networklayer.ospfv2.OSPFRouting;
 import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.networklayer.common.InterfaceTable;
@@ -78,7 +78,7 @@ module BGPRouter
             parameters:
                 @display("p=160,202;i=block/transport");
         }
-        networkLayer: NetworkLayer {
+        networkLayer: IPv4NetworkLayer {
             parameters:
                 proxyARP = true;
                 @display("p=120,284;i=block/layer;q=queue");

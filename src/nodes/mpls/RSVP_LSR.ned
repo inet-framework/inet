@@ -15,6 +15,7 @@ import inet.base.NotificationBoard;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.ipv4.IPv4NetworkLayer;
 import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.networklayer.mpls.LIBTable;
 import inet.networklayer.mpls.MPLS;
@@ -22,7 +23,6 @@ import inet.networklayer.rsvp_te.RSVP;
 import inet.networklayer.rsvp_te.SimpleClassifier;
 import inet.networklayer.ted.LinkStateRouting;
 import inet.networklayer.ted.TED;
-import inet.nodes.inet.NetworkLayer;
 import inet.status.NodeStatus;
 
 
@@ -82,7 +82,7 @@ module RSVP_LSR
             parameters:
                 @display("p=330,67");
         }
-        networkLayer: NetworkLayer {
+        networkLayer: IPv4NetworkLayer {
             parameters:
                 @display("p=192,195");
             gates:

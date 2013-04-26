@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.nodes.inet;
+package inet.networklayer.ipv4;
 
 import inet.networklayer.arp.ARP;
 import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
@@ -31,7 +31,7 @@ import inet.networklayer.ipv4.IPv4;
 //
 // Interfaces to transport layer: TCP, UDP, echo/ping, RSVP
 //
-module NetworkLayer
+module IPv4NetworkLayer
 {
     parameters:
         bool proxyARP = default(true);
@@ -42,7 +42,7 @@ module NetworkLayer
         output ifOut[] @labels(INetworkDatagram);
         input transportIn[] @labels(IPv4ControlInfo/down);
         output transportOut[] @labels(IPv4ControlInfo/up);
-        input pingIn[]@labels(PingPayload/down);
+        input pingIn[] @labels(PingPayload/down);
         output pingOut[] @labels(PingPayload/up);
         input igmpIn;
         output igmpOut;

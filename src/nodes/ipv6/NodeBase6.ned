@@ -24,6 +24,7 @@ import inet.linklayer.IWirelessNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.mobility.IMobility;
 import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.ipv6.IPv6NetworkLayer;
 import inet.networklayer.ipv6.IPv6RoutingTable;
 
 
@@ -63,7 +64,7 @@ module NodeBase6
         }
 
         // network layer
-        networkLayer: NetworkLayer6 {
+        networkLayer: IPv6NetworkLayer {
             parameters:
                 @display("p=329,287;q=queue");
         }

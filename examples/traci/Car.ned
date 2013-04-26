@@ -27,7 +27,7 @@ import inet.applications.traci.TraCIDemo;
 import inet.mobility.models.TraCIMobility;
 import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.transport.udp.UDP;
-import inet.nodes.inet.NetworkLayer;
+import inet.networklayer.ipv4.IPv4NetworkLayer;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 
 module Car
@@ -69,7 +69,7 @@ module Car
             parameters:
                 @display("p=384,146");
         }
-        networkLayer: NetworkLayer {
+        networkLayer: IPv4NetworkLayer {
             parameters:
                 proxyARP = false;
                 @display("p=304,327;q=queue");
