@@ -23,6 +23,12 @@ General
    archiver has bugs and cannot extract the file correctly. Use some other archiver
    or do it from command line (tar xvfz inet-yyyymmdd-opp4-src.tgz)
 
+   NOTE: if you have cloned the github repo (i.e. are not using a tarball),
+   run the following command in the inet root directory:
+       $ cp .cproject-DEFAULT .cproject
+   because the .cproject file is NOT in the repo, for convenience reasons.
+
+
 If you are building from command line:
 --------------------------------------
 3. Change to the INET directory.
