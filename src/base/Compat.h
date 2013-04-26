@@ -19,6 +19,7 @@
 #define __INET_COMPAT_H_
 
 #include <iostream>
+#include <omnetpp.h>
 
 #ifndef EV_FATAL
 // TODO: #if OMNETPP_VERSION < 0x0500
@@ -62,5 +63,71 @@ class cLogStream : public std::ostream
 };
 
 #endif
+
+#endif
+
+#ifdef _MSC_VER
+// complementary error function, not in MSVC
+double INET_API erfc(double x);
+
+// ISO C99 function, not in MSVC
+inline long lrint(double x)
+{
+    return (long)floor(x+0.5);
+}
+
+// ISO C99 function, not in MSVC
+inline double fmin(double a, double b)
+{
+    return a < b ? a : b;
+}
+
+// ISO C99 function, not in MSVC
+inline double fmax(double a, double b)
+{
+    return a > b ? a : b;
+}
+#endif
+
+#if OMNETPP_VERSION < 0x0500
+/**
+ * A check_and_cast<> that accepts pointers other than cObject*, too.
+ * For compatibility; OMNeT++ 5.0 and later already contain this.
+ */
+template<class T, class P>
+T check_and_cast(P *p)
+{
+    if (!p)
+        throw cRuntimeError("check_and_cast(): cannot cast NULL pointer to type '%s'",opp_typename(typeid(T)));
+    T ret = dynamic_cast<T>(p);
+    if (!ret) {
+        const cObject *o = dynamic_cast<const cObject *>(p);
+        if (o)
+            throw cRuntimeError("check_and_cast(): cannot cast (%s *)%s to type '%s'",o->getClassName(),o->getFullPath().c_str(),opp_typename(typeid(T)));
+        else
+            throw cRuntimeError("check_and_cast(): cannot cast %s to type '%s'",opp_typename(typeid(P)),opp_typename(typeid(T)));
+    }
+    return ret;
+}
+
+/**
+ * A const version of check_and_cast<> that accepts pointers other than cObject*, too.
+ * For compatibility; OMNeT++ 5.0 and later already contain this.
+ */
+template<class T, class P>
+T check_and_cast(const P *p)
+{
+    if (!p)
+        throw cRuntimeError("check_and_cast(): cannot cast NULL pointer to type '%s'",opp_typename(typeid(T)));
+    T ret = dynamic_cast<T>(p);
+    if (!ret) {
+        const cObject *o = dynamic_cast<const cObject *>(p);
+        if (o)
+            throw cRuntimeError("check_and_cast(): cannot cast (%s *)%s to type '%s'",o->getClassName(),o->getFullPath().c_str(),opp_typename(typeid(T)));
+        else
+            throw cRuntimeError("check_and_cast(): cannot cast %s to type '%s'",opp_typename(typeid(P)),opp_typename(typeid(T)));
+    }
+    return ret;
+}
 
 #endif
