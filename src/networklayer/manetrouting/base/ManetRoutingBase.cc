@@ -31,6 +31,7 @@
 #include "Ieee802Ctrl_m.h"
 #include "IPv4RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
+#include "IARPCache.h"
 #include "Coord.h"
 #include "ControlInfoBreakLink_m.h"
 #include "Ieee80211Frame_m.h"
@@ -246,7 +247,7 @@ void ManetRoutingBase::registerRoutingModule()
         {
             (*interfaceVector)[i].interfacePtr->ipv4Data()->joinMulticastGroup(IPv4Address::LL_MANET_ROUTERS);
         }
-        arp = ArpAccess().get();
+        arp = ARPCacheAccess().get();
     }
     nb->subscribe(this,NF_L2_AP_DISASSOCIATED);
     nb->subscribe(this,NF_L2_AP_ASSOCIATED);

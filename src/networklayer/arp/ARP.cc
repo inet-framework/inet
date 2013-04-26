@@ -658,7 +658,7 @@ void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
     }
 }
 
-const MACAddress ARP::getDirectAddressResolution(const IPv4Address & add) const
+MACAddress ARP::getDirectAddressResolution(const IPv4Address & add) const
 {
     ARPCache::const_iterator it;
     if (globalARP)
@@ -676,7 +676,7 @@ const MACAddress ARP::getDirectAddressResolution(const IPv4Address & add) const
     return MACAddress::UNSPECIFIED_ADDRESS;
 }
 
-const IPv4Address ARP::getInverseAddressResolution(const MACAddress &add) const
+IPv4Address ARP::getInverseAddressResolution(const MACAddress &add) const
 {
     ARPCache::const_iterator it;
     if (globalARP)
