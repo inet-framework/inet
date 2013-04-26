@@ -1,0 +1,8 @@
+<scenario>
+    <at t="200">
+        <tell module="lifecycleController" target="RA" operation="NodeShutdownOperation"/>
+    </at>
+    <at t="400">
+        <tell module="lifecycleController" target="RA" operation="NodeStartOperation"/>
+    </at>
+</scenario>
