@@ -23,6 +23,7 @@
 //
 
 #include <omnetpp.h>
+#include "Compat.h"
 
 #if OMNETPP_VERSION < 0x0402
 #  error At least OMNeT++/OMNEST version 4.2 required
