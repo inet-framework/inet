@@ -56,17 +56,16 @@ module IPv4NetworkLayer
                 @display("p=85,95;q=queue");
             gates:
                 queueIn[sizeof(ifIn)];
+                queueOut[sizeof(ifOut)];
         }
         arp: ARP {
             parameters:
                 proxyARP = proxyARP;
-                @display("p=202,142;q=pendingQueue");
-            gates:
-                nicOut[sizeof(ifOut)];
+                @display("p=165,120;q=pendingQueue;is=s");
         }
         icmp: ICMP {
             parameters:
-                @display("p=160,63");
+                @display("p=165,70");
         }
         igmp: <igmpType> like IIGMP {
             parameters:
@@ -74,7 +73,7 @@ module IPv4NetworkLayer
         }
         errorHandling: ErrorHandling {
             parameters:
-                @display("p=239,63");
+                @display("p=239,70");
         }
 
     connections allowunconnected:
@@ -100,16 +99,18 @@ module IPv4NetworkLayer
 
         icmp.errorOut --> errorHandling.in;
 
-        ip.queueOut --> arp.ipIn;
+        ip.arpDgramOut --> arp.dgramIn;
+        ip.arpOut --> arp.netwIn;
+        ip.arpIn <-- arp.netwOut;
 
         igmp.routerOut --> igmpOut;
         igmp.routerIn <-- igmpIn;
 
         for i=0..sizeof(ifIn)-1 {
-            ifIn[i] --> { @display("m=s"); } --> ip.queueIn[i];
+            ip.queueIn[i] <-- { @display("m=s"); } <-- ifIn[i];
         }
         for i=0..sizeof(ifOut)-1 {
-            arp.nicOut[i] --> { @display("m=s"); } --> ifOut[i];
+            ip.queueOut[i] --> { @display("m=s"); } --> ifOut[i];
         }
 }
 

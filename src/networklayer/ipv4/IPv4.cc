@@ -33,6 +33,8 @@
 #include "NodeStatus.h"
 #include "NotificationBoard.h"
 #include "IPSocket.h"
+#include "IARPCache.h"
+#include "Ieee802Ctrl_m.h"
 
 Define_Module(IPv4);
 
@@ -46,8 +48,13 @@ void IPv4::initialize(int stage)
         ift = InterfaceTableAccess().get();
         rt = IPv4RoutingTableAccess().get();
         nb = NotificationBoardAccess().getIfExists(); // needed only for multicast forwarding
+        arp = ARPCacheAccess().get();
 
-        queueOutGate = gate("queueOut");
+        arpDgramOutGate = gate("arpDgramOut");
+        arpInGate = gate("arpIn");
+        arpOutGate = gate("arpOut");
+        transportInGateBaseId = gateBaseId("transportIn");
+        queueOutGateBaseId = gateBaseId("queueOut");
 
         defaultTimeToLive = par("timeToLive");
         defaultMCTimeToLive = par("multicastTimeToLive");
@@ -123,40 +130,43 @@ void IPv4::handleMessage(cMessage *msg)
         QueueBase::handleMessage(msg);
 }
 
-void IPv4::endService(cPacket *msg)
+void IPv4::endService(cPacket *packet)
 {
     if (!isUp) {
         EV << "IPv4 is down -- discarding message\n";
-        delete msg;
+        delete packet;
         return;
     }
-    if (msg->getArrivalGate()->isName("transportIn"))
+    if (packet->getArrivalGate()->isName("transportIn")) //TODO packet->getArrivalGate()->getBaseId() == transportInGateBaseId
     {
-        handleMessageFromHL( msg );
+        handlePacketFromHL(packet);
     }
-    else if (dynamic_cast<ARPPacket *>(msg))
+    else if (packet->getArrivalGate() == arpInGate)
     {
-        // dispatch ARP packets to ARP
-        handleARP((ARPPacket *)msg);
+        handlePacketFromARP(packet);
     }
-    else
+    else // from network
     {
-        IPv4Datagram *dgram = check_and_cast<IPv4Datagram *>(msg);
-        InterfaceEntry *fromIE = getSourceInterfaceFrom(dgram);
-        handlePacketFromNetwork(dgram, fromIE);
+        const InterfaceEntry *fromIE = getSourceInterfaceFrom(packet);
+        if (dynamic_cast<ARPPacket *>(packet))
+            handleIncomingARPPacket((ARPPacket *)packet, fromIE);
+        else if (dynamic_cast<IPv4Datagram *>(packet))
+            handleIncomingDatagram((IPv4Datagram *)packet, fromIE);
+        else
+            throw cRuntimeError(packet, "Unexpected packet type");
     }
 
     if (ev.isGUI())
         updateDisplayString();
 }
 
-InterfaceEntry *IPv4::getSourceInterfaceFrom(cPacket *msg)
+const InterfaceEntry *IPv4::getSourceInterfaceFrom(cPacket *packet)
 {
-    cGate *g = msg->getArrivalGate();
+    cGate *g = packet->getArrivalGate();
     return g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
 }
 
-void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromIE)
+void IPv4::handleIncomingDatagram(IPv4Datagram *datagram, const InterfaceEntry *fromIE)
 {
     ASSERT(datagram);
     ASSERT(fromIE);
@@ -216,7 +226,7 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
             delete datagram;
         }
         else
-            forwardMulticastPacket(datagram, fromIE);
+            forwardMulticastPacket(datagram, const_cast<InterfaceEntry*>(fromIE));
     }
     else
     {
@@ -252,62 +262,60 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
     }
 }
 
-void IPv4::handleARP(ARPPacket *msg)
+void IPv4::handleIncomingARPPacket(ARPPacket *packet, const InterfaceEntry *fromIE)
 {
-    // FIXME hasBitError() check  missing!
-
-    // delete old control info
-    delete msg->removeControlInfo();
-
-    // dispatch ARP packets to ARP and let it know the gate index it arrived on
-    InterfaceEntry *fromIE = getSourceInterfaceFrom(msg);
-    ASSERT(fromIE);
-
-    IPv4RoutingDecision *routingDecision = new IPv4RoutingDecision();
-    routingDecision->setInterfaceId(fromIE->getInterfaceId());
-    msg->setControlInfo(routingDecision);
-
-    send(msg, queueOutGate);
+    // give it to the ARP module
+    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(packet->getControlInfo());
+    ctrl->setInterfaceId(fromIE->getInterfaceId());
+    send(packet, arpOutGate);
 }
 
-void IPv4::handleReceivedICMP(ICMPMessage *msg)
+void IPv4::handleIncomingICMP(ICMPMessage *packet)
 {
-    switch (msg->getType())
+    switch (packet->getType())
     {
         case ICMP_REDIRECT: // TODO implement redirect handling
         case ICMP_DESTINATION_UNREACHABLE:
         case ICMP_TIME_EXCEEDED:
         case ICMP_PARAMETER_PROBLEM: {
             // ICMP errors are delivered to the appropriate higher layer protocol
-            IPv4Datagram *bogusPacket = check_and_cast<IPv4Datagram *>(msg->getEncapsulatedPacket());
+            IPv4Datagram *bogusPacket = check_and_cast<IPv4Datagram *>(packet->getEncapsulatedPacket());
             int protocol = bogusPacket->getTransportProtocol();
             int gateindex = mapping.getOutputGateForProtocol(protocol);
-            send(msg, "transportOut", gateindex);
+            send(packet, "transportOut", gateindex);
             break;
         }
         default: {
             // all others are delivered to ICMP: ICMP_ECHO_REQUEST, ICMP_ECHO_REPLY,
             // ICMP_TIMESTAMP_REQUEST, ICMP_TIMESTAMP_REPLY, etc.
             int gateindex = mapping.getOutputGateForProtocol(IP_PROT_ICMP);
-            send(msg, "transportOut", gateindex);
+            send(packet, "transportOut", gateindex);
             break;
         }
     }
 }
 
-void IPv4::handleMessageFromHL(cPacket *msg)
+void IPv4::handlePacketFromARP(cPacket *packet)
+{
+    // send out packet on the appropriate interface
+    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(packet->getControlInfo());
+    InterfaceEntry *destIE = ift->getInterfaceById(ctrl->getInterfaceId());
+    sendPacketToNIC(packet, destIE);
+}
+
+void IPv4::handlePacketFromHL(cPacket *packet)
 {
     // if no interface exists, do not send datagram
     if (ift->getNumInterfaces() == 0)
     {
         EV << "No interfaces exist, dropping packet\n";
         numDropped++;
-        delete msg;
+        delete packet;
         return;
     }
 
     // encapsulate and send
-    IPv4Datagram *datagram = dynamic_cast<IPv4Datagram *>(msg);
+    IPv4Datagram *datagram = dynamic_cast<IPv4Datagram *>(packet);
     IPv4ControlInfo *controlInfo = NULL;
     //FIXME dubious code, remove? how can the HL tell IP whether it wants tunneling or forwarding?? --Andras
     if (datagram) // if HL sends an IPv4Datagram, route the packet
@@ -321,8 +329,8 @@ void IPv4::handleMessageFromHL(cPacket *msg)
     else
     {
         // encapsulate
-        controlInfo = check_and_cast<IPv4ControlInfo*>(msg->removeControlInfo());
-        datagram = encapsulate(msg, controlInfo);
+        controlInfo = check_and_cast<IPv4ControlInfo*>(packet->removeControlInfo());
+        datagram = encapsulate(packet, controlInfo);
     }
 
     // extract requested interface and next hop
@@ -634,7 +642,7 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
     if (protocol==IP_PROT_ICMP)
     {
         // incoming ICMP packets are handled specially
-        handleReceivedICMP(check_and_cast<ICMPMessage *>(decapsulate(datagram)));
+        handleIncomingICMP(check_and_cast<ICMPMessage *>(decapsulate(datagram)));
         numLocalDeliver++;
     }
     else if (protocol==IP_PROT_IP)
@@ -674,7 +682,7 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
 cPacket *IPv4::decapsulate(IPv4Datagram *datagram)
 {
     // decapsulate transport packet
-    InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
+    const InterfaceEntry *fromIE = getSourceInterfaceFrom(datagram);
     cPacket *packet = datagram->decapsulate();
 
     // create and fill in control info
@@ -830,14 +838,76 @@ IPv4Datagram *IPv4::createIPv4Datagram(const char *name)
 void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Address nextHopAddr)
 {
     {
-        // send out datagram to ARP, with control info attached
-        delete datagram->removeControlInfo();
-        IPv4RoutingDecision *routingDecision = new IPv4RoutingDecision();
-        routingDecision->setInterfaceId(ie->getInterfaceId());
-        routingDecision->setNextHopAddr(nextHopAddr);
-        datagram->setControlInfo(routingDecision);
-        send(datagram, queueOutGate);
+        bool isIeee802Lan = ie->isBroadcast() && !ie->getMacAddress().isUnspecified(); // we only need/can do ARP on IEEE 802 LANs
+        if (!isIeee802Lan) {
+            sendPacketToNIC(datagram, ie);
+        }
+        else {
+            //FIXME currently ARP has a proxyARP parameter!!! maybe move this code there....
+            bool proxyArpEnabled = true; //TODO parameter
+            if (nextHopAddr.isUnspecified()) {
+                if (proxyArpEnabled) {
+                    nextHopAddr = datagram->getDestAddress();
+                    EV << "no next-hop address, using destination address " << nextHopAddr << " (proxy ARP)\n";
+                }
+                else {
+                    throw cRuntimeError(datagram, "Cannot send datagram on broadcast interface: no next-hop address and Proxy ARP is disabled");
+                }
+            }
+
+            MACAddress nextHopMacAddr = resolveNextHopMacAddress(datagram, nextHopAddr, ie);
+
+            if (nextHopMacAddr.isUnspecified()) {
+                IPv4RoutingDecision *routingDecision = new IPv4RoutingDecision();
+                routingDecision->setInterfaceId(ie->getInterfaceId());
+                routingDecision->setNextHopAddr(nextHopAddr);
+                datagram->setControlInfo(routingDecision);
+
+                send(datagram, arpDgramOutGate);  // send to ARP for resolution
+            }
+            else {
+                sendPacketToIeee802NIC(datagram, ie, nextHopMacAddr, ETHERTYPE_IPv4);
+            }
+        }
     }
+}
+
+MACAddress IPv4::resolveNextHopMacAddress(cPacket *packet, IPv4Address nextHopAddr, const InterfaceEntry *destIE)
+{
+    if (nextHopAddr.isLimitedBroadcastAddress() || nextHopAddr == destIE->ipv4Data()->getNetworkBroadcastAddress())
+    {
+        EV << "destination address is broadcast, sending packet to broadcast MAC address\n";
+        return MACAddress::BROADCAST_ADDRESS;
+    }
+
+    if (nextHopAddr.isMulticast())
+    {
+        MACAddress macAddr = MACAddress::makeMulticastAddress(nextHopAddr);
+        EV << "destination address is multicast, sending packet to MAC address " << macAddr << "\n";
+        return macAddr;
+    }
+
+    return arp->getDirectAddressResolution(nextHopAddr);
+}
+
+void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, const MACAddress& macAddress, int etherType)
+{
+    // remove old control info
+    delete packet->removeControlInfo();
+
+    // add control info with MAC address
+    Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
+    controlInfo->setDest(macAddress);
+    controlInfo->setEtherType(etherType);
+    packet->setControlInfo(controlInfo);
+
+    sendPacketToNIC(packet, ie);
+}
+
+void IPv4::sendPacketToNIC(cPacket *packet, const InterfaceEntry *ie)
+{
+    EV << "Sending out packet to interface " << ie->getName() << endl;
+    send(packet, queueOutGateBaseId + ie->getNetworkLayerGateIndex());
 }
 
 #ifdef WITH_MANET

@@ -48,6 +48,7 @@ simple ARP
         @statistic[initiatedResolution](title="ARP initiated resolutions";record=count,vector);
         @statistic[failedResolution](title="ARP failed resolutions";record=count,vector);
     gates:
-        input ipIn @labels(ARPPacket,IPv4Datagram);
-        output nicOut[] @labels(ARPPacket);
+        input dgramIn @labels(IPv4Datagram+IPv4RoutingDecision); // datagrams that need address resolution
+        input netwIn @labels(ARPPacket+Ieee802Ctrl); // incoming ARP requests and replies
+        output netwOut @labels(ARPPacket+Ieee802Ctrl,IPv4Datagram+Ieee802Ctrl);  // outgoing ARP requests/replies, and datagrams with resolved next hop
 }

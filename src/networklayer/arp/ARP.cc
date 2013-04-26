@@ -85,8 +85,6 @@ void ARP::initialize(int stage)
         ift = InterfaceTableAccess().get();
         rt = IPv4RoutingTableAccess().get();
 
-        nicOutBaseGateId = gateSize("nicOut")==0 ? -1 : gate("nicOut", 0)->getId();
-
         retryTimeout = par("retryTimeout");
         retryCount = par("retryCount");
         cacheTimeout = par("cacheTimeout");
@@ -96,6 +94,7 @@ void ARP::initialize(int stage)
         pendingQueue.setName("pendingQueue");
 
         isUp = isNodeUp();
+        netwOutGate = gate("netwOut");
 
         // init statistics
         numRequestsSent = numRepliesSent = 0;
@@ -276,50 +275,16 @@ void ARP::updateDisplayString()
 
 void ARP::processOutboundPacket(cMessage *msg)
 {
-    EV << "Packet " << msg << " arrived from higher layer, ";
+    EV << "Packet " << msg << " arrived from IPv4\n";
 
     // get next hop address from control info in packet
-    IPv4RoutingDecision *controlInfo = check_and_cast<IPv4RoutingDecision*>(msg->removeControlInfo());
-    IPv4Address nextHopAddr = controlInfo->getNextHopAddr();
-    InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
-    delete controlInfo;
+    IPv4RoutingDecision *ctrl = check_and_cast<IPv4RoutingDecision*>(msg->removeControlInfo());
+    IPv4Address nextHopAddr = ctrl->getNextHopAddr();
+    InterfaceEntry *ie = ift->getInterfaceById(ctrl->getInterfaceId());
+    delete ctrl;
 
-    // if output interface is not broadcast, don't bother with ARP
-    if (!ie->isBroadcast())
-    {
-        EV << "output interface " << ie->getName() << " is not broadcast, skipping ARP\n";
-        send(msg, nicOutBaseGateId + ie->getNetworkLayerGateIndex());
-        return;
-    }
-
-    // determine what address to look up in ARP cache
-    if (!nextHopAddr.isUnspecified())
-    {
-        EV << "using next-hop address " << nextHopAddr << "\n";
-    }
-    else
-    {
-        // try proxy ARP
-        IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(msg);
-        nextHopAddr = datagram->getDestAddress();
-        EV << "no next-hop address, using destination address " << nextHopAddr << " (proxy ARP)\n";
-    }
-
-    if (nextHopAddr.isLimitedBroadcastAddress() ||
-            nextHopAddr == ie->ipv4Data()->getIPAddress().makeBroadcastAddress(ie->ipv4Data()->getNetmask())) // also include the network broadcast
-    {
-        EV << "destination address is broadcast, sending packet to broadcast MAC address\n";
-        sendPacketToNIC(msg, ie, MACAddress::BROADCAST_ADDRESS, ETHERTYPE_IPv4);
-        return;
-    }
-
-    if (nextHopAddr.isMulticast())
-    {
-        MACAddress macAddr = mapMulticastAddress(nextHopAddr);
-        EV << "destination address is multicast, sending packet to MAC address " << macAddr << "\n";
-        sendPacketToNIC(msg, ie, macAddr, ETHERTYPE_IPv4);
-        return;
-    }
+    if (nextHopAddr.isUnspecified())
+        throw cRuntimeError("Cannot start ARP, next-hop address for packet is unspecified");
 
     if (globalARP)
     {
@@ -332,7 +297,6 @@ void ARP::processOutboundPacket(cMessage *msg)
 
     // try look up
     ARPCache::iterator it = arpCache.find(nextHopAddr);
-    //ASSERT(it==arpCache.end() || ie==(*it).second->ie); // verify: if arpCache gets keyed on InterfaceEntry* too, this becomes unnecessary
     if (it==arpCache.end())
     {
         // no cache entry: launch ARP request
@@ -377,21 +341,6 @@ void ARP::processOutboundPacket(cMessage *msg)
     }
 }
 
-// see  RFC 1112, section 6.4
-MACAddress ARP::mapMulticastAddress(IPv4Address addr)
-{
-    ASSERT(addr.isMulticast());
-
-    MACAddress macAddr;
-    macAddr.setAddressByte(0, 0x01);
-    macAddr.setAddressByte(1, 0x00);
-    macAddr.setAddressByte(2, 0x5e);
-    macAddr.setAddressByte(3, addr.getDByte(1) & 0x7f);
-    macAddr.setAddressByte(4, addr.getDByte(2));
-    macAddr.setAddressByte(5, addr.getDByte(3));
-    return macAddr;
-}
-
 void ARP::initiateARPResolution(ARPCacheEntry *entry)
 {
     IPv4Address nextHopAddr = entry->myIter->first;
@@ -415,10 +364,11 @@ void ARP::sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& m
     Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
     controlInfo->setDest(macAddress);
     controlInfo->setEtherType(etherType);
+    controlInfo->setInterfaceId(ie->getInterfaceId());
     msg->setControlInfo(controlInfo);
 
     // send out
-    send(msg, nicOutBaseGateId + ie->getNetworkLayerGateIndex());
+    send(msg, netwOutGate);
 }
 
 void ARP::sendARPRequest(InterfaceEntry *ie, IPv4Address ipAddress)
@@ -508,9 +458,9 @@ void ARP::processARPPacket(ARPPacket *arp)
     dumpARPPacket(arp);
 
     // extract input port
-    IPv4RoutingDecision *controlInfo = check_and_cast<IPv4RoutingDecision*>(arp->removeControlInfo());
-    InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
-    delete controlInfo;
+    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(arp->removeControlInfo());
+    InterfaceEntry *ie = ift->getInterfaceById(ctrl->getInterfaceId());
+    delete ctrl;
 
     //
     // Recipe a'la RFC 826:
