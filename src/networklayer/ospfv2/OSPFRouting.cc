@@ -28,6 +28,7 @@
 #include "IPv4RoutingTableAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
+#include "IPSocket.h"
 
 
 Define_Module(OSPFRouting);
@@ -54,6 +55,9 @@ void OSPFRouting::initialize(int stage)
         isUp = isNodeUp();
         if (isUp)
             createOspfRouter();
+
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(IP_PROT_OSPF);
     }
 }
 

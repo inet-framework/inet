@@ -22,12 +22,21 @@
 
 #include "ICMP.h"
 
+#include "IPSocket.h"
 #include "IPv4Datagram.h"
 #include "IPv4ControlInfo.h"
 #include "PingPayload_m.h"
 
 Define_Module(ICMP);
 
+void ICMP::initialize(int stage)
+{
+    if (stage == 0)
+    {
+        IPSocket socket(gate("sendOut"));
+        socket.registerProtocol(IP_PROT_ICMP);
+    }
+}
 
 void ICMP::handleMessage(cMessage *msg)
 {

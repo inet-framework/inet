@@ -20,6 +20,7 @@
 #include "SCTP.h"
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
+#include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 
@@ -111,6 +112,9 @@ void SCTP::initialize()
     sizeAssocMap = 0;
     if ((bool)par("udpEncapsEnabled"))
         bindPortForUDP();
+
+    IPSocket socket(gate("to_ip"));
+    socket.registerProtocol(IP_PROT_SCTP);
 }
 
 

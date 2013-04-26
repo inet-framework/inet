@@ -15,6 +15,7 @@
 
 #include "DSDVhello_m.h"//created by opp_msgc 3.3 from DSDVhello.msg
 #include "DSDV_2.h"
+#include "IPSocket.h"
 
 #define NOforwardHello
 Define_Module(DSDV_2);
@@ -22,6 +23,11 @@ Define_Module(DSDV_2);
 void DSDV_2::initialize(int stage)
 {
     //reads from omnetpp.ini
+    if (stage==0)
+    {
+        IPSocket socket(gate("to_ip"));
+        socket.registerProtocol(IP_PROT_MANET);
+    }
     if (stage==4)
     {
         sequencenumber = 0;

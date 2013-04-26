@@ -56,12 +56,20 @@ void ProtocolMapping::parseProtocolMapping(const char *s)
 
 }
 
-int ProtocolMapping::getOutputGateForProtocol(int protocol)
+int ProtocolMapping::findOutputGateForProtocol(int protocol)
 {
     for (Entries::iterator i=entries.begin(); i!=entries.end(); ++i)
         if (i->protocolNumber==protocol)
             return i->outGateIndex;
 
+    return -2;  // illegal gateindex
+}
+
+int ProtocolMapping::getOutputGateForProtocol(int protocol)
+{
+    int ret = findOutputGateForProtocol(protocol);
+    if (ret >= -1)
+        return ret;
     throw cRuntimeError("No output gate defined in protocolMapping for protocol number %d", protocol);
 }
 

@@ -34,27 +34,17 @@ import inet.networklayer.ipv4.IPv4;
 module NetworkLayer
 {
     parameters:
-        @display("i=block/fork");
         bool proxyARP = default(true);
         string igmpType = default("IGMPv2");
+        @display("i=block/fork");
     gates:
-        input ifIn[] @labels(IPv4Datagram);
-        input tcpIn @labels(TCPSegment,IPv4ControlInfo/down);
-        input udpIn @labels(UDPPacket,IPv4ControlInfo/down);
-        input sctpIn @labels(IPv4ControlInfo/down,SCTPPacket);
-        input rsvpIn @labels(IPv4ControlInfo/down);
-        input ospfIn @labels(IPv4ControlInfo/down);
-        input pingIn[];
-        input manetIn;
+        input ifIn[] @labels(INetworkDatagram);
+        output ifOut[] @labels(INetworkDatagram);
+        input transportIn[] @labels(IPv4ControlInfo/down);
+        output transportOut[] @labels(IPv4ControlInfo/up);
+        input pingIn[]@labels(PingPayload/down);
+        output pingOut[] @labels(PingPayload/up);
         input igmpIn;
-        output ifOut[] @labels(IPv4Datagram);
-        output tcpOut @labels(TCPSegment,IPv4ControlInfo/up);
-        output udpOut @labels(UDPPacket,IPv4ControlInfo/up);
-        output sctpOut @labels(IPv4ControlInfo/up,SCTPPacket);
-        output rsvpOut @labels(IPv4ControlInfo/up);
-        output ospfOut @labels(IPv4ControlInfo/up);
-        output pingOut[];
-        output manetOut;
         output igmpOut;
 
     submodules:
@@ -63,11 +53,8 @@ module NetworkLayer
         }
         ip: IPv4 {
             parameters:
-                protocolMapping = "6:0,17:1,1:2,2:3,46:4,89:5,132:6,48:7,138:7"; // see: http://www.iana.org/assignments/protocol-numbers
                 @display("p=85,95;q=queue");
             gates:
-                transportIn[8];
-                transportOut[8];
                 queueIn[sizeof(ifIn)];
         }
         arp: ARP {
@@ -91,30 +78,18 @@ module NetworkLayer
         }
 
     connections allowunconnected:
-        // transport Layer
-        ip.transportOut[0] --> { @display("m=n"); } --> tcpOut;
-        ip.transportIn[0] <-- { @display("m=n"); } <-- tcpIn;
+        for i=0..sizeof(transportIn)-1 {
+            transportIn[i] --> { @display("m=n"); } --> ip.transportIn++;
+        }
+        for i=0..sizeof(transportOut)-1 {
+            ip.transportOut++ --> { @display("m=n"); } --> transportOut[i];
+        }
 
-        ip.transportOut[1] --> { @display("m=n"); } --> udpOut;
-        ip.transportIn[1] <-- { @display("m=n"); } <-- udpIn;
+        ip.transportOut++ --> icmp.localIn;
+        ip.transportIn++ <-- icmp.sendOut;
 
-        ip.transportOut[2] --> icmp.localIn;
-        ip.transportIn[2] <-- icmp.sendOut;
-
-        ip.transportOut[3] --> igmp.ipIn;
-        ip.transportIn[3] <-- igmp.ipOut;
-
-        ip.transportOut[4] --> { @display("m=n"); } --> rsvpOut;
-        ip.transportIn[4] <-- { @display("m=n"); } <-- rsvpIn;
-
-        ip.transportOut[5] --> { @display("m=n"); } --> ospfOut;
-        ip.transportIn[5] <-- { @display("m=n"); } <-- ospfIn;
-
-        ip.transportOut[6] --> { @display("m=n"); } --> sctpOut;
-        ip.transportIn[6] <-- { @display("m=n"); } <-- sctpIn;
-
-        ip.transportOut[7] --> { @display("m=n"); } --> manetOut;
-        ip.transportIn[7] <-- { @display("m=n"); } <-- manetIn;
+        ip.transportOut++ --> igmp.ipIn;
+        ip.transportIn++ <-- igmp.ipOut;
 
         for i=0..sizeof(pingOut)-1 {
             icmp.pingOut++ --> { @display("m=n"); } --> pingOut[i];

@@ -17,6 +17,7 @@
 //
 
 #include "IGMPv2.h"
+#include "IPSocket.h"
 #include "IPv4RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
 #include "IPv4ControlInfo.h"
@@ -382,6 +383,9 @@ void IGMPv2::initialize(int stage)
         WATCH(numReportsRecv);
         WATCH(numLeavesSent);
         WATCH(numLeavesRecv);
+
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(IP_PROT_IGMP);
     }
     else if (stage == 1)
     {

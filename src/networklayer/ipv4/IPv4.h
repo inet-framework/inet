@@ -175,6 +175,11 @@ class INET_API IPv4 : public QueueBase, public ILifecycle
     virtual void sendRouteUpdateMessageToManet(IPv4Datagram *datagram);
 
     /**
+     * Handle message.
+     */
+    virtual void handleMessage(cMessage *msg);
+
+    /**
      * Sends a MANET_ROUTE_NOROUTE packet to Manet. The packet
      * will encapsulate the given datagram, so this method takes
      * ownership.

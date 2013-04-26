@@ -18,6 +18,7 @@
 
 #include "TCP.h"
 
+#include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 #include "LifecycleOperation.h"
@@ -103,6 +104,11 @@ void TCP::initialize(int stage)
   {
     NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
     isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+
+    IPSocket ipSocket(gate("ipOut"));
+    ipSocket.registerProtocol(IP_PROT_TCP);
+    IPSocket ipv6Socket(gate("ipv6Out"));
+    ipv6Socket.registerProtocol(IP_PROT_TCP);
   }
 }
 

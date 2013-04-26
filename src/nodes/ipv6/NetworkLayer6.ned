@@ -40,28 +40,18 @@ module NetworkLayer6
         bool xMIPv6Support = default(false);
         @display("i=block/fork");
     gates:
-        input ifIn[] @labels(IPv6Datagram);
-        output ifOut[] @labels(IPv6Datagram);
-        input sctpIn @labels(IPv4ControlInfo/down,SCTPPacket);
-        output sctpOut @labels(IPv4ControlInfo/up,SCTPPacket);
-        input tcpIn @labels(TCPSegment,IPv6ControlInfo/down);
-        output tcpOut @labels(TCPSegment,IPv6ControlInfo/up);
-        input udpIn @labels(UDPPacket,IPv6ControlInfo/down);
-        output udpOut @labels(UDPPacket,IPv6ControlInfo/up);
-        input rsvpIn @labels(IPv6ControlInfo/down);
-        output rsvpOut @labels(IPv6ControlInfo/up);
-        input ospfIn @labels(IPv6ControlInfo/down);
-        output ospfOut @labels(IPv6ControlInfo/up);
-        input pingIn[];
-        output pingOut[];
+        input ifIn[] @labels(INetworkDatagram);
+        output ifOut[] @labels(INetworkDatagram);
+        input transportIn[] @labels(IPv4ControlInfo/down);
+        output transportOut[] @labels(IPv4ControlInfo/up);
+        input pingIn[]@labels(PingPayload/down);
+        output pingOut[] @labels(PingPayload/up);
     submodules:
+        // TODO: rename to ip
         ipv6: IPv6 {
             parameters:
-                protocolMapping = "6:0,17:1,46:2,89:3,132:4"; // TODO register 132 as sctp in ipv6 code
                 @display("p=84,129");
             gates:
-                transportIn[5];
-                transportOut[5];
                 queueIn[sizeof(ifIn)];
                 queueOut[sizeof(ifIn)];
         }
@@ -86,21 +76,12 @@ module NetworkLayer6
                 @display("p=44,79");
         }
     connections allowunconnected:  // FIXME remove 'nocheck'!
-        // IPv6 to transport Layer
-        ipv6.transportOut[0] --> { @display("m=n"); } --> tcpOut;
-        ipv6.transportIn[0] <-- { @display("m=n"); } <-- tcpIn;
-
-        ipv6.transportOut[1] --> { @display("m=n"); } --> udpOut;
-        ipv6.transportIn[1] <-- { @display("m=n"); } <-- udpIn;
-
-        ipv6.transportOut[2] --> { @display("m=n"); } --> rsvpOut;
-        ipv6.transportIn[2] <-- { @display("m=n"); } <-- rsvpIn;
-
-        ipv6.transportOut[3] --> { @display("m=n"); } --> ospfOut;
-        ipv6.transportIn[3] <-- { @display("m=n"); } <-- ospfIn;
-
-        ipv6.transportOut[4] --> { @display("m=n"); } --> sctpOut;
-        ipv6.transportIn[4] <-- { @display("m=n"); } <-- sctpIn;
+        for i=0..sizeof(transportIn)-1 {
+            transportIn[i] --> { @display("m=n"); } --> ipv6.transportIn++;
+        }
+        for i=0..sizeof(transportOut)-1 {
+            ipv6.transportOut++ --> { @display("m=n"); } --> transportOut[i];
+        }
 
         // IPv6 to IPv6 Tunneling
         iptunneling.upperLayerIn <-- ipv6.upperTunnelingOut;

@@ -39,7 +39,7 @@ module BurstHost extends NodeBase
         }
     connections allowunconnected:
         // transport connections
-        networkLayer.udpOut --> trafGen.ipIn;
-        networkLayer.udpIn <-- trafGen.ipOut;
+        networkLayer.transportOut++ --> trafGen.ipIn;
+        networkLayer.transportIn++ <-- trafGen.ipOut;
 }
 

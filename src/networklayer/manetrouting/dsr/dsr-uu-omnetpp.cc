@@ -24,6 +24,8 @@
 
 //#include <iostream>
 #include "dsr-uu-omnetpp.h"
+
+#include "IPSocket.h"
 #include "IPv4Address.h"
 #include "Ieee802Ctrl_m.h"
 #include "Ieee80211Frame_m.h"
@@ -203,6 +205,9 @@ void DSRUU::initialize(int stage)
     //current_time =simTime();
     if (!is_init)
     {
+        IPSocket ipSocket(gate("to_ip"));
+        ipSocket.registerProtocol(IP_PROT_MANET);
+        ipSocket.registerProtocol(IP_PROT_DSR);
 
         for (int i = 0; i < CONFVAL_MAX; i++)
         {

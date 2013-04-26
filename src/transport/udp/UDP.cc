@@ -23,6 +23,7 @@
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "InterfaceEntry.h"
+#include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 
@@ -138,6 +139,11 @@ void UDP::initialize(int stage)
         droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");
 
         isOperational = false;
+
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(IP_PROT_UDP);
+        IPSocket ipv6Socket(gate("ipv6Out"));
+        ipv6Socket.registerProtocol(IP_PROT_UDP);
     }
     else if (stage == 1)
     {

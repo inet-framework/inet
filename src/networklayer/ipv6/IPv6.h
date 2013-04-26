@@ -142,6 +142,11 @@ class INET_API IPv6 : public QueueBase, public ILifecycle
     virtual int numInitStages() const { return 2; }
 
     /**
+     * Handle message
+     */
+    virtual void handleMessage(cMessage *msg);
+
+    /**
      * Processing of IPv6 datagrams. Called when a datagram reaches the front
      * of the queue.
      */

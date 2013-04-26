@@ -25,11 +25,13 @@
 #ifdef WITH_IPv4
 #include "ICMPMessage_m.h"
 #endif
-#include "IPv4ControlInfo.h"
 
 #ifdef WITH_IPv6
 #include "ICMPv6Message_m.h"
 #endif
+
+#include "IPSocket.h"
+#include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 
 #include "headers/tcp.h"
@@ -249,6 +251,11 @@ void TCP_NSC::initialize(int stage)
     loadStack(stackName, bufferSize);
     pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);
     pStackM->add_default_gateway(localInnerGwS.str().c_str());
+
+    IPSocket ipSocket(gate("ipOut"));
+    ipSocket.registerProtocol(IP_PROT_TCP);
+    IPSocket ipv6Socket(gate("ipv6Out"));
+    ipv6Socket.registerProtocol(IP_PROT_TCP);
 
     isAliveM = true;
   }

@@ -25,11 +25,13 @@
 #ifdef WITH_IPv4
 #include "ICMPMessage_m.h"
 #endif
-#include "IPv4ControlInfo.h"
 
 #ifdef WITH_IPv6
 #include "ICMPv6Message_m.h"
 #endif
+
+#include "IPSocket.h"
+#include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 
 #include "headers/tcp.h"
@@ -116,6 +118,11 @@ void TCP_lwIP::initialize(int stage)
     pLwipFastTimerM = new cMessage("lwip_fast_timer");
 
     tcpEV << "TCP_lwIP " << this << " has stack " << pLwipTcpLayerM << "\n";
+
+    IPSocket ipSocket(gate("ipOut"));
+    ipSocket.registerProtocol(IP_PROT_TCP);
+    IPSocket ipv6Socket(gate("ipv6Out"));
+    ipv6Socket.registerProtocol(IP_PROT_TCP);
 
     isAliveM = true;
   }
