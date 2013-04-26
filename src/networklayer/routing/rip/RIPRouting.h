@@ -51,7 +51,7 @@ struct RIPRoute : public cObject
     simtime_t lastUpdateTime; // time of the last change, only for RTE routes
 
     public:
-    RIPRoute(IRoute *route, RouteType type, int metric);
+    RIPRoute(IRoute *route, RouteType type, int metric, uint16 tag);
     virtual std::string info() const;
 
     RouteType getType() const { return type; }
@@ -72,6 +72,7 @@ struct RIPRoute : public cObject
     void setNextHop(const Address &nextHop) { this->nextHop = nextHop; if (route && type == RIP_ROUTE_RTE) route->setNextHop(nextHop); }
     void setInterface(InterfaceEntry *ie) { this->ie = ie; if(route && type == RIP_ROUTE_RTE) route->setInterface(ie); }
     void setMetric(int metric) { this->metric = metric; if (route && type == RIP_ROUTE_RTE) route->setMetric(metric); }
+    void setRouteTag(uint16 routeTag) { this->tag = routeTag; }
     void setFrom(const Address &from) { this->from = from; }
     void setChanged(bool changed) { this->changed = changed; }
     void setLastUpdateTime(simtime_t time) { lastUpdateTime = time; }
@@ -169,7 +170,7 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
 
     virtual void configureInterfaces(cXMLElement *config);
     virtual void configureInitialRoutes();
-    virtual RIPRoute* importRoute(IRoute *route, RIPRoute::RouteType type, int metric = 1);
+    virtual RIPRoute* importRoute(IRoute *route, RIPRoute::RouteType type, int metric = 1, uint16 routeTag = 0);
     virtual void sendRIPRequest(const RIPInterfaceEntry &ripInterface);
 
     virtual void processRequest(RIPPacket *packet);
@@ -178,8 +179,8 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
 
     virtual void processResponse(RIPPacket *packet);
     virtual bool isValidResponse(RIPPacket *packet);
-    virtual void addRoute(const Address &dest, int prefixLength, const InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from);
-    virtual void updateRoute(RIPRoute *route, const InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from);
+    virtual void addRoute(const Address &dest, int prefixLength, const InterfaceEntry *ie, const Address &nextHop, int metric, uint16 routeTag, const Address &from);
+    virtual void updateRoute(RIPRoute *route, const InterfaceEntry *ie, const Address &nextHop, int metric, uint16 routeTag, const Address &from);
 
     virtual void triggerUpdate();
     virtual RIPRoute *checkRouteIsExpired(RIPRoute *route);

@@ -40,14 +40,14 @@ std::ostream& operator<<(std::ostream& os, const RIPRoute& e)
     return os;
 }
 
-RIPRoute::RIPRoute(IRoute *route, RouteType type, int metric)
+RIPRoute::RIPRoute(IRoute *route, RouteType type, int metric, uint16 routeTag)
     : type(type), route(route), metric(metric), changed(false), lastUpdateTime(0)
 {
     dest = route->getDestinationAsGeneric();
     prefixLength = route->getPrefixLength();
     nextHop = route->getNextHopAsGeneric();
     ie = route->getInterface();
-    tag = 0; // TODO
+    tag = routeTag;
 }
 
 std::string RIPRoute::info() const
@@ -253,11 +253,11 @@ void RIPRouting::configureInitialRoutes()
     }
 }
 
-RIPRoute* RIPRouting::importRoute(IRoute *route, RIPRoute::RouteType type, int metric)
+RIPRoute* RIPRouting::importRoute(IRoute *route, RIPRoute::RouteType type, int metric, uint16 routeTag)
 {
     ASSERT(metric < RIP_INFINITE_METRIC);
 
-    RIPRoute *ripRoute = new RIPRoute(route, type, metric);
+    RIPRoute *ripRoute = new RIPRoute(route, type, metric, routeTag);
     if (type == RIPRoute::RIP_ROUTE_INTERFACE)
     {
         InterfaceEntry *ie = check_and_cast<InterfaceEntry*>(route->getSource());
@@ -670,14 +670,14 @@ void RIPRouting::processResponse(RIPPacket *packet)
             if (ripRoute->getFrom() == srcAddr)
                 ripRoute->setLastUpdateTime(simTime());
             if ((ripRoute->getFrom() == srcAddr && ripRoute->getMetric() != metric) || metric < ripRoute->getMetric())
-                updateRoute(ripRoute, incomingIe->ie, nextHop, metric, srcAddr);
+                updateRoute(ripRoute, incomingIe->ie, nextHop, metric, entry.routeTag, srcAddr);
             // TODO RIPng: if the metric is the same as the old one, and the old route is aboute to expire (i.e. at least halfway to the expiration point)
             //             then update the old route with the new RTE
         }
         else
         {
             if (metric != RIP_INFINITE_METRIC)
-                addRoute(entry.address, entry.prefixLength, incomingIe->ie, nextHop, metric, srcAddr);
+                addRoute(entry.address, entry.prefixLength, incomingIe->ie, nextHop, metric, entry.routeTag, srcAddr);
         }
     }
 
@@ -778,14 +778,15 @@ bool RIPRouting::isValidResponse(RIPPacket *packet)
  * - Set the route change flag
  * - Signal the output process to trigger an update
  */
-void RIPRouting::addRoute(const Address &dest, int prefixLength, const InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from)
+void RIPRouting::addRoute(const Address &dest, int prefixLength, const InterfaceEntry *ie, const Address &nextHop,
+                            int metric, uint16 routeTag, const Address &from)
 {
     RIP_DEBUG << "Add route to " << dest << "/" << prefixLength << ": "
               << "nextHop=" << nextHop << " metric=" << metric << std::endl;
 
     IRoute *route = addRoute(dest, prefixLength, ie, nextHop, metric);
 
-    RIPRoute *ripRoute = new RIPRoute(route, RIPRoute::RIP_ROUTE_RTE, metric);
+    RIPRoute *ripRoute = new RIPRoute(route, RIPRoute::RIP_ROUTE_RTE, metric, routeTag);
     ripRoute->setFrom(from);
     ripRoute->setLastUpdateTime(simTime());
     ripRoute->setChanged(true);
@@ -810,7 +811,7 @@ void RIPRouting::addRoute(const Address &dest, int prefixLength, const Interface
  *  - If the new metric is infinity, start the deletion process
  *    (described above); otherwise, re-initialize the timeout
  */
-void RIPRouting::updateRoute(RIPRoute *ripRoute, const InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from)
+void RIPRouting::updateRoute(RIPRoute *ripRoute, const InterfaceEntry *ie, const Address &nextHop, int metric, uint16 routeTag, const Address &from)
 {
     //ASSERT(ripRoute && ripRoute->getType() == RIPRoute::RIP_ROUTE_RTE);
     //ASSERT(!ripRoute->getRoute() || ripRoute->getRoute()->getSource() == this);
@@ -822,7 +823,7 @@ void RIPRouting::updateRoute(RIPRoute *ripRoute, const InterfaceEntry *ie, const
     ripRoute->setInterface(const_cast<InterfaceEntry*>(ie));
     ripRoute->setMetric(metric);
     ripRoute->setFrom(from);
-    // TODO update tag
+    ripRoute->setRouteTag(routeTag);
 
     if (oldMetric == RIP_INFINITE_METRIC && metric < RIP_INFINITE_METRIC)
     {
