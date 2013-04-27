@@ -49,7 +49,8 @@ Register_Enum(RadioState,
               (RadioState::IDLE,
                RadioState::RECV,
                RadioState::TRANSMIT,
-               RadioState::SLEEP));
+               RadioState::SLEEP,
+               RadioState::OFF));
 
 /****************************************************************
  * Construction functions.
@@ -520,6 +521,7 @@ void Ieee80211Mac::registerInterface()
 
     // add
     ift->addInterface(e);
+    interfaceEntry = e;
 }
 
 void Ieee80211Mac::initializeQueueModule()

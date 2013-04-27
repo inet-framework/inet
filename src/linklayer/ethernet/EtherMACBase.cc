@@ -24,6 +24,8 @@
 #include "InterfaceTableAccess.h"
 #include "IPassiveQueue.h"
 #include "NotificationBoard.h"
+#include "NodeOperations.h"
+#include "InterfaceOperations.h"
 #include "opp_utils.h"
 
 
@@ -178,6 +180,9 @@ void EtherMACBase::initialize()
     readChannelParameters(true);
 
     lastTxFinishTime = -1.0; // not equals with current simtime.
+
+    cModule * node = findContainingNode(this);
+    nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
 
     // initialize self messages
     endTxMsg = new cMessage("EndTransmission", ENDTRANSMISSION);
@@ -360,6 +365,28 @@ void EtherMACBase::receiveSignal(cComponent *src, simsignal_t signalId, cObject 
     }
 }
 
+bool EtherMACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_LINK_LAYER)
+            registerInterface();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        // TODO:
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        // TODO:
+    }
+    else if (dynamic_cast<InterfaceUpOperation *>(operation)) {
+        // TODO:
+    }
+    else if (dynamic_cast<InterfaceDownOperation *>(operation)) {
+        // TODO:
+    }
+    return true;
+}
+
 void EtherMACBase::processConnectDisconnect()
 {
     if (!connected)
@@ -488,7 +515,7 @@ void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
         dataratesDiffer = false;
         if (!outTrChannel)
             transmissionChannel = NULL;
-        interfaceEntry->setState(InterfaceEntry::DOWN);
+        interfaceEntry->setCarrier(false);
         interfaceEntry->setDatarate(0);
     }
     else
@@ -512,7 +539,7 @@ void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
             if (txRate == etherDescrs[i].txrate)
             {
                 curEtherDescr = &(etherDescrs[i]);
-                interfaceEntry->setState(InterfaceEntry::UP);
+                interfaceEntry->setCarrier(true);
                 interfaceEntry->setDatarate(txRate);
                 return;
             }

@@ -25,6 +25,9 @@
 #include "PhyControlInfo_m.h"
 #include "Radio80211aControlInfo_m.h"
 #include "BasicBattery.h"
+#include "NodeStatus.h"
+#include "NodeOperations.h"
+#include "InterfaceOperations.h"
 
 
 #define MK_TRANSMISSION_OVER  1
@@ -45,8 +48,8 @@ Radio::Radio() : rs(this->getId())
     obstacles = NULL;
     radioModel = NULL;
     receptionModel = NULL;
-    transceiverConnect = true;
-    receiverConnect = true;
+    transceiverConnected = true;
+    receiverConnected = true;
     updateString = NULL;
     noiseGenerator = NULL;
 }
@@ -189,6 +192,31 @@ Radio::~Radio()
         delete it->first;
 }
 
+bool Radio::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
+            setRadioState(RadioState::IDLE);  //FIXME only if the interface is up, too
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
+            setRadioState(RadioState::OFF);
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_LOCAL)  // crash is immediate
+            setRadioState(RadioState::OFF);
+    }
+    else if (dynamic_cast<InterfaceUpOperation *>(operation)) {
+        if (stage == InterfaceUpOperation::STAGE_LOCAL)
+            setRadioState(RadioState::IDLE);  //FIXME only if the node is up, too
+    }
+    else if (dynamic_cast<InterfaceDownOperation *>(operation)) {
+        if (stage == InterfaceDownOperation::STAGE_LOCAL)
+            setRadioState(RadioState::OFF);
+    }
+    return true;
+}
 
 bool Radio::processAirFrame(AirFrame *airframe)
 {
@@ -212,6 +240,16 @@ bool Radio::processAirFrame(AirFrame *airframe)
  */
 void Radio::handleMessage(cMessage *msg)
 {
+    if (rs.getState()==RadioState::SLEEP || rs.getState()==RadioState::OFF)
+    {
+        if (msg->getArrivalGateId() == upperLayerIn || msg->isSelfMessage())  //XXX can we ensure we don't receive pk from upper in OFF state?? (race condition)
+            throw cRuntimeError("Radio is turned off");
+        else {
+            EV << "Radio is turned off, dropping packet\n";
+            delete msg;
+            return;
+        }
+    }
     // handle commands
     if (updateString && updateString==msg)
     {
@@ -230,16 +268,8 @@ void Radio::handleMessage(cMessage *msg)
 
     if (msg->getArrivalGateId() == upperLayerIn)
     {
-        if (this->isEnabled())
-        {
-            AirFrame *airframe = encapsulatePacket(PK(msg));
-            handleUpperMsg(airframe);
-        }
-        else
-        {
-            EV << "Radio disabled. ignoring frame" << endl;
-            delete msg;
-        }
+        AirFrame *airframe = encapsulatePacket(PK(msg));
+        handleUpperMsg(airframe);
     }
     else if (msg->isSelfMessage())
     {
@@ -247,7 +277,7 @@ void Radio::handleMessage(cMessage *msg)
     }
     else if (processAirFrame(check_and_cast<AirFrame*>(msg)))
     {
-        if (this->isEnabled() && receiverConnect)
+        if (receiverConnected)
         {
         // must be an AirFrame
             AirFrame *airframe = (AirFrame *) msg;
@@ -334,7 +364,7 @@ void Radio::sendUp(AirFrame *airframe)
 
 void Radio::sendDown(AirFrame *airframe)
 {
-    if (transceiverConnect)
+    if (transceiverConnected)
         sendToChannel(airframe);
     else
         delete airframe;
@@ -828,12 +858,12 @@ void Radio::setRadioState(RadioState::State newState)
     if (rs.getState() != newState)
     {
         emit(radioStateSignal, newState);
-        if (newState == RadioState::SLEEP)
+        if (newState == RadioState::SLEEP || newState == RadioState::OFF)
         {
             disconnectTransceiver();
             disconnectReceiver();
         }
-        else if (rs.getState() == RadioState::SLEEP)
+        else if (rs.getState() == RadioState::SLEEP || rs.getState() == RadioState::OFF)
         {
             connectTransceiver();
             connectReceiver(); // the connection change the state
@@ -944,18 +974,6 @@ void Radio::updateDisplayString() {
         updateString = new cMessage("refresh timer");
     if (updateStringInterval>0)
         scheduleAt(simTime()+updateStringInterval, updateString);
-
-
-}
-
-void Radio::enablingInitialization() {
-    this->connectReceiver();
-    this->connectTransceiver();
-}
-
-void Radio::disablingInitialization() {
-    this->disconnectReceiver();
-    this->disconnectTransceiver();
 }
 
 double Radio::calcDistFreeSpace()
@@ -995,7 +1013,7 @@ void Radio::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
 
 void Radio::disconnectReceiver()
 {
-    receiverConnect = false;
+    receiverConnected = false;
     cc->disableReception(this->myRadioRef);
     if (rs.getState() == RadioState::TRANSMIT)
         error("changing channel while transmitting is not allowed");
@@ -1017,7 +1035,7 @@ void Radio::disconnectReceiver()
 
 void Radio::connectReceiver()
 {
-    receiverConnect = true;
+    receiverConnected = true;
     cc->enableReception(this->myRadioRef);
 
     if (rs.getState()!=RadioState::IDLE)

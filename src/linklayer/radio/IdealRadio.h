@@ -26,7 +26,7 @@
 
 #include "IdealAirFrame_m.h"
 #include "IdealChannelModelAccess.h"
-#include "IPowerControl.h"
+#include "ILifecycle.h"
 #include "RadioState.h"
 
 
@@ -36,7 +36,7 @@
  *
  * See the NED file for details.
  */
-class INET_API IdealRadio : public IdealChannelModelAccess, public IPowerControl
+class INET_API IdealRadio : public IdealChannelModelAccess, public ILifecycle
 {
   public:
     IdealRadio();
@@ -44,6 +44,8 @@ class INET_API IdealRadio : public IdealChannelModelAccess, public IPowerControl
 
     /** Returns the current transmission range */
     virtual int getTransmissionRange() const { return transmissionRange; }
+
+    bool isEnabled() const { return rs != RadioState::OFF && rs != RadioState::SLEEP; }
 
   protected:
     virtual void initialize(int stage);
@@ -76,13 +78,14 @@ class INET_API IdealRadio : public IdealChannelModelAccess, public IPowerControl
     /** Create a new IdealAirFrame */
     virtual IdealAirFrame *createAirFrame() { return new IdealAirFrame(); }
 
+    virtual void setRadioState(RadioState::State newState);
+
     virtual void updateDisplayString();
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
-    // IPowerControl:
-    virtual void enablingInitialization();
-    virtual void disablingInitialization();
+    // ILifecycle:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     typedef std::list<cMessage *> RecvBuff;

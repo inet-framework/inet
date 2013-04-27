@@ -31,6 +31,7 @@
  *  - RECV: channel is busy (radio is in receive mode)
  *  - TRANSMIT: the radio is transmitting
  *  - SLEEP: the radio is sleeping
+ *  - OFF: the device is turned off
  *
  * @author Andreas Koepke, Andras Varga
  * @see NotificationBoard
@@ -44,7 +45,8 @@ class INET_API RadioState : public cObject
       IDLE,
       RECV,
       TRANSMIT,
-      SLEEP
+      SLEEP, //XXX do we need this, or simply OFF would suffice?
+      OFF
     };
 
     //XXX consider adding the following:
@@ -100,6 +102,7 @@ class INET_API RadioState : public cObject
             case RECV: return "RECV";
             case TRANSMIT: return "TRANSMIT";
             case SLEEP: return "SLEEP";
+            case OFF: return "OFF";
             default: return "???";
         }
     }

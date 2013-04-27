@@ -26,6 +26,8 @@
 #include "IPassiveQueue.h"
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
+#include "NodeOperations.h"
+#include "InterfaceOperations.h"
 
 
 Define_Module(PPP);
@@ -112,7 +114,7 @@ void PPP::initialize(int stage)
 
         // register our interface entry in IInterfaceTable
         interfaceEntry = registerInterface(datarate);
-        interfaceEntry->setState(connected ? InterfaceEntry::UP : InterfaceEntry::DOWN);
+        interfaceEntry->setCarrier(connected);
 
         // prepare to fire notifications
         nb = NotificationBoardAccess().get();
@@ -141,6 +143,9 @@ void PPP::initialize(int stage)
             EV << "Requesting first frame from queue module\n";
             queueModule->requestPacket();
         }
+
+        cModule * node = findContainingNode(this);
+        nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
     }
 
     // update display string when addresses have been autoconfigured etc.
@@ -175,7 +180,7 @@ InterfaceEntry *PPP::registerInterface(double datarate)
     // add
     IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
     if (ift)
-        ift->addInterface(e);
+        ift->addInterface(e);  //XXX ?????????? ha ift==NULL, mire fogja hasznalni???
 
     return e;
 }
@@ -200,6 +205,35 @@ void PPP::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
         if (datarateChannel == gcobj->par->getOwner() && !strcmp("datarate", gcobj->par->getName()))
             refreshOutGateConnection(true);
     }
+}
+
+bool PPP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_LINK_LAYER) {
+            bool connected = physOutGate->getPathEndGate()->getType() == cGate::INPUT;
+            double datarate = connected ? datarateChannel->getNominalDatarate() : 0;
+            interfaceEntry = registerInterface(datarate); //FIXME �s a 100 m�sik dolog az initialize-bol???
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        // TODO:
+        interfaceEntry = NULL;  //TODO inkabb NF notification-re!! NF_INTERFACE_DELETED
+        //TODO flush the queue!!! external queue too
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        // TODO: see above
+        interfaceEntry = NULL;
+    }
+    else if (dynamic_cast<InterfaceUpOperation *>(operation)) {
+        // TODO:
+    }
+    else if (dynamic_cast<InterfaceDownOperation *>(operation)) {
+        // TODO:
+        //TODO flush the queue!!! external queue too
+    }
+    return true;
 }
 
 void PPP::refreshOutGateConnection(bool connected)
@@ -264,7 +298,7 @@ void PPP::refreshOutGateConnection(bool connected)
     }
 
     // set interface state
-    interfaceEntry->setState(connected ? InterfaceEntry::UP : InterfaceEntry::DOWN);
+    interfaceEntry->setCarrier(connected);
 
     // data rate
     interfaceEntry->setDatarate(datarate);
@@ -307,6 +341,19 @@ void PPP::startTransmitting(cPacket *msg)
 
 void PPP::handleMessage(cMessage *msg)
 {
+    //TODO: cache result in isEnabled? Q: when to recompute the flag?
+    bool isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+    bool isInterfaceUp = !interfaceEntry || interfaceEntry->getState() == InterfaceEntry::UP;
+    if (!isNodeUp || !isInterfaceUp)   // TODO make these inline functions in future MACBase
+    {
+        if (!msg->arrivedOn("phys$i") || msg->isSelfMessage())  //FIXME remove 1st part -- it is not possible to ensure that no msg is sent by upper layer (race condition!!!)
+            throw cRuntimeError("Interface is turned off");
+        else {
+            EV << "Interface is turned off, dropping packet\n";
+            delete msg;
+            return;
+        }
+    }
     if (msg==endTransmissionEvent)
     {
         // Transmission finished, we can start next one.

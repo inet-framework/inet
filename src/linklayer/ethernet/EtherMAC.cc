@@ -25,6 +25,7 @@
 #include "Ethernet.h"
 #include "Ieee802Ctrl_m.h"
 #include "IPassiveQueue.h"
+#include "InterfaceEntry.h"
 
 // TODO: there is some code that is pretty much the same as the one found in EtherMACFullDuplex.cc (e.g. EtherMAC::beginSendFrames)
 // TODO: refactor using a statemachine that is present in a single function
@@ -182,6 +183,19 @@ void EtherMAC::handleSelfMessage(cMessage *msg)
 
 void EtherMAC::handleMessage(cMessage *msg)
 {
+    bool isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+    bool isInterfaceUp = !interfaceEntry || interfaceEntry->getState() == InterfaceEntry::UP;
+    if (!isNodeUp || !isInterfaceUp)
+    {
+        if (msg->getArrivalGate() == upperLayerInGate || msg->isSelfMessage())  //FIXME remove 1st part -- it is not possible to ensure that no msg is sent by upper layer (race condition!!!)
+            throw cRuntimeError("Interface is turned off");
+        else {
+            EV << "Interface is turned off, dropping packet\n";
+            delete msg;
+            return;
+        }
+    }
+
     if (channelsDiffer)
         readChannelParameters(true);
 

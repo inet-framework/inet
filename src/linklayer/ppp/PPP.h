@@ -24,6 +24,8 @@
 #include "PPPFrame_m.h"
 #include "TxNotifDetails.h"
 #include "INotifiable.h"
+#include "ILifecycle.h"
+#include "NodeStatus.h"
 
 class InterfaceEntry;
 class IPassiveQueue;
@@ -32,7 +34,7 @@ class NotificationBoard;
 /**
  * PPP implementation.
  */
-class INET_API PPP : public cSimpleModule, public INotifiable, public cListener
+class INET_API PPP : public cSimpleModule, public INotifiable, public cListener, public ILifecycle
 {
   protected:
     long txQueueLimit;
@@ -42,6 +44,8 @@ class INET_API PPP : public cSimpleModule, public INotifiable, public cListener
     cQueue txQueue;
     cMessage *endTransmissionEvent;
     IPassiveQueue *queueModule;
+
+    NodeStatus *nodeStatus;
 
     InterfaceEntry *interfaceEntry;  // points into IInterfaceTable
 
@@ -82,6 +86,8 @@ class INET_API PPP : public cSimpleModule, public INotifiable, public cListener
   public:
     PPP();
     virtual ~PPP();
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     virtual int numInitStages() const {return 4;}

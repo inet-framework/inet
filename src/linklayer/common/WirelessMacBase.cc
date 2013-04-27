@@ -23,6 +23,8 @@
 
 #include "WirelessMacBase.h"
 #include "NotificationBoard.h"
+#include "InterfaceEntry.h"
+#include "NodeOperations.h"
 
 
 simsignal_t WirelessMacBase::packetSentToLowerSignal = SIMSIGNAL_NULL;
@@ -41,6 +43,8 @@ void WirelessMacBase::initialize(int stage)
 
         // get a pointer to the NotificationBoard module
         nb = NotificationBoardAccess().get();
+        cModule * node = findContainingNode(this);
+        nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
 
         packetSentToLowerSignal = registerSignal("packetSentToLower");
         packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
@@ -49,9 +53,43 @@ void WirelessMacBase::initialize(int stage)
     }
 }
 
+bool WirelessMacBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_LINK_LAYER)
+            ; // TODO: registerInterface();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        // TODO:
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        // TODO:
+    }
+    else if (dynamic_cast<InterfaceUpOperation *>(operation)) {
+        // TODO:
+    }
+    else if (dynamic_cast<InterfaceDownOperation *>(operation)) {
+        // TODO:
+    }
+    return true;
+}
 
 void WirelessMacBase::handleMessage(cMessage *msg)
 {
+    bool isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+    bool isInterfaceUp = !interfaceEntry || interfaceEntry->getState() == InterfaceEntry::UP;
+    if (!isNodeUp || !isInterfaceUp)
+    {
+        if (!msg->arrivedOn("phys$i") || msg->isSelfMessage())  //FIXME remove 1st part -- it is not possible to ensure that no msg is sent by upper layer (race condition!!!)
+            throw cRuntimeError("Interface is turned off");
+        else {
+            EV << "Interface is turned off, dropping packet\n";
+            delete msg;
+            return;
+        }
+    }
+
     if (msg->isSelfMessage())
         handleSelfMsg(msg);
     else if (msg->getArrivalGateId()==upperLayerIn)

@@ -27,7 +27,11 @@
 #include "INETDefs.h"
 
 #include "NotifierConsts.h"
+#include "NodeStatus.h"
+#include "NodeOperations.h"
+#include "InterfaceOperations.h"
 
+class InterfaceEntry;
 class NotificationBoard;
 
 /**
@@ -35,7 +39,7 @@ class NotificationBoard;
  *
  * @author Daniel Willkomm, Andras Varga
  */
-class INET_API WirelessMacBase : public cSimpleModule
+class INET_API WirelessMacBase : public cSimpleModule, public ILifecycle
 {
   protected:
     /** @brief gate id*/
@@ -53,6 +57,12 @@ class INET_API WirelessMacBase : public cSimpleModule
 
     /** @brief Cached pointer to the NotificationBoard module*/
     NotificationBoard *nb;
+
+    InterfaceEntry *interfaceEntry;
+    NodeStatus *nodeStatus;
+
+  public:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     /** @brief Initialization of the module and some variables*/
