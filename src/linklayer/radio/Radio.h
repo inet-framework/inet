@@ -26,9 +26,8 @@
 #include "IReceptionModel.h"
 #include "SnrList.h"
 #include "ObstacleControl.h"
-#include "IPowerControl.h"
 #include "INoiseGenerator.h"
-
+#include "ILifecycle.h"
 
 /**
  * Abstract base class for radio modules. Radio modules deal with the
@@ -62,7 +61,7 @@
  * @author Juan-Carlos Maureira
  *
  */
-class INET_API Radio : public ChannelAccess, public IPowerControl
+class INET_API Radio : public ChannelAccess, public ILifecycle
 {
   protected:
     typedef std::map<double,double> SensitivityList; // Sensitivity list
@@ -71,6 +70,8 @@ class INET_API Radio : public ChannelAccess, public IPowerControl
   public:
     Radio();
     virtual ~Radio();
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     virtual void initialize(int stage);
@@ -138,23 +139,19 @@ class INET_API Radio : public ChannelAccess, public IPowerControl
      *  check if the packet must be processes
      */
     virtual bool processAirFrame(AirFrame *airframe);
+
     /*
      * Routines to connect or disconnect the transmission and reception  of packets
      */
-
-    virtual void disconnectTransceiver() {transceiverConnect = false;}
-    virtual void connectTransceiver() {transceiverConnect = true;}
-    virtual void disconnectReceiver();
+    virtual void connectTransceiver() { transceiverConnected = true; }
+    virtual void disconnectTransceiver() { transceiverConnected = false; }
     virtual void connectReceiver();
+    virtual void disconnectReceiver();
 
     virtual void registerBattery();
 
     virtual void updateDisplayString();
 
-    // Power Control methods
-    virtual void enablingInitialization();
-    virtual void disablingInitialization();
-    //
     double calcDistFreeSpace();
 
   protected:
@@ -254,8 +251,8 @@ class INET_API Radio : public ChannelAccess, public IPowerControl
     /*
      * this variable is used to disconnect the possibility of sent packets to the ChannelControl
      */
-    bool transceiverConnect;
-    bool receiverConnect;
+    bool transceiverConnected;
+    bool receiverConnected;
 
     // if true draw coverage circles
     bool drawCoverage;

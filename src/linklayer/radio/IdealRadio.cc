@@ -19,6 +19,8 @@
 
 
 #include "IdealRadio.h"
+#include "NodeOperations.h"
+#include "InterfaceOperations.h"
 
 
 #define MK_TRANSMISSION_OVER  1
@@ -276,15 +278,44 @@ void IdealRadio::handleLowerMsgEnd(IdealAirFrame *airframe)
     updateRadioState();
 }
 
-void IdealRadio::updateRadioState()
+bool IdealRadio::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
-    RadioState::State newState = isEnabled()
-            ? (inTransmit ? RadioState::TRANSMIT : ((concurrentReceives>0) ? RadioState::RECV : RadioState::IDLE))
-            : RadioState::SLEEP;
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
+            setRadioState(RadioState::IDLE);  //FIXME only if the interface is up, too
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
+            setRadioState(RadioState::OFF);
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_LOCAL)  // crash is immediate
+            setRadioState(RadioState::OFF);
+    }
+    else if (dynamic_cast<InterfaceUpOperation *>(operation)) {
+        if (stage == InterfaceUpOperation::STAGE_LOCAL)
+            setRadioState(RadioState::IDLE);  //FIXME only if the node is up, too
+    }
+    else if (dynamic_cast<InterfaceDownOperation *>(operation)) {
+        if (stage == InterfaceDownOperation::STAGE_LOCAL)
+            setRadioState(RadioState::OFF);
+    }
+    return true;
+
+}
+
+void IdealRadio::setRadioState(RadioState::State newState)
+{
     if (rs != newState)
     {
+        if (newState == RadioState::SLEEP || newState == RadioState::OFF)
+            cc->disableReception(myRadioRef);
+        else
+            cc->enableReception(myRadioRef);
+
         rs = newState;
-        if (rs == RadioState::SLEEP)
+        if (rs == RadioState::SLEEP || newState == RadioState::OFF)
         {
             // Clear the recvBuff
             for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
@@ -296,6 +327,14 @@ void IdealRadio::updateRadioState()
         }
         emit(radioStateSignal, newState);
     }
+}
+
+void IdealRadio::updateRadioState()
+{
+    RadioState::State newState = isEnabled()
+            ? (inTransmit ? RadioState::TRANSMIT : ((concurrentReceives>0) ? RadioState::RECV : RadioState::IDLE))
+            : RadioState::SLEEP;
+    setRadioState(newState);
 }
 
 void IdealRadio::updateDisplayString()
@@ -313,20 +352,7 @@ void IdealRadio::updateDisplayString()
     }
 }
 
-void IdealRadio::enablingInitialization()
-{
-    cc->enableReception(myRadioRef);
-    updateRadioState();
-}
-
-void IdealRadio::disablingInitialization()
-{
-    cc->disableReception(myRadioRef);
-    updateRadioState();
-}
-
 void IdealRadio::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     IdealChannelModelAccess::receiveSignal(source, signalID, obj);
 }
-

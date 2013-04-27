@@ -134,29 +134,21 @@ void InetSimpleBattery::registerWirelessDevice(int id, double mUsageRadioIdle, d
     }
 
     DeviceEntry *device = new DeviceEntry();
-    device->numAccts = 4;
-    device->accts = new double[4];
-    device->times = new simtime_t[4];
+    const int N = 5;  // number of radio states  TODO symbolic name!!!
+    device->numAccts = N;
+    device->accts = new double[N];
+    device->times = new simtime_t[N];
 
-    if (RadioState::IDLE>=4)
-        error("Battery and RadioState problem");
-    if (RadioState::RECV>=4)
-        error("Battery and RadioState problem");
-    if (RadioState::TRANSMIT>=4)
-        error("Battery and RadioState problem");
-    if (RadioState::SLEEP>=4)
-        error("Battery and RadioState problem");
+    ASSERT(RadioState::IDLE<N && RadioState::RECV<N && RadioState::TRANSMIT<N && RadioState::SLEEP<N && RadioState::OFF<N);
     device->radioUsageCurrent[RadioState::IDLE] = mUsageRadioIdle;
     device->radioUsageCurrent[RadioState::RECV] = mUsageRadioRecv;
     device->radioUsageCurrent[RadioState::TRANSMIT] = mUsageRadioSend;
     device->radioUsageCurrent[RadioState::SLEEP] = mUsageRadioSleep;
+    device->radioUsageCurrent[RadioState::OFF] = 0;
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < N; i++)
     {
         device->accts[i] = 0.0;
-    }
-    for (int i = 0; i < 4; i++)
-    {
         device->times[i] = 0.0;
     }
 

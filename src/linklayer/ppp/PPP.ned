@@ -53,7 +53,7 @@ simple PPP
 
         @signal[txState](type=long);    // 1:transmit, 0:idle
         @signal[rxPkOk](type=PPPFrame);
-        @signal[dropPkIfaceDown](type=PPPFrame);
+        @signal[dropPkIfaceDown](type=PPPFrame);  //TODO currently both upper and lower; todo separate them 
         @signal[dropPkBitError](type=PPPFrame);
         @signal[packetSentToLower](type=PPPFrame);
         @signal[packetReceivedFromLower](type=PPPFrame);

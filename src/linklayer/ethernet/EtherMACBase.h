@@ -24,6 +24,8 @@
 
 #include "IPassiveQueue.h"
 #include "MACAddress.h"
+#include "ILifecycle.h"
+#include "NodeStatus.h"
 
 // Forward declarations:
 class EtherFrame;
@@ -33,7 +35,7 @@ class InterfaceEntry;
 /**
  * Base class for Ethernet MAC implementations.
  */
-class INET_API EtherMACBase : public cSimpleModule, public cListener
+class INET_API EtherMACBase : public cSimpleModule, public cListener, public ILifecycle
 {
   protected:
     enum MACTransmitState
@@ -149,6 +151,8 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
     int pauseUnitsRequested;        // requested pause duration, or zero -- examined at endTx
     EtherFrame *curTxFrame;         // frame being transmitted
 
+    NodeStatus *nodeStatus;
+
     // self messages
     cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;
 
@@ -192,6 +196,8 @@ class INET_API EtherMACBase : public cSimpleModule, public cListener
 
     double getTxRate() { return curEtherDescr->txrate; }
     bool isActive() { return connected && !disabled; }
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     //  initialization
