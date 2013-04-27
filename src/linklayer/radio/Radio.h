@@ -53,13 +53,6 @@
  * and IRadioModel classes.
  *
  * @author Andras Varga, Levente Meszaros
- *
- * Power Control Interface allows to turn on/off the radio interface
- * PowerControlManager helps to perform these tasks, however, user
- * can implemenent its own manager to turn on/off an interface
- *
- * @author Juan-Carlos Maureira
- *
  */
 class INET_API Radio : public ChannelAccess, public ILifecycle
 {

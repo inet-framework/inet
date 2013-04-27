@@ -11,17 +11,18 @@
 //
 package inet.nodes.mpls;
 
-import inet.nodes.inet.NetworkLayer;
-import inet.networklayer.ted.TED;
-import inet.networklayer.ted.LinkStateRouting;
-import inet.networklayer.rsvp_te.SimpleClassifier;
-import inet.networklayer.rsvp_te.RSVP;
-import inet.networklayer.mpls.MPLS;
-import inet.networklayer.mpls.LIBTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.IWiredNic;
 import inet.base.NotificationBoard;
+import inet.linklayer.IWiredNic;
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.mpls.LIBTable;
+import inet.networklayer.mpls.MPLS;
+import inet.networklayer.rsvp_te.RSVP;
+import inet.networklayer.rsvp_te.SimpleClassifier;
+import inet.networklayer.ted.LinkStateRouting;
+import inet.networklayer.ted.TED;
+import inet.nodes.inet.NetworkLayer;
+import inet.status.NodeStatus;
 
 
 //
@@ -31,13 +32,21 @@ import inet.base.NotificationBoard;
 // itself. RSVP uses transport protocols to route packets. ~TED is used
 // to calculate shortest paths.
 //
-module RSVP_LSR extends RSVP_ROUTER_BASE
+module RSVP_LSR
 {
     parameters:
         @node();
         @labels(node,mpls-node);
         @display("i=abstract/router");
+        bool hasStatus = default(false);
+        string peers;
+        string routerId = default("auto");
+    gates:
+        inout pppg[] @labels(PPPFrame-conn);
     submodules:
+        status: NodeStatus if hasStatus {
+            @display("p=50,50");
+        }
         notificationBoard: NotificationBoard {
             parameters:
                 @display("p=74,57");

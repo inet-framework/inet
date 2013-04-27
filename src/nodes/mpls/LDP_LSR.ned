@@ -11,18 +11,19 @@
 //
 package inet.nodes.mpls;
 
-import inet.transport.IUDP;
-import inet.transport.ITCP;
-import inet.nodes.inet.NetworkLayer;
-import inet.networklayer.ted.TED;
-import inet.networklayer.ted.LinkStateRouting;
-import inet.networklayer.mpls.MPLS;
-import inet.networklayer.mpls.LIBTable;
-import inet.networklayer.ldp.LDP;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.IWiredNic;
 import inet.base.NotificationBoard;
+import inet.linklayer.IWiredNic;
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.ldp.LDP;
+import inet.networklayer.mpls.LIBTable;
+import inet.networklayer.mpls.MPLS;
+import inet.networklayer.ted.LinkStateRouting;
+import inet.networklayer.ted.TED;
+import inet.nodes.inet.NetworkLayer;
+import inet.status.NodeStatus;
+import inet.transport.ITCP;
+import inet.transport.IUDP;
 
 
 //
@@ -30,11 +31,24 @@ import inet.base.NotificationBoard;
 //
 // LDP Capable Routers are the main building blocks for an LDP MPLS network.
 //
-module LDP_LSR extends LDP_ROUTER_BASE
+module LDP_LSR
 {
     parameters:
+        @node();
+        @labels(node);
         @display("i=abstract/router");
+        bool hasStatus = default(false);
+        double holdTime @unit("s") = default(15s);
+        double helloInterval @unit("s") = default(5s);
+        string peers;
+        string routerId = default("auto");
+        string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC","TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
+    gates:
+        inout pppg[] @labels(PPPFrame-conn);
     submodules:
+        status: NodeStatus if hasStatus {
+            @display("p=50,50");
+        }
         notificationBoard: NotificationBoard {
             parameters:
                 @display("p=70,60");
@@ -47,7 +61,6 @@ module LDP_LSR extends LDP_ROUTER_BASE
             parameters:
                 IPForward = true;
                 routerId = routerId;
-                routingFile = routingFile;
                 @display("p=70,240");
         }
         ldp: LDP {
