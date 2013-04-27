@@ -1,0 +1,4 @@
+This example demonstrates how the LifecycleController can be used to
+turn on/off nodes in a network. The configured scenario turns on/off a
+router and one of the clients while a ping application sends packets
+continuously from both clients to the server.
