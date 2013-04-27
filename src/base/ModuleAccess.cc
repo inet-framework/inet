@@ -18,15 +18,15 @@
 
 #include "ModuleAccess.h"
 
-inline bool _isNode(cModule *mod)
+inline bool _isNetworkNode(cModule *mod)
 {
     cProperties *props = mod->getProperties();
     return props && props->getAsBool("node");
 }
 
-bool isNode(cModule *mod)
+bool isNetworkNode(cModule *mod)
 {
-    return (mod != NULL) ? _isNode(mod) : false;
+    return (mod != NULL) ? _isNetworkNode(mod) : false;
 }
 
 static cModule *findSubmodRecursive(cModule *curmod, const char *name)
@@ -57,7 +57,7 @@ cModule *findModuleWhereverInNode(const char *name, cModule *from)
     for (cModule *curmod=from; curmod; curmod=curmod->getParentModule())
     {
         mod = findSubmodRecursive(curmod, name);
-        if (mod || _isNode(curmod))
+        if (mod || _isNetworkNode(curmod))
             break;
     }
     return mod;
@@ -75,7 +75,7 @@ cModule *findContainingNode(cModule *from)
 {
     for (cModule *curmod=from; curmod; curmod=curmod->getParentModule())
     {
-        if (_isNode(curmod))
+        if (_isNetworkNode(curmod))
             return curmod;
     }
     return NULL;
@@ -86,7 +86,7 @@ cModule *findModuleUnderContainingNode(cModule *from)
     cModule *prevmod = NULL;
     for (cModule *curmod=from; curmod; curmod=curmod->getParentModule())
     {
-        if (_isNode(curmod))
+        if (_isNetworkNode(curmod))
             return prevmod;
         prevmod = curmod;
     }
