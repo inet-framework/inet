@@ -197,11 +197,15 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
         };
 
     protected:
-        // cached parameter values; all other state is local to initialize()
+        // cached parameter values
         bool addSubnetRoutesParameter;
         bool addDefaultRoutesParameter;
         bool optimizeRoutesParameter;
         bool assignDisjunctSubnetAddressesParameter;
+
+    public:
+        virtual void assignAddress(InterfaceEntry *interfaceEntry);
+        virtual void addStaticRoutes(IRoutingTable *routingTable);
 
     protected:
         virtual int numInitStages() const  { return 3; }
@@ -233,6 +237,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
          * May add default routes and subnet routes if possible and requested.
          */
         virtual void addStaticRoutes(IPv4Topology& topology);
+        virtual void addStaticRoutes(IPv4Topology& topology, Node * sourceNode);
 
         /**
          * Destructively optimizes the given IPv4 routes by merging some of them.
@@ -289,7 +294,6 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
         void addOriginalRouteInfos(RoutingTableInfo& routingTableInfo, int begin, int end, const std::vector<RouteInfo *>& originalRouteInfos);
         bool tryToMergeTwoRoutes(RoutingTableInfo& routingTableInfo, int i, int j, RouteInfo *routeInfoI, RouteInfo *routeInfoJ);
         bool tryToMergeAnyTwoRoutes(RoutingTableInfo& routingTableInfo);
-
 };
 
 #endif

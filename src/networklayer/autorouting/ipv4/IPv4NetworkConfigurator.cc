@@ -108,6 +108,33 @@ void IPv4NetworkConfigurator::initialize(int stage)
     }
 }
 
+void IPv4NetworkConfigurator::assignAddress(InterfaceEntry *interfaceEntry)
+{
+    IPv4Topology topology;
+    extractTopology(topology);
+    readAddressConfiguration(par("config").xmlValue(), topology);
+    for (int i = 0; i < topology.getNumNodes(); i++) {
+        Node *node = (Node *)topology.getNode(i);
+        for (int i = 0; i < (int)node->interfaceInfos.size(); i++) {
+            InterfaceInfo *interfaceInfo = node->interfaceInfos.at(i);
+            if (interfaceInfo->interfaceEntry != interfaceEntry)
+                interfaceInfo->configure = false;
+        }
+    }
+    assignAddresses(topology);
+}
+
+void IPv4NetworkConfigurator::addStaticRoutes(IRoutingTable *routingTable)
+{
+    IPv4Topology topology;
+    extractTopology(topology);
+    for (int i = 0; i < topology.getNumNodes(); i++) {
+        Node *node = (Node *)topology.getNode(i);
+        if (node->routingTable == routingTable)
+            addStaticRoutes(topology, node);
+    }
+}
+
 #undef T
 
 void IPv4NetworkConfigurator::extractTopology(IPv4Topology& topology)
@@ -755,6 +782,9 @@ void IPv4NetworkConfigurator::assignAddresses(IPv4Topology& topology)
                     interfaceData->setNetmask(IPv4Address(completeNetmask));
                 }
                 compatibleInterface->address = completeAddress;
+                compatibleInterface->addressSpecifiedBits = 0xFFFFFFFF;
+                compatibleInterface->netmask = completeNetmask;
+                compatibleInterface->netmaskSpecifiedBits = 0xFFFFFFFF;
                 EV_DEBUG << "Selected interface address: " << IPv4Address(completeAddress) << endl;
 
                 // remove configured interface
@@ -1615,153 +1645,135 @@ bool IPv4NetworkConfigurator::containsRoute(const std::vector<IPv4Route *>& rout
 
 void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
 {
-    long optimizeRoutesDuration = 0;
-    long addDefaultRoutesDuration = 0;
-    long calculateShortestPathsDuration = 0;
-
     // TODO: it should be configurable (via xml?) which nodes need static routes filled in automatically
     // add static routes for all routing tables
     for (int i = 0; i < topology.getNumNodes(); i++)
+        addStaticRoutes(topology, (Node *)topology.getNode(i));
+}
+
+void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology, Node * sourceNode)
+{
+    if (!sourceNode->interfaceTable)
+        return;
+    IRoutingTable *sourceRoutingTable = sourceNode->routingTable;
+    if (!sourceRoutingTable)
+        return;
+
+    // calculate shortest paths from everywhere to sourceNode
+    // we are going to use the paths in reverse direction (assuming all links are bidirectional)
+    topology.calculateUnweightedSingleShortestPathsTo(sourceNode);
+
+    // check if adding the default routes would be ok (this is an optimization)
+    if (addDefaultRoutesParameter && sourceNode->interfaceInfos.size() == 1 && sourceNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo)
     {
-        // extract source
-        Node *sourceNode = (Node *)topology.getNode(i);
-        if (!sourceNode->interfaceTable)
-            continue;
-        IRoutingTable *sourceRoutingTable = sourceNode->routingTable;
-        if (!sourceRoutingTable)
-            continue;
-        //IInterfaceTable *sourceInterfaceTable = sourceNode->interfaceTable;
+        InterfaceInfo *sourceInterfaceInfo = sourceNode->interfaceInfos[0];
+        InterfaceEntry *sourceInterfaceEntry = sourceInterfaceInfo->interfaceEntry;
+        InterfaceInfo *gatewayInterfaceInfo = sourceInterfaceInfo->linkInfo->gatewayInterfaceInfo;
+        InterfaceEntry *gatewayInterfaceEntry = gatewayInterfaceInfo->interfaceEntry;
 
-        // calculate shortest paths from everywhere to sourceNode
-        // we are going to use the paths in reverse direction (assuming all links are bidirectional)
-        long begin = clock();
-        topology.calculateUnweightedSingleShortestPathsTo(sourceNode);
-        calculateShortestPathsDuration += clock() - begin;
+        // add a network route for the local network using ARP
+        IPv4Route *route = new IPv4Route();
+        IPv4InterfaceData *ipv4InterfaceData = sourceInterfaceEntry->ipv4Data();
+        IPv4Address address = ipv4InterfaceData->getIPAddress();
+        IPv4Address netmask = ipv4InterfaceData->getNetmask();
+        route->setDestination(IPv4Address(address.getInt() & netmask.getInt()));
+        route->setGateway(IPv4Address::UNSPECIFIED_ADDRESS);
+        route->setNetmask(netmask);
+        route->setInterface(sourceInterfaceEntry);
+        route->setSource(IPv4Route::MANUAL);
+        sourceRoutingTable->addRoute(route);
 
-        // check if adding the default routes would be ok (this is an optimization)
-        if (addDefaultRoutesParameter && sourceNode->interfaceInfos.size() == 1 && sourceNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo)
+        // add a default route towards the only one gateway
+        route = new IPv4Route();
+        IPv4Address gateway = gatewayInterfaceEntry->ipv4Data()->getIPAddress();
+        route->setDestination(IPv4Address::UNSPECIFIED_ADDRESS);
+        route->setNetmask(IPv4Address::UNSPECIFIED_ADDRESS);
+        route->setGateway(gateway);
+        route->setInterface(sourceInterfaceEntry);
+        route->setSource(IPv4Route::MANUAL);
+        sourceRoutingTable->addRoute(route);
+
+        // skip building and optimizing the whole routing table
+        EV_DEBUG << "Adding default routes to " << sourceNode->getModule()->getFullPath() << ", node has only one (non-loopback) interface\n";
+    }
+    else
+    {
+        std::vector<IPv4Route *> sourceRoutes;
+
+        // add a route to all destinations in the network
+        for (int j = 0; j < topology.getNumNodes(); j++)
         {
-            begin = clock();
-            InterfaceInfo *sourceInterfaceInfo = sourceNode->interfaceInfos[0];
-            InterfaceEntry *sourceInterfaceEntry = sourceInterfaceInfo->interfaceEntry;
-            InterfaceInfo *gatewayInterfaceInfo = sourceInterfaceInfo->linkInfo->gatewayInterfaceInfo;
-            InterfaceEntry *gatewayInterfaceEntry = gatewayInterfaceInfo->interfaceEntry;
+            // extract destination
+            Node *destinationNode = (Node *)topology.getNode(j);
+            if (sourceNode == destinationNode)
+                continue;
+            if (destinationNode->getNumPaths() == 0)
+                continue;
+            if (!destinationNode->interfaceTable)
+                continue;
+            //int destinationGateId = destinationNode->getPath(0)->getLocalGateId();
+            IInterfaceTable *destinationInterfaceTable = destinationNode->interfaceTable;
 
-            // add a network route for the local network using ARP
-            IPv4Route *route = new IPv4Route();
-            IPv4InterfaceData *ipv4InterfaceData = sourceInterfaceEntry->ipv4Data();
-            IPv4Address address = ipv4InterfaceData->getIPAddress();
-            IPv4Address netmask = ipv4InterfaceData->getNetmask();
-            route->setDestination(IPv4Address(address.getInt() & netmask.getInt()));
-            route->setGateway(IPv4Address::UNSPECIFIED_ADDRESS);
-            route->setNetmask(netmask);
-            route->setInterface(sourceInterfaceEntry);
-            route->setSource(IPv4Route::MANUAL);
-            sourceRoutingTable->addRoute(route);
-
-            // add a default route towards the only one gateway
-            route = new IPv4Route();
-            IPv4Address gateway = gatewayInterfaceEntry->ipv4Data()->getIPAddress();
-            route->setDestination(IPv4Address::UNSPECIFIED_ADDRESS);
-            route->setNetmask(IPv4Address::UNSPECIFIED_ADDRESS);
-            route->setGateway(gateway);
-            route->setInterface(sourceInterfaceEntry);
-            route->setSource(IPv4Route::MANUAL);
-            sourceRoutingTable->addRoute(route);
-
-            // skip building and optimizing the whole routing table
-            EV_DEBUG << "Adding default routes to " << sourceNode->getModule()->getFullPath() << ", node has only one (non-loopback) interface\n";
-            addDefaultRoutesDuration += clock() - begin;
-        }
-        else
-        {
-            std::vector<IPv4Route *> sourceRoutes;
-
-            // add a route to all destinations in the network
-            for (int j = 0; j < topology.getNumNodes(); j++)
+            // determine next hop interface
+            // find next hop interface (the last IP interface on the path that is not in the source node)
+            Node *node = destinationNode;
+            Link *link = NULL;
+            InterfaceEntry *nextHopInterfaceEntry = NULL;
+            while (node != sourceNode)
             {
-                if (i == j)
-                    continue;
+                link = (Link *)node->getPath(0);
+                if (node->interfaceTable && node != sourceNode && link->sourceInterfaceInfo)
+                    nextHopInterfaceEntry = link->sourceInterfaceInfo->interfaceEntry;
+                node = (Node *)node->getPath(0)->getRemoteNode();
+            }
 
-                // extract destination
-                Node *destinationNode = (Node *)topology.getNode(j);
-                if (destinationNode->getNumPaths() == 0)
-                    continue;
-                if (!destinationNode->interfaceTable)
-                    continue;
-                //int destinationGateId = destinationNode->getPath(0)->getLocalGateId();
-                IInterfaceTable *destinationInterfaceTable = destinationNode->interfaceTable;
+            // determine source interface
+            InterfaceEntry *sourceInterfaceEntry = link->destinationInterfaceInfo->interfaceEntry;
 
-                // determine next hop interface
-                // find next hop interface (the last IP interface on the path that is not in the source node)
-                Node *node = destinationNode;
-                Link *link = NULL;
-                InterfaceEntry *nextHopInterfaceEntry = NULL;
-                while (node != sourceNode)
+            // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
+            for (int j = 0; j < destinationInterfaceTable->getNumInterfaces(); j++)
+            {
+                InterfaceEntry *destinationInterfaceEntry = destinationInterfaceTable->getInterface(j);
+                if (!destinationInterfaceEntry->ipv4Data())
+                    continue;
+                IPv4Address destinationAddress = destinationInterfaceEntry->ipv4Data()->getIPAddress();
+                IPv4Address destinationNetmask = destinationInterfaceEntry->ipv4Data()->getNetmask();
+                if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->ipv4Data())
                 {
-                    link = (Link *)node->getPath(0);
-                    if (node->interfaceTable && node != sourceNode && link->sourceInterfaceInfo)
-                        nextHopInterfaceEntry = link->sourceInterfaceInfo->interfaceEntry;
-                    node = (Node *)node->getPath(0)->getRemoteNode();
-                }
-
-                // determine source interface
-                InterfaceEntry *sourceInterfaceEntry = link->destinationInterfaceInfo->interfaceEntry;
-
-                // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
-                for (int j = 0; j < destinationInterfaceTable->getNumInterfaces(); j++)
-                {
-                    InterfaceEntry *destinationInterfaceEntry = destinationInterfaceTable->getInterface(j);
-                    if (!destinationInterfaceEntry->ipv4Data())
-                        continue;
-                    IPv4Address destinationAddress = destinationInterfaceEntry->ipv4Data()->getIPAddress();
-                    IPv4Address destinationNetmask = destinationInterfaceEntry->ipv4Data()->getNetmask();
-                    if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->ipv4Data())
+                    IPv4Route *route = new IPv4Route();
+                    IPv4Address gatewayAddress = nextHopInterfaceEntry->ipv4Data()->getIPAddress();
+                    if (addSubnetRoutesParameter && destinationNode->interfaceInfos.size() == 1 && destinationNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo)
                     {
-                        IPv4Route *route = new IPv4Route();
-                        IPv4Address gatewayAddress = nextHopInterfaceEntry->ipv4Data()->getIPAddress();
-                        if (addSubnetRoutesParameter && destinationNode->interfaceInfos.size() == 1 && destinationNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo)
-                        {
-                            route->setDestination(destinationAddress.doAnd(destinationNetmask));
-                            route->setNetmask(destinationNetmask);
-                        }
-                        else
-                        {
-                            route->setDestination(destinationAddress);
-                            route->setNetmask(IPv4Address::ALLONES_ADDRESS);
-                        }
-                        route->setInterface(sourceInterfaceEntry);
-                        if (gatewayAddress != destinationAddress)
-                            route->setGateway(gatewayAddress);
-                        route->setSource(IPv4Route::MANUAL);
-                        if (containsRoute(sourceRoutes, route))
-                            delete route;
-                        else {
-                            sourceRoutes.push_back(route);
-                            EV_DEBUG << "Adding route " << sourceInterfaceEntry->getFullPath() << " -> " << destinationInterfaceEntry->getFullPath() << " as " << route->info() << endl;
-                        }
+                        route->setDestination(destinationAddress.doAnd(destinationNetmask));
+                        route->setNetmask(destinationNetmask);
+                    }
+                    else
+                    {
+                        route->setDestination(destinationAddress);
+                        route->setNetmask(IPv4Address::ALLONES_ADDRESS);
+                    }
+                    route->setInterface(sourceInterfaceEntry);
+                    if (gatewayAddress != destinationAddress)
+                        route->setGateway(gatewayAddress);
+                    route->setSource(IPv4Route::MANUAL);
+                    if (containsRoute(sourceRoutes, route))
+                        delete route;
+                    else {
+                        sourceRoutes.push_back(route);
+                        EV_DEBUG << "Adding route " << sourceInterfaceEntry->getFullPath() << " -> " << destinationInterfaceEntry->getFullPath() << " as " << route->info() << endl;
                     }
                 }
             }
-
-            // optimize routing table to save memory and increase lookup performance
-            if (optimizeRoutesParameter)
-            {
-                long begin = clock();
-                optimizeRoutes(sourceRoutes);
-                optimizeRoutesDuration += clock() - begin;
-            }
-
-            // copy into routing table
-            for (int i = 0; i < (int)sourceRoutes.size(); i++)
-                sourceRoutingTable->addRoute(sourceRoutes[i]);
         }
-    }
 
-    // print some timing information
-    printTimeSpentUsingDuration("calculateShortestPaths", calculateShortestPathsDuration);
-    printTimeSpentUsingDuration("addDefaultRoutes", addDefaultRoutesDuration);
-    printTimeSpentUsingDuration("optimizeRoutes", optimizeRoutesDuration);
+        // optimize routing table to save memory and increase lookup performance
+        if (optimizeRoutesParameter)
+            optimizeRoutes(sourceRoutes);
+
+        // copy into routing table
+        for (int i = 0; i < (int)sourceRoutes.size(); i++)
+            sourceRoutingTable->addRoute(sourceRoutes[i]);
+    }
 }
 
 /**

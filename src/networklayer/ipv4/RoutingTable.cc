@@ -28,10 +28,11 @@
 #include "InterfaceTableAccess.h"
 #include "IPv4InterfaceData.h"
 #include "IPv4Route.h"
+#include "IPv4NetworkConfigurator.h"
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 #include "RoutingTableParser.h"
-
+#include "NodeOperations.h"
 
 Define_Module(RoutingTable);
 
@@ -362,14 +363,15 @@ InterfaceEntry *RoutingTable::getInterfaceByAddress(const IPv4Address& addr) con
 void RoutingTable::configureLoopbackForIPv4()
 {
     InterfaceEntry *ie = ift->getFirstLoopbackInterface();
-
-    // add IPv4 info. Set 127.0.0.1/8 as address by default --
-    // we may reconfigure later it to be the routerId
-    IPv4InterfaceData *d = new IPv4InterfaceData();
-    d->setIPAddress(IPv4Address::LOOPBACK_ADDRESS);
-    d->setNetmask(IPv4Address::LOOPBACK_NETMASK);
-    d->setMetric(1);
-    ie->setIPv4Data(d);
+    if (ie) {
+        // add IPv4 info. Set 127.0.0.1/8 as address by default --
+        // we may reconfigure later it to be the routerId
+        IPv4InterfaceData *d = new IPv4InterfaceData();
+        d->setIPAddress(IPv4Address::LOOPBACK_ADDRESS);
+        d->setNetmask(IPv4Address::LOOPBACK_NETMASK);
+        d->setMetric(1);
+        ie->setIPv4Data(d);
+    }
 }
 
 //---
@@ -839,7 +841,7 @@ void RoutingTable::updateNetmaskRoutes()
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->ipv4Data()->getNetmask()!=IPv4Address::ALLONES_ADDRESS)
+        if (ie->ipv4Data() && ie->ipv4Data()->getNetmask()!=IPv4Address::ALLONES_ADDRESS)
         {
             IPv4Route *route = new IPv4Route();
             route->setSource(IPv4Route::IFACENETMASK);
@@ -859,3 +861,41 @@ void RoutingTable::updateNetmaskRoutes()
     updateDisplayString();
 }
 
+bool RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_NETWORK_LAYER) {
+            // KLUDGE: TODO: move or what?
+            IPv4NetworkConfigurator *configurator = dynamic_cast<IPv4NetworkConfigurator *>(findModuleWherever("configurator", simulation.getSystemModule()));
+            for (int i=0; i<ift->getNumInterfaces(); ++i) {
+                InterfaceEntry *ie = ift->getInterface(i);
+                configureInterfaceForIPv4(ie);
+                // KLUDGE: TODO: move or what?
+                if (configurator)
+                    configurator->assignAddress(ie);
+            }
+            configureLoopbackForIPv4();
+            RoutingTableParser parser(ift, this);
+            const char *filename = par("routingFile");
+            if (*filename && parser.readRoutingTableFromFile(filename)==-1)
+                error("Error reading routing table file %s", filename);
+            configureRouterId();
+            // KLUDGE: TODO: move or what?
+            if (configurator)
+                configurator->addStaticRoutes(this);
+            updateNetmaskRoutes();
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_NETWORK_LAYER)
+            while (!routes.empty())
+                removeRoute(routes[0]);
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            while (!routes.empty())
+                removeRoute(routes[0]);
+    }
+    return true;
+}

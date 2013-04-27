@@ -84,7 +84,7 @@ int Batman::add_del_interface_rules(int8_t rule_action)
             continue;
         if (ifr->isLoopback())      //FIXME What would be the correct conditions here? The isLoopback() used below.
             continue;
-        if (ifr->isDown())
+        if (!ifr->isUp())
             continue;
 
         ManetAddress addr(ifr->ipv4Data()->getIPAddress());
@@ -133,12 +133,12 @@ void Batman::check_active_inactive_interfaces(void)
     /* all available interfaces are deactive */
     for (unsigned int i=0; i<if_list.size(); i++){
         BatmanIf* batman_if = if_list[i];
-        if ((batman_if->if_active) && (batman_if->dev->isDown()))
+        if ((batman_if->if_active) && (!batman_if->dev->isUp()))
         {
             deactivate_interface(batman_if);
             active_ifs--;
         }
-        else if ((!batman_if->if_active) && (!batman_if->dev->isDown()))
+        else if ((!batman_if->if_active) && (batman_if->dev->isUp()))
         {
             activate_interface(batman_if);
             active_ifs++;
@@ -156,7 +156,7 @@ void Batman::check_inactive_interfaces(void)
     for (unsigned int i=0; i<if_list.size(); i++){
         BatmanIf* batman_if = if_list[i];
 
-        if ((!batman_if->if_active) && (!batman_if->dev->isDown()))
+        if ((!batman_if->if_active) && (batman_if->dev->isUp()))
         {
             activate_interface(batman_if);
             active_ifs++;
@@ -172,7 +172,7 @@ void Batman::check_active_interfaces(void)
     for (unsigned int i=0; i<if_list.size(); i++)
     {
         BatmanIf* batman_if = if_list[i];
-        if ((batman_if->if_active) && (batman_if->dev->isDown()))
+        if ((batman_if->if_active) && (!batman_if->dev->isUp()))
         {
             deactivate_interface(batman_if);
             active_ifs--;

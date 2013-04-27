@@ -112,7 +112,7 @@ void PPP::initialize(int stage)
 
         // register our interface entry in IInterfaceTable
         interfaceEntry = registerInterface(datarate);
-        interfaceEntry->setDown(!connected);
+        interfaceEntry->setState(connected ? InterfaceEntry::UP : InterfaceEntry::DOWN);
 
         // prepare to fire notifications
         nb = NotificationBoardAccess().get();
@@ -264,7 +264,7 @@ void PPP::refreshOutGateConnection(bool connected)
     }
 
     // set interface state
-    interfaceEntry->setDown(!connected);
+    interfaceEntry->setState(connected ? InterfaceEntry::UP : InterfaceEntry::DOWN);
 
     // data rate
     interfaceEntry->setDatarate(datarate);

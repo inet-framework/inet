@@ -488,7 +488,7 @@ void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
         dataratesDiffer = false;
         if (!outTrChannel)
             transmissionChannel = NULL;
-        interfaceEntry->setDown(true);
+        interfaceEntry->setState(InterfaceEntry::DOWN);
         interfaceEntry->setDatarate(0);
     }
     else
@@ -512,7 +512,7 @@ void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
             if (txRate == etherDescrs[i].txrate)
             {
                 curEtherDescr = &(etherDescrs[i]);
-                interfaceEntry->setDown(false);
+                interfaceEntry->setState(InterfaceEntry::UP);
                 interfaceEntry->setDatarate(txRate);
                 return;
             }

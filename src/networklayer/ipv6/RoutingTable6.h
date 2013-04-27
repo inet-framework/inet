@@ -24,6 +24,7 @@
 
 #include "IPv6Address.h"
 #include "NotificationBoard.h"
+#include "ILifecycle.h"
 
 class IInterfaceTable;
 class InterfaceEntry;
@@ -100,7 +101,7 @@ class INET_API IPv6Route : public cObject
  * be read and modified during simulation, typically by routing protocol
  * implementations.
  */
-class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
+class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable, public ILifecycle
 {
   protected:
     IInterfaceTable *ift; // cached pointer
@@ -388,6 +389,11 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      */
     bool isOnLinkAddress(const IPv6Address& address); // update 11.9.07 - CB
 #endif /* WITH_xMIPv6 */
+
+    /**
+     * ILifecycle method
+     */
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
 #endif
