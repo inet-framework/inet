@@ -78,6 +78,8 @@ class INET_API InterfaceProtocolData : public cObject
 class INET_API InterfaceEntry : public cNamedObject
 {
     friend class InterfaceProtocolData; // to call protocolDataChanged()
+  public:
+    enum State {UP, DOWN, GOING_UP, GOING_DOWN};
   protected:
     IInterfaceTable *ownerp; ///< IInterfaceTable that contains this interface, or NULL
     cModule *interfaceModule;  ///< interface module, or NULL
@@ -86,7 +88,8 @@ class INET_API InterfaceEntry : public cNamedObject
     int nodeOutputGateId; ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
     int nodeInputGateId;  ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
     int mtu;              ///< Maximum Transmission Unit (e.g. 1500 on Ethernet)
-    bool down;            ///< current state (up or down)
+    State state;          ///< requested interface state, similar to Linux ifup/ifdown
+    bool carrier;         ///< current state (up/down) of the physical layer, e.g. Ethernet cable
     bool broadcast;       ///< interface supports broadcast
     bool multicast;       ///< interface supports multicast
     bool pointToPoint;    ///< interface is point-to-point link
@@ -129,6 +132,15 @@ class INET_API InterfaceEntry : public cNamedObject
      */
     IInterfaceTable *getInterfaceTable() const {return ownerp;}
 
+    /**
+     * Returns the requested state of this interface.
+     */
+    State getState() const            {return state;}
+    /**
+     * Returns the combined state of the carrier and the interface requested state.
+     */
+    bool isUp() const                 {return getState()==UP && hasCarrier();}
+
     /** @name Field getters. Note they are non-virtual and inline, for performance reasons. */
     //@{
     int getInterfaceId() const        {return interfaceId;}
@@ -137,7 +149,7 @@ class INET_API InterfaceEntry : public cNamedObject
     int getNodeOutputGateId() const   {return nodeOutputGateId;}
     int getNodeInputGateId() const    {return nodeInputGateId;}
     int getMTU() const                {return mtu;}
-    bool isDown() const               {return down;}
+    bool hasCarrier() const           {return carrier;}
     bool isBroadcast() const          {return broadcast;}
     bool isMulticast() const          {return multicast;}
     bool isPointToPoint() const       {return pointToPoint;}
@@ -154,7 +166,8 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual void setNodeOutputGateId(int i) {nodeOutputGateId = i; configChanged();}
     virtual void setNodeInputGateId(int i)  {nodeInputGateId = i; configChanged();}
     virtual void setMtu(int m)           {mtu = m; configChanged();}
-    virtual void setDown(bool b)         {down = b; stateChanged();}
+    virtual void setState(State s)       {state = s; stateChanged();}
+    virtual void setCarrier(bool b)      {carrier = b; stateChanged();}
     virtual void setBroadcast(bool b)    {broadcast = b; configChanged();}
     virtual void setMulticast(bool b)    {multicast = b; configChanged();}
     virtual void setPointToPoint(bool b) {pointToPoint = b; configChanged();}

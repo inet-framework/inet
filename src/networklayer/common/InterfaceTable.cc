@@ -25,6 +25,9 @@
 
 #include "InterfaceTable.h"
 #include "NotifierConsts.h"
+#include "NodeStatus.h"
+#include "NodeOperations.h"
+#include "InterfaceOperations.h"
 
 #ifdef WITH_IPv4
 #include "IPv4InterfaceData.h"
@@ -65,19 +68,24 @@ void InterfaceTable::initialize(int stage)
     {
         // get a pointer to the NotificationBoard module
         nb = NotificationBoardAccess().get();
-
-        // register a loopback interface
-        InterfaceEntry *ie = new InterfaceEntry(NULL);
-        ie->setName("lo0");
-        ie->setMtu(3924);
-        ie->setLoopback(true);
-        addInterface(ie);
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)
+            registerLoopbackInterface();
     }
     else if (stage==1)
     {
         WATCH_PTRVECTOR(idToInterface);
         updateDisplayString();
     }
+}
+
+void InterfaceTable::registerLoopbackInterface()
+{
+    InterfaceEntry *ie = new InterfaceEntry(NULL);
+    ie->setName("lo0");
+    ie->setMtu(3924);
+    ie->setLoopback(true);
+    addInterface(ie);
 }
 
 void InterfaceTable::updateDisplayString()
@@ -368,3 +376,45 @@ InterfaceEntry *InterfaceTable::getFirstMulticastInterface()
     return NULL;
 }
 
+bool InterfaceTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<InterfaceDownOperation *>(operation))
+    {
+        InterfaceEntry *ie = dynamic_cast<InterfaceDownOperation *>(operation)->getInterface();
+        switch (stage) {
+            case InterfaceDownOperation::STAGE_LOCAL:
+                ASSERT(ie->getInterfaceTable()==this);
+                ASSERT(ie->getState()==InterfaceEntry::UP);
+                ie->setState(InterfaceEntry::GOING_DOWN);
+                break;
+            case InterfaceDownOperation::STAGE_LAST:
+                ASSERT(ie->getInterfaceTable()==this);
+                ASSERT(ie->getState() == InterfaceEntry::GOING_DOWN);
+                ie->setState(InterfaceEntry::DOWN);
+                //TODO ikon
+                break;
+        }
+    }
+    else if (dynamic_cast<InterfaceUpOperation *>(operation))
+    {
+        //TODO copypasta from above
+    }
+    else if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_LINK_LAYER)
+            registerLoopbackInterface();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_LINK_LAYER)
+            for (int i = 0; i < (int)idToInterface.size(); i++)
+                if (idToInterface[i])
+                    deleteInterface(idToInterface[i]);   //TODO aki betette, az szedje ki? es tunnel eseten?? egyelore jo igy
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            for (int i = 0; i < (int)idToInterface.size(); i++)
+                if (idToInterface[i])
+                    deleteInterface(idToInterface[i]);
+    }
+    return true;
+}

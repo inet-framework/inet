@@ -25,7 +25,7 @@
 #include "IInterfaceTable.h"
 #include "InterfaceEntry.h"
 #include "NotificationBoard.h"
-
+#include "ILifecycle.h"
 
 /**
  * Represents the interface table. This object has one instance per host
@@ -64,7 +64,7 @@
  *
  * @see InterfaceEntry
  */
-class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, protected INotifiable
+class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, protected INotifiable, public ILifecycle
 {
   protected:
     NotificationBoard *nb; // cached pointer
@@ -93,6 +93,8 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
 
     // internal
     virtual void invalidateTmpInterfaceList();
+
+    virtual void registerLoopbackInterface();
 
   public:
     InterfaceTable();
@@ -182,7 +184,6 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
      */
     virtual InterfaceEntry *getInterfaceByInterfaceModule(cModule *ifmod);
 
-
     /**
      * Returns an interface given by its name. Returns NULL if not found.
      */
@@ -201,7 +202,11 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
      * If there is no such interface, then returns NULL.
      */
     virtual InterfaceEntry *getFirstMulticastInterface();
+
+    /**
+     * ILifecycle method
+     */
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
 #endif
-
