@@ -14,8 +14,8 @@
 
 package inet.examples.mpls.ldp;
 
+import inet.base.LifecycleController;
 import inet.base.UnimplementedModule;
-import inet.networklayer.extras.FailureManager;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.mpls.LDP_LSR;
 import inet.world.scenario.ScenarioManager;
@@ -96,7 +96,7 @@ network LDPTEST
             parameters:
                 @display("p=150,50");
         }
-        failureManager: FailureManager {
+        lifecycleController: LifecycleController {
             parameters:
                 @display("p=350,50");
         }

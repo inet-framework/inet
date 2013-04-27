@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <scenario>
-	<at t="2s">
-		<shutdown module="failureManager" target="LSR4"/>
-	</at>
-	<at t="4s">
-		<startup module="failureManager" target="LSR4"/>
-	</at>
+    <at t="2s">
+        <tell module="lifecycleController" target="LSR4" operation="NodeShutdownOperation"/>
+    </at>
+    <at t="4s">
+        <tell module="lifecycleController" target="LSR4" operation="NodeStartOperation"/>
+    </at>
 </scenario>
