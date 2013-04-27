@@ -28,63 +28,72 @@
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
 #include "IRoutingTable.h"
-
+#include "Ieee802Ctrl_m.h"
+#include "NodeOperations.h"
+#include "NodeStatus.h"
 
 Define_Module(IPv4);
 
 
-void IPv4::initialize()
+void IPv4::initialize(int stage)
 {
-    QueueBase::initialize();
+    if (stage == 0)
+    {
+        QueueBase::initialize();
 
-    ift = InterfaceTableAccess().get();
-    rt = RoutingTableAccess().get();
+        ift = InterfaceTableAccess().get();
+        rt = RoutingTableAccess().get();
 
-    queueOutGate = gate("queueOut");
+        queueOutGate = gate("queueOut");
 
-    defaultTimeToLive = par("timeToLive");
-    defaultMCTimeToLive = par("multicastTimeToLive");
-    fragmentTimeoutTime = par("fragmentTimeout");
-    forceBroadcast = par("forceBroadcast");
-    mapping.parseProtocolMapping(par("protocolMapping"));
+        defaultTimeToLive = par("timeToLive");
+        defaultMCTimeToLive = par("multicastTimeToLive");
+        fragmentTimeoutTime = par("fragmentTimeout");
+        forceBroadcast = par("forceBroadcast");
+        mapping.parseProtocolMapping(par("protocolMapping"));
 
-    curFragmentId = 0;
-    lastCheckTime = 0;
-    fragbuf.init(icmpAccess.get());
+        curFragmentId = 0;
+        lastCheckTime = 0;
+        fragbuf.init(icmpAccess.get());
 
-    numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
+        numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
-    WATCH(numMulticast);
-    WATCH(numLocalDeliver);
-    WATCH(numDropped);
-    WATCH(numUnroutable);
-    WATCH(numForwarded);
+        WATCH(numMulticast);
+        WATCH(numLocalDeliver);
+        WATCH(numDropped);
+        WATCH(numUnroutable);
+        WATCH(numForwarded);
 
-    // by default no MANET routing
-    manetRouting = false;
+        // by default no MANET routing
+        manetRouting = false;
 
 #ifdef WITH_MANET
-    // test for the presence of MANET routing
-    // check if there is a protocol -> gate mapping
-    int gateindex = mapping.getOutputGateForProtocol(IP_PROT_MANET);
-    if (gateSize("transportOut")-1<gateindex)
-        return;
+        // test for the presence of MANET routing
+        // check if there is a protocol -> gate mapping
+        int gateindex = mapping.getOutputGateForProtocol(IP_PROT_MANET);
+        if (gateSize("transportOut")-1<gateindex)
+            return;
 
-    // check if that gate is connected at all
-    cGate *manetgate = gate("transportOut", gateindex)->getPathEndGate();
-    if (manetgate==NULL)
-        return;
+        // check if that gate is connected at all
+        cGate *manetgate = gate("transportOut", gateindex)->getPathEndGate();
+        if (manetgate==NULL)
+            return;
 
-    cModule *destmod = manetgate->getOwnerModule();
-    if (destmod==NULL)
-        return;
+        cModule *destmod = manetgate->getOwnerModule();
+        if (destmod==NULL)
+            return;
 
-    // manet routing will be turned on ONLY for routing protocols which has the @reactive property set
-    // this prevents performance loss with other protocols that use pro active routing and do not need
-    // assistance from the IPv4 component
-    cProperties *props = destmod->getProperties();
-    manetRouting = props && props->getAsBool("reactive");
+        // manet routing will be turned on ONLY for routing protocols which has the @reactive property set
+        // this prevents performance loss with other protocols that use pro active routing and do not need
+        // assistance from the IPv4 component
+        cProperties *props = destmod->getProperties();
+        manetRouting = props && props->getAsBool("reactive");
 #endif
+    }
+    else if (stage == 1)
+    {
+        isUp = isNodeUp();
+    }
 }
 
 void IPv4::updateDisplayString()
@@ -100,6 +109,11 @@ void IPv4::updateDisplayString()
 
 void IPv4::endService(cPacket *msg)
 {
+    if (!isUp) {
+        EV << "IPv4 is down -- discarding message\n";
+        delete msg;
+        return;
+    }
     if (msg->getArrivalGate()->isName("transportIn"))
     {
         handleMessageFromHL( msg );
@@ -830,4 +844,47 @@ void IPv4::sendToManet(cPacket *packet)
     send(packet, "transportOut", gateindex);
 }
 #endif
+
+bool IPv4::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_NETWORK_LAYER)
+            start();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_NETWORK_LAYER)
+            stop();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            stop();
+    }
+    return true;
+}
+
+void IPv4::start()
+{
+    ASSERT(queue.isEmpty());
+    isUp = true;
+}
+
+void IPv4::stop()
+{
+    isUp = false;
+    flush();
+}
+
+void IPv4::flush()
+{
+    delete cancelService();
+    queue.clear();
+}
+
+bool IPv4::isNodeUp()
+{
+    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+}
+
 
