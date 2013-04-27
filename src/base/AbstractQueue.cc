@@ -85,3 +85,15 @@ void AbstractQueue::doEndService()
     }
 }
 
+cPacket *AbstractQueue::cancelService()
+{
+    if (!msgServiced)
+        return NULL;
+    else
+    {
+        cancelEvent(endServiceMsg);
+        cPacket *ret = msgServiced;
+        msgServiced = NULL;
+        return ret;
+    }
+}

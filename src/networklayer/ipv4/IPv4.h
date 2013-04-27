@@ -29,6 +29,9 @@
 #include "ControlManetRouting_m.h"
 #endif
 
+#include "IPv4Datagram.h"
+#include "ILifecycle.h"
+
 
 class ARPPacket;
 class ICMPMessage;
@@ -43,7 +46,7 @@ const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
 /**
  * Implements the IPv4 protocol.
  */
-class INET_API IPv4 : public QueueBase
+class INET_API IPv4 : public QueueBase, public ILifecycle
 {
   protected:
     IRoutingTable *rt;
@@ -59,6 +62,7 @@ class INET_API IPv4 : public QueueBase
     bool forceBroadcast;
 
     // working vars
+    bool isUp;
     long curFragmentId; // counter, used to assign unique fragmentIds to datagrams
     IPv4FragBuf fragbuf;  // fragmentation reassembly buffer
     simtime_t lastCheckTime; // when fragbuf was last checked for state fragments
@@ -187,16 +191,24 @@ class INET_API IPv4 : public QueueBase
     IPv4() {}
 
   protected:
-    /**
-     * Initialization
-     */
-    virtual void initialize();
+    virtual int numInitStages() const {return 2;}
+    virtual void initialize(int stage);
 
     /**
      * Processing of IPv4 datagrams. Called when a datagram reaches the front
      * of the queue.
      */
     virtual void endService(cPacket *msg);
+
+    /**
+     * ILifecycle method
+     */
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
+    virtual bool isNodeUp();
+    virtual void stop();
+    virtual void start();
+    virtual void flush();
 };
 
 #endif
