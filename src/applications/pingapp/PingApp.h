@@ -19,6 +19,7 @@
 #include "INETDefs.h"
 
 #include "IPvXAddress.h"
+#include "ILifecycle.h"
 
 class PingPayload;
 
@@ -31,16 +32,20 @@ class PingPayload;
  *
  * See NED file for detailed description of operation.
  */
-class INET_API PingApp : public cSimpleModule
+class INET_API PingApp : public cSimpleModule, public ILifecycle
 {
+  public:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
   protected:
+    virtual bool isRunning() { return timer->isScheduled(); }
     virtual void sendPing();
-    virtual void scheduleNextPing(cMessage *timer);
+    virtual void scheduleNextPing();
     virtual void sendToICMP(cMessage *payload, const IPvXAddress& destAddr, const IPvXAddress& srcAddr, int hopLimit);
     virtual void processPingResponse(PingPayload *msg);
     virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt);
@@ -58,6 +63,7 @@ class INET_API PingApp : public cSimpleModule
     bool printPing;
 
     // state
+    cMessage *timer;
     long sendSeqNo;
     long expectedReplySeqNo;
     simtime_t sendTimeHistory[PING_HISTORY_SIZE];

@@ -24,7 +24,9 @@
 #include "PingPayload_m.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
-
+#include "ModuleAccess.h"
+#include "NodeOperations.h"
+#include "NodeStatus.h"
 
 using std::cout;
 
@@ -72,16 +74,16 @@ void PingApp::initialize()
     WATCH(numPongs);
 
     // schedule first ping (use empty destAddr to disable)
-    if (par("destAddr").stringValue()[0])
-    {
-        cMessage *msg = new cMessage("sendPing");
-        scheduleAt(startTime, msg);
-    }
+    timer = new cMessage("sendPing");
+    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+    bool isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+    if (isNodeUp && par("destAddr").stringValue()[0])
+        scheduleAt(startTime, timer);
 }
 
 void PingApp::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage())
+    if (msg == timer)
     {
         // on first call we need to initialize
         if (sendSeqNo == 0)
@@ -97,13 +99,33 @@ void PingApp::handleMessage(cMessage *msg)
         sendPing();
 
         // then schedule next one if needed
-        scheduleNextPing(msg);
+        scheduleNextPing();
     }
     else
     {
         // process ping response
         processPingResponse(check_and_cast<PingPayload *>(msg));
     }
+}
+
+bool PingApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+            scheduleAt(simTime() + startTime, timer);   // TODO: startTime should be absolute, not after each node startup; if it's DOWN at startTime --> ERROR!
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
+            if (timer)
+                cancelEvent(timer);
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            if (timer)
+                cancelEvent(timer);
+    }
+    return true;
 }
 
 void PingApp::sendPing()
@@ -126,7 +148,7 @@ void PingApp::sendPing()
     sendSeqNo++;
 }
 
-void PingApp::scheduleNextPing(cMessage *timer)
+void PingApp::scheduleNextPing()
 {
     simtime_t nextPing = simTime() + sendIntervalp->doubleValue();
 
