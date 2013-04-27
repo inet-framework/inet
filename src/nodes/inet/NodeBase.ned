@@ -17,14 +17,15 @@
 
 package inet.nodes.inet;
 
-import inet.util.PcapRecorder;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.mobility.IMobility;
-import inet.linklayer.IWirelessNic;
-import inet.linklayer.IWiredNic;
-import inet.linklayer.IExternalNic;
 import inet.base.NotificationBoard;
+import inet.linklayer.IExternalNic;
+import inet.linklayer.IWiredNic;
+import inet.linklayer.IWirelessNic;
+import inet.mobility.IMobility;
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.status.NodeStatus;
+import inet.util.PcapRecorder;
 
 
 //
@@ -42,6 +43,7 @@ module NodeBase
         @display("bgb=,448");
         @node;
         @labels(node,ethernet-node,wireless-node);
+        bool hasStatus = default(false);
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
         int numPcapRecorders = default(0); // no of PcapRecorders.
@@ -54,6 +56,10 @@ module NodeBase
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
+        status: NodeStatus if hasStatus {
+            @display("p=50,50");
+        }
+
         notificationBoard: NotificationBoard {
             parameters:
                 @display("p=53,155;is=s");
