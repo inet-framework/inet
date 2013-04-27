@@ -2689,7 +2689,7 @@ bool IPv6NeighbourDiscovery::canServeWirelessNodes(InterfaceEntry *ie)
     if (connectedGate != NULL)
     {
         cModule* connectedNode = connectedGate->getOwnerModule();
-        ASSERT(isNode(connectedNode));
+        ASSERT(isNetworkNode(connectedNode));
         if (isWirelessAccessPoint(connectedNode))
             return true;
     }
@@ -2709,7 +2709,7 @@ bool IPv6NeighbourDiscovery::isWirelessAccessPoint(cModule* module)
 {
     // AccessPoint is defined as a node containing "relayUnit" and
     // "wlan" submodules
-    return (isNode(module) && module->getSubmodule("relayUnit") &&
+    return (isNetworkNode(module) && module->getSubmodule("relayUnit") &&
             (module->getSubmodule("wlan", 0) || module->getSubmodule("wlan")));
 }
 #endif /* WITH_xMIPv6 */
