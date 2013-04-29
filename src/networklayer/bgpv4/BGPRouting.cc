@@ -94,6 +94,11 @@ void BGPRouting::handleTimer(cMessage *timer)
     }
 }
 
+bool BGPRouting::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    throw cRuntimeError("Lifecycle operation support not implemented");
+}
+
 void BGPRouting::finish()
 {
     unsigned int statTab[BGP::NB_STATS] = {0, 0, 0, 0, 0, 0};

@@ -32,11 +32,12 @@
 #include "BGPOpen.h"
 #include "BGPKeepAlive.h"
 #include "BGPUpdate.h"
+#include "ILifecycle.h"
 
 class BGPSession;
 
 
-class INET_API BGPRouting : public cSimpleModule, public TCPSocket::CallbackInterface
+class INET_API BGPRouting : public cSimpleModule, public ILifecycle, public TCPSocket::CallbackInterface
 {
 public:
     BGPRouting()
@@ -48,6 +49,7 @@ protected:
     virtual int  numInitStages() const  { return 5; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
     virtual void finish();
 
     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
