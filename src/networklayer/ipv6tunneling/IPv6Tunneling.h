@@ -30,6 +30,7 @@
 #include "INETDefs.h"
 
 #include "IPv6Address.h"
+#include "ILifecycle.h"
 
 // Foreign declarations:
 class IInterfaceTable;
@@ -40,7 +41,7 @@ class RoutingTable6;
 /**
  * Management of IP tunnels.
  */
-class INET_API IPv6Tunneling : public cSimpleModule
+class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
 {
     public:
         enum TunnelType
@@ -141,6 +142,8 @@ class INET_API IPv6Tunneling : public cSimpleModule
          * Receive messages from IPv6 module and encapsulate/decapsulate them.
          */
         virtual void handleMessage(cMessage* msg);
+
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
         /**
          * Creates a tunnel with given entry and exit point, which will be used for datagrams

@@ -37,7 +37,7 @@ class ICMPv6Message;
 /**
  * IPv6 implementation.
  */
-class INET_API IPv6 : public QueueBase
+class INET_API IPv6 : public QueueBase, public ILifecycle
 {
   protected:
     IInterfaceTable *ift;
@@ -151,6 +151,8 @@ class INET_API IPv6 : public QueueBase
      * of the queue.
      */
     virtual void endService(cPacket *msg);
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
     /**
      * Determines the correct interface for the specified destination address.
