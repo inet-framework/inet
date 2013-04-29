@@ -29,7 +29,6 @@
 #include "NotifierConsts.h"
 #include "NodeStatus.h"
 #include "NodeOperations.h"
-#include "InterfaceOperations.h"
 
 class InterfaceEntry;
 class NotificationBoard;

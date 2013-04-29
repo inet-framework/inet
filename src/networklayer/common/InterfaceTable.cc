@@ -27,7 +27,6 @@
 #include "NotifierConsts.h"
 #include "NodeStatus.h"
 #include "NodeOperations.h"
-#include "InterfaceOperations.h"
 
 #ifdef WITH_IPv4
 #include "IPv4InterfaceData.h"
@@ -379,41 +378,7 @@ InterfaceEntry *InterfaceTable::getFirstMulticastInterface()
 bool InterfaceTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<InterfaceDownOperation *>(operation))
-    {
-        InterfaceEntry *ie = dynamic_cast<InterfaceDownOperation *>(operation)->getInterface();
-        ASSERT(ie->getInterfaceTable()==this);
-        switch (stage) {
-            case InterfaceDownOperation::STAGE_LOCAL:
-                ASSERT(ie->getState()==InterfaceEntry::UP);
-                ie->setState(InterfaceEntry::GOING_DOWN);
-                break;
-            case InterfaceDownOperation::STAGE_LAST:
-                ASSERT(ie->getState() == InterfaceEntry::GOING_DOWN);
-                ie->setState(InterfaceEntry::DOWN);
-                if (ie->getInterfaceModule())
-                    ie->getInterfaceModule()->getDisplayString().setTagArg("i2", 0, "status/cross");
-                break;
-        }
-    }
-    else if (dynamic_cast<InterfaceUpOperation *>(operation))
-    {
-        InterfaceEntry *ie = dynamic_cast<InterfaceUpOperation *>(operation)->getInterface();
-        ASSERT(ie->getInterfaceTable()==this);
-        switch (stage) {
-            case InterfaceUpOperation::STAGE_LOCAL:
-                ASSERT(ie->getState()==InterfaceEntry::DOWN);
-                ie->setState(InterfaceEntry::GOING_UP);
-                break;
-            case InterfaceUpOperation::STAGE_LAST:
-                ASSERT(ie->getState() == InterfaceEntry::GOING_UP);
-                ie->setState(InterfaceEntry::UP);
-                if (ie->getInterfaceModule())
-                    ie->getInterfaceModule()->getDisplayString().removeTag("i2");
-                break;
-        }
-    }
-    else if (dynamic_cast<NodeStartOperation *>(operation)) {
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_LINK_LAYER)
             registerLoopbackInterface();
     }

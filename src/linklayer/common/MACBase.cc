@@ -24,7 +24,6 @@
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "NodeOperations.h"
-#include "InterfaceOperations.h"
 #include "ModuleAccess.h"
 #include "NotificationBoard.h"
 
@@ -42,12 +41,10 @@ MACBase::~MACBase()
 
 void MACBase::initialize(int stage)
 {
-    //FIXME: if registerInterface() called from handleOperationStage(), I think it must called from initialize(), too
     if (stage == 0)
     {
-       nb = NotificationBoardAccess().getIfExists();
-       if (nb)
-           nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
+        //note: call registerInterface() in subclasses!
+        nb = NotificationBoardAccess().getIfExists();
     }
     if (stage == numInitStages()-1)
     {
@@ -55,20 +52,10 @@ void MACBase::initialize(int stage)
     }
 }
 
-void MACBase::receiveChangeNotification(int category, const cObject *details)
-{
-    if (category == NF_INTERFACE_STATE_CHANGED)
-    {
-        if (details == interfaceEntry)
-            updateOperationalFlag(isNodeUp());
-    }
-}
-
 bool MACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 
-    //TODO dispatch to 5 smaller virtual functions!
     if (dynamic_cast<NodeStartOperation *>(operation))
     {
         if (stage == NodeStartOperation::STAGE_LINK_LAYER) {
@@ -89,24 +76,7 @@ bool MACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
         if (stage == NodeCrashOperation::STAGE_CRASH) {
             interfaceEntry = NULL;  // forget interfaceEntry; it is deleted by InterfaceTable
             updateOperationalFlag(false);
-            //FIXME clear the queue without emit dropPkIfaceDown signals
-        }
-    }
-    else if (dynamic_cast<InterfaceUpOperation *>(operation))
-    {
-        if (stage == InterfaceUpOperation::STAGE_LOCAL) {
-            // note: interfaceEntry state change itself is done by InterfaceTable
-            if (!interfaceEntry)
-                throw cRuntimeError("No interfaceEntry, operation '%s' unsupported", operation->getClassName());
-        }
-    }
-    else if (dynamic_cast<InterfaceDownOperation *>(operation))
-    {
-        if (stage == InterfaceDownOperation::STAGE_LOCAL) {
-            // note: interfaceEntry state change itself is done by InterfaceTable
-            if (!interfaceEntry)
-                throw cRuntimeError("No interfaceEntry, operation '%s' unsupported", operation->getClassName());
-            flushQueue();
+            //FIXME clear the queue without emitting dropPkIfaceDown signals
         }
     }
     else
@@ -115,6 +85,10 @@ bool MACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
     }
 
     return true;
+}
+
+void MACBase::receiveChangeNotification(int category, const cObject *details)
+{
 }
 
 bool MACBase::isNodeUp()
@@ -126,8 +100,7 @@ bool MACBase::isNodeUp()
 
 void MACBase::updateOperationalFlag(bool isNodeUp)
 {
-    // both the node and the interface is up
-    isOperational = isNodeUp && (!interfaceEntry || interfaceEntry->getState() == InterfaceEntry::UP);
+    isOperational = isNodeUp; // TODO and interface is up, too
 }
 
 void MACBase::registerInterface()  //XXX registerInterfaceIfInterfaceTableExists() ???

@@ -25,7 +25,6 @@
 #include "IPassiveQueue.h"
 #include "NotificationBoard.h"
 #include "NodeOperations.h"
-#include "InterfaceOperations.h"
 #include "opp_utils.h"
 
 

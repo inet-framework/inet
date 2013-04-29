@@ -27,7 +27,6 @@
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 #include "NodeOperations.h"
-#include "InterfaceOperations.h"
 
 
 Define_Module(PPP);

@@ -43,8 +43,8 @@ package inet.base;
 // network interface, protocol, etc) to be operated on.
 //
 // The <tt>operation</tt> attribute contains the operation to perform. Some
-// known operations names are: InterfaceDownOperation, NodeShutdownOperation,
-// InterfaceUpOperation, NodeStartOperation. To see all available operations,
+// known operations names are: NodeShutdownOperation, NodeCrashOperation,
+// NodeStartOperation. To see all available operations,
 // find the names of C++ classes subclassed from LifecycleOperation.
 //
 // The details of the mechanism can be found in the C++ documentation of this
