@@ -27,7 +27,6 @@
 #include "BasicBattery.h"
 #include "NodeStatus.h"
 #include "NodeOperations.h"
-#include "InterfaceOperations.h"
 
 
 #define MK_TRANSMISSION_OVER  1
@@ -197,7 +196,7 @@ bool Radio::handleOperationStage(LifecycleOperation *operation, int stage, IDone
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
-            setRadioState(RadioState::IDLE);  //FIXME only if the interface is up, too
+            setRadioState(RadioState::IDLE);  //FIXME only if the interface is up, too; also: connectReceiver(), etc.
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
@@ -205,14 +204,6 @@ bool Radio::handleOperationStage(LifecycleOperation *operation, int stage, IDone
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_LOCAL)  // crash is immediate
-            setRadioState(RadioState::OFF);
-    }
-    else if (dynamic_cast<InterfaceUpOperation *>(operation)) {
-        if (stage == InterfaceUpOperation::STAGE_LOCAL)
-            setRadioState(RadioState::IDLE);  //FIXME only if the node is up, too
-    }
-    else if (dynamic_cast<InterfaceDownOperation *>(operation)) {
-        if (stage == InterfaceDownOperation::STAGE_LOCAL)
             setRadioState(RadioState::OFF);
     }
     return true;

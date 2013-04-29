@@ -20,7 +20,6 @@
 
 #include "IdealRadio.h"
 #include "NodeOperations.h"
-#include "InterfaceOperations.h"
 
 
 #define MK_TRANSMISSION_OVER  1
@@ -291,14 +290,6 @@ bool IdealRadio::handleOperationStage(LifecycleOperation *operation, int stage, 
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_LOCAL)  // crash is immediate
-            setRadioState(RadioState::OFF);
-    }
-    else if (dynamic_cast<InterfaceUpOperation *>(operation)) {
-        if (stage == InterfaceUpOperation::STAGE_LOCAL)
-            setRadioState(RadioState::IDLE);  //FIXME only if the node is up, too
-    }
-    else if (dynamic_cast<InterfaceDownOperation *>(operation)) {
-        if (stage == InterfaceDownOperation::STAGE_LOCAL)
             setRadioState(RadioState::OFF);
     }
     return true;
