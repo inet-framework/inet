@@ -29,6 +29,7 @@
 #include "IPv6Address.h"
 #include "IPv6NDMessage_m.h"
 #include "IPv6NeighbourCache.h"
+#include "ILifecycle.h"
 
 
 //Forward declarations:
@@ -47,7 +48,7 @@ class xMIPv6;
 /**
  * Implements RFC 2461 Neighbor Discovery for IPv6.
  */
-class INET_API IPv6NeighbourDiscovery : public cSimpleModule
+class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
 {
     public:
         typedef std::vector<cMessage*> MsgPtrVector;
@@ -167,6 +168,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
         virtual void processNDMessage(ICMPv6Message *msg, IPv6ControlInfo *ctrlInfo);
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
         virtual void finish();
 
         virtual void processIPv6Datagram(IPv6Datagram *datagram);

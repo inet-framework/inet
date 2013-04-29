@@ -210,6 +210,11 @@ void IPv6NeighbourDiscovery::processNDMessage(ICMPv6Message *msg, IPv6ControlInf
     }
 }
 
+bool IPv6NeighbourDiscovery::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    throw cRuntimeError("Lifecycle operation support not implemented");
+}
+
 void IPv6NeighbourDiscovery::finish()
 {
 }

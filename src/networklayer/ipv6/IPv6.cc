@@ -855,3 +855,8 @@ bool IPv6::processExtensionHeaders(IPv6Datagram* datagram)
 }
 #endif /* WITH_xMIPv6 */
 
+bool IPv6::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    throw cRuntimeError("Lifecycle operation support not implemented");
+}
+

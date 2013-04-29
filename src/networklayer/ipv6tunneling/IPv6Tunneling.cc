@@ -87,6 +87,11 @@ void IPv6Tunneling::handleMessage(cMessage* msg)
         opp_error("IPv6Tunneling: Unknown gate: %s!", msg->getArrivalGate()->getFullName());
 }
 
+bool IPv6Tunneling::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    throw cRuntimeError("Lifecycle operation support not implemented");
+}
+
 IPv6Tunneling::Tunnel::Tunnel(const IPv6Address& _entry, const IPv6Address& _exit, const IPv6Address& _destTrigger)
     :entry(_entry), exit(_exit), tunnelMTU(IPv6_MIN_MTU - 40), tunnelType(SPLIT), destTrigger(_destTrigger)
 {

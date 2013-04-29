@@ -321,3 +321,10 @@ void ICMPv6::errorOut(ICMPv6Message *icmpv6msg)
 {
     send(icmpv6msg, "errorOut");
 }
+
+bool ICMPv6::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    //pingMap.clear();
+    throw cRuntimeError("Lifecycle operation support not implemented");
+}
+
