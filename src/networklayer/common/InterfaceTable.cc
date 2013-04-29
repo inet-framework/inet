@@ -391,7 +391,8 @@ bool InterfaceTable::handleOperationStage(LifecycleOperation *operation, int sta
             case InterfaceDownOperation::STAGE_LAST:
                 ASSERT(ie->getState() == InterfaceEntry::GOING_DOWN);
                 ie->setState(InterfaceEntry::DOWN);
-                //TODO ikon
+                if (ie->getInterfaceModule())
+                    ie->getInterfaceModule()->getDisplayString().setTagArg("i2", 0, "status/cross");
                 break;
         }
     }
@@ -407,7 +408,8 @@ bool InterfaceTable::handleOperationStage(LifecycleOperation *operation, int sta
             case InterfaceUpOperation::STAGE_LAST:
                 ASSERT(ie->getState() == InterfaceEntry::GOING_UP);
                 ie->setState(InterfaceEntry::UP);
-                //TODO ikon
+                if (ie->getInterfaceModule())
+                    ie->getInterfaceModule()->getDisplayString().removeTag("i2");
                 break;
         }
     }
@@ -416,16 +418,28 @@ bool InterfaceTable::handleOperationStage(LifecycleOperation *operation, int sta
             registerLoopbackInterface();
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (stage == NodeShutdownOperation::STAGE_LINK_LAYER)
-            for (int i = 0; i < (int)idToInterface.size(); i++)
-                if (idToInterface[i])
-                    deleteInterface(idToInterface[i]);   //TODO aki betette, az szedje ki? es tunnel eseten?? egyelore jo igy
+        if (stage == NodeShutdownOperation::STAGE_LINK_LAYER) {
+            for (int i = 0; i < (int)idToInterface.size(); i++) {
+                InterfaceEntry *ie = idToInterface[i];
+                if (ie) {
+                    deleteInterface(ie);   //TODO aki betette, az szedje ki? es tunnel eseten?? egyelore jo igy
+                    if (ie->getInterfaceModule())
+                        ie->getInterfaceModule()->getDisplayString().removeTag("i2");
+                }
+            }
+        }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == NodeCrashOperation::STAGE_CRASH)
-            for (int i = 0; i < (int)idToInterface.size(); i++)
-                if (idToInterface[i])
-                    deleteInterface(idToInterface[i]);
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            for (int i = 0; i < (int)idToInterface.size(); i++) {
+                InterfaceEntry *ie = idToInterface[i];
+                if (ie) {
+                    deleteInterface(ie);   //TODO aki betette, az szedje ki? es tunnel eseten?? egyelore jo igy
+                    if (ie->getInterfaceModule())
+                        ie->getInterfaceModule()->getDisplayString().removeTag("i2");
+                }
+            }
+        }
     }
     return true;
 }
