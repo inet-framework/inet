@@ -1,10 +1,10 @@
 # workingdir,                        args,                                          simtimelimit,    fingerprint
 /examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,            0cd5-a4ba
 /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,            d419-aec9
-#/examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping2 -r 0,                   100s,          0    # interactive config, needed a *.numHosts parameter
+#/examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping2 -r 0,                   100s,          0000-0000    # interactive config, needed a *.numHosts parameter
 /examples/adhoc/ieee80211/,          -f fingerprints.ini -c Ping1 -r 0,             1000s,           1a15-c623
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  100s,            afa8-1c70
-# /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,         0   # [Config Ping2]    # interactive config, needed a *.numHosts parameter
+# /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,         0000-0000   # [Config Ping2]    # interactive config, needed a *.numHosts parameter
 
 /examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           ad5d-2efb
 /examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           1943-3c9f
@@ -21,17 +21,17 @@
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp31 -r 0,                  10s,             d631-3f5b
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp51 -r 0,                  10s,             f895-f668
 
-# /examples/emulation/extclient/,      -f omnetpp.ini -c General -r 0,                100s,         0    # pcap devices not supported
-# /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_Traffic -r 0,         100s,         0    # pcap devices not supported
-# /examples/emulation/extserver/,      -f omnetpp.ini -c Downlink_Traffic -r 0,       100s,         0    # pcap devices not supported
-# /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_and_Downlink_Traffic -r 0, 100s,    0    # pcap devices not supported
-# /examples/emulation/traceroute/,     -f omnetpp.ini -c General -r 0,                100s,         0    # pcap devices not supported
+# /examples/emulation/extclient/,      -f omnetpp.ini -c General -r 0,                100s,         0000-0000    # pcap devices not supported
+# /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_Traffic -r 0,         100s,         0000-0000    # pcap devices not supported
+# /examples/emulation/extserver/,      -f omnetpp.ini -c Downlink_Traffic -r 0,       100s,         0000-0000    # pcap devices not supported
+# /examples/emulation/extserver/,      -f omnetpp.ini -c Uplink_and_Downlink_Traffic -r 0, 100s,    0000-0000    # pcap devices not supported
+# /examples/emulation/traceroute/,     -f omnetpp.ini -c General -r 0,                100s,         0000-0000    # pcap devices not supported
 
 /examples/ethernet/arptest/,         -f fingerprints.ini -c ARPTest -r 0,           100s,            f102-0699
 /examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            f102-0699
 /examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            8c24-3bd1
 /examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            93ec-3339
-# /examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,           0   ,# not a complete simulations, defaults.ini included by other ini files
+# /examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,           0000-0000   ,# not a complete simulations, defaults.ini included by other ini files
 /examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0, 50s,             6a59-65fa
 /examples/ethernet/lans/,            -f fingerprints-largenet.ini -c LargeNet -r 0, 5s,              608e-56f1
 /examples/ethernet/lans/,            -f fingerprints.ini -c MixedLAN1 -r 0,         200s,            c06d-c5d7
@@ -77,7 +77,7 @@
 /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts256 -r 0,               20s,             3df8-0a95
 /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1280 -r 0,              1s,              f6fd-a1f6
 
-# /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0,              1s,              0    # cpu time limit exceeded during 0s simtime
+# /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0,              1s,              0000-0000    # cpu time limit exceeded during 0s simtime
 
 /examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          c346-9bec
 /examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             1db4-37df
@@ -125,9 +125,9 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__inet_stream -r 0,      100s,            3e88-ea76
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSClinux -r 0,     100s,            ef74-ac96
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSClinux_stream -r 0, 100s,            ef74-ac96
-# /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSCfreebsd -r 0,   100s,         0    # freebsd NSC stack works on 32 bit system only
-# /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSCfreebsd__NSCfreebsd -r 0, 100s,         0    # freebsd NSC stack works on 32 bit system only
-# /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClwip__inet -r 0,          100s,         0    # lwip NSC stack works on 32 bit system only
+# /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSCfreebsd -r 0,   100s,         0000-0000    # freebsd NSC stack works on 32 bit system only
+# /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSCfreebsd__NSCfreebsd -r 0, 100s,         0000-0000    # freebsd NSC stack works on 32 bit system only
+# /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClwip__inet -r 0,          100s,         0000-0000    # lwip NSC stack works on 32 bit system only
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__NSClinux -r 0,         100s,            3f07-edde
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip -r 0,             100s,            8d97-f1e2
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__inet -r 0,             100s,            0e43-dbc5
@@ -253,7 +253,7 @@
 /examples/mobility/,                 -f omnetpp.ini -c TurtleMobility6 -r 0,        10000s,          122f-0d91
 
 /examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             dd1d-920e
-# /examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            0    # <!> Error in module (TED) R37.LSR0.ted (id=45) during network initialization: Model error: ASSERT: condition !remote.isUnspecified() false in function initialize, networklayer/ted/TED.cc line 86.
+# /examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            0000-0000    # <!> Error in module (TED) R37.LSR0.ted (id=45) during network initialization: Model error: ASSERT: condition !remote.isUnspecified() false in function initialize, networklayer/ted/TED.cc line 86.
 /examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             efd4-58c4
 /examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                100s,            442d-3c9e
 /examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50s,             ba76-a20c
@@ -266,7 +266,7 @@
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandtwostubs -r 0,    100s,            4d42-bfe3
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-A -r 0,              100s,            1c8a-a6dc
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-B -r 0,              100s,            a416-e74a
-# /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                100s,            0    # <!> Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #23916, t=45.089338342798: check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
+# /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                100s,            0000-0000    # <!> Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #23916, t=45.089338342798: check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c static -r 0,                 1000s,           ee71-5f85
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0,               1000s,           1a8a-98e6
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic2 -r 0,               1000s,           fb36-a614
@@ -283,8 +283,8 @@
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            f252-459d
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            d999-82c6
 
-#/examples/traci/,                    -f omnetpp.ini -c accident -r 0,               ---100s,         0
-#/examples/traci_launchd/,            -f omnetpp.ini -c accident -r 0,               ---100s,         0
+#/examples/traci/,                    -f omnetpp.ini -c accident -r 0,               ---100s,         0000-0000
+#/examples/traci_launchd/,            -f omnetpp.ini -c accident -r 0,               ---100s,         0000-0000
 
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            d0bc-3b11
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            67fd-2373
@@ -300,13 +300,13 @@
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,           e6a3-cdc4
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,              7299-2106
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            eac3-0a31
-# /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             100s,         0   # interactive config, needed a *.numHosts parameter
+# /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             100s,         0000-0000   # interactive config, needed a *.numHosts parameter
 
 /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             306b-080b
-# /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   100s,         0   # interactive config, needed a *.numHosts parameter
+# /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   100s,         0000-0000   # interactive config, needed a *.numHosts parameter
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  25s,             8ab2-c9db
 
-# /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                  ---100s,         0   # [Config Ping2] # __interactive__
+# /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                  ---100s,         0000-0000   # [Config Ping2] # __interactive__
 
 /examples/wireless/multiradio/,      -f omnetpp.ini -c IndependentWlans -r 0,       100s,            c58b-a031
 /examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          100s,            250d-7e67
