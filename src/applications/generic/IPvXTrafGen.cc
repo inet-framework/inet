@@ -89,7 +89,8 @@ void IPvXTrafGen::handleMessage(cMessage *msg)
     if (msg == timer)
     {
         sendPacket();
-        scheduleNextPacket(simTime());
+        if (isEnabled())
+            scheduleNextPacket(simTime());
     }
     else
         processPacket(PK(msg));
