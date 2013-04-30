@@ -10,6 +10,10 @@ import inet.util.ThruputMeteringChannel;
 import inet.world.scenario.ScenarioManager;
 
 
+module Dummy
+{
+}
+
 network DynamicTest
 {
     parameters:
@@ -75,6 +79,9 @@ network DynamicTest
         }
         scenarioManager: ScenarioManager {
             @display("p=594,50");
+        }
+        lifecycleController: Dummy {
+            @display("p=94,194");
         }
     connections:
         H1.ethg[0] <--> C <--> R1.ethg[0];
