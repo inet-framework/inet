@@ -18,6 +18,8 @@
 #define __INET_RTPAPPLICATION_H
 
 #include "INETDefs.h"
+
+#include "AppBase.h"
 #include "IPv4Address.h"
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
@@ -27,15 +29,14 @@
  * which uses RTP. It acts as a sender if the omnet parameter fileName is
  * set, and as a receiver if the parameter is empty.
  */
-class INET_API RTPApplication : public cSimpleModule, public ILifecycle
+class INET_API RTPApplication : public AppBase
 {
     public:
         /**
-         * Constructor, with activity() stack size.
+         * Constructor
          */
-        RTPApplication() : cSimpleModule() {}
-
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+        RTPApplication();
+        virtual ~RTPApplication();
 
     protected:
         /**
@@ -44,11 +45,12 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
         virtual void initialize(int stage);
         virtual int numInitStages() const {return 4;}
 
-        /**
-         * RTPApplication uses activity for message handling.
-         * The behaviour is controlled by omnet parameters.
-         */
-        virtual void handleMessage(cMessage* msg);
+        virtual void handleMessageWhenUp(cMessage* msg);
+        virtual bool startApp(IDoneCallback *doneCallback);
+        virtual bool stopApp(IDoneCallback *doneCallback);
+        virtual bool crashApp(IDoneCallback *doneCallback);
+        virtual void cancelAndDeleteSelfMsgs();
+        virtual void reset();
 
     protected:
         enum SelfMsgKind
@@ -58,6 +60,8 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
             STOP_TRANSMISSION,
             LEAVE_SESSION
         };
+
+        std::set<cMessage *> selfMessages;
         /**
          * The CNAME of this participant.
          */
@@ -72,11 +76,6 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
          * The reserved bandwidth for rtp/rtcp in bytes/second.
          */
         int _bandwidth;
-
-        /**
-         * The address of the unicast peer or of the multicast group.
-         */
-        IPv4Address _destinationAddress;
 
         /**
          * One of the udp port used.

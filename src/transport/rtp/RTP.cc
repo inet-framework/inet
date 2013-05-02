@@ -43,22 +43,22 @@ simsignal_t RTP::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void RTP::initialize(int stage)
 {
-  if (stage == 0)
-  {
-    _leaveSession = false;
-    appInGate = findGate("appIn");
-    profileInGate = findGate("profileIn");
-    rtcpInGate = findGate("rtcpIn");
-    udpInGate = findGate("udpIn");
-    _udpSocket.setOutputGate(gate("udpOut"));
+    if (stage == 0)
+    {
+        _leaveSession = false;
+        appInGate = findGate("appIn");
+        profileInGate = findGate("profileIn");
+        rtcpInGate = findGate("rtcpIn");
+        udpInGate = findGate("udpIn");
+        _udpSocket.setOutputGate(gate("udpOut"));
 
-    rcvdPkSignal = registerSignal("rcvdPk");
-  }
-  else if (stage == 1)
-  {
-      NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-      isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-  }
+        rcvdPkSignal = registerSignal("rcvdPk");
+    }
+    else if (stage == 1)
+    {
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+    }
 }
 
 void RTP::handleMessage(cMessage *msg)

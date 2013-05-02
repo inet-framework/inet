@@ -43,24 +43,25 @@ RTCP::RTCP()
 
 void RTCP::initialize(int stage)
 {
-  if (stage == 0)
-  {
-    // initialize variables
-    _ssrcChosen = false;
-    _leaveSession = false;
-    _udpSocket.setOutputGate(gate("udpOut"));
+    if (stage == 0)
+    {
+        // initialize variables
+        _ssrcChosen = false;
+        _leaveSession = false;
+        _udpSocket.setOutputGate(gate("udpOut"));
 
-    _packetsCalculated = 0;
-    _averagePacketSize = 0.0;
+        _packetsCalculated = 0;
+        _averagePacketSize = 0.0;
 
-    _participantInfos.setName("ParticipantInfos");
+        _participantInfos.setName("ParticipantInfos");
 
-    rcvdPkSignal = registerSignal("rcvdPk");
-  }
-  else if (stage == 1) {
-      NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-      isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-  }
+        rcvdPkSignal = registerSignal("rcvdPk");
+    }
+    else if (stage == 1)
+    {
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+    }
 }
 
 RTCP::~RTCP()
@@ -587,6 +588,21 @@ void RTCP::updateDisplayString()
 
 void RTCP::reset()
 {
+    _senderInfo = NULL;
+
+#if 0
+    for (int i = 0; i < _participantInfos.size(); i++)
+    {
+        cObject *participantInfo = _participantInfos.get(i);
+        delete participantInfo;
+    }
+#endif
+    _participantInfos.clear();      //clear also delete members, if owned
+
+    _ssrcChosen = false;
+    _leaveSession = false;
+    _packetsCalculated = 0;
+    _averagePacketSize = 0.0;
 }
 
 bool RTCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
