@@ -29,7 +29,7 @@ simple EtherTrafGen
         string destAddress = default("");  // destination MAC address, or module path name of destination station; empty means off
         int etherType = default(0);  // etherType to set on outgoing packets
         double startTime @unit(s) = default(this.sendInterval);  // time of sending the first packet
-        double stopTime @unit(s) = default(0);  // time of finish sending, 0 means forever
+        double stopTime @unit(s) = default(-1s);  // time of finish sending, -1 means forever
         volatile double sendInterval @unit(s);  // interval between sending bursts
         volatile int numPacketsPerBurst = default(1);  // number of packets to send per burst (packets within a burst are sent at the same simulation time)
         volatile int packetLength @unit(B);  // length of packets to send
