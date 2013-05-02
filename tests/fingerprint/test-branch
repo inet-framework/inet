@@ -1,0 +1,80 @@
+#! /bin/bash
+#
+# For testing commits on a branch.
+#
+# The script loops through all commits in a branch (or between two given commits),
+# checks out each, builds INET, and launches a script that runs some simulations.
+# If the script exits with nonzero exit code, the commit is tagged in the git repo,
+# so commits that break things can be viewed with 'gitk'.
+#
+
+# range of commits to test; edit to your needs
+ENDREV=topic/failover
+STARTREV=topic/tcp
+
+# build and fingerprint threads
+THREADS=7
+
+# the command to run on each commit
+COMMAND="./fingerprints -t $THREADS"
+
+# the label (actually, branch) names added to commits where command output changes
+LABEL=error
+BLABEL=build-error
+
+INET_ROOT=../..
+
+# get the list of commits
+commits=`git rev-list --reverse $STARTREV..$ENDREV || exit 1`
+
+# make clean
+(cd $INET_ROOT && make cleanall)
+
+rm .buildlog-*
+rm *.csv.UPDATED
+rm *.csv.diff-*
+
+#clean old branches
+i=0
+for commit in $commits; do
+    (( i += 1 ))
+    git branch -d "$LABEL-$i" 2>/dev/null
+    git branch -d "$BLABEL-$i" 2>/dev/null
+done
+
+i=0
+for commit in $commits; do
+    (( i += 1 ))
+
+    echo
+    echo ---------------------------------------------------
+    echo -n $i ": "
+    git log -n 1 --pretty=oneline $commit | cat || exit 1
+    git checkout -q $commit || exit 1
+
+    echo "Building..."
+    (cd $INET_ROOT && make -f makemakefiles)
+    if (cd $INET_ROOT && make -j$THREADS) > .buildlog 2>&1; then
+        : # build OK
+    else
+        echo "BUILD ERROR! Tagging with '$BLABEL-$i'"
+        git branch -f "$BLABEL-$i"
+        cp .buildlog ".buildlog-$i"
+        continue
+    fi
+
+    echo "Running test script..."
+
+
+    if $COMMAND > "fp_out-$i.out"; then
+        rm "fp_out-$i.out"
+        echo "OK"
+    else
+        echo "ERROR! Tagging with '$LABEL-$i'"
+        git branch -f "$LABEL-$i"
+        diff -u examples.csv examples.csv.UPDATED >"examples.csv.diff-$i"
+        diff -u manet.csv manet.csv.UPDATED >"manet.csv.diff-$i"
+        rm *.csv.UPDATED
+    fi
+done
+
