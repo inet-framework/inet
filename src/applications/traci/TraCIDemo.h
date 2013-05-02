@@ -34,7 +34,8 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
 {
     public:
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-        { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     protected:

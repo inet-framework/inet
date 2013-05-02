@@ -45,7 +45,7 @@ class INET_API TCPSrvHostApp : public cSimpleModule, public ILifecycle
     virtual void removeThread(TCPServerThreadBase *thread);
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-    { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
 
 /**
