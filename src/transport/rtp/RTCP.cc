@@ -20,6 +20,8 @@
 
 #include "IPv4Address.h"
 #include "LifecycleOperation.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "RTCPPacket.h"
 #include "RTPInnerPacket.h"
 #include "RTPParticipantInfo.h"
@@ -38,19 +40,30 @@ RTCP::RTCP()
     _senderInfo = NULL;
 }
 
-void RTCP::initialize()
+void RTCP::initialize(int stage)
 {
-    // initialize variables
-    _ssrcChosen = false;
-    _leaveSession = false;
-    _udpSocket.setOutputGate(gate("udpOut"));
+    if (stage == 0)
+    {
+        // initialize variables
+        _ssrcChosen = false;
+        _leaveSession = false;
+        _udpSocket.setOutputGate(gate("udpOut"));
 
-    _packetsCalculated = 0;
-    _averagePacketSize = 0.0;
+        _packetsCalculated = 0;
+        _averagePacketSize = 0.0;
 
-    _participantInfos.setName("ParticipantInfos");
+        _participantInfos.setName("ParticipantInfos");
 
-    rcvdPkSignal = registerSignal("rcvdPk");
+        rcvdPkSignal = registerSignal("rcvdPk");
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 RTCP::~RTCP()

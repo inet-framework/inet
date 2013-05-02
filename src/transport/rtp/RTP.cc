@@ -21,6 +21,8 @@
 #include "InterfaceEntry.h"
 #include "IPv4Address.h"
 #include "LifecycleOperation.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "RoutingTableAccess.h"
 #include "RTPInnerPacket.h"
 #include "RTPInterfacePacket_m.h"
@@ -39,16 +41,27 @@ simsignal_t RTP::rcvdPkSignal = SIMSIGNAL_NULL;
 // methods inherited from cSimpleModule
 //
 
-void RTP::initialize()
+void RTP::initialize(int stage)
 {
-    _leaveSession = false;
-    appInGate = findGate("appIn");
-    profileInGate = findGate("profileIn");
-    rtcpInGate = findGate("rtcpIn");
-    udpInGate = findGate("udpIn");
-    _udpSocket.setOutputGate(gate("udpOut"));
+    if (stage == 0)
+    {
+        _leaveSession = false;
+        appInGate = findGate("appIn");
+        profileInGate = findGate("profileIn");
+        rtcpInGate = findGate("rtcpIn");
+        udpInGate = findGate("udpIn");
+        _udpSocket.setOutputGate(gate("udpOut"));
 
-    rcvdPkSignal = registerSignal("rcvdPk");
+        rcvdPkSignal = registerSignal("rcvdPk");
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 void RTP::handleMessage(cMessage *msg)

@@ -43,7 +43,8 @@ class INET_API RTP : public cSimpleModule, public ILifecycle
     /**
      * Initializes variables.
      */
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
 
     /**
      * Handles incoming messages.

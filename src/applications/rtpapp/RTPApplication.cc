@@ -20,6 +20,8 @@
 
 #include "IPvXAddressResolver.h"
 #include "LifecycleOperation.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "RTPInterfacePacket_m.h"
 
 Define_Module(RTPApplication)
@@ -29,51 +31,60 @@ void RTPApplication::initialize(int stage)
 {
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage != 3)
-        return;
+    if (stage == 0)
+    {
+        // the common name (CNAME) of this host
+        _commonName = par("commonName");
 
-    // read all omnet parameters
+        // which rtp profile is to be used (usually RTPAVProfile)
+        _profileName = par("profileName");
 
-    // the common name (CNAME) of this host
-    _commonName = par("commonName");
+        // bandwidth in bytes per second for this session
+        _bandwidth = par("bandwidth");
 
-    // which rtp profile is to be used (usually RTPAVProfile)
-    _profileName = par("profileName");
+        // port number which is to be used; to ports are actually used: one
+        // for rtp and one for rtcp
+        _port = (int)par("portNumber").longValue();
 
-    // bandwidth in bytes per second for this session
-    _bandwidth = par("bandwidth");
+        // fileName of file to be transmitted
+        // NULL or "" means this system acts only as a receiver
+        _fileName = par("fileName");
 
-    // the ip address to connect to (unicast or multicast)
-    _destinationAddress = IPvXAddressResolver().resolve(par("destinationAddress").stringValue()).get4();
+        // payload type of file to transmit
+        _payloadType = par("payloadType");
 
-    // port number which is to be used; to ports are actually used: one
-    // for rtp and one for rtcp
-    _port = (int)par("portNumber").longValue();
+        _sessionEnterDelay = par("sessionEnterDelay");
+        _transmissionStartDelay = par("transmissionStartDelay");
+        _transmissionStopDelay = par("transmissionStopDelay");
+        _sessionLeaveDelay = par("sessionLeaveDelay");
 
-    // fileName of file to be transmitted
-    // NULL or "" means this system acts only as a receiver
-    _fileName = par("fileName");
+        ssrc = 0;
+        isActiveSession = false;
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
+    else if (stage == 3)
+    {
+        // the ip address to connect to (unicast or multicast)
+        _destinationAddress = IPvXAddressResolver().resolve(par("destinationAddress").stringValue()).get4();
 
-    // payload type of file to transmit
-    _payloadType = par("payloadType");
+        ev << "commonName" << _commonName << endl;
+        ev << "profileName" << _profileName << endl;
+        ev << "bandwidth" << _bandwidth << endl;
+        ev << "destinationAddress" << _destinationAddress << endl;
+        ev << "portNumber" << _port << endl;
+        ev << "fileName" << _fileName << endl;
+        ev << "payloadType" << _payloadType << endl;
 
-    _sessionEnterDelay = par("sessionEnterDelay");
-    _transmissionStartDelay = par("transmissionStartDelay");
-    _transmissionStopDelay = par("transmissionStopDelay");
-    _sessionLeaveDelay = par("sessionLeaveDelay");
-
-    ev << "commonName" << _commonName << endl;
-    ev << "profileName" << _profileName << endl;
-    ev << "bandwidth" << _bandwidth << endl;
-    ev << "destinationAddress" << _destinationAddress << endl;
-    ev << "portNumber" << _port << endl;
-    ev << "fileName" << _fileName << endl;
-    ev << "payloadType" << _payloadType << endl;
-
-    ssrc = 0;
-    isActiveSession = false;
-    cMessage *selfMsg = new cMessage("enterSession", ENTER_SESSION);
-    scheduleAt(simTime() + _sessionEnterDelay, selfMsg);
+        cMessage *selfMsg = new cMessage("enterSession", ENTER_SESSION);
+        scheduleAt(simTime() + _sessionEnterDelay, selfMsg);
+    }
 }
 
 void RTPApplication::handleMessage(cMessage* msgIn)
