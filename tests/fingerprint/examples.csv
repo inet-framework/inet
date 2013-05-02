@@ -269,8 +269,11 @@
 # /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0,                100s,            0    # <!> Error in module (OSPFRouting) Backbone.R6.ospf (id=132) at event #23916, t=45.089338342798: check_and_cast(): cannot cast (OSPF::NetworkLSA *) to type 'OSPF::RouterLSA *'.
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c stable -r 0,                 1000s,           a459-b1c6
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0,               1000s,           5d9c-73a4
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic2 -r 0,               1000s,           0000-0000
 /examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            9b4d-69cf
-/examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0,                500s,            2be5-4fa7
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c AlwaysUp -r 0,               500s,            9f57-b379
+# /examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownRestart -r 0,       500s,            0000-0000
+# /examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,        500s,            0000-0000
 
 # /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                100s,            a422-b4ed    # unstable fingerprint
 # /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                100s,            1ef9-fff6    # unstable fingerprint
