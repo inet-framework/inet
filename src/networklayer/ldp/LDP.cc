@@ -32,7 +32,7 @@
 #include "UDPControlInfo_m.h"
 #include "UDPPacket.h"
 #include "TCPSegment.h"
-
+#include "NodeOperations.h"
 
 Define_Module(LDP);
 
@@ -124,7 +124,9 @@ void LDP::initialize(int stage)
 
     // schedule first hello
     sendHelloMsg = new cMessage("LDPSendHello");
-    scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
+    nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+    if (isNodeUp())
+        scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
 
     // bind UDP socket
     udpSocket.setOutputGate(gate("udpOut"));
@@ -158,6 +160,8 @@ void LDP::initialize(int stage)
 
 void LDP::handleMessage(cMessage *msg)
 {
+    if (!isNodeUp())
+        throw cRuntimeError("LDP is not running");
     EV << "Received: (" << msg->getClassName() << ")" << msg->getName() << "\n";
     if (msg==sendHelloMsg)
     {
@@ -190,6 +194,34 @@ void LDP::handleMessage(cMessage *msg)
     {
         processMessageFromTCP(msg);
     }
+}
+
+bool LDP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+            scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+            for (unsigned int i=0; i<myPeers.size(); i++)
+                cancelAndDelete(myPeers[i].timeout);
+            myPeers.clear();
+            cancelEvent(sendHelloMsg);
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            ;
+    }
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
+}
+
+bool LDP::isNodeUp()
+{
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
 void LDP::sendToPeer(IPv4Address dest, cMessage *msg)
