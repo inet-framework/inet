@@ -247,3 +247,12 @@ void RTPApplication::handleMessage(cMessage* msgIn)
     }
     delete msgIn;
 }
+
+bool RTPApplication::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
+}
+

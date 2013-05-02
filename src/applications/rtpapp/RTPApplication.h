@@ -35,8 +35,7 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
          */
         RTPApplication() : cSimpleModule() {}
 
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-        { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
     protected:
         /**

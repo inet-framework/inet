@@ -36,7 +36,7 @@ class INET_API PingTestApp : public cSimpleModule, public ILifecycle
 {
   public:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-    { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   protected:
     virtual void initialize();

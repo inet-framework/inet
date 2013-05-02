@@ -50,7 +50,7 @@ class INET_API TCPSessionApp : public cSimpleModule, public ILifecycle
     TCPSessionApp() : cSimpleModule(65536) {}
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-    { throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   protected:
     virtual void parseScript(const char *script);
