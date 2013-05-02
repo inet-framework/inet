@@ -1,12 +1,13 @@
 
 package inet.examples.ospfv2.simpletest;
 
-import inet.base.UnimplementedModule;
+import inet.base.LifecycleController;
 import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.ospfv2.OSPFRouter;
 import inet.util.ThruputMeteringChannel;
+import inet.world.scenario.ScenarioManager;
 
 
 network SimpleTest
@@ -36,12 +37,14 @@ network SimpleTest
         R1: OSPFRouter {
             parameters:
                 @display("p=296,92");
+                hasStatus = true;
             gates:
                 ethg[2];
         }
         R2: OSPFRouter {
             parameters:
                 @display("p=416,92");
+                hasStatus = true;
             gates:
                 ethg[2];
         }
@@ -68,6 +71,12 @@ network SimpleTest
                 addStaticRoutes = false;
                 addDefaultRoutes = false;
                 @display("p=75,43");
+        }
+        scenarioManager: ScenarioManager {
+            @display("p=75,43");
+        }
+        lifecycleController: LifecycleController {
+            @display("p=208,43");
         }
     connections:
         H1.ethg[0] <--> C <--> N1.ethg[0];
