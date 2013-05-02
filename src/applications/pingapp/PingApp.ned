@@ -52,9 +52,9 @@ simple PingApp like IPingApp
         double packetSize @unit("B") = default(56B); // of ping payload, in bytes
         volatile double sendInterval @unit("s") = default(1s); // time to wait between pings (can be random)
         double hopLimit = default(32); // TTL or hopLimit for IP packets
-        double count = default(0); // stop after count ping requests, 0 means continuously
+        double count = default(-1); // stop after count ping requests, -1 means continuously
         double startTime @unit("s") = default(uniform(0s,this.sendInterval)); // send first ping at startTime
-        double stopTime @unit("s") = default(0s); // time to finish sending, 0 means forever
+        double stopTime @unit("s") = default(-1s); // time to finish sending, -1 means forever
         bool printPing = default(false); // log to stdout
         @display("i=block/app");
         @signal[rtt](type=simtime_t);

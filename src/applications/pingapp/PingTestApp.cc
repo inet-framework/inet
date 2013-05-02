@@ -58,7 +58,7 @@ void PingTestApp::initialize()
     count = par("count");
     startTime = par("startTime").doubleValue();
     stopTime = par("stopTime").doubleValue();
-    if (stopTime != 0 && stopTime <= startTime)
+    if (stopTime != -1 && stopTime < startTime)
         error("Invalid startTime/stopTime parameters");
     printPing = par("printPing").boolValue();
     continuous = par("continuous").boolValue();
@@ -209,7 +209,7 @@ void PingTestApp::scheduleNextPing(cMessage *timer)
     if (sendSeqNo % count == 0)
         nextPing += par("sleepDuration").doubleValue();
 
-    if (stopTime == 0 || nextPing < stopTime)
+    if (stopTime == -1 || nextPing < stopTime)
         scheduleAt(nextPing, timer);
     else
         delete timer;

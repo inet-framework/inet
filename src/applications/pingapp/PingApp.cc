@@ -26,7 +26,6 @@
 #include "IPv6ControlInfo.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
-#include "NodeStatus.h"
 
 using std::cout;
 
@@ -38,11 +37,11 @@ simsignal_t PingApp::outOfOrderArrivalsSignal = SIMSIGNAL_NULL;
 simsignal_t PingApp::pingTxSeqSignal = SIMSIGNAL_NULL;
 simsignal_t PingApp::pingRxSeqSignal = SIMSIGNAL_NULL;
 
-
 PingApp::PingApp()
 {
-    sendIntervalp = NULL;
     timer = NULL;
+    nodeStatus = NULL;
+    sendIntervalPar = NULL;
 }
 
 PingApp::~PingApp()
@@ -58,16 +57,18 @@ void PingApp::initialize()
     // (defer reading srcAddr/destAddr to when ping starts, maybe
     // addresses will be assigned later by some protocol)
     packetSize = par("packetSize");
-    sendIntervalp = & par("sendInterval");
+    sendIntervalPar = &par("sendInterval");
     hopLimit = par("hopLimit");
     count = par("count");
     startTime = par("startTime");
     stopTime = par("stopTime");
-    if (stopTime != 0 && stopTime <= startTime)
+    if (stopTime != -1 && stopTime < startTime)
         error("Invalid startTime/stopTime parameters");
     printPing = (bool)par("printPing");
 
     // state
+    pid = -1;
+    lastStart = -1;
     sendSeqNo = expectedReplySeqNo = 0;
     WATCH(sendSeqNo);
     WATCH(expectedReplySeqNo);
@@ -79,50 +80,36 @@ void PingApp::initialize()
     outOfOrderArrivalsSignal = registerSignal("outOfOrderArrivals");
     pingTxSeqSignal = registerSignal("pingTxSeq");
     pingRxSeqSignal = registerSignal("pingRxSeq");
-
-    lossCount = outOfOrderArrivalCount = numPongs = 0;
+    sentCount = lossCount = outOfOrderArrivalCount = numPongs = 0;
     WATCH(lossCount);
     WATCH(outOfOrderArrivalCount);
     WATCH(numPongs);
 
-    // schedule first ping (use empty destAddr to disable)
+    // references
     timer = new cMessage("sendPing");
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    bool isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-    if (isNodeUp && par("destAddr").stringValue()[0])
-        scheduleAt(startTime, timer);
+    nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+
+    // startup
+    if (isEnabled() && isNodeUp())
+        startSendingPingRequests();
 }
 
 void PingApp::handleMessage(cMessage *msg)
 {
+    if (!isNodeUp())
+        throw cRuntimeError("Application is not running");
     if (msg == timer)
     {
-        // on first call we need to initialize
-        if (sendSeqNo == 0)
-        {
-            srcAddr = IPvXAddressResolver().resolve(par("srcAddr"));
-            destAddr = IPvXAddressResolver().resolve(par("destAddr"));
-            ASSERT(!destAddr.isUnspecified());
-
-            EV << "Starting up: dest=" << destAddr << "  src=" << srcAddr << "\n";
-        }
-
-        // send a ping
-        sendPing();
-
-        // then schedule next one if needed
-        scheduleNextPing();
+        sendPingRequest();
+        scheduleNextPingRequest(simTime());
     }
     else
-    {
-        // process ping response
         processPingResponse(check_and_cast<PingPayload *>(msg));
-    }
 
     if (ev.isGUI())
     {
         char buf[40];
-        sprintf(buf, "sent: %ld pks\nrcvd: %ld pks", sendSeqNo, numPongs);
+        sprintf(buf, "sent: %ld pks\nrcvd: %ld pks", sentCount, numPongs);
         getDisplayString().setTagArg("t", 0, buf);
     }
 }
@@ -131,40 +118,87 @@ bool PingApp::handleOperationStage(LifecycleOperation *operation, int stage, IDo
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
-        {
-            simtime_t start = std::max(startTime, simTime());
-            if (stopTime == 0 || stopTime > start)
-                scheduleAt(start, timer);
-            //TODO reset statistics?  statistics v.s. more than one lifecycle??? see also shutdown/finish
-            //TODO could be re-read startTime,stopTime,count,... parameters??? need volatile???
-        }
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER && isEnabled())
+            startSendingPingRequests();
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
-            if (timer)
-                cancelEvent(timer);
-            //TODO statistics?  statistics v.s. more than one lifecycle???
+            stopSendingPingRequests();
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeCrashOperation::STAGE_CRASH)
-            if (timer)
-                cancelEvent(timer);
+            stopSendingPingRequests();
     }
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
 
-void PingApp::sendPing()
+void PingApp::startSendingPingRequests()
 {
+    ASSERT(!timer->isScheduled());
+    pid = simulation.getUniqueNumber();
+    lastStart = simTime();
+    scheduleNextPingRequest(-1);
+}
+
+void PingApp::stopSendingPingRequests()
+{
+    pid = -1;
+    lastStart = -1;
+    sendSeqNo = expectedReplySeqNo = 0;
+    srcAddr = destAddr = IPvXAddress();
+    cancelNextPingRequest();
+}
+
+void PingApp::scheduleNextPingRequest(simtime_t previous)
+{
+    simtime_t next;
+    if (previous == -1)
+        next = simTime() <= startTime ? startTime : simTime();
+    else
+        next = previous + sendIntervalPar->doubleValue();
+    if (stopTime == -1  || next <= stopTime)
+        scheduleAt(next, timer);
+}
+
+void PingApp::cancelNextPingRequest()
+{
+    cancelEvent(timer);
+}
+
+bool PingApp::isNodeUp()
+{
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+}
+
+bool PingApp::isEnabled()
+{
+    return par("destAddr").stringValue()[0] && (count == -1 || sentCount < count);
+}
+
+void PingApp::sendPingRequest()
+{
+    if (destAddr.isUnspecified())
+    {
+        srcAddr = IPvXAddressResolver().resolve(par("srcAddr"));
+        destAddr = IPvXAddressResolver().resolve(par("destAddr"));
+        EV << "Starting up: destination = " << destAddr << "  source = " << srcAddr << "\n";
+    }
+
     EV << "Sending ping #" << sendSeqNo << "\n";
 
     char name[32];
     sprintf(name, "ping%ld", sendSeqNo);
 
     PingPayload *msg = new PingPayload(name);
-    msg->setOriginatorId(getId());
+    msg->setOriginatorId(pid);
     msg->setSeqNo(sendSeqNo);
     msg->setByteLength(packetSize);
+    const char *time = SIMTIME_STR(simTime());
+    int timeLength = strlen(time);
+    msg->setDataArraySize(timeLength);
+    for (int i = 0; i < timeLength; i++)
+        msg->setData(i, time[i]);
 
     // store the sending time in a circular buffer so we can compute RTT when the packet returns
     sendTimeHistory[sendSeqNo % PING_HISTORY_SIZE] = simTime();
@@ -172,14 +206,7 @@ void PingApp::sendPing()
     sendToICMP(msg, destAddr, srcAddr, hopLimit);
     emit(pingTxSeqSignal, sendSeqNo);
     sendSeqNo++;
-}
-
-void PingApp::scheduleNextPing()
-{
-    simtime_t nextPing = simTime() + sendIntervalp->doubleValue();
-
-    if ((count == 0 || sendSeqNo < count) && (stopTime == 0 || nextPing < stopTime))
-        scheduleAt(nextPing, timer);
+    sentCount++;
 }
 
 void PingApp::sendToICMP(cMessage *msg, const IPvXAddress& destAddr, const IPvXAddress& srcAddr, int hopLimit)
@@ -208,12 +235,29 @@ void PingApp::sendToICMP(cMessage *msg, const IPvXAddress& destAddr, const IPvXA
 
 void PingApp::processPingResponse(PingPayload *msg)
 {
+    if (msg->getOriginatorId() != pid)
+    {
+        EV << "Received response was not sent by this application, dropping packet\n";
+        delete msg;
+        return;
+    }
+
+    int timeLength = msg->getDataArraySize();
+    char time[timeLength + 1];      //FIXME visualC ???
+    for (int i = 0; i < timeLength; i++)
+        time[i] = msg->getData(i);
+    time[timeLength] = '\0';
+    simtime_t sendTime = STR_SIMTIME(time);     // Why converting to/from string?
+
+    if (sendTime < lastStart) {
+        EV << "Received response was not sent since last application start, dropping packet\n";
+        delete msg;
+        return;
+    }
+
     // get src, hopCount etc from packet, and print them
     IPvXAddress src, dest;
     int msgHopCount = -1;
-
-    ASSERT(msg->getOriginatorId() == getId());  // ICMP module error
-
     if (dynamic_cast<IPv4ControlInfo *>(msg->getControlInfo()) != NULL)
     {
         IPv4ControlInfo *ctrl = (IPv4ControlInfo *)msg->getControlInfo();
@@ -295,7 +339,7 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
 
 void PingApp::finish()
 {
-    if (sendSeqNo==0)
+    if (sentCount==0)
     {
         if (printPing)
             EV << getFullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
@@ -304,9 +348,9 @@ void PingApp::finish()
 
     lossCount += sendSeqNo - expectedReplySeqNo;
     // record statistics
-    recordScalar("Pings sent", sendSeqNo);
-    recordScalar("ping loss rate (%)", 100 * lossCount / (double)sendSeqNo);
-    recordScalar("ping out-of-order rate (%)", 100 * outOfOrderArrivalCount / (double)sendSeqNo);
+    recordScalar("Pings sent", sentCount);
+    recordScalar("ping loss rate (%)", 100 * lossCount / (double)sentCount);
+    recordScalar("ping out-of-order rate (%)", 100 * outOfOrderArrivalCount / (double)sentCount);
 
     // print it to stdout as well
     if (printPing)
@@ -315,11 +359,10 @@ void PingApp::finish()
         cout << "\t" << getFullPath() << endl;
         cout << "--------------------------------------------------------" << endl;
         cout << "ping " << par("destAddr").stringValue() << " (" << destAddr << "):" << endl;
-        cout << "sent: " << sendSeqNo << "   received: " << numPongs << "   loss rate (%): " << (100 * lossCount / (double) sendSeqNo) << endl;
+        cout << "sent: " << sentCount << "   received: " << numPongs << "   loss rate (%): " << (100 * lossCount / (double) sentCount) << endl;
         cout << "round-trip min/avg/max (ms): " << (rttStat.getMin() * 1000.0) << "/"
              << (rttStat.getMean() * 1000.0) << "/" << (rttStat.getMax() * 1000.0) << endl;
         cout << "stddev (ms): " << (rttStat.getStddev() * 1000.0) << "   variance:" << rttStat.getVariance() << endl;
         cout << "--------------------------------------------------------" << endl;
     }
 }
-
