@@ -17,6 +17,9 @@
 //
 
 #include "SimpleVoIPReceiver.h"
+
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "SimpleVoIPPacket_m.h"
 
 Define_Module(SimpleVoIPReceiver);
@@ -60,34 +63,42 @@ SimpleVoIPReceiver::~SimpleVoIPReceiver()
 
 void SimpleVoIPReceiver::initialize(int stage)
 {
-    if (stage != 3)
-        return;
-
-    emodel_Ie = par("emodel_Ie");
-    emodel_Bpl = par("emodel_Bpl");
-    emodel_A = par("emodel_A");
-    emodel_Ro = par("emodel_Ro");
-
-    bufferSpace = par("bufferSpace");
-    playoutDelay = par("playoutDelay");
-    mosSpareTime = par("mosSpareTime");
-
-    int port = par("localPort");
-    EV << "VoIPReceiver::initialize - binding to port: local:" << port << endl;
-    if (port != -1) {
-        socket.setOutputGate(gate("udpOut"));
-        socket.bind(port);
+    if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
+    else if (stage == 3)
+    {
+        emodel_Ie = par("emodel_Ie");
+        emodel_Bpl = par("emodel_Bpl");
+        emodel_A = par("emodel_A");
+        emodel_Ro = par("emodel_Ro");
 
-    currentTalkspurt.talkspurtID = -1;
-    selfTalkspurtFinished = new cMessage("selfTalkspurtFinished");
+        bufferSpace = par("bufferSpace");
+        playoutDelay = par("playoutDelay");
+        mosSpareTime = par("mosSpareTime");
 
-    packetLossRateSignal = registerSignal("VoIPPacketLossRate");
-    packetDelaySignal = registerSignal("VoIPPacketDelay");
-    playoutDelaySignal = registerSignal("VoIPPlayoutDelay");
-    playoutLossRateSignal = registerSignal("VoIPPlayoutLossRate");
-    mosSignal = registerSignal("VoIPMosSignal");
-    taildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
+        int port = par("localPort");
+        EV << "VoIPReceiver::initialize - binding to port: local:" << port << endl;
+        if (port != -1) {
+            socket.setOutputGate(gate("udpOut"));
+            socket.bind(port);
+        }
+
+        currentTalkspurt.talkspurtID = -1;
+        selfTalkspurtFinished = new cMessage("selfTalkspurtFinished");
+
+        packetLossRateSignal = registerSignal("VoIPPacketLossRate");
+        packetDelaySignal = registerSignal("VoIPPacketDelay");
+        playoutDelaySignal = registerSignal("VoIPPlayoutDelay");
+        playoutLossRateSignal = registerSignal("VoIPPlayoutLossRate");
+        mosSignal = registerSignal("VoIPMosSignal");
+        taildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
+    }
 }
 
 void SimpleVoIPReceiver::startTalkspurt(SimpleVoIPPacket* packet)

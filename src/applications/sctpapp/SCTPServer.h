@@ -97,7 +97,8 @@ class INET_API SCTPServer : public cSimpleModule, public ILifecycle
         { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     protected:
-        void initialize();
+        void initialize(int stage);
+        int numInitStages() const { return 2; }
         void handleMessage(cMessage *msg);
         void finish();
         void handleTimer(cMessage *msg);

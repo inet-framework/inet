@@ -102,7 +102,8 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     protected:
-        void initialize();
+        void initialize(int stage);
+        virtual int numInitStages() const { return 2; }
         void handleMessage(cMessage *msg);
         void finish();
         void handleTimer(cMessage *msg);

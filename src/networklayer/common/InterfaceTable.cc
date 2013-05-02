@@ -67,6 +67,7 @@ void InterfaceTable::initialize(int stage)
     {
         // get a pointer to the NotificationBoard module
         nb = NotificationBoardAccess().get();
+        //FIXME The valid nodeStatus->getState() value is not guaranteed in stage 0!!!! module order dependent!!!
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)
             registerLoopbackInterface();

@@ -19,6 +19,8 @@
 #include "SCTPPeer.h"
 
 #include "IPvXAddressResolver.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
 #include "SCTPMessage_m.h"
@@ -68,58 +70,69 @@ SCTPPeer::~SCTPPeer()
     rcvdBytesPerAssoc.clear();
 }
 
-void SCTPPeer::initialize()
+void SCTPPeer::initialize(int stage)
 {
-    numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
-    WATCH(numSessions);
-    WATCH(packetsSent);
-    WATCH(packetsRcvd);
-    WATCH(bytesSent);
-    WATCH(numRequestsToSend);
-
-    sentPkSignal = registerSignal("sentPk");
-    echoedPkSignal = registerSignal("echoedPk");
-    rcvdPkSignal = registerSignal("rcvdPk");
-
-    // parameters
-    const char *addressesString = par("localAddress");
-    AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
-    int port = par("localPort");
-    echo = par("echo");
-    delay = par("echoDelay");
-    outboundStreams = par("outboundStreams");
-    ordered = (bool)par("ordered");
-    queueSize = par("queueSize");
-    lastStream = 0;
-    timeoutMsg = new cMessage("SrvAppTimer");
-    SCTPSocket* socket = new SCTPSocket();
-    socket->setOutputGate(gate("sctpOut"));
-    socket->setOutboundStreams(outboundStreams);
-
-    if (addresses.size() == 0)
+    if (stage == 0)
     {
-        socket->bind(port);
-        clientSocket.bind(port);
-    }
-    else
-    {
-        socket->bindx(addresses, port);
-        clientSocket.bindx(addresses, port);
-    }
-    socket->listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient"));
-    sctpEV3 << "SCTPPeer::initialized listen port=" << port << "\n";
-    clientSocket.setCallbackObject(this);
-    clientSocket.setOutputGate(gate("sctpOut"));
+        numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
+        WATCH(numSessions);
+        WATCH(packetsSent);
+        WATCH(packetsRcvd);
+        WATCH(bytesSent);
+        WATCH(numRequestsToSend);
 
-    if ((simtime_t)par("startTime")>0)
-    {
-        connectTimer = new cMessage("ConnectTimer");
-        connectTimer->setKind(MSGKIND_CONNECT);
-        scheduleAt((simtime_t)par("startTime"), connectTimer);
+        sentPkSignal = registerSignal("sentPk");
+        echoedPkSignal = registerSignal("echoedPk");
+        rcvdPkSignal = registerSignal("rcvdPk");
+
+        // parameters
+        const char *addressesString = par("localAddress");
+        AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+        int port = par("localPort");
+        echo = par("echo");
+        delay = par("echoDelay");
+        outboundStreams = par("outboundStreams");
+        ordered = (bool)par("ordered");
+        queueSize = par("queueSize");
+        lastStream = 0;
+        timeoutMsg = new cMessage("SrvAppTimer");
+        SCTPSocket* socket = new SCTPSocket();
+        socket->setOutputGate(gate("sctpOut"));
+        socket->setOutboundStreams(outboundStreams);
+
+        if (addresses.size() == 0)
+        {
+            socket->bind(port);
+            clientSocket.bind(port);
+        }
+        else
+        {
+            socket->bindx(addresses, port);
+            clientSocket.bindx(addresses, port);
+        }
+        socket->listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient").longValue());
+        sctpEV3 << "SCTPPeer::initialized listen port=" << port << "\n";
+        clientSocket.setCallbackObject(this);
+        clientSocket.setOutputGate(gate("sctpOut"));
+
+        if ((simtime_t)par("startTime")>0)
+        {
+            connectTimer = new cMessage("ConnectTimer");
+            connectTimer->setKind(MSGKIND_CONNECT);
+            scheduleAt((simtime_t)par("startTime"), connectTimer);
+        }
+        schedule = false;
+        shutdownReceived = false;
+        sendAllowed = true;
     }
-    schedule = false;
-    shutdownReceived = false;
-    sendAllowed = true;
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 void SCTPPeer::sendOrSchedule(cPacket *msg)

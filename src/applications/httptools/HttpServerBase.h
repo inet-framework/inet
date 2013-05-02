@@ -112,7 +112,8 @@ class INET_API HttpServerBase : public HttpNodeBase
         /** @name cSimpleModule redefinitions */
         //@{
         /** Initialization of the component and startup of browse event scheduling */
-        virtual void initialize();
+        virtual void initialize(int stage);
+        virtual int numInitStages() const { return 2; }
 
         /** Report final statistics */
         virtual void finish();

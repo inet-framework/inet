@@ -39,35 +39,49 @@
 #include "IPv6ExtensionHeaders.h"
 #include "IPv6InterfaceData.h"
 
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
+
 #define FRAGMENT_TIMEOUT 60   // 60 sec, from IPv6 RFC
 
 
 Define_Module(IPv6);
 
-void IPv6::initialize()
+void IPv6::initialize(int stage)
 {
-    QueueBase::initialize();
+    if (stage == 0)
+    {
+        QueueBase::initialize();
 
-    ift = InterfaceTableAccess().get();
-    rt = RoutingTable6Access().get();
-    nd = IPv6NeighbourDiscoveryAccess().get();
-    icmp = ICMPv6Access().get();
+        ift = InterfaceTableAccess().get();
+        rt = RoutingTable6Access().get();
+        nd = IPv6NeighbourDiscoveryAccess().get();
+        icmp = ICMPv6Access().get();
 
-    tunneling = IPv6TunnelingAccess().get();
+        tunneling = IPv6TunnelingAccess().get();
 
-    mapping.parseProtocolMapping(par("protocolMapping"));
+        mapping.parseProtocolMapping(par("protocolMapping"));
 
-    curFragmentId = 0;
-    lastCheckTime = 0;
-    fragbuf.init(icmp);
+        curFragmentId = 0;
+        lastCheckTime = 0;
+        fragbuf.init(icmp);
 
-    numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
+        numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
-    WATCH(numMulticast);
-    WATCH(numLocalDeliver);
-    WATCH(numDropped);
-    WATCH(numUnroutable);
-    WATCH(numForwarded);
+        WATCH(numMulticast);
+        WATCH(numLocalDeliver);
+        WATCH(numDropped);
+        WATCH(numUnroutable);
+        WATCH(numForwarded);
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 void IPv6::updateDisplayString()

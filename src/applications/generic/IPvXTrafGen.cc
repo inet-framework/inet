@@ -51,7 +51,7 @@ void IPvXTrafGen::initialize(int stage)
     if (stage != 3)
         return;
 
-    IPvXTrafSink::initialize();
+    IPvXTrafSink::initialize(stage);
     sentPkSignal = registerSignal("sentPk");
 
     protocol = par("protocol");

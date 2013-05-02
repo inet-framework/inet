@@ -24,7 +24,9 @@
 #include "InterfaceTableAccess.h"
 #include "LIBTableAccess.h"
 #include "NotifierConsts.h"
+#include "ModuleAccess.h"
 #include "NodeOperations.h"
+#include "NodeStatus.h"
 
 #define PSB_REFRESH_INTERVAL    5.0
 #define RSB_REFRESH_INTERVAL    6.0
@@ -71,7 +73,11 @@ void RSVP::initialize(int stage)
         retryInterval = 1.0;
 
         // setup hello
-        setupHello();
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (isOperational)
+            setupHello();
 
         // process traffic configuration
         readTrafficFromXML(par("traffic").xmlValue());

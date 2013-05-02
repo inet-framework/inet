@@ -24,26 +24,31 @@ Define_Module(TCPEchoApp);
 simsignal_t TCPEchoApp::rcvdPkSignal = SIMSIGNAL_NULL;
 simsignal_t TCPEchoApp::sentPkSignal = SIMSIGNAL_NULL;
 
-void TCPEchoApp::initialize()
+void TCPEchoApp::initialize(int stage)
 {
-    cSimpleModule::initialize();
-    delay = par("echoDelay");
-    echoFactor = par("echoFactor");
+    cSimpleModule::initialize(stage);
+    if (stage == 0)
+    {
+        delay = par("echoDelay");
+        echoFactor = par("echoFactor");
 
-    bytesRcvd = bytesSent = 0;
-    WATCH(bytesRcvd);
-    WATCH(bytesSent);
+        bytesRcvd = bytesSent = 0;
+        WATCH(bytesRcvd);
+        WATCH(bytesSent);
 
-    rcvdPkSignal = registerSignal("rcvdPk");
-    sentPkSignal = registerSignal("sentPk");
+        rcvdPkSignal = registerSignal("rcvdPk");
+        sentPkSignal = registerSignal("sentPk");
 
-    socket.setOutputGate(gate("tcpOut"));
-    socket.readDataTransferModePar(*this);
+        socket.setOutputGate(gate("tcpOut"));
+        socket.readDataTransferModePar(*this);
 
-    nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-
-    if (isNodeUp())
-        startListening();
+        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+    }
+    else if (stage == 1)
+    {
+        if (isNodeUp())
+            startListening();
+    }
 }
 
 bool TCPEchoApp::isNodeUp()

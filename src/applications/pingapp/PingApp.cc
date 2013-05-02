@@ -49,49 +49,54 @@ PingApp::~PingApp()
     cancelAndDelete(timer);
 }
 
-void PingApp::initialize()
+void PingApp::initialize(int stage)
 {
-    cSimpleModule::initialize();
+    cSimpleModule::initialize(stage);
 
-    // read params
-    // (defer reading srcAddr/destAddr to when ping starts, maybe
-    // addresses will be assigned later by some protocol)
-    packetSize = par("packetSize");
-    sendIntervalPar = &par("sendInterval");
-    hopLimit = par("hopLimit");
-    count = par("count");
-    startTime = par("startTime");
-    stopTime = par("stopTime");
-    if (stopTime != -1 && stopTime < startTime)
-        error("Invalid startTime/stopTime parameters");
-    printPing = (bool)par("printPing");
+    if (stage == 0)
+    {
+        // read params
+        // (defer reading srcAddr/destAddr to when ping starts, maybe
+        // addresses will be assigned later by some protocol)
+        packetSize = par("packetSize");
+        sendIntervalPar = &par("sendInterval");
+        hopLimit = par("hopLimit");
+        count = par("count");
+        startTime = par("startTime");
+        stopTime = par("stopTime");
+        if (stopTime != -1 && stopTime < startTime)
+            error("Invalid startTime/stopTime parameters");
+        printPing = (bool)par("printPing");
 
-    // state
-    pid = -1;
-    lastStart = -1;
-    sendSeqNo = expectedReplySeqNo = 0;
-    WATCH(sendSeqNo);
-    WATCH(expectedReplySeqNo);
+        // state
+        pid = -1;
+        lastStart = -1;
+        sendSeqNo = expectedReplySeqNo = 0;
+        WATCH(sendSeqNo);
+        WATCH(expectedReplySeqNo);
 
-    // statistics
-    rttStat.setName("pingRTT");
-    rttSignal = registerSignal("rtt");
-    numLostSignal = registerSignal("numLost");
-    outOfOrderArrivalsSignal = registerSignal("outOfOrderArrivals");
-    pingTxSeqSignal = registerSignal("pingTxSeq");
-    pingRxSeqSignal = registerSignal("pingRxSeq");
-    sentCount = lossCount = outOfOrderArrivalCount = numPongs = 0;
-    WATCH(lossCount);
-    WATCH(outOfOrderArrivalCount);
-    WATCH(numPongs);
+        // statistics
+        rttStat.setName("pingRTT");
+        rttSignal = registerSignal("rtt");
+        numLostSignal = registerSignal("numLost");
+        outOfOrderArrivalsSignal = registerSignal("outOfOrderArrivals");
+        pingTxSeqSignal = registerSignal("pingTxSeq");
+        pingRxSeqSignal = registerSignal("pingRxSeq");
+        sentCount = lossCount = outOfOrderArrivalCount = numPongs = 0;
+        WATCH(lossCount);
+        WATCH(outOfOrderArrivalCount);
+        WATCH(numPongs);
 
-    // references
-    timer = new cMessage("sendPing");
-    nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-
-    // startup
-    if (isEnabled() && isNodeUp())
-        startSendingPingRequests();
+        // references
+        timer = new cMessage("sendPing");
+        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+    }
+    else if (stage == 1)
+    {
+        // startup
+        if (isEnabled() && isNodeUp())
+            startSendingPingRequests();
+    }
 }
 
 void PingApp::handleMessage(cMessage *msg)

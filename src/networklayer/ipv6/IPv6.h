@@ -144,7 +144,8 @@ class INET_API IPv6 : public QueueBase, public ILifecycle
     /**
      * Initialization
      */
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
 
     /**
      * Processing of IPv6 datagrams. Called when a datagram reaches the front

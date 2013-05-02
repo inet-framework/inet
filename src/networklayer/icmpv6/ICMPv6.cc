@@ -26,14 +26,25 @@
 #include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"
 
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
+
 #include "PingPayload_m.h"
 
 
 Define_Module(ICMPv6);
 
 
-void ICMPv6::initialize()
+void ICMPv6::initialize(int stage)
 {
+    if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 void ICMPv6::handleMessage(cMessage *msg)

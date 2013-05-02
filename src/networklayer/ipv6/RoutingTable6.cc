@@ -88,6 +88,8 @@ void RoutingTable6::initialize(int stage)
 {
     if (stage==1)
     {
+        //TODO isNodeUp???
+
         ift = InterfaceTableAccess().get();
         nb = NotificationBoardAccess().get();
 

@@ -21,6 +21,7 @@
 #include "InterfaceTableAccess.h"
 #include "IPv4InterfaceData.h"
 #include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "NotifierConsts.h"
 #include "RoutingTableAccess.h"
 #include "NodeOperations.h"
@@ -52,6 +53,14 @@ void DHCPClient::initialize(int stage)
         timer_t1 = NULL;
         timer_t2 = NULL;
         timer_to = NULL;
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
     else if (stage == 3)
     {

@@ -19,7 +19,10 @@
 
 
 #include "IdealRadio.h"
+
+#include "ModuleAccess.h"
 #include "NodeOperations.h"
+#include "NodeStatus.h"
 
 
 #define MK_TRANSMISSION_OVER  1
@@ -63,6 +66,13 @@ void IdealRadio::initialize(int stage)
 
         // signals
         radioStateSignal = registerSignal("radioState");
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        rs = isOperational ? RadioState::IDLE : RadioState::OFF;
     }
     else if (stage == 2)
     {

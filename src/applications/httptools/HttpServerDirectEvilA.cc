@@ -32,9 +32,11 @@
 
 Define_Module(HttpServerDirectEvilA);
 
-void HttpServerDirectEvilA::initialize()
+void HttpServerDirectEvilA::initialize(int stage)
 {
-    HttpServerDirect::initialize();
+    HttpServerDirect::initialize(stage);
+    if (stage != 0)
+        return;
 
     badLow = par("minBadRequests");
     badHigh = par("maxBadRequests");

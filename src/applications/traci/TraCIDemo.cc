@@ -20,6 +20,8 @@
 
 #include "applications/traci/TraCIDemo.h"
 
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "NotificationBoard.h"
 #include "UDPSocket.h"
 
@@ -27,7 +29,15 @@ Define_Module(TraCIDemo);
 
 void TraCIDemo::initialize(int stage) {
     cSimpleModule::initialize(stage);
-    if (stage == 3) {
+    if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
+    else if (stage == 3) {
         debug = par("debug");
 
         mobilityStateChangedSignal = registerSignal("mobilityStateChanged");

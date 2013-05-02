@@ -18,6 +18,9 @@
 
 #include <cmath>
 #include "SimpleVoIPSender.h"
+
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "SimpleVoIPPacket_m.h"
 
 
@@ -40,39 +43,45 @@ void SimpleVoIPSender::initialize(int stage)
     EV << "VoIP Sender initialize: stage " << stage << endl;
 
     // avoid multiple initializations
-    if (stage != 3)
-        return;
+    if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
+    else if (stage == 3)
+    {
+        talkspurtDuration = 0;
+        silenceDuration = 0;
+        selfSource = new cMessage("selfSource");
+        isTalk = false;
+        talkspurtID = 0;
+        talkspurtNumPackets = 0;
+        packetID = 0;
+        timestamp = 0;
+        talkPacketSize = par("talkPacketSize");
+        packetizationInterval = par("packetizationInterval").doubleValue();
+        selfSender = new cMessage("selfSender");
+        localPort = par("localPort");
+        destPort = par("destPort");
+        destAddress = IPvXAddressResolver().resolve(par("destAddress").stringValue());
 
-    talkspurtDuration = 0;
-    silenceDuration = 0;
-    selfSource = new cMessage("selfSource");
-    isTalk = false;
-    talkspurtID = 0;
-    talkspurtNumPackets = 0;
-    packetID = 0;
-    timestamp = 0;
-    talkPacketSize = par("talkPacketSize");
-    packetizationInterval = par("packetizationInterval").doubleValue();
-    selfSender = new cMessage("selfSender");
-    localPort = par("localPort");
-    destPort = par("destPort");
-    destAddress = IPvXAddressResolver().resolve(par("destAddress").stringValue());
+        socket.setOutputGate(gate("udpOut"));
+        socket.bind(localPort);
 
+        EV << "VoIPSender::initialize - binding to port: local:" << localPort << " , dest:" << destPort << endl;
 
-    socket.setOutputGate(gate("udpOut"));
-    socket.bind(localPort);
+        // calculating traffic starting time
+        simtime_t startTime = par("startTime").doubleValue();
+        stopTime = par("stopTime").doubleValue();
+        if (stopTime != -1 && stopTime < startTime)
+            throw cRuntimeError("Invalid startTime/stopTime settings: startTime %g s greater than stopTime %g s", SIMTIME_DBL(startTime), SIMTIME_DBL(stopTime));
 
-    EV << "VoIPSender::initialize - binding to port: local:" << localPort << " , dest:" << destPort << endl;
-
-
-    // calculating traffic starting time
-    simtime_t startTime = par("startTime").doubleValue();
-    stopTime = par("stopTime").doubleValue();
-    if (stopTime != -1 && stopTime < startTime)
-        throw cRuntimeError("Invalid startTime/stopTime settings: startTime %g s greater than stopTime %g s", SIMTIME_DBL(startTime), SIMTIME_DBL(stopTime));
-
-    scheduleAt(startTime, selfSource);
-    EV << "\t starting traffic in " << startTime << " s" << endl;
+        scheduleAt(startTime, selfSource);
+        EV << "\t starting traffic in " << startTime << " s" << endl;
+    }
 }
 
 void SimpleVoIPSender::handleMessage(cMessage *msg)

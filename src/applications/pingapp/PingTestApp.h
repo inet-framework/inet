@@ -39,7 +39,8 @@ class INET_API PingTestApp : public cSimpleModule, public ILifecycle
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
@@ -81,5 +82,4 @@ class INET_API PingTestApp : public cSimpleModule, public ILifecycle
     long outOfOrderArrivalCount;
     long numPongs;
 };
-
 

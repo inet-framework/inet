@@ -22,6 +22,8 @@
 
 #include "SCTPServer.h"
 
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
 #include "SCTPMessage_m.h"
@@ -31,65 +33,77 @@
 
 Define_Module(SCTPServer);
 
-void SCTPServer::initialize()
+void SCTPServer::initialize(int stage)
 {
-    sctpEV3 << "initialize SCTP Server\n";
-    numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
-    WATCH(numSessions);
-    WATCH(packetsSent);
-    WATCH(packetsRcvd);
-    WATCH(bytesSent);
-    WATCH(numRequestsToSend);
+    sctpEV3 << "initialize SCTP Server stage " << stage << endl;
 
-    // parameters
-    finishEndsSimulation = (bool)par("finishEndsSimulation");
-    const char *addressesString = par("localAddress");
-    AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
-    int32 port = par("localPort");
-    echo = par("echo");
-    delay = par("echoDelay");
-    delayFirstRead = par("delayFirstRead");
-    cPar *delT = &par("readingInterval");
-    if (delT->isNumeric() && (double)*delT==0)
-        readInt = false;
-    else
-        readInt = true;
-    int32 messagesToPush = par("messagesToPush");
-    inboundStreams = par("inboundStreams");
-    outboundStreams = par("outboundStreams");
-    ordered = (bool)par("ordered");
-    queueSize = par("queueSize");
-    lastStream = 0;
-    //abort = NULL;
-    //abortSent = false;
-    timeoutMsg = new cMessage("SrvAppTimer");
-    delayTimer = new cMessage("delayTimer");
-    delayTimer->setContextPointer(this);
-    delayFirstReadTimer = new cMessage("delayFirstReadTimer");
-    firstData = true;
-
-    socket = new SCTPSocket();
-    socket->setOutputGate(gate("sctpOut"));
-    socket->setInboundStreams(inboundStreams);
-    socket->setOutboundStreams(outboundStreams);
-
-    if (addresses.size() == 0)
-        socket->bind(port);
-    else
-        socket->bindx(addresses, port);
-
-    socket->listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient"), messagesToPush);
-    sctpEV3 << "SCTPServer::initialized listen port=" << port << "\n";
-    schedule = false;
-    shutdownReceived = false;
-    uint32 streamNum = 0;
-    cStringTokenizer tokenizer(par("streamPriorities").stringValue());
-    while (tokenizer.hasMoreTokens())
+    if (stage == 0)
     {
-        const char *token = tokenizer.nextToken();
-        socket->setStreamPriority(streamNum, (uint32) atoi(token));
+        numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
+        WATCH(numSessions);
+        WATCH(packetsSent);
+        WATCH(packetsRcvd);
+        WATCH(bytesSent);
+        WATCH(numRequestsToSend);
 
-        streamNum++;
+        // parameters
+        finishEndsSimulation = (bool)par("finishEndsSimulation");
+        const char *addressesString = par("localAddress");
+        AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+        int32 port = par("localPort");
+        echo = par("echo");
+        delay = par("echoDelay");
+        delayFirstRead = par("delayFirstRead");
+        cPar *delT = &par("readingInterval");
+        if (delT->isNumeric() && (double)*delT==0)
+            readInt = false;
+        else
+            readInt = true;
+        int32 messagesToPush = par("messagesToPush");
+        inboundStreams = par("inboundStreams");
+        outboundStreams = par("outboundStreams");
+        ordered = (bool)par("ordered");
+        queueSize = par("queueSize");
+        lastStream = 0;
+        //abort = NULL;
+        //abortSent = false;
+        timeoutMsg = new cMessage("SrvAppTimer");
+        delayTimer = new cMessage("delayTimer");
+        delayTimer->setContextPointer(this);
+        delayFirstReadTimer = new cMessage("delayFirstReadTimer");
+        firstData = true;
+
+        socket = new SCTPSocket();
+        socket->setOutputGate(gate("sctpOut"));
+        socket->setInboundStreams(inboundStreams);
+        socket->setOutboundStreams(outboundStreams);
+
+        if (addresses.size() == 0)
+            socket->bind(port);
+        else
+            socket->bindx(addresses, port);
+
+        socket->listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient").longValue(), messagesToPush);
+        sctpEV3 << "SCTPServer::initialized listen port=" << port << "\n";
+        schedule = false;
+        shutdownReceived = false;
+        uint32 streamNum = 0;
+        cStringTokenizer tokenizer(par("streamPriorities").stringValue());
+        while (tokenizer.hasMoreTokens())
+        {
+            const char *token = tokenizer.nextToken();
+            socket->setStreamPriority(streamNum, (uint32) atoi(token));
+
+            streamNum++;
+        }
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
 }
 

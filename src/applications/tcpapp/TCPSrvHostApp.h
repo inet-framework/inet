@@ -35,7 +35,8 @@ class INET_API TCPSrvHostApp : public cSimpleModule, public ILifecycle
     TCPSocketMap socketMap;
 
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 

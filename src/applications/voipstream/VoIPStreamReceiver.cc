@@ -20,6 +20,8 @@
 #include "VoIPStreamReceiver.h"
 
 #include "INETEndians.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 
 
 Define_Module(VoIPStreamReceiver);
@@ -48,26 +50,37 @@ void VoIPStreamReceiver::initSignals()
     delaySignal = registerSignal("delay");
 }
 
-void VoIPStreamReceiver::initialize()
+void VoIPStreamReceiver::initialize(int stage)
 {
-    initSignals();
+    if (stage == 0)
+    {
+        initSignals();
 
-    // Hack for create results folder
-    recordScalar("hackForCreateResultsFolder", 0);
+        // Hack for create results folder
+        recordScalar("hackForCreateResultsFolder", 0);
 
-    // Say Hello to the world
-    ev << "VoIPSinkApp initialize()" << endl;
+        // Say Hello to the world
+        ev << "VoIPSinkApp initialize()" << endl;
 
-    // read parameters
-    localPort = par("localPort");
-    resultFile = par("resultFile");
-    playoutDelay = par("playoutDelay");
+        // read parameters
+        localPort = par("localPort");
+        resultFile = par("resultFile");
+        playoutDelay = par("playoutDelay");
 
-    // initialize avcodec library
-    av_register_all();
+        // initialize avcodec library
+        av_register_all();
 
-    socket.setOutputGate(gate("udpOut"));
-    socket.bind(localPort);
+        socket.setOutputGate(gate("udpOut"));
+        socket.bind(localPort);
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 void VoIPStreamReceiver::handleMessage(cMessage *msg)

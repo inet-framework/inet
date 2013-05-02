@@ -33,9 +33,11 @@
 
 Define_Module(HttpServerDirectEvilB);
 
-void HttpServerDirectEvilB::initialize()
+void HttpServerDirectEvilB::initialize(int stage)
 {
-    HttpServerDirect::initialize();
+    HttpServerDirect::initialize(stage);
+    if (stage != 0)
+        return;
 
     badLow = par("minBadRequests");
     badHigh = par("maxBadRequests");

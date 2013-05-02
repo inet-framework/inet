@@ -32,9 +32,11 @@
 
 Define_Module(HttpServer);
 
-void HttpServer::initialize()
+void HttpServer::initialize(int stage)
 {
-    HttpServerBase::initialize();
+    HttpServerBase::initialize(stage);
+    if (stage != 0)
+        return;
 
     EV_DEBUG << "Initializing server component (sockets version)" << endl;
 

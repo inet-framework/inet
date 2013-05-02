@@ -14,6 +14,8 @@
 
 #include "TelnetApp.h"
 
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 
 #define MSGKIND_CONNECT  0
 #define MSGKIND_SEND     1
@@ -42,22 +44,29 @@ int TelnetApp::checkedScheduleAt(simtime_t t, cMessage *msg)
 void TelnetApp::initialize(int stage)
 {
     TCPGenericCliAppBase::initialize(stage);
-    if (stage != 3)
-        return;
+    if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
+    else if (stage == 3)
+    {
+        numCharsToType = numLinesToType = 0;
+        WATCH(numCharsToType);
+        WATCH(numLinesToType);
 
+        simtime_t startTime = par("startTime");
+        stopTime = par("stopTime");
+        if (stopTime != -1 && stopTime < startTime)
+            error("Invalid startTime/stopTime parameters");
 
-    numCharsToType = numLinesToType = 0;
-    WATCH(numCharsToType);
-    WATCH(numLinesToType);
-
-    simtime_t startTime = par("startTime");
-    stopTime = par("stopTime");
-    if (stopTime != -1 && stopTime < startTime)
-        error("Invalid startTime/stopTime parameters");
-
-    timeoutMsg = new cMessage("timer");
-    timeoutMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(startTime, timeoutMsg);
+        timeoutMsg = new cMessage("timer");
+        timeoutMsg->setKind(MSGKIND_CONNECT);
+        scheduleAt(startTime, timeoutMsg);
+    }
 }
 
 void TelnetApp::handleTimer(cMessage *msg)

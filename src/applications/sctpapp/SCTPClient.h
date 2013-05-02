@@ -89,7 +89,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         /**
          * Initialization.
          */
-        void initialize();
+        void initialize(int stage);
 
         /**
          * For self-messages it invokes handleTimer(); messages arriving from SCTP

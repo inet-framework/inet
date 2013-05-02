@@ -152,6 +152,13 @@ void Radio::initialize(int stage)
     else if (stage == 1)
     {
         registerBattery();
+
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            setRadioState(RadioState::OFF);
+
         // tell initial values to MAC; must be done in stage 1, because they
         // subscribe in stage 0
         nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);

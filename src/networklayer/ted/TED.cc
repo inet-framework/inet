@@ -23,7 +23,9 @@
 #include "RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
 #include "NotificationBoard.h"
+#include "ModuleAccess.h"
 #include "NodeOperations.h"
+#include "NodeStatus.h"
 
 #define LS_INFINITY   1e16
 
@@ -53,7 +55,11 @@ void TED::initialize(int stage)
     maxMessageId = 0;
     ASSERT(!routerId.isUnspecified());
 
-    initializeTED();
+    bool isOperational;
+    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+    isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+    if (isOperational)
+        initializeTED();
 
     WATCH_VECTOR(ted);
 }

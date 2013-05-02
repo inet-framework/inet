@@ -25,7 +25,9 @@
 #include "IPv4InterfaceData.h"
 #include "DHCPServer.h"
 #include "DHCP_m.h"
+#include "ModuleAccess.h"
 #include "NodeOperations.h"
+#include "NodeStatus.h"
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 
@@ -66,8 +68,13 @@ void DHCPServer::initialize(int stage)
         nb = NotificationBoardAccess().get();
         nb->subscribe(this, NF_INTERFACE_CREATED);
         nb->subscribe(this, NF_INTERFACE_DELETED);
-    }
 
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
     if (stage == 2)
     {
         if (ie != NULL)    //FIXME: if (nodeUP)

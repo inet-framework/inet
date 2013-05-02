@@ -30,6 +30,9 @@
 
 #include "HttpBrowserBase.h"
 
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
+
 HttpBrowserBase::HttpBrowserBase()
 : HttpNodeBase()
 {
@@ -159,6 +162,12 @@ void HttpBrowserBase::initialize(int stage)
     else if (stage==1)
     {
         EV_DEBUG << "Initializing base HTTP browser component -- phase 1\n";
+
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
         std::string scriptFile = (const char*)par("scriptFile");
         scriptedMode = !scriptFile.empty();

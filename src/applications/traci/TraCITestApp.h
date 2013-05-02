@@ -39,7 +39,7 @@ class TraCITestApp : public cSimpleModule, protected cListener, public ILifecycl
         { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     protected:
-        int numInitStages() const {return std::max(cSimpleModule::numInitStages(), 1);}
+        int numInitStages() const {return std::max(cSimpleModule::numInitStages(), 2);}
         void initialize(int stage);
         void finish();
 

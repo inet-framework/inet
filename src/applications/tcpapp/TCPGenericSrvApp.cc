@@ -13,6 +13,9 @@
 
 
 #include "TCPGenericSrvApp.h"
+
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "TCPSocket.h"
 #include "TCPCommand_m.h"
 #include "GenericAppMsg_m.h"
@@ -23,28 +26,40 @@ Define_Module(TCPGenericSrvApp);
 simsignal_t TCPGenericSrvApp::rcvdPkSignal = SIMSIGNAL_NULL;
 simsignal_t TCPGenericSrvApp::sentPkSignal = SIMSIGNAL_NULL;
 
-void TCPGenericSrvApp::initialize()
+void TCPGenericSrvApp::initialize(int stage)
 {
-    const char *localAddress = par("localAddress");
-    int localPort = par("localPort");
-    delay = par("replyDelay");
-    maxMsgDelay = 0;
+    if (stage == 0)
+    {
+        int localPort = par("localPort");
+        delay = par("replyDelay");
+        maxMsgDelay = 0;
 
-    //statistics
-    msgsRcvd = msgsSent = bytesRcvd = bytesSent = 0;
-    rcvdPkSignal = registerSignal("rcvdPk");
-    sentPkSignal = registerSignal("sentPk");
+        //statistics
+        msgsRcvd = msgsSent = bytesRcvd = bytesSent = 0;
+        rcvdPkSignal = registerSignal("rcvdPk");
+        sentPkSignal = registerSignal("sentPk");
 
-    WATCH(msgsRcvd);
-    WATCH(msgsSent);
-    WATCH(bytesRcvd);
-    WATCH(bytesSent);
+        WATCH(msgsRcvd);
+        WATCH(msgsSent);
+        WATCH(bytesRcvd);
+        WATCH(bytesSent);
 
-    TCPSocket socket;
-    socket.setOutputGate(gate("tcpOut"));
-    socket.setDataTransferMode(TCP_TRANSFER_OBJECT);
-    socket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
-    socket.listen();
+        //TODO should use IPvXAddressResolver in stage 3
+        const char *localAddress = par("localAddress");
+        TCPSocket socket;
+        socket.setOutputGate(gate("tcpOut"));
+        socket.setDataTransferMode(TCP_TRANSFER_OBJECT);
+        socket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
+        socket.listen();
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 void TCPGenericSrvApp::sendOrSchedule(cMessage *msg, simtime_t delay)

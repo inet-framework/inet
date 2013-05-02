@@ -136,7 +136,8 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
         /**
          * Initialize tunnel manager.
          */
-        virtual void initialize();
+        virtual void initialize(int stage);
+        virtual int numInitStages() const { return 2; }
 
         /**
          * Receive messages from IPv6 module and encapsulate/decapsulate them.

@@ -23,6 +23,8 @@
 #include "IPv6Datagram.h"
 #include "IPv6InterfaceData.h"
 #include "InterfaceTableAccess.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "RoutingTable6Access.h"
 
 #ifdef WITH_xMIPv6
@@ -64,7 +66,15 @@ void IPv6NeighbourDiscovery::initialize(int stage)
     // We have to wait until the 3rd stage (stage 2) with scheduling messages,
     // because interface registration and IPv6 configuration takes places
     // in the first two stages.
-    if (stage == 3)
+    if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
+    else if (stage == 3)
     {
         ift = InterfaceTableAccess().get();
         rt6 = RoutingTable6Access().get();

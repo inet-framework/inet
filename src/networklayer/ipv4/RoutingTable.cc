@@ -65,6 +65,7 @@ RoutingTable::~RoutingTable()
 
 void RoutingTable::initialize(int stage)
 {
+    //FIXME missing case of NodeStatus DOWN
     if (stage==0)
     {
         // get a pointer to the NotificationBoard module and IInterfaceTable

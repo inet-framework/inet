@@ -52,7 +52,7 @@ class INET_API HttpServerDirect : public HttpServerBase
         /** @name cSimpleModule redefinitions */
         //@{
         /** Initialization of the component and startup of browse event scheduling */
-        virtual void initialize();
+        virtual void initialize(int stage);
 
         /** Report final statistics */
         virtual void finish();

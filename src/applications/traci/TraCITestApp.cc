@@ -19,6 +19,8 @@
 //
 
 #include "applications/traci/TraCITestApp.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "NotificationBoard.h"
 #include <cmath>
 
@@ -38,6 +40,14 @@ void TraCITestApp::initialize(int stage) {
         hasStopped = false;
 
         if (debug) std::cout << "TraCITestApp initialized with testNumber=" << testNumber << std::endl;
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
 }
 

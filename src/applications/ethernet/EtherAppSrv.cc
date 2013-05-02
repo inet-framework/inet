@@ -22,28 +22,41 @@
 
 #include "EtherApp_m.h"
 #include "Ieee802Ctrl_m.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 
 Define_Module(EtherAppSrv);
 
 simsignal_t EtherAppSrv::sentPkSignal = SIMSIGNAL_NULL;
 simsignal_t EtherAppSrv::rcvdPkSignal = SIMSIGNAL_NULL;
 
-void EtherAppSrv::initialize()
+void EtherAppSrv::initialize(int stage)
 {
-    localSAP = ETHERAPP_SRV_SAP;
-    remoteSAP = ETHERAPP_CLI_SAP;
+    if (stage == 0)
+    {
+        localSAP = ETHERAPP_SRV_SAP;
+        remoteSAP = ETHERAPP_CLI_SAP;
 
-    // statistics
-    packetsSent = packetsReceived = 0;
-    sentPkSignal = registerSignal("sentPk");
-    rcvdPkSignal = registerSignal("rcvdPk");
+        // statistics
+        packetsSent = packetsReceived = 0;
+        sentPkSignal = registerSignal("sentPk");
+        rcvdPkSignal = registerSignal("rcvdPk");
 
-    WATCH(packetsSent);
-    WATCH(packetsReceived);
+        WATCH(packetsSent);
+        WATCH(packetsReceived);
 
-    bool registerSAP = par("registerSAP");
-    if (registerSAP)
-        registerDSAP(localSAP);
+        bool registerSAP = par("registerSAP");
+        if (registerSAP)
+            registerDSAP(localSAP);
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 void EtherAppSrv::handleMessage(cMessage *msg)

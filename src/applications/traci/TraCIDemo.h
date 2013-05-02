@@ -42,7 +42,7 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
         virtual int numInitStages() const {
             return std::max(4, cSimpleModule::numInitStages());
         }
-        virtual void initialize(int);
+        virtual void initialize(int stage);
         virtual void handleMessage(cMessage* msg);
 
     protected:
