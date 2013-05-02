@@ -19,6 +19,7 @@
 #include "RTCP.h"
 
 #include "IPv4Address.h"
+#include "LifecycleOperation.h"
 #include "RTCPPacket.h"
 #include "RTPInnerPacket.h"
 #include "RTPParticipantInfo.h"
@@ -563,3 +564,12 @@ void RTCP::calculateAveragePacketSize(int size)
     _averagePacketSize += ((double)(size + 20 + 8) - _averagePacketSize) / (double)(++_packetsCalculated);
 #endif
 }
+
+bool RTCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
+}
+

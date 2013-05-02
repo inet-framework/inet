@@ -20,6 +20,8 @@
 
 
 #include "INETDefs.h"
+
+#include "ILifecycle.h"
 #include "IPv4Address.h"
 #include "UDPSocket.h"
 
@@ -41,11 +43,12 @@ class RTPSenderInfo;
  * processing of rtcp packets. It also keeps track of this and other
  * RTP end systems.
  */
-class INET_API RTCP : public cSimpleModule
+class INET_API RTCP : public cSimpleModule, public ILifecycle
 {
   public:
     RTCP();
     virtual ~RTCP();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     /**

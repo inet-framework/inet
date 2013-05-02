@@ -20,7 +20,6 @@
 #include "INETDefs.h"
 #include "IPv4Address.h"
 #include "ILifecycle.h"
-#include "LifecycleOperation.h"
 
 /**
  * The class RTPApplication is just a very simple sample for an application

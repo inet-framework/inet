@@ -19,6 +19,7 @@
 #include "RTPApplication.h"
 
 #include "IPvXAddressResolver.h"
+#include "LifecycleOperation.h"
 #include "RTPInterfacePacket_m.h"
 
 Define_Module(RTPApplication)
