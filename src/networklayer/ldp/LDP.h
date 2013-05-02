@@ -29,6 +29,8 @@
 #include "TCPSocketMap.h"
 #include "IClassifier.h"
 #include "NotificationBoard.h"
+#include "ILifecycle.h"
+#include "NodeStatus.h"
 
 #define LDP_PORT  646
 
@@ -46,7 +48,7 @@ class TED;
 /**
  * LDP (rfc 3036) protocol implementation.
  */
-class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, public IClassifier, public INotifiable
+class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, public IClassifier, public INotifiable, public ILifecycle
 {
   public:
 
@@ -114,6 +116,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     //
     // other variables:
     //
+    NodeStatus *nodeStatus;
     IInterfaceTable *ift;
     IRoutingTable *rt;
     LIBTable *lt;
@@ -174,9 +177,13 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
 
     virtual void announceLinkChange(int tedlinkindex);
 
+    virtual bool isNodeUp();
+
   public:
     LDP();
     virtual ~LDP();
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     virtual int numInitStages() const  {return 4;}
