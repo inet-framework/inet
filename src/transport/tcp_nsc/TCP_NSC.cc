@@ -236,9 +236,11 @@ void TCP_NSC::initialize(int stage)
   }
   else if (stage == 1)
   {
+    bool isOperational;
     NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    if (nodeStatus && nodeStatus->getState() != NodeStatus::UP)
-        throw cRuntimeError("initialize at DOWN state is not supported");
+    isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+    if (!isOperational)
+        throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
     const char* stackName = this->par(stackNameParamNameS).stringValue();
 
