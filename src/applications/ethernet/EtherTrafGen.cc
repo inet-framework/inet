@@ -22,7 +22,8 @@
 #include "EtherTrafGen.h"
 
 #include "Ieee802Ctrl_m.h"
-
+#include "NodeOperations.h"
+#include "ModuleAccess.h"
 
 Define_Module(EtherTrafGen);
 
@@ -31,7 +32,11 @@ simsignal_t EtherTrafGen::rcvdPkSignal = SIMSIGNAL_NULL;
 
 EtherTrafGen::EtherTrafGen()
 {
+    sendInterval = NULL;
+    numPacketsPerBurst = NULL;
+    packetLength = NULL;
     timerMsg = NULL;
+    nodeStatus = NULL;
 }
 
 EtherTrafGen::~EtherTrafGen()
@@ -66,14 +71,75 @@ void EtherTrafGen::initialize(int stage)
         if (destMACAddress.isUnspecified())
             return;
 
-        simtime_t startTime = par("startTime");
+        startTime = par("startTime");
         stopTime = par("stopTime");
-        if (stopTime != 0 && stopTime <= startTime)
+        if (stopTime != -1 && stopTime < startTime)
             error("Invalid startTime/stopTime parameters");
 
         timerMsg = new cMessage("generateNextPacket");
-        scheduleAt(startTime, timerMsg);
+        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+
+        if (isNodeUp() && isEnabled())
+            scheduleNextPacket(-1);
     }
+}
+
+void EtherTrafGen::handleMessage(cMessage *msg)
+{
+    if (!isNodeUp())
+        throw cRuntimeError("Application is not running");
+    if (msg->isSelfMessage())
+    {
+        sendBurstPackets();
+        scheduleNextPacket(simTime());
+    }
+    else
+        receivePacket(check_and_cast<cPacket*>(msg));
+}
+
+bool EtherTrafGen::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER && isEnabled())
+            scheduleNextPacket(-1);
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
+            cancelNextPacket();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            cancelNextPacket();
+    }
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
+}
+
+bool EtherTrafGen::isNodeUp()
+{
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+}
+
+bool EtherTrafGen::isEnabled()
+{
+    return par("destAddress").stringValue()[0];
+}
+
+void EtherTrafGen::scheduleNextPacket(simtime_t previous)
+{
+    simtime_t next;
+    if (previous == -1)
+        next = simTime() <= startTime ? startTime : simTime();
+    else
+        next = previous + sendInterval->doubleValue();
+    if (stopTime == -1  || next <= stopTime)
+        scheduleAt(next, timerMsg);
+}
+
+void EtherTrafGen::cancelNextPacket()
+{
+    cancelEvent(timerMsg);
 }
 
 MACAddress EtherTrafGen::resolveDestMACAddress()
@@ -97,21 +163,6 @@ MACAddress EtherTrafGen::resolveDestMACAddress()
         }
     }
     return destMACAddress;
-}
-
-void EtherTrafGen::handleMessage(cMessage *msg)
-{
-    if (msg->isSelfMessage())
-    {
-        sendBurstPackets();
-        simtime_t d = simTime() + sendInterval->doubleValue();
-        if (stopTime == 0 || d < stopTime)
-            scheduleAt(d, msg);
-    }
-    else
-    {
-        receivePacket(check_and_cast<cPacket*>(msg));
-    }
 }
 
 void EtherTrafGen::sendBurstPackets()

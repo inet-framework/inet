@@ -21,12 +21,14 @@
 #include "INETDefs.h"
 
 #include "MACAddress.h"
+#include "NodeStatus.h"
+#include "ILifecycle.h"
 
 
 /**
  * Simple traffic generator for the Ethernet model.
  */
-class INET_API EtherTrafGen : public cSimpleModule
+class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
 {
   protected:
     long seqNum;
@@ -37,9 +39,11 @@ class INET_API EtherTrafGen : public cSimpleModule
     cPar *packetLength;
     int etherType;
     MACAddress destMACAddress;
+    NodeStatus *nodeStatus;
 
     // self messages
     cMessage *timerMsg;
+    simtime_t startTime;
     simtime_t stopTime;
 
     // receive statistics
@@ -50,13 +54,20 @@ class INET_API EtherTrafGen : public cSimpleModule
 
   public:
     EtherTrafGen();
-    ~EtherTrafGen();
+    virtual ~EtherTrafGen();
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     virtual void initialize(int stage);
     virtual int numInitStages() const {return 2;}
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
+
+    virtual bool isNodeUp();
+    virtual bool isEnabled();
+    virtual void scheduleNextPacket(simtime_t previous);
+    virtual void cancelNextPacket();
 
     virtual MACAddress resolveDestMACAddress();
 
