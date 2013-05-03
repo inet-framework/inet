@@ -33,6 +33,10 @@ simple Radio like IRadio
         double transmitterPower @unit("mW") = default(20mW); // power used for transmission of messages (in mW)
         double thermalNoise @unit("dBm") = default(-110dBm); // base noise level (dBm)
         double sensitivity @unit("dBm") = default(-85dBm); // received signals with power below sensitivity are ignored
+        double maxDistance @unit("m") = default(-1m); // if the maxDistance is bigger of 0 the sensitivity is adjusted to a maximun reception to this value
+        bool setReceptionThreshold = default(false);
+        double receptionThreshold @unit("dBm") = default(-110dBm);
+        double maxDistantReceptionThreshold @unit("m") = default(-1m);
         string radioModel;  // the radio model implementing the IRadioModel interface (C++). e.g. GenericRadioModel, Ieee80211RadioModel
 
         string NoiseGenerator = default("");

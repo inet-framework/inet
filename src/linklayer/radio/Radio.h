@@ -146,9 +146,10 @@ class INET_API Radio : public ChannelAccess, public ILifecycle
     virtual void updateDisplayString();
 
     double calcDistFreeSpace();
+    double calcDistDoubleRay();
 
   protected:
-    // Support of noise generators, the noise generators allow that the radio can change between  RECV <-->IDLE without to receive a frame
+	// Support of noise generators, the noise generators allow that the radio can change between  RECV <-->IDLE without to receive a frame
     static simsignal_t changeLevelNoise;
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
@@ -241,6 +242,12 @@ class INET_API Radio : public ChannelAccess, public ILifecycle
      * -85 dBm
      */
     double sensitivity;
+
+    /*
+     *  minimum signal necessary to change the channel state to RECV
+     */
+    double receptionThreshold;
+
     /*
      * this variable is used to disconnect the possibility of sent packets to the ChannelControl
      */
@@ -249,6 +256,7 @@ class INET_API Radio : public ChannelAccess, public ILifecycle
 
     // if true draw coverage circles
     bool drawCoverage;
+    bool doubleRayCoverage;
 
     // statistics:
     static simsignal_t bitrateSignal;

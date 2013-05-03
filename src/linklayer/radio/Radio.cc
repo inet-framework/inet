@@ -121,9 +121,32 @@ void Radio::initialize(int stage)
         std::string propModel = getChannelControlPar("propagationModel").stdstringValue();
         if (propModel == "")
             propModel = "FreeSpaceModel";
+        doubleRayCoverage = false;
+        if (propModel == "TwoRayGroundModel")
+            doubleRayCoverage = true;
 
         receptionModel = (IReceptionModel *) createOne(propModel.c_str());
         receptionModel->initializeFrom(this);
+
+        // adjust the sensitivity in function of maxDistance and reception model
+        if (par("maxDistance").doubleValue() > 0)
+        {
+            if (sensitivityList.size() == 1 && sensitivityList.begin()->second == sensitivity)
+            {
+                sensitivity = receptionModel->calculateReceivedPower(transmitterPower, carrierFrequency, par("maxDistance").doubleValue());
+                sensitivityList[0] = sensitivity;
+            }
+        }
+
+        receptionThreshold = sensitivity;
+        if (par("setReceptionThreshold").boolValue())
+        {
+            receptionThreshold = FWMath::dBm2mW(par("receptionThreshold").doubleValue());
+            if (par("maxDistantReceptionThreshold").doubleValue() > 0)
+            {
+                receptionThreshold = receptionModel->calculateReceivedPower(transmitterPower, carrierFrequency, par("maxDistantReceptionThreshold").doubleValue());
+            }
+        }
 
         // radio model to handle frame length and reception success calculation (modulation, error correction etc.)
         std::string rModel = par("radioModel").stdstringValue();
@@ -652,7 +675,7 @@ void Radio::handleLowerMsgStart(AirFrame* airframe)
 
         // update the RadioState if the noiseLevel exceeded the threshold
         // and the radio is currently not in receive or in send mode
-        if (BASE_NOISE_LEVEL >= sensitivity && rs.getState() == RadioState::IDLE)
+        if (BASE_NOISE_LEVEL >= receptionThreshold && rs.getState() == RadioState::IDLE)
         {
             EV << "setting radio state to RECV\n";
             setRadioState(RadioState::RECV);
@@ -683,10 +706,14 @@ void Radio::handleLowerMsgEnd(AirFrame * airframe)
 
         // delete the pointer to indicate that no message is currently
         // being received and clear the list
+
+        double snirMin = snrInfo.sList.begin()->snr;
+        for (SnrList::const_iterator iter = snrInfo.sList.begin(); iter != snrInfo.sList.end(); iter++)
+            if (iter->snr < snirMin)
+                snirMin = iter->snr;
         snrInfo.ptr = NULL;
         snrInfo.sList.clear();
-
-        airframe->setSnr(10*log10(recvBuff[airframe]/ (BASE_NOISE_LEVEL))); //ahmed
+        airframe->setSnr(10*log10(snirMin)); //ahmed
         airframe->setLossRate(lossRate);
         // delete the frame from the recvBuff
         recvBuff.erase(airframe);
@@ -740,7 +767,7 @@ void Radio::handleLowerMsgEnd(AirFrame * airframe)
     // change to idle if noiseLevel smaller than threshold and state was
     // not idle before
     // do not change state if currently sending or receiving a message!!!
-    if (BASE_NOISE_LEVEL < sensitivity && rs.getState() == RadioState::RECV && snrInfo.ptr == NULL)
+    if (BASE_NOISE_LEVEL < receptionThreshold && rs.getState() == RadioState::RECV && snrInfo.ptr == NULL)
     {
         // publish the new RadioState:
         EV << "new RadioState is IDLE\n";
@@ -937,6 +964,8 @@ void Radio::updateSensitivity(double rate)
         sensitivity = it->second;
     else
         sensitivity = sensitivityList[0.0];
+    if (!par("setReceptionThreshold").boolValue())
+        receptionThreshold = sensitivity;
     EV<<"bitrate = "<<rate<<endl;
     EV <<" sensitivity after updateSensitivity: "<<sensitivity<<endl;
 }
@@ -979,7 +1008,10 @@ void Radio::updateDisplayString() {
         d.setTagArg("r1", 2, "gray");
         d.removeTag("r2");
         d.insertTag("r2");
-        d.setTagArg("r2", 0, (long) calcDistFreeSpace());
+        if (doubleRayCoverage)
+            d.setTagArg("r2", 0, (long) calcDistDoubleRay());
+        else
+            d.setTagArg("r2", 0, (long) calcDistFreeSpace());
         d.setTagArg("r2", 2, "blue");
     }
     if (updateString==NULL && updateStringInterval>0)
@@ -1005,12 +1037,25 @@ double Radio::calcDistFreeSpace()
     return interfDistance;
 }
 
+
+
+double Radio::calcDistDoubleRay()
+{
+    //the carrier frequency used
+    //minimum power level to be able to physically receive a signal
+    double minReceivePower = sensitivity;
+
+    double interfDistance = pow(transmitterPower/minReceivePower, 1.0 / 4);
+
+    return interfDistance;
+}
+
 void Radio::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     ChannelAccess::receiveSignal(source,signalID, obj);
     if (signalID == changeLevelNoise)
     {
-        if (BASE_NOISE_LEVEL<sensitivity)
+        if (BASE_NOISE_LEVEL < receptionThreshold)
         {
             if (rs.getState()==RadioState::RECV && snrInfo.ptr==NULL)
                 setRadioState(RadioState::IDLE);
@@ -1134,11 +1179,11 @@ void Radio::getSensitivityList(cXMLElement* xmlConfig)
             it != parameters.end(); it++)
         {
             const char* bitRate = (*it)->getAttribute("BitRate");
-            const char* sensitivity = (*it)->getAttribute("Sensitivity");
+            const char* sensitivityStr = (*it)->getAttribute("Sensitivity");
             double rate = atof(bitRate);
             if (rate == 0)
                 error("invalid bit rate");
-            double sens = atof(sensitivity);
+            double sens = atof(sensitivityStr);
             sensitivityList[rate] = FWMath::dBm2mW(sens);
 
         }
@@ -1146,8 +1191,8 @@ void Radio::getSensitivityList(cXMLElement* xmlConfig)
         for(cXMLElementList::const_iterator it = parameters.begin();
             it != parameters.end(); it++)
         {
-            const char* sensitivity = (*it)->getAttribute("Sensitivity");
-            double sens = atof(sensitivity);
+            const char* sensitivityStr = (*it)->getAttribute("Sensitivity");
+            double sens = atof(sensitivityStr);
             sensitivityList[0.0] = FWMath::dBm2mW(sens);
         }
 
