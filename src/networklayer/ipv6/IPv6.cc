@@ -209,7 +209,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     // TBD add option handling code here
     IPv6Address destAddress = datagram->getDestAddress();
 
-    EV << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddress << ": ";
+    EV << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddress << ": \n";
 
     // local delivery of unicast packets
     if (rt->isLocalAddress(destAddress))
