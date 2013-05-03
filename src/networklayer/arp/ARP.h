@@ -18,9 +18,6 @@
 #ifndef __INET_ARP_H
 #define __INET_ARP_H
 
-//#include <stdio.h>
-//#include <string.h>
-//#include <vector>
 #include <map>
 
 #include "INETDefs.h"
@@ -29,6 +26,7 @@
 #include "ModuleAccess.h"
 #include "IPv4Address.h"
 #include "ILifecycle.h"
+#include "NotificationBoard.h"
 
 // Forward declarations:
 class ARPPacket;
@@ -39,7 +37,7 @@ class IRoutingTable;
 /**
  * ARP implementation.
  */
-class INET_API ARP : public cSimpleModule, public ILifecycle
+class INET_API ARP : public cSimpleModule, public ILifecycle, public INotifiable
 {
   public:
     struct ARPCacheEntry;
@@ -50,6 +48,7 @@ class INET_API ARP : public cSimpleModule, public ILifecycle
     // TBD should we key it on (IPv4Address, InterfaceEntry*)?
     struct ARPCacheEntry
     {
+        ARP *owner;     // owner ARP module of this cache entry
         InterfaceEntry *ie; // NIC to send the packet to
         bool pending; // true if resolution is pending
         MACAddress macAddress;  // MAC address
@@ -88,7 +87,7 @@ class INET_API ARP : public cSimpleModule, public ILifecycle
 
     IInterfaceTable *ift;
     IRoutingTable *rt;  // for Proxy ARP
-
+    NotificationBoard *nb;
     // Maps an IP multicast address to an Ethernet multicast address.
     MACAddress mapMulticastAddress(IPv4Address addr);
 
@@ -99,6 +98,7 @@ class INET_API ARP : public cSimpleModule, public ILifecycle
     const MACAddress getDirectAddressResolution(const IPv4Address &) const;
     const IPv4Address getInverseAddressResolution(const MACAddress &) const;
     void setChangeAddress(const IPv4Address &);
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
   protected:
     virtual void initialize(int stage);
