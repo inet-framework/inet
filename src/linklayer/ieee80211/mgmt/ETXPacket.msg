@@ -43,5 +43,6 @@ packet MACBwPacket extends ETXBasePacket
 {
      int type;
      simtime_t time;
+     unsigned long index;
 }
 

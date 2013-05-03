@@ -65,7 +65,13 @@ class MacEtxNeighbor
     int     numFailures;
   public:
     std::vector<simtime_t> timeVector;
-    std::vector<simtime_t> timeETT;
+    class ETTData
+    {
+        public:
+            simtime_t recordTime;
+            simtime_t delay;
+    };
+    std::vector<ETTData> timeETT;
     std::vector<SNRDataTime> signalToNoiseAndSignal; // S/N received
   public:
     MacEtxNeighbor() {packets = 0; time = 0; numFailures = 0;}
@@ -75,6 +81,24 @@ class MacEtxNeighbor
         timeETT.clear();
         signalToNoiseAndSignal.clear();
     }
+
+    MacEtxNeighbor& operator=(const MacEtxNeighbor& other)
+    {
+        if (this==&other) return *this;
+        address = other.address;
+        time = other.time;
+        ettTime = other.ettTime;
+        ett1Time = other.ett1Time;
+        ett2Time = other.ett2Time;
+        airTimeMetric = other.airTimeMetric;
+        packets = other.packets;
+        numFailures = other.numFailures;
+        timeVector = other.timeVector;
+        timeETT =  other.timeETT;
+        signalToNoiseAndSignal = other.signalToNoiseAndSignal;
+        return *this;
+    }
+
     // this vector store a window of values
     void setAddress(const MACAddress &addr) {address = addr;}
     MACAddress getAddress() const {return address;}
@@ -98,7 +122,7 @@ class MacEtxNeighbor
     void  setAirtimeMetric(uint32_t p) {airTimeMetric = p;}
 };
 
-typedef std::map<MACAddress,MacEtxNeighbor*> NeighborsMap;
+typedef std::map<MACAddress,MacEtxNeighbor> NeighborsMap;
 
 class INET_API Ieee80211Etx : public cSimpleModule, public MacEstimateCostProcess, public INotifiable
 {
@@ -118,16 +142,43 @@ class INET_API Ieee80211Etx : public cSimpleModule, public MacEstimateCostProces
     simtime_t etxInterval;
     simtime_t ettInterval;
     simtime_t etxMeasureInterval;
+    simtime_t ettMeasureInterval;
     int ettWindow;
     int etxSize;
     int ettSize1;
     int ettSize2;
     simtime_t maxLive;
-    MACAddress prevAddress;
-    simtime_t  prevTime;
+
+    double hysteresis;
+    long unsigned int ettIndex;
+    class InfoEttData
+    {
+        public:
+            long unsigned int ettIndex;
+            simtime_t  prevTime;
+    };
+    typedef std::map<MACAddress,InfoEttData> InfoEtt;
+    InfoEtt infoEtt;
+
     int powerWindow;
     simtime_t powerWindowTime;
     unsigned int numInterfaces;
+
+    void checkSizeEtxArray(MacEtxNeighbor *neig)
+    {
+        while (!neig->timeVector.empty() && (simTime() - neig->timeVector.front() > (etxMeasureInterval + hysteresis)))
+            neig->timeVector.erase(neig->timeVector.begin());
+        while (neig->timeVector.size() > etxMeasureInterval / etxInterval)
+            neig->timeVector.erase(neig->timeVector.begin());
+    }
+
+    void checkSizeEttArray(MacEtxNeighbor *neig)
+    {
+        if (neig->timeETT.empty())
+            return;
+        while (simTime() - neig->timeETT.front().recordTime > ettMeasureInterval)
+            neig->timeETT.erase(neig->timeETT.begin());
+    }
 
   protected:
     virtual int numInitStages() const {return 3;}
@@ -146,6 +197,8 @@ class INET_API Ieee80211Etx : public cSimpleModule, public MacEstimateCostProces
   public:
     virtual double getEtx(const MACAddress &add,const int &iface = 0);
     virtual int getEtx(const MACAddress &add, double &val);
+    virtual int getEtxEtt(const MACAddress &add, double &etx, double &ett);
+
 
     virtual double getEtt(const MACAddress &add,const int &iface = 0);
     virtual int getEtt(const MACAddress &add, double &val);
@@ -210,7 +263,7 @@ class INET_API Ieee80211Etx : public cSimpleModule, public MacEstimateCostProces
         int i = 0;
         for (NeighborsMap::iterator it = neighbors[iface].begin(); it != neighbors[iface].end(); it++)
         {
-            add[i] = it->second->getAddress();
+            add[i] = it->second.getAddress();
             i++;
         }
         return i;
