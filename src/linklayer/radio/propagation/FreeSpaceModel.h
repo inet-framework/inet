@@ -57,6 +57,7 @@ public:
      * To be redefined to calculate the received power of a transmission.
      */
     virtual double calculateReceivedPower(double pSend, double carrierFrequency, double distance);
+    virtual double calculateDistance(double pSend, double pRec, double carrierFrequency);
     ~FreeSpaceModel() { };
 
     protected:
