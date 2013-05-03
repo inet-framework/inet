@@ -6,6 +6,7 @@
 #include "IPv4InterfaceData.h"
 #include "IPvXAddressResolver.h"
 #include "UDPPacket_m.h"
+#include "Ieee802Ctrl_m.h"
 
 Define_Module(Batman);
 
@@ -272,20 +273,30 @@ void Batman::handleMessage(cMessage *msg)
     //select_timeout = ((int)(((struct forw_node *)forw_list.next)->send_time - curr_time) > 0 ?
     //            ((struct forw_node *)forw_list.next)->send_time - curr_time : 10);
 
-    IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
-    IPvXAddress srcAddr = ctrl->getSrcAddr();
-    IPvXAddress destAddr = ctrl->getDestAddr();
-    neigh = ManetAddress(srcAddr);
-    for (unsigned int i=0; i<if_list.size(); i++)
+    if (!this->isInMacLayer())
     {
-        if (if_list[i]->dev->getInterfaceId() == ctrl->getInterfaceId())
+        IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
+        IPvXAddress srcAddr = ctrl->getSrcAddr();
+        neigh = ManetAddress(srcAddr);
+        for (unsigned int i=0; i<if_list.size(); i++)
         {
-            if_incoming = if_list[i];
-            break;
+            if (if_list[i]->dev->getInterfaceId() == ctrl->getInterfaceId())
+            {
+                if_incoming = if_list[i];
+                break;
+            }
         }
+        delete ctrl;
+    }
+    else
+    {
+        Ieee802Ctrl* ctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
+        MACAddress srcAddr = ctrl->getSrc();
+        neigh = ManetAddress(srcAddr);
+        if_incoming = if_list[0];
+        delete ctrl;
     }
 
-    delete ctrl;
 
     BatmanPacket *bat_packet = NULL;
     UDPPacket *udpPacket = dynamic_cast<UDPPacket*>(msg);
@@ -309,6 +320,15 @@ void Batman::handleMessage(cMessage *msg)
         }
 
         delete msg;
+    }
+    else if (this->isInMacLayer())
+    {
+        if (!dynamic_cast<BatmanPacket*>(msg))
+        {
+            delete  msg;
+            sendPackets(curr_time);
+            return;
+        }
     }
 
     parseIncomingPacket(neigh, if_incoming, bat_packet);

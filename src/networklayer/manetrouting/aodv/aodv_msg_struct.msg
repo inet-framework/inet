@@ -18,7 +18,6 @@
 
 cplusplus {{
 #include "aodv_msg_struct.h"
-#include "ManetAddress.h"
 }}
 
 class noncobject ManetAddress;
@@ -85,7 +84,6 @@ packet RREP extends AODV_msg
     uint32_t lifetime;
     uint32_t cost;
     uint8_t  hopfix;
-    AODV_ext extension[];
 }
 
 packet RREP_ack extends AODV_msg

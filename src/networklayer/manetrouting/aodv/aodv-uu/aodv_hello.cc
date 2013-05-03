@@ -160,6 +160,29 @@ void NS_CLASS hello_send(void *arg)
                 ext->length = 0;
 #endif
 
+#ifdef AODV_USE_STL_RT
+                for (i = 0; i < RT_TABLESIZE; i++)
+                {
+                    for (AodvRtTableMap::iterator it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
+                    {
+                        rt_table_t *rt = it->second;
+                        /* If an entry has an active hello timer, we assume
+                           that we are receiving hello messages from that
+                           node... */
+                        if (rt->hello_timer.used)
+                        {
+#ifdef DEBUG_HELLO
+                            DEBUG(LOG_INFO, 0,
+                                  "Adding %s to hello neighbor set ext",
+                                  ip_to_str(rt->dest_addr));
+#endif
+                            memcpy(buffer_ptr, &rt->dest_addr,
+                                   sizeof(struct in_addr));
+                            buffer_ptr+=sizeof(struct in_addr);
+                        }
+                    }
+                }
+#else
                 for (i = 0; i < RT_TABLESIZE; i++)
                 {
                     list_t *pos;
@@ -189,6 +212,8 @@ void NS_CLASS hello_send(void *arg)
                         }
                     }
                 }
+
+#endif
 #ifdef OMNETPP
                 if (ext->length)
                 {

@@ -225,8 +225,12 @@ void DYMO::handleMessage(cMessage* apMsg)
             }
             else if (control->getOptionCode() == MANET_ROUTE_UPDATE)
             {
-                updateRouteLifetimes(control->getSrcAddress());
-                updateRouteLifetimes(control->getDestAddress());
+                IPv4Address src = control->getSrcAddress().getIPv4();
+                IPv4Address dst = control->getDestAddress().getIPv4();
+                if (!src.isLimitedBroadcastAddress() && !src.isMulticast() && src.isUnspecified())
+                    updateRouteLifetimes(control->getSrcAddress());
+                if (!dst.isLimitedBroadcastAddress() && !dst.isMulticast() && !dst.isUnspecified())
+                    updateRouteLifetimes(control->getDestAddress());
             }
             delete apMsg;
             return;

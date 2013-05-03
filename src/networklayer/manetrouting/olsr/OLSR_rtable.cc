@@ -37,6 +37,14 @@ OLSR_rtable::OLSR_rtable()
 {
 }
 
+OLSR_rtable::OLSR_rtable(OLSR_rtable *rtable)
+{
+    for (rtable_t::const_iterator itRtTable = rtable->getInternalTable()->begin();itRtTable != rtable->getInternalTable()->begin();++itRtTable)
+    {
+        rt_[itRtTable->first] = itRtTable->second->dup();
+    }
+}
+
 ///
 /// \brief Destroys the routing table and all its entries.
 ///

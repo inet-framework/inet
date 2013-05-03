@@ -48,12 +48,15 @@ typedef std::map<nsaddr_t, OLSR_rt_entry*> rtable_t;
 ///
 class OLSR_rtable : public cObject
 {
-    rtable_t    rt_;    ///< Data structure for the routing table.
 
   public:
+    rtable_t    rt_;    ///< Data structure for the routing table.
 
+    OLSR_rtable(OLSR_rtable*);
     OLSR_rtable();
     ~OLSR_rtable();
+    const rtable_t * getInternalTable() {return &rt_;}
+
 
     void        clear();
     void        rm_entry(const nsaddr_t &dest);
@@ -65,6 +68,8 @@ class OLSR_rtable : public cObject
     uint32_t    size();
 
     virtual std::string detailedInfo();
+
+    virtual OLSR_rtable *dup() {return new OLSR_rtable(this);}
 
 //  void        print(Trace*);
 };

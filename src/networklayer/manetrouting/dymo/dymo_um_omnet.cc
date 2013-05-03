@@ -125,12 +125,14 @@ void DYMOUM::initialize(int stage)
         for (int i = 0; i < getNumInterfaces(); i++)
         {
             DEV_NR(i).ifindex = i;
-            dev_indices[getWlanInterfaceIndex(i)] = i;
+            dev_indices[i] = i;
             strcpy(DEV_NR(i).ifname, getInterfaceEntry(i)->getName());
             if (isInMacLayer())
                 DEV_NR(i).ipaddr.s_addr = ManetAddress(getInterfaceEntry(i)->getMacAddress());
             else
                 DEV_NR(i).ipaddr.s_addr = ManetAddress(getInterfaceEntry(i)->ipv4Data()->getIPAddress());
+            if (getInterfaceEntry(i)->isLoopback())
+                continue;
             if (isInMacLayer())
             {
                 mapSeqNum[DEV_NR(i).ipaddr.s_addr] = &this_host.seqnum;
@@ -1343,13 +1345,17 @@ void DYMOUM::packetFailedMac(Ieee80211DataFrame *dgram)
     next_hop.s_addr = ManetAddress(dgram->getReceiverAddress());
     int count = 0;
 
-    if (isStaticNode() && getColaborativeProtocol())
+    if (isStaticNode() && getCollaborativeProtocol())
     {
         ManetAddress next;
         int iface;
         double cost;
-        if (getColaborativeProtocol()->getNextHop(next_hop.s_addr, next, iface, cost))
-            if(next == next_hop.s_addr) return; // both nodes are static, do nothing
+        if (getCollaborativeProtocol()->getNextHop(next_hop.s_addr, next, iface, cost))
+            if(next == next_hop.s_addr)
+            {
+                scheduleNextEvent();
+                return; // both nodes are static, do nothing
+            }
     }
 #ifndef MAPROUTINGTABLE
     dlist_head_t *pos;
@@ -1622,7 +1628,7 @@ int  DYMOUM::getRouteGroup(const ManetAddress& dest, std::vector<ManetAddress> &
 bool DYMOUM::getNextHopGroup(const AddressGroup &gr, ManetAddress &add, int &iface, ManetAddress& gw)
 {
     int distance = 1000;
-    for (AddressGroup::const_iterator it = gr.begin(); it!=gr.end(); it++)
+    for (AddressGroupConstIterator it = gr.begin(); it!=gr.end(); it++)
     {
         struct in_addr destAddr;
         destAddr.s_addr = *it;
@@ -1769,15 +1775,15 @@ void DYMOUM::processLocatorAssoc(const cObject *details)
 {
 #ifdef WITH_80211MESH
     LocatorNotificationInfo *infoLoc = check_and_cast<LocatorNotificationInfo*>(details);
-    ManetAddress destAddr = infoLoc->getMacAddr().getInt();
+    ManetAddress destAddr;
     ManetAddress apAddr;
     if (isInMacLayer())
-        destAddr = infoLoc->getMacAddr().getInt();
+        destAddr = ManetAddress(infoLoc->getMacAddr());
     else
     {
         if (infoLoc->getIpAddr().isUnspecified())
             return;
-        destAddr = infoLoc->getIpAddr().getInt();
+        destAddr = ManetAddress(infoLoc->getIpAddr());
     }
 
     if (getAp(destAddr, apAddr))
@@ -1813,14 +1819,14 @@ void DYMOUM::processLocatorDisAssoc(const cObject *details)
 {
 #ifdef WITH_80211MESH
     LocatorNotificationInfo *infoLoc = check_and_cast<LocatorNotificationInfo*>(details);
-    ManetAddress destAddr = infoLoc->getMacAddr().getInt();
+    ManetAddress destAddr;
     if (isInMacLayer())
-        destAddr = infoLoc->getMacAddr().getInt();
+         destAddr = ManetAddress(infoLoc->getMacAddr());
     else
     {
         if (infoLoc->getIpAddr().isUnspecified())
             return;
-        destAddr = infoLoc->getIpAddr().getInt();
+        destAddr = ManetAddress(infoLoc->getIpAddr());
     }
     struct in_addr dest_addrAux;
     dest_addrAux.s_addr = destAddr;

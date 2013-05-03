@@ -950,20 +950,25 @@ int NS_CLASS re_mustAnswer(RE *re, u_int32_t ifindex)
             if (dynamic_cast<MeshControlInfo*>(re->getControlInfo()))
             {
                 MeshControlInfo * controlInfo = dynamic_cast<MeshControlInfo*>(re->getControlInfo());
-                if (controlInfo->getVectorAddressArraySize()>0)
+                if (controlInfo->getCollaborativeFeedback() && getCollaborativeProtocol())
                 {
                     src_addr.s_addr = re->re_blocks[0].re_node_addr;
                     entry = rtable_find(src_addr);
-                    if (entry && (entry->rt_hopcnt+controlInfo->getVectorAddressArraySize()<=(unsigned int)NET_DIAMETER))
-                        haveRoute= true;
-                    else
-                        delete re->removeControlInfo();
+                    if (entry)
+                    {
+                        double cost;
+                        ManetAddress next;
+                        int iface;
+                        if (getCollaborativeProtocol()->getNextHop(re->target_addr, next, iface, cost))
+                        {
+                            if (entry->rt_hopcnt + cost<= controlInfo->getMaxHopCollaborative())
+                                haveRoute= true;
+                        }
+
+                    }
                 }
             }
-            else
-            {
-                delete re->removeControlInfo();
-            }
+            delete re->removeControlInfo();
         }
     }
 
@@ -1002,24 +1007,115 @@ void NS_CLASS re_answer(RE *re,u_int32_t ifindex)
     struct in_addr src_addr;
     rtable_entry_t *entry;
     rtable_entry_t *rev_rt;
-    int i;
-    MeshControlInfo * controlInfo = check_and_cast<MeshControlInfo*>(re->getControlInfo());
+    double cost;
+    std::vector<ManetAddress> addressVector;
+    if (!getCollaborativeProtocol())
+        opp_error("re_answer no CollaborativeProtocol");
+
+    addressVector.clear();
+
+    if (getCollaborativeProtocol()->supportGetRoute())
+    {
+        getCollaborativeProtocol()->getRoute(re->target_addr,addressVector);
+        if (addressVector.empty())
+            opp_error("re_answer route not found");
+        cost = addressVector.size();
+    }
+    int ifaceIndexNextHop = -1;
+    ManetAddress nextAddr;
+    int ifaceId;
+    if (!getCollaborativeProtocol()->getNextHop(re->target_addr, nextAddr, ifaceId, cost))
+        opp_error("re_answer route not found");
+    if (addressVector.empty())
+        addressVector.push_back(nextAddr);
+    else
+    {
+        if (addressVector[0] != nextAddr)
+        {
+            opp_error("CollaborativeProtocol inconsistency");
+        }
+    }
+
+    for (int i = 0; i < getNumInterfaces(); i++)
+    {
+        if (getInterfaceEntry(i)->getInterfaceId() == ifaceId)
+        {
+            ifaceIndexNextHop = i;
+            break;
+        }
+    }
+    if (ifaceIndexNextHop == -1)
+        opp_error("Interface not found");
+
     // Process list of nodes
-    int sizeVector =controlInfo->getVectorAddressArraySize();
+    unsigned int sizeVector = addressVector.size();
     if (sizeVector>0)
     {
-        next_addr.s_addr = controlInfo->getVectorAddress(0);
-        for (i =0; i<sizeVector; i++)
+        next_addr.s_addr = addressVector[0];
+        if (sizeVector>1)
         {
-            node_addr.s_addr    = controlInfo->getVectorAddress(i);
+            for (unsigned int i =0; i<sizeVector; i++)
+            {
+                node_addr.s_addr    =  addressVector[i];
+                uint32_t seqNum = *mapSeqNum[node_addr.s_addr];
+                entry           = rtable_find(node_addr);
+                uint32_t cost = (i+1) * costStatic;
+                if (entry)
+                {
+                    if (entry->rt_hopcnt>i+1 || entry->rt_hopcnt==0)
+                    {
+                        rtable_update(entry, node_addr, next_addr, ifaceIndexNextHop, seqNum,entry->rt_prefix, i+1, 0, cost, (i+2));
+                    }
+                }
+                else
+                {
+                    rtable_insert(
+                            node_addr, // dest
+                            next_addr, // nxt hop
+                            ifaceIndexNextHop,   // iface
+                            seqNum,    // seqnum
+                            0,         // prefix
+                            i+1,       // hop count
+                            0,         // is gw
+                            cost,
+                            (i+2));
+                }
+            }
+        }
+        else
+        {
+            node_addr.s_addr    =  addressVector[0];
+            next_addr.s_addr = addressVector[0];
             uint32_t seqNum = *mapSeqNum[node_addr.s_addr];
             entry           = rtable_find(node_addr);
-            uint32_t cost = (i+1) * costStatic;
+            uint32_t costInt = costStatic;
             if (entry)
             {
-                if (entry->rt_hopcnt>i+1 || entry->rt_hopcnt==0)
+                rtable_update(entry, node_addr, next_addr, ifaceIndexNextHop, seqNum,entry->rt_prefix, 1, 0, costInt, 2);
+            }
+            else
+            {
+                rtable_insert(node_addr, // dest
+                              next_addr, // nxt hop
+                              ifaceIndexNextHop,   // iface
+                              seqNum,    // seqnum
+                              0,         // prefix
+                              1,       // hop count
+                              0,         // is gw
+                              costInt,
+                              2);
+            }
+
+
+            node_addr.s_addr    =  re->target_addr;
+            seqNum = *mapSeqNum[node_addr.s_addr];
+            entry           = rtable_find(node_addr);
+            costInt = costStatic * cost;
+            if (entry)
+            {
+                if (entry->rt_hopcnt > cost+1 || entry->rt_hopcnt==0)
                 {
-                    rtable_update(entry, node_addr, next_addr, ifindex, seqNum,entry->rt_prefix, i+1, 0, cost, (i+2));
+                    rtable_update(entry, node_addr, next_addr, ifaceIndexNextHop, seqNum,entry->rt_prefix, (int)cost, 0, costInt, (int)(cost+1));
                 }
             }
             else
@@ -1027,13 +1123,13 @@ void NS_CLASS re_answer(RE *re,u_int32_t ifindex)
                 rtable_insert(
                     node_addr, // dest
                     next_addr, // nxt hop
-                    ifindex,   // iface
+                    ifaceIndexNextHop,   // iface
                     seqNum,    // seqnum
                     0,         // prefix
-                    i+1,       // hop count
+                    cost,       // hop count
                     0,         // is gw
-                    cost,
-                    (i+2));
+                    costInt,
+                    (cost+1));
             }
         }
     }
@@ -1072,7 +1168,7 @@ void NS_CLASS re_answer(RE *re,u_int32_t ifindex)
         rrep_src->newBocks(sizeVector);
         for (int i = sizeVector-1; i>0; i--)
         {
-            node_addr.s_addr    = controlInfo->getVectorAddress(i);
+            node_addr.s_addr    = addressVector[i];
             entry           = rtable_find(node_addr);
             if (!entry)
                 error("Entry not found");

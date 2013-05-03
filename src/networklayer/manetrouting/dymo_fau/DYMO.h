@@ -251,9 +251,9 @@ class DYMO : public ManetRoutingBase
     int BUFFER_SIZE_PACKETS; /**< NED configuration parameter: maximum number of queued packets, -1 for no limit */
     int BUFFER_SIZE_BYTES; /**< NED configuration parameter: maximum total size of queued packets, -1 for no limit */
 
-
+    virtual bool supportGetRoute() {return false;}
     virtual uint32_t getRoute(const ManetAddress &, std::vector<ManetAddress> &add) {return 0;};
-    virtual bool getNextHop(const ManetAddress &, ManetAddress &add, int &iface, double &val) {return false;};
+    virtual bool getNextHop(const ManetAddress &, ManetAddress &add, int &iface, double &val) {return false;}
     virtual void setRefreshRoute(const ManetAddress &destination, const ManetAddress & nextHop,bool isReverse) {};
     virtual bool isProactive() {return false;};
     virtual bool isOurType(cPacket * msg)

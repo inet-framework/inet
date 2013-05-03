@@ -40,7 +40,7 @@
 /* Settings for HELLO messages */
 #define ACTIVE_ROUTE_TIMEOUT_HELLO  3000
 #define TTL_START_HELLO             2
-#define DELETE_PERIOD_HELLO         K_PARAM * max(ACTIVE_ROUTE_TIMEOUT_HELLO, ALLOWED_HELLO_LOSS * HELLO_INTERVAL)
+#define DELETE_PERIOD_HELLO         K_PARAM * max(ACTIVE_ROUTE_TIMEOUT, ALLOWED_HELLO_LOSS * HELLO_INTERVAL)
 
 /* Non runtime modifiable settings */
 #define ALLOWED_HELLO_LOSS      2

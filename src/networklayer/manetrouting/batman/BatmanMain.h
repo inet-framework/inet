@@ -155,6 +155,7 @@ class Batman : public ManetRoutingBase
     virtual bool getNextHop(const ManetAddress &, ManetAddress &add, int &iface, double &val);
     virtual void setRefreshRoute(const ManetAddress &destination, const ManetAddress & nextHop, bool isReverse) {};
     virtual bool isProactive() {return true;};
+    virtual bool supportGetRoute () {return false;}
     virtual bool isOurType(cPacket * msg)
     {
         if (dynamic_cast<BatmanPacket*>(msg))

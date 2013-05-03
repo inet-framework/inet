@@ -95,7 +95,7 @@ RREP *rrep_create(u_int8_t flags,
 RREP_ack *rrep_ack_create();
 AODV_ext *rrep_add_ext(RREP * rrep, int type, unsigned int offset,
                        int len, char *data);
-void rrep_send(RREP * rrep, rt_table_t * rev_rt, rt_table_t * fwd_rt, int size);
+void rrep_send(RREP * rrep, rt_table_t * rev_rt, rt_table_t * fwd_rt, int size, double delay = 0);
 void rrep_forward(RREP * rrep, int size, rt_table_t * rev_rt,
                   rt_table_t * fwd_rt, int ttl);
 void rrep_process(RREP * rrep, int rreplen, struct in_addr ip_src,

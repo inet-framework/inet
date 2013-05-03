@@ -148,6 +148,18 @@ void NS_CLASS rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
             {
                 rt_table_invalidate(rt);
             }
+#ifdef OMNETPP
+            else
+            {
+                if (rt->nprec == 0 && par("RRERFoceDiscover").boolValue() && rt->next_hop.S_addr == ip_src.S_addr)
+                {
+                    u_int8_t rreq_flags = 0;
+                    if (par("targetOnlyRreq").boolValue())
+                        rreq_flags |= RREQ_DEST_ONLY;
+                    rreq_route_discovery(udest_addr, rreq_flags, NULL);
+                }
+            }
+#endif
             /* (a) updates the corresponding destination sequence number
              *         with the Destination Sequence Number in the packet, and */
             rt->dest_seqno = rerr_dest_seqno;
