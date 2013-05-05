@@ -85,7 +85,7 @@ void xDYMO::initialize(int stage)
         // context
         notificationBoard = NotificationBoardAccess().get(this);
         interfaceTable = InterfaceTableAccess().get(this);
-        routingTable = dynamic_cast<IRoutingTable *>(findModuleWhereverInNode(routingTableModule, this));
+        routingTable = check_and_cast<IRoutingTable *>(findModuleWhereverInNode(routingTableModule, this));
         networkProtocol = check_and_cast<INetfilter *>(findModuleWhereverInNode(networkProtocolModule, this));
         // internal
         expungeTimer = new cMessage("ExpungeTimer");

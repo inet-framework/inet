@@ -102,5 +102,47 @@ inline double fmax(double a, double b)
 }
 #endif
 
+#if OMNETPP_VERSION < 0x0500
+/**
+ * A check_and_cast<> that accepts pointers other than cObject*, too.
+ * For compatibility; OMNeT++ 5.0 and later already contain this.
+ */
+template<class T, class P>
+T check_and_cast(P *p)
+{
+    if (!p)
+        throw cRuntimeError("check_and_cast(): cannot cast NULL pointer to type '%s'",opp_typename(typeid(T)));
+    T ret = dynamic_cast<T>(p);
+    if (!ret) {
+        const cObject *o = dynamic_cast<const cObject *>(p);
+        if (o)
+            throw cRuntimeError("check_and_cast(): cannot cast (%s *)%s to type '%s'",o->getClassName(),o->getFullPath().c_str(),opp_typename(typeid(T)));
+        else
+            throw cRuntimeError("check_and_cast(): cannot cast %s to type '%s'",opp_typename(typeid(P)),opp_typename(typeid(T)));
+    }
+    return ret;
+}
+
+/**
+ * A const version of check_and_cast<> that accepts pointers other than cObject*, too.
+ * For compatibility; OMNeT++ 5.0 and later already contain this.
+ */
+template<class T, class P>
+T check_and_cast(const P *p)
+{
+    if (!p)
+        throw cRuntimeError("check_and_cast(): cannot cast NULL pointer to type '%s'",opp_typename(typeid(T)));
+    T ret = dynamic_cast<T>(p);
+    if (!ret) {
+        const cObject *o = dynamic_cast<const cObject *>(p);
+        if (o)
+            throw cRuntimeError("check_and_cast(): cannot cast (%s *)%s to type '%s'",o->getClassName(),o->getFullPath().c_str(),opp_typename(typeid(T)));
+        else
+            throw cRuntimeError("check_and_cast(): cannot cast %s to type '%s'",opp_typename(typeid(P)),opp_typename(typeid(T)));
+    }
+    return ret;
+}
+
+#endif
 
 #endif
