@@ -200,7 +200,7 @@ void IPv4RoutingTable::receiveChangeNotification(int category, const cObject *de
     else if (category==NF_INTERFACE_DELETED)
     {
         // remove all routes that point to that interface
-        InterfaceEntry *entry = const_cast<InterfaceEntry*>(check_and_cast<const InterfaceEntry*>(details));
+        const InterfaceEntry *entry = check_and_cast<const InterfaceEntry*>(details);
         deleteInterfaceRoutes(entry);
     }
     else if (category==NF_INTERFACE_STATE_CHANGED)
@@ -224,7 +224,7 @@ cModule *IPv4RoutingTable::getHostModule()
     return findContainingNode(this);
 }
 
-void IPv4RoutingTable::deleteInterfaceRoutes(InterfaceEntry *entry)
+void IPv4RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
 {
     bool changed = false;
 

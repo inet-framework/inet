@@ -248,7 +248,7 @@ class INET_API IPv4MulticastRoute : public cObject, public IMulticastRoute
     virtual void setInInterface(InInterface *_inInterface);
     virtual void clearOutInterfaces();
     virtual void addOutInterface(OutInterface *outInterface);
-    virtual bool removeOutInterface(InterfaceEntry *ie);
+    virtual bool removeOutInterface(const InterfaceEntry *ie);
     virtual void removeOutInterface(unsigned int i);
     virtual void setSourceType(RouteSource _source)  { if (sourceType != _source) {sourceType = _source; changed(F_SOURCE);} }
     virtual void setMetric(int _metric)  { if (metric != _metric) {metric = _metric; changed(F_METRIC);} }

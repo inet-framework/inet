@@ -162,7 +162,7 @@ class INET_API IMulticastRoute
         virtual void setInInterface(InInterface *_inInterface) = 0;
         virtual void clearOutInterfaces() = 0;
         virtual void addOutInterface(OutInterface *outInterface) = 0;
-        virtual bool removeOutInterface(InterfaceEntry *ie) = 0;
+        virtual bool removeOutInterface(const InterfaceEntry *ie) = 0;
         virtual void removeOutInterface(unsigned int i) = 0;
         virtual void setSource(cObject *source) = 0;
         virtual void setMetric(int metric) = 0;
