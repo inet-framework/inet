@@ -60,9 +60,6 @@ xDYMO::~xDYMO()
 void xDYMO::initialize(int stage)
 {
     if (stage == 0) {
-        // context parameters
-        routingTableModule = par("routingTableModule");
-        networkProtocolModule = par("networkProtocolModule");
         // DYMO parameters from RFC
         clientAddresses = par("clientAddresses");
         useMulticastRREP = par("useMulticastRREP");
@@ -86,8 +83,8 @@ void xDYMO::initialize(int stage)
         host = findContainingNode(this);
         notificationBoard = NotificationBoardAccess().get(this);
         interfaceTable = InterfaceTableAccess().get(this);
-        routingTable = check_and_cast<IRoutingTable *>(findModuleWhereverInNode(routingTableModule, this));
-        networkProtocol = check_and_cast<INetfilter *>(findModuleWhereverInNode(networkProtocolModule, this));
+        routingTable = check_and_cast<IRoutingTable *>(findModuleWhereverInNode(par("routingTableModule"), this));
+        networkProtocol = check_and_cast<INetfilter *>(findModuleWhereverInNode(par("networkProtocolModule"), this));
         // internal
         expungeTimer = new cMessage("ExpungeTimer");
         IPSocket socket(gate("ipOut"));

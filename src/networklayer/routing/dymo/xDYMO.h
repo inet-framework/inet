@@ -53,10 +53,6 @@ DYMO_NAMESPACE_BEGIN
 class INET_API xDYMO : public cSimpleModule, public INotifiable, public INetfilter::IHook
 {
   private:
-    // context parameters
-    const char * routingTableModule;
-    const char * networkProtocolModule;
-
     // DYMO parameters from RFC
     const char * clientAddresses;
     bool useMulticastRREP;
