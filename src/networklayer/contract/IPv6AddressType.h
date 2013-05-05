@@ -15,23 +15,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPV6ADDRESSPOLICY_H
-#define __INET_IPV6ADDRESSPOLICY_H
+#ifndef __INET_IPV6ADDRESSTYPE_H
+#define __INET_IPV6ADDRESSTYPE_H
 
 #include "INETDefs.h"
-#include "IAddressPolicy.h"
+#include "IAddressType.h"
 #include "IPv6Address.h"
 #include "IPv6ControlInfo.h"
 
-class INET_API IPv6AddressPolicy : public IAddressPolicy
+class INET_API IPv6AddressType : public IAddressType
 {
     public:
-        static IPv6AddressPolicy INSTANCE;
+        static IPv6AddressType INSTANCE;
         static const IPv6Address ALL_RIP_ROUTERS_MCAST;
 
     public:
-        IPv6AddressPolicy() { }
-        virtual ~IPv6AddressPolicy() { }
+        IPv6AddressType() { }
+        virtual ~IPv6AddressType() { }
 
         virtual int getMaxPrefixLength() const { return 128; }
         virtual Address getLinkLocalManetRoutersMulticastAddress() const { return IPv6Address::LL_MANET_ROUTERS; }

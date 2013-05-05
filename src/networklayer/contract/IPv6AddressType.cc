@@ -15,25 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IADDRESSPOLICY_H
-#define __INET_IADDRESSPOLICY_H
+#include "IPv6AddressType.h"
 
-#include "INETDefs.h"
-#include "Address.h"
-#include "InterfaceEntry.h"
-#include "INetworkProtocolControlInfo.h"
+IPv6AddressType IPv6AddressType::INSTANCE;
 
-// TODO: rename to AddressType?
-class INET_API IAddressPolicy
-{
-    public:
-        IAddressPolicy() { }
-        virtual ~IAddressPolicy() { }
-
-        virtual int getMaxPrefixLength() const = 0;
-        virtual Address getLinkLocalManetRoutersMulticastAddress() const = 0;
-        virtual Address getLinkLocalRIPRoutersMulticastAddress() const = 0;
-        virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const = 0; // TODO: move, where?
-};
-
-#endif
+const IPv6Address IPv6AddressType::ALL_RIP_ROUTERS_MCAST("FF02::9");

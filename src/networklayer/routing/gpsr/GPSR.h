@@ -23,7 +23,7 @@
 #include "Coord.h"
 #include "INotifiable.h"
 #include "IMobility.h"
-#include "IAddressPolicy.h"
+#include "IAddressType.h"
 #include "INetfilter.h"
 #include "IRoutingTable.h"
 #include "NotificationBoard.h"
@@ -51,7 +51,7 @@ class INET_API GPSR : public cSimpleModule, public INotifiable, public INetfilte
         cModule * host;
         NotificationBoard * notificationBoard;
         IMobility * mobility;
-        IAddressPolicy * addressPolicy;
+        IAddressType * addressType;
         IInterfaceTable * interfaceTable;
         IRoutingTable * routingTable; // TODO: delete when necessary functions are moved to interface table
         INetfilter * networkProtocol;

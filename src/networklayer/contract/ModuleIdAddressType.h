@@ -15,22 +15,22 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_MODULEIDADDRESSPOLICY_H
-#define __INET_MODULEIDADDRESSPOLICY_H
+#ifndef __INET_MODULEIDADDRESSTYPE_H
+#define __INET_MODULEIDADDRESSTYPE_H
 
 #include "INETDefs.h"
-#include "IAddressPolicy.h"
+#include "IAddressType.h"
 #include "ModuleIdAddress.h"
 #include "GenericNetworkProtocolControlInfo.h"
 
-class INET_API ModuleIdAddressPolicy : public IAddressPolicy
+class INET_API ModuleIdAddressType : public IAddressType
 {
     public:
-        static ModuleIdAddressPolicy INSTANCE;
+        static ModuleIdAddressType INSTANCE;
 
     public:
-        ModuleIdAddressPolicy() { }
-        virtual ~ModuleIdAddressPolicy() { }
+        ModuleIdAddressType() { }
+        virtual ~ModuleIdAddressType() { }
 
         virtual int getMaxPrefixLength() const { return 0; }
         virtual Address getLinkLocalManetRoutersMulticastAddress() const { return ModuleIdAddress(-109); } // TODO: constant

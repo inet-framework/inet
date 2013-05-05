@@ -15,23 +15,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPV4ADDRESSPOLICY_H
-#define __INET_IPV4ADDRESSPOLICY_H
+#ifndef __INET_IPV4ADDRESSTYPE_H
+#define __INET_IPV4ADDRESSTYPE_H
 
 #include "INETDefs.h"
-#include "IAddressPolicy.h"
+#include "IAddressType.h"
 #include "IPv4Address.h"
 #include "IPv4ControlInfo.h"
 
-class INET_API IPv4AddressPolicy : public IAddressPolicy
+class INET_API IPv4AddressType : public IAddressType
 {
     public:
-        static IPv4AddressPolicy INSTANCE;
+        static IPv4AddressType INSTANCE;
         static const IPv4Address ALL_RIP_ROUTERS_MCAST;
 
     public:
-        IPv4AddressPolicy() { }
-        virtual ~IPv4AddressPolicy() { }
+        IPv4AddressType() { }
+        virtual ~IPv4AddressType() { }
 
         virtual int getMaxPrefixLength() const { return 32; }
         virtual Address getLinkLocalManetRoutersMulticastAddress() const { return IPv4Address::LL_MANET_ROUTERS; }

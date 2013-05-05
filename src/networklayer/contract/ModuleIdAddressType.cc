@@ -15,6 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ModuleIdAddressPolicy.h"
+#include "ModuleIdAddressType.h"
 
-ModuleIdAddressPolicy ModuleIdAddressPolicy::INSTANCE;
+ModuleIdAddressType ModuleIdAddressType::INSTANCE;

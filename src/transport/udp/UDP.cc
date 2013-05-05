@@ -27,7 +27,7 @@
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 #include "GenericNetworkProtocolControlInfo.h"
-#include "IAddressPolicy.h"
+#include "IAddressType.h"
 
 #ifdef WITH_IPv4
 #include "ICMPAccess.h"
@@ -796,8 +796,8 @@ void UDP::sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, con
     {
         // send to generic
         EV << "Sending app packet " << appData->getName() << endl;
-        IAddressPolicy * addressPolicy = destAddr.getAddressPolicy();
-        INetworkProtocolControlInfo *ipControlInfo = addressPolicy->createNetworkProtocolControlInfo();
+        IAddressType * addressType = destAddr.getAddressType();
+        INetworkProtocolControlInfo *ipControlInfo = addressType->createNetworkProtocolControlInfo();
         ipControlInfo->setProtocol(IP_PROT_UDP);
         ipControlInfo->setSourceAddress(srcAddr);
         ipControlInfo->setDestinationAddress(destAddr);

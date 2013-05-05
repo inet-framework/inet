@@ -15,6 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "MACAddressPolicy.h"
+#include "MACAddressType.h"
 
-MACAddressPolicy MACAddressPolicy::INSTANCE;
+MACAddressType MACAddressType::INSTANCE;

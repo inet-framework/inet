@@ -15,6 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ModulePathAddressPolicy.h"
+#include "ModulePathAddressType.h"
 
-ModulePathAddressPolicy ModulePathAddressPolicy::INSTANCE;
+ModulePathAddressType ModulePathAddressType::INSTANCE;

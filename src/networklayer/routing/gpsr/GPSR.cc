@@ -41,7 +41,7 @@ PositionTable GPSR::globalPositionTable;
 GPSR::GPSR()
 {
     notificationBoard = NULL;
-    addressPolicy = NULL;
+    addressType = NULL;
     beaconTimer = NULL;
 }
 
@@ -81,13 +81,13 @@ void GPSR::initialize(int stage)
     }
     else if (stage == 4) {
         notificationBoard->subscribe(this, NF_LINK_BREAK);
-        addressPolicy = getSelfAddress().getAddressPolicy();
+        addressType = getSelfAddress().getAddressType();
         // join multicast groups
         cPatternMatcher interfaceMatcher(interfaces, false, true, false);
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             InterfaceEntry * interfaceEntry = interfaceTable->getInterface(i);
             if (interfaceEntry->isMulticast() && interfaceMatcher.matches(interfaceEntry->getName()))
-                interfaceEntry->joinMulticastGroup(addressPolicy->getLinkLocalManetRoutersMulticastAddress());
+                interfaceEntry->joinMulticastGroup(addressType->getLinkLocalManetRoutersMulticastAddress());
         }
         // hook to netfilter
         networkProtocol->registerHook(0, this);
@@ -215,10 +215,10 @@ GPSRBeacon * GPSR::createBeacon()
 void GPSR::sendBeacon(GPSRBeacon * beacon, double delay)
 {
     GPSR_EV << "Sending beacon: address = " << beacon->getAddress() << ", position = " << beacon->getPosition() << endl;
-    INetworkProtocolControlInfo * networkProtocolControlInfo = addressPolicy->createNetworkProtocolControlInfo();
+    INetworkProtocolControlInfo * networkProtocolControlInfo = addressType->createNetworkProtocolControlInfo();
     networkProtocolControlInfo->setProtocol(IP_PROT_MANET);
     networkProtocolControlInfo->setHopLimit(255);
-    networkProtocolControlInfo->setDestinationAddress(addressPolicy->getLinkLocalManetRoutersMulticastAddress());
+    networkProtocolControlInfo->setDestinationAddress(addressType->getLinkLocalManetRoutersMulticastAddress());
     networkProtocolControlInfo->setSourceAddress(getSelfAddress());
     UDPPacket * udpPacket = new UDPPacket(beacon->getName());
     udpPacket->encapsulate(beacon);

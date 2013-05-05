@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2012 Opensim Ltd.
+// Copyright (C) 2013 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,26 +15,26 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_MODULEPATHADDRESSPOLICY_H
-#define __INET_MODULEPATHADDRESSPOLICY_H
+#ifndef __INET_MACADDRESSTYPE_H
+#define __INET_MACADDRESSTYPE_H
 
 #include "INETDefs.h"
-#include "IAddressPolicy.h"
-#include "ModulePathAddress.h"
+#include "IAddressType.h"
+#include "MACAddress.h"
 #include "GenericNetworkProtocolControlInfo.h"
 
-class INET_API ModulePathAddressPolicy : public IAddressPolicy
+class INET_API MACAddressType : public IAddressType
 {
     public:
-        static ModulePathAddressPolicy INSTANCE;
+        static MACAddressType INSTANCE;
 
     public:
-        ModulePathAddressPolicy() { }
-        virtual ~ModulePathAddressPolicy() { }
+        MACAddressType() { }
+        virtual ~MACAddressType() { }
 
         virtual int getMaxPrefixLength() const { return 0; }
-        virtual Address getLinkLocalManetRoutersMulticastAddress() const { return ModulePathAddress(-109); } // TODO: constant
-        virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ModulePathAddress(-9); } // TODO: constant
+        virtual Address getLinkLocalManetRoutersMulticastAddress() const { return MACAddress(-109); } // TODO: constant
+        virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return MACAddress(-9); } // TODO: constant
         virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const { return new GenericNetworkProtocolControlInfo(); }
 };
 

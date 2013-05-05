@@ -23,7 +23,7 @@
 #include <map>
 #include <omnetpp.h>
 #include "INotifiable.h"
-#include "IAddressPolicy.h"
+#include "IAddressType.h"
 #include "INetfilter.h"
 #include "IRoutingTable.h"
 #include "NotificationBoard.h"
@@ -77,7 +77,7 @@ class INET_API xDYMO : public cSimpleModule, public INotifiable, public INetfilt
     // context
     cModule * host;
     NotificationBoard * notificationBoard;
-    IAddressPolicy * addressPolicy;
+    IAddressType * addressType;
     IInterfaceTable * interfaceTable;
     IRoutingTable * routingTable;
     INetfilter * networkProtocol;

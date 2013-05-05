@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IPv6AddressPolicy.h"
+#include "IPv4AddressType.h"
 
-IPv6AddressPolicy IPv6AddressPolicy::INSTANCE;
+IPv4AddressType IPv4AddressType::INSTANCE;
 
-const IPv6Address IPv6AddressPolicy::ALL_RIP_ROUTERS_MCAST("FF02::9");
+const IPv4Address IPv4AddressType::ALL_RIP_ROUTERS_MCAST("224.0.0.9");

@@ -39,7 +39,7 @@ Define_Module(DYMO::xDYMO);
 xDYMO::xDYMO()
 {
     notificationBoard = NULL;
-    addressPolicy = NULL;
+    addressType = NULL;
     interfaceTable = NULL;
     routingTable = NULL;
     networkProtocol = NULL;
@@ -103,7 +103,7 @@ void xDYMO::initialize(int stage)
     }
     else if (stage == 4) {
         notificationBoard->subscribe(this, NF_LINK_BREAK);
-        addressPolicy = getSelfAddress().getAddressPolicy();
+        addressType = getSelfAddress().getAddressType();
         // join multicast groups
         cPatternMatcher interfaceMatcher(interfaces, false, true, false);
         for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
@@ -112,7 +112,7 @@ void xDYMO::initialize(int stage)
                 // Most AODVv2 messages are sent with the IP destination address set to the link-local
                 // multicast address LL-MANET-Routers [RFC5498] unless otherwise specified. Therefore,
                 // all AODVv2 routers MUST subscribe to LL-MANET-Routers [RFC5498] to receiving AODVv2 messages.
-                interfaceEntry->joinMulticastGroup(addressPolicy->getLinkLocalManetRoutersMulticastAddress());
+                interfaceEntry->joinMulticastGroup(addressType->getLinkLocalManetRoutersMulticastAddress());
         }
         // hook to netfilter
         networkProtocol->registerHook(0, this);
@@ -381,7 +381,7 @@ void xDYMO::processUDPPacket(UDPPacket * packet)
 
 void xDYMO::sendDYMOPacket(DYMOPacket * packet, const InterfaceEntry * interfaceEntry, const Address & nextHop, double delay)
 {
-    INetworkProtocolControlInfo * networkProtocolControlInfo = addressPolicy->createNetworkProtocolControlInfo();
+    INetworkProtocolControlInfo * networkProtocolControlInfo = addressType->createNetworkProtocolControlInfo();
     // 5.4. AODVv2 Packet Header Fields and Information Elements
     // In addition, IP Protocol Number 138 has been reserved for MANET protocols [RFC5498].
     networkProtocolControlInfo->setProtocol(IP_PROT_MANET);
@@ -583,7 +583,7 @@ RREQ * xDYMO::createRREQ(const Address & target, int retryCount)
     //       incur additional enlargement.
     // 5. RREQ_Gen adds the TargNode.Addr to the RREQ.
     targetNode.setAddress(target);
-    targetNode.setPrefixLength(addressPolicy->getMaxPrefixLength());
+    targetNode.setPrefixLength(addressType->getMaxPrefixLength());
     // 6. If a previous value of the TargNode's SeqNum is known RREQ_Gen SHOULD
     //    include TargNode.SeqNum in all but the last RREQ attempt.
     std::map<Address, DYMOSequenceNumber>::iterator st = targetAddressToSequenceNumber.find(target);
@@ -596,7 +596,7 @@ RREQ * xDYMO::createRREQ(const Address & target, int retryCount)
     // 7. RREQ_Gen adds OrigNode.Addr, its prefix, and the RREQ_Gen.SeqNum (OwnSeqNum) to the RREQ.
     const Address & originator = getSelfAddress();
     originatorNode.setAddress(originator);
-    originatorNode.setPrefixLength(addressPolicy->getMaxPrefixLength());
+    originatorNode.setPrefixLength(addressType->getMaxPrefixLength());
     originatorNode.setHasSequenceNumber(true);
     originatorNode.setSequenceNumber(sequenceNumber);
     // 8. If OrigNode.Metric is included it is set to the cost of the route
@@ -619,7 +619,7 @@ void xDYMO::sendRREQ(RREQ * rreq)
     const Address & originator = rreq->getOriginatorNode().getAddress();
     rreq->setBitLength(computeRREQBitLength(rreq));
     DYMO_EV << "Sending RREQ: originator = " << originator << ", target = " << target << endl;
-    sendDYMOPacket(rreq, NULL, addressPolicy->getLinkLocalManetRoutersMulticastAddress(), uniform(0, maxJitter).dbl());
+    sendDYMOPacket(rreq, NULL, addressType->getLinkLocalManetRoutersMulticastAddress(), uniform(0, maxJitter).dbl());
 }
 
 void xDYMO::processRREQ(RREQ * rreqIncoming)
@@ -730,7 +730,7 @@ void xDYMO::sendRREP(RREP * rrep)
     const Address & originator = rrep->getOriginatorNode().getAddress();
     rrep->setBitLength(computeRREPBitLength(rrep));
     DYMO_EV << "Sending broadcast RREP: originator = " << originator << ", target = " << target << endl;
-    sendDYMOPacket(rrep, NULL, addressPolicy->getLinkLocalManetRoutersMulticastAddress(), 0);
+    sendDYMOPacket(rrep, NULL, addressType->getLinkLocalManetRoutersMulticastAddress(), 0);
 }
 
 void xDYMO::sendRREP(RREP * rrep, IRoute * route)
@@ -804,7 +804,7 @@ RERR * xDYMO::createRERR(std::vector<Address> & unreachableAddresses)
         const Address & unreachableAddress = unreachableAddresses[i];
         AddressBlock * addressBlock = new AddressBlock();
         addressBlock->setAddress(unreachableAddress);
-        addressBlock->setPrefixLength(addressPolicy->getMaxPrefixLength());
+        addressBlock->setPrefixLength(addressType->getMaxPrefixLength());
         int size = rerr->getUnreachableNodeArraySize();
         rerr->setUnreachableNodeArraySize(size + 1);
         rerr->setUnreachableNode(size, *addressBlock);
@@ -817,7 +817,7 @@ void xDYMO::sendRERR(RERR * rerr)
 {
     rerr->setBitLength(computeRERRBitLength(rerr));
     DYMO_EV << "Sending RERR: unreachableNodeCount = " << rerr->getUnreachableNodeArraySize() << endl;
-    sendDYMOPacket(rerr, NULL, addressPolicy->getLinkLocalManetRoutersMulticastAddress(), 0);
+    sendDYMOPacket(rerr, NULL, addressType->getLinkLocalManetRoutersMulticastAddress(), 0);
 }
 
 void xDYMO::sendRERRForUndeliverablePacket(const Address & destination)
@@ -1277,7 +1277,7 @@ void xDYMO::addSelfNode(RteMsg * rteMsg)
     addressBlock->setHasMetricType(true);
     addressBlock->setMetricType(HOP_COUNT);
     addressBlock->setAddress(address);
-    addressBlock->setPrefixLength(addressPolicy->getMaxPrefixLength());
+    addressBlock->setPrefixLength(addressType->getMaxPrefixLength());
     addNode(rteMsg, *addressBlock);
 }
 
@@ -1358,7 +1358,7 @@ void xDYMO::receiveChangeNotification(int category, const cObject *details)
                 // TODO: get nexthop and interface from the packet
                 // INetworkProtocolControlInfo * networkProtocolControlInfo = dynamic_cast<INetworkProtocolControlInfo *>(datagram->getControlInfo());
                 const Address & destination = datagram->getDestinationAddress();
-                if (destination.getAddressPolicy() == addressPolicy) {
+                if (destination.getAddressType() == addressType) {
                     IRoute * route = routingTable->findBestMatchingRoute(destination);
                     if (route) {
                         const Address & nextHop = route->getNextHopAsGeneric();

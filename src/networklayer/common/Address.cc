@@ -16,11 +16,11 @@
 //
 
 #include "Address.h"
-#include "IPv4AddressPolicy.h"
-#include "IPv6AddressPolicy.h"
-#include "MACAddressPolicy.h"
-#include "ModuleIdAddressPolicy.h"
-#include "ModulePathAddressPolicy.h"
+#include "IPv4AddressType.h"
+#include "IPv6AddressType.h"
+#include "MACAddressType.h"
+#include "ModuleIdAddressType.h"
+#include "ModulePathAddressType.h"
 
 #define RESERVED_IPV6_ADDRESS_RANGE 0x8000 // IETF reserved address range 8000::/16 (extended)
 
@@ -54,21 +54,21 @@ inline Address::AddressType Address::getType() const
         return Address::IPv6;
 }
 
-IAddressPolicy * Address::getAddressPolicy() const
+IAddressType * Address::getAddressType() const
 {
     switch (getType()) {
         case Address::NONE:
             throw cRuntimeError("Address contains no value");
         case Address::IPv4:
-            return &IPv4AddressPolicy::INSTANCE;
+            return &IPv4AddressType::INSTANCE;
         case Address::IPv6:
-            return &IPv6AddressPolicy::INSTANCE;
+            return &IPv6AddressType::INSTANCE;
         case Address::MAC:
-            return &MACAddressPolicy::INSTANCE;
+            return &MACAddressType::INSTANCE;
         case Address::MODULEID:
-            return &ModuleIdAddressPolicy::INSTANCE;
+            return &ModuleIdAddressType::INSTANCE;
         case Address::MODULEPATH:
-            return &ModulePathAddressPolicy::INSTANCE;
+            return &ModulePathAddressType::INSTANCE;
         default:
             throw cRuntimeError("Unknown type");
     }
