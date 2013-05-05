@@ -68,6 +68,7 @@ void GPSR::initialize(int stage)
         maxJitter = par("maxJitter");
         neighborValidityInterval = par("neighborValidityInterval");
         // context
+        host = findContainingNode(this);
         notificationBoard = NotificationBoardAccess().get(this);
         interfaceTable = InterfaceTableAccess().get(this);
         mobility = check_and_cast<IMobility *>(findModuleWhereverInNode("mobility", this));
@@ -328,8 +329,7 @@ double GPSR::getNeighborAngle(const Address & address)
 
 std::string GPSR::getHostName()
 {
-    // TODO: this is fragile
-    return getParentModule()->getFullName();
+    return host->getFullName();
 }
 
 Address GPSR::getSelfAddress()

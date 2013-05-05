@@ -52,6 +52,7 @@ class INET_API GPSR : public cSimpleModule, public INotifiable, public INetfilte
         simtime_t neighborValidityInterval;
 
         // context
+        cModule * host;
         NotificationBoard * notificationBoard;
         IMobility * mobility;
         IAddressPolicy * addressPolicy;

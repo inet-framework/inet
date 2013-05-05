@@ -83,6 +83,7 @@ void xDYMO::initialize(int stage)
         minHopLimit = par("minHopLimit");
         maxHopLimit = par("maxHopLimit");
         // context
+        host = findContainingNode(this);
         notificationBoard = NotificationBoardAccess().get(this);
         interfaceTable = InterfaceTableAccess().get(this);
         routingTable = check_and_cast<IRoutingTable *>(findModuleWhereverInNode(routingTableModule, this));
@@ -1243,8 +1244,7 @@ DYMORouteState xDYMO::getRouteState(DYMORouteData * routeData)
 
 std::string xDYMO::getHostName()
 {
-    // TODO: this is fragile
-    return getParentModule()->getFullName();
+    return host->getFullName();
 }
 
 Address xDYMO::getSelfAddress()

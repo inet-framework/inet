@@ -79,6 +79,7 @@ class INET_API xDYMO : public cSimpleModule, public INotifiable, public INetfilt
     int maxHopLimit;
 
     // context
+    cModule * host;
     NotificationBoard * notificationBoard;
     IAddressPolicy * addressPolicy;
     IInterfaceTable * interfaceTable;
