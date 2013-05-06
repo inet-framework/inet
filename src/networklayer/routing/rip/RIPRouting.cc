@@ -391,8 +391,11 @@ void RIPRouting::receiveChangeNotification(int category, const cObject *details)
                     ripRoute->setPrefixLength(route->getPrefixLength());
                     ripRoute->setNextHop(route->getNextHopAsGeneric());
                     ripRoute->setInterface(route->getInterface());
-                    ripRoute->setChanged(changed);
-                    triggerUpdate();
+                    if (changed)
+                    {
+                        ripRoute->setChanged(changed);
+                        triggerUpdate();
+                    }
                 }
             }
     }
