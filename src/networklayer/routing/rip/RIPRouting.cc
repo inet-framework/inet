@@ -868,9 +868,11 @@ void RIPRouting::triggerUpdate()
     if (!triggeredUpdateTimer->isScheduled())
     {
         double delay = par("triggeredUpdateDelay");
+        simtime_t updateTime = simTime() + delay;
         // Triggered updates may be suppressed if a regular
         // update is due by the time the triggered update would be sent.
-        scheduleAt(simTime() + delay, triggeredUpdateTimer);
+        if (!updateTimer->isScheduled() || updateTimer->getArrivalTime() > updateTime)
+            scheduleAt(updateTime, triggeredUpdateTimer);
     }
 }
 
