@@ -108,13 +108,33 @@ struct RIPInterfaceEntry
 };
 
 /**
- * Implementation of the Routing Information Protocol v2 (RFC 2453).
+ * Implementation of the Routing Information Protocol.
  *
- * Outside a subnetted network only the network routes are advertised (merging subnet routes) (RFC 2453 3.7)
+ * This module supports RIPv2 (RFC 2453) and RIPng (RFC 2080).
  *
- * Default routes (with 0.0.0.0 address) are added to BGP routers and are propagated by RIP.
- * Routes involving 0.0.0.0 should not leave the boundary of an AS. (RFC 2453 3.7)
+ * RIP is a distance vector routing protocol. Each RIP router periodically sends its
+ * whole routing table to neighbor routers, and updates its own routing table
+ * according to the received information. If a route changed the router might send a
+ * notification to its neighbors immediately (or rather with a small delay) which contains
+ * only the changed routes (triggered updates).
  *
+ * TODO
+ * 1. Initially the router knows only the routes to the directly connected networks, and
+ *    the routes that were manually configured. As it receives route updates from the
+ *    neighbors it learns routes to remote networks.
+ *    It should be possible to cooperate with other routing protocols that work in the same AS
+ *    (e.g. OSPF) or with exterior protocols that connects this AS to other ASs (e.g. BGP).
+ *    This requires some configurable criteria which routes of the routing table should be advertise
+ *    by the RIP router, e.g. 'advertise the default route added by BGP with RIP metric 1'.
+ *
+ * 2. There is no merging of subnet routes. RFC 2453 3.7 suggests that subnetted network routes should
+ *    not be advertised outside the subnetted network.
+ *
+ * 3. RIPng requires the source address of RIP packets be a link-local address, because this address
+ *    is saved in the routing table as the next-hop. Now the source address is left unspecified,
+ *    therefore it is filled by the IPv6 module with the preferred address of the outgoing interface.
+ *    Fix: either add a method to UDPSocket which allows to select the source address, or use
+ *         multiple sockets, each bound to a link-local address.
  */
 class INET_API RIPRouting : public cSimpleModule, protected INotifiable
 {

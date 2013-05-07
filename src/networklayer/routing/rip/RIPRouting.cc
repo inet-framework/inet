@@ -253,6 +253,10 @@ void RIPRouting::configureInitialRoutes()
     }
 }
 
+/**
+ * Adds a new route the RIP routing table for an existing IRoute.
+ * This route will be advertised with the specified metric and routeTag fields.
+ */
 RIPRoute* RIPRouting::importRoute(IRoute *route, RIPRoute::RouteType type, int metric, uint16 routeTag)
 {
     ASSERT(metric < RIP_INFINITE_METRIC);
@@ -881,7 +885,7 @@ void RIPRouting::triggerUpdate()
 
 /**
  * Should be called regularly to handle expiry and purge of routes.
- * Returns the route if it is valid.
+ * If the route is valid, then returns it, otherwise returns NULL.
  */
 RIPRoute *RIPRouting::checkRouteIsExpired(RIPRoute *route)
 {
@@ -949,8 +953,8 @@ void RIPRouting::purgeRoute(RIPRoute *ripRoute)
 }
 
 /**
- * Sends the packet to the specified UDP dest/port.
- * If the dest is a multicast address, then the outgoing interface must be specified.
+ * Sends the packet to the specified destination.
+ * If the destAddr is a multicast, then the destInterface must be specified.
  */
 void RIPRouting::sendPacket(RIPPacket *packet, const Address &destAddr, int destPort, const InterfaceEntry *destInterface)
 {
@@ -958,6 +962,7 @@ void RIPRouting::sendPacket(RIPPacket *packet, const Address &destAddr, int dest
     if (destAddr.isMulticast())
     {
         // TODO RIPng: use a link-local source address
+        //             Is IPv6 address selection (RFC 3484) enough here?
         if (mode == RIPng)
             socket.setTimeToLive(255);
         socket.sendTo(packet, destAddr, destPort, destInterface->getInterfaceId());
