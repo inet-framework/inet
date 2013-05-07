@@ -74,6 +74,7 @@ module InternetCloud
                         multicastTimeToLive = 32;
                         fragmentTimeout = 60s;
                         useProxyARP = true; 
+                        routingTableModule = "^.^.routingTable";
                         @display("p=85,95;q=queue");
                     gates:
                         transportIn[1];
@@ -88,6 +89,7 @@ module InternetCloud
                 arp: ARP {
                     parameters:
                         respondToProxyARP = proxyARP;
+                        routingTableModule = "^.^.routingTable";
                         @display("p=163,206;q=pendingQueue");
                 }
                 icmp: ICMP {
