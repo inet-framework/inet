@@ -45,6 +45,17 @@ void InterfaceProtocolData::changed(int category, int fieldId)
         ownerp->changed(category, fieldId);
 }
 
+std::string InterfaceEntryChangeDetails::info() const
+{
+    return ie->info();
+}
+
+std::string InterfaceEntryChangeDetails::detailedInfo() const
+{
+    std::stringstream out;
+    out << ie->detailedInfo() << " changed field: " << field << "\n";
+    return out.str();
+}
 
 InterfaceEntry::InterfaceEntry(cModule* ifmod)
 {
