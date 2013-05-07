@@ -73,6 +73,7 @@ module InternetCloud
                         timeToLive = 32;
                         multicastTimeToLive = 32;
                         fragmentTimeout = 60s;
+                        useProxyARP = true; 
                         @display("p=85,95;q=queue");
                     gates:
                         transportIn[1];
@@ -85,7 +86,7 @@ module InternetCloud
                 }
                 arp: ARP {
                     parameters:
-                        proxyARP = proxyARP;
+                        respondToProxyARP = proxyARP;
                         @display("p=163,206;q=pendingQueue");
                     gates:
                         nicOut[sizeof(ifOut)];
