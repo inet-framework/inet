@@ -333,7 +333,7 @@ void IGMPv2::initialize(int stage)
     if (stage == 0)
     {
         ift = InterfaceTableAccess().get();
-        rt = check_and_cast<IIPv4RoutingTable *>(findModuleWhereverInNode(par("routingTableModuleName"), this));
+        rt = check_and_cast<IIPv4RoutingTable *>(findModuleWhereverInNode(par("routingTableModule"), this));
         nb = NotificationBoardAccess().get();
 
         nb->subscribe(this, NF_INTERFACE_DELETED);
