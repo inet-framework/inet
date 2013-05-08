@@ -1,6 +1,5 @@
 package inet.examples.bgpv4.BGPCompleteTest;
 
-import inet.base.UnimplementedModule;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.bgp.BGPRouter;
 import inet.nodes.ethernet.EtherSwitch;
