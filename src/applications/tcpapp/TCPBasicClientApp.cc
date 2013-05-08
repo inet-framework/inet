@@ -79,7 +79,8 @@ bool TCPBasicClientApp::handleOperationStage(LifecycleOperation *operation, int 
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
             cancelEvent(timeoutMsg);
-            close();
+            if (socket.getState() == TCPSocket::CONNECTED || socket.getState() == TCPSocket::CONNECTING || socket.getState() == TCPSocket::PEER_CLOSED)
+                close();
             // TODO: wait until socket is closed
         }
     }
