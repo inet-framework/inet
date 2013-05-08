@@ -23,9 +23,20 @@
 
 #include "INETDefs.h"
 
-class INET_API CloudDelayerBase : public cSimpleModule
+#include "INetfilter.h"
+
+//forward declarations:
+class IPv4;
+
+
+class INET_API CloudDelayerBase : public cSimpleModule, public INetfilter::IHook
 {
+  public:
+    CloudDelayerBase();
+    ~CloudDelayerBase();
   protected:
+    virtual void initialize();
+    virtual void finish();
     virtual void handleMessage(cMessage *msg);
 
     /**
@@ -33,6 +44,14 @@ class INET_API CloudDelayerBase : public cSimpleModule
      * otherwise returns calculated delay in outDelay.
      */
     virtual void calculateDropAndDelay(const cMessage *msg, int srcID, int destID, bool& outDrop, simtime_t& outDelay);
+
+    virtual INetfilter::IHook::Result datagramPreRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress);
+    virtual INetfilter::IHook::Result datagramForwardHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress);
+    virtual INetfilter::IHook::Result datagramPostRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress);
+    virtual INetfilter::IHook::Result datagramLocalInHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry);
+    virtual INetfilter::IHook::Result datagramLocalOutHook(INetworkDatagram * datagram, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress);
+  protected:
+    IPv4 *ipv4Layer;
 };
 
 #endif  // __INET_INTERNETCLOUD_CLOUDDELAYERBASE_H

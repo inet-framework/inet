@@ -1,3 +1,8 @@
+2013-08-22  Zoltan Bojthe
+
+    Refactored for modified ARP an IPv4.
+    Uses INetFilter::IHook in IPv4
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-01-30  ------ inet-2.1.0 released ------

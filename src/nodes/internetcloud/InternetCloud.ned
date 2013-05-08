@@ -79,6 +79,7 @@ module InternetCloud
                         transportIn[1];
                         transportOut[1];
                         queueIn[sizeof(ifIn)];
+                        queueOut[sizeof(ifOut)];
                 }
 
                 delayer: <default("MatrixCloudDelayer")> like ICloudDelayer {
@@ -88,8 +89,6 @@ module InternetCloud
                     parameters:
                         respondToProxyARP = proxyARP;
                         @display("p=163,206;q=pendingQueue");
-                    gates:
-                        nicOut[sizeof(ifOut)];
                 }
                 icmp: ICMP {
                     parameters:
@@ -106,13 +105,15 @@ module InternetCloud
 
                 icmp.errorOut --> errorHandling.in;
 
-                ip.queueOut --> delayer.ipIn;
-                delayer.ipOut --> arp.ipIn;
+                ip.arpDgramOut --> arp.dgramIn;
+                ip.arpOut --> arp.netwIn;
+                ip.arpIn <-- arp.netwOut;
 
-                // L2 interfaces to IP and from ARP
+                for i=0..sizeof(ifIn)-1 {
+                    ip.queueIn[i] <-- { @display("m=s"); } <-- ifIn[i];
+                }
                 for i=0..sizeof(ifOut)-1 {
-                    ifIn[i] --> InternetCloudTaggerChannel { @display("m=s"); } --> ip.queueIn[i];
-                    ifOut[i] <-- { @display("m=s"); } <-- arp.nicOut[i];
+                    ip.queueOut[i] --> { @display("m=s"); } --> ifOut[i];
                 }
         }
     submodules:
