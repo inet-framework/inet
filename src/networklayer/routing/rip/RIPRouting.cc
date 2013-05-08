@@ -241,7 +241,10 @@ void RIPRouting::configureInitialRoutes()
         if (isLoopbackInterfaceRoute(route))
             /*ignore*/;
         else if (isLocalInterfaceRoute(route))
-            importRoute(route, RIPRoute::RIP_ROUTE_INTERFACE);
+        {
+            InterfaceEntry *ie = check_and_cast<InterfaceEntry*>(route->getSource());
+            importRoute(route, RIPRoute::RIP_ROUTE_INTERFACE, getInterfaceMetric(ie));
+        }
         else if (isDefaultRoute(route))
             importRoute(route, RIPRoute::RIP_ROUTE_DEFAULT);
         else
@@ -266,9 +269,6 @@ RIPRoute* RIPRouting::importRoute(IRoute *route, RIPRoute::RouteType type, int m
     {
         InterfaceEntry *ie = check_and_cast<InterfaceEntry*>(route->getSource());
         ripRoute->setInterface(ie);
-        RIPInterfaceEntry *ripIe = findInterfaceById(ie->getInterfaceId());
-        if (ripIe)
-            ripRoute->setMetric(ripIe->metric);
     }
 
     ripRoutes.push_back(ripRoute);
@@ -371,7 +371,7 @@ void RIPRouting::receiveChangeNotification(int category, const cObject *details)
                         triggerUpdate();
                     }
                     else
-                        importRoute(route, RIPRoute::RIP_ROUTE_INTERFACE);
+                        importRoute(route, RIPRoute::RIP_ROUTE_INTERFACE, getInterfaceMetric(ie));
                 }
                 else
                 {
@@ -1047,6 +1047,12 @@ void RIPRouting::deleteInterface(const InterfaceEntry *ie)
     }
     if (emitNumRoutesSignal)
         emit(numRoutesSignal, ripRoutes.size());
+}
+
+int RIPRouting::getInterfaceMetric(InterfaceEntry *ie)
+{
+    RIPInterfaceEntry *ripIe = findInterfaceById(ie->getInterfaceId());
+    return ripIe ? ripIe->metric : 1;
 }
 
 void RIPRouting::invalidateRoutes(const InterfaceEntry *ie)

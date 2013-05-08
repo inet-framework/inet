@@ -182,6 +182,7 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     bool isLocalInterfaceRoute(const IRoute *route);
     bool isDefaultRoute(const IRoute *route) { return route->getPrefixLength() == 0; }
     std::string getHostName() {return host->getFullName(); }
+    int getInterfaceMetric(InterfaceEntry *ie);
   protected:
     virtual int numInitStages() const  {return 5;}
     virtual void initialize(int stage);
