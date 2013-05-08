@@ -3,16 +3,13 @@ package inet.examples.ospfv2.dynamictest;
 
 
 
+import inet.base.LifecycleController;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.ospfv2.OSPFRouter;
 import inet.util.ThruputMeteringChannel;
 import inet.world.scenario.ScenarioManager;
 
-
-module Dummy
-{
-}
 
 network DynamicTest
 {
@@ -80,7 +77,7 @@ network DynamicTest
         scenarioManager: ScenarioManager {
             @display("p=594,50");
         }
-        lifecycleController: Dummy {
+        lifecycleController: LifecycleController {
             @display("p=94,194");
         }
     connections:
