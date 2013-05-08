@@ -44,11 +44,10 @@ network Test
 
 %contains-regex: stdout
 
-.*Event #1  T=6.*
+.*Event #\d+  T=6 .*
 .*
 Test.host starting up
 .*
 Test.host started
 
 <!> No more events -- simulation ended at event #\d+, t=6
-

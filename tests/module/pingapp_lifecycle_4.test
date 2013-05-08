@@ -42,14 +42,14 @@ network Test
 </scenario>
 
 %contains-regex: stdout
-.*Event #1  T=0.*
+.*Event #\d+  T=0 .*
 Starting up: .*
 Sending ping #0
 .*
-.*Event #\d+  T=3.*
+.*Event #\d+  T=3 .*
 Sending ping #3
 .*
-.*Event #\d+  T=6.*
+.*Event #\d+  T=6 .*
 .*
 Test.host shutting down
 .*

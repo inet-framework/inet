@@ -3,9 +3,9 @@
 Test for basic TCP application lifecycle handling.
 
 Sequence of operations:
- - at 0 client initializes to down
+ - at 0 client initializes to up
  - at 0 server initializes to down
- - at 1 client executes startup operation
+ - at 1 client executes shutdown operation
  - at 2 server executes startup operation
  - simulation stops at 3
 
@@ -20,7 +20,8 @@ sim-time-limit = 3s
 record-eventlog = true
 
 **.hasStatus = true
-**.initialStatus = "down"
+**.client.status.initialStatus = "up"
+**.server.status.initialStatus = "down"
 **.scenarioManager.script = xmldoc("scenario.xml")
 
 **.arp.retryCount = 0
@@ -64,10 +65,10 @@ network Test
 }
 
 %file: scenario.xml
-  
+ 
 <scenario>
     <at t="1">
-        <tell module="lifecycleController" target="client" operation="NodeStartOperation"/>
+        <tell module="lifecycleController" target="client" operation="NodeShutdownOperation"/>
     </at>
     <at t="2">
         <tell module="lifecycleController" target="server" operation="NodeStartOperation"/>
@@ -77,9 +78,9 @@ network Test
 %contains-regex: stdout
 
 .*
-Test.client starting up
+Test.client shutting down
 .*
-Test.client started
+Test.client shut down
 .*
 Test.server starting up
 .*

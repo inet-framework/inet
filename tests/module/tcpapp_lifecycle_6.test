@@ -3,10 +3,10 @@
 Test for basic TCP application lifecycle handling.
 
 Sequence of operations:
- - at 0 client initializes to down
+ - at 0 client initializes to up
  - at 0 server initializes to down
- - at 1 client executes startup operation
- - at 2 server executes startup operation
+ - at 1 server executes startup operation
+ - at 2 client executes shutdown operation
  - simulation stops at 3
 
 %inifile: omnetpp.ini
@@ -20,7 +20,8 @@ sim-time-limit = 3s
 record-eventlog = true
 
 **.hasStatus = true
-**.initialStatus = "down"
+**.client.status.initialStatus = "up"
+**.server.status.initialStatus = "down"
 **.scenarioManager.script = xmldoc("scenario.xml")
 
 **.arp.retryCount = 0
@@ -64,26 +65,26 @@ network Test
 }
 
 %file: scenario.xml
-  
+ 
 <scenario>
     <at t="1">
-        <tell module="lifecycleController" target="client" operation="NodeStartOperation"/>
+        <tell module="lifecycleController" target="server" operation="NodeStartOperation"/>
     </at>
     <at t="2">
-        <tell module="lifecycleController" target="server" operation="NodeStartOperation"/>
+        <tell module="lifecycleController" target="client" operation="NodeShutdownOperation"/>
     </at>
 </scenario>
 
 %contains-regex: stdout
 
 .*
-Test.client starting up
-.*
-Test.client started
-.*
 Test.server starting up
 .*
 Test.server started
+.*
+Test.client shutting down
+.*
+Test.client shut down
 .*
 Test.client.tcpApp\[0\]: received 0 bytes in 0 packets
 .*

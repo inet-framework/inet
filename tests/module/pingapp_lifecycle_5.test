@@ -43,16 +43,16 @@ network Test
 
 %contains-regex: stdout
 
-.*Event #1  T=3.*
+.*Event #\d+  T=3 .*
 .*
 Test.host starting up
 .*
 Test.host started
-.*Event #2  T=6.*
+.*Event #\d+  T=6 .*
 Starting up: .*
 Sending ping #0
 .*
-.*Event #\d+  T=9.*
+.*Event #\d+  T=9 .*
 Sending ping #3
 
 <!> Simulation time limit reached -- simulation stopped at event #\d+, t=9

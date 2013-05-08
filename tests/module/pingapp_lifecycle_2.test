@@ -42,14 +42,14 @@ network Test
 
 %contains-regex: stdout
 
-.*Event #1  T=3.*
+.*Event #\d+  T=3 .*
 Starting up: .*
 Sending ping #0
 .*
-.*Event #\d+  T=5.*
+.*Event #\d+  T=5 .*
 Sending ping #2
 .*
-.*Event #\d+  T=6.*
+.*Event #\d+  T=6 .*
 .*
 Test.host shutting down
 .*
