@@ -139,8 +139,14 @@ void UDPBasicApp::processStart()
     cStringTokenizer tokenizer(destAddrs);
     const char *token;
 
-    while ((token = tokenizer.nextToken()) != NULL)
-        destAddresses.push_back(IPvXAddressResolver().resolve(token));
+    while ((token = tokenizer.nextToken()) != NULL) {
+        IPvXAddress result;
+        IPvXAddressResolver().tryResolve(token, result);
+        if (result.isUnspecified())
+            EV << "cannot resolve destination address: " << token << endl;
+        else
+            destAddresses.push_back(result);
+    }
 
     if (!destAddresses.empty())
     {
