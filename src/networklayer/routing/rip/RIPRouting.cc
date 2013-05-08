@@ -19,11 +19,12 @@
 #include <functional>
 
 #include "IAddressType.h"
+#include "InterfaceMatcher.h"
 #include "InterfaceTableAccess.h"
+#include "NodeOperations.h"
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 #include "UDP.h"
-#include "InterfaceMatcher.h"
 
 #include "RIPPacket_m.h"
 #include "RIPRouting.h"
@@ -136,6 +137,7 @@ RIPRouting::~RIPRouting()
         delete *it;
     cancelAndDelete(updateTimer);
     cancelAndDelete(triggeredUpdateTimer);
+    cancelAndDelete(shutdownTimer);
 }
 
 simsignal_t RIPRouting::sentRequestSignal = SIMSIGNAL_NULL;
@@ -150,6 +152,7 @@ void RIPRouting::initialize(int stage)
         host = findContainingNode(this);
         ift = InterfaceTableAccess().get();
         rt = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
+        socket.setOutputGate(gate("udpOut"));
 
         const char *m = par("mode");
         if (!m)
@@ -165,10 +168,11 @@ void RIPRouting::initialize(int stage)
         updateInterval = par("updateInterval").doubleValue();
         routeExpiryTime = par("routeExpiryTime").doubleValue();
         routePurgeTime = par("routePurgeTime").doubleValue();
+        shutdownTime = par("shutdownTime").doubleValue();
 
         updateTimer = new cMessage("RIP-timer");
         triggeredUpdateTimer = new cMessage("RIP-trigger");
-        socket.setOutputGate(gate("udpOut"));
+        shutdownTimer = new cMessage("RIP-shutdown");
 
         WATCH_VECTOR(ripInterfaces);
         WATCH_PTRVECTOR(ripRoutes);
@@ -179,35 +183,9 @@ void RIPRouting::initialize(int stage)
         badResponseSignal = registerSignal("badResponse");
         numRoutesSignal = registerSignal("numRoutes");
     }
-    else if (stage == 3) {
-        configureInterfaces(par("ripConfig").xmlValue());
-    }
     else if (stage == 4) { // interfaces and static routes are already initialized
         addressType = rt->getRouterIdAsGeneric().getAddressType();
-        configureInitialRoutes();
-
-        // configure socket
-        socket.setMulticastLoop(false);
-        socket.bind(ripUdpPort);
-        for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
-            if (it->mode != NO_RIP)
-                socket.joinMulticastGroup(addressType->getLinkLocalRIPRoutersMulticastAddress(), it->ie->getInterfaceId());
-
-        // subscribe to notifications
-        NotificationBoard *nb = NotificationBoardAccess().get();
-        nb->subscribe(this, NF_INTERFACE_CREATED);
-        nb->subscribe(this, NF_INTERFACE_DELETED);
-        nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
-        nb->subscribe(this, NF_ROUTE_DELETED);
-        nb->subscribe(this, NF_ROUTE_ADDED);
-        nb->subscribe(this, NF_ROUTE_CHANGED);
-
-        for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
-            if (it->mode != NO_RIP)
-                sendRIPRequest(*it);
-
-        // set update timer
-        scheduleAt(updateInterval, updateTimer);
+        startRIPRouting();
     }
 }
 
@@ -405,6 +383,98 @@ void RIPRouting::receiveChangeNotification(int category, const cObject *details)
     }
 }
 
+bool RIPRouting::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
+            startRIPRouting();
+            return true;
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
+            // invalidate routes
+            for (RouteVector::iterator it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
+                invalidateRoute(*it);
+            // send updates to neighbors
+            for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
+                sendRoutes(addressType->getLinkLocalRIPRoutersMulticastAddress(), ripUdpPort, *it, false);
+
+            stopRIPRouting();
+
+            // wait a few seconds before calling doneCallback, so that UDP can send the messages
+            shutdownTimer->setContextPointer(doneCallback);
+            scheduleAt(simTime() + shutdownTime, shutdownTimer);
+
+            return false;
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            stopRIPRouting();
+            return true;
+        }
+    }
+
+    return true;
+}
+
+void RIPRouting::startRIPRouting()
+{
+    // configure interfaces
+    configureInterfaces(par("ripConfig").xmlValue());
+
+    // import interface routes
+    configureInitialRoutes();
+
+    // configure socket
+    socket.setMulticastLoop(false);
+    socket.bind(ripUdpPort);
+    for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
+        if (it->mode != NO_RIP)
+            socket.joinMulticastGroup(addressType->getLinkLocalRIPRoutersMulticastAddress(), it->ie->getInterfaceId());
+
+    // subscribe to notifications
+    NotificationBoard *nb = NotificationBoardAccess().get();
+    nb->subscribe(this, NF_INTERFACE_CREATED);
+    nb->subscribe(this, NF_INTERFACE_DELETED);
+    nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
+    nb->subscribe(this, NF_ROUTE_DELETED);
+    nb->subscribe(this, NF_ROUTE_ADDED);
+    nb->subscribe(this, NF_ROUTE_CHANGED);
+
+    for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
+        if (it->mode != NO_RIP)
+            sendRIPRequest(*it);
+
+    // set update timer
+    scheduleAt(simTime() + updateInterval, updateTimer);
+}
+
+void RIPRouting::stopRIPRouting()
+{
+    socket.close();
+
+    // subscribe to notifications
+    NotificationBoard *nb = NotificationBoardAccess().get();
+    nb->unsubscribe(this, NF_INTERFACE_CREATED);
+    nb->unsubscribe(this, NF_INTERFACE_DELETED);
+    nb->unsubscribe(this, NF_INTERFACE_STATE_CHANGED);
+    nb->unsubscribe(this, NF_ROUTE_DELETED);
+    nb->unsubscribe(this, NF_ROUTE_ADDED);
+    nb->unsubscribe(this, NF_ROUTE_CHANGED);
+
+    // cancel timers
+    cancelEvent(updateTimer);
+    cancelEvent(triggeredUpdateTimer);
+
+    // clear data
+    ripRoutes.clear();
+    ripInterfaces.clear();
+}
+
 void RIPRouting::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
@@ -417,6 +487,12 @@ void RIPRouting::handleMessage(cMessage *msg)
         else if (msg == triggeredUpdateTimer)
         {
             processUpdate(true);
+        }
+        else if (msg == shutdownTimer)
+        {
+            IDoneCallback *doneCallback = (IDoneCallback*)msg->getContextPointer();
+            msg->setContextPointer(NULL);
+            doneCallback->invoke();
         }
     }
     else if (msg->getKind() == UDP_I_DATA)

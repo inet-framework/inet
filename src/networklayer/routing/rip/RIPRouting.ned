@@ -74,6 +74,7 @@ simple RIPRouting
         volatile double triggeredUpdateDelay @unit(s) = uniform(1s,5s);
         double routeExpiryTime @unit(s) = 180s;
         double routePurgeTime @unit(s) = 120s;
+        double shutdownTime @unit(s) = default(1s);
         @signal[sentRequest](type=cPacket);
         @signal[sentUpdate](type=cPacket);
         @signal[rcvdResponse](type=cPacket);

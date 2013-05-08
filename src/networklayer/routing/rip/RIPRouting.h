@@ -23,6 +23,7 @@
 #include "IRoute.h"
 #include "IRoutingTable.h"
 #include "IInterfaceTable.h"
+#include "ILifecycle.h"
 #include "UDPSocket.h"
 
 #define RIP_INFINITE_METRIC 16
@@ -136,7 +137,7 @@ struct RIPInterfaceEntry
  *    Fix: either add a method to UDPSocket which allows to select the source address, or use
  *         multiple sockets, each bound to a link-local address.
  */
-class INET_API RIPRouting : public cSimpleModule, protected INotifiable
+class INET_API RIPRouting : public cSimpleModule, protected INotifiable, public ILifecycle
 {
     enum Mode { RIPv2, RIPng };
     typedef std::vector<RIPInterfaceEntry> InterfaceVector;
@@ -152,12 +153,14 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     UDPSocket socket;               // bound to the RIP port (see udpPort parameter)
     cMessage *updateTimer;          // for sending unsolicited Response messages in every ~30 seconds.
     cMessage *triggeredUpdateTimer; // scheduled when there are pending changes
+    cMessage *shutdownTimer;        // scheduled at shutdown
     // parameters
     Mode mode;
     int ripUdpPort;                 // UDP port RIP routers (usually 520)
     simtime_t updateInterval;       // time between regular updates
     simtime_t routeExpiryTime;      // learned routes becomes invalid if no update received in this period of time
     simtime_t routePurgeTime;       // invalid routes are deleted after this period of time is elapsed
+    simtime_t shutdownTime;         // time of shutdown processing
     // signals
     static simsignal_t sentRequestSignal;
     static simsignal_t sentUpdateSignal;
@@ -188,6 +191,10 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void receiveChangeNotification(int category, const cObject *details);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
+    virtual void startRIPRouting();
+    virtual void stopRIPRouting();
 
     virtual void configureInterfaces(cXMLElement *config);
     virtual void configureInitialRoutes();
