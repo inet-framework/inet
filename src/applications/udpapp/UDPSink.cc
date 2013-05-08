@@ -64,6 +64,7 @@ void UDPSink::handleMessageWhenUp(cMessage *msg)
 void UDPSink::finish()
 {
     AppBase::finish();
+    EV << getFullPath() << ": received " << numReceived << " packets\n";
 }
 
 void UDPSink::processPacket(cPacket *pk)
