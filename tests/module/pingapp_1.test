@@ -1,0 +1,41 @@
+%description:
+
+Test for one host pinging another.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+sim-time-limit = 10s
+
+*.host*.numPingApps = 1
+*.hostSource.pingApp[0].destAddr = "hostDestination"
+*.hostSource.pingApp[0].printPing = true
+
+%file: test.ned
+
+import inet.nodes.ethernet.Eth10M;
+import inet.nodes.inet.StandardHost;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+
+network Test
+{
+    submodules:
+        hostSource: StandardHost;
+        hostDestination: StandardHost;
+        networkConfigurator: IPv4NetworkConfigurator;
+    connections:
+        hostSource.ethg++ <--> Eth10M <--> hostDestination.ethg++;
+}
+
+%contains: stdout
+
+--------------------------------------------------------
+ping hostDestination (10.0.0.2):
+sent: 11   received: 10   loss rate (%): 9.09091
+round-trip min/avg/max (ms): 0.1633/0.17483/0.2786
+stddev (ms): 0.0364611   variance:1.32941e-09
+--------------------------------------------------------

@@ -26,6 +26,7 @@ cplusplus {{
 // Not the real ICMP codes; here it's set up so that codes above 128 are
 // informational
 //
+// TODO: use real ICMP codes
 enum ICMPType
 {
 
@@ -76,9 +77,9 @@ enum ICMPDestinationUnreachableCodes
 // because their contents is conceptually truncated. decapsulate() would result
 // in a "length became negative" error; use getEncapsulatedMsg() instead.
 //
+// TODO: add originator id and sequence number and create an ICMPControlInfo
 packet ICMPMessage
 {
     int type enum(ICMPType);
     int code;
 }
-

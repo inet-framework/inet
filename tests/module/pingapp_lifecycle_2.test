@@ -1,0 +1,58 @@
+%description:
+
+Test ping start followed by node shutdown.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+sim-time-limit = 9s
+
+*.host.numPingApps = 1
+*.host.pingApp[0].destAddr = "192.168.0.42"
+*.host.pingApp[0].startTime = 3s
+
+**.hasStatus = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%file: test.ned
+
+import inet.nodes.inet.StandardHost;
+import inet.base.LifecycleController;
+import inet.world.scenario.ScenarioManager;
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        lifecycleController: LifecycleController;
+        host: StandardHost;
+}
+
+%file: scenario.xml
+ 
+<scenario>
+    <at t="6.0">
+        <tell module="lifecycleController" target="host" operation="NodeShutdownOperation"/>
+    </at>
+</scenario>
+
+%contains-regex: stdout
+
+.*Event #1  T=3.*
+Starting up: .*
+Sending ping #0
+.*
+.*Event #\d+  T=5.*
+Sending ping #2
+.*
+.*Event #\d+  T=6.*
+.*
+Test.host shutting down
+.*
+Test.host shut down
+.*
+<!> No more events -- simulation ended at event #\d+, t=6

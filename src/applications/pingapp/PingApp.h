@@ -20,6 +20,7 @@
 
 #include "IPvXAddress.h"
 #include "ILifecycle.h"
+#include "NodeStatus.h"
 
 class PingPayload;
 
@@ -45,9 +46,13 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     virtual void finish();
 
   protected:
-    virtual bool isRunning() { return timer->isScheduled(); }
-    virtual void sendPing();
-    virtual void scheduleNextPing();
+    virtual void startSendingPingRequests();
+    virtual void stopSendingPingRequests();
+    virtual void scheduleNextPingRequest(simtime_t previous);
+    virtual void cancelNextPingRequest();
+    virtual bool isNodeUp();
+    virtual bool isEnabled();
+    virtual void sendPingRequest();
     virtual void sendToICMP(cMessage *payload, const IPvXAddress& destAddr, const IPvXAddress& srcAddr, int hopLimit);
     virtual void processPingResponse(PingPayload *msg);
     virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt);
@@ -57,7 +62,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     IPvXAddress destAddr;
     IPvXAddress srcAddr;
     int packetSize;
-    cPar *sendIntervalp;
+    cPar *sendIntervalPar;
     int hopLimit;
     int count;
     simtime_t startTime;
@@ -65,7 +70,10 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     bool printPing;
 
     // state
+    int pid;
     cMessage *timer;
+    NodeStatus *nodeStatus;
+    simtime_t lastStart;
     long sendSeqNo;
     long expectedReplySeqNo;
     simtime_t sendTimeHistory[PING_HISTORY_SIZE];
@@ -77,9 +85,8 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     static simsignal_t outOfOrderArrivalsSignal;
     static simsignal_t pingTxSeqSignal;
     static simsignal_t pingRxSeqSignal;
+    long sentCount;
     long lossCount;
     long outOfOrderArrivalCount;
     long numPongs;
 };
-
-

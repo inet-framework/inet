@@ -25,10 +25,10 @@ cplusplus {{
 //
 // Represents payload in an ICMP/ICMPv6 Echo Request/Reply.
 //
+// TODO: move originator id and sequence number to ICMPMessage and use an ICMPControlInfo
 packet PingPayload
 {
     long originatorId; // sender module id
     long seqNo; // sequence number
     unsigned char data[];
 }
-
