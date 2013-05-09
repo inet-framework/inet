@@ -113,6 +113,8 @@ void ARP::initialize(int stage)
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isLoopback())
                 continue;
+            if (!ie->ipv4Data())
+                continue;
             ARPCacheEntry *entry = new ARPCacheEntry();
             entry->ie = ie;
             entry->pending = false;
