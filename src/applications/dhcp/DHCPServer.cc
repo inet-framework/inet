@@ -411,7 +411,9 @@ void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const Address& destAddr, i
     // printPacket(msg);
 
     //send(msg, "udpOut");
-    socket.sendTo(msg, destAddr, destPort, ie->getInterfaceId());
+    UDPSocket::SendOptions options;
+    options.outInterfaceId = ie->getInterfaceId();
+    socket.sendTo(msg, destAddr, destPort, &options);
 }
 
 void DHCPServer::cancelMessagesBeingProcessed()
