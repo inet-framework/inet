@@ -39,7 +39,7 @@ struct RIPEntry
     unsigned short addressFamilyId; // AF_INET (2), 0 if this is a request for the whole routing table (RFC 2453 3.9.1)
     unsigned short routeTag; // 0 for RIPv1
     Address address;    // 0 allowed for the default route
-    Address subnetMask; // 0 for RIPv1
+    int prefixLength; // 0 for RIPv1
     Address nextHop;    // 0 for RIPv1
     unsigned int metric; // 1-16
 }

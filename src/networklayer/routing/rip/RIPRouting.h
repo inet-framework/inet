@@ -118,7 +118,7 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     ~RIPRouting();
   private:
     RIPInterfaceEntry *findInterfaceEntryById(int interfaceId);
-    RIPRoute *findRoute(const Address &destAddress, const Address &subnetMask);
+    RIPRoute *findRoute(const Address &destAddress, int prefixLength);
     RIPRoute *findLocalInterfaceRoute(IRoute *route);
     bool isOwnAddress(const Address &address);
     void addInterface(InterfaceEntry *ie, int metric, SplitHorizonMode mode);
@@ -190,7 +190,7 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     /**
      * Add the new entry to the routing table and triggers an update.
      */
-    virtual void addRoute(const Address &dest, const Address &subnetMask, InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from);
+    virtual void addRoute(const Address &dest, int prefixLength, InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from);
 
     /**
      * Updates an existing route with the information learned from a RIP packet.
