@@ -713,7 +713,9 @@ void DHCPClient::scheduleTimerT2()
 void DHCPClient::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort)
 {
     EV_INFO << "Sending packet " << msg << endl;
-    socket.sendTo(msg, destAddr, destPort, ie->getInterfaceId());
+    UDPSocket::SendOptions options;
+    options.outInterfaceId = ie->getInterfaceId();
+    socket.sendTo(msg, destAddr, destPort, &options);
 }
 
 void DHCPClient::openSocket()

@@ -486,7 +486,9 @@ void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAdd
 {
     EV_INFO << "Sending packet: " << msg << "." << endl;
     numSent++;
-    socket.sendTo(msg, destAddr, destPort, ie->getInterfaceId());
+    UDPSocket::SendOptions options;
+    options.outInterfaceId = ie->getInterfaceId();
+    socket.sendTo(msg, destAddr, destPort, &options);
 }
 
 void DHCPServer::startApp()
