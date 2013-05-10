@@ -144,6 +144,14 @@ void InterfaceEntry::changed(int category)
         ownerp->interfaceChanged(this, category);
 }
 
+void InterfaceEntry::resetInterface()
+{
+    delete ipv4data; ipv4data = NULL;
+    delete ipv6data; ipv6data = NULL;
+    delete protocol3data; protocol3data = NULL;
+    delete protocol4data; protocol4data = NULL;
+}
+
 void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
 {
 #ifdef WITH_IPv4

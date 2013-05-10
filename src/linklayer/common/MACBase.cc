@@ -43,7 +43,6 @@ void MACBase::initialize(int stage)
 {
     if (stage == 0)
     {
-        //note: call registerInterface() in subclasses!
         nb = NotificationBoardAccess().getIfExists();
     }
     if (stage == numInitStages()-1)
@@ -59,7 +58,6 @@ bool MACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
     if (dynamic_cast<NodeStartOperation *>(operation))
     {
         if (stage == NodeStartOperation::STAGE_LINK_LAYER) {
-            registerInterface();
             updateOperationalFlag(true);
         }
     }

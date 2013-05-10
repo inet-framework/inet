@@ -96,6 +96,8 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
 
     virtual void registerLoopbackInterface();
 
+    virtual void resetInterfaces();
+
   public:
     InterfaceTable();
     virtual ~InterfaceTable();

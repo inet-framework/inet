@@ -119,6 +119,7 @@ class INET_API InterfaceEntry : public cNamedObject
     // internal: to be invoked from InterfaceTable only!
     virtual void setInterfaceTable(IInterfaceTable *t) {ownerp = t;}
     virtual void setInterfaceId(int id) {interfaceId = id;}
+    virtual void resetInterface();
 
   public:
     InterfaceEntry(cModule *interfaceModule);
