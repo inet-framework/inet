@@ -19,15 +19,89 @@
 //
 
 #include "IPv4NodeConfigurator.h"
+#include "ModuleAccess.h"
+#include "InterfaceTableAccess.h"
+#include "RoutingTableAccess.h"
+#include "NodeStatus.h"
+#include "NodeOperations.h"
 
 Define_Module(IPv4NodeConfigurator);
 
+IPv4NodeConfigurator::IPv4NodeConfigurator()
+{
+    nodeStatus = NULL;
+    interfaceTable = NULL;
+    routingTable = NULL;
+    networkConfigurator = NULL;
+}
+
 void IPv4NodeConfigurator::initialize(int stage)
 {
+    if (stage == 0) {
+        const char *networkConfiguratorModule = par("networkConfiguratorModule");
+        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        interfaceTable = InterfaceTableAccess().get();
+        routingTable = RoutingTableAccess().get();
+        networkConfigurator = dynamic_cast<IPv4NetworkConfigurator *>(getModuleByPath(networkConfiguratorModule));
+    }
+    else if (stage == 1) {
+        if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)
+            prepareNode();
+    }
+    else if (stage == 2) {
+        if ((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) && networkConfigurator)
+            configureNode();
+    }
 }
 
 bool IPv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_LINK_LAYER)
+            prepareNode();
+        else if (stage == NodeStartOperation::STAGE_NETWORK_LAYER && networkConfigurator)
+            configureNode();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) ;
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) ;
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
+}
+
+void IPv4NodeConfigurator::prepareNode()
+{
+    for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
+        prepareInterface(interfaceTable->getInterface(i));
+}
+
+void IPv4NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
+{
+    ASSERT(!interfaceEntry->ipv4Data());
+    IPv4InterfaceData *interfaceData = new IPv4InterfaceData();
+    interfaceEntry->setIPv4Data(interfaceData);
+    if (interfaceEntry->isLoopback()) {
+        // we may reconfigure later it to be the routerId
+        interfaceData->setIPAddress(IPv4Address::LOOPBACK_ADDRESS);
+        interfaceData->setNetmask(IPv4Address::LOOPBACK_NETMASK);
+        interfaceData->setMetric(1);
+    }
+    else {
+        // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
+        interfaceData->setMetric((int)ceil(2e9/interfaceEntry->getDatarate())); // use OSPF cost as default
+        if (interfaceEntry->isMulticast())
+        {
+            interfaceData->joinMulticastGroup(IPv4Address::ALL_HOSTS_MCAST);
+            if (routingTable->isIPForwardingEnabled())
+                interfaceData->joinMulticastGroup(IPv4Address::ALL_ROUTERS_MCAST);
+        }
+    }
+}
+
+void IPv4NodeConfigurator::configureNode()
+{
+    ASSERT(networkConfigurator);
+    for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
+        networkConfigurator->configureInterface(interfaceTable->getInterface(i));
+    networkConfigurator->configureRoutingTable(routingTable);
 }

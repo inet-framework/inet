@@ -28,11 +28,11 @@
 #include "InterfaceTableAccess.h"
 #include "IPv4InterfaceData.h"
 #include "IPv4Route.h"
-#include "IPv4NetworkConfigurator.h"
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 #include "RoutingTableParser.h"
 #include "NodeOperations.h"
+#include "NodeStatus.h"
 
 Define_Module(RoutingTable);
 
@@ -88,33 +88,39 @@ void RoutingTable::initialize(int stage)
     }
     else if (stage==1)
     {
-        // L2 modules register themselves in stage 0, so we can only configure
-        // the interfaces in stage 1.
-        const char *filename = par("routingFile");
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        bool isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+        if (isNodeUp) {
+            // set routerId if param is not "" (==no routerId) or "auto" (in which case we'll
+            // do it later in stage 3, after network configurators configured the interfaces)
+            const char *routerIdStr = par("routerId").stringValue();
+            if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
+                routerId = IPv4Address(routerIdStr);
+        }
+    }
+    else if (stage==2)
+    {
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        bool isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+        if (isNodeUp) {
+            // L2 modules register themselves in stage 0, so we can only configure
+            // the interfaces in stage 1.
+            const char *filename = par("routingFile");
 
-        // At this point, all L2 modules have registered themselves (added their
-        // interface entries). Create the per-interface IPv4 data structures.
-        IInterfaceTable *interfaceTable = InterfaceTableAccess().get();
-        for (int i=0; i<interfaceTable->getNumInterfaces(); ++i)
-            configureInterfaceForIPv4(interfaceTable->getInterface(i));
-        configureLoopbackForIPv4();
-
-        // read routing table file (and interface configuration)
-        RoutingTableParser parser(ift, this);
-        if (*filename && parser.readRoutingTableFromFile(filename)==-1)
-            error("Error reading routing table file %s", filename);
-
-        // set routerId if param is not "" (==no routerId) or "auto" (in which case we'll
-        // do it later in stage 3, after network configurators configured the interfaces)
-        const char *routerIdStr = par("routerId").stringValue();
-        if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
-            routerId = IPv4Address(routerIdStr);
+            // read routing table file (and interface configuration)
+            RoutingTableParser parser(ift, this);
+            if (*filename && parser.readRoutingTableFromFile(filename)==-1)
+                error("Error reading routing table file %s", filename);
+        }
     }
     else if (stage==3)
     {
         // routerID selection must be after stage==2 when network autoconfiguration
         // assigns interface addresses
-        configureRouterId();
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        bool isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+        if (isNodeUp)
+            configureRouterId();
 
         // we don't use notifications during initialize(), so we do it manually.
         // Should be in stage=3 because autoconfigurator runs in stage=2.
@@ -867,24 +873,16 @@ bool RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_NETWORK_LAYER) {
-            // KLUDGE: TODO: move or what?
-            IPv4NetworkConfigurator *configurator = dynamic_cast<IPv4NetworkConfigurator *>(getModuleByPath("configurator"));
-            for (int i=0; i<ift->getNumInterfaces(); ++i) {
-                InterfaceEntry *ie = ift->getInterface(i);
-                configureInterfaceForIPv4(ie);
-                // KLUDGE: TODO: move or what?
-                if (configurator)
-                    configurator->assignAddress(ie);
-            }
-            configureLoopbackForIPv4();
-            RoutingTableParser parser(ift, this);
+            // L2 modules register themselves in stage 0, so we can only configure
+            // the interfaces in stage 1.
             const char *filename = par("routingFile");
+            // read routing table file (and interface configuration)
+            RoutingTableParser parser(ift, this);
             if (*filename && parser.readRoutingTableFromFile(filename)==-1)
                 error("Error reading routing table file %s", filename);
+        }
+        else if (stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
             configureRouterId();
-            // KLUDGE: TODO: move or what?
-            if (configurator)
-                configurator->addStaticRoutes(this);
             updateNetmaskRoutes();
         }
     }
