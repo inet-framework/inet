@@ -368,6 +368,8 @@ void LDP::rebuildFecList()
         InterfaceEntry *ie = ift->getInterface(i);
         if (ie->getNetworkLayerGateIndex() < 0)
             continue;
+        if (!ie->ipv4Data())
+            continue;
 
         FecVector::iterator it = findFecEntry(oldList, ie->ipv4Data()->getIPAddress(), 32);
         if (it == oldList.end())
