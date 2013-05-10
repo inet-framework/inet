@@ -24,9 +24,8 @@
 #define MOBILITY_BASE_H
 
 #include "INETDefs.h"
-
+#include "ModuleAccess.h"
 #include "Coord.h"
-#include "BasicModule.h"
 #include "IMobility.h"
 
 
@@ -50,7 +49,7 @@
  * @ingroup basicModules
  * @author Daniel Willkomm, Andras Varga
  */
-class INET_API MobilityBase : public BasicModule, public IMobility
+class INET_API MobilityBase : public cSimpleModule, public IMobility
 {
   public:
     /**

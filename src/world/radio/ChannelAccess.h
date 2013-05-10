@@ -25,8 +25,7 @@
 #include <limits>
 
 #include "INETDefs.h"
-
-#include "BasicModule.h"
+#include "NotificationBoard.h"
 #include "IChannelControl.h"
 
 // Forward declarations
@@ -49,7 +48,7 @@ class AirFrame;
  * @ingroup channelControl
  * @ingroup phyLayer
  */
-class INET_API ChannelAccess : public BasicModule, protected cListener
+class INET_API ChannelAccess : public cSimpleModule, protected cListener
 {
   protected:
     static simsignal_t mobilityStateChangedSignal;

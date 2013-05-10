@@ -57,7 +57,6 @@ MobilityBase::MobilityBase()
 
 void MobilityBase::initialize(int stage)
 {
-    BasicModule::initialize(stage);
     EV << "initializing MobilityBase stage " << stage << endl;
     if (stage == 0)
     {
