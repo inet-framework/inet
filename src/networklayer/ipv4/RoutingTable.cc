@@ -868,7 +868,7 @@ bool RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_NETWORK_LAYER) {
             // KLUDGE: TODO: move or what?
-            IPv4NetworkConfigurator *configurator = dynamic_cast<IPv4NetworkConfigurator *>(findModuleWherever("configurator", simulation.getSystemModule()));
+            IPv4NetworkConfigurator *configurator = dynamic_cast<IPv4NetworkConfigurator *>(getModuleByPath("configurator"));
             for (int i=0; i<ift->getNumInterfaces(); ++i) {
                 InterfaceEntry *ie = ift->getInterface(i);
                 configureInterfaceForIPv4(ie);
