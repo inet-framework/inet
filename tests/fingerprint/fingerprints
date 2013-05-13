@@ -58,13 +58,19 @@ class FingerprintTestCaseGenerator():
             def __call__(self, fingerprint):
                 self.simulation['computedFingerprint'] = fingerprint
 
+        class StoreExitcodeCallback:
+            def __init__(self, simulation):
+                self.simulation = simulation
+            def __call__(self, exitcode):
+                self.simulation['exitcode'] = exitcode
+
         testcases = []
         for simulation in simulations:
             title = simulation['wd'] + " " + simulation['args']
             if not filterRegexList or ['x' for regex in filterRegexList if re.search(regex, title)]: # if any regex matches title
                 if not excludeFilterRegexList or not ['x' for regex in excludeFilterRegexList if re.search(regex, title)]: # if NO exclude-regex matches title
                     testcases.append(FingerprintTestCase(title, simulation['wd'], simulation['args'],
-                            simulation['simtimelimit'], simulation['fingerprint'], StoreFingerprintCallback(simulation)))
+                            simulation['simtimelimit'], simulation['fingerprint'], StoreFingerprintCallback(simulation), StoreExitcodeCallback(simulation)))
         return testcases
 
     def commentRemover(self, csvData):
@@ -94,6 +100,16 @@ class FingerprintTestCaseGenerator():
                 ff.close()
                 print "Check " + updatedFile + " for updated fingerprints"
 
+    def writeFailedCSVFiles(self):
+        for csvFile, simulations in self.fileToSimulationsMap.iteritems():
+            failedContents = self.formatFailedSimulationsTable(csvFile, simulations)
+            if failedContents:
+                failedFile = csvFile + ".FAILED"
+                ff = open(failedFile, 'w')
+                ff.write(failedContents)
+                ff.close()
+                print "Check " + failedFile + " for errors and failed fingerprints"
+
     def escape(self, str):
         if re.search(r'[\r\n\",]', str):
             str = '"' + re.sub('"','""',str) + '"'
@@ -120,6 +136,33 @@ class FingerprintTestCaseGenerator():
                 else:
                     print "ERROR: Cannot replace fingerprint '%s' to '%s' at '%s' line %d:\n     %s" % (oldFingerprint, newFingerprint, csvFile, line, lines[line])
         return ''.join(lines) if containsComputedFingerprint else None
+
+    def formatFailedSimulationsTable(self, csvFile, simulations):
+        ff = open(csvFile, 'r')
+        lines = ff.readlines()
+        ff.close()
+        lines.insert(0, '')     # csv line count is 1..n; insert an empty item --> lines[1] is the first line
+        result = []
+
+        containsErrors = False
+        for simulation in simulations:
+            if 'exitcode' in simulation and simulation['exitcode'] != 0:
+                if not containsErrors:
+                    containsErrors = True
+                    result.append("# Errors:\n");
+                result.append(lines[simulation['line']])
+
+        containsFailures = False
+        for simulation in simulations:
+            if 'computedFingerprint' in simulation:
+                oldFingerprint = simulation['fingerprint']
+                newFingerprint = simulation['computedFingerprint']
+                if oldFingerprint != newFingerprint:
+                    if not containsFailures:
+                        containsFailures = True
+                        result.append("# Failures:\n");
+                    result.append(lines[simulation['line']])
+        return ''.join(result) if containsErrors or containsFailures else None
 
 
 class SimulationResult:
@@ -194,7 +237,7 @@ class SimulationTestCase(unittest.TestCase):
 
 
 class FingerprintTestCase(SimulationTestCase):
-    def __init__(self, title, wd, args, simtimelimit, fingerprint, storeFingerprintCallback):
+    def __init__(self, title, wd, args, simtimelimit, fingerprint, storeFingerprintCallback, storeExitcodeCallback):
         SimulationTestCase.__init__(self)
         self.title = title
         self.wd = wd
@@ -202,6 +245,7 @@ class FingerprintTestCase(SimulationTestCase):
         self.simtimelimit = simtimelimit
         self.fingerprint = fingerprint
         self.storeFingerprintCallback = storeFingerprintCallback
+        self.storeExitcodeCallback = storeExitcodeCallback
 
     def runTest(self):
         # CPU time limit is a safety guard: fingerprint checks shouldn't take forever
@@ -218,6 +262,7 @@ class FingerprintTestCase(SimulationTestCase):
 
         # process the result
         # note: fingerprint mismatch is technically NOT an error in 4.2 or before! (exitcode==0)
+        self.storeExitcodeCallback(result.exitcode)
         if result.exitcode != 0:
             raise Exception("runtime error:" + result.errormsg)
         elif result.cpuTimeLimitReached:
@@ -480,7 +525,9 @@ if __name__ == "__main__":
 
     print
     generator.writeUpdatedCSVFiles()
+    generator.writeFailedCSVFiles()
 
     print "Log has been saved to %s" % logFile
 
     exit(exitCode)
+
