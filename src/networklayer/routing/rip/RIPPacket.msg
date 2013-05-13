@@ -23,29 +23,42 @@ cplusplus {{
 const int MAX_RIP_ENTRIES = 25;
 }}
 
+//
+// RIP commands
+//
 enum RIPCommand {
     RIP_REQUEST  = 1;
     RIP_RESPONSE = 2;
 }
 
+//
+// Address Family constants
+//
 enum RIP_AF {
     RIP_AF_NONE = 0;
     RIP_AF_INET = 2;
-    RIP_AF_AUTH = 0xFFFF;
-}
-
-struct RIPEntry
-{
-    unsigned short addressFamilyId; // AF_INET (2), 0 if this is a request for the whole routing table (RFC 2453 3.9.1)
-    unsigned short routeTag; // 0 for RIPv1
-    Address address;    // 0 allowed for the default route
-    int prefixLength; // 0 for RIPv1
-    Address nextHop;    // 0 for RIPv1
-    unsigned int metric; // 1-16
+    // RIP_AF_AUTH = 0xFFFF;
 }
 
 //
-// TODO
+// RIPv2 route entry
+//
+// see RFC 2453 3.6 and 4
+//
+struct RIPEntry
+{
+    unsigned short addressFamilyId; // usually AF_INET (2), but NONE (0) for whole table requests
+    unsigned short routeTag;        // 0 for RIPv1
+    Address address;                // destination address
+    int prefixLength;               // prefix length of the destination
+    Address nextHop;                // next hop address; may be unspecified if the packet is received from the next hop
+    unsigned int metric;            // metric of the route (1-15) or infinity (16) if no route to the destination
+}
+
+//
+// RIPv2 packet
+//
+// note: Authentication entry is not allowed
 //
 packet RIPPacket {
     unsigned char enum(RIPCommand) command;

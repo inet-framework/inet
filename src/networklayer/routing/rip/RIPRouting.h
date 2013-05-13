@@ -26,91 +26,88 @@
 #include "UDPSocket.h"
 
 #define RIP_INFINITE_METRIC 16
-#define RIP_UDP_PORT 520
-#define RIP_IPV4_MULTICAST_ADDRESS "224.0.0.9"
-
-/* RIPRoute:
- *   destination address
- *   metric
- *   next hop address (missing if destination is directly connected)
- *   bool routeChangeFlag;
- *   timers: expiryTime (180s after update), purgeTime (120s after expiry)
- *
- * Initial routes:
- *   directly connected networks
- *   static routes
- *
- * Outside a subnetted network only the network routes are advertised (merging subnet routes) (RFC 2453 3.7)
- *
- * Default routes (with 0.0.0.0 address) are added to BGP routers and are propagated by RIP.
- * Routes involving 0.0.0.0 should not leave the boundary of an AS. (RFC 2453 3.7)
- *
- * Split horizon: do not send route for a destination network to the neighbors from which the route was learned
- * Poisoned split horizon: send them, but with metric 16 (infinity).
- */
 
 struct RIPRoute : public cObject
 {
     enum RouteType {
-      RIP_ROUTE_RTE,
-      RIP_ROUTE_STATIC,
-      RIP_ROUTE_DEFAULT,
-      RIP_ROUTE_REDISTRIBUTE,
-      RIP_ROUTE_INTERFACE
+      RIP_ROUTE_RTE,            // route learned from a RIPEntry
+      RIP_ROUTE_STATIC,         // static route
+      RIP_ROUTE_DEFAULT,        // default route
+      RIP_ROUTE_REDISTRIBUTE,   // route imported from another routing protocol
+      RIP_ROUTE_INTERFACE       // route belongs to a local interface
     };
 
-    IRoute *route;
-    RouteType type;
-    InterfaceEntry *ie; // only for interface routes
-    Address from; // only for rte routes
-    int metric;
-    uint16 tag;
-    bool changed;
-    simtime_t lastUpdateTime;
+    IRoute *route;         // the route in the host routing table that is associated with this route, may be NULL
+    RouteType type;        // the type of the route
+    InterfaceEntry *ie;    // only for INTERFACE routes
+    Address from;          // only for RTE routes
+    int metric;            // the metric of this route, or infinite (16) if invalid
+    uint16 tag;            // route tag, only for REDISTRIBUTE routes
+    bool changed;          // true if the route has changed since the update
+    simtime_t lastUpdateTime; // time of the last change
 
     RIPRoute(IRoute *route, RouteType type, int metric)
         : route(route), type(type), ie(NULL), metric(metric), tag(0), changed(false), lastUpdateTime(0) {}
     virtual std::string info() const;
 };
 
+/**
+ * Enumerated parameter to control how the RIPRouting module
+ * advertises the routes to its neighbors.
+ */
 enum SplitHorizonMode
 {
-    NO_SPLIT_HORIZON,
-    SPLIT_HORIZON,
-    SPLIT_HORIZON_POISONED_REVERSE
+    NO_SPLIT_HORIZON,     // every route is sent to the neighbor
+    SPLIT_HORIZON,        // do not send routes to the neighbor it was learnt from
+    SPLIT_HORIZON_POISONED_REVERSE // send the route to the neighbor it was learnt from with infinite metric (16)
 };
 
+/**
+ * Holds the RIP configuration of the interfaces.
+ * We could store this data in the InterfaceEntry* itself,
+ * but it contains only 5 holes for protocol data, and they
+ * are used by network layer protocols only. Therefore
+ * RIPRouting manages its own table of these entries.
+ */
 struct RIPInterfaceEntry
 {
-    const InterfaceEntry *ie;
-    int metric;
-    SplitHorizonMode splitHorizonMode;
+    const InterfaceEntry *ie;           // the associated interface entry
+    int metric;                         // metric of this interface
+    SplitHorizonMode splitHorizonMode;  // RIP mode of this interface
+
     RIPInterfaceEntry(const InterfaceEntry *ie);
     void configure(cXMLElement *config);
 };
 
 /**
  * Implementation of the Routing Information Protocol v2 (RFC 2453).
+ *
+ * Outside a subnetted network only the network routes are advertised (merging subnet routes) (RFC 2453 3.7)
+ *
+ * Default routes (with 0.0.0.0 address) are added to BGP routers and are propagated by RIP.
+ * Routes involving 0.0.0.0 should not leave the boundary of an AS. (RFC 2453 3.7)
+ *
  */
 class INET_API RIPRouting : public cSimpleModule, protected INotifiable
 {
     typedef std::vector<RIPInterfaceEntry> InterfaceVector;
     typedef std::vector<RIPRoute*> RouteVector;
     // environment
-    cModule *host;
-    IInterfaceTable *ift;
-    IRoutingTable *rt;
+    cModule *host;                  // the host module that owns this module
+    IInterfaceTable *ift;           // interface table of the host
+    IRoutingTable *rt;              // routing table from which routes are imported and to which learned routes are added
+    IAddressType *addressType;      // address type of the routing table
     // state
-    InterfaceVector ripInterfaces;
-    RouteVector ripRoutes;
-    UDPSocket socket;               // bound to RIP_UDP_PORT
+    InterfaceVector ripInterfaces;  // interfaces on which RIP is used
+    RouteVector ripRoutes;          // all advertised routes (imported or learned)
+    UDPSocket socket;               // bound to the RIP port (see udpPort parameter)
     cMessage *updateTimer;          // for sending unsolicited Response messages in every ~30 seconds.
     cMessage *triggeredUpdateTimer; // scheduled when there are pending changes
-    Address allRipRoutersGroup;     // multicast address, e.g. 224.0.0.9 or FF02::9
     // parameters
-    simtime_t updateInterval;
-    simtime_t routeExpiryTime;
-    simtime_t routePurgeTime;
+    int ripUdpPort;                 // UDP port RIP routers (usually 520)
+    simtime_t updateInterval;       // time between regular updates
+    simtime_t routeExpiryTime;      // learned routes becomes invalid if no update received in this period of time
+    simtime_t routePurgeTime;       // invalid routes are deleted after this period of time is elapsed
     // signals
     static simsignal_t sentRequestSignal;
     static simsignal_t sentUpdateSignal;
@@ -121,117 +118,43 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     RIPRouting();
     ~RIPRouting();
   private:
-    RIPInterfaceEntry *findInterfaceEntryById(int interfaceId);
+    RIPInterfaceEntry *findInterfaceById(int interfaceId);
     RIPRoute *findRoute(const Address &destAddress, int prefixLength);
-    RIPRoute *findLocalInterfaceRoute(IRoute *route);
-    bool isOwnAddress(const Address &address);
+    RIPRoute *findRoute(const Address &destination, int prefixLength, RIPRoute::RouteType type);
+    RIPRoute *findRoute(const InterfaceEntry *ie, RIPRoute::RouteType type);
     void addInterface(const InterfaceEntry *ie, cXMLElement *config);
     void deleteInterface(const InterfaceEntry *ie);
     void invalidateRoutes(const InterfaceEntry *ie);
-    void deleteRoute(const IRoute *route);
     bool isLoopbackInterfaceRoute(const IRoute *route);
     bool isLocalInterfaceRoute(const IRoute *route);
-    bool isDefaultRoute(const IRoute *route);
-    void addLocalInterfaceRoute(IRoute *route);
-    void addDefaultRoute(IRoute *route);
-    void addStaticRoute(IRoute *route);
-    void addRoute(RIPRoute* route);
-    std::string getHostName();
+    bool isDefaultRoute(const IRoute *route) { return route->getPrefixLength() == 0; }
+    std::string getHostName() {return host->getFullName(); }
   protected:
     virtual int numInitStages() const  {return 5;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
-
-    virtual void configureInterfaces(cXMLElement *config);
-
-    /**
-     * Import interface/static/default routes from the routing table.
-     */
-    virtual void configureInitialRoutes();
-
-    /**
-     * Listen on interface/route changes and update private data structures.
-     */
     virtual void receiveChangeNotification(int category, const cObject *details);
 
-    /**
-     * Requests the whole routing table from all neighboring RIP routers.
-     */
+    virtual void configureInterfaces(cXMLElement *config);
+    virtual void configureInitialRoutes();
+    virtual RIPRoute* importRoute(IRoute *route, RIPRoute::RouteType type, int metric = 1);
     virtual void sendInitialRequests();
 
-    /**
-     * Processes a RIP request, i.e. sends the requested routing entries to a peer.
-     */
     virtual void processRequest(RIPPacket *packet);
-
-    /**
-     * Called by triggered updates.
-     */
-    virtual void processTriggeredUpdate();
-
-    /**
-     * Called by regular updates.
-     */
-    virtual void processRegularUpdate();
-
-    /**
-     * Sends routes of the routing table to the specified address.
-     * If changedOnly is true, only the changed routes are sent.
-     * Split Horizon check is performed by this method.
-     * It can send multiple RIPPackets.
-     */
+    virtual void processUpdate(bool triggered);
     virtual void sendRoutes(const Address &address, int port, const RIPInterfaceEntry &ripInterface, bool changedOnly);
 
-    /**
-     * Processes a RIP response, i.e. updates the routing table with the learned routes.
-     */
     virtual void processResponse(RIPPacket *packet);
-
-    /**
-     * Validates a RIP response.
-     */
     virtual bool isValidResponse(RIPPacket *packet);
-
-    /**
-     * Add the new entry to the routing table and triggers an update.
-     */
     virtual void addRoute(const Address &dest, int prefixLength, const InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from);
-
-    /**
-     * Updates an existing route with the information learned from a RIP packet.
-     * If the metric is infinite (16), then the route is invalidated.
-     * It triggers an update, so neighbor routers are notified about the change.
-     */
     virtual void updateRoute(RIPRoute *route, const InterfaceEntry *ie, const Address &nextHop, int metric, const Address &from);
 
-    /**
-     * Sets the update timer to trigger an update in the [1s,5s] interval.
-     * If the update is already scheduled, it does nothing.
-     */
     virtual void triggerUpdate();
-
-    /**
-     * Invalidates the route, i.e. marks it invalid, but keeps it in the routing table for 120s,
-     * so the neighbors are notified about the broken route in the next update.
-     */
+    virtual RIPRoute *checkRouteIsExpired(RIPRoute *route);
     virtual void invalidateRoute(RIPRoute *route);
-
-    /**
-     * Removes the route from the routing table.
-     */
     virtual void purgeRoute(RIPRoute *route);
 
-    /**
-     * Should be called regularly to handle expiry and purge of routes.
-     * Returns the route if it is valid.
-     */
-    virtual RIPRoute *checkRoute(RIPRoute *route);
-
-    /**
-     * Sends the packet to the specified UDP dest/port.
-     * If the dest is a multicast address, then the outgoing interface must be specified.
-     */
-    virtual void sendPacket(RIPPacket *packet, const Address &dest, int port, const InterfaceEntry *ie);
+    virtual void sendPacket(RIPPacket *packet, const Address &destAddr, int destPort, const InterfaceEntry *destInterface);
 };
 
 #endif

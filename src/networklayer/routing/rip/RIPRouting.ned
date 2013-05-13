@@ -31,6 +31,7 @@ simple RIPRouting
         string routingTableModule = default("^.routingTable");
         xml ripConfig = default(xml("<config><interface metric='1'/></config>"));
 
+        int udpPort = 520;
         double updateInterval @unit(s) = 30s;
         volatile double triggeredUpdateDelay @unit(s) = uniform(1s,5s);
         double routeExpiryTime @unit(s) = 180s;
