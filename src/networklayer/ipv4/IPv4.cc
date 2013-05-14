@@ -68,29 +68,6 @@ void IPv4::initialize(int stage)
 
         // by default no MANET routing
         manetRouting = false;
-
-#ifdef WITH_MANET
-        // test for the presence of MANET routing
-        // check if there is a protocol -> gate mapping
-        int gateindex = mapping.findOutputGateForProtocol(IP_PROT_MANET);
-        if (gateindex < 0 || gateindex >= gateSize("transportOut"))
-            return;
-
-        // check if that gate is connected at all
-        cGate *manetgate = gate("transportOut", gateindex)->getPathEndGate();
-        if (manetgate==NULL)
-            return;
-
-        cModule *destmod = manetgate->getOwnerModule();
-        if (destmod==NULL)
-            return;
-
-        // manet routing will be turned on ONLY for routing protocols which has the @reactive property set
-        // this prevents performance loss with other protocols that use pro active routing and do not need
-        // assistance from the IPv4 component
-        cProperties *props = destmod->getProperties();
-        manetRouting = props && props->getAsBool("reactive");
-#endif
     }
     else if (stage == 1)
     {
@@ -113,8 +90,34 @@ void IPv4::handleMessage(cMessage *msg)
 {
     if (msg->getKind() == IP_C_REGISTER_PROTOCOL) {
         IPRegisterProtocolCommand * command = check_and_cast<IPRegisterProtocolCommand *>(msg->getControlInfo());
-        mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
+        int protocol = command->getProtocol();
+        mapping.addProtocolMapping(protocol, msg->getArrivalGate()->getIndex());
         delete msg;
+#ifdef WITH_MANET
+        if (protocol == IP_PROT_MANET)
+        {
+            // test for the presence of MANET routing
+            // check if there is a protocol -> gate mapping
+            int gateindex = mapping.findOutputGateForProtocol(IP_PROT_MANET);
+            if (gateindex < 0 || gateindex >= gateSize("transportOut"))
+                return;
+
+            // check if that gate is connected at all
+            cGate *manetgate = gate("transportOut", gateindex)->getPathEndGate();
+            if (manetgate==NULL)
+                return;
+
+            cModule *destmod = manetgate->getOwnerModule();
+            if (destmod==NULL)
+                return;
+
+            // manet routing will be turned on ONLY for routing protocols which has the @reactive property set
+            // this prevents performance loss with other protocols that use pro active routing and do not need
+            // assistance from the IPv4 component
+            cProperties *props = destmod->getProperties();
+            manetRouting = props && props->getAsBool("reactive");
+        }
+#endif
     }
     else
         QueueBase::handleMessage(msg);
