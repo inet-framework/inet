@@ -112,7 +112,7 @@ void IPv4::updateDisplayString()
 void IPv4::handleMessage(cMessage *msg)
 {
     if (msg->getKind() == IP_C_REGISTER_PROTOCOL) {
-        IPRegisterProtocolCommand * command = check_and_cast<IPRegisterProtocolCommand *>(msg->removeControlInfo());
+        IPRegisterProtocolCommand * command = check_and_cast<IPRegisterProtocolCommand *>(msg->getControlInfo());
         mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
         delete msg;
     }
@@ -651,20 +651,20 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
     }
     else
     {
-        // JcM Fix: check if the transportOut port are connected, otherwise
-        // discard the packet
-        int gateindex = mapping.getOutputGateForProtocol(protocol);
-
-        if (gate("transportOut", gateindex)->isPathOK())
+        int gateindex = mapping.findOutputGateForProtocol(protocol);
+        // check if the transportOut port are connected, otherwise discard the packet
+        if (gateindex >= 0)
         {
-            send(decapsulate(datagram), "transportOut", gateindex);
-            numLocalDeliver++;
+            cGate* outGate = gate("transportOut", gateindex);
+            if (outGate->isPathOK())
+            {
+                send(decapsulate(datagram), outGate);
+                numLocalDeliver++;
+                return;
+            }
         }
-        else
-        {
-            EV << "L3 Protocol not connected. discarding packet" << endl;
-            icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
-        }
+        EV << "L3 Protocol not connected. discarding packet" << endl;
+        icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
     }
 }
 
