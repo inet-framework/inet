@@ -128,10 +128,14 @@ void IPv4NetworkConfigurator::addStaticRoutes(IRoutingTable *routingTable)
 {
     IPv4Topology topology;
     extractTopology(topology);
-    for (int i = 0; i < topology.getNumNodes(); i++) {
-        Node *node = (Node *)topology.getNode(i);
-        if (node->routingTable == routingTable)
-            addStaticRoutes(topology, node);
+    addManualRoutes(par("config").xmlValue(), topology);
+    addManualMulticastRoutes(par("config").xmlValue(), topology);
+    if (par("addStaticRoutes").boolValue()) {
+        for (int i = 0; i < topology.getNumNodes(); i++) {
+            Node *node = (Node *)topology.getNode(i);
+            if (node->routingTable == routingTable)
+                addStaticRoutes(topology, node);
+        }
     }
 }
 
