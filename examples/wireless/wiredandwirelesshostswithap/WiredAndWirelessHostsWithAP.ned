@@ -32,7 +32,7 @@ network WiredAndWirelessHostsWithAP
         accessPoint: AccessPoint {
             @display("p=205,69");
         }
-        iPv4NetworkConfigurator: IPv4NetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             parameters:
                 assignDisjunctSubnetAddresses = false;
                 @display("p=367,165");

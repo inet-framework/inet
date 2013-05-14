@@ -33,7 +33,7 @@ network Voip
             parameters:
                 @display("p=260,94");
         }
-        iPv4NetworkConfigurator: IPv4NetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             @display("p=126,20");
         }
         internetCloud: InternetCloud {
