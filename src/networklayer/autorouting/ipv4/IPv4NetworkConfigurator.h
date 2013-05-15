@@ -346,16 +346,19 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public IPvXAddres
         bool tryToMergeTwoRoutes(RoutingTableInfo& routingTableInfo, int i, int j, RouteInfo *routeInfoI, RouteInfo *routeInfoJ);
         bool tryToMergeAnyTwoRoutes(RoutingTableInfo& routingTableInfo);
 
+    public:
         // TODO: find a better way to reuse and override IPvXAddressResolver functionality
         bool getInterfaceIPv4Address(IPvXAddress &ret, InterfaceEntry *ie, bool netmask)
         {
+            // TODO: replace linear search
             for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
                 LinkInfo *linkInfo = topology.linkInfos[i];
                 for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
                     InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
                     if (interfaceInfo->interfaceEntry == ie) {
-                        ret = netmask ? interfaceInfo->getNetmask() : interfaceInfo->getAddress();
-                        return true;
+                        if (interfaceInfo->configure)
+                            ret = netmask ? interfaceInfo->getNetmask() : interfaceInfo->getAddress();
+                        return interfaceInfo->configure;
                     }
                 }
             }

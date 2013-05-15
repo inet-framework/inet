@@ -22,6 +22,7 @@
 #include "IPvXAddressResolver.h"
 #include "IInterfaceTable.h"
 #include "NotificationBoard.h"
+#include "IPv4NetworkConfigurator.h"
 
 #ifdef WITH_IPv4
 #include "IRoutingTable.h"
@@ -261,7 +262,7 @@ bool IPvXAddressResolver::getIPv4AddressFrom(IPvXAddress& retAddr, IInterfaceTab
     for (int i=0; i < ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (!ie->ipv4Data() || ie->isLoopback())
+        if (ie->isLoopback())
             continue;
         if (getInterfaceIPv4Address(retAddr, ie, netmask))
             return true;
@@ -329,6 +330,14 @@ bool IPvXAddressResolver::getInterfaceIPv4Address(IPvXAddress &ret, InterfaceEnt
             ret = netmask ? ie->ipv4Data()->getNetmask() : addr;
             return true;
         }
+    }
+    else
+    {
+        // find address in the configurator's notebook
+        // TODO: how do we know where is the configurator? get the path from a NED parameter?
+        IPv4NetworkConfigurator *configurator = dynamic_cast<IPv4NetworkConfigurator *>(simulation.getModuleByPath("configurator"));
+        if (configurator)
+            return configurator->getInterfaceIPv4Address(ret, ie, netmask);
     }
 #endif
     return false;
