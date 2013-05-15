@@ -30,7 +30,7 @@ xxx
 
 # added by Joseph Kim
 TAGS
-doc/doxy
+doc/doxy/
 *.RData
 *.Rhistory
 *.anf
