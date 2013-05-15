@@ -55,13 +55,14 @@ void BerParseFile::setPhyOpMode(char p)
 
 int BerParseFile::getTablePosition(double speed)
 {
+    speed /= 1000000;
     if (phyOpMode=='b')
     {
-        if (speed<1)
+        if (speed<2)
             return 0;
-        else if (speed<=2 && speed<5)
+        else if (speed<5)
             return 1;
-        else if (speed<=5 && speed<11)
+        else if (speed<11)
             return 2;
         else
             return 3;
@@ -70,17 +71,17 @@ int BerParseFile::getTablePosition(double speed)
     {
         if (speed<9)
             return 0;
-        else if (speed<=9 && speed<12)
+        else if (speed<12)
             return 1;
-        else if (speed<=12 && speed<18)
+        else if (speed<18)
             return 2;
-        else if (speed<=18 && speed<24)
+        else if (speed<24)
             return 3;
-        else if (speed<=24 && speed<36)
+        else if (speed<36)
             return 4;
-        else if (speed<=36 && speed<48)
+        else if (speed<48)
             return 5;
-        else if (speed<=48 && speed<54)
+        else if (speed<54)
             return 6;
         else
             return 7;
