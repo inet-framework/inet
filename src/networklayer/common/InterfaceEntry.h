@@ -123,7 +123,7 @@ class INET_API InterfaceEntry : public cNamedObject
 
   public:
     InterfaceEntry(cModule *interfaceModule);
-    virtual ~InterfaceEntry() {}
+    virtual ~InterfaceEntry();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
     virtual std::string getFullPath() const;
