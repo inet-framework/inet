@@ -28,7 +28,6 @@
 
 Define_Module(InetSimpleBattery);
 
-
 void InetSimpleBattery::initialize(int stage)
 {
 
@@ -92,8 +91,6 @@ void InetSimpleBattery::initialize(int stage)
         WATCH(lastPublishCapacity);
     }
 }
-
-
 
 int InetSimpleBattery::registerDevice(cObject *id, int numAccts)
 {
@@ -191,8 +188,6 @@ void InetSimpleBattery::handleMessage(cMessage *msg)
     }
 }
 
-
-
 void InetSimpleBattery::finish()
 {
     // do a final update of battery capacity
@@ -230,8 +225,6 @@ void InetSimpleBattery::receiveChangeNotification(int aCategory, const cObject* 
     }
 }
 
-
-
 void InetSimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
 {
     if (amount.getType() == DrawAmount::CURRENT)
@@ -252,7 +245,6 @@ void InetSimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
         deviceEntryVector[deviceID]->draw = current;
         deviceEntryVector[deviceID]->currentActivity = activity;
     }
-
     else if (amount.getType() == DrawAmount::ENERGY)
     {
         double energy = amount.getValue();
@@ -281,7 +273,6 @@ void InetSimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
 /**
  *  Function to update the display string with the remaining energy
  */
-
 InetSimpleBattery::~InetSimpleBattery()
 {
     while (!deviceEntryMap.empty())
@@ -297,8 +288,10 @@ InetSimpleBattery::~InetSimpleBattery()
     }
     if (mCurrEnergy)
         delete mCurrEnergy;
-}
 
+    cancelAndDelete(publish);
+    cancelAndDelete(timeout);
+}
 
 void InetSimpleBattery::deductAndCheck()
 {
@@ -362,7 +355,6 @@ void InetSimpleBattery::deductAndCheck()
         display_string->setTagArg("i", 1, "#ff0000");
         endSimulation();
     }
-
     // battery is not depleted, continue
     else
     {
