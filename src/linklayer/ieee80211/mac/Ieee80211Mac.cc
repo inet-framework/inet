@@ -330,7 +330,7 @@ void Ieee80211Mac::initialize(int stage)
         numCollision = 0;
         numInternalCollision = 0;
         numReceived = 0;
-        numSentMulticast = -1; //sorin
+        numSentMulticast = 0;
         numReceivedMulticast = 0;
         numBits = 0;
         numSentTXOP = 0;
@@ -930,8 +930,6 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             FSMA_No_Event_Transition(Immediate-Data-Ready,
                                      !transmissionQueueEmpty(),
                                      DEFER,
-                                     if (retryCounter() == 0) //  jesjones patch.  TODO: check this particular case, I haven't been sure about this particular case
-                                        invalidateBackoffPeriod();
                                     );
             FSMA_Event_Transition(Receive,
                                   isLowerMsg(msg),
