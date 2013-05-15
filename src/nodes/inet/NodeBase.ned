@@ -18,6 +18,7 @@
 package inet.nodes.inet;
 
 import inet.base.NotificationBoard;
+import inet.battery.IBattery;
 import inet.linklayer.IExternalNic;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
@@ -51,6 +52,7 @@ module NodeBase
         string routingFile = default("");
         bool IPForward = default(true);
         bool forwardMulticast = default(false);
+        string batteryType = default("");
     gates:
         input radioIn[numRadios] @directIn;
         inout pppg[] @labels(PPPFrame-conn);
@@ -63,6 +65,11 @@ module NodeBase
         notificationBoard: NotificationBoard {
             parameters:
                 @display("p=53,155;is=s");
+        }
+
+        battery: <batteryType> like IBattery if batteryType != "" {
+            parameters:
+                @display("p=53,77;i=block/plug;is=s");
         }
 
         // optional mobility module. Required only if wireless cards are present
