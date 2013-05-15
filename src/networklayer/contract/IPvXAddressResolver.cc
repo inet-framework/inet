@@ -416,3 +416,38 @@ NotificationBoard *IPvXAddressResolver::findNotificationBoardOf(cModule *host)
     return dynamic_cast<NotificationBoard *>(mod);
 }
 
+cModule *IPvXAddressResolver::findHostWithAddress(const IPvXAddress & add)
+{
+    if (add.isUnspecified() || add.isMulticast())
+        return NULL;
+
+    cTopology topo("topo");
+    topo.extractByProperty("node");
+
+    // fill in isIPNode, ift and rt members in nodeInfo[]
+
+    for (int i=0; i<topo.getNumNodes(); i++)
+    {
+        cModule *mod = topo.getNode(i)->getModule();
+        IInterfaceTable * itable = IPvXAddressResolver().findInterfaceTableOf(mod);
+        if (itable != NULL)
+        {
+            for (int i = 0; i < itable->getNumInterfaces(); i++)
+            {
+                InterfaceEntry *entry = itable->getInterface(i);
+                if (add.isIPv6())
+                {
+                    if (entry->ipv6Data()->hasAddress(add.get6()))
+                        return mod;
+                }
+                else
+                {
+                    if (entry->ipv4Data()->getIPAddress() == add.get4())
+                        return mod;
+
+                }
+            }
+        }
+    }
+    return NULL;
+}

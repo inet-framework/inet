@@ -1,3 +1,9 @@
+2013-05-15  Alfonso Ariza - takeover from INETMANET
+
+	Introduced a new method in IPvXAddressResolver to return the host
+	with the specified address.
+	Renamed findModuleWithAddress to findHostWithAddress.
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-10-24  Zoltan Bojthe
