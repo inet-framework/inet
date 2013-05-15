@@ -303,7 +303,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         ttl = ctrl4->getTimeToLive();
         tos = ctrl4->getTypeOfService();
         isMulticast = ctrl4->getDestAddr().isMulticast();
-        isBroadcast = ctrl4->getDestAddr() == IPv4Address::ALLONES_ADDRESS;  // note: we cannot recognize other broadcast addresses (where the host part is all-ones), because here we don't know the netmask
+        isBroadcast = ctrl4->getDestAddr().isLimitedBroadcastAddress();  // note: we cannot recognize other broadcast addresses (where the host part is all-ones), because here we don't know the netmask
     }
     else if (dynamic_cast<IPv6ControlInfo *>(ctrl)!=NULL)
     {
@@ -441,7 +441,7 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
 #ifdef WITH_IPv4
         IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
 
-        if (!ctrl4->getDestAddr().isMulticast())
+        if (!ctrl4->getDestAddr().isMulticast() && !ctrl4->getDestAddr().isLimitedBroadcastAddress())
         {
             if (!icmp)
                 icmp = ICMPAccess().get();
