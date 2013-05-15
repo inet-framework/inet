@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2013 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2004 Andras Varga
 // Copyright (C) 2009-2011 Thomas Reschka
 //
@@ -607,6 +608,8 @@ void TCPConnection::sendSegment(uint32 bytes)
     sendToIP(tcpseg);
 }
 
+// modified to implement greedy TCP flow (i.e., infinite data to send)
+// by Kyeong Soo (Joseph) Kim
 bool TCPConnection::sendData(bool fullSegmentsOnly, uint32 congestionWindow)
 {
     if (!state->afterRto)
