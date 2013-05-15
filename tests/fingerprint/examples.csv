@@ -84,7 +84,7 @@
 
 /examples/inet/kidsnw1/,             -f omnetpp.ini -c General -r 0,                1000s,           35ea-1855
 
-/examples/inet/multicast/,           -f omnetpp.ini -c General -r 0,                2000s,           0538-7d02
+/examples/inet/multicast/,           -f omnetpp.ini -c General -r 0,                2000s,           a668-a49e
 
 /examples/inet/nclients/,            -f basicHTTP.ini -c General -r 0,              500000s,         a91e-f09f
 /examples/inet/nclients/,            -f filetransfer.ini -c General -r 0,           5s,              b594-2f9d

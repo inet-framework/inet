@@ -196,6 +196,9 @@ void IPv4NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
         interfaceData->setIPAddress(IPv4Address(interfaceInfo->address));
         interfaceData->setNetmask(IPv4Address(interfaceInfo->netmask));
     }
+    // TODO: should we leave joined multicast groups first?
+    for (std::vector<IPv4Address>::iterator it = interfaceInfo->multicastGroups.begin(); it != interfaceInfo->multicastGroups.end(); it++)
+        interfaceData->joinMulticastGroup(*it);
 }
 
 void IPv4NetworkConfigurator::configureRoutingTable(Node *node)
@@ -1078,10 +1081,8 @@ void IPv4NetworkConfigurator::readInterfaceConfiguration(IPv4Topology& topology)
                             if (isNotEmpty(groupsAttr))
                             {
                                 cStringTokenizer tokenizer(groupsAttr);
-                                while (tokenizer.hasMoreTokens()) {
-                                    IPv4Address address(tokenizer.nextToken());
-                                    interfaceInfo->interfaceEntry->ipv4Data()->joinMulticastGroup(address);
-                                }
+                                while (tokenizer.hasMoreTokens())
+                                    interfaceInfo->multicastGroups.push_back(IPv4Address(tokenizer.nextToken()));
                             }
 
                             interfacesSeen.insert(interfaceInfo);
@@ -1395,7 +1396,7 @@ void IPv4NetworkConfigurator::readMulticastGroupConfiguration(IPv4Topology& topo
                         (towardsMatcher.matchesAny() || linkContainsMatchingHostExcept(linkInfo, &towardsMatcher, hostModule)))
                     {
                         for (int k = 0; k < (int)multicastGroups.size(); k++)
-                            interfaceInfo->interfaceEntry->ipv4Data()->joinMulticastGroup(multicastGroups[k]);
+                            interfaceInfo->multicastGroups.push_back(multicastGroups[k]);
                     }
                 }
             }

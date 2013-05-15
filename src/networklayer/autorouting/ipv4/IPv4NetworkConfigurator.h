@@ -96,6 +96,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public IPvXAddres
                 uint32 addressSpecifiedBits; // 1 means the bit is specified, 0 means the bit is unspecified
                 uint32 netmask;              // the bits
                 uint32 netmaskSpecifiedBits; // 1 means the bit is specified, 0 means the bit is unspecified
+                std::vector<IPv4Address> multicastGroups;
 
             public:
                 InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
