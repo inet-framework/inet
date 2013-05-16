@@ -25,6 +25,7 @@
 #include "AddressResolver.h"
 #include "INetworkProtocolControlInfo.h"
 #include "UDPControlInfo.h"
+#include "NodeOperations.h"
 
 DYMO_NAMESPACE_BEGIN
 
@@ -81,6 +82,7 @@ void xDYMO::initialize(int stage)
         maxHopLimit = par("maxHopLimit");
         // context
         host = findContainingNode(this);
+        nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         notificationBoard = NotificationBoardAccess().get(this);
         interfaceTable = InterfaceTableAccess().get(this);
         routingTable = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
@@ -104,23 +106,16 @@ void xDYMO::initialize(int stage)
     else if (stage == 4) {
         notificationBoard->subscribe(this, NF_LINK_BREAK);
         addressType = getSelfAddress().getAddressType();
-        // join multicast groups
-        cPatternMatcher interfaceMatcher(interfaces, false, true, false);
-        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-            InterfaceEntry * interfaceEntry = interfaceTable->getInterface(i);
-            if (interfaceEntry->isMulticast() && interfaceMatcher.matches(interfaceEntry->getName()))
-                // Most AODVv2 messages are sent with the IP destination address set to the link-local
-                // multicast address LL-MANET-Routers [RFC5498] unless otherwise specified. Therefore,
-                // all AODVv2 routers MUST subscribe to LL-MANET-Routers [RFC5498] to receiving AODVv2 messages.
-                interfaceEntry->joinMulticastGroup(addressType->getLinkLocalManetRoutersMulticastAddress());
-        }
-        // hook to netfilter
         networkProtocol->registerHook(0, this);
+        if (isNodeUp())
+            configureInterfaces();
     }
 }
 
 void xDYMO::handleMessage(cMessage * message)
 {
+    if (!isNodeUp())
+        throw cRuntimeError("Routing protocol is not running");
     if (message->isSelfMessage())
         processSelfMessage(message);
     else
@@ -1238,6 +1233,29 @@ DYMORouteState xDYMO::getRouteState(DYMORouteData * routeData)
 }
 
 //
+// configuration
+//
+
+bool xDYMO::isNodeUp()
+{
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+}
+
+void xDYMO::configureInterfaces()
+{
+    // join multicast groups
+    cPatternMatcher interfaceMatcher(interfaces, false, true, false);
+    for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
+        InterfaceEntry * interfaceEntry = interfaceTable->getInterface(i);
+        if (interfaceEntry->isMulticast() && interfaceMatcher.matches(interfaceEntry->getName()))
+            // Most AODVv2 messages are sent with the IP destination address set to the link-local
+            // multicast address LL-MANET-Routers [RFC5498] unless otherwise specified. Therefore,
+            // all AODVv2 routers MUST subscribe to LL-MANET-Routers [RFC5498] to receiving AODVv2 messages.
+            interfaceEntry->joinMulticastGroup(addressType->getLinkLocalManetRoutersMulticastAddress());
+    }
+}
+
+//
 // address
 //
 
@@ -1342,6 +1360,35 @@ INetfilter::IHook::Result xDYMO::ensureRouteForDatagram(INetworkDatagram * datag
             // the actual routing decision will be repeated in the network protocol
             return ACCEPT;
     }
+}
+
+//
+// lifecycle
+//
+
+
+bool xDYMO::handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+            configureInterfaces();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
+            // TODO: send a RERR to notify peers about broken routes
+            for (std::map<Address, RREQTimer *>::iterator it = targetAddressToRREQTimer.begin(); it != targetAddressToRREQTimer.end(); it++)
+                cancelRouteDiscovery(it->first);
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            targetAddressToSequenceNumber.clear();
+            targetAddressToRREQTimer.clear();
+            targetAddressToDelayedPackets.clear();
+        }
+    }
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
 }
 
 //

@@ -23,9 +23,11 @@
 #include <map>
 #include <omnetpp.h>
 #include "INotifiable.h"
+#include "ILifecycle.h"
 #include "IAddressType.h"
 #include "INetfilter.h"
 #include "IRoutingTable.h"
+#include "NodeStatus.h"
 #include "NotificationBoard.h"
 #include "UDPPacket.h"
 #include "DYMOdefs.h"
@@ -50,7 +52,7 @@ DYMO_NAMESPACE_BEGIN
  *  - 13.6. Message Aggregation
  *    RFC5148 add jitter to broadcasts
  */
-class INET_API xDYMO : public cSimpleModule, public INotifiable, public INetfilter::IHook
+class INET_API xDYMO : public cSimpleModule, public ILifecycle, public INotifiable, public INetfilter::IHook
 {
   private:
     // DYMO parameters from RFC
@@ -76,6 +78,7 @@ class INET_API xDYMO : public cSimpleModule, public INotifiable, public INetfilt
 
     // context
     cModule * host;
+    NodeStatus * nodeStatus;
     NotificationBoard * notificationBoard;
     IAddressType * addressType;
     IInterfaceTable * interfaceTable;
@@ -189,6 +192,10 @@ class INET_API xDYMO : public cSimpleModule, public INotifiable, public INetfilt
     simtime_t getNextExpungeTime();
     DYMORouteState getRouteState(DYMORouteData * routeData);
 
+    // configuration
+    bool isNodeUp();
+    void configureInterfaces();
+
     // address
     std::string getHostName();
     Address getSelfAddress();
@@ -210,6 +217,9 @@ class INET_API xDYMO : public cSimpleModule, public INotifiable, public INetfilt
     virtual Result datagramPostRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress) { return ACCEPT; }
     virtual Result datagramLocalInHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry) { return ACCEPT; }
     virtual Result datagramLocalOutHook(INetworkDatagram * datagram, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress) { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
+
+    // lifecycle
+    virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback);
 
     // notification
     virtual void receiveChangeNotification(int category, const cObject * details);
