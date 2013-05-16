@@ -88,7 +88,7 @@ void ARP::initialize(int stage)
         retryTimeout = par("retryTimeout");
         retryCount = par("retryCount");
         cacheTimeout = par("cacheTimeout");
-        doProxyARP = par("proxyARP");
+        respondToProxyARP = par("respondToProxyARP");
         globalARP = par("globalARP");
 
         pendingQueue.setName("pendingQueue");
@@ -433,15 +433,18 @@ void ARP::requestTimedOut(cMessage *selfmsg)
 
 bool ARP::addressRecognized(IPv4Address destAddr, InterfaceEntry *ie)
 {
-    if (rt->isLocalAddress(destAddr))
+    if (rt->isLocalAddress(destAddr)) {
         return true;
-
-    // respond to Proxy ARP request: if we can route this packet (and the
-    // output port is different from this one), say yes
-    if (!doProxyARP)
+    }
+    else if (respondToProxyARP) {
+        // respond to Proxy ARP request: if we can route this packet (and the
+        // output port is different from this one), say yes
+        InterfaceEntry *rtie = rt->getInterfaceForDestAddr(destAddr);
+        return rtie!=NULL && rtie!=ie;
+    }
+    else {
         return false;
-    InterfaceEntry *rtie = rt->getInterfaceForDestAddr(destAddr);
-    return rtie!=NULL && rtie!=ie;
+    }
 }
 
 void ARP::dumpARPPacket(ARPPacket *arp)

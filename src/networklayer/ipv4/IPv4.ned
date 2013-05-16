@@ -89,6 +89,7 @@ simple IPv4
         int multicastTimeToLive = default(32);
         double fragmentTimeout @unit("s") = default(60s);
         bool forceBroadcast = default(false);
+        bool useProxyARP = default(true);
         @display("i=block/routing");
     gates:
         input transportIn[] @labels(IPv4ControlInfo/down,TCPSegment,UDPPacket);

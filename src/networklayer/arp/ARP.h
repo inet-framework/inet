@@ -65,7 +65,7 @@ class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, 
     simtime_t retryTimeout;
     int retryCount;
     simtime_t cacheTimeout;
-    bool doProxyARP;
+    bool respondToProxyARP;
     bool globalARP;
 
     long numResolutions;
