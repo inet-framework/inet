@@ -33,12 +33,10 @@
 #include "IInterfaceTable.h"
 #include "Address.h"
 #include "ManetAddress.h"
+#include "ManetNetfilterHook.h"
 #include "NotifierConsts.h"
 #include "ICMP.h"
-
-#ifdef WITH_80211MESH
-#include "ILocator.h"
-#endif
+#include "IPv4.h"
 
 #include <vector>
 #include <set>
@@ -50,7 +48,11 @@ class IARPCache;
 typedef std::set<ManetAddress> AddressGroup;
 typedef std::set<ManetAddress>::iterator AddressGroupIterator;
 typedef std::set<ManetAddress>::const_iterator AddressGroupConstIterator;
-class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, protected cListener
+
+/**
+ * Base class for Manet Routing
+ */
+class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, protected cListener, public ManetNetfilterHook
 {
   private:
     static simsignal_t mobilityStateChangedSignal;
@@ -118,10 +120,6 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     bool isGateway;     /// true if the node will work like gateway for address in the list
 
     std::vector<ManetProxyAddress> proxyAddress;
-
-#ifdef WITH_80211MESH
-    ILocator *locator;
-#endif
 
   protected:
     ~ManetRoutingBase();

@@ -32,6 +32,7 @@
  * Storage is efficient: an object occupies size of an IPv6 address
  * (128 bits=16 bytes) plus a short int (address type).
  */
+// TODO: merge into Address
 class ManetAddress
 {
   public:
@@ -124,6 +125,7 @@ class ManetAddress
  * Storage is efficient: an object occupies size of an IPv6 address
  * (128 bits=16 bytes) plus two short int (address type and prefix length).
  */
+// TODO: move into Address.h and rename to AddressPrefix
 class ManetNetworkAddress
 {
   public:

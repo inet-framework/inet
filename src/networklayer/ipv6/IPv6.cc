@@ -559,7 +559,7 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
               ICMP Parameter Problem, Code 1, message to the sender of the packet*/
             EV << "No MIPv6 support on this node!\n";
             IPv6ControlInfo *ctrlInfo = check_and_cast<IPv6ControlInfo*>(packet->removeControlInfo());
-            icmp->sendErrorMessage(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, 1);
+            icmp->sendErrorMessage(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
 
             //delete packet; // 13.9.07 - CB, update 21.9.07 - CB
         }
@@ -576,22 +576,24 @@ void IPv6::localDeliver(IPv6Datagram *datagram)
     }
     else
     {
-        int gateindex = mapping.getOutputGateForProtocol(protocol);
+        int gateindex = mapping.findOutputGateForProtocol(protocol);
+        // check if the transportOut port are connected, otherwise discard the packet
+        if (gateindex >= 0)
+        {
+            cGate* outGate = gate("transportOut", gateindex);
+            if (outGate->isPathOK())
+            {
+                EV << "Protocol " << protocol << ", passing up on gate " << gateindex << "\n";
+                //TODO: Indication of forward progress
+                send(packet, outGate);
+                return;
+            }
+        }
 
-        // 21.9.07 - CB
-        cGate* outGate = gate("transportOut", gateindex);
-        if (!outGate->isConnected())
-        {
-            // TODO send ICMP Destination Unreacheable error
-            EV << "Transport layer gate not connected - dropping packet!\n";
-            delete packet;
-        }
-        else
-        {
-            EV << "Protocol " << protocol << ", passing up on gate " << gateindex << "\n";
-            //TODO: Indication of forward progress
-            send(packet, outGate);
-        }
+        // TODO send ICMP Destination Unreacheable error
+        EV << "Transport layer gate not connected - dropping packet!\n";
+        IPv6ControlInfo *ctrlInfo = check_and_cast<IPv6ControlInfo*>(packet->removeControlInfo());
+        icmp->sendErrorMessage(packet, ctrlInfo, ICMPv6_PARAMETER_PROBLEM, UNRECOGNIZED_NEXT_HDR_TYPE);
     }
 }
 

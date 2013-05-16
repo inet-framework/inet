@@ -43,7 +43,7 @@ cplusplus {{
 //
 // Optional fields:
 // - srcAddr: it will be set to the address of the outgoing interface
-// - typeOfServoce: (default: 0)
+// - typeOfService: (default: 0)
 // - timeToLive: default defined as module parameter
 // - dontFragment: default: false
 //
@@ -74,12 +74,6 @@ class IPv4ControlInfo
     abstract int explicitCongestionNotification;  // maps to bits 6-7 of trafficClass
     short timeToLive;     // maximum hop count
     bool dontFragment;    // "don't fragment" bit
-
-    // The following fields are used in the DSR protocol; TODO revise
-    IPv4Address nextHopAddr; // next hop address (DSR)
-    bool moreFragments;    // "more fragments" bit (DSR protocol)
-    MACAddress macSrc;  // src MAC address (can be left empty when sending)
-    MACAddress macDest; // dest MAC address
 }
 
 

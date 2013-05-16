@@ -241,7 +241,6 @@ int NSCLASS dsr_ack_req_send(struct dsr_pkt *dp)
         }
 
         IPv4Address nextIp((uint32_t)dp->nxt_hop.s_addr);
-        controlInfo->setNextHopAddr(nextIp);
 
         controlInfo->setProtocol(IP_PROT_DSR);
         controlInfo->setInterfaceId(interfaceId); // If broadcast packet send to interface
