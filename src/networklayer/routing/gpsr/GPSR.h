@@ -21,11 +21,13 @@
 
 #include "INETDefs.h"
 #include "Coord.h"
+#include "ILifecycle.h"
 #include "INotifiable.h"
 #include "IMobility.h"
 #include "IAddressType.h"
 #include "INetfilter.h"
 #include "IRoutingTable.h"
+#include "NodeStatus.h"
 #include "NotificationBoard.h"
 #include "PositionTable.h"
 #include "UDPPacket.h"
@@ -42,7 +44,7 @@
 // KLUDGE: implement position registry protocol instead of using a global variable
 // KLUDGE: the GPSR packet is now used to wrap the content of network datagrams
 // KLUDGE: we should rather add these fields as header extensions
-class INET_API GPSR : public cSimpleModule, public INotifiable, public INetfilter::IHook
+class INET_API GPSR : public cSimpleModule, public ILifecycle, public INotifiable, public INetfilter::IHook
 {
     private:
         // GPSR parameters
@@ -54,6 +56,7 @@ class INET_API GPSR : public cSimpleModule, public INotifiable, public INetfilte
 
         // context
         cModule * host;
+        NodeStatus * nodeStatus;
         NotificationBoard * notificationBoard;
         IMobility * mobility;
         IAddressType * addressType;
@@ -103,6 +106,10 @@ class INET_API GPSR : public cSimpleModule, public INotifiable, public INetfilte
         GPSRPacket * createPacket(Address destination, cPacket * content);
         int computePacketBitLength(GPSRPacket * packet);
 
+        // configuration
+        bool isNodeUp();
+        void configureInterfaces();
+
         // position
         Coord intersectSections(Coord & begin1, Coord & end1, Coord & begin2, Coord & end2);
         Coord getDestinationPosition(const Address & address);
@@ -138,6 +145,9 @@ class INET_API GPSR : public cSimpleModule, public INotifiable, public INetfilte
         virtual Result datagramPostRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHop) { return ACCEPT; }
         virtual Result datagramLocalInHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry);
         virtual Result datagramLocalOutHook(INetworkDatagram * datagram, const InterfaceEntry *& outputInterfaceEntry, Address & nextHop);
+
+        // lifecycle
+        virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback);
 
         // notification
         virtual void receiveChangeNotification(int category, const cObject * details);

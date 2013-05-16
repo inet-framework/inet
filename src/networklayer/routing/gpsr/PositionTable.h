@@ -33,6 +33,7 @@ class INET_API PositionTable {
         typedef std::pair<simtime_t, Coord> AddressToPositionMapValue;
         typedef std::map<Address, AddressToPositionMapValue> AddressToPositionMap;
         AddressToPositionMap addressToPositionMap;
+
     public:
         PositionTable() { }
 
@@ -43,6 +44,8 @@ class INET_API PositionTable {
 
         void removePosition(const Address & address);
         void removeOldPositions(simtime_t timestamp);
+
+        void clear();
 
         simtime_t getOldestPosition();
 };

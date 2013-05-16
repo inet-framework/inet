@@ -21,6 +21,7 @@
 #include "InterfaceTableAccess.h"
 #include "IPProtocolId_m.h"
 #include "IPSocket.h"
+#include "NodeOperations.h"
 
 Define_Module(GPSR);
 
@@ -66,6 +67,7 @@ void GPSR::initialize(int stage)
         neighborValidityInterval = par("neighborValidityInterval");
         // context
         host = findContainingNode(this);
+        nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         notificationBoard = NotificationBoardAccess().get(this);
         interfaceTable = InterfaceTableAccess().get(this);
         mobility = check_and_cast<IMobility *>(findModuleWhereverInNode("mobility", this));
@@ -82,15 +84,9 @@ void GPSR::initialize(int stage)
     else if (stage == 4) {
         notificationBoard->subscribe(this, NF_LINK_BREAK);
         addressType = getSelfAddress().getAddressType();
-        // join multicast groups
-        cPatternMatcher interfaceMatcher(interfaces, false, true, false);
-        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-            InterfaceEntry * interfaceEntry = interfaceTable->getInterface(i);
-            if (interfaceEntry->isMulticast() && interfaceMatcher.matches(interfaceEntry->getName()))
-                interfaceEntry->joinMulticastGroup(addressType->getLinkLocalManetRoutersMulticastAddress());
-        }
-        // hook to netfilter
         networkProtocol->registerHook(0, this);
+        if (isNodeUp())
+            configureInterfaces();
     }
 }
 
@@ -260,6 +256,26 @@ int GPSR::computePacketBitLength(GPSRPacket * packet)
     int addresses = 8 * 3 * 4;
     // TODO: address size
     return routingMode + positions + addresses;
+}
+
+//
+// configuration
+//
+
+bool GPSR::isNodeUp()
+{
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+}
+
+void GPSR::configureInterfaces()
+{
+    // join multicast groups
+    cPatternMatcher interfaceMatcher(interfaces, false, true, false);
+    for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
+        InterfaceEntry * interfaceEntry = interfaceTable->getInterface(i);
+        if (interfaceEntry->isMulticast() && interfaceMatcher.matches(interfaceEntry->getName()))
+            interfaceEntry->joinMulticastGroup(addressType->getLinkLocalManetRoutersMulticastAddress());
+    }
 }
 
 //
@@ -579,6 +595,31 @@ INetfilter::IHook::Result GPSR::datagramLocalOutHook(INetworkDatagram * datagram
         networkPacket->encapsulate(gpsrPacket);
         return routeDatagram(datagram, outputInterfaceEntry, nextHop);
     }
+}
+
+
+//
+// lifecycle
+//
+
+bool GPSR::handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation))  {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+            configureInterfaces();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
+            // TODO: send a beacon to remove ourself from peers neighbor position table
+            neighborPositionTable.clear();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            neighborPositionTable.clear();
+    }
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
 }
 
 //

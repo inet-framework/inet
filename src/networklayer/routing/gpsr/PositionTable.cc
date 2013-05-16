@@ -51,6 +51,10 @@ void PositionTable::removeOldPositions(simtime_t timestamp) {
             it++;
 }
 
+void PositionTable::clear() {
+    addressToPositionMap.clear();
+}
+
 simtime_t PositionTable::getOldestPosition() {
     simtime_t oldestPosition = SimTime::getMaxTime();
     for (AddressToPositionMap::iterator it = addressToPositionMap.begin(); it != addressToPositionMap.end(); it++) {
