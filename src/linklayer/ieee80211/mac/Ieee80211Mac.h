@@ -662,6 +662,10 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     virtual void promiscousFrame(cMessage *msg);
 
     virtual bool isDuplicated(cMessage *msg);
+
+  public:
+    virtual State getState() {return static_cast<State>(fsm.getState());}
+    virtual unsigned int getQueueSize() {return transmissionQueueSize();}
 };
 
 #endif
