@@ -54,6 +54,8 @@ module NodeBase
         bool IPForward = default(true);
         bool forwardMulticast = default(false);
         string batteryType = default("");
+        routingTable.IPForward = IPForward;
+        routingTable.forwardMulticast = forwardMulticast;
     gates:
         input radioIn[numRadios] @directIn;
         inout pppg[] @labels(PPPFrame-conn);
@@ -88,8 +90,6 @@ module NodeBase
         routingTable: IPv4RoutingTable {
             parameters:
                 @display("p=53,225;is=s");
-                IPForward = IPForward;
-                forwardMulticast = forwardMulticast;
         }
 
         // linklayer
