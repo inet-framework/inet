@@ -76,6 +76,38 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cIndexedEvent
     virtual void recordRoute(cModule *host, IRoute *route, int category);
 };
 
+
+#else /*OMNETPP_VERSION*/
+
+
+#include "IIPv4RoutingTable.h"
+#include "INotifiable.h"
+
+/**
+ * Records routing table changes into a file.
+  *
+ * @see IPv4RoutingTable, IPv4Route
+ */
+class INET_API RoutingTableRecorder : public cSimpleModule
+{
+    friend class RoutingTableRecorderListener;
+  private:
+    FILE *routingLogFile;
+  public:
+    RoutingTableRecorder();
+    virtual ~RoutingTableRecorder();
+  protected:
+    virtual int numInitStages() const  {return 1;}
+    virtual void initialize(int stage);
+    virtual void handleMessage(cMessage *);
+    virtual void hookListeners();
+    virtual void ensureRoutingLogFileOpen();
+    virtual void receiveChangeNotification(NotificationBoard *nb, int category, const cObject *details);
+    virtual void recordInterfaceChange(cModule *host, const InterfaceEntry *ie, int category);
+    virtual void recordRouteChange(cModule *host, const IRoute *route, int category);
+};
+
 #endif /*OMNETPP_VERSION*/
 
 #endif
+

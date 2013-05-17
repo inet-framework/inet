@@ -191,4 +191,173 @@ void RoutingTableRecorder::recordRoute(cModule *host,  IRoute *route, int catego
 //    content << getParentModule()->getId() << " "; //XXX we assume routing table is direct child of the node compound module
 //    content << a.str();
 
+
+
+
+#else /*OMNETPP_VERSION*/
+
+
+
+
+#include "NotifierConsts.h"
+#include "NotificationBoard.h"
+#include "IIPv4RoutingTable.h"
+#include "IPv4Route.h"
+#include "IInterfaceTable.h"
+#include "IPv4InterfaceData.h"
+#include "RoutingTableRecorder.h"
+
+
+Define_Module(RoutingTableRecorder);
+
+#define LL INT64_PRINTF_FORMAT  // for eventnumber_t
+
+Register_PerRunConfigOption(CFGID_ROUTINGLOG_FILE, "routinglog-file", CFG_FILENAME, "${resultdir}/${configname}-${runnumber}.rt", "Name of the routing log file to generate.");
+
+
+// We need this because we want to know which NotificationBoard the notification comes from
+// (INotifiable::receiveChangeNotification() doesn't have NotificationBoard* as arg).
+class RoutingTableRecorderListener : public INotifiable
+{
+private:
+    NotificationBoard *nb;
+    RoutingTableRecorder *recorder;
+public:
+    RoutingTableRecorderListener(RoutingTableRecorder *recorder, NotificationBoard *nb) {this->recorder = recorder; this->nb = nb;}
+    virtual void receiveChangeNotification(int category, const cObject *details) {recorder->receiveChangeNotification(nb, category, details);}
+};
+
+RoutingTableRecorder::RoutingTableRecorder()
+{
+    routingLogFile = NULL;
+}
+
+RoutingTableRecorder::~RoutingTableRecorder()
+{
+}
+
+void RoutingTableRecorder::initialize(int stage)
+{
+    if (par("enabled").boolValue())
+        hookListeners();
+}
+
+void RoutingTableRecorder::handleMessage(cMessage *)
+{
+    throw cRuntimeError(this, "This module doesn't process messages");
+}
+
+void RoutingTableRecorder::hookListeners()
+{
+    // hook existing notification boards (we won't cover dynamically created hosts/routers, but oh well)
+    for (int id = 0; id < simulation.getLastModuleId(); id++)
+    {
+        NotificationBoard *nb = dynamic_cast<NotificationBoard *>(simulation.getModule(id));
+        if (nb)
+        {
+            INotifiable *listener = new RoutingTableRecorderListener(this, nb);
+            nb->subscribe(listener, NF_INTERFACE_CREATED);
+            nb->subscribe(listener, NF_INTERFACE_DELETED);
+            nb->subscribe(listener, NF_INTERFACE_CONFIG_CHANGED);
+            nb->subscribe(listener, NF_INTERFACE_IPv4CONFIG_CHANGED);
+            //nb->subscribe(listener, NF_INTERFACE_IPv6CONFIG_CHANGED);
+            //nb->subscribe(listener, NF_INTERFACE_STATE_CHANGED);
+
+            nb->subscribe(listener, NF_ROUTE_ADDED);
+            nb->subscribe(listener, NF_ROUTE_DELETED);
+            nb->subscribe(listener, NF_ROUTE_CHANGED);
+        }
+    }
+}
+
+void RoutingTableRecorder::ensureRoutingLogFileOpen()
+{
+    if (routingLogFile == NULL)
+    {
+        // hack to ensure that results/ folder is created
+        simulation.getSystemModule()->recordScalar("hackForCreateResultsFolder", 0);
+
+        std::string fname = ev.getConfig()->getAsFilename(CFGID_ROUTINGLOG_FILE);
+        routingLogFile = fopen(fname.c_str(), "w");
+        if (!routingLogFile)
+            throw cRuntimeError("Cannot open file %s", fname.c_str());
+    }
+}
+
+void RoutingTableRecorder::receiveChangeNotification(NotificationBoard *nb, int category, const cObject *details)
+{
+    cModule *host = nb->getParentModule();
+    if (category==NF_ROUTE_ADDED || category==NF_ROUTE_DELETED || category==NF_ROUTE_CHANGED)
+        recordRouteChange(host, check_and_cast<const IRoute *>(details), category);
+    else
+        recordInterfaceChange(host, check_and_cast<const InterfaceEntry *>(details), category);
+}
+
+void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceEntry *ie, int category)
+{
+    // Note: ie->getInterfaceTable() may be NULL (entry already removed from its table)
+
+    const char *tag;
+    switch (category) {
+    case NF_INTERFACE_CREATED: tag = "+I"; break;
+    case NF_INTERFACE_DELETED: tag = "-I"; break;
+    case NF_INTERFACE_CONFIG_CHANGED: tag = "*I"; break;
+    case NF_INTERFACE_IPv4CONFIG_CHANGED: tag = "*I"; break;
+    default: throw cRuntimeError("Unexpected notification category %d", category);
+    }
+
+    // action, eventNo, simtime, moduleId, ifname, address
+    ensureRoutingLogFileOpen();
+    fprintf(routingLogFile, "%s  %"LL"d  %s  %d  %s %s\n",
+            tag,
+            simulation.getEventNumber(),
+            SIMTIME_STR(simTime()),
+            host->getId(),
+            ie->getName(),
+            (ie->ipv4Data()!=NULL ? ie->ipv4Data()->getIPAddress().str().c_str() : IPv4Address().str().c_str())
+            );
+    fflush(routingLogFile);
+}
+
+void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route, int category)
+{
+    IRoutingTable *rt = route->getRoutingTableAsGeneric(); // may be NULL! (route already removed from its routing table)
+
+    const char *tag;
+    switch (category) {
+    case NF_ROUTE_ADDED: tag = "+R"; break;
+    case NF_ROUTE_CHANGED: tag = "*R"; break;
+    case NF_ROUTE_DELETED: tag = "-R"; break;
+    default: throw cRuntimeError("Unexpected notification category %d", category);
+    }
+
+    // action, eventNo, simtime, moduleId, routerID, dest, dest netmask, nexthop
+    ensureRoutingLogFileOpen();
+    fprintf(routingLogFile, "%s %"LL"d  %s  %d  %s  %s  %d  %s\n",
+            tag,
+            simulation.getEventNumber(),
+            SIMTIME_STR(simTime()),
+            host->getId(),
+            (rt ? rt->getRouterIdAsGeneric().str().c_str() : "*"),
+            route->getDestinationAsGeneric().str().c_str(),
+            route->getPrefixLength(),
+            route->getNextHopAsGeneric().str().c_str()
+    );
+    fflush(routingLogFile);
+}
+
+
+//TODO: routerID change
+//    // time, moduleId, routerID
+//    ensureRoutingLogFileOpen();
+//    fprintf(routingLogFile, "ID  %s  %d  %s\n",
+//            SIMTIME_STR(simTime()),
+//            getParentModule()->getId(), //XXX we assume routing table is direct child of the node compound module
+//            a.str().c_str()
+//            );
+//    fflush(routingLogFile);
+//}
+
+
 #endif /*OMNETPP_VERSION*/
+
