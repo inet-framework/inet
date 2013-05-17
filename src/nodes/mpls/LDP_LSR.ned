@@ -43,7 +43,6 @@ module LDP_LSR
         double helloInterval @unit("s") = default(5s);
         string peers;
         string routerId = default("auto");
-        string routingFile = default("");
         string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC","TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
     gates:
         inout pppg[] @labels(PPPFrame-conn);
@@ -63,8 +62,7 @@ module LDP_LSR
             parameters:
                 IPForward = true;
                 routerId = routerId;
-                routingFile = routingFile;
-                @display("p=73,244;is=s");
+                @display("p=70,240");
         }
         ldp: LDP {
             parameters:

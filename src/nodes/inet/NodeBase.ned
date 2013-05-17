@@ -51,7 +51,6 @@ module NodeBase
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
         int numPcapRecorders = default(0); // no of PcapRecorders.
         string mobilityType = default(numRadios > 0 ? "StationaryMobility" : "");
-        string routingFile = default("");
         bool IPForward = default(true);
         bool forwardMulticast = default(false);
         string batteryType = default("");
@@ -91,7 +90,6 @@ module NodeBase
                 @display("p=53,225;is=s");
                 IPForward = IPForward;
                 forwardMulticast = forwardMulticast;
-                routingFile = routingFile;
         }
 
         // linklayer

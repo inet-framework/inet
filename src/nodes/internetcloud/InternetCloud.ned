@@ -55,7 +55,6 @@ module InternetCloud
         @labels(node,ethernet-node);
         @display("i=misc/cloud");
         int numPcapRecorders = default(0); // no of PcapRecorders.
-        string routingFile = default("");
     gates:
         inout pppg[] @labels(PPPFrame-conn);
     types:
@@ -128,7 +127,6 @@ module InternetCloud
             parameters:
                 IPForward = true;
                 routerId = "auto";
-                routingFile = routingFile;
                 @display("p=60,196");
         }
         pcapRecorder[numPcapRecorders]: PcapRecorder {
