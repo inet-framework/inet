@@ -126,8 +126,6 @@ void Ieee80211Mac::initialize(int stage)
             edcCAF.push_back(catEdca);
         }
         // initialize parameters
-        // Variable to apply the fsm fix
-        fixFSM = par("fixFSM");
         const char *opModeStr = par("opMode").stringValue();
         if (strcmp("b", opModeStr)==0)
             opMode = 'b';
@@ -1289,10 +1287,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   msg == endSIFS && getFrameReceivedBeforeSIFS()->getType() == ST_RTS,
                                   IDLE,
                                   sendCTSFrameOnEndSIFS();
-                                  if (fixFSM)
-                                      finishReception();
-                                  else
-                                      resetStateVariables();
+                                  finishReception();
                                   );
             FSMA_Event_Transition(Transmit-DATA,
                                   msg == endSIFS && getFrameReceivedBeforeSIFS()->getType() == ST_CTS,
@@ -1304,10 +1299,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   msg == endSIFS && isDataOrMgmtFrame(getFrameReceivedBeforeSIFS()),
                                   IDLE,
                                   sendACKFrameOnEndSIFS();
-                                  if (fixFSM)
-                                      finishReception();
-                                  else
-                                      resetStateVariables();
+                                  finishReception();
                                    );
         }
         // this is not a real state
@@ -1318,20 +1310,14 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                      IDLE,
                                      EV << "received frame contains bit errors or collision, next wait period is EIFS\n";
                                      numCollision++;
-                                     if (fixFSM)
-                                         finishReception();
-                                     else
-                                         resetStateVariables();
+                                     finishReception();
                                      );
             FSMA_No_Event_Transition(Immediate-Receive-Multicast,
                                      isLowerMsg(msg) && isMulticast(frame) && !isSentByUs(frame) && isDataOrMgmtFrame(frame),
                                      IDLE,
                                      sendUp(frame);
                                      numReceivedMulticast++;
-                                     if (fixFSM)
-                                         finishReception();
-                                     else
-                                         resetStateVariables();
+                                     finishReception();
                                      );
             FSMA_No_Event_Transition(Immediate-Receive-Data,
                                      isLowerMsg(msg) && isForUs(frame) && isDataOrMgmtFrame(frame),
@@ -1352,19 +1338,13 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                      isLowerMsg(msg) && !isForUs(frame) && isDataOrMgmtFrame(frame),
                                      IDLE,
                                      promiscousFrame(frame);
-                                     if (fixFSM)
-                                         finishReception();
-                                     else
-                                         resetStateVariables();
+                                     finishReception();
                                      numReceivedOther++;
                                      );
             FSMA_No_Event_Transition(Immediate-Receive-Other,
                                      isLowerMsg(msg),
                                      IDLE,
-                                     if (fixFSM)
-                                         finishReception();
-                                     else
-                                         resetStateVariables();
+                                     finishReception();
                                      numReceivedOther++;
                                      );
         }

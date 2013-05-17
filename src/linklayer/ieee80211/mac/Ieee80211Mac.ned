@@ -92,7 +92,6 @@ simple Ieee80211Mac
         int cwMinData = default(-1); // contention window for normal data frames, -1 means default
         int cwMaxData = default(-1); // contention window for normal data frames, -1 means default
         int cwMinMulticast = default(-1); // contention window for broadcast messages, -1 means default
-        bool fixFSM = default(true);
 
         double phyHeaderLength = default(-1); // if -1, the MAC will compute it in function of the modulation type
         bool forceBitRate = default(false); // if true, the MAC will force the bitrate to the physical layer

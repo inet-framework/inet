@@ -1,7 +1,8 @@
 2015-05-15  Alfonso Ariza - takeover from INETMANET
 
-	Bugfix: erronous behaviour in Ieee802.11 mac (do not change 
-	backoff if the retry couter is 0)
+	- fix: erroneous behaviour in Ieee802.11 mac (do not change 
+	backoff if the retry counter is 0)
+	- removed fixFSM parameter
 
 2013-01-30  ------ inet-2.1.0 released ------
 
