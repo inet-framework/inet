@@ -313,7 +313,7 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
         else if (dest.getType() == Address::IPv4) {
             IPv4ControlInfo* controlInfo = new IPv4ControlInfo();
             controlInfo->setProtocol(IP_PROT_SCTP);
-            controlInfo->setSrcAddr(IPv4Address("0.0.0.0"));
+            controlInfo->setSrcAddr(IPv4Address::UNSPECIFIED_ADDRESS);
             controlInfo->setDestAddr(dest.toIPv4());
             sctpmsg->setControlInfo(controlInfo);
             sctpMain->send(sctpmsg, "to_ip");
@@ -474,7 +474,7 @@ void SCTPAssociation::sendInit()
     initTsn = initChunk->getInitTSN();
     IInterfaceTable *ift = interfaceTableAccess.get();
     sctpEV3<<"add local address\n";
-    if (localAddressList.front() == Address("0.0.0.0"))
+    if (localAddressList.front().isUnspecified())
     {
         for (int32 i=0; i<ift->getNumInterfaces(); ++i)
         {

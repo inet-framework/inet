@@ -487,7 +487,7 @@ SCTPAssociation *SCTP::findAssocForMessage(Address srcAddr, Address destAddr, ui
 
 
     // try with localAddr missing (only localPort specified in passive/active open)
-    key.localAddr.set(IPv4Address("0.0.0.0"));
+    key.localAddr = Address();
 
     i = sctpAssocMap.find(key);
     if (i!=sctpAssocMap.end())
@@ -500,7 +500,7 @@ SCTPAssociation *SCTP::findAssocForMessage(Address srcAddr, Address destAddr, ui
     {
         // try fully qualified local socket + blank remote socket (for incoming SYN)
         key = save;
-        key.remoteAddr.set(IPv4Address("0.0.0.0"));
+        key.remoteAddr = Address();
         key.remotePort = 0;
         i = sctpAssocMap.find(key);
         if (i!=sctpAssocMap.end())
@@ -510,7 +510,7 @@ SCTPAssociation *SCTP::findAssocForMessage(Address srcAddr, Address destAddr, ui
         }
 
         // try with blank remote socket, and localAddr missing (for incoming SYN)
-        key.localAddr.set(IPv4Address("0.0.0.0"));
+        key.localAddr = Address();
         i = sctpAssocMap.find(key);
         if (i!=sctpAssocMap.end())
         {

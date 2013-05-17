@@ -529,7 +529,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
             numberOfRemoteAddresses = initchunk->getAddressesArraySize();
             IInterfaceTable *ift = interfaceTableAccess.get();
             state->localAddresses.clear();
-            if (localAddressList.front() == Address("0.0.0.0"))
+            if (localAddressList.front().isUnspecified())
             {
                 for (int32 i=0; i<ift->getNumInterfaces(); ++i)
                 {

@@ -91,7 +91,7 @@ void SCTPSocket::bind(int lPort)
     if (sockstate!=NOT_BOUND)
         throw cRuntimeError("SCTPSocket::bind(): socket already bound");
 
-    localAddresses.push_back(Address("0.0.0.0"));
+    localAddresses.push_back(Address());    // Unspecified address
     localPrt = lPort;
     sockstate = CLOSED;
 }

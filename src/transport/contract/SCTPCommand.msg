@@ -60,8 +60,8 @@ class SCTPCommand extends cPacket
     int ssn = -1;
     unsigned short sendUnordered = false;
     double prValue = 0;
-    Address localAddr = Address("0.0.0.0");
-    Address remoteAddr = Address("0.0.0.0");
+    Address localAddr;
+    Address remoteAddr;
     int gate = -1;
 }
 

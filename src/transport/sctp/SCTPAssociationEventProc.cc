@@ -243,7 +243,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
 
     // ------ Set initial destination address -----------------------------
     if (sendCommand->getPrimary()) {
-        if (sendCommand->getRemoteAddr() == Address("0.0.0.0")) {
+     if (sendCommand->getRemoteAddr().isUnspecified()) {
             datMsg->setInitialDestination(remoteAddr);
         }
         else {
