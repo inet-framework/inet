@@ -218,7 +218,7 @@ void IPv4::handleIncomingDatagram(IPv4Datagram *datagram, const InterfaceEntry *
             EV << "Skip local delivery of multicast datagram (input interface not in multicast group)\n";
 
         // don't forward if IP forwarding is off, or if dest address is link-scope
-        if (!rt->isIPForwardingEnabled() || destAddr.isLinkLocalMulticast())
+        if (!rt->isForwardingEnabled() || destAddr.isLinkLocalMulticast())
         {
             EV << "Skip forwarding of multicast datagram (packet is link-local or forwarding disabled)\n";
             delete datagram;
@@ -248,13 +248,13 @@ void IPv4::handleIncomingDatagram(IPv4Datagram *datagram, const InterfaceEntry *
         else if (destAddr.isLimitedBroadcastAddress() || (broadcastIE=rt->findInterfaceByLocalBroadcastAddress(destAddr)))
         {
             // broadcast datagram on the target subnet if we are a router
-            if (broadcastIE && fromIE != broadcastIE && rt->isIPForwardingEnabled())
+            if (broadcastIE && fromIE != broadcastIE && rt->isForwardingEnabled())
                 fragmentAndSend(datagram->dup(), broadcastIE, IPv4Address::ALLONES_ADDRESS);
 
             EV << "Broadcast received\n";
             reassembleAndDeliver(datagram);
         }
-        else if (!rt->isIPForwardingEnabled())
+        else if (!rt->isForwardingEnabled())
         {
             EV << "forwarding off, dropping packet\n";
             numDropped++;

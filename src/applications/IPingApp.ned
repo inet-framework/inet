@@ -29,7 +29,5 @@ moduleinterface IPingApp
     gates:
         input pingIn @labels(PingPayload/up);
         output pingOut @labels(PingPayload/down);
-        input pingv6In @labels(PingPayload/up);
-        output pingv6Out @labels(PingPayload/down);
 }
 

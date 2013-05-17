@@ -63,7 +63,7 @@ inline std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh) {re
 class IPv6ControlInfo
 {
     @customize(true);
-    int protocol enum(IPProtocolId);  // transport layer protocol
+    short protocol enum(IPProtocolId);  // transport layer protocol
     IPv6Address destAddr; // destination IPv6 address
     IPv6Address srcAddr;  // source IPv6 address
     unsigned char trafficClass;  // Traffic Class byte (low 6 bits: DSCP; highest 2 bits: ECN)

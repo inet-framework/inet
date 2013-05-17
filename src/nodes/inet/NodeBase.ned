@@ -25,8 +25,8 @@ import inet.linklayer.IWirelessNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.mobility.IMobility;
 import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.IPv4NetworkLayer;
-import inet.networklayer.ipv4.IPv4RoutingTable;
+import inet.networklayer.contract.INetworkLayer;
+import inet.networklayer.contract.IRoutingTable;
 import inet.status.NodeStatus;
 import inet.util.PcapRecorder;
 
@@ -51,6 +51,8 @@ module NodeBase
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
         int numPcapRecorders = default(0); // no of PcapRecorders.
         string mobilityType = default(numRadios > 0 ? "StationaryMobility" : "");
+        string networkLayerType = default("IPv4NetworkLayer");
+        string routingTableType = default("IPv4RoutingTable");
         bool IPForward = default(true);
         bool forwardMulticast = default(false);
         string batteryType = default("");
@@ -82,12 +84,13 @@ module NodeBase
         }
 
         // network layer
-        networkLayer: IPv4NetworkLayer {
+        networkLayer: <networkLayerType> like INetworkLayer {
             parameters:
                 @display("p=329,287;q=queue");
         }
 
-        routingTable: IPv4RoutingTable {
+		// routing table
+        routingTable: <routingTableType> like IRoutingTable {
             parameters:
                 @display("p=53,225;is=s");
         }

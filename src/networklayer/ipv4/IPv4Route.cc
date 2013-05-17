@@ -21,10 +21,15 @@
 
 #include "IPv4Route.h"
 #include "IPv4InterfaceData.h"
+#include "IPv4RoutingTable.h"
 
 #include "InterfaceEntry.h"
 #include "IIPv4RoutingTable.h"
 
+
+IPv4Route::~IPv4Route()
+{
+}
 
 std::string IPv4Route::info() const
 {
@@ -47,7 +52,8 @@ std::string IPv4Route::info() const
     out << "  ";
     out << (gateway.isUnspecified() ? "DIRECT" : "REMOTE");
 
-    switch (source)
+
+    switch (sourceType)
     {
         case MANUAL:       out << " MANUAL"; break;
         case IFACENETMASK: out << " IFACENETMASK"; break;
@@ -70,7 +76,7 @@ std::string IPv4Route::detailedInfo() const
 bool IPv4Route::equals(const IPv4Route& route) const
 {
     return rt == route.rt && dest == route.dest && netmask == route.netmask && gateway == route.gateway &&
-           interfacePtr == route.interfacePtr && source == route.source && metric == route.metric;
+           interfacePtr == route.interfacePtr && sourceType == route.sourceType && metric == route.metric;
 }
 
 const char *IPv4Route::getInterfaceName() const
@@ -82,6 +88,11 @@ void IPv4Route::changed(int fieldCode)
 {
     if (rt)
         rt->routeChanged(this, fieldCode);
+}
+
+IRoutingTable *IPv4Route::getRoutingTableAsGeneric() const
+{
+    return getRoutingTable();
 }
 
 IPv4MulticastRoute::~IPv4MulticastRoute()
@@ -109,7 +120,7 @@ std::string IPv4MulticastRoute::info() const
         out << outInterfaces[i]->getInterface()->getName();
     }
 
-    switch (source)
+    switch (sourceType)
     {
         case MANUAL:       out << " MANUAL"; break;
         case DVMRP:        out << " DVRMP"; break;
@@ -143,6 +154,11 @@ void IPv4MulticastRoute::clearOutInterfaces()
         outInterfaces.clear();
         changed(F_OUT);
     }
+}
+
+IRoutingTable *IPv4MulticastRoute::getRoutingTableAsGeneric() const
+{
+    return getRoutingTable();
 }
 
 void IPv4MulticastRoute::addOutInterface(OutInterface *outInterface)

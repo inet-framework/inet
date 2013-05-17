@@ -362,7 +362,7 @@ void DSDV_2::handleMessage(cMessage *msg)
                     e->setNetmask(netmask);
                     e->setGateway(next);
                     e->setInterface(interface80211ptr);
-                    e->setSource(IPv4Route::MANET);
+                    e->setSourceType(IPv4Route::MANET);
                     e->setMetric(numHops);
                     e->setSequencenumber(msgsequencenumber);
                     e->setExpiryTime(simTime()+routeLifetime);

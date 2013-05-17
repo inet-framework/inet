@@ -47,12 +47,13 @@ const char *notificationCategoryName(int category)
         case NF_INTERFACE_IPv4CONFIG_CHANGED: return "IPv4-CFG";
         case NF_INTERFACE_IPv6CONFIG_CHANGED: return "IPv6-CFG";
 
-        case NF_IPv4_ROUTE_ADDED: return "IPv4-ROUTE-ADD";
-        case NF_IPv4_ROUTE_DELETED: return "IPv4-ROUTE-DEL";
-        case NF_IPv4_ROUTE_CHANGED: return "IPv4-ROUTE-CHG";
-        case NF_IPv6_ROUTE_ADDED: return "IPv6-ROUTE-ADD";
-        case NF_IPv6_ROUTE_DELETED: return "IPv6-ROUTE-DEL";
-        case NF_IPv6_ROUTE_CHANGED: return "IPv6-ROUTE-CHG";
+        case NF_ROUTE_ADDED: return "ROUTE-ADD";
+        case NF_ROUTE_DELETED: return "ROUTE-DEL";
+        case NF_ROUTE_CHANGED: return "ROUTE-CHG";
+        case NF_MROUTE_ADDED: return "MROUTE-ADD";
+        case NF_MROUTE_DELETED: return "MROUTE-DEL";
+        case NF_MROUTE_CHANGED: return "MROUTE-CHG";
+
         case NF_IPv6_MCAST_JOIN: return "IPv6-MCAST-JOIN";
         case NF_IPv6_MCAST_LEAVE: return "IPv6-MCAST-LEAVE";
         case NF_IPv6_MCAST_REGISTERED: return "IPv6-MCAST-REGISTERED";

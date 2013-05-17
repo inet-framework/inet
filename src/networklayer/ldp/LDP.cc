@@ -154,8 +154,8 @@ void LDP::initialize(int stage)
     rebuildFecList();
 
     // listen for routing table modifications
-    nb->subscribe(this, NF_IPv4_ROUTE_ADDED);
-    nb->subscribe(this, NF_IPv4_ROUTE_DELETED);
+    nb->subscribe(this, NF_ROUTE_ADDED);
+    nb->subscribe(this, NF_ROUTE_DELETED);
 }
 
 void LDP::handleMessage(cMessage *msg)
@@ -1301,7 +1301,7 @@ void LDP::receiveChangeNotification(int category, const cObject *details)
     Enter_Method_Silent();
     printNotificationBanner(category, details);
 
-    ASSERT(category==NF_IPv4_ROUTE_ADDED || category==NF_IPv4_ROUTE_DELETED);
+    ASSERT(category==NF_ROUTE_ADDED || category==NF_ROUTE_DELETED);
 
     EV << "routing table changed, rebuild list of known FEC" << endl;
 

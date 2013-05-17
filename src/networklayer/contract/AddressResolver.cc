@@ -34,13 +34,11 @@
 #include "IPv6RoutingTable.h"
 #endif
 
-
 Address AddressResolver::resolve(const char *s, int addrType)
 {
     Address addr;
     if (!tryResolve(s, addr, addrType))
         throw cRuntimeError("AddressResolver: address `%s' not configured (yet?)", s);
-
     return addr;
 }
 
@@ -67,7 +65,7 @@ bool AddressResolver::tryResolve(const char *s, Address& result, int addrType)
 
     // must be " modulename [ { '%' interfacename | '>' destnode } ] [ '(' protocol ')' ] [ '/' ] " syntax
     // interfacename: existing_interface_of_module | 'routerId'
-    // protocol: 'ipv4' | 'ipv6'
+    // protocol: 'ipv4' | 'ipv6' | 'mac' | 'modulepath' | 'moduleid'
     // '/': returns mask instead address
     std::string modname, ifname, protocol, destnodename;
     bool netmask = addrType & ADDR_MASK;
@@ -146,17 +144,17 @@ bool AddressResolver::tryResolve(const char *s, Address& result, int addrType)
     else if (ifname.empty())
         result = addressOf(mod, addrType);
     else if (ifname == "routerId")
-        result = Address(routerIdOf(mod)); // addrType is meaningless here, routerId is protocol independent
+        result = routerIdOf(mod); // addrType is meaningless here, routerId is protocol independent
     else
         result = addressOf(mod, ifname.c_str(), addrType);
     return !result.isUnspecified();
 }
 
-IPv4Address AddressResolver::routerIdOf(cModule *host)
+Address AddressResolver::routerIdOf(cModule *host)
 {
 #ifdef WITH_IPv4
     IIPv4RoutingTable *rt = routingTableOf(host);
-    return rt->getRouterId();
+    return Address(rt->getRouterId());
 #else
     throw cRuntimeError("INET was compiled without IPv4 support");
 #endif
@@ -199,30 +197,12 @@ Address AddressResolver::getAddressFrom(IInterfaceTable *ift, int addrType)
 {
     Address ret;
     bool netmask = addrType & ADDR_MASK;
-
-    if (addrType & ADDR_IPv6)
-    {
-        bool exists = getIPv6AddressFrom(ret, ift, netmask);
-        if (!exists)
-        {
-            if(addrType & ADDR_PREFER)
-                exists = getIPv4AddressFrom(ret, ift, netmask);
-        }
-    }
-    else if (addrType & ADDR_IPv4)
-    {
-        bool exists = getIPv4AddressFrom(ret, ift, netmask);
-        if (!exists)
-        {
-            if(addrType & ADDR_PREFER)
-                exists = getIPv6AddressFrom(ret, ift, netmask);
-        }
-    }
+    if ((addrType & ADDR_IPv4) && getIPv4AddressFrom(ret, ift, netmask))
+        return ret;
+    else if ((addrType & ADDR_IPv6) && getIPv6AddressFrom(ret, ift, netmask))
+        return ret;
     else
-    {
         throw cRuntimeError("AddressResolver: unknown addrType %d", addrType);
-    }
-
     return ret;
 }
 
@@ -231,22 +211,12 @@ Address AddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
     Address ret;
     bool mask = addrType & ADDR_MASK;
 
-    if (addrType & ADDR_IPv6)
-    {
-        if (!getInterfaceIPv6Address(ret, ie, mask))
-            if (addrType & ADDR_PREFER)
-                getInterfaceIPv4Address(ret, ie, mask);
-    }
-    else if (addrType & ADDR_IPv4)
-    {
-        if (!getInterfaceIPv4Address(ret, ie, mask))
-            if (addrType & ADDR_PREFER)
-                getInterfaceIPv6Address(ret, ie, mask);
-    }
+    if ((addrType & ADDR_IPv4) && getInterfaceIPv4Address(ret, ie, mask))
+        return ret;
+    else if ((addrType & ADDR_IPv6) && getInterfaceIPv6Address(ret, ie, mask))
+        return ret;
     else
-    {
         throw cRuntimeError("AddressResolver: unknown addrType %d", addrType);
-    }
 
     return ret;
 }
@@ -311,7 +281,7 @@ bool AddressResolver::getInterfaceIPv6Address(Address &ret, InterfaceEntry *ie, 
         IPv6Address addr = ie->ipv6Data()->getPreferredAddress();
         if (!addr.isUnspecified())
         {
-            ret = addr;
+            ret.set(addr);
             return true;
         }
     }
@@ -327,7 +297,7 @@ bool AddressResolver::getInterfaceIPv4Address(Address &ret, InterfaceEntry *ie, 
         IPv4Address addr = ie->ipv4Data()->getIPAddress();
         if (!addr.isUnspecified())
         {
-            ret = netmask ? ie->ipv4Data()->getNetmask() : addr;
+            ret.set(netmask ? ie->ipv4Data()->getNetmask() : addr);
             return true;
         }
     }
@@ -393,8 +363,10 @@ IInterfaceTable *AddressResolver::findInterfaceTableOf(cModule *host)
 IIPv4RoutingTable *AddressResolver::findRoutingTableOf(cModule *host)
 {
 #ifdef WITH_IPv4
-    cModule *mod = host->getSubmodule("routingTable");
-    return dynamic_cast<IIPv4RoutingTable *>(mod);
+    // KLUDGE: TODO: look deeper temporarily
+    IIPv4RoutingTable *rt = dynamic_cast<IIPv4RoutingTable *>(host->getSubmodule("routingTable"));
+    if (!rt) rt = dynamic_cast<IIPv4RoutingTable *>(host->getModuleByPath(".routingTable.ipv4RoutingTable"));
+    return rt;
 #else
     return NULL;
 #endif
@@ -403,8 +375,10 @@ IIPv4RoutingTable *AddressResolver::findRoutingTableOf(cModule *host)
 IPv6RoutingTable *AddressResolver::findRoutingTable6Of(cModule *host)
 {
 #ifdef WITH_IPv6
-    cModule *mod = host->getSubmodule("routingTable6");
-    return dynamic_cast<IPv6RoutingTable *>(mod);
+    // KLUDGE: TODO: look deeper temporarily
+    IPv6RoutingTable *rt = dynamic_cast<IPv6RoutingTable *>(host->getSubmodule("routingTable6"));
+    if (!rt) rt = dynamic_cast<IPv6RoutingTable *>(host->getModuleByPath(".routingTable.ipv6RoutingTable"));
+    return rt;
 #else
     return NULL;
 #endif

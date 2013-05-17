@@ -18,6 +18,7 @@
 #ifndef __IPv6CONTROLINFO_H
 #define __IPv6CONTROLINFO_H
 
+#include "INetworkProtocolControlInfo.h"
 #include "IPv6ControlInfo_m.h"
 
 class IPv6Datagram;
@@ -28,7 +29,7 @@ class IPv6ExtensionHeader;
  *
  * See the IPv6ControlInfo.msg file for more info.
  */
-class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
+class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkProtocolControlInfo
 {
   protected:
     IPv6Datagram *dgram;
@@ -96,6 +97,17 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base
      * Remove the first extension header and return it.
      */
     IPv6ExtensionHeader* removeFirstExtensionHeader();
+
+    virtual short getProtocol() const { return IPv6ControlInfo_Base::getProtocol(); }
+    virtual void setProtocol(short protocol) { IPv6ControlInfo_Base::setProtocol(protocol); }
+    virtual Address getSourceAddress() const { return Address(srcAddr_var); }
+    virtual void setSourceAddress(const Address & address)  { srcAddr_var = address.toIPv6(); }
+    virtual Address getDestinationAddress() const { return Address(destAddr_var); }
+    virtual void setDestinationAddress(const Address & address) { destAddr_var = address.toIPv6(); }
+    virtual int getInterfaceId() const { return IPv6ControlInfo_Base::getInterfaceId(); }
+    virtual void setInterfaceId(int interfaceId) { IPv6ControlInfo_Base::setInterfaceId(interfaceId); }
+    virtual short getHopLimit() const { return IPv6ControlInfo_Base::getHopLimit(); }
+    virtual void setHopLimit(short hopLimit) { IPv6ControlInfo_Base::setHopLimit(hopLimit); }
 };
 
 #endif

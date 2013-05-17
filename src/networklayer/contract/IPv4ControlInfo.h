@@ -18,6 +18,7 @@
 #ifndef __INET_IPv4CONTROLINFO_H
 #define __INET_IPv4CONTROLINFO_H
 
+#include "INetworkProtocolControlInfo.h"
 #include "IPv4ControlInfo_m.h"
 
 class IPv4Datagram;
@@ -27,7 +28,7 @@ class IPv4Datagram;
  *
  * See the IPv4ControlInfo.msg file for more info.
  */
-class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base
+class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base, public INetworkProtocolControlInfo
 {
   protected:
     IPv4Datagram *dgram;
@@ -66,6 +67,17 @@ class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base
     virtual void setOrigDatagram(IPv4Datagram *d);
     virtual IPv4Datagram *getOrigDatagram() const {return dgram;}
     virtual IPv4Datagram *removeOrigDatagram();
+
+    virtual short getProtocol() const { return IPv4ControlInfo_Base::getProtocol(); }
+    virtual void setProtocol(short protocol) { IPv4ControlInfo_Base::setProtocol(protocol); }
+    virtual Address getSourceAddress() const { return Address(srcAddr_var); }
+    virtual void setSourceAddress(const Address & address)  { srcAddr_var = address.toIPv4(); }
+    virtual Address getDestinationAddress() const { return Address(destAddr_var); }
+    virtual void setDestinationAddress(const Address & address) { destAddr_var = address.toIPv4(); }
+    virtual int getInterfaceId() const { return IPv4ControlInfo_Base::getInterfaceId(); }
+    virtual void setInterfaceId(int interfaceId) { IPv4ControlInfo_Base::setInterfaceId(interfaceId); }
+    virtual short getHopLimit() const { return getTimeToLive(); }
+    virtual void setHopLimit(short hopLimit) { setTimeToLive(hopLimit); }
 };
 
 #endif

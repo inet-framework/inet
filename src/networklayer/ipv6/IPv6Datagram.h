@@ -21,13 +21,14 @@
 
 #include <list>
 #include "INETDefs.h"
+#include "INetworkDatagram.h"
 #include "IPv6Datagram_m.h"
 
 /**
  * Represents an IPv6 datagram. More info in the IPv6Datagram.msg file
  * (and the documentation generated from it).
  */
-class INET_API IPv6Datagram : public IPv6Datagram_Base
+class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
 {
   protected:
     typedef std::vector<IPv6ExtensionHeader*> ExtensionHeaders;
@@ -124,8 +125,14 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base
      * Removes and returns the first extension header with the given type.
      */
     virtual IPv6ExtensionHeader* removeExtensionHeader(IPProtocolId extensionType);
+
+
+    virtual Address getSourceAddress() const { return Address(getSrcAddress()); }
+    virtual void setSourceAddress(const Address & address) { setSrcAddress(address.toIPv6()); }
+    virtual Address getDestinationAddress() const { return Address(getDestAddress()); }
+    virtual void setDestinationAddress(const Address & address) { setDestAddress(address.toIPv6()); }
+    virtual int getTransportProtocol() const {return IPv6Datagram_Base::getTransportProtocol();}
+    virtual void setTransportProtocol(int protocol) {IPv6Datagram_Base::setTransportProtocol(protocol);}
 };
 
 #endif
-
-

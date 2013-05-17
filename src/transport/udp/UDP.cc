@@ -26,6 +26,7 @@
 #include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
+#include "IAddressPolicy.h"
 
 #ifdef WITH_IPv4
 #include "ICMPAccess.h"
@@ -777,6 +778,24 @@ void UDP::sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, con
         emit(sentPkSignal, udpPacket);
         send(udpPacket, "ipv6Out");
     }
+    else
+    {
+        // send to IPv6
+        EV << "Sending app packet " << appData->getName() << endl;
+        IAddressPolicy * addressPolicy = destAddr.getAddressPolicy();
+        INetworkProtocolControlInfo *ipControlInfo = addressPolicy->createNetworkProtocolControlInfo();
+        ipControlInfo->setProtocol(IP_PROT_UDP);
+        ipControlInfo->setSourceAddress(srcAddr);
+        ipControlInfo->setDestinationAddress(destAddr);
+        ipControlInfo->setInterfaceId(interfaceId);
+        //ipControlInfo->setMulticastLoop(multicastLoop);
+        ipControlInfo->setHopLimit(ttl);
+        //ipControlInfo->setTrafficClass(tos);
+        udpPacket->setControlInfo(dynamic_cast<cObject *>(ipControlInfo));
+
+        emit(sentPkSignal, udpPacket);
+        send(udpPacket, "ipOut");
+    }
     numSent++;
 }
 
@@ -879,6 +898,8 @@ void UDP::addMulticastAddressToInterface(InterfaceEntry *ie, const Address& mult
         ie->ipv6Data()->assignAddress(multicastAddr.toIPv6(), false, SimTime::getMaxTime(), SimTime::getMaxTime());
 #endif
     }
+    else
+        multicastAddr.getAddressPolicy()->joinMulticastGroup(ie, multicastAddr);
 }
 
 void UDP::leaveMulticastGroups(SockDesc *sd, const std::vector<Address>& multicastAddresses)

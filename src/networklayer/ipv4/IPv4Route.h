@@ -22,16 +22,18 @@
 #include "INETDefs.h"
 
 #include "IPv4Address.h"
+#include "IRoute.h"
 
 class InterfaceEntry;
 class IIPv4RoutingTable;
+
 
 /**
  * IPv4 unicast route in IIPv4RoutingTable.
  *
  * @see IIPv4RoutingTable, IPv4RoutingTable
  */
-class INET_API IPv4Route : public cObject
+class INET_API IPv4Route : public cObject, public IRoute
 {
   public:
     /** Specifies where the route comes from */
@@ -73,9 +75,12 @@ class INET_API IPv4Route : public cObject
     IPv4Address netmask;  ///< Route mask
     IPv4Address gateway;  ///< Next hop
     InterfaceEntry *interfacePtr; ///< interface
-    RouteSource source;   ///< manual, routing prot, etc.
+    RouteSource sourceType;   ///< manual, routing prot, etc.
     unsigned int adminDist; ///< Cisco like administrative distance
     int metric;           ///< Metric ("cost" to reach the destination)
+    cObject *source;   ///< Object identifying the source
+    cObject *protocolData; ///< Routing Protocol specific data
+    IRoute *adapter;
 
   public:
     // field codes for changed()
@@ -91,9 +96,9 @@ class INET_API IPv4Route : public cObject
     void changed(int fieldCode);
 
   public:
-    IPv4Route() : rt(NULL), interfacePtr(NULL), source(MANUAL), adminDist(dUnknown),
-                  metric(0) {}
-    virtual ~IPv4Route() {}
+    IPv4Route() : rt(NULL), interfacePtr(NULL), sourceType(MANUAL), adminDist(dUnknown),
+                  metric(0), source(NULL), protocolData(NULL), adapter(NULL) {}
+    virtual ~IPv4Route();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 
@@ -112,7 +117,7 @@ class INET_API IPv4Route : public cObject
     virtual void setNetmask(IPv4Address _netmask)  { if (netmask != _netmask) {netmask = _netmask; changed(F_NETMASK);} }
     virtual void setGateway(IPv4Address _gateway)  { if (gateway != _gateway) {gateway = _gateway; changed(F_GATEWAY);} }
     virtual void setInterface(InterfaceEntry *_interfacePtr)  { if (interfacePtr != _interfacePtr) {interfacePtr = _interfacePtr; changed(F_IFACE);} }
-    virtual void setSource(RouteSource _source)  { if (source != _source) {source = _source; changed(F_SOURCE);} }
+    virtual void setSourceType(RouteSource _source)  { if (sourceType != _source) {sourceType = _source; changed(F_SOURCE);} }
     virtual void setAdminDist(unsigned int _adminDist)  { if (adminDist != _adminDist) { adminDist = _adminDist; changed(F_ADMINDIST);} }
     virtual void setMetric(int _metric)  { if (metric != _metric) {metric = _metric; changed(F_METRIC);} }
 
@@ -132,13 +137,32 @@ class INET_API IPv4Route : public cObject
     const char *getInterfaceName() const;
 
     /** Source of route. MANUAL (read from file), from routing protocol, etc */
-    RouteSource getSource() const {return source;}
+    RouteSource getSourceType() const {return sourceType;}
 
     /** Route source specific preference value */
     unsigned int getAdminDist() const  { return adminDist; }
 
     /** "Cost" to reach the destination */
     int getMetric() const {return metric;}
+
+    void setSource(cObject *_source) { source = _source; }
+    cObject *getSource() const { return source; }
+
+    cObject *getProtocolData() const { return protocolData; }
+    void setProtocolData(cObject *protocolData) { this->protocolData = protocolData; }
+
+    virtual IRoutingTable *getRoutingTableAsGeneric() const;
+    virtual void setEnabled(bool enabled) {/*TODO: setEnabled(enabled);*/}
+    virtual void setDestination(const Address& dest) {setDestination(dest.toIPv4());}
+    virtual void setPrefixLength(int len) {setNetmask(IPv4Address::makeNetmask(len));}
+    virtual void setNextHop(const Address& nextHop) {setGateway(nextHop.toIPv4());}  //TODO rename IPv4 method
+
+    virtual bool isEnabled() const {return true; /*TODO: isEnabled();*/}
+    virtual bool isExpired() const {return !isValid();}  //TODO rename IPv4 method
+    virtual Address getDestinationAsGeneric() const {return getDestination();}
+    virtual int getPrefixLength() const {return getNetmask().getNetmaskLength();}
+    virtual Address getNextHopAsGeneric() const {return getGateway();} //TODO rename IPv4 method
+
 };
 
 /**
@@ -163,38 +187,9 @@ class INET_API IPv4Route : public cObject
  *
  * @see IIPv4RoutingTable, IPv4RoutingTable
  */
-class INET_API IPv4MulticastRoute : public cObject
+class INET_API IPv4MulticastRoute : public cObject, public IMulticastRoute
 {
   public:
-    class InInterface
-    {
-      protected:
-        InterfaceEntry *ie;
-      public:
-        InInterface(InterfaceEntry *ie) : ie(ie) { ASSERT(ie); }
-        virtual ~InInterface() {}
-
-        InterfaceEntry *getInterface() const { return ie; }
-    };
-
-    class OutInterface
-    {
-      protected:
-        InterfaceEntry *ie;
-        bool _isLeaf;        // for TRPB support
-      public:
-        OutInterface(InterfaceEntry *ie, bool isLeaf = false) : ie(ie), _isLeaf(isLeaf) { ASSERT(ie); }
-        virtual ~OutInterface() {}
-
-        InterfaceEntry *getInterface() const { return ie; }
-        bool isLeaf() const { return _isLeaf; }
-
-        // to disable forwarding on this interface (e.g. pruned by PIM)
-        virtual bool isEnabled() { return true; }
-    };
-
-    typedef std::vector<OutInterface*> OutInterfaceVector;
-
     /** Specifies where the route comes from */
     enum RouteSource
     {
@@ -211,8 +206,10 @@ class INET_API IPv4MulticastRoute : public cObject
     IPv4Address group;             ///< Multicast group, if unspecified then matches any
     InInterface *inInterface;      ///< In interface (upstream)
     OutInterfaceVector outInterfaces; ///< Out interfaces (downstream)
-    RouteSource source;            ///< manual, routing prot, etc.
+    RouteSource sourceType;            ///< manual, routing prot, etc.
+    cObject *source;               ///< Object identifying the source
     int metric;                    ///< Metric ("cost" to reach the source)
+    IMulticastRoute *adapter;
 
   public:
     // field codes for changed()
@@ -227,7 +224,7 @@ class INET_API IPv4MulticastRoute : public cObject
     IPv4MulticastRoute& operator=(const IPv4MulticastRoute& obj);
 
   public:
-    IPv4MulticastRoute() : rt(NULL), inInterface(NULL), source(MANUAL), metric(0) {}
+    IPv4MulticastRoute() : rt(NULL), inInterface(NULL), sourceType(MANUAL), metric(0), adapter(NULL) {}
     virtual ~IPv4MulticastRoute();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
@@ -253,7 +250,7 @@ class INET_API IPv4MulticastRoute : public cObject
     virtual void addOutInterface(OutInterface *outInterface);
     virtual bool removeOutInterface(InterfaceEntry *ie);
     virtual void removeOutInterface(unsigned int i);
-    virtual void setSource(RouteSource _source)  { if (source != _source) {source = _source; changed(F_SOURCE);} }
+    virtual void setSourceType(RouteSource _source)  { if (sourceType != _source) {sourceType = _source; changed(F_SOURCE);} }
     virtual void setMetric(int _metric)  { if (metric != _metric) {metric = _metric; changed(F_METRIC);} }
 
     /** Source address prefix to match */
@@ -275,10 +272,25 @@ class INET_API IPv4MulticastRoute : public cObject
     OutInterface *getOutInterface(unsigned int k) const {return outInterfaces.at(k); }
 
     /** Source of route. MANUAL (read from file), from routing protocol, etc */
-    RouteSource getSource() const {return source;}
+    RouteSource getSourceType() const {return sourceType;}
 
     /** "Cost" to reach the destination */
     int getMetric() const {return metric;}
+
+    void setSource(cObject *_source) { source = _source; }
+    cObject *getSource() const { return source; }
+
+    virtual IRoutingTable *getRoutingTableAsGeneric() const;
+    virtual void setEnabled(bool enabled) {/*TODO: setEnabled(enabled);*/}
+    virtual void setOrigin(const Address& origin) {setOrigin(origin.toIPv4());}
+    virtual void setPrefixLength(int len) {setOriginNetmask(IPv4Address::makeNetmask(len));} //TODO inconsistent naming
+    virtual void setMulticastGroup(const Address& group) {setMulticastGroup(group.toIPv4());}
+
+    virtual bool isEnabled() const {return true; /*TODO: isEnabled();*/}
+    virtual bool isExpired() const {return !isValid();}  //TODO rename IPv4 method
+    virtual Address getOriginAsGeneric() const {return getOrigin();}
+    virtual int getPrefixLength() const {return getOriginNetmask().getNetmaskLength();} //TODO inconsistent naming
+    virtual Address getMulticastGroupAsGeneric() const {return getMulticastGroup();}
 };
 #endif // __INET_IPv4ROUTE_H
 

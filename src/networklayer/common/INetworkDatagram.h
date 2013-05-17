@@ -1,6 +1,5 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2012 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,26 +15,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifndef __INET_INETWORKDATAGRAM_H_
+#define __INET_INETWORKDATAGRAM_H_
 
-#ifndef __INET_IPV4ROUTINGTABLEACCESS_H
-#define __INET_IPV4ROUTINGTABLEACCESS_H
+#include "Address.h"
 
-//  Cleanup and rewrite: Andras Varga, 2004
-
-#include "INETDefs.h"
-
-#include "ModuleAccess.h"
-#include "IIPv4RoutingTable.h"
-
-
-/**
- * Gives access to the IIPv4RoutingTable.
- */
-class INET_API IPv4RoutingTableAccess : public ModuleAccess<IIPv4RoutingTable>
-{
-    public:
-        IPv4RoutingTableAccess() : ModuleAccess<IIPv4RoutingTable>("routingTable") {}
+class INetworkDatagram {
+  public:
+    virtual ~INetworkDatagram() { }
+    virtual Address getSourceAddress() const = 0;
+    virtual void setSourceAddress(const Address & address) = 0;
+    virtual Address getDestinationAddress() const = 0;
+    virtual void setDestinationAddress(const Address & address) = 0;
+    virtual int getTransportProtocol() const = 0;
+    virtual void setTransportProtocol(int protocol) = 0;
 };
 
 #endif
-

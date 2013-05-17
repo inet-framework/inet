@@ -1,6 +1,5 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2013 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -16,26 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "IPv6AddressPolicy.h"
 
-#ifndef __INET_IPV4ROUTINGTABLEACCESS_H
-#define __INET_IPV4ROUTINGTABLEACCESS_H
+IPv6AddressPolicy IPv6AddressPolicy::INSTANCE;
 
-//  Cleanup and rewrite: Andras Varga, 2004
-
-#include "INETDefs.h"
-
-#include "ModuleAccess.h"
-#include "IIPv4RoutingTable.h"
-
-
-/**
- * Gives access to the IIPv4RoutingTable.
- */
-class INET_API IPv4RoutingTableAccess : public ModuleAccess<IIPv4RoutingTable>
-{
-    public:
-        IPv4RoutingTableAccess() : ModuleAccess<IIPv4RoutingTable>("routingTable") {}
-};
-
-#endif
-
+const IPv6Address IPv6AddressPolicy::ALL_RIP_ROUTERS_MCAST("FF02::9");

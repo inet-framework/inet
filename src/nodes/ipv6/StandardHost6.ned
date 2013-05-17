@@ -97,8 +97,8 @@ module StandardHost6 extends NodeBase6
         networkLayer.transportOut++ --> sctp.from_ipv6 if numSctpApps>0;
 
         for i=0..numPingApps-1 {
-            networkLayer.pingOut++ --> pingApp[i].pingv6In;
-            networkLayer.pingIn++ <-- pingApp[i].pingv6Out;
+            networkLayer.pingOut++ --> pingApp[i].pingIn;
+            networkLayer.pingIn++ <-- pingApp[i].pingOut;
         }
 }
 

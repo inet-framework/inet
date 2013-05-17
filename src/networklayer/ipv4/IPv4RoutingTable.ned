@@ -18,6 +18,9 @@
 
 package inet.networklayer.ipv4;
 
+import inet.networklayer.contract.IRoutingTable;
+
+
 //
 // Stores the routing table. (Per-interface configuration is stored in
 // ~InterfaceTable.)
@@ -45,15 +48,14 @@ package inet.networklayer.ipv4;
 // @see ~InterfaceTable
 // @author: Jochen Reber, Andras Varga
 //
-simple IPv4RoutingTable
+simple IPv4RoutingTable like IRoutingTable
 {
     parameters:
+        @display("i=block/table");
         string routerId = default("auto"); // for routers, the router id using IPv4 address dotted
                           // notation; specify "auto" to select the highest
                           // interface address; should be left empty ("") for hosts
         bool IPForward = default(true);  // turns IP forwarding on/off
         bool forwardMulticast = default(false); // turns multicast forwarding on/off
         string routingFile = default("");  // routing table file name
-        @display("i=block/table");
 }
-

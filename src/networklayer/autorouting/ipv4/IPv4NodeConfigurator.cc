@@ -113,7 +113,7 @@ void IPv4NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
         if (interfaceEntry->isMulticast())
         {
             interfaceData->joinMulticastGroup(IPv4Address::ALL_HOSTS_MCAST);
-            if (routingTable->isIPForwardingEnabled())
+            if (routingTable->isForwardingEnabled())
                 interfaceData->joinMulticastGroup(IPv4Address::ALL_ROUTERS_MCAST);
         }
     }

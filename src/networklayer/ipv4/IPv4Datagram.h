@@ -20,13 +20,14 @@
 #define _IPv4DATAGRAM_H_
 
 #include "INETDefs.h"
+#include "INetworkDatagram.h"
 #include "IPv4Datagram_m.h"
 
 /**
  * Represents an IPv4 datagram. More info in the IPv4Datagram.msg file
  * (and the documentation generated from it).
  */
-class INET_API IPv4Datagram : public IPv4Datagram_Base
+class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
 {
   public:
     IPv4Datagram(const char *name = NULL, int kind = 0) : IPv4Datagram_Base(name, kind) {}
@@ -54,8 +55,13 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base
      * Sets bits 6-7 of the Type of Service; expects a value in the 0..3 range
      */
     virtual void setExplicitCongestionNotification(int ecn)  { setTypeOfService( (getTypeOfService() & 0x3f) | ((ecn & 0x3) << 6)); }
+
+    virtual Address getSourceAddress() const { return Address(getSrcAddress()); }
+    virtual void setSourceAddress(const Address & address) { setSrcAddress(address.toIPv4()); }
+    virtual Address getDestinationAddress() const { return Address(getDestAddress()); }
+    virtual void setDestinationAddress(const Address & address) { setDestAddress(address.toIPv4()); }
+    virtual int getTransportProtocol() const {return IPv4Datagram_Base::getTransportProtocol();}
+    virtual void setTransportProtocol(int protocol) {IPv4Datagram_Base::setTransportProtocol(protocol);}
 };
 
 #endif
-
-

@@ -1,5 +1,4 @@
 //
-// Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 // Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -16,26 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+package inet.networklayer.contract;
 
-#ifndef __INET_IPV4ROUTINGTABLEACCESS_H
-#define __INET_IPV4ROUTINGTABLEACCESS_H
-
-//  Cleanup and rewrite: Andras Varga, 2004
-
-#include "INETDefs.h"
-
-#include "ModuleAccess.h"
-#include "IIPv4RoutingTable.h"
-
-
-/**
- * Gives access to the IIPv4RoutingTable.
- */
-class INET_API IPv4RoutingTableAccess : public ModuleAccess<IIPv4RoutingTable>
+//
+// TODO:
+//
+moduleinterface IRoutingTable
 {
-    public:
-        IPv4RoutingTableAccess() : ModuleAccess<IIPv4RoutingTable>("routingTable") {}
-};
-
-#endif
-
+    parameters:
+        @display("i=block/table");
+}

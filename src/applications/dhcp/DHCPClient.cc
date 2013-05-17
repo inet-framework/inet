@@ -213,7 +213,7 @@ void DHCPClient::changeFSMState(CLIENT_STATE new_state)
             e->setNetmask(IPv4Address());
             e->setGateway(lease->gateway);
             e->setInterface(ie);
-            e->setSource(IPv4Route::MANUAL);
+            e->setSourceType(IPv4Route::MANUAL);
             irt->addRoute(e);
         }
         // update the routing table

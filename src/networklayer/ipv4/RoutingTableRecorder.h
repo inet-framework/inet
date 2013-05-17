@@ -19,32 +19,63 @@
 #define __ROUTINGTABLERECORDER_H
 
 #include "INETDefs.h"
+
+#if OMNETPP_VERSION >= 0x0500 && defined HAVE_CEVENTLOGLISTENER  /* cEventlogListener is only supported from 5.0 */
+
+#include <map>
 #include "IIPv4RoutingTable.h"
 #include "INotifiable.h"
+#include "IRoute.h"
 
 /**
- * Records routing table changes into a file.
+ * Records interface table and routing table changes into the eventlog.
   *
  * @see IPv4RoutingTable, IPv4Route
  */
-class INET_API RoutingTableRecorder : public cSimpleModule
+class INET_API RoutingTableRecorder : public cSimpleModule, public cIndexedEventlogManager::cEventlogListener
 {
-    friend class RoutingTableRecorderListener;
-  private:
-    FILE *routingLogFile;
+    friend class RoutingTableNotificationBoardListener;
+
+  protected:
+    struct EventLogEntryReference
+    {
+        eventnumber_t eventNumber;
+        int entryIndex;
+
+        EventLogEntryReference()
+        {
+            this->eventNumber = -1;
+            this->entryIndex = -1;
+        }
+
+        EventLogEntryReference(eventnumber_t eventNumber, int entryIndex)
+        {
+            this->eventNumber = eventNumber;
+            this->entryIndex = entryIndex;
+        }
+    };
+
+    long interfaceKey;
+    long routeKey;
+    std::map<InterfaceEntry *, long> interfaceEntryToKey;
+    std::map<IRoute *, long> routeToKey;
+
   public:
     RoutingTableRecorder();
     virtual ~RoutingTableRecorder();
+
   protected:
     virtual int numInitStages() const  {return 1;}
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *);
     virtual void hookListeners();
-    virtual void ensureRoutingLogFileOpen();
     virtual void receiveChangeNotification(NotificationBoard *nb, int category, const cObject *details);
-    virtual void recordInterfaceChange(cModule *host, const InterfaceEntry *ie, int category);
-    virtual void recordRouteChange(cModule *host, const IPv4Route *route, int category);
+    virtual void recordSnapshot();
+    virtual void recordIndex() {}
+    virtual void recordInterface(cModule *host, InterfaceEntry *ie, int category);
+    virtual void recordRoute(cModule *host, IRoute *route, int category);
 };
 
-#endif
+#endif /*OMNETPP_VERSION*/
 
+#endif

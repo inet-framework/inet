@@ -34,6 +34,8 @@ class PingPayload;
 /**
  * ICMP module.
  */
+// TODO: the word ping should not occur in ICMP code
+// TODO: move identifier, sequence number from PingPayload into ICMPControlInfo
 class INET_API ICMP : public cSimpleModule
 {
   protected:

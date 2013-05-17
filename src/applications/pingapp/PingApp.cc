@@ -26,6 +26,7 @@
 #include "IPv6ControlInfo.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
+#include "IAddressPolicy.h"
 
 using std::cout;
 
@@ -221,26 +222,15 @@ void PingApp::sendPingRequest()
 
 void PingApp::sendToICMP(cMessage *msg, const Address& destAddr, const Address& srcAddr, int hopLimit)
 {
-    if (destAddr.getType() == Address::IPv4)
-    {
-        // send to IPv4
-        IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-        ctrl->setSrcAddr(srcAddr.toIPv4());
-        ctrl->setDestAddr(destAddr.toIPv4());
-        ctrl->setTimeToLive(hopLimit);
-        msg->setControlInfo(ctrl);
-        send(msg, "pingOut");
-    }
-    else
-    {
-        // send to IPv6
-        IPv6ControlInfo *ctrl = new IPv6ControlInfo();
-        ctrl->setSrcAddr(srcAddr.toIPv6());
-        ctrl->setDestAddr(destAddr.toIPv6());
-        ctrl->setHopLimit(hopLimit);
-        msg->setControlInfo(ctrl);
-        send(msg, "pingv6Out");
-    }
+    IAddressPolicy * addressPolicy = destAddr.getAddressPolicy();
+    INetworkProtocolControlInfo * controlInfo = addressPolicy->createNetworkProtocolControlInfo();
+    controlInfo->setSourceAddress(srcAddr);
+    controlInfo->setDestinationAddress(destAddr);
+    controlInfo->setHopLimit(hopLimit);
+    // TODO: remove
+    controlInfo->setProtocol(1); // IP_PROT_ICMP);
+    msg->setControlInfo(dynamic_cast<cObject *>(controlInfo));
+    send(msg, "pingOut");
 }
 
 void PingApp::processPingResponse(PingPayload *msg)
@@ -266,22 +256,10 @@ void PingApp::processPingResponse(PingPayload *msg)
     }
 
     // get src, hopCount etc from packet, and print them
-    Address src, dest;
-    int msgHopCount = -1;
-    if (dynamic_cast<IPv4ControlInfo *>(msg->getControlInfo()) != NULL)
-    {
-        IPv4ControlInfo *ctrl = (IPv4ControlInfo *)msg->getControlInfo();
-        src = ctrl->getSrcAddr();
-        dest = ctrl->getDestAddr();
-        msgHopCount = ctrl->getTimeToLive();
-    }
-    else if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo()) != NULL)
-    {
-        IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->getControlInfo();
-        src = ctrl->getSrcAddr();
-        dest = ctrl->getDestAddr();
-        msgHopCount = ctrl->getHopLimit();
-    }
+    INetworkProtocolControlInfo *ctrl = check_and_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
+    Address src = ctrl->getSourceAddress();
+    Address dest = ctrl->getDestinationAddress();
+    int msgHopLimit = ctrl->getHopLimit();
 
     // calculate the RTT time by looking up the the send time of the packet
     // if the send time is no longer available (i.e. the packet is very old and the
@@ -294,7 +272,7 @@ void PingApp::processPingResponse(PingPayload *msg)
     {
         cout << getFullPath() << ": reply of " << std::dec << msg->getByteLength()
              << " bytes from " << src
-             << " icmp_seq=" << msg->getSeqNo() << " ttl=" << msgHopCount
+             << " icmp_seq=" << msg->getSeqNo() << " ttl=" << msgHopLimit
              << " time=" << (rtt * 1000) << " msec"
              << " (" << msg->getName() << ")" << endl;
     }
