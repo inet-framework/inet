@@ -21,10 +21,12 @@
 
 #include "NotifierConsts.h"
 #include "NotificationBoard.h"
-#include "IIPv4RoutingTable.h"
-#include "IPv4Route.h"
 #include "IInterfaceTable.h"
-#include "IPv4InterfaceData.h"
+#include "IRoutingTable.h"
+#include "IPv4RoutingTable.h"
+#include "IPv6RoutingTable.h"
+#include "GenericRoutingTable.h"
+#include "IPv4InterfaceData.h" // TODO: remove?
 #include "RoutingTableRecorder.h"
 
 
@@ -116,18 +118,32 @@ void RoutingTableRecorder::recordSnapshot()
     }
     for (int id = 0; id < simulation.getLastModuleId(); id++) {
         cModule* module = simulation.getModule(id);
-        IIPv4RoutingTable *rt = dynamic_cast<IIPv4RoutingTable *>(module);
+        IPv4RoutingTable *rt = dynamic_cast<IPv4RoutingTable *>(module);
         if (rt) {
+            // TODO: find out host correctly
             cModule *host = module->getParentModule();
             for (int i = 0; i < rt->getNumRoutes(); i++)
-                recordRoute(host, rt->getRoute(i)->asGeneric(), -1);
+                recordRoute(host, rt->getRoute(i), -1);
+        }
+        IPv6RoutingTable *rt6 = dynamic_cast<IPv6RoutingTable *>(module);
+        if (rt6) {
+            // TODO: find out host correctly
+            cModule *host = module->getParentModule();
+            for (int i = 0; i < rt6->getNumRoutes(); i++)
+                recordRoute(host, rt6->getRoute(i), -1);
+        }
+        GenericRoutingTable *generic = dynamic_cast<GenericRoutingTable *>(module);
+        if (generic) {
+            // TODO: find out host correctly
+            cModule *host = module->getParentModule();
+            for (int i = 0; i < generic->getNumRoutes(); i++)
+                recordRoute(host, generic->getRoute(i), -1);
         }
     }
 }
 
 void RoutingTableRecorder::recordInterface(cModule *host, InterfaceEntry *interface, int category)
 {
-    // Note: ie->getInterfaceTable() may be NULL (entry already removed from its table)
     cEnvir* envir = simulation.getEnvir();
     // moduleId, ifname, address
     std::stringstream content;
@@ -155,16 +171,12 @@ void RoutingTableRecorder::recordInterface(cModule *host, InterfaceEntry *interf
     }
 }
 
-// XXX
 void RoutingTableRecorder::recordRoute(cModule *host,  IRoute *route, int category)
 {
-    IRoutingTable *rt = route->getRoutingTable(); // may be NULL! (route already removed from its routing table)
     cEnvir* envir = simulation.getEnvir();
-    // moduleId, routerID, dest, dest netmask, nexthop
+    // moduleId, dest, dest netmask, nexthop
     std::stringstream content;
-    content << host->getId() << " " << (rt ? rt->getRouterId().str() : "*") << " ";
-    content << route->getDestination().str() << " " << route->getPrefixLength() << " ";
-    content << route->getNextHop().str();
+    content << host->getId() << " " << route->getDestinationAsGeneric().str() << " " << route->getPrefixLength() << " " << route->getNextHopAsGeneric().str();
     switch (category) {
         case NF_ROUTE_ADDED:
             envir->customCreatedEntry("RT", routeKey, content.str().c_str());
@@ -185,11 +197,6 @@ void RoutingTableRecorder::recordRoute(cModule *host,  IRoute *route, int catego
             throw cRuntimeError("Unexpected notification category %d", category);
     }
 }
-
-//TODO: routerID change
-//    // moduleId, routerID
-//    content << getParentModule()->getId() << " "; //XXX we assume routing table is direct child of the node compound module
-//    content << a.str();
 
 
 
@@ -360,4 +367,3 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
 
 
 #endif /*OMNETPP_VERSION*/
-
