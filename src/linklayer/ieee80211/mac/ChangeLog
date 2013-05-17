@@ -1,8 +1,9 @@
-2015-05-15  Alfonso Ariza - takeover from INETMANET
+2013-05-15  Alfonso Ariza - takeover from INETMANET
 
 	- fix: erroneous behaviour in Ieee802.11 mac (do not change 
 	backoff if the retry counter is 0)
 	- removed fixFSM parameter
+	- changed the default MTU size to 2304bytes for 802.11 MAC
 
 2013-01-30  ------ inet-2.1.0 released ------
 

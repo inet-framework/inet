@@ -61,9 +61,9 @@ Link 0
     router / eth0  on:nwLayer.ifOut\[0\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-02 IPv4:\{inet_addr:10.0.0.2/30.*\}
 Link 1
     router / eth1  on:nwLayer.ifOut\[1\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-03 IPv4:\{inet_addr:10.0.0.17/28.*\}
-    mobile\[0\] / wlan0  on:nwLayer.ifOut\[0\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-0B IPv4:\{inet_addr:10.0.0.18/28.*\}
-    mobile\[1\] / wlan0  on:nwLayer.ifOut\[0\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-0C IPv4:\{inet_addr:10.0.0.19/28.*\}
-    mobile\[2\] / wlan0  on:nwLayer.ifOut\[0\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-0D IPv4:\{inet_addr:10.0.0.20/28.*\}
+    mobile\[0\] / wlan0  on:nwLayer.ifOut\[0\]  MTU:2304 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-0B IPv4:\{inet_addr:10.0.0.18/28.*\}
+    mobile\[1\] / wlan0  on:nwLayer.ifOut\[0\]  MTU:2304 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-0C IPv4:\{inet_addr:10.0.0.19/28.*\}
+    mobile\[2\] / wlan0  on:nwLayer.ifOut\[0\]  MTU:2304 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-0D IPv4:\{inet_addr:10.0.0.20/28.*\}
     client\[0\] / eth0  on:nwLayer.ifOut\[0\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-0E IPv4:\{inet_addr:10.0.0.21/28.*\}
     client\[1\] / eth0  on:nwLayer.ifOut\[0\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-0F IPv4:\{inet_addr:10.0.0.22/28.*\}
     client\[2\] / eth0  on:nwLayer.ifOut\[0\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-10 IPv4:\{inet_addr:10.0.0.23/28.*\}

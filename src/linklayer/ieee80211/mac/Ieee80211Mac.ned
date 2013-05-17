@@ -85,7 +85,7 @@ simple Ieee80211Mac
         string wifiPreambleMode @enum("LONG","SHORT") = default("LONG"); // preamble mode; see IEEE 2007, 19.3.2
 
         double basicBitrate @unit("bps") = default(2e6bps);
-        int mtu @unit("B") = default(1500B);
+        int mtu @unit("B") = default(2304B);
         double slotTime @unit("s") = default(9us);
         int rtsThresholdBytes @unit("B") = default(2346B); // longer messages will be sent using RTS/CTS
         int retryLimit = default(-1); // maximum number of retries per message, -1 means default
