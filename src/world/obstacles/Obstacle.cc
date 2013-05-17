@@ -20,6 +20,9 @@
 #include <set>
 #include "world/obstacles/Obstacle.h"
 
+
+typedef std::pair<Coord, double> CoordFrac;
+
 Obstacle::Obstacle(std::string id, double attenuationPerWall, double attenuationPerMeter) :
     visualRepresentation(0),
     id(id),
@@ -86,6 +89,65 @@ namespace {
 
         return p1Frac;
     }
+
+    double segmentsIntersectAt(Coord p1From, Coord p1To, Coord p2From, Coord p2To, Coord &IntersectPoint) {
+        Coord p1Vec = p1To - p1From;
+        Coord p2Vec = p2To - p2From;
+        Coord p1p2 = p1From - p2From;
+
+        double D = (p1Vec.x * p2Vec.y - p1Vec.y * p2Vec.x);
+
+        if (abs(D) < 0.01)
+            return -1;
+
+        double p1Frac = (p2Vec.x * p1p2.y - p2Vec.y * p1p2.x) / D;
+        if (p1Frac < 0 || p1Frac > 1) return -1;
+
+        double p2Frac = (p1Vec.x * p1p2.y - p1Vec.y * p1p2.x) / D;
+        if (p2Frac < 0 || p2Frac > 1) return -1;
+
+        IntersectPoint.x = p1From.x + p1Frac * (p1Vec.x);
+        IntersectPoint.y = p1From.y + p1Frac * (p1Vec.y);
+        return p1Frac;
+    }
+
+
+    bool intersectionCoord(Coord p1From, Coord p1To, Coord p2From, Coord p2To, Coord IntersectPoint)
+    {
+        double ay_cy, ax_cx, px, py;
+        double dx_cx = p2To.x - p2From.x;
+        double dy_cy = p2To.y - p2From.y;
+        double bx_ax = p1To.x - p1From.x;
+        double by_ay = p1To.y - p1From.y;
+
+        double de = (bx_ax) * (dy_cy) - (by_ay) * (dx_cx);
+        //double tor = 1.0E-10;     //tolerance
+
+        double L1IntersectPos = 0;
+        double L2IntersectPos = 0;
+        if (abs(de)>0.01)
+        {
+        //if (de > -tor && de < tor) return false; //line is in parallel
+            ax_cx = p1From.x - p2From.x;
+            ay_cy = p1From.y - p2From.y;
+            double r = ((ay_cy) * (dx_cx) - (ax_cx) * (dy_cy)) / de;
+            double s = ((ay_cy) * (bx_ax) - (ax_cx) * (by_ay)) / de;
+            px = p1From.x + r * (bx_ax);
+            py = p1From.y + r * (by_ay);
+            IntersectPoint.x = px;  //return the intersection point
+            IntersectPoint.y = py;  //return the intersection position
+            L1IntersectPos = r;
+            L2IntersectPos = s;
+        }
+        else
+            return false;
+        if (L1IntersectPos < 0 || L1IntersectPos > 1)
+            return false;
+
+        if (L2IntersectPos < 0 || L2IntersectPos > 1)
+            return false;
+        return true;
+    }
 }
 
 double Obstacle::calculateReceivedPower(double pSend, double carrierFrequency, const Coord& senderPos, double senderAngle, const Coord& receiverPos, double receiverAngle) const {
@@ -119,6 +181,48 @@ double Obstacle::calculateReceivedPower(double pSend, double carrierFrequency, c
     // make sure every other pair of points marks transition through matter and void, respectively.
     if (senderInside) intersectAt.insert(0);
     if (receiverInside) intersectAt.insert(1);
+    if ((intersectAt.size() % 2) != 0)
+    {
+        // problems in a corner
+        std::vector<CoordFrac> intersectVector;
+        const Obstacle::Coords& shape = getShape();
+        Obstacle::Coords::const_iterator i = shape.begin();
+        Obstacle::Coords::const_iterator j = (shape.rbegin()+1).base();
+        for (; i != shape.end(); j = i++) {
+            Coord c1 = *i;
+            Coord c2 = *j;
+            Coord IntersectPoint;
+
+            double val = segmentsIntersectAt(senderPos, receiverPos, c1, c2,IntersectPoint);
+            if (val != -1) {
+                // search if is in the vector
+                bool inside = false;
+                for (unsigned int index = 0 ; index < intersectVector.size(); index++)
+                {
+                    if (intersectVector[index].first.distance(IntersectPoint) < 0.01)
+                    {
+                        inside = true;
+                        if (intersectVector[index].second < val)
+                        {
+                            intersectVector[index].first = IntersectPoint;
+                            intersectVector[index].second = val;
+                        }
+                        break;
+                    }
+                }
+                if (!inside)
+                    intersectVector.push_back(std::make_pair(IntersectPoint,val));
+            }
+
+        }
+        intersectAt.clear();
+        for (unsigned int index = 0 ; index < intersectVector.size(); index++)
+        {
+            intersectAt.insert(intersectVector[index].second);
+        }
+        if (senderInside) intersectAt.insert(0);
+        if (receiverInside) intersectAt.insert(1);
+    }
     ASSERT((intersectAt.size() % 2) == 0);
 
     // sum up distances in matter.
