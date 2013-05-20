@@ -21,7 +21,7 @@ package inet.networklayer.queue;
 
 //
 // Core-Stateless Fqir Queueing (CSFQ) queue with VLAN classifier and
-// token bucket filter (TBF) traffic shaper to be used in network interfaces.
+// token bucket filter (TBF) packet marker to be used in network interfaces.
 // Conforms to the OutputQueue interface.
 //
 simple CSFQVLANTBFQueue like OutputQueue
