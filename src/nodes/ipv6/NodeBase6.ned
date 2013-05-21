@@ -66,9 +66,9 @@ module NodeBase6
         // network layer
         networkLayer: IPv6NetworkLayer {
             parameters:
-                ipv6.routingTableModule = "routingTable6";
-                iptunneling.routingTableModule = "routingTable6";
-                neighbourDiscovery.routingTableModule = "routingTable6";
+                ipv6.routingTableModule = "^.^.routingTable";
+                iptunneling.routingTableModule = "^.^.routingTable";
+                neighbourDiscovery.routingTableModule = "^.^.routingTable";
                 @display("p=329,287;q=queue");
         }
 
