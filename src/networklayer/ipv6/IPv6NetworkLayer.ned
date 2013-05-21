@@ -21,6 +21,7 @@ package inet.networklayer.ipv6;
 
 import inet.networklayer.IIPv6Tunneling;
 import inet.networklayer.IxMIPv6Support;
+import inet.networklayer.contract.INetworkLayer;
 import inet.networklayer.icmpv6.ICMPv6;
 import inet.networklayer.icmpv6.IPv6NeighbourDiscovery;
 
@@ -31,7 +32,7 @@ import inet.networklayer.icmpv6.IPv6NeighbourDiscovery;
 // The module has ports to connect to a higher layer (TCP, UDP) and
 // several network interfaces.
 //
-module IPv6NetworkLayer
+module IPv6NetworkLayer like INetworkLayer
 {
     parameters:
         bool xMIPv6Support = default(false);
