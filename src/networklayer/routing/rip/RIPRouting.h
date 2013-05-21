@@ -130,12 +130,6 @@ struct RIPInterfaceEntry
  *
  * 2. There is no merging of subnet routes. RFC 2453 3.7 suggests that subnetted network routes should
  *    not be advertised outside the subnetted network.
- *
- * 3. RIPng requires the source address of RIP packets be a link-local address, because this address
- *    is saved in the routing table as the next-hop. Now the source address is left unspecified,
- *    therefore it is filled by the IPv6 module with the preferred address of the outgoing interface.
- *    Fix: either add a method to UDPSocket which allows to select the source address, or use
- *         multiple sockets, each bound to a link-local address.
  */
 class INET_API RIPRouting : public cSimpleModule, protected INotifiable, public ILifecycle
 {

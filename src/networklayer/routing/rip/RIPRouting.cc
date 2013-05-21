@@ -1038,12 +1038,13 @@ void RIPRouting::sendPacket(RIPPacket *packet, const Address &destAddr, int dest
 
     if (destAddr.isMulticast())
     {
-        // TODO RIPng: use a link-local source address
-        //             Is IPv6 address selection (RFC 3484) enough here?
-        if (mode == RIPng)
-            socket.setTimeToLive(255);
         UDPSocket::SendOptions options;
         options.outInterfaceId = destInterface->getInterfaceId();
+        if (mode == RIPng)
+        {
+            socket.setTimeToLive(255);
+            options.srcAddr = addressType->getLinkLocalAddress(destInterface);
+        }
         socket.sendTo(packet, destAddr, destPort, &options);
     }
     else
