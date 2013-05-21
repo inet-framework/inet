@@ -409,8 +409,17 @@ void IPv6InterfaceData::choosePreferredAddress()
 
     // sort addresses by scope and expiry time, then pick the first one
     std::sort(addresses.begin(), addresses.end(), addrLess);
-    preferredAddr = addresses[0].address;
-    preferredAddrExpiryTime = addresses[0].expiryTime;
+    // choose first unicast address
+    for (int i = 0; i < (int)addresses.size(); ++i)
+    {
+        if (addresses[i].address.isUnicast())
+        {
+            preferredAddr = addresses[i].address;
+            preferredAddrExpiryTime = addresses[i].expiryTime;
+            return;
+        }
+    }
+    preferredAddr = IPv6Address::UNSPECIFIED_ADDRESS;
 }
 
 void IPv6InterfaceData::addAdvPrefix(const AdvPrefix& advPrefix)
