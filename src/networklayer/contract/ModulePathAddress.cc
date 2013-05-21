@@ -20,15 +20,35 @@
 #include "InterfaceTableAccess.h"
 
 
+namespace {
+    // copied the cModule::getModuleByRelativePath(), but returns NULL instead throw cRuntimeError
+    cModule *getModuleByRelativePath(cModule *modp, const char *path)
+    {
+        // match components of the path
+        opp_string pathbuf(path);
+        char *token = strtok(pathbuf.buffer(), ".");
+        while (token && modp)
+        {
+            char *lbracket;
+            if ((lbracket=strchr(token,'[')) == NULL)
+                modp = modp->getSubmodule(token);  // no index given
+            else
+            {
+                if (token[strlen(token)-1] != ']')
+                    return NULL;
+                int index = atoi(lbracket+1);
+                *lbracket = '\0'; // cut off [index]
+                modp = modp->getSubmodule(token, index);
+            }
+            token = strtok(NULL,".");
+        }
+        return modp;  // NULL if not found
+    }
+}
+
 bool ModulePathAddress::tryParse(const char *addr)
 {
-    cModule * module = NULL;
-    try
-    {
-        module = simulation.getSystemModule()->getModuleByRelativePath(addr);
-    } catch (cRuntimeError e) {
-        return false;
-    }
+    cModule *module = getModuleByRelativePath(simulation.getSystemModule(), addr);
     if (module) {
         // accepts network interface modules only:
         if (isNetworkNode(module))
@@ -50,3 +70,4 @@ std::string ModulePathAddress::str() const
     std::string fullPath = module->getFullPath();
     return strchr(fullPath.c_str(), '.') + 1;
 }
+
