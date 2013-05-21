@@ -32,7 +32,7 @@ CSFQVLANTBFQueue::~CSFQVLANTBFQueue()
     for (int i=0; i<numQueues; i++)
     {
         delete queues[i];
-        cancelAndDelete(conformityTimer[i]);
+//        cancelAndDelete(conformityTimer[i]);
     }
 }
 
@@ -41,37 +41,76 @@ void CSFQVLANTBFQueue::initialize()
     PassiveQueueBase::initialize();
 
     // configuration
-    frameCapacity = par("frameCapacity");
+//    frameCapacity = par("frameCapacity");
     numQueues = par("numQueues");
-    bucketSize = par("bucketSize").longValue()*8LL; // in bit
-    meanRate = par("meanRate"); // in bps
-    mtu = par("mtu").longValue()*8; // in bit
-    peakRate = par("peakRate"); // in bps
 
     // state
     const char *classifierClass = par("classifierClass");
     classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
     classifier->setMaxNumQueues(numQueues);
+    const char *vids = par("vids");
+    classifier->initializeIndexTable(vids);
 
     outGate = gate("out");
 
-    // set subqueues
-    queues.assign(numQueues, (cQueue *)NULL);
-    meanBucketLength.assign(numQueues, bucketSize);
-    peakBucketLength.assign(numQueues, mtu);
-    lastTime.assign(numQueues, simTime());
-    conformityFlag.assign(numQueues, false);
-    conformityTimer.assign(numQueues, (cMessage *)NULL);
-    for (int i = 0; i < numQueues; i++)
-    {
-        char buf[32];
-        sprintf(buf, "queue-%d", i);
-        queues[i] = new cQueue(buf);
-        conformityTimer[i] = new cMessage("Conformity Timer", i);   // message kind carries a queue index
-    }
+    // FIFO queue
+    fifo = new cQueue("FIFO queue");
 
-    // state: RR scheduler
-    currentQueueIndex = 0;
+//    // subqueues
+//    queues.assign(numQueues, (cQueue *)NULL);
+//    meanBucketLength.assign(numQueues, bucketSize);
+//    peakBucketLength.assign(numQueues, mtu);
+//    lastTime.assign(numQueues, simTime());
+//    conformityFlag.assign(numQueues, false);
+//    conformityTimer.assign(numQueues, (cMessage *)NULL);
+//    for (int i = 0; i < numQueues; i++)
+//    {
+//        char buf[32];
+//        sprintf(buf, "queue-%d", i);
+//        queues[i] = new cQueue(buf);
+//        conformityTimer[i] = new cMessage("Conformity Timer", i);   // message kind carries a queue index
+//    }
+
+    // TBFs
+    // - bucket size
+    const char *bs = par("bucketSize");
+    bucketSize = cStringTokenizer(bs).asIntVector()*8LL;    // in bit
+    if (bucketSize.size() == 1)
+    {
+        int tmp = bucketSize[0];
+        bucketSize.resize(numQueues, tmp);
+    }
+    // - mean rate
+    const char *mr = par("meanRate");
+    meanRate = cStringTokenizer(mr).asDoubleVector();   // in bps
+    if (meanRate.size() == 1)
+    {
+        int tmp = meanRate[0];
+        meanRate.resize(numQueues, tmp);
+    }
+    // - MTU
+    const char *mt = par("mtu");
+    mtu = cStringTokenizer(mt).asIntVector()*8LL;   // in bit
+    if (mtu.size() == 1)
+    {
+        int tmp = mtu[0];
+        mtu.resize(numQueues, tmp);
+    }
+    // - peak rate
+    const char *pr = par("peakRate");
+    peakRate = cStringTokenizer(pr).asDoubleVector();   // in bps
+    if (peakRate.size() == 1)
+    {
+        int tmp = peakRate[0];
+        peakRate.resize(numQueues, tmp);
+    }
+    // - states
+    meanBucketLength = bucketSize;
+    peakBucketLength = mtu;
+    lastTime.assign(numQueues, simTime());
+
+//    // state: RR scheduler
+//    currentQueueIndex = 0;
 
     // statistic
     warmupFinished = false;
@@ -144,34 +183,36 @@ void CSFQVLANTBFQueue::handleMessage(cMessage *msg)
     }
 
     if (msg->isSelfMessage())
-    {   // Conformity Timer expires
-        int queueIndex = msg->getKind();    // message kind carries a queue index
-        conformityFlag[queueIndex] = true;
-
-        // update TBF status
-        int pktLength = (check_and_cast<cPacket *>(queues[queueIndex]->front()))->getBitLength();
-        bool conformance = isConformed(queueIndex, pktLength);
-// DEBUG
-        ASSERT(conformance == true);
-// DEBUG
-        if (packetRequested > 0)
-        {
-            cPacket *pkt = check_and_cast<cPacket *>(dequeue());
-            if (pkt != NULL)
-            {
-                packetRequested--;
-                if (warmupFinished == true)
-                {
-                    numBitsSent[currentQueueIndex] += pkt->getBitLength();
-                    numQueueSent[currentQueueIndex]++;
-                }
-                sendOut(pkt);
-            }
-            else
-            {
-                error("%s::handleMessage: Error in round-robin scheduling", getFullPath().c_str());
-            }
-        }
+    {   // Something wrong
+        error("%s: Received an unexpected self message", getFullPath().c_str());
+//        // Conformity Timer expires
+//        int queueIndex = msg->getKind();    // message kind carries a queue index
+//        conformityFlag[queueIndex] = true;
+//
+//        // update TBF status
+//        int pktLength = (check_and_cast<cPacket *>(queues[queueIndex]->front()))->getBitLength();
+//        bool conformance = isConformed(queueIndex, pktLength);
+//// DEBUG
+//        ASSERT(conformance == true);
+//// DEBUG
+//        if (packetRequested > 0)
+//        {
+//            cPacket *pkt = check_and_cast<cPacket *>(dequeue());
+//            if (pkt != NULL)
+//            {
+//                packetRequested--;
+//                if (warmupFinished == true)
+//                {
+//                    numBitsSent[currentQueueIndex] += pkt->getBitLength();
+//                    numQueueSent[currentQueueIndex]++;
+//                }
+//                sendOut(pkt);
+//            }
+//            else
+//            {
+//                error("%s::handleMessage: Error in round-robin scheduling", getFullPath().c_str());
+//            }
+//        }
     }
     else
     {   // a frame arrives

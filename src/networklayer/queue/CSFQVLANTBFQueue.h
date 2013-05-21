@@ -102,24 +102,25 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
 
   protected:
     // configuration
-    int frameCapacity;
     int numQueues;
-    long long bucketSize;    // in bit; note that the corresponding parameter in NED/INI is in byte.
-    double meanRate;
-    int mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
-    double peakRate;
+//    int frameCapacity;
+    LongLongVector bucketSize;  // in bit; note that the corresponding parameter in NED/INI is in byte.
+    DoubleVector meanRate;  // in bps
+    IntVector mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
+    DoubleVector peakRate;  // in bps
 
     // state
     IQoSClassifier *classifier;
-    QueueVector queues;
+    cQueue *fifo;   // common FIFO queue
+//    QueueVector queues;
     LongLongVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
     IntVector peakBucketLength;  // vector of the number of tokens (bits) in the bucket for peak rate/MTU control
     TimeVector lastTime; // vector of the last time the TBF used
     BoolVector conformityFlag;  // vector of flag to indicate whether the HOL frame conforms to TBF
     FlowStateVector flowState;  // vector of flowState
 
-    // state: RR scheduler
-    int currentQueueIndex;  // index of a queue whose HOL frame is scheduled for TX during the last RR scheduling
+//    // state: RR scheduler
+//    int currentQueueIndex;  // index of a queue whose HOL frame is scheduled for TX during the last RR scheduling
 
     // statistics
     bool warmupFinished;        ///< if true, start statistics gathering
@@ -129,8 +130,8 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
     IntVector numQueueUnshaped;
     IntVector numQueueSent;
 
-    // timer
-    MsgVector conformityTimer;  // vector of timer indicating that enough tokens will be available for the transmission of the HOL frame
+//    // timer
+//    MsgVector conformityTimer;  // vector of timer indicating that enough tokens will be available for the transmission of the HOL frame
 
     cGate *outGate;
 

@@ -27,16 +27,26 @@ package inet.networklayer.queue;
 simple CSFQVLANTBFQueue like OutputQueue
 {
     parameters:
-        int frameCapacity = default(100);  // per-subqueue capacity
         int numQueues = default(1);	// number of per-VLAN queues
-		string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier
-        int bucketSize @unit(byte) = default(3000B);
+        string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier
+        string vids = default("");	// VIDs used for initialization of index table
+//        int frameCapacity = default(100);  // per-subqueue capacity
+		//---------------------------------------------------------------------
+		// parameter values for TBFs in string
+		// - either provide one value for all TBFs or multiple values whose
+		// - number is equal to 'numQueues'
+		//---------------------------------------------------------------------
+		string bucketSize = default("3000");	// token bucket sizes in byte
+//        int bucketSize @unit(byte) = default(3000B);
 			// token bucket size; must be larger than mtu.
 			// note that with a finite line/peak rate,
 			// the maximum burst size is not equal to token bucket size.
-		double meanRate @unit(bps) = default(10Mbps);	// token generation rate
-		int mtu @unit(byte) = default(1522B);	// for Ethernet frame with header(18) + VLAN tag (4) + maximum payload (1500)
-		double peakRate @unit(bps) = default(100Mbps);	// must be larger than meanRate
+		string meanRate = default("10000000");	// token generation rates in bps
+//		double meanRate @unit(bps) = default(10Mbps);	// token generation rate
+		string mtu = default("1522");			// MTUs in byte; for Ethernet frame with header(18) + VLAN tag (4) + maximum payload (1500)
+//		int mtu @unit(byte) = default(1522B);	// for Ethernet frame with header(18) + VLAN tag (4) + maximum payload (1500)
+		string peakRate = default("100000000");	// peak rates in bps
+//		double peakRate @unit(bps) = default(100Mbps);	// must be larger than meanRate
         @display("i=block/queue");
     gates:
         input in;
