@@ -26,7 +26,7 @@
 
 Register_Class(BasicVLANClassifier);
 
-void BasicVLANClassifier::initializeIndexTable(const char *str)
+void BasicVLANClassifier::initialize(const char *str)
 {
     cStringTokenizer tokenizer(str);
     while (tokenizer.hasMoreTokens())
@@ -38,7 +38,7 @@ void BasicVLANClassifier::initializeIndexTable(const char *str)
         else
         {
             const char *token = tokenizer.nextToken();
-            indexTable[atof(vid)] = numQueues++;
+            indexTable[atof(token)] = numQueues++;
         }
     }
 }
