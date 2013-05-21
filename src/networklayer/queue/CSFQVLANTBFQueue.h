@@ -21,6 +21,7 @@
 #define __INET_CSFQVLANTBFQUEUE_H
 
 #include <omnetpp.h>
+#include <algorithm>
 #include <sstream>
 #include <vector>
 #include "PassiveQueueBase.h"
@@ -111,7 +112,7 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
 
     // state
     IQoSClassifier *classifier;
-    cQueue *fifo;   // common FIFO queue
+    cQueue fifo;   // common FIFO queue
 //    QueueVector queues;
     LongLongVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
     IntVector peakBucketLength;  // vector of the number of tokens (bits) in the bucket for peak rate/MTU control

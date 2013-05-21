@@ -29,11 +29,11 @@ CSFQVLANTBFQueue::CSFQVLANTBFQueue()
 
 CSFQVLANTBFQueue::~CSFQVLANTBFQueue()
 {
-    for (int i=0; i<numQueues; i++)
-    {
-        delete queues[i];
+    // for (int i=0; i<numQueues; i++)
+    // {
+    //     delete queues[i];
 //        cancelAndDelete(conformityTimer[i]);
-    }
+//    }
 }
 
 void CSFQVLANTBFQueue::initialize()
@@ -49,12 +49,12 @@ void CSFQVLANTBFQueue::initialize()
     classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
     classifier->setMaxNumQueues(numQueues);
     const char *vids = par("vids");
-    classifier->initializeIndexTable(vids);
+    classifier->initialize(vids);
 
     outGate = gate("out");
 
     // FIFO queue
-    fifo = new cQueue("FIFO queue");
+    fifo.setName("FIFO queue");
 
 //    // subqueues
 //    queues.assign(numQueues, (cQueue *)NULL);
@@ -74,7 +74,9 @@ void CSFQVLANTBFQueue::initialize()
     // TBFs
     // - bucket size
     const char *bs = par("bucketSize");
-    bucketSize = cStringTokenizer(bs).asIntVector()*8LL;    // in bit
+    std::vector<int> v_bs = cStringTokenizer(bs).asIntVector();
+    bucketSize.assign(v_bs.begin(), v_bs.end());
+    std::transform(bucketSize.begin(), bucketSize.end(), bucketSize.begin(), std::bind1st(std::multiplies<long long>(), 8)); // convert bytes to bits
     if (bucketSize.size() == 1)
     {
         int tmp = bucketSize[0];
@@ -82,7 +84,8 @@ void CSFQVLANTBFQueue::initialize()
     }
     // - mean rate
     const char *mr = par("meanRate");
-    meanRate = cStringTokenizer(mr).asDoubleVector();   // in bps
+    std::vector<double> v_mr = cStringTokenizer(mr).asDoubleVector();
+    meanRate.assign(v_mr.begin(), v_mr.end());
     if (meanRate.size() == 1)
     {
         int tmp = meanRate[0];
@@ -90,7 +93,9 @@ void CSFQVLANTBFQueue::initialize()
     }
     // - MTU
     const char *mt = par("mtu");
-    mtu = cStringTokenizer(mt).asIntVector()*8LL;   // in bit
+    std::vector<int> v_mt = cStringTokenizer(mt).asIntVector();
+    mtu.assign(v_mt.begin(), v_mt.end());
+    std::transform(mtu.begin(), mtu.end(), mtu.begin(), std::bind1st(std::multiplies<long long>(), 8)); // convert bytes to bits    
     if (mtu.size() == 1)
     {
         int tmp = mtu[0];
@@ -98,7 +103,8 @@ void CSFQVLANTBFQueue::initialize()
     }
     // - peak rate
     const char *pr = par("peakRate");
-    peakRate = cStringTokenizer(pr).asDoubleVector();   // in bps
+    std::vector<double> v_pr = cStringTokenizer(pr).asDoubleVector();
+    peakRate.assign(v_pr.begin(), v_pr.end());
     if (peakRate.size() == 1)
     {
         int tmp = peakRate[0];
@@ -226,43 +232,27 @@ void CSFQVLANTBFQueue::handleMessage(cMessage *msg)
 // DEBUG
         ASSERT(pktLength > 0);
 // DEBUG
-        if (queue->isEmpty())
+        // if (queue->isEmpty())
+        // {
+        if (isConformed(queueIndex, pktLength))
         {
-            if (isConformed(queueIndex, pktLength))
+            if (warmupFinished == true)
             {
+                numQueueUnshaped[queueIndex]++;
+            }
+            if (packetRequested > 0)
+            {
+                packetRequested--;
                 if (warmupFinished == true)
                 {
-                    numQueueUnshaped[queueIndex]++;
+                    numBitsSent[queueIndex] += pktLength;
+                    numQueueSent[queueIndex]++;
                 }
-                if (packetRequested > 0)
-                {
-                    packetRequested--;
-                    if (warmupFinished == true)
-                    {
-                        numBitsSent[queueIndex] += pktLength;
-                        numQueueSent[queueIndex]++;
-                    }
-                    currentQueueIndex = queueIndex;
-                    sendOut(msg);
-                }
-                else
-                {
-                    bool dropped = enqueue(msg);
-                    if (dropped)
-                    {
-                        if (warmupFinished == true)
-                        {
-                            numQueueDropped[queueIndex]++;
-                        }
-                    }
-                    else
-                    {
-                        conformityFlag[queueIndex] = true;
-                    }
-                }
+                currentQueueIndex = queueIndex;
+                sendOut(msg);
             }
             else
-            {   // frame is not conformed
+            {
                 bool dropped = enqueue(msg);
                 if (dropped)
                 {
@@ -273,13 +263,12 @@ void CSFQVLANTBFQueue::handleMessage(cMessage *msg)
                 }
                 else
                 {
-                    triggerConformityTimer(queueIndex, pktLength);
-                    conformityFlag[queueIndex] = false;
+                    conformityFlag[queueIndex] = true;
                 }
             }
         }
         else
-        {   // queue is not empty
+        {   // frame is not conformed
             bool dropped = enqueue(msg);
             if (dropped)
             {
@@ -288,7 +277,24 @@ void CSFQVLANTBFQueue::handleMessage(cMessage *msg)
                     numQueueDropped[queueIndex]++;
                 }
             }
+            else
+            {
+                triggerConformityTimer(queueIndex, pktLength);
+                conformityFlag[queueIndex] = false;
+            }
         }
+        // }
+        // else
+        // {   // queue is not empty
+        //     bool dropped = enqueue(msg);
+        //     if (dropped)
+        //     {
+        //         if (warmupFinished == true)
+        //         {
+        //             numQueueDropped[queueIndex]++;
+        //         }
+        //     }
+        // }
 
         if (ev.isGUI())
         {
