@@ -69,8 +69,8 @@ void GPSR::initialize(int stage)
         notificationBoard = NotificationBoardAccess().get(this);
         interfaceTable = InterfaceTableAccess().get(this);
         mobility = check_and_cast<IMobility *>(findModuleWhereverInNode("mobility", this));
-        routingTable = check_and_cast<IRoutingTable *>(findModuleWhereverInNode(par("routingTableModule"), this));
-        networkProtocol = check_and_cast<INetfilter *>(findModuleWhereverInNode(par("networkProtocolModule"), this));
+        routingTable = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
+        networkProtocol = check_and_cast<INetfilter *>(getModuleByPath(par("networkProtocolModule")));
         // internal
         beaconTimer = new cMessage("BeaconTimer");
         purgeNeighborsTimer = new cMessage("PurgeNeighborsTimer");

@@ -485,7 +485,7 @@ IIPv4RoutingTable *AddressResolver::findRoutingTableOf(cModule *host)
 #ifdef WITH_IPv4
     // KLUDGE: TODO: look deeper temporarily
     IIPv4RoutingTable *rt = dynamic_cast<IIPv4RoutingTable *>(host->getSubmodule("routingTable"));
-    if (!rt) rt = dynamic_cast<IIPv4RoutingTable *>(host->getModuleByPath(".routingTable.ipv4RoutingTable"));
+    if (!rt) rt = dynamic_cast<IIPv4RoutingTable *>(host->getModuleByPath(".routingTable.ipv4"));
     return rt;
 #else
     return NULL;
@@ -497,7 +497,7 @@ IPv6RoutingTable *AddressResolver::findRoutingTable6Of(cModule *host)
 #ifdef WITH_IPv6
     // KLUDGE: TODO: look deeper temporarily
     IPv6RoutingTable *rt = dynamic_cast<IPv6RoutingTable *>(host->getSubmodule("routingTable6"));
-    if (!rt) rt = dynamic_cast<IPv6RoutingTable *>(host->getModuleByPath(".routingTable.ipv6RoutingTable"));
+    if (!rt) rt = dynamic_cast<IPv6RoutingTable *>(host->getModuleByPath(".routingTable.ipv6"));
     return rt;
 #else
     return NULL;

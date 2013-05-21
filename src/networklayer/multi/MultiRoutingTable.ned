@@ -23,7 +23,7 @@ import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.networklayer.ipv6.IPv6RoutingTable;
 
 //
-// TODO
+// This module supports multiple different routing tables simultaneously.
 //
 module MultiRoutingTable like IRoutingTable
 {
@@ -34,14 +34,13 @@ module MultiRoutingTable like IRoutingTable
         bool enableGeneric = default(true);
 
     submodules:
-        // TODO: simplify names to ipv4, ipv6, generic once looking up modules support paths
-        ipv4RoutingTable: IPv4RoutingTable if enableIPv4 {
-            @display("p=100,50;is=s");
+        ipv4: IPv4RoutingTable if enableIPv4 {
+            @display("p=50,50;is=s");
         }
-        ipv6RoutingTable: IPv6RoutingTable if enableIPv6 {
-            @display("p=100,100;is=s");
+        ipv6: IPv6RoutingTable if enableIPv6 {
+            @display("p=50,100;is=s");
         }
-        genericRoutingTable: GenericRoutingTable if enableGeneric {
-            @display("p=100,150;is=s");
+        generic: GenericRoutingTable if enableGeneric {
+            @display("p=50,150;is=s");
         }
 }

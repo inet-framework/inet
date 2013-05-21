@@ -55,7 +55,7 @@ void IPv6::initialize(int stage)
         QueueBase::initialize();
 
         ift = InterfaceTableAccess().get();
-        rt = check_and_cast<IPv6RoutingTable *>(findModuleWhereverInNode(par("routingTableModule"), this));
+        rt = check_and_cast<IPv6RoutingTable *>(getModuleByPath(par("routingTableModule")));
         nd = IPv6NeighbourDiscoveryAccess().get();
         icmp = ICMPv6Access().get();
         tunneling = IPv6TunnelingAccess().get();

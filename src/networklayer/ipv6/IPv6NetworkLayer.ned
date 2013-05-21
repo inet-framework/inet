@@ -35,6 +35,7 @@ module IPv6NetworkLayer
 {
     parameters:
         bool xMIPv6Support = default(false);
+        *.routingTableModule = default("^.^.routingTable");
         @display("i=block/fork");
     gates:
         input ifIn[] @labels(INetworkDatagram);

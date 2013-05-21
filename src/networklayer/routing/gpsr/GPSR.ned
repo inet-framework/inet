@@ -40,7 +40,7 @@ simple GPSR like IGPSR
         @display("i=block/routing");
 
         // context parameters
-        string routingTableModule = default("routingTable");
+        string routingTableModule = default("^.routingTable");
         string networkProtocolModule = default("ip");
 
         // gpsr parameters
@@ -62,12 +62,12 @@ module MultiGPSR like IGPSR
         bool enableIPv4 = default(true);
         bool enableIPv6 = default(true);
         bool enableGeneric = default(true);
-        ipv4GPSR.routingTableModule = default("ipv4RoutingTable");
-        ipv4GPSR.networkProtocolModule = default("ip");
-        ipv6GPSR.routingTableModule = default("ipv6RoutingTable");
-        ipv6GPSR.networkProtocolModule = default("ipv6");
-        genericGPSR.routingTableModule = default("genericRoutingTable");
-        genericGPSR.networkProtocolModule = default("gnp");
+        ipv4.routingTableModule = default("^.^.routingTable.ipv4");
+        ipv4.networkProtocolModule = default("^.^.networkLayer.ip");
+        ipv6.routingTableModule = default("^.^.routingTable.ipv6");
+        ipv6.networkProtocolModule = default("^.^.networkLayer.ipv6.ipv6");
+        generic.routingTableModule = default("^.^.routingTable.generic");
+        generic.networkProtocolModule = default("^.^.networkLayer.generic.gnp");
 
     gates:
         input ipIn;
@@ -75,13 +75,13 @@ module MultiGPSR like IGPSR
 
     submodules:
         // TODO: simplify names to ipv4, ipv6, generic once looking up modules support paths
-        ipv4GPSR: GPSR if enableIPv4 {
+        ipv4: GPSR if enableIPv4 {
             @display("p=100,100");
         }
-        ipv6GPSR: GPSR if enableIPv6 {
+        ipv6: GPSR if enableIPv6 {
             @display("p=200,100");
         }
-        genericGPSR: GPSR if enableGeneric {
+        generic: GPSR if enableGeneric {
             @display("p=300,100");
         }
         multiplexer: NetworkDatagramMultiplexer {
@@ -91,10 +91,10 @@ module MultiGPSR like IGPSR
     connections allowunconnected:
         multiplexer.upperOut --> ipOut;
         ipIn --> multiplexer.upperIn;
-        multiplexer.lowerOut++ --> ipv4GPSR.ipIn if enableIPv4;
-        ipv4GPSR.ipOut --> multiplexer.lowerIn++ if enableIPv4;
-        multiplexer.lowerOut++ --> ipv6GPSR.ipIn if enableIPv6;
-        ipv6GPSR.ipOut --> multiplexer.lowerIn++ if enableIPv6;
-        multiplexer.lowerOut++ --> genericGPSR.ipIn if enableGeneric;
-        genericGPSR.ipOut --> multiplexer.lowerIn++ if enableGeneric;
+        multiplexer.lowerOut++ --> ipv4.ipIn if enableIPv4;
+        ipv4.ipOut --> multiplexer.lowerIn++ if enableIPv4;
+        multiplexer.lowerOut++ --> ipv6.ipIn if enableIPv6;
+        ipv6.ipOut --> multiplexer.lowerIn++ if enableIPv6;
+        multiplexer.lowerOut++ --> generic.ipIn if enableGeneric;
+        generic.ipOut --> multiplexer.lowerIn++ if enableGeneric;
 }

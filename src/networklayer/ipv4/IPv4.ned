@@ -84,7 +84,7 @@ package inet.networklayer.ipv4;
 simple IPv4
 {
     parameters:
-        string routingTableModule = default("routingTable");
+        string routingTableModule;
         double procDelay @unit("s") = default(0s);
         int timeToLive = default(32);
         int multicastTimeToLive = default(32);

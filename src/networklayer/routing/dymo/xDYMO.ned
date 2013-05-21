@@ -45,8 +45,8 @@ simple xDYMO like IDYMO
         @display("i=block/routing");
 
         // context parameters
-        string routingTableModule = default("routingTable");
-        string networkProtocolModule = default("ip");
+        string routingTableModule = default("^.routingTable");
+        string networkProtocolModule = default("^.networkLayer.ip");
 
         // 1. DYMO parameter group
         string clientAddresses = default("10.10.0.0/24 10.20.0.0"); // CLIENT_ADDRESSES
@@ -93,12 +93,12 @@ module MultiDYMO like IDYMO
         bool enableIPv4 = default(true);
         bool enableIPv6 = default(true);
         bool enableGeneric = default(true);
-        ipv4DYMO.routingTableModule = default("ipv4RoutingTable");
-        ipv4DYMO.networkProtocolModule = default("ip");
-        ipv6DYMO.routingTableModule = default("ipv6RoutingTable");
-        ipv6DYMO.networkProtocolModule = default("ipv6");
-        genericDYMO.routingTableModule = default("genericRoutingTable");
-        genericDYMO.networkProtocolModule = default("gnp");
+        ipv4.routingTableModule = default("^.^.routingTable.ipv4");
+        ipv4.networkProtocolModule = default("^.^.networkLayer.ipv4.ip");
+        ipv6.routingTableModule = default("^.^.routingTable.ipv6");
+        ipv6.networkProtocolModule = default("^.^.networkLayer.ipv6.ipv6");
+        generic.routingTableModule = default("^.^.routingTable.generic");
+        generic.networkProtocolModule = default("^.^.networkLayer.generic.gnp");
 
     gates:
         input ipIn;
@@ -106,13 +106,13 @@ module MultiDYMO like IDYMO
 
     submodules:
         // TODO: simplify names to ipv4, ipv6, generic once looking up modules support paths
-        ipv4DYMO: xDYMO if enableIPv4 {
+        ipv4: xDYMO if enableIPv4 {
             @display("p=100,100");
         }
-        ipv6DYMO: xDYMO if enableIPv6 {
+        ipv6: xDYMO if enableIPv6 {
             @display("p=200,100");
         }
-        genericDYMO: xDYMO if enableGeneric {
+        generic: xDYMO if enableGeneric {
             @display("p=300,100");
         }
         multiplexer: NetworkDatagramMultiplexer {
@@ -122,10 +122,10 @@ module MultiDYMO like IDYMO
     connections allowunconnected:
         multiplexer.upperOut --> ipOut;
         ipIn --> multiplexer.upperIn;
-        multiplexer.lowerOut++ --> ipv4DYMO.ipIn if enableIPv4;
-        ipv4DYMO.ipOut --> multiplexer.lowerIn++ if enableIPv4;
-        multiplexer.lowerOut++ --> ipv6DYMO.ipIn if enableIPv6;
-        ipv6DYMO.ipOut --> multiplexer.lowerIn++ if enableIPv6;
-        multiplexer.lowerOut++ --> genericDYMO.ipIn if enableGeneric;
-        genericDYMO.ipOut --> multiplexer.lowerIn++ if enableGeneric;
+        multiplexer.lowerOut++ --> ipv4.ipIn if enableIPv4;
+        ipv4.ipOut --> multiplexer.lowerIn++ if enableIPv4;
+        multiplexer.lowerOut++ --> ipv6.ipIn if enableIPv6;
+        ipv6.ipOut --> multiplexer.lowerIn++ if enableIPv6;
+        multiplexer.lowerOut++ --> generic.ipIn if enableGeneric;
+        generic.ipOut --> multiplexer.lowerIn++ if enableGeneric;
 }

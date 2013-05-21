@@ -37,6 +37,7 @@ module IPv4NetworkLayer like INetworkLayer
     parameters:
         bool proxyARP = default(true);
         string igmpType = default("IGMPv2");
+        *.routingTableModule = default("^.^.routingTable");
         @display("i=block/fork");
     gates:
         input ifIn[] @labels(INetworkDatagram);

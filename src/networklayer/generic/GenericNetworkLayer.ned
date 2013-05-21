@@ -27,6 +27,7 @@ import inet.networklayer.contract.INetworkLayer;
 module GenericNetworkLayer like INetworkLayer
 {
     parameters:
+        *.routingTableModule = default("^.^.routingTable");
         @display("i=block/fork");
     gates:
         input ifIn[] @labels(INetworkDatagram);
