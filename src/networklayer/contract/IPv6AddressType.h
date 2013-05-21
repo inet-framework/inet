@@ -38,6 +38,7 @@ class INET_API IPv6AddressType : public IAddressType
         virtual Address getLinkLocalManetRoutersMulticastAddress() const { return IPv6Address::LL_MANET_ROUTERS; }
         virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ALL_RIP_ROUTERS_MCAST; };
         virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const { return new IPv6ControlInfo(); }
+        virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const;
 };
 
 #endif

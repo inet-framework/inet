@@ -16,7 +16,13 @@
 //
 
 #include "IPv6AddressType.h"
+#include "IPv6InterfaceData.h"
 
 IPv6AddressType IPv6AddressType::INSTANCE;
 
 const IPv6Address IPv6AddressType::ALL_RIP_ROUTERS_MCAST("FF02::9");
+
+Address IPv6AddressType::getLinkLocalAddress(const InterfaceEntry *ie) const
+{
+    return ie->ipv6Data() ? ie->ipv6Data()->getLinkLocalAddress() : IPv6Address::UNSPECIFIED_ADDRESS;
+}

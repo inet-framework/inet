@@ -38,6 +38,7 @@ class INET_API IPv4AddressType : public IAddressType
         virtual Address getLinkLocalManetRoutersMulticastAddress() const { return IPv4Address::LL_MANET_ROUTERS; }
         virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ALL_RIP_ROUTERS_MCAST; }
         virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const { return new IPv4ControlInfo(); }
+        virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return IPv4Address::UNSPECIFIED_ADDRESS; }
 };
 
 #endif

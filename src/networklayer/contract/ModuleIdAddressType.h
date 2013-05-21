@@ -37,6 +37,7 @@ class INET_API ModuleIdAddressType : public IAddressType
         virtual Address getLinkLocalManetRoutersMulticastAddress() const { return ModuleIdAddress(-109); } // TODO: constant
         virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ModuleIdAddress(-9); } // TODO: constant
         virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const { return new GenericNetworkProtocolControlInfo(); }
+        virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return ModuleIdAddress(); } // TODO constant
 };
 
 #endif

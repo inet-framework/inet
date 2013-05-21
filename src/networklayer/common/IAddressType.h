@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 #include "Address.h"
 #include "INetworkProtocolControlInfo.h"
+#include "InterfaceEntry.h"
 
 /**
  * This class provides the abstract interface for different address types.
@@ -36,6 +37,10 @@ class INET_API IAddressType
         virtual Address getLinkLocalManetRoutersMulticastAddress() const = 0;
         virtual Address getLinkLocalRIPRoutersMulticastAddress() const = 0;
         virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const = 0; // TODO: move, where?
+        /**
+         * Returns the first valid link-local address of the interface, or UNSPECIFIED_ADDRESS if there's none.
+         */
+        virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const = 0;
 };
 
 #endif
