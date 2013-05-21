@@ -41,7 +41,7 @@ simple GPSR like IGPSR
 
         // context parameters
         string routingTableModule = default("^.routingTable");
-        string networkProtocolModule = default("ip");
+        string networkProtocolModule = default("^.networkLayer.ip");
 
         // gpsr parameters
         int planarizationMode @enum(0,1) = default(0); // 0 for GG, 1 for RNG
@@ -63,7 +63,7 @@ module MultiGPSR like IGPSR
         bool enableIPv6 = default(true);
         bool enableGeneric = default(true);
         ipv4.routingTableModule = default("^.^.routingTable.ipv4");
-        ipv4.networkProtocolModule = default("^.^.networkLayer.ip");
+        ipv4.networkProtocolModule = default("^.^.networkLayer.ipv4.ip");
         ipv6.routingTableModule = default("^.^.routingTable.ipv6");
         ipv6.networkProtocolModule = default("^.^.networkLayer.ipv6.ipv6");
         generic.routingTableModule = default("^.^.routingTable.generic");
