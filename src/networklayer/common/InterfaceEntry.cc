@@ -269,6 +269,12 @@ void InterfaceEntry::joinMulticastGroup(const Address & address) const {
             ipv4Data()->joinMulticastGroup(address.toIPv4());
             break;
 #endif
+#ifdef WITH_IPv6
+        case Address::IPv6:
+            // TODO
+            // ipv6Data()->joinMulticastGroup(address.toIPv6());
+            break;
+#endif
         case Address::MAC:
         case Address::MODULEID:
         case Address::MODULEPATH:
