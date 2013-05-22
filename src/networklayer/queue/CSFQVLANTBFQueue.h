@@ -104,7 +104,7 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
   protected:
     // configuration
     int numQueues;
-//    int frameCapacity;
+    int frameCapacity;
     LongLongVector bucketSize;  // in bit; note that the corresponding parameter in NED/INI is in byte.
     DoubleVector meanRate;  // in bps
     IntVector mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.

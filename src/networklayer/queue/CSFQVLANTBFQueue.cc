@@ -41,7 +41,7 @@ void CSFQVLANTBFQueue::initialize()
     PassiveQueueBase::initialize();
 
     // configuration
-//    frameCapacity = par("frameCapacity");
+    frameCapacity = par("frameCapacity");
     numQueues = par("numQueues");
 
     // state
@@ -55,21 +55,6 @@ void CSFQVLANTBFQueue::initialize()
 
     // FIFO queue
     fifo.setName("FIFO queue");
-
-//    // subqueues
-//    queues.assign(numQueues, (cQueue *)NULL);
-//    meanBucketLength.assign(numQueues, bucketSize);
-//    peakBucketLength.assign(numQueues, mtu);
-//    lastTime.assign(numQueues, simTime());
-//    conformityFlag.assign(numQueues, false);
-//    conformityTimer.assign(numQueues, (cMessage *)NULL);
-//    for (int i = 0; i < numQueues; i++)
-//    {
-//        char buf[32];
-//        sprintf(buf, "queue-%d", i);
-//        queues[i] = new cQueue(buf);
-//        conformityTimer[i] = new cMessage("Conformity Timer", i);   // message kind carries a queue index
-//    }
 
     // TBFs
     // - bucket size
