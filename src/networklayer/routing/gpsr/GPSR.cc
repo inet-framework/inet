@@ -41,9 +41,16 @@ PositionTable GPSR::globalPositionTable;
 
 GPSR::GPSR()
 {
+    host = NULL;
+    nodeStatus = NULL;
     notificationBoard = NULL;
+    mobility = NULL;
     addressType = NULL;
+    interfaceTable = NULL;
+    routingTable = NULL;
+    networkProtocol = NULL;
     beaconTimer = NULL;
+    purgeNeighborsTimer = NULL;
 }
 
 GPSR::~GPSR()
@@ -82,6 +89,7 @@ void GPSR::initialize(int stage)
         socket.registerProtocol(IP_PROT_MANET);
     }
     else if (stage == 4) {
+        globalPositionTable.clear();
         notificationBoard->subscribe(this, NF_LINK_BREAK);
         addressType = getSelfAddress().getAddressType();
         networkProtocol->registerHook(0, this);
