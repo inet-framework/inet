@@ -22,11 +22,11 @@
 #include "IPv4Address.h"
 
 unsigned int MACAddress::autoAddressCtr;
+bool MACAddress::simulationLifetimeListenerAdded;
 
 const MACAddress MACAddress::UNSPECIFIED_ADDRESS;
 const MACAddress MACAddress::BROADCAST_ADDRESS("ff:ff:ff:ff:ff:ff");
 const MACAddress MACAddress::MULTICAST_PAUSE_ADDRESS("01:80:C2:00:00:01");
-
 
 unsigned char MACAddress::getAddressByte(unsigned int k) const
 {
@@ -133,6 +133,11 @@ InterfaceToken MACAddress::formInterfaceIdentifier() const
 
 MACAddress MACAddress::generateAutoAddress()
 {
+    if (!simulationLifetimeListenerAdded) {
+        // NOTE: EXECUTE_ON_STARTUP is too early and would add the listener to StaticEnv
+        ev.addListener(new MACAddress::SimulationLifetimeListener());
+        simulationLifetimeListenerAdded = true;
+    }
     ++autoAddressCtr;
 
     uint64 intAddr = 0x0AAA00000000ULL + (autoAddressCtr & 0xffffffffUL);

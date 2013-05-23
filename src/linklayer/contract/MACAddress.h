@@ -39,8 +39,21 @@ class INET_API MACAddress
   private:
     uint64 address;   // 6*8=48 bit address, lowest 6 bytes are used, highest 2 bytes are always zero
     static unsigned int autoAddressCtr; // global counter for generateAutoAddress()
+    static bool simulationLifetimeListenerAdded;
 
   public:
+    class SimulationLifetimeListener : public cISimulationLifetimeListener
+    {
+        virtual void lifetimeEvent(SimulationLifetimeEventType eventType, cObject *details) {
+            if (eventType == LF_PRE_NETWORK_INITIALIZE)
+                autoAddressCtr = 0;
+        }
+
+        virtual void listenerRemoved() {
+            delete this;
+        }
+    };
+
     /** The unspecified MAC address, 00:00:00:00:00:00 */
     static const MACAddress UNSPECIFIED_ADDRESS;
 
