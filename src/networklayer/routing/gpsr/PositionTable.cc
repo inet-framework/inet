@@ -18,6 +18,8 @@
 
 #include "PositionTable.h"
 
+static double const NaN = 0.0 / 0.0;
+
 std::vector<Address> PositionTable::getAddresses() const {
     std::vector<Address> addresses;
     for (AddressToPositionMap::const_iterator it = addressToPositionMap.begin(); it != addressToPositionMap.end(); it++)
@@ -25,10 +27,15 @@ std::vector<Address> PositionTable::getAddresses() const {
     return addresses;
 }
 
+bool PositionTable::hasPosition(const Address & address) const {
+    AddressToPositionMap::const_iterator it = addressToPositionMap.find(address);
+    return it != addressToPositionMap.end();
+}
+
 Coord PositionTable::getPosition(const Address & address) const {
     AddressToPositionMap::const_iterator it = addressToPositionMap.find(address);
     if (it == addressToPositionMap.end())
-        return Coord();
+        return Coord(NaN, NaN, NaN);
     else
         return it->second.second;
 }

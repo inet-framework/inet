@@ -39,6 +39,7 @@ class INET_API PositionTable {
 
         std::vector<Address> getAddresses() const;
 
+        bool hasPosition(const Address & address) const;
         Coord getPosition(const Address & address) const;
         void setPosition(const Address & address, const Coord & coord);
 
