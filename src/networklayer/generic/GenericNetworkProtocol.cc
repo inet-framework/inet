@@ -525,7 +525,6 @@ void GenericNetworkProtocol::reinjectQueuedDatagram(const INetworkDatagram* data
             const InterfaceEntry * outIE = iter->outIE;
             const Address & nextHop = iter->nextHop;
             INetfilter::IHook::Type hookType = iter->hookType;
-            queuedDatagramsForHooks.erase(iter);
             switch (hookType) {
                 case INetfilter::IHook::PREROUTING:
                     datagramPreRouting(datagram, inIE, outIE, nextHop);
@@ -540,6 +539,7 @@ void GenericNetworkProtocol::reinjectQueuedDatagram(const INetworkDatagram* data
                     error("Re-injection of datagram queued for this hook not implemented");
                     break;
             }
+            queuedDatagramsForHooks.erase(iter);
             return;
         }
     }

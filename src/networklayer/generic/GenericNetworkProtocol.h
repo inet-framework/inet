@@ -41,7 +41,10 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter
      */
     struct QueuedDatagramForHook {
       public:
-        QueuedDatagramForHook(GenericDatagram* datagram, const InterfaceEntry * inIE, const InterfaceEntry * outIE, Address & nexthop, INetfilter::IHook::Type hookType) : datagram(datagram), inIE(inIE), outIE(outIE), nextHop(nextHop), hookType(hookType) {}
+        QueuedDatagramForHook(GenericDatagram* datagram, const InterfaceEntry * inIE, const InterfaceEntry * outIE,
+                              Address & nextHop, INetfilter::IHook::Type hookType)
+                : datagram(datagram), inIE(inIE), outIE(outIE), nextHop(nextHop), hookType(hookType) { }
+
         virtual ~QueuedDatagramForHook() {}
 
         GenericDatagram* datagram;
