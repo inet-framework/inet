@@ -111,34 +111,44 @@ bool InterfaceTable::isLocalAddress(const Address& address) const {
 
 InterfaceEntry *InterfaceTable::findInterfaceByAddress(const Address& address) const {
     if (!address.isUnspecified()) {
+        Address::AddressType addrType = address.getType();
         for (int i = 0; i < (int)idToInterface.size(); i++) {
             InterfaceEntry *ie = idToInterface[i];
             if (ie) {
-                switch (address.getType()) {
-                    case Address::IPv4:
+                switch (addrType) {
 #ifdef WITH_IPv4
+                    case Address::IPv4:
                         if (ie->ipv4Data() && ie->ipv4Data()->getIPAddress() == address.toIPv4())
                             return ie;
+                        break;
 #endif
-                    case Address::IPv6:
+
 #ifdef WITH_IPv6
+                    case Address::IPv6:
                         if (ie->ipv6Data() && ie->ipv6Data()->hasAddress(address.toIPv6()))
                             return ie;
+                        break;
 #endif
+
                     case Address::MAC:
                         if (ie->getMacAddress() == address.toMAC())
                             return ie;
+                        break;
+
                     case Address::MODULEPATH:
                     case Address::MODULEID:
                         if (ie->getGenericNetworkProtocolData() && ie->getGenericNetworkProtocolData()->getAddress() == address)
                             return ie;
+                        break;
+
                     default:
                         throw cRuntimeError("Unknown address type");
+                        break;
                 }
             }
         }
-        return NULL;
     }
+    return NULL;
 }
 
 int InterfaceTable::getNumInterfaces()
