@@ -119,6 +119,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public AddressRes
         class IPv4Topology : public Topology {
             public:
                 std::vector<LinkInfo *> linkInfos; // all links in the network
+                std::map<InterfaceEntry *, InterfaceInfo *> interfaceInfos; // all interfaces in the network
 
             public:
                 virtual ~IPv4Topology() { for (int i = 0; i < (int)linkInfos.size(); i++) delete linkInfos[i]; }
@@ -205,7 +206,6 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public AddressRes
         /**
          * Computes the IPv4 network configuration for all nodes in the network.
          * The result of the computation is only stored in the network configurator.
-         *
          */
         virtual void computeConfiguration();
 
@@ -306,7 +306,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public AddressRes
         virtual bool isBridgeNode(Node *node);
         virtual bool isWirelessInterface(InterfaceEntry *interfaceEntry);
         virtual const char *getWirelessId(InterfaceEntry *interfaceEntry);
-        virtual InterfaceInfo *createInterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
+        virtual InterfaceInfo *createInterfaceInfo(IPv4Topology& topology, Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
         virtual void parseAddressAndSpecifiedBits(const char *addressAttr, uint32_t& outAddress, uint32_t& outAddressSpecifiedBits);
         virtual bool linkContainsMatchingHostExcept(LinkInfo *linkInfo, Matcher *hostMatcher, cModule *exceptModule);
         virtual const char *getMandatoryAttribute(cXMLElement *element, const char *attr);
@@ -339,24 +339,8 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public AddressRes
         bool tryToMergeTwoRoutes(RoutingTableInfo& routingTableInfo, int i, int j, RouteInfo *routeInfoI, RouteInfo *routeInfoJ);
         bool tryToMergeAnyTwoRoutes(RoutingTableInfo& routingTableInfo);
 
-    public:
-        // TODO: find a better way to reuse and override IPvXAddressResolver functionality
-        bool getInterfaceIPv4Address(Address &ret, InterfaceEntry *ie, bool netmask)
-        {
-            // TODO: replace linear search
-            for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
-                LinkInfo *linkInfo = topology.linkInfos[i];
-                for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
-                    InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
-                    if (interfaceInfo->interfaceEntry == ie) {
-                        if (interfaceInfo->configure)
-                            ret = netmask ? interfaceInfo->getNetmask() : interfaceInfo->getAddress();
-                        return interfaceInfo->configure;
-                    }
-                }
-            }
-            return false;
-        }
+        // address resolver interface
+        bool getInterfaceIPv4Address(Address &ret, InterfaceEntry * interfaceEntry, bool netmask);
 };
 
 #endif
