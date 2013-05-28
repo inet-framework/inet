@@ -29,19 +29,6 @@
 #include "IPv4NetworkConfigurator.h"
 
 /**
- TODO:
-Have 3 stages for network configuration?
- - in stage N + 0: network configurator computes the configuration for the whole network
- - in stage N + 1: node configurators configure their interfaces
- - in stage N + 2: node configurators configure their routing table (must be after interface configuration to allow manual routes using names)
-
-functions:
- - set IP address
- - find IP address by name
-
-*/
-
-/**
  * This module provides the static configuration for the IPv4RoutingTable and
  * the IPv4 network interfaces of a particular node in the network.
  *
