@@ -383,7 +383,7 @@ bool AddressResolver::getInterfaceIPv4Address(Address &ret, InterfaceEntry *ie, 
     {
         // find address in the configurator's notebook
         // TODO: how do we know where is the configurator? get the path from a NED parameter?
-        IPv4NetworkConfigurator *configurator = dynamic_cast<IPv4NetworkConfigurator *>(simulation.getModuleByPath("configurator"));
+        AddressResolver *configurator = dynamic_cast<AddressResolver *>(simulation.getModuleByPath("configurator"));
         if (configurator)
             return configurator->getInterfaceIPv4Address(ret, ie, netmask);
     }
