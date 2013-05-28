@@ -77,7 +77,7 @@ void GPSR::initialize(int stage)
         nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         notificationBoard = NotificationBoardAccess().get(this);
         interfaceTable = InterfaceTableAccess().get(this);
-        mobility = check_and_cast<IMobility *>(findModuleWhereverInNode("mobility", this));
+        mobility = check_and_cast<IMobility *>(host->getSubmodule("mobility"));
         routingTable = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
         networkProtocol = check_and_cast<INetfilter *>(getModuleByPath(par("networkProtocolModule")));
         // internal
