@@ -40,10 +40,13 @@ void IPv4NodeConfigurator::initialize(int stage)
 {
     if (stage == 0)
     {
+        cModule *node = findContainingNode(this);
+        if (!node)
+            throw cRuntimeError("The container @node module not found");
         const char *networkConfiguratorPath = par("networkConfiguratorModule");
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
         interfaceTable = InterfaceTableAccess().get();
-        routingTable = IPv4RoutingTableAccess().get();
+        routingTable = AddressResolver().findRoutingTableOf(node);
 
         if (!networkConfiguratorPath[0])
             networkConfigurator = NULL;
