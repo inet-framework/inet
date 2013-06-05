@@ -117,6 +117,7 @@ class INET_API InetSimpleBattery : public BasicBattery
     };
 
     cMessage *publish;
+    cMessage *timeout;
     simtime_t lastUpdateTime;
 
     virtual void deductAndCheck();

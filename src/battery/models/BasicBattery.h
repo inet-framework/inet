@@ -117,7 +117,6 @@ class INET_API BasicBattery : public cSimpleModule, public INotifiable
     bool mustSubscribe;
     // debit battery at least once every resolution seconds
     simtime_t resolution;
-    cMessage *timeout;
     double publishDelta;
     simtime_t publishTime;
     simtime_t lastUpdateTime;
@@ -141,7 +140,7 @@ class INET_API BasicBattery : public cSimpleModule, public INotifiable
     // OPERATIONS
     // void         handleMessage(cMessage *msg);
 
-    virtual void receiveChangeNotification(int, const cObject*);
+    virtual void receiveChangeNotification(int, const cObject*) = 0;
 
 };
 
