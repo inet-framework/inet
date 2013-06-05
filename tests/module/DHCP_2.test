@@ -8,6 +8,7 @@ import inet.applications.IUDPApp;
 import inet.applications.dhcp.DHCPClient;
 import inet.applications.dhcp.DHCPServer;
 import inet.base.NotificationBoard;
+import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 
@@ -33,6 +34,9 @@ module DHCPNode
         }
         routingTable: RoutingTable {
             @display("p=68,216");
+        }
+        configurator: IPv4NodeConfigurator {
+            @display("p=39,158");
         }
     connections:
         dhcpApp.udpOut --> dhcpOut;
