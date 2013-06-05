@@ -323,7 +323,7 @@ int GenericRoutingTable::getNumRoutes() const
 
 IRoute* GenericRoutingTable::getRoute(int k) const
 {
-    ASSERT(k >= 0 && k < routes.size());
+    ASSERT(k >= 0 && (unsigned int)k < routes.size());
     return routes[k];
 }
 
