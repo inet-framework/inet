@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.omnetpp.common"/>
+	<classpathentry kind="lib" path="/home/levy/workspace/eclipse/plugins/org.eclipse.equinox.common_3.6.100.v20120522-1841.jar" sourcepath="/home/levy/workspace/eclipse/plugins/org.eclipse.equinox.common.source_3.6.100.v20120522-1841.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/home/levy/workspace/eclipse/plugins/org.eclipse.platform.doc.isv_3.8.1.v20120730-193458.jar!/reference/api"/>
+		</attributes>
+		<accessrules>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/boot/*"/>
+			<accessrule kind="discouraged" pattern="org/eclipse/core/internal/runtime/*"/>
+			<accessrule kind="accessible" pattern="org/eclipse/core/runtime/*"/>
+			<accessrule kind="accessible" pattern="org/eclipse/equinox/events/*"/>
+			<accessrule ignoreifbetter="true" kind="nonaccessible" pattern="**/*"/>
+		</accessrules>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/levy/workspace/eclipse/plugins/org.eclipse.core.jobs_3.5.200.v20120521-2346.jar"/>
+	<classpathentry kind="lib" path="/home/levy/workspace/eclipse/plugins/org.eclipse.core.resources_3.8.1.v20120802-154922.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
