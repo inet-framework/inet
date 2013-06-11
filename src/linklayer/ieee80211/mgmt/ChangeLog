@@ -1,3 +1,7 @@
+2013-06-11  Zoltan Bojthe
+
+    removed experimental Etx implementation (was a takeover from INETMANET).
+
 2013-05-15  Alfonso Ariza - takeover from INETMANET
 
 	fix: problem with the Ieee802Ctrl sender address in ad-hoc mode
