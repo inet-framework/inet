@@ -2765,3 +2765,14 @@ void Ieee80211Mac::promiscousFrame(cMessage *msg)
     if (!isDuplicated(msg)) // duplicate detection filter
         nb->fireChangeNotification(NF_LINK_PROMISCUOUS, msg);
 }
+
+bool Ieee80211Mac::isBackoffPending()
+{
+    for (unsigned int i = 0; i<edcCAF.size(); i++)
+    {
+        if (edcCAF[i].backoff)
+            return true;
+    }
+    return false;
+}
+

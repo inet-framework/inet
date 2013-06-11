@@ -650,15 +650,8 @@ class INET_API Ieee80211Mac : public WirelessMacBase
         backoffPeriod() = -1;
     }
 
-    virtual bool isBackoffPending()
-    {
-        for (unsigned int i = 0; i<edcCAF.size(); i++)
-        {
-            if (edcCAF[i].backoff)
-                return true;
-        }
-        return false;
-    }
+    virtual bool isBackoffPending();
+
     ModulationType getControlAnswerMode(ModulationType reqMode);
     //@}
 
