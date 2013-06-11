@@ -48,6 +48,9 @@ class INET_API Ieee80211MgmtAdhoc : public Ieee80211MgmtBase
     /** Utility function for handleUpperMessage() */
     virtual Ieee80211DataFrame *encapsulate(cPacket *msg);
 
+    /** Utility method to decapsulate a data frame */
+    virtual cPacket *decapsulate(Ieee80211DataFrame *frame);
+
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, const cObject *details);
 
@@ -64,7 +67,6 @@ class INET_API Ieee80211MgmtAdhoc : public Ieee80211MgmtBase
     virtual void handleBeaconFrame(Ieee80211BeaconFrame *frame);
     virtual void handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame);
     virtual void handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame);
-    virtual cPacket *decapsulate(Ieee80211DataFrame *frame);
     //@}
 };
 

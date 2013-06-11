@@ -232,6 +232,22 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cPacket *msg)
     return frame;
 }
 
+cPacket *Ieee80211MgmtSTA::decapsulate(Ieee80211DataFrame *frame)
+{
+    cPacket *payload = frame->decapsulate();
+
+    Ieee802Ctrl *ctrl = new Ieee802Ctrl();
+    ctrl->setSrc(frame->getAddress3());
+    ctrl->setDest(frame->getReceiverAddress());
+    Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
+    if (frameWithSNAP)
+        ctrl->setEtherType(frameWithSNAP->getEtherType());
+    payload->setControlInfo(ctrl);
+
+    delete frame;
+    return payload;
+}
+
 Ieee80211MgmtSTA::APInfo *Ieee80211MgmtSTA::lookupAP(const MACAddress& address)
 {
     for (AccessPointList::iterator it=apList.begin(); it!=apList.end(); ++it)

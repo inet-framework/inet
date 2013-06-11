@@ -54,6 +54,9 @@ class INET_API Ieee80211MgmtSTASimplified : public Ieee80211MgmtBase
     /** Utility function for handleUpperMessage() */
     virtual Ieee80211DataFrame *encapsulate(cPacket *msg);
 
+    /** Utility method to decapsulate a data frame */
+    virtual cPacket *decapsulate(Ieee80211DataFrame *frame);
+
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
     virtual void receiveChangeNotification(int category, const cObject *details);
 

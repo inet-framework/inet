@@ -174,22 +174,6 @@ void Ieee80211MgmtBase::dropManagementFrame(Ieee80211ManagementFrame *frame)
     numMgmtFramesDropped++;
 }
 
-cPacket *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
-{
-    cPacket *payload = frame->decapsulate();
-
-    Ieee802Ctrl *ctrl = new Ieee802Ctrl();
-    ctrl->setSrc(frame->getAddress3());
-    ctrl->setDest(frame->getReceiverAddress());
-    Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
-    if (frameWithSNAP)
-        ctrl->setEtherType(frameWithSNAP->getEtherType());
-    payload->setControlInfo(ctrl);
-
-    delete frame;
-    return payload;
-}
-
 void Ieee80211MgmtBase::sendUp(cMessage *msg)
 {
     ASSERT(isOperational);

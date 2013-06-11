@@ -119,6 +119,9 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     /** Utility function for handleUpperMessage() */
     virtual Ieee80211DataFrame *encapsulate(cPacket *msg);
 
+    /** Utility method to decapsulate a data frame */
+    virtual cPacket *decapsulate(Ieee80211DataFrame *frame);
+
     /** Utility function: sends authentication request */
     virtual void startAuthentication(APInfo *ap, simtime_t timeout);
 
