@@ -1,3 +1,10 @@
+2013-06-11  Zoltan Bojthe
+
+    StaticGridMobility: Added new parameters to specify the number of rows/columns and
+    the horizontal/verical separation between the nodes. Note that the way the node
+    positions are calculated has changed. You may need to update your INI files (see
+    the NED file for more info.)
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-08-07  ------ inet-2.0.0 released ------

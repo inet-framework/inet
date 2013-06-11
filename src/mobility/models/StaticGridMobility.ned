@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2006 Isabel Dietrich <isabel.dietrich@informatik.uni-erlangen.de>
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,16 +22,23 @@ package inet.mobility.models;
 
 
 //
-// Places all nodes in a rectangular grid.
-//
-// @see ~ChannelControl
-// @author Isabel Dietrich
+// Places all hosts in a rectangular grid.
+// The usable area (constraint area minus margins on each side) is split into smaller cells
+// (with separationX,separationY size). Hosts are placed in the middle of each cell.
+// By default, the number of columns and rows follow the aspect ratio of the usable area.
+// By default stepX and stepY are calculated based on the number of columns and rows.
 //
 simple StaticGridMobility extends MobilityBase
 {
     parameters:
-        int marginX @unit(m);
-        int marginY @unit(m);
+        int marginX @unit(m) = default(0m);
+        int marginY @unit(m) = default(0m);
         int numHosts;
+        int columns = default(int(sqrt(numHosts * (this.constraintAreaMaxX - this.constraintAreaMinX - 2 * marginX) / (this.constraintAreaMaxY - this.constraintAreaMinY - 2 * marginY))+ 0.5));
+        int rows = default((numHosts + columns - 1) / columns);
+        double initialZ @unit(m) = default(0m);
+        double separationX @unit(m) = default((this.constraintAreaMaxX - this.constraintAreaMinX - 2 * marginX) / columns);
+        double separationY @unit(m) = default((this.constraintAreaMaxY - this.constraintAreaMinY - 2 * marginY) / rows);
         @class(StaticGridMobility);
 }
+

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2006 Isabel Dietrich <isabel.dietrich@informatik.uni-erlangen.de>
+ * Copyright (C) 2013 OpenSim Ltd
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,45 +24,27 @@
 Define_Module(StaticGridMobility);
 
 
-StaticGridMobility::StaticGridMobility()
-{
-    marginX = 0;
-    marginY = 0;
-    numHosts = 0;
-}
-
-void StaticGridMobility::initialize(int stage)
-{
-    MobilityBase::initialize(stage);
-    EV << "initializing StaticGridMobility stage " << stage << endl;
-    if (stage == 0)
-    {
-        numHosts = par("numHosts");
-        marginX = par("marginX");
-        marginY = par("marginY");
-    }
-}
-
 void StaticGridMobility::initializePosition()
 {
-    int index = visualRepresentation->getIndex();
-    int size = (int)ceil(sqrt((double)numHosts));
-    int row = (int)floor((double)index / (double)size);
-    int col = index % size;
-    lastPosition.x = constraintAreaMin.x + marginX
-            + col * ((constraintAreaMax.x - constraintAreaMin.x) - 2 * marginX) / (size - 1);
-    if (lastPosition.x >= constraintAreaMax.x)
-        lastPosition.x -= 1;
-    lastPosition.y = constraintAreaMin.y + marginY
-            + row * ((constraintAreaMax.y - constraintAreaMin.y) - 2 * marginY) / (size - 1);
-    if (lastPosition.y >= constraintAreaMax.y)
-        lastPosition.y -= 1;
-    lastPosition.z = 0;
-}
+    int numHosts = par("numHosts");
+    double marginX = par("marginX");
+    double marginY = par("marginY");
+    double separationX = par("separationX");
+    double separationY = par("separationX");
+    int columns =  par("columns");
+    int rows =  par("rows");
+    if (numHosts > rows * columns)
+        throw cRuntimeError("parameter error: numHosts > rows * columns");
 
-void StaticGridMobility::finish()
-{
-    MobilityBase::finish();
+    int index = visualRepresentation->getIndex();
+
+    int row = index / columns;
+    int col = index % columns;
+    lastPosition.x = constraintAreaMin.x + marginX + (col+0.5) * separationX;
+    lastPosition.y = constraintAreaMin.y + marginY + (row+0.5) * separationY;
+    lastPosition.z = par("initialZ");
     recordScalar("x", lastPosition.x);
     recordScalar("y", lastPosition.y);
+    recordScalar("z", lastPosition.z);
 }
+
