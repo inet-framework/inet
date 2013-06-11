@@ -30,7 +30,7 @@ simple CSFQVLANTBFQueue like OutputQueue
         int numQueues = default(1);	// number of per-VLAN queues
         string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier
         string vids = default("");	// VIDs used for initialization of index table
-//        int frameCapacity = default(100);  // per-subqueue capacity
+        int frameCapacity = default(100);  // FIFO queue capacity
 		//---------------------------------------------------------------------
 		// parameter values for TBFs in string
 		// - either provide one value for all TBFs or multiple values whose
