@@ -103,8 +103,9 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
 
   protected:
     // configuration
-    int numQueues;
-    int frameCapacity;
+    int numFlows;
+    int queueSize;
+    int queueThreshold;
     LongLongVector bucketSize;  // in bit; note that the corresponding parameter in NED/INI is in byte.
     DoubleVector meanRate;  // in bps
     IntVector mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
@@ -120,16 +121,17 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
     BoolVector conformityFlag;  // vector of flag to indicate whether the HOL frame conforms to TBF
     FlowStateVector flowState;  // vector of flowState
 
-//    // state: RR scheduler
-//    int currentQueueIndex;  // index of a queue whose HOL frame is scheduled for TX during the last RR scheduling
+    // CSFQ+TBF
+    DoubleVector conformedRate; // vector of estimated rate of conformed flow
+    DoubleVector nonconformedRate;  // vector of estimated rate of nonconformed flow
 
     // statistics
     bool warmupFinished;        ///< if true, start statistics gathering
     DoubleVector numBitsSent;
-    IntVector numQueueReceived; // redefined from PassiveQueueBase with 'name hiding'
-    IntVector numQueueDropped;  // redefined from PassiveQueueBase with 'name hiding'
-    IntVector numQueueUnshaped;
-    IntVector numQueueSent;
+    IntVector numPktsReceived;
+    IntVector numPktsDropped;
+    IntVector numPktsUnshaped;
+    IntVector numPktsSent;
 
 //    // timer
 //    MsgVector conformityTimer;  // vector of timer indicating that enough tokens will be available for the transmission of the HOL frame
@@ -186,7 +188,7 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
      * From CSFQ.
      */
     virtual void estimateAlpha(int pktSize, double arrvRate, double arrvTime, int enqueue);
-    virtual double estimateRate(int flowId, int pktSize, double arrvTime);
+    virtual double estimateRate(int flowId, int pktLength, double arrvTime);
 };
 
 #endif
