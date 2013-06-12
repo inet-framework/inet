@@ -12,6 +12,9 @@ cmdenv-express-mode = false
 
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")
+*.host.hasTcp = true
+*.host.hasUdp = true
+*.host.hasSctp = true
 
 %file: test.ned
 
