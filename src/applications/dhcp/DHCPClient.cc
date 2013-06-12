@@ -220,7 +220,7 @@ void DHCPClient::changeFSMState(CLIENT_STATE new_state)
             irt->addRoute(e);
         }
         // update the routing table
-        nb->fireChangeNotification(NF_INTERFACE_IPv4CONFIG_CHANGED, NULL);
+        nb->fireChangeNotification(NF_INTERFACE_IPv4CONFIG_CHANGED, ie);
         EV << "publishing the configuration change into the blackboard" << endl;
     }
 
