@@ -98,9 +98,12 @@ void IPvXTrafGen::handleMessage(cMessage *msg)
                     destAddresses.push_back(result);
             }
         }
-        sendPacket();
-        if (!destAddresses.empty() && isEnabled())
-            scheduleNextPacket(simTime());
+        if (!destAddresses.empty())
+        {
+            sendPacket();
+            if (isEnabled())
+                scheduleNextPacket(simTime());
+        }
     }
     else
         processPacket(PK(msg));
