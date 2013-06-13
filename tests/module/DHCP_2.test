@@ -132,10 +132,10 @@ scheduling process
 Host dhcpClient got ip: 192.168.1.100/255.255.255.0
 scheduling process
 Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-** Event #92   T=10500.022   Elapsed: 0.004s (0m 00s)  100% completed
-     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
-     Messages:  created: 136   present: 4   in FES: 3
+** Event #92   T=10500.022   Elapsed:
 
+
+%contains: stdout
 <!> Simulation time limit reached -- simulation stopped at event #92, t=10500.022.
 
 
