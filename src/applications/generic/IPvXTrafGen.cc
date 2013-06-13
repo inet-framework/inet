@@ -28,7 +28,6 @@
 
 Define_Module(IPvXTrafGen);
 
-int IPvXTrafGen::counter;
 simsignal_t IPvXTrafGen::sentPkSignal = SIMSIGNAL_NULL;
 
 IPvXTrafGen::IPvXTrafGen()
@@ -63,8 +62,6 @@ void IPvXTrafGen::initialize(int stage)
 
     packetLengthPar = &par("packetLength");
     sendIntervalPar = &par("sendInterval");
-
-    counter = 0;
 
     numSent = 0;
     WATCH(numSent);
@@ -176,7 +173,7 @@ IPvXAddress IPvXTrafGen::chooseDestAddr()
 void IPvXTrafGen::sendPacket()
 {
     char msgName[32];
-    sprintf(msgName, "appData-%d", counter++);
+    sprintf(msgName, "appData-%d", numSent);
 
     cPacket *payload = new cPacket(msgName);
     payload->setByteLength(packetLengthPar->longValue());
