@@ -43,8 +43,6 @@ class INET_API UDPBasicApp : public AppBase
     simtime_t stopTime;
     cMessage *selfMsg;
 
-    static int counter; // counter for generating a global number for each packet
-
     // statistics
     int numSent;
     int numReceived;
@@ -54,7 +52,6 @@ class INET_API UDPBasicApp : public AppBase
 
     // chooses random destination address
     virtual IPvXAddress chooseDestAddr();
-    virtual cPacket *createPacket();
     virtual void sendPacket();
     virtual void processPacket(cPacket *msg);
     virtual void setSocketOptions();

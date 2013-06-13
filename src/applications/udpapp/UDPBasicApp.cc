@@ -27,7 +27,6 @@
 
 Define_Module(UDPBasicApp);
 
-int UDPBasicApp::counter;
 simsignal_t UDPBasicApp::sentPkSignal = SIMSIGNAL_NULL;
 simsignal_t UDPBasicApp::rcvdPkSignal = SIMSIGNAL_NULL;
 
@@ -49,7 +48,6 @@ void UDPBasicApp::initialize(int stage)
     // address auto-assignment takes place etc.
     if (stage == 0)
     {
-        counter = 0;
         numSent = 0;
         numReceived = 0;
         WATCH(numSent);
@@ -109,19 +107,13 @@ IPvXAddress UDPBasicApp::chooseDestAddr()
     return destAddresses[k];
 }
 
-cPacket *UDPBasicApp::createPacket()
-{
-    char msgName[32];
-    sprintf(msgName, "UDPBasicAppData-%d", counter++);
-
-    cPacket *payload = new cPacket(msgName);
-    payload->setByteLength(par("messageLength").longValue());
-    return payload;
-}
-
 void UDPBasicApp::sendPacket()
 {
-    cPacket *payload = createPacket();
+    char msgName[32];
+    sprintf(msgName, "UDPBasicAppData-%d", numSent);
+    cPacket *payload = new cPacket(msgName);
+    payload->setByteLength(par("messageLength").longValue());
+
     IPvXAddress destAddr = chooseDestAddr();
 
     emit(sentPkSignal, payload);
