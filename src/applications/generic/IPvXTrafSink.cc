@@ -34,9 +34,9 @@ void IPvXTrafSink::initialize(int stage)
 {
     if (stage == 0)
     {
-    numReceived = 0;
-    WATCH(numReceived);
-    rcvdPkSignal = registerSignal("rcvdPk");
+        numReceived = 0;
+        WATCH(numReceived);
+        rcvdPkSignal = registerSignal("rcvdPk");
     }
     else if (stage == 1)
     {
