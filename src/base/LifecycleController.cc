@@ -71,7 +71,7 @@ void LifecycleController::processCommand(const cXMLElement& node)
     LifecycleOperation *operation = check_and_cast<LifecycleOperation *>(createOne(operationName));
     std::map<std::string,std::string> params = node.getAttributes();
     params.erase("module");
-    params.erase("at");
+    params.erase("t");
     params.erase("target");
     params.erase("operation");
     operation->initialize(module, params);
