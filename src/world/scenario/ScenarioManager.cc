@@ -72,9 +72,9 @@ void ScenarioManager::processCommand(cXMLElement *node)
         processSetChannelAttrCommand(node);
     // else if (!strcmp(tag,"create-module"))
     //    processCreateModuleCommand(node);
-     else if (!strcmp(tag, "connect"))
+    else if (!strcmp(tag, "connect"))
         processConnectCommand(node);
-     else if (!strcmp(tag, "disconnect"))
+    else if (!strcmp(tag, "disconnect"))
         processDisconnectCommand(node);
     else
         processModuleSpecificCommand(node);
