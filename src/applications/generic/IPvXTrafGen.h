@@ -35,6 +35,7 @@
 class INET_API IPvXTrafGen : public IPvXTrafSink
 {
   protected:
+    enum Kinds {START=100, NEXT};
     cMessage *timer;
     int protocol;
     int numPackets;

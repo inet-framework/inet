@@ -46,12 +46,12 @@ IPvXTrafGen::~IPvXTrafGen()
 
 void IPvXTrafGen::initialize(int stage)
 {
+    IPvXTrafSink::initialize(stage);
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
     if (stage != 3)
         return;
 
-    IPvXTrafSink::initialize(stage);
     sentPkSignal = registerSignal("sentPk");
 
     protocol = par("protocol");
@@ -60,12 +60,6 @@ void IPvXTrafGen::initialize(int stage)
     stopTime = par("stopTime");
     if (stopTime != -1 && stopTime < startTime)
         error("Invalid startTime/stopTime parameters");
-
-    const char *destAddrs = par("destAddresses");
-    cStringTokenizer tokenizer(destAddrs);
-    const char *token;
-    while ((token = tokenizer.nextToken()) != NULL)
-        destAddresses.push_back(IPvXAddressResolver().resolve(token));
 
     packetLengthPar = &par("packetLength");
     sendIntervalPar = &par("sendInterval");
@@ -88,8 +82,24 @@ void IPvXTrafGen::handleMessage(cMessage *msg)
         throw cRuntimeError("Application is not running");
     if (msg == timer)
     {
+        if (msg->getKind() == START)
+        {
+            destAddresses.clear();
+            const char *destAddrs = par("destAddresses");
+            cStringTokenizer tokenizer(destAddrs);
+            const char *token;
+            while ((token = tokenizer.nextToken()) != NULL)
+            {
+                IPvXAddress result;
+                IPvXAddressResolver().tryResolve(token, result);
+                if (result.isUnspecified())
+                    EV << "cannot resolve destination address: " << token << endl;
+                else
+                    destAddresses.push_back(result);
+            }
+        }
         sendPacket();
-        if (isEnabled())
+        if (!destAddresses.empty() && isEnabled())
             scheduleNextPacket(simTime());
     }
     else
@@ -126,9 +136,15 @@ void IPvXTrafGen::scheduleNextPacket(simtime_t previous)
 {
     simtime_t next;
     if (previous == -1)
+    {
         next = simTime() <= startTime ? startTime : simTime();
+        timer->setKind(START);
+    }
     else
+    {
         next = previous + sendIntervalPar->doubleValue();
+        timer->setKind(NEXT);
+    }
     if (stopTime == -1  || next <= stopTime)
         scheduleAt(next, timer);
 }
@@ -145,7 +161,7 @@ bool IPvXTrafGen::isNodeUp()
 
 bool IPvXTrafGen::isEnabled()
 {
-    return !destAddresses.empty() && (numPackets == -1 || numSent < numPackets);
+    return (numPackets == -1 || numSent < numPackets);
 }
 
 IPvXAddress IPvXTrafGen::chooseDestAddr()
