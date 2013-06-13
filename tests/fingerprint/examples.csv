@@ -102,7 +102,7 @@
 
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0,                5000s,           9072-df80
 
-/examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0,                100s,            287c-f3d5
+/examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0,                100s,            624f-4af4
 
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 0, 5s,              0201-e30f
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_internalQueue -r 0, 5s,              2546-6065
