@@ -57,7 +57,8 @@ bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int stage, 
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == 0) {
             EV << node->getFullPath() << " starting up" << endl;
-            ASSERT(getState()==DOWN);
+            if(getState() != DOWN)
+                throw cRuntimeError("Current node status is not 'down' at NodeStartOperation");
             setState(GOING_UP);
         }
         // NOTE: this is not an 'else if' so that it works if there's only 1 stage
@@ -70,7 +71,8 @@ bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int stage, 
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == 0) {
             EV << node->getFullPath() << " shutting down" << endl;
-            ASSERT(getState()==UP);
+            if(getState() != UP)
+                throw cRuntimeError("Current node status is not 'up' at NodeShutdownOperation");
             setState(GOING_DOWN);
         }
         // NOTE: this is not an 'else if' so that it works if there's only 1 stage
@@ -83,7 +85,8 @@ bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int stage, 
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == 0) {
             EV << node->getFullPath() << " crashing" << endl;
-            ASSERT(getState()==UP);
+            if(getState() != UP)
+                throw cRuntimeError("Current node status is not 'up' at NodeCrashOperation");
             setState(GOING_DOWN);
         }
         // NOTE: this is not an 'else if' so that it works if there's only 1 stage
