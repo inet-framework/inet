@@ -290,7 +290,7 @@
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            a4eb-21b4
 /examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            f1ed-3d85
 
-/examples/voipstream/VoIPStreamLargeNet/, -f omnetpp.ini -c General -r 0,                5s,              9ea9-a18d
+/examples/voipstream/VoIPStreamLargeNet/, -f omnetpp.ini -c General -r 0,                5s,              91bd-0513
 /examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g726 -r 0,                   5s,              5969-3e2a
 /examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_aLaw -r 0,              5s,              664e-e18a
 /examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_muLaw -r 0,             5s,              1ba9-db0b

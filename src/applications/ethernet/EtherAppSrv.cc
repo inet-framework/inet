@@ -44,10 +44,6 @@ void EtherAppSrv::initialize(int stage)
 
         WATCH(packetsSent);
         WATCH(packetsReceived);
-
-        bool registerSAP = par("registerSAP");
-        if (registerSAP)
-            registerDSAP(localSAP);
     }
     else if (stage == 1)
     {
@@ -56,6 +52,10 @@ void EtherAppSrv::initialize(int stage)
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
+
+        bool registerSAP = par("registerSAP");
+        if (registerSAP)
+            registerDSAP(localSAP);
     }
 }
 
