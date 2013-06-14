@@ -28,7 +28,6 @@ simple EtherAppSrv
     parameters:
         bool registerSAP; // whether to sent IEEE802CTRL_REGISTER_DSAP on startup
         int localSAP = default(0xf1);
-        int remoteSAP = default(0xf0);
         @display("i=block/app");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);

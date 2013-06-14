@@ -35,7 +35,6 @@ class INET_API EtherAppSrv : public cSimpleModule, public ILifecycle
 {
   protected:
     int localSAP;
-    int remoteSAP;
     NodeStatus *nodeStatus;
 
     // statistics
@@ -57,7 +56,7 @@ class INET_API EtherAppSrv : public cSimpleModule, public ILifecycle
 
     virtual bool isNodeUp();
     void registerDSAP(int dsap);
-    void sendPacket(cPacket *datapacket, const MACAddress& destAddr);
+    void sendPacket(cPacket *datapacket, const MACAddress& destAddr, int destSap);
 };
 
 #endif

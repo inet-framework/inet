@@ -36,7 +36,6 @@ void EtherAppSrv::initialize(int stage)
     if (stage == 0)
     {
         localSAP = par("localSAP");
-        remoteSAP = par("remoteSAP");
 
         // statistics
         packetsSent = packetsReceived = 0;
@@ -82,6 +81,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
 
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(req->removeControlInfo());
     MACAddress srcAddr = ctrl->getSrc();
+    int srcSap = ctrl->getSsap();
     long requestId = req->getRequestId();
     long replyBytes = req->getResponseBytes();
     char msgname[30];
@@ -107,17 +107,17 @@ void EtherAppSrv::handleMessage(cMessage *msg)
         EtherAppResp *datapacket = new EtherAppResp(msgname, IEEE802CTRL_DATA);
         datapacket->setRequestId(requestId);
         datapacket->setByteLength(l);
-        sendPacket(datapacket, srcAddr);
+        sendPacket(datapacket, srcAddr, srcSap);
 
         k++;
     }
 }
 
-void EtherAppSrv::sendPacket(cPacket *datapacket, const MACAddress& destAddr)
+void EtherAppSrv::sendPacket(cPacket *datapacket, const MACAddress& destAddr, int destSap)
 {
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setSsap(localSAP);
-    etherctrl->setDsap(remoteSAP);
+    etherctrl->setDsap(destSap);
     etherctrl->setDest(destAddr);
     datapacket->setControlInfo(etherctrl);
     emit(sentPkSignal, datapacket);
