@@ -20,6 +20,7 @@
 #include "EtherFrame_m.h"
 #include "Ethernet.h"
 #include "Ieee802Ctrl_m.h"
+#include "ModuleAccess.h"
 
 
 Define_Module(EtherLLC);
@@ -31,25 +32,36 @@ simsignal_t EtherLLC::passedUpPkSignal = SIMSIGNAL_NULL;
 simsignal_t EtherLLC::droppedPkUnknownDSAPSignal = SIMSIGNAL_NULL;
 simsignal_t EtherLLC::pauseSentSignal = SIMSIGNAL_NULL;
 
-void EtherLLC::initialize()
+void EtherLLC::initialize(int stage)
 {
-    seqNum = 0;
-    WATCH(seqNum);
+    if (stage == 0)
+    {
+        seqNum = 0;
+        WATCH(seqNum);
 
-    dsapsRegistered = totalFromHigherLayer = totalFromMAC = totalPassedUp = droppedUnknownDSAP = 0;
+        dsapsRegistered = totalFromHigherLayer = totalFromMAC = totalPassedUp = droppedUnknownDSAP = 0;
 
-    dsapSignal = registerSignal("dsap");
-    encapPkSignal = registerSignal("encapPk");
-    decapPkSignal = registerSignal("decapPk");
-    passedUpPkSignal = registerSignal("passedUpPk");
-    droppedPkUnknownDSAPSignal = registerSignal("droppedPkUnknownDSAP");
-    pauseSentSignal = registerSignal("pauseSent");
+        dsapSignal = registerSignal("dsap");
+        encapPkSignal = registerSignal("encapPk");
+        decapPkSignal = registerSignal("decapPk");
+        passedUpPkSignal = registerSignal("passedUpPk");
+        droppedPkUnknownDSAPSignal = registerSignal("droppedPkUnknownDSAP");
+        pauseSentSignal = registerSignal("pauseSent");
 
-    WATCH(dsapsRegistered);
-    WATCH(totalFromHigherLayer);
-    WATCH(totalFromMAC);
-    WATCH(totalPassedUp);
-    WATCH(droppedUnknownDSAP);
+        WATCH(dsapsRegistered);
+        WATCH(totalFromHigherLayer);
+        WATCH(totalFromMAC);
+        WATCH(totalPassedUp);
+        WATCH(droppedUnknownDSAP);
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 void EtherLLC::handleMessage(cMessage *msg)
