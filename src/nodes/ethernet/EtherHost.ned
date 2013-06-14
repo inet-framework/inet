@@ -18,11 +18,12 @@
 
 package inet.nodes.ethernet;
 
+import inet.applications.ethernet.EtherAppCli;
+import inet.applications.ethernet.EtherAppSrv;
+import inet.linklayer.IEtherMAC;
 import inet.linklayer.ethernet.EtherLLC;
 import inet.linklayer.ethernet.EtherQoSQueue;
-import inet.linklayer.IEtherMAC;
-import inet.applications.ethernet.EtherAppSrv;
-import inet.applications.ethernet.EtherAppCli;
+import inet.status.NodeStatus;
 
 
 //
@@ -34,6 +35,7 @@ import inet.applications.ethernet.EtherAppCli;
 module EtherHost
 {
     parameters:
+        bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default(""); // DropTailQueue, DiffServQueue, or empty to use the internal queue
@@ -43,6 +45,9 @@ module EtherHost
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:
+        status: NodeStatus if hasStatus {
+            @display("p=50,50");
+        }
         cli: EtherAppCli {
             parameters:
                 registerSAP = true;
