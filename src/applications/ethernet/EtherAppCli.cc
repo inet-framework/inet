@@ -154,7 +154,8 @@ void EtherAppCli::scheduleNextPacket(simtime_t previous)
 
 void EtherAppCli::cancelNextPacket()
 {
-    cancelEvent(timerMsg);
+    if (timerMsg)
+        cancelEvent(timerMsg);
 }
 
 MACAddress EtherAppCli::resolveDestMACAddress()
