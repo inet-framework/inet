@@ -61,15 +61,9 @@ typedef struct identHash {
 } IdentHashTable;
 #endif
 
-//#define SRCID       /* identify flow bassed of source id rather than flow id */
+//#define SRCID       /* identify flow based of source id rather than flow id */
 //#define CSFQ_RLMEX  /* used for RLM experiments only */
 
-
-
-/**
- * Returns the maximum of a and b.
- */
-inline double max(const double a, const double b) { return (a > b) ? a : b; }
 
 /**
  * Drop-tail queue with VLAN classifier, token bucket filter (TBF) traffic shaper,
@@ -78,16 +72,30 @@ inline double max(const double a, const double b) { return (a > b) ? a : b; }
  */
 class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
 {
-    typedef struct {
+    typedef struct
+    {
+        double alpha_;
+        double tmpAlpha_;
+        int kalpha_;
+        double rateAlpha_;
+        double rateTotal_;
+        double lArv_;
+        int congested_;
+        int pktSize_;
+        int pktSizeE_;
+    } CSFQState;
+
+    typedef struct
+    {
         double weight_;     // flow weight
-        double k_;          // averaging interval for rate estimation
-        double estRate_;    // estimated rate
+        double k_;// averaging interval for rate estimation
+        double estRate_;// estimated rate
         double prevTime_;
         // internal statistics
-        int size_;          // keep track of packets that arrive at the same time
-        int numArv_;        // number of arrived packets
-        int numDpt_;        // number of dropped packets
-        int numDropped_;    // number of dropped packets
+        int size_;// keep track of packets that arrive at the same time
+        int numArv_;// number of arrived packets
+        int numDpt_;// number of dropped packets
+        int numDropped_;// number of dropped packets
     } FlowState;
 
     // type definitions for member variables
@@ -114,14 +122,15 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
     // state
     IQoSClassifier *classifier;
     cQueue fifo;   // common FIFO queue
-//    QueueVector queues;
+    int currentQueueSize;   // in bit
     LongLongVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
     IntVector peakBucketLength;  // vector of the number of tokens (bits) in the bucket for peak rate/MTU control
     TimeVector lastTime; // vector of the last time the TBF used
     BoolVector conformityFlag;  // vector of flag to indicate whether the HOL frame conforms to TBF
-    FlowStateVector flowState;  // vector of flowState
 
-    // CSFQ+TBF
+    // CSFQ
+    CSFQState csfqState;    // CSFQ-related states
+    FlowStateVector flowState;  // vector of flowState
     DoubleVector conformedRate; // vector of estimated rate of conformed flow
     DoubleVector nonconformedRate;  // vector of estimated rate of nonconformed flow
 
@@ -132,9 +141,6 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
     IntVector numPktsDropped;
     IntVector numPktsUnshaped;
     IntVector numPktsSent;
-
-//    // timer
-//    MsgVector conformityTimer;  // vector of timer indicating that enough tokens will be available for the transmission of the HOL frame
 
     cGate *outGate;
 

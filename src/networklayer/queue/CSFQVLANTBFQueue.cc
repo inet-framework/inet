@@ -23,16 +23,14 @@ Define_Module(CSFQVLANTBFQueue);
 
 CSFQVLANTBFQueue::CSFQVLANTBFQueue()
 {
-//    queues = NULL;
-//    numFlows = NULL;
 }
 
 CSFQVLANTBFQueue::~CSFQVLANTBFQueue()
 {
-    // for (int i=0; i<numFlows; i++)
-    // {
-    //     delete queues[i];
-//        cancelAndDelete(conformityTimer[i]);
+//    for (int i = 0; i < numFlows; i++)
+//    {
+//        delete queues[i];
+//        cancelAndDelete (conformityTimer[i]);
 //    }
 }
 
@@ -40,22 +38,23 @@ void CSFQVLANTBFQueue::initialize()
 {
     PassiveQueueBase::initialize();
 
-    // configuration
-    numFlows = par("numFlows");
-    queueSize = par("queueSize");
-    queueThreshold = par("queueThreshold");
+    outGate = gate("out");
 
-    // state
+    // general
+    numFlows = par("numFlows"); // also the number of subscribers
+
+    // FIFO queue
+    queueSize = par("queueSize");   // in bit
+    queueThreshold = par("queueThreshold"); // in bit
+    currentQueueSize = 0;
+    fifo.setName("FIFO queue");
+
+    // VLAN classifier
     const char *classifierClass = par("classifierClass");
     classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
     classifier->setMaxNumQueues(numFlows);
     const char *vids = par("vids");
     classifier->initialize(vids);
-
-    outGate = gate("out");
-
-    // FIFO queue
-    fifo.setName("FIFO queue");
 
     // TBF: bucket size
     const char *bs = par("bucketSize");
@@ -67,6 +66,7 @@ void CSFQVLANTBFQueue::initialize()
         int tmp = bucketSize[0];
         bucketSize.resize(numFlows, tmp);
     }
+
     // TBF: mean rate
     const char *mr = par("meanRate");
     std::vector<double> v_mr = cStringTokenizer(mr).asDoubleVector();
@@ -76,6 +76,7 @@ void CSFQVLANTBFQueue::initialize()
         int tmp = meanRate[0];
         meanRate.resize(numFlows, tmp);
     }
+
     // TBF: MTU
     const char *mt = par("mtu");
     std::vector<int> v_mt = cStringTokenizer(mt).asIntVector();
@@ -86,6 +87,7 @@ void CSFQVLANTBFQueue::initialize()
         int tmp = mtu[0];
         mtu.resize(numFlows, tmp);
     }
+
     // TBF: peak rate
     const char *pr = par("peakRate");
     std::vector<double> v_pr = cStringTokenizer(pr).asDoubleVector();
@@ -95,32 +97,22 @@ void CSFQVLANTBFQueue::initialize()
         int tmp = peakRate[0];
         peakRate.resize(numFlows, tmp);
     }
+
     // TBF: states
     meanBucketLength = bucketSize;
     peakBucketLength = mtu;
     lastTime.assign(numFlows, simTime());
 
-//    // state: RR scheduler
-//    currentQueueIndex = 0;
-
-    // statistics
-    warmupFinished = false;
-    numBitsSent.assign(numFlows, 0.0);
-    numPktsReceived.assign(numFlows, 0);
-    numPktsDropped.assign(numFlows, 0);
-    numPktsUnshaped.assign(numFlows, 0);
-    numPktsSent.assign(numFlows, 0);
-
-    // CSFQ+TBF: statues
+    // CSFQ+TBF: rate estimates
     conformedRate.assign(numFlows, 0.0);
     nonconformedRate.assign(numFlows, 0.0);
 
-    // CSFQ+TBF: flow
+    // CSFQ+TBF: flow state
     flowState.resize(numFlows);
     for (int i = 0; i < numFlows; i++) {
         flowState[i].weight_    = 1.0;
         flowState[i].k_         = 100000.0;
-        flowState[i].numArv_    = flowState[i].numDpt_ = flowState[i].numDroped_ = 0;
+        flowState[i].numArv_    = flowState[i].numDpt_ = flowState[i].numDropped_ = 0;
         flowState[i].prevTime_  = 0.0;
         flowState[i].estRate_   = 0.0;
         flowState[i].size_      = 0;
@@ -129,9 +121,9 @@ void CSFQVLANTBFQueue::initialize()
 #endif
     }
 
-    // CSFQ+TBF
-    alpha_ = tmpAlpha_ = 0.;
-    kalpha_ = KALPHA;
+    // CSFQ
+    csfqState.alpha_ = csfqState.tmpAlpha_ = 0.;
+    csfqState.kalpha_ = KALPHA;
 
 #ifdef PENALTY_BOX
     for (int i = 0; i < MONITOR_TABLE_SIZE; i++) {
@@ -145,23 +137,22 @@ void CSFQVLANTBFQueue::initialize()
     numDroppedPkts_ = 0;
 #endif
 
-    lastArv_ = rateAlpha_ = rateTotal_ = 0.;
-    lArv_ = 0.;
-    pktSize_ = pktSizeE_ = 0;
-    congested_ = 1;
+    csfqState.lastArv_ = csfqState.rateAlpha_ = csfqState.rateTotal_ = 0.;
+    csfqState.lArv_ = 0.;
+    csfqState.pktSize_ = csfqState.pktSizeE_ = 0;
+    csfqState.congested_ = 1;
 
 #ifdef PENALTY_BOX
     bind("kLink_", &kDropped_);
 #endif
 
-//    bind("kLink_", &kLink_);
-//    edge_ = 1;
-//    bind("edge_", &edge_);
-//
-//    bind("qsize_", &qsize_);
-//    bind("qsizeThresh_", &qsizeThresh_);
-//    bind("rate_", &rate_);
-//    bind("id_", &id_);
+    // statistics
+    warmupFinished = false;
+    numBitsSent.assign(numFlows, 0.0);
+    numPktsReceived.assign(numFlows, 0);
+    numPktsDropped.assign(numFlows, 0);
+    numPktsUnshaped.assign(numFlows, 0);
+    numPktsSent.assign(numFlows, 0);
 }
 
 void CSFQVLANTBFQueue::handleMessage(cMessage *msg)
@@ -194,13 +185,11 @@ void CSFQVLANTBFQueue::handleMessage(cMessage *msg)
 // DEBUG
         if (isConformed(flowId, pktLength))
         {
-            conformedRate[flowId] = estimateRate(flowId, pktLength, simTime());
-
             if (warmupFinished == true)
             {
                 numPktsUnshaped[flowId]++;
             }
-
+            conformedRate[flowId] = estimateRate(flowId, pktLength, simTime().dbl());
             if (packetRequested > 0)
             {
                 packetRequested--;
@@ -226,7 +215,7 @@ void CSFQVLANTBFQueue::handleMessage(cMessage *msg)
         else
         {   // frame is not conformed
             conformedRate[flowId] = meanRate[flowId];
-            nonconfromedRate[flowID] = estimateRate(flowId, pktLength, simTime());
+            nonconformedRate[flowId] = estimateRate(flowId, pktLength, simTime().dbl());
 
             // TODO: Obtain dropping probability prob
             if (prob > dblrand())
@@ -263,7 +252,7 @@ void CSFQVLANTBFQueue::handleMessage(cMessage *msg)
 
 bool CSFQVLANTBFQueue::enqueue(cMessage *msg)
 {
-    if (queueSize && fifo->length() >= queueSize)
+    if (queueSize && fifo.length() >= queueSize)
     {
         EV << "FIFO queue full, dropping packet.\n";
         delete msg;
@@ -271,56 +260,19 @@ bool CSFQVLANTBFQueue::enqueue(cMessage *msg)
     }
     else
     {
-        fifo->insert(msg);
+        fifo.insert(msg);
         return false;
     }
 }
 
 cMessage *CSFQVLANTBFQueue::dequeue()
 {
-    bool found = false;
-    int startQueueIndex = (currentQueueIndex + 1) % numFlows;  // search from the next queue for a frame to transmit
-    for (int i = 0; i < numFlows; i++)
+    if (fifo.empty())
     {
-       if (conformityFlag[(i+startQueueIndex)%numFlows])
-       {
-           currentQueueIndex = (i+startQueueIndex)%numFlows;
-           found = true;
-           break;
-       }
-    }
-
-    if (found == false)
-    {
-        // TO DO: further processing?
         return NULL;
     }
-
-    cMessage *msg = (cMessage *)queues[currentQueueIndex]->pop();
-
-    // TO DO: update statistics
-
-    // conformity processing for the HOL frame
-    if (queues[currentQueueIndex]->isEmpty() == false)
-    {
-        int pktLength = (check_and_cast<cPacket *>(queues[currentQueueIndex]->front()))->getBitLength();
-        if (isConformed(currentQueueIndex, pktLength))
-        {
-            conformityFlag[currentQueueIndex] = true;
-        }
-        else
-        {
-            conformityFlag[currentQueueIndex] = false;
-            triggerConformityTimer(currentQueueIndex, pktLength);
-        }
-    }
-    else
-    {
-        conformityFlag[currentQueueIndex] = false;
-    }
-
-    // return a packet from the scheduled queue for transmission
-    return (msg);
+    cMessage *msg = (cMessage *) fifo.pop();
+    return msg;
 }
 
 void CSFQVLANTBFQueue::sendOut(cMessage *msg)
@@ -341,8 +293,9 @@ void CSFQVLANTBFQueue::requestPacket()
     {
         if (warmupFinished == true)
         {
-            numBitsSent[currentQueueIndex] += (check_and_cast<cPacket *>(msg))->getBitLength();
-            numFlowSent[currentQueueIndex]++;
+            int flowId = classifier->classifyPacket(msg);
+            numBitsSent[flowId] += (check_and_cast<cPacket *>(msg))->getBitLength();
+            numPktsSent[flowId]++;
         }
         sendOut(msg);
     }
@@ -361,16 +314,16 @@ bool CSFQVLANTBFQueue::isConformed(int flowId, int pktLength)
     // update states
     simtime_t now = simTime();
     //unsigned long long meanTemp = meanBucketLength[flowId] + (unsigned long long)(meanRate*(now - lastTime[flowId]).dbl() + 0.5);
-    unsigned long long meanTemp = meanBucketLength[flowId] + (unsigned long long)ceil(meanRate*(now - lastTime[flowId]).dbl());
-    meanBucketLength[queueIndex] = (long long)((meanTemp > bucketSize) ? bucketSize : meanTemp);
+    unsigned long long meanTemp = meanBucketLength[flowId] + (unsigned long long)ceil(meanRate[flowId]*(now - lastTime[flowId]).dbl());
+    meanBucketLength[flowId] = (long long)((meanTemp > bucketSize[flowId]) ? bucketSize[flowId] : meanTemp);
     //unsigned long long peakTemp = peakBucketLength[queueIndex] + (unsigned long long)(peakRate*(now - lastTime[queueIndex]).dbl() + 0.5);
-    unsigned long long peakTemp = peakBucketLength[flowId] + (unsigned long long)ceil(peakRate*(now - lastTime[flowId]).dbl());
-    peakBucketLength[flowId] = int((peakTemp > mtu) ? mtu : peakTemp);
+    unsigned long long peakTemp = peakBucketLength[flowId] + (unsigned long long)ceil(peakRate[flowId]*(now - lastTime[flowId]).dbl());
+    peakBucketLength[flowId] = int((peakTemp > mtu[flowId]) ? mtu[flowId] : peakTemp);
     lastTime[flowId] = now;
 
-    if (pktLength <= meanBucketLength[queueIndex])
+    if (pktLength <= meanBucketLength[flowId])
     {
-        if  (pktLength <= peakBucketLength[queueIndex])
+        if  (pktLength <= peakBucketLength[flowId])
         {
             meanBucketLength[flowId] -= pktLength;
             peakBucketLength[flowId] -= pktLength;
@@ -381,54 +334,54 @@ bool CSFQVLANTBFQueue::isConformed(int flowId, int pktLength)
 }
 
 
-void CSFQVLANTBFQueue::dumpTbfStatus(int queueIndex)
+void CSFQVLANTBFQueue::dumpTbfStatus(int flowId)
 {
-    EV << "Last Time = " << lastTime[queueIndex] << endl;
+    EV << "Last Time = " << lastTime[flowId] << endl;
     EV << "Current Time = " << simTime() << endl;
     EV << "Token bucket for mean rate/burst control " << endl;
-    EV << "- Bucket size [bit]: " << bucketSize << endl;
-    EV << "- Mean rate [bps]: " << meanRate << endl;
-    EV << "- Bucket length [bit]: " << meanBucketLength[queueIndex] << endl;
+    EV << "- Bucket size [bit]: " << bucketSize[flowId] << endl;
+    EV << "- Mean rate [bps]: " << meanRate[flowId] << endl;
+    EV << "- Bucket length [bit]: " << meanBucketLength[flowId] << endl;
     EV << "Token bucket for peak rate/MTU control " << endl;
-    EV << "- MTU [bit]: " << mtu << endl;
-    EV << "- Peak rate [bps]: " << peakRate << endl;
-    EV << "- Bucket length [bit]: " << peakBucketLength[queueIndex] << endl;
+    EV << "- MTU [bit]: " << mtu[flowId] << endl;
+    EV << "- Peak rate [bps]: " << peakRate[flowId] << endl;
+    EV << "- Bucket length [bit]: " << peakBucketLength[flowId] << endl;
 }
 
 // compute estimated flow rate by using exponential averaging
-double CSFQVLANTBFQueue::estimateRate(int flowId, int pktSize, double arrvTime)
+double CSFQVLANTBFQueue::estimateRate(int flowId, int pktLength, double arrvTime)
 {
-    double d = (arvTime - fs_[flowid].prevTime_) * 1000000;
-    double k = fs_[flowid].k_;
+    double d = (csfqState.arvTime - csfqState.fs_[flowId].csfqState.prevTime_) * 1000000;
+    double k = fs_[flowId].k_;
 
     if (d == 0.0)
     {
-        fs_[flowid].size_ += pktSize;
-        if (fs_[flowid].estRate_)
+        fs_[flowId].size_ += pktLength;
+        if (fs_[flowId].estRate_)
         {
-            return fs_[flowid].estRate_;
+            return fs_[flowId].estRate_;
         }
         else
         {   // this is the first packet; just initialize the rate
-            return (fs_[flowid].estRate_ = rateAlpha_ / 2);
+            return (fs_[flowId].estRate_ = rateAlpha_ / 2);
         }
     }
     else
     {
-        pktSize += fs_[flowid].size_;
-        fs_[flowid].size_ = 0;
+        pktLength += fs_[flowId].size_;
+        fs_[flowId].size_ = 0;
     }
 
-    fs_[flowid].prevTime_ = arvTime;
-    fs_[flowid].estRate_ = (1. - exp(-d / k)) * (double) pktSize / d + exp(-d / k) * fs_[flowid].estRate_;
-    return fs_[flowid].estRate_;
+    flowState[flowId].prevTime_ = arvTime;
+    flowState[flowId].estRate_ = (1. - exp(-d / k)) * (double) pktLength / d + exp(-d / k) * fs_[flowId].estRate_;
+    return flowState[flowId].estRate_;
 }
 
 // estimate the link's alpha parameter
 void CSFQVLANTBFQueue::estimateAlpha(int pktSize, double pktLabel, double arvTime, int enqueue)
 {
-    float d = (arvTime - lastArv_) * 1000000., w, rate = rate_ / 1000000.;
-    double k = kLink_ / 1000000.;
+    float d = (csfqState.arvTime - csfqState.lastArv_) * 1000000., w, rate = csfqState.rate_ / 1000000.;
+    double k = csfqState.kLink_ / 1000000.;
 
     // set lastArv_ to the arrival time of the first packet
     if (lastArv_ == 0.)
@@ -456,9 +409,9 @@ void CSFQVLANTBFQueue::estimateAlpha(int pktSize, double pktLabel, double arvTim
     pktSize_ = pktSizeE_ = 0;
 
     // compute the initial value of alpha_
-    if (alpha_ == 0.)
+    if (csfqState.alpha_ == 0.)
     {
-        if (qsizeCrt_ < qsizeThresh_)
+        if (currentQueueSize < queueThreshold)
         {
             if (tmpAlpha_ < pktLabel)
             {
@@ -478,7 +431,7 @@ void CSFQVLANTBFQueue::estimateAlpha(int pktSize, double pktLabel, double arvTim
     }
     // update alpha_
     if (rate <= rateTotal_)
-    { // link congested
+    {   // link congested
         if (!congested_)
         {
             congested_ = 1;
@@ -531,36 +484,34 @@ void CSFQVLANTBFQueue::estimateAlpha(int pktSize, double pktLabel, double arvTim
             }
         }
     }
-
 #ifdef CSFQ_LOG
-    printf("|%d %f %f %f\n", id_, arvTime, rateAlpha_, rateTotal_);
+    EV << id_ << " " << arvTime << " " << rateAlpha_ << " " << rateTotal_;
 #endif
 }
 
 void CSFQVLANTBFQueue::finish()
 {
-    unsigned long sumQueueReceived = 0;
-    unsigned long sumQueueDropped = 0;
-    unsigned long sumQueueShaped = 0;
-    unsigned long sumQueueUnshaped = 0;
+    unsigned long sumPktsReceived = 0;
+    unsigned long sumPktsDropped = 0;
+    unsigned long sumPktsShaped = 0;
 
     for (int i=0; i < numFlows; i++)
     {
         std::stringstream ss_received, ss_dropped, ss_shaped, ss_sent, ss_throughput;
-        ss_received << "packets received by per-VLAN queue[" << i << "]";
-        ss_dropped << "packets dropped by per-VLAN queue[" << i << "]";
-        ss_shaped << "packets shaped by per-VLAN queue[" << i << "]";
-        ss_sent << "packets sent by per-VLAN queue[" << i << "]";
-        ss_throughput << "bits/sec sent per-VLAN queue[" << i << "]";
+        ss_received << "packets received from flow[" << i << "]";
+        ss_dropped << "packets dropped from flow[" << i << "]";
+        ss_shaped << "packets shaped from flow[" << i << "]";
+        ss_sent << "packets sent from flow[" << i << "]";
+        ss_throughput << "bits/sec sent from flow[" << i << "]";
         recordScalar((ss_received.str()).c_str(), numPktsReceived[i]);
         recordScalar((ss_dropped.str()).c_str(), numPktsDropped[i]);
         recordScalar((ss_shaped.str()).c_str(), numPktsReceived[i]-numPktsUnshaped[i]);
         recordScalar((ss_sent.str()).c_str(), numPktsSent[i]);
         recordScalar((ss_throughput.str()).c_str(), numBitsSent[i]/(simTime()-simulation.getWarmupPeriod()).dbl());
-        sumQueueReceived += numFlowReceived[i];
-        sumQueueDropped += numPktsDropped[i];
-        sumQueueShaped += numPktsReceived[i] - numPktsUnshaped[i];
+        sumPktsReceived += numPktsReceived[i];
+        sumPktsDropped += numPktsDropped[i];
+        sumPktsShaped += numPktsReceived[i] - numPktsUnshaped[i];
     }
-    recordScalar("overall packet loss rate of per-VLAN queues", sumQueueDropped/double(sumQueueReceived));
-    recordScalar("overall packet shaped rate of per-VLAN queues", sumQueueShaped/double(sumQueueReceived));
+    recordScalar("overall packet loss rate", sumPktsDropped/double(sumPktsReceived));
+    recordScalar("overall packet shaped rate", sumPktsShaped/double(sumPktsReceived));
 }

@@ -27,10 +27,11 @@ package inet.networklayer.queue;
 simple CSFQVLANTBFQueue like OutputQueue
 {
     parameters:
-        int numQueues = default(1);	// number of per-VLAN queues
+        int numFlows = default(1);	// number of flows (i.e., subscribers)
+        int queueSize @unit(b) = default(100000000b);  // FIFO queue size
+        int queueThreshold @unit(b) = default(50000000b);	// FIFO threshold to detect link congestion
         string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier
         string vids = default("");	// VIDs used for initialization of index table
-        int frameCapacity = default(100);  // FIFO queue capacity
 		//---------------------------------------------------------------------
 		// parameter values for TBFs in string
 		// - either provide one value for all TBFs or multiple values whose
