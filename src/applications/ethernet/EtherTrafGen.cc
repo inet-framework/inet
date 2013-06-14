@@ -79,7 +79,7 @@ void EtherTrafGen::initialize(int stage)
         timerMsg = new cMessage("generateNextPacket");
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
 
-        if (isNodeUp() && isEnabled())
+        if (isNodeUp() && isGenerator())
             scheduleNextPacket(-1);
     }
 }
@@ -101,7 +101,7 @@ bool EtherTrafGen::handleOperationStage(LifecycleOperation *operation, int stage
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER && isEnabled())
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER && isGenerator())
             scheduleNextPacket(-1);
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
@@ -121,7 +121,7 @@ bool EtherTrafGen::isNodeUp()
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
-bool EtherTrafGen::isEnabled()
+bool EtherTrafGen::isGenerator()
 {
     return par("destAddress").stringValue()[0];
 }

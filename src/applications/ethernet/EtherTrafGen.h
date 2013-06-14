@@ -65,7 +65,7 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
     virtual void finish();
 
     virtual bool isNodeUp();
-    virtual bool isEnabled();
+    virtual bool isGenerator();
     virtual void scheduleNextPacket(simtime_t previous);
     virtual void cancelNextPacket();
 
