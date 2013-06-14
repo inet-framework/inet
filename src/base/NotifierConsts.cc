@@ -53,9 +53,19 @@ const char *notificationCategoryName(int category)
         case NF_IPv6_ROUTE_ADDED: return "IPv6-ROUTE-ADD";
         case NF_IPv6_ROUTE_DELETED: return "IPv6-ROUTE-DEL";
         case NF_IPv6_ROUTE_CHANGED: return "IPv6-ROUTE-CHG";
+        case NF_IPv6_MCAST_JOIN: return "IPv6-MCAST-JOIN";
+        case NF_IPv6_MCAST_LEAVE: return "IPv6-MCAST-LEAVE";
+        case NF_IPv6_MCAST_REGISTERED: return "IPv6-MCAST-REGISTERED";
+        case NF_IPv6_MCAST_UNREGISTERED: return "IPv6-MCAST_UNREGISTERED";
 
         case NF_IPv6_HANDOVER_OCCURRED: return "IPv6-HANDOVER";
         case NF_MIPv6_RO_COMPLETED: return "MIPv6 RO COMPLETED";
+
+        case NF_CLNS_ROUTE_ADDED: return "CLNS-ROUTE-ADD";
+        case NF_CLNS_ROUTE_DELETED: return "CLNS-ROUTE-DEL";
+        case NF_CLNS_ROUTE_CHANGED: return "CLNS-ROUTE-CHG";
+
+        case NF_ISIS_ADJ_CHANGED: return "ISIS-ADJ-CHG";
 
         case NF_OVERLAY_TRANSPORTADDRESS_CHANGED: return "OVERLAY-TRANSPORTADDESS";
         case NF_OVERLAY_NODE_LEAVE: return "OVERLAY-NODE-LEAVE";

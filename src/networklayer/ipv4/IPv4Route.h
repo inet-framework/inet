@@ -158,6 +158,7 @@ class INET_API IPv4MulticastRoute : public cObject
     {
         MANUAL,       ///< manually added static route
         DVMRP,        ///< managed by DVMRP router
+        PIM_DM,       ///< managed by PIM-DM router
         PIM_SM,       ///< managed by PIM-SM router
     };
 
