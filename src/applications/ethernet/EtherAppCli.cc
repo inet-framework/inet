@@ -55,8 +55,8 @@ void EtherAppCli::initialize(int stage)
         respLength = &par("respLength");
         sendInterval = &par("sendInterval");
 
-        localSAP = ETHERAPP_CLI_SAP;
-        remoteSAP = ETHERAPP_SRV_SAP;
+        localSAP = par("localSAP");
+        remoteSAP = par("remoteSAP");
 
         seqNum = 0;
         WATCH(seqNum);

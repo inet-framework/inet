@@ -35,8 +35,8 @@ void EtherAppSrv::initialize(int stage)
 {
     if (stage == 0)
     {
-        localSAP = ETHERAPP_SRV_SAP;
-        remoteSAP = ETHERAPP_CLI_SAP;
+        localSAP = par("localSAP");
+        remoteSAP = par("remoteSAP");
 
         // statistics
         packetsSent = packetsReceived = 0;
