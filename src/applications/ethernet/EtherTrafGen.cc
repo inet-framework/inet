@@ -65,18 +65,14 @@ void EtherTrafGen::initialize(int stage)
         WATCH(packetsSent);
         WATCH(packetsReceived);
 
-        destMACAddress = resolveDestMACAddress();
-
-        // if no dest address given, nothing to do
-        if (destMACAddress.isUnspecified())
-            return;
-
         startTime = par("startTime");
         stopTime = par("stopTime");
         if (stopTime != -1 && stopTime < startTime)
             error("Invalid startTime/stopTime parameters");
 
-        timerMsg = new cMessage("generateNextPacket");
+        if (isGenerator())
+            timerMsg = new cMessage("generateNextPacket");
+
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
 
         if (isNodeUp() && isGenerator())
@@ -90,6 +86,13 @@ void EtherTrafGen::handleMessage(cMessage *msg)
         throw cRuntimeError("Application is not running");
     if (msg->isSelfMessage())
     {
+        if (msg->getKind() == START)
+        {
+            destMACAddress = resolveDestMACAddress();
+            // if no dest address given, nothing to do
+            if (destMACAddress.isUnspecified())
+                return;
+        }
         sendBurstPackets();
         scheduleNextPacket(simTime());
     }
@@ -130,9 +133,15 @@ void EtherTrafGen::scheduleNextPacket(simtime_t previous)
 {
     simtime_t next;
     if (previous == -1)
+    {
         next = simTime() <= startTime ? startTime : simTime();
+        timerMsg->setKind(START);
+    }
     else
+    {
         next = previous + sendInterval->doubleValue();
+        timerMsg->setKind(NEXT);
+    }
     if (stopTime == -1  || next <= stopTime)
         scheduleAt(next, timerMsg);
 }

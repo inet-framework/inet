@@ -31,6 +31,8 @@
 class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
 {
   protected:
+    enum Kinds {START=100, NEXT};
+
     long seqNum;
 
     // send parameters
