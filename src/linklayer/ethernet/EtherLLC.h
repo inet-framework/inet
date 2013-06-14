@@ -38,6 +38,9 @@ class INET_API EtherLLC : public cSimpleModule, public ILifecycle
     typedef std::map<int,int> DsapToPortMap;  // DSAP registration table
     DsapToPortMap dsapToPort;  // DSAP registration table
 
+    // lifecycle
+    bool isUp;
+
     // statistics
     long dsapsRegistered;       // number DSAPs (higher layers) registered
     long totalFromHigherLayer;  // total number of packets received from higher layer
@@ -63,12 +66,14 @@ class INET_API EtherLLC : public cSimpleModule, public ILifecycle
     virtual void handleSendPause(cMessage *msg);
     virtual int findPortForSAP(int sap);
 
+    virtual void start();
+    virtual void stop();
+
     // utility function
     virtual void updateDisplayString();
 
   public:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
 #endif

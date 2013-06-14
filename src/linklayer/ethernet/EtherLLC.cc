@@ -21,7 +21,7 @@
 #include "Ethernet.h"
 #include "Ieee802Ctrl_m.h"
 #include "ModuleAccess.h"
-
+#include "NodeOperations.h"
 
 Define_Module(EtherLLC);
 
@@ -56,16 +56,23 @@ void EtherLLC::initialize(int stage)
     }
     else if (stage == 1)
     {
-        bool isOperational;
+        // lifecycle
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+        isUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+        if (isUp)
+            start();
     }
 }
 
 void EtherLLC::handleMessage(cMessage *msg)
 {
+    if (!isUp)
+    {
+        EV << "EtherLLC is down -- discarding message\n";
+        delete msg;
+        return;
+    }
+
     if (msg->arrivedOn("lowerLayerIn"))
     {
         // frame received from lower layer
@@ -270,3 +277,36 @@ void EtherLLC::handleSendPause(cMessage *msg)
 
     delete msg;
 }
+
+bool EtherLLC::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_NETWORK_LAYER)
+            start();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_NETWORK_LAYER)
+            stop();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            stop();
+    }
+    return true;
+}
+
+void EtherLLC::start()
+{
+    dsapToPort.clear();
+    dsapsRegistered = dsapToPort.size();
+    isUp = true;
+}
+
+void EtherLLC::stop()
+{
+    dsapToPort.clear();
+    dsapsRegistered = dsapToPort.size();
+    isUp = false;
+}
+
