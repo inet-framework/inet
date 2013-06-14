@@ -30,20 +30,20 @@
 /examples/ethernet/arptest/,         -f fingerprints.ini -c ARPTest -r 0,           100s,            5356-7acd
 /examples/ethernet/arptest/,         -f omnetpp.ini -c ARPTest -r 0,                500s,            5356-7acd
 /examples/ethernet/arptest2/,        -f omnetpp.ini -c ARPTest -r 0,                500s,            31db-e0cb
-/examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            93ec-3339
+/examples/ethernet/lans/,            -f bus.ini -c BusLAN -r 0,                     100s,            ff4c-c904
 # /examples/ethernet/lans/,            -f defaults.ini -c General -r 0,               -1s,           0000-0000   ,# not a complete simulations, defaults.ini included by other ini files
-/examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0, 50s,             6a59-65fa
-/examples/ethernet/lans/,            -f fingerprints-largenet.ini -c LargeNet -r 0, 5s,              608e-56f1
-/examples/ethernet/lans/,            -f fingerprints.ini -c MixedLAN1 -r 0,         200s,            c06d-c5d7
-/examples/ethernet/lans/,            -f hub.ini -c Hub1 -r 0,                       100s,            fb08-035e
-/examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0,                       10s,             c638-351d
-/examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0,                       100s,            fb08-035e
-/examples/ethernet/lans/,            -f hub.ini -c Hub4 -r 0,                       100s,            fb08-035e
-/examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              608e-56f1
-/examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            66d4-cda5
-/examples/ethernet/lans/,            -f omnetpp.ini -c MixedLAN1 -r 0,              500s,            350e-38dd
-/examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0,            5000s,           8883-d55f
-/examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0,             200s,            69f7-9cda
+/examples/ethernet/lans/,            -f duplexswitch.ini -c SwitchedDuplexLAN -r 0, 50s,             3a4b-00bf
+/examples/ethernet/lans/,            -f fingerprints-largenet.ini -c LargeNet -r 0, 5s,              d86b-873f
+/examples/ethernet/lans/,            -f fingerprints.ini -c MixedLAN1 -r 0,         200s,            6596-39e8
+/examples/ethernet/lans/,            -f hub.ini -c Hub1 -r 0,                       100s,            16c0-7069
+/examples/ethernet/lans/,            -f hub.ini -c Hub2 -r 0,                       10s,             cdaf-1f2b
+/examples/ethernet/lans/,            -f hub.ini -c Hub3 -r 0,                       100s,            16c0-7069
+/examples/ethernet/lans/,            -f hub.ini -c Hub4 -r 0,                       100s,            16c0-7069
+/examples/ethernet/lans/,            -f largeNet.ini -c LargeNet -r 0,              5s,              d86b-873f
+/examples/ethernet/lans/,            -f mixed.ini -c MixedLAN -r 0,                 100s,            f13b-3d5b
+/examples/ethernet/lans/,            -f omnetpp.ini -c MixedLAN1 -r 0,              500s,            3ae7-4622
+/examples/ethernet/lans/,            -f switch.ini -c SwitchedLAN1 -r 0,            5000s,           582c-f84b
+/examples/ethernet/lans/,            -f twoHosts.ini -c TwoHosts1 -r 0,             200s,            d263-8a61
 
 /examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0,                500000s,         25e4-59d6
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c random -r 0,                 500000s,         b6c9-6992
@@ -290,7 +290,7 @@
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            a4eb-21b4
 /examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            f1ed-3d85
 
-/examples/voipstream/VoIPStreamLargeNet/, -f omnetpp.ini -c General -r 0,                5s,              48ed-9ea7
+/examples/voipstream/VoIPStreamLargeNet/, -f omnetpp.ini -c General -r 0,                5s,              9ea9-a18d
 /examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g726 -r 0,                   5s,              5969-3e2a
 /examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_aLaw -r 0,              5s,              664e-e18a
 /examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_muLaw -r 0,             5s,              1ba9-db0b

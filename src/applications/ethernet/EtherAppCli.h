@@ -31,6 +31,8 @@
 class INET_API EtherAppCli : public cSimpleModule, public ILifecycle
 {
   protected:
+    enum Kinds {START=100, NEXT};
+
     // send parameters
     long seqNum;
     cPar *reqLength;
