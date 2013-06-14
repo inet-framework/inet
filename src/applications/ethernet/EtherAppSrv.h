@@ -23,6 +23,7 @@
 #include "MACAddress.h"
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
+#include "NodeStatus.h"
 
 #define MAX_REPLY_CHUNK_SIZE   1497
 
@@ -35,6 +36,7 @@ class INET_API EtherAppSrv : public cSimpleModule, public ILifecycle
   protected:
     int localSAP;
     int remoteSAP;
+    NodeStatus *nodeStatus;
 
     // statistics
     long packetsSent;
@@ -43,15 +45,17 @@ class INET_API EtherAppSrv : public cSimpleModule, public ILifecycle
     static simsignal_t rcvdPkSignal;
 
   public:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     virtual void initialize(int stage);
     virtual int numInitStages() const { return 2; }
+    virtual void startApp();
+    virtual void stopApp();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
+    virtual bool isNodeUp();
     void registerDSAP(int dsap);
     void sendPacket(cPacket *datapacket, const MACAddress& destAddr);
 };

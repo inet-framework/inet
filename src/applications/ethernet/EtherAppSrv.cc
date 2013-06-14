@@ -23,6 +23,7 @@
 #include "EtherApp_m.h"
 #include "Ieee802Ctrl_m.h"
 #include "ModuleAccess.h"
+#include "NodeOperations.h"
 #include "NodeStatus.h"
 
 Define_Module(EtherAppSrv);
@@ -47,20 +48,33 @@ void EtherAppSrv::initialize(int stage)
     }
     else if (stage == 1)
     {
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
-
-        bool registerSAP = par("registerSAP");
-        if (registerSAP)
-            registerDSAP(localSAP);
+        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        if (isNodeUp())
+            startApp();
     }
+}
+
+bool EtherAppSrv::isNodeUp()
+{
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+}
+
+void EtherAppSrv::startApp()
+{
+    bool registerSAP = par("registerSAP");
+    if (registerSAP)
+        registerDSAP(localSAP);
+}
+
+void EtherAppSrv::stopApp()
+{
 }
 
 void EtherAppSrv::handleMessage(cMessage *msg)
 {
+    if (!isNodeUp())
+        throw cRuntimeError("Application is not running");
+
     EV << "Received packet `" << msg->getName() << "'\n";
     EtherAppReq *req = check_and_cast<EtherAppReq *>(msg);
     packetsReceived++;
@@ -122,6 +136,26 @@ void EtherAppSrv::registerDSAP(int dsap)
 
     send(msg, "out");
 }
+
+bool EtherAppSrv::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+            startApp();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
+            stopApp();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            stopApp();
+    }
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
+}
+
 
 void EtherAppSrv::finish()
 {
