@@ -1,0 +1,210 @@
+%description:
+
+Test shutdown and startup operations on EtherAppCli/EtherAppSrv/EtherLLC modules.
+
+sender[0] and recip start at down
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+
+**.hasStatus = true
+*.sender[0].*.initialStatus = "down"
+*.recip.*.initialStatus = "down"
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+# app config
+**.sender[*].cli.startTime = 1s
+**.sender[*].cli.sendInterval = 0.4s
+**.sender[*].cli.stopTime = 7s
+**.sender[*].cli.reqLength = 800B
+**.sender[*].cli.respLength = 100B
+
+**.sender[*].cli.destAddress = "recip"
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: test.ned
+
+import inet.base.LifecycleController;
+import inet.nodes.ethernet.EtherHost;
+import inet.nodes.ethernet.EtherSwitch;
+import inet.world.scenario.ScenarioManager;
+
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager {
+            @display("p=450,50");
+        }
+        lifecycleController: LifecycleController {
+            @display("p=150,50");
+        }
+        sender[2]: EtherHost {
+            @display("p=100,350,r,150");
+        }
+        recip: EtherHost {
+            @display("p=500,350");
+        }
+        switch: EtherSwitch {
+            @display("p=300,180");
+        }
+
+    connections:
+        sender[0].ethg <--> {  datarate = 10Mbps; delay = 10us; } <--> switch.ethg++;
+        sender[1].ethg <--> {  datarate = 10Mbps; delay = 10us; } <--> switch.ethg++;
+        recip.ethg <--> {  datarate = 10Mbps; delay = 10us; } <--> switch.ethg++;
+}
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%file: scenario.xml
+
+<scenario>
+    <tell t="1.5" module="lifecycleController" target="recip" operation="NodeStartOperation"/>
+    <tell t="2.0" module="lifecycleController" target="sender[0]" operation="NodeStartOperation"/>
+
+    <tell t="3.0" module="lifecycleController" target="recip" operation="NodeShutdownOperation"/>
+    <tell t="4.0" module="lifecycleController" target="recip" operation="NodeStartOperation"/>
+
+    <tell t="5.0" module="lifecycleController" target="sender[1]" operation="NodeShutdownOperation"/>
+    <tell t="6.0" module="lifecycleController" target="sender[1]" operation="NodeStartOperation"/>
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+
+\*\* Event \#\d+  T=1   Test\.sender\[1\]\.cli .*
+Test\.sender\[1\]\.cli registering DSAP 240
+Generating packet `req-\d+-1'
+.*
+\*\* Event \#\d+  T=1\.4   Test\.sender\[1\]\.cli .*
+Generating packet `req-\d+-2'
+.*
+?\*\* Event #\d+  T=1\.5   Test\.scenarioManager .*
+Test\.recip starting up
+.*
+Test\.recip\.srv registering DSAP 241
+.*
+Test\.recip started
+.*
+?\*\* Event \#\d+  T=1\.8   Test\.sender\[1\]\.cli .*
+Generating packet `req-\d+-3'
+.*
+?\*\* Event #\d+  T=2   Test\.scenarioManager .*
+Test\.sender\[0\] starting up
+.*
+Test\.sender\[0\].srv registering DSAP 241
+.*
+Test\.sender\[0\] started
+.*
+?\*\* Event \#\d+  T=2   Test\.sender\[0\]\.cli .*
+Test\.sender\[0\]\.cli registering DSAP 240
+Generating packet `req-\d+-1'
+.*
+?\*\* Event \#\d+  T=2\.2   Test\.sender\[1\]\.cli .*
+Generating packet `req-\d+-4'
+.*
+?\*\* Event \#\d+  T=2\.4   Test\.sender\[0\]\.cli .*
+Generating packet `req-\d+-2'
+.*
+?\*\* Event \#\d+  T=2\.6   Test\.sender\[1\]\.cli .*
+Generating packet `req-\d+-5'
+.*
+?\*\* Event \#\d+  T=2\.8   Test\.sender\[0\]\.cli .*
+Generating packet `req-\d+-3'
+.*
+?\*\* Event #\d+  T=3   Test\.scenarioManager .*
+Test\.recip shutting down
+.*
+Test\.recip shut down
+.*
+?\*\* Event \#\d+  T=3   Test\.sender\[1\]\.cli .*
+Generating packet `req-\d+-6'
+.*
+?\*\* Event \#\d+  T=3\.2   Test\.sender\[0\]\.cli .*
+Generating packet `req-\d+-4'
+.*
+?\*\* Event \#\d+  T=3\.4   Test\.sender\[1\]\.cli .*
+Generating packet `req-\d+-7'
+.*
+?\*\* Event \#\d+  T=3\.6   Test\.sender\[0\]\.cli .*
+Generating packet `req-\d+-5'
+.*
+?\*\* Event \#\d+  T=3\.8   Test\.sender\[1\]\.cli .*
+Generating packet `req-\d+-8'
+.*
+?\*\* Event #\d+  T=4   Test\.scenarioManager .*
+Test\.recip starting up
+.*
+Test\.recip.srv registering DSAP 241
+.*
+Test\.recip started
+.*
+?\*\* Event \#\d+  T=4   Test\.sender\[0\]\.cli .*
+Generating packet `req-\d+-6'
+.*
+?\*\* Event \#\d+  T=4\.2   Test\.sender\[1\]\.cli .*
+Generating packet `req-\d+-9'
+.*
+?\*\* Event \#\d+  T=4\.4   Test\.sender\[0\]\.cli .*
+Generating packet `req-\d+-7'
+.*
+?\*\* Event \#\d+  T=4\.6   Test\.sender\[1\]\.cli .*
+Generating packet `req-\d+-10'
+.*
+?\*\* Event \#\d+  T=4\.8   Test\.sender\[0\]\.cli .*
+Generating packet `req-\d+-8'
+.*
+?\*\* Event #\d+  T=5   Test\.scenarioManager .*
+Test\.sender\[1\] shutting down
+.*
+Test\.sender\[1\] shut down
+.*
+?\*\* Event \#\d+  T=5\.2   Test\.sender\[0\]\.cli .*
+Generating packet `req-\d+-9'
+.*
+?\*\* Event \#\d+  T=5\.6   Test\.sender\[0\]\.cli .*
+Generating packet `req-\d+-10'
+.*
+?\*\* Event #\d+  T=6   Test\.scenarioManager .*
+Test\.sender\[1\] starting up
+.*
+Test\.sender\[1\].srv registering DSAP 241
+.*
+Test\.sender\[1\] started
+\*\* Event \#\d+  T=6   Test\.sender\[0\]\.cli .*
+Generating packet `req-\d+-11'
+\*\* Event \#\d+  T=6   Test\.sender\[1\]\.cli .*
+Test\.sender\[1\]\.cli registering DSAP 240
+Generating packet `req-\d+-11'
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/General-0.sca
+scalar Test.sender[0].cli 	sentPk:count 	13
+attr
+
+%contains: results/General-0.sca
+scalar Test.sender[0].cli 	rcvdPk:count 	11
+attr
+
+%contains: results/General-0.sca
+scalar Test.sender[1].cli 	sentPk:count 	13
+attr
+
+%contains: results/General-0.sca
+scalar Test.sender[1].cli 	rcvdPk:count 	8
+attr
+
+%contains: results/General-0.sca
+scalar Test.recip.srv 	rcvdPk:count 	19
+attr
+
+%contains: results/General-0.sca
+scalar Test.recip.srv 	sentPk:count 	19
+attr
