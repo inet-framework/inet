@@ -22,6 +22,7 @@ import inet.base.NotificationBoard;
 import inet.linklayer.IEtherMAC;
 import inet.linklayer.IMACRelayUnit;
 import inet.networklayer.common.InterfaceTable;
+import inet.status.NodeStatus;
 
 
 //
@@ -40,6 +41,7 @@ module EtherSwitch
         @node();
         @labels(node,ethernet-node);
         @display("i=device/switch");
+        bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string relayUnitType = default("MACRelayUnitNP"); // type of the ~IMACRelayUnit; currently possible
@@ -47,16 +49,19 @@ module EtherSwitch
     gates:
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
+        status: NodeStatus if hasStatus {
+            @display("p=50,50;is=s");
+        }
         interfaceTable: InterfaceTable {
-            @display("p=59,121");
+            @display("p=50,100;is=s");
         }
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=59,43");
+                @display("p=50,150;is=s");
         }
         relayUnit: <relayUnitType> like IMACRelayUnit {
             parameters:
-                @display("p=200,50");
+                @display("p=270,50");
             gates:
                 lowerLayerIn[sizeof(ethg)];
                 lowerLayerOut[sizeof(ethg)];
@@ -65,7 +70,7 @@ module EtherSwitch
             parameters:
                 promiscuous = true;
                 queueModule = "";
-                @display("p=70,150,row;q=txQueue");
+                @display("p=170,150,row;q=txQueue");
         }
     connections:
         for i=0..sizeof(ethg)-1 {
