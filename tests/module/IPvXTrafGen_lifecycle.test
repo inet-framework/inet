@@ -73,7 +73,7 @@ network Test
             @display("p=76,50");
         }
         sender[2]: TrafGenHost {
-            @display("p=88,181");
+            @display("p=88,181,c,50");
         }
         recip: TrafGenHost {
             @display("p=359,181");
