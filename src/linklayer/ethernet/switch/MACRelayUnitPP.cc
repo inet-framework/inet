@@ -42,6 +42,10 @@ MACRelayUnitPP::MACRelayUnitPP()
 
 MACRelayUnitPP::~MACRelayUnitPP()
 {
+    for (int i = 0; i < numPorts; ++i)
+    {
+        cancelAndDelete(buffer[i].timer);
+    }
     delete [] buffer;
 }
 
@@ -70,7 +74,8 @@ void MACRelayUnitPP::initialize()
     {
         buffer[i].port = i;
         buffer[i].cpuBusy = false;
-
+        buffer[i].timer = new cMessage("endProcessing");
+        buffer[i].timer->setContextPointer(&buffer[i]);
         char qname[40];
         sprintf(qname, "portQueue%d", i);
         buffer[i].queue.setName(qname);
@@ -125,9 +130,7 @@ void MACRelayUnitPP::handleIncomingFrame(EtherFrame *frame)
         {
             EV << "Port CPU " << inputport << " free, begin processing of incoming frame " << frame << endl;
             buffer[inputport].cpuBusy = true;
-            cMessage *msg = new cMessage("endProcessing");
-            msg->setContextPointer(&buffer[inputport]);
-            scheduleAt(simTime() + processingTime, msg);
+            scheduleAt(simTime() + processingTime, buffer[inputport].timer);
         }
     }
     // Drop the frame and record the number of dropped frames
@@ -172,7 +175,6 @@ void MACRelayUnitPP::processFrame(cMessage *msg)
     {
         EV << "Port CPU idle\n";
         pBuff->cpuBusy = false;
-        delete msg;
     }
 }
 

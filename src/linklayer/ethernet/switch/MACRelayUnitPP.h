@@ -40,6 +40,7 @@ class INET_API MACRelayUnitPP : public MACRelayUnitBase
     {
         int port;
         bool cpuBusy;
+        cMessage *timer;
         cQueue queue;
     };
 
