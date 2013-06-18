@@ -800,6 +800,16 @@ RERR * xDYMO::createRERR(std::vector<Address> & unreachableAddresses)
         AddressBlock * addressBlock = new AddressBlock();
         addressBlock->setAddress(unreachableAddress);
         addressBlock->setPrefixLength(addressType->getMaxPrefixLength());
+        addressBlock->setHasValidityTime(false);
+        addressBlock->setHasMetric(false);
+        addressBlock->setHasMetricType(false);
+        std::map<Address, DYMOSequenceNumber>::iterator st = targetAddressToSequenceNumber.find(unreachableAddress);
+        if (st != targetAddressToSequenceNumber.end()) {
+            addressBlock->setHasSequenceNumber(true);
+            addressBlock->setSequenceNumber(st->second);
+        }
+        else
+            addressBlock->setHasSequenceNumber(false);
         int size = rerr->getUnreachableNodeArraySize();
         rerr->setUnreachableNodeArraySize(size + 1);
         rerr->setUnreachableNode(size, *addressBlock);
@@ -924,7 +934,7 @@ void xDYMO::processRERR(RERR * rerrIncoming)
                         unreachableAddress == route->getDestinationAsGeneric() &&
                         route->getNextHopAsGeneric() == networkProtocolControlInfo->getSourceAddress() &&
                         route->getInterface()->getInterfaceId() == networkProtocolControlInfo->getInterfaceId() &&
-                        routeData->getSequenceNumber() <= addressBlock.getSequenceNumber())
+                        (!addressBlock.getHasSequenceNumber() || routeData->getSequenceNumber() <= addressBlock.getSequenceNumber()))
                     {
                         // If the route satisfies all of the above conditions, HandlingRtr sets
                         // the Route.Broken flag for that route.
@@ -1290,14 +1300,16 @@ void xDYMO::addSelfNode(RteMsg * rteMsg)
 {
     const Address & address = getSelfAddress();
     AddressBlock * addressBlock = new AddressBlock();
-    addressBlock->setHasSequenceNumber(true);
-    addressBlock->setSequenceNumber(sequenceNumber);
+    addressBlock->setAddress(address);
+    addressBlock->setPrefixLength(addressType->getMaxPrefixLength());
+    addressBlock->setHasValidityTime(false);
+    addressBlock->setValidityTime(-1);
     addressBlock->setHasMetric(true);
     addressBlock->setMetric(0);
     addressBlock->setHasMetricType(true);
     addressBlock->setMetricType(HOP_COUNT);
-    addressBlock->setAddress(address);
-    addressBlock->setPrefixLength(addressType->getMaxPrefixLength());
+    addressBlock->setHasSequenceNumber(true);
+    addressBlock->setSequenceNumber(sequenceNumber);
     addNode(rteMsg, *addressBlock);
 }
 
