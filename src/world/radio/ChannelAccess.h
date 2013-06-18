@@ -61,7 +61,7 @@ class INET_API ChannelAccess : public BasicModule, protected cListener
     bool positionUpdateArrived;
 
   public:
-    ChannelAccess() : cc(NULL), myRadioRef(NULL), hostModule(NULL) {}
+    ChannelAccess() : nb(NULL), cc(NULL), myRadioRef(NULL), hostModule(NULL) {}
     virtual ~ChannelAccess();
 
     /**

@@ -58,6 +58,7 @@ void ChannelAccess::initialize(int stage)
         cc = getChannelControl();
         nb = NotificationBoardAccess().get();
         hostModule = findHost();
+        myRadioRef = NULL;
 
         positionUpdateArrived = false;
         // register to get a notification when position changes

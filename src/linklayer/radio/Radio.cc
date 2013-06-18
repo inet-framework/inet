@@ -153,27 +153,39 @@ void Radio::initialize(int stage)
     {
         registerBattery();
 
-        bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            setRadioState(RadioState::OFF);
-
-        // tell initial values to MAC; must be done in stage 1, because they
-        // subscribe in stage 0
-        nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
-        nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
+        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (isOperational)
+        {
+            // tell initial values to MAC; must be done in stage 1, because they
+            // subscribe in stage 0
+            nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+            nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
+        }
     }
     else if (stage == 2)
     {
-        // tell initial channel number to ChannelControl; should be done in
-        // stage==2 or later, because base class initializes myRadioRef in that stage
-        cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (isOperational)
+        {
+            // tell initial channel number to ChannelControl; should be done in
+            // stage==2 or later, because base class initializes myRadioRef in that stage
+            cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
 
-        // statistics
-        emit(bitrateSignal, rs.getBitrate());
-        emit(radioStateSignal, rs.getState());
-        emit(channelNumberSignal, rs.getChannelNumber());
+            // statistics
+            emit(bitrateSignal, rs.getBitrate());
+            emit(radioStateSignal, rs.getState());
+            emit(channelNumberSignal, rs.getChannelNumber());
+        }
+        else
+        {
+            setRadioState(RadioState::OFF);
+            // tell initial values to MAC; must be done in stage 1, because they
+            // subscribe in stage 0
+            nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+            nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
+        }
 
         // draw the interference distance
         this->updateDisplayString();
