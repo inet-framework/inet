@@ -75,14 +75,17 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
     typedef struct
     {
         double alpha_;
-        double tmpAlpha_;
-        int kalpha_;
+        double kLink_;
+        double lastArv_;
+        double lArv_;
+        double rate_;
         double rateAlpha_;
         double rateTotal_;
-        double lArv_;
+        double tmpAlpha_;
         int congested_;
-        int pktSize_;
-        int pktSizeE_;
+        int kalpha_;
+        int pktLength_;
+        int pktLengthE_;
     } CSFQState;
 
     typedef struct
@@ -108,7 +111,6 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
     typedef std::vector<cQueue *> QueueVector;
     typedef std::vector<simtime_t> TimeVector;
 
-
   protected:
     // configuration
     int numFlows;
@@ -123,13 +125,15 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
     IQoSClassifier *classifier;
     cQueue fifo;   // common FIFO queue
     int currentQueueSize;   // in bit
+
+    // TBF
     LongLongVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
     IntVector peakBucketLength;  // vector of the number of tokens (bits) in the bucket for peak rate/MTU control
     TimeVector lastTime; // vector of the last time the TBF used
     BoolVector conformityFlag;  // vector of flag to indicate whether the HOL frame conforms to TBF
 
     // CSFQ
-    CSFQState csfqState;    // CSFQ-related states
+    CSFQState csfq;    // CSFQ-related states
     FlowStateVector flowState;  // vector of flowState
     DoubleVector conformedRate; // vector of estimated rate of conformed flow
     DoubleVector nonconformedRate;  // vector of estimated rate of nonconformed flow
@@ -193,7 +197,7 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
     /**
      * From CSFQ.
      */
-    virtual void estimateAlpha(int pktSize, double arrvRate, double arrvTime, int enqueue);
+    virtual void estimateAlpha(int pktLength, double arrvRate, double arrvTime, int enqueue);
     virtual double estimateRate(int flowId, int pktLength, double arrvTime);
 };
 

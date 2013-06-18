@@ -122,8 +122,8 @@ void CSFQVLANTBFQueue::initialize()
     }
 
     // CSFQ
-    csfqState.alpha_ = csfqState.tmpAlpha_ = 0.;
-    csfqState.kalpha_ = KALPHA;
+    csfq.alpha_ = csfq.tmpAlpha_ = 0.;
+    csfq.kalpha_ = KALPHA;
 
 #ifdef PENALTY_BOX
     for (int i = 0; i < MONITOR_TABLE_SIZE; i++) {
@@ -137,10 +137,10 @@ void CSFQVLANTBFQueue::initialize()
     numDroppedPkts_ = 0;
 #endif
 
-    csfqState.lastArv_ = csfqState.rateAlpha_ = csfqState.rateTotal_ = 0.;
-    csfqState.lArv_ = 0.;
-    csfqState.pktSize_ = csfqState.pktSizeE_ = 0;
-    csfqState.congested_ = 1;
+    csfq.lastArv_ = csfq.rateAlpha_ = csfq.rateTotal_ = 0.;
+    csfq.lArv_ = 0.;
+    csfq.pktLength_ = csfq.pktLengthE_ = 0;
+    csfq.congested_ = 1;
 
 #ifdef PENALTY_BOX
     bind("kLink_", &kDropped_);
@@ -217,10 +217,9 @@ void CSFQVLANTBFQueue::handleMessage(cMessage *msg)
             conformedRate[flowId] = meanRate[flowId];
             nonconformedRate[flowId] = estimateRate(flowId, pktLength, simTime().dbl());
 
-            // TODO: Obtain dropping probability prob
-            if (prob > dblrand())
+            if (std::max(0.0, 1.0 - csfq.alpha_/nonconformedRate[flowId]) > dblrand())
             {
-                // TODO: Estimate alpha with 1
+                estimateAlpha(pktLength, nonconformedRate[flowId], simTime().dbl(), 1);
                 delete msg;
                 if (warmupFinished == true)
                 {
@@ -229,7 +228,7 @@ void CSFQVLANTBFQueue::handleMessage(cMessage *msg)
             }
             else
             {
-                // TODO: Estimate alpha with 0
+                estimateAlpha(pktLength, nonconformedRate[flowId], simTime().dbl(), 0);
                 bool dropped = enqueue(msg);
                 if (dropped)
                 {
@@ -351,141 +350,141 @@ void CSFQVLANTBFQueue::dumpTbfStatus(int flowId)
 // compute estimated flow rate by using exponential averaging
 double CSFQVLANTBFQueue::estimateRate(int flowId, int pktLength, double arrvTime)
 {
-    double d = (csfqState.arvTime - csfqState.fs_[flowId].csfqState.prevTime_) * 1000000;
-    double k = fs_[flowId].k_;
+    double d = (arrvTime - flowState[flowId].prevTime_) * 1000000;
+    double k = flowState[flowId].k_;
 
     if (d == 0.0)
     {
-        fs_[flowId].size_ += pktLength;
-        if (fs_[flowId].estRate_)
+        flowState[flowId].size_ += pktLength;
+        if (flowState[flowId].estRate_)
         {
-            return fs_[flowId].estRate_;
+            return flowState[flowId].estRate_;
         }
         else
         {   // this is the first packet; just initialize the rate
-            return (fs_[flowId].estRate_ = rateAlpha_ / 2);
+            return (flowState[flowId].estRate_ = csfq.rateAlpha_ / 2);
         }
     }
     else
     {
-        pktLength += fs_[flowId].size_;
-        fs_[flowId].size_ = 0;
+        pktLength += flowState[flowId].size_;
+        flowState[flowId].size_ = 0;
     }
 
-    flowState[flowId].prevTime_ = arvTime;
-    flowState[flowId].estRate_ = (1. - exp(-d / k)) * (double) pktLength / d + exp(-d / k) * fs_[flowId].estRate_;
+    flowState[flowId].prevTime_ = arrvTime;
+    flowState[flowId].estRate_ = (1. - exp(-d / k)) * (double) pktLength / d + exp(-d / k) * flowState[flowId].estRate_;
     return flowState[flowId].estRate_;
 }
 
 // estimate the link's alpha parameter
-void CSFQVLANTBFQueue::estimateAlpha(int pktSize, double pktLabel, double arvTime, int enqueue)
+void CSFQVLANTBFQueue::estimateAlpha(int pktLength, double arrvRate, double arrvTime, int enqueue)
 {
-    float d = (csfqState.arvTime - csfqState.lastArv_) * 1000000., w, rate = csfqState.rate_ / 1000000.;
-    double k = csfqState.kLink_ / 1000000.;
+    float d = (arrvTime - csfq.lastArv_) * 1000000., w, rate = csfq.rate_ / 1000000.;
+    double k = csfq.kLink_ / 1000000.;
 
     // set lastArv_ to the arrival time of the first packet
-    if (lastArv_ == 0.)
+    if (csfq.lastArv_ == 0.)
     {
-        lastArv_ = arvTime;
+        csfq.lastArv_ = arrvTime;
     }
 
     // account for packets received simultaneously
-    pktSize_ += pktSize;
+    csfq.pktLength_ += pktLength;
     if (enqueue)
     {
-        pktSizeE_ += pktSize;
+        csfq.pktLengthE_ += pktLength;
     }
-    if (arvTime == lastArv_)
+    if (arrvTime == csfq.lastArv_)
     {
         return;
     }
 
     // estimate the aggregate arrival rate (rateTotal_) and the
     // aggregate forwarded (rateAlpha_) rates
-    w = exp(-d / kLink_);
-    rateAlpha_ = (1 - w) * (double) pktSizeE_ / d + w * rateAlpha_;
-    rateTotal_ = (1 - w) * (double) pktSize_ / d + w * rateTotal_;
-    lastArv_ = arvTime;
-    pktSize_ = pktSizeE_ = 0;
+    w = exp(-d / csfq.kLink_);
+    csfq.rateAlpha_ = (1 - w) * (double) csfq.pktLengthE_ / d + w * csfq.rateAlpha_;
+    csfq.rateTotal_ = (1 - w) * (double) csfq.pktLength_ / d + w * csfq.rateTotal_;
+    csfq.lastArv_ = arrvTime;
+    csfq.pktLength_ = csfq.pktLengthE_ = 0;
 
     // compute the initial value of alpha_
-    if (csfqState.alpha_ == 0.)
+    if (csfq.alpha_ == 0.)
     {
         if (currentQueueSize < queueThreshold)
         {
-            if (tmpAlpha_ < pktLabel)
+            if (csfq.tmpAlpha_ < arrvRate)
             {
-                tmpAlpha_ = pktLabel;
+                csfq.tmpAlpha_ = arrvRate;
             }
             return;
         }
-        if (alpha_ < tmpAlpha_)
+        if (csfq.alpha_ < csfq.tmpAlpha_)
         {
-            alpha_ = tmpAlpha_;
+            csfq.alpha_ = csfq.tmpAlpha_;
         }
-        if (alpha_ == 0.)
+        if (csfq.alpha_ == 0.)
         {
-            alpha_ = rate / 2.;  // arbitrary initialization
+            csfq.alpha_ = rate / 2.;  // arbitrary initialization
         }
-        tmpAlpha_ = 0.;
+        csfq.tmpAlpha_ = 0.;
     }
     // update alpha_
-    if (rate <= rateTotal_)
+    if (rate <= csfq.rateTotal_)
     {   // link congested
-        if (!congested_)
+        if (!csfq.congested_)
         {
-            congested_ = 1;
-            lArv_ = arvTime;
-            kalpha_ = KALPHA;
+            csfq.congested_ = 1;
+            csfq.lArv_ = arrvTime;
+            csfq.kalpha_ = KALPHA;
         }
         else
         {
-            if (arvTime < lArv_ + k)
+            if (arrvTime < csfq.lArv_ + k)
             {
                 return;
             }
-            lArv_ = arvTime;
-            alpha_ *= rate / rateAlpha_;
-            if (rate < alpha_)
+            csfq.lArv_ = arrvTime;
+            csfq.alpha_ *= rate / csfq.rateAlpha_;
+            if (rate < csfq.alpha_)
             {
-                alpha_ = rate;
+                csfq.alpha_ = rate;
             }
         }
     }
     else
     {   // (rate < rateTotal_) => link uncongested
-        if (congested_)
+        if (csfq.congested_)
         {
-            congested_ = 0;
-            lArv_ = arvTime;
-            tmpAlpha_ = 0;
+            csfq.congested_ = 0;
+            csfq.lArv_ = arrvTime;
+            csfq.tmpAlpha_ = 0;
         }
         else
         {
-            if (arvTime < lArv_ + k)
+            if (arrvTime < csfq.lArv_ + k)
             {
-                if (tmpAlpha_ < pktLabel)
+                if (csfq.tmpAlpha_ < arrvRate)
                 {
-                    tmpAlpha_ = pktLabel;
+                    csfq.tmpAlpha_ = arrvRate;
                 }
             }
             else
             {
-                alpha_ = tmpAlpha_;
-                lArv_ = arvTime;
-                if (qsizeCrt_ < qsizeThresh_)
+                csfq.alpha_ = csfq.tmpAlpha_;
+                csfq.lArv_ = arrvTime;
+                if (currentQueueSize < queueThreshold)
                 {
-                    alpha_ = 0.;
+                    csfq.alpha_ = 0.;
                 }
                 else
                 {
-                    tmpAlpha_ = 0.;
+                    csfq.tmpAlpha_ = 0.;
                 }
             }
         }
     }
 #ifdef CSFQ_LOG
-    EV << id_ << " " << arvTime << " " << rateAlpha_ << " " << rateTotal_;
+    EV << id_ << " " << arrvTime << " " << csfq.rateAlpha_ << " " << csfq.rateTotal_;
 #endif
 }
 
