@@ -1,6 +1,7 @@
 %description:
 Testing IdealRadio, IdealChannelModel, IdealWirelessMac, IdealWirelessNic modules
 host1 and host2 send UDP packets to host0: both senders use full transmit capacity, host0 receives all packets
+Nic modules use internal queues
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini

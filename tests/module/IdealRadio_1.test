@@ -1,6 +1,7 @@
 %description:
 Testing IdealRadio, IdealChannelModel, IdealWirelessMac, IdealWirelessNic modules
 3 hosts pings host0: inside, on border, outside of transmitRange, pong host1 and host2 only
+Nic modules use internal queues
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
