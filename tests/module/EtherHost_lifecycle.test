@@ -87,6 +87,10 @@ network Test
 %#--------------------------------------------------------------------------------------------------------------
 %# sender[0]
 %#--------------------------------------------------------------------------------------------------------------
+%not-contains-regex: stdout
+\*\* Event \#\d+  T=[01](\.d+)?   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+Generating packet `req-\d+-\d+'
+%#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  T=2   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
@@ -173,6 +177,10 @@ Doing stage 5/8 of operation NodeShutdownOperation on Test\.sender\[0\]
 Doing stage 6/8 of operation NodeShutdownOperation on Test\.sender\[0\]
 Doing stage 7/8 of operation NodeShutdownOperation on Test\.sender\[0\]
 Test\.sender\[0\] shut down
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains-regex: stdout
+\*\* Event \#\d+  T=9(\.d+)?   Test\.sender\[0\]\.cli \(EtherAppCli, id=\d+\)
+Generating packet `req-\d+-\d+'
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %# sender[1]
