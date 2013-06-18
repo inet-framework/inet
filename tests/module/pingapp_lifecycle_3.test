@@ -51,3 +51,6 @@ Test.host starting up
 Test.host started
 
 <!> No more events -- simulation ended at event #\d+, t=6
+
+%not-contains: stdout
+Sending ping #
