@@ -55,7 +55,7 @@ network Test
         client: StandardHost;
         server: StandardHost;
     connections:
-        client.ethg++ <--> Eth10M <--> server.ethg++;
+        client.pppg++ <--> Eth10M <--> server.pppg++;
 }
 
 %file: scenario.xml
