@@ -9,6 +9,7 @@ network = Test
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
+record-eventlog = true
 #debugger-attach-on-error = true
 
 **.hasStatus = true
@@ -17,6 +18,8 @@ cmdenv-express-mode = false
 *.host.hasTcp = true
 *.host.hasUdp = true
 *.host.hasSctp = true
+*.host.eth[0].csmacdSupport = true
+*.host.eth[1].csmacdSupport = false
 
 %file: test.ned
 
@@ -30,7 +33,15 @@ network Test
     submodules:
         scenarioManager: ScenarioManager;
         lifecycleController: LifecycleController;
-        host: StandardHost;
+        host: StandardHost
+        {
+            gates:
+                ethg[2];
+                pppg[2];
+        }
+    connections:
+        host.ethg[0] <--> {datarate=10Mbps; delay=10us;} <--> host.ethg[1];
+        host.pppg[0] <--> {datarate=10Mbps; delay=10us;} <--> host.pppg[1];
 }
 
 %file: scenario.xml
