@@ -64,7 +64,7 @@ class INET_API MACRelayUnitPP : public MACRelayUnitBase
   protected:
     /** @name Redefined cSimpleModule member functions. */
     //@{
-    virtual void initialize();
+    virtual void initialize(int stage);
 
     /**
      * Calls handleIncomingFrame() for frames arrived from outside,
@@ -84,6 +84,10 @@ class INET_API MACRelayUnitPP : public MACRelayUnitBase
      * to the appropriate port, and starts processing the next frame.
      */
     virtual void processFrame(cMessage *msg);
+
+    // for lifecycle:
+    virtual void start();
+    virtual void stop();
 };
 
 #endif

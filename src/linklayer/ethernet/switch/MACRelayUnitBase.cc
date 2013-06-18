@@ -20,7 +20,8 @@
 #include "EtherFrame_m.h"
 #include "EtherMACBase.h"
 #include "Ethernet.h"
-
+#include "ModuleAccess.h"
+#include "NodeOperations.h"
 
 #define MAX_LINE 100
 
@@ -65,36 +66,44 @@ static char *fgetline(FILE *fp)
     return line;
 }
 
-void MACRelayUnitBase::initialize()
+void MACRelayUnitBase::initialize(int stage)
 {
-    // number of ports
-    numPorts = gate("lowerLayerOut", 0)->size();
-    if (gate("lowerLayerIn", 0)->size()!=numPorts)
-        error("the sizes of the lowerLayerIn[] and lowerLayerOut[] gate vectors must be the same");
+    if (stage == 0)
+    {
+        // number of ports
+        numPorts = gate("lowerLayerOut", 0)->size();
+        if (gate("lowerLayerIn", 0)->size()!=numPorts)
+            error("the sizes of the lowerLayerIn[] and lowerLayerOut[] gate vectors must be the same");
 
-    // other parameters
-    addressTableSize = par("addressTableSize");
-    addressTableSize = addressTableSize >= 0 ? addressTableSize : 0;
+        // other parameters
+        addressTableSize = par("addressTableSize");
+        addressTableSize = addressTableSize >= 0 ? addressTableSize : 0;
 
-    agingTime = par("agingTime");
-    agingTime = agingTime > 0 ? agingTime : 10;
+        agingTime = par("agingTime");
+        agingTime = agingTime > 0 ? agingTime : 10;
 
-    // Option to pre-read in Address Table. To turn ot off, set addressTableFile to empty string
-    const char *addressTableFile = par("addressTableFile");
-    if (addressTableFile && *addressTableFile)
-        readAddressTable(addressTableFile);
+        // Option to pre-read in Address Table. To turn ot off, set addressTableFile to empty string
+        const char *addressTableFile = par("addressTableFile");
+        if (addressTableFile && *addressTableFile)
+            readAddressTable(addressTableFile);
 
-    pauseFinished = new simtime_t[numPorts];
+        pauseFinished = new simtime_t[numPorts];
 #ifdef USE_DOUBLE_SIMTIME
-    for (int i=0; i<numPorts; i++)
+        for (int i=0; i<numPorts; i++)
         pauseFinished[i] = SIMTIME_ZERO;
 #else
-    // simtime_t constructor already initialize by SIMTIME_ZERO
+        // simtime_t constructor already initialize by SIMTIME_ZERO
 #endif
 
-    seqNum = 0;
+        seqNum = 0;
 
-    WATCH_MAP(addresstable);
+        WATCH_MAP(addresstable);
+    }
+    else if (stage == 1)
+    {
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+    }
 }
 
 void MACRelayUnitBase::handleAndDispatchFrame(EtherFrame *frame, int inputport)
@@ -333,5 +342,51 @@ void MACRelayUnitBase::sendPauseFramesIfNeeded(int pauseUnits)
         if (pauseFinished[i] <= now)
             sendPauseFrame(i, pauseUnits);
     }
+}
+
+void MACRelayUnitBase::start()
+{
+    for (int i=0; i < numPorts; ++i)
+        pauseFinished[i] = SIMTIME_ZERO;
+    addresstable.clear();
+    isOperational = true;
+}
+
+void MACRelayUnitBase::stop()
+{
+    for (int i=0; i < numPorts; ++i)
+        pauseFinished[i] = SIMTIME_ZERO;
+    addresstable.clear();
+    isOperational = false;
+}
+
+bool MACRelayUnitBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_LINK_LAYER) {
+            start();
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_LINK_LAYER) {
+            stop();
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            stop();
+        }
+    }
+    else
+    {
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    }
+
+    return true;
 }
 

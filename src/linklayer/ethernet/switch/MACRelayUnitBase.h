@@ -24,6 +24,7 @@
 
 #include "INETDefs.h"
 
+#include "ILifecycle.h"
 #include "MACAddress.h"
 
 class EtherFrame;
@@ -35,7 +36,7 @@ class EtherFrame;
  * behavior (incl. queueing and performance aspects) must be addressed
  * in subclasses.
  */
-class INET_API MACRelayUnitBase : public cSimpleModule
+class INET_API MACRelayUnitBase : public cSimpleModule, public ILifecycle
 {
   public:
     // An entry of the Address Lookup Table
@@ -63,6 +64,7 @@ class INET_API MACRelayUnitBase : public cSimpleModule
 
     int seqNum;                 // counter for PAUSE frames
     simtime_t *pauseFinished;   // finish time of last PAUSE (array of numPorts element)
+    bool isOperational;         // for lifecycle
 
   public:
     MACRelayUnitBase() { pauseFinished = NULL; }
@@ -72,7 +74,8 @@ class INET_API MACRelayUnitBase : public cSimpleModule
     /**
      * Read parameters parameters.
      */
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
 
     /**
      * Updates address table with source address, determines output port
@@ -130,6 +133,14 @@ class INET_API MACRelayUnitBase : public cSimpleModule
      * PAUSE frame on the ports, which previous PAUSE time is terminated.
      */
     virtual void sendPauseFramesIfNeeded(int pauseUnits);
+
+    // for lifecycle:
+  public:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
+  protected:
+    virtual void start();
+    virtual void stop();
 };
 
 #endif
