@@ -225,6 +225,8 @@ bool Radio::handleOperationStage(LifecycleOperation *operation, int stage, IDone
         if (stage == NodeStartOperation::STAGE_LOCAL)  // crash is immediate
             setRadioState(RadioState::OFF);
     }
+    else
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
     return true;
 }
 
