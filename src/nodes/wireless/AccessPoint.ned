@@ -21,6 +21,7 @@ import inet.linklayer.IMACRelayUnit;
 import inet.linklayer.IWirelessNic;
 import inet.mobility.IMobility;
 import inet.networklayer.common.InterfaceTable;
+import inet.status.NodeStatus;
 
 
 //
@@ -47,21 +48,26 @@ module AccessPoint
         string mobilityType = default("StationaryMobility"); // how the node moves around. see: inet.mobility
         string relayUnitType = default(haveClass("MACRelayUnitNP")?"MACRelayUnitNP":"MACRelayUnit_None"); // type of the IMACRelayUnit (MACRelayUnitNP, MACRelayUnitPP, etc)
         int numRadios = default(1);               // the number of radios in the access point
+        bool hasStatus = default(false);
         wlan[*].mgmtType = default("Ieee80211MgmtAP");
     gates:
         input radioIn[numRadios] @directIn;
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
+        status: NodeStatus if hasStatus {
+            @display("p=51,43");
+        }
+
         interfaceTable: InterfaceTable {
-            @display("p=59,121");
+            @display("p=51,121;is=s");
         }
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=59,43");
+                @display("p=128,27;is=s");
         }
         mobility: <mobilityType> like IMobility {
             parameters:
-                @display("p=169,43");
+                @display("p=208,43");
         }
         relayUnit: <relayUnitType> like IMACRelayUnit if sizeof(ethg)+numRadios>1 {
             parameters:
@@ -69,7 +75,7 @@ module AccessPoint
         }
         wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
             parameters:
-                @display("p=89,225;q=queue");
+                @display("p=89,225,row;q=queue");
         }
         eth[sizeof(ethg)]: <default("EtherMACFullDuplex")> like IEtherMAC {
             parameters:
