@@ -46,7 +46,7 @@ void TestApp::initialize()
       IPv4Datagram *datagram = new IPv4Datagram(buf);
       send(datagram, "out", i);
     }
-    
+
     // send 64 IPv6 datagram
     for (int i = 0; i < 64; i++)
     {
@@ -67,13 +67,13 @@ void TestApp::handleMessage(cMessage *msg)
   {
     IPv4Datagram *datagram = (IPv4Datagram*)msg;
     out << datagram->getName() << ": " << datagram->getDiffServCodePoint() << "\n";
-    delete datagram;
   }
   else if (dynamic_cast<IPv6Datagram*>(msg))
   {
     IPv6Datagram *datagram = (IPv6Datagram*)msg;
     out << datagram->getName() << ": " << datagram->getDiffServCodePoint() << "\n";
   }
+  delete msg;
 }
 
 }
