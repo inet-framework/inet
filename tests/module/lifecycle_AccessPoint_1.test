@@ -54,6 +54,9 @@ network Test
     <at t="2.0">
         <tell module="lifecycleController" target="host" operation="NodeStartOperation"/>
     </at>
+    <at t="2.5">
+        <tell module="lifecycleController" target="host" operation="NodeShutdownOperation"/>
+    </at>
 </scenario>
 
 %contains-regex: stdout
@@ -65,6 +68,10 @@ Test.host shut down
 Test.host starting up
 .*
 Test.host started
+.*
+Test.host shutting down
+.*
+Test.host shut down
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
