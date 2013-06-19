@@ -19,7 +19,9 @@
 #include "Ieee80211MgmtBase.h"
 
 #include "Ieee802Ctrl_m.h"
-
+#include "LifecycleOperation.h"
+#include "NodeOperations.h"
+#include "NodeStatus.h"
 
 simsignal_t Ieee80211MgmtBase::dataQueueLenSignal = SIMSIGNAL_NULL;
 
@@ -52,6 +54,9 @@ void Ieee80211MgmtBase::initialize(int stage)
     }
     else if (stage==1)
     {
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+
         // obtain our address from MAC
         cModule *mac = getParentModule()->getSubmodule("mac");
         if (!mac)
@@ -62,6 +67,9 @@ void Ieee80211MgmtBase::initialize(int stage)
 
 void Ieee80211MgmtBase::handleMessage(cMessage *msg)
 {
+    if (!isOperational)
+        throw cRuntimeError("Message '%s' received when module is OFF", msg->getName());
+
     if (msg->isSelfMessage())
     {
         // process timers
@@ -100,6 +108,7 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
 
 void Ieee80211MgmtBase::sendOrEnqueue(cPacket *frame)
 {
+    ASSERT(isOperational);
     PassiveQueueBase::handleMessage(frame);
 }
 
@@ -154,6 +163,7 @@ cMessage *Ieee80211MgmtBase::dequeue()
 
 void Ieee80211MgmtBase::sendOut(cMessage *msg)
 {
+    ASSERT(isOperational);
     send(msg, "macOut");
 }
 
@@ -182,6 +192,7 @@ cPacket *Ieee80211MgmtBase::decapsulate(Ieee80211DataFrame *frame)
 
 void Ieee80211MgmtBase::sendUp(cMessage *msg)
 {
+    ASSERT(isOperational);
     send(msg, "upperLayerOut");
 }
 
@@ -247,5 +258,39 @@ void Ieee80211MgmtBase::processFrame(Ieee80211DataOrMgmtFrame *frame)
       default:
         throw cRuntimeError("Unexpected frame type (%s)%s", frame->getClassName(), frame->getName());
     }
+}
+
+bool Ieee80211MgmtBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
+            start();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
+            stop();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_LOCAL)  // crash is immediate
+            stop();
+    }
+    else
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    return true;
+}
+
+void Ieee80211MgmtBase::start()
+{
+    isOperational = true;
+}
+
+void Ieee80211MgmtBase::stop()
+{
+    clear();
+    dataQueue.clear();
+    emit(dataQueueLenSignal, dataQueue.length());
+    mgmtQueue.clear();
+    isOperational = false;
 }
 

@@ -122,6 +122,13 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     void sendAssocNotification(const MACAddress &addr);
 
     void sendDisAssocNotification(const MACAddress &addr);
+
+    /** lifecycle support */
+    //@{
+  protected:
+    virtual void start();
+    virtual void stop();
+    //@}
 };
 
 #endif

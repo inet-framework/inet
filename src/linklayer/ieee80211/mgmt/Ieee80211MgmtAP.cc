@@ -67,7 +67,8 @@ void Ieee80211MgmtAP::initialize(int stage)
     }
     else if (stage == 1)
     {
-        scheduleAt(simTime()+uniform(0, beaconInterval), beaconTimer);
+        if (isOperational)
+            scheduleAt(simTime()+uniform(0, beaconInterval), beaconTimer);
     }
 }
 
@@ -423,5 +424,18 @@ void Ieee80211MgmtAP::sendDisAssocNotification(const MACAddress &addr)
     notif.setApAddress(myAddress);
     notif.setStaAddress(addr);
     nb->fireChangeNotification(NF_L2_AP_DISASSOCIATED,&notif);
+}
+
+void Ieee80211MgmtAP::start()
+{
+    Ieee80211MgmtAPBase::start();
+    scheduleAt(simTime()+uniform(0, beaconInterval), beaconTimer);
+}
+
+void Ieee80211MgmtAP::stop()
+{
+    cancelEvent(beaconTimer);
+    staList.clear();
+    Ieee80211MgmtAPBase::stop();
 }
 
