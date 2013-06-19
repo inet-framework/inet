@@ -37,6 +37,11 @@ static std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtAP::STAInfo
     return os;
 }
 
+Ieee80211MgmtAP::~Ieee80211MgmtAP()
+{
+    cancelAndDelete(beaconTimer);
+}
+
 void Ieee80211MgmtAP::initialize(int stage)
 {
     Ieee80211MgmtAPBase::initialize(stage);
