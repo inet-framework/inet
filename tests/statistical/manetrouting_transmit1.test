@@ -102,7 +102,7 @@ description = "Aodv Simple test"
 **.udpApp[0].sleepDuration = 1s
 # **.udpApp[0].burstDuration = uniform(1s,4s,1)
 # **.udpApp[0].stopTime = uniform(20s,40s,1)
-**.udpApp[0].stopTime = 0s
+**.udpApp[0].stopTime = -1s
 ##**.udpApp[0].startTime = uniform(0s,4s,1)
 **.udpApp[0].startTime = 10s
 **.udpApp[0].delayLimit = 20s
@@ -119,7 +119,7 @@ description = "Aodv Simple test"
 # ping app (off)
 **.pingApp.count = 0
 **.pingApp.startTime = 1s
-**.pingApp.stopTime = 0
+**.pingApp.stopTime = -1s
 **.pingApp.printPing = true
 
 # tcp settings
