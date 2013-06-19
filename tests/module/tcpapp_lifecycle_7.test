@@ -87,3 +87,10 @@ Test.server shut down
 .*
 Test.client.tcpApp\[0\]: received 1000 bytes in 10 packets
 .*
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

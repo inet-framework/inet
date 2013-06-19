@@ -42,3 +42,9 @@ cmdenv-express-mode=false
 ICMPv6 packet: passing it to higher layer
 %contains: stdout
 Ignoring UDP error report
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

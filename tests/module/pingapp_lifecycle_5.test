@@ -56,3 +56,10 @@ Sending ping #0
 Sending ping #3
 
 <!> Simulation time limit reached -- simulation stopped at event #\d+, t=9
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

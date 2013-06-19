@@ -87,3 +87,8 @@ scalar NetIdealRadios.host[3].pingApp[0] 	pingRxSeq:count 	0
 %contains: results/General-0.sca
 scalar NetIdealRadios.host[3].pingApp[0] 	pingTxSeq:count 	100
 %#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

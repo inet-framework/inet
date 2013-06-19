@@ -228,3 +228,9 @@ cmdenv-express-mode=false
 #43:20000071903992: 'IFG' (EtherIFG) sent:20000071903992 (12 byte) discard:0, delay:0, duration:96000
 #44:20000071999992: 'PK at 20: 980 Bytes' (EtherFrame) sent:20000071999992 (988 byte) discard:0, delay:0, duration:7903999
 
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

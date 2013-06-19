@@ -54,3 +54,10 @@ Test.host started
 
 %not-contains: stdout
 Sending ping #
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

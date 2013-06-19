@@ -67,3 +67,9 @@ Socket created: sockId=2 appGateIndex=0 localPort=1025
 Socket connected: sockId=2 appGateIndex=0 localPort=1025 remotePort=1000 remoteAddr=10.0.0.1 multicastLoop=0
 .*
 Socket connected: sockId=2 appGateIndex=0 localPort=100 remotePort=2000 remoteAddr=10.0.0.2 multicastLoop=0
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

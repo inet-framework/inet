@@ -38,3 +38,9 @@ cmdenv-express-mode=false
 This fragment completes the datagram.
 %contains: stdout
 Received packet: (cPacket)UDPBasicAppData-0 (5000 bytes)
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

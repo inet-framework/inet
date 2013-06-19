@@ -64,3 +64,9 @@ Test.host shut down
 Test.host starting up
 .*
 Test.host started
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

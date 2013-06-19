@@ -50,3 +50,9 @@ packet-7    Yellow
 packet-8    Green
 packet-9    Yellow
 packet-10   Green
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

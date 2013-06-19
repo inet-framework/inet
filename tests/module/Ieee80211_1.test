@@ -52,3 +52,9 @@ ned-path = .;../../../../src
 
 %contains: results/General-0.elog
 - reception of noise message over, removing recvdPower from noiseLevel....
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

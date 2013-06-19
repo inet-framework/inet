@@ -29,3 +29,10 @@ include ../../lib/defaults.ini
 
 %contains: stdout
 [3.204] tcpdump finished, A:5 B:4 segments
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

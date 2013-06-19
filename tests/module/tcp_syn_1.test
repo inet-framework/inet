@@ -40,3 +40,9 @@ srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
 %contains: stdout
 [1.204] tcpdump finished, A:4 B:3 segments
 
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

@@ -75,3 +75,8 @@ scalar NetIdealRadios.host[1].udpApp[0] 	sentPk:count 	10000
 %contains: results/General-0.sca
 scalar NetIdealRadios.host[2].udpApp[0] 	sentPk:count 	10000
 %#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

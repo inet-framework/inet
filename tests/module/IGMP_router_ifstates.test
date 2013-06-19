@@ -66,3 +66,9 @@ t=0.* nqrouter/eth0/<unspec>: QUERIER --> query received <> --> NON_QUERIER
 t=100\..* nqrouter/eth0/<unspec>: NON_QUERIER --> query received <> --> NON_QUERIER
 t=305\..* nqrouter/eth0: NON_QUERIER --> other querier present timer expired <send query> --> QUERIER
 t=405\..* nqrouter/eth0: QUERIER --> gen. query timer expired <send query> --> QUERIER
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

@@ -41,3 +41,9 @@ cmdenv-express-mode=false
 %contains: stdout
 L3 Protocol not connected. discarding packet
 sending ICMP error ICMP-error-#1-type13-code2
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

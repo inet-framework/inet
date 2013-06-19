@@ -83,3 +83,10 @@ Test.client started
 .*
 Test.server.udpApp\[0\]: received 0 packets
 .*
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

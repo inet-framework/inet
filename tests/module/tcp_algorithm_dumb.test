@@ -80,3 +80,9 @@ scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
 %contains: results/General-6.sca
 scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
 
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

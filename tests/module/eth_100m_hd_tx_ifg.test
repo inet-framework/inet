@@ -67,4 +67,9 @@ cmdenv-express-mode=false
 #3:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:8000000
 #4:20000008959999: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000008959999 (100 byte) discard:0, delay:0, duration:8000000
 
-
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

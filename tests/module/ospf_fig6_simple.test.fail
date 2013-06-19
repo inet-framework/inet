@@ -291,3 +291,8 @@ scalar Fig6.Area3_H1.udpApp[1] 	sentPk:count 	100
 %contains: results/General-0.sca
 scalar Fig6.Area3_H1.udpApp[1] 	rcvdPk:count 	100
 %#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

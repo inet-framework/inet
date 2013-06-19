@@ -59,3 +59,9 @@ Link 1
     mobile\[1\] / wlan0  on:nwLayer.ifOut\[0\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-07 IPv4:\{inet_addr:10.0.0.11/29.*\}
     mobile\[2\] / wlan0  on:nwLayer.ifOut\[0\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-08 IPv4:\{inet_addr:10.0.0.12/29.*\}
 
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

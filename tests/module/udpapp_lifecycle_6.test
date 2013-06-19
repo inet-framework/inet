@@ -83,3 +83,10 @@ Test.client shut down
 .*
 Test.server.udpApp\[0\]: received 10 packets
 .*
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

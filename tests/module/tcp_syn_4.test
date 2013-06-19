@@ -37,3 +37,10 @@ cli_tcp: SYN_SENT --> CLOSED  (on TIMEOUT_CONN_ESTAB)
 
 %contains: stdout
 [75.000] tcpdump finished, A:5 B:0 segments
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

@@ -94,3 +94,8 @@ CloudAndHosts\.sender\[1\]\.pingApp\[0\]: reply of 56 bytes from 10\.0\.0.\d+ ic
 CloudAndHosts\.sender\[0\]\.pingApp\[0\]: reply of 56 bytes from 10\.0\.0.\d+ icmp_seq=0 ttl=28 time=.*
 [^C].*
 %#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

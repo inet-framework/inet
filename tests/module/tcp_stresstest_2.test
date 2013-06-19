@@ -30,3 +30,10 @@ include ../../lib/defaults.ini
 TcpTestNet2.cli_app: received 0 bytes in 0 packets
 TcpTestNet2.srv_app: received 655360 bytes in 447 packets
 [293.525] tcpdump finished, A:727 B:523 segments
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

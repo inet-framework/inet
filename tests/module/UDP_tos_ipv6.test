@@ -34,3 +34,9 @@ cmdenv-express-mode = false
 
 %contains-regex: stdout
 Received packet: \(cPacket\)UDPBasicAppData-0 .* ToS=53
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

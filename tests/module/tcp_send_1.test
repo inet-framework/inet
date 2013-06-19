@@ -37,3 +37,9 @@ TcpTestNet1.cli_app: received 0 bytes in 0 packets
 TcpTestNet1.srv_app: received 100 bytes in 1 packets
 [0.208] tcpdump finished, A:2 B:2 segments
 
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

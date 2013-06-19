@@ -272,3 +272,8 @@ scalar Test1.H2.udpApp[0] 	rcvdPk:count 	100
 %contains: results/General-6.sca
 scalar Test1.H2.udpApp[1] 	echoedPk:count 	100
 %#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

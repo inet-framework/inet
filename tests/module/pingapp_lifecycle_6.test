@@ -58,3 +58,10 @@ Sending ping #3
 .*
 
 <!> No more events -- simulation ended at event #\d+, t=6
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

@@ -43,3 +43,9 @@ cli_tcp: ESTABLISHED --> CLOSED  (on ABORT)
 %contains: stdout
 [1822.000] tcpdump finished, A:15 B:1 segments
 
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------
