@@ -335,7 +335,6 @@ OLSROPT::link_sensing(OLSR_msg& msg, const nsaddr_t &receiver_iface, const nsadd
     double now = CURRENT_TIME;
     bool updated = false;
     bool created = false;
-    bool change = false;
 
     OLSR_link_tuple* link_tuple = state_.find_link_tuple(sender_iface);
     if (link_tuple == NULL)
