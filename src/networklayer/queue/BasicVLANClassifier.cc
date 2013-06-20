@@ -26,6 +26,23 @@
 
 Register_Class(BasicVLANClassifier);
 
+void BasicVLANClassifier::initialize(const char *str)
+{
+    cStringTokenizer tokenizer(str);
+    while (tokenizer.hasMoreTokens())
+    {
+        if (numQueues >= maxNumQueues)
+        {
+            throw cRuntimeError("%s::initializeIndexTable: Exceeds the maximum number of queues", getFullPath().c_str());
+        }
+        else
+        {
+            const char *token = tokenizer.nextToken();
+            indexTable[atof(token)] = numQueues++;
+        }
+    }
+}
+
 int BasicVLANClassifier::getNumQueues()
 {
 //    return indexTable.size();
