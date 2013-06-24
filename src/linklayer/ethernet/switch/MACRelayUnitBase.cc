@@ -310,16 +310,11 @@ void MACRelayUnitBase::sendPauseFrame(int portno, int pauseUnits)
 {
     EV << "Creating and sending PAUSE frame on port " << portno << " with duration=" << pauseUnits << " units\n";
 
-    cGate* gate = this->gate("lowerLayerOut", portno);
-    EtherMACBase *destModule = check_and_cast<EtherMACBase*>(gate->getPathEndGate()->getOwnerModule());
-
     IInterfaceTable *ift = InterfaceTableAccess().get();
     InterfaceEntry *ie = ift->getInterfaceByNetworkLayerGateIndex(portno);
-    ASSERT(ie->getInterfaceModule() == destModule);
 
     if (ie->isUp())
     {
-        ASSERT(destModule->isActive());
         // create Ethernet frame
         char framename[40];
         sprintf(framename, "pause-%d-%d", getId(), seqNum++);
@@ -330,12 +325,10 @@ void MACRelayUnitBase::sendPauseFrame(int portno, int pauseUnits)
         frame->setByteLength(ETHER_PAUSE_COMMAND_PADDED_BYTES);
 
         send(frame, "lowerLayerOut", portno);
-        ASSERT(ie->getDatarate() == destModule->getTxRate());
         pauseFinished[portno] = simTime() + ((double)PAUSE_UNIT_BITS) * pauseUnits / ie->getDatarate();
     }
     else //disconnected or disabled
     {
-        ASSERT(!(destModule->isActive()));
         pauseFinished[portno] = SIMTIME_ZERO;
     }
 }
