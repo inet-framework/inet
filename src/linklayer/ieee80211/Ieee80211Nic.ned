@@ -43,38 +43,42 @@ module Ieee80211Nic like IWirelessNic
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
         bool _agentNeeded = (mgmtType == "Ieee80211MgmtSTA");   // internal par. do not use, shows if optional agent module is needed
-        @display("i=block/ifcard;bgb=259,357");
+        @display("i=block/ifcard;bgb=336,357");
     gates:
         input upperLayerIn; // to upper layers
         output upperLayerOut; // from upper layers
         input radioIn @labels(AirFrame); // to receive AirFrames
     submodules:
-        outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0;
-        inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0;
+        outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0 {
+            @display("p=218,70");
+        }
+        inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
+            @display("p=107,55");
+        }
         // optional agent module (can be either 0 or 1 sized vector)
         agent: Ieee80211AgentSTA if _agentNeeded {
             parameters:
-                @display("p=202,136");
+                @display("p=261,131");
         }
         mgmt: <mgmtType> like IIeee80211Mgmt {
             parameters:
-                @display("p=96,136;q=wlanDataQueue");
+                @display("p=157,131;q=wlanDataQueue");
         }
         mac: Ieee80211Mac {
             parameters:
                 opMode = opMode;
                 bitrate = bitrate;
                 queueModule = "mgmt";
-                @display("p=96,222");
+                @display("p=157,217");
         }
         radio: Ieee80211Radio {
             parameters:
                 phyOpMode = opMode;
                 bitrate = bitrate;
-                @display("p=96,307");
+                @display("p=157,302");
         }
     connections:
-        radioIn --> radio.radioIn;
+        radioIn --> { @display("m=s"); } --> radio.radioIn;
         radio.upperLayerIn <-- mac.lowerLayerOut;
         radio.upperLayerOut --> mac.lowerLayerIn;
 
@@ -84,15 +88,15 @@ module Ieee80211Nic like IWirelessNic
         mgmt.agentOut --> agent.mgmtIn if _agentNeeded;
         mgmt.agentIn <-- agent.mgmtOut if _agentNeeded;
 
-        mgmt.upperLayerOut --> upperLayerOut if numInputHooks == 0;
-        mgmt.upperLayerIn <-- upperLayerIn if numOutputHooks == 0;
+        mgmt.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0;
+        mgmt.upperLayerIn <-- { @display("m=n"); } <-- upperLayerIn if numOutputHooks == 0;
 
         mgmt.upperLayerOut --> inputHook[0].in if numInputHooks > 0;
         for i=0..numInputHooks-2 {
             inputHook[i].out --> inputHook[i+1].in;
         }
-        inputHook[numInputHooks-1].out --> upperLayerOut if numInputHooks > 0;
-        outputHook[0].in <-- upperLayerIn if numOutputHooks > 0;
+        inputHook[numInputHooks-1].out --> { @display("m=n"); } --> upperLayerOut if numInputHooks > 0;
+        outputHook[0].in <-- { @display("m=n"); } <-- upperLayerIn if numOutputHooks > 0;
         for i=0..numOutputHooks-2 {
             outputHook[i].out --> outputHook[i+1].in;
         }
