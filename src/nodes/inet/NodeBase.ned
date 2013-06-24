@@ -115,19 +115,19 @@ module NodeBase
     connections allowunconnected:
         // connections to network outside
         for i=0..sizeof(radioIn)-1 {
-            radioIn[i] --> wlan[i].radioIn;
+            radioIn[i] --> { @display("m=s"); } --> wlan[i].radioIn;
             wlan[i].upperLayerOut --> networkLayer.ifIn++;
             wlan[i].upperLayerIn <-- networkLayer.ifOut++;
         }
 
         for i=0..sizeof(ethg)-1 {
-            ethg[i] <--> eth[i].phys;
+            ethg[i] <--> { @display("m=s"); } <--> eth[i].phys;
             eth[i].upperLayerOut --> networkLayer.ifIn++;
             eth[i].upperLayerIn <-- networkLayer.ifOut++;
         }
 
         for i=0..sizeof(pppg)-1 {
-            pppg[i] <--> ppp[i].phys;
+            pppg[i] <--> { @display("m=s"); } <--> ppp[i].phys;
             ppp[i].upperLayerOut --> networkLayer.ifIn++;
             ppp[i].upperLayerIn <-- networkLayer.ifOut++;
         }
