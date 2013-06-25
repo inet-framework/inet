@@ -16,9 +16,9 @@
 package inet.nodes.wireless;
 
 import inet.base.NotificationBoard;
-import inet.linklayer.IEtherMAC;
 import inet.linklayer.IMACRelayUnit;
 import inet.linklayer.IWirelessNic;
+import inet.linklayer.ethernet.EthNic;
 import inet.mobility.IMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.status.NodeStatus;
@@ -77,11 +77,10 @@ module AccessPoint
             parameters:
                 @display("p=89,225,row;q=queue");
         }
-        eth[sizeof(ethg)]: <default("EtherMACFullDuplex")> like IEtherMAC {
+        eth[sizeof(ethg)]: EthNic {
             parameters:
-                promiscuous = true;
-                txQueueLimit = 1000; // increase if needed
-                queueModule = "";
+                macType = default("EtherMACFullDuplex");
+                mac.promiscuous = true;
                 @display("p=208,225,row;q=txQueue");
         }
     connections allowunconnected:

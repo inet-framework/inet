@@ -19,8 +19,8 @@
 package inet.nodes.ethernet;
 
 import inet.base.NotificationBoard;
-import inet.linklayer.IEtherMAC;
 import inet.linklayer.IMACRelayUnit;
+import inet.linklayer.ethernet.EthNic;
 import inet.networklayer.common.InterfaceTable;
 import inet.status.NodeStatus;
 
@@ -66,10 +66,10 @@ module EtherSwitch
                 lowerLayerIn[sizeof(ethg)];
                 lowerLayerOut[sizeof(ethg)];
         }
-        eth[sizeof(ethg)]: <macType> like IEtherMAC {
+        eth[sizeof(ethg)]: EthNic {
             parameters:
-                promiscuous = true;
-                queueModule = "";
+                macType = macType;
+                mac.promiscuous = true;
                 @display("p=170,150,row;q=txQueue");
         }
     connections:
