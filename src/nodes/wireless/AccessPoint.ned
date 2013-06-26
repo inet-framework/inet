@@ -80,7 +80,6 @@ module AccessPoint
         eth[sizeof(ethg)]: EthernetInterface {
             parameters:
                 encapType = "EtherEncapDummy";
-                queueType = "";
                 mac.promiscuous = true;
                 @display("p=208,225,row;q=txQueue");
         }

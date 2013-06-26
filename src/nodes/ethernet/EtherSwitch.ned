@@ -69,7 +69,6 @@ module EtherSwitch
         eth[sizeof(ethg)]: EthernetInterface {
             parameters:
                 encapType = "EtherEncapDummy";
-                queueType = "";
                 csmacdSupport = csmacdSupport;
                 macType = macType;
                 mac.promiscuous = true;
