@@ -20,7 +20,7 @@ package inet.nodes.ethernet;
 
 import inet.base.NotificationBoard;
 import inet.linklayer.IMACRelayUnit;
-import inet.linklayer.ethernet.EthNic;
+import inet.linklayer.ethernet.EthernetInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.status.NodeStatus;
 
@@ -66,8 +66,11 @@ module EtherSwitch
                 lowerLayerIn[sizeof(ethg)];
                 lowerLayerOut[sizeof(ethg)];
         }
-        eth[sizeof(ethg)]: EthNic {
+        eth[sizeof(ethg)]: EthernetInterface {
             parameters:
+                encapType = "EtherEncapDummy";
+                queueType = "";
+                csmacdSupport = csmacdSupport;
                 macType = macType;
                 mac.promiscuous = true;
                 @display("p=170,150,row;q=txQueue");
