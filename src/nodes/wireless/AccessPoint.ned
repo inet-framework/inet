@@ -17,8 +17,8 @@ package inet.nodes.wireless;
 
 import inet.base.NotificationBoard;
 import inet.linklayer.IMACRelayUnit;
+import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
-import inet.linklayer.ethernet.EthernetInterface;
 import inet.mobility.IMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.status.NodeStatus;
@@ -50,6 +50,7 @@ module AccessPoint
         int numRadios = default(1);               // the number of radios in the access point
         bool hasStatus = default(false);
         wlan[*].mgmtType = default("Ieee80211MgmtAP");
+        eth[*].encapType = "EtherEncapDummy";
     gates:
         input radioIn[numRadios] @directIn;
         inout ethg[] @labels(EtherFrame-conn);
@@ -77,9 +78,8 @@ module AccessPoint
             parameters:
                 @display("p=89,225,row;q=queue");
         }
-        eth[sizeof(ethg)]: EthernetInterface {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
-                encapType = "EtherEncapDummy";
                 mac.promiscuous = true;
                 @display("p=208,225,row;q=txQueue");
         }

@@ -20,7 +20,7 @@ package inet.nodes.ethernet;
 
 import inet.base.NotificationBoard;
 import inet.linklayer.IMACRelayUnit;
-import inet.linklayer.ethernet.EthernetInterface;
+import inet.linklayer.IWiredNic;
 import inet.networklayer.common.InterfaceTable;
 import inet.status.NodeStatus;
 
@@ -45,6 +45,9 @@ module EtherSwitch
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string relayUnitType = default("MACRelayUnitNP"); // type of the ~IMACRelayUnit; currently possible
+        eth[*].encapType = "EtherEncapDummy";
+        eth[*].csmacdSupport = csmacdSupport;
+        eth[*].macType = macType;
                                                           // values are ~MACRelayUnitNP and ~MACRelayUnitPP
     gates:
         inout ethg[] @labels(EtherFrame-conn);
@@ -62,22 +65,16 @@ module EtherSwitch
         relayUnit: <relayUnitType> like IMACRelayUnit {
             parameters:
                 @display("p=270,50");
-            gates:
-                lowerLayerIn[sizeof(ethg)];
-                lowerLayerOut[sizeof(ethg)];
         }
-        eth[sizeof(ethg)]: EthernetInterface {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
-                encapType = "EtherEncapDummy";
-                csmacdSupport = csmacdSupport;
-                macType = macType;
                 mac.promiscuous = true;
                 @display("p=170,150,row;q=txQueue");
         }
     connections:
         for i=0..sizeof(ethg)-1 {
-            eth[i].upperLayerIn <-- relayUnit.lowerLayerOut[i];
-            eth[i].upperLayerOut --> relayUnit.lowerLayerIn[i];
+            eth[i].upperLayerIn <-- relayUnit.lowerLayerOut++;
+            eth[i].upperLayerOut --> relayUnit.lowerLayerIn++;
             eth[i].phys <--> ethg[i];
         }
 }
