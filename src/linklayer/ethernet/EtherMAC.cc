@@ -390,7 +390,11 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     simtime_t endRxTime = simTime() + msg->getDuration();
     EtherJam *jamMsg = dynamic_cast<EtherJam*>(msg);
 
-    if (!duplexMode && receiveState == RX_RECONNECT_STATE)
+    if (duplexMode && jamMsg)
+    {
+        error("Stray jam signal arrived in full-duplex mode");
+    }
+    else if (!duplexMode && receiveState == RX_RECONNECT_STATE)
     {
         long treeId = jamMsg ? jamMsg->getAbortedPkTreeID() : msg->getTreeId();
         addReceptionInReconnectState(treeId, endRxTime);
