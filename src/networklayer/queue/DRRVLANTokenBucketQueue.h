@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2012 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2005 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -17,14 +17,14 @@
 //
 
 
-#ifndef __INET_DRRVLANTokenBucketQUEUE_H
-#define __INET_DRRVLANTokenBucketQUEUE_H
+#ifndef __INET_DROPTAILVLANTBFQUEUE_H
+#define __INET_DROPTAILVLANTBFQUEUE_H
 
 #include <omnetpp.h>
 #include <sstream>
 #include <vector>
 #include "PassiveQueueBase.h"
-#include "BasicTokenBucketMeter.h"
+#include "IQoSClassifier.h"
 
 /**
  * Returns the maximum of a and b.
@@ -36,7 +36,7 @@ inline double max(const double a, const double b) { return (a > b) ? a : b; }
  * and round-robin (RR) scheduler.
  * See NED for more info.
  */
-class INET_API DRRVLANTokenBucketQueue : public PassiveQueueBase
+class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
 {
     // type definitions for member variables
     typedef std::vector<bool> BoolVector;
@@ -81,8 +81,8 @@ class INET_API DRRVLANTokenBucketQueue : public PassiveQueueBase
     cGate *outGate;
 
   public:
-    DRRVLANTokenBucketQueue();
-    virtual ~DRRVLANTokenBucketQueue();
+    DropTailVLANTBFQueue();
+    virtual ~DropTailVLANTBFQueue();
 
   protected:
     virtual void initialize();
@@ -130,3 +130,5 @@ class INET_API DRRVLANTokenBucketQueue : public PassiveQueueBase
 };
 
 #endif
+
+
