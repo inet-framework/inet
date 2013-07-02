@@ -78,7 +78,7 @@ void EtherAppCli::initialize(int stage)
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
 
         if (isNodeUp() && isGenerator())
-            scheduleNextPacket(-1);
+            scheduleNextPacket(true);
     }
 }
 
@@ -100,7 +100,7 @@ void EtherAppCli::handleMessage(cMessage *msg)
                 return;
         }
         sendPacket();
-        scheduleNextPacket(simTime());
+        scheduleNextPacket(false);
     }
     else
         receivePacket(check_and_cast<cPacket*>(msg));
@@ -111,7 +111,7 @@ bool EtherAppCli::handleOperationStage(LifecycleOperation *operation, int stage,
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER && isGenerator())
-            scheduleNextPacket(-1);
+            scheduleNextPacket(true);
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
@@ -135,17 +135,18 @@ bool EtherAppCli::isGenerator()
     return par("destAddress").stringValue()[0];
 }
 
-void EtherAppCli::scheduleNextPacket(simtime_t previous)
+void EtherAppCli::scheduleNextPacket(bool start)
 {
+    simtime_t cur = simTime();
     simtime_t next;
-    if (previous == -1)
+    if (start)
     {
-        next = simTime() <= startTime ? startTime : simTime();
+        next = cur <= startTime ? startTime : cur;
         timerMsg->setKind(START);
     }
     else
     {
-        next = previous + sendInterval->doubleValue();
+        next = cur + sendInterval->doubleValue();
         timerMsg->setKind(NEXT);
     }
     if (stopTime == -1  || next <= stopTime)

@@ -69,7 +69,7 @@ class INET_API EtherAppCli : public cSimpleModule, public ILifecycle
 
     virtual bool isNodeUp();
     virtual bool isGenerator();
-    virtual void scheduleNextPacket(simtime_t previous);
+    virtual void scheduleNextPacket(bool start);
     virtual void cancelNextPacket();
 
     virtual MACAddress resolveDestMACAddress();
