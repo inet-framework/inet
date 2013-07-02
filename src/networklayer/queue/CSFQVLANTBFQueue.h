@@ -121,9 +121,11 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
     IntVector mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
     DoubleVector peakRate;  // in bps
 
-    // state
+    // VLAN classifier
     IQoSClassifier *classifier;
-    cQueue fifo;   // common FIFO queue
+
+    // FIFO
+    cQueue fifo;
     int currentQueueSize;   // in bit
 
     // TBF

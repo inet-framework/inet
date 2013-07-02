@@ -56,7 +56,7 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     int mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
     double peakRate;
 
-    // state
+    // VLAN classifier
     IQoSClassifier *classifier;
     QueueVector queues;
     LongLongVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
@@ -64,7 +64,13 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     TimeVector lastTime; // vector of the last time the TBF used
     BoolVector conformityFlag;  // vector of flag to indicate whether the HOL frame conforms to TBF
 
-    // state: RR scheduler
+    // Token bucket meters
+
+    // FIFO
+    cQueue fifo;
+    int currentQueueSize;   // in bit
+
+    // DRR scheduler and queues
     int currentQueueIndex;  // index of a queue whose HOL frame is scheduled for TX during the last RR scheduling
 
     // statistics

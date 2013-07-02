@@ -40,22 +40,23 @@ void DRRVLANTokenBucketQueue::initialize()
 {
     PassiveQueueBase::initialize();
 
-    // configuration
+    outGate = gate("out");
+
+    // general
     frameCapacity = par("frameCapacity");
     numQueues = par("numQueues");
-    bucketSize = par("bucketSize").longValue()*8LL; // in bit
-    meanRate = par("meanRate"); // in bps
-    mtu = par("mtu").longValue()*8; // in bit
-    peakRate = par("peakRate"); // in bps
 
-    // state
+    // VLAN classifier
     const char *classifierClass = par("classifierClass");
     classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
     classifier->setMaxNumQueues(numQueues);
+    const char *vids = par("vids");
+    classifier->initialize(vids);
 
-    outGate = gate("out");
+    // FIFO queue for conformant packets
+    fifo.setName("FIFO queue");
 
-    // set subqueues
+    // Per-subscriber queues with DRR scheduler for non-conformant packets
     queues.assign(numQueues, (cQueue *)NULL);
     meanBucketLength.assign(numQueues, bucketSize);
     peakBucketLength.assign(numQueues, mtu);
@@ -67,7 +68,6 @@ void DRRVLANTokenBucketQueue::initialize()
         char buf[32];
         sprintf(buf, "queue-%d", i);
         queues[i] = new cQueue(buf);
-        conformityTimer[i] = new cMessage("Conformity Timer", i);   // message kind carries a queue index
     }
 
     // state: RR scheduler

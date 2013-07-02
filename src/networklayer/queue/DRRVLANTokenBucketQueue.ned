@@ -13,9 +13,12 @@ import inet.networklayer.queue.BasicTokenBucketMeter;
 
 //
 // Model for an ISP traffic controller enabling proportional excess bandwidth
-// allocation. It consists of a FIFO queue and DDR queues joined with priority queueing
-// with high priority for the FIFO queue. Incoming packets are classfied by a VLAN
-// classifier and metered by token buckets; conformant packets are put into the FIFO queue,
+// allocation.
+// Incoming packets are first classfied by a VLAN classifier and then metered
+// by token buckets. Conformant packets are put into a common FIFO queue, while
+// non-conformant packets are put into per-subscriber queues served by a DRR
+// scheduler, which are joined by priority queueing with high priority for the
+// FIFO queue.
 //
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 // @date   2013-07-01
@@ -28,6 +31,7 @@ module DRRVLANTokenBucketQueue
         int frameCapacity = default(100);  // per-subqueue capacity
         int numQueues = default(1);	// number of per-VLAN queues
 		string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier
+		string vids = default("");	// VIDs used for initialization of index table
     gates:
         output out;
     submodules:
