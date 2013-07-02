@@ -363,6 +363,7 @@ SCTPAssociation::SCTPAssociation(SCTP* _module, int32 _appGateIndex, int32 _asso
     char vectorName[128];
     snprintf(vectorName, sizeof(vectorName), "Advertised Receiver Window %d", assocId);
     advRwnd = new cOutVector(vectorName);
+    assocThroughputVector = new cOutVector("Association Throughput");
 
     // ====== Stream scheduling ==============================================
     ssModule = sctpMain->par("ssModule");
@@ -386,6 +387,7 @@ SCTPAssociation::~SCTPAssociation()
     delete T5_ShutdownGuardTimer;
     delete SackTimer;
 
+    delete assocThroughputVector;
     delete advRwnd;
     delete cumTsnAck;
     delete numGapBlocks;
