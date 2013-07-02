@@ -890,9 +890,9 @@ void EtherMAC::processReceivedPauseFrame(EtherPauseFrame *frame)
 
 void EtherMAC::scheduleEndIFGPeriod()
 {
-    EtherIFG gap;
     transmitState = WAIT_IFG_STATE;
-    scheduleAt(simTime() + transmissionChannel->calculateDuration(&gap), endIFGMsg);
+    simtime_t endIFGTime = simTime() + (INTERFRAME_GAP_BITS / curEtherDescr->txrate);
+    scheduleAt(endIFGTime, endIFGMsg);
 }
 
 void EtherMAC::fillIFGIfInBurst()

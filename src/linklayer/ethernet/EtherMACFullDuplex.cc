@@ -369,17 +369,15 @@ void EtherMACFullDuplex::processPauseCommand(int pauseUnits)
 
 void EtherMACFullDuplex::scheduleEndIFGPeriod()
 {
-    EtherIFG gap;
     transmitState = WAIT_IFG_STATE;
-    scheduleAt(simTime() + transmissionChannel->calculateDuration(&gap), endIFGMsg);
+    simtime_t endIFGTime = simTime() + (INTERFRAME_GAP_BITS / curEtherDescr->txrate);
+    scheduleAt(endIFGTime, endIFGMsg);
 }
 
 void EtherMACFullDuplex::scheduleEndPausePeriod(int pauseUnits)
 {
     // length is interpreted as 512-bit-time units
-    cPacket pause;
-    pause.setBitLength(pauseUnits * PAUSE_UNIT_BITS);
-    simtime_t pausePeriod = transmissionChannel->calculateDuration(&pause);
+    simtime_t pausePeriod = ((pauseUnits * PAUSE_UNIT_BITS) / curEtherDescr->txrate);
     scheduleAt(simTime() + pausePeriod, endPauseMsg);
     transmitState = PAUSE_STATE;
 }
