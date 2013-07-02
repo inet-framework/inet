@@ -193,4 +193,48 @@ SCTPDataVariables* SCTPQueue::dequeueChunkBySSN(const uint16 ssn)
     return NULL;
 }
 
+uint16 SCTPQueue::getFirstSsnInQueue(const uint16 sid)
+{
+    return payloadQueue.begin()->second->ssn;
+}
 
+void SCTPQueue::findEarliestOutstandingTSNsForPath(const IPvXAddress& remoteAddress,
+        uint32&            earliestOutstandingTSN,
+        uint32&            rtxEarliestOutstandingTSN) const
+{
+    bool findEarliestOutstandingTSN = true;
+    bool findRTXEarliestOutstandingTSN = true;
+
+    for (PayloadQueue::const_iterator iterator = payloadQueue.begin();
+            iterator != payloadQueue.end(); ++iterator) {
+        const SCTPDataVariables* chunk = iterator->second;
+        if (chunk->getLastDestination() == remoteAddress) {
+            // ====== Find earliest outstanding TSNs ===========================
+            if (chunk->hasBeenAcked == false) {
+                if ( (findEarliestOutstandingTSN) &&
+                        (chunk->numberOfRetransmissions == 0) ) {
+                    earliestOutstandingTSN = chunk->tsn;
+                }
+                findEarliestOutstandingTSN = false;
+                if ( (findRTXEarliestOutstandingTSN) &&
+                        (chunk->numberOfRetransmissions > 0) ) {
+                    rtxEarliestOutstandingTSN = chunk->tsn;
+                }
+                findRTXEarliestOutstandingTSN = false;
+            }
+        }
+    }
+}
+
+
+uint32 SCTPQueue::getSizeOfFirstChunk(const IPvXAddress& remoteAddress)
+{
+    for (PayloadQueue::const_iterator iterator = payloadQueue.begin();
+            iterator != payloadQueue.end(); ++iterator) {
+        const SCTPDataVariables* chunk = iterator->second;
+        if (chunk->getNextDestination() == remoteAddress) {
+            return chunk->booksize;
+        }
+    }
+    return (0);
+}

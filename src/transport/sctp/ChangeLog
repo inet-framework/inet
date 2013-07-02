@@ -1,3 +1,8 @@
+2013-06-21  Irene Rüngeler
+
+	Implemented NR_SACK feature, which is necessary for handling reneging 
+	especially when using CMT.
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-08-07  ------ inet-2.0.0 released ------

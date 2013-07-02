@@ -76,6 +76,7 @@ message SCTPInitChunk extends SCTPChunk
     bool forwardTsn;
     IPvXAddress addresses[];
     uint8 unrecognizedParameters[]; //Will be filled by the Parser, if unrecognized Parameters arrive.
+    uint16 sepChunks[]; //Supported extensions parameter, i.e. for StreamReset
 }
 
 message SCTPInitAckChunk extends SCTPChunk
@@ -95,6 +96,7 @@ message SCTPInitAckChunk extends SCTPChunk
     char cookie[];
     uint8 unrecognizedParameters[];
     cPacketPtr stateCookie;
+    uint16 sepChunks[]; //Supported extensions parameter, i.e. for StreamReset
 }
 
 
@@ -151,6 +153,7 @@ message SCTPDataChunk extends SCTPChunk
     // Payload Protocol Identifier
     uint32 ppid;
     simtime_t enqueuingTime;
+    simtime_t firstSendTime;
 }
 
 message SCTPForwardTsnChunk extends SCTPChunk
@@ -168,13 +171,19 @@ message SCTPSackChunk extends SCTPChunk
     uint32 a_rwnd;
     // Number of Gap Ack Blocks
     uint16 numGaps;
+    // Number of Non-Revokable Gap Ack Blocks
+    uint16 numNrGaps;
     // Number of Duplicate TSNs
     uint16 numDupTsns;
     // Start and End of Gap Ack Blocks
+    bool   isNrSack;
     uint32 gapStart[];
     uint32 gapStop[];
     uint32 dupTsns[];
     uint32 sackSeqNum = 0;
+    uint32 nrGapStart[];
+    uint32 nrGapStop[];
+    bool   nrSubtractRGaps = false;
 }
 
 message SCTPAbortChunk extends SCTPChunk
@@ -224,3 +233,7 @@ message SCTPParameter extends cPacket
     uint16 parameterType;
 }
 
+message SCTPSupportedExtensionsParameter extends SCTPParameter
+{
+    uint16 chunkTypes[];
+}

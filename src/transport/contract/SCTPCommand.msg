@@ -188,3 +188,11 @@ class SCTPRcvCommand extends SCTPCommand
     uint32 tsn;
     uint32 cumTsn;
 }
+
+class SCTPSendQueueAbated extends SCTPCommand
+{
+    uint64 bytesAvailable;
+    uint64 bytesQueued;
+    uint64 bytesLimit;
+    uint64 queuedForStream[];
+}

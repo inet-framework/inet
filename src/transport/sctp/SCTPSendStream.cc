@@ -26,9 +26,9 @@ SCTPSendStream::SCTPSendStream(const uint16 id)
 
     char queueName[64];
     snprintf(queueName, sizeof(queueName), "OrderedSendQueue ID %d", id);
-    streamQ = new cQueue(queueName);
+    streamQ = new cPacketQueue(queueName);
     snprintf(queueName, sizeof(queueName), "UnorderedSendQueue ID %d", id);
-    uStreamQ = new cQueue(queueName);
+    uStreamQ = new cPacketQueue(queueName);
 }
 
 SCTPSendStream::~SCTPSendStream()
@@ -56,4 +56,6 @@ void SCTPSendStream::deleteQueue()
     }
     delete streamQ;
     delete uStreamQ;
+    totalLength = 0;
 }
+

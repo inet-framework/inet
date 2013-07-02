@@ -50,6 +50,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
 {
     int32 size_init_chunk = sizeof(struct init_chunk);
     int32 size_sack_chunk = sizeof(struct sack_chunk);
+    int32 size_nr_sack_chunk = sizeof(struct nr_sack_chunk);
     int32 size_heartbeat_chunk = sizeof(struct heartbeat_chunk);
     int32 size_heartbeat_ack_chunk = sizeof(struct heartbeat_ack_chunk);
     int32 size_chunk = sizeof(struct chunk);
@@ -198,16 +199,6 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         }
                     }
 
-                    /*if(cookielen == 0)
-                    {
-                        cookielen = 4;
-                        initAckChunk->setCookieArraySize(cookielen);
-                        initAckChunk->setCookie(0, '1');
-                        initAckChunk->setCookie(1, '3');
-                        initAckChunk->setCookie(2, '3');
-                        initAckChunk->setCookie(3, '7');
-                        iac->length = htons(ntohs(iac->length) + 8);
-                    }*/
                     int32 cookielen = initAckChunk->getCookieArraySize();
                     if (cookielen == 0)
                     {
@@ -239,17 +230,18 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     break;
                 }
                 case SACK:
+                case NR_SACK:
                 {
                     SCTPSackChunk *sackChunk = check_and_cast<SCTPSackChunk *>(chunk);
 
                     // destination is send buffer:
-                    struct sack_chunk *sac = (struct sack_chunk*) (buf + writtenbytes); // append data to buffer
-                    writtenbytes += (sackChunk->getBitLength() / 8);
+                    struct nr_sack_chunk *sac = (struct nr_sack_chunk*) (buf + writtenbytes); // append data to buffer
+                    writtenbytes += sackChunk->getByteLength();
 
                     // fill buffer with data from SCTP init ack chunk structure
                     sac->type = sackChunk->getChunkType();
 //                  sac->flags = sackChunk->getFlags(); // no flags available in this type of SCTPChunk
-                    sac->length = htons(sackChunk->getBitLength() / 8);
+                    sac->length = htons(sackChunk->getByteLength());
                     uint32 cumtsnack = sackChunk->getCumTsnAck();
                     sac->cum_tsn_ack = htonl(cumtsnack);
                     sac->a_rwnd = htonl(sackChunk->getA_rwnd());
@@ -257,17 +249,29 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     sac->nr_of_dups = htons(sackChunk->getNumDupTsns());
 
                     // GAPs and Dup. TSNs:
-                    int32 numgaps = sackChunk->getNumGaps();
-                    int32 numdups = sackChunk->getNumDupTsns();
-                    for (int32 i=0; i<numgaps; i++)
+                    int16 numgaps = sackChunk->getNumGaps();
+                    int16 numdups = sackChunk->getNumDupTsns();
+                    int16 numnrgaps = 0;
+                    for (int16 i=0; i<numgaps; i++)
                     {
-                        struct sack_gap *gap = (struct sack_gap*) (((unsigned char *)sac) + size_sack_chunk + i*sizeof(struct sack_gap));
+                        struct sack_gap *gap = (struct sack_gap*) (((unsigned char *)sac) + (sackChunk->getIsNrSack()?size_nr_sack_chunk:size_sack_chunk) + i*sizeof(struct sack_gap));
                         gap->start = htons(sackChunk->getGapStart(i) - cumtsnack);
                         gap->stop = htons(sackChunk->getGapStop(i) - cumtsnack);
                     }
-                    for (int32 i=0; i<numdups; i++)
+                    if (sackChunk->getIsNrSack()) {
+                        sac->nr_of_nr_gaps = htons(sackChunk->getNumNrGaps());
+                        sac->reserved = htons(0);
+                        numnrgaps = sackChunk->getNumNrGaps();
+                        for (int16 i=0; i<numnrgaps; i++)
+                        {
+                            struct sack_gap *gap = (struct sack_gap*) (((unsigned char *)sac) + size_nr_sack_chunk + (numgaps + i)*sizeof(struct sack_gap));
+                            gap->start = htons(sackChunk->getNrGapStart(i) - cumtsnack);
+                            gap->stop = htons(sackChunk->getNrGapStop(i) - cumtsnack);
+                        }
+                    }
+                    for (int16 i=0; i<numdups; i++)
                     {
-                        struct sack_duptsn *dup = (struct sack_duptsn*) (((unsigned char *)sac) + size_sack_chunk + numgaps*sizeof(struct sack_gap) + i*sizeof(sack_duptsn));
+                        struct sack_duptsn *dup = (struct sack_duptsn*) (((unsigned char *)sac) + (sackChunk->getIsNrSack()?size_nr_sack_chunk:size_sack_chunk) + (numgaps + numnrgaps)*sizeof(struct sack_gap) + i*sizeof(sack_duptsn));
                         dup->tsn = htonl(sackChunk->getDupTsns(i));
                     }
                     break;

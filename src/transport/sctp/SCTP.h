@@ -143,6 +143,12 @@ class INET_API SCTP : public cSimpleModule
             uint32 numForwardTsn;
             double throughput;
             simtime_t lifeTime;
+            uint32 numOverfullSACKs;
+            uint64 sumRGapRanges;                              // Total sum of RGap ranges (Last RGapStop - CumAck)
+            uint64 sumNRGapRanges;                             // Total sum of NRGap ranges (Last NRGapStop - CumAck)
+            uint32 numDropsBecauseNewTSNGreaterThanHighestTSN;
+            uint32 numDropsBecauseNoRoomInBuffer;
+            uint32 numChunksReneged;
         }AssocStat;
 
         typedef std::map<int32,AssocStat> AssocStatMap;

@@ -75,6 +75,7 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     cwndTimeout = pathRto;
     cwnd = 0;
     ssthresh = 0;
+    rttUpdateTime = 0.0;
     fastRecoveryExitPoint = 0;
     fastRecoveryActive = false;
 
@@ -84,6 +85,7 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     numberOfHeartbeatsRcvd = 0;
     numberOfHeartbeatAcksSent = 0;
     numberOfHeartbeatAcksRcvd = 0;
+    numberOfDuplicates = 0;
 
     // ====== Path Info ======================================================
     SCTPPathInfo* pinfo = new SCTPPathInfo("pinfo");
@@ -119,18 +121,18 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     statisticsPathCwnd = new cOutVector(str);
 
     snprintf(str, sizeof(str), "TSN Sent %d:%s", assoc->assocId, addr.str().c_str());
-    pathTSN = new cOutVector(str);
+    vectorPathSentTSN = new cOutVector(str);
     snprintf(str, sizeof(str), "TSN Received %d:%s", assoc->assocId, addr.str().c_str());
-    pathRcvdTSN = new cOutVector(str);
+    vectorPathReceivedTSN = new cOutVector(str);
 
     snprintf(str, sizeof(str), "HB Sent %d:%s", assoc->assocId, addr.str().c_str());
-    pathHb = new cOutVector(str);
+    vectorPathHb = new cOutVector(str);
     snprintf(str, sizeof(str), "HB ACK Sent %d:%s", assoc->assocId, addr.str().c_str());
-    pathHbAck = new cOutVector(str);
+    vectorPathHbAck = new cOutVector(str);
     snprintf(str, sizeof(str), "HB Received %d:%s", assoc->assocId, addr.str().c_str());
-    pathRcvdHb = new cOutVector(str);
+    vectorPathRcvdHb = new cOutVector(str);
     snprintf(str, sizeof(str), "HB ACK Received %d:%s", assoc->assocId, addr.str().c_str());
-    pathRcvdHbAck = new cOutVector(str);
+    vectorPathRcvdHbAck = new cOutVector(str);
 }
 
 SCTPPathVariables::~SCTPPathVariables()
@@ -144,12 +146,12 @@ SCTPPathVariables::~SCTPPathVariables()
     delete statisticsPathRTO;
     delete statisticsPathRTT;
 
-    delete pathTSN;
-    delete pathRcvdTSN;
-    delete pathHb;
-    delete pathRcvdHb;
-    delete pathHbAck;
-    delete pathRcvdHbAck;
+    delete vectorPathSentTSN;
+    delete vectorPathReceivedTSN;
+    delete vectorPathHb;
+    delete vectorPathRcvdHb;
+    delete vectorPathHbAck;
+    delete vectorPathRcvdHbAck;
 
 }
 
@@ -165,16 +167,23 @@ SCTPDataVariables::SCTPDataVariables()
     sid = 0;
     ssn = 0;
     ppid = 0;
+    fragments = 1;
     gapReports = 0;
     enqueuingTime = 0;
     sendTime = 0;
     expiryTime = 0;
     enqueuedInTransmissionQ = false;
     hasBeenAcked = false;
+    hasBeenCountedAsNewlyAcked = false;
     hasBeenReneged = false;
     hasBeenAbandoned = false;
     hasBeenFastRetransmitted = false;
     countsAsOutstanding = false;
+    queuedOnPath = NULL;
+    ackedOnPath = NULL;
+    hasBeenMoved = false;
+    hasBeenTimerBasedRtxed = false;
+    firstSendTime = 0;
     lastDestination = NULL;
     nextDestination = NULL;
     initialDestination = NULL;
@@ -216,7 +225,7 @@ SCTPStateVariables::SCTPStateVariables()
     appSendAllowed = true;
     noMoreOutstanding = false;
     primaryPath = NULL;
-    lastDataSourceAddress = IPvXAddress("0.0.0.0");
+    lastDataSourcePath = NULL;
     shutdownChunk = NULL;
     initChunk = NULL;
     cookieChunk = NULL;
@@ -228,12 +237,13 @@ SCTPStateVariables::SCTPStateVariables()
     errorCount = 0;
     initRetransCounter = 0;
     nextTSN = 0;
-    cTsnAck = 0;
+    chunksAdded = 0;
+    dataChunksAdded = 0;
+    packetBytes = 0;
     lastTsnAck = 0;
-    highestTsnReceived = 0;
     highestTsnAcked = 0;
-    highestTsnStored = 0;
     nextRSid = 0;
+    advancedPeerAckPoint = 0;
     ackState = 0;
     lastStreamScheduled = 0;
     peerRwnd = 0;
@@ -242,11 +252,12 @@ SCTPStateVariables::SCTPStateVariables()
     outstandingBytes = 0;
     messagesToPush = 0;
     pushMessagesLeft = 0;
-    numGaps = 0;
     msgNum = 0;
     bytesRcvd = 0;
     sendBuffer = 0;
     queuedReceivedBytes = 0;
+    assocThroughput = 0;
+    queuedSentBytes = 0;
     lastSendQueueAbated = simTime();
     queuedMessages = 0;
     queueLimit = 0;
@@ -257,12 +268,6 @@ SCTPStateVariables::SCTPStateVariables()
     for (unsigned int i = 0; i < 65536; i++) {
         numMsgsReq[i] = 0;
     }
-
-    for (unsigned int i = 0; i < MAX_GAP_COUNT; i++) {
-        gapStartList[i] = 0;
-        gapStopList[i] = 0;
-    }
-
     for (unsigned int i = 0; i < 32; i++) {
         localTieTag[i] = 0;
         peerTieTag[i] = 0;
@@ -414,7 +419,7 @@ bool SCTPAssociation::processTimer(cMessage *msg)
     }
     else if (msg==SackTimer)
     {
-    sctpEV3<<simulation.getSimTime()<<" delayed Sack: cTsnAck="<<state->cTsnAck<<" highestTsnReceived="<<state->highestTsnReceived<<" lastTsnReceived="<<state->lastTsnReceived<<" ackState="<<state->ackState<<" numGaps="<<state->numGaps<<"\n";
+    sctpEV3<<simulation.getSimTime()<<" delayed Sack: cTsnAck="<<state->gapList.getCumAckTSN()<<" highestTsnReceived="<<state->gapList.getHighestTSNReceived()<<" lastTsnReceived="<<state->lastTsnReceived<<" ackState="<<state->ackState<<" numGaps="<<state->gapList.getNumGaps(SCTPGapList::GT_Any)<<"\n";
         sendSack();
     }
     else if (msg==T2_ShutdownTimer)
@@ -717,10 +722,17 @@ void SCTPAssociation::stateEntered(int32 status)
             state->enableHeartbeats = (bool)sctpMain->par("enableHeartbeats");
             state->numGapReports = sctpMain->par("numGapReports");
             state->maxBurst = (uint32)sctpMain->par("maxBurst");
-                state->header = 0;
+            state->nrSack = (bool)sctpMain->par("nrSack");
+            state->disableReneging = (bool)sctpMain->par("disableReneging");
+            state->checkSackSeqNumber = (bool)sctpMain->par("checkSackSeqNumber");
+            state->outgoingSackSeqNum = 0;
+            state->incomingSackSeqNum = 0;
+            state->header = 0;
             state->swsLimit = (uint32)sctpMain->par("swsLimit");
             state->fastRecoverySupported = (bool)sctpMain->par("fastRecoverySupported");
             state->reactivatePrimaryPath = (bool)sctpMain->par("reactivatePrimaryPath");
+            state->packetsInTotalBurst = 0;
+            state->throughputInterval = (double)sctpMain->par("throughputInterval");
             sackPeriod = (double)sctpMain->par("sackPeriod");
             sackFrequency = sctpMain->par("sackFrequency");
             SCTP::AssocStat stat;
@@ -736,8 +748,14 @@ void SCTPAssociation::stateEntered(int32 status)
             stat.numDups = 0;
             stat.numPathFailures = 0;
             stat.numForwardTsn = 0;
+            stat.sumRGapRanges = 0;
+            stat.sumNRGapRanges = 0;
+            stat.numOverfullSACKs = 0;
             stat.lifeTime = 0;
             stat.throughput = 0;
+            stat.numDropsBecauseNewTSNGreaterThanHighestTSN = 0;
+            stat.numDropsBecauseNoRoomInBuffer = 0;
+            stat.numChunksReneged = 0;
             sctpMain->assocStatMap[stat.assocId] = stat;
             ccModule = sctpMain->par("ccModule");
 

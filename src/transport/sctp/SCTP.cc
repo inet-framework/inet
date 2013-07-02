@@ -145,7 +145,7 @@ void SCTP::handleMessage(cMessage *msg)
 
         sctpEV3<<"selfMessage\n";
 
-         SCTPAssociation *assoc = (SCTPAssociation *) msg->getContextPointer();
+        SCTPAssociation *assoc = (SCTPAssociation *) msg->getContextPointer();
         bool ret = assoc->processTimer(msg);
 
         if (!ret)
@@ -881,6 +881,12 @@ void SCTP::finish()
         recordScalar("Duplicate Acks", assoc.numDups);
         recordScalar("Packets Received", numPacketsReceived);
         recordScalar("Packets Dropped", numPacketsDropped);
-
+        recordScalar("Sum of R Gap Ranges", assoc.sumRGapRanges);
+        recordScalar("Sum of NR Gap Ranges", assoc.sumNRGapRanges);
+        recordScalar("Overfull SACKs", assoc.numOverfullSACKs);
+        recordScalar("Drops Because New TSN Greater Than Highest TSN", assoc.numDropsBecauseNewTSNGreaterThanHighestTSN);
+        recordScalar("Drops Because No Room In Buffer", assoc.numDropsBecauseNoRoomInBuffer);
+        recordScalar("Chunks Reneged", assoc.numChunksReneged);
+        recordScalar("sackPeriod", (simtime_t)par("sackPeriod"));
     }
 }

@@ -61,7 +61,7 @@ void SCTPAssociation::initStreams(uint32 inStreams, uint32 outStreams)
 }
 
 
-int32 SCTPAssociation::streamScheduler(bool peek) //peek indicates that no data is sent, but we just want to peek
+int32 SCTPAssociation::streamScheduler(SCTPPathVariables* path, bool peek) //peek indicates that no data is sent, but we just want to peek
 {
     int32 sid, testsid;
 

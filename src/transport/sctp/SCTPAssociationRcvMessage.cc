@@ -42,16 +42,17 @@ void SCTPAssociation::decreaseOutstandingBytes(SCTPDataVariables* chunk)
 {
     SCTPPathVariables* lastPath = chunk->getLastDestinationPath();
 
-    assert(lastPath->outstandingBytes >= chunk->booksize);
-    lastPath->outstandingBytes -= chunk->booksize;
-    state->outstandingBytes -= chunk->booksize;
-    assert((int64)state->outstandingBytes >= 0);
+    if (chunk->countsAsOutstanding) {
+        assert(lastPath->outstandingBytes >= chunk->booksize);
+        lastPath->outstandingBytes -= chunk->booksize;
+        state->outstandingBytes -= chunk->booksize;
+        assert((int64)state->outstandingBytes >= 0);
 
-    chunk->countsAsOutstanding = false;
+        chunk->countsAsOutstanding = false;
 
-    CounterMap::iterator iterator = qCounter.roomRetransQ.find(lastPath->remoteAddress);
+        CounterMap::iterator iterator = qCounter.roomRetransQ.find(lastPath->remoteAddress);
         iterator->second -= ADD_PADDING(chunk->booksize + SCTP_DATA_CHUNK_LENGTH);
-
+    }
 }
 
 
@@ -86,13 +87,24 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
     sctpEV3 << "numberOfChunks=" <<numberOfChunks << endl;
 
     state->sctpmsg = (SCTPMessage*)sctpmsg->dup();
+    
+    if (fsm->getState()!=SCTP_S_CLOSED &&
+            fsm->getState()!=SCTP_S_COOKIE_WAIT &&
+            fsm->getState()!=SCTP_S_COOKIE_ECHOED &&
+            fsm->getState()!=SCTP_S_SHUTDOWN_ACK_SENT &&
+            simTime() > state->lastAssocThroughputTime + state->throughputInterval &&
+            assocThroughputVector != NULL) {
+        assocThroughputVector->record(state->assocThroughput / (simTime() - state->lastAssocThroughputTime) / 1000);
+        state->lastAssocThroughputTime = simTime();
+        state->assocThroughput = 0;
+    }
+    state->assocThroughput += sctpmsg->getByteLength();
 
     // ====== Handle chunks ==================================================
     bool trans = true;
     bool sendAllowed = false;
     bool dupReceived = false;
     bool dataChunkReceived = false;
-    bool dataChunkDelivered = false;
     bool shutdownCalled = false;
     for (uint32 i = 0; i < numberOfChunks; i++) {
         SCTPChunk* header = (SCTPChunk*)(sctpmsg->removeChunk());
@@ -169,7 +181,6 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
                     const SCTPEventCode event = processDataArrived(dataChunk);
                     if (event == SCTP_E_DELIVERED) {
                         dataChunkReceived = true;
-                        dataChunkDelivered = true;
                         state->sackAllowed = true;
                     }
                     else if (event==SCTP_E_SEND || event==SCTP_E_IGNORE) {
@@ -189,6 +200,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
             trans = true;
             break;
         case SACK:
+        case NR_SACK:
         {
             sctpEV3 << "SCTPAssociationRcvMessage: SACK received" << endl;
             const int32 scount = qCounter.roomSumSendStreams;
@@ -234,7 +246,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
             delete heartbeatChunk;
             if (path) {
                 path->numberOfHeartbeatsRcvd++;
-                path->pathRcvdHb->record(path->numberOfHeartbeatsRcvd);
+                path->vectorPathRcvdHb->record(path->numberOfHeartbeatsRcvd);
             }
             break;
         case HEARTBEAT_ACK:
@@ -379,7 +391,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
                 qCounter.roomRetransQ[rPath->remoteAddress] = 0;
             }
             initPeerTsn = initchunk->getInitTSN();
-            state->cTsnAck = initPeerTsn - 1;
+            state->gapList.setInitialCumAckTSN(initPeerTsn - 1);
             state->initialPeerRwnd = initchunk->getA_rwnd();
             state->peerRwnd = state->initialPeerRwnd;
             localVTag = initchunk->getInitTag();
@@ -510,6 +522,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
 bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk* initAckChunk)
 {
     bool trans = false;
+
     if (fsm->getState() == SCTP_S_COOKIE_WAIT)
     {
         sctpEV3<<"State is COOKIE_WAIT, Cookie_Echo has to be sent\n";
@@ -523,7 +536,7 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk* initAckChunk)
             state->setPrimaryPath(getPath(remoteAddr));
             initPeerTsn = initAckChunk->getInitTSN();
             localVTag = initAckChunk->getInitTag();
-            state->cTsnAck = initPeerTsn - 1;
+            state->gapList.setInitialCumAckTSN(initPeerTsn - 1);
             state->initialPeerRwnd = initAckChunk->getA_rwnd();
             state->peerRwnd = state->initialPeerRwnd;
             remoteAddressList.clear();
@@ -682,31 +695,9 @@ bool SCTPAssociation::processCookieAckArrived()
 }
 
 void SCTPAssociation::tsnWasReneged(SCTPDataVariables*       chunk,
+                                                const SCTPPathVariables* sackPath,
                                                 const int                    type)
 {
-
-#ifdef PKT
-    if (transmissionQ->getQueueSize() > 0) {
-        for (SCTPQueue::PayloadQueue::iterator tq = transmissionQ->payloadQueue.begin();
-              tq != transmissionQ->payloadQueue.end(); tq++) {
-            if (tq->second->tsn > chunk->tsn) {
-                if (!transmissionQ->checkAndInsertChunk(chunk->tsn, chunk)) {
-                    sctpEV3 << "tsnWasReneged: cannot add message/chunk (TSN="
-                              << chunk->tsn <<") to the transmissionQ" << endl;
-                }
-                else {
-                    chunk->enqueuedInTransmissionQ = true;
-                    chunk->setNextDestination(chunk->getLastDestinationPath());
-                    CounterMap::iterator q = qCounter.roomTransQ.find(chunk->getNextDestination());
-                    q->second += ADD_PADDING(chunk->len/8+SCTP_DATA_CHUNK_LENGTH);
-                    CounterMap::iterator qb = qCounter.bookedTransQ.find(chunk->getNextDestination());
-                    qb->second += chunk->booksize;
-                    return;
-                }
-            }
-        }
-    }
-#endif
     sctpEV3 << "TSN " << chunk->tsn << " has been reneged (type "
               << type << ")" << endl;
     unackChunk(chunk);
@@ -727,13 +718,64 @@ void SCTPAssociation::tsnWasReneged(SCTPDataVariables*       chunk,
 SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 {
     simtime_t            rttEstimation = MAXTIME;
-    bool                 ctsnaAdvanced = false;
+    const uint64         sendBufferBeforeUpdate = state->sendBuffer;
     SCTPPathVariables*   path = getPath(remoteAddr);    // Path for *this* SACK!
     const uint64         arwnd = sackChunk->getA_rwnd();
     const uint32         tsna = sackChunk->getCumTsnAck();
     uint32               highestNewAck = tsna;   // Highest newly acked TSN
-    const uint16         numGaps = sackChunk->getNumGaps();
-    bool                 getChunkFastFirstTime = true;
+    const uint16         numDups = sackChunk->getNumDupTsns();
+    SCTP::AssocStat*     assocStat = sctpMain->getAssocStat(assocId);
+
+    // ====== Put information from SACK into GapList =========================
+    SCTPGapList sackGapList;
+    sackGapList.setInitialCumAckTSN(sackChunk->getCumTsnAck());
+    uint32 lastTSN = sackChunk->getCumTsnAck();
+    for (uint32 i = 0; i < sackChunk->getNumGaps(); i++) {
+        uint32 tsn = sackChunk->getGapStart(i);
+        assert(tsnLt(lastTSN + 1, tsn)); lastTSN = tsn;
+        while (tsnLe(tsn, sackChunk->getGapStop(i))) {
+            bool dummy;
+            sackGapList.updateGapList(tsn, dummy, true);    // revokable TSN
+            tsn++;
+        }
+        lastTSN = sackChunk->getGapStop(i);
+    }
+    assocStat->sumRGapRanges += ((sackChunk->getCumTsnAck() <= lastTSN) ?
+            (uint64)(lastTSN - sackChunk->getCumTsnAck()) :
+            (uint64)(sackChunk->getCumTsnAck() - lastTSN));
+    if (sackChunk->getNrSubtractRGaps() == false) {
+        lastTSN = sackChunk->getCumTsnAck();
+        for (uint32 i = 0; i < sackChunk->getNumNrGaps(); i++) {
+            uint32 tsn = sackChunk->getNrGapStart(i);
+            assert(tsnLt(lastTSN + 1, tsn)); lastTSN = tsn;
+            while (tsnLe(tsn, sackChunk->getNrGapStop(i))) {
+                bool dummy;
+                sackGapList.updateGapList(tsn, dummy, false);   // non-revokable TSN
+                tsn++;
+            }
+            lastTSN = sackChunk->getNrGapStop(i);
+        }
+    }
+    else {
+        lastTSN = sackChunk->getCumTsnAck();
+        for (uint32 i = 0; i < sackChunk->getNumNrGaps(); i++) {
+            uint32 tsn = sackChunk->getNrGapStart(i);
+            assert(tsnLt(lastTSN + 1, tsn)); lastTSN = tsn;
+            while (tsnLe(tsn, sackChunk->getNrGapStop(i))) {
+                if (sackGapList.tsnIsRevokable(tsn) == false) {
+                    bool dummy;
+                    sackGapList.updateGapList(tsn, dummy, false);   // non-revokable TSN
+                }
+                tsn++;
+            }
+            lastTSN = sackChunk->getNrGapStop(i);
+        }
+    }
+    assocStat->sumNRGapRanges += (sackChunk->getCumTsnAck() <= lastTSN) ?
+            (uint64)(lastTSN - sackChunk->getCumTsnAck()) :
+            (uint64)(sackChunk->getCumTsnAck() - lastTSN);
+    const uint16 numGaps = sackGapList.getNumGaps(SCTPGapList::GT_Any);
+
 
     // ====== Print some information =========================================
     sctpEV3 << "##### SACK Processing: TSNa=" << tsna << " #####" << endl;
@@ -746,7 +788,22 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
                   << endl;
     }
 
+    sctpEV3 << "Before processSackArrived for path " << path->remoteAddress
+            << " with tsna=" << tsna << ":" << endl;
 
+    // ====== SACK Sequence Number Check =====================================
+    sctpEV3 << "SACK Seq Number = " << sackChunk->getSackSeqNum() << endl;
+    if ( (state->checkSackSeqNumber == true) &&
+            (sackChunk->getSackSeqNum() <= state->incomingSackSeqNum) ) {
+        sctpEV3 << "Out-of-data SACK: " << sackChunk->getSackSeqNum()
+                      << " < " << state->incomingSackSeqNum << endl;
+        return SCTP_E_IGNORE;
+    }
+    state->incomingSackSeqNum = sackChunk->getSackSeqNum();
+
+    if (assocStat) {
+        assocStat->numDups += numDups;
+    }
 
     // ====== Initialize some variables ======================================
     for (SCTPPathMap::iterator piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
@@ -757,9 +814,11 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
         myPath->requiresRtx = false;
         myPath->lowestTSNRetransmitted = false;
         myPath->findLowestTSN = true;
-        myPath->gapAcksInLastSACK = 0;
-        myPath->gapNAcksInLastSACK = 0;
+        myPath->gapAckedChunksInLastSACK = 0;
+        myPath->gapNRAckedChunksInLastSACK = 0;
+        myPath->gapUnackedChunksInLastSACK = 0;
         myPath->newlyAckedBytes = 0;
+        myPath->newCumAck = false;   // Check whether CumAck affects this path
         if (myPath == path) {
             myPath->lastAckTime = simTime();
         }
@@ -786,7 +845,10 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
         dequeueAckedChunks(tsna, path, rttEstimation); // chunks with tsn between lastTsnAck and tsna are removed from the transmissionQ and the retransmissionQ; outstandingBytes are decreased
 
         state->lastTsnAck = tsna;
-        ctsnaAdvanced = true;
+        if (tsnGt(tsna, state->advancedPeerAckPoint)) {
+            state->advancedPeerAckPoint = tsna;
+            state->ackPointAdvanced = true;
+        }
     }
     else if (tsnLt(tsna, state->lastTsnAck)) {
         sctpEV3 << "Stale CumAck (" << tsna << " < " << state->lastTsnAck << ")"
@@ -809,7 +871,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
             SCTPDataVariables* myChunk = retransmissionQ->getChunk(i);
             if (myChunk) {
                 if (chunkHasBeenAcked(myChunk)) {
-                    tsnWasReneged(myChunk, 0);
+                    tsnWasReneged(myChunk, path, 0);
                 }
             }
             i--;
@@ -829,25 +891,25 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
         // We got fragment reports... check for newly acked chunks.
         const uint32 queuedChunks = retransmissionQ->payloadQueue.size();
         sctpEV3 << "Number of chunks in retransmissionQ: " << queuedChunks
-                  <<" highestGapStop: "  << sackChunk->getGapStop(numGaps-1)
+                  <<" highestGapStop: " << sackGapList.getGapStop(SCTPGapList::GT_Any, numGaps-1)
                   <<" highestTsnAcked: " << state->highestTsnAcked << endl;
 
         // ====== Handle reneging =============================================
         // highest gapStop smaller than highestTsnAcked: there might have been reneging
-        if (tsnLt(sackChunk->getGapStop(numGaps-1), state->highestTsnAcked)) {
+        if (tsnLt(sackGapList.getGapStop(SCTPGapList::GT_Any, numGaps-1), state->highestTsnAcked)) {
             // Reneging, type 2:
             // In a previous SACK, chunks up to highestTsnAcked have been acked.
             // This SACK contains a last gap ack < highestTsnAcked
             //      => rereg TSNs from last gap ack to highestTsnAcked
             //      => new highestTsnAcked = last gap ack
             uint32 i = state->highestTsnAcked;
-            while (i >= sackChunk->getGapStop(numGaps - 1) + 1) {
+            while (i >= sackGapList.getGapStop(SCTPGapList::GT_Any, numGaps - 1) + 1) {
                 // ====== Looking up TSN in retransmission queue ================
                 SCTPDataVariables* myChunk = retransmissionQ->getChunk(i);
                 if (myChunk) {
                     if (chunkHasBeenAcked(myChunk)) {
                         sctpEV3 << "TSN " << i << " was found. It has been un-acked." << endl;
-                        tsnWasReneged(myChunk, 2);
+                        tsnWasReneged(myChunk, path, 2);
                         sctpEV3 << "highestTsnAcked now " << state->highestTsnAcked << endl;
                     }
                 }
@@ -856,20 +918,21 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
                 }
                 i--;
             }
-            state->highestTsnAcked = sackChunk->getGapStop(numGaps - 1);
+            state->highestTsnAcked = sackGapList.getGapStop(SCTPGapList::GT_Any, numGaps - 1);
         }
 
         // ====== Looking for changes in the gap reports ======================
         sctpEV3 << "Looking for changes in gap reports" << endl;
         for (int32 key = 0; key < numGaps; key++) {
-            const uint32 lo = sackChunk->getGapStart(key);
-            const uint32 hi = sackChunk->getGapStop(key);
+            const uint32 lo = sackGapList.getGapStart(SCTPGapList::GT_Any, key);
+            const uint32 hi = sackGapList.getGapStop(SCTPGapList::GT_Any, key);
 
 
             // ====== Iterate over TSNs in gap reports =========================
             sctpEV3 << "Examine TSNs between " << lo << " and " << hi << endl;
             for (uint32 pos = lo; pos <= hi; pos++) {
-                SCTPDataVariables* myChunk = retransmissionQ->getChunkFast(pos, getChunkFastFirstTime);
+            	bool chunkFirstTime = true;
+                SCTPDataVariables* myChunk = retransmissionQ->getChunkFast(pos, chunkFirstTime);
                 if (myChunk) {
                     if (chunkHasBeenAcked(myChunk) == false) {
                         SCTPPathVariables* myChunkLastPath = myChunk->getLastDestinationPath();
@@ -877,20 +940,37 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
                         // T.D. 02.02.2010: This chunk has been acked newly.
                         //                        Let's process this new acknowledgement!
                         handleChunkReportedAsAcked(highestNewAck, rttEstimation, myChunk,
-                                                            path /* i.e. the SACK path for RTT measurement! */);
+                                path /* i.e. the SACK path for RTT measurement! */,
+                                sackGapList.tsnIsNonRevokable(myChunk->tsn));
+                    }
+                    else {
+                    }
+                }
+
+                // ====== R-acked chunk became NR-acked =========================
+                else if (sackGapList.tsnIsNonRevokable(pos)) {
+                    bool chunkFirstTime = false; /*????????*/
+                    SCTPDataVariables* myChunk = retransmissionQ->getChunkFast(pos, chunkFirstTime);
+                    if (myChunk) {
+                        // myChunk != NULL -> R-acked before, but not NR-acked
+                        handleChunkReportedAsAcked(highestNewAck, rttEstimation, myChunk,
+                                path /* i.e. the SACK path for RTT measurement! */,
+                                sackGapList.tsnIsNonRevokable(myChunk->tsn));
+                        // All NR-acked chunks have chunkMap->getChunk(pos) == NULL!
                     }
                 }
             }
         }
-        state->highestTsnAcked = sackChunk->getGapStop(numGaps-1);
+        state->highestTsnAcked = sackGapList.getGapStop(SCTPGapList::GT_Any, numGaps-1);
 
         // ====== Examine chunks between the gap reports ======================
         // They might have to be retransmitted or they could have been removed
         uint32 lo = tsna;
         for (int32 key = 0; key < numGaps; key++) {
-            const uint32 hi = sackChunk->getGapStart(key);
+            const uint32 hi = sackGapList.getGapStart(SCTPGapList::GT_Any, key);
             for (uint32 pos = lo+1; pos <= hi - 1; pos++) {
-                SCTPDataVariables* myChunk = retransmissionQ->getChunkFast(pos, getChunkFastFirstTime);
+                bool chunkFirstTime = true;
+                SCTPDataVariables* myChunk = retransmissionQ->getChunkFast(pos, chunkFirstTime);
                 if (myChunk) {
                     handleChunkReportedAsMissing(sackChunk, highestNewAck, myChunk,
                                                           path /* i.e. the SACK path for RTT measurement! */);
@@ -899,13 +979,18 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
                     sctpEV3 << "TSN " << pos << " not found in retransmissionQ" << endl;
                 }
             }
-            lo = sackChunk->getGapStop(key);
+            lo = sackGapList.getGapStop(SCTPGapList::GT_Any, key);
         }
 
 
         // ====== Validity checks =============================================
     }
 
+
+    // ====== Buffer space may have been gained => tell application ==========
+    if (sendBufferBeforeUpdate != state->sendBuffer) {
+        generateSendQueueAbatedIndication(sendBufferBeforeUpdate - state->sendBuffer);
+    }
 
     // ====== Update Fast Recovery status, according to SACK =================
     updateFastRecoveryStatus(state->lastTsnAck);
@@ -942,6 +1027,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
         state->peerWindowFull = false;
         state->zeroWindowProbing = false;
     }
+    advancePeerTsn();
 
     // ====== Need for zero-window probing? ==================================
     if (osb == 0) {
@@ -954,6 +1040,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
     // #### Congestion Window Management                                  ####
     // #######################################################################
 
+    // ======= Update congestion window of each path =========================
     sctpEV3 << "Before ccUpdateBytesAcked: ";
     for (SCTPPathMap::iterator piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
         SCTPPathVariables* myPath = piter->second;
@@ -1024,10 +1111,12 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 void SCTPAssociation::handleChunkReportedAsAcked(uint32&                  highestNewAck,
                                                                  simtime_t&           rttEstimation,
                                                                  SCTPDataVariables* myChunk,
-                                                                 SCTPPathVariables* sackPath)
+                                                                 SCTPPathVariables* sackPath,
+                                                                 const bool         sackIsNonRevokable)
 {
     SCTPPathVariables* myChunkLastPath = myChunk->getLastDestinationPath();
     if ( (myChunk->numberOfTransmissions == 1) &&
+          (myChunk->hasBeenMoved == false) &&
           (myChunk->hasBeenReneged == false) ) {
         if (myChunkLastPath == sackPath) {
             const simtime_t timeDifference = simTime() - myChunk->sendTime;
@@ -1039,29 +1128,35 @@ void SCTPAssociation::handleChunkReportedAsAcked(uint32&                  highes
         }
     }
     if ( (myChunk->hasBeenAbandoned == false) &&
-          (myChunk->hasBeenReneged == false) ) {
-        myChunkLastPath->newlyAckedBytes += (myChunk->booksize);
-
+          (myChunk->hasBeenReneged == false) &&
+          (myChunk->hasBeenAcked == false) ) {
         sctpEV3 << simTime() << ": GapAcked TSN " << myChunk->tsn
                   << " on path " << myChunkLastPath->remoteAddress << endl;
 
         if (myChunk->tsn > highestNewAck) {
             highestNewAck = myChunk->tsn;
         }
-        ackChunk(myChunk);
-        if (myChunk->countsAsOutstanding) {
-            decreaseOutstandingBytes(myChunk);
+
+        if (sackIsNonRevokable == true) {
+            myChunkLastPath->gapAckedChunksInLastSACK++;
+            myChunkLastPath->gapNRAckedChunksInLastSACK++;
         }
-        if (transmissionQ->getChunk(myChunk->tsn)) {      // I.R. 02.01.07
-            sctpEV3 << "Found TSN " << myChunk->tsn << " in transmissionQ -> remote it" << endl;
-            transmissionQ->removeMsg(myChunk->tsn);
-            myChunk->enqueuedInTransmissionQ = false;
-            CounterMap::iterator q = qCounter.roomTransQ.find(myChunk->getNextDestination());
-            q->second -= ADD_PADDING(myChunk->len/8+SCTP_DATA_CHUNK_LENGTH);
-            CounterMap::iterator qb = qCounter.bookedTransQ.find(myChunk->getNextDestination());
-            qb->second -= myChunk->booksize;
+        else {
+            myChunkLastPath->gapAckedChunksInLastSACK++;
         }
-        myChunk->gapReports = 0;
+    }
+
+    // ====== Non-Renegable SACK =============================================
+    if (sackIsNonRevokable == true) {
+        // NOTE: nonRenegablyAckChunk() will only work with ChunkMap,
+        //       since the actual chunk object will be gone ...
+        nonRenegablyAckChunk(myChunk, sackPath, rttEstimation,
+                sctpMain->getAssocStat(assocId));
+    }
+
+    // ====== Renegable SACK =================================================
+    else {
+        renegablyAckChunk(myChunk, sackPath);
     }
 }
 
@@ -1069,7 +1164,7 @@ void SCTPAssociation::handleChunkReportedAsAcked(uint32&                  highes
 void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk*      sackChunk,
                                                                     const uint32                 highestNewAck,
                                                                     SCTPDataVariables*       myChunk,
-                                                                    const SCTPPathVariables* sackPath)
+                                                                    SCTPPathVariables* sackPath)
 {
     SCTPPathVariables* myChunkLastPath = myChunk->getLastDestinationPath();
     sctpEV3 << "TSN " << myChunk->tsn << " is missing in gap reports (last "
@@ -1080,8 +1175,7 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk*      sac
         const uint32 chunkReportedAsMissing = (highestNewAck > myChunk->tsn) ? 1 : 0;
         if (chunkReportedAsMissing > 0) {
             myChunk->gapReports += chunkReportedAsMissing;
-
-            myChunkLastPath->gapNAcksInLastSACK++;
+            myChunkLastPath->gapUnackedChunksInLastSACK++;
 
             if (myChunk->gapReports >= state->numGapReports) {
                 bool fastRtx = false;
@@ -1128,32 +1222,171 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk*      sac
                 }
             }
         }
-        else {
-            myChunk->hasBeenFastRetransmitted = false;
-            sctpEV3 << "TSN " << myChunk->tsn << " countsAsOutstanding="
-                        << myChunk->countsAsOutstanding << endl;
-            if (highestNewAck > myChunk->tsn) {
-                myChunk->gapReports++;
-            }
-            myChunkLastPath->gapAcksInLastSACK++;
-        }
         myChunkLastPath->findLowestTSN = false;
     }
     else {
         // Reneging, type 1:
         // A chunk in the gap blocks has been un-acked => reneg it.
-        tsnWasReneged(myChunk, 1);
+        tsnWasReneged(myChunk, sackPath, 1);
     }
 }
 
 
-uint32 SCTPAssociation::dequeueAckedChunks(const uint32       tsna,
+void SCTPAssociation::nonRenegablyAckChunk(SCTPDataVariables* chunk,
+        SCTPPathVariables* sackPath,
+        simtime_t&         rttEstimation,
+        SCTP::AssocStat*   assocStat)
+{
+    SCTPPathVariables* lastPath = chunk->getLastDestinationPath();
+    assert(lastPath != NULL);
+
+    // ====== Bookkeeping ====================================================
+    // Subtract chunk size from sender buffer size
+    state->sendBuffer -= chunk->len/8;
+
+    // Subtract chunk size from the queue size of its stream
+    SCTPSendStreamMap::iterator streamIterator = sendStreams.find(chunk->sid);
+    assert(streamIterator != sendStreams.end());
+    SCTPSendStream* stream = streamIterator->second;
+    assert(stream != NULL);
+    cQueue* streamQ = (chunk->ordered == false) ? stream->getUnorderedStreamQ() : stream->getStreamQ();
+    assert(streamQ != NULL);
+  //  streamQ->subLen(chunk->len / 8);
+
+    if ( (chunk->hasBeenCountedAsNewlyAcked == false) &&
+         (chunk->hasBeenAcked == false) ) {
+            chunk->hasBeenCountedAsNewlyAcked = true;
+            // The chunk has not been acked before.
+            // Therefore, its size may *once* be counted as newly acked.
+            lastPath->newlyAckedBytes += chunk->booksize;
+    }
+
+    assert(chunk->queuedOnPath->queuedBytes >= chunk->booksize);
+    chunk->queuedOnPath->queuedBytes -= chunk->booksize;
+    chunk->queuedOnPath = NULL;
+
+    assert(state->queuedSentBytes >= chunk->booksize);
+    state->queuedSentBytes -= chunk->booksize;
+    if (assocStat) {
+        assocStat->ackedBytes += chunk->len/8;
+    }
+
+    // ====== RTT calculation ================================================
+    if ((chunkHasBeenAcked(chunk) == false) && (chunk->countsAsOutstanding)) {
+        if ((chunk->numberOfTransmissions == 1) && (lastPath == sackPath) && (chunk->hasBeenMoved == false)) {
+            const simtime_t timeDifference = simTime() - chunk->sendTime;
+            if ((timeDifference < rttEstimation) || (rttEstimation == MAXTIME)) {
+                rttEstimation = timeDifference;
+            }
+        }
+        decreaseOutstandingBytes(chunk);
+    }
+
+    // ====== Remove chunk pointer from ChunkMap =============================
+    // The chunk still has to be remembered as acknowledged!
+    ackChunk(chunk, sackPath);
+
+    // ====== Remove chunk from transmission queue ===========================
+    // Dequeue chunk, cause it has been acked
+    if (transmissionQ->getChunk(chunk->tsn)) {
+        transmissionQ->removeMsg(chunk->tsn);
+        chunk->enqueuedInTransmissionQ = false;
+        CounterMap::iterator q = qCounter.roomTransQ.find(chunk->getNextDestination());
+        q->second -= ADD_PADDING(chunk->len/8+SCTP_DATA_CHUNK_LENGTH);
+        CounterMap::iterator qb = qCounter.bookedTransQ.find(chunk->getNextDestination());
+        qb->second -= chunk->booksize;
+    }
+
+    // ====== Remove chunk from retransmission queue =========================
+    chunk = retransmissionQ->getAndExtractChunk(chunk->tsn);
+    if (chunk->userData != NULL) {
+        delete chunk->userData;
+    }
+    delete chunk;
+}
+
+
+void SCTPAssociation::renegablyAckChunk(SCTPDataVariables* chunk,
+        SCTPPathVariables* sackPath)
+{
+    // ====== Bookkeeping ====================================================
+    if (chunk->countsAsOutstanding) {
+        decreaseOutstandingBytes(chunk);
+    }
+
+    if ( (chunk->hasBeenCountedAsNewlyAcked == false) &&
+            (chunk->hasBeenAcked == false) ) {
+           chunk->hasBeenCountedAsNewlyAcked = true;
+           // The chunk has not been acked before.
+           // Therefore, its size may *once* be counted as newly acked.
+           chunk->getLastDestinationPath()->newlyAckedBytes += chunk->booksize;
+    }
+
+    // ====== Acknowledge chunk =============================================
+    ackChunk(chunk, sackPath);
+    chunk->gapReports = 0;
+
+    // ====== Remove chunk from transmission queue ===========================
+    if (transmissionQ->getChunk(chunk->tsn)) {   // I.R. 02.01.2007
+        sctpEV3 << "Found TSN " << chunk->tsn << " in transmissionQ -> remote it" << endl;
+        transmissionQ->removeMsg(chunk->tsn);
+        chunk->enqueuedInTransmissionQ = false;
+        CounterMap::iterator q = qCounter.roomTransQ.find(chunk->getNextDestination());
+        q->second -= ADD_PADDING(chunk->len/8+SCTP_DATA_CHUNK_LENGTH);
+        CounterMap::iterator qb = qCounter.bookedTransQ.find(chunk->getNextDestination());
+        qb->second -= chunk->booksize;
+    }
+}
+
+
+void SCTPAssociation::generateSendQueueAbatedIndication(const uint64 bytes)
+{
+    if (state->sendBuffer < state->sendQueueLimit) {
+        // Just send SCTP_I_SENDQUEUE_ABATED once, after all newly acked
+        // chunks have been dequeued.
+        // Only send indication if the sendBuffer size has dropped below the sendQueueLimit
+        // assert(state->lastSendQueueAbated < simTime());
+        state->appSendAllowed = true;
+        sctpEV3 << simTime() << ":\tSCTP_I_SENDQUEUE_ABATED("
+                << bytes << ") to refill buffer "
+                << state->sendBuffer << "/" << state->sendQueueLimit << endl;
+
+        cPacket* msg = new cPacket(indicationName(SCTP_I_SENDQUEUE_ABATED));
+        msg->setKind(SCTP_I_SENDQUEUE_ABATED);
+
+        SCTPSendQueueAbated* sendQueueAbatedIndication =
+                new SCTPSendQueueAbated(indicationName(SCTP_I_SENDQUEUE_ABATED));
+        sendQueueAbatedIndication->setAssocId(assocId);
+        sendQueueAbatedIndication->setLocalAddr(localAddr);
+        sendQueueAbatedIndication->setRemoteAddr(remoteAddr);
+        sendQueueAbatedIndication->setNumMsgs(bytes);   // NOTE: Legacy API!
+
+        sendQueueAbatedIndication->setQueuedForStreamArraySize(sendStreams.size());
+        unsigned int streamID = 0;
+        for (SCTPSendStreamMap::iterator iterator = sendStreams.begin();
+                iterator != sendStreams.end(); ++iterator) {
+            const SCTPSendStream* stream = iterator->second;
+            sendQueueAbatedIndication->setQueuedForStream(streamID, stream->getUnorderedStreamQ()->getByteLength()+stream->getStreamQ()->getByteLength());
+            streamID++;
+        }
+
+        sendQueueAbatedIndication->setBytesAvailable(state->sendQueueLimit - state->sendBuffer);
+        sendQueueAbatedIndication->setBytesQueued(state->sendBuffer);
+        sendQueueAbatedIndication->setBytesLimit(state->sendQueueLimit);
+
+        msg->setControlInfo(sendQueueAbatedIndication);
+        sctpMain->send(msg, "to_appl", appGateIndex);
+
+        state->lastSendQueueAbated = simTime();
+    }
+}
+
+
+void SCTPAssociation::dequeueAckedChunks(const uint32       tsna,
                                                          SCTPPathVariables* sackPath,
                                                          simtime_t&           rttEstimation)
 {
     SCTP::AssocStat* assocStat = sctpMain->getAssocStat(assocId);
-    uint32            newlyAckedBytes = 0;
-    uint64            sendBufferBeforeUpdate = state->sendBuffer;
 
     // Set it ridiculously high
     rttEstimation = MAXTIME;
@@ -1165,50 +1398,14 @@ uint32 SCTPAssociation::dequeueAckedChunks(const uint32       tsna,
         if (tsnGe(tsna, chunk->tsn)) {
             sctpEV3 << simTime() << ": CumAcked TSN " << chunk->tsn
                     << " on path " << chunk->getLastDestination() << endl;
-            // Dequeue chunk, cause it has been acked
-            if (transmissionQ->getChunk(chunk->tsn)) {
-                transmissionQ->removeMsg(chunk->tsn);
-                chunk->enqueuedInTransmissionQ = false;
-                CounterMap::iterator q = qCounter.roomTransQ.find(chunk->getNextDestination());
-                q->second -= ADD_PADDING(chunk->len/8+SCTP_DATA_CHUNK_LENGTH);
-                CounterMap::iterator qb = qCounter.bookedTransQ.find(chunk->getNextDestination());
-                qb->second -= chunk->booksize;
-            }
-
-            chunk = retransmissionQ->getAndExtractChunk(chunk->tsn);
-            state->sendBuffer -= chunk->len/8;
-
-            SCTPPathVariables* lastPath = chunk->getLastDestinationPath();
-            assert(lastPath != NULL);
 
             if (!chunkHasBeenAcked(chunk)) {
-                newlyAckedBytes += (chunk->booksize);
-
-                lastPath->newlyAckedBytes += (chunk->booksize);
-
+                SCTPPathVariables* lastPath = chunk->getLastDestinationPath();
                 // T.D. 05.12.09: CumAck affects lastPath -> reset its T3 timer later.
                 lastPath->newCumAck = true;
             }
 
-
-            if (assocStat) {
-                assocStat->ackedBytes += chunk->len/8;
-            }
-
-            if ((chunkHasBeenAcked(chunk) == false) && (chunk->countsAsOutstanding)) {
-                ackChunk(chunk);
-                if ((chunk->numberOfTransmissions == 1) && (chunk->getLastDestinationPath() == sackPath)) {
-                    const simtime_t timeDifference = simTime() - chunk->sendTime;
-                    if ((timeDifference < rttEstimation) || (rttEstimation == MAXTIME)) {
-                        rttEstimation = timeDifference;
-                    }
-                }
-                decreaseOutstandingBytes(chunk);
-            }
-            if (chunk->userData != NULL) {
-                delete chunk->userData;
-            }
-            delete chunk;
+            nonRenegablyAckChunk(chunk, sackPath, rttEstimation, assocStat);
         }
         else {
             break;
@@ -1216,39 +1413,35 @@ uint32 SCTPAssociation::dequeueAckedChunks(const uint32       tsna,
         iterator = retransmissionQ->payloadQueue.begin();
     }
 
-    if (sendBufferBeforeUpdate != state->sendBuffer && state->sendBuffer < state->sendQueueLimit) {
-        // T.D. 06.02.2010: Just send SCTP_I_SENDQUEUE_ABATED once, after all newly acked
-        //                        chunks have been dequeued.
-        // I.R. only send indication if the sendBuffer size has dropped below the sendQueueLimit
-        assert(state->lastSendQueueAbated < simTime());
-        state->appSendAllowed = true;
-        sctpEV3 << simTime() << ":\tSCTP_I_SENDQUEUE_ABATED("
-                  << sendBufferBeforeUpdate - state->sendBuffer << ") to refill buffer "
-                  << state->sendBuffer << "/" << state->sendQueueLimit << endl;
-        sendIndicationToApp(SCTP_I_SENDQUEUE_ABATED, sendBufferBeforeUpdate - state->sendBuffer);
-        state->lastSendQueueAbated = simTime();
-    }
-
-    sctpEV3 << "dequeueAckedChunks(): newlyAckedBytes=" << newlyAckedBytes
-              << ", rttEstimation=" << rttEstimation << endl;
-
-    return (newlyAckedBytes);
+    sctpEV3 << "dequeueAckedChunks(): rttEstimation=" << rttEstimation << endl;
 }
 
 
 
 SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
 {
-    bool                     checkCtsnaChange = false;
     const uint32         tsn = dataChunk->getTsn();
     SCTPPathVariables* path = getPath(remoteAddr);
 
     state->newChunkReceived = false;
     state->lastTsnReceived = tsn;
-    state->lastDataSourceAddress = remoteAddr;
+
+    bool found = false;
+    for (std::list<SCTPPathVariables*>::iterator iterator = state->lastDataSourceList.begin();
+            iterator != state->lastDataSourceList.end(); iterator++) {
+        if (*iterator == path) {
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        state->lastDataSourceList.push_back(path);
+    }
+    state->lastDataSourcePath = path;
 
     sctpEV3 << simTime() << " SCTPAssociation::processDataArrived TSN=" << tsn << endl;
-    path->pathRcvdTSN->record(tsn);
+    path->vectorPathReceivedTSN->record(tsn);
+    calculateRcvBuffer();
 
     SCTPSimpleMessage* smsg = check_and_cast <SCTPSimpleMessage*>(dataChunk->decapsulate());
     dataChunk->setBitLength(SCTP_DATA_CHUNK_LENGTH*8);
@@ -1260,72 +1453,54 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
     SCTP::AssocStatMap::iterator iter = sctpMain->assocStatMap.find(assocId);
     iter->second.rcvdBytes += dataChunk->getByteLength()-SCTP_DATA_CHUNK_LENGTH;
 
-    if (state->numGaps == 0) {
-        state->highestTsnReceived = state->cTsnAck;
-    }
-    else {
-        state->highestTsnReceived = state->gapStopList[state->numGaps-1];
-    }
     if (state->stopReceiving) {
         return SCTP_E_IGNORE;
     }
 
-    if (tsnLe(tsn, state->cTsnAck)) {
-            sctpEV3 << "Duplicate TSN " << tsn << " (smaller than CumAck)" << endl;
-            state->dupList.push_back(tsn);
-            state->dupList.unique();
-            delete check_and_cast <SCTPSimpleMessage*>(dataChunk->decapsulate());
-            return SCTP_E_DUP_RECEIVED;
-    }
-
-
-    if ((int32)(state->localRwnd-state->queuedReceivedBytes) <= 0) {
-        if (tsnGt(tsn, state->highestTsnReceived)) {
+    // ====== Duplicate: tsn < CumAckTSN =====================================
+    if (tsnLe(tsn, state->gapList.getCumAckTSN())) {
+        if (state->stopOldData) {
             return SCTP_E_IGNORE;
         }
-        // changed 06.07.05 I.R.
-        else if ((!tsnIsDuplicate(tsn)) &&
-                    (tsn < state->highestTsnStored)) {
-            if (!makeRoomForTsn(tsn, dataChunk->getBitLength()-SCTP_DATA_CHUNK_LENGTH*8, dataChunk->getUBit())) {
-                delete check_and_cast <SCTPSimpleMessage*>(dataChunk->decapsulate());
-                return SCTP_E_IGNORE;
-            }
-        }
-    }
-    if (tsnGt(tsn, state->highestTsnReceived)) {
-        sctpEV3 << "highestTsnReceived=" << state->highestTsnReceived
-                  << " tsn=" << tsn << endl;
-        state->highestTsnReceived = state->highestTsnStored = tsn;
-        if (tsn == initPeerTsn) {
-            state->cTsnAck = tsn;
-        }
         else {
-            sctpEV3 << "Update fragment list" << endl;
-            checkCtsnaChange = updateGapList(tsn);
+            sctpEV3 << simTime() << ": Duplicate TSN " << tsn << " (smaller than CumAck)" << endl;
+            state->dupList.push_back(tsn);
+            state->dupList.unique();
+            path->numberOfDuplicates++;
+            delete check_and_cast <SCTPSimpleMessage*>(dataChunk->decapsulate());
+            return SCTP_E_DUP_RECEIVED;
         }
-        state->newChunkReceived = true;
     }
-    else if (tsnIsDuplicate(tsn)) {
+
+    // ====== Duplicate ======================================================
+    if (tsnIsDuplicate(tsn)) {
         // TSN value is duplicate within a fragment
         sctpEV3 << "Duplicate TSN " << tsn << " (copy)" << endl;
         state->dupList.push_back(tsn);
         state->dupList.unique();
+        path->numberOfDuplicates++;
         return SCTP_E_IGNORE;
     }
-    else {
-        checkCtsnaChange = updateGapList(tsn);
-    }
+
+    // ====== Out of receiver buffer space? ==================================
+    calculateRcvBuffer();
+
+
+    // ====== Update of CumAckTSN ============================================
+    state->gapList.updateGapList(tsn, state->newChunkReceived,
+            (state->disableReneging == false) ? true : false);
+    state->gapList.tryToAdvanceCumAckTSN();
+    sctpEV3 << "cumAckTSN=" << state->gapList.getCumAckTSN()
+                   << " highestTSNReceived=" << state->gapList.getHighestTSNReceived() << endl;
+
+
+    // ====== Silly Window Syndrome Avoidance ================================
     if (state->swsAvoidanceInvoked) {
         // swsAvoidanceInvoked => schedule a SACK to be sent at once in this case
         sctpEV3 << "swsAvoidanceInvoked" << endl;
         state->ackState = sackFrequency;
     }
 
-    if (checkCtsnaChange) {
-        advanceCtsna();
-    }
-    sctpEV3 << "cTsnAck=" << state->cTsnAck
-              << " highestTsnReceived=" << state->highestTsnReceived << endl;
 
     // ====== Enqueue new chunk ==============================================
     SCTPEventCode event = SCTP_E_SEND;
@@ -1334,12 +1509,17 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
         const int ret = iter->second->enqueueNewDataChunk(makeVarFromMsg(dataChunk));
         if (ret > 0) {
             state->queuedReceivedBytes += payloadLength;
+            calculateRcvBuffer();
 
             event = SCTP_E_DELIVERED;
             if (ret < 3) {
                 sendDataArrivedNotification(dataChunk->getSid());
                 putInDeliveryQ(dataChunk->getSid());
+                if (simTime() > state->lastThroughputTime + 1) {
+                    state->lastThroughputTime = simTime();
+                }
             }
+            calculateRcvBuffer();
         }
         state->newChunkReceived = false;
     }
@@ -1347,12 +1527,11 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
     return (event);
 }
 
-
 SCTPEventCode SCTPAssociation::processHeartbeatAckArrived(SCTPHeartbeatAckChunk* hback,
                                                                              SCTPPathVariables*     path)
 {
     path->numberOfHeartbeatAcksRcvd++;
-    path->pathRcvdHbAck->record(path->numberOfHeartbeatAcksRcvd);
+    path->vectorPathRcvdHbAck->record(path->numberOfHeartbeatAcksRcvd);
     /* hb-ack goes to pathmanagement, reset error counters, stop timeout timer */
     const IPvXAddress addr = hback->getRemoteAddr();
     const simtime_t hbTimeField = hback->getTimeField();
@@ -1662,15 +1841,25 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
 
             // ====== Insert chunks into TransmissionQ ============================
             // Only insert chunks that were sent to the path that has timed out
-            if ( ((chunkHasBeenAcked(chunk) == false && chunk->countsAsOutstanding) || chunk->hasBeenReneged) &&
-                  (chunk->getLastDestinationPath() == path) ) {
-                sctpEV3 << simTime() << ": Timer-Based RTX for TSN "
-                          << chunk->tsn << " on path " << chunk->getLastDestination() << endl;
+            if (((chunkHasBeenAcked(chunk) == false && chunk->countsAsOutstanding)
+                    || chunk->hasBeenReneged) && (chunk->getLastDestinationPath() == path)) {
+                SCTPPathVariables* nextPath = getNextDestination(chunk);
+                sctpEV3 << simTime() << ": Timer-Based RTX for TSN " << chunk->tsn
+                        << ": lastDestination=" << chunk->getLastDestination()
+                        << " lastPathRTO=" << chunk->getLastDestinationPath()->pathRto
+                        << " nextDestination=" << nextPath->remoteAddress
+                        << " nextPathRTO=" << nextPath->pathRto
+                        << " waiting=" << simTime() - chunk->sendTime
+                        << endl;
                 chunk->getLastDestinationPath()->numberOfTimerBasedRetransmissions++;
-                SCTP::AssocStatMap::iterator iter = sctpMain->assocStatMap.find(assocId);
-                iter->second.numT3Rtx++;
+                chunk->hasBeenTimerBasedRtxed = true;
 
-                moveChunkToOtherPath(chunk, getNextDestination(chunk));
+                if (!chunk->hasBeenAbandoned) {
+                    SCTP::AssocStatMap::iterator iter = sctpMain->assocStatMap.find(assocId);
+                    iter->second.numT3Rtx++;
+                }
+
+                moveChunkToOtherPath(chunk, nextPath);
             }
         }
     }
@@ -1686,31 +1875,22 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
 void SCTPAssociation::moveChunkToOtherPath(SCTPDataVariables* chunk,
                                                          SCTPPathVariables* newPath)
 {
+    // ======= Remove chunk from outstanding bytes ===========================
+    if (chunk->countsAsOutstanding) {
+        decreaseOutstandingBytes(chunk);
+    }
+
     // ====== Prepare next destination =======================================
-    SCTPPathVariables* lastPath = chunk->getLastDestinationPath();
     chunk->hasBeenFastRetransmitted = false;
     chunk->gapReports = 0;
     chunk->setNextDestination(newPath);
-    sctpEV3 << simTime() << ": Timer-Based RTX for TSN " << chunk->tsn
-              << ": lastDestination=" << chunk->getLastDestination()
-              << " nextDestination="  << chunk->getNextDestination() << endl;
 
-    // ======= Remove chunk's booksize from outstanding bytes ================
-    // T.D. 12.02.2010: This case may happen when using sender queue control!
-    if (chunk->countsAsOutstanding) {
-        assert(lastPath->outstandingBytes >= chunk->booksize);
-        lastPath->outstandingBytes -= chunk->booksize;
-        assert((int32)lastPath->outstandingBytes >= 0);
-        state->outstandingBytes -= chunk->booksize;
-        assert((int64)state->outstandingBytes >= 0);
-        chunk->countsAsOutstanding = false;
-        // T.D. 12.02.2010: No Timer-Based RTX is necessary any more when there
-        //                        are no outstanding bytes!
-        if (lastPath->outstandingBytes == 0) {
-            stopTimer(lastPath->T3_RtxTimer);
-        }
-    }
+    // ====== Rebook chunk on new path =======================================
+    assert(chunk->queuedOnPath->queuedBytes >= chunk->booksize);
+    chunk->queuedOnPath->queuedBytes -= chunk->booksize;
 
+    chunk->queuedOnPath = chunk->getNextDestinationPath();
+    chunk->queuedOnPath->queuedBytes += chunk->booksize;
 
     // ====== Perform bookkeeping ============================================
     // Check, if chunk_ptr->tsn is already in transmission queue.
@@ -1726,16 +1906,14 @@ void SCTPAssociation::moveChunkToOtherPath(SCTPDataVariables* chunk,
         q->second += ADD_PADDING(chunk->len/8+SCTP_DATA_CHUNK_LENGTH);
         CounterMap::iterator qb = qCounter.bookedTransQ.find(chunk->getNextDestination());
         qb->second += chunk->booksize;
-
-        if (chunk->countsAsOutstanding) {
-            decreaseOutstandingBytes(chunk);
-        }
-        state->peerRwnd += (chunk->booksize);
+        state->peerRwnd += chunk->booksize;
     }
     if (state->peerRwnd > state->initialPeerRwnd) {
         state->peerRwnd = state->initialPeerRwnd;
     }
-    sctpEV3 << "T3 Timeout: Chunk (TSN=" << chunk->tsn
-                << ") has been requeued in transmissionQ, rwnd was set to "
-                << state->peerRwnd << endl;
+
+    // T.D. 02.08.2011: The peer window may not be full anymore!
+    if ( (state->peerWindowFull) && (state->peerRwnd > 0) ) {
+        state->peerWindowFull = false;
+    }
 }

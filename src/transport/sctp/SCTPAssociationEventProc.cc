@@ -172,7 +172,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
     }
 
     // ------ Optional padding and size calculations ----------------------
-    datMsg->setBooksize(smsg->getBitLength() / 8 + state->header);
+    datMsg->setBooksize(smsg->getByteLength() + state->header);
     qCounter.roomSumSendStreams += ADD_PADDING(smsg->getBitLength() / 8 + SCTP_DATA_CHUNK_LENGTH);
     qCounter.bookedSumSendStreams += datMsg->getBooksize();
     // Add chunk size to sender buffer size
@@ -189,6 +189,8 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
         datMsg->setOrdered(true);
         stream->getStreamQ()->insert(datMsg);
 
+        sendQueue->record(stream->getStreamQ()->getLength());
+
         // ------ Send buffer full? -------------------------------------------
         if ((state->appSendAllowed) &&
             (state->sendQueueLimit > 0) &&
@@ -196,7 +198,6 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
             sendIndicationToApp(SCTP_I_SENDQUEUE_FULL);
             state->appSendAllowed = false;
         }
-        sendQueue->record(stream->getStreamQ()->getLength());
     }
 
     state->queuedMessages++;

@@ -64,6 +64,15 @@ simple SCTP like ISCTP
         int arwnd = default(65535);
         int swsLimit = default(3000);        // Limit for SWS
         bool udpEncapsEnabled = default(false);
+        double throughputInterval = default(1);
+
+        //#====== SACK Sequence Numbers =======================================
+        bool checkSackSeqNumber = default(false);
+
+        //#====== NR-SACK =====================================================
+        bool nrSack = default(false);
+        bool disableReneging = default(false);
+
         @display("i=block/wheelbarrow");
 
     gates:
