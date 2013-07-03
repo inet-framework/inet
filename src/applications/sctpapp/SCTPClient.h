@@ -62,6 +62,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         cMessage* stopTimer;
         cMessage* primaryChangeTimer;
 
+        int32 chunksAbandoned;
         /** Utility: sends a request to the server */
         void sendRequest(bool last = true);
 
@@ -147,6 +148,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         void sendqueueFullArrived(int32 connId);
         void sendqueueAbatedArrived(int32 connId, uint64 buffer);
         void addressAddedArrived(int32 assocId, IPvXAddress remoteAddr);
+        void msgAbandonedArrived(int32 assocId);
 };
 
 #endif

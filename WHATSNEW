@@ -10,7 +10,8 @@ OMNeT++ 4.2 or 4.3.
 
 NEW:
 
-  - Added NR_SACK feature is supported now in SCTP (patch submitted by Irene Rüngeler)
+  - Added NR_SACK feature to SCTP (patch submitted by Irene Rüngeler)
+  - Added Partial Reliability SCTP (RFC 3758) (patch submitted by Irene Rüngeler)
 
 
 INET-2.1.0 (Jan 31, 2013)

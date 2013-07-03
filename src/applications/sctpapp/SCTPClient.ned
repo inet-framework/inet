@@ -43,6 +43,8 @@ simple SCTPClient like ISCTPApp
         bool echo = default(false);  // echoes received packages when true
         bool ordered = default(true);
         int queueSize = default(0);
+        int prMethod = default(0);  //0=NONE, 1=PR_TTL, 2=PR_RTX, 3=PR_PRIO, 4=PR_STRRST
+        double prValue = default(0); //for PR-SCTP
         double stopTime @unit(s) = default(0s);
         double primaryTime @unit(s) = default(0s);
         string newPrimary = default("");

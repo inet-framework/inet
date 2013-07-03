@@ -128,7 +128,7 @@ void SCTPClient::connect()
     ev << "issuing OPEN command\n";
     setStatusString("connecting");
     ev << "connect to address " << connectAddress << "\n";
-    socket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, (uint32)par("numRequestsPerSession"));
+    socket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
     numSessions++;
 }
 
@@ -338,7 +338,7 @@ void SCTPClient::sendRequest(bool last)
         last = true;
 
     emit(sentPkSignal, msg);
-    socket.send(cmsg, last);
+    socket.send(cmsg, par("prMethod"), par("prValue"), last);
     bytesSent += sendBytes;
 }
 
@@ -528,6 +528,12 @@ void SCTPClient::setPrimaryPath(const char* str)
     cmsg->setControlInfo(pinfo);
     socket.sendNotification(cmsg);
 }
+
+void SCTPClient::msgAbandonedArrived(int32 assocId)
+{
+    chunksAbandoned++;
+}
+
 
 void SCTPClient::sendqueueFullArrived(int32 assocId)
 {

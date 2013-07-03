@@ -55,6 +55,7 @@ class  INET_API SCTPSocket
         virtual void socketFailure(int assocId, void *yourPtr, int code) {}
         virtual void socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status){}// {delete status;}
         virtual void sendRequestArrived() {}
+        virtual void msgAbandonedArrived(int assocId) {}
         virtual void shutdownReceivedArrived(int connId) {}
         virtual void sendqueueFullArrived(int connId) {}
         virtual void sendqueueAbatedArrived(int connId, uint64 buffer) {}
@@ -185,14 +186,16 @@ class  INET_API SCTPSocket
     /**
      * Active OPEN to the given remote socket.
      */
-    void connect(IPvXAddress remoteAddress, int32 remotePort, uint32 numRequests);
+    void connect(IPvXAddress remoteAddress, int32 remotePort, int32 prMethod, uint32 numRequests);
 
-    void connectx(AddressVector remoteAddresses, int32 remotePort, uint32 numRequests = 0);
+    void connectx(AddressVector remoteAddresses, int32 remotePort, int32 prMethod=0, uint32 numRequests = 0);
 
     /**
      * Sends data packet.
      */
     void send(cPacket *msg, bool last = true, bool primary = true);
+    void send(cPacket *msg, int prMethod, double prValue, bool last);
+    void send(cPacket *msg, int prMethod, double prValue, bool last, int32 streamId);
 
     void sendNotification(cPacket *msg);
     void sendRequest(cPacket *msg);

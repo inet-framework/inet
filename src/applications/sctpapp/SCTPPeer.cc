@@ -154,6 +154,8 @@ void SCTPPeer::generateAndSend(SCTPConnectInfo *connectInfo)
         cmd->setSendUnordered(COMPLETE_MESG_UNORDERED);
     lastStream = (lastStream+1)%outboundStreams;
     cmd->setSid(lastStream);
+    cmd->setPrValue(par("prValue"));
+    cmd->setPrMethod((int32)par("prMethod"));
     cmd->setLast(true);
     cmsg->setKind(SCTP_C_SEND);
     cmsg->setControlInfo(cmd);
@@ -173,7 +175,7 @@ void SCTPPeer::connect()
     sctpEV3 << "issuing OPEN command\n";
     sctpEV3 << "Assoc " << clientSocket.getConnectionId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
     numSessions++;
-    clientSocket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, (uint32)par("numRequestsPerSession"));
+    clientSocket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
 
 }
 
@@ -374,6 +376,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
                     k->second->collect(simulation.getSimTime()-smsg->getCreationTime());
                     cPacket* cmsg = new cPacket("SVData");
                     bytesSent += smsg->getByteLength();
+                    cmd->setPrValue(0);
                     emit(sentPkSignal, smsg);
                     cmd->setSendUnordered(cmd->getSendUnordered());
                     lastStream = (lastStream+1)%outboundStreams;
@@ -693,7 +696,7 @@ void SCTPPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
         cmsg->setKind(ind->getSendUnordered() ? SCTP_C_SEND_UNORDERED : SCTP_C_SEND_ORDERED);
         packetsSent++;
         delete msg;
-        clientSocket.send(cmsg, 1);
+        clientSocket.send(cmsg, 0, 0, 1);
     }
 
     if ((long)par("numPacketsToReceive")>0)
@@ -718,6 +721,12 @@ void SCTPPeer::shutdownReceivedArrived(int32 connId)
         cmsg->setControlInfo(qinfo);
         clientSocket.sendNotification(cmsg);
     }
+}
+
+
+void SCTPPeer::msgAbandonedArrived(int32 assocId)
+{
+    chunksAbandoned++;
 }
 
 void SCTPPeer::sendqueueFullArrived(int32 assocId)

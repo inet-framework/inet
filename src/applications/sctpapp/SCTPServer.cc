@@ -109,6 +109,8 @@ void SCTPServer::generateAndSend()
     cmd->setSendUnordered(ordered ? COMPLETE_MESG_ORDERED : COMPLETE_MESG_UNORDERED);
     lastStream = (lastStream+1)%outboundStreams;
     cmd->setSid(lastStream);
+    cmd->setPrValue(par("prValue"));
+    cmd->setPrMethod((int32)par("prMethod"));
     if (queueSize>0 && numRequestsToSend > 0 && count < queueSize*2)
         cmd->setLast(false);
     else
@@ -387,6 +389,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                     bytesSent += smsg->getBitLength()/8;
                     cmd->setSendUnordered(cmd->getSendUnordered());
                     lastStream = (lastStream+1)%outboundStreams;
+                    cmd->setPrValue(0);
                     cmd->setSid(lastStream);
                     cmd->setLast(true);
                     cmsg->encapsulate(smsg);

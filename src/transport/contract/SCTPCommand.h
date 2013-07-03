@@ -66,7 +66,8 @@ enum SctpStatusInd
     SCTP_I_SEND_MSG             = 12,
     SCTP_I_SHUTDOWN_RECEIVED    = 13,
     SCTP_I_SENDQUEUE_FULL       = 14,
-    SCTP_I_SENDQUEUE_ABATED     = 15
+    SCTP_I_SENDQUEUE_ABATED     = 15,
+    SCTP_I_ABANDONED            = 16
 };
 
 enum SCTPFlags

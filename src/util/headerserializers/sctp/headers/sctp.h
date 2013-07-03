@@ -256,6 +256,14 @@ struct error_chunk {
 } __PACKED__;
 
 
+struct forward_tsn_chunk {
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint32_t cum_tsn;
+    uint8_t  stream_info[0];
+} __PACKED__;
+
 // variable length parameters in INIT chunk:
 #define INIT_PARAM_IPV4 5
 #define INIT_PARAM_IPV6 6
@@ -300,6 +308,12 @@ struct supported_extensions_parameter {
     uint16_t type;
     uint16_t length;
     uint8_t chunk_type[0];
+} __PACKED__;
+
+
+struct forward_tsn_supported_parameter {
+    uint16_t type;
+    uint16_t length;
 } __PACKED__;
 
 
@@ -354,6 +368,12 @@ struct sack_duptsn {
     uint32_t tsn;
 } __PACKED__;
 
+
+// Forward_TSN streams
+struct forward_tsn_streams {
+    uint16_t sid;
+    uint16_t ssn;
+} __PACKED__;
 
 struct data_vector {
     uint8_t data[0];

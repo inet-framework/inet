@@ -107,5 +107,3 @@ class INET_API SCTPErrorChunk : public SCTPErrorChunk_Base
         virtual cPacket *removeParameter();
 };
 #endif
-
-

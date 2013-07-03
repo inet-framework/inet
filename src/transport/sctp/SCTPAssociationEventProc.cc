@@ -52,6 +52,7 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
             rAddr = openCmd->getRemoteAddr();
         localPort = openCmd->getLocalPort();
         remotePort = openCmd->getRemotePort();
+        state->prMethod = openCmd->getPrMethod();
         state->numRequests = openCmd->getNumRequests();
         if (rAddr.isUnspecified() || remotePort==0)
             throw cRuntimeError("Error processing command OPEN_ACTIVE: remote address and port must be specified");
@@ -158,6 +159,84 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
     datMsg->setPpid(ppid);
     datMsg->setEnqueuingTime(simulation.getSimTime());
 
+    // ------ PR-SCTP & Drop messages to free buffer space ----------------
+    datMsg->setPrMethod(sendCommand->getPrMethod());
+    switch (sendCommand->getPrMethod()) {
+        case PR_TTL:
+            if (sendCommand->getPrValue() > 0) {
+                datMsg->setExpiryTime(simulation.getSimTime() + sendCommand->getPrValue());
+            }
+            break;
+        case PR_RTX:
+            datMsg->setRtx((uint32)sendCommand->getPrValue());
+            break;
+        case PR_PRIO:
+            datMsg->setPriority((uint32)sendCommand->getPrValue());
+            state->queuedDroppableBytes += msg->getByteLength();
+            break;
+    }
+
+    if ((state->appSendAllowed) &&
+            (state->sendQueueLimit > 0) &&
+            (state->queuedDroppableBytes > 0) &&
+            ((uint64)state->sendBuffer >= state->sendQueueLimit) ) {
+        uint32 lowestPriority;
+        cQueue* strq;
+        int64 dropsize = state->sendBuffer - state->sendQueueLimit;
+        SCTPDataMsg* dropmsg;
+
+        if (sendUnordered)
+            strq = stream->getUnorderedStreamQ();
+        else
+            strq = stream->getStreamQ();
+
+        while (dropsize >= 0 && state->queuedDroppableBytes > 0) {
+            lowestPriority = 0;
+            dropmsg = NULL;
+
+            // Find lowest priority
+            for (cQueue::Iterator iter(*strq); !iter.end(); iter++) {
+                SCTPDataMsg* msg = (SCTPDataMsg*) iter();
+
+                if (msg->getPriority() > lowestPriority)
+                    lowestPriority = msg->getPriority();
+            }
+
+            // If just passed message has the lowest priority,
+            // drop it and we're done.
+            if (datMsg->getPriority() > lowestPriority) {
+                sctpEV3 << "msg will be abandoned, buffer is full and priority too low ("
+                        << datMsg->getPriority() << ")\n";
+                state->queuedDroppableBytes -= msg->getByteLength();
+                delete smsg;
+                delete msg;
+                sendIndicationToApp(SCTP_I_ABANDONED);
+                return;
+            }
+
+            // Find oldest message with lowest priority
+            for (cQueue::Iterator iter(*strq); !iter.end(); iter++) {
+                SCTPDataMsg* msg = (SCTPDataMsg*) iter();
+
+                if (msg->getPriority() == lowestPriority) {
+                    if (!dropmsg ||
+                            (dropmsg && dropmsg->getEnqueuingTime() < msg->getEnqueuingTime()))
+                        lowestPriority = msg->getPriority();
+                }
+            }
+
+            if (dropmsg) {
+                strq->remove(dropmsg);
+                dropsize -= dropmsg->getByteLength();
+                state->queuedDroppableBytes -= dropmsg->getByteLength();
+                SCTPSimpleMessage* smsg = check_and_cast<SCTPSimpleMessage*>((msg->decapsulate()));
+                delete smsg;
+                delete dropmsg;
+                sendIndicationToApp(SCTP_I_ABANDONED);
+            }
+        }
+    }
+
     // ------ Set initial destination address -----------------------------
     if (sendCommand->getPrimary()) {
         if (sendCommand->getRemoteAddr() == IPvXAddress("0.0.0.0")) {
@@ -195,8 +274,12 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
         if ((state->appSendAllowed) &&
             (state->sendQueueLimit > 0) &&
             ((uint64)state->sendBuffer >= state->sendQueueLimit) ) {
-            sendIndicationToApp(SCTP_I_SENDQUEUE_FULL);
-            state->appSendAllowed = false;
+        	// If there are not enough messages that could be dropped,
+        	// the buffer is really full and the app has to be notified.
+        	if (state->queuedDroppableBytes < state->sendBuffer - state->sendQueueLimit) {
+            	sendIndicationToApp(SCTP_I_SENDQUEUE_FULL);
+            	state->appSendAllowed = false;
+            }
         }
     }
 

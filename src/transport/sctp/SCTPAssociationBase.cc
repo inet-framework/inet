@@ -184,6 +184,7 @@ SCTPDataVariables::SCTPDataVariables()
     hasBeenMoved = false;
     hasBeenTimerBasedRtxed = false;
     firstSendTime = 0;
+    sendForwardIfAbandoned = false;
     lastDestination = NULL;
     nextDestination = NULL;
     initialDestination = NULL;
@@ -256,8 +257,10 @@ SCTPStateVariables::SCTPStateVariables()
     bytesRcvd = 0;
     sendBuffer = 0;
     queuedReceivedBytes = 0;
+    prMethod = 0;
     assocThroughput = 0;
     queuedSentBytes = 0;
+    queuedDroppableBytes = 0;
     lastSendQueueAbated = simTime();
     queuedMessages = 0;
     queueLimit = 0;

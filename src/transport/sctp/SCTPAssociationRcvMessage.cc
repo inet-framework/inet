@@ -310,6 +310,16 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
             delete state->shutdownAckChunk;
             delete shutdownCompleteChunk;
             break;
+        case FORWARD_TSN:
+            sctpEV3 << "SCTPAssociationRcvMessage: FORWARD_TSN received" << endl;
+            SCTPForwardTsnChunk* forwChunk;
+            forwChunk = check_and_cast<SCTPForwardTsnChunk*>(header);
+            processForwardTsnArrived(forwChunk);
+            trans = true;
+            sendAllowed = true;
+            dataChunkReceived = true;
+            delete forwChunk;
+            break;
         default: sctpEV3<<"different type" << endl;
             break;
         }
@@ -1185,11 +1195,14 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk*      sac
 
                     // ====== Add chunk to transmission queue ========
                     if (transmissionQ->getChunk(myChunk->tsn) == NULL) {
-                        SCTP::AssocStat* assocStat = sctpMain->getAssocStat(assocId);
-                        if (assocStat) {
-                            assocStat->numFastRtx++;
+                        if (!chunkMustBeAbandoned(myChunk, sackPath)) {
+                            SCTP::AssocStat* assocStat = sctpMain->getAssocStat(assocId);
+                            if (assocStat) {
+                                assocStat->numFastRtx++;
+                            }
                         }
                         myChunk->hasBeenFastRetransmitted = true;
+                        myChunk->sendForwardIfAbandoned = true;
 
                         sctpEV3 << simTime() << ": Fast RTX for TSN "
                                   << myChunk->tsn << " on path " << myChunk->getLastDestination() << endl;
@@ -1417,6 +1430,46 @@ void SCTPAssociation::dequeueAckedChunks(const uint32       tsna,
 }
 
 
+SCTPEventCode SCTPAssociation::processForwardTsnArrived(SCTPForwardTsnChunk* fwChunk)
+{
+    sctpEV3 << "processForwardTsnArrived\n";
+    sctpEV3 << "last state->cTsnAck=" << state->gapList.getCumAckTSN() << " fwCumAck=" << fwChunk->getNewCumTsn() << "\n";
+
+    /* Ignore old FORWARD_TSNs, probably stale retransmits. */
+    if (state->gapList.getCumAckTSN() >= fwChunk->getNewCumTsn()) {
+        return SCTP_E_IGNORE;
+    }
+
+    for (uint32 i = 0; i < fwChunk->getSidArraySize(); i++) {
+        if (fwChunk->getSsn(i) != -1) {
+            SCTPReceiveStreamMap::iterator iter = receiveStreams.find(fwChunk->getSid(i));
+            SCTPReceiveStream* rStream = iter->second;
+
+            /* Uncomment the folloing to drop gap-acknowledged messages
+             * between two abandonend messages rather then delivering them.
+             */
+          
+            if (rStream->getOrderedQ()->getQueueSize() > 0)
+                rStream->setExpectedStreamSeqNum(rStream->getOrderedQ()->getFirstSsnInQueue(fwChunk->getSid(i)));
+            else if (rStream->getExpectedStreamSeqNum() <= fwChunk->getSsn(i))
+                rStream->setExpectedStreamSeqNum(fwChunk->getSsn(i)+1);
+            if (rStream->getExpectedStreamSeqNum() > 65535) {
+                rStream->setExpectedStreamSeqNum(0);
+            }
+            sendDataArrivedNotification(fwChunk->getSid(i));
+            calculateRcvBuffer();
+        }
+    }
+    /* Update Gap lists with abandoned TSNs and advance CumTSNAck */
+    for (uint32 i = state->gapList.getCumAckTSN() + 1; i <= fwChunk->getNewCumTsn(); i++) {
+        if (i > state->gapList.getCumAckTSN() && !state->gapList.tsnInGapList(i)) {
+            bool dummy;
+            state->gapList.updateGapList(i, dummy, false);
+            state->gapList.tryToAdvanceCumAckTSN();
+        }
+    }
+    return SCTP_E_IGNORE;
+}
 
 SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
 {
@@ -1773,6 +1826,24 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
     path->pathRto = min(2 * path->pathRto.dbl(), sctpMain->par("rtoMax"));
     path->statisticsPathRTO->record(path->pathRto);
     sctpEV3 << "Schedule T3 based retransmission for path "<< path->remoteAddress << endl;
+    if (SCTP::testing) {
+        sctpEV3 << "Unacked chunks in Retransmission Queue:" << endl;
+        for (SCTPQueue::PayloadQueue::const_iterator iterator = retransmissionQ->payloadQueue.begin();
+                iterator != retransmissionQ->payloadQueue.end(); ++iterator) {
+            const SCTPDataVariables* myChunk = iterator->second;
+            if (!myChunk->hasBeenAcked) {
+                const SCTPPathVariables* myChunkLastPath = myChunk->getLastDestinationPath();
+                sctpEV3 << " - " << myChunk->tsn
+                        << "\tsent=now-" << simTime() - myChunk->sendTime
+                        << "\tlast=" << myChunkLastPath->remoteAddress
+                        << "\tnumTX=" << myChunk->numberOfTransmissions
+                        << "\tnumRTX=" << myChunk->numberOfRetransmissions
+                        << "\tfastRTX=" << ((myChunk->hasBeenFastRetransmitted == true) ? "YES!" : "no")
+                        << endl;
+            }
+        }
+        sctpEV3 << "----------------------" << endl;
+    }
 
     // ====== Update congestion window =======================================
     (this->*ccFunctions.ccUpdateAfterRtxTimeout)(path);
@@ -1841,7 +1912,7 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
 
             // ====== Insert chunks into TransmissionQ ============================
             // Only insert chunks that were sent to the path that has timed out
-            if (((chunkHasBeenAcked(chunk) == false && chunk->countsAsOutstanding)
+            if (!chunkMustBeAbandoned(chunk, path) && ((chunkHasBeenAcked(chunk) == false && chunk->countsAsOutstanding)
                     || chunk->hasBeenReneged) && (chunk->getLastDestinationPath() == path)) {
                 SCTPPathVariables* nextPath = getNextDestination(chunk);
                 sctpEV3 << simTime() << ": Timer-Based RTX for TSN " << chunk->tsn
@@ -1853,6 +1924,7 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
                         << endl;
                 chunk->getLastDestinationPath()->numberOfTimerBasedRetransmissions++;
                 chunk->hasBeenTimerBasedRtxed = true;
+                chunk->sendForwardIfAbandoned = true;
 
                 if (!chunk->hasBeenAbandoned) {
                     SCTP::AssocStatMap::iterator iter = sctpMain->assocStatMap.find(assocId);

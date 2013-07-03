@@ -76,6 +76,7 @@ message SCTPInitChunk extends SCTPChunk
     bool forwardTsn;
     IPvXAddress addresses[];
     uint8 unrecognizedParameters[]; //Will be filled by the Parser, if unrecognized Parameters arrive.
+    uint16 chunkTypes[]; //Chunk list parameter, i.e. for SCTP AUTH
     uint16 sepChunks[]; //Supported extensions parameter, i.e. for StreamReset
 }
 
@@ -96,6 +97,7 @@ message SCTPInitAckChunk extends SCTPChunk
     char cookie[];
     uint8 unrecognizedParameters[];
     cPacketPtr stateCookie;
+    uint16 chunkTypes[];
     uint16 sepChunks[]; //Supported extensions parameter, i.e. for StreamReset
 }
 
@@ -136,6 +138,8 @@ message SCTPDataMsg extends cPacket
     uint32 booksize;
     uint32 rtx;
     bool fragment;
+    uint32 prMethod;
+    uint32 priority;
 }
 
 message SCTPDataChunk extends SCTPChunk

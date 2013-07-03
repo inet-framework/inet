@@ -113,14 +113,24 @@ enum SCTPChunkTypes
     COOKIE_ECHO         = 10,
     COOKIE_ACK          = 11,
     SHUTDOWN_COMPLETE   = 14,
-    NR_SACK             = 16
+    NR_SACK             = 16,
+    FORWARD_TSN         = 192
 };
 
+enum SCTPPrMethods
+{
+    PR_NONE   = 0,
+    PR_TTL    = 1,
+    PR_RTX    = 2,
+    PR_PRIO   = 3,
+    PR_STRRST = 4
+};
 
 enum SCTPParameterTypes
 {
     UNRECOGNIZED_PARAMETER          = 8,
-    SUPPORTED_ADDRESS_TYPES         = 12
+    SUPPORTED_ADDRESS_TYPES         = 12,
+    FORWARD_TSN_SUPPORTED_PARAMETER = 49152
 };
 
 
@@ -173,8 +183,6 @@ enum SCTPStreamSchedulers
 
 #define SCTP_MAX_PAYLOAD                1488 // 12 bytes for common header
 
-#define MAX_GAP_COUNT                   500
-#define MAX_GAP_REPORTS                 4
 #define ADD_PADDING(x)                  ((((x) + 3) >> 2) << 2)
 
 #define DEBUG                           1
@@ -358,6 +366,9 @@ class INET_API SCTPDataVariables : public cObject
         bool                hasBeenTimerBasedRtxed;    // Has chunk been timer-based retransmitted?
         bool                hasBeenMoved;              // Chunk has been moved to solve buffer blocking
         simtime_t           firstSendTime;
+        uint32              prMethod;
+        uint32              priority;
+        bool                sendForwardIfAbandoned;
 
     public:
         static const IPvXAddress zeroAddress;
@@ -437,6 +448,7 @@ class INET_API SCTPStateVariables : public cObject
         simtime_t                   lastTransmission;
         uint64                      outstandingBytes;     // Number of bytes outstanding
         uint64                      queuedSentBytes;      // Number of bytes in sender queue
+        uint64                      queuedDroppableBytes; // Bytes in send queue droppable by PR-SCTP
         uint64                      queuedReceivedBytes;  // Number of bytes in receiver queue
         uint32                      lastStreamScheduled;
         uint32                      assocPmtu;                // smallest overall path mtu
@@ -493,9 +505,10 @@ class INET_API SCTPStateVariables : public cObject
         bool                        checkSackSeqNumber;         // Ensure handling SACKs in original sequence
         uint32                      outgoingSackSeqNum;
         uint32                      incomingSackSeqNum;
-        
+
         // ====== Further features ============================================
         uint32                      advancedPeerAckPoint;
+        uint32                      prMethod;
         simtime_t                   lastThroughputTime;
         simtime_t                   lastAssocThroughputTime;
         uint32                      assocThroughput;
@@ -711,6 +724,7 @@ class INET_API SCTPAssociation : public cObject
         SCTPEventCode processDataArrived(SCTPDataChunk* dataChunk);
         SCTPEventCode processSackArrived(SCTPSackChunk* sackChunk);
         SCTPEventCode processHeartbeatAckArrived(SCTPHeartbeatAckChunk* heartbeatack, SCTPPathVariables* path);
+        SCTPEventCode processForwardTsnArrived(SCTPForwardTsnChunk* forChunk);
         //@}
 
         /** @name Processing timeouts. Invoked from processTimer(). */
@@ -815,6 +829,11 @@ class INET_API SCTPAssociation : public cObject
 
         bool allPathsInactive() const;
 
+        SCTPForwardTsnChunk* createForwardTsnChunk(const IPvXAddress& pid);
+
+        bool msgMustBeAbandoned(SCTPDataMsg* msg, int32 stream, bool ordered); //PR-SCTP
+        bool chunkMustBeAbandoned(SCTPDataVariables* chunk, 
+                                     SCTPPathVariables* sackPath);
         void advancePeerTsn();
         /**
         * Manipulating chunks

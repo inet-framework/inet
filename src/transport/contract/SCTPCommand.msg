@@ -59,7 +59,7 @@ class SCTPCommand extends cPacket
     int numMsgs = 1;
     int ssn = -1;
     unsigned short sendUnordered = false;
-    double lifetime = 0;
+    double prValue = 0;
     IPvXAddress localAddr = IPvXAddress("0.0.0.0");
     IPvXAddress remoteAddr = IPvXAddress("0.0.0.0");
     int gate = -1;
@@ -113,6 +113,7 @@ class SCTPOpenCommand extends SCTPCommand
     string sctpAlgorithmClass;       // may be left empty
     uint32 inboundStreams;
     uint32 outboundStreams;
+    int prMethod;
     uint32 numRequests;
     uint32 messagesToPush;
 }
@@ -125,6 +126,7 @@ class SCTPOpenCommand extends SCTPCommand
 //
 class SCTPSendCommand extends SCTPCommand
 {
+    unsigned int prMethod;
     bool last;
     unsigned int ppid = 0;
     bool primary = true;

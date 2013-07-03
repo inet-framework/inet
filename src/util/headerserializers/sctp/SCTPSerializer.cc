@@ -132,6 +132,13 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     sup_addr->length = htons(6);
                     sup_addr->address_type = htons(INIT_PARAM_IPV4);
                     parPtr += 8;
+                    if (initChunk->getForwardTsn() == true)
+                    {
+                        struct forward_tsn_supported_parameter* forward = (struct forward_tsn_supported_parameter*) (((unsigned char *)ic) + size_init_chunk + parPtr);
+                        forward->type = htons(FORWARD_TSN_SUPPORTED_PARAMETER);
+                        forward->length = htons(4);
+                        parPtr += 4;
+                    }
                     int32 numaddr = initChunk->getAddressesArraySize();
                     for (int32 i=0; i<numaddr; i++)
                     {
@@ -169,6 +176,13 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     sup_addr->address_type = htons(INIT_PARAM_IPV4);
                     parPtr += 8;
 
+                    if (initAckChunk->getForwardTsn() == true)
+                    {
+                        struct forward_tsn_supported_parameter* forward = (struct forward_tsn_supported_parameter*) (((unsigned char *)iac) + size_init_chunk + parPtr);
+                        forward->type = htons(FORWARD_TSN_SUPPORTED_PARAMETER);
+                        forward->length = htons(4);
+                        parPtr += 4;
+                    }
 
                     int32 numaddr = initAckChunk->getAddressesArraySize();
                     for (int32 i=0; i<numaddr; i++)
@@ -476,6 +490,24 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     sac->flags = flags;
                     break;
                 }
+                case FORWARD_TSN:
+                {
+                    SCTPForwardTsnChunk* forward = check_and_cast<SCTPForwardTsnChunk*>(chunk);
+                    struct forward_tsn_chunk* forw = (struct forward_tsn_chunk*) (buf + writtenbytes);
+                    writtenbytes += (forward->getByteLength());
+                    forw->type = forward->getChunkType();
+                    forw->length = htons(forward->getByteLength());
+                    forw->cum_tsn = htonl(forward->getNewCumTsn());
+                    int streamPtr = 0;
+                    for (unsigned int i=0; i<forward->getSidArraySize(); i++)
+                    {
+                        struct forward_tsn_streams* str = (struct forward_tsn_streams*) (((unsigned char*) forw) + sizeof(struct forward_tsn_chunk) + streamPtr);
+                        str->sid = htons(forward->getSid(i));
+                        str->ssn = htons(forward->getSsn(i));
+                        streamPtr+=4;
+                    }
+                    break;
+                }
                 case ERRORTYPE:
                 {
                     SCTPErrorChunk* errorchunk = check_and_cast<SCTPErrorChunk*>(chunk);
@@ -539,6 +571,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
     int32 size_heartbeat_ack_chunk = sizeof(struct heartbeat_ack_chunk);
     int32 size_abort_chunk = sizeof(struct abort_chunk);
     int32 size_cookie_echo_chunk = sizeof(struct cookie_echo_chunk);
+    int size_forward_tsn_chunk = sizeof(struct forward_tsn_chunk);
     uint16 paramType;
     int32 parptr, chunklen, cLen, woPadding;
     struct common_header *common_header = (struct common_header*) (buf);
@@ -665,6 +698,15 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                                 chunklen += 20;
                                 break;
                             }
+                            case FORWARD_TSN_SUPPORTED_PARAMETER:
+                            {
+                                sctpEV3<<"Forward TSN\n";
+                                int size=chunk->getChunkTypesArraySize();
+                                chunk->setChunkTypesArraySize(size+1);
+                                chunk->setChunkTypes(size,FORWARD_TSN_SUPPORTED_PARAMETER);
+                                chunklen++;
+                                break;
+                            }
                             default:
                             {
                                 sctpEV3 << "ExtInterface: Unknown SCTP INIT parameter type " << paramType<<"\n";
@@ -762,6 +804,14 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                                 for (int32 i=0; i<cookieLen; i++)
                                     chunk->setCookie(i, cookie->value[i]);
                                 chunklen += cookieLen+4;
+                                break;
+                            }
+                            case FORWARD_TSN_SUPPORTED_PARAMETER:
+                            {
+                                int size=chunk->getChunkTypesArraySize();
+                                chunk->setChunkTypesArraySize(size+1);
+                                chunk->setChunkTypes(size,FORWARD_TSN_SUPPORTED_PARAMETER);
+                                chunklen++;
                                 break;
                             }
                             default:
@@ -997,6 +1047,29 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                 errorchunk->setBitLength(SCTP_ERROR_CHUNK_LENGTH*8);
                 parptr = 0;
                 dest->addChunk(errorchunk);
+                break;
+            }
+            case FORWARD_TSN:
+            {
+                const struct forward_tsn_chunk *forward_tsn_chunk;
+                forward_tsn_chunk = (struct forward_tsn_chunk*) (chunks + chunkPtr);
+                SCTPForwardTsnChunk *chunk;
+                chunk = new SCTPForwardTsnChunk("FORWARD_TSN");
+                chunk->setChunkType(chunkType);
+                chunk->setName("FORWARD_TSN");
+                chunk->setNewCumTsn(ntohl(forward_tsn_chunk->cum_tsn));
+                int streamNumber=0, streamptr=0;
+                while (cLen>size_forward_tsn_chunk+streamptr)
+                {
+                    const struct forward_tsn_streams *forward = (struct forward_tsn_streams*) (((unsigned char*)forward_tsn_chunk) + size_forward_tsn_chunk + streamptr);
+                    chunk->setSidArraySize(++streamNumber);
+                    chunk->setSid(streamNumber-1, ntohs(forward->sid));
+                    chunk->setSsnArraySize(streamNumber);
+                    chunk->setSsn(streamNumber-1, ntohs(forward->ssn));
+                    streamptr+=sizeof(struct forward_tsn_streams);
+                }
+                chunk->setByteLength(cLen);
+                dest->addChunk(chunk);
                 break;
             }
             default:

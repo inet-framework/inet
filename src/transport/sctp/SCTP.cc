@@ -810,6 +810,9 @@ void SCTP::removeAssociation(SCTPAssociation *assoc)
         snprintf((char*)&str, sizeof(str), "Number of Heartbeat ACKs Received %d:%s",
                  assoc->assocId, path->remoteAddress.str().c_str());
         recordScalar(str, path->numberOfHeartbeatAcksRcvd);
+        snprintf((char*)&str, sizeof(str), "Number of Duplicates %d:%s",
+                assoc->assocId, path->remoteAddress.str().c_str());
+        recordScalar(str, path->numberOfDuplicates);
     }
 
 

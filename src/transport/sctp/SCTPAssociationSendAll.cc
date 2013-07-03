@@ -128,6 +128,8 @@ SCTPDataVariables* SCTPAssociation::makeDataVarFromDataMsg(SCTPDataMsg*         
     datVar->sid = datMsg->getSid();
     datVar->allowedNoRetransmissions = datMsg->getRtx();
     datVar->booksize = datMsg->getBooksize();
+    datVar->prMethod = datMsg->getPrMethod();
+    datVar->priority = datMsg->getPriority();
 
     // ------ Stream handling ---------------------------------------
     SCTPSendStreamMap::iterator iterator = sendStreams.find(datMsg->getSid());
@@ -332,6 +334,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables* pathId, bool firstPass)
     SCTPMessage*            sctpMsg = NULL;
     SCTPSackChunk*          sackChunk = NULL;
     SCTPDataChunk*          chunkPtr = NULL;
+    SCTPForwardTsnChunk* forwardChunk = NULL;
 
     uint16 chunksAdded = 0;
     uint16 dataChunksAdded = 0;
@@ -348,6 +351,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables* pathId, bool firstPass)
     bool sendOneMorePacket = false;
     bool sendingAllowed = true;
     bool sackAdded = false;
+    bool forwardPresent = false;
 
     // ====== Obtain path ====================================================
     sctpEV3 << endl << "##### sendAll(";
@@ -411,7 +415,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables* pathId, bool firstPass)
             loadPacket(path, &sctpMsg, &chunksAdded, &dataChunksAdded);
             headerCreated = true;
         }
-        else if (bytesToSend > 0 || bytes.chunk || bytes.packet || sackWithData || sackOnly) {
+        else if (bytesToSend > 0 || bytes.chunk || bytes.packet || sackWithData || sackOnly || forwardPresent) {
             sctpMsg = new SCTPMessage("send");
             sctpMsg->setByteLength(SCTP_COMMON_HEADER);
             headerCreated = true;
@@ -446,6 +450,37 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables* pathId, bool firstPass)
                 state->sackAllowed = false;
                 sendSACKviaSelectedPath(sctpMsg);
                 return;
+            }
+        }
+        // ====== FORWARD_TSN =================================================
+        if (!forwardPresent && !state->stopSending)
+        {
+            if (peekAbandonedChunk(path) != NULL)
+            {
+                forwardChunk = createForwardTsnChunk(path->remoteAddress);
+                chunksAdded++;
+                totalChunksSent++;
+                state->ackPointAdvanced = false;
+                if (!headerCreated) {
+                    sctpMsg = new SCTPMessage("send");
+                    sctpMsg->setByteLength(SCTP_COMMON_HEADER);
+                    headerCreated = true;
+                    chunksAdded = 0;
+                }
+                // ------ Create AUTH chunk, if necessary -----------------------
+                sctpMsg->addChunk(forwardChunk);
+                forwardPresent = true;
+                if (!path->T3_RtxTimer->isScheduled()) {
+                    // Start retransmission timer, if not scheduled before
+                    startTimer(path->T3_RtxTimer, path->pathRto);
+                }
+                if (bytesToSend == 0) {
+                    sendToIP(sctpMsg, path->remoteAddress);
+                    forwardPresent = false;
+                    headerCreated = false;
+                    chunksAdded = 0;
+                    sctpMsg = NULL;
+                }
             }
         }
 
@@ -513,6 +548,23 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables* pathId, bool firstPass)
                                     sackAdded = false;
                                     chunksAdded = 0;
                                 }
+                            }
+                        }
+                    }
+
+                    // Check for FORWARD-TSN again, might just have been triggered...
+                    if (datVar == NULL && !forwardPresent && !state->stopSending) {
+                        if (peekAbandonedChunk(path) != NULL) {
+                            forwardChunk = createForwardTsnChunk(path->remoteAddress);
+                            chunksAdded++;
+                            totalChunksSent++;
+                            state->ackPointAdvanced = false;
+                            // ------ Create AUTH chunk, if necessary -----------------------
+                            sctpMsg->addChunk(forwardChunk);
+                            forwardPresent = true;
+                            if (!path->T3_RtxTimer->isScheduled()) {
+                                // Start retransmission timer, if not scheduled before
+                                startTimer(path->T3_RtxTimer, path->pathRto);
                             }
                         }
                     }

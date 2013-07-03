@@ -164,6 +164,7 @@ const char* SCTPAssociation::indicationName(const int32 code)
         CASE(SCTP_I_SEND_MSG);
         CASE(SCTP_I_SENDQUEUE_FULL);
         CASE(SCTP_I_SENDQUEUE_ABATED);
+        CASE(SCTP_I_ABANDONED);
     }
     return s;
 #undef CASE
@@ -495,6 +496,10 @@ void SCTPAssociation::sendInit()
             }
         }
     }
+    if (state->prMethod != 0) {
+        initChunk->setForwardTsn(true);
+    }
+
     sctpMain->printInfoAssocMap();
     initChunk->setBitLength(length*8);
     sctpmsg->addChunk(initChunk);
@@ -656,6 +661,10 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
     else
         initAckChunk->setUnrecognizedParametersArraySize(0);
 
+    if (state->prMethod != 0)
+    {
+        initAckChunk->setForwardTsn(true);
+    }
     initAckChunk->setBitLength((length+initAckChunk->getCookieArraySize())*8 + cookie->getBitLength());
     inboundStreams = ((initChunk->getNoOutStreams()<initAckChunk->getNoInStreams())?initChunk->getNoOutStreams():initAckChunk->getNoInStreams());
     outboundStreams = ((initChunk->getNoInStreams()<initAckChunk->getNoOutStreams())?initChunk->getNoInStreams():initAckChunk->getNoOutStreams());
@@ -936,6 +945,68 @@ void SCTPAssociation::scheduleSack()
 
         }
     }
+}
+
+SCTPForwardTsnChunk* SCTPAssociation::createForwardTsnChunk(const IPvXAddress& pid)
+{
+    uint16 chunkLength = SCTP_FORWARD_TSN_CHUNK_LENGTH;
+    SCTPDataVariables* chunk;
+    typedef std::map<uint16,int16> SidMap;
+    SidMap sidMap;
+
+    sctpEV3 << "Create forwardTsnChunk for " << pid << "\n";
+    SCTPForwardTsnChunk* forwChunk = new SCTPForwardTsnChunk("FORWARD_TSN");
+    forwChunk->setChunkType(FORWARD_TSN);
+    advancePeerTsn();
+    forwChunk->setNewCumTsn(state->advancedPeerAckPoint);
+    for (SCTPQueue::PayloadQueue::iterator it=retransmissionQ->payloadQueue.begin(); it!=retransmissionQ->payloadQueue.end(); it++)
+    {
+        chunk = it->second;
+        sctpEV3 << "tsn=" << chunk->tsn << " lastDestination=" << chunk->getLastDestination() << " abandoned=" << chunk->hasBeenAbandoned << "\n";
+        if (chunk->getLastDestination() == pid && chunk->hasBeenAbandoned && chunk->tsn <= forwChunk->getNewCumTsn())
+        {
+            if (chunk->ordered)
+            {
+                sidMap[chunk->sid] = chunk->ssn;
+            }
+            else
+            {
+                sidMap[chunk->sid] = -1;
+            }
+            /* Fake chunk retransmission */
+            if (chunk->sendForwardIfAbandoned) {
+                chunk->gapReports = 0;
+                chunk->hasBeenFastRetransmitted = false;
+                chunk->sendTime = simTime();
+                chunk->numberOfRetransmissions++;
+                chunk->sendForwardIfAbandoned = false;
+
+                SCTPQueue::PayloadQueue::iterator itt = transmissionQ->payloadQueue.find(chunk->tsn);
+                if (itt != transmissionQ->payloadQueue.end()) {
+                    transmissionQ->payloadQueue.erase(itt);
+                    chunk->enqueuedInTransmissionQ = false;
+                    CounterMap::iterator i = qCounter.roomTransQ.find(pid);
+                    i->second -= ADD_PADDING(chunk->len/8+SCTP_DATA_CHUNK_LENGTH);
+                    CounterMap::iterator ib = qCounter.bookedTransQ.find(pid);
+                    ib->second -= chunk->booksize;
+                }
+            }
+        }
+    }
+    forwChunk->setSidArraySize(sidMap.size());
+    forwChunk->setSsnArraySize(sidMap.size());
+    int32 i = 0;
+    for (SidMap::iterator j=sidMap.begin(); j!=sidMap.end(); j++)
+    {
+        forwChunk->setSid(i, j->first);
+        forwChunk->setSsn(i, j->second);
+        chunkLength += 4;
+        i++;
+    }
+    forwChunk->setByteLength(chunkLength);
+    SCTP::AssocStatMap::iterator iter = sctpMain->assocStatMap.find(assocId);
+    iter->second.numForwardTsn++;
+    return forwChunk;
 }
 
 static uint32 copyToRGaps(SCTPSackChunk*         sackChunk,
@@ -1558,7 +1629,7 @@ SCTPDataVariables* SCTPAssociation::getOutboundDataChunk(const SCTPPathVariables
         for (SCTPQueue::PayloadQueue::iterator it = transmissionQ->payloadQueue.begin();
              it != transmissionQ->payloadQueue.end(); it++) {
             SCTPDataVariables* chunk = it->second;
-            if ( (chunkHasBeenAcked(chunk) == false) &&
+            if ( (chunkHasBeenAcked(chunk) == false) && !chunk->hasBeenAbandoned &&
                  (chunk->getNextDestinationPath() == path) ) {
                 const int32 len = ADD_PADDING(chunk->len/8+SCTP_DATA_CHUNK_LENGTH);
                 sctpEV3 << "getOutboundDataChunk() found chunk " << chunk->tsn
@@ -1585,61 +1656,91 @@ SCTPDataVariables* SCTPAssociation::getOutboundDataChunk(const SCTPPathVariables
 }
 
 
+bool SCTPAssociation::chunkMustBeAbandoned(SCTPDataVariables* chunk, SCTPPathVariables* sackPath)
+{
+	switch (chunk->prMethod)
+	{
+	    case PR_TTL:
+            if (chunk->expiryTime > 0 && chunk->expiryTime <= simTime()) {
+                if (!chunk->hasBeenAbandoned) {
+                    std::cout << "TSN " << chunk->tsn << " will be abandoned"
+                                      << " (expiryTime=" << chunk->expiryTime
+                                      << " sendTime=" << chunk->sendTime << ")" << endl;
+                    chunk->hasBeenAbandoned = true;
+                    chunk->sendForwardIfAbandoned = true;
+                    sendIndicationToApp(SCTP_I_ABANDONED);
+                }
+            }
+            break;
+        case PR_RTX:
+			if (chunk->numberOfRetransmissions >= chunk->allowedNoRetransmissions) {
+				if (!chunk->hasBeenAbandoned) {
+					sctpEV3 << "chunkMustBeAbandoned: TSN " << chunk->tsn << " will be abandoned"
+							<< " (maxRetransmissions=" << chunk->allowedNoRetransmissions << ")" << endl;
+					chunk->hasBeenAbandoned = true;
+					chunk->sendForwardIfAbandoned = true;
+					decreaseOutstandingBytes(chunk);
+					chunk->countsAsOutstanding = false;
+					sendIndicationToApp(SCTP_I_ABANDONED);
+				}
+			}
+			break;
+	}
+
+	if (chunk->hasBeenAbandoned) {
+        return true;
+	}
+	return false;
+}
+
 SCTPDataVariables* SCTPAssociation::peekAbandonedChunk(const SCTPPathVariables* path)
 {
-    // Are there chunks in the retransmission queue? If Yes -> dequeue and return it.
-    if (!retransmissionQ->payloadQueue.empty())
+    SCTPDataVariables* retChunk = NULL;
+
+    if (state->prMethod != 0 && !retransmissionQ->payloadQueue.empty())
     {
         for (SCTPQueue::PayloadQueue::iterator it = retransmissionQ->payloadQueue.begin();
              it != retransmissionQ->payloadQueue.end(); it++) {
             SCTPDataVariables* chunk = it->second;
-            sctpEV3<<"peek Chunk "<<chunk->tsn<<"\n";
-            if (chunk->getLastDestinationPath() == path && chunk->hasBeenAbandoned) {
-                sctpEV3<<"peekAbandonedChunk() found chunk in the retransmission queue\n";
-                return chunk;
+
+            if (chunk->getLastDestinationPath() == path) {
+                /* Apply policies if necessary */
+                if (!chunk->hasBeenAbandoned && !chunk->hasBeenAcked &&
+                        (chunk->hasBeenFastRetransmitted || chunk->hasBeenTimerBasedRtxed)) {
+                    switch (chunk->prMethod) {
+                        case PR_TTL:
+                            if (chunk->expiryTime > 0 && chunk->expiryTime <= simTime()) {
+                                if (!chunk->hasBeenAbandoned) {
+                                    std::cout << "TSN " << chunk->tsn << " will be abandoned"
+                                            << " (expiryTime=" << chunk->expiryTime
+                                            << " sendTime=" << chunk->sendTime << ")" << endl;
+                                    chunk->hasBeenAbandoned = true;
+                                    sendIndicationToApp(SCTP_I_ABANDONED);
+                                }
+                            }
+                            break;
+                        case PR_RTX:
+                            if (chunk->hasBeenFastRetransmitted && chunk->numberOfRetransmissions >= chunk->allowedNoRetransmissions) {
+                                if (!chunk->hasBeenAbandoned) {
+                                    std::cout << "peekAbandonedChunk: TSN " << chunk->tsn << " will be abandoned"
+                                            << " (maxRetransmissions=" << chunk->allowedNoRetransmissions << ")" << endl;
+                                    chunk->hasBeenAbandoned = true;
+                                    sendIndicationToApp(SCTP_I_ABANDONED);
+                                }
+                            }
+                            break;
+                    }
+                }
+
+                if (chunk->hasBeenAbandoned && chunk->sendForwardIfAbandoned) {
+                    retChunk = chunk;
+                }
             }
+
         }
     }
-    return NULL;
+    return retChunk;
 }
-
-#if 0
-SCTPDataMsg* SCTPAssociation::peekOutboundDataMsg()
-{
-    SCTPDataMsg* datMsg = NULL;
-    int32 nextStream = -1;
-    nextStream = (this->*ssFunctions.ssGetNextSid)(true);
-
-    if (nextStream == -1)
-    {
-
-        sctpEV3<<"peekOutboundDataMsg(): no valid stream found -> returning NULL !\n";
-
-        return NULL;
-    }
-
-
-    for (SCTPSendStreamMap::iterator iter=sendStreams.begin(); iter!=sendStreams.end(); ++iter)
-    {
-        if ((int32)iter->first==nextStream)
-        {
-            SCTPSendStream* stream = iter->second;
-            if (!stream->getUnorderedStreamQ()->empty())
-            {
-                    return (datMsg);
-
-            }
-            if (!stream->getStreamQ()->empty())
-            {
-                    return (datMsg);
-
-            }
-        }
-    }
-    return NULL;
-
-}
-#endif
 
 SCTPDataMsg* SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables* path,
         const int32        availableSpace,
@@ -1709,6 +1810,8 @@ SCTPDataMsg* SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables* path,
                         datMsgFragment->setPpid(datMsgQueued->getPpid());
                         datMsgFragment->setInitialDestination(datMsgQueued->getInitialDestination());
                         datMsgFragment->setEnqueuingTime(datMsgQueued->getEnqueuingTime());
+                        datMsgFragment->setPrMethod(datMsgQueued->getPrMethod());
+                        datMsgFragment->setPriority(datMsgQueued->getPriority());
                         datMsgFragment->setMsgNum(datMsgQueued->getMsgNum());
                         datMsgFragment->setOrdered(datMsgQueued->getOrdered());
                         datMsgFragment->setExpiryTime(datMsgQueued->getExpiryTime());
