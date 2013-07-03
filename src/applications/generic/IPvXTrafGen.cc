@@ -57,7 +57,9 @@ void IPvXTrafGen::initialize(int stage)
     numPackets = par("numPackets");
     startTime = par("startTime");
     stopTime = par("stopTime");
-    if (stopTime != -1 && stopTime < startTime)
+    if (stopTime == -1)
+        stopTime = MAXTIME;
+    else if (stopTime < startTime)
         error("Invalid startTime/stopTime parameters");
 
     packetLengthPar = &par("packetLength");
@@ -145,7 +147,7 @@ void IPvXTrafGen::scheduleNextPacket(simtime_t previous)
         next = previous + sendIntervalPar->doubleValue();
         timer->setKind(NEXT);
     }
-    if (stopTime == -1  || next <= stopTime)
+    if (next <= stopTime)
         scheduleAt(next, timer);
 }
 

@@ -64,7 +64,9 @@ void PingApp::initialize(int stage)
         count = par("count");
         startTime = par("startTime");
         stopTime = par("stopTime");
-        if (stopTime != -1 && stopTime < startTime)
+        if (stopTime == -1)
+            stopTime = MAXTIME;
+        else if (stopTime < startTime)
             error("Invalid startTime/stopTime parameters");
         printPing = (bool)par("printPing");
 
@@ -162,7 +164,7 @@ void PingApp::scheduleNextPingRequest(simtime_t previous)
         next = simTime() <= startTime ? startTime : simTime();
     else
         next = previous + sendIntervalPar->doubleValue();
-    if (stopTime == -1  || next <= stopTime)
+    if (next <= stopTime)
         scheduleAt(next, timer);
 }
 

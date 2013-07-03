@@ -67,7 +67,9 @@ void EtherTrafGen::initialize(int stage)
 
         startTime = par("startTime");
         stopTime = par("stopTime");
-        if (stopTime != -1 && stopTime < startTime)
+        if (stopTime == -1)
+            stopTime = MAXTIME;
+        else if (stopTime < startTime)
             error("Invalid startTime/stopTime parameters");
 
         if (isGenerator())
@@ -142,7 +144,7 @@ void EtherTrafGen::scheduleNextPacket(simtime_t previous)
         next = previous + sendInterval->doubleValue();
         timerMsg->setKind(NEXT);
     }
-    if (stopTime == -1  || next <= stopTime)
+    if (next <= stopTime)
         scheduleAt(next, timerMsg);
 }
 

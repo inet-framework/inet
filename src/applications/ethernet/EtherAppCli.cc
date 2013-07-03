@@ -70,7 +70,9 @@ void EtherAppCli::initialize(int stage)
 
         startTime = par("startTime");
         stopTime = par("stopTime");
-        if (stopTime != -1 && stopTime < startTime)
+        if (stopTime == -1)
+            stopTime = MAXTIME;
+        else if (stopTime < startTime)
             error("Invalid startTime/stopTime parameters");
 
         if (isGenerator())
@@ -149,7 +151,7 @@ void EtherAppCli::scheduleNextPacket(bool start)
         next = cur + sendInterval->doubleValue();
         timerMsg->setKind(NEXT);
     }
-    if (stopTime == -1  || next <= stopTime)
+    if (next <= stopTime)
         scheduleAt(next, timerMsg);
 }
 
