@@ -159,7 +159,7 @@ void UDPBasicApp::processSend()
 {
     sendPacket();
     simtime_t d = simTime() + par("sendInterval").doubleValue();
-    if (stopTime == -1 || d < stopTime)
+    if (stopTime == -1 || d <= stopTime)
     {
         selfMsg->setKind(SEND);
         scheduleAt(d, selfMsg);

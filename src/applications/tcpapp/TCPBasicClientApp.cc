@@ -155,7 +155,7 @@ void TCPBasicClientApp::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
 {
     cancelEvent(timeoutMsg);
 
-    if (stopTime > d)
+    if (d <= stopTime)
     {
         timeoutMsg->setKind(msgKind);
         scheduleAt(d, timeoutMsg);

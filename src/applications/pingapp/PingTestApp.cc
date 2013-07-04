@@ -225,7 +225,7 @@ void PingTestApp::scheduleNextPing(cMessage *timer)
     if (sendSeqNo % count == 0)
         nextPing += par("sleepDuration").doubleValue();
 
-    if (nextPing < stopTime)
+    if (nextPing <= stopTime)
         scheduleAt(nextPing, timer);
     else
         delete timer;
