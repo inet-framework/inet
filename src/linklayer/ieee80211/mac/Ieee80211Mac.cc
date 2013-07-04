@@ -2199,48 +2199,30 @@ double Ieee80211Mac::computeFrameDuration(int bits, double bitrate)
 
 void Ieee80211Mac::logState()
 {
-    std::string a[10];
-    std::string b[10];
-    std::string medium = "busy";
-    for (int i=0; i<10; i++)
-    {
-        a[i] = "";
-        b[i] = "";
-    }
-
-    if (isMediumFree())
-        medium = "free";
-    for (int i=0; i<numCategories(); i++)
-    {
-        if (endBackoff(i)->isScheduled())
-            b[i] = "scheduled";
-        if (endAIFS(i)->isScheduled())
-            a[i] = "scheduled";
-    }
-
-    EV  << "# state information: mode = " << modeName(mode) << ", state = " << fsm.getStateName();
-    EV << ", backoff 0.."<<numCategories()<<" = ";
-    for (int i=0; i<numCategories(); i++)
-         EV << backoff(i) << " ";
-    EV <<  "\n# backoffPeriod 0.."<<numCategories()<<" = ";
-    for (int i=0; i<numCategories(); i++)
-         EV << backoffPeriod(i) << " ";
-    EV << "\n# retryCounter 0.."<<numCategories()<<" = ";
-    for (int i=0; i<numCategories(); i++)
-         EV << retryCounter(i) << " ";
-    EV << ", radioState = " << radioState << ", nav = " << nav <<  ",txop is "<< txop << "\n";
-    EV << "#queue size 0.."<<numCategories()<<" = ";
-    for (int i=0; i<numCategories(); i++)
-        EV << transmissionQueue(i)->size() << " ";
-    EV << ", medium is " << medium << ", scheduled AIFS are ";
-    for (int i=0; i<numCategories(); i++)
-        EV << i << "(" << a[i] << ")";
-    EV << ", scheduled backoff are ";
-    for (int i=0; i<numCategories(); i++)
-        EV << i << "(" << b[i] << ")";
+    int numCategs = numCategories();
+    EV << "# state information: mode = " << modeName(mode) << ", state = " << fsm.getStateName();
+    EV << ", backoff 0.." << numCategs << " =";
+    for (int i=0; i<numCategs; i++)
+        EV << " " << edcCAF[i].backoff;
+    EV <<  "\n# backoffPeriod 0.." << numCategs << " =";
+    for (int i=0; i<numCategs; i++)
+        EV << " " << edcCAF[i].backoffPeriod;
+    EV << "\n# retryCounter 0.." << numCategs << " =";
+    for (int i=0; i<numCategs; i++)
+        EV << " " << edcCAF[i].retryCounter;
+    EV << ", radioState = " << radioState << ", nav = " << nav <<  ", txop is "<< txop << "\n";
+    EV << "#queue size 0.." << numCategs << " =";
+    for (int i=0; i<numCategs; i++)
+        EV << " " << transmissionQueue(i)->size();
+    EV << ", medium is " << (isMediumFree() ? "free" : "busy") << ", scheduled AIFS are";
+    for (int i=0; i<numCategs; i++)
+        EV << " " << i << "(" << (edcCAF[i].endAIFS->isScheduled() ? "scheduled" : "") << ")";
+    EV << ", scheduled backoff are";
+    for (int i=0; i<numCategs; i++)
+        EV << " " << i << "(" << (edcCAF[i].endBackoff->isScheduled() ? "scheduled" : "") << ")";
     EV << "\n# currentAC: " << currentAC << ", oldcurrentAC: " << oldcurrentAC;
     if (getCurrentTransmission() != NULL)
-         EV << "\n# current transmission: " << getCurrentTransmission()->getId();
+        EV << "\n# current transmission: " << getCurrentTransmission()->getId();
     else
         EV << "\n# current transmission: none";
     EV << endl;
