@@ -2750,7 +2750,7 @@ void Ieee80211Mac::removeOldTuplesFromDuplicateMap()
     if (duplicateDetect && lastTimeDelete+duplicateTimeOut>=simTime())
     {
         lastTimeDelete=simTime();
-        for (Ieee80211ASFTupleList::iterator it = asfTuplesList.begin();it!=asfTuplesList.begin();)
+        for (Ieee80211ASFTupleList::iterator it = asfTuplesList.begin(); it!=asfTuplesList.end(); )
         {
             if (it->second.receivedTime+duplicateTimeOut<simTime())
             {
@@ -2772,14 +2772,8 @@ const MACAddress & Ieee80211Mac::isInterfaceRegistered()
     IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
     if (!ift)
         return MACAddress::UNSPECIFIED_ADDRESS;
-    char *interfaceName = new char[strlen(getParentModule()->getFullName()) + 1];
-    char *d = interfaceName;
-    for (const char *s = getParentModule()->getFullName(); *s; s++)
-        if (isalnum(*s))
-            *d++ = *s;
-    *d = '\0';
-    InterfaceEntry * e = ift->getInterfaceByName(interfaceName);
-    delete [] interfaceName;
+    std::string interfaceName = OPP_Global::stripnonalnum(getParentModule()->getFullName());
+    InterfaceEntry *e = ift->getInterfaceByName(interfaceName.c_str());
     if (e)
         return e->getMacAddress();
     return MACAddress::UNSPECIFIED_ADDRESS;

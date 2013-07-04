@@ -268,7 +268,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     virtual cOutVector * jitter(int i = -1);
     virtual cOutVector * macDelay(int i = -1);
     virtual cOutVector * throughput(int i = -1);
-    inline const int numCategories(){return edcCAF.size();}
+    inline int numCategories() const {return edcCAF.size();}
     virtual const bool isBackoffMsg(cMessage *msg);
 
     const char *modeName(int mode);
