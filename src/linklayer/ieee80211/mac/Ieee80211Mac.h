@@ -349,7 +349,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     */
     bool duplicateDetect;
     bool purgeOldTuples;
-    double duplicateTimeOut;
+    simtime_t duplicateTimeOut;
     simtime_t lastTimeDelete;
     Ieee80211ASFTupleList asfTuplesList;
 

@@ -321,8 +321,8 @@ void Ieee80211Mac::initialize(int stage)
             numGivenUp(i) = 0;
             numSent(i) = 0;
             bits(i) = 0;
-            maxJitter(i) = 0;
-            minJitter(i) = 0;
+            maxJitter(i) = SIMTIME_ZERO;
+            minJitter(i) = SIMTIME_ZERO;
         }
 
         numCollision = 0;
@@ -338,7 +338,7 @@ void Ieee80211Mac::initialize(int stage)
         failedCounter = 0;
         recovery = 0;
         timer = 0;
-        timeStampLastMessageReceived = 0;
+        timeStampLastMessageReceived = SIMTIME_ZERO;
 
         stateVector.setName("State");
         stateVector.setEnum("Ieee80211Mac");
@@ -785,7 +785,7 @@ void Ieee80211Mac::handleLowerMsg(cPacket *msg)
     contI++;
 
     frame = dynamic_cast<Ieee80211Frame *>(msg);
-    if (timeStampLastMessageReceived == 0)
+    if (timeStampLastMessageReceived == SIMTIME_ZERO)
         timeStampLastMessageReceived = simTime();
     else
     {
@@ -924,7 +924,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             FSMA_Event_Transition(Data-Ready,
                                   isUpperMsg(msg),
                                   DEFER,
-                                  ASSERT(isInvalidBackoffPeriod() || backoffPeriod() == 0);
+                                  ASSERT(isInvalidBackoffPeriod() || backoffPeriod() == SIMTIME_ZERO);
                                   invalidateBackoffPeriod();
                                  );
             FSMA_No_Event_Transition(Immediate-Data-Ready,
@@ -1161,9 +1161,9 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   numBits += fr->getBitLength();
                                   bits() += fr->getBitLength();
                                   macDelay()->record(simTime() - fr->getMACArrive());
-                                  if (maxJitter() == 0 || maxJitter() < (simTime() - fr->getMACArrive()))
+                                  if (maxJitter() == SIMTIME_ZERO || maxJitter() < (simTime() - fr->getMACArrive()))
                                       maxJitter() = simTime() - fr->getMACArrive();
-                                  if (minJitter() == 0 || minJitter() > (simTime() - fr->getMACArrive()))
+                                  if (minJitter() == SIMTIME_ZERO || minJitter() > (simTime() - fr->getMACArrive()))
                                       minJitter() = simTime() - fr->getMACArrive();
                                   EV << "record macDelay AC" << currentAC << " value " << simTime() - fr->getMACArrive() <<endl;
                                   numSentTXOP++;
@@ -1185,9 +1185,9 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
 
 
                                   macDelay()->record(simTime() - fr->getMACArrive());
-                                  if (maxJitter() == 0 || maxJitter() < (simTime() - fr->getMACArrive()))
+                                  if (maxJitter() == SIMTIME_ZERO || maxJitter() < (simTime() - fr->getMACArrive()))
                                       maxJitter() = simTime() - fr->getMACArrive();
-                                  if (minJitter() == 0 || minJitter() > (simTime() - fr->getMACArrive()))
+                                  if (minJitter() == SIMTIME_ZERO || minJitter() > (simTime() - fr->getMACArrive()))
                                       minJitter() = simTime() - fr->getMACArrive();
                                   EV << "record macDelay AC" << currentAC << " value " << simTime() - fr->getMACArrive() <<endl;
                                   numSentTXOP++;
@@ -1228,9 +1228,9 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   bits() += fr->getBitLength();
 
                                   macDelay()->record(simTime() - fr->getMACArrive());
-                                  if (maxJitter() == 0 || maxJitter() < (simTime() - fr->getMACArrive()))
+                                  if (maxJitter() == SIMTIME_ZERO || maxJitter() < (simTime() - fr->getMACArrive()))
                                       maxJitter() = simTime() - fr->getMACArrive();
-                                  if (minJitter() == 0 || minJitter() > (simTime() - fr->getMACArrive()))
+                                  if (minJitter() == SIMTIME_ZERO || minJitter() > (simTime() - fr->getMACArrive()))
                                       minJitter() = simTime() - fr->getMACArrive();
                                   EV << "record macDelay AC" << currentAC << " value " << simTime() - fr->getMACArrive() <<endl;
                                   cancelTimeoutPeriod();
@@ -1420,11 +1420,11 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         {
             throughput(i)->record(bits(i)/(simTime()-last));
             bits(i) = 0;
-            if (maxJitter(i) > 0 && minJitter(i) > 0)
+            if (maxJitter(i) > SIMTIME_ZERO && minJitter(i) > SIMTIME_ZERO)
             {
                 jitter(i)->record(maxJitter(i)-minJitter(i));
-                maxJitter(i) = 0;
-                minJitter(i) = 0;
+                maxJitter(i) = SIMTIME_ZERO;
+                minJitter(i) = SIMTIME_ZERO;
             }
         }
         last = simTime();
@@ -1742,7 +1742,7 @@ bool Ieee80211Mac::isInvalidBackoffPeriod()
 void Ieee80211Mac::generateBackoffPeriod()
 {
     backoffPeriod() = computeBackoffPeriod(getCurrentTransmission(), retryCounter());
-    ASSERT(backoffPeriod() >= 0);
+    ASSERT(backoffPeriod() >= SIMTIME_ZERO);
     EV << "backoff period set to " << backoffPeriod()<< endl;
 }
 
@@ -1760,7 +1760,7 @@ void Ieee80211Mac::decreaseBackoffPeriod()
             simtime_t elapsedBackoffTime = simTime() - endBackoff(i)->getSendingTime();
             backoffPeriod(i) -= ((int)(elapsedBackoffTime / getSlotTime())) * getSlotTime();
             EV << "actual backoff[" << i << "] is " <<backoffPeriod(i) << ", elapsed is " << elapsedBackoffTime << endl;
-            ASSERT(backoffPeriod(i) >= 0);
+            ASSERT(backoffPeriod(i) >= SIMTIME_ZERO);
             EV << "backoff[" << i << "] period decreased to " << backoffPeriod(i) << endl;
         }
     }
@@ -2056,7 +2056,7 @@ void Ieee80211Mac::setMode(Mode mode)
 
 void Ieee80211Mac::resetStateVariables()
 {
-    backoffPeriod() = 0;
+    backoffPeriod() = SIMTIME_ZERO;
     if (rateControlMode == RATE_AARF || rateControlMode == RATE_ARF)
         reportDataOk();
     else
