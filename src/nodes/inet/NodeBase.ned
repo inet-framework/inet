@@ -22,6 +22,7 @@ import inet.battery.IBattery;
 import inet.linklayer.IExternalNic;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
+import inet.linklayer.loopback.LoopbackInterface;
 import inet.mobility.IMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
@@ -102,13 +103,16 @@ module NodeBase
             @display("p=53,338,r,10");
         }
 
+        lo0: LoopbackInterface {
+            @display("p=78,406");
+        }
         wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
             parameters:
-                @display("p=132,406,row,60;q=queue");
+                @display("p=216,406,row,60;q=queue");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
-                @display("p=329,406,row,60;q=txQueue");
+                @display("p=368,406,row,60;q=txQueue");
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
@@ -116,7 +120,7 @@ module NodeBase
         }
         ext[numExtInterfaces]: <default("ExtInterface")> like IExternalNic {
             parameters:
-                @display("p=45,406,row,10;q=txQueue;i=block/ifcard");
+                @display("p=149,406,row,10;q=txQueue;i=block/ifcard");
         }
 
     connections allowunconnected:

@@ -17,13 +17,14 @@
 
 package inet.nodes.ipv6;
 
-import inet.networklayer.ipv6.RoutingTable6;
-import inet.networklayer.common.InterfaceTable;
-import inet.mobility.IMobility;
-import inet.linklayer.IWirelessNic;
-import inet.linklayer.IWiredNic;
-import inet.linklayer.IExternalNic;
 import inet.base.NotificationBoard;
+import inet.linklayer.IExternalNic;
+import inet.linklayer.IWiredNic;
+import inet.linklayer.IWirelessNic;
+import inet.linklayer.loopback.LoopbackInterface;
+import inet.mobility.IMobility;
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.ipv6.RoutingTable6;
 
 
 //
@@ -80,6 +81,9 @@ module NodeBase6
                 @display("p=53,287;is=s");
         }
 
+        lo0: LoopbackInterface {
+            @display("p=78,406");
+        }
         wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
             parameters:
                 @display("p=159,406;q=queue");

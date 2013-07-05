@@ -13,6 +13,7 @@ package inet.nodes.mpls;
 
 import inet.base.NotificationBoard;
 import inet.linklayer.IWiredNic;
+import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.mpls.LIBTable;
@@ -105,6 +106,9 @@ module RSVP_LSR
         libTable: LIBTable {
             parameters:
                 @display("p=312,268");
+        }
+        lo0: LoopbackInterface {
+            @display("p=100,270");
         }
     connections allowunconnected:
         linkStateRouting.ipOut --> networkLayer.ospfIn;

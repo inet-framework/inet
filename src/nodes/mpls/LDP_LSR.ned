@@ -13,6 +13,7 @@ package inet.nodes.mpls;
 
 import inet.base.NotificationBoard;
 import inet.linklayer.IWiredNic;
+import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.networklayer.ldp.LDP;
@@ -48,22 +49,22 @@ module LDP_LSR
         inout pppg[] @labels(PPPFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
-            @display("p=50,50");
+            @display("p=73,45");
         }
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=70,60");
+                @display("p=73,106;is=s");
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=70,150");
+                @display("p=73,176;is=s");
         }
         routingTable: RoutingTable {
             parameters:
                 IPForward = true;
                 routerId = routerId;
                 routingFile = routingFile;
-                @display("p=70,240");
+                @display("p=73,244;is=s");
         }
         ldp: LDP {
             parameters:
@@ -95,9 +96,12 @@ module LDP_LSR
                 ifIn[sizeof(pppg)];
                 ifOut[sizeof(pppg)];
         }
+        lo0: LoopbackInterface {
+            @display("p=50,388");
+        }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
-                @display("p=105,388,row,90;q=l2queue");
+                @display("p=131,388,row,90;q=l2queue");
         }
         mpls: MPLS {
             parameters:
