@@ -47,22 +47,22 @@ module RSVP_LSR
         inout pppg[] @labels(PPPFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
-            @display("p=50,50");
+            @display("p=58,50");
         }
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=74,57");
+                @display("p=58,106;is=s");
         }
         routingTable: RoutingTable {
             parameters:
                 IPForward = true;
                 routerId = routerId;
                 routingFile = routingFile;
-                @display("p=68,138");
+                @display("p=58,174;is=s");
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=68,208");
+                @display("p=58,242;is=s");
         }
         ted: TED {
             parameters:
@@ -86,29 +86,29 @@ module RSVP_LSR
             parameters:
                 @display("p=192,195");
             gates:
-                ifIn[sizeof(pppg)];
-                ifOut[sizeof(pppg)];
+                ifIn[sizeof(pppg)+1];
+                ifOut[sizeof(pppg)+1];
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
-                @display("p=88,329,row,90;q=l2queue");
+                @display("p=132,345,row,90;q=l2queue");
         }
         mpls: MPLS {
             parameters:
                 classifier = "classifier";
                 @display("p=192,270");
             gates:
-                netwIn[sizeof(pppg)];
-                netwOut[sizeof(pppg)];
-                ifIn[sizeof(pppg)];
-                ifOut[sizeof(pppg)];
+                netwIn[sizeof(pppg)+1];
+                netwOut[sizeof(pppg)+1];
+                ifIn[sizeof(pppg)+1];
+                ifOut[sizeof(pppg)+1];
         }
         libTable: LIBTable {
             parameters:
                 @display("p=312,268");
         }
         lo0: LoopbackInterface {
-            @display("p=100,270");
+            @display("p=50,345");
         }
     connections allowunconnected:
         linkStateRouting.ipOut --> networkLayer.ospfIn;
@@ -117,14 +117,17 @@ module RSVP_LSR
         rsvp.ipOut --> networkLayer.rsvpIn;
         rsvp.ipIn <-- networkLayer.rsvpOut;
 
+        lo0.upperLayerOut --> networkLayer.ifIn[0];
+        networkLayer.ifOut[0] --> lo0.upperLayerIn;
+
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
 
-            ppp[i].upperLayerOut --> mpls.ifIn[i];
-            ppp[i].upperLayerIn <-- mpls.ifOut[i];
+            ppp[i].upperLayerOut --> mpls.ifIn[i+1];
+            ppp[i].upperLayerIn <-- mpls.ifOut[i+1];
 
-            mpls.netwOut[i] --> networkLayer.ifIn[i];
-            mpls.netwIn[i] <-- networkLayer.ifOut[i];
+            mpls.netwOut[i+1] --> networkLayer.ifIn[i+1];
+            mpls.netwIn[i+1] <-- networkLayer.ifOut[i+1];
         }
 }
 

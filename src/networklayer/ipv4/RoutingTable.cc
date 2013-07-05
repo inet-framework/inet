@@ -154,6 +154,7 @@ void RoutingTable::configureRouterId()
         if (getInterfaceByAddress(routerId)==NULL)
         {
             InterfaceEntry *lo0 = ift->getFirstLoopbackInterface();
+            ASSERT(lo0);
             lo0->ipv4Data()->setIPAddress(routerId);
             lo0->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS);
         }

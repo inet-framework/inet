@@ -93,8 +93,8 @@ module LDP_LSR
             parameters:
                 @display("p=224,223");
             gates:
-                ifIn[sizeof(pppg)];
-                ifOut[sizeof(pppg)];
+                ifIn[sizeof(pppg)+1];
+                ifOut[sizeof(pppg)+1];
         }
         lo0: LoopbackInterface {
             @display("p=50,388");
@@ -109,10 +109,10 @@ module LDP_LSR
                 classifier = "ldp";
                 @display("p=224,302");
             gates:
-                netwIn[sizeof(pppg)];
-                netwOut[sizeof(pppg)];
-                ifIn[sizeof(pppg)];
-                ifOut[sizeof(pppg)];
+                netwIn[sizeof(pppg)+1];
+                netwOut[sizeof(pppg)+1];
+                ifIn[sizeof(pppg)+1];
+                ifOut[sizeof(pppg)+1];
         }
         libTable: LIBTable {
             parameters:
@@ -134,14 +134,17 @@ module LDP_LSR
         tcp.ipOut --> networkLayer.tcpIn;
         tcp.ipIn <-- networkLayer.tcpOut;
 
+        lo0.upperLayerOut --> networkLayer.ifIn[0];
+        networkLayer.ifOut[0] --> lo0.upperLayerIn;
+
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
 
-            ppp[i].upperLayerOut --> mpls.ifIn[i];
-            ppp[i].upperLayerIn <-- mpls.ifOut[i];
+            ppp[i].upperLayerOut --> mpls.ifIn[i+1];
+            ppp[i].upperLayerIn <-- mpls.ifOut[i+1];
 
-            mpls.netwOut[i] --> networkLayer.ifIn[i];
-            mpls.netwIn[i] <-- networkLayer.ifOut[i];
+            mpls.netwOut[i+1] --> networkLayer.ifIn[i+1];
+            mpls.netwIn[i+1] <-- networkLayer.ifOut[i+1];
         }
 }
 

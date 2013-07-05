@@ -103,6 +103,9 @@ module NodeBase6
 
     connections allowunconnected:
         // connections to network outside
+        networkLayer.ifOut++ --> lo0.upperLayerIn;
+        lo0.upperLayerOut --> networkLayer.ifIn++;
+
         for i=0..sizeof(radioIn)-1 {
             radioIn[i] --> wlan[i].radioIn;
             wlan[i].upperLayerOut --> networkLayer.ifIn++;

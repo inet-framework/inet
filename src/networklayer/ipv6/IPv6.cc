@@ -195,10 +195,29 @@ void IPv6::handleMessageFromHL(cPacket *msg)
     }
 #endif /* WITH_xMIPv6 */
 
+    IPv6Address destAddress = datagram->getDestAddress();
+
+    // check for local delivery
+    if (!destAddress.isMulticast() && rt->isLocalAddress(destAddress))
+    {
+        EV << "local delivery\n";
+        if (datagram->getSrcAddress().isUnspecified())
+            datagram->setSrcAddress(destAddress); // allows two apps on the same host to communicate
+
+        if (destIE && !destIE->isLoopback())
+        {
+            EV << "datagram destination address is local, ignoring destination interface specified in the control info\n";
+            destIE = NULL;
+        }
+        if (!destIE)
+            destIE = ift->getFirstLoopbackInterface();
+        ASSERT(destIE);
+    }
+
     // route packet
     if (destIE != NULL)
         fragmentAndSend(datagram, destIE, MACAddress::BROADCAST_ADDRESS, true); // FIXME what MAC address to use?
-    else if (!datagram->getDestAddress().isMulticast())
+    else if (!destAddress.isMulticast())
         routePacket(datagram, destIE, true);
     else
         routeMulticastPacket(datagram, destIE, NULL, true);
@@ -214,10 +233,9 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     // local delivery of unicast packets
     if (rt->isLocalAddress(destAddress))
     {
+        if (fromHL)
+            error("model error: local unicast packet arrived from HL, but handleMessageFromHL() not detected it");
         EV << "local delivery\n";
-
-        if (datagram->getSrcAddress().isUnspecified())
-            datagram->setSrcAddress(destAddress); // allows two apps on the same host to communicate
 
         numLocalDeliver++;
         localDeliver(datagram);
