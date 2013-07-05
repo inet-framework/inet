@@ -1,9 +1,9 @@
 # workingdir,                        args,                                          simtimelimit,    fingerprint
-/examples/manetrouting/fg80211/ini/, -f Mob_DSR_omnetpp.ini -c General -r 0,        100s,            4f1c-c6c7
+/examples/manetrouting/fg80211/ini/, -f Mob_DSR_omnetpp.ini -c General -r 0,        100s,            bc4c-2465
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c General -r 0,                100s,            1f90-2272
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c DYMOUM -r 0,                 100s,            3107-c736
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c DYMO -r 0,                   100s,            77fc-c83d
-/examples/manetrouting/fg80211/,     -f omnetpp.ini -c DSRUU -r 0,                  100s,            7a96-14f1
+/examples/manetrouting/fg80211/,     -f omnetpp.ini -c DSRUU -r 0,                  100s,            7bb9-c133
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c OLSR -r 0,                   20s,             e675-fb29
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c DSDV_2 -r 0,                 10s,             4511-505d
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c Batman -r 0,                 10s,             7d43-ee76
@@ -11,7 +11,7 @@
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DYMO -r 0,                   10s,             7d8a-2900
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DYMOUM -r 0,                 10s,             f164-17a1
 # /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c AODVUU -r 0,                 10s,             6a17-abf7    #unstable fingerprint
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DSRUU -r 0,                  10s,             b750-3263
+/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DSRUU -r 0,                  10s,             6a7f-df18
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c OLSR -r 0,                   10s,             0c58-dd9f
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DSDV_2 -r 0,                 5s,              55ab-5747
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c Batman -r 0,                 10s,             3c90-90f4
@@ -21,7 +21,7 @@
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0,                 100s,            82fe-ac9f
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMO -r 0,                   100s,            f3e4-03fb
 # /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c AODVUU -r 0,                 100s,            9d02-6e8d  # unstable fingerprint
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DSRUU -r 0,                  100s,            03c0-e8f3
+/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DSRUU -r 0,                  100s,            41ff-5948
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c OLSR -r 0,                   5s,              56ac-5bdd
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DSDV_2 -r 0,                 5s,              0c83-5de2
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c Batman -r 0,                 2s,              4175-b645
