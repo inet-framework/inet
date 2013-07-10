@@ -31,7 +31,7 @@
  * accounting and measurement purposes.
  *
  */
-class INET_API IQoSMeter : public cPolymorphic
+class INET_API IQoSMeter : public cSimpleModule
 {
   public:
 
@@ -39,6 +39,7 @@ class INET_API IQoSMeter : public cPolymorphic
      * Initialize the meter (e.g., the size of token bucket).
      */
     virtual void initialize();
+    virtual void finish();
 
     /**
      * The method should return the result of metering for the given packet.

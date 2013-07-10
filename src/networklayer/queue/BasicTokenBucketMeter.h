@@ -20,20 +20,41 @@
 #ifndef __INET_BASICTOKENBUCKETMETER_H
 #define __INET_BASICTOKENBUCKETMETER_H
 
-#include "IQoSMeter.h"
+#include <omnetpp.h>
+#include "INETDefs.h"
+//#include "IQoSMeter.h"
 
 /**
  * A meter based on two token buckets one for average and the other for peak rates.
   */
-class INET_API BasicDSCPClassifier : public IQoSClassifier
+class INET_API BasicTokenBucketMeter : public IQoSMeter
 {
+  public:
 
-    public:
-    /**
-     * The method should return the result of metering based on two token buckets
-     * for the given packet, 0 for conformance and 1 for not.
-     */
+  protected:
+    // configuration
+    long long bucketSize;   // in bit; note that the corresponding parameter in NED/INI is in byte.
+    double meanRate;
+    int mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
+    double peakRate;
+
+    // state
+    long long meanBucketLength;  // the number of tokens (bits) in the bucket for mean rate/burst control
+    int peakBucketLength;  // the number of tokens (bits) in the bucket for peak rate/MTU control
+    simtime_t lastTime; // the last time the TBF used
+    bool isTxScheduled; // flag to indicate whether there is any scheduled frame transmission
+
+    // statistics
+    bool warmupFinished;        ///< if true, start statistics gathering
+    int numBitsConformed;
+    int numBitsSent;
+    int numPktsConformed;
+    int numPktsSent;
+
+  protected:
+
     virtual void initialize();
+    virtual void finish();
 
     /**
      * The method should return the result of metering based on two token buckets

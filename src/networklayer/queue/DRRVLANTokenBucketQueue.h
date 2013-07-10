@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2012 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2013 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2005 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -17,14 +17,14 @@
 //
 
 
-#ifndef __INET_DROPTAILVLANTBFQUEUE_H
-#define __INET_DROPTAILVLANTBFQUEUE_H
+#ifndef __INET_DRRVLANTokenBucketQUEUE_H
+#define __INET_DRRVLANTokenBucketQUEUE_H
 
 #include <omnetpp.h>
 #include <sstream>
 #include <vector>
 #include "PassiveQueueBase.h"
-#include "IQoSClassifier.h"
+#include "BasicTokenBucketMeter.h"
 
 /**
  * Returns the maximum of a and b.
@@ -36,7 +36,7 @@ inline double max(const double a, const double b) { return (a > b) ? a : b; }
  * and round-robin (RR) scheduler.
  * See NED for more info.
  */
-class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
+class INET_API DRRVLANTokenBucketQueue : public PassiveQueueBase
 {
     // type definitions for member variables
     typedef std::vector<bool> BoolVector;
@@ -56,7 +56,7 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     int mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
     double peakRate;
 
-    // VLAN classifier
+    // state
     IQoSClassifier *classifier;
     QueueVector queues;
     LongLongVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
@@ -64,13 +64,7 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     TimeVector lastTime; // vector of the last time the TBF used
     BoolVector conformityFlag;  // vector of flag to indicate whether the HOL frame conforms to TBF
 
-    // Token bucket meters
-
-    // FIFO
-    cQueue fifo;
-    int currentQueueSize;   // in bit
-
-    // DRR scheduler and queues
+    // state: RR scheduler
     int currentQueueIndex;  // index of a queue whose HOL frame is scheduled for TX during the last RR scheduling
 
     // statistics
@@ -87,8 +81,8 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     cGate *outGate;
 
   public:
-    DropTailVLANTBFQueue();
-    virtual ~DropTailVLANTBFQueue();
+    DRRVLANTokenBucketQueue();
+    virtual ~DRRVLANTokenBucketQueue();
 
   protected:
     virtual void initialize();
@@ -136,5 +130,3 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
 };
 
 #endif
-
-
