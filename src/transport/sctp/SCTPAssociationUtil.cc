@@ -140,6 +140,7 @@ const char* SCTPAssociation::eventName(const int32 event)
         CASE(SCTP_E_DELIVERED);
         CASE(SCTP_E_SEND_SHUTDOWN_ACK);
         CASE(SCTP_E_STOP_SENDING);
+        CASE(SCTP_E_SEND_ASCONF);
     }
     return s;
 #undef CASE
@@ -165,6 +166,7 @@ const char* SCTPAssociation::indicationName(const int32 code)
         CASE(SCTP_I_SENDQUEUE_FULL);
         CASE(SCTP_I_SENDQUEUE_ABATED);
         CASE(SCTP_I_ABANDONED);
+        CASE(SCTP_I_ADDRESS_ADDED);
     }
     return s;
 #undef CASE
@@ -187,6 +189,9 @@ uint32 SCTPAssociation::chunkToInt(const char* type)
     if (strcmp(type, "COOKIE_ACK")==0) return 11;
     if (strcmp(type, "SHUTDOWN_COMPLETE")==0) return 14;
     if (strcmp(type, "NR-SACK")==0) return 16;
+    if (strcmp(type, "ASCONF_ACK")==0) return 128;
+    if (strcmp(type, "FORWARD_TSN")==0) return 192;
+    if (strcmp(type, "ASCONF")==0) return 193;
     sctpEV3<<"ChunkConversion not successful\n";
     return (0xffffffff);
 }
@@ -232,32 +237,6 @@ SCTPAssociation* SCTPAssociation::cloneAssociation()
     sctpMain->printInfoAssocMap();
     return assoc;
 }
-
-#if 0
-void SCTPAssociation::recordInPathVectors(SCTPMessage* pMsg,
-                                          const IPvXAddress& rDest)
-{
-    uint32 n_chunks = pMsg->getChunksArraySize();
-    if (n_chunks == 0)
-       return;
-
-    SCTPPathVariables* p_path = getPath(rDest);
-
-    for (uint32 i = 0; i < n_chunks; i++) {
-        const SCTPChunk* p_chunk = check_and_cast<const SCTPChunk *>(pMsg->getChunks(i));
-        if (p_chunk->getChunkType() == DATA) {
-            const SCTPDataChunk* p_data_chunk = check_and_cast<const SCTPDataChunk *>(p_chunk);
-            p_path->pathTSN->record(p_data_chunk->getTsn());
-        } else if (p_chunk->getChunkType() == HEARTBEAT) {
-            p_path->numberOfHeartbeatsSent++;
-            p_path->pathHb->record(p_path->numberOfHeartbeatsSent);
-        } else if (p_chunk->getChunkType() == HEARTBEAT_ACK) {
-            p_path->numberOfHeartbeatAcksSent++;
-            p_path->pathHbAck->record(p_path->numberOfHeartbeatAcksSent);
-        }
-    }
-}
-#endif
 
 void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
                                          const IPvXAddress& dest)
@@ -418,6 +397,8 @@ void SCTPAssociation::sendInit()
     initChunk->setInitTSN(1000);
     state->nextTSN = initChunk->getInitTSN();
     state->lastTSN = initChunk->getInitTSN() + state->numRequests - 1;
+    state->asconfSn = 1000;
+
     initTsn = initChunk->getInitTSN();
     IInterfaceTable *ift = interfaceTableAccess.get();
     sctpEV3<<"add local address\n";
@@ -495,6 +476,14 @@ void SCTPAssociation::sendInit()
                     localAddr = (*i);
             }
         }
+    }
+
+    uint16 count = 0;
+    if ((bool)sctpMain->par("addIP") == true) {
+        initChunk->setSepChunksArraySize(++count);
+        initChunk->setSepChunks(count-1, ASCONF);
+        initChunk->setSepChunksArraySize(++count);
+        initChunk->setSepChunks(count-1, ASCONF_ACK);
     }
     if (state->prMethod != 0) {
         initChunk->setForwardTsn(true);
@@ -578,6 +567,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
         initAckChunk->setInitTSN(2000);
         state->nextTSN = initAckChunk->getInitTSN();
         state->lastTSN = initAckChunk->getInitTSN() + state->numRequests - 1;
+        state->asconfSn = 2000;
         cookie->setLocalTag(localVTag);
         cookie->setPeerTag(peerVTag);
         for (int32 i=0; i<32; i++)
@@ -649,6 +639,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
             length += 8;
         }
 
+    uint16 count = 0;
     uint32 unknownLen = initChunk->getUnrecognizedParametersArraySize();
     if (unknownLen>0)
     {
@@ -661,6 +652,13 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
     else
         initAckChunk->setUnrecognizedParametersArraySize(0);
 
+    if ((bool)sctpMain->par("addIP") == true)
+    {
+        initAckChunk->setSepChunksArraySize(++count);
+        initAckChunk->setSepChunks(count-1, ASCONF);
+        initAckChunk->setSepChunksArraySize(++count);
+        initAckChunk->setSepChunks(count-1, ASCONF_ACK);
+    }
     if (state->prMethod != 0)
     {
         initAckChunk->setForwardTsn(true);
@@ -1456,6 +1454,8 @@ void SCTPAssociation::removePath(const IPvXAddress& addr)
         stopTimer(path->CwndTimer);
         delete path->CwndTimer;
         sctpPathMap.erase(pathIterator);
+        stopTimer(path->AsconfTimer);
+        delete path->AsconfTimer;
         delete path;
     }
 }
@@ -2089,12 +2089,14 @@ void SCTPAssociation::pmStartPathManagement()
         if (path->remoteAddress == state->initialPrimaryPath && !path->confirmed) {
             path->confirmed = true;
         }
-        sctpEV3<<getFullPath()<<" numberOfLocalAddresses="<<state->localAddresses.size()<<"\n";
-		path->heartbeatTimeout = (double)sctpMain->par("hbInterval")+i*path->pathRto;
-		stopTimer(path->HeartbeatTimer);
-		sendHeartbeat(path);
-		startTimer(path->HeartbeatTimer, path->heartbeatTimeout);
-		startTimer(path->HeartbeatIntervalTimer, path->heartbeatIntervalTimeout);
+        sctpEV3 << getFullPath() << " numberOfLocalAddresses=" << state->localAddresses.size() << "\n";
+        if (state->enableHeartbeats) {
+            path->heartbeatTimeout = (double)sctpMain->par("hbInterval")+i*path->pathRto;
+            stopTimer(path->HeartbeatTimer);
+            sendHeartbeat(path);
+            startTimer(path->HeartbeatTimer, path->heartbeatTimeout);
+            startTimer(path->HeartbeatIntervalTimer, path->heartbeatIntervalTimeout);
+        }
         path->statisticsPathRTO->record(path->pathRto);
         i++;
     }
@@ -2112,7 +2114,7 @@ int32 SCTPAssociation::getOutstandingBytes() const
 
 void SCTPAssociation::pmClearPathCounter(SCTPPathVariables* path)
 {
-    state->errorCount -= path->pathErrorCount;
+    state->errorCount = 0;
     path->pathErrorCount = 0;
     if (path->activePath == false) {
         /* notify the application */

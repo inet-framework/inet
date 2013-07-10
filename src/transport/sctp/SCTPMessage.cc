@@ -210,3 +210,124 @@ void SCTPErrorChunk::clean()
     }
 }
 
+Register_Class(SCTPAsconfChunk);
+
+SCTPAsconfChunk& SCTPAsconfChunk::operator=(const SCTPAsconfChunk& other)
+{
+    SCTPAsconfChunk_Base::operator=(other);
+
+    this->setBitLength(SCTP_ADD_IP_CHUNK_LENGTH*8);
+    for (std::list<cPacket*>::const_iterator i=other.parameterList.begin(); i!=other.parameterList.end(); ++i)
+        addAsconfParam((cPacket *)(*i)->dup());
+
+    return *this;
+}
+
+void SCTPAsconfChunk::setAsconfParamsArraySize(const uint32 size)
+{
+    throw new cException(this, "setAsconfParamsArraySize() not supported, use addAsconfParam()");
+}
+
+uint32 SCTPAsconfChunk::getAsconfParamsArraySize() const
+{
+    return parameterList.size();
+}
+
+cPacketPtr& SCTPAsconfChunk::getAsconfParams(uint32 k)
+{
+    std::list<cPacket*>::iterator i = parameterList.begin();
+    while (k>0 && i!=parameterList.end())
+        (++i, --k);
+    return *i;
+}
+
+void SCTPAsconfChunk::setAsconfParams(const uint32 k, const cPacketPtr& chunks_var)
+{
+    throw new cException(this, "setAsconfParams() not supported, use addAsconfParam()");
+}
+
+void SCTPAsconfChunk::addAsconfParam(cPacket* msg)
+{
+    take(msg);
+    //if (this->parameterList.size()<2)
+    //{
+    this->setBitLength(this->getBitLength()+ADD_PADDING(msg->getBitLength()));
+    parameterList.push_back(msg);
+    /*}
+   else
+      throw cRuntimeError("Not more than two parameters allowed!");*/
+}
+
+cPacket *SCTPAsconfChunk::removeAsconfParam()
+{
+    if (parameterList.empty())
+        return NULL;
+
+    cPacket *msg = parameterList.front();
+    parameterList.pop_front();
+    drop(msg);
+    this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
+    return msg;
+}
+
+
+Register_Class(SCTPAsconfAckChunk);
+
+SCTPAsconfAckChunk& SCTPAsconfAckChunk::operator=(const SCTPAsconfAckChunk& other)
+{
+    SCTPAsconfAckChunk_Base::operator=(other);
+
+    this->setBitLength(SCTP_ADD_IP_CHUNK_LENGTH*8);
+    for (std::list<cPacket*>::const_iterator i=other.parameterList.begin(); i!=other.parameterList.end(); ++i)
+        addAsconfResponse((cPacket *)(*i)->dup());
+
+    return *this;
+}
+
+void SCTPAsconfAckChunk::setAsconfResponseArraySize(const uint32 size)
+{
+    throw new cException(this, "setAsconfResponseArraySize() not supported, use addAsconfResponse()");
+}
+
+uint32 SCTPAsconfAckChunk::getAsconfResponseArraySize() const
+{
+    return parameterList.size();
+}
+
+cPacketPtr& SCTPAsconfAckChunk::getAsconfResponse(uint32 k)
+{
+    std::list<cPacket*>::iterator i = parameterList.begin();
+    while (k>0 && i!=parameterList.end())
+        (++i, --k);
+    return *i;
+}
+
+void SCTPAsconfAckChunk::setAsconfResponse(const uint32 k, const cPacketPtr& chunks_var)
+{
+    throw new cException(this, "setAsconfresponse() not supported, use addAsconfResponse()");
+}
+
+void SCTPAsconfAckChunk::addAsconfResponse(cPacket* msg)
+{
+    take(msg);
+    /*if (this->parameterList.size()<2)
+   {*/
+    this->setBitLength(this->getBitLength()+ADD_PADDING(msg->getBitLength()));
+    parameterList.push_back(msg);
+    /*}
+   else
+      throw cRuntimeError("Not more than two parameters allowed!");*/
+}
+
+cPacket *SCTPAsconfAckChunk::removeAsconfResponse()
+{
+    if (parameterList.empty())
+        return NULL;
+
+    cPacket *msg = parameterList.front();
+    parameterList.pop_front();
+    drop(msg);
+    this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
+    return msg;
+}
+

@@ -29,8 +29,10 @@ inline double rint(double x) {return floor(x+.5);}
 
 void SCTPAssociation::recordCwndUpdate(SCTPPathVariables* path)
 {
-    path->statisticsPathSSthresh->record(path->ssthresh);
-    path->statisticsPathCwnd->record(path->cwnd);
+    if (path != NULL) {
+        path->statisticsPathSSthresh->record(path->ssthresh);
+        path->statisticsPathCwnd->record(path->cwnd);
+    }
 }
 
 
@@ -294,5 +296,4 @@ void SCTPAssociation::cwndUpdateAfterCwndTimeout(SCTPPathVariables* path)
     sctpEV3 << "\t=>\tsst=" << path->ssthresh
             << "\tcwnd=" << path->cwnd << endl;
     recordCwndUpdate(path);
-    recordCwndUpdate(NULL);
 }

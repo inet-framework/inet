@@ -189,6 +189,7 @@ class INET_API SCTP : public cSimpleModule
         uint32 numGapReports;
         uint32 numPacketsReceived;
         uint32 numPacketsDropped;
+        bool addIP;
 
     public:
         virtual ~SCTP();

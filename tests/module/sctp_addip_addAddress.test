@@ -1,0 +1,72 @@
+%description:
+Testing Add-IP: 
+%#--------------------------------------------------------------------------------------------------------------
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network=multihomed
+cmdenv-event-banners=false
+cmdenv-express-mode = false
+cmdenv-module-messages=false
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+**.testing = false
+**.testTimeout = 0
+
+# udp app (off)
+**.numUdpApps = 0
+**.udpType = ""
+
+**.numTcpApps = 0
+**.tcpType = "TCP"
+
+# sctp apps
+**.sctp_client.numSctpApps = 1
+**.sctp_client.sctpType="SCTP"
+**.sctp_client.sctpApp[0].typename = "SCTPClient"
+**.sctp_client.sctpApp[0].localAddress = "10.1.1.1 10.2.1.1"
+**.sctp_client.sctpApp[0].connectAddress = "10.1.3.1"
+**.sctp_client.sctpApp[0].primaryPath = "10.1.3.1"
+**.sctp_client.sctpApp[0].connectPort = 6666
+**.sctp_client.sctpApp[0].requestLength= 1452
+**.sctp_client.sctpApp[0].startTime = truncnormal(1s,0.2s)
+**.sctp_client.sctpApp[0].stopTime = truncnormal(50s,2s)
+**.sctp_client.sctpApp[0].numRequestsPerSession = 100000000
+**.sctp_client.sctpApp[0].queueSize = 100
+**.sctp_client.sctpApp[0].outboundStreams = 1
+**.sctp_client.sctpApp[0].prMethod = 2 # 0=NONE 1=PR_TTL 2=PR_RTX 3=PR_PRIO 4=PR_STRRST
+**.sctp_client.sctpApp[0].prValue = 0 # 0 retransmissions
+**.sctp_client.sctp.chunks = "ASCONF,ASCONF_ACK"
+**.sctp_client.sctp.addAddress = ""
+**.sctp_client.sctp.addIpType = "0"
+**.sctp_client.sctp.addTime = 0s
+
+**.sctp_server.numSctpApps = 1
+**.sctp_server.sctpType="SCTP"
+**.sctp_server.sctpApp[0].typename = "SCTPServer"
+**.sctp_server.sctpApp[0].localAddress = "10.1.3.1"
+**.sctp_server.sctpApp[0].localPort = 6666
+**.sctp_server.sctpApp[*].queueSize = 0 #Size of sendQueue before App is notified to send new data
+**.sctp_server.sctpApp[*].numPacketsToSendPerClient = 0
+**.sctp_server.sctpApp[*].numPacketsToReceivePerClient = 0
+**.sctp_server.sctpApp[*].outboundStreams = 1
+**.sctp_server.sctp.chunks = "ASCONF,ASCONF_ACK"
+**.sctp_server.sctp.addAddress = "10.2.3.1"
+**.sctp_server.sctp.addIpType = "49153" 
+#NONE = 0, SET_PRIMARY_ADDRESS= 49156, ADAPTATION_LAYER_INDICATION= 49158, SUPPORTED_EXTENSIONS= 32776,
+#ADD_IP_ADDRESS = 49153, DELETE_IP_ADDRESS= 49154, ERROR_CAUSE_INDICATION= 49155, SUCCESS_INDICATION= 49157
+**.sctp_server.sctp.addTime = 10s
+
+# sctp settings
+**.sctp.sctpAlgorithmClass = "SCTPAlg"
+**.sctp.addIP = true
+
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: results/General-0.sca
+scalar multihomed.sctp_server.sctp 	"Number of Heartbeat ACKs Sent 3:10.2.1.1" 	[1-9][0-9]*
+%#--------------------------------------------------------------------------------------------------------------

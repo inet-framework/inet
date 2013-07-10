@@ -41,7 +41,8 @@ enum SctpCommandCode
     SCTP_C_QUEUE_BYTES_LIMIT    = 12,   // set send queue limit (in bytes)
     SCTP_C_QUEUE_MSGS_LIMIT     = 13,   // set send queue limit (in messages)
     SCTP_C_SHUTDOWN             = 14,
-    SCTP_C_NO_OUTSTANDING       = 15
+    SCTP_C_NO_OUTSTANDING       = 15,
+    SCTP_C_SEND_ASCONF       = 19
 };
 
 //
@@ -67,7 +68,8 @@ enum SctpStatusInd
     SCTP_I_SHUTDOWN_RECEIVED    = 13,
     SCTP_I_SENDQUEUE_FULL       = 14,
     SCTP_I_SENDQUEUE_ABATED     = 15,
-    SCTP_I_ABANDONED            = 16
+    SCTP_I_ABANDONED            = 16,
+    SCTP_I_ADDRESS_ADDED = 20 // used for AddIP
 };
 
 enum SCTPFlags

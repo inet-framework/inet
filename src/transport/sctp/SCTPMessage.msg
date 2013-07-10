@@ -237,7 +237,57 @@ message SCTPParameter extends cPacket
     uint16 parameterType;
 }
 
+message SCTPAsconfChunk extends SCTPChunk
+{
+    @customize(true);
+    uint32 serialNumber;
+    IPvXAddress addressParam;
+    uint32 peerVTag; //for NAT
+    abstract cPacketPtr asconfParams[];
+}
+
+message SCTPAsconfAckChunk extends SCTPChunk
+{
+    @customize(true);
+    uint32 serialNumber;
+    abstract cPacketPtr asconfResponse[];
+}
+
+message SCTPAddIPParameter extends SCTPParameter
+{
+    uint32 requestCorrelationId; //assigned by the sender to identify each request parameter
+    IPvXAddress addressParam;
+}
+
+message SCTPDeleteIPParameter extends SCTPParameter
+{
+    uint32 requestCorrelationId; //assigned by the sender to identify each request parameter
+    IPvXAddress addressParam;
+}
+
+message SCTPSetPrimaryIPParameter extends SCTPParameter
+{
+    uint32 requestCorrelationId; //assigned by the sender to identify each request parameter
+    IPvXAddress addressParam;
+}
+
 message SCTPSupportedExtensionsParameter extends SCTPParameter
 {
     uint16 chunkTypes[];
+}
+
+message SCTPErrorCauseParameter extends SCTPParameter
+{
+    uint32 responseCorrelationId;
+    uint32 errorCauseType;
+}
+
+message SCTPSimpleErrorCauseParameter extends SCTPParameter
+{
+    uint16 value;
+}
+
+message SCTPSuccessIndication extends SCTPParameter
+{
+    uint32 responseCorrelationId;
 }

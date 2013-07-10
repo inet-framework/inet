@@ -209,8 +209,7 @@ void SCTP::handleMessage(cMessage *msg)
                 findListen = true;
 
             SCTPAssociation *assoc = findAssocForMessage(srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
-            if (!assoc && sctpAssocMap.size()>0)
-                assoc = findAssocWithVTag(sctpmsg->getTag(), sctpmsg->getSrcPort(), sctpmsg->getDestPort());
+
             if (!assoc)
             {
                 sctpEV3<<"no assoc found msg="<<sctpmsg->getName()<<"\n";
@@ -768,6 +767,9 @@ void SCTP::removeAssociation(SCTPAssociation *assoc)
                             }
                             if (myAssoc->SackTimer) {
                                 myAssoc->stopTimer(myAssoc->SackTimer);
+                            }
+                            if (myAssoc->StartAddIP) {
+                                myAssoc->stopTimer(myAssoc->StartAddIP);
                             }
                             sctpAssocMap.erase(sctpAssocMapIterator);
                             sizeAssocMap--;

@@ -320,6 +320,26 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
             dataChunkReceived = true;
             delete forwChunk;
             break;
+        case ASCONF:
+            sctpEV3 << "SCTPAssociationRcvMessage: ASCONF received" << endl;
+            if (fsm->getState() == SCTP_S_COOKIE_ECHOED) {
+                trans = performStateTransition(SCTP_E_RCV_COOKIE_ACK);
+            }
+            SCTPAsconfChunk* asconfChunk;
+            asconfChunk = check_and_cast<SCTPAsconfChunk*>(header);
+            processAsconfArrived(asconfChunk);
+            trans = true;
+            delete asconfChunk;
+            break;
+        case ASCONF_ACK:
+            sctpEV3 << "SCTPAssociationRcvMessage: ASCONF_ACK received" << endl;
+            SCTPAsconfAckChunk* asconfAckChunk;
+            asconfAckChunk = check_and_cast<SCTPAsconfAckChunk*>(header);
+            processAsconfAckArrived(asconfAckChunk);
+            trans = true;
+            delete state->asconfChunk;
+            delete asconfAckChunk;
+            break;
         default: sctpEV3<<"different type" << endl;
             break;
         }
@@ -1262,9 +1282,8 @@ void SCTPAssociation::nonRenegablyAckChunk(SCTPDataVariables* chunk,
     assert(streamIterator != sendStreams.end());
     SCTPSendStream* stream = streamIterator->second;
     assert(stream != NULL);
-    cQueue* streamQ = (chunk->ordered == false) ? stream->getUnorderedStreamQ() : stream->getStreamQ();
+    cPacketQueue* streamQ = (chunk->ordered == false) ? stream->getUnorderedStreamQ() : stream->getStreamQ();
     assert(streamQ != NULL);
-  //  streamQ->subLen(chunk->len / 8);
 
     if ( (chunk->hasBeenCountedAsNewlyAcked == false) &&
          (chunk->hasBeenAcked == false) ) {
@@ -1622,6 +1641,264 @@ SCTPEventCode SCTPAssociation::processHeartbeatAckArrived(SCTPHeartbeatAckChunk*
 }
 
 
+SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk* asconfChunk)
+{
+    SCTPParameter* sctpParam;
+    SCTPPathVariables* path;
+    IPvXAddress addr;
+    std::vector<IPvXAddress> locAddr;
+    sctpEV3 << "Asconf arrived " << asconfChunk->getName() << "\n";
+    SCTPMessage *sctpAsconfAck = new SCTPMessage("ASCONF_ACK");
+    sctpAsconfAck->setBitLength(SCTP_COMMON_HEADER*8);
+    sctpAsconfAck->setSrcPort(localPort);
+    sctpAsconfAck->setDestPort(remotePort);
+
+    if (state->numberAsconfReceived > 0 || (state->numberAsconfReceived == 0 && asconfChunk->getSerialNumber() == initPeerTsn + state->numberAsconfReceived))
+    {
+        SCTPAsconfAckChunk* asconfAckChunk = createAsconfAckChunk(asconfChunk->getSerialNumber());
+        state->numberAsconfReceived++;
+        int32 count = asconfChunk->getAsconfParamsArraySize();
+        sctpEV3 << "Number of Asconf parameters=" << count << "\n";
+        for (int32 c=0; c<count; c++)
+        {
+            sctpParam = (SCTPParameter*)(asconfChunk->removeAsconfParam());
+            switch (sctpParam->getParameterType())
+            {
+                case ADD_IP_ADDRESS:
+                    sctpEV3 << "ADD_IP_PARAMETER\n";
+                    SCTPAddIPParameter* ipParam;
+                    ipParam = check_and_cast<SCTPAddIPParameter*>(sctpParam);
+                    addr = ipParam->getAddressParam();
+                    if (addr==IPvXAddress("0.0.0.0"))
+                    {
+                        sctpEV3 << "no address specified, add natted address " << remoteAddr << "\n";
+                        addr = remoteAddr;
+                        sendIndicationToApp(SCTP_I_ADDRESS_ADDED);
+                    }
+                    for (AddressVector::iterator k=state->localAddresses.begin(); k!=state->localAddresses.end(); ++k)
+                    {
+                        sctpMain->addRemoteAddress(this, (*k), addr);
+                        addPath(addr);
+                        sctpEV3 << "add remote address " << addr << " to local address " << (*k) << "\n";
+                    }
+                    this->remoteAddressList.push_back(addr);
+                    path = getPath(addr);
+                    if (state->enableHeartbeats)
+                    {
+                        stopTimer(path->HeartbeatTimer);
+                        stopTimer(path->HeartbeatIntervalTimer);
+                        path->statisticsPathRTO->record(path->pathRto);
+                        startTimer(path->HeartbeatIntervalTimer, path->pathRto);
+                        path->forceHb = true;
+                    }
+                    else
+                        path->confirmed = true;
+                    asconfAckChunk->addAsconfResponse(createSuccessIndication(ipParam->getRequestCorrelationId()));
+                    delete ipParam;
+                    break;
+                case DELETE_IP_ADDRESS:
+                    SCTPDeleteIPParameter* delParam;
+                    delParam = check_and_cast<SCTPDeleteIPParameter*>(sctpParam);
+                    addr = delParam->getAddressParam();
+                    if (state->localAddresses.size() == 1)
+                    {
+                        SCTPErrorCauseParameter* errorParam;
+                        errorParam = new SCTPErrorCauseParameter("Error");
+                        errorParam->setParameterType(ERROR_CAUSE_INDICATION);
+                        errorParam->setResponseCorrelationId(delParam->getRequestCorrelationId());
+                        errorParam->setErrorCauseType(ERROR_DELETE_LAST_IP_ADDRESS);
+                        errorParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH+4)*8);
+                        errorParam->encapsulate((cPacket*)delParam->dup());
+                        asconfAckChunk->addAsconfResponse(errorParam);
+                    }
+                    else if (addr == remoteAddr)
+                    {
+                        sctpEV3 << "addr=remoteAddr, make Error Parameter\n";
+                        SCTPErrorCauseParameter* errParam;
+                        errParam = new SCTPErrorCauseParameter("Error");
+                        errParam->setParameterType(ERROR_CAUSE_INDICATION);
+                        errParam->setResponseCorrelationId(delParam->getRequestCorrelationId());
+                        errParam->setErrorCauseType(ERROR_DELETE_SOURCE_ADDRESS);
+                        errParam->setByteLength(SCTP_ADD_IP_PARAMETER_LENGTH+4);
+                        errParam->encapsulate((cPacket*)delParam->dup());
+                        asconfAckChunk->addAsconfResponse(errParam);
+                    }
+                    else
+                    {
+                        locAddr = (std::vector<IPvXAddress>) state->localAddresses;
+                        sctpMain->removeRemoteAddressFromAllAssociations(this, addr, locAddr);
+                        for (AddressVector::iterator j=remoteAddressList.begin(); j!=remoteAddressList.end(); j++)
+                        {
+                            if ((*j)==addr)
+                            {
+                                remoteAddressList.erase(j);
+                                break;
+                            }
+                        }
+                        removePath(addr);
+                        sctpEV3 << "remove path from address " << addr << "\n";
+                        asconfAckChunk->addAsconfResponse(createSuccessIndication(delParam->getRequestCorrelationId()));
+                    }
+                    delete delParam;
+                    break;
+                case SET_PRIMARY_ADDRESS:
+                    sctpEV3 << "SET_PRIMARY_ADDRESS\n";
+                    SCTPSetPrimaryIPParameter* priParam;
+                    priParam = check_and_cast<SCTPSetPrimaryIPParameter*>(sctpParam);
+                    addr = priParam->getAddressParam();
+                    if (addr==IPvXAddress("0.0.0.0"))
+                    {
+                        sctpEV3 << "no address specified, add natted address " << remoteAddr << "\n";
+                        addr = remoteAddr;
+                    }
+                    for (AddressVector::iterator i = remoteAddressList.begin(); i != remoteAddressList.end(); i++)
+                    {
+                        if ((*i) == addr)
+                        {
+                            if (getPath(addr)->confirmed == true)
+                            {
+                                state->setPrimaryPath(getPath(addr));
+                                sctpEV3 << "set primaryPath to " << addr << "\n";
+                            }
+                            else
+                            {
+                                getPath(addr)->primaryPathCandidate = true;
+                                //if (state->enableHeartbeats)
+                                sendHeartbeat(getPath(addr));
+                            }
+                            break;
+                        }
+                    }
+                    asconfAckChunk->addAsconfResponse(createSuccessIndication(priParam->getRequestCorrelationId()));
+                    delete priParam;
+                    break;
+            }
+        }
+        sctpAsconfAck->addChunk(asconfAckChunk);
+        sendToIP(sctpAsconfAck, remoteAddr);
+    }
+    return SCTP_E_IGNORE;
+}
+
+SCTPEventCode SCTPAssociation::processAsconfAckArrived(SCTPAsconfAckChunk* asconfAckChunk)
+{
+    SCTPParameter* sctpParam;
+    IPvXAddress addr;
+    SCTPAsconfChunk *sctpasconf;
+    std::vector<uint32> errorCorrId;
+    std::vector<uint32>::iterator iter;
+    bool errorFound = false;
+
+    sctpasconf = check_and_cast<SCTPAsconfChunk*>(state->asconfChunk->dup());
+    if (asconfAckChunk->getSerialNumber()==sctpasconf->getSerialNumber())
+    {
+        stopTimer(getPath(remoteAddr)->AsconfTimer);
+        state->errorCount = 0;
+        state->asconfOutstanding = false;
+        getPath(remoteAddr)->pathErrorCount = 0;
+        std::vector<IPvXAddress> remAddr = (std::vector<IPvXAddress>) remoteAddressList;
+        for (uint32 j=0; j<asconfAckChunk->getAsconfResponseArraySize(); j++)
+        {
+            sctpParam = (SCTPParameter*)(asconfAckChunk->getAsconfResponse(j));
+            if (sctpParam->getParameterType() == ERROR_CAUSE_INDICATION)
+            {
+                SCTPErrorCauseParameter* error = check_and_cast<SCTPErrorCauseParameter* >(sctpParam);
+                errorCorrId.push_back(error->getResponseCorrelationId());
+                sctpEV3 << "error added with id " << error->getResponseCorrelationId() << "\n";
+            }
+        }
+        for (uint32 i=0; i<sctpasconf->getAsconfParamsArraySize(); i++)
+        {
+            sctpParam = check_and_cast<SCTPParameter*>(sctpasconf->removeAsconfParam());
+            errorFound = false;
+            switch (sctpParam->getParameterType())
+            {
+                case ADD_IP_ADDRESS:
+                    SCTPAddIPParameter* ipParam;
+                    ipParam = check_and_cast<SCTPAddIPParameter*>(sctpParam);
+                    if (errorCorrId.size()>0)
+                    {
+                        for (iter = errorCorrId.begin(); iter != errorCorrId.end(); iter++)
+                            if ((*iter) == ipParam->getRequestCorrelationId())
+                            {
+                                errorFound = true;
+                                break;
+                            }
+                    }
+                    if (errorFound==true) {
+                        delete ipParam;
+                        break;
+                    }
+                    addr = ipParam->getAddressParam();
+                    if (addr==IPvXAddress("0.0.0.0"))
+                    {
+                        addr = localAddr;
+                        sendIndicationToApp(SCTP_I_ADDRESS_ADDED);
+                    }
+                    sctpMain->addLocalAddressToAllRemoteAddresses(this, addr, remAddr);
+                    state->localAddresses.push_back(addr);
+                    delete ipParam;
+                    break;
+                case DELETE_IP_ADDRESS:
+                    SCTPDeleteIPParameter* delParam;
+                    delParam = check_and_cast<SCTPDeleteIPParameter*>(sctpParam);
+                    if (errorCorrId.size()>0)
+                    {
+                        for (iter = errorCorrId.begin(); iter != errorCorrId.end(); iter++)
+                        {
+                            if ((*iter) == delParam->getRequestCorrelationId())
+                            {
+                                errorFound = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (errorFound==true)
+                    {
+                        delete delParam;
+                        break;
+                    }
+                    addr = delParam->getAddressParam();
+                    sctpMain->removeLocalAddressFromAllRemoteAddresses(this, addr, remAddr);
+                    for (AddressVector::iterator j=state->localAddresses.begin(); j!=state->localAddresses.end(); j++)
+                    {
+                        if ((*j)==addr)
+                        {
+                            sctpEV3 << "erase address " << (*j) << "\n";
+                            state->localAddresses.erase(j);
+                            break;
+                        }
+                    }
+                    delete delParam;
+                    break;
+                case SET_PRIMARY_ADDRESS:
+                    SCTPSetPrimaryIPParameter* priParam;
+                    priParam = check_and_cast<SCTPSetPrimaryIPParameter*>(sctpParam);
+                    if (errorCorrId.size()>0)
+                    {
+                        for (iter = errorCorrId.begin(); iter != errorCorrId.end(); iter++)
+                        {
+                            if ((*iter) == delParam->getRequestCorrelationId())
+                            {
+                                errorFound = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (errorFound==true) 
+                    {
+                        delete delParam;
+                        break;
+                    }
+                    delete priParam;
+                    break;
+            }
+        }
+    }
+    delete sctpasconf;
+    return SCTP_E_IGNORE;
+}
+
 
 void SCTPAssociation::process_TIMEOUT_INIT_REXMIT(SCTPEventCode& event)
 {
@@ -1816,6 +2093,21 @@ int32 SCTPAssociation::updateCounters(SCTPPathVariables* path)
     return 1;
 }
 
+void SCTPAssociation::process_TIMEOUT_ASCONF(SCTPPathVariables* path)
+{
+    int32 value;
+
+    if ((value = updateCounters(path)) == 1)
+    {
+        retransmitAsconf();
+
+        /* increase the RTO (by doubling it) */
+        path->pathRto = min(2*path->pathRto.dbl(), sctpMain->par("rtoMax"));
+        path->statisticsPathRTO->record(path->pathRto);
+
+        startTimer(path->AsconfTimer, path->pathRto);
+    }
+}
 
 
 void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)

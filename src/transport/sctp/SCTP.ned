@@ -66,6 +66,12 @@ simple SCTP like ISCTP
         bool udpEncapsEnabled = default(false);
         double throughputInterval = default(1);
 
+        //#====== Add-IP ======================================================
+        bool addIP = default(false);
+        double addTime @unit(s) = default(0s);
+        string addAddress = default("");
+        string addIpType = default("0");      // SET_PRIMARY_ADDRESS=49156,ADD_IP_ADDRESS=49153,DELETE_IP_ADDRESS=49154
+
         //#====== SACK Sequence Numbers =======================================
         bool checkSackSeqNumber = default(false);
 

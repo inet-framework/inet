@@ -264,6 +264,25 @@ struct forward_tsn_chunk {
     uint8_t  stream_info[0];
 } __PACKED__;
 
+
+struct asconf_chunk {
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint32_t serial;
+    uint8_t parameters[0];
+} __PACKED__;
+
+
+struct asconf_ack_chunk {
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint32_t serial;
+    uint8_t parameters[0];
+} __PACKED__;
+
+
 // variable length parameters in INIT chunk:
 #define INIT_PARAM_IPV4 5
 #define INIT_PARAM_IPV6 6
@@ -301,6 +320,14 @@ struct cookie_parameter {
     uint32_t peerTag;
     uint8_t localTieTag[32];
     uint8_t peerTieTag[32];
+} __PACKED__;
+
+
+struct add_ip_parameter {
+    uint16_t type;
+    uint16_t length;
+    uint32_t correlation_id;
+    uint8_t parameters[0];
 } __PACKED__;
 
 

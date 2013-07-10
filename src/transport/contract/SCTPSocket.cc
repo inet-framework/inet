@@ -454,6 +454,14 @@ void SCTPSocket::processMessage(cPacket *msg)
             delete cmd;
             break;
         }
+        case SCTP_I_ADDRESS_ADDED:
+        {
+            SCTPCommand* cmd=check_and_cast<SCTPCommand*>(msg->removeControlInfo());
+            if (cb)
+                cb->addressAddedArrived(assocId, cmd->getLocalAddr(),remoteAddr);
+            delete cmd;
+            break;
+        }
         default:
             throw cRuntimeError("SCTPSocket: invalid msg kind %d, one of the SCTP_I_xxx constants expected", msg->getKind());
     }

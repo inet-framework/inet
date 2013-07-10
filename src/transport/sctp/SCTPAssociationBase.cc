@@ -101,6 +101,9 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     CwndTimer = new cMessage(str);
     snprintf(str, sizeof(str), "RTX_TIMER %d:%s", assoc->assocId, addr.str().c_str());
     T3_RtxTimer = new cMessage(str);
+    snprintf(str, sizeof(str), "ASCONF_TIMER %d:%s", assoc->assocId, addr.str().c_str());
+    AsconfTimer = new cMessage(str);
+    AsconfTimer->setContextPointer(association);
     HeartbeatTimer->setContextPointer(association);
     HeartbeatIntervalTimer->setContextPointer(association);
     CwndTimer->setContextPointer(association);
@@ -109,6 +112,7 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     HeartbeatTimer->setControlInfo(pinfo->dup());
     HeartbeatIntervalTimer->setControlInfo(pinfo->dup());
     CwndTimer->setControlInfo(pinfo->dup());
+    AsconfTimer->setControlInfo(pinfo->dup());
 
     snprintf(str, sizeof(str), "RTO %d:%s", assoc->assocId, addr.str().c_str());
     statisticsPathRTO = new cOutVector(str);
@@ -219,6 +223,7 @@ SCTPStateVariables::SCTPStateVariables()
     stopOldData = false;
     stopSending = false;
     inOut = false;
+    asconfOutstanding = false;
     queueUpdate = false;
     firstDataSent = false;
     peerWindowFull = false;
@@ -227,6 +232,7 @@ SCTPStateVariables::SCTPStateVariables()
     noMoreOutstanding = false;
     primaryPath = NULL;
     lastDataSourcePath = NULL;
+    asconfChunk = NULL;
     shutdownChunk = NULL;
     initChunk = NULL;
     cookieChunk = NULL;
@@ -368,6 +374,11 @@ SCTPAssociation::SCTPAssociation(SCTP* _module, int32 _appGateIndex, int32 _asso
     advRwnd = new cOutVector(vectorName);
     assocThroughputVector = new cOutVector("Association Throughput");
 
+    // ====== Add IP =====================================================
+    StartAddIP = new cMessage("addIP");
+    StartAddIP->setContextPointer(this);
+    StartAddIP->setControlInfo(pinfo->dup());
+
     // ====== Stream scheduling ==============================================
     ssModule = sctpMain->par("ssModule");
 
@@ -396,6 +407,7 @@ SCTPAssociation::~SCTPAssociation()
     delete numGapBlocks;
     delete sendQueue;
 
+    delete StartAddIP;
 
     delete fsm;
     delete state;
@@ -464,6 +476,14 @@ bool SCTPAssociation::processTimer(cMessage *msg)
             sctpEV3<<"set testing to true\n";
         }
     }
+    else if (path != NULL && msg == path->AsconfTimer) {
+        process_TIMEOUT_ASCONF(path);
+    }
+    else if (msg == StartAddIP) {
+        state->corrIdNum = state->asconfSn;
+        const char* type = (const char *)sctpMain->par("addIpType");
+        sendAsconf(type);
+    }
     else
     {
         sctpAlgorithm->processTimer(msg, event);
@@ -503,6 +523,7 @@ SCTPEventCode SCTPAssociation::preanalyseAppCommandEvent(int32 commandCode)
     case SCTP_C_QUEUE_BYTES_LIMIT:   return SCTP_E_QUEUE_BYTES_LIMIT;
     case SCTP_C_SHUTDOWN:            return SCTP_E_SHUTDOWN;
     case SCTP_C_NO_OUTSTANDING:      return SCTP_E_SEND_SHUTDOWN_ACK;
+    case SCTP_C_SEND_ASCONF:         return SCTP_E_SEND_ASCONF;   // Needed for multihomed NAT
     default:
         sctpEV3<<"commandCode="<<commandCode<<"\n";
         throw cRuntimeError("Unknown message kind in app command");
@@ -534,6 +555,8 @@ bool SCTPAssociation::processAppCommand(cPacket *msg)
         case SCTP_E_RECEIVE: process_RECEIVE_REQUEST(event, sctpCommand); break;
 
         case SCTP_E_PRIMARY: process_PRIMARY(event, sctpCommand); break;
+
+        case SCTP_E_SEND_ASCONF: sendAsconf(sctpMain->par("addIpType")); break;
 
         case SCTP_E_QUEUE_BYTES_LIMIT: process_QUEUE_BYTES_LIMIT(sctpCommand); break;
 
@@ -781,6 +804,14 @@ void SCTPAssociation::stateEntered(int32 status)
             pmStartPathManagement();
             state->sendQueueLimit = (uint32)sctpMain->par("sendQueueLimit");
             sendEstabIndicationToApp();
+            const bool addIP = (bool)sctpMain->par("addIP");
+            sctpEV3 << getFullPath() << ": addIP = " << addIP << " time = " << (double)sctpMain->par("addTime") << "\n";
+            if (addIP == true && (double)sctpMain->par("addTime")>0)
+            {
+                sctpEV3 << "startTimer addTime to expire at " << simulation.getSimTime()+(double)sctpMain->par("addTime") << "\n";
+
+                scheduleTimeout(StartAddIP, (double)sctpMain->par("addTime"));
+            }
             char str[128];
             snprintf(str, sizeof(str), "Cumulated TSN Ack of Association %d", assocId);
             cumTsnAck = new cOutVector(str);
@@ -844,6 +875,8 @@ void SCTPAssociation::removePath()
         delete path->T3_RtxTimer;
         stopTimer(path->CwndTimer);
         delete path->CwndTimer;
+        stopTimer(path->AsconfTimer);
+        delete path->AsconfTimer;
         delete path;
         sctpPathMap.erase(pathIterator);
     }

@@ -95,7 +95,8 @@ enum SCTPEventCode
     SCTP_E_QUEUE_BYTES_LIMIT,
     SCTP_E_SEND_QUEUE_LIMIT,
     SCTP_E_SEND_SHUTDOWN_ACK,
-    SCTP_E_STOP_SENDING
+    SCTP_E_STOP_SENDING,
+    SCTP_E_SEND_ASCONF
 };
 
 enum SCTPChunkTypes
@@ -114,7 +115,9 @@ enum SCTPChunkTypes
     COOKIE_ACK          = 11,
     SHUTDOWN_COMPLETE   = 14,
     NR_SACK             = 16,
-    FORWARD_TSN         = 192
+    ASCONF_ACK          = 128,
+    FORWARD_TSN         = 192,
+    ASCONF              = 193
 };
 
 enum SCTPPrMethods
@@ -124,6 +127,19 @@ enum SCTPPrMethods
     PR_RTX    = 2,
     PR_PRIO   = 3,
     PR_STRRST = 4
+};
+
+enum SCTPAddIPCorrelatedTypes
+{
+    SET_PRIMARY_ADDRESS          = 49156,
+    ADAPTATION_LAYER_INDICATION  = 49158,
+    SUPPORTED_EXTENSIONS         = 32776,
+    ADD_IP_ADDRESS               = 49153,
+    DELETE_IP_ADDRESS            = 49154,
+    ERROR_CAUSE_INDICATION       = 49155,
+    SUCCESS_INDICATION           = 49157,
+    ERROR_DELETE_LAST_IP_ADDRESS = 160,
+    ERROR_DELETE_SOURCE_ADDRESS  = 162
 };
 
 enum SCTPParameterTypes
@@ -159,6 +175,8 @@ enum SCTPStreamSchedulers
 #define SCTP_SHUTDOWN_CHUNK_LENGTH      8
 #define SCTP_SHUTDOWN_ACK_LENGTH        4
 #define SCTP_ERROR_CHUNK_LENGTH         4       // without parameters
+#define SCTP_ADD_IP_CHUNK_LENGTH        8
+#define SCTP_ADD_IP_PARAMETER_LENGTH    8
 #define IP_HEADER_LENGTH                20
 #define SCTP_DEFAULT_ARWND              (1<<16)
 #define SCTP_DEFAULT_INBOUND_STREAMS    17
@@ -247,6 +265,7 @@ class INET_API SCTPPathVariables : public cObject
         cMessage*           HeartbeatIntervalTimer;
         cMessage*           CwndTimer;
         cMessage*           T3_RtxTimer;
+        cMessage*           AsconfTimer;
 
         // ====== Path Status =================================================
         simtime_t           heartbeatTimeout;
@@ -506,6 +525,13 @@ class INET_API SCTPStateVariables : public cObject
         uint32                      outgoingSackSeqNum;
         uint32                      incomingSackSeqNum;
 
+        // ====== Partial Reliability SCTP ====================================
+        uint32                      asconfSn;                // own AddIP serial number
+        uint16                      numberAsconfReceived;
+        uint32                      corrIdNum;
+        bool                        asconfOutstanding;
+        SCTPAsconfChunk*            asconfChunk;
+
         // ====== Further features ============================================
         uint32                      advancedPeerAckPoint;
         uint32                      prMethod;
@@ -573,6 +599,7 @@ class INET_API SCTPAssociation : public cObject
         cMessage*               T5_ShutdownGuardTimer;
         cMessage*               SackTimer;
         cMessage*               StartTesting;
+        cMessage*               StartAddIP;
         cOutVector*             assocThroughputVector;
 
     protected:
@@ -737,6 +764,7 @@ class INET_API SCTPAssociation : public cObject
         void process_TIMEOUT_PROBING();
         void process_TIMEOUT_SHUTDOWN(SCTPEventCode& event);
         int32 updateCounters(SCTPPathVariables* path);
+        void process_TIMEOUT_ASCONF(SCTPPathVariables* path);
         //@}
 
         void startTimer(cMessage* timer, const simtime_t& timeout);
@@ -777,7 +805,6 @@ class INET_API SCTPAssociation : public cObject
         inline void sendToIP(SCTPMessage* sctpmsg) {
             sendToIP(sctpmsg, remoteAddr);
         }
-        void recordInPathVectors(SCTPMessage* pMsg, const IPvXAddress& rDest);
         void scheduleSack();
         /** Utility: signal to user that connection timed out */
         void signalConnectionTimeout();
@@ -888,6 +915,16 @@ class INET_API SCTPAssociation : public cObject
                                      const simtime_t&     rttEstimation);
 
         void disposeOf(SCTPMessage* sctpmsg);
+        
+        /** Methods for Add-IP **/
+        void sendAsconf(const char* type, const bool remote = false);
+        void sendAsconfAck(const uint32 serialNumber);
+        SCTPEventCode processAsconfArrived(SCTPAsconfChunk* asconfChunk);
+        SCTPEventCode processAsconfAckArrived(SCTPAsconfAckChunk* asconfAckChunk);
+        void retransmitAsconf();
+        SCTPAsconfAckChunk*      createAsconfAckChunk(const uint32 serialNumber);
+        SCTPSuccessIndication*   createSuccessIndication(uint32 correlationId);
+
         void calculateRcvBuffer();
         void listOrderedQ();
         void tsnWasReneged(SCTPDataVariables*   chunk,

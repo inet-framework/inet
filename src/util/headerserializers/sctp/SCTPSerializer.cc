@@ -508,6 +508,166 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     }
                     break;
                 }
+                case ASCONF:
+                {
+                    SCTPAsconfChunk* asconfChunk = check_and_cast<SCTPAsconfChunk*>(chunk);
+                    struct asconf_chunk* asconf = (struct asconf_chunk*) (buf + writtenbytes);
+                    writtenbytes += (asconfChunk->getByteLength());
+                    asconf->type = asconfChunk->getChunkType();
+                    asconf->length = htons(asconfChunk->getByteLength());
+                    asconf->serial = htonl(asconfChunk->getSerialNumber());
+                    int parPtr = 0;
+                    struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter*) (((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr);
+                    ipv4addr->type = htons(INIT_PARAM_IPV4);
+                    ipv4addr->length = htons(8);
+                    ipv4addr->address = htonl(asconfChunk->getAddressParam().get4().getInt());
+                    parPtr += 8;
+                    for (unsigned int i=0; i<asconfChunk->getAsconfParamsArraySize(); i++)
+                    {
+                        SCTPParameter* parameter = check_and_cast<SCTPParameter*>(asconfChunk->getAsconfParams(i));
+                        switch (parameter->getParameterType())
+                        {
+                            case ADD_IP_ADDRESS:
+                            {
+                                SCTPAddIPParameter* addip = check_and_cast<SCTPAddIPParameter*>(parameter);
+                                struct add_ip_parameter* ip = (struct add_ip_parameter*)(((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr);
+                                parPtr += 8;
+                                ip->type = htons(ADD_IP_ADDRESS);
+                                ip->correlation_id = htonl(addip->getRequestCorrelationId());
+                                struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter*) (((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr);
+                                ipv4addr->type = htons(INIT_PARAM_IPV4);
+                                ipv4addr->length = htons(8);
+                                ipv4addr->address = htonl(addip->getAddressParam().get4().getInt());
+                                parPtr += 8;
+                                ip->length = htons(addip->getByteLength());
+                                break;
+                            }
+                            case DELETE_IP_ADDRESS:
+                            {
+                                SCTPDeleteIPParameter* deleteip = check_and_cast<SCTPDeleteIPParameter*>(parameter);
+                                struct add_ip_parameter* ip = (struct add_ip_parameter*)(((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr);
+                                parPtr += 8;
+                                ip->type = htons(DELETE_IP_ADDRESS);
+                                ip->correlation_id = htonl(deleteip->getRequestCorrelationId());
+                                struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter*) (((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr);
+                                ipv4addr->type = htons(INIT_PARAM_IPV4);
+                                ipv4addr->length = htons(8);
+                                ipv4addr->address = htonl(deleteip->getAddressParam().get4().getInt());
+                                parPtr += 8;
+                                ip->length = htons(deleteip->getByteLength());
+                                break;
+                            }
+                            case SET_PRIMARY_ADDRESS:
+                            {
+                                SCTPSetPrimaryIPParameter* setip = check_and_cast<SCTPSetPrimaryIPParameter*>(parameter);
+                                struct add_ip_parameter* ip = (struct add_ip_parameter*)(((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr);
+                                parPtr += 8;
+                                ip->type = htons(SET_PRIMARY_ADDRESS);
+                                ip->correlation_id = htonl(setip->getRequestCorrelationId());
+                                struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter*) (((unsigned char *)asconf) + sizeof(struct asconf_chunk) + parPtr);
+                                ipv4addr->type = htons(INIT_PARAM_IPV4);
+                                ipv4addr->length = htons(8);
+                                ipv4addr->address = htonl(setip->getAddressParam().get4().getInt());
+                                parPtr += 8;
+                                ip->length = htons(setip->getByteLength());
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
+                case ASCONF_ACK:
+                {
+                    SCTPAsconfAckChunk* asconfAckChunk = check_and_cast<SCTPAsconfAckChunk*>(chunk);
+                    struct asconf_ack_chunk* asconfack = (struct asconf_ack_chunk*) (buf + writtenbytes);
+                    writtenbytes += (asconfAckChunk->getByteLength());
+                    asconfack->type = asconfAckChunk->getChunkType();
+                    asconfack->length = htons(asconfAckChunk->getByteLength());
+                    asconfack->serial = htonl(asconfAckChunk->getSerialNumber());
+                    int parPtr = 0;
+                    for (unsigned int i=0; i<asconfAckChunk->getAsconfResponseArraySize(); i++)
+                    {
+                        SCTPParameter* parameter = check_and_cast<SCTPParameter*>(asconfAckChunk->getAsconfResponse(i));
+                        switch (parameter->getParameterType())
+                        {
+                            case ERROR_CAUSE_INDICATION:
+                            {
+                                SCTPErrorCauseParameter* error = check_and_cast<SCTPErrorCauseParameter*>(parameter);
+                                struct add_ip_parameter* addip = (struct add_ip_parameter*) (((unsigned char *)asconfack) + sizeof(struct asconf_ack_chunk) + parPtr);
+                                addip->type = htons(error->getParameterType());
+                                addip->length = htons(error->getByteLength());
+                                addip->correlation_id = htonl(error->getResponseCorrelationId());
+                                parPtr += 8;
+                                struct error_cause* errorc = (struct error_cause*) (((unsigned char *)asconfack) + sizeof(struct asconf_ack_chunk) + parPtr);
+                                errorc->cause_code = htons(error->getErrorCauseType());
+                                errorc->length = htons(error->getByteLength()-8);
+                                parPtr += 4;
+                                if (check_and_cast<SCTPParameter*>(error->getEncapsulatedPacket()) != NULL) {
+                                	SCTPParameter* encParameter = check_and_cast<SCTPParameter*>(error->getEncapsulatedPacket());
+                                	switch (encParameter->getParameterType())
+									{
+										case ADD_IP_ADDRESS:
+										{
+											SCTPAddIPParameter* addip = check_and_cast<SCTPAddIPParameter*>(encParameter);
+											struct add_ip_parameter* ip = (struct add_ip_parameter*)(((unsigned char *)errorc) + sizeof(struct error_cause));
+											parPtr += 8;
+											ip->type = htons(ADD_IP_ADDRESS);
+											ip->correlation_id = htonl(addip->getRequestCorrelationId());
+											struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter*) (((unsigned char *)errorc) + sizeof(struct error_cause) + 8);
+											ipv4addr->length = htons(8);
+											ipv4addr->address = htonl(addip->getAddressParam().get4().getInt());
+											parPtr += 8;
+											ip->length = htons(addip->getByteLength());
+											break;
+										}
+										case DELETE_IP_ADDRESS:
+										{
+											SCTPDeleteIPParameter* deleteip = check_and_cast<SCTPDeleteIPParameter*>(encParameter);
+											struct add_ip_parameter* ip = (struct add_ip_parameter*)(((unsigned char *)errorc) + sizeof(struct error_cause));
+											parPtr += 8;
+											ip->type = htons(DELETE_IP_ADDRESS);
+											ip->correlation_id = htonl(deleteip->getRequestCorrelationId());
+											struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter*)  (((unsigned char *)errorc) + sizeof(struct error_cause) + 8);
+											ipv4addr->type = htons(INIT_PARAM_IPV4);
+											ipv4addr->length = htons(8);
+											ipv4addr->address = htonl(deleteip->getAddressParam().get4().getInt());
+											parPtr += 8;
+											ip->length = htons(deleteip->getByteLength());
+											break;
+										}
+										case SET_PRIMARY_ADDRESS:
+										{
+											SCTPSetPrimaryIPParameter* setip = check_and_cast<SCTPSetPrimaryIPParameter*>(encParameter);
+											struct add_ip_parameter* ip = (struct add_ip_parameter*)(((unsigned char *)errorc) + sizeof(struct error_cause));
+											parPtr += 8;
+											ip->type = htons(SET_PRIMARY_ADDRESS);
+											ip->correlation_id = htonl(setip->getRequestCorrelationId());
+											struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter*) (((unsigned char *)errorc) + sizeof(struct error_cause) + 8);
+											ipv4addr->type = htons(INIT_PARAM_IPV4);
+											ipv4addr->length = htons(8);
+											ipv4addr->address = htonl(setip->getAddressParam().get4().getInt());
+											parPtr += 8;
+											ip->length = htons(setip->getByteLength());
+											break;
+										}
+									}
+                                }
+                                break;
+                            }
+                            case SUCCESS_INDICATION:
+                            {
+                                SCTPSuccessIndication* success = check_and_cast<SCTPSuccessIndication*>(parameter);
+                                struct add_ip_parameter* addip = (struct add_ip_parameter*) (((unsigned char *)asconfack) + sizeof(struct asconf_ack_chunk) + parPtr);
+                                addip->type = htons(success->getParameterType());
+                                addip->length = htons(8);
+                                addip->correlation_id = htonl(success->getResponseCorrelationId());
+                                parPtr += 8;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
                 case ERRORTYPE:
                 {
                     SCTPErrorChunk* errorchunk = check_and_cast<SCTPErrorChunk*>(chunk);
@@ -529,10 +689,6 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 // break;
 
             }
-
-            /*drop(chunk);
-            delete chunk;*/
-
         }
     // finally, set the CRC32 checksum field in the SCTP common header
 
@@ -572,6 +728,9 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
     int32 size_abort_chunk = sizeof(struct abort_chunk);
     int32 size_cookie_echo_chunk = sizeof(struct cookie_echo_chunk);
     int size_forward_tsn_chunk = sizeof(struct forward_tsn_chunk);
+    int size_asconf_chunk = sizeof(struct asconf_chunk);
+    int size_addip_parameter = sizeof(struct add_ip_parameter);
+    int size_asconf_ack_chunk = sizeof(struct asconf_ack_chunk);
     uint16 paramType;
     int32 parptr, chunklen, cLen, woPadding;
     struct common_header *common_header = (struct common_header*) (buf);
@@ -1067,6 +1226,152 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                     chunk->setSsnArraySize(streamNumber);
                     chunk->setSsn(streamNumber-1, ntohs(forward->ssn));
                     streamptr+=sizeof(struct forward_tsn_streams);
+                }
+                chunk->setByteLength(cLen);
+                dest->addChunk(chunk);
+                break;
+            }
+            case ASCONF:
+            {
+                const struct asconf_chunk *asconf_chunk = (struct asconf_chunk*) (chunks + chunkPtr);    // (recvBuffer + size_ip + size_common_header);
+                int paramLength=0;
+                SCTPAsconfChunk *chunk = new SCTPAsconfChunk("ASCONF");
+                chunk->setChunkType(chunkType);
+                chunk->setName("ASCONF");
+                chunk->setSerialNumber(ntohl(asconf_chunk->serial));
+                if(cLen > size_asconf_chunk)
+                {
+                    int parcounter = 0;
+                    parptr = 0;
+                    // we supppose an ipv4 address parameter
+                    const struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter*) (((unsigned char*)asconf_chunk) + size_asconf_chunk + parptr);
+                    int parlen = ADD_PADDING(ntohs(ipv4addr->length));
+                    parptr += parlen;
+                    // set pointer forwards with count of bytes in length field of TLV
+                    parcounter++;
+                    if(ntohs(ipv4addr->type) != INIT_PARAM_IPV4)
+                    {
+                        if(parlen == 0)
+                            throw new cRuntimeError("ParamLen == 0.");
+                        continue;
+                    }
+                    else
+                    {
+                        IPvXAddress localAddr(IPv4Address(ntohl(ipv4addr->address)));
+                        chunk->setAddressParam(localAddr);
+                    }
+                    while(cLen > size_asconf_chunk+parptr)
+                    {
+                        const struct add_ip_parameter *ipparam = (struct add_ip_parameter*) (((unsigned char*)asconf_chunk) + size_asconf_chunk + parptr);
+                        paramType = ntohs(ipparam->type);
+                        paramLength = ntohs(ipparam->length);
+                        switch (paramType)
+                        {
+                        case ADD_IP_ADDRESS:
+                        {
+                            sctpEV3<<"parse ADD_IP_ADDRESS\n";
+                            SCTPAddIPParameter* addip;
+                            addip = new SCTPAddIPParameter("ADD_IP");
+                            addip->setParameterType(ntohs(ipparam->type));
+                            addip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
+                            const struct init_ipv4_address_parameter *v4addr1;
+                            v4addr1 = (struct init_ipv4_address_parameter*) (((unsigned char*)asconf_chunk) + size_asconf_chunk + parptr + size_addip_parameter);
+                            IPvXAddress localAddr(IPv4Address(ntohl(v4addr1->address)));
+                            addip->setAddressParam(localAddr);
+                            chunk->addAsconfParam(addip);
+                            break;
+                        }
+                        case DELETE_IP_ADDRESS:
+                        {
+                            sctpEV3<<"parse DELETE_IP_ADDRESS\n";
+                            SCTPDeleteIPParameter* deleteip;
+                            deleteip = new SCTPDeleteIPParameter("DELETE_IP");
+                            deleteip->setParameterType(ntohs(ipparam->type));
+                            deleteip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
+                            const struct init_ipv4_address_parameter *v4addr2;
+                            v4addr2 = (struct init_ipv4_address_parameter*) (((unsigned char*)asconf_chunk) + size_asconf_chunk + parptr + size_addip_parameter);
+                            IPvXAddress localAddr(IPv4Address(ntohl(v4addr2->address)));
+                            deleteip->setAddressParam(localAddr);
+                            chunk->addAsconfParam(deleteip);
+                            break;
+                        }
+                        case SET_PRIMARY_ADDRESS:
+                        {
+                            sctpEV3<<"parse SET_PRIMARY_ADDRESS\n";
+                            SCTPSetPrimaryIPParameter* priip;
+                            priip = new SCTPSetPrimaryIPParameter("SET_PRI_IP");
+                            priip->setParameterType(ntohs(ipparam->type));
+                            priip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
+                            const struct init_ipv4_address_parameter *v4addr3;
+                            v4addr3 = (struct init_ipv4_address_parameter*) (((unsigned char*)asconf_chunk) + size_asconf_chunk + parptr + size_addip_parameter);
+                            IPvXAddress localAddr(IPv4Address(ntohl(v4addr3->address)));
+                            priip->setAddressParam(localAddr);
+                            chunk->addAsconfParam(priip);
+                            break;
+                        }
+                        default: printf("TODO: Implement parameter type %d!\n", paramType);
+                            ev << "ExtInterface: Unknown SCTP parameter type " << paramType;
+                            /*throw new cRuntimeError("TODO: unknown parametertype in incoming packet from external interface! Implement it!");*/
+                            break;
+
+                        }
+                        parptr += ADD_PADDING(paramLength);
+                        parcounter++;
+                    }
+                }
+                chunk->setByteLength(cLen);
+                dest->addChunk(chunk);
+                break;
+            }
+            case ASCONF_ACK:
+            {
+                const struct asconf_ack_chunk *asconf_ack_chunk = (struct asconf_ack_chunk*) (chunks + chunkPtr);    // (recvBuffer + size_ip + size_common_header);
+                int paramLength = 0;
+                SCTPAsconfAckChunk *chunk = new SCTPAsconfAckChunk("ASCONF_ACK");
+                chunk->setChunkType(chunkType);
+                chunk->setName("ASCONF_ACK");
+                chunk->setSerialNumber(ntohl(asconf_ack_chunk->serial));
+                if(cLen > size_asconf_ack_chunk)
+                {
+                    int parcounter = 0;
+                    parptr = 0;
+
+                    while(cLen > size_asconf_ack_chunk+parptr)
+                    {
+                        const struct add_ip_parameter *ipparam = (struct add_ip_parameter*) (((unsigned char*)asconf_ack_chunk) + size_asconf_ack_chunk + parptr);
+                        paramType = ntohs(ipparam->type);
+                        paramLength = ntohs(ipparam->length);
+                        switch (paramType)
+                        {
+                        case ERROR_CAUSE_INDICATION:
+                        {
+                            SCTPErrorCauseParameter* errorip;
+                            errorip = new SCTPErrorCauseParameter("ERROR_CAUSE");
+                            errorip->setParameterType(ntohs(ipparam->type));
+                            errorip->setResponseCorrelationId(ntohl(ipparam->correlation_id));
+                            const struct error_cause *errorcause;
+                            errorcause = (struct error_cause*) (((unsigned char*)asconf_ack_chunk) + size_asconf_ack_chunk + parptr + size_addip_parameter);
+                            errorip->setErrorCauseType(htons(errorcause->cause_code));
+                            chunk->addAsconfResponse(errorip);
+                            break;
+                        }
+                        case SUCCESS_INDICATION:
+                        {
+                            SCTPSuccessIndication* success;
+                            success = new SCTPSuccessIndication("SUCCESS");
+                            success->setParameterType(ntohs(ipparam->type));
+                            success->setResponseCorrelationId(ntohl(ipparam->correlation_id));
+                            chunk->addAsconfResponse(success);
+                            break;
+                        }
+                        default: printf("TODO: Implement parameter type %d!\n", paramType);
+                            ev << "ExtInterface: Unknown SCTP parameter type " << paramType;
+                            break;
+
+                        }
+                        parptr += ADD_PADDING(paramLength);
+                        parcounter++;
+                    }
                 }
                 chunk->setByteLength(cLen);
                 dest->addChunk(chunk);
