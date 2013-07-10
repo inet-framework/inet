@@ -27,7 +27,7 @@
 /**
  * A meter based on two token buckets one for average and the other for peak rates.
   */
-class INET_API BasicTokenBucketMeter : public IQoSMeter
+class INET_API BasicTokenBucketMeter : public cSimpleModule
 {
   public:
 
@@ -47,9 +47,9 @@ class INET_API BasicTokenBucketMeter : public IQoSMeter
     // statistics
     bool warmupFinished;        ///< if true, start statistics gathering
     int numBitsConformed;
-    int numBitsSent;
+    int numBitsReceived;
     int numPktsConformed;
-    int numPktsSent;
+    int numPktsReceived;
 
   protected:
 

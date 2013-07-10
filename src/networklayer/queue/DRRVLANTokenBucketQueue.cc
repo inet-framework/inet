@@ -44,7 +44,7 @@ void DRRVLANTokenBucketQueue::initialize()
 
     // general
     frameCapacity = par("frameCapacity");
-    numQueues = par("numQueues");
+    numFlows = par("numFlows");
 
     // VLAN classifier
     const char *classifierClass = par("classifierClass");

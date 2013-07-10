@@ -23,6 +23,7 @@
 #include <omnetpp.h>
 #include <sstream>
 #include <vector>
+#include "IQoSClassifier.h"
 #include "PassiveQueueBase.h"
 #include "BasicTokenBucketMeter.h"
 
@@ -49,15 +50,23 @@ class INET_API DRRVLANTokenBucketQueue : public PassiveQueueBase
 
   protected:
     // configuration
-    int frameCapacity;
-    int numQueues;
-    long long bucketSize;    // in bit; note that the corresponding parameter in NED/INI is in byte.
-    double meanRate;
-    int mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
-    double peakRate;
+//    int frameCapacity;
+    int queueSize;
+    int queueThreshold;
+    int numFlows;
+//    long long bucketSize;    // in bit; note that the corresponding parameter in NED/INI is in byte.
+//    double meanRate;
+//    int mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
+//    double peakRate;
+
+    // VLAN classifier
+    IQoSClassifier *classifier;
+
+    // FIFO
+    cQueue fifo;
+    int currentQueueSize;   // in bit
 
     // state
-    IQoSClassifier *classifier;
     QueueVector queues;
     LongLongVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
     IntVector peakBucketLength;  // vector of the number of tokens (bits) in the bucket for peak rate/MTU control

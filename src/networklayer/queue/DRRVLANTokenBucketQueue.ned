@@ -28,14 +28,15 @@ module DRRVLANTokenBucketQueue
     parameters:
         @labels(node,hybridpon-node);
         @display("i=block/subqueue;bgb=130,90");
-        int frameCapacity = default(100);  // per-subqueue capacity
-        int numQueues = default(1);	// number of per-VLAN queues
-		string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier
+        int numFlows = default(1);	// number of flows (i.e., subscribers)
+        int queueSize @unit(b) = default(100000000b);  // FIFO queue size
+        int queueThreshold @unit(b) = default(50000000b);	// FIFO threshold to detect link congestion
+        string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier        
 		string vids = default("");	// VIDs used for initialization of index table
     gates:
         output out;
     submodules:
-        tbm[numQueues]: BasicTokenBucketMeter {
+        tbm[numFlows]: BasicTokenBucketMeter {
             parameters:
                 @display("i=block/classifier;p=60,40");
         }

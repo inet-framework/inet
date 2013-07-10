@@ -32,9 +32,9 @@ void BasicTokenBucketMeter::initialize()
     // statistic
     warmupFinished = false;
     numBitsConformed = 0;
-    numBitsSent = 0;
+    numBitsReceived = 0;
     numPktsConformed = 0;
-    numPktsSent = 0;
+    numPktsReceived = 0;
 }
 
 int BasicTokenBucketMeter::meterPacket(cMessage *msg)
@@ -65,6 +65,12 @@ int BasicTokenBucketMeter::meterPacket(cMessage *msg)
         {
             meanBucketLength -= pktLength;
             peakBucketLength -= pktLength;
+
+            if (simTime() >= simulation.getWarmupPeriod()) {
+                numBitsConformed += pktLength;
+                numPktsConformed++;
+            }
+
             return 1;   // conformed
         }
     }
@@ -87,28 +93,12 @@ int BasicTokenBucketMeter::meterPacket(cMessage *msg)
 
 void BasicTokenBucketMeter::finish()
 {
-    unsigned long sumQueueReceived = 0;
-    unsigned long sumQueueDropped = 0;
-    unsigned long sumQueueShaped = 0;
-    unsigned long sumQueueUnshaped = 0;
-
-    for (int i=0; i < numQueues; i++)
-    {
-        std::stringstream ss_received, ss_dropped, ss_shaped, ss_sent, ss_throughput;
-        ss_received << "packets received by per-VLAN queue[" << i << "]";
-        ss_dropped << "packets dropped by per-VLAN queue[" << i << "]";
-        ss_shaped << "packets shaped by per-VLAN queue[" << i << "]";
-        ss_sent << "packets sent by per-VLAN queue[" << i << "]";
-        ss_throughput << "bits/sec sent per-VLAN queue[" << i << "]";
-        recordScalar((ss_received.str()).c_str(), numQueueReceived[i]);
-        recordScalar((ss_dropped.str()).c_str(), numQueueDropped[i]);
-        recordScalar((ss_shaped.str()).c_str(), numQueueReceived[i]-numQueueUnshaped[i]);
-        recordScalar((ss_sent.str()).c_str(), numQueueSent[i]);
-        recordScalar((ss_throughput.str()).c_str(), numBitsSent[i]/(simTime()-simulation.getWarmupPeriod()).dbl());
-        sumQueueReceived += numQueueReceived[i];
-        sumQueueDropped += numQueueDropped[i];
-        sumQueueShaped += numQueueReceived[i] - numQueueUnshaped[i];
-    }
-    recordScalar("overall packet loss rate of per-VLAN queues", sumQueueDropped/double(sumQueueReceived));
-    recordScalar("overall packet shaped rate of per-VLAN queues", sumQueueShaped/double(sumQueueReceived));
+    std::stringstream ss_received, ss_conformed, ss_throughput;
+    ss_received << "number of packets received";
+    ss_conformed << "number of packets conformed";
+    ss_throughput << "bits/sec received";
+    recordScalar((ss_received.str()).c_str(), numPktsReceived);
+    recordScalar((ss_conformed.str()).c_str(), numPktsConformed);
+    recordScalar((ss_throughput.str()).c_str(), numBitsReceived / (simTime() - simulation.getWarmupPeriod()).dbl());
+    recordScalar("packet conformed rate", numPktsConformed / double(numPktsReceived));
 }
