@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __INET_CSFQVLANTBFQUEUE_H
-#define __INET_CSFQVLANTBFQUEUE_H
+#ifndef __INET_CSFQVLANTOKENBUCKETQUEUE_H
+#define __INET_CSFQVLANTOKENBUCKETQUEUE_H
 
 #include <omnetpp.h>
 #include <algorithm>
@@ -70,7 +70,7 @@ typedef struct identHash {
  * and round-robin (RR) scheduler.
  * See NED for more info.
  */
-class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
+class INET_API CSFQVLANTokenBucketQueue : public PassiveQueueBase
 {
     typedef struct
     {
@@ -151,8 +151,8 @@ class INET_API CSFQVLANTBFQueue : public PassiveQueueBase
     cGate *outGate;
 
   public:
-    CSFQVLANTBFQueue();
-    virtual ~CSFQVLANTBFQueue();
+    CSFQVLANTokenBucketQueue();
+    virtual ~CSFQVLANTokenBucketQueue();
 
   protected:
     virtual void initialize();

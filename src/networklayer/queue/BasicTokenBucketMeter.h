@@ -24,35 +24,35 @@
 #include "INETDefs.h"
 //#include "IQoSMeter.h"
 
+
 /**
  * A meter based on two token buckets one for average and the other for peak rates.
-  */
+ * It returns 0 for conformed and 1 for non-conformed packets.
+ */
 class INET_API BasicTokenBucketMeter : public cSimpleModule
 {
   public:
 
   protected:
-    // configuration
+    // TBF parameters
     long long bucketSize;   // in bit; note that the corresponding parameter in NED/INI is in byte.
-    double meanRate;
-    int mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
-    double peakRate;
+    double meanRate;        // in bps
+    int mtu;                // in bit; note that the corresponding parameter in NED/INI is in byte.
+    double peakRate;        // in bps
 
-    // state
-    long long meanBucketLength;  // the number of tokens (bits) in the bucket for mean rate/burst control
-    int peakBucketLength;  // the number of tokens (bits) in the bucket for peak rate/MTU control
-    simtime_t lastTime; // the last time the TBF used
-    bool isTxScheduled; // flag to indicate whether there is any scheduled frame transmission
+    // TBF states
+    long long meanBucketLength; // the current number of tokens (bits) in the bucket for mean rate/burst control
+    int peakBucketLength;       // the current number of tokens (bits) in the bucket for peak rate/MTU control
+    simtime_t lastTime;         // the last time the token bucket was used
 
     // statistics
-    bool warmupFinished;        ///< if true, start statistics gathering
+//    bool warmupFinished;        ///< if true, start statistics gathering
     int numBitsConformed;
-    int numBitsReceived;
+    int numBitsMetered;
     int numPktsConformed;
-    int numPktsReceived;
+    int numPktsMetered;
 
   protected:
-
     virtual void initialize();
     virtual void finish();
 

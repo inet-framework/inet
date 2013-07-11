@@ -23,25 +23,32 @@ Define_Module(BasicTokenBucketMeter);
 
 void BasicTokenBucketMeter::initialize()
 {
-    // configuration
+    // NED parameters
     bucketSize = par("bucketSize").longValue()*8LL; // in bit
     meanRate = par("meanRate"); // in bps
     mtu = par("mtu").longValue()*8; // in bit
     peakRate = par("peakRate"); // in bps
 
-    // statistic
-    warmupFinished = false;
+    // TBF states
+    meanBucketLength = bucketSize;
+    peakBucketLength = mtu;
+    lastTime = simTime();
+
+    // statistics
+//    warmupFinished = false;
     numBitsConformed = 0;
-    numBitsReceived = 0;
+    numBitsMetered = 0;
     numPktsConformed = 0;
-    numPktsReceived = 0;
+    numPktsMetered = 0;
 }
 
 int BasicTokenBucketMeter::meterPacket(cMessage *msg)
 {
-    Enter_Method("isConformed()");
+    Enter_Method("meterPacket()");
 
     int pktLength = (check_and_cast<cPacket *>(msg))->getBitLength();
+    numBitsMetered += pktLength;
+    numPktsMetered++;
 
 // DEBUG
     EV << "Last Time = " << lastTime << endl;
@@ -71,10 +78,10 @@ int BasicTokenBucketMeter::meterPacket(cMessage *msg)
                 numPktsConformed++;
             }
 
-            return 1;   // conformed
+            return 0;   // conformed
         }
     }
-    return 0;   // not conformed
+    return 1;   // not conformed
 }
 
 //void BasicTokenBucketMeter::dumpTbfStatus(int queueIndex)
@@ -93,12 +100,12 @@ int BasicTokenBucketMeter::meterPacket(cMessage *msg)
 
 void BasicTokenBucketMeter::finish()
 {
-    std::stringstream ss_received, ss_conformed, ss_throughput;
-    ss_received << "number of packets received";
+    std::stringstream ss_metered, ss_conformed, ss_throughput;
+    ss_metered << "number of packets metered";
     ss_conformed << "number of packets conformed";
-    ss_throughput << "bits/sec received";
-    recordScalar((ss_received.str()).c_str(), numPktsReceived);
+    ss_throughput << "bits/sec metered";
+    recordScalar((ss_metered.str()).c_str(), numPktsMetered);
     recordScalar((ss_conformed.str()).c_str(), numPktsConformed);
-    recordScalar((ss_throughput.str()).c_str(), numBitsReceived / (simTime() - simulation.getWarmupPeriod()).dbl());
-    recordScalar("packet conformed rate", numPktsConformed / double(numPktsReceived));
+    recordScalar((ss_throughput.str()).c_str(), numBitsMetered / (simTime() - simulation.getWarmupPeriod()).dbl());
+    recordScalar("packet conformed rate", numPktsConformed / double(numPktsMetered));
 }

@@ -17,15 +17,15 @@
 //
 
 
-#include "CSFQVLANTBFQueue.h"
+#include "CSFQVLANTokenBucketQueue.h"
 
-Define_Module(CSFQVLANTBFQueue);
+Define_Module(CSFQVLANTokenBucketQueue);
 
-CSFQVLANTBFQueue::CSFQVLANTBFQueue()
+CSFQVLANTokenBucketQueue::CSFQVLANTokenBucketQueue()
 {
 }
 
-CSFQVLANTBFQueue::~CSFQVLANTBFQueue()
+CSFQVLANTokenBucketQueue::~CSFQVLANTokenBucketQueue()
 {
 //    for (int i = 0; i < numFlows; i++)
 //    {
@@ -34,7 +34,7 @@ CSFQVLANTBFQueue::~CSFQVLANTBFQueue()
 //    }
 }
 
-void CSFQVLANTBFQueue::initialize()
+void CSFQVLANTokenBucketQueue::initialize()
 {
     PassiveQueueBase::initialize();
 
@@ -155,7 +155,7 @@ void CSFQVLANTBFQueue::initialize()
     numPktsSent.assign(numFlows, 0);
 }
 
-void CSFQVLANTBFQueue::handleMessage(cMessage *msg)
+void CSFQVLANTokenBucketQueue::handleMessage(cMessage *msg)
 {
     if (warmupFinished == false)
     {   // start statistics gathering once the warm-up period has passed.
@@ -249,7 +249,7 @@ void CSFQVLANTBFQueue::handleMessage(cMessage *msg)
     }
 }
 
-bool CSFQVLANTBFQueue::enqueue(cMessage *msg)
+bool CSFQVLANTokenBucketQueue::enqueue(cMessage *msg)
 {
     if (queueSize && fifo.length() >= queueSize)
     {
@@ -264,7 +264,7 @@ bool CSFQVLANTBFQueue::enqueue(cMessage *msg)
     }
 }
 
-cMessage *CSFQVLANTBFQueue::dequeue()
+cMessage *CSFQVLANTokenBucketQueue::dequeue()
 {
     if (fifo.empty())
     {
@@ -274,12 +274,12 @@ cMessage *CSFQVLANTBFQueue::dequeue()
     return msg;
 }
 
-void CSFQVLANTBFQueue::sendOut(cMessage *msg)
+void CSFQVLANTokenBucketQueue::sendOut(cMessage *msg)
 {
     send(msg, outGate);
 }
 
-void CSFQVLANTBFQueue::requestPacket()
+void CSFQVLANTokenBucketQueue::requestPacket()
 {
     Enter_Method("requestPacket()");
 
@@ -300,7 +300,7 @@ void CSFQVLANTBFQueue::requestPacket()
     }
 }
 
-bool CSFQVLANTBFQueue::isConformed(int flowId, int pktLength)
+bool CSFQVLANTokenBucketQueue::isConformed(int flowId, int pktLength)
 {
     Enter_Method("isConformed()");
 
@@ -333,7 +333,7 @@ bool CSFQVLANTBFQueue::isConformed(int flowId, int pktLength)
 }
 
 
-void CSFQVLANTBFQueue::dumpTbfStatus(int flowId)
+void CSFQVLANTokenBucketQueue::dumpTbfStatus(int flowId)
 {
     EV << "Last Time = " << lastTime[flowId] << endl;
     EV << "Current Time = " << simTime() << endl;
@@ -348,7 +348,7 @@ void CSFQVLANTBFQueue::dumpTbfStatus(int flowId)
 }
 
 // compute estimated flow rate by using exponential averaging
-double CSFQVLANTBFQueue::estimateRate(int flowId, int pktLength, double arrvTime)
+double CSFQVLANTokenBucketQueue::estimateRate(int flowId, int pktLength, double arrvTime)
 {
     double d = (arrvTime - flowState[flowId].prevTime_) * 1000000;
     double k = flowState[flowId].k_;
@@ -377,7 +377,7 @@ double CSFQVLANTBFQueue::estimateRate(int flowId, int pktLength, double arrvTime
 }
 
 // estimate the link's alpha parameter
-void CSFQVLANTBFQueue::estimateAlpha(int pktLength, double arrvRate, double arrvTime, int enqueue)
+void CSFQVLANTokenBucketQueue::estimateAlpha(int pktLength, double arrvRate, double arrvTime, int enqueue)
 {
     float d = (arrvTime - csfq.lastArv_) * 1000000., w, rate = csfq.rate_ / 1000000.;
     double k = csfq.kLink_ / 1000000.;
@@ -488,7 +488,7 @@ void CSFQVLANTBFQueue::estimateAlpha(int pktLength, double arrvRate, double arrv
 #endif
 }
 
-void CSFQVLANTBFQueue::finish()
+void CSFQVLANTokenBucketQueue::finish()
 {
     unsigned long sumPktsReceived = 0;
     unsigned long sumPktsDropped = 0;

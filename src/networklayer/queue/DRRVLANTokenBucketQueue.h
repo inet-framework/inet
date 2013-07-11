@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __INET_DRRVLANTokenBucketQUEUE_H
-#define __INET_DRRVLANTokenBucketQUEUE_H
+#ifndef __INET_DRRVLANTOKENBUCKETQUEUE_H
+#define __INET_DRRVLANTOKENBUCKETQUEUE_H
 
 #include <omnetpp.h>
 #include <sstream>
@@ -52,7 +52,7 @@ class INET_API DRRVLANTokenBucketQueue : public PassiveQueueBase
     // configuration
 //    int frameCapacity;
     int queueSize;
-    int queueThreshold;
+//    int queueThreshold;
     int numFlows;
 //    long long bucketSize;    // in bit; note that the corresponding parameter in NED/INI is in byte.
 //    double meanRate;

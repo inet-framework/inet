@@ -24,15 +24,15 @@ Define_Module(DRRVLANTokenBucketQueue);
 DRRVLANTokenBucketQueue::DRRVLANTokenBucketQueue()
 {
 //    queues = NULL;
-//    numQueues = NULL;
+//    numFlows = NULL;
 }
 
 DRRVLANTokenBucketQueue::~DRRVLANTokenBucketQueue()
 {
-    for (int i=0; i<numQueues; i++)
+    for (int i=0; i<numFlows; i++)
     {
         delete queues[i];
-        cancelAndDelete(conformityTimer[i]);
+//        cancelAndDelete(conformityTimer[i]);
     }
 }
 
@@ -43,13 +43,13 @@ void DRRVLANTokenBucketQueue::initialize()
     outGate = gate("out");
 
     // general
-    frameCapacity = par("frameCapacity");
+    queueSize = par("queueSize");
     numFlows = par("numFlows");
 
     // VLAN classifier
     const char *classifierClass = par("classifierClass");
     classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
-    classifier->setMaxNumQueues(numQueues);
+    classifier->setMaxNumQueues(numFlows);
     const char *vids = par("vids");
     classifier->initialize(vids);
 
@@ -57,13 +57,13 @@ void DRRVLANTokenBucketQueue::initialize()
     fifo.setName("FIFO queue");
 
     // Per-subscriber queues with DRR scheduler for non-conformant packets
-    queues.assign(numQueues, (cQueue *)NULL);
-    meanBucketLength.assign(numQueues, bucketSize);
-    peakBucketLength.assign(numQueues, mtu);
-    lastTime.assign(numQueues, simTime());
-    conformityFlag.assign(numQueues, false);
-    conformityTimer.assign(numQueues, (cMessage *)NULL);
-    for (int i=0; i<numQueues; i++)
+    queues.assign(numFlows, (cQueue *)NULL);
+    meanBucketLength.assign(numFlows, bucketSize);
+    peakBucketLength.assign(numFlows, mtu);
+    lastTime.assign(numFlows, simTime());
+    conformityFlag.assign(numFlows, false);
+    conformityTimer.assign(numFlows, (cMessage *)NULL);
+    for (int i=0; i<numFlows; i++)
     {
         char buf[32];
         sprintf(buf, "queue-%d", i);
@@ -75,11 +75,11 @@ void DRRVLANTokenBucketQueue::initialize()
 
     // statistic
     warmupFinished = false;
-    numBitsSent.assign(numQueues, 0.0);
-    numQueueReceived.assign(numQueues, 0);
-    numQueueDropped.assign(numQueues, 0);
-    numQueueUnshaped.assign(numQueues, 0);
-    numQueueSent.assign(numQueues, 0);
+    numBitsSent.assign(numFlows, 0.0);
+    numQueueReceived.assign(numFlows, 0);
+    numQueueDropped.assign(numFlows, 0);
+    numQueueUnshaped.assign(numFlows, 0);
+    numQueueSent.assign(numFlows, 0);
 }
 
 void DRRVLANTokenBucketQueue::handleMessage(cMessage *msg)
@@ -88,7 +88,7 @@ void DRRVLANTokenBucketQueue::handleMessage(cMessage *msg)
     {   // start statistics gathering once the warm-up period has passed.
         if (simTime() >= simulation.getWarmupPeriod()) {
             warmupFinished = true;
-            for (int i = 0; i < numQueues; i++)
+            for (int i = 0; i < numFlows; i++)
             {
                 numQueueReceived[i] = queues[i]->getLength();   // take into account the frames/packets already in queues
             }
@@ -231,12 +231,12 @@ bool DRRVLANTokenBucketQueue::enqueue(cMessage *msg)
 cMessage *DRRVLANTokenBucketQueue::dequeue()
 {
     bool found = false;
-    int startQueueIndex = (currentQueueIndex + 1) % numQueues;  // search from the next queue for a frame to transmit
-    for (int i = 0; i < numQueues; i++)
+    int startQueueIndex = (currentQueueIndex + 1) % numFlows;  // search from the next queue for a frame to transmit
+    for (int i = 0; i < numFlows; i++)
     {
-       if (conformityFlag[(i+startQueueIndex)%numQueues])
+       if (conformityFlag[(i+startQueueIndex)%numFlows])
        {
-           currentQueueIndex = (i+startQueueIndex)%numQueues;
+           currentQueueIndex = (i+startQueueIndex)%numFlows;
            found = true;
            break;
        }
@@ -374,7 +374,7 @@ void DRRVLANTokenBucketQueue::finish()
     unsigned long sumQueueShaped = 0;
     unsigned long sumQueueUnshaped = 0;
 
-    for (int i=0; i < numQueues; i++)
+    for (int i=0; i < numFlows; i++)
     {
         std::stringstream ss_received, ss_dropped, ss_shaped, ss_sent, ss_throughput;
         ss_received << "packets received by per-VLAN queue[" << i << "]";

@@ -12,28 +12,28 @@ package inet.networklayer.queue;
 import inet.networklayer.queue.BasicTokenBucketMeter;
 
 //
-// Model for an ISP traffic controller enabling proportional excess bandwidth
-// allocation.
-// Incoming packets are first classfied by a VLAN classifier and then metered
-// by token buckets. Conformant packets are put into a common FIFO queue, while
-// non-conformant packets are put into per-subscriber queues served by a DRR
+// Model for an ISP traffic controller enabling proportional allocation of
+// excess bandwidth allocation.
+// An incoming packet is first classfied by a VLAN classifier and then metered
+// by token buckets. If conformant, the packet is put into a common FIFO queue;
+// if not conformant, it is put into per-subscriber queues served by a DRR
 // scheduler, which are joined by priority queueing with high priority for the
 // FIFO queue.
 //
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 // @date   2013-07-01
 //
-module DRRVLANTokenBucketQueue
+module DRRVLANTokenBucketQueue like OutputQueue
 {
     parameters:
-        @labels(node,hybridpon-node);
+        @labels(node,queue-node);
         @display("i=block/subqueue;bgb=130,90");
         int numFlows = default(1);	// number of flows (i.e., subscribers)
-        int queueSize @unit(b) = default(100000000b);  // FIFO queue size
-        int queueThreshold @unit(b) = default(50000000b);	// FIFO threshold to detect link congestion
+        int queueSize @unit(b) = default(100000000b);  // FIFO & per-flow queue size
         string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier        
 		string vids = default("");	// VIDs used for initialization of index table
     gates:
+        input in;
         output out;
     submodules:
         tbm[numFlows]: BasicTokenBucketMeter {
