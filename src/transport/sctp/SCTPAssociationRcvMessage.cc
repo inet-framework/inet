@@ -87,6 +87,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
     sctpEV3 << "numberOfChunks=" <<numberOfChunks << endl;
 
     state->sctpmsg = (SCTPMessage*)sctpmsg->dup();
+    bool authenticationNecessary = state->peerAuth;
     
     if (fsm->getState()!=SCTP_S_CLOSED &&
             fsm->getState()!=SCTP_S_COOKIE_WAIT &&
@@ -117,6 +118,37 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
             sctpEV3 << " VTag "<< sctpmsg->getTag() << " incorrect. Should be "
                       << peerVTag << " localVTag=" << localVTag << endl;
             return true;
+        }
+
+        if (authenticationNecessary) {
+            if (type == AUTH) {
+                sctpEV3 << "SCTPAssociationRcvMessage: AUTH received" << endl;
+                SCTPAuthenticationChunk* authChunk;
+                authChunk = check_and_cast<SCTPAuthenticationChunk*>(header);
+                if (authChunk->getHMacIdentifier() != 1) {
+                    sendHMacError(authChunk->getHMacIdentifier());
+                    SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+                    it->second.numAuthChunksRejected++;
+                    return true;
+                }
+                if (authChunk->getHMacOk() == false) {
+                    delete authChunk;
+                    SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+                    it->second.numAuthChunksRejected++;
+                    return true;
+                }
+                authenticationNecessary = false;
+                SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+                it->second.numAuthChunksAccepted++;
+                delete authChunk;
+                continue;
+            }
+            else
+            {
+                if (typeInChunkList(type)) {
+                    return true;
+                }
+            }
         }
 
         switch (type) {
@@ -340,6 +372,14 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
             delete state->asconfChunk;
             delete asconfAckChunk;
             break;
+        case ERRORTYPE:
+            sctpEV3 << "SCTPAssociationRcvMessage: ERROR received" << endl;
+            SCTPErrorChunk* errorChunk;
+            errorChunk = check_and_cast<SCTPErrorChunk*>(header);
+            processErrorArrived(errorChunk);
+            trans = true;
+            delete errorChunk;
+            break;
         default: sctpEV3<<"different type" << endl;
             break;
         }
@@ -376,6 +416,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
     SCTPAssociation* assoc;
     char timerName[128];
     bool trans = false;
+    uint16 type;
     InterfaceTableAccess interfaceTableAccess;
     AddressVector adv;
 
@@ -495,6 +536,18 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
                 qCounter.bookedTransQ[remoteAddr] = 0;
                 qCounter.roomRetransQ[remoteAddr] = 0;
             }
+            if (initchunk->getHmacTypesArraySize() != 0)
+            {
+                state->peerAuth = true;
+                for (uint32 j=0; j<initchunk->getChunkTypesArraySize(); j++)
+                {
+                    type = initchunk->getChunkTypes(j);
+                    if (type != INIT && type != INIT_ACK && type != AUTH && type != SHUTDOWN_COMPLETE)
+                    {
+                        state->peerChunkList.push_back(type);
+                    }
+                }
+            }
             trans = performStateTransition(SCTP_E_RCV_INIT);
             if (trans) {
                 sendInitAck(initchunk);
@@ -552,6 +605,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
 bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk* initAckChunk)
 {
     bool trans = false;
+    uint16 type;
 
     if (fsm->getState() == SCTP_S_COOKIE_WAIT)
     {
@@ -600,6 +654,19 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk* initAckChunk)
             inboundStreams = ((initAckChunk->getNoOutStreams()<inboundStreams)?initAckChunk->getNoOutStreams():inboundStreams);
             outboundStreams = ((initAckChunk->getNoInStreams()<outboundStreams)?initAckChunk->getNoInStreams():outboundStreams);
             (this->*ssFunctions.ssInitStreams)(inboundStreams, outboundStreams);
+            if (initAckChunk->getHmacTypesArraySize() != 0)
+            {
+                state->peerAuth = true;
+                for (uint32 j=0; j<initAckChunk->getChunkTypesArraySize(); j++)
+                {
+                    type = initAckChunk->getChunkTypes(j);
+                    if (type != INIT && type != INIT_ACK && type != AUTH && type != SHUTDOWN_COMPLETE)
+                    {
+                        state->peerChunkList.push_back(type);
+                    }
+                }
+
+            }
             sendCookieEcho(initAckChunk);
         }
         startTimer(T1_InitTimer, state->initRexmitTimeout);
@@ -1647,12 +1714,19 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk* asconfChunk
     SCTPPathVariables* path;
     IPvXAddress addr;
     std::vector<IPvXAddress> locAddr;
+    SCTPAuthenticationChunk* authChunk;
     sctpEV3 << "Asconf arrived " << asconfChunk->getName() << "\n";
     SCTPMessage *sctpAsconfAck = new SCTPMessage("ASCONF_ACK");
     sctpAsconfAck->setBitLength(SCTP_COMMON_HEADER*8);
     sctpAsconfAck->setSrcPort(localPort);
     sctpAsconfAck->setDestPort(remotePort);
-
+    if (state->auth && state->peerAuth)
+    {
+        authChunk = createAuthChunk();
+        sctpAsconfAck->addChunk(authChunk);
+        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        it->second.numAuthChunksSent++;
+    }
     if (state->numberAsconfReceived > 0 || (state->numberAsconfReceived == 0 && asconfChunk->getSerialNumber() == initPeerTsn + state->numberAsconfReceived))
     {
         SCTPAsconfAckChunk* asconfAckChunk = createAsconfAckChunk(asconfChunk->getSerialNumber());
@@ -1899,6 +1973,23 @@ SCTPEventCode SCTPAssociation::processAsconfAckArrived(SCTPAsconfAckChunk* ascon
     return SCTP_E_IGNORE;
 }
 
+void SCTPAssociation::processErrorArrived(SCTPErrorChunk* errorChunk)
+{
+    uint32 parameterType;
+    for (uint32 i=0; i<errorChunk->getParametersArraySize(); i++)
+    {
+        SCTPParameter* param = (SCTPParameter*)errorChunk->getParameters(i);
+        parameterType = param->getParameterType();
+        switch (parameterType)
+        {
+            case UNSUPPORTED_HMAC:
+            {
+                sendAbort();
+                break;
+            }
+        }
+    }
+}
 
 void SCTPAssociation::process_TIMEOUT_INIT_REXMIT(SCTPEventCode& event)
 {

@@ -114,6 +114,7 @@ enum SCTPChunkTypes
     COOKIE_ECHO         = 10,
     COOKIE_ACK          = 11,
     SHUTDOWN_COMPLETE   = 14,
+    AUTH                = 15,
     NR_SACK             = 16,
     ASCONF_ACK          = 128,
     FORWARD_TSN         = 192,
@@ -146,9 +147,16 @@ enum SCTPParameterTypes
 {
     UNRECOGNIZED_PARAMETER          = 8,
     SUPPORTED_ADDRESS_TYPES         = 12,
-    FORWARD_TSN_SUPPORTED_PARAMETER = 49152
+    FORWARD_TSN_SUPPORTED_PARAMETER = 49152,
+    RANDOM                          = 32770,
+    CHUNKS                          = 32771,
+    HMAC_ALGO                       = 32772
 };
 
+enum SCTPErrorCauses
+{
+    UNSUPPORTED_HMAC  = 261
+};
 
 
 
@@ -177,6 +185,8 @@ enum SCTPStreamSchedulers
 #define SCTP_ERROR_CHUNK_LENGTH         4       // without parameters
 #define SCTP_ADD_IP_CHUNK_LENGTH        8
 #define SCTP_ADD_IP_PARAMETER_LENGTH    8
+#define SCTP_AUTH_CHUNK_LENGTH          8
+#define SHA_LENGTH                      20
 #define IP_HEADER_LENGTH                20
 #define SCTP_DEFAULT_ARWND              (1<<16)
 #define SCTP_DEFAULT_INBOUND_STREAMS    17
@@ -535,6 +545,16 @@ class INET_API SCTPStateVariables : public cObject
         // ====== Further features ============================================
         uint32                      advancedPeerAckPoint;
         uint32                      prMethod;
+        uint16                      hmacType;
+        bool                        peerAuth;
+        bool                        auth;
+        std::vector<uint16>         chunkList;
+        std::vector<uint16>         peerChunkList;
+        uint8                       keyVector[512];
+        uint32                      sizeKeyVector;
+        uint8                       peerKeyVector[512];
+        uint32                      sizePeerKeyVector;
+        uint8                       sharedKey[512];
         simtime_t                   lastThroughputTime;
         simtime_t                   lastAssocThroughputTime;
         uint32                      assocThroughput;
@@ -752,6 +772,7 @@ class INET_API SCTPAssociation : public cObject
         SCTPEventCode processSackArrived(SCTPSackChunk* sackChunk);
         SCTPEventCode processHeartbeatAckArrived(SCTPHeartbeatAckChunk* heartbeatack, SCTPPathVariables* path);
         SCTPEventCode processForwardTsnArrived(SCTPForwardTsnChunk* forChunk);
+        void processErrorArrived(SCTPErrorChunk* error);
         //@}
 
         /** @name Processing timeouts. Invoked from processTimer(). */
@@ -856,6 +877,8 @@ class INET_API SCTPAssociation : public cObject
 
         bool allPathsInactive() const;
 
+        void sendHMacError(const uint16 id);
+
         SCTPForwardTsnChunk* createForwardTsnChunk(const IPvXAddress& pid);
 
         bool msgMustBeAbandoned(SCTPDataMsg* msg, int32 stream, bool ordered); //PR-SCTP
@@ -916,14 +939,18 @@ class INET_API SCTPAssociation : public cObject
 
         void disposeOf(SCTPMessage* sctpmsg);
         
-        /** Methods for Add-IP **/
+        /** Methods for Add-IP and AUTH **/
         void sendAsconf(const char* type, const bool remote = false);
         void sendAsconfAck(const uint32 serialNumber);
         SCTPEventCode processAsconfArrived(SCTPAsconfChunk* asconfChunk);
         SCTPEventCode processAsconfAckArrived(SCTPAsconfAckChunk* asconfAckChunk);
         void retransmitAsconf();
+        bool typeInChunkList(const uint16 type);
         SCTPAsconfAckChunk*      createAsconfAckChunk(const uint32 serialNumber);
+        SCTPAuthenticationChunk* createAuthChunk();
         SCTPSuccessIndication*   createSuccessIndication(uint32 correlationId);
+        void calculateAssocSharedKey();
+        bool compareRandom();
 
         void calculateRcvBuffer();
         void listOrderedQ();
@@ -977,11 +1004,13 @@ class INET_API SCTPAssociation : public cObject
         void storePacket(SCTPPathVariables* pathVar,
                               SCTPMessage*          sctpMsg,
                               const uint16          chunksAdded,
-                              const uint16          dataChunksAdded);
-        void loadPacket(SCTPPathVariables* pathVar,
-                             SCTPMessage**        sctpMsg,
-                             uint16*                  chunksAdded,
-                             uint16*                  dataChunksAdded);
+                              const uint16          dataChunksAdded,
+                              const bool            authAdded);
+        void loadPacket(SCTPPathVariables*          pathVar,
+                             SCTPMessage**          sctpMsg,
+                             uint16*                chunksAdded,
+                             uint16*                dataChunksAdded,
+                             bool*                  authAdded);
 
         inline void ackChunk(SCTPDataVariables* chunk, SCTPPathVariables* sackPath) {
             chunk->hasBeenAcked = true;
@@ -1004,6 +1033,20 @@ class INET_API SCTPAssociation : public cObject
         void recordTransmission(SCTPMessage* sctpMsg, SCTPPathVariables* path);
         void recordAcknowledgement(SCTPDataVariables* chunk, SCTPPathVariables* path);
         void recordDequeuing(SCTPDataVariables* chunk);
+        
+        inline bool addAuthChunkIfNecessary(SCTPMessage* sctpMsg,
+                                        const uint16 chunkType,
+                                        const bool   authAdded) {
+            if ((state->auth) && (state->peerAuth) && (typeInChunkList(chunkType)) && (authAdded == false))
+            {
+                SCTPAuthenticationChunk* authChunk = createAuthChunk();
+                sctpMsg->addChunk(authChunk);
+                SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+                it->second.numAuthChunksSent++;
+                return (true);
+            }
+            return (false);
+        }
 };
 
 #endif

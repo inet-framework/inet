@@ -267,6 +267,11 @@ SCTPStateVariables::SCTPStateVariables()
     assocThroughput = 0;
     queuedSentBytes = 0;
     queuedDroppableBytes = 0;
+    sizeKeyVector = 0;
+    sizePeerKeyVector = 0;
+    auth = false;
+    peerAuth = false;
+    hmacType = 0;
     lastSendQueueAbated = simTime();
     queuedMessages = 0;
     queueLimit = 0;
@@ -760,6 +765,7 @@ void SCTPAssociation::stateEntered(int32 status)
             state->fastRecoverySupported = (bool)sctpMain->par("fastRecoverySupported");
             state->reactivatePrimaryPath = (bool)sctpMain->par("reactivatePrimaryPath");
             state->packetsInTotalBurst = 0;
+            state->auth = sctpMain->auth;
             state->throughputInterval = (double)sctpMain->par("throughputInterval");
             sackPeriod = (double)sctpMain->par("sackPeriod");
             sackFrequency = sctpMain->par("sackFrequency");
@@ -784,6 +790,9 @@ void SCTPAssociation::stateEntered(int32 status)
             stat.numDropsBecauseNewTSNGreaterThanHighestTSN = 0;
             stat.numDropsBecauseNoRoomInBuffer = 0;
             stat.numChunksReneged = 0;
+            stat.numAuthChunksSent = 0;
+            stat.numAuthChunksAccepted = 0;
+            stat.numAuthChunksRejected = 0;
             sctpMain->assocStatMap[stat.assocId] = stat;
             ccModule = sctpMain->par("ccModule");
 

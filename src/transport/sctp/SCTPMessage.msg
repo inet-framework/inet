@@ -78,6 +78,8 @@ message SCTPInitChunk extends SCTPChunk
     uint8 unrecognizedParameters[]; //Will be filled by the Parser, if unrecognized Parameters arrive.
     uint16 chunkTypes[]; //Chunk list parameter, i.e. for SCTP AUTH
     uint16 sepChunks[]; //Supported extensions parameter, i.e. for StreamReset
+    uint16 hmacTypes[]; //HMAC Identifier for HMAC algorithm parameter
+    uint8 random[]; //Random Parameter for SCTP AUTH
 }
 
 message SCTPInitAckChunk extends SCTPChunk
@@ -97,8 +99,10 @@ message SCTPInitAckChunk extends SCTPChunk
     char cookie[];
     uint8 unrecognizedParameters[];
     cPacketPtr stateCookie;
+    uint8 random[]; //Random Number
     uint16 chunkTypes[];
     uint16 sepChunks[]; //Supported extensions parameter, i.e. for StreamReset
+    uint16 hmacTypes[];
 }
 
 
@@ -235,6 +239,14 @@ message SCTPErrorChunk extends SCTPChunk
 message SCTPParameter extends cPacket
 {
     uint16 parameterType;
+}
+
+message SCTPAuthenticationChunk extends SCTPChunk
+{
+    uint16 sharedKey;
+    uint16 hMacIdentifier;
+    bool hMacOk;
+    uint32 HMAC[];
 }
 
 message SCTPAsconfChunk extends SCTPChunk

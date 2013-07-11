@@ -66,6 +66,10 @@ simple SCTP like ISCTP
         bool udpEncapsEnabled = default(false);
         double throughputInterval = default(1);
 
+        //#====== Chunk Authentication ========================================
+        bool auth = default(false);
+        string chunks = default("");
+
         //#====== Add-IP ======================================================
         bool addIP = default(false);
         double addTime @unit(s) = default(0s);

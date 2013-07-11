@@ -282,6 +282,14 @@ struct asconf_ack_chunk {
     uint8_t parameters[0];
 } __PACKED__;
 
+struct auth_chunk {
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint16_t shared_key;
+    uint16_t hmac_identifier;
+    uint8_t  hmac[0];
+} __PACKED__;
 
 // variable length parameters in INIT chunk:
 #define INIT_PARAM_IPV4 5
@@ -331,6 +339,13 @@ struct add_ip_parameter {
 } __PACKED__;
 
 
+struct hmac_algo {
+    uint16_t type;
+    uint16_t length;
+    uint16_t ident[0];
+} __PACKED__;
+
+
 struct supported_extensions_parameter {
     uint16_t type;
     uint16_t length;
@@ -348,6 +363,13 @@ struct supported_address_types_parameter {
     uint16_t type;
     uint16_t length;
     uint16_t address_type;
+} __PACKED__;
+
+
+struct random_parameter {
+    uint16_t type;
+    uint16_t length;
+    uint8_t random[];
 } __PACKED__;
 
 

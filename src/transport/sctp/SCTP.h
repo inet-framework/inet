@@ -149,6 +149,9 @@ class INET_API SCTP : public cSimpleModule
             uint32 numDropsBecauseNewTSNGreaterThanHighestTSN;
             uint32 numDropsBecauseNoRoomInBuffer;
             uint32 numChunksReneged;
+            uint32 numAuthChunksSent;
+            uint32 numAuthChunksAccepted;
+            uint32 numAuthChunksRejected;
         }AssocStat;
 
         typedef std::map<int32,AssocStat> AssocStatMap;
@@ -189,6 +192,7 @@ class INET_API SCTP : public cSimpleModule
         uint32 numGapReports;
         uint32 numPacketsReceived;
         uint32 numPacketsDropped;
+        bool auth;
         bool addIP;
 
     public:

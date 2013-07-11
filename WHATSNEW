@@ -10,6 +10,7 @@ OMNeT++ 4.2 or 4.3.
 
 NEW:
 
+  - Implemented SCTP Authentication (RFC 4895) (patch submitted by Irene Rüngeler).
   - Implemented Add-IP feature for SCTP (RFC 5061) (patch submitted by Irene Rüngeler).
   - Added NR_SACK feature to SCTP (patch submitted by Irene Rüngeler)
   - Added Partial Reliability SCTP (RFC 3758) (patch submitted by Irene Rüngeler)

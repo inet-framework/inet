@@ -102,6 +102,7 @@ void SCTP::initialize()
     {
         testTimeout = (simtime_t)netw->par("testTimeout");
     }
+    this->auth = (bool)par("auth");
     numPacketsReceived = 0;
     numPacketsDropped = 0;
     sizeAssocMap = 0;
@@ -893,5 +894,8 @@ void SCTP::finish()
         recordScalar("Drops Because No Room In Buffer", assoc.numDropsBecauseNoRoomInBuffer);
         recordScalar("Chunks Reneged", assoc.numChunksReneged);
         recordScalar("sackPeriod", (simtime_t)par("sackPeriod"));
+        recordScalar("Number of AUTH chunks sent", assoc.numAuthChunksSent);
+        recordScalar("Number of AUTH chunks accepted", assoc.numAuthChunksAccepted);
+        recordScalar("Number of AUTH chunks rejected", assoc.numAuthChunksRejected);
     }
 }

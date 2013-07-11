@@ -188,6 +188,7 @@ uint32 SCTPAssociation::chunkToInt(const char* type)
     if (strcmp(type, "COOKIE_ECHO")==0) return 10;
     if (strcmp(type, "COOKIE_ACK")==0) return 11;
     if (strcmp(type, "SHUTDOWN_COMPLETE")==0) return 14;
+    if (strcmp(type, "AUTH")==0) return 15;
     if (strcmp(type, "NR-SACK")==0) return 16;
     if (strcmp(type, "ASCONF_ACK")==0) return 128;
     if (strcmp(type, "FORWARD_TSN")==0) return 192;
@@ -365,6 +366,19 @@ void SCTPAssociation::initAssociation(SCTPOpenCommand *openCmd)
     sctpAlgorithm->initialize();
     // create state block
     state = sctpAlgorithm->createStateVariables();
+
+    const char* chunks = sctpMain->par("chunks").stringValue();
+    char* chunkscopy = (char *)malloc(sizeof(strlen(chunks)));
+    strcpy(chunkscopy, chunks);
+    char* token;
+    token = strtok((char*)chunkscopy, ",");
+    while (token != NULL)
+    {
+        this->state->chunkList.push_back(chunkToInt(token));
+        sctpEV3 << "add " << chunkToInt(token) << " to chunkList\n";
+        token = strtok(NULL, ",");
+    }
+    free (chunkscopy);
 }
 
 
@@ -479,6 +493,43 @@ void SCTPAssociation::sendInit()
     }
 
     uint16 count = 0;
+    if (sctpMain->auth==true)
+    {
+        initChunk->setSepChunksArraySize(++count);
+        initChunk->setSepChunks(count-1, AUTH);
+        state->keyVector[0] = (uint8_t)RANDOM;
+        state->keyVector[2] = 36;
+        for (int32 k=0; k<32; k++)
+        {
+            initChunk->setRandomArraySize(k+1);
+            initChunk->setRandom(k, (uint8)(intrand(256)));
+            state->keyVector[k+2] = initChunk->getRandom(k);
+        }
+        state->sizeKeyVector = 36;
+        state->keyVector[state->sizeKeyVector] = (uint8_t)CHUNKS;
+        state->sizeKeyVector += 2;
+        state->keyVector[state->sizeKeyVector ] = state->chunkList.size()+4;
+        state->sizeKeyVector += 2;
+        initChunk->setChunkTypesArraySize(state->chunkList.size());
+        int32 k = 0;
+        for (std::vector<uint16>::iterator it=state->chunkList.begin(); it!=state->chunkList.end(); it++)
+        {
+            initChunk->setChunkTypes(k, (*it));
+            state->keyVector[state->sizeKeyVector] = (*it);
+            state->sizeKeyVector ++;
+            k++;
+        }
+        state->keyVector[state->sizeKeyVector] = (uint8_t)HMAC_ALGO;
+        state->sizeKeyVector += 2;
+        state->keyVector[state->sizeKeyVector] = 1+4;
+        state->sizeKeyVector += 2;
+        state->keyVector[state->sizeKeyVector] = 1;
+        state->sizeKeyVector ++;
+        initChunk->setHmacTypesArraySize(1);
+        initChunk->setHmacTypes(0, 1);
+        length += initChunk->getChunkTypesArraySize()+46;
+    }
+
     if ((bool)sctpMain->par("addIP") == true) {
         initChunk->setSepChunksArraySize(++count);
         initChunk->setSepChunks(count-1, ASCONF);
@@ -640,6 +691,27 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
         }
 
     uint16 count = 0;
+    if (sctpMain->auth==true)
+    {
+        initAckChunk->setSepChunksArraySize(++count);
+        initAckChunk->setSepChunks(count-1, AUTH);
+        for (int32 k=0; k<32; k++)
+        {
+            initAckChunk->setRandomArraySize(k+1);
+            initAckChunk->setRandom(k, (uint8)(intrand(256)));
+        }
+        initAckChunk->setChunkTypesArraySize(state->chunkList.size());
+        int32 k = 0;
+        for (std::vector<uint16>::iterator it=state->chunkList.begin(); it!=state->chunkList.end(); it++)
+        {
+            initAckChunk->setChunkTypes(k, (*it));
+            k++;
+        }
+        initAckChunk->setHmacTypesArraySize(1);
+        initAckChunk->setHmacTypes(0, 1);
+        length += initAckChunk->getChunkTypesArraySize()+46;
+
+    }
     uint32 unknownLen = initChunk->getUnrecognizedParametersArraySize();
     if (unknownLen>0)
     {
@@ -663,6 +735,8 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
     {
         initAckChunk->setForwardTsn(true);
     }
+    length += count;
+
     initAckChunk->setBitLength((length+initAckChunk->getCookieArraySize())*8 + cookie->getBitLength());
     inboundStreams = ((initChunk->getNoOutStreams()<initAckChunk->getNoInStreams())?initChunk->getNoOutStreams():initAckChunk->getNoInStreams());
     outboundStreams = ((initChunk->getNoInStreams()<initAckChunk->getNoOutStreams())?initChunk->getNoInStreams():initAckChunk->getNoOutStreams());
@@ -682,6 +756,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
 
 void SCTPAssociation::sendCookieEcho(SCTPInitAckChunk* initAckChunk)
 {
+    SCTPAuthenticationChunk* authChunk;
     SCTPMessage *sctpcookieecho = new SCTPMessage();
     sctpcookieecho->setBitLength(SCTP_COMMON_HEADER*8);
 
@@ -720,6 +795,15 @@ void SCTPAssociation::sendCookieEcho(SCTPInitAckChunk* initAckChunk)
     {
         state->cookieChunk->setStateCookie(initAckChunk->getStateCookie()->dup());
     }
+
+    if (state->auth && state->peerAuth && typeInChunkList(COOKIE_ECHO))
+    {
+        authChunk = createAuthChunk();
+        sctpcookieecho->addChunk(authChunk);
+        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        it->second.numAuthChunksSent++;
+    }
+
     sctpcookieecho->addChunk(cookieEchoChunk);
     sendToIP(sctpcookieecho);
 }
@@ -727,12 +811,20 @@ void SCTPAssociation::sendCookieEcho(SCTPInitAckChunk* initAckChunk)
 
 void SCTPAssociation::retransmitCookieEcho()
 {
+    SCTPAuthenticationChunk* authChunk;
     SCTPMessage*                 sctpmsg = new SCTPMessage();
     sctpmsg->setBitLength(SCTP_COMMON_HEADER*8);
     SCTPCookieEchoChunk* cookieEchoChunk = check_and_cast<SCTPCookieEchoChunk*>(state->cookieChunk->dup());
     if (cookieEchoChunk->getCookieArraySize()==0)
     {
         cookieEchoChunk->setStateCookie(state->cookieChunk->getStateCookie()->dup());
+    }
+    if (state->auth && state->peerAuth && typeInChunkList(COOKIE_ECHO))
+    {
+        authChunk = createAuthChunk();
+        sctpmsg->addChunk(authChunk);
+        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        it->second.numAuthChunksSent++;
     }
     sctpmsg->addChunk(cookieEchoChunk);
 
@@ -743,6 +835,7 @@ void SCTPAssociation::retransmitCookieEcho()
 
 void SCTPAssociation::sendHeartbeat(const SCTPPathVariables* path)
 {
+    SCTPAuthenticationChunk* authChunk;
     SCTPMessage* sctpHeartbeatbeat = new SCTPMessage();
     sctpHeartbeatbeat->setBitLength(SCTP_COMMON_HEADER*8);
 
@@ -753,6 +846,12 @@ void SCTPAssociation::sendHeartbeat(const SCTPPathVariables* path)
     heartbeatChunk->setRemoteAddr(path->remoteAddress);
     heartbeatChunk->setTimeField(simTime());
     heartbeatChunk->setBitLength((SCTP_HEARTBEAT_CHUNK_LENGTH+12)*8);
+    if (state->auth && state->peerAuth && typeInChunkList(HEARTBEAT)) {
+        authChunk = createAuthChunk();
+        sctpHeartbeatbeat->addChunk(authChunk);
+        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        it->second.numAuthChunksSent++;
+    }
     sctpHeartbeatbeat->addChunk(heartbeatChunk);
     sctpEV3 << "sendHeartbeat: sendToIP to " << path->remoteAddress << endl;
     sendToIP(sctpHeartbeatbeat, path->remoteAddress);
@@ -762,6 +861,7 @@ void SCTPAssociation::sendHeartbeatAck(const SCTPHeartbeatChunk* heartbeatChunk,
                                                     const IPvXAddress&        src,
                                                     const IPvXAddress&        dest)
 {
+    SCTPAuthenticationChunk* authChunk;
     SCTPMessage*                 sctpHeartbeatAck = new SCTPMessage();
     sctpHeartbeatAck->setBitLength(SCTP_COMMON_HEADER*8);
     sctpHeartbeatAck->setSrcPort(localPort);
@@ -778,6 +878,12 @@ void SCTPAssociation::sendHeartbeatAck(const SCTPHeartbeatChunk* heartbeatChunk,
     }
 
     heartbeatAckChunk->setBitLength(heartbeatChunk->getBitLength());
+    if (state->auth && state->peerAuth && typeInChunkList(HEARTBEAT_ACK)) {
+        authChunk = createAuthChunk();
+        sctpHeartbeatAck->addChunk(authChunk);
+        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        it->second.numAuthChunksSent++;
+    }
     sctpHeartbeatAck->addChunk(heartbeatAckChunk);
 
     sctpEV3 << "sendHeartbeatAck: sendToIP from " << src << " to " << dest << endl;
@@ -786,6 +892,7 @@ void SCTPAssociation::sendHeartbeatAck(const SCTPHeartbeatChunk* heartbeatChunk,
 
 void SCTPAssociation::sendCookieAck(const IPvXAddress& dest)
 {
+    SCTPAuthenticationChunk* authChunk;
     SCTPMessage *sctpcookieack = new SCTPMessage();
     sctpcookieack->setBitLength(SCTP_COMMON_HEADER*8);
 
@@ -796,6 +903,13 @@ void SCTPAssociation::sendCookieAck(const IPvXAddress& dest)
     SCTPCookieAckChunk* cookieAckChunk = new SCTPCookieAckChunk("COOKIE_ACK");
     cookieAckChunk->setChunkType(COOKIE_ACK);
     cookieAckChunk->setBitLength(SCTP_COOKIE_ACK_LENGTH*8);
+    if (state->auth && state->peerAuth && typeInChunkList(COOKIE_ACK))
+    {
+        authChunk = createAuthChunk();
+        sctpcookieack->addChunk(authChunk);
+        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        it->second.numAuthChunksSent++;
+    }
     sctpcookieack->addChunk(cookieAckChunk);
     sendToIP(sctpcookieack, dest);
 }
@@ -847,6 +961,7 @@ void SCTPAssociation::sendShutdownComplete()
 
 void SCTPAssociation::sendAbort()
 {
+    SCTPAuthenticationChunk* authChunk;
     SCTPMessage *msg = new SCTPMessage();
     msg->setBitLength(SCTP_COMMON_HEADER*8);
 
@@ -858,12 +973,20 @@ void SCTPAssociation::sendAbort()
     abortChunk->setChunkType(ABORT);
     abortChunk->setT_Bit(0);
     abortChunk->setBitLength(SCTP_ABORT_CHUNK_LENGTH*8);
+    if (state->auth && state->peerAuth && typeInChunkList(ABORT))
+    {
+        authChunk = createAuthChunk();
+        msg->addChunk(authChunk);
+        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        it->second.numAuthChunksSent++;
+    }
     msg->addChunk(abortChunk);
     sendToIP(msg, remoteAddr);
 }
 
 void SCTPAssociation::sendShutdown()
 {
+    SCTPAuthenticationChunk* authChunk;
     SCTPMessage *msg = new SCTPMessage();
     msg->setBitLength(SCTP_COMMON_HEADER*8);
 
@@ -876,6 +999,13 @@ void SCTPAssociation::sendShutdown()
     //shutdownChunk->setCumTsnAck(state->lastTsnAck);
     shutdownChunk->setCumTsnAck(state->gapList.getCumAckTSN());
     shutdownChunk->setBitLength(SCTP_SHUTDOWN_CHUNK_LENGTH*8);
+    if (state->auth && state->peerAuth && typeInChunkList(SHUTDOWN))
+    {
+        authChunk = createAuthChunk();
+        msg->addChunk(authChunk);
+        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        it->second.numAuthChunksSent++;
+    }
     state->initRexmitTimeout = SCTP_TIMEOUT_INIT_REXMIT;
     state->initRetransCounter = 0;
     stopTimer(T5_ShutdownGuardTimer);
@@ -1228,7 +1358,8 @@ SCTPSackChunk* SCTPAssociation::createSack()
 
 void SCTPAssociation::sendSack()
 {
-    SCTPSackChunk*               sackChunk;
+    SCTPAuthenticationChunk* authChunk;
+    SCTPSackChunk*           sackChunk;
 
     sctpEV3 << "Sending SACK" << endl;
 
@@ -1239,6 +1370,12 @@ void SCTPAssociation::sendSack()
 
     SCTPMessage* sctpmsg = new SCTPMessage();
     sctpmsg->setBitLength(SCTP_COMMON_HEADER*8);
+    if (state->auth && state->peerAuth && typeInChunkList(SACK)) {
+        authChunk = createAuthChunk();
+        sctpmsg->addChunk(authChunk);
+        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        it->second.numAuthChunksSent++;
+    }
     sctpmsg->addChunk(sackChunk);
 
     sendSACKviaSelectedPath(sctpmsg);
@@ -1260,6 +1397,20 @@ void SCTPAssociation::sendDataArrivedNotification(uint16 sid)
     sendToApp(cmsg);
 }
 
+void SCTPAssociation::sendHMacError(const uint16 id)
+{
+    SCTPMessage *sctpmsg = new SCTPMessage();
+    sctpmsg->setBitLength(SCTP_COMMON_HEADER*8);
+    SCTPErrorChunk* errorChunk = new SCTPErrorChunk("Error");
+    errorChunk->setChunkType(ERRORTYPE);
+    SCTPSimpleErrorCauseParameter* cause = new SCTPSimpleErrorCauseParameter("Cause");
+    cause->setParameterType(UNSUPPORTED_HMAC);
+    cause->setBitLength(6*8);
+    cause->setValue(id);
+    errorChunk->setBitLength(4*8);
+    errorChunk->addParameters(cause);
+    sctpmsg->addChunk(errorChunk);
+}
 
 void SCTPAssociation::putInDeliveryQ(uint16 sid)
 {

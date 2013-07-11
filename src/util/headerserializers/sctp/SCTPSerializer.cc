@@ -44,7 +44,11 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 using namespace INETFw;
 
-
+unsigned char SCTPSerializer::keyVector[512];
+unsigned int  SCTPSerializer::sizeKeyVector = 0;
+unsigned char SCTPSerializer::peerKeyVector[512];
+unsigned int  SCTPSerializer::sizePeerKeyVector = 0;
+unsigned char SCTPSerializer::sharedKey[512];
 
 int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint32 bufsize)
 {
@@ -55,7 +59,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
     int32 size_heartbeat_ack_chunk = sizeof(struct heartbeat_ack_chunk);
     int32 size_chunk = sizeof(struct chunk);
 
-
+    int authstart=0;
     struct common_header *ch = (struct common_header*) (buf);
     uint32 writtenbytes = sizeof(struct common_header);
 
@@ -148,6 +152,19 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                             ipv4addr->address = htonl(initChunk->getAddresses(i).get4().getInt());
                             parPtr += sizeof(struct init_ipv4_address_parameter);
                     }
+                    int chunkcount = initChunk->getSepChunksArraySize();
+                    if (chunkcount > 0)
+                    {
+                        struct supported_extensions_parameter *supext = (struct supported_extensions_parameter*) (((unsigned char *)ic) + size_init_chunk + parPtr);
+                        supext->type = htons(SUPPORTED_EXTENSIONS);
+                        int chunkcount = initChunk->getSepChunksArraySize();
+                        supext->length = htons(sizeof(struct supported_extensions_parameter)+chunkcount);
+                        for(int i=0; i<chunkcount; i++)
+                        {
+                            supext->chunk_type[i]=initChunk->getSepChunks(i);
+                        }
+                        parPtr += ADD_PADDING(sizeof(struct supported_extensions_parameter)+chunkcount);
+                    }
                     ic->length = htons(SCTP_INIT_CHUNK_LENGTH+parPtr);
                     writtenbytes += SCTP_INIT_CHUNK_LENGTH+parPtr;
                     break;
@@ -192,6 +209,19 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         ipv4addr->length = htons(8);
                         ipv4addr->address = htonl(initAckChunk->getAddresses(i).get4().getInt());
                         parPtr += 8;
+                    }
+                    int chunkcount = initAckChunk->getSepChunksArraySize();
+                    if (chunkcount > 0)
+                    {
+                        struct supported_extensions_parameter *supext = (struct supported_extensions_parameter*) (((unsigned char *)iac) + size_init_chunk + parPtr);
+                        supext->type = htons(SUPPORTED_EXTENSIONS);
+                        int chunkcount = initAckChunk->getSepChunksArraySize();
+                        supext->length = htons(sizeof(struct supported_extensions_parameter)+chunkcount);
+                        for(int i=0; i<chunkcount; i++)
+                        {
+                            supext->chunk_type[i]=initAckChunk->getSepChunks(i);
+                        }
+                        parPtr += ADD_PADDING(sizeof(struct supported_extensions_parameter)+chunkcount);
                     }
                     uint32 uLen = initAckChunk->getUnrecognizedParametersArraySize();
                     if (uLen>0)
@@ -490,6 +520,21 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     sac->flags = flags;
                     break;
                 }
+                case AUTH:
+                {
+                    SCTPAuthenticationChunk *authChunk = check_and_cast<SCTPAuthenticationChunk *>(chunk);
+                    struct auth_chunk* auth = (struct auth_chunk*) (buf + writtenbytes);
+                    authstart=writtenbytes;
+                    writtenbytes += SCTP_AUTH_CHUNK_LENGTH + SHA_LENGTH;
+                    auth->type = authChunk->getChunkType();
+                    auth->flags = 0;
+                    auth->length = htons(SCTP_AUTH_CHUNK_LENGTH + SHA_LENGTH);
+                    auth->shared_key = htons(authChunk->getSharedKey());
+                    auth->hmac_identifier = htons(authChunk->getHMacIdentifier());
+                    for(int i=0; i<SHA_LENGTH; i++)
+                        auth->hmac[i] = 0;
+                    break;
+                }
                 case FORWARD_TSN:
                 {
                     SCTPForwardTsnChunk* forward = check_and_cast<SCTPForwardTsnChunk*>(chunk);
@@ -686,17 +731,34 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 default:
                     printf("Serialize TODO: Implement for outgoing chunk type %d!\n", chunkType);
                     throw new cRuntimeError("TODO: unknown chunktype in outgoing packet on external interface! Implement it!");
-                // break;
-
             }
         }
+    // calculate the HMAC if required
+	uint8 result[SHA_LENGTH];
+	if (authstart!=0)
+	{      
+		struct data_vector* ac = (struct data_vector*) (buf + authstart);
+		sctpEV3<<"sizeKeyVector="<<sizeKeyVector<<", sizePeerKeyVector="<<sizePeerKeyVector<<"\n";
+		hmacSha1((uint8*)ac->data, writtenbytes-authstart, sharedKey, sizeKeyVector+sizePeerKeyVector, result);
+		struct auth_chunk* auth = (struct auth_chunk*) (buf + authstart);
+		for (int32 k=0; k < SHA_LENGTH; k++)
+			auth->hmac[k] = result[k];
+	}
     // finally, set the CRC32 checksum field in the SCTP common header
-
-    /*sctpEV3<<"srcport="<<msg->getSrcPort() <<"destport="<<msg->getDestPort() <<"writtenbytes vor checksum="<<writtenbytes<<"\n";*/
 
     ch->checksum = checksum((unsigned char*)ch, writtenbytes);
     return writtenbytes;
 }
+
+
+void SCTPSerializer::hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key, uint32 keylen, uint8 *digest)
+{
+    /* XXX needs to be implemented */
+    for (uint16 i = 0; i < SHA_LENGTH; i++) {
+        digest[i] = 0;
+    }
+}
+
 
 uint32 SCTPSerializer::checksum(const uint8_t *buf, register uint32 len)
 {
@@ -727,10 +789,12 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
     int32 size_heartbeat_ack_chunk = sizeof(struct heartbeat_ack_chunk);
     int32 size_abort_chunk = sizeof(struct abort_chunk);
     int32 size_cookie_echo_chunk = sizeof(struct cookie_echo_chunk);
+    int size_error_chunk = sizeof(struct error_chunk);
     int size_forward_tsn_chunk = sizeof(struct forward_tsn_chunk);
     int size_asconf_chunk = sizeof(struct asconf_chunk);
     int size_addip_parameter = sizeof(struct add_ip_parameter);
     int size_asconf_ack_chunk = sizeof(struct asconf_ack_chunk);
+    int size_auth_chunk = sizeof(struct auth_chunk);
     uint16 paramType;
     int32 parptr, chunklen, cLen, woPadding;
     struct common_header *common_header = (struct common_header*) (buf);
@@ -802,6 +866,10 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
             {
                 ev<<"parse INIT\n";
                 const struct init_chunk *init_chunk = (struct init_chunk*) (chunks + chunkPtr); // (recvBuffer + size_ip + size_common_header);
+                struct tlv* cp;
+                struct random_parameter* rp;
+                struct hmac_algo* hp;
+                unsigned int rplen, hplen, cplen;
                 chunklen = SCTP_INIT_CHUNK_LENGTH;
                 SCTPInitChunk *chunk = new SCTPInitChunk("INIT");
                 chunk->setChunkType(chunkType);
@@ -818,6 +886,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                 {
                     int32 parcounter = 0, addrcounter = 0;
                     parptr = 0;
+                    int chkcounter=0;
                     bool stopProcessing = false;
                     while (cLen > size_init_chunk+parptr && !stopProcessing)
                     {
@@ -857,6 +926,26 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                                 chunklen += 20;
                                 break;
                             }
+                            case SUPPORTED_EXTENSIONS:
+                            {
+                                sctpEV3<<"Supported extensions\n";
+                                const struct supported_extensions_parameter *supext;
+                                supext = (struct supported_extensions_parameter*) (((unsigned char*)init_chunk) + size_init_chunk + parptr);
+                                unsigned short chunkTypes;
+                                chunklen+=4;
+                                int len = 4;
+                                sctpEV3<<"supext->len="<<ntohs(supext->length)<<"\n";
+                                while (ntohs(supext->length) > len)
+                                {
+                                    chunkTypes = (int)*(chunks + chunkPtr+size_init_chunk+parptr+4+chkcounter);
+                                    chunk->setSepChunksArraySize(++chkcounter);
+                                    sctpEV3<<"Extension "<<chunkTypes<<" added\n";
+                                    chunk->setSepChunks(chkcounter-1, chunkTypes);
+                                    chunklen ++;
+                                    len++;
+                                }
+                                break;
+                            }
                             case FORWARD_TSN_SUPPORTED_PARAMETER:
                             {
                                 sctpEV3<<"Forward TSN\n";
@@ -864,6 +953,66 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                                 chunk->setChunkTypesArraySize(size+1);
                                 chunk->setChunkTypes(size,FORWARD_TSN_SUPPORTED_PARAMETER);
                                 chunklen++;
+                                break;
+                            }
+                            case RANDOM:
+                            {
+                                sctpEV3<<"random parameter received\n";
+                                const struct random_parameter *rand;
+                                rand = (struct random_parameter*) (((unsigned char*)init_chunk) + size_init_chunk + parptr);
+                                unsigned char* rv = (unsigned char*)malloc(64);
+                                rp = (struct random_parameter*)((unsigned char*)rv);
+                                rp->type = rand->type;
+                                rplen = ntohs(rand->length);
+                                rp->length = rand->length;
+                                int rlen = ntohs(rand->length)-4;
+                                chunk->setRandomArraySize(rlen);
+                                for (int i=0; i<rlen; i++)
+                                {
+                                    chunk->setRandom(i,(unsigned char)(rand->random[i]));
+                                    rp->random[i] = (unsigned char)(rand->random[i]);
+                                }
+                                chunklen+=parameter->length/8;
+                                break;
+                            }
+                            case HMAC_ALGO:
+                            {
+                                sctpEV3<<"hmac_algo parameter received\n";
+                                const struct hmac_algo *hmac;
+                                hmac = (struct hmac_algo*) (((unsigned char*)init_chunk) + size_init_chunk + parptr);
+                                int num = (ntohs(hmac->length)-4)/2;
+                                chunk->setHmacTypesArraySize(num);
+                                unsigned char* hv = (unsigned char*)malloc(64);
+                                hp = (struct hmac_algo*)((unsigned char*)hv);
+                                hp->type = hmac->type;
+                                hplen = ntohs(hmac->length);
+                                hp->length = hmac->length;
+                                for (int i=0; i<num; i++)
+                                {
+                                    chunk->setHmacTypes(i,ntohs(hmac->ident[i]));
+                                    hp->ident[i] = hmac->ident[i];
+                                }
+                                chunklen+=4+2*num;
+                                break;
+                            }
+                            case CHUNKS:
+                            {
+                                sctpEV3<<"chunks parameter received\n";
+                                const struct tlv *chunks;
+                                chunks = (struct tlv*) (((unsigned char*)init_chunk) + size_init_chunk + parptr);
+                                unsigned char* cv = (unsigned char*)malloc(64);
+                                cp = (struct tlv*)((unsigned char*)cv);
+                                cp->type = chunks->type;
+                                cplen = ntohs(chunks->length);
+                                cp->length = chunks->length;
+                                int num = cplen-4;
+                                chunk->setChunkTypesArraySize(num);
+                                for (int i=0; i<num; i++)
+                                {
+                                    chunk->setChunkTypes(i, (chunks->value[i]));
+                                    cp->value[i] = chunks->value[i];
+                                }
+                                chunklen+=parameter->length/8;
                                 break;
                             }
                             default:
@@ -891,8 +1040,28 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                         parptr += ADD_PADDING(ntohs(parameter->length));
                         parcounter++;
                     }
-
-
+                }
+                if (chunk->getHmacTypesArraySize() != 0)
+                {
+                    unsigned char * vector = (unsigned char*)malloc(64);
+                    sizePeerKeyVector = rplen;
+                    memcpy(vector, rp, rplen);
+                    for (unsigned int k=0; k<sizePeerKeyVector; k++)
+                    {
+                        peerKeyVector[k] = vector[k];
+                    }
+                    memcpy(vector, cp, cplen);
+                    for (unsigned int k=0; k<cplen; k++)
+                    {
+                        peerKeyVector[sizePeerKeyVector+k] = vector[k];
+                    }
+                    sizePeerKeyVector += cplen;
+                    memcpy(vector, hp, hplen);
+                    for (unsigned int k=0; k<hplen; k++)
+                    {
+                        peerKeyVector[sizePeerKeyVector+k] = vector[k];
+                    }
+                    sizePeerKeyVector += hplen;
                 }
                 chunk->setBitLength(chunklen*8);
                 dest->addChunk(chunk);
@@ -902,6 +1071,10 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
             case INIT_ACK:
             {
                 const struct init_ack_chunk *iac = (struct init_ack_chunk*) (chunks + chunkPtr);
+                struct tlv* cp;
+                struct random_parameter* rp;
+                struct hmac_algo* hp;
+                unsigned int rplen, hplen, cplen;
                 chunklen = SCTP_INIT_CHUNK_LENGTH;
                 SCTPInitAckChunk *chunk = new SCTPInitAckChunk("INIT_ACK");
                 chunk->setChunkType(chunkType);
@@ -915,6 +1088,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                 {
                     int32 parcounter = 0, addrcounter = 0;
                     parptr = 0;
+                    int chkcounter=0;
                     bool stopProcessing = false;
                     //sctpEV3<<"cLen="<<cLen<<"\n";
                     while (cLen > size_init_ack_chunk+parptr && !stopProcessing)
@@ -954,6 +1128,64 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                                 chunklen += 20;
                                 break;
                             }
+                            case RANDOM:
+                            {
+                                const struct random_parameter *rand;
+                                rand = (struct random_parameter*) (((unsigned char*)iac) + size_init_ack_chunk + parptr);
+                                int rlen = ntohs(rand->length)-4;
+                                chunk->setRandomArraySize(rlen);
+                                unsigned char* rv = (unsigned char*)malloc(64);
+                                rp = (struct random_parameter*)((unsigned char*)rv);
+                                rp->type = rand->type;
+                                rplen = ntohs(rand->length);
+                                rp->length = rand->length;
+                                for (int i=0; i<rlen; i++)
+                                {
+                                    chunk->setRandom(i,(unsigned char)(rand->random[i]));
+                                    rp->random[i] = (unsigned char)(rand->random[i]);
+                                }
+
+                                chunklen+=ntohs(parameter->length)/8;
+                                break;
+                            }
+                            case HMAC_ALGO:
+                            {
+                                const struct hmac_algo *hmac;
+                                hmac = (struct hmac_algo*) (((unsigned char*)iac) + size_init_ack_chunk + parptr);
+                                int num = (ntohs(hmac->length)-4)/2;
+                                chunk->setHmacTypesArraySize(num);
+                                unsigned char* hv = (unsigned char*)malloc(64);
+                                hp = (struct hmac_algo*)((unsigned char*)hv);
+                                hp->type = hmac->type;
+                                hplen = ntohs(hmac->length);
+                                hp->length = hmac->length;
+                                for (int i=0; i<num; i++)
+                                {
+                                    chunk->setHmacTypes(i,ntohs(hmac->ident[i]));
+                                    hp->ident[i] = hmac->ident[i];
+                                }
+                                chunklen+=4+2*num;
+                                break;
+                            }
+                            case CHUNKS:
+                            {
+                                const struct tlv *chunks;
+                                chunks = (struct tlv*) (((unsigned char*)iac) + size_init_ack_chunk + parptr);
+                                int num = ntohs(chunks->length)-4;
+                                chunk->setChunkTypesArraySize(num);
+                                unsigned char* cv = (unsigned char*)malloc(64);
+                                cp = (struct tlv*)((unsigned char*)cv);
+                                cp->type = chunks->type;
+                                cplen = ntohs(chunks->length);
+                                cp->length = chunks->length;
+                                for (int i=0; i<num; i++)
+                                {
+                                    chunk->setChunkTypes(i, chunks->value[i]);
+                                    cp->value[i] = chunks->value[i];
+                                }
+                                chunklen+=ntohs(parameter->length)/8;
+                                break;
+                            }
                             case INIT_PARAM_COOKIE:
                             {
                                 const struct tlv *cookie = (struct tlv*) (((unsigned char*)iac) + size_init_ack_chunk + parptr);
@@ -963,6 +1195,23 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                                 for (int32 i=0; i<cookieLen; i++)
                                     chunk->setCookie(i, cookie->value[i]);
                                 chunklen += cookieLen+4;
+                                break;
+                            }
+                            case SUPPORTED_EXTENSIONS:
+                            {
+                                const struct supported_extensions_parameter *supext;
+                                supext = (struct supported_extensions_parameter*) (((unsigned char*)iac) + size_init_ack_chunk + parptr);
+                                unsigned short chunkTypes;
+                                chunklen+=4;
+                                int len = 4;
+                                while (ntohs(supext->length) > len)
+                                {
+                                    chunkTypes = (int)*(chunks + chunkPtr+size_init_ack_chunk+parptr+4+chkcounter);
+                                    chunk->setSepChunksArraySize(++chkcounter);
+                                    chunk->setSepChunks(chkcounter-1, chunkTypes);
+                                    chunklen ++;
+                                    len++;
+                                }
                                 break;
                             }
                             case FORWARD_TSN_SUPPORTED_PARAMETER:
@@ -1000,6 +1249,29 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                         //sctpEV3<<"parptr="<<parptr<<"\n";
                         parcounter++;
                     }
+                }
+                if (chunk->getHmacTypesArraySize() != 0)
+                {
+                    unsigned char * vector = (unsigned char*)malloc(64);
+                    sizePeerKeyVector = rplen;
+                    memcpy(vector, rp, rplen);
+                    for (unsigned int k=0; k<sizePeerKeyVector; k++)
+                    {
+                        peerKeyVector[k] = vector[k];
+                    }
+                    memcpy(vector, cp, cplen);
+                    for (unsigned int k=0; k<cplen; k++)
+                    {
+                        peerKeyVector[sizePeerKeyVector+k] = vector[k];
+                    }
+                    sizePeerKeyVector += cplen;
+                    memcpy(vector, hp, hplen);
+                    for (unsigned int k=0; k<hplen; k++)
+                    {
+                        peerKeyVector[sizePeerKeyVector+k] = vector[k];
+                    }
+                    sizePeerKeyVector += hplen;
+                    calculateSharedKey();
                 }
                 chunk->setBitLength(chunklen*8);
                 dest->addChunk(chunk);
@@ -1205,6 +1477,15 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                 errorchunk->setChunkType(chunkType);
                 errorchunk->setBitLength(SCTP_ERROR_CHUNK_LENGTH*8);
                 parptr = 0;
+                const struct error_cause *err = (struct error_cause*) (((unsigned char*)error) + size_error_chunk + parptr);
+                if (err->cause_code == UNSUPPORTED_HMAC)
+                {
+                    SCTPSimpleErrorCauseParameter* errParam;
+                    errParam = new SCTPSimpleErrorCauseParameter();
+                    errParam->setParameterType(err->cause_code);
+                    errParam->setByteLength(err->length);
+                    errorchunk->addParameters(errParam);
+                }
                 dest->addChunk(errorchunk);
                 break;
             }
@@ -1228,6 +1509,46 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                     streamptr+=sizeof(struct forward_tsn_streams);
                 }
                 chunk->setByteLength(cLen);
+                dest->addChunk(chunk);
+                break;
+            }
+            case AUTH:
+            {
+                int hmacSize;
+                struct auth_chunk *ac = (struct auth_chunk*) (chunks + chunkPtr);
+                SCTPAuthenticationChunk *chunk = new SCTPAuthenticationChunk("AUTH");
+                chunk->setChunkType(chunkType);
+                chunk->setSharedKey(ntohs(ac->shared_key));
+                chunk->setHMacIdentifier(ntohs(ac->hmac_identifier));
+                if(cLen>size_auth_chunk)
+                {
+                    hmacSize = woPadding-size_auth_chunk;
+                    chunk->setHMACArraySize(hmacSize);
+                    for(int i=0; i<hmacSize; i++)
+                    {
+                        chunk->setHMAC(i, ac->hmac[i]);
+                        ac->hmac[i]=0;
+                    }
+                }
+
+                unsigned char result[SHA_LENGTH];
+                unsigned int flen;
+                flen = bufsize-(size_common_header+chunkPtr);
+
+                const struct data_vector *sc = (struct data_vector*) (chunks + chunkPtr);
+                hmacSha1((uint8 *)sc->data, flen, sharedKey, sizeKeyVector+sizePeerKeyVector, result);
+
+                chunk->setHMacOk(true);
+                for (unsigned int j = 0; j < SHA_LENGTH; j++)
+                {
+                    if (result[j]!=chunk->getHMAC(j))
+                    {
+                        sctpEV3<<"hmac falsch\n";
+                        chunk->setHMacOk(false);
+                        break;
+                    }
+                }
+                chunk->setByteLength(woPadding);
                 dest->addChunk(chunk);
                 break;
             }
@@ -1380,14 +1701,59 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
             default:
                 //printf("TODO: Implement chunk type %d, found in chunk array on %d!\n", chunkType, ct);
                 sctpEV3 << "Parser: Unknown SCTP chunk type " << chunkType;
-
-                /*throw new cRuntimeError("TODO: unknown chunktype in incoming packet from external interface! Implement it!");*/
-
                 break;
         }   // end of switch(chunkType)
         chunkPtr += cLen;
     }   // end of while()
 }
 
+bool SCTPSerializer::compareRandom()
+{
+    unsigned int i,  size;
+    if (sizeKeyVector != sizePeerKeyVector)
+    {
+        if (sizePeerKeyVector > sizeKeyVector)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    else
+        size = sizeKeyVector;
+    for(i=0; i<size; i++)
+    {
+        if (keyVector[i]<peerKeyVector[i])
+            return false;
+        if (keyVector[i]>peerKeyVector[i])
+            return true;
+    }
+    return true;
+}
+
+void SCTPSerializer::calculateSharedKey()
+{
+    unsigned int i;
+    bool peerFirst = false;
+
+    peerFirst = compareRandom();
+
+    if (peerFirst == false)
+    {
+        for (i=0; i<sizeKeyVector; i++)
+            sharedKey[i] = keyVector[i];
+        for (i=0; i<sizePeerKeyVector; i++)
+            sharedKey[i+sizeKeyVector] = peerKeyVector[i];
+    }
+    else
+    {
+        for (i=0; i<sizePeerKeyVector; i++)
+            sharedKey[i] = peerKeyVector[i];
+        for (i=0; i<sizeKeyVector; i++)
+            sharedKey[i+sizePeerKeyVector] = keyVector[i];
+    }
+}
 
 

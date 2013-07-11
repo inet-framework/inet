@@ -23,6 +23,7 @@
 
 void SCTPAssociation::sendAsconf(const char* type, const bool remote)
 {
+    SCTPAuthenticationChunk* authChunk;
     char*                    token;
     bool                     nat = false;
     IPvXAddress              targetAddr = remoteAddr;
@@ -135,6 +136,12 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
         }
         asconfChunk->setBitLength(chunkLength*8);
 
+        if (state->auth && state->peerAuth) {
+            authChunk = createAuthChunk();
+            sctpAsconf->addChunk(authChunk);
+            SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+            it->second.numAuthChunksSent++;
+        }
         sctpAsconf->addChunk(asconfChunk);
 
         state->asconfChunk = check_and_cast<SCTPAsconfChunk*>(asconfChunk->dup());
@@ -156,6 +163,12 @@ void SCTPAssociation::retransmitAsconf()
     sctpasconf->setChunkType(ASCONF);
     sctpasconf->setBitLength(state->asconfChunk->getBitLength());
 
+    if (state->auth && state->peerAuth) {
+        SCTPAuthenticationChunk* authChunk = createAuthChunk();
+        sctpmsg->addChunk(authChunk);
+        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        it->second.numAuthChunksSent++;
+    }
     sctpmsg->addChunk(sctpasconf);
 
     sendToIP(sctpmsg);
@@ -172,6 +185,12 @@ void SCTPAssociation::sendAsconfAck(const uint32 serialNumber)
     asconfAckChunk->setChunkType(ASCONF_ACK);
     asconfAckChunk->setSerialNumber(serialNumber);
     asconfAckChunk->setBitLength(SCTP_ADD_IP_CHUNK_LENGTH*8);
+    if (state->auth && state->peerAuth) {
+        SCTPAuthenticationChunk* authChunk = createAuthChunk();
+        sctpAsconfAck->addChunk(authChunk);
+        SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
+        it->second.numAuthChunksSent++;
+    }
     sctpAsconfAck->addChunk(asconfAckChunk);
     sendToIP(sctpAsconfAck, remoteAddr);
 }
@@ -183,6 +202,81 @@ SCTPAsconfAckChunk* SCTPAssociation::createAsconfAckChunk(const uint32 serialNum
     asconfAckChunk->setSerialNumber(serialNumber);
     asconfAckChunk->setBitLength(SCTP_ADD_IP_CHUNK_LENGTH*8);
     return asconfAckChunk;
+}
+
+SCTPAuthenticationChunk* SCTPAssociation::createAuthChunk()
+{
+    SCTPAuthenticationChunk* authChunk = new SCTPAuthenticationChunk("AUTH");
+
+    authChunk->setChunkType(AUTH);
+    authChunk->setSharedKey(0);
+    authChunk->setHMacIdentifier(1);
+    authChunk->setHMacOk(true);
+    authChunk->setHMACArraySize(SHA_LENGTH);
+    for (int32 i=0; i<SHA_LENGTH; i++) {
+        authChunk->setHMAC(i, 0);
+    }
+    authChunk->setBitLength((SCTP_AUTH_CHUNK_LENGTH + SHA_LENGTH)*8);
+    return authChunk;
+}
+
+bool SCTPAssociation::compareRandom()
+{
+    int32 i, sizeKeyVector, sizePeerKeyVector, size;
+
+    sizeKeyVector = sizeof(state->keyVector);
+    sizePeerKeyVector = sizeof(state->peerKeyVector);
+
+    if (sizeKeyVector != sizePeerKeyVector) {
+        if (sizePeerKeyVector > sizeKeyVector) {
+            size = sizeKeyVector;
+            for (i=sizePeerKeyVector-1; i>sizeKeyVector; i--) {
+                if (state->peerKeyVector[i]!=0)
+                    return false;
+            }
+        }
+        else {
+            size = sizePeerKeyVector;
+            for (i=sizeKeyVector-1; i>sizePeerKeyVector; i--) {
+                if (state->keyVector[i]!=0)
+                    return true;
+            }
+        }
+    }
+    for (i=size-1; i>0; i--) {
+        if (state->keyVector[i]<state->peerKeyVector[i])
+            return false;
+        if (state->keyVector[i]>state->peerKeyVector[i])
+            return true;
+    }
+    return true;
+}
+
+void SCTPAssociation::calculateAssocSharedKey()
+{
+    const bool peerFirst = compareRandom();
+    if (peerFirst == true) {
+        for (uint32 i=0; i<state->sizeKeyVector; i++)
+            state->sharedKey[i] = state->keyVector[i];
+        for (uint32 i=0; i<state->sizePeerKeyVector; i++)
+            state->sharedKey[i+state->sizeKeyVector] = state->peerKeyVector[i];
+    }
+    else {
+        for (uint32 i=0; i<state->sizePeerKeyVector; i++)
+            state->sharedKey[i] = state->peerKeyVector[i];
+        for (uint32 i=0; i<state->sizeKeyVector; i++)
+            state->sharedKey[i+state->sizePeerKeyVector] = state->keyVector[i];
+    }
+}
+
+bool SCTPAssociation::typeInChunkList(const uint16 type)
+{
+    for (std::vector<uint16>::iterator i=state->peerChunkList.begin(); i!=state->peerChunkList.end(); i++) {
+        if ((*i)==type) {
+            return true;
+        }
+    }
+    return false;
 }
 
 SCTPSuccessIndication* SCTPAssociation::createSuccessIndication(const uint32 correlationId)

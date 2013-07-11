@@ -1,7 +1,11 @@
+2013-07-11  irene Rüngeler
+
+	Implemented SCTP Authentication (RFC 4895).
+
 2013-07-08  Irene Rüngeler
 
-    Implemented Add-IP feature for SCTP (RFC 5061).
-    
+	Implemented Add-IP feature for SCTP (RFC 5061).
+
 2013-06-21  Irene Rüngeler
 
 	Implemented NR_SACK feature, which is necessary for handling reneging 

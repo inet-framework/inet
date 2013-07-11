@@ -42,6 +42,16 @@ class SCTPSerializer
         void parse(const uint8 *buf, uint32 bufsize, SCTPMessage *dest);
 
         static uint32 checksum(const uint8 *buf, register uint32 len);
+        static void hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key, uint32 keylen, uint8 *digest);
+        void calculateSharedKey();
+        bool compareRandom();
+
+    private:
+        static unsigned char keyVector[512];
+        static unsigned int  sizeKeyVector;
+        static unsigned char peerKeyVector[512];
+        static unsigned int  sizePeerKeyVector;
+        static unsigned char sharedKey[512];
 };
 
 #endif
