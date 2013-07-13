@@ -36,7 +36,7 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     int packetRequested;
 
     // statistics
-    int numQueueReceived;
+    int numPktsReceived;
     int numQueueDropped;
 
   protected:

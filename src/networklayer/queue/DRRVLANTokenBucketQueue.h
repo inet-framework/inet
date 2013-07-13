@@ -44,48 +44,37 @@ class INET_API DRRVLANTokenBucketQueue : public PassiveQueueBase
     typedef std::vector<double> DoubleVector;
     typedef std::vector<int> IntVector;
     typedef std::vector<long long> LongLongVector;
+    typedef std::vector<BasicTokenBucketMeter *> TbmVector;
     typedef std::vector<cMessage *> MsgVector;
     typedef std::vector<cQueue *> QueueVector;
     typedef std::vector<simtime_t> TimeVector;
 
   protected:
-    // configuration
-//    int frameCapacity;
-    int queueSize;
-//    int queueThreshold;
+    // general
     int numFlows;
-//    long long bucketSize;    // in bit; note that the corresponding parameter in NED/INI is in byte.
-//    double meanRate;
-//    int mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
-//    double peakRate;
+    int queueSize;
 
     // VLAN classifier
     IQoSClassifier *classifier;
+
+    // token bucket meters
+    TbmVector tbm;
 
     // FIFO
     cQueue fifo;
     int currentQueueSize;   // in bit
 
-    // state
-    QueueVector queues;
-    LongLongVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
-    IntVector peakBucketLength;  // vector of the number of tokens (bits) in the bucket for peak rate/MTU control
-    TimeVector lastTime; // vector of the last time the TBF used
-    BoolVector conformityFlag;  // vector of flag to indicate whether the HOL frame conforms to TBF
-
-    // state: RR scheduler
+    // DRR scheduler
     int currentQueueIndex;  // index of a queue whose HOL frame is scheduled for TX during the last RR scheduling
+    QueueVector queues;
 
     // statistics
     bool warmupFinished;        ///< if true, start statistics gathering
     DoubleVector numBitsSent;
-    IntVector numQueueReceived; // redefined from PassiveQueueBase with 'name hiding'
-    IntVector numQueueDropped;  // redefined from PassiveQueueBase with 'name hiding'
-    IntVector numQueueUnshaped;
-    IntVector numQueueSent;
-
-    // timer
-    MsgVector conformityTimer;  // vector of timer indicating that enough tokens will be available for the transmission of the HOL frame
+    IntVector numPktsReceived; // redefined from PassiveQueueBase with 'name hiding'
+    IntVector numPktsDropped;  // redefined from PassiveQueueBase with 'name hiding'
+    IntVector numPktsConformed;
+    IntVector numPktsSent;
 
     cGate *outGate;
 
@@ -127,15 +116,6 @@ class INET_API DRRVLANTokenBucketQueue : public PassiveQueueBase
      * when one becomes available.
      */
     virtual void requestPacket();
-
-    /**
-     * Newly defined.
-     */
-    virtual bool isConformed(int queueIndex, int pktLength);
-
-    virtual void triggerConformityTimer(int queueIndex, int pktLength);
-
-    virtual void dumpTbfStatus(int queueIndex);
 };
 
 #endif

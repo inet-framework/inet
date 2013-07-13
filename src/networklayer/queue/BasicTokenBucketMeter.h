@@ -56,6 +56,7 @@ class INET_API BasicTokenBucketMeter : public cSimpleModule
     virtual void initialize();
     virtual void finish();
 
+  public:
     /**
      * The method should return the result of metering based on two token buckets
      * for the given packet, 0 for conformance and 1 for not.

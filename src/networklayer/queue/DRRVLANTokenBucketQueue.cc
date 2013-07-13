@@ -32,7 +32,6 @@ DRRVLANTokenBucketQueue::~DRRVLANTokenBucketQueue()
     for (int i=0; i<numFlows; i++)
     {
         delete queues[i];
-//        cancelAndDelete(conformityTimer[i]);
     }
 }
 
@@ -43,8 +42,8 @@ void DRRVLANTokenBucketQueue::initialize()
     outGate = gate("out");
 
     // general
-    queueSize = par("queueSize");
     numFlows = par("numFlows");
+    queueSize = par("queueSize");
 
     // VLAN classifier
     const char *classifierClass = par("classifierClass");
@@ -53,16 +52,18 @@ void DRRVLANTokenBucketQueue::initialize()
     const char *vids = par("vids");
     classifier->initialize(vids);
 
+    // Token bucket meters
+    tbm.assign(numFlows, (BasicTokenBucketMeter *)NULL);
+    for (int i=0; i<numFlows; i++)
+    {
+        tbm[i] = check_and_cast<BasicTokenBucketMeter *>(this->getSubmodule("tbm", i));
+    }
+
     // FIFO queue for conformant packets
     fifo.setName("FIFO queue");
 
     // Per-subscriber queues with DRR scheduler for non-conformant packets
     queues.assign(numFlows, (cQueue *)NULL);
-    meanBucketLength.assign(numFlows, bucketSize);
-    peakBucketLength.assign(numFlows, mtu);
-    lastTime.assign(numFlows, simTime());
-    conformityFlag.assign(numFlows, false);
-    conformityTimer.assign(numFlows, (cMessage *)NULL);
     for (int i=0; i<numFlows; i++)
     {
         char buf[32];
@@ -70,16 +71,16 @@ void DRRVLANTokenBucketQueue::initialize()
         queues[i] = new cQueue(buf);
     }
 
-    // state: RR scheduler
+    // DRR scheduler
     currentQueueIndex = 0;
 
-    // statistic
+    // statistics
     warmupFinished = false;
     numBitsSent.assign(numFlows, 0.0);
-    numQueueReceived.assign(numFlows, 0);
-    numQueueDropped.assign(numFlows, 0);
-    numQueueUnshaped.assign(numFlows, 0);
-    numQueueSent.assign(numFlows, 0);
+    numPktsReceived.assign(numFlows, 0);
+    numPktsDropped.assign(numFlows, 0);
+    numPktsConformed.assign(numFlows, 0);
+    numPktsSent.assign(numFlows, 0);
 }
 
 void DRRVLANTokenBucketQueue::handleMessage(cMessage *msg)
@@ -90,123 +91,93 @@ void DRRVLANTokenBucketQueue::handleMessage(cMessage *msg)
             warmupFinished = true;
             for (int i = 0; i < numFlows; i++)
             {
-                numQueueReceived[i] = queues[i]->getLength();   // take into account the frames/packets already in queues
+                numPktsReceived[i] = queues[i]->getLength();   // take into account the frames/packets already in queues
             }
         }
     }
 
-    if (msg->isSelfMessage())
-    {   // Conformity Timer expires
-        int queueIndex = msg->getKind();    // message kind carries a queue index
-        conformityFlag[queueIndex] = true;
-
-        // update TBF status
-        int pktLength = (check_and_cast<cPacket *>(queues[queueIndex]->front()))->getBitLength();
-        bool conformance = isConformed(queueIndex, pktLength);
-// DEBUG
-        ASSERT(conformance == true);
-// DEBUG
-        if (packetRequested > 0)
-        {
-            cPacket *pkt = check_and_cast<cPacket *>(dequeue());
-            if (pkt != NULL)
-            {
-                packetRequested--;
-                if (warmupFinished == true)
-                {
-                    numBitsSent[currentQueueIndex] += pkt->getBitLength();
-                    numQueueSent[currentQueueIndex]++;
-                }
-                sendOut(pkt);
-            }
-            else
-            {
-                error("%s::handleMessage: Error in round-robin scheduling", getFullPath().c_str());
-            }
-        }
-    }
-    else
+    if (!msg->isSelfMessage())
     {   // a frame arrives
-        int queueIndex = classifier->classifyPacket(msg);
-        cQueue *queue = queues[queueIndex];
+        int flowIndex = classifier->classifyPacket(msg);
+        cQueue *queue = queues[flowIndex];
         if (warmupFinished == true)
         {
-            numQueueReceived[queueIndex]++;
+            numPktsReceived[flowIndex]++;
         }
         int pktLength = (check_and_cast<cPacket *>(msg))->getBitLength();
 // DEBUG
         ASSERT(pktLength > 0);
 // DEBUG
-        if (queue->isEmpty())
-        {
-            if (isConformed(queueIndex, pktLength))
+
+        if (tbm[flowIndex]->meterPacket(msg) == 0)
+        {   // conformant packet
+            if (warmupFinished == true)
             {
+                numPktsConformed[flowIndex]++;
+            }
+            if (packetRequested > 0)
+            {
+                packetRequested--;
                 if (warmupFinished == true)
                 {
-                    numQueueUnshaped[queueIndex]++;
+                    numBitsSent[flowIndex] += pktLength;
+                    numPktsSent[flowIndex]++;
                 }
-                if (packetRequested > 0)
+                sendOut(msg);
+            }
+            else
+            {
+                if (queueSize && fifo.length() >= queueSize)
                 {
-                    packetRequested--;
+                    EV << "FIFO queue full, dropping packet.\n";
                     if (warmupFinished == true)
                     {
-                        numBitsSent[queueIndex] += pktLength;
-                        numQueueSent[queueIndex]++;
+                        numPktsDropped[flowIndex]++;
                     }
-                    currentQueueIndex = queueIndex;
-                    sendOut(msg);
+                    delete msg;
                 }
                 else
                 {
-                    bool dropped = enqueue(msg);
-                    if (dropped)
-                    {
-                        if (warmupFinished == true)
-                        {
-                            numQueueDropped[queueIndex]++;
-                        }
-                    }
-                    else
-                    {
-                        conformityFlag[queueIndex] = true;
-                    }
+                    fifo.insert(msg);
                 }
             }
-            else
-            {   // frame is not conformed
+        }
+        else
+        {   // non-conformant packet
+            if (queue->isEmpty())
+            {
                 bool dropped = enqueue(msg);
                 if (dropped)
                 {
                     if (warmupFinished == true)
                     {
-                        numQueueDropped[queueIndex]++;
+                        numPktsDropped[flowIndex]++;
                     }
                 }
-                else
+            }
+            else
+            {   // queue is not empty
+                bool dropped = enqueue(msg);
+                if (dropped)
                 {
-                    triggerConformityTimer(queueIndex, pktLength);
-                    conformityFlag[queueIndex] = false;
+                    if (warmupFinished == true)
+                    {
+                        numPktsDropped[flowIndex]++;
+                    }
                 }
             }
-        }
-        else
-        {   // queue is not empty
-            bool dropped = enqueue(msg);
-            if (dropped)
-            {
-                if (warmupFinished == true)
-                {
-                    numQueueDropped[queueIndex]++;
-                }
-            }
-        }
 
-        if (ev.isGUI())
-        {
-            char buf[40];
-            sprintf(buf, "q rcvd: %d\nq dropped: %d", numQueueReceived[queueIndex], numQueueDropped[queueIndex]);
-            getDisplayString().setTagArg("t", 0, buf);
+            if (ev.isGUI())
+            {
+                char buf[40];
+                sprintf(buf, "q rcvd: %d\nq dropped: %d", numPktsReceived[flowIndex], numPktsDropped[flowIndex]);
+                getDisplayString().setTagArg("t", 0, buf);
+            }
         }
+    }
+    else
+    {   // self message is not expected; something wrong.
+        error("%s::handleMessage: Unexpected self message", getFullPath().c_str());
     }
 }
 
@@ -215,7 +186,7 @@ bool DRRVLANTokenBucketQueue::enqueue(cMessage *msg)
     int queueIndex = classifier->classifyPacket(msg);
     cQueue *queue = queues[queueIndex];
 
-    if (frameCapacity && queue->length() >= frameCapacity)
+    if (queueSize && queue->length() >= queueSize)
     {
         EV << "Queue " << queueIndex << " full, dropping packet.\n";
         delete msg;
@@ -230,49 +201,32 @@ bool DRRVLANTokenBucketQueue::enqueue(cMessage *msg)
 
 cMessage *DRRVLANTokenBucketQueue::dequeue()
 {
-    bool found = false;
-    int startQueueIndex = (currentQueueIndex + 1) % numFlows;  // search from the next queue for a frame to transmit
-    for (int i = 0; i < numFlows; i++)
+    if (!fifo.isEmpty())
     {
-       if (conformityFlag[(i+startQueueIndex)%numFlows])
-       {
-           currentQueueIndex = (i+startQueueIndex)%numFlows;
-           found = true;
-           break;
-       }
+        return ((cMessage *)fifo.pop());
     }
-
-    if (found == false)
-    {
-        // TO DO: further processing?
-        return NULL;
-    }
-
-    cMessage *msg = (cMessage *)queues[currentQueueIndex]->pop();
-
-    // TO DO: update statistics
-
-    // conformity processing for the HOL frame
-    if (queues[currentQueueIndex]->isEmpty() == false)
-    {
-        int pktLength = (check_and_cast<cPacket *>(queues[currentQueueIndex]->front()))->getBitLength();
-        if (isConformed(currentQueueIndex, pktLength))
+    else
+    {   // TODO: implement DRR scheduling here
+        bool found = false;
+        int startQueueIndex = (currentQueueIndex + 1) % numFlows;  // search from the next queue for a frame to transmit
+        for (int i = 0; i < numFlows; i++)
         {
-            conformityFlag[currentQueueIndex] = true;
+            currentQueueIndex = (i + startQueueIndex) % numFlows;
+            found = true;
+            break;
+        }
+
+        if (found)
+        {
+            // TODO: update statistics
+            return ((cMessage *)queues[currentQueueIndex]->pop());
         }
         else
         {
-            conformityFlag[currentQueueIndex] = false;
-            triggerConformityTimer(currentQueueIndex, pktLength);
+            // TODO: further processing?
+            return NULL;
         }
     }
-    else
-    {
-        conformityFlag[currentQueueIndex] = false;
-    }
-
-    // return a packet from the scheduled queue for transmission
-    return (msg);
 }
 
 void DRRVLANTokenBucketQueue::sendOut(cMessage *msg)
@@ -293,78 +247,12 @@ void DRRVLANTokenBucketQueue::requestPacket()
     {
         if (warmupFinished == true)
         {
-            numBitsSent[currentQueueIndex] += (check_and_cast<cPacket *>(msg))->getBitLength();
-            numQueueSent[currentQueueIndex]++;
+            int flowIndex = classifier->classifyPacket(msg);    // TODO: any more efficient way?
+            numBitsSent[flowIndex] += (check_and_cast<cPacket *>(msg))->getBitLength();
+            numPktsSent[flowIndex]++;
         }
         sendOut(msg);
     }
-}
-
-bool DRRVLANTokenBucketQueue::isConformed(int queueIndex, int pktLength)
-{
-    Enter_Method("isConformed()");
-
-// DEBUG
-    EV << "Last Time = " << lastTime[queueIndex] << endl;
-    EV << "Current Time = " << simTime() << endl;
-    EV << "Packet Length = " << pktLength << endl;
-// DEBUG
-
-    // update states
-    simtime_t now = simTime();
-    //unsigned long long meanTemp = meanBucketLength[queueIndex] + (unsigned long long)(meanRate*(now - lastTime[queueIndex]).dbl() + 0.5);
-    unsigned long long meanTemp = meanBucketLength[queueIndex] + (unsigned long long)ceil(meanRate*(now - lastTime[queueIndex]).dbl());
-    meanBucketLength[queueIndex] = (long long)((meanTemp > bucketSize) ? bucketSize : meanTemp);
-    //unsigned long long peakTemp = peakBucketLength[queueIndex] + (unsigned long long)(peakRate*(now - lastTime[queueIndex]).dbl() + 0.5);
-    unsigned long long peakTemp = peakBucketLength[queueIndex] + (unsigned long long)ceil(peakRate*(now - lastTime[queueIndex]).dbl());
-    peakBucketLength[queueIndex] = int((peakTemp > mtu) ? mtu : peakTemp);
-    lastTime[queueIndex] = now;
-
-    if (pktLength <= meanBucketLength[queueIndex])
-    {
-        if  (pktLength <= peakBucketLength[queueIndex])
-        {
-            meanBucketLength[queueIndex] -= pktLength;
-            peakBucketLength[queueIndex] -= pktLength;
-            return true;
-        }
-    }
-    return false;
-}
-
-// trigger TBF conformity timer for the HOL frame in the queue,
-// indicating that enough tokens will be available for its transmission
-void DRRVLANTokenBucketQueue::triggerConformityTimer(int queueIndex, int pktLength)
-{
-    Enter_Method("triggerConformityCounter()");
-
-    double meanDelay = (pktLength - meanBucketLength[queueIndex]) / meanRate;
-    double peakDelay = (pktLength - peakBucketLength[queueIndex]) / peakRate;
-
-// DEBUG
-    EV << "Packet Length = " << pktLength << endl;
-    dumpTbfStatus(queueIndex);
-    EV << "Delay for Mean TBF = " << meanDelay << endl;
-    EV << "Delay for Peak TBF = " << peakDelay << endl;
-    EV << "Current Time = " << simTime() << endl;
-    EV << "Counter Expiration Time = " << simTime() + max(meanDelay, peakDelay) << endl;
-// DEBUG
-
-    scheduleAt(simTime() + max(meanDelay, peakDelay), conformityTimer[queueIndex]);
-}
-
-void DRRVLANTokenBucketQueue::dumpTbfStatus(int queueIndex)
-{
-    EV << "Last Time = " << lastTime[queueIndex] << endl;
-    EV << "Current Time = " << simTime() << endl;
-    EV << "Token bucket for mean rate/burst control " << endl;
-    EV << "- Bucket size [bit]: " << bucketSize << endl;
-    EV << "- Mean rate [bps]: " << meanRate << endl;
-    EV << "- Bucket length [bit]: " << meanBucketLength[queueIndex] << endl;
-    EV << "Token bucket for peak rate/MTU control " << endl;
-    EV << "- MTU [bit]: " << mtu << endl;
-    EV << "- Peak rate [bps]: " << peakRate << endl;
-    EV << "- Bucket length [bit]: " << peakBucketLength[queueIndex] << endl;
 }
 
 void DRRVLANTokenBucketQueue::finish()
@@ -382,14 +270,14 @@ void DRRVLANTokenBucketQueue::finish()
         ss_shaped << "packets shaped by per-VLAN queue[" << i << "]";
         ss_sent << "packets sent by per-VLAN queue[" << i << "]";
         ss_throughput << "bits/sec sent per-VLAN queue[" << i << "]";
-        recordScalar((ss_received.str()).c_str(), numQueueReceived[i]);
-        recordScalar((ss_dropped.str()).c_str(), numQueueDropped[i]);
-        recordScalar((ss_shaped.str()).c_str(), numQueueReceived[i]-numQueueUnshaped[i]);
-        recordScalar((ss_sent.str()).c_str(), numQueueSent[i]);
+        recordScalar((ss_received.str()).c_str(), numPktsReceived[i]);
+        recordScalar((ss_dropped.str()).c_str(), numPktsDropped[i]);
+        recordScalar((ss_shaped.str()).c_str(), numPktsReceived[i]-numPktsConformed[i]);
+        recordScalar((ss_sent.str()).c_str(), numPktsSent[i]);
         recordScalar((ss_throughput.str()).c_str(), numBitsSent[i]/(simTime()-simulation.getWarmupPeriod()).dbl());
-        sumQueueReceived += numQueueReceived[i];
-        sumQueueDropped += numQueueDropped[i];
-        sumQueueShaped += numQueueReceived[i] - numQueueUnshaped[i];
+        sumQueueReceived += numPktsReceived[i];
+        sumQueueDropped += numPktsDropped[i];
+        sumQueueShaped += numPktsReceived[i] - numPktsConformed[i];
     }
     recordScalar("overall packet loss rate of per-VLAN queues", sumQueueDropped/double(sumQueueReceived));
     recordScalar("overall packet shaped rate of per-VLAN queues", sumQueueShaped/double(sumQueueReceived));
