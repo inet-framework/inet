@@ -25,6 +25,16 @@
 
 Define_Module(UDPBurstApp);
 
+UDPBurstApp::UDPBurstApp()
+{
+}
+
+UDPBurstApp::~UDPBurstApp()
+{
+    cancelAndDelete(burstTimer);
+    cancelAndDelete(messageTimer);
+}
+
 void UDPBurstApp::initialize(int stage)
 {
     // because of IPAddressResolver, we need to wait until interfaces are registered,
@@ -94,6 +104,10 @@ void UDPBurstApp::handleMessage(cMessage *msg)
         {   // start of a new burst; reset messageLength
             messageLength = par("messageLength").longValue();
             scheduleAt(simTime()+(double)par("messagePeriod"), msg);
+
+            // cancel any scheduled messageTimer due to random values of messageLength and messagePeriod;
+            // i.e., there could be any message not sent yet during the previous message period.
+            cancelEvent(messageTimer);
         }
         sendPacket();
     }
