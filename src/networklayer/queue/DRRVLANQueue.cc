@@ -17,17 +17,17 @@
 //
 
 
-#include "DRRVLANTokenBucketQueue.h"
+#include "DRRVLANQueue.h"
 
-Define_Module(DRRVLANTokenBucketQueue);
+Define_Module(DRRVLANQueue);
 
-DRRVLANTokenBucketQueue::DRRVLANTokenBucketQueue()
+DRRVLANQueue::DRRVLANQueue()
 {
 //    queues = NULL;
 //    numFlows = NULL;
 }
 
-DRRVLANTokenBucketQueue::~DRRVLANTokenBucketQueue()
+DRRVLANQueue::~DRRVLANQueue()
 {
     for (int i=0; i<numFlows; i++)
     {
@@ -35,7 +35,7 @@ DRRVLANTokenBucketQueue::~DRRVLANTokenBucketQueue()
     }
 }
 
-void DRRVLANTokenBucketQueue::initialize()
+void DRRVLANQueue::initialize()
 {
     PassiveQueueBase::initialize();
 
@@ -54,9 +54,11 @@ void DRRVLANTokenBucketQueue::initialize()
 
     // Token bucket meters
     tbm.assign(numFlows, (BasicTokenBucketMeter *)NULL);
+    cModule *mac = getParentModule();
     for (int i=0; i<numFlows; i++)
     {
-        tbm[i] = check_and_cast<BasicTokenBucketMeter *>(this->getSubmodule("tbm", i));
+        cModule *meter = mac->getSubmodule("meter", i);
+        tbm[i] = check_and_cast<BasicTokenBucketMeter *>(meter);
     }
 
     // FIFO queue for conformant packets
@@ -72,7 +74,10 @@ void DRRVLANTokenBucketQueue::initialize()
     }
 
     // DRR scheduler
+    long quantum = par("quantum").longValue();  // FIXME: Extend it to a vector later!
     currentQueueIndex = 0;
+    deficitCounters.assign(numFlows, 0);
+    quanta.assign(numFlows, quantum);
 
     // statistics
     warmupFinished = false;
@@ -83,7 +88,7 @@ void DRRVLANTokenBucketQueue::initialize()
     numPktsSent.assign(numFlows, 0);
 }
 
-void DRRVLANTokenBucketQueue::handleMessage(cMessage *msg)
+void DRRVLANQueue::handleMessage(cMessage *msg)
 {
     if (warmupFinished == false)
     {   // start statistics gathering once the warm-up period has passed.
@@ -181,7 +186,7 @@ void DRRVLANTokenBucketQueue::handleMessage(cMessage *msg)
     }
 }
 
-bool DRRVLANTokenBucketQueue::enqueue(cMessage *msg)
+bool DRRVLANQueue::enqueue(cMessage *msg)
 {
     int queueIndex = classifier->classifyPacket(msg);
     cQueue *queue = queues[queueIndex];
@@ -199,22 +204,32 @@ bool DRRVLANTokenBucketQueue::enqueue(cMessage *msg)
     }
 }
 
-cMessage *DRRVLANTokenBucketQueue::dequeue()
+cMessage *DRRVLANQueue::dequeue()
 {
     if (!fifo.isEmpty())
-    {
+    {   // FIFO queue has a priority over per-flow queues
         return ((cMessage *)fifo.pop());
     }
     else
-    {   // TODO: implement DRR scheduling here
+    {   // DRR scheduling over per-flow queues
         bool found = false;
         int startQueueIndex = (currentQueueIndex + 1) % numFlows;  // search from the next queue for a frame to transmit
         for (int i = 0; i < numFlows; i++)
         {
-            currentQueueIndex = (i + startQueueIndex) % numFlows;
-            found = true;
-            break;
-        }
+            int idx = (i + startQueueIndex) % numFlows;
+            if (!queues[idx]->isEmpty())
+            {
+                deficitCounters[idx] += quanta[idx];
+                int pktLength = (check_and_cast<cPacket *>(queues[idx]->front()))->getByteLength();
+                if (deficitCounters[idx] >= pktLength)
+                {
+                    currentQueueIndex = idx;
+                    deficitCounters[idx] -= pktLength;
+                    found = true;
+                    break;
+                }
+            }
+        } // end of for()
 
         if (found)
         {
@@ -229,12 +244,12 @@ cMessage *DRRVLANTokenBucketQueue::dequeue()
     }
 }
 
-void DRRVLANTokenBucketQueue::sendOut(cMessage *msg)
+void DRRVLANQueue::sendOut(cMessage *msg)
 {
     send(msg, outGate);
 }
 
-void DRRVLANTokenBucketQueue::requestPacket()
+void DRRVLANQueue::requestPacket()
 {
     Enter_Method("requestPacket()");
 
@@ -255,12 +270,11 @@ void DRRVLANTokenBucketQueue::requestPacket()
     }
 }
 
-void DRRVLANTokenBucketQueue::finish()
+void DRRVLANQueue::finish()
 {
     unsigned long sumQueueReceived = 0;
     unsigned long sumQueueDropped = 0;
     unsigned long sumQueueShaped = 0;
-    unsigned long sumQueueUnshaped = 0;
 
     for (int i=0; i < numFlows; i++)
     {

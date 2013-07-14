@@ -23,21 +23,48 @@ import inet.networklayer.queue.BasicTokenBucketMeter;
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 // @date   2013-07-01
 //
-module DRRVLANTokenBucketQueue like OutputQueue
+simple DRRVLANQueue like OutputQueue
 {
     parameters:
         @labels(node,queue-node);
         @display("i=block/subqueue;bgb=130,90");
         int numFlows = default(1);	// number of flows (i.e., subscribers)
         int queueSize @unit(b) = default(100000000b);  // FIFO & per-flow queue size
+        int quantum @unit(B) = default(1522B);	// DRR quantum size
         string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier        
 		string vids = default("");	// VIDs used for initialization of index table
     gates:
         input in;
         output out;
-    submodules:
-        tbm[numFlows]: BasicTokenBucketMeter {
-            parameters:
-                @display("i=block/classifier;p=60,40");
-        }
 }
+
+//module DRRVLANTokenBucketQueue like OutputQueue
+//{
+//    parameters:
+//        @labels(node,queue-node);
+//        @display("i=block/subqueue;bgb=130,90");
+//        int numFlows = default(1);	// number of flows (i.e., subscribers)
+//        int queueSize @unit(b) = default(100000000b);  // FIFO & per-flow queue size
+//        int quantum @unit(B) = default(1522B);	// DRR quantum size
+//        string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier        
+//		string vids = default("");	// VIDs used for initialization of index table
+//    gates:
+//        input in;
+//        output out;
+//    submodules:
+//        queue: DRRVLANQueue {
+//            parameters:
+//                numFlows = numFlows;
+//                queueSize = queueSize;
+//                quantum = quantum;
+//                classifierClass = classifierClass;
+//                vids = vids;
+//        }
+//        meter[numFlows]: BasicTokenBucketMeter {
+//            parameters:
+//                @display("i=block/classifier;p=60,40");
+//        }
+//	connections:
+//	    in --> queue.in;
+//	    out <-- queue.out;
+//}

@@ -21,7 +21,7 @@ package inet.examples.ngoa.isp_traffic_control;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.access.NgnAccessModem;
-import inet.nodes.access.NgnAccessNode;
+import inet.nodes.access.NgnAccessNode2;
 import inet.nodes.access.NgnAccessSplitter;
 import inet.nodes.inet.RouterWithEthernetInterface2;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
@@ -62,7 +62,7 @@ network NgnAccess
             gates:
                 ethg[1];
         }
-        olt: NgnAccessNode {
+        olt: NgnAccessNode2 {
             parameters:
                 @display("p=388,119");
             gates:
@@ -135,7 +135,7 @@ network NgnAccessWithPerformanceMeters
             gates:
                 ethg[1];
         }
-        olt: NgnAccessNode {
+        olt: NgnAccessNode2 {
             parameters:
                 @display("p=388,119");
             gates:

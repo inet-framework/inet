@@ -27,7 +27,6 @@
 #include "PassiveQueueBase.h"
 #include "IQoSClassifier.h"
 
-
 // define constants
 #define KALPHA 29 // 0.99^29 = 0.75
 //#define CSFQ_LOG

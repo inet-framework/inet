@@ -17,27 +17,25 @@
 //
 
 
-#ifndef __INET_DRRVLANTOKENBUCKETQUEUE_H
-#define __INET_DRRVLANTOKENBUCKETQUEUE_H
+#ifndef __INET_DRRVLANQUEUE_H
+#define __INET_DRRVLANQUEUE_H
 
 #include <omnetpp.h>
 #include <sstream>
 #include <vector>
-#include "IQoSClassifier.h"
 #include "PassiveQueueBase.h"
 #include "BasicTokenBucketMeter.h"
+#include "IQoSClassifier.h"
 
 /**
- * Returns the maximum of a and b.
- */
-inline double max(const double a, const double b) { return (a > b) ? a : b; }
-
-/**
- * Drop-tail queue with VLAN classifier, token bucket filter (TBF) traffic shaper,
- * and round-robin (RR) scheduler.
+ * Priority queueing (PQ) over FIFO queue and per-flow queues with
+ * deficit round-robin (DRR) scheduler.
+ * Incoming packets are classified by an external VLAN classifier and
+ * metered by an external token bucket meters before being put into
+ * a FIFO or per-flow queues.
  * See NED for more info.
  */
-class INET_API DRRVLANTokenBucketQueue : public PassiveQueueBase
+class INET_API DRRVLANQueue : public PassiveQueueBase
 {
     // type definitions for member variables
     typedef std::vector<bool> BoolVector;
@@ -54,10 +52,10 @@ class INET_API DRRVLANTokenBucketQueue : public PassiveQueueBase
     int numFlows;
     int queueSize;
 
-    // VLAN classifier
+    // (VLAN) classifier
     IQoSClassifier *classifier;
 
-    // token bucket meters
+    // (token bucket) meters
     TbmVector tbm;
 
     // FIFO
@@ -65,8 +63,10 @@ class INET_API DRRVLANTokenBucketQueue : public PassiveQueueBase
     int currentQueueSize;   // in bit
 
     // DRR scheduler
-    int currentQueueIndex;  // index of a queue whose HOL frame is scheduled for TX during the last RR scheduling
-    QueueVector queues;
+    int currentQueueIndex;      ///< index of a queue whose HOL frame is scheduled for TX during the last RR scheduling
+    IntVector deficitCounters;  ///< vector of deficit counters in DRR scheduling
+    IntVector quanta;           ///< vector of quantum  in DRR scheduling
+    QueueVector queues;         ///< per-flow queues
 
     // statistics
     bool warmupFinished;        ///< if true, start statistics gathering
@@ -79,10 +79,11 @@ class INET_API DRRVLANTokenBucketQueue : public PassiveQueueBase
     cGate *outGate;
 
   public:
-    DRRVLANTokenBucketQueue();
-    virtual ~DRRVLANTokenBucketQueue();
+    DRRVLANQueue();
+    virtual ~DRRVLANQueue();
 
   protected:
+//    virtual int numInitStages() const {return 2;}
     virtual void initialize();
 
     /**

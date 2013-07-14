@@ -24,9 +24,6 @@
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.414982452" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.base.1406305899" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.base">
 								<option id="gnu.cpp.compiler.option.include.paths.486227038" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/usr/include/c++/4.6"/>
-									<listOptionValue builtIn="false" value="/usr/include/c++/4.6/backward"/>
-									<listOptionValue builtIn="false" value="/usr/include/c++/4.6/x86_64-linux-gnu"/>
 									<listOptionValue builtIn="false" value="/usr/include/x86_64-linux-gnu"/>
 									<listOptionValue builtIn="false" value="/usr/local/include"/>
 									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/src/common&quot;"/>
@@ -34,8 +31,11 @@
 									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/include/platdep&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/mingw/lib/gcc/mingw32/4.7.2/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OMNETPP_ROOT}/mingw/lib/gcc/mingw32/4.7.2/include/c++&quot;"/>
-									<listOptionValue builtIn="false" value="/usr/lib/gcc/x86_64-linux-gnu/4.6/include"/>
-									<listOptionValue builtIn="false" value="/usr/lib/gcc/x86_64-linux-gnu/4.6/include-fixed"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7/x86_64-linux-gnu"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.7/backward"/>
+									<listOptionValue builtIn="false" value="/usr/lib/gcc/x86_64-linux-gnu/4.7/include"/>
+									<listOptionValue builtIn="false" value="/usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1857212190" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -138,8 +138,13 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="INET-HNRL.org.omnetpp.cdt.omnetppProjectType.887371800" name="OMNEST Simulation" projectType="org.omnetpp.cdt.omnetppProjectType"/>
 	</storageModule>
-	<storageModule moduleId="refreshScope" versionNumber="1">
-		<resource resourceType="PROJECT" workspacePath="/inet-hnrl"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="gcc-release">
+			<resource resourceType="PROJECT" workspacePath="/inet-hnrl"/>
+		</configuration>
+		<configuration configurationName="gcc-debug">
+			<resource resourceType="PROJECT" workspacePath="/inet-hnrl"/>
+		</configuration>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile"/>
