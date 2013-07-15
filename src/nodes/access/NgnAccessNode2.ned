@@ -78,8 +78,8 @@ module NgnAccessNode2
             parameters:
                 @display("p=94,184,row;q=queue");
                 promiscuous = true;
-                numFlows = numSubscribers;
-//                queueType = index == 0 ? "DropTailVLANTBFQueue" : "DropTailQueue";
+                queueType = index == 0 ? "DRRVLANQueue" : "DropTailQueue";
+                numFlows = index == 0 ? numSubscribers : 0;
         }
     connections:
         for i=0..sizeof(ethg)-1 {

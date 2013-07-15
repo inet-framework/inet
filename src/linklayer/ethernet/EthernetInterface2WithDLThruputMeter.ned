@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2012 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2013 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2006 Levente Meszaros
 //
 // This program is free software; you can redistribute it and/or
@@ -22,7 +22,7 @@ package inet.linklayer.ethernet;
 
 import inet.linklayer.INetworkInterface;
 import inet.networklayer.queue.OutputQueue;
-import inet.util.DelayMeter;
+import inet.linklayer.ppp.ThruputMeter;
 
 
 //
@@ -32,11 +32,11 @@ import inet.util.DelayMeter;
 //
 // @see EthernetInterface, EthernetInterfaceNoQueue
 //
-module EthernetInterface2WithDLDelayMeter like INetworkInterface
+module EthernetInterface2WithDLThruputMeter like INetworkInterface
 {
     parameters:
         string queueType = default("DropTailQueue");
-        @display("i=block/ifcard;bgb=226,315");
+        @display("i=block/ifcard;bgb=245,315");
     gates:
         input netwIn;
         output netwOut;
@@ -44,7 +44,7 @@ module EthernetInterface2WithDLDelayMeter like INetworkInterface
     submodules:
         queue: <queueType> like OutputQueue {
             parameters:
-                @display("p=77,71;q=l2queue");
+                @display("p=53,48;q=l2queue");
         }
         mac: EtherMAC2 {
             parameters:
@@ -54,19 +54,21 @@ module EthernetInterface2WithDLDelayMeter like INetworkInterface
         }
         encap: EtherEncap {
             parameters:
-                @display("p=116,151");
+                @display("p=116,103");
         }
-        delayMeter: DelayMeter {
+        thruputMeter: ThruputMeter {
             parameters:
-            	@display("p=153,71");
+                @display("p=187,157");
         }
     connections:
         netwIn --> queue.in;
         queue.out --> encap.upperLayerIn;
-        netwOut <-- delayMeter.out;
-        delayMeter.in <-- { @display("m=n"); } <-- encap.upperLayerOut;
+        //        netwOut <-- thruputMeter.out;
+        //        thruputMeter.in <-- { @display("m=n"); } <-- encap.upperLayerOut;
+        netwOut <-- encap.upperLayerOut;
         encap.lowerLayerOut --> mac.upperLayerIn;
-        encap.lowerLayerIn <-- mac.upperLayerOut;
+        encap.lowerLayerIn <-- thruputMeter.out;
+        thruputMeter.in <-- { @display("m=n"); } <-- mac.upperLayerOut;
         mac.phys <--> phys;
 }
 

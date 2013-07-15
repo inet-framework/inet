@@ -29,8 +29,9 @@ simple DRRVLANQueue like OutputQueue
         @labels(node,queue-node);
         @display("i=block/subqueue;bgb=130,90");
         int numFlows = default(1);	// number of flows (i.e., subscribers)
-        int queueSize @unit(b) = default(100000000b);  // FIFO & per-flow queue size
-        int quantum @unit(B) = default(1522B);	// DRR quantum size
+		int frameCapacity = default(100);
+//        int queueSize @unit(b) = default(100000000b);  // FIFO & per-flow queue size
+        string quanta = default("1522");	// DRR quantum sizes in byte
         string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier        
 		string vids = default("");	// VIDs used for initialization of index table
     gates:

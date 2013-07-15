@@ -25,9 +25,8 @@ import inet.nodes.access.NgnAccessNode2;
 import inet.nodes.access.NgnAccessSplitter;
 import inet.nodes.inet.RouterWithEthernetInterface2;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
-import inet.nodes.inet.StandardHost3WithEthernetInterface2WithDLDelayMeter;
+import inet.nodes.inet.StandardHost3WithEthernetInterface2WithDLThruputMeter;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
-import inet.util.BurstMeter;
 
 
 //
@@ -104,13 +103,12 @@ network NgnAccess
 
 
 //
-// 'NgnAccess' network with both DelayMeter and BurstMeter to measure frame/packet-level
-// statistics.
+// 'NgnAccess' network with hosts with DLThruputMeter.
 //
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-// @date   2012-03-10
+// @date   2013-07-15
 //
-network NgnAccessWithPerformanceMeters
+network NgnAccessWithDLThruputMeter
 {
     parameters:
         int N = default(1);	// number of ONUs (subscribers)
@@ -154,7 +152,7 @@ network NgnAccessWithPerformanceMeters
             gates:
                 ethg[n+1];
         }
-        host[N*n]: StandardHost3WithEthernetInterface2WithDLDelayMeter {
+        host[N*n]: StandardHost3WithEthernetInterface2WithDLThruputMeter {
             parameters:
                 @display("i=device/laptop;p=46,119");
             gates:
@@ -162,9 +160,6 @@ network NgnAccessWithPerformanceMeters
         }
         router: RouterWithEthernetInterface2 {
             @display("p=507,120");
-        }
-        burstMeter: BurstMeter {
-            @display("i=block/timer_vs;p=572,167;is=vs");
         }
     connections:
         for i=0..N-1, for j=0..n-1 {
@@ -175,7 +170,5 @@ network NgnAccessWithPerformanceMeters
         }
         accessSwitch.ethg[N] <--> {  delay = distribution_delay; datarate = distribution_rate; } <--> olt.ethg[0];
         olt.ethg[1] <--> {  delay = backbone_delay1; datarate = backbone_rate; } <--> router.ethg++;
-        router.ethg$o++ --> {  delay = backbone_delay2; datarate = backbone_rate; } --> server.ethg$i++;
-        router.ethg$i++ <-- {  delay = 0.5*backbone_delay2; datarate = backbone_rate; } <-- burstMeter.out;
-        burstMeter.in <-- {  delay = 0.5*backbone_delay2; datarate = backbone_rate; } <-- server.ethg$o++;        
+		router.ethg++ <--> {  delay = backbone_delay2; datarate = backbone_rate; } <--> server.ethg++;
 }

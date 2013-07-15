@@ -43,7 +43,8 @@ void DRRVLANQueue::initialize()
 
     // general
     numFlows = par("numFlows");
-    queueSize = par("queueSize");
+    frameCapacity = par("frameCapacity");
+//    queueSize = par("queueSize");
 
     // VLAN classifier
     const char *classifierClass = par("classifierClass");
@@ -74,10 +75,26 @@ void DRRVLANQueue::initialize()
     }
 
     // DRR scheduler
-    long quantum = par("quantum").longValue();  // FIXME: Extend it to a vector later!
     currentQueueIndex = 0;
     deficitCounters.assign(numFlows, 0);
-    quanta.assign(numFlows, quantum);
+
+    quanta.assign(numFlows, 0);
+    const char *str = par("quanta");
+    cStringTokenizer tokenizer(str);
+    int idx = 0;
+    while (tokenizer.hasMoreTokens())
+    {
+        if (idx >= numFlows)
+        {
+            throw cRuntimeError("%s::initialize DRR quanta: Exceeds the maximum number of flows", getFullPath().c_str());
+        }
+        else
+        {
+            const char *token = tokenizer.nextToken();
+            quanta[idx] = atoi(token);
+            idx++;
+        }
+    }
 
     // statistics
     warmupFinished = false;
@@ -132,7 +149,7 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
             }
             else
             {
-                if (queueSize && fifo.length() >= queueSize)
+                if (frameCapacity && fifo.length() >= frameCapacity)
                 {
                     EV << "FIFO queue full, dropping packet.\n";
                     if (warmupFinished == true)
@@ -191,7 +208,7 @@ bool DRRVLANQueue::enqueue(cMessage *msg)
     int queueIndex = classifier->classifyPacket(msg);
     cQueue *queue = queues[queueIndex];
 
-    if (queueSize && queue->length() >= queueSize)
+    if (frameCapacity && queue->length() >= frameCapacity)
     {
         EV << "Queue " << queueIndex << " full, dropping packet.\n";
         delete msg;

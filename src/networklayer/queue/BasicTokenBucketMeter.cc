@@ -35,7 +35,7 @@ void BasicTokenBucketMeter::initialize()
     lastTime = simTime();
 
     // statistics
-//    warmupFinished = false;
+    warmupFinished = false;
     numBitsConformed = 0;
     numBitsMetered = 0;
     numPktsConformed = 0;
@@ -46,18 +46,31 @@ int BasicTokenBucketMeter::meterPacket(cMessage *msg)
 {
     Enter_Method("meterPacket()");
 
-    int pktLength = (check_and_cast<cPacket *>(msg))->getBitLength();
-    numBitsMetered += pktLength;
-    numPktsMetered++;
+    if (warmupFinished == false)
+    {
+        if (simTime() >= simulation.getWarmupPeriod())
+        {
+            warmupFinished = true;
+        }
+    }
 
-// DEBUG
-    EV << "Last Time = " << lastTime << endl;
-    EV << "Current Time = " << simTime() << endl;
-    EV << "Packet Length = " << pktLength << endl;
-// DEBUG
+    int pktLength = (check_and_cast<cPacket *>(msg))->getBitLength();
+    simtime_t now = simTime();
+
+    if (warmupFinished == true)
+    {
+        numBitsMetered += pktLength;
+        numPktsMetered++;
+    }
+
+    // DEBUG
+        EV << "Last Time = " << lastTime << endl;
+        EV << "Current Time = " << now << endl;
+        EV << "Packet Length = " << pktLength << endl;
+        EV << "Token Incremental = " << (unsigned long long)ceil(meanRate*(now - lastTime).dbl()) << endl;
+    // DEBUG
 
     // update states
-    simtime_t now = simTime();
     //unsigned long long meanTemp = meanBucketLength + (unsigned long long)(meanRate*(now - lastTime).dbl() + 0.5);
     unsigned long long meanTemp = meanBucketLength + (unsigned long long)ceil(meanRate*(now - lastTime).dbl());
     meanBucketLength = (long long)((meanTemp > bucketSize) ? bucketSize : meanTemp);
@@ -73,7 +86,8 @@ int BasicTokenBucketMeter::meterPacket(cMessage *msg)
             meanBucketLength -= pktLength;
             peakBucketLength -= pktLength;
 
-            if (simTime() >= simulation.getWarmupPeriod()) {
+            if (warmupFinished == true)
+            {
                 numBitsConformed += pktLength;
                 numPktsConformed++;
             }

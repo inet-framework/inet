@@ -46,7 +46,7 @@ class INET_API BasicTokenBucketMeter : public cSimpleModule
     simtime_t lastTime;         // the last time the token bucket was used
 
     // statistics
-//    bool warmupFinished;        ///< if true, start statistics gathering
+    bool warmupFinished;        ///< if true, start statistics gathering
     int numBitsConformed;
     int numBitsMetered;
     int numPktsConformed;

@@ -21,6 +21,7 @@
 #define __INET_DRRVLANQUEUE_H
 
 #include <omnetpp.h>
+#include <stdlib.h>     // atoi()
 #include <sstream>
 #include <vector>
 #include "PassiveQueueBase.h"
@@ -50,7 +51,8 @@ class INET_API DRRVLANQueue : public PassiveQueueBase
   protected:
     // general
     int numFlows;
-    int queueSize;
+    int frameCapacity;
+//    int queueSize;
 
     // (VLAN) classifier
     IQoSClassifier *classifier;
@@ -60,7 +62,7 @@ class INET_API DRRVLANQueue : public PassiveQueueBase
 
     // FIFO
     cQueue fifo;
-    int currentQueueSize;   // in bit
+//    int currentQueueSize;   // in bit
 
     // DRR scheduler
     int currentQueueIndex;      ///< index of a queue whose HOL frame is scheduled for TX during the last RR scheduling
