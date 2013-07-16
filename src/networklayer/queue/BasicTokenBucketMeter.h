@@ -47,8 +47,8 @@ class INET_API BasicTokenBucketMeter : public cSimpleModule
 
     // statistics
     bool warmupFinished;        ///< if true, start statistics gathering
-    int numBitsConformed;
-    int numBitsMetered;
+    unsigned long long numBitsConformed;
+    unsigned long long numBitsMetered;
     int numPktsConformed;
     int numPktsMetered;
 
@@ -62,6 +62,10 @@ class INET_API BasicTokenBucketMeter : public cSimpleModule
      * for the given packet, 0 for conformance and 1 for not.
      */
     virtual int meterPacket(cMessage *msg);
+    inline long long getBucketSize() {return bucketSize;};
+    inline double getMeanRate() {return meanRate;};
+    inline int getMtu() {return mtu;};
+    inline double getPeakRate() {return peakRate;};
 };
 
 #endif

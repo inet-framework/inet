@@ -25,6 +25,7 @@
 #include <sstream>
 #include <vector>
 #include "PassiveQueueBase.h"
+#include "BasicTokenBucketMeter.h"
 #include "IQoSClassifier.h"
 
 // define constants
@@ -37,20 +38,20 @@
 #define PUNISH_TABLE_SIZE  10
 #define DROPPED_ARRAY_SIZE 100
 #define PUNISH_THRESH  1.3  /*
-                 * when the flow's rate exceeds
-                 * PUNISH_THRESH times the fair rate
-                 * the flow is punished
-                 */
-#define GOOD_THRESH 0.7  /*
-                  * when the punished flow's rate is
-                  * GOOD_THRESH times smaller than the
-                  * link's fair rate the flow
-                  * is no longer punished
-                  */
+                             * when the flow's rate exceeds
+                             * PUNISH_THRESH times the fair rate
+                             * the flow is punished
+                             */
+#define GOOD_THRESH 0.7     /*
+                             * when the punished flow's rate is
+                             * GOOD_THRESH times smaller than the
+                             * link's fair rate the flow
+                             * is no longer punished
+                             */
 #define BETA 0.98            /*
-                  * (1 - BETA) = precentage by which
-                  * link's fair rate is decreased when a
-                  * forced drop occurs
+                              * (1 - BETA) = precentage by which
+                              * link's fair rate is decreased when a
+                              * forced drop occurs
                               */
 
 typedef struct identHash {
@@ -65,8 +66,11 @@ typedef struct identHash {
 
 
 /**
- * Drop-tail queue with VLAN classifier, token bucket filter (TBF) traffic shaper,
- * and round-robin (RR) scheduler.
+ * Incoming packets are classified by an external VLAN classifier and
+ * metered by an external token bucket meters before being put into
+ * a common FIFO queue, non-conformant ones being processed core-stateless
+ * fair queueing (CSFQ) algorithm for proportional allocation of excess
+ * bandwidth.
  * See NED for more info.
  */
 class INET_API CSFQVLANTokenBucketQueue : public PassiveQueueBase
@@ -106,32 +110,26 @@ class INET_API CSFQVLANTokenBucketQueue : public PassiveQueueBase
     typedef std::vector<FlowState> FlowStateVector;
     typedef std::vector<int> IntVector;
     typedef std::vector<long long> LongLongVector;
+    typedef std::vector<BasicTokenBucketMeter *> TbmVector;
     typedef std::vector<cMessage *> MsgVector;
     typedef std::vector<cQueue *> QueueVector;
     typedef std::vector<simtime_t> TimeVector;
 
   protected:
-    // configuration
+    // general
     int numFlows;
-    int queueSize;
-    int queueThreshold;
-    LongLongVector bucketSize;  // in bit; note that the corresponding parameter in NED/INI is in byte.
-    DoubleVector meanRate;  // in bps
-    IntVector mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
-    DoubleVector peakRate;  // in bps
 
     // VLAN classifier
     IQoSClassifier *classifier;
 
     // FIFO
     cQueue fifo;
+    int queueSize;
     int currentQueueSize;   // in bit
+    int queueThreshold;
 
-    // TBF
-    LongLongVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
-    IntVector peakBucketLength;  // vector of the number of tokens (bits) in the bucket for peak rate/MTU control
-    TimeVector lastTime; // vector of the last time the TBF used
-    BoolVector conformityFlag;  // vector of flag to indicate whether the HOL frame conforms to TBF
+    // token bucket meters
+    TbmVector tbm;
 
     // CSFQ
     CSFQState csfq;    // CSFQ-related states
@@ -142,9 +140,9 @@ class INET_API CSFQVLANTokenBucketQueue : public PassiveQueueBase
     // statistics
     bool warmupFinished;        ///< if true, start statistics gathering
     DoubleVector numBitsSent;
-    IntVector numPktsReceived;
-    IntVector numPktsDropped;
-    IntVector numPktsUnshaped;
+    IntVector numPktsReceived; // redefined from PassiveQueueBase with 'name hiding'
+    IntVector numPktsDropped;  // redefined from PassiveQueueBase with 'name hiding'
+    IntVector numPktsConformed;
     IntVector numPktsSent;
 
     cGate *outGate;
@@ -189,14 +187,7 @@ class INET_API CSFQVLANTokenBucketQueue : public PassiveQueueBase
     virtual void requestPacket();
 
     /**
-     * Newly defined.
-     */
-    virtual bool isConformed(int queueIndex, int pktLength);
-//    virtual void triggerConformityTimer(int queueIndex, int pktLength);
-    virtual void dumpTbfStatus(int queueIndex);
-
-    /**
-     * From CSFQ.
+     * For CSFQ.
      */
     virtual void estimateAlpha(int pktLength, double arrvRate, double arrvTime, int enqueue);
     virtual double estimateRate(int flowId, int pktLength, double arrvTime);

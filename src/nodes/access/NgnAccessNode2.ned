@@ -78,7 +78,8 @@ module NgnAccessNode2
             parameters:
                 @display("p=94,184,row;q=queue");
                 promiscuous = true;
-                queueType = index == 0 ? "DRRVLANQueue" : "DropTailQueue";
+//                queueType = index == 0 ? "DRRVLANQueue" : "DropTailQueue";
+//                queueType = index == 0 ? "CSFQVLANTokenBucketQueue" : "DropTailQueue";
                 numFlows = index == 0 ? numSubscribers : 0;
         }
     connections:

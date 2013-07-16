@@ -22,44 +22,30 @@ package inet.networklayer.queue;
 import inet.networklayer.queue.BasicTokenBucketMeter;
 
 //
-// Core-Stateless Fqir Queueing (CSFQ) queue with VLAN classifier and
-// token bucket meter to be used in network interfaces.
-// Conforms to the OutputQueue interface.
+// Model for an ISP traffic controller enabling proportional allocation of
+// excess bandwidth allocation.
+// An incoming packet is first classfied by a VLAN classifier and then metered
+// by token buckets. If conformant, the packet is put into a common FIFO queue
+// without any processing; if not conformant, it goes through core-stateless fair
+// queueing (CSFQ), dropping if needed, and then put into a common FIFO queue.
 //
-module CSFQVLANTokenBucketQueue like OutputQueue
+// @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
+// @date   2013-07-01
+//
+simple CSFQVLANTokenBucketQueue like OutputQueue
 {
     parameters:
         @labels(node,queue-node);
         @display("i=block/queue");
         int numFlows = default(1);	// number of flows (i.e., subscribers)
+//		int frameCapacity = default(100);
         int queueSize @unit(b) = default(100000000b);  // FIFO queue size
         int queueThreshold @unit(b) = default(50000000b);	// FIFO threshold to detect link congestion
         string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier
         string vids = default("");	// VIDs used for initialization of index table
-//		//---------------------------------------------------------------------
-//		// parameter values for TBFs in string
-//		// - either provide one value for all TBFs or multiple values whose
-//		// - number is equal to 'numQueues'
-//		//---------------------------------------------------------------------
-//		string bucketSize = default("3000");	// token bucket sizes in byte
-////        int bucketSize @unit(byte) = default(3000B);
-//			// token bucket size; must be larger than mtu.
-//			// note that with a finite line/peak rate,
-//			// the maximum burst size is not equal to token bucket size.
-//		string meanRate = default("10000000");	// token generation rates in bps
-////		double meanRate @unit(bps) = default(10Mbps);	// token generation rate
-//		string mtu = default("1522");			// MTUs in byte; for Ethernet frame with header(18) + VLAN tag (4) + maximum payload (1500)
-////		int mtu @unit(byte) = default(1522B);	// for Ethernet frame with header(18) + VLAN tag (4) + maximum payload (1500)
-//		string peakRate = default("100000000");	// peak rates in bps
-////		double peakRate @unit(bps) = default(100Mbps);	// must be larger than meanRate
     gates:
         input in;
         output out;
-    submodules:
-        tbm[numFlows]: BasicTokenBucketMeter {
-            parameters:
-                @display("i=block/classifier");
-        }
 }
 
 

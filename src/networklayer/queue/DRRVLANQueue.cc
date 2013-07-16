@@ -23,8 +23,6 @@ Define_Module(DRRVLANQueue);
 
 DRRVLANQueue::DRRVLANQueue()
 {
-//    queues = NULL;
-//    numFlows = NULL;
 }
 
 DRRVLANQueue::~DRRVLANQueue()
@@ -132,7 +130,7 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
 // DEBUG
 
         if (tbm[flowIndex]->meterPacket(msg) == 0)
-        {   // conformant packet
+        {   // frame is conformed
             if (warmupFinished == true)
             {
                 numPktsConformed[flowIndex]++;
@@ -165,7 +163,7 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
             }
         }
         else
-        {   // non-conformant packet
+        {   // frame is not conformed
             if (queue->isEmpty())
             {
                 bool dropped = enqueue(msg);

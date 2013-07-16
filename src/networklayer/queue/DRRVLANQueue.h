@@ -54,10 +54,10 @@ class INET_API DRRVLANQueue : public PassiveQueueBase
     int frameCapacity;
 //    int queueSize;
 
-    // (VLAN) classifier
+    // VLAN classifier
     IQoSClassifier *classifier;
 
-    // (token bucket) meters
+    // token bucket meters
     TbmVector tbm;
 
     // FIFO
@@ -85,7 +85,6 @@ class INET_API DRRVLANQueue : public PassiveQueueBase
     virtual ~DRRVLANQueue();
 
   protected:
-//    virtual int numInitStages() const {return 2;}
     virtual void initialize();
 
     /**

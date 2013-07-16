@@ -36,8 +36,8 @@ void BasicTokenBucketMeter::initialize()
 
     // statistics
     warmupFinished = false;
-    numBitsConformed = 0;
-    numBitsMetered = 0;
+    numBitsConformed = 0L;
+    numBitsMetered = 0L;
     numPktsConformed = 0;
     numPktsMetered = 0;
 }
@@ -67,7 +67,8 @@ int BasicTokenBucketMeter::meterPacket(cMessage *msg)
         EV << "Last Time = " << lastTime << endl;
         EV << "Current Time = " << now << endl;
         EV << "Packet Length = " << pktLength << endl;
-        EV << "Token Incremental = " << (unsigned long long)ceil(meanRate*(now - lastTime).dbl()) << endl;
+        double tokenGenerated = (unsigned long long)ceil(meanRate*(now - lastTime).dbl());
+        EV << "Token Generated = " << tokenGenerated << endl;
     // DEBUG
 
     // update states

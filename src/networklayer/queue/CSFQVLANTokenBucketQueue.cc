@@ -27,11 +27,6 @@ CSFQVLANTokenBucketQueue::CSFQVLANTokenBucketQueue()
 
 CSFQVLANTokenBucketQueue::~CSFQVLANTokenBucketQueue()
 {
-//    for (int i = 0; i < numFlows; i++)
-//    {
-//        delete queues[i];
-//        cancelAndDelete (conformityTimer[i]);
-//    }
 }
 
 void CSFQVLANTokenBucketQueue::initialize()
@@ -43,12 +38,6 @@ void CSFQVLANTokenBucketQueue::initialize()
     // general
     numFlows = par("numFlows"); // also the number of subscribers
 
-    // FIFO queue
-    queueSize = par("queueSize");   // in bit
-    queueThreshold = par("queueThreshold"); // in bit
-    currentQueueSize = 0;
-    fifo.setName("FIFO queue");
-
     // VLAN classifier
     const char *classifierClass = par("classifierClass");
     classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
@@ -56,52 +45,68 @@ void CSFQVLANTokenBucketQueue::initialize()
     const char *vids = par("vids");
     classifier->initialize(vids);
 
-    // TBF: bucket size
-    const char *bs = par("bucketSize");
-    std::vector<int> v_bs = cStringTokenizer(bs).asIntVector();
-    bucketSize.assign(v_bs.begin(), v_bs.end());
-    std::transform(bucketSize.begin(), bucketSize.end(), bucketSize.begin(), std::bind1st(std::multiplies<long long>(), 8)); // convert bytes to bits
-    if (bucketSize.size() == 1)
+    // Token bucket meters
+    tbm.assign(numFlows, (BasicTokenBucketMeter *)NULL);
+    cModule *mac = getParentModule();
+    for (int i=0; i<numFlows; i++)
     {
-        int tmp = bucketSize[0];
-        bucketSize.resize(numFlows, tmp);
+        cModule *meter = mac->getSubmodule("meter", i);
+        tbm[i] = check_and_cast<BasicTokenBucketMeter *>(meter);
     }
 
-    // TBF: mean rate
-    const char *mr = par("meanRate");
-    std::vector<double> v_mr = cStringTokenizer(mr).asDoubleVector();
-    meanRate.assign(v_mr.begin(), v_mr.end());
-    if (meanRate.size() == 1)
-    {
-        int tmp = meanRate[0];
-        meanRate.resize(numFlows, tmp);
-    }
+    // FIFO queue
+    queueSize = par("queueSize");   // in bit
+    queueThreshold = par("queueThreshold"); // in bit
+    currentQueueSize = 0;
+    fifo.setName("FIFO queue");
 
-    // TBF: MTU
-    const char *mt = par("mtu");
-    std::vector<int> v_mt = cStringTokenizer(mt).asIntVector();
-    mtu.assign(v_mt.begin(), v_mt.end());
-    std::transform(mtu.begin(), mtu.end(), mtu.begin(), std::bind1st(std::multiplies<long long>(), 8)); // convert bytes to bits    
-    if (mtu.size() == 1)
-    {
-        int tmp = mtu[0];
-        mtu.resize(numFlows, tmp);
-    }
-
-    // TBF: peak rate
-    const char *pr = par("peakRate");
-    std::vector<double> v_pr = cStringTokenizer(pr).asDoubleVector();
-    peakRate.assign(v_pr.begin(), v_pr.end());
-    if (peakRate.size() == 1)
-    {
-        int tmp = peakRate[0];
-        peakRate.resize(numFlows, tmp);
-    }
-
-    // TBF: states
-    meanBucketLength = bucketSize;
-    peakBucketLength = mtu;
-    lastTime.assign(numFlows, simTime());
+//
+//    // TBF: bucket size
+//    const char *bs = par("bucketSize");
+//    std::vector<int> v_bs = cStringTokenizer(bs).asIntVector();
+//    bucketSize.assign(v_bs.begin(), v_bs.end());
+//    std::transform(bucketSize.begin(), bucketSize.end(), bucketSize.begin(), std::bind1st(std::multiplies<long long>(), 8)); // convert bytes to bits
+//    if (bucketSize.size() == 1)
+//    {
+//        int tmp = bucketSize[0];
+//        bucketSize.resize(numFlows, tmp);
+//    }
+//
+//    // TBF: mean rate
+//    const char *mr = par("meanRate");
+//    std::vector<double> v_mr = cStringTokenizer(mr).asDoubleVector();
+//    meanRate.assign(v_mr.begin(), v_mr.end());
+//    if (meanRate.size() == 1)
+//    {
+//        int tmp = meanRate[0];
+//        meanRate.resize(numFlows, tmp);
+//    }
+//
+//    // TBF: MTU
+//    const char *mt = par("mtu");
+//    std::vector<int> v_mt = cStringTokenizer(mt).asIntVector();
+//    mtu.assign(v_mt.begin(), v_mt.end());
+//    std::transform(mtu.begin(), mtu.end(), mtu.begin(), std::bind1st(std::multiplies<long long>(), 8)); // convert bytes to bits
+//    if (mtu.size() == 1)
+//    {
+//        int tmp = mtu[0];
+//        mtu.resize(numFlows, tmp);
+//    }
+//
+//    // TBF: peak rate
+//    const char *pr = par("peakRate");
+//    std::vector<double> v_pr = cStringTokenizer(pr).asDoubleVector();
+//    peakRate.assign(v_pr.begin(), v_pr.end());
+//    if (peakRate.size() == 1)
+//    {
+//        int tmp = peakRate[0];
+//        peakRate.resize(numFlows, tmp);
+//    }
+//
+//    // TBF: states
+//    meanBucketLength = bucketSize;
+//    peakBucketLength = mtu;
+//    lastTime.assign(numFlows, simTime());
 
     // CSFQ+TBF: rate estimates
     conformedRate.assign(numFlows, 0.0);
@@ -151,7 +156,7 @@ void CSFQVLANTokenBucketQueue::initialize()
     numBitsSent.assign(numFlows, 0.0);
     numPktsReceived.assign(numFlows, 0);
     numPktsDropped.assign(numFlows, 0);
-    numPktsUnshaped.assign(numFlows, 0);
+    numPktsConformed.assign(numFlows, 0);
     numPktsSent.assign(numFlows, 0);
 }
 
@@ -174,29 +179,31 @@ void CSFQVLANTokenBucketQueue::handleMessage(cMessage *msg)
     }
     else
     {   // a frame arrives
-        int flowId = classifier->classifyPacket(msg);
+        int flowIndex = classifier->classifyPacket(msg);
         if (warmupFinished == true)
         {
-            numPktsReceived[flowId]++;
+            numPktsReceived[flowIndex]++;
         }
         int pktLength = (check_and_cast<cPacket *>(msg))->getBitLength();
 // DEBUG
         ASSERT(pktLength > 0);
 // DEBUG
-        if (isConformed(flowId, pktLength))
-        {
+        if (tbm[flowIndex]->meterPacket(msg) == 0)
+        {   // frame is conformed
             if (warmupFinished == true)
             {
-                numPktsUnshaped[flowId]++;
+                numPktsConformed[flowIndex]++;
             }
-            conformedRate[flowId] = estimateRate(flowId, pktLength, simTime().dbl());
+            // TODO: Refine below
+            conformedRate[flowIndex] = estimateRate(flowIndex, pktLength, simTime().dbl());
+
             if (packetRequested > 0)
             {
                 packetRequested--;
                 if (warmupFinished == true)
                 {
-                    numBitsSent[flowId] += pktLength;
-                    numPktsSent[flowId]++;
+                    numBitsSent[flowIndex] += pktLength;
+                    numPktsSent[flowIndex]++;
                 }
                 sendOut(msg);
             }
@@ -207,34 +214,34 @@ void CSFQVLANTokenBucketQueue::handleMessage(cMessage *msg)
                 {
                     if (warmupFinished == true)
                     {
-                        numPktsDropped[flowId]++;
+                        numPktsDropped[flowIndex]++;
                     }
                 }
             }
         }
         else
         {   // frame is not conformed
-            conformedRate[flowId] = meanRate[flowId];
-            nonconformedRate[flowId] = estimateRate(flowId, pktLength, simTime().dbl());
+            conformedRate[flowIndex] = tbm[flowIndex]->getMeanRate(); // TODO: is this right? need skip?
+            nonconformedRate[flowIndex] = estimateRate(flowIndex, pktLength, simTime().dbl());  // TODO: refine here
 
-            if (std::max(0.0, 1.0 - csfq.alpha_/nonconformedRate[flowId]) > dblrand())
-            {
-                estimateAlpha(pktLength, nonconformedRate[flowId], simTime().dbl(), 1);
+            if (std::max(0.0, 1.0 - csfq.alpha_*tbm[flowIndex]->getMeanRate()/nonconformedRate[flowIndex]) > dblrand())
+            {   // drop the frame
+                estimateAlpha(pktLength, nonconformedRate[flowIndex], simTime().dbl(), 1);
                 delete msg;
                 if (warmupFinished == true)
                 {
-                    numPktsDropped[flowId]++;
+                    numPktsDropped[flowIndex]++;
                 }
             }
             else
             {
-                estimateAlpha(pktLength, nonconformedRate[flowId], simTime().dbl(), 0);
+                estimateAlpha(pktLength, nonconformedRate[flowIndex], simTime().dbl(), 0);
                 bool dropped = enqueue(msg);
                 if (dropped)
                 {
                     if (warmupFinished == true)
                     {
-                        numPktsDropped[flowId]++;
+                        numPktsDropped[flowIndex]++;
                     }
                 }
             }
@@ -243,7 +250,7 @@ void CSFQVLANTokenBucketQueue::handleMessage(cMessage *msg)
         if (ev.isGUI())
         {
             char buf[40];
-            sprintf(buf, "q rcvd: %d\nq dropped: %d", numPktsReceived[flowId], numPktsDropped[flowId]);
+            sprintf(buf, "q rcvd: %d\nq dropped: %d", numPktsReceived[flowIndex], numPktsDropped[flowIndex]);
             getDisplayString().setTagArg("t", 0, buf);
         }
     }
@@ -298,53 +305,6 @@ void CSFQVLANTokenBucketQueue::requestPacket()
         }
         sendOut(msg);
     }
-}
-
-bool CSFQVLANTokenBucketQueue::isConformed(int flowId, int pktLength)
-{
-    Enter_Method("isConformed()");
-
-// DEBUG
-    EV << "Last Time = " << lastTime[flowId] << endl;
-    EV << "Current Time = " << simTime() << endl;
-    EV << "Packet Length = " << pktLength << endl;
-// DEBUG
-
-    // update states
-    simtime_t now = simTime();
-    //unsigned long long meanTemp = meanBucketLength[flowId] + (unsigned long long)(meanRate*(now - lastTime[flowId]).dbl() + 0.5);
-    unsigned long long meanTemp = meanBucketLength[flowId] + (unsigned long long)ceil(meanRate[flowId]*(now - lastTime[flowId]).dbl());
-    meanBucketLength[flowId] = (long long)((meanTemp > bucketSize[flowId]) ? bucketSize[flowId] : meanTemp);
-    //unsigned long long peakTemp = peakBucketLength[queueIndex] + (unsigned long long)(peakRate*(now - lastTime[queueIndex]).dbl() + 0.5);
-    unsigned long long peakTemp = peakBucketLength[flowId] + (unsigned long long)ceil(peakRate[flowId]*(now - lastTime[flowId]).dbl());
-    peakBucketLength[flowId] = int((peakTemp > mtu[flowId]) ? mtu[flowId] : peakTemp);
-    lastTime[flowId] = now;
-
-    if (pktLength <= meanBucketLength[flowId])
-    {
-        if  (pktLength <= peakBucketLength[flowId])
-        {
-            meanBucketLength[flowId] -= pktLength;
-            peakBucketLength[flowId] -= pktLength;
-            return true;
-        }
-    }
-    return false;
-}
-
-
-void CSFQVLANTokenBucketQueue::dumpTbfStatus(int flowId)
-{
-    EV << "Last Time = " << lastTime[flowId] << endl;
-    EV << "Current Time = " << simTime() << endl;
-    EV << "Token bucket for mean rate/burst control " << endl;
-    EV << "- Bucket size [bit]: " << bucketSize[flowId] << endl;
-    EV << "- Mean rate [bps]: " << meanRate[flowId] << endl;
-    EV << "- Bucket length [bit]: " << meanBucketLength[flowId] << endl;
-    EV << "Token bucket for peak rate/MTU control " << endl;
-    EV << "- MTU [bit]: " << mtu[flowId] << endl;
-    EV << "- Peak rate [bps]: " << peakRate[flowId] << endl;
-    EV << "- Bucket length [bit]: " << peakBucketLength[flowId] << endl;
 }
 
 // compute estimated flow rate by using exponential averaging
@@ -504,12 +464,12 @@ void CSFQVLANTokenBucketQueue::finish()
         ss_throughput << "bits/sec sent from flow[" << i << "]";
         recordScalar((ss_received.str()).c_str(), numPktsReceived[i]);
         recordScalar((ss_dropped.str()).c_str(), numPktsDropped[i]);
-        recordScalar((ss_shaped.str()).c_str(), numPktsReceived[i]-numPktsUnshaped[i]);
+        recordScalar((ss_shaped.str()).c_str(), numPktsReceived[i]-numPktsConformed[i]);
         recordScalar((ss_sent.str()).c_str(), numPktsSent[i]);
         recordScalar((ss_throughput.str()).c_str(), numBitsSent[i]/(simTime()-simulation.getWarmupPeriod()).dbl());
         sumPktsReceived += numPktsReceived[i];
         sumPktsDropped += numPktsDropped[i];
-        sumPktsShaped += numPktsReceived[i] - numPktsUnshaped[i];
+        sumPktsShaped += numPktsReceived[i] - numPktsConformed[i];
     }
     recordScalar("overall packet loss rate", sumPktsDropped/double(sumPktsReceived));
     recordScalar("overall packet shaped rate", sumPktsShaped/double(sumPktsReceived));
