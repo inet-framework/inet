@@ -1,3 +1,7 @@
+2013-07-17  Irene Rüngeler
+
+	Added 8 new strategies for stream scheduling
+
 2013-07-15  Irene Rüngeler
 
 	Implemented SCTP Stream Reset (RFC 6525)

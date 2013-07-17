@@ -66,7 +66,6 @@ void SCTPAssociation::sendOutgoingResetRequest(SCTPIncomingSSNResetRequestParame
         msg->setDestPort(remotePort);
         msg->addChunk(resetChunk);
         state->resetChunk = check_and_cast<SCTPStreamResetChunk*>(resetChunk->dup());
-        state->resetChunk->setName("STATE_RESET");
 
         sendToIP(msg, remoteAddr);
     }
@@ -204,9 +203,7 @@ void SCTPAssociation::sendStreamResetRequest(uint16 type)
     }
     state->streamResetSequenceNumber = ++srsn;
     state->resetChunk = check_and_cast<SCTPStreamResetChunk*>(resetChunk->dup());
-    state->resetChunk->setName("STATE_STREAM_RESET");
     msg->addChunk(resetChunk);
-    
     sendToIP(msg, remoteAddr);
     PK(getPath(remoteAddr)->ResetTimer)->encapsulate(rt);
     startTimer(getPath(remoteAddr)->ResetTimer, getPath(remoteAddr)->pathRto);
@@ -254,7 +251,7 @@ void SCTPAssociation::sendStreamResetResponse(uint32 srrsn)
     msg->setBitLength(SCTP_COMMON_HEADER*8);
     msg->setSrcPort(localPort);
     msg->setDestPort(remotePort);
-    resetChunk = new SCTPStreamResetChunk("STREAM_RESET5");
+    resetChunk = new SCTPStreamResetChunk("STREAM_RESET");
     resetChunk->setChunkType(STREAM_RESET);
     resetChunk->setBitLength((SCTP_STREAM_RESET_CHUNK_LENGTH)*8);
     SCTPStreamResetResponseParameter* responseParam = new SCTPStreamResetResponseParameter("Response_Param");

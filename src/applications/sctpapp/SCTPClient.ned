@@ -52,6 +52,9 @@ simple SCTPClient like ISCTPApp
         double stopTime @unit(s) = default(0s);
         double primaryTime @unit(s) = default(0s);
         string newPrimary = default("");
+        string streamRequestLengths = default("");
+        string streamRequestRatio = default("");
+        string streamPriorities = default("");
         bool finishEndsSimulation = default(false);
         @signal[sentPk](type=SCTPSimpleMessage);
         @signal[rcvdPk](type=cPacket);

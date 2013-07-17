@@ -63,6 +63,10 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         cMessage* primaryChangeTimer;
 
         int32 chunksAbandoned;
+        std::map<uint32,uint32> streamRequestLengthMap;
+        std::map<uint32,uint32> streamRequestRatioMap;
+        std::map<uint32,uint32> streamRequestRatioSendMap;
+
         /** Utility: sends a request to the server */
         void sendRequest(bool last = true);
 

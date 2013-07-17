@@ -152,6 +152,7 @@ class  INET_API SCTPSocket
     void setInboundStreams(int streams) {inboundStreams = streams;};
     int getOutboundStreams() {return outboundStreams;};
     int getLastStream() {return lastStream;};
+    void setStreamPriority(uint32 stream, uint32 priority);
 
     /**
      * Bind the socket to a local port number.

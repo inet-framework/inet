@@ -44,6 +44,8 @@ simple SCTPPeer like ISCTPApp
         double startTime @unit(s) = default(1s); // time first session begins
         int numRequestsPerSession = default(1);  // number of requests sent per session
         int numPacketsToReceive = default(0);
+        string streamPriorities = default("");
+
         @display("i=block/app");
         @signal[sentPk](type=SCTPSimpleMessage);
         @signal[rcvdPk](type=cPacket);

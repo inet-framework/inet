@@ -475,4 +475,13 @@ void SCTPSocket::processMessage(cPacket *msg)
     delete msg;
 }
 
-
+void SCTPSocket::setStreamPriority(uint32 stream, uint32 priority)
+{
+    cPacket *msg = new cPacket("SET_STREAM_PRIO", SCTP_C_SET_STREAM_PRIO);
+    SCTPSendCommand *cmd = new SCTPSendCommand();
+    cmd->setAssocId(assocId);
+    cmd->setSid(stream);
+    cmd->setPpid(priority);
+    msg->setControlInfo(cmd);
+    sendToSCTP(msg);
+}

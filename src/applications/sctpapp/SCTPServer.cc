@@ -82,6 +82,15 @@ void SCTPServer::initialize()
     sctpEV3 << "SCTPServer::initialized listen port=" << port << "\n";
     schedule = false;
     shutdownReceived = false;
+    uint32 streamNum = 0;
+    cStringTokenizer tokenizer(par("streamPriorities").stringValue());
+    while (tokenizer.hasMoreTokens())
+    {
+        const char *token = tokenizer.nextToken();
+        socket->setStreamPriority(streamNum, (uint32) atoi(token));
+
+        streamNum++;
+    }
 }
 
 void SCTPServer::sendOrSchedule(cPacket *msg)

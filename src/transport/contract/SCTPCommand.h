@@ -43,7 +43,8 @@ enum SctpCommandCode
     SCTP_C_SHUTDOWN             = 14,
     SCTP_C_NO_OUTSTANDING       = 15,
     SCTP_C_STREAM_RESET         = 16,   // send StreamResetChunk
-    SCTP_C_SEND_ASCONF          = 19
+    SCTP_C_SEND_ASCONF          = 19,
+    SCTP_C_SET_STREAM_PRIO      = 20
 };
 
 //

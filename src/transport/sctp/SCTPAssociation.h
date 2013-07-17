@@ -97,7 +97,8 @@ enum SCTPEventCode
     SCTP_E_SEND_SHUTDOWN_ACK,
     SCTP_E_STOP_SENDING,
     SCTP_E_STREAM_RESET,
-    SCTP_E_SEND_ASCONF
+    SCTP_E_SEND_ASCONF,
+    SCTP_E_SET_STREAM_PRIO
 };
 
 enum SCTPChunkTypes
@@ -187,7 +188,16 @@ enum SCTPCCModules
 
 enum SCTPStreamSchedulers
 {
-    ROUND_ROBIN             = 0
+    ROUND_ROBIN            = 0,
+    ROUND_ROBIN_PACKET     = 1,
+    RANDOM_SCHEDULE        = 2,
+    RANDOM_SCHEDULE_PACKET = 3,
+    FAIR_BANDWITH          = 4,
+    FAIR_BANDWITH_PACKET   = 5,
+    PRIORITY               = 6,
+    FCFS                   = 7,
+    PATH_MANUAL            = 8,
+    PATH_MAP_TO_PATH       = 9
 };
 
 
@@ -596,11 +606,16 @@ class INET_API SCTPStateVariables : public cObject
         uint32                      advancedPeerAckPoint;
         uint32                      prMethod;
         simtime_t                   lastThroughputTime;
+        std::map<uint16,uint32>     streamThroughput;
         simtime_t                   lastAssocThroughputTime;
         uint32                      assocThroughput;
         double                      throughputInterval;
         bool                        ssNextStream;
         bool                        ssLastDataChunkSizeSet;
+        bool                        ssOneStreamLeft;
+        std::map<uint16,uint32>     ssPriorityMap;
+        std::map<uint16,int32>      ssFairBandwidthMap;
+        std::map<uint16,int32>      ssStreamToPathMap;
 
     private:
         SCTPPathVariables*          primaryPath;
@@ -660,6 +675,8 @@ class INET_API SCTPAssociation : public cObject
         cMessage*               SackTimer;
         cMessage*               StartTesting;
         cMessage*               StartAddIP;
+        cOutVector*             EndToEndDelay;
+        std::map<uint16,cOutVector*> streamThroughputVectors;
         cOutVector*             assocThroughputVector;
 
     protected:
@@ -946,6 +963,15 @@ class INET_API SCTPAssociation : public cObject
         int32 streamScheduler(SCTPPathVariables* path, bool peek);
         void initStreams(uint32 inStreams, uint32 outStreams);
         int32 numUsableStreams();
+        int32 streamSchedulerRoundRobinPacket(SCTPPathVariables* path, bool peek);
+        int32 streamSchedulerRandom(SCTPPathVariables* path, bool peek);
+        int32 streamSchedulerRandomPacket(SCTPPathVariables* path, bool peek);
+        int32 streamSchedulerFairBandwidth(SCTPPathVariables* path, bool peek);
+        int32 streamSchedulerFairBandwidthPacket(SCTPPathVariables* path, bool peek);
+        int32 streamSchedulerPriority(SCTPPathVariables* path, bool peek);
+        int32 streamSchedulerFCFS(SCTPPathVariables* path, bool peek);
+        int32 pathStreamSchedulerManual(SCTPPathVariables* path, bool peek);
+        int32 pathStreamSchedulerMapToPath(SCTPPathVariables* path, bool peek);
         typedef struct streamSchedulingFunctions {
             void(SCTPAssociation::*ssInitStreams)(uint32 inStreams, uint32 outStreams);
             int32(SCTPAssociation::*ssGetNextSid)(SCTPPathVariables* path, bool peek);

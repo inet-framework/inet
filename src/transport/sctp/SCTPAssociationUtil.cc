@@ -142,6 +142,7 @@ const char* SCTPAssociation::eventName(const int32 event)
         CASE(SCTP_E_STOP_SENDING);
         CASE(SCTP_E_STREAM_RESET);
         CASE(SCTP_E_SEND_ASCONF);
+        CASE(SCTP_E_SET_STREAM_PRIO);
     }
     return s;
 #undef CASE
@@ -345,6 +346,11 @@ void SCTPAssociation::sendEstabIndicationToApp()
     msg->setControlInfo(establishIndication);
     sctpMain->send(msg, "to_appl", appGateIndex);
 
+    char vectorName[128];
+    for (uint16 i = 0; i < inboundStreams; i++) {
+        snprintf(vectorName, sizeof(vectorName), "Stream %d Throughput", i);
+        streamThroughputVectors[i] = new cOutVector(vectorName);
+    }
 }
 
 void SCTPAssociation::sendToApp(cPacket *msg)
@@ -1543,6 +1549,13 @@ void SCTPAssociation::pushUlp()
             cmd->setCumTsn(state->lastTsnAck);
             msg->setControlInfo(cmd);
             state->numMsgsReq[count]--;
+            EndToEndDelay->record(simTime() - chunk->firstSendTime);
+            SCTP::AssocStatMap::iterator iter = sctpMain->assocStatMap.find(assocId);
+            if (iter->second.numEndToEndMessages >= iter->second.startEndToEndDelay &&
+                    (iter->second.numEndToEndMessages < iter->second.stopEndToEndDelay || !iter->second.stopEndToEndDelay)) {
+                iter->second.cumEndToEndDelay += (simTime() - chunk->firstSendTime);
+            }
+            iter->second.numEndToEndMessages++;
 
             // set timestamp to sending time
             chunk->userData->setTimestamp(chunk->firstSendTime);

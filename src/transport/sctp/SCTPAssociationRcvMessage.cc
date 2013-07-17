@@ -1701,8 +1701,14 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
                 sendDataArrivedNotification(dataChunk->getSid());
                 putInDeliveryQ(dataChunk->getSid());
                 if (simTime() > state->lastThroughputTime + 1) {
+                    for (uint16 i = 0; i < inboundStreams; i++) {
+                        streamThroughputVectors[i]->record(state->streamThroughput[i]  /
+                                (simTime() - state->lastThroughputTime) / 1024);
+                        state->streamThroughput[i] = 0;
+                    }
                     state->lastThroughputTime = simTime();
                 }
+                state->streamThroughput[dataChunk->getSid()] += payloadLength;
             }
             calculateRcvBuffer();
         }

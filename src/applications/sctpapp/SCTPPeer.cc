@@ -188,6 +188,15 @@ void SCTPPeer::connect()
         sctpEV3 << "StreamReset Timer scheduled at " << simulation.getSimTime() << "\n";
         scheduleAt(simulation.getSimTime()+(double)par("streamRequestTime"), cmsg);
     }
+    uint32 streamNum = 0;
+    cStringTokenizer tokenizer(par("streamPriorities").stringValue());
+    while (tokenizer.hasMoreTokens())
+    {
+        const char *token = tokenizer.nextToken();
+        clientSocket.setStreamPriority(streamNum, (uint32) atoi(token));
+
+        streamNum++;
+    }
 }
 
 void SCTPPeer::handleMessage(cMessage *msg)

@@ -65,6 +65,9 @@ simple SCTP like ISCTP
         int swsLimit = default(3000);        // Limit for SWS
         bool udpEncapsEnabled = default(false);
         double throughputInterval = default(1);
+        string streamsToPaths = default("");
+        int startEndToEndDelay = default(0);
+        int stopEndToEndDelay = default(10);
 
         //#====== Chunk Authentication ========================================
         bool auth = default(false);

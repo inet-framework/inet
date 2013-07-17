@@ -140,7 +140,26 @@ void SCTPClient::connect()
         cmsg->setKind(MSGKIND_RESET);
         sctpEV3 << "StreamReset Timer scheduled at " << simulation.getSimTime() << "\n";
         scheduleAt(simulation.getSimTime()+(double)par("streamRequestTime"), cmsg);
-    }    
+    }
+
+    for (uint16 i = 0; i < outStreams; i++)
+    {
+        streamRequestLengthMap[i] = par("requestLength");
+        streamRequestRatioMap[i] = 1;
+        streamRequestRatioSendMap[i] = 1;
+    }
+
+    uint32 streamNum = 0;
+    cStringTokenizer ratioTokenizer(par("streamRequestRatio").stringValue());
+    while (ratioTokenizer.hasMoreTokens())
+    {
+        const char *token = ratioTokenizer.nextToken();
+        streamRequestRatioMap[streamNum] = (uint32) atoi(token);
+        streamRequestRatioSendMap[streamNum] = (uint32) atoi(token);
+
+        streamNum++;
+    }
+
     numSessions++;
 }
 
@@ -324,6 +343,34 @@ void SCTPClient::sendRequest(bool last)
     uint32 i, sendBytes;
 
     sendBytes = par("requestLength");
+
+    // find next stream
+    uint16 nextStream = 0;
+    for (uint16 i = 0; i < outStreams; i++)
+    {
+        if (streamRequestRatioSendMap[i] > streamRequestRatioSendMap[nextStream])
+            nextStream = i;
+    }
+
+    // no stream left, reset map
+    if (nextStream == 0 && streamRequestRatioSendMap[nextStream] == 0)
+    {
+        for (uint16 i = 0; i < outStreams; i++)
+        {
+            streamRequestRatioSendMap[i] = streamRequestRatioMap[i];
+            if (streamRequestRatioSendMap[i] > streamRequestRatioSendMap[nextStream])
+                nextStream = i;
+        }
+    }
+
+    if (nextStream == 0 && streamRequestRatioSendMap[nextStream] == 0)
+    {
+        opp_error("Invalid setting of streamRequestRatio: only 0 weightings");
+    }
+
+    sendBytes = streamRequestLengthMap[nextStream];
+    streamRequestRatioSendMap[nextStream]--;
+
 
     if (sendBytes < 1)
         sendBytes = 1;

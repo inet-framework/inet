@@ -817,8 +817,11 @@ void SCTP::removeAssociation(SCTPAssociation *assoc)
                 assoc->assocId, path->remoteAddress.str().c_str());
         recordScalar(str, path->numberOfDuplicates);
     }
-
-
+    for (uint16 i = 0; i < assoc->inboundStreams; i++) {
+        snprintf((char*)&str, sizeof(str), "Bytes received on stream %d of assoc %d",
+                i, assoc->assocId);
+                recordScalar(str, assoc->getState()->streamThroughput[i]); 
+    } 
     assoc->removePath();
     assoc->deleteStreams();
 
@@ -899,5 +902,11 @@ void SCTP::finish()
         recordScalar("Number of AUTH chunks rejected", assoc.numAuthChunksRejected);
         recordScalar("Number of StreamReset requests sent", assoc.numResetRequestsSent);
         recordScalar("Number of StreamReset requests performed", assoc.numResetRequestsPerformed);
+        if (assoc.numEndToEndMessages > 0 && (assoc.cumEndToEndDelay / assoc.numEndToEndMessages) > 0) {
+            uint32 msgnum = assoc.numEndToEndMessages - assoc.startEndToEndDelay;
+            if (assoc.stopEndToEndDelay > 0)
+                msgnum -= (assoc.numEndToEndMessages - assoc.stopEndToEndDelay);
+            recordScalar("Average End to End Delay", assoc.cumEndToEndDelay / msgnum);
+        }
     }
 }

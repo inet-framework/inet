@@ -35,30 +35,6 @@ void SCTPAssociation::increaseOutstandingBytes(SCTPDataVariables* chunk,
     iterator->second += ADD_PADDING(chunk->booksize + SCTP_DATA_CHUNK_LENGTH);
 }
 
-#if 0
-int32 SCTPAssociation::calculateBytesToSendOnPath(const SCTPPathVariables* pathVar)
-{
-    int32                    bytesToSend;
-    const SCTPDataMsg* datMsg = peekOutboundDataMsg();
-    if (datMsg != NULL) {
-        const uint32 ums = datMsg->getBooksize();        // Get user message size
-            const uint32 num = (uint32)floor((double)(pathVar->pmtu - 32) / (ums + SCTP_DATA_CHUNK_LENGTH));
-            if (num * ums > state->peerRwnd) {
-                // Receiver cannot handle data yet
-                bytesToSend = 0;
-            }
-            else {
-                // Receiver will accept data
-                bytesToSend = num * ums;
-            }
-    }
-    else {
-        bytesToSend = 0;
-    }
-    return (bytesToSend);
-}
-#endif
-
 void SCTPAssociation::storePacket(SCTPPathVariables* pathVar,
                                              SCTPMessage*         sctpMsg,
                                              const uint16         chunksAdded,
@@ -165,6 +141,8 @@ SCTPDataVariables* SCTPAssociation::makeDataVarFromDataMsg(SCTPDataMsg*         
         datVar->ssn = 0;
         datVar->ordered = false;
     }
+
+    state->ssLastDataChunkSizeSet = true;
 
     return (datVar);
 }
