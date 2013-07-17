@@ -152,6 +152,8 @@ class INET_API SCTP : public cSimpleModule
             uint32 numAuthChunksSent;
             uint32 numAuthChunksAccepted;
             uint32 numAuthChunksRejected;
+            uint32 numResetRequestsSent;
+            uint32 numResetRequestsPerformed;
         }AssocStat;
 
         typedef std::map<int32,AssocStat> AssocStatMap;

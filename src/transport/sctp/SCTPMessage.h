@@ -107,6 +107,40 @@ class INET_API SCTPErrorChunk : public SCTPErrorChunk_Base
         virtual cPacket *removeParameter();
 };
 
+class INET_API SCTPStreamResetChunk : public SCTPStreamResetChunk_Base
+{
+    protected:
+        std::list<cPacket*> parameterList;
+
+    public:
+        SCTPStreamResetChunk(const char* name = NULL, int32 kind = 0) : SCTPStreamResetChunk_Base(name, kind) {};
+        SCTPStreamResetChunk(const SCTPStreamResetChunk& other) : SCTPStreamResetChunk_Base(other.getName()) {operator=(other);};
+        SCTPStreamResetChunk& operator=(const SCTPStreamResetChunk& other);
+
+        virtual SCTPStreamResetChunk* dup() const {return new SCTPStreamResetChunk(*this);}
+        virtual void setParametersArraySize(const uint32 size);
+        virtual uint32 getParametersArraySize() const;
+
+        /** Generated but unused method, should not be called. */
+        virtual void setParameters(const uint32 k, const cPacketPtr& parameters_var);
+
+        /**
+        * Returns the kth parameter in this SCTP Reset Chunk
+        */
+        virtual cPacketPtr& getParameters(uint32 k);
+
+        /**
+        * Adds a message object to the SCTP packet. The packet length will be adjusted
+        */
+        virtual void addParameter(cPacket* msg);
+
+        /**
+        * Removes and returns the first message object in this SCTP packet.
+        */
+        virtual cPacket* removeParameter();
+};
+
+
 class INET_API SCTPAsconfChunk : public SCTPAsconfChunk_Base
 {
     protected:

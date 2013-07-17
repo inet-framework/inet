@@ -134,6 +134,7 @@ SCTPDataVariables* SCTPAssociation::makeDataVarFromDataMsg(SCTPDataMsg*         
     datVar->booksize = datMsg->getBooksize();
     datVar->prMethod = datMsg->getPrMethod();
     datVar->priority = datMsg->getPriority();
+    datVar->strReset = datMsg->getStrReset();
 
     // ------ Stream handling ---------------------------------------
     SCTPSendStreamMap::iterator iterator = sendStreams.find(datMsg->getSid());

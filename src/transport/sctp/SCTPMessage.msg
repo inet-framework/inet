@@ -144,6 +144,7 @@ message SCTPDataMsg extends cPacket
     bool fragment;
     uint32 prMethod;
     uint32 priority;
+    bool strReset;
 }
 
 message SCTPDataChunk extends SCTPChunk
@@ -239,6 +240,47 @@ message SCTPErrorChunk extends SCTPChunk
 message SCTPParameter extends cPacket
 {
     uint16 parameterType;
+}
+
+message SCTPStreamResetChunk extends SCTPChunk
+{
+    @customize(true);
+    abstract cPacketPtr parameters[];
+}
+
+message SCTPOutgoingSSNResetRequestParameter extends SCTPParameter
+{
+    uint32 srReqSn; //Stream Reset Request Sequence Number: initialized with the initial TSN, then incremented
+    uint32 srResSn; //Stream Reset Response Sequence Number
+    uint32 lastTsn; //Senders last assigned TSN
+    uint16 streamNumbers[];
+}
+
+message SCTPIncomingSSNResetRequestParameter extends SCTPParameter
+{
+    uint32 srReqSn; //Stream Reset Request Sequence Number
+    uint16 streamNumbers[];
+}
+
+message SCTPSSNTSNResetRequestParameter extends SCTPParameter
+{
+    uint32 srReqSn; //Stream Reset Request Sequence Number
+}
+
+message SCTPStreamResetResponseParameter extends SCTPParameter
+{
+    uint32 srResSn; //Stream Reset Response Sequence Number
+    uint32 result;
+    uint32 sendersNextTsn = 0;
+    uint32 receiversNextTsn = 0;
+}
+
+message SCTPResetTimer extends cPacket
+{
+    uint32 inSN; //Stream Reset Response Sequence Number for Incoming Reset Request
+    bool inAcked;   // false, when timer is running for the Reset Response Sequence Number, true otherwise
+    uint32 outSN; //Stream Reset Response Sequence Number for Outgoing Reset Request
+    bool outAcked;
 }
 
 message SCTPAuthenticationChunk extends SCTPChunk

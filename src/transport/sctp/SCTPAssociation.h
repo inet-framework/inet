@@ -96,6 +96,7 @@ enum SCTPEventCode
     SCTP_E_SEND_QUEUE_LIMIT,
     SCTP_E_SEND_SHUTDOWN_ACK,
     SCTP_E_STOP_SENDING,
+    SCTP_E_STREAM_RESET,
     SCTP_E_SEND_ASCONF
 };
 
@@ -117,6 +118,7 @@ enum SCTPChunkTypes
     AUTH                = 15,
     NR_SACK             = 16,
     ASCONF_ACK          = 128,
+    STREAM_RESET        = 130,
     FORWARD_TSN         = 192,
     ASCONF              = 193
 };
@@ -128,6 +130,24 @@ enum SCTPPrMethods
     PR_RTX    = 2,
     PR_PRIO   = 3,
     PR_STRRST = 4
+};
+
+enum SCTPStreamResetConstants
+{
+    NOTHING_TO_DO       = 0,
+    PERFORMED           = 1,
+    DENIED              = 2,
+    WRONG_SSN           = 3,
+    REQUEST_IN_PROGRESS = 4,
+    NO_RESET            = 5,
+    RESET_OUTGOING      = 6,
+    RESET_INCOMING      = 7,
+    RESET_BOTH          = 8,
+    SSN_TSN             = 9,
+    OUTGOING_RESET_REQUEST_PARAMETER = 13,
+    INCOMING_RESET_REQUEST_PARAMETER = 14,
+    SSN_TSN_RESET_REQUEST_PARAMETER  = 15,
+    STREAM_RESET_RESPONSE_PARAMETER  = 16
 };
 
 enum SCTPAddIPCorrelatedTypes
@@ -183,6 +203,11 @@ enum SCTPStreamSchedulers
 #define SCTP_SHUTDOWN_CHUNK_LENGTH      8
 #define SCTP_SHUTDOWN_ACK_LENGTH        4
 #define SCTP_ERROR_CHUNK_LENGTH         4       // without parameters
+#define SCTP_STREAM_RESET_CHUNK_LENGTH                  4   // without parameters
+#define SCTP_OUTGOING_RESET_REQUEST_PARAMETER_LENGTH   16   // without streams
+#define SCTP_INCOMING_RESET_REQUEST_PARAMETER_LENGTH    8   // without streams
+#define SCTP_SSN_TSN_RESET_REQUEST_PARAMETER_LENGTH     8
+#define SCTP_STREAM_RESET_RESPONSE_PARAMETER_LENGTH    12
 #define SCTP_ADD_IP_CHUNK_LENGTH        8
 #define SCTP_ADD_IP_PARAMETER_LENGTH    8
 #define SCTP_AUTH_CHUNK_LENGTH          8
@@ -275,6 +300,7 @@ class INET_API SCTPPathVariables : public cObject
         cMessage*           HeartbeatIntervalTimer;
         cMessage*           CwndTimer;
         cMessage*           T3_RtxTimer;
+        cPacket*            ResetTimer;
         cMessage*           AsconfTimer;
 
         // ====== Path Status =================================================
@@ -395,6 +421,7 @@ class INET_API SCTPDataVariables : public cObject
         bool                hasBeenTimerBasedRtxed;    // Has chunk been timer-based retransmitted?
         bool                hasBeenMoved;              // Chunk has been moved to solve buffer blocking
         simtime_t           firstSendTime;
+        bool                strReset;
         uint32              prMethod;
         uint32              priority;
         bool                sendForwardIfAbandoned;
@@ -542,9 +569,18 @@ class INET_API SCTPStateVariables : public cObject
         bool                        asconfOutstanding;
         SCTPAsconfChunk*            asconfChunk;
 
-        // ====== Further features ============================================
-        uint32                      advancedPeerAckPoint;
-        uint32                      prMethod;
+        // ====== Stream Reset ================================================
+        bool                        streamReset;
+        bool                        peerStreamReset;
+        uint32                      streamResetSequenceNumber;
+        uint32                      expectedStreamResetSequenceNumber;
+        uint32                      peerRequestSn;
+        uint32                      inRequestSn;
+        uint32                      peerTsnAfterReset;
+        uint32                      lastTsnBeforeReset;      // lastTsn announced in OutgoingStreamResetParameter
+        SCTPStreamResetChunk*       resetChunk;
+        
+        // ====== SCTP Authentication =========================================
         uint16                      hmacType;
         bool                        peerAuth;
         bool                        auth;
@@ -555,6 +591,10 @@ class INET_API SCTPStateVariables : public cObject
         uint8                       peerKeyVector[512];
         uint32                      sizePeerKeyVector;
         uint8                       sharedKey[512];
+
+        // ====== Further features ============================================
+        uint32                      advancedPeerAckPoint;
+        uint32                      prMethod;
         simtime_t                   lastThroughputTime;
         simtime_t                   lastAssocThroughputTime;
         uint32                      assocThroughput;
@@ -756,6 +796,7 @@ class INET_API SCTPAssociation : public cObject
         void process_STATUS(SCTPEventCode& event, SCTPCommand* sctpCommand, cPacket* msg);
         void process_RECEIVE_REQUEST(SCTPEventCode& event, SCTPCommand* sctpCommand);
         void process_PRIMARY(SCTPEventCode& event, SCTPCommand* sctpCommand);
+        void process_STREAM_RESET(SCTPCommand* sctpCommand);
         //@}
 
         /** @name Processing SCTP message arrivals. Invoked from processSCTPMessage(). */
@@ -785,6 +826,7 @@ class INET_API SCTPAssociation : public cObject
         void process_TIMEOUT_PROBING();
         void process_TIMEOUT_SHUTDOWN(SCTPEventCode& event);
         int32 updateCounters(SCTPPathVariables* path);
+        void process_TIMEOUT_RESET(SCTPPathVariables* path);
         void process_TIMEOUT_ASCONF(SCTPPathVariables* path);
         //@}
 
@@ -818,6 +860,7 @@ class INET_API SCTPAssociation : public cObject
         /** Retransmitting chunks */
         void retransmitInit();
         void retransmitCookieEcho();
+        void retransmitReset();
         void retransmitShutdown();
         void retransmitShutdownAck();
 
@@ -876,7 +919,12 @@ class INET_API SCTPAssociation : public cObject
         void pathStatusIndication(const SCTPPathVariables* path, const bool status);
 
         bool allPathsInactive() const;
-
+        
+        void sendStreamResetRequest(uint16 type);
+        void sendStreamResetResponse(uint32 srrsn);
+        void sendStreamResetResponse(SCTPSSNTSNResetRequestParameter* requestParam,
+                                 bool                             options);
+        void sendOutgoingResetRequest(SCTPIncomingSSNResetRequestParameter* requestParam);
         void sendHMacError(const uint16 id);
 
         SCTPForwardTsnChunk* createForwardTsnChunk(const IPvXAddress& pid);
@@ -938,7 +986,22 @@ class INET_API SCTPAssociation : public cObject
                                      const simtime_t&     rttEstimation);
 
         void disposeOf(SCTPMessage* sctpmsg);
-        
+
+        /** Methods for Stream Reset **/
+        void resetSsns();
+        void resetExpectedSsns();
+        SCTPParameter* makeOutgoingStreamResetParameter(uint32 srsn);
+        SCTPParameter* makeIncomingStreamResetParameter(uint32 srsn);
+        SCTPParameter* makeSSNTSNResetParameter(uint32 srsn);
+        void sendOutgoingRequestAndResponse(uint32 inRequestSn, uint32 outRequestSn);
+        SCTPEventCode processInAndOutResetRequestArrived(SCTPIncomingSSNResetRequestParameter* inRequestParam, SCTPOutgoingSSNResetRequestParameter* outRequestParam);
+        SCTPEventCode processOutAndResponseArrived(SCTPOutgoingSSNResetRequestParameter* outRequestParam, SCTPStreamResetResponseParameter* responseParam);
+        SCTPEventCode processStreamResetArrived(SCTPStreamResetChunk*strResChunk);
+        void processOutgoingResetRequestArrived(SCTPOutgoingSSNResetRequestParameter* requestParam);
+        void processIncomingResetRequestArrived(SCTPIncomingSSNResetRequestParameter* requestParam);
+        void processSSNTSNResetRequestArrived(SCTPSSNTSNResetRequestParameter* requestParam);
+        void processResetResponseArrived(SCTPStreamResetResponseParameter* responseParam);
+
         /** Methods for Add-IP and AUTH **/
         void sendAsconf(const char* type, const bool remote = false);
         void sendAsconfAck(const uint32 serialNumber);

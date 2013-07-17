@@ -113,6 +113,7 @@ class SCTPOpenCommand extends SCTPCommand
     string sctpAlgorithmClass;       // may be left empty
     uint32 inboundStreams;
     uint32 outboundStreams;
+    bool streamReset;
     int prMethod;
     uint32 numRequests;
     uint32 messagesToPush;

@@ -149,6 +149,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         void sendqueueAbatedArrived(int32 connId, uint64 buffer);
         void addressAddedArrived(int32 assocId, IPvXAddress remoteAddr);
         void msgAbandonedArrived(int32 assocId);
+        void sendStreamResetNotification();
 };
 
 #endif

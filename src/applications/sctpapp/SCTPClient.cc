@@ -28,6 +28,7 @@
 #define MSGKIND_SEND     1
 #define MSGKIND_ABORT    2
 #define MSGKIND_PRIMARY  3
+#define MSGKIND_RESET    4
 #define MSGKIND_STOP     5
 
 
@@ -128,7 +129,18 @@ void SCTPClient::connect()
     ev << "issuing OPEN command\n";
     setStatusString("connecting");
     ev << "connect to address " << connectAddress << "\n";
-    socket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+	bool streamReset = par("streamReset");
+	socket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+
+    if (!streamReset)
+        streamReset = false;
+    else if (streamReset == true)
+    {
+        cMessage* cmsg = new cMessage("StreamReset");
+        cmsg->setKind(MSGKIND_RESET);
+        sctpEV3 << "StreamReset Timer scheduled at " << simulation.getSimTime() << "\n";
+        scheduleAt(simulation.getSimTime()+(double)par("streamRequestTime"), cmsg);
+    }    
     numSessions++;
 }
 
@@ -396,6 +408,12 @@ void SCTPClient::handleTimer(cMessage *msg)
             setPrimaryPath((const char*)par("newPrimary"));
             break;
 
+        case MSGKIND_RESET:
+            sctpEV3 << "StreamReset Timer expired at Client at " << simulation.getSimTime() << "...send notification\n";
+            sendStreamResetNotification();
+            delete msg;
+            break;
+
         case MSGKIND_STOP:
             numRequestsToSend = 0;
             sendAllowed = false;
@@ -528,6 +546,26 @@ void SCTPClient::setPrimaryPath(const char* str)
     cmsg->setControlInfo(pinfo);
     socket.sendNotification(cmsg);
 }
+
+void SCTPClient::sendStreamResetNotification()
+{
+    uint32 type;
+
+    type = (uint32)par("streamResetType");
+    if (type >= 6 && type <= 9)
+    {
+        cPacket* cmsg = new cPacket("CMSG-SR");
+        SCTPResetInfo *rinfo = new SCTPResetInfo();
+        rinfo->setAssocId(socket.getConnectionId());
+        rinfo->setRemoteAddr(socket.getRemoteAddr());
+        type = (uint32)par("streamResetType");
+        rinfo->setRequestType((uint16)type);
+        cmsg->setKind(SCTP_C_STREAM_RESET);
+        cmsg->setControlInfo(rinfo);
+        socket.sendNotification(cmsg);
+    }
+}
+
 
 void SCTPClient::msgAbandonedArrived(int32 assocId)
 {

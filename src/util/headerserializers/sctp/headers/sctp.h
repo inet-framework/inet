@@ -291,6 +291,15 @@ struct auth_chunk {
     uint8_t  hmac[0];
 } __PACKED__;
 
+
+struct stream_reset_chunk {
+    uint8_t type;
+    uint8_t flags;
+    uint16_t length;
+    uint8_t parameters[0];
+} __PACKED__;
+
+
 // variable length parameters in INIT chunk:
 #define INIT_PARAM_IPV4 5
 #define INIT_PARAM_IPV6 6
@@ -423,6 +432,43 @@ struct forward_tsn_streams {
     uint16_t sid;
     uint16_t ssn;
 } __PACKED__;
+
+
+// Parameters for Stream Reset
+struct outgoing_reset_request_parameter {
+    uint16_t type;
+    uint16_t length;
+    uint32_t srReqSn; // Stream Reset Request Sequence Number
+    uint32_t srResSn; // Stream Reset Response Sequence Number
+    uint32_t lastTsn; // Senders last assigned TSN
+    uint16_t streamNumbers[0];
+} __PACKED__;
+
+
+struct incoming_reset_request_parameter {
+    uint16_t type;
+    uint16_t length;
+    uint32_t srReqSn; // Stream Reset Request Sequence Number
+    uint16_t streamNumbers[0];
+} __PACKED__;
+
+
+struct ssn_tsn_reset_request_parameter {
+    uint16_t type;
+    uint16_t length;
+    uint32_t srReqSn; // Stream Reset Request Sequence Number
+} __PACKED__;
+
+
+struct stream_reset_response_parameter {
+    uint16_t type;
+    uint16_t length;
+    uint32_t srResSn; // Stream Reset Response Sequence Number
+    uint32_t result;
+    uint32_t sendersNextTsn;
+    uint32_t receiversNextTsn;
+} __PACKED__;
+
 
 struct data_vector {
     uint8_t data[0];

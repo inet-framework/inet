@@ -125,7 +125,7 @@ void SCTPSocket::bindx(AddressVector lAddresses, int lPort)
     sockstate = CLOSED;
 }
 
-void SCTPSocket::listen(bool fork, uint32 requests, uint32 messagesToPush)
+void SCTPSocket::listen(bool fork, bool reset, uint32 requests, uint32 messagesToPush)
 {
     if (sockstate!=CLOSED)
         throw cRuntimeError(sockstate==NOT_BOUND ? "SCTPSocket: must call bind() before listen()"
@@ -145,6 +145,7 @@ void SCTPSocket::listen(bool fork, uint32 requests, uint32 messagesToPush)
     openCmd->setInboundStreams(inboundStreams);
     openCmd->setOutboundStreams(outboundStreams);
     openCmd->setNumRequests(requests);
+    openCmd->setStreamReset(reset);
     openCmd->setMessagesToPush(messagesToPush);
     msg->setControlInfo(openCmd);
     sctpEV3<<"Assoc "<<openCmd->getAssocId()<<"::send PassiveOPEN to SCTP from socket:listen \n";
@@ -153,7 +154,7 @@ void SCTPSocket::listen(bool fork, uint32 requests, uint32 messagesToPush)
     sockstate = LISTENING;
 }
 
-void SCTPSocket::connect(IPvXAddress remoteAddress, int32 remotePort, int32 prMethod, uint32 numRequests)
+void SCTPSocket::connect(IPvXAddress remoteAddress, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests)
 {
     sctpEV3<<"Socket connect. Assoc="<<assocId<<", sockstate="<<sockstate<<"\n";
     if (oneToOne && sockstate!=NOT_BOUND && sockstate!=CLOSED)
@@ -180,6 +181,7 @@ void SCTPSocket::connect(IPvXAddress remoteAddress, int32 remotePort, int32 prMe
     openCmd->setInboundStreams(inboundStreams);
     openCmd->setNumRequests(numRequests);
     openCmd->setPrMethod(prMethod);
+    openCmd->setStreamReset(streamReset);
     msg->setControlInfo(openCmd);
     sendToSCTP(msg);
     if (oneToOne)
@@ -187,7 +189,7 @@ void SCTPSocket::connect(IPvXAddress remoteAddress, int32 remotePort, int32 prMe
 }
 
 
-void SCTPSocket::connectx(AddressVector remoteAddressList, int32 remotePort, int32 prMethod, uint32 numRequests)
+void SCTPSocket::connectx(AddressVector remoteAddressList, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests)
 {
     sctpEV3<<"Socket connectx.  sockstate="<<sockstate<<"\n";
     /*if (sockstate!=NOT_BOUND && sockstate!=CLOSED)
@@ -213,6 +215,7 @@ void SCTPSocket::connectx(AddressVector remoteAddressList, int32 remotePort, int
     openCmd->setOutboundStreams(outboundStreams);
     openCmd->setNumRequests(numRequests);
     openCmd->setPrMethod(prMethod);
+    openCmd->setStreamReset(streamReset);
     msg->setControlInfo(openCmd);
     sendToSCTP(msg);
     if (oneToOne)
@@ -454,6 +457,9 @@ void SCTPSocket::processMessage(cPacket *msg)
             delete cmd;
             break;
         }
+        case SCTP_I_RCV_STREAMS_RESETTED:
+        case SCTP_I_SEND_STREAMS_RESETTED:
+        case SCTP_I_RESET_REQUEST_FAILED: break;
         case SCTP_I_ADDRESS_ADDED:
         {
             SCTPCommand* cmd=check_and_cast<SCTPCommand*>(msg->removeControlInfo());

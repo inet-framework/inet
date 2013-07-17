@@ -181,14 +181,14 @@ class  INET_API SCTPSocket
      * connection will be accepted, and SCTP will refuse subsequent ones.
      * See SCTPOpenCommand documentation (neddoc) for more info.
      */
-    void listen(bool fork = false, uint32 requests = 0, uint32 messagesToPush = 0);
+    void listen(bool fork=false, bool streamReset=false, uint32 requests=0, uint32 messagesToPush=0);
 
     /**
      * Active OPEN to the given remote socket.
      */
-    void connect(IPvXAddress remoteAddress, int32 remotePort, int32 prMethod, uint32 numRequests);
+    void connect(IPvXAddress remoteAddress, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests);
 
-    void connectx(AddressVector remoteAddresses, int32 remotePort, int32 prMethod=0, uint32 numRequests = 0);
+    void connectx(AddressVector remoteAddresses, int32 remotePort, bool streamReset=false, int32 prMethod=0, uint32 numRequests = 0);
 
     /**
      * Sends data packet.

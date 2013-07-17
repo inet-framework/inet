@@ -897,5 +897,7 @@ void SCTP::finish()
         recordScalar("Number of AUTH chunks sent", assoc.numAuthChunksSent);
         recordScalar("Number of AUTH chunks accepted", assoc.numAuthChunksAccepted);
         recordScalar("Number of AUTH chunks rejected", assoc.numAuthChunksRejected);
+        recordScalar("Number of StreamReset requests sent", assoc.numResetRequestsSent);
+        recordScalar("Number of StreamReset requests performed", assoc.numResetRequestsPerformed);
     }
 }

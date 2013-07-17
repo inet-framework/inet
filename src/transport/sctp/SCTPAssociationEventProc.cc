@@ -52,6 +52,7 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
             rAddr = openCmd->getRemoteAddr();
         localPort = openCmd->getLocalPort();
         remotePort = openCmd->getRemotePort();
+        state->streamReset = openCmd->getStreamReset();
         state->prMethod = openCmd->getPrMethod();
         state->numRequests = openCmd->getNumRequests();
         if (rAddr.isUnspecified() || remotePort==0)
@@ -96,6 +97,7 @@ void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sc
             inboundStreams = openCmd->getInboundStreams();
             outboundStreams = openCmd->getOutboundStreams();
             state->localRwnd = (long)sctpMain->par("arwnd");
+            state->streamReset = openCmd->getStreamReset();
             state->numRequests = openCmd->getNumRequests();
             state->messagesToPush = openCmd->getMessagesToPush();
 
@@ -320,6 +322,17 @@ void SCTPAssociation::process_PRIMARY(SCTPEventCode& event, SCTPCommand *sctpCom
     state->setPrimaryPath(getPath(pinfo->getRemoteAddress()));
 }
 
+void SCTPAssociation::process_STREAM_RESET(SCTPCommand *sctpCommand)
+{
+    sctpEV3 << "process_STREAM_RESET request arriving from App\n";
+    SCTPResetInfo *rinfo = check_and_cast<SCTPResetInfo *>(sctpCommand);
+    if (!(getPath(remoteAddr)->ResetTimer->isScheduled()))
+    {
+        sendStreamResetRequest(rinfo->getRequestType());
+        if (rinfo->getRequestType()==RESET_OUTGOING || rinfo->getRequestType()==RESET_BOTH || rinfo->getRequestType()==SSN_TSN)
+            state->resetPending = true;
+    }
+}
 
 void SCTPAssociation::process_QUEUE_MSGS_LIMIT(const SCTPCommand* sctpCommand)
 {

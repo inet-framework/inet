@@ -42,7 +42,8 @@ enum SctpCommandCode
     SCTP_C_QUEUE_MSGS_LIMIT     = 13,   // set send queue limit (in messages)
     SCTP_C_SHUTDOWN             = 14,
     SCTP_C_NO_OUTSTANDING       = 15,
-    SCTP_C_SEND_ASCONF       = 19
+    SCTP_C_STREAM_RESET         = 16,   // send StreamResetChunk
+    SCTP_C_SEND_ASCONF          = 19
 };
 
 //
@@ -69,7 +70,10 @@ enum SctpStatusInd
     SCTP_I_SENDQUEUE_FULL       = 14,
     SCTP_I_SENDQUEUE_ABATED     = 15,
     SCTP_I_ABANDONED            = 16,
-    SCTP_I_ADDRESS_ADDED = 20 // used for AddIP
+    SCTP_I_SEND_STREAMS_RESETTED = 17,
+    SCTP_I_RCV_STREAMS_RESETTED = 18,
+    SCTP_I_RESET_REQUEST_FAILED = 19,
+    SCTP_I_ADDRESS_ADDED = 20 // used for AddIP and multihomed NAT
 };
 
 enum SCTPFlags

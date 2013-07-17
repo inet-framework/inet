@@ -210,6 +210,67 @@ void SCTPErrorChunk::clean()
     }
 }
 
+Register_Class(SCTPStreamResetChunk);
+
+SCTPStreamResetChunk& SCTPStreamResetChunk::operator=(const SCTPStreamResetChunk& other)
+{
+    SCTPStreamResetChunk_Base::operator=(other);
+
+    this->setBitLength(SCTP_STREAM_RESET_CHUNK_LENGTH*8);
+    for (std::list<cPacket*>::const_iterator i=other.parameterList.begin(); i!=other.parameterList.end(); ++i)
+        addParameter((cPacket *)(*i)->dup());
+
+    return *this;
+}
+
+void SCTPStreamResetChunk::setParametersArraySize(const uint32 size)
+{
+    throw new cException(this, "setParametersArraySize() not supported, use addParameter()");
+}
+
+uint32 SCTPStreamResetChunk::getParametersArraySize() const
+{
+    return parameterList.size();
+}
+
+cPacketPtr& SCTPStreamResetChunk::getParameters(uint32 k)
+{
+    std::list<cPacket*>::iterator i = parameterList.begin();
+    while (k>0 && i!=parameterList.end())
+        (++i, --k);
+    return *i;
+}
+
+void SCTPStreamResetChunk::setParameters(const uint32 k, const cPacketPtr& chunks_var)
+{
+    throw new cException(this, "setParameters() not supported, use addParameter()");
+}
+
+void SCTPStreamResetChunk::addParameter(cPacket* msg)
+{
+    take(msg);
+    if (this->parameterList.size()<2)
+    {
+        this->setBitLength(this->getBitLength()+ADD_PADDING(msg->getBitLength()));
+        parameterList.push_back(msg);
+    }
+    else
+        throw cRuntimeError("Not more than two parameters allowed!");
+}
+
+cPacket *SCTPStreamResetChunk::removeParameter()
+{
+    if (parameterList.empty())
+        return NULL;
+
+    cPacket *msg = parameterList.front();
+    parameterList.pop_front();
+    drop(msg);
+    this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
+    return msg;
+}
+
+
 Register_Class(SCTPAsconfChunk);
 
 SCTPAsconfChunk& SCTPAsconfChunk::operator=(const SCTPAsconfChunk& other)

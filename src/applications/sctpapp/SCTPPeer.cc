@@ -31,6 +31,7 @@
 #define MSGKIND_SEND     1
 #define MSGKIND_ABORT    2
 #define MSGKIND_PRIMARY  3
+#define MSGKIND_RESET    4
 #define MSGKIND_STOP     5
 
 Define_Module(SCTPPeer);
@@ -105,7 +106,7 @@ void SCTPPeer::initialize()
         socket->bindx(addresses, port);
         clientSocket.bindx(addresses, port);
     }
-    socket->listen(true, par("numPacketsToSendPerClient").longValue());
+    socket->listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient"));
     sctpEV3 << "SCTPPeer::initialized listen port=" << port << "\n";
     clientSocket.setCallbackObject(this);
     clientSocket.setOutputGate(gate("sctpOut"));
@@ -175,8 +176,18 @@ void SCTPPeer::connect()
     sctpEV3 << "issuing OPEN command\n";
     sctpEV3 << "Assoc " << clientSocket.getConnectionId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
     numSessions++;
-    clientSocket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+    bool streamReset = par("streamReset");
+    clientSocket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
 
+    if (!streamReset)
+        streamReset = false;
+    else if (streamReset == true)
+    {
+        cMessage* cmsg = new cMessage("StreamReset");
+        cmsg->setKind(MSGKIND_RESET);
+        sctpEV3 << "StreamReset Timer scheduled at " << simulation.getSimTime() << "\n";
+        scheduleAt(simulation.getSimTime()+(double)par("streamRequestTime"), cmsg);
+    }
 }
 
 void SCTPPeer::handleMessage(cMessage *msg)
@@ -420,7 +431,12 @@ void SCTPPeer::handleMessage(cMessage *msg)
             delete msg;
             break;
         }
-
+        case SCTP_I_SEND_STREAMS_RESETTED:
+        case SCTP_I_RCV_STREAMS_RESETTED:
+        {
+            ev << "Streams have been resetted\n";
+            break;
+        }
         case SCTP_I_CLOSED:
             delete msg;
             break;
@@ -746,5 +762,25 @@ void SCTPPeer::finish()
 
     ev << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     ev << getFullPath() << "Over all " << notifications << " notifications received\n ";
+
+    for (BytesPerAssoc::iterator j = bytesPerAssoc.begin(); j != bytesPerAssoc.end(); j++)
+    {
+        delete j->second;
+        bytesPerAssoc.erase(j);
+    }
+    for (EndToEndDelay::iterator k = endToEndDelay.begin(); k != endToEndDelay.end(); k++)
+    {
+        delete k->second;
+        endToEndDelay.erase(k);
+    }
+    for (HistEndToEndDelay::iterator l = histEndToEndDelay.begin(); l != histEndToEndDelay.end(); l++)
+    {
+        delete l->second;
+        histEndToEndDelay.erase(l);
+    }
+    rcvdPacketsPerAssoc.clear();
+    sentPacketsPerAssoc.clear();
+    rcvdBytesPerAssoc.clear();
+
 }
 

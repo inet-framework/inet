@@ -133,6 +133,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         void shutdownReceivedArrived(int32 connId);
         void sendqueueFullArrived(int32 connId);
         void msgAbandonedArrived(int32 assocId);
+        void sendStreamResetNotification();
 
         void setStatusString(const char *s);
         void addressAddedArrived(int32 assocId, IPvXAddress remoteAddr);

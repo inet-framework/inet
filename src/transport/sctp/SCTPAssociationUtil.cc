@@ -140,6 +140,7 @@ const char* SCTPAssociation::eventName(const int32 event)
         CASE(SCTP_E_DELIVERED);
         CASE(SCTP_E_SEND_SHUTDOWN_ACK);
         CASE(SCTP_E_STOP_SENDING);
+        CASE(SCTP_E_STREAM_RESET);
         CASE(SCTP_E_SEND_ASCONF);
     }
     return s;
@@ -166,6 +167,9 @@ const char* SCTPAssociation::indicationName(const int32 code)
         CASE(SCTP_I_SENDQUEUE_FULL);
         CASE(SCTP_I_SENDQUEUE_ABATED);
         CASE(SCTP_I_ABANDONED);
+        CASE(SCTP_I_SEND_STREAMS_RESETTED);
+        CASE(SCTP_I_RCV_STREAMS_RESETTED);
+        CASE(SCTP_I_RESET_REQUEST_FAILED);
         CASE(SCTP_I_ADDRESS_ADDED);
     }
     return s;
@@ -191,6 +195,7 @@ uint32 SCTPAssociation::chunkToInt(const char* type)
     if (strcmp(type, "AUTH")==0) return 15;
     if (strcmp(type, "NR-SACK")==0) return 16;
     if (strcmp(type, "ASCONF_ACK")==0) return 128;
+    if (strcmp(type, "STREAM_RESET")==0) return 130;
     if (strcmp(type, "FORWARD_TSN")==0) return 192;
     if (strcmp(type, "ASCONF")==0) return 193;
     sctpEV3<<"ChunkConversion not successful\n";
@@ -411,6 +416,7 @@ void SCTPAssociation::sendInit()
     initChunk->setInitTSN(1000);
     state->nextTSN = initChunk->getInitTSN();
     state->lastTSN = initChunk->getInitTSN() + state->numRequests - 1;
+    state->streamResetSequenceNumber = state->nextTSN;
     state->asconfSn = 1000;
 
     initTsn = initChunk->getInitTSN();
@@ -530,6 +536,10 @@ void SCTPAssociation::sendInit()
         length += initChunk->getChunkTypesArraySize()+46;
     }
 
+    if (state->streamReset == true) {
+        initChunk->setSepChunksArraySize(++count);
+        initChunk->setSepChunks(count-1, STREAM_RESET);
+    }
     if ((bool)sctpMain->par("addIP") == true) {
         initChunk->setSepChunksArraySize(++count);
         initChunk->setSepChunks(count-1, ASCONF);
@@ -619,6 +629,7 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
         state->nextTSN = initAckChunk->getInitTSN();
         state->lastTSN = initAckChunk->getInitTSN() + state->numRequests - 1;
         state->asconfSn = 2000;
+        state->streamResetSequenceNumber = state->nextTSN;
         cookie->setLocalTag(localVTag);
         cookie->setPeerTag(peerVTag);
         for (int32 i=0; i<32; i++)
@@ -724,6 +735,11 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
     else
         initAckChunk->setUnrecognizedParametersArraySize(0);
 
+    if (state->streamReset == true)
+    {
+        initAckChunk->setSepChunksArraySize(++count);
+        initAckChunk->setSepChunks(count-1, STREAM_RESET);
+    }
     if ((bool)sctpMain->par("addIP") == true)
     {
         initAckChunk->setSepChunksArraySize(++count);
@@ -1605,6 +1621,8 @@ void SCTPAssociation::removePath(const IPvXAddress& addr)
         stopTimer(path->CwndTimer);
         delete path->CwndTimer;
         sctpPathMap.erase(pathIterator);
+        stopTimer(path->ResetTimer);
+        delete path->ResetTimer;
         stopTimer(path->AsconfTimer);
         delete path->AsconfTimer;
         delete path;
@@ -1625,7 +1643,7 @@ void SCTPAssociation::deleteStreams()
 
 bool SCTPAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, const bool uBit)
 {
-    std::cout << simTime() << ":\tmakeRoomForTsn:"
+    sctpEV3 << simTime() << ":\tmakeRoomForTsn:"
             << " tsn=" << tsn
             << " length=" << length
             << " highestTSN=" << state->gapList.getHighestTSNReceived() << endl;
@@ -1643,7 +1661,7 @@ bool SCTPAssociation::makeRoomForTsn(const uint32 tsn, const uint32 length, cons
         // ====== New TSN is larger than highest one in GapList? ==============
         if (tsnGt(tsn, tryTSN)) {
             // There is no space for a TSN that high!
-            std::cout << "makeRoomForTsn:"
+            sctpEV3 << "makeRoomForTsn:"
                     << " tsn=" << tryTSN
                     << " tryTSN=" << tryTSN << " -> no space" << endl;
             return false;
@@ -1814,7 +1832,7 @@ bool SCTPAssociation::chunkMustBeAbandoned(SCTPDataVariables* chunk, SCTPPathVar
 	    case PR_TTL:
             if (chunk->expiryTime > 0 && chunk->expiryTime <= simTime()) {
                 if (!chunk->hasBeenAbandoned) {
-                    std::cout << "TSN " << chunk->tsn << " will be abandoned"
+                    sctpEV3 << "TSN " << chunk->tsn << " will be abandoned"
                                       << " (expiryTime=" << chunk->expiryTime
                                       << " sendTime=" << chunk->sendTime << ")" << endl;
                     chunk->hasBeenAbandoned = true;
@@ -1862,7 +1880,7 @@ SCTPDataVariables* SCTPAssociation::peekAbandonedChunk(const SCTPPathVariables* 
                         case PR_TTL:
                             if (chunk->expiryTime > 0 && chunk->expiryTime <= simTime()) {
                                 if (!chunk->hasBeenAbandoned) {
-                                    std::cout << "TSN " << chunk->tsn << " will be abandoned"
+                                    sctpEV3 << "TSN " << chunk->tsn << " will be abandoned"
                                             << " (expiryTime=" << chunk->expiryTime
                                             << " sendTime=" << chunk->sendTime << ")" << endl;
                                     chunk->hasBeenAbandoned = true;
@@ -1873,7 +1891,7 @@ SCTPDataVariables* SCTPAssociation::peekAbandonedChunk(const SCTPPathVariables* 
                         case PR_RTX:
                             if (chunk->hasBeenFastRetransmitted && chunk->numberOfRetransmissions >= chunk->allowedNoRetransmissions) {
                                 if (!chunk->hasBeenAbandoned) {
-                                    std::cout << "peekAbandonedChunk: TSN " << chunk->tsn << " will be abandoned"
+                                    sctpEV3 << "peekAbandonedChunk: TSN " << chunk->tsn << " will be abandoned"
                                             << " (maxRetransmissions=" << chunk->allowedNoRetransmissions << ")" << endl;
                                     chunk->hasBeenAbandoned = true;
                                     sendIndicationToApp(SCTP_I_ABANDONED);
@@ -1963,6 +1981,7 @@ SCTPDataMsg* SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables* path,
                         datMsgFragment->setEnqueuingTime(datMsgQueued->getEnqueuingTime());
                         datMsgFragment->setPrMethod(datMsgQueued->getPrMethod());
                         datMsgFragment->setPriority(datMsgQueued->getPriority());
+                        datMsgFragment->setStrReset(datMsgQueued->getStrReset());
                         datMsgFragment->setMsgNum(datMsgQueued->getMsgNum());
                         datMsgFragment->setOrdered(datMsgQueued->getOrdered());
                         datMsgFragment->setExpiryTime(datMsgQueued->getExpiryTime());
@@ -2166,7 +2185,7 @@ SCTPPathVariables* SCTPAssociation::getNextDestination(SCTPDataVariables* chunk)
     }
     else {
         if (chunk->hasBeenFastRetransmitted) {
-            sctpEV3 << "Chunk is scheduled for FastRetransmission. Next destination = "
+            sctpEV3 << "Chunk " << chunk->tsn << " is scheduled for FastRetransmission. Next destination = "
                       << chunk->getLastDestination() << endl;
             return (chunk->getLastDestinationPath());
         }

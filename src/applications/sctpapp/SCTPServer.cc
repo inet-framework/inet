@@ -78,7 +78,7 @@ void SCTPServer::initialize()
     else
         socket->bindx(addresses, port);
 
-    socket->listen(true, par("numPacketsToSendPerClient").longValue(), messagesToPush);
+    socket->listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient"), messagesToPush);
     sctpEV3 << "SCTPServer::initialized listen port=" << port << "\n";
     schedule = false;
     shutdownReceived = false;
@@ -424,6 +424,14 @@ void SCTPServer::handleMessage(cMessage *msg)
                 delete msg;
                 break;
             }
+            case SCTP_I_SEND_STREAMS_RESETTED:
+            case SCTP_I_RCV_STREAMS_RESETTED:
+            {
+                ev << "Streams have been resetted\n";
+                delete msg;
+                break;
+            }
+
             case SCTP_I_CLOSED:
                 if (delayTimer->isScheduled())
                     cancelEvent(delayTimer);

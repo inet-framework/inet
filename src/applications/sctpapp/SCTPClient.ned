@@ -45,6 +45,10 @@ simple SCTPClient like ISCTPApp
         int queueSize = default(0);
         int prMethod = default(0);  //0=NONE, 1=PR_TTL, 2=PR_RTX, 3=PR_PRIO, 4=PR_STRRST
         double prValue = default(0); //for PR-SCTP
+        bool streamReset = default(false);
+        double streamRequestTime @unit(s) = default(0s);
+        int streamResetType = default(5);  //NO_RESET=5, RESET_OUTGOING=6, RESET_INCOMING=7, RESET_BOTH=8, SSN_TSN=9
+        bool streamAnswer = default(false);
         double stopTime @unit(s) = default(0s);
         double primaryTime @unit(s) = default(0s);
         string newPrimary = default("");

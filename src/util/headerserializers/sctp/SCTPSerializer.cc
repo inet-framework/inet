@@ -728,6 +728,91 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         writtenbytes += ADD_PADDING(error->length);
                     break;
                 }
+                case STREAM_RESET:
+                {
+                    SCTPStreamResetChunk* streamReset = check_and_cast<SCTPStreamResetChunk*>(chunk);
+                    struct stream_reset_chunk* stream = (struct stream_reset_chunk*)(buf + writtenbytes);
+                    writtenbytes += (streamReset->getByteLength());
+                    stream->type = streamReset->getChunkType();
+                    stream->length = htons(streamReset->getByteLength());
+                    int parPtr = 0;
+                    for (unsigned int i=0; i<streamReset->getParametersArraySize(); i++)
+                    {
+                        SCTPParameter* parameter = check_and_cast<SCTPParameter*>(streamReset->getParameters(i));
+                        switch (parameter->getParameterType())
+                        {
+                            case OUTGOING_RESET_REQUEST_PARAMETER:
+                            {
+                                SCTPOutgoingSSNResetRequestParameter* outparam = check_and_cast<SCTPOutgoingSSNResetRequestParameter*>(parameter);
+                                struct outgoing_reset_request_parameter* out = (outgoing_reset_request_parameter*)  (((unsigned char *)stream) + sizeof(struct stream_reset_chunk) + parPtr);
+                                out->type = htons(outparam->getParameterType());
+                                out->srReqSn = htonl(outparam->getSrReqSn());
+                                out->srResSn = htonl(outparam->getSrResSn());
+                                out->lastTsn = htonl(outparam->getLastTsn());
+                                parPtr += sizeof(struct outgoing_reset_request_parameter);
+                                if (outparam->getStreamNumbersArraySize() > 0)
+                                {
+                                    for (unsigned int j=0; j<outparam->getStreamNumbersArraySize(); j++)
+                                    {
+                                        out->streamNumbers[j*2] = htons(outparam->getStreamNumbers(j));
+
+                                    }
+                                    parPtr += ADD_PADDING(outparam->getStreamNumbersArraySize()*2);
+                                }
+                                out->length = htons(sizeof(struct outgoing_reset_request_parameter) + outparam->getStreamNumbersArraySize()*2);
+                                break;
+                            }
+                            case INCOMING_RESET_REQUEST_PARAMETER:
+                            {
+                                SCTPIncomingSSNResetRequestParameter* inparam = check_and_cast<SCTPIncomingSSNResetRequestParameter*>(parameter);
+                                struct incoming_reset_request_parameter* in = (incoming_reset_request_parameter*)  (((unsigned char *)stream) + sizeof(struct stream_reset_chunk) + parPtr);
+                                in->type = htons(inparam->getParameterType());
+                                in->srReqSn = htonl(inparam->getSrReqSn());
+                                parPtr += sizeof(struct incoming_reset_request_parameter);
+                                if (inparam->getStreamNumbersArraySize() > 0)
+                                {
+                                    for (unsigned int j=0; j<inparam->getStreamNumbersArraySize(); j++)
+                                    {
+                                        in->streamNumbers[j*2] = htons(inparam->getStreamNumbers(j));
+
+                                    }
+                                    parPtr += ADD_PADDING(inparam->getStreamNumbersArraySize()*2);
+                                }
+                                in->length = htons(sizeof(struct incoming_reset_request_parameter) + inparam->getStreamNumbersArraySize()*2);
+                                break;
+                            }
+                            case SSN_TSN_RESET_REQUEST_PARAMETER:
+                            {
+                                SCTPSSNTSNResetRequestParameter* ssnparam = check_and_cast<SCTPSSNTSNResetRequestParameter*>(parameter);
+                                struct ssn_tsn_reset_request_parameter* ssn = (struct ssn_tsn_reset_request_parameter*) (((unsigned char *)stream) + sizeof(struct stream_reset_chunk) + parPtr);
+                                ssn->type = htons(ssnparam->getParameterType());
+                                ssn->length = htons(4);
+                                ssn->srReqSn = htonl(ssnparam->getSrReqSn());
+                                parPtr += sizeof(struct ssn_tsn_reset_request_parameter);
+                                break;
+                            }
+                            case STREAM_RESET_RESPONSE_PARAMETER:
+                            {
+                                SCTPStreamResetResponseParameter* response = check_and_cast<SCTPStreamResetResponseParameter*>(parameter);
+                                struct stream_reset_response_parameter* resp = (struct stream_reset_response_parameter*) (((unsigned char *)stream) + sizeof(struct stream_reset_chunk) + parPtr);
+                                resp->type = htons(response->getParameterType());
+                                resp->srResSn = htonl(response->getSrResSn());
+                                resp->result = htonl(response->getResult());
+                                resp->length = htons(12);
+                                parPtr += 12;
+                                if (response->getSendersNextTsn()!=0)
+                                {
+                                    resp->sendersNextTsn = htonl(response->getSendersNextTsn());
+                                    resp->receiversNextTsn = htonl(response->getReceiversNextTsn());
+                                    resp->length = htons(20);
+                                    parPtr += 8;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
                 default:
                     printf("Serialize TODO: Implement for outgoing chunk type %d!\n", chunkType);
                     throw new cRuntimeError("TODO: unknown chunktype in outgoing packet on external interface! Implement it!");
@@ -795,6 +880,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
     int size_addip_parameter = sizeof(struct add_ip_parameter);
     int size_asconf_ack_chunk = sizeof(struct asconf_ack_chunk);
     int size_auth_chunk = sizeof(struct auth_chunk);
+    int size_stream_reset_chunk = sizeof(struct stream_reset_chunk);
     uint16 paramType;
     int32 parptr, chunklen, cLen, woPadding;
     struct common_header *common_header = (struct common_header*) (buf);
@@ -1689,6 +1775,115 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                             ev << "ExtInterface: Unknown SCTP parameter type " << paramType;
                             break;
 
+                        }
+                        parptr += ADD_PADDING(paramLength);
+                        parcounter++;
+                    }
+                }
+                chunk->setByteLength(cLen);
+                dest->addChunk(chunk);
+                break;
+            }
+            case STREAM_RESET:
+            {
+                const struct stream_reset_chunk *stream_reset_chunk;
+                stream_reset_chunk = (struct stream_reset_chunk*) (chunks + chunkPtr);
+                SCTPStreamResetChunk *chunk;
+                chunk = new SCTPStreamResetChunk("STREAM_RESET");
+                chunk->setChunkType(chunkType);
+                chunk->setName("STREAM_RESET");
+                chunk->setByteLength(SCTP_STREAM_RESET_CHUNK_LENGTH);
+                chunklen = SCTP_STREAM_RESET_CHUNK_LENGTH;
+                int len;
+                if((unsigned int)cLen > sizeof(struct stream_reset_chunk))
+                {
+                    parptr = 0;
+                    int parcounter = 0;
+                    int snnumbers, sncounter;
+                    while(cLen > size_stream_reset_chunk+parptr)
+                    {
+                        const struct tlv *parameter = (struct tlv*)(((unsigned char*)stream_reset_chunk) + size_stream_reset_chunk + parptr);
+                        paramType = ntohs(parameter->type);
+                        int paramLength = ntohs(parameter->length);
+                        switch (paramType)
+                        {
+                        case OUTGOING_RESET_REQUEST_PARAMETER:
+                        {
+                            const struct outgoing_reset_request_parameter *outrr;
+                            outrr = (struct outgoing_reset_request_parameter*) (((unsigned char*)stream_reset_chunk) + size_stream_reset_chunk + parptr);
+                            SCTPOutgoingSSNResetRequestParameter* outstrrst;
+                            outstrrst = new SCTPOutgoingSSNResetRequestParameter("OUT_STR_RST");
+                            outstrrst->setParameterType(OUTGOING_RESET_REQUEST_PARAMETER);
+                            outstrrst->setSrReqSn(ntohl(outrr->srReqSn)); //Stream Reset Request Sequence Number
+                            outstrrst->setSrResSn(ntohl(outrr->srResSn)); //Stream Reset Response Sequence Number
+                            outstrrst->setLastTsn(ntohl(outrr->lastTsn)); //Senders last assigned TSN
+                            chunklen+=SCTP_OUTGOING_RESET_REQUEST_PARAMETER_LENGTH;
+                            len = SCTP_OUTGOING_RESET_REQUEST_PARAMETER_LENGTH;
+                            sncounter = 0;
+                            while (ntohs(outrr->length) > len)
+                            {
+                                snnumbers = (int)*(chunks + chunkPtr+size_stream_reset_chunk+parptr+SCTP_OUTGOING_RESET_REQUEST_PARAMETER_LENGTH+sncounter*2);
+                                outstrrst->setStreamNumbersArraySize(++sncounter);
+                                outstrrst->setStreamNumbers(sncounter-1, snnumbers);
+                                chunklen +=2;
+                                len+=2;
+                            }
+                            chunk->addParameter(outstrrst);
+                            break;
+                        }
+                        case INCOMING_RESET_REQUEST_PARAMETER:
+                        {
+                            const struct incoming_reset_request_parameter *inrr;
+                            inrr = (struct incoming_reset_request_parameter*) (((unsigned char*)stream_reset_chunk) + size_stream_reset_chunk + parptr);
+                            SCTPIncomingSSNResetRequestParameter* instrrst;
+                            instrrst = new SCTPIncomingSSNResetRequestParameter("IN_STR_RST");
+                            instrrst->setParameterType(INCOMING_RESET_REQUEST_PARAMETER);
+                            instrrst->setSrReqSn(ntohl(inrr->srReqSn)); //Stream Reset Request Sequence Number
+                            chunklen+=SCTP_OUTGOING_RESET_REQUEST_PARAMETER_LENGTH;
+                            len = SCTP_INCOMING_RESET_REQUEST_PARAMETER_LENGTH;
+                            while (ntohs(inrr->length) > len)
+                            {
+                                snnumbers = (int)*(chunks + chunkPtr+size_stream_reset_chunk+parptr+SCTP_OUTGOING_RESET_REQUEST_PARAMETER_LENGTH+sncounter*2);
+                                instrrst->setStreamNumbersArraySize(++sncounter);
+                                instrrst->setStreamNumbers(sncounter-1, snnumbers);
+                                chunklen +=2;
+                                len+=2;
+                            }
+                            chunk->addParameter(instrrst);
+                            break;
+                        }
+                        case SSN_TSN_RESET_REQUEST_PARAMETER:
+                        {
+                            const struct ssn_tsn_reset_request_parameter *ssnrr;
+                            ssnrr = (struct ssn_tsn_reset_request_parameter*) (((unsigned char*)stream_reset_chunk) + size_stream_reset_chunk + parptr);
+                            SCTPSSNTSNResetRequestParameter* ssnstrrst;
+                            ssnstrrst = new SCTPSSNTSNResetRequestParameter("SSN_STR_RST");
+                            ssnstrrst->setParameterType(SSN_TSN_RESET_REQUEST_PARAMETER);
+                            ssnstrrst->setSrReqSn(ntohl(ssnrr->srReqSn));
+                            chunklen+=SCTP_SSN_TSN_RESET_REQUEST_PARAMETER_LENGTH;
+                            chunk->addParameter(ssnstrrst);
+                            break;
+                        }
+                        case STREAM_RESET_RESPONSE_PARAMETER:
+                        {
+                            const struct stream_reset_response_parameter *resp;
+                            resp = (struct stream_reset_response_parameter*) (((unsigned char*)stream_reset_chunk) + size_stream_reset_chunk + parptr);
+                            SCTPStreamResetResponseParameter* strrst;
+                            strrst = new SCTPStreamResetResponseParameter("STR_RST_RESPONSE");
+                            strrst->setParameterType(STREAM_RESET_RESPONSE_PARAMETER);
+                            strrst->setSrResSn(ntohl(resp->srResSn));
+                            strrst->setResult(ntohl(resp->result));
+                            int pLen = SCTP_STREAM_RESET_RESPONSE_PARAMETER_LENGTH;
+                            if (cLen > size_stream_reset_chunk + parptr + SCTP_STREAM_RESET_RESPONSE_PARAMETER_LENGTH)
+                            {
+                                strrst->setSendersNextTsn(ntohl(resp->sendersNextTsn));
+                                strrst->setReceiversNextTsn(ntohl(resp->receiversNextTsn));
+                                pLen += 8;
+                            }
+                            strrst->setByteLength(pLen);
+                            chunk->addParameter(strrst);
+                            break;
+                        }
                         }
                         parptr += ADD_PADDING(paramLength);
                         parcounter++;
