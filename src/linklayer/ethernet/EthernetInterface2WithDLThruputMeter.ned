@@ -22,7 +22,7 @@ package inet.linklayer.ethernet;
 
 import inet.linklayer.INetworkInterface;
 import inet.networklayer.queue.OutputQueue;
-import inet.linklayer.ppp.ThruputMeter;
+import inet.linklayer.ppp.ThruputMeter2;
 
 
 //
@@ -56,7 +56,7 @@ module EthernetInterface2WithDLThruputMeter like INetworkInterface
             parameters:
                 @display("p=116,103");
         }
-        thruputMeter: ThruputMeter {
+        thruputMeter: ThruputMeter2 {
             parameters:
                 @display("p=187,157");
         }

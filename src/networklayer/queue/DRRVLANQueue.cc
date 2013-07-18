@@ -124,7 +124,7 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
         {
             numPktsReceived[flowIndex]++;
         }
-        int pktLength = (check_and_cast<cPacket *>(msg))->getBitLength();
+        int pktLength = PK(msg)->getBitLength();
 // DEBUG
         ASSERT(pktLength > 0);
 // DEBUG
@@ -235,7 +235,7 @@ cMessage *DRRVLANQueue::dequeue()
             if (!queues[idx]->isEmpty())
             {
                 deficitCounters[idx] += quanta[idx];
-                int pktLength = (check_and_cast<cPacket *>(queues[idx]->front()))->getByteLength();
+                int pktLength = PK(queues[idx]->front())->getByteLength();
                 if (deficitCounters[idx] >= pktLength)
                 {
                     currentQueueIndex = idx;
@@ -278,7 +278,7 @@ void DRRVLANQueue::requestPacket()
         if (warmupFinished == true)
         {
             int flowIndex = classifier->classifyPacket(msg);    // TODO: any more efficient way?
-            numBitsSent[flowIndex] += (check_and_cast<cPacket *>(msg))->getBitLength();
+            numBitsSent[flowIndex] += PK(msg)->getBitLength();
             numPktsSent[flowIndex]++;
         }
         sendOut(msg);
@@ -287,27 +287,27 @@ void DRRVLANQueue::requestPacket()
 
 void DRRVLANQueue::finish()
 {
-    unsigned long sumQueueReceived = 0;
-    unsigned long sumQueueDropped = 0;
-    unsigned long sumQueueShaped = 0;
+    unsigned long sumPktsReceived = 0;
+    unsigned long sumPktsDropped = 0;
+    unsigned long sumPktsNonconformed = 0;
 
     for (int i=0; i < numFlows; i++)
     {
-        std::stringstream ss_received, ss_dropped, ss_shaped, ss_sent, ss_throughput;
-        ss_received << "packets received by per-VLAN queue[" << i << "]";
-        ss_dropped << "packets dropped by per-VLAN queue[" << i << "]";
-        ss_shaped << "packets shaped by per-VLAN queue[" << i << "]";
-        ss_sent << "packets sent by per-VLAN queue[" << i << "]";
-        ss_throughput << "bits/sec sent per-VLAN queue[" << i << "]";
+        std::stringstream ss_received, ss_dropped, ss_nonconformed, ss_sent, ss_throughput;
+        ss_received << "packets received from flow[" << i << "]";
+        ss_dropped << "packets dropped from flow[" << i << "]";
+        ss_nonconformed << "packets non-conformed from flow[" << i << "]";
+        ss_sent << "packets sent from flow[" << i << "]";
+        ss_throughput << "bits/sec sent from flow[" << i << "]";
         recordScalar((ss_received.str()).c_str(), numPktsReceived[i]);
         recordScalar((ss_dropped.str()).c_str(), numPktsDropped[i]);
-        recordScalar((ss_shaped.str()).c_str(), numPktsReceived[i]-numPktsConformed[i]);
+        recordScalar((ss_nonconformed.str()).c_str(), numPktsReceived[i]-numPktsConformed[i]);
         recordScalar((ss_sent.str()).c_str(), numPktsSent[i]);
         recordScalar((ss_throughput.str()).c_str(), numBitsSent[i]/(simTime()-simulation.getWarmupPeriod()).dbl());
-        sumQueueReceived += numPktsReceived[i];
-        sumQueueDropped += numPktsDropped[i];
-        sumQueueShaped += numPktsReceived[i] - numPktsConformed[i];
+        sumPktsReceived += numPktsReceived[i];
+        sumPktsDropped += numPktsDropped[i];
+        sumPktsNonconformed += numPktsReceived[i] - numPktsConformed[i];
     }
-    recordScalar("overall packet loss rate of per-VLAN queues", sumQueueDropped/double(sumQueueReceived));
-    recordScalar("overall packet shaped rate of per-VLAN queues", sumQueueShaped/double(sumQueueReceived));
+    recordScalar("overall packet loss rate of per-VLAN queues", sumPktsDropped/double(sumPktsReceived));
+    recordScalar("overall packet shaped rate of per-VLAN queues", sumPktsNonconformed/double(sumPktsReceived));
 }

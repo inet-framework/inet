@@ -32,15 +32,18 @@ import inet.networklayer.queue.BasicTokenBucketMeter;
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 // @date   2013-07-01
 //
-simple CSFQVLANTokenBucketQueue like OutputQueue
+simple CSFQVLANQueue like OutputQueue
 {
     parameters:
         @labels(node,queue-node);
         @display("i=block/queue");
         int numFlows = default(1);	// number of flows (i.e., subscribers)
 //		int frameCapacity = default(100);
-        int queueSize @unit(b) = default(100000000b);  // FIFO queue size
-        int queueThreshold @unit(b) = default(50000000b);	// FIFO threshold to detect link congestion
+		double linkRate @unit(bps) = default(100Mbps);	// transmission rate of output link (i.e., feeder line rate (R_F))
+        int queueSize @unit(b) = default(121760000b);	// FIFO queue size; default value corresponds to 10000 frames of 1522B each.
+        int queueThreshold @unit(b) = default(30440000b);	// FIFO threshold to detect link congestion; default value is a quarter of default queueSize.
+        double K @unit(s) = default(100ms);	// averaging constant for flow rate estimation
+        double K_alpha @unit(s) = default(200ms);	// averaging constant for fair rate (alpha) estimation
         string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier
         string vids = default("");	// VIDs used for initialization of index table
     gates:

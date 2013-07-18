@@ -17,11 +17,11 @@
 //
 
 
-#ifndef __INET_CSFQVLANTOKENBUCKETQUEUE_H
-#define __INET_CSFQVLANTOKENBUCKETQUEUE_H
+#ifndef __INET_CSFQVLANQUEUE_H
+#define __INET_CSFQVLANQUEUE_H
 
 #include <omnetpp.h>
-#include <algorithm>
+//#include <algorithm>
 #include <sstream>
 #include <vector>
 #include "PassiveQueueBase.h"
@@ -73,32 +73,33 @@ typedef struct identHash {
  * bandwidth.
  * See NED for more info.
  */
-class INET_API CSFQVLANTokenBucketQueue : public PassiveQueueBase
+class INET_API CSFQVLANQueue : public PassiveQueueBase
 {
     typedef struct
     {
-        double alpha_;
-        double kLink_;
-        double lastArv_;
-        double lArv_;
-        double rate_;
-        double rateAlpha_;
-        double rateTotal_;
-        double tmpAlpha_;
-        int congested_;
-        int kalpha_;
-        int pktLength_;
-        int pktLengthE_;
+        double alpha;       // output link fair rate
+        double K_alpha;     // averaging interval for rate estimation
+        simtime_t lastArv;  // the arrival time of the last packet (in sec)
+        simtime_t startTime;    // used to store the start of an interval of length K_alpha
+        double linkRate;    // link rate (in bps)
+        double rateTotal;   // aggregate arrival rate (i.e., \hat{A})
+        double rateAlpha;   // aggregate forwarded rate corresponding to crt. alpha (i.e., \hat{F})
+        double tmpAlpha;    // used to compute the largest label of a packet, i.e., the largest flow rate seen during an interval of length K_alpha
+        bool congested;     // indicate whether the link is congested or not
+        int kalpha;        // maximum number of times the fair rate (alpha) can be decreased when the queue overflows, during a time interval of length K_alpha
+        int pktLength;      // the total number of bits enqueued between two consecutive rate estimations. usually, this represent the size of one packet;
+                            // however, if more packets are received at the same time this will represent the cumulative size of all packets received simultaneously
+        int pktLengthEnqueued;    // same as above, but for the total number of bytes that are enqueued between consecutive rate estimations
     } CSFQState;
 
     typedef struct
     {
-        double weight_;     // flow weight
-        double k_;// averaging interval for rate estimation
-        double estRate_;// estimated rate
-        double prevTime_;
+        double weight;  // flow weight (set to TB mean rate)
+        double K;   // averaging interval for rate estimation
+        double estRate[2];      // estimated rates; 0 for conformed and 1 for non-conformed packets
+        simtime_t prevTime[2];  // time of previously arrived packet; 0 for conformed and 1 for non-conformed packet
         // internal statistics
-        int size_;// keep track of packets that arrive at the same time
+        int sumPktSize;// keep track of packets that arrive at the same time
         int numArv_;// number of arrived packets
         int numDpt_;// number of dropped packets
         int numDropped_;// number of dropped packets
@@ -111,9 +112,6 @@ class INET_API CSFQVLANTokenBucketQueue : public PassiveQueueBase
     typedef std::vector<int> IntVector;
     typedef std::vector<long long> LongLongVector;
     typedef std::vector<BasicTokenBucketMeter *> TbmVector;
-    typedef std::vector<cMessage *> MsgVector;
-    typedef std::vector<cQueue *> QueueVector;
-    typedef std::vector<simtime_t> TimeVector;
 
   protected:
     // general
@@ -134,8 +132,6 @@ class INET_API CSFQVLANTokenBucketQueue : public PassiveQueueBase
     // CSFQ
     CSFQState csfq;    // CSFQ-related states
     FlowStateVector flowState;  // vector of flowState
-    DoubleVector conformedRate; // vector of estimated rate of conformed flow
-    DoubleVector nonconformedRate;  // vector of estimated rate of nonconformed flow
 
     // statistics
     bool warmupFinished;        ///< if true, start statistics gathering
@@ -147,9 +143,17 @@ class INET_API CSFQVLANTokenBucketQueue : public PassiveQueueBase
 
     cGate *outGate;
 
+    // debugging
+#ifdef NDEBUG
+    // do nothing for release mode
+#else
+    typedef std::vector<cOutVector *> OutVectorVector;
+    std::vector<OutVectorVector> estRateVectors;
+#endif
+
   public:
-    CSFQVLANTokenBucketQueue();
-    virtual ~CSFQVLANTokenBucketQueue();
+    CSFQVLANQueue();
+    virtual ~CSFQVLANQueue();
 
   protected:
     virtual void initialize();
@@ -189,8 +193,8 @@ class INET_API CSFQVLANTokenBucketQueue : public PassiveQueueBase
     /**
      * For CSFQ.
      */
-    virtual void estimateAlpha(int pktLength, double arrvRate, double arrvTime, int enqueue);
-    virtual double estimateRate(int flowId, int pktLength, double arrvTime);
+    virtual void estimateAlpha(int pktLength, double arrvRate, simtime_t arrvTime, int dropped);
+    virtual double estimateRate(int flowId, int pktLength, simtime_t arrvTime, int color);
 };
 
 #endif
