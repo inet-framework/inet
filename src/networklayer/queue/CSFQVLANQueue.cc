@@ -27,8 +27,7 @@ CSFQVLANQueue::CSFQVLANQueue()
 
 CSFQVLANQueue::~CSFQVLANQueue()
 {
-#ifdef NDEBUG
-#else
+#ifndef NDEBUG
     for (int i = 0; i < numFlows; i++)
     {
         for (int j = 0; j < 2; j++)
@@ -39,131 +38,130 @@ CSFQVLANQueue::~CSFQVLANQueue()
 #endif
 }
 
-void CSFQVLANQueue::initialize()
+void CSFQVLANQueue::initialize(int stage)
 {
-    PassiveQueueBase::initialize();
+    if (stage == 0)
+    {   // the following should be initialized in the 1st stage (stage==0);
+        // otherwise VLAN ID initialization is not working properly.
 
-    outGate = gate("out");
+        PassiveQueueBase::initialize();
 
-    // general
-    numFlows = par("numFlows"); // also the number of subscribers
+        outGate = gate("out");
 
-    // VLAN classifier
-    const char *classifierClass = par("classifierClass");
-    classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
-    classifier->setMaxNumQueues(numFlows);
-    const char *vids = par("vids");
-    classifier->initialize(vids);
+        // general
+        numFlows = par("numFlows").longValue(); // also the number of subscribers
+        linkRate = par("linkRate").doubleValue();
 
-    // Token bucket meters
-    tbm.assign(numFlows, (BasicTokenBucketMeter *)NULL);
-    cModule *mac = getParentModule();
-    for (int i=0; i<numFlows; i++)
-    {
-        cModule *meter = mac->getSubmodule("meter", i);
-        tbm[i] = check_and_cast<BasicTokenBucketMeter *>(meter);
+        // VLAN classifier
+        const char *classifierClass = par("classifierClass").stringValue();
+        classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
+        classifier->setMaxNumQueues(numFlows);
+        const char *vids = par("vids").stringValue();
+        classifier->initialize(vids);
+
+        // debugging
+#ifndef NDEBUG
+        pktReqVector.setName("packets requested");
+#endif
     }
+    if (stage == 1)
+    {   // the following should be initialized in the 2nd stage (stage==1)
+        // because token bucket meters are not initialized in the 1st stage yet.
 
-    // FIFO queue
-    queueSize = par("queueSize");   // in bit
-    queueThreshold = par("queueThreshold"); // in bit
-    currentQueueSize = 0;
-    fifo.setName("FIFO queue");
-
-    // CSFQ++
-    double K = par("K").doubleValue();
-    flowState.resize(numFlows);
-    for (int i = 0; i < numFlows; i++) {
-        flowState[i].weight = tbm[i]->getMeanRate();
-        flowState[i].K = K;
-        flowState[i].numArv_ = flowState[i].numDpt_ = flowState[i].numDropped_ = 0;
-        flowState[i].sumPktSize = 0;
-        for (int j = 0; j < 2; j++)
+        // Token bucket meters
+        tbm.assign(numFlows, (BasicTokenBucketMeter *)NULL);
+        cModule *mac = getParentModule();
+        for (int i=0; i<numFlows; i++)
         {
-            flowState[i].estRate[j]= 0.0;
-            flowState[i].prevTime[j]= 0.0;
+            cModule *meter = mac->getSubmodule("meter", i);
+            tbm[i] = check_and_cast<BasicTokenBucketMeter *>(meter);
         }
-#ifdef SRCID
-        hashid_[i]              = 0;
-#endif
-    }
 
-    csfq.linkRate = par("linkRate").doubleValue();
-    csfq.K_alpha = par("K_alpha").doubleValue();
-    csfq.alpha = csfq.tmpAlpha = 0.;
-    csfq.kalpha = KALPHA;
+        // FIFO queue
+        fifo.setName("FIFO queue");
+        queueSize = par("queueSize").longValue();           // in bit
+        queueThreshold = par("queueThreshold").longValue(); // in bit
+        currentQueueSize = 0;
 
-#ifdef PENALTY_BOX
-    for (int i = 0; i < MONITOR_TABLE_SIZE; i++) {
-        monitorTable_[i].valid_ = 0;
-        monitorTable_[i].prevTime_ = monitorTable_[i].estNormRate_ = 0.;
-    }
-    for (int i = 0; i < PUNISH_TABLE_SIZE; i++) {
-        punishTable_[i].valid_ = 0;
-        punishTable_[i].prevTime_ = monitorTable_[i].estNormRate_ = 0.;
-    }
-    numDroppedPkts_ = 0;
-#endif
+        // CSFQ++: System-wide variables
+        K = par("K").doubleValue();
+        K_alpha = par("K_alpha").doubleValue();
+        excessBW = linkRate;
+        fairShareRate = excessBW;
+//        fairShareRate = 0.0;
+        rateTotal = 0.0;
+        rateEnqueued = 0.0;
+        maxRate = 0.0;
+        kalpha = KALPHA;
+        lastArv = 0.0;
+        startTime = 0.0;
+        sumBitsTotal = 0;
+        sumBitsEnqueued = 0;
+        congested = false;
 
-    csfq.lastArv = csfq.startTime = 0.;
-    csfq.rateAlpha = csfq.rateTotal = 0.;
-    csfq.pktLength = csfq.pktLengthEnqueued = 0;
-    csfq.congested = 1;
+        // CSFQ++: Flow-specific variables
+        weight.assign(numFlows, 0.0);
+        sumBits.assign(numFlows, 0);
+        flowRate.assign(numFlows, std::vector<double>(2, 0.0));
+        prevTime.assign(numFlows, std::vector<simtime_t>(2, simtime_t(0.0)));
+        for (int i = 0; i < numFlows; i++) {
+            weight[i] = (i == 1 ? 1.0 : 2.0);
+//            weight[i] = tbm[i]->getMeanRate();
+        }
 
-#ifdef PENALTY_BOX
-    bind("kLink_", &kDropped_);
-#endif
+        // statistics
+        warmupFinished = false;
+        numBitsSent.assign(numFlows, 0.0);
+        numPktsReceived.assign(numFlows, 0);
+        numPktsDropped.assign(numFlows, 0);
+        numPktsConformed.assign(numFlows, 0);
+        numPktsSent.assign(numFlows, 0);
 
-    // statistics
-    warmupFinished = false;
-    numBitsSent.assign(numFlows, 0.0);
-    numPktsReceived.assign(numFlows, 0);
-    numPktsDropped.assign(numFlows, 0);
-    numPktsConformed.assign(numFlows, 0);
-    numPktsSent.assign(numFlows, 0);
-
-    // debugging
-#ifdef NDEBUG
-#else
-    for (int i=0; i < numFlows; i++)
-    {
-        OutVectorVector estRateVector;
-        for (int j=0; j < 2; j++)
+        // debugging
+#ifndef NDEBUG
+        excessBWVector.setName("excess bandwidth");
+        fairShareRateVector.setName("fair share rate (alpha)");
+        queueLengthVector.setName("FIFO queue length");
+        queueSizeVector.setName("FIFO queue size (bits)");
+        rateTotalVector.setName("aggregate rate of non-conformed packets");
+        rateEnqueuedVector.setName("aggregate rate of enqueued non-conformed packets");
+        for (int i=0; i < numFlows; i++)
         {
-            std::stringstream vname;
-            vname << (j == 0 ? "conformed" : "non-conformed") << " rate for flow[" << i << "] (bit/sec)";
-            cOutVector *vector = new cOutVector((vname.str()).c_str());
-            estRateVector.push_back(vector);
+            OutVectorVector estRateVector;
+            for (int j=0; j < 2; j++)
+            {
+                std::stringstream vname;
+                vname << (j == 0 ? "conformed" : "non-conformed") << " rate for flow[" << i << "] (bit/sec)";
+                cOutVector *vector = new cOutVector((vname.str()).c_str());
+                estRateVector.push_back(vector);
+            }
+            estRateVectors.push_back(estRateVector);
         }
-        estRateVectors.push_back(estRateVector);
-    }
 #endif
+    }   // end of if () for stage checking
 }
 
 void CSFQVLANQueue::handleMessage(cMessage *msg)
 {
     if (warmupFinished == false)
     {   // start statistics gathering once the warm-up period has passed.
-        if (simTime() >= simulation.getWarmupPeriod()) {
+        if (simTime() >= simulation.getWarmupPeriod())
+        {
             warmupFinished = true;
-//            for (int i = 0; i < numFlows; i++)
-//            {
-//                numPktsReceived[i] = queues[i]->getLength();   // take into account the frames/packets already in queues
-//            }
         }
     }
 
     if (!msg->isSelfMessage())
     {   // a frame arrives
         int flowIndex = classifier->classifyPacket(msg);
-        if (warmupFinished == true)
-        {
-            numPktsReceived[flowIndex]++;
-        }
         int pktLength = PK(msg)->getBitLength();
 // DEBUG
         ASSERT(pktLength > 0);
 // DEBUG
+        if (warmupFinished == true)
+        {
+            numPktsReceived[flowIndex]++;
+        }
         if (tbm[flowIndex]->meterPacket(msg) == 0)
         {   // frame is conformed
             if (warmupFinished == true)
@@ -171,9 +169,25 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
                 numPktsConformed[flowIndex]++;
             }
             estimateRate(flowIndex, pktLength, simTime(), 0);
+
+            // update excess BW
+            double sum = 0.0;
+            for (int i = 0; i < numFlows; i++)
+            {
+                sum += flowRate[i][0];    // sum of conformed rates
+            }
+            excessBW = std::max(linkRate - sum, 0.0);
+
+#ifndef NDEBUG
+            excessBWVector.record(excessBW);
+#endif
+
             if (packetRequested > 0)
             {
                 packetRequested--;
+#ifndef NDEBUG
+            pktReqVector.record(packetRequested);
+#endif
                 if (warmupFinished == true)
                 {
                     numBitsSent[flowIndex] += pktLength;
@@ -185,7 +199,7 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
             {
                 bool dropped = enqueue(msg);
                 if (dropped)
-                {
+                {   // buffer overflow
                     if (warmupFinished == true)
                     {
                         numPktsDropped[flowIndex]++;
@@ -195,12 +209,18 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
         }
         else
         {   // frame is not conformed
+            double rate = estimateRate(flowIndex, pktLength, simTime(), 1);
 //            conformedRate[flowIndex] = tbm[flowIndex]->getMeanRate(); // TODO: need skip?
-            double estRate = estimateRate(flowIndex, pktLength, simTime(), 1);
-//            if (std::max(0.0, 1.0 - csfq.alpha_ * flowState[flowIndex].weight / estRate) > dblrand())
-            if (csfq.alpha * flowState[flowIndex].weight / estRate < dblrand())
+//            if (std::max(0.0, 1.0 - fairShareRate_ * weight[flowIndex] / rate) > dblrand())
+
+            if (fairShareRate * weight[flowIndex] / rate < dblrand())
             {   // drop the frame
-                estimateAlpha(pktLength, estRate, simTime(), 1);
+#ifndef NDEBUG
+                double normalizedRate = rate / weight[flowIndex];
+                estimateAlpha(pktLength, normalizedRate, simTime(), true);
+#else
+                estimateAlpha(pktLength, rate/weight[flowIndex], simTime(), true);
+#endif
                 delete msg;
                 if (warmupFinished == true)
                 {
@@ -208,17 +228,67 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
                 }
             }
             else
-            {
-                estimateAlpha(pktLength, estRate, simTime(), 0);
-                bool dropped = enqueue(msg);
-                if (dropped)
-                {
+            {   // send or enqueue the frame
+                if (packetRequested > 0)
+                {   // send the frame
+                    packetRequested--;
+#ifndef NDEBUG
+            pktReqVector.record(packetRequested);
+#endif
                     if (warmupFinished == true)
                     {
-                        numPktsDropped[flowIndex]++;
+                        numBitsSent[flowIndex] += pktLength;
+                        numPktsSent[flowIndex]++;
+                    }
+                    sendOut(msg);
+#ifndef NDEBUG
+                    double normalizedRate = rate / weight[flowIndex];
+                    estimateAlpha(pktLength, normalizedRate, simTime(), false);
+#else
+                    estimateAlpha(pktLength, rate/weight[flowIndex], simTime(), false);
+#endif
+                }
+                else
+                {   // enqueue the frame
+                    bool dropped = enqueue(msg);
+                    if (dropped)
+                    {   // buffer overflow
+#ifndef NDEBUG
+                        double normalizedRate = rate / weight[flowIndex];
+                        estimateAlpha(pktLength, normalizedRate, simTime(), true);
+#else
+                        estimateAlpha(pktLength, rate/weight[flowIndex], simTime(), true);
+#endif
+                        if (warmupFinished == true)
+                        {
+                            numPktsDropped[flowIndex]++;
+                        }
+
+                        // decrease fairShareRate; the number of times it is decreased
+                        // during an interval of length k is bounded by kalpha.
+                        // This is to avoid overcorrection.
+                        if (kalpha-- >= 0)
+                        {
+                            fairShareRate *= 0.99;
+                        }
+                    }
+                    else
+                    {   // frame has been successfully enqueued
+#ifndef NDEBUG
+                        double normalizedRate = rate / weight[flowIndex];
+                        estimateAlpha(pktLength, normalizedRate, simTime(), false);
+#else
+                        estimateAlpha(pktLength, rate/weight[flowIndex], simTime(), false);
+#endif
                     }
                 }
             }
+
+#ifndef NDEBUG
+            fairShareRateVector.record(fairShareRate);
+            rateTotalVector.record(rateTotal);
+            rateEnqueuedVector.record(rateEnqueued);
+#endif
         }
 
         if (ev.isGUI())
@@ -248,6 +318,10 @@ bool CSFQVLANQueue::enqueue(cMessage *msg)
     {
         fifo.insert(msg);
         currentQueueSize += pktLength;
+#ifndef NDEBUG
+    queueLengthVector.record(fifo.getLength());
+    queueSizeVector.record(currentQueueSize);
+#endif
         return false;
     }
 }
@@ -258,7 +332,13 @@ cMessage *CSFQVLANQueue::dequeue()
     {
         return NULL;
     }
-    return ((cMessage *)fifo.pop());
+    cMessage *msg = (cMessage *)fifo.pop();
+    currentQueueSize -= PK(msg)->getBitLength();
+#ifndef NDEBUG
+    queueLengthVector.record(fifo.getLength());
+    queueSizeVector.record(currentQueueSize);
+#endif
+    return (msg);
 }
 
 void CSFQVLANQueue::sendOut(cMessage *msg)
@@ -271,9 +351,12 @@ void CSFQVLANQueue::requestPacket()
     Enter_Method("requestPacket()");
 
     cMessage *msg = dequeue();
-    if (msg==NULL)
+    if (msg == NULL)
     {
         packetRequested++;
+#ifndef NDEBUG
+        pktReqVector.record(packetRequested);
+#endif
     }
     else
     {
@@ -288,195 +371,183 @@ void CSFQVLANQueue::requestPacket()
 }
 
 // compute estimated flow rate by using exponential averaging
-// color: result of metering -> 0 for conformed and 1 for non-conformed packets
+// - color: result of metering -> 0 for conformed and 1 for non-conformed packets
 double CSFQVLANQueue::estimateRate(int flowIndex, int pktLength, simtime_t arrvTime, int color)
 {
-    double T = (arrvTime - flowState[flowIndex].prevTime[color]).dbl(); // interarrival time of packet
-    double K = flowState[flowIndex].K;
+    double T = (arrvTime - prevTime[flowIndex][color]).dbl();   // packet interarrival
 
     if (T == 0.0)
     {   // multiple packets arrive simultaneously
-        flowState[flowIndex].sumPktSize += pktLength;
-        if (flowState[flowIndex].estRate[color])
+        sumBits[flowIndex] += pktLength;
+        if (flowRate[flowIndex][color])
         {
-#if defined NDEBUG
-#else
-            estRateVectors[flowIndex][color]->record(flowState[flowIndex].estRate[color]);
+#ifndef NDEBUG
+            estRateVectors[flowIndex][color]->record(flowRate[flowIndex][color]);
 #endif
-            return flowState[flowIndex].estRate[color];
+            return flowRate[flowIndex][color];
         }
         else
         {   // this is the first packet; just initialize the rate
-#if defined NDEBUG
-#else
-            estRateVectors[flowIndex][color]->record(csfq.rateAlpha / 2);
+#ifndef NDEBUG
+            estRateVectors[flowIndex][color]->record(rateEnqueued / 2);
 #endif
-            return (flowState[flowIndex].estRate[color] = csfq.rateAlpha / 2);
+            return (flowRate[flowIndex][color] = rateEnqueued / 2);
         }
     }
     else
     {
-        pktLength += flowState[flowIndex].sumPktSize;
-        flowState[flowIndex].sumPktSize = 0;
+        pktLength += sumBits[flowIndex];
+        sumBits[flowIndex] = 0;
     }
 
-    flowState[flowIndex].prevTime[color] = arrvTime;
-    flowState[flowIndex].estRate[color] = (1. - exp(-T/K))*pktLength/T + exp(-T/K) * flowState[flowIndex].estRate[color];
-#if defined NDEBUG
-#else
-            estRateVectors[flowIndex][color]->record(flowState[flowIndex].estRate[color]);
+    prevTime[flowIndex][color] = arrvTime;
+    double w = exp(-T/K);
+    flowRate[flowIndex][color] = (1 - w)*pktLength/T + w*flowRate[flowIndex][color];
+#ifndef NDEBUG
+            estRateVectors[flowIndex][color]->record(flowRate[flowIndex][color]);
 #endif
-    return flowState[flowIndex].estRate[color];
+    return flowRate[flowIndex][color];
 }
 
-// estimate the link's alpha parameter
-void CSFQVLANQueue::estimateAlpha(int pktLength, double arrvRate, simtime_t arrvTime, int dropped)
+// estimate the link's (normalized) fair share rate (alpha)
+// - pktLength: packet length
+// - rate: estimated normalized flow rate
+// - arrvTime: packet arrival time
+// - dropped: flag indicating whether the packet is dropped or not
+void CSFQVLANQueue::estimateAlpha(int pktLength, double rate, simtime_t arrvTime, int dropped)
 {
-    double T = (arrvTime - csfq.lastArv).dbl();
-    double k = csfq.K_alpha / 1000000.;
+    double T = (arrvTime - lastArv).dbl();   // packet interarrival
+    double k = K_alpha;    // the window size (i.e., K_c)
 
-    // set lastArv_ to the arrival time of the first packet
-    if (csfq.lastArv == 0.)
+    // set lastArv to the arrival time of the first packet
+    if (lastArv == 0.0)
     {
-        csfq.lastArv = arrvTime;
+        lastArv = arrvTime;
     }
 
     // account for packets received simultaneously
-    csfq.pktLength += pktLength;
+    sumBitsTotal += pktLength;
     if (dropped == false)
     {   // this packet was enqueued for transmission
-        csfq.pktLengthEnqueued += pktLength;
+        sumBitsEnqueued += pktLength;
     }
-    if (arrvTime == csfq.lastArv)
+    if (arrvTime == lastArv)
     {
-        return;
+        return; // TODO: check this!
     }
 
-    // estimate the aggregate arrival rate (rateTotal_) and the
-    // aggregate forwarded (rateAlpha) rates
-    double w = exp(-T / csfq.K_alpha);
-    csfq.rateAlpha = (1 - w) * (double) csfq.pktLengthEnqueued / T + w * csfq.rateAlpha;
-    csfq.rateTotal = (1 - w) * (double) csfq.pktLength / T + w * csfq.rateTotal;
-    csfq.lastArv = arrvTime;
-    csfq.pktLength = csfq.pktLengthEnqueued = 0;
+    // estimate aggregate arrival (rateTotal) and enqueued (rateEnqueued) rates
+    double w = exp(-T / K_alpha);
+    rateTotal = (1 - w)*sumBitsTotal/T + w*rateTotal;
+    rateEnqueued = (1 - w)*sumBitsEnqueued/T + w*rateEnqueued;
+    lastArv = arrvTime;
+    sumBitsTotal = sumBitsEnqueued = 0;
 
-    // compute the initial value of alpha
-    if (csfq.alpha == 0.)
-    {
-        if (currentQueueSize < queueThreshold)
-        {   // not congested
-            if (csfq.tmpAlpha < arrvRate)
-            {   // update the largest rate
-                csfq.tmpAlpha = arrvRate;
-            }
-            return;
-        }
-        if (csfq.alpha < csfq.tmpAlpha)
-        {
-            csfq.alpha = csfq.tmpAlpha;
-        }
-        if (csfq.alpha == 0.)
-        {
-            csfq.alpha = csfq.linkRate / 2.;  // arbitrary initialization
-        }
-        csfq.tmpAlpha = 0.;
-    }
+//    // compute the initial value of fair share rate (alpha).
+//    // note that whenever fair share rate is reset to 0, packet dropping is skipped.
+//    if (fairShareRate == 0.0)
+//    {
+//        if (currentQueueSize < queueThreshold)
+//        {   // not congested
+//            maxRate = std::max(maxRate, rate);
+//            return;
+//        }
+//        fairShareRate = std::max(fairShareRate, maxRate);
+//        if (fairShareRate == 0.0)
+//        {
+//            fairShareRate = linkRate / 2.;  // arbitrary initialization
+//        }
+//        maxRate = 0.0;
+//    }
 
     // update alpha
-    double sum = 0.0;
-    for (int i = 0; i < numFlows; i++)
-    {
-        sum += flowState[i].estRate[0];    // sum of conformed rates
-    }
-    double excessBW = csfq.linkRate - sum;    // excess bandwidth
-    if (csfq.rateTotal >= excessBW)
+    if (rateTotal >= excessBW)
     {   // link congested
-        if (!csfq.congested)
+        if (!congested)
         {
-            csfq.congested = true;
-            csfq.startTime = arrvTime;
-            csfq.kalpha = KALPHA;
+            congested = true;
+            startTime = arrvTime;
+            kalpha = KALPHA;
+            if (fairShareRate == 0.0)
+            {
+                fairShareRate = std::min(rate, excessBW);   // initialize
+            }
         }
         else
         {
-            if (arrvTime < csfq.startTime + k)
+            if (arrvTime > startTime + k)
+//            {
+//                maxRate = std::max(maxRate, rate);  // TODO: check this
+//            }
+//            else
             {
-                if (csfq.tmpAlpha < arrvRate)
-                {
-                    csfq.tmpAlpha = arrvRate;
-                }
+                startTime = arrvTime;
+                fairShareRate *= excessBW / rateEnqueued;
+
+                // TODO: check the validity of this reset
+                congested = false;
             }
-            else
-            {
-                csfq.alpha *= excessBW / csfq.rateAlpha;
-                csfq.startTime = arrvTime;
-            }
-            if (csfq.linkRate < csfq.alpha)
-            {
-                csfq.alpha = csfq.linkRate;
-            }
+            fairShareRate = std::min(fairShareRate, excessBW);
         }
     }
     else
     {   // link not congested
-        if (csfq.congested)
+        if (congested)
         {
-            csfq.congested = false;
-            csfq.startTime = arrvTime;
-            csfq.tmpAlpha = 0;
+            congested = false;
+            startTime = arrvTime;
+            maxRate = 0;
         }
         else
         {
-            if (arrvTime < csfq.startTime + k)
+            if (arrvTime < startTime + k)
             {
-                if (csfq.tmpAlpha < arrvRate)
-                {
-                    csfq.tmpAlpha = arrvRate;
-                }
+                maxRate = std::max(maxRate, rate);
             }
             else
             {
-                csfq.alpha = csfq.tmpAlpha;
-                csfq.startTime = arrvTime;
-                if (currentQueueSize < queueThreshold)
-                {
-                    csfq.alpha = 0.;
-                }
-                else
-                {
-                    csfq.tmpAlpha = 0.;
-                }
+                fairShareRate = maxRate;
+                startTime = arrvTime;
+                maxRate = 0;
+
+                // TODO: check below
+//                // UPDATE: In the original CSFQ code, when alpha is set to 0, packet dropping is skipped!
+//                if (currentQueueSize < queueThreshold)
+//                {
+//                    fairShareRate = 0.0;
+//                }
+//                else
+//                {
+//                    maxRate = 0.0;
+//                }
             }
         }
     }
-#ifdef CSFQ_LOG
-    EV << id_ << " " << arrvTime << " " << csfq.rateAlpha << " " << csfq.rateTotal;
-#endif
 }
 
 void CSFQVLANQueue::finish()
 {
     unsigned long sumPktsReceived = 0;
+    unsigned long sumPktsConformed = 0;
     unsigned long sumPktsDropped = 0;
-    unsigned long sumPktsNonconformed = 0;
 
     for (int i=0; i < numFlows; i++)
     {
-        std::stringstream ss_received, ss_dropped, ss_nonconformed, ss_sent, ss_throughput;
+        std::stringstream ss_received, ss_conformed, ss_dropped, ss_sent, ss_throughput;
         ss_received << "packets received from flow[" << i << "]";
+        ss_conformed << "packets conformed from flow[" << i << "]";
         ss_dropped << "packets dropped from flow[" << i << "]";
-        ss_nonconformed << "packets non-conformed from flow[" << i << "]";
         ss_sent << "packets sent from flow[" << i << "]";
         ss_throughput << "bits/sec sent from flow[" << i << "]";
         recordScalar((ss_received.str()).c_str(), numPktsReceived[i]);
+        recordScalar((ss_conformed.str()).c_str(), numPktsConformed[i]);
         recordScalar((ss_dropped.str()).c_str(), numPktsDropped[i]);
-        recordScalar((ss_nonconformed.str()).c_str(), numPktsReceived[i]-numPktsConformed[i]);
         recordScalar((ss_sent.str()).c_str(), numPktsSent[i]);
         recordScalar((ss_throughput.str()).c_str(), numBitsSent[i]/(simTime()-simulation.getWarmupPeriod()).dbl());
         sumPktsReceived += numPktsReceived[i];
+        sumPktsConformed += numPktsConformed[i];
         sumPktsDropped += numPktsDropped[i];
-        sumPktsNonconformed += numPktsReceived[i] - numPktsConformed[i];
     }
+    recordScalar("overall packet conformed rate", sumPktsConformed/double(sumPktsReceived));
     recordScalar("overall packet loss rate", sumPktsDropped/double(sumPktsReceived));
-    recordScalar("overall packet shaped rate", sumPktsNonconformed/double(sumPktsReceived));
 }

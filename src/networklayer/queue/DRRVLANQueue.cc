@@ -40,15 +40,15 @@ void DRRVLANQueue::initialize()
     outGate = gate("out");
 
     // general
-    numFlows = par("numFlows");
-    frameCapacity = par("frameCapacity");
+    numFlows = par("numFlows").longValue();
+    frameCapacity = par("frameCapacity").longValue();
 //    queueSize = par("queueSize");
 
     // VLAN classifier
-    const char *classifierClass = par("classifierClass");
+    const char *classifierClass = par("classifierClass").stringValue();
     classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
     classifier->setMaxNumQueues(numFlows);
-    const char *vids = par("vids");
+    const char *vids = par("vids").stringValue();
     classifier->initialize(vids);
 
     // Token bucket meters
@@ -119,16 +119,15 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
     if (!msg->isSelfMessage())
     {   // a frame arrives
         int flowIndex = classifier->classifyPacket(msg);
+        int pktLength = PK(msg)->getBitLength();
+// DEBUG
+        ASSERT(pktLength > 0);
+// DEBUG
         cQueue *queue = queues[flowIndex];
         if (warmupFinished == true)
         {
             numPktsReceived[flowIndex]++;
         }
-        int pktLength = PK(msg)->getBitLength();
-// DEBUG
-        ASSERT(pktLength > 0);
-// DEBUG
-
         if (tbm[flowIndex]->meterPacket(msg) == 0)
         {   // frame is conformed
             if (warmupFinished == true)

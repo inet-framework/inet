@@ -21,7 +21,7 @@
 #define __INET_CSFQVLANQUEUE_H
 
 #include <omnetpp.h>
-//#include <algorithm>
+#include <algorithm>
 #include <sstream>
 #include <vector>
 #include "PassiveQueueBase.h"
@@ -30,40 +30,6 @@
 
 // define constants
 #define KALPHA 29 // 0.99^29 = 0.75
-//#define CSFQ_LOG
-//#define PENALTY_BOX  /* use penalty box in conjucntion with CSFQ */
-
-#ifdef PENALTY_BOX
-#define MONITOR_TABLE_SIZE 10
-#define PUNISH_TABLE_SIZE  10
-#define DROPPED_ARRAY_SIZE 100
-#define PUNISH_THRESH  1.3  /*
-                             * when the flow's rate exceeds
-                             * PUNISH_THRESH times the fair rate
-                             * the flow is punished
-                             */
-#define GOOD_THRESH 0.7     /*
-                             * when the punished flow's rate is
-                             * GOOD_THRESH times smaller than the
-                             * link's fair rate the flow
-                             * is no longer punished
-                             */
-#define BETA 0.98            /*
-                              * (1 - BETA) = precentage by which
-                              * link's fair rate is decreased when a
-                              * forced drop occurs
-                              */
-
-typedef struct identHash {
-    int valid_;
-    double prevTime_;
-    double estNormRate_;
-} IdentHashTable;
-#endif
-
-//#define SRCID       /* identify flow based of source id rather than flow id */
-//#define CSFQ_RLMEX  /* used for RLM experiments only */
-
 
 /**
  * Incoming packets are classified by an external VLAN classifier and
@@ -75,47 +41,18 @@ typedef struct identHash {
  */
 class INET_API CSFQVLANQueue : public PassiveQueueBase
 {
-    typedef struct
-    {
-        double alpha;       // output link fair rate
-        double K_alpha;     // averaging interval for rate estimation
-        simtime_t lastArv;  // the arrival time of the last packet (in sec)
-        simtime_t startTime;    // used to store the start of an interval of length K_alpha
-        double linkRate;    // link rate (in bps)
-        double rateTotal;   // aggregate arrival rate (i.e., \hat{A})
-        double rateAlpha;   // aggregate forwarded rate corresponding to crt. alpha (i.e., \hat{F})
-        double tmpAlpha;    // used to compute the largest label of a packet, i.e., the largest flow rate seen during an interval of length K_alpha
-        bool congested;     // indicate whether the link is congested or not
-        int kalpha;        // maximum number of times the fair rate (alpha) can be decreased when the queue overflows, during a time interval of length K_alpha
-        int pktLength;      // the total number of bits enqueued between two consecutive rate estimations. usually, this represent the size of one packet;
-                            // however, if more packets are received at the same time this will represent the cumulative size of all packets received simultaneously
-        int pktLengthEnqueued;    // same as above, but for the total number of bytes that are enqueued between consecutive rate estimations
-    } CSFQState;
-
-    typedef struct
-    {
-        double weight;  // flow weight (set to TB mean rate)
-        double K;   // averaging interval for rate estimation
-        double estRate[2];      // estimated rates; 0 for conformed and 1 for non-conformed packets
-        simtime_t prevTime[2];  // time of previously arrived packet; 0 for conformed and 1 for non-conformed packet
-        // internal statistics
-        int sumPktSize;// keep track of packets that arrive at the same time
-        int numArv_;// number of arrived packets
-        int numDpt_;// number of dropped packets
-        int numDropped_;// number of dropped packets
-    } FlowState;
-
     // type definitions for member variables
     typedef std::vector<bool> BoolVector;
     typedef std::vector<double> DoubleVector;
-    typedef std::vector<FlowState> FlowStateVector;
     typedef std::vector<int> IntVector;
     typedef std::vector<long long> LongLongVector;
     typedef std::vector<BasicTokenBucketMeter *> TbmVector;
+    typedef std::vector<simtime_t> TimeVector;
 
   protected:
     // general
     int numFlows;
+    double linkRate;    // link rate (in bps)
 
     // VLAN classifier
     IQoSClassifier *classifier;
@@ -129,9 +66,29 @@ class INET_API CSFQVLANQueue : public PassiveQueueBase
     // token bucket meters
     TbmVector tbm;
 
-    // CSFQ
-    CSFQState csfq;    // CSFQ-related states
-    FlowStateVector flowState;  // vector of flowState
+    // CSFQ++: System-wide variables
+    double K;               // averaging interval for flow rate estimation
+    double K_alpha;         // averaging interval for overall rate estimation
+    double excessBW;        // excess bandwidth (i.e., C_{ex})
+    double fairShareRate;   // normalized fair share rate for non-conformed flows
+    double rateTotal;       // aggregate arrival rate of non-conformed packets (i.e., \hat{A})
+    double rateEnqueued;    // aggregate enqueued rate of non-conformed packets (i.e., \hat{F})
+    double maxRate;         // used to compute the largest normalized flow rate seen during the interval of K_alpha
+    simtime_t lastArv;      // the arrival time of the last packet (in sec)
+    simtime_t startTime;    // used to store the start of an interval of length K_alpha
+    int kalpha;             // maximum number of times the fair rate (alpha) can be decreased when the queue overflows, during a time interval of length K_alpha
+    int sumBitsTotal;       // the total number of bits enqueued between two consecutive rate estimations. usually, this represent the size of one packet;
+                            // however, if more packets are received at the same time this will represent the cumulative size of all packets received simultaneously
+    int sumBitsEnqueued;    // same as above, but for the total number of bytes that are enqueued between consecutive rate estimations
+    bool congested;         // flag indicating whether the link is congested or not
+
+    // CSFQ++: Flow-specific variables
+    DoubleVector weight;    // vector of flow weights (set to TB mean rate)
+    IntVector sumBits;      // keep track of packets that arrive at the same time
+    std::vector< std::vector<double> > flowRate;    // 2-dimensional vector of estimated flow rates;
+                                                    // - second index of 0 for conformed and 1 for non-conformed packets
+    std::vector< std::vector<simtime_t> > prevTime; // 2-dimensional vector of time of previously arrived packet;
+                                                    // - second index of 0 for conformed and 1 for non-conformed packet
 
     // statistics
     bool warmupFinished;        ///< if true, start statistics gathering
@@ -144,9 +101,14 @@ class INET_API CSFQVLANQueue : public PassiveQueueBase
     cGate *outGate;
 
     // debugging
-#ifdef NDEBUG
-    // do nothing for release mode
-#else
+#ifndef NDEBUG
+    cOutVector excessBWVector;
+    cOutVector fairShareRateVector;
+    cOutVector pktReqVector;
+    cOutVector queueLengthVector;
+    cOutVector queueSizeVector;
+    cOutVector rateTotalVector;
+    cOutVector rateEnqueuedVector;
     typedef std::vector<cOutVector *> OutVectorVector;
     std::vector<OutVectorVector> estRateVectors;
 #endif
@@ -156,7 +118,9 @@ class INET_API CSFQVLANQueue : public PassiveQueueBase
     virtual ~CSFQVLANQueue();
 
   protected:
-    virtual void initialize();
+//    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const {return 2;}
 
     /**
      * Redefined from PassiveQueueBase.
@@ -193,7 +157,7 @@ class INET_API CSFQVLANQueue : public PassiveQueueBase
     /**
      * For CSFQ.
      */
-    virtual void estimateAlpha(int pktLength, double arrvRate, simtime_t arrvTime, int dropped);
+    virtual void estimateAlpha(int pktLength, double rate, simtime_t arrvTime, int dropped);
     virtual double estimateRate(int flowId, int pktLength, simtime_t arrvTime, int color);
 };
 

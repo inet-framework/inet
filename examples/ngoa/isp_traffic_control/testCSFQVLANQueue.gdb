@@ -6,6 +6,7 @@ exec-file ../../../../omnetpp-4.3/bin/opp_run
 set args -l ../../../src/inet -n ../../../examples:../../../src -u Cmdenv -f Shared.ini -c csfq-tbm_debug_dynamic -r 0
 tbreak main
 tbreak CSFQVLANQueue::initialize
+tbreak CSFQVLANQueue::estimateAlpha
 # display messageLength
 # display payloadLength
 # display numSent
