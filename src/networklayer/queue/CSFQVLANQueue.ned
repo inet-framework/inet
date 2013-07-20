@@ -29,6 +29,10 @@ import inet.networklayer.queue.BasicTokenBucketMeter;
 // without any processing; if not conformant, it goes through core-stateless fair
 // queueing (CSFQ), dropping if needed, and then put into a common FIFO queue.
 //
+// Note that for CSFQ, none of the buffer-related amendments described in the original
+// paper have been implemented; the packet dropping in this module is based on
+// rate estimations only.
+//
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 // @date   2013-07-01
 //
@@ -39,11 +43,11 @@ simple CSFQVLANQueue like OutputQueue
         @display("i=block/queue");
         int numFlows = default(1);	// number of flows (i.e., subscribers)
 //		int frameCapacity = default(100);
-		double linkRate @unit(bps) = default(100Mbps);	// transmission rate of output link (i.e., feeder line rate (R_F))
-        int queueSize @unit(B) = default(15220000B);	// FIFO queue size; default value corresponds to 10000 frames of 1522B each.
+		double linkRate @unit(bps) = default(100Mbps);		// transmission rate of output link (i.e., feeder line rate (R_F))
+        int queueSize @unit(B) = default(15220000B);		// FIFO queue size; default value corresponds to 10,000 maximum-sized VLAN frames.
         int queueThreshold @unit(B) = default(3805000B);	// FIFO threshold to detect link congestion; default value is a quarter of default queueSize.
-        double K @unit(s) = default(100ms);	// averaging constant for flow rate estimation
-        double K_alpha @unit(s) = default(200ms);	// averaging constant for fair rate (alpha) estimation
+        double K @unit(s) = default(100ms);					// averaging constant for flow rate estimation
+        double K_alpha @unit(s) = default(200ms);			// averaging constant for fair rate (alpha) estimation
         string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier
         string vids = default("");	// VIDs used for initialization of index table
     gates:

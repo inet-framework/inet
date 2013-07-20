@@ -29,8 +29,9 @@ simple DRRVLANQueue like OutputQueue
         @labels(node,queue-node);
         @display("i=block/subqueue;bgb=130,90");
         int numFlows = default(1);	// number of flows (i.e., subscribers)
-		int frameCapacity = default(100);
-//        int queueSize @unit(b) = default(100000000b);  // FIFO & per-flow queue size
+//		int frameCapacity = default(100);
+		int fifoSize @unit(B) = default(15220000B);	// FIFO queue size; default value corresponds to 10,000 maximum-sized VLAN frames.
+        int voqSize @unit(B) = default(15220000B);	// per-flow virtual output queue (VOQ) size; default value corresponds to 10,000 maximum-sized VLAN frames.
         string quanta = default("1522");	// DRR quantum sizes in byte
         string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier        
 		string vids = default("");	// VIDs used for initialization of index table
@@ -38,34 +39,3 @@ simple DRRVLANQueue like OutputQueue
         input in;
         output out;
 }
-
-//module DRRVLANTokenBucketQueue like OutputQueue
-//{
-//    parameters:
-//        @labels(node,queue-node);
-//        @display("i=block/subqueue;bgb=130,90");
-//        int numFlows = default(1);	// number of flows (i.e., subscribers)
-//        int queueSize @unit(b) = default(100000000b);  // FIFO & per-flow queue size
-//        int quantum @unit(B) = default(1522B);	// DRR quantum size
-//        string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier        
-//		string vids = default("");	// VIDs used for initialization of index table
-//    gates:
-//        input in;
-//        output out;
-//    submodules:
-//        queue: DRRVLANQueue {
-//            parameters:
-//                numFlows = numFlows;
-//                queueSize = queueSize;
-//                quantum = quantum;
-//                classifierClass = classifierClass;
-//                vids = vids;
-//        }
-//        meter[numFlows]: BasicTokenBucketMeter {
-//            parameters:
-//                @display("i=block/classifier;p=60,40");
-//        }
-//	connections:
-//	    in --> queue.in;
-//	    out <-- queue.out;
-//}

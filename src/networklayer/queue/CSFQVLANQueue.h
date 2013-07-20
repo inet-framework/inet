@@ -76,7 +76,7 @@ class INET_API CSFQVLANQueue : public PassiveQueueBase
     double maxRate;         // used to compute the largest normalized flow rate seen during the interval of K_alpha
     simtime_t lastArv;      // the arrival time of the last packet (in sec)
     simtime_t startTime;    // used to store the start of an interval of length K_alpha
-    int kalpha;             // maximum number of times the fair rate (alpha) can be decreased when the queue overflows, during a time interval of length K_alpha
+//    int kalpha;             // maximum number of times the fair rate (alpha) can be decreased when the queue overflows, during a time interval of length K_alpha
     int sumBitsTotal;       // the total number of bits enqueued between two consecutive rate estimations. usually, this represent the size of one packet;
                             // however, if more packets are received at the same time this will represent the cumulative size of all packets received simultaneously
     int sumBitsEnqueued;    // same as above, but for the total number of bytes that are enqueued between consecutive rate estimations

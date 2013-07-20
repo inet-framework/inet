@@ -51,8 +51,7 @@ class INET_API DRRVLANQueue : public PassiveQueueBase
   protected:
     // general
     int numFlows;
-    int frameCapacity;
-//    int queueSize;
+//    int frameCapacity;
 
     // VLAN classifier
     IQoSClassifier *classifier;
@@ -62,13 +61,17 @@ class INET_API DRRVLANQueue : public PassiveQueueBase
 
     // FIFO
     cQueue fifo;
-//    int currentQueueSize;   // in bit
+    int fifoSize;           // in byte
+    int fifoCurrentSize;    // in byte
 
     // DRR scheduler
-    int currentQueueIndex;      ///< index of a queue whose HOL frame is scheduled for TX during the last RR scheduling
+    int currentVoqIndex;        ///< index of a VOQ whose HOL frame is scheduled for TX during the last RR scheduling
     IntVector deficitCounters;  ///< vector of deficit counters in DRR scheduling
     IntVector quanta;           ///< vector of quantum  in DRR scheduling
-    QueueVector queues;         ///< per-flow queues
+    QueueVector voq;            ///< per-flow virtual output queues (VOQs)
+    int voqSize;                ///< VOQ size in byte
+    IntVector voqCurrentSize;   ///< current size of VOQs in byte
+    bool continuation;          ///< flag indicating whether the previous run is continued.
 
     // statistics
     bool warmupFinished;        ///< if true, start statistics gathering

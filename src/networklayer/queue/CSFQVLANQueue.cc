@@ -92,7 +92,7 @@ void CSFQVLANQueue::initialize(int stage)
         rateTotal = 0.0;
         rateEnqueued = 0.0;
         maxRate = 0.0;
-        kalpha = KALPHA;
+//        kalpha = KALPHA;
         lastArv = 0.0;
         startTime = 0.0;
         sumBitsTotal = 0;
@@ -104,9 +104,17 @@ void CSFQVLANQueue::initialize(int stage)
         sumBits.assign(numFlows, 0);
         flowRate.assign(numFlows, std::vector<double>(2, 0.0));
         prevTime.assign(numFlows, std::vector<simtime_t>(2, simtime_t(0.0)));
+
+        double minTGR = tbm[0]->getMeanRate();
+        for (int i = 1; i < numFlows; i++)
+        {
+            if (tbm[i]->getMeanRate() < minTGR)
+            {
+                minTGR = tbm[i]->getMeanRate();
+            }
+        }
         for (int i = 0; i < numFlows; i++) {
-            weight[i] = (i == 1 ? 1.0 : 2.0);
-//            weight[i] = tbm[i]->getMeanRate();
+            weight[i] = tbm[i]->getMeanRate() / minTGR;
         }
 
         // statistics
@@ -264,13 +272,13 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
                             numPktsDropped[flowIndex]++;
                         }
 
-                        // decrease fairShareRate; the number of times it is decreased
-                        // during an interval of length k is bounded by kalpha.
-                        // This is to avoid overcorrection.
-                        if (kalpha-- >= 0)
-                        {
-                            fairShareRate *= 0.99;
-                        }
+//                        // decrease fairShareRate; the number of times it is decreased
+//                        // during an interval of length k is bounded by kalpha.
+//                        // This is to avoid overcorrection.
+//                        if (kalpha-- >= 0)
+//                        {
+//                            fairShareRate *= 0.99;
+//                        }
                     }
                     else
                     {   // frame has been successfully enqueued
@@ -467,7 +475,7 @@ void CSFQVLANQueue::estimateAlpha(int pktLength, double rate, simtime_t arrvTime
         {
             congested = true;
             startTime = arrvTime;
-            kalpha = KALPHA;
+//            kalpha = KALPHA;
             if (fairShareRate == 0.0)
             {
                 fairShareRate = std::min(rate, excessBW);   // initialize

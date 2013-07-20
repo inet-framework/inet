@@ -29,7 +29,7 @@ DRRVLANQueue::~DRRVLANQueue()
 {
     for (int i=0; i<numFlows; i++)
     {
-        delete queues[i];
+        delete voq[i];
     }
 }
 
@@ -41,8 +41,6 @@ void DRRVLANQueue::initialize()
 
     // general
     numFlows = par("numFlows").longValue();
-    frameCapacity = par("frameCapacity").longValue();
-//    queueSize = par("queueSize");
 
     // VLAN classifier
     const char *classifierClass = par("classifierClass").stringValue();
@@ -61,37 +59,38 @@ void DRRVLANQueue::initialize()
     }
 
     // FIFO queue for conformant packets
+    fifoSize = par("fifoSize").longValue();
     fifo.setName("FIFO queue");
+    fifoCurrentSize = 0;
 
-    // Per-subscriber queues with DRR scheduler for non-conformant packets
-    queues.assign(numFlows, (cQueue *)NULL);
+    // Per-subscriber VOQs with DRR scheduler for non-conformant packets
+    voqSize = par("voqSize").longValue();
+    voq.assign(numFlows, (cQueue *)NULL);
     for (int i=0; i<numFlows; i++)
     {
         char buf[32];
         sprintf(buf, "queue-%d", i);
-        queues[i] = new cQueue(buf);
+        voq[i] = new cQueue(buf);
     }
+    voqCurrentSize.assign(numFlows, 0);
 
     // DRR scheduler
-    currentQueueIndex = 0;
+    currentVoqIndex = 0;
     deficitCounters.assign(numFlows, 0);
+    continuation = false;
 
-    quanta.assign(numFlows, 0);
+    // DRR scheduler: Quanta
     const char *str = par("quanta");
     cStringTokenizer tokenizer(str);
-    int idx = 0;
-    while (tokenizer.hasMoreTokens())
+    quanta = tokenizer.asIntVector();
+    if (quanta.size() < numFlows)
     {
-        if (idx >= numFlows)
-        {
-            throw cRuntimeError("%s::initialize DRR quanta: Exceeds the maximum number of flows", getFullPath().c_str());
-        }
-        else
-        {
-            const char *token = tokenizer.nextToken();
-            quanta[idx] = atoi(token);
-            idx++;
-        }
+        int quantum = *(quanta.end() - 1);  // fill new elements with the value of the last element
+        quanta.resize(numFlows, quantum);
+    }
+    else if (quanta.size() > numFlows)
+    {
+        error("%s::initialize DRR quanta: Exceeds the maximum number of flows", getFullPath().c_str());
     }
 
     // statistics
@@ -111,7 +110,7 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
             warmupFinished = true;
             for (int i = 0; i < numFlows; i++)
             {
-                numPktsReceived[i] = queues[i]->getLength();   // take into account the frames/packets already in queues
+                numPktsReceived[i] = voq[i]->getLength();   // take into account the frames/packets already in VOQs
             }
         }
     }
@@ -123,7 +122,7 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
 // DEBUG
         ASSERT(pktLength > 0);
 // DEBUG
-        cQueue *queue = queues[flowIndex];
+        cQueue *queue = voq[flowIndex];
         if (warmupFinished == true)
         {
             numPktsReceived[flowIndex]++;
@@ -146,7 +145,9 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
             }
             else
             {
-                if (frameCapacity && fifo.length() >= frameCapacity)
+                int pktByteLength = PK(msg)->getByteLength();
+                if (fifoCurrentSize + pktByteLength > fifoSize)
+//                if (frameCapacity && fifo.length() >= frameCapacity)
                 {
                     EV << "FIFO queue full, dropping packet.\n";
                     if (warmupFinished == true)
@@ -158,6 +159,7 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
                 else
                 {
                     fifo.insert(msg);
+                    fifoCurrentSize += pktByteLength;
                 }
             }
         }
@@ -203,59 +205,92 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
 bool DRRVLANQueue::enqueue(cMessage *msg)
 {
     int queueIndex = classifier->classifyPacket(msg);
-    cQueue *queue = queues[queueIndex];
+    int pktByteLength = PK(msg)->getByteLength();
 
-    if (frameCapacity && queue->length() >= frameCapacity)
+    if (voqCurrentSize[queueIndex] + pktByteLength > voqSize)
     {
-        EV << "Queue " << queueIndex << " full, dropping packet.\n";
+        EV << "VOQ[" << queueIndex << "] full, dropping packet.\n";
         delete msg;
         return true;
     }
     else
     {
-        queue->insert(msg);
+        voq[queueIndex]->insert(msg);
+        voqCurrentSize[queueIndex] += pktByteLength;
         return false;
     }
 }
 
 cMessage *DRRVLANQueue::dequeue()
 {
+    cMessage *msg = (cMessage *)NULL;
+
     if (!fifo.isEmpty())
-    {   // FIFO queue has a priority over per-flow queues
-        return ((cMessage *)fifo.pop());
+    {   // FIFO queue has a priority over per-flow VOQs
+        msg = (cMessage *)fifo.pop();
+        fifoCurrentSize -= PK(msg)->getByteLength();
+        return (msg);
     }
     else
-    {   // DRR scheduling over per-flow queues
-        bool found = false;
-        int startQueueIndex = (currentQueueIndex + 1) % numFlows;  // search from the next queue for a frame to transmit
+    {   // DRR scheduling over per-flow VOQs
+
+        // check whether there is any non-empty VOQ
+        bool isVoqEmpty = true;
         for (int i = 0; i < numFlows; i++)
         {
-            int idx = (i + startQueueIndex) % numFlows;
-            if (!queues[idx]->isEmpty())
+            if (!voq[i]->isEmpty())
             {
-                deficitCounters[idx] += quanta[idx];
-                int pktLength = PK(queues[idx]->front())->getByteLength();
-                if (deficitCounters[idx] >= pktLength)
-                {
-                    currentQueueIndex = idx;
-                    deficitCounters[idx] -= pktLength;
-                    found = true;
-                    break;
-                }
+                isVoqEmpty = false;
+                break;
             }
-        } // end of for()
+        }
 
-        if (found)
+        if (isVoqEmpty)
         {
-            // TODO: update statistics
-            return ((cMessage *)queues[currentQueueIndex]->pop());
+            continuation = false;
+            return (msg);
         }
         else
         {
-            // TODO: further processing?
-            return NULL;
+            int i = 0;
+            while (true)
+            {
+                int idx = (currentVoqIndex + i) % numFlows;
+                if (!voq[idx]->isEmpty())
+                {
+                    deficitCounters[idx] += continuation ? 0 : quanta[idx];
+                    continuation = false;   // reset the flag
+
+                    int pktByteLength = PK(voq[idx]->front())->getByteLength();
+                    if (deficitCounters[idx] >= pktByteLength)
+                    {   // serve the packet
+                        msg = (cMessage *)voq[idx]->pop();
+                        voqCurrentSize[idx] -= pktByteLength;
+                        deficitCounters[idx] -= pktByteLength;
+
+                        // check whether the deficit counter value is enough for the HOL packet
+                        if (!voq[idx]->isEmpty())
+                        {
+                            pktByteLength = PK(voq[idx]->front())->getByteLength();
+                            if (deficitCounters[idx] >= pktByteLength)
+                            {   // set the flag and the start queue index
+                                continuation = true;
+                                currentVoqIndex = idx;
+                            }
+                            else
+                            {
+                                currentVoqIndex = (idx + 1) % numFlows;
+                            }
+                        }
+                        break;  // from the while loop
+                    }
+                }
+                i++;
+            } // end of while()
         }
-    }
+    }   // end of DRR scheduling
+
+    return (msg);   // just in case
 }
 
 void DRRVLANQueue::sendOut(cMessage *msg)
@@ -307,6 +342,6 @@ void DRRVLANQueue::finish()
         sumPktsDropped += numPktsDropped[i];
         sumPktsNonconformed += numPktsReceived[i] - numPktsConformed[i];
     }
-    recordScalar("overall packet loss rate of per-VLAN queues", sumPktsDropped/double(sumPktsReceived));
-    recordScalar("overall packet shaped rate of per-VLAN queues", sumPktsNonconformed/double(sumPktsReceived));
+    recordScalar("overall packet loss rate of per-flow VOQs", sumPktsDropped/double(sumPktsReceived));
+    recordScalar("overall packet shaped rate of per-flow VOQs", sumPktsNonconformed/double(sumPktsReceived));
 }
