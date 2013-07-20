@@ -79,9 +79,9 @@ void CSFQVLANQueue::initialize(int stage)
 
         // FIFO queue
         fifo.setName("FIFO queue");
-        queueSize = par("queueSize").longValue();           // in bit
-        queueThreshold = par("queueThreshold").longValue(); // in bit
-        currentQueueSize = 0;
+        queueSize = par("queueSize").longValue();           // in byte
+        queueThreshold = par("queueThreshold").longValue(); // in byte
+        currentQueueSize = 0;                               // in byte
 
         // CSFQ++: System-wide variables
         K = par("K").doubleValue();
@@ -121,8 +121,8 @@ void CSFQVLANQueue::initialize(int stage)
 #ifndef NDEBUG
         excessBWVector.setName("excess bandwidth");
         fairShareRateVector.setName("fair share rate (alpha)");
-        queueLengthVector.setName("FIFO queue length");
-        queueSizeVector.setName("FIFO queue size (bits)");
+        queueLengthVector.setName("FIFO queue length (packets)");
+        queueSizeVector.setName("FIFO queue size (bytes)");
         rateTotalVector.setName("aggregate rate of non-conformed packets");
         rateEnqueuedVector.setName("aggregate rate of enqueued non-conformed packets");
         for (int i=0; i < numFlows; i++)
@@ -306,9 +306,9 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
 
 bool CSFQVLANQueue::enqueue(cMessage *msg)
 {
-    int pktLength = PK(msg)->getBitLength();
+    int pktByteLength = PK(msg)->getByteLength();
 
-    if (currentQueueSize + pktLength > queueSize)
+    if (currentQueueSize + pktByteLength > queueSize)
     {
         EV << "FIFO queue full, dropping packet.\n";
         delete msg;
@@ -317,7 +317,7 @@ bool CSFQVLANQueue::enqueue(cMessage *msg)
     else
     {
         fifo.insert(msg);
-        currentQueueSize += pktLength;
+        currentQueueSize += pktByteLength;
 #ifndef NDEBUG
     queueLengthVector.record(fifo.getLength());
     queueSizeVector.record(currentQueueSize);
@@ -333,7 +333,7 @@ cMessage *CSFQVLANQueue::dequeue()
         return NULL;
     }
     cMessage *msg = (cMessage *)fifo.pop();
-    currentQueueSize -= PK(msg)->getBitLength();
+    currentQueueSize -= PK(msg)->getByteLength();
 #ifndef NDEBUG
     queueLengthVector.record(fifo.getLength());
     queueSizeVector.record(currentQueueSize);

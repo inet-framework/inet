@@ -59,9 +59,9 @@ class INET_API CSFQVLANQueue : public PassiveQueueBase
 
     // FIFO
     cQueue fifo;
-    int queueSize;
-    int currentQueueSize;   // in bit
-    int queueThreshold;
+    int queueSize;          // in byte
+    int currentQueueSize;   // in byte
+    int queueThreshold;     // in byte
 
     // token bucket meters
     TbmVector tbm;

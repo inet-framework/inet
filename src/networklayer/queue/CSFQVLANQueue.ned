@@ -40,8 +40,8 @@ simple CSFQVLANQueue like OutputQueue
         int numFlows = default(1);	// number of flows (i.e., subscribers)
 //		int frameCapacity = default(100);
 		double linkRate @unit(bps) = default(100Mbps);	// transmission rate of output link (i.e., feeder line rate (R_F))
-        int queueSize @unit(b) = default(121760000b);	// FIFO queue size; default value corresponds to 10000 frames of 1522B each.
-        int queueThreshold @unit(b) = default(30440000b);	// FIFO threshold to detect link congestion; default value is a quarter of default queueSize.
+        int queueSize @unit(B) = default(15220000B);	// FIFO queue size; default value corresponds to 10000 frames of 1522B each.
+        int queueThreshold @unit(B) = default(3805000B);	// FIFO threshold to detect link congestion; default value is a quarter of default queueSize.
         double K @unit(s) = default(100ms);	// averaging constant for flow rate estimation
         double K_alpha @unit(s) = default(200ms);	// averaging constant for fair rate (alpha) estimation
         string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier
