@@ -28,9 +28,6 @@
 #include "BasicTokenBucketMeter.h"
 #include "IQoSClassifier.h"
 
-// define constants
-#define KALPHA 29 // 0.99^29 = 0.75
-
 /**
  * Incoming packets are classified by an external VLAN classifier and
  * metered by an external token bucket meters before being put into
@@ -57,14 +54,14 @@ class INET_API CSFQVLANQueue : public PassiveQueueBase
     // VLAN classifier
     IQoSClassifier *classifier;
 
+    // token bucket meters
+    TbmVector tbm;
+
     // FIFO
     cQueue fifo;
     int queueSize;          // in byte
     int currentQueueSize;   // in byte
-    int queueThreshold;     // in byte
-
-    // token bucket meters
-    TbmVector tbm;
+//    int queueThreshold;     // in byte
 
     // CSFQ++: System-wide variables
     double K;               // averaging interval for flow rate estimation

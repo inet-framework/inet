@@ -61,7 +61,25 @@ void CSFQVLANQueue::initialize(int stage)
 
         // debugging
 #ifndef NDEBUG
+        excessBWVector.setName("excess bandwidth");
+        fairShareRateVector.setName("fair share rate (alpha)");
         pktReqVector.setName("packets requested");
+        queueLengthVector.setName("FIFO queue length (packets)");
+        queueSizeVector.setName("FIFO queue size (bytes)");
+        rateTotalVector.setName("aggregate rate of non-conformed packets");
+        rateEnqueuedVector.setName("aggregate rate of enqueued non-conformed packets");
+        for (int i=0; i < numFlows; i++)
+        {
+            OutVectorVector estRateVector;
+            for (int j=0; j < 2; j++)
+            {
+                std::stringstream vname;
+                vname << (j == 0 ? "conformed" : "non-conformed") << " rate for flow[" << i << "] (bit/sec)";
+                cOutVector *vector = new cOutVector((vname.str()).c_str());
+                estRateVector.push_back(vector);
+            }
+            estRateVectors.push_back(estRateVector);
+        }
 #endif
     }
     if (stage == 1)
@@ -80,7 +98,7 @@ void CSFQVLANQueue::initialize(int stage)
         // FIFO queue
         fifo.setName("FIFO queue");
         queueSize = par("queueSize").longValue();           // in byte
-        queueThreshold = par("queueThreshold").longValue(); // in byte
+//        queueThreshold = par("queueThreshold").longValue(); // in byte
         currentQueueSize = 0;                               // in byte
 
         // CSFQ++: System-wide variables
@@ -126,26 +144,26 @@ void CSFQVLANQueue::initialize(int stage)
         numPktsSent.assign(numFlows, 0);
 
         // debugging
-#ifndef NDEBUG
-        excessBWVector.setName("excess bandwidth");
-        fairShareRateVector.setName("fair share rate (alpha)");
-        queueLengthVector.setName("FIFO queue length (packets)");
-        queueSizeVector.setName("FIFO queue size (bytes)");
-        rateTotalVector.setName("aggregate rate of non-conformed packets");
-        rateEnqueuedVector.setName("aggregate rate of enqueued non-conformed packets");
-        for (int i=0; i < numFlows; i++)
-        {
-            OutVectorVector estRateVector;
-            for (int j=0; j < 2; j++)
-            {
-                std::stringstream vname;
-                vname << (j == 0 ? "conformed" : "non-conformed") << " rate for flow[" << i << "] (bit/sec)";
-                cOutVector *vector = new cOutVector((vname.str()).c_str());
-                estRateVector.push_back(vector);
-            }
-            estRateVectors.push_back(estRateVector);
-        }
-#endif
+//#ifndef NDEBUG
+//        excessBWVector.setName("excess bandwidth");
+//        fairShareRateVector.setName("fair share rate (alpha)");
+//        queueLengthVector.setName("FIFO queue length (packets)");
+//        queueSizeVector.setName("FIFO queue size (bytes)");
+//        rateTotalVector.setName("aggregate rate of non-conformed packets");
+//        rateEnqueuedVector.setName("aggregate rate of enqueued non-conformed packets");
+//        for (int i=0; i < numFlows; i++)
+//        {
+//            OutVectorVector estRateVector;
+//            for (int j=0; j < 2; j++)
+//            {
+//                std::stringstream vname;
+//                vname << (j == 0 ? "conformed" : "non-conformed") << " rate for flow[" << i << "] (bit/sec)";
+//                cOutVector *vector = new cOutVector((vname.str()).c_str());
+//                estRateVector.push_back(vector);
+//            }
+//            estRateVectors.push_back(estRateVector);
+//        }
+//#endif
     }   // end of if () for stage checking
 }
 
@@ -470,7 +488,7 @@ void CSFQVLANQueue::estimateAlpha(int pktLength, double rate, simtime_t arrvTime
 
     // update alpha
     if (rateTotal >= excessBW)
-    {   // link congested
+    {   // link is congested
         if (!congested)
         {
             congested = true;
@@ -499,7 +517,7 @@ void CSFQVLANQueue::estimateAlpha(int pktLength, double rate, simtime_t arrvTime
         }
     }
     else
-    {   // link not congested
+    {   // link is not congested
         if (congested)
         {
             congested = false;
