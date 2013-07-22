@@ -51,13 +51,13 @@ sim-time-limit = 1s
 
 %contains-regex: stdout
 Link 0
-    server / eth0  on:nwLayer.ifOut\[0\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-01 IPv4:\{inet_addr:10.0.0.1/30.*\}
-    router / eth0  on:nwLayer.ifOut\[0\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-02 IPv4:\{inet_addr:10.0.0.2/30.*\}
+    server / eth0  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-01 IPv4:\{inet_addr:10.0.0.1/30.*\}
+    router / eth0  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-02 IPv4:\{inet_addr:10.0.0.2/30.*\}
 Link 1
-    router / eth1  on:nwLayer.ifOut\[1\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-03 IPv4:\{inet_addr:10.0.0.9/29.*\}
-    mobile\[0\] / wlan0  on:nwLayer.ifOut\[0\]  MTU:2304 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-06 IPv4:\{inet_addr:10.0.0.10/29.*\}
-    mobile\[1\] / wlan0  on:nwLayer.ifOut\[0\]  MTU:2304 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-07 IPv4:\{inet_addr:10.0.0.11/29.*\}
-    mobile\[2\] / wlan0  on:nwLayer.ifOut\[0\]  MTU:2304 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-08 IPv4:\{inet_addr:10.0.0.12/29.*\}
+    router / eth1  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-03 IPv4:\{inet_addr:10.0.0.9/29.*\}
+    mobile\[0\] / wlan0  on:nwLayer.ifOut\[\d+\]  MTU:2304 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-06 IPv4:\{inet_addr:10.0.0.10/29.*\}
+    mobile\[1\] / wlan0  on:nwLayer.ifOut\[\d+\]  MTU:2304 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-07 IPv4:\{inet_addr:10.0.0.11/29.*\}
+    mobile\[2\] / wlan0  on:nwLayer.ifOut\[\d+\]  MTU:2304 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-08 IPv4:\{inet_addr:10.0.0.12/29.*\}
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
