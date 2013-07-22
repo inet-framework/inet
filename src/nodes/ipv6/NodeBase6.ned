@@ -37,7 +37,7 @@ import inet.base.NotificationBoard;
 module NodeBase6
 {
     parameters:
-        @display("bgb=611,448");
+        @display("bgb=623,479");
         @node;
         @labels(node,ethernet-node,wireless-node);
         int numExtInterfaces = default(0);
@@ -52,13 +52,13 @@ module NodeBase6
     submodules:
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=53,194");
+                @display("p=53,155;is=s");
         }
 
         // optional mobility module. Required only if wireless cards are present
         mobility: <mobilityType> like IMobility if mobilityType != "" && numRadios > 0 {
             parameters:
-                @display("p=53,121");
+                @display("p=53,111");
         }
 
         // network layer
@@ -69,7 +69,7 @@ module NodeBase6
 
         routingTable6: RoutingTable6 {
             parameters:
-                @display("p=53,287");
+                @display("p=53,225;is=s");
                 isRouter = IPForward;
                 routingTable = routingTable;
         }
@@ -77,24 +77,24 @@ module NodeBase6
         // linklayer
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=53,386");
+                @display("p=53,287;is=s");
         }
 
         wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
             parameters:
-                @display("p=159,386;q=queue");
+                @display("p=159,406;q=queue");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
-                @display("p=282,386,row,90;q=txQueue");
+                @display("p=282,406,row,90;q=txQueue");
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
-                @display("p=407,386,row,90;q=txQueue");
+                @display("p=407,406,row,90;q=txQueue");
         }
         ext[numExtInterfaces]: <default("ExtInterface")> like IExternalNic {
             parameters:
-                @display("p=547,386,row,90;q=txQueue;i=block/ifcard");
+                @display("p=547,406,row,90;q=txQueue;i=block/ifcard");
         }
 
     connections allowunconnected:
