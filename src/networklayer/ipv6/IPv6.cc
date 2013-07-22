@@ -63,7 +63,7 @@ void IPv6::initialize(int stage)
         mapping.parseProtocolMapping(par("protocolMapping"));
 
         curFragmentId = 0;
-        lastCheckTime = 0;
+        lastCheckTime = SIMTIME_ZERO;
         fragbuf.init(icmp);
 
         numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;

@@ -420,7 +420,7 @@ void IPv6InterfaceData::deduceAdvPrefix()
         IPv6InterfaceData::AdvPrefix& p = rtrVars.advPrefixList[i];
         /*IPv6Address globalAddr = */
         autoConfRouterGlobalScopeAddress(p);
-        assignAddress(p.rtrAddress, false, 0, 0);
+        assignAddress(p.rtrAddress, false, SIMTIME_ZERO, SIMTIME_ZERO);
     }
 }
 
@@ -467,6 +467,6 @@ void IPv6InterfaceData::updateHomeNetworkInfo(const IPv6Address& hoa, const IPv6
     IPv6Address addr = getGlobalAddress(HoA);
 
     if ( addr == IPv6Address::UNSPECIFIED_ADDRESS )
-        this->assignAddress(hoa, false, 0, 0, true);
+        this->assignAddress(hoa, false, SIMTIME_ZERO, SIMTIME_ZERO, true);
 }
 #endif /* WITH_xMIPv6 */
