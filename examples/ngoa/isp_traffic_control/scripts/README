@@ -1,10 +1,9 @@
 scripts
 =======
 
-This directory includes scripts to submit array & batch jobs to a
-cluster (managed by Sun Grid Engine) and do pre- & post-processing of
-simulation results for a comparison study of next-generation optical
-access network (NGOA) architectures.
+This directory includes scripts to submit array & batch jobs to a cluster
+(managed by Sun Grid Engine) and do pre- & post-processing of simulation results
+for a comparison study of next-generation access network (NGA) architectures.
 
 
 1. Simulation run (batch processing)

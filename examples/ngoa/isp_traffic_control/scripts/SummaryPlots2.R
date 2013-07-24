@@ -21,7 +21,7 @@ library(reshape)
 ifelse (Sys.getenv("OS") == "Windows_NT",
         .root.directory <- "E:/tools/omnetpp/inet-hnrl",
         .root.directory <- "~/inet-hnrl")
-.base.directory <- paste(.root.directory, 'examples/ngoa/isp_traffic_shaping2', sep='/')
+.base.directory <- paste(.root.directory, 'examples/ngoa/isp_traffic_control', sep='/')
 .script.directory <- paste(.root.directory, 'etc/inet-hnrl', sep='/')
 ###
 ### source scripts
@@ -45,12 +45,8 @@ Pause <- function () {
 ###
 ### define variables
 ###
-.da_unshaped_100M.wd <- paste(.base.directory, "results/Dedicated/unshaped_dr100M", sep="/")
-.da_unshaped_dr1G.wd <- paste(.base.directory, "results/Dedicated/unshaped_dr1G", sep="/")
-.da_shaped_dr100M.wd <- paste(.base.directory, "results/Dedicated/shaped_dr100M", sep="/")
-.da_shaped_dr1G.wd <- paste(.base.directory, "results/Dedicated/shaped_dr1G", sep="/")
-.sa_shaped_dr100M.wd <- paste(.base.directory, "results/Shared/shaped_dr100M", sep="/")
-## .sa_N10_nh1_nf1_nv1_tbf.wd <- paste(.base.directory, "results/Shared/test/N10_nh1_nf1_nv1_tbf-test", sep="/")
+.csfq-tbm.wd <- paste(.base.directory, "results/csfq-tbm", sep="/")
+.drr-tbm.wd <- paste(.base.directory, "results/drr-tbm", sep="/")
 ## for plotting
 .measure <-  c('average session delay [s]',
                '90th-sessionDelay:percentile',
@@ -112,19 +108,18 @@ Pause <- function () {
 .old <- theme_set(theme_bw())
 .pt_size <- 3.5
 #################################################################################
-### summary plots for dedicated architecture with HTTP, FTP, and video traffic
-### but no traffic shaping
+### summary plots for static configurations with UDP traffic
 ###
-### Note: This is for the IEEE Transactions on Networking paper.
+### Note: This is for the IEEE Communications Letters paper.
 #################################################################################
-.resp <- readline("Process data from dedicated access without traffic shaping? (hit y or n) ")
+.resp <- readline("Process data from static configurations with UDP traffic? (hit y or n) ")
 if (.resp == 'y') {
     .config <- readline("Type OMNeT++ configuration name: ")
-    .da.wd <- paste(.base.directory, "results/Dedicated", .config, sep="/")
+    .static_udp.wd <- paste(.base.directory, "results/Dedicated", .config, sep="/")
     .da.rdata <- paste(.config, 'RData', sep=".")
-    if (file.exists(paste(.da.wd, .da.rdata, sep='/')) == FALSE) {
+    if (file.exists(paste(.static_udp.wd, .da.rdata, sep='/')) == FALSE) {
         ## Do the processing of OMNeT++ data files unless there is a corresponding RData file in the working directory
-        .n_totalFiles <- length(list.files(path=.da.wd, pattern='*.sca$'))  # total number of (scalar) files to process
+        .n_totalFiles <- length(list.files(path=.static_udp.wd, pattern='*.sca$'))  # total number of (scalar) files to process
         .n_repetitions <- 10    # number of repetitions per experiment
         .n_experiments <- ceiling(.n_totalFiles/.n_repetitions)   # number of experiments
         .n_files <- ceiling(.n_totalFiles/.n_experiments)   # number of files per experiment
@@ -134,7 +129,7 @@ if (.resp == 'y') {
         for (.i in 1:.n_experiments) {
             cat(paste("Processing ", as.character(.i), "th experiment ...\n", sep=""))
             for (.j in 1:.n_files) {
-                .fileNames[.j] <- paste(.da.wd,
+                .fileNames[.j] <- paste(.static_udp.wd,
                                         paste(.config, "-", as.character((.i-1)*.n_files+.j-1), ".sca", sep=""),
                                         sep='/')
             }
@@ -186,11 +181,11 @@ if (.resp == 'y') {
         .df.name <- paste('.da_', .config, '.df', sep='')
         assign(.scalars_df.name, .scalars_df)
         assign(.df.name, sort_df(.df, vars=c('dr', 'ur', 'n')))
-        save(list=c(.scalars_df.name, .df.name), file=paste(.da.wd, .da.rdata, sep="/"))
+        save(list=c(.scalars_df.name, .df.name), file=paste(.static_udp.wd, .da.rdata, sep="/"))
     }
     else {
         ## Otherwise, load objects from the saved file
-        load(paste(.da.wd, .da.rdata, sep='/'))
+        load(paste(.static_udp.wd, .da.rdata, sep='/'))
         .df.name <- paste('.da_', .config, '.df', sep='')
     }   # end of if() for the processing of OMNeT++ data files
     .da.df <- get(.df.name)
@@ -208,18 +203,18 @@ if (.resp == 'y') {
         .plots[[.i]] <- .p
         ## save each plot as a PDF file
         .p
-        ggsave(paste(.da.wd,
+        ggsave(paste(.static_udp.wd,
                      paste(paste(.config, .measure.type[.i], .measure.abbrv[.i], sep="-"), "pdf", sep="."),
                      sep="/"))
     }   # end of for(.i)
     ## save combined plots into a PDF file per measure.type (e.g., ftp, http)
-    pdf(paste(.da.wd, paste(.config, "ftp.pdf", sep="-"), sep='/'))
+    pdf(paste(.static_udp.wd, paste(.config, "ftp.pdf", sep="-"), sep='/'))
     grid.arrange(.plots[[1]], .plots[[2]], .plots[[3]], .plots[[4]], .plots[[5]], .plots[[6]])
     dev.off()
-    pdf(paste(.da.wd, paste(.config, "http.pdf", sep="-"), sep='/'))
+    pdf(paste(.static_udp.wd, paste(.config, "http.pdf", sep="-"), sep='/'))
     grid.arrange(.plots[[7]], .plots[[8]], .plots[[9]], .plots[[10]], .plots[[11]], .plots[[12]], ncol=2)
     dev.off()
-    pdf(paste(.da.wd, paste(.config, "packet.pdf", sep="-"), sep='/'))
+    pdf(paste(.static_udp.wd, paste(.config, "packet.pdf", sep="-"), sep='/'))
     grid.arrange(.plots[[14]], .plots[[15]], .plots[[16]], .plots[[17]], .plots[[18]], ncol=2)
     dev.off()
 }   # end of if()
