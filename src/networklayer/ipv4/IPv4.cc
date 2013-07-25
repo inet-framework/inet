@@ -500,14 +500,14 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE
         numUnroutable++;
         delete datagram;
     }
-    else if (route->getParent() && fromIE != route->getParent())
+    else if (route->getInInterface() && fromIE != route->getInInterface()->getInterface())
     {
-        EV << "Did not arrive on parent interface, packet dropped.\n";
+        EV << "Did not arrive on input interface, packet dropped.\n";
         numDropped++;
         delete datagram;
     }
     // backward compatible: no parent means shortest path interface to source (RPB routing)
-    else if (!route->getParent() && fromIE != getShortestPathInterfaceToSource(datagram))
+    else if (!route->getInInterface() && fromIE != getShortestPathInterfaceToSource(datagram))
     {
         EV << "Did not arrive on shortest path, packet dropped.\n";
         numDropped++;
@@ -517,16 +517,16 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE
     {
         numForwarded++;
         // copy original datagram for multiple destinations
-        const IPv4MulticastRoute::ChildInterfaceVector &children = route->getChildren();
-        for (unsigned int i=0; i<children.size(); i++)
+        for (unsigned int i=0; i<route->getNumOutInterfaces(); i++)
         {
-            InterfaceEntry *destIE = children[i]->getInterface();
-            if (destIE != fromIE)
+            IPv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
+            InterfaceEntry *destIE = outInterface->getInterface();
+            if (destIE != fromIE && outInterface->isEnabled())
             {
                 int ttlThreshold = destIE->ipv4Data()->getMulticastTtlThreshold();
                 if (datagram->getTimeToLive() <= ttlThreshold)
                     EV << "Not forwarding to " << destIE->getName() << " (ttl treshold reached)\n";
-                else if (children[i]->isLeaf() && !destIE->ipv4Data()->hasMulticastListener(destAddr))
+                else if (outInterface->isLeaf() && !destIE->ipv4Data()->hasMulticastListener(destAddr))
                     EV << "Not forwarding to " << destIE->getName() << " (no listeners)\n";
                 else
                 {

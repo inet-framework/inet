@@ -91,8 +91,8 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     MulticastRouteVector multicastRoutes; // Multicast route array, sorted by netmask desc, origin asc, metric asc
 
     // for convenience
-    typedef IPv4MulticastRoute::ChildInterface ChildInterface;
-    typedef IPv4MulticastRoute::ChildInterfaceVector ChildInterfaceVector;
+    typedef IPv4MulticastRoute::OutInterface OutInterface;
+    typedef IPv4MulticastRoute::OutInterfaceVector OutInterfaceVector;
 
     // routing cache: maps destination address to the route
     typedef std::map<IPv4Address, IPv4Route *> RoutingCache;
