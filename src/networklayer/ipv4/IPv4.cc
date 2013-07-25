@@ -31,6 +31,8 @@
 #include "Ieee802Ctrl_m.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
+#include "NotificationBoard.h"
+
 
 Define_Module(IPv4);
 
@@ -43,6 +45,7 @@ void IPv4::initialize(int stage)
 
         ift = InterfaceTableAccess().get();
         rt = RoutingTableAccess().get();
+        nb = NotificationBoardAccess().getIfExists(); // needed only for multicast forwarding
 
         queueOutGate = gate("queueOut");
 
@@ -499,24 +502,40 @@ InterfaceEntry *IPv4::getShortestPathInterfaceToSource(IPv4Datagram *datagram)
 void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE)
 {
     ASSERT(fromIE);
-    const IPv4Address &origin = datagram->getSrcAddress();
+    const IPv4Address &srcAddr = datagram->getSrcAddress();
     const IPv4Address &destAddr = datagram->getDestAddress();
     ASSERT(destAddr.isMulticast());
+    ASSERT(!destAddr.isLinkLocalMulticast());
+
+    if (!nb)
+        throw cRuntimeError("If multicast forwarding is enabled, then the node must contain a NotificationBoard.");
 
     EV << "Forwarding multicast datagram `" << datagram->getName() << "' with dest=" << destAddr << "\n";
 
     numMulticast++;
 
-    const IPv4MulticastRoute *route = rt->findBestMatchingMulticastRoute(origin, destAddr);
+    const IPv4MulticastRoute *route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
     if (!route)
     {
-        EV << "No route, packet dropped.\n";
-        numUnroutable++;
-        delete datagram;
+        EV << "Multicast route does not exist, try to add.\n";
+        nb->fireChangeNotification(NF_IPv4_NEW_MULTICAST, datagram);
+
+        // read new record
+        route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
+
+        if (!route)
+        {
+            EV << "No route, packet dropped.\n";
+            numUnroutable++;
+            delete datagram;
+            return;
+        }
     }
-    else if (route->getInInterface() && fromIE != route->getInInterface()->getInterface())
+
+    if (route->getInInterface() && fromIE != route->getInInterface()->getInterface())
     {
         EV << "Did not arrive on input interface, packet dropped.\n";
+        nb->fireChangeNotification(NF_IPv4_DATA_ON_NONRPF, datagram);
         numDropped++;
         delete datagram;
     }
@@ -529,6 +548,8 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE
     }
     else
     {
+        nb->fireChangeNotification(NF_IPv4_DATA_ON_RPF, datagram); // forwarding hook
+
         numForwarded++;
         // copy original datagram for multiple destinations
         for (unsigned int i=0; i<route->getNumOutInterfaces(); i++)
@@ -549,6 +570,9 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE
                 }
             }
         }
+
+        nb->fireChangeNotification(NF_IPv4_MDATA_REGISTER, datagram); // postRouting hook
+
         // only copies sent, delete original datagram
         delete datagram;
     }

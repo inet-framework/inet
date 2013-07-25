@@ -38,6 +38,7 @@ class ICMPMessage;
 class IInterfaceTable;
 class IPv4Datagram;
 class IRoutingTable;
+class NotificationBoard;
 
 // ICMP type 2, code 4: fragmentation needed, but don't-fragment bit set
 const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
@@ -51,6 +52,7 @@ class INET_API IPv4 : public QueueBase, public ILifecycle
   protected:
     IRoutingTable *rt;
     IInterfaceTable *ift;
+    NotificationBoard *nb;
     ICMPAccess icmpAccess;
     cGate *queueOutGate; // the most frequently used output gate
     bool manetRouting;
