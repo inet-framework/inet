@@ -41,8 +41,7 @@ class INET_API CSFQVLANQueue : public PassiveQueueBase
     // type definitions for member variables
     typedef std::vector<bool> BoolVector;
     typedef std::vector<double> DoubleVector;
-    typedef std::vector<int> IntVector;
-    typedef std::vector<long long> LongLongVector;
+    typedef std::vector<unsigned long> UnsignedLongVector;
     typedef std::vector<BasicTokenBucketMeter *> TbmVector;
     typedef std::vector<simtime_t> TimeVector;
 
@@ -74,14 +73,14 @@ class INET_API CSFQVLANQueue : public PassiveQueueBase
     simtime_t lastArv;      // the arrival time of the last packet (in sec)
     simtime_t startTime;    // used to store the start of an interval of length K_alpha
 //    int kalpha;             // maximum number of times the fair rate (alpha) can be decreased when the queue overflows, during a time interval of length K_alpha
-    int sumBitsTotal;       // the total number of bits enqueued between two consecutive rate estimations. usually, this represent the size of one packet;
+    unsigned long sumBitsTotal; // the total number of bits enqueued between two consecutive rate estimations. usually, this represent the size of one packet;
                             // however, if more packets are received at the same time this will represent the cumulative size of all packets received simultaneously
-    int sumBitsEnqueued;    // same as above, but for the total number of bytes that are enqueued between consecutive rate estimations
+    unsigned long sumBitsEnqueued;  // same as above, but for the total number of bytes that are enqueued between consecutive rate estimations
     bool congested;         // flag indicating whether the link is congested or not
 
     // CSFQ++: Flow-specific variables
     DoubleVector weight;    // vector of flow weights (set to TB mean rate)
-    IntVector sumBits;      // keep track of packets that arrive at the same time
+    UnsignedLongVector sumBits;     // keep track of packets that arrive at the same time
     std::vector< std::vector<double> > flowRate;    // 2-dimensional vector of estimated flow rates;
                                                     // - second index of 0 for conformed and 1 for non-conformed packets
     std::vector< std::vector<simtime_t> > prevTime; // 2-dimensional vector of time of previously arrived packet;
@@ -90,10 +89,10 @@ class INET_API CSFQVLANQueue : public PassiveQueueBase
     // statistics
     bool warmupFinished;        ///< if true, start statistics gathering
     DoubleVector numBitsSent;
-    IntVector numPktsReceived; // redefined from PassiveQueueBase with 'name hiding'
-    IntVector numPktsDropped;  // redefined from PassiveQueueBase with 'name hiding'
-    IntVector numPktsConformed;
-    IntVector numPktsSent;
+    UnsignedLongVector numPktsReceived; // redefined from PassiveQueueBase with 'name hiding'
+    UnsignedLongVector numPktsDropped;  // redefined from PassiveQueueBase with 'name hiding'
+    UnsignedLongVector numPktsConformed;
+    UnsignedLongVector numPktsSent;
 
     cGate *outGate;
 
