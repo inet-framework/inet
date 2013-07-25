@@ -154,7 +154,7 @@ class INET_API CSFQVLANQueue : public PassiveQueueBase
     /**
      * For CSFQ.
      */
-    virtual void estimateAlpha(int pktLength, double rate, simtime_t arrvTime, int dropped);
+    virtual void estimateAlpha(int pktLength, double rate, simtime_t arrvTime, bool dropped);
     virtual double estimateRate(int flowId, int pktLength, simtime_t arrvTime, int color);
 };
 

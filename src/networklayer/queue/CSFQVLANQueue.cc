@@ -98,7 +98,6 @@ void CSFQVLANQueue::initialize(int stage)
         // FIFO queue
         fifo.setName("FIFO queue");
         queueSize = par("queueSize").longValue();           // in byte
-//        queueThreshold = par("queueThreshold").longValue(); // in byte
         currentQueueSize = 0;                               // in byte
 
         // CSFQ++: System-wide variables
@@ -110,7 +109,6 @@ void CSFQVLANQueue::initialize(int stage)
         rateTotal = 0.0;
         rateEnqueued = 0.0;
         maxRate = 0.0;
-//        kalpha = KALPHA;
         lastArv = 0.0;
         startTime = 0.0;
         sumBitsTotal = 0;
@@ -440,7 +438,7 @@ double CSFQVLANQueue::estimateRate(int flowIndex, int pktLength, simtime_t arrvT
 // - rate: estimated normalized flow rate
 // - arrvTime: packet arrival time
 // - dropped: flag indicating whether the packet is dropped or not
-void CSFQVLANQueue::estimateAlpha(int pktLength, double rate, simtime_t arrvTime, int dropped)
+void CSFQVLANQueue::estimateAlpha(int pktLength, double rate, simtime_t arrvTime, bool dropped)
 {
     double T = (arrvTime - lastArv).dbl();   // packet interarrival
     double k = K_alpha;    // the window size (i.e., K_c)

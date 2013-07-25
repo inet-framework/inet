@@ -65,33 +65,10 @@ class INET_API CSFQVLANQueue2 : public CSFQVLANQueue
      */
     virtual void handleMessage(cMessage *msg);
 
-//    /**
-//     * Redefined from PassiveQueueBase.
-//     */
-//    virtual void finish();
-
-//    /**
-//     * Redefined from PassiveQueueBase.
-//     */
-//    virtual bool enqueue(cMessage *msg);
-
-//    /**
-//     * Redefined from PassiveQueueBase to implement round-robin (RR) scheduling.
-//     */
-//    virtual cMessage *dequeue();
-
-//    /**
-//     * The queue should send a packet whenever this method is invoked.
-//     * If the queue is currently empty, it should send a packet when
-//     * when one becomes available.
-//     */
-//    virtual void requestPacket();
-
     /**
      * For CSFQ.
      */
-    virtual void estimateAlpha(int pktLength, double rate, simtime_t arrvTime, int dropped);
-//    virtual double estimateRate(int flowId, int pktLength, simtime_t arrvTime, int color);
+    virtual void estimateAlpha(int pktLength, double rate, simtime_t arrvTime, bool dropped);
 };
 
 #endif
