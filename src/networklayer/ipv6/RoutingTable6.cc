@@ -229,10 +229,20 @@ void RoutingTable6::receiveChangeNotification(int category, const cObject *detai
     else if (category==NF_INTERFACE_DELETED)
     {
         //TODO remove all routes that point to that interface (?)
+        InterfaceEntry *interfaceEntry = check_and_cast<InterfaceEntry*>(details);
+        int interfaceEntryId = interfaceEntry->getInterfaceId();
+        purgeDestCacheForInterfaceID(interfaceEntryId);
     }
     else if (category==NF_INTERFACE_STATE_CHANGED)
     {
-        //TODO invalidate routing cache (?)
+        InterfaceEntry *interfaceEntry = check_and_cast<InterfaceEntry*>(details);
+        int interfaceEntryId = interfaceEntry->getInterfaceId();
+
+        // an interface went down
+        if (interfaceEntry->isDown())
+        {
+            purgeDestCacheForInterfaceID(interfaceEntryId);
+        }
     }
     else if (category==NF_INTERFACE_CONFIG_CHANGED)
     {
@@ -745,6 +755,9 @@ void RoutingTable6::addRoute(IPv6Route *route)
     // stop at the first match when doing the longest prefix matching
     std::sort(routeList.begin(), routeList.end(), routeLessThan);
 
+    /*XXX: this deletes some cache entries we want to keep, but the node MUST update
+     the Destination Cache in such a way that the latest route information are used.*/
+    purgeDestCache();
     updateDisplayString();
 
     nb->fireChangeNotification(NF_IPv6_ROUTE_ADDED, route);
@@ -760,6 +773,11 @@ void RoutingTable6::removeRoute(IPv6Route *route)
     routeList.erase(it);
     delete route;
 
+    /*XXX: this deletes some cache entries we want to keep, but the node MUST update
+     the Destination Cache in such a way that all entries using the next-hop from
+     the deleted route perform next-hop determination again rather than continue
+     sending traffic using that deleted route next-hop.*/
+    purgeDestCache();
     updateDisplayString();
 }
 
