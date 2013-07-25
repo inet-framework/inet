@@ -65,8 +65,8 @@ InterfaceEntry::InterfaceEntry(cModule* ifmod)
 
     ipv4data = NULL;
     ipv6data = NULL;
-    protocol3data = NULL;
-    protocol4data = NULL;
+    isisdata = NULL;
+    trilldata = NULL;
     estimateCostProcessArray.clear();
 }
 
@@ -99,10 +99,10 @@ std::string InterfaceEntry::info() const
         out << " " << ipv4data->info();
     if (ipv6data)
         out << " " << ipv6data->info();
-    if (protocol3data)
-        out << " " << protocol3data->info();
-    if (protocol4data)
-        out << " " << protocol4data->info();
+    if (isisdata)
+        out << " " << ((InterfaceProtocolData *)isisdata)->info(); // Khmm...
+    if (trilldata)
+        out << " " << ((InterfaceProtocolData *)trilldata)->info(); // Khmm...
     return out.str();
 }
 
@@ -131,10 +131,10 @@ std::string InterfaceEntry::detailedInfo() const
         out << " " << ipv4data->info() << "\n";
     if (ipv6data)
         out << " " << ipv6data->info() << "\n";
-    if (protocol3data)
-        out << " " << protocol3data->info() << "\n";
-    if (protocol4data)
-        out << " " << protocol4data->info() << "\n";
+    if (isisdata)
+        out << " " << ((InterfaceProtocolData *)isisdata)->info() << "\n"; // Khmm...
+    if (trilldata)
+        out << " " << ((InterfaceProtocolData *)trilldata)->info() << "\n"; // Khmm...
 
     return out.str();
 }
@@ -201,19 +201,21 @@ void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
 #endif
 }
 
-void InterfaceEntry::setProtocol3Data(InterfaceProtocolData *p)
+void InterfaceEntry::setTRILLInterfaceData(TRILLInterfaceData *p)
 {
-    if (protocol3data && protocol3data->ownerp == this)
-        delete protocol3data;
-    protocol3data = p;
+    if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this)
+        delete trilldata;
+    trilldata = p;
+    ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
     configChanged();
 }
 
-void InterfaceEntry::setProtocol4Data(InterfaceProtocolData *p)
+void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
 {
-    if (protocol4data && protocol4data->ownerp == this)
-        delete protocol4data;
-    protocol4data = p;
+    if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this)
+        delete isisdata;
+    isisdata = p;
+    ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
     configChanged();
 }
 
