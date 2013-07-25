@@ -60,6 +60,12 @@ const char *IPv6Route::routeSrcName(RouteSrc src)
     }
 }
 
+void IPv6Route::changed(int fieldCode)
+{
+    if (_rt)
+        _rt->routeChanged(this, fieldCode);
+}
+
 //----
 
 std::ostream& operator<<(std::ostream& os, const IPv6Route& e)
@@ -239,6 +245,21 @@ void RoutingTable6::receiveChangeNotification(int category, const cObject *detai
     {
         //TODO
     }
+}
+
+void RoutingTable6::routeChanged(IPv6Route *entry, int fieldCode)
+{
+    ASSERT(entry != NULL);
+
+    /*XXX: this deletes some cache entries we want to keep, but the node MUST update
+     the Destination Cache in such a way that all entries will use the latest
+     route information.*/
+    if (fieldCode==IPv6Route::F_NEXTHOP || fieldCode==IPv6Route::F_IFACE)
+        purgeDestCache();
+
+    updateDisplayString();
+
+    nb->fireChangeNotification(NF_IPv6_ROUTE_CHANGED, entry); // TODO include fieldCode in the notification
 }
 
 void RoutingTable6::configureInterfaceForIPv6(InterfaceEntry *ie)
@@ -720,6 +741,7 @@ bool RoutingTable6::routeLessThan(const IPv6Route *a, const IPv6Route *b)
 
 void RoutingTable6::addRoute(IPv6Route *route)
 {
+    route->setRoutingTable(this);
     routeList.push_back(route);
 
     // we keep entries sorted by prefix length in routeList, so that we can
