@@ -45,6 +45,26 @@ class INET_API IPv6Route : public cObject
         ROUTING_PROT,   ///< route is managed by a routing protocol (OSPF,BGP,etc)
     };
 
+    /** Cisco like administrative distances (includes IPv4 protocols)*/
+    enum RouteAdminDist
+    {
+        dDirectlyConnected = 0,
+        dStatic = 1,
+        dEIGRPSummary = 5,
+        dBGPExternal = 20,
+        dEIGRPInternal = 90,
+        dIGRP = 100,
+        dOSPF = 110,
+        dISIS = 115,
+        dRIP = 120,
+        dEGP = 140,
+        dODR = 160,
+        dEIGRPExternal = 170,
+        dBGPInternal = 200,
+        dDHCPlearned = 254,
+        dUnknown = 255
+    };
+
   protected:
     IPv6Address _destPrefix;
     short _length;
@@ -53,6 +73,7 @@ class INET_API IPv6Route : public cObject
     IPv6Address _nextHop;  // unspecified means "direct"
     simtime_t _expiryTime; // if route is an advertised prefix: prefix lifetime
     int _metric;
+    unsigned int  _adminDist;
 
   public:
     /**
@@ -66,6 +87,7 @@ class INET_API IPv6Route : public cObject
         _interfaceID = -1;
         _expiryTime = 0;
         _metric = 0;
+        _adminDist = dUnknown;
     }
 
     virtual std::string info() const;
@@ -76,6 +98,7 @@ class INET_API IPv6Route : public cObject
     void setNextHop(const IPv6Address& nextHop)  {_nextHop = nextHop;}
     void setExpiryTime(simtime_t expiryTime)  {_expiryTime = expiryTime;}
     void setMetric(int metric)  {_metric = metric;}
+    void setAdminDist(unsigned int adminDist)  {_adminDist = adminDist;}
 
     const IPv6Address& getDestPrefix() const {return _destPrefix;}
     int getPrefixLength() const  {return _length;}
@@ -84,6 +107,7 @@ class INET_API IPv6Route : public cObject
     const IPv6Address& getNextHop() const  {return _nextHop;}
     simtime_t getExpiryTime() const  {return _expiryTime;}
     int getMetric() const  {return _metric;}
+    unsigned int getAdminDist() const  { return _adminDist; }
 };
 
 /**
