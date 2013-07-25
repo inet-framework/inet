@@ -147,6 +147,16 @@ class INET_API UDPSocket
     void setMulticastOutputInterface(int interfaceId);
 
     /**
+     * Set the ReuseAddress option on the UDP socket. It is possible to use
+     * an already bound address/port in the bind() command only if both the
+     * original and the new socket set the ReuseAddress flag to true.
+     * Note that only one socket will receive the packets arrived at that
+     * address/port (the last bound one). This option works like REUSE_ADDR
+     * socket option in Linux.
+     */
+    void setReuseAddress(bool value);
+
+    /**
      * Adds the socket to the given multicast group, that is, UDP packets
      * arriving to the given multicast address will be passed up to the socket.
      * One can also optionally specify the output interface for packets sent to
