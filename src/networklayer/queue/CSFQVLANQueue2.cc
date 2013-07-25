@@ -93,16 +93,14 @@ void CSFQVLANQueue2::handleMessage(cMessage *msg)
                 sum += flowRate[i][0];    // sum of conformed rates
             }
             excessBW = std::max(linkRate - sum, 0.0);
-
 #ifndef NDEBUG
             excessBWVector.record(excessBW);
 #endif
-
             if (packetRequested > 0)
             {
                 packetRequested--;
 #ifndef NDEBUG
-            pktReqVector.record(packetRequested);
+                pktReqVector.record(packetRequested);
 #endif
                 if (warmupFinished == true)
                 {
@@ -126,24 +124,20 @@ void CSFQVLANQueue2::handleMessage(cMessage *msg)
         else
         {   // frame is not conformed
             double rate = estimateRate(flowIndex, pktLength, simTime(), 1);
-
-            if (fairShareRate > 0.0)
-            {   // note that we skip packet dropping when fairShareRate == 0.0;
+            if ( (fairShareRate > 0.0) && (fairShareRate * weight[flowIndex] / rate < dblrand()) )
+            {   // probabilistically drop the frame
+                // note that we skip packet dropping when fairShareRate == 0.0;
                 // fairShareRate is set to 0 when the queue size is below the threshold
-
-                if (fairShareRate * weight[flowIndex] / rate < dblrand())
-                {   // probabilistically drop the frame
 #ifndef NDEBUG
-                    double normalizedRate = rate / weight[flowIndex];
-                    estimateAlpha(pktLength, normalizedRate, simTime(), true);
+                double normalizedRate = rate / weight[flowIndex];
+                estimateAlpha(pktLength, normalizedRate, simTime(), true);
 #else
-                    estimateAlpha(pktLength, rate/weight[flowIndex], simTime(), true);
+                estimateAlpha(pktLength, rate/weight[flowIndex], simTime(), true);
 #endif
-                    delete msg;
-                    if (warmupFinished == true)
-                    {
-                        numPktsDropped[flowIndex]++;
-                    }
+                delete msg;
+                if (warmupFinished == true)
+                {
+                    numPktsDropped[flowIndex]++;
                 }
             }
             else

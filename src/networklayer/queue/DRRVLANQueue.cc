@@ -322,26 +322,26 @@ void DRRVLANQueue::requestPacket()
 void DRRVLANQueue::finish()
 {
     unsigned long sumPktsReceived = 0;
+    unsigned long sumPktsConformed = 0;
     unsigned long sumPktsDropped = 0;
-    unsigned long sumPktsNonconformed = 0;
 
     for (int i=0; i < numFlows; i++)
     {
-        std::stringstream ss_received, ss_dropped, ss_nonconformed, ss_sent, ss_throughput;
+        std::stringstream ss_received, ss_conformed, ss_dropped, ss_sent, ss_throughput;
         ss_received << "packets received from flow[" << i << "]";
+        ss_conformed << "packets conformed from flow[" << i << "]";
         ss_dropped << "packets dropped from flow[" << i << "]";
-        ss_nonconformed << "packets non-conformed from flow[" << i << "]";
         ss_sent << "packets sent from flow[" << i << "]";
         ss_throughput << "bits/sec sent from flow[" << i << "]";
         recordScalar((ss_received.str()).c_str(), numPktsReceived[i]);
+        recordScalar((ss_conformed.str()).c_str(), numPktsConformed[i]);
         recordScalar((ss_dropped.str()).c_str(), numPktsDropped[i]);
-        recordScalar((ss_nonconformed.str()).c_str(), numPktsReceived[i]-numPktsConformed[i]);
         recordScalar((ss_sent.str()).c_str(), numPktsSent[i]);
         recordScalar((ss_throughput.str()).c_str(), numBitsSent[i]/(simTime()-simulation.getWarmupPeriod()).dbl());
         sumPktsReceived += numPktsReceived[i];
+        sumPktsConformed += numPktsConformed[i];
         sumPktsDropped += numPktsDropped[i];
-        sumPktsNonconformed += numPktsReceived[i] - numPktsConformed[i];
     }
-    recordScalar("overall packet loss rate of per-flow VOQs", sumPktsDropped/double(sumPktsReceived));
-    recordScalar("overall packet shaped rate of per-flow VOQs", sumPktsNonconformed/double(sumPktsReceived));
+    recordScalar("overall packet conformed rate", sumPktsConformed/double(sumPktsReceived));
+    recordScalar("overall packet loss rate", sumPktsDropped/double(sumPktsReceived));
 }

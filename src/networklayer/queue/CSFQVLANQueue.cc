@@ -201,16 +201,14 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
                 sum += flowRate[i][0];    // sum of conformed rates
             }
             excessBW = std::max(linkRate - sum, 0.0);
-
 #ifndef NDEBUG
             excessBWVector.record(excessBW);
 #endif
-
             if (packetRequested > 0)
             {
                 packetRequested--;
 #ifndef NDEBUG
-            pktReqVector.record(packetRequested);
+                pktReqVector.record(packetRequested);
 #endif
                 if (warmupFinished == true)
                 {
@@ -236,9 +234,8 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
             double rate = estimateRate(flowIndex, pktLength, simTime(), 1);
 //            conformedRate[flowIndex] = tbm[flowIndex]->getMeanRate(); // TODO: need skip?
 //            if (std::max(0.0, 1.0 - fairShareRate_ * weight[flowIndex] / rate) > dblrand())
-
             if (fairShareRate * weight[flowIndex] / rate < dblrand())
-            {   // drop the frame
+            {   // probabilistically drop the frame
 #ifndef NDEBUG
                 double normalizedRate = rate / weight[flowIndex];
                 estimateAlpha(pktLength, normalizedRate, simTime(), true);
