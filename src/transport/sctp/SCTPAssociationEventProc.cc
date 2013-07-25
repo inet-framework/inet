@@ -97,6 +97,7 @@ void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sc
             inboundStreams = openCmd->getInboundStreams();
             outboundStreams = openCmd->getOutboundStreams();
             state->localRwnd = (long)sctpMain->par("arwnd");
+            state->localMsgRwnd = sctpMain->par("messageAcceptLimit");
             state->streamReset = openCmd->getStreamReset();
             state->numRequests = openCmd->getNumRequests();
             state->messagesToPush = openCmd->getMessagesToPush();
@@ -253,7 +254,13 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
     }
 
     // ------ Optional padding and size calculations ----------------------
-    datMsg->setBooksize(smsg->getByteLength() + state->header);
+    if (state->padding) {
+        datMsg->setBooksize(ADD_PADDING(smsg->getByteLength() + state->header));
+    }
+    else {
+        datMsg->setBooksize(smsg->getByteLength() + state->header);
+    }
+
     qCounter.roomSumSendStreams += ADD_PADDING(smsg->getBitLength() / 8 + SCTP_DATA_CHUNK_LENGTH);
     qCounter.bookedSumSendStreams += datMsg->getBooksize();
     // Add chunk size to sender buffer size

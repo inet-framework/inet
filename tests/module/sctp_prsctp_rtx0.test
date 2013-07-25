@@ -59,7 +59,6 @@ ned-path = .;../../../../src;../../lib
 #**.ppp[*].queue.frameCapacity = 100  # in routers
 #**.ppp[*].ppp.mtu = 1500 B
 
-#**.vector-recording = false
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout

@@ -45,13 +45,19 @@ void SCTPAssociation::decreaseOutstandingBytes(SCTPDataVariables* chunk)
     if (chunk->countsAsOutstanding) {
         assert(lastPath->outstandingBytes >= chunk->booksize);
         lastPath->outstandingBytes -= chunk->booksize;
+        lastPath->statisticsPathOutstandingBytes->record(lastPath->outstandingBytes);
         state->outstandingBytes -= chunk->booksize;
         assert((int64)state->outstandingBytes >= 0);
+        statisticsOutstandingBytes->record(state->outstandingBytes);
 
         chunk->countsAsOutstanding = false;
 
         CounterMap::iterator iterator = qCounter.roomRetransQ.find(lastPath->remoteAddress);
-        iterator->second -= ADD_PADDING(chunk->booksize + SCTP_DATA_CHUNK_LENGTH);
+        state->outstandingMessages--;
+        if (state->osbWithHeader)
+            iterator->second -= ADD_PADDING(chunk->booksize);
+        else
+            iterator->second -= ADD_PADDING(chunk->booksize + SCTP_DATA_CHUNK_LENGTH);
     }
 }
 
@@ -483,7 +489,14 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
             initPeerTsn = initchunk->getInitTSN();
             state->gapList.setInitialCumAckTSN(initPeerTsn - 1);
             state->initialPeerRwnd = initchunk->getA_rwnd();
+            if (initchunk->getMsg_rwnd()>0)
+            {
+                state->peerAllowsChunks = true;
+                state->initialPeerMsgRwnd = initchunk->getMsg_rwnd();
+                state->peerMsgRwnd = state->initialPeerMsgRwnd;
+            }
             state->peerRwnd = state->initialPeerRwnd;
+            statisticsPeerRwnd->record(state->peerRwnd);
             localVTag = initchunk->getInitTag();
             numberOfRemoteAddresses = initchunk->getAddressesArraySize();
             IInterfaceTable *ift = interfaceTableAccess.get();
@@ -654,6 +667,14 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk* initAckChunk)
             state->gapList.setInitialCumAckTSN(initPeerTsn - 1);
             state->initialPeerRwnd = initAckChunk->getA_rwnd();
             state->peerRwnd = state->initialPeerRwnd;
+            statisticsPeerRwnd->record(state->peerRwnd);
+            if (initAckChunk->getMsg_rwnd()>0)
+            {
+                state->peerAllowsChunks = true;
+                state->initialPeerMsgRwnd = initAckChunk->getMsg_rwnd();
+                state->peerMsgRwnd = state->initialPeerMsgRwnd;
+            }
+            state->expectedStreamResetSequenceNumber = initPeerTsn;
             remoteAddressList.clear();
             numberOfRemoteAddresses = initAckChunk->getAddressesArraySize();
             sctpEV3<<"number of remote addresses in initAck="<<numberOfRemoteAddresses<<"\n";
@@ -864,6 +885,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
     uint32               highestNewAck = tsna;   // Highest newly acked TSN
     const uint16         numDups = sackChunk->getNumDupTsns();
     SCTP::AssocStat*     assocStat = sctpMain->getAssocStat(assocId);
+    const uint32         msgRwnd = sackChunk->getMsg_rwnd();
 
     // ====== Put information from SACK into GapList =========================
     SCTPGapList sackGapList;
@@ -940,6 +962,12 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
     }
     state->incomingSackSeqNum = sackChunk->getSackSeqNum();
 
+    // ====== Record statistics ==============================================
+    numGapBlocks->record(numGaps);
+    statisticsRevokableGapBlocksInLastSACK->record(sackGapList.getNumGaps(SCTPGapList::GT_Revokable));
+    statisticsNonRevokableGapBlocksInLastSACK->record(sackGapList.getNumGaps(SCTPGapList::GT_NonRevokable));
+
+    path->vectorPathAckedTSNCumAck->record(tsna);
     if (assocStat) {
         assocStat->numDups += numDups;
     }
@@ -965,6 +993,9 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 
 
     // ====== Zero Window Probing ============================================
+    if ((state->peerAllowsChunks) && (msgRwnd > 0) && (state->zeroWindowProbing) ) {
+        state->zeroWindowProbing = false;
+    }
     if ( (state->zeroWindowProbing) && (arwnd > 0) ) {
         state->zeroWindowProbing = false;
     }
@@ -1123,6 +1154,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
 
 
         // ====== Validity checks =============================================
+        path->vectorPathAckedTSNGapAck->record(state->highestTsnAcked);
     }
 
 
@@ -1139,6 +1171,13 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
               << ", path=" << path->remoteAddress << endl;
     pmRttMeasurement(path, rttEstimation);
 
+    // ====== Record statistics ==============================================
+    for (SCTPPathMap::iterator piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
+        SCTPPathVariables* myPath = piter->second;
+        myPath->statisticsPathGapAckedChunksInLastSACK->record(myPath->gapAckedChunksInLastSACK);
+        myPath->statisticsPathGapNRAckedChunksInLastSACK->record(myPath->gapNRAckedChunksInLastSACK);
+        myPath->statisticsPathGapUnackedChunksInLastSACK->record(myPath->gapUnackedChunksInLastSACK);
+    }
 
 
     // #######################################################################
@@ -1146,7 +1185,22 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
     // #######################################################################
 
     const uint32 osb = getOutstandingBytes();
-    state->peerRwnd = arwnd - osb;
+    if (state->bytesToAddPerPeerChunk > 0) {
+        state->peerRwnd = arwnd - osb  - (state->outstandingMessages * state->bytesToAddPerPeerChunk);
+    }
+    else if (state->peerAllowsChunks) {
+        state->peerMsgRwnd = msgRwnd - state->outstandingMessages;
+        state->peerRwnd = arwnd - osb;
+        if ((int32)(state->peerMsgRwnd) < 0) {
+            state->peerMsgRwnd = 0;
+        }
+        if (state->peerMsgRwnd > state->initialPeerMsgRwnd) {
+            state->peerMsgRwnd = state->initialPeerMsgRwnd;
+        }
+    }
+    else {
+        state->peerRwnd = arwnd - osb;
+    }
 
     // position of statement changed 20.07.05 I.R.
     if ((int32)(state->peerRwnd) < 0) {
@@ -1155,22 +1209,26 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk* sackChunk)
     if (state->peerRwnd > state->initialPeerRwnd) {
         state->peerRwnd = state->initialPeerRwnd;
     }
+    if (state->peerAllowsChunks && msgRwnd == 0) {
+        state->peerWindowFull = true;
+    }
     if (arwnd == 1 || state->peerRwnd < state->swsLimit || arwnd == 0) {
         sctpEV3 << "processSackArrived: arwnd=" << arwnd
                   << " state->peerRwnd=" << state->peerRwnd
                   << " set peerWindowFull" << endl;
         state->peerWindowFull = true;
     }
-    else
-    {
+    else if ((state->peerAllowsChunks && msgRwnd > 0) || !state->peerAllowsChunks) {
         state->peerWindowFull = false;
         state->zeroWindowProbing = false;
     }
     advancePeerTsn();
+    statisticsArwndInLastSACK->record(arwnd);
+    statisticsPeerRwnd->record(state->peerRwnd);
 
     // ====== Need for zero-window probing? ==================================
     if (osb == 0) {
-        if (arwnd == 0)
+        if ((state->peerAllowsChunks && msgRwnd == 0) || arwnd == 0)
             state->zeroWindowProbing = true;
     }
 
@@ -1314,7 +1372,6 @@ void SCTPAssociation::handleChunkReportedAsMissing(const SCTPSackChunk*      sac
         const uint32 chunkReportedAsMissing = (highestNewAck > myChunk->tsn) ? 1 : 0;
         if (chunkReportedAsMissing > 0) {
             myChunk->gapReports += chunkReportedAsMissing;
-            sctpEV3 << simTime() <<  "Number of GapReports in TSN "<< myChunk->tsn <<": " << myChunk->gapReports << endl;
             myChunkLastPath->gapUnackedChunksInLastSACK++;
 
             if (myChunk->gapReports >= state->numGapReports) {
@@ -1405,12 +1462,17 @@ void SCTPAssociation::nonRenegablyAckChunk(SCTPDataVariables* chunk,
 
     assert(chunk->queuedOnPath->queuedBytes >= chunk->booksize);
     chunk->queuedOnPath->queuedBytes -= chunk->booksize;
+    chunk->queuedOnPath->statisticsPathQueuedSentBytes->record(chunk->queuedOnPath->queuedBytes);
     chunk->queuedOnPath = NULL;
 
     assert(state->queuedSentBytes >= chunk->booksize);
     state->queuedSentBytes -= chunk->booksize;
+    statisticsQueuedSentBytes->record(state->queuedSentBytes);
     if (assocStat) {
         assocStat->ackedBytes += chunk->len/8;
+    }
+    if ( (assocStat) && (fairTimer)) {
+        assocStat->fairAckedBytes += chunk->len/8;
     }
 
     // ====== RTT calculation ================================================
@@ -1669,6 +1731,27 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
 
     // ====== Out of receiver buffer space? ==================================
     calculateRcvBuffer();
+    if ( ((state->messageAcceptLimit > 0) &&
+            (state->localMsgRwnd-state->bufferedMessages <= 0)) ||
+            ((state->messageAcceptLimit == 0) &&
+                    ((int32)(state->localRwnd-state->queuedReceivedBytes -
+                            state->bufferedMessages * state->bytesToAddPerRcvdChunk) <= 0)) ) {
+        state->ackState = sackFrequency;
+
+        if (tsnGt(tsn, state->gapList.getHighestTSNReceived())) {
+            sctpEV3 << "DROP: " <<  (int)tsn << " high=" << (int)state->gapList.getHighestTSNReceived() 
+                << " Q=" << (int)state->queuedReceivedBytes << " Rwnd=" << (int)state->localRwnd << endl;
+            iter->second.numDropsBecauseNewTSNGreaterThanHighestTSN++;
+            return SCTP_E_IGNORE;
+            //          }  ????
+        }
+        else if ((tsn < state->gapList.getHighestTSNReceived()) &&
+                (state->disableReneging == false) &&
+                (!makeRoomForTsn(tsn, dataChunk->getBitLength()-SCTP_DATA_CHUNK_LENGTH*8, dataChunk->getUBit()))) {
+            iter->second.numDropsBecauseNoRoomInBuffer++;
+            return SCTP_E_IGNORE;
+        }
+    }
 
 
     // ====== Update of CumAckTSN ============================================
@@ -1698,6 +1781,7 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
 
             event = SCTP_E_DELIVERED;
             if (ret < 3) {
+                state->bufferedMessages++;
                 sendDataArrivedNotification(dataChunk->getSid());
                 putInDeliveryQ(dataChunk->getSid());
                 if (simTime() > state->lastThroughputTime + 1) {
@@ -2652,9 +2736,11 @@ void SCTPAssociation::moveChunkToOtherPath(SCTPDataVariables* chunk,
     // ====== Rebook chunk on new path =======================================
     assert(chunk->queuedOnPath->queuedBytes >= chunk->booksize);
     chunk->queuedOnPath->queuedBytes -= chunk->booksize;
+    chunk->queuedOnPath->statisticsPathQueuedSentBytes->record(chunk->queuedOnPath->queuedBytes);
 
     chunk->queuedOnPath = chunk->getNextDestinationPath();
     chunk->queuedOnPath->queuedBytes += chunk->booksize;
+    chunk->queuedOnPath->statisticsPathQueuedSentBytes->record(chunk->queuedOnPath->queuedBytes);
 
     // ====== Perform bookkeeping ============================================
     // Check, if chunk_ptr->tsn is already in transmission queue.
@@ -2670,14 +2756,22 @@ void SCTPAssociation::moveChunkToOtherPath(SCTPDataVariables* chunk,
         q->second += ADD_PADDING(chunk->len/8+SCTP_DATA_CHUNK_LENGTH);
         CounterMap::iterator qb = qCounter.bookedTransQ.find(chunk->getNextDestination());
         qb->second += chunk->booksize;
-        state->peerRwnd += chunk->booksize;
+        state->peerRwnd += (chunk->booksize + state->bytesToAddPerPeerChunk);
+        if (state->peerAllowsChunks) {
+            state->peerMsgRwnd++;
+        }
     }
     if (state->peerRwnd > state->initialPeerRwnd) {
         state->peerRwnd = state->initialPeerRwnd;
+    }
+    if (state->peerAllowsChunks && state->peerMsgRwnd > state->initialPeerMsgRwnd) {
+        state->peerMsgRwnd = state->initialPeerMsgRwnd;
     }
 
     // T.D. 02.08.2011: The peer window may not be full anymore!
     if ( (state->peerWindowFull) && (state->peerRwnd > 0) ) {
         state->peerWindowFull = false;
     }
+
+    statisticsPeerRwnd->record(state->peerRwnd);
 }

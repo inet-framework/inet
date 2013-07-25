@@ -24,14 +24,32 @@ inline double rint(double x) {return floor(x+.5);}
 
 // #define sctpEV3 std::cout
 
-
+static inline double GET_SRTT(const double srtt)
+{
+    return (floor(1000.0 * srtt * 8.0));
+}
 
 
 void SCTPAssociation::recordCwndUpdate(SCTPPathVariables* path)
 {
-    if (path != NULL) {
+    if (path == NULL) {
+        uint32 totalSsthresh = 0.0;
+        uint32 totalCwnd = 0.0;
+        double totalBandwidth = 0.0;
+        for (SCTPPathMap::iterator pathIterator = sctpPathMap.begin();
+                pathIterator != sctpPathMap.end(); pathIterator++) {
+            SCTPPathVariables* path = pathIterator->second;
+            totalSsthresh += path->ssthresh;
+            totalCwnd += path->cwnd;
+            totalBandwidth += path->cwnd / GET_SRTT(path->srtt.dbl());
+        }
+        statisticsTotalSSthresh->record(totalSsthresh);
+        statisticsTotalCwnd->record(totalCwnd);
+        statisticsTotalBandwidth->record(totalBandwidth);
+    } else {
         path->statisticsPathSSthresh->record(path->ssthresh);
         path->statisticsPathCwnd->record(path->cwnd);
+        path->statisticsPathBandwidth->record(path->cwnd / GET_SRTT(path->srtt.dbl()));
     }
 }
 
@@ -73,9 +91,10 @@ void SCTPAssociation::cwndUpdateAfterSack()
                                                   4 * (int32)path->pmtu);
                       path->cwnd = path->ssthresh;
 
-                 sctpEV3 << "\t=>\tsst=" << path->ssthresh << " cwnd=" << path->cwnd << endl;
-                 recordCwndUpdate(path);
-                 path->partialBytesAcked = 0;
+                sctpEV3 << "\t=>\tsst=" << path->ssthresh << " cwnd=" << path->cwnd << endl;
+                recordCwndUpdate(path);
+                path->partialBytesAcked = 0;
+                path->vectorPathPbAcked->record(path->partialBytesAcked);
 
 
                 // ====== Fast Recovery ========================================
@@ -101,6 +120,7 @@ void SCTPAssociation::cwndUpdateAfterSack()
                     path->fastRecoveryActive = true;
                     path->fastRecoveryExitPoint = highestOutstanding;
                     path->fastRecoveryEnteringTime = simTime();
+                    path->vectorPathFastRecoveryState->record(path->cwnd);
 
                     sctpEV3 << simTime() << ":\tCC [cwndUpdateAfterSack] Entering Fast Recovery on path "
                               << path->remoteAddress
@@ -236,6 +256,7 @@ void SCTPAssociation::cwndUpdateBytesAcked(SCTPPathVariables* path,
         if (path->outstandingBytes == 0) {
             path->partialBytesAcked = 0;
         }
+        path->vectorPathPbAcked->record(path->partialBytesAcked);
     }
     else {
         sctpEV3 << assocId << ": " << simTime() << ":\tCC "
@@ -252,6 +273,7 @@ void SCTPAssociation::cwndUpdateAfterRtxTimeout(SCTPPathVariables* path)
                              4 * (int32)path->pmtu);
     path->cwnd = path->pmtu;
     path->partialBytesAcked = 0;
+    path->vectorPathPbAcked->record(path->partialBytesAcked);
     sctpEV3 << "\t=>\tsst=" << path->ssthresh
             << "\tcwnd=" << path->cwnd << endl;
     recordCwndUpdate(path);
@@ -260,6 +282,7 @@ void SCTPAssociation::cwndUpdateAfterRtxTimeout(SCTPPathVariables* path)
     if (path->fastRecoveryActive == true) {
         path->fastRecoveryActive = false;
         path->fastRecoveryExitPoint = 0;
+        path->vectorPathFastRecoveryState->record(0);
     }
 }
 

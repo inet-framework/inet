@@ -154,6 +154,11 @@ class INET_API SCTP : public cSimpleModule
             uint32 numAuthChunksRejected;
             uint32 numResetRequestsSent;
             uint32 numResetRequestsPerformed;
+            simtime_t fairStart;
+            simtime_t fairStop;
+            uint64 fairAckedBytes;
+            double fairThroughput;
+            simtime_t fairLifeTime;
             uint64 numEndToEndMessages;
             SimTime cumEndToEndDelay;
             uint64 startEndToEndDelay;

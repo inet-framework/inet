@@ -58,20 +58,28 @@ simple SCTP like ISCTP
         bool fastRecoverySupported = default(true);
         string sctpAlgorithmClass = default("SCTPAlg");
         int ccModule = default(0);           // RFC4960=0
+        bool osbWithHeader = default(false);
 
         //#====== Other Parameters ============================================
         int ssModule = default(0);           // ROUND_ROBIN=0
         int arwnd = default(65535);
         int swsLimit = default(3000);        // Limit for SWS
         bool udpEncapsEnabled = default(false);
-        double throughputInterval = default(1);
+        int bytesToAddPerRcvdChunk = default(0);        // for flowcontrol
+        int bytesToAddPerPeerChunk = default(0);        // for flowcontrol
+        bool tellArwnd = default(false);    // for flowcontrol
+        int messageAcceptLimit = default(0);        // for flowcontrol
+        double fairStart @unit(s) = default(0s);
+        double fairStop @unit(s) = default(0s);
         string streamsToPaths = default("");
         int startEndToEndDelay = default(0);
         int stopEndToEndDelay = default(10);
+        double throughputInterval = default(1);
 
         //#====== Chunk Authentication ========================================
         bool auth = default(false);
         string chunks = default("");
+        bool padding = default(false);
 
         //#====== Add-IP ======================================================
         bool addIP = default(false);

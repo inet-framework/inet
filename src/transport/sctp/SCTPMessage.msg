@@ -76,6 +76,7 @@ message SCTPInitChunk extends SCTPChunk
     bool forwardTsn;
     IPvXAddress addresses[];
     uint8 unrecognizedParameters[]; //Will be filled by the Parser, if unrecognized Parameters arrive.
+    uint32 msg_rwnd;
     uint16 chunkTypes[]; //Chunk list parameter, i.e. for SCTP AUTH
     uint16 sepChunks[]; //Supported extensions parameter, i.e. for StreamReset
     uint16 hmacTypes[]; //HMAC Identifier for HMAC algorithm parameter
@@ -99,6 +100,7 @@ message SCTPInitAckChunk extends SCTPChunk
     char cookie[];
     uint8 unrecognizedParameters[];
     cPacketPtr stateCookie;
+    uint32 msg_rwnd;
     uint8 random[]; //Random Number
     uint16 chunkTypes[];
     uint16 sepChunks[]; //Supported extensions parameter, i.e. for StreamReset
@@ -192,6 +194,7 @@ message SCTPSackChunk extends SCTPChunk
     uint32 sackSeqNum = 0;
     uint32 nrGapStart[];
     uint32 nrGapStop[];
+    uint32 msg_rwnd;
     bool   nrSubtractRGaps = false;
 }
 

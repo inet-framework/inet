@@ -337,6 +337,12 @@ class INET_API SCTPPathVariables : public cObject
         unsigned int        numberOfHeartbeatAcksRcvd;
 
         // ====== Output Vectors ==============================================
+        cOutVector*         vectorPathFastRecoveryState;
+        cOutVector*         vectorPathPbAcked;
+        cOutVector*         vectorPathTSNFastRTX;
+        cOutVector*         vectorPathTSNTimerBased;
+        cOutVector*         vectorPathAckedTSNCumAck;
+        cOutVector*         vectorPathAckedTSNGapAck;
         cOutVector*         vectorPathSentTSN;
         cOutVector*         vectorPathReceivedTSN;
         cOutVector*         vectorPathHb;
@@ -347,6 +353,14 @@ class INET_API SCTPPathVariables : public cObject
         cOutVector*         statisticsPathRTT;
         cOutVector*         statisticsPathSSthresh;
         cOutVector*         statisticsPathCwnd;
+        cOutVector*         statisticsPathOutstandingBytes;
+        cOutVector*         statisticsPathQueuedSentBytes;
+        cOutVector*         statisticsPathSenderBlockingFraction;
+        cOutVector*         statisticsPathReceiverBlockingFraction;
+        cOutVector*         statisticsPathGapAckedChunksInLastSACK;
+        cOutVector*         statisticsPathGapNRAckedChunksInLastSACK;
+        cOutVector*         statisticsPathGapUnackedChunksInLastSACK;
+        cOutVector*         statisticsPathBandwidth;
 };
 
 
@@ -603,8 +617,20 @@ class INET_API SCTPStateVariables : public cObject
         uint8                       sharedKey[512];
 
         // ====== Further features ============================================
+        bool                        osbWithHeader;
+        bool                        padding;
         uint32                      advancedPeerAckPoint;
         uint32                      prMethod;
+        bool                        peerAllowsChunks;        // Flowcontrol: indicates whether the peer adjusts the window according to a number of messages
+        uint32                      initialPeerMsgRwnd;
+        uint32                      localMsgRwnd;
+        uint32                      peerMsgRwnd;             // Flowcontrol: corresponds to peerRwnd
+        uint32                      bufferedMessages;        // Messages buffered at the receiver side
+        uint32                      outstandingMessages;     // Outstanding messages on the sender side; used for flowControl; including retransmitted messages
+        uint32                      bytesToAddPerRcvdChunk;
+        uint32                      bytesToAddPerPeerChunk;
+        bool                        tellArwnd;
+        bool                        swsMsgInvoked;           // Flowcontrol: corresponds to swsAvoidanceInvoked
         simtime_t                   lastThroughputTime;
         std::map<uint16,uint32>     streamThroughput;
         simtime_t                   lastAssocThroughputTime;
@@ -675,9 +701,13 @@ class INET_API SCTPAssociation : public cObject
         cMessage*               SackTimer;
         cMessage*               StartTesting;
         cMessage*               StartAddIP;
+        cOutVector*             advMsgRwnd;
         cOutVector*             EndToEndDelay;
+        bool                    fairTimer;
         std::map<uint16,cOutVector*> streamThroughputVectors;
         cOutVector*             assocThroughputVector;
+        cMessage*               FairStartTimer;
+        cMessage*               FairStopTimer;
 
     protected:
         AddressVector           localAddressList;
@@ -711,6 +741,29 @@ class INET_API SCTPAssociation : public cObject
         SCTPSendStreamMap       sendStreams;
         SCTPReceiveStreamMap    receiveStreams;
         SCTPAlgorithm*          sctpAlgorithm;
+      
+        // ------ Transmission Statistics -------------------------------------
+        cOutVector*           statisticsOutstandingBytes;
+        cOutVector*           statisticsQueuedReceivedBytes;
+        cOutVector*           statisticsQueuedSentBytes;
+        cOutVector*           statisticsTotalSSthresh;
+        cOutVector*           statisticsTotalCwnd;
+        cOutVector*           statisticsTotalBandwidth;
+        // ------ Received SACK Statistics ------------------------------------
+        cOutVector*           statisticsRevokableGapBlocksInLastSACK;    // Revokable GapAck blocks in last received SACK
+        cOutVector*           statisticsNonRevokableGapBlocksInLastSACK; // Non-Revokable GapAck blocks in last received SACK
+        cOutVector*           statisticsArwndInLastSACK;
+        cOutVector*           statisticsPeerRwnd;
+        // ------ Sent SACK Statistics ----------------------------------------
+        cOutVector*           statisticsNumTotalGapBlocksStored;         // Number of GapAck blocks stored (NOTE: R + NR!)
+        cOutVector*           statisticsNumRevokableGapBlocksStored;     // Number of Revokable GapAck blocks stored
+        cOutVector*           statisticsNumNonRevokableGapBlocksStored;  // Number of Non-Revokable GapAck blocks stored
+        cOutVector*           statisticsNumDuplicatesStored;             // Number of duplicate TSNs stored
+        cOutVector*           statisticsNumRevokableGapBlocksSent;       // Number of Revokable GapAck blocks sent in last SACK
+        cOutVector*           statisticsNumNonRevokableGapBlocksSent;    // Number of Non-Revokable GapAck blocks sent in last SACK
+        cOutVector*           statisticsNumDuplicatesSent;               // Number of duplicate TSNs sent in last SACK
+        cOutVector*           statisticsSACKLengthSent;                  // Length of last sent SACK
+
 
     public:
         /**

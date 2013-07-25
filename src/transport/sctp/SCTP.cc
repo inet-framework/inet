@@ -902,6 +902,13 @@ void SCTP::finish()
         recordScalar("Number of AUTH chunks rejected", assoc.numAuthChunksRejected);
         recordScalar("Number of StreamReset requests sent", assoc.numResetRequestsSent);
         recordScalar("Number of StreamReset requests performed", assoc.numResetRequestsPerformed);
+        if ((double)par("fairStart") > 0) {
+            recordScalar("fair acked bytes", assoc.fairAckedBytes);
+            recordScalar("fair start time", assoc.fairStart);
+            recordScalar("fair stop time", assoc.fairStop);
+            recordScalar("fair lifetime", assoc.fairLifeTime);
+            recordScalar("fair throughput", assoc.fairThroughput);
+        }
         if (assoc.numEndToEndMessages > 0 && (assoc.cumEndToEndDelay / assoc.numEndToEndMessages) > 0) {
             uint32 msgnum = assoc.numEndToEndMessages - assoc.startEndToEndDelay;
             if (assoc.stopEndToEndDelay > 0)

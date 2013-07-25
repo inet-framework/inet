@@ -1,6 +1,7 @@
 2013-07-17  Irene Rüngeler
 
 	Added 8 new strategies for stream scheduling
+	Patch for more statistics and better flow control.
 
 2013-07-15  Irene Rüngeler
 
