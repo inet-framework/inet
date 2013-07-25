@@ -35,14 +35,6 @@
  */
 class INET_API CSFQVLANQueue2 : public CSFQVLANQueue
 {
-//    // type definitions for member variables
-//    typedef std::vector<bool> BoolVector;
-//    typedef std::vector<double> DoubleVector;
-//    typedef std::vector<int> IntVector;
-//    typedef std::vector<long long> LongLongVector;
-//    typedef std::vector<BasicTokenBucketMeter *> TbmVector;
-//    typedef std::vector<simtime_t> TimeVector;
-
   protected:
 
     // FIFO

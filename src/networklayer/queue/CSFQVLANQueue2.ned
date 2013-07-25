@@ -29,8 +29,9 @@ import inet.networklayer.queue.BasicTokenBucketMeter;
 // without any processing; if not conformant, it goes through core-stateless fair
 // queueing (CSFQ), dropping if needed, and then put into a common FIFO queue.
 //
-// Note that for CSFQ, the buffer-related amendments described in the original
-// paper have been implemented.
+// Note that for CSFQ, the buffer-related amendments described in the ns2 simulation
+// code from the first authour of the original paper have been implemented, which are
+// slightly different from those in that paper.
 //
 // @see CSFQVLANQueue
 //
@@ -54,6 +55,3 @@ simple CSFQVLANQueue2 like OutputQueue
         input in;
         output out;
 }
-
-
-

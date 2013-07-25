@@ -21,23 +21,6 @@
 
 Define_Module(CSFQVLANQueue2);
 
-//CSFQVLANQueue2::CSFQVLANQueue2()
-//{
-//}
-//
-//CSFQVLANQueue2::~CSFQVLANQueue2()
-//{
-//#ifndef NDEBUG
-//    for (int i = 0; i < numFlows; i++)
-//    {
-//        for (int j = 0; j < 2; j++)
-//        {
-//            delete estRateVectors[i][j];
-//        }
-//    }
-//#endif
-//}
-
 void CSFQVLANQueue2::initialize(int stage)
 {
     CSFQVLANQueue::initialize(stage);
@@ -45,8 +28,6 @@ void CSFQVLANQueue2::initialize(int stage)
     if (stage == 1)
     {   // the following should be initialized in the 2nd stage (stage==1)
         // because token bucket meters are not initialized in the 1st stage yet.
-
-        CSFQVLANQueue::initialize(stage);
 
         // FIFO queue
         queueThreshold = par("queueThreshold").longValue(); // in byte
@@ -143,7 +124,7 @@ void CSFQVLANQueue2::handleMessage(cMessage *msg)
             else
             {   // send or enqueue the frame
 
-                // we call estimateAlpha() with dropped=false even when the packet was dropped,
+                // we call estimateAlpha() with dropped=false even when the packet is dropped,
                 // as this packet would have been enqueued by CSFQ
 #ifndef NDEBUG
                 double normalizedRate = rate / weight[flowIndex];
@@ -206,7 +187,7 @@ void CSFQVLANQueue2::handleMessage(cMessage *msg)
 }
 
 // estimate the link's (normalized) fair share rate (alpha)
-// - pktLength: packet length
+// - pktLength: packet length in bit
 // - rate: estimated normalized flow rate
 // - arrvTime: packet arrival time
 // - dropped: flag indicating whether the packet is dropped or not
@@ -252,8 +233,8 @@ void CSFQVLANQueue2::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
         if (fairShareRate == 0.0)
         {
             // TODO: justify below
-//            fairShareRate = linkRate / 2.;  // arbitrary initialization
-            fairShareRate = excessBW / 2.;  // arbitrary initialization
+            fairShareRate = linkRate / 2.;  // arbitrary initialization
+            // fairShareRate = excessBW / 2.;  // arbitrary initialization
         }
         maxRate = 0.0;
     }
@@ -294,7 +275,7 @@ void CSFQVLANQueue2::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
         {
             congested = false;
             startTime = arrvTime;
-            maxRate = 0;
+            maxRate = 0.0;
         }
         else
         {
@@ -306,7 +287,6 @@ void CSFQVLANQueue2::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
             {
                 fairShareRate = maxRate;
                 startTime = arrvTime;
-                maxRate = 0;
 
                 // UPDATE: In the original CSFQ code, when alpha is set to 0, packet dropping is skipped!
                 if (currentQueueSize < queueThreshold)
