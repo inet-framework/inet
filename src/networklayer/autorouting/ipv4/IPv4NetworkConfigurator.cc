@@ -1327,12 +1327,12 @@ void IPv4NetworkConfigurator::dumpConfig(IPv4Topology& topology)
                 stream << "\" source=\""; if (route->getOrigin().isUnspecified()) stream << "*"; else stream << route->getOrigin();
                 stream << "\" netmask=\""; if (route->getOriginNetmask().isUnspecified()) stream << "*"; else stream << route->getOriginNetmask();
                 stream << "\" groups=\""; if (route->getMulticastGroup().isUnspecified()) stream << "*"; else stream << route->getMulticastGroup();
-                if (route->getParent()) stream << "\" parent=\"" << route->getParent()->getName();
+                if (route->getInInterface()) stream << "\" parent=\"" << route->getInInterface()->getInterface()->getName();
                 stream << "\" children=\"";
-                for (int k = 0; k < (int)route->getChildren().size(); k++)
+                for (unsigned int k = 0; k < route->getNumOutInterfaces(); k++)
                 {
                     if (k) stream << " ";
-                    stream << route->getChildren()[k]->getInterface()->getName();
+                    stream << route->getOutInterface(k)->getInterface()->getName();
                 }
                 stream << "\" metric=\"" << route->getMetric() << "\"/>" << endl;
                 fprintf(f, "%s", stream.str().c_str());
@@ -1569,11 +1569,11 @@ void IPv4NetworkConfigurator::readManualMulticastRouteConfiguration(IPv4Topology
                             route->setOrigin(source);
                             route->setOriginNetmask(netmask);
                             route->setMulticastGroup(groups[j]);
-                            route->setParent(parent);
+                            route->setInInterface(parent ? new IPv4MulticastRoute::InInterface(parent) : NULL);
                             if (isNotEmpty(metricAttr))
                                 route->setMetric(atoi(metricAttr));
                             for (int k = 0; k < (int)children.size(); ++k)
-                                route->addChild(children[k], false/*TODO:isLeaf*/);
+                                route->addOutInterface(new IPv4MulticastRoute::OutInterface(children[k], false/*TODO:isLeaf*/));
                             node->staticMulticastRoutes.push_back(route);
                         }
                     }

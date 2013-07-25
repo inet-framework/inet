@@ -238,12 +238,12 @@ void RoutingTable::deleteInterfaceRoutes(InterfaceEntry *entry)
     }
 
     // delete or update multicast routes:
-    //   1. delete routes has entry as parent
-    //   2. remove entry from children list
+    //   1. delete routes has entry as input interface
+    //   2. remove entry from output interface list
     for (MulticastRouteVector::iterator it = multicastRoutes.begin(); it != multicastRoutes.end(); )
     {
         IPv4MulticastRoute *route = *it;
-        if (route->getParent() == entry)
+        if (route->getInInterface() && route->getInInterface()->getInterface() == entry)
         {
             it = multicastRoutes.erase(it);
             ASSERT(route->getRoutingTable() == this); // still filled in, for the listeners' benefit
@@ -253,7 +253,7 @@ void RoutingTable::deleteInterfaceRoutes(InterfaceEntry *entry)
         }
         else
         {
-            bool removed = route->removeChild(entry);
+            bool removed = route->removeOutInterface(entry);
             if (removed)
             {
                 nb->fireChangeNotification(NF_IPv4_MROUTE_CHANGED, route);
@@ -310,13 +310,12 @@ void RoutingTable::printMulticastRoutingTable() const
                   route->getOriginNetmask().isUnspecified() ? "*" : route->getOriginNetmask().str().c_str(),
                   route->getMulticastGroup().isUnspecified() ? "*" : route->getMulticastGroup().str().c_str(),
                   route->getMetric(),
-                  !route->getParent() ? "*" : route->getParent()->getName());
-        const ChildInterfaceVector &children = route->getChildren();
-        for (ChildInterfaceVector::const_iterator it = children.begin(); it != children.end(); ++it)
+                  !route->getInInterface() ? "*" : route->getInInterface()->getInterface()->getName());
+        for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++)
         {
-            if (it != children.begin())
+            if (i != 0)
                 EV << ",";
-            EV << (*it)->getInterface()->getName();
+            EV << route->getOutInterface(i)->getInterface()->getName();
         }
         EV << "\n";
     }
@@ -733,18 +732,18 @@ void RoutingTable::internalAddMulticastRoute(IPv4MulticastRoute *entry)
                 entry->getMulticastGroup().str().c_str());
 
     // check that the interface exists
-    if (entry->getParent() && !entry->getParent()->isMulticast())
-        error("addMulticastRoute(): parent interface must be multicast capable");
+    if (entry->getInInterface() && !entry->getInInterface()->getInterface()->isMulticast())
+        error("addMulticastRoute(): input interface must be multicast capable");
 
-    const ChildInterfaceVector &children = entry->getChildren();
-    for (ChildInterfaceVector::const_iterator it = children.begin(); it != children.end(); ++it)
+    for (unsigned int i = 0; i < entry->getNumOutInterfaces(); i++)
     {
-        if (!(*it))
-            error("addMulticastRoute(): child interface cannot be NULL");
-        else if (!(*it)->getInterface()->isMulticast())
-            error("addMulticastRoute(): child interface must be multicast capable");
-        else if ((*it)->getInterface() == entry->getParent())
-            error("addMulticastRoute(): child interface cannot be the same as the parent");
+        IPv4MulticastRoute::OutInterface *outInterface = entry->getOutInterface(i);
+        if (!outInterface)
+            error("addMulticastRoute(): output interface cannot be NULL");
+        else if (!outInterface->getInterface()->isMulticast())
+            error("addMulticastRoute(): output interface must be multicast capable");
+        else if (entry->getInInterface() && outInterface->getInterface() == entry->getInInterface()->getInterface())
+            error("addMulticastRoute(): output interface cannot be the same as the input interface");
     }
 
 
