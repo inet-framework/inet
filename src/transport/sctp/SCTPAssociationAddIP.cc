@@ -47,12 +47,16 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
         else {
             asconfChunk->setAddressParam(localAddr);
         }
-        if (localAddr.isIPv6()) {
+
+        if (localAddr.getType() == Address::IPv6) {
             chunkLength += 20;
         }
-        else {
+        else if (localAddr.getType() == Address::IPv4){
             chunkLength += 8;
         }
+        else
+            throw cRuntimeError("Unknown address type");
+
         asconfChunk->setByteLength(chunkLength);
         
         char typecopy[128];
@@ -82,14 +86,16 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
                     else {
                         ipParam->setAddressParam(AddressResolver().resolve(sctpMain->par("addAddress"), 1));
                     }
-                    if (ipParam->getAddressParam().isIPv6()) {
+                    if (ipParam->getAddressParam().getType() == Address::IPv6) {
                         chunkLength += 20;
                         ipParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH+20)*8);
                     }
-                    else {
+                    else if (ipParam->getAddressParam().getType() == Address::IPv4) {
                         chunkLength += 8;
                         ipParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH+8)*8);
                     }
+                    else
+                        throw cRuntimeError("Unknown address type");
                     asconfChunk->addAsconfParam(ipParam);
                     break;
                 }
@@ -101,14 +107,16 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
                     delParam->setParameterType(DELETE_IP_ADDRESS);
                     delParam->setRequestCorrelationId(++state->corrIdNum);
                     delParam->setAddressParam(AddressResolver().resolve(sctpMain->par("addAddress"), 1));
-                    if (delParam->getAddressParam().isIPv6()) {
+                    if (delParam->getAddressParam().getType() == Address::IPv6) {
                         chunkLength += 20;
                         delParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH+20)*8);
                     }
-                    else {
+                    else if (delParam->getAddressParam().getType() == Address::IPv4) {
                         chunkLength += 8;
                         delParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH+8)*8);
                     }
+                    else
+                        throw cRuntimeError("Unknown address type");
                     asconfChunk->addAsconfParam(delParam);
                     break;
                 }
@@ -123,14 +131,16 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
                     if (nat) {
                         priParam->setAddressParam(Address("0.0.0.0"));
                     }
-                    if (priParam->getAddressParam().isIPv6()) {
+                    if (priParam->getAddressParam().getType() == Address::IPv6) {
                         chunkLength += 20;
                         priParam->setByteLength((SCTP_ADD_IP_PARAMETER_LENGTH+20));
                     }
-                    else {
+                    else if (priParam->getAddressParam().getType() == Address::IPv4) {
                         chunkLength += 8;
                         priParam->setByteLength((SCTP_ADD_IP_PARAMETER_LENGTH+8));
                     }
+                    else
+                        throw cRuntimeError("Unknown address type");
                     asconfChunk->addAsconfParam(priParam);
                     break;
                 }

@@ -435,19 +435,23 @@ cModule *AddressResolver::findHostWithAddress(const Address & add)
             for (int i = 0; i < itable->getNumInterfaces(); i++)
             {
                 InterfaceEntry *entry = itable->getInterface(i);
-                if (add.isIPv6())
+                switch (add.getType())
                 {
 #ifdef WITH_IPv6
-                    if (entry->ipv6Data()->hasAddress(add.toIPv6()))
-                        return mod;
+                    case Address::IPv6:
+                        if (entry->ipv6Data()->hasAddress(add.toIPv6()))
+                            return mod;
+                        break;
 #endif
-                }
-                else
-                {
 #ifdef WITH_IPv4
-                    if (entry->ipv4Data()->getIPAddress() == add.toIPv4())
-                        return mod;
+                    case Address::IPv4:
+                        if (entry->ipv4Data()->getIPAddress() == add.toIPv4())
+                            return mod;
+                        break;
 #endif
+                    default:
+                        throw cRuntimeError("findHostWithAddress() doesn't accept AddressType '%s', yet", Address::getTypeName(add.getType()));
+                        break;
                 }
             }
         }

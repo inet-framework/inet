@@ -318,6 +318,8 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
             sctpmsg->setControlInfo(controlInfo);
             sctpMain->send(sctpmsg, "to_ip");
         }
+        else
+            throw cRuntimeError("Unknown address type: %d", (int)(dest.getType()));
 
         if (chunk->getChunkType() == HEARTBEAT) {
             SCTPPathVariables* path = getPath(dest);
@@ -547,6 +549,8 @@ void SCTPAssociation::sendInit()
             }
         }
     }
+    else
+        throw cRuntimeError("Unknown address type: %d", (int)(remoteAddr.getType()));
 
     uint16 count = 0;
     if (sctpMain->auth==true)
@@ -1433,8 +1437,17 @@ SCTPSackChunk* SCTPAssociation::createSack()
 
     // ====== What has to be stored in the SACK? =============================
     const uint32 mtu = getPath(remoteAddr)->pmtu;
+
+    uint32 hdrSize;
+    if (remoteAddr.getType() == Address::IPv6)
+        hdrSize = 40;
+    else if (remoteAddr.getType() == Address::IPv4)
+        hdrSize = 20;
+    else
+        throw cRuntimeError("Unknown address type");
+
     const uint32 allowedLength = mtu -
-            ((remoteAddr.isIPv6()) ? 40 : 20) -
+            hdrSize -
             SCTP_COMMON_HEADER -
             SCTP_SACK_CHUNK_LENGTH;
     uint32 numDups = state->dupList.size();
@@ -2647,6 +2660,7 @@ int SCTPAssociation::getAddressLevel(const Address& addr)
                 throw cRuntimeError("Unknown IPv4 address category: %d", (int)(addr.toIPv4().getAddressCategory()));
         }
     }
+    throw cRuntimeError("Unknown address type: %d", (int)(addr.getType()));
 }
 
 void SCTPAssociation::putInTransmissionQ(const uint32 tsn, SCTPDataVariables* chunk)
