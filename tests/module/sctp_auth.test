@@ -37,7 +37,6 @@ ned-path = .;../../../../src;../../lib
 **.sctp_client.sctpApp[0].connectPort = 6666
 **.sctp_client.sctpApp[0].requestLength= 800
 **.sctp_client.sctpApp[0].startTime = truncnormal(1s,0.2s)
-**.sctp_client.sctpApp[0].stopTime = 0
 **.sctp_client.sctpApp[0].numRequestsPerSession = 100
 **.sctp_client.sctpApp[0].queueSize = 0
 **.sctp_client.sctpApp[0].outboundStreams = 1
