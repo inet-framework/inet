@@ -115,6 +115,9 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     // adjust routes with src=IFACENETMASK to actual interface netmasks
     virtual void updateNetmaskRoutes();
 
+    // creates a new empty route
+    virtual IPv4Route *createNewRoute();
+
     // displays summary above the icon
     virtual void updateDisplayString();
 

@@ -867,7 +867,7 @@ void RoutingTable::updateNetmaskRoutes()
         InterfaceEntry *ie = ift->getInterface(i);
         if (ie->ipv4Data() && ie->ipv4Data()->getNetmask()!=IPv4Address::ALLONES_ADDRESS)
         {
-            IPv4Route *route = new IPv4Route();
+            IPv4Route *route = createNewRoute();
             route->setSource(IPv4Route::IFACENETMASK);
             route->setDestination(ie->ipv4Data()->getIPAddress().doAnd(ie->ipv4Data()->getNetmask()));
             route->setNetmask(ie->ipv4Data()->getNetmask());
@@ -915,4 +915,9 @@ bool RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage
                 removeRoute(routes[0]);
     }
     return true;
+}
+
+IPv4Route *RoutingTable::createNewRoute()
+{
+    return new IPv4Route();
 }
