@@ -261,13 +261,13 @@ void CSFQVLANQueue3::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
                 fairShareRate *= excessBW / rateEnqueued;
                 fairShareRate = std::min(fairShareRate, excessBW);
 
-                // // TODO: check the validity of this reset
-                // congested = false;
+                // TODO: check the validity of this reset
+                congested = false;
             }
         }
     }
     else
-    {   // link is not congested according to rate estimation
+    {   // link is not congested per rate estimation
         if (congested)
         {   // becomes uncongested
             congested = false;
