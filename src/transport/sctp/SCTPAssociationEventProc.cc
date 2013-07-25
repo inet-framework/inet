@@ -30,7 +30,7 @@
 
 void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg)
 {
-    IPvXAddress lAddr, rAddr;
+    Address lAddr, rAddr;
 
     SCTPOpenCommand *openCmd = check_and_cast<SCTPOpenCommand *>(sctpCommand);
 
@@ -78,7 +78,7 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
 
 void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg)
 {
-    IPvXAddress lAddr;
+    Address lAddr;
     int16 localPort;
 
     SCTPOpenCommand *openCmd = check_and_cast<SCTPOpenCommand *>(sctpCommand);
@@ -107,7 +107,7 @@ void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sc
 
             sctpEV3 << "Assoc "<<assocId<<"::Starting to listen on: " << lAddr << ":" << localPort << "\n";
 
-            sctpMain->updateSockPair(this, lAddr, IPvXAddress(), localPort, 0);
+            sctpMain->updateSockPair(this, lAddr, Address(), localPort, 0);
             break;
 
         default:
@@ -243,7 +243,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
 
     // ------ Set initial destination address -----------------------------
     if (sendCommand->getPrimary()) {
-        if (sendCommand->getRemoteAddr() == IPvXAddress("0.0.0.0")) {
+        if (sendCommand->getRemoteAddr() == Address("0.0.0.0")) {
             datMsg->setInitialDestination(remoteAddr);
         }
         else {

@@ -19,8 +19,8 @@
 
 #include "UDPBasicApp.h"
 
+#include "AddressResolver.h"
 #include "InterfaceTableAccess.h"
-#include "IPvXAddressResolver.h"
 #include "NodeOperations.h"
 #include "UDPControlInfo_m.h"
 
@@ -44,7 +44,7 @@ void UDPBasicApp::initialize(int stage)
 {
     AppBase::initialize(stage);
 
-    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
+    // because of AddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
     if (stage == 0)
     {
@@ -101,7 +101,7 @@ void UDPBasicApp::setSocketOptions()
         socket.joinLocalMulticastGroups();
 }
 
-IPvXAddress UDPBasicApp::chooseDestAddr()
+Address UDPBasicApp::chooseDestAddr()
 {
     int k = intrand(destAddresses.size());
     return destAddresses[k];
@@ -114,7 +114,7 @@ void UDPBasicApp::sendPacket()
     cPacket *payload = new cPacket(msgName);
     payload->setByteLength(par("messageLength").longValue());
 
-    IPvXAddress destAddr = chooseDestAddr();
+    Address destAddr = chooseDestAddr();
 
     emit(sentPkSignal, payload);
     socket.sendTo(payload, destAddr, destPort);
@@ -132,8 +132,8 @@ void UDPBasicApp::processStart()
     const char *token;
 
     while ((token = tokenizer.nextToken()) != NULL) {
-        IPvXAddress result;
-        IPvXAddressResolver().tryResolve(token, result);
+        Address result;
+        AddressResolver().tryResolve(token, result);
         if (result.isUnspecified())
             EV << "cannot resolve destination address: " << token << endl;
         else

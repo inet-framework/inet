@@ -31,8 +31,8 @@
 #include "IPv4Datagram.h"
 #include "InterfaceTable.h"
 #include "InterfaceTableAccess.h"
-#include "RoutingTable.h"
-#include "RoutingTableAccess.h"
+#include "IPv4RoutingTable.h"
+#include "IPv4RoutingTableAccess.h"
 #include "IPv4.h"
 
 class DYMO;

@@ -6,7 +6,7 @@
 #include "IPv4InterfaceData.h"
 #include "IPv4ControlInfo.h"
 #include "IInterfaceTable.h"
-#include "IRoutingTable.h"
+#include "IIPv4RoutingTable.h"
 #include "IGMPv2.h"
 
 enum StateKind

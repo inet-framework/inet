@@ -19,7 +19,7 @@
 #include "lwip/tcp.h"
 
 //forward declarations:
-class IPvXAddress;
+class Address;
 struct pbuf;
 
 /**
@@ -39,7 +39,7 @@ class LwipTcpStackIf
      * @param len:    length of tcpseg
      */
     virtual void ip_output(LwipTcpLayer::tcp_pcb *pcb,
-            IPvXAddress const& src, IPvXAddress const& dest, void *tcpseg, int len) = 0;
+            Address const& src, Address const& dest, void *tcpseg, int len) = 0;
 
     /**
      * TCP layer events
@@ -57,7 +57,7 @@ class LwipTcpStackIf
     /**
      * Get the network interface
      */
-    virtual netif* ip_route(IPvXAddress const & ipAddr) = 0;
+    virtual netif* ip_route(Address const & ipAddr) = 0;
 
     virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
             const void *dataptr, int len) = 0;

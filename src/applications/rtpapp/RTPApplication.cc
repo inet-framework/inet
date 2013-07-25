@@ -18,7 +18,7 @@
 
 #include "RTPApplication.h"
 
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 #include "LifecycleOperation.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
@@ -29,7 +29,7 @@ Define_Module(RTPApplication)
 
 void RTPApplication::initialize(int stage)
 {
-    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
+    // because of AddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
     if (stage == 0)
     {
@@ -72,7 +72,7 @@ void RTPApplication::initialize(int stage)
     else if (stage == 3)
     {
         // the ip address to connect to (unicast or multicast)
-        _destinationAddress = IPvXAddressResolver().resolve(par("destinationAddress").stringValue()).get4();
+        _destinationAddress = AddressResolver().resolve(par("destinationAddress").stringValue()).toIPv4();
 
         EV << "commonName" << _commonName << endl;
         EV << "profileName" << _profileName << endl;

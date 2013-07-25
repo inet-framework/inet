@@ -27,7 +27,7 @@
 
 #include "INETDefs.h"
 
-#include "IPvXAddress.h"
+#include "Address.h"
 #include "UDPSocket.h"
 
 #define SCTP_UDP_PORT  9899
@@ -103,8 +103,8 @@ class INET_API SCTP : public cSimpleModule
         };
         struct SockPair
         {
-            IPvXAddress localAddr;
-            IPvXAddress remoteAddr;
+            Address localAddr;
+            Address remoteAddr;
             uint16 localPort;
             uint16 remotePort;
 
@@ -186,10 +186,10 @@ class INET_API SCTP : public cSimpleModule
 
         uint16 nextEphemeralPort;
 
-        SCTPAssociation *findAssocForMessage(IPvXAddress srcAddr, IPvXAddress destAddr, uint32 srcPort, uint32 destPort, bool findListen);
+        SCTPAssociation *findAssocForMessage(Address srcAddr, Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
         SCTPAssociation *findAssocForApp(int32 appGateIndex, int32 assocId);
-        void sendAbortFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAddr, IPvXAddress destAddr);
-        void sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, IPvXAddress srcAddr, IPvXAddress destAddr);
+        void sendAbortFromMain(SCTPMessage* sctpmsg, Address srcAddr, Address destAddr);
+        void sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, Address srcAddr, Address destAddr);
         void updateDisplayString();
 
     public:
@@ -226,17 +226,17 @@ class INET_API SCTP : public cSimpleModule
         /**
         * To be called from SCTPAssociation when socket pair    changes
         */
-        void updateSockPair(SCTPAssociation *assoc, IPvXAddress localAddr, IPvXAddress remoteAddr, int32 localPort, int32 remotePort);
-        void addLocalAddress(SCTPAssociation *assoc, IPvXAddress address);
-        void addLocalAddressToAllRemoteAddresses(SCTPAssociation *assoc, IPvXAddress address, std::vector<IPvXAddress> remAddresses);
-        bool addRemoteAddress(SCTPAssociation *assoc, IPvXAddress localAddress, IPvXAddress remoteAddress);
-        void removeLocalAddressFromAllRemoteAddresses(SCTPAssociation *assoc, IPvXAddress address, std::vector<IPvXAddress> remAddresses);
-        void removeRemoteAddressFromAllAssociations(SCTPAssociation *assoc, IPvXAddress address, std::vector<IPvXAddress> locAddresses);
+        void updateSockPair(SCTPAssociation *assoc, Address localAddr, Address remoteAddr, int32 localPort, int32 remotePort);
+        void addLocalAddress(SCTPAssociation *assoc, Address address);
+        void addLocalAddressToAllRemoteAddresses(SCTPAssociation *assoc, Address address, std::vector<Address> remAddresses);
+        bool addRemoteAddress(SCTPAssociation *assoc, Address localAddress, Address remoteAddress);
+        void removeLocalAddressFromAllRemoteAddresses(SCTPAssociation *assoc, Address address, std::vector<Address> remAddresses);
+        void removeRemoteAddressFromAllAssociations(SCTPAssociation *assoc, Address address, std::vector<Address> locAddresses);
         /**
         * Update assocs socket pair, and register newAssoc (which'll keep LISTENing).
         * Also, assoc will get a new assocId (and newAssoc will live on with its old assocId).
         */
-        void addForkedAssociation(SCTPAssociation *assoc, SCTPAssociation *newAssoc, IPvXAddress localAddr, IPvXAddress remoteAddr, int32 localPort, int32 remotePort);
+        void addForkedAssociation(SCTPAssociation *assoc, SCTPAssociation *newAssoc, Address localAddr, Address remoteAddr, int32 localPort, int32 remotePort);
 
         /**
         * To be called from SCTPAssociation: reserves an ephemeral port for the connection.

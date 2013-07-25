@@ -40,7 +40,7 @@
 
 #include "ProtocolMap.h"
 #include "IPv4Address.h"
-#include "IPvXAddress.h"
+#include "Address.h"
 #include "ControlManetRouting_m.h"
 #ifdef WITH_80211MESH
 #include "LocatorNotificationInfo_m.h"
@@ -647,8 +647,8 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
     if (!isInMacLayer())
     {
         IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
-        IPvXAddress srcAddr = ctrl->getSrcAddr();
-        IPvXAddress destAddr = ctrl->getDestAddr();
+        Address srcAddr = ctrl->getSrcAddr();
+        Address destAddr = ctrl->getDestAddr();
         src.s_addr = ManetAddress(srcAddr);
         dst.s_addr = ManetAddress(destAddr);
         interfaceId = ctrl->getInterfaceId();

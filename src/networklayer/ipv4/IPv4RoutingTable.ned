@@ -45,7 +45,7 @@ package inet.networklayer.ipv4;
 // @see ~InterfaceTable
 // @author: Jochen Reber, Andras Varga
 //
-simple RoutingTable
+simple IPv4RoutingTable
 {
     parameters:
         string routerId = default("auto"); // for routers, the router id using IPv4 address dotted

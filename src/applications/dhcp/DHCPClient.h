@@ -25,7 +25,7 @@
 #include "DHCP_m.h"
 #include "DHCPLease.h"
 #include "InterfaceTable.h"
-#include "RoutingTable.h"
+#include "IPv4RoutingTable.h"
 #include "UDPSocket.h"
 #include "INotifiable.h"
 #include "ILifecycle.h"
@@ -66,7 +66,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
 
         NotificationBoard* nb; // Notification board
         InterfaceEntry* ie; // interface to configure
-        IRoutingTable* irt; // Routing table to update
+        IIPv4RoutingTable* irt; // Routing table to update
 
         DHCPLease* lease; // leased ip information
 
@@ -83,7 +83,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         virtual void handleDHCPMessage(DHCPMessage* msg);
         virtual void receiveChangeNotification(int category, const cPolymorphic *details);
         virtual cModule* getContainingNode();
-        virtual void sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort);
+        virtual void sendToUDP(cPacket *msg, int srcPort, const Address& destAddr, int destPort);
 
         // internal client methods
         virtual void changeFSMState(CLIENT_STATE new_state);

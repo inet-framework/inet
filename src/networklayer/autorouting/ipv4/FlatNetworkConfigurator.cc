@@ -16,9 +16,9 @@
 //
 
 #include <algorithm>
-#include "IRoutingTable.h"
+#include "IIPv4RoutingTable.h"
 #include "IInterfaceTable.h"
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 #include "FlatNetworkConfigurator.h"
 #include "InterfaceEntry.h"
 #include "IPv4InterfaceData.h"
@@ -70,11 +70,11 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
     for (int i=0; i<topo.getNumNodes(); i++)
     {
         cModule *mod = topo.getNode(i)->getModule();
-        nodeInfo[i].isIPNode = IPvXAddressResolver().findRoutingTableOf(mod)!=NULL && IPvXAddressResolver().findInterfaceTableOf(mod)!=NULL;
+        nodeInfo[i].isIPNode = AddressResolver().findRoutingTableOf(mod)!=NULL && AddressResolver().findInterfaceTableOf(mod)!=NULL;
         if (nodeInfo[i].isIPNode)
         {
-            nodeInfo[i].ift = IPvXAddressResolver().interfaceTableOf(mod);
-            nodeInfo[i].rt = IPvXAddressResolver().routingTableOf(mod);
+            nodeInfo[i].ift = AddressResolver().interfaceTableOf(mod);
+            nodeInfo[i].rt = AddressResolver().routingTableOf(mod);
             nodeInfo[i].ipForwardEnabled = mod->hasPar("IPForward") ? mod->par("IPForward").boolValue() : false;
             topo.getNode(i)->setWeight(nodeInfo[i].ipForwardEnabled ? 0.0 : INFINITY);
         }
@@ -126,7 +126,7 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
             continue;
 
         IInterfaceTable *ift = nodeInfo[i].ift;
-        IRoutingTable *rt = nodeInfo[i].rt;
+        IIPv4RoutingTable *rt = nodeInfo[i].rt;
 
         // count non-loopback interfaces
         int numIntf = 0;
@@ -198,7 +198,7 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& _topo, NodeInfoVector
             EV << " towards " << destModName << "=" << IPv4Address(destAddr) << " interface " << ie->getName() << endl;
 
             // add route
-            IRoutingTable *rt = nodeInfo[j].rt;
+            IIPv4RoutingTable *rt = nodeInfo[j].rt;
             IPv4Route *e = new IPv4Route();
             e->setDestination(destAddr);
             e->setNetmask(IPv4Address(255, 255, 255, 255)); // full match needed

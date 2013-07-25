@@ -15,7 +15,7 @@
 #include <iostream>
 #include "SimpleClassifier.h"
 #include "XMLUtils.h"
-#include "RoutingTableAccess.h"
+#include "IPv4RoutingTableAccess.h"
 #include "LIBTableAccess.h"
 #include "RSVPAccess.h"
 #include "LIBTable.h"
@@ -30,8 +30,8 @@ void SimpleClassifier::initialize(int stage)
 
     maxLabel = 0;
 
-    RoutingTableAccess routingTableAccess;
-    IRoutingTable *rt = routingTableAccess.get();
+    IPv4RoutingTableAccess routingTableAccess;
+    IIPv4RoutingTable *rt = routingTableAccess.get();
     routerId = rt->getRouterId();
 
     LIBTableAccess libTableAccess;

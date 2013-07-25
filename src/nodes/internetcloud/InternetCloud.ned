@@ -30,7 +30,7 @@ import inet.networklayer.internetcloud.InternetCloudTaggerChannel;
 import inet.networklayer.ipv4.ErrorHandling;
 import inet.networklayer.ipv4.ICMP;
 import inet.networklayer.ipv4.IPv4;
-import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.util.PcapRecorder;
 
 
@@ -125,7 +125,7 @@ module InternetCloud
             parameters:
                 @display("p=60,131");
         }
-        routingTable: RoutingTable {
+        routingTable: IPv4RoutingTable {
             parameters:
                 IPForward = true;
                 routerId = "auto";

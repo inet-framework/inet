@@ -31,7 +31,7 @@
 
 //Forward declarations:
 #ifdef WITH_xMIPv6
-class RoutingTable6;
+class IPv6RoutingTable;
 #endif /* WITH_xMIPv6 */
 
 #define IPv6_DEFAULT_DUPADDRDETECTTRANSMITS 1   // send NS once (RFC2462:Section 5.1)
@@ -785,7 +785,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
     IPv6Address removeAddress(IPv6InterfaceData::AddressType type); // update 06.08.08 - CB
 
   protected:
-    RoutingTable6* rt6; // A pointer variable, specifically used to access the type of node (MN, HA, Router, CN). Used in info(). (Zarrar Yousaf 20.07.07)
+    IPv6RoutingTable* rt6; // A pointer variable, specifically used to access the type of node (MN, HA, Router, CN). Used in info(). (Zarrar Yousaf 20.07.07)
 #endif /* WITH_xMIPv6 */
 };
 

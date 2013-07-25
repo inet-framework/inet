@@ -17,8 +17,8 @@
 //
 
 #include "INETDefs.h"
-#include "IPvXAddress.h"
-#include "IPvXAddressResolver.h"
+#include "Address.h"
+#include "AddressResolver.h"
 
 #ifdef WITH_IPv4
 #include "IPv4Datagram.h"

@@ -28,7 +28,7 @@
 #include "IPv4InterfaceData.h"
 #include "IPv6ControlInfo.h"
 #include "Ieee802Ctrl_m.h"
-#include "RoutingTableAccess.h"
+#include "IPv4RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
 #include "Coord.h"
 #include "ControlInfoBreakLink_m.h"
@@ -86,7 +86,7 @@ void ManetRoutingBase::registerRoutingModule()
     /* Set host parameters */
     isRegistered = true;
     int  num_80211 = 0;
-    inet_rt = RoutingTableAccess().getIfExists();
+    inet_rt = IPv4RoutingTableAccess().getIfExists();
     inet_ift = InterfaceTableAccess().get();
     nb = NotificationBoardAccess().get();
 

@@ -17,11 +17,11 @@
 
 
 cplusplus {{
-#include "IPvXAddress.h"
+#include "Address.h"
 }}
 
 
-class noncobject IPvXAddress;
+class noncobject Address;
 
 //
 // TCP command codes, sent by the application to TCP. These constants
@@ -147,8 +147,8 @@ enum TCPDataTransferMode
 //
 class TCPOpenCommand extends TCPCommand
 {
-    IPvXAddress localAddr; // may be left empty
-    IPvXAddress remoteAddr;// required for active open
+    Address localAddr; // may be left empty
+    Address remoteAddr;// required for active open
     int localPort = -1;       // required for passive open
     int remotePort = -1;      // required for active open
     bool fork = false;        // used only for passive open
@@ -175,8 +175,8 @@ class TCPSendCommand extends TCPCommand
 //
 class TCPConnectInfo extends TCPCommand
 {
-    IPvXAddress localAddr;
-    IPvXAddress remoteAddr;
+    Address localAddr;
+    Address remoteAddr;
     int localPort;
     int remotePort;
 }
@@ -194,8 +194,8 @@ class TCPStatusInfo extends TCPCommand
     int state;
     string stateName;
 
-    IPvXAddress localAddr;
-    IPvXAddress remoteAddr;
+    Address localAddr;
+    Address remoteAddr;
     int localPort;
     int remotePort;
 

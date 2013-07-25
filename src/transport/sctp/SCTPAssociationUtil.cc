@@ -26,8 +26,8 @@
 #include "SCTPCommand_m.h"
 #include "SCTPQueue.h"
 #include "SCTPAlgorithm.h"
-#include "RoutingTable.h"
-#include "RoutingTableAccess.h"
+#include "IPv4RoutingTable.h"
+#include "IPv4RoutingTableAccess.h"
 #include "InterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "IPv6Address.h"
@@ -276,7 +276,7 @@ SCTPAssociation* SCTPAssociation::cloneAssociation()
 }
 
 void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
-                                         const IPvXAddress& dest)
+                                         const Address& dest)
 {
     // Final touches on the segment before sending
     sctpmsg->setSrcPort(localPort);
@@ -306,7 +306,7 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
             IPv6ControlInfo* controlInfo = new IPv6ControlInfo();
             controlInfo->setProtocol(IP_PROT_SCTP);
             controlInfo->setSrcAddr(IPv6Address());
-            controlInfo->setDestAddr(dest.get6());
+            controlInfo->setDestAddr(dest.toIPv6());
             sctpmsg->setControlInfo(controlInfo);
             sctpMain->send(sctpmsg, "to_ipv6");
         }
@@ -314,7 +314,7 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
             IPv4ControlInfo* controlInfo = new IPv4ControlInfo();
             controlInfo->setProtocol(IP_PROT_SCTP);
             controlInfo->setSrcAddr(IPv4Address("0.0.0.0"));
-            controlInfo->setDestAddr(dest.get4());
+            controlInfo->setDestAddr(dest.toIPv4());
             sctpmsg->setControlInfo(controlInfo);
             sctpMain->send(sctpmsg, "to_ip");
         }
@@ -472,7 +472,7 @@ void SCTPAssociation::sendInit()
     initTsn = initChunk->getInitTSN();
     IInterfaceTable *ift = interfaceTableAccess.get();
     sctpEV3<<"add local address\n";
-    if (localAddressList.front() == IPvXAddress("0.0.0.0"))
+    if (localAddressList.front() == Address("0.0.0.0"))
     {
         for (int32 i=0; i<ift->getNumInterfaces(); ++i)
         {
@@ -535,14 +535,14 @@ void SCTPAssociation::sendInit()
                 length += 8;
                 sctpMain->addLocalAddress(this, (*i));
                 state->localAddresses.push_back((*i));
-                if (localAddr.get4().getInt()==0)
+                if (localAddr.toIPv4().getInt()==0)
                     localAddr = (*i);
             }
             else if (rlevel==4 && addressLevel==3 && friendly)
             {
                 sctpMain->addLocalAddress(this, (*i));
                 state->localAddresses.push_back((*i));
-                if (localAddr.get4().getInt()==0)
+                if (localAddr.toIPv4().getInt()==0)
                     localAddr = (*i);
             }
         }
@@ -935,8 +935,8 @@ void SCTPAssociation::sendHeartbeat(const SCTPPathVariables* path)
 }
 
 void SCTPAssociation::sendHeartbeatAck(const SCTPHeartbeatChunk* heartbeatChunk,
-                                                    const IPvXAddress&        src,
-                                                    const IPvXAddress&        dest)
+                                                    const Address&        src,
+                                                    const Address&        dest)
 {
     SCTPAuthenticationChunk* authChunk;
     SCTPMessage*                 sctpHeartbeatAck = new SCTPMessage();
@@ -967,7 +967,7 @@ void SCTPAssociation::sendHeartbeatAck(const SCTPHeartbeatChunk* heartbeatChunk,
     sendToIP(sctpHeartbeatAck, dest);
 }
 
-void SCTPAssociation::sendCookieAck(const IPvXAddress& dest)
+void SCTPAssociation::sendCookieAck(const Address& dest)
 {
     SCTPAuthenticationChunk* authChunk;
     SCTPMessage *sctpcookieack = new SCTPMessage();
@@ -991,7 +991,7 @@ void SCTPAssociation::sendCookieAck(const IPvXAddress& dest)
     sendToIP(sctpcookieack, dest);
 }
 
-void SCTPAssociation::sendShutdownAck(const IPvXAddress& dest)
+void SCTPAssociation::sendShutdownAck(const Address& dest)
 {
     sendOnAllPaths(getPath(dest));
     if (getOutstandingBytes() == 0) {
@@ -1229,7 +1229,7 @@ void SCTPAssociation::scheduleSack()
     }
 }
 
-SCTPForwardTsnChunk* SCTPAssociation::createForwardTsnChunk(const IPvXAddress& pid)
+SCTPForwardTsnChunk* SCTPAssociation::createForwardTsnChunk(const Address& pid)
 {
     uint16 chunkLength = SCTP_FORWARD_TSN_CHUNK_LENGTH;
     SCTPDataVariables* chunk;
@@ -1793,7 +1793,7 @@ SCTPDataChunk* SCTPAssociation::transformDataChunk(SCTPDataVariables* chunk)
     return dataChunk;
 }
 
-void SCTPAssociation::addPath(const IPvXAddress& addr)
+void SCTPAssociation::addPath(const Address& addr)
 {
     sctpEV3<<"Add Path remote address: "<<addr<<"\n";
 
@@ -1810,7 +1810,7 @@ void SCTPAssociation::addPath(const IPvXAddress& addr)
     sctpEV3<<"path added\n";
 }
 
-void SCTPAssociation::removePath(const IPvXAddress& addr)
+void SCTPAssociation::removePath(const Address& addr)
 {
     SCTPPathMap::iterator pathIterator = sctpPathMap.find(addr);
     if (pathIterator != sctpPathMap.end())
@@ -2447,7 +2447,7 @@ void SCTPAssociation::pmDataIsSentOn(SCTPPathVariables* path)
 
 void SCTPAssociation::pmStartPathManagement()
 {
-    RoutingTableAccess routingTableAccess;
+    IPv4RoutingTableAccess routingTableAccess;
     SCTPPathVariables* path;
     int32 i = 0;
     /* populate path structures !!! */
@@ -2457,7 +2457,7 @@ void SCTPAssociation::pmStartPathManagement()
     {
         path = piter->second;
         path->pathErrorCount = 0;
-        InterfaceEntry *rtie = routingTableAccess.get()->getInterfaceForDestAddr(path->remoteAddress.get4());
+        InterfaceEntry *rtie = routingTableAccess.get()->getInterfaceForDestAddr(path->remoteAddress.toIPv4());
         path->pmtu = rtie->getMTU();
         sctpEV3 << "Path MTU of Interface "<< i << " = " << path->pmtu <<"\n";
         if (path->pmtu < state->assocPmtu)
@@ -2590,11 +2590,11 @@ void SCTPAssociation::disposeOf(SCTPMessage* sctpmsg)
     delete sctpmsg;
 }
 
-int SCTPAssociation::getAddressLevel(const IPvXAddress& addr)
+int SCTPAssociation::getAddressLevel(const Address& addr)
 {
     if (addr.isIPv6())
     {
-        switch(addr.get6().getScope())
+        switch(addr.toIPv6().getScope())
         {
             case IPv6Address::UNSPECIFIED:
             case IPv6Address::MULTICAST:
@@ -2613,12 +2613,12 @@ int SCTPAssociation::getAddressLevel(const IPvXAddress& addr)
                 return 4;
 
             default:
-                throw cRuntimeError("Unknown IPv6 scope: %d", (int)(addr.get6().getScope()));
+                throw cRuntimeError("Unknown IPv6 scope: %d", (int)(addr.toIPv6().getScope()));
         }
     }
     else
     {
-        switch(addr.get4().getAddressCategory())
+        switch(addr.toIPv4().getAddressCategory())
         {
             case IPv4Address::UNSPECIFIED:
             case IPv4Address::THIS_NETWORK:
@@ -2644,7 +2644,7 @@ int SCTPAssociation::getAddressLevel(const IPvXAddress& addr)
                 return 4;
 
             default:
-                throw cRuntimeError("Unknown IPv4 address category: %d", (int)(addr.get4().getAddressCategory()));
+                throw cRuntimeError("Unknown IPv4 address category: %d", (int)(addr.toIPv4().getAddressCategory()));
         }
     }
 }

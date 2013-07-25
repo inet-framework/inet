@@ -26,7 +26,7 @@ package inet.networklayer.icmpv6;
 // attached. The message will be used as ping payload (encapsulated into an ~ICMPv6Message).
 // When an ICMPv6 Echo Reply is received, the payload message will be sent to pingOut.
 //
-// @see ~IPv6, ~RoutingTable6, ~IPv6NeighbourDiscovery
+// @see ~IPv6, ~IPv6RoutingTable, ~IPv6NeighbourDiscovery
 //#FIXME gate descriptions needed...
 //
 simple ICMPv6

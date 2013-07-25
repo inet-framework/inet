@@ -21,9 +21,9 @@
 #include "FlatNetworkConfigurator6.h"
 
 #include "IInterfaceTable.h"
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 #include "IPv6InterfaceData.h"
-#include "RoutingTable6.h"
+#include "IPv6RoutingTable.h"
 
 // FIXME UPDATE DOCU!!!!!!!
 
@@ -66,8 +66,8 @@ void FlatNetworkConfigurator6::setDisplayString(int numIPNodes, int numNonIPNode
 
 bool FlatNetworkConfigurator6::isIPNode(cTopology::Node *node)
 {
-    return IPvXAddressResolver().findRoutingTable6Of(node->getModule()) != NULL
-            && IPvXAddressResolver().findInterfaceTableOf(node->getModule()) != NULL;
+    return AddressResolver().findRoutingTable6Of(node->getModule()) != NULL
+            && AddressResolver().findInterfaceTableOf(node->getModule()) != NULL;
 }
 
 void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
@@ -83,8 +83,8 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
 
         // find interface table and assign address to all (non-loopback) interfaces
         cModule *mod = topo.getNode(i)->getModule();
-        IInterfaceTable *ift = IPvXAddressResolver().interfaceTableOf(mod);
-        RoutingTable6 *rt = IPvXAddressResolver().routingTable6Of(mod);
+        IInterfaceTable *ift = AddressResolver().interfaceTableOf(mod);
+        IPv6RoutingTable *rt = AddressResolver().routingTable6Of(mod);
 
         // skip hosts
         if (!rt->par("isRouter").boolValue())
@@ -137,8 +137,8 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
         if (!isIPNode(node))
             continue;
 
-        RoutingTable6 *rt = IPvXAddressResolver().routingTable6Of(node->getModule());
-        IInterfaceTable *ift = IPvXAddressResolver().interfaceTableOf(node->getModule());
+        IPv6RoutingTable *rt = AddressResolver().routingTable6Of(node->getModule());
+        IInterfaceTable *ift = AddressResolver().interfaceTableOf(node->getModule());
 
         // skip hosts
         if (!rt->par("isRouter").boolValue())
@@ -179,8 +179,8 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
 */
 
         numIPNodes++; // FIXME split into num hosts, num routers
-        RoutingTable6 *destRt = IPvXAddressResolver().routingTable6Of(destNode->getModule());
-        IInterfaceTable *destIft = IPvXAddressResolver().interfaceTableOf(destNode->getModule());
+        IPv6RoutingTable *destRt = AddressResolver().routingTable6Of(destNode->getModule());
+        IInterfaceTable *destIft = AddressResolver().interfaceTableOf(destNode->getModule());
 
         // don't add routes towards hosts
         if (!destRt->par("isRouter").boolValue())
@@ -217,8 +217,8 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
             if (atNode->getNumPaths() == 0)
                 continue;       // not connected
 
-            RoutingTable6 *rt = IPvXAddressResolver().routingTable6Of(atNode->getModule());
-            IInterfaceTable *ift = IPvXAddressResolver().interfaceTableOf(atNode->getModule());
+            IPv6RoutingTable *rt = AddressResolver().routingTable6Of(atNode->getModule());
+            IInterfaceTable *ift = AddressResolver().interfaceTableOf(atNode->getModule());
 
             // skip hosts' routing tables
             if (!rt->par("isRouter").boolValue())
@@ -240,7 +240,7 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
             // ok, the next hop is now just one step away from prevNode
             cGate *remoteGate = prevNode->getPath(0)->getRemoteGate();
             cModule *nextHop = remoteGate->getOwnerModule();
-            IInterfaceTable *nextHopIft = IPvXAddressResolver().interfaceTableOf(nextHop);
+            IInterfaceTable *nextHopIft = AddressResolver().interfaceTableOf(nextHop);
             InterfaceEntry *nextHopOnlinkIf = nextHopIft->getInterfaceByNodeInputGateId(remoteGate->getId());
 
             // find link-local address for next hop

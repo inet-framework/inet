@@ -26,13 +26,13 @@ void TCPSrvHostApp::initialize(int stage)
 
     if (stage == 0)
     {
-        //TODO should use IPvXAddressResolver in stage 3
+        //TODO should use AddressResolver in stage 3
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
 
         serverSocket.setOutputGate(gate("tcpOut"));
         serverSocket.readDataTransferModePar(*this);
-        serverSocket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
+        serverSocket.bind(localAddress[0] ? Address(localAddress) : Address(), localPort);
         serverSocket.listen();
     }
     else if (stage == 1)

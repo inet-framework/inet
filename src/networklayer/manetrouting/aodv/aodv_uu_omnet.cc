@@ -37,7 +37,7 @@
 
 #include "ProtocolMap.h"
 #include "IPv4Address.h"
-#include "IPvXAddress.h"
+#include "Address.h"
 #include "ControlManetRouting_m.h"
 #include "Ieee802Ctrl_m.h"
 #include "aodv_uu_omnet.h"
@@ -855,8 +855,8 @@ void NS_CLASS recvAODVUUPacket(cMessage * msg)
     if (!isInMacLayer())
     {
         IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->getControlInfo());
-        IPvXAddress srcAddr = ctrl->getSrcAddr();
-        IPvXAddress destAddr = ctrl->getDestAddr();
+        Address srcAddr = ctrl->getSrcAddr();
+        Address destAddr = ctrl->getDestAddr();
 
         src.s_addr = ManetAddress(srcAddr);
         dst.s_addr =  ManetAddress(destAddr);

@@ -23,7 +23,7 @@
 #include "IPv4Address.h"
 
 class IInterfaceTable;
-class IRoutingTable;
+class IIPv4RoutingTable;
 
 
 /**
@@ -40,7 +40,7 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
         NodeInfo() {isIPNode = false; ift = NULL; rt = NULL; usesDefaultRoute = false;}
         bool isIPNode;
         IInterfaceTable *ift;
-        IRoutingTable *rt;
+        IIPv4RoutingTable *rt;
         IPv4Address address;
         bool usesDefaultRoute;
         bool ipForwardEnabled;

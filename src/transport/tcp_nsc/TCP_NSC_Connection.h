@@ -27,7 +27,7 @@
 
 #include "INETDefs.h"
 
-#include "IPvXAddress.h"
+#include "Address.h"
 
 // forward declarations:
 class TCPConnectInfo;
@@ -47,7 +47,7 @@ class INET_API TCP_NSC_Connection
     {
       public:
         SockAddr() : ipAddrM(), portM(-1) {}
-        IPvXAddress ipAddrM;
+        Address ipAddrM;
         unsigned short portM;
 
         inline bool operator<(const SockAddr& b) const

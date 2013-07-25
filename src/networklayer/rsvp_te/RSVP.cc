@@ -14,13 +14,13 @@
 
 #include "RSVP.h"
 #include "IPv4ControlInfo.h"
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 #include "common.h"
 #include "Utils.h"
 #include "XMLUtils.h"
 #include "IPv4InterfaceData.h"
 #include "TEDAccess.h"
-#include "RoutingTableAccess.h"
+#include "IPv4RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
 #include "LIBTableAccess.h"
 #include "NotifierConsts.h"
@@ -58,7 +58,7 @@ void RSVP::initialize(int stage)
     if (stage==4)
     {
         tedmod = TEDAccess().get();
-        rt = RoutingTableAccess().get();
+        rt = IPv4RoutingTableAccess().get();
         ift = InterfaceTableAccess().get();
         routerId = rt->getRouterId();
         lt = LIBTableAccess().get();
@@ -173,12 +173,12 @@ EroVector RSVP::readTrafficRouteFromXML(const cXMLElement *route)
         if (!strcmp(hop->getTagName(), "node"))
         {
             h.L = false;
-            h.node = IPvXAddressResolver().resolve(hop->getNodeValue()).get4();
+            h.node = AddressResolver().resolve(hop->getNodeValue()).toIPv4();
         }
         else if (!strcmp(hop->getTagName(), "lnode"))
         {
             h.L = true;
-            h.node = IPvXAddressResolver().resolve(hop->getNodeValue()).get4();
+            h.node = AddressResolver().resolve(hop->getNodeValue()).toIPv4();
         }
         else
         {

@@ -30,9 +30,9 @@
 #include "IPv4Datagram.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
-#include "IRoutingTable.h"
-#include "RoutingTable.h"
-#include "RoutingTableAccess.h"
+#include "IIPv4RoutingTable.h"
+#include "IPv4RoutingTable.h"
+#include "IPv4RoutingTableAccess.h"
 
 using namespace std;
 
@@ -61,7 +61,7 @@ class INET_API DSDV_2 : public cSimpleModule
   protected:
     simtime_t hellomsgperiod_DSDV;
     IInterfaceTable *ift;
-    IRoutingTable *rt;
+    IIPv4RoutingTable *rt;
 
   public:
     DSDV_2();

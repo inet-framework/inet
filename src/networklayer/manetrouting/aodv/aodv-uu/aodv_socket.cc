@@ -614,8 +614,6 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
         else
             delay = par ("unicastDelay").doubleValue();
     }
-    //       IPv4Address   desAddIp4(dst.s_addr);
-    //       IPvXAddress destAdd(desAddIp4);
     if (useIndex)
         sendToIp(aodv_msg, 654, destAdd, 654, ttl, delay, dev->ifindex);
     else
@@ -705,6 +703,4 @@ void aodv_socket_cleanup(void)
     }
 #endif              /* NS_PORT */
 }
-
-
 

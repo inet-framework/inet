@@ -38,7 +38,7 @@ class INET_API UDPBasicApp : public AppBase
 
     UDPSocket socket;
     int localPort, destPort;
-    std::vector<IPvXAddress> destAddresses;
+    std::vector<Address> destAddresses;
     simtime_t startTime;
     simtime_t stopTime;
     cMessage *selfMsg;
@@ -51,7 +51,7 @@ class INET_API UDPBasicApp : public AppBase
     static simsignal_t rcvdPkSignal;
 
     // chooses random destination address
-    virtual IPvXAddress chooseDestAddr();
+    virtual Address chooseDestAddr();
     virtual void sendPacket();
     virtual void processPacket(cPacket *msg);
     virtual void setSocketOptions();

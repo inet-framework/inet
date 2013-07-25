@@ -18,7 +18,7 @@
 
 #include "NotifierConsts.h"
 #include "NotificationBoard.h"
-#include "IRoutingTable.h"
+#include "IIPv4RoutingTable.h"
 #include "IPv4Route.h"
 #include "IInterfaceTable.h"
 #include "IPv4InterfaceData.h"
@@ -138,7 +138,7 @@ void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceE
 
 void RoutingTableRecorder::recordRouteChange(cModule *host, const IPv4Route *route, int category)
 {
-    IRoutingTable *rt = route->getRoutingTable(); // may be NULL! (route already removed from its routing table)
+    IIPv4RoutingTable *rt = route->getRoutingTable(); // may be NULL! (route already removed from its routing table)
 
     const char *tag;
     switch (category) {

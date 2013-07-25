@@ -61,7 +61,7 @@ void TCPEchoApp::startListening()
     const char *localAddress = par("localAddress");
     int localPort = par("localPort");
     socket.renewSocket();
-    socket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
+    socket.bind(localAddress[0] ? Address(localAddress) : Address(), localPort);
     socket.listen();
 }
 

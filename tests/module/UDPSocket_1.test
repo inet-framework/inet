@@ -26,9 +26,9 @@ void TestApp::activity()
   UDPSocket s;
   s.setOutputGate(gate("udpOut"));
   s.setMulticastLoop(false);
-  s.connect(IPvXAddress("10.0.0.1"), 1000);
+  s.connect(Address("10.0.0.1"), 1000);
   s.bind(100);
-  s.connect(IPvXAddress("10.0.0.2"), 2000);
+  s.connect(Address("10.0.0.2"), 2000);
 }
 
 }

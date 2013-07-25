@@ -21,7 +21,7 @@
 
 #include "opp_utils.h"
 
-#include "RoutingTable6.h"
+#include "IPv6RoutingTable.h"
 
 #include "IPv6InterfaceData.h"
 #include "InterfaceTableAccess.h"
@@ -29,7 +29,7 @@
 #include "IPv6TunnelingAccess.h"
 #include "NodeOperations.h"
 
-Define_Module(RoutingTable6);
+Define_Module(IPv6RoutingTable);
 
 
 std::string IPv6Route::info() const
@@ -74,28 +74,28 @@ std::ostream& operator<<(std::ostream& os, const IPv6Route& e)
     return os;
 };
 
-std::ostream& operator<<(std::ostream& os, const RoutingTable6::DestCacheEntry& e)
+std::ostream& operator<<(std::ostream& os, const IPv6RoutingTable::DestCacheEntry& e)
 {
     os << "if=" << e.interfaceId << " " << e.nextHopAddr;  //FIXME try printing interface name
     return os;
 };
 
-RoutingTable6::RoutingTable6()
+IPv6RoutingTable::IPv6RoutingTable()
 {
 }
 
-RoutingTable6::~RoutingTable6()
+IPv6RoutingTable::~IPv6RoutingTable()
 {
     for (unsigned int i=0; i<routeList.size(); i++)
         delete routeList[i];
 }
 
-IPv6Route *RoutingTable6::createNewRoute(IPv6Address destPrefix, int prefixLength, IPv6Route::RouteSrc src)
+IPv6Route *IPv6RoutingTable::createNewRoute(IPv6Address destPrefix, int prefixLength, IPv6Route::RouteSrc src)
 {
     return new IPv6Route(destPrefix, prefixLength, src);
 }
 
-void RoutingTable6::initialize(int stage)
+void IPv6RoutingTable::initialize(int stage)
 {
     if (stage==1)
     {
@@ -162,7 +162,7 @@ void RoutingTable6::initialize(int stage)
     }
 }
 
-void RoutingTable6::parseXMLConfigFile()
+void IPv6RoutingTable::parseXMLConfigFile()
 {
     // TODO to be revised by Andras
     // configure interfaces from XML config file
@@ -200,7 +200,7 @@ void RoutingTable6::parseXMLConfigFile()
     }
 }
 
-void RoutingTable6::updateDisplayString()
+void IPv6RoutingTable::updateDisplayString()
 {
     if (!ev.isGUI())
         return;
@@ -211,12 +211,12 @@ void RoutingTable6::updateDisplayString()
     getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
 
-void RoutingTable6::handleMessage(cMessage *msg)
+void IPv6RoutingTable::handleMessage(cMessage *msg)
 {
     throw cRuntimeError("This module doesn't process messages");
 }
 
-void RoutingTable6::receiveChangeNotification(int category, const cObject *details)
+void IPv6RoutingTable::receiveChangeNotification(int category, const cObject *details)
 {
     if (simulation.getContextType()==CTX_INITIALIZE)
         return;  // ignore notifications during initialize
@@ -258,7 +258,7 @@ void RoutingTable6::receiveChangeNotification(int category, const cObject *detai
     }
 }
 
-void RoutingTable6::routeChanged(IPv6Route *entry, int fieldCode)
+void IPv6RoutingTable::routeChanged(IPv6Route *entry, int fieldCode)
 {
     ASSERT(entry != NULL);
 
@@ -273,7 +273,7 @@ void RoutingTable6::routeChanged(IPv6Route *entry, int fieldCode)
     nb->fireChangeNotification(NF_IPv6_ROUTE_CHANGED, entry); // TODO include fieldCode in the notification
 }
 
-void RoutingTable6::configureInterfaceForIPv6(InterfaceEntry *ie)
+void IPv6RoutingTable::configureInterfaceForIPv6(InterfaceEntry *ie)
 {
     IPv6InterfaceData *ipv6IfData = new IPv6InterfaceData();
     ie->setIPv6Data(ipv6IfData);
@@ -303,7 +303,7 @@ void RoutingTable6::configureInterfaceForIPv6(InterfaceEntry *ie)
     }
 }
 
-void RoutingTable6::assignRequiredNodeAddresses(InterfaceEntry *ie)
+void IPv6RoutingTable::assignRequiredNodeAddresses(InterfaceEntry *ie)
 {
     //RFC 3513 Section 2.8:A Node's Required Addresses
     /*A host is required to recognize the following addresses as
@@ -367,7 +367,7 @@ static bool toBool(const char *s, bool defaultValue = false)
     return !strcmp(s, "on") || !strcmp(s, "true") || !strcmp(s, "yes");
 }
 
-void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *cfg)
+void IPv6RoutingTable::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *cfg)
 {
     /*XML parsing capabilities tweaked by WEI. For now, we can configure a specific
     node's interface. We can set advertising prefixes and other variables to be used
@@ -432,7 +432,7 @@ void RoutingTable6::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement *c
     }
 }
 
-void RoutingTable6::configureTunnelFromXML(cXMLElement* cfg)
+void IPv6RoutingTable::configureTunnelFromXML(cXMLElement* cfg)
 {
     IPv6Tunneling* tunneling = IPv6TunnelingAccess().get();
 
@@ -460,7 +460,7 @@ void RoutingTable6::configureTunnelFromXML(cXMLElement* cfg)
     }
 }
 
-InterfaceEntry *RoutingTable6::getInterfaceByAddress(const IPv6Address& addr)
+InterfaceEntry *IPv6RoutingTable::getInterfaceByAddress(const IPv6Address& addr)
 {
     Enter_Method("getInterfaceByAddress(%s)=?", addr.str().c_str());
 
@@ -476,7 +476,7 @@ InterfaceEntry *RoutingTable6::getInterfaceByAddress(const IPv6Address& addr)
     return NULL;
 }
 
-bool RoutingTable6::isLocalAddress(const IPv6Address& dest) const
+bool IPv6RoutingTable::isLocalAddress(const IPv6Address& dest) const
 {
     Enter_Method("isLocalAddress(%s) y/n", dest.str().c_str());
 
@@ -511,7 +511,7 @@ bool RoutingTable6::isLocalAddress(const IPv6Address& dest) const
     return false;
 }
 
-const IPv6Address& RoutingTable6::lookupDestCache(const IPv6Address& dest, int& outInterfaceId)
+const IPv6Address& IPv6RoutingTable::lookupDestCache(const IPv6Address& dest, int& outInterfaceId)
 {
     Enter_Method("lookupDestCache(%s)", dest.str().c_str());
 
@@ -533,7 +533,7 @@ const IPv6Address& RoutingTable6::lookupDestCache(const IPv6Address& dest, int& 
     return entry.nextHopAddr;
 }
 
-const IPv6Route *RoutingTable6::doLongestPrefixMatch(const IPv6Address& dest)
+const IPv6Route *IPv6RoutingTable::doLongestPrefixMatch(const IPv6Address& dest)
 {
     Enter_Method("doLongestPrefixMatch(%s)", dest.str().c_str());
 
@@ -566,7 +566,7 @@ const IPv6Route *RoutingTable6::doLongestPrefixMatch(const IPv6Address& dest)
     return NULL;
 }
 
-bool RoutingTable6::isPrefixPresent(const IPv6Address& prefix) const
+bool IPv6RoutingTable::isPrefixPresent(const IPv6Address& prefix) const
 {
     for (RouteList::const_iterator it=routeList.begin(); it!=routeList.end(); it++)
         if (prefix.matches((*it)->getDestPrefix(), 128))
@@ -574,7 +574,7 @@ bool RoutingTable6::isPrefixPresent(const IPv6Address& prefix) const
     return false;
 }
 
-void RoutingTable6::updateDestCache(const IPv6Address& dest, const IPv6Address& nextHopAddr, int interfaceId, simtime_t expiryTime)
+void IPv6RoutingTable::updateDestCache(const IPv6Address& dest, const IPv6Address& nextHopAddr, int interfaceId, simtime_t expiryTime)
 {
     DestCacheEntry &entry = destCache[dest];
     entry.nextHopAddr = nextHopAddr;
@@ -584,13 +584,13 @@ void RoutingTable6::updateDestCache(const IPv6Address& dest, const IPv6Address& 
     updateDisplayString();
 }
 
-void RoutingTable6::purgeDestCache()
+void IPv6RoutingTable::purgeDestCache()
 {
     destCache.clear();
     updateDisplayString();
 }
 
-void RoutingTable6::purgeDestCacheEntriesToNeighbour(const IPv6Address& nextHopAddr, int interfaceId)
+void IPv6RoutingTable::purgeDestCacheEntriesToNeighbour(const IPv6Address& nextHopAddr, int interfaceId)
 {
     for (DestCache::iterator it=destCache.begin(); it!=destCache.end(); )
     {
@@ -608,7 +608,7 @@ void RoutingTable6::purgeDestCacheEntriesToNeighbour(const IPv6Address& nextHopA
     updateDisplayString();
 }
 
-void RoutingTable6::purgeDestCacheForInterfaceID(int interfaceId)
+void IPv6RoutingTable::purgeDestCacheForInterfaceID(int interfaceId)
 {
     for (DestCache::iterator it=destCache.begin(); it!=destCache.end(); )
     {
@@ -626,7 +626,7 @@ void RoutingTable6::purgeDestCacheForInterfaceID(int interfaceId)
     updateDisplayString();
 }
 
-void RoutingTable6::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength,
+void IPv6RoutingTable::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength,
         int interfaceId, simtime_t expiryTime)
 {
     // see if prefix exists in table
@@ -664,7 +664,7 @@ void RoutingTable6::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int p
     updateDisplayString();
 }
 
-void RoutingTable6::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int prefixLength,
+void IPv6RoutingTable::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int prefixLength,
         int interfaceId, simtime_t expiryTime)
 {
     // FIXME this is very similar to the one above -- refactor!!
@@ -704,7 +704,7 @@ void RoutingTable6::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int p
     updateDisplayString();
 }
 
-void RoutingTable6::removeOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength)
+void IPv6RoutingTable::removeOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength)
 {
     // scan the routing table for this prefix and remove it
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); it++)
@@ -719,7 +719,7 @@ void RoutingTable6::removeOnLinkPrefix(const IPv6Address& destPrefix, int prefix
     updateDisplayString();
 }
 
-void RoutingTable6::addStaticRoute(const IPv6Address& destPrefix, int prefixLength,
+void IPv6RoutingTable::addStaticRoute(const IPv6Address& destPrefix, int prefixLength,
                     unsigned int interfaceId, const IPv6Address& nextHop,
                     int metric)
 {
@@ -736,7 +736,7 @@ void RoutingTable6::addStaticRoute(const IPv6Address& destPrefix, int prefixLeng
     addRoute(route);
 }
 
-void RoutingTable6::addDefaultRoute(const IPv6Address& nextHop, unsigned int ifID,
+void IPv6RoutingTable::addDefaultRoute(const IPv6Address& nextHop, unsigned int ifID,
         simtime_t routerLifetime)
 {
     // create route object
@@ -754,13 +754,13 @@ void RoutingTable6::addDefaultRoute(const IPv6Address& nextHop, unsigned int ifI
     addRoute(route);
 }
 
-void RoutingTable6::addRoutingProtocolRoute(IPv6Route *route)
+void IPv6RoutingTable::addRoutingProtocolRoute(IPv6Route *route)
 {
     ASSERT(route->getSrc()==IPv6Route::ROUTING_PROT);
     addRoute(route);
 }
 
-bool RoutingTable6::routeLessThan(const IPv6Route *a, const IPv6Route *b)
+bool IPv6RoutingTable::routeLessThan(const IPv6Route *a, const IPv6Route *b)
 {
     // helper for sort() in addRoute(). We want routes with longer
     // prefixes to be at front, so we compare them as "less".
@@ -776,7 +776,7 @@ bool RoutingTable6::routeLessThan(const IPv6Route *a, const IPv6Route *b)
     return a->getMetric() < b->getMetric();
 }
 
-void RoutingTable6::addRoute(IPv6Route *route)
+void IPv6RoutingTable::addRoute(IPv6Route *route)
 {
     route->setRoutingTable(this);
     routeList.push_back(route);
@@ -793,7 +793,7 @@ void RoutingTable6::addRoute(IPv6Route *route)
     nb->fireChangeNotification(NF_IPv6_ROUTE_ADDED, route);
 }
 
-void RoutingTable6::removeRoute(IPv6Route *route)
+void IPv6RoutingTable::removeRoute(IPv6Route *route)
 {
     RouteList::iterator it = std::find(routeList.begin(), routeList.end(), route);
     ASSERT(it!=routeList.end());
@@ -811,12 +811,12 @@ void RoutingTable6::removeRoute(IPv6Route *route)
     updateDisplayString();
 }
 
-int RoutingTable6::getNumRoutes() const
+int IPv6RoutingTable::getNumRoutes() const
 {
     return routeList.size();
 }
 
-IPv6Route *RoutingTable6::getRoute(int i)
+IPv6Route *IPv6RoutingTable::getRoute(int i)
 {
     ASSERT(i>=0 && i<(int)routeList.size());
     return routeList[i];
@@ -825,7 +825,7 @@ IPv6Route *RoutingTable6::getRoute(int i)
 #ifdef WITH_xMIPv6
 //#####Added by Zarrar Yousaf##################################################################
 
-const IPv6Address& RoutingTable6::getHomeAddress()
+const IPv6Address& IPv6RoutingTable::getHomeAddress()
 {
     for (int i=0; i<ift->getNumInterfaces(); ++i)
     {
@@ -838,7 +838,7 @@ const IPv6Address& RoutingTable6::getHomeAddress()
 }
 
 // Added by CB
-bool RoutingTable6::isHomeAddress(const IPv6Address& addr)
+bool IPv6RoutingTable::isHomeAddress(const IPv6Address& addr)
 {
     // check all interfaces whether they have the
     // provided address as HoA
@@ -853,7 +853,7 @@ bool RoutingTable6::isHomeAddress(const IPv6Address& addr)
 }
 
 // Added by CB
-void RoutingTable6::removeDefaultRoutes(int interfaceID)
+void IPv6RoutingTable::removeDefaultRoutes(int interfaceID)
 {
     EV << "/// Removing default route for interface=" << interfaceID << endl;
 
@@ -870,7 +870,7 @@ void RoutingTable6::removeDefaultRoutes(int interfaceID)
 }
 
 // Added by CB
-void RoutingTable6::removeAllRoutes()
+void IPv6RoutingTable::removeAllRoutes()
 {
     EV << "/// Removing all routes from rt6 " << endl;
 
@@ -883,7 +883,7 @@ void RoutingTable6::removeAllRoutes()
 }
 
 // 4.9.07 - Added by CB
-void RoutingTable6::removePrefixes(int interfaceID)
+void IPv6RoutingTable::removePrefixes(int interfaceID)
 {
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); )
     {
@@ -897,7 +897,7 @@ void RoutingTable6::removePrefixes(int interfaceID)
     updateDisplayString();
 }
 
-bool RoutingTable6::isOnLinkAddress(const IPv6Address& address)
+bool IPv6RoutingTable::isOnLinkAddress(const IPv6Address& address)
 {
     for (int j = 0; j < ift->getNumInterfaces(); j++)
     {
@@ -913,7 +913,7 @@ bool RoutingTable6::isOnLinkAddress(const IPv6Address& address)
 #endif /* WITH_xMIPv6 */
 
 
-bool RoutingTable6::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool IPv6RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {

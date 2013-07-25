@@ -43,7 +43,7 @@ const char  *IFCONFIG_START_TOKEN = "ifconfig:",
             *ROUTE_START_TOKEN = "route:",
             *ROUTE_END_TOKEN = "routeend.";
 
-RoutingTableParser::RoutingTableParser(IInterfaceTable *i, IRoutingTable *r)
+RoutingTableParser::RoutingTableParser(IInterfaceTable *i, IIPv4RoutingTable *r)
 {
     ift = i;
     rt = r;

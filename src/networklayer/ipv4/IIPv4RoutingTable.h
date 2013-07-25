@@ -26,17 +26,17 @@
 #include "IPv4Route.h"  // not strictly required, but most clients will need it anyway
 
 /**
- * A C++ interface to abstract the functionality of IRoutingTable.
- * Referring to IRoutingTable via this interface makes it possible to
- * transparently replace IRoutingTable with a different implementation,
+ * A C++ interface to abstract the functionality of IIPv4RoutingTable.
+ * Referring to IIPv4RoutingTable via this interface makes it possible to
+ * transparently replace IIPv4RoutingTable with a different implementation,
  * without any change to the base INET.
  *
- * @see IRoutingTable, IPv4Route
+ * @see IIPv4RoutingTable, IPv4Route
  */
-class INET_API IRoutingTable
+class INET_API IIPv4RoutingTable
 {
   public:
-    virtual ~IRoutingTable() {};
+    virtual ~IIPv4RoutingTable() {};
 
     /**
      * For debugging

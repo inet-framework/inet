@@ -22,7 +22,7 @@
 #include <string.h>
 #include "INETDefs.h"
 #include "UDPSocket.h"
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
 
@@ -54,7 +54,7 @@ class SimpleVoIPSender : public cSimpleModule, public ILifecycle
     simtime_t timestamp;
     int localPort;
     int destPort;
-    IPvXAddress destAddress;
+    Address destAddress;
     simtime_t stopTime;
 
     void talkspurt(simtime_t dur);

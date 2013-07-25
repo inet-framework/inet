@@ -21,7 +21,7 @@ import inet.util.MessageChecker;
 import inet.transport.ITCP;
 import inet.nodes.inet.NetworkLayer;
 import inet.networklayer.ospfv2.OSPFRouting;
-import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.bgpv4.BGPRouting;
 import inet.linklayer.IWiredNic;
@@ -51,7 +51,7 @@ module BGPRouter
             parameters:
                 @display("p=52,108;i=block/table_s");
         }
-        routingTable: RoutingTable {
+        routingTable: IPv4RoutingTable {
             parameters:
                 IPForward = true;
                 routerId = "auto";

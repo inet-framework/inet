@@ -21,7 +21,7 @@
 #include "IntServ.h"
 #include "ILifecycle.h"
 
-class IRoutingTable;
+class IIPv4RoutingTable;
 class IInterfaceTable;
 class InterfaceEntry;
 class NotificationBoard;
@@ -96,7 +96,7 @@ class TED : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
-    IRoutingTable *rt;
+    IIPv4RoutingTable *rt;
     IInterfaceTable *ift;
     IPv4Address routerId;
     NotificationBoard *nb;

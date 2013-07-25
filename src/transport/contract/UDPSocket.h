@@ -20,7 +20,7 @@
 #define __INET_UDPSOCKET_H
 
 #include "INETDefs.h"
-#include "IPvXAddress.h"
+#include "Address.h"
 
 class UDPDataIndication;
 
@@ -41,7 +41,7 @@ class UDPDataIndication;
  * <pre>
  *   UDPSocket socket;
  *   socket.setOutputGate(gate("udpOut"));
- *   socket.connect(IPvXAddress("10.0.0.2"), 2000);
+ *   socket.connect(Address("10.0.0.2"), 2000);
  *
  *   cPacket *pk = new cPacket("dgram");
  *   pk->setByteLength(1024);
@@ -106,14 +106,14 @@ class INET_API UDPSocket
      * Bind the socket to a local port number and IP address (useful with
      * multi-homing or multicast addresses). Use port=0 for an ephemeral port.
      */
-    void bind(IPvXAddress localAddr, int localPort);
+    void bind(Address localAddr, int localPort);
 
     /**
      * Connects to a remote UDP socket. This has two effects:
      * (1) this socket will only receive packets from specified address/port,
      * and (2) you can use send() (as opposed to sendTo()) to send packets.
      */
-    void connect(IPvXAddress remoteAddr, int remotePort);
+    void connect(Address remoteAddr, int remotePort);
 
     /**
      * Set the TTL (IPv6: Hop Limit) field on sent packets.
@@ -162,7 +162,7 @@ class INET_API UDPSocket
      * One can also optionally specify the output interface for packets sent to
      * that address.
      */
-    void joinMulticastGroup(const IPvXAddress& multicastAddr, int interfaceId=-1);
+    void joinMulticastGroup(const Address& multicastAddr, int interfaceId=-1);
 
     /**
      * Joins the socket to each multicast group that are registered with
@@ -174,7 +174,7 @@ class INET_API UDPSocket
      * Causes the socket to leave the given multicast group, i.e. UDP packets
      * arriving to the given multicast address will no longer passed up to the socket.
      */
-    void leaveMulticastGroup(const IPvXAddress& multicastAddr);
+    void leaveMulticastGroup(const Address& multicastAddr);
 
     /**
      * Causes the socket to leave each multicast groups that are registered with
@@ -185,13 +185,13 @@ class INET_API UDPSocket
     /**
      * Sends a data packet to the given address and port.
      */
-    void sendTo(cPacket *msg, IPvXAddress destAddr, int destPort);
+    void sendTo(cPacket *msg, Address destAddr, int destPort);
 
     /**
      * Sends a data packet to the given address and port using the provided
      * interface.
      */
-    void sendTo(cPacket *msg, IPvXAddress destAddr, int destPort, int outInterface);
+    void sendTo(cPacket *msg, Address destAddr, int destPort, int outInterface);
 
     /**
      * Sends a data packet to the address and port specified previously

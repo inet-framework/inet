@@ -25,7 +25,7 @@ package inet.applications.generic;
 // If the destAddresses parameter contains more than one address, one
 // of them is randomly for each packet. An address may be given in the
 // dotted decimal notation (or, for IPv6, in the usual notation with colons),
-// or with the module name. (The IPvXAddressResolver class is used to resolve
+// or with the module name. (The AddressResolver class is used to resolve
 // the address.) To disable the model, set destAddresses to "".
 //
 // The peer can be ~IPvXTrafSink or another ~IPvXTrafGen (it handles received packets

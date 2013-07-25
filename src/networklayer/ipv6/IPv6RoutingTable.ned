@@ -15,35 +15,22 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IPvXAddress.h"
 
-#include <iostream>
+package inet.networklayer.ipv6;
 
-
-bool IPvXAddress::tryParse(const char *addr)
+//
+// IPv6 Routing Table and Neighbour Discovery data structures.
+// NOTE: This component MUST be named as "routingTable6" inside
+// a StandardHost/Router etc. in order to be accessible by the
+// ~IPv6 and other modules
+//
+// @see ~IPv6, ~IPv6NeighbourDiscovery, ~ICMPv6
+//
+simple IPv6RoutingTable
 {
-    // try as IPv4
-    if (IPv4Address::isWellFormed(addr))
-    {
-        set(IPv4Address(addr));
-        return true;
-    }
-
-    // try as IPv6
-    IPv6Address ipv6;
-    if (ipv6.tryParse(addr))
-    {
-        set(ipv6);
-        return true;
-    }
-
-    // no luck
-    return false;
+    parameters:
+        xml routingTable = default(xml("<routingTable/>"));
+        bool isRouter;
+        bool forwardMulticast = default(false);
+        @display("i=block/table");
 }
-
-void IPvXAddress::set(const char *addr)
-{
-    if (!tryParse(addr))
-        throw cRuntimeError("IPvXAddress: cannot interpret address string `%s'", addr);
-}
-

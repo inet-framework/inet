@@ -24,13 +24,13 @@
 
 #include "INETDefs.h"
 
-#include "IPvXAddress.h"
+#include "Address.h"
 
 // Forward declarations:
 class IInterfaceTable;
 class InterfaceEntry;
-class IRoutingTable;
-class RoutingTable6;
+class IIPv4RoutingTable;
+class IPv6RoutingTable;
 class NotificationBoard;
 
 
@@ -49,17 +49,17 @@ class NotificationBoard;
  *    - routerId: "router1%routerId", "R1%routerId"
  *    - interface of a host or router toward defined another node: "client1>router"
  */
-class INET_API IPvXAddressResolver
+class INET_API AddressResolver
 {
   protected:
     // internal
-    virtual bool getIPv4AddressFrom(IPvXAddress &retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getIPv4AddressFrom(Address &retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getIPv6AddressFrom(IPvXAddress &retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getIPv6AddressFrom(Address &retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getInterfaceIPv4Address(IPvXAddress &ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceIPv4Address(Address &ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceIPv6Address(IPvXAddress &ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceIPv6Address(Address &ret, InterfaceEntry *ie, bool mask);
 
   public:
     enum {
@@ -74,8 +74,8 @@ class INET_API IPvXAddressResolver
     };
 
   public:
-    IPvXAddressResolver() {}
-    virtual ~IPvXAddressResolver() {}
+    AddressResolver() {}
+    virtual ~AddressResolver() {}
 
     /**
      * Accepts dotted decimal notation ("127.0.0.1"), module name of the host
@@ -84,14 +84,14 @@ class INET_API IPvXAddressResolver
      * looked up using <tt>simulation.getModuleByPath()</tt>, and then
      * addressOf() will be called to determine its IP address.
      */
-    virtual IPvXAddress resolve(const char *str, int addrType = ADDR_PREFER_IPv6);
+    virtual Address resolve(const char *str, int addrType = ADDR_PREFER_IPv6);
 
     /**
      * Utility function: Calls resolve() for each item in the string vector, and
      * returns the result in an address vector. The string vector may come e.g.
      * from cStringTokenizer::asVector().
      */
-    virtual std::vector<IPvXAddress> resolve(std::vector<std::string> strs, int addrType = ADDR_PREFER_IPv6);
+    virtual std::vector<Address> resolve(std::vector<std::string> strs, int addrType = ADDR_PREFER_IPv6);
 
     /**
      * Similar to resolve(), but returns false (instead of throwing an error)
@@ -99,22 +99,22 @@ class INET_API IPvXAddressResolver
      * doesn't have an address assigned yet. (It still throws an error
      * on any other error condition).
      */
-    virtual bool tryResolve(const char *str, IPvXAddress& result, int addrType = ADDR_PREFER_IPv6);
+    virtual bool tryResolve(const char *str, Address& result, int addrType = ADDR_PREFER_IPv6);
 
     /** @name Utility functions supporting resolve() */
     //@{
     /**
      * Returns IPv4 or IPv6 address of the given host or router.
      *
-     * This function uses routingTableOf() to find the IRoutingTable module,
+     * This function uses routingTableOf() to find the IIPv4RoutingTable module,
      * then invokes getAddressFrom() to extract the IP address.
      */
-    virtual IPvXAddress addressOf(cModule *host, int addrType = ADDR_PREFER_IPv6);
+    virtual Address addressOf(cModule *host, int addrType = ADDR_PREFER_IPv6);
 
     /**
      * Similar to addressOf(), but only looks at the given interface
      */
-    virtual IPvXAddress addressOf(cModule *host, const char *ifname, int addrType = ADDR_PREFER_IPv6);
+    virtual Address addressOf(cModule *host, const char *ifname, int addrType = ADDR_PREFER_IPv6);
 
     /**
      * Returns IPv4 or IPv6 address of the given host or router.
@@ -122,11 +122,11 @@ class INET_API IPvXAddressResolver
      * This function find an interface of host connected to destmod
      * then invokes getAddressFrom() to extract the IP address.
      */
-    virtual IPvXAddress addressOf(cModule *host, cModule *destmod, int addrType = ADDR_PREFER_IPv6);
+    virtual Address addressOf(cModule *host, cModule *destmod, int addrType = ADDR_PREFER_IPv6);
 
     /**
      * Returns the router Id of the given router. Router Id is obtained from
-     * the getRouterId() method of the IRoutingTable submodule.
+     * the getRouterId() method of the IIPv4RoutingTable submodule.
      */
     virtual IPv4Address routerIdOf(cModule *host);
 
@@ -134,12 +134,12 @@ class INET_API IPvXAddressResolver
      * Returns the IPv4 or IPv6 address of the given host or router, given its IInterfaceTable
      * module. For IPv4, the first usable interface address is chosen.
      */
-    virtual IPvXAddress getAddressFrom(IInterfaceTable *ift, int addrType = ADDR_PREFER_IPv6);
+    virtual Address getAddressFrom(IInterfaceTable *ift, int addrType = ADDR_PREFER_IPv6);
 
     /**
      * Returns the IPv4 or IPv6 address of the given interface (of a host or router).
      */
-    virtual IPvXAddress getAddressFrom(InterfaceEntry *ie, int addrType = ADDR_PREFER_IPv6);
+    virtual Address getAddressFrom(InterfaceEntry *ie, int addrType = ADDR_PREFER_IPv6);
 
     /**
      * The function tries to look up the IInterfaceTable module as submodule
@@ -149,18 +149,18 @@ class INET_API IPvXAddressResolver
     virtual IInterfaceTable *interfaceTableOf(cModule *host);
 
     /**
-     * The function tries to look up the IRoutingTable module as submodule
+     * The function tries to look up the IIPv4RoutingTable module as submodule
      * <tt>"routingTable"</tt> or <tt>"networkLayer.routingTable"</tt> within
      * the host/router module. Throws an error if not found.
      */
-    virtual IRoutingTable *routingTableOf(cModule *host);
+    virtual IIPv4RoutingTable *routingTableOf(cModule *host);
 
     /**
-     * The function tries to look up the RoutingTable6 module as submodule
+     * The function tries to look up the IPv6RoutingTable module as submodule
      * <tt>"routingTable6"</tt> or <tt>"networkLayer.routingTable6"</tt> within
      * the host/router module. Throws an error if not found.
      */
-    virtual RoutingTable6 *routingTable6Of(cModule *host);
+    virtual IPv6RoutingTable *routingTable6Of(cModule *host);
 
     /**
      * The function tries to look up the NotificationBoard module as submodule
@@ -177,12 +177,12 @@ class INET_API IPvXAddressResolver
     /**
      * Like routingTableOf(), but doesn't throw error if not found.
      */
-    virtual IRoutingTable *findRoutingTableOf(cModule *host);
+    virtual IIPv4RoutingTable *findRoutingTableOf(cModule *host);
 
     /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */
-    virtual RoutingTable6 *findRoutingTable6Of(cModule *host);
+    virtual IPv6RoutingTable *findRoutingTable6Of(cModule *host);
 
     /**
      * Like notificationBoardOf(), but doesn't throw error if not found.
@@ -192,7 +192,7 @@ class INET_API IPvXAddressResolver
     /**
      * Find the Host with the specified address.
      */
-    virtual cModule *findHostWithAddress(const IPvXAddress &addr);
+    virtual cModule *findHostWithAddress(const Address &addr);
     //@}
 };
 

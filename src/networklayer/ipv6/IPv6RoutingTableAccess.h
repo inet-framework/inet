@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Andras Varga
+// Copyright (C) 2005 Wei Yang, Ng
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -14,23 +14,26 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
+//
+
+#ifndef __INET_ROUTING_TABLE6_ACCESS_H
+#define __INET_ROUTING_TABLE6_ACCESS_H
+
+#include "INETDefs.h"
+
+#include "ModuleAccess.h"
+#include "IPv6RoutingTable.h"
 
 
-package inet.networklayer.ipv6;
-
-//
-// IPv6 Routing Table and Neighbour Discovery data structures.
-// NOTE: This component MUST be named as "routingTable6" inside
-// a StandardHost/Router etc. in order to be accessible by the
-// ~IPv6 and other modules
-//
-// @see ~IPv6, ~IPv6NeighbourDiscovery, ~ICMPv6
-//
-simple RoutingTable6
+/**
+ * Gives access to IPv6RoutingTable
+ */
+class INET_API IPv6RoutingTableAccess : public ModuleAccess<IPv6RoutingTable>
 {
-    parameters:
-        xml routingTable = default(xml("<routingTable/>"));
-        bool isRouter;
-        bool forwardMulticast = default(false);
-        @display("i=block/table");
-}
+    public:
+        IPv6RoutingTableAccess() : ModuleAccess<IPv6RoutingTable>("routingTable6") {}
+};
+
+#endif
+
+

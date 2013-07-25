@@ -21,8 +21,8 @@
 #include "NetworkInfo.h"
 
 #include "InterfaceEntry.h"
-#include "IPvXAddressResolver.h"
-#include "IRoutingTable.h"
+#include "AddressResolver.h"
+#include "IIPv4RoutingTable.h"
 
 
 Define_Module(NetworkInfo);
@@ -73,7 +73,7 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
     {
         std::vector<std::string> lines;
 
-        IRoutingTable *rt = check_and_cast<IRoutingTable *>(rtmod);
+        IIPv4RoutingTable *rt = check_and_cast<IIPv4RoutingTable *>(rtmod);
         for (int i = 0; i < rt->getNumRoutes(); i++)
         {
             IPv4Address dest = rt->getRoute(i)->getDestination();

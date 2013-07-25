@@ -34,7 +34,7 @@ bool TCPConnection::tryFastRoute(TCPSegment *tcpseg)
 }
 
 
-void TCPConnection::segmentArrivalWhileClosed(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr)
+void TCPConnection::segmentArrivalWhileClosed(TCPSegment *tcpseg, Address srcAddr, Address destAddr)
 {
     tcpEV << "Seg arrived: ";
     printSegmentBrief(tcpseg);
@@ -87,7 +87,7 @@ void TCPConnection::segmentArrivalWhileClosed(TCPSegment *tcpseg, IPvXAddress sr
     }
 }
 
-TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
+TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, Address src, Address dest)
 {
     tcpEV << "Seg arrived: ";
     printSegmentBrief(tcpseg);
@@ -770,7 +770,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
 
 //----
 
-TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr)
+TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, Address srcAddr, Address destAddr)
 {
     tcpEV2 << "Processing segment in LISTEN\n";
 
@@ -914,7 +914,7 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPvXAddre
     return TCP_E_IGNORE;
 }
 
-TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr)
+TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, Address srcAddr, Address destAddr)
 {
     tcpEV2 << "Processing segment in SYN_SENT\n";
 

@@ -25,16 +25,16 @@
 #include "INETDefs.h"
 
 #include "ModuleAccess.h"
-#include "IRoutingTable.h"
+#include "IIPv4RoutingTable.h"
 
 
 /**
- * Gives access to the IRoutingTable.
+ * Gives access to the IIPv4RoutingTable.
  */
-class INET_API RoutingTableAccess : public ModuleAccess<IRoutingTable>
+class INET_API IPv4RoutingTableAccess : public ModuleAccess<IIPv4RoutingTable>
 {
     public:
-        RoutingTableAccess() : ModuleAccess<IRoutingTable>("routingTable") {}
+        IPv4RoutingTableAccess() : ModuleAccess<IIPv4RoutingTable>("routingTable") {}
 };
 
 #endif

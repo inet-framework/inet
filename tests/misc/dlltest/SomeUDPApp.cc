@@ -21,7 +21,7 @@
 
 #include "SomeUDPApp.h"
 #include "UDPControlInfo_m.h"
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 
 
 
@@ -31,7 +31,7 @@ int SomeUDPApp::counter;
 
 void SomeUDPApp::initialize(int stage)
 {
-    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
+    // because of AddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
     if (stage!=3)
         return;
@@ -50,7 +50,7 @@ void SomeUDPApp::initialize(int stage)
     cStringTokenizer tokenizer(destAddrs);
     const char *token;
     while ((token = tokenizer.nextToken())!=NULL)
-        destAddresses.push_back(IPvXAddressResolver().resolve(token));
+        destAddresses.push_back(AddressResolver().resolve(token));
 
     if (destAddresses.empty())
         return;
@@ -61,7 +61,7 @@ void SomeUDPApp::initialize(int stage)
     scheduleAt((double)par("sendInterval"), timer);
 }
 
-IPvXAddress SomeUDPApp::chooseDestAddr()
+Address SomeUDPApp::chooseDestAddr()
 {
     int k = intrand(destAddresses.size());
     return destAddresses[k];
@@ -75,7 +75,7 @@ void SomeUDPApp::sendPacket()
     cMessage *payload = new cMessage(msgName);
     payload->setLength(msgLength);
 
-    IPvXAddress destAddr = chooseDestAddr();
+    Address destAddr = chooseDestAddr();
     sendToUDP(payload, localPort, destAddr, destPort);
 
     numSent++;

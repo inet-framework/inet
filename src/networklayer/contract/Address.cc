@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2005 Wei Yang, Ng
+// Copyright (C) 2005 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -14,26 +14,36 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-//
 
-#ifndef __INET_ROUTING_TABLE6_ACCESS_H
-#define __INET_ROUTING_TABLE6_ACCESS_H
+#include "Address.h"
 
-#include "INETDefs.h"
-
-#include "ModuleAccess.h"
-#include "RoutingTable6.h"
+#include <iostream>
 
 
-/**
- * Gives access to RoutingTable6
- */
-class INET_API RoutingTable6Access : public ModuleAccess<RoutingTable6>
+bool Address::tryParse(const char *addr)
 {
-    public:
-        RoutingTable6Access() : ModuleAccess<RoutingTable6>("routingTable6") {}
-};
+    // try as IPv4
+    if (IPv4Address::isWellFormed(addr))
+    {
+        set(IPv4Address(addr));
+        return true;
+    }
 
-#endif
+    // try as IPv6
+    IPv6Address ipv6;
+    if (ipv6.tryParse(addr))
+    {
+        set(ipv6);
+        return true;
+    }
 
+    // no luck
+    return false;
+}
+
+void Address::set(const char *addr)
+{
+    if (!tryParse(addr))
+        throw cRuntimeError("Address: cannot interpret address string `%s'", addr);
+}
 

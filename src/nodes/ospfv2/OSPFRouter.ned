@@ -21,7 +21,7 @@ package inet.nodes.ospfv2;
 import inet.base.NotificationBoard;
 import inet.linklayer.IWiredNic;
 import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.networklayer.ospfv2.OSPFRouting;
 import inet.nodes.inet.NetworkLayer;
 import inet.nodes.inet.Router;

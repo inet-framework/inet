@@ -21,9 +21,9 @@
 
 #include "HostAutoConfigurator.h"
 
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 #include "IPv4InterfaceData.h"
-#include "IRoutingTable.h"
+#include "IIPv4RoutingTable.h"
 #include "IInterfaceTable.h"
 #include "IPv4Address.h"
 
@@ -65,11 +65,11 @@ void HostAutoConfigurator::setupNetworkLayer()
     if (!host) throw cRuntimeError("No parent module found");
 
     // get our routing table
-    IRoutingTable* routingTable = IPvXAddressResolver().routingTableOf(host);
+    IIPv4RoutingTable* routingTable = AddressResolver().routingTableOf(host);
     if (!routingTable) throw cRuntimeError("No routing table found");
 
     // get our interface table
-    IInterfaceTable *ift = IPvXAddressResolver().interfaceTableOf(host);
+    IInterfaceTable *ift = AddressResolver().interfaceTableOf(host);
     if (!ift) throw cRuntimeError("No interface table found");
 
     // look at all interface table entries

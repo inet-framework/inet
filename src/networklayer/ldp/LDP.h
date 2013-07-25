@@ -40,7 +40,7 @@
 
 
 class IInterfaceTable;
-class IRoutingTable;
+class IIPv4RoutingTable;
 class LIBTable;
 class TED;
 
@@ -118,7 +118,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     //
     NodeStatus *nodeStatus;
     IInterfaceTable *ift;
-    IRoutingTable *rt;
+    IIPv4RoutingTable *rt;
     LIBTable *lt;
     TED *tedmod;
     NotificationBoard *nb;

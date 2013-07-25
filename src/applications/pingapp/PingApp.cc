@@ -20,7 +20,7 @@
 
 #include "PingApp.h"
 
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 #include "PingPayload_m.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
@@ -156,7 +156,7 @@ void PingApp::stopSendingPingRequests()
     pid = -1;
     lastStart = -1;
     sendSeqNo = expectedReplySeqNo = 0;
-    srcAddr = destAddr = IPvXAddress();
+    srcAddr = destAddr = Address();
     cancelNextPingRequest();
 }
 
@@ -190,8 +190,8 @@ void PingApp::sendPingRequest()
 {
     if (destAddr.isUnspecified())
     {
-        srcAddr = IPvXAddressResolver().resolve(par("srcAddr"));
-        destAddr = IPvXAddressResolver().resolve(par("destAddr"));
+        srcAddr = AddressResolver().resolve(par("srcAddr"));
+        destAddr = AddressResolver().resolve(par("destAddr"));
         EV << "Starting up: destination = " << destAddr << "  source = " << srcAddr << "\n";
     }
 
@@ -219,14 +219,14 @@ void PingApp::sendPingRequest()
     sentCount++;
 }
 
-void PingApp::sendToICMP(cMessage *msg, const IPvXAddress& destAddr, const IPvXAddress& srcAddr, int hopLimit)
+void PingApp::sendToICMP(cMessage *msg, const Address& destAddr, const Address& srcAddr, int hopLimit)
 {
     if (!destAddr.isIPv6())
     {
         // send to IPv4
         IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-        ctrl->setSrcAddr(srcAddr.get4());
-        ctrl->setDestAddr(destAddr.get4());
+        ctrl->setSrcAddr(srcAddr.toIPv4());
+        ctrl->setDestAddr(destAddr.toIPv4());
         ctrl->setTimeToLive(hopLimit);
         msg->setControlInfo(ctrl);
         send(msg, "pingOut");
@@ -235,8 +235,8 @@ void PingApp::sendToICMP(cMessage *msg, const IPvXAddress& destAddr, const IPvXA
     {
         // send to IPv6
         IPv6ControlInfo *ctrl = new IPv6ControlInfo();
-        ctrl->setSrcAddr(srcAddr.get6());
-        ctrl->setDestAddr(destAddr.get6());
+        ctrl->setSrcAddr(srcAddr.toIPv6());
+        ctrl->setDestAddr(destAddr.toIPv6());
         ctrl->setHopLimit(hopLimit);
         msg->setControlInfo(ctrl);
         send(msg, "pingv6Out");
@@ -266,7 +266,7 @@ void PingApp::processPingResponse(PingPayload *msg)
     }
 
     // get src, hopCount etc from packet, and print them
-    IPvXAddress src, dest;
+    Address src, dest;
     int msgHopCount = -1;
     if (dynamic_cast<IPv4ControlInfo *>(msg->getControlInfo()) != NULL)
     {

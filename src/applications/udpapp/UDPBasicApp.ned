@@ -29,7 +29,7 @@ import inet.applications.IUDPApp;
 // The sending interval can be a constant or a random value (e.g. exponential(1)).
 // If the destAddresses parameter contains more than one address, one
 // of them is randomly chosen for each packet. An address may be given in the
-// dotted decimal notation, or with the module name. (The IPvXAddressResolver
+// dotted decimal notation, or with the module name. (The AddressResolver
 // class is used to resolve the address.) To disable the model, set
 // destAddresses to "".
 //

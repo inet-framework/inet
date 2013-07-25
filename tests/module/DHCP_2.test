@@ -11,7 +11,7 @@ import inet.base.NotificationBoard;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.ipv4.IPv4RoutingTable;
 
 
 module DHCPNode
@@ -33,7 +33,7 @@ module DHCPNode
         interfaceTable: InterfaceTable {
             @display("p=66,145");
         }
-        routingTable: RoutingTable {
+        routingTable: IPv4RoutingTable {
             @display("p=68,216");
         }
         configurator: IPv4NodeConfigurator {

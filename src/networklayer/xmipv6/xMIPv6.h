@@ -41,7 +41,7 @@ class IPv6ControlInfo;
 class IPv6Datagram;
 class IPv6NeighbourDiscovery;
 class IPv6Tunneling;
-class RoutingTable6;
+class IPv6RoutingTable;
 class NotificationBoard;
 
 // 13.9.07
@@ -75,7 +75,7 @@ class INET_API xMIPv6 : public cSimpleModule
 
   protected:
     IInterfaceTable* ift;
-    RoutingTable6* rt6;
+    IPv6RoutingTable* rt6;
     BindingUpdateList* bul; //31.07.07
     BindingCache* bc; //31.07.07
     IPv6Tunneling* tunneling; // 21.08.07 - CB

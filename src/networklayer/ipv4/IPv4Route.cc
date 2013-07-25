@@ -23,7 +23,7 @@
 #include "IPv4InterfaceData.h"
 
 #include "InterfaceEntry.h"
-#include "IRoutingTable.h"
+#include "IIPv4RoutingTable.h"
 
 
 std::string IPv4Route::info() const

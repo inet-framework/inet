@@ -66,7 +66,7 @@ void SimpleVoIPSender::initialize(int stage)
         selfSender = new cMessage("selfSender");
         localPort = par("localPort");
         destPort = par("destPort");
-        destAddress = IPvXAddressResolver().resolve(par("destAddress").stringValue());
+        destAddress = AddressResolver().resolve(par("destAddress").stringValue());
 
         socket.setOutputGate(gate("udpOut"));
         socket.bind(localPort);

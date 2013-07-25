@@ -26,7 +26,7 @@
 
 #include "NotificationBoard.h"
 #include "DYMO_RoutingEntry.h"
-#include "IRoutingTable.h"
+#include "IIPv4RoutingTable.h"
 
 /**
   * class describes the functionality of the routing table

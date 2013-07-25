@@ -32,7 +32,7 @@
 class ARPPacket;
 class IInterfaceTable;
 class InterfaceEntry;
-class IRoutingTable;
+class IIPv4RoutingTable;
 
 /**
  * ARP implementation.
@@ -86,8 +86,9 @@ class INET_API ARP : public cSimpleModule, public ILifecycle, public INotifiable
     int nicOutBaseGateId;  // id of the nicOut[0] gate
 
     IInterfaceTable *ift;
-    IRoutingTable *rt;  // for Proxy ARP
+    IIPv4RoutingTable *rt;  // for Proxy ARP
     NotificationBoard *nb;
+
     // Maps an IP multicast address to an Ethernet multicast address.
     MACAddress mapMulticastAddress(IPv4Address addr);
 

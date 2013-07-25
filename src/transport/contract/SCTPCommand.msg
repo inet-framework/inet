@@ -19,15 +19,15 @@
 cplusplus {{
 #include <vector>
 
-#include "IPvXAddress.h"
+#include "Address.h"
 #include "SCTPCommand.h"
 
-typedef std::vector<IPvXAddress> AddressVector;
+typedef std::vector<Address> AddressVector;
 }}
 
 
 
-class noncobject IPvXAddress;
+class noncobject Address;
 
 class noncobject AddressVector;
 
@@ -60,8 +60,8 @@ class SCTPCommand extends cPacket
     int ssn = -1;
     unsigned short sendUnordered = false;
     double prValue = 0;
-    IPvXAddress localAddr = IPvXAddress("0.0.0.0");
-    IPvXAddress remoteAddr = IPvXAddress("0.0.0.0");
+    Address localAddr = Address("0.0.0.0");
+    Address remoteAddr = Address("0.0.0.0");
     int gate = -1;
 }
 
@@ -102,9 +102,9 @@ class SCTPErrorInfo extends SCTPCommand
 //
 class SCTPOpenCommand extends SCTPCommand
 {
-   //IPvXAddress localAddr;             // may be left empty
+   //Address localAddr;             // may be left empty
     AddressVector localAddresses;
-    IPvXAddress remoteAddr;            // required for active open
+    Address remoteAddr;            // required for active open
     AddressVector remoteAddresses;
     int localPort = -1;              // required for passive open
     int remotePort = -1;             // required for active open
@@ -143,8 +143,8 @@ class SCTPSendCommand extends SCTPCommand
 //
 class SCTPConnectInfo extends SCTPCommand
 {
-    //IPvXAddress localAddr;
-    //IPvXAddress remoteAddr;
+    //Address localAddr;
+    //Address remoteAddr;
     AddressVector remoteAddresses;
     int localPort;
     int remotePort;
@@ -165,18 +165,18 @@ class SCTPStatusInfo extends SCTPCommand
 {
     int state;
     string stateName;
-    IPvXAddress pathId;
+    Address pathId;
     bool active;
 }
 
 class SCTPPathInfo extends SCTPCommand
 {
-    IPvXAddress remoteAddress;
+    Address remoteAddress;
 }
 
 class SCTPResetInfo extends SCTPCommand
 {
-    IPvXAddress remoteAddr;
+    Address remoteAddr;
     unsigned short requestType = 0;
     char streams[];
 }

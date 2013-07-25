@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "INETDefs.h"
-#include "IPvXAddress.h"
+#include "Address.h"
 #include "ILifecycle.h"
 
 

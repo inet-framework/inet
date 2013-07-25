@@ -382,7 +382,7 @@ void Established::entry()
     //if it's an IGP Session, send update message with only the BGP routes learned by EGP
     const IPv4Route*          rtEntry;
     BGP::RoutingTableEntry* BGPEntry;
-    IRoutingTable*          IPRoutingTable = session.getIPRoutingTable();
+    IIPv4RoutingTable*          IPRoutingTable = session.getIPRoutingTable();
 
     for (int i=1; i<IPRoutingTable->getNumRoutes(); i++)
     {

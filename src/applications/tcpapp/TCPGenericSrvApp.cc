@@ -44,12 +44,12 @@ void TCPGenericSrvApp::initialize(int stage)
         WATCH(bytesRcvd);
         WATCH(bytesSent);
 
-        //TODO should use IPvXAddressResolver in stage 3
+        //TODO should use AddressResolver in stage 3
         const char *localAddress = par("localAddress");
         TCPSocket socket;
         socket.setOutputGate(gate("tcpOut"));
         socket.setDataTransferMode(TCP_TRANSFER_OBJECT);
-        socket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
+        socket.bind(localAddress[0] ? Address(localAddress) : Address(), localPort);
         socket.listen();
     }
     else if (stage == 1)

@@ -23,8 +23,8 @@
 #ifndef MobilityFramework
 #include "IPv4Datagram.h"
 #include "InterfaceTableAccess.h"
-#include "RoutingTableAccess.h"
-#include "IRoutingTable.h"
+#include "IPv4RoutingTableAccess.h"
+#include "IIPv4RoutingTable.h"
 #include "ICMPAccess.h"
 #include "IPv4InterfaceData.h"
 #include "IInterfaceTable.h"
@@ -249,7 +249,7 @@ class DSRUU:public cSimpleModule, public INotifiable
 //************++
 
 #ifndef MobilityFramework
-    IRoutingTable *inet_rt;
+    IIPv4RoutingTable *inet_rt;
     IInterfaceTable *inet_ift;
 #else
     SimpleArp* arp;

@@ -24,7 +24,7 @@ package inet.networklayer.icmpv6;
 // An overview of the IPv6 implementation in the INET Framework is
 // provided <a href="ipv6overview.html">here</a>.
 //
-// @see ~IPv6, ~RoutingTable6, ~ICMPv6
+// @see ~IPv6, ~IPv6RoutingTable, ~ICMPv6
 //
 simple IPv6NeighbourDiscovery
 {

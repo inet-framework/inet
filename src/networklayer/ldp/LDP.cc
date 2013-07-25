@@ -25,7 +25,7 @@
 #include "LIBTable.h"
 #include "InterfaceTableAccess.h"
 #include "IPv4InterfaceData.h"
-#include "RoutingTableAccess.h"
+#include "IPv4RoutingTableAccess.h"
 #include "LIBTableAccess.h"
 #include "TEDAccess.h"
 #include "NotifierConsts.h"
@@ -109,7 +109,7 @@ void LDP::initialize(int stage)
     helloInterval = par("helloInterval").doubleValue();
 
     ift = InterfaceTableAccess().get();
-    rt = RoutingTableAccess().get();
+    rt = IPv4RoutingTableAccess().get();
     lt = LIBTableAccess().get();
     tedmod = TEDAccess().get();
     nb = NotificationBoardAccess().get();
@@ -543,7 +543,7 @@ void LDP::processHelloTimeout(cMessage *msg)
 void LDP::processLDPHello(LDPHello *msg)
 {
     UDPDataIndication *controlInfo = check_and_cast<UDPDataIndication *>(msg->getControlInfo());
-    //IPv4Address peerAddr = controlInfo->getSrcAddr().get4();
+    //IPv4Address peerAddr = controlInfo->getSrcAddr().toIPv4();
     IPv4Address peerAddr = msg->getSenderAddress();
     int interfaceId = controlInfo->getInterfaceId();
     delete msg;
@@ -627,7 +627,7 @@ void LDP::processMessageFromTCP(cMessage *msg)
         // FIXME there seems to be some confusion here. Is it sure that
         // routerIds we use as peerAddrs are the same as IP addresses
         // the routing is based on? --Andras
-        IPv4Address peerAddr = socket->getRemoteAddress().get4();
+        IPv4Address peerAddr = socket->getRemoteAddress().toIPv4();
 
         int i = findPeer(peerAddr);
         if (i==-1 || myPeers[i].socket)

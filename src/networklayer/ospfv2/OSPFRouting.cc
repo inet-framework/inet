@@ -25,7 +25,7 @@
 
 #include "MessageHandler.h"
 #include "OSPFConfigReader.h"
-#include "RoutingTableAccess.h"
+#include "IPv4RoutingTableAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
@@ -59,7 +59,7 @@ void OSPFRouting::initialize(int stage)
 
 void OSPFRouting::createOspfRouter()
 {
-    IRoutingTable *rt = RoutingTableAccess().get();
+    IIPv4RoutingTable *rt = IPv4RoutingTableAccess().get();
     ospfRouter = new OSPF::Router(rt->getRouterId(), this);
 
     // read the OSPF AS configuration

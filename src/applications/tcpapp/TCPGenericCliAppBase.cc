@@ -15,7 +15,7 @@
 #include "TCPGenericCliAppBase.h"
 
 #include "GenericAppMsg_m.h"
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 
 
 simsignal_t TCPGenericCliAppBase::connectSignal = SIMSIGNAL_NULL;
@@ -46,7 +46,7 @@ void TCPGenericCliAppBase::initialize(int stage)
     const char *localAddress = par("localAddress");
     int localPort = par("localPort");
     socket.readDataTransferModePar(*this);
-    socket.bind(*localAddress ? IPvXAddressResolver().resolve(localAddress) : IPvXAddress(), localPort);
+    socket.bind(*localAddress ? AddressResolver().resolve(localAddress) : Address(), localPort);
 
     socket.setCallbackObject(this);
     socket.setOutputGate(gate("tcpOut"));
@@ -74,8 +74,8 @@ void TCPGenericCliAppBase::connect()
     EV << "issuing OPEN command\n";
     setStatusString("connecting");
 
-    IPvXAddress destination;
-    IPvXAddressResolver().tryResolve(connectAddress, destination);
+    Address destination;
+    AddressResolver().tryResolve(connectAddress, destination);
     if (destination.isUnspecified())
         EV << "cannot resolve destination address: " << connectAddress << endl;
     else {

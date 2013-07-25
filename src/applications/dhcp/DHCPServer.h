@@ -74,14 +74,14 @@ class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILi
         virtual void processPacket(DHCPMessage *packet);
         virtual void sendOffer(DHCPLease* lease);
         virtual void sendACK(DHCPLease* lease);
-        virtual void sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort);
-        virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+        virtual void sendToUDP(cPacket *msg, int srcPort, const Address& destAddr, int destPort);
 
     public:
         DHCPServer();
         virtual ~DHCPServer();
 
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+        virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 };
 
 #endif

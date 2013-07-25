@@ -45,8 +45,8 @@
 //  - network interfaces: ~EthernetInterface, ~PPPInterface, ~Ieee80211Nic
 //  - <a href="ieee80211.html">IEEE 802.11 models</a>, both ad-hoc and infrastructure
 //    mode are supported
-//  - IPv4 layer: ~IPv4, ~ARP and ~ICMP; ~RoutingTable
-//  - IPv6 support: ~IPv6, ~IPv6NeighbourDiscovery, ~ICMPv6, ~RoutingTable6;
+//  - IPv4 layer: ~IPv4, ~ARP and ~ICMP; ~IPv4RoutingTable
+//  - IPv6 support: ~IPv6, ~IPv6NeighbourDiscovery, ~ICMPv6, ~IPv6RoutingTable;
 //    see <a href="ipv6overview.html">IPv6 model overview</a>
 //  - transport layer: ~TCP, ~UDP, ~SCTP
 //  - ~InterfaceTable and ~NotificationBoard are there in every

@@ -39,7 +39,7 @@ import inet.applications.IUDPApp;
 // The own addresses will be ignored.
 //
 // An address may be given in the dotted decimal notation, or with the module
-// name. (The IPvXAddressResolver class is used to resolve the address.)
+// name. (The AddressResolver class is used to resolve the address.)
 // You can use the "Broadcast" string as address for sending broadcast messages.
 //
 // INET also defines several NED functions that can be useful:

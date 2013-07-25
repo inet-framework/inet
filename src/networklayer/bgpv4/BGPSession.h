@@ -61,7 +61,7 @@ public:
     IPv4Address       getPeerAddr()                               { return _info.peerAddr;}
     TCPSocket*      getSocket()                                 { return _info.socket;}
     TCPSocket*      getSocketListen()                           { return _info.socketListen;}
-    IRoutingTable*  getIPRoutingTable()                         { return _bgpRouting.getIPRoutingTable();}
+    IIPv4RoutingTable*  getIPRoutingTable()                         { return _bgpRouting.getIPRoutingTable();}
     std::vector<BGP::RoutingTableEntry*> getBGPRoutingTable()   { return _bgpRouting.getBGPRoutingTable();}
     Macho::Machine<BGPFSM::TopState>&    getFSM()               { return *_fsm;}
     bool checkExternalRoute(const IPv4Route* ospfRoute)           { return _bgpRouting.checkExternalRoute(ospfRoute);}

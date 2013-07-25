@@ -57,10 +57,10 @@ Define_Module(TCP_NSC);
 
 
 //static member variables:
-const IPvXAddress TCP_NSC::localInnerIpS("1.0.0.253");
-const IPvXAddress TCP_NSC::localInnerMaskS("255.255.255.0");
-const IPvXAddress TCP_NSC::localInnerGwS("1.0.0.254");
-const IPvXAddress TCP_NSC::remoteFirstInnerIpS("2.0.0.1");
+const Address TCP_NSC::localInnerIpS("1.0.0.253");
+const Address TCP_NSC::localInnerMaskS("255.255.255.0");
+const Address TCP_NSC::localInnerGwS("1.0.0.254");
+const Address TCP_NSC::remoteFirstInnerIpS("2.0.0.1");
 
 const char * TCP_NSC::stackNameParamNameS = "stackName";
 const char * TCP_NSC::bufferSizeParamNameS = "stackBufferSize";
@@ -170,7 +170,7 @@ TCP_NSC::TCP_NSC()
 
 // return mapped remote ip in host byte order
 // if addrP not exists in map, it's create a new nsc addr
-uint32_t TCP_NSC::mapRemote2Nsc(IPvXAddress const& addrP)
+uint32_t TCP_NSC::mapRemote2Nsc(Address const& addrP)
 {
     Remote2NscMap::iterator i = remote2NscMapM.find(addrP);
     if (i != remote2NscMapM.end())
@@ -179,7 +179,7 @@ uint32_t TCP_NSC::mapRemote2Nsc(IPvXAddress const& addrP)
     }
 
     // get first free remote NSC IP
-    uint32_t ret = remoteFirstInnerIpS.get4().getInt();
+    uint32_t ret = remoteFirstInnerIpS.toIPv4().getInt();
     Nsc2RemoteMap::iterator j;
     for ( j = nsc2RemoteMapM.begin(); j != nsc2RemoteMapM.end(); j++)
     {
@@ -199,7 +199,7 @@ uint32_t TCP_NSC::mapRemote2Nsc(IPvXAddress const& addrP)
 // return original remote ip from remote NSC IP
 // assert if  IP not exists in map
 // nscAddrP in host byte order!
-IPvXAddress const & TCP_NSC::mapNsc2Remote(uint32_t nscAddrP)
+Address const & TCP_NSC::mapNsc2Remote(uint32_t nscAddrP)
 {
     Nsc2RemoteMap::iterator i = nsc2RemoteMapM.find(nscAddrP);
 
@@ -388,7 +388,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     ih->protocol = 6;       // TCP
     ih->check = 0;
     ih->saddr = htonl(nscSrcAddr);
-    ih->daddr = htonl(localInnerIpS.get4().getInt());
+    ih->daddr = htonl(localInnerIpS.toIPv4().getInt());
 
     tcpEV << this << ": modified to: IP " << ih->version << " len " << ih->ihl
           << " protocol " << (unsigned int)(ih->protocol)
@@ -846,7 +846,7 @@ void TCP_NSC::gettime(unsigned int *secP, unsigned int *usecP)
 
 void TCP_NSC::sendToIP(const void *dataP, int lenP)
 {
-    IPvXAddress src, dest;
+    Address src, dest;
     const nsc_iphdr *iph = (const nsc_iphdr *)dataP;
 
     int ipHdrLen = 4 * iph->ihl;
@@ -903,8 +903,8 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         // send over IPv4
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
-        controlInfo->setSrcAddr(src.get4());
-        controlInfo->setDestAddr(dest.get4());
+        controlInfo->setSrcAddr(src.toIPv4());
+        controlInfo->setDestAddr(dest.toIPv4());
         tcpseg->setControlInfo(controlInfo);
 
         output = "ipOut";
@@ -914,8 +914,8 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
         // send over IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
-        controlInfo->setSrcAddr(src.get6());
-        controlInfo->setDestAddr(dest.get6());
+        controlInfo->setSrcAddr(src.toIPv6());
+        controlInfo->setDestAddr(dest.toIPv6());
         tcpseg->setControlInfo(controlInfo);
 
         output = "ipv6Out";

@@ -42,8 +42,8 @@ void TCPSpoof::sendSpoofPacket()
 {
     TCPSegment *tcpseg = new TCPSegment("spoof");
 
-    IPvXAddress srcAddr = IPvXAddressResolver().resolve(par("srcAddress"));
-    IPvXAddress destAddr = IPvXAddressResolver().resolve(par("destAddress"));
+    Address srcAddr = AddressResolver().resolve(par("srcAddress"));
+    Address destAddr = AddressResolver().resolve(par("destAddress"));
     int srcPort = par("srcPort");
     int destPort = par("destPort");
     bool isSYN = par("isSYN");
@@ -61,7 +61,7 @@ void TCPSpoof::sendSpoofPacket()
     sendToIP(tcpseg, srcAddr, destAddr);
 }
 
-void TCPSpoof::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
+void TCPSpoof::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
 {
     EV << "Sending: ";
     //printSegmentBrief(tcpseg);
@@ -71,8 +71,8 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
         // send over IPv4
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
-        controlInfo->setSrcAddr(src.get4());
-        controlInfo->setDestAddr(dest.get4());
+        controlInfo->setSrcAddr(src.toIPv4());
+        controlInfo->setDestAddr(dest.toIPv4());
         tcpseg->setControlInfo(controlInfo);
 
         emit(sentPkSignal, tcpseg);
@@ -83,8 +83,8 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest)
         // send over IPv6
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
         controlInfo->setProtocol(IP_PROT_TCP);
-        controlInfo->setSrcAddr(src.get6());
-        controlInfo->setDestAddr(dest.get6());
+        controlInfo->setSrcAddr(src.toIPv6());
+        controlInfo->setDestAddr(dest.toIPv6());
         tcpseg->setControlInfo(controlInfo);
 
         emit(sentPkSignal, tcpseg);

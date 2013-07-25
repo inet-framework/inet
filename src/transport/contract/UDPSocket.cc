@@ -46,10 +46,10 @@ void UDPSocket::sendToUDP(cMessage *msg)
 
 void UDPSocket::bind(int localPort)
 {
-    bind(IPvXAddress(), localPort);
+    bind(Address(), localPort);
 }
 
-void UDPSocket::bind(IPvXAddress localAddr, int localPort)
+void UDPSocket::bind(Address localAddr, int localPort)
 {
     if (localPort<-1 || localPort>65535)  // -1: ephemeral port
         throw cRuntimeError("UDPSocket::bind(): invalid port number %d", localPort);
@@ -63,7 +63,7 @@ void UDPSocket::bind(IPvXAddress localAddr, int localPort)
     sendToUDP(msg);
 }
 
-void UDPSocket::connect(IPvXAddress addr, int port)
+void UDPSocket::connect(Address addr, int port)
 {
     if (addr.isUnspecified())
         throw cRuntimeError("UDPSocket::connect(): unspecified remote address");
@@ -79,7 +79,7 @@ void UDPSocket::connect(IPvXAddress addr, int port)
     sendToUDP(msg);
 }
 
-void UDPSocket::sendTo(cPacket *pk, IPvXAddress destAddr, int destPort)
+void UDPSocket::sendTo(cPacket *pk, Address destAddr, int destPort)
 {
     pk->setKind(UDP_C_DATA);
     UDPSendCommand *ctrl = new UDPSendCommand();
@@ -90,7 +90,7 @@ void UDPSocket::sendTo(cPacket *pk, IPvXAddress destAddr, int destPort)
     sendToUDP(pk);
 }
 
-void UDPSocket::sendTo(cPacket *pk, IPvXAddress destAddr, int destPort, int outInterface)
+void UDPSocket::sendTo(cPacket *pk, Address destAddr, int destPort, int outInterface)
 {
     pk->setKind(UDP_C_DATA);
     UDPSendCommand *ctrl = new UDPSendCommand();
@@ -179,7 +179,7 @@ void UDPSocket::setReuseAddress(bool value)
     sendToUDP(msg);
 }
 
-void UDPSocket::joinMulticastGroup(const IPvXAddress& multicastAddr, int interfaceId)
+void UDPSocket::joinMulticastGroup(const Address& multicastAddr, int interfaceId)
 {
     cMessage *msg = new cMessage("JoinMulticastGroups", UDP_C_SETOPTION);
     UDPJoinMulticastGroupsCommand *ctrl = new UDPJoinMulticastGroupsCommand();
@@ -243,7 +243,7 @@ void UDPSocket::joinLocalMulticastGroups()
 }
 
 
-void UDPSocket::leaveMulticastGroup(const IPvXAddress& multicastAddr)
+void UDPSocket::leaveMulticastGroup(const Address& multicastAddr)
 {
     cMessage *msg = new cMessage("LeaveMulticastGroups", UDP_C_SETOPTION);
     UDPLeaveMulticastGroupsCommand *ctrl = new UDPLeaveMulticastGroupsCommand();
@@ -317,8 +317,8 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
 {
     UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(pk->getControlInfo());
 
-    IPvXAddress srcAddr = ctrl->getSrcAddr();
-    IPvXAddress destAddr = ctrl->getDestAddr();
+    Address srcAddr = ctrl->getSrcAddr();
+    Address destAddr = ctrl->getDestAddr();
     int srcPort = ctrl->getSrcPort();
     int destPort = ctrl->getDestPort();
     int interfaceID = ctrl->getInterfaceId();

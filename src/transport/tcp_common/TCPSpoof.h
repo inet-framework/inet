@@ -17,7 +17,7 @@
 #include "INETDefs.h"
 
 #include "TCPSegment.h"
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 
 
 /**
@@ -26,7 +26,7 @@
 class INET_API TCPSpoof : public cSimpleModule
 {
   protected:
-    virtual void sendToIP(TCPSegment *tcpseg, IPvXAddress src, IPvXAddress dest);
+    virtual void sendToIP(TCPSegment *tcpseg, Address src, Address dest);
     virtual unsigned long chooseInitialSeqNum();
     virtual void sendSpoofPacket();
 

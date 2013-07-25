@@ -20,7 +20,7 @@
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "NotifierConsts.h"
-#include "RoutingTableAccess.h"
+#include "IPv4RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
 #include "NotificationBoard.h"
 #include "TED.h"
@@ -45,7 +45,7 @@ void LinkStateRouting::initialize(int stage)
     {
         tedmod = TEDAccess().get();
 
-        IRoutingTable *rt = RoutingTableAccess().get();
+        IIPv4RoutingTable *rt = IPv4RoutingTableAccess().get();
         routerId = rt->getRouterId();
 
         // listen for TED modifications

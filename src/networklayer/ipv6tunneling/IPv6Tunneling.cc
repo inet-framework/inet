@@ -43,7 +43,7 @@
 #include "IPv6InterfaceData.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
-#include "RoutingTable6Access.h"
+#include "IPv6RoutingTableAccess.h"
 
 #ifdef WITH_xMIPv6
 #include "MobilityHeader_m.h" // for HA Option header
@@ -66,7 +66,7 @@ void IPv6Tunneling::initialize(int stage)
     if (stage == 0)
     {
         ift = InterfaceTableAccess().get();
-        rt = RoutingTable6Access().get();
+        rt = IPv6RoutingTableAccess().get();
 
         vIfIndexTop = INT_MAX; // virtual interface number set to maximum int value
         noOfNonSplitTunnels = 0; // current number of non-split tunnels on this host

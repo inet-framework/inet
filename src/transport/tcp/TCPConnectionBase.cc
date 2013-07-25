@@ -327,7 +327,7 @@ bool TCPConnection::processTimer(cMessage *msg)
     return performStateTransition(event);
 }
 
-bool TCPConnection::processTCPSegment(TCPSegment *tcpseg, IPvXAddress segSrcAddr, IPvXAddress segDestAddr)
+bool TCPConnection::processTCPSegment(TCPSegment *tcpseg, Address segSrcAddr, Address segDestAddr)
 {
     printConnBrief();
     if (!localAddr.isUnspecified())

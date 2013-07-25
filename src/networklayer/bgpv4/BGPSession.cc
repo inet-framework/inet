@@ -124,7 +124,7 @@ void BGPSession::sendOpenMessage()
     BGPOpenMessage* openMsg = new BGPOpenMessage("BGPOpen");
     openMsg->setMyAS(_info.ASValue);
     openMsg->setHoldTime(_holdTime);
-    openMsg->setBGPIdentifier(_info.socket->getLocalAddress().get4());
+    openMsg->setBGPIdentifier(_info.socket->getLocalAddress().toIPv4());
     _info.socket->send(openMsg);
     _openMsgSent ++;
 }

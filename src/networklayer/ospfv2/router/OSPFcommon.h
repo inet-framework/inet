@@ -24,7 +24,7 @@
 #include <stdio.h>
 
 #include "IPv4Address.h"
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 
 
 // global constants
@@ -186,12 +186,12 @@ inline bool OSPF::LSAKeyType_Less::operator() (OSPF::LSAKeyType leftKey, OSPF::L
 
 inline IPv4Address ipv4AddressFromAddressString(const char* charForm)
 {
-    return IPvXAddressResolver().resolve(charForm, IPvXAddressResolver::ADDR_IPv4).get4();
+    return AddressResolver().resolve(charForm, AddressResolver::ADDR_IPv4).toIPv4();
 }
 
 inline IPv4Address ipv4NetmaskFromAddressString(const char* charForm)
 {
-    return IPvXAddressResolver().resolve(charForm, IPvXAddressResolver::ADDR_IPv4|IPvXAddressResolver::ADDR_MASK).get4();
+    return AddressResolver().resolve(charForm, AddressResolver::ADDR_IPv4|AddressResolver::ADDR_MASK).toIPv4();
 }
 
 inline char hexCharToByte(char hex)

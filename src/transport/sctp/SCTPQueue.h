@@ -21,7 +21,7 @@
 
 #include "INETDefs.h"
 
-#include "IPvXAddress.h"
+#include "Address.h"
 #include "SCTP.h"
 
 
@@ -85,11 +85,11 @@ class INET_API SCTPQueue : public cObject
 
     SCTPDataVariables* dequeueChunkBySSN(const uint16 ssn);
 
-    uint32 getSizeOfFirstChunk(const IPvXAddress& remoteAddress);
+    uint32 getSizeOfFirstChunk(const Address& remoteAddress);
 
     uint16 getFirstSsnInQueue(const uint16 sid);
 
-    void findEarliestOutstandingTSNsForPath(const IPvXAddress& remoteAddress,
+    void findEarliestOutstandingTSNsForPath(const Address& remoteAddress,
                                             uint32&            earliestOutstandingTSN,
                                             uint32&            rtxEarliestOutstandingTSN) const;
 

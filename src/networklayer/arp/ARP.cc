@@ -23,8 +23,8 @@
 #include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
-#include "IRoutingTable.h"
-#include "RoutingTableAccess.h"
+#include "IIPv4RoutingTable.h"
+#include "IPv4RoutingTableAccess.h"
 #include "ARPPacket_m.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
@@ -83,7 +83,7 @@ void ARP::initialize(int stage)
     if (stage==4)
     {
         ift = InterfaceTableAccess().get();
-        rt = RoutingTableAccess().get();
+        rt = IPv4RoutingTableAccess().get();
 
         nicOutBaseGateId = gateSize("nicOut")==0 ? -1 : gate("nicOut", 0)->getId();
 

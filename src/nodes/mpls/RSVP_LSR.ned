@@ -15,7 +15,7 @@ import inet.base.NotificationBoard;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.networklayer.mpls.LIBTable;
 import inet.networklayer.mpls.MPLS;
 import inet.networklayer.rsvp_te.RSVP;
@@ -53,7 +53,7 @@ module RSVP_LSR
             parameters:
                 @display("p=58,106;is=s");
         }
-        routingTable: RoutingTable {
+        routingTable: IPv4RoutingTable {
             parameters:
                 IPForward = true;
                 routerId = routerId;

@@ -35,7 +35,7 @@ package inet.networklayer.autorouting.ipv4;
 //   -#  then it'll discover the topology of the network (using OMNeT++'s
 //       cTopology class), and calculate shortest paths;
 //   -#  finally, it will add routes which correspond to the shortest
-//       paths to the routing tables (see RoutingTable::addRoutingEntry()).
+//       paths to the routing tables (see IPv4RoutingTable::addRoutingEntry()).
 //
 // How does it know which modules are routers, hosts, et.c that need to
 // be configured, and what is the network topology? The configurator
@@ -44,7 +44,7 @@ package inet.networklayer.autorouting.ipv4;
 // shortest path algorithm on it, and configures all modules which are
 // IPv4 nodes.
 //
-// It is assumed that the routing table (~RoutingTable module) is the
+// It is assumed that the routing table (~IPv4RoutingTable module) is the
 // "routingTable" or "networkLayer.routingTable" submodule in all hosts
 // and routers.
 //

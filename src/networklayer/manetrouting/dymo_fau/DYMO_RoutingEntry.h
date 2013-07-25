@@ -27,7 +27,7 @@
 
 #include <IPv4Address.h>
 #include <InterfaceTable.h>
-#include "RoutingTable.h"
+#include "IPv4RoutingTable.h"
 #include "DYMO_Timer.h"
 
 class DYMO;

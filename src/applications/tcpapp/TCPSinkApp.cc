@@ -35,11 +35,11 @@ void TCPSinkApp::initialize(int stage)
         WATCH(bytesRcvd);
         rcvdPkSignal = registerSignal("rcvdPk");
 
-        //TODO should use IPvXAddressResolver in stage 3
+        //TODO should use AddressResolver in stage 3
         TCPSocket socket;
         socket.setOutputGate(gate("tcpOut"));
         socket.readDataTransferModePar(*this);
-        socket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
+        socket.bind(localAddress[0] ? Address(localAddress) : Address(), localPort);
         socket.listen();
     }
     else if (stage == 1)

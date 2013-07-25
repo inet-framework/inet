@@ -22,7 +22,7 @@
 #include "IPv6InterfaceData.h"
 
 #ifdef WITH_xMIPv6
-#include "RoutingTable6Access.h"
+#include "IPv6RoutingTableAccess.h"
 #endif /* WITH_xMIPv6 */
 
 //FIXME invoked changed() from state-changing methods, to trigger notification...
@@ -86,7 +86,7 @@ IPv6InterfaceData::IPv6InterfaceData()
     routerMcastData = NULL;
     nb = NULL;
 #ifdef WITH_xMIPv6
-    rt6 = RoutingTable6Access().get();
+    rt6 = IPv6RoutingTableAccess().get();
 #endif /* WITH_xMIPv6 */
     /*******************Setting host/node/router Protocol Constants************/
     routerConstants.maxInitialRtrAdvertInterval = IPv6_MAX_INITIAL_RTR_ADVERT_INTERVAL;
@@ -128,7 +128,7 @@ IPv6InterfaceData::IPv6InterfaceData()
         _getMaxRandomFactor(), getBaseReachableTime());
     hostVars.retransTimer = IPv6_RETRANS_TIMER;
 
-    //rtrVars.advSendAdvertisements is set in RoutingTable6.cc:line 143
+    //rtrVars.advSendAdvertisements is set in IPv6RoutingTable.cc:line 143
     rtrVars.maxRtrAdvInterval = IPv6_DEFAULT_MAX_RTR_ADV_INT;
     rtrVars.minRtrAdvInterval = 0.33*rtrVars.maxRtrAdvInterval;
     rtrVars.advManagedFlag = false;

@@ -18,7 +18,7 @@
 #ifndef __INET_BGPROUTINGTABLEENTRY_H
 #define __INET_BGPROUTINGTABLEENTRY_H
 
-#include "RoutingTable.h"
+#include "IPv4RoutingTable.h"
 #include "BGPCommon.h"
 
 namespace BGP {

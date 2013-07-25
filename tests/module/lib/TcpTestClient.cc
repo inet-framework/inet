@@ -159,10 +159,10 @@ void TcpTestClient::handleSelfMessage(cMessage *msg)
             const char *connectAddress = par("connectAddress");
             int connectPort = par("connectPort");
 
-            socket.bind(*localAddress ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
+            socket.bind(*localAddress ? Address(localAddress) : Address(), localPort);
 
             if (par("active").boolValue())
-                socket.connect(IPvXAddress(par("connectAddress")), connectPort);
+                socket.connect(Address(par("connectAddress")), connectPort);
             else
                 socket.listenOnce();
             scheduleNextSend();

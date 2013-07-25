@@ -28,7 +28,7 @@
 #include <set>
 
 class IInterfaceTable;
-class IRoutingTable;
+class IIPv4RoutingTable;
 class NotificationBoard;
 
 class INET_API IGMPv2 : public cSimpleModule, protected INotifiable
@@ -129,7 +129,7 @@ class INET_API IGMPv2 : public cSimpleModule, protected INotifiable
     };
 
   protected:
-    IRoutingTable *rt;     // cached pointer
+    IIPv4RoutingTable *rt;     // cached pointer
     IInterfaceTable *ift;  // cached pointer
     NotificationBoard *nb; // cached pointer
 

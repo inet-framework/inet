@@ -38,7 +38,7 @@ class SomeUDPApp : public UDPAppBase
     std::string nodeName;
     int localPort, destPort;
     int msgLength;
-    std::vector<IPvXAddress> destAddresses;
+    std::vector<Address> destAddresses;
 
     static int counter; // counter for generating a global number for each packet
 
@@ -46,7 +46,7 @@ class SomeUDPApp : public UDPAppBase
     int numReceived;
 
     // chooses random destination address
-    virtual IPvXAddress chooseDestAddr();
+    virtual Address chooseDestAddr();
     virtual void sendPacket();
     virtual void processPacket(cMessage *msg);
 

@@ -57,7 +57,7 @@ void UDPEchoApp::handleMessageWhenUp(cMessage *msg)
 
         // determine its source address/port
         UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(pk->removeControlInfo());
-        IPvXAddress srcAddress = ctrl->getSrcAddr();
+        Address srcAddress = ctrl->getSrcAddr();
         int srcPort = ctrl->getSrcPort();
         delete ctrl;
 

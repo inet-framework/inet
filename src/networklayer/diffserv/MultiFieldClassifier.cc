@@ -17,8 +17,8 @@
 //
 
 #include "INETDefs.h"
-#include "IPvXAddress.h"
-#include "IPvXAddressResolver.h"
+#include "Address.h"
+#include "AddressResolver.h"
 
 #ifdef WITH_IPv4
 #include "IPv4Datagram.h"
@@ -44,9 +44,9 @@ using namespace DiffservUtil;
 #ifdef WITH_IPv4
 bool MultiFieldClassifier::Filter::matches(IPv4Datagram *datagram)
 {
-    if (srcPrefixLength > 0 && (srcAddr.isIPv6() || !datagram->getSrcAddress().prefixMatches(srcAddr.get4(), srcPrefixLength)))
+    if (srcPrefixLength > 0 && (srcAddr.isIPv6() || !datagram->getSrcAddress().prefixMatches(srcAddr.toIPv4(), srcPrefixLength)))
         return false;
-    if (destPrefixLength > 0 && (destAddr.isIPv6() || !datagram->getDestAddress().prefixMatches(destAddr.get4(), destPrefixLength)))
+    if (destPrefixLength > 0 && (destAddr.isIPv6() || !datagram->getDestAddress().prefixMatches(destAddr.toIPv4(), destPrefixLength)))
         return false;
     if (protocol >= 0 && datagram->getTransportProtocol() != protocol)
         return false;
@@ -86,9 +86,9 @@ bool MultiFieldClassifier::Filter::matches(IPv4Datagram *datagram)
 #ifdef WITH_IPv6
 bool MultiFieldClassifier::Filter::matches(IPv6Datagram *datagram)
 {
-    if (srcPrefixLength > 0 && (!srcAddr.isIPv6() || !datagram->getSrcAddress().matches(srcAddr.get6(), srcPrefixLength)))
+    if (srcPrefixLength > 0 && (!srcAddr.isIPv6() || !datagram->getSrcAddress().matches(srcAddr.toIPv6(), srcPrefixLength)))
         return false;
-    if (destPrefixLength > 0 && (!destAddr.isIPv6() || !datagram->getDestAddress().matches(destAddr.get6(), destPrefixLength)))
+    if (destPrefixLength > 0 && (!destAddr.isIPv6() || !datagram->getDestAddress().matches(destAddr.toIPv6(), destPrefixLength)))
         return false;
     if (protocol >= 0 && datagram->getTransportProtocol() != protocol)
         return false;
@@ -232,7 +232,7 @@ void MultiFieldClassifier::addFilter(const Filter &filter)
 
 void MultiFieldClassifier::configureFilters(cXMLElement *config)
 {
-    IPvXAddressResolver addressResolver;
+    AddressResolver addressResolver;
     cXMLElementList filterElements = config->getChildrenByTagName("filter");
     for (int i = 0; i < (int)filterElements.size(); i++)
     {

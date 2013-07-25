@@ -18,7 +18,7 @@
 
 #include "SCTPPeer.h"
 
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 #include "SCTPAssociation.h"
@@ -87,7 +87,7 @@ void SCTPPeer::initialize(int stage)
 
         // parameters
         const char *addressesString = par("localAddress");
-        AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+        AddressVector addresses = AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int port = par("localPort");
         echo = par("echo");
         delay = par("echoDelay");
@@ -191,7 +191,7 @@ void SCTPPeer::connect()
     sctpEV3 << "Assoc " << clientSocket.getConnectionId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
     numSessions++;
     bool streamReset = par("streamReset");
-    clientSocket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+    clientSocket.connect(AddressResolver().resolve(connectAddress, 1), connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
 
     if (!streamReset)
         streamReset = false;

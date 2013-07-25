@@ -32,9 +32,9 @@ class INET_API MultiFieldClassifier : public cSimpleModule
         {
             int gateIndex;
 
-            IPvXAddress srcAddr;
+            Address srcAddr;
             int srcPrefixLength;
-            IPvXAddress destAddr;
+            Address destAddr;
             int destPrefixLength;
             int protocol;
             int tos;

@@ -18,7 +18,7 @@
 
 #include "OSPFRouter.h"
 
-#include "RoutingTableAccess.h"
+#include "IPv4RoutingTableAccess.h"
 
 
 OSPF::Router::Router(OSPF::RouterID id, cSimpleModule* containingModule) :
@@ -745,9 +745,9 @@ void OSPF::Router::rebuildRoutingTable()
     routingTable.clear();
     routingTable.assign(newTable.begin(), newTable.end());
 
-    RoutingTableAccess routingTableAccess;
+    IPv4RoutingTableAccess routingTableAccess;
     std::vector<IPv4Route*> eraseEntries;
-    IRoutingTable* simRoutingTable = routingTableAccess.get();
+    IIPv4RoutingTable* simRoutingTable = routingTableAccess.get();
     unsigned long routingEntryNumber = simRoutingTable->getNumRoutes();
     // remove entries from the IPv4 routing table inserted by the OSPF module
     for (i = 0; i < routingEntryNumber; i++) {
@@ -1328,7 +1328,7 @@ void OSPF::Router::updateExternalRoute(IPv4Address networkAddress, const OSPFASE
     OSPFOptions lsaOptions;
     //OSPF::LSAKeyType lsaKey;
 
-    IRoutingTable* simRoutingTable = RoutingTableAccess().get();
+    IIPv4RoutingTable* simRoutingTable = IPv4RoutingTableAccess().get();
     unsigned long routingEntryNumber = simRoutingTable->getNumRoutes();
     bool inRoutingTable = false;
     // add the external route to the routing table if it was not added by another module
@@ -1350,7 +1350,7 @@ void OSPF::Router::updateExternalRoute(IPv4Address networkAddress, const OSPFASE
         entry->setInterface(InterfaceTableAccess().get()->getInterfaceById(ifIndex));
         entry->setSource(IPv4Route::MANUAL);
         entry->setMetric(externalRouteContents.getRouteCost());
-        simRoutingTable->addRoute(entry);   // IRoutingTable deletes entry pointer
+        simRoutingTable->addRoute(entry);   // IIPv4RoutingTable deletes entry pointer
     }
 
     lsaHeader.setLsAge(0);
@@ -1380,7 +1380,7 @@ void OSPF::Router::updateExternalRoute(IPv4Address networkAddress, const OSPFASE
 
 void OSPF::Router::addExternalRouteInIPTable(IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex)
 {
-    IRoutingTable* simRoutingTable = RoutingTableAccess().get();
+    IIPv4RoutingTable* simRoutingTable = IPv4RoutingTableAccess().get();
     IInterfaceTable* simInterfaceTable = InterfaceTableAccess().get();
     int routingEntryNumber = simRoutingTable->getNumRoutes();
     bool inRoutingTable = false;

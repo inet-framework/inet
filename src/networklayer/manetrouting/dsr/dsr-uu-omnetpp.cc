@@ -324,7 +324,7 @@ void DSRUU::initialize(int stage)
     if (stage==4)
     {
         /* Search the 80211 interface */
-        inet_rt = RoutingTableAccess().get();
+        inet_rt = IPv4RoutingTableAccess().get();
         inet_ift = InterfaceTableAccess().get();
 
         int  num_80211 = 0;

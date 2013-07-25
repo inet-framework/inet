@@ -141,7 +141,7 @@ int TCPSerializer::serialize(const TCPSegment *tcpseg,
 
 int TCPSerializer::serialize(const TCPSegment *tcpseg,
         unsigned char *buf, unsigned int bufsize,
-        const IPvXAddress &srcIp, const IPvXAddress &destIp)
+        const Address &srcIp, const Address &destIp)
 {
     int writtenbytes = serialize(tcpseg, buf, bufsize);
     struct tcphdr *tcp = (struct tcphdr*) (buf);
@@ -235,7 +235,7 @@ void TCPSerializer::parse(const unsigned char *buf, unsigned int bufsize, TCPSeg
 }
 
 uint16_t TCPSerializer::checksum(const void *addr, unsigned int count,
-        const IPvXAddress &srcIp, const IPvXAddress &destIp)
+        const Address &srcIp, const Address &destIp)
 {
     uint32_t sum = TCPIPchecksum::_checksum(addr, count);
 

@@ -23,7 +23,7 @@
 #include "UDPVideoStreamCli.h"
 
 #include "UDPControlInfo_m.h"
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 
 
 Define_Module(UDPVideoStreamCli);
@@ -75,7 +75,7 @@ void UDPVideoStreamCli::requestStream()
     int svrPort = par("serverPort");
     int localPort = par("localPort");
     const char *address = par("serverAddress");
-    IPvXAddress svrAddr = IPvXAddressResolver().resolve(address);
+    Address svrAddr = AddressResolver().resolve(address);
 
     if (svrAddr.isUnspecified())
     {

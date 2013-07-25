@@ -33,7 +33,7 @@ package inet.base;
 // ~NotificationBoard is accessed via direct C++ method calls (not
 // message exchange). Modules can "subscribe" to categories of changes
 // (e.g. "routing table changed" or "radio channel became empty").
-// When such a change occurs, the corresponding module (e.g. the ~RoutingTable
+// When such a change occurs, the corresponding module (e.g. the ~IPv4RoutingTable
 // or the physical layer module) will let ~NotificationBoard know, and
 // it will disseminate this information to all interested modules.
 //

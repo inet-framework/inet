@@ -22,7 +22,7 @@
 #include "INETDefs.h"
 
 #include "QueueBase.h"
-#include "RoutingTable6.h"
+#include "IPv6RoutingTable.h"
 #include "ICMPv6.h"
 #include "IPv6NeighbourDiscovery.h"
 
@@ -41,7 +41,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle
 {
   protected:
     IInterfaceTable *ift;
-    RoutingTable6 *rt;
+    IPv6RoutingTable *rt;
     IPv6NeighbourDiscovery *nd;
     ICMPv6 *icmp;
 

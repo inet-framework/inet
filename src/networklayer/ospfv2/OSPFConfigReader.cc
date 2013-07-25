@@ -27,13 +27,13 @@
 #include "IPv4Address.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 #include "MessageHandler.h"
 #include "OSPFArea.h"
 #include "OSPFcommon.h"
 #include "OSPFInterface.h"
 #include "PatternMatcher.h"
-#include "RoutingTableAccess.h"
+#include "IPv4RoutingTableAccess.h"
 #include "XMLUtils.h"
 
 

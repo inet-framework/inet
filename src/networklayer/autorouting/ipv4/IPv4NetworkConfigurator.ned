@@ -53,7 +53,7 @@ package inet.networklayer.autorouting.ipv4;
 // router, etc.) are expected to have the @node property, becaue that's how the
 // configurator recognizes them in the model. All nodes must have their
 // interface table (~InterfaceTable module) as their "interfaceTable" submodule.
-// All routers must have their routing table (~RoutingTable module) as their
+// All routers must have their routing table (~IPv4RoutingTable module) as their
 // "routingTable" or "networkLayer.routingTable" submodule.
 //
 // By default all interfaces in all nodes will have a unique IPv4 address
@@ -279,7 +279,7 @@ package inet.networklayer.autorouting.ipv4;
 //
 //    - @destination
 //      Optional parameter attribute that specifies the destination address in
-//      the route (IPvXAddressResolver syntax). The default value is "*".
+//      the route (AddressResolver syntax). The default value is "*".
 //      e.g. "192.168.1.1" or "subnet.client[3]" or "subnet.server(ipv4)" or "*"
 //
 //    - @netmask
@@ -289,7 +289,7 @@ package inet.networklayer.autorouting.ipv4;
 //
 //    - @gateway
 //      Optional parameter attribute that specifies the gateway (next-hop)
-//      address in the route (IPvXAddressResolver syntax). When unspecified
+//      address in the route (AddressResolver syntax). When unspecified
 //      the interface parameter must be specified. The default value is "*".
 //      e.g. "192.168.1.254" or "subnet.router" or "*"
 //

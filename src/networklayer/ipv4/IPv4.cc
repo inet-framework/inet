@@ -27,7 +27,7 @@
 #include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
-#include "IRoutingTable.h"
+#include "IIPv4RoutingTable.h"
 #include "Ieee802Ctrl_m.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
@@ -44,7 +44,7 @@ void IPv4::initialize(int stage)
         QueueBase::initialize();
 
         ift = InterfaceTableAccess().get();
-        rt = RoutingTableAccess().get();
+        rt = IPv4RoutingTableAccess().get();
         nb = NotificationBoardAccess().getIfExists(); // needed only for multicast forwarding
 
         queueOutGate = gate("queueOut");

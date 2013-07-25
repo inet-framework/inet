@@ -16,7 +16,7 @@
 #include <iostream>
 #include "LIBTable.h"
 #include "XMLUtils.h"
-#include "RoutingTableAccess.h"
+#include "IPv4RoutingTableAccess.h"
 
 Define_Module(LIBTable);
 
@@ -28,8 +28,8 @@ void LIBTable::initialize(int stage)
     // we have to wait until routerId gets assigned in stage 3
     if (stage==4)
     {
-        RoutingTableAccess routingTableAccess;
-        IRoutingTable *rt = routingTableAccess.get();
+        IPv4RoutingTableAccess routingTableAccess;
+        IIPv4RoutingTable *rt = routingTableAccess.get();
         routerId = rt->getRouterId();
 
         // read configuration

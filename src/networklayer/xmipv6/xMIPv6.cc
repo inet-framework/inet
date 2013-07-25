@@ -32,7 +32,7 @@
 #include "IPv6InterfaceData.h"
 #include "IPv6NeighbourDiscoveryAccess.h"
 #include "IPv6TunnelingAccess.h"
-#include "RoutingTable6Access.h"
+#include "IPv6RoutingTableAccess.h"
 
 
 #define MK_SEND_PERIODIC_BU            1
@@ -120,7 +120,7 @@ void xMIPv6::initialize(int stage)
         // moved rt6 initialization to here, as we should
         // set the MIPv6 flag as soon as possible for use
         // with other modules.
-        rt6 = RoutingTable6Access().get();
+        rt6 = IPv6RoutingTableAccess().get();
         ASSERT(rt6 != NULL);
         rt6->setMIPv6Support(true); // 4.9.07 - CB
 

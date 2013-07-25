@@ -17,7 +17,7 @@
 //
 
 cplusplus {{
-#include "IPvXAddress.h"
+#include "Address.h"
 }}
 
 
@@ -30,7 +30,7 @@ typedef cPacket *cPacketPtr;
 struct cPacketPtr;
 
 
-class noncobject IPvXAddress;
+class noncobject Address;
 
 message SCTPSimpleMessage extends cPacket
 {
@@ -74,7 +74,7 @@ message SCTPInitChunk extends SCTPChunk
     // Initial TSN
     uint32 initTSN;
     bool forwardTsn;
-    IPvXAddress addresses[];
+    Address addresses[];
     uint8 unrecognizedParameters[]; //Will be filled by the Parser, if unrecognized Parameters arrive.
     uint32 msg_rwnd;
     uint16 chunkTypes[]; //Chunk list parameter, i.e. for SCTP AUTH
@@ -85,21 +85,21 @@ message SCTPInitChunk extends SCTPChunk
 
 message SCTPInitAckChunk extends SCTPChunk
 {
-    // Initiate Tag
-    uint32 initTag;
-    // Advertised Receiver Window
-    uint32 a_rwnd;
-    // Number of Outbound Streams
-    uint16 noOutStreams;
-    // Number of Inbound Streams
-    uint16 noInStreams;
-    // Initial TSN
-    uint32 initTSN;
-    bool forwardTsn;
-    IPvXAddress addresses[];
-    char cookie[];
-    uint8 unrecognizedParameters[];
-    cPacketPtr stateCookie;
+     // Initiate Tag
+     uint32 initTag;
+     // Advertised Receiver Window
+     uint32 a_rwnd;
+     // Number of Outbound Streams
+     uint16 noOutStreams;
+     // Number of Inbound Streams
+     uint16 noInStreams;
+     // Initial TSN
+     uint32 initTSN;
+     bool forwardTsn;
+     Address addresses[];
+     char cookie[];
+     uint8 unrecognizedParameters[];
+     cPacketPtr stateCookie;
     uint32 msg_rwnd;
     uint8 random[]; //Random Number
     uint16 chunkTypes[];
@@ -137,7 +137,7 @@ message SCTPDataMsg extends cPacket
     simtime_t enqueuingTime;
     simtime_t expiryTime;
     uint32 ppid;
-    IPvXAddress initialDestination;
+    Address initialDestination;
     uint32 msgNum;
     uint16 sid;
     bool ordered;
@@ -208,14 +208,14 @@ message SCTPAbortChunk extends SCTPChunk
 
 message SCTPHeartbeatChunk extends SCTPChunk
 {
-    IPvXAddress remoteAddr;
+    Address remoteAddr;
     simtime_t timeField;
     char info[];
 }
 
 message SCTPHeartbeatAckChunk extends SCTPChunk
 {
-    IPvXAddress remoteAddr;
+    Address remoteAddr;
     simtime_t timeField;
     char info[];
 }
@@ -311,7 +311,7 @@ message SCTPAsconfChunk extends SCTPChunk
 {
     @customize(true);
     uint32 serialNumber;
-    IPvXAddress addressParam;
+    Address addressParam;
     uint32 peerVTag; //for NAT
     abstract cPacketPtr asconfParams[];
 }
@@ -326,19 +326,19 @@ message SCTPAsconfAckChunk extends SCTPChunk
 message SCTPAddIPParameter extends SCTPParameter
 {
     uint32 requestCorrelationId; //assigned by the sender to identify each request parameter
-    IPvXAddress addressParam;
+    Address addressParam;
 }
 
 message SCTPDeleteIPParameter extends SCTPParameter
 {
     uint32 requestCorrelationId; //assigned by the sender to identify each request parameter
-    IPvXAddress addressParam;
+    Address addressParam;
 }
 
 message SCTPSetPrimaryIPParameter extends SCTPParameter
 {
     uint32 requestCorrelationId; //assigned by the sender to identify each request parameter
-    IPvXAddress addressParam;
+    Address addressParam;
 }
 
 message SCTPSupportedExtensionsParameter extends SCTPParameter

@@ -21,9 +21,8 @@
 
 
 #include "INETDefs.h"
-
 #include "ILifecycle.h"
-#include "IPvXAddress.h"
+#include "Address.h"
 #include "RTPInnerPacket.h"
 #include "RTPInterfacePacket_m.h"
 #include "UDPSocket.h"

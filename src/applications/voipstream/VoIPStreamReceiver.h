@@ -37,7 +37,7 @@ extern "C" {
 #include <iostream>
 #include <sys/stat.h>
 
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 #include "UDPControlInfo_m.h"
 #include "UDPSocket.h"
 #include "VoIPStreamPacket_m.h"
@@ -92,9 +92,9 @@ class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
         AVCodecContext *decCtx;
         AVCodec *pCodecDec;
         AudioOutFile outFile;
-        IPvXAddress srcAddr;
+        Address srcAddr;
         int srcPort;
-        IPvXAddress destAddr;
+        Address destAddr;
         int destPort;
     };
 

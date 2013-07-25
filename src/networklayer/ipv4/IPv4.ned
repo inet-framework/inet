@@ -51,11 +51,11 @@ package inet.networklayer.ipv4;
 //
 // <b>Routing and interfacing with lower layers</b>
 //
-// The routing table is stored in the module ~RoutingTable. When a datagram
-// needs to be routed, ~IPv4 queries ~RoutingTable for the output interface
+// The routing table is stored in the module ~IPv4RoutingTable. When a datagram
+// needs to be routed, ~IPv4 queries ~IPv4RoutingTable for the output interface
 // (or "port") and next hop address of the packet. This is done by directly
-// calling C++ methods (such as findBestMatchingRoute(destAddress)) of ~RoutingTable.
-// No message exchange with ~RoutingTable takes place.
+// calling C++ methods (such as findBestMatchingRoute(destAddress)) of ~IPv4RoutingTable.
+// No message exchange with ~IPv4RoutingTable takes place.
 //
 // A routed datagram will be sent to the queueOut gate, with an
 // ~IPv4RoutingDecision control info object attached which contains
@@ -63,7 +63,7 @@ package inet.networklayer.ipv4;
 // connected to ~ARP.
 //
 // Routing protocol implementations (e.g. OSPF and ISIS) can also query
-// and manipulate the route table by calling ~RoutingTable's methods in C++.
+// and manipulate the route table by calling ~IPv4RoutingTable's methods in C++.
 //
 // <b>Performance model, QoS</b>
 //
@@ -77,7 +77,7 @@ package inet.networklayer.ipv4;
 // method which determines processing time for a packet, or (2) use a
 // different base class.
 //
-// @see ~RoutingTable, ~IPv4ControlInfo, ~IPv4RoutingDecision, ~ARP
+// @see ~IPv4RoutingTable, ~IPv4ControlInfo, ~IPv4RoutingDecision, ~ARP
 //
 // @author Andras Varga
 //

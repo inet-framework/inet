@@ -17,7 +17,7 @@
 //
 
 #include "IGMPv2.h"
-#include "RoutingTableAccess.h"
+#include "IPv4RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
@@ -332,7 +332,7 @@ void IGMPv2::initialize(int stage)
     if (stage == 0)
     {
         ift = InterfaceTableAccess().get();
-        rt = RoutingTableAccess().get();
+        rt = IPv4RoutingTableAccess().get();
         nb = NotificationBoardAccess().get();
 
         nb->subscribe(this, NF_INTERFACE_DELETED);

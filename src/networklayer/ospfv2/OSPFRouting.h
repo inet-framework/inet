@@ -24,7 +24,7 @@
 #include "INETDefs.h"
 
 #include "IInterfaceTable.h"
-#include "IRoutingTable.h"
+#include "IIPv4RoutingTable.h"
 #include "OSPFPacket_m.h"
 #include "OSPFRouter.h"
 #include "ILifecycle.h"

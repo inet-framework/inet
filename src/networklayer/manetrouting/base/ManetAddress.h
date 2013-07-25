@@ -22,7 +22,7 @@
 
 #include "IPv4Address.h"
 #include "IPv6Address.h"
-#include "IPvXAddress.h"
+#include "Address.h"
 #include "MACAddress.h"
 
 /**
@@ -49,19 +49,19 @@ class ManetAddress
     ManetAddress(const ManetAddress& o) : hi(o.hi), lo(o.lo), addrType(o.addrType) {}
     explicit ManetAddress(IPv4Address addr) { set(addr); }
     explicit ManetAddress(const IPv6Address& addr) { set(addr); }
-    explicit ManetAddress(const IPvXAddress& addr) { set(addr); }
+    explicit ManetAddress(const Address& addr) { set(addr); }
     explicit ManetAddress(MACAddress addr) { set(addr); }
 
     /// Setters
     void set(const IPv4Address& addr) { addrType = IPv4_ADDRESS; hi = addr.getInt(); lo = 0; }
     void set(const IPv6Address& addr);
-    void set(const IPvXAddress& addr);
+    void set(const Address& addr);
     void set(const MACAddress& addr) { addrType = MAC_ADDRESS; hi = addr.getInt(); lo = 0; }
 
     /// Getters
     IPv4Address getIPv4() const;
     IPv6Address getIPv6() const;
-    IPvXAddress getIPvX() const;
+    Address getIPvX() const;
     MACAddress getMAC() const;
 
     /// Get address type
@@ -132,14 +132,14 @@ class ManetNetworkAddress
     ManetNetworkAddress(const ManetAddress& o, short unsigned int masklen) : address(o), prefixLength(masklen) { setPrefixLen(masklen); }
     explicit ManetNetworkAddress(IPv4Address addr, short unsigned int masklen=32) { set(addr, masklen); }
     explicit ManetNetworkAddress(const IPv6Address& addr, short unsigned int masklen=128) { set(addr, masklen); }
-    explicit ManetNetworkAddress(const IPvXAddress& addr) { set(addr); }
-    ManetNetworkAddress(const IPvXAddress& addr, short unsigned int masklen) { set(addr, masklen); }
+    explicit ManetNetworkAddress(const Address& addr) { set(addr); }
+    ManetNetworkAddress(const Address& addr, short unsigned int masklen) { set(addr, masklen); }
     explicit ManetNetworkAddress(MACAddress addr, short unsigned int masklen=48) { set(addr, masklen); }
 
     void set(IPv4Address addr, short unsigned int masklen = 32);
     void set(const IPv6Address& addr, short unsigned int masklen = 128);
-    void set(const IPvXAddress& addr);
-    void set(const IPvXAddress& addr, short unsigned int masklen);
+    void set(const Address& addr);
+    void set(const Address& addr, short unsigned int masklen);
     void set(MACAddress addr, short unsigned int masklen = 48);
 
     void setPrefixLen(short unsigned int masklen);

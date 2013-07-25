@@ -28,7 +28,7 @@ import inet.applications.IPingApp;
 // Start/stop time, sendInterval etc. can be specified via parameters. An address
 // may be given in the dotted decimal notation (or, for IPv6, in the usual
 // notation with colons), or with the module name.
-// (The IPvXAddressResolver class is used to resolve the address.)
+// (The AddressResolver class is used to resolve the address.)
 // To disable send, specify empty destAddr.
 //
 // Every ping request is sent out with a sequence number, and replies are

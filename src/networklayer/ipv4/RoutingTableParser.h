@@ -32,7 +32,7 @@
 
 #include "INETDefs.h"
 
-#include "RoutingTable.h"
+#include "IPv4RoutingTable.h"
 
 /**
  * Parses a routing table file into a routing table.
@@ -41,13 +41,13 @@ class INET_API RoutingTableParser
 {
   protected:
     IInterfaceTable *ift;
-    IRoutingTable *rt;
+    IIPv4RoutingTable *rt;
 
   public:
     /**
      * Constructor
      */
-    RoutingTableParser(IInterfaceTable *ift, IRoutingTable *rt);
+    RoutingTableParser(IInterfaceTable *ift, IIPv4RoutingTable *rt);
 
     /**
      * Destructor

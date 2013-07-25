@@ -18,10 +18,10 @@
 
 
 cplusplus {{
-#include "IPvXAddress.h"
+#include "Address.h"
 }}
 
-class noncobject IPvXAddress;
+class noncobject Address;
 
 
 //
@@ -79,7 +79,7 @@ class UDPControlInfo
 //
 class UDPBindCommand extends UDPControlInfo
 {
-    IPvXAddress localAddr;
+    Address localAddr;
     int localPort = -1;
 }
 
@@ -95,7 +95,7 @@ class UDPBindCommand extends UDPControlInfo
 //
 class UDPConnectCommand extends UDPControlInfo
 {
-    IPvXAddress remoteAddr;
+    Address remoteAddr;
     int remotePort = -1;
 }
 
@@ -112,7 +112,7 @@ class UDPConnectCommand extends UDPControlInfo
 //
 class UDPSendCommand extends UDPControlInfo
 {
-    IPvXAddress destAddr; // destination IPv4 or IPv6 address
+    Address destAddr; // destination IPv4 or IPv6 address
     int destPort = -1;     // destination port
     int interfaceId = -1; // interface on which the packet must be sent (see ~InterfaceTable)
 }
@@ -137,8 +137,8 @@ class UDPCloseCommand extends UDPControlInfo
 //
 class UDPDataIndication extends UDPControlInfo
 {
-    IPvXAddress srcAddr;   // source IPv4 or IPv6 address of the received packet
-    IPvXAddress destAddr;  // destination IPv4 or IPv6 address of the received packet
+    Address srcAddr;   // source IPv4 or IPv6 address of the received packet
+    Address destAddr;  // destination IPv4 or IPv6 address of the received packet
     int srcPort;           // source port of the received packet
     int destPort;          // destination port of the received packet
     int ttl;               // TTL field of the received packet
@@ -155,8 +155,8 @@ class UDPDataIndication extends UDPControlInfo
 //
 class UDPErrorIndication extends UDPControlInfo
 {
-    IPvXAddress srcAddr;   // source IPv4 or IPv6 address of the undeliverable packet
-    IPvXAddress destAddr;  // destination IPv4 or IPv6 address of the undeliverable packet
+    Address srcAddr;   // source IPv4 or IPv6 address of the undeliverable packet
+    Address destAddr;  // destination IPv4 or IPv6 address of the undeliverable packet
     int srcPort;           // source port of the undeliverable packet
     int destPort;          // destination port of the undeliverable packet
 }
@@ -261,7 +261,7 @@ class UDPSetReuseAddressCommand extends UDPSetOptionCommand
 //
 class UDPJoinMulticastGroupsCommand extends UDPSetOptionCommand
 {
-    IPvXAddress multicastAddr[];
+    Address multicastAddr[];
     int interfaceId[];
 }
 
@@ -275,6 +275,6 @@ class UDPJoinMulticastGroupsCommand extends UDPSetOptionCommand
 //
 class UDPLeaveMulticastGroupsCommand extends UDPSetOptionCommand
 {
-    IPvXAddress multicastAddr[];
+    Address multicastAddr[];
 }
 

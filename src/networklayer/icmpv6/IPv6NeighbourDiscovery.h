@@ -38,7 +38,7 @@ class IInterfaceTable;
 class InterfaceEntry;
 class IPv6ControlInfo;
 class IPv6Datagram;
-class RoutingTable6;
+class IPv6RoutingTable;
 
 #ifdef WITH_xMIPv6
 class xMIPv6;
@@ -99,7 +99,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
         cQueue pendingQueue;
 
         IInterfaceTable *ift;
-        RoutingTable6 *rt6;
+        IPv6RoutingTable *rt6;
         ICMPv6 *icmpv6;
 
 #ifdef WITH_xMIPv6

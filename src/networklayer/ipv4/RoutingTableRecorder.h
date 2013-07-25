@@ -19,13 +19,13 @@
 #define __ROUTINGTABLERECORDER_H
 
 #include "INETDefs.h"
-#include "IRoutingTable.h"
+#include "IIPv4RoutingTable.h"
 #include "INotifiable.h"
 
 /**
  * Records routing table changes into a file.
   *
- * @see RoutingTable, IPv4Route
+ * @see IPv4RoutingTable, IPv4Route
  */
 class INET_API RoutingTableRecorder : public cSimpleModule
 {

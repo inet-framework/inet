@@ -53,7 +53,7 @@ OSPF::RoutingTableEntry::RoutingTableEntry(const RoutingTableEntry& entry) :
 void OSPF::RoutingTableEntry::setPathType(RoutingPathType type)
 {
     pathType = type;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
+    // FIXME: this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
     if (pathType == OSPF::RoutingTableEntry::TYPE2_EXTERNAL) {
         setMetric(cost + type2Cost * 1000);
     } else {
@@ -64,7 +64,7 @@ void OSPF::RoutingTableEntry::setPathType(RoutingPathType type)
 void OSPF::RoutingTableEntry::setCost(Metric pathCost)
 {
     cost = pathCost;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
+    // FIXME: this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
     if (pathType == OSPF::RoutingTableEntry::TYPE2_EXTERNAL) {
         setMetric(cost + type2Cost * 1000);
     } else {
@@ -75,7 +75,7 @@ void OSPF::RoutingTableEntry::setCost(Metric pathCost)
 void OSPF::RoutingTableEntry::setType2Cost(Metric pathCost)
 {
     type2Cost = pathCost;
-    // FIXME: this is a hack. But the correct way to do it is to implement a separate IRoutingTable module for OSPF...
+    // FIXME: this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
     if (pathType == OSPF::RoutingTableEntry::TYPE2_EXTERNAL) {
         setMetric(cost + type2Cost * 1000);
     } else {

@@ -22,7 +22,7 @@
 
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"
-#include "RoutingTableAccess.h"
+#include "IPv4RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
 #include "OSPFRoutingAccess.h"
 #include "BGPRoutingTableEntry.h"
@@ -65,7 +65,7 @@ protected:
     void            getCancelAndDelete(cMessage* msg)           { return cancelAndDelete(msg);}
     cMessage*       getCancelEvent(cMessage* msg)               { return cancelEvent(msg);}
     cGate*          getGate(const char* gateName)               { return gate(gateName);}
-    IRoutingTable*  getIPRoutingTable()                         { return _rt;}
+    IIPv4RoutingTable*  getIPRoutingTable()                         { return _rt;}
     std::vector<BGP::RoutingTableEntry*> getBGPRoutingTable()   { return _BGPRoutingTable;}
     /**
      * \brief active listenSocket for a given session (used by BGPFSM)
@@ -84,7 +84,7 @@ protected:
      */
     BGP::SessionID findNextSession(BGP::type type, bool startSession = false);
     /**
-     * \brief check if the route is in OSPF external RoutingTable
+     * \brief check if the route is in OSPF external IPv4RoutingTable
      *
      * \return true if it is, false else
      */
@@ -121,11 +121,11 @@ private:
     void loadSessionConfig(cXMLElementList& sessionList, simtime_t* delayTab);
     void loadConfigFromXML(cXMLElement *bgpConfig);
     BGP::ASID findMyAS(cXMLElementList& ASList, int& outRouterPosition);
-    bool ospfExist(IRoutingTable* rtTable);
+    bool ospfExist(IIPv4RoutingTable* rtTable);
     void loadTimerConfig(cXMLElementList& timerConfig, simtime_t* delayTab);
     unsigned char asLoopDetection(BGP::RoutingTableEntry* entry, BGP::ASID myAS);
     BGP::SessionID findIdFromPeerAddr(std::map<BGP::SessionID, BGPSession*> sessions, IPv4Address peerAddr);
-    int isInRoutingTable(IRoutingTable* rtTable, IPv4Address addr);
+    int isInRoutingTable(IIPv4RoutingTable* rtTable, IPv4Address addr);
     int isInInterfaceTable(IInterfaceTable* rtTable, IPv4Address addr);
     BGP::SessionID findIdFromSocketConnId(std::map<BGP::SessionID, BGPSession*> sessions, int connId);
     unsigned int calculateStartDelay(int rtListSize, unsigned char rtPosition, unsigned char rtPeerPosition);
@@ -135,7 +135,7 @@ private:
     BGP::SessionID                          _currSessionId;
 
     IInterfaceTable*                        _inft;
-    IRoutingTable*                          _rt;                // The IP routing table
+    IIPv4RoutingTable*                          _rt;                // The IP routing table
     std::vector<BGP::RoutingTableEntry*>    _BGPRoutingTable;   // The BGP routing table
     std::vector<BGP::RoutingTableEntry*>    _prefixListIN;
     std::vector<BGP::RoutingTableEntry*>    _prefixListOUT;

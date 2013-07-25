@@ -25,7 +25,7 @@
 #include "InterfaceTableAccess.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
-#include "RoutingTable6Access.h"
+#include "IPv6RoutingTableAccess.h"
 
 #ifdef WITH_xMIPv6
 #include "xMIPv6Access.h"
@@ -77,7 +77,7 @@ void IPv6NeighbourDiscovery::initialize(int stage)
     else if (stage == 3)
     {
         ift = InterfaceTableAccess().get();
-        rt6 = RoutingTable6Access().get();
+        rt6 = IPv6RoutingTableAccess().get();
         icmpv6 = ICMPv6Access().get();
 
 #ifdef WITH_xMIPv6

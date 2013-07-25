@@ -18,7 +18,7 @@
 #include "LifecycleController.h"
 #include "IInterfaceTable.h"
 #include "InterfaceEntry.h"
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 #include "LifecycleOperation.h"
 #include "opp_utils.h"   // for OPP_Global::getModuleByPath()
 

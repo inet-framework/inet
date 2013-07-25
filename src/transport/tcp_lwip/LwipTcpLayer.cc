@@ -22,7 +22,7 @@
 
 #include "lwip/memp.h"
 
-#include "IPvXAddress.h"
+#include "Address.h"
 #include "LwipTcpStackIf.h"
 
 
@@ -83,7 +83,7 @@ err_t LwipTcpLayer::ip_output(LwipTcpLayer::tcp_pcb *pcb, struct pbuf *p,
     assert(p);
     assert(p->len <= p->tot_len);
 
-    IPvXAddress srcAddr, destAddr;
+    Address srcAddr, destAddr;
 
     srcAddr = src->addr;
     destAddr = dest->addr;
@@ -94,7 +94,7 @@ err_t LwipTcpLayer::ip_output(LwipTcpLayer::tcp_pcb *pcb, struct pbuf *p,
 
 struct netif * LwipTcpLayer::ip_route(struct ip_addr *addr)
 {
-    IPvXAddress ipAddr;
+    Address ipAddr;
 
     if (addr)
         ipAddr = addr->addr;

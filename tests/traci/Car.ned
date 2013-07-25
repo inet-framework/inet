@@ -24,7 +24,7 @@ import inet.base.NotificationBoard;
 import inet.networklayer.common.InterfaceTable;
 import inet.applications.traci.TraCITestApp;
 import inet.mobility.models.TraCIMobility;
-import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.transport.udp.UDP;
 import inet.nodes.inet.NetworkLayer;
 import inet.linklayer.ieee80211.Ieee80211Nic;
@@ -54,7 +54,7 @@ module Car
             parameters:
                 @display("p=60,459");
         }
-        routingTable: RoutingTable {
+        routingTable: IPv4RoutingTable {
             parameters:
                 IPForward = true;
                 routerId = "";

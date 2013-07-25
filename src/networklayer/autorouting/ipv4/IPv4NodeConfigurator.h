@@ -25,7 +25,7 @@
 #include "ILifecycle.h"
 #include "NodeStatus.h"
 #include "IInterfaceTable.h"
-#include "IRoutingTable.h"
+#include "IIPv4RoutingTable.h"
 #include "IPv4NetworkConfigurator.h"
 
 /**
@@ -51,7 +51,7 @@ class IPv4NodeConfigurator : public cSimpleModule, public ILifecycle {
     protected:
         NodeStatus *nodeStatus;
         IInterfaceTable *interfaceTable;
-        IRoutingTable *routingTable;
+        IIPv4RoutingTable *routingTable;
         IPv4NetworkConfigurator *networkConfigurator;
 
     public:

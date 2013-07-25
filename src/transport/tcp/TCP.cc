@@ -55,8 +55,8 @@ bool TCP::logverbose;
 
 static std::ostream& operator<<(std::ostream& os, const TCP::SockPair& sp)
 {
-    os << "loc=" << IPvXAddress(sp.localAddr) << ":" << sp.localPort << " "
-       << "rem=" << IPvXAddress(sp.remoteAddr) << ":" << sp.remotePort;
+    os << "loc=" << Address(sp.localAddr) << ":" << sp.localPort << " "
+       << "rem=" << Address(sp.remoteAddr) << ":" << sp.remotePort;
     return os;
 }
 
@@ -152,7 +152,7 @@ void TCP::handleMessage(cMessage *msg)
             TCPSegment *tcpseg = check_and_cast<TCPSegment *>(msg);
 
             // get src/dest addresses
-            IPvXAddress srcAddr, destAddr;
+            Address srcAddr, destAddr;
 
             if (dynamic_cast<IPv4ControlInfo *>(tcpseg->getControlInfo()) != NULL)
             {
@@ -222,7 +222,7 @@ TCPConnection *TCP::createConnection(int appGateIndex, int connId)
     return new TCPConnection(this, appGateIndex, connId);
 }
 
-void TCP::segmentArrivalWhileClosed(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr)
+void TCP::segmentArrivalWhileClosed(TCPSegment *tcpseg, Address srcAddr, Address destAddr)
 {
     TCPConnection *tmp = new TCPConnection();
     tmp->segmentArrivalWhileClosed(tcpseg, srcAddr, destAddr);
@@ -293,7 +293,7 @@ void TCP::updateDisplayString()
     getDisplayString().setTagArg("t", 0, buf2);
 }
 
-TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, IPvXAddress srcAddr, IPvXAddress destAddr)
+TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, Address srcAddr, Address destAddr)
 {
     SockPair key;
     key.localAddr = destAddr;
@@ -310,7 +310,7 @@ TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, IPvXAddress srcAddr, 
         return i->second;
 
     // try with localAddr missing (only localPort specified in passive/active open)
-    key.localAddr = IPvXAddress();
+    key.localAddr = Address();
     i = tcpConnMap.find(key);
 
     if (i != tcpConnMap.end())
@@ -318,7 +318,7 @@ TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, IPvXAddress srcAddr, 
 
     // try fully qualified local socket + blank remote socket (for incoming SYN)
     key = save;
-    key.remoteAddr = IPvXAddress();
+    key.remoteAddr = Address();
     key.remotePort = -1;
     i = tcpConnMap.find(key);
 
@@ -326,7 +326,7 @@ TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, IPvXAddress srcAddr, 
         return i->second;
 
     // try with blank remote socket, and localAddr missing (for incoming SYN)
-    key.localAddr = IPvXAddress();
+    key.localAddr = Address();
     i = tcpConnMap.find(key);
 
     if (i != tcpConnMap.end())
@@ -368,7 +368,7 @@ ushort TCP::getEphemeralPort()
     return lastEphemeralPort;
 }
 
-void TCP::addSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress remoteAddr, int localPort, int remotePort)
+void TCP::addSockPair(TCPConnection *conn, Address localAddr, Address remoteAddr, int localPort, int remotePort)
 {
     // update addresses/ports in TCPConnection
     SockPair key;
@@ -398,7 +398,7 @@ void TCP::addSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress re
         usedEphemeralPorts.insert(localPort);
 }
 
-void TCP::updateSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress remoteAddr, int localPort, int remotePort)
+void TCP::updateSockPair(TCPConnection *conn, Address localAddr, Address remoteAddr, int localPort, int remotePort)
 {
     // find with existing address/port pair...
     SockPair key;
@@ -423,7 +423,7 @@ void TCP::updateSockPair(TCPConnection *conn, IPvXAddress localAddr, IPvXAddress
     // localPort doesn't change (see ASSERT above), so there's no need to update usedEphemeralPorts[].
 }
 
-void TCP::addForkedConnection(TCPConnection *conn, TCPConnection *newConn, IPvXAddress localAddr, IPvXAddress remoteAddr, int localPort, int remotePort)
+void TCP::addForkedConnection(TCPConnection *conn, TCPConnection *newConn, Address localAddr, Address remoteAddr, int localPort, int remotePort)
 {
     // update conn's socket pair, and register newConn (which'll keep LISTENing)
     updateSockPair(conn, localAddr, remoteAddr, localPort, remotePort);

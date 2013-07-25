@@ -53,8 +53,8 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
         bool isBound;
         bool onlyLocalPortIsSet;
         bool reuseAddr;
-        IPvXAddress localAddr;
-        IPvXAddress remoteAddr;
+        Address localAddr;
+        Address remoteAddr;
         int localPort;
         int remotePort;
         bool isBroadcast;
@@ -62,7 +62,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
         bool multicastLoop;
         int ttl;
         unsigned char typeOfService;
-        std::map<IPvXAddress,int> multicastAddrs; // key: multicast address; value: output interface Id or -1
+        std::map<Address,int> multicastAddrs; // key: multicast address; value: output interface Id or -1
     };
 
     typedef std::list<SockDesc *> SockDescList;   // might contain duplicated local addresses if their reuseAddr flag is set
@@ -100,9 +100,9 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     // socket handling
     virtual SockDesc *getSocketById(int sockId);
     virtual SockDesc *getOrCreateSocket(int sockId, int gateIndex);
-    virtual SockDesc *createSocket(int sockId, int gateIndex, const IPvXAddress& localAddr, int localPort);
-    virtual void bind(int sockId, int gateIndex, const IPvXAddress& localAddr, int localPort);
-    virtual void connect(int sockId, int gateIndex, const IPvXAddress& remoteAddr, int remotePort);
+    virtual SockDesc *createSocket(int sockId, int gateIndex, const Address& localAddr, int localPort);
+    virtual void bind(int sockId, int gateIndex, const Address& localAddr, int localPort);
+    virtual void connect(int sockId, int gateIndex, const Address& remoteAddr, int remotePort);
     virtual void close(int sockId);
     virtual void clearAllSockets();
     virtual void setTimeToLive(SockDesc *sd, int ttl);
@@ -111,20 +111,20 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void setMulticastOutputInterface(SockDesc *sd, int interfaceId);
     virtual void setMulticastLoop(SockDesc *sd, bool loop);
     virtual void setReuseAddress(SockDesc *sd, bool reuseAddr);
-    virtual void joinMulticastGroups(SockDesc *sd, const std::vector<IPvXAddress>& multicastAddresses, const std::vector<int> interfaceIds);
-    virtual void leaveMulticastGroups(SockDesc *sd, const std::vector<IPvXAddress>& multicastAddresses);
-    virtual void addMulticastAddressToInterface(InterfaceEntry *ie, const IPvXAddress& multicastAddr);
+    virtual void joinMulticastGroups(SockDesc *sd, const std::vector<Address>& multicastAddresses, const std::vector<int> interfaceIds);
+    virtual void leaveMulticastGroups(SockDesc *sd, const std::vector<Address>& multicastAddresses);
+    virtual void addMulticastAddressToInterface(InterfaceEntry *ie, const Address& multicastAddr);
 
     // ephemeral port
     virtual ushort getEphemeralPort();
 
-    virtual SockDesc *findSocketForUnicastPacket(const IPvXAddress& localAddr, ushort localPort, const IPvXAddress& remoteAddr, ushort remotePort);
-    virtual std::vector<SockDesc*> findSocketsForMcastBcastPacket(const IPvXAddress& localAddr, ushort localPort, const IPvXAddress& remoteAddr, ushort remotePort, bool isMulticast, bool isBroadcast);
-    virtual SockDesc *findFirstSocketByLocalAddress(const IPvXAddress& localAddr, ushort localPort);
-    virtual void sendUp(cPacket *payload, SockDesc *sd, const IPvXAddress& srcAddr, ushort srcPort, const IPvXAddress& destAddr, ushort destPort, int interfaceId, int ttl, unsigned char tos);
-    virtual void sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort, const IPvXAddress& destAddr, ushort destPort, int interfaceId, bool multicastLoop, int ttl, unsigned char tos);
+    virtual SockDesc *findSocketForUnicastPacket(const Address& localAddr, ushort localPort, const Address& remoteAddr, ushort remotePort);
+    virtual std::vector<SockDesc*> findSocketsForMcastBcastPacket(const Address& localAddr, ushort localPort, const Address& remoteAddr, ushort remotePort, bool isMulticast, bool isBroadcast);
+    virtual SockDesc *findFirstSocketByLocalAddress(const Address& localAddr, ushort localPort);
+    virtual void sendUp(cPacket *payload, SockDesc *sd, const Address& srcAddr, ushort srcPort, const Address& destAddr, ushort destPort, int interfaceId, int ttl, unsigned char tos);
+    virtual void sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, const Address& destAddr, ushort destPort, int interfaceId, bool multicastLoop, int ttl, unsigned char tos);
     virtual void processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl);
-    virtual void sendUpErrorIndication(SockDesc *sd, const IPvXAddress& localAddr, ushort localPort, const IPvXAddress& remoteAddr, ushort remotePort);
+    virtual void sendUpErrorIndication(SockDesc *sd, const Address& localAddr, ushort localPort, const Address& remoteAddr, ushort remotePort);
 
     // process an ICMP error packet
     virtual void processICMPError(cPacket *icmpErrorMsg); // TODO use ICMPMessage

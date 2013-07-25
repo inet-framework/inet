@@ -40,7 +40,7 @@
  *
  * Interfaces are dynamically registered: at the start of the simulation,
  * every L2 module adds its own InterfaceEntry to the table; after that,
- * IPv4's IRoutingTable and IPv6's RoutingTable6 (an possibly, further
+ * IPv4's IIPv4RoutingTable and IPv6's IPv6RoutingTable (an possibly, further
  * L3 protocols) add protocol-specific data on each InterfaceEntry
  * (see IPv4InterfaceData, IPv6InterfaceData, and InterfaceEntry::setIPv4Data(),
  * InterfaceEntry::setIPv6Data())
