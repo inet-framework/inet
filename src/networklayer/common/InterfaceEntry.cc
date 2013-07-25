@@ -64,8 +64,8 @@ InterfaceEntry::InterfaceEntry(cModule* ifmod)
 
     ipv4data = NULL;
     ipv6data = NULL;
-    protocol3data = NULL;
-    protocol4data = NULL;
+    isisdata = NULL;
+    trilldata = NULL;
     estimateCostProcessArray.clear();
 }
 
@@ -93,10 +93,10 @@ std::string InterfaceEntry::info() const
         out << " " << ((cObject*)ipv4data)->info(); // Khmm...
     if (ipv6data)
         out << " " << ((cObject*)ipv6data)->info(); // Khmm...
-    if (protocol3data)
-        out << " " << protocol3data->info();
-    if (protocol4data)
-        out << " " << protocol4data->info();
+    if (isisdata)
+        out << " " << ((cObject*)isisdata)->info(); // Khmm...
+    if (trilldata)
+        out << " " << ((cObject*)trilldata)->info(); // Khmm...
     return out.str();
 }
 
@@ -125,10 +125,10 @@ std::string InterfaceEntry::detailedInfo() const
         out << " " << ((cObject*)ipv4data)->info() << "\n"; // Khmm...
     if (ipv6data)
         out << " " << ((cObject*)ipv6data)->info() << "\n"; // Khmm...
-    if (protocol3data)
-        out << " " << protocol3data->info() << "\n";
-    if (protocol4data)
-        out << " " << protocol4data->info() << "\n";
+    if (isisdata)
+        out << " " << ((cObject*)isisdata)->info() << "\n"; // Khmm...
+    if (trilldata)
+        out << " " << ((cObject*)trilldata)->info() << "\n"; // Khmm...
 
     return out.str();
 }
@@ -163,6 +163,24 @@ void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
 #else
     throw cRuntimeError(this, "setIPv4Data(): INET was compiled without IPv6 support");
 #endif
+}
+
+void InterfaceEntry::setTRILLInterfaceData(TRILLInterfaceData *p)
+{
+
+    trilldata = p;
+    ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
+    configChanged();
+
+}
+
+void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
+{
+
+    isisdata = p;
+    ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
+    configChanged();
+
 }
 
 bool InterfaceEntry::setEstimateCostProcess(int position, MacEstimateCostProcess *p)
