@@ -65,7 +65,18 @@ class INET_API IPv6Route : public cObject
         dUnknown = 255
     };
 
+    enum ChangeCodes // field codes for changed()
+    {
+        F_NEXTHOP,
+        F_IFACE,
+        F_METRIC,
+        F_EXPIRYTIME,
+        F_ADMINDIST,
+        F_LAST,
+    };
+
   protected:
+    RoutingTable6 *_rt;     ///< the routing table in which this route is inserted, or NULL
     IPv6Address _destPrefix;
     short _length;
     RouteSrc _src;
@@ -75,12 +86,15 @@ class INET_API IPv6Route : public cObject
     int _metric;
     unsigned int  _adminDist;
 
+    void changed(int fieldCode);
+
   public:
     /**
      * Constructor. The destination prefix and the route source is passed
      * to the constructor and cannot be changed afterwards.
      */
     IPv6Route(IPv6Address destPrefix, int length, RouteSrc src) {
+        _rt = NULL;
         _destPrefix = destPrefix;
         _length = length;
         _src = src;
@@ -90,15 +104,19 @@ class INET_API IPv6Route : public cObject
         _adminDist = dUnknown;
     }
 
+    /** To be called by the routing table when this route is added or removed from it */
+    virtual void setRoutingTable(RoutingTable6 *rt) { _rt = rt; }
+    RoutingTable6 *getRoutingTable() const {return _rt;}
+
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
     static const char *routeSrcName(RouteSrc src);
 
-    void setInterfaceId(int interfaceId)  {_interfaceID = interfaceId;}
-    void setNextHop(const IPv6Address& nextHop)  {_nextHop = nextHop;}
-    void setExpiryTime(simtime_t expiryTime)  {_expiryTime = expiryTime;}
-    void setMetric(int metric)  {_metric = metric;}
-    void setAdminDist(unsigned int adminDist)  {_adminDist = adminDist;}
+    void setInterfaceId(int interfaceId)  { if (interfaceId != _interfaceID) { _interfaceID = interfaceId; changed(F_IFACE);} }
+    void setNextHop(const IPv6Address& nextHop)  {if (nextHop != _nextHop) { _nextHop = nextHop; changed(F_NEXTHOP);} }
+    void setExpiryTime(simtime_t expiryTime)  { if (expiryTime != _expiryTime) { _expiryTime = expiryTime; changed(F_EXPIRYTIME);} }
+    void setMetric(int metric)  { if (metric != _metric) { _metric = metric; changed(F_METRIC);} }
+    void setAdminDist(unsigned int adminDist)  { if (adminDist != _adminDist) { _adminDist = adminDist; changed(F_ADMINDIST);} }
 
     const IPv6Address& getDestPrefix() const {return _destPrefix;}
     int getPrefixLength() const  {return _length;}
@@ -216,6 +234,13 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      * IP forwarding on/off
      */
     virtual bool isRouter() const {return isrouter;}
+
+    /**
+     * To be called from route objects whenever a field changes. Used for
+     * maintaining internal data structures and firing "routing table changed"
+     * notifications.
+     */
+    virtual void routeChanged(IPv6Route *entry, int fieldCode);
 
 #ifdef WITH_xMIPv6
     /**
