@@ -83,6 +83,11 @@ RoutingTable6::~RoutingTable6()
         delete routeList[i];
 }
 
+IPv6Route *RoutingTable6::createNewRoute(IPv6Address destPrefix, int prefixLength, IPv6Route::RouteSrc src)
+{
+    return new IPv6Route(destPrefix, prefixLength, src);
+}
+
 void RoutingTable6::initialize(int stage)
 {
     if (stage==1)
@@ -577,7 +582,7 @@ void RoutingTable6::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int p
     if (route==NULL)
     {
         // create new route object
-        IPv6Route *route = new IPv6Route(destPrefix, prefixLength, IPv6Route::FROM_RA);
+        IPv6Route *route = createNewRoute(destPrefix, prefixLength, IPv6Route::FROM_RA);
         route->setInterfaceId(interfaceId);
         route->setExpiryTime(expiryTime);
         route->setMetric(0);
@@ -617,7 +622,7 @@ void RoutingTable6::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, int p
     if (route==NULL)
     {
         // create new route object
-        IPv6Route *route = new IPv6Route(destPrefix, prefixLength, IPv6Route::OWN_ADV_PREFIX);
+        IPv6Route *route = createNewRoute(destPrefix, prefixLength, IPv6Route::OWN_ADV_PREFIX);
         route->setInterfaceId(interfaceId);
         route->setExpiryTime(expiryTime);
         route->setMetric(0);
@@ -658,7 +663,7 @@ void RoutingTable6::addStaticRoute(const IPv6Address& destPrefix, int prefixLeng
                     int metric)
 {
     // create route object
-    IPv6Route *route = new IPv6Route(destPrefix, prefixLength, IPv6Route::STATIC);
+    IPv6Route *route = createNewRoute(destPrefix, prefixLength, IPv6Route::STATIC);
     route->setInterfaceId(interfaceId);
     route->setNextHop(nextHop);
     if (metric==0)
@@ -674,7 +679,7 @@ void RoutingTable6::addDefaultRoute(const IPv6Address& nextHop, unsigned int ifI
         simtime_t routerLifetime)
 {
     // create route object
-    IPv6Route *route = new IPv6Route(IPv6Address(), 0, IPv6Route::FROM_RA);
+    IPv6Route *route = createNewRoute(IPv6Address(), 0, IPv6Route::FROM_RA);
     route->setInterfaceId(ifID);
     route->setNextHop(nextHop);
     route->setMetric(10); //FIXME:should be filled from interface metric

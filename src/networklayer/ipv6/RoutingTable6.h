@@ -27,6 +27,7 @@
 
 class IInterfaceTable;
 class InterfaceEntry;
+class RoutingTable6;
 
 /**
  * Represents a route in the route table. Routes with src=FROM_RA represent
@@ -157,6 +158,9 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     RouteList routeList;
 
   protected:
+    // creates a new empty route, factory method overriden in subclasses that use custom routes
+    virtual IPv6Route *createNewRoute(IPv6Address destPrefix, int prefixLength, IPv6Route::RouteSrc src);
+
     // internal: routes of different type can only be added via well-defined functions
     virtual void addRoute(IPv6Route *route);
     // helper for addRoute()
