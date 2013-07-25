@@ -568,17 +568,25 @@ IPv4Route *RoutingTable::getDefaultRoute() const
     return NULL;
 }
 
+// The 'routes' vector stores the routes in this order.
+// The best matching route should precede the other matching routes,
+// so the method should return true if a is better the b.
 bool RoutingTable::routeLessThan(const IPv4Route *a, const IPv4Route *b)
 {
-    // helper for sort() in addRoute(). We want routes with longer
-    // prefixes to be at front, so we compare them as "less".
-    // For metric, a smaller value is better (we report that as "less").
+    // longer prefixes are better, because they are more specific
     if (a->getNetmask() != b->getNetmask())
         return a->getNetmask() > b->getNetmask();
 
     if (a->getDestination() != b->getDestination())
         return a->getDestination() < b->getDestination();
 
+    // for the same destination/netmask:
+
+    // smaller administration distance is better
+    if (a->getAdminDist() != b->getAdminDist())
+        return a->getAdminDist() < b->getAdminDist();
+
+    // smaller metric is better
     return a->getMetric() < b->getMetric();
 }
 
@@ -607,6 +615,12 @@ void RoutingTable::internalAddRoute(IPv4Route *entry)
         if (oldDefaultRoute != NULL)
             deleteRoute(oldDefaultRoute);
     }
+
+    // The 'routes' vector may contain multiple routes with the same destination/netmask.
+    // Routes are stored in descending netmask length and ascending administrative_distance/metric order,
+    // so the first matching is the best one.
+    // XXX Should only the route with the best metic be stored? Then the worse route should be deleted and
+    //     internalAddRoute() should return a bool indicating if it was successful.
 
     // add to tables
     // we keep entries sorted by netmask desc, metric asc in routeList, so that we can
@@ -846,6 +860,7 @@ void RoutingTable::updateNetmaskRoutes()
             route->setDestination(ie->ipv4Data()->getIPAddress().doAnd(ie->ipv4Data()->getNetmask()));
             route->setNetmask(ie->ipv4Data()->getNetmask());
             route->setGateway(IPv4Address());
+            route->setAdminDist(IPv4Route::dDirectlyConnected);
             route->setMetric(ie->ipv4Data()->getMetric());
             route->setInterface(ie);
             route->setRoutingTable(this);

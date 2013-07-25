@@ -47,6 +47,26 @@ class INET_API IPv4Route : public cObject
         MANET2,       ///< managed by manet, search approximate address
     };
 
+    /** Cisco like administrative distances */
+    enum RouteAdminDist
+    {
+        dDirectlyConnected = 0,
+        dStatic = 1,
+        dEIGRPSummary = 5,
+        dBGPExternal = 20,
+        dEIGRPInternal = 90,
+        dIGRP = 100,
+        dOSPF = 110,
+        dISIS = 115,
+        dRIP = 120,
+        dEGP = 140,
+        dODR = 160,
+        dEIGRPExternal = 170,
+        dBGPInternal = 200,
+        dDHCPlearned = 254,
+        dUnknown = 255
+    };
+
   private:
     IRoutingTable *rt;    ///< the routing table in which this route is inserted, or NULL
     IPv4Address dest;     ///< Destination
@@ -54,10 +74,13 @@ class INET_API IPv4Route : public cObject
     IPv4Address gateway;  ///< Next hop
     InterfaceEntry *interfacePtr; ///< interface
     RouteSource source;   ///< manual, routing prot, etc.
+    unsigned int adminDist; ///< Cisco like administrative distance
     int metric;           ///< Metric ("cost" to reach the destination)
 
   public:
-    enum {F_DESTINATION, F_NETMASK, F_GATEWAY, F_IFACE, F_TYPE, F_SOURCE, F_METRIC, F_LAST}; // field codes for changed()
+    // field codes for changed()
+    enum {F_DESTINATION, F_NETMASK, F_GATEWAY, F_IFACE, F_TYPE, F_SOURCE,
+          F_ADMINDIST, F_METRIC, F_LAST};
 
   private:
     // copying not supported: following are private and also left undefined
@@ -68,7 +91,8 @@ class INET_API IPv4Route : public cObject
     void changed(int fieldCode);
 
   public:
-    IPv4Route() : rt(NULL), interfacePtr(NULL), source(MANUAL), metric(0) {}
+    IPv4Route() : rt(NULL), interfacePtr(NULL), source(MANUAL), adminDist(dUnknown),
+                  metric(0) {}
     virtual ~IPv4Route() {}
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
@@ -89,6 +113,7 @@ class INET_API IPv4Route : public cObject
     virtual void setGateway(IPv4Address _gateway)  { if (gateway != _gateway) {gateway = _gateway; changed(F_GATEWAY);} }
     virtual void setInterface(InterfaceEntry *_interfacePtr)  { if (interfacePtr != _interfacePtr) {interfacePtr = _interfacePtr; changed(F_IFACE);} }
     virtual void setSource(RouteSource _source)  { if (source != _source) {source = _source; changed(F_SOURCE);} }
+    virtual void setAdminDist(unsigned int _adminDist)  { if (adminDist != _adminDist) { adminDist = _adminDist; changed(F_ADMINDIST);} }
     virtual void setMetric(int _metric)  { if (metric != _metric) {metric = _metric; changed(F_METRIC);} }
 
     /** Destination address prefix to match */
@@ -108,6 +133,9 @@ class INET_API IPv4Route : public cObject
 
     /** Source of route. MANUAL (read from file), from routing protocol, etc */
     RouteSource getSource() const {return source;}
+
+    /** Route source specific preference value */
+    unsigned int getAdminDist() const  { return adminDist; }
 
     /** "Cost" to reach the destination */
     int getMetric() const {return metric;}
