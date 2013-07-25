@@ -81,15 +81,6 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     bool IPForward;
     bool multicastForward;
 
-    //
-    // Routes:
-    //
-    typedef std::vector<IPv4Route *> RouteVector;
-    RouteVector routes;          // Unicast route array, sorted by netmask desc, dest asc, metric asc
-
-    typedef std::vector<IPv4MulticastRoute*> MulticastRouteVector;
-    MulticastRouteVector multicastRoutes; // Multicast route array, sorted by netmask desc, origin asc, metric asc
-
     // for convenience
     typedef IPv4MulticastRoute::OutInterface OutInterface;
     typedef IPv4MulticastRoute::OutInterfaceVector OutInterfaceVector;
@@ -103,6 +94,18 @@ class INET_API RoutingTable: public cSimpleModule, public IRoutingTable, protect
     mutable AddressSet localAddresses;
     // JcM add: to handle the local broadcast address
     mutable AddressSet localBroadcastAddresses;
+
+  private:
+    // The vectors storing routes are ordered by prefix length, administrative distance, and metric.
+    // Subclasses should use internalAdd[Multicast]Route() and internalRemove[Multicast]Route() methods
+    // to modify them, but they can not access them directly.
+
+    typedef std::vector<IPv4Route *> RouteVector;
+    RouteVector routes;          // Unicast route array, sorted by netmask desc, dest asc, metric asc
+
+    typedef std::vector<IPv4MulticastRoute*> MulticastRouteVector;
+    MulticastRouteVector multicastRoutes; // Multicast route array, sorted by netmask desc, origin asc, metric asc
+
 
   protected:
     // set IPv4 address etc on local loopback
