@@ -42,14 +42,14 @@ network multihomed
     submodules:
         sctp_client: StandardHost {
             parameters:
-                routingFile = "../../lib/multi_client.mrt";
+                routingTable.routingFile = "../../lib/multi_client.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
             gates:
                 pppg[2];
         }
         sctp_server: StandardHost {
             parameters:
-                routingFile = "../../lib/multi_server.mrt";
+                routingTable.routingFile = "../../lib/multi_server.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
             gates:
                 pppg[2];
@@ -57,14 +57,14 @@ network multihomed
         }
         router1: Router {
             parameters:
-                routingFile = "../../lib/multi_router1.mrt";
+                routingTable.routingFile = "../../lib/multi_router1.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
             gates:
                 pppg[4];
         }
         router2: Router {
             parameters:
-                routingFile = "../../lib/multi_router2.mrt";
+                routingTable.routingFile = "../../lib/multi_router2.mrt";
                 networkLayer.configurator.networkConfiguratorModule = "";
             gates:
                 pppg[4];
