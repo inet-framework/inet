@@ -45,6 +45,12 @@ void MACBase::initialize(int stage)
     {
         nb = NotificationBoardAccess().getIfExists();
     }
+    else if (stage == 1)
+    {
+        if (nb)
+            nb->subscribe(this, NF_INTERFACE_DELETED);
+    }
+
     if (stage == numInitStages()-1)
     {
         if (stage < 1)
@@ -87,6 +93,11 @@ bool MACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
 
 void MACBase::receiveChangeNotification(int category, const cObject *details)
 {
+    if (category == NF_INTERFACE_DELETED)
+    {
+        if (interfaceEntry == check_and_cast<const InterfaceEntry *>(details))
+            interfaceEntry = NULL;
+    }
 }
 
 bool MACBase::isNodeUp()
