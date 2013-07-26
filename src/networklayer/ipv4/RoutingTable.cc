@@ -84,6 +84,7 @@ void RoutingTable::initialize(int stage)
         WATCH_PTRVECTOR(routes);
         WATCH_PTRVECTOR(multicastRoutes);
         WATCH(IPForward);
+        WATCH(multicastForward);
         WATCH(routerId);
     }
     else if (stage==1)
