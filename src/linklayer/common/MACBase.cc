@@ -66,7 +66,6 @@ bool MACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
     else if (dynamic_cast<NodeShutdownOperation *>(operation))
     {
         if (stage == NodeShutdownOperation::STAGE_LINK_LAYER) {
-            interfaceEntry = NULL;  // forget interfaceEntry; it is deleted by InterfaceTable
             updateOperationalFlag(false);
             flushQueue();
         }
@@ -74,7 +73,6 @@ bool MACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
     else if (dynamic_cast<NodeCrashOperation *>(operation))
     {
         if (stage == NodeCrashOperation::STAGE_CRASH) {
-            interfaceEntry = NULL;  // forget interfaceEntry; it is deleted by InterfaceTable
             updateOperationalFlag(false);
             //FIXME clear the queue without emitting dropPkIfaceDown signals
         }
