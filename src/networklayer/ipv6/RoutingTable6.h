@@ -150,6 +150,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     NotificationBoard *nb; // cached pointer
 
     bool isrouter;
+    bool multicastForward;  //If node is forwarding multicast info
 
 #ifdef WITH_xMIPv6
     bool ishome_agent; //added by Zarrar Yousaf @ CNI, UniDortmund on 20.02.07
@@ -234,6 +235,8 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      * IP forwarding on/off
      */
     virtual bool isRouter() const {return isrouter;}
+
+    virtual bool isMulticastForwardingEnabled() { return multicastForward; }
 
     /**
      * To be called from route objects whenever a field changes. Used for
