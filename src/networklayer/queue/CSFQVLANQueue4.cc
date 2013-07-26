@@ -17,133 +17,24 @@
 //
 
 
-#include "CSFQVLANQueue.h"
+#include "CSFQVLANQueue4.h"
 
-Define_Module(CSFQVLANQueue);
+Define_Module(CSFQVLANQueue4);
 
-CSFQVLANQueue::CSFQVLANQueue()
+void CSFQVLANQueue4::initialize(int stage)
 {
-}
+    CSFQVLANQueue3::initialize(stage);
 
-CSFQVLANQueue::~CSFQVLANQueue()
-{
-#ifndef NDEBUG
-    for (int i = 0; i < numFlows; i++)
-    {
-        for (int j = 0; j < 2; j++)
-        {
-            delete estRateVectors[i][j];
-        }
-    }
-#endif
-}
-
-void CSFQVLANQueue::initialize(int stage)
-{
-    if (stage == 0)
-    {   // the following should be initialized in the 1st stage (stage==0);
-        // otherwise VLAN ID initialization is not working properly.
-
-        PassiveQueueBase::initialize();
-
-        outGate = gate("out");
-
-        // general
-        numFlows = par("numFlows").longValue(); // also the number of subscribers
-        linkRate = par("linkRate").doubleValue();
-
-        // VLAN classifier
-        const char *classifierClass = par("classifierClass").stringValue();
-        classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
-        classifier->setMaxNumQueues(numFlows);
-        const char *vids = par("vids").stringValue();
-        classifier->initialize(vids);
-
-        // debugging
-#ifndef NDEBUG
-        excessBWVector.setName("excess bandwidth");
-        fairShareRateVector.setName("fair share rate (alpha)");
-        pktReqVector.setName("packets requested");
-        queueLengthVector.setName("FIFO queue length (packets)");
-        queueSizeVector.setName("FIFO queue size (bytes)");
-        rateTotalVector.setName("aggregate rate of non-conformed packets");
-        rateEnqueuedVector.setName("aggregate rate of enqueued non-conformed packets");
-        for (int i=0; i < numFlows; i++)
-        {
-            OutVectorVector estRateVector;
-            for (int j=0; j < 2; j++)
-            {
-                std::stringstream vname;
-                vname << (j == 0 ? "conformed" : "non-conformed") << " rate for flow[" << i << "] (bit/sec)";
-                cOutVector *vector = new cOutVector((vname.str()).c_str());
-                estRateVector.push_back(vector);
-            }
-            estRateVectors.push_back(estRateVector);
-        }
-#endif
-    }
     if (stage == 1)
     {   // the following should be initialized in the 2nd stage (stage==1)
         // because token bucket meters are not initialized in the 1st stage yet.
 
-        // Token bucket meters
-        tbm.assign(numFlows, (BasicTokenBucketMeter *)NULL);
-        cModule *mac = getParentModule();
-        for (int i=0; i<numFlows; i++)
-        {
-            cModule *meter = mac->getSubmodule("meter", i);
-            tbm[i] = check_and_cast<BasicTokenBucketMeter *>(meter);
-        }
-
-        // FIFO queue
-        fifo.setName("FIFO queue");
-        queueSize = par("queueSize").longValue();           // in byte
-        currentQueueSize = 0;                               // in byte
-
-        // CSFQ++: System-wide variables
-        K = par("K").doubleValue();
-        K_alpha = par("K_alpha").doubleValue();
-        excessBW = linkRate;
-        fairShareRate = excessBW;
-//        fairShareRate = 0.0;
-        rateTotal = 0.0;
-        rateEnqueued = 0.0;
-        maxRate = 0.0;
-        lastArv = 0.0;
-        startTime = 0.0;
-        sumBitsTotal = 0;
-        sumBitsEnqueued = 0;
-        congested = false;
-
-        // CSFQ++: Flow-specific variables
-        weight.assign(numFlows, 0.0);
-        sumBits.assign(numFlows, 0);
-        flowRate.assign(numFlows, std::vector<double>(2, 0.0));
-        prevTime.assign(numFlows, std::vector<simtime_t>(2, simtime_t(0.0)));
-
-        double minTGR = tbm[0]->getMeanRate();
-        for (int i = 1; i < numFlows; i++)
-        {
-            if (tbm[i]->getMeanRate() < minTGR)
-            {
-                minTGR = tbm[i]->getMeanRate();
-            }
-        }
-        for (int i = 0; i < numFlows; i++) {
-            weight[i] = tbm[i]->getMeanRate() / minTGR;
-        }
-
-        // statistics
-        warmupFinished = false;
-        numBitsSent.assign(numFlows, 0.0);
-        numPktsReceived.assign(numFlows, 0);
-        numPktsDropped.assign(numFlows, 0);
-        numPktsConformed.assign(numFlows, 0);
-        numPktsSent.assign(numFlows, 0);
+        K_beta = par("K_beta").longValue();
+        kbeta = K_beta;
     }   // end of if () for stage checking
 }
 
-void CSFQVLANQueue::handleMessage(cMessage *msg)
+void CSFQVLANQueue4::handleMessage(cMessage *msg)
 {
     if (warmupFinished == false)
     {   // start statistics gathering once the warm-up period has passed.
@@ -204,14 +95,31 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
                     {
                         numPktsDropped[flowIndex]++;
                     }
+
+                    // decrease fairShareRate; the number of times it is decreased
+                    // during an interval of length k is bounded by kalpha.
+                    // This is to avoid overcorrection.
+                    if (kalpha-- >= 0)
+                    {
+                        fairShareRate *= 0.99;
+                    }
+                }
+            }
+
+            if (currentQueueSize > queueThreshold)
+            {
+                // decrease fairShareRate; the number of times it is decreased
+                // during an interval of length k is bounded by K_beta.
+                // This is to avoid overcorrection.
+                if (kbeta-- > 0)
+                {
+                    fairShareRate *= 0.99;
                 }
             }
         }
         else
         {   // frame is not conformed
             double rate = estimateRate(flowIndex, pktLength, simTime(), 1);
-//            conformedRate[flowIndex] = tbm[flowIndex]->getMeanRate(); // TODO: need skip?
-//            if (std::max(0.0, 1.0 - fairShareRate_ * weight[flowIndex] / rate) > dblrand())
             if (fairShareRate * weight[flowIndex] / rate < dblrand())
             {   // probabilistically drop the frame
 #ifndef NDEBUG
@@ -265,6 +173,25 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
                         {
                             numPktsDropped[flowIndex]++;
                         }
+
+                        // decrease fairShareRate; the number of times it is decreased
+                        // during an interval of length k is bounded by kalpha.
+                        // This is to avoid overcorrection.
+                        if (kalpha-- >= 0)
+                        {
+                            fairShareRate *= 0.99;
+                        }
+                    }
+                }
+
+                if (currentQueueSize > queueThreshold)
+                {
+                    // decrease fairShareRate; the number of times it is decreased
+                    // during an interval of length k is bounded by K_beta.
+                    // This is to avoid overcorrection.
+                    if (kbeta-- > 0)
+                    {
+                        fairShareRate *= 0.99;
                     }
                 }
             }
@@ -289,117 +216,12 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
     }
 }
 
-bool CSFQVLANQueue::enqueue(cMessage *msg)
-{
-    int pktByteLength = PK(msg)->getByteLength();
-
-    if (currentQueueSize + pktByteLength > queueSize)
-    {
-        EV << "FIFO queue full, dropping packet.\n";
-        delete msg;
-        return true;
-    }
-    else
-    {
-        fifo.insert(msg);
-        currentQueueSize += pktByteLength;
-#ifndef NDEBUG
-    queueLengthVector.record(fifo.getLength());
-    queueSizeVector.record(currentQueueSize);
-#endif
-        return false;
-    }
-}
-
-cMessage *CSFQVLANQueue::dequeue()
-{
-    if (fifo.empty())
-    {
-        return NULL;
-    }
-    cMessage *msg = (cMessage *)fifo.pop();
-    currentQueueSize -= PK(msg)->getByteLength();
-#ifndef NDEBUG
-    queueLengthVector.record(fifo.getLength());
-    queueSizeVector.record(currentQueueSize);
-#endif
-    return (msg);
-}
-
-void CSFQVLANQueue::sendOut(cMessage *msg)
-{
-    send(msg, outGate);
-}
-
-void CSFQVLANQueue::requestPacket()
-{
-    Enter_Method("requestPacket()");
-
-    cMessage *msg = dequeue();
-    if (msg == NULL)
-    {
-        packetRequested++;
-#ifndef NDEBUG
-        pktReqVector.record(packetRequested);
-#endif
-    }
-    else
-    {
-        if (warmupFinished == true)
-        {
-            int flowIndex = classifier->classifyPacket(msg);
-            numBitsSent[flowIndex] += PK(msg)->getBitLength();
-            numPktsSent[flowIndex]++;
-        }
-        sendOut(msg);
-    }
-}
-
-// compute estimated flow rate by using exponential averaging
-// - color: result of metering -> 0 for conformed and 1 for non-conformed packets
-double CSFQVLANQueue::estimateRate(int flowIndex, int pktLength, simtime_t arrvTime, int color)
-{
-    double T = (arrvTime - prevTime[flowIndex][color]).dbl();   // packet interarrival
-
-    if (T == 0.0)
-    {   // multiple packets arrive simultaneously
-        sumBits[flowIndex] += pktLength;
-        if (flowRate[flowIndex][color])
-        {
-#ifndef NDEBUG
-            estRateVectors[flowIndex][color]->record(flowRate[flowIndex][color]);
-#endif
-            return flowRate[flowIndex][color];
-        }
-        else
-        {   // this is the first packet; just initialize the rate
-#ifndef NDEBUG
-            estRateVectors[flowIndex][color]->record(rateEnqueued / 2);
-#endif
-            return (flowRate[flowIndex][color] = rateEnqueued / 2);
-        }
-    }
-    else
-    {
-        pktLength += sumBits[flowIndex];
-        sumBits[flowIndex] = 0;
-    }
-
-    prevTime[flowIndex][color] = arrvTime;
-    double w = exp(-T/K);
-    flowRate[flowIndex][color] = (1 - w)*pktLength/T + w*flowRate[flowIndex][color];
-#ifndef NDEBUG
-            estRateVectors[flowIndex][color]->record(flowRate[flowIndex][color]);
-#endif
-    return flowRate[flowIndex][color];
-}
-
 // estimate the link's (normalized) fair share rate (alpha)
 // - pktLength: packet length in bit
 // - rate: estimated normalized flow rate
 // - arrvTime: packet arrival time
 // - dropped: flag indicating whether the packet is dropped or not
-void CSFQVLANQueue::estimateAlpha(int pktLength, double rate, simtime_t arrvTime, bool dropped)
+void CSFQVLANQueue4::estimateAlpha(int pktLength, double rate, simtime_t arrvTime, bool dropped)
 {
     double T = (arrvTime - lastArv).dbl();   // packet interarrival
     double k = K_alpha;    // the window size (i.e., K_c)
@@ -418,7 +240,7 @@ void CSFQVLANQueue::estimateAlpha(int pktLength, double rate, simtime_t arrvTime
     }
     if (arrvTime == lastArv)
     {
-        return;
+        return; // TODO: check this!
     }
 
     // estimate aggregate arrival (rateTotal) and enqueued (rateEnqueued) rates
@@ -435,6 +257,8 @@ void CSFQVLANQueue::estimateAlpha(int pktLength, double rate, simtime_t arrvTime
         {   // becomes congested
             congested = true;
             startTime = arrvTime;
+            kalpha = KALPHA;
+            kbeta = K_beta;
             if (fairShareRate == 0.0)
             {
                 fairShareRate = std::min(rate, excessBW);   // initialize
@@ -465,7 +289,7 @@ void CSFQVLANQueue::estimateAlpha(int pktLength, double rate, simtime_t arrvTime
         {   // becomes uncongested
             congested = false;
             startTime = arrvTime;
-            maxRate = 0;
+            maxRate = 0.0;
         }
         else
         {   // remains uncongested
@@ -483,29 +307,3 @@ void CSFQVLANQueue::estimateAlpha(int pktLength, double rate, simtime_t arrvTime
     }
 }
 
-void CSFQVLANQueue::finish()
-{
-    unsigned long sumPktsReceived = 0;
-    unsigned long sumPktsConformed = 0;
-    unsigned long sumPktsDropped = 0;
-
-    for (int i=0; i < numFlows; i++)
-    {
-        std::stringstream ss_received, ss_conformed, ss_dropped, ss_sent, ss_throughput;
-        ss_received << "packets received from flow[" << i << "]";
-        ss_conformed << "packets conformed from flow[" << i << "]";
-        ss_dropped << "packets dropped from flow[" << i << "]";
-        ss_sent << "packets sent from flow[" << i << "]";
-        ss_throughput << "bits/sec sent from flow[" << i << "]";
-        recordScalar((ss_received.str()).c_str(), numPktsReceived[i]);
-        recordScalar((ss_conformed.str()).c_str(), numPktsConformed[i]);
-        recordScalar((ss_dropped.str()).c_str(), numPktsDropped[i]);
-        recordScalar((ss_sent.str()).c_str(), numPktsSent[i]);
-        recordScalar((ss_throughput.str()).c_str(), numBitsSent[i]/(simTime()-simulation.getWarmupPeriod()).dbl());
-        sumPktsReceived += numPktsReceived[i];
-        sumPktsConformed += numPktsConformed[i];
-        sumPktsDropped += numPktsDropped[i];
-    }
-    recordScalar("overall packet conformed rate", sumPktsConformed/double(sumPktsReceived));
-    recordScalar("overall packet loss rate", sumPktsDropped/double(sumPktsReceived));
-}
