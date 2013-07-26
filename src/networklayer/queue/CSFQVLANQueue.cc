@@ -261,26 +261,11 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
 #endif
                     if (dropped)
                     {   // buffer overflow
-// #ifndef NDEBUG
-//                         double normalizedRate = rate / weight[flowIndex];
-//                         estimateAlpha(pktLength, normalizedRate, simTime(), true);
-// #else
-//                         estimateAlpha(pktLength, rate/weight[flowIndex], simTime(), true);
-// #endif
                         if (warmupFinished == true)
                         {
                             numPktsDropped[flowIndex]++;
                         }
                     }
-                    // else
-                    // {   // frame has been successfully enqueued
-// #ifndef NDEBUG
-//                         double normalizedRate = rate / weight[flowIndex];
-//                         estimateAlpha(pktLength, normalizedRate, simTime(), false);
-// #else
-//                         estimateAlpha(pktLength, rate/weight[flowIndex], simTime(), false);
-// #endif
-                    // }
                 }
             }
 
@@ -433,7 +418,7 @@ void CSFQVLANQueue::estimateAlpha(int pktLength, double rate, simtime_t arrvTime
     }
     if (arrvTime == lastArv)
     {
-        return; // TODO: check this!
+        return;
     }
 
     // estimate aggregate arrival (rateTotal) and enqueued (rateEnqueued) rates
@@ -462,6 +447,12 @@ void CSFQVLANQueue::estimateAlpha(int pktLength, double rate, simtime_t arrvTime
                 startTime = arrvTime;
                 fairShareRate *= excessBW / rateEnqueued;
                 fairShareRate = std::min(fairShareRate, excessBW);
+
+                // TODO: verify the following re-initialization
+                if (fairShareRate == 0.0)
+                {
+                    fairShareRate = std::min(rate, excessBW);   // initialize
+                }
 
                 // // TODO: check the validity of this reset
                 // congested = false;
