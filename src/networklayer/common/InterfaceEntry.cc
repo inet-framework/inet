@@ -161,7 +161,7 @@ void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
     p->ownerp = this;
     configChanged();
 #else
-    throw cRuntimeError(this, "setIPv4Data(): INET was compiled without IPv6 support");
+    throw cRuntimeError(this, "setIPv6Data(): INET was compiled without IPv6 support");
 #endif
 }
 
