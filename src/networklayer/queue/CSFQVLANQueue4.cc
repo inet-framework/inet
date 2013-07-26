@@ -113,13 +113,15 @@ void CSFQVLANQueue4::handleMessage(cMessage *msg)
                 // This is to avoid overcorrection.
                 if (kbeta-- > 0)
                 {
-                    fairShareRate *= 0.99;
+                    // fairShareRate *= 0.99;
+                    fairShareRate *= 0.7;
                 }
             }
         }
         else
         {   // frame is not conformed
             double rate = estimateRate(flowIndex, pktLength, simTime(), 1);
+            // if ( (currentQueueSize > queueThreshold) || (fairShareRate * weight[flowIndex] / rate < dblrand()) )
             if (fairShareRate * weight[flowIndex] / rate < dblrand())
             {   // probabilistically drop the frame
 #ifndef NDEBUG
@@ -184,18 +186,19 @@ void CSFQVLANQueue4::handleMessage(cMessage *msg)
                     }
                 }
 
-                if (currentQueueSize > queueThreshold)
+
+            }
+            if (currentQueueSize > queueThreshold)
+            {
+                // decrease fairShareRate; the number of times it is decreased
+                // during an interval of length k is bounded by K_beta.
+                // This is to avoid overcorrection.
+                if (kbeta-- > 0)
                 {
-                    // decrease fairShareRate; the number of times it is decreased
-                    // during an interval of length k is bounded by K_beta.
-                    // This is to avoid overcorrection.
-                    if (kbeta-- > 0)
-                    {
-                        fairShareRate *= 0.99;
-                    }
+                    // fairShareRate *= 0.99;
+                    fairShareRate *= 0.7;
                 }
             }
-
 #ifndef NDEBUG
             fairShareRateVector.record(fairShareRate);
             rateTotalVector.record(rateTotal);
@@ -286,10 +289,31 @@ void CSFQVLANQueue4::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
     else
     {   // link is not congested per rate estimation
         if (congested)
-        {   // becomes uncongested
-            congested = false;
-            startTime = arrvTime;
-            maxRate = 0.0;
+        {   // peviously congested
+            if (currentQueueSize >= queueThreshold)
+            {   // remains congested (per previous congestion and queue statuses)
+                if (arrvTime > startTime + k)
+                {
+                    startTime = arrvTime;
+                    fairShareRate *= excessBW / rateEnqueued;
+                    fairShareRate = std::min(fairShareRate, excessBW);
+
+                    // TODO: verify the following re-initialization
+                    if (fairShareRate == 0.0)
+                    {
+                        fairShareRate = std::min(rate, excessBW);   // initialize
+                    }
+
+                    // // TODO: check the validity of this reset
+                    // congested = false;
+                }   
+            }
+            else
+            {   // becomes uncongested (per both rate estimation and queue status)
+                congested = false;
+                startTime = arrvTime;
+                maxRate = 0.0;
+            }
         }
         else
         {   // remains uncongested
