@@ -8,13 +8,15 @@
 * @version 1.0
 * @date Feb 2011
 ******************************************************/
-#include "Admacrelay.h"
-#include "Ethernet.h"
-#include "EtherMAC.h"
-#include "Cache1QAccess.h"
-#include "RSTPAccess.h"
-#include "MVRPAccess.h"
+
 #include "Relay1Q.h"
+
+#include "Admacrelay.h"
+#include "Cache1QAccess.h"
+#include "EtherMAC.h"
+#include "Ethernet.h"
+#include "MVRPAccess.h"
+#include "RSTPAccess.h"
 
 
 Define_Module( Relay1Q );

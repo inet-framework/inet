@@ -10,15 +10,15 @@
 
 #include "RSTP.h"
 
-#include "Ethernet.h"
-#include "EtherFrame.h"
-#include "MACRelayUnitBase.h"
 #include "Admacrelay.h"
-#include "EtherMAC.h"
-#include "Cache1QAccess.h"
 #include "AdmacrelayAccess.h"
-#include "XMLUtils.h"
+#include "Cache1QAccess.h"
+#include "EtherFrame.h"
+#include "EtherMAC.h"
+#include "Ethernet.h"
+#include "MACRelayUnitBase.h"
 #include "Relay1QAccess.h"
+#include "XMLUtils.h"
 
 
 Define_Module (RSTP);

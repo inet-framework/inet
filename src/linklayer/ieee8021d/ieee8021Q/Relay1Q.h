@@ -8,8 +8,10 @@
 * @version 1.0
 * @date Feb 2010
 ******************************************************/
+
 #ifndef __A_RELAY1Q_H
 #define __A_RELAY1Q_H
+
 
 #include "MACAddress.h"
 #include "EtherFrame.h"

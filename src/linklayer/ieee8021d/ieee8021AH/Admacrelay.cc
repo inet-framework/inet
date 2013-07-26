@@ -8,13 +8,14 @@
 * @version 1.0
 * @date Feb 2011
 ******************************************************/
+
 #include "Admacrelay.h"
 
+#include "Delivery_m.h"
 #include "Ethernet.h"
 #include "EtherMAC.h"
-#include "Delivery_m.h"
-#include "RSTPAccess.h"
 #include "MVRPAccess.h"
+#include "RSTPAccess.h"
 
 
 Define_Module( Admacrelay );

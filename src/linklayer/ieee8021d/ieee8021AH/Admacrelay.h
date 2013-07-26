@@ -8,6 +8,7 @@
 * @version 1.0
 * @date Feb 2011
 ******************************************************/
+
 #ifndef __A_ADMACRELAY_H
 #define __A_ADMACRELAY_H
 
@@ -19,7 +20,6 @@
 #include "MVRP.h"
 #include "Delivery_m.h"
 #include "Relay1Q.h"
-
 
 
 /**
