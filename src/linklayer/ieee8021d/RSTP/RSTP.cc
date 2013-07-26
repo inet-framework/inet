@@ -54,7 +54,7 @@ void RSTP::initialize(int stage)
 		admac=AdmacrelayAccess().getIfExists();
 		if(admac==NULL)
 		{
-			admac=Relay1QAccess().get();
+			admac=Relay1QAccess().getIfExists();
 		}
 		if(admac==NULL)
 			error("Relay module not found");

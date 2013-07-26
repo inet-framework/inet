@@ -32,8 +32,6 @@ void Admacrelay::initialize(int stage)
 		rstpModule=RSTPAccess().get();
 		mvrpModule=MVRPAccess().get();
 
-		if((cache==NULL)||(rstpModule==NULL)||(mvrpModule==NULL))
-			error("Initialization error");
 		//Gets bridge MAC address from rstpModule
 		address=rstpModule->getAddress();
 
