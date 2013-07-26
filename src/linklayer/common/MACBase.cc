@@ -47,6 +47,8 @@ void MACBase::initialize(int stage)
     }
     if (stage == numInitStages()-1)
     {
+        if (stage < 1)
+            throw cRuntimeError("Required minimum value of numInitStages is 2");
         updateOperationalFlag(isNodeUp());  // needs to be done when interface is already registered (=last stage)
     }
 }
