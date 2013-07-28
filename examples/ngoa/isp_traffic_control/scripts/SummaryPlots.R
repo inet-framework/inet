@@ -97,3 +97,43 @@ if (.resp == "y") {
     ggsave(paste(.static.wd, paste(.config, "pdf", sep="."), sep="/"))
     dev.off()
 }   # end of if()
+#################################################################################
+### summary plots for dynamic configurations
+###
+### Note: This is for the IEEE Communications Letters paper.
+#################################################################################
+.resp <- readline("Process data from dynamic configurations? (hit y or n) ")
+if (.resp == "y") {
+    .config <- readline("Type OMNeT++ configuration name: ")
+    .dynamic.rdata <- paste(.config, "RData", sep=".")
+    if (file.exists(paste(.dynamic.wd, .dynamic.rdata, sep="/")) == FALSE) {
+        ## Do the processing of OMNeT++ data files unless there is a corresponding RData file in the working directory
+        .df <- loadDataset(paste(.dynamic.wd, paste(.config, "-0.vec", sep=""), sep="/"))
+        .v <- loadVectors(.df, NULL)
+        .vv <- .v$vectors
+        .vd <- .v$vectordata
+        .rk <- subset(.vv, name=="thruput (bit/sec)")$resultkey
+        .df <- subset(.vd, is.element(resultkey, .rk))  # select throughput in b/s only
+        .df$resultkey <- as.factor(.df$resultkey)       # for later processing (including plotting)
+        ## save data frames for later use
+        .df.name <- paste(.config, ".df", sep="")
+        assign(.df.name, .df)
+        save(list=c(.df.name), file=paste(.dynamic.wd, .dynamic.rdata, sep="/"))
+    } else {
+        ## Otherwise, load objects from the saved file
+        load(paste(.dynamic.wd, .dynamic.rdata, sep="/"))
+        .df.name <- paste(.config, ".df", sep="")
+    }   # end of if() for the processing of OMNeT++ data files
+    .df <- get(.df.name)
+    .df$y <- .df$y / 1.0e6  # divide by 1.0e6 for unit conversion (i.e., b/s -> Mb/s)
+    is.na(.df) <- is.na(.df) # remove NaNs
+    .df <- .df[!is.infinite(.df$y),] # remove Infs
+    .p <- ggplot(.df, aes(x=x, y=y, group=resultkey, linetype=resultkey)) +
+        geom_line() +
+        xlab("Time [s]") +
+        ylab("Throughput [Mb/s]")
+    ## save each plot as a PDF file
+    .p
+    ggsave(paste(.dynamic.wd, paste(.config, "pdf", sep="."), sep="/"))
+    dev.off()
+}   # end of if()

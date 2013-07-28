@@ -212,7 +212,12 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
             double rate = estimateRate(flowIndex, pktLength, simTime(), 1);
 //            conformedRate[flowIndex] = tbm[flowIndex]->getMeanRate(); // TODO: need skip?
 //            if (std::max(0.0, 1.0 - fairShareRate_ * weight[flowIndex] / rate) > dblrand())
+#ifndef NDEBUG
+            double rv = dblrand();
+            if (fairShareRate * weight[flowIndex] / rate < rv)
+#else
             if (fairShareRate * weight[flowIndex] / rate < dblrand())
+#endif
             {   // probabilistically drop the frame
 #ifndef NDEBUG
                 double normalizedRate = rate / weight[flowIndex];
