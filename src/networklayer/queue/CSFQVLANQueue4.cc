@@ -29,8 +29,8 @@ void CSFQVLANQueue4::initialize(int stage)
     {   // the following should be initialized in the 2nd stage (stage==1)
         // because token bucket meters are not initialized in the 1st stage yet.
 
-        K_beta = par("K_beta").longValue();
-        kbeta = K_beta;
+        max_beta = par("max_beta").longValue();
+        kbeta = max_beta;
     }   // end of if () for stage checking
 }
 
@@ -109,7 +109,7 @@ void CSFQVLANQueue4::handleMessage(cMessage *msg)
             if (currentQueueSize > queueThreshold)
             {
                 // decrease fairShareRate; the number of times it is decreased
-                // during an interval of length k is bounded by K_beta.
+                // during an interval of length k is bounded by max_beta.
                 // This is to avoid overcorrection.
                 if (kbeta-- > 0)
                 {
@@ -121,8 +121,8 @@ void CSFQVLANQueue4::handleMessage(cMessage *msg)
         else
         {   // frame is not conformed
             double rate = estimateRate(flowIndex, pktLength, simTime(), 1);
-            // if ( (currentQueueSize > queueThreshold) || (fairShareRate * weight[flowIndex] / rate < dblrand()) )
-            if (fairShareRate * weight[flowIndex] / rate < dblrand())
+            if ( (currentQueueSize > queueThreshold) || (fairShareRate * weight[flowIndex] / rate < dblrand()) )
+            // if (fairShareRate * weight[flowIndex] / rate < dblrand())
             {   // probabilistically drop the frame
 #ifndef NDEBUG
                 double normalizedRate = rate / weight[flowIndex];
@@ -191,7 +191,7 @@ void CSFQVLANQueue4::handleMessage(cMessage *msg)
             if (currentQueueSize > queueThreshold)
             {
                 // decrease fairShareRate; the number of times it is decreased
-                // during an interval of length k is bounded by K_beta.
+                // during an interval of length k is bounded by max_beta.
                 // This is to avoid overcorrection.
                 if (kbeta-- > 0)
                 {
@@ -260,8 +260,8 @@ void CSFQVLANQueue4::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
         {   // becomes congested
             congested = true;
             startTime = arrvTime;
-            kalpha = KALPHA;
-            kbeta = K_beta;
+            kalpha = max_alpha;
+            kbeta = max_beta;
             if (fairShareRate == 0.0)
             {
                 fairShareRate = std::min(rate, excessBW);   // initialize
@@ -273,7 +273,7 @@ void CSFQVLANQueue4::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
             {
                 startTime = arrvTime;
                 fairShareRate *= excessBW / rateEnqueued;
-                fairShareRate = std::min(fairShareRate, excessBW);
+                // fairShareRate = std::min(fairShareRate, excessBW);
 
                 // TODO: verify the following re-initialization
                 if (fairShareRate == 0.0)
@@ -289,32 +289,32 @@ void CSFQVLANQueue4::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
     else
     {   // link is not congested per rate estimation
         if (congested)
-        {   // peviously congested
-            if (currentQueueSize >= queueThreshold)
-            {   // remains congested (per previous congestion and queue statuses)
-                if (arrvTime > startTime + k)
-                {
-                    startTime = arrvTime;
-                    fairShareRate *= excessBW / rateEnqueued;
-                    fairShareRate = std::min(fairShareRate, excessBW);
+        // {   // peviously congested
+        //     if (currentQueueSize >= queueThreshold)
+        //     {   // remains congested (per previous congestion and queue statuses)
+        //         if (arrvTime > startTime + k)
+        //         {
+        //             startTime = arrvTime;
+        //             fairShareRate *= excessBW / rateEnqueued;
+        //             fairShareRate = std::min(fairShareRate, excessBW);
 
-                    // TODO: verify the following re-initialization
-                    if (fairShareRate == 0.0)
-                    {
-                        fairShareRate = std::min(rate, excessBW);   // initialize
-                    }
+        //             // TODO: verify the following re-initialization
+        //             if (fairShareRate == 0.0)
+        //             {
+        //                 fairShareRate = std::min(rate, excessBW);   // initialize
+        //             }
 
-                    // // TODO: check the validity of this reset
-                    // congested = false;
-                }   
-            }
-            else
-            {   // becomes uncongested (per both rate estimation and queue status)
-                congested = false;
-                startTime = arrvTime;
-                maxRate = 0.0;
-            }
+        //             // // TODO: check the validity of this reset
+        //             // congested = false;
+        //         }   
+        //     }
+        //     else
+        {   // becomes uncongested (per both rate estimation and queue status)
+            congested = false;
+            startTime = arrvTime;
+            maxRate = 0.0;
         }
+        // }
         else
         {   // remains uncongested
             if (arrvTime < startTime + k)
@@ -323,7 +323,9 @@ void CSFQVLANQueue4::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
             }
             else
             {
-                fairShareRate = maxRate;
+                // fairShareRate = maxRate;
+                // fairShareRate = linkRate;
+                fairShareRate = excessBW;
                 startTime = arrvTime;
                 maxRate = 0.0;
             }

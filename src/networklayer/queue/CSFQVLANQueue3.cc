@@ -34,7 +34,8 @@ void CSFQVLANQueue3::initialize(int stage)
 
         // CSFQ++: System-wide variables
         fairShareRate = excessBW;        
-        kalpha = KALPHA;
+        max_alpha = par("max_alpha").longValue();
+        kalpha = max_alpha;
     }   // end of if () for stage checking
 }
 
@@ -233,7 +234,7 @@ void CSFQVLANQueue3::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
             {   // becomes congested (per both rate estimation and queue status)
                 congested = true;
                 startTime = arrvTime;
-                kalpha = KALPHA;
+                kalpha = max_alpha;
                 if (fairShareRate == 0.0)
                 {
                     fairShareRate = std::min(rate, excessBW);   // initialize

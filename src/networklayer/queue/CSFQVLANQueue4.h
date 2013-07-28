@@ -34,8 +34,8 @@ class INET_API CSFQVLANQueue4 : public CSFQVLANQueue3
 {
   protected:
     // CSFQ++: System-wide variables
-    int K_beta; // maximum number of times fair rate (alpha) can be decreased when the queue passes threshold, during a time interval of length K_alpha
-    int kbeta;  // counter for the number of times the fair rate decreases due to queue's passing the threshold
+    int max_beta;   // maximum number of times fair rate (alpha) can be decreased when the queue passes threshold, during a time interval of length K_alpha
+    int kbeta;      // counter for the number of times the fair rate decreases due to queue's passing the threshold
 
   protected:
     virtual void initialize(int stage);

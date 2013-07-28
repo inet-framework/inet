@@ -22,9 +22,6 @@
 
 #include "CSFQVLANQueue.h"
 
-// define constants
-#define KALPHA 29 // 0.99^29 = 0.75
-
 /**
  * Incoming packets are classified by an external VLAN classifier and
  * metered by an external token bucket meters before being put into
@@ -41,7 +38,8 @@ class INET_API CSFQVLANQueue3 : public CSFQVLANQueue
     int queueThreshold;     // in byte
 
     // CSFQ++: System-wide variables
-    int kalpha;             // maximum number of times the fair rate (alpha) can be decreased when the queue overflows, during a time interval of length K_alpha
+    int max_alpha;          // maximum number of times fair rate (alpha) can be decreased when queue overflows, during a time interval of length K_alpha
+    int kalpha;             // counter for the number of times fair rate decreases due to buffer overflow
 
   protected:
     virtual void initialize(int stage);

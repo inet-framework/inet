@@ -47,8 +47,8 @@ simple CSFQVLANQueue4 like OutputQueue
         int queueThreshold @unit(B) = default(3805000B);	// FIFO threshold to detect link congestion; default value is a quarter of default queueSize.
         double K @unit(s) = default(100ms);					// averaging constant for flow rate estimation
         double K_alpha @unit(s) = default(200ms);			// averaging constant for fair rate (alpha) estimation
-        int K_beta = default(29);							// maximum number of times fair rate (alpha) can be decreased when the queue passes threshold, during a time interval of length K_alpha
-        													// note that 0.99^29 = 0.75
+		int max_alpha = default(29);						// maximum number of times fair rate (alpha) can be decreased when queue overflows, during a time interval of length K_alpha
+		int max_beta = default(29);							// maximum number of times fair rate (alpha) can be decreased when queue passes threshold, during a time interval of length K_alpha
         string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier
         string vids = default("");	// VIDs used for initialization of index table
     gates:
