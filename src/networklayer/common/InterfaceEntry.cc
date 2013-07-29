@@ -72,10 +72,20 @@ InterfaceEntry::InterfaceEntry(cModule* ifmod)
 
 InterfaceEntry::~InterfaceEntry()
 {
+#ifdef WITH_IPv4
     if (ipv4data && ipv4data->ownerp == this)
         delete ipv4data;
+#else
+    if (ipv4data)
+        throw cRuntimeError(this, "Model error: ipv4data filled, but INET was compiled without IPv4 support");
+#endif
+#ifdef WITH_IPv6
     if (ipv6data && ipv6data->ownerp == this)
         delete ipv6data;
+#else
+    if (ipv6data)
+        throw cRuntimeError(this, "Model error: ipv6data filled, but INET was compiled without IPv6 support");
+#endif
     if (protocol3data && protocol3data->ownerp == this)
         delete protocol3data;
     if (protocol4data && protocol4data->ownerp == this)
@@ -158,8 +168,18 @@ void InterfaceEntry::changed(int category)
 
 void InterfaceEntry::resetInterface()
 {
+#ifdef WITH_IPv4
     delete ipv4data; ipv4data = NULL;
+#else
+    if (ipv4data)
+        throw cRuntimeError(this, "Model error: ipv4data filled, but INET was compiled without IPv4 support");
+#endif
+#ifdef WITH_IPv6
     delete ipv6data; ipv6data = NULL;
+#else
+    if (ipv6data)
+        throw cRuntimeError(this, "Model error: ipv6data filled, but INET was compiled without IPv6 support");
+#endif
     delete protocol3data; protocol3data = NULL;
     delete protocol4data; protocol4data = NULL;
 }

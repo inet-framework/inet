@@ -22,9 +22,9 @@
 #include "IPvXAddressResolver.h"
 #include "IInterfaceTable.h"
 #include "NotificationBoard.h"
-#include "IPv4NetworkConfigurator.h"
 
 #ifdef WITH_IPv4
+#include "IPv4NetworkConfigurator.h"
 #include "IRoutingTable.h"
 #include "IPv4InterfaceData.h"
 #endif
@@ -437,14 +437,17 @@ cModule *IPvXAddressResolver::findHostWithAddress(const IPvXAddress & add)
                 InterfaceEntry *entry = itable->getInterface(i);
                 if (add.isIPv6())
                 {
+#ifdef WITH_IPv6
                     if (entry->ipv6Data()->hasAddress(add.get6()))
                         return mod;
+#endif
                 }
                 else
                 {
+#ifdef WITH_IPv4
                     if (entry->ipv4Data()->getIPAddress() == add.get4())
                         return mod;
-
+#endif
                 }
             }
         }

@@ -23,10 +23,16 @@
 
 #include "UDPControlInfo_m.h"
 #include "IPvXAddressResolver.h"
+
+#ifdef WITH_IPv4
 #include "IRoutingTable.h"
 #include "RoutingTableAccess.h"
+#endif
+
+#ifdef WITH_IPv6
 #include "RoutingTable6.h"
 #include "RoutingTable6Access.h"
+#endif
 
 
 EXECUTE_ON_STARTUP(
