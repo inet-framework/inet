@@ -212,8 +212,8 @@ bool LDP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == NodeCrashOperation::STAGE_CRASH)
-            ;
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+        }
     }
     else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;

@@ -376,7 +376,8 @@ InterfaceEntry *InterfaceTable::getFirstMulticastInterface()
 bool InterfaceTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) ;
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+    }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_LINK_LAYER)
             resetInterfaces();

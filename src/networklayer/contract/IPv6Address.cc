@@ -46,26 +46,27 @@ const IPv6Address IPv6Address::LL_MANET_ROUTERS("FF02:0:0:0:0:0:0:6D");
 
 // Helper: Parses at most 8 colon-separated 16-bit hex numbers ("groups"),
 // and returns their count. Advances s just over the last hex digit converted.
-static int parseGroups(const char *&s, int *groups)
+static int parseGroups(const char *&s, uint16_t *groups)
 {
     int k = 0;
     while (1)
     {
         char *e;
-        groups[k] = strtoul(s, &e, 16);
+        unsigned long grp = strtoul(s, &e, 16);
         if (s==e) { // no hex digit converted
             if (k!=0) s--;  // "unskip" preceding ':'
-            return k;
+            break;
         }
         // if negative or too big, return (s will point to beginning of large number)
-        if (groups[k]<0 || groups[k]>0xffff)
-            return k;
-        k++;  // group[k] successfully stored
+        if (grp > 0xffff)
+            break;
+        groups[k++] = grp;  // group[k] successfully stored
         s = e;  // skip converted hex number
         if (*s!=':' || k==8)
-            return k;
+            break;
         s++;  // skip ':'
     }
+    return k;
 }
 
 bool IPv6Address::doTryParse(const char *&addr)
@@ -78,14 +79,14 @@ bool IPv6Address::doTryParse(const char *&addr)
     }
 
     // parse and store 16-bit units
-    int groups[8];
+    uint16_t groups[8];
     int numGroups = parseGroups(addr, groups);
 
     // if address string contains "::", parse and store second half too
     if (*addr==':' && *(addr+1)==':')
     {
         addr += 2;
-        int suffixGroups[8];
+        uint16_t suffixGroups[8];
         int numSuffixGroups = parseGroups(addr, suffixGroups);
 
         // merge suffixGroups[] into groups[]
@@ -103,7 +104,7 @@ bool IPv6Address::doTryParse(const char *&addr)
 
     // copy groups to d[]
     for (unsigned int i=0; i<4; i++)
-        d[i] = (groups[i*2]<<16) + groups[2*i + 1];
+        d[i] = ((uint32_t)(groups[2*i])<<16) + groups[2*i + 1];
 
     return true;
 }
@@ -148,7 +149,7 @@ void IPv6Address::set(const char *addr)
 }
 
 // Helper: finds the longest sequence of zeroes in the address (at least with len=2)
-static void findGap(int *groups, int& start, int& end)
+static void findGap(uint16_t *groups, int& start, int& end)
 {
     start = end = 0;
     int beg = -1;
@@ -181,9 +182,9 @@ std::string IPv6Address::str() const
         return std::string("<unspec>");
 
     // convert to 16-bit grops
-    int groups[8] = {
-        (d[0]>>16), (d[0]&0xffff), (d[1]>>16), (d[1]&0xffff),
-        (d[2]>>16), (d[2]&0xffff), (d[3]>>16), (d[3]&0xffff)
+    uint16_t groups[8] = {
+        uint16_t(d[0]>>16), uint16_t(d[0]&0xffff), uint16_t(d[1]>>16), uint16_t(d[1]&0xffff),
+        uint16_t(d[2]>>16), uint16_t(d[2]&0xffff), uint16_t(d[3]>>16), uint16_t(d[3]&0xffff)
     };
 
     // find longest sequence of zeros in groups[]
