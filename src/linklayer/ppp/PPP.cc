@@ -490,3 +490,18 @@ void PPP::flushQueue()
         }
     }
 }
+
+void PPP::clearQueue()
+{
+    // code would look slightly nicer with a pop() function that returns NULL if empty
+    if (queueModule)
+    {
+        queueModule->clear(); // clear request count
+        queueModule->requestPacket();
+    }
+    else
+    {
+        txQueue.clear();
+    }
+}
+

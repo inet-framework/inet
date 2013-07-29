@@ -447,6 +447,14 @@ void EtherMACBase::flushQueue()
     }
 }
 
+void EtherMACBase::clearQueue()
+{
+    if (txQueue.innerQueue)
+        txQueue.innerQueue->clear();
+    else
+        txQueue.extQueue->clear(); // clear request count
+}
+
 void EtherMACBase::refreshConnection()
 {
     Enter_Method_Silent();

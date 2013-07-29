@@ -59,6 +59,7 @@ class INET_API IdealWirelessMac : public WirelessMacBase, public cListener
     /** implements MacBase functions */
     //@{
     virtual void flushQueue();
+    virtual void clearQueue();
     virtual InterfaceEntry *createInterfaceEntry();
     //@}
 

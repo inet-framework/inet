@@ -2280,6 +2280,23 @@ void Ieee80211Mac::flushQueue()
     }
 }
 
+void Ieee80211Mac::clearQueue()
+{
+    if (queueModule) {
+        queueModule->clear(); // clear request count
+    }
+
+    for (int i=0; i<numCategories(); i++)
+    {
+        while (!transmissionQueue(i)->empty())
+        {
+            cMessage *msg = transmissionQueue(i)->front();
+            transmissionQueue(i)->pop_front();
+            delete msg;
+        }
+    }
+}
+
 void Ieee80211Mac::reportDataOk()
 {
     retryCounter() = 0;

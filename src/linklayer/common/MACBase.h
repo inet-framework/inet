@@ -44,13 +44,30 @@ class INET_API MACBase : public cSimpleModule, public ILifecycle, public INotifi
     protected:
         virtual void initialize(int stage);
         void registerInterface(); // do not override! override createInterfaceEntry()
-        virtual InterfaceEntry *createInterfaceEntry() = 0;
         virtual void receiveChangeNotification(int category, const cObject *details);
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
         virtual void updateOperationalFlag(bool isNodeUp);
         virtual bool isNodeUp();
-        virtual void flushQueue() = 0;
         virtual void handleMessageWhenDown(cMessage *msg);
+
+        /**
+         * should create InterfaceEntry
+         */
+        virtual InterfaceEntry *createInterfaceEntry() = 0;
+
+        /**
+         * should clear queue and emit signal "dropPkFromHLIfaceDown" with entire packets
+         */
+        virtual void flushQueue() = 0;
+
+        /**
+         * should clear queue silently
+         */
+        virtual void clearQueue() = 0;
+
+        /**
+         * should return true if the msg arrived from upper layer, else return false
+         */
         virtual bool isUpperMsg(cMessage *msg) = 0;
 };
 

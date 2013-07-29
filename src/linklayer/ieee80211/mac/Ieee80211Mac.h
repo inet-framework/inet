@@ -564,6 +564,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     virtual bool transmissionQueueEmpty();
     virtual unsigned int transmissionQueueSize();
     virtual void flushQueue();
+    virtual void clearQueue();
 
     /** @brief Mapping to access categories. */
     virtual int mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame);

@@ -80,7 +80,7 @@ bool MACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
     {
         if (stage == NodeCrashOperation::STAGE_CRASH) {
             updateOperationalFlag(false);
-            //FIXME clear the queue without emitting dropPkIfaceDown signals
+            clearQueue();
         }
     }
     else

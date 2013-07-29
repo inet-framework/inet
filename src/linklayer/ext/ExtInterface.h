@@ -61,11 +61,14 @@ class ExtInterface : public MACBase
     cSocketRTScheduler *rtScheduler;
 
   protected:
-    InterfaceEntry *createInterfaceEntry();
     void displayBusy();
     void displayIdle();
     void updateDisplayString();
+
+    // MACBase functions
+    InterfaceEntry *createInterfaceEntry();
     virtual void flushQueue();
+    virtual void clearQueue();
     virtual bool isUpperMsg(cMessage *msg) {return msg->arrivedOn("upperLayerIn");}
 
   private:

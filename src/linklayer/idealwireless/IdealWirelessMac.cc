@@ -48,7 +48,20 @@ IdealWirelessMac::~IdealWirelessMac()
 
 void IdealWirelessMac::flushQueue()
 {
-    //FIXME implementation!!!!
+    ASSERT(queueModule);
+    while (!queueModule->isEmpty())
+    {
+        cMessage *msg = queueModule->pop();
+        //TODO emit(dropPkIfaceDownSignal, msg); -- 'pkDropped' signals are missing in this module!
+        delete msg;
+    }
+    queueModule->clear(); // clear request count
+}
+
+void IdealWirelessMac::clearQueue()
+{
+    ASSERT(queueModule);
+    queueModule->clear();
 }
 
 void IdealWirelessMac::initialize(int stage)

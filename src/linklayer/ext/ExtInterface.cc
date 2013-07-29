@@ -212,4 +212,11 @@ void ExtInterface::finish()
 
 void ExtInterface::flushQueue()
 {
+    // does not have a queue, do nothing
 }
+
+void ExtInterface::clearQueue()
+{
+    // does not have a queue, do nothing
+}
+

@@ -66,17 +66,22 @@ class INET_API PPP : public MACBase, public cListener
     static simsignal_t packetReceivedFromUpperSignal;
 
   protected:
-    virtual InterfaceEntry *createInterfaceEntry();
     virtual void startTransmitting(cPacket *msg);
     virtual PPPFrame *encapsulate(cPacket *msg);
     virtual cPacket *decapsulate(PPPFrame *pppFrame);
     virtual void displayBusy();
     virtual void displayIdle();
     virtual void updateDisplayString();
-    virtual void receiveSignal(cComponent *src, simsignal_t id, cObject *obj);
     virtual void refreshOutGateConnection(bool connected);
+
+    // cListener function
+    virtual void receiveSignal(cComponent *src, simsignal_t id, cObject *obj);
+
+    // MACBase functions
+    virtual InterfaceEntry *createInterfaceEntry();
     virtual bool isUpperMsg(cMessage *msg) {return msg->arrivedOn("netwIn");}
     virtual void flushQueue();
+    virtual void clearQueue();
 
   public:
     PPP();

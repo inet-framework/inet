@@ -105,6 +105,7 @@ class INET_API EtherMACBase : public MACBase, public cListener
         int getQueueLimit() const { return queueLimit; }
         bool isFull() const { return queueLimit != 0 && queue.length() > queueLimit; }
         int length() const { return queue.length(); }
+        void clear() { queue.clear(); }
     };
 
     class MacQueue
@@ -205,7 +206,6 @@ class INET_API EtherMACBase : public MACBase, public cListener
     virtual void initializeMACAddress();
     virtual void initializeQueueModule();
     virtual void initializeStatistics();
-    virtual InterfaceEntry *createInterfaceEntry();
 
     // finish
     virtual void finish();
@@ -224,7 +224,11 @@ class INET_API EtherMACBase : public MACBase, public cListener
     virtual void getNextFrameFromQueue();
     virtual void requestNextFrameFromExtQueue();
     virtual void processConnectDisconnect();
+
+    // MACBase
+    virtual InterfaceEntry *createInterfaceEntry();
     virtual void flushQueue();
+    virtual void clearQueue();
     virtual bool isUpperMsg(cMessage *msg) {return msg->getArrivalGate() == upperLayerInGate;}
 
     // display
