@@ -161,6 +161,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
     datMsg->setSid(streamId);
     datMsg->setPpid(ppid);
     datMsg->setEnqueuingTime(simulation.getSimTime());
+    datMsg->setSackNow(sendCommand->getSackNow());
 
     // ------ PR-SCTP & Drop messages to free buffer space ----------------
     datMsg->setPrMethod(sendCommand->getPrMethod());

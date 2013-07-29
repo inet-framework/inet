@@ -35,6 +35,10 @@ SCTPMessage& SCTPMessage::operator=(const SCTPMessage& other)
 void SCTPMessage::copy(const SCTPMessage& other)
 {
      this->setTag(other.getTag());
+     this->setSrcPort(other.getSrcPort());
+     this->setDestPort(other.getDestPort());
+     this->setChecksumOk(other.getChecksumOk());
+     this->setByteLength(SCTP_COMMON_HEADER);
      for (std::list<cPacket*>::const_iterator i=other.chunkList.begin(); i!=other.chunkList.end(); ++i)
           addChunk((cPacket *)(*i)->dup());
 }
@@ -88,7 +92,7 @@ void SCTPMessage::addChunk(cPacket* msg)
         snprintf(str, sizeof(str), "%s %s", this->getName(), msg->getName());
         this->setName(str);
     }
-    this->setBitLength(this->getBitLength()+ADD_PADDING(msg->getBitLength()/8)*8);
+    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
     chunkList.push_back(msg);
 }
 
@@ -100,7 +104,7 @@ cPacket *SCTPMessage::removeChunk()
     cPacket *msg = chunkList.front();
     chunkList.pop_front();
     drop(msg);
-    this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
+    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
     return msg;
 }
 
@@ -112,7 +116,7 @@ cPacket *SCTPMessage::removeLastChunk()
     cPacket *msg = chunkList.back();
     chunkList.pop_back();
     drop(msg);
-    this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
+    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
     return msg;
 }
 
@@ -179,7 +183,7 @@ void SCTPErrorChunk::addParameters(cPacket* msg)
 {
      take(msg);
 
-     this->setBitLength(this->getBitLength()+ADD_PADDING(msg->getBitLength()));
+     this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
      parameterList.push_back(msg);
 }
 
@@ -191,7 +195,7 @@ cPacket *SCTPErrorChunk::removeParameter()
     cPacket *msg = parameterList.front();
     parameterList.pop_front();
     drop(msg);
-    this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
+    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
     return msg;
 }
 
@@ -216,7 +220,7 @@ SCTPStreamResetChunk& SCTPStreamResetChunk::operator=(const SCTPStreamResetChunk
 {
     SCTPStreamResetChunk_Base::operator=(other);
 
-    this->setBitLength(SCTP_STREAM_RESET_CHUNK_LENGTH*8);
+    this->setByteLength(SCTP_STREAM_RESET_CHUNK_LENGTH);
     for (std::list<cPacket*>::const_iterator i=other.parameterList.begin(); i!=other.parameterList.end(); ++i)
         addParameter((cPacket *)(*i)->dup());
 
@@ -251,7 +255,7 @@ void SCTPStreamResetChunk::addParameter(cPacket* msg)
     take(msg);
     if (this->parameterList.size()<2)
     {
-        this->setBitLength(this->getBitLength()+ADD_PADDING(msg->getBitLength()));
+        this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
         parameterList.push_back(msg);
     }
     else
@@ -266,7 +270,7 @@ cPacket *SCTPStreamResetChunk::removeParameter()
     cPacket *msg = parameterList.front();
     parameterList.pop_front();
     drop(msg);
-    this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
+    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
     return msg;
 }
 
@@ -277,7 +281,7 @@ SCTPAsconfChunk& SCTPAsconfChunk::operator=(const SCTPAsconfChunk& other)
 {
     SCTPAsconfChunk_Base::operator=(other);
 
-    this->setBitLength(SCTP_ADD_IP_CHUNK_LENGTH*8);
+    this->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH);
     for (std::list<cPacket*>::const_iterator i=other.parameterList.begin(); i!=other.parameterList.end(); ++i)
         addAsconfParam((cPacket *)(*i)->dup());
 
@@ -310,13 +314,8 @@ void SCTPAsconfChunk::setAsconfParams(const uint32 k, const cPacketPtr& chunks_v
 void SCTPAsconfChunk::addAsconfParam(cPacket* msg)
 {
     take(msg);
-    //if (this->parameterList.size()<2)
-    //{
-    this->setBitLength(this->getBitLength()+ADD_PADDING(msg->getBitLength()));
+    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
     parameterList.push_back(msg);
-    /*}
-   else
-      throw cRuntimeError("Not more than two parameters allowed!");*/
 }
 
 cPacket *SCTPAsconfChunk::removeAsconfParam()
@@ -327,7 +326,7 @@ cPacket *SCTPAsconfChunk::removeAsconfParam()
     cPacket *msg = parameterList.front();
     parameterList.pop_front();
     drop(msg);
-    this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
+    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
     return msg;
 }
 
@@ -338,7 +337,7 @@ SCTPAsconfAckChunk& SCTPAsconfAckChunk::operator=(const SCTPAsconfAckChunk& othe
 {
     SCTPAsconfAckChunk_Base::operator=(other);
 
-    this->setBitLength(SCTP_ADD_IP_CHUNK_LENGTH*8);
+    this->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH);
     for (std::list<cPacket*>::const_iterator i=other.parameterList.begin(); i!=other.parameterList.end(); ++i)
         addAsconfResponse((cPacket *)(*i)->dup());
 
@@ -371,13 +370,8 @@ void SCTPAsconfAckChunk::setAsconfResponse(const uint32 k, const cPacketPtr& chu
 void SCTPAsconfAckChunk::addAsconfResponse(cPacket* msg)
 {
     take(msg);
-    /*if (this->parameterList.size()<2)
-   {*/
-    this->setBitLength(this->getBitLength()+ADD_PADDING(msg->getBitLength()));
+    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
     parameterList.push_back(msg);
-    /*}
-   else
-      throw cRuntimeError("Not more than two parameters allowed!");*/
 }
 
 cPacket *SCTPAsconfAckChunk::removeAsconfResponse()
@@ -388,7 +382,7 @@ cPacket *SCTPAsconfAckChunk::removeAsconfResponse()
     cPacket *msg = parameterList.front();
     parameterList.pop_front();
     drop(msg);
-    this->setBitLength(this->getBitLength()-ADD_PADDING(msg->getBitLength()/8)*8);
+    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
     return msg;
 }
 

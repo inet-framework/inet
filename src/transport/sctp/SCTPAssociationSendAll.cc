@@ -115,6 +115,7 @@ SCTPDataVariables* SCTPAssociation::makeDataVarFromDataMsg(SCTPDataMsg*         
 
     datVar->bbit = datMsg->getBBit();
     datVar->ebit = datMsg->getEBit();
+    datVar->ibit = datMsg->getSackNow();
     datVar->enqueuingTime = datMsg->getEnqueuingTime();
     datVar->expiryTime = datMsg->getExpiryTime();
     datVar->ppid = datMsg->getPpid();
@@ -895,6 +896,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables* pathId, bool firstPass)
                             sendOneMorePacket = false;
                             bytesToSend = 0;
                             bytes.packet = false;
+                            chunkPtr->setIBit(sctpMain->sackNow);
                         }
 
                         if (dataChunksAdded > 0) {

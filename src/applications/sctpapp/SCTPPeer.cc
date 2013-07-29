@@ -159,6 +159,7 @@ void SCTPPeer::generateAndSend(SCTPConnectInfo *connectInfo)
     }
     msg->setDataLen(numBytes);
     msg->setByteLength(numBytes);
+    msg->setEncaps(false);
     cmsg->encapsulate(msg);
     SCTPSendCommand *cmd = new SCTPSendCommand();
     cmd->setAssocId(serverAssocId);
@@ -606,6 +607,7 @@ void SCTPPeer::sendRequest(bool last)
     }
 
     msg->setDataLen(numBytes);
+    msg->setEncaps(false);
     msg->setBitLength(numBytes * 8);
     msg->setCreationTime(simulation.getSimTime());
     cmsg->encapsulate(msg);

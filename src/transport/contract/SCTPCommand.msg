@@ -131,6 +131,7 @@ class SCTPSendCommand extends SCTPCommand
     bool last;
     unsigned int ppid = 0;
     bool primary = true;
+    bool sackNow = false;
 }
 
 

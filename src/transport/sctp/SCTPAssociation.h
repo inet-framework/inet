@@ -119,6 +119,7 @@ enum SCTPChunkTypes
     AUTH                = 15,
     NR_SACK             = 16,
     ASCONF_ACK          = 128,
+    PKTDROP             = 129,
     STREAM_RESET        = 130,
     FORWARD_TSN         = 192,
     ASCONF              = 193
@@ -221,6 +222,7 @@ enum SCTPStreamSchedulers
 #define SCTP_ADD_IP_CHUNK_LENGTH        8
 #define SCTP_ADD_IP_PARAMETER_LENGTH    8
 #define SCTP_AUTH_CHUNK_LENGTH          8
+#define SCTP_PKTDROP_CHUNK_LENGTH       16  // without included dropped packet
 #define SHA_LENGTH                      20
 #define IP_HEADER_LENGTH                20
 #define SCTP_DEFAULT_ARWND              (1<<16)
@@ -429,6 +431,7 @@ class INET_API SCTPDataVariables : public cObject
         bool                bbit;
         bool                ebit;
         bool                ordered;
+        bool                ibit;
 
         // ====== Retransmission Management ===================================
         uint32              gapReports;
@@ -445,6 +448,8 @@ class INET_API SCTPDataVariables : public cObject
         bool                hasBeenTimerBasedRtxed;    // Has chunk been timer-based retransmitted?
         bool                hasBeenMoved;              // Chunk has been moved to solve buffer blocking
         simtime_t           firstSendTime;
+        bool                wasDropped;                // For receiving side of PKTDROP: chunk dropped
+        bool                wasPktDropped;             // Stays true even if the TSN has been transmitted
         bool                strReset;
         uint32              prMethod;
         uint32              priority;
@@ -567,6 +572,7 @@ class INET_API SCTPStateVariables : public cObject
         uint32                      swsLimit;
         bool                        lastMsgWasFragment;
         bool                        enableHeartbeats;
+        bool                        sendHeartbeatsOnActivePaths;
         SCTPMessage*                sctpMsg;
         uint16                      chunksAdded;
         uint16                      dataChunksAdded;
@@ -578,6 +584,8 @@ class INET_API SCTPStateVariables : public cObject
         uint32                      gapReportLimit;
         bool                        disableReneging;
 
+        // ====== Retransmission Method =======================================
+        uint32                      rtxMethod;
         // ====== Max Burst ===================================================
         uint32                      maxBurst;
         
@@ -619,6 +627,8 @@ class INET_API SCTPStateVariables : public cObject
         // ====== Further features ============================================
         bool                        osbWithHeader;
         bool                        padding;
+        bool                        pktDropSent;
+        bool                        peerPktDrop;
         uint32                      advancedPeerAckPoint;
         uint32                      prMethod;
         bool                        peerAllowsChunks;        // Flowcontrol: indicates whether the peer adjusts the window according to a number of messages
@@ -883,6 +893,7 @@ class INET_API SCTPAssociation : public cObject
         SCTPEventCode processSackArrived(SCTPSackChunk* sackChunk);
         SCTPEventCode processHeartbeatAckArrived(SCTPHeartbeatAckChunk* heartbeatack, SCTPPathVariables* path);
         SCTPEventCode processForwardTsnArrived(SCTPForwardTsnChunk* forChunk);
+        bool processPacketDropArrived(SCTPPacketDropChunk* pktdrop);
         void processErrorArrived(SCTPErrorChunk* error);
         //@}
 
@@ -995,6 +1006,7 @@ class INET_API SCTPAssociation : public cObject
         void sendStreamResetResponse(SCTPSSNTSNResetRequestParameter* requestParam,
                                  bool                             options);
         void sendOutgoingResetRequest(SCTPIncomingSSNResetRequestParameter* requestParam);
+        void sendPacketDrop(const bool flag);
         void sendHMacError(const uint16 id);
 
         SCTPForwardTsnChunk* createForwardTsnChunk(const IPvXAddress& pid);

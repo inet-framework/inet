@@ -397,6 +397,7 @@ void SCTPClient::sendRequest(bool last)
         msg->setData(i, 'a');
 
     msg->setDataLen(sendBytes);
+    msg->setEncaps(false);
     msg->setByteLength(sendBytes);
     msg->setCreationTime(simulation.getSimTime());
     cmsg->encapsulate(msg);

@@ -147,6 +147,7 @@ message SCTPDataMsg extends cPacket
     uint32 prMethod;
     uint32 priority;
     bool strReset;
+    bool sackNow;
 }
 
 message SCTPDataChunk extends SCTPChunk
@@ -155,6 +156,7 @@ message SCTPDataChunk extends SCTPChunk
     bool eBit = 0;
     bool bBit = 0;
     bool uBit = 0;
+    bool iBit = 0;
     // Transmission Sequence Number
     uint32 tsn;
     // Stream identifier
@@ -243,6 +245,17 @@ message SCTPErrorChunk extends SCTPChunk
 message SCTPParameter extends cPacket
 {
     uint16 parameterType;
+}
+
+message SCTPPacketDropChunk extends SCTPChunk
+{
+    bool cFlag;
+    bool tFlag;
+    bool bFlag;
+    bool mFlag;
+    uint32 maxRwnd;
+    uint32 queuedData;
+    uint16 truncLength;
 }
 
 message SCTPStreamResetChunk extends SCTPChunk

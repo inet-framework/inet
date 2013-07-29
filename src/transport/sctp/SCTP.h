@@ -205,6 +205,9 @@ class INET_API SCTP : public cSimpleModule
         uint32 numPacketsDropped;
         bool auth;
         bool addIP;
+        bool pktdrop;
+        bool sackNow;
+        uint64 numPktDropReports;
 
     public:
         virtual ~SCTP();

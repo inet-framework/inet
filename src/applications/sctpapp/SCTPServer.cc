@@ -125,6 +125,7 @@ void SCTPServer::generateAndSend()
         msg->setData(i, 's');
 
     msg->setDataLen(numBytes);
+    msg->setEncaps(false);
     msg->setBitLength(numBytes * 8);
     cmsg->encapsulate(msg);
     SCTPSendCommand *cmd = new SCTPSendCommand("Send1");

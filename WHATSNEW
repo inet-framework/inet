@@ -16,6 +16,9 @@ NEW:
   - Implemented Add-IP feature for SCTP (RFC 5061) (patch submitted by Irene Rüngeler).
   - Added NR_SACK feature to SCTP (patch submitted by Irene Rüngeler)
   - Added Partial Reliability SCTP (RFC 3758) (patch submitted by Irene Rüngeler)
+  - Added SCTP packet drop feature  (draft-stewart-sctp-pktdrprep-15.txt)
+  - Added SCTP "sack immediately" feature (draft-ietf-tsvwg-sctp-sack-immediately) 
+  - Added several alternatives to send fast retransmissions on SCTP.
 
 
 INET-2.1.0 (Jan 31, 2013)

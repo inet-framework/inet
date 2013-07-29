@@ -103,6 +103,9 @@ void SCTP::initialize()
         testTimeout = (simtime_t)netw->par("testTimeout");
     }
     this->auth = (bool)par("auth");
+    this->pktdrop = (bool)par("packetDrop");
+    this->sackNow = (bool)par("sackNow");
+    numPktDropReports = 0;
     numPacketsReceived = 0;
     numPacketsDropped = 0;
     sizeAssocMap = 0;
@@ -166,7 +169,7 @@ void SCTP::handleMessage(cMessage *msg)
 
         numPacketsReceived++;
 
-        if ((sctpmsg->hasBitError() || !(sctpmsg->getChecksumOk()))) {
+        if (!pktdrop && (sctpmsg->hasBitError() || !(sctpmsg->getChecksumOk()))) {
             sctpEV3<<"Packet has bit-error. delete it\n";
 
             bitError = true;
@@ -909,11 +912,15 @@ void SCTP::finish()
             recordScalar("fair lifetime", assoc.fairLifeTime);
             recordScalar("fair throughput", assoc.fairThroughput);
         }
+        recordScalar("Number of PacketDrop Reports", numPktDropReports);
+
         if (assoc.numEndToEndMessages > 0 && (assoc.cumEndToEndDelay / assoc.numEndToEndMessages) > 0) {
             uint32 msgnum = assoc.numEndToEndMessages - assoc.startEndToEndDelay;
             if (assoc.stopEndToEndDelay > 0)
                 msgnum -= (assoc.numEndToEndMessages - assoc.stopEndToEndDelay);
             recordScalar("Average End to End Delay", assoc.cumEndToEndDelay / msgnum);
         }
+
+        recordScalar("RTXMethod", (double)par("RTXMethod"));
     }
 }

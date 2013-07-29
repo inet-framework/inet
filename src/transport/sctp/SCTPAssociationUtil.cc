@@ -197,6 +197,7 @@ uint32 SCTPAssociation::chunkToInt(const char* type)
     if (strcmp(type, "AUTH")==0) return 15;
     if (strcmp(type, "NR-SACK")==0) return 16;
     if (strcmp(type, "ASCONF_ACK")==0) return 128;
+    if (strcmp(type, "PKTDROP")==0) return 129;
     if (strcmp(type, "STREAM_RESET")==0) return 130;
     if (strcmp(type, "FORWARD_TSN")==0) return 192;
     if (strcmp(type, "ASCONF")==0) return 193;
@@ -546,6 +547,10 @@ void SCTPAssociation::sendInit()
         length += initChunk->getChunkTypesArraySize()+46;
     }
 
+    if (sctpMain->pktdrop) {
+        initChunk->setSepChunksArraySize(++count);
+        initChunk->setSepChunks(count-1, PKTDROP);
+    }
     if (state->streamReset == true) {
         initChunk->setSepChunksArraySize(++count);
         initChunk->setSepChunks(count-1, STREAM_RESET);
@@ -745,6 +750,12 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
     }
     else
         initAckChunk->setUnrecognizedParametersArraySize(0);
+
+    if (sctpMain->pktdrop)
+    {
+        initAckChunk->setSepChunksArraySize(++count);
+        initAckChunk->setSepChunks(count-1, PKTDROP);
+    }
 
     if (state->streamReset == true)
     {
@@ -1072,6 +1083,84 @@ void SCTPAssociation::retransmitShutdownAck()
     sendToIP(sctpmsg);
 }
 
+void SCTPAssociation::sendPacketDrop(const bool flag)
+{
+    sctpEV3 << "sendPacketDrop:\t";
+    SCTPMessage* drop = (SCTPMessage *)state->sctpmsg->dup();
+    if (drop->getChunksArraySize()==1)
+    {
+        SCTPChunk* header = (SCTPChunk*)(drop->getChunks(0));
+        if (header->getChunkType()==PKTDROP)
+        {
+            disposeOf(state->sctpmsg);
+            delete drop;
+            return;
+        }
+    }
+    SCTPMessage *sctpmsg = new SCTPMessage();
+    sctpmsg->setBitLength(SCTP_COMMON_HEADER*8);
+    SCTPPacketDropChunk* pktdrop = new SCTPPacketDropChunk("PKTDROP");
+    pktdrop->setChunkType(PKTDROP);
+    pktdrop->setCFlag(false);
+    pktdrop->setTFlag(false);
+    pktdrop->setBFlag(flag);
+    pktdrop->setMFlag(false);
+    pktdrop->setMaxRwnd(sctpMain->par("arwnd"));
+    pktdrop->setQueuedData(state->queuedReceivedBytes);
+    pktdrop->setTruncLength(0);
+    pktdrop->setByteLength(SCTP_PKTDROP_CHUNK_LENGTH);
+    std::cout << "length of msg to encapsulate=" << drop->getByteLength() << "\n";
+    uint16 mss = getPath(remoteAddr)->pmtu - SCTP_COMMON_HEADER - SCTP_DATA_CHUNK_LENGTH - IP_HEADER_LENGTH;
+    if (drop->getByteLength()>mss)
+    {
+        uint16 diff = drop->getByteLength()-mss;
+        pktdrop->setTruncLength(drop->getByteLength());
+        SCTPChunk* chunk = (SCTPChunk*)(drop->removeLastChunk());
+        if (chunk->getChunkType()==DATA)
+        {
+            SCTPDataChunk* dataChunk = check_and_cast<SCTPDataChunk*>(chunk);
+            SCTPSimpleMessage* smsg = check_and_cast <SCTPSimpleMessage*>(dataChunk->decapsulate());
+            if (smsg->getDataLen() > diff)
+            {
+                uint16 newLength = smsg->getDataLen()-diff;
+                smsg->setDataArraySize(newLength);
+                for (uint16 i=0; i<newLength; i++)
+                    smsg->setData(i, 'a');
+                smsg->setDataLen(newLength);
+                smsg->setEncaps(false);
+                smsg->setByteLength(newLength);
+                dataChunk->encapsulate(smsg);
+                drop->addChunk(dataChunk);
+            }
+            else if (drop->getChunksArraySize()==1)
+            {
+                delete chunk;
+                delete pktdrop;
+                disposeOf(state->sctpmsg);
+                disposeOf(drop);
+                sctpEV3 << "laenge=" << drop->getByteLength() << " numberOfChunks=1\n";
+                return;
+            }
+        }
+        else
+        {
+            delete pktdrop;
+            disposeOf(state->sctpmsg);
+            disposeOf(drop);
+            sctpEV3 << "laenge=" << drop->getByteLength() << " numberOfChunks=1\n";
+            return;
+        }
+        pktdrop->setTFlag(true);
+    }
+    pktdrop->encapsulate(drop);
+    sctpEV3 << "length of PKTDROP chunk=" << pktdrop->getBitLength()/8 << "\n";
+    sctpmsg->addChunk(pktdrop);
+    sctpEV3 << "total length now " << sctpmsg->getByteLength() << "\n";
+    disposeOf(state->sctpmsg);
+    state->pktDropSent = true;
+    sctpMain->numPktDropReports++;
+    sendToIP(sctpmsg);
+}
 
 void SCTPAssociation::scheduleSack()
 {
@@ -1657,6 +1746,7 @@ SCTPDataChunk* SCTPAssociation::transformDataChunk(SCTPDataVariables* chunk)
     dataChunk->setSid(chunk->sid);
     dataChunk->setSsn(chunk->ssn);
     dataChunk->setPpid(chunk->ppid);
+    dataChunk->setIBit(chunk->ibit);
     dataChunk->setEnqueuingTime(chunk->enqueuingTime);
     dataChunk->setFirstSendTime(chunk->firstSendTime);
     dataChunk->setBitLength(SCTP_DATA_CHUNK_LENGTH*8);
@@ -1819,6 +1909,7 @@ SCTPDataVariables* SCTPAssociation::makeVarFromMsg(SCTPDataChunk* dataChunk)
 
     chunk->bbit = dataChunk->getBBit();
     chunk->ebit = dataChunk->getEBit();
+    chunk->ibit = dataChunk->getIBit();
     chunk->sid = dataChunk->getSid();
     chunk->ssn = dataChunk->getSsn();
     chunk->ppid = dataChunk->getPpid();
@@ -1832,7 +1923,11 @@ SCTPDataVariables* SCTPAssociation::makeVarFromMsg(SCTPDataChunk* dataChunk)
     SCTPSimpleMessage* smsg = check_and_cast<SCTPSimpleMessage*>(dataChunk->decapsulate());
 
     chunk->userData = smsg;
-    chunk->len = smsg->getDataLen()*8;
+    sctpEV3 << "smsg encapsulate? " << smsg->getEncaps() << endl;
+    if (smsg->getEncaps())
+        chunk->len = smsg->getBitLength();
+    else
+        chunk->len = smsg->getDataLen()*8;
     chunk->firstSendTime = dataChunk->getFirstSendTime();
     calculateRcvBuffer();
 
@@ -2043,6 +2138,7 @@ SCTPDataMsg* SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables* path,
                     const uint16 fullSizedPackets = (uint16)(datMsgQueued->getByteLength() / msgbytes);
                     sctpEV3<<"Fragmentation: chunk " << &datMsgQueued << ", size = " << datMsgQueued->getByteLength() << endl;
                     sctpEV3<<assocId<<": number of fullSizedPackets: "<<fullSizedPackets<<endl;
+                    uint16 pcounter = 0;
 
                     while (datMsgQueued)
                     {
@@ -2055,6 +2151,10 @@ SCTPDataMsg* SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables* path,
                         SCTPDataMsg* datMsgFragment = new SCTPDataMsg();
                         datMsgFragment->setSid(datMsgQueued->getSid());
                         datMsgFragment->setPpid(datMsgQueued->getPpid());
+                        if (++pcounter == fullSizedPackets && sctpMain->sackNow)
+                            datMsgFragment->setSackNow(true);
+                        else
+                            datMsgFragment->setSackNow(datMsgQueued->getSackNow());
                         datMsgFragment->setInitialDestination(datMsgQueued->getInitialDestination());
                         datMsgFragment->setEnqueuingTime(datMsgQueued->getEnqueuingTime());
                         datMsgFragment->setPrMethod(datMsgQueued->getPrMethod());
@@ -2123,7 +2223,8 @@ SCTPDataMsg* SCTPAssociation::dequeueOutboundDataMsg(SCTPPathVariables* path,
                         if (datMsgQueuedEncMsg->getByteLength() == offset)
                         {
                             datMsgFragment->setEBit(true);
-
+                            if (sctpMain->sackNow)
+                                datMsgFragment->setSackNow(true);
                             /* remove original element */
                             sctpEV3<<"Fragmentation: delete " << &datMsgQueued << endl;
                             //streamQ->pop();
@@ -2286,14 +2387,16 @@ SCTPPathVariables* SCTPAssociation::getNextDestination(SCTPDataVariables* chunk)
 
 void SCTPAssociation::pmDataIsSentOn(SCTPPathVariables* path)
 {
-    /* restart hb_timer on this path */
-    stopTimer(path->HeartbeatTimer);
-    if (state->enableHeartbeats)
-    {
-        path->heartbeatTimeout = path->pathRto + (double)sctpMain->par("hbInterval");
-        startTimer(path->HeartbeatTimer, path->heartbeatTimeout);
-        sctpEV3 << "Restarting HB timer on path "<< path->remoteAddress
-                  << " to expire at time " << path->heartbeatTimeout << endl;
+    if ( (!state->sendHeartbeatsOnActivePaths) || (!state->enableHeartbeats) ) {
+        /* restart hb_timer on this path */
+        stopTimer(path->HeartbeatTimer);
+        if (state->enableHeartbeats)
+        {
+            path->heartbeatTimeout = path->pathRto + (double)sctpMain->par("hbInterval");
+            startTimer(path->HeartbeatTimer, path->heartbeatTimeout);
+            sctpEV3 << "Restarting HB timer on path " << path->remoteAddress
+                    << " to expire at time " << path->heartbeatTimeout << endl;
+        }
     }
 
     path->cwndTimeout = path->pathRto;
@@ -2516,6 +2619,8 @@ void SCTPAssociation::putInTransmissionQ(const uint32 tsn, SCTPDataVariables* ch
     SCTPQueue::PayloadQueue::iterator it = transmissionQ->payloadQueue.find(tsn);
     if (it == transmissionQ->payloadQueue.end()) {
         sctpEV3 << "putInTransmissionQ: insert tsn=" << tsn << endl;
+        chunk->wasDropped = true;
+        chunk->wasPktDropped = true;
         chunk->hasBeenFastRetransmitted = true;
         chunk->setNextDestination(chunk->getLastDestinationPath());
         if (!transmissionQ->checkAndInsertChunk(chunk->tsn, chunk)) {

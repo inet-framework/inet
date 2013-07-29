@@ -1,3 +1,9 @@
+2013-07-29  Irene Rüngeler
+
+	 Added the packet drop feature  (draft-stewart-sctp-pktdrprep-15.txt), 
+	 the "sack immediately" feature (draft-ietf-tsvwg-sctp-sack-immediately) 
+	 and several alternatives to send fast retransmissions.
+
 2013-07-17  Irene Rüngeler
 
 	Added 8 new strategies for stream scheduling

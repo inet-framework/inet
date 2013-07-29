@@ -240,10 +240,13 @@ SCTPDataVariables::SCTPDataVariables()
     hasBeenAbandoned = false;
     hasBeenFastRetransmitted = false;
     countsAsOutstanding = false;
+    ibit = false;
     queuedOnPath = NULL;
     ackedOnPath = NULL;
     hasBeenMoved = false;
     hasBeenTimerBasedRtxed = false;
+    wasDropped = false;
+    wasPktDropped = false;
     firstSendTime = 0;
     sendForwardIfAbandoned = false;
     lastDestination = NULL;
@@ -288,6 +291,8 @@ SCTPStateVariables::SCTPStateVariables()
     peerWindowFull = false;
     zeroWindow = false;
     padding = false;
+    pktDropSent = false;
+    peerPktDrop = false;
     appSendAllowed = true;
     noMoreOutstanding = false;
     primaryPath = NULL;
@@ -331,6 +336,7 @@ SCTPStateVariables::SCTPStateVariables()
     queuedDroppableBytes = 0;
     lastMsgWasFragment = false;
     enableHeartbeats = true;
+    sendHeartbeatsOnActivePaths = false;
     sizeKeyVector = 0;
     sizePeerKeyVector = 0;
     auth = false;
@@ -1010,8 +1016,10 @@ void SCTPAssociation::stateEntered(int32 status)
 
             state->nagleEnabled = (bool)sctpMain->par("nagleEnabled");
             state->enableHeartbeats = (bool)sctpMain->par("enableHeartbeats");
+            state->sendHeartbeatsOnActivePaths = (bool)sctpMain->par("sendHeartbeatsOnActivePaths");
             state->numGapReports = sctpMain->par("numGapReports");
             state->maxBurst = (uint32)sctpMain->par("maxBurst");
+            state->rtxMethod = sctpMain->par("RTXMethod");
             state->nrSack = (bool)sctpMain->par("nrSack");
             state->disableReneging = (bool)sctpMain->par("disableReneging");
             state->checkSackSeqNumber = (bool)sctpMain->par("checkSackSeqNumber");

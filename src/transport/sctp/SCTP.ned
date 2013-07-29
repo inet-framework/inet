@@ -49,6 +49,7 @@ simple SCTP like ISCTP
         //#====== Heartbeats ==================================================
         bool enableHeartbeats = default(true);
         double hbInterval @unit(s) = default(30s);
+        bool sendHeartbeatsOnActivePaths = default(false);
 
         //#====== Nagle Algorithm =============================================
         bool nagleEnabled = default(true);
@@ -59,6 +60,7 @@ simple SCTP like ISCTP
         string sctpAlgorithmClass = default("SCTPAlg");
         int ccModule = default(0);           // RFC4960=0
         bool osbWithHeader = default(false);
+        int RTXMethod = default(0);        // 0=Once after 3 Sacks; 1=once per RTT; 2=Switch off Fast Retransmit; 3=Always after 3 Sacks
 
         //#====== Other Parameters ============================================
         int ssModule = default(0);           // ROUND_ROBIN=0
@@ -86,6 +88,12 @@ simple SCTP like ISCTP
         double addTime @unit(s) = default(0s);
         string addAddress = default("");
         string addIpType = default("0");      // SET_PRIMARY_ADDRESS=49156,ADD_IP_ADDRESS=49153,DELETE_IP_ADDRESS=49154
+
+        //#====== Packet Drop =================================================
+        bool packetDrop = default(false);
+
+        //#====== SACK Now ====================================================
+        bool sackNow = default(false);
 
         //#====== SACK Sequence Numbers =======================================
         bool checkSackSeqNumber = default(false);
