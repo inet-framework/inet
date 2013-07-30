@@ -232,13 +232,13 @@ void RoutingTable6::receiveChangeNotification(int category, const cObject *detai
     else if (category==NF_INTERFACE_DELETED)
     {
         //TODO remove all routes that point to that interface (?)
-        InterfaceEntry *interfaceEntry = check_and_cast<InterfaceEntry*>(details);
+        const InterfaceEntry *interfaceEntry = check_and_cast<const InterfaceEntry*>(details);
         int interfaceEntryId = interfaceEntry->getInterfaceId();
         purgeDestCacheForInterfaceID(interfaceEntryId);
     }
     else if (category==NF_INTERFACE_STATE_CHANGED)
     {
-        InterfaceEntry *interfaceEntry = check_and_cast<InterfaceEntry*>(details);
+        const InterfaceEntry *interfaceEntry = check_and_cast<const InterfaceEntry*>(details);
         int interfaceEntryId = interfaceEntry->getInterfaceId();
 
         // an interface went down
