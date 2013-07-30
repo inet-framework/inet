@@ -31,12 +31,12 @@ import inet.networklayer.queue.BasicTokenBucketMeter;
 //
 // Note that for CSFQ, new buffer-related amendments have been implemented.
 //
-// @see CSFQVLANQueue, CSFQVLANQueue2, CSFQVLANQueue3 
+// @see CSFQVLANQueue, CSFQVLANQueue2, CSFQVLANQueue3, CSFQVLANQueue4
 //
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
-// @date   2013-07-26
+// @date   2013-07-30
 //
-simple CSFQVLANQueue4 like OutputQueue
+simple CSFQVLANQueue5 like OutputQueue
 {
     parameters:
         @labels(node,queue-node);

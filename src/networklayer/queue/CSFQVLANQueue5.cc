@@ -17,28 +17,11 @@
 //
 
 
-#include "CSFQVLANQueue4.h"
+#include "CSFQVLANQueue5.h"
 
-Define_Module(CSFQVLANQueue4);
+Define_Module(CSFQVLANQueue5);
 
-void CSFQVLANQueue4::initialize(int stage)
-{
-    CSFQVLANQueue3::initialize(stage);
-
-    if (stage == 1)
-    {   // the following should be initialized in the 2nd stage (stage==1)
-        // because token bucket meters are not initialized in the 1st stage yet.
-
-        thresholdScaleFactor = par("thresholdScaleFactor").doubleValue();
-        lowerThreshold = int((1.0 - thresholdScaleFactor)*queueThreshold);
-        upperThreshold = int((1.0 + thresholdScaleFactor)*queueThreshold);
-        thresholdPassed = false;
-        max_beta = par("max_beta").longValue();
-        kbeta = max_beta;
-    }   // end of if () for stage checking
-}
-
-void CSFQVLANQueue4::handleMessage(cMessage *msg)
+void CSFQVLANQueue5::handleMessage(cMessage *msg)
 {
     if (warmupFinished == false)
     {   // start statistics gathering once the warm-up period has passed.
@@ -104,8 +87,7 @@ void CSFQVLANQueue4::handleMessage(cMessage *msg)
                         numPktsDropped[flowIndex]++;
                     }
 
-                    // decrease fairShareRate; the number of times it is decreased
-                    // during an interval of length k is bounded by kalpha.
+                    // decrease fairShareRate; the number of times it is decreased during an interval of length k is bounded by kalpha.
                     // This is to avoid overcorrection.
                     if (kalpha-- >= 0)
                     {
@@ -114,23 +96,39 @@ void CSFQVLANQueue4::handleMessage(cMessage *msg)
                 }
             }
 
-            if (thresholdPassed)
-            {
-                // decrease fairShareRate; the number of times it is decreased
-                // during an interval of length k is bounded by max_beta.
-                // This is to avoid overcorrection.
-                if (kbeta-- > 0)
-                {
-                    // fairShareRate *= 0.99;
-                    fairShareRate *= 0.7;
-                }
-            }
+//            if (thresholdPassed)
+//            {
+//                // decrease fairShareRate; the number of times it is decreased during an interval of length k is bounded by max_beta.
+//                // This is to avoid overcorrection.
+//                if (kbeta-- > 0)
+//                {
+//                    // fairShareRate *= 0.99;
+//                    fairShareRate *= 0.7;
+//                }
+//            }
         }
         else
         {   // frame is not conformed
             double rate = estimateRate(flowIndex, pktLength, simTime(), 1);
-            if ( thresholdPassed || (fairShareRate * weight[flowIndex] / rate < dblrand()) )
-            // if (fairShareRate * weight[flowIndex] / rate < dblrand())
+            if (thresholdPassed)
+            {
+                // decrease fairShareRate; the number of times it is decreased during an interval of length k is bounded by max_beta.
+                // This is to avoid overcorrection.
+                if (kbeta-- > 0)
+                {
+                     fairShareRate *= 0.91;
+                }
+            }
+            else
+            {
+                kbeta = max_beta;
+                if (fairShareRate == 0.0)
+                {
+                    fairShareRate = std::min(rate, excessBW);   // initialize
+                }
+            }
+//            if ( thresholdPassed || (fairShareRate * weight[flowIndex] / rate < dblrand()) )
+             if (fairShareRate * weight[flowIndex] / rate < dblrand())
             {   // probabilistically drop the frame
 #ifndef NDEBUG
                 double normalizedRate = rate / weight[flowIndex];
@@ -196,17 +194,17 @@ void CSFQVLANQueue4::handleMessage(cMessage *msg)
 
 
             }
-            if (thresholdPassed)
-            {
-                // decrease fairShareRate; the number of times it is decreased
-                // during an interval of length k is bounded by max_beta.
-                // This is to avoid overcorrection.
-                if (kbeta-- > 0)
-                {
-                    // fairShareRate *= 0.99;
-                    fairShareRate *= 0.7;
-                }
-            }
+//            if (thresholdPassed)
+//            {
+//                // decrease fairShareRate; the number of times it is decreased
+//                // during an interval of length k is bounded by max_beta.
+//                // This is to avoid overcorrection.
+//                if (kbeta-- > 0)
+//                {
+//                    // fairShareRate *= 0.99;
+//                    fairShareRate *= 0.7;
+//                }
+//            }
 #ifndef NDEBUG
             fairShareRateVector.record(fairShareRate);
             rateTotalVector.record(rateTotal);
@@ -232,7 +230,7 @@ void CSFQVLANQueue4::handleMessage(cMessage *msg)
 // - rate: estimated normalized flow rate
 // - arrvTime: packet arrival time
 // - dropped: flag indicating whether the packet is dropped or not
-void CSFQVLANQueue4::estimateAlpha(int pktLength, double rate, simtime_t arrvTime, bool dropped)
+void CSFQVLANQueue5::estimateAlpha(int pktLength, double rate, simtime_t arrvTime, bool dropped)
 {
     double T = (arrvTime - lastArv).dbl();   // packet interarrival
     double k = K_alpha;    // the window size (i.e., K_c)
@@ -269,7 +267,7 @@ void CSFQVLANQueue4::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
             congested = true;
             startTime = arrvTime;
             kalpha = max_alpha;
-            kbeta = max_beta;
+//            kbeta = max_beta;
             if (fairShareRate == 0.0)
             {
                 fairShareRate = std::min(rate, excessBW);   // initialize

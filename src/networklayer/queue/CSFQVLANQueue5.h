@@ -17,10 +17,10 @@
 //
 
 
-#ifndef __INET_CSFQVLANQUEUE4_H
-#define __INET_CSFQVLANQUEUE4_H
+#ifndef __INET_CSFQVLANQUEUE5_H
+#define __INET_CSFQVLANQUEUE5_H
 
-#include "CSFQVLANQueue3.h"
+#include "CSFQVLANQueue4.h"
 
 /**
  * Incoming packets are classified by an external VLAN classifier and
@@ -30,20 +30,8 @@
  * bandwidth.
  * See NED for more info.
  */
-class INET_API CSFQVLANQueue4 : public CSFQVLANQueue3
+class INET_API CSFQVLANQueue5 : public CSFQVLANQueue4
 {
-  protected:
-    // CSFQ++: System-wide variables
-    bool thresholdPassed;   // flag indicating whether queue passes threshold or not
-    double thresholdScaleFactor;    // scaling factor used to determine queue threshold lower and upper limits
-    int lowerThreshold;
-    int upperThreshold;
-    int max_beta;   // maximum number of times fair rate (alpha) can be decreased when the queue passes threshold, during a time interval of length K_alpha
-    int kbeta;      // counter for the number of times the fair rate decreases due to queue's passing the threshold
-
-  protected:
-    virtual void initialize(int stage);
-
     /**
      * Redefined from PassiveQueueBase.
      */
