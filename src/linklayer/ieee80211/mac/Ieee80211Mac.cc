@@ -499,7 +499,6 @@ InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
     e->setMACAddress(address);
     e->setInterfaceToken(address.formInterfaceIdentifier());
 
-    // FIXME: MTU on 802.11 = ?
     e->setMtu(par("mtu").longValue());
 
     // capabilities

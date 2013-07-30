@@ -18,7 +18,6 @@ ByteArrayBuffer::ByteArrayBuffer()
  :
     dataLengthM(0)
 {
-    // FIXME
 }
 
 ByteArrayBuffer::ByteArrayBuffer(const ByteArrayBuffer& other)
