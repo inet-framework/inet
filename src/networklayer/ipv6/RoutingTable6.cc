@@ -242,7 +242,7 @@ void RoutingTable6::receiveChangeNotification(int category, const cObject *detai
         int interfaceEntryId = interfaceEntry->getInterfaceId();
 
         // an interface went down
-        if (interfaceEntry->isDown())
+        if (!interfaceEntry->isUp())
         {
             purgeDestCacheForInterfaceID(interfaceEntryId);
         }
