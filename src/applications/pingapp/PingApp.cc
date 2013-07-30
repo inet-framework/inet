@@ -104,7 +104,12 @@ void PingApp::initialize(int stage)
 void PingApp::handleMessage(cMessage *msg)
 {
     if (!isNodeUp())
-        throw cRuntimeError("Application is not running");
+    {
+        if (msg->isSelfMessage())
+            throw cRuntimeError("Application is not running");
+        delete msg;
+        return;
+    }
     if (msg == timer)
     {
         sendPingRequest();
