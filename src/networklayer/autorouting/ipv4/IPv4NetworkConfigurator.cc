@@ -221,11 +221,10 @@ void IPv4NetworkConfigurator::configureRoutingTable(Node *node)
         clone->setSource(original->getSource());
         clone->setOrigin(original->getOrigin());
         clone->setOriginNetmask(original->getOriginNetmask());
-        clone->setParent(original->getParent());
+        clone->setInInterface(original->getInInterface());
         clone->setMulticastGroup(original->getMulticastGroup());
-        const IPv4MulticastRoute::ChildInterfaceVector &children = original->getChildren();
-        for (int j = 0; j < (int)children.size(); j++)
-            clone->addChild(children.at(j)->getInterface(), children.at(j)->isLeaf());
+        for (int j = 0; j < (int)original->getNumOutInterfaces(); j++)
+            clone->addOutInterface(original->getOutInterface(j));
         node->routingTable->addMulticastRoute(clone);
     }
 }
