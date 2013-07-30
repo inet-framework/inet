@@ -167,12 +167,12 @@ void InterfaceEntry::resetInterface()
     if (ipv6data)
         throw cRuntimeError(this, "Model error: ipv6data filled, but INET was compiled without IPv6 support");
 #endif
-    if (protocol3data && protocol3data->ownerp == this)
-        delete protocol3data;
-    protocol3data = NULL;
-    if (protocol4data && protocol4data->ownerp == this)
-        delete protocol4data;
-    protocol4data = NULL;
+    if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this)
+        delete (InterfaceProtocolData *)isisdata;
+    isisdata = NULL;
+    if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this)
+        delete (InterfaceProtocolData *)trilldata;
+    trilldata = NULL;
 }
 
 void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
@@ -203,8 +203,8 @@ void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
 
 void InterfaceEntry::setTRILLInterfaceData(TRILLInterfaceData *p)
 {
-    if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this)
-        delete trilldata;
+    if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this) // Khmm...
+        delete (InterfaceProtocolData *)trilldata; // Khmm...
     trilldata = p;
     ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
     configChanged();
@@ -212,8 +212,8 @@ void InterfaceEntry::setTRILLInterfaceData(TRILLInterfaceData *p)
 
 void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
 {
-    if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this)
-        delete isisdata;
+    if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this) // Khmm...
+        delete (InterfaceProtocolData *)isisdata; // Khmm...
     isisdata = p;
     ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
     configChanged();
@@ -241,3 +241,4 @@ MacEstimateCostProcess* InterfaceEntry::getEstimateCostProcess(int position)
     }
     return NULL;
 }
+
