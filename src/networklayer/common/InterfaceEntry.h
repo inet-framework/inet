@@ -190,8 +190,8 @@ class INET_API InterfaceEntry : public cNamedObject
     //@{
     virtual void setIPv4Data(IPv4InterfaceData *p);
     virtual void setIPv6Data(IPv6InterfaceData *p);
-    virtual void setProtocol3Data(InterfaceProtocolData *p)  {protocol3data = p; configChanged();}
-    virtual void setProtocol4Data(InterfaceProtocolData *p)  {protocol4data = p; configChanged();}
+    virtual void setProtocol3Data(InterfaceProtocolData *p);
+    virtual void setProtocol4Data(InterfaceProtocolData *p);
     //@}
 
     /** @name access to the cost process estimation  */

@@ -72,24 +72,7 @@ InterfaceEntry::InterfaceEntry(cModule* ifmod)
 
 InterfaceEntry::~InterfaceEntry()
 {
-#ifdef WITH_IPv4
-    if (ipv4data && ipv4data->ownerp == this)
-        delete ipv4data;
-#else
-    if (ipv4data)
-        throw cRuntimeError(this, "Model error: ipv4data filled, but INET was compiled without IPv4 support");
-#endif
-#ifdef WITH_IPv6
-    if (ipv6data && ipv6data->ownerp == this)
-        delete ipv6data;
-#else
-    if (ipv6data)
-        throw cRuntimeError(this, "Model error: ipv6data filled, but INET was compiled without IPv6 support");
-#endif
-    if (protocol3data && protocol3data->ownerp == this)
-        delete protocol3data;
-    if (protocol4data && protocol4data->ownerp == this)
-        delete protocol4data;
+    resetInterface();
 }
 
 std::string InterfaceEntry::info() const
@@ -113,9 +96,9 @@ std::string InterfaceEntry::info() const
         out << getMacAddress();
 
     if (ipv4data)
-        out << " " << ((cObject*)ipv4data)->info(); // Khmm...
+        out << " " << ipv4data->info();
     if (ipv6data)
-        out << " " << ((cObject*)ipv6data)->info(); // Khmm...
+        out << " " << ipv6data->info();
     if (protocol3data)
         out << " " << protocol3data->info();
     if (protocol4data)
@@ -145,9 +128,9 @@ std::string InterfaceEntry::detailedInfo() const
         out << getMacAddress();
     out << "\n";
     if (ipv4data)
-        out << " " << ((cObject*)ipv4data)->info() << "\n"; // Khmm...
+        out << " " << ipv4data->info() << "\n";
     if (ipv6data)
-        out << " " << ((cObject*)ipv6data)->info() << "\n"; // Khmm...
+        out << " " << ipv6data->info() << "\n";
     if (protocol3data)
         out << " " << protocol3data->info() << "\n";
     if (protocol4data)
@@ -169,25 +152,33 @@ void InterfaceEntry::changed(int category)
 void InterfaceEntry::resetInterface()
 {
 #ifdef WITH_IPv4
-    delete ipv4data; ipv4data = NULL;
+    if (ipv4data && ipv4data->ownerp == this)
+        delete ipv4data;
+    ipv4data = NULL;
 #else
     if (ipv4data)
         throw cRuntimeError(this, "Model error: ipv4data filled, but INET was compiled without IPv4 support");
 #endif
 #ifdef WITH_IPv6
-    delete ipv6data; ipv6data = NULL;
+    if (ipv6data && ipv6data->ownerp == this)
+        delete ipv6data;
+    ipv6data = NULL;
 #else
     if (ipv6data)
         throw cRuntimeError(this, "Model error: ipv6data filled, but INET was compiled without IPv6 support");
 #endif
-    delete protocol3data; protocol3data = NULL;
-    delete protocol4data; protocol4data = NULL;
+    if (protocol3data && protocol3data->ownerp == this)
+        delete protocol3data;
+    protocol3data = NULL;
+    if (protocol4data && protocol4data->ownerp == this)
+        delete protocol4data;
+    protocol4data = NULL;
 }
 
 void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
 {
 #ifdef WITH_IPv4
-    if (ipv4data)
+    if (ipv4data && ipv4data->ownerp == this)
         delete ipv4data;
     ipv4data = p;
     p->ownerp = this;
@@ -200,14 +191,30 @@ void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
 void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
 {
 #ifdef WITH_IPv6
-    if (ipv6data)
+    if (ipv6data && ipv6data->ownerp == this)
         delete ipv6data;
     ipv6data = p;
     p->ownerp = this;
     configChanged();
 #else
-    throw cRuntimeError(this, "setIPv4Data(): INET was compiled without IPv6 support");
+    throw cRuntimeError(this, "setIPv6Data(): INET was compiled without IPv6 support");
 #endif
+}
+
+void InterfaceEntry::setProtocol3Data(InterfaceProtocolData *p)
+{
+    if (protocol3data && protocol3data->ownerp == this)
+        delete protocol3data;
+    protocol3data = p;
+    configChanged();
+}
+
+void InterfaceEntry::setProtocol4Data(InterfaceProtocolData *p)
+{
+    if (protocol4data && protocol4data->ownerp == this)
+        delete protocol4data;
+    protocol4data = p;
+    configChanged();
 }
 
 bool InterfaceEntry::setEstimateCostProcess(int position, MacEstimateCostProcess *p)
