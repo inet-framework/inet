@@ -20,8 +20,9 @@
 
 package inet.linklayer.loopback;
 
-import inet.base.Nop;
+import inet.base.IHook;
 import inet.linklayer.INic;
+import inet.linklayer.ITrafficConditioner;
 
 
 //
@@ -29,13 +30,40 @@ import inet.linklayer.INic;
 //
 module LoopbackInterface like INic
 {
+    parameters:
+        @display("i=block/ifcard;bgb=214,249;bgl=53");
+        int numOutputHooks = default(0);
+        int numInputHooks = default(0);
     gates:
-        input upperLayerIn;    // from upper layers
-        output upperLayerOut;  // to upper layers
+        input upperLayerIn;
+        output upperLayerOut;
     submodules:
-        nop: Nop;
+        outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0 {
+            @display("p=42,33");
+        }
+        inputHook[numInputHooks]: <default("Nop")> like IHook if numInputHooks>0 {
+            @display("p=177,33");
+        }
+        lo: Loopback {
+            parameters:
+                @display("p=98,207");
+        }
     connections:
-        upperLayerIn --> nop.in;
-        nop.out --> upperLayerOut;
+        upperLayerIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0;
+        upperLayerIn --> { @display("m=n"); } --> lo.netwIn if numOutputHooks == 0;
+
+        for i=0..numOutputHooks-2 {
+            outputHook[i].out --> outputHook[i+1].in;
+        }
+        outputHook[numOutputHooks-1].out --> lo.netwIn if numOutputHooks > 0;
+
+        lo.netwOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0;
+
+        lo.netwOut --> inputHook[0].in if numInputHooks > 0;
+
+        for i=0..numInputHooks-2 {
+            inputHook[i].out --> inputHook[i+1].in;
+        }
+        inputHook[numInputHooks-1].out --> { @display("m=n"); } --> upperLayerOut if numInputHooks > 0;
 }
 
