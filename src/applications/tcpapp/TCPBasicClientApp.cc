@@ -49,9 +49,7 @@ void TCPBasicClientApp::initialize(int stage)
 
     startTime = par("startTime");
     stopTime = par("stopTime");
-    if (stopTime == -1)
-        stopTime = MAXTIME;
-    else if (stopTime < startTime)
+    if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
         error("Invalid startTime/stopTime parameters");
 
     timeoutMsg = new cMessage("timer");
@@ -74,8 +72,12 @@ bool TCPBasicClientApp::handleOperationStage(LifecycleOperation *operation, int 
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
             simtime_t now = simTime();
-            timeoutMsg->setKind(MSGKIND_CONNECT);
-            scheduleAt(now < startTime ? startTime : now, timeoutMsg);
+            simtime_t start = std::max(startTime, now);
+            if (timeoutMsg && ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)))
+            {
+                timeoutMsg->setKind(MSGKIND_CONNECT);
+                scheduleAt(start, timeoutMsg);
+            }
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
@@ -155,7 +157,7 @@ void TCPBasicClientApp::rescheduleOrDeleteTimer(simtime_t d, short int msgKind)
 {
     cancelEvent(timeoutMsg);
 
-    if (d <= stopTime)
+    if (stopTime < SIMTIME_ZERO || d < stopTime)
     {
         timeoutMsg->setKind(msgKind);
         scheduleAt(d, timeoutMsg);

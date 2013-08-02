@@ -85,7 +85,8 @@ void SCTPClient::initialize(int stage)
         sendAllowed = true;
         bufferSize = 0;
 
-        if ((simtime_t)par("stopTime") != -1)
+        simtime_t stopTime = par("stopTime");
+        if (stopTime >= SIMTIME_ZERO)
         {
             stopTimer = new cMessage("StopTimer");
             stopTimer->setKind(MSGKIND_STOP);
@@ -98,11 +99,12 @@ void SCTPClient::initialize(int stage)
             stopTimer = NULL;
         }
 
-        if ((simtime_t)par("primaryTime") != 0)
+        simtime_t primaryTime = par("primaryTime");
+        if (primaryTime != SIMTIME_ZERO)
         {
             primaryChangeTimer = new cMessage("PrimaryTime");
             primaryChangeTimer->setKind(MSGKIND_PRIMARY);
-            scheduleAt((simtime_t)par("primaryTime"), primaryChangeTimer);
+            scheduleAt(primaryTime, primaryChangeTimer);
         }
         else
         {

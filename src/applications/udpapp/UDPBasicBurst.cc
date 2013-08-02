@@ -81,7 +81,7 @@ void UDPBasicBurst::initialize(int stage)
         delayLimit = par("delayLimit");
         startTime = par("startTime");
         stopTime = par("stopTime");
-        if (stopTime != -1 && stopTime <= startTime)
+        if (stopTime >= SIMTIME_ZERO && stopTime <= startTime)
             error("Invalid startTime/stopTime parameters");
 
         messageLengthPar = &par("messageLength");
@@ -194,7 +194,7 @@ void UDPBasicBurst::processStart()
 
 void UDPBasicBurst::processSend()
 {
-    if (stopTime == -1 || simTime() < stopTime)
+    if (stopTime < SIMTIME_ZERO || simTime() < stopTime)
     {
         // send and reschedule next sending
         if (isSource) // if the node is a sink, don't generate messages
@@ -337,7 +337,7 @@ void UDPBasicBurst::generateBurst()
     if (activeBurst && nextPkt >= nextSleep)
         nextPkt = nextBurst;
 
-    if (stopTime != -1 && nextPkt > stopTime)
+    if (stopTime >= SIMTIME_ZERO && nextPkt >= stopTime)
     {
         timerNext->setKind(STOP);
         nextPkt = stopTime;
@@ -357,11 +357,11 @@ bool UDPBasicBurst::startApp(IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
 
-    if (stopTime != -1 && stopTime <= start)
-        return true;
-
-    timerNext->setKind(START);
-    scheduleAt(start, timerNext);
+    if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))
+    {
+        timerNext->setKind(START);
+        scheduleAt(start, timerNext);
+    }
 
     return true;
 }

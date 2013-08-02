@@ -76,7 +76,7 @@ void SimpleVoIPSender::initialize(int stage)
         // calculating traffic starting time
         simtime_t startTime = par("startTime").doubleValue();
         stopTime = par("stopTime").doubleValue();
-        if (stopTime != -1 && stopTime < startTime)
+        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime settings: startTime %g s greater than stopTime %g s", SIMTIME_DBL(startTime), SIMTIME_DBL(stopTime));
 
         scheduleAt(startTime, selfSource);
@@ -118,15 +118,16 @@ void SimpleVoIPSender::talkspurt(simtime_t dur)
 
 void SimpleVoIPSender::selectPeriodTime()
 {
-    if (stopTime != -1 && simTime() >= stopTime)
+    simtime_t now = simTime();
+    if (stopTime >= SIMTIME_ZERO && now >= stopTime)
         return;
 
     if (isTalk)
     {
         silenceDuration = par("silenceDuration").doubleValue();
         EV << "SILENCE: " << "Duration: " << silenceDuration << " seconds\n\n";
-        simtime_t endSilent = simTime() + silenceDuration;
-        if (stopTime != -1 && endSilent > stopTime)
+        simtime_t endSilent = now + silenceDuration;
+        if (stopTime >= SIMTIME_ZERO && endSilent > stopTime)
             endSilent = stopTime;
         scheduleAt(endSilent, selfSource);
         isTalk = false;
@@ -135,11 +136,11 @@ void SimpleVoIPSender::selectPeriodTime()
     {
         talkspurtDuration = par("talkspurtDuration").doubleValue();
         EV << "TALKSPURT: " << talkspurtID << " Duration: " << talkspurtDuration << " seconds\n\n";
-        simtime_t endTalk = simTime() + talkspurtDuration;
-        if (stopTime != -1 && endTalk > stopTime)
+        simtime_t endTalk = now + talkspurtDuration;
+        if (stopTime >= SIMTIME_ZERO && endTalk > stopTime)
         {
             endTalk = stopTime;
-            talkspurtDuration = stopTime - simTime();
+            talkspurtDuration = stopTime - now;
         }
         talkspurt(talkspurtDuration);
         scheduleAt(endTalk, selfSource);
