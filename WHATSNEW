@@ -2,23 +2,123 @@ Recent changes in the INET Framework
 ====================================
 
 INET-2.2.0 (July xx, 2013)
---------------------------
+-------------------------
 
-This is the latest stable version of the INET Framework. This version
-is now recommended for your further INET based development. It requires 
-OMNeT++ 4.2 or 4.3.
+The two main features of this release is support for shutdown/restart
+and similar events for network nodes, and TCP Westwood and TCP Vegas
+support.
 
-NEW:
+This release is likely the last one in the 2.x series that brings new
+features. We are working on a feature set that affects INET core
+functionality and core modules, xxxxx
 
-  - Added 8 new strategies for SCTP stream scheduling (patch submitted by Irene Rüngeler).
-  - Implemented SCTP Stream Reset (RFC 6525) (patch submitted by Irene Rüngeler).
-  - Implemented SCTP Authentication (RFC 4895) (patch submitted by Irene Rüngeler).
-  - Implemented Add-IP feature for SCTP (RFC 5061) (patch submitted by Irene Rüngeler).
-  - Added NR_SACK feature to SCTP (patch submitted by Irene Rüngeler)
-  - Added Partial Reliability SCTP (RFC 3758) (patch submitted by Irene Rüngeler)
-  - Added SCTP packet drop feature  (draft-stewart-sctp-pktdrprep-15.txt)
-  - Added SCTP "sack immediately" feature (draft-ietf-tsvwg-sctp-sack-immediately) 
-  - Added several alternatives to send fast retransmissions on SCTP.
+NOTE to git users: we have removed the .cproject file from the repo
+as it was always in the way during development when switching/rebasing
+branches, but we added it back as .cproject-DEFAULT. Thus, after checking
+out this version you need to begin by restoring .cproject:
+  $ cp .cproject-DEFAULT .cproject
+
+Now, the features:
+
+1. Lifecycle infrastructure.
+
+    Lifecycle: for shutdown/crash/startup/etc, a LifecycleOperation (e.g.
+    NodeShutdownOperation) is applied to the submodule tree of the  node
+    (host or router) by LifecycleController. Each module can decide how
+    to handle the operation and how to store the resulting state (up/down,etc).
+    Operations can be multi-stage, and don't need to complete immediately
+    (i.e. they can take nonzero simulation time and multiple events to complete).
+
+    Network nodes now also have a status submodule (type NodeStatus) with the sole
+    purpose of storing the whole node's status (up/down) and displaying it
+    via icons.
+
+    - classes: ILifecycle, LifecycleOperation (NodeOperation, InterfaceOperation),
+      LifecycleController, NodeStatus
+    - NodeStatus module to store the network node's status (up or down)
+    - added optional NodeStatus submodule to NodeBase
+    - added a test for the basic Lifecycle infrastructure
+
+   MPLS,etc: removed obsolete ways of shutdown/restart: FailureManager, PowerControl, LDP_FAILED/RSVP_FAILED
+
+2. Added Vegas and Westwood algorithms.
+
+   Source: https://github.com/maferhe2/TCP-Vegas-Westwood,
+   commit 5cae09feea84bd85b9d657833de90f4beae1de25
+
+   See the following paper:
+   "INET framework extensions for TCP Vegas and TCP Westwood", Maria Fernandez,
+   Carlos Calafate, Juan-Carlos Cano and Pietro Manzoni. OMNeT++ Workshop, 2013.
+   http://www.omnet-workshop.org/2013/uploads/slides/OMNeT-Workshop2013-SP-4.pdf
+
+3. Added IdealWirelessNic (IdealRadio + IdealWirelessMac) and IdealWirelessFrame msg.
+
+   This is a highly abstracted wireless NIC that consists of a unit disk radio
+   and a trivial MAC protocol. It offers simplicity for scenarios where Layer 1
+   and 2 effects can be completely ignored, for example testing the basic
+   functionality of a wireless ad-hoc routing protocol.
+
+   The most important parameter this model accepts is the transmission range.
+   When a radio transmits a frame, all other radios within transmission range
+   will receive the frame correctly, and radios out of range will not be
+   affected at all. There are no collisions -- a radio can simultaneously
+   receive any number of frames, and also transmit a single frame at the same time.
+
+4. STCP received several new features (patches submitted by Irene Ruengeler):
+   - 8 new strategies for SCTP stream scheduling
+   - SCTP Stream Reset (RFC 6525)
+   - SCTP Authentication (RFC 4895)
+   - Add-IP feature for SCTP (RFC 5061)
+   - NR_SACK feature to SCTP
+   - Partial Reliability SCTP (RFC 3758)
+   - SCTP packet drop feature  (draft-stewart-sctp-pktdrprep-15.txt)
+   - SCTP "sack immediately" feature (draft-ietf-tsvwg-sctp-sack-immediately)
+   - several alternatives to send fast retransmissions on SCTP
+
+5. Loopback interface added
+
+   Loopback used to be a special case inside the IPv4/IPv6 modules, now it is handled
+   completely like any other interface, with a separate Loopback module.
+
+Minor changes:
+
+- PingApp and other apps: for the stopTime parameter, 'none' is now represented
+  by -1, not 0. As this is the default setting, likely very few simulations (ini files)
+  are affected.  XXXX
+
+- IPv4NetworkConfigurator: added @groups to <interface> (ie. multicast groups
+  can now be also specified in the <interface> element, not only in a separate
+   <multicast-group> element)
+
+- in many simulation examples, .irt files were replaced by IPv4NetworkConfigurator XML.
+
+- EtherMACFullDuplex: wait IFG only between frames (by Till Steinbach)
+
+    the IEEE 802.3 spec explicitly says that IFG should be *after* frames, not before.
+
+    http://standards.ieee.org/getieee802/download/802.3-2008_section1.pdf
+
+    Section 4.2.3.2.1, full duplex operation:
+            After the last bit of a transmitted frame, (that is, when transmitting
+            changes from true to false), the MAC continues to defer for a proper interPacket-Gap (see 4.2.3.2.2)
+    And further on (4.2.3.2.2):
+            This is intended to provide interpacket recovery time for other CSMA/CD
+            sublayers and for the physical medium."
+
+- Ieee80211Mac: added signals declarations and statistics in the NED file
+
+- NED: Added InterfaceTable unconditionally to bridge devices, as it is currently required by IPv4NetworkConfigurator.
+  Also added NotificationBoard required by InterfaceTable.
+
+- IPv4NetworkConfigurator: Changed to support mixed wired and wireless LANs for autoconfiguration.
+
+ Fixed IPv4NetworkConfigurator bug sometimes not being able to assign addresses.
+    Changed to assign most constrained addresses first.
+
+- Ethernet: Renamed mac submodule to eth in ethernet switch.
+
+- Many smaller fixes and improvements
+
 
 
 INET-2.1.0 (Jan 31, 2013)
@@ -38,7 +138,7 @@ NEW:
 CHANGED:
 
 Applications:
-  - PingApp: Shows the configured destination address at the end of the 
+  - PingApp: Shows the configured destination address at the end of the
     simulation.
   - TCPBasicClientApp: bugfix #611: simulation generated an ASSERT if
     numRequestsPerSession parameter value larger than 1.
@@ -47,11 +147,11 @@ Applications:
     VoIPStreamSender/Receiver.)
 
 Ethernet:
-  - Transmission channel's 'disabled' parameter is now correctly handled in 
+  - Transmission channel's 'disabled' parameter is now correctly handled in
     EtherMacBase.
 
 Ieee80211Mac:
-  - Better parameter processing in MAC: error is thrown if an undefined value 
+  - Better parameter processing in MAC: error is thrown if an undefined value
     is specified for the opmode or autoBitrate parameters.
   - Added the Ieee80211Descriptor class to assign modulation speed
     and type for the different opModes.
@@ -59,7 +159,7 @@ Ieee80211Mac:
 
 BGP:
   - Minor optimizations
-  - Bugfix: The text in specification "sets the ConnectRetryTimer to zero" means: 
+  - Bugfix: The text in specification "sets the ConnectRetryTimer to zero" means:
     restart this timer. The _connectRetryTime member now stores the timeout value.
 
 Manetrouting:
@@ -70,10 +170,10 @@ Manetrouting:
       - unused static variables
       - isIpLocalAddress(), uses isLocalAddress()
       - convertAddressToString()
-      - getXPos(), getYPos() functions, you should use getPosition() 
+      - getXPos(), getYPos() functions, you should use getPosition()
         instead.
   - redesigned coordinate and speed storage and access.
-    replaced double x,y with a Coord.  getDirection() now returns the 
+    replaced double x,y with a Coord.  getDirection() now returns the
     speed vector (as a Coord)
   - getters returns UNSPECIFIED_ADDRESS if addrType==UNDEFINED
   - merged sendToIp() code into a common base function sendToIpOnIface()
@@ -91,7 +191,7 @@ Batman:
   - Fixed several memory leaks
   - Fixed routing table corruption and possible crash when multiple
     radios were used in a single host
-  - Fixed decapsulation of incoming packets. Now it checks for the 
+  - Fixed decapsulation of incoming packets. Now it checks for the
     type of decapsulated packet.
   - Fix for a problem when aggregated batman packets were
     dropped erronously.
@@ -99,7 +199,7 @@ Batman:
     so traffic towards those networks can be routed correctly.
     Use the announcedNetworks parameter to specify multiple connected
     external networks.
-  - Added SourceModifier script to help the conversion from the original 
+  - Added SourceModifier script to help the conversion from the original
     batmand code.
     - fixes spaces, tabs and empty lines
     - replaces some c-style structs to c++-style classes
@@ -117,30 +217,30 @@ Examples:
 
 Other changes:
   - Uint128 class was removed. Use ManetNetworkAddress class instead.
-  - Visual changes in StandardHost/NodeBase: utility module icons are 
+  - Visual changes in StandardHost/NodeBase: utility module icons are
     now smaller and wlan[]/PingApp[] modules are displayed in a row.
   - NodeBase: it is possible to use mobility module even if numRadios = 0
-  - Added check for detecting too small netmask parameter value in 
+  - Added check for detecting too small netmask parameter value in
     HostAutoConfigurator
   - PacketDump: TCP header option fix (dumped only in verbose mode.)
-  - Bugfix #620. The module pointer returned by a ModuleAccess class is 
+  - Bugfix #620. The module pointer returned by a ModuleAccess class is
     now cached only if get() was used. For get(module) no caching is done.
   - MACAddress: made the constructor explicit so we will not see
     unexpected implicit conversions in future
-  - IPv6Address: removed Uint128 related functions and added an 
+  - IPv6Address: removed Uint128 related functions and added an
     additional constructMask() method
   - headerserializers: compile fix for Visual C++ 10.0 and later
   - Pcap now records on ALL interfaces by default (including external IFs).
     Added Enter_Method for better error reporting if a packet cannot be
     serialized. Also added an icon for PcapRecorder.
   - Several TCP related fixes.
-  
+
 
 INET-2.0.0 (Aug 7, 2012)
 ------------------------
 
-If you are upgrading from an earlier INET version (i.e. INET 20111118), 
-expect to have to revise your existing omnetpp.ini files and possibly 
+If you are upgrading from an earlier INET version (i.e. INET 20111118),
+expect to have to revise your existing omnetpp.ini files and possibly
 NED/C++ files as well.
 
 Changes since 1.99.5:
@@ -153,23 +253,23 @@ OLSR protocol received several patches allowing it to work with multiple
 radios. It can work now on both wired and wireless interfaces.
 
 Ieee80211:
-  - bugfix: The latest version of INET (1.99.5) contained a bug where 
+  - bugfix: The latest version of INET (1.99.5) contained a bug where
     speed values for 11MBps and 12MBps were swapped.
   - A new "bitrate" parameter was added to the Ieee80211Nic module.
-    The Radio and MAC module uses this bitrate to set thir own bitrate 
-    value. Its default value is 11Mbps for 802.11b, 27Mbps for 802.11p 
-    and 54Mbps for 802.11g and  802.11a. (i.e. the default bitrate depends 
-    on the opMode parameter) This can avoid potential configuration 
+    The Radio and MAC module uses this bitrate to set thir own bitrate
+    value. Its default value is 11Mbps for 802.11b, 27Mbps for 802.11p
+    and 54Mbps for 802.11g and  802.11a. (i.e. the default bitrate depends
+    on the opMode parameter) This can avoid potential configuration
     inconsitencies. UPDATE all your INI files accordingly.
 
-The Ethernet module now throws an error message if two ethernet ports are 
-connected using an IdealChannel. Previously it just silently ignored the 
+The Ethernet module now throws an error message if two ethernet ports are
+connected using an IdealChannel. Previously it just silently ignored the
 connection that was definitely against the "least surprise" principle.
 
 A new "Delayer" module has been added and DropsGenerator and DuplicatesGenerator
 has been renamed to OrdinalBasedDropper and OrdinalBasedDuplicator respectively.
-These modules implement the IHook module interface and can be installed inside 
-hosts to induce different packet errors. IHook modules can be inserted 
+These modules implement the IHook module interface and can be installed inside
+hosts to induce different packet errors. IHook modules can be inserted
 between the network and link layer protocols.
 
 The Ext-interface, TraCI, Mobility and Ping modules received some minor fixes.
@@ -178,10 +278,10 @@ See ChangeLogs in individual source folders for more information.
 INET-1.99.5 (June 22, 2012)
 ---------------------------
 
-This is the final testing version of the 1.99.x series leading to the 2.0 
+This is the final testing version of the 1.99.x series leading to the 2.0
 release. Requires OMNeT++ 4.2 (version 4.2.2 suggested).
 
-Several OSPF fixes and changes in configuration (see the ChangeLog file 
+Several OSPF fixes and changes in configuration (see the ChangeLog file
 in the OSPF folder for details):
   - improved error detection in xml config files
   - replaced the ospfConfigFile string-type ned parameter with ospfConfig parameter (xml type)
@@ -194,20 +294,20 @@ in the OSPF folder for details):
       converted all the ospf config files to the new format in the examples folder
       (after using the converter you must convert router@id to router@name by hand).
   - added @toward attribute to XML for easier interface specification
-      old: interfaces were specified by their name (e.g. ifName="eth0"). 
-      new: interfaces can be specified either by their name (e.g. ifName="eth0"), 
+      old: interfaces were specified by their name (e.g. ifName="eth0").
+      new: interfaces can be specified either by their name (e.g. ifName="eth0"),
       or by the name of a module the interface is connected to (e.g. toward="Area3.N9")
   - fixed OSPF.xsd schema
 
 Queueing components:
-  The networklayer/queue folder has moved to linklayer/queue folder as 
+  The networklayer/queue folder has moved to linklayer/queue folder as
   queues are mostly used in linklayer. This is a new framework that can be
   used to create more complex systems.
   Old queuing components has been removed:
    - DropTailQosQueue, REDQueue, WeightedFairQueue
    - IQoSClassifier (moved to linklayer/ieee80211/mac)
    - BasicDSCPClassifier
-  Some of them can be substituted by compound modules composed of these newly 
+  Some of them can be substituted by compound modules composed of these newly
   added components:
    - FIFOQueue
    - REDDropper
@@ -216,12 +316,12 @@ Queueing components:
    - WRRScheduler
   For example REDQueue is a combination of a REDDropper and a FIFOQueue,
   and DropTailQosQueue is a combination of some classifier, DropTailQueues,
-  and a PriorityScheduler. Read the INET Manual (in doc folder) for more 
+  and a PriorityScheduler. Read the INET Manual (in doc folder) for more
   information about the usage of these modules.
 
 Brand new Differentiated Services component (using the Queueing framework)
 that is implementing the following standards:
-  - RFC 2474: Definition of the Differentiated Services Field (DS Field) in 
+  - RFC 2474: Definition of the Differentiated Services Field (DS Field) in
     the IPv4 and IPv6 Headers
   - RFC 2475: An Architecture for Differentiated Services
   - RFC 2597: Assured Forwarding PHB Group
@@ -231,7 +331,7 @@ that is implementing the following standards:
   - RFC 3290: An Informal Management Model for Diffserv Routers
 
 
-New send method on UDPSocket now allows to specify on which interface 
+New send method on UDPSocket now allows to specify on which interface
 the packets should be sent out.
 
 Added DHCP protocol implementation by Juan Carlos Maureira
@@ -241,18 +341,18 @@ like any other UDP apps.
 MANET routing protocols updated from INETMANET-2.0 @ 7fb431b
 The whole manetrouting directory was taken over.
 
-Mobility: Added two new mobility models: 
+Mobility: Added two new mobility models:
   - TraCI + TraCIScenarioManager to connect with an external server
-  - LinearNodeDistribution - static hosts in a single line in 
+  - LinearNodeDistribution - static hosts in a single line in
     ANY direction
 
 IPv4Route: removed the "type" attribute from the routing entries
 
 VoIPTool: Now compiles with the latest version of ffmpeg libs
 
-IGMPv2: external routers attached to the IGMP module are now 
-responsible for implementing the IGMP router logic (emitting queries 
-and processing group membership reports). In this case the IGMP 
+IGMPv2: external routers attached to the IGMP module are now
+responsible for implementing the IGMP router logic (emitting queries
+and processing group membership reports). In this case the IGMP
 module passes all incoming IGMP messages to the external router.
 
 Updated 802.11 model from INETMANET-2.0 @ 7fb431b (minor bugfixes)
@@ -267,8 +367,8 @@ The ancient 802.11 implementation from the mobility framework was removed
 (i.e. the mf80211 directory).
 
 Added HostAutoConfigurator module (should be added inside a host)
-This configurator is deprecated and should be used ONLY if the hosts are 
-dynamically created/deleted during the simulation. Otherwise please use the 
+This configurator is deprecated and should be used ONLY if the hosts are
+dynamically created/deleted during the simulation. Otherwise please use the
 new IPv4NetworkConfigurator.
 
 IPv4NetworkConfigurator: Examples have been updated to use this configurator.
@@ -350,7 +450,7 @@ Change from previous behavior:
 
 - Enhancements in IPvXAddressResolver. The new resolver allows you
   to specify an interface based on which module the interface is
-  connected to. 
+  connected to.
 
 - Added a RoutingTableRecorder module that records all the changes
   in the routing table to a file.

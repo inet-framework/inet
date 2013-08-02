@@ -28,7 +28,7 @@ import inet.linklayer.radio.IdealRadio;
 
 
 //
-// Highly abstracted wireless NIC that consists of a unit disk radio and a dummy
+// Highly abstracted wireless NIC that consists of a unit disk radio and a trivial
 // MAC protocol. It offers simplicity for scenarios where Layer 1 and 2 effects
 // can be completely ignored, for example testing the basic functionality
 // of a wireless ad-hoc routing protocol.

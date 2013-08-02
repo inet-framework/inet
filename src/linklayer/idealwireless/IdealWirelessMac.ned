@@ -21,7 +21,7 @@ package inet.linklayer.idealwireless;
 
 
 //
-// Implements a dummy MAC layer for use in ~IdealWirelessNic.
+// Implements a trivial MAC layer for use in ~IdealWirelessNic.
 //
 // This module only provides encapsulation/decapsulation (into IdealAirFrame), 
 // but no real medium access protocol.
