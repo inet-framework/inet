@@ -227,6 +227,7 @@ class ColorAttribute : public cObject
         ColorAttribute(int color) : color(color) {}
         virtual const char *getName() const  {return "dscolor";}
         virtual std::string info() const { return colorToString(color); }
+        virtual cObject *dup() const { return new ColorAttribute(color); }
 };
 
 int getColor(cPacket *packet)
