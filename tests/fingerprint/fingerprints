@@ -41,17 +41,17 @@ exitCode = 0
 
 class FingerprintTestCaseGenerator():
     fileToSimulationsMap = {}
-    def generateFromCSV(self, csvFileList, filterRegexList, excludeFilterRegexList):
+    def generateFromCSV(self, csvFileList, filterRegexList, excludeFilterRegexList, repeat):
         testcases = []
         for csvFile in csvFileList:
             f = open(csvFile, 'rb')
             simulations = self.parseSimulationsTable(f)
             f.close()
             self.fileToSimulationsMap[csvFile] = simulations
-            testcases.extend(self.generateFromDictList(simulations, filterRegexList, excludeFilterRegexList))
+            testcases.extend(self.generateFromDictList(simulations, filterRegexList, excludeFilterRegexList, repeat))
         return testcases
 
-    def generateFromDictList(self, simulations, filterRegexList, excludeFilterRegexList):
+    def generateFromDictList(self, simulations, filterRegexList, excludeFilterRegexList, repeat):
         class StoreFingerprintCallback:
             def __init__(self, simulation):
                 self.simulation = simulation
@@ -70,7 +70,7 @@ class FingerprintTestCaseGenerator():
             if not filterRegexList or ['x' for regex in filterRegexList if re.search(regex, title)]: # if any regex matches title
                 if not excludeFilterRegexList or not ['x' for regex in excludeFilterRegexList if re.search(regex, title)]: # if NO exclude-regex matches title
                     testcases.append(FingerprintTestCase(title, simulation['wd'], simulation['args'],
-                            simulation['simtimelimit'], simulation['fingerprint'], StoreFingerprintCallback(simulation), StoreExitcodeCallback(simulation)))
+                            simulation['simtimelimit'], simulation['fingerprint'], StoreFingerprintCallback(simulation), StoreExitcodeCallback(simulation), repeat))
         return testcases
 
     def commentRemover(self, csvData):
@@ -127,6 +127,8 @@ class FingerprintTestCaseGenerator():
             if 'computedFingerprint' in simulation:
                 oldFingerprint = simulation['fingerprint']
                 newFingerprint = simulation['computedFingerprint']
+                if ',' in newFingerprint:
+                    newFingerprint = '"' + newFingerprint + '"'
                 containsComputedFingerprint = True
                 line = simulation['line']
                 pattern = "\\b" + oldFingerprint + "\\b"
@@ -237,7 +239,7 @@ class SimulationTestCase(unittest.TestCase):
 
 
 class FingerprintTestCase(SimulationTestCase):
-    def __init__(self, title, wd, args, simtimelimit, fingerprint, storeFingerprintCallback, storeExitcodeCallback):
+    def __init__(self, title, wd, args, simtimelimit, fingerprint, storeFingerprintCallback, storeExitcodeCallback, repeat):
         SimulationTestCase.__init__(self)
         self.title = title
         self.wd = wd
@@ -246,6 +248,7 @@ class FingerprintTestCase(SimulationTestCase):
         self.fingerprint = fingerprint
         self.storeFingerprintCallback = storeFingerprintCallback
         self.storeExitcodeCallback = storeExitcodeCallback
+        self.repeat = repeat
 
     def runTest(self):
         # CPU time limit is a safety guard: fingerprint checks shouldn't take forever
@@ -258,24 +261,33 @@ class FingerprintTestCase(SimulationTestCase):
             " --fingerprint=" + self.fingerprint + " --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=false"
 
-        result = self.runSimulation(self.title, command, workingdir)
+        anyFingerpintBad = False;
+        computedFingerprints = set()
+        for rep in range(self.repeat):
+            result = self.runSimulation(self.title, command, workingdir)
 
-        # process the result
-        # note: fingerprint mismatch is technically NOT an error in 4.2 or before! (exitcode==0)
-        self.storeExitcodeCallback(result.exitcode)
-        if result.exitcode != 0:
-            raise Exception("runtime error:" + result.errormsg)
-        elif result.cpuTimeLimitReached:
-            raise Exception("cpu time limit exceeded")
-        elif result.simulatedTime == 0 and self.simtimelimit != '0s':
-            raise Exception("zero time simulated")
-        elif result.isFingerprintOK is None:
-            raise Exception("other")
-        elif result.isFingerprintOK == False:
-            self.storeFingerprintCallback(result.computedFingerprint)
-            assert False, "fingerprint mismatch; actual " + str(result.computedFingerprint)
-        else:
-            pass
+            # process the result
+            # note: fingerprint mismatch is technically NOT an error in 4.2 or before! (exitcode==0)
+            self.storeExitcodeCallback(result.exitcode)
+            if result.exitcode != 0:
+                raise Exception("runtime error:" + result.errormsg)
+            elif result.cpuTimeLimitReached:
+                raise Exception("cpu time limit exceeded")
+            elif result.simulatedTime == 0 and self.simtimelimit != '0s':
+                raise Exception("zero time simulated")
+            elif result.isFingerprintOK is None:
+                raise Exception("other")
+            elif result.isFingerprintOK == False:
+                computedFingerprints.add(result.computedFingerprint)
+                anyFingerpintBad = True
+            else:
+                # fingerprint OK:
+                computedFingerprints.add(self.fingerprint)
+#                pass
+
+        if anyFingerpintBad:
+            self.storeFingerprintCallback(",".join(computedFingerprints))
+            assert False, "some fingerprint mismatch; actual " + " '" + ",".join(computedFingerprints) +"'"
 
     def __str__(self):
         return self.title
@@ -503,6 +515,7 @@ if __name__ == "__main__":
     parser.add_argument('-m', '--match', action='append', metavar='regex', help='Line filter: a line (more precisely, workingdir+SPACE+args) must match any of the regular expressions in order for that test case to be run')
     parser.add_argument('-x', '--exclude', action='append', metavar='regex', help='Negative line filter: a line (more precisely, workingdir+SPACE+args) must NOT match any of the regular expressions in order for that test case to be run')
     parser.add_argument('-t', '--threads', type=int, default=multiprocessing.cpu_count(), help='number of parallel threads (default: number of CPUs, currently '+str(multiprocessing.cpu_count())+')')
+    parser.add_argument('-r', '--repeat', type=int, default=1, help='number of repeating each test (default: 1)')
     args = parser.parse_args()
 
     if os.path.isfile(logFile):
@@ -513,11 +526,12 @@ if __name__ == "__main__":
         args.testspecfiles = glob.glob('*.csv')
 
     generator = FingerprintTestCaseGenerator()
-    testcases = generator.generateFromCSV(args.testspecfiles, args.match, args.exclude)
+    testcases = generator.generateFromCSV(args.testspecfiles, args.match, args.exclude, args.repeat)
 
     testSuite = ThreadedTestSuite()
     testSuite.addTests(testcases)
     testSuite.thread_count = args.threads
+    testSuite.repeat = args.repeat
 
     testRunner = unittest.TextTestRunner(stream=sys.stdout, verbosity=9, resultclass=SimulationTextTestResult)
 
