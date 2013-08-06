@@ -17,7 +17,7 @@
 //
 
 
-package inet.examples.ngoa.isp_traffic_control;
+package inet.examples.traffic_engineering.isp_traffic_control;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.access.NgnAccessModem;

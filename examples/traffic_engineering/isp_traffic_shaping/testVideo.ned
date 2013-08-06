@@ -18,7 +18,7 @@
 //
 
 
-package inet.examples.ngoa.isp_traffic_shaping;
+package inet.examples.traffic_engineering.isp_traffic_shaping;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
