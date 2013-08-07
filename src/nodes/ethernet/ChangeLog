@@ -1,3 +1,33 @@
+2013-06-26  Zoltan Bojthe
+
+	EtherSwitch: made eth[] modules replaceable
+
+2013-06-25  Zoltan Bojthe
+
+	EtherSwitch: replaced EtherMAC with EthernetInterface so that
+	external queues can be used (useful for e.g. QoS)
+
+2013-06-17  Zoltan Bojthe
+
+	EtherSwitch: added lifecycle support
+
+2013-06-14  Zoltan Bojthe
+
+	EtherHost: added NodeStatus, required by lifecycle operations
+
+2013-03-21  Levente Meszaros
+
+	EtherSwitch: renamed mac[] submodule vector to eth[]
+
+2013-03-21  Levente Meszaros
+
+	EtherSwitch: added InterfaceTable unconditionally; also added
+	NotificationBoard, required by InterfaceTable.
+
+2013-01-14  Zoltan Bojthe
+
+	EtherHost2: encap module made replaceable ("like IEtherEncap")
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-08-07  ------ inet-2.0.0 released ------

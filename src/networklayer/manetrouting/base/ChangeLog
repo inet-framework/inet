@@ -1,3 +1,12 @@
+2013-05-03  Alfonso Ariza Quintana
+
+	manet: synced with INETMANET (20130503)
+
+	olsr, dymo, dsr, dsdv, batman, aodv, olsr, dsdv: synced with INETMANET
+	manetbase: introduced GlobalWirelessInspector, updated manet base.
+
+	Z.B.: remove GlobalWirelessLinkInspector; added/fixed parameter units
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-11-23  Zoltan Bojthe
@@ -11,9 +20,9 @@
 	    - convertAddressToString()
 		- removed getXPos(), getYPos() functions, you should use
 	      getPosition() instead.
-	      
+
 	- redesigned coordinate and speed storage and access
-	  replaced double x,y with a Coord.  getDirection() returns the 
+	  replaced double x,y with a Coord.  getDirection() returns the
 	  speed vector (in Coord)
 	- getters returns UNSPECIFIED_ADDRESS if addrType==UNDEFINED
 

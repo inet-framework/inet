@@ -1,10 +1,23 @@
+2013-06-19  Zoltan Bojthe
+
+	- Ieee80211MgmtAP: fixed the undisposed object problem
+	- Ieee80211Mgmt*: added lifecycle support
+	- Ieee80211MgmtAP: schedule timer at initialize stage 1 
+
 2013-06-11  Zoltan Bojthe
 
-    removed experimental Etx implementation (was a takeover from INETMANET).
+	- 802.11: removed experimental Etx code
+	- 802.11 mgmt: decapsulate() moved to specific mgmt classes from MgmtBase
 
-2013-05-15  Alfonso Ariza - takeover from INETMANET
+2013-05-15  Alfonso Ariza Quintana - takeover from INETMANET
 
-	fix: problem with the Ieee802Ctrl sender address in ad-hoc mode
+	- 802.11 mgmt: fix a problem with the Ieee802Ctrl sender address in ad-hoc
+	  mode
+
+2013-02-20  Andras Varga
+
+	const fixes (in OMNeT++ 5.0, check_and_cast<> no longer silently
+	discards const modifier)
 
 2013-01-30  ------ inet-2.1.0 released ------
 
@@ -83,7 +96,7 @@
 
 2011-11-10  Zoltan Bojthe
 
-	fixes for bug #190 by Alfonso Ariza: 802.11 STA nodes abort the
+	fixes for bug #190 by Alfonso Ariza Quintana: 802.11 STA nodes abort the
 	simulation
 
 	If the STA node is not associated to an AP it will send a packet with a

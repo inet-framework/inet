@@ -1,3 +1,22 @@
+2013-07-29  Zoltan Bojthe
+
+	MACBase and it descendants: added clearQueue() for clear outgoing queue
+	at CRASH operation
+
+2013-04-27  Andras Varga
+
+	InterfaceTable, RoutingTable: added lifecycle support
+
+2013-04-09  Andras Varga
+
+	introduced MACBase (INotifiable and ILifecycle), all MACs
+	adapted to it
+
+	Details:
+	- introduce isOperational etc in MACs
+	- remove hasSubscribers optimization from PPP, we'll use signals soon
+	anyway
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-08-07  ------ inet-2.0.0 released ------

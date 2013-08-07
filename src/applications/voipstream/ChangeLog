@@ -1,3 +1,20 @@
+2013-05-02  Zoltan Bojthe
+
+	- Added NodeStatus::DOWN checks for initialize()
+	- lifecycle: Enter_Method_Silent() was missed in some
+	  handleOperationStage() function
+
+2013-04-25  Levente Meszaros
+
+	App: Added ILifecycle to the rest of applications.
+
+	All application must either support lifecycle operations properly or
+	throw an error when executing any lifecycle operations.
+
+2013-04-22  Levente Meszaros
+
+	Changed stopTime to use -1 to run the application forever.
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-09-18  Zoltan Bojthe
@@ -12,7 +29,7 @@
 
 2012-09-13  Zoltan Bojthe
 
-	voiptool/voipstream: renamed files/folders to VoIPStream 
+	voiptool/voipstream: renamed files/folders to VoIPStream
 
 	Renamed feature to VoIPStream. Renamed classes, modules, messages,
 	files:

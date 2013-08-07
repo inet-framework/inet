@@ -1,3 +1,10 @@
+2013-04-17  Zoltan Bojthe
+
+	TCP_lwIP,TCP_NSC: added ILifecycle as base class, but operations throw
+	error for now:
+	- throw error when nodeStatus is not UP in initialize()
+	- throw error when a lifecycle operation arrives
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-11-08  Zoltan Bojthe

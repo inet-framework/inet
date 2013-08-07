@@ -1,3 +1,8 @@
+2013-02-22  Andras Varga
+
+	LIBTable: xml parameter "conf" was renamed to "config", and default value
+	(empty XML document) was added
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-08-07  ------ inet-2.0.0 released ------
@@ -179,5 +184,3 @@
 	change to the project root and type
 
 	$ gitk -- Network/MPLS INET/src/networklayer/mpls
-
-

@@ -1,6 +1,15 @@
+2013-03-07  Zoltan Bojthe
+
+	IChannelControl: added getPropagationSpeed()
+
+2013-03-07  Zoltan Bojthe
+
+	ChannelControl: eliminated LIGHT_SPEED variable, use SPEED_OF_LIGHT
+	instead
+
 2013-03-08  Zoltan Bojthe
 
-	Added IdealChannelModel and IdealChannelModelAccess, to be used with 
+	Added IdealChannelModel and IdealChannelModelAccess, to be used with
 	IdealWirelessNic. See IdealWirelessNic for details.
 
 2013-01-30  ------ inet-2.1.0 released ------
@@ -147,4 +156,3 @@
 	change to the project root and type
 
 	$ gitk -- src/world INET/src/world World
-

@@ -1,3 +1,82 @@
+2013-07-05  Zoltan Bojthe
+
+	IPv4: loopback interface is no longer a special case in IPv4, but it
+	is implemented with a separate loopback interface module that acts
+	as any other network interface.
+
+2013-07-26  Tamas Borbely
+
+	RoutingTable: add watch for 'multicastForward' parameter
+
+2013-07-25  Tamas Borbely
+
+	RoutingTable: make 'routes' and 'multicastRoutes' fields private,
+	to ensure that subclasses cannot violate its invariants.
+	(These vectors must be sorted according to prefix lengths.)
+
+2013-07-25  Tamas Borbely
+
+	RoutingTable: added factory methods for creating new route objects,
+	so subclasses can use their own route types
+
+2013-07-25  Tamas Borbely
+
+	IPv4: add notifications about multicast routing events.
+
+	These notifications can be used by routing protocol modules (e.g. PIM)
+	to update their states
+
+2013-07-25  Tamas Borbely
+
+	Rename and extend parent/child interface data in IPv4MulticastRoute
+
+	- the new names are more common (in/out)
+	- subclasses of IPv4MulticastRoute can extend InInterface and OutInterface
+
+	Note: this is not backward compatible change
+
+2013-07-25  Tamas Borbely
+
+	IPv4Route/IPv6Route: add administrative distance field
+
+	The route entries are sorted first by administrative distance, then by
+	metric. When looking up the best route for a destination, then routes
+	with lower administrative distances are preferred. Metrics are compared
+	only if the administrative distances are the same.
+
+	Default values for these distances are defined in RouteAdminDist enums,
+	but they are set only for interface and static routes.
+
+2013-06-14  Tamas Borbely
+
+	New constants: PIM_DM for RouteSource; IGMPV3_MEMBERSHIP_REPORT for IGMPType
+
+2013-02-06  Levente Meszaros
+
+	IPv4: routing table: added a new route check
+
+2013-05-16  Levente Meszaros
+
+	IPv4Datagram: Fixed missed copy constructor to be like the one suggested
+	by msgc.
+
+2013-04-27  Andras Varga
+
+	IPv4: added lifecycle support
+
+2013-04-27  Andras Varga
+
+	RoutingTable: added lifecycle support
+
+2013-02-20  Andras Varga
+
+	const fixes (in OMNeT++ 5.0, check_and_cast<> no longer silently
+	discards const modifier)
+
+2013-02-01  Andras Varga
+
+	IPv4InterfaceData: added getNetworkBroadcastAddress()
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-11-20  Zoltan Bojthe

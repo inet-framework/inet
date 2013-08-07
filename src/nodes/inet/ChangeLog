@@ -1,6 +1,19 @@
-2013-05-15  Aflonso Ariza - takover from INETMANET
+2013-07-05  Zoltan Bojthe
 
-	Included optional batter module in the NodeBase.
+	Follow the factoring of a loopback interface module from IPv4/IPv6:
+	added LoopbackInterface to NodeBase
+
+2013-05-15  Alfonso Ariza - takover from INETMANET
+
+	NodeBase: added optional battery (off by default)
+
+2013-05-14  Levente Meszaros
+
+	IPv4NetworkLayer: Added IPv4NodeConfigurator
+
+2013-04-27  Andras Varga
+
+	NodeBase: added NodeStatus, required for lifecycle operations support
 
 2013-01-30  ------ inet-2.1.0 released ------
 

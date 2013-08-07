@@ -1,18 +1,66 @@
-2013-05-15  Alfonso Ariza - takeover from INETMANET
+2013-07-29  Zoltan Bojthe
 
-	- fix: erroneous behaviour in Ieee802.11 mac (do not change 
-	backoff if the retry counter is 0)
+	MACBase and it descendants: added clearQueue() for clear outgoing queue
+	at CRASH operation
+
+2013-07-04  Zoltan Bojthe
+
+	- ieee 802.11 mac: optimizations: use SIMTIME_ZERO instead 0, use
+	  simtime_t instead double
+	- WifiMode: fixed return value calculation - uses float constants instead
+	  integer
+	- ieee802.11 MAC: logState(): optimised, spacing fixes in output format
+	- fixed compiler warning: signed/unsigned comparison; moved function body
+	to .cc
+
+2013-05-15  Alfonso Ariza Quintana - takeover from INETMANET
+
+	- fix: erroneous behaviour in Ieee802.11 mac (do not change
+	  backoff if the retry counter is 0)
 	- removed fixFSM parameter
 	- changed the default MTU size to 2304bytes for 802.11 MAC
+
+2013-04-09  Andras Varga
+
+	Introduced MACBase (INotifiable and ILifecycle), all MACs
+	adapted to it
+
+2013-03-18  Zoltan Bojthe
+
+	ieee80211Mac: added signals, statistics
+
+2013-03-12  Zoltan Bojthe
+
+	linklayer: moved WirelessMacBase to common folder
+
+	this class will be shared by:
+	 - IdealWirelessMac module in src/linklayer/idealwireless
+	 - Ieee80211Mac module in src/linklayer/ieee80211/mac
+
+2013-03-01  Zoltan Bojthe
+
+	WirelessMacBase: bugfixes
+
+	- handleCommand() should handle only commands from upper layer
+	- handleLowerMsg() should handle only packets from lower layer
+	- throws error on unhandled messages
+
+2013-02-20  Andras Varga
+
+	const fixes (in OMNeT++ 5.0, check_and_cast<> no longer silently
+	discards const modifier)
+
+	TODO maybe introduce a check_and_const_cast<> macro as shortcut for
+	const_cast<T*>(check_and_cast<const T*>(p)) ?
 
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-08-28  Zoltan Bojthe
 
-	- Better parameter processing: error is thrown if an undefined value 
+	- Better parameter processing: error is thrown if an undefined value
 	  is specified in opmode or autoBitrate
 	- Refactored how WifiModulationType::getMode80211a/b/g/p()
-	  is used. 
+	  is used.
 	- Added the Ieee80211Descriptor class to assign modulation speed
 	  and type for the different opModes.
 

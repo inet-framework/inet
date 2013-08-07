@@ -1,19 +1,77 @@
+2013-07-29  Zoltan Bojthe
+
+	MACBase and it descendants: added clearQueue() for clearing outgoing queue
+	at CRASH operation
+
+2013-07-26  Zoltan Bojthe
+
+	EtherMACBase: bugfix: now it has two init stages because isNodeUp() uses another 
+	module that must be accessed in stage 1 or later only.
+
+2013-06-27  Zoltan Bojthe
+
+	- EtherMAC: throws error when receiving JAM in fullduplex mode
+	- EthernetInterface: added encapType parameter
+	- Replaced EtherMAC modules with EthernetInterface in the EtherSwitch and AccessPoint
+	  modules
+	- added EtherEncapDummy module
+	- EthernetInterface.ned: refactoring. No functional changes.
+	- switch: MACRelay uses interfacetable/interfaceentry instead of direct
+	  access to the EtherMAC module
+
+2013-06-18  Zoltan Bojthe
+
+	- MACRelayUnit: added lifecycle support
+	- MACRelayUnitPP: added timer pointer to PortBuffer
+	  so self messgages can be clean up at the end.
+
+2013-04-23  Levente Meszaros
+
+	Ethernet: Adapted to lifecycle operations.
+
+2013-04-09  Andras Varga
+
+	Introduced MACBase (INotifiable and ILifecycle), all MACs
+	adapted to it
+
+2013-03-21  Levente Meszaros
+
+	Ethernet: Fixed interface name when EtherMAC is directly added to a node
+	instead of inside a NIC module.
 
 2013-02-26  Zoltan Bojthe
 
-    Fixed IFG sending:
-    Wait IFG only between frames instead always wait IFG before send a frame.
+	Fixed IFG sending:
+	Wait IFG only between frames instead always wait IFG before send a frame.
 
-    Bugfix in EtherMacFullDuplex: if uses external queue and
-    received a Pause frame, sending was stopped sometimes.
+	The IEEE 802.3 spec explicitly says that IFG should be *after* frames,
+	not before.
 
-    Added tests.
+	http://standards.ieee.org/getieee802/download/802.3-2008_section1.pdf
+
+	Section 4.2.3.2.1, full duplex operation:
+	       After the last bit of a transmitted frame, (that is, when transmitting
+	       changes from true to false), the MAC continues to defer for a proper 
+	       interPacket-Gap (see 4.2.3.2.2) And further on (4.2.3.2.2):
+	       This is intended to provide interpacket recovery time for other CSMA/CD
+	       sublayers and for the physical medium."
+
+	Bugfix in EtherMacFullDuplex: when external queue was used and
+	received a Pause frame, send was stopped sometimes.
+
+	Added tests.
+
+2013-01-14  Zoltan Bojthe
+
+	- EtherLLC: optimisation
+	- ethernet interface: added IEtherEncap moduleinterface
+	- etherMAC: Instead of silent padding too short frames, throws a runtime error.
 
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-11-26  Zoltan Bojthe
 
-	EtherMacBase: Added the detection transmission channel's 'disabled' 
+	EtherMacBase: Added the detection transmission channel's 'disabled'
 	parameter
 
 2012-08-07  ------ inet-2.0.0 released ------

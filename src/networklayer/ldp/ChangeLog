@@ -1,3 +1,11 @@
+2013-05-10  Levente Meszaros
+
+	LDP: Fixed bug when there's no IP address yet.
+
+2013-05-02  Andras Varga
+
+	LDP: added support for lifecycle operations.
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-08-07  ------ inet-2.0.0 released ------

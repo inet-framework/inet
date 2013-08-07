@@ -1,3 +1,17 @@
+2013-05-03  Alfonso Ariza Quintana
+
+	manet: synced with INETMANET (20130503)
+
+	olsr, dymo, dsr, dsdv, batman, aodv, olsr, dsdv: synced with INETMANET
+	manetbase: introduced GlobalWirelessInspector, updated manet base.
+
+	Z.B.: remove GlobalWirelessLinkInspector; added/fixed parameter units
+
+2013-02-20  Andras Varga
+
+	const fixes (in OMNeT++ 5.0, check_and_cast<> no longer silently
+	discards const modifier)
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-08-07  ------ inet-2.0.0 released ------

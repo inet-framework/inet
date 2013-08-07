@@ -1,3 +1,12 @@
+2013-05-03  Alfonso Ariza Quintana
+
+	manet: synced with INETMANET (20130503)
+
+	olsr, dymo, dsr, dsdv, batman, aodv, olsr, dsdv: synced with INETMANET
+	manetbase: introduced GlobalWirelessInspector, updated manet base.
+
+	Z.B.: remove GlobalWirelessLinkInspector; added/fixed parameter units
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-11-19  Zoltan Bojthe
@@ -9,7 +18,7 @@
 	- Fixed several memory leaks
 	- Fixed routing table corruption and possible crash when multiple
 	  radios were used in a single host
-	- Fixed decapsulation of incoming packets. Now it checks for the 
+	- Fixed decapsulation of incoming packets. Now it checks for the
 	  type of decapsulated packet.
 	- Fix for a problem when aggregated batman packets were
 	  dropped erronously.

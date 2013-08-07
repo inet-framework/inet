@@ -2,7 +2,7 @@
 
 2012-11-23  Zoltan Bojthe
 
-	ManetRouting: 
+	ManetRouting:
 	  - uses now ManetNetworkAddress instead of Uint128
 	  - removed iterator typedefs of the AddressGroup
 	  - merged sendToIp() code into a common base function

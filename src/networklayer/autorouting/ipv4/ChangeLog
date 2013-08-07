@@ -1,3 +1,83 @@
+2013-07-25  Tamas Borbely
+
+	Rename and extend parent/child interface data in IPv4MulticastRoute
+
+	- the new names are more common (in/out)
+	- subclasses of IPv4MulticastRoute can extend InInterface and OutInterface
+
+	Note: this is not backward compatible change
+
+2013-04-12  Zoltan Bojthe
+
+	FlatNetworkConfigurator, FlatNetworkConfigurator6: changed isIPNode
+	detection (node must have both RoutingTable and InterfaceTable)
+
+2013-05-15  Levente Meszaros
+
+	IPvXAddressResolver: Extended interface IPv4 address lookup to also try
+	IPv4NetworkConfigurator.
+
+	Fixes when the node is down and interface is not configured yet.
+
+2013-05-15  Levente Meszaros
+
+	IPv4NetworkConfigurator: Changed how multicast groups are joined
+
+2013-05-10  Levente Meszaros
+
+	IPv4NetworkConfigurator: Changed to compute all network configuration
+	only internally and apply them only upon explicit request.
+
+2013-05-14  Levente Meszaros
+
+	IPv4NetworkConfigurator: Fixed issue when static routes are re-added to
+	the routing table and updated fingerprint.
+
+2013-05-14  Levente Meszaros
+
+	IPv4NetworkLayer: Added IPv4NodeConfigurator
+
+2013-04-24  Andras Varga
+
+	IPv4NetworkConfigurator: workaround crash when a node is down; added
+	plan to resolve it (Levy)
+
+2013-04-27  Andras Varga
+
+	InterfaceTable, RoutingTable: added lifecycle support
+
+2013-04-24  Andras Varga
+
+	IPv4NetworkConfigurator: workaround crash when a node is down; added
+	plan to resolve it (Levy)
+
+2013-04-27  Andras Varga
+
+	InterfaceTable, RoutingTable: added lifecycle support
+
+2013-03-14  Levente Meszaros
+
+	Fixed IPv4NetworkConfigurator bug sometimes not being able to assign
+	addresses. Changed to assign the most constrained addresses first.
+
+2013-03-21  Levente Meszaros
+
+	IPv4NetworkConfigurator: Changed to support mixed wired and wireless
+	LANs for autoconfiguration.
+
+2013-03-21  Levente Meszaros
+
+	IPv4NetworkConfigurator: Added dumpLinks parameter.
+
+2013-04-03  Levente Meszaros
+
+	IPv4NetworkConfigurator: Replaced call to AddressResolver with member
+	variable access.
+
+2013-02-22  Andras Varga
+
+	IPv4NetworkConfigurator: added @groups to <interface>
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-09-13  Zoltan Bojthe

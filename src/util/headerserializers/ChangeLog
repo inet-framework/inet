@@ -1,3 +1,31 @@
+2013-07-17  Rudolf Hornig
+
+	sctp: implemented SCTP Stream Reset (RFC 6525) (patch submitted by Irene
+	Ruengeler).
+
+2013-07-11  Rudolf Hornig
+
+	sctp: Authentication (RFC 4895) (patch submitted by Irene Ruengeler).
+
+2013-07-10  Rudolf Hornig
+
+	sctp: Implemented Add-IP feature for SCTP (RFC 5061) (patch submitted by
+	Irene Ruegeler).
+
+2013-07-03  Rudolf Hornig
+
+	sctp: implementation of Partial Reliability SCTP (RFC 3758) by Irene
+	Ruengeler
+
+2013-07-02  Rudolf Hornig
+
+	sctp: NR_SACK feature, implemented submitted by Irene Ruengeler
+
+2013-02-20  Andras Varga
+
+	const fixes (in OMNeT++ 5.0, check_and_cast<> no longer silently
+	discards const modifier)
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-10-25  Tamas Borbely

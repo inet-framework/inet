@@ -1,32 +1,37 @@
-2013-07-29  Irene Rüngeler
+2013-07-29  Irene Ruengeler
 
-	 Added the packet drop feature  (draft-stewart-sctp-pktdrprep-15.txt), 
-	 the "sack immediately" feature (draft-ietf-tsvwg-sctp-sack-immediately) 
+	 Added the packet drop feature  (draft-stewart-sctp-pktdrprep-15.txt),
+	 the "sack immediately" feature (draft-ietf-tsvwg-sctp-sack-immediately)
 	 and several alternatives to send fast retransmissions.
 
-2013-07-17  Irene Rüngeler
+2013-07-17  Irene Ruengeler
 
 	Added 8 new strategies for stream scheduling
 	Patch for more statistics and better flow control.
 
-2013-07-15  Irene Rüngeler
+2013-07-15  Irene Ruengeler
 
 	Implemented SCTP Stream Reset (RFC 6525)
 
-2013-07-11  Irene Rüngeler
+2013-07-11  Irene Ruengeler
 
 	Implemented SCTP Authentication (RFC 4895).
 
-2013-07-08  Irene Rüngeler
+2013-07-08  Irene Ruengeler
 
 	Implemented Add-IP feature for SCTP (RFC 5061).
 
-2013-06-21  Irene Rüngeler
+2013-06-21  Irene Ruengeler
 
-	Implemented NR_SACK feature, which is necessary for handling reneging 
+	Implemented NR_SACK feature, which is necessary for handling reneging
 	especially when using CMT.
 
 	Implemented Partial Reliability SCTP (RFC 3758)
+
+2013-02-20  Andras Varga
+
+	const fixes (in OMNeT++ 5.0, check_and_cast<> no longer silently
+	discards const modifier)
 
 2013-01-30  ------ inet-2.1.0 released ------
 
@@ -222,7 +227,7 @@
 	Fixed an SCTP bug when primary path fails but the server continues to
 	send ACKS on the primary path.
 
-	Patch by Antonio M. Macías Ojeda reviewed by Irene Rüngeler
+	Patch by Antonio M. Macías Ojeda reviewed by Irene Ruengeler
 
 2010-04-16  Rudolf Hornig
 

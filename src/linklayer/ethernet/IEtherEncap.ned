@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 // @author: Zoltan Bojthe
+//
 
 package inet.linklayer.ethernet;
 

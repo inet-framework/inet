@@ -1,15 +1,30 @@
+2013-04-17  Zoltan Bojthe
+
+	TCP: added lifecycle support
+
+2013-04-04  Zoltan Bojthe
+
+	Several fixes and refactoring changes on the original contributed
+	TCP Vegas and Westwood code; see git log for details.
+
 2013-03-14  Zoltan Bojthe
 
-    Added Vegas and Westwood algorithms:
-    https://github.com/maferhe2/TCP-Vegas-Westwood 5cae09feea84bd85b9d657833de90f4beae1de25
-    http://www.omnet-workshop.org/2013/uploads/slides/OMNeT-Workshop2013-SP-4.pdf
-    María Fernández, Carlos Calafate, Juan-Carlos Cano and Pietro Manzoni.
+	TCP: Added Vegas and Westwood algorithms
+
+	Source: https://github.com/maferhe2/TCP-Vegas-Westwood,
+	commit 5cae09feea84bd85b9d657833de90f4beae1de25
+
+	See the following paper:
+	"INET framework extensions for TCP Vegas and TCP Westwood",
+	Maria Fernandez, Carlos Calafate, Juan-Carlos Cano and Pietro Manzoni.
+	OMNeT++ Workshop, 2013.
+	http://www.omnet-workshop.org/2013/uploads/slides/OMNeT-Workshop2013-SP-4.pdf
 
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-11-14  Zoltan Bojthe
 
-	Fix for the nagle algorithm: should send data from queue if received any ACK
+	Fix for the Nagle algorithm: should send data from queue if received any ACK
 
 2012-11-07  Zoltan Bojthe
 

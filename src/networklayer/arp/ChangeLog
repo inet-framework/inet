@@ -1,3 +1,21 @@
+2013-05-03  Alfonso Ariza
+
+	ARP: is now sensitive to IPv4 config changes (reacts to
+	NF_INTERFACE_IPv4CONFIG_CHANGED), and invalidates the cache
+	if necessary. )
+
+	Original patch modified by Zoltan Bojthe:
+	- removed localAddressVector member
+	- added 'owner' to ARPCacheEntry (used in GlobalArpCache)
+
+2013-05-09  Levente Meszaros
+
+	ARP: Fixed when there's no IP address during initialize.
+
+2013-04-17  Andras Varga
+
+	ARP: added lifecycle support
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-08-07  ------ inet-2.0.0 released ------

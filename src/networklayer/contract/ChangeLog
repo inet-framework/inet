@@ -1,17 +1,30 @@
-2013-05-15  Alfonso Ariza - takeover from INETMANET
+2013-06-14  Tamas Borbely
 
-	Introduced a new method in IPvXAddressResolver to return the host
-	with the specified address.
-	Renamed findModuleWithAddress to findHostWithAddress.
+	IPProtocolId.msg: added new constant: IP_PROT_PIM
+
+2013-05-15  Alfonso Ariza
+
+	IPvXAddressResolver: added findHostWithAddress() method (was called
+	findModuleWithAddress() in the original patch)
+
+2013-05-15  Levente Meszaros
+
+	IPvXAddressResolver: Extended interface IPv4 address lookup: when the
+	interface is not yet configured for IPv4, it tries to get the address
+	from IPv4NetworkConfigurator.
+
+2013-02-01  Andras Varga
+
+	IPv4Address: renamed getBroadcastAddress() to makeBroadcastAddress()
 
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-10-24  Zoltan Bojthe
 
-	IPv6Address: 
+	IPv6Address:
 	- Removed Uint128 related functions
 	- Added an additional constructMask() method
-	- The convert to Uint128 operator has been replaced with 
+	- The convert to Uint128 operator has been replaced with
 	  converter function
 
 2012-08-07  ------ inet-2.0.0 released ------

@@ -1,3 +1,67 @@
+2013-08-07  Zoltan Bojthe
+
+	IPv6: bugfix: datagram source IP address remained unfilled when IPv6
+	sent a HL packet to neighbor discovery (ND)
+
+	Solution:
+	- IPv6 adds "IPv6-fromHL" parameter to IPv6Datagram before sending it to ND;
+	- IPv6 reads and removes the parameter when it receives an IPv6Datagram from ND
+
+	- added fromHL parameter to determineOutputInterface()
+	- handleDatagramFromNetwork() was merged to endService(), and reads
+	  fromHL value from the "IPv6-fromHL" parameter of IPv6Datagram.
+
+2013-07-05  Zoltan Bojthe
+
+	IPv6: fixes related to loopback interface and local delivery
+
+2013-07-26  Tamas Borbely
+
+	RoutingTable6: added 'forwardMulticast' parameter
+
+2013-07-26  Tamas Borbely
+
+	RoutingTable6: join ALL_NODES_2 and ALL_ROUTERS_2 (in routers)
+	multicast groups at initialization
+
+2013-07-25  Tamas Borbely
+
+	RoutingTable6 fix: clear cached routes when the interface is down or
+	the routing table is changed
+
+2013-07-25  Tamas Borbely
+
+	RoutingTable6: fire change notifications when the routes are changed
+
+2013-07-25  Tamas Borbely
+
+	RoutingTable6: added factory methods for creating route objects,
+	so that subclasses can use their own route types
+
+2013-07-25  Tamas Borbely
+
+	IPv4Route/IPv6Route: added administrative distance field
+
+	The route entries are sorted first by administrative distance, then by
+	metric. When looking up the best route for a destination, then routes
+	with lower administrative distances are preferred. Metrics are compared
+	only if the administrative distances are the same.
+
+	Default values for these distances are defined in RouteAdminDist enums,
+	but they are set only for interface and static routes.
+
+2013-06-14  Tamas Borbely
+
+	IPv6InterfaceData: added multicast data
+
+2013-04-29  Andras Varga
+
+	IPv6: lifecycle operations not supported yet
+
+2013-04-27  Andras Varga
+
+	RoutingTable6: added lifecycle support
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-08-07  ------ inet-2.0.0 released ------

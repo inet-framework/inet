@@ -1,3 +1,33 @@
+2013-06-14  Zoltan Bojthe
+
+	EtherAppCli: added localSAP, remoteSAP NED parameters
+	EtherAppSrv: added localSAP parameter (use incoming SSAP as outgoing
+	DSAP for replies)
+
+2013-06-14  Zoltan Bojthe
+
+	EtherAppSrv: added lifecycle support
+
+2013-06-14  Zoltan Bojthe
+
+	EtherAppSrv: moved registerSAP to stage 1 in initialize()
+	and register SAP only when the node status is UP
+
+	EtherAppCli: register DSAP and resolve dest MAC address at startTime
+	instead initialize; always register DSAP
+
+2013-06-14  Zoltan Bojthe
+
+	EtherTrafGen: resolve destination MAC address at startTime instead
+	initialize
+
+2013-04-25  Levente Meszaros
+
+	Added ILifecycle support to most applications.
+
+	All applications must either support lifecycle operations properly or
+	throw an error when executing any lifecycle operations.
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-08-07  ------ inet-2.0.0 released ------

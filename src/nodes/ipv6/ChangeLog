@@ -1,3 +1,12 @@
+2013-07-05  Zoltan Bojthe
+
+	Follow the factoring of a loopback interface module from IPv4/IPv6:
+	added LoopbackInterface to NodeBase6
+
+2013-07-22  Zoltan Bojthe
+
+	StandardHost6, NodeBase6: cosmetics: module positioning, etc
+
 2013-01-30  ------ inet-2.1.0 released ------
 
 2012-08-07  ------ inet-2.0.0 released ------
