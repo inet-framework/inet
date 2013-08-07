@@ -33,7 +33,6 @@ module EtherEncapDummy like IEtherEncap
 {
     parameters:
         @display("i=block/square");
-        bool useSNAP = default(false);  // create EtherFrameWithSNAP frames instead of EthernetIIFrame - ignored parameter
     gates:
         input upperLayerIn @labels(EtherFrame); // higher layer
         output upperLayerOut @labels(EtherFrame); // higher layer

@@ -34,7 +34,6 @@ module EthernetInterface like IWiredNic
 {
     parameters:
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
-        bool useSNAP = default(false);  // use EtherFrameWithSNAP instead EthernetIIFrame
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default(""); // ~DropTailQueue, or a Diffserv queue; set to "" for use of an internal queue
         string ingressTCType = default(""); // a module type implementing ~ITrafficConditioner for optional traffic conditioning of incoming traffic
@@ -73,7 +72,6 @@ module EthernetInterface like IWiredNic
         }
         encap: <encapType> like IEtherEncap {
             parameters:
-                useSNAP = useSNAP;
                 @display("p=182,205");
         }
     connections:

@@ -24,7 +24,6 @@ package inet.linklayer.ethernet;
 moduleinterface IEtherEncap
 {
     parameters:
-        bool useSNAP;  // create EtherFrameWithSNAP frames instead of EthernetIIFrame
         @display("i=block/square");
     gates:
         input upperLayerIn @labels(Ieee802Ctrl/down); // higher layer
