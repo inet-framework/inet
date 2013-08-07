@@ -17,7 +17,7 @@
 //
 
 
-package inet.examples.traffic_enginering.traffic_control;
+package inet.examples.traffic_engineering.traffic_control;
 
 import inet.networklayer.autorouting.FlatNetworkConfigurator;
 //import inet.nodes.ethernet.EtherSwitch2WithOutputQueue;

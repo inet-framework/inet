@@ -1,0 +1,26 @@
+scripts
+=======
+
+This directory includes scripts to submit array & batch jobs to a cluster
+(managed by Sun Grid Engine) and do pre- & post-processing of simulation results
+for a comparison study of next-generation access network (NGA) architectures.
+
+
+1. Simulation run (batch processing)
+
+arrayrun.sh:
+Submit a batch job to cluster (Grid Engine) as in the following
+example:
+  
+qsub -t 1:50 -o directoryForStandardOutput -j yes arrayrun.sh iniFile configuration
+
+
+2. Data analysis (pre- and post-processing)
+
+generateMeansPlotsForAll.pl:
+Plot group means with 95% confidence intervals for batch of
+simulations
+
+generateMsgPlotsForAll.pl:
+Plot the number of messages present in the system for batch of
+simulations (to check the warm-up period)
