@@ -57,12 +57,13 @@ module TrafGenHost extends NodeBase
     submodules:
         trafGen: <trafGenType> like IIPvXTrafficGenerator {
             parameters:
+                protocol = 17;    // UDP
                 @display("p=329,81");
         }
     connections allowunconnected:
         // transport connections
-        networkLayer.udpOut --> trafGen.ipIn;
-        networkLayer.udpIn <-- trafGen.ipOut;
+        networkLayer.transportOut++ --> trafGen.ipIn;
+        networkLayer.transportIn++ <-- trafGen.ipOut;
 }
 
 network Test
