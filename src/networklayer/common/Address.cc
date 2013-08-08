@@ -248,6 +248,9 @@ const char *Address::getTypeName(AddressType t)
         CASE(NONE);
         CASE(IPv4);
         CASE(IPv6);
+        CASE(MAC);
+        CASE(MODULEID);
+        CASE(MODULEPATH);
         default: return "Unknown type";
     }
 #undef CASE
