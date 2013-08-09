@@ -24,6 +24,7 @@
 
 #include <algorithm>
 
+#include "AddressResolver.h"
 #include "BindingCacheAccess.h"
 #include "BindingUpdateList.h"
 #include "BindingUpdateListAccess.h"
@@ -120,8 +121,8 @@ void xMIPv6::initialize(int stage)
         // moved rt6 initialization to here, as we should
         // set the MIPv6 flag as soon as possible for use
         // with other modules.
-        rt6 = IPv6RoutingTableAccess().get();
-        ASSERT(rt6 != NULL);
+        cModule *host = findContainingNode(this, true);
+        rt6 = AddressResolver().routingTable6Of(host);
         rt6->setMIPv6Support(true); // 4.9.07 - CB
 
         // moved init stuff from rt6 to here as this is actually
