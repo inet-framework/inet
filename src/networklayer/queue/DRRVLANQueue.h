@@ -84,6 +84,11 @@ protected:
 
     cGate *outGate;
 
+    // debugging
+#ifndef NDEBUG
+    cOutVector pktReqVector;
+#endif
+
   public:
     DRRVLANQueue();
     virtual ~DRRVLANQueue();

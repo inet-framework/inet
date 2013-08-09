@@ -100,6 +100,11 @@ void DRRVLANQueue::initialize()
     numPktsDropped.assign(numFlows, 0);
     numPktsConformed.assign(numFlows, 0);
     numPktsSent.assign(numFlows, 0);
+
+    // debugging
+#ifndef NDEBUG
+    pktReqVector.setName("packets requested");
+#endif
 }
 
 void DRRVLANQueue::handleMessage(cMessage *msg)
@@ -136,6 +141,9 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
             if (packetRequested > 0)
             {
                 packetRequested--;
+#ifndef NDEBUG
+                pktReqVector.record(packetRequested);
+#endif
                 if (warmupFinished == true)
                 {
                     numBitsSent[flowIndex] += pktLength;
@@ -147,7 +155,6 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
             {
                 int pktByteLength = PK(msg)->getByteLength();
                 if (fifoCurrentSize + pktByteLength > fifoSize)
-//                if (frameCapacity && fifo.length() >= frameCapacity)
                 {
                     EV << "FIFO queue full, dropping packet.\n";
                     if (warmupFinished == true)
@@ -165,26 +172,13 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
         }
         else
         {   // frame is not conformed
-            if (queue->isEmpty())
+            // TODO: need to check 'packetRequested'?
+            bool dropped = enqueue(msg);
+            if (dropped)
             {
-                bool dropped = enqueue(msg);
-                if (dropped)
+                if (warmupFinished == true)
                 {
-                    if (warmupFinished == true)
-                    {
-                        numPktsDropped[flowIndex]++;
-                    }
-                }
-            }
-            else
-            {   // queue is not empty
-                bool dropped = enqueue(msg);
-                if (dropped)
-                {
-                    if (warmupFinished == true)
-                    {
-                        numPktsDropped[flowIndex]++;
-                    }
+                    numPktsDropped[flowIndex]++;
                 }
             }
 
@@ -306,6 +300,9 @@ void DRRVLANQueue::requestPacket()
     if (msg==NULL)
     {
         packetRequested++;
+#ifndef NDEBUG
+        pktReqVector.record(packetRequested);
+#endif
     }
     else
     {

@@ -34,45 +34,28 @@
  */
 class INET_API DRRVLANQueue2 : public DRRVLANQueue
 {
+protected:
     // type definitions for member variables
     typedef std::list<int> IntList;
 
   protected:
-//    // general
-//    int numFlows;
-//
-//    // VLAN classifier
-//    IQoSClassifier *classifier;
-//
-//    // token bucket meters
-//    TbmVector tbm;
 
     // DRR scheduler
-//    int currentVoqIndex;        ///< index of a VOQ whose HOL frame is scheduled for TX during the last RR scheduling
-//    IntVector deficitCounters;  ///< vector of deficit counters
-    IntVector conformedCounters;        ///< vector of counters for conformed bytes
-    IntVector nonconformedCounters;    ///< vector of counters for non-conformed bytes
-//    IntVector quanta;           ///< vector of quantum
-//    QueueVector voq;            ///< per-flow virtual output queues (VOQs)
-//    int voqSize;                ///< VOQ size in byte
-//    IntVector voqCurrentSize;   ///< current size of VOQs in byte
-//    bool continuation;          ///< flag indicating whether the previous run is continued.
-    IntList conformedList;      ///< list of queues with non-zero conformed bytes
-    IntList nonconformedList;   ///< list of queues with non-zero non-conformed bytes
+    IntVector conformedCounters;    ///< vector of counters for conformed bytes
+    IntVector nonconformedCounters; ///< vector of counters for non-conformed bytes
+    IntList conformedList;          ///< list of queues with non-zero conformed bytes
+    IntList nonconformedList;       ///< list of queues with non-zero non-conformed bytes
 
-//    // statistics
-//    bool warmupFinished;        ///< if true, start statistics gathering
-//    DoubleVector numBitsSent;
-//    IntVector numPktsReceived; // redefined from PassiveQueueBase with 'name hiding'
-//    IntVector numPktsDropped;  // redefined from PassiveQueueBase with 'name hiding'
-//    IntVector numPktsConformed;
-//    IntVector numPktsSent;
-//
-//    cGate *outGate;
+    // debugging
+#ifndef NDEBUG
+    typedef std::vector<cOutVector *> OutVectorVector;
+    OutVectorVector conformedCounterVector;
+    OutVectorVector nonconformedCounterVector;
+#endif
 
   public:
-//    DRRVLANQueue();
-//    virtual ~DRRVLANQueue();
+    DRRVLANQueue2();
+    virtual ~DRRVLANQueue2();
 
   protected:
     virtual void initialize();
@@ -82,27 +65,10 @@ class INET_API DRRVLANQueue2 : public DRRVLANQueue
      */
     virtual void handleMessage(cMessage *msg);
 
-//    /**
-//     * Redefined from DRRVLANQueue.
-//     */
-//    virtual void finish();
-
-//    /**
-//     * Redefined from DRRVLANQueue.
-//     */
-//    virtual bool enqueue(cMessage *msg);
-
     /**
      * Redefined from DRRVLANQueue.
      */
     virtual cMessage *dequeue();
-
-//    /**
-//     * The queue should send a packet whenever this method is invoked.
-//     * If the queue is currently empty, it should send a packet when
-//     * when one becomes available.
-//     */
-//    virtual void requestPacket();
 };
 
 #endif

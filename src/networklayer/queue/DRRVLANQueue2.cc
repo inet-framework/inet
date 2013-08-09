@@ -21,82 +21,46 @@
 
 Define_Module(DRRVLANQueue2);
 
-//DRRVLANQueue2::DRRVLANQueue2()
-//{
-//}
-//
-//DRRVLANQueue2::~DRRVLANQueue2()
-//{
-//    for (int i=0; i<numFlows; i++)
-//    {
-//        delete voq[i];
-//    }
-//}
+DRRVLANQueue2::DRRVLANQueue2()
+{
+}
+
+DRRVLANQueue2::~DRRVLANQueue2()
+{
+#ifndef NDEBUG
+    for (int i = 0; i < numFlows; i++)
+    {
+        delete conformedCounterVector[i];
+        delete nonconformedCounterVector[i];
+    }
+#endif
+}
 
 void DRRVLANQueue2::initialize()
 {
-    PassiveQueueBase::initialize();
-
-     outGate = gate("out");
-
-     // general
-     numFlows = par("numFlows").longValue();
-
-     // VLAN classifier
-     const char *classifierClass = par("classifierClass").stringValue();
-     classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
-     classifier->setMaxNumQueues(numFlows);
-     const char *vids = par("vids").stringValue();
-     classifier->initialize(vids);
-
-     // Token bucket meters
-     tbm.assign(numFlows, (BasicTokenBucketMeter *)NULL);
-     cModule *mac = getParentModule();
-     for (int i=0; i<numFlows; i++)
-     {
-         cModule *meter = mac->getSubmodule("meter", i);
-         tbm[i] = check_and_cast<BasicTokenBucketMeter *>(meter);
-     }
-
-     // Per-subscriber VOQs with DRR scheduler for non-conformant packets
-     voqSize = par("voqSize").longValue();
-     voq.assign(numFlows, (cQueue *)NULL);
-     for (int i=0; i<numFlows; i++)
-     {
-         char buf[32];
-         sprintf(buf, "queue-%d", i);
-         voq[i] = new cQueue(buf);
-     }
-     voqCurrentSize.assign(numFlows, 0);
+    DRRVLANQueue::initialize();
 
      // DRR scheduler
-     currentVoqIndex = 0;
-     deficitCounters.assign(numFlows, 0);
      conformedCounters.assign(numFlows, 0);
      nonconformedCounters.assign(numFlows, 0);
-     continuation = false;
 
-     // DRR scheduler: Quanta
-     const char *str = par("quanta");
-     cStringTokenizer tokenizer(str);
-     quanta = tokenizer.asIntVector();
-     if (quanta.size() < numFlows)
+     // debugging
+#ifndef NDEBUG
+     for (int i=0; i < numFlows; i++)
      {
-         int quantum = *(quanta.end() - 1);  // fill new elements with the value of the last element
-         quanta.resize(numFlows, quantum);
-     }
-     else if (quanta.size() > numFlows)
-     {
-         error("%s::initialize DRR quanta: Exceeds the maximum number of flows", getFullPath().c_str());
-     }
+         cOutVector *vector;
+         std::stringstream vname;
 
-     // statistics
-     warmupFinished = false;
-     numBitsSent.assign(numFlows, 0.0);
-     numPktsReceived.assign(numFlows, 0);
-     numPktsDropped.assign(numFlows, 0);
-     numPktsConformed.assign(numFlows, 0);
-     numPktsSent.assign(numFlows, 0);
+         vname << "conformed bytes for flow[" << i << "]";
+         vector = new cOutVector((vname.str()).c_str());
+         conformedCounterVector.push_back(vector);
+
+         vname.str(std::string());  // clear string stream
+         vname << "non-conformed bytes for flow[" << i << "]";
+         vector = new cOutVector((vname.str()).c_str());
+         nonconformedCounterVector.push_back(vector);
+     }
+#endif
 }
 
 void DRRVLANQueue2::handleMessage(cMessage *msg)
@@ -116,64 +80,115 @@ void DRRVLANQueue2::handleMessage(cMessage *msg)
     {   // a frame arrives
         int flowIndex = classifier->classifyPacket(msg);
         int pktLength = PK(msg)->getBitLength();
-        int pktByteLength = PK(msg)->getByteLength();
-        int color = tbm[flowIndex]->meterPacket(msg);   // result of metering; 0 for conformed and 1 for non-conformed packet
 // DEBUG
         ASSERT(pktLength > 0);
 // DEBUG
-        cQueue *queue = voq[flowIndex];
-        bool queueEmpty = queue->isEmpty(); // status of queue before enqueueing the packet
+        int pktByteLength = PK(msg)->getByteLength();
+        int color = tbm[flowIndex]->meterPacket(msg);   // result of metering; 0 for conformed and 1 for non-conformed packet
+//        cQueue *queue = voq[flowIndex];
+//        bool queueEmpty = queue->isEmpty(); // status of queue before enqueueing the packet
         if (warmupFinished == true)
         {
             numPktsReceived[flowIndex]++;
+            if (color == 0)
+            {   // frame is conformed
+                numPktsConformed[flowIndex]++;
+            }
         }
-        bool dropped = enqueue(msg);
-        if (dropped)
+
+        if (packetRequested > 0)
         {
+            packetRequested--;
+#ifndef NDEBUG
+            pktReqVector.record(packetRequested);
+#endif
             if (warmupFinished == true)
             {
-                numPktsDropped[flowIndex]++;
+                numBitsSent[flowIndex] += PK(msg)->getBitLength();
+                numPktsSent[flowIndex]++;
             }
+            sendOut(msg);
         }
         else
         {
-            if (color == 0)
+            bool dropped = enqueue(msg);
+            if (dropped)
             {
                 if (warmupFinished == true)
                 {
-                    numPktsConformed[flowIndex]++;
+                    numPktsDropped[flowIndex]++;
                 }
-                conformedCounters[flowIndex] += pktByteLength;
-                IntList::iterator iter = std::find (conformedList.begin(), conformedList.end(), flowIndex);
-                if (iter == conformedList.end())
-                {   // add flow index to active list
-                    conformedList.push_back(flowIndex);
+                if (color == 0)
+                {   // exchange of the values of counters to emulate priority queueing
+                    if (nonconformedCounters[flowIndex] >= pktByteLength)
+                    {
+                        conformedCounters[flowIndex] += pktByteLength;
+                        nonconformedCounters[flowIndex] -= pktByteLength;
+#ifndef NDEBUG
+                        conformedCounterVector[flowIndex]->record(conformedCounters[flowIndex]);
+                        nonconformedCounterVector[flowIndex]->record(nonconformedCounters[flowIndex]);
+#endif
+                        // update active list for conformed packets
+                        IntList::iterator iter = std::find(conformedList.begin(), conformedList.end(), flowIndex);
+                        if (iter == conformedList.end())
+                        {   // add flow index to active list
+                            conformedList.push_back(flowIndex);
+                        }
+
+                        // update active list for non-conformed packets
+                        if (nonconformedCounters[flowIndex] == 0)
+                        {
+                            nonconformedList.remove(flowIndex);
+                        }
+                    }
                 }
             }
             else
             {
-                nonconformedCounters[flowIndex] += pktByteLength;
-                IntList::iterator iter = std::find (nonconformedList.begin(), nonconformedList.end(), flowIndex);
-                if (iter == nonconformedList.end())
-                {   // add flow index to active list
-                    conformedList.push_back(flowIndex);
-                }
-            }
-            if (queueEmpty)
-            {
-                if (packetRequested > 0)
-                {
-                    cMessage *dequeued_msg = dequeue();
-                    if (dequeued_msg != NULL)
-                    {
-                        packetRequested--;
-                        if (warmupFinished == true)
-                        {
-                            numBitsSent[flowIndex] += PK(dequeued_msg)->getBitLength();
-                            numPktsSent[flowIndex]++;
-                        }
+                if (color == 0)
+                {   // frame is conformed
+                    conformedCounters[flowIndex] += pktByteLength;
+#ifndef NDEBUG
+                    conformedCounterVector[flowIndex]->record(conformedCounters[flowIndex]);
+#endif
+                    IntList::iterator iter = std::find(conformedList.begin(), conformedList.end(), flowIndex);
+                    if (iter == conformedList.end())
+                    {   // add flow index to active list
+                        conformedList.push_back(flowIndex);
                     }
                 }
+                else
+                {   // frame is not conformed
+                    nonconformedCounters[flowIndex] += pktByteLength;
+#ifndef NDEBUG
+                    nonconformedCounterVector[flowIndex]->record(nonconformedCounters[flowIndex]);
+#endif
+                    IntList::iterator iter = std::find(nonconformedList.begin(), nonconformedList.end(), flowIndex);
+                    if (iter == nonconformedList.end())
+                    {   // add flow index to active list
+                        nonconformedList.push_back(flowIndex);
+                    }
+                }
+//            if (queueEmpty)
+//            {
+//                if (packetRequested > 0)
+//                {
+//                    cMessage *dequeued_msg = dequeue();
+//                    if (dequeued_msg != NULL)
+//                    {
+//                        packetRequested--;
+//#ifndef NDEBUG
+//                        pktReqVector.record(packetRequested);
+//#endif
+//                        if (warmupFinished == true)
+//                        {
+//                            numBitsSent[flowIndex] += PK(dequeued_msg)->getBitLength();
+//                            numPktsSent[flowIndex]++;
+//                        }
+//                        sendOut(dequeued_msg);
+//                    }
+//                }
+//            }
             }
         }
 
@@ -183,149 +198,113 @@ void DRRVLANQueue2::handleMessage(cMessage *msg)
             sprintf(buf, "q rcvd: %d\nq dropped: %d", numPktsReceived[flowIndex], numPktsDropped[flowIndex]);
             getDisplayString().setTagArg("t", 0, buf);
         }
-    }
+    }   // end of if () for self message
     else
     {   // self message is not expected; something wrong.
         error("%s::handleMessage: Unexpected self message", getFullPath().c_str());
     }
 }
 
-//bool DRRVLANQueue2::enqueue(cMessage *msg)
-//{
-//    int queueIndex = classifier->classifyPacket(msg);
-//    int pktByteLength = PK(msg)->getByteLength();
-//
-//    if (voqCurrentSize[queueIndex] + pktByteLength > voqSize)
-//    {
-//        EV << "VOQ[" << queueIndex << "] full, dropping packet.\n";
-//        delete msg;
-//        return true;
-//    }
-//    else
-//    {
-//        voq[queueIndex]->insert(msg);
-//        voqCurrentSize[queueIndex] += pktByteLength;
-//        return false;
-//    }
-//}
-
 cMessage *DRRVLANQueue2::dequeue()
 {
-    cMessage *msg = (cMessage *)NULL;
-
     // check first the list of queues with non-zero conformed bytes
-    while (conformedList.empty() == false) {
-        int idx = conformedList.front();
+    while (!conformedList.empty()) {
+        int flowIndex = conformedList.front();
         conformedList.pop_front();
-        while ((conformedCounters[idx] > 0) && (voq[idx]->isEmpty() == false)) {
-            int pktByteLength = PK(voq[idx]->front())->getByteLength();
-            if (pktByteLength <= conformedCounters[idx])
+        // DEBUG
+        ASSERT(!voq[flowIndex]->isEmpty());
+        // DEBUG
+        int pktByteLength = PK(voq[flowIndex]->front())->getByteLength();
+        if (conformedCounters[flowIndex] >= pktByteLength)
+        {   // serve the packet
+            cMessage *msg = (cMessage *)voq[flowIndex]->pop();
+            voqCurrentSize[flowIndex] -= pktByteLength;
+            conformedCounters[flowIndex] -= pktByteLength;
+#ifndef NDEBUG
+            conformedCounterVector[flowIndex]->record(conformedCounters[flowIndex]);
+#endif
+
+            // check whether the conformed counter value is enough for the HOL packet
+            if (!voq[flowIndex]->isEmpty() && (conformedCounters[flowIndex] >= PK(voq[flowIndex]->front())->getByteLength()))
             {
-                msg = (cMessage *)voq[idx]->pop();
-                return msg;
+                conformedList.push_back(flowIndex);
             }
-            else
-            {
-                break;
-            }
+            return msg;
         }
-        if ((conformedCounters[idx] > 0) && (voq[idx]->isEmpty() == false))
-        {
-            conformedList.push_back(idx);
-        }
-    }
+        // else
+        // {
+        //     break;
+        // }
+
+        // if (!voq[flowIndex]->isEmpty() && (conformedCounters[flowIndex] > 0))
+        // {
+        //     conformedList.push_back(flowIndex);
+        // }
+    }   // end of while ()
 
     // check then the list of queues with non-zero non-conformed bytes and do regular DRR scheduling
-    if (nonconformedList.empty() == true)
+    cMessage *msg = (cMessage *)NULL;
+    if (nonconformedList.empty())
     {
         continuation = false;
         return (msg);
     }
     else
     {
-        while (nonconformedList.empty() == false)
+        while (!nonconformedList.empty())
         {
-            int idx = nonconformedList.front();
-//            nonconformedList.pop_front();
-            if (voq[idx]->isEmpty() == false)
+            int flowIndex = nonconformedList.front();
+            nonconformedList.pop_front();
+            // DEBUG
+            ASSERT(!voq[flowIndex]->isEmpty());
+            // DEBUG
+            deficitCounters[flowIndex] += continuation ? 0 : quanta[flowIndex];
+            continuation = false;   // reset the flag
+
+            int pktByteLength = PK(voq[flowIndex]->front())->getByteLength();
+            if ((deficitCounters[flowIndex] >= pktByteLength) && (nonconformedCounters[flowIndex] >= pktByteLength))
+            {   // serve the packet
+                msg = (cMessage *) voq[flowIndex]->pop();
+                voqCurrentSize[flowIndex] -= pktByteLength;
+                deficitCounters[flowIndex] -= pktByteLength;
+                nonconformedCounters[flowIndex] -= pktByteLength;
+#ifndef NDEBUG
+                nonconformedCounterVector[flowIndex]->record(nonconformedCounters[flowIndex]);
+#endif
+            }
+
+            // check whether the deficit and non-conformed counter values are enough for the HOL packet
+            if (!voq[flowIndex]->isEmpty())
             {
-                deficitCounters[idx] += continuation ? 0 : quanta[idx];
-                continuation = false;   // reset the flag
-
-                int pktByteLength = PK(voq[idx]->front())->getByteLength();
-                if ((deficitCounters[idx] >= pktByteLength) && (nonconformedCounters[idx] >= pktByteLength))
-                {   // serve the packet
-                    msg = (cMessage *)voq[idx]->pop();
-                    voqCurrentSize[idx] -= pktByteLength;
-                    deficitCounters[idx] -= pktByteLength;
-                    nonconformedCounters[idx] -= pktByteLength;
-
-                    // check whether the deficit counter value is enough for the HOL packet
-                    if (voq[idx]->isEmpty() == false)
-                    {
-                        pktByteLength = PK(voq[idx]->front())->getByteLength();
-                        if ((deficitCounters[idx] >= pktByteLength) && (nonconformedCounters[idx] >= pktByteLength))
-                        {   // set the flag and keep the index in the front of the list
-                            continuation = true;
-                        }
-                        else
-                        {
-                            nonconformedList.pop_front();
-                        }
+                pktByteLength = PK(voq[flowIndex]->front())->getByteLength();                
+                if (nonconformedCounters[flowIndex] >= pktByteLength)
+                {
+                    if (deficitCounters[flowIndex] >= pktByteLength)
+                    {   // set the flag and put the index back to the front of the list
+                        continuation = true;
+                        nonconformedList.push_front(flowIndex);
                     }
-                    break;  // from the while loop
+                    else
+                    {
+                        nonconformedList.push_back(flowIndex);
+                    }
                 }
+                else
+                {
+                    deficitCounters[flowIndex] = 0;
+                }
+            }
+            else
+            {
+                deficitCounters[flowIndex] = 0;
+            }
+
+            if (msg != NULL)
+            {
+                break;  // from the while loop
             }
         } // end of while()
     }
 
     return (msg);   // just in case
 }
-
-//void DRRVLANQueue2::requestPacket()
-//{
-//    Enter_Method("requestPacket()");
-//
-//    cMessage *msg = dequeue();
-//    if (msg==NULL)
-//    {
-//        packetRequested++;
-//    }
-//    else
-//    {
-//        if (warmupFinished == true)
-//        {
-//            int flowIndex = classifier->classifyPacket(msg);    // TODO: any more efficient way?
-//            numBitsSent[flowIndex] += PK(msg)->getBitLength();
-//            numPktsSent[flowIndex]++;
-//        }
-//        sendOut(msg);
-//    }
-//}
-
-//void DRRVLANQueue2::finish()
-//{
-//    unsigned long sumPktsReceived = 0;
-//    unsigned long sumPktsConformed = 0;
-//    unsigned long sumPktsDropped = 0;
-//
-//    for (int i=0; i < numFlows; i++)
-//    {
-//        std::stringstream ss_received, ss_conformed, ss_dropped, ss_sent, ss_throughput;
-//        ss_received << "packets received from flow[" << i << "]";
-//        ss_conformed << "packets conformed from flow[" << i << "]";
-//        ss_dropped << "packets dropped from flow[" << i << "]";
-//        ss_sent << "packets sent from flow[" << i << "]";
-//        ss_throughput << "bits/sec sent from flow[" << i << "]";
-//        recordScalar((ss_received.str()).c_str(), numPktsReceived[i]);
-//        recordScalar((ss_conformed.str()).c_str(), numPktsConformed[i]);
-//        recordScalar((ss_dropped.str()).c_str(), numPktsDropped[i]);
-//        recordScalar((ss_sent.str()).c_str(), numPktsSent[i]);
-//        recordScalar((ss_throughput.str()).c_str(), numBitsSent[i]/(simTime()-simulation.getWarmupPeriod()).dbl());
-//        sumPktsReceived += numPktsReceived[i];
-//        sumPktsConformed += numPktsConformed[i];
-//        sumPktsDropped += numPktsDropped[i];
-//    }
-//    recordScalar("overall packet conformed rate", sumPktsConformed/double(sumPktsReceived));
-//    recordScalar("overall packet loss rate", sumPktsDropped/double(sumPktsReceived));
-//}
