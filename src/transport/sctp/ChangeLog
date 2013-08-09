@@ -1,3 +1,7 @@
+2013-08-08  Irene Ruengeler
+
+	Code refactoring, output/logging changes, minor fixes
+
 2013-07-29  Irene Ruengeler
 
 	 Added the packet drop feature  (draft-stewart-sctp-pktdrprep-15.txt),

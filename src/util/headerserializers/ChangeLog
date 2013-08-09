@@ -1,3 +1,7 @@
+2013-08-08  Irene Ruengeler
+
+	sctp: Fixes for supporting HMac
+
 2013-07-17  Rudolf Hornig
 
 	sctp: implemented SCTP Stream Reset (RFC 6525) (patch submitted by Irene

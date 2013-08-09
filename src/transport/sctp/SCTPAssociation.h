@@ -812,7 +812,7 @@ class INET_API SCTPAssociation : public cObject
         /** Utility: returns name of SCTP_S_xxx constants */
         static const char* stateName(const int32 state);
 
-        static uint32 chunkToInt(const char* type);
+        static uint16 chunkToInt(const char* type);
 
         /* Process self-messages (timers).
         * Normally returns true. A return value of false means that the
@@ -1100,6 +1100,7 @@ class INET_API SCTPAssociation : public cObject
         SCTPEventCode processAsconfAckArrived(SCTPAsconfAckChunk* asconfAckChunk);
         void retransmitAsconf();
         bool typeInChunkList(const uint16 type);
+        bool typeInOwnChunkList(const uint16 type);
         SCTPAsconfAckChunk*      createAsconfAckChunk(const uint32 serialNumber);
         SCTPAuthenticationChunk* createAuthChunk();
         SCTPSuccessIndication*   createSuccessIndication(uint32 correlationId);

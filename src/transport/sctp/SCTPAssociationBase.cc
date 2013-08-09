@@ -178,14 +178,9 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
 
 SCTPPathVariables::~SCTPPathVariables()
 {
-    statisticsPathSSthresh->record(0);
-    statisticsPathCwnd->record(0);
-    statisticsPathBandwidth->record(0.0);
     delete statisticsPathSSthresh;
     delete statisticsPathCwnd;
     delete statisticsPathBandwidth;
-    statisticsPathRTO->record(0);
-    statisticsPathRTT->record(0);
     delete statisticsPathRTO;
     delete statisticsPathRTT;
 
@@ -196,7 +191,6 @@ SCTPPathVariables::~SCTPPathVariables()
     delete vectorPathHbAck;
     delete vectorPathRcvdHbAck;
 
-    statisticsPathQueuedSentBytes->record(0);
     delete statisticsPathQueuedSentBytes;
     delete statisticsPathOutstandingBytes;
     delete statisticsPathGapAckedChunksInLastSACK;
@@ -205,9 +199,7 @@ SCTPPathVariables::~SCTPPathVariables()
     delete statisticsPathSenderBlockingFraction;
     delete statisticsPathReceiverBlockingFraction;
 
-    vectorPathPbAcked->record(0);
     delete vectorPathPbAcked;
-    vectorPathFastRecoveryState->record(0);
     delete vectorPathFastRecoveryState;
 
     delete vectorPathTSNFastRTX;
@@ -514,7 +506,7 @@ SCTPAssociation::SCTPAssociation(SCTP* _module, int32 _appGateIndex, int32 _asso
     FairStopTimer->setControlInfo(pinfo->dup());
     snprintf(vectorName, sizeof(vectorName), "Advertised Message Receiver Window of Association %d", assocId);
     advMsgRwnd = new cOutVector(vectorName);
-    snprintf(vectorName, sizeof(vectorName), "End to End Delay");
+    snprintf(vectorName, sizeof(vectorName), "End to End Delay of Association %d", assocId);
     EndToEndDelay = new cOutVector(vectorName);
 
     // ====== Assoc throughput ===============================================
@@ -626,6 +618,9 @@ SCTPAssociation::~SCTPAssociation()
     if (assocThroughputVector != NULL) delete assocThroughputVector;
     if (FairStartTimer) delete cancelEvent(FairStartTimer);
     if (FairStopTimer) delete cancelEvent(FairStopTimer);
+    
+    if (state->asconfOutstanding && state->asconfChunk)
+        delete state->asconfChunk;
 
     delete fsm;
     delete state;
@@ -1099,14 +1094,16 @@ void SCTPAssociation::stateEntered(int32 status)
             pmStartPathManagement();
             state->sendQueueLimit = (uint32)sctpMain->par("sendQueueLimit");
             sendEstabIndicationToApp();
-            const bool addIP = (bool)sctpMain->par("addIP");
-            sctpEV3 << getFullPath() << ": addIP = " << addIP << " time = " << (double)sctpMain->par("addTime") << "\n";
-            if (addIP == true && (double)sctpMain->par("addTime")>0)
-            {
-                sctpEV3 << "startTimer addTime to expire at " << simulation.getSimTime()+(double)sctpMain->par("addTime") << "\n";
+            if (sctpMain->hasPar("addIP")) {
+                const bool addIP = (bool)sctpMain->par("addIP");
+				sctpEV3 << getFullPath() << ": addIP = " << addIP << " time = " << (double)sctpMain->par("addTime") << "\n";
+				if (addIP == true && (double)sctpMain->par("addTime")>0)
+				{
+					sctpEV3 << "startTimer addTime to expire at " << simulation.getSimTime()+(double)sctpMain->par("addTime") << "\n";
 
-                scheduleTimeout(StartAddIP, (double)sctpMain->par("addTime"));
-            }
+					scheduleTimeout(StartAddIP, (double)sctpMain->par("addTime"));
+				}
+			}
             if ((double)sctpMain->par("fairStart")>0)
             {
                 sctpMain->scheduleAt(sctpMain->par("fairStart"), FairStartTimer);
@@ -1167,6 +1164,12 @@ void SCTPAssociation::removePath()
     while ((pathIterator = sctpPathMap.begin()) != sctpPathMap.end())
     {
         SCTPPathVariables* path = pathIterator->second;
+        for (AddressVector::iterator j=remoteAddressList.begin(); j!=remoteAddressList.end(); j++) {
+            if ((*j)==path->remoteAddress) {
+                remoteAddressList.erase(j);
+                break;
+            }
+        }
         sctpEV3 << getFullPath() << " remove path " << path->remoteAddress << endl;
         stopTimer(path->HeartbeatTimer);
         delete path->HeartbeatTimer;

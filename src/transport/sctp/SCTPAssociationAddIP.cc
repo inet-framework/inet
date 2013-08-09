@@ -24,7 +24,6 @@
 void SCTPAssociation::sendAsconf(const char* type, const bool remote)
 {
     SCTPAuthenticationChunk* authChunk;
-    char*                    token;
     bool                     nat = false;
     IPvXAddress              targetAddr = remoteAddr;
     uint16                   chunkLength = 0;
@@ -54,8 +53,12 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
         else {
             chunkLength += 8;
         }
-        asconfChunk->setBitLength(chunkLength);
-        token = strtok((char*)type, ",");
+        asconfChunk->setByteLength(chunkLength);
+        
+        char typecopy[128];
+        strcpy(typecopy, type);
+        char* token;
+        token = strtok((char*)typecopy, ",");
         while (token != NULL)
         {
             switch (atoi(token))
@@ -122,19 +125,21 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
                     }
                     if (priParam->getAddressParam().isIPv6()) {
                         chunkLength += 20;
-                        priParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH+20)*8);
+                        priParam->setByteLength((SCTP_ADD_IP_PARAMETER_LENGTH+20));
                     }
                     else {
                         chunkLength += 8;
-                        priParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH+8)*8);
+                        priParam->setByteLength((SCTP_ADD_IP_PARAMETER_LENGTH+8));
                     }
                     asconfChunk->addAsconfParam(priParam);
                     break;
                 }
+                default: printf("type %d not known\n", atoi(token));
+                    break;
             }
             token = strtok(NULL, ",");
         }
-        asconfChunk->setBitLength(chunkLength*8);
+        asconfChunk->setByteLength(chunkLength);
 
         if (state->auth && state->peerAuth) {
             authChunk = createAuthChunk();
@@ -156,12 +161,12 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
 void SCTPAssociation::retransmitAsconf()
 {
     SCTPMessage* sctpmsg = new SCTPMessage();
-    sctpmsg->setBitLength(SCTP_COMMON_HEADER*8);
+    sctpmsg->setByteLength(SCTP_COMMON_HEADER);
 
     SCTPAsconfChunk* sctpasconf = new SCTPAsconfChunk("ASCONF-RTX");
     sctpasconf = check_and_cast<SCTPAsconfChunk *>(state->asconfChunk->dup());
     sctpasconf->setChunkType(ASCONF);
-    sctpasconf->setBitLength(state->asconfChunk->getBitLength());
+    sctpasconf->setByteLength(state->asconfChunk->getByteLength());
 
     if (state->auth && state->peerAuth) {
         SCTPAuthenticationChunk* authChunk = createAuthChunk();
@@ -200,7 +205,7 @@ SCTPAsconfAckChunk* SCTPAssociation::createAsconfAckChunk(const uint32 serialNum
     SCTPAsconfAckChunk *asconfAckChunk = new SCTPAsconfAckChunk("ASCONF_ACK");
     asconfAckChunk->setChunkType(ASCONF_ACK);
     asconfAckChunk->setSerialNumber(serialNumber);
-    asconfAckChunk->setBitLength(SCTP_ADD_IP_CHUNK_LENGTH*8);
+    asconfAckChunk->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH);
     return asconfAckChunk;
 }
 
@@ -272,6 +277,16 @@ void SCTPAssociation::calculateAssocSharedKey()
 bool SCTPAssociation::typeInChunkList(const uint16 type)
 {
     for (std::vector<uint16>::iterator i=state->peerChunkList.begin(); i!=state->peerChunkList.end(); i++) {
+        if ((*i)==type) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SCTPAssociation::typeInOwnChunkList(const uint16 type)
+{
+    for (std::vector<uint16>::iterator i=state->chunkList.begin(); i!=state->chunkList.end(); i++) {
         if ((*i)==type) {
             return true;
         }

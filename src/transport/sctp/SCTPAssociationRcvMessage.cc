@@ -146,6 +146,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
                     sendHMacError(authChunk->getHMacIdentifier());
                     SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
                     it->second.numAuthChunksRejected++;
+                    delete authChunk;
                     return true;
                 }
                 if (authChunk->getHMacOk() == false) {
@@ -466,7 +467,7 @@ bool SCTPAssociation::process_RCV_Message(SCTPMessage*       sctpmsg,
 bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort, int32 destPort)
 {
     SCTPAssociation* assoc;
-    char timerName[128];
+    char timerName[64];
     bool trans = false;
     uint16 type;
     InterfaceTableAccess interfaceTableAccess;
@@ -576,8 +577,9 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
                     sctpEV3<<__LINE__<<" get new path for "<<initchunk->getAddresses(j)<<" ptr="<<path<<"\n";
                     for (AddressVector::iterator k=state->localAddresses.begin(); k!=state->localAddresses.end(); ++k)
                     {
-                        sctpMain->addRemoteAddress(this, (*k), initchunk->getAddresses(j));
-                        this->remoteAddressList.push_back(initchunk->getAddresses(j));
+                        if (sctpMain->addRemoteAddress(this, (*k), initchunk->getAddresses(j))) {
+                            this->remoteAddressList.push_back(initchunk->getAddresses(j));
+                        }
                     }
                     sctpPathMap[path->remoteAddress] = path;
                     qCounter.roomTransQ[path->remoteAddress] = 0;
@@ -644,6 +646,18 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
     else if (fsm->getState() == SCTP_S_COOKIE_WAIT) //INIT-Collision
     {
         sctpEV3<<"INIT collision: send Init-Ack\n";
+        if (initchunk->getHmacTypesArraySize() != 0) {
+            state->peerAuth = true;
+            if (state->peerChunkList.size() == 0) {
+                for (uint32 j=0; j<initchunk->getChunkTypesArraySize(); j++)
+                {
+                    type = initchunk->getChunkTypes(j);
+                    if (type != INIT && type != INIT_ACK && type != AUTH && type != SHUTDOWN_COMPLETE) {
+                        state->peerChunkList.push_back(type);
+                    }
+                }
+            }
+        }
         sendInitAck(initchunk);
         trans = true;
     }
@@ -720,9 +734,10 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk* initAckChunk)
                     if (!((*k).isUnspecified()))
                     {
                         sctpEV3<<"addPath "<<initAckChunk->getAddresses(j)<<"\n";
-                        sctpMain->addRemoteAddress(this, (*k), initAckChunk->getAddresses(j));
-                        this->remoteAddressList.push_back(initAckChunk->getAddresses(j));
-                        addPath(initAckChunk->getAddresses(j));
+                        if (sctpMain->addRemoteAddress(this, (*k), initAckChunk->getAddresses(j))) {
+                            this->remoteAddressList.push_back(initAckChunk->getAddresses(j));
+                            addPath(initAckChunk->getAddresses(j));
+                        }
                     }
                 }
             }
@@ -1810,10 +1825,10 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
         state->ackState = sackFrequency;
 
         if (tsnGt(tsn, state->gapList.getHighestTSNReceived())) {
-            std::cout << "DROP: " <<  (int)tsn << " high=" << (int)state->gapList.getHighestTSNReceived() 
+            sctpEV3 << "DROP: " <<  (int)tsn << " high=" << (int)state->gapList.getHighestTSNReceived() 
                 << " Q=" << (int)state->queuedReceivedBytes << " Rwnd=" << (int)state->localRwnd << endl;
             if ((!state->pktDropSent) && (sctpMain->pktdrop) && (state->peerPktDrop)) {
-                std::cout << "Receive buffer full (case 1): sendPacketDrop" << endl;
+                sctpEV3 << "Receive buffer full (case 1): sendPacketDrop" << endl;
                 sendPacketDrop(false);
             }
             iter->second.numDropsBecauseNewTSNGreaterThanHighestTSN++;
@@ -1824,7 +1839,7 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
                 (state->disableReneging == false) &&
                 (!makeRoomForTsn(tsn, dataChunk->getBitLength()-SCTP_DATA_CHUNK_LENGTH*8, dataChunk->getUBit()))) {
             if ((!state->pktDropSent) && (sctpMain->pktdrop) && (state->peerPktDrop)) {
-                std::cout << "Receive buffer full (case 2): sendPacketDrop" << endl;
+                sctpEV3 << "Receive buffer full (case 2): sendPacketDrop" << endl;
                 sendPacketDrop(false);
             }
             iter->second.numDropsBecauseNoRoomInBuffer++;
@@ -2208,11 +2223,12 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk* asconfChunk
                     }
                     for (AddressVector::iterator k=state->localAddresses.begin(); k!=state->localAddresses.end(); ++k)
                     {
-                        sctpMain->addRemoteAddress(this, (*k), addr);
-                        addPath(addr);
-                        sctpEV3 << "add remote address " << addr << " to local address " << (*k) << "\n";
+                        if (sctpMain->addRemoteAddress(this, (*k), addr)) {
+                            addPath(addr);
+                            sctpEV3 << "add remote address " << addr << " to local address " << (*k) << "\n";
+                            this->remoteAddressList.push_back(addr);
+                        }
                     }
-                    this->remoteAddressList.push_back(addr);
                     path = getPath(addr);
                     if (state->enableHeartbeats)
                     {
@@ -2234,7 +2250,7 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk* asconfChunk
                     if (state->localAddresses.size() == 1)
                     {
                         SCTPErrorCauseParameter* errorParam;
-                        errorParam = new SCTPErrorCauseParameter("Error");
+                        errorParam = new SCTPErrorCauseParameter("ErrorCause");
                         errorParam->setParameterType(ERROR_CAUSE_INDICATION);
                         errorParam->setResponseCorrelationId(delParam->getRequestCorrelationId());
                         errorParam->setErrorCauseType(ERROR_DELETE_LAST_IP_ADDRESS);
@@ -2246,7 +2262,7 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk* asconfChunk
                     {
                         sctpEV3 << "addr=remoteAddr, make Error Parameter\n";
                         SCTPErrorCauseParameter* errParam;
-                        errParam = new SCTPErrorCauseParameter("Error");
+                        errParam = new SCTPErrorCauseParameter("ErrorCause");
                         errParam->setParameterType(ERROR_CAUSE_INDICATION);
                         errParam->setResponseCorrelationId(delParam->getRequestCorrelationId());
                         errParam->setErrorCauseType(ERROR_DELETE_SOURCE_ADDRESS);
@@ -2258,14 +2274,6 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk* asconfChunk
                     {
                         locAddr = (std::vector<IPvXAddress>) state->localAddresses;
                         sctpMain->removeRemoteAddressFromAllAssociations(this, addr, locAddr);
-                        for (AddressVector::iterator j=remoteAddressList.begin(); j!=remoteAddressList.end(); j++)
-                        {
-                            if ((*j)==addr)
-                            {
-                                remoteAddressList.erase(j);
-                                break;
-                            }
-                        }
                         removePath(addr);
                         sctpEV3 << "remove path from address " << addr << "\n";
                         asconfAckChunk->addAsconfResponse(createSuccessIndication(delParam->getRequestCorrelationId()));
@@ -2307,6 +2315,12 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk* asconfChunk
         }
         sctpAsconfAck->addChunk(asconfAckChunk);
         sendToIP(sctpAsconfAck, remoteAddr);
+		if (StartAddIP->isScheduled()) {
+			stopTimer(StartAddIP);
+			state->corrIdNum = state->asconfSn;
+			const char* type = (const char *)sctpMain->par("addIpType");
+			sendAsconf(type, false);
+		}
     }
     return SCTP_E_IGNORE;
 }

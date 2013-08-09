@@ -229,7 +229,7 @@ class INET_API SCTP : public cSimpleModule
         void updateSockPair(SCTPAssociation *assoc, IPvXAddress localAddr, IPvXAddress remoteAddr, int32 localPort, int32 remotePort);
         void addLocalAddress(SCTPAssociation *assoc, IPvXAddress address);
         void addLocalAddressToAllRemoteAddresses(SCTPAssociation *assoc, IPvXAddress address, std::vector<IPvXAddress> remAddresses);
-        void addRemoteAddress(SCTPAssociation *assoc, IPvXAddress localAddress, IPvXAddress remoteAddress);
+        bool addRemoteAddress(SCTPAssociation *assoc, IPvXAddress localAddress, IPvXAddress remoteAddress);
         void removeLocalAddressFromAllRemoteAddresses(SCTPAssociation *assoc, IPvXAddress address, std::vector<IPvXAddress> remAddresses);
         void removeRemoteAddressFromAllAssociations(SCTPAssociation *assoc, IPvXAddress address, std::vector<IPvXAddress> locAddresses);
         /**

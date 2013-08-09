@@ -246,13 +246,11 @@ void SCTPAssociation::bytesAllowedToSend(SCTPPathVariables* path,
     }
 
     // ====== Transmission allowed by peer's receiver window? ================
-    else if (state->peerWindowFull || (state->peerAllowsChunks && state->peerMsgRwnd <= 0)) {
-        if (path->outstandingBytes == 0) {
+    else if ((state->peerWindowFull || (state->peerAllowsChunks && state->peerMsgRwnd <= 0)) && (path->outstandingBytes == 0)) {
             // Zero Window Probing
             sctpEV3 << "bytesAllowedToSend(" << path->remoteAddress << "): zeroWindowProbing" << endl;
             state->zeroWindowProbing = true;
             bytes.chunk = true;
-        }
     }
 
     // ====== Retransmissions ================================================
@@ -263,8 +261,11 @@ void SCTPAssociation::bytesAllowedToSend(SCTPPathVariables* path,
             const int32 allowance = path->cwnd - path->outstandingBytes;
             sctpEV3 << "bytesAllowedToSend(" << path->remoteAddress << "): cwnd-osb=" << allowance << endl;
             if (state->peerRwnd < path->pmtu) {
-                bytes.bytesToSend = state->peerRwnd;
-                sctpEV3 << "bytesAllowedToSend(" << path->remoteAddress << "): rwnd<pmtu" << endl;
+                bytes.bytesToSend = 0;
+                bytes.chunk = true;
+                sctpEV3 << "bytesAllowedToSend(" << path->remoteAddress << "): one chunk" << endl;
+                // RFC4960: When a Fast Retransmit is being performed, the sender SHOULD ignore the value
+                // of cwnd and SHOULD NOT delay retransmission for this single packet.
                 return;
             }
             else if (allowance > 0) {

@@ -213,6 +213,7 @@ void SCTPSocket::connectx(AddressVector remoteAddressList, int32 remotePort, boo
     openCmd->setRemoteAddresses(remoteAddresses);
     openCmd->setRemotePort(remotePrt);
     openCmd->setOutboundStreams(outboundStreams);
+    openCmd->setInboundStreams(inboundStreams);
     openCmd->setNumRequests(numRequests);
     openCmd->setPrMethod(prMethod);
     openCmd->setStreamReset(streamReset);

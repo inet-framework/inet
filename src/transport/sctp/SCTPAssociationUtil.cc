@@ -179,7 +179,7 @@ const char* SCTPAssociation::indicationName(const int32 code)
 }
 
 
-uint32 SCTPAssociation::chunkToInt(const char* type)
+uint16 SCTPAssociation::chunkToInt(const char* type)
 {
     if (strcmp(type, "DATA")==0) return 0;
     if (strcmp(type, "INIT")==0) return 1;
@@ -202,7 +202,7 @@ uint32 SCTPAssociation::chunkToInt(const char* type)
     if (strcmp(type, "FORWARD_TSN")==0) return 192;
     if (strcmp(type, "ASCONF")==0) return 193;
     sctpEV3<<"ChunkConversion not successful\n";
-    return (0xffffffff);
+    return (0xffff);
 }
 
 void SCTPAssociation::printAssocBrief()
@@ -232,6 +232,34 @@ SCTPAssociation* SCTPAssociation::cloneAssociation()
     assoc->sctpAlgorithm->setAssociation(assoc);
     assoc->sctpAlgorithm->initialize();
     assoc->state = assoc->sctpAlgorithm->createStateVariables();
+    
+    if ((bool)sctpMain->par("auth")) {
+        const char* chunks = sctpMain->par("chunks").stringValue();
+        bool asc = false;
+        bool asca = false;
+        char* chunkscopy = (char *)malloc(strlen(chunks)+1);
+        strcpy(chunkscopy, chunks);
+        char* token;
+        token = strtok((char*)chunkscopy, ",");
+        while (token != NULL)
+        {
+            if (chunkToInt(token) == ASCONF)
+                asc = true;
+            if (chunkToInt(token) == ASCONF_ACK)
+                asca = true;
+            if (!typeInOwnChunkList(chunkToInt(token))) {
+                this->state->chunkList.push_back(chunkToInt(token));
+            }
+            token = strtok(NULL, ",");
+        }
+        if ((bool)sctpMain->par("addIP")) {
+            if (!asc && !typeInOwnChunkList(ASCONF))
+                state->chunkList.push_back(ASCONF);
+			if (!asca && !typeInOwnChunkList(ASCONF_ACK))
+				state->chunkList.push_back(ASCONF_ACK);
+        }
+        free (chunkscopy);
+    }
 
     assoc->state->active = false;
     assoc->state->fork = true;
@@ -382,15 +410,26 @@ void SCTPAssociation::initAssociation(SCTPOpenCommand *openCmd)
 
     if ((bool)sctpMain->par("auth")) {
         const char* chunks = sctpMain->par("chunks").stringValue();
-        char* chunkscopy = (char *)malloc(sizeof(strlen(chunks)));
+        bool asc = false;
+        bool asca = false;
+        char* chunkscopy = (char *)malloc(strlen(chunks)+1);
         strcpy(chunkscopy, chunks);
         char* token;
         token = strtok((char*)chunkscopy, ",");
         while (token != NULL)
         {
+            if (chunkToInt(token) == ASCONF)
+                asc = true;
+            if (chunkToInt(token) == ASCONF_ACK)
+                asca = true;
             this->state->chunkList.push_back(chunkToInt(token));
-            sctpEV3 << "add " << chunkToInt(token) << " to chunkList\n";
             token = strtok(NULL, ",");
+        }
+        if ((bool)sctpMain->par("addIP")) {
+            if (!asc)
+                state->chunkList.push_back(ASCONF);
+			if (!asca)
+				state->chunkList.push_back(ASCONF_ACK);
         }
         free (chunkscopy);
     }
@@ -915,7 +954,7 @@ void SCTPAssociation::sendHeartbeatAck(const SCTPHeartbeatChunk* heartbeatChunk,
             heartbeatAckChunk->setInfo(i, heartbeatChunk->getInfo(i));
     }
 
-    heartbeatAckChunk->setBitLength(heartbeatChunk->getBitLength());
+    heartbeatAckChunk->setByteLength(heartbeatChunk->getByteLength());
     if (state->auth && state->peerAuth && typeInChunkList(HEARTBEAT_ACK)) {
         authChunk = createAuthChunk();
         sctpHeartbeatAck->addChunk(authChunk);
@@ -1109,7 +1148,6 @@ void SCTPAssociation::sendPacketDrop(const bool flag)
     pktdrop->setQueuedData(state->queuedReceivedBytes);
     pktdrop->setTruncLength(0);
     pktdrop->setByteLength(SCTP_PKTDROP_CHUNK_LENGTH);
-    std::cout << "length of msg to encapsulate=" << drop->getByteLength() << "\n";
     uint16 mss = getPath(remoteAddr)->pmtu - SCTP_COMMON_HEADER - SCTP_DATA_CHUNK_LENGTH - IP_HEADER_LENGTH;
     if (drop->getByteLength()>mss)
     {
@@ -1565,7 +1603,7 @@ void SCTPAssociation::sendHMacError(const uint16 id)
 {
     SCTPMessage *sctpmsg = new SCTPMessage();
     sctpmsg->setBitLength(SCTP_COMMON_HEADER*8);
-    SCTPErrorChunk* errorChunk = new SCTPErrorChunk("Error");
+    SCTPErrorChunk* errorChunk = new SCTPErrorChunk("ErrorChunk");
     errorChunk->setChunkType(ERRORTYPE);
     SCTPSimpleErrorCauseParameter* cause = new SCTPSimpleErrorCauseParameter("Cause");
     cause->setParameterType(UNSUPPORTED_HMAC);
