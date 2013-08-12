@@ -556,7 +556,9 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
                 adv = localAddressList;
             }
             int rlevel = getAddressLevel(remoteAddr);
-            if (rlevel>0)
+            if (adv.size() == 1) {
+                state->localAddresses.push_back((*adv.begin()));
+            } else if (rlevel>0) {
                 for (AddressVector::iterator i=adv.begin(); i!=adv.end(); ++i)
                 {
                     if (getAddressLevel((*i))>=rlevel)
@@ -565,6 +567,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
                         state->localAddresses.push_back((*i));
                     }
                 }
+            }
             for (uint32 j=0; j<initchunk->getAddressesArraySize(); j++)
             {
                 // skip IPv6 because we can't send to them yet
