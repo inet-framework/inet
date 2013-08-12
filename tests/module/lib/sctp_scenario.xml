@@ -1,0 +1,7 @@
+<!-- This file is used by the ScenarioManager. -->
+<scenario>
+    <at t="1.0">
+        <disconnect src-module="sctp_server" src-gate="pppg[0]" />
+    </at>
+</scenario>
+

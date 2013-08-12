@@ -1,0 +1,62 @@
+%description:
+Testing SCTP congestion control: A multi-homed client sends data to a multi-homed server. 
+Due to a lossy link data gets lost and has to be retransmitted. We have to see fast and timer
+based retransmissions.   
+%#--------------------------------------------------------------------------------------------------------------
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network=multihomed
+cmdenv-event-banners=false
+cmdenv-express-mode = false
+cmdenv-module-messages=false
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+**.testing = false
+**.testTimeout = 0
+
+# udp app (off)
+**.numUdpApps = 0
+**.udpType = ""
+
+**.numTcpApps = 0
+**.tcpType = "TCP"
+
+# sctp apps
+**.sctp_client.numSctpApps = 1
+**.sctp_client.sctpType="SCTP"
+**.sctp_client.sctpApp[0].typename = "SCTPClient"
+**.sctp_client.sctpApp[0].localAddress = "10.1.1.1 10.2.1.1"
+**.sctp_client.sctpApp[0].connectAddress = "10.1.3.1"
+**.sctp_client.sctpApp[0].primaryPath = "10.1.3.1"
+**.sctp_client.sctpApp[0].connectPort = 6666
+**.sctp_client.sctpApp[0].requestLength= 1452
+**.sctp_client.sctpApp[0].startTime = 1s
+**.sctp_client.sctpApp[0].stopTime = 500s
+**.sctp_client.sctpApp[0].numRequestsPerSession = 100000000
+**.sctp_client.sctpApp[0].queueSize = 100
+
+**.sctp_server.numSctpApps = 1
+**.sctp_server.sctpType="SCTP"
+**.sctp_server.sctpApp[0].typename = "SCTPServer"
+**.sctp_server.sctpApp[0].localAddress = "10.1.3.1 10.2.3.1"
+**.sctp_server.sctpApp[0].localPort = 6666
+**.sctp_server.sctpApp[*].queueSize = 0 #Size of sendQueue before App is notified to send new data
+**.sctp_server.sctpApp[*].numPacketsToSendPerClient = 0
+**.sctp_server.sctpApp[*].numPacketsToReceivePerClient = 0
+
+
+# sctp settings
+**.sctp.sctpAlgorithmClass = "SCTPAlg"
+
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+Association 1: number of Fast RTX=[1-9][0-9]*, number of Timer-Based RTX=[1-9][0-9]*
+%contains-regex: results/General-0.sca
+scalar multihomed.sctp_server.sctp[ \t]*"Number of Bytes received from 3:10.2.1.1"[ \t]*[1-9][0-9]*
+%#--------------------------------------------------------------------------------------------------------------
