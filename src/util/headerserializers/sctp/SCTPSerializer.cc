@@ -91,6 +91,8 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         flags |= BEGIN_BIT;
                     if (dataChunk->getEBit())
                         flags |= END_BIT;
+                    if (dataChunk->getIBit())
+                        flags |= I_BIT;
                     dc->flags = flags;
                     dc->length = htons(dataChunk->getByteLength());
                     dc->tsn = htonl(dataChunk->getTsn());
@@ -926,6 +928,32 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     }
                     break;
                 }
+                case PKTDROP:
+                {
+                    SCTPPacketDropChunk* packetdrop = check_and_cast<SCTPPacketDropChunk*>(chunk);
+                    struct pktdrop_chunk* drop = (struct pktdrop_chunk*) (buf + writtenbytes);
+                    unsigned char flags = 0;
+                    if(packetdrop->getCFlag())
+                        flags |= C_FLAG;
+                    if(packetdrop->getTFlag())
+                        flags |= T_FLAG;
+                    if(packetdrop->getBFlag())
+                        flags |= B_FLAG;
+                    if(packetdrop->getMFlag())
+                        flags |= M_FLAG;
+                    drop->flags = flags;
+                    drop->type = packetdrop->getChunkType();
+                    drop->max_rwnd = htonl(packetdrop->getMaxRwnd());
+                    drop->queued_data = htonl(packetdrop->getQueuedData());
+                    drop->trunc_length = htons(packetdrop->getTruncLength());
+                    drop->reserved = 0;
+                    SCTPMessage *msg = check_and_cast<SCTPMessage *>(packetdrop->getEncapsulatedPacket());
+                    int msglen = msg->getByteLength();
+                    drop->length = htons(SCTP_PKTDROP_CHUNK_LENGTH+msglen);
+                    //int len = serialize(msg, drop->dropped_data, msglen);
+                    writtenbytes += (packetdrop->getByteLength());
+                    break;
+                }
                 default:
                     printf("Serialize TODO: Implement for outgoing chunk type %d!\n", chunkType);
                     throw new cRuntimeError("TODO: unknown chunktype in outgoing packet on external interface! Implement it!");
@@ -1021,9 +1049,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
     {
         const struct chunk * chunk = (struct chunk*)(chunks + chunkPtr);
         int32 chunkType = chunk->type;
-sctpEV3<<"chunkType="<<chunkType<<"\n";
         woPadding = ntohs(chunk->length);
-sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
         cLen = ADD_PADDING(woPadding);
         switch (chunkType)
         {
@@ -1039,6 +1065,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                 chunk->setUBit(dc->flags & UNORDERED_BIT);
                 chunk->setBBit(dc->flags & BEGIN_BIT);
                 chunk->setEBit(dc->flags & END_BIT);
+                chunk->setIBit(dc->flags & I_BIT);
                 chunk->setTsn(ntohl(dc->tsn));
                 chunk->setSid(ntohs(dc->sid));
                 chunk->setSsn(ntohs(dc->ssn));
@@ -1057,7 +1084,7 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
 
                     chunk->encapsulate(msg);
                 }
-                sctpEV3<<"datachunkLength="<<chunk->getBitLength()<<"\n";
+                sctpEV3<<"datachunkLength="<<chunk->getByteLength()<<"\n";
                 dest->addChunk(chunk);
                 break;
             }
@@ -2004,6 +2031,26 @@ sctpEV3<<"chunk->length="<<ntohs(chunk->length)<<"\n";
                 }
                 chunk->setByteLength(cLen);
                 dest->addChunk(chunk);
+                break;
+            }
+            case PKTDROP:
+            {
+                const struct pktdrop_chunk *drop;
+                drop = (struct pktdrop_chunk*)(chunks + chunkPtr);
+                SCTPPacketDropChunk* dropChunk;
+                dropChunk = new SCTPPacketDropChunk("PKTDROP");
+                dropChunk->setChunkType(PKTDROP);
+                dropChunk->setCFlag(drop->flags & C_FLAG);
+                dropChunk->setTFlag(drop->flags & T_FLAG);
+                dropChunk->setBFlag(drop->flags & B_FLAG);
+                dropChunk->setMFlag(drop->flags & M_FLAG);
+                dropChunk->setMaxRwnd(ntohl(drop->max_rwnd));
+                dropChunk->setQueuedData(ntohl(drop->queued_data));
+                dropChunk->setTruncLength(ntohs(drop->trunc_length));
+                sctpEV3<<"SCTPSerializer::pktdrop: parse SCTPMessage\n";
+                SCTPMessage* msg;
+                msg = new SCTPMessage();
+                parse((unsigned char*)chunks+chunkPtr+16, bufsize-size_common_header-chunkPtr-16, msg);
                 break;
             }
             default:

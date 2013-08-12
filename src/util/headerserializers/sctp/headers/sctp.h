@@ -19,15 +19,13 @@
 #ifndef OPPSIM_NETINET_SCTP_H_
 #define OPPSIM_NETINET_SCTP_H_
 
-//#include "platdep/intxtypes.h"
-//cd gesamter #define und struct Block neu:
-
 #ifdef _MSC_VER
 #define __PACKED__
 #else
 #define __PACKED__  __attribute__((packed))
 #endif
 
+#define I_BIT         0x08
 #define UNORDERED_BIT 0x04
 #define BEGIN_BIT     0x02
 #define END_BIT       0x01
@@ -297,6 +295,18 @@ struct stream_reset_chunk {
     uint8_t flags;
     uint16_t length;
     uint8_t parameters[0];
+} __PACKED__;
+
+
+struct pktdrop_chunk {
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint32_t max_rwnd;
+    uint32_t queued_data;
+    uint16_t trunc_length;
+    uint16_t reserved;
+    uint8_t  dropped_data[0];
 } __PACKED__;
 
 
