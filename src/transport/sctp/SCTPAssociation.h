@@ -337,6 +337,7 @@ class INET_API SCTPPathVariables : public cObject
         unsigned int        numberOfHeartbeatAcksSent;
         unsigned int        numberOfHeartbeatsRcvd;
         unsigned int        numberOfHeartbeatAcksRcvd;
+        uint64              numberOfBytesReceived;
 
         // ====== Output Vectors ==============================================
         cOutVector*         vectorPathFastRecoveryState;

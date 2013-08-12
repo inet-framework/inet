@@ -86,6 +86,7 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     numberOfHeartbeatAcksSent = 0;
     numberOfHeartbeatAcksRcvd = 0;
     numberOfDuplicates = 0;
+    numberOfBytesReceived = 0;
 
     // ====== Path Info ======================================================
     SCTPPathInfo* pinfo = new SCTPPathInfo("pinfo");

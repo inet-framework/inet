@@ -1780,6 +1780,7 @@ SCTPEventCode SCTPAssociation::processDataArrived(SCTPDataChunk* dataChunk)
     sctpEV3 << "state->bytesRcvd=" << state->bytesRcvd << endl;
     state->bytesRcvd += payloadLength;
     sctpEV3 << "state->bytesRcvd now=" << state->bytesRcvd << endl;
+    path->numberOfBytesReceived += payloadLength;
     SCTP::AssocStatMap::iterator iter = sctpMain->assocStatMap.find(assocId);
     iter->second.rcvdBytes += dataChunk->getByteLength()-SCTP_DATA_CHUNK_LENGTH;
 
@@ -2894,7 +2895,7 @@ void SCTPAssociation::process_TIMEOUT_RTX(SCTPPathVariables* path)
                         << " nextPathRTO=" << nextPath->pathRto
                         << " waiting=" << simTime() - chunk->sendTime
                         << endl;
-                chunk->getLastDestinationPath()->numberOfTimerBasedRetransmissions++;
+                nextPath->numberOfTimerBasedRetransmissions++;
                 chunk->hasBeenTimerBasedRtxed = true;
                 chunk->sendForwardIfAbandoned = true;
 

@@ -237,6 +237,7 @@ void SCTP::handleMessage(cMessage *msg)
             }
             else
             {
+                sctpEV3 << "assoc " << assoc->assocId << "found\n";
                 bool ret = assoc->processSCTPMessage(sctpmsg, srcAddr, destAddr);
                 if (!ret)
                 {
@@ -825,6 +826,9 @@ void SCTP::removeAssociation(SCTPAssociation *assoc)
         snprintf((char*)&str, sizeof(str), "Number of Duplicates %d:%s",
                 assoc->assocId, path->remoteAddress.str().c_str());
         recordScalar(str, path->numberOfDuplicates);
+        snprintf((char*)&str, sizeof(str), "Number of Bytes received from %d:%s",
+                assoc->assocId, path->remoteAddress.str().c_str());
+        recordScalar(str, path->numberOfBytesReceived);
     }
     for (uint16 i = 0; i < assoc->inboundStreams; i++) {
         snprintf((char*)&str, sizeof(str), "Bytes received on stream %d of assoc %d",
