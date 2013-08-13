@@ -47,3 +47,14 @@ void Address::set(const char *addr)
         throw cRuntimeError("Address: cannot interpret address string `%s'", addr);
 }
 
+const char *Address::getTypeName(AddressType t)
+{
+#define CASE(x) case x: return #x
+    switch (t)
+    {
+        CASE(IPv4);
+        CASE(IPv6);
+        default: return "Unknown type";
+    }
+#undef CASE
+}

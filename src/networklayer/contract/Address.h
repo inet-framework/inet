@@ -290,6 +290,8 @@ class INET_API Address
         else
             return memcmp(&d, &addr.d, 16) < 0;  // this provides an ordering, though not surely the one one would expect
     }
+
+    static const char *getTypeName(AddressType t);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Address& ip)
