@@ -148,6 +148,14 @@ inline std::ostream& operator<<(std::ostream& out, const IRoute * route)
 class INET_API IMulticastRoute
 {
   public:
+    /** Specifies where the route comes from */
+    enum SourceType
+    {
+        MANUAL,       ///< manually added static route
+        DVMRP,        ///< managed by DVMRP router
+        PIM_SM,       ///< managed by PIM-SM router
+    };
+
     class InInterface
     {
       protected:
@@ -162,13 +170,13 @@ class INET_API IMulticastRoute
     class OutInterface
     {
       protected:
-        InterfaceEntry *ie;
+        const InterfaceEntry *ie;
         bool _isLeaf;        // for TRPB support
       public:
-        OutInterface(InterfaceEntry *ie, bool isLeaf = false) : ie(ie), _isLeaf(isLeaf) { ASSERT(ie); }
+        OutInterface(const InterfaceEntry *ie, bool isLeaf = false) : ie(ie), _isLeaf(isLeaf) { ASSERT(ie); }
         virtual ~OutInterface() {}
 
-        InterfaceEntry *getInterface() const { return ie; }
+        const InterfaceEntry *getInterface() const { return ie; }
         bool isLeaf() const { return _isLeaf; }
 
         // to disable forwarding on this interface (e.g. pruned by PIM)
@@ -177,61 +185,54 @@ class INET_API IMulticastRoute
 
     typedef std::vector<OutInterface*> OutInterfaceVector;
 
-        /** Specifies where the route comes from */
-        enum SourceType
-        {
-            MANUAL,       ///< manually added static route
-            DVMRP,        ///< managed by DVMRP router
-            PIM_SM,       ///< managed by PIM-SM router
-        };
 
 //TODO maybe:
 //    virtual std::string info() const;
 //    virtual std::string detailedInfo() const;
 
-        virtual ~IMulticastRoute() {}
+    virtual ~IMulticastRoute() {}
 
-        /** The routing table in which this route is inserted, or NULL. */
-        virtual IRoutingTable *getRoutingTableAsGeneric() const = 0;
+    /** The routing table in which this route is inserted, or NULL. */
+    virtual IRoutingTable *getRoutingTableAsGeneric() const = 0;
 
-        virtual void setEnabled(bool enabled) = 0;
-        virtual void setOrigin(const Address& origin) = 0;
-        virtual void setPrefixLength(int len) = 0;
-        virtual void setMulticastGroup(const Address& group) = 0;
-        virtual void setInInterface(InInterface *_inInterface) = 0;
-        virtual void clearOutInterfaces() = 0;
-        virtual void addOutInterface(OutInterface *outInterface) = 0;
-        virtual bool removeOutInterface(const InterfaceEntry *ie) = 0;
-        virtual void removeOutInterface(unsigned int i) = 0;
-        virtual void setSource(cObject *source) = 0;
-        virtual void setSourceType(SourceType type) = 0;
-        virtual void setMetric(int metric) = 0;
+    virtual void setEnabled(bool enabled) = 0;
+    virtual void setOrigin(const Address& origin) = 0;
+    virtual void setPrefixLength(int len) = 0;
+    virtual void setMulticastGroup(const Address& group) = 0;
+    virtual void setInInterface(InInterface *_inInterface) = 0;
+    virtual void clearOutInterfaces() = 0;
+    virtual void addOutInterface(OutInterface *outInterface) = 0;
+    virtual bool removeOutInterface(const InterfaceEntry *ie) = 0;
+    virtual void removeOutInterface(unsigned int i) = 0;
+    virtual void setSource(cObject *source) = 0;
+    virtual void setSourceType(SourceType type) = 0;
+    virtual void setMetric(int metric) = 0;
 
-        /** Disabled entries are ignored by routing until the became enabled again. */
-        virtual bool isEnabled() const = 0;
+    /** Disabled entries are ignored by routing until the became enabled again. */
+    virtual bool isEnabled() const = 0;
 
-        /** Expired entries are ignored by routing, and may be periodically purged. */
-        virtual bool isExpired() const = 0;
+    /** Expired entries are ignored by routing, and may be periodically purged. */
+    virtual bool isExpired() const = 0;
 
-        /** Source address prefix to match */
-        virtual Address getOriginAsGeneric() const = 0;
+    /** Source address prefix to match */
+    virtual Address getOriginAsGeneric() const = 0;
 
-        /** Prefix length to match */
-        virtual int getPrefixLength() const = 0;
+    /** Prefix length to match */
+    virtual int getPrefixLength() const = 0;
 
-        /** Multicast group address */
-        virtual Address getMulticastGroupAsGeneric() const = 0;
+    /** Multicast group address */
+    virtual Address getMulticastGroupAsGeneric() const = 0;
 
-        /** Source of route */
-        virtual cObject *getSource() const = 0;
+   /** Source of route */
+    virtual cObject *getSource() const = 0;
 
-        /** Source type of the route */
-        virtual SourceType getSourceType() const = 0;
+    /** Source type of the route */
+    virtual SourceType getSourceType() const = 0;
 
-        /** Cost to reach the destination */
-        virtual int getMetric() const = 0;
+    /** Cost to reach the destination */
+    virtual int getMetric() const = 0;
 
-        static const char *sourceTypeName(SourceType sourceType);
+    static const char *sourceTypeName(SourceType sourceType);
 };
 
 #endif

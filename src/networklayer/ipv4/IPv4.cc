@@ -568,7 +568,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
         for (unsigned int i=0; i<route->getNumOutInterfaces(); i++)
         {
             IPv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
-            InterfaceEntry *destIE = outInterface->getInterface();
+            const InterfaceEntry *destIE = outInterface->getInterface();
             if (destIE != fromIE && outInterface->isEnabled())
             {
                 int ttlThreshold = destIE->ipv4Data()->getMulticastTtlThreshold();
