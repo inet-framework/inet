@@ -476,7 +476,7 @@ void IPv6InterfaceData::joinMulticastGroup(const IPv6Address& multicastAddress)
     refCounts.push_back(1);
 
 
-    changed1();
+    changed1(F_MULTICAST_ADDRESSES);
 
     if(!nb)
         nb = NotificationBoardAccess().get();
@@ -500,7 +500,7 @@ void IPv6InterfaceData::leaveMulticastGroup(const IPv6Address& multicastAddress)
                 multicastGroups.erase(multicastGroups.begin()+i);
                 refCounts.erase(refCounts.begin()+i);
 
-                changed1();
+                changed1(F_MULTICAST_ADDRESSES);
 
                 if (!nb)
                     nb = NotificationBoardAccess().get();
@@ -525,7 +525,7 @@ void IPv6InterfaceData::addMulticastListener(const IPv6Address &multicastAddress
     if (!hasMulticastListener(multicastAddress))
     {
         getRouterData()->reportedMulticastGroups.push_back(multicastAddress);
-        changed1();
+        changed1(F_MULTICAST_LISTENERS);
     }
 }
 
@@ -541,7 +541,7 @@ void IPv6InterfaceData::removeMulticastListener(const IPv6Address &multicastAddr
     if (i != n)
     {
         multicastGroups.erase(multicastGroups.begin() + i);
-        changed1();
+        changed1(F_MULTICAST_LISTENERS);
     }
 }
 

@@ -230,7 +230,7 @@ void InterfaceEntry::setTRILLInterfaceData(TRILLInterfaceData *p)
         delete (InterfaceProtocolData *)trilldata; // Khmm...
     trilldata = p;
     ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
-    configChanged();
+    configChanged(-1);      //FIXME use valid field ID
 }
 
 void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
@@ -239,7 +239,7 @@ void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
         delete (InterfaceProtocolData *)isisdata; // Khmm...
     isisdata = p;
     ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
-    configChanged();
+    configChanged(-1);      //FIXME use valid field ID
 }
 
 bool InterfaceEntry::setEstimateCostProcess(int position, MacEstimateCostProcess *p)
