@@ -89,7 +89,7 @@ class INET_API InterfaceEntry : public cNamedObject
     int nwLayerGateIndex; ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)
     int nodeOutputGateId; ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
     int nodeInputGateId;  ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
-    int mtu;              ///< Maximum Transmission Unit (e.g. 1500 on Ethernet)
+    int mtu;              ///< Maximum Transmission Unit (e.g. 1500 on Ethernet); 0 means infinite (i.e. never fragment)
     State state;          ///< requested interface state, similar to Linux ifup/ifdown
     bool carrier;         ///< current state (up/down) of the physical layer, e.g. Ethernet cable
     bool broadcast;       ///< interface supports broadcast

@@ -699,8 +699,8 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Addre
 
     int mtu = ie->getMTU();
 
-    // check if datagram does not require fragmentation
-    if (datagram->getByteLength() <= mtu)
+    // send datagram straight out if it doesn't require fragmentation (note: mtu==0 means infinite mtu)
+    if (mtu == 0 || datagram->getByteLength() <= mtu)
     {
         sendDatagramToOutput(datagram, ie, nextHopAddr);
         return;
@@ -721,8 +721,10 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Addre
     int payloadLength = datagram->getByteLength() - headerLength;
     int fragmentLength = ((mtu - headerLength) / 8) * 8; // payload only (without header)
     int offsetBase = datagram->getFragmentOffset();
+    if (fragmentLength <= 0)
+        throw cRuntimeError("Cannot fragment datagram: MTU=%d too small for header size (%d bytes)", mtu, headerLength); // exception and not ICMP because this is likely a simulation configuration error, not something one wants to simulate
 
-    int noOfFragments = (payloadLength + fragmentLength - 1)/ fragmentLength;
+    int noOfFragments = (payloadLength + fragmentLength - 1) / fragmentLength;
     EV << "Breaking datagram into " << noOfFragments << " fragments\n";
 
     // create and send fragments
@@ -899,5 +901,3 @@ bool IPv4::isNodeUp()
     NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
-
-
