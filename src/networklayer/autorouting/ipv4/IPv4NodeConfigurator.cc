@@ -37,7 +37,8 @@ IPv4NodeConfigurator::IPv4NodeConfigurator()
 
 void IPv4NodeConfigurator::initialize(int stage)
 {
-    if (stage == 0) {
+    if (stage == 0)
+    {
         const char *networkConfiguratorPath = par("networkConfiguratorModule");
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         interfaceTable = InterfaceTableAccess().get();
@@ -52,11 +53,13 @@ void IPv4NodeConfigurator::initialize(int stage)
             networkConfigurator = check_and_cast<IPv4NetworkConfigurator *>(module);
         }
     }
-    else if (stage == 1) {
+    else if (stage == 1)
+    {
         if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)
             prepareNode();
     }
-    else if (stage == 2) {
+    else if (stage == 2)
+    {
         if ((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) && networkConfigurator)
             configureNode();
     }
@@ -71,9 +74,12 @@ bool IPv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, i
         else if (stage == NodeStartOperation::STAGE_NETWORK_LAYER && networkConfigurator)
             configureNode();
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) ;
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) ;
-    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+        /*nothing to do*/;
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+        /*nothing to do*/;
+    else
+        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
 
@@ -88,13 +94,15 @@ void IPv4NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
     ASSERT(!interfaceEntry->ipv4Data());
     IPv4InterfaceData *interfaceData = new IPv4InterfaceData();
     interfaceEntry->setIPv4Data(interfaceData);
-    if (interfaceEntry->isLoopback()) {
+    if (interfaceEntry->isLoopback())
+    {
         // we may reconfigure later it to be the routerId
         interfaceData->setIPAddress(IPv4Address::LOOPBACK_ADDRESS);
         interfaceData->setNetmask(IPv4Address::LOOPBACK_NETMASK);
         interfaceData->setMetric(1);
     }
-    else {
+    else
+    {
         // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
         interfaceData->setMetric((int)ceil(2e9/interfaceEntry->getDatarate())); // use OSPF cost as default
         if (interfaceEntry->isMulticast())
