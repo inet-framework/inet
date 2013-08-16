@@ -38,11 +38,19 @@ IPv4NodeConfigurator::IPv4NodeConfigurator()
 void IPv4NodeConfigurator::initialize(int stage)
 {
     if (stage == 0) {
-        const char *networkConfiguratorModule = par("networkConfiguratorModule");
+        const char *networkConfiguratorPath = par("networkConfiguratorModule");
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         interfaceTable = InterfaceTableAccess().get();
         routingTable = RoutingTableAccess().get();
-        networkConfigurator = dynamic_cast<IPv4NetworkConfigurator *>(getModuleByPath(networkConfiguratorModule));
+
+        if (!networkConfiguratorPath[0])
+            networkConfigurator = NULL;
+        else {
+            cModule *module = getModuleByPath(networkConfiguratorPath);
+            if (!module)
+                throw cRuntimeError("Configurator module '%s' not found (check the 'networkConfiguratorModule' parameter)", networkConfiguratorPath);
+            networkConfigurator = check_and_cast<IPv4NetworkConfigurator *>(module);
+        }
     }
     else if (stage == 1) {
         if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)
