@@ -104,7 +104,7 @@ void DRRVLANQueue2::handleMessage(cMessage *msg)
 #endif
             if (warmupFinished == true)
             {
-                numBitsSent[flowIndex] += PK(msg)->getBitLength();
+                numBitsSent[flowIndex] += pktLength;
                 numPktsSent[flowIndex]++;
             }
             sendOut(msg);

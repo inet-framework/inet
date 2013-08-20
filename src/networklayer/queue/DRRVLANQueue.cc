@@ -127,33 +127,35 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
 // DEBUG
         ASSERT(pktLength > 0);
 // DEBUG
+        int pktByteLength = PK(msg)->getByteLength();
+        int color = tbm[flowIndex]->meterPacket(msg);   // result of metering; 0 for conformed and 1 for non-conformed packet
         cQueue *queue = voq[flowIndex];
         if (warmupFinished == true)
         {
             numPktsReceived[flowIndex]++;
-        }
-        if (tbm[flowIndex]->meterPacket(msg) == 0)
-        {   // frame is conformed
-            if (warmupFinished == true)
-            {
+            if (color == 0)
+            {   // frame is conformed
                 numPktsConformed[flowIndex]++;
             }
-            if (packetRequested > 0)
-            {
-                packetRequested--;
+        }
+
+        if (packetRequested > 0)
+        {
+            packetRequested--;
 #ifndef NDEBUG
-                pktReqVector.record(packetRequested);
+            pktReqVector.record(packetRequested);
 #endif
-                if (warmupFinished == true)
-                {
-                    numBitsSent[flowIndex] += pktLength;
-                    numPktsSent[flowIndex]++;
-                }
-                sendOut(msg);
-            }
-            else
+            if (warmupFinished == true)
             {
-                int pktByteLength = PK(msg)->getByteLength();
+                numBitsSent[flowIndex] += pktLength;
+                numPktsSent[flowIndex]++;
+            }
+            sendOut(msg);
+        }
+        else
+        {
+            if (color == 0)
+            {   // frame is conformed
                 if (fifoCurrentSize + pktByteLength > fifoSize)
                 {
                     EV << "FIFO queue full, dropping packet.\n";
@@ -169,27 +171,64 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
                     fifoCurrentSize += pktByteLength;
                 }
             }
-        }
-        else
-        {   // frame is not conformed
-            // TODO: need to check 'packetRequested'?
-            bool dropped = enqueue(msg);
-            if (dropped)
-            {
-                if (warmupFinished == true)
+//        if (tbm[flowIndex]->meterPacket(msg) == 0)
+//        {   // frame is conformed
+//            if (warmupFinished == true)
+//            {
+//                numPktsConformed[flowIndex]++;
+//            }
+//            if (packetRequested > 0)
+//            {
+//                packetRequested--;
+//#ifndef NDEBUG
+//                pktReqVector.record(packetRequested);
+//#endif
+//                if (warmupFinished == true)
+//                {
+//                    numBitsSent[flowIndex] += pktLength;
+//                    numPktsSent[flowIndex]++;
+//                }
+//                sendOut(msg);
+//            }
+//            else
+//            {
+//                int pktByteLength = PK(msg)->getByteLength();
+//                if (fifoCurrentSize + pktByteLength > fifoSize)
+//                {
+//                    EV << "FIFO queue full, dropping packet.\n";
+//                    if (warmupFinished == true)
+//                    {
+//                        numPktsDropped[flowIndex]++;
+//                    }
+//                    delete msg;
+//                }
+//                else
+//                {
+//                    fifo.insert(msg);
+//                    fifoCurrentSize += pktByteLength;
+//                }
+//            }
+//        }
+            else
+            {   // frame is not conformed
+                bool dropped = enqueue(msg);
+                if (dropped)
                 {
-                    numPktsDropped[flowIndex]++;
+                    if (warmupFinished == true)
+                    {
+                        numPktsDropped[flowIndex]++;
+                    }
                 }
             }
-
-            if (ev.isGUI())
-            {
-                char buf[40];
-                sprintf(buf, "q rcvd: %d\nq dropped: %d", numPktsReceived[flowIndex], numPktsDropped[flowIndex]);
-                getDisplayString().setTagArg("t", 0, buf);
-            }
         }
-    }
+
+        if (ev.isGUI())
+        {
+            char buf[40];
+            sprintf(buf, "q rcvd: %d\nq dropped: %d", numPktsReceived[flowIndex], numPktsDropped[flowIndex]);
+            getDisplayString().setTagArg("t", 0, buf);
+        }
+    }   // end of if () for self message
     else
     {   // self message is not expected; something wrong.
         error("%s::handleMessage: Unexpected self message", getFullPath().c_str());
