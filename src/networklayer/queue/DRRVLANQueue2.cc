@@ -71,13 +71,13 @@ void DRRVLANQueue2::handleMessage(cMessage *msg)
             warmupFinished = true;
             for (int i = 0; i < numFlows; i++)
             {
-                numPktsReceived[i] = voq[i]->getLength();   // take into account the frames/packets already in VOQs
+                numPktsReceived[i] = voq[i]->getLength();   // take into account the packets already in VOQs
             }
         }
     }
 
     if (!msg->isSelfMessage())
-    {   // a frame arrives
+    {   // a packet arrives
         int flowIndex = classifier->classifyPacket(msg);
         int pktLength = PK(msg)->getBitLength();
 // DEBUG
@@ -91,7 +91,7 @@ void DRRVLANQueue2::handleMessage(cMessage *msg)
         {
             numPktsReceived[flowIndex]++;
             if (color == 0)
-            {   // frame is conformed
+            {   // packet is conformed
                 numPktsConformed[flowIndex]++;
             }
         }
@@ -146,7 +146,7 @@ void DRRVLANQueue2::handleMessage(cMessage *msg)
             else
             {
                 if (color == 0)
-                {   // frame is conformed
+                {   // packet is conformed
                     conformedCounters[flowIndex] += pktByteLength;
 #ifndef NDEBUG
                     conformedCounterVector[flowIndex]->record(conformedCounters[flowIndex]);
@@ -158,7 +158,7 @@ void DRRVLANQueue2::handleMessage(cMessage *msg)
                     }
                 }
                 else
-                {   // frame is not conformed
+                {   // packet is not conformed
                     nonconformedCounters[flowIndex] += pktByteLength;
 #ifndef NDEBUG
                     nonconformedCounterVector[flowIndex]->record(nonconformedCounters[flowIndex]);
@@ -207,6 +207,8 @@ void DRRVLANQueue2::handleMessage(cMessage *msg)
 
 cMessage *DRRVLANQueue2::dequeue()
 {
+    cMessage *msg = (cMessage *)NULL;
+
     // check first the list of queues with non-zero conformed bytes
     while (!conformedList.empty()) {
         int flowIndex = conformedList.front();
@@ -217,7 +219,7 @@ cMessage *DRRVLANQueue2::dequeue()
         int pktByteLength = PK(voq[flowIndex]->front())->getByteLength();
         if (conformedCounters[flowIndex] >= pktByteLength)
         {   // serve the packet
-            cMessage *msg = (cMessage *)voq[flowIndex]->pop();
+            msg = (cMessage *)voq[flowIndex]->pop();
             voqCurrentSize[flowIndex] -= pktByteLength;
             conformedCounters[flowIndex] -= pktByteLength;
 #ifndef NDEBUG
@@ -243,7 +245,7 @@ cMessage *DRRVLANQueue2::dequeue()
     }   // end of while ()
 
     // check then the list of queues with non-zero non-conformed bytes and do regular DRR scheduling
-    cMessage *msg = (cMessage *)NULL;
+
     if (nonconformedList.empty())
     {
         continuation = false;
@@ -264,7 +266,7 @@ cMessage *DRRVLANQueue2::dequeue()
             int pktByteLength = PK(voq[flowIndex]->front())->getByteLength();
             if ((deficitCounters[flowIndex] >= pktByteLength) && (nonconformedCounters[flowIndex] >= pktByteLength))
             {   // serve the packet
-                msg = (cMessage *) voq[flowIndex]->pop();
+                msg = (cMessage *)voq[flowIndex]->pop();
                 voqCurrentSize[flowIndex] -= pktByteLength;
                 deficitCounters[flowIndex] -= pktByteLength;
                 nonconformedCounters[flowIndex] -= pktByteLength;

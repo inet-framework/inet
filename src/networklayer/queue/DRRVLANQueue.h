@@ -20,9 +20,11 @@
 #ifndef __INET_DRRVLANQUEUE_H
 #define __INET_DRRVLANQUEUE_H
 
+#include <algorithm>
+#include <list>
 #include <omnetpp.h>
-#include <stdlib.h>     // atoi()
 #include <sstream>
+#include <stdlib.h>     // atoi()
 #include <vector>
 #include "PassiveQueueBase.h"
 #include "BasicTokenBucketMeter.h"
@@ -40,6 +42,7 @@ class INET_API DRRVLANQueue : public PassiveQueueBase
 {
   protected:
     // type definitions for member variables
+    typedef std::list<int> IntList;
     typedef std::vector<bool> BoolVector;
     typedef std::vector<double> DoubleVector;
     typedef std::vector<int> IntVector;
@@ -52,7 +55,6 @@ class INET_API DRRVLANQueue : public PassiveQueueBase
   protected:
     // general
     int numFlows;
-//    int frameCapacity;
 
     // VLAN classifier
     IQoSClassifier *classifier;
@@ -66,7 +68,8 @@ class INET_API DRRVLANQueue : public PassiveQueueBase
     int fifoCurrentSize;    // in byte
 
     // DRR scheduler
-    int currentVoqIndex;        ///< index of a VOQ whose HOL frame is scheduled for TX during the last RR scheduling
+//    int currentVoqIndex;        ///< index of a VOQ whose HOL frame is scheduled for TX during the last RR scheduling
+    IntList activeList;         ///< list of active queues with frames
     IntVector deficitCounters;  ///< vector of deficit counters in DRR scheduling
     IntVector quanta;           ///< vector of quantum  in DRR scheduling
     QueueVector voq;            ///< per-flow virtual output queues (VOQs)

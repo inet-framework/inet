@@ -75,7 +75,6 @@ void DRRVLANQueue::initialize()
     voqCurrentSize.assign(numFlows, 0);
 
     // DRR scheduler
-    currentVoqIndex = 0;
     deficitCounters.assign(numFlows, 0);
     continuation = false;
 
@@ -115,13 +114,13 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
             warmupFinished = true;
             for (int i = 0; i < numFlows; i++)
             {
-                numPktsReceived[i] = voq[i]->getLength();   // take into account the frames/packets already in VOQs
+                numPktsReceived[i] = voq[i]->getLength();   // take into account the packets already in VOQs
             }
         }
     }
 
     if (!msg->isSelfMessage())
-    {   // a frame arrives
+    {   // a packet arrives
         int flowIndex = classifier->classifyPacket(msg);
         int pktLength = PK(msg)->getBitLength();
 // DEBUG
@@ -129,12 +128,11 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
 // DEBUG
         int pktByteLength = PK(msg)->getByteLength();
         int color = tbm[flowIndex]->meterPacket(msg);   // result of metering; 0 for conformed and 1 for non-conformed packet
-//        cQueue *queue = voq[flowIndex];
         if (warmupFinished == true)
         {
             numPktsReceived[flowIndex]++;
             if (color == 0)
-            {   // frame is conformed
+            {   // packet is conformed
                 numPktsConformed[flowIndex]++;
             }
         }
@@ -155,7 +153,7 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
         else
         {
             if (color == 0)
-            {   // frame is conformed
+            {   // packet is conformed
                 if (fifoCurrentSize + pktByteLength > fifoSize)
                 {
                     EV << "FIFO queue full, dropping packet.\n";
@@ -171,52 +169,22 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
                     fifoCurrentSize += pktByteLength;
                 }
             }
-//        if (tbm[flowIndex]->meterPacket(msg) == 0)
-//        {   // frame is conformed
-//            if (warmupFinished == true)
-//            {
-//                numPktsConformed[flowIndex]++;
-//            }
-//            if (packetRequested > 0)
-//            {
-//                packetRequested--;
-//#ifndef NDEBUG
-//                pktReqVector.record(packetRequested);
-//#endif
-//                if (warmupFinished == true)
-//                {
-//                    numBitsSent[flowIndex] += pktLength;
-//                    numPktsSent[flowIndex]++;
-//                }
-//                sendOut(msg);
-//            }
-//            else
-//            {
-//                int pktByteLength = PK(msg)->getByteLength();
-//                if (fifoCurrentSize + pktByteLength > fifoSize)
-//                {
-//                    EV << "FIFO queue full, dropping packet.\n";
-//                    if (warmupFinished == true)
-//                    {
-//                        numPktsDropped[flowIndex]++;
-//                    }
-//                    delete msg;
-//                }
-//                else
-//                {
-//                    fifo.insert(msg);
-//                    fifoCurrentSize += pktByteLength;
-//                }
-//            }
-//        }
             else
-            {   // frame is not conformed
+            {   // packet is not conformed
                 bool dropped = enqueue(msg);
                 if (dropped)
                 {
                     if (warmupFinished == true)
                     {
                         numPktsDropped[flowIndex]++;
+                    }
+                }
+                else
+                {
+                    IntList::iterator iter = std::find(activeList.begin(), activeList.end(), flowIndex);
+                    if (iter == activeList.end())
+                    {   // add flow index to active list
+                        activeList.push_back(flowIndex);
                     }
                 }
             }
@@ -266,61 +234,55 @@ cMessage *DRRVLANQueue::dequeue()
     }
     else
     {   // DRR scheduling over per-flow VOQs
-
-        // check whether there is any non-empty VOQ
-        bool isVoqEmpty = true;
-        for (int i = 0; i < numFlows; i++)
-        {
-            if (!voq[i]->isEmpty())
-            {
-                isVoqEmpty = false;
-                break;
-            }
-        }
-
-        if (isVoqEmpty)
+        if (activeList.empty())
         {
             continuation = false;
             return (msg);
         }
-        else
+
+        while (!activeList.empty())
         {
-            int i = 0;
-            while (true)
-            {
-                int idx = (currentVoqIndex + i) % numFlows;
-                if (!voq[idx]->isEmpty())
+            int flowIndex = activeList.front();
+            activeList.pop_front();
+            // DEBUG
+            ASSERT(!voq[flowIndex]->isEmpty());
+            // DEBUG
+            deficitCounters[flowIndex] += continuation ? 0 : quanta[flowIndex];
+            continuation = false;   // reset the flag
+
+            int pktByteLength = PK(voq[flowIndex]->front())->getByteLength();
+            if (deficitCounters[flowIndex] >= pktByteLength)
+            {   // serve the packet
+                msg = (cMessage *)voq[flowIndex]->pop();
+                voqCurrentSize[flowIndex] -= pktByteLength;
+                deficitCounters[flowIndex] -= pktByteLength;
+
+                // check whether the deficit counter value is enough for the HOL packet
+                if (!voq[flowIndex]->isEmpty())
                 {
-                    deficitCounters[idx] += continuation ? 0 : quanta[idx];
-                    continuation = false;   // reset the flag
-
-                    int pktByteLength = PK(voq[idx]->front())->getByteLength();
-                    if (deficitCounters[idx] >= pktByteLength)
-                    {   // serve the packet
-                        msg = (cMessage *)voq[idx]->pop();
-                        voqCurrentSize[idx] -= pktByteLength;
-                        deficitCounters[idx] -= pktByteLength;
-
-                        // check whether the deficit counter value is enough for the HOL packet
-                        if (!voq[idx]->isEmpty())
-                        {
-                            pktByteLength = PK(voq[idx]->front())->getByteLength();
-                            if (deficitCounters[idx] >= pktByteLength)
-                            {   // set the flag and the start queue index
-                                continuation = true;
-                                currentVoqIndex = idx;
-                            }
-                            else
-                            {
-                                currentVoqIndex = (idx + 1) % numFlows;
-                            }
-                        }
-                        break;  // from the while loop
+                    pktByteLength = PK(voq[flowIndex]->front())->getByteLength();
+                    if (deficitCounters[flowIndex] >= pktByteLength)
+                    {   // set the flag and put the index back to the front of the list
+                        continuation = true;
+                        activeList.push_front(flowIndex);
+                    }
+                    else
+                    {
+                        activeList.push_back(flowIndex);
                     }
                 }
-                i++;
-            } // end of while()
-        }
+                else
+                {
+                    deficitCounters[flowIndex] = 0;
+                }
+
+                break;  // from the while loop
+            }
+            else
+            {
+                activeList.push_back(flowIndex);
+            }
+        }   // end of while()
     }   // end of DRR scheduling
 
     return (msg);   // just in case
