@@ -95,10 +95,14 @@ std::string InterfaceEntry::info() const
     else
         out << getMacAddress();
 
+#ifdef WITH_IPv4
     if (ipv4data)
         out << " " << ipv4data->info();
+#endif
+#ifdef WITH_IPv6
     if (ipv6data)
         out << " " << ipv6data->info();
+#endif
     if (isisdata)
         out << " " << ((InterfaceProtocolData *)isisdata)->info(); // Khmm...
     if (trilldata)
@@ -127,10 +131,14 @@ std::string InterfaceEntry::detailedInfo() const
     else
         out << getMacAddress();
     out << "\n";
+#ifdef WITH_IPv4
     if (ipv4data)
         out << " " << ipv4data->info() << "\n";
+#endif
+#ifdef WITH_IPv6
     if (ipv6data)
         out << " " << ipv6data->info() << "\n";
+#endif
     if (isisdata)
         out << " " << ((InterfaceProtocolData *)isisdata)->info() << "\n"; // Khmm...
     if (trilldata)
