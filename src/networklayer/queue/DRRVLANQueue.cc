@@ -129,7 +129,7 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
 // DEBUG
         int pktByteLength = PK(msg)->getByteLength();
         int color = tbm[flowIndex]->meterPacket(msg);   // result of metering; 0 for conformed and 1 for non-conformed packet
-        cQueue *queue = voq[flowIndex];
+//        cQueue *queue = voq[flowIndex];
         if (warmupFinished == true)
         {
             numPktsReceived[flowIndex]++;

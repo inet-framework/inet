@@ -38,7 +38,7 @@
  */
 class INET_API DRRVLANQueue : public PassiveQueueBase
 {
-protected:
+  protected:
     // type definitions for member variables
     typedef std::vector<bool> BoolVector;
     typedef std::vector<double> DoubleVector;
