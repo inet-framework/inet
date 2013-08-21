@@ -16,6 +16,7 @@
 
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
+#include "NodeOperations.h"
 
 #define MSGKIND_CONNECT  0
 #define MSGKIND_SEND     1
@@ -67,6 +68,37 @@ void TelnetApp::initialize(int stage)
         timeoutMsg->setKind(MSGKIND_CONNECT);
         scheduleAt(startTime, timeoutMsg);
     }
+}
+
+bool TelnetApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
+            simtime_t now = simTime();
+            simtime_t startTime = par("startTime");
+            simtime_t start = std::max(startTime, now);
+            if (timeoutMsg && ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)))
+            {
+                timeoutMsg->setKind(MSGKIND_CONNECT);
+                scheduleAt(start, timeoutMsg);
+            }
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
+            cancelEvent(timeoutMsg);
+            if (socket.getState() == TCPSocket::CONNECTED || socket.getState() == TCPSocket::CONNECTING || socket.getState() == TCPSocket::PEER_CLOSED)
+                close();
+            // TODO: wait until socket is closed
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            cancelEvent(timeoutMsg);
+    }
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
 }
 
 void TelnetApp::handleTimer(cMessage *msg)

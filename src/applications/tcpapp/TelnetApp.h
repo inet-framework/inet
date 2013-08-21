@@ -33,8 +33,7 @@ class INET_API TelnetApp : public TCPGenericCliAppBase, public ILifecycle
     TelnetApp();
     virtual ~TelnetApp();
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     /** Redefined initialize(int stage). Number of stages used from TCPgenericCliAppBase. */
