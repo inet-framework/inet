@@ -5,7 +5,7 @@
 
 2013-04-09  Andras Varga
 
-	Iintroduced MACBase (INotifiable and ILifecycle), all MACs
+	Introduced MACBase (INotifiable and ILifecycle), all MACs
 	adapted to it
 
 2013-03-13  Andras Varga

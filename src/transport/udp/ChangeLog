@@ -1,15 +1,12 @@
 2013-07-25  Tamas Borbely
 
 	UDP: implemented ReuseAddress option (it's like SO_REUSEADDR socket
-	option in Linux)
-
-	If ReuseAddress is set to true on two sockets, then they can bind to the
-	same local address/port.
+	option in Linux). If ReuseAddress is set to true on two sockets,
+	then they can bind to the same local address/port.
 
 	E.g. the following works:
 
-	      UDPSocket s1, s1;
-	     ...
+	     UDPSocket s1, s2;
 	     s1.setReuseAddress(true);
 	     s1.bind(7777);
 	     s2.setReuseAddress(true);

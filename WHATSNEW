@@ -1,16 +1,11 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-2.2.0 (July xx, 2013)
--------------------------
+INET-2.2.0 (August xx, 2013)
+----------------------------
 
-The two main features of this release is support for shutdown/restart
-and similar events for network nodes, and TCP Westwood and TCP Vegas
-support.
-
-This release is likely the last one in the 2.x series that brings new
-features. We are working on a feature set that affects INET core
-functionality and core modules, xxxxx
+The main highlight of this release is the long-sought support for
+simulating node shutdown/restart events for network nodes.
 
 NOTE to git users: we have removed the .cproject file from the repo
 as it was always in the way during development when switching/rebasing
@@ -22,16 +17,16 @@ Now, the features:
 
 1. Lifecycle infrastructure.
 
-    Lifecycle: for shutdown/crash/startup/etc, a LifecycleOperation (e.g.
-    NodeShutdownOperation) is applied to the submodule tree of the  node
-    (host or router) by LifecycleController. Each module can decide how
-    to handle the operation and how to store the resulting state (up/down,etc).
-    Operations can be multi-stage, and don't need to complete immediately
-    (i.e. they can take nonzero simulation time and multiple events to complete).
+   For node shutdown/crash/startup/etc, a LifecycleOperation (e.g.
+   NodeShutdownOperation) is applied to the submodule tree of the  node
+   (host or router) by LifecycleController. Each module can decide how
+   to handle the operation and how to store the resulting state (up/down,etc).
+   Operations can be multi-stage, and don't need to complete immediately
+   (i.e. they can take nonzero simulation time and multiple events to complete).
 
-    Network nodes now also have a status submodule (type NodeStatus) with the sole
-    purpose of storing the whole node's status (up/down) and displaying it
-    via icons.
+   Network nodes now also have a status submodule (type NodeStatus) with the sole
+   purpose of storing the whole node's status (up/down) and displaying it
+   via icons.
 
     - classes: ILifecycle, LifecycleOperation (NodeOperation, InterfaceOperation),
       LifecycleController, NodeStatus
@@ -39,23 +34,32 @@ Now, the features:
     - added optional NodeStatus submodule to NodeBase
     - added a test for the basic Lifecycle infrastructure
 
-   MPLS,etc: removed obsolete ways of shutdown/restart: FailureManager, PowerControl, LDP_FAILED/RSVP_FAILED
+   We also removed obsolete ways of shutdown/restart: FailureManager, PowerControl,
+   LDP_FAILED/RSVP_FAILED, etc.
 
-2. Added Vegas and Westwood algorithms.
+2. Static IP4 configuration:
 
-   Source: https://github.com/maferhe2/TCP-Vegas-Westwood,
-   commit 5cae09feea84bd85b9d657833de90f4beae1de25
+   A new module, IPv4NodeConfigurator was added to IPv4NetworkLayer. This module
+   is necessary because IPv4NetworkConfigurator cannot configure the node after
+   a restart (see newly introduced node lifecycle operations above), since
+   being a global module, it doesn't know about node lifecycle events. The new
+   module listens to node lifecycle events, and configures the node's routing
+   table and interfaces according to configuration computed by the network's
+   global IPv4NetworkConfigurator module. Initialization-time node configuration
+   is also carried out by the new module.
 
-   See the following paper:
+3. Added TCP Vegas and Westwood algorithms.
+
+   The implementation is a slightly improved version of a 2013 workshop submission:
    "INET framework extensions for TCP Vegas and TCP Westwood", Maria Fernandez,
    Carlos Calafate, Juan-Carlos Cano and Pietro Manzoni. OMNeT++ Workshop, 2013.
    http://www.omnet-workshop.org/2013/uploads/slides/OMNeT-Workshop2013-SP-4.pdf
 
-3. Added IdealWirelessNic (IdealRadio + IdealWirelessMac) and IdealWirelessFrame msg.
+4. Added IdealWirelessNic (IdealRadio + IdealWirelessMac) and IdealWirelessFrame msg.
 
    This is a highly abstracted wireless NIC that consists of a unit disk radio
    and a trivial MAC protocol. It offers simplicity for scenarios where Layer 1
-   and 2 effects can be completely ignored, for example testing the basic
+   and Layer 2 effects can be completely ignored, for example testing the basic
    functionality of a wireless ad-hoc routing protocol.
 
    The most important parameter this model accepts is the transmission range.
@@ -64,7 +68,7 @@ Now, the features:
    affected at all. There are no collisions -- a radio can simultaneously
    receive any number of frames, and also transmit a single frame at the same time.
 
-4. STCP received several new features (patches submitted by Irene Ruengeler):
+5. STCP received several new features (patches submitted by Irene Ruengeler):
    - 8 new strategies for SCTP stream scheduling
    - SCTP Stream Reset (RFC 6525)
    - SCTP Authentication (RFC 4895)
@@ -75,16 +79,30 @@ Now, the features:
    - SCTP "sack immediately" feature (draft-ietf-tsvwg-sctp-sack-immediately)
    - several alternatives to send fast retransmissions on SCTP
 
-5. Loopback interface added
+6. Loopback interface added
 
-   Loopback used to be a special case inside the IPv4/IPv6 modules, now it is handled
-   completely like any other interface, with a separate Loopback module.
+   Loopback used to be a special case inside the IPv4/IPv6 modules, now it
+   is handled completely like any other interface, with a separate Loopback
+   module.
 
-Minor changes:
+7. EtherSwitch, AccessPoint:
+
+   Bare EtherMAC modules have been replaced with EthernetInterface, so that
+   external queues can be used (useful for e.g. QoS).
+
+Other, smaller changes:
+
+- MANET protocols have been synchonized with the INETMANET project
+
+- NodeBase: added optional battery (off by default)
+
+- UDP: implemented ReuseAddress option (it's like SO_REUSEADDR socket
+  option in Linux). If ReuseAddress is set to true on two sockets,
+  then they can bind to the same local address/port.
 
 - PingApp and other apps: for the stopTime parameter, 'none' is now represented
-  by -1, not 0. As this is the default setting, likely very few simulations (ini files)
-  are affected.  XXXX
+  by -1, not 0. As this is the default setting, likely very few simulations
+  (ini files) are affected.
 
 - IPv4NetworkConfigurator: added @groups to <interface> (ie. multicast groups
   can now be also specified in the <interface> element, not only in a separate
@@ -92,30 +110,33 @@ Minor changes:
 
 - in many simulation examples, .irt files were replaced by IPv4NetworkConfigurator XML.
 
-- EtherMACFullDuplex: wait IFG only between frames (by Till Steinbach)
-
-    the IEEE 802.3 spec explicitly says that IFG should be *after* frames, not before.
-
-    http://standards.ieee.org/getieee802/download/802.3-2008_section1.pdf
-
-    Section 4.2.3.2.1, full duplex operation:
-            After the last bit of a transmitted frame, (that is, when transmitting
-            changes from true to false), the MAC continues to defer for a proper interPacket-Gap (see 4.2.3.2.2)
-    And further on (4.2.3.2.2):
-            This is intended to provide interpacket recovery time for other CSMA/CD
-            sublayers and for the physical medium."
+- EtherMACFullDuplex: wait IFG *after* frames, not before.
 
 - Ieee80211Mac: added signals declarations and statistics in the NED file
 
-- NED: Added InterfaceTable unconditionally to bridge devices, as it is currently required by IPv4NetworkConfigurator.
-  Also added NotificationBoard required by InterfaceTable.
+- EthernetInterface: the encap submodule was made replaceable ("like IEtherEncap")
 
-- IPv4NetworkConfigurator: Changed to support mixed wired and wireless LANs for autoconfiguration.
+- NED: Added InterfaceTable unconditionally to bridge devices, as it is currently
+  required by IPv4NetworkConfigurator. Also added NotificationBoard required by
+  InterfaceTable.
 
- Fixed IPv4NetworkConfigurator bug sometimes not being able to assign addresses.
-    Changed to assign most constrained addresses first.
+- IPv4NetworkConfigurator: Changed to support mixed wired and wireless LANs
+  for autoconfiguration.
 
-- Ethernet: Renamed mac submodule to eth in ethernet switch.
+- Fixed IPv4NetworkConfigurator bug sometimes not being able to assign addresses.
+  Changed to assign most constrained addresses first.
+
+- RTPHost was moved from src/transport to src/nodes/, and changed to be based
+  on StandardHost
+
+- TurtleMobility: Fixed getting the position from a mobility signal listener
+  during initialization. The script was resumed before initialize() finished,
+  resulting in incorrect positioning.
+
+- StaticGridMobility: Added new parameters to specify the number of rows/columns
+  and the horizontal/verical separation between the nodes. Note that the way
+  the node positions are calculated has changed. You may need to update your
+  INI files (see the NED file for more info.)
 
 - Many smaller fixes and improvements
 

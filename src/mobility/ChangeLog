@@ -6,7 +6,7 @@
 
 2012-06-08  Rudolf Hornig
 
-	Added LinearNodeDistributionMobility and TRACIMobility from the
+	Added LinearNodeDistributionMobility and TraCIMobility from the
 	INETMANET project.
 
 2012-05-18  Rudolf Hornig
@@ -16,6 +16,7 @@
 2012-04-27  Levente Meszaros
 
 	Mobility: added default icon
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-02-24  ------ inet-1.99.3 released ------

@@ -21,11 +21,20 @@
 package inet.networklayer.autorouting.ipv4;
 
 //
-// This module provides the static configuration for the IPv4RoutingTable and
-// the IPv4 network interfaces of a particular node. The configuration data
-// is computed globally by the IPv4NetworkConfigurator module. The actual
-// configuration happens during initialize and also when the node is starts up
-// after a shut down or a crash.
+// This module has one instance per network node, and it acts like a bridge
+// between the node and the network's global configurator module,
+// ~IPv4NetworkConfigurator.
+//
+// ~IPv4NetworkConfigurator only computes and remembers configuration data
+// (assigned IP addresses, static routes, etc), but does configure the nodes'
+// routing tables and interfaces accordingly. The actual configuration is
+// is carried out by this module, at network initialization time and also when
+// the node restarts (i.e. after a shutdown or a crash.)
+//
+// This module is needed because of failure/restart scenarios:
+// ~IPv4NetworkConfigurator would not be able to configure the node after
+// a restart, because being a global module, it doesn't know about node
+// lifecycle events.
 //
 simple IPv4NodeConfigurator
 {

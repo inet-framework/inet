@@ -1,24 +1,18 @@
 2013-06-24  Zoltan Bojthe
 
-	MACRelayUnit: removed testing ASSERTs
+	switch: MACRelay to use InterfaceTable/InterfaceEntry instead of direct
+	access to the EtherMAC module
 
-2013-06-24  Zoltan Bojthe
-
-	switch: MACRelay uses interfacetable/interfaceentry instead direct
-	access for EtherMAC module
-
-	assert tests added for detects differrences between returned values by
+	Assert tests added for detects differrences between returned values by
 	MAC and by IE
 
 2013-06-18  Zoltan Bojthe
 
-	MACRelayUnit: added liifecycle support
+	MACRelayUnit: added lifecycle support
 
 2013-06-17  Zoltan Bojthe
 
 	MACRelayUnitPP: added timer pointer to PortBuffer
-
-	stores all self message pointer
 
 2013-01-30  ------ inet-2.1.0 released ------
 

@@ -5,19 +5,19 @@
 
 2013-07-04  Zoltan Bojthe
 
-	- ieee 802.11 mac: optimizations: use SIMTIME_ZERO instead 0, use
-	  simtime_t instead double
+	- Ieee80211Mac: optimizations: use SIMTIME_ZERO instead of 0, use
+	  simtime_t instead of double
 	- WifiMode: fixed return value calculation - uses float constants instead
 	  integer
-	- ieee802.11 MAC: logState(): optimised, spacing fixes in output format
+	- Ieee80211Mac: logState(): optimised, spacing fixes in output format
 	- fixed compiler warning: signed/unsigned comparison; moved function body
-	to .cc
+	  to .cc
 
 2013-06-19  Zoltan Bojthe
 
 	- Ieee80211MgmtAP: fixed the undisposed object problem
 	- Ieee80211Mgmt*: added lifecycle support
-	- Ieee80211MgmtAP: schedule timer at initialize stage 1 
+	- Ieee80211MgmtAP: schedule timer at initialize stage 1
 
 2013-06-11  Zoltan Bojthe
 

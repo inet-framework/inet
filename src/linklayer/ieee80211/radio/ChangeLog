@@ -5,8 +5,8 @@
 
 2013-04-29  Zoltan Bojthe
 
-	Ieee80211RadioModel: removed unused uninitialized variables
-	these were used in EV out only
+	Ieee80211RadioModel: removed unused uninitialized variables;
+	they were used in EV out only
 
 2013-01-30  ------ inet-2.1.0 released ------
 
