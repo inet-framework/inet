@@ -24,6 +24,9 @@ import ned.DatarateChannel;
 
 network LDPTEST
 {
+    parameters:
+        **.networkLayer.configurator.networkConfiguratorModule = "";
+
     types:
         channel C5 extends DatarateChannel
         {
@@ -40,6 +43,7 @@ network LDPTEST
             datarate = 600kbps;
             delay = 15us;
         }
+
     submodules:
         LSR1: LDP_LSR {
             parameters:
@@ -100,7 +104,6 @@ network LDPTEST
             parameters:
                 @display("p=350,50");
         }
-        configurator: UnimplementedModule;
     connections:
         LSR1.pppg[0] <--> C15 <--> LSR2.pppg[0];
         LSR1.pppg[1] <--> C5 <--> LSR4.pppg[0];

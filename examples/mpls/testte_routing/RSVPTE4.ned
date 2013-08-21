@@ -28,6 +28,9 @@ import inet.world.scenario.ScenarioManager;
 //
 network RSVPTE4
 {
+    parameters:
+        **.networkLayer.configurator.networkConfiguratorModule = "";
+
     submodules:
         LSR1: RSVP_LSR {
             parameters:
@@ -106,7 +109,6 @@ network RSVPTE4
             parameters:
                 @display("p=500,50");
         }
-        configurator: UnimplementedModule;
     connections:
         LSR1.pppg[0] <--> {  delay = 15ms; datarate = 600kbps; } <--> LSR2.pppg[0];
         LSR1.pppg[1] <--> {  delay = 5ms; datarate = 600kbps; } <--> LSR3.pppg[0];

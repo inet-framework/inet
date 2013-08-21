@@ -90,7 +90,6 @@ network RSVPTE4
             parameters:
                 @display("p=500,50");
         }
-        configurator: UnimplementedModule;
     connections:
         LSR1.pppg++ <--> {  delay = 15ms; datarate = 600kbps; } <--> LSR2.pppg++;
         LSR1.pppg++ <--> {  delay = 5ms; datarate = 600kbps; } <--> LSR3.pppg++;
