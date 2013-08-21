@@ -34,7 +34,7 @@ simple StaticGridMobility extends MobilityBase
         int marginX @unit(m) = default(0m);
         int marginY @unit(m) = default(0m);
         int numHosts;
-        int columns = default(int(sqrt(numHosts * (this.constraintAreaMaxX - this.constraintAreaMinX - 2 * marginX) / (this.constraintAreaMaxY - this.constraintAreaMinY - 2 * marginY))+ 0.5));
+        int columns = default(ceil(sqrt(numHosts * (this.constraintAreaMaxX - this.constraintAreaMinX - 2 * marginX) / (this.constraintAreaMaxY - this.constraintAreaMinY - 2 * marginY))));
         int rows = default((numHosts + columns - 1) / columns);
         double initialZ @unit(m) = default(0m);
         double separationX @unit(m) = default((this.constraintAreaMaxX - this.constraintAreaMinX - 2 * marginX) / columns);

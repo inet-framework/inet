@@ -30,7 +30,7 @@ void StaticGridMobility::initializePosition()
     double marginX = par("marginX");
     double marginY = par("marginY");
     double separationX = par("separationX");
-    double separationY = par("separationX");
+    double separationY = par("separationY");
     int columns =  par("columns");
     int rows =  par("rows");
     if (numHosts > rows * columns)
