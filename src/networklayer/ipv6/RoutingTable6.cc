@@ -615,8 +615,6 @@ void RoutingTable6::purgeDestCacheForInterfaceID(int interfaceId)
         if (it->second.interfaceId==interfaceId)
         {
             // move the iterator past this element before removing it
-            //DestCache::iterator oldIt = it++;
-            //destCache.erase(oldIt);
             destCache.erase(it++);
         }
         else
