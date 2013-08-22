@@ -306,6 +306,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable, publ
     //@}
 
     /** @name Managing the destination cache */
+    //@{
     /**
      * Add or update a destination cache entry.
      */
@@ -323,6 +324,12 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable, publ
      * go though router selection again.
      */
     virtual void purgeDestCacheEntriesToNeighbour(const IPv6Address& nextHopAddr, int interfaceId);
+
+    /**
+     * Removes all destination cache entries for the specified interface
+     */
+    void purgeDestCacheForInterfaceID(int interfaceId);
+
     //@}
 
     /** @name Managing prefixes and the route table */
@@ -421,11 +428,6 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable, publ
      * Removes all prefixes registered for the given interface.
      */
     void removePrefixes(int interfaceID);
-
-    /*
-     * Removes all destination cache entries for the specified interface
-     */
-    void purgeDestCacheForInterfaceID(int interfaceId);
 
     /**
      * Can be used to check whether this node supports MIPv6 or not

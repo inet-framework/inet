@@ -608,6 +608,26 @@ void RoutingTable6::purgeDestCacheEntriesToNeighbour(const IPv6Address& nextHopA
     updateDisplayString();
 }
 
+void RoutingTable6::purgeDestCacheForInterfaceID(int interfaceId)
+{
+    for (DestCache::iterator it=destCache.begin(); it!=destCache.end(); )
+    {
+        if (it->second.interfaceId==interfaceId)
+        {
+            // move the iterator past this element before removing it
+            //DestCache::iterator oldIt = it++;
+            //destCache.erase(oldIt);
+            destCache.erase(it++);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    updateDisplayString();
+}
+
 void RoutingTable6::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, int prefixLength,
         int interfaceId, simtime_t expiryTime)
 {
@@ -874,26 +894,6 @@ void RoutingTable6::removePrefixes(int interfaceID)
             it = routeList.erase(it);
         else
             ++it;
-    }
-
-    updateDisplayString();
-}
-
-void RoutingTable6::purgeDestCacheForInterfaceID(int interfaceId)
-{
-    for (DestCache::iterator it=destCache.begin(); it!=destCache.end(); )
-    {
-        if (it->second.interfaceId==interfaceId)
-        {
-            // move the iterator past this element before removing it
-            //DestCache::iterator oldIt = it++;
-            //destCache.erase(oldIt);
-            destCache.erase(it++);
-        }
-        else
-        {
-            ++it;
-        }
     }
 
     updateDisplayString();
