@@ -7,13 +7,7 @@ INET-2.2.0 (August 22, 2013)
 The main highlight of this release is the long-sought support for
 simulating node shutdown/restart events for network nodes.
 
-NOTE to git users: we have removed the .cproject file from the repo
-as it was always in the way during development when switching/rebasing
-branches, but we added it back as .cproject-DEFAULT. Thus, after checking
-out this version you need to begin by restoring .cproject:
-  $ cp .cproject-DEFAULT .cproject
-
-Now, the features:
+New features:
 
 1. Lifecycle infrastructure.
 
