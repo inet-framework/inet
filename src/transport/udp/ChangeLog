@@ -1,3 +1,5 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
 2013-07-25  Tamas Borbely
 
 	UDP: implemented ReuseAddress option (it's like SO_REUSEADDR socket

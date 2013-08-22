@@ -1,3 +1,5 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
 2013-07-04  Zoltan Bojthe
 
 	apps: stopTime checks changed: send packet when simTime() <= stopTime

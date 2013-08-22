@@ -1,3 +1,5 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
 2013-06-12  Zoltan Bojthe
 
 	dhcp: NF_INTERFACE_IPv4CONFIG_CHANGED was fired without interface entry

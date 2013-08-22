@@ -1,3 +1,5 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
 2013-07-17  Rudolf Hornig
 
 	SCTPSerializer: support for SCTP Stream Reset (RFC 6525) (patch submitted
