@@ -25,6 +25,13 @@ package inet.networklayer.autorouting.ipv4;
 // It assigns per-interface IP addresses, strives to take subnets into account,
 // and can also optimize the generated routing tables by merging routing entries.
 //
+// IMPORTANT: as of INET 2.2, this module does NOT assign addresses or add
+// routes directly, just stores them in its internal data structures.
+// Network nodes are supposed to contain an instance of ~IPv4NodeConfigurator
+// (normally part of the network layer compound module) that actually
+// configures the node's interface table and routing table based on the
+// information stored in the global network configurator module.
+//
 // The configurator supports both manual and automatic address assignment,
 // and their combinations. You can provide address and netmask templates
 // with unspecified parts, and the configurator automatically completes

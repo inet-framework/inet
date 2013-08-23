@@ -30,6 +30,13 @@
 	IPv4NetworkConfigurator: Changed to compute all network configuration
 	only internally and apply them only upon explicit request.
 
+	IMPORTANT: from now on, this module does NOT assign addresses or add
+	routes directly, just stores them in its internal data structures.
+	Network nodes are supposed to contain an instance of IPv4NodeConfigurator
+	(normally part of the network layer compound module) that actually
+	configures the node's interface table and routing table based on the
+	information stored in the global network configurator module.
+
 2013-05-14  Levente Meszaros
 
 	IPv4NetworkConfigurator: Fixed issue when static routes are re-added to
