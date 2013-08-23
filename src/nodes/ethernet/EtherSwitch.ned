@@ -73,8 +73,8 @@ module EtherSwitch
         }
     connections:
         for i=0..sizeof(ethg)-1 {
-            eth[i].upperLayerIn <-- relayUnit.lowerLayerOut++;
-            eth[i].upperLayerOut --> relayUnit.lowerLayerIn++;
+            eth[i].upperLayerIn <-- relayUnit.ifOut++;
+            eth[i].upperLayerOut --> relayUnit.ifIn++;
             eth[i].phys <--> ethg[i];
         }
 }

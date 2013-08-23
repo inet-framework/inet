@@ -1,5 +1,23 @@
 2013-08-22  ------ inet-2.2.0 released ------
 
+2013-08-23  Andras Varga
+
+	InterfaceTable: revert to earlier behavior of determining networkLayerGateIndex.
+	Now the module connected to a NIC *must* have gate vectors called ifIn and ifOut.
+	If they don't, the code decides that the NIC is *not* directly connected to
+	a network layer, and leaves networkLayerGateIndex unfilled.
+
+	ASSUMPTIONS:
+	 1. The NIC module (ifmod) may or may not be connected to a network layer 
+	    module (e.g. IPv4NetworkLayer or MPLS)
+	 2. If it *is* connected to a network layer (or a relay unit), the network 
+	    layer module's gates must be called ifIn[] and ifOut[], and NIC must be 
+	    connected to identical gate indices in both vectors.
+	 3. If the NIC module is not connected to another modules ifIn[] and ifOut[] 
+	    gates, we assume that it is NOT connected to a network layer, and leave 
+	    networkLayerGateIndex in InterfaceEntry unfilled.
+	4. The NIC may or may not connect to gates of the containing host compound module.
+
 2013-07-05  Zoltan Bojthe
 
 	InterfaceTable: remove explicit registration of a loopback interface;

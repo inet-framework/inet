@@ -72,9 +72,9 @@ void MACRelayUnitBase::initialize(int stage)
     if (stage == 0)
     {
         // number of ports
-        numPorts = gate("lowerLayerOut", 0)->size();
-        if (gate("lowerLayerIn", 0)->size()!=numPorts)
-            error("the sizes of the lowerLayerIn[] and lowerLayerOut[] gate vectors must be the same");
+        numPorts = gate("ifOut", 0)->size();
+        if (gate("ifIn", 0)->size()!=numPorts)
+            error("the sizes of the ifIn[] and ifOut[] gate vectors must be the same");
 
         // other parameters
         addressTableSize = par("addressTableSize");
@@ -135,7 +135,7 @@ void MACRelayUnitBase::handleAndDispatchFrame(EtherFrame *frame, int inputport)
     if (outputport >= 0)
     {
         EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputport << endl;
-        send(frame, "lowerLayerOut", outputport);
+        send(frame, "ifOut", outputport);
     }
     else
     {
@@ -148,7 +148,7 @@ void MACRelayUnitBase::broadcastFrame(EtherFrame *frame, int inputport)
 {
     for (int i=0; i<numPorts; ++i)
         if (i != inputport)
-            send((EtherFrame*)frame->dup(), "lowerLayerOut", i);
+            send((EtherFrame*)frame->dup(), "ifOut", i);
     delete frame;
 }
 
@@ -312,6 +312,7 @@ void MACRelayUnitBase::sendPauseFrame(int portno, int pauseUnits)
 
     IInterfaceTable *ift = InterfaceTableAccess().get();
     InterfaceEntry *ie = ift->getInterfaceByNetworkLayerGateIndex(portno);
+    ASSERT(ie);
 
     if (ie->isUp())
     {
@@ -324,7 +325,7 @@ void MACRelayUnitBase::sendPauseFrame(int portno, int pauseUnits)
 
         frame->setByteLength(ETHER_PAUSE_COMMAND_PADDED_BYTES);
 
-        send(frame, "lowerLayerOut", portno);
+        send(frame, "ifOut", portno);
         pauseFinished[portno] = simTime() + ((double)PAUSE_UNIT_BITS) * pauseUnits / ie->getDatarate();
     }
     else //disconnected or disabled

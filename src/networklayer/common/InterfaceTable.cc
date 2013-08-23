@@ -179,8 +179,18 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
     if (!ifmod)
         throw cRuntimeError("addInterface(): specified module is not in this host/router");
 
+    // ASSUMPTIONS:
+    // 1. The NIC module (ifmod) may or may not be connected to a network layer module (e.g. IPv4NetworkLayer or MPLS)
+    // 2. If it *is* connected to a network layer, the network layer module's gates must be called
+    //    ifIn[] and ifOut[], and NIC must be connected to identical gate indices in both vectors.
+    // 3. If the NIC module is not connected to another modules ifIn[] and ifOut[] gates, we assume
+    //    that it is NOT connected to a network layer, and leave networkLayerGateIndex
+    //    in InterfaceEntry unfilled.
+    // 4. The NIC may or may not connect to gates of the containing host compound module.
+    //
+
     // find gates connected to host / network layer
-    cGate *nwlayerInGate = NULL, *nwlayerOutGate = NULL;
+    cGate *nwlayerInGate = NULL, *nwlayerOutGate = NULL; // ifIn[] and ifOut[] gates in the network layer
     for (GateIterator i(ifmod); !i.end(); i++)
     {
         cGate *g = i();
@@ -193,21 +203,27 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
             entry->setNodeInputGateId(g->getPreviousGate()->getId());
 
         // find the gate index of networkLayer/networkLayer6/mpls that connects to this interface
-        if (g->getType()==cGate::OUTPUT && g->getNextGate() && g->isName("upperLayerOut"))
+        if (g->getType()==cGate::OUTPUT && g->getNextGate() && g->getNextGate()->isName("ifIn")) // connected to ifIn in networkLayer?
             nwlayerInGate = g->getNextGate();
-        if (g->getType()==cGate::INPUT && g->getPreviousGate() && g->isName("upperLayerIn"))
+        if (g->getType()==cGate::INPUT && g->getPreviousGate() && g->getPreviousGate()->isName("ifOut")) // connected to ifOut in networkLayer?
             nwlayerOutGate = g->getPreviousGate();
     }
 
-    // consistency checks
+    // consistency checks and setting networkLayerGateIndex:
+
     // note: we don't check nodeOutputGateId/nodeInputGateId, because wireless interfaces
     // are not connected to the host
-    if (!nwlayerInGate && !nwlayerOutGate)      // Accesspoint does not have a network layer so the NIC is not connected
-        return;
-    if (!nwlayerInGate || !nwlayerOutGate || nwlayerInGate->getOwnerModule()!=nwlayerOutGate->getOwnerModule() || nwlayerInGate->getIndex()!=nwlayerOutGate->getIndex())
-        throw cRuntimeError("addInterface(): interface must be connected to network layer's in/out gates using the same gate index");
 
-    entry->setNetworkLayerGateIndex(nwlayerInGate->getIndex());
+    if (nwlayerInGate || nwlayerOutGate)    // connected to a network layer (i.e. to another module's inIn/ifOut gates)
+    {
+        if (!nwlayerInGate || !nwlayerOutGate)
+            throw cRuntimeError("addInterface(): interface module '%s' is connected only to an 'ifOut' or an 'ifIn' gate, must connect to either both or neither", ifmod->getFullPath().c_str());
+        if (nwlayerInGate->getOwnerModule() != nwlayerOutGate->getOwnerModule())
+            throw cRuntimeError("addInterface(): interface module '%s' is connected to 'ifOut' and 'ifIn' gates in different modules", ifmod->getFullPath().c_str());
+        if (nwlayerInGate->getIndex() != nwlayerOutGate->getIndex()) // if both are scalar, that's OK too (index==0)
+            throw cRuntimeError("addInterface(): gate index mismatch: interface module '%s' is connected to different indices in 'ifOut[']/'ifIn[]' gates of the network layer module", ifmod->getFullPath().c_str());
+        entry->setNetworkLayerGateIndex(nwlayerInGate->getIndex());
+    }
 }
 
 void InterfaceTable::deleteInterface(InterfaceEntry *entry)

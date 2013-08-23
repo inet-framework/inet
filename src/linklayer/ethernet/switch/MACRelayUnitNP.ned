@@ -51,7 +51,7 @@ simple MACRelayUnitNP like IMACRelayUnit
         @statistic[processedBytes](title="Processed bytes"; record=count,sum,vector);
         @statistic[droppedBytes](title="Dropped bytes"; record=count,sum,vector);
     gates:
-        input lowerLayerIn[] @labels(EtherFrame);
-        output lowerLayerOut[] @labels(EtherFrame);
+        input ifIn[] @labels(EtherFrame);
+        output ifOut[] @labels(EtherFrame);
 }
 

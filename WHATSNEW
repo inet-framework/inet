@@ -84,9 +84,16 @@ New features:
    Bare EtherMAC modules have been replaced with EthernetInterface, so that
    external queues can be used (useful for e.g. QoS).
 
+8. InterfaceTable, NIC, NetworkLayer:
+
+   Revert to earlier behavior of determining networkLayerGateIndex.
+   Now the module connected to a NIC *must* have gate vectors called ifIn and ifOut.
+   If it doesn't, the code decides that the NIC is *not* directly connected to
+   a network layer, and leaves networkLayerGateIndex unfilled.
+
 Other, smaller changes:
 
-- MANET protocols have been synchonized with the INETMANET project
+- MANET protocols have been synchronized with the INETMANET project
 
 - NodeBase: added optional battery (off by default)
 
@@ -100,7 +107,7 @@ Other, smaller changes:
 
 - IPv4NetworkConfigurator: added @groups to <interface> (ie. multicast groups
   can now be also specified in the <interface> element, not only in a separate
-   <multicast-group> element)
+  <multicast-group> element)
 
 - in many simulation examples, .irt files were replaced by IPv4NetworkConfigurator XML.
 

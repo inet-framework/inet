@@ -53,8 +53,8 @@ moduleinterface IMACRelayUnit
                                      // (when it expires, entry is removed from the table)
         @display("i=block/switch");
     gates:
-        input lowerLayerIn[] @labels(EtherFrame);
-        output lowerLayerOut[] @labels(EtherFrame);
+        input ifIn[] @labels(EtherFrame);
+        output ifOut[] @labels(EtherFrame);
 }
 
 simple MACRelayUnit_None like IMACRelayUnit
@@ -66,7 +66,7 @@ simple MACRelayUnit_None like IMACRelayUnit
         @display("i=old/x_noentry");
         @class("UnimplementedModule");
     gates:
-        input lowerLayerIn[] @labels(EtherFrame);
-        output lowerLayerOut[] @labels(EtherFrame);
+        input ifIn[] @labels(EtherFrame);
+        output ifOut[] @labels(EtherFrame);
 }
 
