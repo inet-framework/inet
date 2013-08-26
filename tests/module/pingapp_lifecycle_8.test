@@ -16,6 +16,8 @@ sim-time-limit = 9s
 *.host.pingApp[0].startTime = 0s
 *.host.pingApp[0].stopTime = 6s
 
+*.host.networkLayer.configurator.networkConfiguratorModule = ""
+
 **.hasStatus = true
 **.scenarioManager.script = xmldoc("scenario.xml")
 

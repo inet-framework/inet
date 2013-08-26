@@ -37,7 +37,9 @@ module DHCPNode
             @display("p=68,216");
         }
         configurator: IPv4NodeConfigurator {
-            @display("p=39,158");
+            parameters:
+                @display("p=39,158");
+                networkConfiguratorModule = "";
         }
         lo0: LoopbackInterface {
             @display("p=78,406");

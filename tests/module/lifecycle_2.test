@@ -18,6 +18,7 @@ record-eventlog = true
 *.host.hasSctp = true
 *.host.eth[0].csmacdSupport = true
 *.host.eth[1].csmacdSupport = false
+*.host.networkLayer.configurator.networkConfiguratorModule = ""
 
 %file: test.ned
 

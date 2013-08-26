@@ -15,6 +15,8 @@ sim-time-limit = 9s
 *.host.pingApp[0].destAddr = "192.168.0.42"
 *.host.pingApp[0].startTime = 3s
 
+*.host.networkLayer.configurator.networkConfiguratorModule = ""
+
 **.hasStatus = true
 **.initialStatus = "down"
 **.scenarioManager.script = xmldoc("scenario.xml")

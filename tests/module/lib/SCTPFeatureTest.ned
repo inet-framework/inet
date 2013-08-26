@@ -25,6 +25,7 @@ network SCTPFeatureTest
             parameters:
                 IPForward = false;
                 routingFile = "../../lib/sctp_client.mrt";
+                networkLayer.configurator.networkConfiguratorModule = "";
                 @display("i=laptop3;p=128,317");
             gates:
                 pppg[1];
@@ -33,6 +34,7 @@ network SCTPFeatureTest
             parameters:
                 IPForward = false;
                 routingFile = "../../lib/sctp_server.mrt";
+                networkLayer.configurator.networkConfiguratorModule = "";
                 @display("i=laptop3");
             gates:
                 pppg[1];
@@ -40,6 +42,7 @@ network SCTPFeatureTest
         router1: Router {
             parameters:
                 routingFile = "../../lib/sctp_router1.mrt";
+                networkLayer.configurator.networkConfiguratorModule = "";
                 @display("i=abstract/router;p=270,293");
             gates:
                 pppg[2];
@@ -47,6 +50,7 @@ network SCTPFeatureTest
         router2: Router {
             parameters:
                 routingFile = "../../lib/sctp_router2.mrt";
+                networkLayer.configurator.networkConfiguratorModule = "";
                 @display("i=abstract/router");
             gates:
                 pppg[2];

@@ -17,6 +17,8 @@ record-eventlog = true
 **.scenarioManager.script = xmldoc("scenario.xml")
 *.host.numRadios=2
 
+*.host.networkLayer.configurator.networkConfiguratorModule = ""
+
 *.host.mobilityType = "StationaryMobility"
 **.mobility.constraintAreaMinX = 0m
 **.mobility.constraintAreaMinY = 0m

@@ -12,6 +12,7 @@ network LocalUDP
     submodules:
         host: StandardHost {
             parameters:
+                networkLayer.configurator.networkConfiguratorModule = "";
                 @display("i=device/pc3");
         }
 }
