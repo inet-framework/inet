@@ -55,16 +55,6 @@ class INET_API IPv6Route : public cObject, public IRoute
         dUnknown = 255
     };
 
-    enum ChangeCodes // field codes for changed()
-    {
-        F_NEXTHOP,
-        F_IFACE,
-        F_METRIC,
-        F_EXPIRYTIME,
-        F_ADMINDIST,
-        F_LAST,
-    };
-
   protected:
     IPv6RoutingTable *_rt; // TODO introduce IIPv6RoutingTable
     IPv6Address _destPrefix;

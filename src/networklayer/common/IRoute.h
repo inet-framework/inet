@@ -51,7 +51,8 @@ class INET_API IRoute
         };
 
         /** Field codes for NB_ROUTE_CHANGED notifications */
-        enum {
+        enum ChangeCodes
+        {
             F_DESTINATION,
             F_PREFIX_LENGTH,
             F_NEXTHOP,
@@ -60,6 +61,7 @@ class INET_API IRoute
             F_TYPE,
             F_ADMINDIST,
             F_METRIC,
+            F_EXPIRYTIME,
             F_LAST
         };
 
