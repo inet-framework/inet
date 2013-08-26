@@ -214,7 +214,7 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
     // note: we don't check nodeOutputGateId/nodeInputGateId, because wireless interfaces
     // are not connected to the host
 
-    if (nwlayerInGate || nwlayerOutGate)    // connected to a network layer (i.e. to another module's inIn/ifOut gates)
+    if (nwlayerInGate || nwlayerOutGate)    // connected to a network layer (i.e. to another module's ifIn/ifOut gates)
     {
         if (!nwlayerInGate || !nwlayerOutGate)
             throw cRuntimeError("addInterface(): interface module '%s' is connected only to an 'ifOut' or an 'ifIn' gate, must connect to either both or neither", ifmod->getFullPath().c_str());
