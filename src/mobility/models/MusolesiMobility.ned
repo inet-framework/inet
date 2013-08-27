@@ -1,7 +1,7 @@
 //
 
 package inet.mobility.models;
-import inet.mobility.MobilityBase;
+import inet.mobility.IMobility;
 
 //
 // This is a package generating Mobility as described by Musolesi in
