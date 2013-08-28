@@ -255,7 +255,7 @@
 /examples/mpls/ldp/,                 -f omnetpp.ini -c General -r 0,                50s,             e88f-548c
 # /examples/mpls/net37/,               -f omnetpp.ini -c General -r 0,                100s,            0000-0000    # <!> Error in module (TED) R37.LSR0.ted (id=45) during network initialization: Model error: ASSERT: condition !remote.isUnspecified() false in function initialize, networklayer/ted/TED.cc line 86.
 /examples/mpls/testte_failure/,      -f omnetpp.ini -c General -r 0,                10s,             c476-9b26
-/examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                100s,            20bf-3d6e
+/examples/mpls/testte_failure2/,     -f omnetpp.ini -c General -r 0,                100s,            95f8-c6d8
 /examples/mpls/testte_reroute/,      -f omnetpp.ini -c General -r 0,                50s,             d45b-434a
 /examples/mpls/testte_routing/,      -f omnetpp.ini -c General -r 0,                10s,             23ca-130a
 /examples/mpls/testte_tunnel/,       -f omnetpp.ini -c General -r 0,                50s,             6043-c86c
