@@ -25,6 +25,7 @@ void IPSocket::registerProtocol(int protocol)
         controlInfo->setProtocol(protocol);
         cMessage * message = new cMessage("RegisterProtocol", IP_C_REGISTER_PROTOCOL);
         message->setControlInfo(controlInfo);
+        message->setIgnoreByHasher(true);
         sendToIP(message);
     }
 }
