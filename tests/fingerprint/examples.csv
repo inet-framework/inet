@@ -190,13 +190,13 @@
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0,             1.5s,            8e55-dff2
 /examples/inet/udpburst/,            -f omnetpp.ini -c General -r 0,                1000s,           0ca8-7b65
 
-/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c simple -r 0,                 100s,            7dfd-9e8b
-/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c two_senders -r 0,            100s,            c03b-9b18
-/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c ten_senders -r 0,            100s,            9e27-1663
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c simple -r 0,                 100s,            0d08-63d8
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c two_senders -r 0,            100s,            56cc-29b6
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            7637-7cea
-/examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            1784-2777
+# /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c simple -r 0,                 100s,            7dfd-9e8b
+# /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c two_senders -r 0,            100s,            c03b-9b18
+# /examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c ten_senders -r 0,            100s,            9e27-1663
+# /examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c simple -r 0,                 100s,            0d08-63d8
+# /examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c two_senders -r 0,            100s,            56cc-29b6
+# /examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            7637-7cea
+# /examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            1784-2777
 
 # /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                100s,            34b1-536e    # unstable fingerprint
 # /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              100s,            c980-8b04    # unstable fingerprint
@@ -286,9 +286,9 @@
 #/examples/traci/,                    -f omnetpp.ini -c accident -r 0,               ---100s,         0000-0000
 #/examples/traci_launchd/,            -f omnetpp.ini -c accident -r 0,               ---100s,         0000-0000
 
-/examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            6e88-36cc
-/examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            22e4-f2ca
-/examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            0488-6ddf
+# /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0,            200s,            6e88-36cc
+# /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            22e4-f2ca
+# /examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            0488-6ddf
 
 /examples/voipstream/VoIPStreamLargeNet/, -f omnetpp.ini -c General -r 0,                5s,              9fd3-9ed9
 /examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g726 -r 0,                   5s,              ef6e-7011
