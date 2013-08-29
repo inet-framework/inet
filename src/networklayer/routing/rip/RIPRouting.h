@@ -130,6 +130,8 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 
+    virtual void configureInterfaces(cXMLElement *config);
+
     /**
      * Import interface/static/default routes from the routing table.
      */

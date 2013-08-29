@@ -16,12 +16,14 @@
 //
 
 #include <algorithm>
+#include <functional>
 
 #include "IAddressType.h"
 #include "InterfaceTableAccess.h"
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
 #include "UDP.h"
+#include "InterfaceMatcher.h"
 
 #include "RIPPacket_m.h"
 #include "RIPRouting.h"
@@ -120,14 +122,7 @@ void RIPRouting::initialize(int stage)
         WATCH_PTRVECTOR(ripRoutes);
     }
     else if (stage == 3) {
-        // initialize RIP interfaces
-        // TODO now each multicast interface is added, with metric 1; use configuration instead
-        for (int i = 0; i < ift->getNumInterfaces(); ++i)
-        {
-            InterfaceEntry *ie = ift->getInterface(i);
-            if (ie->isMulticast())
-                addInterface(ie, 1 /*ie->ipv4Data()->getMetric()???*/);
-        }
+        configureInterfaces(par("ripConfig").xmlValue());
     }
     else if (stage == 4) { // interfaces and static routes are already initialized
         allRipRoutersGroup = rt->getRouterIdAsGeneric().getAddressType()->getLinkLocalRIPRoutersMulticastAddress();
@@ -151,6 +146,33 @@ void RIPRouting::initialize(int stage)
 
         // set update timer
         scheduleAt(RIP_UPDATE_INTERVAL, updateTimer);
+    }
+}
+
+inline bool isNotEmpty(const char *s) {return s && s[0];}
+
+void RIPRouting::configureInterfaces(cXMLElement *config)
+{
+    cXMLElementList interfaceElements = config->getChildrenByTagName("interface");
+    InterfaceMatcher matcher(interfaceElements);
+
+    for (int i = 0; i < ift->getNumInterfaces(); ++i)
+    {
+        InterfaceEntry *ie = ift->getInterface(i);
+        if (ie->isMulticast() && !ie->isLoopback())
+        {
+            int i = matcher.findMatchingSelector(ie);
+            if (i >= 0)
+            {
+                cXMLElement *interfaceElement = interfaceElements[i];
+
+                const char *metricAttr = interfaceElement->getAttribute("metric"); // integer
+                //const char *splitHorizonModeAttr = element->getAttribute("split-horizon-mode"); // enum
+
+                int metric = isNotEmpty(metricAttr) ? atoi(metricAttr) : 1;
+                addInterface(ie, metric);
+            }
+        }
     }
 }
 
