@@ -1,9 +1,9 @@
 # workingdir,                        args,                                          simtimelimit,    fingerprint
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             0422-a461
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             10fe-4a23
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             aef8-aa10
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             7181-2b18
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c Generic -r 0,                10s,             54c1-1979    # unstable fingerprint
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             b3ce-7633    # unstable fingerprint
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             56a6-71ea
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             04a3-3112
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             7af2-746f    # unstable fingerprint
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv4 -r 0,                   20s,             ff39-af1a
 /examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv6 -r 0,                   20s,             31e6-a3bc
