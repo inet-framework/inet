@@ -29,18 +29,9 @@ network GPSRNetworkRandom
                 config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
                 @display("p=50,100");
         }
-        //        routingTableRecorder: RoutingTableRecorder {
-        //            parameters:
-        //                @display("p=50,150");
-        //        }
-        lifecycleController: LifecycleController {
+        routingTableRecorder: RoutingTableRecorder {
             parameters:
-                @display("p=50,200");
-        }
-        scenarioManager: ScenarioManager {
-            parameters:
-                script = default(xml("<scenario/>"));
-                @display("p=50,250");
+                @display("p=50,150");
         }
         lifecycleController: LifecycleController {
             parameters:
