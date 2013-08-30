@@ -167,18 +167,18 @@ class INET_API InterfaceEntry : public cNamedObject
     /** @name Field setters */
     //@{
     virtual void setName(const char *s)  {cNamedObject::setName(s); configChanged();}
-    virtual void setNetworkLayerGateIndex(int i) {nwLayerGateIndex = i; configChanged();}
-    virtual void setNodeOutputGateId(int i) {nodeOutputGateId = i; configChanged();}
-    virtual void setNodeInputGateId(int i)  {nodeInputGateId = i; configChanged();}
-    virtual void setMtu(int m)           {mtu = m; configChanged();}
-    virtual void setState(State s)       {state = s; stateChanged();}
-    virtual void setCarrier(bool b)      {carrier = b; stateChanged();}
-    virtual void setBroadcast(bool b)    {broadcast = b; configChanged();}
-    virtual void setMulticast(bool b)    {multicast = b; configChanged();}
-    virtual void setPointToPoint(bool b) {pointToPoint = b; configChanged();}
-    virtual void setLoopback(bool b)     {loopback = b; configChanged();}
-    virtual void setDatarate(double d)   {datarate = d; configChanged();}
-    virtual void setMACAddress(const MACAddress& addr) {macAddr = addr; configChanged();}
+    virtual void setNetworkLayerGateIndex(int i) {if (nwLayerGateIndex!=i) {nwLayerGateIndex = i; configChanged();}}
+    virtual void setNodeOutputGateId(int i) {if (nodeOutputGateId!=i) {nodeOutputGateId = i; configChanged();}}
+    virtual void setNodeInputGateId(int i)  {if (nodeInputGateId!=i) {nodeInputGateId = i; configChanged();}}
+    virtual void setMtu(int m)           {if (mtu!=m) {mtu = m; configChanged();}}
+    virtual void setState(State s)       {if (state!=s) {state = s; stateChanged();}}
+    virtual void setCarrier(bool b)      {if (carrier!=b) {carrier = b; stateChanged();}}
+    virtual void setBroadcast(bool b)    {if (broadcast!=b) {broadcast = b; configChanged();}}
+    virtual void setMulticast(bool b)    {if (multicast!=b) {multicast = b; configChanged();}}
+    virtual void setPointToPoint(bool b) {if (pointToPoint!=b) {pointToPoint = b; configChanged();}}
+    virtual void setLoopback(bool b)     {if (loopback!=b) {loopback = b; configChanged();}}
+    virtual void setDatarate(double d)   {if (datarate!=d) {datarate = d; configChanged();}}
+    virtual void setMACAddress(const MACAddress& addr) {if (macAddr!=addr) {macAddr = addr; configChanged();}}
     virtual void setInterfaceToken(const InterfaceToken& t) {token = t; configChanged();}
     //@}
 
