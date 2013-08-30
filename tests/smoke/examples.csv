@@ -118,8 +118,8 @@
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_VideoStream -r 0
 # /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_common -r 0
 /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 0
-/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_NSC -r 0
-/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_lwIP -r 0
+# /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_NSC -r 0       # Unimplemented data transfer mode 2:TCP_TRANSFER_OBJECT
+# /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_lwIP -r 0      # Unsupported lifecycle operation 'NodeShutdownOperation'
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 0
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_internalQueue -r 0
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_fullduplex -r 0
