@@ -55,7 +55,6 @@ void MusolesiMobility::initialize(int stage)
         numberOfColumns = par("numberOfColumns");
         rewiringProb = par("rewiringProb");
         numberOfGroups = par("numberOfGroups");
-        girvanNewmanOn = par("girvanNewmanOn");
         numHosts = par("numHosts");
         hcmm = par("hcmm");
         recordStartTime = par("recordStartTime");
@@ -85,9 +84,6 @@ void MusolesiMobility::initialize(int stage)
 
         if (numberOfGroups > numHosts)
             error("You have set a number of hosts lower than the number of groups: %d < %d",numHosts,numberOfGroups);
-
-        if (girvanNewmanOn == true)
-            error("Girvan Newman algorithm not supported");
 
         if (par("targetChoice").stdstringValue().compare("proportional") == 0)
             targetChoice = PROPORTIONAL;

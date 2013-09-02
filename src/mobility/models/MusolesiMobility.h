@@ -34,6 +34,7 @@
 
 #ifndef MUSOLESI_MOBILITY_H
 #define MUSOLESI_MOBILITY_H
+#include "LineSegmentsMobilityBase.h"
 
 struct hostsItem
 {
@@ -62,10 +63,6 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
 
         double rewiringProb;
         int numberOfGroups;
-
-        //Girvan-Newman algorithm for graph clustering, it is not implemented in this version
-        //The default clustering algorithm is the Caveman-model
-        bool girvanNewmanOn;
 
         int targetChoice;
 

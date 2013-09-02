@@ -23,7 +23,6 @@
 //
 
 package inet.mobility.models;
-import inet.mobility.IMobility;
 
 //
 // Mobility Patterns Generator for ns-2 simulator
@@ -58,7 +57,6 @@ simple MusolesiMobility extends MobilityBase
       double rewiringPeriod @unit("s") = default(0); // rewiring interval
       double reshufflePeriod @unit("s") = default(0); // reshuffling interval
       int numberOfGroups = default(10);
-      bool girvanNewmanOn = default(false);
       string targetChoice = default("pseudodeterministic");
       bool recordStatistics = default(false);
       double drift = default(0.1);
