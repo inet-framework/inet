@@ -9,7 +9,7 @@ Testing TCP communication speed
 
 import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 
 channel C extends DatarateChannel
@@ -76,7 +76,7 @@ network TcpSpeedTest
             parameters:
                 srvTcpType = "TCP_lwIP";
         }
-        configurator: FlatNetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             @display("p=70,40");
         }
 }
@@ -119,8 +119,6 @@ sim-time-limit = 2s+20s
 **.ppp[*].queueType = "DropTailQueue" # in routers
 **.ppp[*].queue.frameCapacity = 10
 #**.ppp[*].queue.frameCapacity = 47  # good:(13,15,16,18,19,21-25, 7) bad:(17,20)
-
-*.configurator.networkAddress = "192.168.1.0"
 
 %#--------------------------------------------------------------------------------------------------------------
 %postprocess-script: check.r

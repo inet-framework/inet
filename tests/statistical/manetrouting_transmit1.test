@@ -82,6 +82,8 @@ description = "Aodv Simple test"
 **.constraintAreaMaxY = 300m
 **.constraintAreaMaxZ = 0m
 
+**.networkLayer.configurator.networkConfiguratorModule = ""
+
 # mobility
 **.mobility.initFromDisplayString = false
 
