@@ -198,22 +198,22 @@
 /examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            2da3-2602
 /examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            a0f3-c703
 
-# /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                100s,            34b1-536e    # unstable fingerprint
-# /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              100s,            c980-8b04    # unstable fingerprint
-# /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,                100s,            17ed-8b28    # unstable fingerprint
-# /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,               100s,            029e-8559    # unstable fingerprint
-# /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,               100s,            aab7-d733    # unstable fingerprint
-# /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,             100s,            6ab3-2e50    # unstable fingerprint
-# /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,             100s,            856e-1e06    # unstable fingerprint
-# /examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,             100s,            49ad-4191    # unstable fingerprint
-# /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             f906-03ca    # unstable fingerprint
+/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          a669-8344
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             9b13-0883
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,             50s,             eaba-6a76
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,               50s,             f8a4-a92c
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,             50s,             256e-a1a3
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,             50s,             0052-df3f
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,               50s,             9bc6-81a8
+/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,                50s,             f3d3-a603
+/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             92c8-22e4
 /examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c PPP -r 0,                    50s,             aa7d-e0f5
+/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           d3a9-8a33
 /examples/ipv6/nclients/,            -f omnetpp.ini -c PPP -r 0,                    1000s,           8230-c0e1
-# /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           b2e0-2ac0    # unstable fingerprint
 
 ### /examples/manetrouting/* : see manet.csv
 
-# /examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    100s,            d809-4d5a    # unstable fingerprint
+/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             d5c7-197b
 
 /examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0,          10000s,          7108-73d8
 /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility1 -r 0,    10000s,          1764-abd7
@@ -280,10 +280,10 @@
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0,               500s,            245a-b090
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   100s,            61c9-0e04
 
-# /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                100s,            a422-b4ed    # unstable fingerprint
-# /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                100s,            1ef9-fff6    # unstable fingerprint
-# /examples/rtp/unicast1/,          -f omnetpp.ini -c General -r 0,                100s,            cfaf-783c    # unstable fingerprint
-# /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                100s,            f9be-62bb    # unstable fingerprint
+# /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            0bd5-71a8    # unstable fingerprint
+# /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           67ec-ff51    # unstable fingerprint
+# /examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           a7c1-0e5b    # unstable fingerprint
+# /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            feed-b09b    # unstable fingerprint
 
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            905b-693b
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            7614-bba6

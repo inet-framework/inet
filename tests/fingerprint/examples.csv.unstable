@@ -1,17 +1,5 @@
 # workingdir,                        args,                                          simtimelimit,    fingerprint
-# repeat 5 times
-/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          e91f-fb6c
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_inet -r 0,              50s,             c980-8b04
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet__lwip -r 0,             50s,             481d-9c4a
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c inet_nsc -r 0,               50s,             c409-41f0
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__inet -r 0,             50s,             856e-1e06
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c lwip__lwip -r 0,             50s,             f77f-4cda
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_inet -r 0,               50s,             3cde-0c00
-/examples/ipv6/ipv6bulk/,            -f omnetpp.ini -c nsc_nsc -r 0,                50s,             d39d-473c
-/examples/ipv6/ipv6nclients/,        -f omnetpp.ini -c ETH -r 0,                    50s,             f906-03ca
-/examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0,                    1000s,           b2e0-2ac0
-/examples/mobileipv6/,               -f omnetpp.ini -c One -r 0,                    25s,             05c2-e365
-/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            54b5-a6b3
-/examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                500s,            a8ae-e2ce
-/examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           cfaf-783c
-/examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            4493-d000
+/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            0bd5-71a8
+/examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           67ec-ff51
+/examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           a7c1-0e5b
+/examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            feed-b09b
