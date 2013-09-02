@@ -136,8 +136,8 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
 
         // global useful functions from original code
         void rewire();
-        void refresh_weight_array_ingroups();
-        void generate_adjacency();
+        void refreshWeightArrayIngroups();
+        void generateAdjacency();
         bool areInTheSameGroup(int node1, int node2);
         bool isInGroup(int node, std::vector<int>& group, int numberOfMembers);
 };

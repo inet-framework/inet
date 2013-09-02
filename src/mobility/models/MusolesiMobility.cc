@@ -464,8 +464,8 @@ void MusolesiMobility::setInitialPosition()
     buf << "bgg=" << int(gridSizex);
     parentDispStr.parse(buf.str().c_str());
 
-    refresh_weight_array_ingroups();
-    generate_adjacency();
+    refreshWeightArrayIngroups();
+    generateAdjacency();
 
     for (int i = 0; i < numberOfGroups; i++)
     {
@@ -506,8 +506,8 @@ void MusolesiMobility::setPosition(bool reshufflePositionOnly)
     // i.e., w=0
     if(!reshufflePositionOnly)
     {
-        refresh_weight_array_ingroups();
-        generate_adjacency();
+        refreshWeightArrayIngroups();
+        generateAdjacency();
         for (int i = 0; i < numberOfGroups; i++)
         {
             EV << "The members of group " << i+1 << " are: ";
@@ -661,7 +661,7 @@ void MusolesiMobility::rewire()
 // probability probRewiring. threshold is the value under which the relationship
 // is not considered important
 
-void MusolesiMobility::refresh_weight_array_ingroups()
+void MusolesiMobility::refreshWeightArrayIngroups()
 {
     // initially distributes users uniformly into groups
     // Added a random distribution over the beginning of the cycle
@@ -746,7 +746,7 @@ void MusolesiMobility::refresh_weight_array_ingroups()
 }
 
 // generate the adjacency matrix from the weight matrix of size array_size given a certain threshold
-void MusolesiMobility::generate_adjacency()
+void MusolesiMobility::generateAdjacency()
 {
     for (int i = 0; i < numHosts; i++)
     {
