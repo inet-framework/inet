@@ -1,11 +1,11 @@
 
 /*
  * Mobilty based on the code released by Mirco Musolesi:
- * http://portal.acm.org/citation.cfm?id=1132983.1132990 
+ * http://portal.acm.org/citation.cfm?id=1132983.1132990
  * "A community based mobility model for ad hoc network research"
  * Ported to Omnet++ by Leonardo Maccari for the PAF-FPE project, see pervacy.eu
  * leonardo.maccari@unitn.it
- 
+
  Mobility Patterns Generator for ns-2 simulator
  Based on a Community Based Mobility Model
 
@@ -44,32 +44,20 @@
 #include <omnetpp.h>
 #include "LineSegmentsMobilityBase.h"
 
-/*  helper structs  */
 typedef struct hostsItem
 {
         double currentX;
         double currentY;
-        double relativeX;
-        double relativeY;
-        double goalRelativeX;
-        double goalRelativeY;
-        double goalCurrentX;
-        double goalCurrentY;
         int cellIdX;
         int cellIdY;
-        int myCellIdX;
-        int myCellIdY;
+        int homeCellIdX;
+        int homeCellIdY;
         double speed;
-        //double absSpeed;
-        //double af;
-        //bool isATraveller;
-        //double nextStopTime;
 } hostsItem;
 
 typedef struct cellsItem
 {
-        double minX;
-        double minY;
+        Coord pos;
         int numberOfHosts;
 } cellsItem;
 
@@ -114,38 +102,39 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         bool reshufflePositionsOnly;
         int myGroup;
         bool recordStatistics;
-        Coord areaTopLeft, areaBottomRight;
 
-        static hostsItem * hosts;
-        static cellsItem ** cells;
-        static int * numberOfMembers;
-
+        static std::vector<hostsItem> hosts;
+        static std::vector<std::vector<cellsItem> > cells;
+        static std::vector<int> numberOfMembers;
         //Connectivity Matrix
-        static int **adjacency;
+        static std::vector<std::vector<int> > adjacency;
         //Interaction Matrix
-        static double **interaction;
-
-        static int **groups;
+        static std::vector<std::vector<double> > interaction;
+        static std::vector<std::vector<int> > groups;
 
         static simsignal_t blocksHistogram;
         static simsignal_t walkedMeters;
         static simsignal_t blockChanges;
 
-        double ** CA;
-        double **a;
-
+        std::vector<std::vector<double> > CA;
+        std::vector<std::vector<double> > a;
         int nodeId;
 
         cMessage * moveMessage;
 
+    public:
+        MusolesiMobility() {}
+        ~MusolesiMobility();
+
+    protected:
         /** @brief Initializes mobility model parameters.*/
         virtual void initialize(int);
         virtual void finish();
         virtual void initializePosition();
-        /* @brief Configure the initial group matrix */
+        /* @brief Configure the initial group matrix and positions */
         void setInitialPosition();
-        /* @brief Refresh the group matrix*/
-        void setPosition();
+        /* @brief Refresh the host's positions and the group matrix only if the reshufflePositionsOnly is false */
+        void setPosition(bool reshufflePositionsOnly);
         /* @brief Define and allocate static members with original Musolesi code*/
         void DefineStaticMembers();
         /* @brief Redefined from LineSegmentsMobility */
@@ -155,20 +144,14 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         virtual void handleSelfMsg(cMessage* msg);
         virtual void handleMessage(cMessage* msg);
         void move();
-        Coord getRandomPoint(int minX, int minY);
+        Coord getRandomPoint(Coord pos);
 
         // global useful functions from original code
-        void print_int_array(int **array, int array_size);
-        void print_double_array(double **array, int array_size);
-        int **initialise_int_array(int array_size);
-        double **initialise_double_array(int array_size);
-        void rewire(double **weight, int array_size, double probRewiring, double threshold, int ** groups, int *numberOfMembers,
-                int numberOfGroups);
-        void refresh_weight_array_ingroups(double ** weight, int array_size, int numberOfGroups, double nRewiring,
-                double threshold, int** groups, int* numberofMembers);
-        void generate_adjacency(double** weightMat, int** adjacencyMat, double threshold, int array_size);
-        bool areInTheSameGroup(int node1, int node2, int** groups, int numberOfGroups, int* numberOfMembers);
-        bool isInGroup(int node, int* group, int numberOfMembers);
+        void rewire();
+        void refresh_weight_array_ingroups();
+        void generate_adjacency();
+        bool areInTheSameGroup(int node1, int node2);
+        bool isInGroup(int node, std::vector<int>& group, int numberOfMembers);
 };
 
 
