@@ -94,9 +94,7 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         static std::vector<hostsItem> hosts;
         static std::vector<std::vector<cellsItem> > cells;
         static std::vector<int> numberOfMembers;
-        // connectivity Matrix
-        static std::vector<std::vector<int> > adjacency;
-        // interaction Matrix
+        // Interaction Matrix
         static std::vector<std::vector<double> > interaction;
         static std::vector<std::vector<int> > groups;
 
@@ -137,7 +135,6 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         // global useful functions from original code
         void rewire();
         void refreshWeightArrayIngroups();
-        void generateAdjacency();
         bool areInTheSameGroup(int node1, int node2);
         bool isInGroup(int node, std::vector<int>& group, int numberOfMembers);
 };

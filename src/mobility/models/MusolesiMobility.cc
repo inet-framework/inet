@@ -26,7 +26,6 @@ Define_Module(MusolesiMobility);
 // this members must be the same for each node. They are static and
 // allocated/deallocated always by node zero
 
-std::vector<std::vector<int> > MusolesiMobility::adjacency;
 std::vector<hostsItem> MusolesiMobility::hosts;
 std::vector<std::vector<cellsItem> > MusolesiMobility::cells;
 std::vector<int> MusolesiMobility::numberOfMembers;
@@ -153,12 +152,10 @@ void MusolesiMobility::defineStaticMembers()
         for (int i = 0; i < numberOfRows; i++)
             cells[i].resize(numberOfColumns);
 
-        adjacency.resize(numHosts);
         interaction.resize(numHosts);
         groups.resize(numHosts);
         for (int i = 0; i < numHosts; i++)
         {
-            adjacency[i].resize(numHosts);
             interaction[i].resize(numHosts);
             groups[i].resize(numHosts);
         }
@@ -465,7 +462,6 @@ void MusolesiMobility::setInitialPosition()
     parentDispStr.parse(buf.str().c_str());
 
     refreshWeightArrayIngroups();
-    generateAdjacency();
 
     for (int i = 0; i < numberOfGroups; i++)
     {
@@ -507,7 +503,6 @@ void MusolesiMobility::setPosition(bool reshufflePositionOnly)
     if(!reshufflePositionOnly)
     {
         refreshWeightArrayIngroups();
-        generateAdjacency();
         for (int i = 0; i < numberOfGroups; i++)
         {
             EV << "The members of group " << i+1 << " are: ";
@@ -608,11 +603,9 @@ MusolesiMobility::~MusolesiMobility()
     cells.clear();
     for (int i = 0; i < numHosts; i++)
     {
-        adjacency[i].clear();
         interaction[i].clear();
         groups[i].clear();
     }
-    adjacency.clear();
     interaction.clear();
     groups.clear();
     numberOfMembers.clear();
@@ -715,10 +708,10 @@ void MusolesiMobility::refreshWeightArrayIngroups()
             {
                 if (areInTheSameGroup(i + 1, j + 1) == true)
                 {
-                    // chose a couple of nodes in the group
+                    // choose a couple of nodes in the group
                     if (uniform(0, 1) < rewiringProb)
-                    {   // do rewiring
-
+                    {
+                        // do rewiring
                         bool found = false;
                         for (int z = 0; z < numHosts; z++)
                             if ((areInTheSameGroup(i + 1, z + 1) == false)
@@ -742,21 +735,6 @@ void MusolesiMobility::refreshWeightArrayIngroups()
                 }
             }
         } // if weight != -1 this number has already been assigned by previous iterations
-    }
-}
-
-// generate the adjacency matrix from the weight matrix of size array_size given a certain threshold
-void MusolesiMobility::generateAdjacency()
-{
-    for (int i = 0; i < numHosts; i++)
-    {
-        for (int j = 0; j < numHosts; j++)
-        {
-            if (interaction[i][j] > threshold)
-                adjacency[i][j] = 1;
-            else
-                adjacency[i][j] = 0;
-        }
     }
 }
 
