@@ -33,20 +33,13 @@ simsignal_t MusolesiMobility::blockChanges = SIMSIGNAL_NULL;
 #define PSEUDODETERMINISTIC 1
 #define PROPORTIONAL 2
 
-// If Girvan Newman is actived, uncomment this. GN, in this release does not
-// work, feel free to debug it.
-//
-//#define GN
-
-
 void MusolesiMobility::initialize(int stage)
 {
 
     EV << "initializing MusolesiMobility stage " << stage << endl;
     stationary = false; // this stuff is needed by LineSegmentsMobilityBase
-	obstacleAvoidance = par("obstacleAvoidance").boolValue();
-	LineSegmentsMobilityBase::initialize(stage, obstacleAvoidance);
-
+	//obstacleAvoidance = par("obstacleAvoidance").boolValue();
+	LineSegmentsMobilityBase::initialize(stage);
     if (stage == 0)
     {
 
@@ -134,9 +127,12 @@ void MusolesiMobility::initialize(int stage)
 
 }
 
-void MusolesiMobility::initializePosition(){ 
-        if (nodeId == 0){ // maps are static so just one node is required to calculate them 
-            setInitialPosition(false);
+void MusolesiMobility::initializePosition()
+{
+        // maps are static so just one node is required to calculate them
+        if (nodeId == 0)
+        {
+            setInitialPosition();
         }
         lastPosition.x = hosts[nodeId].currentX;
         lastPosition.y = hosts[nodeId].currentY;
@@ -400,7 +396,7 @@ void MusolesiMobility::handleMessage(cMessage * msg){
 void MusolesiMobility::handleSelfMsg(cMessage * msg){
     if (simTime() > rewiringPeriod && initialrewiringPeriod > 0 && nodeId == 0)
     {
-            setInitialPosition(true);
+        setPosition();
             rewire(interaction,  numHosts, rewiringProb, 
                      threshold,  groups,  numberOfMembers, numberOfGroups);
         rewiringPeriod += initialrewiringPeriod;
@@ -462,106 +458,86 @@ void MusolesiMobility::handleSelfMsg(cMessage * msg){
 }
 
 // @Brief Set the initial position of the nodes, or shuffle the groups (if shuffle==1)
-void MusolesiMobility::setInitialPosition(bool shuffle)
+void MusolesiMobility::setInitialPosition()
 {
-    bool splitted=true;
-    double previousModth=0.0;
-    double modth=0.1;
-    int initialNumberOfGroups = numberOfGroups;
+    // NOTE: the playground for omnet has zero coordinate on top left.
+    // consequently, the cells are always addressed as a matrix indexed
+    // using top-left element as 0,0
+    for (int i=0;i<numberOfRows;i++)
+        for (int j=0;j<numberOfColumns;j++)
+            cells[i][j].numberOfHosts = 0;
 
-    if(!shuffle){
-        for (int i=0;i<numberOfRows;i++) // NOTE: the playground for omnet has zero coordinate on top left.
-        								 // consequently, the cells are always addressed as a matrix indexed
-        								 // using top-left element as 0,0
-            for (int j=0;j<numberOfColumns;j++) 
-                cells[i][j].numberOfHosts=0;
-        groups=initialise_int_array(numHosts);
-        double gridSizex, gridSizeY;
-        gridSizex = (constraintAreaMax.x - constraintAreaMin.x)/numberOfColumns;
+    groups = initialise_int_array(numHosts);
+    double gridSizex = (constraintAreaMax.x - constraintAreaMin.x)/numberOfColumns;
 
-        cDisplayString& parentDispStr = getParentModule()->getParentModule()->getDisplayString();
+    cDisplayString& parentDispStr = getParentModule()->getParentModule()->getDisplayString();
 
-        std::stringstream buf;
-        buf << "bgg=" << int(gridSizex);
-        parentDispStr.parse(buf.str().c_str());
-    }
+    std::stringstream buf;
+    buf << "bgg=" << int(gridSizex);
+    parentDispStr.parse(buf.str().c_str());
 
-    //clustering using the Girvan-Newman algorithm
-    //
-    //I have doubts about the use of GN algorithm. It seems that it does
-    //only one iteration, and I've verified it also in the original code
-    //by Musolesi. So, Or there is something I'm missing in the
-    //configuration of the parameters, or this doesn't work. I Disabled
-    //it by now (see initialize)
-    if (girvanNewmanOn==true) {	
-#ifdef GN
-        //This function initialise the matrix creating a matrix composed of n disjointed groups 
-        //with nodes uniformely distributed, then performs rewiring for each link with
-        //prob probRewiring. threshold is the value under which the relationship 
-        //is not considered important
-        initialise_weight_array_ingroups(interaction,numHosts,initialNumberOfGroups,rewiringProb,threshold);
+    refresh_weight_array_ingroups(interaction,numHosts,numberOfGroups,rewiringProb,threshold, groups, numberOfMembers);
+    generate_adjacency(interaction,adjacency,threshold,numHosts);
 
-        // transform the float matrix into a binary matrix
-        generate_adjacency(interaction,adjacency,threshold,numHosts);					
-        do {
-            for (int i=0;i<numHosts; i++)
-                numberOfMembers[i]=0;
-            splitted=false;
-            double betw[numHosts];
-            for (int i=0;i<numHosts; i++)
-                betw[i]=0;
-            calculate_betweenness(betw,adjacency,numHosts);
-
-            for (int i=0;i<numHosts; i++)
-                numberOfMembers[i]=0;
-            numberOfGroups=getGroups(adjacency, groups ,numberOfMembers,numHosts);
-            previousModth=modth;
-            modth=splitNetwork_Threshold(adjacency, betw, numHosts, modth);
-        } while ( (previousModth<modth) && (modth > -1) );
-#endif 
-    }
-    else {
-        //communities based on the initial number of caves in the Caveman model		
-        //i.e., w=0
-        refresh_weight_array_ingroups(interaction,numHosts,initialNumberOfGroups,rewiringProb,threshold, groups, numberOfMembers);
-        generate_adjacency(interaction,adjacency,threshold,numHosts);					
-    }
-    for (int i=0;i<numberOfGroups;i++) {
+    for (int i=0;i<numberOfGroups;i++)
+    {
         ev <<"The members of group "<<i+1<<" are: ";
         for (int j=0;j<numberOfMembers[i];j++)
             ev <<groups[i][j]-1<<" ";
         ev << std::endl;
     }
-    for (int i=0;i<numberOfGroups;i++) {
+    for (int i=0;i<numberOfGroups;i++)
+    {
+        int cellIdX = uniform(0,numberOfRows);
+        int cellIdY = uniform(0,numberOfColumns);
+        for (int j=0;j<numberOfMembers[i];j++)
+        {
+            int hostId = groups[i][j];
+            hosts[hostId-1].myCellIdX = cellIdX;
+            hosts[hostId-1].myCellIdY = cellIdY;
+            //increment the number of the hosts in that cell
+            cells[cellIdX][cellIdY].numberOfHosts += 1;
+            hosts[hostId-1].cellIdX = cellIdX;
+            hosts[hostId-1].cellIdY = cellIdY;
+            ev << "Setting home of " << hostId << " in position " << hosts[hostId-1].myCellIdX << " " << hosts[hostId-1].myCellIdY << std::endl;
+            ev << "Setting pos  of " << hostId << " in position " << hosts[hostId-1].cellIdX << " " << hosts[hostId-1].cellIdY << std::endl;
+        }
+    }
+    //definition of the initial position of the hosts
+    for (int k=0;k<numHosts;k++)
+    {
+        Coord randomPoint = getRandomPoint(cells[hosts[k].cellIdX][hosts[k].cellIdY].minX,cells[hosts[k].cellIdX][hosts[k].cellIdY].minY);
+        hosts[k].currentX=randomPoint.x;
+        hosts[k].currentY=randomPoint.y;
+    }
+}
+
+void MusolesiMobility::setPosition()
+{
+    //communities based on the initial number of caves in the Caveman model
+    //i.e., w=0
+    refresh_weight_array_ingroups(interaction,numHosts,numberOfGroups,rewiringProb,threshold, groups, numberOfMembers);
+    generate_adjacency(interaction,adjacency,threshold,numHosts);
+    for (int i=0;i<numberOfGroups;i++)
+    {
+        ev <<"The members of group "<<i+1<<" are: ";
+        for (int j=0;j<numberOfMembers[i];j++)
+            ev <<groups[i][j]-1<<" ";
+        ev << std::endl;
+    }
+
+    for (int i=0;i<numberOfGroups;i++)
+    {
         int cellIdX=uniform(0,numberOfRows);
         int cellIdY=uniform(0,numberOfColumns);
-        for (int j=0;j<numberOfMembers[i];j++) {
+        for (int j=0;j<numberOfMembers[i];j++)
+        {
             int hostId=groups[i][j];
             hosts[hostId-1].myCellIdX = cellIdX;
             hosts[hostId-1].myCellIdY = cellIdY;
             //increment the number of the hosts in that cell
-            if (!shuffle){
-                cells[cellIdX][cellIdY].numberOfHosts+=1;
-                hosts[hostId-1].cellIdX=cellIdX;
-                hosts[hostId-1].cellIdY=cellIdY;
-                ev << "Setting home of " << hostId << " in position " 
-                    << hosts[hostId-1].myCellIdX << " " << hosts[hostId-1].myCellIdY << std::endl;
-                ev << "Setting pos  of " << hostId << " in position " 
-                    << hosts[hostId-1].cellIdX << " " << hosts[hostId-1].cellIdY << std::endl;
-            }
         }
     }
-    //definition of the initial position of the hosts
-    if (!shuffle)
-        for (int k=0;k<numHosts;k++) {
-        	Coord randomPoint = getRandomPointWithObstacles(
-        			cells[hosts[k].cellIdX][hosts[k].cellIdY].minX,
-        			cells[hosts[k].cellIdX][hosts[k].cellIdY].minY);
-            hosts[k].currentX=randomPoint.x;
-            hosts[k].currentY=randomPoint.y;
-        }
-
-
 }
 
 void MusolesiMobility::move()
@@ -573,16 +549,14 @@ void MusolesiMobility::move()
     reflectIfOutside(lastPosition, lastSpeed, angle);
 }
 
-Coord MusolesiMobility::getRandomPointWithObstacles(int minX, int minY){
-	Coord upLeft, downRight;
-	upLeft.x = minX;
-	upLeft.y = minY;
-	upLeft.z = 0;
-	downRight.x = minX+sideLengthX;
-	downRight.y = minY+sideLengthY;
-	downRight.z = 1;
+Coord MusolesiMobility::getRandomPoint(int minX, int minY)
+{
+	Coord p;
+    p.x = uniform(minX, minX+sideLengthX);
+    p.y = uniform(minY, minY+sideLengthY);
+    p.z = uniform(0,1);
 
-	return  LineSegmentsMobilityBase::getRandomPositionWithObstacles(upLeft, downRight);
+	return p;
 }
 
 void MusolesiMobility::finish(){

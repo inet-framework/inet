@@ -86,8 +86,6 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
     int numberOfGroups; 
     bool girvanNewmanOn; 
     int targetChoice;
-    double sideLength_WholeAreaX;
-    double sideLength_WholeAreaY;
 	double sideLengthX;
 	double sideLengthY;
 	double threshold;
@@ -136,7 +134,9 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
     virtual void finish();
     virtual void initializePosition();
     /* @brief Configure the initial group matrix */
-    void setInitialPosition(bool rewire);
+    void setInitialPosition();
+    /* @brief Refresh the group matrix*/
+    void setPosition();
     /* @brief Define and allocate static members with original Musolesi code*/
     void DefineStaticMembers();
     /* @brief Redefined from LineSegmentsMobility */
@@ -146,7 +146,7 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
     virtual void handleSelfMsg(cMessage* msg);
     virtual void handleMessage(cMessage* msg);
     void move();
-    Coord getRandomPointWithObstacles(int minX, int minY);
+    Coord getRandomPoint(int minX, int minY);
 
 
 };
