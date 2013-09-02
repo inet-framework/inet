@@ -13,7 +13,12 @@ import inet.mobility.IMobility;
 simple MusolesiMobility extends MobilityBase
 {
     parameters:
-
+      @display("i=block/cogwheel_s");
+      @class(MusolesiMobility);
+      @statistic[blocksHistogram](title="Blocks histogram"; record=histogram, vector);
+      @statistic[walkedMeters](title="Walked Meters"; record=sum);
+      @statistic[blockChanges](title="Block changes"; record=sum);
+      
       bool obstacleAvoidance = default(false);
 
       double minHostSpeed = default(0.1);
@@ -46,14 +51,7 @@ simple MusolesiMobility extends MobilityBase
 
       double x = default(-1); // start x coordinate (-1 = display string position, or random if it's missing)
       double y = default(-1); // start y coordinate (-1 = display string position, or random if it's missing)
-      double updateInterval @unit("s") = default(100ms); // time interval to update the hosts position
-      @display("i=block/cogwheel_s");
-      @class(MusolesiMobility);
-      @statistic[blocksHistogram](title="Blocks histogram"; record=histogram, vector);
-      @statistic[walkedMeters](title="Walked Meters"; record=sum);
-      @statistic[blockChanges](title="Block changes"; record=sum);
-      
+      double updateInterval @unit("s") = default(100ms); // time interval to update the hosts position      
     
-
 }
 
