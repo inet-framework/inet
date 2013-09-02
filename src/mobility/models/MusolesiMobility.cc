@@ -1,14 +1,25 @@
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+
+#include <sstream>
 #include "MusolesiMobility.h"
-#include "sstream"
-/*
- * Test done: nodes 1..100, groups 10
- *  nodes 100, groups 1..100
- *  nodes 30 thre 0.1..0.9
- *  nodes 30 thre 0.1 rewire 0.1..0.9 (rewiring doesn't change that much...)
- *  30 nodes, with deterministicOn 1/0. Always use 0, otherwise the nodes
- *  converge
- *
- */
+
+#define DETERMINISTIC 0
+#define PSEUDODETERMINISTIC 1
+#define PROPORTIONAL 2
 
 Define_Module(MusolesiMobility);
 
@@ -27,10 +38,6 @@ std::map<int, int> MusolesiMobility::interContactDistribution;
 simsignal_t MusolesiMobility::blocksHistogram = SIMSIGNAL_NULL;
 simsignal_t MusolesiMobility::walkedMeters = SIMSIGNAL_NULL;
 simsignal_t MusolesiMobility::blockChanges = SIMSIGNAL_NULL;
-
-#define DETERMINISTIC 0
-#define PSEUDODETERMINISTIC 1
-#define PROPORTIONAL 2
 
 void MusolesiMobility::initialize(int stage)
 {
@@ -105,7 +112,7 @@ void MusolesiMobility::initialize(int stage)
         sideLengthX = constraintAreaMax.x / ((double)numberOfColumns);
         sideLengthY = constraintAreaMax.y / ((double)numberOfRows);
 
-        DefineStaticMembers();// just allocate static memory
+        defineStaticMembers(); // just allocate static memory
         if (recordStatistics)
             for (int i = 0; i< numHosts; i++)
                 nodesInMyBlock[i].first = nodesInMyBlock[i].second = 0;
@@ -122,15 +129,15 @@ void MusolesiMobility::initializePosition()
 {
     // maps are static so just one node is required to calculate them
     if (nodeId == 0)
-    {
         setInitialPosition();
-    }
+
     lastPosition.x = hosts[nodeId].currentX;
     lastPosition.y = hosts[nodeId].currentY;
 }
-void MusolesiMobility::DefineStaticMembers()
+
+void MusolesiMobility::defineStaticMembers()
 {
-    //memory allocation
+    // memory allocation
     a.resize(numberOfRows);
     CA.resize(numberOfRows);
 
@@ -139,10 +146,11 @@ void MusolesiMobility::DefineStaticMembers()
         a[i].resize(numberOfColumns);
         CA[i].resize(numberOfColumns);
     }
-    //cell attractivity
+
+    // cell attractivity
     if (nodeId == 0)
     {
-        //memory allocation for static data members
+        // memory allocation for static data members
         hosts.resize(numHosts);
         numberOfMembers.resize(numHosts);
         cells.resize(numberOfRows);
@@ -241,7 +249,8 @@ void MusolesiMobility::setTargetPosition()
                 }
             }
         }
-        //end deterministic;
+
+        // end deterministic;
         // Pseudodeterministic choice. Order the cells with attraction != 0
         // for their attraction, then extract a random value with exponential
         // distribution (expmean defined before, recall average = 1/expmean)
@@ -273,8 +282,8 @@ void MusolesiMobility::setTargetPosition()
             // square. The choice is random with probability distribution
             // proportional to the attractivity of the squares.
 
-            //Algorithm of the selection of the new cell
-            //Denominator for the normalization of the values
+            // Algorithm of the selection of the new cell
+            // Denominator for the normalization of the values
             float denNorm = 0.00;
             // this is the added probability to choose an empty square
             // calculate normalized attractivity denomitor, plus drift for squares
@@ -323,14 +332,14 @@ void MusolesiMobility::setTargetPosition()
         }
     }
 
-    //Re-definition of the number of hosts in each cell
+    // Re-definition of the number of hosts in each cell
     cells[previousGoalCellX][previousGoalCellY].numberOfHosts -= 1;
     cells[selectedGoalCellX][selectedGoalCellY].numberOfHosts += 1;
 
     if (recordStatistics && (previousGoalCellX != selectedGoalCellX || previousGoalCellY != selectedGoalCellY))
         emit(blockChanges, 1);
 
-    //refresh of the information
+    // refresh of the information
     hosts[nodeId].cellIdX = selectedGoalCellX;
     hosts[nodeId].cellIdY = selectedGoalCellY;
 
@@ -401,7 +410,7 @@ void MusolesiMobility::handleSelfMsg(cMessage * msg)
     }
     if (simTime() > reshufflePeriod && initialreshufflePeriod > 0 && nodeId == 0)
     {
-        if(reshufflePositionsOnly)
+        if (reshufflePositionsOnly)
             setPosition(true);
         else
             rewire();
@@ -464,10 +473,10 @@ void MusolesiMobility::setInitialPosition()
 
     for (int i = 0; i < numberOfGroups; i++)
     {
-        ev << "The members of group "<< i + 1 << " are: ";
+        EV << "The members of group "<< i + 1 << " are: ";
         for (int j = 0; j < numberOfMembers[i]; j++)
-            ev << groups[i][j]-1 << " ";
-        ev << std::endl;
+            EV << groups[i][j]-1 << " ";
+        EV << std::endl;
     }
     for (int i = 0; i < numberOfGroups; i++)
     {
@@ -478,15 +487,15 @@ void MusolesiMobility::setInitialPosition()
             int hostId = groups[i][j];
             hosts[hostId - 1].homeCellIdX = cellIdX;
             hosts[hostId - 1].homeCellIdY = cellIdY;
-            //increment the number of the hosts in that cell
+            // increment the number of the hosts in that cell
             cells[cellIdX][cellIdY].numberOfHosts += 1;
             hosts[hostId - 1].cellIdX = cellIdX;
             hosts[hostId - 1].cellIdY = cellIdY;
-            ev<< "Setting home of " << hostId << " in position " << hosts[hostId-1].homeCellIdX << " " << hosts[hostId-1].homeCellIdY << std::endl;
-            ev<< "Setting pos  of " << hostId << " in position " << hosts[hostId-1].cellIdX << " " << hosts[hostId-1].cellIdY << std::endl;
+            EV<< "Setting home of " << hostId << " in position " << hosts[hostId-1].homeCellIdX << " " << hosts[hostId-1].homeCellIdY << std::endl;
+            EV<< "Setting pos  of " << hostId << " in position " << hosts[hostId-1].cellIdX << " " << hosts[hostId-1].cellIdY << std::endl;
         }
     }
-    //definition of the initial position of the hosts
+    // definition of the initial position of the hosts
     for (int k = 0; k < numHosts; k++)
     {
         Coord randomPoint = getRandomPoint(cells[hosts[k].cellIdX][hosts[k].cellIdY].pos);
@@ -497,18 +506,18 @@ void MusolesiMobility::setInitialPosition()
 
 void MusolesiMobility::setPosition(bool reshufflePositionOnly)
 {
-    //communities based on the initial number of caves in the Caveman model
-    //i.e., w=0
+    // communities based on the initial number of caves in the Caveman model
+    // i.e., w=0
     if(!reshufflePositionOnly)
     {
         refresh_weight_array_ingroups();
         generate_adjacency();
         for (int i = 0; i < numberOfGroups; i++)
         {
-            ev << "The members of group " << i+1 << " are: ";
+            EV << "The members of group " << i+1 << " are: ";
             for (int j = 0;j < numberOfMembers[i]; j++)
-                ev << groups[i][j]-1 << " ";
-            ev << std::endl;
+                EV << groups[i][j]-1 << " ";
+            EV << std::endl;
         }
     }
     for (int i = 0; i < numberOfGroups; i++)
@@ -528,6 +537,7 @@ void MusolesiMobility::move()
 {
     LineSegmentsMobilityBase::move();
     double angle = 0;
+
     // see http://dev.omnetpp.org/bugs/view.php?id=527
     // raiseErrorIfOutside();
     reflectIfOutside(lastPosition, lastSpeed, angle);
@@ -548,22 +558,17 @@ void MusolesiMobility::finish()
     if (recordStatistics)
     {
         for (int i = 0; i < numHosts; i++)
-        {
-            if (i == nodeId)
-                continue;
-            if (nodesInMyBlock[i].first != 0)
-            {
+            if (i != nodeId && nodesInMyBlock[i].first != 0)
                 intervalDistribution[(int) (10 * (simTime().dbl() - nodesInMyBlock[i].first))]++;
-            }
-        }
     }
+
     if (nodeId == 0)
     {
         int totalFreq = 0;
         double partialFreq = 0;
         if (recordStatistics)
         {
-            std::cout << "#CONTACTTIME" << std::endl;
+            EV << "#CONTACTTIME" << std::endl;
             // print statistics
             for (std::map<int, int>::iterator ii = intervalDistribution.begin(); ii != intervalDistribution.end(); ii++)
             {
@@ -572,23 +577,22 @@ void MusolesiMobility::finish()
             for (std::map<int, int>::iterator ii = intervalDistribution.begin(); ii != intervalDistribution.end(); ii++)
             {
                 partialFreq += ii->second;
-                std::cout << ii->first << " " << ii->second << " " << 1 - partialFreq / totalFreq << std::endl;
+                EV << ii->first << " " << ii->second << " " << 1 - partialFreq / totalFreq << std::endl;
             }
             totalFreq = 0;
             partialFreq = 0;
-            std::cout << "#INTERCTIME" << std::endl;
-            for (std::map<int, int>::iterator ii = interContactDistribution.begin();
-                    ii != interContactDistribution.end(); ii++)
+            EV << "#INTERCTIME" << std::endl;
+
+            for (std::map<int, int>::iterator ii = interContactDistribution.begin(); ii != interContactDistribution.end(); ii++)
             {
                 totalFreq += ii->second;
             }
-            for (std::map<int, int>::iterator ii = interContactDistribution.begin();
-                    ii != interContactDistribution.end(); ii++)
+            for (std::map<int, int>::iterator ii = interContactDistribution.begin(); ii != interContactDistribution.end(); ii++)
             {
                 partialFreq += ii->second;
-                std::cout << ii->first << " " << ii->second << " " << 1 - partialFreq / totalFreq << std::endl;
+                EV << ii->first << " " << ii->second << " " << 1 - partialFreq / totalFreq << std::endl;
             }
-            std::cout << "#ENDSTATISTICS" << std::endl;
+            EV << "#ENDSTATISTICS" << std::endl;
 
         }
     }
@@ -638,9 +642,11 @@ void MusolesiMobility::rewire()
         for (int j = 0; j < numHosts; j++)
         {
             if (areInTheSameGroup(i + 1, j + 1) == true)
-            { // chose a couple of nodes in the group
+            {
+                // chose a couple of nodes in the group
                 if (uniform(0, 1) < rewiringProb)
-                {   // do rewiring
+                {
+                    // do rewiring
                     bool found = false;
                     for (int z = 0; z < numHosts; z++)
                         if ((areInTheSameGroup(i + 1, z + 1) == false)
@@ -654,14 +660,13 @@ void MusolesiMobility::rewire()
         }
 }
 
-//This function initialize the matrix creating a matrix composed of n disjointed groups
-//with nodes uniformly distributed, then performs re-wiring for each link with
-//probability probRewiring. threshold is the value under which the relationship
-//is not considered important
+// This function initializes the matrix creating a matrix composed of n disjoint groups
+// with nodes uniformly distributed, then performs re-wiring for each link with
+// probability probRewiring. threshold is the value under which the relationship
+// is not considered important
 
 void MusolesiMobility::refresh_weight_array_ingroups()
 {
-
     // initially distributes users uniformly into groups
     // Added a random distribution over the beginning of the cycle
     // or else re-wiring generates always the same groups
@@ -686,12 +691,13 @@ void MusolesiMobility::refresh_weight_array_ingroups()
             numberOfMembers[i] += 1;
         }
     }
-    if (groupReminder)
+    if (groupReminder) {
         for (int i = 0; i < groupReminder; i++)
         {
             groups[i][numberOfMembers[i]] = (numberOfGroups * groupSize + i + rnd) % numHosts + 1;
             numberOfMembers[i] += 1;
         }
+    }
 
     for (int i = 0; i < numHosts; i++)
         for (int j = 0; j < numHosts; j++)
@@ -706,12 +712,14 @@ void MusolesiMobility::refresh_weight_array_ingroups()
         scalefactor = (1 - threshold);
 
     for (int i = 0; i < numHosts; i++)
+    {
         for (int j = 0; j < numHosts; j++)
         {
             if (interaction[i][j] < 0)
             {
                 if (areInTheSameGroup(i + 1, j + 1) == true)
-                { // chose a couple of nodes in the group
+                {
+                    // chose a couple of nodes in the group
                     if (uniform(0, 1) < rewiringProb)
                     {   // do rewiring
 
@@ -726,22 +734,24 @@ void MusolesiMobility::refresh_weight_array_ingroups()
                         interaction[i][j] = interaction[j][i] = (uniform(0, 1) * scalefactor);  // give i,j a bad score
                     }
                     else
-                    {  //no rewiring
+                    {
+                        // no rewiring
                         interaction[i][j] = interaction[j][i] = 1.0 - (uniform(0, 1) * scalefactor); // give i,j a good score
                     }
                 }
                 else
-                { //the hosts are not in the same cluster
+                {
+                    // the hosts are not in the same cluster
                     interaction[i][j] = interaction[j][i] = (uniform(0, 1) * scalefactor); // give i,j a bad score
                 }
             }
         } // if weight != -1 this number has already been assigned by previous iterations
+    }
 }
 
-//generate the adjacency matrix from the weight matrix of size array_size given a certain threshold
+// generate the adjacency matrix from the weight matrix of size array_size given a certain threshold
 void MusolesiMobility::generate_adjacency()
 {
-
     for (int i = 0; i < numHosts; i++)
     {
         for (int j = 0; j < numHosts; j++)
@@ -754,34 +764,23 @@ void MusolesiMobility::generate_adjacency()
     }
 }
 
-//Given the groups of nodes and two nodes "node1" and "node2" returns true if the hosts
-//are in the same group, false otherwise
+// Given the groups of nodes and two nodes "node1" and "node2" returns true if the hosts
+// are in the same group, false otherwise
 bool MusolesiMobility::areInTheSameGroup(int node1, int node2)
 {
     for (int k = 0; k < numberOfGroups; k++)
-    {
-
         if (isInGroup(node1, groups[k], numberOfMembers[k]))
-        {
             if (isInGroup(node2, groups[k], numberOfMembers[k]))
-            {
                 return true;
-            }
-        }
-    }
     return false;
 }
 
-//Given a group of nodes and a node, stored in the array group of size equal
-//to numberOfMembers, returns true if the node is in the group or false otherwise
+// Given a group of nodes and a node, stored in the array group of size equal
+// to numberOfMembers, returns true if the node is in the group or false otherwise
 bool MusolesiMobility::isInGroup(int node, std::vector<int>& group, int numberOfMembers)
 {
     for (int k = 0; k < numberOfMembers; k++)
-    {
         if (group[k] == node)
-        {
             return true;
-        }
-    }
     return false;
 }
