@@ -14,4 +14,4 @@
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   500s,            86a9-53f0
 /examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              500s,            fe59-75f6
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 500s,            9212-d8c9
-/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            6114-9989
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            4b8a-c897
