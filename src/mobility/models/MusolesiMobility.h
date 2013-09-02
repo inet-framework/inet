@@ -60,10 +60,10 @@ typedef struct hostsItem
         int myCellIdX;
         int myCellIdY;
         double speed;
-        double absSpeed;
-        double af;
-        bool isATraveller;
-        double nextStopTime;
+        //double absSpeed;
+        //double af;
+        //bool isATraveller;
+        //double nextStopTime;
 } hostsItem;
 
 typedef struct cellsItem
@@ -116,8 +116,6 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         bool recordStatistics;
         Coord areaTopLeft, areaBottomRight;
 
-    protected:
-
         static hostsItem * hosts;
         static cellsItem ** cells;
         static int * numberOfMembers;
@@ -139,7 +137,7 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         int nodeId;
 
         cMessage * moveMessage;
-    protected:
+
         /** @brief Initializes mobility model parameters.*/
         virtual void initialize(int);
         virtual void finish();
@@ -159,29 +157,21 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         void move();
         Coord getRandomPoint(int minX, int minY);
 
+        // global useful functions from original code
+        void print_int_array(int **array, int array_size);
+        void print_double_array(double **array, int array_size);
+        int **initialise_int_array(int array_size);
+        double **initialise_double_array(int array_size);
+        void rewire(double **weight, int array_size, double probRewiring, double threshold, int ** groups, int *numberOfMembers,
+                int numberOfGroups);
+        void refresh_weight_array_ingroups(double ** weight, int array_size, int numberOfGroups, double nRewiring,
+                double threshold, int** groups, int* numberofMembers);
+        void generate_adjacency(double** weightMat, int** adjacencyMat, double threshold, int array_size);
+        bool areInTheSameGroup(int node1, int node2, int** groups, int numberOfGroups, int* numberOfMembers);
+        bool isInGroup(int node, int* group, int numberOfMembers);
 };
 
-// global useful functions from original code
 
-void print_int_array(int **array, int array_size);
-
-void print_double_array(double **array, int array_size);
-
-int **initialise_int_array(int array_size);
-
-double **initialise_double_array(int array_size);
-
-void rewire(double **weight, int array_size, double probRewiring, double threshold, int ** groups, int *numberOfMembers,
-        int numberOfGroups);
-
-void refresh_weight_array_ingroups(double ** weight, int array_size, int numberOfGroups, double nRewiring,
-        double threshold, int** groups, int* numberofMembers);
-
-void generate_adjacency(double** weightMat, int** adjacencyMat, double threshold, int array_size);
-
-bool areInTheSameGroup(int node1, int node2, int** groups, int numberOfGroups, int* numberOfMembers);
-
-bool isInGroup(int node, int* group, int numberOfMembers);
 
 #endif
 
