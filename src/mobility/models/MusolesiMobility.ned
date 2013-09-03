@@ -43,8 +43,6 @@ simple MusolesiMobility extends MobilityBase
       @statistic[walkedMeters](title="Walked Meters"; record=sum);
       @statistic[blockChanges](title="Block changes"; record=sum);
 
-      bool obstacleAvoidance = default(false);
-
       double minHostSpeed = default(0.1);
       double maxHostSpeed = default(10);
       double connectionThreshold = default(0.1);
@@ -56,7 +54,7 @@ simple MusolesiMobility extends MobilityBase
       double rewiringProb = default(0.1);
       double rewiringPeriod @unit("s") = default(0); // rewiring interval
       double reshufflePeriod @unit("s") = default(0); // reshuffling interval
-      int numberOfGroups = default(10);
+      int numberOfCommunities = default(10);
       string targetChoice = default("pseudodeterministic");
       bool recordStatistics = default(false);
       double drift = default(0.1);
@@ -69,7 +67,7 @@ simple MusolesiMobility extends MobilityBase
                     //has been added just to perform statistical comparisons
 
       int numHosts;
-      double hcmm = default(0); // do we use Boldrini/Conti/Passarella? what is
+      double HCMM = default(0); // do we use Boldrini/Conti/Passarella? what is
                                // the probability of going back home?
 
       double x = default(-1); // start x coordinate (-1 = display string position, or random if it's missing)

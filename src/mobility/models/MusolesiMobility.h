@@ -40,14 +40,14 @@ struct hostsItem
 {
         double currentX;
         double currentY;
-        int cellIdX;
-        int cellIdY;
-        int homeCellIdX;
-        int homeCellIdY;
+        int sqaureIdX;
+        int squareIdY;
+        int homeSquareIdX;
+        int homeSquareIdY;
         double speed;
 };
 
-struct cellsItem
+struct squareItem
 {
         Coord pos;
         int numberOfHosts;
@@ -62,24 +62,24 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         int numberOfColumns;
 
         double rewiringProb;
-        int numberOfGroups;
+        int numberOfCommunities;
 
         int targetChoice;
 
-        // length of the cells (rectangles)
+        // length of the squares
         double sideLengthX;
         double sideLengthY;
 
-        // interaction threshold to set Connectivity Matrix (adjacency matrix)
+        // interaction threshold
         double threshold;
         // number of mobile hosts
         int numHosts;
 
-        double hcmm;
+        double HCMM;
         int rewiringPeriod;
         int reshufflePeriod;
-        int initialrewiringPeriod;
-        int initialreshufflePeriod;
+        int initialRewiringPeriod;
+        int initialReshufflePeriod;
         double recordStartTime;
         std::map<int, std::pair<double, double> > nodesInMyBlock;
         static std::map<int, int> intervalDistribution;
@@ -88,21 +88,20 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         double drift;
         double expmean;
         bool reshufflePositionsOnly;
-        int myGroup;
+        int myCommunity;
         bool recordStatistics;
 
         static std::vector<hostsItem> hosts;
-        static std::vector<std::vector<cellsItem> > cells;
+        static std::vector<std::vector<squareItem> > squares;
         static std::vector<int> numberOfMembers;
-        // Interaction Matrix
         static std::vector<std::vector<double> > interaction;
-        static std::vector<std::vector<int> > groups;
+        static std::vector<std::vector<int> > communities;
 
         static simsignal_t blocksHistogram;
         static simsignal_t walkedMeters;
         static simsignal_t blockChanges;
 
-        std::vector<std::vector<double> > CA;
+        std::vector<std::vector<double> > squareAttractivity;
         std::vector<std::vector<double> > a;
         int nodeId;
 
@@ -121,7 +120,7 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         void setInitialPosition();
         /* @brief Refresh the host's positions and the group matrix only if the reshufflePositionsOnly is false */
         void setPosition(bool reshufflePositionsOnly);
-        /* @brief Define and allocate static members with original Musolesi code*/
+        /* @brief Define and allocate static members */
         void defineStaticMembers();
         /* @brief Redefined from LineSegmentsMobility */
         virtual void setTargetPosition();
@@ -130,13 +129,13 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         virtual void handleSelfMsg(cMessage* msg);
         virtual void handleMessage(cMessage* msg);
         void move();
+        /* @brief Get a random point inside a square */
         Coord getRandomPoint(Coord pos);
 
-        // global useful functions from original code
         void rewire();
-        void refreshWeightArrayIngroups();
-        bool areInTheSameGroup(int node1, int node2);
-        bool isInGroup(int node, std::vector<int>& group, int numberOfMembers);
+        void refresCommunities();
+        bool areInTheSameCommunity(int node1, int node2);
+        bool isInCommunity(int node, std::vector<int>& group, int numberOfMembers);
 };
 
 
