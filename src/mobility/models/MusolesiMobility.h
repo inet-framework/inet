@@ -102,7 +102,6 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         static simsignal_t blockChanges;
 
         std::vector<std::vector<double> > squareAttractivity;
-        std::vector<std::vector<double> > a;
         int nodeId;
 
         cMessage * moveMessage;
@@ -133,7 +132,7 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         Coord getRandomPoint(Coord pos);
 
         void rewire();
-        void refresCommunities();
+        void refreshCommunities();
         bool areInTheSameCommunity(int node1, int node2);
         bool isInCommunity(int node, std::vector<int>& group, int numberOfMembers);
 };

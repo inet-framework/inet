@@ -103,8 +103,8 @@ void MusolesiMobility::initialize(int stage)
 
         // Note origin is top-left
         // Calculates the square's side length
-        sideLengthX = constraintAreaMax.x / ((double)numberOfColumns);
-        sideLengthY = constraintAreaMax.y / ((double)numberOfRows);
+        sideLengthX = constraintAreaMax.x / (1.0*numberOfColumns);
+        sideLengthY = constraintAreaMax.y / (1.0*numberOfRows);
 
         defineStaticMembers(); // just allocate static memory
         if (recordStatistics)
@@ -132,14 +132,10 @@ void MusolesiMobility::initializePosition()
 void MusolesiMobility::defineStaticMembers()
 {
     // memory allocation
-    a.resize(numberOfRows);
     squareAttractivity.resize(numberOfRows);
 
     for (int i = 0; i < numberOfRows; i++)
-    {
-        a[i].resize(numberOfColumns);
         squareAttractivity[i].resize(numberOfColumns);
-    }
 
     if (nodeId == 0)
     {
@@ -199,10 +195,7 @@ void MusolesiMobility::setTargetPosition()
         for (int c = 0; c < numberOfRows; c++)
         {
             for (int r = 0; r < numberOfColumns; r++)
-            {
                 squareAttractivity[c][r] = 0.0;
-                a[c][r] = 0.0;
-            }
         }
         for (int n = 0; n < numHosts; n++)
             if (n != nodeId)
@@ -218,7 +211,7 @@ void MusolesiMobility::setTargetPosition()
                 {
                     if (squares[c][r].numberOfHosts != 0)
                     {
-                        squareAttractivity[c][r] = squareAttractivity[c][r] / (double) squares[c][r].numberOfHosts;
+                        squareAttractivity[c][r] = squareAttractivity[c][r] / (1.0 * squares[c][r].numberOfHosts);
                     }
                     else
                         squareAttractivity[c][r] = 0;
@@ -257,7 +250,7 @@ void MusolesiMobility::setTargetPosition()
                     if (squareAttractivity[c][r] != 0)
                         orderedSquareSet[squareAttractivity[c][r]] = std::pair<int, int>(c, r);
 
-            unsigned int rnd = exponential((double) expmean);
+            unsigned int rnd = exponential(1.0 * expmean);
             if (rnd >= orderedSquareSet.size())
             {
                 rnd = orderedSquareSet.size() - 1;
@@ -275,7 +268,7 @@ void MusolesiMobility::setTargetPosition()
 
             // Algorithm of the selection of the new square
             // Denominator for the normalization of the values
-            float denNorm = 0.00;
+            double denNorm = 0.00;
             // this is the added probability to choose an empty square
             // calculate normalized attractivity denominator, plus drift for squares
             // that have 0 attractivity.
@@ -306,8 +299,7 @@ void MusolesiMobility::setTargetPosition()
             {
                 for (int r = 0; r < numberOfColumns; r++)
                 {
-                    a[c][r] = (squareAttractivity[c][r] + drift) / denNorm;
-                    totalInterest += a[c][r];
+                    totalInterest += (squareAttractivity[c][r] + drift) / denNorm;
                     if (infiniteDice < totalInterest)
                     {
                         selectedGoalSquareX = c;
@@ -459,7 +451,7 @@ void MusolesiMobility::setInitialPosition()
     buf << "bgg=" << int(gridSizex);
     parentDispStr.parse(buf.str().c_str());
 
-    refresCommunities();
+    refreshCommunities();
 
     for (int i = 0; i < numberOfCommunities; i++)
     {
@@ -500,7 +492,7 @@ void MusolesiMobility::setPosition(bool reshufflePositionOnly)
     // i.e., w=0
     if(!reshufflePositionOnly)
     {
-        refresCommunities();
+        refreshCommunities();
         for (int i = 0; i < numberOfCommunities; i++)
         {
             EV << "The members of communtities " << i+1 << " are: ";
@@ -592,11 +584,9 @@ MusolesiMobility::~MusolesiMobility()
 {
     for(int i = 0; i < numberOfRows; i++)
     {
-        a[i].clear();
         squareAttractivity[i].clear();
         squares[i].clear();
     }
-    a.clear();
     squareAttractivity.clear();
     squares.clear();
     for (int i = 0; i < numHosts; i++)
@@ -652,7 +642,7 @@ void MusolesiMobility::rewire()
 // probability probRewiring. threshold is the value under which the relationship
 // is not considered important
 
-void MusolesiMobility::refresCommunities()
+void MusolesiMobility::refreshCommunities()
 {
     // initially distributes users uniformly into communities
     // Added a random distribution over the beginning of the cycle
