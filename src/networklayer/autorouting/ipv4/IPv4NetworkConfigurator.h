@@ -85,6 +85,9 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public AddressRes
                 int mtu;
                 double metric;
                 bool configure;              // false means the IP address of the interface will not be modified
+                bool addStaticRoute;         // add-static-route attribute
+                bool addDefaultRoute;        // add-default-route attribute
+                bool addSubnetRoute;         // add-subnet-route attribute
                 uint32 address;              // the bits
                 uint32 addressSpecifiedBits; // 1 means the bit is specified, 0 means the bit is unspecified
                 uint32 netmask;              // the bits

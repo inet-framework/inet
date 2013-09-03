@@ -26,6 +26,7 @@
 #include "IPv4NetworkConfigurator.h"
 #include "InterfaceEntry.h"
 #include "ModuleAccess.h"
+#include "XMLUtils.h"
 
 Define_Module(IPv4NetworkConfigurator);
 
@@ -48,6 +49,9 @@ IPv4NetworkConfigurator::InterfaceInfo::InterfaceInfo(Node *node, LinkInfo *link
     mtu = -1;
     metric = -1;
     configure = false;
+    addStaticRoute = true;
+    addDefaultRoute = true;
+    addSubnetRoute = true;
     address = 0;
     addressSpecifiedBits = 0;
     netmask = 0;
@@ -1009,6 +1013,9 @@ void IPv4NetworkConfigurator::readInterfaceConfiguration(IPv4Topology& topology)
         const char *mtuAttr = interfaceElement->getAttribute("mtu"); // integer
         const char *metricAttr = interfaceElement->getAttribute("metric"); // integer
         const char *groupsAttr = interfaceElement->getAttribute("groups"); // list of multicast addresses
+        bool addStaticRouteAttr = getAttributeBoolValue(interfaceElement, "add-static-route", true);
+        bool addDefaultRouteAttr = getAttributeBoolValue(interfaceElement, "add-default-route", true);
+        bool addSubnetRouteAttr = getAttributeBoolValue(interfaceElement, "add-subnet-route", true);
 
         if (amongAttr && *amongAttr)       // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
         {
@@ -1064,6 +1071,11 @@ void IPv4NetworkConfigurator::readInterfaceConfiguration(IPv4Topology& topology)
                                     interfaceInfo->netmaskSpecifiedBits = netmaskSpecifiedBits;
                                 }
                             }
+
+                            // route flags
+                            interfaceInfo->addStaticRoute = addStaticRouteAttr;
+                            interfaceInfo->addDefaultRoute = addDefaultRouteAttr;
+                            interfaceInfo->addSubnetRoute = addSubnetRouteAttr;
 
                             // mtu
                             if (isNotEmpty(mtuAttr))
@@ -1735,6 +1747,8 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
         // check if adding the default routes would be ok (this is an optimization)
         if (addDefaultRoutesParameter && sourceNode->interfaceInfos.size() == 1 && sourceNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo)
         {
+          if (sourceNode->interfaceInfos[0]->addDefaultRoute)
+          {
             InterfaceInfo *sourceInterfaceInfo = sourceNode->interfaceInfos[0];
             InterfaceEntry *sourceInterfaceEntry = sourceInterfaceInfo->interfaceEntry;
             InterfaceInfo *gatewayInterfaceInfo = sourceInterfaceInfo->linkInfo->gatewayInterfaceInfo;
@@ -1761,6 +1775,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
 
             // skip building and optimizing the whole routing table
             EV_DEBUG << "Adding default routes to " << sourceNode->getModule()->getFullPath() << ", node has only one (non-loopback) interface\n";
+          }
         }
         else
         {
@@ -1790,7 +1805,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
                 }
 
                 // determine source interface
-                if (link->destinationInterfaceInfo)
+                if (link->destinationInterfaceInfo && link->destinationInterfaceInfo->addStaticRoute)
                 {
                     InterfaceEntry *sourceInterfaceEntry = link->destinationInterfaceInfo->interfaceEntry;
 
@@ -1805,7 +1820,8 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
                         {
                             IPv4Route *route = new IPv4Route();
                             IPv4Address gatewayAddress = nextHopInterfaceInfo->getAddress();
-                            if (addSubnetRoutesParameter && destinationNode->interfaceInfos.size() == 1 && destinationNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo)
+                            if (addSubnetRoutesParameter && destinationNode->interfaceInfos.size() == 1 && destinationNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo
+                                    && destinationNode->interfaceInfos[0]->addSubnetRoute)
                             {
                                 route->setDestination(destinationAddress.doAnd(destinationNetmask));
                                 route->setNetmask(destinationNetmask);
