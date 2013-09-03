@@ -276,7 +276,7 @@ void MusolesiMobility::setTargetPosition()
             {
                 for (int r = 0; r < numberOfColumns; r++)
                 {
-                    denNorm = denNorm + squareAttractivity[c][r] + drift;
+                    denNorm += squareAttractivity[c][r] + drift;
                 }
             }
             // calculate normalized attractivity for each square,
@@ -292,25 +292,20 @@ void MusolesiMobility::setTargetPosition()
             // Note, each square with some node has some attractivity, in the
             // previous case the best square is chosen, in this case, even a square
             // with little attractivity may be chosen
-            float infiniteDice = (float) uniform(0.0, 1.0);
+
+            double infiniteDice = uniform(0.0, 1.0);
             double totalInterest = 0;
-            bool goOut = 0;
-            for (int c = 0; c < numberOfRows; c++)
+            for (int i = 0; i < numberOfRows && infiniteDice >= totalInterest; i++)
             {
-                for (int r = 0; r < numberOfColumns; r++)
+                for (int j = 0; j < numberOfColumns && infiniteDice >= totalInterest; j++)
                 {
-                    totalInterest += (squareAttractivity[c][r] + drift) / denNorm;
+                    totalInterest += (squareAttractivity[i][j] + drift) / denNorm;
                     if (infiniteDice < totalInterest)
                     {
-                        selectedGoalSquareX = c;
-                        selectedGoalSquareY = r;
-                        goOut = 1;
-                        break;
+                        selectedGoalSquareX = i;
+                        selectedGoalSquareY = j;
                     }
-
                 }
-                if (goOut)
-                    break;
             }
         }
     }
