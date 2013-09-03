@@ -19,7 +19,7 @@
 
 #define DETERMINISTIC 0
 #define PSEUDODETERMINISTIC 1
-#define PROPORTIONAL 2
+#define PROBABILISTIC 2
 
 Define_Module(MusolesiMobility);
 
@@ -83,14 +83,14 @@ void MusolesiMobility::initialize(int stage)
         if (numberOfCommunities > numHosts)
             error("You have set a number of hosts lower than the number of groups: %d < %d",numHosts,numberOfCommunities);
 
-        if (par("targetChoice").stdstringValue().compare("proportional") == 0)
-            targetChoice = PROPORTIONAL;
+        if (par("targetChoice").stdstringValue().compare("probabilistic") == 0)
+            targetChoice = PROBABILISTIC;
         else if (par("targetChoice").stdstringValue().compare("pseudodeterministic") == 0)
             targetChoice = PSEUDODETERMINISTIC;
         else if (par("targetChoice").stdstringValue().compare("deterministic") == 0)
             targetChoice = DETERMINISTIC;
         else
-            error("targetChoice parameter must be one in deterministic, pseudodeterministic, proportional");
+            error("targetChoice parameter must be one in deterministic, pseudodeterministic, probabilistic");
         if (targetChoice == DETERMINISTIC)
             EV << "targetChoice == DETERMINISTIC makes the node converge to fixed positions in the original algorithm. \
                 After a few time there is almost no mobility. It must be pared with Boldrini variation and rewiring (see parameter hcmm)";
@@ -260,7 +260,7 @@ void MusolesiMobility::setTargetPosition()
             selectedGoalSquareX = (oSeti->second.first);
             selectedGoalSquareY = (oSeti->second.second);
         }
-        else if (targetChoice == PROPORTIONAL)
+        else if (targetChoice == PROBABILISTIC)
         {
             // Probabilistic target selection. Each node selects a target in a
             // square. The choice is random with probability distribution
