@@ -127,5 +127,6 @@ void IPv4NodeConfigurator::configureNode()
     ASSERT(networkConfigurator);
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
         networkConfigurator->configureInterface(interfaceTable->getInterface(i));
-    networkConfigurator->configureRoutingTable(routingTable);
+    if (par("configureRoutingTable").boolValue())
+        networkConfigurator->configureRoutingTable(routingTable);
 }

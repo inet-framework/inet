@@ -41,4 +41,5 @@ simple IPv4NodeConfigurator
     parameters:
         @display("i=block/cogwheel_s");
         string networkConfiguratorModule = default("configurator"); // the absolute path to the IPv4NetworkConfigurator; use "" if there is no configurator
+        bool configureRoutingTable = default(true);     // add routing entries to routing table (uses the configurator module)
 }
