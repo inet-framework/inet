@@ -70,10 +70,10 @@ simple RIPRouting
         xml ripConfig = default(xml("<config><interface metric='1'/></config>"));
 
         int udpPort = (mode == "RIPng" ? 521 : 520);
-        double updateInterval @unit(s) = 30s;
-        volatile double triggeredUpdateDelay @unit(s) = uniform(1s,5s);
-        double routeExpiryTime @unit(s) = 180s;
-        double routePurgeTime @unit(s) = 120s;
+        double updateInterval @unit(s) = default(30s);
+        volatile double triggeredUpdateDelay @unit(s) = default(uniform(1s,5s));
+        double routeExpiryTime @unit(s) = default(180s);
+        double routePurgeTime @unit(s) = default(120s);
         double shutdownTime @unit(s) = default(1s);
         @signal[sentRequest](type=cPacket);
         @signal[sentUpdate](type=cPacket);
