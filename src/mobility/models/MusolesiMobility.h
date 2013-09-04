@@ -85,7 +85,6 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         std::map<int, std::pair<double, double> > nodesInMyBlock;
         static std::map<int, int> intervalDistribution;
         static std::map<int, int> interContactDistribution;
-        bool RWP;
         double drift;
         double expmean;
         bool reshufflePositionsOnly;

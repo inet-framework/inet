@@ -63,9 +63,6 @@ simple MusolesiMobility extends MobilityBase
       bool reshufflePositionsOnly = default(false); // do not update group
                             //composition, only the position of the group
 
-      bool RWP = default(false); // disable group movements, just a RWP. This
-                    //has been added just to perform statistical comparisons
-
       int numHosts;
       double HCMM = default(0); // do we use Boldrini/Conti/Passarella? what is
                                // the probability of going back home?

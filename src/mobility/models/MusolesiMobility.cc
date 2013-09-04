@@ -67,7 +67,6 @@ void MusolesiMobility::initialize(int stage)
         constraintAreaMax += constraintAreaMin;
 
         nodeId = getParentModule()->getIndex();
-        RWP = par("RWP");
 
         initialRewiringPeriod = rewiringPeriod = par("rewiringPeriod");
         initialReshufflePeriod = reshufflePeriod = par("reshufflePeriod");
@@ -168,15 +167,9 @@ void MusolesiMobility::setTargetPosition()
     int previousGoalSquareX = hosts[nodeId].sqaureIdX;
     int previousGoalSquareY = hosts[nodeId].squareIdY;
 
-    // It is a simple random Random Waypoint method
-    if (RWP)
-    {
-        selectedGoalSquareX = uniform(0, numberOfRows);
-        selectedGoalSquareY = uniform(0, numberOfColumns);
-    }
     // Boldrini variation, set a probability for each node to go back home
     // when a target has been reached.
-    else if ((HCMM > uniform(0, 1)) && (previousGoalSquareY != hosts[nodeId].homeSquareIdX)
+    if ((HCMM > uniform(0, 1)) && (previousGoalSquareY != hosts[nodeId].homeSquareIdX)
             && (previousGoalSquareX != hosts[nodeId].homeSquareIdY))
     {
         selectedGoalSquareX = hosts[nodeId].homeSquareIdX;
