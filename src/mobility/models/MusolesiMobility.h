@@ -60,23 +60,24 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         double maxHostSpeed;
         int numberOfRows;
         int numberOfColumns;
-
         double rewiringProb;
         int numberOfCommunities;
-
+        // The method of selection a new target position
         int targetChoice;
 
-        // length of the squares
+        // Length of the squares
         double sideLengthX;
         double sideLengthY;
 
-        // interaction threshold
+        // Interaction threshold
         double threshold;
-        // number of mobile hosts
+        // Number of mobile hosts
         int numHosts;
-
+        // Probability of "going back home"
         double HCMM;
+        // Time interval between two community reconfigurations
         int rewiringPeriod;
+        // Time interval between two home square changes
         int reshufflePeriod;
         int initialRewiringPeriod;
         int initialReshufflePeriod;
@@ -114,9 +115,9 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         virtual void initialize(int);
         virtual void finish();
         virtual void initializePosition();
-        /* @brief Configure the initial group matrix and positions */
+        /* @brief Configure the initial community matrix and positions */
         void setInitialPosition();
-        /* @brief Refresh the host's positions and the group matrix only if the reshufflePositionsOnly is false */
+        /* @brief Refresh the host's home and the community matrix only if the reshufflePositionsOnly is false */
         void setPosition(bool reshufflePositionsOnly);
         /* @brief Define and allocate static members */
         void defineStaticMembers();
