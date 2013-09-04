@@ -27,7 +27,6 @@ Define_Module(MusolesiMobility);
 
 std::vector<hostsItem> MusolesiMobility::hosts;
 std::vector<std::vector<squareItem> > MusolesiMobility::squares;
-std::vector<int> MusolesiMobility::numberOfMembers;
 std::vector<std::vector<double> > MusolesiMobility::interaction;
 std::vector<std::vector<int> > MusolesiMobility::communities;
 std::map<int, int> MusolesiMobility::intervalDistribution;
@@ -138,18 +137,15 @@ void MusolesiMobility::defineStaticMembers()
     {
         // Memory allocation for static data members
         hosts.resize(numHosts);
-        numberOfMembers.resize(numHosts);
         squares.resize(numberOfRows);
+        communities.resize(numberOfCommunities);
         for (int i = 0; i < numberOfRows; i++)
             squares[i].resize(numberOfColumns);
 
         interaction.resize(numHosts);
-        communities.resize(numHosts);
         for (int i = 0; i < numHosts; i++)
-        {
             interaction[i].resize(numHosts);
-            communities[i].resize(numHosts);
-        }
+
         // Setup the speeds and areas
         for (int i = 0; i < numHosts; i++)
             hosts[i].speed = uniform(minHostSpeed, maxHostSpeed);
@@ -335,7 +331,7 @@ void MusolesiMobility::handleMessage(cMessage * msg)
 
         for (int i = 0; i < numberOfCommunities; i++)
         {
-            for (int j = 0; j < numberOfMembers[i]; j++)
+            for (int j = 0; j < communities[i].size(); j++)
                 if (communities[i][j] - 1 == nodeId)
                     myCommunity = i + 1;
         }
@@ -423,7 +419,7 @@ void MusolesiMobility::setInitialPosition()
     for (int i = 0; i < numberOfCommunities; i++)
     {
         EV << "The members of communities "<< i + 1 << " are: ";
-        for (int j = 0; j < numberOfMembers[i]; j++)
+        for (int j = 0; j < communities[i].size(); j++)
             EV << communities[i][j]-1 << " ";
         EV << std::endl;
     }
@@ -431,7 +427,7 @@ void MusolesiMobility::setInitialPosition()
     {
         int squareIdX = uniform(0, numberOfRows);
         int squareIdY = uniform(0, numberOfColumns);
-        for (int j = 0; j < numberOfMembers[i]; j++)
+        for (int j = 0; j < communities[i].size(); j++)
         {
             int hostId = communities[i][j];
             // Initially, we set the first square as a home
@@ -466,7 +462,7 @@ void MusolesiMobility::setPosition(bool reshufflePositionOnly)
         for (int i = 0; i < numberOfCommunities; i++)
         {
             EV << "The members of communtities " << i+1 << " are: ";
-            for (int j = 0;j < numberOfMembers[i]; j++)
+            for (int j = 0;j < communities[i].size(); j++)
                 EV << communities[i][j]-1 << " ";
             EV << std::endl;
         }
@@ -477,7 +473,7 @@ void MusolesiMobility::setPosition(bool reshufflePositionOnly)
     {
         int squareIdX = uniform(0, numberOfRows);
         int squareIdY = uniform(0, numberOfColumns);
-        for (int j = 0; j < numberOfMembers[i]; j++)
+        for (int j = 0; j < communities[i].size(); j++)
         {
             int hostId = communities[i][j];
             hosts[hostId - 1].homeSquareIdX = squareIdX;
@@ -560,13 +556,11 @@ MusolesiMobility::~MusolesiMobility()
     squareAttractivity.clear();
     squares.clear();
     for (int i = 0; i < numHosts; i++)
-    {
         interaction[i].clear();
-        communities[i].clear();
-    }
+    for (int i = 0; i < numberOfCommunities; i++)
+        communities.clear();
     interaction.clear();
     communities.clear();
-    numberOfMembers.clear();
     hosts.clear();
     intervalDistribution.clear();
     interContactDistribution.clear();
@@ -618,11 +612,6 @@ void MusolesiMobility::refreshCommunities()
     // Added a random distribution over the beginning of the cycle
     // or else re-wiring generates always the same communities
 
-    for (int i = 0; i < numberOfCommunities; i++)
-    {
-        numberOfMembers[i] = 0;
-    }
-
     // this revised way introduces some more randomization in the community selection
     // not really random, one between the previous of node X and the next of
     // node X will always be in the community of node X.
@@ -630,21 +619,17 @@ void MusolesiMobility::refreshCommunities()
     int rnd = uniform(0, numHosts);
     int communitySize = numHosts / numberOfCommunities;
     int communityReminder = numHosts % numberOfCommunities;
+
+    for(int i = 0; i < numberOfCommunities; i++)
+        communities[i].clear();
+
     for (int i = 0; i < numberOfCommunities; i++)
-    {
         for (int j = i * communitySize; j < i * communitySize + communitySize; j++)
-        {
-            communities[i][numberOfMembers[i]] = (j + rnd) % numHosts + 1;
-            numberOfMembers[i] += 1;
-        }
-    }
-    if (communityReminder) {
+            communities[i].push_back((j + rnd) % numHosts + 1);
+
+    if (communityReminder)
         for (int i = 0; i < communityReminder; i++)
-        {
-            communities[i][numberOfMembers[i]] = (numberOfCommunities * communitySize + i + rnd) % numHosts + 1;
-            numberOfMembers[i] += 1;
-        }
-    }
+            communities[i].push_back((numberOfCommunities * communitySize + i + rnd) % numHosts + 1);
 
     for (int i = 0; i < numHosts; i++)
         for (int j = 0; j < numHosts; j++)
@@ -701,16 +686,16 @@ void MusolesiMobility::refreshCommunities()
 bool MusolesiMobility::areInTheSameCommunity(int node1, int node2)
 {
     for (int k = 0; k < numberOfCommunities; k++)
-        if (isInCommunity(node1, communities[k], numberOfMembers[k]) && isInCommunity(node2, communities[k], numberOfMembers[k]))
+        if (isInCommunity(node1, communities[k]) && isInCommunity(node2, communities[k]))
             return true;
     return false;
 }
 
 // Given a community of nodes and a node, stored in the array community of size equal
 // to numberOfMembers, returns true if the node is in the community or false otherwise
-bool MusolesiMobility::isInCommunity(int node, std::vector<int>& community, int numberOfMembers)
+bool MusolesiMobility::isInCommunity(int node, std::vector<int>& community)
 {
-    for (int k = 0; k < numberOfMembers; k++)
+    for (unsigned int k = 0; k < community.size(); k++)
         if (community[k] == node)
             return true;
     return false;

@@ -93,7 +93,6 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
 
         static std::vector<hostsItem> hosts;
         static std::vector<std::vector<squareItem> > squares;
-        static std::vector<int> numberOfMembers;
         static std::vector<std::vector<double> > interaction;
         static std::vector<std::vector<int> > communities;
 
@@ -134,7 +133,7 @@ class INET_API MusolesiMobility : public LineSegmentsMobilityBase
         void rewire();
         void refreshCommunities();
         bool areInTheSameCommunity(int node1, int node2);
-        bool isInCommunity(int node, std::vector<int>& group, int numberOfMembers);
+        bool isInCommunity(int node, std::vector<int>& group);
 };
 
 
