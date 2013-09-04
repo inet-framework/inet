@@ -41,7 +41,6 @@ void MusolesiMobility::initialize(int stage)
 {
     EV<< "initializing MusolesiMobility stage " << stage << endl;
     stationary = false; // this stuff is needed by LineSegmentsMobilityBase
-
     LineSegmentsMobilityBase::initialize(stage);
     if (stage == 0)
     {
@@ -93,7 +92,7 @@ void MusolesiMobility::initialize(int stage)
             error("targetChoice parameter must be one in deterministic, pseudodeterministic, probabilistic");
         if (targetChoice == DETERMINISTIC)
             EV << "targetChoice == DETERMINISTIC makes the node converge to fixed positions in the original algorithm. \
-                After a few time there is almost no mobility. It must be pared with Boldrini variation and rewiring (see parameter hcmm)";
+                After a few time there is almost no mobility. It must be fixed with Boldrini variation and rewiring (see parameter HCMM)";
         if (HCMM > 0)
         {
             EV << "Using Boldrini/Conti/Passarella fix to original mobility" << std::endl;
@@ -101,18 +100,17 @@ void MusolesiMobility::initialize(int stage)
                 error("HCMM parameter is a probability, must be below 1");
         }
 
-        // Note origin is top-left
         // Calculates the square's side length
         sideLengthX = constraintAreaMax.x / (1.0*numberOfColumns);
         sideLengthY = constraintAreaMax.y / (1.0*numberOfRows);
 
-        defineStaticMembers(); // just allocate static memory
+        defineStaticMembers();
         if (recordStatistics)
             for (int i = 0; i< numHosts; i++)
                 nodesInMyBlock[i].first = nodesInMyBlock[i].second = 0;
 
         moveMessage = new cMessage("MusolesiHeartbeat");
-        scheduleAt(simTime() + 1, moveMessage);// do statistics, reshuffle, rewire...
+        scheduleAt(simTime() + 1, moveMessage); // do statistics, reshuffle, rewire...
         blocksHistogram = registerSignal("blocksHistogram");
         walkedMeters = registerSignal("walkedMeters");
         blockChanges = registerSignal("blockChanges");
@@ -121,7 +119,7 @@ void MusolesiMobility::initialize(int stage)
 
 void MusolesiMobility::initializePosition()
 {
-    // maps are static so just one node is required to calculate them
+    // Maps are static so just one node is required to calculate them
     if (nodeId == 0)
         setInitialPosition();
 
@@ -131,7 +129,6 @@ void MusolesiMobility::initializePosition()
 
 void MusolesiMobility::defineStaticMembers()
 {
-    // memory allocation
     squareAttractivity.resize(numberOfRows);
 
     for (int i = 0; i < numberOfRows; i++)
@@ -139,7 +136,7 @@ void MusolesiMobility::defineStaticMembers()
 
     if (nodeId == 0)
     {
-        // memory allocation for static data members
+        // Memory allocation for static data members
         hosts.resize(numHosts);
         numberOfMembers.resize(numHosts);
         squares.resize(numberOfRows);
@@ -153,7 +150,7 @@ void MusolesiMobility::defineStaticMembers()
             interaction[i].resize(numHosts);
             communities[i].resize(numHosts);
         }
-        // setup the speeds and areas
+        // Setup the speeds and areas
         for (int i = 0; i < numHosts; i++)
             hosts[i].speed = uniform(minHostSpeed, maxHostSpeed);
         for (int i = 0; i < numberOfRows; i++)
@@ -175,23 +172,23 @@ void MusolesiMobility::setTargetPosition()
     int previousGoalSquareX = hosts[nodeId].sqaureIdX;
     int previousGoalSquareY = hosts[nodeId].squareIdY;
 
+    // It is a simple random Random Waypoint method
     if (RWP)
     {
         selectedGoalSquareX = uniform(0, numberOfRows);
         selectedGoalSquareY = uniform(0, numberOfColumns);
     }
+    // Boldrini variation, set a probability for each node to go back home
+    // when a target has been reached.
     else if ((HCMM > uniform(0, 1)) && (previousGoalSquareY != hosts[nodeId].homeSquareIdX)
             && (previousGoalSquareX != hosts[nodeId].homeSquareIdY))
     {
-        // Boldrini variation, set a probability for each node to go back home
-        // when a target has been reached. In Boldrini it could be anytime when
-        // the node is out of home sampled at the rate
         selectedGoalSquareX = hosts[nodeId].homeSquareIdX;
         selectedGoalSquareY = hosts[nodeId].homeSquareIdY;
     }
     else
     {
-        // update attraction matrix
+        // Update attraction matrix
         for (int c = 0; c < numberOfRows; c++)
         {
             for (int r = 0; r < numberOfColumns; r++)
@@ -204,7 +201,7 @@ void MusolesiMobility::setTargetPosition()
         // The deterministic targetChoice only works with high HCMM
         if (targetChoice == DETERMINISTIC)
         {
-            double CAMax = 0;
+            double mostAttractive = 0;
             for (int c = 0; c < numberOfRows; c++)
             {
                 for (int r = 0; r < numberOfColumns; r++)
@@ -222,24 +219,20 @@ void MusolesiMobility::setTargetPosition()
             {
                 for (int r = 0; r < numberOfColumns; r++)
                 {
-                    if (squareAttractivity[c][r] > CAMax)
+                    if (squareAttractivity[c][r] > mostAttractive)
                     {
                         selectedGoalSquareX = c;
                         selectedGoalSquareY = r;
 
-                        CAMax = squareAttractivity[c][r];
+                        mostAttractive = squareAttractivity[c][r];
 
                     }
                 }
             }
         }
-
-        // end deterministic;
-        // Pseudodeterministic choice. Order the squares with attraction != 0
-        // for their attraction, then extract a random value with exponential
-        // distribution (expmean defined before, recall average = 1/expmean)
-        // that has a strong bias on the most attractive ones, but adds some
-        // turbulence to the choice, (not that much as the uniform)
+        // The squares are sorted by their social attractivity
+        // Then select among the highest with some random
+        // distribution.
         else if (targetChoice == PSEUDODETERMINISTIC)
         {
             std::map<double, std::pair<int, int> > orderedSquareSet;
@@ -252,26 +245,19 @@ void MusolesiMobility::setTargetPosition()
 
             unsigned int rnd = exponential(1.0 * expmean);
             if (rnd >= orderedSquareSet.size())
-            {
                 rnd = orderedSquareSet.size() - 1;
-            }
+
             oSeti = orderedSquareSet.begin();
             std::advance(oSeti,rnd);
             selectedGoalSquareX = (oSeti->second.first);
             selectedGoalSquareY = (oSeti->second.second);
         }
+        // This probabilistic method performs a Roulette Wheel selection
         else if (targetChoice == PROBABILISTIC)
         {
-            // Probabilistic target selection. Each node selects a target in a
-            // square. The choice is random with probability distribution
-            // proportional to the attractivity of the squares.
-
-            // Algorithm of the selection of the new square
-            // Denominator for the normalization of the values
+            // Calculate the normalization denominator for the selection
             double denNorm = 0.00;
-            // this is the added probability to choose an empty square
-            // calculate normalized attractivity denominator, plus drift for squares
-            // that have 0 attractivity.
+
             for (int c = 0; c < numberOfRows; c++)
             {
                 for (int r = 0; r < numberOfColumns; r++)
@@ -279,20 +265,7 @@ void MusolesiMobility::setTargetPosition()
                     denNorm += squareAttractivity[c][r] + drift;
                 }
             }
-            // calculate normalized attractivity for each square,
-            // assign a value of a distribution from 0 to 1 proportional to the
-            // normalized attractivity to each square, get a random square with
-            // probability proportional to the normalized attractivity. This
-            // has been rewritten compared to original code. It was made of
-            // too much for(), now it is quicker, just one cycle.
-            // You can imagine squares as an array, extract a random value
-            // (total squareAttractivity is normalized by deNorm to 1), get the element of
-            // the array for which cumulative probability is higher than random
-            //
-            // Note, each square with some node has some attractivity, in the
-            // previous case the best square is chosen, in this case, even a square
-            // with little attractivity may be chosen
-
+            // This is a simple Roulette Wheel selection algorithm
             double infiniteDice = uniform(0.0, 1.0);
             double totalInterest = 0;
             for (int i = 0; i < numberOfRows && infiniteDice >= totalInterest; i++)
@@ -310,14 +283,14 @@ void MusolesiMobility::setTargetPosition()
         }
     }
 
-    // Re-definition of the number of hosts in each square
+    // Redefinition of the number of hosts in each square
     squares[previousGoalSquareX][previousGoalSquareY].numberOfHosts -= 1;
     squares[selectedGoalSquareX][selectedGoalSquareY].numberOfHosts += 1;
 
     if (recordStatistics && (previousGoalSquareX != selectedGoalSquareX || previousGoalSquareY != selectedGoalSquareY))
         emit(blockChanges, 1);
 
-    // refresh of the information
+    // Refresh of the information
     hosts[nodeId].sqaureIdX = selectedGoalSquareX;
     hosts[nodeId].squareIdY = selectedGoalSquareY;
 
@@ -432,7 +405,6 @@ void MusolesiMobility::handleSelfMsg(cMessage * msg)
     scheduleAt(simTime() + 1, msg);
 }
 
-// @Brief Set the initial position of the nodes, or shuffle the communities (if shuffle==1)
 void MusolesiMobility::setInitialPosition()
 {
     // NOTE: the playground for omnet has zero coordinate on top left.
@@ -462,17 +434,20 @@ void MusolesiMobility::setInitialPosition()
         for (int j = 0; j < numberOfMembers[i]; j++)
         {
             int hostId = communities[i][j];
+            // Initially, we set the first square as a home
             hosts[hostId - 1].homeSquareIdX = squareIdX;
             hosts[hostId - 1].homeSquareIdY = squareIdY;
-            // increment the number of the hosts in that square
+
+            // Increment the number of the hosts in that square
             squares[squareIdX][squareIdY].numberOfHosts += 1;
             hosts[hostId - 1].sqaureIdX = squareIdX;
             hosts[hostId - 1].squareIdY = squareIdY;
+
             EV<< "Setting home of " << hostId << " in position " << hosts[hostId-1].homeSquareIdX << " " << hosts[hostId-1].homeSquareIdY << std::endl;
-            EV<< "Setting pos  of " << hostId << " in position " << hosts[hostId-1].sqaureIdX << " " << hosts[hostId-1].squareIdY << std::endl;
+            EV<< "Setting position of " << hostId << " in position " << hosts[hostId-1].sqaureIdX << " " << hosts[hostId-1].squareIdY << std::endl;
         }
     }
-    // definition of the initial position of the hosts
+    // Definition of the initial position of the hosts
     for (int k = 0; k < numHosts; k++)
     {
         Coord randomPoint = getRandomPoint(squares[hosts[k].sqaureIdX][hosts[k].squareIdY].pos);
@@ -483,8 +458,8 @@ void MusolesiMobility::setInitialPosition()
 
 void MusolesiMobility::setPosition(bool reshufflePositionOnly)
 {
-    // communities based on the initial number of caves in the Caveman model
-    // i.e., w=0
+    // If reshufflePositionOnly is false then refreshCommunities()
+    // modify the social network, so the communities may be change.
     if(!reshufflePositionOnly)
     {
         refreshCommunities();
@@ -496,6 +471,8 @@ void MusolesiMobility::setPosition(bool reshufflePositionOnly)
             EV << std::endl;
         }
     }
+    // This procedure assign a new home to each host
+    // with uniform distribution
     for (int i = 0; i < numberOfCommunities; i++)
     {
         int squareIdX = uniform(0, numberOfRows);
@@ -545,11 +522,9 @@ void MusolesiMobility::finish()
         if (recordStatistics)
         {
             EV << "#CONTACTTIME" << std::endl;
-            // print statistics
+            // Print statistics
             for (std::map<int, int>::iterator ii = intervalDistribution.begin(); ii != intervalDistribution.end(); ii++)
-            {
                 totalFreq += ii->second;
-            }
             for (std::map<int, int>::iterator ii = intervalDistribution.begin(); ii != intervalDistribution.end(); ii++)
             {
                 partialFreq += ii->second;
