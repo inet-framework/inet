@@ -1,0 +1,119 @@
+Musolesi Mobility for INET Framework
+====================================
+
+The Musolesi Mobility is a mobility model for Wireless Ad-Hoc Networks. It has been detailed by M. Musolesi and C. Mascolo in [1].
+It is a realistic model derived from social studies. 
+
+
+Using Social Networks as Input of the Mobility Model
+====================================================
+
+This model allows collections of hosts to be grouped together in a way that is based on social relationships among the hosts.
+This grouping is then mapped to a simulation space, with movements influenced by the strength of social interactions that may also 
+change in time. Initially, we need a social network graph which models a real scenario.
+
+The main idea for creating a social network is the following:
+
+	The Caveman model:
+	------------------
+
+	- Divide the n hosts in c communities, then fill an n-by-n 
+	  matrix C with 1s where hosts are in the same community and 0s 
+	  otherwise
+	- Modify matrix C with certain probability, that is, 
+     some links are broken and some new ones are created.
+	  Thus there is social connection between the communities.
+	- Each edge gets a value in range [0,1] which indicates 
+	  the extent of social interaction between the two hosts.
+
+Taking an example, the hosts can be the members of a family, and a community is the family in itself.
+
+
+Establishment of the Mobility Model: Placement of the Communities in the Simulation Space
+=========================================================================================
+
+To model a real scenario, divide the simulation space in squares, x rows and y columns then assign a square to each community 
+and place its hosts inside the square.
+
+This square models a geographical location of the community, e. g. a workplace of a bank office. Then, in order to keep up the mobility, 
+we need new target positions where the hosts are desired to go. As a simulation goes on, each hosts calculates its own target position
+according to the parameters of the social network. When these target positions are calculated, each host performs a movement to reach
+that new location. Then we repeat this procedure periodically over the lifetime of the simulation.
+
+The details of selection the subsequent target positions will be described later.
+
+
+Social Network Reconfigurations
+===============================
+
+Like in everyone’s life, the daily movements are governed by different patterns of mobility which depend on the people we need to
+interact with. When we at home, our social interaction are stronger towards our family members. Thus, the social network of the 
+mobility model can be changed many times as a simulation goes on. These changes mean that the mobility model periodically 
+refresh the interactions between the hosts, so their preference of selection new targets may also change.
+
+The interval of time between changes is an input of the model.
+
+In this implementation, there is an important modification presented in [2], where the model has been modified introducing a parameter
+that gives the probability of "going back home" (HCMM: Home-cell Community-based Mobility Model) independently from the other's positions.
+This home is the first square where the host was initially assigned to, however, this home may also change in time.
+
+
+Selection of the subsequent target positions:
+=============================================
+
+When a target position is reached, the new target is chosen according to the following mechanisms.
+
+The deterministic choice:
+-------------------------
+
+A certain number of hosts is in each square S is at time t. Each square exerts a certain social attractivity for a certain host. 
+The social attractivity of a square is a measure of its importance in terms of the social relationships for the host taken into consideration. 
+The social importance is calculated by evaluating the strength of the relationships with the hosts that are moving towards that particular square.
+
+Formally, let C(S) be the set of hosts associated to square S, we define social attractivity of that square towards the host i, namely 
+SA(S,i), as follows
+
+SA(S,i) = Sum( m_{i,j} ) / w, for all j in C(S), where m_{i,j} is the social interaction between the hosts i,j, and w = |C(S)|,
+if w = 0, then SA(S,i) is set to 0.
+
+The new target is randomly chosen inside the square characterized by the highest social attractivity.
+
+The pseudodeterministic choice:
+--------------------------------
+
+In this method, the squares are sorted by their social attractivity, which is calculated similarly as in the previous case, however it's not normalized by |C(S)|.
+Then extract a random value with exponential distribution that has strong bias on the most attractive ones, but it adds some random effect to the choice.
+
+Since HCMM is still not zero they also often come back home, which creates an effect of oscillation between squares.
+
+The probabilistic choice:
+-------------------------
+
+The probabilistic method performs a Roulette Wheel selection. The main steps of the algorithm:
+	
+	(1) Calculate sum of all social attractivity - sum S
+	(2) Generate a random number from interval [0,1] - r, or from [0,S] if it is not normalized to 1.
+	(3) Go through the squares and sum attractivities from 0 - sum s. When the sum s is greater then r, stop and
+	    select the current square.
+
+In this case, a little drift added to each square attractivity, this makes possible to select a square with zero attractivity. 
+
+
+References
+==========
+
+[1] A Community Based Mobility Model for Ad Hoc Network Research
+    Mirco Musolesi and Cecilia Mascolo.
+    In Proceedings of the 2nd ACM/SIGMOBILE International Workshop on Multi-hop Ad Hoc Networks: from theory to reality (REALMAN'06). 
+    Colocated with MobiHoc'06. Florence, Italy. May 2006. ACM Press.
+
+[2] Users mobility models for opportunistic networks: the role of physical locations
+    Chiara Boldrini, Marco Conti, and Andrea Passarella. 
+    IEEE Wireless Rural and Emergency Communications - WRECOM07, page 1--6. (2007)
+
+[3] http://pervacy.eu
+
+
+
+
+
