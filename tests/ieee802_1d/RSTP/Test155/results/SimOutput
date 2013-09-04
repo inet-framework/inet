@@ -1,0 +1,27 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2013 Andras Varga, OpenSim Ltd.
+Version: 4.3, build: 130403-bf01aae, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+Setting up Cmdenv...
+Loading NED files from ../../: 138
+Loading NED files from ../../../src/: 271
+
+Preparing for running configuration Test155, run #0...
+Scenario: $repetition=0
+Assigned runID=Test155-0-20130903-14:18:04-39936
+Setting up network `CompleteNetwork'...
+Initializing...
+
+Running simulation...
+** Event #1   T=0   Elapsed: 0.000s (0m 00s)  0% completed
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 116   present: 116   in FES: 29
+** Event #28807   T=200.000001   Elapsed: 0.492s (0m 00s)  100% completed
+     Speed:     ev/sec=58548.8   simsec/sec=406.504   ev/simsec=144.03
+     Messages:  created: 9786   present: 115   in FES: 28
+
+<!> Simulation time limit reached -- simulation stopped at event #28807, t=200.000001.
+
+
+Calling finish() at end of Run #0...
+
+End.
