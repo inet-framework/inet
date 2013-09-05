@@ -58,7 +58,7 @@ void HttpController::initialize(int stage)
             error("Server popularity distribution random object could not be created");
         EV_INFO << "Using " << rdServerSelection->typeStr() << " for server popularity distribution." << endl;
 
-        pspecial = 0.0; // No special events by defaault
+        pspecial = 0.0; // No special events by default
         totalLookups = 0;
     }
     else if (stage==1)
