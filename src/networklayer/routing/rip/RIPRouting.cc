@@ -335,7 +335,9 @@ void RIPRouting::receiveChangeNotification(int category, const cObject *details)
             if (route->getSource() != this)
             {
                 if (isLoopbackInterfaceRoute(route))
+                {
                     /*ignore*/;
+                }
                 else if (isLocalInterfaceRoute(route))
                 {
                     InterfaceEntry *ie = check_and_cast<InterfaceEntry*>(route->getSource());
@@ -380,6 +382,9 @@ void RIPRouting::receiveChangeNotification(int category, const cObject *details)
                     }
                 }
             }
+            break;
+        default:
+            throw cRuntimeError("Unaccepted notification category: %d", category);
     }
 }
 
