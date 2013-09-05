@@ -70,6 +70,7 @@ package inet.world.scenario;
 //    - <connect>: src-module, src-gate, dest-module, dest-gate, channel-type
 //        - <param>: name, value
 //    - <disconnect>: src-module, src-gate
+//          FIXME - TRANSLATE: a src-gate lehet inout gate is, akkor mindket iranyra disconnect
 //
 simple ScenarioManager
 {
