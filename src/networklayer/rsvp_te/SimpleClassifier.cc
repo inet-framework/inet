@@ -23,17 +23,20 @@
 Define_Module(SimpleClassifier);
 
 
-int SimpleClassifier::numInitStages() const  {return 5;}
+int SimpleClassifier::numInitStages() const { return STAGE_DO_INIT_ROUTING_PROTOCOLS + 1; }
 
 void SimpleClassifier::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    // we have to wait until routerId gets assigned in stage 3
-    if (stage == 4)
+    if (stage == STAGE_DO_LOCAL)
     {
         maxLabel = 0;
-
+        WATCH_VECTOR(bindings);
+    }
+    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
+    {
+        ASSERT(stage > STAGE_DO_ASSIGN_ROUTERID); // we have to wait until routerId gets assigned in stage 3
         IPv4RoutingTableAccess routingTableAccess;
         IIPv4RoutingTable *rt = routingTableAccess.get();
         routerId = rt->getRouterId();
@@ -45,8 +48,6 @@ void SimpleClassifier::initialize(int stage)
         rsvp = rsvpAccess.get();
 
         readTableFromXML(par("config").xmlValue());
-
-        WATCH_VECTOR(bindings);
     }
 }
 

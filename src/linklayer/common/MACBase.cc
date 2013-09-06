@@ -17,7 +17,10 @@
 // Author: Andras Varga (andras@omnetpp.org)
 //
 
+#include <stdlib.h>
+
 #include "MACBase.h"
+
 #include "NodeStatus.h"
 #include "NotifierConsts.h"
 #include "InterfaceEntry.h"
@@ -39,26 +42,24 @@ MACBase::~MACBase()
 {
 }
 
-int MACBase::numInitStages() const { return 2; }
+int MACBase::numInitStages() const { return STAGE_NOTIFICATIONBOARD_AVAILABLE + 1; }
 
 void MACBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         nb = NotificationBoardAccess().getIfExists();
     }
-    else if (stage == 1)
+    if (stage == STAGE_NOTIFICATIONBOARD_AVAILABLE)
     {
         if (nb)
             nb->subscribe(this, NF_INTERFACE_DELETED);
     }
-
-    if (stage == numInitStages()-1)
+    if (stage == numInitStages() - 1)
     {
-        if (stage < 1)
-            throw cRuntimeError("Required minimum value of numInitStages is 2");
+        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
         updateOperationalFlag(isNodeUp());  // needs to be done when interface is already registered (=last stage)
     }
 }

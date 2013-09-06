@@ -24,26 +24,27 @@ using namespace DiffservUtil;
 Define_Module(TokenBucketMeter);
 
 
-int TokenBucketMeter::numInitStages() const { return 3; }
+int TokenBucketMeter::numInitStages() const { return STAGE_INTERFACEENTRY_REGISTERED + 1; }
 
 void TokenBucketMeter::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         numRcvd = 0;
         numRed = 0;
         WATCH(numRcvd);
         WATCH(numRed);
-    }
-    else if (stage == 2)
-    {
-        const char *cirStr = par("cir");
-        CIR = parseInformationRate(cirStr, "cir", *this, 0);
+
         CBS = 8 * (int)par("cbs");
         colorAwareMode = par("colorAwareMode");
         Tc = CBS;
+    }
+    if (stage == STAGE_INTERFACEENTRY_REGISTERED)
+    {
+        const char *cirStr = par("cir");
+        CIR = parseInformationRate(cirStr, "cir", *this, 0);
         lastUpdateTime = simTime();
     }
 }

@@ -24,13 +24,13 @@ using namespace DiffservUtil;
 Define_Module(SingleRateThreeColorMeter);
 
 
-int SingleRateThreeColorMeter::numInitStages() const { return 3; }
+int SingleRateThreeColorMeter::numInitStages() const { return STAGE_INTERFACEENTRY_REGISTERED + 1; }
 
 void SingleRateThreeColorMeter::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         numRcvd = 0;
         numYellow = 0;
@@ -38,16 +38,17 @@ void SingleRateThreeColorMeter::initialize(int stage)
         WATCH(numRcvd);
         WATCH(numYellow);
         WATCH(numRed);
-    }
-    else if (stage == 2)
-    {
-        const char *cirStr = par("cir");
-        CIR = parseInformationRate(cirStr, "cir", *this, 0);
+
         CBS = 8 * (int)par("cbs");
         EBS = 8 * (int)par("ebs");
         colorAwareMode = par("colorAwareMode");
         Tc = CBS;
         Te = EBS;
+    }
+    if (stage == STAGE_INTERFACEENTRY_REGISTERED)
+    {
+        const char *cirStr = par("cir");
+        CIR = parseInformationRate(cirStr, "cir", *this, 0);
         lastUpdateTime = simTime();
     }
 }

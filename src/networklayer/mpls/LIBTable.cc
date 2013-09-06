@@ -21,17 +21,19 @@
 Define_Module(LIBTable);
 
 
-int LIBTable::numInitStages() const  {return 5;}
+int LIBTable::numInitStages() const { return STAGE_ROUTERID_AVAILABLE + 1; }
 
 void LIBTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage==0)
+    if (stage == STAGE_DO_LOCAL)
+    {
         maxLabel = 0;
 
-    // we have to wait until routerId gets assigned in stage 3
-    if (stage==4)
+        WATCH_VECTOR(lib);
+    }
+    if (stage == STAGE_ROUTERID_AVAILABLE)
     {
         IPv4RoutingTableAccess routingTableAccess;
         IIPv4RoutingTable *rt = routingTableAccess.get();
@@ -40,8 +42,6 @@ void LIBTable::initialize(int stage)
         // read configuration
 
         readTableFromXML(par("config").xmlValue());
-
-        WATCH_VECTOR(lib);
     }
 }
 

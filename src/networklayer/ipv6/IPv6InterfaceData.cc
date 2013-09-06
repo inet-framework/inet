@@ -49,7 +49,6 @@ std::string IPv6InterfaceData::HostMulticastData::info()
 
 std::string IPv6InterfaceData::HostMulticastData::detailedInfo()
 {
-
     std::stringstream out;
     out << "Joined Groups:";
     for (int i = 0; i < (int)joinedMulticastGroups.size(); ++i)

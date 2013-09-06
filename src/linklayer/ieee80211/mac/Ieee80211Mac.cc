@@ -103,15 +103,21 @@ Ieee80211Mac::~Ieee80211Mac()
  * Initialization functions.
  */
 
-int Ieee80211Mac::numInitStages() const {return 2;}
+int Ieee80211Mac::numInitStages() const
+{
+    static int stages = std::max(STAGE_DO_SUBSCRIBE_TO_RADIOSTATE_NOTIFICATIONS, STAGE_DO_REGISTER_INTERFACE) + 1;
+    return std::max(stages, WirelessMacBase::numInitStages());
+}
 
 void Ieee80211Mac::initialize(int stage)
 {
+    EV_DEBUG << "Initializing stage " << stage << endl;
+
     WirelessMacBase::initialize(stage);
 
-    if (stage == 0)
+    //TODO: revise it: it's too big; should revise stages, too!!!
+    if (stage == STAGE_DO_LOCAL)
     {
-        EV << "Initializing stage 0\n";
         int numQueues = 1;
         if (par("EDCA"))
         {
@@ -271,9 +277,6 @@ void Ieee80211Mac::initialize(int stage)
                 address.setAddress(addressString);
         }
 
-        // subscribe for the information of the carrier sense
-        nb->subscribe(this, NF_RADIOSTATE_CHANGED);
-
         // initialize self messages
         endSIFS = new cMessage("SIFS");
         endDIFS = new cMessage("DIFS");
@@ -286,11 +289,21 @@ void Ieee80211Mac::initialize(int stage)
         endTimeout = new cMessage("Timeout");
         endReserve = new cMessage("Reserve");
         mediumStateChange = new cMessage("MediumStateChange");
-
+    }
+    if (stage == STAGE_DO_SUBSCRIBE_TO_RADIOSTATE_NOTIFICATIONS)
+    {
+        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
+        // subscribe for the information of the carrier sense
+        nb->subscribe(this, NF_RADIOSTATE_CHANGED);
+    }
+    if (stage == STAGE_DO_REGISTER_INTERFACE)
+    {
         // interface
         if (isInterfaceRegistered().isUnspecified()) //TODO do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras
             registerInterface();
-
+    }
+    if (stage == STAGE_DO_LOCAL)
+    {
         // obtain pointer to external queue
         initializeQueueModule();
 

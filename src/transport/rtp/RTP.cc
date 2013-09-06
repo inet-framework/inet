@@ -41,13 +41,13 @@ simsignal_t RTP::rcvdPkSignal = SIMSIGNAL_NULL;
 // methods inherited from cSimpleModule
 //
 
-int RTP::numInitStages() const { return 2; }
+int RTP::numInitStages() const { return STAGE_NODESTATUS_AVAILABLE + 1; }
 
 void RTP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         _leaveSession = false;
         appInGate = findGate("appIn");
@@ -58,7 +58,7 @@ void RTP::initialize(int stage)
 
         rcvdPkSignal = registerSignal("rcvdPk");
     }
-    else if (stage == 1)
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

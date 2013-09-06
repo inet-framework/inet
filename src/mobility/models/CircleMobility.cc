@@ -37,14 +37,15 @@ CircleMobility::CircleMobility()
 
 int CircleMobility::numInitStages() const
 {
-    return std::max(STAGE_LOCAL_BEGIN + 1, MovingMobilityBase::numInitStages());
+    return std::max(STAGE_DO_LOCAL + 1, MovingMobilityBase::numInitStages());
 }
 
 void CircleMobility::initialize(int stage)
 {
     MovingMobilityBase::initialize(stage);
+
     EV_TRACE << "initializing CircleMobility stage " << stage << endl;
-    if (stage == STAGE_LOCAL_BEGIN)
+    if (stage == STAGE_DO_LOCAL)
     {
         cx = par("cx");
         cy = par("cy");

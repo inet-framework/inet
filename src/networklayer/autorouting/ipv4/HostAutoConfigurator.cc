@@ -29,15 +29,14 @@
 
 Define_Module(HostAutoConfigurator);
 
-int HostAutoConfigurator::numInitStages() const
-{
-    return 2 + 1;
-}
 
-void HostAutoConfigurator::initialize(int stage) {
+int HostAutoConfigurator::numInitStages() const { return STAGE_DO_CONFIGURE_IP_ADDRESSES + 1; }
+
+void HostAutoConfigurator::initialize(int stage)
+{
     cSimpleModule::initialize(stage);
 
-    if (stage == 2) {
+    if (stage == STAGE_DO_CONFIGURE_IP_ADDRESSES) {
         setupNetworkLayer();
     }
 }

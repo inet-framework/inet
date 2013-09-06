@@ -42,7 +42,7 @@ void WirelessMacBase::initialize(int stage)
 {
     MACBase::initialize(stage);
 
-    if (stage==0)
+    if (stage == STAGE_DO_LOCAL)
     {
         upperLayerIn = findGate("upperLayerIn");
         upperLayerOut = findGate("upperLayerOut");

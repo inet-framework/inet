@@ -50,13 +50,13 @@ void VoIPStreamReceiver::initSignals()
     delaySignal = registerSignal("delay");
 }
 
-int VoIPStreamReceiver::numInitStages() const { return 2; }
+int VoIPStreamReceiver::numInitStages() const { return STAGE_NODESTATUS_AVAILABLE + 1; }
 
 void VoIPStreamReceiver::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         initSignals();
 
@@ -74,10 +74,11 @@ void VoIPStreamReceiver::initialize(int stage)
         // initialize avcodec library
         av_register_all();
 
+        //FIXME socket bind -- move to other stage!!!
         socket.setOutputGate(gate("udpOut"));
         socket.bind(localPort);
     }
-    else if (stage == 1)
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

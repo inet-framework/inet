@@ -53,13 +53,13 @@ DYMO::DYMO()
     DYMO_INTERFACES = NULL;
 }
 
-int DYMO::numInitStages() const  {return 5;}
+int DYMO::numInitStages() const { return STAGE_DO_INIT_ROUTING_PROTOCOLS + 1; }
 
-void DYMO::initialize(int aStage)
+void DYMO::initialize(int stage)
 {
-    ManetRoutingBase::initialize(aStage);
+    ManetRoutingBase::initialize(stage);
 
-    if (4 == aStage)
+    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
     {
         ownSeqNumLossTimeout = new DYMO_Timer(this, "OwnSeqNumLossTimeout");
         WATCH_PTR(ownSeqNumLossTimeout);
@@ -129,7 +129,10 @@ void DYMO::initialize(int aStage)
         queuedDataPackets = new DYMO_DataQueue(this, BUFFER_SIZE_PACKETS, BUFFER_SIZE_BYTES);
         WATCH_PTR(queuedDataPackets);
 
+        ASSERT(stage >= STAGE_IP_LAYER_READY_FOR_HOOK_REGISTRATION);
+        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
         registerRoutingModule();
+
         // setSendToICMP(true);
         myAddr = getAddress().getIPv4().getInt();   //FIXME
         linkLayerFeeback();

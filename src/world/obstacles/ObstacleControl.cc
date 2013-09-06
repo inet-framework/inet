@@ -29,23 +29,24 @@ Define_Module(ObstacleControl);
 ObstacleControl::~ObstacleControl() {
 }
 
-int ObstacleControl::numInitStages() const
-{
-    return 1 + 1;
-}
+int ObstacleControl::numInitStages() const { return STAGE_ANNOTATIONMANAGER_AVAILABLE + 1; }
 
-void ObstacleControl::initialize(int stage) {
+void ObstacleControl::initialize(int stage)
+{
     cSimpleModule::initialize(stage);
 
-    if (stage == 1)
+    if (stage == STAGE_DO_LOCAL)
     {
         obstacles.clear();
         cacheEntries.clear();
 
-        annotations = AnnotationManagerAccess().getIfExists();
-        if (annotations) annotationGroup = annotations->createGroup("obstacles");
-
         obstaclesXml = par("obstacles");
+    }
+    if (stage == STAGE_ANNOTATIONMANAGER_AVAILABLE)
+    {
+        annotations = AnnotationManagerAccess().getIfExists();
+        if (annotations)
+            annotationGroup = annotations->createGroup("obstacles");
 
         addFromXml(obstaclesXml);
     }

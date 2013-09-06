@@ -51,7 +51,7 @@ class SomeUDPApp : public UDPAppBase
     virtual void processPacket(cMessage *msg);
 
   protected:
-    virtual int numInitStages() const {return 4;}
+    virtual int numInitStages() const { return STAGE_INIT_APPLICATION + 1; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 };

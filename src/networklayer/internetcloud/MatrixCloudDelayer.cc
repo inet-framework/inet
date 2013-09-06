@@ -128,24 +128,30 @@ MatrixCloudDelayer::~MatrixCloudDelayer()
     matrixEntries.clear();
 }
 
-void MatrixCloudDelayer::initialize()
+int MatrixCloudDelayer::numInitStages() const { return CloudDelayerBase::numInitStages(); }
+
+void MatrixCloudDelayer::initialize(int stage)
 {
-    CloudDelayerBase::initialize();
-    host = findContainingNode(this);
-    ift = InterfaceTableAccess().get(this);
-    cXMLElement *configEntity = par("config").xmlValue();
-    // parse XML config
-    if (strcmp(configEntity->getTagName(), "internetCloud"))
-        error("Cannot read internetCloud configuration, unaccepted '%s' entity at %s", configEntity->getTagName(),
-                configEntity->getSourceLocation());
-    bool defaultSymmetric = getBoolAttribute(*configEntity, "symmetric");
-    const cXMLElement *parameterEntity = getUniqueChild(configEntity, "parameters");
-    cXMLElementList trafficEntities = parameterEntity->getChildrenByTagName("traffic");
-    for (int i = 0; i < (int) trafficEntities.size(); i++)
+    CloudDelayerBase::initialize(stage);
+
+    if (stage == STAGE_DO_LOCAL)
     {
-        cXMLElement *trafficEntity = trafficEntities[i];
-        MatrixEntry *matrixEntry = new MatrixEntry(trafficEntity, defaultSymmetric);
-        matrixEntries.push_back(matrixEntry);
+        host = findContainingNode(this);
+        ift = InterfaceTableAccess().get(this);
+        cXMLElement *configEntity = par("config").xmlValue();
+        // parse XML config
+        if (strcmp(configEntity->getTagName(), "internetCloud"))
+            error("Cannot read internetCloud configuration, unaccepted '%s' entity at %s", configEntity->getTagName(),
+                    configEntity->getSourceLocation());
+        bool defaultSymmetric = getBoolAttribute(*configEntity, "symmetric");
+        const cXMLElement *parameterEntity = getUniqueChild(configEntity, "parameters");
+        cXMLElementList trafficEntities = parameterEntity->getChildrenByTagName("traffic");
+        for (int i = 0; i < (int) trafficEntities.size(); i++)
+        {
+            cXMLElement *trafficEntity = trafficEntities[i];
+            MatrixEntry *matrixEntry = new MatrixEntry(trafficEntity, defaultSymmetric);
+            matrixEntries.push_back(matrixEntry);
+        }
     }
 }
 

@@ -39,7 +39,7 @@ TED::~TED()
 {
 }
 
-int TED::numInitStages() const { return 5; }
+int TED::numInitStages() const { return STAGE_DO_INIT_ROUTING_PROTOCOLS + 1; }
 
 void TED::initialize(int stage)
 {
@@ -48,23 +48,29 @@ void TED::initialize(int stage)
     // we have to wait for stage 2 until interfaces get registered (stage 0)
     // and get their auto-assigned IPv4 addresses (stage 2); routerId gets
     // assigned in stage 3
-    if (stage == 4)
+    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
     {
+        ASSERT(stage >= STAGE_ROUTERID_AVAILABLE);
+        ASSERT(stage >= STAGE_IP_ADDRESS_AVAILABLE);
+        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
+        ASSERT(stage >= STAGE_INTERFACEENTRY_IP_PROTOCOLDATA_AVAILABLE);
+
+        maxMessageId = 0;
+
+        WATCH_VECTOR(ted);
+
         rt = IPv4RoutingTableAccess().get();
         ift = InterfaceTableAccess().get();
         routerId = rt->getRouterId();
-        nb = NotificationBoardAccess().get();
-
-        maxMessageId = 0;
         ASSERT(!routerId.isUnspecified());
+
+        nb = NotificationBoardAccess().get();
 
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (isOperational)
             initializeTED();
-
-        WATCH_VECTOR(ted);
     }
 }
 

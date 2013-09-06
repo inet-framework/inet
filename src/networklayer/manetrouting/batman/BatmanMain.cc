@@ -105,19 +105,15 @@ Batman::~Batman()
     hna_chg_list.clear();
 }
 
-int Batman::numInitStages() const  {return 5;}
+int Batman::numInitStages() const  { return STAGE_DO_INIT_ROUTING_PROTOCOLS + 1; }
 
 void Batman::initialize(int stage)
 {
     ManetRoutingBase::initialize(stage);
 
-    if (stage == 4)
+    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
     {
-        int32_t download_speed = 0, upload_speed = 0;
         found_ifs = 0;
-
-        registerRoutingModule();
-        //createTimerQueue();
 
         debug_level = par("debugLevel");
         if (debug_level > debug_level_max) {
@@ -132,27 +128,38 @@ void Batman::initialize(int stage)
         if (originator_interval < 0.001)
             throw cRuntimeError("Invalid 'originatorInterval' parameter");
 
-        const char *preferedGateWay = par("preferedGateWay");
-        pref_gateway =  ManetAddress(AddressResolver().resolve(preferedGateWay, AddressResolver::ADDR_IPv4));
-
         routing_class = par("routingClass");
         if (routing_class < 0)
             throw cRuntimeError("Invalid 'routingClass' parameter");
 
-    /*
+        aggregation_enabled = par("aggregationEnable").boolValue();
+        disable_client_nat = 1;
+
+        MAX_AGGREGATION_BYTES = par("MAX_AGGREGATION_BYTES");
+
+        int32_t download_speed = 0, upload_speed = 0;
+
+        ASSERT(stage > STAGE_DO_ASSIGN_ROUTERID);
+
+        ASSERT(stage >= STAGE_IP_LAYER_READY_FOR_HOOK_REGISTRATION);
+        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
+        registerRoutingModule();
+        //createTimerQueue();
+
+        const char *preferedGateWay = par("preferedGateWay");
+        pref_gateway =  ManetAddress(AddressResolver().resolve(preferedGateWay, AddressResolver::ADDR_IPv4));
+
+        /*
         IPv4Address vis = par("visualizationServer");
 
         if (!vis.isUnspecified())
         {
             vis_server = vis.getInt();
         }
-    */
-        aggregation_enabled = par("aggregationEnable").boolValue();
-        disable_client_nat = 1;
+        */
 
         download_speed = par("GWClass_download_speed");
         upload_speed = par("GWClass_upload_speed");
-        MAX_AGGREGATION_BYTES = par("MAX_AGGREGATION_BYTES");
 
         if ((download_speed > 0) && (upload_speed == 0))
             upload_speed = download_speed / 5;
@@ -177,7 +184,8 @@ void Batman::initialize(int stage)
         //if (((routing_class != 0 ) || ( gateway_class != 0 ))&& (!probe_tun(1)))
         //    opp_error("");
 
-        for (int i = 0; i<getNumWlanInterfaces(); i++) {
+        for (int i = 0; i<getNumWlanInterfaces(); i++)
+        {
             InterfaceEntry *iEntry = getWlanInterfaceEntry(i);
 
             BatmanIf *batman_if;
@@ -229,7 +237,7 @@ void Batman::initialize(int stage)
         /* add rule for hna networks */
         //add_del_rule(0, 0, BATMAN_RT_TABLE_NETWORKS, BATMAN_RT_PRIO_UNREACH - 1, 0, RULE_TYPE_DST, RULE_ADD);
 
-            /* add unreachable routing table entry */
+        /* add unreachable routing table entry */
         //add_del_route(0, 0, 0, 0, 0, "unknown", BATMAN_RT_TABLE_UNREACH, ROUTE_TYPE_UNREACHABLE, ROUTE_ADD);
 
         if (routing_class > 0) {
@@ -255,7 +263,6 @@ void Batman::initialize(int stage)
         scheduleAt(select_timeout, timer);
     }
 }
-
 
 void Batman::handleMessage(cMessage *msg)
 {

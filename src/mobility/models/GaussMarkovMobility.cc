@@ -37,14 +37,15 @@ GaussMarkovMobility::GaussMarkovMobility()
 
 int GaussMarkovMobility::numInitStages() const
 {
-    return std::max(STAGE_LOCAL_BEGIN + 1, LineSegmentsMobilityBase::numInitStages());
+    return std::max(STAGE_DO_LOCAL + 1, LineSegmentsMobilityBase::numInitStages());
 }
 
 void GaussMarkovMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
+
     EV_TRACE << "initializing GaussMarkovMobility stage " << stage << endl;
-    if (stage == STAGE_LOCAL_BEGIN)
+    if (stage == STAGE_DO_LOCAL)
     {
         speedMean = par("speed");
         angleMean = par("angle");

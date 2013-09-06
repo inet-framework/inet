@@ -50,14 +50,18 @@ PPP::~PPP()
     cancelAndDelete(endTransmissionEvent);
 }
 
-int PPP::numInitStages() const {return 4;}
+int PPP::numInitStages() const
+{
+    return std::max(MACBase::numInitStages(),
+            (int)std::max(STAGE_CHANNEL_AVAILABLE, STAGE_DO_REGISTER_INTERFACE) + 1);
+}
 
 void PPP::initialize(int stage)
 {
     MACBase::initialize(stage);
 
     // all initialization is done in the first stage
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         txQueue.setName("txQueue");
         endTransmissionEvent = new cMessage("pppEndTxEvent");
@@ -100,23 +104,38 @@ void PPP::initialize(int stage)
 
         // remember the output gate now, to speed up send()
         physOutGate = gate("phys$o");
-
+    }
+    if (stage == STAGE_CHANNEL_AVAILABLE)
+    {
         // we're connected if other end of connection path is an input gate
         bool connected = physOutGate->getPathEndGate()->getType() == cGate::INPUT;
-
         // if we're connected, get the gate with transmission rate
         datarateChannel = connected ? physOutGate->getTransmissionChannel() : NULL;
-
+    }
+    if (stage == STAGE_DO_REGISTER_INTERFACE)
+    {
         // register our interface entry in IInterfaceTable
         registerInterface();
 
         // prepare to fire notifications
         notifDetails.setInterfaceEntry(interfaceEntry);
 
+        ASSERT(stage > STAGE_DO_LOCAL);       // stage should be larger than 0 for call queueModule member function
+        // request first frame to send
+        if (queueModule && 0 == queueModule->getNumPendingRequests())
+        {
+            EV << "Requesting first frame from queue module\n";
+            queueModule->requestPacket();
+        }
+    }
+
+    // update display string when addresses have been autoconfigured etc.
+    if (stage == numInitStages()-1)
+    {
         // display string stuff
         if (ev.isGUI())
         {
-            if (connected)
+            if (datarateChannel)    // not NULL if connected
             {
                 oldConnColor = datarateChannel->getDisplayString().getTagArg("ls", 0);
             }
@@ -127,18 +146,6 @@ void PPP::initialize(int stage)
                 getDisplayString().setTagArg("i", 2, "100");
             }
         }
-
-        // request first frame to send
-        if (queueModule && 0 == queueModule->getNumPendingRequests())
-        {
-            EV << "Requesting first frame from queue module\n";
-            queueModule->requestPacket();
-        }
-    }
-
-    // update display string when addresses have been autoconfigured etc.
-    if (stage == 3)
-    {
         updateDisplayString();
     }
 }

@@ -27,10 +27,7 @@
 Define_Module(RTPApplication)
 
 
-int RTPApplication::numInitStages() const
-{
-    return 3 + 1;
-}
+int RTPApplication::numInitStages() const { return STAGE_DO_INIT_APPLICATION + 1; }
 
 void RTPApplication::initialize(int stage)
 {
@@ -38,7 +35,7 @@ void RTPApplication::initialize(int stage)
 
     // because of AddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         // the common name (CNAME) of this host
         _commonName = par("commonName");
@@ -68,16 +65,17 @@ void RTPApplication::initialize(int stage)
         ssrc = 0;
         isActiveSession = false;
     }
-    else if (stage == 1)
+    if (stage == STAGE_DO_INIT_APPLICATION)
     {
+        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
+        ASSERT(stage >= STAGE_IP_ADDRESS_AVAILABLE);
+
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
-    else if (stage == 3)
-    {
+
         // the ip address to connect to (unicast or multicast)
         _destinationAddress = AddressResolver().resolve(par("destinationAddress").stringValue()).toIPv4();
 

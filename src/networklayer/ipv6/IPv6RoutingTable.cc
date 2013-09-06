@@ -57,30 +57,25 @@ IPv6Route *IPv6RoutingTable::createNewRoute(IPv6Address destPrefix, int prefixLe
     return new IPv6Route(destPrefix, prefixLength, src);
 }
 
-int IPv6RoutingTable::numInitStages() const  {return 5;}
+int IPv6RoutingTable::numInitStages() const
+{
+    static int stages = std::max(STAGE_NOTIFICATIONBOARD_AVAILABLE, STAGE_DO_ADD_IP_PROTOCOLDATA_TO_INTERFACEENTRY) + 1;
+    return stages;
+}
 
 void IPv6RoutingTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage==1)
+    if (stage == STAGE_DO_LOCAL)
     {
-        //TODO isNodeUp???
-
-        ift = InterfaceTableAccess().get();
-        nb = NotificationBoardAccess().get();
-
-        nb->subscribe(this, NF_INTERFACE_CREATED);
-        nb->subscribe(this, NF_INTERFACE_DELETED);
-        nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
-        nb->subscribe(this, NF_INTERFACE_CONFIG_CHANGED);
-        nb->subscribe(this, NF_INTERFACE_IPv6CONFIG_CHANGED);
-
         WATCH_PTRVECTOR(routeList);
         WATCH_MAP(destCache); // FIXME commented out for now
         isrouter = par("isRouter");
         multicastForward = par("forwardMulticast");
         WATCH(isrouter);
+
+        ift = InterfaceTableAccess().get();
 
 #ifdef WITH_xMIPv6
         // the following MIPv6 related flags will be overridden by the MIPv6 module (if existing)
@@ -92,7 +87,21 @@ void IPv6RoutingTable::initialize(int stage)
 
         mipv6Support = false; // 4.9.07 - CB
 #endif /* WITH_xMIPv6 */
+    }
+    if (stage == STAGE_NOTIFICATIONBOARD_AVAILABLE)
+    {
+        //TODO isNodeUp???
 
+        nb = NotificationBoardAccess().get();
+
+        nb->subscribe(this, NF_INTERFACE_CREATED);
+        nb->subscribe(this, NF_INTERFACE_DELETED);
+        nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
+        nb->subscribe(this, NF_INTERFACE_CONFIG_CHANGED);
+        nb->subscribe(this, NF_INTERFACE_IPv6CONFIG_CHANGED);
+    }
+    if (stage == STAGE_DO_ADD_IP_PROTOCOLDATA_TO_INTERFACEENTRY)
+    {
         // add IPv6InterfaceData to interfaces
         for (int i=0; i<ift->getNumInterfaces(); i++)
         {
@@ -120,10 +129,7 @@ void IPv6RoutingTable::initialize(int stage)
                                                 ie->getInterfaceId(), SIMTIME_ZERO);
             }
         }
-    }
-    else if (stage==4)
-    {
-        // configurator adds routes only in stage==3
+
         updateDisplayString();
     }
 }

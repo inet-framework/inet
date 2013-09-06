@@ -22,23 +22,26 @@
 Define_Module(DSDV_2);
 
 
-int DSDV_2::numInitStages() const  {return 5;}
+int DSDV_2::numInitStages() const  { return STAGE_DO_INIT_ROUTING_PROTOCOLS + 1; }
 
 void DSDV_2::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
     //reads from omnetpp.ini
-    if (stage==0)
-    {
-        IPSocket socket(gate("to_ip"));
-        socket.registerProtocol(IP_PROT_MANET);
-    }
-    if (stage==4)
+    if (stage == STAGE_DO_LOCAL)
     {
         sequencenumber = 0;
         ift = NULL;
         rt = NULL;
+    }
+    if (stage == STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP)
+    {
+        IPSocket socket(gate("to_ip"));
+        socket.registerProtocol(IP_PROT_MANET);
+    }
+    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
+    {
         ift = InterfaceTableAccess().get();
         /* Search the 80211 interface */
         int  num_80211 = 0;
@@ -91,7 +94,6 @@ void DSDV_2::initialize(int stage)
         forwardList = new list<forwardHello*>;
         event = new cMessage("event");
         scheduleAt( uniform(0, par("MaxVariance_DSDV").doubleValue(), par("RNGseed_DSDV").doubleValue()), event);
-
     }
 }
 

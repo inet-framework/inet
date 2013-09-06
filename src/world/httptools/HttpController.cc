@@ -33,14 +33,15 @@
 Define_Module(HttpController);
 
 
-int HttpController::numInitStages() const {return 2;}
+int HttpController::numInitStages() const { return STAGE_NODESTATUS_AVAILABLE + 1; }
 
 void HttpController::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
     EV_DEBUG << "Initializing stage " << stage << endl;
-    if (stage==0)
+
+    if (stage == STAGE_DO_LOCAL)
     {
         EV_INFO << "Initializing HTTP controller. First stage" << endl;
 
@@ -64,7 +65,7 @@ void HttpController::initialize(int stage)
         pspecial = 0.0; // No special events by default
         totalLookups = 0;
     }
-    else if (stage==1)
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         // Two stages are required to finalize the initialization of the random object for the site selection
         // once the final number of web sites is known.

@@ -45,7 +45,7 @@ void TCPBasicClientApp::initialize(int stage)
 {
     TCPGenericCliAppBase::initialize(stage);
 
-    if (stage == 3)
+    if (stage == STAGE_DO_LOCAL)
     {
         numRequestsToSend = 0;
         earlySend = false;  // TBD make it parameter
@@ -56,6 +56,10 @@ void TCPBasicClientApp::initialize(int stage)
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             error("Invalid startTime/stopTime parameters");
+    }
+    if (stage == STAGE_DO_INIT_APPLICATION)
+    {
+        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
 
         timeoutMsg = new cMessage("timer");
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

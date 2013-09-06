@@ -29,39 +29,34 @@
 Define_Module(InetSimpleBattery);
 
 
-int InetSimpleBattery::numInitStages() const {return 2;}
+int InetSimpleBattery::numInitStages() const { return BasicBattery::numInitStages(); }
 
 void InetSimpleBattery::initialize(int stage)
 {
-
     BasicBattery::initialize(stage); //DO NOT DELETE!!
-    if (stage == 0)
+
+    if (stage == STAGE_DO_LOCAL)
     {
         voltage = par("voltage");
         nominalCapmAh = par("nominal");
         if (nominalCapmAh <= 0)
-        {
-            error("invalid nominal capacity value");
-        }
+            throw cRuntimeError("invalid nominal capacity value");
+
         capmAh = par("capacity");
 
         // Publish capacity to BatteryStats every publishTime (if > 0) and
         // whenever capacity has changed by publishDelta (if < 100%).
         publishTime = 0;
 
-        publishDelta = 1;
         publishDelta = par("publishDelta");
         if (publishDelta < 0 || publishDelta > 1)
-        {
-            error("invalid publishDelta value");
-        }
+            throw cRuntimeError("invalid publishDelta value");
 
         resolution = par("resolution");
-        EV<< "capacity = " << capmAh << "mA-h (nominal = " << nominalCapmAh <<
-        ") at " << voltage << "V" << endl;
+        EV << "capacity = " << capmAh << "mA-h (nominal = " << nominalCapmAh
+           << ") at " << voltage << "V" << endl;
         EV << "publishDelta = " << publishDelta * 100 << "%, publishTime = "
-        << publishTime << "s, resolution = " << resolution << "sec"
-        << endl;
+           << publishTime << "s, resolution = " << resolution << "sec" << endl;
 
         capacity = capmAh * 60 * 60 * voltage; // use mW-sec internally
         nominalCapacity = nominalCapmAh * 60 * 60 * voltage;

@@ -34,16 +34,13 @@
 #include "NodeStatus.h"
 
 
-int HttpServerBase::numInitStages() const
-{
-    return std::max(1 + 1, HttpNodeBase::numInitStages());
-}
+int HttpServerBase::numInitStages() const { return std::max(STAGE_NODESTATUS_AVAILABLE + 1, HttpNodeBase::numInitStages()); }
 
 void HttpServerBase::initialize(int stage)
 {
     HttpNodeBase::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         EV_DEBUG << "Initializing server component\n";
 
@@ -155,16 +152,18 @@ void HttpServerBase::initialize(int stage)
         WATCH(imgResourcesServed);
         WATCH(textResourcesServed);
         WATCH(badRequests);
-
-        updateDisplay();
     }
-    else if (stage == 1)
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
+    if (stage == numInitStages() -1)
+    {
+        updateDisplay();
     }
 }
 

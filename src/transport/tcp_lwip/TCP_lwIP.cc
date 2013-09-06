@@ -82,7 +82,11 @@ TCP_lwIP::TCP_lwIP()
     netIf.state = NULL;
 }
 
-int TCP_lwIP::numInitStages() const { return 2; }
+int TCP_lwIP::numInitStages() const
+{
+    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, std::max(STAGE_DO_LOCAL, STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP)) + 1;
+    return stages;
+}
 
 void TCP_lwIP::initialize(int stage)
 {
@@ -90,7 +94,7 @@ void TCP_lwIP::initialize(int stage)
 
     tcpEV << this << ": initialize stage " << stage << endl;
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         const char *q;
         q = par("sendQueueClass");
@@ -108,24 +112,26 @@ void TCP_lwIP::initialize(int stage)
         logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
 
         recordStatisticsM = par("recordStats");
+
+        pLwipTcpLayerM = new LwipTcpLayer(*this);
+        pLwipFastTimerM = new cMessage("lwip_fast_timer");
+        tcpEV << "TCP_lwIP " << this << " has stack " << pLwipTcpLayerM << "\n";
     }
-    else if (stage == 1)
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-
-        pLwipTcpLayerM = new LwipTcpLayer(*this);
-
-        pLwipFastTimerM = new cMessage("lwip_fast_timer");
-
-        tcpEV << "TCP_lwIP " << this << " has stack " << pLwipTcpLayerM << "\n";
-
+    }
+    if (stage == STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP)
+    {
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(IP_PROT_TCP);
-
+    }
+    if (stage == numInitStages() - 1)
+    {
         isAliveM = true;
     }
 }

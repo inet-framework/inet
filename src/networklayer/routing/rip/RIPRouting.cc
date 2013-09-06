@@ -146,13 +146,14 @@ simsignal_t RIPRouting::rcvdResponseSignal = SIMSIGNAL_NULL;
 simsignal_t RIPRouting::badResponseSignal = SIMSIGNAL_NULL;
 simsignal_t RIPRouting::numRoutesSignal = SIMSIGNAL_NULL;
 
-int RIPRouting::numInitStages() const { return 5; }
+int RIPRouting::numInitStages() const { return STAGE_DO_INIT_ROUTING_PROTOCOLS + 1; }
 
 void RIPRouting::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0) {
+    if (stage == STAGE_DO_LOCAL)
+    {
         host = findContainingNode(this);
         ift = InterfaceTableAccess().get();
         rt = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
@@ -187,7 +188,12 @@ void RIPRouting::initialize(int stage)
         badResponseSignal = registerSignal("badResponse");
         numRoutesSignal = registerSignal("numRoutes");
     }
-    else if (stage == 4) { // interfaces and static routes are already initialized
+    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
+    { // interfaces and static routes are already initialized
+        ASSERT(stage >= STAGE_ROUTERID_AVAILABLE);
+        ASSERT(stage >= STAGE_INTERFACEENTRY_REGISTERED);
+        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
+
         addressType = rt->getRouterIdAsGeneric().getAddressType();
         startRIPRouting();
     }

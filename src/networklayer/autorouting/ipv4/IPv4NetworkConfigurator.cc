@@ -76,13 +76,17 @@ IPv4NetworkConfigurator::RouteInfo *IPv4NetworkConfigurator::RoutingTableInfo::f
     return NULL;
 }
 
-int IPv4NetworkConfigurator::numInitStages() const  { return 4; }
+int IPv4NetworkConfigurator::numInitStages() const
+{
+    static int stages = std::max(STAGE_DO_COMPUTE_IP_AUTOCONFIGURATION, STAGE_ROUTINGTABLE_COMPLETED) + 1;
+    return stages;
+}
 
 void IPv4NetworkConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         assignAddressesParameter = par("assignAddresses");
         assignDisjunctSubnetAddressesParameter = par("assignDisjunctSubnetAddresses");
@@ -92,9 +96,9 @@ void IPv4NetworkConfigurator::initialize(int stage)
         optimizeRoutesParameter = par("optimizeRoutes");
         configuration = par("config");
     }
-    else if (stage == 2)
+    if (stage == STAGE_DO_COMPUTE_IP_AUTOCONFIGURATION)
         ensureConfigurationComputed(topology);
-    else if (stage == 3)
+    if (stage == STAGE_ROUTINGTABLE_COMPLETED)
         dumpConfiguration();
 }
 

@@ -40,15 +40,13 @@ UDPBasicApp::~UDPBasicApp()
     cancelAndDelete(selfMsg);
 }
 
-int UDPBasicApp::numInitStages() const {return 4;}
+int UDPBasicApp::numInitStages() const { return std::max(STAGE_DO_LOCAL + 1, AppBase::numInitStages()); }
 
 void UDPBasicApp::initialize(int stage)
 {
     AppBase::initialize(stage);
 
-    // because of AddressResolver, we need to wait until interfaces are registered,
-    // address auto-assignment takes place etc.
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         numSent = 0;
         numReceived = 0;

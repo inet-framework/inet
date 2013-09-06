@@ -55,7 +55,12 @@ Radio::Radio() : rs(this->getId())
 
 int Radio::numInitStages() const
 {
-    return std::max(2 + 1, ChannelAccess::numInitStages());
+    static int stages = std::max(std::max(
+            STAGE_BATTERY_READY_FOR_DEVICE_REGISTRATION,
+            STAGE_DO_PUBLISH_RADIOSTATE),
+            STAGE_DO_REGISTER_RADIO
+            ) + 1;
+    return std::max(ChannelAccess::numInitStages(), stages);
 }
 
 void Radio::initialize(int stage)
@@ -64,7 +69,7 @@ void Radio::initialize(int stage)
 
     EV << "Initializing Radio, stage=" << stage << endl;
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         gate("radioIn")->setDeliverOnReceptionStart(true);
 
@@ -175,30 +180,35 @@ void Radio::initialize(int stage)
             updateStringInterval = par("refreshCoverageInterval");
         else
             updateStringInterval = 0;
-
     }
-    else if (stage == 1)
+    if (stage == STAGE_BATTERY_READY_FOR_DEVICE_REGISTRATION)
     {
         registerBattery();
-
+    }
+    if (stage == STAGE_DO_PUBLISH_RADIOSTATE)
+    {
+        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
+        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (isOperational)
         {
-            // tell initial values to MAC; must be done in stage 1, because they
-            // subscribe in stage 0
+            // tell initial values to MAC; must be done in stage STAGE_OTHER_MODULES_AVAILABLE+1 or later, because they
+            // subscribe in stage STAGE_OTHER_MODULES_AVAILABLE
             nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
             nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
         }
     }
-    else if (stage == 2)
+    if (stage == STAGE_DO_REGISTER_RADIO)
     {
+        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
+        ASSERT(stage >= STAGE_CHANNELCONTROL_AVAILABLE);
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (isOperational)
         {
             // tell initial channel number to ChannelControl; should be done in
-            // stage==2 or later, because base class initializes myRadioRef in that stage
+            // stage==STAGE_REGISTER_RADIO or later, because base class initializes myRadioRef in that stage
             cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
 
             // statistics
@@ -208,6 +218,7 @@ void Radio::initialize(int stage)
         }
         else
         {
+            ASSERT(stage > STAGE_NOTIFICATIONBOARD_AVAILABLE);
             setRadioState(RadioState::OFF);
             // tell initial values to MAC; must be done in stage 1, because they
             // subscribe in stage 0

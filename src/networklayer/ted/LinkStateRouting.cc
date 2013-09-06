@@ -39,15 +39,20 @@ LinkStateRouting::~LinkStateRouting()
     cancelAndDelete(announceMsg);
 }
 
-int LinkStateRouting::numInitStages() const { return 5; }
+int LinkStateRouting::numInitStages() const { return STAGE_DO_INIT_ROUTING_PROTOCOLS + 1; }
 
 void LinkStateRouting::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
     // we have to wait until routerId gets assigned in stage 3
-    if (stage==4)
+    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
     {
+        ASSERT(stage >= STAGE_ROUTERID_AVAILABLE);
+        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
+        ASSERT(stage >= STAGE_INTERFACEENTRY_REGISTERED);
+        ASSERT(stage >= STAGE_IP_ADDRESS_AVAILABLE);
+
         tedmod = TEDAccess().get();
 
         IIPv4RoutingTable *rt = IPv4RoutingTableAccess().get();
@@ -71,6 +76,8 @@ void LinkStateRouting::initialize(int stage)
         // schedule start of flooding link state info
         announceMsg = new cMessage("announce");
         scheduleAt(simTime() + exponential(0.01), announceMsg);
+
+        ASSERT(stage >= STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP);
         IPSocket socket(gate("ipOut"));
         socket.registerProtocol(IP_PROT_OSPF);
     }

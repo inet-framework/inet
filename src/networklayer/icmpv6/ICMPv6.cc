@@ -35,13 +35,13 @@
 Define_Module(ICMPv6);
 
 
-int ICMPv6::numInitStages() const { return 2; }
+int ICMPv6::numInitStages() const { return STAGE_NODESTATUS_AVAILABLE + 1; }
 
 void ICMPv6::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 1)
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

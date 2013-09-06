@@ -46,28 +46,22 @@ DHCPClient::~DHCPClient()
     cancelTimer_TO();
 }
 
-int DHCPClient::numInitStages() const { return 3 + 1; }
+int DHCPClient::numInitStages() const
+{
+    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_INIT_APPLICATION) + 1;
+    return stages;
+}
 
 void DHCPClient::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         timer_t1 = NULL;
         timer_t2 = NULL;
         timer_to = NULL;
-    }
-    else if (stage == 1)
-    {
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
-    else if (stage == 3)
-    {
+
         numSent = 0;
         numReceived = 0;
         retry_count = 0;
@@ -85,14 +79,27 @@ void DHCPClient::initialize(int stage)
         // DHCP UDP ports
         bootpc_port = 68; // client
         bootps_port = 67; // server
+    }
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
+    if (stage == STAGE_DO_INIT_APPLICATION)
+    {
+        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
+        ASSERT(stage >= STAGE_INTERFACEENTRY_REGISTERED);
+        ASSERT(stage >= STAGE_TRANSPORT_LAYER_AVAILABLE);
 
         // get the hostname
         cModule* host = getContainingNode();
         host_name = host->getFullName();
 
-        nb = NotificationBoardAccess().get();
-
         // for a wireless interface subscribe the association event to start the DHCP protocol
+        nb = NotificationBoardAccess().get();
         nb->subscribe(this, NF_L2_ASSOCIATED);
 
         // Get the interface to configure

@@ -52,16 +52,16 @@ Define_Module(MoBANCoordinator);
 
 int MoBANCoordinator::numInitStages() const
 {
-    return std::max(STAGE_LOCAL_BEGIN + 1, LineSegmentsMobilityBase::numInitStages());
+    return std::max(STAGE_DO_ASSIGN_MOBILITY_COORDINATOR + 1, LineSegmentsMobilityBase::numInitStages());
 }
 
-void MoBANCoordinator::initialize(int stage) {
+void MoBANCoordinator::initialize(int stage)
+{
     LineSegmentsMobilityBase::initialize(stage);
+
     EV_TRACE << "initializing MoBANCoordinator stage " << stage << endl;
-    if (stage == STAGE_LOCAL_BEGIN) {
-        //FIXME calls some functions on other modules, but initialization stage of other modules are not guaranteed.
-        // The initialize(0) not called yet on some other modules.
-        // Should be redesigned stages in MoBANCoordinator/MoBANLocal modules.
+    if (stage == STAGE_DO_ASSIGN_MOBILITY_COORDINATOR)
+    {
         useMobilityPattern = par("useMobilityPattern").boolValue();
         collectLocalModules(getParentModule());
 

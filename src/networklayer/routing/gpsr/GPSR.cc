@@ -63,13 +63,18 @@ GPSR::~GPSR()
 // module interface
 //
 
-int GPSR::numInitStages() const { return 5; }
+int GPSR::numInitStages() const
+{
+    static int stages = std::max(STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP, STAGE_DO_INIT_ROUTING_PROTOCOLS) + 1;
+    return stages;
+}
 
 void GPSR::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0) {
+    if (stage == STAGE_DO_LOCAL)
+    {
         // GPSR parameters
         planarizationMode = (GPSRPlanarizationMode)(int)par("planarizationMode");
         interfaces = par("interfaces");
@@ -89,10 +94,16 @@ void GPSR::initialize(int stage)
         purgeNeighborsTimer = new cMessage("PurgeNeighborsTimer");
         scheduleBeaconTimer();
         schedulePurgeNeighborsTimer();
+    }
+    if (stage == STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP)
+    {
         IPSocket socket(gate("ipOut"));
         socket.registerProtocol(IP_PROT_MANET);
     }
-    else if (stage == 4) {
+    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
+    {
+        ASSERT(stage >= STAGE_IP_LAYER_READY_FOR_HOOK_REGISTRATION);
+        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
         globalPositionTable.clear();
         notificationBoard->subscribe(this, NF_LINK_BREAK);
         addressType = getSelfAddress().getAddressType();

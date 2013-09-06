@@ -61,7 +61,11 @@ IPv6NeighbourDiscovery::~IPv6NeighbourDiscovery()
     //   AdvIfList advIfList;
 }
 
-int IPv6NeighbourDiscovery::numInitStages() const {return 4;}
+int IPv6NeighbourDiscovery::numInitStages() const
+{
+    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_SET_INTERFACEENTRY_RTR_ADV_INTERVAL) + 1;
+    return stages;
+}
 
 void IPv6NeighbourDiscovery::initialize(int stage)
 {
@@ -70,7 +74,7 @@ void IPv6NeighbourDiscovery::initialize(int stage)
     // We have to wait until the 3rd stage (stage 2) with scheduling messages,
     // because interface registration and IPv6 configuration takes places
     // in the first two stages.
-    if (stage == 1)
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
@@ -78,8 +82,10 @@ void IPv6NeighbourDiscovery::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
-    else if (stage == 3)
+    if (stage == STAGE_DO_SET_INTERFACEENTRY_RTR_ADV_INTERVAL)
     {
+        ASSERT(stage >= STAGE_INTERFACEENTRY_IP_PROTOCOLDATA_AVAILABLE);
+        ASSERT(stage >= STAGE_INTERFACEENTRY_REGISTERED);
         ift = InterfaceTableAccess().get();
         rt6 = check_and_cast<IPv6RoutingTable *>(getModuleByPath(par("routingTableModule")));
         icmpv6 = ICMPv6Access().get();
@@ -112,11 +118,12 @@ void IPv6NeighbourDiscovery::initialize(int stage)
                 createRATimer(ie);
             }
         }
+
         //This simulates random node bootup time. Link local address assignment
         //takes place during this time.
         cMessage *msg = new cMessage("assignLinkLocalAddr", MK_ASSIGN_LINKLOCAL_ADDRESS);
-        //We want routers to boot up faster!
 
+        //We want routers to boot up faster!
         if (rt6->isRouter())
             scheduleAt(simTime() + uniform(0, 0.3), msg); //Random Router bootup time
         else

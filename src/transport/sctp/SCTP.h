@@ -211,7 +211,8 @@ class INET_API SCTP : public cSimpleModule
 
     public:
         virtual ~SCTP();
-        virtual void initialize();
+        virtual void initialize(int stage);
+        virtual int numInitStages() const;
         virtual void handleMessage(cMessage *msg);
         virtual void finish();
 

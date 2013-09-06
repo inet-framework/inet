@@ -20,15 +20,21 @@
 Define_Module(TCPSrvHostApp);
 
 
-int TCPSrvHostApp::numInitStages() const { return 2; }
+int TCPSrvHostApp::numInitStages() const
+{
+    int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_INIT_APPLICATION) + 1;
+    return stages;
+}
 
 void TCPSrvHostApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_INIT_APPLICATION)
     {
-        //TODO should use AddressResolver in stage 3
+        ASSERT(stage >= STAGE_TRANSPORT_LAYER_AVAILABLE);
+        ASSERT(stage >= STAGE_IP_ADDRESS_AVAILABLE);
+
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
 
@@ -37,7 +43,7 @@ void TCPSrvHostApp::initialize(int stage)
         serverSocket.bind(localAddress[0] ? Address(localAddress) : Address(), localPort);
         serverSocket.listen();
     }
-    else if (stage == 1)
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

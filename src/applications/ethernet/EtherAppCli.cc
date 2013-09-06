@@ -45,18 +45,13 @@ EtherAppCli::~EtherAppCli()
     cancelAndDelete(timerMsg);
 }
 
-int EtherAppCli::numInitStages() const
-{
-    return 1 + 1;
-}
+int EtherAppCli::numInitStages() const { return STAGE_NODESTATUS_AVAILABLE + 1; }
 
 void EtherAppCli::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    // we can only initialize in the 2nd stage (stage==1), because
-    // assignment of "auto" MAC addresses takes place in stage 0
-    if (stage == 1)
+    if (stage == STAGE_DO_LOCAL)
     {
         reqLength = &par("reqLength");
         respLength = &par("respLength");
@@ -79,9 +74,12 @@ void EtherAppCli::initialize(int stage)
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             error("Invalid startTime/stopTime parameters");
-
+    }
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    {
         if (isGenerator())
             timerMsg = new cMessage("generateNextPacket");
+
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
 
         if (isNodeUp() && isGenerator())

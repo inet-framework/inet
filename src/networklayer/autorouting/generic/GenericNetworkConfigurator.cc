@@ -44,16 +44,18 @@ static void printElapsedTime(const char *name, long startTime)
     printTimeSpentUsingDuration(name, clock() - startTime);
 }
 
+
+int GenericNetworkConfigurator::numInitStages() const { return STAGE_DO_COMPUTE_IP_AUTOCONFIGURATION + 1; }
+
 #define T(CODE)  {long startTime=clock(); CODE; printElapsedTime(#CODE, startTime);}
-
-int GenericNetworkConfigurator::numInitStages() const { return 3; }
-
 void GenericNetworkConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 2)
+    if (stage == STAGE_DO_COMPUTE_IP_AUTOCONFIGURATION)
     {
+        ASSERT(stage >= STAGE_INTERFACEENTRY_REGISTERED);
+
         long initializeStartTime = clock();
 
         GenericTopology topology;
@@ -76,7 +78,6 @@ void GenericNetworkConfigurator::initialize(int stage)
         printElapsedTime("initialize", initializeStartTime);
     }
 }
-
 #undef T
 
 void GenericNetworkConfigurator::extractTopology(GenericTopology& topology)

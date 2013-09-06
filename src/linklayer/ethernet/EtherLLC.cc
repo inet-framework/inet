@@ -33,13 +33,13 @@ simsignal_t EtherLLC::droppedPkUnknownDSAPSignal = SIMSIGNAL_NULL;
 simsignal_t EtherLLC::pauseSentSignal = SIMSIGNAL_NULL;
 
 
-int EtherLLC::numInitStages() const { return 2; }
+int EtherLLC::numInitStages() const { return STAGE_NODESTATUS_AVAILABLE + 1; }
 
 void EtherLLC::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         seqNum = 0;
         WATCH(seqNum);
@@ -59,7 +59,7 @@ void EtherLLC::initialize(int stage)
         WATCH(totalPassedUp);
         WATCH(droppedUnknownDSAP);
     }
-    else if (stage == 1)
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         // lifecycle
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

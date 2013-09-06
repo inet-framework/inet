@@ -90,13 +90,13 @@ xMIPv6::~xMIPv6()
     }
 }
 
-int xMIPv6::numInitStages() const { return 4; }
+int xMIPv6::numInitStages() const { return STAGE_DO_IPV6ROUTINGTABLE_XMIPV6_SETTINGS + 1; }
 
 void xMIPv6::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         EV << "Initializing xMIPv6 module" << endl;
 
@@ -115,12 +115,10 @@ void xMIPv6::initialize(int stage)
         statVectorCoTtoMN.setName("CoT to MN");
         statVectorHoTfromCN.setName("HoT from CN");
         statVectorCoTfromCN.setName("CoT from CN");*/
-    }
-    else if (stage == 1)
-    {
+
         tunneling = IPv6TunnelingAccess().get(); // access to tunneling module, 21.08.07 - CB
     }
-    else if (stage == 2)
+    if (stage == STAGE_DO_IPV6ROUTINGTABLE_XMIPV6_SETTINGS)
     {
         // moved rt6 initialization to here, as we should
         // set the MIPv6 flag as soon as possible for use
@@ -132,14 +130,8 @@ void xMIPv6::initialize(int stage)
         // moved init stuff from rt6 to here as this is actually
         // the right place for these parameters
         // 26.10.07 - CB
-        rt6->setIsHomeAgent(par("isHomeAgent"));
-        rt6->setIsMobileNode(par("isMobileNode"));
-    }
-    else if (stage == 3)
-    {
-        // We have to wait until the 4th stage (stage=3) with scheduling messages,
-        // because interface registration and IPv6 configuration takes places
-        // in the first two stages.
+        rt6->setIsHomeAgent(par("isHomeAgent").boolValue());
+        rt6->setIsMobileNode(par("isMobileNode").boolValue());
 
         ift = InterfaceTableAccess().get();
         ipv6nd = IPv6NeighbourDiscoveryAccess().get(); //Zarrar Yousaf 17.07.07
@@ -157,7 +149,7 @@ void xMIPv6::initialize(int stage)
 
         WATCH_VECTOR(cnList);
         WATCH_MAP(interfaceCoAList);
-     }
+    }
 }
 
 void xMIPv6::handleMessage(cMessage *msg)

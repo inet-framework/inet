@@ -27,15 +27,14 @@
 Define_Module(TraCITestApp);
 
 
-int TraCITestApp::numInitStages() const
-{
-    return 1 + 1;
-}
+int TraCITestApp::numInitStages() const {return STAGE_NODESTATUS_AVAILABLE + 1;}
 
 void TraCITestApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    if (stage == 0) {
+
+    if (stage == STAGE_DO_LOCAL)
+    {
         testNumber = par("testNumber");
 
         mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
@@ -47,7 +46,7 @@ void TraCITestApp::initialize(int stage)
 
         EV_DEBUG << "TraCITestApp initialized with testNumber=" << testNumber << std::endl;
     }
-    else if (stage == 1)
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

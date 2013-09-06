@@ -29,6 +29,7 @@
 
 Define_Module(IPvXTrafGen);
 
+simsignal_t IPvXTrafGen::rcvdPkSignal = SIMSIGNAL_NULL;
 simsignal_t IPvXTrafGen::sentPkSignal = SIMSIGNAL_NULL;
 
 IPvXTrafGen::IPvXTrafGen()
@@ -44,15 +45,21 @@ IPvXTrafGen::~IPvXTrafGen()
     cancelAndDelete(timer);
 }
 
-int IPvXTrafGen::numInitStages() const { return 4; }
+int IPvXTrafGen::numInitStages() const
+{
+    static int stages = std::max(STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP, STAGE_DO_INIT_APPLICATION) + 1;
+    return stages;
+}
 
 void IPvXTrafGen::initialize(int stage)
 {
-    IPvXTrafSink::initialize(stage);
+    cSimpleModule::initialize(stage);
+
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage == 3)
+    if (stage == STAGE_DO_LOCAL)
     {
+        rcvdPkSignal = registerSignal("rcvdPk");
         sentPkSignal = registerSignal("sentPk");
 
         protocol = par("protocol");
@@ -66,17 +73,33 @@ void IPvXTrafGen::initialize(int stage)
         sendIntervalPar = &par("sendInterval");
 
         numSent = 0;
+        numReceived = 0;
         WATCH(numSent);
+        WATCH(numReceived);
+    }
+    if (stage == STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP)
+    {
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(protocol);
+    }
+    if (stage == STAGE_DO_INIT_APPLICATION)
+    {
+        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
+        ASSERT(stage >= STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP);
 
         timer = new cMessage("sendTimer");
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
-        IPSocket ipSocket(gate("ipOut"));
-        ipSocket.registerProtocol(protocol);
-
-        if (isNodeUp() && isEnabled())
-            scheduleNextPacket(-1);
+        if (isNodeUp())
+            startApp();
     }
+}
+
+void IPvXTrafGen::startApp()
+{
+    if (isEnabled())
+        scheduleNextPacket(-1);
 }
 
 void IPvXTrafGen::handleMessage(cMessage *msg)
@@ -123,8 +146,8 @@ bool IPvXTrafGen::handleOperationStage(LifecycleOperation *operation, int stage,
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER && isEnabled())
-            scheduleNextPacket(-1);
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+            startApp();
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
@@ -210,3 +233,40 @@ void IPvXTrafGen::sendPacket()
     send(payload, "ipOut");
     numSent++;
 }
+
+void IPvXTrafGen::printPacket(cPacket *msg)
+{
+    Address src, dest;
+    int protocol = -1;
+
+    if (dynamic_cast<IPv4ControlInfo *>(msg->getControlInfo()) != NULL)
+    {
+        IPv4ControlInfo *ctrl = (IPv4ControlInfo *)msg->getControlInfo();
+        src = ctrl->getSrcAddr();
+        dest = ctrl->getDestAddr();
+        protocol = ctrl->getProtocol();
+    }
+    else if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo()) != NULL)
+    {
+        IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->getControlInfo();
+        src = ctrl->getSrcAddr();
+        dest = ctrl->getDestAddr();
+        protocol = ctrl->getProtocol();
+    }
+
+    EV << msg << endl;
+    EV << "Payload length: " << msg->getByteLength() << " bytes" << endl;
+
+    if (protocol != -1)
+        EV << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
+}
+
+void IPvXTrafGen::processPacket(cPacket *msg)
+{
+    emit(rcvdPkSignal, msg);
+    EV << "Received packet: ";
+    printPacket(msg);
+    delete msg;
+    numReceived++;
+}
+

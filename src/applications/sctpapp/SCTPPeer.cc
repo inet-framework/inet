@@ -70,13 +70,16 @@ SCTPPeer::~SCTPPeer()
     rcvdBytesPerAssoc.clear();
 }
 
-int SCTPPeer::numInitStages() const { return 2; }
+int SCTPPeer::numInitStages() const
+{
+    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_INIT_APPLICATION) + 1;
+}
 
 void SCTPPeer::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
         WATCH(numSessions);
@@ -88,6 +91,11 @@ void SCTPPeer::initialize(int stage)
         sentPkSignal = registerSignal("sentPk");
         echoedPkSignal = registerSignal("echoedPk");
         rcvdPkSignal = registerSignal("rcvdPk");
+    }
+    if (stage == STAGE_DO_INIT_APPLICATION)
+    {
+        ASSERT(stage >= STAGE_TRANSPORT_LAYER_AVAILABLE);
+        ASSERT(stage >= STAGE_IP_ADDRESS_AVAILABLE);
 
         // parameters
         const char *addressesString = par("localAddress");
@@ -119,7 +127,7 @@ void SCTPPeer::initialize(int stage)
         clientSocket.setCallbackObject(this);
         clientSocket.setOutputGate(gate("sctpOut"));
 
-        if ((simtime_t)par("startTime")>0)
+        if ((simtime_t)par("startTime") > SIMTIME_ZERO)     //FIXME is invalid the startTime == 0 ????
         {
             connectTimer = new cMessage("ConnectTimer");
             connectTimer->setKind(MSGKIND_CONNECT);
@@ -129,7 +137,7 @@ void SCTPPeer::initialize(int stage)
         shutdownReceived = false;
         sendAllowed = true;
     }
-    else if (stage == 1)
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

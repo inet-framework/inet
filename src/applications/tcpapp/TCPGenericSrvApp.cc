@@ -14,6 +14,7 @@
 
 #include "TCPGenericSrvApp.h"
 
+#include "AddressResolver.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 #include "TCPSocket.h"
@@ -27,15 +28,18 @@ simsignal_t TCPGenericSrvApp::rcvdPkSignal = SIMSIGNAL_NULL;
 simsignal_t TCPGenericSrvApp::sentPkSignal = SIMSIGNAL_NULL;
 
 
-int TCPGenericSrvApp::numInitStages() const { return 2; }
+int TCPGenericSrvApp::numInitStages() const
+{
+    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_INIT_APPLICATION) + 1;
+    return stages;
+}
 
 void TCPGenericSrvApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
-        int localPort = par("localPort");
         delay = par("replyDelay");
         maxMsgDelay = 0;
 
@@ -48,16 +52,21 @@ void TCPGenericSrvApp::initialize(int stage)
         WATCH(msgsSent);
         WATCH(bytesRcvd);
         WATCH(bytesSent);
+    }
+    if (stage == STAGE_DO_INIT_APPLICATION)
+    {
+        ASSERT(stage >= STAGE_TRANSPORT_LAYER_AVAILABLE);
+        ASSERT(stage >= STAGE_IP_ADDRESS_AVAILABLE);
 
-        //TODO should use AddressResolver in stage 3
         const char *localAddress = par("localAddress");
+        int localPort = par("localPort");
         TCPSocket socket;
         socket.setOutputGate(gate("tcpOut"));
         socket.setDataTransferMode(TCP_TRANSFER_OBJECT);
-        socket.bind(localAddress[0] ? Address(localAddress) : Address(), localPort);
+        socket.bind(localAddress[0] ? AddressResolver().resolve(localAddress) : Address(), localPort);
         socket.listen();
     }
-    else if (stage == 1)
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

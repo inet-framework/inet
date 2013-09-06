@@ -115,13 +115,17 @@ UDP::~UDP()
     clearAllSockets();
 }
 
-int UDP::numInitStages() const { return 2; }
+int UDP::numInitStages() const
+{
+    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP) + 1;
+    return stages;
+}
 
 void UDP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         WATCH_PTRMAP(socketsByIdMap);
         WATCH_MAP(socketsByPortMap);
@@ -145,11 +149,13 @@ void UDP::initialize(int stage)
         droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");
 
         isOperational = false;
-
+    }
+    if (stage == STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP)
+    {
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(IP_PROT_UDP);
     }
-    else if (stage == 1)
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

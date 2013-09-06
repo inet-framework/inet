@@ -24,12 +24,13 @@
 #endif
 
 
-int Ieee80211MgmtAPBase::numInitStages() const {return 2;}
+int Ieee80211MgmtAPBase::numInitStages() const { return Ieee80211MgmtBase::numInitStages(); }
 
 void Ieee80211MgmtAPBase::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
-    if (stage == 0)
+
+    if (stage == STAGE_DO_LOCAL)
     {
         isConnectedToHL = gate("upperLayerOut")->getPathEndGate()->isConnected();
         const char * encDec = par("encapDecap").stringValue();

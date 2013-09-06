@@ -28,7 +28,8 @@ class INET_API NetfilterInfoHook : public cSimpleModule, public INetfilter::IHoo
     INetfilter *netfilter;
 
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const;
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
@@ -62,11 +63,20 @@ class INET_API NetfilterInfoHook : public cSimpleModule, public INetfilter::IHoo
 
 Define_Module(NetfilterInfoHook);
 
-
-void NetfilterInfoHook::initialize()
+int NetfilterInfoHook::numInitStages() const
 {
-    netfilter = check_and_cast<INetfilter*>(findModuleWhereverInNode("ip", this));
-    netfilter->registerHook(0, this);
+    return STAGE_IP_LAYER_READY_FOR_HOOK_REGISTRATION + 1;
+}
+
+void NetfilterInfoHook::initialize(int stage)
+{
+    cSimpleModule::initialize(stage);
+
+    if (stage == STAGE_IP_LAYER_READY_FOR_HOOK_REGISTRATION)
+    {
+        netfilter = check_and_cast<INetfilter*>(findModuleWhereverInNode("ip", this));
+        netfilter->registerHook(0, this);
+    }
 }
 
 void NetfilterInfoHook::handleMessage(cMessage *msg)

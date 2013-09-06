@@ -37,14 +37,15 @@ TractorMobility::TractorMobility()
 
 int TractorMobility::numInitStages() const
 {
-    return std::max(STAGE_LOCAL_BEGIN + 1, LineSegmentsMobilityBase::numInitStages());
+    return std::max(STAGE_DO_LOCAL + 1, LineSegmentsMobilityBase::numInitStages());
 }
 
 void TractorMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
+
     EV_TRACE << "initializing TractorMobility stage " << stage << endl;
-    if (stage == STAGE_LOCAL_BEGIN)
+    if (stage == STAGE_DO_LOCAL)
     {
         speed = par("speed");
         x1 = par("x1");

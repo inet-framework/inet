@@ -43,13 +43,17 @@ DHCPServer::~DHCPServer()
 {
 }
 
-int DHCPServer::numInitStages() const { return 4; }
+int DHCPServer::numInitStages() const
+{
+    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_INIT_APPLICATION) + 1;
+    return stages;
+}
 
 void DHCPServer::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 1)
+    if (stage == STAGE_DO_LOCAL)
     {
         numSent = 0;
         numReceived = 0;
@@ -63,24 +67,27 @@ void DHCPServer::initialize(int stage)
 
         // process delay
         proc_delay = 0.001; // 100ms
-
-        //TODO should check nodeStatus
-
-        IInterfaceTable* ift = InterfaceTableAccess().get();
-        ie = ift->getInterfaceByName(par("interface"));
-
-        nb = NotificationBoardAccess().get();
-        nb->subscribe(this, NF_INTERFACE_CREATED);
-        nb->subscribe(this, NF_INTERFACE_DELETED);
-
+    }
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
-    if (stage == 2)
+    if (stage == STAGE_DO_INIT_APPLICATION)
     {
+        ASSERT(stage >= STAGE_INTERFACEENTRY_REGISTERED);
+        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
+        ASSERT(stage >= STAGE_TRANSPORT_LAYER_AVAILABLE);
+
+        nb = NotificationBoardAccess().get();
+        nb->subscribe(this, NF_INTERFACE_CREATED);
+        nb->subscribe(this, NF_INTERFACE_DELETED);
+
+        IInterfaceTable* ift = InterfaceTableAccess().get();
+        ie = ift->getInterfaceByName(par("interface"));
         if (ie != NULL)    //FIXME: if (nodeUP)
             openSocket();
     }

@@ -70,24 +70,18 @@ ARP::ARP()
     nb = NULL;
 }
 
-int ARP::numInitStages() const {return 5;}
+int ARP::numInitStages() const { return STAGE_IP_ADDRESS_AVAILABLE + 1; }
 
 void ARP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage==0)
+    if (stage == STAGE_DO_LOCAL)
     {
         sentReqSignal = registerSignal("sentReq");
         sentReplySignal = registerSignal("sentReply");
         initiatedResolutionSignal = registerSignal("initiatedResolution");
         failedResolutionSignal = registerSignal("failedResolution");
-    }
-
-    if (stage==4)
-    {
-        ift = InterfaceTableAccess().get();
-        rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
 
         retryTimeout = par("retryTimeout");
         retryCount = par("retryCount");
@@ -97,7 +91,6 @@ void ARP::initialize(int stage)
 
         pendingQueue.setName("pendingQueue");
 
-        isUp = isNodeUp();
         netwOutGate = gate("netwOut");
 
         // init statistics
@@ -110,6 +103,18 @@ void ARP::initialize(int stage)
 
         WATCH_PTRMAP(arpCache);
         WATCH_PTRMAP(globalArpCache);
+    }
+    if (stage == STAGE_IP_ADDRESS_AVAILABLE)
+    {
+        ASSERT(stage > STAGE_DO_CONFIGURE_IP_ADDRESSES);
+        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
+        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
+        ASSERT(stage >= STAGE_INTERFACEENTRY_REGISTERED);
+
+        ift = InterfaceTableAccess().get();
+        rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+
+        isUp = isNodeUp();
 
         // register our addresses in the global cache (even if globalARP is locally turned off)
         for (int i=0; i<ift->getNumInterfaces(); i++)

@@ -42,7 +42,7 @@ void HttpServerEvilA::initialize(int stage)
 {
     HttpServer::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         badLow = par("minBadRequests");
         badHigh = par("maxBadRequests");

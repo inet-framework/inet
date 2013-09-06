@@ -39,13 +39,12 @@ MovingMobilityBase::~MovingMobilityBase()
     cancelAndDelete(moveTimer);
 }
 
-int MovingMobilityBase::numInitStages() const {return 3;}
-
 void MovingMobilityBase::initialize(int stage)
 {
     MobilityBase::initialize(stage);
+
     EV_TRACE << "initializing MovingMobilityBase stage " << stage << endl;
-    if (stage == STAGE_LOCAL_BEGIN) {
+    if (stage == STAGE_DO_LOCAL) {
         moveTimer = new cMessage("move");
         updateInterval = par("updateInterval");
     }

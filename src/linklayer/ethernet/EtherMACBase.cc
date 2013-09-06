@@ -16,6 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <stdlib.h>
+
 #include "EtherMACBase.h"
 
 #include "EtherFrame_m.h"
@@ -158,13 +160,17 @@ EtherMACBase::~EtherMACBase()
     cancelAndDelete(endPauseMsg);
 }
 
-int EtherMACBase::numInitStages() const { return 2; }
+int EtherMACBase::numInitStages() const
+{
+    static int stages = STAGE_DO_REGISTER_INTERFACE + 1;
+    return std::max(stages, MACBase::numInitStages());
+}
 
 void EtherMACBase::initialize(int stage)
 {
     MACBase::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         physInGate = gate("phys$i");
         physOutGate = gate("phys$o");
@@ -175,13 +181,18 @@ void EtherMACBase::initialize(int stage)
         initializeFlags();
 
         initializeMACAddress();
-        initializeQueueModule();
         initializeStatistics();
-
+    }
+    if (stage == STAGE_DO_REGISTER_INTERFACE)
+    {
         registerInterface(); // needs MAC address
-
+        ASSERT(stage >= STAGE_IPASSIVEQUEUE_AVAILABLE); // should be stage larger than 0 for use queue module member functions
+        ASSERT(stage >= STAGE_CHANNEL_AVAILABLE);
+        initializeQueueModule();
         readChannelParameters(true);
-
+    }
+    if (stage == STAGE_DO_LOCAL)
+    {
         lastTxFinishTime = -1.0; // not equals with current simtime.
 
         // initialize self messages

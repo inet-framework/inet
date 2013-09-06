@@ -328,21 +328,25 @@ void IGMPv2::deleteRouterGroupData(InterfaceEntry *ie, const IPv4Address &group)
     }
 }
 
-int IGMPv2::numInitStages() const  {return 2;}
+int IGMPv2::numInitStages() const
+{
+    static int stages = std::max(std::max(
+            STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP,
+            STAGE_NOTIFICATIONBOARD_AVAILABLE),
+            STAGE_INTERFACEENTRY_REGISTERED
+            ) + 1;
+    return stages;
+}
 
 void IGMPv2::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         ift = InterfaceTableAccess().get();
         rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
         nb = NotificationBoardAccess().get();
-
-        nb->subscribe(this, NF_INTERFACE_DELETED);
-        nb->subscribe(this, NF_IPv4_MCAST_JOIN);
-        nb->subscribe(this, NF_IPv4_MCAST_LEAVE);
 
         enabled = par("enabled");
         externalRouter = gate("routerIn")->isPathOK() && gate("routerOut")->isPathOK();
@@ -387,11 +391,19 @@ void IGMPv2::initialize(int stage)
         WATCH(numReportsRecv);
         WATCH(numLeavesSent);
         WATCH(numLeavesRecv);
-
+    }
+    if (stage == STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP)
+    {
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(IP_PROT_IGMP);
     }
-    else if (stage == 1)
+    if (stage == STAGE_NOTIFICATIONBOARD_AVAILABLE)
+    {
+        nb->subscribe(this, NF_INTERFACE_DELETED);
+        nb->subscribe(this, NF_IPv4_MCAST_JOIN);
+        nb->subscribe(this, NF_IPv4_MCAST_LEAVE);
+    }
+    if (stage == STAGE_INTERFACEENTRY_REGISTERED)
     {
         for (int i = 0; i < (int)ift->getNumInterfaces(); ++i)
         {

@@ -32,17 +32,24 @@
 
 Define_Module(HttpServer);
 
-
 int HttpServer::numInitStages() const
 {
-    return std::max(0 + 1, HttpServerBase::numInitStages());
+    return std::max(STAGE_DO_INIT_APPLICATION + 1, HttpServerBase::numInitStages());
 }
 
 void HttpServer::initialize(int stage)
 {
     HttpServerBase::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
+    {
+        numBroken = 0;
+        socketsOpened = 0;
+
+        WATCH(numBroken);
+        WATCH(socketsOpened);
+    }
+    if (stage == STAGE_DO_INIT_APPLICATION)
     {
         EV_DEBUG << "Initializing server component (sockets version)" << endl;
 
@@ -54,12 +61,6 @@ void HttpServer::initialize(int stage)
         listensocket.bind(port);
         listensocket.setCallbackObject(this);
         listensocket.listen();
-
-        numBroken = 0;
-        socketsOpened = 0;
-
-        WATCH(numBroken);
-        WATCH(socketsOpened);
     }
 }
 

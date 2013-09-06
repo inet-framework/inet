@@ -29,13 +29,20 @@ Define_Module(TraCIDemo);
 
 int TraCIDemo::numInitStages() const
 {
-    return 3 + 1;
+    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_INIT_APPLICATION) + 1;
+    return stages;
 }
 
-void TraCIDemo::initialize(int stage) {
+void TraCIDemo::initialize(int stage)
+{
     cSimpleModule::initialize(stage);
 
-    if (stage == 1)
+    if (stage == STAGE_DO_LOCAL)
+    {
+        mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
+        sentMessage = false;
+    }
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
@@ -43,13 +50,12 @@ void TraCIDemo::initialize(int stage) {
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
-    else if (stage == 3)
+    if (stage == STAGE_DO_INIT_APPLICATION)
     {
-        mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
+        ASSERT(stage >= STAGE_TRANSPORT_LAYER_AVAILABLE);
+
         traci = TraCIMobilityAccess().get();
         traci->subscribe(mobilityStateChangedSignal, this);
-
-        sentMessage = false;
 
         setupLowerLayer();
     }

@@ -447,11 +447,11 @@ OLSR_MsgTimer::expire()
 
 ///
 ///
-int OLSR::numInitStages() const  { return 4 + 1; }
+int OLSR::numInitStages() const { return STAGE_DO_INIT_ROUTING_PROTOCOLS + 1; }
 
 void OLSR::initialize(int stage)
 {
-    if (stage == 4)
+    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
     {
 
        if (isInMacLayer())
@@ -489,6 +489,8 @@ void OLSR::initialize(int stage)
         msg_seq_ = OLSR_MAX_SEQ_NUM;
         ansn_ = OLSR_MAX_SEQ_NUM;
 
+        ASSERT(stage >= STAGE_IP_LAYER_READY_FOR_HOOK_REGISTRATION);
+        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
         registerRoutingModule();
         ra_addr_ = getAddress();
 

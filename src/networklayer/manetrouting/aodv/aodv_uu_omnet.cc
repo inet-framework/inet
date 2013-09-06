@@ -65,7 +65,7 @@ int AODVUU::totalRerrSend=0;
 int AODVUU::totalRerrRec=0;
 #endif
 
-int NS_CLASS numInitStages() const  {return 5;}
+int NS_CLASS numInitStages() const  { return STAGE_DO_INIT_ROUTING_PROTOCOLS + 1; }
 
 void NS_CLASS initialize(int stage)
 {
@@ -76,7 +76,7 @@ void NS_CLASS initialize(int stage)
        after binding them! The desired default values should be set in
        ~ns/tcl/lib/ns-default.tcl instead.
      */
-    if (stage==4)
+    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
     {
 #ifndef AODV_GLOBAL_STATISTISTIC
         iswrite = false;
@@ -145,6 +145,8 @@ void NS_CLASS initialize(int stage)
         }
 
         /* Initialize common manet routing protocol structures */
+        ASSERT(stage >= STAGE_IP_LAYER_READY_FOR_HOOK_REGISTRATION);
+        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
         registerRoutingModule();
         if (llfeedback)
             linkLayerFeeback();

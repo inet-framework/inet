@@ -90,31 +90,46 @@ void SCTP::bindPortForUDP()
     udpSocket.bind(SCTP_UDP_PORT);
 }
 
-void SCTP::initialize()
+int SCTP::numInitStages() const { return STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP + 1; }
+
+void SCTP::initialize(int stage)
 {
-    nextEphemeralPort = (uint16)(intrand(10000) + 30000);
+    cSimpleModule::initialize(stage);
 
-    cModule *netw = simulation.getSystemModule();
-
-    testing = netw->hasPar("testing") && netw->par("testing").boolValue();
-    if (testing) {
-    }
-    if (netw->hasPar("testTimeout"))
+    if (stage == STAGE_DO_LOCAL)
     {
-        testTimeout = (simtime_t)netw->par("testTimeout");
-    }
-    this->auth = (bool)par("auth");
-    this->pktdrop = (bool)par("packetDrop");
-    this->sackNow = (bool)par("sackNow");
-    numPktDropReports = 0;
-    numPacketsReceived = 0;
-    numPacketsDropped = 0;
-    sizeAssocMap = 0;
-    if ((bool)par("udpEncapsEnabled"))
-        bindPortForUDP();
+        this->auth = (bool)par("auth");
+        this->pktdrop = (bool)par("packetDrop");
+        this->sackNow = (bool)par("sackNow");
+        numPktDropReports = 0;
+        numPacketsReceived = 0;
+        numPacketsDropped = 0;
+        sizeAssocMap = 0;
+        nextEphemeralPort = (uint16)(intrand(10000) + 30000);
 
-    IPSocket socket(gate("to_ip"));
-    socket.registerProtocol(IP_PROT_SCTP);
+        cModule *netw = simulation.getSystemModule();
+        testing = netw->hasPar("testing") && netw->par("testing").boolValue();
+        if (testing) {
+        }
+        if (netw->hasPar("testTimeout"))
+        {
+            testTimeout = (simtime_t)netw->par("testTimeout");
+        }
+    }
+
+    if (stage == STAGE_TRANSPORT_LAYER_AVAILABLE)
+    {
+        if (par("udpEncapsEnabled").boolValue())
+        {
+            bindPortForUDP();
+        }
+    }
+
+    if (stage == STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP)
+    {
+        IPSocket socket(gate("to_ip"));
+        socket.registerProtocol(IP_PROT_SCTP);
+    }
 }
 
 

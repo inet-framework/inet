@@ -42,7 +42,7 @@ void HttpServerDirect::initialize(int stage)
 {
     HttpServerBase::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         EV_DEBUG << "Initializing direct server component\n";
 

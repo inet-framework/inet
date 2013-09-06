@@ -38,10 +38,10 @@ int HttpBrowserDirect::numInitStages() const { return HttpBrowserBase::numInitSt
 
 void HttpBrowserDirect::initialize(int stage)
 {
+    EV_DEBUG << "Initializing HTTP direct browser component - stage " << stage << endl;
     HttpBrowserBase::initialize(stage);
-    EV_DEBUG << "Initializing HTTP direct browser component\n";
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         // linkSpeed is used to model transmission delay.
         linkSpeed = par("linkSpeed");

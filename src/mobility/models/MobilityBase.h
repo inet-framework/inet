@@ -28,9 +28,6 @@
 #include "Coord.h"
 #include "IMobility.h"
 
-#define STAGE_LOCAL_BEGIN 0
-#define STAGE_MOBILITY_INITIALIZE_POSITION 1
-
 /**
  * @brief Abstract base class for mobility modules.
  *

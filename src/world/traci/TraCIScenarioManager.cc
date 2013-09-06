@@ -47,20 +47,21 @@ TraCIScenarioManager::~TraCIScenarioManager() {
     cancelAndDelete(executeOneTimestepTrigger);
 }
 
-int TraCIScenarioManager::numInitStages() const
-{
-    return 1 + 1;
-}
+int TraCIScenarioManager::numInitStages() const { return STAGE_DO_LOCAL + 1; }
 
 void TraCIScenarioManager::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    if (stage == 1)
+
+    if (stage == STAGE_DO_LOCAL)
     {
         connectAt = par("connectAt");
         firstStepAt = par("firstStepAt");
         updateInterval = par("updateInterval");
-        if (firstStepAt == -1) firstStepAt = connectAt + updateInterval;
+        if (firstStepAt == -1)
+            firstStepAt = connectAt + updateInterval;
+        if (firstStepAt <= connectAt)
+            throw cRuntimeError("bad parameters: firstStepAt should be larger than connectAt");
         moduleType = par("moduleType").stdstringValue();
         moduleName = par("moduleName").stdstringValue();
         moduleDisplayString = par("moduleDisplayString").stdstringValue();
@@ -104,7 +105,6 @@ void TraCIScenarioManager::initialize(int stage)
 
         socketPtr = 0;
 
-        ASSERT(firstStepAt > connectAt);
         connectAndStartTrigger = new cMessage("connect");
         scheduleAt(connectAt, connectAndStartTrigger);
         executeOneTimestepTrigger = new cMessage("step");

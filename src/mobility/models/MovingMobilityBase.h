@@ -66,8 +66,6 @@ class INET_API MovingMobilityBase : public MobilityBase
 
     virtual ~MovingMobilityBase();
 
-    virtual int numInitStages() const;
-
     virtual void initialize(int stage);
 
     virtual void initializePosition();

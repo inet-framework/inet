@@ -36,7 +36,7 @@ IdealChannelModelAccess::~IdealChannelModelAccess()
     }
 }
 
-int IdealChannelModelAccess::numInitStages() const { return 3; }
+int IdealChannelModelAccess::numInitStages() const { return STAGE_LOCATION_AVAILABLE + 1; }
 
 /**
  * Upon initialization IdealChannelModelAccess registers the nic parent module
@@ -46,7 +46,7 @@ void IdealChannelModelAccess::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         cc = dynamic_cast<IdealChannelModel *>(simulation.getModuleByPath("channelControl"));
         if (!cc)
@@ -59,7 +59,7 @@ void IdealChannelModelAccess::initialize(int stage)
         mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
         hostModule->subscribe(mobilityStateChangedSignal, this);
     }
-    else if (stage == 2)
+    if (stage == STAGE_LOCATION_AVAILABLE)
     {
         if (!positionUpdateArrived)
             throw cRuntimeError("The coordinates of '%s' host are invalid. Please configure Mobility for this host.", hostModule->getFullPath().c_str());

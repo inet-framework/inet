@@ -72,6 +72,8 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         void sendRequest(bool last = true);
 
     public:
+        SCTPClient();
+        virtual ~SCTPClient();
         struct pathStatus
         {
             bool active;

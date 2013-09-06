@@ -32,13 +32,15 @@
 /**
  * IP traffic generator application. See NED for more info.
  */
-class INET_API IPvXTrafGen : public IPvXTrafSink
+class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
 {
   protected:
     enum Kinds {START=100, NEXT};
     cMessage *timer;
     int protocol;
     int numPackets;
+    int numReceived;
+    bool isOperational;
     simtime_t startTime;
     simtime_t stopTime;
     std::vector<Address> destAddresses;
@@ -48,6 +50,7 @@ class INET_API IPvXTrafGen : public IPvXTrafSink
 
     int numSent;
     static simsignal_t sentPkSignal;
+    static simsignal_t rcvdPkSignal;
 
   public:
     IPvXTrafGen();
@@ -67,6 +70,12 @@ class INET_API IPvXTrafGen : public IPvXTrafSink
     virtual int numInitStages() const;
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
+
+    virtual void startApp();
+
+    virtual void printPacket(cPacket *msg);
+    virtual void processPacket(cPacket *msg);
+
 };
 
 #endif

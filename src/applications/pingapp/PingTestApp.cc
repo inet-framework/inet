@@ -48,16 +48,13 @@ simsignal_t PingTestApp::pingTxSeqSignal = SIMSIGNAL_NULL;
 simsignal_t PingTestApp::pingRxSeqSignal = SIMSIGNAL_NULL;
 
 
-int PingTestApp::numInitStages() const
-{
-    return 1 + 1;
-}
+int PingTestApp::numInitStages() const { return STAGE_NODESTATUS_AVAILABLE + 1; }
 
 void PingTestApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         // read params
         // (defer reading srcAddr/destAddr to when ping starts, maybe
@@ -98,7 +95,7 @@ void PingTestApp::initialize(int stage)
             scheduleAt(startTime, msg);
         }
     }
-    else if (stage == 1)
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

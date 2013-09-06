@@ -44,13 +44,18 @@ GenericRoutingTable::~GenericRoutingTable()
         delete multicastRoutes[i];
 }
 
-int GenericRoutingTable::numInitStages() const  {return 4;}
+int GenericRoutingTable::numInitStages() const
+{
+    static int stages = std::max(STAGE_INTERFACEENTRY_REGISTERED, std::max(STAGE_DO_ASSIGN_ROUTERID, STAGE_NOTIFICATIONBOARD_AVAILABLE)) + 1;
+
+    return stages;
+}
 
 void GenericRoutingTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage==0)
+    if (stage == STAGE_DO_LOCAL)
     {
         // get a pointer to the NotificationBoard module and IInterfaceTable
         nb = NotificationBoardAccess().get();
@@ -68,19 +73,22 @@ void GenericRoutingTable::initialize(int stage)
         forwardingEnabled = par("forwardingEnabled").boolValue();
         multicastForwardingEnabled = par("multicastForwardingEnabled");
 
-        nb->subscribe(this, NF_INTERFACE_CREATED);
-        nb->subscribe(this, NF_INTERFACE_DELETED);
-        nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
-        nb->subscribe(this, NF_INTERFACE_CONFIG_CHANGED);
-        nb->subscribe(this, NF_INTERFACE_IPv4CONFIG_CHANGED);
-
 //TODO        WATCH_PTRVECTOR(routes);
 //TODO        WATCH_PTRVECTOR(multicastRoutes);
         WATCH(forwardingEnabled);
         WATCH(multicastForwardingEnabled);
         WATCH(routerId);
     }
-    else if (stage==1)
+    if (stage == STAGE_NOTIFICATIONBOARD_AVAILABLE)
+    {
+        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
+        nb->subscribe(this, NF_INTERFACE_CREATED);
+        nb->subscribe(this, NF_INTERFACE_DELETED);
+        nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
+        nb->subscribe(this, NF_INTERFACE_CONFIG_CHANGED);
+        nb->subscribe(this, NF_INTERFACE_IPv4CONFIG_CHANGED);
+    }
+    if (stage == STAGE_INTERFACEENTRY_REGISTERED)
     {
 //        // L2 modules register themselves in stage 0, so we can only configure
 //        // the interfaces in stage 1.
@@ -105,10 +113,11 @@ void GenericRoutingTable::initialize(int stage)
 //        if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
 //            routerId = IPv4Address(routerIdStr);
     }
-    else if (stage==3)
+    if (stage == STAGE_DO_ASSIGN_ROUTERID)
     {
-        // routerID selection must be after stage==2 when network autoconfiguration
-        // assigns interface addresses
+        ASSERT(stage >= STAGE_IP_ADDRESS_AVAILABLE);
+        // routerID selection must be after stage==STAGE_AUTOCONFIGURE_ADDRESSES
+        // when network autoconfiguration assigns interface addresses
         configureRouterId();
 
 //        // we don't use notifications during initialize(), so we do it manually.

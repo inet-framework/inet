@@ -28,16 +28,23 @@ Define_Module(NodeStatus);
 simsignal_t NodeStatus::nodeStatusChangedSignal = SIMSIGNAL_NULL;
 
 
+int NodeStatus::numInitStages() const
+{
+    return STAGE_DO_LOCAL + 1;
+}
+
 void NodeStatus::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == STAGE_DO_LOCAL)
     {
         nodeStatusChangedSignal = registerSignal("nodeStatusChanged");
         state = getStateByName(par("initialStatus"));
         origIcon = getDisplayString().getTagArg("i", 0);
         updateDisplayString();
+
+        ASSERT(stage < STAGE_NODESTATUS_AVAILABLE);
     }
 }
 
@@ -52,47 +59,47 @@ NodeStatus::State NodeStatus::getStateByName(const char *name)
     return (State)state;
 }
 
-bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int opStage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     cModule *node = findContainingNode(this);
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == 0) {
+        if (opStage == 0) {
             EV << node->getFullPath() << " starting up" << endl;
             if(getState() != DOWN)
                 throw cRuntimeError("Current node status is not 'down' at NodeStartOperation");
             setState(GOING_UP);
         }
         // NOTE: this is not an 'else if' so that it works if there's only 1 stage
-        if (stage == operation->getNumStages() - 1) {
+        if (opStage == operation->getNumStages() - 1) {
             ASSERT(getState()==GOING_UP);
             setState(UP);
             EV << node->getFullPath() << " started" << endl;
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (stage == 0) {
+        if (opStage == 0) {
             EV << node->getFullPath() << " shutting down" << endl;
             if(getState() != UP)
                 throw cRuntimeError("Current node status is not 'up' at NodeShutdownOperation");
             setState(GOING_DOWN);
         }
         // NOTE: this is not an 'else if' so that it works if there's only 1 stage
-        if (stage == operation->getNumStages() - 1) {
+        if (opStage == operation->getNumStages() - 1) {
             ASSERT(getState()==GOING_DOWN);
             setState(DOWN);
             EV << node->getFullPath() << " shut down" << endl;
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == 0) {
+        if (opStage == 0) {
             EV << node->getFullPath() << " crashing" << endl;
             if(getState() != UP)
                 throw cRuntimeError("Current node status is not 'up' at NodeCrashOperation");
             setState(GOING_DOWN);
         }
         // NOTE: this is not an 'else if' so that it works if there's only 1 stage
-        if (stage == operation->getNumStages() - 1) {
+        if (opStage == operation->getNumStages() - 1) {
             ASSERT(getState()==GOING_DOWN);
             setState(DOWN);
             EV << node->getFullPath() << " crashed" << endl;

@@ -30,27 +30,22 @@
 Define_Module(FlatNetworkConfigurator6);
 
 
-int FlatNetworkConfigurator6::numInitStages() const { return 4; }
+int FlatNetworkConfigurator6::numInitStages() const { return STAGE_DO_CONFIGURE_IP_ADDRESSES + 1; }
 
 void FlatNetworkConfigurator6::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    // FIXME refactor: make routers[] array? (std::vector<cTopology::Node*>)
-    // FIXME: spare common beginning for all stages?
-
-    cTopology topo("topo");
-
-    // extract topology
-    topo.extractByProperty("node");
-    EV << "cTopology found " << topo.getNumNodes() << " nodes\n";
-
-    if (stage==2)
+    if (stage == STAGE_DO_CONFIGURE_IP_ADDRESSES)
     {
+        cTopology topo("topo");
+
+        // extract topology
+        topo.extractByProperty("node");
+        EV << "cTopology found " << topo.getNumNodes() << " nodes\n";
+
         configureAdvPrefixes(topo);
-    }
-    else if (stage==3)
-    {
+
         addOwnAdvPrefixRoutes(topo);
         addStaticRoutes(topo);
     }

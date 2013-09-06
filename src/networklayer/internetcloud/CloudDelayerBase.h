@@ -35,7 +35,8 @@ class INET_API CloudDelayerBase : public cSimpleModule, public INetfilter::IHook
     CloudDelayerBase();
     ~CloudDelayerBase();
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const;
     virtual void finish();
     virtual void handleMessage(cMessage *msg);
 

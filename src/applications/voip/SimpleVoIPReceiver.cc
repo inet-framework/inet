@@ -61,21 +61,17 @@ SimpleVoIPReceiver::~SimpleVoIPReceiver()
     cancelAndDelete(selfTalkspurtFinished);
 }
 
-int SimpleVoIPReceiver::numInitStages() const {return 4;}
+int SimpleVoIPReceiver::numInitStages() const
+{
+    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_INIT_APPLICATION) + 1;
+    return stages;
+}
 
 void SimpleVoIPReceiver::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 1)
-    {
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
-    else if (stage == 3)
+    if (stage == STAGE_DO_LOCAL)
     {
         emodel_Ie = par("emodel_Ie");
         emodel_Bpl = par("emodel_Bpl");
@@ -86,15 +82,7 @@ void SimpleVoIPReceiver::initialize(int stage)
         playoutDelay = par("playoutDelay");
         mosSpareTime = par("mosSpareTime");
 
-        int port = par("localPort");
-        EV << "VoIPReceiver::initialize - binding to port: local:" << port << endl;
-        if (port != -1) {
-            socket.setOutputGate(gate("udpOut"));
-            socket.bind(port);
-        }
-
         currentTalkspurt.talkspurtID = -1;
-        selfTalkspurtFinished = new cMessage("selfTalkspurtFinished");
 
         packetLossRateSignal = registerSignal("VoIPPacketLossRate");
         packetDelaySignal = registerSignal("VoIPPacketDelay");
@@ -102,6 +90,27 @@ void SimpleVoIPReceiver::initialize(int stage)
         playoutLossRateSignal = registerSignal("VoIPPlayoutLossRate");
         mosSignal = registerSignal("VoIPMosSignal");
         taildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
+    }
+    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
+    if (stage == STAGE_DO_INIT_APPLICATION)
+    {
+        ASSERT(stage >= STAGE_TRANSPORT_LAYER_AVAILABLE);
+
+        int port = par("localPort");
+        EV << "VoIPReceiver::initialize - binding to port: local:" << port << endl;
+        if (port != -1) {
+            socket.setOutputGate(gate("udpOut"));
+            socket.bind(port);
+        }
+
+        selfTalkspurtFinished = new cMessage("selfTalkspurtFinished");
     }
 }
 
