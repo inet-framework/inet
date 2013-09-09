@@ -34,24 +34,36 @@ The main idea for creating the initial social network is the following
       the extent of social interaction between the two hosts.
 
 
-Establishment of the Mobility Model: Placement of the Communities in the Simulation Space
-=========================================================================================
+Placement of the Communities in the Simulation Space
+====================================================
 
 To model a real scenario, divide the simulation space into squares, x rows
 and y columns, then assign a square to each community and place its hosts
-inside the square.
+inside the square. This square models a geographical location of the community, 
+e. g. a bank office.
 
-This square models a geographical location of the community, e. g. a
-workplace of a bank office. Then, in order to keep up the mobility, we need
-new target positions where the hosts are desired to go. As a simulation
-goes on, each hosts calculates its own target position according to the
-parameters of the social network. When these target positions are
-calculated, each host performs a movement to reach that new location. Then
-we repeat this procedure periodically over the lifetime of the simulation.
+Initially, hosts in a same community, share a common home position, later on,
+this home position can be change independently from the other community
+members.
+
+It is important to note that this home position is just initially indicates the current 
+geographical location of the host. While the simulation runs, it is just a square, 
+where the host wants to go with some probability.
+
+Moreover, each host has an another coordinate which represents its current position 
+at a moment.
+
+Movements in the Simulation Space
+=================================
+
+In order to keep up the mobility, we need new target positions where the hosts 
+are desired to go. As a simulation goes on, each hosts calculates its own target 
+position according to the parameters of the social network. When these target 
+positions are calculated, each host performs a movement to reach that new location. 
+Then we repeat this procedure periodically over the lifetime of the simulation.
 
 The details of selection the subsequent target positions will be described
 later.
-
 
 Social Network Reconfigurations
 ===============================
@@ -120,10 +132,10 @@ The probabilistic choice:
 The probabilistic method performs a Roulette Wheel selection. The main
 steps of the algorithm:
 
-    (1) Calculate sum of all social attractivity - sum S
-    (2) Generate a random number from interval [0,1] - r, or from [0,S]
+    (1) Calculate sum S of all social attractivity
+    (2) Generate a random number r from interval [0,1], or from [0,S]
         if it is not normalized to 1.
-    (3) Go through the squares and sum attractivities from 0 - sum s.
+    (3) Go through the squares and sum (s) attractivities from 0.
         When the sum s is greater then r, stop and select the current square.
 
 In this case, a little drift added to each square attractivity, this makes
