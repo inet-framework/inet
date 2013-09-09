@@ -42,22 +42,21 @@ and y columns, then assign a square to each community and place its hosts
 inside the square. This square models a geographical location of the community, 
 e. g. a bank office.
 
-Initially, hosts in a same community, share a common home position, later on,
-this home position can be change independently from the other community
-members.
+Initially, hosts in a same community share a common home position, later on,
+the home position of each host may change independent of other community members.
 
-It is important to note that this home position is just initially indicates the current 
+It is important to note that this home position just initially indicates the current 
 geographical location of the host. While the simulation runs, it is just a square, 
 where the host wants to go with some probability.
 
-Moreover, each host has an another coordinate which represents its current position 
+Moreover, each host has an another location which represents its current position 
 at a moment.
 
 Movements in the Simulation Space
 =================================
 
 In order to keep up the mobility, we need new target positions where the hosts 
-are desired to go. As a simulation goes on, each hosts calculates its own target 
+desire to go. As a simulation goes on, each hosts calculates its own target 
 position according to the parameters of the social network. When these target 
 positions are calculated, each host performs a movement to reach that new location. 
 Then we repeat this procedure periodically over the lifetime of the simulation.
