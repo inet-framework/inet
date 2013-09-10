@@ -28,18 +28,14 @@
 std::string IPv4InterfaceData::HostMulticastData::info()
 {
     std::stringstream out;
-    if (!joinedMulticastGroups.empty() &&
-            (joinedMulticastGroups[0]!=IPv4Address::ALL_HOSTS_MCAST || joinedMulticastGroups.size() > 1))
+    if (!joinedMulticastGroups.empty())
     {
         out << " mcastgrps:";
         bool addComma = false;
         for (int i = 0; i < (int)joinedMulticastGroups.size(); ++i)
         {
-            if (joinedMulticastGroups[i] != IPv4Address::ALL_HOSTS_MCAST)
-            {
                 out << (addComma?",":"") << joinedMulticastGroups[i];
                 addComma = true;
-            }
         }
     }
     return out.str();
