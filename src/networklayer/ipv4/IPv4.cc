@@ -188,13 +188,18 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
         if (fromIE->ipv4Data()->isMemberOfMulticastGroup(destAddr) ||
                 (rt->isMulticastForwardingEnabled() && datagram->getTransportProtocol() == IP_PROT_IGMP))
             reassembleAndDeliver(datagram->dup());
+        else
+            EV << "Skip local delivery of multicast datagram (input interface not in multicast group)\n";
 
         // don't forward if IP forwarding is off, or if dest address is link-scope
         if (!rt->isIPForwardingEnabled() || destAddr.isLinkLocalMulticast())
+        {
+            EV << "Skip forwarding of multicast datagram (packet is link-local or forwarding disabled)\n";
             delete datagram;
+        }
         else if (datagram->getTimeToLive() == 0)
         {
-            EV << "TTL reached 0, dropping datagram.\n";
+            EV << "Skip forwarding of multicast datagram (TTL reached 0)\n";
             delete datagram;
         }
         else
