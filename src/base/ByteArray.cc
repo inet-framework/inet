@@ -43,9 +43,10 @@ void ByteArray::addDataFromBuffer(const void *ptr, unsigned int length)
     char *ndata_var = new char[nlength];
     if (data_arraysize)
         memcpy(ndata_var, data_var, data_arraysize);
-    memcpy(ndata_var, data_var + data_arraysize, length);
+    memcpy(ndata_var + data_arraysize, ptr, length);
     delete [] data_var;
     data_var = ndata_var;
+    data_arraysize = nlength;
 }
 
 unsigned int ByteArray::copyDataToBuffer(void *ptr, unsigned int length, unsigned int srcOffs) const
