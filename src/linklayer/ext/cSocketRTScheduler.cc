@@ -317,6 +317,8 @@ cMessage *cSocketRTScheduler::getNextEvent()
         diffTime = timeval_substract(curTime, targetTime);
         EV << "We are behind: " << diffTime.tv_sec + diffTime.tv_usec * 1e-6 << " seconds\n";
     }
+    cEvent *tmp = sim->msgQueue.removeFirst();
+    ASSERT(tmp == event);
     return event;
 }
 #undef cEvent
