@@ -99,7 +99,13 @@ void xDYMO::initialize(int stage)
             if (slash)
                 *slash = 0;
             const Address address = addressResolver.resolve(clientAddress);
-            int prefixLength = slash ? atoi(slash + 1) : 32;
+            int prefixLength = address.getAddressType()->getMaxPrefixLength();
+            if (slash)
+            {
+                int pLength = atoi(slash + 1);
+                if (pLength < 0 || pLength > prefixLength)
+                    throw cRuntimeError("invalid prefix length in 'clientAddresses' parameter: '%s/%s'", clientAddress, slash);
+            }
             clientAddressAndPrefixLengthPairs.push_back(std::pair<Address, int>(address, prefixLength));
         }
     }
