@@ -23,5 +23,4 @@ simple MACAddressTable
     parameters:
         @display("i=block/table2");
         double agingTime @unit("s") = default(30s);
-        bool verbose = default(false);
 }

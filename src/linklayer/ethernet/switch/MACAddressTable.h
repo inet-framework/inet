@@ -17,47 +17,69 @@
 #define __INET_MACADDRESSTABLE_H_
 
 #include "MACAddress.h"
+
 class MACAddressTable : public cSimpleModule
 {
     protected:
-        struct RelayEntry {
-            unsigned int Vid;
-            MACAddress MAC;
-            int Gate;
-            simtime_t inserted;
+
+        struct AddressEntry
+        {
+                unsigned int vid;           // VLAN ID
+                int portno;                 // Input port
+                simtime_t insertionTime;    // Arrival time of Lookup Address Table entry
+                AddressEntry() :
+                        vid(0)
+                {
+                }
+                AddressEntry(unsigned int vid, int portno, simtime_t insertionTime) :
+                        vid(vid), portno(portno), insertionTime(insertionTime)
+                {
+                }
         };
-        simtime_t agingTime;
-        bool verbose;
-    public:
-        std::vector <RelayEntry> RelayTable;        /// Vid/MAC/Gate/insertedTime
+
+        typedef std::map<MACAddress, AddressEntry> AddressTable;
+        typedef std::map<unsigned int, AddressTable*> VlanAddressTable;
+
+        simtime_t agingTime;                // Max idle time for address table entries
+        AddressTable * addressTable;        // VLAN-unaware address lookup (vid = 0)
+        VlanAddressTable vlanAddressTable;  // VLAN-aware address lookup
 
     protected:
+
         virtual void initialize();
         virtual void handleMessage(cMessage *msg);
+
+        /**
+         * @brief Returns a MAC Address Table for a specified VLAN ID
+         */
+        AddressTable * getTableForVid(unsigned int vid);
+
+    public:
+
+        MACAddressTable();
+        ~MACAddressTable();
 
     public:
         // Table management
 
         /**
          * @brief For a known arriving port, V-TAG and destination MAC. It finds out the port where relay component should deliver the message
-         * @param MACDest MAC destination
-         * @param outputPort Returns the output gate index
-         * @return False=NotFound or output=input
+         * @param address MAC destination
+         * @param vid VLAN ID
+         * @return Output port for address, or -1 if unknown.
          */
-
-        virtual bool resolveMAC(std::vector <int> * outputPorts, MACAddress MACDest, unsigned int Vid=0);
-
+        virtual int getPortForAddress(MACAddress& address, unsigned int vid = 0);
 
         /**
-         * @brief Register a new MAC at RelayTable.
+         * @brief Register a new MAC address at AddressTable.
          * @return True if refreshed. False if it is new.
          */
-        virtual bool registerMAC(int Gate, MACAddress MAC, unsigned int Vid=0);
+        virtual bool updateTableWithAddress(int portno, MACAddress& address, unsigned int vid = 0);
 
         /**
-         *  @brief Clears Gate cache
+         *  @brief Clears portno cache
          */
-        virtual void flush(int Gate);
+        virtual void flush(int portno);
 
         /**
          *  @brief Prints cached data
@@ -65,14 +87,18 @@ class MACAddressTable : public cSimpleModule
         virtual void printState();
 
         /**
-         * @brief Copy cache from a to b port
+         * @brief Copy cache from portA to portB port
          */
-        virtual void cpCache(int a, int b);
+        virtual void copyTable(int portA, int portB);
 
         /**
-         * @brief Clean aged entries
+         * @brief Remove aged entries from a specified VLAN
          */
-        virtual void cleanAgedEntries();
+        virtual void removeAgedEntriesFromVlan(unsigned int vid = 0);
+        /**
+         * @brief Remove aged entries from all VLANs
+         */
+        virtual void removeAgedEntriesFromAllVlans();
 };
 
 #endif
