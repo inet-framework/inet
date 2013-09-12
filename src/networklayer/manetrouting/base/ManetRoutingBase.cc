@@ -370,16 +370,10 @@ void ManetRoutingBase::registerPosition()
         opp_error("Manet routing protocol is not register");
     regPosition = true;
     mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
-    cModule *mod;
-    for (mod = getParentModule(); mod != 0; mod = mod->getParentModule()) {
-            cProperties *properties = mod->getProperties();
-            if (properties && properties->getAsBool("node"))
-                break;
-    }
-    if (mod)
-        mod->subscribe(mobilityStateChangedSignal, this);
-    else
-        getParentModule()->subscribe(mobilityStateChangedSignal, this);
+    cModule *mod = findContainingNode(getParentModule(), false);
+    if (!mod)
+        mod = getParentModule();
+    mod->subscribe(mobilityStateChangedSignal, this);
 }
 
 void ManetRoutingBase::processLinkBreak(const cObject *details) {return;}
