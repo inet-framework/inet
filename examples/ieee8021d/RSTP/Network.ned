@@ -34,7 +34,7 @@ network CompleteNetwork
                 @display("p=333,78");
 
             gates:
-                ethgB[2];
+                ethg[2];
 
         }
         switchBEB2: RSTPSwitch {
@@ -42,14 +42,14 @@ network CompleteNetwork
                 @display("p=301,217");
 
             gates:
-                ethgB[3];
+                ethg[3];
         }
         switchBEB3: RSTPSwitch {
             parameters:
                 @display("p=443,78");
 
             gates:
-                ethgB[2];
+                ethg[2];
 
         }
         switchBEB4: RSTPSwitch {
@@ -57,7 +57,7 @@ network CompleteNetwork
                 @display("p=322,153");
 
             gates:
-                ethgB[4];
+                ethg[4];
 
         }
         switchBEB5: RSTPSwitch {
@@ -65,7 +65,7 @@ network CompleteNetwork
                 @display("p=529,217");
 
             gates:
-                ethgB[1];
+                ethg[1];
 
         }
         switchBEB6: RSTPSwitch {
@@ -73,7 +73,7 @@ network CompleteNetwork
                 @display("p=148,217");
 
             gates:
-                ethgB[2];
+                ethg[2];
 
         }
         switchBEB7: RSTPSwitch {
@@ -81,19 +81,19 @@ network CompleteNetwork
                 @display("p=443,153");
 
             gates:
-                ethgB[4];
+                ethg[4];
 
         }
     connections:
-        switchBEB1.ethgB[0] <--> C <--> switchBEB4.ethgB[0];
-        switchBEB1.ethgB[1] <--> C <--> switchBEB3.ethgB[0];
-        switchBEB2.ethgB[0] <--> C <--> switchBEB4.ethgB[2];
-        switchBEB2.ethgB[1] <--> C <--> switchBEB6.ethgB[1];
-        switchBEB2.ethgB[2] <--> C <--> switchBEB7.ethgB[2];
-        switchBEB3.ethgB[1] <--> C <--> switchBEB7.ethgB[0];
-        switchBEB4.ethgB[1] <--> C <--> switchBEB6.ethgB[0];
-        switchBEB4.ethgB[3] <--> C <--> switchBEB7.ethgB[1];
-        switchBEB5.ethgB[0] <--> C <--> switchBEB7.ethgB[3];
+        switchBEB1.ethg[0] <--> C <--> switchBEB4.ethg[0];
+        switchBEB1.ethg[1] <--> C <--> switchBEB3.ethg[0];
+        switchBEB2.ethg[0] <--> C <--> switchBEB4.ethg[2];
+        switchBEB2.ethg[1] <--> C <--> switchBEB6.ethg[1];
+        switchBEB2.ethg[2] <--> C <--> switchBEB7.ethg[2];
+        switchBEB3.ethg[1] <--> C <--> switchBEB7.ethg[0];
+        switchBEB4.ethg[1] <--> C <--> switchBEB6.ethg[0];
+        switchBEB4.ethg[3] <--> C <--> switchBEB7.ethg[1];
+        switchBEB5.ethg[0] <--> C <--> switchBEB7.ethg[3];
 }
 
 
@@ -112,7 +112,7 @@ network NetworkWithBK
                 @display("p=333,78");
 
             gates:
-                ethgB[2];
+                ethg[2];
 
         }
         switchBEB2: RSTPSwitch {
@@ -120,7 +120,7 @@ network NetworkWithBK
                 @display("p=301,217");
 
             gates:
-                ethgB[5];
+                ethg[5];
         }
         switchBEB3: RSTPSwitch {
             parameters:
@@ -128,7 +128,7 @@ network NetworkWithBK
 
 
             gates:
-                ethgB[2];
+                ethg[2];
 
         }
         switchBEB4: RSTPSwitch {
@@ -136,42 +136,42 @@ network NetworkWithBK
                 @display("p=322,153");
 
             gates:
-                ethgB[4];
+                ethg[4];
         }
         switchBEB5: RSTPSwitch {
             parameters:
                 @display("p=529,217");
 
             gates:
-                ethgB[2];
+                ethg[2];
         }
         switchBEB6: RSTPSwitch {
             parameters:
                 @display("p=148,217");
 
             gates:
-                ethgB[2];
+                ethg[2];
         }
         switchBEB7: RSTPSwitch {
             parameters:
                 @display("p=443,153");
 
             gates:
-                ethgB[5];
+                ethg[5];
 
         }
     connections:
-        switchBEB1.ethgB[0] <--> C <--> switchBEB4.ethgB[0];
-        switchBEB1.ethgB[1] <--> C <--> switchBEB3.ethgB[0];
-        switchBEB2.ethgB[0] <--> C <--> switchBEB4.ethgB[2];
-        switchBEB2.ethgB[1] <--> C <--> switchBEB6.ethgB[1];
-        switchBEB2.ethgB[2] <--> C <--> switchBEB7.ethgB[2];
-        switchBEB3.ethgB[1] <--> C <--> switchBEB7.ethgB[0];
-        switchBEB4.ethgB[1] <--> C <--> switchBEB6.ethgB[0];
-        switchBEB4.ethgB[3] <--> C <--> switchBEB7.ethgB[1];
-        switchBEB5.ethgB[0] <--> C <--> switchBEB7.ethgB[3];
-        switchBEB5.ethgB[1] <--> C <--> switchBEB7.ethgB[4];
-        switchBEB2.ethgB[3] <--> C <--> switchBEB2.ethgB[4];
+        switchBEB1.ethg[0] <--> C <--> switchBEB4.ethg[0];
+        switchBEB1.ethg[1] <--> C <--> switchBEB3.ethg[0];
+        switchBEB2.ethg[0] <--> C <--> switchBEB4.ethg[2];
+        switchBEB2.ethg[1] <--> C <--> switchBEB6.ethg[1];
+        switchBEB2.ethg[2] <--> C <--> switchBEB7.ethg[2];
+        switchBEB3.ethg[1] <--> C <--> switchBEB7.ethg[0];
+        switchBEB4.ethg[1] <--> C <--> switchBEB6.ethg[0];
+        switchBEB4.ethg[3] <--> C <--> switchBEB7.ethg[1];
+        switchBEB5.ethg[0] <--> C <--> switchBEB7.ethg[3];
+        switchBEB5.ethg[1] <--> C <--> switchBEB7.ethg[4];
+        switchBEB2.ethg[3] <--> C <--> switchBEB2.ethg[4];
 }
 
 
@@ -190,7 +190,7 @@ network NetworkWithHosts
                 @display("p=333,78");
 
             gates:
-                ethgB[2];
+                ethg[2];
 
         }
         switchBEB2: RSTPSwitch {
@@ -198,14 +198,14 @@ network NetworkWithHosts
                 @display("p=301,217");
 
             gates:
-                ethgB[3];
+                ethg[3];
         }
         switchBEB3: RSTPSwitch {
             parameters:
                 @display("p=443,78");
 
             gates:
-                ethgB[3];
+                ethg[3];
 
         }
         switchBEB4: RSTPSwitch {
@@ -213,7 +213,7 @@ network NetworkWithHosts
                 @display("p=322,153");
 
             gates:
-                ethgB[4];
+                ethg[4];
 
         }
         switchBEB5: RSTPSwitch {
@@ -221,7 +221,7 @@ network NetworkWithHosts
                 @display("p=529,217");
 
             gates:
-                ethgB[2];
+                ethg[2];
 
         }
         switchBEB6: RSTPSwitch {
@@ -229,7 +229,7 @@ network NetworkWithHosts
                 @display("p=148,217");
 
             gates:
-                ethgB[3];
+                ethg[3];
 
         }
         switchBEB7: RSTPSwitch {
@@ -237,7 +237,7 @@ network NetworkWithHosts
                 @display("p=443,153");
 
             gates:
-                ethgB[4];
+                ethg[4];
 
         }
         host1: EtherHost {
@@ -250,16 +250,16 @@ network NetworkWithHosts
             @display("p=529,78");
         }
     connections:
-        switchBEB1.ethgB[0] <--> C <--> switchBEB4.ethgB[0];
-        switchBEB1.ethgB[1] <--> C <--> switchBEB3.ethgB[0];
-        switchBEB2.ethgB[0] <--> C <--> switchBEB4.ethgB[2];
-        switchBEB2.ethgB[1] <--> C <--> switchBEB6.ethgB[1];
-        switchBEB2.ethgB[2] <--> C <--> switchBEB7.ethgB[2];
-        switchBEB3.ethgB[1] <--> C <--> switchBEB7.ethgB[0];
-        switchBEB4.ethgB[1] <--> C <--> switchBEB6.ethgB[0];
-        switchBEB4.ethgB[3] <--> C <--> switchBEB7.ethgB[1];
-        switchBEB5.ethgB[0] <--> C <--> switchBEB7.ethgB[3];
-        switchBEB3.ethgB[2] <--> C <--> host3.ethg;
-        switchBEB5.ethgB[1] <--> C <--> host2.ethg;
-        switchBEB6.ethgB[2] <--> C <--> host1.ethg;
+        switchBEB1.ethg[0] <--> C <--> switchBEB4.ethg[0];
+        switchBEB1.ethg[1] <--> C <--> switchBEB3.ethg[0];
+        switchBEB2.ethg[0] <--> C <--> switchBEB4.ethg[2];
+        switchBEB2.ethg[1] <--> C <--> switchBEB6.ethg[1];
+        switchBEB2.ethg[2] <--> C <--> switchBEB7.ethg[2];
+        switchBEB3.ethg[1] <--> C <--> switchBEB7.ethg[0];
+        switchBEB4.ethg[1] <--> C <--> switchBEB6.ethg[0];
+        switchBEB4.ethg[3] <--> C <--> switchBEB7.ethg[1];
+        switchBEB5.ethg[0] <--> C <--> switchBEB7.ethg[3];
+        switchBEB3.ethg[2] <--> C <--> host3.ethg;
+        switchBEB5.ethg[1] <--> C <--> host2.ethg;
+        switchBEB6.ethg[2] <--> C <--> host1.ethg;
 }

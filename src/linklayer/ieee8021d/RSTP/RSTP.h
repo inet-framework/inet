@@ -18,6 +18,7 @@
 #include "PortFilt.h"
 #include "MACAddressTable.h"
 #include "PortFiltRSTP.h"
+#include "InterfaceTable.h"
 
 
 enum PortStateT
@@ -127,6 +128,7 @@ class RSTP: public cSimpleModule
 
 	MACAddressTable * sw;  /// Needed for flushing.
 
+	IInterfaceTable * ifTable;
 
 	/*Static data. Bridge data. */
 	int priority;  /// Bridge priority. It's own priority.

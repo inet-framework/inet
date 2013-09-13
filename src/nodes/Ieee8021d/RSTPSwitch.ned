@@ -7,56 +7,72 @@
 
 
 package inet.nodes.Ieee8021d;
-import inet.linklayer.ieee8021d.RSTP.BComponentRSTP;
-import inet.linklayer.ieee8021d.ieee8021Q.PortFilt;
-import inet.linklayer.ethernet.EtherMAC;
+import inet.base.NotificationBoard;
+import inet.networklayer.common.InterfaceTable;
+import inet.linklayer.IWiredNic;
+import inet.linklayer.ethernet.switch.MACAddressTable;
 import inet.linklayer.ieee8021d.RSTP.RSTP;
-import inet.linklayer.ieee8021d.MVRP.MVRP;
+import inet.linklayer.ieee8021d.RSTP.RelayRSTP;
+import inet.linklayer.ieee8021d.RSTP.PortFiltRSTP;
 
-//
-// Model of Backbone Edge Bridge (BEB)
-// It can also be used as a Backbone bridge
-//
-// This model uses the RSTP (rapid spanning tree) and the MVRP (multiple vlan registration protocol) module
-//
 module RSTPSwitch
 {
     parameters:
         @node();
-        @display("i=device/router;bgb=643,476;bgl=2");
+        @display("i=device/router;bgb=386,346;bgl=2");
+        eth[*].encapType = "EtherEncapDummy";
     gates:
-        inout ethgB[];  //To the backbone
+        inout ethg[];
     submodules:
-        bcomponent: BComponentRSTP {
+        interfaceTable: InterfaceTable {
+            @display("p=50,92;is=s");
+        }
+        notificationBoard: NotificationBoard {
             parameters:
-                @display("p=183,178");
-                sizeEthgB = sizeof(ethgB);
+                @display("p=50,150;is=s");
+        }
+        relay: RelayRSTP {
+            parameters:
+                @display("p=199,50");
             gates:
-                BportsOut[sizeof(ethgB)];
-                BportsIn[sizeof(ethgB)];
-                RSTPPort;
-        } 												//Relay unit. Present in all backbone nodes.
-
-        macB[sizeof(ethgB)]: EtherMAC {
+                GatesIn[sizeof(ethg)];
+                GatesOut[sizeof(ethg)];
+                RSTPGate;
+        }
+        cache: MACAddressTable {
             parameters:
-                promiscuous = true;
-                queueModule = "";
-                @display("p=183,330,row");
-        }												// IComponent data managing.
+                @display("p=316,50");
+        }
 
+        PortFilt[sizeof(ethg)]: PortFiltRSTP {
+            parameters:
+                @display("p=199,150,row");
+            gates:
+                GatesIn[];
+                GatesOut[];
+
+        }
+        
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
+            parameters:
+                mac.promiscuous = true;
+                @display("p=199,281,row;q=txQueue");
+        }
+        
         rstp: RSTP {
-            @display("p=47,109");
+            @display("p=127,50");
             gates:
                 RSTPPort;
         }												// RSTP protocol managing.
 
     connections:
-
-        for i=0..sizeof(ethgB)-1 {
-            ethgB[i] <--> macB[i].phys;
-            bcomponent.BportsOut[i] --> macB[i].upperLayerIn;
-            bcomponent.BportsIn[i] <-- macB[i].upperLayerOut;
+        for i=0..sizeof(ethg)-1 {
+            ethg[i] <--> eth[i].phys;
+            PortFilt[i].GatesOut[0] --> eth[i].upperLayerIn;
+            PortFilt[i].GatesIn[0] <-- eth[i].upperLayerOut;
+            PortFilt[i].GatesIn[1] <-- relay.GatesOut[i];
+            PortFilt[i].GatesOut[1] --> relay.GatesIn[i];
         }
 
-        rstp.RSTPPort <--> bcomponent.RSTPPort;
+        rstp.RSTPPort <--> relay.RSTPGate;
 }

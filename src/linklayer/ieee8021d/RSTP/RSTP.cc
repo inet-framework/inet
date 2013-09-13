@@ -22,6 +22,9 @@
 #include "RelayRSTP.h"
 #include "RelayRSTPAccess.h"
 #include "MACAddressTableAccess.h"
+#include "InterfaceTableAccess.h"
+#include "InterfaceEntry.h"
+
 
 
 Define_Module (RSTP);
@@ -54,6 +57,7 @@ void RSTP::initialize(int stage)
 	{
 		sw=MACAddressTableAccess().get(); //cache pointer
 		//Gets the relay pointer.
+		ifTable=InterfaceTableAccess().get();
 		admac=RelayRSTPAccess().getIfExists();
 //		admac=AdmacrelayAccess().getIfExists();
 //		if(admac==NULL)
@@ -64,18 +68,14 @@ void RSTP::initialize(int stage)
 			error("Relay module not found");
 
 		//Gets the backbone mac address
-		cModule * macUnit = Parent->getSubmodule("macB",0);
-		if(macUnit==NULL)
+		InterfaceEntry * ifEntry=ifTable->getInterface(0);
+		if(ifEntry!=NULL)
 		{
-			macUnit = Parent->getSubmodule("mac",0);
-		}
-		if(macUnit!=NULL)
-		{
-			address.setAddress(check_and_cast<EtherMAC *>(macUnit)->par("address"));
+			address = ifEntry->getMacAddress();
 		}
 		else
 		{
-			ev<<"macB[0] not found. Is not this module connected to another BEB?"<<endl;
+			ev<<"interface not found. Is not this module connected to another BEB?"<<endl;
 			ev<<"Setting AAAAAA000001 as backbone mac address."<<endl;
 			address.setAddress("AAAAAA000001");
 		}
@@ -917,24 +917,22 @@ void RSTP::colorRootPorts()
 				sprintf(buf,"MAC: %s",b->c_str());
 				Parent->getDisplayString().setTagArg("tt",0,buf);
 			}
-			cModule * puerta=Parent->getSubmodule("macB",l);
-			if(puerta==NULL)
-				puerta=Parent->getSubmodule("mac",l);
-			if(puerta!=NULL)  //Marking port state
+			cModule * puerta=Parent->getSubmodule("eth",l);
+			if(puerta!=NULL)
 			{
 				char buf[10];
 				int estado=Puertos[l].PortState;
-				if(estado==0)
+				switch(estado)
 				{
+				case 0 :
 					sprintf(buf,"DISCARDING\n");
-				}
-				else if(estado==1)
-				{
+					break;
+				case 1:
 					sprintf(buf,"LEARNING\n");
-				}
-				else if(estado==2)
-				{
+					break;
+				case 2:
 					sprintf(buf,"FORWARDING\n");
+					break;
 				}
 				puerta->getDisplayString().setTagArg("t",0,buf);
 			}
