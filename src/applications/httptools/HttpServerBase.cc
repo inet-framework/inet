@@ -417,10 +417,10 @@ std::string HttpServerBase::generateBody()
 void HttpServerBase::registerWithController()
 {
     // Find controller object and register
-    cModule * controller = simulation.getSystemModule()->getSubmodule("controller");
+    HttpController *controller = check_and_cast_nullable<HttpController *>(simulation.getSystemModule()->getSubmodule("controller"));
     if (controller == NULL)
         error("Controller module not found");
-    ((HttpController*)controller)->registerServer(getParentModule()->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);
+    controller->registerServer(getParentModule()->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);
 }
 
 void HttpServerBase::readSiteDefinition(std::string file)
