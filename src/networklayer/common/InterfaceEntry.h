@@ -36,6 +36,7 @@ class IPv4InterfaceData;
 class IPv6InterfaceData;
 class TRILLInterfaceData;
 class ISISInterfaceData;
+class VLANInterfaceData;
 
 class INET_API MacEstimateCostProcess
 {
@@ -104,6 +105,7 @@ class INET_API InterfaceEntry : public cNamedObject
     IPv6InterfaceData *ipv6data;   ///< IPv6-specific interface info (IPv6 addresses, etc)
     ISISInterfaceData *isisdata; ///< ISIS-specific interface info
     TRILLInterfaceData *trilldata; ///< TRILL-specific interface info
+    VLANInterfaceData *vlandata;
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
 
   private:
@@ -186,6 +188,7 @@ class INET_API InterfaceEntry : public cNamedObject
     IPv6InterfaceData *ipv6Data() const  {return ipv6data;}
     TRILLInterfaceData *trillData() const {return trilldata;}
     ISISInterfaceData *isisData() const {return isisdata;}
+    VLANInterfaceData *vlanData() const {return vlandata;}
     //@}
 
     /** @name Installing protocol-specific interface data */
@@ -194,6 +197,7 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual void setIPv6Data(IPv6InterfaceData *p);
     virtual void setTRILLInterfaceData(TRILLInterfaceData *p);
     virtual void setISISInterfaceData(ISISInterfaceData *p);
+    virtual void setVLANInterfaceData(VLANInterfaceData *p);
     //@}
 
     /** @name access to the cost process estimation  */

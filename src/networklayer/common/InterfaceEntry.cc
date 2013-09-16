@@ -67,6 +67,7 @@ InterfaceEntry::InterfaceEntry(cModule* ifmod)
     ipv6data = NULL;
     isisdata = NULL;
     trilldata = NULL;
+    vlandata = NULL;
     estimateCostProcessArray.clear();
 }
 
@@ -107,6 +108,8 @@ std::string InterfaceEntry::info() const
         out << " " << ((InterfaceProtocolData *)isisdata)->info(); // Khmm...
     if (trilldata)
         out << " " << ((InterfaceProtocolData *)trilldata)->info(); // Khmm...
+    if (vlandata)
+        out << " " << ((InterfaceProtocolData *)vlandata)->info() << "\n"; // Khmm...
     return out.str();
 }
 
@@ -133,17 +136,18 @@ std::string InterfaceEntry::detailedInfo() const
     out << "\n";
 #ifdef WITH_IPv4
     if (ipv4data)
-        out << " " << ipv4data->info() << "\n";
+        out << " " << ipv4data->detailedInfo() << "\n";
 #endif
 #ifdef WITH_IPv6
     if (ipv6data)
-        out << " " << ipv6data->info() << "\n";
+        out << " " << ipv6data->detailedInfo() << "\n";
 #endif
     if (isisdata)
-        out << " " << ((InterfaceProtocolData *)isisdata)->info() << "\n"; // Khmm...
+        out << " " << ((InterfaceProtocolData *)isisdata)->detailedInfo() << "\n"; // Khmm...
     if (trilldata)
-        out << " " << ((InterfaceProtocolData *)trilldata)->info() << "\n"; // Khmm...
-
+        out << " " << ((InterfaceProtocolData *)trilldata)->detailedInfo() << "\n"; // Khmm...
+    if (vlandata)
+        out << " " << ((InterfaceProtocolData *)vlandata)->detailedInfo() << "\n"; // Khmm...
     return out.str();
 }
 std::string InterfaceEntry::getFullPath() const
@@ -181,6 +185,9 @@ void InterfaceEntry::resetInterface()
     if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this)
         delete (InterfaceProtocolData *)trilldata;
     trilldata = NULL;
+    if (vlandata && ((InterfaceProtocolData *)vlandata)->ownerp == this)
+        delete (InterfaceProtocolData *)vlandata;
+    vlandata = NULL;
 }
 
 void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
@@ -223,6 +230,15 @@ void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
     if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this) // Khmm...
         delete (InterfaceProtocolData *)isisdata; // Khmm...
     isisdata = p;
+    ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
+    configChanged();
+}
+
+void InterfaceEntry::setVLANInterfaceData(VLANInterfaceData *p)
+{
+    if (vlandata && ((InterfaceProtocolData *)vlandata)->ownerp == this) // Khmm...
+        delete (InterfaceProtocolData *)vlandata; // Khmm...
+    vlandata = p;
     ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
     configChanged();
 }
