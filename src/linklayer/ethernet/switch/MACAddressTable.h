@@ -37,7 +37,13 @@ class MACAddressTable : public cSimpleModule
                 }
         };
 
-        typedef std::map<MACAddress, AddressEntry> AddressTable;
+        struct MAC_compare
+        {
+            bool operator()(const MACAddress& u1, const MACAddress& u2) const
+                {return u1.compareTo(u2) < 0;}
+        };
+
+        typedef std::map<MACAddress, AddressEntry, MAC_compare> AddressTable;
         typedef std::map<unsigned int, AddressTable*> VlanAddressTable;
 
         simtime_t agingTime;                // Max idle time for address table entries
