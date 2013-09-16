@@ -105,6 +105,11 @@ class MACAddressTable : public cSimpleModule
          * @brief Remove aged entries from all VLANs
          */
         virtual void removeAgedEntriesFromAllVlans();
+
+        /**
+         * Pre-reads in entries for Address Table during initialization.
+         */
+        virtual void readAddressTable(const char * fileName);
 };
 
 #endif

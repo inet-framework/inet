@@ -15,6 +15,7 @@
 
 #include <map>
 #include "MACAddressTable.h"
+#define MAX_LINE 100
 
 Define_Module(MACAddressTable);
 
@@ -28,7 +29,39 @@ MACAddressTable::MACAddressTable()
 
 void MACAddressTable::initialize()
 {
+
     agingTime = par("agingTime");
+
+    // Option to pre-read in Address Table. To turn ot off, set addressTableFile to empty string
+    const char * addressTableFile = par("addressTableFile");
+    if (addressTableFile && *addressTableFile)
+        readAddressTable(addressTableFile);
+}
+
+/**
+ * Function reads from a file stream pointed to by 'fp' and stores characters
+ * until the '\n' or EOF character is found, the resultant string is returned.
+ * Note that neither '\n' nor EOF character is stored to the resultant string,
+ * also note that if on a line containing useful data that EOF occurs, then
+ * that line will not be read in, hence must terminate file with unused line.
+ */
+static char *fgetline(FILE *fp)
+{
+    // alloc buffer and read a line
+    char *line = new char[MAX_LINE];
+    if (fgets(line, MAX_LINE, fp)==NULL)
+    {
+        delete [] line;
+        return NULL;
+    }
+
+    // chop CR/LF
+    line[MAX_LINE-1] = '\0';
+    int len = strlen(line);
+    while (len>0 && (line[len-1]=='\n' || line[len-1]=='\r'))
+        line[--len] = '\0';
+
+    return line;
 }
 
 void MACAddressTable::handleMessage(cMessage *)
@@ -211,6 +244,65 @@ void MACAddressTable::removeAgedEntriesFromAllVlans()
             }
         }
     }
+}
+
+void MACAddressTable::readAddressTable(const char* fileName)
+{
+    FILE *fp = fopen(fileName, "r");
+    if (fp == NULL)
+        error("cannot open address table file `%s'", fileName);
+
+    //  Syntax of the file goes as:
+    //  VLAN ID, address in hexadecimal representation, portno
+    //  1    ffffffff    1
+    //  1    ffffeed1    2
+    //  2    aabcdeff    3
+    //
+    //  etc...
+    //
+    //  Each iteration of the loop reads in an entire line i.e. up to '\n' or EOF characters
+    //  and uses strtok to extract tokens from the resulting string
+    char *line;
+    int lineno = 0;
+    while ((line = fgetline(fp)) != NULL)
+    {
+        lineno++;
+
+        // lines beginning with '#' are treated as comments
+        if (line[0]=='#')
+            continue;
+
+        // scan in VLAN ID
+        char *vlanID = strtok(line, " \t");
+        // scan in hexaddress
+        char *hexaddress = strtok(NULL, " \t");
+        // scan in port number
+        char *portno = strtok(NULL, " \t");
+
+        // empty line?
+        if (!vlanID)
+            continue;
+
+        // broken line?
+        if (!portno || !hexaddress)
+            error("line %d invalid in address table file `%s'", lineno, fileName);
+
+        // Create an entry with address and portno and insert into table
+        AddressEntry entry(atoi(vlanID), atoi(portno), 0);
+        AddressTable * table = getTableForVid(entry.vid);
+
+        if(table == NULL)
+        {
+            table = new AddressTable();
+            vlanAddressTable[entry.vid] = table;
+        }
+
+        (*table)[MACAddress(hexaddress)] = entry;
+
+        // Garbage collection before next iteration
+        delete [] line;
+    }
+    fclose(fp);
 }
 
 MACAddressTable::~MACAddressTable()
