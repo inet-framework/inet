@@ -3,26 +3,25 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
+// 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-//
+// 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-//
+// 
 
-#ifndef __INET_MACADDRESSTABLEACCESS_H_
-#define __INET_MACADDRESSTABLEACCESS_H_
+package inet.linklayer.ethernet.switch;
 
-#include "ModuleAccess.h"
-#include "MACAddressTable.h"
+import inet.linklayer.IMACRelayUnit;
 
-class INET_API MACAddressTableAccess : public ModuleAccess<MACAddressTable>
+simple MACRelayUnit like IMACRelayUnit
 {
-    public:
-        MACAddressTableAccess() : ModuleAccess<MACAddressTable>("macTable") {}
-};
-
-#endif
+    parameters:
+		@display("i=block/switch");
+    gates:
+        input ifIn[] @labels(EtherFrame);
+        output ifOut[] @labels(EtherFrame);
+}

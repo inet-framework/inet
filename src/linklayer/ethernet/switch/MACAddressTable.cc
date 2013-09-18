@@ -31,6 +31,7 @@ void MACAddressTable::initialize()
 {
 
     agingTime = par("agingTime");
+    lastPurge = SIMTIME_ZERO;
 
     // Option to pre-read in Address Table. To turn ot off, set addressTableFile to empty string
     const char * addressTableFile = par("addressTableFile");
@@ -88,7 +89,6 @@ MACAddressTable::AddressTable * MACAddressTable::getTableForVid(unsigned int vid
 }
 
 /*
- * getPortForAddress
  * For a known arriving port, V-TAG and destination MAC. It generates a vector with the ports where relay component
  * should deliver the message.
  * returns false if not found
@@ -121,7 +121,6 @@ int MACAddressTable::getPortForAddress(MACAddress& address, unsigned int vid)
 }
 
 /*
- * updateTableWithAddress
  * Register a new MAC address at addressTable.
  * True if refreshed. False if it is new.
  */
@@ -146,6 +145,8 @@ bool MACAddressTable::updateTableWithAddress(int portno, MACAddress& address, un
 
     if (iter == table->end())
     {
+        removeAgedEntriesIfNeeded();
+
         // Add entry to table
         EV<< "Adding entry to Address Table: "<< address << " --> port" << portno << "\n";
         (*table)[address] = AddressEntry(vid,portno,simTime());
@@ -246,6 +247,16 @@ void MACAddressTable::removeAgedEntriesFromAllVlans()
     }
 }
 
+void MACAddressTable::removeAgedEntriesIfNeeded()
+{
+    simtime_t now = simTime();
+
+    if(now >= lastPurge + 1)
+        removeAgedEntriesFromAllVlans();
+
+    lastPurge = simTime();
+}
+
 void MACAddressTable::readAddressTable(const char* fileName)
 {
     FILE *fp = fopen(fileName, "r");
@@ -303,6 +314,15 @@ void MACAddressTable::readAddressTable(const char* fileName)
         delete [] line;
     }
     fclose(fp);
+}
+
+void MACAddressTable::clearTable()
+{
+    for (VlanAddressTable::iterator iter = vlanAddressTable.begin(); iter != vlanAddressTable.end(); iter++)
+        delete iter->second;
+
+    vlanAddressTable.clear();
+
 }
 
 MACAddressTable::~MACAddressTable()

@@ -47,6 +47,7 @@ class MACAddressTable : public cSimpleModule
         typedef std::map<unsigned int, AddressTable*> VlanAddressTable;
 
         simtime_t agingTime;                // Max idle time for address table entries
+        simtime_t lastPurge;                // Time of the last call of removeAgedEntriesFromAllVlans()
         AddressTable * addressTable;        // VLAN-unaware address lookup (vid = 0)
         VlanAddressTable vlanAddressTable;  // VLAN-aware address lookup
 
@@ -106,10 +107,22 @@ class MACAddressTable : public cSimpleModule
          */
         virtual void removeAgedEntriesFromAllVlans();
 
+        /*
+         * It calls removeAgedEntriesFromAllVlans() if and only if at least
+         * 1 second has passed since the method was last called.
+         */
+        virtual void removeAgedEntriesIfNeeded();
+
         /**
          * Pre-reads in entries for Address Table during initialization.
          */
         virtual void readAddressTable(const char * fileName);
+
+        /**
+         * For lifecycle: clears all entries from the vlanAddressTable.
+         */
+        virtual void clearTable();
+
 };
 
 #endif

@@ -47,10 +47,6 @@ package inet.linklayer;
 moduleinterface IMACRelayUnit
 {
     parameters:
-        string addressTableFile;  // set to empty string if not used
-        int addressTableSize; // max size of address table
-        double agingTime @unit("s"); // max idle time for address table entries
-                                     // (when it expires, entry is removed from the table)
         @display("i=block/switch");
     gates:
         input ifIn[] @labels(EtherFrame);

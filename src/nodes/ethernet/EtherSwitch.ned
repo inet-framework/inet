@@ -23,7 +23,7 @@ import inet.linklayer.IMACRelayUnit;
 import inet.linklayer.IWiredNic;
 import inet.networklayer.common.InterfaceTable;
 import inet.status.NodeStatus;
-
+import inet.linklayer.ethernet.switch.MACAddressTable;
 
 //
 // Model of an Ethernet switch.
@@ -44,7 +44,7 @@ module EtherSwitch
         bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
-        string relayUnitType = default("MACRelayUnitNP"); // type of the ~IMACRelayUnit; currently possible
+        string relayUnitType = default("MACRelayUnit"); // type of the ~IMACRelayUnit; currently possible
         eth[*].encapType = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
         eth[*].macType = macType;
@@ -62,6 +62,7 @@ module EtherSwitch
             parameters:
                 @display("p=50,150;is=s");
         }
+        macTable : MACAddressTable;
         relayUnit: <relayUnitType> like IMACRelayUnit {
             parameters:
                 @display("p=270,50");
