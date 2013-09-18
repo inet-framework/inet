@@ -18,7 +18,6 @@
 
 #include "RelayRSTP.h"
 
-#include "EtherMAC.h"
 #include "Ethernet.h"
 #include "RSTPAccess.h"
 #include "MACAddressTableAccess.h"

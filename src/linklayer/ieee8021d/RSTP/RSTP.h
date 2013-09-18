@@ -22,8 +22,6 @@
 #include "BPDU.h"
 #include "MACAddress.h"
 #include "Delivery_m.h"
-#include "Cache1Q.h"
-#include "PortFilt.h"
 #include "MACAddressTable.h"
 #include "PortFiltRSTP.h"
 #include "InterfaceTable.h"
