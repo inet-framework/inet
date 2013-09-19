@@ -52,7 +52,7 @@ module RSTPSwitch
                 GatesOut[sizeof(ethg)];
                 RSTPGate;
         }
-        cache: MACAddressTable {
+        macTable: MACAddressTable {
             parameters:
                 @display("p=316,50");
         }
