@@ -111,7 +111,7 @@ void DHCPClient::initialize(int stage)
         socket.setOutputGate(gate("udpOut"));
         socket.bind(bootpc_port);
         socket.setBroadcast(true);
-        ev << "DHCP Client bound to port " << bootpc_port << " at " << ie->getName() <<  endl;
+        EV << "DHCP Client bound to port " << bootpc_port << " at " << ie->getName() <<  endl;
 
         // set client to idle state
         client_state = IDLE;
@@ -274,7 +274,7 @@ void DHCPClient::handleTimer(cMessage* msg)
         }
         else
         {
-            ev << "No DHCP offer. restarting. " << endl;
+            EV << "No DHCP offer. restarting. " << endl;
             retry_count = 0;
             changeFSMState(INIT);
         }
@@ -289,7 +289,7 @@ void DHCPClient::handleTimer(cMessage* msg)
         }
         else
         {
-            ev << "No DHCP ACK. restarting. " << endl;
+            EV << "No DHCP ACK. restarting. " << endl;
             retry_count = 0;
         }
         if (client_state == REQUESTING)
@@ -308,13 +308,13 @@ void DHCPClient::handleTimer(cMessage* msg)
 
     if (category == T1)
     {
-        ev << "T1 reached. starting RENEWING state " << endl;
+        EV << "T1 reached. starting RENEWING state " << endl;
         changeFSMState(RENEWING);
     }
 
     if (category == T2 && client_state == RENEWING)
     {
-        ev << "T2 reached. starting REBINDING state " << endl;
+        EV << "T2 reached. starting REBINDING state " << endl;
         changeFSMState(REBINDING);
     }
 
@@ -536,7 +536,7 @@ void DHCPClient::sendDiscover()
     discover->getOptions().add(PARAM_LIST, DNS);
     discover->getOptions().add(PARAM_LIST, NTP_SRV);
 
-    ev << "Sending DHCPDISCOVER" << endl;
+    EV << "Sending DHCPDISCOVER" << endl;
     sendToUDP(discover, bootpc_port, IPv4Address::ALLONES_ADDRESS, bootps_port);
 }
 

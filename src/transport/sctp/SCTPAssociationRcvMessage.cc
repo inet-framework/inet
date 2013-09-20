@@ -2704,7 +2704,7 @@ void SCTPAssociation::stopTimers()
 void SCTPAssociation::stopTimer(cMessage* timer)
 {
 
-    ev << "stopTimer " << timer->getName() << endl;
+    EV << "stopTimer " << timer->getName() << endl;
     if (timer->isScheduled()) {
         cancelEvent(timer);
     }

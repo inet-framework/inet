@@ -91,7 +91,7 @@ void HttpBrowser::handleMessage(cMessage *msg)
         if (socket==NULL)
         {
             // Handle errors. @todo error instead of warning?
-            EV_WARNING << "No socket found for message " << msg->getName() << endl;
+            EV_WARN << "No socket found for message " << msg->getName() << endl;
             delete msg;
             return;
         }
@@ -265,7 +265,7 @@ void HttpBrowser::socketClosed(int connId, void *yourPtr)
 
 void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
 {
-    EV_WARNING << "connection broken. Connection id " << connId << endl;
+    EV_WARN << "connection broken. Connection id " << connId << endl;
     numBroken++;
 
     if (yourPtr==NULL)
@@ -275,9 +275,9 @@ void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
     }
 
     if (code==TCP_I_CONNECTION_RESET)
-        EV_WARNING << "Connection reset!\n";
+        EV_WARN << "Connection reset!\n";
     else if (code==TCP_I_CONNECTION_REFUSED)
-        EV_WARNING << "Connection refused!\n";
+        EV_WARN << "Connection refused!\n";
 
     SockData *sockdata = (SockData*)yourPtr;
     TCPSocket *socket = sockdata->socket;

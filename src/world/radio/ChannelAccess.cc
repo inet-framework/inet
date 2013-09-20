@@ -19,7 +19,7 @@
 #include "ChannelAccess.h"
 #include "IMobility.h"
 
-#define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev << logName() << "::ChannelAccess: "
+#define coreEV (ev.isDisabled()||!coreDebug) ? EV : EV << logName() << "::ChannelAccess: "
 
 simsignal_t ChannelAccess::mobilityStateChangedSignal = SIMSIGNAL_NULL;
 

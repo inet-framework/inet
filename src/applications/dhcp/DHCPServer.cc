@@ -89,7 +89,7 @@ void DHCPServer::openSocket()
     socket.setOutputGate(gate("udpOut"));
     socket.bind(bootps_port);
     socket.setBroadcast(true);
-    ev << "DHCP Server bound to port " << bootps_port << " at " << ie << endl;
+    EV << "DHCP Server bound to port " << bootps_port << " at " << ie << endl;
 }
 
 void DHCPServer::receiveChangeNotification(int category, const cPolymorphic *details)

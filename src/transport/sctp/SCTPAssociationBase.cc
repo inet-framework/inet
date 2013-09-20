@@ -854,7 +854,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 
     if (event==SCTP_E_IGNORE)   // e.g. discarded segment
     {
-        ev << "Staying in state: " << stateName(fsm->getState()) << " (no FSM event)\n";
+        EV << "Staying in state: " << stateName(fsm->getState()) << " (no FSM event)\n";
         return true;
     }
 
@@ -971,7 +971,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 
     if (oldState!=fsm->getState())
     {
-        ev << "Transition: " << stateName(oldState) << " --> " << stateName(fsm->getState())
+        EV << "Transition: " << stateName(oldState) << " --> " << stateName(fsm->getState())
            << "    (event was: " << eventName(event) << ")\n";
         sctpEV3 << sctpMain->getName() << ": " << stateName(oldState) << " --> "
                 << stateName(fsm->getState()) << "  (on " << eventName(event) << ")\n";
@@ -979,7 +979,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
     }
     else
     {
-        ev << "Staying in state: " << stateName(fsm->getState())
+        EV << "Staying in state: " << stateName(fsm->getState())
            << " (event was: " << eventName(event) << ")\n";
     }
 

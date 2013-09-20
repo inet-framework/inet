@@ -251,7 +251,7 @@ void NS_CLASS initialize(int stage)
         is_init=true;
         // Initialize the timer
         scheduleNextEvent();
-        ev << "Aodv active"<< "\n";
+        EV << "Aodv active"<< "\n";
     }
 }
 

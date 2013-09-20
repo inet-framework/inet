@@ -451,7 +451,7 @@ void SCTPServer::handleMessage(cMessage *msg)
             case SCTP_I_SEND_STREAMS_RESETTED:
             case SCTP_I_RCV_STREAMS_RESETTED:
             {
-                ev << "Streams have been resetted\n";
+                EV << "Streams have been resetted\n";
                 delete msg;
                 break;
             }
@@ -538,21 +538,21 @@ void SCTPServer::finish()
     delete delayTimer;
     delete delayFirstReadTimer;
 
-    ev << getFullPath() << ": opened " << numSessions << " sessions\n";
-    ev << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
+    EV << getFullPath() << ": opened " << numSessions << " sessions\n";
+    EV << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
     for (ServerAssocStatMap::iterator l=serverAssocStatMap.begin(); l!=serverAssocStatMap.end(); ++l)
     {
-        ev << getFullPath() << " Assoc: " << l->first << "\n";
-        ev << "\tstart time: " << l->second.start << "\n";
-        ev << "\tstop time: " << l->second.stop << "\n";
-        ev << "\tlife time: " << l->second.lifeTime << "\n";
-        ev << "\treceived bytes:" << l->second.rcvdBytes << "\n";
-        ev << "\tthroughput: " << (l->second.rcvdBytes / l->second.lifeTime.dbl())*8 << " bit/sec\n";
+        EV << getFullPath() << " Assoc: " << l->first << "\n";
+        EV << "\tstart time: " << l->second.start << "\n";
+        EV << "\tstop time: " << l->second.stop << "\n";
+        EV << "\tlife time: " << l->second.lifeTime << "\n";
+        EV << "\treceived bytes:" << l->second.rcvdBytes << "\n";
+        EV << "\tthroughput: " << (l->second.rcvdBytes / l->second.lifeTime.dbl())*8 << " bit/sec\n";
         recordScalar("bytes rcvd", l->second.rcvdBytes);
         recordScalar("throughput", (l->second.rcvdBytes / l->second.lifeTime.dbl())*8);
     }
-    ev << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
-    ev << getFullPath() << "Over all " << notifications << " notifications received\n ";
+    EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
+    EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
 
     BytesPerAssoc::iterator j;
     while ((j = bytesPerAssoc.begin()) != bytesPerAssoc.end())

@@ -40,13 +40,6 @@ typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
-
-//
-// Macro to prevent executing ev<< statements in Express mode.
-// Compare ev/sec values with code compiled with #define EV ev.
-//
-#define EV ev.isDisabled()?ev:ev
-
 // used at several places as
 #define SPEED_OF_LIGHT 299792458.0
 

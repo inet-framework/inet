@@ -802,7 +802,7 @@ void NS_CLASS re_intermediate_rrep (struct in_addr src_addr,struct in_addr dest_
 {
     /** create a new RREP and send it to given destination **/
 #ifdef OMNETPP
-    ev << "sending a reply to OrigNode " <<  src_addr.s_addr << endl;
+    EV << "sending a reply to OrigNode " <<  src_addr.s_addr << endl;
 #endif
     rtable_entry_t *rev_rt  = rtable_find(src_addr);
 

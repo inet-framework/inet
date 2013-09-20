@@ -34,7 +34,7 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
 
     SCTPOpenCommand *openCmd = check_and_cast<SCTPOpenCommand *>(sctpCommand);
 
-    ev<<"SCTPAssociationEventProc:process_ASSOCIATE\n";
+    EV<<"SCTPAssociationEventProc:process_ASSOCIATE\n";
 
     switch (fsm->getState())
     {
@@ -62,7 +62,7 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
         {
         localPort = sctpMain->getEphemeralPort();
         }
-        ev << "OPEN: " << lAddr << ":" << localPort << " --> " << rAddr << ":" << remotePort << "\n";
+        EV << "OPEN: " << lAddr << ":" << localPort << " --> " << rAddr << ":" << remotePort << "\n";
 
         sctpMain->updateSockPair(this, lAddr, rAddr, localPort, remotePort);
         state->localRwnd = (long)sctpMain->par("arwnd");

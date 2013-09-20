@@ -21,7 +21,7 @@
 
 #include "AirFrame_m.h"
 
-#define coreEV (ev.isDisabled()||!coreDebug) ? ev : ev << "ChannelControl: "
+#define coreEV (ev.isDisabled()||!coreDebug) ? EV : EV << "ChannelControl: "
 
 Define_Module(ChannelControl);
 

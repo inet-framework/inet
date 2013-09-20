@@ -714,7 +714,7 @@ void SCTP::addForkedAssociation(SCTPAssociation *assoc, SCTPAssociation *newAsso
 {
     SockPair keyAssoc;
 
-    ev<<"addForkedConnection assocId="<<assoc->assocId<<"    newId="<<newAssoc->assocId<<"\n";
+    EV<<"addForkedConnection assocId="<<assoc->assocId<<"    newId="<<newAssoc->assocId<<"\n";
 
     for (SctpAssocMap::iterator j=sctpAssocMap.begin(); j!=sctpAssocMap.end(); ++j)
         if (assoc->assocId==j->second->assocId)
@@ -876,23 +876,23 @@ void SCTP::finish()
         removeAssociation(assocMapIterator->second);
         assocMapIterator = sctpAssocMap.begin();
     }
-    ev << getFullPath() << ": finishing SCTP with "
+    EV << getFullPath() << ": finishing SCTP with "
         << sctpAssocMap.size() << " connections open." << endl;
 
     for (AssocStatMap::const_iterator iterator = assocStatMap.begin();
           iterator != assocStatMap.end(); iterator++) {
         const SCTP::AssocStat& assoc = iterator->second;
 
-        ev << "Association " << assoc.assocId << ": started at " << assoc.start
+        EV << "Association " << assoc.assocId << ": started at " << assoc.start
             << " and finished at " << assoc.stop << " --> lifetime: " << assoc.lifeTime << endl;
-        ev << "Association " << assoc.assocId << ": sent bytes=" << assoc.sentBytes
+        EV << "Association " << assoc.assocId << ": sent bytes=" << assoc.sentBytes
             << ", acked bytes=" << assoc.ackedBytes<< ", throughput=" << assoc.throughput<< " bit/s" << endl;
-        ev << "Association " << assoc.assocId << ": transmitted Bytes="
+        EV << "Association " << assoc.assocId << ": transmitted Bytes="
             << assoc.transmittedBytes<< ", retransmitted Bytes=" << assoc.transmittedBytes-assoc.ackedBytes<< endl;
-        ev << "Association " << assoc.assocId << ": number of Fast RTX="
+        EV << "Association " << assoc.assocId << ": number of Fast RTX="
             << assoc.numFastRtx << ", number of Timer-Based RTX=" << assoc.numT3Rtx
             << ", path failures=" << assoc.numPathFailures<< ", ForwardTsns=" << assoc.numForwardTsn<< endl;
-        ev << "AllMessages=" <<numPacketsReceived<< " BadMessages=" <<numPacketsDropped<< endl;
+        EV << "AllMessages=" <<numPacketsReceived<< " BadMessages=" <<numPacketsDropped<< endl;
 
         recordScalar("Association Lifetime", assoc.lifeTime);
         recordScalar("Acked Bytes", assoc.ackedBytes);

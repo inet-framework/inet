@@ -67,7 +67,7 @@ void VoIPStreamSender::initialize(int stage)
     else if (stage == 3)  //wait until stage 3 - The Address resolver does not work before that!
     {
         // say HELLO to the world
-        ev << "VoIPSourceApp -> initialize(" << stage << ")" << endl;
+        EV << "VoIPSourceApp -> initialize(" << stage << ")" << endl;
 
         // Hack for create results folder
         recordScalar("hackForCreateResultsFolder", 0);
@@ -94,9 +94,9 @@ void VoIPStreamSender::initialize(int stage)
         samplesPerPacket = (int)round(sampleRate * SIMTIME_DBL(packetTimeLength));
         if (samplesPerPacket & 1)
             samplesPerPacket++;
-        ev << "The packetTimeLength parameter is " << packetTimeLength * 1000.0 << "ms, ";
+        EV << "The packetTimeLength parameter is " << packetTimeLength * 1000.0 << "ms, ";
         packetTimeLength = ((double)samplesPerPacket) / sampleRate;
-        ev << "adjusted to " << packetTimeLength * 1000.0 << "ms" << endl;
+        EV << "adjusted to " << packetTimeLength * 1000.0 << "ms" << endl;
 
         sampleBuffer.clear(0);
 

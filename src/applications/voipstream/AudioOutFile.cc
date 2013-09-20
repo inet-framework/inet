@@ -58,7 +58,7 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
     AVOutputFormat *fmt = av_guess_format(NULL, resultFile, NULL);
     if (!fmt)
     {
-        ev << "Could not deduce output format from file extension: using WAV.\n";
+        EV << "Could not deduce output format from file extension: using WAV.\n";
         fmt = av_guess_format("wav", NULL, NULL);
     }
     if (!fmt)

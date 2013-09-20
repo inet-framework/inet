@@ -1958,7 +1958,7 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildMulticastFrame(Ieee80211DataOrMgmtF
     PhyControlInfo *phyControlInfo_old = dynamic_cast<PhyControlInfo *>( frameToSend->getControlInfo() );
     if (phyControlInfo_old)
     {
-        ev<<"Per frame1 params"<<endl;
+        EV<<"Per frame1 params"<<endl;
         PhyControlInfo *phyControlInfo_new = new PhyControlInfo;
         *phyControlInfo_new = *phyControlInfo_old;
         //EV<<"PhyControlInfo bitrate "<<phyControlInfo->getBitrate()/1e6<<"Mbps txpower "<<phyControlInfo->txpower()<<"mW"<<endl;
@@ -2157,11 +2157,11 @@ double Ieee80211Mac::computeFrameDuration(Ieee80211Frame *msg)
 
     PhyControlInfo *ctrl;
     double duration;
-    ev<<*msg;
+    EV<<*msg;
     ctrl = dynamic_cast<PhyControlInfo*> ( msg->removeControlInfo() );
     if ( ctrl )
     {
-        ev<<"Per frame2 params bitrate "<<ctrl->getBitrate()/1e6<<endl;
+        EV<<"Per frame2 params bitrate "<<ctrl->getBitrate()/1e6<<endl;
         duration = computeFrameDuration(msg->getBitLength(), ctrl->getBitrate());
         delete ctrl;
         return duration;

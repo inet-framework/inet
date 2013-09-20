@@ -17,7 +17,7 @@
 #include "BatmanMsg.h"
 
 
-#define debug_output(x)     (ev.isDisabled() || ((x) > debug_level)) ? ev : ev
+#define debug_output(x)     (ev.isDisabled() || ((x) > debug_level)) ? EV : EV
 
 #define TYPE_OF_WORD uint64_t /* you should choose something big, if you don't want to waste cpu */
 #define WORD_BIT_SIZE  (sizeof(TYPE_OF_WORD)*8)

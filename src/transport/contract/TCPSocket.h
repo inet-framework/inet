@@ -85,17 +85,17 @@ class TCPStatusInfo;
  * }
  *
  * void MyModule::socketDataArrived(int, void *, cPacket *msg, bool) {
- *     ev << "Received TCP data, " << msg->getByteLength() << " bytes\\n";
+ *     EV << "Received TCP data, " << msg->getByteLength() << " bytes\\n";
  *     delete msg;
  * }
  *
  * void MyModule::socketFailure(int, void *, int code) {
  *     if (code==TCP_I_CONNECTION_RESET)
- *         ev << "Connection reset!\\n";
+ *         EV << "Connection reset!\\n";
  *     else if (code==TCP_I_CONNECTION_REFUSED)
- *         ev << "Connection refused!\\n";
+ *         EV << "Connection refused!\\n";
  *     else if (code==TCP_I_TIMEOUT)
- *         ev << "Connection timed out!\\n";
+ *         EV << "Connection timed out!\\n";
  * }
  * </pre>
  *

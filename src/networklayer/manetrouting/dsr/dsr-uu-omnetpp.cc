@@ -395,7 +395,7 @@ void DSRUU::initialize(int stage)
         }
         interface80211ptr->ipv4Data()->joinMulticastGroup(IPv4Address::LL_MANET_ROUTERS);
         is_init = true;
-        ev << "Dsr active" << "\n";
+        EV << "Dsr active" << "\n";
     }
 
     return;
@@ -656,7 +656,7 @@ void DSRUU::packetFailed(IPv4Datagram *ipDgram)
     if (ipDgram->getTransportProtocol()!=IP_PROT_DSR)
     {
         // This shouldn't really happen ?
-        ev << "Data packet from "<< ipDgram->getSrcAddress() <<"without DSR header!n";
+        EV << "Data packet from "<< ipDgram->getSrcAddress() <<"without DSR header!n";
         return;
     }
 

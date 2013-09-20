@@ -106,7 +106,7 @@
     while (!___exit && (___c++ < FSM_MAXT || (opp_error(eINFLOOP, (fsm).getStateName()), 0)))
 
 #define FSMA_Print(exiting)                                            \
-    (ev << "FSM " << ___fsm->getName()                                    \
+    (EV << "FSM " << ___fsm->getName()                                    \
         << ((exiting) ? ": leaving state  " : ": entering state ")     \
         << ___fsm->getStateName() << endl)
 

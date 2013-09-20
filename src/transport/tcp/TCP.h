@@ -34,14 +34,14 @@ class TCPSegment;
 class TCPSendQueue;
 class TCPReceiveQueue;
 
-// macro for normal ev<< logging (Note: deliberately no parens in macro def)
-#define tcpEV (ev.isDisabled()||TCP::testing)?ev:ev
+// macro for normal EV<< logging (Note: deliberately no parens in macro def)
+#define tcpEV (ev.isDisabled()||TCP::testing)?EV:EV
 
-// macro for more verbose ev<< logging (Note: deliberately no parens in macro def)
-#define tcpEV2 (ev.isDisabled()||TCP::testing||!TCP::logverbose)?ev:ev
+// macro for more verbose EV<< logging (Note: deliberately no parens in macro def)
+#define tcpEV2 (ev.isDisabled()||TCP::testing||!TCP::logverbose)?EV:EV
 
 // testingEV writes log that automated test cases can check (*.test files)
-#define testingEV (ev.isDisabled()||!TCP::testing)?ev:ev
+#define testingEV (ev.isDisabled()||!TCP::testing)?EV:EV
 
 
 

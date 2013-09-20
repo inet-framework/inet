@@ -203,7 +203,7 @@ cModule* HttpController::getAnyServerModule()
 
     if (webSiteList.size() == 0)
     {
-        EV_WARNING << "No modules registered. Cannot select a random module" << endl;
+        EV_WARN << "No modules registered. Cannot select a random module" << endl;
         return NULL;
     }
 
@@ -254,7 +254,7 @@ int HttpController::getAnyServerInfo(char* wwwName, char* module, int &port)
 
     if (webSiteList.size() == 0)
     {
-        EV_WARNING << "No modules registered. Cannot select a random module" << endl;
+        EV_WARN << "No modules registered. Cannot select a random module" << endl;
         return -1;
     }
 

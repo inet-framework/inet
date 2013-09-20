@@ -14,7 +14,7 @@
 #define LWIP_PLATFORM_DIAG(c) do { printf("%u] ", get_stack_id()); printf(c); } while (0)
 */
 //#define LWIP_PLATFORM_DIAG(c) printf(c)
-#define LWIP_PLATFORM_DIAG(c) do { ev<<"(LWIP):"; ev.printf c; } while (0)
+#define LWIP_PLATFORM_DIAG(c) do { EV<<"(LWIP):"; ev.printf c; } while (0)
 
 #ifndef BYTE_ORDER
 #define BYTE_ORDER LITTLE_ENDIAN

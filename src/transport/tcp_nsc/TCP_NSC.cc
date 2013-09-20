@@ -71,7 +71,7 @@ bool TCP_NSC::logverboseS;
 #ifdef tcpEV
 #undef tcpEV
 #endif
-// macro for normal ev<< logging (note: deliberately no parens in macro def)
+// macro for normal EV<< logging (note: deliberately no parens in macro def)
 #define tcpEV ((ev.isDisabled()) || (TCP_NSC::testingS)) ? ev : ev
 
 struct nsc_iphdr

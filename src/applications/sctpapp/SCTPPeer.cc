@@ -457,7 +457,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
         case SCTP_I_SEND_STREAMS_RESETTED:
         case SCTP_I_RCV_STREAMS_RESETTED:
         {
-            ev << "Streams have been resetted\n";
+            EV << "Streams have been resetted\n";
             break;
         }
         case SCTP_I_CLOSED:
@@ -540,7 +540,7 @@ void SCTPPeer::socketPeerClosed(int32, void *)
     // close the connection (if not already closed)
     if (clientSocket.getState()==SCTPSocket::PEER_CLOSED)
     {
-        ev << "remote SCTP closed, closing here as well\n";
+        EV << "remote SCTP closed, closing here as well\n";
         setStatusString("closing");
         clientSocket.close();
     }
@@ -549,14 +549,14 @@ void SCTPPeer::socketPeerClosed(int32, void *)
 void SCTPPeer::socketClosed(int32, void *)
 {
     // *redefine* to start another session etc.
-    ev << "connection closed\n";
+    EV << "connection closed\n";
     setStatusString("closed");
 }
 
 void SCTPPeer::socketFailure(int32, void *, int32 code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
-    ev << "connection broken\n";
+    EV << "connection broken\n";
     setStatusString("broken");
     // reconnect after a delay
     timeMsg->setKind(MSGKIND_CONNECT);
@@ -623,7 +623,7 @@ void SCTPPeer::socketEstablished(int32, void *)
 {
     int32 count = 0;
      // *redefine* to perform or schedule first sending
-    ev << "SCTPClient: connected\n";
+    EV << "SCTPClient: connected\n";
     setStatusString("connected");
     // determine number of requests in this session
     numRequestsToSend = (long) par("numRequestsPerSession");
@@ -776,16 +776,16 @@ void SCTPPeer::sendqueueFullArrived(int32 assocId)
 
 void SCTPPeer::finish()
 {
-    ev << getFullPath() << ": opened " << numSessions << " sessions\n";
-    ev << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
+    EV << getFullPath() << ": opened " << numSessions << " sessions\n";
+    EV << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
 
     for (RcvdBytesPerAssoc::iterator l=rcvdBytesPerAssoc.begin(); l!=rcvdBytesPerAssoc.end(); ++l)
     {
-        ev << getFullPath() << ": received " << l->second << " bytes in assoc " << l->first << "\n";
+        EV << getFullPath() << ": received " << l->second << " bytes in assoc " << l->first << "\n";
     }
 
-    ev << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
-    ev << getFullPath() << "Over all " << notifications << " notifications received\n ";
+    EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
+    EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
 
     for (BytesPerAssoc::iterator j = bytesPerAssoc.begin(); j != bytesPerAssoc.end(); j++)
     {

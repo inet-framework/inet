@@ -93,11 +93,11 @@ void IPvXTrafSink::printPacket(cPacket *msg)
         protocol = ctrl->getProtocol();
     }
 
-    ev  << msg << endl;
-    ev  << "Payload length: " << msg->getByteLength() << " bytes" << endl;
+    EV << msg << endl;
+    EV << "Payload length: " << msg->getByteLength() << " bytes" << endl;
 
     if (protocol != -1)
-        ev  << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
+        EV << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
 }
 
 void IPvXTrafSink::processPacket(cPacket *msg)

@@ -2246,7 +2246,7 @@ OLSR::mac_failed(IPv4Datagram* p)
 
     nsaddr_t dest_addr = ManetAddress(p->getDestAddress());
 
-    ev <<"Node " << OLSR::node_id(ra_addr()) << "MAC Layer detects a breakage on link to "  <<
+    EV <<"Node " << OLSR::node_id(ra_addr()) << "MAC Layer detects a breakage on link to "  <<
     OLSR::node_id(dest_addr);
 
     if (dest_addr == ManetAddress(IPv4Address(IP_BROADCAST)))
