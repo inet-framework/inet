@@ -21,12 +21,20 @@
 #include "Ethernet.h"
 #include "RSTPAccess.h"
 #include "MACAddressTableAccess.h"
+#include "ModuleAccess.h"
+#include "NodeOperations.h"
+#include "NodeStatus.h"
 
 Define_Module(RelayRSTP);
 
 void RelayRSTP::initialize(int stage)
 {
-    if(stage==2)  // "auto" MAC addresses assignment takes place in stage 0. rstpModule gets address in stage 1.
+    if (stage == 1)
+    {
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+    }
+    else if(stage == 2)  // "auto" MAC addresses assignment takes place in stage 0. rstpModule gets address in stage 1.
     {
         //Obtaining AddressTable, rstp modules pointers
         AddressTable = MACAddressTableAccess().get();
@@ -44,6 +52,12 @@ void RelayRSTP::initialize(int stage)
 
 void RelayRSTP::handleMessage(cMessage *msg)
 {
+    if (!isOperational)
+    {
+        EV << "Message '" << msg << "' arrived when module status is down, dropped it\n";
+        delete msg;
+        return;
+    }
     ev << "New message"<<endl;
 
     //rstp module update.
@@ -184,4 +198,45 @@ void RelayRSTP::broadcastMsg(cMessage * msg)
         }
     }
     delete msg;
+}
+void RelayRSTP::start()
+{
+    AddressTable->clearTable();
+    isOperational = true;
+}
+
+void RelayRSTP::stop()
+{
+    AddressTable->clearTable();
+    isOperational = false;
+}
+
+bool RelayRSTP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_LINK_LAYER) {
+            start();
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_LINK_LAYER) {
+            stop();
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            stop();
+        }
+    }
+    else
+    {
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    }
+
+    return true;
 }

@@ -24,6 +24,7 @@ import inet.base.NotificationBoard;
 import inet.networklayer.common.InterfaceTable;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.ethernet.switch.MACAddressTable;
+import inet.status.NodeStatus;
 import inet.linklayer.rstp.RSTP;
 import inet.linklayer.rstp.RelayRSTP;
 import inet.linklayer.rstp.PortFiltRSTP;
@@ -33,10 +34,14 @@ module RSTPSwitch
     parameters:
         @node();
         @display("i=device/router;bgb=386,346;bgl=2");
+        bool hasStatus = default(false);
         eth[*].encapType = "EtherEncapDummy";
     gates:
         inout ethg[];
     submodules:
+        status: NodeStatus if hasStatus {
+            @display("p=50,50;is=s");
+        }
         interfaceTable: InterfaceTable {
             @display("p=50,92;is=s");
         }

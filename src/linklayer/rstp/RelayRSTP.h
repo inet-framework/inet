@@ -21,6 +21,7 @@
 
 #include <omnetpp.h>
 
+#include "ILifecycle.h"
 #include "MACAddress.h"
 #include "EtherFrame.h"
 #include "BPDU.h"
@@ -28,12 +29,13 @@
 #include "MACAddressTable.h"
 #include "Delivery.h"
 
-class RelayRSTP : public cSimpleModule
+class RelayRSTP : public cSimpleModule, public ILifecycle
 {
   protected:
     MACAddressTable *AddressTable;   /// SwTable module pointer. Updated every time the admcarelay module is accessed.
     RSTP * rstpModule; /// RSTP module pointer.
     bool verbose;  /// It sets module verbosity
+    bool isOperational;         // for lifecycle
   protected:
     MACAddress address;
     virtual void initialize(int stage);
@@ -44,6 +46,13 @@ class RelayRSTP : public cSimpleModule
     virtual void handleEtherFrame(EtherFrame *frame);
     virtual void relayMsg(cMessage * msg,int outputPort);
     virtual void broadcastMsg(cMessage * msg);
+
+  // for lifecycle:
+  public:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+  protected:
+    virtual void start();
+    virtual void stop();
 };
 
 #endif
