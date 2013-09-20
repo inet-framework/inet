@@ -36,7 +36,6 @@ simple RSTP
         bool verbose=default(false);						//sets module verbosity
         bool testing=default(false);						//Saves testing data
         bool autoEdge=default(true);  						//Automatic edge setting. If false, Edge ports will have to wait to get designated.
-        xml UpTimeEvents=default(xmldoc("UpTimeEvents.xml"));
     gates:
       	inout RSTPPort @labels(BPDU);						//To admacrelay
 }

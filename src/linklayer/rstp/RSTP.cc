@@ -63,11 +63,6 @@ void RSTP::initialize(int stage)
 		//Gets the relay pointer.
 		ifTable=InterfaceTableAccess().get();
 		admac=RelayRSTPAccess().getIfExists();
-//		admac=AdmacrelayAccess().getIfExists();
-//		if(admac==NULL)
-//		{
-//			admac=Relay1QAccess().getIfExists();
-//		}
 		if(admac==NULL)
 			error("Relay module not found");
 
@@ -87,19 +82,6 @@ void RSTP::initialize(int stage)
 		MaxAge=par("MaxAge");
 		verbose=(bool) par("verbose");
 		testing=(bool) par("testing");
-		up=true;
-
-		//Reading events from file
-		const cXMLElement * tree= par("UpTimeEvents").xmlValue();
-		ASSERT(tree);
-		ASSERT(!strcmp(tree->getTagName(), "Events"));
-		cXMLElementList list=tree->getChildrenByTagName("Event");
-		for (cXMLElementList::iterator iter=list.begin(); iter != list.end(); iter++)
-		{
-			cXMLElement * event = *iter;
-			scheduleUpTimeEvent(event);
-		}
-
 		priority=par("BridgePriority");
 		TCWhileTime=(simtime_t) par("TCWhileTime");
 		hellotime=(simtime_t) par("helloTime");
@@ -235,11 +217,6 @@ void RSTP::handleMessage(cMessage *msg)
             case SELF_TIMETODESIGNATE:
                 // Not asigned ports switch to designated.
                 handleMigrate(msg);
-                break;
-
-            case SELF_UPTIMEEVENT_UP:
-            case SELF_UPTIMEEVENT_DOWN:
-                handleUpTimeEvent(msg);  //Handling UP or DOWN event.
                 break;
 
             default:
@@ -942,7 +919,7 @@ void RSTP::colorRootPorts()
 			}
 		}
 	}
-	if(up==true)
+	if(true) //only when the router is working
 	{
 		if(found==false)
 		{ //Root mark
@@ -1033,36 +1010,14 @@ void RSTP::initPorts()
 		Puertos[j].Flushed++;
 		sw->flush(j);
 
-//		if(dynamic_cast<Admacrelay *>(admac)!=NULL)
-//		{
-//			cGate * gate=admac->gate("GatesOut",j);
-//			if(gate!=NULL)
-//			{
-//				gate=gate->getNextGate();
-//				if(gate!=NULL)
-//						Puertos[j].portfilt=check_and_cast<PortFilt *>(gate->getOwner());
-//			}
-//		}
-//		else if(dynamic_cast<Relay1Q *>(admac)!=NULL)
-//		{
-//			cGate * gate=admac->gate("GatesOut",j);
-//			if(gate!=NULL)
-//			{
-//				gate=gate->getNextGate();
-//				if(gate!=NULL)
-//					Puertos[j].portfilt=check_and_cast<PortFilt *>(gate->getOwner());
-//			}
-//		}
-//		else if(dynamic_cast<RelayRSTP *>(admac)!=NULL)
-//      {
-            cGate * gate=admac->gate("GatesOut",j);
+
+        cGate * gate=admac->gate("GatesOut",j);
+        if(gate!=NULL)
+        {
+            gate=gate->getNextGate();
             if(gate!=NULL)
-            {
-                gate=gate->getNextGate();
-                if(gate!=NULL)
-                    Puertos[j].portfilt=check_and_cast<PortFiltRSTP *>(gate->getOwner());
-            }
-//      }
+                Puertos[j].portfilt=check_and_cast<PortFiltRSTP *>(gate->getOwner());
+        }
 	}
 }
 
@@ -1259,37 +1214,6 @@ void PortStatus::updatePortVector(BPDUieee8021D *frame,int arrival)
 	this->PortRstpVector.srcPort=frame->getPortNumber();
 	this->PortRstpVector.arrivalPort=arrival;
 	this->LostBPDU=0;
-}
-
-void RSTP::scheduleUpTimeEvent(cXMLElement * event)
-{//Schedule "UPTimeEvents". Falling nodes or links.
-	simtime_t temp=(simtime_t) getParameterDoubleValue(event,"Time");
-	short EventType = getParameterBoolValue(event,"Type") ? SELF_UPTIMEEVENT_UP : SELF_UPTIMEEVENT_DOWN;
-	cMessage * msg=new cMessage("UpTimeEvent",EventType);
-	//cXMLElementList list;
-	scheduleAt(temp,msg);
-}
-
-void RSTP::handleUpTimeEvent(cMessage * msg)
-{//Handles scheduled "UPTimeEvents"
-
-	if(msg->getKind()==SELF_UPTIMEEVENT_UP)
-	{
-		initPorts();
-		up=true;
-	}
-	else if(msg->getKind()==SELF_UPTIMEEVENT_DOWN)
-	{
-		for(unsigned int i=0;i<Puertos.size();i++)
-		{
-			Puertos[i].PortRole=DISABLED;
-			Puertos[i].PortState=DISCARDING;
-		}
-		Parent->getDisplayString().setTagArg("i2",0,"status/stop");
-		Parent->getDisplayString().setTagArg("i",1,"#ff6565");
-		up=false;
-	}
-	delete msg;
 }
 
 MACAddress RSTP::getAddress()

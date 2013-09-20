@@ -114,9 +114,7 @@ class RSTP: public cSimpleModule
     {
         SELF_HELLOTIME = 1,
         SELF_UPGRADE,
-        SELF_TIMETODESIGNATE,
-        SELF_UPTIMEEVENT_UP,
-        SELF_UPTIMEEVENT_DOWN
+        SELF_TIMETODESIGNATE
     };
 
 	  /*Dynamic data.*/
@@ -124,7 +122,6 @@ class RSTP: public cSimpleModule
 	int MaxAge;
 	bool verbose;		/// Sets module verbosity
 	bool testing;		/// Save Testing data
-	bool up;
 
 	cModule* Parent; /// Pointer to the parent module
 	cModule* admac;
@@ -255,16 +252,6 @@ class RSTP: public cSimpleModule
 	 * @brief If root TCWhile has not expired, sends a BPDU to the Root with TCFlag=true.
 	 */
 	virtual void sendTCNtoRoot();
-
-	/**
-	 * @brief Handling UP/DOWN event
-	 */
-	virtual void handleUpTimeEvent(cMessage *);
-
-	/**
-	 * @brief Scheduling UP/DOWN events
-	 */
-	virtual void scheduleUpTimeEvent(cXMLElement * event);
 
 	/**
 	 * @brief HelloTime event handling.
