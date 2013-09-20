@@ -48,66 +48,26 @@ void RelayRSTP::handleMessage(cMessage *msg)
 
     //rstp module update.
     rstpModule=RSTPAccess().get();
-    int ArrivalRole=rstpModule->getPortRole(msg->getArrivalGate()->getIndex());
 
     //Sends to correct handler after verification
-    if (dynamic_cast<BPDUieee8021D *>(msg) != NULL)
+    if (msg->arrivedOn("RSTPGate$i"))
+    { //Outgoing Frame. Delivery encapsulates the frame.
+        ev<<"Outgoing Frame";
+        handleFrameFromRSTP(check_and_cast<BPDUieee8021D *> (msg));
+    }
+    else if (dynamic_cast<BPDUieee8021D *>(msg) != NULL)
     {
         ev<<"BPDU";
+        int ArrivalRole=rstpModule->getPortRole(msg->getArrivalGate()->getIndex());
         if(ArrivalRole!=DISABLED)
-            handleIncomingFrame(check_and_cast<BPDUieee8021D *> (msg));
+            handleBPDUFrame(check_and_cast<BPDUieee8021D *> (msg));
         else
             delete msg;
     }
-    else if (dynamic_cast<Delivery *>(msg)!=NULL)
-    { //Outgoing Frame. Delivery encapsulates the frame.
-        ev<<"Outgoing Frame";
-        handleIncomingFrame(check_and_cast<Delivery *>(msg));
-    }
-    else
+    else if(dynamic_cast<EtherFrame *>(msg) != NULL)
     {
         ev<<"Data Frame";
-        handleIncomingFrame(msg);
-    }
-}
-
-void RelayRSTP::handleIncomingFrame(BPDUieee8021D *frame)
-{
-    if((frame->getDest()==address)||(frame->getDest()==MACAddress::STP_MULTICAST_ADDRESS))
-    {
-        Delivery * frame2= new Delivery();
-        frame2->setArrivalPort(frame->getArrivalGate()->getIndex());
-        frame2->encapsulate(frame);
-        send(frame2,"RSTPGate$o"); //And sends the frame to the RSTP module.
-    }
-    else
-    {
-        ev<<"Wrong formated BPDU";
-        delete frame;
-    }
-}
-
-void RelayRSTP::handleIncomingFrame(Delivery *frame)
-{
-    int sendBy=frame->getSendByPort();
-    if(sendBy>gateSize("GatesOut"))
-    {
-        ev<<"Error. Wrong sending port.";
-    }
-    else
-    {
-        cMessage * msg=frame->decapsulate();
-        send(msg,"GatesOut",sendBy);
-    }
-    delete frame;
-}
-
-void RelayRSTP::handleIncomingFrame(cMessage * msg)
-{  //Check port state and frame type.
-    int ArrivalState=rstpModule->getPortState(msg->getArrivalGate()->getIndex());
-
-    if(dynamic_cast<EtherFrame *>(msg) != NULL)
-    {
+        int ArrivalState=rstpModule->getPortState(msg->getArrivalGate()->getIndex());
         if((ArrivalState==FORWARDING)||(ArrivalState==LEARNING))
         {
             ev<<"Handling Ethernet Frame";
@@ -120,6 +80,37 @@ void RelayRSTP::handleIncomingFrame(cMessage * msg)
     else
     {
         error("Not supported frame type");
+    }
+}
+
+void RelayRSTP::handleBPDUFrame(BPDUieee8021D *frame)
+{
+    if((frame->getDest()==address)||(frame->getDest()==MACAddress::STP_MULTICAST_ADDRESS))
+    {
+        Delivery * ctrlInfo= new Delivery();
+        ctrlInfo->setArrivalPort(frame->getArrivalGate()->getIndex());
+        frame->setControlInfo(ctrlInfo);
+        send(frame,"RSTPGate$o"); //And sends the frame to the RSTP module.
+    }
+    else
+    {
+        ev<<"Wrong formated BPDU";
+        delete frame;
+    }
+}
+
+void RelayRSTP::handleFrameFromRSTP(BPDUieee8021D *frame)
+{
+    Delivery * ctrlInfo=check_and_cast<Delivery *>(frame->removeControlInfo());
+    int sendBy=ctrlInfo->getSendByPort();
+    delete ctrlInfo;
+    if(sendBy>gateSize("GatesOut"))
+    {
+        ev<<"Error. Wrong sending port.";
+    }
+    else
+    {
+        send(frame,"GatesOut",sendBy);
     }
 }
 

@@ -250,7 +250,7 @@ void RSTP::handleMessage(cMessage *msg)
 	else
 	{
 		ev<<"BPDU received at RSTP module."<<endl;
-	handleIncomingFrame(check_and_cast<Delivery *> (msg));   //Handling BPDU (not self message)
+	handleIncomingFrame(check_and_cast<BPDUieee8021D *> (msg));   //Handling BPDU (not self message)
 
 	}
 	if(verbose==true)
@@ -430,7 +430,7 @@ void RSTP::handleBK(BPDUieee8021D * frame, int arrival)
 	}
 }
 
-void RSTP::handleIncomingFrame(Delivery *frame2)
+void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 {  //Incoming BPDU handling
 	if(verbose==true)
 	{
@@ -438,9 +438,9 @@ void RSTP::handleIncomingFrame(Delivery *frame2)
 	}
 
 	//First. Checking message age
-	int arrival=frame2->getArrivalPort(); //arrival port.
-	BPDUieee8021D * frame=check_and_cast<BPDUieee8021D *>(frame2->decapsulate());
-	delete frame2;
+	Delivery * ctrlInfo=check_and_cast<Delivery *>(frame->removeControlInfo());
+    int arrival=ctrlInfo->getArrivalPort();
+    delete ctrlInfo;
 	if(frame->getAge()<MaxAge)
 	{
 		//Checking TC.
@@ -787,7 +787,7 @@ void RSTP::sendTCNtoRoot()
 			if(simulation.getSimTime()<Puertos[r].TCWhile)
 			{
 				BPDUieee8021D * frame = new BPDUieee8021D();
-				Delivery * frame2= new Delivery();
+				Delivery * ctrlInfo= new Delivery();
 				RSTPVector a = getRootRstpVector();
 
 				frame->setRootPriority(a.RootPriority);
@@ -803,9 +803,9 @@ void RSTP::sendTCNtoRoot()
 				frame->setDisplayString("b=,,,#3e3ef3");
 		        if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
 		            frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
-				frame2->setSendByPort(r);
-				frame2->encapsulate(frame);
-				send(frame2,"RSTPPort$o");
+				ctrlInfo->setSendByPort(r);
+				frame->setControlInfo(ctrlInfo);
+				send(frame,"RSTPPort$o");
 			}
 		}
 	}
@@ -827,7 +827,7 @@ void RSTP::sendBPDU(int port)
 	if(Puertos[port].PortRole!=DISABLED)
 	{
 		BPDUieee8021D * frame = new BPDUieee8021D();
-		Delivery * frame2=new Delivery();
+		Delivery * ctrlInfo=new Delivery();
 		RSTPVector a = getRootRstpVector();
 		frame->setRootPriority(a.RootPriority);
 		frame->setRootMAC(a.RootMAC);
@@ -847,9 +847,9 @@ void RSTP::sendBPDU(int port)
 			frame->setTC(false);
         if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
             frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
-		frame2->setSendByPort(port);
-		frame2->encapsulate(frame);
-		send(frame2,"RSTPPort$o");
+		ctrlInfo->setSendByPort(port);
+		frame->setControlInfo(ctrlInfo);
+		send(frame,"RSTPPort$o");
 	}
 }
 

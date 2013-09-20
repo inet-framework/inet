@@ -21,7 +21,7 @@
 
 #include "BPDU.h"
 #include "MACAddress.h"
-#include "Delivery_m.h"
+#include "Delivery.h"
 #include "MACAddressTable.h"
 #include "PortFiltRSTP.h"
 #include "InterfaceTable.h"
@@ -216,7 +216,7 @@ class RSTP: public cSimpleModule
 	 * @brief BPDU processing.
 	 * Updates RSTP vectors information. Handles port role changes.
 	 */
-	virtual void handleIncomingFrame(Delivery *frame2);
+	virtual void handleIncomingFrame(BPDUieee8021D *frame);
 
 	/**
 	 * @brief Savin statistics
