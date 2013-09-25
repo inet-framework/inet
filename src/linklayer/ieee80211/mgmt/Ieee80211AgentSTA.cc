@@ -51,7 +51,7 @@ void Ieee80211AgentSTA::initialize(int stage)
 
         InterfaceTable *ift = (InterfaceTable*)InterfaceTableAccess().getIfExists();
         myIface = NULL;
-        if (!ift)
+        if (ift)
         {
             myIface = ift->getInterfaceByName(getParentModule()->getFullName());
         }
