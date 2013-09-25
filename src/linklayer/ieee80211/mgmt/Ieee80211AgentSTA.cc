@@ -65,10 +65,10 @@ void Ieee80211AgentSTA::initialize(int stage)
         dropConfirmSignal = registerSignal("dropConfirm");
 
         // start up: send scan request
-        if (par("startingTime").doubleValue()>0)
-            scheduleAt(simTime()+par("startingTime").doubleValue(), new cMessage("startUp", MK_STARTUP));
-        else
-            scheduleAt(simTime()+uniform(0, maxChannelTime), new cMessage("startUp", MK_STARTUP));
+        simtime_t startingTime = par("startingTime").doubleValue();
+        if (startingTime < SIMTIME_ZERO)
+            startingTime = uniform(SIMTIME_ZERO, maxChannelTime);
+        scheduleAt(simTime()+startingTime, new cMessage("startUp", MK_STARTUP));
     }
 }
 
