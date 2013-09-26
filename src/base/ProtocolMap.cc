@@ -56,16 +56,16 @@ void ProtocolMapping::parseProtocolMapping(const char *s)
 
 }
 
-int ProtocolMapping::findOutputGateForProtocol(int protocol)
+int ProtocolMapping::findOutputGateForProtocol(int protocol) const
 {
-    for (Entries::iterator i=entries.begin(); i!=entries.end(); ++i)
+    for (Entries::const_iterator i=entries.begin(); i!=entries.end(); ++i)
         if (i->protocolNumber==protocol)
             return i->outGateIndex;
 
     return -2;  // illegal gateindex
 }
 
-int ProtocolMapping::getOutputGateForProtocol(int protocol)
+int ProtocolMapping::getOutputGateForProtocol(int protocol) const
 {
     int ret = findOutputGateForProtocol(protocol);
     if (ret >= -1)
@@ -73,3 +73,13 @@ int ProtocolMapping::getOutputGateForProtocol(int protocol)
     throw cRuntimeError("No output gate defined in protocolMapping for protocol number %d", protocol);
 }
 
+void ProtocolMapping::addProtocolMapping(int protocol, int gateIndex)
+{
+    int registered = findOutputGateForProtocol(protocol);
+    if (registered == -2)
+        entries.push_back(Entry(protocol, gateIndex));
+    else if (registered == gateIndex)
+        EV_WARN << "The protocol " << protocol << " already registered to gate index=" << gateIndex << endl;
+    else
+        throw cRuntimeError("The protocol %d should not register to gate index=%d because it already registered to gate index=%d.", protocol, gateIndex, registered);
+}

@@ -44,14 +44,14 @@ class INET_API ProtocolMapping
   public:
     ProtocolMapping() {}
     ~ProtocolMapping() {}
-    void addProtocolMapping(int protocol, int gateIndex) { entries.push_back(Entry(protocol, gateIndex)); }
+    void addProtocolMapping(int protocol, int gateIndex);
     void parseProtocolMapping(const char *s);
 
     /** find output gate index for protocol ID and returns it. Returns -2 if not found. */
-    int findOutputGateForProtocol(int protocol);
+    int findOutputGateForProtocol(int protocol) const;
 
     /** find output gate index for protocol ID and returns it. Throws an error if not found. */
-    int getOutputGateForProtocol(int protocol);
+    int getOutputGateForProtocol(int protocol) const;
 };
 
 #endif
