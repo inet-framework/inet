@@ -24,7 +24,7 @@ Register_Class(TCPNewReno);
 
 
 TCPNewReno::TCPNewReno() : TCPTahoeRenoFamily(),
-  state((TCPNewRenoStateVariables *&)TCPAlgorithm::state)
+        state((TCPNewRenoStateVariables *&)TCPAlgorithm::state)
 {
 }
 

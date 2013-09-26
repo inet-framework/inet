@@ -26,7 +26,7 @@ Register_Class(DumbTCP);
 
 
 DumbTCP::DumbTCP() : TCPAlgorithm(),
-  state((DumbTCPStateVariables *&)TCPAlgorithm::state)
+        state((DumbTCPStateVariables *&)TCPAlgorithm::state)
 {
     rexmitTimer = NULL;
 }

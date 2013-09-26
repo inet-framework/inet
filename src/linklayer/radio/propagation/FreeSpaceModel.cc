@@ -62,7 +62,7 @@ double FreeSpaceModel::calculateReceivedPower(double pSend, double carrierFreque
 /** @brief calculates the power with the deterministic free space propagation model */
 double FreeSpaceModel::freeSpace(double Gt, double Gr, double L, double Pt, double lambda, double distance, double alpha)
 {
-  /** @brief
+    /** @brief
      * Friis free space equation:
      *
      *       Pt * Gt * Gr * (lambda^2)
@@ -70,20 +70,20 @@ double FreeSpaceModel::freeSpace(double Gt, double Gr, double L, double Pt, doub
      *       (4 * pi)^2 * d^alpha * L
      */
 
-  if (distance == 0.0)
-    return Pt;
+    if (distance == 0.0)
+        return Pt;
 
- /** @return returns a power value */
-  // Antennengewinn eines lambda/2-Dipols ist etwa 2,15 dBi
-  // Pt is in milli watt
-  double pr = (Pt * lambda * lambda * Gt * Gr / (16.0 *M_PI * M_PI * pow(distance, alpha) * L));
-  //cout /*EV*/ << "FreeSpace Pr=" << pr << " Pt " << Pt << " lambda " << lambda << " Gt " << Gt << " Gr " << Gr << " distance " << distance << " L " << L << " PI " << M_PI << endl;
-  return pr;
+    /** @return returns a power value */
+    // Antennengewinn eines lambda/2-Dipols ist etwa 2,15 dBi
+    // Pt is in milli watt
+    double pr = (Pt * lambda * lambda * Gt * Gr / (16.0 *M_PI * M_PI * pow(distance, alpha) * L));
+    //cout /*EV*/ << "FreeSpace Pr=" << pr << " Pt " << Pt << " lambda " << lambda << " Gt " << Gt << " Gr " << Gr << " distance " << distance << " L " << L << " PI " << M_PI << endl;
+    return pr;
 }
 
 double FreeSpaceModel::calculateDistance(double pSend, double pRec, double carrierFrequency)
 {
-  /** @brief
+    /** @brief
      * Friis free space equation:
      *
      *       Pt * Gt * Gr * (lambda^2)
@@ -91,14 +91,15 @@ double FreeSpaceModel::calculateDistance(double pSend, double pRec, double carri
      *       (4 * pi)^2 * d^alpha * L
      */
 
-  if (pSend == pRec)
-    return 0.0;
+    if (pSend == pRec)
+        return 0.0;
 
-  double lambda = SPEED_OF_LIGHT / carrierFrequency;
- /** @return returns a power value */
-  // Antennengewinn eines lambda/2-Dipols ist etwa 2,15 dBi
-  // Pt is in milli watt
+    double lambda = SPEED_OF_LIGHT / carrierFrequency;
+    /** @return returns a power value */
+    // Antennengewinn eines lambda/2-Dipols ist etwa 2,15 dBi
+    // Pt is in milli watt
 
-  double aux  = (pSend * lambda * lambda * Gt * Gr / (16.0 *M_PI * M_PI * pRec * L));
-  return pow(aux, 1.0 / pathLossAlpha);
+    double aux  = (pSend * lambda * lambda * Gt * Gr / (16.0 *M_PI * M_PI * pRec * L));
+    return pow(aux, 1.0 / pathLossAlpha);
 }
+

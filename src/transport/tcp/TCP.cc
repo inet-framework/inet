@@ -77,37 +77,37 @@ static std::ostream& operator<<(std::ostream& os, const TCPConnection& conn)
 
 void TCP::initialize(int stage)
 {
-  if (stage == 0)
-  {
-    const char *q;
-    q = par("sendQueueClass");
-    if (*q != '\0')
-        error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
+    if (stage == 0)
+    {
+        const char *q;
+        q = par("sendQueueClass");
+        if (*q != '\0')
+            error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
 
-    q = par("receiveQueueClass");
-    if (*q != '\0')
-        error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
+        q = par("receiveQueueClass");
+        if (*q != '\0')
+            error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
 
-    lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
-    WATCH(lastEphemeralPort);
+        lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+        WATCH(lastEphemeralPort);
 
-    WATCH_PTRMAP(tcpConnMap);
-    WATCH_PTRMAP(tcpAppConnMap);
+        WATCH_PTRMAP(tcpConnMap);
+        WATCH_PTRMAP(tcpAppConnMap);
 
-    recordStatistics = par("recordStats");
+        recordStatistics = par("recordStats");
 
-    cModule *netw = simulation.getSystemModule();
-    testing = netw->hasPar("testing") && netw->par("testing").boolValue();
-    logverbose = !testing && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
-  }
-  else if (stage == 1)
-  {
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        cModule *netw = simulation.getSystemModule();
+        testing = netw->hasPar("testing") && netw->par("testing").boolValue();
+        logverbose = !testing && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
+    }
+    else if (stage == 1)
+    {
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
-    IPSocket ipSocket(gate("ipOut"));
-    ipSocket.registerProtocol(IP_PROT_TCP);
-  }
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(IP_PROT_TCP);
+    }
 }
 
 TCP::~TCP()

@@ -21,10 +21,9 @@
 
 std::string intToString(int i)
 {
-  std::ostringstream stream;
-  stream << i << std::flush;
-  std::string str(stream.str());
-  return str;
+    std::ostringstream stream;
+    stream << i << std::flush;
+    std::string str(stream.str());
+    return str;
 }
-
 

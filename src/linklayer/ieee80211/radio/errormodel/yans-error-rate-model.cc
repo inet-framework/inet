@@ -26,89 +26,95 @@ YansErrorRateModel::YansErrorRateModel()
 double
 YansErrorRateModel::Log2(double val) const
 {
-  return log(val) / log(2.0);
+    return log(val) / log(2.0);
 }
+
 double
 YansErrorRateModel::GetBpskBer(double snr, uint32_t signalSpread, uint32_t phyRate) const
 {
-  double EbNo = snr * signalSpread / phyRate;
-  double z = sqrt(EbNo);
-  double ber = 0.5 * erfc(z);
-  EV << "bpsk snr="<<snr<<" ber="<<ber << endl;
-  return ber;
+    double EbNo = snr * signalSpread / phyRate;
+    double z = sqrt(EbNo);
+    double ber = 0.5 * erfc(z);
+    EV << "bpsk snr="<<snr<<" ber="<<ber << endl;
+    return ber;
 }
+
 double
 YansErrorRateModel::GetQamBer(double snr, unsigned int m, uint32_t signalSpread, uint32_t phyRate) const
 {
-  double EbNo = snr * signalSpread / phyRate;
-  double z = sqrt((1.5 * Log2(m) * EbNo) / (m - 1.0));
-  double z1 = ((1.0 - 1.0 / sqrt((double)m)) * erfc(z));
-  double z2 = 1 - pow((1-z1), 2.0);
-  double ber = z2 / Log2(m);
-  EV << "Qam m="<<m<<" rate=" << phyRate << " snr="<<snr<<" ber="<<ber << endl;
-  return ber;
+    double EbNo = snr * signalSpread / phyRate;
+    double z = sqrt((1.5 * Log2(m) * EbNo) / (m - 1.0));
+    double z1 = ((1.0 - 1.0 / sqrt((double)m)) * erfc(z));
+    double z2 = 1 - pow((1-z1), 2.0);
+    double ber = z2 / Log2(m);
+    EV << "Qam m="<<m<<" rate=" << phyRate << " snr="<<snr<<" ber="<<ber << endl;
+    return ber;
 }
+
 uint32_t
 YansErrorRateModel::Factorial(uint32_t k) const
 {
-  uint32_t fact = 1;
-  while (k > 0)
+    uint32_t fact = 1;
+    while (k > 0)
     {
       fact *= k;
       k--;
     }
-  return fact;
+    return fact;
 }
+
 double
 YansErrorRateModel::Binomial(uint32_t k, double p, uint32_t n) const
 {
-  double retval = Factorial(n) / (Factorial(k) * Factorial(n-k)) * pow(p, (int)k) * pow(1-p, (int)(n-k));
-  return retval;
+    double retval = Factorial(n) / (Factorial(k) * Factorial(n-k)) * pow(p, (int)k) * pow(1-p, (int)(n-k));
+    return retval;
 }
+
 double
 YansErrorRateModel::CalculatePdOdd(double ber, unsigned int d) const
 {
-  ASSERT((d % 2) == 1);
-  unsigned int dstart = (d + 1) / 2;
-  unsigned int dend = d;
-  double pd = 0;
+    ASSERT((d % 2) == 1);
+    unsigned int dstart = (d + 1) / 2;
+    unsigned int dend = d;
+    double pd = 0;
 
-  for (unsigned int i = dstart; i < dend; i++)
+    for (unsigned int i = dstart; i < dend; i++)
     {
-      pd += Binomial(i, ber, d);
+        pd += Binomial(i, ber, d);
     }
-  return pd;
+    return pd;
 }
+
 double
 YansErrorRateModel::CalculatePdEven(double ber, unsigned int d) const
 {
-  ASSERT((d % 2) == 0);
-  unsigned int dstart = d / 2 + 1;
-  unsigned int dend = d;
-  double pd = 0;
+    ASSERT((d % 2) == 0);
+    unsigned int dstart = d / 2 + 1;
+    unsigned int dend = d;
+    double pd = 0;
 
-  for (unsigned int i = dstart; i < dend; i++)
+    for (unsigned int i = dstart; i < dend; i++)
     {
-      pd += Binomial(i, ber, d);
+        pd += Binomial(i, ber, d);
     }
-  pd += 0.5 * Binomial(d / 2, ber, d);
+    pd += 0.5 * Binomial(d / 2, ber, d);
 
-  return pd;
+    return pd;
 }
 
 double
 YansErrorRateModel::CalculatePd(double ber, unsigned int d) const
 {
-  double pd;
-  if ((d % 2) == 0)
+    double pd;
+    if ((d % 2) == 0)
     {
-      pd = CalculatePdEven(ber, d);
+        pd = CalculatePdEven(ber, d);
     }
-  else
+    else
     {
-      pd = CalculatePdOdd(ber, d);
+        pd = CalculatePdOdd(ber, d);
     }
-  return pd;
+    return pd;
 }
 
 double
@@ -116,16 +122,16 @@ YansErrorRateModel::GetFecBpskBer(double snr, double nbits,
                          uint32_t signalSpread, uint32_t phyRate,
                          uint32_t dFree, uint32_t adFree) const
 {
-  double ber = GetBpskBer(snr, signalSpread, phyRate);
-  if (ber == 0.0)
+    double ber = GetBpskBer(snr, signalSpread, phyRate);
+    if (ber == 0.0)
     {
-      return 1.0;
+        return 1.0;
     }
-  double pd = CalculatePd(ber, dFree);
-  double pmu = adFree * pd;
-  pmu = std::min(pmu, 1.0);
-  double pms = pow(1 - pmu, nbits);
-  return pms;
+    double pd = CalculatePd(ber, dFree);
+    double pmu = adFree * pd;
+    pmu = std::min(pmu, 1.0);
+    double pms = pow(1 - pmu, nbits);
+    return pms;
 }
 
 double
@@ -135,20 +141,20 @@ YansErrorRateModel::GetFecQamBer(double snr, uint32_t nbits,
                        uint32_t m, uint32_t dFree,
                        uint32_t adFree, uint32_t adFreePlusOne) const
 {
-  double ber = GetQamBer(snr, m, signalSpread, phyRate);
-  if (ber == 0.0)
+    double ber = GetQamBer(snr, m, signalSpread, phyRate);
+    if (ber == 0.0)
     {
-      return 1.0;
+        return 1.0;
     }
-  /* first term */
-  double pd = CalculatePd(ber, dFree);
-  double pmu = adFree * pd;
-  /* second term */
-  pd = CalculatePd(ber, dFree + 1);
-  pmu += adFreePlusOne * pd;
-  pmu = std::min(pmu, 1.0);
-  double pms = pow(1 - pmu, (int)nbits);
-  return pms;
+    /* first term */
+    double pd = CalculatePd(ber, dFree);
+    double pmu = adFree * pd;
+    /* second term */
+    pd = CalculatePd(ber, dFree + 1);
+    pmu += adFreePlusOne * pd;
+    pmu = std::min(pmu, 1.0);
+    double pms = pow(1 - pmu, (int)nbits);
+    return pms;
 }
 
 //
@@ -158,14 +164,14 @@ YansErrorRateModel::GetFecQamBer(double snr, uint32_t nbits,
 double
 YansErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const
 {
-  if (mode.getModulationClass() == MOD_CLASS_ERP_OFDM ||
-      mode.getModulationClass() == MOD_CLASS_OFDM)
+    if (mode.getModulationClass() == MOD_CLASS_ERP_OFDM ||
+        mode.getModulationClass() == MOD_CLASS_OFDM)
     {
-      if (mode.getConstellationSize() == 2)
+        if (mode.getConstellationSize() == 2)
         {
-          if (mode.getCodeRate() == CODE_RATE_1_2)
+            if (mode.getCodeRate() == CODE_RATE_1_2)
             {
-              return GetFecBpskBer(snr,
+                return GetFecBpskBer(snr,
                                     nbits,
                                     mode.getBandwidth(), // signal spread
                                     mode.getPhyRate(), // phy rate
@@ -173,9 +179,9 @@ YansErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_
                                     11 // adFree
                                     );
             }
-          else
+            else
             {
-              return GetFecBpskBer(snr,
+                return GetFecBpskBer(snr,
                                     nbits,
                                     mode.getBandwidth(), // signal spread
                                     mode.getPhyRate(), // phy rate
@@ -184,11 +190,11 @@ YansErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_
                                     );
             }
         }
-      else if (mode.getConstellationSize() == 4)
+        else if (mode.getConstellationSize() == 4)
         {
-          if (mode.getCodeRate() == CODE_RATE_1_2)
+            if (mode.getCodeRate() == CODE_RATE_1_2)
             {
-              return GetFecQamBer(snr,
+                return GetFecQamBer(snr,
                                    nbits,
                                    mode.getBandwidth(), // signal spread
                                    mode.getPhyRate(), // phy rate
@@ -198,9 +204,9 @@ YansErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_
                                    0   // adFreePlusOne
                                    );
             }
-          else
+            else
             {
-              return GetFecQamBer(snr,
+                return GetFecQamBer(snr,
                                    nbits,
                                    mode.getBandwidth(), // signal spread
                                    mode.getPhyRate(), // phy rate
@@ -211,11 +217,11 @@ YansErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_
                                    );
             }
         }
-      else if (mode.getConstellationSize() == 16)
+        else if (mode.getConstellationSize() == 16)
         {
-          if (mode.getCodeRate() == CODE_RATE_1_2)
+            if (mode.getCodeRate() == CODE_RATE_1_2)
             {
-              return GetFecQamBer(snr,
+                return GetFecQamBer(snr,
                                    nbits,
                                    mode.getBandwidth(), // signal spread
                                    mode.getPhyRate(), // phy rate
@@ -225,9 +231,9 @@ YansErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_
                                    0   // adFreePlusOne
                                    );
             }
-          else
+            else
             {
-              return GetFecQamBer(snr,
+                return GetFecQamBer(snr,
                                    nbits,
                                    mode.getBandwidth(), // signal spread
                                    mode.getPhyRate(), // phy rate
@@ -238,11 +244,11 @@ YansErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_
                                    );
             }
         }
-      else if (mode.getConstellationSize() == 64)
+        else if (mode.getConstellationSize() == 64)
         {
-          if (mode.getCodeRate() == CODE_RATE_2_3)
+            if (mode.getCodeRate() == CODE_RATE_2_3)
             {
-              return GetFecQamBer(snr,
+                return GetFecQamBer(snr,
                                    nbits,
                                    mode.getBandwidth(), // signal spread
                                    mode.getPhyRate(), // phy rate
@@ -252,7 +258,7 @@ YansErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_
                                    16  // adFreePlusOne
                                    );
             }
-          else
+            else
             {
               return GetFecQamBer(snr,
                                    nbits,
@@ -266,18 +272,18 @@ YansErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_
             }
         }
     }
-  else if (mode.getModulationClass() == MOD_CLASS_DSSS)
+    else if (mode.getModulationClass() == MOD_CLASS_DSSS)
     {
-      switch (mode.getDataRate())
+        switch (mode.getDataRate())
         {
-        case 1000000:
-          return DsssErrorRateModel::GetDsssDbpskSuccessRate(snr, nbits);
-        case 2000000:
-          return DsssErrorRateModel::GetDsssDqpskSuccessRate(snr, nbits);
-        case 5500000:
-          return DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate(snr, nbits);
-        case 11000000:
-          return DsssErrorRateModel::GetDsssDqpskCck11SuccessRate(snr, nbits);
+            case 1000000:
+                return DsssErrorRateModel::GetDsssDbpskSuccessRate(snr, nbits);
+            case 2000000:
+                return DsssErrorRateModel::GetDsssDqpskSuccessRate(snr, nbits);
+            case 5500000:
+                return DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate(snr, nbits);
+            case 11000000:
+                return DsssErrorRateModel::GetDsssDqpskCck11SuccessRate(snr, nbits);
         }
     }
   return 0;

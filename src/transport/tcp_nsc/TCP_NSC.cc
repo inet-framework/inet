@@ -217,46 +217,46 @@ void TCP_NSC::initialize(int stage)
 {
     tcpEV << this << ": initialize stage " << stage << endl;
 
-  if (stage == 0)
-  {
-    const char *q;
-    q = par("sendQueueClass");
+    if (stage == 0)
+    {
+        const char *q;
+        q = par("sendQueueClass");
 
-    if (*q != '\0')
-        error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
+        if (*q != '\0')
+            error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
 
-    q = par("receiveQueueClass");
+        q = par("receiveQueueClass");
 
-    if (*q != '\0')
-        error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
+        if (*q != '\0')
+            error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
 
-    WATCH_MAP(tcpAppConnMapM);
+        WATCH_MAP(tcpAppConnMapM);
 
-    cModule *netw = simulation.getSystemModule();
-    testingS = netw->hasPar("testing") && netw->par("testing").boolValue();
-    logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
-  }
-  else if (stage == 1)
-  {
-    bool isOperational;
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-    if (!isOperational)
-        throw cRuntimeError("This module doesn't support starting in node DOWN state");
+        cModule *netw = simulation.getSystemModule();
+        testingS = netw->hasPar("testing") && netw->par("testing").boolValue();
+        logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
-    const char* stackName = this->par(stackNameParamNameS).stringValue();
+        const char* stackName = this->par(stackNameParamNameS).stringValue();
 
-    int bufferSize = (int)(this->par(bufferSizeParamNameS).longValue());
+        int bufferSize = (int)(this->par(bufferSizeParamNameS).longValue());
 
-    loadStack(stackName, bufferSize);
-    pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);
-    pStackM->add_default_gateway(localInnerGwS.str().c_str());
+        loadStack(stackName, bufferSize);
+        pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);
+        pStackM->add_default_gateway(localInnerGwS.str().c_str());
 
-    IPSocket ipSocket(gate("ipOut"));
-    ipSocket.registerProtocol(IP_PROT_TCP);
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(IP_PROT_TCP);
 
-    isAliveM = true;
-  }
+        isAliveM = true;
+    }
 }
 
 TCP_NSC::~TCP_NSC()

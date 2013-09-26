@@ -899,15 +899,16 @@ struct dev_info NS_CLASS dev_nr(int n)
 
 int NS_CLASS ifindex2devindex(unsigned int ifindex)
 {
-  int i;
+    int i;
 
-  for (i = 0; i < this_host.nif; i++)
-    if (dev_indices[i] == ifindex)
-      return i;
+    for (i = 0; i < this_host.nif; i++)
+        if (dev_indices[i] == ifindex)
+            return i;
 
-  return -1;
+    return -1;
 }
 */
+
 void DYMOUM::processLinkBreak(const cObject *details)
 {
     IPv4Datagram  *dgram = NULL;

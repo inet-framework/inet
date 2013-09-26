@@ -23,16 +23,16 @@ std::string vectorToString(IPAddressVector vec)
 
 std::string vectorToString(IPAddressVector vec, const char *delim)
 {
-  std::ostringstream stream;
-  for (unsigned int i = 0; i < vec.size(); i++)
-  {
-      stream << vec[i];
-      if (i < vec.size() - 1)
-        stream << delim;
-  }
-  stream << std::flush;
-  std::string str(stream.str());
-  return str;
+    std::ostringstream stream;
+    for (unsigned int i = 0; i < vec.size(); i++)
+    {
+        stream << vec[i];
+        if (i < vec.size() - 1)
+            stream << delim;
+    }
+    stream << std::flush;
+    std::string str(stream.str());
+    return str;
 }
 
 std::string vectorToString(EroVector vec)

@@ -2137,17 +2137,17 @@ void Ieee80211Mac::popTransmissionQueue()
     {
         if (numCategories()==1)
         {
-        // the module are continuously asking for packets
+            // the module are continuously asking for packets
             EV << "requesting another frame from queue module\n";
             queueModule->requestPacket();
-         }
-         else if (numCategories()>1 && (int)transmissionQueueSize()==maxQueueSize-1)
-         {
-         // Now exist a empty frame space
-         // the module are continuously asking for packets
+        }
+        else if (numCategories()>1 && (int)transmissionQueueSize()==maxQueueSize-1)
+        {
+            // Now exist a empty frame space
+            // the module are continuously asking for packets
             EV << "requesting another frame from queue module\n";
             queueModule->requestPacket();
-         }
+        }
     }
     delete temp;
 }
@@ -2167,7 +2167,6 @@ double Ieee80211Mac::computeFrameDuration(Ieee80211Frame *msg)
         return duration;
     }
     else
-
         return computeFrameDuration(msg->getBitLength(), bitrate);
 }
 
@@ -2300,7 +2299,7 @@ void Ieee80211Mac::reportDataOk()
 {
     retryCounter() = 0;
     if (rateControlMode==RATE_CR)
-       return;
+        return;
     successCounter ++;
     failedCounter = 0;
     recovery = false;
@@ -2443,82 +2442,82 @@ void Ieee80211Mac::setBitrate(double rate)
 bool & Ieee80211Mac::backoff(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
+        opp_error("AC doesn't exist");
     return edcCAF[i].backoff;
 }
 
 simtime_t & Ieee80211Mac::TXOP(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].TXOP;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].TXOP;
 }
 
 simtime_t & Ieee80211Mac::backoffPeriod(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].backoffPeriod;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].backoffPeriod;
 }
 
 int & Ieee80211Mac::retryCounter(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].retryCounter;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].retryCounter;
 }
 
 int & Ieee80211Mac::AIFSN(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].AIFSN;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].AIFSN;
 }
 
 int & Ieee80211Mac::cwMax(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].cwMax;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].cwMax;
 }
 
 int & Ieee80211Mac::cwMin(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].cwMin;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].cwMin;
 }
 
 cMessage * Ieee80211Mac::endAIFS(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].endAIFS;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].endAIFS;
 }
 
 cMessage * Ieee80211Mac::endBackoff(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].endBackoff;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].endBackoff;
 }
 
 const bool Ieee80211Mac::isBackoffMsg(cMessage *msg)
@@ -2526,7 +2525,7 @@ const bool Ieee80211Mac::isBackoffMsg(cMessage *msg)
     for (unsigned int i=0; i<edcCAF.size(); i++)
     {
         if (msg==edcCAF[i].endBackoff)
-           return true;
+            return true;
     }
     return false;
 }
@@ -2535,73 +2534,73 @@ const bool Ieee80211Mac::isBackoffMsg(cMessage *msg)
 long & Ieee80211Mac::numRetry(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].numRetry;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].numRetry;
 }
 
 long & Ieee80211Mac::numSentWithoutRetry(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)numCategories())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].numSentWithoutRetry;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].numSentWithoutRetry;
 }
 
 long & Ieee80211Mac::numGivenUp(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].numGivenUp;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].numGivenUp;
 }
 
 long & Ieee80211Mac::numSent(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].numSent;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].numSent;
 }
 
 long & Ieee80211Mac::numDropped(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].numDropped;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].numDropped;
 }
 
 long & Ieee80211Mac::bits(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].bits;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].bits;
 }
 
 simtime_t & Ieee80211Mac::minJitter(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].minjitter;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].minjitter;
 }
 
 simtime_t & Ieee80211Mac::maxJitter(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAF[i].maxjitter;
+        opp_error("AC doesn't exist");
+    return edcCAF[i].maxjitter;
 }
 
 // out vectors
@@ -2610,28 +2609,28 @@ simtime_t & Ieee80211Mac::maxJitter(int i)
 cOutVector * Ieee80211Mac::jitter(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAFOutVector[i].jitter;
+        opp_error("AC doesn't exist");
+    return edcCAFOutVector[i].jitter;
 }
 
 cOutVector * Ieee80211Mac::macDelay(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAFOutVector[i].macDelay;
+        opp_error("AC doesn't exist");
+    return edcCAFOutVector[i].macDelay;
 }
 
 cOutVector * Ieee80211Mac::throughput(int i)
 {
     if (i==-1)
-         i = currentAC;
+        i = currentAC;
     if (i>=(int)edcCAF.size())
-         opp_error("AC doesn't exist");
-     return edcCAFOutVector[i].throughput;
+        opp_error("AC doesn't exist");
+    return edcCAFOutVector[i].throughput;
 }
 
 Ieee80211Mac::Ieee80211DataOrMgmtFrameList * Ieee80211Mac::transmissionQueue(int i)
@@ -2642,7 +2641,6 @@ Ieee80211Mac::Ieee80211DataOrMgmtFrameList * Ieee80211Mac::transmissionQueue(int
         opp_error("AC doesn't exist");
     return &(edcCAF[i].transmissionQueue);
 }
-
 
 ModulationType
 Ieee80211Mac::getControlAnswerMode(ModulationType reqMode)
@@ -2697,36 +2695,36 @@ Ieee80211Mac::getControlAnswerMode(ModulationType reqMode)
        *
        * ...then it's our best choice so far.
        */
-      if (thismode.getIsMandatory()
-          && (!found || thismode.getPhyRate() > mode.getPhyRate())
-          && thismode.getPhyRate() <= reqMode.getPhyRate()
-          && thismode.getModulationClass() == reqMode.getModulationClass())
+        if (thismode.getIsMandatory()
+                && (!found || thismode.getPhyRate() > mode.getPhyRate())
+                && thismode.getPhyRate() <= reqMode.getPhyRate()
+                && thismode.getModulationClass() == reqMode.getModulationClass())
         {
-          mode = thismode;
-          // As above; we've found a potentially-suitable transmit
-          // rate, but we need to continue and consider all the
-          // mandatory rates before we can be sure we've got the right
-          // one.
-          found = true;
+            mode = thismode;
+            // As above; we've found a potentially-suitable transmit
+            // rate, but we need to continue and consider all the
+            // mandatory rates before we can be sure we've got the right
+            // one.
+            found = true;
         }
     }
 
-  /**
-   * If we still haven't found a suitable rate for the response then
-   * someone has messed up the simulation config. This probably means
-   * that the WifiPhyStandard is not set correctly, or that a rate that
-   * is not supported by the PHY has been explicitly requested in a
-   * WifiRemoteStationManager (or descendant) configuration.
-   *
-   * Either way, it is serious - we can either disobey the standard or
-   * fail, and I have chosen to do the latter...
-   */
-  if (!found)
+    /**
+     * If we still haven't found a suitable rate for the response then
+     * someone has messed up the simulation config. This probably means
+     * that the WifiPhyStandard is not set correctly, or that a rate that
+     * is not supported by the PHY has been explicitly requested in a
+     * WifiRemoteStationManager (or descendant) configuration.
+     *
+     * Either way, it is serious - we can either disobey the standard or
+     * fail, and I have chosen to do the latter...
+     */
+    if (!found)
     {
-      opp_error("Can't find response rate for reqMode. Check standard and selected rates match.");
+        opp_error("Can't find response rate for reqMode. Check standard and selected rates match.");
     }
 
-  return mode;
+    return mode;
 }
 
 // This methods implemet the duplicate filter

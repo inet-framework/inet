@@ -86,44 +86,44 @@ void TCP_lwIP::initialize(int stage)
 {
     tcpEV << this << ": initialize stage " << stage << endl;
 
-  if (stage == 0)
-  {
-    const char *q;
-    q = par("sendQueueClass");
-    if (*q != '\0')
-        error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
+    if (stage == 0)
+    {
+        const char *q;
+        q = par("sendQueueClass");
+        if (*q != '\0')
+            error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
 
-    q = par("receiveQueueClass");
-    if (*q != '\0')
-        error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
+        q = par("receiveQueueClass");
+        if (*q != '\0')
+            error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
 
-    WATCH_MAP(tcpAppConnMapM);
+        WATCH_MAP(tcpAppConnMapM);
 
-    cModule *netw = simulation.getSystemModule();
-    testingS = netw->hasPar("testing") && netw->par("testing").boolValue();
-    logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
+        cModule *netw = simulation.getSystemModule();
+        testingS = netw->hasPar("testing") && netw->par("testing").boolValue();
+        logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
 
-    recordStatisticsM = par("recordStats");
-  }
-  else if (stage == 1)
-  {
-    bool isOperational;
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-    if (!isOperational)
-        throw cRuntimeError("This module doesn't support starting in node DOWN state");
+        recordStatisticsM = par("recordStats");
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
-    pLwipTcpLayerM = new LwipTcpLayer(*this);
+        pLwipTcpLayerM = new LwipTcpLayer(*this);
 
-    pLwipFastTimerM = new cMessage("lwip_fast_timer");
+        pLwipFastTimerM = new cMessage("lwip_fast_timer");
 
-    tcpEV << "TCP_lwIP " << this << " has stack " << pLwipTcpLayerM << "\n";
+        tcpEV << "TCP_lwIP " << this << " has stack " << pLwipTcpLayerM << "\n";
 
-    IPSocket ipSocket(gate("ipOut"));
-    ipSocket.registerProtocol(IP_PROT_TCP);
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(IP_PROT_TCP);
 
-    isAliveM = true;
-  }
+        isAliveM = true;
+    }
 }
 
 TCP_lwIP::~TCP_lwIP()
