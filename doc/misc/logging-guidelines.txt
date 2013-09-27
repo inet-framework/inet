@@ -1,0 +1,93 @@
+
+
+
+Some unresolved questions:
+ - what context information should be present in each log line? how do we support
+   easy and efficient searching and filtering of log output? how do we support
+   easy use of grep and similar tools?
+ - do we suggest that context information that doesn't change during an event
+   should be reported only once? should context information be repeated or not in
+   subsequent lines?
+
+
+
+LOGGING GUIDELINES
+==================
+This document describes how to write and organize log statements in the INET
+framework. The target audience of this document includes maintainers, developers
+and contributors.
+
+General Logging Guidelines
+--------------------------
+Log output should be valid English sentences starting with an uppercase letter
+and ending with correct punctuation. Log output that spans multiple lines
+should use indentation where it isn't immediately obvious that the lines
+are related to each other. Dynamic content should be marked with single quotes.
+Key value pairs should be labeled and separated by '='. Enumerated values should
+be properly separated with spaces.
+
+Target Audience of Logging
+--------------------------
+The people who read the log output can be divided based on the knowledge they
+have regarding the protocol specification. They may know
+ - the public interface of the protocol
+ - the internals of the protocol
+ - the actual implementation of the protocol
+
+Log Levels
+----------
+This chapter describes when to use the various log levels provided by OMNeT++
+The rules presented here extend the rules provided in the OMNeT++ documentation.
+
+fatal
+ - target for people (not necessarily programmers) who know the public interface
+ - don't report programming errors, use C++ exceptions for this purpose
+ - report protocol specific unrecoverable fatal error situations
+ - use rarely if at all
+
+error
+ - target for people (not necessarily programmers) who know the public interface
+ - don't report programming errors, use C++ exceptions for this purpose
+ - report protocol specific recoverable error situations
+
+warn
+ - target for people (not necessarily programmers) who know the public interface
+ - report protocol specific exceptional situations
+ - don't report things that occur too often such as collisions on a radio channel
+
+info
+ - target for people (not necessarily programmers) who know the public interface
+ - think about the module as a closed (black) box
+ - report protocol specific public input, output, state changes and decisions
+
+detail
+ - target for users (not necessarily programmers) who know the internals
+ - think about the module as an open (white) box
+ - report protocol specific internal state changes and decisions
+ - report scheduling and processing of protocol specific timers
+
+debug
+ - target for developers/maintainers who know the actual implementation
+ - report implementation specific state changes and decisions
+ - report internal variable and data structure states and changes
+ - report current states and transitions of state machines
+
+trace
+ - target for developers/maintainers who know the actual implementation
+ - report the execution of initialize stages, operation stages
+ - report entering/leaving functions, loops, blocks, branches, recursions
+
+Log Categories
+--------------
+
+test
+ - report output that is checked for in automated tests
+
+time
+ - report performance related data that is measured in terms of wall clock time
+
+parameter
+ - report the actual parameter values picked up during initialization
+
+default (empty)
+ - report any other information using the default category
