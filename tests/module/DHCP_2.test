@@ -76,6 +76,7 @@ ned-path = .;../../../../src;../../lib
 network = Dhcptest
 
 sim-time-limit = 10500s
+cmdenv-express-mode = true
 
 **.dhcpClient.dhcpApp.interface="lo0"   # interface to be configured
 

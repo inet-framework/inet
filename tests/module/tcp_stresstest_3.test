@@ -10,7 +10,7 @@ ned-path = .;../../../../src;../../lib
 network=TcpTestNet2
 
 #[Cmdenv]
-cmdenv-express-mode=true
+cmdenv-express-mode=false
 #cmdenv-event-banners=false
 #cmdenv-module-messages=false
 
