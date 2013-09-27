@@ -62,6 +62,30 @@ std::string stripnonalnum(const char *s)
     return result;
 }
 
+#define BUFLEN 1024
+
+std::string stringf(const char *fmt, ...)
+{
+    char buf[BUFLEN];
+    va_list va;
+    va_start(va, fmt);
+    vsnprintf(buf, BUFLEN, fmt, va);
+    buf[BUFLEN-1] = '\0';
+    va_end(va);
+    return buf;
+}
+
+std::string vstringf(const char *fmt, va_list& args)
+{
+    char buf[BUFLEN];
+    vsnprintf(buf, BUFLEN, fmt, args);
+    buf[BUFLEN-1] = '\0';
+    return buf;
+}
+
+#undef BUFLEN
+
+
 #if OMNETPP_VERSION < 0x0403
 inline char *nextToken(char *&rest)
 {

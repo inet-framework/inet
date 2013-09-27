@@ -56,7 +56,7 @@ bool TCP_lwIP::logverboseS;
 #undef tcpEV
 #endif
 // macro for normal EV<< logging (note: deliberately no parens in macro def)
-#define tcpEV ((ev.isDisabled()) || (TCP_lwIP::testingS)) ? ev : ev
+#define tcpEV  TCP_lwIP::testingS ? EV : EV
 
 TCP_lwIP::TCP_lwIP()
   :

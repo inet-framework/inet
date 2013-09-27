@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "INETDefs.h"
+#include "opp_utils.h"
 
 #define PACK_STRUCT_STRUCT __attribute__ (( __packed__ ))
 #define LWIP_PLATFORM_ASSERT(c) assert(c)
@@ -14,7 +15,7 @@
 #define LWIP_PLATFORM_DIAG(c) do { printf("%u] ", get_stack_id()); printf(c); } while (0)
 */
 //#define LWIP_PLATFORM_DIAG(c) printf(c)
-#define LWIP_PLATFORM_DIAG(c) do { EV<<"(LWIP):"; ev.printf c; } while (0)
+#define LWIP_PLATFORM_DIAG(c) do { EV << "(LWIP):" << OPP_Global::stringf c; } while (0)
 
 #ifndef BYTE_ORDER
 #define BYTE_ORDER LITTLE_ENDIAN

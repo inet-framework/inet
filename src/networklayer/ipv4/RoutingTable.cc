@@ -33,6 +33,9 @@
 #include "RoutingTableParser.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
+#include "opp_utils.h"
+
+using namespace OPP_Global;
 
 Define_Module(RoutingTable);
 
@@ -282,13 +285,13 @@ void RoutingTable::invalidateCache()
 void RoutingTable::printRoutingTable() const
 {
     EV << "-- Routing table --\n";
-    ev.printf("%-16s %-16s %-16s %-4s %-16s %s\n",
+    EV << stringf("%-16s %-16s %-16s %-4s %-16s %s\n",
               "Destination", "Netmask", "Gateway", "Iface", "", "Metric");
 
     for (int i=0; i<getNumRoutes(); i++) {
         IPv4Route *route = getRoute(i);
         InterfaceEntry *interfacePtr = route->getInterface();
-        ev.printf("%-16s %-16s %-16s %-4s (%s) %d\n",
+        EV << stringf("%-16s %-16s %-16s %-4s (%s) %d\n",
                   route->getDestination().isUnspecified() ? "*" : route->getDestination().str().c_str(),
                   route->getNetmask().isUnspecified() ? "*" : route->getNetmask().str().c_str(),
                   route->getGateway().isUnspecified() ? "*" : route->getGateway().str().c_str(),
@@ -302,12 +305,12 @@ void RoutingTable::printRoutingTable() const
 void RoutingTable::printMulticastRoutingTable() const
 {
     EV << "-- Multicast routing table --\n";
-    ev.printf("%-16s %-16s %-16s %-6s %-6s %s\n",
+    EV << stringf("%-16s %-16s %-16s %-6s %-6s %s\n",
               "Source", "Netmask", "Group", "Metric", "In", "Outs");
 
     for (int i=0; i<getNumMulticastRoutes(); i++) {
         IPv4MulticastRoute *route = getMulticastRoute(i);
-        ev.printf("%-16s %-16s %-16s %-6d %-6s ",
+        EV << stringf("%-16s %-16s %-16s %-6d %-6s ",
                   route->getOrigin().isUnspecified() ? "*" : route->getOrigin().str().c_str(),
                   route->getOriginNetmask().isUnspecified() ? "*" : route->getOriginNetmask().str().c_str(),
                   route->getMulticastGroup().isUnspecified() ? "*" : route->getMulticastGroup().str().c_str(),

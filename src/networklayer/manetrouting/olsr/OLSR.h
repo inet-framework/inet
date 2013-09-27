@@ -37,6 +37,7 @@
 #include "OLSR_state.h"
 #include "OLSR_rtable.h"
 #include "OLSR_repositories.h"
+#include "opp_utils.h"
 
 #include <map>
 #include <vector>
@@ -74,7 +75,7 @@
 #define CURRENT_TIME_T  SIMTIME_DBL(simTime())
 #endif
 
-#define debug  ev.printf
+#define debug  EV << OPP_Global::stringf
 
 
 
