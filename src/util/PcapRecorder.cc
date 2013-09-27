@@ -45,7 +45,7 @@ void PcapRecorder::initialize()
     snaplen = this->par("snaplen");
     dumpBadFrames = par("dumpBadFrames").boolValue();
     packetDumper.setVerbose(par("verbose").boolValue());
-    packetDumper.setOutStream(EV);
+    packetDumper.setOutStream(EVSTREAM);
     signalList.clear();
 
     {

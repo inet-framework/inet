@@ -47,7 +47,7 @@ void TCPDump::initialize()
 
     snaplen = this->par("snaplen");
     tcpdump.setVerbose(par("verbose").boolValue());
-    tcpdump.setOutStream(EV);
+    tcpdump.setOutStream(EVSTREAM);
 
     if (*file)
         pcapDump.openPcap(file, snaplen);

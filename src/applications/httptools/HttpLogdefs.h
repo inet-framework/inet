@@ -38,11 +38,7 @@
 #ifdef OPP_LOG  /*TODO: OMNETPP_VERSION >= 0x500 */
   #define EV_SUMMARY EV_INFO_C("summary")
 #else
-  #define EV_DEBUG EV << getFullPath() << " #DEBUG#    : "
-  #define EV_INFO EV << getFullPath() << " #INFO#     : "
-  #define EV_WARN EV << getFullPath() << " #WARNING#  : "
-  #define EV_ERROR EV << getFullPath() << " #ERROR#    : "
-  #define EV_SUMMARY EV << getFullPath() << " #SUMMARY#    : "
+  #define EV_SUMMARY EV << "SUMMARY: "
 #endif
 
 #endif

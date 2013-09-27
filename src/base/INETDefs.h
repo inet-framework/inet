@@ -45,6 +45,12 @@
 #  define EV_TRACE  EV << "TRACE: "
 #endif
 
+#if OMNETPP_VERSION < 0x500
+#  define EVSTREAM  ev.getOStream()
+#else
+#  define EVSTREAM  EV
+#endif
+
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
