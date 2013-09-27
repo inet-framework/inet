@@ -36,6 +36,15 @@
 #  define INET_API
 #endif
 
+#if OMNETPP_VERSION < 0x500
+#  define EV_FATAL  EV << "FATAL: "
+#  define EV_ERROR  EV << "ERROR: "
+#  define EV_WARN   EV << "WARN: "
+#  define EV_INFO   EV
+#  define EV_DEBUG  EV << "DEBUG: "
+#  define EV_TRACE  EV << "TRACE: "
+#endif
+
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
