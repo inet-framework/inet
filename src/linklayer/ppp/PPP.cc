@@ -104,7 +104,7 @@ void PPP::initialize(int stage)
         // request first frame to send
         if (queueModule && 0 == queueModule->getNumPendingRequests())
         {
-            EV << "Requesting first frame from queue module\n";
+            EV_DETAIL << "Requesting first frame from queue module\n";
             queueModule->requestPacket();
         }
     }
@@ -215,7 +215,7 @@ void PPP::refreshOutGateConnection(bool connected)
             while (!txQueue.empty())
             {
                 cMessage *msg = check_and_cast<cMessage *>(txQueue.pop());
-                EV << "Interface is not connected, dropping packet " << msg << endl;
+                EV_ERROR << "Interface is not connected, dropping packet " << msg << endl;
                 numDroppedIfaceDown++;
                 emit(dropPkIfaceDownSignal, msg);
                 delete msg;
@@ -272,7 +272,7 @@ void PPP::startTransmitting(cPacket *msg)
     emit(NF_PP_TX_BEGIN, &notifDetails);
 
     // send
-    EV << "Starting transmission of " << pppFrame << endl;
+    EV_INFO << "Transmission of " << pppFrame << " started.\n";
     emit(txStateSignal, 1L);
     emit(packetSentToLowerSignal, pppFrame);
     send(pppFrame, physOutGate);
@@ -296,7 +296,7 @@ void PPP::handleMessage(cMessage *msg)
     if (msg==endTransmissionEvent)
     {
         // Transmission finished, we can start next one.
-        EV << "Transmission finished.\n";
+        EV_INFO << "Transmission successfully completed.\n";
         emit(txStateSignal, 0L);
 
         if (ev.isGUI())
@@ -318,6 +318,7 @@ void PPP::handleMessage(cMessage *msg)
     }
     else if (msg->arrivedOn("phys$i"))
     {
+        EV_INFO << "Received " << msg << " from network.\n";
         //TODO: if incoming gate is not connected now, then the link has benn deleted
         // during packet transmission --> discard incomplete packet.
 
@@ -330,7 +331,7 @@ void PPP::handleMessage(cMessage *msg)
         // check for bit errors
         if (PK(msg)->hasBitError())
         {
-            EV << "Bit error in " << msg << endl;
+            EV_WARN << "Bit error in " << msg << endl;
             emit(dropPkBitErrorSignal, msg);
             numBitErr++;
             delete msg;
@@ -343,14 +344,16 @@ void PPP::handleMessage(cMessage *msg)
             cPacket *payload = decapsulate(pppFrame);
             numRcvdOK++;
             emit(packetSentToUpperSignal, payload);
+            EV_INFO << "Sending " << payload << " to upper layer.\n";
             send(payload, "netwOut");
         }
     }
     else // arrived on gate "netwIn"
     {
+        EV_INFO << "Received " << msg << " from upper layer.\n";
         if (datarateChannel == NULL)
         {
-            EV << "Interface is not connected, dropping packet " << msg << endl;
+            EV_WARN << "Interface is not connected, dropping packet " << msg << endl;
             numDroppedIfaceDown++;
             emit(dropPkIfaceDownSignal, msg);
             delete msg;
@@ -365,7 +368,7 @@ void PPP::handleMessage(cMessage *msg)
             if (endTransmissionEvent->isScheduled())
             {
                 // We are currently busy, so just queue up the packet.
-                EV << "Received " << msg << " for transmission but transmitter busy, queueing.\n";
+                EV_DETAIL << "Received " << msg << " for transmission but transmitter busy, queueing.\n";
 
                 if (ev.isGUI() && txQueue.length() >= 3)
                     getDisplayString().setTagArg("i", 1, "red");
@@ -381,7 +384,6 @@ void PPP::handleMessage(cMessage *msg)
             else
             {
                 // We are idle, so we can start transmitting right away.
-                EV << "Received " << msg << " for transmission\n";
                 startTransmitting(PK(msg));
             }
         }
