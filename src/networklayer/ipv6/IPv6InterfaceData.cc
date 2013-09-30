@@ -272,6 +272,7 @@ void IPv6InterfaceData::assignAddress(const IPv6Address& addr, bool tentative,
 #endif /* WITH_xMIPv6 */
 
     choosePreferredAddress();
+    changed1(F_IP_ADDRESS);
 }
 
 void IPv6InterfaceData::updateMatchingAddressExpiryTimes(const IPv6Address& prefix, int length,
@@ -371,6 +372,7 @@ void IPv6InterfaceData::removeAddress(const IPv6Address& address)
     ASSERT(k!=-1);
     addresses.erase(addresses.begin()+k);
     choosePreferredAddress();
+    changed1(F_IP_ADDRESS);
 }
 
 bool IPv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
@@ -618,6 +620,7 @@ IPv6Address IPv6InterfaceData::removeAddress(IPv6InterfaceData::AddressType type
 
     // pick new address as we've removed the old one
     choosePreferredAddress();
+    changed1(F_IP_ADDRESS);
 
     return addr;
 }

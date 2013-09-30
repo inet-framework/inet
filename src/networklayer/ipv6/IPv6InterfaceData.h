@@ -111,7 +111,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
     typedef std::vector<IPv6Address> IPv6AddressVector;
 
     // field ids for change notifications
-    enum {F_MULTICAST_ADDRESSES, F_MULTICAST_LISTENERS};    //FIXME missed field IDs and missed notifications in setter functions
+    enum {F_IP_ADDRESS, F_MULTICAST_ADDRESSES, F_MULTICAST_LISTENERS};    //FIXME missed field IDs and missed notifications in setter functions
 
   protected:
     struct HostMulticastData
