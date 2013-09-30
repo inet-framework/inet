@@ -481,7 +481,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
      * in Router Advertisements. Zero expiry time means infinity.
      */
     virtual void updateMatchingAddressExpiryTimes(const IPv6Address& prefix, int length,
-                                     simtime_t expiryTime = 0, simtime_t prefExpiryTime = 0);
+                                     simtime_t expiryTime = SIMTIME_ZERO, simtime_t prefExpiryTime = SIMTIME_ZERO);
 
     /**
      * Returns the number of addresses the interface has.

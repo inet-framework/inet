@@ -173,8 +173,8 @@ std::string IPv6InterfaceData::info() const
 //               ? (addresses[i].addrType==HoA ? "HoA" : "CoA") : "")
 #endif /* WITH_xMIPv6 */
 
-           << " expiryTime: " << (addresses[i].expiryTime==0 ? "inf" : SIMTIME_STR(addresses[i].expiryTime))
-           << " prefExpiryTime: " << (addresses[i].prefExpiryTime==0 ? "inf" : SIMTIME_STR(addresses[i].prefExpiryTime))
+           << " expiryTime: " << (addresses[i].expiryTime==SIMTIME_ZERO ? "inf" : SIMTIME_STR(addresses[i].expiryTime))
+           << " prefExpiryTime: " << (addresses[i].prefExpiryTime==SIMTIME_ZERO ? "inf" : SIMTIME_STR(addresses[i].prefExpiryTime))
            << endl;
     }
 
@@ -192,9 +192,9 @@ std::string IPv6InterfaceData::info() const
         os << "R-Flag = " << (a.advRtrAddr ? "1 " : "0 ");
 #endif /* WITH_xMIPv6 */
 
-        if (a.advValidLifetime==0)
+        if (a.advValidLifetime == SIMTIME_ZERO)
            os  << "lifetime:inf";
-        else if (a.advValidLifetime>0)
+        else if (a.advValidLifetime > SIMTIME_ZERO)
            os  << "expires:" << a.advValidLifetime;
         else
            os  << "lifetime:+" << (-1 * a.advValidLifetime);
@@ -392,7 +392,7 @@ bool IPv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
         return a.addrType == CoA; // HoA is better than CoA, 24.9.07 - CB
 #endif /* WITH_xMIPv6 */
 
-    return (a.expiryTime==0 && b.expiryTime!=0) || a.expiryTime>b.expiryTime;  // longer expiry time is better
+    return (a.expiryTime==SIMTIME_ZERO && b.expiryTime!=SIMTIME_ZERO) || a.expiryTime>b.expiryTime;  // longer expiry time is better
 }
 
 void IPv6InterfaceData::choosePreferredAddress()
