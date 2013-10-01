@@ -18,6 +18,8 @@ package inet.examples.rstp;
 import ned.DatarateChannel;
 import inet.nodes.rstp.RSTPSwitch;
 import inet.nodes.ethernet.EtherHost;
+import inet.base.LifecycleController;
+import inet.world.scenario.ScenarioManager;
 
 network CompleteNetwork
 {
@@ -29,13 +31,19 @@ network CompleteNetwork
             datarate = 100Mbps;
         }
     submodules:
+        scenarioManager: ScenarioManager {
+            @display("p=75,101");
+        }
+        
+        lifecycleController: LifecycleController {
+            @display("p=75,155");
+        }
+        
         switchBEB1: RSTPSwitch {
             parameters:
                 @display("p=333,78");
-
             gates:
                 ethg[2];
-
         }
         switchBEB2: RSTPSwitch {
             parameters:
@@ -240,6 +248,12 @@ network NetworkWithHosts
                 ethg[4];
 
         }
+        scenarioManager: ScenarioManager {
+            @display("p=75,101");
+        }
+        lifecycleController: LifecycleController {
+            @display("p=75,155");
+        }
         host1: EtherHost {
             @display("p=77,217");
         }
@@ -249,6 +263,7 @@ network NetworkWithHosts
         host3: EtherHost {
             @display("p=529,78");
         }
+        
     connections:
         switchBEB1.ethg[0] <--> C <--> switchBEB4.ethg[0];
         switchBEB1.ethg[1] <--> C <--> switchBEB3.ethg[0];

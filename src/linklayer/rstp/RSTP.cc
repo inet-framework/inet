@@ -28,6 +28,9 @@
 #include "MACAddressTableAccess.h"
 #include "InterfaceTableAccess.h"
 #include "InterfaceEntry.h"
+#include "ModuleAccess.h"
+#include "NodeOperations.h"
+#include "NodeStatus.h"
 
 
 
@@ -57,6 +60,11 @@ void RSTP::initialize(int stage)
 	{
 		error("Parent not found");
 	}
+    if (stage==1)
+    {
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+    }
 	if(stage==1) // "auto" MAC addresses assignment takes place in stage 0.
 	{
 		sw=MACAddressTableAccess().get(); //cache pointer
@@ -920,7 +928,7 @@ void RSTP::colorRootPorts()
 			}
 		}
 	}
-	if(true) //only when the router is working
+	if(isOperational) //only when the router is working
 	{
 		if(found==false)
 		{ //Root mark
@@ -1222,3 +1230,48 @@ MACAddress RSTP::getAddress()
 	return address;
 }
 
+void RSTP::start()
+{
+    initPorts();
+    isOperational = true;
+}
+
+void RSTP::stop()
+{
+    for(unsigned int i=0;i<Puertos.size();i++)
+    {
+        Puertos[i].PortRole=DISABLED;
+        Puertos[i].PortState=DISCARDING;
+    }
+    isOperational = false;
+}
+
+bool RSTP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_LINK_LAYER) {
+            start();
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_LINK_LAYER) {
+            stop();
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            stop();
+        }
+    }
+    else
+    {
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    }
+
+    return true;
+}

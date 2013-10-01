@@ -19,6 +19,7 @@
 #ifndef __A_RSTP_H
 #define __A_RSTP_H
 
+#include "ILifecycle.h"
 #include "BPDU.h"
 #include "MACAddress.h"
 #include "EtherFrame.h"
@@ -122,6 +123,7 @@ class RSTP: public cSimpleModule
 	int MaxAge;
 	bool verbose;		/// Sets module verbosity
 	bool testing;		/// Save Testing data
+	bool isOperational; // for lifecycle
 
 	cModule* Parent; /// Pointer to the parent module
 	cModule* admac;
@@ -278,6 +280,13 @@ class RSTP: public cSimpleModule
 	 * @brief Handles the switch to backup in one of the ports
 	 */
 	virtual void handleBK(BPDUieee8021D * frame, int arrival);
+
+  // for lifecycle:
+  public:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+  protected:
+    virtual void start();
+    virtual void stop();
 };
 
 

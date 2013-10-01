@@ -1,0 +1,4 @@
+<script>
+	<at t='60s'><tell module='lifecycleController' operation='NodeShutdownOperation' target='switchBEB4'/></at>
+	<at t='90s'><tell module='lifecycleController' operation='NodeStartOperation' target='switchBEB4'/></at>
+</script>
