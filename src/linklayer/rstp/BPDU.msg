@@ -17,7 +17,6 @@
 
 
 class noncobject MACAddress;
-class noncobject EtherFrame;
 
 cplusplus {{
 #include "MACAddress.h"
@@ -28,7 +27,7 @@ cplusplus {{
 //
 // BPDU
 //
-packet BPDUieee8021D extends EtherFrame
+packet BPDUieee8021D
 {
     byteLength = 35;
     string displayString = "b=,,,#a5a5ff";

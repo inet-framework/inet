@@ -27,7 +27,6 @@
 #include "BPDU.h"
 #include "RSTP.h"
 #include "MACAddressTable.h"
-#include "Delivery.h"
 
 class RelayRSTP : public cSimpleModule, public ILifecycle
 {
@@ -41,7 +40,7 @@ class RelayRSTP : public cSimpleModule, public ILifecycle
     virtual void initialize(int stage);
     virtual int numInitStages() const {return 3;}
     virtual void handleMessage(cMessage *msg);
-    virtual void handleBPDUFrame(BPDUieee8021D *frame);             /// BPDU handler. Delivers BPDUs to every Designated port or to the RSTP module.
+    virtual void handleBPDUFrame(EtherFrame *frame);             /// BPDU handler. Delivers BPDUs to every Designated port or to the RSTP module.
     virtual void handleFrameFromRSTP(BPDUieee8021D *frame);
     virtual void handleEtherFrame(EtherFrame *frame);
     virtual void relayMsg(cMessage * msg,int outputPort);

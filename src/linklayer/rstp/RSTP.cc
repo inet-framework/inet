@@ -415,9 +415,10 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 	}
 
 	//First. Checking message age
-	Delivery * ctrlInfo=check_and_cast<Delivery *>(frame->removeControlInfo());
-    int arrival=ctrlInfo->getArrivalPort();
-    delete ctrlInfo;
+	Ieee802Ctrl * etherctrl=check_and_cast<Ieee802Ctrl *>(frame->removeControlInfo());
+    int arrival=etherctrl->getInterfaceId();
+    MACAddress src = etherctrl->getSrc();
+    delete etherctrl;
 	if(frame->getAge()<MaxAge)
 	{
 		//Checking TC.
@@ -426,7 +427,7 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 		int r=getRootIndex();
 
 		//Checking possible backup
-		if(frame->getSrc().compareTo(address)==0)  //more than one port in the same LAN.
+		if(src.compareTo(address)==0)  //more than one port in the same LAN.
 		{
 			handleBK(frame,arrival);
 		}
@@ -440,11 +441,11 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 
 			int caso=0;
 			bool Flood=false;
-			caso=Puertos[arrival].PortRstpVector.compareRstpVector(frame,Puertos[arrival].PortCost);
+			caso=Puertos[arrival].PortRstpVector.compareRstpVector(frame,Puertos[arrival].PortCost, src);
 			if((caso>0)&&(frame->getRootMAC().compareTo(address)!=0)) //Root will not participate in a loop with its own address
 			{
 				//Update that port rstp info.
-				Puertos[arrival].updatePortVector(frame,arrival);
+				Puertos[arrival].updatePortVector(frame,arrival, src);
 				if(r==-1)
 				{//There was not root
 					Puertos[arrival].PortRole=ROOT;
@@ -465,7 +466,7 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 				}
 				else
 				{//There was a Root. Challenge 2. Compare with the root.
-					int caso2=Puertos[r].PortRstpVector.compareRstpVector(frame,Puertos[arrival].PortCost); //Comparing with root port vector
+					int caso2=Puertos[r].PortRstpVector.compareRstpVector(frame,Puertos[arrival].PortCost, src); //Comparing with root port vector
 					int caso3=0;
 					switch(caso2)
 					{
@@ -585,7 +586,7 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 						case -3: //Same Root RPC but worse source
 						case -4: //Same Root RPC Source but worse port
 							//Compares with frame that would be sent if it were the root for this LAN.
-							caso3=contestRstpVector(frame,arrival); //Case 0 not possible. < if own vector better than frame.
+							caso3=contestRstpVector(frame,arrival,src); //Case 0 not possible. < if own vector better than frame.
 							if(caso3<0)
 							{
 								Puertos[arrival].PortRole=DESIGNATED;
@@ -605,7 +606,7 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 					}
 				}
 			}
-			else if((frame->getSrc().compareTo(Puertos[arrival].PortRstpVector.srcAddress)==0) //Worse or similar, but the same source
+			else if((src.compareTo(Puertos[arrival].PortRstpVector.srcAddress)==0) //Worse or similar, but the same source
 					&&(frame->getRootMAC().compareTo(address)!=0))   // Root will not participate
 			{//Source has updated BPDU information.
 				switch(caso)
@@ -636,7 +637,7 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 							}
 							Puertos[alternative].PortRole=ROOT;
 							Puertos[alternative].PortState=FORWARDING; //Comes from alternate. Preserves lostBPDU.
-							Puertos[arrival].updatePortVector(frame,arrival);
+							Puertos[arrival].updatePortVector(frame,arrival,src);
 							sendBPDU(arrival); //Show him a better Root as soon as possible
 						}
 						else
@@ -649,10 +650,10 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 								Puertos[j].Flushed++;
 								sw->flush(j);
 							}
-							caso2=Puertos[arrival].PortRstpVector.compareRstpVector(frame,Puertos[arrival].PortCost);
+							caso2=Puertos[arrival].PortRstpVector.compareRstpVector(frame,Puertos[arrival].PortCost, src);
 							if(caso2>0)
 							{
-								Puertos[arrival].updatePortVector(frame,arrival); //If this module is not better. Keep it as a ROOT.
+								Puertos[arrival].updatePortVector(frame,arrival,src); //If this module is not better. Keep it as a ROOT.
 								Puertos[arrival].PortRole=ROOT;
 								Puertos[arrival].PortState=FORWARDING;
 							}
@@ -664,7 +665,7 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 					{
 						Puertos[arrival].PortState=DISCARDING;
 						Puertos[arrival].PortRole=DESIGNATED;
-						Puertos[arrival].updatePortVector(frame,arrival);
+						Puertos[arrival].updatePortVector(frame,arrival,src);
 						sendBPDU(arrival); //Show him a better Root as soon as possible
 					}
 					break;
@@ -679,14 +680,14 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 						if(alternative>=0)
 						{
 							int caso2=0;
-							caso2=Puertos[alternative].PortRstpVector.compareRstpVector(frame,Puertos[arrival].PortCost);
+							caso2=Puertos[alternative].PortRstpVector.compareRstpVector(frame,Puertos[arrival].PortCost, src);
 							if(caso2<0)//If alternate is better, change
 							{
 								Puertos[alternative].PortRole=ROOT;
 								Puertos[alternative].PortState=FORWARDING;
 								Puertos[arrival].PortRole=DESIGNATED;//Temporary. Just one port can be root at contest time.
 								int caso3=0;
-								caso3=contestRstpVector(frame,arrival);
+								caso3=contestRstpVector(frame,arrival,src);
 								if(caso3<0)
 								{
 									Puertos[arrival].PortRole=DESIGNATED;
@@ -710,7 +711,7 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 								sw->copyTable(arrival,alternative); //Copy cache from old to new root.
 							}
 						}
-						Puertos[arrival].updatePortVector(frame,arrival);
+						Puertos[arrival].updatePortVector(frame,arrival,src);
 						//Propagating new information.
 						Flood=true;
 						//If alternate is worse than root, or there is not alternate, keep old root as root.
@@ -718,7 +719,7 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 					else if(Puertos[arrival].PortRole==ALTERNATE_PORT)
 					{
 						int caso2=0;
-						caso2=contestRstpVector(frame,arrival);
+						caso2=contestRstpVector(frame,arrival,src);
 						if(caso2<0)
 						{
 							Puertos[arrival].PortRole=DESIGNATED; //If the frame is worse than this module generated frame. Switch to Designated/Discarding
@@ -731,7 +732,7 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 							//This does not deserve expedited BPDU
 						}
 					}
-					Puertos[arrival].updatePortVector(frame,arrival);
+					Puertos[arrival].updatePortVector(frame,arrival,src);
 					break;
 				}
 			}
@@ -764,7 +765,7 @@ void RSTP::sendTCNtoRoot()
 			if(simulation.getSimTime()<Puertos[r].TCWhile)
 			{
 				BPDUieee8021D * frame = new BPDUieee8021D();
-				Delivery * ctrlInfo= new Delivery();
+				Ieee802Ctrl * etherctrl= new Ieee802Ctrl();
 				RSTPVector a = getRootRstpVector();
 
 				frame->setRootPriority(a.RootPriority);
@@ -772,16 +773,16 @@ void RSTP::sendTCNtoRoot()
 				frame->setAge(a.Age);
 				frame->setCost(a.RootPathCost);
 				frame->setSrcPriority(priority);
-				frame->setSrc(address);
-				frame->setDest(MACAddress("01-80-C2-00-00-00"));
 				frame->setAck(false);
 				frame->setPortNumber(r);  //Src port number.
 				frame->setTC(true);
 				frame->setDisplayString("b=,,,#3e3ef3");
 		        if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
 		            frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
-				ctrlInfo->setSendByPort(r);
-				frame->setControlInfo(ctrlInfo);
+		        etherctrl->setSrc(address);
+		        etherctrl->setDest(MACAddress::STP_MULTICAST_ADDRESS);
+				etherctrl->setInterfaceId(r);
+				frame->setControlInfo(etherctrl);
 				send(frame,"RSTPPort$o");
 			}
 		}
@@ -804,15 +805,13 @@ void RSTP::sendBPDU(int port)
 	if(Puertos[port].PortRole!=DISABLED)
 	{
 		BPDUieee8021D * frame = new BPDUieee8021D();
-		Delivery * ctrlInfo=new Delivery();
+		Ieee802Ctrl * etherctrl=new Ieee802Ctrl();
 		RSTPVector a = getRootRstpVector();
 		frame->setRootPriority(a.RootPriority);
 		frame->setRootMAC(a.RootMAC);
 		frame->setCost(a.RootPathCost);
 		frame->setAge(a.Age);
 		frame->setSrcPriority(priority);
-		frame->setSrc(address);
-		frame->setDest(MACAddress("01-80-C2-00-00-00"));
 		frame->setAck(false);
 		frame->setPortNumber(port);  //Src port number.
 		if(simulation.getSimTime()<Puertos[port].TCWhile)
@@ -824,8 +823,10 @@ void RSTP::sendBPDU(int port)
 			frame->setTC(false);
         if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
             frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
-		ctrlInfo->setSendByPort(port);
-		frame->setControlInfo(ctrlInfo);
+        etherctrl->setSrc(address);
+        etherctrl->setDest(MACAddress::STP_MULTICAST_ADDRESS);
+		etherctrl->setInterfaceId(port);
+		frame->setControlInfo(etherctrl);
 		send(frame,"RSTPPort$o");
 	}
 }
@@ -1079,7 +1080,7 @@ int RSTP::contestRstpVector(RSTPVector vect2,int v2Port)
 	return result;
 }
 
-int RSTP::contestRstpVector(BPDUieee8021D* msg,int arrival)
+int RSTP::contestRstpVector(BPDUieee8021D* msg,int arrival,MACAddress src)
 {//Compares msg with the vector that would be sent if this were the root node for the arrival LAN.
 	// >0 if frame vector better than own vector. =0 if they are similar.
 	// -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
@@ -1094,11 +1095,11 @@ int RSTP::contestRstpVector(BPDUieee8021D* msg,int arrival)
 	vect.srcPort=msg->getPortNumber();
 	vect.arrivalPort=arrival;
 	int result=0;
-	result=vect.compareRstpVector(msg,0);
+	result=vect.compareRstpVector(msg, 0, src);
 	return result;
 }
 
-int RSTPVector::compareRstpVector(BPDUieee8021D * msg,int PortCost)
+int RSTPVector::compareRstpVector(BPDUieee8021D * msg,int PortCost, MACAddress src)
 {//Compares msg with vect. >0 if msg better than vect. =0 if they are similar.
 	// -4=Worse Port  -3=Worse Src -2=Worse RPC -1=Worse Root  0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
 	//Adds Port cost to msg.
@@ -1108,7 +1109,7 @@ int RSTPVector::compareRstpVector(BPDUieee8021D * msg,int PortCost)
 	vect2.RootMAC = msg->getRootMAC();
 	vect2.RootPathCost=msg->getCost()+PortCost;
 	vect2.srcPriority=msg->getSrcPriority();
-	vect2.srcAddress = msg->getSrc();
+	vect2.srcAddress = src;
 	vect2.srcPortPriority=msg->getPortPriority();
 	vect2.srcPort=msg->getPortNumber();
 	result=this->compareRstpVector(vect2);
@@ -1202,14 +1203,14 @@ PortStatus::PortStatus()
 	portfilt=NULL;
 }
 
-void PortStatus::updatePortVector(BPDUieee8021D *frame,int arrival)
+void PortStatus::updatePortVector(BPDUieee8021D *frame,int arrival, MACAddress src)
 {//Updates this port status with frame information, received at arrival.
 	this->PortRstpVector.RootPriority=frame->getRootPriority();
 	this->PortRstpVector.RootMAC = frame->getRootMAC();
 	this->PortRstpVector.RootPathCost=frame->getCost()+this->PortCost;
 	this->PortRstpVector.Age=frame->getAge()+1;
 	this->PortRstpVector.srcPriority=frame->getSrcPriority();
-	this->PortRstpVector.srcAddress = frame->getSrc();
+	this->PortRstpVector.srcAddress = src;
 	this->PortRstpVector.srcPortPriority=frame->getPortPriority();
 	this->PortRstpVector.srcPort=frame->getPortNumber();
 	this->PortRstpVector.arrivalPort=arrival;

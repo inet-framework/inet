@@ -21,7 +21,7 @@
 
 #include "BPDU.h"
 #include "MACAddress.h"
-#include "Delivery.h"
+#include "EtherFrame.h"
 #include "MACAddressTable.h"
 #include "PortFiltRSTP.h"
 #include "InterfaceTable.h"
@@ -73,7 +73,7 @@ public:
 	 * @return (<0 if vector better than frame)
 	 * -4=Worse Port -3=Worse Src -2=Worse RPC -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
 	 */
-	virtual int compareRstpVector(BPDUieee8021D * frame,int PortCost);
+	virtual int compareRstpVector(BPDUieee8021D * frame,int PortCost, MACAddress src);
 
 	/**
 	 * @brief Compares two RSTPVector.
@@ -100,7 +100,7 @@ public:
 
 	PortStatus();
 	virtual ~PortStatus(){}
-	virtual void updatePortVector(BPDUieee8021D *frame,int arrival);
+	virtual void updatePortVector(BPDUieee8021D *frame,int arrival, MACAddress src);
 }; /// Global per port state info
 
 /**
@@ -239,7 +239,7 @@ class RSTP: public cSimpleModule
 	 * @return (<0 if own vector is better than frame)
 	 * -4=Worse Port -3=Worse Src -2=Worse RPC -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
 	 */
-	virtual int contestRstpVector(BPDUieee8021D *frame, int arrival);
+	virtual int contestRstpVector(BPDUieee8021D *frame, int arrival, MACAddress src);
 
 	/**
 	 * @brief Compares the vector with the frame this module would send through that por
