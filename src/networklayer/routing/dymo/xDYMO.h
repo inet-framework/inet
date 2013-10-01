@@ -194,7 +194,6 @@ class INET_API xDYMO : public cSimpleModule, public ILifecycle, public cListener
     void configureInterfaces();
 
     // address
-    std::string getHostName();
     Address getSelfAddress();
     bool isClientAddress(const Address & address);
 
