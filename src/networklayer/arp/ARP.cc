@@ -125,7 +125,7 @@ void ARP::handleMessageWhenDown(cMessage *msg)
 {
     if (msg->isSelfMessage())
         throw cRuntimeError("Model error: self msg '%s' received when protocol is down", msg->getName());
-    EV << "Protocol is turned off, dropping '" << msg->getName() << "' message\n";
+    EV_WARN << "Protocol is turned off, dropping '" << msg->getName() << "' message\n";
     delete msg;
 }
 
@@ -191,7 +191,7 @@ void ARP::updateDisplayString()
     std::stringstream os;
 
     os << arpCache.size() << " cache entries\nsent req:" << numRequestsSent
-            << " repl:" << numRepliesSent << " fail:" << numFailedResolutions;
+       << " repl:" << numRepliesSent << " fail:" << numFailedResolutions;
 
     getDisplayString().setTagArg("t", 0, os.str().c_str());
 }
@@ -225,6 +225,7 @@ void ARP::sendPacketToNIC(cMessage *msg, const InterfaceEntry *ie, const MACAddr
     msg->setControlInfo(controlInfo);
 
     // send out
+    EV_INFO << "Sending " << msg << " to network protocol.\n";
     send(msg, netwOutGate);
 }
 
@@ -259,7 +260,7 @@ void ARP::requestTimedOut(cMessage *selfmsg)
     {
         // retry
         IPv4Address nextHopAddr = entry->myIter->first;
-        EV << "ARP request for " << nextHopAddr << " timed out, resending\n";
+        EV_INFO << "ARP request for " << nextHopAddr << " timed out, resending\n";
         sendARPRequest(entry->ie, nextHopAddr);
         scheduleAt(simTime()+retryTimeout, selfmsg);
         return;
@@ -295,15 +296,15 @@ bool ARP::addressRecognized(IPv4Address destAddr, InterfaceEntry *ie)
 
 void ARP::dumpARPPacket(ARPPacket *arp)
 {
-    EV << (arp->getOpcode()==ARP_REQUEST ? "ARP_REQ" : arp->getOpcode()==ARP_REPLY ? "ARP_REPLY" : "unknown type")
-       << "  src=" << arp->getSrcIPAddress() << " / " << arp->getSrcMACAddress()
-       << "  dest=" << arp->getDestIPAddress() << " / " << arp->getDestMACAddress() << "\n";
+    EV_DETAIL << (arp->getOpcode()==ARP_REQUEST ? "ARP_REQ" : arp->getOpcode()==ARP_REPLY ? "ARP_REPLY" : "unknown type")
+             << "  src=" << arp->getSrcIPAddress() << " / " << arp->getSrcMACAddress()
+             << "  dest=" << arp->getDestIPAddress() << " / " << arp->getDestMACAddress() << "\n";
 }
 
 
 void ARP::processARPPacket(ARPPacket *arp)
 {
-    EV << "ARP packet " << arp << " arrived:\n";
+    EV_INFO << "Received " << arp << " from network protocol.\n";
     dumpARPPacket(arp);
 
     // extract input port
@@ -390,7 +391,7 @@ void ARP::processARPPacket(ARPPacket *arp)
         {
             case ARP_REQUEST:
             {
-                EV << "Packet was ARP REQUEST, sending REPLY\n";
+                EV_DETAIL << "Packet was ARP REQUEST, sending REPLY\n";
 
                 // find our own IPv4 address and MAC address on the given interface
                 MACAddress myMACAddress = ie->getMacAddress();
@@ -412,7 +413,7 @@ void ARP::processARPPacket(ARPPacket *arp)
             }
             case ARP_REPLY:
             {
-                EV << "Discarding packet\n";
+                EV_DETAIL << "Discarding packet\n";
                 delete arp;
                 break;
             }
@@ -424,14 +425,14 @@ void ARP::processARPPacket(ARPPacket *arp)
     else
     {
         // address not recognized
-        EV << "IPv4 address " << arp->getDestIPAddress() << " not recognized, dropping ARP packet\n";
+        EV_INFO << "IPv4 address " << arp->getDestIPAddress() << " not recognized, dropping ARP packet\n";
         delete arp;
     }
 }
 
 void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
 {
-    EV << "Updating ARP cache entry: " << entry->myIter->first << " <--> " << macAddress << "\n";
+    EV_DETAIL << "Updating ARP cache entry: " << entry->myIter->first << " <--> " << macAddress << "\n";
 
     // update entry
     if (entry->pending)
