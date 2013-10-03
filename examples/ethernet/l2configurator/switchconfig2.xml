@@ -1,0 +1,3 @@
+<config>
+<interface hosts='Switch2 Switch3' towards='Switch1' cost='154'/>
+</config>

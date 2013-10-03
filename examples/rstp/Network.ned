@@ -20,6 +20,7 @@ import inet.nodes.rstp.RSTPSwitch;
 import inet.nodes.ethernet.EtherHost;
 import inet.base.LifecycleController;
 import inet.world.scenario.ScenarioManager;
+import inet.linklayer.configurator.L2NetworkConfigurator;
 
 network CompleteNetwork
 {
@@ -28,60 +29,62 @@ network CompleteNetwork
         scenarioManager: ScenarioManager {
             @display("p=75,101");
         }
-        
+        l2NetworkConfigurator: L2NetworkConfigurator {
+            @display("p=75,217");
+        }
         lifecycleController: LifecycleController {
             @display("p=75,155");
         }
-        
+
         switchBEB1: RSTPSwitch {
             parameters:
                 @display("p=333,78");
             gates:
                 ethg[];
         }
-        
+
         switchBEB2: RSTPSwitch {
             parameters:
                 @display("p=301,217");
             gates:
                 ethg[];
         }
-        
+
         switchBEB3: RSTPSwitch {
             parameters:
                 @display("p=443,78");
             gates:
                 ethg[];
         }
-        
+
         switchBEB4: RSTPSwitch {
             parameters:
                 @display("p=322,153");
             gates:
                 ethg[];
         }
-        
+
         switchBEB5: RSTPSwitch {
             parameters:
                 @display("p=529,217");
             gates:
                 ethg[];
         }
-        
+
         switchBEB6: RSTPSwitch {
             parameters:
                 @display("p=148,217");
             gates:
                 ethg[];
         }
-        
+
         switchBEB7: RSTPSwitch {
             parameters:
                 @display("p=443,153");
             gates:
                 ethg[];
         }
-        
+
     connections:
         switchBEB1.ethg++ <--> Eth1G <--> switchBEB4.ethg++;
         switchBEB1.ethg++ <--> Eth1G <--> switchBEB3.ethg++;
@@ -109,15 +112,15 @@ network NetworkWithHosts extends CompleteNetwork
         host1: EtherHost {
             @display("p=77,217");
         }
-        
+
         host2: EtherHost {
             @display("p=609,217");
         }
-        
+
         host3: EtherHost {
             @display("p=529,78");
         }
-        
+
     connections:
         switchBEB3.ethg++ <--> Eth1G <--> host3.ethg;
         switchBEB5.ethg++ <--> Eth1G <--> host2.ethg;

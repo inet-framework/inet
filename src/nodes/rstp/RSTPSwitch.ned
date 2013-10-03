@@ -28,6 +28,7 @@ import inet.status.NodeStatus;
 import inet.linklayer.rstp.RSTP;
 import inet.linklayer.rstp.RelayRSTP;
 import inet.linklayer.rstp.PortFiltRSTP;
+import inet.linklayer.configurator.L2NodeConfigurator;
 
 module RSTPSwitch
 {
@@ -42,12 +43,15 @@ module RSTPSwitch
         status: NodeStatus if hasStatus {
             @display("p=50,50;is=s");
         }
+        l2NodeConfigurator: L2NodeConfigurator {
+            @display("p=50,181");
+        }
         interfaceTable: InterfaceTable {
             @display("p=50,92;is=s");
         }
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=50,150;is=s");
+                @display("p=50,135;is=s");
         }
         relay: RelayRSTP {
             parameters:
@@ -70,13 +74,13 @@ module RSTPSwitch
                 GatesOut[];
 
         }
-        
+
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
                 mac.promiscuous = true;
                 @display("p=199,281,row;q=txQueue");
         }
-        
+
         rstp: RSTP {
             @display("p=127,50");
             gates:
