@@ -74,7 +74,7 @@ package inet.world.scenario;
 simple ScenarioManager
 {
     parameters:
-        xml script;
+        xml script = default(xml("<script></script>"));
         @display("i=block/control_s");
         @labels(node,mpls-node);
 }
