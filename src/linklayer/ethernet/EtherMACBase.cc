@@ -503,12 +503,6 @@ bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)
     return true;
 }
 
-template<class T>
-T check_and_cast_nullable(cObject *p)
-{
-    return p ? check_and_cast<T>(p) : NULL;
-}
-
 void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
 {
     // When the connected channels change at runtime, we'll receive

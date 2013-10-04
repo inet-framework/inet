@@ -42,6 +42,7 @@ class INET_API MACAddress
     static bool simulationLifetimeListenerAdded;
 
   public:
+#if OMNETPP_VERSION >= 0x500
     class SimulationLifetimeListener : public cISimulationLifetimeListener
     {
         virtual void lifetimeEvent(SimulationLifetimeEventType eventType, cObject *details) {
@@ -53,6 +54,7 @@ class INET_API MACAddress
             delete this;
         }
     };
+#endif
 
     /** The unspecified MAC address, 00:00:00:00:00:00 */
     static const MACAddress UNSPECIFIED_ADDRESS;

@@ -21,50 +21,21 @@
 #include <iostream>
 #include <omnetpp.h>
 
-#ifndef EV_FATAL
-// TODO: #if OMNETPP_VERSION < 0x0500
-// FIXME: eventually remove these forward compatibility macros
-#define EV_FATAL EV
-#define EV_ERROR EV
-#define EV_WARN  EV
-#define EV_INFO  EV
-#define EV_DEBUG EV
-#define EV_TRACE EV
 
-#define EV_FATAL_S EV
-#define EV_ERROR_S EV
-#define EV_WARN_S  EV
-#define EV_INFO_S  EV
-#define EV_DEBUG_S EV
-#define EV_TRACE_S EV
+#if OMNETPP_VERSION < 0x500
+#  define EV_FATAL  EV << "FATAL: "
+#  define EV_ERROR  EV << "ERROR: "
+#  define EV_WARN   EV << "WARN: "
+#  define EV_INFO   EV
+#  define EV_DEBUG  EV << "DEBUG: "
+#  define EV_TRACE  EV << "TRACE: "
+#endif  // OMNETPP_VERSION < 0x500
 
-#define EV_FATAL_P ev.printf
-#define EV_ERROR_P ev.printf
-#define EV_WARN_P  ev.printf
-#define EV_INFO_P  ev.printf
-#define EV_DEBUG_P ev.printf
-#define EV_TRACE_P ev.printf
-
-#define EV_FATAL_PS ev.printf
-#define EV_ERROR_PS ev.printf
-#define EV_WARN_PS  ev.printf
-#define EV_INFO_PS  ev.printf
-#define EV_DEBUG_PS ev.printf
-#define EV_TRACE_PS ev.printf
-
-#define EV_S EV
-
-#define EV_GLOBAL_STREAM
-
-class cLogStream : public std::ostream
-{
-    public:
-        static cLogStream globalStream;
-};
-
-#endif
-
-#endif
+#if OMNETPP_VERSION < 0x500
+#  define EVSTREAM  ev.getOStream()
+#else
+#  define EVSTREAM  EV
+#endif  // OMNETPP_VERSION < 0x500
 
 #ifdef _MSC_VER
 // complementary error function, not in MSVC
@@ -87,7 +58,7 @@ inline double fmax(double a, double b)
 {
     return a > b ? a : b;
 }
-#endif
+#endif  // _MSC_VER
 
 #if OMNETPP_VERSION < 0x0500
 /**
@@ -130,4 +101,15 @@ T check_and_cast(const P *p)
     return ret;
 }
 
-#endif
+template<class T, class P>
+T check_and_cast_nullable(P *p)
+{
+    if (!p)
+        return NULL;
+    return check_and_cast<T>(p);
+}
+
+#endif  // OMNETPP_VERSION < 0x0500
+
+#endif  // __INET_COMPAT_H_
+
