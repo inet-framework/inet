@@ -22,10 +22,10 @@ cplusplus {{
 #include "INETDefs.h"
 #include "IPv4Address.h"
 #include <vector>
-typedef std::vector<IPv4Address> IPVector;
+typedef std::vector<IPv4Address> IPv4AddressVector;
 }}
 
-class noncobject IPVector;
+class noncobject IPv4AddressVector;
 
 enum IGMPType
 {
@@ -36,33 +36,71 @@ enum IGMPType
 	IGMPV3_MEMBERSHIP_REPORT = 0x22;
 }
 
-struct GroupRecord
-{
-    int recordType;
-    int numOfSources;
-    IPv4Address groupAddress;
-    IPVector SourceList;
-};
-
 packet IGMPMessage
 {
     int type @enum(IGMPType);
+}
+
+packet IGMPQuery extends IGMPMessage
+{
+    IPv4Address groupAddress;
+}
+
+packet IGMPv1Query extends IGMPQuery
+{
+    type = IGMP_MEMBERSHIP_QUERY;
+}
+
+packet IGMPv1Report extends IGMPMessage
+{
+    type = IGMPV1_MEMBERSHIP_REPORT;
+    IPv4Address groupAddress;
+}
+
+packet IGMPv2Query extends IGMPQuery
+{
+    type = IGMP_MEMBERSHIP_QUERY;
     int maxRespTime;
+}
+
+packet IGMPv2Report extends IGMPMessage
+{
+    type = IGMPV2_MEMBERSHIP_REPORT;
     IPv4Address groupAddress;
 }
 
-packet IGMPv3Query
+packet IGMPv2Leave extends IGMPMessage
 {
-    int type enum(IGMPType) = IGMP_MEMBERSHIP_QUERY;
+    type = IGMPV2_LEAVE_GROUP;
+    IPv4Address groupAddress;
+}
+
+packet IGMPv3Query extends IGMPQuery
+{
+    type  = IGMP_MEMBERSHIP_QUERY;
     int maxRespCode;
-    IPv4Address groupAddress;
-    int numOfSources;
-    IPVector sourceList;
+    IPv4AddressVector sourceList;
 }
 
-packet IGMPv3Report
+enum GroupRecordType
 {
-    int type enum(IGMPType) = IGMPV3_MEMBERSHIP_REPORT;
-    int numGroupRecords;
+    MODE_IS_INCLUDE = 1;
+    MODE_IS_EXCLUDE = 2;
+    CHANGE_TO_INCLUDE_MODE = 3;
+    CHANGE_TO_EXCLUDE_MODE = 4;
+    ALLOW_NEW_SOURCES = 5;
+    BLOCK_OLD_SOURCE = 6;
+}
+
+struct GroupRecord
+{
+    int recordType enum(GroupRecordType);
+    IPv4Address groupAddress;
+    IPv4AddressVector sourceList;
+};
+
+packet IGMPv3Report extends IGMPMessage
+{
+    type = IGMPV3_MEMBERSHIP_REPORT;
     GroupRecord groupRecord[];
 }

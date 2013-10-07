@@ -564,7 +564,6 @@ void IGMPv3::sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr,std::vec
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupAddr);
         msg->setMaxRespCode((int)(maxRespTime * 10.0));
-        msg->setNumOfSources(sources.size());
         msg->setSourceList(sources);
         msg->setByteLength(12 + (4 * sources.size()));
         sendQueryToIP(msg, ie, groupAddr.isUnspecified() ? IPv4Address::ALL_HOSTS_MCAST : groupAddr);
@@ -654,14 +653,11 @@ void IGMPv3::processHostGeneralQueryTimer(cMessage *msg)
             gr.recordType = IGMPV3_RT_IS_EX;
         }
         gr.groupAddress = it->second->groupAddr;
-        gr.numOfSources = it->second->sourceAddressList.size();
-        gr.SourceList = IGMPv3::IpVector();
-        gr.SourceList = it->second->sourceAddressList;
+        gr.sourceList = it->second->sourceAddressList;
         report->setGroupRecord(counter++,gr);
     }
     if(counter != 0)    //if no record created, dont need to send report
     {
-        report->setNumGroupRecords(counter);
         EV << "IGMPv3: Host General Query Timer expired on iface=" << ie->getName() << "\n";
         sendReportToIP(report, ie, IPv4Address::ALL_IGMPV3_ROUTERS_MCAST);
         numReportsSent++;
@@ -766,7 +762,7 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
     numQueriesRecv++;
 
     IPv4Address &groupAddr = msg->getGroupAddress();
-    IpVector sources = msg->getSourceList();
+    IPv4AddressVector sources = msg->getSourceList();
 
     double maxRespTime = countMaxResponseTime((double)msg->getMaxRespCode()) /10.0;
     double delay = uniform(0.0, maxRespTime);
@@ -818,7 +814,7 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
                 //rule 5.
                 if(groupData->timer->getArrivalTime() > simTime() + delay)
                 {
-                    IGMPv3::IpVector combinedSources;
+                    IPv4AddressVector combinedSources;
                     combinedSources.reserve(msg->getSourceList().size() + ctx->sourceList.size());
                     combinedSources.insert(combinedSources.end(), msg->getSourceList().begin(), msg->getSourceList().end());
                     combinedSources.insert(combinedSources.end(),ctx->sourceList.begin(),ctx->sourceList.end());
@@ -878,10 +874,10 @@ double IGMPv3::countMaxResponseTime(double maxRespCode)
     return maxRespTime;
 }
 
-IGMPv3::IpVector IGMPv3::IpComplement(IGMPv3::IpVector first, IGMPv3::IpVector second)
+IPv4AddressVector IGMPv3::IpComplement(IPv4AddressVector first, IPv4AddressVector second)
 {
-    IGMPv3::IpVector complement;
-    IGMPv3::IpVector::iterator it;
+    IPv4AddressVector complement;
+    IPv4AddressVector::iterator it;
 
     std::sort(first.begin(), first.end());
     std::sort(second.begin(), second.end());
@@ -891,10 +887,10 @@ IGMPv3::IpVector IGMPv3::IpComplement(IGMPv3::IpVector first, IGMPv3::IpVector s
     return complement;
 }
 
-IGMPv3::IpVector IGMPv3::IpIntersection(IGMPv3::IpVector first, IGMPv3::IpVector second)
+IPv4AddressVector IGMPv3::IpIntersection(IPv4AddressVector first, IPv4AddressVector second)
 {
-    IGMPv3::IpVector intersection;
-    IGMPv3::IpVector::iterator it;
+    IPv4AddressVector intersection;
+    IPv4AddressVector::iterator it;
 
     std::sort(first.begin(), first.end());
     std::sort(second.begin(), second.end());
@@ -904,10 +900,10 @@ IGMPv3::IpVector IGMPv3::IpIntersection(IGMPv3::IpVector first, IGMPv3::IpVector
     return intersection;
 }
 
-IGMPv3::IpVector IGMPv3::IpUnion(IGMPv3::IpVector first, IGMPv3::IpVector second)
+IPv4AddressVector IGMPv3::IpUnion(IPv4AddressVector first, IPv4AddressVector second)
 {
-    IGMPv3::IpVector intersection;
-    IGMPv3::IpVector::iterator it;
+    IPv4AddressVector intersection;
+    IPv4AddressVector::iterator it;
 
     std::sort(first.begin(), first.end());
     std::sort(second.begin(), second.end());
@@ -918,7 +914,7 @@ IGMPv3::IpVector IGMPv3::IpUnion(IGMPv3::IpVector first, IGMPv3::IpVector second
 }
 
 
-void IGMPv3::sendGroupReport(InterfaceEntry *ie, IPv4Address group, ReportType type, IpVector sources)
+void IGMPv3::sendGroupReport(InterfaceEntry *ie, IPv4Address group, ReportType type, IPv4AddressVector sources)
 {
     ASSERT(group.isMulticast() && !group.isLinkLocalMulticast());
 
@@ -926,14 +922,11 @@ void IGMPv3::sendGroupReport(InterfaceEntry *ie, IPv4Address group, ReportType t
     IGMPv3Report *msg = new IGMPv3Report("IGMPv3 report");
     msg->setType(IGMPV3_MEMBERSHIP_REPORT);
     GroupRecord gr;
-    gr.SourceList = IGMPv3::IpVector();
-    gr.SourceList = sources;
+    gr.sourceList = sources;
     gr.groupAddress = group;
-    gr.numOfSources = sources.size();
     gr.recordType = type;
     msg->setGroupRecordArraySize(1);
     msg->setGroupRecord(0,gr);
-    msg->setNumGroupRecords(1);
     sendReportToIP(msg, ie, group);
     numReportsSent++;
 }
@@ -950,7 +943,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
 
     if (rt->isMulticastForwardingEnabled())
     {
-        for(int i = 0; i < msg->getNumGroupRecords(); i++)
+        for(unsigned int i = 0; i < msg->getGroupRecordArraySize(); i++)
         {
             GroupRecord gr = msg->getGroupRecord(i);
             RouterGroupData *groupData = getRouterGroupData(ie, gr.groupAddress);
@@ -973,7 +966,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
             {
                 if(groupData->filter == IGMPV3_FM_INCLUDE)
                 {
-                    for(IGMPv3::IpVector::iterator it = gr.SourceList.begin(); it != gr.SourceList.end(); ++it)
+                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
                     {
                         SourceRecord *record = getSourceRecord(ie, groupData->groupAddr, *it);
                         if(!record)
@@ -988,7 +981,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                 }
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
                 {
-                    for(IGMPv3::IpVector::iterator it = gr.SourceList.begin(); it != gr.SourceList.end(); ++it)
+                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
                     {
                         SourceRecord *record = getSourceRecord(ie, groupData->groupAddr, *it);
                         if(!record)
@@ -1017,7 +1010,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     //change to mode exclude
                     groupData->filter = IGMPV3_FM_EXCLUDE;
                     //A*B, B-A ; B-A=0
-                    for(IGMPv3::IpVector::iterator it = gr.SourceList.begin(); it != gr.SourceList.end(); ++ it)
+                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++ it)
                     {
                         SourceRecord *record = getSourceRecord(ie, groupData->groupAddr, *it);
                         if(!record)
@@ -1032,7 +1025,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         //IGMPv3::IpVector::iterator itIp;
-                        if(std::find(gr.SourceList.begin(), gr.SourceList.end(), it->first) == gr.SourceList.end())
+                        if(std::find(gr.sourceList.begin(), gr.sourceList.end(), it->first) == gr.sourceList.end())
                         {
                             deleteSourceRecord(ie, groupData->groupAddr, it->first);
                         }
@@ -1057,14 +1050,14 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     {
                         if(it->second->sourceTimer->isScheduled())
                         {
-                            if(std::find(gr.SourceList.begin(), gr.SourceList.end(), it->first)== gr.SourceList.end())
+                            if(std::find(gr.sourceList.begin(), gr.sourceList.end(), it->first)== gr.sourceList.end())
                             {
                                 deleteSourceRecord(ie, groupData->groupAddr, it->first);
                             }
                         }
                         else
                         {
-                            if(std::find(gr.SourceList.begin(), gr.SourceList.end(), it->first)==gr.SourceList.end())
+                            if(std::find(gr.sourceList.begin(), gr.sourceList.end(), it->first)==gr.sourceList.end())
                             {
                                 deleteSourceRecord(ie, groupData->groupAddr, it->first);
                             }
@@ -1072,7 +1065,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
 
                     }
                     //A-X-Y = GMI
-                    for(IGMPv3::IpVector::iterator it = gr.SourceList.begin(); it != gr.SourceList.end(); ++it)
+                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
                     {
                         SourceRecord *record = getSourceRecord(ie, groupData->groupAddr, *it);
                         if(!record)
@@ -1092,7 +1085,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                 if(groupData->filter == IGMPV3_FM_INCLUDE)
                 {
                     //A+B; B=gmi
-                    for(IGMPv3::IpVector::iterator it = gr.SourceList.begin(); it != gr.SourceList.end(); ++it)
+                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
                     {
                         SourceRecord *record = getSourceRecord(ie, groupData->groupAddr, *it);
                         if(!record)
@@ -1108,7 +1101,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
                 {
                     //Exclude X+A,Y-A ; A=gmi
-                    for(IGMPv3::IpVector::iterator it = gr.SourceList.begin(); it != gr.SourceList.end(); ++it)
+                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
                     {
                         SourceRecord *record = getSourceRecord(ie, groupData->groupAddr, *it);
                         if(!record)
@@ -1128,12 +1121,12 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                 {
                     //send q(G, A*B)
                     //include A
-                    IGMPv3::IpVector mapSources;
+                    IPv4AddressVector mapSources;
                     for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         mapSources.push_back(it->first);
                     }
-                    sendQuery(ie, groupData->groupAddr, IpIntersection(mapSources,gr.SourceList), queryResponseInterval);
+                    sendQuery(ie, groupData->groupAddr, IpIntersection(mapSources,gr.sourceList), queryResponseInterval);
                 }
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
                 {
@@ -1153,7 +1146,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                         }
                     }
                     //Send q(G,A-Y)
-                    IGMPv3::IpVector mapSourcesY;
+                    IPv4AddressVector mapSourcesY;
                     for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         if(!it->second->sourceTimer->isScheduled())
@@ -1161,7 +1154,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                             mapSourcesY.push_back(it->first);
                         }
                     }
-                    sendQuery(ie, groupData->groupAddr, IpComplement(gr.SourceList, mapSourcesY), queryResponseInterval);
+                    sendQuery(ie, groupData->groupAddr, IpComplement(gr.sourceList, mapSourcesY), queryResponseInterval);
                 }
             }
             else if(gr.recordType == IGMPV3_RT_TO_IN)
@@ -1169,7 +1162,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                 if(groupData->filter == IGMPV3_FM_INCLUDE)
                 {
                     //A+B; B=gmi
-                    for(IGMPv3::IpVector::iterator it = gr.SourceList.begin(); it != gr.SourceList.end(); ++it)
+                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
                     {
                         SourceRecord *record = getSourceRecord(ie, groupData->groupAddr, *it);
                         if(!record)
@@ -1182,17 +1175,17 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                             startTimer(record->sourceTimer, groupMembershipInterval);
                     }
                     //send q(G,A-B)
-                    IGMPv3::IpVector sourcesA;
+                    IPv4AddressVector sourcesA;
                     for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         sourcesA.push_back(it->first);
                     }
-                    sendQuery(ie, groupData->groupAddr, IpComplement(sourcesA, gr.SourceList), queryResponseInterval);
+                    sendQuery(ie, groupData->groupAddr, IpComplement(sourcesA, gr.sourceList), queryResponseInterval);
                 }
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
                 {
                     //exclude X+A Y-A A=gmi
-                    for(IGMPv3::IpVector::iterator it = gr.SourceList.begin(); it != gr.SourceList.end(); ++it)
+                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
                     {
                         SourceRecord *record = getSourceRecord(ie, groupData->groupAddr, *it);
                         if(!record)
@@ -1205,7 +1198,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                         startTimer(record->sourceTimer, groupMembershipInterval);
                     }
                     //send q(g,x-A)
-                    IGMPv3::IpVector sourcesX;
+                    IPv4AddressVector sourcesX;
                     for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         if(it->second->sourceTimer->isScheduled())
@@ -1213,9 +1206,9 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                             sourcesX.push_back(it->first);
                         }
                     }
-                    sendQuery(ie, groupData->groupAddr, IpComplement(sourcesX, gr.SourceList), queryResponseInterval);
+                    sendQuery(ie, groupData->groupAddr, IpComplement(sourcesX, gr.sourceList), queryResponseInterval);
                     //send q(g)
-                    IGMPv3::IpVector emptySources;
+                    IPv4AddressVector emptySources;
                     emptySources.clear();
                     sendQuery(ie,groupData->groupAddr, emptySources, queryResponseInterval);
                 }
@@ -1235,7 +1228,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     //change to mode exclude
                     groupData->filter = IGMPV3_FM_EXCLUDE;
                     //A*B, B-A ; B-A=0
-                    for(IGMPv3::IpVector::iterator it = gr.SourceList.begin(); it != gr.SourceList.end(); ++ it)
+                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++ it)
                     {
                         SourceRecord *record = getSourceRecord(ie, groupData->groupAddr, *it);
                         if(!record)
@@ -1250,18 +1243,18 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         //IGMPv3::IpVector::iterator itIp;
-                        if(std::find(gr.SourceList.begin(), gr.SourceList.end(), it->first) == gr.SourceList.end())
+                        if(std::find(gr.sourceList.begin(), gr.sourceList.end(), it->first) == gr.sourceList.end())
                         {
                             deleteSourceRecord(ie, groupData->groupAddr, it->first);
                         }
                     }
                     //send q(g,a*b)
-                    IGMPv3::IpVector mapSources;
+                    IPv4AddressVector mapSources;
                     for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         mapSources.push_back(it->first);
                     }
-                    sendQuery(ie, groupData->groupAddr, IpIntersection(mapSources,gr.SourceList), queryResponseInterval);
+                    sendQuery(ie, groupData->groupAddr, IpIntersection(mapSources,gr.sourceList), queryResponseInterval);
                 }
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
                 {
@@ -1280,21 +1273,21 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     {
                         if(it->second->sourceTimer->isScheduled())
                         {
-                            if(std::find(gr.SourceList.begin(), gr.SourceList.end(), it->first)== gr.SourceList.end())
+                            if(std::find(gr.sourceList.begin(), gr.sourceList.end(), it->first)== gr.sourceList.end())
                             {
                                 deleteSourceRecord(ie, groupData->groupAddr, it->first);
                             }
                         }
                         else
                         {
-                            if(std::find(gr.SourceList.begin(), gr.SourceList.end(), it->first)==gr.SourceList.end())
+                            if(std::find(gr.sourceList.begin(), gr.sourceList.end(), it->first)==gr.sourceList.end())
                             {
                                 deleteSourceRecord(ie, groupData->groupAddr, it->first);
                             }
                         }
                     }
                     //A-X-Y = GMI
-                    for(IGMPv3::IpVector::iterator it = gr.SourceList.begin(); it != gr.SourceList.end(); ++it)
+                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
                     {
                         SourceRecord *record = getSourceRecord(ie, groupData->groupAddr, *it);
                         if(!record)
@@ -1308,7 +1301,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     }
 
                     //send q(g,a-y)
-                    IGMPv3::IpVector mapSourcesY;
+                    IPv4AddressVector mapSourcesY;
                     for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         if(!it->second->sourceTimer->isScheduled())
@@ -1316,7 +1309,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                             mapSourcesY.push_back(it->first);
                         }
                     }
-                    sendQuery(ie, groupData->groupAddr, IpComplement(gr.SourceList, mapSourcesY), queryResponseInterval);
+                    sendQuery(ie, groupData->groupAddr, IpComplement(gr.sourceList, mapSourcesY), queryResponseInterval);
                 }
             }
         }

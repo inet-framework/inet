@@ -99,7 +99,22 @@ void TestIGMP::processIgmpMessage(IGMPMessage *msg)
 {
     IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)msg->getControlInfo();
     InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
-    IPv4Address group = msg->getGroupAddress();
+    IPv4Address group = IPv4Address::UNSPECIFIED_ADDRESS;
+    switch (msg->getType())
+    {
+        case IGMP_MEMBERSHIP_QUERY:
+            group = check_and_cast<IGMPQuery*>(msg)->getGroupAddress();
+            break;
+        case IGMPV1_MEMBERSHIP_REPORT:
+            group = check_and_cast<IGMPv1Report*>(msg)->getGroupAddress();
+            break;
+        case IGMPV2_MEMBERSHIP_REPORT:
+            group = check_and_cast<IGMPv2Report*>(msg)->getGroupAddress();
+            break;
+        case IGMPV2_LEAVE_GROUP:
+            group = check_and_cast<IGMPv2Leave*>(msg)->getGroupAddress();
+            break;
+    }
     int stateMask = 0;
     if (rt->isMulticastForwardingEnabled())
         stateMask |= ROUTER_IF_STATE;

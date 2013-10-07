@@ -578,7 +578,7 @@ void IGMPv2::sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr, double 
         else
             EV << "IGMPv2: sending Membership Query for group=" << groupAddr << " on iface=" << ie->getName() << "\n";
 
-        IGMPMessage *msg = new IGMPMessage("IGMPv2 query");
+        IGMPv2Query *msg = new IGMPv2Query("IGMPv2 query");
         msg->setType(IGMP_MEMBERSHIP_QUERY);
         msg->setGroupAddress(groupAddr);
         msg->setMaxRespTime((int)(maxRespTime * 10.0));
@@ -598,7 +598,7 @@ void IGMPv2::sendReport(InterfaceEntry *ie, HostGroupData* group)
     ASSERT(group->groupAddr.isMulticast() && !group->groupAddr.isLinkLocalMulticast());
 
     EV << "IGMPv2: sending Membership Report for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
-    IGMPMessage *msg = new IGMPMessage("IGMPv2 report");
+    IGMPv2Report *msg = new IGMPv2Report("IGMPv2 report");
     msg->setType(IGMPV2_MEMBERSHIP_REPORT);
     msg->setGroupAddress(group->groupAddr);
     msg->setByteLength(8);
@@ -611,7 +611,7 @@ void IGMPv2::sendLeave(InterfaceEntry *ie, HostGroupData* group)
     ASSERT(group->groupAddr.isMulticast() && !group->groupAddr.isLinkLocalMulticast());
 
     EV << "IGMPv2: sending Leave Group for group=" << group->groupAddr << " on iface=" << ie->getName() << "\n";
-    IGMPMessage *msg = new IGMPMessage("IGMPv2 leave");
+    IGMPv2Leave *msg = new IGMPv2Leave("IGMPv2 leave");
     msg->setType(IGMPV2_LEAVE_GROUP);
     msg->setGroupAddress(group->groupAddr);
     msg->setByteLength(8);
@@ -640,17 +640,17 @@ void IGMPv2::processIgmpMessage(IGMPMessage *msg)
     switch (msg->getType())
     {
         case IGMP_MEMBERSHIP_QUERY:
-            processQuery(ie, controlInfo->getSrcAddr(), msg);
+            processQuery(ie, controlInfo->getSrcAddr(), check_and_cast<IGMPQuery*>(msg));
             break;
         //case IGMPV1_MEMBERSHIP_REPORT:
         //    processV1Report(ie, msg);
         //    delete msg;
         //    break;
         case IGMPV2_MEMBERSHIP_REPORT:
-            processV2Report(ie, msg);
+            processV2Report(ie, check_and_cast<IGMPv2Report*>(msg));
             break;
         case IGMPV2_LEAVE_GROUP:
-            processLeave(ie, msg);
+            processLeave(ie, check_and_cast<IGMPv2Leave*>(msg));
             break;
         default:
             if (externalRouter)
@@ -714,7 +714,7 @@ void IGMPv2::processRexmtTimer(cMessage *msg)
     ctx->routerGroup->state = IGMP_RGS_CHECKING_MEMBERSHIP;
 }
 
-void IGMPv2::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMessage *msg)
+void IGMPv2::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPQuery *msg)
 {
     ASSERT(ie->isMulticast());
 
@@ -723,13 +723,16 @@ void IGMPv2::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMes
     numQueriesRecv++;
 
     IPv4Address &groupAddr = msg->getGroupAddress();
+    IGMPv2Query *v2Query = dynamic_cast<IGMPv2Query*>(msg);
+    int maxRespTime = v2Query ? v2Query->getMaxRespTime() : 100;
+
     if (groupAddr.isUnspecified())
     {
         // general query
         EV << "IGMPv2: received General Membership Query on iface=" << ie->getName() << "\n";
         numGeneralQueriesRecv++;
         for (GroupToHostDataMap::iterator it = interfaceData->groups.begin(); it != interfaceData->groups.end(); ++it)
-            processGroupQuery(ie, it->second, msg->getMaxRespTime());
+            processGroupQuery(ie, it->second, maxRespTime);
     }
     else
     {
@@ -738,7 +741,7 @@ void IGMPv2::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMes
         numGroupSpecificQueriesRecv++;
         GroupToHostDataMap::iterator it = interfaceData->groups.find(groupAddr);
         if (it != interfaceData->groups.end())
-            processGroupQuery(ie, it->second, msg->getMaxRespTime());
+            processGroupQuery(ie, it->second, maxRespTime);
     }
 
     if (rt->isMulticastForwardingEnabled())
@@ -761,7 +764,7 @@ void IGMPv2::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMes
             RouterGroupData *groupData = getRouterGroupData(ie, groupAddr);
             if (groupData->state == IGMP_RGS_MEMBERS_PRESENT)
             {
-                double maxResponseTime = (double)msg->getMaxRespTime() / 10.0;
+                double maxResponseTime = (double)maxRespTime / 10.0;
                 startTimer(groupData->timer, maxResponseTime * lastMemberQueryCount);
                 groupData->state = IGMP_RGS_CHECKING_MEMBERSHIP;
             }
@@ -793,7 +796,7 @@ void IGMPv2::processGroupQuery(InterfaceEntry *ie, HostGroupData* group, int max
     }
 }
 
-void IGMPv2::processV2Report(InterfaceEntry *ie, IGMPMessage *msg)
+void IGMPv2::processV2Report(InterfaceEntry *ie, IGMPv2Report *msg)
 {
     ASSERT(ie->isMulticast());
 
@@ -856,7 +859,7 @@ void IGMPv2::processV2Report(InterfaceEntry *ie, IGMPMessage *msg)
     delete msg;
 }
 
-void IGMPv2::processLeave(InterfaceEntry *ie, IGMPMessage *msg)
+void IGMPv2::processLeave(InterfaceEntry *ie, IGMPv2Leave *msg)
 {
     ASSERT(ie->isMulticast());
 

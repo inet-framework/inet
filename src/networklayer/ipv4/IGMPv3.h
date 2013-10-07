@@ -41,7 +41,7 @@ class NotificationBoard;
 class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
 {
     public:
-        typedef std::vector<IPv4Address> IpVector;
+        typedef std::vector<IPv4Address> IPv4AddressVector;
 
         struct SourceRecord
         {
@@ -98,7 +98,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
             IGMPv3 *owner;
             IPv4Address groupAddr;
             FilterMode filter;
-            IpVector sourceAddressList;
+            IPv4AddressVector sourceAddressList;
             HostGroupState state;
             cMessage *timer;
             cMessage *sourceTimer;
@@ -263,7 +263,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
         virtual void startHostSourceTimer(InterfaceEntry *ie, HostGroupData* group, double maxRespTime, std::vector<IPv4Address> sourceList);
 
         virtual void sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr,std::vector<IPv4Address> sources, double maxRespTime);
-        virtual void sendGroupReport(InterfaceEntry *ie, IPv4Address group, ReportType type, IpVector sources);
+        virtual void sendGroupReport(InterfaceEntry *ie, IPv4Address group, ReportType type, IPv4AddressVector sources);
         virtual void sendQueryToIP(IGMPv3Query *msg, InterfaceEntry *ie, const IPv4Address& dest);
         virtual void sendReportToIP(IGMPv3Report *msg, InterfaceEntry *ie, const IPv4Address& dest);
 
@@ -281,9 +281,10 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
         virtual void multicastGroupLeft(InterfaceEntry *ie, const IPv4Address& groupAddr);
 
         /* Vector functions */
-        virtual IpVector IpComplement(IpVector first, IpVector second);
-        virtual IpVector IpIntersection(IpVector first, IpVector second);
-        virtual IpVector IpUnion(IpVector first, IpVector second);
+        virtual IPv4AddressVector IpComplement(IPv4AddressVector first, IPv4AddressVector second);
+        virtual IPv4AddressVector IpIntersection(IPv4AddressVector first, IPv4AddressVector second);
+        virtual IPv4AddressVector IpUnion(IPv4AddressVector first, IPv4AddressVector second);
+
         /**
          * Function for counting max response time from max response code
          */
