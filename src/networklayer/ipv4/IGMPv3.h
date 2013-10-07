@@ -286,9 +286,12 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
         virtual IPv4AddressVector IpUnion(IPv4AddressVector first, IPv4AddressVector second);
 
         /**
-         * Function for counting max response time from max response code
+         * Function for computing the time value in seconds from an encoded value.
+         * Codes in the [1,127] interval are the number of 1/10 seconds,
+         * codes above 127 are contain a 3-bit exponent and a four bit mantissa
+         * and represents the (mantissa + 16) * 2^(3+exp) number of 1/10 seconds.
          */
-        virtual double countMaxResponseTime(double maxRespCode);
+        virtual double decodeTime(unsigned char code);
 };
 
 

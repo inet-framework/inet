@@ -764,7 +764,7 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
     IPv4Address &groupAddr = msg->getGroupAddress();
     IPv4AddressVector sources = msg->getSourceList();
 
-    double maxRespTime = countMaxResponseTime((double)msg->getMaxRespCode()) /10.0;
+    double maxRespTime = decodeTime(msg->getMaxRespCode());
     double delay = uniform(0.0, maxRespTime);
 
 
@@ -851,27 +851,19 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
     delete msg;
 }
 
-double IGMPv3::countMaxResponseTime(double maxRespCode)
+double IGMPv3::decodeTime(unsigned char code)
 {
-    double maxRespTime;
-    if(maxRespCode < 128)
-        maxRespTime = maxRespCode;
+    unsigned time;
+    if(code < 128)
+        time = code;
     else
     {
-        unsigned long mantis;
-        unsigned long exp;
-
-        bitset<8> bvalue((unsigned long)maxRespCode);
-        bitset<8> bmantis(string("00001111"));
-        bitset<8> bexp(string("01110000"));
-        bmantis = bmantis & bvalue;
-        mantis = bmantis.to_ulong();
-        bexp = bexp & bvalue;
-        bexp>>3;
-        exp = bexp.to_ulong();
-        maxRespTime =  (double)mantis * pow(10,(double)exp);
+        unsigned mantis = code & 0x15;
+        unsigned exp = (code >> 4) & 0x07;
+        time = (mantis | 0x10) << (exp + 3);
     }
-    return maxRespTime;
+
+    return (double)time / 10.0;
 }
 
 IPv4AddressVector IGMPv3::IpComplement(IPv4AddressVector first, IPv4AddressVector second)

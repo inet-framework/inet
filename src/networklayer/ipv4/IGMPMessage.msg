@@ -60,7 +60,7 @@ packet IGMPv1Report extends IGMPMessage
 packet IGMPv2Query extends IGMPQuery
 {
     type = IGMP_MEMBERSHIP_QUERY;
-    int maxRespTime;
+    unsigned char maxRespTime;
 }
 
 packet IGMPv2Report extends IGMPMessage
@@ -78,7 +78,10 @@ packet IGMPv2Leave extends IGMPMessage
 packet IGMPv3Query extends IGMPQuery
 {
     type  = IGMP_MEMBERSHIP_QUERY;
-    int maxRespCode;
+    unsigned char maxRespCode;
+    bool suppressRouterProc;
+    unsigned char robustnessVariable;
+    unsigned char queryIntervalCode;
     IPv4AddressVector sourceList;
 }
 
