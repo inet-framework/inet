@@ -121,7 +121,7 @@ int InetSimpleBattery::registerDevice(cObject *id, int numAccts)
 void InetSimpleBattery::registerWirelessDevice(int id, double mUsageRadioIdle, double mUsageRadioRecv, double mUsageRadioSend, double mUsageRadioSleep)
 {
     Enter_Method_Silent();
-    if (deviceEntryMap.find(id)!=deviceEntryMap.end())
+    if (deviceEntryMap.find(id) != deviceEntryMap.end())
     {
         EV << "This device is register \n";
         return;
@@ -158,7 +158,6 @@ void InetSimpleBattery::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-
         switch (msg->getKind())
         {
         case AUTO_UPDATE:
@@ -337,7 +336,6 @@ void InetSimpleBattery::deductAndCheck()
         }
     }
 
-
     lastUpdateTime = now;
 
     EV << "residual capacity = " << residualCapacity << "\n";
@@ -345,7 +343,7 @@ void InetSimpleBattery::deductAndCheck()
     cDisplayString* display_string = &getParentModule()->getDisplayString();
 
     // battery is depleted
-    if (residualCapacity <= 0.0 )
+    if (residualCapacity <= 0.0)
     {
 
         EV << "[BATTERY]: " << getParentModule()->getFullName() <<" 's battery exhausted, stop simulation" << "\n";
@@ -359,17 +357,16 @@ void InetSimpleBattery::deductAndCheck()
         if ((lastPublishCapacity - residualCapacity)/capacity >= publishDelta)
         {
             lastPublishCapacity = residualCapacity;
-            Energy* p_ene = new Energy(residualCapacity);
+            Energy *p_ene = new Energy(residualCapacity);
             mpNb->fireChangeNotification(NF_BATTERY_CHANGED, p_ene);
             delete p_ene;
 
             display_string->setTagArg("i", 1, "#000000"); // black coloring
             EV << "[BATTERY]: " << getParentModule()->getFullName() << " 's battery energy left: " << lastPublishCapacity  << "%" << "\n";
-            //char buf[3];
-
         }
     }
     residualVec.record(residualCapacity);
     if (mCurrEnergy)
         mCurrEnergy->record(capacity-residualCapacity);
 }
+
