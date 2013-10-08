@@ -280,11 +280,6 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
         virtual void multicastGroupJoined(InterfaceEntry *ie, const IPv4Address& groupAddr);
         virtual void multicastGroupLeft(InterfaceEntry *ie, const IPv4Address& groupAddr);
 
-        /* Vector functions */
-        virtual IPv4AddressVector IpComplement(IPv4AddressVector first, IPv4AddressVector second);
-        virtual IPv4AddressVector IpIntersection(IPv4AddressVector first, IPv4AddressVector second);
-        virtual IPv4AddressVector IpUnion(IPv4AddressVector first, IPv4AddressVector second);
-
         /**
          * Function for computing the time value in seconds from an encoded value.
          * Codes in the [1,127] interval are the number of 1/10 seconds,

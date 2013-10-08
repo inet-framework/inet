@@ -37,6 +37,32 @@ using namespace std;
 
 Define_Module(IGMPv3);
 
+static IPv4AddressVector set_complement(IPv4AddressVector first, IPv4AddressVector second)
+{
+    IPv4AddressVector complement;
+    IPv4AddressVector::iterator it;
+
+    std::sort(first.begin(), first.end());
+    std::sort(second.begin(), second.end());
+
+    it = set_difference(first.begin(), first.end(), second.begin(), second.end(), complement.begin());
+    complement.resize(it-complement.begin());
+    return complement;
+}
+
+static IPv4AddressVector set_intersection(IPv4AddressVector first, IPv4AddressVector second)
+{
+    IPv4AddressVector intersection;
+    IPv4AddressVector::iterator it;
+
+    std::sort(first.begin(), first.end());
+    std::sort(second.begin(), second.end());
+
+    it = set_intersection(first.begin(), first.end(), second.begin(), second.end(), intersection.begin());
+    intersection.resize(it-intersection.begin());
+    return intersection;
+}
+
 IGMPv3::HostGroupData::HostGroupData(IGMPv3 *owner, const IPv4Address &group)
     : owner(owner), groupAddr(group)
 {
@@ -684,11 +710,11 @@ void IGMPv3::processHostGroupQueryTimer(cMessage *msg)
     {
         if(ctx->hostGroup->filter == IGMPV3_FM_INCLUDE)
         {
-            sendGroupReport(ctx->ie, ctx->hostGroup->groupAddr, IGMPV3_RT_IS_IN, IpIntersection(ctx->hostGroup->sourceAddressList, ctx->sourceList));
+            sendGroupReport(ctx->ie, ctx->hostGroup->groupAddr, IGMPV3_RT_IS_IN, set_intersection(ctx->hostGroup->sourceAddressList, ctx->sourceList));
         }
         else if(ctx->hostGroup->filter == IGMPV3_FM_EXCLUDE)
         {
-            sendGroupReport(ctx->ie, ctx->hostGroup->groupAddr, IGMPV3_RT_IS_IN, IpComplement(ctx->sourceList, ctx->hostGroup->sourceAddressList));
+            sendGroupReport(ctx->ie, ctx->hostGroup->groupAddr, IGMPV3_RT_IS_IN, set_complement(ctx->sourceList, ctx->hostGroup->sourceAddressList));
         }
     }
 
@@ -718,14 +744,14 @@ void IGMPv3::processSocketChange(SocketMessage *msg)
         //OldState: INCLUDE(A) NewState: INCLUDE(B) StateChangeRecordSent: ALLOW(B-A) BLOCK(A-B)
         if(groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_INCLUDE && groupData->sourceAddressList != msg->getSourceAddressList())
         {
-            sendGroupReport(ie, msg->getGroupAddr(), IGMPV3_RT_ALLOW, IpComplement(msg->getSourceAddressList(), groupData->sourceAddressList));
-            sendGroupReport(ie, msg->getGroupAddr(), IGMPV3_RT_BLOCK, IpComplement(groupData->sourceAddressList, msg->getSourceAddressList()));
+            sendGroupReport(ie, msg->getGroupAddr(), IGMPV3_RT_ALLOW, set_complement(msg->getSourceAddressList(), groupData->sourceAddressList));
+            sendGroupReport(ie, msg->getGroupAddr(), IGMPV3_RT_BLOCK, set_complement(groupData->sourceAddressList, msg->getSourceAddressList()));
             groupData->sourceAddressList = msg->getSourceAddressList();
         }
         else if(groupData->filter == IGMPV3_FM_EXCLUDE && filter == IGMPV3_FM_EXCLUDE && groupData->sourceAddressList != msg->getSourceAddressList())
         {
-            sendGroupReport(ie, msg->getGroupAddr(), IGMPV3_RT_ALLOW, IpComplement(groupData->sourceAddressList, msg->getSourceAddressList()));
-            sendGroupReport(ie, msg->getGroupAddr(), IGMPV3_RT_BLOCK, IpComplement(msg->getSourceAddressList(), groupData->sourceAddressList));
+            sendGroupReport(ie, msg->getGroupAddr(), IGMPV3_RT_ALLOW, set_complement(groupData->sourceAddressList, msg->getSourceAddressList()));
+            sendGroupReport(ie, msg->getGroupAddr(), IGMPV3_RT_BLOCK, set_complement(msg->getSourceAddressList(), groupData->sourceAddressList));
             groupData->sourceAddressList = msg->getSourceAddressList();
         }
         else if(groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_EXCLUDE)
@@ -865,46 +891,6 @@ double IGMPv3::decodeTime(unsigned char code)
 
     return (double)time / 10.0;
 }
-
-IPv4AddressVector IGMPv3::IpComplement(IPv4AddressVector first, IPv4AddressVector second)
-{
-    IPv4AddressVector complement;
-    IPv4AddressVector::iterator it;
-
-    std::sort(first.begin(), first.end());
-    std::sort(second.begin(), second.end());
-
-    it = set_difference(first.begin(), first.end(), second.begin(), second.end(), complement.begin());
-    complement.resize(it-complement.begin());
-    return complement;
-}
-
-IPv4AddressVector IGMPv3::IpIntersection(IPv4AddressVector first, IPv4AddressVector second)
-{
-    IPv4AddressVector intersection;
-    IPv4AddressVector::iterator it;
-
-    std::sort(first.begin(), first.end());
-    std::sort(second.begin(), second.end());
-
-    it = set_intersection(first.begin(), first.end(), second.begin(), second.end(), intersection.begin());
-    intersection.resize(it-intersection.begin());
-    return intersection;
-}
-
-IPv4AddressVector IGMPv3::IpUnion(IPv4AddressVector first, IPv4AddressVector second)
-{
-    IPv4AddressVector intersection;
-    IPv4AddressVector::iterator it;
-
-    std::sort(first.begin(), first.end());
-    std::sort(second.begin(), second.end());
-
-    it = set_union(first.begin(), first.end(), second.begin(), second.end(), intersection.begin());
-    intersection.resize(it-intersection.begin());
-    return intersection;
-}
-
 
 void IGMPv3::sendGroupReport(InterfaceEntry *ie, IPv4Address group, ReportType type, IPv4AddressVector sources)
 {
@@ -1118,7 +1104,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     {
                         mapSources.push_back(it->first);
                     }
-                    sendQuery(ie, groupData->groupAddr, IpIntersection(mapSources,gr.sourceList), queryResponseInterval);
+                    sendQuery(ie, groupData->groupAddr, set_intersection(mapSources,gr.sourceList), queryResponseInterval);
                 }
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
                 {
@@ -1146,7 +1132,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                             mapSourcesY.push_back(it->first);
                         }
                     }
-                    sendQuery(ie, groupData->groupAddr, IpComplement(gr.sourceList, mapSourcesY), queryResponseInterval);
+                    sendQuery(ie, groupData->groupAddr, set_complement(gr.sourceList, mapSourcesY), queryResponseInterval);
                 }
             }
             else if(gr.recordType == IGMPV3_RT_TO_IN)
@@ -1172,7 +1158,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     {
                         sourcesA.push_back(it->first);
                     }
-                    sendQuery(ie, groupData->groupAddr, IpComplement(sourcesA, gr.sourceList), queryResponseInterval);
+                    sendQuery(ie, groupData->groupAddr, set_complement(sourcesA, gr.sourceList), queryResponseInterval);
                 }
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
                 {
@@ -1198,7 +1184,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                             sourcesX.push_back(it->first);
                         }
                     }
-                    sendQuery(ie, groupData->groupAddr, IpComplement(sourcesX, gr.sourceList), queryResponseInterval);
+                    sendQuery(ie, groupData->groupAddr, set_complement(sourcesX, gr.sourceList), queryResponseInterval);
                     //send q(g)
                     IPv4AddressVector emptySources;
                     emptySources.clear();
@@ -1246,7 +1232,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     {
                         mapSources.push_back(it->first);
                     }
-                    sendQuery(ie, groupData->groupAddr, IpIntersection(mapSources,gr.sourceList), queryResponseInterval);
+                    sendQuery(ie, groupData->groupAddr, set_intersection(mapSources,gr.sourceList), queryResponseInterval);
                 }
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
                 {
@@ -1301,7 +1287,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                             mapSourcesY.push_back(it->first);
                         }
                     }
-                    sendQuery(ie, groupData->groupAddr, IpComplement(gr.sourceList, mapSourcesY), queryResponseInterval);
+                    sendQuery(ie, groupData->groupAddr, set_complement(gr.sourceList, mapSourcesY), queryResponseInterval);
                 }
             }
         }
