@@ -110,10 +110,7 @@ int InetSimpleBattery::registerDevice(cObject *id, int numAccts)
     for (int i = 0; i < numAccts; i++)
     {
         device->accts[i] = 0.0;
-    }
-    for (int i = 0; i < numAccts; i++)
-    {
-        device->times[i] = 0.0;
+        device->times[i] = SIMTIME_ZERO;
     }
 
     EV<< "initialized device "  << deviceEntryVector.size() << " with " << numAccts << " accounts" << endl;
@@ -146,7 +143,7 @@ void InetSimpleBattery::registerWirelessDevice(int id, double mUsageRadioIdle, d
     for (int i = 0; i < N; i++)
     {
         device->accts[i] = 0.0;
-        device->times[i] = 0.0;
+        device->times[i] = SIMTIME_ZERO;
     }
 
     deviceEntryMap.insert(std::pair<int,DeviceEntry*>(id, device));
