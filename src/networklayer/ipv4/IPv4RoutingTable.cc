@@ -95,7 +95,7 @@ void IPv4RoutingTable::initialize(int stage)
     else if (stage==1)
     {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        bool isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+        isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
         if (isNodeUp) {
             // set routerId if param is not "" (==no routerId) or "auto" (in which case we'll
             // do it later in stage 3, after network configurators configured the interfaces)
@@ -106,8 +106,6 @@ void IPv4RoutingTable::initialize(int stage)
     }
     else if (stage==2)
     {
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        bool isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
         if (isNodeUp) {
             // L2 modules register themselves in stage 0, so we can only configure
             // the interfaces in stage 1.
@@ -123,8 +121,6 @@ void IPv4RoutingTable::initialize(int stage)
     {
         // routerID selection must be after stage==2 when network autoconfiguration
         // assigns interface addresses
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        bool isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
         if (isNodeUp)
             configureRouterId();
 
@@ -910,17 +906,24 @@ bool IPv4RoutingTable::handleOperationStage(LifecycleOperation *operation, int s
         else if (stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
             configureRouterId();
             updateNetmaskRoutes();
+            isNodeUp = true;
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_NETWORK_LAYER)
+        {
             while (!routes.empty())
                 removeRoute(routes[0]);
+            isNodeUp = false;
+        }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeCrashOperation::STAGE_CRASH)
+        {
             while (!routes.empty())
                 removeRoute(routes[0]);
+            isNodeUp = false;
+        }
     }
     return true;
 }

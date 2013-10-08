@@ -82,6 +82,7 @@ class INET_API IPv4RoutingTable: public cSimpleModule, public IIPv4RoutingTable,
     IPv4Address routerId;
     bool IPForward;
     bool multicastForward;
+    bool isNodeUp;
 
     // for convenience
     typedef IPv4MulticastRoute::OutInterface OutInterface;
