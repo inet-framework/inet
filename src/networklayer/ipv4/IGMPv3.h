@@ -28,7 +28,7 @@
 #include "INETDefs.h"
 #include "INotifiable.h"
 #include "IPv4Address.h"
-#include "IGMPMessage_m.h"
+#include "IGMPMessage.h"
 #include "SocketMessage_m.h"
 #include "InterfaceEntry.h"
 

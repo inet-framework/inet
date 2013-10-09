@@ -75,10 +75,16 @@ packet IGMPv2Leave extends IGMPMessage
     IPv4Address groupAddress;
 }
 
-packet IGMPv3Query extends IGMPQuery
+//
+// IGMPv3Query extends IGMPv2Query, because
+// IGMPv2 routers must accept IGMPv3Query packets.
+//
+// Note: in IGMPv3Query the maxResponseTime field is
+// renamed to maxResponseCode and it is interpreted
+// differently than in IGMPv2. 
+packet IGMPv3Query extends IGMPv2Query
 {
-    type  = IGMP_MEMBERSHIP_QUERY;
-    unsigned char maxRespCode;
+    @customize(true);
     bool suppressRouterProc;
     unsigned char robustnessVariable;
     unsigned char queryIntervalCode;
