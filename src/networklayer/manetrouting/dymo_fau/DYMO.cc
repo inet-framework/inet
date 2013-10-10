@@ -23,7 +23,7 @@
 #include "UDPControlInfo_m.h"
 #include "UDPSocket.h"
 #include "IPProtocolId_m.h"
-#include "IPv4ControlInfo.h"
+#include "INetworkProtocolControlInfo.h"
 #include "UDPPacket.h"
 #include "ModuleAccess.h"
 #include "IPv4.h"
@@ -247,8 +247,9 @@ void DYMO::handleMessage(cMessage* apMsg)
             }
             msg_aux = udpPacket->decapsulate();
 
-            IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(udpPacket->removeControlInfo());
-            if (isLocalAddress(Address(controlInfo->getSrcAddr())) || controlInfo->getSrcAddr().isUnspecified())
+            INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo*>(udpPacket->removeControlInfo());
+            Address srcAddr = controlInfo->getSourceAddress();
+            if (isLocalAddress(srcAddr) || srcAddr.isUnspecified())
             {
                 // local address delete packet
                 delete msg_aux;
@@ -256,7 +257,7 @@ void DYMO::handleMessage(cMessage* apMsg)
                 delete apMsg;
                 return;
             }
-            msg_aux->setControlInfo(controlInfo);
+            msg_aux->setControlInfo(check_and_cast<cObject *>(controlInfo));
         }
         else
         {
@@ -398,8 +399,8 @@ InterfaceEntry* DYMO::getNextHopInterface(DYMO_PacketBBMessage* pkt)
 
     if (!pkt) throw cRuntimeError("getNextHopInterface called with NULL packet");
 
-    IPv4ControlInfo* controlInfo = check_and_cast<IPv4ControlInfo*>(pkt->removeControlInfo());
-    if (!controlInfo) throw cRuntimeError("received packet did not have IPv4ControlInfo attached");
+    INetworkProtocolControlInfo* controlInfo = check_and_cast_nullable<INetworkProtocolControlInfo *>(pkt->removeControlInfo());
+    if (!controlInfo) throw cRuntimeError("received packet did not have INetworkProtocolControlInfo attached");
 
     int interfaceId = controlInfo->getInterfaceId();
     if (interfaceId == -1) throw cRuntimeError("received packet's UDPControlInfo did not have information on interfaceId");
@@ -418,7 +419,7 @@ InterfaceEntry* DYMO::getNextHopInterface(DYMO_PacketBBMessage* pkt)
 
     if (!srcIf) throw cRuntimeError("parent module interface table did not contain interface on which packet arrived");
 
-    if (controlInfo) delete controlInfo;
+    delete controlInfo;
     return srcIf;
 }
 
@@ -568,8 +569,8 @@ void DYMO::handleLowerRERR(DYMO_RERR *my_rerr)
     statsDYMORcvd++;
 
     // get RERR's IPv4.SourceAddress
-    IPv4ControlInfo* controlInfo = check_and_cast<IPv4ControlInfo*>(my_rerr->getControlInfo());
-    IPv4Address sourceAddr = controlInfo->getSrcAddr();
+    INetworkProtocolControlInfo* controlInfo = check_and_cast<INetworkProtocolControlInfo*>(my_rerr->getControlInfo());
+    IPv4Address sourceAddr = controlInfo->getSourceAddress().toIPv4();
 
     // get RERR's SourceInterface
     InterfaceEntry* sourceInterface = getNextHopInterface(my_rerr);

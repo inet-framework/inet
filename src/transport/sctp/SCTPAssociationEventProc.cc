@@ -21,7 +21,6 @@
 #include "SCTP.h"
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
-#include "IPv4ControlInfo_m.h"
 #include "SCTPAlgorithm.h"
 
 //

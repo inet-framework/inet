@@ -19,8 +19,8 @@
 #include "TCP.h"
 
 #include "IPSocket.h"
-#include "IPv4ControlInfo.h"
-#include "IPv6ControlInfo.h"
+#include "INetworkProtocolControlInfo.h"
+#include "IPProtocolId_m.h"
 #include "LifecycleOperation.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
@@ -153,24 +153,15 @@ void TCP::handleMessage(cMessage *msg)
             // get src/dest addresses
             Address srcAddr, destAddr;
 
-            if (dynamic_cast<IPv4ControlInfo *>(tcpseg->getControlInfo()) != NULL)
-            {
-                IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)tcpseg->removeControlInfo();
-                srcAddr = controlInfo->getSrcAddr();
-                destAddr = controlInfo->getDestAddr();
-                delete controlInfo;
-            }
-            else if (dynamic_cast<IPv6ControlInfo *>(tcpseg->getControlInfo()) != NULL)
-            {
-                IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)tcpseg->removeControlInfo();
-                srcAddr = controlInfo->getSrcAddr();
-                destAddr = controlInfo->getDestAddr();
-                delete controlInfo;
-            }
-            else
-            {
-                throw cRuntimeError("(%s)%s arrived without control info", tcpseg->getClassName(), tcpseg->getName());
-            }
+            cObject *ctrl = tcpseg->removeControlInfo();
+            if (!ctrl)
+                error("(%s)%s arrived without control info", tcpseg->getClassName(), tcpseg->getName());
+
+            INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(ctrl);
+            srcAddr = controlInfo->getSourceAddress();
+            destAddr = controlInfo->getDestinationAddress();
+            //interfaceId = controlInfo->getInterfaceId();
+            delete ctrl;
 
             // process segment
             TCPConnection *conn = findConnForSegment(tcpseg, srcAddr, destAddr);

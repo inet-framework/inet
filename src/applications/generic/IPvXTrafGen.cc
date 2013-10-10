@@ -23,8 +23,8 @@
 #include "NodeOperations.h"
 #include "AddressResolver.h"
 #include "IPSocket.h"
-#include "IPv4ControlInfo.h"
-#include "IPv6ControlInfo.h"
+#include "IAddressType.h"
+#include "INetworkProtocolControlInfo.h"
 
 
 Define_Module(IPvXTrafGen);
@@ -195,24 +195,13 @@ void IPvXTrafGen::sendPacket()
 
     Address destAddr = chooseDestAddr();
 
-    if (destAddr.getType() == Address::IPv4)
-    {
-        // send to IPv4
-        IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-        controlInfo->setDestAddr(destAddr.toIPv4());
-        controlInfo->setProtocol(protocol);
-        payload->setControlInfo(controlInfo);
-    }
-    else if (destAddr.getType() == Address::IPv6)
-    {
-        // send to IPv6
-        IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-        controlInfo->setDestAddr(destAddr.toIPv6());
-        controlInfo->setProtocol(protocol);
-        payload->setControlInfo(controlInfo);
-    }
-    else
-        throw cRuntimeError("Unknown address type");
+    IAddressType *addressType = destAddr.getAddressType();
+    INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
+    //controlInfo->setSourceAddress();
+    controlInfo->setDestinationAddress(destAddr);
+    controlInfo->setTransportProtocol(protocol);
+    payload->setControlInfo(check_and_cast<cObject *>(controlInfo));
+
     EV_INFO << "Sending packet: ";
     printPacket(payload);
     emit(sentPkSignal, payload);
@@ -225,19 +214,12 @@ void IPvXTrafGen::printPacket(cPacket *msg)
     Address src, dest;
     int protocol = -1;
 
-    if (dynamic_cast<IPv4ControlInfo *>(msg->getControlInfo()) != NULL)
+    INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
+    if (ctrl != NULL)
     {
-        IPv4ControlInfo *ctrl = (IPv4ControlInfo *)msg->getControlInfo();
-        src = ctrl->getSrcAddr();
-        dest = ctrl->getDestAddr();
-        protocol = ctrl->getProtocol();
-    }
-    else if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo()) != NULL)
-    {
-        IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->getControlInfo();
-        src = ctrl->getSrcAddr();
-        dest = ctrl->getDestAddr();
-        protocol = ctrl->getProtocol();
+        src = ctrl->getSourceAddress();
+        dest = ctrl->getDestinationAddress();
+        protocol = ctrl->getTransportProtocol();
     }
 
     EV_INFO << msg << endl;

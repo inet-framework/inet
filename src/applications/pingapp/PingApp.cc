@@ -22,11 +22,10 @@
 
 #include "AddressResolver.h"
 #include "PingPayload_m.h"
-#include "IPv4ControlInfo.h"
-#include "IPv6ControlInfo.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "IAddressType.h"
+#include "INetworkProtocolControlInfo.h"
 
 using std::cout;
 

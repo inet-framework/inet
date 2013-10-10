@@ -5,8 +5,6 @@
 #include "aodv_msg_struct.h"
 #include "InterfaceTable.h"
 #include "UDPPacket.h"
-#include "IPv4ControlInfo.h"
-#include "IPv6ControlInfo.h"
 #include "ICMPMessage_m.h"
 #include "IPv4Datagram.h"
 #include "IPv4RoutingTable.h"

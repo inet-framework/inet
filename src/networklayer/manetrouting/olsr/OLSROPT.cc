@@ -34,9 +34,7 @@
 #include <limits.h>
 
 #include "UDPPacket.h"
-#include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
-#include "IPv6ControlInfo.h"
 
 #include "OLSRpkt_m.h"
 #include "OLSROPT.h"

@@ -21,8 +21,7 @@
 
 #include "AddressResolver.h"
 #include "IPSocket.h"
-#include "IPv4ControlInfo.h"
-#include "IPv6ControlInfo.h"
+#include "INetworkProtocolControlInfo.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 
@@ -83,25 +82,19 @@ void IPvXTrafSink::printPacket(cPacket *msg)
     Address src, dest;
     int protocol = -1;
 
-    if (dynamic_cast<IPv4ControlInfo *>(msg->getControlInfo()) != NULL)
+    INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
+
+    if (ctrl != NULL)
     {
-        IPv4ControlInfo *ctrl = (IPv4ControlInfo *)msg->getControlInfo();
-        src = ctrl->getSrcAddr();
-        dest = ctrl->getDestAddr();
-        protocol = ctrl->getProtocol();
-    }
-    else if (dynamic_cast<IPv6ControlInfo *>(msg->getControlInfo()) != NULL)
-    {
-        IPv6ControlInfo *ctrl = (IPv6ControlInfo *)msg->getControlInfo();
-        src = ctrl->getSrcAddr();
-        dest = ctrl->getDestAddr();
-        protocol = ctrl->getProtocol();
+        src = ctrl->getSourceAddress();
+        dest = ctrl->getDestinationAddress();
+        protocol = ctrl->getTransportProtocol();
     }
 
     EV_INFO << msg << endl;
     EV_INFO << "Payload length: " << msg->getByteLength() << " bytes" << endl;
 
-    if (protocol != -1)
+    if (ctrl != NULL)
         EV_INFO << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << endl;
 }
 

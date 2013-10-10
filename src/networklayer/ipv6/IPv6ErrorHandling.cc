@@ -24,7 +24,6 @@
 #include "INETDefs.h"
 
 #include "IPv6ErrorHandling.h"
-#include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"
 
 Define_Module(IPv6ErrorHandling);

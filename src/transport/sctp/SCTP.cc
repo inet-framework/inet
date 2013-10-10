@@ -21,9 +21,8 @@
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
 #include "IAddressType.h"
+#include "INetworkProtocolControlInfo.h"
 #include "IPSocket.h"
-#include "IPv4ControlInfo.h"
-#include "IPv6ControlInfo.h"
 #include "ModuleAccess.h"
 
 #ifdef WITH_IPv4
@@ -189,7 +188,7 @@ void SCTP::handleMessage(cMessage *msg)
             delete msg;
             return;
         }
-        if (msg->arrivedOn("from_ip"))
+
         {
             if (par("udpEncapsEnabled"))
             {
@@ -396,7 +395,6 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, Address srcAddr, A
     msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
     send(msg, "to_ip");
 }
-
 
 void SCTP::updateDisplayString()
 {

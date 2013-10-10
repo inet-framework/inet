@@ -61,7 +61,8 @@
 #include "Ieee80211Frame_m.h"
 #include "dymoum/dlist.h"
 #include "dymo_msg_struct.h"
-#include "IPv4Datagram.h"
+#include "INetworkDatagram.h"
+
 #include <map>
 
 /* Forward declaration needed to be able to reference the class */
@@ -267,7 +268,7 @@ class DYMOUM : public ManetRoutingBase
     void recvDYMOUMPacket(cMessage * p);
     void processPacket(IPv4Datagram *, unsigned int);
     void processMacPacket(cPacket * p, const Address &, const Address &, int);
-    void getMacAddress(IPv4Datagram *);
+    void getMacAddress(INetworkDatagram *);
 
     cPacket * get_packet_queue(struct in_addr dest_addr);
 

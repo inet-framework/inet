@@ -30,9 +30,10 @@
 #include "ICMPv6Message_m.h"
 #endif
 
+#include "IAddressType.h"
 #include "IPSocket.h"
-#include "IPv4ControlInfo.h"
-#include "IPv6ControlInfo.h"
+#include "INetworkProtocolControlInfo.h"
+#include "IPProtocolId_m.h"
 
 #include "headers/tcp.h"
 #include "lwip/tcp.h"
@@ -144,27 +145,15 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment* tcpsegP)
     Address srcAddr, destAddr;
     int interfaceId = -1;
 
-    // get src/dest addresses
-    if (dynamic_cast<IPv4ControlInfo *>(tcpsegP->getControlInfo()) != NULL)
-    {
-        IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)tcpsegP->removeControlInfo();
-        srcAddr = controlInfo->getSrcAddr();
-        destAddr = controlInfo->getDestAddr();
-        interfaceId = controlInfo->getInterfaceId();
-        delete controlInfo;
-    }
-    else if (dynamic_cast<IPv6ControlInfo *>(tcpsegP->getControlInfo()) != NULL)
-    {
-        IPv6ControlInfo *controlInfo = (IPv6ControlInfo *)tcpsegP->removeControlInfo();
-        srcAddr = controlInfo->getSrcAddr();
-        destAddr = controlInfo->getDestAddr();
-        interfaceId = controlInfo->getInterfaceId();
-        delete controlInfo;
-    }
-    else
-    {
-        throw cRuntimeError("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
-    }
+    cObject *ctrl = tcpsegP->removeControlInfo();
+    if (!ctrl)
+        error("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
+
+    INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(ctrl);
+    srcAddr = controlInfo->getSourceAddress();
+    destAddr = controlInfo->getDestinationAddress();
+    interfaceId = controlInfo->getInterfaceId();
+    delete ctrl;
 
     // process segment
     size_t ipHdrLen = sizeof(ip_hdr);
@@ -605,26 +594,15 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, Address const& srcP,
 
     ASSERT(tcpseg);
 
-    if (destP.getType() == Address::IPv4)
-    {
-        // send over IPv4
-        IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-        controlInfo->setProtocol(IP_PROT_TCP);
-        controlInfo->setSrcAddr(srcP.toIPv4());
-        controlInfo->setDestAddr(destP.toIPv4());
-        tcpseg->setControlInfo(controlInfo);
-    }
-    else if (destP.getType() == Address::IPv6)
-    {
-        // send over IPv6
-        IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-        controlInfo->setProtocol(IP_PROT_TCP);
-        controlInfo->setSrcAddr(srcP.toIPv6());
-        controlInfo->setDestAddr(destP.toIPv6());
-        tcpseg->setControlInfo(controlInfo);
-    }
-    else
-        throw cRuntimeError("Unknown address type");
+    EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP
+          << " from " << srcP << " to " << destP << "\n";
+
+    IAddressType *addressType = destP.getAddressType();
+    INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
+    controlInfo->setTransportProtocol(IP_PROT_TCP);
+    controlInfo->setSourceAddress(srcP);
+    controlInfo->setDestinationAddress(destP);
+    tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
 
     if (conn)
     {

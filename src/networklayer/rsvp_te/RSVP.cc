@@ -1504,7 +1504,7 @@ void RSVP::processPathErrMsg(RSVPPathError* msg)
     {
         EV_INFO << "forwarding error message to PHOP (" << psb->Previous_Hop_Address << ")" << endl;
 
-        msg->removeControlInfo();
+        delete msg->removeControlInfo();
         sendToIP(msg, psb->Previous_Hop_Address);
     }
     else

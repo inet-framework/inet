@@ -26,14 +26,12 @@
 #include "SCTPCommand_m.h"
 #include "SCTPQueue.h"
 #include "SCTPAlgorithm.h"
+#include "IAddressType.h"
 #include "IPv4RoutingTable.h"
 #include "IPv6RoutingTable.h"
 #include "InterfaceTable.h"
-#include "IPv6Address.h"
+#include "IPProtocolId_m.h"
 #include "common.h"
-#include "IPv4ControlInfo.h"
-#include "IPv6ControlInfo.h"
-
 
 #ifdef WITH_IPv4
 #include "IPv4InterfaceData.h"
@@ -320,24 +318,13 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
         sctpMain->udpSocket.sendTo(sctpmsg, remoteAddr, SCTP_UDP_PORT);
     }
     else {
-        if (dest.getType() == Address::IPv6) {
-            IPv6ControlInfo* controlInfo = new IPv6ControlInfo();
-            controlInfo->setProtocol(IP_PROT_SCTP);
-            controlInfo->setSrcAddr(IPv6Address());
-            controlInfo->setDestAddr(dest.toIPv6());
-            sctpmsg->setControlInfo(controlInfo);
-            sctpMain->send(sctpmsg, "to_ip");
-        }
-        else if (dest.getType() == Address::IPv4) {
-            IPv4ControlInfo* controlInfo = new IPv4ControlInfo();
-            controlInfo->setProtocol(IP_PROT_SCTP);
-            controlInfo->setSrcAddr(IPv4Address::UNSPECIFIED_ADDRESS);
-            controlInfo->setDestAddr(dest.toIPv4());
-            sctpmsg->setControlInfo(controlInfo);
-            sctpMain->send(sctpmsg, "to_ip");
-        }
-        else
-            throw cRuntimeError("Unknown address type: %d", (int)(dest.getType()));
+        IAddressType *addressType = dest.getAddressType();
+        INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
+        controlInfo->setTransportProtocol(IP_PROT_SCTP);
+        //controlInfo->setSourceAddress();
+        controlInfo->setDestinationAddress(dest);
+        sctpmsg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+        sctpMain->send(sctpmsg, "to_ip");
 
         if (chunkType == HEARTBEAT) {
             SCTPPathVariables* path = getPath(dest);

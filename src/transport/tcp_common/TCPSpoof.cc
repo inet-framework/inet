@@ -14,9 +14,9 @@
 
 #include "TCPSpoof.h"
 
-#include "IPv4ControlInfo.h"
-#include "IPv6ControlInfo.h"
-
+#include "IAddressType.h"
+#include "INetworkProtocolControlInfo.h"
+#include "IPProtocolId_m.h"
 
 Define_Module(TCPSpoof);
 
@@ -65,32 +65,15 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
     EV_INFO << "Sending: ";
     //printSegmentBrief(tcpseg);
 
-    if (dest.getType() == Address::IPv4)
-    {
-        // send over IPv4
-        IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-        controlInfo->setProtocol(IP_PROT_TCP);
-        controlInfo->setSrcAddr(src.toIPv4());
-        controlInfo->setDestAddr(dest.toIPv4());
-        tcpseg->setControlInfo(controlInfo);
+    IAddressType *addressType = dest.getAddressType();
+    INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
+    controlInfo->setTransportProtocol(IP_PROT_TCP);
+    controlInfo->setSourceAddress(src);
+    controlInfo->setDestinationAddress(dest);
+    tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
 
-        emit(sentPkSignal, tcpseg);
-        send(tcpseg, "ipOut");
-    }
-    else if (dest.getType() == Address::IPv6)
-    {
-        // send over IPv6
-        IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-        controlInfo->setProtocol(IP_PROT_TCP);
-        controlInfo->setSrcAddr(src.toIPv6());
-        controlInfo->setDestAddr(dest.toIPv6());
-        tcpseg->setControlInfo(controlInfo);
-
-        emit(sentPkSignal, tcpseg);
-        send(tcpseg, "ipOut");
-    }
-    else
-        throw cRuntimeError("Unknown address type");
+    emit(sentPkSignal, tcpseg);
+    send(tcpseg, "ipOut");
 }
 
 unsigned long TCPSpoof::chooseInitialSeqNum()

@@ -136,8 +136,7 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
     reply->setType(ICMPv6_ECHO_REPLY);
     reply->encapsulate(request->decapsulate());
 
-    IPv6ControlInfo *ctrl
- = check_and_cast<IPv6ControlInfo *>(request->getControlInfo());
+    IPv6ControlInfo *ctrl = check_and_cast<IPv6ControlInfo *>(request->getControlInfo());
     IPv6ControlInfo *replyCtrl = new IPv6ControlInfo();
     replyCtrl->setProtocol(IP_PROT_IPv6_ICMP);
     replyCtrl->setDestAddr(ctrl->getSrcAddr());
@@ -269,7 +268,7 @@ void ICMPv6::sendToIP(ICMPv6Message *msg, const IPv6Address& dest)
 
 void ICMPv6::sendToIP(ICMPv6Message *msg)
 {
-    // assumes IPv4ControlInfo is already attached
+    // assumes IPv6ControlInfo is already attached
     send(msg, "ipv6Out");
 }
 

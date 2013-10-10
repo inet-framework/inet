@@ -25,8 +25,9 @@
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
-#include "IPv4ControlInfo.h"
-#include "IPv6ControlInfo.h"
+#include "IAddressType.h"
+#include "INetworkProtocolControlInfo.h"
+#include "IPProtocolId_m.h"
 #include "TCPSendQueue.h"
 #include "TCPSACKRexmitQueue.h"
 #include "TCPReceiveQueue.h"
@@ -231,30 +232,13 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
 
     // TBD reuse next function for sending
 
-    if (remoteAddr.getType() == Address::IPv4)
-    {
-        // send over IPv4
-        IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-        controlInfo->setProtocol(IP_PROT_TCP);
-        controlInfo->setSrcAddr(localAddr.toIPv4());
-        controlInfo->setDestAddr(remoteAddr.toIPv4());
-        tcpseg->setControlInfo(controlInfo);
-
-        tcpMain->send(tcpseg, "ipOut");
-    }
-    else if (remoteAddr.getType() == Address::IPv6)
-    {
-        // send over IPv6
-        IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-        controlInfo->setProtocol(IP_PROT_TCP);
-        controlInfo->setSrcAddr(localAddr.toIPv6());
-        controlInfo->setDestAddr(remoteAddr.toIPv6());
-        tcpseg->setControlInfo(controlInfo);
-
-        tcpMain->send(tcpseg, "ipOut");
-    }
-    else
-        throw cRuntimeError("Unknown address type");
+    IAddressType *addressType = remoteAddr.getAddressType();
+    INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
+    controlInfo->setTransportProtocol(IP_PROT_TCP);
+    controlInfo->setSourceAddress(localAddr);
+    controlInfo->setDestinationAddress(remoteAddr);
+    tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    tcpMain->send(tcpseg, "ipOut");
 }
 
 void TCPConnection::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
@@ -262,30 +246,13 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
     EV_INFO << "Sending: ";
     printSegmentBrief(tcpseg);
 
-    if (dest.getType() == Address::IPv4)
-    {
-        // send over IPv4
-        IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-        controlInfo->setProtocol(IP_PROT_TCP);
-        controlInfo->setSrcAddr(src.toIPv4());
-        controlInfo->setDestAddr(dest.toIPv4());
-        tcpseg->setControlInfo(controlInfo);
-
-        check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg, "ipOut");
-    }
-    else if (dest.getType() == Address::IPv6)
-    {
-        // send over IPv6
-        IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-        controlInfo->setProtocol(IP_PROT_TCP);
-        controlInfo->setSrcAddr(src.toIPv6());
-        controlInfo->setDestAddr(dest.toIPv6());
-        tcpseg->setControlInfo(controlInfo);
-
-        check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg, "ipOut");
-    }
-    else
-        throw cRuntimeError("Unknown address type");
+    IAddressType *addressType = dest.getAddressType();
+    INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
+    controlInfo->setTransportProtocol(IP_PROT_TCP);
+    controlInfo->setSourceAddress(src);
+    controlInfo->setDestinationAddress(dest);
+    tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg, "ipOut");
 }
 
 TCPSegment *TCPConnection::createTCPSegment(const char *name)

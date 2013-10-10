@@ -17,7 +17,7 @@
 #include "INETDefs.h"
 
 #include "TED.h"
-#include "IPv4ControlInfo.h"
+
 #include "IPv4InterfaceData.h"
 #include "NotifierConsts.h"
 #include "IIPv4RoutingTable.h"

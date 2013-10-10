@@ -34,10 +34,9 @@
 #include <limits.h>
 
 #include "UDPPacket.h"
+#include "INetworkProtocolControlInfo.h"
 #include "IPv4Datagram.h"
-#include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
-#include "IPv6ControlInfo.h"
 
 #include "OLSRpkt_m.h"
 #include "OLSR.h"
@@ -635,8 +634,8 @@ OLSR::check_packet(cPacket* msg, nsaddr_t &src_addr, int &index)
         delete op;
         return NULL;
     }
-    IPv4ControlInfo* controlInfo = check_and_cast<IPv4ControlInfo*>(msg->removeControlInfo());
-    src_addr = Address(controlInfo->getSrcAddr());
+    INetworkProtocolControlInfo* controlInfo = check_and_cast<INetworkProtocolControlInfo*>(msg->removeControlInfo());
+    src_addr = controlInfo->getSourceAddress();
     index = -1;
     InterfaceEntry * ie;
 

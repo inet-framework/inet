@@ -29,7 +29,6 @@
 
 #include "UDPPacket.h"
 #include "IPv4ControlInfo.h"
-#include "IPv6ControlInfo.h"
 #include "ICMPMessage_m.h"
 #include "NotifierConsts.h"
 #include "Ieee802Ctrl.h"
@@ -434,9 +433,9 @@ void DYMOUM::handleMessage(cMessage *msg)
             dymoMsg = check_and_cast  <DYMO_element *>(msg_aux);
             if (!isInMacLayer())
             {
-                IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(udpPacket->removeControlInfo());
-                src_addr.s_addr = Address(controlInfo->getSrcAddr());
-                dymoMsg->setControlInfo(controlInfo);
+                INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo*>(udpPacket->removeControlInfo());
+                src_addr.s_addr = controlInfo->getSourceAddress();
+                dymoMsg->setControlInfo(check_and_cast<cObject *>(controlInfo));
             }
             else
             {
@@ -614,12 +613,12 @@ const char *DYMOUM::if_indextoname(int ifindex, char *ifname)
 }
 
 
-void DYMOUM::getMacAddress(IPv4Datagram *dgram)
+void DYMOUM::getMacAddress(INetworkDatagram *dgram)
 {
     if (dgram)
     {
         MACAddress macAddressConv;
-        cObject * ctrl = dgram->removeControlInfo();
+        cObject * ctrl = check_and_cast<cPacket *>(dgram)->removeControlInfo();
 
         if (ctrl!=NULL)
         {
@@ -649,8 +648,8 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
     if (!isInMacLayer())
     {
         IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
-        Address srcAddr = ctrl->getSrcAddr();
-        Address destAddr = ctrl->getDestAddr();
+        Address srcAddr = ctrl->getSourceAddress();
+        Address destAddr = ctrl->getDestinationAddress();
         src.s_addr = Address(srcAddr);
         dst.s_addr = Address(destAddr);
         interfaceId = ctrl->getInterfaceId();
@@ -674,9 +673,7 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
             dst.s_addr = Address(ctrl->getDest());
             if (ctrl)
                 delete ctrl;
-
         }
-
     }
 
     InterfaceEntry *   ie;

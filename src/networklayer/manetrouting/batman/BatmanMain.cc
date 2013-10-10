@@ -2,7 +2,7 @@
   */
 #include "BatmanMain.h"
 
-#include "IPv4ControlInfo.h"
+#include "INetworkProtocolControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "AddressResolver.h"
 #include "UDPPacket_m.h"
@@ -278,8 +278,8 @@ void Batman::handleMessage(cMessage *msg)
 
     if (!this->isInMacLayer())
     {
-        IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
-        Address srcAddr = ctrl->getSrcAddr();
+        INetworkProtocolControlInfo *ctrl = check_and_cast<INetworkProtocolControlInfo *>(msg->removeControlInfo());
+        Address srcAddr = ctrl->getSourceAddress();
         neigh = srcAddr;
         for (unsigned int i=0; i<if_list.size(); i++)
         {
