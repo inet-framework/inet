@@ -23,6 +23,7 @@
  */
 
 #include "IGMPv3.h"
+#include "IPSocket.h"
 #include "IPv4RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
 #include "IPv4ControlInfo.h"
@@ -331,6 +332,8 @@ void IGMPv3::initialize(int stage)
         WATCH(numReportsSent);
         WATCH(numReportsRecv);
 
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(IP_PROT_IGMP);
     }
     else if (stage == 1)
     {
