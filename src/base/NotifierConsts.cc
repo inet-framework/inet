@@ -59,6 +59,7 @@ simsignal_t NF_MROUTE_CHANGED = cComponent::registerSignal("NF_MROUTE_CHANGED");
 
 simsignal_t NF_IPv4_MCAST_JOIN = cComponent::registerSignal("NF_IPv4_MCAST_JOIN");
 simsignal_t NF_IPv4_MCAST_LEAVE = cComponent::registerSignal("NF_IPv4_MCAST_LEAVE");
+simsignal_t NF_IPv4_MCAST_CHANGE = cComponent::registerSignal("NF_IPv4_MCAST_CHANGE");
 simsignal_t NF_IPv4_MCAST_REGISTERED = cComponent::registerSignal("NF_IPv4_MCAST_REGISTERED");
 simsignal_t NF_IPv4_MCAST_UNREGISTERED = cComponent::registerSignal("NF_IPv4_MCAST_UNREGISTERED");
 

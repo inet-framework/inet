@@ -75,6 +75,7 @@ extern simsignal_t    // admin
     // layer 3 - IPv4
     NF_IPv4_MCAST_JOIN,
     NF_IPv4_MCAST_LEAVE,
+    NF_IPv4_MCAST_CHANGE,
     NF_IPv4_MCAST_REGISTERED,
     NF_IPv4_MCAST_UNREGISTERED,
 

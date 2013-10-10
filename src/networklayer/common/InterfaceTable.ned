@@ -47,6 +47,7 @@ simple InterfaceTable
         @signal[NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED](type=InterfaceEntryChangeDetails);
         @signal[NF_IPv4_MCAST_JOIN](type=IPv4MulticastGroupInfo);
         @signal[NF_IPv4_MCAST_LEAVE](type=IPv4MulticastGroupInfo);
+        @signal[NF_IPv4_MCAST_CHANGE](type=IPv4MulticastGroupSourceInfo);
         @signal[NF_IPv6_MCAST_JOIN](type=IPv6MulticastGroupInfo);
         @signal[NF_IPv6_MCAST_LEAVE](type=IPv6MulticastGroupInfo);
 }

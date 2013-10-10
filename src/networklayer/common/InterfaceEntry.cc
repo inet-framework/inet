@@ -315,3 +315,41 @@ void InterfaceEntry::joinMulticastGroup(const Address & address) const {
             throw cRuntimeError("Unknown address type");
     }
 }
+
+static void toIPv4AddressVector(const std::vector<Address> &addresses, std::vector<IPv4Address> &result)
+{
+    result.reserve(addresses.size());
+    for (unsigned int i = 0; i < addresses.size(); ++i)
+        result.push_back(addresses[i].toIPv4());
+}
+
+void InterfaceEntry::changeMulticastGroupMembership(const Address &multicastAddress,
+        McastSourceFilterMode oldFilterMode, const std::vector<Address> &oldSourceList,
+        McastSourceFilterMode newFilterMode, const std::vector<Address> &newSourceList)
+{
+    switch (multicastAddress.getType()) {
+#ifdef WITH_IPv4
+        case Address::IPv4:
+        {
+            std::vector<IPv4Address> oldIPv4SourceList, newIPv4SourceList;
+            toIPv4AddressVector(oldSourceList, oldIPv4SourceList);
+            toIPv4AddressVector(newSourceList, newIPv4SourceList);
+            ipv4Data()->changeMulticastGroupMembership(multicastAddress.toIPv4(),
+                                                        oldFilterMode, oldIPv4SourceList, newFilterMode, newIPv4SourceList);
+            break;
+        }
+#endif
+#ifdef WITH_IPv6
+        case Address::IPv6:
+            // TODO
+            break;
+#endif
+        case Address::MAC:
+        case Address::MODULEID:
+        case Address::MODULEPATH:
+            // TODO
+            break;
+        default:
+            throw cRuntimeError("Unknown address type");
+    }
+}

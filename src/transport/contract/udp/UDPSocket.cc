@@ -194,7 +194,7 @@ void UDPSocket::joinLocalMulticastGroups()
         InterfaceEntry *ie = ift->getInterface(i);
 #ifdef WITH_IPv4
         if (ie->ipv4Data())
-            numOfAddresses += ie->ipv4Data()->getJoinedMulticastGroups().size();
+            numOfAddresses += ie->ipv4Data()->getNumOfJoinedMulticastGroups();
 #endif
 #ifdef WITH_IPv6
         // TODO
@@ -216,10 +216,10 @@ void UDPSocket::joinLocalMulticastGroups()
 #ifdef WITH_IPv4
             if (ie->ipv4Data())
             {
-                const IPv4InterfaceData::IPv4AddressVector &addresses = ie->ipv4Data()->getJoinedMulticastGroups();
-                for (unsigned int j = 0; j < addresses.size(); ++j, ++k)
+                int numOfMulticastGroups = ie->ipv4Data()->getNumOfJoinedMulticastGroups();
+                for (int j = 0; j < numOfMulticastGroups; ++j, ++k)
                 {
-                    ctrl->setMulticastAddr(k, addresses[j]);
+                    ctrl->setMulticastAddr(k, ie->ipv4Data()->getJoinedMulticastGroup(j));
                     ctrl->setInterfaceId(k, interfaceId);
                 }
             }
@@ -256,7 +256,7 @@ void UDPSocket::leaveLocalMulticastGroups()
         InterfaceEntry *ie = ift->getInterface(i);
 #ifdef WITH_IPv4
         if (ie->ipv4Data())
-            numOfAddresses += ie->ipv4Data()->getJoinedMulticastGroups().size();
+            numOfAddresses += ie->ipv4Data()->getNumOfJoinedMulticastGroups();
 #endif
 #ifdef WITH_IPv6
         // TODO
@@ -276,10 +276,10 @@ void UDPSocket::leaveLocalMulticastGroups()
 #ifdef WITH_IPv4
             if (ie->ipv4Data())
             {
-                const IPv4InterfaceData::IPv4AddressVector &addresses = ie->ipv4Data()->getJoinedMulticastGroups();
-                for (unsigned int j = 0; j < addresses.size(); ++j, ++k)
+                int numOfMulticastGroups = ie->ipv4Data()->getNumOfJoinedMulticastGroups();
+                for (int j = 0; j < numOfMulticastGroups; ++j, ++k)
                 {
-                    ctrl->setMulticastAddr(k, addresses[j]);
+                    ctrl->setMulticastAddr(k, ie->ipv4Data()->getJoinedMulticastGroup(j));
                 }
             }
 #endif

@@ -39,6 +39,8 @@ class IPv6InterfaceData;
 class TRILLInterfaceData;
 class ISISInterfaceData;
 
+enum McastSourceFilterMode { MCAST_INCLUDE_SOURCES, MCAST_EXCLUDE_SOURCES };
+
 class INET_API MacEstimateCostProcess
 {
 public:
@@ -217,7 +219,10 @@ class INET_API InterfaceEntry : public cNamedObject
     ISISInterfaceData *isisData() const {return isisdata;}
     //@}
 
-    virtual void joinMulticastGroup(const Address & address) const;
+    virtual void joinMulticastGroup(const Address & address) const; // XXX why const method?
+    virtual void changeMulticastGroupMembership(const Address &multicastAddress,
+                        McastSourceFilterMode oldFilterMode, const std::vector<Address> &oldSourceList,
+                        McastSourceFilterMode newFilterMode, const std::vector<Address> &newSourceList);
 
     /** @name Installing protocol-specific interface data */
     //@{
