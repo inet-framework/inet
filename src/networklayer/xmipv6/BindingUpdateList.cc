@@ -99,12 +99,9 @@ BindingUpdateList::~BindingUpdateList()
 //        delete bindingUpdateList[i];
 }
 
-void BindingUpdateList::initialize(int stage)
+void BindingUpdateList::initialize()
 {
-    if (stage == 1)
-    {
-        WATCH_MAP(bindingUpdateList); //added by Zarrar Yousaf
-    }
+    WATCH_MAP(bindingUpdateList); //added by Zarrar Yousaf
 }
 
 void BindingUpdateList::handleMessage(cMessage *msg)

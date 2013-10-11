@@ -84,8 +84,7 @@ class INET_API BindingCache : public cSimpleModule
     virtual ~BindingCache();
 
   protected:
-    int numInitStages() const {return 2;}
-    virtual void initialize(int stage);
+    virtual void initialize();
 
     /**
      * Raises an error.
