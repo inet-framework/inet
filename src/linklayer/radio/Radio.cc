@@ -206,7 +206,6 @@ void Radio::initialize(int stage)
             setRadioState(RadioState::OFF);
             // tell initial values to MAC; must be done in stage 1, because they
             // subscribe in stage 0
-            nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
             nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
         }
 
