@@ -182,8 +182,9 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node * rootNode)
                        std::string hostFullPath = hostModule->getFullPath();
                        std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
 
+                       cGate * gate = hostModule->gate(ifEntry->getNodeInputGateId());
                        std::stringstream ss;
-                       ss << ifEntry->getInterfaceId() - 100; // FIXME: -1 virtual interface?
+                       ss << gate->getIndex();
                        std::string port = ss.str();
 
                        // Note: "hosts", "interfaces" and "towards" must ALL match on the interface for the rule to apply
