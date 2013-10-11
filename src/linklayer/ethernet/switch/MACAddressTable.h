@@ -123,6 +123,11 @@ class MACAddressTable : public cSimpleModule
          */
         virtual void clearTable();
 
+        /*
+         * Some (eg.: STP, RSTP) protocols may need to change agingTime
+         */
+        virtual void setAgingTime(simtime_t agingTime);
+        virtual void resetDefaultAging();
 };
 
 #endif

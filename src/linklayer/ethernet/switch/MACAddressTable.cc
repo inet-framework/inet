@@ -330,3 +330,13 @@ MACAddressTable::~MACAddressTable()
     for (VlanAddressTable::iterator iter = vlanAddressTable.begin(); iter != vlanAddressTable.end(); iter++)
         delete iter->second;
 }
+
+void MACAddressTable::setAgingTime(simtime_t agingTime)
+{
+    this->agingTime = agingTime;
+}
+
+void MACAddressTable::resetDefaultAging()
+{
+    agingTime = par("agingTime");
+}
