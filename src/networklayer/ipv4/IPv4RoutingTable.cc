@@ -68,6 +68,8 @@ IPv4RoutingTable::~IPv4RoutingTable()
 
 void IPv4RoutingTable::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     //FIXME missing case of NodeStatus DOWN
     if (stage==0)
     {

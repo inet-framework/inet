@@ -87,6 +87,8 @@ void OLSR_ETX_LinkQualityTimer::expire()
 void
 OLSR_ETX::initialize(int stage)
 {
+    OLSR::initialize(stage);
+
     if (stage==4)
     {
         if (isInMacLayer())
@@ -197,7 +199,6 @@ OLSR_ETX::initialize(int stage)
             linkLayerFeeback();
         }
         scheduleNextEvent();
-
     }
 }
 
@@ -220,7 +221,6 @@ OLSR_ETX::initialize(int stage)
 void
 OLSR_ETX::recv_olsr(cMessage* msg)
 {
-
     OLSR_pkt* op;
     nsaddr_t src_addr;
     int index;
@@ -334,7 +334,6 @@ OLSR_ETX::recv_olsr(cMessage* msg)
         break;
     }
     delete op;
-
 }
 
 ///

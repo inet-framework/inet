@@ -40,6 +40,8 @@ void AppBase::finish()
 
 void AppBase::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0) // STAGE_LOCAL
     {
         isOperational = false;

@@ -33,6 +33,8 @@ simsignal_t IPvXTrafSink::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void IPvXTrafSink::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         numReceived = 0;

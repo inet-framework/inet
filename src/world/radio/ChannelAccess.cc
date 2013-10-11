@@ -49,6 +49,8 @@ ChannelAccess::~ChannelAccess()
  */
 void ChannelAccess::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         cc = getChannelControl();

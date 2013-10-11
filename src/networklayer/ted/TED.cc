@@ -41,6 +41,8 @@ TED::~TED()
 
 void TED::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     // we have to wait for stage 2 until interfaces get registered (stage 0)
     // and get their auto-assigned IPv4 addresses (stage 2); routerId gets
     // assigned in stage 3

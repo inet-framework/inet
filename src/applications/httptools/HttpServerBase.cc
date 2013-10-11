@@ -35,6 +35,8 @@
 
 void HttpServerBase::initialize(int stage)
 {
+    HttpNodeBase::initialize(stage);
+
     if (stage == 0)
     {
         EV_DEBUG << "Initializing server component\n";

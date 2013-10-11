@@ -59,10 +59,12 @@ HttpBrowserBase::~HttpBrowserBase()
 
 void HttpBrowserBase::initialize(int stage)
 {
+    EV_DEBUG << "Initializing base HTTP browser component -- stage " << stage << endl;
+
+    HttpNodeBase::initialize(stage);
+
     if (stage==0)
     {
-        EV_DEBUG << "Initializing base HTTP browser component -- phase 0\n";
-
         cXMLElement *rootelement = par("config").xmlValue();
         if (rootelement==NULL)
             error("Configuration file is not defined");

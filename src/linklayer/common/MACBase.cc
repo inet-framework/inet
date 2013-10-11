@@ -41,6 +41,8 @@ MACBase::~MACBase()
 
 void MACBase::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         nb = NotificationBoardAccess().getIfExists();

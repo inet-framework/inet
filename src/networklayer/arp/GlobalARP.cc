@@ -26,7 +26,10 @@ Define_Module(GlobalARP);
 
 void GlobalARP::initialize(int stage)
 {
-    if (stage == 0) {
+    cSimpleModule::initialize(stage);
+
+    if (stage == 0)
+    {
         ift = InterfaceTableAccess().get();
         nicOutBaseGateId = gateSize("nicOut")==0 ? -1 : gate("nicOut", 0)->getId();
     }

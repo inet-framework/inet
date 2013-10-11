@@ -37,6 +37,8 @@ void SCTPServer::initialize(int stage)
 {
     sctpEV3 << "initialize SCTP Server stage " << stage << endl;
 
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;

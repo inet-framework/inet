@@ -31,6 +31,8 @@ Define_Module(ICMP);
 
 void ICMP::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         IPSocket socket(gate("sendOut"));

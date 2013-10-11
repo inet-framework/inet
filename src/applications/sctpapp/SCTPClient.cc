@@ -42,6 +42,8 @@ simsignal_t SCTPClient::echoedPkSignal = SIMSIGNAL_NULL;
 
 void SCTPClient::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     sctpEV3 << "initialize SCTP Client stage "<< stage << endl;
     if (stage == 0)
     {

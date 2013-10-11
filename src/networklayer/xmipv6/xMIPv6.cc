@@ -92,6 +92,8 @@ xMIPv6::~xMIPv6()
 
 void xMIPv6::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         EV << "Initializing xMIPv6 module" << endl;

@@ -71,6 +71,8 @@ std::map<ManetAddress,u_int32_t *> DYMOUM::mapSeqNum;
 
 void DYMOUM::initialize(int stage)
 {
+    ManetRoutingBase::initialize(stage);
+
     if (stage==4)
     {
 

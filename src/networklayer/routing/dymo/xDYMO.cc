@@ -60,6 +60,8 @@ xDYMO::~xDYMO()
 
 void xDYMO::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0) {
         // DYMO parameters from RFC
         clientAddresses = par("clientAddresses");

@@ -25,6 +25,8 @@ Define_Module(TwoRateThreeColorMeter);
 
 void TwoRateThreeColorMeter::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         numRcvd = 0;

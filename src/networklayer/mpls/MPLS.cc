@@ -36,6 +36,8 @@ Define_Module(MPLS);
 
 void MPLS::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage!=3) // interfaceTable must be initialized
         return;
 

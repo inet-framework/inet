@@ -22,6 +22,8 @@ Define_Module(LIBTable);
 
 void LIBTable::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage==0)
         maxLabel = 0;
 

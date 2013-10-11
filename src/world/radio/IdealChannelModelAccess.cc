@@ -42,6 +42,8 @@ IdealChannelModelAccess::~IdealChannelModelAccess()
  */
 void IdealChannelModelAccess::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         cc = dynamic_cast<IdealChannelModel *>(simulation.getModuleByPath("channelControl"));

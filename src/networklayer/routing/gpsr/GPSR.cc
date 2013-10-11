@@ -65,6 +65,8 @@ GPSR::~GPSR()
 
 void GPSR::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0) {
         // GPSR parameters
         planarizationMode = (GPSRPlanarizationMode)(int)par("planarizationMode");

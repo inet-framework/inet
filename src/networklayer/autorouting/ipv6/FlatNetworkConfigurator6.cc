@@ -31,6 +31,8 @@ Define_Module(FlatNetworkConfigurator6);
 
 void FlatNetworkConfigurator6::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     // FIXME refactor: make routers[] array? (std::vector<cTopology::Node*>)
     // FIXME: spare common beginning for all stages?
 

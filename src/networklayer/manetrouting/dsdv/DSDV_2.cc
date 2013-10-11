@@ -22,6 +22,8 @@ Define_Module(DSDV_2);
 
 void DSDV_2::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     //reads from omnetpp.ini
     if (stage==0)
     {

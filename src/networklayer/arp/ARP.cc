@@ -72,6 +72,8 @@ ARP::ARP()
 
 void ARP::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage==0)
     {
         sentReqSignal = registerSignal("sentReq");

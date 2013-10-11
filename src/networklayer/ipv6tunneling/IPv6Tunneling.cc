@@ -63,6 +63,8 @@ IPv6Tunneling::IPv6Tunneling()
 
 void IPv6Tunneling::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         ift = InterfaceTableAccess().get();

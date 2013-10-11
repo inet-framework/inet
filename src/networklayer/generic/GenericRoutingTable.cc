@@ -46,6 +46,8 @@ GenericRoutingTable::~GenericRoutingTable()
 
 void GenericRoutingTable::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage==0)
     {
         // get a pointer to the NotificationBoard module and IInterfaceTable

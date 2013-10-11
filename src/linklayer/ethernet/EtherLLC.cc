@@ -34,6 +34,8 @@ simsignal_t EtherLLC::pauseSentSignal = SIMSIGNAL_NULL;
 
 void EtherLLC::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         seqNum = 0;

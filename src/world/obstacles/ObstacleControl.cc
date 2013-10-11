@@ -31,6 +31,8 @@ ObstacleControl::~ObstacleControl() {
 }
 
 void ObstacleControl::initialize(int stage) {
+    cSimpleModule::initialize(stage);
+
     if (stage == 1) {
         obstacles.clear();
         cacheEntries.clear();

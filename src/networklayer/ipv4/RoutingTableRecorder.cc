@@ -62,8 +62,13 @@ RoutingTableRecorder::~RoutingTableRecorder()
 
 void RoutingTableRecorder::initialize(int stage)
 {
-    if (par("enabled").boolValue())
-        hookListeners();
+    cSimpleModule::initialize(stage);
+
+    if (stage == 0)
+    {
+        if (par("enabled").boolValue())
+            hookListeners();
+    }
 }
 
 void RoutingTableRecorder::handleMessage(cMessage *)
@@ -247,8 +252,13 @@ RoutingTableRecorder::~RoutingTableRecorder()
 
 void RoutingTableRecorder::initialize(int stage)
 {
-    if (par("enabled").boolValue())
-        hookListeners();
+    cSimpleModule::initialize(stage);
+
+    if (stage == 0)
+    {
+        if (par("enabled").boolValue())
+            hookListeners();
+    }
 }
 
 void RoutingTableRecorder::handleMessage(cMessage *)

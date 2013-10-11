@@ -24,6 +24,8 @@ Define_Module(SimpleClassifier);
 
 void SimpleClassifier::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     // we have to wait until routerId gets assigned in stage 3
     if (stage!=4)
         return;

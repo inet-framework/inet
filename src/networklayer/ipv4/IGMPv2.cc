@@ -330,6 +330,8 @@ void IGMPv2::deleteRouterGroupData(InterfaceEntry *ie, const IPv4Address &group)
 
 void IGMPv2::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         ift = InterfaceTableAccess().get();

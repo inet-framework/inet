@@ -43,6 +43,8 @@ simsignal_t RTP::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void RTP::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         _leaveSession = false;

@@ -108,6 +108,8 @@ Batman::~Batman()
 
 void Batman::initialize(int stage)
 {
+    ManetRoutingBase::initialize(stage);
+
     if (stage!=4)
         return;
 

@@ -25,6 +25,8 @@ Define_Module(EchoProtocol);
 
 void EchoProtocol::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     IPSocket socket(gate("sendOut"));
     socket.registerProtocol(IP_PROT_ICMP);
 }

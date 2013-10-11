@@ -35,6 +35,8 @@ Define_Module(FlatNetworkConfigurator);
 
 void FlatNetworkConfigurator::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage==2)
     {
         WeightedTopology topo("topo");

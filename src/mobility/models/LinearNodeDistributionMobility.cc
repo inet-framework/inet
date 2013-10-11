@@ -33,7 +33,8 @@ LinearNodeDistributionMobility::LinearNodeDistributionMobility()
 
 void LinearNodeDistributionMobility::initialize(int stage)
 {
-    MobilityBase::initialize(stage);
+    StationaryMobility::initialize(stage);
+
     EV_TRACE << "initializing LinearNodeDistributionMobility stage " << stage << endl;
     if (stage == STAGE_LOCAL_BEGIN)
     {

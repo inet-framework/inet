@@ -48,6 +48,8 @@ OSPFRouting::~OSPFRouting()
 
 void OSPFRouting::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     // we have to wait for stage 2 until interfaces are registered (stage 0)
     // and routerId is assigned (stage 3)
     if (stage == 4)

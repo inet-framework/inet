@@ -148,6 +148,8 @@ simsignal_t RIPRouting::numRoutesSignal = SIMSIGNAL_NULL;
 
 void RIPRouting::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0) {
         host = findContainingNode(this);
         ift = InterfaceTableAccess().get();

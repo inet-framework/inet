@@ -30,6 +30,8 @@ simsignal_t NodeStatus::nodeStatusChangedSignal = SIMSIGNAL_NULL;
 
 void NodeStatus::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         nodeStatusChangedSignal = registerSignal("nodeStatusChanged");

@@ -69,6 +69,8 @@ static char *fgetline(FILE *fp)
 
 void MACRelayUnitBase::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         // number of ports

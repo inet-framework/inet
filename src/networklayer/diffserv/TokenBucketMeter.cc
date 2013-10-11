@@ -25,6 +25,8 @@ Define_Module(TokenBucketMeter);
 
 void TokenBucketMeter::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         numRcvd = 0;

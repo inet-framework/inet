@@ -53,6 +53,8 @@ RSVP::~RSVP()
 
 void RSVP::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     // we have to wait for stage 2 until interfaces get registered (stage 0)
     // and get their auto-assigned IP addresses (stage 2); routerId gets
     // assigned in state 3

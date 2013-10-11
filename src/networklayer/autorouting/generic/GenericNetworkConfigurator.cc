@@ -48,6 +48,8 @@ static void printElapsedTime(const char *name, long startTime)
 
 void GenericNetworkConfigurator::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 2)
     {
         long initializeStartTime = clock();

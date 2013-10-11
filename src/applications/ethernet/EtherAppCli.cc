@@ -47,6 +47,8 @@ EtherAppCli::~EtherAppCli()
 
 void EtherAppCli::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     // we can only initialize in the 2nd stage (stage==1), because
     // assignment of "auto" MAC addresses takes place in stage 0
     if (stage == 1)

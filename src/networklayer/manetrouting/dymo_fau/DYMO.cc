@@ -55,7 +55,7 @@ DYMO::DYMO()
 
 void DYMO::initialize(int aStage)
 {
-    cSimpleModule::initialize(aStage);
+    ManetRoutingBase::initialize(aStage);
 
     if (4 == aStage)
     {

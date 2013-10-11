@@ -74,6 +74,8 @@ void TraCIMobility::Statistics::recordScalars(cSimpleModule& module)
 
 void TraCIMobility::initialize(int stage)
 {
+    //TODO why call the base::initialize() at the end?
+
     if (stage == STAGE_LOCAL_BEGIN) {
         accidentCount = par("accidentCount");
 

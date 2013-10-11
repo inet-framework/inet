@@ -78,7 +78,10 @@ IPv4NetworkConfigurator::RouteInfo *IPv4NetworkConfigurator::RoutingTableInfo::f
 
 void IPv4NetworkConfigurator::initialize(int stage)
 {
-    if (stage == 0) {
+    cSimpleModule::initialize(stage);
+
+    if (stage == 0)
+    {
         assignAddressesParameter = par("assignAddresses");
         assignDisjunctSubnetAddressesParameter = par("assignDisjunctSubnetAddresses");
         addStaticRoutesParameter = par("addStaticRoutes");

@@ -33,6 +33,8 @@ simsignal_t EtherAppSrv::rcvdPkSignal = SIMSIGNAL_NULL;
 
 void EtherAppSrv::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         localSAP = par("localSAP");

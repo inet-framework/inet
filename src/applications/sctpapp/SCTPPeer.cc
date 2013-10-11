@@ -72,6 +72,8 @@ SCTPPeer::~SCTPPeer()
 
 void SCTPPeer::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;

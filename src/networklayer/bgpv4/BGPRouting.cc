@@ -38,6 +38,8 @@ BGPRouting::~BGPRouting(void)
 
 void BGPRouting::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 1)
     {
         bool isOperational;

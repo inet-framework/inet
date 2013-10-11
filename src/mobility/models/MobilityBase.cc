@@ -57,6 +57,8 @@ MobilityBase::MobilityBase()
 
 void MobilityBase::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     EV_TRACE << "initializing MobilityBase stage " << stage << endl;
     if (stage == STAGE_LOCAL_BEGIN)
     {

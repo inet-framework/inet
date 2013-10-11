@@ -48,6 +48,8 @@ DHCPClient::~DHCPClient()
 
 void DHCPClient::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         timer_t1 = NULL;

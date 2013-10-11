@@ -59,6 +59,8 @@ IPv6Route *IPv6RoutingTable::createNewRoute(IPv6Address destPrefix, int prefixLe
 
 void IPv6RoutingTable::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage==1)
     {
         //TODO isNodeUp???

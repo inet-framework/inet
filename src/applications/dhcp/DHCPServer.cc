@@ -45,6 +45,8 @@ DHCPServer::~DHCPServer()
 
 void DHCPServer::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 1)
     {
         numSent = 0;

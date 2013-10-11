@@ -64,6 +64,8 @@ InterfaceTable::~InterfaceTable()
 
 void InterfaceTable::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage==0)
     {
         // get a pointer to the NotificationBoard module

@@ -196,6 +196,8 @@ void DSRUUTimer::cancel()
 
 void DSRUU::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     //current_time =simTime();
     if (!is_init)
     {

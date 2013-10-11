@@ -63,6 +63,8 @@ SimpleVoIPReceiver::~SimpleVoIPReceiver()
 
 void SimpleVoIPReceiver::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 1)
     {
         bool isOperational;

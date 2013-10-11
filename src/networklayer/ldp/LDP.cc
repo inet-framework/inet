@@ -102,6 +102,8 @@ LDP::~LDP()
 
 void LDP::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     //FIXME move bind() and listen() calls to a new startModule() function, and call it from initialize() and from handleOperationStage()
     //FIXME register to InterfaceEntry changes, for detecting the interface add/delete, and detecting multicast config changes:
     //      should be refresh the udpSockets vector when interface added/deleted, or isMulticast() value changed.
