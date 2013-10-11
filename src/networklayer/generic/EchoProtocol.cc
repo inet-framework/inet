@@ -23,12 +23,17 @@
 
 Define_Module(EchoProtocol);
 
+int EchoProtocol::numInitStages() const { return 1; }
+
 void EchoProtocol::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    IPSocket socket(gate("sendOut"));
-    socket.registerProtocol(IP_PROT_ICMP);
+    if (stage == 0)
+    {
+        IPSocket socket(gate("sendOut"));
+        socket.registerProtocol(IP_PROT_ICMP);
+    }
 }
 
 void EchoProtocol::handleMessage(cMessage *msg)
