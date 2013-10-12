@@ -68,6 +68,7 @@ InterfaceEntry::InterfaceEntry(cModule* ifmod)
     isisdata = NULL;
     trilldata = NULL;
     vlandata = NULL;
+    ieee8021dData = NULL;
     estimateCostProcessArray.clear();
 }
 
@@ -188,6 +189,9 @@ void InterfaceEntry::resetInterface()
     if (vlandata && ((InterfaceProtocolData *)vlandata)->ownerp == this)
         delete (InterfaceProtocolData *)vlandata;
     vlandata = NULL;
+    if (ieee8021dData && ((InterfaceProtocolData *)ieee8021dData)->ownerp == this)
+        delete (InterfaceProtocolData *)ieee8021dData;
+    ieee8021dData = NULL;
 }
 
 void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
@@ -239,6 +243,15 @@ void InterfaceEntry::setVLANInterfaceData(VLANInterfaceData *p)
     if (vlandata && ((InterfaceProtocolData *)vlandata)->ownerp == this) // Khmm...
         delete (InterfaceProtocolData *)vlandata; // Khmm...
     vlandata = p;
+    ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
+    configChanged();
+}
+
+void InterfaceEntry::setIEEE8021DInterfaceData(IEEE8021DInterfaceData *p)
+{
+    if (ieee8021dData && ((InterfaceProtocolData *)ieee8021dData)->ownerp == this) // Khmm...
+        delete (InterfaceProtocolData *)ieee8021dData; // Khmm...
+    ieee8021dData = p;
     ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
     configChanged();
 }
