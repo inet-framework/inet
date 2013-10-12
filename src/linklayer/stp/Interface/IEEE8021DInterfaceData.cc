@@ -35,12 +35,12 @@ bool IEEE8021DInterfaceData::isForwarding()
     return false;
 }
 
-unsigned int IEEE8021DInterfaceData::getAge() const
+simtime_t IEEE8021DInterfaceData::getAge() const
 {
     return portData.age;
 }
 
-void IEEE8021DInterfaceData::setAge(unsigned int age)
+void IEEE8021DInterfaceData::setAge(simtime_t age)
 {
     portData.age = age;
 }
@@ -65,32 +65,32 @@ void IEEE8021DInterfaceData::setBridgePriority(unsigned int bridgePriority)
     portData.bridgePriority = bridgePriority;
 }
 
-unsigned int IEEE8021DInterfaceData::getFdWhile() const
+simtime_t IEEE8021DInterfaceData::getFdWhile() const
 {
     return portData.fdWhile;
 }
 
-void IEEE8021DInterfaceData::setFdWhile(unsigned int fdWhile)
+void IEEE8021DInterfaceData::setFdWhile(simtime_t fdWhile)
 {
     portData.fdWhile = fdWhile;
 }
 
-unsigned int IEEE8021DInterfaceData::getFwdDelay() const
+simtime_t IEEE8021DInterfaceData::getFwdDelay() const
 {
     return portData.fwdDelay;
 }
 
-void IEEE8021DInterfaceData::setFwdDelay(unsigned int fwdDelay)
+void IEEE8021DInterfaceData::setFwdDelay(simtime_t fwdDelay)
 {
     portData.fwdDelay = fwdDelay;
 }
 
-unsigned int IEEE8021DInterfaceData::getHelloTime() const
+simtime_t IEEE8021DInterfaceData::getHelloTime() const
 {
     return portData.helloTime;
 }
 
-void IEEE8021DInterfaceData::setHelloTime(unsigned int helloTime)
+void IEEE8021DInterfaceData::setHelloTime(simtime_t helloTime)
 {
     portData.helloTime = helloTime;
 }
@@ -105,12 +105,12 @@ void IEEE8021DInterfaceData::setLinkCost(unsigned int linkCost)
     portData.linkCost = linkCost;
 }
 
-unsigned int IEEE8021DInterfaceData::getMaxAge() const
+simtime_t IEEE8021DInterfaceData::getMaxAge() const
 {
     return portData.maxAge;
 }
 
-void IEEE8021DInterfaceData::setMaxAge(unsigned int maxAge)
+void IEEE8021DInterfaceData::setMaxAge(simtime_t maxAge)
 {
     portData.maxAge = maxAge;
 }

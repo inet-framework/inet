@@ -30,63 +30,57 @@ class IEEE8021DInterfaceData : public InterfaceProtocolData
 
         enum PortRole
         {
-            ALTERNATE,
-            NOTASSIGNED,
-            DISABLED,
-            DESIGNATED,
-            BACKUP,
-            ROOT
+            ALTERNATE, NOTASSIGNED, DISABLED, DESIGNATED, BACKUP, ROOT
         };
 
         enum PortState
         {
-            DISCARDING,
-            LEARNING,
-            FORWARDING
+            DISCARDING, LEARNING, FORWARDING
         };
 
         struct PortInfo
         {
-            PortState state;
-            PortRole role;
+                PortState state;
+                PortRole role;
 
-            unsigned int priority;
-            unsigned int rootPathCost;
-            unsigned int rootPriority;
-            unsigned int bridgePriority;
-            unsigned int portPriority;
-            MACAddress rootAddress;
-            MACAddress bridgeAddress;
-            unsigned int portNum;
-            unsigned int linkCost;
-            unsigned int age;
-            unsigned int fdWhile;
+                MACAddress rootAddress;
+                MACAddress bridgeAddress;
 
-            unsigned int maxAge;
-            unsigned int fwdDelay;
-            unsigned int helloTime;
+                unsigned int priority;
+                unsigned int rootPathCost;
+                unsigned int rootPriority;
+                unsigned int bridgePriority;
+                unsigned int portPriority;
+                unsigned int portNum;
+                unsigned int linkCost;
+
+                simtime_t age;
+                simtime_t fdWhile;
+                simtime_t maxAge;
+                simtime_t fwdDelay;
+                simtime_t helloTime;
         };
 
     protected:
         PortInfo portData;
 
     public:
-        unsigned int getAge() const;
-        void setAge(unsigned int age);
+        simtime_t getAge() const;
+        void setAge(simtime_t age);
         const MACAddress& getBridgeAddress() const;
         void setBridgeAddress(const MACAddress& bridgeAddress);
         unsigned int getBridgePriority() const;
         void setBridgePriority(unsigned int bridgePriority);
-        unsigned int getFdWhile() const;
-        void setFdWhile(unsigned int fdWhile);
-        unsigned int getFwdDelay() const;
-        void setFwdDelay(unsigned int fwdDelay);
-        unsigned int getHelloTime() const;
-        void setHelloTime(unsigned int helloTime);
+        simtime_t getFdWhile() const;
+        void setFdWhile(simtime_t fdWhile);
+        simtime_t getFwdDelay() const;
+        void setFwdDelay(simtime_t fwdDelay);
+        simtime_t getHelloTime() const;
+        void setHelloTime(simtime_t helloTime);
         unsigned int getLinkCost() const;
         void setLinkCost(unsigned int linkCost);
-        unsigned int getMaxAge() const;
-        void setMaxAge(unsigned int maxAge);
+        simtime_t getMaxAge() const;
+        void setMaxAge(simtime_t maxAge);
         unsigned int getPortNum() const;
         void setPortNum(unsigned int portNum);
         unsigned int getPortPriority() const;
