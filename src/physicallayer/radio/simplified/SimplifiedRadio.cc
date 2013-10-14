@@ -48,7 +48,7 @@ void SimplifiedRadio::initialize(int stage)
 {
     SimplifiedRadioChannelAccess::initialize(stage);
 
-    EV << "Initializing Radio, stage=" << stage << endl;
+    EV_TRACE << "Initializing Radio, stage=" << stage << endl;
 
     if (stage == INITSTAGE_LOCAL)
     {
@@ -76,7 +76,7 @@ void SimplifiedRadio::initialize(int stage)
             subscribe(changeLevelNoise, this); // the INoiseGenerator must send a signal to this module
         }
 
-        EV << "Initialized channel with noise: " << noiseLevel << " sensitivity: " << sensitivity <<
+        EV_DEBUG << "Initialized channel with noise: " << noiseLevel << " sensitivity: " << sensitivity <<
         endl;
 
         // initialize the pointer of the snrInfo with NULL to indicate
@@ -94,7 +94,7 @@ void SimplifiedRadio::initialize(int stage)
 
         obstacles = findModuleFromPar<ObstacleControl>(par("obstacleControlModule"), this);
         if (obstacles)
-            EV << "Found ObstacleControl" << endl;
+            EV_DEBUG << "Found ObstacleControl" << endl;
 
         // this is the parameter of the radio channel (global)
         std::string propModel = getRadioChannelPar("propagationModel").stdstringValue();
@@ -226,7 +226,7 @@ void SimplifiedRadio::handleMessageWhenUp(cMessage *msg)
         if (msg->getArrivalGate() == upperLayerIn || msg->isSelfMessage())  //XXX can we ensure we don't receive pk from upper in OFF state?? (race condition)
             throw cRuntimeError("Radio is turned off");
         else {
-            EV << "Radio is turned off, dropping packet\n";
+            EV_ERROR << "Radio is turned off, dropping packet\n";
             delete msg;
             return;
         }
@@ -267,13 +267,13 @@ void SimplifiedRadio::handleMessageWhenUp(cMessage *msg)
         }
         else
         {
-            EV << "Radio is not in receiver mode, dropping frame" << endl;
+            EV_WARN << "Radio is not in receiver mode, dropping frame" << endl;
             delete msg;
         }
     }
     else
     {
-        EV << "listening to different channel when receiving message -- dropping it\n";
+        EV_WARN << "listening to different channel when receiving message -- dropping it\n";
         delete msg;
     }
 }
@@ -316,7 +316,7 @@ SimplifiedRadioFrame *SimplifiedRadio::encapsulatePacket(cPacket *frame)
     radioFrame->setCarrierFrequency(carrierFrequency);
     delete ctrl;
 
-    EV << "Frame (" << frame->getClassName() << ")" << frame->getName()
+    EV_DEBUG << "Frame (" << frame->getClassName() << ")" << frame->getName()
     << " will be transmitted at " << (radioFrame->getBitrate()/1e6) << "Mbps\n";
     return radioFrame;
 }
@@ -340,7 +340,7 @@ void SimplifiedRadio::sendUp(SimplifiedRadioFrame *radioFrame)
     frame->setControlInfo(cinfo);
 
     delete radioFrame;
-    EV << "sending up frame " << frame->getName() << endl;
+    EV_DEBUG << "sending up frame " << frame->getName() << endl;
     send(frame, upperLayerOut);
 }
 
@@ -384,7 +384,7 @@ void SimplifiedRadio::handleUpperMsg(SimplifiedRadioFrame *radioFrame)
     // if a packet was being received, it is corrupted now as should be treated as noise
     if (snrInfo.ptr != NULL)
     {
-        EV << "Sending a message while receiving another. The received one is now corrupted.\n";
+        EV_WARN << "Sending a message while receiving another. The received one is now corrupted.\n";
 
         // remove the snr information stored for the message currently being
         // received. This message is treated as noise now and the
@@ -402,7 +402,7 @@ void SimplifiedRadio::handleUpperMsg(SimplifiedRadioFrame *radioFrame)
     // about the "real" stuff
 
     // change radio status
-    EV << "sending down frame\n";
+    EV_INFO << "sending down frame\n";
 
     scheduleAt(simTime() + radioFrame->getDuration(), endTransmissionTimer);
     sendDown(radioFrame);
@@ -420,14 +420,14 @@ void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
 
         if (newChannel!=-1)
         {
-            EV << "Command received: change to channel #" << newChannel << "\n";
+            EV_DEBUG << "Command received: change to channel #" << newChannel << "\n";
 
             // do it
             if (radioChannel == newChannel)
-                EV << "Right on that channel, nothing to do\n"; // fine, nothing to do
+                EV_DEBUG << "Right on that channel, nothing to do\n"; // fine, nothing to do
             else if (radioTransmissionState == RADIO_TRANSMISSION_STATE_TRANSMITTING)
             {
-                EV << "We're transmitting right now, remembering to change after it's completed\n";
+                EV_DEBUG << "We're transmitting right now, remembering to change after it's completed\n";
                 this->newChannel = newChannel;
             }
             else
@@ -435,14 +435,14 @@ void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
         }
         if (newBitrate!=-1)
         {
-            EV << "Command received: change bitrate to " << (newBitrate/1e6) << "Mbps\n";
+            EV_DEBUG << "Command received: change bitrate to " << (newBitrate/1e6) << "Mbps\n";
 
             // do it
             if (bitrate == newBitrate)
-                EV << "Right at that bitrate, nothing to do\n"; // fine, nothing to do
+                EV_DEBUG << "Right at that bitrate, nothing to do\n"; // fine, nothing to do
             else if (radioTransmissionState == RADIO_TRANSMISSION_STATE_TRANSMITTING)
             {
-                EV << "We're transmitting right now, remembering to change after it's completed\n";
+                EV_DEBUG << "We're transmitting right now, remembering to change after it's completed\n";
                 this->newBitrate = newBitrate;
             }
             else
@@ -469,7 +469,7 @@ void SimplifiedRadio::handleSelfMsg(cMessage *msg)
 {
     if (msg == endTransmissionTimer)
     {
-        EV << "Transmission successfully completed.\n";
+        EV_INFO << "Transmission successfully completed.\n";
         updateTransceiverState();
         // switch channel if it needs be
         if (newChannel != -1)
@@ -550,7 +550,7 @@ void SimplifiedRadio::handleLowerMsgStart(SimplifiedRadioFrame* radioFrame)
     // processing ongoing transmissions during a channel change
     if (radioFrame->getArrivalTime() == simTime() && rcvdPower >= sensitivity && radioTransmissionState != RADIO_TRANSMISSION_STATE_TRANSMITTING && snrInfo.ptr == NULL)
     {
-        EV << "receiving frame " << radioFrame->getName() << " with rcvdPower " << rcvdPower << endl;
+        EV_DEBUG << "receiving frame " << radioFrame->getName() << " with rcvdPower " << rcvdPower << endl;
 
         // Put frame and related SnrList in receive buffer
         SnrList snrList;
@@ -564,7 +564,7 @@ void SimplifiedRadio::handleLowerMsgStart(SimplifiedRadioFrame* radioFrame)
     // receive power is too low or another message is being sent or received
     else
     {
-        EV << "frame " << radioFrame->getName() << " with rcvdPower " << rcvdPower << " is just noise\n";
+        EV_DEBUG << "frame " << radioFrame->getName() << " with rcvdPower " << rcvdPower << " is just noise\n";
         //add receive power to the noise level
         noiseLevel += rcvdPower;
 
@@ -572,7 +572,7 @@ void SimplifiedRadio::handleLowerMsgStart(SimplifiedRadioFrame* radioFrame)
         if (snrInfo.ptr != NULL)
         {
             // update snr info for currently being received message
-            EV << "adding new snr value to snr list of message being received\n";
+            EV_DEBUG << "adding new snr value to snr list of message being received\n";
             addNewSnr();
         }
     }
@@ -594,7 +594,7 @@ void SimplifiedRadio::handleLowerMsgEnd(SimplifiedRadioFrame *radioFrame)
     // check if message has to be send to the decider
     if (snrInfo.ptr == radioFrame)
     {
-        EV << "reception of frame over, preparing to send packet to upper layer\n";
+        EV_DEBUG << "reception of frame over, preparing to send packet to upper layer\n";
         // get Packet and list out of the receive buffer:
         SnrList list;
         list = snrInfo.sList;
@@ -640,7 +640,7 @@ void SimplifiedRadio::handleLowerMsgEnd(SimplifiedRadioFrame *radioFrame)
     // all other messages are noise
     else
     {
-        EV << "reception of noise message over, removing recvdPower from noiseLevel....\n";
+        EV_DEBUG << "reception of noise message over, removing recvdPower from noiseLevel....\n";
         // get the rcvdPower and subtract it from the noiseLevel
         noiseLevel -= recvBuff[radioFrame];
 
@@ -655,7 +655,7 @@ void SimplifiedRadio::handleLowerMsgEnd(SimplifiedRadioFrame *radioFrame)
 
         // message should be deleted
         delete radioFrame;
-        EV << "message deleted\n";
+        EV_DEBUG << "message deleted\n";
     }
 }
 
@@ -694,7 +694,7 @@ void SimplifiedRadio::setRadioChannel(int channel)
     updateTransceiverState();
 
     // do channel switch
-    EV << "Changing from channel " << radioChannel << " to " << channel << "\n";
+    EV_INFO << "Changing from channel " << radioChannel << " to " << channel << "\n";
     radioChannel = channel;
     emit(radioChannelChangedSignal, channel);
 
@@ -706,10 +706,10 @@ void SimplifiedRadio::setRadioChannel(int channel)
 
     cGate* radioGate = this->gate("radioIn")->getPathStartGate();
 
-    EV << "RadioGate :" << radioGate->getFullPath() << " " << radioGate->getFullName() << endl;
+    EV_DEBUG << "RadioGate :" << radioGate->getFullPath() << " " << radioGate->getFullName() << endl;
 
     // pick up ongoing transmissions on the new channel
-    EV << "Picking up ongoing transmissions on new channel:\n";
+    EV_DEBUG << "Picking up ongoing transmissions on new channel:\n";
     ISimplifiedRadioChannel::TransmissionList tlAux = cc->getOngoingTransmissions(channel);
     for (ISimplifiedRadioChannel::TransmissionList::const_iterator it = tlAux.begin(); it != tlAux.end(); ++it)
     {
@@ -724,13 +724,13 @@ void SimplifiedRadio::setRadioChannel(int channel)
         // if this transmission is on our new channel and it would reach us in the future, then schedule it
         if (channel == radioFrame->getChannelNumber())
         {
-            EV << " - (" << radioFrame->getClassName() << ")" << radioFrame->getName() << ": ";
+            EV_DEBUG << " - (" << radioFrame->getClassName() << ")" << radioFrame->getName() << ": ";
         }
 
         // if there is a message on the air which will reach us in the future
         if (radioFrame->getTimestamp() + propagationDelay >= simTime())
         {
-            EV << "will arrive in the future, scheduling it\n";
+            EV_DEBUG << "will arrive in the future, scheduling it\n";
 
             // we need to send to each radioIn[] gate of this host
             //for (int i = 0; i < radioGate->size(); i++)
@@ -743,7 +743,7 @@ void SimplifiedRadio::setRadioChannel(int channel)
         // if we hear some part of the message
         else if (radioFrame->getTimestamp() + radioFrame->getDuration() + propagationDelay > simTime())
         {
-            EV << "missed beginning of frame, processing it as noise\n";
+            EV_DEBUG << "missed beginning of frame, processing it as noise\n";
 
             SimplifiedRadioFrame *frameDup = radioFrame->dup();
             frameDup->setArrivalTime(radioFrame->getTimestamp() + propagationDelay);
@@ -753,7 +753,7 @@ void SimplifiedRadio::setRadioChannel(int channel)
         }
         else
         {
-            EV << "in the past\n";
+            EV_DEBUG << "in the past\n";
         }
     }
 }
@@ -767,7 +767,7 @@ void SimplifiedRadio::setBitrate(double bitrate)
     if (radioTransmissionState == RADIO_TRANSMISSION_STATE_TRANSMITTING)
         throw cRuntimeError("changing the bitrate while transmitting is not allowed");
 
-    EV << "Setting bitrate to " << (bitrate/1e6) << "Mbps\n";
+    EV_INFO << "Setting bitrate to " << (bitrate/1e6) << "Mbps\n";
     emit(bitrateSignal, bitrate);
     this->bitrate = bitrate;
 
@@ -835,8 +835,8 @@ void SimplifiedRadio::updateTransceiverState()
 /*
 void SimplifiedRadio::updateSensitivity(double rate)
 {
-    EV<<"bitrate = "<<rate<<endl;
-    EV <<" sensitivity: "<<sensitivity<<endl;
+    EV_DEBUG << "bitrate = "<<rate<<endl;
+    EV_DEBUG << " sensitivity: "<<sensitivity<<endl;
     if (rate == 6E+6)
     {
         sensitivity = FWMath::dBm2mW(-82);
@@ -869,7 +869,7 @@ void SimplifiedRadio::updateSensitivity(double rate)
     {
         sensitivity = FWMath::dBm2mW(-65);
     }
-    EV <<" sensitivity after updateSensitivity: "<<sensitivity<<endl;
+    EV_DEBUG << " sensitivity after updateSensitivity: "<<sensitivity<<endl;
 }
 */
 
@@ -886,8 +886,8 @@ void SimplifiedRadio::updateSensitivity(double rate)
         sensitivity = sensitivityList[0.0];
     if (!par("setReceptionThreshold").boolValue())
         receptionThreshold = sensitivity;
-    EV<<"bitrate = "<<rate<<endl;
-    EV <<" sensitivity after updateSensitivity: "<<sensitivity<<endl;
+    EV_DEBUG << "bitrate = "<<rate<<endl;
+    EV_DEBUG << " sensitivity after updateSensitivity: "<<sensitivity<<endl;
 }
 
 void SimplifiedRadio::updateDisplayString() {
@@ -992,10 +992,10 @@ void SimplifiedRadio::connectReceiver()
 
     cGate* radioGate = this->gate("radioIn")->getPathStartGate();
 
-    EV << "RadioGate :" << radioGate->getFullPath() << " " << radioGate->getFullName() << endl;
+    EV_DEBUG << "RadioGate :" << radioGate->getFullPath() << " " << radioGate->getFullName() << endl;
 
     // pick up ongoing transmissions on the new channel
-    EV << "Picking up ongoing transmissions on current channel:\n";
+    EV_DEBUG << "Picking up ongoing transmissions on current channel:\n";
     ISimplifiedRadioChannel::TransmissionList tlAux = cc->getOngoingTransmissions(radioChannel);
     for (ISimplifiedRadioChannel::TransmissionList::const_iterator it = tlAux.begin(); it != tlAux.end(); ++it)
     {
@@ -1010,8 +1010,8 @@ void SimplifiedRadio::connectReceiver()
         // if there is a message on the air which will reach us in the future
         if (radioFrame->getTimestamp() + propagationDelay >= simTime())
         {
-            EV << " - (" << radioFrame->getClassName() << ")" << radioFrame->getName() << ": ";
-            EV << "will arrive in the future, scheduling it\n";
+            EV_DEBUG << " - (" << radioFrame->getClassName() << ")" << radioFrame->getName() << ": ";
+            EV_DEBUG << "will arrive in the future, scheduling it\n";
 
             // we need to send to each radioIn[] gate of this host
             //for (int i = 0; i < radioGate->size(); i++)
@@ -1024,7 +1024,7 @@ void SimplifiedRadio::connectReceiver()
         // if we hear some part of the message
         else if (radioFrame->getTimestamp() + radioFrame->getDuration() + propagationDelay > simTime())
         {
-            EV << "missed beginning of frame, processing it as noise\n";
+            EV_DEBUG << "missed beginning of frame, processing it as noise\n";
 
             SimplifiedRadioFrame *frameDup = radioFrame->dup();
             frameDup->setArrivalTime(radioFrame->getTimestamp() + propagationDelay);
