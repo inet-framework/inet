@@ -65,7 +65,7 @@
             }
             condition_seen = true; if (isFoo && ___is_event)
             {
-                EV << "firing " << XY << " transition for " << ___fsm->getName() << endl;
+                EV_DEBUG << "firing " << XY << " transition for " << ___fsm->getName() << endl;
                 doFoo;
                 ___fsm->setState(Y, "Y");
                 ___is_event = false;
@@ -74,7 +74,7 @@
             }
             condition_seen = true; if (isFooBar && !___is_event)
             {
-                EV << "firing " << XZ << " transition for " << ___fsm->getName() << endl;
+                EV_DEBUG << "firing " << XZ << " transition for " << ___fsm->getName() << endl;
                 doFooBar;
                 ___fsm->setState(Z, "Z");
                 ___exit = false;
@@ -85,7 +85,7 @@
         {
             condition_seen = true; if (isBar && ___is_event)
             {
-                EV << "firing " << YX << " transition for " << ___fsm->getName() << endl;
+                EV_DEBUG << "firing " << YX << " transition for " << ___fsm->getName() << endl;
                 doVar;
                 ___fsm->setState(X, "X");
                 ___is_event = false;
@@ -102,13 +102,13 @@
     bool ___condition_seen = false;                                    \
     int ___c = 0;                                                      \
     cFSM *___fsm = &fsm;                                               \
-    EV << "processing event in state machine " << (fsm).getName() << endl;  \
+    EV_DEBUG << "processing event in state machine " << (fsm).getName() << endl;  \
     while (!___exit && (___c++ < FSM_MAXT || (throw cRuntimeError(E_INFLOOP, (fsm).getStateName()), 0)))
 
-#define FSMA_Print(exiting)                                            \
-    (EV << "FSM " << ___fsm->getName()                                    \
-        << ((exiting) ? ": leaving state  " : ": entering state ")     \
-        << ___fsm->getStateName() << endl)
+#define FSMA_Print(exiting)                                              \
+    (EV_DEBUG << "FSM " << ___fsm->getName()                             \
+              << ((exiting) ? ": leaving state  " : ": entering state ") \
+              << ___fsm->getStateName() << endl)
 
 #define FSMA_State(s)  if (___condition_seen = false, ___exit = true, ___fsm->getState() == (s))
 
@@ -125,7 +125,7 @@
 
 #define FSMA_Transition(transition, condition, target, action)                          \
         FSMA_Print(true);                                                               \
-        EV << "firing " << #transition << " transition for " << ___fsm->getName() << endl; \
+        EV_DEBUG << "firing " << #transition << " transition for " << ___fsm->getName() << endl; \
         action;                                                                         \
         ___fsm->setState(target, #target);                                              \
         FSMA_Print(false);                                                              \
