@@ -89,9 +89,9 @@ void L2NodeConfigurator::prepareNode()
 
 void L2NodeConfigurator::prepareInterface(InterfaceEntry * interfaceEntry)
 {
-    ASSERT(!interfaceEntry->vlanData());
-    VLANInterfaceData * vlanInterfaceData = new VLANInterfaceData();
-    interfaceEntry->setVLANInterfaceData(vlanInterfaceData);
+    ASSERT(!interfaceEntry->ieee8021DData());
+    IEEE8021DInterfaceData * ieee8021dInterfaceData = new IEEE8021DInterfaceData();
+    interfaceEntry->setIEEE8021DInterfaceData(ieee8021dInterfaceData);
 }
 
 void L2NodeConfigurator::configureNode()

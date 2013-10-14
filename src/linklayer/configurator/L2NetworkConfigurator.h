@@ -21,7 +21,7 @@
 
 #include <algorithm>
 #include <vector>
-#include "VLANInterfaceData.h"
+#include "IEEE8021DInterfaceData.h"
 #include "stlutils.h"
 #include "INETDefs.h"
 #include "Topology.h"
@@ -40,6 +40,7 @@ class L2NetworkConfigurator : public cSimpleModule
 {
   public:
         L2NetworkConfigurator() { rootNode = NULL; }
+        typedef IEEE8021DInterfaceData::PortInfo PortInfo;
   protected:
     class InterfaceInfo;
 
@@ -66,11 +67,7 @@ class L2NetworkConfigurator : public cSimpleModule
             Node * node;
             Node * childNode;
             InterfaceEntry * interfaceEntry;
-
-            // RSTP port properties
-            bool tagged;
-            int cost;
-            int priority;
+            PortInfo portData;
 
         public:
             InterfaceInfo(Node * node, Node * childNode, InterfaceEntry * interfaceEntry);

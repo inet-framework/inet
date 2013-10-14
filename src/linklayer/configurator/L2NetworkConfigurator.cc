@@ -57,11 +57,6 @@ L2NetworkConfigurator::InterfaceInfo::InterfaceInfo(Node * node, Node * childNod
     this->node = node;
     this->interfaceEntry = interfaceEntry;
     this->childNode = childNode;
-    // default parameters for every switch
-    // todo: what are the default parameters for this protocol?
-    tagged = true;
-    cost = 1;
-    priority = 5;
 }
 void L2NetworkConfigurator::extractTopology(L2Topology& topology)
 {
@@ -142,11 +137,10 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node * rootNode)
         const char * amongAttr = interfaceElement->getAttribute("among");       // neighbor host names, like "host[*] router1"
         const char * portsAttr = interfaceElement->getAttribute("ports");       // switch gate indices, like "0 1 2"
 
-        // BEGIN RSTP properties, for more information see RSTP module
-        const char * tagged = interfaceElement->getAttribute("tagged");
+        // Begin RSTP properties, for more information see RSTP module
         const char * cost = interfaceElement->getAttribute("cost");
         const char * priority = interfaceElement->getAttribute("priority");
-        // END RSTP properties
+        // End RSTP properties
 
         if (amongAttr && *amongAttr) // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
         {
@@ -193,17 +187,14 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node * rootNode)
                                && (towardsMatcher.matchesAny() || linkContainsMatchingHostExcept(currentNode->interfaceInfos[i],towardsMatcher,hostModule)) &&
                                (portsMatcher.matchesAny() || portsMatcher.matches(port.c_str()) ) )
                        {
-                           // tagged
-                           if (isNotEmpty(tagged))
-                               currentNode->interfaceInfos[i]->tagged = !strcmp(tagged, "true") ? true : false;
 
                            // cost
                            if (isNotEmpty(cost))
-                               currentNode->interfaceInfos[i]->cost = atoi(cost);
+                               currentNode->interfaceInfos[i]->portData.linkCost = atoi(cost);
 
                            // priority
                            if (isNotEmpty(priority))
-                               currentNode->interfaceInfos[i]->priority = atoi(priority);
+                               currentNode->interfaceInfos[i]->portData.portPriority = atoi(priority);
 
 
                            EV_DEBUG << hostModule->getFullPath() << ":" << ifEntry->getFullName() << endl;
@@ -297,11 +288,10 @@ void L2NetworkConfigurator::configureInterface(InterfaceEntry * interfaceEntry)
 void L2NetworkConfigurator::configureInterface(InterfaceInfo * interfaceInfo)
 {
     InterfaceEntry * interfaceEntry = interfaceInfo->interfaceEntry;
-    VLANInterfaceData * interfaceData = interfaceEntry->vlanData();
+    IEEE8021DInterfaceData * interfaceData = interfaceEntry->ieee8021DData();
 
-    interfaceData->setCost(interfaceInfo->cost);
-    interfaceData->setPriority(interfaceInfo->priority);
-    interfaceData->setTagged(interfaceInfo->tagged);
+    interfaceData->setLinkCost(interfaceInfo->portData.linkCost);
+    interfaceData->setPortPriority(interfaceInfo->portData.portPriority);
 }
 
 L2NetworkConfigurator::Matcher::~Matcher()
