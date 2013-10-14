@@ -189,10 +189,8 @@ void PingApp::sendPingRequest()
     {
         srcAddr = AddressResolver().resolve(par("srcAddr"));
         destAddr = AddressResolver().resolve(par("destAddr"));
-        EV << "Starting up: destination = " << destAddr << "  source = " << srcAddr << "\n";
+        EV_INFO << "Starting up with destination = " << destAddr << ", source = " << srcAddr << ".\n";
     }
-
-    EV << "Sending ping #" << sendSeqNo << "\n";
 
     char name[32];
     sprintf(name, "ping%ld", sendSeqNo);
@@ -226,6 +224,7 @@ void PingApp::sendToICMP(PingPayload *msg, const Address& destAddr, const Addres
     // TODO: remove
     controlInfo->setTransportProtocol(1); // IP_PROT_ICMP);
     msg->setControlInfo(dynamic_cast<cObject *>(controlInfo));
+    EV_INFO << "Sending ping request #" << msg->getSeqNo() << " to lower layer.\n";
     send(msg, "pingOut");
 }
 
@@ -233,7 +232,7 @@ void PingApp::processPingResponse(PingPayload *msg)
 {
     if (msg->getOriginatorId() != pid)
     {
-        EV << "Received response was not sent by this application, dropping packet\n";
+        EV_WARN << "Received response was not sent by this application, dropping packet\n";
         delete msg;
         return;
     }
@@ -246,7 +245,7 @@ void PingApp::processPingResponse(PingPayload *msg)
     simtime_t sendTime = STR_SIMTIME(time);     // Why converting to/from string?
 
     if (sendTime < lastStart) {
-        EV << "Received response was not sent since last application start, dropping packet\n";
+        EV_WARN << "Received response was not sent since last application start, dropping packet\n";
         delete msg;
         return;
     }
@@ -266,6 +265,7 @@ void PingApp::processPingResponse(PingPayload *msg)
 
     if (printPing)
     {
+        // TODO: why not EV? is it because of express mode?
         cout << getFullPath() << ": reply of " << std::dec << msg->getByteLength()
              << " bytes from " << src
              << " icmp_seq=" << msg->getSeqNo() << " ttl=" << msgHopLimit
@@ -280,7 +280,7 @@ void PingApp::processPingResponse(PingPayload *msg)
 
 void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
 {
-    EV << "Ping reply #" << seqNo << " arrived, rtt=" << rtt << "\n";
+    EV_INFO << "Received ping reply #" << seqNo << " with RTT = " << rtt << "\n";
     emit(pingRxSeqSignal, seqNo);
 
     numPongs++;
@@ -299,7 +299,7 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
     }
     else if (seqNo > expectedReplySeqNo)
     {
-        EV << "Jump in seq numbers, assuming pings since #" << expectedReplySeqNo << " got lost\n";
+        EV_DETAIL << "Jump in seq numbers, assuming pings since #" << expectedReplySeqNo << " got lost\n";
 
         // jump in the sequence: count pings in gap as lost for now
         // (if they arrive later, we'll decrement back the loss counter)
@@ -313,7 +313,7 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
     else // seqNo < expectedReplySeqNo
     {
         // ping reply arrived too late: count as out-of-order arrival (not loss after all)
-        EV << "Arrived out of order (too late)\n";
+        EV_DETAIL << "Arrived out of order (too late)\n";
         outOfOrderArrivalCount++;
         lossCount--;
         emit(outOfOrderArrivalsSignal, outOfOrderArrivalCount);
@@ -326,7 +326,7 @@ void PingApp::finish()
     if (sentCount==0)
     {
         if (printPing)
-            EV << getFullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
+            EV_WARN << getFullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
         return;
     }
 
@@ -339,6 +339,7 @@ void PingApp::finish()
     // print it to stdout as well
     if (printPing)
     {
+        // TODO: why not EV? is it because of express mode?
         cout << "--------------------------------------------------------" << endl;
         cout << "\t" << getFullPath() << endl;
         cout << "--------------------------------------------------------" << endl;

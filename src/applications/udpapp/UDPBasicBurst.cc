@@ -200,7 +200,7 @@ void UDPBasicBurst::handleMessageWhenUp(cMessage *msg)
     }
     else if (msg->getKind() == UDP_I_ERROR)
     {
-        EV << "Ignoring UDP error report\n";
+        EV_WARN << "Ignoring UDP error report\n";
         delete msg;
     }
     else
@@ -220,7 +220,7 @@ void UDPBasicBurst::processPacket(cPacket *pk)
 {
     if (pk->getKind() == UDP_I_ERROR)
     {
-        EV << "UDP error received\n";
+        EV_WARN << "UDP error received\n";
         delete pk;
         return;
     }
@@ -235,7 +235,7 @@ void UDPBasicBurst::processPacket(cPacket *pk)
         {
             if (it->second >= msgId)
             {
-                EV << "Out of order packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+                EV_DEBUG << "Out of order packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
                 emit(outOfOrderPkSignal, pk);
                 delete pk;
                 numDuplicated++;
@@ -252,7 +252,7 @@ void UDPBasicBurst::processPacket(cPacket *pk)
     {
         if (simTime() - pk->getTimestamp() > delayLimit)
         {
-            EV << "Old packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+            EV_DEBUG << "Old packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
             emit(dropPkSignal, pk);
             delete pk;
             numDeleted++;
@@ -260,7 +260,7 @@ void UDPBasicBurst::processPacket(cPacket *pk)
         }
     }
 
-    EV << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+    EV_INFO << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
     emit(rcvdPkSignal, pk);
     numReceived++;
     delete pk;

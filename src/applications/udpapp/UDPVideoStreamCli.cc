@@ -55,7 +55,7 @@ void UDPVideoStreamCli::handleMessageWhenUp(cMessage* msg)
     }
     else if (msg->getKind() == UDP_I_ERROR)
     {
-        EV << "Ignoring UDP error report\n";
+        EV_WARN << "Ignoring UDP error report\n";
         delete msg;
     }
     else
@@ -73,11 +73,11 @@ void UDPVideoStreamCli::requestStream()
 
     if (svrAddr.isUnspecified())
     {
-        EV << "Server address is unspecified, skip sending video stream request\n";
+        EV_ERROR << "Server address is unspecified, skip sending video stream request\n";
         return;
     }
 
-    EV << "Requesting video stream from " << svrAddr << ":" << svrPort << "\n";
+    EV_INFO << "Requesting video stream from " << svrAddr << ":" << svrPort << "\n";
 
     socket.setOutputGate(gate("udpOut"));
     socket.bind(localPort);
@@ -88,7 +88,7 @@ void UDPVideoStreamCli::requestStream()
 
 void UDPVideoStreamCli::receiveStream(cPacket *pk)
 {
-    EV << "Video stream packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
+    EV_INFO << "Video stream packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
     emit(rcvdPkSignal, pk);
     delete pk;
 }

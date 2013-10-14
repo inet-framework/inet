@@ -39,7 +39,7 @@ SimpleVoIPSender::~SimpleVoIPSender()
 
 void SimpleVoIPSender::initialize(int stage)
 {
-    EV << "VoIP Sender initialize: stage " << stage << endl;
+    EV_TRACE << "VoIP Sender initialize: stage " << stage << endl;
 
     cSimpleModule::initialize(stage);
 
@@ -72,7 +72,7 @@ void SimpleVoIPSender::initialize(int stage)
         socket.setOutputGate(gate("udpOut"));
         socket.bind(localPort);
 
-        EV << "VoIPSender::initialize - binding to port: local:" << localPort << " , dest:" << destPort << endl;
+        EV_INFO << "VoIPSender::initialize - binding to port: local:" << localPort << " , dest:" << destPort << endl;
 
         // calculating traffic starting time
         simtime_t startTime = par("startTime").doubleValue();
@@ -81,7 +81,7 @@ void SimpleVoIPSender::initialize(int stage)
             throw cRuntimeError("Invalid startTime/stopTime settings: startTime %g s greater than stopTime %g s", SIMTIME_DBL(startTime), SIMTIME_DBL(stopTime));
 
         scheduleAt(startTime, selfSource);
-        EV << "\t starting traffic in " << startTime << " s" << endl;
+        EV_INFO << "\t starting traffic in " << startTime << " s" << endl;
     }
 }
 
@@ -112,7 +112,7 @@ void SimpleVoIPSender::talkspurt(simtime_t dur)
     talkspurtID++;
     packetID = 0;
     talkspurtNumPackets = (ceil(dur / packetizationInterval));
-    EV << "TALKSPURT " << talkspurtID-1 << " will be sent " << talkspurtNumPackets << " packets\n\n";
+    EV_DEBUG << "TALKSPURT " << talkspurtID-1 << " will be sent " << talkspurtNumPackets << " packets\n\n";
 
     scheduleAt(startTime + packetizationInterval, selfSender);
 }
@@ -126,7 +126,7 @@ void SimpleVoIPSender::selectPeriodTime()
     if (isTalk)
     {
         silenceDuration = par("silenceDuration").doubleValue();
-        EV << "SILENCE: " << "Duration: " << silenceDuration << " seconds\n\n";
+        EV_DEBUG << "SILENCE: " << "Duration: " << silenceDuration << " seconds\n\n";
         simtime_t endSilent = now + silenceDuration;
         if (stopTime >= SIMTIME_ZERO && endSilent > stopTime)
             endSilent = stopTime;
@@ -136,7 +136,7 @@ void SimpleVoIPSender::selectPeriodTime()
     else
     {
         talkspurtDuration = par("talkspurtDuration").doubleValue();
-        EV << "TALKSPURT: " << talkspurtID << " Duration: " << talkspurtDuration << " seconds\n\n";
+        EV_DEBUG << "TALKSPURT: " << talkspurtID << " Duration: " << talkspurtDuration << " seconds\n\n";
         simtime_t endTalk = now + talkspurtDuration;
         if (stopTime >= SIMTIME_ZERO && endTalk > stopTime)
         {
@@ -158,7 +158,7 @@ void SimpleVoIPSender::sendVoIPPacket()
     packet->setVoipTimestamp(simTime() - packetizationInterval);    // start time of voice in this packet
     packet->setVoiceDuration(packetizationInterval);
     packet->setByteLength(talkPacketSize);
-    EV << "TALKSPURT " << talkspurtID-1 << " sending packet " << packetID << "\n";
+    EV_INFO << "TALKSPURT " << talkspurtID-1 << " sending packet " << packetID << "\n";
 
     socket.sendTo(packet, destAddress, destPort);
     ++packetID;

@@ -185,7 +185,7 @@ MACAddress EtherAppCli::resolveDestMACAddress()
 
 void EtherAppCli::registerDSAP(int dsap)
 {
-    EV << getFullPath() << " registering DSAP " << dsap << "\n";
+    EV_DEBUG << getFullPath() << " registering DSAP " << dsap << "\n";
 
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setDsap(dsap);
@@ -201,7 +201,7 @@ void EtherAppCli::sendPacket()
 
     char msgname[30];
     sprintf(msgname, "req-%d-%ld", getId(), seqNum);
-    EV << "Generating packet `" << msgname << "'\n";
+    EV_INFO << "Generating packet `" << msgname << "'\n";
 
     EtherAppReq *datapacket = new EtherAppReq(msgname, IEEE802CTRL_DATA);
 
@@ -226,7 +226,7 @@ void EtherAppCli::sendPacket()
 
 void EtherAppCli::receivePacket(cPacket *msg)
 {
-    EV << "Received packet `" << msg->getName() << "'\n";
+    EV_INFO << "Received packet `" << msg->getName() << "'\n";
 
     packetsReceived++;
     emit(rcvdPkSignal, msg);
