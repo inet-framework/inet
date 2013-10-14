@@ -38,7 +38,7 @@ inline bool isNotEmpty(const char *s) {return s && s[0];}
 
 static void printElapsedTime(const char *name, long startTime)
 {
-    EV_INFO << "Time spent in IPv4NetworkConfigurator::" << name << ": " << ((double)(clock() - startTime) / CLOCKS_PER_SEC) << "s" << endl;
+    EV_DEBUG_C("time") << "Time spent in IPv4NetworkConfigurator::" << name << ": " << ((double)(clock() - startTime) / CLOCKS_PER_SEC) << "s" << endl;
 }
 
 IPv4NetworkConfigurator::InterfaceInfo::InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry)
@@ -98,6 +98,7 @@ void IPv4NetworkConfigurator::initialize(int stage)
 
 void IPv4NetworkConfigurator::computeConfiguration()
 {
+    EV_INFO << "Computing static network configuration (addresses and routes).\n";
     long initializeStartTime = clock();
     topology.clear();
     // extract topology into the IPv4Topology object, then fill in a LinkInfo[] vector
@@ -116,7 +117,7 @@ void IPv4NetworkConfigurator::computeConfiguration()
     // calculate shortest paths, and add corresponding static routes
     if (addStaticRoutesParameter)
         T(addStaticRoutes(topology));
-    printElapsedTime("initialize", initializeStartTime);
+    printElapsedTime("computeConfiguration", initializeStartTime);
 }
 
 void IPv4NetworkConfigurator::ensureConfigurationComputed(IPv4Topology& topology)
@@ -147,6 +148,7 @@ void IPv4NetworkConfigurator::dumpConfiguration()
 void IPv4NetworkConfigurator::configureAllInterfaces()
 {
     ensureConfigurationComputed(topology);
+    EV_INFO << "Configuring all network interfaces.\n";
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         for (int i = 0; i < (int)node->interfaceInfos.size(); i++) {
@@ -171,6 +173,7 @@ void IPv4NetworkConfigurator::configureInterface(InterfaceEntry *interfaceEntry)
 void IPv4NetworkConfigurator::configureAllRoutingTables()
 {
     ensureConfigurationComputed(topology);
+    EV_INFO << "Configuring all routing tables.\n";
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         if (node->routingTable)
@@ -191,6 +194,7 @@ void IPv4NetworkConfigurator::configureRoutingTable(IIPv4RoutingTable *routingTa
 
 void IPv4NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
 {
+    EV_DETAIL << "Configuring network interface " << interfaceInfo->getFullPath() << ".\n";
     InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
     IPv4InterfaceData *interfaceData = interfaceEntry->ipv4Data();
     if (interfaceInfo->mtu != -1) interfaceEntry->setMtu(interfaceInfo->mtu);
@@ -206,6 +210,7 @@ void IPv4NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
 
 void IPv4NetworkConfigurator::configureRoutingTable(Node *node)
 {
+    EV_DETAIL << "Configuring routing table of " << node->getModule()->getFullPath() << ".\n";
     for (int i = 0; i < (int)node->staticRoutes.size(); i++) {
         IPv4Route *original = node->staticRoutes[i];
         IPv4Route *clone = new IPv4Route();
@@ -1062,6 +1067,8 @@ void IPv4NetworkConfigurator::readInterfaceConfiguration(IPv4Topology& topology)
                             (interfaceMatcher.matchesAny() || interfaceMatcher.matches(interfaceInfo->interfaceEntry->getFullName())) &&
                             (towardsMatcher.matchesAny() || linkContainsMatchingHostExcept(linkInfo, &towardsMatcher, hostModule)))
                         {
+                            EV_DEBUG << "Processing interface configuration for " << hostModule->getFullPath() << ":" << interfaceInfo->interfaceEntry->getFullName() << endl;
+
                             // unicast address constraints
                             interfaceInfo->configure = haveAddressConstraint;
                             if (interfaceInfo->configure)
@@ -1097,7 +1104,6 @@ void IPv4NetworkConfigurator::readInterfaceConfiguration(IPv4Topology& topology)
                             }
 
                             interfacesSeen.insert(interfaceInfo);
-                            EV_DEBUG << hostModule->getFullPath() << ":" << interfaceInfo->interfaceEntry->getFullName() << endl;
                         }
                     }
                 }
