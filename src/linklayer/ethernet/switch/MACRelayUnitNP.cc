@@ -85,16 +85,16 @@ void MACRelayUnitNP::initialize(int stage)
             endProcEvents[i] = new cMessage(msgname, i);
         }
 
-        EV << "Parameters of (" << getClassName() << ") " << getFullPath() << "\n";
-        EV << "number of processors: " << numCPUs << "\n";
-        EV << "processing time: " << processingTime << "\n";
-        EV << "ports: " << numPorts << "\n";
-        EV << "buffer size: " << bufferSize << "\n";
-        EV << "address table size: " << addressTableSize << "\n";
-        EV << "aging time: " << agingTime << "\n";
-        EV << "high watermark: " << highWatermark << "\n";
-        EV << "pause time: " << pauseUnits << "\n";
-        EV << "\n";
+        EV_DEBUG << "Parameters of (" << getClassName() << ") " << getFullPath() << "\n";
+        EV_DEBUG << "number of processors: " << numCPUs << "\n";
+        EV_DEBUG << "processing time: " << processingTime << "\n";
+        EV_DEBUG << "ports: " << numPorts << "\n";
+        EV_DEBUG << "buffer size: " << bufferSize << "\n";
+        EV_DEBUG << "address table size: " << addressTableSize << "\n";
+        EV_DEBUG << "aging time: " << agingTime << "\n";
+        EV_DEBUG << "high watermark: " << highWatermark << "\n";
+        EV_DEBUG << "pause time: " << pauseUnits << "\n";
+        EV_DEBUG << "\n";
     }
 }
 
@@ -104,11 +104,12 @@ void MACRelayUnitNP::handleMessage(cMessage *msg)
     {
         if(!isOperational)
         {
-            EV << "Message '" << msg << "' arrived when module status is down, dropped it\n";
+            EV_ERROR << "Message '" << msg << "' arrived when module status is down, dropped it\n";
             delete msg;
             return;
         }
         // Frame received from MAC unit
+        EV_INFO << "Received " << msg << " from lower layer.\n";
         handleIncomingFrame(check_and_cast<EtherFrame *>(msg));
     }
     else
@@ -140,12 +141,12 @@ void MACRelayUnitNP::handleIncomingFrame(EtherFrame *frame)
                 break;
         if (i==numCPUs)
         {
-            EV << "All CPUs busy, enqueueing incoming frame " << frame << " for later processing\n";
+            EV_DETAIL << "All CPUs busy, enqueueing incoming frame " << frame << " for later processing\n";
             queue.insert(frame);
         }
         else
         {
-            EV << "Idle CPU-" << i << " starting processing of incoming frame " << frame << endl;
+            EV_DETAIL << "Idle CPU-" << i << " starting processing of incoming frame " << frame << endl;
             cMessage *msg = endProcEvents[i];
             ASSERT(msg->getContextPointer()==NULL);
             msg->setContextPointer(frame);
@@ -155,7 +156,7 @@ void MACRelayUnitNP::handleIncomingFrame(EtherFrame *frame)
     // Drop the frame and record the number of dropped frames
     else
     {
-        EV << "Buffer full, dropping frame " << frame << endl;
+        EV_WARN << "Buffer full, dropping frame " << frame << endl;
         delete frame;
         ++numDroppedFrames;
     }
@@ -173,7 +174,7 @@ void MACRelayUnitNP::processFrame(cMessage *msg)
     long length = frame->getByteLength();
     int inputport = frame->getArrivalGate()->getIndex();
 
-    EV << "CPU-" << cpu << " completed processing of frame " << frame << endl;
+    EV_DETAIL << "CPU-" << cpu << " completed processing of frame " << frame << endl;
 
     handleAndDispatchFrame(frame, inputport);
     printAddressTable();
@@ -188,12 +189,12 @@ void MACRelayUnitNP::processFrame(cMessage *msg)
     {
         EtherFrame *newframe = (EtherFrame *) queue.pop();
         msg->setContextPointer(newframe);
-        EV << "CPU-" << cpu << " starting processing of frame " << newframe << endl;
+        EV_DETAIL << "CPU-" << cpu << " starting processing of frame " << newframe << endl;
         scheduleAt(simTime()+processingTime, msg);
     }
     else
     {
-        EV << "CPU-" << cpu << " idle\n";
+        EV_DETAIL << "CPU-" << cpu << " idle\n";
     }
 }
 

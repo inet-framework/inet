@@ -116,7 +116,7 @@ void MACRelayUnitBase::handleAndDispatchFrame(EtherFrame *frame, int inputport)
     // handle broadcast frames first
     if (frame->getDest().isBroadcast())
     {
-        EV << "Broadcasting broadcast frame " << frame << endl;
+        EV_DETAIL << "Broadcasting broadcast frame " << frame << endl;
         broadcastFrame(frame, inputport);
         return;
     }
@@ -128,25 +128,26 @@ void MACRelayUnitBase::handleAndDispatchFrame(EtherFrame *frame, int inputport)
     // (although wireless ports are ok to receive the same message)
     if (inputport == outputport)
     {
-        EV << "Output port is same as input port, " << frame->getFullName() <<
-              " dest " << frame->getDest() << ", discarding frame\n";
+        EV_DETAIL << "Output port is same as input port, " << frame->getFullName()
+           << " dest " << frame->getDest() << ", discarding frame\n";
         delete frame;
         return;
     }
     if (outputport >= 0)
     {
-        EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputport << endl;
+        EV_INFO << "Sending " << frame << " with destination = " << frame->getDest() << ", port = " << outputport << endl;
         send(frame, "ifOut", outputport);
     }
     else
     {
-        EV << "Dest address " << frame->getDest() << " unknown, broadcasting frame " << frame << endl;
+        EV_DETAIL << "Dest address " << frame->getDest() << " unknown, broadcasting frame " << frame << endl;
         broadcastFrame(frame, inputport);
     }
 }
 
 void MACRelayUnitBase::broadcastFrame(EtherFrame *frame, int inputport)
 {
+    EV_INFO << "Sending " << frame << " to all lower layers." << endl;
     for (int i=0; i<numPorts; ++i)
         if (i != inputport)
             send((EtherFrame*)frame->dup(), "ifOut", i);
@@ -156,11 +157,11 @@ void MACRelayUnitBase::broadcastFrame(EtherFrame *frame, int inputport)
 void MACRelayUnitBase::printAddressTable()
 {
     AddressTable::iterator iter;
-    EV << "Address Table (" << addresstable.size() << " entries):\n";
+    EV_DETAIL << "Address Table (" << addresstable.size() << " entries):\n";
     for (iter = addresstable.begin(); iter!=addresstable.end(); ++iter)
     {
-        EV << "  " << iter->first << " --> port" << iter->second.portno <<
-              (iter->second.insertionTime+agingTime <= simTime() ? " (aged)" : "") << endl;
+        EV_DETAIL << "  " << iter->first << " --> port" << iter->second.portno
+                 << (iter->second.insertionTime+agingTime <= simTime() ? " (aged)" : "") << endl;
     }
 }
 
@@ -172,8 +173,8 @@ void MACRelayUnitBase::removeAgedEntriesFromTable()
         AddressEntry& entry = cur->second;
         if (entry.insertionTime + agingTime <= simTime())
         {
-            EV << "Removing aged entry from Address Table: " <<
-                  cur->first << " --> port" << cur->second.portno << "\n";
+            EV_DETAIL << "Removing aged entry from Address Table: "
+                     << cur->first << " --> port" << cur->second.portno << "\n";
             addresstable.erase(cur);
         }
     }
@@ -193,8 +194,8 @@ void MACRelayUnitBase::removeOldestTableEntry()
     }
     if (oldest != addresstable.end())
     {
-        EV << "Table full, removing oldest entry: " <<
-              oldest->first << " --> port" << oldest->second.portno << "\n";
+        EV_DETAIL << "Table full, removing oldest entry: "
+                 << oldest->first << " --> port" << oldest->second.portno << "\n";
         addresstable.erase(oldest);
     }
 }
@@ -210,7 +211,7 @@ void MACRelayUnitBase::updateTableWithAddress(MACAddress& address, int portno)
         if (addressTableSize!=0 && addresstable.size() == (unsigned int)addressTableSize)
         {
             // lazy removal of aged entries: only if table gets full (this step is not strictly needed)
-            EV << "Making room in Address Table by throwing out aged entries.\n";
+            EV_DETAIL << "Making room in Address Table by throwing out aged entries.\n";
             removeAgedEntriesFromTable();
 
             if (addresstable.size() == (unsigned int)addressTableSize)
@@ -218,7 +219,7 @@ void MACRelayUnitBase::updateTableWithAddress(MACAddress& address, int portno)
         }
 
         // Add entry to table
-        EV << "Adding entry to Address Table: "<< address << " --> port" << portno << "\n";
+        EV_DETAIL << "Adding entry to Address Table: "<< address << " --> port" << portno << "\n";
         AddressEntry entry;
         entry.portno = portno;
         entry.insertionTime = simTime();
@@ -227,7 +228,7 @@ void MACRelayUnitBase::updateTableWithAddress(MACAddress& address, int portno)
     else
     {
         // Update existing entry
-        EV << "Updating entry in Address Table: "<< address << " --> port" << portno << "\n";
+        EV_DETAIL << "Updating entry in Address Table: "<< address << " --> port" << portno << "\n";
         AddressEntry& entry = iter->second;
         entry.insertionTime = simTime();
         entry.portno = portno;
@@ -246,7 +247,7 @@ int MACRelayUnitBase::getPortForAddress(MACAddress& address)
     if (iter->second.insertionTime + agingTime <= simTime())
     {
         // don't use (and throw out) aged entries
-        EV << "Ignoring and deleting aged entry: "<< iter->first << " --> port" << iter->second.portno << "\n";
+        EV_DETAIL << "Ignoring and deleting aged entry: "<< iter->first << " --> port" << iter->second.portno << "\n";
         addresstable.erase(iter);
         return -1;
     }
@@ -310,7 +311,7 @@ void MACRelayUnitBase::readAddressTable(const char* fileName)
 
 void MACRelayUnitBase::sendPauseFrame(int portno, int pauseUnits)
 {
-    EV << "Creating and sending PAUSE frame on port " << portno << " with duration=" << pauseUnits << " units\n";
+    EV_DETAIL << "Creating and sending PAUSE frame on port " << portno << " with duration=" << pauseUnits << " units\n";
 
     IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     InterfaceEntry *ie = ift->getInterfaceByNetworkLayerGateIndex(portno);

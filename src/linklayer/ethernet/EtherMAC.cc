@@ -148,7 +148,7 @@ void EtherMAC::readChannelParameters(bool errorWhenAsymmetric)
 void EtherMAC::handleSelfMessage(cMessage *msg)
 {
     // Process different self-messages (timer signals)
-    EV << "Self-message " << msg << " received\n";
+    EV_TRACE << "Self-message " << msg << " received\n";
 
     switch (msg->getKind())
     {
@@ -220,7 +220,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 
     frame->setFrameByteLength(frame->getByteLength());
 
-    EV << "Received frame from upper layer: " << frame << endl;
+    EV_INFO << "Received " << frame << " from upper layer." << endl;
 
     emit(packetReceivedFromUpperSignal, frame);
 
@@ -238,7 +238,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 
     if (!connected || disabled)
     {
-        EV << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping packet " << frame << endl;
+        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping packet " << frame << endl;
         emit(dropPkFromHLIfaceDownSignal, frame);
         numDroppedPkFromHLIfaceDown++;
         delete frame;
@@ -274,7 +274,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
                   txQueue.innerQueue->getQueueLimit());
 
         // store frame and possibly begin transmitting
-        EV << "Frame " << frame << " arrived from higher layer, enqueueing\n";
+        EV_DETAIL << "Frame " << frame << " arrived from higher layer, enqueueing\n";
         txQueue.innerQueue->insertFrame(frame);
 
         if (!curTxFrame && !txQueue.innerQueue->empty())
@@ -283,7 +283,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 
     if ((duplexMode || receiveState == RX_IDLE_STATE) && transmitState == TX_IDLE_STATE)
     {
-        EV << "No incoming carrier signals detected, frame clear to send\n";
+        EV_DETAIL << "No incoming carrier signals detected, frame clear to send\n";
         startFrameTransmission();
     }
 }
@@ -356,11 +356,11 @@ void EtherMAC::processReceivedJam(EtherJam *jam)
 
 void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
 {
-    EV << "Received frame from network: " << msg << endl;
+    EV_DETAIL << "Received " << msg << " from network.\n";
 
     if (!connected || disabled)
     {
-        EV << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << msg << endl;
+        EV_WARN << (!connected ? "Interface is not connected" : "MAC is disabled") << " -- dropping msg " << msg << endl;
         if (dynamic_cast<EtherFrame *>(msg))    // do not count JAM and IFG packets
         {
             emit(dropPkIfaceDownSignal, msg);
@@ -409,10 +409,10 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         addReception(endRxTime);
         delete msg;
 
-        EV << "Transmission interrupted by incoming frame, handling collision\n";
+        EV_DETAIL << "Transmission interrupted by incoming frame, handling collision\n";
         cancelEvent((transmitState==TRANSMITTING_STATE) ? endTxMsg : endIFGMsg);
 
-        EV << "Transmitting jam signal\n";
+        EV_DETAIL << "Transmitting jam signal\n";
         sendJamSignal(); // backoff will be executed when jamming finished
 
         numCollisions++;
@@ -424,7 +424,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
             throw cRuntimeError("Stray jam signal arrived (usual cause is cable length exceeding allowed maximum)");
 
         channelBusySince = simTime();
-        EV << "Start reception of frame\n";
+        EV_INFO << "Reception of " << msg << " started.\n";
         scheduleEndRxPeriod(msg);
     }
     else if (receiveState == RECEIVING_STATE
@@ -436,7 +436,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         // BEFORE "end of previous frame" event (endRxMsg) -- same simulation time,
         // only wrong order.
 
-        EV << "Back-to-back frames: completing reception of current frame, starting reception of next one\n";
+        EV_DETAIL << "Back-to-back frames: completing reception of current frame, starting reception of next one\n";
 
         // complete reception of previous frame
         cancelEvent(endRxMsg);
@@ -458,7 +458,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         }
         else // EtherFrame or EtherPauseFrame
         {
-            EV << "Overlapping receptions -- setting collision state\n";
+            EV_DETAIL << "Overlapping receptions -- setting collision state\n";
             addReception(endRxTime);
             // delete collided frames: arrived frame as well as the one we're currently receiving
             delete msg;
@@ -488,7 +488,7 @@ void EtherMAC::handleEndIFGPeriod()
 
     currentSendPkTreeID = 0;
 
-    EV << "IFG elapsed\n";
+    EV_DETAIL << "IFG elapsed\n";
 
     if (frameBursting && (transmitState != SEND_IFG_STATE))
     {
@@ -506,7 +506,7 @@ void EtherMAC::startFrameTransmission()
 {
     ASSERT(curTxFrame);
 
-    EV << "Transmitting a copy of frame " << curTxFrame << endl;
+    EV_INFO << "Transmission of " << curTxFrame << " started.\n";
 
     EtherFrame *frame = curTxFrame->dup();
 
@@ -538,7 +538,7 @@ void EtherMAC::startFrameTransmission()
         // But we don't know of any ongoing transmission so we blindly
         // start transmitting, immediately collide and send a jam signal.
         //
-        EV << "startFrameTransmission(): sending JAM signal.\n";
+        EV_DETAIL << "startFrameTransmission(): sending JAM signal.\n";
         printState();
 
         sendJamSignal();
@@ -592,7 +592,7 @@ void EtherMAC::handleEndTxPeriod()
         emit(txPkSignal, curTxFrame);
     }
 
-    EV << "Transmission of " << curTxFrame << " successfully completed\n";
+    EV_INFO << "Transmission of " << curTxFrame << " successfully completed.\n";
     delete curTxFrame;
     curTxFrame = NULL;
     lastTxFinishTime = simTime();
@@ -611,13 +611,13 @@ void EtherMAC::handleEndTxPeriod()
     if (pauseUnitsRequested > 0)
     {
         // if we received a PAUSE frame recently, go into PAUSE state
-        EV << "Going to PAUSE mode for " << pauseUnitsRequested << " time units\n";
+        EV_DETAIL << "Going to PAUSE mode for " << pauseUnitsRequested << " time units\n";
         scheduleEndPausePeriod(pauseUnitsRequested);
         pauseUnitsRequested = 0;
     }
     else
     {
-        EV << "Start IFG period\n";
+        EV_DETAIL << "Start IFG period\n";
         scheduleEndIFGPeriod();
         if (!txQueue.extQueue)
             fillIFGIfInBurst();
@@ -641,18 +641,17 @@ void EtherMAC::handleEndRxPeriod()
     switch (receiveState)
     {
         case RECEIVING_STATE:
-            EV << "Frame reception complete\n";
             frameReceptionComplete();
             totalSuccessfulRxTxTime += dt;
             break;
 
         case RX_COLLISION_STATE:
-            EV << "Incoming signals finished after collision\n";
+            EV_DETAIL << "Incoming signals finished after collision\n";
             totalCollisionTime += dt;
             break;
 
         case RX_RECONNECT_STATE:
-            EV << "Incoming signals finished or reconnect time elapsed after reconnect\n";
+            EV_DETAIL << "Incoming signals finished or reconnect time elapsed after reconnect\n";
             endRxTimeList.clear();
             break;
 
@@ -677,12 +676,12 @@ void EtherMAC::handleEndBackoffPeriod()
 
     if (receiveState == RX_IDLE_STATE)
     {
-        EV << "Backoff period ended, wait IFG\n";
+        EV_DETAIL << "Backoff period ended, wait IFG\n";
         scheduleEndIFGPeriod();
     }
     else
     {
-        EV << "Backoff period ended but channel is not free, idling\n";
+        EV_DETAIL << "Backoff period ended but channel is not free, idling\n";
         transmitState = TX_IDLE_STATE;
     }
 }
@@ -712,7 +711,7 @@ void EtherMAC::handleEndJammingPeriod()
     if (transmitState != JAMMING_STATE)
         throw cRuntimeError("At end of JAMMING but not in JAMMING_STATE");
 
-    EV << "Jamming finished, executing backoff\n";
+    EV_DETAIL << "Jamming finished, executing backoff\n";
     handleRetransmission();
 }
 
@@ -720,7 +719,7 @@ void EtherMAC::handleRetransmission()
 {
     if (++backoffs > MAX_ATTEMPTS)
     {
-        EV << "Number of retransmit attempts of frame exceeds maximum, cancelling transmission of frame\n";
+        EV_DETAIL << "Number of retransmit attempts of frame exceeds maximum, cancelling transmission of frame\n";
         delete curTxFrame;
         curTxFrame = NULL;
         transmitState = TX_IDLE_STATE;
@@ -730,7 +729,7 @@ void EtherMAC::handleRetransmission()
         return;
     }
 
-    EV << "Executing backoff procedure\n";
+    EV_DETAIL << "Executing backoff procedure\n";
     int backoffRange = (backoffs >= BACKOFF_RANGE_LIMIT) ? 1024 : (1 << backoffs);
     int slotNumber = intuniform(0, backoffRange-1);
 
@@ -743,9 +742,9 @@ void EtherMAC::handleRetransmission()
 
 void EtherMAC::printState()
 {
-#define CASE(x) case x: EV << #x; break
+#define CASE(x) case x: EV_DETAIL << #x; break
 
-    EV << "transmitState: ";
+    EV_DETAIL << "transmitState: ";
     switch (transmitState)
     {
         CASE(TX_IDLE_STATE);
@@ -757,7 +756,7 @@ void EtherMAC::printState()
         CASE(PAUSE_STATE);
     }
 
-    EV << ",  receiveState: ";
+    EV_DETAIL << ",  receiveState: ";
     switch (receiveState)
     {
         CASE(RX_IDLE_STATE);
@@ -766,13 +765,13 @@ void EtherMAC::printState()
         CASE(RX_RECONNECT_STATE);
     }
 
-    EV << ",  backoffs: " << backoffs;
-    EV << ",  numConcurrentRxTransmissions: " << numConcurrentTransmissions;
+    EV_DETAIL << ",  backoffs: " << backoffs;
+    EV_DETAIL << ",  numConcurrentRxTransmissions: " << numConcurrentTransmissions;
 
     if (txQueue.innerQueue)
-        EV << ",  queueLength: " << txQueue.innerQueue->length();
+        EV_DETAIL << ",  queueLength: " << txQueue.innerQueue->length();
 
-    EV << endl;
+    EV_DETAIL << endl;
 
 #undef CASE
 }
@@ -795,7 +794,7 @@ void EtherMAC::handleEndPausePeriod()
     if (transmitState != PAUSE_STATE)
         throw cRuntimeError("At end of PAUSE and not in PAUSE_STATE");
 
-    EV << "Pause finished, resuming transmissions\n";
+    EV_DETAIL << "Pause finished, resuming transmissions\n";
     beginSendFrames();
 }
 
@@ -832,6 +831,7 @@ void EtherMAC::frameReceptionComplete()
     }
     else
     {
+        EV_INFO << "Reception of " << frame << " successfully completed.\n";
         processReceivedDataFrame(check_and_cast<EtherFrame *>(frame));
     }
 }
@@ -850,6 +850,7 @@ void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, frame);
     // pass up to upper layer
+    EV_INFO << "Sending " << frame << " to upper layer.\n";
     send(frame, "upperLayerOut");
 }
 
@@ -863,14 +864,14 @@ void EtherMAC::processReceivedPauseFrame(EtherPauseFrame *frame)
 
     if (transmitState == TX_IDLE_STATE)
     {
-        EV << "PAUSE frame received, pausing for " << pauseUnitsRequested << " time units\n";
+        EV_DETAIL << "PAUSE frame received, pausing for " << pauseUnitsRequested << " time units\n";
         if (pauseUnits > 0)
             scheduleEndPausePeriod(pauseUnits);
     }
     else if (transmitState == PAUSE_STATE)
     {
-        EV << "PAUSE frame received, pausing for " << pauseUnitsRequested
-           << " more time units from now\n";
+        EV_DETAIL << "PAUSE frame received, pausing for " << pauseUnitsRequested
+                 << " more time units from now\n";
         cancelEvent(endPauseMsg);
 
         if (pauseUnits > 0)
@@ -880,7 +881,7 @@ void EtherMAC::processReceivedPauseFrame(EtherPauseFrame *frame)
     {
         // transmitter busy -- wait until it finishes with current frame (endTx)
         // and then it'll go to PAUSE state
-        EV << "PAUSE frame received, storing pause request\n";
+        EV_DETAIL << "PAUSE frame received, storing pause request\n";
         pauseUnitsRequested = pauseUnits;
     }
 }
@@ -949,14 +950,14 @@ void EtherMAC::beginSendFrames()
     if (curTxFrame)
     {
         // Other frames are queued, therefore wait IFG period and transmit next frame
-        EV << "Will transmit next frame in output queue after IFG period\n";
+        EV_DETAIL << "Will transmit next frame in output queue after IFG period\n";
         startFrameTransmission();
     }
     else
     {
         // No more frames, set transmitter to idle
         transmitState = TX_IDLE_STATE;
-        EV << "No more frames to send, transmitter set to idle\n";
+        EV_DETAIL << "No more frames to send, transmitter set to idle\n";
     }
 }
 

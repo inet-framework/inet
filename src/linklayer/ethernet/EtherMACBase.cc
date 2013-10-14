@@ -216,7 +216,7 @@ void EtherMACBase::initializeQueueModule()
             queueModule = check_and_cast<IPassiveQueue *>(queueOut->getOwnerModule());
         }
 
-        EV << "Requesting first frame from queue module\n";
+        EV_DETAIL << "Requesting first frame from queue module\n";
         txQueue.setExternalQueue(queueModule);
 
         if (txQueue.extQueue->getNumPendingRequests() == 0)
@@ -254,7 +254,7 @@ void EtherMACBase::initializeFlags()
     connected = physOutGate->getPathEndGate()->isConnected() && physInGate->getPathStartGate()->isConnected();
 
     if (!connected)
-        EV << "MAC not connected to a network.\n";
+        EV_WARN << "MAC not connected to a network.\n";
 
     WATCH(connected);
 
@@ -405,7 +405,7 @@ void EtherMACBase::processConnectDisconnect()
             while (!txQueue.innerQueue->empty())
             {
                 cMessage *msg = check_and_cast<cMessage *>(txQueue.innerQueue->pop());
-                EV << "Interface is not connected, dropping packet " << msg << endl;
+                EV_DETAIL << "Interface is not connected, dropping packet " << msg << endl;
                 numDroppedPkFromHLIfaceDown++;
                 emit(dropPkIfaceDownSignal, msg);
                 delete msg;
@@ -486,7 +486,7 @@ bool EtherMACBase::dropFrameNotForUs(EtherFrame *frame)
     if (isPause && frame->getDest().equals(MACAddress::MULTICAST_PAUSE_ADDRESS))
         return false;
 
-    EV << "Frame `" << frame->getName() <<"' not destined to us, discarding\n";
+    EV_WARN << "Frame `" << frame->getName() <<"' not destined to us, discarding\n";
     numDroppedNotForUs++;
     emit(dropPkNotForUsSignal, frame);
     delete frame;
@@ -569,15 +569,15 @@ void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
 void EtherMACBase::printParameters()
 {
     // Dump parameters
-    EV << "MAC address: " << address << (promiscuous ? ", promiscuous mode" : "") << endl
-       << "txrate: " << curEtherDescr->txrate << ", "
-       << (duplexMode ? "full-duplex" : "half-duplex") << endl;
+    EV_DETAIL << "MAC address: " << address << (promiscuous ? ", promiscuous mode" : "") << endl
+             << "txrate: " << curEtherDescr->txrate << ", "
+             << (duplexMode ? "full-duplex" : "half-duplex") << endl;
 #if 1
-    EV << "bitTime: " << 1.0 / curEtherDescr->txrate << endl;
-    EV << "frameBursting: " << frameBursting << endl;
-    EV << "slotTime: " << curEtherDescr->slotTime << endl;
-    EV << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr->txrate << endl;
-    EV << endl;
+    EV_DETAIL << "bitTime: " << 1.0 / curEtherDescr->txrate << endl;
+    EV_DETAIL << "frameBursting: " << frameBursting << endl;
+    EV_DETAIL << "slotTime: " << curEtherDescr->slotTime << endl;
+    EV_DETAIL << "interFrameGap: " << INTERFRAME_GAP_BITS / curEtherDescr->txrate << endl;
+    EV_DETAIL << endl;
 #endif
 }
 

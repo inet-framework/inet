@@ -46,10 +46,12 @@ void EtherEncap::handleMessage(cMessage *msg)
 {
     if (msg->arrivedOn("lowerLayerIn"))
     {
+        EV_INFO << "Received " << msg << " from lower layer." << endl;
         processFrameFromMAC(check_and_cast<EtherFrame *>(msg));
     }
     else
     {
+        EV_INFO << "Received " << msg << " from upper layer." << endl;
         // from higher layer
         switch (msg->getKind())
         {
@@ -91,7 +93,7 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
     // with this information and transmits resultant frame to lower layer
 
     // create Ethernet frame, fill it in from Ieee802Ctrl and encapsulate msg in it
-    EV << "Encapsulating higher layer packet `" << msg->getName() <<"' for MAC\n";
+    EV_DETAIL << "Encapsulating higher layer packet `" << msg->getName() <<"' for MAC\n";
 
     IMACProtocolControlInfo* controlInfo = check_and_cast<IMACProtocolControlInfo*>(msg->removeControlInfo());
     Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl*>(controlInfo);
@@ -126,6 +128,7 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
     if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
         frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);  // "padding"
 
+    EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(frame, "lowerLayerOut");
 }
 
@@ -144,13 +147,14 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
         etherctrl->setEtherType(((EtherFrameWithSNAP *)frame)->getLocalcode());
     higherlayermsg->setControlInfo(etherctrl);
 
-    EV << "Decapsulating frame `" << frame->getName() <<"', passing up contained "
-          "packet `" << higherlayermsg->getName() << "' to higher layer\n";
+    EV_DETAIL << "Decapsulating frame `" << frame->getName() << "', passing up contained packet `"
+             << higherlayermsg->getName() << "' to higher layer\n";
 
     totalFromMAC++;
     emit(decapPkSignal, higherlayermsg);
 
     // pass up to higher layers.
+    EV_INFO << "Sending " << higherlayermsg << " to upper layer.\n";
     send(higherlayermsg, "upperLayerOut");
     delete frame;
 }
@@ -163,7 +167,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     int pauseUnits = etherctrl->getPauseUnits();
     delete etherctrl;
 
-    EV << "Creating and sending PAUSE frame, with duration=" << pauseUnits << " units\n";
+    EV_DETAIL << "Creating and sending PAUSE frame, with duration = " << pauseUnits << " units\n";
 
     // create Ethernet frame
     char framename[40];
@@ -176,6 +180,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
     frame->setDest(dest);
     frame->setByteLength(ETHER_PAUSE_COMMAND_PADDED_BYTES);
 
+    EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(frame, "lowerLayerOut");
     delete msg;
 
