@@ -33,5 +33,5 @@ enum EchoProtocolType
 //
 packet EchoPacket
 {
-    int type enum(EchoProtocolType);
+    int type @enum(EchoProtocolType);
 }

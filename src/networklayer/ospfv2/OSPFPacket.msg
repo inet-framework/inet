@@ -50,7 +50,7 @@ struct OSPFOptions
 packet OSPFPacket
 {
     char version = 2;
-    char type enum(OSPFPacketType) = HELLO_PACKET;
+    char type @enum(OSPFPacketType) = HELLO_PACKET;
 
     IPv4Address routerID;
     IPv4Address areaID;
@@ -95,7 +95,7 @@ class OSPFLSAHeader
 {
     unsigned short lsAge = 0;
     OSPFOptions lsOptions;
-    char lsType enum(LSAType) = ROUTERLSA_TYPE;
+    char lsType @enum(LSAType) = ROUTERLSA_TYPE;
     IPv4Address linkStateID;
     IPv4Address advertisingRouter;
     long lsSequenceNumber = 0;
@@ -128,7 +128,7 @@ class Link
 {
     IPv4Address linkID;
     unsigned long linkData = 0;
-    unsigned char type enum(LinkType) = POINTTOPOINT_LINK;
+    unsigned char type @enum(LinkType) = POINTTOPOINT_LINK;
     unsigned char numberOfTOS = 0;
     unsigned long linkCost = 1;
     TOSData tosData[];

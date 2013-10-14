@@ -94,7 +94,7 @@ class TCPCommand
 //
 class TCPErrorInfo extends TCPCommand
 {
-    int errorCode enum(TCPErrorCode);
+    int errorCode @enum(TCPErrorCode);
     string messageText;
 }
 
@@ -152,7 +152,7 @@ class TCPOpenCommand extends TCPCommand
     int localPort = -1;       // required for passive open
     int remotePort = -1;      // required for active open
     bool fork = false;        // used only for passive open
-    int dataTransferMode enum(TCPDataTransferMode); // whether to transmit C++ objects, real bytes or just byte counts. See ~TCPDataTransferMode.
+    int dataTransferMode @enum(TCPDataTransferMode); // whether to transmit C++ objects, real bytes or just byte counts. See ~TCPDataTransferMode.
     string tcpAlgorithmClass; // TCP congestion control algorithm; leave empty for default
 }
 

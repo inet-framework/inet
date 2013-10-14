@@ -70,7 +70,7 @@ class SCTPCommand extends cPacket
 //
 class SCTPErrorInfo extends SCTPCommand
 {
-    int errorCode enum(SCTPErrorCode);
+    int errorCode @enum(SCTPErrorCode);
     string messageText;
 }
 

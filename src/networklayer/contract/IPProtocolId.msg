@@ -60,5 +60,5 @@ enum IPProtocolId
 
 class IPRegisterProtocolCommand
 {
-    int protocol enum(IPProtocolId);
+    int protocol @enum(IPProtocolId);
 }

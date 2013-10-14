@@ -37,7 +37,7 @@ class GenericNetworkProtocolControlInfo  //TODO rename!!!!
     Address sourceAddress @getter(_getSourceAddress);    // source address
     int interfaceId = -1; // interface on which the datagram was received, or
                           // should be sent (see ~InterfaceTable)
-    short protocol enum(IPProtocolId);  // encapsulated protocol
+    short protocol @enum(IPProtocolId);  // encapsulated protocol
     short hopLimit;     // maximum hop count
 }
 

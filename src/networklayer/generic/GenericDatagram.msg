@@ -31,6 +31,6 @@ packet GenericDatagram
     @customize(true);
     Address sourceAddress @getter(_getSrcAddr);
     Address destinationAddress @getter(_getDestAddr);
-    int transportProtocol enum(IPProtocolId) = IP_PROT_NONE;
+    int transportProtocol @enum(IPProtocolId) = IP_PROT_NONE;
     short hopLimit;
 }

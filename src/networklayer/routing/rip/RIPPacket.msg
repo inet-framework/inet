@@ -62,7 +62,7 @@ struct RIPEntry
 // note: Authentication entry is not allowed
 //
 packet RIPPacket {
-    unsigned char enum(RIPCommand) command;
+    unsigned char command @enum(RIPCommand);
     // version is fixed: 2
     RIPEntry entry[];
 }
