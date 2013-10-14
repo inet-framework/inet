@@ -35,25 +35,26 @@ Define_Module(HttpServer);
 void HttpServer::initialize(int stage)
 {
     HttpServerBase::initialize(stage);
-    if (stage != 0)
-        return;
 
-    EV_DEBUG << "Initializing server component (sockets version)" << endl;
+    if (stage == 0)
+    {
+        EV_DEBUG << "Initializing server component (sockets version)" << endl;
 
-    int port = par("port");
+        int port = par("port");
 
-    TCPSocket listensocket;
-    listensocket.setOutputGate(gate("tcpOut"));
-    listensocket.setDataTransferMode(TCP_TRANSFER_OBJECT);
-    listensocket.bind(port);
-    listensocket.setCallbackObject(this);
-    listensocket.listen();
+        TCPSocket listensocket;
+        listensocket.setOutputGate(gate("tcpOut"));
+        listensocket.setDataTransferMode(TCP_TRANSFER_OBJECT);
+        listensocket.bind(port);
+        listensocket.setCallbackObject(this);
+        listensocket.listen();
 
-    numBroken = 0;
-    socketsOpened = 0;
+        numBroken = 0;
+        socketsOpened = 0;
 
-    WATCH(numBroken);
-    WATCH(socketsOpened);
+        WATCH(numBroken);
+        WATCH(socketsOpened);
+    }
 }
 
 void HttpServer::finish()

@@ -39,25 +39,26 @@ TCPBasicClientApp::~TCPBasicClientApp()
 void TCPBasicClientApp::initialize(int stage)
 {
     TCPGenericCliAppBase::initialize(stage);
-    if (stage != 3)
-        return;
 
-    numRequestsToSend = 0;
-    earlySend = false;  // TBD make it parameter
-    WATCH(numRequestsToSend);
-    WATCH(earlySend);
+    if (stage == 3)
+    {
+        numRequestsToSend = 0;
+        earlySend = false;  // TBD make it parameter
+        WATCH(numRequestsToSend);
+        WATCH(earlySend);
 
-    startTime = par("startTime");
-    stopTime = par("stopTime");
-    if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
-        error("Invalid startTime/stopTime parameters");
+        startTime = par("startTime");
+        stopTime = par("stopTime");
+        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+            error("Invalid startTime/stopTime parameters");
 
-    timeoutMsg = new cMessage("timer");
-    nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        timeoutMsg = new cMessage("timer");
+        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
 
-    if (isNodeUp()) {
-        timeoutMsg->setKind(MSGKIND_CONNECT);
-        scheduleAt(startTime, timeoutMsg);
+        if (isNodeUp()) {
+            timeoutMsg->setKind(MSGKIND_CONNECT);
+            scheduleAt(startTime, timeoutMsg);
+        }
     }
 }
 

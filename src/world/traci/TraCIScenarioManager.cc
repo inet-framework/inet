@@ -49,64 +49,63 @@ TraCIScenarioManager::~TraCIScenarioManager() {
 
 void TraCIScenarioManager::initialize(int stage) {
     cSimpleModule::initialize(stage);
-    if (stage != 1) {
-        return;
+    if (stage == 1)
+    {
+        connectAt = par("connectAt");
+        firstStepAt = par("firstStepAt");
+        updateInterval = par("updateInterval");
+        if (firstStepAt == -1) firstStepAt = connectAt + updateInterval;
+        moduleType = par("moduleType").stdstringValue();
+        moduleName = par("moduleName").stdstringValue();
+        moduleDisplayString = par("moduleDisplayString").stdstringValue();
+        penetrationRate = par("penetrationRate").doubleValue();
+        host = par("host").stdstringValue();
+        port = par("port");
+        autoShutdown = par("autoShutdown");
+        margin = par("margin");
+        std::string roiRoads_s = par("roiRoads");
+        std::string roiRects_s = par("roiRects");
+
+        // parse roiRoads
+        roiRoads.clear();
+        std::istringstream roiRoads_i(roiRoads_s);
+        std::string road;
+        while (std::getline(roiRoads_i, road, ' ')) {
+            roiRoads.push_back(road);
+        }
+
+        // parse roiRects
+        roiRects.clear();
+        std::istringstream roiRects_i(roiRects_s);
+        std::string rect;
+        while (std::getline(roiRects_i, rect, ' ')) {
+            std::istringstream rect_i(rect);
+            double x1; rect_i >> x1; ASSERT(rect_i);
+            char c1; rect_i >> c1; ASSERT(rect_i);
+            double y1; rect_i >> y1; ASSERT(rect_i);
+            char c2; rect_i >> c2; ASSERT(rect_i);
+            double x2; rect_i >> x2; ASSERT(rect_i);
+            char c3; rect_i >> c3; ASSERT(rect_i);
+            double y2; rect_i >> y2; ASSERT(rect_i);
+            roiRects.push_back(std::pair<TraCICoord, TraCICoord>(TraCICoord(x1, y1), TraCICoord(x2, y2)));
+        }
+
+        nextNodeVectorIndex = 0;
+        hosts.clear();
+        subscribedVehicles.clear();
+        activeVehicleCount = 0;
+        autoShutdownTriggered = false;
+
+        socketPtr = 0;
+
+        ASSERT(firstStepAt > connectAt);
+        connectAndStartTrigger = new cMessage("connect");
+        scheduleAt(connectAt, connectAndStartTrigger);
+        executeOneTimestepTrigger = new cMessage("step");
+        scheduleAt(firstStepAt, executeOneTimestepTrigger);
+
+        EV_DEBUG << "initialized TraCIScenarioManager" << endl;
     }
-
-    connectAt = par("connectAt");
-    firstStepAt = par("firstStepAt");
-    updateInterval = par("updateInterval");
-    if (firstStepAt == -1) firstStepAt = connectAt + updateInterval;
-    moduleType = par("moduleType").stdstringValue();
-    moduleName = par("moduleName").stdstringValue();
-    moduleDisplayString = par("moduleDisplayString").stdstringValue();
-    penetrationRate = par("penetrationRate").doubleValue();
-    host = par("host").stdstringValue();
-    port = par("port");
-    autoShutdown = par("autoShutdown");
-    margin = par("margin");
-    std::string roiRoads_s = par("roiRoads");
-    std::string roiRects_s = par("roiRects");
-
-    // parse roiRoads
-    roiRoads.clear();
-    std::istringstream roiRoads_i(roiRoads_s);
-    std::string road;
-    while (std::getline(roiRoads_i, road, ' ')) {
-        roiRoads.push_back(road);
-    }
-
-    // parse roiRects
-    roiRects.clear();
-    std::istringstream roiRects_i(roiRects_s);
-    std::string rect;
-    while (std::getline(roiRects_i, rect, ' ')) {
-        std::istringstream rect_i(rect);
-        double x1; rect_i >> x1; ASSERT(rect_i);
-        char c1; rect_i >> c1; ASSERT(rect_i);
-        double y1; rect_i >> y1; ASSERT(rect_i);
-        char c2; rect_i >> c2; ASSERT(rect_i);
-        double x2; rect_i >> x2; ASSERT(rect_i);
-        char c3; rect_i >> c3; ASSERT(rect_i);
-        double y2; rect_i >> y2; ASSERT(rect_i);
-        roiRects.push_back(std::pair<TraCICoord, TraCICoord>(TraCICoord(x1, y1), TraCICoord(x2, y2)));
-    }
-
-    nextNodeVectorIndex = 0;
-    hosts.clear();
-    subscribedVehicles.clear();
-    activeVehicleCount = 0;
-    autoShutdownTriggered = false;
-
-    socketPtr = 0;
-
-    ASSERT(firstStepAt > connectAt);
-    connectAndStartTrigger = new cMessage("connect");
-    scheduleAt(connectAt, connectAndStartTrigger);
-    executeOneTimestepTrigger = new cMessage("step");
-    scheduleAt(firstStepAt, executeOneTimestepTrigger);
-
-    EV_DEBUG << "initialized TraCIScenarioManager" << endl;
 }
 
 std::string TraCIScenarioManager::receiveTraCIMessage() {

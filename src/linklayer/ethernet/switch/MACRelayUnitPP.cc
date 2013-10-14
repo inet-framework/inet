@@ -53,46 +53,46 @@ void MACRelayUnitPP::initialize(int stage)
 {
     MACRelayUnitBase::initialize(stage);
 
-    if (stage != 0)
-        return;
-
-    numProcessedFrames = numDroppedFrames = 0;
-    WATCH(numProcessedFrames);
-    WATCH(numDroppedFrames);
-
-    processingTime = par("processingTime");
-    bufferSize = par("bufferSize");
-    highWatermark = par("highWatermark");
-    pauseUnits = par("pauseUnits");
-
-    processedBytesSignal = registerSignal("processed");
-    droppedBytesSignal = registerSignal("dropped");
-    usedBufferBytesSignal = registerSignal("usedBufferBytes");
-
-    bufferUsed = 0;
-    WATCH(bufferUsed);
-
-    buffer = new PortBuffer[numPorts];
-    for (int i = 0; i < numPorts; ++i)
+    if (stage == 0)
     {
-        buffer[i].port = i;
-        buffer[i].cpuBusy = false;
-        buffer[i].timer = new cMessage("endProcessing");
-        buffer[i].timer->setContextPointer(&buffer[i]);
-        char qname[40];
-        sprintf(qname, "portQueue%d", i);
-        buffer[i].queue.setName(qname);
-    }
+        numProcessedFrames = numDroppedFrames = 0;
+        WATCH(numProcessedFrames);
+        WATCH(numDroppedFrames);
 
-    EV << "Parameters of (" << getClassName() << ") " << getFullPath() << "\n";
-    EV << "processing time: " << processingTime << "\n";
-    EV << "ports: " << numPorts << "\n";
-    EV << "buffer size: " << bufferSize << "\n";
-    EV << "address table size: " << addressTableSize << "\n";
-    EV << "aging time: " << agingTime << "\n";
-    EV << "high watermark: " << highWatermark << "\n";
-    EV << "pause time: " << pauseUnits << "\n";
-    EV << "\n";
+        processingTime = par("processingTime");
+        bufferSize = par("bufferSize");
+        highWatermark = par("highWatermark");
+        pauseUnits = par("pauseUnits");
+
+        processedBytesSignal = registerSignal("processed");
+        droppedBytesSignal = registerSignal("dropped");
+        usedBufferBytesSignal = registerSignal("usedBufferBytes");
+
+        bufferUsed = 0;
+        WATCH(bufferUsed);
+
+        buffer = new PortBuffer[numPorts];
+        for (int i = 0; i < numPorts; ++i)
+        {
+            buffer[i].port = i;
+            buffer[i].cpuBusy = false;
+            buffer[i].timer = new cMessage("endProcessing");
+            buffer[i].timer->setContextPointer(&buffer[i]);
+            char qname[40];
+            sprintf(qname, "portQueue%d", i);
+            buffer[i].queue.setName(qname);
+        }
+
+        EV << "Parameters of (" << getClassName() << ") " << getFullPath() << "\n";
+        EV << "processing time: " << processingTime << "\n";
+        EV << "ports: " << numPorts << "\n";
+        EV << "buffer size: " << bufferSize << "\n";
+        EV << "address table size: " << addressTableSize << "\n";
+        EV << "aging time: " << agingTime << "\n";
+        EV << "high watermark: " << highWatermark << "\n";
+        EV << "pause time: " << pauseUnits << "\n";
+        EV << "\n";
+    }
 }
 
 void MACRelayUnitPP::handleMessage(cMessage *msg)

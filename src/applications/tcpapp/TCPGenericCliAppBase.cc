@@ -25,33 +25,34 @@ simsignal_t TCPGenericCliAppBase::sentPkSignal = SIMSIGNAL_NULL;
 void TCPGenericCliAppBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    if (stage != 3)
-        return;
 
-    numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = bytesRcvd = 0;
+    if (stage == 3)
+    {
+        numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = bytesRcvd = 0;
 
-    //statistics
-    connectSignal = registerSignal("connect");
-    rcvdPkSignal = registerSignal("rcvdPk");
-    sentPkSignal = registerSignal("sentPk");
+        //statistics
+        connectSignal = registerSignal("connect");
+        rcvdPkSignal = registerSignal("rcvdPk");
+        sentPkSignal = registerSignal("sentPk");
 
-    WATCH(numSessions);
-    WATCH(numBroken);
-    WATCH(packetsSent);
-    WATCH(packetsRcvd);
-    WATCH(bytesSent);
-    WATCH(bytesRcvd);
+        WATCH(numSessions);
+        WATCH(numBroken);
+        WATCH(packetsSent);
+        WATCH(packetsRcvd);
+        WATCH(bytesSent);
+        WATCH(bytesRcvd);
 
-    // parameters
-    const char *localAddress = par("localAddress");
-    int localPort = par("localPort");
-    socket.readDataTransferModePar(*this);
-    socket.bind(*localAddress ? AddressResolver().resolve(localAddress) : Address(), localPort);
+        // parameters
+        const char *localAddress = par("localAddress");
+        int localPort = par("localPort");
+        socket.readDataTransferModePar(*this);
+        socket.bind(*localAddress ? AddressResolver().resolve(localAddress) : Address(), localPort);
 
-    socket.setCallbackObject(this);
-    socket.setOutputGate(gate("tcpOut"));
+        socket.setCallbackObject(this);
+        socket.setOutputGate(gate("tcpOut"));
 
-    setStatusString("waiting");
+        setStatusString("waiting");
+    }
 }
 
 void TCPGenericCliAppBase::handleMessage(cMessage *msg)

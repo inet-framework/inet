@@ -108,60 +108,61 @@ void LDP::initialize(int stage)
     //FIXME register to InterfaceEntry changes, for detecting the interface add/delete, and detecting multicast config changes:
     //      should be refresh the udpSockets vector when interface added/deleted, or isMulticast() value changed.
 
-    if (stage != 3)
-        return; // wait for routing table to initialize first
-
-    holdTime = par("holdTime").doubleValue();
-    helloInterval = par("helloInterval").doubleValue();
-
-    ift = InterfaceTableAccess().get();
-    rt = IPv4RoutingTableAccess().get();
-    lt = LIBTableAccess().get();
-    tedmod = TEDAccess().get();
-    nb = NotificationBoardAccess().get();
-
-    WATCH_VECTOR(myPeers);
-    WATCH_VECTOR(fecUp);
-    WATCH_VECTOR(fecDown);
-    WATCH_VECTOR(fecList);
-    WATCH_VECTOR(pending);
-
-    maxFecid = 0;
-
-    // schedule first hello
-    sendHelloMsg = new cMessage("LDPSendHello");
-    nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    if (isNodeUp())
-        scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
-
-    // bind UDP socket
-    udpSocket.setOutputGate(gate("udpOut"));
-    udpSocket.bind(LDP_PORT);
-    for (int i = 0; i < ift->getNumInterfaces(); ++i)
+    if (stage == 3)
     {
-        InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->isMulticast())
+        // wait for routing table to initialize first
+        holdTime = par("holdTime").doubleValue();
+        helloInterval = par("helloInterval").doubleValue();
+
+        ift = InterfaceTableAccess().get();
+        rt = IPv4RoutingTableAccess().get();
+        lt = LIBTableAccess().get();
+        tedmod = TEDAccess().get();
+        nb = NotificationBoardAccess().get();
+
+        WATCH_VECTOR(myPeers);
+        WATCH_VECTOR(fecUp);
+        WATCH_VECTOR(fecDown);
+        WATCH_VECTOR(fecList);
+        WATCH_VECTOR(pending);
+
+        maxFecid = 0;
+
+        // schedule first hello
+        sendHelloMsg = new cMessage("LDPSendHello");
+        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        if (isNodeUp())
+            scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
+
+        // bind UDP socket
+        udpSocket.setOutputGate(gate("udpOut"));
+        udpSocket.bind(LDP_PORT);
+        for (int i = 0; i < ift->getNumInterfaces(); ++i)
         {
-            udpSockets.push_back(UDPSocket());
-            udpSockets.back().setOutputGate(gate("udpOut"));
-            udpSockets.back().setMulticastLoop(false);
-            udpSockets.back().setMulticastOutputInterface(ie->getInterfaceId());
+            InterfaceEntry *ie = ift->getInterface(i);
+            if (ie->isMulticast())
+            {
+                udpSockets.push_back(UDPSocket());
+                udpSockets.back().setOutputGate(gate("udpOut"));
+                udpSockets.back().setMulticastLoop(false);
+                udpSockets.back().setMulticastOutputInterface(ie->getInterfaceId());
+            }
         }
+
+        // start listening for incoming TCP conns
+        EV << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
+        serverSocket.setOutputGate(gate("tcpOut"));
+        serverSocket.readDataTransferModePar(*this);
+        serverSocket.bind(LDP_PORT);
+        serverSocket.listen();
+
+        // build list of recognized FECs
+        rebuildFecList();
+
+        // listen for routing table modifications
+        nb->subscribe(this, NF_ROUTE_ADDED);
+        nb->subscribe(this, NF_ROUTE_DELETED);
     }
-
-    // start listening for incoming TCP conns
-    EV << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
-    serverSocket.setOutputGate(gate("tcpOut"));
-    serverSocket.readDataTransferModePar(*this);
-    serverSocket.bind(LDP_PORT);
-    serverSocket.listen();
-
-    // build list of recognized FECs
-    rebuildFecList();
-
-    // listen for routing table modifications
-    nb->subscribe(this, NF_ROUTE_ADDED);
-    nb->subscribe(this, NF_ROUTE_DELETED);
 }
 
 void LDP::handleMessage(cMessage *msg)

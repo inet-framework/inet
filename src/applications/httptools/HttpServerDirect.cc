@@ -35,13 +35,14 @@ Define_Module(HttpServerDirect);
 void HttpServerDirect::initialize(int stage)
 {
     HttpServerBase::initialize(stage);
-    if (stage != 0)
-        return;
 
-    EV_DEBUG << "Initializing direct server component\n";
+    if (stage == 0)
+    {
+        EV_DEBUG << "Initializing direct server component\n";
 
-    // Set the link speed
-    linkSpeed = par("linkSpeed");
+        // Set the link speed
+        linkSpeed = par("linkSpeed");
+    }
 }
 
 void HttpServerDirect::finish()

@@ -49,32 +49,32 @@ void IPvXTrafGen::initialize(int stage)
     IPvXTrafSink::initialize(stage);
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage != 3)
-        return;
+    if (stage == 3)
+    {
+        sentPkSignal = registerSignal("sentPk");
 
-    sentPkSignal = registerSignal("sentPk");
+        protocol = par("protocol");
+        numPackets = par("numPackets");
+        startTime = par("startTime");
+        stopTime = par("stopTime");
+        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+            error("Invalid startTime/stopTime parameters");
 
-    protocol = par("protocol");
-    numPackets = par("numPackets");
-    startTime = par("startTime");
-    stopTime = par("stopTime");
-    if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
-        error("Invalid startTime/stopTime parameters");
+        packetLengthPar = &par("packetLength");
+        sendIntervalPar = &par("sendInterval");
 
-    packetLengthPar = &par("packetLength");
-    sendIntervalPar = &par("sendInterval");
+        numSent = 0;
+        WATCH(numSent);
 
-    numSent = 0;
-    WATCH(numSent);
+        timer = new cMessage("sendTimer");
+        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
 
-    timer = new cMessage("sendTimer");
-    nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(protocol);
 
-    IPSocket ipSocket(gate("ipOut"));
-    ipSocket.registerProtocol(protocol);
-
-    if (isNodeUp() && isEnabled())
-        scheduleNextPacket(-1);
+        if (isNodeUp() && isEnabled())
+            scheduleNextPacket(-1);
+    }
 }
 
 void IPvXTrafGen::handleMessage(cMessage *msg)

@@ -27,24 +27,24 @@ void SimpleClassifier::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     // we have to wait until routerId gets assigned in stage 3
-    if (stage!=4)
-        return;
+    if (stage == 4)
+    {
+        maxLabel = 0;
 
-    maxLabel = 0;
+        IPv4RoutingTableAccess routingTableAccess;
+        IIPv4RoutingTable *rt = routingTableAccess.get();
+        routerId = rt->getRouterId();
 
-    IPv4RoutingTableAccess routingTableAccess;
-    IIPv4RoutingTable *rt = routingTableAccess.get();
-    routerId = rt->getRouterId();
+        LIBTableAccess libTableAccess;
+        lt = libTableAccess.get();
 
-    LIBTableAccess libTableAccess;
-    lt = libTableAccess.get();
+        RSVPAccess rsvpAccess;
+        rsvp = rsvpAccess.get();
 
-    RSVPAccess rsvpAccess;
-    rsvp = rsvpAccess.get();
+        readTableFromXML(par("config").xmlValue());
 
-    readTableFromXML(par("config").xmlValue());
-
-    WATCH_VECTOR(bindings);
+        WATCH_VECTOR(bindings);
+    }
 }
 
 void SimpleClassifier::handleMessage(cMessage *)

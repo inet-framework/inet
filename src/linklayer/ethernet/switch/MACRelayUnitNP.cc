@@ -58,44 +58,44 @@ void MACRelayUnitNP::initialize(int stage)
 {
     MACRelayUnitBase::initialize(stage);
 
-    if (stage != 0)
-        return;
-
-    bufferLevel.setName("buffer level");
-    queue.setName("queue");
-
-    numProcessedFrames = numDroppedFrames = 0;
-    WATCH(numProcessedFrames);
-    WATCH(numDroppedFrames);
-
-    numCPUs = par("numCPUs");
-
-    processingTime = par("processingTime");
-    bufferSize = par("bufferSize");
-    highWatermark = par("highWatermark");
-    pauseUnits = par("pauseUnits");
-
-    bufferUsed = 0;
-    WATCH(bufferUsed);
-
-    endProcEvents = new cMessage *[numCPUs];
-    for (int i=0; i<numCPUs; i++)
+    if (stage == 0)
     {
-        char msgname[40];
-        sprintf(msgname, "endProcessing-cpu%d", i);
-        endProcEvents[i] = new cMessage(msgname, i);
-    }
+        bufferLevel.setName("buffer level");
+        queue.setName("queue");
 
-    EV << "Parameters of (" << getClassName() << ") " << getFullPath() << "\n";
-    EV << "number of processors: " << numCPUs << "\n";
-    EV << "processing time: " << processingTime << "\n";
-    EV << "ports: " << numPorts << "\n";
-    EV << "buffer size: " << bufferSize << "\n";
-    EV << "address table size: " << addressTableSize << "\n";
-    EV << "aging time: " << agingTime << "\n";
-    EV << "high watermark: " << highWatermark << "\n";
-    EV << "pause time: " << pauseUnits << "\n";
-    EV << "\n";
+        numProcessedFrames = numDroppedFrames = 0;
+        WATCH(numProcessedFrames);
+        WATCH(numDroppedFrames);
+
+        numCPUs = par("numCPUs");
+
+        processingTime = par("processingTime");
+        bufferSize = par("bufferSize");
+        highWatermark = par("highWatermark");
+        pauseUnits = par("pauseUnits");
+
+        bufferUsed = 0;
+        WATCH(bufferUsed);
+
+        endProcEvents = new cMessage *[numCPUs];
+        for (int i=0; i<numCPUs; i++)
+        {
+            char msgname[40];
+            sprintf(msgname, "endProcessing-cpu%d", i);
+            endProcEvents[i] = new cMessage(msgname, i);
+        }
+
+        EV << "Parameters of (" << getClassName() << ") " << getFullPath() << "\n";
+        EV << "number of processors: " << numCPUs << "\n";
+        EV << "processing time: " << processingTime << "\n";
+        EV << "ports: " << numPorts << "\n";
+        EV << "buffer size: " << bufferSize << "\n";
+        EV << "address table size: " << addressTableSize << "\n";
+        EV << "aging time: " << agingTime << "\n";
+        EV << "high watermark: " << highWatermark << "\n";
+        EV << "pause time: " << pauseUnits << "\n";
+        EV << "\n";
+    }
 }
 
 void MACRelayUnitNP::handleMessage(cMessage *msg)
