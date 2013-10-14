@@ -19,6 +19,28 @@
 
 // TODO: Currently, it is working with STP but may need to change to work with RSTP
 
+IEEE8021DInterfaceData::IEEE8021DInterfaceData()
+{
+    // Default port data for STP
+    defaultStpPort.state = DISCARDING;
+    defaultStpPort.role = NOTASSIGNED;
+    defaultStpPort.priority = 128;
+    defaultStpPort.rootPathCost = INT16_MAX;
+    defaultStpPort.rootPriority = 65536;
+    defaultStpPort.rootAddress = MACAddress("FF-FF-FF-FF-FF-FF");
+    defaultStpPort.bridgePriority = 65536;
+    defaultStpPort.bridgeAddress = MACAddress("FF-FF-FF-FF-FF-FF");
+    defaultStpPort.portPriority = 256;
+    defaultStpPort.portNum = 256;
+    defaultStpPort.age = 0;
+    defaultStpPort.fdWhile = 0;
+    defaultStpPort.maxAge = 20;
+    defaultStpPort.fwdDelay = 15;
+    defaultStpPort.helloTime = 2;
+    defaultStpPort.linkCost = 19;     // todo: set cost according to the bandwidth
+
+}
+
 bool IEEE8021DInterfaceData::isLearning()
 {
     if (portData.state == LEARNING || portData.state == FORWARDING)
@@ -200,8 +222,8 @@ IEEE8021DInterfaceData::PortInfo IEEE8021DInterfaceData::getPortInfoData()
     return portData;
 }
 
-void IEEE8021DInterfaceData::setPortInfoData(PortInfo& portInfoData)
+void IEEE8021DInterfaceData::setDefaultStpPortInfoData()
 {
-    portData = portInfoData;
+    portData = defaultStpPort;
 }
 

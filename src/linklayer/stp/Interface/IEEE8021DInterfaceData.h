@@ -26,7 +26,7 @@ class IEEE8021DInterfaceData : public InterfaceProtocolData
 {
     public:
 
-        //IEEE8021DInterfaceData() {}; // todo: set the port cost according to the channel bandwidth
+        IEEE8021DInterfaceData();
 
         enum PortRole
         {
@@ -63,6 +63,7 @@ class IEEE8021DInterfaceData : public InterfaceProtocolData
 
     protected:
         PortInfo portData;
+        PortInfo defaultStpPort;
 
     public:
         simtime_t getAge() const;
@@ -99,7 +100,7 @@ class IEEE8021DInterfaceData : public InterfaceProtocolData
         void setState(PortState state);
 
         PortInfo getPortInfoData();
-        void setPortInfoData(PortInfo& portInfoData);
+        void setDefaultStpPortInfoData();
         bool isLearning();
         bool isForwarding();
 };
