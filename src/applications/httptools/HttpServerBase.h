@@ -107,7 +107,7 @@ class INET_API HttpServerBase : public HttpNodeBase
         //@{
         /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize(int stage);
-        virtual int numInitStages() const { return 2; }
+        virtual int numInitStages() const;
 
         /** Report final statistics */
         virtual void finish();

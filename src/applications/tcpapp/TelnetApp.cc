@@ -42,6 +42,11 @@ int TelnetApp::checkedScheduleAt(simtime_t t, cMessage *msg)
     return 0;
 }
 
+int TelnetApp::numInitStages() const
+{
+    return std::max(3 + 1, TCPGenericCliAppBase::numInitStages());
+}
+
 void TelnetApp::initialize(int stage)
 {
     TCPGenericCliAppBase::initialize(stage);

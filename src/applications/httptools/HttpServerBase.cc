@@ -33,6 +33,12 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
+
+int HttpServerBase::numInitStages() const
+{
+    return std::max(1 + 1, HttpNodeBase::numInitStages());
+}
+
 void HttpServerBase::initialize(int stage)
 {
     HttpNodeBase::initialize(stage);
