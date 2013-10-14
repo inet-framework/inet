@@ -840,9 +840,13 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, const InterfaceEntry *ie
         }
         else {
             if (nextHopAddr.isUnspecified()) {
-                if (useProxyARP) {
-                    nextHopAddr = datagram->getDestAddress();
-                    EV << "no next-hop address, using destination address " << nextHopAddr << " (proxy ARP)\n";
+                IPv4InterfaceData* ipv4Data = ie->ipv4Data();
+                IPv4Address destAddress = datagram->getDestAddress();
+                if (IPv4Address::maskedAddrAreEqual(destAddress, ie->ipv4Data()->getIPAddress(), ipv4Data->getNetmask()))
+                    nextHopAddr = destAddress;
+                else if (useProxyARP) {
+                    nextHopAddr = destAddress;
+                    EV_WARN << "no next-hop address, using destination address " << nextHopAddr << " (proxy ARP)\n";
                 }
                 else {
                     throw cRuntimeError(datagram, "Cannot send datagram on broadcast interface: no next-hop address and Proxy ARP is disabled");
