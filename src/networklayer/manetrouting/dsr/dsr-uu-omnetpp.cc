@@ -199,7 +199,7 @@ void DSRUU::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     //current_time =simTime();
-    if (!is_init)
+    if (stage == 0)
     {
         IPSocket ipSocket(gate("to_ip"));
         ipSocket.registerProtocol(IP_PROT_MANET);
@@ -320,8 +320,6 @@ void DSRUU::initialize(int stage)
         etx_timer.setOwer(this);
 
         initHook(this);
-
-        is_init = true;
     }
 
     if (stage==4)
@@ -396,7 +394,6 @@ void DSRUU::initialize(int stage)
             }
         }
         interface80211ptr->ipv4Data()->joinMulticastGroup(IPv4Address::LL_MANET_ROUTERS);
-        is_init = true;
         EV << "Dsr active" << "\n";
     }
 
@@ -424,7 +421,6 @@ DSRUU::DSRUU():cSimpleModule(), INotifiable()
     lc_timer_ptr = new DSRUUTimer(this);
     ack_timer_ptr = new DSRUUTimer(this);
     etx_timer_ptr = new DSRUUTimer(this);
-    is_init = false;
 }
 
 DSRUU::~DSRUU()
@@ -523,9 +519,6 @@ void DSRUU::defaultProcess(cMessage *ipDgram)
 // Rutina HandleMessage ()
 void DSRUU::handleMessage(cMessage* msg)
 {
-    if (is_init==false)
-        opp_error("Dsr has not been initialized ");
-
     //current_time =simTime();
     if (msg->isSelfMessage())
     {// Timer msg

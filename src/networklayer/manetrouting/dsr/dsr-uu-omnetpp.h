@@ -194,7 +194,6 @@ class DSRUU:public cSimpleModule, public INotifiable, public ManetNetfilterHook
     static int lifo_token;
 
   private:
-    bool is_init;
     struct in_addr myaddr_;
     MACAddress macaddr_;
     int interfaceId;
