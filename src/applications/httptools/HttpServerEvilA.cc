@@ -32,6 +32,12 @@
 
 Define_Module(HttpServerEvilA);
 
+
+int HttpServerEvilA::numInitStages() const
+{
+    return std::max(0 + 1, HttpServer::numInitStages());
+}
+
 void HttpServerEvilA::initialize(int stage)
 {
     HttpServer::initialize(stage);
@@ -62,7 +68,4 @@ std::string HttpServerEvilA::generateBody()
 
     return result;
 }
-
-
-
 

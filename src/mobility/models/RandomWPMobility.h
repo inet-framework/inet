@@ -38,6 +38,8 @@ class INET_API RandomWPMobility : public LineSegmentsMobilityBase
     bool nextMoveIsWait;
 
   protected:
+    int numInitStages() const;
+
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int stage);
 

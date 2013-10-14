@@ -72,6 +72,11 @@ void TraCIMobility::Statistics::recordScalars(cSimpleModule& module)
     module.recordScalar("totalCO2Emission", totalCO2Emission);
 }
 
+int TraCIMobility::numInitStages() const
+{
+    return std::max(STAGE_LOCAL_BEGIN + 1, MobilityBase::numInitStages());
+}
+
 void TraCIMobility::initialize(int stage)
 {
     //TODO why call the base::initialize() at the end?

@@ -126,6 +126,11 @@ void Ns2MotionMobility::parseFile(const char *filename)
 
 }
 
+int Ns2MotionMobility::numInitStages() const
+{
+    return std::max(STAGE_LOCAL_BEGIN + 1, LineSegmentsMobilityBase::numInitStages());
+}
+
 void Ns2MotionMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);

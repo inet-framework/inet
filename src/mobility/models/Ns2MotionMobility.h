@@ -62,6 +62,8 @@ class INET_API Ns2MotionMobility : public LineSegmentsMobilityBase
   protected:
     void parseFile(const char *filename);
 
+    int numInitStages() const;
+
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int stage);
 

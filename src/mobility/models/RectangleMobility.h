@@ -41,6 +41,8 @@ class INET_API RectangleMobility : public MovingMobilityBase
     double corner1, corner2, corner3, corner4;
 
   protected:
+    virtual int numInitStages() const;
+
     /** @brief Initializes mobility model parameters.
      *
      * If the host is not stationary it calculates a random position on the rectangle.

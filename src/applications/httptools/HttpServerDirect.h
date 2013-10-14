@@ -51,6 +51,8 @@ class INET_API HttpServerDirect : public HttpServerBase
     protected:
         /** @name cSimpleModule redefinitions */
         //@{
+        virtual int numInitStages() const;
+
         /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize(int stage);
 

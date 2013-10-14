@@ -31,6 +31,11 @@ TurtleMobility::TurtleMobility()
     angle = 0;
 }
 
+int TurtleMobility::numInitStages() const
+{
+    return std::max(STAGE_LOCAL_BEGIN + 1, LineSegmentsMobilityBase::numInitStages());
+}
+
 void TurtleMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);

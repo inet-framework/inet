@@ -40,6 +40,8 @@ class INET_API ConstSpeedMobility : public LineSegmentsMobilityBase
     double speed;
 
   protected:
+    virtual int numInitStages() const;
+
     /** @brief Initializes mobility model parameters. */
     virtual void initialize(int stage);
 

@@ -50,6 +50,11 @@
 
 Define_Module(MoBANCoordinator);
 
+int MoBANCoordinator::numInitStages() const
+{
+    return std::max(STAGE_LOCAL_BEGIN + 1, LineSegmentsMobilityBase::numInitStages());
+}
+
 void MoBANCoordinator::initialize(int stage) {
     LineSegmentsMobilityBase::initialize(stage);
     EV_TRACE << "initializing MoBANCoordinator stage " << stage << endl;

@@ -32,6 +32,12 @@
 
 Define_Module(HttpServerDirectEvilA);
 
+
+int HttpServerDirectEvilA::numInitStages() const
+{
+    return std::max(0 + 1, HttpServerDirect::numInitStages());
+}
+
 void HttpServerDirectEvilA::initialize(int stage)
 {
     HttpServerDirect::initialize(stage);

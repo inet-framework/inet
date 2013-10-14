@@ -38,6 +38,11 @@ ChiangMobility::ChiangMobility()
     yState = 0;
 }
 
+int ChiangMobility::numInitStages() const
+{
+    return std::max(STAGE_LOCAL_BEGIN + 1, LineSegmentsMobilityBase::numInitStages());
+}
+
 void ChiangMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);

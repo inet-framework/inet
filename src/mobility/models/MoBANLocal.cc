@@ -53,6 +53,11 @@ MoBANLocal::MoBANLocal()
     speed = 0;
 }
 
+int MoBANLocal::numInitStages() const
+{
+    return std::max(2 + 1, LineSegmentsMobilityBase::numInitStages());
+}
+
 void MoBANLocal::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);

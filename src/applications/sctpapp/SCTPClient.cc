@@ -40,6 +40,12 @@ simsignal_t SCTPClient::sentPkSignal = SIMSIGNAL_NULL;
 simsignal_t SCTPClient::rcvdPkSignal = SIMSIGNAL_NULL;
 simsignal_t SCTPClient::echoedPkSignal = SIMSIGNAL_NULL;
 
+
+int SCTPClient::numInitStages() const
+{
+    return 1 + 1;
+}
+
 void SCTPClient::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

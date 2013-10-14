@@ -69,6 +69,7 @@ class INET_API TraCIMobility : public MobilityBase
         };
 
         TraCIMobility() : MobilityBase(), isPreInitialized(false) {}
+        virtual int numInitStages() const;
         virtual void initialize(int stage);
         virtual void setInitialPosition();
         virtual void finish();

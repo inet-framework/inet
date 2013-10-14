@@ -31,6 +31,11 @@ LinearNodeDistributionMobility::LinearNodeDistributionMobility()
     orientation = 0;
 }
 
+int LinearNodeDistributionMobility::numInitStages() const
+{
+    return std::max(STAGE_LOCAL_BEGIN + 1, StationaryMobility::numInitStages());
+}
+
 void LinearNodeDistributionMobility::initialize(int stage)
 {
     StationaryMobility::initialize(stage);

@@ -32,6 +32,12 @@
 
 Define_Module(HttpServerDirect);
 
+
+int HttpServerDirect::numInitStages() const
+{
+    return std::max(0 + 1, HttpServerBase::numInitStages());
+}
+
 void HttpServerDirect::initialize(int stage)
 {
     HttpServerBase::initialize(stage);

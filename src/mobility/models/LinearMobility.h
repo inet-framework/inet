@@ -39,6 +39,8 @@ class INET_API LinearMobility : public MovingMobilityBase
     double acceleration;   ///< acceleration of linear motion
 
   protected:
+    virtual int numInitStages() const;
+
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int stage);
 

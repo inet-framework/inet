@@ -41,6 +41,8 @@ class INET_API GaussMarkovMobility : public LineSegmentsMobilityBase
     double variance;       ///< variance
 
   protected:
+    virtual int numInitStages() const;
+
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int stage);
 

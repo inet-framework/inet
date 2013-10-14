@@ -42,6 +42,8 @@ class INET_API LinearNodeDistributionMobility : public StationaryMobility
     double orientation;
 
   protected:
+    virtual int numInitStages() const;
+
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int stage);
 

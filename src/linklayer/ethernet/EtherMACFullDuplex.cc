@@ -33,6 +33,11 @@ EtherMACFullDuplex::EtherMACFullDuplex()
 {
 }
 
+int EtherMACFullDuplex::numInitStages() const
+{
+    return std::max(0 + 1, EtherMACBase::numInitStages());
+}
+
 void EtherMACFullDuplex::initialize(int stage)
 {
     EtherMACBase::initialize(stage);

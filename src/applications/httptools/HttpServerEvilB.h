@@ -56,6 +56,7 @@ class INET_API HttpServerEvilB : public HttpServer
         int badLow;
         int badHigh;
     protected:
+        virtual int numInitStages() const;
         virtual void initialize(int stage);
         virtual std::string generateBody();
 };

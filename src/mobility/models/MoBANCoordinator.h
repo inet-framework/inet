@@ -159,6 +159,8 @@ class MoBANCoordinator: public LineSegmentsMobilityBase
     PostureTransition* transitions;
 
   protected:
+    virtual int numInitStages() const;
+
     virtual void initialize(int);
 
     virtual void setInitialPosition();

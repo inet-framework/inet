@@ -46,6 +46,8 @@ class INET_API CircleMobility : public MovingMobilityBase
     double angle;
 
   protected:
+    virtual int numInitStages() const;
+
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int stage);
 

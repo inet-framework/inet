@@ -45,6 +45,8 @@ class INET_API MassMobility : public LineSegmentsMobilityBase
     double angle;   ///< angle of linear motion
 
   protected:
+    virtual int numInitStages() const;
+
     /** @brief Initializes mobility model parameters. */
     virtual void initialize(int stage);
 

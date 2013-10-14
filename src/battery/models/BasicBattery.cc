@@ -27,11 +27,16 @@
 /**
  * Initialization routine
  */
-void BasicBattery::initialize(int aStage)
+int BasicBattery::numInitStages() const
 {
-    cSimpleModule::initialize(aStage); //DO NOT DELETE!!
+    return 0 + 1;
+}
 
-    if (0 == aStage)
+void BasicBattery::initialize(int stage)
+{
+    cSimpleModule::initialize(stage); //DO NOT DELETE!!
+
+    if (0 == stage)
     {
         mpNb = NotificationBoardAccess().get();
     }

@@ -30,6 +30,11 @@ ConstSpeedMobility::ConstSpeedMobility()
     speed = 0;
 }
 
+int ConstSpeedMobility::numInitStages() const
+{
+    return std::max(STAGE_LOCAL_BEGIN + 1, LineSegmentsMobilityBase::numInitStages());
+}
+
 void ConstSpeedMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);

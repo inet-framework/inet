@@ -49,6 +49,11 @@ MACRelayUnitPP::~MACRelayUnitPP()
     delete [] buffer;
 }
 
+int MACRelayUnitPP::numInitStages() const
+{
+    return std::max(0 + 1, MACRelayUnitBase::numInitStages());
+}
+
 void MACRelayUnitPP::initialize(int stage)
 {
     MACRelayUnitBase::initialize(stage);

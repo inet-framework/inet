@@ -58,6 +58,11 @@ EtherMAC::~EtherMAC()
     cancelAndDelete(endJammingMsg);
 }
 
+int EtherMAC::numInitStages() const
+{
+    return std::max(0 + 1, EtherMACBase::numInitStages());
+}
+
 void EtherMAC::initialize(int stage)
 {
     EtherMACBase::initialize(stage);

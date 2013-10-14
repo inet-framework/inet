@@ -39,6 +39,8 @@ class INET_API BonnMotionMobility : public LineSegmentsMobilityBase
     int currentLine;
 
   protected:
+    virtual int numInitStages() const;
+
     /** @brief Initializes mobility model parameters. */
     virtual void initialize(int stage);
 

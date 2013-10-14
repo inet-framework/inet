@@ -81,12 +81,12 @@ class DrawAmount
 
 class INET_API BasicBattery : public cSimpleModule, public INotifiable
 {
-  public:
-    // LIFECYCLE
-
+  protected:
+    virtual int numInitStages() const;
     virtual void initialize(int);
     virtual void finish();
 
+  public:
     virtual int registerDevice(cObject *id, int numAccts)
     {
         error("BasicBattery::registerDevice not overloaded"); return 0;

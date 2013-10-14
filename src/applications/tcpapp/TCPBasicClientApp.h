@@ -46,6 +46,8 @@ class INET_API TCPBasicClientApp : public TCPGenericCliAppBase, public ILifecycl
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
+    virtual int numInitStages() const;
+
     /** Redefined . */
     virtual void initialize(int stage);
 

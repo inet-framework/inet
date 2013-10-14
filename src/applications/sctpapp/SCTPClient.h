@@ -86,6 +86,8 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     protected:
+        virtual int numInitStages() const;
+
         /**
          * Initialization.
          */
