@@ -38,8 +38,11 @@ void HttpBrowserDirect::initialize(int stage)
     HttpBrowserBase::initialize(stage);
     EV_DEBUG << "Initializing HTTP direct browser component\n";
 
-    // linkSpeed is used to model transmission delay.
-    linkSpeed = par("linkSpeed");
+    if (stage == 0)
+    {
+        // linkSpeed is used to model transmission delay.
+        linkSpeed = par("linkSpeed");
+    }
 }
 
 void HttpBrowserDirect::finish()
