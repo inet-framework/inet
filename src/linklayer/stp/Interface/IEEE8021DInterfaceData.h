@@ -43,6 +43,8 @@ class IEEE8021DInterfaceData : public InterfaceProtocolData
                 PortState state;
                 PortRole role;
 
+                bool edge;
+
                 MACAddress rootAddress;
                 MACAddress bridgeAddress;
 
@@ -98,6 +100,9 @@ class IEEE8021DInterfaceData : public InterfaceProtocolData
         void setRootPriority(unsigned int rootPriority);
         PortState getState() const;
         void setState(PortState state);
+        bool isEdge() const;
+        void setEdge(bool edge);
+
 
         PortInfo getPortInfoData();
         void setDefaultStpPortInfoData();

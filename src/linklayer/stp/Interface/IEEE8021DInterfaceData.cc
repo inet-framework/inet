@@ -38,6 +38,7 @@ IEEE8021DInterfaceData::IEEE8021DInterfaceData()
     defaultStpPort.fwdDelay = 15;
     defaultStpPort.helloTime = 2;
     defaultStpPort.linkCost = 19;     // todo: set cost according to the bandwidth
+    defaultStpPort.edge = false;
 
 }
 
@@ -227,3 +228,12 @@ void IEEE8021DInterfaceData::setDefaultStpPortInfoData()
     portData = defaultStpPort;
 }
 
+bool IEEE8021DInterfaceData::isEdge() const
+{
+    return portData.edge;
+}
+
+void IEEE8021DInterfaceData::setEdge(bool edge)
+{
+    portData.edge=edge;
+}
