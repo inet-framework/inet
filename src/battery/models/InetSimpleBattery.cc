@@ -28,6 +28,9 @@
 
 Define_Module(InetSimpleBattery);
 
+
+int InetSimpleBattery::numInitStages() const {return 2;}
+
 void InetSimpleBattery::initialize(int stage)
 {
 

@@ -97,7 +97,7 @@ class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, 
   public:
     ARP();
     virtual ~ARP();
-    int numInitStages() const {return 5;}
+    virtual int numInitStages() const;
     virtual MACAddress getDirectAddressResolution(const IPv4Address &) const;
     virtual IPv4Address getInverseAddressResolution(const MACAddress &) const;
     void setChangeAddress(const IPv4Address &);

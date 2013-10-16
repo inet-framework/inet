@@ -67,7 +67,11 @@ int DYMOUM::totalRrepAckRec = 0;
 int DYMOUM::totalRerrSend = 0;
 int DYMOUM::totalRerrRec = 0;
 #endif
+
 std::map<ManetAddress,u_int32_t *> DYMOUM::mapSeqNum;
+
+
+int DYMOUM::numInitStages() const  {return 5;}
 
 void DYMOUM::initialize(int stage)
 {

@@ -66,6 +66,8 @@ IPv4RoutingTable::~IPv4RoutingTable()
         delete multicastRoutes[i];
 }
 
+int IPv4RoutingTable::numInitStages() const  {return 4;}
+
 void IPv4RoutingTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

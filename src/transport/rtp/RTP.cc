@@ -41,6 +41,8 @@ simsignal_t RTP::rcvdPkSignal = SIMSIGNAL_NULL;
 // methods inherited from cSimpleModule
 //
 
+int RTP::numInitStages() const { return 2; }
+
 void RTP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

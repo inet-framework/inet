@@ -74,6 +74,7 @@ static std::ostream& operator<<(std::ostream& os, const TCPConnection& conn)
     return os;
 }
 
+int TCP::numInitStages() const { return 2; }
 
 void TCP::initialize(int stage)
 {

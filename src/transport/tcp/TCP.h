@@ -171,7 +171,7 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
 
   protected:
     virtual void initialize(int stage);
-    virtual int numInitStages() const { return 2; }
+    virtual int numInitStages() const;
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 

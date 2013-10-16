@@ -100,6 +100,8 @@ LDP::~LDP()
     //socketMap.deleteSockets();
 }
 
+int LDP::numInitStages() const  {return 4;}
+
 void LDP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

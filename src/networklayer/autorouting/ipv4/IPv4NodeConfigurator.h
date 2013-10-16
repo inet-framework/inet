@@ -45,7 +45,7 @@ class IPv4NodeConfigurator : public cSimpleModule, public ILifecycle {
         IPv4NodeConfigurator();
 
     protected:
-        virtual int numInitStages() const { return 4; }
+        virtual int numInitStages() const;
         virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
         virtual void initialize(int stage);
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);

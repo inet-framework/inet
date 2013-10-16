@@ -53,6 +53,8 @@ DYMO::DYMO()
     DYMO_INTERFACES = NULL;
 }
 
+int DYMO::numInitStages() const  {return 5;}
+
 void DYMO::initialize(int aStage)
 {
     ManetRoutingBase::initialize(aStage);

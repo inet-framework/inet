@@ -44,6 +44,11 @@ EtherTrafGen::~EtherTrafGen()
     cancelAndDelete(timerMsg);
 }
 
+int EtherTrafGen::numInitStages() const
+{
+    return 1 + 1;
+}
+
 void EtherTrafGen::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

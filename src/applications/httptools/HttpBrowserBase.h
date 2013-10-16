@@ -144,14 +144,14 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize(int stage);
 
+        /** Returns the number of initialization stages. Two required. */
+        virtual int numInitStages() const;
+
         /** Report final statistics */
         virtual void finish();
 
         /** Handle incoming messages */
         virtual void handleMessage(cMessage *msg) = 0;
-
-        /** Returns the number of initialization stages. Two required. */
-        int numInitStages() const {return 2;}
         //@}
 
     protected:

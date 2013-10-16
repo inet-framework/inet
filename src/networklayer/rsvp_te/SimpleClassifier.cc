@@ -22,6 +22,9 @@
 
 Define_Module(SimpleClassifier);
 
+
+int SimpleClassifier::numInitStages() const  {return 5;}
+
 void SimpleClassifier::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

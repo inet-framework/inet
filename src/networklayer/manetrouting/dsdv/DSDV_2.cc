@@ -18,7 +18,11 @@
 #include "IPSocket.h"
 
 #define NOforwardHello
+
 Define_Module(DSDV_2);
+
+
+int DSDV_2::numInitStages() const  {return 5;}
 
 void DSDV_2::initialize(int stage)
 {

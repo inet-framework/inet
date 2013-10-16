@@ -29,6 +29,11 @@
 
 Define_Module(HostAutoConfigurator);
 
+int HostAutoConfigurator::numInitStages() const
+{
+    return 2 + 1;
+}
+
 void HostAutoConfigurator::initialize(int stage) {
     cSimpleModule::initialize(stage);
 

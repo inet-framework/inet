@@ -27,13 +27,18 @@
 Define_Module(ObstacleControl);
 
 ObstacleControl::~ObstacleControl() {
+}
 
+int ObstacleControl::numInitStages() const
+{
+    return 1 + 1;
 }
 
 void ObstacleControl::initialize(int stage) {
     cSimpleModule::initialize(stage);
 
-    if (stage == 1) {
+    if (stage == 1)
+    {
         obstacles.clear();
         cacheEntries.clear();
 

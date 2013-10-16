@@ -41,7 +41,7 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
     EncapDecap encapDecap;
 
   protected:
-    virtual int numInitStages() const {return 2;}
+    virtual int numInitStages() const;
     virtual void initialize(int);
 
     /**

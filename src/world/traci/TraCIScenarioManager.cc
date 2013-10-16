@@ -47,7 +47,13 @@ TraCIScenarioManager::~TraCIScenarioManager() {
     cancelAndDelete(executeOneTimestepTrigger);
 }
 
-void TraCIScenarioManager::initialize(int stage) {
+int TraCIScenarioManager::numInitStages() const
+{
+    return 1 + 1;
+}
+
+void TraCIScenarioManager::initialize(int stage)
+{
     cSimpleModule::initialize(stage);
     if (stage == 1)
     {

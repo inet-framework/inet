@@ -40,7 +40,7 @@ class INET_API AppBase : public cSimpleModule, public ILifecycle
 
   protected:
     virtual void initialize(int stage);
-    virtual int numInitStages() const { return 4; }     //TODO STAGE_APPLAYER
+    virtual int numInitStages() const;
     virtual void finish();
     virtual void handleMessage(cMessage *msg);
     virtual void handleMessageWhenUp(cMessage *msg) = 0;

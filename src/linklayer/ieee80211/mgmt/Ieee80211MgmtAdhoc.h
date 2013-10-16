@@ -33,7 +33,7 @@
 class INET_API Ieee80211MgmtAdhoc : public Ieee80211MgmtBase
 {
   protected:
-    virtual int numInitStages() const {return 2;}
+    virtual int numInitStages() const;
     virtual void initialize(int);
 
     /** Implements abstract Ieee80211MgmtBase method */

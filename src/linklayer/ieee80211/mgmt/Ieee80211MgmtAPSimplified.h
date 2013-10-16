@@ -34,7 +34,7 @@
 class INET_API Ieee80211MgmtAPSimplified : public Ieee80211MgmtAPBase
 {
   protected:
-    virtual int numInitStages() const {return 2;}
+    virtual int numInitStages() const;
     virtual void initialize(int);
 
     /** Implements abstract Ieee80211MgmtBase method */

@@ -75,7 +75,7 @@ class INET_API MACRelayUnitBase : public cSimpleModule, public ILifecycle
      * Read parameters parameters.
      */
     virtual void initialize(int stage);
-    virtual int numInitStages() const { return 2; }
+    virtual int numInitStages() const;
 
     /**
      * Updates address table with source address, determines output port

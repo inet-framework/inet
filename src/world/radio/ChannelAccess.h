@@ -83,7 +83,7 @@ class INET_API ChannelAccess : public cSimpleModule, protected cListener
 
     /** Register with ChannelControl and subscribe to hostPos*/
     virtual void initialize(int stage);
-    virtual int numInitStages() const { return 3; }
+    virtual int numInitStages() const;
 };
 
 #endif

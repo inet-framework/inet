@@ -24,6 +24,9 @@
 
 Define_Module(GlobalARP);
 
+
+int GlobalARP::numInitStages() const {return 1;}
+
 void GlobalARP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

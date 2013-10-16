@@ -84,6 +84,9 @@ void OLSR_ETX_LinkQualityTimer::expire()
 /********** OLSR_ETX class **********/
 ///
 ///
+
+int OLSR_ETX::numInitStages() const  {return 5;}
+
 void
 OLSR_ETX::initialize(int stage)
 {

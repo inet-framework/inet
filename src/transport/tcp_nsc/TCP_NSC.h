@@ -68,7 +68,7 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     // called by the OMNeT++ simulation kernel:
 
     virtual void initialize(int stage);
-    virtual int numInitStages() const { return 2; }
+    virtual int numInitStages() const;
     virtual void handleMessage(cMessage *msgP);
     virtual void finish();
 

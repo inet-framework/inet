@@ -30,6 +30,9 @@ simsignal_t Ieee80211AgentSTA::sentRequestSignal = SIMSIGNAL_NULL;
 simsignal_t Ieee80211AgentSTA::acceptConfirmSignal = SIMSIGNAL_NULL;
 simsignal_t Ieee80211AgentSTA::dropConfirmSignal = SIMSIGNAL_NULL;
 
+
+int Ieee80211AgentSTA::numInitStages() const {return 2;}
+
 void Ieee80211AgentSTA::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

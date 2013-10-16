@@ -29,6 +29,9 @@
 
 Define_Module(ICMP);
 
+
+int ICMP::numInitStages() const  {return 1;}
+
 void ICMP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

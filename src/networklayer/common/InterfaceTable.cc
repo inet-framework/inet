@@ -62,6 +62,11 @@ InterfaceTable::~InterfaceTable()
     delete [] tmpInterfaceList;
 }
 
+int InterfaceTable::numInitStages() const
+{
+    return 1 + 1;
+}
+
 void InterfaceTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

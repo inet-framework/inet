@@ -39,6 +39,8 @@ MACBase::~MACBase()
 {
 }
 
+int MACBase::numInitStages() const { return 2; }
+
 void MACBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

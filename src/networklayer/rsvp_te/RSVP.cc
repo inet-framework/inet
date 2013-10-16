@@ -51,6 +51,8 @@ RSVP::~RSVP()
     // TODO cancelAndDelete timers in all data structures
 }
 
+int RSVP::numInitStages() const { return 5; }
+
 void RSVP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

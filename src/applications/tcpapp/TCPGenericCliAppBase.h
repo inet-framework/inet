@@ -49,7 +49,8 @@ class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::Ca
      */
     virtual void initialize(int stage);
 
-    virtual int numInitStages() const { return 4; }
+    virtual int numInitStages() const;
+
     /**
      * For self-messages it invokes handleTimer(); messages arriving from TCP
      * will get dispatched to the socketXXX() functions.

@@ -23,6 +23,9 @@
 #include "EtherFrame_m.h"
 #endif
 
+
+int Ieee80211MgmtAPBase::numInitStages() const {return 2;}
+
 void Ieee80211MgmtAPBase::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);

@@ -31,6 +31,9 @@ Define_Module(IPvXTrafSink);
 
 simsignal_t IPvXTrafSink::rcvdPkSignal = SIMSIGNAL_NULL;
 
+
+int IPvXTrafSink::numInitStages() const { return 2; }
+
 void IPvXTrafSink::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

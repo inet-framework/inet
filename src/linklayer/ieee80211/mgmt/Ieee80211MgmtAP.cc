@@ -42,6 +42,8 @@ Ieee80211MgmtAP::~Ieee80211MgmtAP()
     cancelAndDelete(beaconTimer);
 }
 
+int Ieee80211MgmtAP::numInitStages() const {return 2;}
+
 void Ieee80211MgmtAP::initialize(int stage)
 {
     Ieee80211MgmtAPBase::initialize(stage);

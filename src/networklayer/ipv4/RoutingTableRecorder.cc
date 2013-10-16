@@ -60,6 +60,8 @@ RoutingTableRecorder::~RoutingTableRecorder()
 {
 }
 
+int RoutingTableRecorder::numInitStages() const  {return 1;}
+
 void RoutingTableRecorder::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
@@ -249,6 +251,8 @@ RoutingTableRecorder::RoutingTableRecorder()
 RoutingTableRecorder::~RoutingTableRecorder()
 {
 }
+
+int RoutingTableRecorder::numInitStages() const  {return 1;}
 
 void RoutingTableRecorder::initialize(int stage)
 {

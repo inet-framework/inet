@@ -36,6 +36,8 @@ IPv4NodeConfigurator::IPv4NodeConfigurator()
     networkConfigurator = NULL;
 }
 
+int IPv4NodeConfigurator::numInitStages() const { return 4; }
+
 void IPv4NodeConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

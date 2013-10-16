@@ -233,7 +233,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public AddressRes
         virtual void configureRoutingTable(IIPv4RoutingTable *routingTable);
 
     protected:
-        virtual int numInitStages() const  { return 4; }
+        virtual int numInitStages() const;
         virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
         virtual void initialize(int stage);
 

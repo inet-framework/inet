@@ -35,6 +35,8 @@
 Define_Module(ICMPv6);
 
 
+int ICMPv6::numInitStages() const { return 2; }
+
 void ICMPv6::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

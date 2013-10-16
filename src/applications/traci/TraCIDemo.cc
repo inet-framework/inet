@@ -27,8 +27,14 @@
 
 Define_Module(TraCIDemo);
 
+int TraCIDemo::numInitStages() const
+{
+    return 3 + 1;
+}
+
 void TraCIDemo::initialize(int stage) {
     cSimpleModule::initialize(stage);
+
     if (stage == 1)
     {
         bool isOperational;

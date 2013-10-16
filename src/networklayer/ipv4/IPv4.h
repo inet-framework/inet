@@ -226,7 +226,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle
     IPv4() { rt = NULL; ift = NULL; arp = NULL; arpOutGate = NULL; }
 
   protected:
-    virtual int numInitStages() const {return 2;}
+    virtual int numInitStages() const;
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 

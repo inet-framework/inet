@@ -58,7 +58,7 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
     static simsignal_t dropConfirmSignal;
 
   protected:
-    virtual int numInitStages() const {return 2;}
+    virtual int numInitStages() const;
     virtual void initialize(int);
 
     /** Overridden cSimpleModule method */

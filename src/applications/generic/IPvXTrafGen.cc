@@ -44,6 +44,8 @@ IPvXTrafGen::~IPvXTrafGen()
     cancelAndDelete(timer);
 }
 
+int IPvXTrafGen::numInitStages() const { return 4; }
+
 void IPvXTrafGen::initialize(int stage)
 {
     IPvXTrafSink::initialize(stage);

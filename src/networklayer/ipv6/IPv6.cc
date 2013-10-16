@@ -48,6 +48,9 @@
 
 Define_Module(IPv6);
 
+
+int IPv6::numInitStages() const { return 2; }
+
 void IPv6::initialize(int stage)
 {
     if (stage == 0)

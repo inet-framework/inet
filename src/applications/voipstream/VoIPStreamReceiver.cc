@@ -50,6 +50,8 @@ void VoIPStreamReceiver::initSignals()
     delaySignal = registerSignal("delay");
 }
 
+int VoIPStreamReceiver::numInitStages() const { return 2; }
+
 void VoIPStreamReceiver::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

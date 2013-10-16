@@ -44,6 +44,8 @@ GenericRoutingTable::~GenericRoutingTable()
         delete multicastRoutes[i];
 }
 
+int GenericRoutingTable::numInitStages() const  {return 4;}
+
 void GenericRoutingTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

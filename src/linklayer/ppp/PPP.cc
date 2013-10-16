@@ -50,6 +50,8 @@ PPP::~PPP()
     cancelAndDelete(endTransmissionEvent);
 }
 
+int PPP::numInitStages() const {return 4;}
+
 void PPP::initialize(int stage)
 {
     MACBase::initialize(stage);

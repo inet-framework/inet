@@ -38,6 +38,8 @@ void AppBase::finish()
     isOperational = false;
 }
 
+int AppBase::numInitStages() const { return 4; }     //TODO STAGE_APPLAYER
+
 void AppBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

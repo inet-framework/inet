@@ -69,7 +69,7 @@ class INET_API InetSimpleBattery : public BasicBattery
 
   public:
     virtual void    initialize(int);
-    virtual int numInitStages() const {return 2;}
+    virtual int numInitStages() const;
     virtual void    finish();
     virtual void handleMessage(cMessage *msg);
     /**

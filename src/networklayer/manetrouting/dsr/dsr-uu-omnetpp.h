@@ -293,8 +293,8 @@ class DSRUU:public cSimpleModule, public INotifiable, public ManetNetfilterHook
     DSRUU();
     ~DSRUU();
 
-    int numInitStages() const  {return 5;}
-    void initialize(int stage);
+    virtual int numInitStages() const;
+    virtual void initialize(int stage);
 
     struct iphdr * dsr_build_ip(struct dsr_pkt *dp, struct in_addr src,
                                 struct in_addr dst, int ip_len, int tot_len,

@@ -39,9 +39,7 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     protected:
-        virtual int numInitStages() const {
-            return std::max(4, cSimpleModule::numInitStages());
-        }
+        virtual int numInitStages() const;
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage* msg);
 

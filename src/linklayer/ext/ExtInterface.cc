@@ -37,6 +37,9 @@
 
 Define_Module(ExtInterface);
 
+
+int ExtInterface::numInitStages() const {return 4;}
+
 void ExtInterface::initialize(int stage)
 {
     MACBase::initialize(stage);

@@ -54,6 +54,8 @@ void VoIPStreamSender::Buffer::clear(int framesize)
     writeOffset = 0;
 }
 
+int VoIPStreamSender::numInitStages() const {return 4;}
+
 void VoIPStreamSender::initialize(int stage)
 {
     if (stage == 1)

@@ -158,6 +158,8 @@ EtherMACBase::~EtherMACBase()
     cancelAndDelete(endPauseMsg);
 }
 
+int EtherMACBase::numInitStages() const { return 2; }
+
 void EtherMACBase::initialize(int stage)
 {
     MACBase::initialize(stage);

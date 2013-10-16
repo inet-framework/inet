@@ -51,8 +51,7 @@ class INET_API TwoRateThreeColorMeter : public cSimpleModule
     TwoRateThreeColorMeter() {}
 
   protected:
-
-    virtual int numInitStages() const { return 3; }
+    virtual int numInitStages() const;
 
     virtual void initialize(int stage);
 

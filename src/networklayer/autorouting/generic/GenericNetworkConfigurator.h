@@ -129,7 +129,7 @@ class INET_API GenericNetworkConfigurator : public cSimpleModule
         };
 
     protected:
-        virtual int numInitStages() const  { return 3; }
+        virtual int numInitStages() const;
         virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
         virtual void initialize(int stage);
 

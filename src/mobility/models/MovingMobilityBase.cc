@@ -39,6 +39,8 @@ MovingMobilityBase::~MovingMobilityBase()
     cancelAndDelete(moveTimer);
 }
 
+int MovingMobilityBase::numInitStages() const {return 3;}
+
 void MovingMobilityBase::initialize(int stage)
 {
     MobilityBase::initialize(stage);

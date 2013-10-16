@@ -57,7 +57,7 @@ class OSPFRouting :  public cSimpleModule, public ILifecycle
     bool checkExternalRoute(const IPv4Address& route);
 
   protected:
-    virtual int numInitStages() const  {return 5;}
+    virtual int numInitStages() const;
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void handleMessageWhenDown(cMessage *msg);

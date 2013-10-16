@@ -23,6 +23,9 @@ using namespace DiffservUtil;
 
 Define_Module(SingleRateThreeColorMeter);
 
+
+int SingleRateThreeColorMeter::numInitStages() const { return 3; }
+
 void SingleRateThreeColorMeter::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

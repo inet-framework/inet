@@ -43,6 +43,8 @@ Loopback::~Loopback()
 {
 }
 
+int Loopback::numInitStages() const {return 4;}
+
 void Loopback::initialize(int stage)
 {
     MACBase::initialize(stage);

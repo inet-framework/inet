@@ -63,6 +63,8 @@ GPSR::~GPSR()
 // module interface
 //
 
+int GPSR::numInitStages() const { return 5; }
+
 void GPSR::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

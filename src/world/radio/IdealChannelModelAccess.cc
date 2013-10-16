@@ -36,6 +36,8 @@ IdealChannelModelAccess::~IdealChannelModelAccess()
     }
 }
 
+int IdealChannelModelAccess::numInitStages() const { return 3; }
+
 /**
  * Upon initialization IdealChannelModelAccess registers the nic parent module
  * to have all its connections handled by ChannelControl

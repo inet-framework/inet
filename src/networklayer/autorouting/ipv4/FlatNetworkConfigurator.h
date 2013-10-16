@@ -48,7 +48,7 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
     typedef std::vector<NodeInfo> NodeInfoVector;
 
   protected:
-    virtual int numInitStages() const  {return 3;}
+    virtual int numInitStages() const;
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 

@@ -26,6 +26,9 @@ Define_Module(TCPGenericSrvApp);
 simsignal_t TCPGenericSrvApp::rcvdPkSignal = SIMSIGNAL_NULL;
 simsignal_t TCPGenericSrvApp::sentPkSignal = SIMSIGNAL_NULL;
 
+
+int TCPGenericSrvApp::numInitStages() const { return 2; }
+
 void TCPGenericSrvApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

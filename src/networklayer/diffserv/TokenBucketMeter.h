@@ -42,8 +42,7 @@ class INET_API TokenBucketMeter : public cSimpleModule
     TokenBucketMeter() {}
 
   protected:
-
-    virtual int numInitStages() const { return 3; }
+    virtual int numInitStages() const;
 
     virtual void initialize(int stage);
 

@@ -40,6 +40,8 @@ RTCP::RTCP()
     _senderInfo = NULL;
 }
 
+int RTCP::numInitStages() const { return 2; }
+
 void RTCP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

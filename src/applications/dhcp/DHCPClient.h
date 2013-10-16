@@ -72,10 +72,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
 
     protected:
         // simulation method
-        virtual int numInitStages() const
-        {
-            return 4;
-        }
+        virtual int numInitStages() const;
         virtual void initialize(int stage);
         virtual void finish();
         virtual void handleMessage(cMessage *msg);

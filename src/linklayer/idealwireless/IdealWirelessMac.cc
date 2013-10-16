@@ -64,6 +64,8 @@ void IdealWirelessMac::clearQueue()
     queueModule->clear();
 }
 
+int IdealWirelessMac::numInitStages() const { return 2; }
+
 void IdealWirelessMac::initialize(int stage)
 {
     WirelessMacBase::initialize(stage);

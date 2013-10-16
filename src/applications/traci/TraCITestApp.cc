@@ -26,7 +26,14 @@
 
 Define_Module(TraCITestApp);
 
-void TraCITestApp::initialize(int stage) {
+
+int TraCITestApp::numInitStages() const
+{
+    return 1 + 1;
+}
+
+void TraCITestApp::initialize(int stage)
+{
     cSimpleModule::initialize(stage);
     if (stage == 0) {
         testNumber = par("testNumber");

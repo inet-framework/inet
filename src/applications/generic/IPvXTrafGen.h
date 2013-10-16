@@ -64,7 +64,7 @@ class INET_API IPvXTrafGen : public IPvXTrafSink
     virtual Address chooseDestAddr();
     virtual void sendPacket();
 
-    virtual int numInitStages() const {return 4;}
+    virtual int numInitStages() const;
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 };

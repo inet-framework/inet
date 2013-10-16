@@ -27,6 +27,11 @@
 Define_Module(RTPApplication)
 
 
+int RTPApplication::numInitStages() const
+{
+    return 3 + 1;
+}
+
 void RTPApplication::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

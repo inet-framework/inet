@@ -92,7 +92,7 @@ class INET_API UDPBasicBurst : public AppBase
     virtual void generateBurst();
 
   protected:
-    virtual int numInitStages() const {return 4;}
+    virtual int numInitStages() const;
     virtual void initialize(int stage);
     virtual void handleMessageWhenUp(cMessage *msg);
     virtual void finish();

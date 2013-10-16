@@ -40,7 +40,7 @@ class INET_API UDPSink : public AppBase
     virtual void processPacket(cPacket *msg);
 
   protected:
-    virtual int numInitStages() const {return 4;}
+    virtual int numInitStages() const;
     virtual void initialize(int stage);
     virtual void handleMessageWhenUp(cMessage *msg);
     virtual void finish();

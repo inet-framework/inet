@@ -33,6 +33,9 @@
 
 Define_Module(SCTPServer);
 
+
+int SCTPServer::numInitStages() const { return 2; }
+
 void SCTPServer::initialize(int stage)
 {
     sctpEV3 << "initialize SCTP Server stage " << stage << endl;

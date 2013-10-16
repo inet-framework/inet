@@ -33,6 +33,9 @@
 
 Define_Module(HttpBrowserDirect);
 
+
+int HttpBrowserDirect::numInitStages() const { return HttpBrowserBase::numInitStages(); }
+
 void HttpBrowserDirect::initialize(int stage)
 {
     HttpBrowserBase::initialize(stage);

@@ -50,6 +50,11 @@ PingApp::~PingApp()
     cancelAndDelete(timer);
 }
 
+int PingApp::numInitStages() const
+{
+    return 1 + 1;
+}
+
 void PingApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

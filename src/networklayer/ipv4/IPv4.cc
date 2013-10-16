@@ -42,6 +42,9 @@ Define_Module(IPv4);
 // a multicast cimek eseten hianyoznak bizonyos NetFilter hook-ok
 // a local interface-k hasznalata eseten szinten hianyozhatnak bizonyos NetFilter hook-ok
 
+
+int IPv4::numInitStages() const  {return 2;}
+
 void IPv4::initialize(int stage)
 {
     if (stage == 0)

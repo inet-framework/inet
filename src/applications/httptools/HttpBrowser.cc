@@ -43,6 +43,8 @@ HttpBrowser::~HttpBrowser()
     //
 }
 
+int HttpBrowser::numInitStages() const { return HttpBrowserBase::numInitStages(); }
+
 void HttpBrowser::initialize(int stage)
 {
     HttpBrowserBase::initialize(stage);

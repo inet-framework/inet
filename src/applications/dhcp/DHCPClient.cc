@@ -46,6 +46,8 @@ DHCPClient::~DHCPClient()
     cancelTimer_TO();
 }
 
+int DHCPClient::numInitStages() const { return 3 + 1; }
+
 void DHCPClient::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

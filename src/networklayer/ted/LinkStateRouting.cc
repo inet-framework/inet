@@ -39,6 +39,8 @@ LinkStateRouting::~LinkStateRouting()
     cancelAndDelete(announceMsg);
 }
 
+int LinkStateRouting::numInitStages() const { return 5; }
+
 void LinkStateRouting::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

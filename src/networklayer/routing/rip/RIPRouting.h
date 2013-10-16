@@ -181,7 +181,7 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable, public 
     std::string getHostName() {return host->getFullName(); }
     int getInterfaceMetric(InterfaceEntry *ie);
   protected:
-    virtual int numInitStages() const  {return 5;}
+    virtual int numInitStages() const;
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void receiveChangeNotification(int category, const cObject *details);

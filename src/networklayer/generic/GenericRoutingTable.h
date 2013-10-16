@@ -51,7 +51,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
         MulticastRouteVector multicastRoutes; // multicast route table, sorted by prefix match order
 
     protected:
-        virtual int numInitStages() const  {return 4;}
+        virtual int numInitStages() const;
         virtual void initialize(int stage);
 
         /**

@@ -105,6 +105,7 @@ Batman::~Batman()
     hna_chg_list.clear();
 }
 
+int Batman::numInitStages() const  {return 5;}
 
 void Batman::initialize(int stage)
 {

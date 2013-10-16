@@ -40,11 +40,11 @@
 class INET_API ObstacleControl : public cSimpleModule
 {
     public:
-        ~ObstacleControl();
-        void initialize(int stage);
-        int numInitStages() const { return 2; }
-        void finish();
-        void handleMessage(cMessage *msg);
+        virtual ~ObstacleControl();
+        virtual void initialize(int stage);
+        virtual int numInitStages() const;
+        virtual void finish();
+        virtual void handleMessage(cMessage *msg);
         void handleSelfMsg(cMessage *msg);
 
         void addFromXml(cXMLElement* xml);

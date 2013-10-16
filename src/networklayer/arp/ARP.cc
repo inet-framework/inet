@@ -70,6 +70,8 @@ ARP::ARP()
     nb = NULL;
 }
 
+int ARP::numInitStages() const {return 5;}
+
 void ARP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

@@ -213,6 +213,8 @@ Address const & TCP_NSC::mapNsc2Remote(uint32_t nscAddrP)
 }
 // x == mapNsc2Remote(mapRemote2Nsc(x))
 
+int TCP_NSC::numInitStages() const { return 2; }
+
 void TCP_NSC::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

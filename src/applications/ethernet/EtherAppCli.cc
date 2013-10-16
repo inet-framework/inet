@@ -45,6 +45,11 @@ EtherAppCli::~EtherAppCli()
     cancelAndDelete(timerMsg);
 }
 
+int EtherAppCli::numInitStages() const
+{
+    return 1 + 1;
+}
+
 void EtherAppCli::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

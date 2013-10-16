@@ -61,6 +61,8 @@ IPv6Tunneling::IPv6Tunneling()
     rt = NULL;
 }
 
+int IPv6Tunneling::numInitStages() const { return 2; }
+
 void IPv6Tunneling::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

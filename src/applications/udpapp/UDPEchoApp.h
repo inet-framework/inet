@@ -35,7 +35,7 @@ class UDPEchoApp : public AppBase
     static simsignal_t pkSignal;
 
   protected:
-    virtual int numInitStages() const {return 4;}
+    virtual int numInitStages() const;
     virtual void initialize(int stage);
     virtual void handleMessageWhenUp(cMessage *msg);
     virtual void finish();

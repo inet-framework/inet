@@ -82,7 +82,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     MobilityBase();
 
     /** @brief Returns the required number of initialize stages. */
-    virtual int numInitStages() const {return 2;}
+    virtual int numInitStages() const;
 
     /** @brief Initializes mobility model parameters. */
     virtual void initialize(int stage);

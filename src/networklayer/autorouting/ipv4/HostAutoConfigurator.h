@@ -32,7 +32,7 @@ class INET_API HostAutoConfigurator : public cSimpleModule
     public:
         virtual void initialize(int stage);
         virtual void finish();
-        virtual int numInitStages() const {return 3;}
+        virtual int numInitStages() const;
 
         virtual void handleMessage(cMessage *msg);
 

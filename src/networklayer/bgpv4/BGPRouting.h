@@ -46,7 +46,7 @@ public:
     virtual ~BGPRouting();
 
 protected:
-    virtual int  numInitStages() const  { return 5; }
+    virtual int  numInitStages() const;
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);

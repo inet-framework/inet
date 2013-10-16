@@ -46,6 +46,8 @@ static void printElapsedTime(const char *name, long startTime)
 
 #define T(CODE)  {long startTime=clock(); CODE; printElapsedTime(#CODE, startTime);}
 
+int GenericNetworkConfigurator::numInitStages() const { return 3; }
+
 void GenericNetworkConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

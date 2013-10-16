@@ -76,6 +76,8 @@ IPv4NetworkConfigurator::RouteInfo *IPv4NetworkConfigurator::RoutingTableInfo::f
     return NULL;
 }
 
+int IPv4NetworkConfigurator::numInitStages() const  { return 4; }
+
 void IPv4NetworkConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);

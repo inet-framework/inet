@@ -115,7 +115,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual ~IPv6RoutingTable();
 
   protected:
-    virtual int numInitStages() const  {return 5;}
+    virtual int numInitStages() const;
     virtual void initialize(int stage);
     virtual void parseXMLConfigFile();
 

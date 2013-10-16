@@ -447,10 +447,11 @@ OLSR_MsgTimer::expire()
 
 ///
 ///
-void
-OLSR::initialize(int stage)
+int OLSR::numInitStages() const  { return 4 + 1; }
+
+void OLSR::initialize(int stage)
 {
-    if (stage==4)
+    if (stage == 4)
     {
 
        if (isInMacLayer())

@@ -62,16 +62,16 @@ class SimpleVoIPSender : public cSimpleModule, public ILifecycle
     void sendVoIPPacket();
 
   public:
-    ~SimpleVoIPSender();
+    virtual ~SimpleVoIPSender();
     SimpleVoIPSender();
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   protected:
-    virtual int numInitStages() const {return 4;}
-    void initialize(int stage);
-    void handleMessage(cMessage *msg);
+    virtual int numInitStages() const;
+    virtual void initialize(int stage);
+    virtual void handleMessage(cMessage *msg);
 };
 
 #endif /* VOIPSENDER_H_ */
