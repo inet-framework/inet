@@ -17,6 +17,7 @@
 
 #include "STPTester.h"
 #include "IEEE8021DInterfaceData.h"
+#include "NodeStatus.h"
 
 STPTester::STPTester()
 {
