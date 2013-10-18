@@ -1,8 +1,5 @@
 TODO: DHCP Client should work multiple interfaces, but works with only one.
 
-TODO: TCP, UDP, and other protocols: must be implement an IProtocol, IProtocol has a getMyProtocolIDs() function,
-      and IPv4, IPv6 get it instead protocolmapping parameter.
-
 TODO: UDP: add a parameter: used protocol number, default value is UDP.
       It's useful for UDP-like protocols, e.g. MANET
 
