@@ -209,6 +209,13 @@ void RSTP::finish()
 
 void RSTP::handleMessage(cMessage *msg)
 {//It can receive BPDU or self messages. Self messages are hello time, time to switch to designated, or status upgrade time.
+    if (!isOperational)
+    {
+        EV << "Message '" << msg << "' arrived when module status is down, dropped it\n";
+        delete msg;
+        return;
+    }
+
 	if(msg->isSelfMessage())
 	{
         switch (msg->getKind())

@@ -107,7 +107,7 @@ public:
 /**
  * RSTP implementation.
  */
-class RSTP: public cSimpleModule
+class RSTP: public cSimpleModule, public ILifecycle
 {
   protected:
     /* kind codes for self messages */
