@@ -47,8 +47,6 @@ TODO: implement missing models:
 
 TODO: derive BGPRouter from OSPFRouter that should be derived from Router
 
-TODO: Remove ChannelInstaller. Channels can now implement thruput metering in C++.
-
 TODO: is the namId needed at StandardHost level? Possibly implement namtrace as a plugin?
 
 TODO: port NAM trace writer to use signals mechanism
