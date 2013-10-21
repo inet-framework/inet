@@ -22,5 +22,5 @@ simple L2NetworkConfigurator
 {
     parameters:
         @display("i=block/cogwheel_s");
-        xml config = default(xml("<config><interface hosts='Switch1 Switch2' ports='0' cost='123'/></config>"));
+        xml config = default(xml("<config><interface hosts='**' ports='**' cost='19'/></config>"));
 }
