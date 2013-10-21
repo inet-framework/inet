@@ -52,7 +52,7 @@ void IEEE8021DRelay::handleMessage(cMessage * msg)
 {
     if (!isOperational)
     {
-        EV << "Message '" << msg << "' arrived when module status is down, dropped it\n";
+        EV_ERROR << "Message '" << msg << "' arrived when module status is down, dropped it." << endl;
         delete msg;
         return;
     }
@@ -62,20 +62,28 @@ void IEEE8021DRelay::handleMessage(cMessage * msg)
         // Messages from STP process
         if (strcmp(msg->getArrivalGate()->getName(), "STPGate$i") == 0)
         {
+            EV_INFO << "Received " << msg << " from STP/RSTP module." << endl;
             BPDU * bpdu = check_and_cast<BPDU* >(msg);
             dispatchBPDU(bpdu);
         }
         // Messages from network
         else if (strcmp(msg->getArrivalGate()->getName(), "ifIn") == 0)
         {
+            EV_INFO << "Received " << msg << " from network." << endl;
             EthernetIIFrame * frame = check_and_cast<EthernetIIFrame*>(msg);
+            int arrivalGate = msg->getArrivalGate()->getIndex();
             handleAndDispatchFrame(frame);
         }
     }
+    else
+        delete msg;
+
 }
 
 void IEEE8021DRelay::broadcast(EthernetIIFrame * frame)
 {
+    EV_DETAIL << "Broadcast frame " << frame << endl;
+
     unsigned int arrivalGate = frame->getArrivalGate()->getIndex();
 
     for (unsigned int i = 0; i < portCount; i++)
@@ -88,28 +96,44 @@ void IEEE8021DRelay::broadcast(EthernetIIFrame * frame)
 void IEEE8021DRelay::handleAndDispatchFrame(EthernetIIFrame * frame)
 {
     int arrivalGate = frame->getArrivalGate()->getIndex();
-
+    IEEE8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
     // Broadcast address
     if (frame->getDest().isBroadcast())
         broadcast(frame);
 
     // BPDU Handling
-    if (frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress)
+    if ((frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && port->getRole() != IEEE8021DInterfaceData::DISABLED)
+    {
+        EV_DETAIL << "Deliver BPDU to the STP/RSTP module" << endl;
         deliverBPDU(frame); // Deliver to the STP/RSTP module
+    }
     else
     {
-        int outGate = macTable->getPortForAddress(frame->getDest());
         learn(frame);
+        int outGate = macTable->getPortForAddress(frame->getDest());
         // Not known -> broadcast
         if (outGate == -1)
+        {
+            EV_DETAIL << "Destination address = " << frame->getDest() << " unknown, broadcasting frame " << frame << endl;
             broadcast(frame);
+        }
         else
         {
-            IEEE8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
-            if (port->isForwarding() && outGate != arrivalGate)
-                dispatch(frame, outGate);
+            if (port->isForwarding())
+            {
+                if (outGate != arrivalGate)
+                    dispatch(frame, outGate);
+                else
+                {
+                    EV_DETAIL << "Output port is same as input port, " << frame->getFullName() << " destination = " << frame->getDest() << ", discarding frame " << frame << endl;
+                    delete frame;
+                }
+            }
             else
-                delete frame; // Drop this frame
+            {
+                EV_DETAIL << "The input port = " << arrivalGate << " is not in state forwarding, discarding frame " << frame->getFullName() << endl;
+                delete frame;
+            }
         }
     }
 
@@ -117,8 +141,8 @@ void IEEE8021DRelay::handleAndDispatchFrame(EthernetIIFrame * frame)
 
 void IEEE8021DRelay::dispatch(EthernetIIFrame * frame, unsigned int portNum)
 {
+    IEEE8021DInterfaceData * port = getPortInterfaceData(portNum);
     frame->setByteLength(ETHER_MAC_FRAME_BYTES);
-
     // Padding
     if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
         frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
@@ -126,7 +150,10 @@ void IEEE8021DRelay::dispatch(EthernetIIFrame * frame, unsigned int portNum)
     if (portNum >= portCount)
         return;
 
-    send(frame, "ifOut", portNum);
+    EV_INFO << "Sending " << frame << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
+
+    if (port->isForwarding())
+        send(frame, "ifOut", portNum);
 
     return;
 }
@@ -143,11 +170,11 @@ void IEEE8021DRelay::learn(EthernetIIFrame * frame)
 void IEEE8021DRelay::dispatchBPDU(BPDU * bpdu)
 {
     Ieee802Ctrl * controlInfo = dynamic_cast<Ieee802Ctrl *>(bpdu->removeControlInfo());
-    unsigned int port = controlInfo->getInterfaceId();
+    unsigned int portNum = controlInfo->getInterfaceId();
     MACAddress address = controlInfo->getDest();
     delete controlInfo;
 
-    if (port >= portCount || port < 0)
+    if (portNum >= portCount || portNum < 0)
         return;
 
     // TODO: use LLCFrame
@@ -163,7 +190,9 @@ void IEEE8021DRelay::dispatchBPDU(BPDU * bpdu)
     if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
         frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
 
-    send(frame, "ifOut", port);
+    EV_INFO << "Sending BPDU frame " << frame << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
+
+    send(frame, "ifOut", portNum);
 }
 
 void IEEE8021DRelay::deliverBPDU(EthernetIIFrame * frame)
@@ -179,6 +208,7 @@ void IEEE8021DRelay::deliverBPDU(EthernetIIFrame * frame)
 
     delete frame; // We have the BPDU packet, so delete the frame
 
+    EV_INFO << "Sending BPDU frame " << bpdu << " to the STP/RSTP module" << endl;
     send(bpdu, "STPGate$o");
 }
 
@@ -189,7 +219,7 @@ IEEE8021DInterfaceData * IEEE8021DRelay::getPortInterfaceData(unsigned int portN
     IEEE8021DInterfaceData * portData = gateIfEntry->ieee8021DData();
 
     if (!portData)
-        error("IEEE8021DInterfaceData not found!");
+        throw cRuntimeError("IEEE8021DInterfaceData not found for port = %d",portNum);
 
     return portData;
 }
