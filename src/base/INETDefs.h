@@ -44,6 +44,7 @@
 #  define EV_DETAIL EV << "DETAIL: "
 #  define EV_DEBUG  EV << "DEBUG: "
 #  define EV_TRACE  EV << "TRACE: "
+#  define EV_DETAIL EV << "DETAIL: "
 #endif
 
 #if OMNETPP_VERSION < 0x500
