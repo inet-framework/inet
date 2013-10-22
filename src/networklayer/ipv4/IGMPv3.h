@@ -98,8 +98,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
             FilterMode filter;
             IPv4AddressVector sourceAddressList;
             HostGroupState state;
-            cMessage *timer;
-            cMessage *sourceTimer;
+            cMessage *timer; // for scheduling responses to Group-Specific and Group-and-Source-Specific Queries
 
             HostGroupData(IGMPv3 *owner,const IPv4Address &group);
             virtual ~HostGroupData();

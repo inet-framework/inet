@@ -73,7 +73,6 @@ IGMPv3::HostGroupData::HostGroupData(IGMPv3 *owner, const IPv4Address &group)
     filter = IGMPV3_FM_INCLUDE;
     sourceAddressList.clear();
     timer = NULL;           //timer for group query
-    sourceTimer = NULL;     //timer for group and source query
 }
 
 IGMPv3::HostGroupData::~HostGroupData()
@@ -83,13 +82,7 @@ IGMPv3::HostGroupData::~HostGroupData()
         delete (IGMPV3HostTimerGroupContext*)timer->getContextPointer();
         owner->cancelAndDelete(timer);
     }
-    if(sourceTimer)
-    {
-        delete (IGMPV3HostTimerSourceContext*)sourceTimer->getContextPointer();
-        owner->cancelAndDelete(sourceTimer);
-    }
 }
-
 
 IGMPv3::RouterGroupData::RouterGroupData(IGMPv3 *owner, const IPv4Address &group)
     : owner(owner), groupAddr(group)
