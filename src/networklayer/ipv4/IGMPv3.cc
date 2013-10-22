@@ -531,44 +531,6 @@ void IGMPv3::startTimer(cMessage *timer, double interval)
     scheduleAt(simTime() + interval, timer);
 }
 
-void IGMPv3::startHostGeneralTimer(InterfaceEntry *ie, HostInterfaceData* ifc, double maxRespTime)
-{
-    if (!ifc->generalQueryTimer)
-    {
-        ifc->generalQueryTimer = new cMessage("IGMPv3 Host General timer", IGMPV3_H_GENERAL_QUERY_TIMER);
-    }
-
-    double delay = uniform(0.0, maxRespTime);
-    EV << "setting host General timer for " << ie->getName() << " to " << delay << "\n";
-    startTimer(ifc->generalQueryTimer, delay);
-}
-
-void IGMPv3::startHostGroupTimer(InterfaceEntry *ie, HostGroupData* group, double maxRespTime)
-{
-    if (!group->timer)
-    {
-        group->timer = new cMessage("IGMPv3 Host Group timer", IGMPV3_H_GROUP_TIMER);
-        group->timer->setContextPointer(new IGMPV3HostTimerGroupContext(ie, group));
-    }
-
-    double delay = uniform(0.0, maxRespTime);
-    EV << "setting host timer for " << ie->getName() << " and group " << group->groupAddr.str() << " to " << delay << "\n";
-    startTimer(group->timer, delay);
-}
-
-void IGMPv3::startHostSourceTimer(InterfaceEntry *ie, HostGroupData* group, double maxRespTime, std::vector<IPv4Address> sourceList)
-{
-    if (!group->timer)
-    {
-        group->timer = new cMessage("IGMPv3 Host Group and Source timer", IGMPV3_H_SOURCE_TIMER);
-        group->timer->setContextPointer(new IGMPV3HostTimerSourceContext(ie, group, sourceList));
-    }
-
-    double delay = uniform(0.0, maxRespTime);
-    EV << "setting host timer for " << ie->getName() << " and group " << group->groupAddr.str() << "and source to " << delay << "\n";
-    startTimer(group->timer, delay);
-}
-
 void IGMPv3::sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr,std::vector<IPv4Address> sources, double maxRespTime)
 {
     ASSERT(groupAddr.isUnspecified() || (groupAddr.isMulticast() && !groupAddr.isLinkLocalMulticast()));

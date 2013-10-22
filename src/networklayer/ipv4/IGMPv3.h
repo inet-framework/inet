@@ -255,9 +255,6 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
         virtual void configureInterface(InterfaceEntry *ie);
 
         virtual void startTimer(cMessage *timer, double interval);
-        virtual void startHostGeneralTimer(InterfaceEntry *ie, HostInterfaceData* ifc, double maxRespTime);
-        virtual void startHostGroupTimer(InterfaceEntry *ie, HostGroupData* group, double maxRespTime);
-        virtual void startHostSourceTimer(InterfaceEntry *ie, HostGroupData* group, double maxRespTime, std::vector<IPv4Address> sourceList);
 
         virtual void sendQuery(InterfaceEntry *ie, const IPv4Address& groupAddr,std::vector<IPv4Address> sources, double maxRespTime);
         virtual void sendGroupReport(InterfaceEntry *ie, IPv4Address group, ReportType type, IPv4AddressVector sources);
