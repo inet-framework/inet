@@ -341,7 +341,6 @@ void TestIGMP::printStates(int stateMask, InterfaceEntry *ie, const IPv4Address 
     }
 }
 
-
 void TestIGMP::dumpMulticastGroups(const char* name, const char *ifname, IPv4AddressVector groups)
 {
   if (!out.is_open())
