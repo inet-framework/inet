@@ -55,7 +55,7 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
         packetRequested--;
         emit(enqueuePkSignal, msg);
         emit(dequeuePkSignal, msg);
-        emit(queueingTimeSignal, 0L);
+        emit(queueingTimeSignal, SIMTIME_ZERO);
         sendOut(msg);
     }
     else
