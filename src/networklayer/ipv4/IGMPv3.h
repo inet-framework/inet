@@ -29,7 +29,6 @@
 #include "INotifiable.h"
 #include "IPv4Address.h"
 #include "IGMPMessage.h"
-#include "SocketMessage_m.h"
 #include "InterfaceEntry.h"
 
 #include <set>
@@ -275,10 +274,10 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
 
         virtual void processQuery(IGMPv3Query *msg);
         virtual void processReport(IGMPv3Report *msg);
-        virtual void processSocketChange(SocketMessage *msg);
 
         virtual void multicastGroupJoined(InterfaceEntry *ie, const IPv4Address& groupAddr);
         virtual void multicastGroupLeft(InterfaceEntry *ie, const IPv4Address& groupAddr);
+        virtual void multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, McastSourceFilterMode filterMode, const std::vector<IPv4Address> &sourceList);
 
         /**
          * Function for computing the time value in seconds from an encoded value.

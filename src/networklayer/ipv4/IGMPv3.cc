@@ -425,6 +425,11 @@ void IGMPv3::receiveChangeNotification(int category, const cPolymorphic *details
             info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
             multicastGroupLeft(info->ie, info->groupAddress);
             break;
+        case NF_IPv4_MCAST_CHANGE:
+        {
+            const IPv4MulticastGroupSourceInfo *info = check_and_cast<const IPv4MulticastGroupSourceInfo*>(details);
+            multicastSourceListChanged(info->ie, info->groupAddress, info->filterMode, info->sourceList);
+        }
     }
 }
 
@@ -476,6 +481,7 @@ void IGMPv3::handleMessage(cMessage *msg)
             case IGMPV3_H_GROUP_TIMER:
                 processHostGroupQueryTimer(msg);
                 break;
+            // XXX IGMPV3_H_SOURCE_TIMER?
             default:
                 ASSERT(false);
                 break;
@@ -485,10 +491,9 @@ void IGMPv3::handleMessage(cMessage *msg)
         processQuery((IGMPv3Query *)msg);
     else if (dynamic_cast<IGMPv3Report *>(msg))
         processReport((IGMPv3Report *)msg);
-    else if (dynamic_cast<SocketMessage *>(msg))
-        processSocketChange((SocketMessage *)msg);
+    // TODO process v1/v2 queries/reports
     else
-        ASSERT(false);
+        throw cRuntimeError("Unexpected message: %s", msg->getClassName());
 }
 
 void IGMPv3::multicastGroupJoined(InterfaceEntry *ie, const IPv4Address& groupAddr)
@@ -720,55 +725,69 @@ void IGMPv3::processHostGroupQueryTimer(cMessage *msg)
 
     ctx->sourceList.clear();
 }
+
 /**
- * Function for processing data from future Multicast application
  * This function is sending report message if interface state was changed.
  */
-void IGMPv3::processSocketChange(SocketMessage *msg)
+void IGMPv3::multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, McastSourceFilterMode filterMode, const std::vector<IPv4Address> &sourceList)
 {
-    InterfaceEntry *ie = (InterfaceEntry*)msg->getContextPointer();
     ASSERT(ie);
     EV << "IGMPv3: Host received socket change on iface=" << ie->getName() << "\n";
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
-    GroupToHostDataMap::iterator it = interfaceData->groups.find(msg->getGroupAddr());
+    // XXX If no interface state existed for that multicast address before the change,
+    //     then the "non-existent" state is considered to have a filter mode of INCLUDE
+    //     and an empty source list.
+    GroupToHostDataMap::iterator it = interfaceData->groups.find(group);
     HostGroupData *groupData = it->second;
     FilterMode filter;
-    if(msg->getFilter())
+    if(filterMode == MCAST_INCLUDE_SOURCES)
         filter = IGMPV3_FM_INCLUDE;
     else
         filter = IGMPV3_FM_EXCLUDE;
 
-    //Chec if IF state is different
-    if(!(groupData->filter == filter) || !(groupData->sourceAddressList == msg->getSourceAddressList()))
+    //Check if IF state is different
+    if(!(groupData->filter == filter) || !(groupData->sourceAddressList == sourceList))
     {
         //OldState: INCLUDE(A) NewState: INCLUDE(B) StateChangeRecordSent: ALLOW(B-A) BLOCK(A-B)
-        if(groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_INCLUDE && groupData->sourceAddressList != msg->getSourceAddressList())
+        if(groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_INCLUDE && groupData->sourceAddressList != sourceList)
         {
-            sendGroupReport(ie, msg->getGroupAddr(), IGMPV3_RT_ALLOW, set_complement(msg->getSourceAddressList(), groupData->sourceAddressList));
-            sendGroupReport(ie, msg->getGroupAddr(), IGMPV3_RT_BLOCK, set_complement(groupData->sourceAddressList, msg->getSourceAddressList()));
-            groupData->sourceAddressList = msg->getSourceAddressList();
+            // XXX If the computed source list for either an ALLOW or a BLOCK State-
+            //     Change Record is empty, that record is omitted from the Report
+            //     message.
+            // XXX Send only one report (with two groups)
+            sendGroupReport(ie, group, IGMPV3_RT_ALLOW, set_complement(sourceList, groupData->sourceAddressList));
+            sendGroupReport(ie, group, IGMPV3_RT_BLOCK, set_complement(groupData->sourceAddressList, sourceList));
+            groupData->sourceAddressList = sourceList;
         }
-        else if(groupData->filter == IGMPV3_FM_EXCLUDE && filter == IGMPV3_FM_EXCLUDE && groupData->sourceAddressList != msg->getSourceAddressList())
+        else if(groupData->filter == IGMPV3_FM_EXCLUDE && filter == IGMPV3_FM_EXCLUDE && groupData->sourceAddressList != sourceList)
         {
-            sendGroupReport(ie, msg->getGroupAddr(), IGMPV3_RT_ALLOW, set_complement(groupData->sourceAddressList, msg->getSourceAddressList()));
-            sendGroupReport(ie, msg->getGroupAddr(), IGMPV3_RT_BLOCK, set_complement(msg->getSourceAddressList(), groupData->sourceAddressList));
-            groupData->sourceAddressList = msg->getSourceAddressList();
+            // XXX If the computed source list for either an ALLOW or a BLOCK State-
+            //     Change Record is empty, that record is omitted from the Report
+            //     message.
+            // XXX Send only one report (with two groups)
+            sendGroupReport(ie, group, IGMPV3_RT_ALLOW, set_complement(groupData->sourceAddressList, sourceList));
+            sendGroupReport(ie, group, IGMPV3_RT_BLOCK, set_complement(sourceList, groupData->sourceAddressList));
+            groupData->sourceAddressList = sourceList;
         }
         else if(groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_EXCLUDE)
         {
-            sendGroupReport(ie, msg->getGroupAddr(), IGMPV3_RT_TO_EX, msg->getSourceAddressList());
+            sendGroupReport(ie, group, IGMPV3_RT_TO_EX, sourceList);
             groupData->filter = filter;
-            groupData->sourceAddressList = msg->getSourceAddressList();
+            groupData->sourceAddressList = sourceList;
         }
         else if(groupData->filter == IGMPV3_FM_EXCLUDE && filter == IGMPV3_FM_INCLUDE)
         {
-            sendGroupReport(ie, msg->getGroupAddr(), IGMPV3_RT_TO_IN, msg->getSourceAddressList());
+            sendGroupReport(ie, group, IGMPV3_RT_TO_IN, sourceList);
             groupData->filter = filter;
-            groupData->sourceAddressList = msg->getSourceAddressList();
+            groupData->sourceAddressList = sourceList;
         }
     }
 
-    delete msg;
+    // XXX missing: the report  is retransmitted [Robustness Variable] - 1 more times,
+    // at intervals chosen at random from the range (0, [Unsolicited Report Interval])
+
+    // XXX if an interface change occured when there is a pending report, then
+    // the groups of the old report and the new report are merged.
 }
 
 void IGMPv3::processQuery(IGMPv3Query *msg)
