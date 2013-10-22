@@ -70,7 +70,7 @@ IGMPv3::HostGroupData::HostGroupData(IGMPv3 *owner, const IPv4Address &group)
     ASSERT(groupAddr.isMulticast());
 
     state = IGMPV3_HGS_NON_MEMBER;
-    filter = IGMPV3_FM_INITIAL;
+    filter = IGMPV3_FM_INCLUDE;
     sourceAddressList.clear();
     timer = NULL;           //timer for group query
     sourceTimer = NULL;     //timer for group and source query
@@ -99,7 +99,7 @@ IGMPv3::RouterGroupData::RouterGroupData(IGMPv3 *owner, const IPv4Address &group
 
     state = IGMPV3_RGS_NO_MEMBERS_PRESENT;
     timer = NULL;
-    filter = IGMPV3_FM_INITIAL;
+    filter = IGMPV3_FM_INCLUDE;
     sources.clear();
 }
 
@@ -665,16 +665,16 @@ void IGMPv3::processHostGeneralQueryTimer(cMessage *msg)
     report->setType(IGMPV3_MEMBERSHIP_REPORT);
     int counter = 0;
     report->setGroupRecordArraySize(interfaceData->groups.size());
+
+    // XXX Do not create reports larger than MTU of the interface
+    //
+
     /*
      * creating GroupRecord for each group on interface
      */
     for(GroupToHostDataMap::iterator it = interfaceData->groups.begin(); it != interfaceData->groups.end(); ++it)
     {
         GroupRecord gr;
-        if(it->second->filter == IGMPV3_FM_INITIAL)
-        {
-            gr.recordType = IGMPV3_RT_IS_EX;
-        }
         if(it->second->filter == IGMPV3_FM_INCLUDE)
         {
             gr.recordType = IGMPV3_RT_IS_IN;

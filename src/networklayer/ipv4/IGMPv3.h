@@ -79,7 +79,6 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
         {
             IGMPV3_FM_INCLUDE,
             IGMPV3_FM_EXCLUDE,
-            IGMPV3_FM_INITIAL,
         };
 
         enum ReportType
