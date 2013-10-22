@@ -112,7 +112,8 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
             FilterMode filter;
             RouterGroupState state;
             cMessage *timer;
-            SourceToGroupDataMap sources;
+            SourceToGroupDataMap sources; // XXX should map source addresses to source timers
+                                          // i.e. map<IPv4Address,cMessage*>
 
             RouterGroupData(IGMPv3 *owner, const IPv4Address &group);
             virtual ~RouterGroupData();
@@ -122,8 +123,9 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
         struct HostInterfaceData
         {
             IGMPv3 *owner;
+            int multicastRouterVersion;
             GroupToHostDataMap groups;
-            cMessage *generalQueryTimer;
+            cMessage *generalQueryTimer; // for scheduling responses to General Queries
 
             HostInterfaceData(IGMPv3 *owner);
             virtual ~HostInterfaceData();
@@ -150,9 +152,10 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
             IGMPV3_R_SOURCE_TIMER,
             IGMPV3_H_GENERAL_QUERY_TIMER,
             IGMPV3_H_GROUP_TIMER,
-            IGMPV3_H_SOURCE_TIMER,
+            IGMPV3_H_SOURCE_TIMER, // XXX unused?
         };
 
+        // XXX delete this; use IGMPV3HostTimerSourceContext with empty sourceList
         struct IGMPV3HostTimerGroupContext
         {
             InterfaceEntry *ie;

@@ -443,6 +443,7 @@ void IGMPv3::configureInterface(InterfaceEntry *ie)
     }
 }
 
+// TODO accept v1/v2 messages too
 void IGMPv3::handleMessage(cMessage *msg)
 {
     if (!enabled)
@@ -581,6 +582,7 @@ void IGMPv3::processRouterGeneralQueryTimer(cMessage *msg)
     }
 }
 
+// TODO add Router Alert option, set Type of Service to 0xc0
 void IGMPv3::sendReportToIP(IGMPv3Report *msg, InterfaceEntry *ie, const IPv4Address& dest)
 {
     ASSERT(ie->isMulticast());
@@ -609,6 +611,7 @@ void IGMPv3::sendQueryToIP(IGMPv3Query *msg, InterfaceEntry *ie, const IPv4Addre
     send(msg, "ipOut");
 }
 
+// RFC3376 5.2  report generation, point 1.
 void IGMPv3::processHostGeneralQueryTimer(cMessage *msg)
 {
     IGMPV3HostGeneralTimerContext *ctx = (IGMPV3HostGeneralTimerContext*)msg->getContextPointer();
@@ -650,6 +653,7 @@ void IGMPv3::processHostGeneralQueryTimer(cMessage *msg)
     }
 }
 
+// RFC3376 5.2  report generation, point 2. and 3.
 void IGMPv3::processHostGroupQueryTimer(cMessage *msg)
 {
     IGMPV3HostTimerSourceContext *ctx = (IGMPV3HostTimerSourceContext*)msg->getContextPointer();
@@ -657,6 +661,7 @@ void IGMPv3::processHostGroupQueryTimer(cMessage *msg)
     //checking if query is group or group-and-source specific
     if(ctx->sourceList.empty())
     {
+        // Send report for a Group-Specific Query
         if(ctx->hostGroup->filter == IGMPV3_FM_EXCLUDE)
         {
             sendGroupReport(ctx->ie, ctx->hostGroup->groupAddr, IGMPV3_RT_IS_EX, ctx->hostGroup->sourceAddressList);
@@ -668,6 +673,7 @@ void IGMPv3::processHostGroupQueryTimer(cMessage *msg)
     }
     else
     {
+        // Send report for a Group-and-Source-Specific Query
         if(ctx->hostGroup->filter == IGMPV3_FM_INCLUDE)
         {
             sendGroupReport(ctx->ie, ctx->hostGroup->groupAddr, IGMPV3_RT_IS_IN, set_intersection(ctx->hostGroup->sourceAddressList, ctx->sourceList));
@@ -767,16 +773,19 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
     double maxRespTime = decodeTime(msg->getMaxRespCode());
     double delay = uniform(0.0, maxRespTime);
 
-
-
     // Rules from RFC page 22
     if(interfaceData->generalQueryTimer->isScheduled() && interfaceData->generalQueryTimer->getArrivalTime() < simTime() + delay)
     {
-        //rule 1.
+        // 1. If there is a pending response to a previous General Query
+        //    scheduled sooner than the selected delay, no additional response
+        //    needs to be scheduled.
     }
     else if(groupAddr.isUnspecified() && msg->getSourceList().empty())
     {
-        //rule 2.
+        // 2. If the received Query is a General Query, the interface timer is
+        //    used to schedule a response to the General Query after the
+        //    selected delay.  Any previously pending response to a General
+        //    Query is canceled.
         if(interfaceData->generalQueryTimer->isScheduled())
         {
             cancelEvent(interfaceData->generalQueryTimer);
@@ -792,14 +801,25 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
         }
         else if(!groupAddr.isUnspecified() && !groupData->timer->isScheduled())
         {
-            //rule 3.
+            // 3. If the received Query is a Group-Specific Query or a Group-and-
+            //    Source-Specific Query and there is no pending response to a
+            //    previous Query for this group, then the group timer is used to
+            //    schedule a report.  If the received Query is a Group-and-Source-
+            //    Specific Query, the list of queried sources is recorded to be used
+            //    when generating a response.
             groupData->timer->setContextPointer(new IGMPV3HostTimerSourceContext(ie, groupData, msg->getSourceList()));
             scheduleAt(simTime() + delay, groupData->timer);
         }
         else if(!groupAddr.isUnspecified() && groupData->timer->isScheduled())
         {
             IGMPV3HostTimerSourceContext *ctx = (IGMPV3HostTimerSourceContext*)groupData->timer->getContextPointer();
-            //rule 4.
+            //4. If there already is a pending response to a previous Query
+            //   scheduled for this group, and either the new Query is a Group-
+            //   Specific Query or the recorded source-list associated with the
+            //   group is empty, then the group source-list is cleared and a single
+            //   response is scheduled using the group timer.  The new response is
+            //   scheduled to be sent at the earliest of the remaining time for the
+            //   pending report and the selected delay.
             if(msg->getSourceList().empty())
             {
                 groupData->timer->setContextPointer(new IGMPV3HostTimerSourceContext(ie, groupData, msg->getSourceList()));
@@ -811,7 +831,13 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
             }
             else
             {
-                //rule 5.
+                // 5. If the received Query is a Group-and-Source-Specific Query and
+                //    there is a pending response for this group with a non-empty
+                //    source-list, then the group source list is augmented to contain
+                //    the list of sources in the new Query and a single response is
+                //    scheduled using the group timer.  The new response is scheduled to
+                //    be sent at the earliest of the remaining time for the pending
+                //    report and the selected delay.
                 if(groupData->timer->getArrivalTime() > simTime() + delay)
                 {
                     IPv4AddressVector combinedSources;

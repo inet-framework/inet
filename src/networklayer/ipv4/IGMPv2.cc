@@ -619,6 +619,7 @@ void IGMPv2::sendLeave(InterfaceEntry *ie, HostGroupData* group)
     numLeavesSent++;
 }
 
+// TODO add Router Alert option
 void IGMPv2::sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& dest)
 {
     ASSERT(ie->isMulticast());
