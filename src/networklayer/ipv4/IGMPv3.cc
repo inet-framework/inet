@@ -482,13 +482,28 @@ void IGMPv3::handleMessage(cMessage *msg)
                 break;
         }
     }
-    else if (dynamic_cast<IGMPv3Query *>(msg))
-        processQuery((IGMPv3Query *)msg);
-    else if (dynamic_cast<IGMPv3Report *>(msg))
-        processReport((IGMPv3Report *)msg);
-    // TODO process v1/v2 queries/reports
     else
-        throw cRuntimeError("Unexpected message: %s", msg->getClassName());
+        processIgmpMessage(check_and_cast<IGMPMessage*>(msg));
+}
+
+void IGMPv3::processIgmpMessage(IGMPMessage *msg)
+{
+    switch (msg->getType())
+    {
+        case IGMP_MEMBERSHIP_QUERY:
+            if (dynamic_cast<IGMPv3Query *>(msg))
+                    processQuery((IGMPv3Query *)msg);
+            else
+                /* TODO process v1 and v2 queries*/;
+            break;
+        case IGMPV3_MEMBERSHIP_REPORT:
+            processReport(check_and_cast<IGMPv3Report*>(msg));
+            break;
+        // TODO process v1/v2 reports
+        default:
+            delete msg;
+            throw cRuntimeError("IGMPv2: Unhandled message type (%dq)", msg->getType());
+    }
 }
 
 void IGMPv3::multicastGroupJoined(InterfaceEntry *ie, const IPv4Address& groupAddr)

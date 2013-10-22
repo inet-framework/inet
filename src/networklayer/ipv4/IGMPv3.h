@@ -270,6 +270,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
         virtual void processRouterGroupTimer(cMessage *msg);
         virtual void processRouterSourceTimer(cMessage *msg);
 
+        virtual void processIgmpMessage(IGMPMessage *msg);
         virtual void processQuery(IGMPv3Query *msg);
         virtual void processReport(IGMPv3Report *msg);
 
