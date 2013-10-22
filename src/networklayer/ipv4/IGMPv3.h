@@ -83,12 +83,12 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
 
         enum ReportType
         {
-            IGMPV3_RT_ALLOW = 1,
-            IGMPV3_RT_BLOCK = 2,
-            IGMPV3_RT_IS_IN = 3,
-            IGMPV3_RT_IS_EX = 4,
-            IGMPV3_RT_TO_IN = 5,
-            IGMPV3_RT_TO_EX = 6,
+            IGMPV3_RT_IS_IN = 1,
+            IGMPV3_RT_IS_EX = 2,
+            IGMPV3_RT_TO_IN = 3,
+            IGMPV3_RT_TO_EX = 4,
+            IGMPV3_RT_ALLOW = 5,
+            IGMPV3_RT_BLOCK = 6,
         };
 
         struct HostGroupData
