@@ -530,7 +530,7 @@ void IGMPv3::multicastGroupLeft(InterfaceEntry *ie, const IPv4Address& groupAddr
     if (enabled && !groupAddr.isLinkLocalMulticast())
     {
         HostGroupData *groupData = getHostGroupData(ie, groupAddr);
-        if (groupData)
+        if (groupData && groupData->timer)
         {
             if (groupData->timer->isScheduled())
                 cancelEvent(groupData->timer);
@@ -709,18 +709,24 @@ void IGMPv3::processHostGroupQueryTimer(cMessage *msg)
 void IGMPv3::multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, McastSourceFilterMode filterMode, const std::vector<IPv4Address> &sourceList)
 {
     ASSERT(ie);
+
+    if (!enabled || group.isLinkLocalMulticast())
+        return;
+
     EV << "IGMPv3: Host received socket change on iface=" << ie->getName() << "\n";
-    HostInterfaceData *interfaceData = getHostInterfaceData(ie);
-    // XXX If no interface state existed for that multicast address before the change,
-    //     then the "non-existent" state is considered to have a filter mode of INCLUDE
-    //     and an empty source list.
-    GroupToHostDataMap::iterator it = interfaceData->groups.find(group);
-    HostGroupData *groupData = it->second;
-    FilterMode filter;
-    if(filterMode == MCAST_INCLUDE_SOURCES)
-        filter = IGMPV3_FM_INCLUDE;
-    else
-        filter = IGMPV3_FM_EXCLUDE;
+
+    HostGroupData *groupData = getHostGroupData(ie, group);
+    if (!groupData)
+    {
+        // If no interface state existed for that multicast address before the change,
+        // then the "non-existent" state is considered to have a filter mode of INCLUDE
+        // and an empty source list.
+        groupData = createHostGroupData(ie, group);
+        numGroups++;
+        numHostGroups++;
+    }
+
+    FilterMode filter = filterMode == MCAST_INCLUDE_SOURCES ? IGMPV3_FM_INCLUDE : IGMPV3_FM_EXCLUDE;
 
     //Check if IF state is different
     if(!(groupData->filter == filter) || !(groupData->sourceAddressList == sourceList))
@@ -811,6 +817,12 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
     if(!groupAddr.isUnspecified())
     {
         HostGroupData *groupData = getHostGroupData(ie, groupAddr);
+        if (!groupData) {
+            groupData = createHostGroupData(ie, groupAddr);
+            numGroups++;
+            numHostGroups++;
+        }
+
         if(!groupData->timer)
         {
             groupData->timer = new cMessage("IGMPv3 Host Group Timer", IGMPV3_H_GROUP_TIMER);
