@@ -24,7 +24,6 @@
 class IIPv4RoutingTable;
 class IInterfaceTable;
 class InterfaceEntry;
-class NotificationBoard;
 
 
 /**
@@ -99,7 +98,6 @@ class TED : public cSimpleModule, public ILifecycle
     IIPv4RoutingTable *rt;
     IInterfaceTable *ift;
     IPv4Address routerId;
-    NotificationBoard *nb;
 
     IPAddressVector interfaceAddrs; // list of local interface addresses
 

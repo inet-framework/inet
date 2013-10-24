@@ -22,7 +22,6 @@
 #include "InterfaceMatcher.h"
 #include "InterfaceTableAccess.h"
 #include "NodeOperations.h"
-#include "NotificationBoard.h"
 #include "NotifierConsts.h"
 #include "UDP.h"
 
@@ -152,7 +151,7 @@ void RIPRouting::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        host = findContainingNode(this);
+        host = getContainingNode(this);
         ift = InterfaceTableAccess().get();
         rt = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
         socket.setOutputGate(gate("udpOut"));
@@ -277,7 +276,7 @@ void RIPRouting::sendRIPRequest(const RIPInterfaceEntry &ripInterface)
 /**
  * Listen on interface/route changes and update private data structures.
  */
-void RIPRouting::receiveChangeNotification(int category, const cObject *details)
+void RIPRouting::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     Enter_Method_Silent("RIPRouting::receiveChangeNotification(%s)", notificationCategoryName(category));
 
@@ -285,111 +284,114 @@ void RIPRouting::receiveChangeNotification(int category, const cObject *details)
     const InterfaceEntry *ie;
     const InterfaceEntryChangeDetails *change;
 
-    switch (category)
+    if (category == NF_INTERFACE_CREATED)
     {
-        case NF_INTERFACE_CREATED:
-            // configure interface for RIP
-            ie = check_and_cast<const InterfaceEntry*>(details);
-            if (ie->isMulticast() && !ie->isLoopback())
-            {
-                cXMLElementList config = par("ripConfig").xmlValue()->getChildrenByTagName("interface");
-                int i = InterfaceMatcher(config).findMatchingSelector(ie);
-                if (i >= 0)
-                    addInterface(ie, config[i]);
-            }
-            break;
-        case NF_INTERFACE_DELETED:
-            // delete interfaces and routes referencing the deleted interface
-            ie = check_and_cast<const InterfaceEntry*>(details);
-            deleteInterface(ie);
-            break;
-        case NF_INTERFACE_STATE_CHANGED:
-            change = check_and_cast<const InterfaceEntryChangeDetails*>(details);
-            if (change->getFieldId() == InterfaceEntry::F_CARRIER || change->getFieldId() == InterfaceEntry::F_STATE)
-            {
-                ie = change->getInterfaceEntry();
-                if (!ie->isUp())
-                {
-                    invalidateRoutes(ie);
-                }
-                else
-                {
-                    RIPInterfaceEntry *ripInterfacePtr = findInterfaceById(ie->getInterfaceId());
-                    if (ripInterfacePtr && ripInterfacePtr->mode != NO_RIP)
-                        sendRIPRequest(*ripInterfacePtr);
-                }
-            }
-            break;
-        case NF_ROUTE_DELETED:
-            // remove references to the deleted route and invalidate the RIP route
-            route = const_cast<IRoute*>(check_and_cast<const IRoute*>(details));
-            if (route->getSource() != this)
-            {
-                for (RouteVector::iterator it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
-                    if ((*it)->getRoute() == route)
-                    {
-                        (*it)->setRoute(NULL);
-                        invalidateRoute(*it);
-                    }
-            }
-            break;
-        case NF_ROUTE_ADDED:
-            // add or update the RIP route
-            route = const_cast<IRoute*>(check_and_cast<const IRoute*>(details));
-            if (route->getSource() != this)
-            {
-                if (isLoopbackInterfaceRoute(route))
-                {
-                    /*ignore*/;
-                }
-                else if (isLocalInterfaceRoute(route))
-                {
-                    InterfaceEntry *ie = check_and_cast<InterfaceEntry*>(route->getSource());
-                    RIPRoute *ripRoute = findRoute(ie, RIPRoute::RIP_ROUTE_INTERFACE);
-                    if (ripRoute) // readded
-                    {
-                        RIPInterfaceEntry *ripIe = findInterfaceById(ie->getInterfaceId());
-                        ripRoute->setRoute(route);
-                        ripRoute->setMetric(ripIe ? ripIe->metric : 1);
-                        ripRoute->setChanged(true);
-                        triggerUpdate();
-                    }
-                    else
-                        importRoute(route, RIPRoute::RIP_ROUTE_INTERFACE, getInterfaceMetric(ie));
-                }
-                else
-                {
-                    // TODO import external routes from other routing daemons
-                }
-            }
-            break;
-        case NF_ROUTE_CHANGED:
-            route = const_cast<IRoute*>(check_and_cast<const IRoute*>(details));
-            if (route->getSource() != this)
-            {
-                RIPRoute *ripRoute = findRoute(route);
-                if (ripRoute)
-                {
-                    // TODO check and update tag
-                    bool changed = route->getDestinationAsGeneric() != ripRoute->getDestination() ||
-                                   route->getPrefixLength() != ripRoute->getPrefixLength() ||
-                                   route->getNextHopAsGeneric() != ripRoute->getNextHop() ||
-                                   route->getInterface() != ripRoute->getInterface();
-                    ripRoute->setDestination(route->getDestinationAsGeneric());
-                    ripRoute->setPrefixLength(route->getPrefixLength());
-                    ripRoute->setNextHop(route->getNextHopAsGeneric());
-                    ripRoute->setInterface(route->getInterface());
-                    if (changed)
-                    {
-                        ripRoute->setChanged(changed);
-                        triggerUpdate();
-                    }
-                }
-            }
-            break;
-        default:
-            throw cRuntimeError("Unaccepted notification category: %d", category);
+        // configure interface for RIP
+        ie = check_and_cast<const InterfaceEntry*>(details);
+        if (ie->isMulticast() && !ie->isLoopback())
+        {
+            cXMLElementList config = par("ripConfig").xmlValue()->getChildrenByTagName("interface");
+            int i = InterfaceMatcher(config).findMatchingSelector(ie);
+            if (i >= 0)
+                addInterface(ie, config[i]);
+        }
     }
+    else if (category == NF_INTERFACE_DELETED)
+    {
+        // delete interfaces and routes referencing the deleted interface
+        ie = check_and_cast<const InterfaceEntry*>(details);
+        deleteInterface(ie);
+    }
+    else if (category == NF_INTERFACE_STATE_CHANGED)
+    {
+        change = check_and_cast<const InterfaceEntryChangeDetails*>(details);
+        if (change->getFieldId() == InterfaceEntry::F_CARRIER || change->getFieldId() == InterfaceEntry::F_STATE)
+        {
+            ie = change->getInterfaceEntry();
+            if (!ie->isUp())
+            {
+                invalidateRoutes(ie);
+            }
+            else
+            {
+                RIPInterfaceEntry *ripInterfacePtr = findInterfaceById(ie->getInterfaceId());
+                if (ripInterfacePtr && ripInterfacePtr->mode != NO_RIP)
+                    sendRIPRequest(*ripInterfacePtr);
+            }
+        }
+    }
+    else if (category == NF_ROUTE_DELETED)
+    {
+        // remove references to the deleted route and invalidate the RIP route
+        route = const_cast<IRoute*>(check_and_cast<const IRoute*>(details));
+        if (route->getSource() != this)
+        {
+            for (RouteVector::iterator it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
+                if ((*it)->getRoute() == route)
+                {
+                    (*it)->setRoute(NULL);
+                    invalidateRoute(*it);
+                }
+        }
+    }
+    else if (category == NF_ROUTE_ADDED)
+    {
+        // add or update the RIP route
+        route = const_cast<IRoute*>(check_and_cast<const IRoute*>(details));
+        if (route->getSource() != this)
+        {
+            if (isLoopbackInterfaceRoute(route))
+            {
+                /*ignore*/;
+            }
+            else if (isLocalInterfaceRoute(route))
+            {
+                InterfaceEntry *ie = check_and_cast<InterfaceEntry*>(route->getSource());
+                RIPRoute *ripRoute = findRoute(ie, RIPRoute::RIP_ROUTE_INTERFACE);
+                if (ripRoute) // readded
+                {
+                    RIPInterfaceEntry *ripIe = findInterfaceById(ie->getInterfaceId());
+                    ripRoute->setRoute(route);
+                    ripRoute->setMetric(ripIe ? ripIe->metric : 1);
+                    ripRoute->setChanged(true);
+                    triggerUpdate();
+                }
+                else
+                    importRoute(route, RIPRoute::RIP_ROUTE_INTERFACE, getInterfaceMetric(ie));
+            }
+            else
+            {
+                // TODO import external routes from other routing daemons
+            }
+        }
+    }
+    else if (category == NF_ROUTE_CHANGED)
+    {
+        route = const_cast<IRoute*>(check_and_cast<const IRoute*>(details));
+        if (route->getSource() != this)
+        {
+            RIPRoute *ripRoute = findRoute(route);
+            if (ripRoute)
+            {
+                // TODO check and update tag
+                bool changed = route->getDestinationAsGeneric() != ripRoute->getDestination() ||
+                               route->getPrefixLength() != ripRoute->getPrefixLength() ||
+                               route->getNextHopAsGeneric() != ripRoute->getNextHop() ||
+                               route->getInterface() != ripRoute->getInterface();
+                ripRoute->setDestination(route->getDestinationAsGeneric());
+                ripRoute->setPrefixLength(route->getPrefixLength());
+                ripRoute->setNextHop(route->getNextHopAsGeneric());
+                ripRoute->setInterface(route->getInterface());
+                if (changed)
+                {
+                    ripRoute->setChanged(changed);
+                    triggerUpdate();
+                }
+            }
+        }
+    }
+    else
+        throw cRuntimeError("Unaccepted notification category: %d", category);
 }
 
 bool RIPRouting::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -446,13 +448,12 @@ void RIPRouting::startRIPRouting()
             socket.joinMulticastGroup(addressType->getLinkLocalRIPRoutersMulticastAddress(), it->ie->getInterfaceId());
 
     // subscribe to notifications
-    NotificationBoard *nb = NotificationBoardAccess().get();
-    nb->subscribe(this, NF_INTERFACE_CREATED);
-    nb->subscribe(this, NF_INTERFACE_DELETED);
-    nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
-    nb->subscribe(this, NF_ROUTE_DELETED);
-    nb->subscribe(this, NF_ROUTE_ADDED);
-    nb->subscribe(this, NF_ROUTE_CHANGED);
+    host->subscribe(NF_INTERFACE_CREATED, this);
+    host->subscribe(NF_INTERFACE_DELETED, this);
+    host->subscribe(NF_INTERFACE_STATE_CHANGED, this);
+    host->subscribe(NF_ROUTE_DELETED, this);
+    host->subscribe(NF_ROUTE_ADDED, this);
+    host->subscribe(NF_ROUTE_CHANGED, this);
 
     for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
         if (it->mode != NO_RIP)
@@ -467,13 +468,12 @@ void RIPRouting::stopRIPRouting()
     socket.close();
 
     // subscribe to notifications
-    NotificationBoard *nb = NotificationBoardAccess().get();
-    nb->unsubscribe(this, NF_INTERFACE_CREATED);
-    nb->unsubscribe(this, NF_INTERFACE_DELETED);
-    nb->unsubscribe(this, NF_INTERFACE_STATE_CHANGED);
-    nb->unsubscribe(this, NF_ROUTE_DELETED);
-    nb->unsubscribe(this, NF_ROUTE_ADDED);
-    nb->unsubscribe(this, NF_ROUTE_CHANGED);
+    host->unsubscribe(NF_INTERFACE_CREATED, this);
+    host->unsubscribe(NF_INTERFACE_DELETED, this);
+    host->unsubscribe(NF_INTERFACE_STATE_CHANGED, this);
+    host->unsubscribe(NF_ROUTE_DELETED, this);
+    host->unsubscribe(NF_ROUTE_ADDED, this);
+    host->unsubscribe(NF_ROUTE_CHANGED, this);
 
     // cancel timers
     cancelEvent(updateTimer);

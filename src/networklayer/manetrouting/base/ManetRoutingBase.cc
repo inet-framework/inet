@@ -87,7 +87,7 @@ void ManetRoutingBase::registerRoutingModule()
     int  num_80211 = 0;
     inet_rt = IPv4RoutingTableAccess().getIfExists();
     inet_ift = InterfaceTableAccess().get();
-    nb = NotificationBoardAccess().get();
+    hostModule = getContainingNode(this);
 
     if (routesVector)
         routesVector->clear();
@@ -246,8 +246,8 @@ void ManetRoutingBase::registerRoutingModule()
         }
         arp = ARPCacheAccess().get();
     }
-    nb->subscribe(this,NF_L2_AP_DISASSOCIATED);
-    nb->subscribe(this,NF_L2_AP_ASSOCIATED);
+    hostModule->subscribe(NF_L2_AP_DISASSOCIATED, this);
+    hostModule->subscribe(NF_L2_AP_ASSOCIATED, this);
 
     if (par("PublicRoutingTables").boolValue())
     {
@@ -347,21 +347,21 @@ void ManetRoutingBase::linkLayerFeeback()
 {
     if (!isRegistered)
         opp_error("Manet routing protocol is not register");
-    nb->subscribe(this, NF_LINK_BREAK);
+    hostModule->subscribe(NF_LINK_BREAK, this);
 }
 
 void ManetRoutingBase::linkPromiscuous()
 {
     if (!isRegistered)
         opp_error("Manet routing protocol is not register");
-    nb->subscribe(this, NF_LINK_PROMISCUOUS);
+    hostModule->subscribe(NF_LINK_PROMISCUOUS, this);
 }
 
 void ManetRoutingBase::linkFullPromiscuous()
 {
     if (!isRegistered)
         opp_error("Manet routing protocol is not register");
-    nb->subscribe(this, NF_LINK_FULL_PROMISCUOUS);
+    hostModule->subscribe(NF_LINK_FULL_PROMISCUOUS, this);
 }
 
 void ManetRoutingBase::registerPosition()
@@ -370,7 +370,7 @@ void ManetRoutingBase::registerPosition()
         opp_error("Manet routing protocol is not register");
     regPosition = true;
     mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
-    cModule *mod = findContainingNode(getParentModule(), false);
+    cModule *mod = findContainingNode(getParentModule());
     if (!mod)
         mod = getParentModule();
     mod->subscribe(mobilityStateChangedSignal, this);
@@ -771,7 +771,7 @@ void ManetRoutingBase::omnet_clean_rte()
 //
 // generic receiveChangeNotification, the protocols must implement processLinkBreak and processPromiscuous only
 //
-void ManetRoutingBase::receiveChangeNotification(int category, const cObject *details)
+void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     Enter_Method("Manet llf");
     if (!isRegistered)
@@ -843,13 +843,9 @@ void ManetRoutingBase::receiveChangeNotification(int category, const cObject *de
             }
         }
     }
-}
-
-void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
-{
-    if (signalID == mobilityStateChangedSignal)
+    else if (category == mobilityStateChangedSignal)
     {
-        IMobility *mobility = check_and_cast<IMobility*>(obj);
+        IMobility *mobility = check_and_cast<IMobility*>(details);
         curPosition = mobility->getCurrentPosition();
         curSpeed = mobility->getCurrentSpeed();
         posTimer = simTime();

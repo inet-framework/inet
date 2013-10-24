@@ -29,9 +29,8 @@
 #include "ARP.h"
 #include "UDPSocket.h"
 
-class NotificationBoard;
 
-class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILifecycle
+class INET_API DHCPServer : public cSimpleModule, public cListener, public ILifecycle
 {
     protected:
         // Transmission Timer
@@ -55,7 +54,6 @@ class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILi
         simtime_t proc_delay; // process delay
 
         InterfaceEntry* ie; // interface to listen
-        NotificationBoard* nb;
         UDPSocket socket;
 
     protected:

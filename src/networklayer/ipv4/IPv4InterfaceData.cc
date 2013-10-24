@@ -83,7 +83,6 @@ IPv4InterfaceData::IPv4InterfaceData()
     metric = 0;
     hostData = NULL;
     routerData = NULL;
-    nb = NULL;
 }
 
 IPv4InterfaceData::~IPv4InterfaceData()
@@ -143,10 +142,8 @@ void IPv4InterfaceData::joinMulticastGroup(const IPv4Address& multicastAddress)
 
     changed1(F_MULTICAST_ADDRESSES);
 
-    if (!nb)
-        nb = NotificationBoardAccess().get();
     IPv4MulticastGroupInfo info(ownerp, multicastAddress);
-    nb->fireChangeNotification(NF_IPv4_MCAST_JOIN, &info);
+    ownerp->getInterfaceModule()->emit(NF_IPv4_MCAST_JOIN, &info);
 }
 
 void IPv4InterfaceData::leaveMulticastGroup(const IPv4Address& multicastAddress)
@@ -167,10 +164,8 @@ void IPv4InterfaceData::leaveMulticastGroup(const IPv4Address& multicastAddress)
 
                 changed1(F_MULTICAST_ADDRESSES);
 
-                if (!nb)
-                    nb = NotificationBoardAccess().get();
                 IPv4MulticastGroupInfo info(ownerp, multicastAddress);
-                nb->fireChangeNotification(NF_IPv4_MCAST_LEAVE, &info);
+                ownerp->getInterfaceModule()->emit(NF_IPv4_MCAST_LEAVE, &info);
             }
         }
     }

@@ -27,7 +27,6 @@
 
 #include "INETDefs.h"
 
-#include "NotificationBoard.h"
 #include "InterfaceEntry.h"
 #include "IPv4Address.h"
 
@@ -82,8 +81,6 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
     int metric;                       ///< link "cost"; see e.g. MS KB article Q299540
     HostMulticastData *hostData;
     RouterMulticastData *routerData;
-
-    NotificationBoard *nb; // cached pointer
 
   protected:
     void changed1(int fieldId) {changed(NF_INTERFACE_IPv4CONFIG_CHANGED, fieldId);}

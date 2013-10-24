@@ -23,7 +23,6 @@
 #include "NotifierConsts.h"
 #include "IPv4RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
-#include "NotificationBoard.h"
 #include "TED.h"
 #include "TEDAccess.h"
 
@@ -51,8 +50,8 @@ void LinkStateRouting::initialize(int stage)
         routerId = rt->getRouterId();
 
         // listen for TED modifications
-        NotificationBoard *nb = NotificationBoardAccess().get();
-        nb->subscribe(this, NF_TED_CHANGED);
+        cModule *host = getContainingNode(this);
+        host->subscribe(NF_TED_CHANGED, this);
 
         // peers are given as interface names in the "peers" module parameter;
         // store corresponding interface addresses in peerIfAddrs[]
@@ -93,7 +92,7 @@ void LinkStateRouting::handleMessage(cMessage * msg)
         ASSERT(false);
 }
 
-void LinkStateRouting::receiveChangeNotification(int category, const cObject *details)
+void LinkStateRouting::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);

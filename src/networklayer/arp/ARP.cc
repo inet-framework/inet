@@ -67,7 +67,6 @@ ARP::ARP()
 
     ift = NULL;
     rt = NULL;
-    nb = NULL;
 }
 
 void ARP::initialize(int stage)
@@ -136,9 +135,9 @@ void ARP::initialize(int stage)
             ASSERT(where->second == entry);
             entry->myIter = where; // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
         }
-        nb = NotificationBoardAccess().getIfExists();
-        if (nb != NULL)
-            nb->subscribe(this, NF_INTERFACE_IPv4CONFIG_CHANGED);
+        cModule *host = findContainingNode(this);
+        if (host != NULL)
+            host->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
     }
 }
 
@@ -688,7 +687,7 @@ void ARP::setChangeAddress(const IPv4Address &oldAddress)
 }
 
 
-void ARP::receiveChangeNotification(int category, const cObject *details)
+void ARP::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     Enter_Method_Silent();
     // host associated. Link is up. Change the state to init.

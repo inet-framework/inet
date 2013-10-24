@@ -19,7 +19,6 @@
 #define __INET_RIPROUTING_H_
 
 #include "INETDefs.h"
-#include "INotifiable.h"
 #include "IRoute.h"
 #include "IRoutingTable.h"
 #include "IInterfaceTable.h"
@@ -131,7 +130,7 @@ struct RIPInterfaceEntry
  * 2. There is no merging of subnet routes. RFC 2453 3.7 suggests that subnetted network routes should
  *    not be advertised outside the subnetted network.
  */
-class INET_API RIPRouting : public cSimpleModule, protected INotifiable, public ILifecycle
+class INET_API RIPRouting : public cSimpleModule, protected cListener, public ILifecycle
 {
     enum Mode { RIPv2, RIPng };
     typedef std::vector<RIPInterfaceEntry> InterfaceVector;
@@ -184,7 +183,7 @@ class INET_API RIPRouting : public cSimpleModule, protected INotifiable, public 
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
-    virtual void receiveChangeNotification(int category, const cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
     virtual void startRIPRouting();

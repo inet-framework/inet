@@ -22,7 +22,6 @@
 
 
 #include "WirelessMacBase.h"
-#include "NotificationBoard.h"
 #include "InterfaceEntry.h"
 #include "NodeOperations.h"
 

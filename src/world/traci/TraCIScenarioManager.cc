@@ -654,8 +654,6 @@ void TraCIScenarioManager::deleteModule(std::string nodeId) {
     cModule* mod = getManagedModule(nodeId);
     if (!mod) error("no vehicle with Id \"%s\" found", nodeId.c_str());
 
-    if (!mod->getSubmodule("notificationBoard")) error("host has no submodule notificationBoard");
-
     hosts.erase(nodeId);
     mod->callFinish();
     mod->deleteModule();

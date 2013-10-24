@@ -28,7 +28,6 @@
 
 class InterfaceEntry;
 class IPassiveQueue;
-class NotificationBoard;
 
 /**
  * Loopback interface implementation.

@@ -49,8 +49,8 @@ void Ieee80211AgentSTA::initialize(int stage)
         while ((token = tokenizer.nextToken())!=NULL)
             channelsToScan.push_back(atoi(token));
 
-        nb = NotificationBoardAccess().get();
-        nb->subscribe(this, NF_L2_BEACON_LOST);
+        cModule *host = getContainingNode(this);
+        host->subscribe(NF_L2_BEACON_LOST, this);
 
         // JcM add: get the default ssid, if there is one.
         default_ssid = par("default_ssid").stringValue();
@@ -122,7 +122,7 @@ void Ieee80211AgentSTA::handleResponse(cMessage *msg)
     delete ctrl;
 }
 
-void Ieee80211AgentSTA::receiveChangeNotification(int category, const cObject *details)
+void Ieee80211AgentSTA::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);
@@ -134,7 +134,7 @@ void Ieee80211AgentSTA::receiveChangeNotification(int category, const cObject *d
         getParentModule()->getParentModule()->bubble("Beacon lost!");
         //sendDisassociateRequest();
         sendScanRequest();
-        nb->fireChangeNotification(NF_L2_DISASSOCIATED, myIface);
+        emit(NF_L2_DISASSOCIATED, myIface);
     }
 }
 
@@ -325,11 +325,11 @@ void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
         getParentModule()->getParentModule()->bubble("Associated with AP");
         if(prevAP.isUnspecified() || prevAP != resp->getAddress())
         {
-            nb->fireChangeNotification(NF_L2_ASSOCIATED_NEWAP, myIface); //XXX detail: InterfaceEntry?
+            emit(NF_L2_ASSOCIATED_NEWAP, myIface); //XXX detail: InterfaceEntry?
             prevAP = resp->getAddress();
         }
         else
-            nb->fireChangeNotification(NF_L2_ASSOCIATED_OLDAP, myIface);
+            emit(NF_L2_ASSOCIATED_OLDAP, myIface);
     }
 }
 
@@ -346,7 +346,7 @@ void Ieee80211AgentSTA::processReassociateConfirm(Ieee80211Prim_ReassociateConfi
     else
     {
         EV << "Reassociation successful\n";
-        nb->fireChangeNotification(NF_L2_ASSOCIATED_OLDAP, myIface); //XXX detail: InterfaceEntry?
+        emit(NF_L2_ASSOCIATED_OLDAP, myIface); //XXX detail: InterfaceEntry?
         emit(acceptConfirmSignal, PR_REASSOCIATE_CONFIRM);
         // we are happy!
     }

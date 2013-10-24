@@ -26,7 +26,6 @@
 #include "RSVPHelloMsg.h"
 #include "SignallingMsg_m.h"
 #include "IRSVPClassifier.h"
-#include "NotificationBoard.h"
 #include "ILifecycle.h"
 
 class SimpleClassifier;
@@ -176,7 +175,6 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
     IIPv4RoutingTable *rt;
     IInterfaceTable *ift;
     LIBTable *lt;
-    NotificationBoard *nb;
 
     IRSVPClassifier *rpct;
 

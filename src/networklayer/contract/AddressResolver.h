@@ -33,7 +33,6 @@ class InterfaceEntry;
 class IIPv4RoutingTable;
 class IPv6RoutingTable;
 class GenericRoutingTable;
-class NotificationBoard;
 
 #define DEFAULT_ADDR_TYPE (ADDR_IPv4 | ADDR_IPv6 | ADDR_MAC | ADDR_MODULEPATH | ADDR_MODULEID)
 
@@ -176,13 +175,6 @@ class INET_API AddressResolver
     virtual IPv6RoutingTable *routingTable6Of(cModule *host);
 
     /**
-     * The function tries to look up the NotificationBoard module as submodule
-     * <tt>"notificationBoard"</tt> within the host/router module. Throws an error
-     * if not found.
-     */
-    virtual NotificationBoard *notificationBoardOf(cModule *host);
-
-    /**
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */
     virtual IInterfaceTable *findInterfaceTableOf(cModule *host);
@@ -201,11 +193,6 @@ class INET_API AddressResolver
      * Like interfaceTableOf(), but doesn't throw error if not found.
      */
     virtual GenericRoutingTable *findGenericRoutingTableOf(cModule *host);
-
-    /**
-     * Like notificationBoardOf(), but doesn't throw error if not found.
-     */
-    virtual NotificationBoard *findNotificationBoardOf(cModule *host);
 
     /**
      * Find the Host with the specified address.

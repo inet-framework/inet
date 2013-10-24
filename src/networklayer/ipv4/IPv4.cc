@@ -31,7 +31,6 @@
 #include "Ieee802Ctrl_m.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
-#include "NotificationBoard.h"
 #include "IPSocket.h"
 #include "IARPCache.h"
 #include "Ieee802Ctrl_m.h"
@@ -51,7 +50,6 @@ void IPv4::initialize(int stage)
 
         ift = InterfaceTableAccess().get();
         rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
-        nb = NotificationBoardAccess().getIfExists(); // needed only for multicast forwarding
         arp = ARPCacheAccess().get();
 
         arpDgramOutGate = gate("arpDgramOut");
@@ -521,9 +519,6 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
     ASSERT(destAddr.isMulticast());
     ASSERT(!destAddr.isLinkLocalMulticast());
 
-    if (!nb)
-        throw cRuntimeError("If multicast forwarding is enabled, then the node must contain a NotificationBoard.");
-
     EV << "Forwarding multicast datagram `" << datagram->getName() << "' with dest=" << destAddr << "\n";
 
     numMulticast++;
@@ -532,7 +527,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
     if (!route)
     {
         EV << "Multicast route does not exist, try to add.\n";
-        nb->fireChangeNotification(NF_IPv4_NEW_MULTICAST, datagram);
+        emit(NF_IPv4_NEW_MULTICAST, datagram);
 
         // read new record
         route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
@@ -549,7 +544,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
     if (route->getInInterface() && fromIE != route->getInInterface()->getInterface())
     {
         EV << "Did not arrive on input interface, packet dropped.\n";
-        nb->fireChangeNotification(NF_IPv4_DATA_ON_NONRPF, datagram);
+        emit(NF_IPv4_DATA_ON_NONRPF, datagram);
         numDropped++;
         delete datagram;
     }
@@ -562,7 +557,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
     }
     else
     {
-        nb->fireChangeNotification(NF_IPv4_DATA_ON_RPF, datagram); // forwarding hook
+        emit(NF_IPv4_DATA_ON_RPF, datagram); // forwarding hook
 
         numForwarded++;
         // copy original datagram for multiple destinations
@@ -585,7 +580,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
             }
         }
 
-        nb->fireChangeNotification(NF_IPv4_MDATA_REGISTER, datagram); // postRouting hook
+        emit(NF_IPv4_MDATA_REGISTER, datagram); // postRouting hook
 
         // only copies sent, delete original datagram
         delete datagram;

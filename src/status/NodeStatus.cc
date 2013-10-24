@@ -56,7 +56,7 @@ NodeStatus::State NodeStatus::getStateByName(const char *name)
 bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int opStage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    cModule *node = findContainingNode(this);
+    cModule *node = getContainingNode(this);
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (opStage == 0) {
             EV << node->getFullPath() << " starting up" << endl;
@@ -120,7 +120,7 @@ void NodeStatus::updateDisplayString()
         case GOING_DOWN: icon = "status/execute"; break;
         default: throw cRuntimeError("Unknown status");
     }
-    cModule *node = findContainingNode(this);
+    cModule *node = getContainingNode(this);
     const char *myicon = state==UP ? origIcon.c_str() : icon;
     getDisplayString().setTagArg("i", 0, myicon);
     if (*icon)

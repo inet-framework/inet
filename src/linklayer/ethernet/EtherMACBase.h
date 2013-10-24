@@ -36,7 +36,7 @@ class InterfaceEntry;
 /**
  * Base class for Ethernet MAC implementations.
  */
-class INET_API EtherMACBase : public MACBase, public cListener
+class INET_API EtherMACBase : public MACBase
 {
   protected:
     enum MACTransmitState

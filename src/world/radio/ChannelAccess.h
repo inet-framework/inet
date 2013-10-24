@@ -25,7 +25,6 @@
 #include <limits>
 
 #include "INETDefs.h"
-#include "NotificationBoard.h"
 #include "IChannelControl.h"
 
 // Forward declarations
@@ -52,7 +51,6 @@ class INET_API ChannelAccess : public cSimpleModule, protected cListener
 {
   protected:
     static simsignal_t mobilityStateChangedSignal;
-    NotificationBoard *nb; // Cached pointer to the NotificationBoard module
     IChannelControl* cc;  // Pointer to the ChannelControl module
     IChannelControl::RadioRef myRadioRef;  // Identifies this radio in the ChannelControl module
     cModule *hostModule;    // the host that contains this radio model
@@ -60,7 +58,7 @@ class INET_API ChannelAccess : public cSimpleModule, protected cListener
     bool positionUpdateArrived;
 
   public:
-    ChannelAccess() : nb(NULL), cc(NULL), myRadioRef(NULL), hostModule(NULL) {}
+    ChannelAccess() : cc(NULL), myRadioRef(NULL), hostModule(NULL), positionUpdateArrived(false) {}
     virtual ~ChannelAccess();
 
     /**

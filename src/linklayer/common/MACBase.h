@@ -22,18 +22,16 @@
 
 #include "INETDefs.h"
 #include "ILifecycle.h"
-#include "INotifiable.h"
 
-class NotificationBoard;
 class InterfaceEntry;
 
 /**
  * Base class for MAC modules.
  */
-class INET_API MACBase : public cSimpleModule, public ILifecycle, public INotifiable
+class INET_API MACBase : public cSimpleModule, public ILifecycle, public cListener
 {
     protected:
-        NotificationBoard *nb;
+        cModule *hostModule;
         bool isOperational;  // for use in handleMessage()
         InterfaceEntry *interfaceEntry;  // NULL if no InterfaceTable or node is down
 
@@ -42,10 +40,11 @@ class INET_API MACBase : public cSimpleModule, public ILifecycle, public INotifi
         virtual ~MACBase();
 
     protected:
+        using cListener::receiveSignal;
         virtual void initialize(int stage);
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         void registerInterface(); // do not override! override createInterfaceEntry()
-        virtual void receiveChangeNotification(int category, const cObject *details);
+        virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
         virtual void updateOperationalFlag(bool isNodeUp);
         virtual bool isNodeUp();

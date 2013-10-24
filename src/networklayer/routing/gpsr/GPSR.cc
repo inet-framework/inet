@@ -17,7 +17,6 @@
 //
 
 #include "GPSR.h"
-#include "NotificationBoard.h"
 #include "InterfaceTableAccess.h"
 #include "IPProtocolId_m.h"
 #include "IPSocket.h"
@@ -43,7 +42,6 @@ GPSR::GPSR()
 {
     host = NULL;
     nodeStatus = NULL;
-    notificationBoard = NULL;
     mobility = NULL;
     addressType = NULL;
     interfaceTable = NULL;
@@ -76,9 +74,8 @@ void GPSR::initialize(int stage)
         maxJitter = par("maxJitter");
         neighborValidityInterval = par("neighborValidityInterval");
         // context
-        host = findContainingNode(this);
+        host = getContainingNode(this);
         nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
-        notificationBoard = NotificationBoardAccess().get(this);
         interfaceTable = InterfaceTableAccess().get(this);
         mobility = check_and_cast<IMobility *>(host->getSubmodule("mobility"));
         routingTable = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
@@ -95,7 +92,7 @@ void GPSR::initialize(int stage)
         socket.registerProtocol(IP_PROT_MANET);
 
         globalPositionTable.clear();
-        notificationBoard->subscribe(this, NF_LINK_BREAK);
+        host->subscribe(NF_LINK_BREAK, this);
         addressType = getSelfAddress().getAddressType();
         networkProtocol->registerHook(0, this);
         if (isNodeUp())
@@ -639,7 +636,7 @@ bool GPSR::handleOperationStage(LifecycleOperation * operation, int stage, IDone
 // notification
 //
 
-void GPSR::receiveChangeNotification(int category, const cObject *details)
+void GPSR::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     Enter_Method("receiveChangeNotification");
     if (category == NF_LINK_BREAK) {

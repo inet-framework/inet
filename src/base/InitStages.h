@@ -29,7 +29,7 @@ enum InitStages
     /**
      * Local initializations. Initializations that don't use or affect
      * other modules take place (e.g. reading of parameters); modules may
-     * subscribe to notifications. NodeStatus, NotificationBoard, IPassiveQueue,
+     * subscribe to notifications. NodeStatus, IPassiveQueue,
      * etc. are available for other modules after this stage.
      */
     INITSTAGE_LOCAL = 0,

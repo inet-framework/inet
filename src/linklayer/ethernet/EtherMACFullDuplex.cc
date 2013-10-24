@@ -20,7 +20,6 @@
 
 #include "EtherFrame_m.h"
 #include "IPassiveQueue.h"
-#include "NotificationBoard.h"
 #include "NotifierConsts.h"
 #include "InterfaceEntry.h"
 

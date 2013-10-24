@@ -82,13 +82,13 @@ void IPv6RoutingTable::initialize(int stage)
         mipv6Support = false; // 4.9.07 - CB
 #endif /* WITH_xMIPv6 */
 
-        nb = NotificationBoardAccess().get();
+        cModule *host = getContainingNode(this);
 
-        nb->subscribe(this, NF_INTERFACE_CREATED);
-        nb->subscribe(this, NF_INTERFACE_DELETED);
-        nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
-        nb->subscribe(this, NF_INTERFACE_CONFIG_CHANGED);
-        nb->subscribe(this, NF_INTERFACE_IPv6CONFIG_CHANGED);
+        host->subscribe(NF_INTERFACE_CREATED, this);
+        host->subscribe(NF_INTERFACE_DELETED, this);
+        host->subscribe(NF_INTERFACE_STATE_CHANGED, this);
+        host->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
+        host->subscribe(NF_INTERFACE_IPv6CONFIG_CHANGED, this);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER)
     {
@@ -177,7 +177,7 @@ void IPv6RoutingTable::handleMessage(cMessage *msg)
     throw cRuntimeError("This module doesn't process messages");
 }
 
-void IPv6RoutingTable::receiveChangeNotification(int category, const cObject *details)
+void IPv6RoutingTable::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     if (simulation.getContextType()==CTX_INITIALIZE)
         return;  // ignore notifications during initialize
@@ -229,7 +229,7 @@ void IPv6RoutingTable::routeChanged(IPv6Route *entry, int fieldCode)
         // invalidateCache();
         updateDisplayString();
     }
-    nb->fireChangeNotification(NF_ROUTE_CHANGED, entry); // TODO include fieldCode in the notification
+    emit(NF_ROUTE_CHANGED, entry); // TODO include fieldCode in the notification
 }
 
 
@@ -612,10 +612,10 @@ void IPv6RoutingTable::addOrUpdateOnLinkPrefix(const IPv6Address& destPrefix, in
     else
     {
         // update existing one; notification-wise, we pretend the route got removed then re-added
-        nb->fireChangeNotification(NF_ROUTE_DELETED, route);
+        emit(NF_ROUTE_DELETED, route);
         route->setInterface(ift->getInterfaceById(interfaceId));
         route->setExpiryTime(expiryTime);
-        nb->fireChangeNotification(NF_ROUTE_ADDED, route);
+        emit(NF_ROUTE_ADDED, route);
     }
 
     updateDisplayString();
@@ -652,10 +652,10 @@ void IPv6RoutingTable::addOrUpdateOwnAdvPrefix(const IPv6Address& destPrefix, in
     else
     {
         // update existing one; notification-wise, we pretend the route got removed then re-added
-        nb->fireChangeNotification(NF_ROUTE_DELETED, route);
+        emit(NF_ROUTE_DELETED, route);
         route->setInterface(ift->getInterfaceById(interfaceId));
         route->setExpiryTime(expiryTime);
-        nb->fireChangeNotification(NF_ROUTE_ADDED, route);
+        emit(NF_ROUTE_ADDED, route);
     }
 
     updateDisplayString();
@@ -742,7 +742,7 @@ void IPv6RoutingTable::addRoute(IPv6Route *route)
     purgeDestCache();
     updateDisplayString();
 
-    nb->fireChangeNotification(NF_ROUTE_ADDED, route);
+    emit(NF_ROUTE_ADDED, route);
 }
 
 IPv6Route *IPv6RoutingTable::removeRoute(IPv6Route *route)
@@ -753,7 +753,7 @@ IPv6Route *IPv6RoutingTable::removeRoute(IPv6Route *route)
         updateDisplayString();
         // TODO purge cache?
 
-        nb->fireChangeNotification(NF_ROUTE_DELETED, route); // rather: going to be deleted
+        emit(NF_ROUTE_DELETED, route); // rather: going to be deleted
     }
     return route;
 }
@@ -788,7 +788,7 @@ IPv6RoutingTable::RouteList::iterator IPv6RoutingTable::internalDeleteRoute(Rout
     ASSERT(it != routeList.end());
     IPv6Route *route = *it;
     it = routeList.erase(it);
-    nb->fireChangeNotification(NF_ROUTE_DELETED, route);
+    emit(NF_ROUTE_DELETED, route);
     // TODO purge cache?
     delete route;
     return it;
@@ -873,7 +873,7 @@ void IPv6RoutingTable::deleteAllRoutes()
 
     for (unsigned int i=0; i<routeList.size(); i++)
     {
-        nb->fireChangeNotification(NF_ROUTE_DELETED, routeList[i]);
+        emit(NF_ROUTE_DELETED, routeList[i]);
         delete routeList[i];
     }
 

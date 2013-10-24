@@ -20,17 +20,15 @@
 #define __DHCPCLIENT_H__
 
 #include <vector>
-#include "NotificationBoard.h"
 #include "MACAddress.h"
 #include "DHCP_m.h"
 #include "DHCPLease.h"
 #include "InterfaceTable.h"
 #include "IPv4RoutingTable.h"
 #include "UDPSocket.h"
-#include "INotifiable.h"
 #include "ILifecycle.h"
 
-class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILifecycle
+class INET_API DHCPClient : public cSimpleModule, public cListener, public ILifecycle
 {
     protected:
         int bootps_port; // server
@@ -64,7 +62,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
 
         MACAddress client_mac_address; // client_mac_address
 
-        NotificationBoard* nb; // Notification board
+        cModule *host;
         InterfaceEntry* ie; // interface to configure
         IIPv4RoutingTable* irt; // Routing table to update
 
@@ -78,8 +76,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         virtual void handleMessage(cMessage *msg);
         virtual void handleTimer(cMessage *msg);
         virtual void handleDHCPMessage(DHCPMessage* msg);
-        virtual void receiveChangeNotification(int category, const cPolymorphic *details);
-        virtual cModule* getContainingNode();
+        virtual void receiveSignal(cComponent *source, int category, cObject *details);
         virtual void sendToUDP(cPacket *msg, int srcPort, const Address& destAddr, int destPort);
 
         // internal client methods

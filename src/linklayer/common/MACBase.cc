@@ -28,12 +28,11 @@
 #include "InterfaceTableAccess.h"
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
-#include "NotificationBoard.h"
 
 
 MACBase::MACBase()
 {
-    nb = NULL;
+    hostModule = NULL;
     interfaceEntry = NULL;
     isOperational = false;
 }
@@ -48,9 +47,9 @@ void MACBase::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        nb = NotificationBoardAccess().getIfExists();
-        if (nb)
-            nb->subscribe(this, NF_INTERFACE_DELETED);
+        hostModule = findContainingNode(this);
+        if (hostModule)
+            hostModule->subscribe(NF_INTERFACE_DELETED, this);
     }
     else if (stage == INITSTAGE_LAST)
     {
@@ -90,7 +89,7 @@ bool MACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
     return true;
 }
 
-void MACBase::receiveChangeNotification(int category, const cObject *details)
+void MACBase::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     if (category == NF_INTERFACE_DELETED)
     {
@@ -101,8 +100,7 @@ void MACBase::receiveChangeNotification(int category, const cObject *details)
 
 bool MACBase::isNodeUp()
 {
-    cModule *node = findContainingNode(this);
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
+    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(hostModule->getSubmodule("status"));
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 

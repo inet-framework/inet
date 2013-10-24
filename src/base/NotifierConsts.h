@@ -23,7 +23,7 @@
 
 
 /**
- * Category constants for NotificationBoard
+ * signals for NotificationBoard
  */
 // TODO document associated notification detail structs
 extern simsignal_t    // admin

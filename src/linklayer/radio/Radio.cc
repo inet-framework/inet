@@ -179,8 +179,9 @@ void Radio::initialize(int stage)
         if (isOperational)
         {
             // emit initial values
-            nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
-            nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
+            emit(NF_RADIOSTATE_CHANGED, &rs);
+            emit(NF_RADIO_CHANNEL_CHANGED, &rs);
+
             cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
 
             // statistics
@@ -192,7 +193,7 @@ void Radio::initialize(int stage)
         {
             // tell initial values to MAC
             setRadioState(RadioState::OFF);
-            nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
+            emit(NF_RADIO_CHANNEL_CHANGED, &rs);
         }
 
         // draw the interference distance
@@ -803,7 +804,7 @@ void Radio::changeChannel(int channel)
 
     cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
 
-    cModule *myHost = findContainingNode(this, true);
+    cModule *myHost = getContainingNode(this);
 
     //cGate *radioGate = myHost->gate("radioIn");
 
@@ -857,8 +858,8 @@ void Radio::changeChannel(int channel)
     }
 
     // notify other modules about the channel switch; and actually, radio state has changed too
-    nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
-    nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+    emit(NF_RADIO_CHANNEL_CHANGED, &rs);
+    emit(NF_RADIOSTATE_CHANGED, &rs);
 }
 
 void Radio::setBitrate(double bitrate)
@@ -894,7 +895,7 @@ void Radio::setRadioState(RadioState::State newState)
         }
 
         rs.setState(newState);
-        nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+        emit(NF_RADIOSTATE_CHANGED, &rs);
     }
 }
 /*
@@ -1084,7 +1085,7 @@ void Radio::connectReceiver()
         rs.setState(RadioState::IDLE); // Force radio to Idle
 
     cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
-    cModule *myHost = findContainingNode(this, true);
+    cModule *myHost = getContainingNode(this);
 
     //cGate *radioGate = myHost->gate("radioIn");
 
@@ -1129,7 +1130,7 @@ void Radio::connectReceiver()
     }
 
     // notify other modules about the channel switch; and actually, radio state has changed too
-    nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+    emit(NF_RADIOSTATE_CHANGED, &rs);
 }
 
 

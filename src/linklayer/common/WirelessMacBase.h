@@ -31,7 +31,6 @@
 #include "NodeOperations.h"
 
 class InterfaceEntry;
-class NotificationBoard;
 
 /**
  * Base class for wireless MAC protocols that use MF's physical layer.

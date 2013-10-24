@@ -21,7 +21,6 @@
 #include "applications/traci/TraCITestApp.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
-#include "NotificationBoard.h"
 #include <cmath>
 
 Define_Module(TraCITestApp);

@@ -28,7 +28,6 @@
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
-#include "NotificationBoard.h"
 #include "NotifierConsts.h"
 
 
@@ -64,15 +63,16 @@ void DHCPServer::initialize(int stage)
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
+        cModule *host = getContainingNode(this);
+
         bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
-        nb = NotificationBoardAccess().get();
-        nb->subscribe(this, NF_INTERFACE_CREATED);
-        nb->subscribe(this, NF_INTERFACE_DELETED);
+        host->subscribe(NF_INTERFACE_CREATED, this);
+        host->subscribe(NF_INTERFACE_DELETED, this);
 
         IInterfaceTable* ift = InterfaceTableAccess().get();
         ie = ift->getInterfaceByName(par("interface"));
@@ -96,27 +96,21 @@ void DHCPServer::receiveChangeNotification(int category, const cPolymorphic *det
     Enter_Method_Silent();
 
     InterfaceEntry *nie;
-    switch (category)
+
+    if (category == NF_INTERFACE_CREATED)
     {
-        case NF_INTERFACE_CREATED:
-            nie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
-            if (!ie && !strcmp(nie->getName(), par("interface").stringValue()))
-            {
-                ie = nie;
-            }
-            break;
-
-        case NF_INTERFACE_DELETED:
-            nie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
-            if (ie == nie)
-            {
-                ie = NULL;
-            }
-            break;
-
-        default:
-            throw cRuntimeError("Unaccepted notification category: %d", category);
+        nie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
+        if (!ie && !strcmp(nie->getName(), par("interface").stringValue()))
+            ie = nie;
     }
+    else if (category == NF_INTERFACE_DELETED)
+    {
+        nie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
+        if (ie == nie)
+            ie = NULL;
+    }
+    else
+        throw cRuntimeError("Unaccepted notification category: %d", category);
 }
 
 void DHCPServer::handleMessage(cMessage *msg)

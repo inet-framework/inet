@@ -50,10 +50,9 @@ void Ieee80211MgmtAPSimplified::handleCommand(int msgkind, cObject *ctrl)
     error("handleCommand(): no commands supported");
 }
 
-void Ieee80211MgmtAPSimplified::receiveChangeNotification(int category, const cObject *details)
+void Ieee80211MgmtAPSimplified::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     Enter_Method_Silent();
-    printNotificationBanner(category, details);
 }
 
 void Ieee80211MgmtAPSimplified::handleDataFrame(Ieee80211DataFrame *frame)

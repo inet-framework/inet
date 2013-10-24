@@ -375,10 +375,10 @@ void DSRUU::initialize(int stage)
         macaddr_ = interface80211ptr->getMacAddress();
 
         // ASSERT(stage >= STAGE:NOTIFICATIONBOARD_AVAILABLE);
-        nb = NotificationBoardAccess().get();
-        nb->subscribe(this, NF_LINK_BREAK);
+        cModule *host = getContainingNode(this);
+        host->subscribe(NF_LINK_BREAK, this);
         if (get_confval(PromiscOperation))
-            nb->subscribe(this, NF_LINK_PROMISCUOUS);
+            host->subscribe(NF_LINK_PROMISCUOUS, this);
         // clear routing entries related to wlan interfaces and autoassign ip adresses
         bool manetPurgeRoutingTables = (bool) par("manetPurgeRoutingTables");
         if (manetPurgeRoutingTables)
@@ -413,7 +413,7 @@ void DSRUU::finish()
     maint_buf_cleanup();
 }
 
-DSRUU::DSRUU():cSimpleModule(), INotifiable()
+DSRUU::DSRUU():cSimpleModule(), cListener()
 {
     lifoDsrPkt = NULL;
     lifo_token = 0;
@@ -577,7 +577,7 @@ void DSRUU::handleMessage(cMessage* msg)
     return;
 }
 
-void DSRUU::receiveChangeNotification(int category, const cObject *details)
+void DSRUU::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     IPv4Datagram  *dgram = NULL;
     //current_time = simTime();

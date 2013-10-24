@@ -23,19 +23,17 @@
 
 #include "PPPFrame_m.h"
 #include "TxNotifDetails.h"
-#include "INotifiable.h"
 #include "ILifecycle.h"
 #include "NodeStatus.h"
 #include "MACBase.h"
 
 class InterfaceEntry;
 class IPassiveQueue;
-class NotificationBoard;
 
 /**
  * PPP implementation.
  */
-class INET_API PPP : public MACBase, public cListener
+class INET_API PPP : public MACBase
 {
   protected:
     long txQueueLimit;

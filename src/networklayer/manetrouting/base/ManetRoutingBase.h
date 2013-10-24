@@ -29,7 +29,6 @@
 #include "compatibility.h"
 #include "Coord.h"
 #include "IIPv4RoutingTable.h"
-#include "NotificationBoard.h"
 #include "IInterfaceTable.h"
 #include "Address.h"
 #include "ManetAddress.h"
@@ -52,7 +51,7 @@ typedef std::set<ManetAddress>::const_iterator AddressGroupConstIterator;
 /**
  * Base class for Manet Routing
  */
-class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, protected cListener, public ManetNetfilterHook
+class INET_API ManetRoutingBase : public cSimpleModule, public cListener, public ManetNetfilterHook
 {
   private:
     static simsignal_t mobilityStateChangedSignal;
@@ -75,7 +74,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 
     IIPv4RoutingTable *inet_rt;
     IInterfaceTable *inet_ift;
-    NotificationBoard *nb;
+    cModule *hostModule;
     ICMP *icmpModule;
     bool mac_layer_;
     ManetAddress    hostAddress;
@@ -207,8 +206,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
      *
      * ManetRoutingBase is subscribed to position changes.
      */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-    virtual void receiveChangeNotification(int category, const cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
     virtual void processLinkBreak(const cObject *details);
     virtual void processLinkBreakManagement(const cObject *details);
     virtual void processPromiscuous(const cObject *details);

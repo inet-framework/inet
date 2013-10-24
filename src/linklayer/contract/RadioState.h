@@ -34,7 +34,6 @@
  *  - OFF: the device is turned off
  *
  * @author Andreas Koepke, Andras Varga
- * @see NotificationBoard
  */
 class INET_API RadioState : public cObject
 {

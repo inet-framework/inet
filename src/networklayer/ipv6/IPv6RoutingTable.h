@@ -25,7 +25,6 @@
 #include "IRoutingTable.h"
 #include "IPv6Route.h"
 #include "IPv6Address.h"
-#include "NotificationBoard.h"
 #include "ILifecycle.h"
 
 class IInterfaceTable;
@@ -47,11 +46,10 @@ class IPv6RoutingTable;
  * be read and modified during simulation, typically by routing protocol
  * implementations.
  */
-class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, protected INotifiable, public ILifecycle
+class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, protected cListener, public ILifecycle
 {
   protected:
     IInterfaceTable *ift; // cached pointer
-    NotificationBoard *nb; // cached pointer
 
     bool isrouter;
     bool multicastForward;  //If node is forwarding multicast info
@@ -125,10 +123,10 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual void handleMessage(cMessage *);
 
     /**
-     * Called by the NotificationBoard whenever a change of a category
+     * Called by the signal handler whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveChangeNotification(int category, const cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
 
   public:
     /** @name Interfaces */

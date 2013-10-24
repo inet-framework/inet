@@ -36,7 +36,7 @@ class IPassiveQueue;
  *
  * See the NED file for details.
  */
-class INET_API IdealWirelessMac : public WirelessMacBase, public cListener
+class INET_API IdealWirelessMac : public WirelessMacBase
 {
   protected:
     static simsignal_t radioStateSignal;

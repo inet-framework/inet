@@ -18,6 +18,7 @@
 
 #include "Ieee80211MgmtSTA.h"
 #include "Ieee802Ctrl_m.h"
+#include "ModuleAccess.h"
 #include "NotifierConsts.h"
 #include "PhyControlInfo_m.h"
 #include "RadioState.h"
@@ -96,8 +97,8 @@ void Ieee80211MgmtSTA::initialize(int stage)
         isAssociated = false;
         assocTimeoutMsg = NULL;
 
-        nb = NotificationBoardAccess().get();
-        nb->subscribe(this, NF_LINK_FULL_PROMISCUOUS);
+        host = getContainingNode(this);
+        host->subscribe(NF_LINK_FULL_PROMISCUOUS, this);
 
         WATCH(isScanning);
         WATCH(isAssociated);
@@ -280,7 +281,7 @@ void Ieee80211MgmtSTA::changeChannel(int channelNum)
 void Ieee80211MgmtSTA::beaconLost()
 {
     EV << "Missed a few consecutive beacons -- AP is considered lost\n";
-    nb->fireChangeNotification(NF_L2_BEACON_LOST, NULL);  //XXX use InterfaceEntry as detail, etc...
+    emit(NF_L2_BEACON_LOST, (cObject *)NULL);  //XXX use InterfaceEntry as detail, etc...
 }
 
 void Ieee80211MgmtSTA::sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& address)
@@ -345,7 +346,7 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, simtime_t timeout)
     scheduleAt(simTime()+timeout, assocTimeoutMsg);
 }
 
-void Ieee80211MgmtSTA::receiveChangeNotification(int category, const cObject *details)
+void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);
@@ -417,7 +418,7 @@ void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
 
     // start scanning
     if (scanning.activeScan)
-        nb->subscribe(this, NF_RADIOSTATE_CHANGED);
+        host->subscribe(NF_RADIOSTATE_CHANGED, this);
     scanning.currentChannelIndex = -1; // so we'll start with index==0
     isScanning = true;
     scanNextChannel();
@@ -430,7 +431,7 @@ bool Ieee80211MgmtSTA::scanNextChannel()
     {
         EV << "Finished scanning last channel\n";
         if (scanning.activeScan)
-            nb->unsubscribe(this, NF_RADIOSTATE_CHANGED);
+            host->unsubscribe(NF_RADIOSTATE_CHANGED, this);
         isScanning = false;
         return true; // we're done
     }
@@ -764,7 +765,7 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
         isAssociated = true;
         (APInfo&)assocAP = (*ap);
 
-        nb->fireChangeNotification(NF_L2_ASSOCIATED, NULL); //XXX detail: InterfaceEntry?
+        emit(NF_L2_ASSOCIATED, (cObject *)NULL); //XXX detail: InterfaceEntry?
 
         assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", MK_BEACON_TIMEOUT);
         scheduleAt(simTime()+MAX_BEACONS_MISSED*assocAP.beaconInterval, assocAP.beaconTimeoutMsg);

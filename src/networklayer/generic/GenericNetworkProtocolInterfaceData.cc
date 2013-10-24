@@ -21,15 +21,6 @@
 
 #include "GenericNetworkProtocolInterfaceData.h"
 
-GenericNetworkProtocolInterfaceData::GenericNetworkProtocolInterfaceData()
-{
-    metric = 0;
-    nb = NULL;
-}
-
-GenericNetworkProtocolInterfaceData::~GenericNetworkProtocolInterfaceData()
-{
-}
 
 std::string GenericNetworkProtocolInterfaceData::info() const
 {

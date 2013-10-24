@@ -18,6 +18,7 @@
 
 #include "ChannelAccess.h"
 #include "IMobility.h"
+#include "ModuleAccess.h"
 
 simsignal_t ChannelAccess::mobilityStateChangedSignal = SIMSIGNAL_NULL;
 
@@ -55,8 +56,7 @@ void ChannelAccess::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         cc = getChannelControl();
-        nb = NotificationBoardAccess().get();
-        hostModule = findContainingNode(this, true);
+        hostModule = getContainingNode(this);
         myRadioRef = NULL;
 
         positionUpdateArrived = false;

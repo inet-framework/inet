@@ -22,7 +22,6 @@
 
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
-#include "NotificationBoard.h"
 #include "UDPSocket.h"
 
 Define_Module(TraCIDemo);

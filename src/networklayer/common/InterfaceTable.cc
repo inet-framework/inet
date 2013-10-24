@@ -24,6 +24,7 @@
 #include <sstream>
 
 #include "InterfaceTable.h"
+#include "ModuleAccess.h"
 #include "NotifierConsts.h"
 #include "NodeStatus.h"
 #include "NodeOperations.h"
@@ -50,7 +51,7 @@ std::ostream& operator<<(std::ostream& os, const InterfaceEntry& e)
 
 InterfaceTable::InterfaceTable()
 {
-    nb = NULL;
+    host = NULL;
     tmpNumInterfaces = -1;
     tmpInterfaceList = NULL;
 }
@@ -68,8 +69,8 @@ void InterfaceTable::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        // get a pointer to the NotificationBoard module
-        nb = NotificationBoardAccess().get();
+        // get a pointer to the host module
+        host = getContainingNode(this);
         WATCH_PTRVECTOR(idToInterface);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER)
@@ -93,7 +94,7 @@ void InterfaceTable::handleMessage(cMessage *msg)
     throw cRuntimeError("This module doesn't process messages");
 }
 
-void InterfaceTable::receiveChangeNotification(int category, const cObject *details)
+void InterfaceTable::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     // nothing needed here at the moment
     Enter_Method_Silent();
@@ -104,7 +105,9 @@ void InterfaceTable::receiveChangeNotification(int category, const cObject *deta
 
 cModule *InterfaceTable::getHostModule()
 {
-    return findContainingNode(this);
+    if (!host)
+        host = getContainingNode(this);
+    return host;
 }
 
 bool InterfaceTable::isLocalAddress(const Address& address) const {
@@ -253,7 +256,7 @@ int InterfaceTable::getBiggestInterfaceId()
 
 void InterfaceTable::addInterface(InterfaceEntry *entry)
 {
-    if (!nb)
+    if (!host)
         throw cRuntimeError("InterfaceTable must precede all network interface modules in the node's NED definition");
     // check name is unique
     if (getInterfaceByName(entry->getName())!=NULL)
@@ -268,7 +271,7 @@ void InterfaceTable::addInterface(InterfaceEntry *entry)
     // fill in networkLayerGateIndex, nodeOutputGateId, nodeInputGateId
     discoverConnectingGates(entry);
 
-    nb->fireChangeNotification(NF_INTERFACE_CREATED, entry);
+    emit(NF_INTERFACE_CREATED, entry);
 }
 
 void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
@@ -337,7 +340,7 @@ void InterfaceTable::deleteInterface(InterfaceEntry *entry)
     if (entry != getInterfaceById(id))
         throw cRuntimeError("deleteInterface(): interface '%s' not found in interface table", entry->getName());
 
-    nb->fireChangeNotification(NF_INTERFACE_DELETED, entry);  // actually, only going to be deleted
+    emit(NF_INTERFACE_DELETED, entry);  // actually, only going to be deleted
 
     idToInterface[id - INTERFACEIDS_START] = NULL;
     delete entry;
@@ -353,7 +356,7 @@ void InterfaceTable::invalidateTmpInterfaceList()
 
 void InterfaceTable::interfaceChanged(int category, const InterfaceEntryChangeDetails *details)
 {
-    nb->fireChangeNotification(category, details);
+    emit(category, const_cast<InterfaceEntryChangeDetails *>(details));
 
     if (ev.isGUI() && par("displayAddresses").boolValue())
         updateLinkDisplayString(details->getInterfaceEntry());

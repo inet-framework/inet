@@ -21,7 +21,6 @@
 #include "INETDefs.h"
 
 #include "Ieee80211MgmtAPBase.h"
-#include "NotificationBoard.h"
 
 
 /**
@@ -46,8 +45,8 @@ class INET_API Ieee80211MgmtAPSimplified : public Ieee80211MgmtAPBase
     /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
     virtual void handleCommand(int msgkind, cObject *ctrl);
 
-    /** Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveChangeNotification(int category, const cObject *details);
+    /** Called by the signal handler whenever a change occurs we're interested in */
+    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
 
     /** @name Processing of different frame types */
     //@{

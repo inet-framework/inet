@@ -21,7 +21,6 @@
 #include "INETDefs.h"
 
 #include "Ieee80211MgmtBase.h"
-#include "NotificationBoard.h"
 
 class EtherFrame;
 

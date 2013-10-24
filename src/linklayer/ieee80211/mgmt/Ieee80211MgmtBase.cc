@@ -20,6 +20,7 @@
 
 #include "Ieee802Ctrl_m.h"
 #include "LifecycleOperation.h"
+#include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 

@@ -145,7 +145,8 @@ void InetSimpleBattery::registerWirelessDevice(int id, double mUsageRadioIdle, d
     deviceEntryMap.insert(std::pair<int,DeviceEntry*>(id, device));
     if (mustSubscribe)
     {
-        mpNb->subscribe(this, NF_RADIOSTATE_CHANGED);
+        cModule *host = getContainingNode(this);
+        host->subscribe(NF_RADIOSTATE_CHANGED, this);
         mustSubscribe = false;
     }
 }
@@ -354,7 +355,7 @@ void InetSimpleBattery::deductAndCheck()
         {
             lastPublishCapacity = residualCapacity;
             Energy *p_ene = new Energy(residualCapacity);
-            mpNb->fireChangeNotification(NF_BATTERY_CHANGED, p_ene);
+            emit(NF_BATTERY_CHANGED, p_ene);
             delete p_ene;
 
             display_string->setTagArg("i", 1, "#000000"); // black coloring

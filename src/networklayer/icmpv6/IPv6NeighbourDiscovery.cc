@@ -2697,7 +2697,7 @@ bool IPv6NeighbourDiscovery::canServeWirelessNodes(InterfaceEntry *ie)
         return true;
 
     // check if this interface is directly connected to an AccessPoint.
-    cModule* node = findContainingNode(this);
+    cModule* node = getContainingNode(this);
     cGate* gate = node->gate(ie->getNodeOutputGateId());
     ASSERT(gate != NULL);
     cGate* connectedGate = gate->getNextGate();

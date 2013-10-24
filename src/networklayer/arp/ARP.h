@@ -26,7 +26,6 @@
 #include "ModuleAccess.h"
 #include "IPv4Address.h"
 #include "ILifecycle.h"
-#include "NotificationBoard.h"
 #include "IARPCache.h"
 
 // Forward declarations:
@@ -38,7 +37,7 @@ class IIPv4RoutingTable;
 /**
  * ARP implementation.
  */
-class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, public INotifiable
+class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, public cListener
 {
   public:
     struct ARPCacheEntry;
@@ -89,7 +88,6 @@ class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, 
 
     IInterfaceTable *ift;
     IIPv4RoutingTable *rt;  // for answering ProxyARP requests
-    NotificationBoard *nb;
 
     // Maps an IP multicast address to an Ethernet multicast address.
     MACAddress mapMulticastAddress(IPv4Address addr);
@@ -101,7 +99,7 @@ class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, 
     virtual MACAddress getDirectAddressResolution(const IPv4Address &) const;
     virtual IPv4Address getInverseAddressResolution(const MACAddress &) const;
     void setChangeAddress(const IPv4Address &);
-    virtual void receiveChangeNotification(int category, const cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
 
   protected:
     virtual void initialize(int stage);

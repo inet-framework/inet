@@ -25,6 +25,7 @@
 #include "EtherFrame_m.h"
 #endif
 
+#include "ModuleAccess.h"
 #include "NotifierConsts.h"
 #include "RadioState.h"
 
@@ -63,9 +64,9 @@ void Ieee80211MgmtAP::initialize(int stage)
 
         //TBD fill in supportedRates
 
-        nb = NotificationBoardAccess().get();
+        cModule *host = getContainingNode(this);
         // subscribe for notifications
-        nb->subscribe(this, NF_RADIO_CHANNEL_CHANGED);
+        host->subscribe(NF_RADIO_CHANNEL_CHANGED, this);
 
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");
@@ -113,7 +114,7 @@ void Ieee80211MgmtAP::handleCommand(int msgkind, cObject *ctrl)
     error("handleCommand(): no commands supported");
 }
 
-void Ieee80211MgmtAP::receiveChangeNotification(int category, const cObject *details)
+void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);
@@ -420,7 +421,7 @@ void Ieee80211MgmtAP::sendAssocNotification(const MACAddress &addr)
     NotificationInfoSta notif;
     notif.setApAddress(myAddress);
     notif.setStaAddress(addr);
-    nb->fireChangeNotification(NF_L2_AP_ASSOCIATED,&notif);
+    emit(NF_L2_AP_ASSOCIATED,&notif);
 }
 
 void Ieee80211MgmtAP::sendDisAssocNotification(const MACAddress &addr)
@@ -428,7 +429,7 @@ void Ieee80211MgmtAP::sendDisAssocNotification(const MACAddress &addr)
     NotificationInfoSta notif;
     notif.setApAddress(myAddress);
     notif.setStaAddress(addr);
-    nb->fireChangeNotification(NF_L2_AP_DISASSOCIATED,&notif);
+    emit(NF_L2_AP_DISASSOCIATED,&notif);
 }
 
 void Ieee80211MgmtAP::start()

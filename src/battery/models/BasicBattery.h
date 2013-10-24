@@ -24,9 +24,8 @@
 // SYSTEM INCLUDES
 #include "INETDefs.h"
 
-// INCLUDES for access to the Notification board (publish energy)
+#include "ModuleAccess.h"
 #include "NotifierConsts.h"
-#include "NotificationBoard.h"
 
 
 /**
@@ -79,7 +78,7 @@ class DrawAmount
 };
 
 
-class INET_API BasicBattery : public cSimpleModule, public INotifiable
+class INET_API BasicBattery : public cSimpleModule, public cListener
 {
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -128,13 +127,8 @@ class INET_API BasicBattery : public cSimpleModule, public INotifiable
     double lastPublishCapacity;
     simtime_t lifetime;
 
-
     // OPERATIONS
     void HandleSelfMsg(cMessage*);
-
-
-    // pointer to the notification board
-    NotificationBoard*  mpNb;
 
   private:
     // OPERATIONS

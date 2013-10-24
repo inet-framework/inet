@@ -24,7 +24,6 @@
 
 #include "IInterfaceTable.h"
 #include "InterfaceEntry.h"
-#include "NotificationBoard.h"
 #include "ILifecycle.h"
 
 /**
@@ -57,17 +56,17 @@
  * stale Ids can be detected, and they are also invariant to insertion/deletion.
  *
  * Clients can get notified about interface changes by subscribing to
- * the following notifications in NotificationBoard: NF_INTERFACE_CREATED,
+ * the following signals on host module: NF_INTERFACE_CREATED,
  * NF_INTERFACE_DELETED, NF_INTERFACE_STATE_CHANGED, NF_INTERFACE_CONFIG_CHANGED.
  * State change gets fired for up/down events; all other changes fire as
  * config change.
  *
  * @see InterfaceEntry
  */
-class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, protected INotifiable, public ILifecycle
+class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, protected cListener, public ILifecycle
 {
   protected:
-    NotificationBoard *nb; // cached pointer
+    cModule *host; // cached pointer
 
     // primary storage for interfaces: vector indexed by id; may contain NULLs;
     // slots are never reused to ensure id uniqueness
@@ -115,7 +114,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
      * Called by the NotificationBoard whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveChangeNotification(int category, const cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
 
     /**
      * Returns the host or router this interface table lives in.

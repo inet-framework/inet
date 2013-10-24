@@ -29,7 +29,7 @@ class INET_API TestIGMP : public IGMPv2, public IScriptable
   protected:
     typedef IPv4InterfaceData::IPv4AddressVector IPv4AddressVector;
     virtual void initialize(int stage);
-    virtual void receiveChangeNotification(int category, const cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
     virtual void configureInterface(InterfaceEntry *ie);
     virtual void processIgmpMessage(IGMPMessage *msg);
     virtual void processHostGroupTimer(cMessage *msg);
@@ -64,26 +64,26 @@ void TestIGMP::initialize(int stage)
     IGMPv2::initialize(stage);
 }
 
-void TestIGMP::receiveChangeNotification(int category, const cObject *details)
+void TestIGMP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     const IPv4MulticastGroupInfo *info;
-    switch (category)
+    if (signalID == NF_IPv4_MCAST_JOIN)
     {
-        case NF_IPv4_MCAST_JOIN:
-            info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
-            startEvent("join group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
-            IGMPv2::receiveChangeNotification(category, details);
-            endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
-            break;
-        case NF_IPv4_MCAST_LEAVE:
-            info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
-            startEvent("leave group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
-            IGMPv2::receiveChangeNotification(category, details);
-            endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
-            break;
-        default:
-            IGMPv2::receiveChangeNotification(category, details);
-            break;
+        info = check_and_cast<const IPv4MulticastGroupInfo*>(obj);
+        startEvent("join group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
+        IGMPv2::receiveSignal(source, signalID, obj);
+        endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
+    }
+    else if (signalID == NF_IPv4_MCAST_LEAVE)
+    {
+        info = check_and_cast<const IPv4MulticastGroupInfo*>(obj);
+        startEvent("leave group", HOST_GROUP_STATE, info->ie, &info->groupAddress);
+        IGMPv2::receiveSignal(source, signalID, obj);
+        endEvent(HOST_GROUP_STATE, info->ie, &info->groupAddress);
+    }
+    else
+    {
+        IGMPv2::receiveSignal(source, signalID, obj);
     }
 }
 

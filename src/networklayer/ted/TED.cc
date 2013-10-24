@@ -22,7 +22,6 @@
 #include "NotifierConsts.h"
 #include "IPv4RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
-#include "NotificationBoard.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
@@ -33,6 +32,8 @@ Define_Module(TED);
 
 TED::TED()
 {
+    rt = NULL;
+    ift = NULL;
 }
 
 TED::~TED()
@@ -53,8 +54,6 @@ void TED::initialize(int stage)
         ift = InterfaceTableAccess().get();
         routerId = rt->getRouterId();
         ASSERT(!routerId.isUnspecified());
-
-        nb = NotificationBoardAccess().get();
 
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

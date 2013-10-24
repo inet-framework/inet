@@ -46,7 +46,7 @@ void BonnMotionMobility::initialize(int stage)
         is3D  = par("is3D").boolValue();
         int nodeId = par("nodeId");
         if (nodeId == -1)
-            nodeId = findContainingNode(this)->getIndex();
+            nodeId = getContainingNode(this)->getIndex();
         const char *fname = par("traceFile");
         const BonnMotionFile *bmFile = BonnMotionFileCache::getInstance()->getFile(fname);
         lines = bmFile->getLine(nodeId);

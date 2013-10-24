@@ -26,7 +26,6 @@
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "IPassiveQueue.h"
-#include "NotificationBoard.h"
 #include "NotifierConsts.h"
 
 

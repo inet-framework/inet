@@ -83,7 +83,6 @@ IPv6InterfaceData::IPv6InterfaceData()
 {
     hostMcastData = NULL;
     routerMcastData = NULL;
-    nb = NULL;
 #ifdef WITH_xMIPv6
     // rt6 = IPv6RoutingTableAccess().get();
 #endif /* WITH_xMIPv6 */
@@ -488,10 +487,8 @@ void IPv6InterfaceData::joinMulticastGroup(const IPv6Address& multicastAddress)
 
     changed1(F_MULTICAST_ADDRESSES);
 
-    if(!nb)
-        nb = NotificationBoardAccess().get();
     IPv6MulticastGroupInfo info(ownerp, multicastAddress);
-    nb->fireChangeNotification(NF_IPv6_MCAST_JOIN, &info);
+    ownerp->getInterfaceModule()->emit(NF_IPv6_MCAST_JOIN, &info);
 }
 
 void IPv6InterfaceData::leaveMulticastGroup(const IPv6Address& multicastAddress)
@@ -512,10 +509,8 @@ void IPv6InterfaceData::leaveMulticastGroup(const IPv6Address& multicastAddress)
 
                 changed1(F_MULTICAST_ADDRESSES);
 
-                if (!nb)
-                    nb = NotificationBoardAccess().get();
                 IPv6MulticastGroupInfo info(ownerp, multicastAddress);
-                nb->fireChangeNotification(NF_IPv6_MCAST_LEAVE, &info);
+                ownerp->getInterfaceModule()->emit(NF_IPv6_MCAST_LEAVE, &info);
             }
         }
     }

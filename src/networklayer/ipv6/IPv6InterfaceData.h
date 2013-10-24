@@ -25,7 +25,6 @@
 
 #include "INETDefs.h"
 
-#include "NotificationBoard.h"
 #include "IPv6Address.h"
 #include "InterfaceEntry.h"
 
@@ -133,8 +132,6 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
 
     HostMulticastData *hostMcastData;
     RouterMulticastData *routerMcastData;
-
-    NotificationBoard *nb;
 
   public:
     /**

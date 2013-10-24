@@ -18,7 +18,7 @@ EXTRA_INCLUDES=`find ../../src/ -type d | sed s!^!-I../!`
 (cd work; opp_makemake -f --deep -linet -L../../../src -P . --no-deep-includes $EXTRA_INCLUDES; $MAKE) || exit 1
 
 echo
-opp_test -r $OPT -v $TESTFILES || exit 1
+opp_test -a "--check-signals=false" -r $OPT -v $TESTFILES || exit 1
 
 echo
 echo Results can be found in ./work

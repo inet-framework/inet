@@ -23,7 +23,6 @@
 #include "INETDefs.h"
 
 #include "Ieee80211Primitives_m.h"
-#include "NotificationBoard.h"
 #include "InterfaceTable.h"
 
 
@@ -36,11 +35,10 @@
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
+class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
 {
   protected:
     InterfaceEntry *myIface;
-    NotificationBoard *nb;
     MACAddress prevAP;
     bool activeScan;
     std::vector<int> channelsToScan;
@@ -70,8 +68,8 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public INotifiable
     /** Handle responses from mgmgt */
     virtual void handleResponse(cMessage *msg);
 
-    /** Redefined from INotifiable; called by NotificationBoard */
-    virtual void receiveChangeNotification(int category, const cObject *details);
+    /** Redefined from cListener; called by signal handler */
+    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
 
     // utility method: attaches object to a message as controlInfo, and sends it to mgmt
     virtual void sendRequest(Ieee80211PrimRequest *req);

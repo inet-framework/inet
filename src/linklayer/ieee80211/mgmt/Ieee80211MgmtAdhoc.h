@@ -21,7 +21,6 @@
 #include "INETDefs.h"
 
 #include "Ieee80211MgmtBase.h"
-#include "NotificationBoard.h"
 
 
 /**
@@ -51,8 +50,8 @@ class INET_API Ieee80211MgmtAdhoc : public Ieee80211MgmtBase
     /** Utility method to decapsulate a data frame */
     virtual cPacket *decapsulate(Ieee80211DataFrame *frame);
 
-    /** Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveChangeNotification(int category, const cObject *details);
+    /** Called by the signal handler whenever a change occurs we're interested in */
+    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
 
     /** @name Processing of different frame types */
     //@{

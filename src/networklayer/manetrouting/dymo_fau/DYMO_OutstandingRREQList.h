@@ -25,7 +25,6 @@
 #include "INETDefs.h"
 
 #include "DYMO_Timer.h"
-#include "NotificationBoard.h"
 
 
 class DYMO_OutstandingRREQ

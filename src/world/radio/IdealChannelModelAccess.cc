@@ -50,7 +50,7 @@ void IdealChannelModelAccess::initialize(int stage)
         if (!cc)
             throw cRuntimeError("Could not find IdealChannelModel module with name 'channelControl' in the toplevel network.");
 
-        hostModule = findContainingNode(this, true);
+        hostModule = getContainingNode(this);
 
         positionUpdateArrived = false;
         // register to get a notification when position changes

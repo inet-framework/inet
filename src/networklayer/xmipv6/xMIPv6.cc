@@ -98,8 +98,6 @@ void xMIPv6::initialize(int stage)
     {
         EV << "Initializing xMIPv6 module" << endl;
 
-        nb = NotificationBoardAccess().get();
-
         // statistic collection
         /*statVectorBUtoHA.setName("BU to HA");
         statVectorBUtoCN.setName("BU to CN");
@@ -121,7 +119,7 @@ void xMIPv6::initialize(int stage)
         // moved rt6 initialization to here, as we should
         // set the MIPv6 flag as soon as possible for use
         // with other modules.
-        cModule *host = findContainingNode(this, true);
+        cModule *host = getContainingNode(this);
         rt6 = AddressResolver().routingTable6Of(host);
         rt6->setMIPv6Support(true); // 4.9.07 - CB
 
@@ -1327,7 +1325,7 @@ void xMIPv6::processBAMessage(BindingAcknowledgement* ba, IPv6ControlInfo* ctrlI
                     /*statVectorBAfromCN.record(1);*/
 
                     // fire event to MIH subscribers
-                    nb->fireChangeNotification(NF_MIPv6_RO_COMPLETED, NULL);
+                    emit(NF_MIPv6_RO_COMPLETED, (cObject *)NULL);
                 }
 
                 // set BAck flag in BUL

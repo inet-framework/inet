@@ -24,7 +24,6 @@
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "IPassiveQueue.h"
-#include "NotificationBoard.h"
 #include "NotifierConsts.h"
 #include "NodeOperations.h"
 
@@ -171,6 +170,11 @@ InterfaceEntry *PPP::createInterfaceEntry()
 
 void PPP::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
 {
+    MACBase::receiveSignal(src, id, obj);
+
+    if (id != POST_MODEL_CHANGE)
+        return;
+
     if (dynamic_cast<cPostPathCreateNotification *>(obj))
     {
         cPostPathCreateNotification *gcobj = (cPostPathCreateNotification *)obj;
@@ -275,7 +279,7 @@ void PPP::startTransmitting(cPacket *msg)
 
     // fire notification
     notifDetails.setPacket(pppFrame);
-    nb->fireChangeNotification(NF_PP_TX_BEGIN, &notifDetails);
+    emit(NF_PP_TX_BEGIN, &notifDetails);
 
     // send
     EV << "Starting transmission of " << pppFrame << endl;
@@ -310,7 +314,7 @@ void PPP::handleMessage(cMessage *msg)
 
         // fire notification
         notifDetails.setPacket(NULL);
-        nb->fireChangeNotification(NF_PP_TX_END, &notifDetails);
+        emit(NF_PP_TX_END, &notifDetails);
 
         if (!txQueue.empty())
         {
@@ -329,7 +333,7 @@ void PPP::handleMessage(cMessage *msg)
 
         // fire notification
         notifDetails.setPacket(PK(msg));
-        nb->fireChangeNotification(NF_PP_RX_END, &notifDetails);
+        emit(NF_PP_RX_END, &notifDetails);
 
         emit(packetReceivedFromLowerSignal, msg);
 

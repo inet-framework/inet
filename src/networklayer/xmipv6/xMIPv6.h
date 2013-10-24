@@ -42,7 +42,7 @@ class IPv6Datagram;
 class IPv6NeighbourDiscovery;
 class IPv6Tunneling;
 class IPv6RoutingTable;
-class NotificationBoard;
+
 
 // 13.9.07
 // Keys for timer list (=message type)
@@ -92,10 +92,6 @@ class INET_API xMIPv6 : public cSimpleModule
     cOutVector statVectorHoTItoCN, statVectorCoTItoCN;
     cOutVector statVectorHoTtoMN, statVectorCoTtoMN;
     cOutVector statVectorHoTfromCN, statVectorCoTfromCN;
-
-
-    /** NB is used for MIH signalling */
-    NotificationBoard* nb; // 14.01.08 - CB
 
     /**
      * The base class for all other timers that are used for retransmissions.

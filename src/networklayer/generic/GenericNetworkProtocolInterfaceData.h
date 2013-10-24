@@ -22,7 +22,6 @@
 
 #include "INETDefs.h"
 
-#include "NotificationBoard.h"
 #include "InterfaceEntry.h"
 #include "Address.h"
 
@@ -37,8 +36,6 @@ class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolDat
     Address inetAddr;  ///< address of interface
     int metric;        ///< link "cost"; see e.g. MS KB article Q299540  //TODO needed???
 
-    NotificationBoard *nb; // cached pointer
-
   public:
     // field ids for change notifications
     enum {F_ADDRESS, F_METRIC};
@@ -52,8 +49,7 @@ class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolDat
     GenericNetworkProtocolInterfaceData& operator=(const GenericNetworkProtocolInterfaceData& obj);
 
   public:
-    GenericNetworkProtocolInterfaceData();
-    virtual ~GenericNetworkProtocolInterfaceData();
+    GenericNetworkProtocolInterfaceData() { metric = 0; }
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 

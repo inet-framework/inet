@@ -21,7 +21,6 @@
 #include "INETDefs.h"
 
 #include "Ieee80211MgmtBase.h"
-#include "NotificationBoard.h"
 #include "Ieee80211Primitives_m.h"
 
 
@@ -84,7 +83,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     };
 
   protected:
-    NotificationBoard *nb;
+    cModule *host;
 
     // number of channels in ChannelControl -- used if we're told to scan "all" channels
     int numChannels;
@@ -168,7 +167,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     virtual void sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& address);
 
     /** Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveChangeNotification(int category, const cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
 
     /** Utility function: converts Ieee80211StatusCode (->frame) to Ieee80211PrimResultCode (->primitive) */
     virtual int statusCodeToPrimResultCode(int statusCode);

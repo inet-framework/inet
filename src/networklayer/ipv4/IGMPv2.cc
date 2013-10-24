@@ -22,7 +22,6 @@
 #include "InterfaceTableAccess.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
-#include "NotificationBoard.h"
 
 #include <algorithm>
 
@@ -337,10 +336,10 @@ void IGMPv2::initialize(int stage)
         ift = InterfaceTableAccess().get();
         rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
 
-        nb = NotificationBoardAccess().get();
-        nb->subscribe(this, NF_INTERFACE_DELETED);
-        nb->subscribe(this, NF_IPv4_MCAST_JOIN);
-        nb->subscribe(this, NF_IPv4_MCAST_LEAVE);
+        cModule *host = getContainingNode(this);
+        host->subscribe(NF_INTERFACE_DELETED, this);
+        host->subscribe(NF_IPv4_MCAST_JOIN, this);
+        host->subscribe(NF_IPv4_MCAST_LEAVE, this);
 
         enabled = par("enabled");
         externalRouter = gate("routerIn")->isPathOK() && gate("routerOut")->isPathOK();
@@ -394,7 +393,8 @@ void IGMPv2::initialize(int stage)
             if (ie->isMulticast())
                 configureInterface(ie);
         }
-        nb->subscribe(this, NF_INTERFACE_CREATED);
+        cModule *host = getContainingNode(this);
+        host->subscribe(NF_INTERFACE_CREATED, this);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_2)
     {
@@ -411,37 +411,39 @@ IGMPv2::~IGMPv2()
         deleteRouterInterfaceData(routerData.begin()->first);
 }
 
-void IGMPv2::receiveChangeNotification(int category, const cPolymorphic *details)
+void IGMPv2::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     Enter_Method_Silent();
 
     InterfaceEntry *ie;
     int interfaceId;
     const IPv4MulticastGroupInfo *info;
-    switch (category)
+
+    if (category == NF_INTERFACE_CREATED)
     {
-        case NF_INTERFACE_CREATED:
-            ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
-            if (ie->isMulticast())
-                configureInterface(ie);
-            break;
-        case NF_INTERFACE_DELETED:
-            ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
-            if (ie->isMulticast())
-            {
-                interfaceId = ie->getInterfaceId();
-                deleteHostInterfaceData(interfaceId);
-                deleteRouterInterfaceData(interfaceId);
-            }
-            break;
-        case NF_IPv4_MCAST_JOIN:
-            info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
-            multicastGroupJoined(info->ie, info->groupAddress);
-            break;
-        case NF_IPv4_MCAST_LEAVE:
-            info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
-            multicastGroupLeft(info->ie, info->groupAddress);
-            break;
+        ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
+        if (ie->isMulticast())
+            configureInterface(ie);
+    }
+    else if (category == NF_INTERFACE_DELETED)
+    {
+        ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
+        if (ie->isMulticast())
+        {
+            interfaceId = ie->getInterfaceId();
+            deleteHostInterfaceData(interfaceId);
+            deleteRouterInterfaceData(interfaceId);
+        }
+    }
+    else if (category == NF_IPv4_MCAST_JOIN)
+    {
+        info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
+        multicastGroupJoined(info->ie, info->groupAddress);
+    }
+    else if (category == NF_IPv4_MCAST_LEAVE)
+    {
+        info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
+        multicastGroupLeft(info->ie, info->groupAddress);
     }
 }
 
@@ -694,7 +696,7 @@ void IGMPv2::processLeaveTimer(cMessage *msg)
     ctx->ie->ipv4Data()->removeMulticastListener(ctx->routerGroup->groupAddr);
 
     IPv4MulticastGroupInfo info(ctx->ie, ctx->routerGroup->groupAddr);
-    nb->fireChangeNotification(NF_IPv4_MCAST_UNREGISTERED, &info);
+    emit(NF_IPv4_MCAST_UNREGISTERED, &info);
     numRouterGroups--;
 
     if (ctx->routerGroup->state ==  IGMP_RGS_CHECKING_MEMBERSHIP)
@@ -846,7 +848,7 @@ void IGMPv2::processV2Report(InterfaceEntry *ie, IGMPMessage *msg)
             ie->ipv4Data()->addMulticastListener(groupAddr);
             // notify routing
             IPv4MulticastGroupInfo info(ie, routerGroupData->groupAddr);
-            nb->fireChangeNotification(NF_IPv4_MCAST_REGISTERED, &info);
+            emit(NF_IPv4_MCAST_REGISTERED, &info);
             numRouterGroups++;
         }
         else if (routerGroupData->state == IGMP_RGS_CHECKING_MEMBERSHIP)

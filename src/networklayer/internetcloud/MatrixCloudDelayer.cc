@@ -134,7 +134,7 @@ void MatrixCloudDelayer::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        host = findContainingNode(this);
+        host = getContainingNode(this);
         ift = InterfaceTableAccess().get(this);
         cXMLElement *configEntity = par("config").xmlValue();
         // parse XML config

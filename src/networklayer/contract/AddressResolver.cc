@@ -21,7 +21,6 @@
 
 #include "AddressResolver.h"
 #include "IInterfaceTable.h"
-#include "NotificationBoard.h"
 
 #include "ModulePathAddress.h"
 #include "ModuleIdAddress.h"
@@ -465,17 +464,6 @@ IPv6RoutingTable *AddressResolver::routingTable6Of(cModule *host)
     return mod;
 }
 
-NotificationBoard *AddressResolver::notificationBoardOf(cModule *host)
-{
-    // find NotificationBoard
-    cModule *mod = host->getSubmodule("notificationBoard");
-    if (!mod)
-        throw cRuntimeError("AddressResolver: NotificationBoard not found as submodule "
-                  " notificationBoard' in host/router `%s'", host->getFullPath().c_str());
-
-    return check_and_cast<NotificationBoard *>(mod);
-}
-
 IInterfaceTable *AddressResolver::findInterfaceTableOf(cModule *host)
 {
     cModule *mod = host->getSubmodule("interfaceTable");
@@ -512,12 +500,6 @@ GenericRoutingTable *AddressResolver::findGenericRoutingTableOf(cModule *host)
     GenericRoutingTable *rt = dynamic_cast<GenericRoutingTable *>(host->getSubmodule("routingTable"));
     if (!rt) rt = dynamic_cast<GenericRoutingTable *>(host->getModuleByPath(".routingTable.generic"));
     return rt;
-}
-
-NotificationBoard *AddressResolver::findNotificationBoardOf(cModule *host)
-{
-    cModule *mod = host->getSubmodule("notificationBoard");
-    return dynamic_cast<NotificationBoard *>(mod);
 }
 
 cModule *AddressResolver::findHostWithAddress(const Address & add)

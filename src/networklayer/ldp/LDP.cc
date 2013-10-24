@@ -117,7 +117,6 @@ void LDP::initialize(int stage)
         rt = IPv4RoutingTableAccess().get();
         lt = LIBTableAccess().get();
         tedmod = TEDAccess().get();
-        nb = NotificationBoardAccess().get();
 
         WATCH_VECTOR(myPeers);
         WATCH_VECTOR(fecUp);
@@ -161,8 +160,9 @@ void LDP::initialize(int stage)
         rebuildFecList();
 
         // listen for routing table modifications
-        nb->subscribe(this, NF_ROUTE_ADDED);
-        nb->subscribe(this, NF_ROUTE_DELETED);
+        cModule *host = getContainingNode(this);
+        host->subscribe(NF_ROUTE_ADDED, this);
+        host->subscribe(NF_ROUTE_DELETED, this);
     }
 }
 
@@ -1304,7 +1304,7 @@ bool LDP::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::st
     return false;
 }
 
-void LDP::receiveChangeNotification(int category, const cObject *details)
+void LDP::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     Enter_Method_Silent();
     printNotificationBanner(category, details);
@@ -1321,7 +1321,7 @@ void LDP::announceLinkChange(int tedlinkindex)
     TEDChangeInfo d;
     d.setTedLinkIndicesArraySize(1);
     d.setTedLinkIndices(0, tedlinkindex);
-    nb->fireChangeNotification(NF_TED_CHANGED, &d);
+    emit(NF_TED_CHANGED, &d);
 }
 
 

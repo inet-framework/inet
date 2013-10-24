@@ -51,15 +51,16 @@ INET_API cModule *findModuleWhereverInNode(const char *name, cModule *from);
 INET_API cModule *findModuleSomewhereUp(const char *name, cModule *from);
 
 /**
- * Checks if the module is node, i.e. it has a @node attribute.
- */
-bool isNetworkNode(cModule *mod);
-
-/**
  * Find the node containing the given module.
  * Returns NULL, if no containing node.
  */
-INET_API cModule *findContainingNode(cModule *from, bool errorIfNotFound = false);
+INET_API cModule *findContainingNode(cModule *from);
+
+/**
+ * Find the node containing the given module.
+ * throws error if no containing node.
+ */
+INET_API cModule *getContainingNode(cModule *from);
 
 /**
  * Find the ancestor module under the node containing the given module.

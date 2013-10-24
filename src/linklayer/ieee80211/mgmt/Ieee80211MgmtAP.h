@@ -23,7 +23,6 @@
 #include "INETDefs.h"
 
 #include "Ieee80211MgmtAPBase.h"
-#include "NotificationBoard.h"
 
 
 /**
@@ -65,9 +64,6 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     typedef std::map<MACAddress,STAInfo, MAC_compare> STAList;
 
   protected:
-
-    NotificationBoard *nb;
-
     // configuration
     std::string ssid;
     int channelNumber;
@@ -80,8 +76,9 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     cMessage *beaconTimer;
 
   public:
-    Ieee80211MgmtAP() :  nb(NULL), beaconTimer(NULL) {}
+    Ieee80211MgmtAP() : beaconTimer(NULL) {}
     virtual ~Ieee80211MgmtAP();
+
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int);
@@ -95,8 +92,8 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     /** Implements abstract Ieee80211MgmtBase method -- throws an error (no commands supported) */
     virtual void handleCommand(int msgkind, cObject *ctrl);
 
-    /** Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveChangeNotification(int category, const cObject *details);
+    /** Called by the signal handler whenever a change occurs we're interested in */
+    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
 
     /** Utility function: return sender STA's entry from our STA list, or NULL if not in there */
     virtual STAInfo *lookupSenderSTA(Ieee80211ManagementFrame *frame);

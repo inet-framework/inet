@@ -20,7 +20,6 @@
 #define __INET_IGMP_H
 
 #include "INETDefs.h"
-#include "INotifiable.h"
 #include "IPv4Address.h"
 #include "IGMPMessage_m.h"
 #include "InterfaceEntry.h"
@@ -29,9 +28,9 @@
 
 class IInterfaceTable;
 class IIPv4RoutingTable;
-class NotificationBoard;
 
-class INET_API IGMPv2 : public cSimpleModule, protected INotifiable
+
+class INET_API IGMPv2 : public cSimpleModule, protected cListener
 {
   protected:
     enum RouterState
@@ -131,7 +130,6 @@ class INET_API IGMPv2 : public cSimpleModule, protected INotifiable
   protected:
     IIPv4RoutingTable *rt;     // cached pointer
     IInterfaceTable *ift;  // cached pointer
-    NotificationBoard *nb; // cached pointer
 
     bool enabled;
     bool externalRouter;
@@ -172,7 +170,7 @@ class INET_API IGMPv2 : public cSimpleModule, protected INotifiable
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
-    virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
     virtual ~IGMPv2();
 
   protected:

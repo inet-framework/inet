@@ -35,7 +35,6 @@ class ARPPacket;
 class ICMPMessage;
 class IInterfaceTable;
 class IIPv4RoutingTable;
-class NotificationBoard;
 class IARPCache;
 
 // ICMP type 2, code 4: fragmentation needed, but don't-fragment bit set
@@ -68,7 +67,6 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle
     IIPv4RoutingTable *rt;
     IInterfaceTable *ift;
     IARPCache *arp;
-    NotificationBoard *nb;
     ICMPAccess icmpAccess;
     cGate *arpDgramOutGate;
     cGate *arpInGate;

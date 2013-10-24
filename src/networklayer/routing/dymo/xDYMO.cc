@@ -17,7 +17,6 @@
 //
 
 #include "xDYMO.h"
-#include "NotificationBoard.h"
 #include "InterfaceTableAccess.h"
 #include "IPSocket.h"
 #include "IPProtocolId_m.h"
@@ -39,7 +38,6 @@ Define_Module(DYMO::xDYMO);
 
 xDYMO::xDYMO()
 {
-    notificationBoard = NULL;
     addressType = NULL;
     interfaceTable = NULL;
     routingTable = NULL;
@@ -84,9 +82,8 @@ void xDYMO::initialize(int stage)
         minHopLimit = par("minHopLimit");
         maxHopLimit = par("maxHopLimit");
         // context
-        host = findContainingNode(this);
+        host = getContainingNode(this);
         nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
-        notificationBoard = NotificationBoardAccess().get(this);
         interfaceTable = InterfaceTableAccess().get(this);
         routingTable = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
         networkProtocol = check_and_cast<INetfilter *>(getModuleByPath(par("networkProtocolModule")));
@@ -118,7 +115,7 @@ void xDYMO::initialize(int stage)
         IPSocket socket(gate("ipOut"));
         socket.registerProtocol(IP_PROT_MANET);
 
-        notificationBoard->subscribe(this, NF_LINK_BREAK);
+        host->subscribe(NF_LINK_BREAK, this);
         addressType = getSelfAddress().getAddressType();
         networkProtocol->registerHook(0, this);
         if (isNodeUp())
@@ -1421,7 +1418,7 @@ bool xDYMO::handleOperationStage(LifecycleOperation * operation, int stage, IDon
 // notification
 //
 
-void xDYMO::receiveChangeNotification(int category, const cObject *details)
+void xDYMO::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
 {
     Enter_Method("receiveChangeNotification");
     if (category == NF_LINK_BREAK) {
