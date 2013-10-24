@@ -31,7 +31,7 @@
  * @ingroup mobility
  * @author Andras Varga
  */
-class ANSimMobility : public LineSegmentsMobilityBase
+class INET_API ANSimMobility : public LineSegmentsMobilityBase
 {
   protected:
     // config

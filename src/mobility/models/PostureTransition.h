@@ -48,7 +48,6 @@
 #include <sstream>
 
 #include "INETDefs.h"
-
 #include "Coord.h"
 
 
@@ -65,7 +64,7 @@
  * @ingroup MoBAN
  * @author Majid Nabi
  */
-class PostureTransition {
+class INET_API PostureTransition {
   protected:
     /** @brief Number of postures. */
     int numPos;

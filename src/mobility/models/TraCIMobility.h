@@ -29,6 +29,7 @@
 
 #include <omnetpp.h>
 
+#include "INETDefs.h"
 #include "MobilityBase.h"
 #include "ModuleAccess.h"
 #include "world/traci/TraCIScenarioManager.h"

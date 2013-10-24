@@ -43,8 +43,10 @@
 #ifndef MO_BAN_LOCAL_H
 #define MO_BAN_LOCAL_H
 
-#include <LineSegmentsMobilityBase.h>
-#include <MoBANCoordinator.h>
+#include "INETDefs.h"
+
+#include "LineSegmentsMobilityBase.h"
+#include "MoBANCoordinator.h"
 
 
 /**
@@ -58,7 +60,7 @@
  * @ingroup MoBAN
  * @author Majid Nabi
  */
-class MoBANLocal : public LineSegmentsMobilityBase
+class INET_API MoBANLocal : public LineSegmentsMobilityBase
 {
   protected:
     /** @brief The coordinator of the WBAN. */
