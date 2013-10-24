@@ -1,4 +1,5 @@
-//
+// Copyright (C) 2013 OpenSim Ltd.
+// 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -14,15 +15,21 @@
 // 
 
 package inet.linklayer.ieee8021d.stp;
+import inet.linklayer.ieee8021d.ISpanningTree;
 
-//
-// Spanning Tree Protocol module
-//
-simple SpanningTree
+// The Spanning Tree Protocol (STP) is a network protocol that ensures a loop-free 
+// topology for any bridged Ethernet local area network. The basic function of STP 
+// is to prevent bridge loops and the broadcast radiation that results from them. 
+// Spanning tree also allows a network design to include spare (redundant) links to 
+// provide automatic backup paths if an active link fails, without the danger of 
+// bridge loops, or the need for manual enabling/disabling of these backup links.
+// 
+// There are various versions of Spanning Tree algorithm and protocol. This module
+// implements it according to the IEEE 802.1D-1998 specification.
+
+simple STP like ISpanningTree
 {
     parameters:
-        string configFile = default("");
-        string switchID = default("");
     	@display("i=block/network2");
 	gates:
 	    inout STPGate;

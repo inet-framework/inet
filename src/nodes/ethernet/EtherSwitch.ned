@@ -23,7 +23,13 @@ import inet.linklayer.IMACRelayUnit;
 import inet.linklayer.IWiredNic;
 import inet.networklayer.common.InterfaceTable;
 import inet.status.NodeStatus;
+import inet.linklayer.ieee8021d.stp.STP;
+import inet.linklayer.ieee8021d.stp.STP;
 import inet.linklayer.ethernet.switch.MACAddressTable;
+import inet.linklayer.configurator.L2NodeConfigurator;
+import inet.linklayer.rstp.RSTP;
+import inet.linklayer.ethernet.switch.Relay.IEEE8021DRelay;
+import inet.linklayer.ieee8021d.ISpanningTree;
 
 //
 // Model of an Ethernet switch.
@@ -33,27 +39,29 @@ import inet.linklayer.ethernet.switch.MACAddressTable;
 // it must be set to false, otherwise it can be set to true.
 // By default used half duples CSMA/CD mac
 //
-// This model does not contain the spanning tree algorithm.
 //
+
 module EtherSwitch
 {
     parameters:
         @node();
         @labels(node,ethernet-node);
-        @display("i=device/switch");
+        @display("i=device/switch;bgb=251,213");
         bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
-        string relayUnitType = default("MACRelayUnit"); // type of the ~IMACRelayUnit; currently possible
+        string spanningTreeProtocolVersion = default("STP");
         eth[*].encapType = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
         eth[*].macType = macType;
-                                                          // values are ~MACRelayUnitNP and ~MACRelayUnitPP
     gates:
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
         status: NodeStatus if hasStatus {
-            @display("p=50,50;is=s");
+            @display("p=50,58;is=s");
+        }
+        l2NodeConfigurator: L2NodeConfigurator {
+            @display("p=50,181");
         }
         interfaceTable: InterfaceTable {
             @display("p=50,100;is=s");
@@ -62,15 +70,23 @@ module EtherSwitch
             parameters:
                 @display("p=50,150;is=s");
         }
-        macTable : MACAddressTable;
-        relayUnit: <relayUnitType> like IMACRelayUnit {
+        macTable: MACAddressTable {
+            @display("p=50,19;is=s");
+        }
+        relayUnit: IEEE8021DRelay {
             parameters:
-                @display("p=270,50");
+                @display("p=198,50;is=m");
+            gates:
+                ifIn[sizeof(ethg)];
+                ifOut[sizeof(ethg)];
+        }
+        stp: <spanningTreeProtocolVersion> like ISpanningTree {
+            @display("p=125,50");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
                 mac.promiscuous = true;
-                @display("p=170,150,row;q=txQueue");
+                @display("p=198,150,row;q=txQueue");
         }
     connections:
         for i=0..sizeof(ethg)-1 {
@@ -78,4 +94,5 @@ module EtherSwitch
             eth[i].upperLayerOut --> relayUnit.ifIn++;
             eth[i].phys <--> ethg[i];
         }
+        stp.STPGate <--> relayUnit.STPGate;
 }

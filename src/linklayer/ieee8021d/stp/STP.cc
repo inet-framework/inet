@@ -23,9 +23,9 @@
 #include "InterfaceEntry.h"
 #include "STPTester.h"
 
-Define_Module(SpanningTree);
+Define_Module(STP);
 
-void SpanningTree::initialize(int stage)
+void STP::initialize(int stage)
 {
     if (stage == 0)
     {
@@ -75,13 +75,13 @@ void SpanningTree::initialize(int stage)
     }
 }
 
-SpanningTree::~SpanningTree()
+STP::~STP()
 {
     cancelAndDelete(tick);
 }
 
 // Default port information for the InterfaceTable
-void SpanningTree::initPortTable()
+void STP::initPortTable()
 {
     for (unsigned int i = 0; i < portCount; i++)
     {
@@ -90,7 +90,7 @@ void SpanningTree::initPortTable()
     }
 }
 
-void SpanningTree::handleMessage(cMessage * msg)
+void STP::handleMessage(cMessage * msg)
 {
     if (!isOperational)
     {
@@ -128,7 +128,7 @@ void SpanningTree::handleMessage(cMessage * msg)
     }
 }
 
-void SpanningTree::colorTree()
+void STP::colorTree()
 {
     IEEE8021DInterfaceData * port;
     for (unsigned int i = 0; i < portCount; i++)
@@ -173,7 +173,7 @@ void SpanningTree::colorTree()
     }
 }
 
-void SpanningTree::handleBPDU(BPDU * bpdu)
+void STP::handleBPDU(BPDU * bpdu)
 {
     Ieee802Ctrl * controlInfo = check_and_cast<Ieee802Ctrl *>(bpdu->getControlInfo());
     int arrivalGate = controlInfo->getInterfaceId();
@@ -218,7 +218,7 @@ void SpanningTree::handleBPDU(BPDU * bpdu)
     delete bpdu;
 }
 
-void SpanningTree::handleTCN(BPDU * tcn)
+void STP::handleTCN(BPDU * tcn)
 {
     topologyChangeNotification = true;
     topologyChangeRecvd = true;
@@ -236,10 +236,9 @@ void SpanningTree::handleTCN(BPDU * tcn)
         send(tcn, "STPGate$o");
     else
         delete tcn;
-
 }
 
-void SpanningTree::generateBPDU(int port, const MACAddress& address)
+void STP::generateBPDU(int port, const MACAddress& address)
 {
     BPDU * bpdu = new BPDU();
     Ieee802Ctrl * controlInfo = new Ieee802Ctrl();
@@ -281,7 +280,7 @@ void SpanningTree::generateBPDU(int port, const MACAddress& address)
     send(bpdu, "STPGate$o");
 }
 
-void SpanningTree::generateTCN()
+void STP::generateTCN()
 {
     // There is something to notify
     if (topologyChangeNotification)
@@ -308,7 +307,7 @@ void SpanningTree::generateTCN()
 }
 
 // Check of the received BPDU is superior to port information from InterfaceTable
-bool SpanningTree::superiorBPDU(int portNum, BPDU * bpdu)
+bool STP::superiorBPDU(int portNum, BPDU * bpdu)
 {
     IEEE8021DInterfaceData * port = getPortInterfaceData(portNum);
     IEEE8021DInterfaceData * xBpdu = new IEEE8021DInterfaceData();
@@ -343,7 +342,7 @@ bool SpanningTree::superiorBPDU(int portNum, BPDU * bpdu)
     return true;
 }
 
-void SpanningTree::setSuperiorBPDU(int portNum, BPDU * bpdu)
+void STP::setSuperiorBPDU(int portNum, BPDU * bpdu)
 {
     // BDPU is out-of-date
     if (bpdu->getMessageAge() >= bpdu->getMaxAge())
@@ -367,7 +366,7 @@ void SpanningTree::setSuperiorBPDU(int portNum, BPDU * bpdu)
 
 }
 
-void SpanningTree::generator()
+void STP::generator()
 {
     // Only the root switch can generate Hello BPDUs
     if (!isRoot)
@@ -390,7 +389,7 @@ void SpanningTree::generator()
         macTable->resetDefaultAging();
 }
 
-void SpanningTree::handleTick()
+void STP::handleTick()
 {
     // Bridge timers
     convergenceTime++;
@@ -422,7 +421,7 @@ void SpanningTree::handleTick()
     generateTCN();
 }
 
-void SpanningTree::checkTimers()
+void STP::checkTimers()
 {
     IEEE8021DInterfaceData * port;
 
@@ -499,7 +498,7 @@ void SpanningTree::checkTimers()
 
 }
 
-void SpanningTree::checkParametersChange()
+void STP::checkParametersChange()
 {
     if (isRoot)
     {
@@ -514,7 +513,7 @@ void SpanningTree::checkParametersChange()
     }
 }
 
-IEEE8021DInterfaceData * SpanningTree::getPortInterfaceData(unsigned int portNum)
+IEEE8021DInterfaceData * STP::getPortInterfaceData(unsigned int portNum)
 {
     cGate * gate = this->getParentModule()->gate("ethg$o", portNum);
     InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
@@ -526,7 +525,7 @@ IEEE8021DInterfaceData * SpanningTree::getPortInterfaceData(unsigned int portNum
     return portData;
 }
 
-bool SpanningTree::checkRootEligibility()
+bool STP::checkRootEligibility()
 {
     IEEE8021DInterfaceData * port;
 
@@ -541,7 +540,7 @@ bool SpanningTree::checkRootEligibility()
     return true;
 }
 
-void SpanningTree::tryRoot()
+void STP::tryRoot()
 {
     if (checkRootEligibility())
     {
@@ -563,7 +562,7 @@ void SpanningTree::tryRoot()
 
 }
 
-int SpanningTree::superiorID(unsigned int aPriority, MACAddress aAddress, unsigned int bPriority, MACAddress bAddress) // todo paraméter nevek
+int STP::superiorID(unsigned int aPriority, MACAddress aAddress, unsigned int bPriority, MACAddress bAddress) // todo paraméter nevek
 {
     if (aPriority < bPriority)
         return 1; // A is superior
@@ -582,7 +581,7 @@ int SpanningTree::superiorID(unsigned int aPriority, MACAddress aAddress, unsign
     return 0;
 }
 
-int SpanningTree::superiorPort(unsigned int aPriority, unsigned int aNum, unsigned int bPriority, unsigned int bNum)
+int STP::superiorPort(unsigned int aPriority, unsigned int aNum, unsigned int bPriority, unsigned int bNum)
 {
     if (aPriority < bPriority)
         return 1; // A is superior
@@ -601,7 +600,7 @@ int SpanningTree::superiorPort(unsigned int aPriority, unsigned int aNum, unsign
     return 0;
 }
 
-int SpanningTree::superiorTPort(IEEE8021DInterfaceData * portA, IEEE8021DInterfaceData * portB)
+int STP::superiorTPort(IEEE8021DInterfaceData * portA, IEEE8021DInterfaceData * portB)
 {
     int result;
 
@@ -636,7 +635,7 @@ int SpanningTree::superiorTPort(IEEE8021DInterfaceData * portA, IEEE8021DInterfa
     return 0; // same
 }
 
-void SpanningTree::selectRootPort()
+void STP::selectRootPort()
 {
     unsigned int xRootPort = 0;
     int result;
@@ -683,7 +682,7 @@ void SpanningTree::selectRootPort()
 
 }
 
-void SpanningTree::selectDesignatedPorts()
+void STP::selectDesignatedPorts()
 {
     // Select designated ports
     desPorts.clear();
@@ -725,7 +724,7 @@ void SpanningTree::selectDesignatedPorts()
     delete bridgeGlobal;
 }
 
-void SpanningTree::allDesignated()
+void STP::allDesignated()
 {
     // All ports of the root switch are designated ports
 
@@ -742,19 +741,19 @@ void SpanningTree::allDesignated()
     }
 }
 
-void SpanningTree::lostRoot()
+void STP::lostRoot()
 {
     topologyChangeNotification = true;
     tryRoot();
 }
 
-void SpanningTree::lostAlternate(int port)
+void STP::lostAlternate(int port)
 {
     selectDesignatedPorts();
     topologyChangeNotification = true;
 }
 
-void SpanningTree::reset()
+void STP::reset()
 {
     // Upon booting all switches believe themselves to be the root
 
@@ -774,7 +773,7 @@ void SpanningTree::reset()
     }
 }
 
-void SpanningTree::start()
+void STP::start()
 {
     // Obtain a bridge address from InterfaceTable
     ifTable = InterfaceTableAccess().get();
@@ -810,7 +809,7 @@ void SpanningTree::start()
     scheduleAt(simTime() + 1, tick);
 }
 
-void SpanningTree::stop()
+void STP::stop()
 {
     isOperational = false;
 
@@ -841,7 +840,7 @@ void SpanningTree::stop()
     cancelEvent(tick);
 }
 
-bool SpanningTree::handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback)
+bool STP::handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback)
 {
     Enter_Method_Silent();
 

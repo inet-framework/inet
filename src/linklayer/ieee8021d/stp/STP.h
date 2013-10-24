@@ -28,7 +28,7 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
-class SpanningTree : public cSimpleModule, public ILifecycle
+class STP : public cSimpleModule, public ILifecycle
 {
     public:
         typedef IEEE8021DInterfaceData::PortInfo PortInfo;
@@ -83,7 +83,7 @@ class SpanningTree : public cSimpleModule, public ILifecycle
         virtual void handleMessage(cMessage * msg);
         virtual void initialize(int stage);
         virtual int numInitStages() const { return 2; }
-        virtual ~SpanningTree();
+        virtual ~STP();
 
     public:
         IEEE8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
@@ -113,7 +113,7 @@ class SpanningTree : public cSimpleModule, public ILifecycle
         friend inline std::ostream& operator<<(std::ostream& os, const IEEE8021DInterfaceData::PortRole r);
         friend inline std::ostream& operator<<(std::ostream& os, const IEEE8021DInterfaceData::PortState s);
         friend inline std::ostream& operator<<(std::ostream& os, IEEE8021DInterfaceData * p);
-        friend inline std::ostream& operator<<(std::ostream& os, SpanningTree i);
+        friend inline std::ostream& operator<<(std::ostream& os, STP i);
 
         // for lifecycle:
     public:
@@ -190,7 +190,7 @@ inline std::ostream& operator<<(std::ostream& os, IEEE8021DInterfaceData * p)
     return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, SpanningTree i)
+inline std::ostream& operator<<(std::ostream& os, STP i)
 {
     os << "RootID Priority: " << i.rootPriority << " \n";
     os << "  Address: " << i.rootAddress << " \n";
