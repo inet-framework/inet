@@ -44,8 +44,12 @@ simple ARP
         bool respondToProxyARP = default(true);        // reply to proxy ARP requests (i.e. for IP addresses that this node can route)
         bool globalARP = default(false);
         @display("i=block/layer");
+        @signal[sentReq](type=long);
+        @signal[sentReply](type=long);
+        @signal[initiatedResolution](type=long);
+        @signal[failedResolution](type=long);
         @statistic[sentReq](title="ARP request sent";record=count,vector);
-        @statistic[sentReplies](title="ARP replies sent";record=count,vector);
+        @statistic[sentReply](title="ARP replies sent";record=count,vector);
         @statistic[initiatedResolution](title="ARP initiated resolutions";record=count,vector);
         @statistic[failedResolution](title="ARP failed resolutions";record=count,vector);
     gates:

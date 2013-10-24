@@ -113,8 +113,8 @@ simple Ieee80211Mac
         bool multiMac = default(false); // allows multiples mac interfaces in the same link layer
         @display("i=block/layer");
 
-        @signal[packetSentToLower](type=IdealWirelessFrame);
-        @signal[packetReceivedFromLower](type=IdealWirelessFrame);
+        @signal[packetSentToLower](type=Ieee80211Frame);
+        @signal[packetReceivedFromLower](type=cPacket);     // expected type=Ieee80211Frame
         @signal[packetSentToUpper](type=cPacket);   // cPacket with Ieee802Ctrl ctrlinfo
         @signal[packetReceivedFromUpper](type=cPacket);   // cPacket with Ieee802Ctrl ctrlinfo
 

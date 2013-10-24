@@ -50,7 +50,7 @@ simple VoIPStreamSender like IUDPApp
         string soundFile;                       // file name of input audio file
         int repeatCount = default(1);
         string traceFileName = default("");     // file name to save output stream (wav), OFF when empty
-        @signal[sentPk](type=VoIPPacket);
+        @signal[sentPk](type=VoIPStreamPacket);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @display("i=block/departure");
     gates:

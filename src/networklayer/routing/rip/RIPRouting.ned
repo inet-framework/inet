@@ -79,6 +79,7 @@ simple RIPRouting
         @signal[sentUpdate](type=cPacket);
         @signal[rcvdResponse](type=cPacket);
         @signal[badResponse](type=cPacket);
+        @signal[numRoutes](type=unsigned long);
         @statistic[sentRequest](title="request sent"; source=sentRequest; record=count,"vector(constant1)"; interpolationmode=none);
         @statistic[sentUpdate](title="update sent"; source=sentUpdate; record=count,"vector(constant1)"; interpolationmode=none);
         @statistic[rcvdResponse](title="response received"; source=rcvdResponse; record=count,"vector(constant1)"; interpolationmode=none);
