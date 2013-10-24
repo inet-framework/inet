@@ -36,9 +36,12 @@ void STPTester::depthFirstSearch()
         parent[graph.getNode(i)] = NULL;
     }
 
-    /*
-     * for(int i = 0; i < graph.getNumNodes(); i++)
-     *    if(color[graph.getNode(i) == WHITE)
+    /* Use this for testing loop-freeness in all connected components.
+     * Note that in this case the algorithm is unable to decide
+     * whether a graph is connected.
+     *
+     * for (int i = 0; i < graph.getNumNodes(); i++)
+     *    if (color[graph.getNode(i)] == WHITE)
      *       dfsVisit(graph.getNode(i));
      */
 
