@@ -26,9 +26,7 @@
  * Category constants for NotificationBoard
  */
 // TODO document associated notification detail structs
-enum
-{
-    // admin
+extern simsignal_t    // admin
     NF_SUBSCRIBERLIST_CHANGED,
 
     // - host
@@ -131,8 +129,8 @@ enum
     //...
     // - battery
     NF_BATTERY_CHANGED,
-    NF_BATTERY_CPUTIME_CONSUMED,
-};
+    NF_BATTERY_CPUTIME_CONSUMED
+;
 
 /**
  * Utility function

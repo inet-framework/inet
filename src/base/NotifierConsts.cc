@@ -18,65 +18,90 @@
 #include <stdio.h>
 #include "NotifierConsts.h"
 
+simsignal_t NF_SUBSCRIBERLIST_CHANGED = cComponent::registerSignal("NF_SUBSCRIBERLIST_CHANGED");
+
+simsignal_t NF_NODE_FAILURE = cComponent::registerSignal("NF_NODE_FAILURE");
+simsignal_t NF_NODE_RECOVERY = cComponent::registerSignal("NF_NODE_RECOVERY");
+
+simsignal_t NF_RADIOSTATE_CHANGED = cComponent::registerSignal("NF_RADIOSTATE_CHANGED");
+simsignal_t NF_RADIO_CHANNEL_CHANGED = cComponent::registerSignal("NF_RADIO_CHANNEL_CHANGED");
+simsignal_t NF_RADIO_CHANGE_NOISE = cComponent::registerSignal("NF_RADIO_CHANGE_NOISE");
+
+simsignal_t NF_PP_TX_BEGIN = cComponent::registerSignal("NF_PP_TX_BEGIN");
+simsignal_t NF_PP_TX_END = cComponent::registerSignal("NF_PP_TX_END");
+simsignal_t NF_PP_RX_END = cComponent::registerSignal("NF_PP_RX_END");
+simsignal_t NF_TX_ACKED = cComponent::registerSignal("NF_TX_ACKED");
+simsignal_t NF_L2_Q_DROP = cComponent::registerSignal("NF_L2_Q_DROP");
+simsignal_t NF_MAC_BECAME_IDLE = cComponent::registerSignal("NF_MAC_BECAME_IDLE");
+simsignal_t NF_L2_BEACON_LOST = cComponent::registerSignal("NF_L2_BEACON_LOST");
+simsignal_t NF_L2_ASSOCIATED = cComponent::registerSignal("NF_L2_ASSOCIATED");
+simsignal_t NF_L2_ASSOCIATED_NEWAP = cComponent::registerSignal("NF_L2_ASSOCIATED_NEWAP");
+simsignal_t NF_L2_ASSOCIATED_OLDAP = cComponent::registerSignal("NF_L2_ASSOCIATED_OLDAP");
+simsignal_t NF_L2_DISASSOCIATED = cComponent::registerSignal("NF_L2_DISASSOCIATED");
+simsignal_t NF_L2_AP_ASSOCIATED = cComponent::registerSignal("NF_L2_AP_ASSOCIATED");
+simsignal_t NF_L2_AP_DISASSOCIATED = cComponent::registerSignal("NF_L2_AP_DISASSOCIATED");
+
+simsignal_t NF_LINK_BREAK = cComponent::registerSignal("NF_LINK_BREAK");
+simsignal_t NF_LINK_PROMISCUOUS = cComponent::registerSignal("NF_LINK_PROMISCUOUS");
+simsignal_t NF_LINK_FULL_PROMISCUOUS = cComponent::registerSignal("NF_LINK_FULL_PROMISCUOUS");
+simsignal_t NF_LINK_REFRESH = cComponent::registerSignal("NF_LINK_REFRESH");
+
+simsignal_t NF_INTERFACE_CREATED = cComponent::registerSignal("NF_INTERFACE_CREATED");
+simsignal_t NF_INTERFACE_DELETED = cComponent::registerSignal("NF_INTERFACE_DELETED");
+simsignal_t NF_INTERFACE_STATE_CHANGED = cComponent::registerSignal("NF_INTERFACE_STATE_CHANGED");
+simsignal_t NF_INTERFACE_CONFIG_CHANGED = cComponent::registerSignal("NF_INTERFACE_CONFIG_CHANGED");
+simsignal_t NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED = cComponent::registerSignal("NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED");
+simsignal_t NF_INTERFACE_IPv4CONFIG_CHANGED = cComponent::registerSignal("NF_INTERFACE_IPv4CONFIG_CHANGED");
+simsignal_t NF_INTERFACE_IPv6CONFIG_CHANGED = cComponent::registerSignal("NF_INTERFACE_IPv6CONFIG_CHANGED");
+simsignal_t NF_TED_CHANGED = cComponent::registerSignal("NF_TED_CHANGED");
+
+simsignal_t NF_ROUTE_ADDED = cComponent::registerSignal("NF_ROUTE_ADDED");
+simsignal_t NF_ROUTE_DELETED = cComponent::registerSignal("NF_ROUTE_DELETED");
+simsignal_t NF_ROUTE_CHANGED = cComponent::registerSignal("NF_ROUTE_CHANGED");
+simsignal_t NF_MROUTE_ADDED = cComponent::registerSignal("NF_MROUTE_ADDED");
+simsignal_t NF_MROUTE_DELETED = cComponent::registerSignal("NF_MROUTE_DELETED");
+simsignal_t NF_MROUTE_CHANGED = cComponent::registerSignal("NF_MROUTE_CHANGED");
+
+simsignal_t NF_IPv4_MCAST_JOIN = cComponent::registerSignal("NF_IPv4_MCAST_JOIN");
+simsignal_t NF_IPv4_MCAST_LEAVE = cComponent::registerSignal("NF_IPv4_MCAST_LEAVE");
+simsignal_t NF_IPv4_MCAST_REGISTERED = cComponent::registerSignal("NF_IPv4_MCAST_REGISTERED");
+simsignal_t NF_IPv4_MCAST_UNREGISTERED = cComponent::registerSignal("NF_IPv4_MCAST_UNREGISTERED");
+
+simsignal_t NF_IPv4_NEW_MULTICAST = cComponent::registerSignal("NF_IPv4_NEW_MULTICAST");
+simsignal_t NF_IPv4_NEW_MULTICAST_DENSE = cComponent::registerSignal("NF_IPv4_NEW_MULTICAST_DENSE");
+simsignal_t NF_IPv4_NEW_MULTICAST_SPARSE = cComponent::registerSignal("NF_IPv4_NEW_MULTICAST_SPARSE");
+simsignal_t NF_IPv4_NEW_IGMP_ADDED = cComponent::registerSignal("NF_IPv4_NEW_IGMP_ADDED");
+simsignal_t NF_IPv4_NEW_IGMP_REMOVED = cComponent::registerSignal("NF_IPv4_NEW_IGMP_REMOVED");
+simsignal_t NF_IPv4_DATA_ON_NONRPF = cComponent::registerSignal("NF_IPv4_DATA_ON_NONRPF");
+simsignal_t NF_IPv4_DATA_ON_RPF = cComponent::registerSignal("NF_IPv4_DATA_ON_RPF");
+simsignal_t NF_IPv4_RPF_CHANGE = cComponent::registerSignal("NF_IPv4_RPF_CHANGE");
+simsignal_t NF_IPv4_DATA_ON_RPF_PIMSM = cComponent::registerSignal("NF_IPv4_DATA_ON_RPF_PIMSM");
+simsignal_t NF_IPv4_MDATA_REGISTER = cComponent::registerSignal("NF_IPv4_MDATA_REGISTER");
+simsignal_t NF_IPv4_NEW_IGMP_ADDED_PISM = cComponent::registerSignal("NF_IPv4_NEW_IGMP_ADDED_PISM");
+simsignal_t NF_IPv4_NEW_IGMP_REMOVED_PIMSM = cComponent::registerSignal("NF_IPv4_NEW_IGMP_REMOVED_PIMSM");
+
+simsignal_t NF_IPv6_HANDOVER_OCCURRED = cComponent::registerSignal("NF_IPv6_HANDOVER_OCCURRED");
+simsignal_t NF_MIPv6_RO_COMPLETED = cComponent::registerSignal("NF_MIPv6_RO_COMPLETED");
+simsignal_t NF_IPv6_MCAST_JOIN = cComponent::registerSignal("NF_IPv6_MCAST_JOIN");
+simsignal_t NF_IPv6_MCAST_LEAVE = cComponent::registerSignal("NF_IPv6_MCAST_LEAVE");
+simsignal_t NF_IPv6_MCAST_REGISTERED = cComponent::registerSignal("NF_IPv6_MCAST_REGISTERED");
+simsignal_t NF_IPv6_MCAST_UNREGISTERED = cComponent::registerSignal("NF_IPv6_MCAST_UNREGISTERED");
+
+simsignal_t NF_CLNS_ROUTE_ADDED = cComponent::registerSignal("NF_CLNS_ROUTE_ADDED");
+simsignal_t NF_CLNS_ROUTE_DELETED = cComponent::registerSignal("NF_CLNS_ROUTE_DELETED");
+simsignal_t NF_CLNS_ROUTE_CHANGED = cComponent::registerSignal("NF_CLNS_ROUTE_CHANGED");
+
+simsignal_t NF_ISIS_ADJ_CHANGED = cComponent::registerSignal("NF_ISIS_ADJ_CHANGED");
+
+simsignal_t NF_OVERLAY_TRANSPORTADDRESS_CHANGED = cComponent::registerSignal("NF_OVERLAY_TRANSPORTADDRESS_CHANGED");
+simsignal_t NF_OVERLAY_NODE_GRACEFUL_LEAVE = cComponent::registerSignal("NF_OVERLAY_NODE_GRACEFUL_LEAVE");
+simsignal_t NF_OVERLAY_NODE_LEAVE = cComponent::registerSignal("NF_OVERLAY_NODE_LEAVE");
+simsignal_t NF_BATTERY_CHANGED = cComponent::registerSignal("NF_BATTERY_CHANGED");
+simsignal_t NF_BATTERY_CPUTIME_CONSUMED = cComponent::registerSignal("NF_BATTERY_CPUTIME_CONSUMED");
 
 const char *notificationCategoryName(int category)
 {
-    const char *s;
-    static char buf[8];
-    switch (category)
-    {
-        case NF_SUBSCRIBERLIST_CHANGED: return "SUBSCRIBERS";
-
-        case NF_NODE_FAILURE: return "FAILURE";
-        case NF_NODE_RECOVERY: return "RECOVERY";
-
-        case NF_RADIOSTATE_CHANGED: return "RADIO-STATE";
-        case NF_RADIO_CHANNEL_CHANGED: return "RADIO-CHANNEL";
-        case NF_PP_TX_BEGIN: return "TX-BEG";
-        case NF_PP_TX_END: return "TX-END";
-        case NF_PP_RX_END: return "RX-END";
-        case NF_L2_Q_DROP: return "DROP";
-        case NF_MAC_BECAME_IDLE: return "MAC-IDLE";
-        case NF_L2_BEACON_LOST: return "BEACON-LOST";
-        case NF_L2_ASSOCIATED: return "ASSOCIATED";
-
-        case NF_INTERFACE_CREATED: return "IF-CREATED";
-        case NF_INTERFACE_DELETED: return "IF-DELETED";
-        case NF_INTERFACE_STATE_CHANGED: return "IF-STATE";
-        case NF_INTERFACE_CONFIG_CHANGED: return "IF-CFG";
-        case NF_INTERFACE_IPv4CONFIG_CHANGED: return "IPv4-CFG";
-        case NF_INTERFACE_IPv6CONFIG_CHANGED: return "IPv6-CFG";
-
-        case NF_ROUTE_ADDED: return "ROUTE-ADD";
-        case NF_ROUTE_DELETED: return "ROUTE-DEL";
-        case NF_ROUTE_CHANGED: return "ROUTE-CHG";
-        case NF_MROUTE_ADDED: return "MROUTE-ADD";
-        case NF_MROUTE_DELETED: return "MROUTE-DEL";
-        case NF_MROUTE_CHANGED: return "MROUTE-CHG";
-
-        case NF_IPv6_MCAST_JOIN: return "IPv6-MCAST-JOIN";
-        case NF_IPv6_MCAST_LEAVE: return "IPv6-MCAST-LEAVE";
-        case NF_IPv6_MCAST_REGISTERED: return "IPv6-MCAST-REGISTERED";
-        case NF_IPv6_MCAST_UNREGISTERED: return "IPv6-MCAST_UNREGISTERED";
-
-        case NF_IPv6_HANDOVER_OCCURRED: return "IPv6-HANDOVER";
-        case NF_MIPv6_RO_COMPLETED: return "MIPv6 RO COMPLETED";
-
-        case NF_CLNS_ROUTE_ADDED: return "CLNS-ROUTE-ADD";
-        case NF_CLNS_ROUTE_DELETED: return "CLNS-ROUTE-DEL";
-        case NF_CLNS_ROUTE_CHANGED: return "CLNS-ROUTE-CHG";
-
-        case NF_ISIS_ADJ_CHANGED: return "ISIS-ADJ-CHG";
-
-        case NF_OVERLAY_TRANSPORTADDRESS_CHANGED: return "OVERLAY-TRANSPORTADDESS";
-        case NF_OVERLAY_NODE_LEAVE: return "OVERLAY-NODE-LEAVE";
-        case NF_OVERLAY_NODE_GRACEFUL_LEAVE: return "NODE-GRACEFUL-LEAVE";
-        case NF_BATTERY_CHANGED: return "NF_BATTERY_CHANGED";
-        case NF_BATTERY_CPUTIME_CONSUMED: return "NF_BATTERY_CPUTIME_CONSUMED";
-
-        default: sprintf(buf, "%d", category); s = buf; break;
-    }
-    return s;
+    return cComponent::getSignalName(category);
 }
 
 void printNotificationBanner(int category, const cObject *details)
