@@ -58,7 +58,6 @@ extern simsignal_t    // admin
     NF_LINK_BREAK, // used for manet link layer feedback
     NF_LINK_PROMISCUOUS, // used for manet promiscuous mode, the packets that have this node how destination are no promiscuous send
     NF_LINK_FULL_PROMISCUOUS, // Used for manet promiscuous mode, all packets are promiscuous
-    NF_LINK_REFRESH,     // used for refreshing a neigbour adjacency
 
     // - layer 3 (network)
     NF_INTERFACE_CREATED,
