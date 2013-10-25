@@ -1,0 +1,66 @@
+%description:
+
+Checks that a host reports multicast state changes of the interface.
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=10s
+cmdenv-express-mode = false
+log-format = "%t %N: "
+
+network=TestIGMPNetwork
+**.igmpType = "IGMPv3"
+**.IPForward = false
+**.forwardMulticast = false
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%file: scenario.xml
+<scenario>
+
+<dump t="1" module="node.tester" ifname="eth0" what="groups"/>
+
+<join t="2" module="node.tester" ifname="eth0" group="225.0.0.1"/>
+<dump t="2" module="node.tester" ifname="eth0" what="groups"/>
+
+<leave t="3" module="node.tester" ifname="eth0" group="225.0.0.1"/>
+<dump t="3" module="node.tester" ifname="eth0" what="groups"/>
+
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%#
+%# First check that join/leave commands has modified the interface state
+%#
+%contains-regex: test.out
+1 tester: eth0: groups = 224.0.0.1 E<>
+.*
+2 tester: eth0: groups = 224.0.0.1 E<>, 225.0.0.1 E<>
+.*
+3 tester: eth0: groups = 224.0.0.1 E<>
+
+%#
+%# Now check that the IGMP module sent the reports immediately
+%#
+%contains-regex: test.out
+2 igmp: State of group '225.0.0.1' on interface 'eth0' has changed:
+2 igmp:.*Old state: INCLUDE\(\).
+2 igmp:.*New state: EXCLUDE\(\).
+2 igmp: Sending TO_EX report.
+.*
+3 igmp: State of group '225.0.0.1' on interface 'eth0' has changed:
+3 igmp:.*Old state: EXCLUDE\(\).
+3 igmp:.*New state: INCLUDE\(\).
+3 igmp: Sending TO_IN report.
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

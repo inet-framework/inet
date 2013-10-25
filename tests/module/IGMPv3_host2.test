@@ -1,0 +1,54 @@
+%description:
+
+Checks that a host responds to a General Query with a correct response.
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=300s
+cmdenv-express-mode = false
+log-format = "%t %N: "
+
+network=TestIGMPNetwork
+**.igmpType = "IGMPv3"
+**.IPForward = false
+**.forwardMulticast = false
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%file: scenario.xml
+<scenario>
+
+<join t="2" module="node.tester" ifname="eth0" group="225.0.0.1"/>
+<dump t="2" module="node.tester" ifname="eth0" what="groups"/>
+
+<send t="3" module="node.tester" ifname="eth0" type="IGMPv3Query" maxRespCode="10"/>
+
+</scenario>
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%#
+%# First check that the join was successful
+%#
+%contains-regex: test.out
+2 tester: eth0: groups = 224.0.0.1 E<>, 225.0.0.1 E<>
+
+%#
+%# Now check that the IGMP module responded with a correct report
+%#
+%contains-regex: test.out
+3 tester: Sending: IGMPv3Query<group=<unspec>, sourceList=<>.*>.
+.*
+3\..* tester: Received: IGMPv3Report<225.0.0.1=IS_EX<>>.
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------
