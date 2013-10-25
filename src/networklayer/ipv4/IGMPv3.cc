@@ -571,7 +571,7 @@ void IGMPv3::multicastGroupJoined(InterfaceEntry *ie, IPv4Address groupAddr)
         numGroups++;
         numHostGroups++;
         IPv4AddressVector sources;
-        // FIXME report type should be TO_EX
+        // FIXME report type should be TO_EX; dest address should be ALL_IGMPV3_ROUTERS_MCAST
         sendGroupReport(ie, groupData->groupAddr, IGMPV3_RT_IS_EX, sources);    //sending Join Report message
         groupData->state = IGMPV3_HGS_DELAYING_MEMBER;
     }
@@ -728,6 +728,7 @@ void IGMPv3::processHostGroupQueryTimer(cMessage *msg)
     IGMPV3HostTimerSourceContext *ctx = (IGMPV3HostTimerSourceContext*)msg->getContextPointer();
 
     //checking if query is group or group-and-source specific
+    // FIXME All dest addresses must be ALL_IGMPV3_ROUTERS_MCAST
     if(ctx->sourceList.empty())
     {
         // Send report for a Group-Specific Query
@@ -790,12 +791,13 @@ void IGMPv3::multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, M
     //Check if IF state is different
     if(!(groupData->filter == filter) || !(groupData->sourceAddressList == sourceList))
     {
+        // FIXME All dest addresses must be ALL_IGMPV3_ROUTERS_MCAST
         //OldState: INCLUDE(A) NewState: INCLUDE(B) StateChangeRecordSent: ALLOW(B-A) BLOCK(A-B)
         if(groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_INCLUDE && groupData->sourceAddressList != sourceList)
         {
-            // XXX If the computed source list for either an ALLOW or a BLOCK State-
-            //     Change Record is empty, that record is omitted from the Report
-            //     message.
+            // FIXME If the computed source list for either an ALLOW or a BLOCK State-
+            //       Change Record is empty, that record should be omitted from the Report
+            //       message.
             // XXX Send only one report (with two groups)
             EV_DETAIL << "Sending ALLOW/BLOCK report.\n";
             sendGroupReport(ie, group, IGMPV3_RT_ALLOW, set_complement(sourceList, groupData->sourceAddressList));
