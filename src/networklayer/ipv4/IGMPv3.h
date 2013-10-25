@@ -102,6 +102,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
 
             HostGroupData(IGMPv3 *owner,const IPv4Address &group);
             virtual ~HostGroupData();
+            std::string getStateInfo() const;
         };
         typedef std::map<IPv4Address,HostGroupData*> GroupToHostDataMap;
 
@@ -117,6 +118,10 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
 
             RouterGroupData(IGMPv3 *owner, const IPv4Address &group);
             virtual ~RouterGroupData();
+            std::string getStateInfo() const;
+
+            private:
+            void printSourceList(std::ostream &out, bool withRunningTimer) const;
         };
         typedef std::map<IPv4Address, RouterGroupData*> GroupToRouterDataMap;
 
