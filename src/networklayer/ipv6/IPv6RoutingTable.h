@@ -126,7 +126,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      * Called by the signal handler whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
   public:
     /** @name Interfaces */

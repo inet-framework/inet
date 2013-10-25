@@ -426,18 +426,18 @@ void DHCPClient::handleDHCPMessage(DHCPMessage* msg)
     }
 }
 
-void DHCPClient::receiveSignal(cComponent *source, int category, cObject *details)
+void DHCPClient::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
-    printNotificationBanner(category, details);
+    printNotificationBanner(signalID, obj);
 
     // host associated. Link is up. Change the state to init.
-    if (category == NF_L2_ASSOCIATED)
+    if (signalID == NF_L2_ASSOCIATED)
     {
         InterfaceEntry * ie = NULL;
-        if (details)
+        if (obj)
         {
-            ie = dynamic_cast<InterfaceEntry*>(details);
+            ie = dynamic_cast<InterfaceEntry*>(obj);
         }
         if (!ie || (ie && (ie == ie)))
         {

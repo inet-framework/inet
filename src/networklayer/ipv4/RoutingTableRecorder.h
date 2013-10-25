@@ -68,11 +68,11 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cIndexedEvent
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *);
     virtual void hookListeners();
-    virtual void receiveChangeNotification(cModule *source, int category, const cObject *details);
+    virtual void receiveChangeNotification(cModule *source, simsignal_t signalID, cObject *obj);
     virtual void recordSnapshot();
     virtual void recordIndex() {}
-    virtual void recordInterface(cModule *host, const InterfaceEntry *ie, int category);
-    virtual void recordRoute(cModule *host, const IRoute *route, int category);
+    virtual void recordInterface(cModule *host, const InterfaceEntry *ie, simsignal_t signalID);
+    virtual void recordRoute(cModule *host, const IRoute *route, simsignal_t signalID);
 };
 
 
@@ -100,9 +100,9 @@ class INET_API RoutingTableRecorder : public cSimpleModule
     virtual void handleMessage(cMessage *);
     virtual void hookListeners();
     virtual void ensureRoutingLogFileOpen();
-    virtual void receiveChangeNotification(cComponent *source, int category, const cObject *details);
-    virtual void recordInterfaceChange(cModule *host, const InterfaceEntry *ie, int category);
-    virtual void recordRouteChange(cModule *host, const IRoute *route, int category);
+    virtual void receiveChangeNotification(cComponent *source, simsignal_t signalID, cObject *details);
+    virtual void recordInterfaceChange(cModule *host, const InterfaceEntry *ie, simsignal_t signalID);
+    virtual void recordRouteChange(cModule *host, const IRoute *route, simsignal_t signalID);
 };
 
 #endif /*OMNETPP_VERSION*/

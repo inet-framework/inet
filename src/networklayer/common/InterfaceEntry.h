@@ -61,8 +61,8 @@ class INET_API InterfaceProtocolData : public cObject
     InterfaceEntry *ownerp;  // the interface entry this object belongs to
 
   protected:
-    // fires notification with the given category, and the interface entry as details
-    virtual void changed(int category, int fieldId);
+    // fires notification with the given signalID, and the interface entry as obj
+    virtual void changed(simsignal_t signalID, int fieldId);
 
   public:
     InterfaceProtocolData() {ownerp = NULL;}
@@ -138,7 +138,7 @@ class INET_API InterfaceEntry : public cNamedObject
     // change notifications
     virtual void configChanged(int fieldId) {changed(NF_INTERFACE_CONFIG_CHANGED, fieldId);}
     virtual void stateChanged(int fieldId) {changed(NF_INTERFACE_STATE_CHANGED, fieldId);}
-    virtual void changed(int category, int fieldId);
+    virtual void changed(simsignal_t signalID, int fieldId);
 
   public:
     // internal: to be invoked from InterfaceTable only!

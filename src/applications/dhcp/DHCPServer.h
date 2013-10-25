@@ -79,7 +79,7 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
         virtual ~DHCPServer();
 
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-        virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+        virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
 };
 
 #endif

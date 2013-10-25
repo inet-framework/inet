@@ -38,11 +38,11 @@
 #endif
 
 
-void InterfaceProtocolData::changed(int category, int fieldId)
+void InterfaceProtocolData::changed(simsignal_t signalID, int fieldId)
 {
     // notify the containing InterfaceEntry that something changed
     if (ownerp)
-        ownerp->changed(category, fieldId);
+        ownerp->changed(signalID, fieldId);
 }
 
 std::string InterfaceEntryChangeDetails::info() const
@@ -165,12 +165,12 @@ std::string InterfaceEntry::getFullPath() const
     return ownerp == NULL ? getFullName() : ownerp->getHostModule()->getFullPath() + "." + getFullName();
 }
 
-void InterfaceEntry::changed(int category, int fieldId)
+void InterfaceEntry::changed(simsignal_t signalID, int fieldId)
 {
     if (ownerp)
     {
         InterfaceEntryChangeDetails details(this, fieldId);
-        ownerp->interfaceChanged(category, &details);
+        ownerp->interfaceChanged(signalID, &details);
     }
 }
 

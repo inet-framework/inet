@@ -771,18 +771,18 @@ void ManetRoutingBase::omnet_clean_rte()
 //
 // generic receiveChangeNotification, the protocols must implement processLinkBreak and processPromiscuous only
 //
-void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method("Manet llf");
     if (!isRegistered)
         opp_error("Manet routing protocol is not register");
-    if (category == NF_LINK_BREAK)
+    if (signalID == NF_LINK_BREAK)
     {
-        if (details == NULL)
+        if (obj == NULL)
             return;
-        if (dynamic_cast<Ieee80211DataOrMgmtFrame *>(const_cast<cObject*>(details)))
+        if (dynamic_cast<Ieee80211DataOrMgmtFrame *>(const_cast<cObject*>(obj)))
         {
-            Ieee80211DataFrame *frame = dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject*>(details));
+            Ieee80211DataFrame *frame = dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject*>(obj));
             if (frame)
             {
                 cPacket * pktAux = frame->getEncapsulatedPacket();
@@ -796,28 +796,28 @@ void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t category, c
                     delete pkt;
                 }
                 else
-                    processLinkBreak(details);
+                    processLinkBreak(obj);
             }
             else
             {
                 Ieee80211ManagementFrame *frame =
-                        dynamic_cast<Ieee80211ManagementFrame *>(const_cast<cObject*>(details));
+                        dynamic_cast<Ieee80211ManagementFrame *>(const_cast<cObject*>(obj));
                 if (frame)
-                    processLinkBreakManagement(details);
+                    processLinkBreakManagement(obj);
             }
         }
     }
-    else if (category == NF_LINK_PROMISCUOUS)
+    else if (signalID == NF_LINK_PROMISCUOUS)
     {
-        processPromiscuous(details);
+        processPromiscuous(obj);
     }
-    else if (category == NF_LINK_FULL_PROMISCUOUS)
+    else if (signalID == NF_LINK_FULL_PROMISCUOUS)
     {
-        processFullPromiscuous(details);
+        processFullPromiscuous(obj);
     }
-    else if(category == NF_L2_AP_DISASSOCIATED || category == NF_L2_AP_ASSOCIATED)
+    else if(signalID == NF_L2_AP_DISASSOCIATED || signalID == NF_L2_AP_ASSOCIATED)
     {
-        Ieee80211MgmtAP::NotificationInfoSta *infoSta = dynamic_cast<Ieee80211MgmtAP::NotificationInfoSta *>(const_cast<cObject*> (details));
+        Ieee80211MgmtAP::NotificationInfoSta *infoSta = dynamic_cast<Ieee80211MgmtAP::NotificationInfoSta *>(const_cast<cObject*> (obj));
         if (infoSta)
         {
             ManetAddress addr;
@@ -834,7 +834,7 @@ void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t category, c
                      break;
                  }
             }
-            if (category == NF_L2_AP_ASSOCIATED)
+            if (signalID == NF_L2_AP_ASSOCIATED)
             {
                 ManetProxyAddress p;
                 p.address = addr;
@@ -843,9 +843,9 @@ void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t category, c
             }
         }
     }
-    else if (category == mobilityStateChangedSignal)
+    else if (signalID == mobilityStateChangedSignal)
     {
-        IMobility *mobility = check_and_cast<IMobility*>(details);
+        IMobility *mobility = check_and_cast<IMobility*>(obj);
         curPosition = mobility->getCurrentPosition();
         curSpeed = mobility->getCurrentSpeed();
         posTimer = simTime();

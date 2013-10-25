@@ -577,18 +577,18 @@ void DSRUU::handleMessage(cMessage* msg)
     return;
 }
 
-void DSRUU::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void DSRUU::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     IPv4Datagram  *dgram = NULL;
     //current_time = simTime();
 
-    if (details==NULL)
+    if (obj==NULL)
         return;
 
-    if (category == NF_LINK_BREAK)
+    if (signalID == NF_LINK_BREAK)
     {
         Enter_Method("Dsr Link Break");
-        Ieee80211DataFrame *frame = dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject *>(details));
+        Ieee80211DataFrame *frame = dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject *>(obj));
         if (frame)
         {
             if (dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedPacket()))
@@ -609,15 +609,15 @@ void DSRUU::receiveSignal(cComponent *source, simsignal_t category, cObject *det
             packetFailed(dgram);
         }
     }
-    else if (category == NF_LINK_PROMISCUOUS)
+    else if (signalID == NF_LINK_PROMISCUOUS)
     {
         if (get_confval(PromiscOperation))
         {
             Enter_Method("Dsr promisc");
 
-            if (dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject*>(details)))
+            if (dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject*>(obj)))
             {
-                const Ieee80211DataFrame *frame = check_and_cast<const Ieee80211DataFrame *>(details);
+                const Ieee80211DataFrame *frame = check_and_cast<const Ieee80211DataFrame *>(obj);
                 if (dynamic_cast<DSRPkt *>(frame->getEncapsulatedPacket()))
                 {
 

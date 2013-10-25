@@ -92,16 +92,16 @@ void LinkStateRouting::handleMessage(cMessage * msg)
         ASSERT(false);
 }
 
-void LinkStateRouting::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void LinkStateRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
-    printNotificationBanner(category, details);
+    printNotificationBanner(signalID, obj);
 
-    ASSERT(category == NF_TED_CHANGED);
+    ASSERT(signalID == NF_TED_CHANGED);
 
     EV << "TED changed\n";
 
-    const TEDChangeInfo *d = check_and_cast<const TEDChangeInfo *>(details);
+    const TEDChangeInfo *d = check_and_cast<const TEDChangeInfo *>(obj);
 
     unsigned int k = d->getTedLinkIndicesArraySize();
 

@@ -449,8 +449,8 @@ class INET_API Ieee80211Mac : public WirelessMacBase
      * @brief Functions called from other classes to notify about state changes and to handle messages.
      */
     //@{
-    /** @brief Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
+    /** @brief Called by the signal handler whenever a change occurs we're interested in */
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     /** @brief Handle commands (msg kind+control info) coming from upper layers */
     virtual void handleCommand(cMessage *msg);

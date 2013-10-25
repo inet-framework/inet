@@ -88,7 +88,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     virtual void discoverConnectingGates(InterfaceEntry *entry);
 
     // called from InterfaceEntry
-    virtual void interfaceChanged(int category, const InterfaceEntryChangeDetails *details);
+    virtual void interfaceChanged(simsignal_t signalID, const InterfaceEntryChangeDetails *details);
 
     // internal
     virtual void invalidateTmpInterfaceList();
@@ -111,10 +111,10 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
 
   public:
     /**
-     * Called by the NotificationBoard whenever a change of a category
+     * Called by the signal handler whenever a change of a category
      * occurs to which this client has subscribed.
      */
-    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     /**
      * Returns the host or router this interface table lives in.

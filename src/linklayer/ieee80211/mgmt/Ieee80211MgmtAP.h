@@ -93,7 +93,7 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     virtual void handleCommand(int msgkind, cObject *ctrl);
 
     /** Called by the signal handler whenever a change occurs we're interested in */
-    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     /** Utility function: return sender STA's entry from our STA list, or NULL if not in there */
     virtual STAInfo *lookupSenderSTA(Ieee80211ManagementFrame *frame);

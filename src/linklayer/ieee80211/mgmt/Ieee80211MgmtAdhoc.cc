@@ -74,7 +74,7 @@ cPacket *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
     return payload;
 }
 
-void Ieee80211MgmtAdhoc::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void Ieee80211MgmtAdhoc::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
 }

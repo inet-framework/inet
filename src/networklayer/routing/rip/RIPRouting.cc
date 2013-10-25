@@ -276,18 +276,18 @@ void RIPRouting::sendRIPRequest(const RIPInterfaceEntry &ripInterface)
 /**
  * Listen on interface/route changes and update private data structures.
  */
-void RIPRouting::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void RIPRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
-    Enter_Method_Silent("RIPRouting::receiveChangeNotification(%s)", notificationCategoryName(category));
+    Enter_Method_Silent("RIPRouting::receiveChangeNotification(%s)", notificationCategoryName(signalID));
 
     IRoute *route;
     const InterfaceEntry *ie;
     const InterfaceEntryChangeDetails *change;
 
-    if (category == NF_INTERFACE_CREATED)
+    if (signalID == NF_INTERFACE_CREATED)
     {
         // configure interface for RIP
-        ie = check_and_cast<const InterfaceEntry*>(details);
+        ie = check_and_cast<const InterfaceEntry*>(obj);
         if (ie->isMulticast() && !ie->isLoopback())
         {
             cXMLElementList config = par("ripConfig").xmlValue()->getChildrenByTagName("interface");
@@ -296,15 +296,15 @@ void RIPRouting::receiveSignal(cComponent *source, simsignal_t category, cObject
                 addInterface(ie, config[i]);
         }
     }
-    else if (category == NF_INTERFACE_DELETED)
+    else if (signalID == NF_INTERFACE_DELETED)
     {
         // delete interfaces and routes referencing the deleted interface
-        ie = check_and_cast<const InterfaceEntry*>(details);
+        ie = check_and_cast<const InterfaceEntry*>(obj);
         deleteInterface(ie);
     }
-    else if (category == NF_INTERFACE_STATE_CHANGED)
+    else if (signalID == NF_INTERFACE_STATE_CHANGED)
     {
-        change = check_and_cast<const InterfaceEntryChangeDetails*>(details);
+        change = check_and_cast<const InterfaceEntryChangeDetails*>(obj);
         if (change->getFieldId() == InterfaceEntry::F_CARRIER || change->getFieldId() == InterfaceEntry::F_STATE)
         {
             ie = change->getInterfaceEntry();
@@ -320,10 +320,10 @@ void RIPRouting::receiveSignal(cComponent *source, simsignal_t category, cObject
             }
         }
     }
-    else if (category == NF_ROUTE_DELETED)
+    else if (signalID == NF_ROUTE_DELETED)
     {
         // remove references to the deleted route and invalidate the RIP route
-        route = const_cast<IRoute*>(check_and_cast<const IRoute*>(details));
+        route = const_cast<IRoute*>(check_and_cast<const IRoute*>(obj));
         if (route->getSource() != this)
         {
             for (RouteVector::iterator it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
@@ -334,10 +334,10 @@ void RIPRouting::receiveSignal(cComponent *source, simsignal_t category, cObject
                 }
         }
     }
-    else if (category == NF_ROUTE_ADDED)
+    else if (signalID == NF_ROUTE_ADDED)
     {
         // add or update the RIP route
-        route = const_cast<IRoute*>(check_and_cast<const IRoute*>(details));
+        route = const_cast<IRoute*>(check_and_cast<const IRoute*>(obj));
         if (route->getSource() != this)
         {
             if (isLoopbackInterfaceRoute(route))
@@ -365,9 +365,9 @@ void RIPRouting::receiveSignal(cComponent *source, simsignal_t category, cObject
             }
         }
     }
-    else if (category == NF_ROUTE_CHANGED)
+    else if (signalID == NF_ROUTE_CHANGED)
     {
-        route = const_cast<IRoute*>(check_and_cast<const IRoute*>(details));
+        route = const_cast<IRoute*>(check_and_cast<const IRoute*>(obj));
         if (route->getSource() != this)
         {
             RIPRoute *ripRoute = findRoute(route);
@@ -391,7 +391,7 @@ void RIPRouting::receiveSignal(cComponent *source, simsignal_t category, cObject
         }
     }
     else
-        throw cRuntimeError("Unaccepted notification category: %d", category);
+        throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
 }
 
 bool RIPRouting::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

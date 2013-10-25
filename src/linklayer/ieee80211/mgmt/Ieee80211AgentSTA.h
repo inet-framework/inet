@@ -69,7 +69,7 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
     virtual void handleResponse(cMessage *msg);
 
     /** Redefined from cListener; called by signal handler */
-    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     // utility method: attaches object to a message as controlInfo, and sends it to mgmt
     virtual void sendRequest(Ieee80211PrimRequest *req);

@@ -411,7 +411,7 @@ IGMPv2::~IGMPv2()
         deleteRouterInterfaceData(routerData.begin()->first);
 }
 
-void IGMPv2::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void IGMPv2::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
 
@@ -419,15 +419,15 @@ void IGMPv2::receiveSignal(cComponent *source, simsignal_t category, cObject *de
     int interfaceId;
     const IPv4MulticastGroupInfo *info;
 
-    if (category == NF_INTERFACE_CREATED)
+    if (signalID == NF_INTERFACE_CREATED)
     {
-        ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
+        ie = check_and_cast<InterfaceEntry*>(obj);
         if (ie->isMulticast())
             configureInterface(ie);
     }
-    else if (category == NF_INTERFACE_DELETED)
+    else if (signalID == NF_INTERFACE_DELETED)
     {
-        ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
+        ie = check_and_cast<InterfaceEntry*>(obj);
         if (ie->isMulticast())
         {
             interfaceId = ie->getInterfaceId();
@@ -435,14 +435,14 @@ void IGMPv2::receiveSignal(cComponent *source, simsignal_t category, cObject *de
             deleteRouterInterfaceData(interfaceId);
         }
     }
-    else if (category == NF_IPv4_MCAST_JOIN)
+    else if (signalID == NF_IPv4_MCAST_JOIN)
     {
-        info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
+        info = check_and_cast<const IPv4MulticastGroupInfo*>(obj);
         multicastGroupJoined(info->ie, info->groupAddress);
     }
-    else if (category == NF_IPv4_MCAST_LEAVE)
+    else if (signalID == NF_IPv4_MCAST_LEAVE)
     {
-        info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
+        info = check_and_cast<const IPv4MulticastGroupInfo*>(obj);
         multicastGroupLeft(info->ie, info->groupAddress);
     }
 }

@@ -91,26 +91,26 @@ void DHCPServer::openSocket()
     EV << "DHCP Server bound to port " << bootps_port << " at " << ie << endl;
 }
 
-void DHCPServer::receiveChangeNotification(int category, const cPolymorphic *details)
+void DHCPServer::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
 
     InterfaceEntry *nie;
 
-    if (category == NF_INTERFACE_CREATED)
+    if (signalID == NF_INTERFACE_CREATED)
     {
-        nie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
+        nie = check_and_cast<InterfaceEntry*>(obj);
         if (!ie && !strcmp(nie->getName(), par("interface").stringValue()))
             ie = nie;
     }
-    else if (category == NF_INTERFACE_DELETED)
+    else if (signalID == NF_INTERFACE_DELETED)
     {
-        nie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
+        nie = check_and_cast<InterfaceEntry*>(obj);
         if (ie == nie)
             ie = NULL;
     }
     else
-        throw cRuntimeError("Unaccepted notification category: %d", category);
+        throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
 }
 
 void DHCPServer::handleMessage(cMessage *msg)

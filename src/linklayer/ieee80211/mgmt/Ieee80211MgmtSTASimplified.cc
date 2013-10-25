@@ -93,7 +93,7 @@ cPacket *Ieee80211MgmtSTASimplified::decapsulate(Ieee80211DataFrame *frame)
     return payload;
 }
 
-void Ieee80211MgmtSTASimplified::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void Ieee80211MgmtSTASimplified::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
 }

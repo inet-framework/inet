@@ -687,13 +687,13 @@ void ARP::setChangeAddress(const IPv4Address &oldAddress)
 }
 
 
-void ARP::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void ARP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
     // host associated. Link is up. Change the state to init.
-    if (category == NF_INTERFACE_IPv4CONFIG_CHANGED)
+    if (signalID == NF_INTERFACE_IPv4CONFIG_CHANGED)
     {
-        const InterfaceEntryChangeDetails *iecd = check_and_cast<const InterfaceEntryChangeDetails *>(details);
+        const InterfaceEntryChangeDetails *iecd = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
         InterfaceEntry *ie = iecd->getInterfaceEntry();
         // rebuild the arp cache
         if (ie->isLoopback())

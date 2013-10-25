@@ -94,11 +94,11 @@ void InterfaceTable::handleMessage(cMessage *msg)
     throw cRuntimeError("This module doesn't process messages");
 }
 
-void InterfaceTable::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void InterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     // nothing needed here at the moment
     Enter_Method_Silent();
-    printNotificationBanner(category, details);
+    printNotificationBanner(signalID, obj);
 }
 
 //---
@@ -354,9 +354,9 @@ void InterfaceTable::invalidateTmpInterfaceList()
     tmpInterfaceList = NULL;
 }
 
-void InterfaceTable::interfaceChanged(int category, const InterfaceEntryChangeDetails *details)
+void InterfaceTable::interfaceChanged(simsignal_t signalID, const InterfaceEntryChangeDetails *details)
 {
-    emit(category, const_cast<InterfaceEntryChangeDetails *>(details));
+    emit(signalID, const_cast<InterfaceEntryChangeDetails *>(details));
 
     if (ev.isGUI() && par("displayAddresses").boolValue())
         updateLinkDisplayString(details->getInterfaceEntry());

@@ -1304,12 +1304,12 @@ bool LDP::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::st
     return false;
 }
 
-void LDP::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void LDP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
-    printNotificationBanner(category, details);
+    printNotificationBanner(signalID, obj);
 
-    ASSERT(category==NF_ROUTE_ADDED || category==NF_ROUTE_DELETED);
+    ASSERT(signalID==NF_ROUTE_ADDED || signalID==NF_ROUTE_DELETED);
 
     EV << "routing table changed, rebuild list of known FEC" << endl;
 

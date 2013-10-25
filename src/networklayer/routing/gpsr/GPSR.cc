@@ -636,10 +636,10 @@ bool GPSR::handleOperationStage(LifecycleOperation * operation, int stage, IDone
 // notification
 //
 
-void GPSR::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void GPSR::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method("receiveChangeNotification");
-    if (category == NF_LINK_BREAK) {
+    if (signalID == NF_LINK_BREAK) {
         GPSR_EV << "Received link break" << endl;
         // TODO: shall we remove the neighbor?
     }

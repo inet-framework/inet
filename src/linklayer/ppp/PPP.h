@@ -73,7 +73,7 @@ class INET_API PPP : public MACBase
     virtual void refreshOutGateConnection(bool connected);
 
     // cListener function
-    virtual void receiveSignal(cComponent *src, simsignal_t id, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     // MACBase functions
     virtual InterfaceEntry *createInterfaceEntry();

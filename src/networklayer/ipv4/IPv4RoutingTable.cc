@@ -169,34 +169,34 @@ void IPv4RoutingTable::handleMessage(cMessage *msg)
     throw cRuntimeError("This module doesn't process messages");
 }
 
-void IPv4RoutingTable::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void IPv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     if (simulation.getContextType()==CTX_INITIALIZE)
         return;  // ignore notifications during initialize
 
     Enter_Method_Silent();
-    printNotificationBanner(category, details);
+    printNotificationBanner(signalID, obj);
 
-    if (category==NF_INTERFACE_CREATED)
+    if (signalID==NF_INTERFACE_CREATED)
     {
         // add netmask route for the new interface
         updateNetmaskRoutes();
     }
-    else if (category==NF_INTERFACE_DELETED)
+    else if (signalID==NF_INTERFACE_DELETED)
     {
         // remove all routes that point to that interface
-        const InterfaceEntry *entry = check_and_cast<const InterfaceEntry*>(details);
+        const InterfaceEntry *entry = check_and_cast<const InterfaceEntry*>(obj);
         deleteInterfaceRoutes(entry);
     }
-    else if (category==NF_INTERFACE_STATE_CHANGED)
+    else if (signalID==NF_INTERFACE_STATE_CHANGED)
     {
         invalidateCache();
     }
-    else if (category==NF_INTERFACE_CONFIG_CHANGED)
+    else if (signalID==NF_INTERFACE_CONFIG_CHANGED)
     {
         invalidateCache();
     }
-    else if (category==NF_INTERFACE_IPv4CONFIG_CHANGED)
+    else if (signalID==NF_INTERFACE_IPv4CONFIG_CHANGED)
     {
         // if anything IPv4-related changes in the interfaces, interface netmask
         // based routes have to be re-built.

@@ -56,8 +56,8 @@ class INET_API Ieee80211MgmtSTASimplified : public Ieee80211MgmtBase
     /** Utility method to decapsulate a data frame */
     virtual cPacket *decapsulate(Ieee80211DataFrame *frame);
 
-    /** Called by the NotificationBoard whenever a change occurs we're interested in */
-    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
+    /** Called by the signal handler whenever a change occurs we're interested in */
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     /** @name Processing of different frame types */
     //@{

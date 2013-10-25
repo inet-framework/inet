@@ -122,12 +122,12 @@ void Ieee80211AgentSTA::handleResponse(cMessage *msg)
     delete ctrl;
 }
 
-void Ieee80211AgentSTA::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void Ieee80211AgentSTA::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
-    printNotificationBanner(category, details);
+    printNotificationBanner(signalID, obj);
 
-    if (category == NF_L2_BEACON_LOST)
+    if (signalID == NF_L2_BEACON_LOST)
     {
         //XXX should check details if it's about this NIC
         EV << "beacon lost, starting scanning again\n";

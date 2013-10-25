@@ -1418,12 +1418,12 @@ bool xDYMO::handleOperationStage(LifecycleOperation * operation, int stage, IDon
 // notification
 //
 
-void xDYMO::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void xDYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method("receiveChangeNotification");
-    if (category == NF_LINK_BREAK) {
+    if (signalID == NF_LINK_BREAK) {
         DYMO_EV << "Received link break" << endl;
-        Ieee80211Frame *ieee80211Frame = dynamic_cast<Ieee80211Frame *>(const_cast<cObject*>(details));
+        Ieee80211Frame *ieee80211Frame = dynamic_cast<Ieee80211Frame *>(const_cast<cObject*>(obj));
         if (ieee80211Frame) {
             INetworkDatagram * datagram = dynamic_cast<INetworkDatagram *>(ieee80211Frame->getEncapsulatedPacket());
             if (datagram) {

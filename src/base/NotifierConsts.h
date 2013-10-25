@@ -134,12 +134,12 @@ extern simsignal_t    // admin
 /**
  * Utility function
  */
-const char *notificationCategoryName(int category);
+const char *notificationCategoryName(simsignal_t signalID);
 
 /**
  * Utility function
  */
-void printNotificationBanner(int category, const cObject *details);
+void printNotificationBanner(simsignal_t signalID, const cObject *obj);
 
 #endif
 

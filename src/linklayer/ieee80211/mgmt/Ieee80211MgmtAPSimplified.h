@@ -46,7 +46,7 @@ class INET_API Ieee80211MgmtAPSimplified : public Ieee80211MgmtAPBase
     virtual void handleCommand(int msgkind, cObject *ctrl);
 
     /** Called by the signal handler whenever a change occurs we're interested in */
-    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     /** @name Processing of different frame types */
     //@{

@@ -346,24 +346,24 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, simtime_t timeout)
     scheduleAt(simTime()+timeout, assocTimeoutMsg);
 }
 
-void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
-    printNotificationBanner(category, details);
+    printNotificationBanner(signalID, obj);
 
     // Note that we are only subscribed during scanning!
-    if (category==NF_RADIOSTATE_CHANGED)
+    if (signalID==NF_RADIOSTATE_CHANGED)
     {
-        const RadioState::State radioState = check_and_cast<const RadioState *>(details)->getState();
+        const RadioState::State radioState = check_and_cast<const RadioState *>(obj)->getState();
         if (radioState==RadioState::RECV)
         {
             EV << "busy radio channel detected during scanning\n";
             scanning.busyChannelDetected = true;
         }
     }
-    else if (category==NF_LINK_FULL_PROMISCUOUS)
+    else if (signalID==NF_LINK_FULL_PROMISCUOUS)
     {
-        Ieee80211DataOrMgmtFrame *frame = dynamic_cast<Ieee80211DataOrMgmtFrame*>(const_cast<cPolymorphic*>(details));
+        Ieee80211DataOrMgmtFrame *frame = dynamic_cast<Ieee80211DataOrMgmtFrame*>(obj);
         if (!frame || frame->getControlInfo()==NULL)
             return;
         if (frame->getType()!=ST_BEACON)

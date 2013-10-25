@@ -114,15 +114,15 @@ void Ieee80211MgmtAP::handleCommand(int msgkind, cObject *ctrl)
     error("handleCommand(): no commands supported");
 }
 
-void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
-    printNotificationBanner(category, details);
+    printNotificationBanner(signalID, obj);
 
-    if (category == NF_RADIO_CHANNEL_CHANGED)
+    if (signalID == NF_RADIO_CHANNEL_CHANGED)
     {
         EV << "updating channel number\n";
-        channelNumber = check_and_cast<const RadioState *>(details)->getChannelNumber();
+        channelNumber = check_and_cast<const RadioState *>(obj)->getChannelNumber();
     }
 }
 

@@ -99,7 +99,7 @@ class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, 
     virtual MACAddress getDirectAddressResolution(const IPv4Address &) const;
     virtual IPv4Address getInverseAddressResolution(const MACAddress &) const;
     void setChangeAddress(const IPv4Address &);
-    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
   protected:
     virtual void initialize(int stage);

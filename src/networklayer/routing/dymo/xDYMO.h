@@ -219,7 +219,7 @@ class INET_API xDYMO : public cSimpleModule, public ILifecycle, public cListener
     virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback);
 
     // notification
-    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
 
 DYMO_NAMESPACE_END

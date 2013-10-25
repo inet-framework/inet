@@ -73,7 +73,7 @@ class LinkStateRouting : public cSimpleModule, public cListener
     virtual void processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPv4Address sender);
 
     // cListener method
-    virtual void receiveSignal(cComponent *source, simsignal_t category, cObject *details);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     virtual void sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPv4Address exceptPeer);
     virtual void sendToPeer(IPv4Address peer, const std::vector<TELinkStateInfo> & list, bool req);

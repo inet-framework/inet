@@ -76,7 +76,7 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
         virtual void handleMessage(cMessage *msg);
         virtual void handleTimer(cMessage *msg);
         virtual void handleDHCPMessage(DHCPMessage* msg);
-        virtual void receiveSignal(cComponent *source, int category, cObject *details);
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
         virtual void sendToUDP(cPacket *msg, int srcPort, const Address& destAddr, int destPort);
 
         // internal client methods

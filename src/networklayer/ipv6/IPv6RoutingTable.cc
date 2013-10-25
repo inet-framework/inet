@@ -177,29 +177,29 @@ void IPv6RoutingTable::handleMessage(cMessage *msg)
     throw cRuntimeError("This module doesn't process messages");
 }
 
-void IPv6RoutingTable::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void IPv6RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     if (simulation.getContextType()==CTX_INITIALIZE)
         return;  // ignore notifications during initialize
 
     Enter_Method_Silent();
-    printNotificationBanner(category, details);
+    printNotificationBanner(signalID, obj);
 
-    if (category==NF_INTERFACE_CREATED)
+    if (signalID==NF_INTERFACE_CREATED)
     {
         //TODO something like this:
         //InterfaceEntry *ie = check_and_cast<InterfaceEntry*>(details);
         //configureInterfaceForIPv6(ie);
     }
-    else if (category==NF_INTERFACE_DELETED)
+    else if (signalID==NF_INTERFACE_DELETED)
     {
         // remove all routes that point to that interface
-        const InterfaceEntry *entry = check_and_cast<const InterfaceEntry*>(details);
+        const InterfaceEntry *entry = check_and_cast<const InterfaceEntry*>(obj);
         deleteInterfaceRoutes(entry);
     }
-    else if (category==NF_INTERFACE_STATE_CHANGED)
+    else if (signalID==NF_INTERFACE_STATE_CHANGED)
     {
-        const InterfaceEntry *interfaceEntry = check_and_cast<const InterfaceEntry*>(details);
+        const InterfaceEntry *interfaceEntry = check_and_cast<const InterfaceEntry*>(obj);
         int interfaceEntryId = interfaceEntry->getInterfaceId();
 
         // an interface went down
@@ -208,11 +208,11 @@ void IPv6RoutingTable::receiveSignal(cComponent *source, simsignal_t category, c
             purgeDestCacheForInterfaceID(interfaceEntryId);
         }
     }
-    else if (category==NF_INTERFACE_CONFIG_CHANGED)
+    else if (signalID==NF_INTERFACE_CONFIG_CHANGED)
     {
         //TODO invalidate routing cache (?)
     }
-    else if (category==NF_INTERFACE_IPv6CONFIG_CHANGED)
+    else if (signalID==NF_INTERFACE_IPv6CONFIG_CHANGED)
     {
         //TODO
     }

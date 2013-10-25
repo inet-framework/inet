@@ -825,16 +825,16 @@ void Ieee80211Mac::handleLowerMsg(cPacket *msg)
     EV<<"Leave handleLowerMsg...\n";
 }
 
-void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t category, cObject *details)
+void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
-    WirelessMacBase::receiveSignal(source, category, details);
+    WirelessMacBase::receiveSignal(source, signalID, obj);
 
-    printNotificationBanner(category, details);
+    printNotificationBanner(signalID, obj);
 
-    if (category == NF_RADIOSTATE_CHANGED)
+    if (signalID == NF_RADIOSTATE_CHANGED)
     {
-        const RadioState * rstate = check_and_cast<const RadioState *>(details);
+        const RadioState * rstate = check_and_cast<const RadioState *>(obj);
         if (rstate->getRadioId()!=getRadioModuleId())
             return;
 
