@@ -305,8 +305,9 @@ void IGMPv3::initialize(int stage)
         nb = NotificationBoardAccess().get();
 
         nb->subscribe(this, NF_INTERFACE_DELETED);
-        nb->subscribe(this, NF_IPv4_MCAST_JOIN);
-        nb->subscribe(this, NF_IPv4_MCAST_LEAVE);
+        //nb->subscribe(this, NF_IPv4_MCAST_JOIN);
+        //nb->subscribe(this, NF_IPv4_MCAST_LEAVE);
+        nb->subscribe(this, NF_IPv4_MCAST_CHANGE);
 
         enabled = par("enabled");
         robustness = par("robustnessVariable");
