@@ -25,6 +25,8 @@
 
 #include "IPv4InterfaceData.h"
 
+#include "IInterfaceTable.h"
+
 std::string IPv4InterfaceData::HostMulticastData::info()
 {
     std::stringstream out;
@@ -142,8 +144,12 @@ void IPv4InterfaceData::joinMulticastGroup(const IPv4Address& multicastAddress)
 
     changed1(F_MULTICAST_ADDRESSES);
 
-    IPv4MulticastGroupInfo info(ownerp, multicastAddress);
-    ownerp->getInterfaceModule()->emit(NF_IPv4_MCAST_JOIN, &info);
+    cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : NULL;
+    if (m)
+    {
+        IPv4MulticastGroupInfo info(ownerp, multicastAddress);
+        m->emit(NF_IPv4_MCAST_JOIN, &info);
+    }
 }
 
 void IPv4InterfaceData::leaveMulticastGroup(const IPv4Address& multicastAddress)
@@ -164,8 +170,12 @@ void IPv4InterfaceData::leaveMulticastGroup(const IPv4Address& multicastAddress)
 
                 changed1(F_MULTICAST_ADDRESSES);
 
-                IPv4MulticastGroupInfo info(ownerp, multicastAddress);
-                ownerp->getInterfaceModule()->emit(NF_IPv4_MCAST_LEAVE, &info);
+                cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : NULL;
+                if (m)
+                {
+                    IPv4MulticastGroupInfo info(ownerp, multicastAddress);
+                    m->emit(NF_IPv4_MCAST_LEAVE, &info);
+                }
             }
         }
     }

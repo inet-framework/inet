@@ -21,6 +21,8 @@
 
 #include "IPv6InterfaceData.h"
 
+#include "IInterfaceTable.h"
+
 #ifdef WITH_xMIPv6
 #include "IPv6RoutingTableAccess.h"
 #endif /* WITH_xMIPv6 */
@@ -487,8 +489,12 @@ void IPv6InterfaceData::joinMulticastGroup(const IPv6Address& multicastAddress)
 
     changed1(F_MULTICAST_ADDRESSES);
 
-    IPv6MulticastGroupInfo info(ownerp, multicastAddress);
-    ownerp->getInterfaceModule()->emit(NF_IPv6_MCAST_JOIN, &info);
+    cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : NULL;
+    if (m)
+    {
+        IPv6MulticastGroupInfo info(ownerp, multicastAddress);
+        m->emit(NF_IPv6_MCAST_JOIN, &info);
+    }
 }
 
 void IPv6InterfaceData::leaveMulticastGroup(const IPv6Address& multicastAddress)
@@ -509,8 +515,12 @@ void IPv6InterfaceData::leaveMulticastGroup(const IPv6Address& multicastAddress)
 
                 changed1(F_MULTICAST_ADDRESSES);
 
-                IPv6MulticastGroupInfo info(ownerp, multicastAddress);
-                ownerp->getInterfaceModule()->emit(NF_IPv6_MCAST_LEAVE, &info);
+                cModule *m = ownerp ? dynamic_cast<cModule *>(ownerp->getInterfaceTable()) : NULL;
+                if (m)
+                {
+                    IPv6MulticastGroupInfo info(ownerp, multicastAddress);
+                    m->emit(NF_IPv6_MCAST_LEAVE, &info);
+                }
             }
         }
     }
