@@ -84,7 +84,7 @@
 /examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          4ba7-8db3
 
 /examples/inet/igmp/,                -f omnetpp.ini -c IGMPv2 -r 0,                 200s,            2cc2-8b8e
-/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv3 -r 0,                 200s,            8e3b-cbd3
+/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv3 -r 0,                 200s,            ec2e-d491
 
 /examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             1f13-268e
 
