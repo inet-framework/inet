@@ -27,6 +27,10 @@
 #include "IIPv4RoutingTable.h"
 
 
+Register_Class(IPv4Route);
+Register_Class(IPv4MulticastRoute);
+
+
 IPv4Route::~IPv4Route()
 {
 }

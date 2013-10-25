@@ -104,6 +104,7 @@ simple RSVP
         double helloInterval @unit(s);
         double helloTimeout @unit(s);
         @display("i=block/control");
+        @signal[NF_TED_CHANGED](type=TEDChangeInfo);
     gates:
         input ipIn @labels(IPv4ControlInfo/up);
         output ipOut @labels(IPv4ControlInfo/down);

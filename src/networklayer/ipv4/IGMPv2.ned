@@ -117,6 +117,8 @@ simple IGMPv2 like IIGMP
         double unsolicitedReportInterval @unit("s") = default(10s);
 //      double version1RouterPresentInterval @unit("s") = default(400s);
         @display("i=block/cogwheel_s");
+        @signal[NF_IPv4_MCAST_REGISTERED](type=IPv4MulticastGroupInfo);
+        @signal[NF_IPv4_MCAST_UNREGISTERED](type=IPv4MulticastGroupInfo);
 
     gates:
         input ipIn @labels(IPv4ControlInfo/up);  // delivered IGMP packets

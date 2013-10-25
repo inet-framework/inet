@@ -31,6 +31,7 @@
 
 
 Define_Module(Ieee80211MgmtAP);
+Register_Class(Ieee80211MgmtAP::NotificationInfoSta);
 
 static std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtAP::STAInfo& sta)
 {

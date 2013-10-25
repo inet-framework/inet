@@ -38,5 +38,16 @@ simple InterfaceTable
     parameters:
         bool displayAddresses = default(true);  // whether to display IP addresses on links
         @display("i=block/table");
+        @signal[NF_INTERFACE_CREATED](type=InterfaceEntry);
+        @signal[NF_INTERFACE_DELETED](type=InterfaceEntry);
+        @signal[NF_INTERFACE_STATE_CHANGED](type=InterfaceEntryChangeDetails);
+        @signal[NF_INTERFACE_CONFIG_CHANGED](type=InterfaceEntryChangeDetails);
+        @signal[NF_INTERFACE_IPv4CONFIG_CHANGED](type=InterfaceEntryChangeDetails);
+        @signal[NF_INTERFACE_IPv6CONFIG_CHANGED](type=InterfaceEntryChangeDetails);
+        @signal[NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED](type=InterfaceEntryChangeDetails);
+        @signal[NF_IPv4_MCAST_JOIN](type=IPv4MulticastGroupInfo);
+        @signal[NF_IPv4_MCAST_LEAVE](type=IPv4MulticastGroupInfo);
+        @signal[NF_IPv6_MCAST_JOIN](type=IPv6MulticastGroupInfo);
+        @signal[NF_IPv6_MCAST_LEAVE](type=IPv6MulticastGroupInfo);
 }
 

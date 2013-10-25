@@ -36,4 +36,10 @@ simple IPv6RoutingTable like IRoutingTable
         xml routes = default(xml("<routingTable/>"));
         bool isRouter = default(false);
         bool forwardMulticast = default(false);
+        @signal[NF_ROUTE_ADDED](type=IPv6Route);
+        @signal[NF_ROUTE_CHANGED](type=IPv6Route);
+        @signal[NF_ROUTE_DELETED](type=IPv6Route);
+        @signal[NF_MROUTE_ADDED](type=IPv6MulticastRoute);
+        @signal[NF_MROUTE_DELETED](type=IPv6MulticastRoute);
+        @signal[NF_MROUTE_CHANGED](type=IPv6MulticastRoute);
 }

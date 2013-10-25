@@ -21,6 +21,9 @@
 
 #include "IPv6RoutingTable.h"
 
+
+Register_Abstract_Class(IPv6Route);
+
 std::string IPv6Route::info() const
 {
     std::stringstream out;

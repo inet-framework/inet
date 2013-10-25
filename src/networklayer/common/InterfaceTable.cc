@@ -356,6 +356,8 @@ void InterfaceTable::invalidateTmpInterfaceList()
 
 void InterfaceTable::interfaceChanged(simsignal_t signalID, const InterfaceEntryChangeDetails *details)
 {
+    Enter_Method_Silent();
+
     emit(signalID, const_cast<InterfaceEntryChangeDetails *>(details));
 
     if (ev.isGUI() && par("displayAddresses").boolValue())

@@ -27,6 +27,9 @@
 #include "IPv6RoutingTableAccess.h"
 #endif /* WITH_xMIPv6 */
 
+
+Register_Abstract_Class(IPv6MulticastGroupInfo);
+
 //FIXME invoked changed() from state-changing methods, to trigger notification...
 
 std::string IPv6InterfaceData::HostMulticastData::info()

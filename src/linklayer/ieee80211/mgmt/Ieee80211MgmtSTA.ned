@@ -36,6 +36,8 @@ simple Ieee80211MgmtSTA like IIeee80211Mgmt
         @signal[queueingTime](type=simtime_t);
         @signal[dataQueueLen](type=long);  // number of stored packets
         @signal[rcvdPk](type=cPacket);
+        @signal[NF_L2_ASSOCIATED](type=InterfaceEntry);
+        @signal[NF_L2_BEACON_LOST](type=InterfaceEntry);
         @statistic[dataQueueLen](title="data queue length"; record=max,timeavg,vector; interpolationmode=sample-hold);
         @statistic[dropPkByQueue](title="packets dropped by queue"; source=dropPkByQueue; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:

@@ -70,6 +70,9 @@ simple Radio like IRadio
         @signal[channelNo](type=long);
         @signal[radioState](type=long);  // enum
         @signal[lossRate](type="double"); // 0..1; percentage of frames received incorrectly in the last period
+        @signal[NF_RADIOSTATE_CHANGED](type=RadioState);
+        @signal[NF_RADIO_CHANNEL_CHANGED](type=RadioState);
+        @signal[NF_RADIO_CHANGE_NOISE](type=RadioState);
         @statistic[bitrate](title="tx bitrate"; record=min,max,timeavg,vector; interpolationmode=sample-hold;unit=bps);
         @statistic[channelNo](title="channel no"; record=histogram,vector; interpolationmode=sample-hold);
         @statistic[radioState](title="radio state (enum)"; record=count,vector; interpolationmode=sample-hold);

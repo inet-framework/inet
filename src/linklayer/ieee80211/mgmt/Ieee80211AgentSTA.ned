@@ -42,6 +42,9 @@ simple Ieee80211AgentSTA
         @signal[sentRequest](type=long); // ENUM! ~Ieee80211PrimRequestCode
         @signal[acceptConfirm](type=long); // ENUM! ~Ieee80211PrimConfirmCode
         @signal[dropConfirm](type=long); // ENUM! ~Ieee80211PrimConfirmCode
+        @signal[NF_L2_ASSOCIATED_NEWAP](type=InterfaceEntry);
+        @signal[NF_L2_ASSOCIATED_OLDAP](type=InterfaceEntry);
+        @signal[NF_L2_DISASSOCIATED](type=InterfaceEntry);
         @statistic[sentRequest](title="sent requests"; record=count,vector); // ENUM! ~Ieee80211PrimRequestCode
         @statistic[acceptConfirm](title="accepted confirms"; record=count,vector); // ENUM! ~Ieee80211PrimConfirmCode
         @statistic[dropConfirm](title="dropped confirms"; record=count,vector); // ENUM! ~Ieee80211PrimConfirmCode

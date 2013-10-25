@@ -37,6 +37,8 @@
 #include "IPv6InterfaceData.h"
 #endif
 
+Register_Abstract_Class(InterfaceEntryChangeDetails);
+Register_Abstract_Class(InterfaceEntry);
 
 void InterfaceProtocolData::changed(simsignal_t signalID, int fieldId)
 {
