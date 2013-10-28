@@ -35,9 +35,10 @@ packet BPDUieee8021D
     MACAddress rootMAC;			//Proposed root MAC
     int cost;					//Cost from root
     int SrcPriority;  			//id priority. Priority + srcMAC define the bridge id
+    MACAddress srcMAC;
     int PortPriority;			//Priority of the tx port.
     int PortNumber;				//Sender Bridge output port.
-    int age;					//Message age  
+    simtime_t age;					//Message age  
     bool TC;					//Topology change flag
     bool Ack;					//Acknowledgement flag
 }

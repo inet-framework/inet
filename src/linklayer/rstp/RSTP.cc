@@ -39,7 +39,7 @@ Define_Module (RSTP);
 RSTP::RSTP()
 {
     Parent = NULL;
-    admac = NULL;
+    relay = NULL;
     sw = NULL;
 	helloM = new cMessage("itshellotime", SELF_HELLOTIME);
 	forwardM = new cMessage("upgrade", SELF_UPGRADE);
@@ -70,9 +70,11 @@ void RSTP::initialize(int stage)
 		sw=MACAddressTableAccess().get(); //cache pointer
 		//Gets the relay pointer.
 		ifTable=InterfaceTableAccess().get();
-		admac=RelayRSTPAccess().getIfExists();
-		if(admac==NULL)
+		relay=RelayRSTPAccess().getIfExists();
+		if(relay==NULL)
 			error("Relay module not found");
+
+		portCount = this->getParentModule()->gate("ethg$o", 0)->getVectorSize();
 
 		//Gets the backbone mac address
 		InterfaceEntry * ifEntry=ifTable->getInterface(0);
@@ -86,6 +88,7 @@ void RSTP::initialize(int stage)
 			ev<<"Setting AAAAAA000001 as backbone mac address."<<endl;
 			address.setAddress("AAAAAA000001");
 		}
+
 		autoEdge=par("autoEdge");
 		MaxAge=par("MaxAge");
 		verbose=(bool) par("verbose");
@@ -96,33 +99,8 @@ void RSTP::initialize(int stage)
 		forwardDelay=(simtime_t)par("forwardDelay");
 		migrateTime=(simtime_t) par ("migrateTime");  //Time the bridge waits for a better root info. After migrateTime time it swiches all ports which are not bk or alternate to designated.
 
-		//RSTP module initialization. Puertos will save per port RSTP info.
-		for(int i=0;i<(admac->gateSize("GatesOut"));i++)
-		{
-			Puertos.push_back(* new PortStatus());
-		}
-
-		//Detecting Edge ports and initializing
 		initPorts();
-		for(unsigned int i=0;i<Puertos.size();i++)
-		{
-			if(Puertos[i].portfilt!=NULL)
-			{
-				Puertos[i].Edge=false;
-				Puertos[i].PortCost=Puertos[i].portfilt->getCost();
-				Puertos[i].PortPriority=Puertos[i].portfilt->getPriority();
-				if((Puertos[i].portfilt->isEdge()==true)&&(autoEdge==true))
-				{
-					Puertos[i].Edge=true;
-					Puertos[i].PortRole=DESIGNATED;
-					Puertos[i].PortState=FORWARDING;
-				}
-			}
-			else
-			{
-				error("PortFilt not initialized");
-			}
-		}
+
 		double waitTime=0.000001;  //Now
 		//Programming next auto-messages.
 		scheduleAt(simTime()+waitTime, helloM); //Next hello message generation.
@@ -136,76 +114,7 @@ void RSTP::initialize(int stage)
 	}
 }
 
-void RSTP::finish()
-{//Saving statistics
-	if(testing==true)
-	{
-		FILE * pFile;
-		char buff[50];
-		sprintf(buff,"results/RSTP-%s.info",getParentModule()->getName());
-		pFile = fopen (buff,"w");
-		if (pFile!=NULL)
-		{
-			int r=getRootIndex();
-			fprintf(pFile,"%s\n",getParentModule()->getName());
-			fprintf(pFile,"Priority %d\n",priority);
-			fprintf(pFile,"Local Address %s\n",address.str().c_str());
-			fprintf(pFile,"Root Gate %d\n",r);
-			if(r>=0)
-			{
-				fprintf(pFile,"*******ROOT BPDU INFO***********\n");
-				fprintf(pFile,"Root Priority %d\n",Puertos[r].PortRstpVector.RootPriority);
-				fprintf(pFile,"Root MAC %s\n",Puertos[r].PortRstpVector.RootMAC.str().c_str());
-				fprintf(pFile,"Cost %d\n",Puertos[r].PortRstpVector.RootPathCost);
-				fprintf(pFile,"Src Priority %d\n",Puertos[r].PortRstpVector.srcPriority);
-				fprintf(pFile,"Src MAC %s\n",Puertos[r].PortRstpVector.srcAddress.str().c_str());
-				fprintf(pFile,"Src Tx Gate Priority %d\n",Puertos[r].PortRstpVector.srcPortPriority);
-				fprintf(pFile,"Src Tx Gate %d\n",Puertos[r].PortRstpVector.srcPort);
-				fprintf(pFile,"********************************\n");
-			}
-			fprintf(pFile,"***********PORTSTATE************\n"); //Print  ROL
-			for(unsigned int i=0;i<Puertos.size();i++)
-			{
-				if(Puertos[i].PortRole==ROOT)
-					fprintf(pFile,"Root");
-				else if (Puertos[i].PortRole==DESIGNATED)
-					fprintf(pFile,"Designated");
-				else if (Puertos[i].PortRole==BACKUP)
-					fprintf(pFile,"Backup");
-				else if (Puertos[i].PortRole==ALTERNATE_PORT)
-					fprintf(pFile,"Alternate");
-				else if (Puertos[i].PortRole==DISABLED)
-					fprintf(pFile,"Disabled");
-				else if (Puertos[i].PortRole==NOTASIGNED)
-					fprintf(pFile,"Not asigned");
-				fprintf(pFile," / ");						// Print STATE
-				if(Puertos[i].PortState==DISCARDING)
-				{
-					fprintf(pFile,"Discarding");
-				}
-				else if (Puertos[i].PortState==LEARNING)
-				{
-					fprintf(pFile,"Learning");
-				}
-				else if (Puertos[i].PortState==FORWARDING)
-				{
-					fprintf(pFile,"Forwarding");
-				}
-
-				if(Puertos[i].Edge==true)					// Print (Client)
-					fprintf(pFile," (Client)");
-				fprintf(pFile,"\n");
-
-				if((Puertos[i].PortRole!=DISABLED)&&(Puertos[i].PortRole!=NOTASIGNED)&&(Puertos[i].PortRole!=DESIGNATED))
-				{// Best received BPDUs are random for time dependent DISABLED, NOTASIGNED and DESIGNATED
-				// Not useful for validation purposes
-					fprintf(pFile,"Best BPDU: Root %s  / Src %s\n\n",Puertos[i].PortRstpVector.RootMAC.str().c_str(),Puertos[i].PortRstpVector.srcAddress.str().c_str());
-				}
-			}
-			fclose (pFile);
-		}
-	}
-}
+void RSTP::finish(){}
 
 void RSTP::handleMessage(cMessage *msg)
 {//It can receive BPDU or self messages. Self messages are hello time, time to switch to designated, or status upgrade time.
@@ -254,12 +163,13 @@ void RSTP::handleMessage(cMessage *msg)
 
 void RSTP::handleMigrate(cMessage * msg)
 {
-	for(unsigned int i=0;i<Puertos.size();i++)
+	for(unsigned int i=0;i<portCount;i++)
 	{
-		if(Puertos[i].PortRole==NOTASIGNED)
+	    IEEE8021DInterfaceData * port = getPortInterfaceData(i);
+		if(port->getRole() == IEEE8021DInterfaceData::NOTASSIGNED)
 		{
-			Puertos[i].PortRole=DESIGNATED;
-			Puertos[i].PortState=DISCARDING;  // Contest to become forwarding.
+		    port->setRole(IEEE8021DInterfaceData::DESIGNATED);
+		    port->setState(IEEE8021DInterfaceData::DISCARDING);  // Contest to become forwarding.
 		}
 	}
 	scheduleAt(simTime()+migrateTime, msg);  //Programming next switch to designate
@@ -267,33 +177,27 @@ void RSTP::handleMigrate(cMessage * msg)
 
 void RSTP::handleUpgrade(cMessage * msg)
 {
-	for(unsigned int i=0;i<Puertos.size();i++)
+	for(unsigned int i=0;i<portCount;i++)
 	{
-		if(Puertos[i].PortRole==DESIGNATED)
+	    IEEE8021DInterfaceData * port = getPortInterfaceData(i);
+		if(port->getRole() == IEEE8021DInterfaceData::DESIGNATED)
 		{
-			switch(Puertos[i].PortState)
-			{
-				case DISCARDING:
-					Puertos[i].PortState=LEARNING;
-					break;
-
-				case LEARNING:
-					Puertos[i].PortState=FORWARDING;
-					//Flushing other ports
-					//TCN over all active ports
-					for(unsigned int j=0;j<Puertos.size();j++)
-					{
-						Puertos[j].TCWhile=simulation.getSimTime()+TCWhileTime;
-						if(j!=i)
-						{
-							Puertos[j].Flushed++;
-							sw->flush(j);
-						}
-					}
-					break;
-
-				case FORWARDING:
-					break;
+		    if(port->getState() == IEEE8021DInterfaceData::DISCARDING)
+		        port->setState(IEEE8021DInterfaceData::LEARNING);
+		    if(port->getState() == IEEE8021DInterfaceData::LEARNING)
+		    {
+		        port->setState(IEEE8021DInterfaceData::FORWARDING);
+                //Flushing other ports
+                //TCN over all active ports
+                for(unsigned int j=0;j<portCount;j++)
+                {
+                    IEEE8021DInterfaceData * port2 = getPortInterfaceData(j);
+                    port2->setTCWhile(simulation.getSimTime()+TCWhileTime);
+                    if(j!=i)
+                    {
+                        sw->flush(j);
+                    }
+                }
 			}
 		}
 	}
@@ -307,57 +211,69 @@ void RSTP::handleHelloTime(cMessage * msg)
 		ev<<"Hello time."<<endl;
 		printState();
 	}
-	for(unsigned int i=0;i<Puertos.size();i++)
-	{ //Sends hello through all (active ports). ->learning, forwarding or not asigned ports.
+	for(unsigned int i=0;i<portCount;i++)
+	{
+	    //Sends hello through all (active ports). ->learning, forwarding or not asigned ports.
 		//Increments LostBPDU just from ROOT, ALTERNATE and BACKUP
-		if((Puertos[i].Edge!=true)&&((Puertos[i].PortRole==ROOT)||(Puertos[i].PortRole==ALTERNATE_PORT)||(Puertos[i].PortRole==BACKUP)))
+	    IEEE8021DInterfaceData * port = getPortInterfaceData(i);
+		if(!port->isEdge()
+		        && (port->getRole() == IEEE8021DInterfaceData::ROOT
+		                || port->getRole() == IEEE8021DInterfaceData::ALTERNATE
+		                || port->getRole() == IEEE8021DInterfaceData::BACKUP))
 		{
-			Puertos[i].LostBPDU++;
-			if(Puertos[i].LostBPDU>3)   // 3 HelloTime without the best BPDU.
-			{//Starts contest.
-				if(Puertos[i].PortRole==ROOT)
-				{ //Looking for the best ALTERNATE port.
+		    port->setLostBPDU(port->getLostBPDU()+1);
+			if(port->getLostBPDU()>3)   // 3 HelloTime without the best BPDU.
+			{
+			    //Starts contest.
+				if(port->getRole() == IEEE8021DInterfaceData::ROOT)
+				{
+				    //Looking for the best ALTERNATE port.
 					int candidato=getBestAlternate();
 					if(candidato!=-1)
-					{//If an alternate gate has been found, switch to alternate.
+					{
+					    //If an alternate gate has been found, switch to alternate.
 						ev<<"To Alternate"<<endl;
 						//ALTERNATE->ROOT. Discarding->FW.(immediately)
 						//Old root gate goes to Designated and discarding. A new contest should be done to determine the new root path from this LAN
 						//Updating root vector.
-						Puertos[i].PortRole=DESIGNATED;
-						Puertos[i].PortState=DISCARDING; //If there is not a better BPDU, that will become Forwarding.
-						Puertos[i].PortRstpVector.init(priority,address);  //Reset. Then, a new BPDU will be allowed to upgrade the best received info for this port.
-						Puertos[candidato].PortRole=ROOT;
-						Puertos[candidato].PortState=FORWARDING;
-						Puertos[candidato].LostBPDU=0;
+						IEEE8021DInterfaceData * candidatoPort = getPortInterfaceData(candidato);
+						port->setRole(IEEE8021DInterfaceData::DESIGNATED);
+						port->setState(IEEE8021DInterfaceData::DISCARDING); //If there is not a better BPDU, that will become Forwarding.
+						initInterfacedata(i);  //FIXME: bla //Reset. Then, a new BPDU will be allowed to upgrade the best received info for this port.
+						candidatoPort->setRole(IEEE8021DInterfaceData::ROOT);
+						candidatoPort->setState(IEEE8021DInterfaceData::FORWARDING);
+						candidatoPort->setLostBPDU(0);
 						//Flushing other ports
 						//Sending TCN over all active ports
-						for(unsigned int j=0;j<Puertos.size();j++)
+						for(unsigned int j=0;j<portCount;j++)
 						{
-							Puertos[j].TCWhile=simulation.getSimTime()+TCWhileTime;
-							if(j!=(unsigned int)candidato)
-							{
-								Puertos[j].Flushed++;
-								sw->flush(j);
-							}
+						    IEEE8021DInterfaceData * jPort = getPortInterfaceData(j);
+                            jPort->setTCWhile(simulation.getSimTime()+TCWhileTime);
+                            if(j!=(unsigned int)candidato)
+                            {
+                                sw->flush(j);
+                            }
 						}
 						sw->copyTable(i,candidato); //Copy cache from old to new root.
 					}
 					else
-					{//Alternate not found. Selects a new Root.
+					{
+					    //Alternate not found. Selects a new Root.
 						ev<<"Alternate not found. Starts from beginning."<<endl;
 						//Initializing Puertos. Starts from the beginning.
 						initPorts();
 					}
 				}
-				else if((Puertos[i].PortRole==ALTERNATE_PORT)||(Puertos[i].PortRole==BACKUP))
-				{//It should take care of this LAN, switching to designated.
-					Puertos[i].PortRole=DESIGNATED;
-					Puertos[i].PortState=DISCARDING; // A new content will start in case of another switch were in alternate.
+				else if(port->getRole() == IEEE8021DInterfaceData::ALTERNATE
+				        ||port->getRole() == IEEE8021DInterfaceData::BACKUP)
+				{
+				    //It should take care of this LAN, switching to designated.
+					port->setRole(IEEE8021DInterfaceData::DESIGNATED);
+					port->setState(IEEE8021DInterfaceData::DISCARDING); // A new content will start in case of another switch were in alternate.
 					//If there is no problem, this will become forwarding in a few seconds.
-					Puertos[i].PortRstpVector.init(priority,address); //Reset port rstp vector.
+					initInterfacedata(i); //Reset port rstp vector.
 				}
-				Puertos[i].LostBPDU=0; //Reseting lost bpdu counter after a change.
+				port->setLostBPDU(0); //Reseting lost bpdu counter after a change.
 			}
 		}
 	}
@@ -365,25 +281,26 @@ void RSTP::handleHelloTime(cMessage * msg)
 	sendTCNtoRoot();
 	if(verbose==true)
 	{
-		colorRootPorts();
+		//colorRootPorts();
 	}
 	scheduleAt(simTime()+hellotime, msg); //Programming next hello time.
 }
 
 void RSTP::checkTC(BPDUieee8021D * frame, int arrival)
 {
-	if((frame->getTC()==true)&&(Puertos[arrival].PortState==FORWARDING))
+    IEEE8021DInterfaceData * port = getPortInterfaceData(arrival);
+	if((frame->getTC() == true) && (port->getState() == IEEE8021DInterfaceData::FORWARDING))
 	{
 		Parent->bubble("TCN received");
-		for(unsigned int i=0;i<Puertos.size();i++)
+		for(unsigned int i=0;i<portCount;i++)
 		{
 			if((int)i!=arrival)
 			{
+			    IEEE8021DInterfaceData * port2 = getPortInterfaceData(i);
 				//Flushing other ports
 				//TCN over other ports.
-				Puertos[i].Flushed++;
 				sw->flush(i);
-				Puertos[i].TCWhile=simulation.getSimTime()+TCWhileTime;
+				port2->setTCWhile(simulation.getSimTime()+TCWhileTime);
 			}
 		}
 	}
@@ -391,34 +308,37 @@ void RSTP::checkTC(BPDUieee8021D * frame, int arrival)
 
 void RSTP::handleBK(BPDUieee8021D * frame, int arrival)
 {
-	if((frame->getPortPriority()<Puertos[arrival].PortPriority)
-			||((frame->getPortPriority()==Puertos[arrival].PortPriority)&&(frame->getPortNumber()<arrival)))
+    IEEE8021DInterfaceData * port = getPortInterfaceData(arrival);
+	if((frame->getPortPriority() < port->getPortPriority())
+			|| ((frame->getPortPriority() == port->getPortPriority())
+			        && (frame->getPortNumber() < arrival)))
 	{
 		//Flushing this port
-		Puertos[arrival].Flushed++;
 		sw->flush(arrival);
-		Puertos[arrival].PortRole=BACKUP;
-		Puertos[arrival].PortState=DISCARDING;
-		Puertos[arrival].LostBPDU=0;
+		port->setRole(IEEE8021DInterfaceData::BACKUP);
+		port->setState(IEEE8021DInterfaceData::DISCARDING);
+		port->setLostBPDU(0);
 	}
-	else if((frame->getPortPriority()>Puertos[arrival].PortPriority)
-			||((frame->getPortPriority()==Puertos[arrival].PortPriority)&&(frame->getPortNumber()>arrival)))
+	else if(frame->getPortPriority() > port->getPortPriority()
+			|| (frame->getPortPriority() == port->getPortPriority()
+			        && frame->getPortNumber() > arrival))
 	{
+	    IEEE8021DInterfaceData * port2 = getPortInterfaceData(frame->getPortNumber());
 		//Flushing that port
-		Puertos[frame->getPortNumber()].Flushed++;
 		sw->flush(frame->getPortNumber());  //PortNumber is sender port number. It is not arrival port.
-		Puertos[frame->getPortNumber()].PortRole=BACKUP;
-		Puertos[frame->getPortNumber()].PortState=DISCARDING;
-		Puertos[frame->getPortNumber()].LostBPDU=0;
+		port2->setRole(IEEE8021DInterfaceData::BACKUP);
+		port2->setState(IEEE8021DInterfaceData::DISCARDING);
+        port2->setLostBPDU(0);
 	}
 	else
-	{//Unavoidable loop. Received its own message at the same port.Switch to disabled.
+	{
+	    IEEE8021DInterfaceData * port2 = getPortInterfaceData(frame->getPortNumber());
+	    //Unavoidable loop. Received its own message at the same port.Switch to disabled.
 		ev<<"Unavoidable loop. Received its own message at the same port. To disabled."<<endl;
 		//Flushing that port
-		Puertos[frame->getPortNumber()].Flushed++;
 		sw->flush(frame->getPortNumber());  //PortNumber is sender port number. It is not arrival port.
-		Puertos[frame->getPortNumber()].PortRole=DISABLED;
-		Puertos[frame->getPortNumber()].PortState=DISCARDING;
+        port2->setRole(IEEE8021DInterfaceData::DISABLED);
+        port2->setState(IEEE8021DInterfaceData::DISCARDING);
 	}
 }
 
@@ -453,74 +373,81 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 			//First vs Best received BPDU for that port --------->caso
 			//Second vs Root BPDU-------------------------------->caso1
 			//Third vs BPDU that would be sent from this Bridge.->caso2
-
+		    IEEE8021DInterfaceData * arrivalPort = getPortInterfaceData(arrival);
 			int caso=0;
 			bool Flood=false;
-			caso=Puertos[arrival].PortRstpVector.compareRstpVector(frame,Puertos[arrival].PortCost, src);
+			caso=compareInterfacedata(arrival,frame,arrivalPort->getLinkCost());
+			EV_DEBUG<<"caso: "<<caso<<endl;
 			if((caso>0)&&(frame->getRootMAC().compareTo(address)!=0)) //Root will not participate in a loop with its own address
 			{
 				//Update that port rstp info.
-				Puertos[arrival].updatePortVector(frame,arrival, src);
+				updateInterfacedata(frame,arrival);
 				if(r==-1)
-				{//There was not root
-					Puertos[arrival].PortRole=ROOT;
-					Puertos[arrival].PortState=FORWARDING;
-					Puertos[arrival].LostBPDU=0;
+				{
+				    //There was not root
+				    arrivalPort->setRole(IEEE8021DInterfaceData::ROOT);
+				    arrivalPort->setState(IEEE8021DInterfaceData::FORWARDING);
+				    arrivalPort->setLostBPDU(0);
 					//Flushing other ports
 					//TCN over all ports.
-					for(unsigned int j=0;j<Puertos.size();j++)
+					for(unsigned int j=0;j<portCount;j++)
 					{
-						Puertos[j].TCWhile=simulation.getSimTime()+TCWhileTime;
+					    IEEE8021DInterfaceData * jPort = getPortInterfaceData(j);
+						jPort->setTCWhile(simulation.getSimTime()+TCWhileTime);
 						if(j!=(unsigned int)arrival)
 						{
-							Puertos[j].Flushed++;
 							sw->flush(j);
 						}
 					}
 					Flood=true;
 				}
 				else
-				{//There was a Root. Challenge 2. Compare with the root.
-					int caso2=Puertos[r].PortRstpVector.compareRstpVector(frame,Puertos[arrival].PortCost, src); //Comparing with root port vector
+				{
+				    IEEE8021DInterfaceData * rootPort = getPortInterfaceData(r);
+				    //There was a Root. Challenge 2. Compare with the root.
+					int caso2=compareInterfacedata(r,frame,arrivalPort->getLinkCost()); //Comparing with root port vector
+					EV_DEBUG<<"caso2: "<<caso2<<endl;
 					int caso3=0;
+
 					switch(caso2)
 					{
 						case 0: //Double link to the same port of the root source.Tie breaking. Better local port first.
-							if((Puertos[r].PortPriority<Puertos[arrival].PortPriority)
-									||((Puertos[r].PortPriority==Puertos[arrival].PortPriority)&&(r<arrival)))
+							if(rootPort->getPortPriority() < arrivalPort->getPortPriority()
+									|| (rootPort->getPortPriority() == arrivalPort->getPortPriority()
+									        && r<arrival))
 							{
 								//Flushing that port
-								Puertos[arrival].Flushed++;
 								sw->flush(arrival);
-								Puertos[arrival].PortRole=ALTERNATE_PORT;
-								Puertos[arrival].PortState=DISCARDING;
-								Puertos[arrival].LostBPDU=0;
+			                    arrivalPort->setRole(IEEE8021DInterfaceData::ALTERNATE);
+			                    arrivalPort->setState(IEEE8021DInterfaceData::DISCARDING);
+			                    arrivalPort->setLostBPDU(0);
 							}
 							else
 							{
-								if(Puertos[arrival].PortState!=FORWARDING)
-								{//Flushing other ports
-								 //TCN over all ports.
-									for(unsigned int j=0;j<Puertos.size();j++)
+								if(arrivalPort->getState() != IEEE8021DInterfaceData::FORWARDING)
+								{
+								    //Flushing other ports
+								    //TCN over all ports.
+									for(unsigned int j=0;j<portCount;j++)
 									{
-										Puertos[j].TCWhile=simulation.getSimTime()+TCWhileTime;
-										if(j!=(unsigned int)arrival)
-										{
-											Puertos[j].Flushed++;
-											sw->flush(j);
-										}
+										IEEE8021DInterfaceData * jPort = getPortInterfaceData(j);
+                                        jPort->setTCWhile(simulation.getSimTime()+TCWhileTime);
+                                        if(j!=(unsigned int)arrival)
+                                        {
+                                            sw->flush(j);
+                                        }
 									}
 								}
 								else
-								{	//Flushing r. Needed in case arrival were previously Fw
-									Puertos[r].Flushed++;
+								{
+								    //Flushing r. Needed in case arrival were previously Fw
 									sw->flush(r);
 								}
-								Puertos[r].PortRole=ALTERNATE_PORT;
-								Puertos[r].PortState=DISCARDING; //Comes from root. Preserve lostBPDU
-								Puertos[arrival].PortRole=ROOT;
-								Puertos[arrival].PortState=FORWARDING;
-								Puertos[arrival].LostBPDU=0;
+								rootPort->setRole(IEEE8021DInterfaceData::ALTERNATE);
+								rootPort->setState(IEEE8021DInterfaceData::DISCARDING); //Comes from root. Preserve lostBPDU
+								arrivalPort->setRole(IEEE8021DInterfaceData::ROOT);
+                                arrivalPort->setState(IEEE8021DInterfaceData::FORWARDING);
+                                arrivalPort->setLostBPDU(0);
 								sw->copyTable(r,arrival); //Copy cache from old to new root.
 
 								//The change does not deserve flooding
@@ -528,28 +455,28 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 							break;
 
 						case 1:   //New port rstp info is better than the root in another gate. Root change.
-							for(unsigned int i=0;i<Puertos.size();i++)
+							for(unsigned int i=0;i<portCount;i++)
 							{
-								if(Puertos[i].Edge==false)   //Avoiding clients reseting
+							    IEEE8021DInterfaceData * iPort = getPortInterfaceData(i);
+								if(!iPort->isEdge())   //Avoiding clients reseting
 								{
-									if(Puertos[arrival].PortState!=FORWARDING)
+									if(arrivalPort->getState()!=IEEE8021DInterfaceData::FORWARDING)
 									{
-										Puertos[i].TCWhile=simulation.getSimTime()+TCWhileTime;
+										iPort->setTCWhile(simulation.getSimTime()+TCWhileTime);
 									}
 									//Flush i
-									Puertos[i].Flushed++;
 									sw->flush(i);
 									if(i!=(unsigned)arrival)
 									{
-										Puertos[i].PortRole=NOTASIGNED;
-										Puertos[i].PortState=DISCARDING;
-										Puertos[i].PortRstpVector.init(priority,address);
+										iPort->setRole(IEEE8021DInterfaceData::NOTASSIGNED);
+										iPort->setState(IEEE8021DInterfaceData::DISCARDING);
+										initInterfacedata(i);
 									}
 								}
 							}
-							Puertos[arrival].PortRole=ROOT;
-							Puertos[arrival].PortState=FORWARDING;
-							Puertos[arrival].LostBPDU=0;
+							arrivalPort->setRole(IEEE8021DInterfaceData::ROOT);
+                            arrivalPort->setState(IEEE8021DInterfaceData::FORWARDING);
+                            arrivalPort->setLostBPDU(0);
 
 							Flood=true;
 							break;
@@ -558,39 +485,40 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 						case 3: //Same that Root RPC but better source
 						case 4: //Same that Root RPC Source but better port
 
-							if(Puertos[arrival].PortState!=FORWARDING)
-							{//Flushing other ports
+							if(arrivalPort->getState()!=IEEE8021DInterfaceData::FORWARDING)
+							{
+							    //Flushing other ports
 								//TCN over all ports
-								for(unsigned int j=0;j<Puertos.size();j++)
+								for(unsigned int j=0;j<portCount;j++)
 								{
-									Puertos[j].TCWhile=simulation.getSimTime()+TCWhileTime;
-									if(j!=(unsigned int)arrival)
-									{
-										Puertos[j].Flushed++;
-										sw->flush(j);
-									}
+								    IEEE8021DInterfaceData * jPort = getPortInterfaceData(j);
+                                    jPort->setTCWhile(simulation.getSimTime()+TCWhileTime);
+                                    if(j!=(unsigned int)arrival)
+                                    {
+                                        sw->flush(j);
+                                    }
 								}
 							}
-							Puertos[arrival].PortRole=ROOT;
-							Puertos[arrival].PortState=FORWARDING;
-							Puertos[r].PortRole=ALTERNATE_PORT; //Temporary. Just one port can be root at contest time.
-							Puertos[arrival].LostBPDU=0;
+                            arrivalPort->setRole(IEEE8021DInterfaceData::ROOT);
+                            arrivalPort->setState(IEEE8021DInterfaceData::FORWARDING);
+                            arrivalPort->setLostBPDU(0);
+                            rootPort->setRole(IEEE8021DInterfaceData::ALTERNATE); //Temporary. Just one port can be root at contest time.
 							sw->copyTable(r,arrival); //Copy cache from old to new root.
 							Flood=true;
-							caso3=contestRstpVector(Puertos[r].PortRstpVector, Puertos[r].PortCost);
+							caso3=contestInterfacedata(r);
+							EV_DEBUG<<"caso3: "<<caso3<<endl;
 							if(caso3>=0)
 							{
-								Puertos[r].PortRole=ALTERNATE_PORT;
+							    rootPort->setRole(IEEE8021DInterfaceData::ALTERNATE);
 								//LostBPDU not reset.
 								//Flushing r
-								Puertos[r].Flushed++;
 								sw->flush(r);
 							}
 							else
 							{
-								Puertos[r].PortRole=DESIGNATED;
+							    rootPort->setRole(IEEE8021DInterfaceData::DESIGNATED);
 							}
-							Puertos[r].PortState=DISCARDING;
+							rootPort->setState(IEEE8021DInterfaceData::DISCARDING);
 							break;
 
 						case -1: //Worse Root
@@ -601,86 +529,89 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 						case -3: //Same Root RPC but worse source
 						case -4: //Same Root RPC Source but worse port
 							//Compares with frame that would be sent if it were the root for this LAN.
-							caso3=contestRstpVector(frame,arrival,src); //Case 0 not possible. < if own vector better than frame.
+							caso3=contestInterfacedata(frame,arrival); //Case 0 not possible. < if own vector better than frame.
+							EV_DEBUG<<"caso3: "<<caso3<<endl;
 							if(caso3<0)
 							{
-								Puertos[arrival].PortRole=DESIGNATED;
-								Puertos[arrival].PortState=DISCARDING;
+								arrivalPort->setRole(IEEE8021DInterfaceData::DESIGNATED);
+                                arrivalPort->setState(IEEE8021DInterfaceData::DISCARDING);
 								sendBPDU(arrival); //BPDU to show him a better Root as soon as possible
 							}
 							else
 							{
 								//Flush arrival
-								Puertos[arrival].Flushed++;
 								sw->flush(arrival);
-								Puertos[arrival].PortRole=ALTERNATE_PORT;
-								Puertos[arrival].PortState=DISCARDING;
-								Puertos[arrival].LostBPDU=0;
+								arrivalPort->setRole(IEEE8021DInterfaceData::ALTERNATE);
+                                arrivalPort->setState(IEEE8021DInterfaceData::DISCARDING);
+                                arrivalPort->setLostBPDU(0);
 							}
 							break;
 					}
 				}
 			}
-			else if((src.compareTo(Puertos[arrival].PortRstpVector.srcAddress)==0) //Worse or similar, but the same source
+			else if((src.compareTo(arrivalPort->getBridgeAddress())==0) //Worse or similar, but the same source
 					&&(frame->getRootMAC().compareTo(address)!=0))   // Root will not participate
-			{//Source has updated BPDU information.
+			{
+			    //Source has updated BPDU information.
 				switch(caso)
 				{
 				case 0:
-					Puertos[arrival].LostBPDU=0;   // Same BPDU. Not updated.
+				    arrivalPort->setLostBPDU(0);   // Same BPDU. Not updated.
 					break;
 
 				case -1://Worse Root
-					if(Puertos[arrival].PortRole==ROOT)
+					if(arrivalPort->getRole() == IEEE8021DInterfaceData::ROOT)
 					{
 						int alternative=getBestAlternate(); //Searching old alternate
 						if(alternative>=0)
 						{
-							Puertos[arrival].PortRole=DESIGNATED;
-							Puertos[arrival].PortState=DISCARDING;
+						    IEEE8021DInterfaceData * alternativePort = getPortInterfaceData(alternative);
+						    arrivalPort->setRole(IEEE8021DInterfaceData::DESIGNATED);
+                            arrivalPort->setState(IEEE8021DInterfaceData::DISCARDING);
 							sw->copyTable(arrival,alternative);  //Copy cache from old to new root.
 							//Flushing other ports
 							//TCN over all ports. Alternative was alternate.
-							for(unsigned int j=0;j<Puertos.size();j++)
-							{
-								Puertos[j].TCWhile=simulation.getSimTime()+TCWhileTime;
-								if(j!=(unsigned int)alternative)
-								{
-									Puertos[j].Flushed++;
-									sw->flush(j);
-								}
-							}
-							Puertos[alternative].PortRole=ROOT;
-							Puertos[alternative].PortState=FORWARDING; //Comes from alternate. Preserves lostBPDU.
-							Puertos[arrival].updatePortVector(frame,arrival,src);
+							for(unsigned int j=0;j<portCount;j++)
+                            {
+                                IEEE8021DInterfaceData * jPort = getPortInterfaceData(j);
+                                jPort->setTCWhile(simulation.getSimTime()+TCWhileTime);
+                                if(j!=(unsigned int)alternative)
+                                {
+                                    sw->flush(j);
+                                }
+                            }
+							alternativePort->setRole(IEEE8021DInterfaceData::ROOT);
+							alternativePort->setState(IEEE8021DInterfaceData::FORWARDING); //Comes from alternate. Preserves lostBPDU.
+							updateInterfacedata(frame,arrival);
 							sendBPDU(arrival); //Show him a better Root as soon as possible
 						}
 						else
-						{	//If there is not alternate, is it better than own initial vector?
+						{
+						    //If there is not alternate, is it better than own initial vector?
 							int caso2=0;
 							initPorts(); //Allowing other ports to contest again.
 							//Flushing all ports.
-							for(unsigned int j=0;j<Puertos.size();j++)
+							for(unsigned int j=0;j<portCount;j++)
 							{
-								Puertos[j].Flushed++;
 								sw->flush(j);
 							}
-							caso2=Puertos[arrival].PortRstpVector.compareRstpVector(frame,Puertos[arrival].PortCost, src);
+							caso2=compareInterfacedata(arrival,frame,arrivalPort->getLinkCost());
+							EV_DEBUG<<"caso2: "<<caso2<<endl;
 							if(caso2>0)
 							{
-								Puertos[arrival].updatePortVector(frame,arrival,src); //If this module is not better. Keep it as a ROOT.
-								Puertos[arrival].PortRole=ROOT;
-								Puertos[arrival].PortState=FORWARDING;
+							    updateInterfacedata(frame,arrival); //If this module is not better. Keep it as a ROOT.
+								arrivalPort->setRole(IEEE8021DInterfaceData::ROOT);
+                                arrivalPort->setState(IEEE8021DInterfaceData::FORWARDING);
 							}
 							//Propagating new information.
 							Flood=true;
 						}
 					}
-					else if(Puertos[arrival].PortRole==ALTERNATE_PORT)
+					else if(arrivalPort->getRole() == IEEE8021DInterfaceData::ALTERNATE)
 					{
-						Puertos[arrival].PortState=DISCARDING;
-						Puertos[arrival].PortRole=DESIGNATED;
-						Puertos[arrival].updatePortVector(frame,arrival,src);
+					    arrivalPort->setRole(IEEE8021DInterfaceData::DESIGNATED);
+                        arrivalPort->setState(IEEE8021DInterfaceData::DISCARDING);
+                        updateInterfacedata(frame,arrival);
 						sendBPDU(arrival); //Show him a better Root as soon as possible
 					}
 					break;
@@ -688,66 +619,70 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 				case -2:
 				case -3:
 				case -4: //Same Root.Worse source
-					if(Puertos[arrival].PortRole==ROOT)
+					if(arrivalPort->getRole() == IEEE8021DInterfaceData::ROOT)
 					{
-						Puertos[arrival].LostBPDU=0;
+					    arrivalPort->setLostBPDU(0);
 						int alternative=getBestAlternate(); //Searching old alternate
 						if(alternative>=0)
 						{
+						    IEEE8021DInterfaceData * alternativePort = getPortInterfaceData(alternative);
 							int caso2=0;
-							caso2=Puertos[alternative].PortRstpVector.compareRstpVector(frame,Puertos[arrival].PortCost, src);
+							caso2=compareInterfacedata(alternative,frame,arrivalPort->getLinkCost());
+							EV_DEBUG<<"caso2: "<<caso2<<endl;
 							if(caso2<0)//If alternate is better, change
 							{
-								Puertos[alternative].PortRole=ROOT;
-								Puertos[alternative].PortState=FORWARDING;
-								Puertos[arrival].PortRole=DESIGNATED;//Temporary. Just one port can be root at contest time.
+								alternativePort->setRole(IEEE8021DInterfaceData::ROOT);
+								alternativePort->setState(IEEE8021DInterfaceData::FORWARDING);
+								arrivalPort->setRole(IEEE8021DInterfaceData::DESIGNATED);//Temporary. Just one port can be root at contest time.
 								int caso3=0;
-								caso3=contestRstpVector(frame,arrival,src);
+								caso3=contestInterfacedata(frame,arrival);
+								EV_DEBUG<<"caso3: "<<caso3<<endl;
 								if(caso3<0)
 								{
-									Puertos[arrival].PortRole=DESIGNATED;
+									arrivalPort->setRole(IEEE8021DInterfaceData::DESIGNATED);
 								}
 								else
 								{
-									Puertos[arrival].PortRole=ALTERNATE_PORT;
+									arrivalPort->setRole(IEEE8021DInterfaceData::ALTERNATE);
 								}
-								Puertos[arrival].PortState=DISCARDING;
+								arrivalPort->setState(IEEE8021DInterfaceData::DISCARDING);
 								//Flushing other ports
 								//TC over all ports.
-								for(unsigned int j=0;j<Puertos.size();j++)
-								{
-									Puertos[j].TCWhile=simulation.getSimTime()+TCWhileTime;
-									if(j!=(unsigned int)alternative)
-									{
-										Puertos[j].Flushed++;
-										sw->flush(j);
-									}
-								}
+								for(unsigned int j=0;j<portCount;j++)
+                                {
+                                    IEEE8021DInterfaceData * jPort = getPortInterfaceData(j);
+                                    jPort->setTCWhile(simulation.getSimTime()+TCWhileTime);
+                                    if(j!=(unsigned int)alternative)
+                                    {
+                                        sw->flush(j);
+                                    }
+                                }
 								sw->copyTable(arrival,alternative); //Copy cache from old to new root.
 							}
 						}
-						Puertos[arrival].updatePortVector(frame,arrival,src);
+						updateInterfacedata(frame,arrival);
 						//Propagating new information.
 						Flood=true;
 						//If alternate is worse than root, or there is not alternate, keep old root as root.
 					}
-					else if(Puertos[arrival].PortRole==ALTERNATE_PORT)
+					else if(arrivalPort->getRole() == IEEE8021DInterfaceData::ALTERNATE)
 					{
 						int caso2=0;
-						caso2=contestRstpVector(frame,arrival,src);
+						caso2=contestInterfacedata(frame,arrival);
+						EV_DEBUG<<"caso2: "<<caso2<<endl;
 						if(caso2<0)
 						{
-							Puertos[arrival].PortRole=DESIGNATED; //If the frame is worse than this module generated frame. Switch to Designated/Discarding
-							Puertos[arrival].PortState=DISCARDING;
+							arrivalPort->setRole(IEEE8021DInterfaceData::DESIGNATED); //If the frame is worse than this module generated frame. Switch to Designated/Discarding
+							arrivalPort->setState(IEEE8021DInterfaceData::DISCARDING);
 							sendBPDU(arrival); //Show him a better BPDU as soon as possible
 						}
 						else
 						{
-							Puertos[arrival].LostBPDU=0; //If it is better than this module generated frame, keep it as alternate
+							arrivalPort->setLostBPDU(0); //If it is better than this module generated frame, keep it as alternate
 							//This does not deserve expedited BPDU
 						}
 					}
-					Puertos[arrival].updatePortVector(frame,arrival,src);
+					updateInterfacedata(frame,arrival);
 					break;
 				}
 			}
@@ -772,24 +707,25 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 void RSTP::sendTCNtoRoot()
 {//If TCWhile is not expired, sends BPDU with TC flag to the root.
 	this->bubble("SendTCNtoRoot");
-	unsigned int r=getRootIndex();
-	if((r>=0)&&(r<Puertos.size()))
+	int r=getRootIndex();
+	if((r>=0)&&(r<portCount))
 	{
-		if(Puertos[r].PortRole!=DISABLED)
+	    IEEE8021DInterfaceData * rootPort = getPortInterfaceData(r);
+		if(rootPort->getRole() != IEEE8021DInterfaceData::DISABLED)
 		{
-			if(simulation.getSimTime()<Puertos[r].TCWhile)
+			if(simulation.getSimTime()<rootPort->getTCWhile())
 			{
 				BPDUieee8021D * frame = new BPDUieee8021D();
 				Ieee802Ctrl * etherctrl= new Ieee802Ctrl();
-				RSTPVector a = getRootRstpVector();
 
-				frame->setRootPriority(a.RootPriority);
-				frame->setRootMAC(a.RootMAC);
-				frame->setAge(a.Age);
-				frame->setCost(a.RootPathCost);
+				frame->setRootPriority(rootPort->getRootPriority());
+				frame->setRootMAC(rootPort->getRootAddress());
+				frame->setAge(rootPort->getAge());
+				frame->setCost(rootPort->getRootPathCost());
 				frame->setSrcPriority(priority);
 				frame->setAck(false);
 				frame->setPortNumber(r);  //Src port number.
+				frame->setSrcMAC(address);
 				frame->setTC(true);
 				frame->setDisplayString("b=,,,#3e3ef3");
 		        if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
@@ -806,9 +742,13 @@ void RSTP::sendTCNtoRoot()
 
 void RSTP::sendBPDUs()
 {//Send BPDUs through all ports if they are required.
-	for(unsigned int i=0;i<Puertos.size();i++)
+	for(unsigned int i=0;i<portCount;i++)
 	{
-		if((Puertos[i].PortRole!=ROOT)&&(Puertos[i].PortRole!=ALTERNATE_PORT)&&(Puertos[i].PortRole!=DISABLED)&&(Puertos[i].Edge!=true))
+	    IEEE8021DInterfaceData * iPort = getPortInterfaceData(i);
+		if((iPort->getRole() != IEEE8021DInterfaceData::ROOT)
+		        && (iPort->getRole() != IEEE8021DInterfaceData::ALTERNATE)
+		        && (iPort->getRole() != IEEE8021DInterfaceData::DISABLED)
+		        && (!iPort->isEdge()))
 		{
 			sendBPDU(i);
 		}
@@ -816,20 +756,35 @@ void RSTP::sendBPDUs()
 }
 
 void RSTP::sendBPDU(int port)
-{//Send a BPDU throuth port.
-	if(Puertos[port].PortRole!=DISABLED)
+{
+    //Send a BPDU throuth port.
+    IEEE8021DInterfaceData * iport = getPortInterfaceData(port);
+    int r=getRootIndex();
+    IEEE8021DInterfaceData * rootPort;
+    if (r!=-1)
+        rootPort = getPortInterfaceData(r);
+	if(iport->getRole() != IEEE8021DInterfaceData::DISABLED)
 	{
 		BPDUieee8021D * frame = new BPDUieee8021D();
 		Ieee802Ctrl * etherctrl=new Ieee802Ctrl();
-		RSTPVector a = getRootRstpVector();
-		frame->setRootPriority(a.RootPriority);
-		frame->setRootMAC(a.RootMAC);
-		frame->setCost(a.RootPathCost);
-		frame->setAge(a.Age);
+		if (r!=-1)
+		{
+		    frame->setRootPriority(rootPort->getRootPriority());
+		    frame->setRootMAC(rootPort->getRootAddress());
+		    frame->setAge(rootPort->getAge());
+		    frame->setCost(rootPort->getRootPathCost());
+		}
+		else{
+		    frame->setRootPriority(priority);
+            frame->setRootMAC(address);
+            frame->setAge(0);
+            frame->setCost(0);
+		}
 		frame->setSrcPriority(priority);
 		frame->setAck(false);
 		frame->setPortNumber(port);  //Src port number.
-		if(simulation.getSimTime()<Puertos[port].TCWhile)
+		frame->setSrcMAC(address);
+		if(simulation.getSimTime() < iport->getTCWhile())
 		{
 			frame->setTC(true);
 			frame->setDisplayString("b=,,,#3e3ef3");
@@ -847,98 +802,82 @@ void RSTP::sendBPDU(int port)
 }
 
 void RSTP::colorRootPorts()
-{//Gives color to the root link, or module border if it is root.
-	bool found=false;
-	for(unsigned int l=0;l<Puertos.size();l++)
-	{//Marking port state
-		if(Puertos[l].Edge!=true)
-		{
-			cGate * Gate1=NULL;
-			cGate * Gate2=NULL;
-			cGate * Gate3=NULL;
-			cGate * Gate4=NULL;
-			if(Parent->hasGate("ethgB$o",l))
-			{
-				Gate1=Parent->gate("ethgB$o",l); //That will work just for 1AH.
-				Gate2=Parent->gate("ethgB$i",l);
-				Gate3=Gate1->getNextGate();
-				Gate4=Gate2->getPreviousGate();
-			}
-			else if(Parent->hasGate("ethg$o",l))
-			{
-				Gate1=Parent->gate("ethg$o",l); //That will work just for 1Q.
-				Gate2=Parent->gate("ethg$i",l);
-				Gate3=Gate1->getNextGate();
-				Gate4=Gate2->getPreviousGate();
-			}
-			if(Puertos[l].PortRole==ROOT)
-			{ //Marking root port.
-				if((Gate1!=NULL)&&(Gate2!=NULL)&&(Gate3!=NULL)&&(Gate4!=NULL))
-				{
-					Gate1->getDisplayString().setTagArg("ls",0,"#a5ffff");  //Sets link color. Green.
-					Gate1->getDisplayString().setTagArg("ls",1,3); //Making line wider
-					Gate2->getDisplayString().setTagArg("ls",0,"#a5ffff");  //Sets link color. Green.
-					Gate2->getDisplayString().setTagArg("ls",1,3); //Making line wider
-					Gate3->getDisplayString().setTagArg("ls",0,"#a5ffff");  //Sets link color. Green.
-					Gate3->getDisplayString().setTagArg("ls",1,3); //Making line wider
-					Gate4->getDisplayString().setTagArg("ls",0,"#a5ffff");  //Sets link color. Green.
-					Gate4->getDisplayString().setTagArg("ls",1,3); //Making line wider
-				}
-				char buf[50];
-				std::string * mac=new std::string();
-				* mac=address.str();
-				sprintf(buf,"MAC: %s",mac->c_str());
-				Parent->getDisplayString().setTagArg("tt",0,buf);
-				std::string * rootM=new std::string();
-				* rootM=Puertos[l].PortRstpVector.RootMAC.str();
-				sprintf(buf,"Root: %s",rootM->c_str());
-				getDisplayString().setTagArg("t",0,buf);
-				found=true;
-			}
-			else if((Puertos[l].PortRole!=ROOT)&&(Puertos[l].PortRole!=DESIGNATED)&&(Puertos[l].PortRole!=NOTASIGNED))
-			{ //Remove possible root port mark
-				if((Gate1!=NULL)&&(Gate2!=NULL)&&(Gate3!=NULL)&&(Gate4!=NULL))
-				{
-					Gate1->getDisplayString().setTagArg("ls",0,"black");
-					Gate1->getDisplayString().setTagArg("ls",1,1);
-					Gate2->getDisplayString().setTagArg("ls",0,"black");
-					Gate2->getDisplayString().setTagArg("ls",1,1);
-					Gate3->getDisplayString().setTagArg("ls",0,"black");
-					Gate3->getDisplayString().setTagArg("ls",1,1);
-					Gate4->getDisplayString().setTagArg("ls",0,"black");
-					Gate4->getDisplayString().setTagArg("ls",1,1);
-				}
-				std::string * b=new std::string();
-				char buf[50];
-				* b=address.str();
-				sprintf(buf,"MAC: %s",b->c_str());
-				Parent->getDisplayString().setTagArg("tt",0,buf);
-			}
-			cModule * puerta=Parent->getSubmodule("eth",l);
-			if(puerta!=NULL)
-			{
-				char buf[10];
-				int estado=Puertos[l].PortState;
-				switch(estado)
-				{
-				case 0 :
-					sprintf(buf,"DISCARDING\n");
-					break;
-				case 1:
-					sprintf(buf,"LEARNING\n");
-					break;
-				case 2:
-					sprintf(buf,"FORWARDING\n");
-					break;
-				}
-				puerta->getDisplayString().setTagArg("t",0,buf);
-			}
-		}
-	}
-	if(isOperational) //only when the router is working
+{
+    //Gives color to the root link, or module border if it is root.
+    IEEE8021DInterfaceData * port;
+    bool isRoot=true;
+    for (unsigned int i = 0; i < portCount; i++)
+    {
+        port = getPortInterfaceData(i);
+        cGate * outGate = getParentModule()->gate("ethg$o", i);
+        cGate * inputGate = getParentModule()->gate("ethg$i", i);
+        cGate * outGateNext = outGate->getNextGate();
+        cGate * inputGatePrev = inputGate->getPreviousGate();
+
+        if(port->getRole() == IEEE8021DInterfaceData::ROOT)
+        {
+            isRoot=false;
+            if(outGate && inputGate && inputGatePrev && outGateNext){
+                if (port->isForwarding())
+                {
+                    outGate->getDisplayString().setTagArg("ls", 0, "#a5ffff");
+                    outGate->getDisplayString().setTagArg("ls", 1, 3);
+
+                    inputGate->getDisplayString().setTagArg("ls", 0, "#a5ffff");
+                    inputGate->getDisplayString().setTagArg("ls", 1, 3);
+
+                    outGateNext->getDisplayString().setTagArg("ls", 0, "#a5ffff");
+                    outGateNext->getDisplayString().setTagArg("ls", 1, 3);
+
+                    inputGatePrev->getDisplayString().setTagArg("ls", 0, "#a5ffff");
+                    inputGatePrev->getDisplayString().setTagArg("ls", 1, 3);
+                }
+                else
+                {
+                    outGate->getDisplayString().setTagArg("ls", 0, "#000000");
+                    outGate->getDisplayString().setTagArg("ls", 1, 1);
+
+                    inputGate->getDisplayString().setTagArg("ls", 0, "#000000");
+                    inputGate->getDisplayString().setTagArg("ls", 1, 1);
+
+                    outGateNext->getDisplayString().setTagArg("ls", 0, "#000000");
+                    outGateNext->getDisplayString().setTagArg("ls", 1, 1);
+
+                    inputGatePrev->getDisplayString().setTagArg("ls", 0, "#000000");
+                    inputGatePrev->getDisplayString().setTagArg("ls", 1, 1);
+                }
+            }
+        }
+
+        cModule * puerta=Parent->getSubmodule("eth",i);
+        if(puerta!=NULL)
+        {
+            char buf[20];
+            int state=port->getState();
+            switch(state)
+            {
+            case 0 :
+                sprintf(buf,"DISCARDING\n");
+                break;
+            case 1:
+                sprintf(buf,"LEARNING\n");
+                break;
+            case 2:
+                sprintf(buf,"FORWARDING\n");
+                break;
+            default:
+                sprintf(buf,"WTF\n");
+                break;
+            }
+            puerta->getDisplayString().setTagArg("t",0,buf);
+        }
+    }
+
+    if(isOperational) //only when the router is working
 	{
-		if(found==false)
-		{ //Root mark
+		if(isRoot)
+		{
+		    //Root mark
 			Parent->getDisplayString().setTagArg("i2",0,"status/check");
 			Parent->getDisplayString().setTagArg("i",1,"#a5ffff");
 			char buf[50];
@@ -946,7 +885,8 @@ void RSTP::colorRootPorts()
 			getDisplayString().setTagArg("t",0,buf);
 		}
 		else
-		{ //Remove possible root mark
+		{
+		    //Remove possible root mark
 			Parent->getDisplayString().removeTag("i2");
 			Parent->getDisplayString().setTagArg("i",1,"");
 		}
@@ -954,7 +894,8 @@ void RSTP::colorRootPorts()
 }
 
 void RSTP::printState()
-{// Prints current database info
+{
+    // Prints current database info
 	if(Parent!=NULL)
 		ev<<endl<<Parent->getName()<<endl;
 	int r=getRootIndex();
@@ -963,213 +904,265 @@ void RSTP::printState()
 	ev<<"Local MAC: "<<address<<endl;
 	if(r>=0)
 	{
-		ev<<"Root Priority: "<<Puertos[r].PortRstpVector.RootPriority<<endl;
-		ev<<"Root MAC: "<<Puertos[r].PortRstpVector.RootMAC.str()<<endl;
-		ev<<"cost: "<<Puertos[r].PortRstpVector.RootPathCost<<endl;
-		ev<<"age:  "<<Puertos[r].PortRstpVector.Age<<endl;
-		ev<<"Src priority: "<<Puertos[r].PortRstpVector.srcPriority<<endl;
-		ev<<"Src address: "<<Puertos[r].PortRstpVector.srcAddress.str()<<endl;
-		ev<<"Src TxGate Priority: "<<Puertos[r].PortRstpVector.srcPortPriority<<endl;
-		ev<<"Src TxGate: "<<Puertos[r].PortRstpVector.srcPort<<endl;
+	    IEEE8021DInterfaceData * rootPort = getPortInterfaceData(r);
+		ev<<"Root Priority: "<<rootPort->getRootPriority()<<endl;
+		ev<<"Root address: "<<rootPort->getRootAddress().str()<<endl;
+		ev<<"cost: "<<rootPort->getRootPathCost()<<endl;
+		ev<<"age:  "<<rootPort->getAge()<<endl;
+		ev<<"Bridge priority: "<<rootPort->getBridgePriority()<<endl;
+		ev<<"Bridge address: "<<rootPort->getBridgeAddress().str()<<endl;
+		ev<<"Src TxGate Priority: "<<rootPort->getPortPriority()<<endl;
+		ev<<"Src TxGate: "<<rootPort->getPortNum()<<endl;
 	}
 	ev<<"Port State/Role: "<<endl;
-	for(unsigned int i=0;i<Puertos.size();i++)
+	for(unsigned int i=0;i<portCount;i++)
 	{
-		ev<<Puertos[i].PortState<<" ";
-		if(Puertos[i].PortState==DISCARDING)
+	    IEEE8021DInterfaceData * iPort = getPortInterfaceData(i);
+		ev<<iPort->getState()<<" ";
+		if(iPort->getState() == IEEE8021DInterfaceData::DISCARDING)
 		{
 			ev<<"Discarding";
 		}
-		else if (Puertos[i].PortState==LEARNING)
+		else if (iPort->getState() == IEEE8021DInterfaceData::LEARNING)
 		{
 			ev<<"Learning";
 		}
-		else if (Puertos[i].PortState==FORWARDING)
+		else if (iPort->getState() == IEEE8021DInterfaceData::FORWARDING)
 		{
 			ev<<"Forwarding";
 		}
 		ev<<"  ";
-		if(Puertos[i].PortRole==ROOT)
+		if(iPort->getRole() == IEEE8021DInterfaceData::ROOT)
 			ev<<"Root";
-		else if (Puertos[i].PortRole==DESIGNATED)
+		else if (iPort->getRole() == IEEE8021DInterfaceData::DESIGNATED)
 			ev<<"Designated";
-		else if (Puertos[i].PortRole==BACKUP)
+		else if (iPort->getRole() == IEEE8021DInterfaceData::BACKUP)
 			ev<<"Backup";
-		else if (Puertos[i].PortRole==ALTERNATE_PORT)
+		else if (iPort->getRole() == IEEE8021DInterfaceData::ALTERNATE)
 			ev<<"Alternate";
-		else if (Puertos[i].PortRole==DISABLED)
+		else if (iPort->getRole() == IEEE8021DInterfaceData::DISABLED)
 			ev<<"Disabled";
-		else if (Puertos[i].PortRole==NOTASIGNED)
+		else if (iPort->getRole() == IEEE8021DInterfaceData::NOTASSIGNED)
 			ev<<"Not assigned";
-		if(Puertos[i].Edge==true)
+		if(iPort->isEdge())
 			ev<<" (Client)";
 		ev<<endl;
 	}
 	ev<<"Per port best source. Root/Src"<<endl;
-	for(unsigned int i=0;i<Puertos.size();i++)
+	for(unsigned int i=0;i<portCount;i++)
 	{
-		ev<<Puertos[i].PortRstpVector.RootMAC.str()<<"/"<<Puertos[i].PortRstpVector.srcAddress.str()<<endl;
+	    IEEE8021DInterfaceData * iPort = getPortInterfaceData(i);
+		ev<<iPort->getRootAddress().str()<<"/"<<iPort->getBridgeAddress().str()<<endl;
 	}
+}
+
+void RSTP::initInterfacedata(unsigned int portNum)
+{
+    IEEE8021DInterfaceData * ifd = getPortInterfaceData(portNum);
+    ifd->setRootPriority(priority);
+    ifd->setRootAddress(address);
+    ifd->setRootPathCost(0);
+    ifd->setAge(0);
+    ifd->setBridgePriority(priority);
+    ifd->setBridgeAddress(address);
+    ifd->setPortPriority(-1);
+    ifd->setPortNum(-1);
+    ifd->setLostBPDU(0);
 }
 
 void RSTP::initPorts()
-{ //Initialize RSTP dynamic information.
-	for(unsigned int j=0;j<Puertos.size();j++)
+{
+    //Initialize RSTP dynamic information.
+	for(unsigned int j=0;j<portCount;j++)
 	{
-		Puertos[j].LostBPDU=0;
-		if(!Puertos[j].Edge)
+	    IEEE8021DInterfaceData * jPort = getPortInterfaceData(j);
+		if(!jPort->isEdge())
 		{
-			Puertos[j].PortRole=NOTASIGNED;
-			Puertos[j].PortState=DISCARDING;
+			jPort->setRole(IEEE8021DInterfaceData::NOTASSIGNED);
+			jPort->setState(IEEE8021DInterfaceData::DISCARDING);
 		}
-		Puertos[j].PortRstpVector.init(priority,address);
-		Puertos[j].Flushed++;
+		initInterfacedata(j);
 		sw->flush(j);
-
-
-        cGate * gate=admac->gate("GatesOut",j);
-        if(gate!=NULL)
-        {
-            gate=gate->getNextGate();
-            if(gate!=NULL)
-                Puertos[j].portfilt=check_and_cast<PortFiltRSTP *>(gate->getOwner());
-        }
 	}
 }
 
-PortRoleT RSTP::getPortRole(int index)
+void RSTP::updateInterfacedata(BPDUieee8021D *frame,unsigned int portNum)
 {
-	Enter_Method("Get rol");
-	return Puertos[index].PortRole;
+    IEEE8021DInterfaceData * ifd = getPortInterfaceData(portNum);
+    ifd->setRootPriority(frame->getRootPriority());
+    ifd->setRootAddress(frame->getRootMAC());
+    ifd->setRootPathCost(frame->getCost()+ifd->getLinkCost());
+    ifd->setAge(frame->getAge()+1);
+    ifd->setBridgePriority(frame->getSrcPriority());
+    ifd->setBridgeAddress(frame->getSrcMAC());
+    ifd->setPortPriority(frame->getPortPriority());
+    ifd->setPortNum(frame->getPortNumber());
+    ifd->setLostBPDU(0);
 }
-
-PortStateT RSTP::getPortState(int index)
+int RSTP::contestInterfacedata(unsigned int portNum)
 {
-	Enter_Method("Get State");
-	return Puertos[index].PortState;
-}
-
-void RSTPVector::init(int priority, MACAddress address)
-{//Initializing PortRstpVector.
-	this->RootPriority=priority;
-	this->RootMAC = address;
-	this->RootPathCost=0;
-	this->Age=0;
-	this->srcPriority=priority;
-	this->srcAddress = address;
-	this->srcPortPriority=-1;
-	this->srcPort=-1;
-	this->arrivalPort=-1;
-}
-
-RSTPVector RSTP::getRootRstpVector()
-{//Gets root gate rstp vector. (Cost not incremented)
-	int RootIndex=getRootIndex();
-	if(RootIndex>=0)
-	{ //Selects the best known RstpVector.
-		return Puertos[RootIndex].PortRstpVector;
-	}
-	else
-	{
-	    RSTPVector RootVect;
-		RootVect.init(priority,address);
-	    return RootVect;
-	}
-}
-
-int RSTP::contestRstpVector(RSTPVector vect2,int v2Port)
-{//Compares vect2 with the vector that would be sent if this were the root node for the arrival LAN.
+    //Compares vect2 with the vector that would be sent if this were the root node for the arrival LAN.
 	//>0 if vect2 better than own vector. =0 if they are similar.
 	// -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
-	RSTPVector vect;
 	int r=getRootIndex();
-	vect.RootPriority=Puertos[r].PortRstpVector.RootPriority;
-	vect.RootMAC=Puertos[r].PortRstpVector.RootMAC;
-	vect.RootPathCost=Puertos[r].PortRstpVector.RootPathCost+Puertos[v2Port].PortCost; //Compensating incoming added cost
-	vect.srcPriority=priority;
-	vect.srcAddress = address;
-	vect.srcPortPriority=Puertos[vect2.arrivalPort].PortPriority;
-	vect.srcPort=vect2.arrivalPort;
-	int result=0;
-	result=vect.compareRstpVector(vect2);
-	return result;
-}
+	IEEE8021DInterfaceData * rootPort = getPortInterfaceData(r);
+	IEEE8021DInterfaceData * ifd = getPortInterfaceData(portNum);
 
-int RSTP::contestRstpVector(BPDUieee8021D* msg,int arrival,MACAddress src)
-{//Compares msg with the vector that would be sent if this were the root node for the arrival LAN.
-	// >0 if frame vector better than own vector. =0 if they are similar.
-	// -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
-	RSTPVector vect;
-	int r=getRootIndex();
-	vect.RootPriority=Puertos[r].PortRstpVector.RootPriority;
-	vect.RootMAC=Puertos[r].PortRstpVector.RootMAC;
-	vect.RootPathCost=Puertos[r].PortRstpVector.RootPathCost;
-	vect.srcPriority=priority;
-	vect.srcAddress = address;
-	vect.srcPortPriority=Puertos[arrival].PortPriority;
-	vect.srcPort=msg->getPortNumber();
-	vect.arrivalPort=arrival;
-	int result=0;
-	result=vect.compareRstpVector(msg, 0, src);
-	return result;
-}
+	int rootPriority1=rootPort->getRootPriority();
+    MACAddress rootAddress1=rootPort->getRootAddress();
+    int rootPathCost1=rootPort->getRootPathCost()+ifd->getLinkCost();
+    int bridgePriority1=priority;
+    MACAddress bridgeAddress1=address;
+    int portPriority1=ifd->getPortPriority();
+    int portNum1=portNum;
 
-int RSTPVector::compareRstpVector(BPDUieee8021D * msg,int PortCost, MACAddress src)
-{//Compares msg with vect. >0 if msg better than vect. =0 if they are similar.
-	// -4=Worse Port  -3=Worse Src -2=Worse RPC -1=Worse Root  0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
-	//Adds Port cost to msg.
-	int result=0;
-	RSTPVector vect2;
-	vect2.RootPriority=msg->getRootPriority();
-	vect2.RootMAC = msg->getRootMAC();
-	vect2.RootPathCost=msg->getCost()+PortCost;
-	vect2.srcPriority=msg->getSrcPriority();
-	vect2.srcAddress = src;
-	vect2.srcPortPriority=msg->getPortPriority();
-	vect2.srcPort=msg->getPortNumber();
-	result=this->compareRstpVector(vect2);
-	return result;
-}
+    int rootPriority2=ifd->getRootPriority();
+    MACAddress rootAddress2=ifd->getRootAddress();
+    int rootPathCost2=ifd->getRootPathCost();
+    int bridgePriority2=ifd->getBridgePriority();
+    MACAddress bridgeAddress2=ifd->getBridgeAddress();
+    int portPriority2=ifd->getPortPriority();
+    int portNum2=ifd->getPortNum();
 
-int RSTPVector::compareRstpVector(RSTPVector vect2)
-{//Compares this vect with vect2. <0 if this better than vect2, =0 if they are similar.
-    // 4=Worse Port  3=Worse Src  2=Worse RPC  1=Worse Root  0=Similar  -1=Better Root  -2=Better RPC  -3=Better Src  -4=Better Port
 
-    if(RootPriority != vect2.RootPriority)
-        return (RootPriority < vect2.RootPriority) ? -1 : 1;
-    // RootPriority == vect2.RootPriority
-    int c = RootMAC.compareTo(vect2.RootMAC);
+	if(rootPriority1 != rootPriority2)
+        return (rootPriority1 < rootPriority2) ? -1 : 1;
+
+    int c = rootAddress1.compareTo(rootAddress2);
     if (c != 0)
         return (c < 0) ? -1 : 1;
 
-    // RootMAC == vect2.RootMAC
-    if (RootPathCost != vect2.RootPathCost)
-        return (RootPathCost < vect2.RootPathCost) ? -2 : 2;
+    if (rootPathCost1 != rootPathCost2)
+        return (rootPathCost1 < rootPathCost2) ? -2 : 2;
 
-    // RootPathCost == vect2.RootPathCost
-    if(srcPriority != vect2.srcPriority)
-        return (srcPriority < vect2.srcPriority) ? -3 : 3;
-    // srcPriority == vect2.srcPriority
-    c = srcAddress.compareTo(vect2.srcAddress);
+    if(bridgePriority1 != bridgePriority2)
+        return (bridgePriority1 < bridgePriority2) ? -3 : 3;
+
+    c = bridgeAddress1.compareTo(bridgeAddress2);
     if (c != 0)
         return (c < 0) ? -3 : 3;
 
     // srcAddress == vect2.srcAddress
-    if (srcPortPriority != vect2.srcPortPriority)
-        return (srcPortPriority < vect2.srcPortPriority) ? -4 : 4;
+    if (portPriority1 != portPriority2)
+        return (portPriority1 < portPriority2) ? -4 : 4;
     // srcPortPriority == vect2.srcPortPriority
-    if (srcPort != vect2.srcPort)
-        return (srcPort < vect2.srcPort) ? -4 : 4;
+    if (portNum1 != portNum2)
+        return (portNum1 < portNum2) ? -4 : 4;
+
+    return 0;
+}
+
+int RSTP::contestInterfacedata(BPDUieee8021D* msg,unsigned int portNum)
+{
+    //Compares msg with the vector that would be sent if this were the root node for the arrival LAN.
+	// >0 if frame vector better than own vector. =0 if they are similar.
+	// -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
+
+    int r=getRootIndex();
+    IEEE8021DInterfaceData * rootPort = getPortInterfaceData(r);
+    IEEE8021DInterfaceData * ifd = getPortInterfaceData(portNum);
+
+    int rootPriority1=rootPort->getRootPriority();
+    MACAddress rootAddress1=rootPort->getRootAddress();
+    int rootPathCost1=rootPort->getRootPathCost();
+    int bridgePriority1=priority;
+    MACAddress bridgeAddress1=address;
+    int portPriority1=ifd->getPortPriority();
+    int portNum1=portNum;
+
+    int rootPriority2=msg->getRootPriority();
+    MACAddress rootAddress2=msg->getRootMAC();
+    int rootPathCost2=msg->getCost();
+    int bridgePriority2=msg->getSrcPriority();
+    MACAddress bridgeAddress2=msg->getSrcMAC();
+    int portPriority2=msg->getPortPriority();
+    int portNum2=msg->getPortNumber();
+
+
+    if(rootPriority1 != rootPriority2)
+        return (rootPriority1 < rootPriority2) ? -1 : 1;
+
+    int c = rootAddress1.compareTo(rootAddress2);
+    if (c != 0)
+        return (c < 0) ? -1 : 1;
+
+    if (rootPathCost1 != rootPathCost2)
+        return (rootPathCost1 < rootPathCost2) ? -2 : 2;
+
+    if(bridgePriority1 != bridgePriority2)
+        return (bridgePriority1 < bridgePriority2) ? -3 : 3;
+
+    c = bridgeAddress1.compareTo(bridgeAddress2);
+    if (c != 0)
+        return (c < 0) ? -3 : 3;
+
+    // srcAddress == vect2.srcAddress
+    if (portPriority1 != portPriority2)
+        return (portPriority1 < portPriority2) ? -4 : 4;
+    // srcPortPriority == vect2.srcPortPriority
+    if (portNum1 != portNum2)
+        return (portNum1 < portNum2) ? -4 : 4;
+
+    return 0;
+
+
+}
+int RSTP::compareInterfacedata(unsigned int portNum, BPDUieee8021D * msg,int linkCost)
+{
+    IEEE8021DInterfaceData * ifd = getPortInterfaceData(portNum);
+
+    int rootPriority1=ifd->getRootPriority();
+    MACAddress rootAddress1=ifd->getRootAddress();
+    int rootPathCost1=ifd->getRootPathCost();
+    int bridgePriority1=ifd->getBridgePriority();
+    MACAddress bridgeAddress1=ifd->getBridgeAddress();
+    int portPriority1=ifd->getPortPriority();
+    int portNum1=ifd->getPortNum();
+
+    int rootPriority2=msg->getRootPriority();
+    MACAddress rootAddress2=msg->getRootMAC();
+    int rootPathCost2=msg->getCost()+linkCost;
+    int bridgePriority2=msg->getSrcPriority();
+    MACAddress bridgeAddress2=msg->getSrcMAC();
+    int portPriority2=msg->getPortPriority();
+    int portNum2=msg->getPortNumber();
+
+
+    if(rootPriority1 != rootPriority2)
+        return (rootPriority1 < rootPriority2) ? -1 : 1;
+
+    int c = rootAddress1.compareTo(rootAddress2);
+    if (c != 0)
+        return (c < 0) ? -1 : 1;
+
+    if (rootPathCost1 != rootPathCost2)
+        return (rootPathCost1 < rootPathCost2) ? -2 : 2;
+
+    if(bridgePriority1 != bridgePriority2)
+        return (bridgePriority1 < bridgePriority2) ? -3 : 3;
+
+    c = bridgeAddress1.compareTo(bridgeAddress2);
+    if (c != 0)
+        return (c < 0) ? -3 : 3;
+
+    // srcAddress == vect2.srcAddress
+    if (portPriority1 != portPriority2)
+        return (portPriority1 < portPriority2) ? -4 : 4;
+    // srcPortPriority == vect2.srcPortPriority
+    if (portNum1 != portNum2)
+        return (portNum1 < portNum2) ? -4 : 4;
 
     return 0;
 }
 
 int RSTP::getRootIndex()
-{//Returns the Root Gate index or -1 if there is not Root Gate.
+{
+    //Returns the Root Gate index or -1 if there is not Root Gate.
 	int result=-1;
-	for(unsigned int i=0;i<Puertos.size();i++)
+	for(unsigned int i=0;i<portCount;i++)
 	{
-		if(Puertos[i].PortRole==ROOT)
+	    IEEE8021DInterfaceData * iPort = getPortInterfaceData(i);
+		if(iPort->getRole() == IEEE8021DInterfaceData::ROOT)
 		{
 			result=i;
 			break;
@@ -1179,62 +1172,32 @@ int RSTP::getRootIndex()
 }
 
 int RSTP::getBestAlternate()
-{// Gets best alternate port index.
+{
+    // Gets best alternate port index.
 	int candidato=-1;  //Index of the best alternate found.
-	for(unsigned int j=0;j<Puertos.size();j++)
+	for(unsigned int j=0;j<portCount;j++)
 	{
-		if(Puertos[j].PortRole==ALTERNATE_PORT) //Just from Alternates. Others are not updated.
+	    IEEE8021DInterfaceData * jPort = getPortInterfaceData(j);
+		if(jPort->getRole() == IEEE8021DInterfaceData::ALTERNATE) //Just from Alternates. Others are not updated.
 		{
-			if(((candidato<0)||(Puertos[j].PortRstpVector.RootPathCost<Puertos[candidato].PortRstpVector.RootPathCost)
-							||((Puertos[j].PortRstpVector.RootPathCost==Puertos[candidato].PortRstpVector.RootPathCost)&&(Puertos[j].PortRstpVector.srcPriority<Puertos[candidato].PortRstpVector.srcPriority))
-							||((Puertos[j].PortRstpVector.RootPathCost==Puertos[candidato].PortRstpVector.RootPathCost)&&(Puertos[j].PortRstpVector.srcPriority==Puertos[candidato].PortRstpVector.srcPriority)&&(Puertos[j].PortRstpVector.srcAddress.compareTo(Puertos[candidato].PortRstpVector.srcAddress)<0))
-							||((Puertos[j].PortRstpVector.RootPathCost==Puertos[candidato].PortRstpVector.RootPathCost)&&(Puertos[j].PortRstpVector.srcPriority==Puertos[candidato].PortRstpVector.srcPriority)&&(Puertos[j].PortRstpVector.srcAddress.compareTo(Puertos[candidato].PortRstpVector.srcAddress)==0)&&(Puertos[j].PortRstpVector.srcPortPriority<Puertos[candidato].PortRstpVector.srcPortPriority))
-							||((Puertos[j].PortRstpVector.RootPathCost==Puertos[candidato].PortRstpVector.RootPathCost)&&(Puertos[j].PortRstpVector.srcPriority==Puertos[candidato].PortRstpVector.srcPriority)&&(Puertos[j].PortRstpVector.srcAddress.compareTo(Puertos[candidato].PortRstpVector.srcAddress)==0)&&(Puertos[j].PortRstpVector.srcPortPriority==Puertos[candidato].PortRstpVector.srcPortPriority)&&(Puertos[j].PortRstpVector.srcPort<Puertos[candidato].PortRstpVector.srcPort))))
-			{//It is the first alternate or better than the found one
-				candidato=j; //New candidate
+			if(candidato<0)
+			    candidato=j;
+			else
+			{
+			    IEEE8021DInterfaceData * candidatoPort = getPortInterfaceData(candidato);
+			    if((jPort->getRootPathCost() < candidatoPort->getRootPathCost())
+							||(jPort->getRootPathCost() == candidatoPort->getRootPathCost() && jPort->getBridgePriority() < candidatoPort->getBridgePriority())
+							||(jPort->getRootPathCost() == candidatoPort->getRootPathCost() && jPort->getBridgePriority() == candidatoPort->getBridgePriority() && jPort->getBridgeAddress().compareTo(candidatoPort->getBridgeAddress()) < 0)
+							||(jPort->getRootPathCost() == candidatoPort->getRootPathCost() && jPort->getBridgePriority() == candidatoPort->getBridgePriority() && jPort->getBridgeAddress().compareTo(candidatoPort->getBridgeAddress()) == 0 && jPort->getPortPriority() < candidatoPort->getPortPriority())
+							||(jPort->getRootPathCost() == candidatoPort->getRootPathCost() && jPort->getBridgePriority() == candidatoPort->getBridgePriority() && jPort->getBridgeAddress().compareTo(candidatoPort->getBridgeAddress()) == 0 && jPort->getPortPriority() == candidatoPort->getPortPriority() && jPort->getPortNum() < candidatoPort->getPortNum()))
+                {
+                    //It is the first alternate or better than the found one
+                    candidato=j; //New candidate
+                }
 			}
 		}
 	}
 	return candidato;
-}
-
-bool RSTP::isEdge(int index)
-{
-	return Puertos[index].Edge;
-}
-
-PortStatus::PortStatus()
-{//PortStatus constructor
-	Edge=false;		 // It indicates that this is a client port.
-	Flushed=0;
-
-	PortRole=NOTASIGNED;
-	PortState=DISCARDING;
-	LostBPDU=0;			//Lost BPDU counter. Used to detect topology changes.
-	PortCost=0;			//Cost for that port.
-	PortPriority=0;		//Priority for that port.
-	TCWhile=0;		//This port will send TC=true until this time has been overtaken.
-
-	portfilt=NULL;
-}
-
-void PortStatus::updatePortVector(BPDUieee8021D *frame,int arrival, MACAddress src)
-{//Updates this port status with frame information, received at arrival.
-	this->PortRstpVector.RootPriority=frame->getRootPriority();
-	this->PortRstpVector.RootMAC = frame->getRootMAC();
-	this->PortRstpVector.RootPathCost=frame->getCost()+this->PortCost;
-	this->PortRstpVector.Age=frame->getAge()+1;
-	this->PortRstpVector.srcPriority=frame->getSrcPriority();
-	this->PortRstpVector.srcAddress = src;
-	this->PortRstpVector.srcPortPriority=frame->getPortPriority();
-	this->PortRstpVector.srcPort=frame->getPortNumber();
-	this->PortRstpVector.arrivalPort=arrival;
-	this->LostBPDU=0;
-}
-
-MACAddress RSTP::getAddress()
-{
-	return address;
 }
 
 void RSTP::start()
@@ -1245,10 +1208,11 @@ void RSTP::start()
 
 void RSTP::stop()
 {
-    for(unsigned int i=0;i<Puertos.size();i++)
+    for(unsigned int i=0;i<portCount;i++)
     {
-        Puertos[i].PortRole=DISABLED;
-        Puertos[i].PortState=DISCARDING;
+        IEEE8021DInterfaceData * iPort = getPortInterfaceData(i);
+        iPort->setRole(IEEE8021DInterfaceData::DISABLED);
+        iPort->setState(IEEE8021DInterfaceData::DISCARDING);
     }
     isOperational = false;
 }
@@ -1281,4 +1245,16 @@ bool RSTP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
     }
 
     return true;
+}
+
+IEEE8021DInterfaceData * RSTP::getPortInterfaceData(unsigned int portNum)
+{
+    cGate * gate = this->getParentModule()->gate("ethg$o", portNum);
+    InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
+    IEEE8021DInterfaceData * portData = gateIfEntry->ieee8021DData();
+
+    if (!portData)
+        error("IEEE8021DInterfaceData not found!");
+
+    return portData;
 }

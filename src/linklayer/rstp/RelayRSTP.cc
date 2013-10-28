@@ -24,6 +24,9 @@
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
+#include "InterfaceTableAccess.h"
+#include "InterfaceEntry.h"
+#include "ModuleAccess.h"
 
 Define_Module(RelayRSTP);
 
@@ -33,20 +36,17 @@ void RelayRSTP::initialize(int stage)
     {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        ifTable=InterfaceTableAccess().get();
     }
     else if(stage == 2)  // "auto" MAC addresses assignment takes place in stage 0. rstpModule gets address in stage 1.
     {
         //Obtaining AddressTable, rstp modules pointers
         AddressTable = MACAddressTableAccess().get();
-        rstpModule = RSTPAccess().get();
 
         //Gets bridge MAC address from rstpModule
-        address=rstpModule->getAddress();
 
         //Gets parameter values
         verbose=(bool) par("verbose");
-        if(verbose==true)
-            ev<<"Bridge MAC address "<<address.str()<<endl;
     }
 }
 
@@ -72,16 +72,16 @@ void RelayRSTP::handleMessage(cMessage *msg)
     else if (dynamic_cast<EtherFrame *>(msg) != NULL && check_and_cast<EtherFrame *> (msg)->getDest()==MACAddress::STP_MULTICAST_ADDRESS) //TODO: Find a better condition
     {
         ev<<"BPDU";
-        int ArrivalRole=rstpModule->getPortRole(msg->getArrivalGate()->getIndex());
-        if(ArrivalRole!=DISABLED)
+        IEEE8021DInterfaceData * port = getPortInterfaceData(msg->getArrivalGate()->getIndex());
+        if(port->getRole() != IEEE8021DInterfaceData::DISABLED)
             handleBPDUFrame(check_and_cast<EtherFrame *> (msg));
         delete msg;
     }
     else if(dynamic_cast<EtherFrame *>(msg) != NULL)
     {
         ev<<"Data Frame";
-        int ArrivalState=rstpModule->getPortState(msg->getArrivalGate()->getIndex());
-        if((ArrivalState==FORWARDING)||(ArrivalState==LEARNING))
+        IEEE8021DInterfaceData * port = getPortInterfaceData(msg->getArrivalGate()->getIndex());
+        if(port->getState() == IEEE8021DInterfaceData::FORWARDING || port->getState() == IEEE8021DInterfaceData::LEARNING)
         {
             ev<<"Handling Ethernet Frame"<<endl;
             handleEtherFrame(check_and_cast<EtherFrame *> (msg));
@@ -133,7 +133,7 @@ void RelayRSTP::handleFrameFromRSTP(BPDUieee8021D *frame)
 
 void RelayRSTP::handleEtherFrame(EtherFrame *frame)
 {
-    int ArrivalState=rstpModule->getPortState(frame->getArrivalGate()->getIndex());
+    IEEE8021DInterfaceData * port = getPortInterfaceData(frame->getArrivalGate()->getIndex());
     int arrival=frame->getArrivalGate()->getIndex();
     EtherFrame * EthIITemp= frame;
     if(verbose==true)
@@ -142,7 +142,7 @@ void RelayRSTP::handleEtherFrame(EtherFrame *frame)
     }
 
     //Learning in case of FORWARDING or LEARNING state.
-    if((ArrivalState==FORWARDING)|| (ArrivalState==LEARNING))
+    if(port->getState() == IEEE8021DInterfaceData::FORWARDING || port->getState() == IEEE8021DInterfaceData::LEARNING)
     {
         if(EthIITemp->getSrc()!= MACAddress::UNSPECIFIED_ADDRESS )
         {
@@ -150,7 +150,7 @@ void RelayRSTP::handleEtherFrame(EtherFrame *frame)
         }
     }
     //Processing in case of FORWARDING state
-    if(ArrivalState==FORWARDING)
+    if(port->getState() == IEEE8021DInterfaceData::FORWARDING)
     {
         int outputPort;
         if (EthIITemp->getDest().isBroadcast())
@@ -175,8 +175,8 @@ void RelayRSTP::handleEtherFrame(EtherFrame *frame)
 void RelayRSTP::relayMsg(cMessage * msg, int outputPort)
 {
     int arrival=msg->getArrivalGate()->getIndex();
-    int outputState=rstpModule->getPortState(outputPort);
-    if((arrival!=outputPort)&&(outputState==FORWARDING))
+    IEEE8021DInterfaceData * port = getPortInterfaceData(outputPort);
+    if(arrival!=outputPort && port->getState() == IEEE8021DInterfaceData::FORWARDING)
     {
         if(verbose==true)
             ev << "Sending frame to port " << outputPort << endl;
@@ -190,8 +190,8 @@ void RelayRSTP::broadcastMsg(cMessage * msg)
     int gates=gateSize("GatesOut");
     for(int i=0;i<gates;i++)
     {
-        int outputState=rstpModule->getPortState(i);
-        if((arrival!=i)&&(outputState==FORWARDING))
+        IEEE8021DInterfaceData * port = getPortInterfaceData(i);
+        if(arrival!=i && port->getState() == IEEE8021DInterfaceData::FORWARDING)
         {
             if(verbose==true)
                 ev << "Sending frame to port " << i << endl;
@@ -241,4 +241,15 @@ bool RelayRSTP::handleOperationStage(LifecycleOperation *operation, int stage, I
     }
 
     return true;
+}
+IEEE8021DInterfaceData * RelayRSTP::getPortInterfaceData(unsigned int portNum)
+{
+    cGate * gate = this->getParentModule()->gate("ethg$o", portNum);
+    InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
+    IEEE8021DInterfaceData * portData = gateIfEntry->ieee8021DData();
+
+    if (!portData)
+        error("IEEE8021DInterfaceData not found!");
+
+    return portData;
 }

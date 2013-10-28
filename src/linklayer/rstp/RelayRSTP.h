@@ -27,6 +27,8 @@
 #include "BPDU.h"
 #include "RSTP.h"
 #include "MACAddressTable.h"
+#include "InterfaceTable.h"
+#include "IEEE8021DInterfaceData.h"
 
 class RelayRSTP : public cSimpleModule, public ILifecycle
 {
@@ -35,6 +37,7 @@ class RelayRSTP : public cSimpleModule, public ILifecycle
     RSTP * rstpModule; /// RSTP module pointer.
     bool verbose;  /// It sets module verbosity
     bool isOperational;         // for lifecycle
+    IInterfaceTable * ifTable;
   protected:
     MACAddress address;
     virtual void initialize(int stage);
@@ -52,6 +55,7 @@ class RelayRSTP : public cSimpleModule, public ILifecycle
   protected:
     virtual void start();
     virtual void stop();
+    IEEE8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
 };
 
 #endif

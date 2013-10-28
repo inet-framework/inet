@@ -26,83 +26,7 @@
 #include "MACAddressTable.h"
 #include "PortFiltRSTP.h"
 #include "InterfaceTable.h"
-
-
-enum PortStateT
-{
-	DISCARDING,
-	LEARNING,
-	FORWARDING
-};	/// Port state. Current behavior
-
-enum PortRoleT
-{
-	ALTERNATE_PORT,
-	NOTASIGNED,
-	DISABLED,
-	DESIGNATED,
-	BACKUP,
-	ROOT
-}; /// Port role within the current topology
-
-
-/**
- * @brief RSTP information for a particular port
- */
-class RSTPVector
-{
-public:
-	int RootPriority;
-	MACAddress RootMAC;
-	int RootPathCost;
-	int Age;
-	int srcPriority;
-	MACAddress srcAddress;
-	int srcPortPriority;
-	int srcPort;
-	int arrivalPort;
-
-
-	/**
-	 * @brief Gets the RSTP vector i to the initial case. (auto proposed)
-	 */
-	virtual void init(int priority, MACAddress address);
-
-
-	/**
-	 * @brief Compares a RSTPVector with BPDU contained info.
-	 * @return (<0 if vector better than frame)
-	 * -4=Worse Port -3=Worse Src -2=Worse RPC -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
-	 */
-	virtual int compareRstpVector(BPDUieee8021D * frame,int PortCost, MACAddress src);
-
-	/**
-	 * @brief Compares two RSTPVector.
-	 * @return <0 if vect1 is better than vect 2. >0 if vect1 worse than vect2. 0 if they are similar
-	 */
-	virtual int compareRstpVector(RSTPVector vect2);
-};
-
-class PortStatus
-{
-public:
-    bool Edge;		 // It indicates that this is a client port.
-	int Flushed;	 // Counts how many times this port cache has been flushed during simulation
-
-	PortRoleT PortRole;
-	PortStateT PortState;
-	int LostBPDU;			//Lost BPDU counter. Used to detect topology changes.
-	RSTPVector PortRstpVector;	//best received RSTPvector in that port.
-	int PortCost;			//Cost for that port.
-	int PortPriority;		//Priority for that port.
-	simtime_t TCWhile;		//This port will send TC=true until this time has been overtaken.
-
-	PortFiltRSTP * portfilt;
-
-	PortStatus();
-	virtual ~PortStatus(){}
-	virtual void updatePortVector(BPDUieee8021D *frame,int arrival, MACAddress src);
-}; /// Global per port state info
+#include "IEEE8021DInterfaceData.h"
 
 /**
  * RSTP implementation.
@@ -126,8 +50,9 @@ class RSTP: public cSimpleModule, public ILifecycle
 	bool isOperational; // for lifecycle
 
 	cModule* Parent; /// Pointer to the parent module
-	cModule* admac;
+	cModule* relay;
 
+	unsigned int portCount;
 	simtime_t TCWhileTime; /// TCN activation time
 	bool autoEdge;	/// Automatic edge ports detection
 
@@ -139,7 +64,6 @@ class RSTP: public cSimpleModule, public ILifecycle
 	int priority;  /// Bridge priority. It's own priority.
 	MACAddress address; /// BEB MAC address
 
-	std::vector <PortStatus> Puertos;	/// Vector with all port status
 	simtime_t hellotime;	/// Time between hello BPDUs
 	simtime_t forwardDelay;	/// After that a discarding port switches to learning and so on if it is designated
 	simtime_t migrateTime;  /// After that, a not asigned port becomes designated
@@ -153,32 +77,10 @@ class RSTP: public cSimpleModule, public ILifecycle
 	virtual ~RSTP();
 	virtual int numInitStages() const {return 2;}
 
-	/**
-	* @brief Obtains the port role
-	* @param index Port index
-	* @return PortRole
-	*/
-	virtual PortRoleT getPortRole(int index);
-	/**
-	* @brief Obtains the port state
-	* @param index Port index
-	* @return PortState
-	*/
-	virtual PortStateT getPortState(int index);
-	/**
-	* @brief Determines if a port is connected to a client network
-	* @param index Port index
-	* @return True if it is connected to a client network
-	*/
-	virtual bool isEdge(int index);
-
-	/**
-	* @brief Get BEB address.
-	*/
-	virtual MACAddress getAddress();
-
   protected:
 	virtual void initialize(int stage);
+
+	virtual void initInterfacedata(unsigned int portNum);
 
 	/**
 	 * @brief initialize (Puertos) RSTP dynamic information
@@ -230,29 +132,30 @@ class RSTP: public cSimpleModule, public ILifecycle
 	 * @return Gate index
 	 */
 	virtual int getRootIndex();
-	/**
-	 * @brief Obtains the root RSTP vector.
-	 * Root gate RSTP vector
-	 */
-	virtual RSTPVector getRootRstpVector();
+
+
+	virtual void updateInterfacedata(BPDUieee8021D *frame,unsigned int portNum);
 
 	/**
 	 * @brief Compares the frame with the frame this module would send through that port
 	 * @return (<0 if own vector is better than frame)
 	 * -4=Worse Port -3=Worse Src -2=Worse RPC -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
 	 */
-	virtual int contestRstpVector(BPDUieee8021D *frame, int arrival, MACAddress src);
+	virtual int contestInterfacedata(BPDUieee8021D* msg,unsigned int portNum);
 
 	/**
 	 * @brief Compares the vector with the frame this module would send through that por
 	 * @return (<0 if own vector is better than vect2)
 	 * -4=Worse Port -3=Worse Src -2=Worse RPC -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
 	 */
-	virtual int contestRstpVector(RSTPVector vect2,int v2Port);
+	virtual int contestInterfacedata(unsigned int portNum);
 
 	/**
 	 * @brief If root TCWhile has not expired, sends a BPDU to the Root with TCFlag=true.
 	 */
+
+	virtual int compareInterfacedata(unsigned int portNum, BPDUieee8021D * msg,int linkCost);
+
 	virtual void sendTCNtoRoot();
 
 	/**
@@ -287,6 +190,7 @@ class RSTP: public cSimpleModule, public ILifecycle
   protected:
     virtual void start();
     virtual void stop();
+    IEEE8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
 };
 
 
