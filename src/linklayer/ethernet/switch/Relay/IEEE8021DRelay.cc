@@ -71,7 +71,6 @@ void IEEE8021DRelay::handleMessage(cMessage * msg)
         {
             EV_INFO << "Received " << msg << " from network." << endl;
             EthernetIIFrame * frame = check_and_cast<EthernetIIFrame*>(msg);
-            int arrivalGate = msg->getArrivalGate()->getIndex();
             handleAndDispatchFrame(frame);
         }
     }
@@ -99,8 +98,10 @@ void IEEE8021DRelay::handleAndDispatchFrame(EthernetIIFrame * frame)
     IEEE8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
     // Broadcast address
     if (frame->getDest().isBroadcast())
+    {
         broadcast(frame);
-
+        return;
+    }
     // BPDU Handling
     if ((frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && port->getRole() != IEEE8021DInterfaceData::DISABLED)
     {
