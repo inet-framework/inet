@@ -48,5 +48,33 @@ const int HEADER_WITHOUT_PREAMBLE = 48;
 const double BITRATE_HEADER = 1E+6;
 const double BANDWIDTH = 2E+6;
 
+/** @brief Center frequencies for 802.11b */
+const double CENTER_FREQUENCIES[] = {
+-1, //channel 0 does not exist
+        2.412e9, // 1
+        2.417e9, // 2
+        2.422e9, // 3
+        2.427e9, // 4
+        2.432e9, // 5
+        2.437e9, // 6
+        2.442e9, // 7
+        2.447e9, // 8
+        2.452e9, // 9
+        2.457e9, // 10
+        2.462e9, // 11
+        2.467e9, // 12
+        2.472e9, // 13
+        2.484e9, // 14
+        };
+
+/** @brief duration of the PHY header
+ *
+ * If the radio was switched to
+ * late, a partially received header is still ok, the total received
+ * packet duration can be shorter by this amount compared to the send
+ * packet.
+ */
+const double RED_PHY_HEADER_DURATION = 0.000020;
+
 #endif
 
