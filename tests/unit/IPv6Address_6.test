@@ -10,9 +10,9 @@ static void parseAddr(const char *s)
     IPv6Address a;
     int prefixLen;
     if (!a.tryParseAddrWithPrefix(s,prefixLen))
-        ev << "BAD ";
+        EV << "BAD ";
     uint32 *d = a.words();
-    ev << s << " --> " << a.str() << "/" << prefixLen << "\n";
+    EV << s << " --> " << a.str() << "/" << prefixLen << "\n";
 }
 
 %activity:
@@ -21,7 +21,7 @@ parseAddr("::0/128");
 parseAddr("::0/129");
 parseAddr("::1/64");
 parseAddr("12:34:56::aa:bb:cc/56");
-ev << ".\n";
+EV << ".\n";
 
 %contains: stdout
 ::0/0 --> <unspec>/0

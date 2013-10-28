@@ -7,7 +7,7 @@ test IPv6Address constants
 %global:
 
 %activity:
-#define P(X)  ev << #X << "  " << X << "\n";
+#define P(X)  EV << #X << "  " << X << "\n";
 
 P(IPv6Address::UNSPECIFIED_ADDRESS);
 P(IPv6Address::LOOPBACK_ADDRESS);
@@ -18,7 +18,7 @@ P(IPv6Address::ALL_ROUTERS_2);
 P(IPv6Address::ALL_ROUTERS_5);
 P(IPv6Address::SOLICITED_NODE_PREFIX);
 P(IPv6Address::LINKLOCAL_PREFIX);
-ev << ".\n";
+EV << ".\n";
 
 %contains: stdout
 IPv6Address::UNSPECIFIED_ADDRESS  <unspec>

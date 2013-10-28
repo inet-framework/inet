@@ -10,14 +10,14 @@ TCPMsgBasedSendQueue sendQueue;
 TCPMsgBasedSendQueue *sq = &sendQueue;
 
 sq->init(0);
-ev << sq->info() <<"\n";
+EV << sq->info() <<"\n";
 
 TCPMsgBasedRcvQueue rcvQueue;
 TCPMsgBasedRcvQueue *rq = &rcvQueue;
 
 uint32 seq = 0;
 rq->init(seq);
-ev << rq->info() <<"\n";
+EV << rq->info() <<"\n";
 
 enqueue(sq, "msg1", 500000000); //          0.. 500000000
 enqueue(sq, "msg2", 500000000); //  500000000..1000000000
@@ -44,7 +44,7 @@ for(;;)
     seq = eseq;
 }
 
-ev << ".\n";
+EV << ".\n";
 
 %contains: stdout
 [0..0), 0 packets

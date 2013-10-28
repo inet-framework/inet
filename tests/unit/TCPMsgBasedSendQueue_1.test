@@ -11,7 +11,7 @@ TCPMsgBasedSendQueue sendQueue;
 TCPMsgBasedSendQueue *q = &sendQueue;
 
 q->init(1000);
-ev << q->info() <<"\n";
+EV << q->info() <<"\n";
 
 enqueue(q, "msg1", 100); // 1000..1100
 enqueue(q, "msg2", 400); // 1100..1500
@@ -30,7 +30,7 @@ discardUpTo(q, 2100);
 
 delete createSegmentWithBytes(q, 2100, 2100);
 
-ev << ".\n";
+EV << ".\n";
 
 
 %contains: stdout

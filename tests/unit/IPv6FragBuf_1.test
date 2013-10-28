@@ -63,10 +63,10 @@ for (f.src=1024; f.src<1026; f.src++) {
 for (int j=0; j<v.size(); j++)
 {
     Frag& f = v[j];
-    ev << f.src << ">" << f.dest << ":" << f.id << " " << f.offset << " (" << f.bytes << ") " << (f.islast?"LAST":"") << "\n";
+    EV << f.src << ">" << f.dest << ":" << f.id << " " << f.offset << " (" << f.bytes << ") " << (f.islast?"LAST":"") << "\n";
 }
 
-ev << numdatagrams << " datagrams in " << v.size() << " fragments\n";
+EV << numdatagrams << " datagrams in " << v.size() << " fragments\n";
 
 // try assemble them, fragments in original order
 IPv6FragBuf fragbuf1;
@@ -74,14 +74,14 @@ int i, num;
 for (i=0, num=0; i<v.size(); i++)
     if (insertFragment(fragbuf1, v[i]))
         num++;
-ev << "assembled in original order: " << num << "\n";
+EV << "assembled in original order: " << num << "\n";
 
 // try assemble fragments in reverse order
 IPv6FragBuf fragbuf2;
 for (i=v.size()-1, num=0; i>=0; i--)
     if (insertFragment(fragbuf2, v[i]))
         num++;
-ev << "assembled in reverse order: " << num << "\n";
+EV << "assembled in reverse order: " << num << "\n";
 
 // shuffle fragments
 for (i=0; i<100000; i++)
@@ -96,7 +96,7 @@ IPv6FragBuf fragbuf3;
 for (i=0, num=0; i<v.size(); i++)
     if (insertFragment(fragbuf3, v[i]))
         num++;
-ev << "assembled in random order: " << num << "\n";
+EV << "assembled in random order: " << num << "\n";
 
 
 %contains: stdout

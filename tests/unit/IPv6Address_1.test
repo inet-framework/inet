@@ -2,6 +2,7 @@
 Test parsing IPv6 addresses
 
 %includes:
+#include <stdio.h>
 #include "IPv6Address.h"
 
 %global:
@@ -9,9 +10,9 @@ static void parseAddr(const char *s)
 {
     IPv6Address a(s);
     uint32 *d = a.words();
-    ev << s << " --> " << a.str() << " (";
-    ev.printf("%x-%x-%x-%x", d[0],d[1],d[2],d[3]);
-    ev << ")\n";
+    char buff[100];
+    sprintf(buff, "%x-%x-%x-%x", d[0],d[1],d[2],d[3]);
+    EV << s << " --> " << a.str() << " (" << buff << ")\n";
 }
 
 %activity:
@@ -31,7 +32,7 @@ parseAddr("12:34:56::aa:bb:cc");
 parseAddr("ff80:1111:2222:3300:fe44:a555:6666:7778");
 parseAddr("::fe44:a555:6666:7778");
 parseAddr("ff80:1111:2222:3300::");
-ev << ".\n";
+EV << ".\n";
 
 %contains: stdout
 :: --> <unspec> (0-0-0-0)

@@ -13,7 +13,7 @@ TCPVirtualDataRcvQueue *q = &rcvQueue;
 
 q->init(1000);
 
-ev << q->info() <<"\n";
+EV << q->info() <<"\n";
 
 insertSegment(q, 1000, 1100);
 insertSegment(q, 1000, 1100);
@@ -57,7 +57,7 @@ extractBytesUpTo(q, 2300);
 ///////////////////////////////////////////////////////////////
 
 q->init(4294967000);
-ev << q->info() <<"\n";
+EV << q->info() <<"\n";
 
 insertSegment(q, 4294967000, 4294967100);
 insertSegment(q, 4294967000, 4294967100);
@@ -96,7 +96,7 @@ insertSegment(q, 804, 904);
 extractBytesUpTo(q, 704);
 extractBytesUpTo(q, 1004);
 
-ev << ".\n";
+EV << ".\n";
 
 %contains: stdout
 rcv_nxt=1000

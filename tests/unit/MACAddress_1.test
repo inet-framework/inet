@@ -15,13 +15,13 @@ static std::ostream& operator<<(std::ostream& os, const InterfaceToken& token)
 }
 
 %global:
-#define P(X)  ev << X << "-->" << MACAddress(X).formInterfaceIdentifier() << "\n"
+#define P(X)  EV << X << "-->" << MACAddress(X).formInterfaceIdentifier() << "\n"
 
 %activity:
 P("00:00:00:00:00:00");
 P("AA:BB:CC:DD:EE:FF");
 P("00:21:6b:39:db:48");
-ev << ".\n";
+EV << ".\n";
 
 %contains: stdout
 00:00:00:00:00:00-->InterfaceToken(020000ff,fe000000,64)

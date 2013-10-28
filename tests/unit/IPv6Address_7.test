@@ -6,14 +6,14 @@ Test formLinkLocalAddress()
 #include "InterfaceToken.h"
 
 %global:
-#define P(X)  ev << #X << "-->" << IPv6Address::formLinkLocalAddress(X) << "\n"
+#define P(X)  EV << #X << "-->" << IPv6Address::formLinkLocalAddress(X) << "\n"
 
 %activity:
 P(InterfaceToken(1,2,64));
 P(InterfaceToken(0x11112222,0x33334444,64));
 P(InterfaceToken(0x11112222,0x33334444,48));
 P(InterfaceToken(0x11112222,0x33334444,20));
-ev << ".\n";
+EV << ".\n";
 
 %contains: stdout
 InterfaceToken(1,2,64)-->fe80::2:0:1

@@ -11,30 +11,30 @@ IPv6Address multicast;
 IPv6Address unspecified;
 IPv6Address loopback;
 
-ev << "This is a link local address." << endl;
+EV << "This is a link local address." << endl;
 linkLocalAddr.set("fe80:1111:2222:3300:fe44:a555:6666:7777");
-ev << linkLocalAddr.str() << endl;
-ev << linkLocalAddr.getScope() << endl;
+EV << linkLocalAddr.str() << endl;
+EV << linkLocalAddr.getScope() << endl;
 
-ev << "This is a site local address." << endl;
+EV << "This is a site local address." << endl;
 siteLocalAddr.set("fec0:1111:2222:3300:fe44:a555:6666:7777");
-ev << siteLocalAddr.str() << endl;
-ev << siteLocalAddr.getScope() << endl;
+EV << siteLocalAddr.str() << endl;
+EV << siteLocalAddr.getScope() << endl;
 
-ev << "This is a multicast address." << endl;
+EV << "This is a multicast address." << endl;
 multicast.set("ff00:1111:2222:3300:fe44:a555:6666:7777");
-ev << multicast.str() << endl;
-ev << multicast.getScope() << endl;
+EV << multicast.str() << endl;
+EV << multicast.getScope() << endl;
 
-ev << "This is an unspecified address." << endl;
+EV << "This is an unspecified address." << endl;
 unspecified.set("0:0:0:0:0:0:0:0");
-ev << unspecified.str() << endl;
-ev << unspecified.getScope() << endl;
+EV << unspecified.str() << endl;
+EV << unspecified.getScope() << endl;
 
-ev << "This is a loopback address." << endl;
+EV << "This is a loopback address." << endl;
 loopback.set("0:0:0:0:0:0:0:1");
-ev << loopback.str() << endl;
-ev << loopback.getScope() << endl;
+EV << loopback.str() << endl;
+EV << loopback.getScope() << endl;
 
 %contains: stdout
 This is a link local address.

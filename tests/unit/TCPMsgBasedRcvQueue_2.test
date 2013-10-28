@@ -10,13 +10,13 @@ TCPMsgBasedSendQueue sendQueue;
 TCPMsgBasedSendQueue *sq = &sendQueue;
 
 sq->init(4294967000);
-ev << sq->info() <<"\n";
+EV << sq->info() <<"\n";
 
 TCPMsgBasedRcvQueue rcvQueue;
 TCPMsgBasedRcvQueue *rq = &rcvQueue;
 
 rq->init(4294967000);
-ev << rq->info() <<"\n";
+EV << rq->info() <<"\n";
 
 enqueue(sq, "msg1", 100); // 4294967000..4294967100
 enqueue(sq, "msg2", 100); // 4294967100..4294967200
@@ -47,7 +47,7 @@ insertSegment(rq, createSegmentWithBytes(sq, 900, 1000));
 extractBytesUpTo(rq, 1000);
 discardUpTo(sq, 1000);
 
-ev << ".\n";
+EV << ".\n";
 
 %subst: /[\{\}]/ /
 
