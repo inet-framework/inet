@@ -17,13 +17,17 @@
 
 
 #include "Ieee80211MgmtSTA.h"
+
 #include "Ieee802Ctrl_m.h"
+#include "InterfaceEntry.h"
+#include "InterfaceTableAccess.h"
 #include "ModuleAccess.h"
 #include "NotifierConsts.h"
 #include "PhyControlInfo_m.h"
 #include "RadioState.h"
 #include "ChannelAccess.h"
 #include "Radio80211aControlInfo_m.h"
+#include "opp_utils.h"
 
 //TBD supportedRates!
 //TBD use command msg kinds?
@@ -112,6 +116,14 @@ void Ieee80211MgmtSTA::initialize(int stage)
         // determine numChannels (needed when we're told to scan "all" channels)
         IChannelControl *cc = ChannelAccess::getChannelControl();
         numChannels = cc->getNumChannels();
+    }
+    else if (stage == INITSTAGE_LINK_LAYER_2)
+    {
+        IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
+        if (ift)
+        {
+            myIface = ift->getInterfaceByName(OPP_Global::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
+        }
     }
 }
 
@@ -281,7 +293,7 @@ void Ieee80211MgmtSTA::changeChannel(int channelNum)
 void Ieee80211MgmtSTA::beaconLost()
 {
     EV << "Missed a few consecutive beacons -- AP is considered lost\n";
-    emit(NF_L2_BEACON_LOST, (cObject *)NULL);  //XXX use InterfaceEntry as detail, etc...
+    emit(NF_L2_BEACON_LOST, myIface);  //XXX use InterfaceEntry as detail, etc...
 }
 
 void Ieee80211MgmtSTA::sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& address)
@@ -765,7 +777,7 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
         isAssociated = true;
         (APInfo&)assocAP = (*ap);
 
-        emit(NF_L2_ASSOCIATED, (cObject *)NULL); //XXX detail: InterfaceEntry?
+        emit(NF_L2_ASSOCIATED, myIface);
 
         assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", MK_BEACON_TIMEOUT);
         scheduleAt(simTime()+MAX_BEACONS_MISSED*assocAP.beaconInterval, assocAP.beaconTimeoutMsg);

@@ -24,6 +24,8 @@
 #include "Ieee80211Primitives_m.h"
 
 
+class InterfaceEntry;
+
 /**
  * Used in 802.11 infrastructure mode: handles management frames for
  * a station (STA). See corresponding NED file for a detailed description.
@@ -84,6 +86,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
 
   protected:
     cModule *host;
+    InterfaceEntry *myIface;
 
     // number of channels in ChannelControl -- used if we're told to scan "all" channels
     int numChannels;
@@ -102,9 +105,12 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     cMessage *assocTimeoutMsg; // if non-NULL: association is in progress
     AssociatedAPInfo assocAP;
 
+  public:
+    Ieee80211MgmtSTA() : host(NULL), myIface(NULL), numChannels(-1), isScanning(false),isAssociated(false), assocTimeoutMsg(NULL) {}
+
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int);
+    virtual void initialize(int stage);
 
     /** Implements abstract Ieee80211MgmtBase method */
     virtual void handleTimer(cMessage *msg);

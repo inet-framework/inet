@@ -20,7 +20,7 @@
 #include "Ieee80211Primitives_m.h"
 #include "NotifierConsts.h"
 #include "InterfaceTableAccess.h"
-
+#include "opp_utils.h"
 
 Define_Module(Ieee80211AgentSTA);
 
@@ -70,10 +70,10 @@ void Ieee80211AgentSTA::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER_2)
     {
-        InterfaceTable *ift = (InterfaceTable*)InterfaceTableAccess().getIfExists();
+        IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
         if (ift)
         {
-            myIface = ift->getInterfaceByName(getParentModule()->getFullName());
+            myIface = ift->getInterfaceByName(OPP_Global::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
         }
     }
 }
