@@ -141,21 +141,24 @@ void STP::colorTree()
         cGate * outGateNext = outGate->getNextGate();
         cGate * inputGatePrev = inputGate->getPreviousGate();
 
-        if(port->getRole() == IEEE8021DInterfaceData::ROOT && outGate && inputGate && inputGatePrev && outGateNext)
+        if(outGate && inputGate && inputGatePrev && outGateNext)
         {
             if (port->isForwarding())
             {
-                outGate->getDisplayString().setTagArg("ls", 0, "#a5ffff");
-                outGate->getDisplayString().setTagArg("ls", 1, 3);
+                if (port->getRole() == IEEE8021DInterfaceData::ROOT)
+                {
+                    outGate->getDisplayString().setTagArg("ls", 0, "#a5ffff");
+                    outGate->getDisplayString().setTagArg("ls", 1, 3);
 
-                inputGate->getDisplayString().setTagArg("ls", 0, "#a5ffff");
-                inputGate->getDisplayString().setTagArg("ls", 1, 3);
+                    inputGate->getDisplayString().setTagArg("ls", 0, "#a5ffff");
+                    inputGate->getDisplayString().setTagArg("ls", 1, 3);
 
-                outGateNext->getDisplayString().setTagArg("ls", 0, "#a5ffff");
-                outGateNext->getDisplayString().setTagArg("ls", 1, 3);
+                    outGateNext->getDisplayString().setTagArg("ls", 0, "#a5ffff");
+                    outGateNext->getDisplayString().setTagArg("ls", 1, 3);
 
-                inputGatePrev->getDisplayString().setTagArg("ls", 0, "#a5ffff");
-                inputGatePrev->getDisplayString().setTagArg("ls", 1, 3);
+                    inputGatePrev->getDisplayString().setTagArg("ls", 0, "#a5ffff");
+                    inputGatePrev->getDisplayString().setTagArg("ls", 1, 3);
+                }
             }
             else
             {
@@ -312,7 +315,7 @@ void STP::generateTCN()
             controlInfo->setInterfaceId(rootPort);
             tcn->setControlInfo(controlInfo);
 
-            EV_INFO << "The topology was changed. Sending Topology Change Notification BPDU" << tcn << " to the Root Switch." << endl;
+            EV_INFO << "The topology was changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;
             send(tcn, "STPGate$o");
         }
     }
@@ -396,7 +399,7 @@ void STP::generator()
     // If the topology changed, then we turn faster aging on
     if (topologyChange > 0)
     {
-        EV_DEBUG << "MACAddressTable aging time set to 5" << endl;
+        EV_DEBUG << "MACAddressTable aging time set to 5." << endl;
         macTable->setAgingTime(5);
         topologyChange--;
     }
@@ -434,6 +437,7 @@ void STP::handleTick()
             EV_DEBUG << "Forward Delay timer incremented on port=" << i << endl;
             port->setFdWhile(port->getFdWhile() + 1);
         }
+
     }
     checkTimers();
     checkParametersChange();
