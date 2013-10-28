@@ -28,17 +28,11 @@ void LIBTable::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         maxLabel = 0;
-
         WATCH_VECTOR(lib);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER_4)
+    else if (stage == INITSTAGE_NETWORK_LAYER)
     {
-        IPv4RoutingTableAccess routingTableAccess;
-        IIPv4RoutingTable *rt = routingTableAccess.get();
-        routerId = rt->getRouterId();
-
         // read configuration
-
         readTableFromXML(par("config").xmlValue());
     }
 }

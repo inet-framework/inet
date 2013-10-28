@@ -60,7 +60,6 @@ class INET_API LIBTable: public cSimpleModule
         };
 
     protected:
-        IPv4Address routerId;
         int maxLabel;
         std::vector<LIBEntry> lib;
 

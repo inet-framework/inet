@@ -84,37 +84,31 @@ enum InitStages
     INITSTAGE_NETWORK_LAYER_3 = 8,
 
     /**
-     * Initialization of network-layer protocols, stage 4. Exists because
-     * LIBTable needs to read routerID.
-     */
-    INITSTAGE_NETWORK_LAYER_4 = 9,
-
-    /**
      * Initialization of transport-layer protocols. Transport protocols register
      * their protocol IDs in IP, etc.
      */
-    INITSTAGE_TRANSPORT_LAYER = 10,
+    INITSTAGE_TRANSPORT_LAYER = 9,
 
     /**
      * Initialization of transport-layer protocols, 2nd stage. Exists because SCTP
      * may be transported over UDP.
      */
-    INITSTAGE_TRANSPORT_LAYER_2 = 11,
+    INITSTAGE_TRANSPORT_LAYER_2 = 10,
 
     /**
      * Initialization of routing protocols.
      */
-    INITSTAGE_ROUTING_PROTOCOLS = 12,
+    INITSTAGE_ROUTING_PROTOCOLS = 11,
 
     /**
      * Initialization of applications.
      */
-    INITSTAGE_APPLICATION_LAYER = 13,
+    INITSTAGE_APPLICATION_LAYER = 12,
 
     /**
      * Operations that no other initializations can depend on, e.g. display string updates.
      */
-    INITSTAGE_LAST = 14,
+    INITSTAGE_LAST = 13,
 
     /**
      * The number of initialization stages.
