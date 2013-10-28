@@ -41,7 +41,7 @@ inline bool isNotEmpty(const char * s)
 
 static void printElapsedTime(const char *name, long startTime)
 {
-    EV_INFO << "Time spent in L2NetworkConfigurator::" << name << ": " << ((double)(clock() - startTime) / CLOCKS_PER_SEC) << "s" << endl;
+    EV_INFO<< "Time spent in L2NetworkConfigurator::" << name << ": " << ((double)(clock() - startTime) / CLOCKS_PER_SEC) << "s" << endl;
 }
 
 void L2NetworkConfigurator::initialize(int stage)
@@ -63,7 +63,7 @@ void L2NetworkConfigurator::extractTopology(L2Topology& topology)
     topology.extractByProperty("node");
     EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
 
-    if(topology.getNumNodes() == 0)
+    if (topology.getNumNodes() == 0)
         error("Empty network!");
 
     // extract nodes, fill in interfaceTable and routingTable members in node
@@ -74,7 +74,7 @@ void L2NetworkConfigurator::extractTopology(L2Topology& topology)
         cModule * ifTable = node->module->getSubmodule("interfaceTable");
 
         // EtherHost has no InterfaceTable
-        if(ifTable) //todo:
+        if (ifTable) //todo:
             node->interfaceTable = dynamic_cast<IInterfaceTable *>(ifTable);
     }
 
@@ -108,7 +108,7 @@ void L2NetworkConfigurator::extractTopology(L2Topology& topology)
 
                     if (linkOut)
                     {
-                        childNode = (Node*)linkOut->getRemoteNode();
+                        childNode = (Node*) linkOut->getRemoteNode();
                         Q.push(childNode);
                     }
 
@@ -119,7 +119,6 @@ void L2NetworkConfigurator::extractTopology(L2Topology& topology)
         }
     }
 }
-
 
 void L2NetworkConfigurator::readInterfaceConfiguration(Node * rootNode)
 {
@@ -132,9 +131,9 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node * rootNode)
         cXMLElement *interfaceElement = interfaceElements[i];
 
         const char * hostAttr = interfaceElement->getAttribute("hosts");        // "host* router[0..3]"
-        const char * interfaceAttr = interfaceElement->getAttribute("names");   // i.e. interface names, like "eth* ppp0"
+        const char * interfaceAttr = interfaceElement->getAttribute("names");  // i.e. interface names, like "eth* ppp0"
         const char * towardsAttr = interfaceElement->getAttribute("towards");   // neighbor host names, like "ap switch"
-        const char * amongAttr = interfaceElement->getAttribute("among");       // neighbor host names, like "host[*] router1"
+        const char * amongAttr = interfaceElement->getAttribute("among"); // neighbor host names, like "host[*] router1"
         const char * portsAttr = interfaceElement->getAttribute("ports");       // switch gate indices, like "0 1 2"
 
         // Begin RSTP properties, for more information see RSTP module
@@ -162,63 +161,63 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node * rootNode)
             Q.push(rootNode);
 
             // configure port type/cost/priority constraints on matching interfaces
-            while(!Q.empty())
+            while (!Q.empty())
             {
                 Node * currentNode = Q.front();
                 Q.pop();
 
-                for(unsigned int i = 0; i < currentNode->interfaceInfos.size(); i++)
+                for (unsigned int i = 0; i < currentNode->interfaceInfos.size(); i++)
                 {
                     InterfaceEntry * ifEntry = currentNode->interfaceInfos[i]->interfaceEntry;
-                    if(interfacesSeen.count(ifEntry) == 0 && matchedBefore.count(ifEntry) == 0)
+                    if (interfacesSeen.count(ifEntry) == 0 && matchedBefore.count(ifEntry) == 0)
                     {
-                       cModule * hostModule = currentNode->module;
-                       std::string hostFullPath = hostModule->getFullPath();
-                       std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
+                        cModule * hostModule = currentNode->module;
+                        std::string hostFullPath = hostModule->getFullPath();
+                        std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
 
-                       // loopback interfaces
-                       if (ifEntry->getNodeInputGateId() == -1)
-                       {
-                           interfacesSeen.insert(ifEntry);
-                           continue;
-                       }
+                        // loopback interfaces
+                        if (ifEntry->getNodeInputGateId() == -1)
+                        {
+                            interfacesSeen.insert(ifEntry);
+                            continue;
+                        }
 
-                       cGate * gate = hostModule->gate(ifEntry->getNodeInputGateId());
-                       std::stringstream ss;
-                       ss << gate->getIndex();
-                       std::string port = ss.str();
+                        cGate * gate = hostModule->gate(ifEntry->getNodeInputGateId());
+                        std::stringstream ss;
+                        ss << gate->getIndex();
+                        std::string port = ss.str();
 
-                       // Note: "hosts", "interfaces" and "towards" must ALL match on the interface for the rule to apply
-                       if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str()))
-                               && (interfaceMatcher.matchesAny() || interfaceMatcher.matches(ifEntry->getFullName()))
-                               && (towardsMatcher.matchesAny() || linkContainsMatchingHostExcept(currentNode->interfaceInfos[i],towardsMatcher,hostModule)) &&
-                               (portsMatcher.matchesAny() || portsMatcher.matches(port.c_str()) ) )
-                       {
+                        // Note: "hosts", "interfaces" and "towards" must ALL match on the interface for the rule to apply
+                        if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str()))
+                                && (interfaceMatcher.matchesAny() || interfaceMatcher.matches(ifEntry->getFullName()))
+                                && (towardsMatcher.matchesAny() || linkContainsMatchingHostExcept(currentNode->interfaceInfos[i],towardsMatcher, hostModule))
+                                && (portsMatcher.matchesAny() || portsMatcher.matches(port.c_str())))
+                        {
 
-                           // cost
-                           if (isNotEmpty(cost))
-                               currentNode->interfaceInfos[i]->portData.linkCost = atoi(cost);
+                            // cost
+                            if (isNotEmpty(cost))
+                                currentNode->interfaceInfos[i]->portData.linkCost = atoi(cost);
 
-                           // priority
-                           if (isNotEmpty(priority))
-                               currentNode->interfaceInfos[i]->portData.portPriority = atoi(priority);
+                            // priority
+                            if (isNotEmpty(priority))
+                                currentNode->interfaceInfos[i]->portData.portPriority = atoi(priority);
 
+                            EV_DEBUG << hostModule->getFullPath() << ":" << ifEntry->getFullName() << endl;
 
-                           EV_DEBUG << hostModule->getFullPath() << ":" << ifEntry->getFullName() << endl;
+                            matchedBefore.insert(ifEntry);
+                        }
 
-                           matchedBefore.insert(ifEntry);
-                       }
-
-                       interfacesSeen.insert(ifEntry);
-                       if (currentNode->interfaceInfos[i]->childNode)
-                              Q.push(currentNode->interfaceInfos[i]->childNode);
+                        interfacesSeen.insert(ifEntry);
+                        if (currentNode->interfaceInfos[i]->childNode)
+                            Q.push(currentNode->interfaceInfos[i]->childNode);
                     }
                 }
             }
         }
         catch (std::exception& e)
         {
-            throw cRuntimeError("Error in XML <interface> element at %s: %s", interfaceElement->getSourceLocation(), e.what());
+            throw cRuntimeError("Error in XML <interface> element at %s: %s", interfaceElement->getSourceLocation(),
+                    e.what());
         }
     }
 }
@@ -251,11 +250,12 @@ Topology::LinkOut * L2NetworkConfigurator::findLinkOut(Node * node, int gateId)
     return NULL;
 }
 
-bool L2NetworkConfigurator::linkContainsMatchingHostExcept(InterfaceInfo * currentInfo, Matcher& hostMatcher, cModule * exceptModule)
+bool L2NetworkConfigurator::linkContainsMatchingHostExcept(InterfaceInfo * currentInfo, Matcher& hostMatcher,
+        cModule * exceptModule)
 {
     Node * childNode = currentInfo->childNode;
 
-    if(childNode == NULL)
+    if (childNode == NULL)
         return false;
 
     cModule * hostModule = childNode->module;
@@ -303,7 +303,7 @@ void L2NetworkConfigurator::configureInterface(InterfaceInfo * interfaceInfo)
 
 L2NetworkConfigurator::Matcher::~Matcher()
 {
-    for (int i = 0; i < (int)matchers.size(); i++)
+    for (int i = 0; i < (int) matchers.size(); i++)
         delete matchers[i];
 }
 
@@ -325,7 +325,7 @@ bool L2NetworkConfigurator::Matcher::matches(const char *s)
     if (matchesany)
         return true;
 
-    for (int i = 0; i < (int)matchers.size(); i++)
+    for (int i = 0; i < (int) matchers.size(); i++)
         if (matchers[i]->matches(s))
             return true;
 
