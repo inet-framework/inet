@@ -137,16 +137,11 @@ void IEEE8021DRelay::handleAndDispatchFrame(EthernetIIFrame * frame)
             }
         }
     }
-
 }
 
 void IEEE8021DRelay::dispatch(EthernetIIFrame * frame, unsigned int portNum)
 {
     IEEE8021DInterfaceData * port = getPortInterfaceData(portNum);
-    frame->setByteLength(ETHER_MAC_FRAME_BYTES);
-    // Padding
-    if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
-        frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
 
     if (portNum >= portCount)
         return;
