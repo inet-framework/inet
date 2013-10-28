@@ -176,6 +176,13 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node * rootNode)
                        std::string hostFullPath = hostModule->getFullPath();
                        std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
 
+                       // loopback interfaces
+                       if (ifEntry->getNodeInputGateId() == -1)
+                       {
+                           interfacesSeen.insert(ifEntry);
+                           continue;
+                       }
+
                        cGate * gate = hostModule->gate(ifEntry->getNodeInputGateId());
                        std::stringstream ss;
                        ss << gate->getIndex();
