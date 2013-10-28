@@ -80,7 +80,7 @@ module EtherSwitch
                 ifIn[sizeof(ethg)];
                 ifOut[sizeof(ethg)];
         }
-        stp: <spanningTreeProtocolVersion> like ISpanningTree {
+        stp: <spanningTreeProtocolVersion> like ISpanningTree if spanningTreeProtocolVersion != "" {
             @display("p=125,50");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
@@ -94,5 +94,8 @@ module EtherSwitch
             eth[i].upperLayerOut --> relayUnit.ifIn++;
             eth[i].phys <--> ethg[i];
         }
-        stp.STPGate <--> relayUnit.STPGate;
+        
+        if spanningTreeProtocolVersion != "" {
+        	stp.STPGate <--> relayUnit.STPGate;
+        }
 }

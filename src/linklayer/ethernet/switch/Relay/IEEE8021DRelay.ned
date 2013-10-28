@@ -25,5 +25,5 @@ simple IEEE8021DRelay
 	gates:
         input ifIn[];
         output ifOut[];
-        inout STPGate;
+        inout STPGate @loose;
 }

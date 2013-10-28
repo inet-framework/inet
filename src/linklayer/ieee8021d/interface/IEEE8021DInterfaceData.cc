@@ -39,7 +39,11 @@ IEEE8021DInterfaceData::IEEE8021DInterfaceData()
     defaultStpPort.helloTime = 2;
     defaultStpPort.linkCost = 19;     // todo: set cost according to the bandwidth
     defaultStpPort.edge = false;
-    portData=defaultStpPort;
+    portData = defaultStpPort;
+
+    // If there is no STP module then all ports
+    // must be in forwarding state.
+    portData.state = FORWARDING;
 }
 
 bool IEEE8021DInterfaceData::isLearning()
