@@ -40,27 +40,30 @@ class IEEE8021DInterfaceData : public InterfaceProtocolData
 
         struct PortInfo
         {
+                unsigned int priority;
+                unsigned int linkCost;
+                bool edge;
+
                 PortState state;
                 PortRole role;
 
-                bool edge;
-
-                MACAddress rootAddress;
-                MACAddress bridgeAddress;
-
-                unsigned int priority;
-                unsigned int rootPathCost;
                 unsigned int rootPriority;
+                MACAddress rootAddress;
+                unsigned int rootPathCost;
                 unsigned int bridgePriority;
+                MACAddress bridgeAddress;
                 unsigned int portPriority;
                 unsigned int portNum;
-                unsigned int linkCost;
+
 
                 simtime_t age;
                 simtime_t fdWhile;
                 simtime_t maxAge;
                 simtime_t fwdDelay;
                 simtime_t helloTime;
+                simtime_t TCWhile;      //This port will send TC=true until this time has been overtaken.
+
+                unsigned int lostBPDU;
         };
 
     protected:
@@ -102,12 +105,16 @@ class IEEE8021DInterfaceData : public InterfaceProtocolData
         void setState(PortState state);
         bool isEdge() const;
         void setEdge(bool edge);
-
+        simtime_t getTCWhile() const;
+        void setTCWhile(simtime_t TCWhile);
 
         PortInfo getPortInfoData();
         void setDefaultStpPortInfoData();
         bool isLearning();
         bool isForwarding();
+
+        void setLostBPDU(unsigned int portPriority);
+        unsigned int getLostBPDU() const;
 };
 
 #endif /* IEEE8021DINTERFACEDATA_H_ */

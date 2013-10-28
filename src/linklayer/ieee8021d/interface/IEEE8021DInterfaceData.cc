@@ -39,7 +39,7 @@ IEEE8021DInterfaceData::IEEE8021DInterfaceData()
     defaultStpPort.helloTime = 2;
     defaultStpPort.linkCost = 19;     // todo: set cost according to the bandwidth
     defaultStpPort.edge = false;
-
+    portData=defaultStpPort;
 }
 
 bool IEEE8021DInterfaceData::isLearning()
@@ -236,4 +236,24 @@ bool IEEE8021DInterfaceData::isEdge() const
 void IEEE8021DInterfaceData::setEdge(bool edge)
 {
     portData.edge=edge;
+}
+
+simtime_t IEEE8021DInterfaceData::getTCWhile() const
+{
+    return portData.TCWhile;
+}
+
+void IEEE8021DInterfaceData::setTCWhile(simtime_t TCWhile)
+{
+    portData.TCWhile = TCWhile;
+}
+
+unsigned int IEEE8021DInterfaceData::getLostBPDU() const
+{
+    return portData.lostBPDU;
+}
+
+void IEEE8021DInterfaceData::setLostBPDU(unsigned int lostBPDU)
+{
+    portData.lostBPDU = lostBPDU;
 }
