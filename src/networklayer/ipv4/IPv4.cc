@@ -128,11 +128,15 @@ void IPv4::endService(cPacket *msg)
     }
     else
     {
-        IPv4Datagram *dgram = check_and_cast<IPv4Datagram *>(msg);
-        InterfaceEntry *fromIE = getSourceInterfaceFrom(dgram);
-        handlePacketFromNetwork(dgram, fromIE);
+        IPv4Datagram *dgram = dynamic_cast<IPv4Datagram *>(msg);
+        if (dgram)
+        {
+            InterfaceEntry *fromIE = getSourceInterfaceFrom(dgram);
+            handlePacketFromNetwork(dgram, fromIE);
+        }
+        else
+            delete msg;
     }
-
     if (ev.isGUI())
         updateDisplayString();
 }
