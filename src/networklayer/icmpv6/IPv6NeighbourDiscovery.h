@@ -164,7 +164,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
 
     protected:
         /************************Miscellaneous Stuff***************************/
-        virtual int numInitStages() const;
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
         virtual void processNDMessage(ICMPv6Message *msg, IPv6ControlInfo *ctrlInfo);

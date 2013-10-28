@@ -70,16 +70,11 @@ SCTPPeer::~SCTPPeer()
     rcvdBytesPerAssoc.clear();
 }
 
-int SCTPPeer::numInitStages() const
-{
-    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_INIT_APPLICATION) + 1;
-}
-
 void SCTPPeer::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
         WATCH(numSessions);
@@ -92,11 +87,8 @@ void SCTPPeer::initialize(int stage)
         echoedPkSignal = registerSignal("echoedPk");
         rcvdPkSignal = registerSignal("rcvdPk");
     }
-    if (stage == STAGE_DO_INIT_APPLICATION)
+    else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
-        ASSERT(stage >= STAGE_TRANSPORT_LAYER_AVAILABLE);
-        ASSERT(stage >= STAGE_IP_ADDRESS_AVAILABLE);
-
         // parameters
         const char *addressesString = par("localAddress");
         AddressVector addresses = AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
@@ -136,9 +128,7 @@ void SCTPPeer::initialize(int stage)
         schedule = false;
         shutdownReceived = false;
         sendAllowed = true;
-    }
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
-    {
+
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

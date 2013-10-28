@@ -66,7 +66,7 @@ class INET_API LIBTable: public cSimpleModule
 
     protected:
         virtual void initialize(int stage);
-        virtual int numInitStages() const;
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void handleMessage(cMessage *msg);
 
         // static configuration

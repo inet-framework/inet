@@ -60,13 +60,11 @@ RoutingTableRecorder::~RoutingTableRecorder()
 {
 }
 
-int RoutingTableRecorder::numInitStages() const  {return STAGE_DO_LOCAL + 1;}
-
 void RoutingTableRecorder::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_NETWORK_LAYER)
     {
         if (par("enabled").boolValue())
             hookListeners();
@@ -252,15 +250,12 @@ RoutingTableRecorder::~RoutingTableRecorder()
 {
 }
 
-int RoutingTableRecorder::numInitStages() const  {return STAGE_NOTIFICATIONBOARD_AVAILABLE + 1;}
-
 void RoutingTableRecorder::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_NOTIFICATIONBOARD_AVAILABLE)
+    if (stage == INITSTAGE_NETWORK_LAYER)
     {
-        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
         if (par("enabled").boolValue())
             hookListeners();
     }

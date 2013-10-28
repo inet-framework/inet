@@ -39,7 +39,7 @@ class INET_API PingTestApp : public cSimpleModule, public ILifecycle
 
   protected:
     virtual void initialize(int stage);
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 

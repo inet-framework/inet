@@ -38,14 +38,12 @@
 Define_Module(ExtInterface);
 
 
-int ExtInterface::numInitStages() const { return std::max((int)STAGE_DO_REGISTER_INTERFACE + 1, MACBase::numInitStages()); }
-
 void ExtInterface::initialize(int stage)
 {
     MACBase::initialize(stage);
 
     // subscribe at scheduler for external messages
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         if (dynamic_cast<cSocketRTScheduler *>(simulation.getScheduler()) != NULL)
         {
@@ -67,11 +65,11 @@ void ExtInterface::initialize(int stage)
         WATCH(numRcvd);
         WATCH(numDropped);
     }
-    if (stage == STAGE_DO_REGISTER_INTERFACE)
+    else if (stage == INITSTAGE_LINK_LAYER)
     {
         registerInterface();
     }
-    if (stage == numInitStages()-1)
+    else if (stage == INITSTAGE_LAST)
     {
         // if not connected, make it gray
         if (ev.isGUI() && !connected)

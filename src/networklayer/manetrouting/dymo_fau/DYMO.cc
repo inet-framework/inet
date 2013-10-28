@@ -53,13 +53,11 @@ DYMO::DYMO()
     DYMO_INTERFACES = NULL;
 }
 
-int DYMO::numInitStages() const { return STAGE_DO_INIT_ROUTING_PROTOCOLS + 1; }
-
 void DYMO::initialize(int stage)
 {
     ManetRoutingBase::initialize(stage);
 
-    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
         ownSeqNumLossTimeout = new DYMO_Timer(this, "OwnSeqNumLossTimeout");
         WATCH_PTR(ownSeqNumLossTimeout);
@@ -129,8 +127,6 @@ void DYMO::initialize(int stage)
         queuedDataPackets = new DYMO_DataQueue(this, BUFFER_SIZE_PACKETS, BUFFER_SIZE_BYTES);
         WATCH_PTR(queuedDataPackets);
 
-        ASSERT(stage >= STAGE_IP_LAYER_READY_FOR_HOOK_REGISTRATION);
-        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
         registerRoutingModule();
 
         // setSendToICMP(true);

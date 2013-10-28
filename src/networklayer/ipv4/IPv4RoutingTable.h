@@ -149,7 +149,7 @@ class INET_API IPv4RoutingTable: public cSimpleModule, public IIPv4RoutingTable,
     virtual ~IPv4RoutingTable();
 
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
 
     /**

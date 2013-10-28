@@ -51,16 +51,11 @@ RSVP::~RSVP()
     // TODO cancelAndDelete timers in all data structures
 }
 
-int RSVP::numInitStages() const { return STAGE_DO_INIT_ROUTING_PROTOCOLS + 1; }
-
 void RSVP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    // we have to wait for stage 2 until interfaces get registered (stage 0)
-    // and get their auto-assigned IP addresses (stage 2); routerId gets
-    // assigned in state 3
-    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
         tedmod = TEDAccess().get();
         rt = IPv4RoutingTableAccess().get();
@@ -87,7 +82,6 @@ void RSVP::initialize(int stage)
         // process traffic configuration
         readTrafficFromXML(par("traffic").xmlValue());
 
-        ASSERT(stage >= STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP);
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(IP_PROT_RSVP);
     }

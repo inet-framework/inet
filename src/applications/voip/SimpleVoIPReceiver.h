@@ -102,7 +102,7 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     void initialize(int stage);
     void handleMessage(cMessage *msg);
     virtual void finish();

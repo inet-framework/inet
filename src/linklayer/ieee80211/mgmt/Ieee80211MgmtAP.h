@@ -83,7 +83,7 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     Ieee80211MgmtAP() :  nb(NULL), beaconTimer(NULL) {}
     virtual ~Ieee80211MgmtAP();
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int);
 
     /** Implements abstract Ieee80211MgmtBase method */

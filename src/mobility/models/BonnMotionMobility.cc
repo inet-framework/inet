@@ -36,17 +36,12 @@ BonnMotionMobility::~BonnMotionMobility()
     BonnMotionFileCache::deleteInstance();
 }
 
-int BonnMotionMobility::numInitStages() const
-{
-    return std::max(STAGE_DO_LOCAL + 1, LineSegmentsMobilityBase::numInitStages());
-}
-
 void BonnMotionMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing BonnMotionMobility stage " << stage << endl;
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         is3D  = par("is3D").boolValue();
         int nodeId = par("nodeId");

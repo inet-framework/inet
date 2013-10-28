@@ -36,7 +36,7 @@ class INET_API TelnetApp : public TCPGenericCliAppBase, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     /** Redefined initialize(int stage). Number of stages used from TCPgenericCliAppBase. */
     virtual void initialize(int stage);

@@ -68,7 +68,7 @@ class INET_API DSDV_2 : public cSimpleModule    // proactive protocol, don't nee
     ~DSDV_2();
 
   protected:
-    int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 

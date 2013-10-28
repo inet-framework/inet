@@ -194,24 +194,12 @@ void DSRUUTimer::cancel()
         a_->cancelEvent(&msgtimer);
 }
 
-int DSRUU::numInitStages() const
-{
-    static int stages = std::max(STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP, STAGE_DO_INIT_ROUTING_PROTOCOLS) + 1;
-    return stages;
-}
-
 void DSRUU::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
     //current_time =simTime();
-    if (stage == STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP)
-    {
-        IPSocket ipSocket(gate("to_ip"));
-        ipSocket.registerProtocol(IP_PROT_MANET);
-        ipSocket.registerProtocol(IP_PROT_DSR);
-    }
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         for (int i = 0; i < CONFVAL_MAX; i++)
         {
@@ -327,14 +315,17 @@ void DSRUU::initialize(int stage)
         ack_timer.setOwer(this);
         etx_timer.setOwer(this);
     }
-
-    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
+        IPSocket ipSocket(gate("to_ip"));
+        ipSocket.registerProtocol(IP_PROT_MANET);
+        ipSocket.registerProtocol(IP_PROT_DSR);
+
         /* Search the 80211 interface */
         inet_rt = IPv4RoutingTableAccess().get();
         inet_ift = InterfaceTableAccess().get();
 
-        ASSERT(stage >= STAGE_IP_LAYER_READY_FOR_HOOK_REGISTRATION);
+        // ASSERT(stage >= STAGE:IP_LAYER_READY_FOR_HOOK_REGISTRATION);
         initHook(this);
 
         int  num_80211 = 0;
@@ -383,7 +374,7 @@ void DSRUU::initialize(int stage)
         myaddr_.s_addr = interface80211ptr->ipv4Data()->getIPAddress().getInt();
         macaddr_ = interface80211ptr->getMacAddress();
 
-        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
+        // ASSERT(stage >= STAGE:NOTIFICATIONBOARD_AVAILABLE);
         nb = NotificationBoardAccess().get();
         nb->subscribe(this, NF_LINK_BREAK);
         if (get_confval(PromiscOperation))

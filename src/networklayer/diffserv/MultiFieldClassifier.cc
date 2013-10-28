@@ -131,13 +131,11 @@ Define_Module(MultiFieldClassifier);
 simsignal_t MultiFieldClassifier::pkClassSignal = SIMSIGNAL_NULL;
 
 
-int MultiFieldClassifier::numInitStages() const  {return STAGE_IP_ADDRESS_AVAILABLE + 1;}
-
 void MultiFieldClassifier::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         numOutGates = gateSize("outs");
 
@@ -146,7 +144,7 @@ void MultiFieldClassifier::initialize(int stage)
 
         pkClassSignal = registerSignal("pkClass");
     }
-    if (stage == STAGE_IP_ADDRESS_AVAILABLE)
+    else if (stage == INITSTAGE_NETWORK_LAYER_3)
     {
         cXMLElement *config = par("filters").xmlValue();
         configureFilters(config);

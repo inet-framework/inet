@@ -54,16 +54,11 @@ MACRelayUnitNP::~MACRelayUnitNP()
     delete [] endProcEvents;
 }
 
-int MACRelayUnitNP::numInitStages() const
-{
-    return std::max(0 + 1, MACRelayUnitBase::numInitStages());
-}
-
 void MACRelayUnitNP::initialize(int stage)
 {
     MACRelayUnitBase::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         bufferLevel.setName("buffer level");
         queue.setName("queue");

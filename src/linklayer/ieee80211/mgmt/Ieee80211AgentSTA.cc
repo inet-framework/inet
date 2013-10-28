@@ -31,17 +31,11 @@ simsignal_t Ieee80211AgentSTA::acceptConfirmSignal = SIMSIGNAL_NULL;
 simsignal_t Ieee80211AgentSTA::dropConfirmSignal = SIMSIGNAL_NULL;
 
 
-int Ieee80211AgentSTA::numInitStages() const
-{
-    static int stages = std::max(STAGE_NOTIFICATIONBOARD_AVAILABLE, STAGE_INTERFACEENTRY_REGISTERED) + 1;
-    return stages;
-}
-
 void Ieee80211AgentSTA::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         // read parameters
         activeScan = par("activeScan");
@@ -56,6 +50,7 @@ void Ieee80211AgentSTA::initialize(int stage)
             channelsToScan.push_back(atoi(token));
 
         nb = NotificationBoardAccess().get();
+        nb->subscribe(this, NF_L2_BEACON_LOST);
 
         // JcM add: get the default ssid, if there is one.
         default_ssid = par("default_ssid").stringValue();
@@ -73,11 +68,7 @@ void Ieee80211AgentSTA::initialize(int stage)
 
         myIface = NULL;
     }
-    if (stage == STAGE_NOTIFICATIONBOARD_AVAILABLE)
-    {
-        nb->subscribe(this, NF_L2_BEACON_LOST);
-    }
-    if (stage == STAGE_INTERFACEENTRY_REGISTERED)
+    else if (stage == INITSTAGE_LINK_LAYER_2)
     {
         InterfaceTable *ift = (InterfaceTable*)InterfaceTableAccess().getIfExists();
         if (ift)

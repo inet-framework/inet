@@ -169,7 +169,7 @@ class INET_API IGMPv2 : public cSimpleModule, protected INotifiable
     int numLeavesRecv;
 
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void receiveChangeNotification(int category, const cPolymorphic *details);

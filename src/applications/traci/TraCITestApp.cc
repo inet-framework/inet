@@ -27,13 +27,11 @@
 Define_Module(TraCITestApp);
 
 
-int TraCITestApp::numInitStages() const {return STAGE_NODESTATUS_AVAILABLE + 1;}
-
 void TraCITestApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         testNumber = par("testNumber");
 
@@ -46,7 +44,7 @@ void TraCITestApp::initialize(int stage)
 
         EV_DEBUG << "TraCITestApp initialized with testNumber=" << testNumber << std::endl;
     }
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

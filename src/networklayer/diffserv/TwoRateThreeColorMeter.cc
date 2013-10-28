@@ -24,13 +24,11 @@ using namespace DiffservUtil;
 Define_Module(TwoRateThreeColorMeter);
 
 
-int TwoRateThreeColorMeter::numInitStages() const { return STAGE_INTERFACEENTRY_REGISTERED + 1; }
-
 void TwoRateThreeColorMeter::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         numRcvd = 0;
         numYellow = 0;
@@ -45,7 +43,7 @@ void TwoRateThreeColorMeter::initialize(int stage)
         Tp = PBS;
         Tc = CBS;
     }
-    if (stage == STAGE_INTERFACEENTRY_REGISTERED)
+    else if (stage == INITSTAGE_NETWORK_LAYER)
     {
         PIR = parseInformationRate(par("pir"), "pir", *this, 0);
         CIR = parseInformationRate(par("cir"), "cir", *this, 0);

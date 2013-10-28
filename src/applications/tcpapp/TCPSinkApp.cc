@@ -24,34 +24,24 @@ Define_Module(TCPSinkApp);
 
 simsignal_t TCPSinkApp::rcvdPkSignal = SIMSIGNAL_NULL;
 
-int TCPSinkApp::numInitStages() const
-{
-    return STAGE_DO_INIT_APPLICATION + 1;
-}
-
 void TCPSinkApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
 
         bytesRcvd = 0;
         WATCH(bytesRcvd);
         rcvdPkSignal = registerSignal("rcvdPk");
     }
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
-    if (stage == STAGE_DO_INIT_APPLICATION)
-    {
-        ASSERT(stage >= STAGE_TRANSPORT_LAYER_AVAILABLE);
-        ASSERT(stage >= STAGE_IP_ADDRESS_AVAILABLE);
 
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");

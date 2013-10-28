@@ -30,17 +30,12 @@ RectangleMobility::RectangleMobility()
     corner1 = corner2 = corner3 = corner4 = 0;
 }
 
-int RectangleMobility::numInitStages() const
-{
-    return std::max(STAGE_DO_LOCAL + 1, MovingMobilityBase::numInitStages());
-}
-
 void RectangleMobility::initialize(int stage)
 {
     MovingMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing RectangleMobility stage " << stage << endl;
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         speed = par("speed");
         stationary = (speed == 0);

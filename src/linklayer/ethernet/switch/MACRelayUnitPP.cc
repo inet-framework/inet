@@ -49,16 +49,11 @@ MACRelayUnitPP::~MACRelayUnitPP()
     delete [] buffer;
 }
 
-int MACRelayUnitPP::numInitStages() const
-{
-    return std::max(0 + 1, MACRelayUnitBase::numInitStages());
-}
-
 void MACRelayUnitPP::initialize(int stage)
 {
     MACRelayUnitBase::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         numProcessedFrames = numDroppedFrames = 0;
         WATCH(numProcessedFrames);

@@ -115,17 +115,11 @@ UDP::~UDP()
     clearAllSockets();
 }
 
-int UDP::numInitStages() const
-{
-    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP) + 1;
-    return stages;
-}
-
 void UDP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         WATCH_PTRMAP(socketsByIdMap);
         WATCH_MAP(socketsByPortMap);
@@ -150,13 +144,11 @@ void UDP::initialize(int stage)
 
         isOperational = false;
     }
-    if (stage == STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP)
+    else if (stage == INITSTAGE_TRANSPORT_LAYER)
     {
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(IP_PROT_UDP);
-    }
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
-    {
+
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
     }

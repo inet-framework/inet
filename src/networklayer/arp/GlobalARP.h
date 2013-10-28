@@ -43,7 +43,7 @@ class INET_API GlobalARP : public cSimpleModule
   public:
     GlobalARP() { }
     virtual ~GlobalARP() { }
-    int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
   protected:
     virtual void initialize(int stage);

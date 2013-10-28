@@ -236,7 +236,7 @@ class OLSR_ETX : public OLSR
 
         static bool seq_num_bigger_than(uint16_t, uint16_t);
         NotificationBoard *nb;
-        virtual int numInitStages() const;
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         // virtual void receiveChangeNotification(int category, cObject *details);
         // void mac_failed(IPv4Datagram*);

@@ -103,12 +103,6 @@ Ieee80211Mac::~Ieee80211Mac()
  * Initialization functions.
  */
 
-int Ieee80211Mac::numInitStages() const
-{
-    static int stages = std::max(STAGE_DO_SUBSCRIBE_TO_RADIOSTATE_NOTIFICATIONS, STAGE_DO_REGISTER_INTERFACE) + 1;
-    return std::max(stages, WirelessMacBase::numInitStages());
-}
-
 void Ieee80211Mac::initialize(int stage)
 {
     EV_DEBUG << "Initializing stage " << stage << endl;
@@ -116,7 +110,7 @@ void Ieee80211Mac::initialize(int stage)
     WirelessMacBase::initialize(stage);
 
     //TODO: revise it: it's too big; should revise stages, too!!!
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         int numQueues = 1;
         if (par("EDCA"))
@@ -289,23 +283,12 @@ void Ieee80211Mac::initialize(int stage)
         endTimeout = new cMessage("Timeout");
         endReserve = new cMessage("Reserve");
         mediumStateChange = new cMessage("MediumStateChange");
-    }
-    if (stage == STAGE_DO_SUBSCRIBE_TO_RADIOSTATE_NOTIFICATIONS)
-    {
-        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
+
         // subscribe for the information of the carrier sense
         nb->subscribe(this, NF_RADIOSTATE_CHANGED);
-    }
-    if (stage == STAGE_DO_REGISTER_INTERFACE)
-    {
-        // interface
-        if (isInterfaceRegistered().isUnspecified()) //TODO do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras
-            registerInterface();
-    }
-    if (stage == STAGE_DO_LOCAL)
-    {
+
         // obtain pointer to external queue
-        initializeQueueModule();
+        initializeQueueModule();  //FIXME STAGE: this should be in L2 initialization!!!!
 
         // state variables
         fsm.setName("Ieee80211Mac State Machine");
@@ -387,6 +370,12 @@ void Ieee80211Mac::initialize(int stage)
         validRecMode = false;
         initWatches();
         radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule()->getId();
+    }
+    else if (stage == INITSTAGE_LINK_LAYER)
+    {
+        // interface
+        if (isInterfaceRegistered().isUnspecified()) //TODO do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras
+            registerInterface();
     }
 }
 

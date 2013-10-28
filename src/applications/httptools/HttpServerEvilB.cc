@@ -33,16 +33,11 @@
 
 Define_Module(HttpServerEvilB);
 
-int HttpServerEvilB::numInitStages() const
-{
-    return std::max(0 + 1, HttpServer::numInitStages());
-}
-
 void HttpServerEvilB::initialize(int stage)
 {
     HttpServer::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         badLow = par("minBadRequests");
         badHigh = par("maxBadRequests");

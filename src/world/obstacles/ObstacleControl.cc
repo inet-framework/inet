@@ -29,20 +29,18 @@ Define_Module(ObstacleControl);
 ObstacleControl::~ObstacleControl() {
 }
 
-int ObstacleControl::numInitStages() const { return STAGE_ANNOTATIONMANAGER_AVAILABLE + 1; }
-
 void ObstacleControl::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         obstacles.clear();
         cacheEntries.clear();
 
         obstaclesXml = par("obstacles");
     }
-    if (stage == STAGE_ANNOTATIONMANAGER_AVAILABLE)
+    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
     {
         annotations = AnnotationManagerAccess().getIfExists();
         if (annotations)

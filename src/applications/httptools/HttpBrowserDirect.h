@@ -60,7 +60,7 @@ class INET_API HttpBrowserDirect : public HttpBrowserBase
         virtual void handleMessage(cMessage *msg);
 
         /** Returns the number of initialization stages. Two required. */
-        int numInitStages() const;
+        int numInitStages() const { return NUM_INIT_STAGES; }
         //@}
 
     protected:

@@ -32,31 +32,21 @@ Define_Module(IPvXTrafSink);
 simsignal_t IPvXTrafSink::rcvdPkSignal = SIMSIGNAL_NULL;
 
 
-int IPvXTrafSink::numInitStages() const
-{
-    static int stages = std::max(STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP, STAGE_DO_INIT_APPLICATION) + 1;
-    return stages;
-}
-
 void IPvXTrafSink::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         numReceived = 0;
         WATCH(numReceived);
         rcvdPkSignal = registerSignal("rcvdPk");
     }
-    if (stage == STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP)
+    else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
         int protocol = par("protocol");
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(protocol);
-    }
-    if (stage == STAGE_DO_INIT_APPLICATION)
-    {
-        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
 
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

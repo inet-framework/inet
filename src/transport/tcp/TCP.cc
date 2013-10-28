@@ -74,17 +74,11 @@ static std::ostream& operator<<(std::ostream& os, const TCPConnection& conn)
     return os;
 }
 
-int TCP::numInitStages() const
-{
-    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP) + 1;
-    return stages;
-}
-
 void TCP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         const char *q;
         q = par("sendQueueClass");
@@ -107,13 +101,10 @@ void TCP::initialize(int stage)
         testing = netw->hasPar("testing") && netw->par("testing").boolValue();
         logverbose = !testing && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
     }
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    else if (stage == INITSTAGE_TRANSPORT_LAYER)
     {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-    }
-    if (stage == STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP)
-    {
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(IP_PROT_TCP);
     }

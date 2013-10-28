@@ -76,7 +76,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public INotifiabl
 
     protected:
         // module interface
-        int numInitStages() const;
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         void initialize(int stage);
         void handleMessage(cMessage * message);
 

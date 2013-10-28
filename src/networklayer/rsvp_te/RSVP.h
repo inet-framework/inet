@@ -284,7 +284,7 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
     virtual ~RSVP();
 
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 

@@ -43,11 +43,9 @@ Define_Module(IPv4);
 // a local interface-k hasznalata eseten szinten hianyozhatnak bizonyos NetFilter hook-ok
 
 
-int IPv4::numInitStages() const  { return STAGE_NODESTATUS_AVAILABLE + 1; }
-
 void IPv4::initialize(int stage)
 {
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         QueueBase::initialize();
 
@@ -84,7 +82,7 @@ void IPv4::initialize(int stage)
         WATCH(numUnroutable);
         WATCH(numForwarded);
     }
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    else if (stage == INITSTAGE_NETWORK_LAYER)
     {
         isUp = isNodeUp();
     }

@@ -43,7 +43,7 @@ class INET_API MACBase : public cSimpleModule, public ILifecycle, public INotifi
 
     protected:
         virtual void initialize(int stage);
-        virtual int numInitStages() const;
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         void registerInterface(); // do not override! override createInterfaceEntry()
         virtual void receiveChangeNotification(int category, const cObject *details);
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);

@@ -39,7 +39,7 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     protected:
-        virtual int numInitStages() const;
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage* msg);
 

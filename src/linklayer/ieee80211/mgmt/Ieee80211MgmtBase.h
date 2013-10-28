@@ -56,7 +56,7 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public ILifecycle, p
     static simsignal_t dataQueueLenSignal;
 
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int);
 
     /** Dispatches incoming messages to handleTimer(), handleUpperMessage() or processFrame(). */

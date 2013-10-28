@@ -57,15 +57,13 @@ HttpBrowserBase::~HttpBrowserBase()
     cancelAndDelete(eventTimer);
 }
 
-int HttpBrowserBase::numInitStages() const { return STAGE_NODESTATUS_AVAILABLE + 1; }
-
 void HttpBrowserBase::initialize(int stage)
 {
     EV_DEBUG << "Initializing base HTTP browser component -- stage " << stage << endl;
 
     HttpNodeBase::initialize(stage);
 
-    if (stage==STAGE_DO_LOCAL)
+    if (stage==INITSTAGE_LOCAL)
     {
         cXMLElement *rootelement = par("config").xmlValue();
         if (rootelement==NULL)
@@ -161,10 +159,8 @@ void HttpBrowserBase::initialize(int stage)
 
         eventTimer = new cMessage("eventTimer");
     }
-    if (stage == STAGE_NODESTATUS_AVAILABLE) //TODO change to STAGE_INIT_APPLICATION
+    else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
-        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
-
         EV_DEBUG << "Initializing base HTTP browser component -- phase 1\n";
 
         bool isOperational;

@@ -38,27 +38,18 @@ void AppBase::finish()
     isOperational = false;
 }
 
-int AppBase::numInitStages() const
-{
-    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_INIT_APPLICATION) + 1;
-    return stages;
-}
-
 void AppBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         isOperational = false;
     }
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
-    }
-    if (stage == STAGE_DO_INIT_APPLICATION)
-    {
         if (isOperational)
             startApp(NULL);
     }

@@ -39,19 +39,13 @@ IdealRadio::IdealRadio()
     concurrentReceives = 0;
 }
 
-int IdealRadio::numInitStages() const
-{
-    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_REGISTER_RADIO) + 1;
-    return std::max(stages, IdealChannelModelAccess::numInitStages());
-}
-
 void IdealRadio::initialize(int stage)
 {
     IdealChannelModelAccess::initialize(stage);
 
     EV << "Initializing IdealRadio, stage=" << stage << endl;
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         inTransmit = false;
         concurrentReceives = 0;
@@ -73,15 +67,13 @@ void IdealRadio::initialize(int stage)
         // signals
         radioStateSignal = registerSignal("radioState");
     }
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    else if (stage == INITSTAGE_PHYSICAL_LAYER)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         rs = isOperational ? RadioState::IDLE : RadioState::OFF;
-    }
-    if (stage == STAGE_DO_REGISTER_RADIO)
-    {
+
         emit(radioStateSignal, rs);
 
         // draw the interference distance

@@ -21,19 +21,17 @@
 Define_Module(LIBTable);
 
 
-int LIBTable::numInitStages() const { return STAGE_ROUTERID_AVAILABLE + 1; }
-
 void LIBTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         maxLabel = 0;
 
         WATCH_VECTOR(lib);
     }
-    if (stage == STAGE_ROUTERID_AVAILABLE)
+    else if (stage == INITSTAGE_NETWORK_LAYER_4)
     {
         IPv4RoutingTableAccess routingTableAccess;
         IIPv4RoutingTable *rt = routingTableAccess.get();

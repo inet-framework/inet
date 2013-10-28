@@ -66,25 +66,20 @@ IPv4RoutingTable::~IPv4RoutingTable()
         delete multicastRoutes[i];
 }
 
-int IPv4RoutingTable::numInitStages() const
-{
-    static int stages = std::max(std::max(std::max(std::max(
-            STAGE_NOTIFICATIONBOARD_AVAILABLE,
-            STAGE_NODESTATUS_AVAILABLE),
-            STAGE_DO_ASSIGN_ROUTERID),
-            STAGE_DO_ADD_STATIC_ROUTES),
-            STAGE_DO_ASSIGN_ROUTERID) + 1;
-    return stages;
-}
-
 void IPv4RoutingTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         // get a pointer to the NotificationBoard module and IInterfaceTable
         nb = NotificationBoardAccess().get();
+        nb->subscribe(this, NF_INTERFACE_CREATED);
+        nb->subscribe(this, NF_INTERFACE_DELETED);
+        nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
+        nb->subscribe(this, NF_INTERFACE_CONFIG_CHANGED);
+        nb->subscribe(this, NF_INTERFACE_IPv4CONFIG_CHANGED);
+
         ift = InterfaceTableAccess().get();
 
         IPForward = par("IPForward").boolValue();
@@ -96,49 +91,30 @@ void IPv4RoutingTable::initialize(int stage)
         WATCH(multicastForward);
         WATCH(routerId);
     }
-    if (stage == STAGE_NOTIFICATIONBOARD_AVAILABLE)
-    {
-        nb->subscribe(this, NF_INTERFACE_CREATED);
-        nb->subscribe(this, NF_INTERFACE_DELETED);
-        nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
-        nb->subscribe(this, NF_INTERFACE_CONFIG_CHANGED);
-        nb->subscribe(this, NF_INTERFACE_IPv4CONFIG_CHANGED);
-    }
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    else if (stage == INITSTAGE_NETWORK_LAYER)
     {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isNodeUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
         if (isNodeUp) {
             // set routerId if param is not "" (==no routerId) or "auto" (in which case we'll
-            // do it later in STAGE_DO_ASSIGN_ROUTER_ID, after network configurators configured the interfaces)
+            // do it later in a later stage, after network configurators configured the interfaces)
             const char *routerIdStr = par("routerId").stringValue();
             if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
                 routerId = IPv4Address(routerIdStr);
         }
     }
-    if (stage == STAGE_DO_ADD_STATIC_ROUTES)
+    else if (stage == INITSTAGE_NETWORK_LAYER_3)
     {
-        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
-
-        if (isNodeUp) {
-            // L2 modules register themselves in stage 0, so we can only configure
-            // the interfaces in stage 1.
-            const char *filename = par("routingFile");
-
+        if (isNodeUp)
+        {
             // read routing table file (and interface configuration)
+            const char *filename = par("routingFile");
             RoutingTableParser parser(ift, this);
             if (*filename && parser.readRoutingTableFromFile(filename)==-1)
                 error("Error reading routing table file %s", filename);
         }
-    }
-    if (stage == STAGE_DO_ASSIGN_ROUTERID)
-    {
-        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
-        ASSERT(stage >= STAGE_INTERFACEENTRY_IP_PROTOCOLDATA_AVAILABLE);
-        ASSERT(stage >= STAGE_IP_ADDRESS_AVAILABLE);
 
-        // routerID selection must be after stage==2 when network autoconfiguration
-        // assigns interface addresses
+        // routerID selection must be after network autoconfiguration assigned interface addresses
         if (isNodeUp)
             configureRouterId();
 
@@ -152,7 +128,7 @@ void IPv4RoutingTable::configureRouterId()
     if (routerId.isUnspecified())  // not yet configured
     {
         const char *routerIdStr = par("routerId").stringValue();
-        if (!strcmp(routerIdStr, "auto"))  // non-"auto" cases already handled in stage 1
+        if (!strcmp(routerIdStr, "auto"))  // non-"auto" cases already handled earlier
         {
             // choose highest interface address as routerId
             for (int i=0; i<ift->getNumInterfaces(); ++i)
@@ -910,10 +886,8 @@ bool IPv4RoutingTable::handleOperationStage(LifecycleOperation *operation, int s
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_NETWORK_LAYER) {
-            // L2 modules register themselves in stage 0, so we can only configure
-            // the interfaces in stage 1.
-            const char *filename = par("routingFile");
             // read routing table file (and interface configuration)
+            const char *filename = par("routingFile");
             RoutingTableParser parser(ift, this);
             if (*filename && parser.readRoutingTableFromFile(filename)==-1)
                 error("Error reading routing table file %s", filename);

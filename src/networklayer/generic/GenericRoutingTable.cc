@@ -44,18 +44,11 @@ GenericRoutingTable::~GenericRoutingTable()
         delete multicastRoutes[i];
 }
 
-int GenericRoutingTable::numInitStages() const
-{
-    static int stages = std::max(STAGE_INTERFACEENTRY_REGISTERED, std::max(STAGE_DO_ASSIGN_ROUTERID, STAGE_NOTIFICATIONBOARD_AVAILABLE)) + 1;
-
-    return stages;
-}
-
 void GenericRoutingTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         // get a pointer to the NotificationBoard module and IInterfaceTable
         nb = NotificationBoardAccess().get();
@@ -78,22 +71,15 @@ void GenericRoutingTable::initialize(int stage)
         WATCH(forwardingEnabled);
         WATCH(multicastForwardingEnabled);
         WATCH(routerId);
-    }
-    if (stage == STAGE_NOTIFICATIONBOARD_AVAILABLE)
-    {
-        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
+
         nb->subscribe(this, NF_INTERFACE_CREATED);
         nb->subscribe(this, NF_INTERFACE_DELETED);
         nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
         nb->subscribe(this, NF_INTERFACE_CONFIG_CHANGED);
         nb->subscribe(this, NF_INTERFACE_IPv4CONFIG_CHANGED);
     }
-    if (stage == STAGE_INTERFACEENTRY_REGISTERED)
+    else if (stage == INITSTAGE_NETWORK_LAYER)
     {
-//        // L2 modules register themselves in stage 0, so we can only configure
-//        // the interfaces in stage 1.
-//        const char *filename = par("routingFile");
-
         // At this point, all L2 modules have registered themselves (added their
         // interface entries). Create the per-interface IPv4 data structures.
         IInterfaceTable *interfaceTable = InterfaceTableAccess().get();
@@ -108,20 +94,17 @@ void GenericRoutingTable::initialize(int stage)
 
 //TODO
 //        // set routerId if param is not "" (==no routerId) or "auto" (in which case we'll
-//        // do it later in stage 3, after network configurators configured the interfaces)
+//        // do it later in a later stage, after network configurators configured the interfaces)
 //        const char *routerIdStr = par("routerId").stringValue();
 //        if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
 //            routerId = IPv4Address(routerIdStr);
     }
-    if (stage == STAGE_DO_ASSIGN_ROUTERID)
+    else if (stage == INITSTAGE_NETWORK_LAYER_3)
     {
-        ASSERT(stage >= STAGE_IP_ADDRESS_AVAILABLE);
-        // routerID selection must be after stage==STAGE_AUTOCONFIGURE_ADDRESSES
-        // when network autoconfiguration assigns interface addresses
+        // routerID selection must be after network autoconfiguration assigned interface addresses
         configureRouterId();
 
 //        // we don't use notifications during initialize(), so we do it manually.
-//        // Should be in stage=3 because autoconfigurator runs in stage=2.
 //        updateNetmaskRoutes();
 
         //printRoutingTable();
@@ -157,7 +140,7 @@ void GenericRoutingTable::configureRouterId()
     if (routerId.isUnspecified())  // not yet configured
     {
         const char *routerIdStr = par("routerId").stringValue();
-        if (!strcmp(routerIdStr, "auto"))  // non-"auto" cases already handled in stage 1
+        if (!strcmp(routerIdStr, "auto"))  // non-"auto" cases already handled in earlier stage
         {
             // choose highest interface address as routerId
             for (int i=0; i<ift->getNumInterfaces(); ++i)

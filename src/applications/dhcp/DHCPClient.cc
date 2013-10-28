@@ -46,17 +46,11 @@ DHCPClient::~DHCPClient()
     cancelTimer_TO();
 }
 
-int DHCPClient::numInitStages() const
-{
-    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_INIT_APPLICATION) + 1;
-    return stages;
-}
-
 void DHCPClient::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         timer_t1 = NULL;
         timer_t2 = NULL;
@@ -80,19 +74,13 @@ void DHCPClient::initialize(int stage)
         bootpc_port = 68; // client
         bootps_port = 67; // server
     }
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
-    if (stage == STAGE_DO_INIT_APPLICATION)
-    {
-        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
-        ASSERT(stage >= STAGE_INTERFACEENTRY_REGISTERED);
-        ASSERT(stage >= STAGE_TRANSPORT_LAYER_AVAILABLE);
 
         // get the hostname
         cModule* host = getContainingNode();

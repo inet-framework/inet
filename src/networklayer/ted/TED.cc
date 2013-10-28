@@ -39,22 +39,12 @@ TED::~TED()
 {
 }
 
-int TED::numInitStages() const { return STAGE_DO_INIT_ROUTING_PROTOCOLS + 1; }
-
 void TED::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    // we have to wait for stage 2 until interfaces get registered (stage 0)
-    // and get their auto-assigned IPv4 addresses (stage 2); routerId gets
-    // assigned in stage 3
-    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
-        ASSERT(stage >= STAGE_ROUTERID_AVAILABLE);
-        ASSERT(stage >= STAGE_IP_ADDRESS_AVAILABLE);
-        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
-        ASSERT(stage >= STAGE_INTERFACEENTRY_IP_PROTOCOLDATA_AVAILABLE);
-
         maxMessageId = 0;
 
         WATCH_VECTOR(ted);

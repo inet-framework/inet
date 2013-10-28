@@ -71,13 +71,11 @@ int DYMOUM::totalRerrRec = 0;
 std::map<ManetAddress,u_int32_t *> DYMOUM::mapSeqNum;
 
 
-int DYMOUM::numInitStages() const  { return STAGE_DO_INIT_ROUTING_PROTOCOLS + 1; }
-
 void DYMOUM::initialize(int stage)
 {
     ManetRoutingBase::initialize(stage);
 
-    if (stage == STAGE_DO_INIT_ROUTING_PROTOCOLS)
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
 
 #ifndef DYMO_UM_GLOBAL_STATISTISTIC
@@ -116,8 +114,6 @@ void DYMOUM::initialize(int stage)
 
         /* Search the 80211 interface */
 
-        ASSERT(stage >= STAGE_IP_LAYER_READY_FOR_HOOK_REGISTRATION);
-        ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
         registerRoutingModule();
 
         NS_DEV_NR = getWlanInterfaceIndexByAddress();
@@ -193,7 +189,6 @@ void DYMOUM::initialize(int stage)
             linkLayerFeeback();
         if ((bool) par("promiscuous"))
         {
-            ASSERT(stage >= STAGE_NOTIFICATIONBOARD_AVAILABLE);
             linkPromiscuous();
         }
 

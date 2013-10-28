@@ -29,13 +29,11 @@
 Define_Module(InetSimpleBattery);
 
 
-int InetSimpleBattery::numInitStages() const { return BasicBattery::numInitStages(); }
-
 void InetSimpleBattery::initialize(int stage)
 {
     BasicBattery::initialize(stage); //DO NOT DELETE!!
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         voltage = par("voltage");
         nominalCapmAh = par("nominal");

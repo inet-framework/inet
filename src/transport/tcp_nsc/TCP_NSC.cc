@@ -213,15 +213,13 @@ Address const & TCP_NSC::mapNsc2Remote(uint32_t nscAddrP)
 }
 // x == mapNsc2Remote(mapRemote2Nsc(x))
 
-int TCP_NSC::numInitStages() const { return STAGE_NODESTATUS_AVAILABLE + 1; }
-
 void TCP_NSC::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
     tcpEV << this << ": initialize stage " << stage << endl;
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         const char *q;
         q = par("sendQueueClass");
@@ -239,31 +237,25 @@ void TCP_NSC::initialize(int stage)
         cModule *netw = simulation.getSystemModule();
         testingS = netw->hasPar("testing") && netw->par("testing").boolValue();
         logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
+
+        // load the stack
+        const char* stackName = this->par(stackNameParamNameS).stringValue();
+        int bufferSize = (int)(this->par(bufferSizeParamNameS).longValue());
+        loadStack(stackName, bufferSize);
+        pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);
+        pStackM->add_default_gateway(localInnerGwS.str().c_str());
     }
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    else if (stage == INITSTAGE_TRANSPORT_LAYER)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
-    if (stage == STAGE_DO_LOCAL)
-    {
-        const char* stackName = this->par(stackNameParamNameS).stringValue();
-
-        int bufferSize = (int)(this->par(bufferSizeParamNameS).longValue());
-
-        loadStack(stackName, bufferSize);
-        pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);
-        pStackM->add_default_gateway(localInnerGwS.str().c_str());
-    }
-    if (stage == STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP)
-    {
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(IP_PROT_TCP);
     }
-    if (stage == numInitStages() - 1)
+    else if (stage == INITSTAGE_LAST)
     {
         isAliveM = true;
     }

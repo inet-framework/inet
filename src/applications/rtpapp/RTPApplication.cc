@@ -27,15 +27,13 @@
 Define_Module(RTPApplication)
 
 
-int RTPApplication::numInitStages() const { return STAGE_DO_INIT_APPLICATION + 1; }
-
 void RTPApplication::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
     // because of AddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         // the common name (CNAME) of this host
         _commonName = par("commonName");
@@ -65,11 +63,8 @@ void RTPApplication::initialize(int stage)
         ssrc = 0;
         isActiveSession = false;
     }
-    if (stage == STAGE_DO_INIT_APPLICATION)
+    else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
-        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
-        ASSERT(stage >= STAGE_IP_ADDRESS_AVAILABLE);
-
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

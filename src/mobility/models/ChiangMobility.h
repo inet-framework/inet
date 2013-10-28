@@ -38,7 +38,7 @@ class INET_API ChiangMobility : public LineSegmentsMobilityBase
     int yState;                ///< 0 = negative direction, 1 = no move, 2 = positive direction
 
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     /** @brief Initializes mobility model parameters.*/
     virtual void initialize(int stage);

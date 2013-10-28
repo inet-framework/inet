@@ -43,7 +43,7 @@ class INET_API NodeStatus : public cSimpleModule, public ILifecycle
   public:
     virtual State getState() const { return state; }
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle messages"); }
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);

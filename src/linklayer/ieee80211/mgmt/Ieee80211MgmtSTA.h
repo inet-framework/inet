@@ -104,7 +104,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     AssociatedAPInfo assocAP;
 
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int);
 
     /** Implements abstract Ieee80211MgmtBase method */

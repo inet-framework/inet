@@ -36,26 +36,19 @@ BGPRouting::~BGPRouting(void)
     _prefixListOUT.erase(_prefixListOUT.begin(), _prefixListOUT.end());
 }
 
-int BGPRouting::numInitStages() const
-{
-    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_ROUTINGTABLE_COMPLETED) + 1;
-    return stages;
-}
-
 void BGPRouting::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
-    if (stage == STAGE_ROUTINGTABLE_COMPLETED) // we must wait until IPv4RoutingTable is completely initialized
-    {
+
+        // we must wait until IPv4RoutingTable is completely initialized
         _rt = IPv4RoutingTableAccess().get();
         _inft = InterfaceTableAccess().get();
 

@@ -199,7 +199,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter
      * Initialization
      */
     virtual void initialize(int stage);
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     /**
      * Handle message

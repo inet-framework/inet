@@ -142,7 +142,7 @@ class Batman : public ManetRoutingBase
 
   protected:
     virtual void handleMessage(cMessage *msg);
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void processLinkBreak(const cObject *details){};
     virtual void packetFailed(IPv4Datagram *dgram) {}

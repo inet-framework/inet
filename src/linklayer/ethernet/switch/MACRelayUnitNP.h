@@ -56,7 +56,7 @@ class INET_API MACRelayUnitNP : public MACRelayUnitBase
   protected:
     /** @name Redefined cSimpleModule member functions. */
     //@{
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     virtual void initialize(int stage);
 

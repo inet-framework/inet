@@ -61,20 +61,11 @@ IPv6NeighbourDiscovery::~IPv6NeighbourDiscovery()
     //   AdvIfList advIfList;
 }
 
-int IPv6NeighbourDiscovery::numInitStages() const
-{
-    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_SET_INTERFACEENTRY_RTR_ADV_INTERVAL) + 1;
-    return stages;
-}
-
 void IPv6NeighbourDiscovery::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    // We have to wait until the 3rd stage (stage 2) with scheduling messages,
-    // because interface registration and IPv6 configuration takes places
-    // in the first two stages.
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    if (stage == INITSTAGE_NETWORK_LAYER)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
@@ -82,10 +73,8 @@ void IPv6NeighbourDiscovery::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
-    if (stage == STAGE_DO_SET_INTERFACEENTRY_RTR_ADV_INTERVAL)
+    else if (stage == INITSTAGE_NETWORK_LAYER_3)
     {
-        ASSERT(stage >= STAGE_INTERFACEENTRY_IP_PROTOCOLDATA_AVAILABLE);
-        ASSERT(stage >= STAGE_INTERFACEENTRY_REGISTERED);
         ift = InterfaceTableAccess().get();
         rt6 = check_and_cast<IPv6RoutingTable *>(getModuleByPath(par("routingTableModule")));
         icmpv6 = ICMPv6Access().get();

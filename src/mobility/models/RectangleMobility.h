@@ -41,7 +41,7 @@ class INET_API RectangleMobility : public MovingMobilityBase
     double corner1, corner2, corner3, corner4;
 
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     /** @brief Initializes mobility model parameters.
      *

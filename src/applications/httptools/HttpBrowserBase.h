@@ -145,7 +145,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         virtual void initialize(int stage);
 
         /** Returns the number of initialization stages. Two required. */
-        virtual int numInitStages() const;
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
         /** Report final statistics */
         virtual void finish();

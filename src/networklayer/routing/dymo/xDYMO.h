@@ -99,7 +99,7 @@ class INET_API xDYMO : public cSimpleModule, public ILifecycle, public INotifiab
 
   protected:
     // module interface
-    int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     void initialize(int stage);
     void handleMessage(cMessage * message);
 

@@ -33,7 +33,7 @@ void SomeUDPApp::initialize(int stage)
 {
     // because of AddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage != STAGE_INIT_APPLICATION)
+    if (stage != INITSTAGE_APPLICATION_LAYER)
         return;
 
     counter = 0;

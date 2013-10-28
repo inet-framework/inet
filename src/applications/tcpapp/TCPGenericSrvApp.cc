@@ -28,17 +28,11 @@ simsignal_t TCPGenericSrvApp::rcvdPkSignal = SIMSIGNAL_NULL;
 simsignal_t TCPGenericSrvApp::sentPkSignal = SIMSIGNAL_NULL;
 
 
-int TCPGenericSrvApp::numInitStages() const
-{
-    static int stages = std::max(STAGE_NODESTATUS_AVAILABLE, STAGE_DO_INIT_APPLICATION) + 1;
-    return stages;
-}
-
 void TCPGenericSrvApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         delay = par("replyDelay");
         maxMsgDelay = 0;
@@ -53,11 +47,8 @@ void TCPGenericSrvApp::initialize(int stage)
         WATCH(bytesRcvd);
         WATCH(bytesSent);
     }
-    if (stage == STAGE_DO_INIT_APPLICATION)
+    else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
-        ASSERT(stage >= STAGE_TRANSPORT_LAYER_AVAILABLE);
-        ASSERT(stage >= STAGE_IP_ADDRESS_AVAILABLE);
-
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
         TCPSocket socket;
@@ -65,9 +56,7 @@ void TCPGenericSrvApp::initialize(int stage)
         socket.setDataTransferMode(TCP_TRANSFER_OBJECT);
         socket.bind(localAddress[0] ? AddressResolver().resolve(localAddress) : Address(), localPort);
         socket.listen();
-    }
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
-    {
+
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

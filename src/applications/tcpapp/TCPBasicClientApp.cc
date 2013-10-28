@@ -36,16 +36,10 @@ TCPBasicClientApp::~TCPBasicClientApp()
     cancelAndDelete(timeoutMsg);
 }
 
-int TCPBasicClientApp::numInitStages() const
-{
-    return std::max(3 + 1, TCPGenericCliAppBase::numInitStages());
-}
-
 void TCPBasicClientApp::initialize(int stage)
 {
     TCPGenericCliAppBase::initialize(stage);
-
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         numRequestsToSend = 0;
         earlySend = false;  // TBD make it parameter
@@ -57,10 +51,8 @@ void TCPBasicClientApp::initialize(int stage)
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             error("Invalid startTime/stopTime parameters");
     }
-    if (stage == STAGE_DO_INIT_APPLICATION)
+    else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
-        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
-
         timeoutMsg = new cMessage("timer");
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
 

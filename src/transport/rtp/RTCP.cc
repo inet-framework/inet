@@ -40,13 +40,11 @@ RTCP::RTCP()
     _senderInfo = NULL;
 }
 
-int RTCP::numInitStages() const { return STAGE_NODESTATUS_AVAILABLE + 1; }
-
 void RTCP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         // initialize variables
         _ssrcChosen = false;
@@ -60,7 +58,7 @@ void RTCP::initialize(int stage)
 
         rcvdPkSignal = registerSignal("rcvdPk");
     }
-    if (stage == STAGE_NODESTATUS_AVAILABLE)
+    else if (stage == INITSTAGE_TRANSPORT_LAYER)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

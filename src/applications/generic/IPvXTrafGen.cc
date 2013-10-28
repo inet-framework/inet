@@ -45,19 +45,13 @@ IPvXTrafGen::~IPvXTrafGen()
     cancelAndDelete(timer);
 }
 
-int IPvXTrafGen::numInitStages() const
-{
-    static int stages = std::max(STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP, STAGE_DO_INIT_APPLICATION) + 1;
-    return stages;
-}
-
 void IPvXTrafGen::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         rcvdPkSignal = registerSignal("rcvdPk");
         sentPkSignal = registerSignal("sentPk");
@@ -77,15 +71,10 @@ void IPvXTrafGen::initialize(int stage)
         WATCH(numSent);
         WATCH(numReceived);
     }
-    if (stage == STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP)
+    else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(protocol);
-    }
-    if (stage == STAGE_DO_INIT_APPLICATION)
-    {
-        ASSERT(stage >= STAGE_NODESTATUS_AVAILABLE);
-        ASSERT(stage >= STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP);
 
         timer = new cMessage("sendTimer");
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

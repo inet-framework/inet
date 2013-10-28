@@ -76,7 +76,7 @@ class ExtInterface : public MACBase
     const char *tag_width;
 
   public:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 

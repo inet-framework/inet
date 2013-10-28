@@ -112,7 +112,7 @@ class HttpController : public cSimpleModule
         virtual void handleMessage(cMessage *msg);
 
         /** Returns the number of initialization stages. Two required. */
-        virtual int numInitStages() const;
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         //@}
 
     public:

@@ -40,7 +40,7 @@ class TractorMobility : public LineSegmentsMobilityBase
     int step;
 
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     /** @brief Initializes mobility model parameters. */
     virtual void initialize(int);

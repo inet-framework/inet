@@ -43,14 +43,12 @@ Loopback::~Loopback()
 {
 }
 
-int Loopback::numInitStages() const { return std::max(MACBase::numInitStages(), (int)STAGE_DO_REGISTER_INTERFACE + 1); }
-
 void Loopback::initialize(int stage)
 {
     MACBase::initialize(stage);
 
     // all initialization is done in the first stage
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         numSent = numRcvdOK = 0;
         WATCH(numSent);
@@ -59,14 +57,14 @@ void Loopback::initialize(int stage)
         packetSentToUpperSignal = registerSignal("packetSentToUpper");
         packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
     }
-    if (stage == STAGE_DO_REGISTER_INTERFACE)
+    else if (stage == INITSTAGE_LINK_LAYER)
     {
         // register our interface entry in IInterfaceTable
         registerInterface();
     }
 
     // update display string when addresses have been autoconfigured etc.
-    if (stage == numInitStages()-1)
+    else if (stage == INITSTAGE_LAST)
     {
         updateDisplayString();
     }

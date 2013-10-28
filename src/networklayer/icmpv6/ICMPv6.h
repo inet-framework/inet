@@ -77,7 +77,7 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
      * Initialization
      */
     virtual void initialize(int stage);
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     /**
      *  Processing of messages that arrive in this module. Messages arrived here

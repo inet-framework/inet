@@ -50,7 +50,7 @@ class INET_API UDPVideoStreamCli : public AppBase
   protected:
     ///@name Overridden cSimpleModule functions
     //@{
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void finish();
     virtual void handleMessageWhenUp(cMessage *msg);

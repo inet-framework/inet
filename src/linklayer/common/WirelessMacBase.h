@@ -55,7 +55,7 @@ class INET_API WirelessMacBase : public MACBase
     static simsignal_t packetReceivedFromUpperSignal;
 
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     /** @brief Initialization of the module and some variables*/
     virtual void initialize(int);

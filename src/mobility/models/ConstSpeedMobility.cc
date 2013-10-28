@@ -30,17 +30,12 @@ ConstSpeedMobility::ConstSpeedMobility()
     speed = 0;
 }
 
-int ConstSpeedMobility::numInitStages() const
-{
-    return std::max(STAGE_DO_LOCAL + 1, LineSegmentsMobilityBase::numInitStages());
-}
-
 void ConstSpeedMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing ConstSpeedMobility stage " << stage << endl;
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         speed = par("speed");
         stationary = speed == 0;

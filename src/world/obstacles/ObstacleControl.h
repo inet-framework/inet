@@ -42,7 +42,7 @@ class INET_API ObstacleControl : public cSimpleModule
     public:
         virtual ~ObstacleControl();
         virtual void initialize(int stage);
-        virtual int numInitStages() const;
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void finish();
         virtual void handleMessage(cMessage *msg);
         void handleSelfMsg(cMessage *msg);

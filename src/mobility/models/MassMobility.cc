@@ -33,17 +33,12 @@ MassMobility::MassMobility()
     angle = 0;
 }
 
-int MassMobility::numInitStages() const
-{
-    return std::max(STAGE_DO_LOCAL + 1, LineSegmentsMobilityBase::numInitStages());
-}
-
 void MassMobility::initialize(int stage)
 {
     LineSegmentsMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing MassMobility stage " << stage << endl;
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
         angle = par("startAngle").doubleValue();
         changeIntervalParameter = &par("changeInterval");

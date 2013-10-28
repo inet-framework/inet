@@ -434,7 +434,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
      */
     //@{
     /** @brief Initialization of the module and its variables */
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int);
     virtual InterfaceEntry *createInterfaceEntry();
     virtual void initializeQueueModule();

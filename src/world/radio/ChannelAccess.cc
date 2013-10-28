@@ -44,11 +44,6 @@ ChannelAccess::~ChannelAccess()
     }
 }
 
-int ChannelAccess::numInitStages() const
-{
-    return STAGE_DO_REGISTER_RADIO + 1;
-}
-
 /**
  * Upon initialization ChannelAccess registers the nic parent module
  * to have all its connections handled by ChannelControl
@@ -57,9 +52,8 @@ void ChannelAccess::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == STAGE_DO_LOCAL)
+    if (stage == INITSTAGE_LOCAL)
     {
-        ASSERT(stage < STAGE_DO_INITIALIZE_AND_PUBLISH_LOCATION);
         cc = getChannelControl();
         nb = NotificationBoardAccess().get();
         hostModule = findContainingNode(this, true);
@@ -70,9 +64,8 @@ void ChannelAccess::initialize(int stage)
         mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
         hostModule->subscribe(mobilityStateChangedSignal, this);
     }
-    if (stage == STAGE_DO_REGISTER_RADIO)
+    else if (stage == INITSTAGE_PHYSICAL_LAYER)
     {
-        ASSERT(stage > STAGE_DO_INITIALIZE_AND_PUBLISH_LOCATION);
         if (!positionUpdateArrived)
         {
             radioPos.x = parseInt(hostModule->getDisplayString().getTagArg("p", 0), -1);

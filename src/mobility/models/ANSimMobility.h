@@ -40,7 +40,7 @@ class ANSimMobility : public LineSegmentsMobilityBase
     cXMLElement *nextPositionChange; ///< points to the next \<position_change> element
 
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     /** @brief Initializes mobility model parameters. */
     virtual void initialize(int stage);

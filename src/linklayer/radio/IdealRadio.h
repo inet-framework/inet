@@ -48,7 +48,7 @@ class INET_API IdealRadio : public IdealChannelModelAccess, public ILifecycle
     bool isEnabled() const { return rs != RadioState::OFF && rs != RadioState::SLEEP; }
 
   protected:
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void finish();
 

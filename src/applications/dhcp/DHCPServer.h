@@ -59,7 +59,7 @@ class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILi
         UDPSocket socket;
 
     protected:
-        virtual int numInitStages() const;
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
         virtual void handleIncomingPacket(DHCPMessage *pkt);

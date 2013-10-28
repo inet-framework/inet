@@ -49,7 +49,7 @@ class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::Ca
      */
     virtual void initialize(int stage);
 
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     /**
      * For self-messages it invokes handleTimer(); messages arriving from TCP

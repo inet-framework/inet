@@ -54,7 +54,7 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
     // called by the OMNeT++ simulation kernel:
 
     virtual void initialize(int stage);
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msgP);
     virtual void finish();
 

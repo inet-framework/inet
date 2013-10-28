@@ -20,104 +20,106 @@
 #ifndef __INET_INITSTAGES
 #define __INET_INITSTAGES
 
-//TODO: rewrite to like these:
-/*
-#define STAGE_DO_LOCAL                                                   0
-#define STAGE_INTERFACE_TABLE_READY_TO_REGISTER_INTERFACES         STAGE_LOCAL + 1
-#define STAGE_DO_REGISTER_ETH_INTERFACE                                  STAGE_INTERFACE_TABLE_IS_READY_TO_REGISTER_INTERFACES
-#define STAGE_DO_REGISTER_PPP_INTERFACE                                  STAGE_INTERFACE_TABLE_IS_READY_TO_REGISTER_INTERFACES
-#define STAGE_ETH_INTERFACE_REGISTERED                             STAGE_REGISTER_ETH_INTERFACE + 1
-#define STAGE_PPP_INTERFACE_REGISTERED                             STAGE_REGISTER_PPP_INTERFACE + 1
-#define STAGE_ALL_INTERFACES_REGISTERED                           max(STAGE_ETH_INTERFACE_IS_REGISTERED, STAGE_PPP_INTERFACE_IS_REGISTERED)
-*/
 
 /**
- * cModule::initialize stage naming rules
- *
- * Stage names are defined using C++ macro definitions. There are two kinds of
- * such macros, one that specifies some activity, and another one that specifies
- * some state.
- *
- * An activity describing stage name tells what does the corresponding else-if
- * branch in the implementor module's initialize function should do. These names
- * should start with the STAGE_DO prefix. The macro expressions on the right side
- * should only use state describing stage names.
- *
- * A state describing stage name should tell what state is available for all modules
- * in that stage. These names should start with the STAGE prefix. The macro expressions
- * on the right side should only use activity describing stage names.
+ * Initialization stages.
  */
-
-#define _max_(a, b)   ((a) > (b) ? (a) : (b))
-
-enum InetInitStages
+enum InitStages
 {
-    STAGE_DO_LOCAL = 0,            // for changes that don't depend on other modules
-    STAGE_CHANNEL_AVAILABLE = 0,    // gate path bejarhato, transmission channel available on gate path
+    /**
+     * Local initializations. Initializations that don't use or affect
+     * other modules take place (e.g. reading of parameters); modules may
+     * subscribe to notifications. NodeStatus, NotificationBoard, IPassiveQueue,
+     * etc. are available for other modules after this stage.
+     */
+    INITSTAGE_LOCAL = 0,
 
-    STAGE_NODESTATUS_AVAILABLE = STAGE_DO_LOCAL + 1,        // NodeStatus module knows the initial status of the node
-    STAGE_IP_LAYER_READY_FOR_HOOK_REGISTRATION = STAGE_DO_LOCAL + 1,      // The IP layer ready for calling the registerHook() function
-    STAGE_IP_LAYER_READY_FOR_PROTOCOL_REGISTRATION = STAGE_DO_LOCAL + 1,      // The IP layer ready for receive the registerProtocol message
-    STAGE_NOTIFICATIONBOARD_AVAILABLE = STAGE_DO_LOCAL + 1,      // The NotificationBoard ready for calling the subscribe() and fireChangeNotification() functions
-    STAGE_DO_ASSIGN_MOBILITY_COORDINATOR = STAGE_DO_LOCAL + 1,      // used in MoBANCoordinator/MoBANLocal modules
-    STAGE_ANNOTATIONMANAGER_AVAILABLE = STAGE_DO_LOCAL + 1,
-    STAGE_BATTERY_READY_FOR_DEVICE_REGISTRATION = STAGE_DO_LOCAL + 1,
-    STAGE_CHANNELCONTROL_AVAILABLE = STAGE_DO_LOCAL + 1,      // registerRadio(), setChannel(), etc. available in IChannelControl module
-    STAGE_DO_IPV6ROUTINGTABLE_XMIPV6_SETTINGS = STAGE_DO_LOCAL + 1,
-    STAGE_DO_TRACI_LAUNCH = STAGE_DO_LOCAL + 1,      // FIXME why 1? why not 0?
-    STAGE_INTERFACETABLE_READY_FOR_INTERFACE_REGISTRATION = STAGE_DO_LOCAL + 1,
-    STAGE_DO_REGISTER_INTERFACE = STAGE_INTERFACETABLE_READY_FOR_INTERFACE_REGISTRATION,       // register interface entries to interface tables
-    STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP = STAGE_IP_LAYER_READY_FOR_PROTOCOL_REGISTRATION,       // sending register protocol msg to IP layer
-    STAGE_DO_GENERATE_MACADDRESS = STAGE_DO_REGISTER_INTERFACE,
-    STAGE_CHANNELCONTROL_NUMCHANNELS_AVAILABLE = STAGE_DO_LOCAL + 1,
-    STAGE_IPASSIVEQUEUE_AVAILABLE = STAGE_DO_LOCAL + 1,       // IPassiveQueue::memberFunctions() work correctly
-    STAGE_DO_SUBSCRIBE_TO_RADIOSTATE_NOTIFICATIONS = _max_(STAGE_DO_LOCAL + 1, STAGE_NOTIFICATIONBOARD_AVAILABLE),          // notificationBoard->subscribe() to NF_RADIOSTATE_CHANGED and NF_RADIO_CHANNEL_CHANGED
+    /**
+     * Physical environment initializations (mobility, obstacles, battery, annotations, etc).
+     */
+    INITSTAGE_PHYSICAL_ENVIRONMENT = 1,
 
-    STAGE_TRANSPORTPROTOCOLID_REGISTERED_IN_IP = STAGE_DO_REGISTER_TRANSPORTPROTOCOLID_IN_IP + 1,
-    STAGE_RADIOSTATE_SUBSCRIPTIONS_DONE = STAGE_DO_SUBSCRIBE_TO_RADIOSTATE_NOTIFICATIONS + 1,
-    STAGE_DO_PUBLISH_RADIOSTATE = STAGE_RADIOSTATE_SUBSCRIPTIONS_DONE,
-    STAGE_MACADDRESS_AVAILABLE = STAGE_DO_GENERATE_MACADDRESS + 1,
-    STAGE_DO_ADD_IP_PROTOCOLDATA_TO_INTERFACEENTRY = STAGE_DO_REGISTER_INTERFACE + 1,
-    STAGE_INTERFACEENTRY_REGISTERED = STAGE_DO_REGISTER_INTERFACE + 1,
-    STAGE_MOBILITY_COORDINATOR_ASSIGNED = STAGE_DO_ASSIGN_MOBILITY_COORDINATOR + 1,
-    STAGE_DO_INITIALIZE_AND_PUBLISH_LOCATION = STAGE_MOBILITY_COORDINATOR_ASSIGNED,
-    STAGE_DO_COMPUTE_IP_AUTOCONFIGURATION = STAGE_INTERFACEENTRY_REGISTERED,
-    STAGE_TRANSPORT_LAYER_AVAILABLE = _max_(STAGE_NODESTATUS_AVAILABLE + 1, STAGE_TRANSPORTPROTOCOLID_REGISTERED_IN_IP),
+    /**
+     * Additional physical environment initializations that depend on the previous stage.
+     * Some mobility modules (namely group mobility) compute and publish locations in this stage,
+     * because they learn their mobility coordinator in the previous stage.
+     */
+    INITSTAGE_PHYSICAL_ENVIRONMENT_2 = 2,
 
-    STAGE_LOCATION_AVAILABLE = STAGE_DO_INITIALIZE_AND_PUBLISH_LOCATION + 1,
-    STAGE_DO_REGISTER_RADIO = _max_(_max_(
-            STAGE_LOCATION_AVAILABLE,
-            STAGE_NODESTATUS_AVAILABLE),
-            STAGE_CHANNELCONTROL_AVAILABLE),
-    STAGE_DO_CONFIGURE_IP_ADDRESSES = STAGE_DO_COMPUTE_IP_AUTOCONFIGURATION + 1,
-    STAGE_INTERFACEENTRY_IP_PROTOCOLDATA_AVAILABLE = STAGE_DO_ADD_IP_PROTOCOLDATA_TO_INTERFACEENTRY + 1,
+    /**
+     * Initialization of the physical layer of protocol stacks. Radio publishes the initial RadioState;
+     * radios are registered in ChannelController.
+     */
+    INITSTAGE_PHYSICAL_LAYER = 3,
 
-    STAGE_DO_ADD_STATIC_ROUTES = STAGE_DO_CONFIGURE_IP_ADDRESSES + 1,
-    STAGE_DO_SET_INTERFACEENTRY_RTR_ADV_INTERVAL = STAGE_INTERFACEENTRY_IP_PROTOCOLDATA_AVAILABLE + 1, /*TODO refactor IPv6NeighborDiscovery so that this constant is not needed*/
-    STAGE_IP_ADDRESS_AVAILABLE = STAGE_DO_CONFIGURE_IP_ADDRESSES + 1,
-    STAGE_DO_ASSIGN_ROUTERID = STAGE_IP_ADDRESS_AVAILABLE,     // set routerID, update IFACENETMASK routes
+    /**
+     * Initialization of link-layer protocols. Automatic MAC addresses are
+     * assigned; interfaces are registered in InterfaceTable.
+     */
+    INITSTAGE_LINK_LAYER = 4,
 
-    STAGE_ROUTERID_AVAILABLE = STAGE_DO_ASSIGN_ROUTERID + 1,
-    STAGE_DO_INIT_ROUTING_PROTOCOLS = _max_(_max_(_max_(_max_(_max_(
-            STAGE_ROUTERID_AVAILABLE,
-            STAGE_IP_ADDRESS_AVAILABLE),
-            STAGE_DO_SET_INTERFACEENTRY_RTR_ADV_INTERVAL + 1),
-            STAGE_INTERFACEENTRY_IP_PROTOCOLDATA_AVAILABLE),
-            STAGE_INTERFACEENTRY_REGISTERED),
-            STAGE_TRANSPORTPROTOCOLID_REGISTERED_IN_IP),
+    /**
+     * Additional link-layer initializations that depend on the previous stage.
+     */
+    INITSTAGE_LINK_LAYER_2 = 5,
 
-    STAGE_ROUTINGTABLE_COMPLETED = STAGE_DO_INIT_ROUTING_PROTOCOLS + 1,
+    /**
+     * Initialization of network-layer protocols, stage 1. Network configurators
+     * (e.g. IPv4NetworkConfigurator) run in this stage and compute IP addresses
+     * and static routes; protocol-specific data (e.g. IPv4InterfaceData)
+     * are added to InterfaceEntry; netf7ilter hooks are registered in IPv4; etc.
+     */
+    INITSTAGE_NETWORK_LAYER = 6,
 
-    STAGE_ROUTING_PROTOCOLS_INITIALIZED = STAGE_ROUTINGTABLE_COMPLETED + 1,
-    STAGE_DO_INIT_APPLICATION = _max_(_max_(_max_(_max_(_max_(
-            STAGE_ROUTING_PROTOCOLS_INITIALIZED,
-            STAGE_INTERFACEENTRY_REGISTERED),
-            STAGE_IP_ADDRESS_AVAILABLE),
-            STAGE_NODESTATUS_AVAILABLE),
-            STAGE_TRANSPORTPROTOCOLID_REGISTERED_IN_IP),
-            STAGE_TRANSPORT_LAYER_AVAILABLE),
+    /**
+     * Initialization of network-layer protocols, stage 2. IP addresses
+     * are assigned in this stage.
+     */
+    INITSTAGE_NETWORK_LAYER_2 = 7,
 
-    NUM_STAGES
+    /**
+     * Initialization of network-layer protocols, stage 3. Static routes
+     * are added, routerIDs are computed, etc.
+     */
+    INITSTAGE_NETWORK_LAYER_3 = 8,
+
+    /**
+     * Initialization of network-layer protocols, stage 4. Exists because
+     * LIBTable needs to read routerID.
+     */
+    INITSTAGE_NETWORK_LAYER_4 = 9,
+
+    /**
+     * Initialization of transport-layer protocols. Transport protocols register
+     * their protocol IDs in IP, etc.
+     */
+    INITSTAGE_TRANSPORT_LAYER = 10,
+
+    /**
+     * Initialization of transport-layer protocols, 2nd stage. Exists because SCTP
+     * may be transported over UDP.
+     */
+    INITSTAGE_TRANSPORT_LAYER_2 = 11,
+
+    /**
+     * Initialization of routing protocols.
+     */
+    INITSTAGE_ROUTING_PROTOCOLS = 12,
+
+    /**
+     * Initialization of applications.
+     */
+    INITSTAGE_APPLICATION_LAYER = 13,
+
+    /**
+     * Operations that no other initializations can depend on, e.g. display string updates.
+     */
+    INITSTAGE_LAST = 14,
+
+    /**
+     * The number of initialization stages.
+     */
+    NUM_INIT_STAGES,
 };
 
 #endif // __INET_INITSTAGES

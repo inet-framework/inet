@@ -268,7 +268,7 @@ class DYMOUM : public ManetRoutingBase
     IPv4Datagram *pkt_decapsulate(IPv4Datagram *);
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
-    virtual int numInitStages() const;
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     void recvDYMOUMPacket(cMessage * p);
     void processPacket(IPv4Datagram *, unsigned int);

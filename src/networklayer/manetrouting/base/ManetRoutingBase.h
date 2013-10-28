@@ -126,10 +126,9 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     ManetRoutingBase();
 
 ////////////////////////////////////////////
-////////////////////////////////////////////
-///     CRITICAL
-//      must be executed in the initialize method with stage 4 o bigger, this method initialize all the estructures
-/////////////////////////////////////////////
+//
+//   to be called in INITSTAGE_ROUTING_PROTOCOLS
+//
 /////////////////////////////////////////////
     virtual void registerRoutingModule();
 
@@ -197,8 +196,6 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
 
     /**
      * Activate the register position (subscribe to mobilityStateChanged signal).
-     * For position protocols this method must be activated in the stage 0 to register
-     * the initial node position
      */
     virtual void registerPosition();
     //@}
