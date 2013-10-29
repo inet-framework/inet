@@ -132,7 +132,7 @@ void IPv4RoutingTable::configureRouterId()
             for (int i=0; i<ift->getNumInterfaces(); ++i)
             {
                 InterfaceEntry *ie = ift->getInterface(i);
-                if (!ie->isLoopback() && ie->ipv4Data()->getIPAddress().getInt() > routerId.getInt())
+                if (!ie->isLoopback() && ie->ipv4Data() && ie->ipv4Data()->getIPAddress().getInt() > routerId.getInt())
                     routerId = ie->ipv4Data()->getIPAddress();
             }
         }
