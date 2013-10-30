@@ -18,7 +18,6 @@
 
 #include "EtherFrame.h"
 #include "STP.h"
-#include "STPMACCompare.h"
 #include "InterfaceTableAccess.h"
 #include "InterfaceEntry.h"
 #include "STPTester.h"
@@ -584,9 +583,9 @@ int STP::superiorID(unsigned int aPriority, MACAddress aAddress, unsigned int bP
         return -1;
 
     // APR == BPR
-    if (aAddress < bAddress)
+    if (aAddress.compareTo(bAddress) == -1)
         return 1; // A is superior
-    else if (aAddress > bAddress)
+    else if (aAddress.compareTo(bAddress) == 1)
         return -1;
 
     // A==B
