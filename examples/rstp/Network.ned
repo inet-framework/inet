@@ -16,7 +16,6 @@
 package inet.examples.rstp;
 
 import inet.nodes.ethernet.Eth1G;
-import inet.nodes.rstp.RSTPSwitch;
 import inet.nodes.ethernet.EtherHost;
 import inet.base.LifecycleController;
 import inet.nodes.ethernet.EtherSwitch;

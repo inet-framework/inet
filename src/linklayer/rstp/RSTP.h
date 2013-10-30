@@ -20,7 +20,7 @@
 #define __A_RSTP_H
 
 #include "ILifecycle.h"
-#include "BPDU.h"
+#include "IEEE8021DBPDU_m.h"
 #include "MACAddress.h"
 #include "EtherFrame.h"
 #include "MACAddressTable.h"
@@ -50,7 +50,6 @@ class RSTP: public cSimpleModule, public ILifecycle
 	bool isOperational; // for lifecycle
 
 	cModule* Parent; /// Pointer to the parent module
-	cModule* relay;
 
 	unsigned int portCount;
 	simtime_t TCWhileTime; /// TCN activation time
@@ -117,7 +116,7 @@ class RSTP: public cSimpleModule, public ILifecycle
 	 * @brief BPDU processing.
 	 * Updates RSTP vectors information. Handles port role changes.
 	 */
-	virtual void handleIncomingFrame(BPDUieee8021D *frame);
+	virtual void handleIncomingFrame(BPDU *frame);
 
 	/**
 	 * @brief Savin statistics
@@ -134,14 +133,14 @@ class RSTP: public cSimpleModule, public ILifecycle
 	virtual int getRootIndex();
 
 
-	virtual void updateInterfacedata(BPDUieee8021D *frame,unsigned int portNum);
+	virtual void updateInterfacedata(BPDU *frame,unsigned int portNum);
 
 	/**
 	 * @brief Compares the frame with the frame this module would send through that port
 	 * @return (<0 if own vector is better than frame)
 	 * -4=Worse Port -3=Worse Src -2=Worse RPC -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
 	 */
-	virtual int contestInterfacedata(BPDUieee8021D* msg,unsigned int portNum);
+	virtual int contestInterfacedata(BPDU* msg,unsigned int portNum);
 
 	/**
 	 * @brief Compares the vector with the frame this module would send through that por
@@ -154,7 +153,7 @@ class RSTP: public cSimpleModule, public ILifecycle
 	 * @brief If root TCWhile has not expired, sends a BPDU to the Root with TCFlag=true.
 	 */
 
-	virtual int compareInterfacedata(unsigned int portNum, BPDUieee8021D * msg,int linkCost);
+	virtual int compareInterfacedata(unsigned int portNum, BPDU * msg,int linkCost);
 
 	virtual void sendTCNtoRoot();
 
@@ -177,12 +176,12 @@ class RSTP: public cSimpleModule, public ILifecycle
 	 * @brief Checks the frame TC flag.
 	 * Sets TCWhile if the port was forwarding and the flag is true.
 	 */
-	virtual void checkTC(BPDUieee8021D * frame, int arrival);
+	virtual void checkTC(BPDU * frame, int arrival);
 
 	/**
 	 * @brief Handles the switch to backup in one of the ports
 	 */
-	virtual void handleBK(BPDUieee8021D * frame, int arrival);
+	virtual void handleBK(BPDU * frame, int arrival);
 
   // for lifecycle:
   public:

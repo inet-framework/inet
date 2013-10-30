@@ -67,7 +67,7 @@ void RelayRSTP::handleMessage(cMessage *msg)
     if (msg->arrivedOn("RSTPGate$i"))
     { //Outgoing Frame. Ieee802Ctrl encapsulates the frame.
         ev<<"Outgoing Frame";
-        handleFrameFromRSTP(check_and_cast<BPDUieee8021D *> (msg));
+        handleFrameFromRSTP(check_and_cast<BPDU *> (msg));
     }
     else if (dynamic_cast<EtherFrame *>(msg) != NULL && check_and_cast<EtherFrame *> (msg)->getDest()==MACAddress::STP_MULTICAST_ADDRESS) //TODO: Find a better condition
     {
@@ -102,7 +102,7 @@ void RelayRSTP::handleBPDUFrame(EtherFrame *frame)
 {
     if((frame->getDest()==address)||(frame->getDest()==MACAddress::STP_MULTICAST_ADDRESS))
     {
-        BPDUieee8021D *bpduFrame = check_and_cast<BPDUieee8021D *>(PK(frame)->decapsulate());
+        BPDU *bpduFrame = check_and_cast<BPDU *>(PK(frame)->decapsulate());
         Ieee802Ctrl * etherctrl= new Ieee802Ctrl();
         etherctrl->setInterfaceId(frame->getArrivalGate()->getIndex());
         etherctrl->setDest(frame->getDest());
@@ -117,7 +117,7 @@ void RelayRSTP::handleBPDUFrame(EtherFrame *frame)
     }
 }
 
-void RelayRSTP::handleFrameFromRSTP(BPDUieee8021D *frame)
+void RelayRSTP::handleFrameFromRSTP(BPDU *frame)
 {
     Ieee802Ctrl * etherctrl=check_and_cast<Ieee802Ctrl *>(frame->removeControlInfo());
     EtherFrame *eth2Frame = new EthernetIIFrame(frame->getName());;

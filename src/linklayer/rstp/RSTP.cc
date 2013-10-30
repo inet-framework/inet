@@ -21,10 +21,6 @@
 #include "EtherFrame.h"
 #include "EtherMAC.h"
 #include "Ethernet.h"
-#include "MACRelayUnitBase.h"
-#include "XMLUtils.h"
-#include "RelayRSTP.h"
-#include "RelayRSTPAccess.h"
 #include "MACAddressTableAccess.h"
 #include "InterfaceTableAccess.h"
 #include "InterfaceEntry.h"
@@ -39,7 +35,6 @@ Define_Module (RSTP);
 RSTP::RSTP()
 {
     Parent = NULL;
-    relay = NULL;
     sw = NULL;
 	helloM = new cMessage("itshellotime", SELF_HELLOTIME);
 	forwardM = new cMessage("upgrade", SELF_UPGRADE);
@@ -70,9 +65,6 @@ void RSTP::initialize(int stage)
 		sw=MACAddressTableAccess().get(); //cache pointer
 		//Gets the relay pointer.
 		ifTable=InterfaceTableAccess().get();
-		relay=RelayRSTPAccess().getIfExists();
-		if(relay==NULL)
-			error("Relay module not found");
 
 		portCount = this->getParentModule()->gate("ethg$o", 0)->getVectorSize();
 
@@ -151,7 +143,7 @@ void RSTP::handleMessage(cMessage *msg)
 	else
 	{
 		ev<<"BPDU received at RSTP module."<<endl;
-	handleIncomingFrame(check_and_cast<BPDUieee8021D *> (msg));   //Handling BPDU (not self message)
+	handleIncomingFrame(check_and_cast<BPDU *> (msg));   //Handling BPDU (not self message)
 
 	}
 	if(verbose==true)
@@ -286,10 +278,10 @@ void RSTP::handleHelloTime(cMessage * msg)
 	scheduleAt(simTime()+hellotime, msg); //Programming next hello time.
 }
 
-void RSTP::checkTC(BPDUieee8021D * frame, int arrival)
+void RSTP::checkTC(BPDU * frame, int arrival)
 {
     IEEE8021DInterfaceData * port = getPortInterfaceData(arrival);
-	if((frame->getTC() == true) && (port->getState() == IEEE8021DInterfaceData::FORWARDING))
+	if((frame->getTcFlag() == true) && (port->getState() == IEEE8021DInterfaceData::FORWARDING))
 	{
 		Parent->bubble("TCN received");
 		for(unsigned int i=0;i<portCount;i++)
@@ -306,12 +298,12 @@ void RSTP::checkTC(BPDUieee8021D * frame, int arrival)
 	}
 }
 
-void RSTP::handleBK(BPDUieee8021D * frame, int arrival)
+void RSTP::handleBK(BPDU * frame, int arrival)
 {
     IEEE8021DInterfaceData * port = getPortInterfaceData(arrival);
 	if((frame->getPortPriority() < port->getPortPriority())
 			|| ((frame->getPortPriority() == port->getPortPriority())
-			        && (frame->getPortNumber() < arrival)))
+			        && (frame->getPortNum() < arrival)))
 	{
 		//Flushing this port
 		sw->flush(arrival);
@@ -321,28 +313,28 @@ void RSTP::handleBK(BPDUieee8021D * frame, int arrival)
 	}
 	else if(frame->getPortPriority() > port->getPortPriority()
 			|| (frame->getPortPriority() == port->getPortPriority()
-			        && frame->getPortNumber() > arrival))
+			        && frame->getPortNum() > arrival))
 	{
-	    IEEE8021DInterfaceData * port2 = getPortInterfaceData(frame->getPortNumber());
+	    IEEE8021DInterfaceData * port2 = getPortInterfaceData(frame->getPortNum());
 		//Flushing that port
-		sw->flush(frame->getPortNumber());  //PortNumber is sender port number. It is not arrival port.
+		sw->flush(frame->getPortNum());  //PortNumber is sender port number. It is not arrival port.
 		port2->setRole(IEEE8021DInterfaceData::BACKUP);
 		port2->setState(IEEE8021DInterfaceData::DISCARDING);
         port2->setLostBPDU(0);
 	}
 	else
 	{
-	    IEEE8021DInterfaceData * port2 = getPortInterfaceData(frame->getPortNumber());
+	    IEEE8021DInterfaceData * port2 = getPortInterfaceData(frame->getPortNum());
 	    //Unavoidable loop. Received its own message at the same port.Switch to disabled.
 		ev<<"Unavoidable loop. Received its own message at the same port. To disabled."<<endl;
 		//Flushing that port
-		sw->flush(frame->getPortNumber());  //PortNumber is sender port number. It is not arrival port.
+		sw->flush(frame->getPortNum());  //PortNumber is sender port number. It is not arrival port.
         port2->setRole(IEEE8021DInterfaceData::DISABLED);
         port2->setState(IEEE8021DInterfaceData::DISCARDING);
 	}
 }
 
-void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
+void RSTP::handleIncomingFrame(BPDU *frame)
 {  //Incoming BPDU handling
 	if(verbose==true)
 	{
@@ -354,7 +346,7 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
     int arrival=etherctrl->getInterfaceId();
     MACAddress src = etherctrl->getSrc();
     delete etherctrl;
-	if(frame->getAge()<MaxAge)
+	if(frame->getMessageAge()<MaxAge)
 	{
 		//Checking TC.
 		checkTC(frame, arrival); //Sets TCWhile if arrival port was Forwarding
@@ -378,7 +370,7 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 			bool Flood=false;
 			caso=compareInterfacedata(arrival,frame,arrivalPort->getLinkCost());
 			EV_DEBUG<<"caso: "<<caso<<endl;
-			if((caso>0)&&(frame->getRootMAC().compareTo(address)!=0)) //Root will not participate in a loop with its own address
+			if((caso>0)&&(frame->getRootAddress().compareTo(address)!=0)) //Root will not participate in a loop with its own address
 			{
 				//Update that port rstp info.
 				updateInterfacedata(frame,arrival);
@@ -550,7 +542,7 @@ void RSTP::handleIncomingFrame(BPDUieee8021D *frame)
 				}
 			}
 			else if((src.compareTo(arrivalPort->getBridgeAddress())==0) //Worse or similar, but the same source
-					&&(frame->getRootMAC().compareTo(address)!=0))   // Root will not participate
+					&&(frame->getRootAddress().compareTo(address)!=0))   // Root will not participate
 			{
 			    //Source has updated BPDU information.
 				switch(caso)
@@ -715,26 +707,25 @@ void RSTP::sendTCNtoRoot()
 		{
 			if(simulation.getSimTime()<rootPort->getTCWhile())
 			{
-				BPDUieee8021D * frame = new BPDUieee8021D();
+				BPDU * frame = new BPDU();
 				Ieee802Ctrl * etherctrl= new Ieee802Ctrl();
 
 				frame->setRootPriority(rootPort->getRootPriority());
-				frame->setRootMAC(rootPort->getRootAddress());
-				frame->setAge(rootPort->getAge());
-				frame->setCost(rootPort->getRootPathCost());
-				frame->setSrcPriority(priority);
-				frame->setAck(false);
-				frame->setPortNumber(r);  //Src port number.
-				frame->setSrcMAC(address);
-				frame->setTC(true);
-				frame->setDisplayString("b=,,,#3e3ef3");
+				frame->setRootAddress(rootPort->getRootAddress());
+				frame->setMessageAge(rootPort->getAge());
+				frame->setRootPathCost(rootPort->getRootPathCost());
+				frame->setBridgePriority(priority);
+				frame->setTcaFlag(false);
+				frame->setPortNum(r);  //Src port number.
+				frame->setBridgeAddress(address);
+				frame->setTcFlag(true);
 		        if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
 		            frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
 		        etherctrl->setSrc(address);
 		        etherctrl->setDest(MACAddress::STP_MULTICAST_ADDRESS);
 				etherctrl->setInterfaceId(r);
 				frame->setControlInfo(etherctrl);
-				send(frame,"RSTPPort$o");
+				send(frame,"STPGate$o");
 			}
 		}
 	}
@@ -765,39 +756,38 @@ void RSTP::sendBPDU(int port)
         rootPort = getPortInterfaceData(r);
 	if(iport->getRole() != IEEE8021DInterfaceData::DISABLED)
 	{
-		BPDUieee8021D * frame = new BPDUieee8021D();
+		BPDU * frame = new BPDU();
 		Ieee802Ctrl * etherctrl=new Ieee802Ctrl();
 		if (r!=-1)
 		{
 		    frame->setRootPriority(rootPort->getRootPriority());
-		    frame->setRootMAC(rootPort->getRootAddress());
-		    frame->setAge(rootPort->getAge());
-		    frame->setCost(rootPort->getRootPathCost());
+		    frame->setRootAddress(rootPort->getRootAddress());
+		    frame->setMessageAge(rootPort->getAge());
+		    frame->setRootPathCost(rootPort->getRootPathCost());
 		}
 		else{
 		    frame->setRootPriority(priority);
-            frame->setRootMAC(address);
-            frame->setAge(0);
-            frame->setCost(0);
+            frame->setRootAddress(address);
+            frame->setMessageAge(0);
+            frame->setRootPathCost(0);
 		}
-		frame->setSrcPriority(priority);
-		frame->setAck(false);
-		frame->setPortNumber(port);  //Src port number.
-		frame->setSrcMAC(address);
+		frame->setBridgePriority(priority);
+		frame->setTcaFlag(false);
+		frame->setPortNum(port);  //Src port number.
+		frame->setBridgeAddress(address);
 		if(simulation.getSimTime() < iport->getTCWhile())
 		{
-			frame->setTC(true);
-			frame->setDisplayString("b=,,,#3e3ef3");
+			frame->setTcFlag(true);
 		}
 		else
-			frame->setTC(false);
+			frame->setTcFlag(false);
         if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
             frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
         etherctrl->setSrc(address);
         etherctrl->setDest(MACAddress::STP_MULTICAST_ADDRESS);
 		etherctrl->setInterfaceId(port);
 		frame->setControlInfo(etherctrl);
-		send(frame,"RSTPPort$o");
+		send(frame,"STPGate$o");
 	}
 }
 
@@ -866,7 +856,7 @@ void RSTP::colorRootPorts()
                 sprintf(buf,"FORWARDING\n");
                 break;
             default:
-                sprintf(buf,"WTF\n");
+                sprintf(buf,"UNKNOWN\n");
                 break;
             }
             puerta->getDisplayString().setTagArg("t",0,buf);
@@ -986,17 +976,17 @@ void RSTP::initPorts()
 	}
 }
 
-void RSTP::updateInterfacedata(BPDUieee8021D *frame,unsigned int portNum)
+void RSTP::updateInterfacedata(BPDU *frame,unsigned int portNum)
 {
     IEEE8021DInterfaceData * ifd = getPortInterfaceData(portNum);
     ifd->setRootPriority(frame->getRootPriority());
-    ifd->setRootAddress(frame->getRootMAC());
-    ifd->setRootPathCost(frame->getCost()+ifd->getLinkCost());
-    ifd->setAge(frame->getAge()+1);
-    ifd->setBridgePriority(frame->getSrcPriority());
-    ifd->setBridgeAddress(frame->getSrcMAC());
+    ifd->setRootAddress(frame->getRootAddress());
+    ifd->setRootPathCost(frame->getRootPathCost()+ifd->getLinkCost());
+    ifd->setAge(frame->getMessageAge()+1);
+    ifd->setBridgePriority(frame->getBridgePriority());
+    ifd->setBridgeAddress(frame->getBridgeAddress());
     ifd->setPortPriority(frame->getPortPriority());
-    ifd->setPortNum(frame->getPortNumber());
+    ifd->setPortNum(frame->getPortNum());
     ifd->setLostBPDU(0);
 }
 int RSTP::contestInterfacedata(unsigned int portNum)
@@ -1052,7 +1042,7 @@ int RSTP::contestInterfacedata(unsigned int portNum)
     return 0;
 }
 
-int RSTP::contestInterfacedata(BPDUieee8021D* msg,unsigned int portNum)
+int RSTP::contestInterfacedata(BPDU* msg,unsigned int portNum)
 {
     //Compares msg with the vector that would be sent if this were the root node for the arrival LAN.
 	// >0 if frame vector better than own vector. =0 if they are similar.
@@ -1071,12 +1061,12 @@ int RSTP::contestInterfacedata(BPDUieee8021D* msg,unsigned int portNum)
     int portNum1=portNum;
 
     int rootPriority2=msg->getRootPriority();
-    MACAddress rootAddress2=msg->getRootMAC();
-    int rootPathCost2=msg->getCost();
-    int bridgePriority2=msg->getSrcPriority();
-    MACAddress bridgeAddress2=msg->getSrcMAC();
+    MACAddress rootAddress2=msg->getRootAddress();
+    int rootPathCost2=msg->getRootPathCost();
+    int bridgePriority2=msg->getBridgePriority();
+    MACAddress bridgeAddress2=msg->getBridgeAddress();
     int portPriority2=msg->getPortPriority();
-    int portNum2=msg->getPortNumber();
+    int portNum2=msg->getPortNum();
 
 
     if(rootPriority1 != rootPriority2)
@@ -1107,7 +1097,7 @@ int RSTP::contestInterfacedata(BPDUieee8021D* msg,unsigned int portNum)
 
 
 }
-int RSTP::compareInterfacedata(unsigned int portNum, BPDUieee8021D * msg,int linkCost)
+int RSTP::compareInterfacedata(unsigned int portNum, BPDU * msg,int linkCost)
 {
     IEEE8021DInterfaceData * ifd = getPortInterfaceData(portNum);
 
@@ -1120,12 +1110,12 @@ int RSTP::compareInterfacedata(unsigned int portNum, BPDUieee8021D * msg,int lin
     int portNum1=ifd->getPortNum();
 
     int rootPriority2=msg->getRootPriority();
-    MACAddress rootAddress2=msg->getRootMAC();
-    int rootPathCost2=msg->getCost()+linkCost;
-    int bridgePriority2=msg->getSrcPriority();
-    MACAddress bridgeAddress2=msg->getSrcMAC();
+    MACAddress rootAddress2=msg->getRootAddress();
+    int rootPathCost2=msg->getRootPathCost()+linkCost;
+    int bridgePriority2=msg->getBridgePriority();
+    MACAddress bridgeAddress2=msg->getBridgeAddress();
     int portPriority2=msg->getPortPriority();
-    int portNum2=msg->getPortNumber();
+    int portNum2=msg->getPortNum();
 
 
     if(rootPriority1 != rootPriority2)
@@ -1250,7 +1240,11 @@ bool RSTP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
 IEEE8021DInterfaceData * RSTP::getPortInterfaceData(unsigned int portNum)
 {
     cGate * gate = this->getParentModule()->gate("ethg$o", portNum);
+    if(gate==NULL)
+        error("gate is NULL");
     InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
+    if(gateIfEntry==NULL)
+            error("gateIfEntry is NULL");
     IEEE8021DInterfaceData * portData = gateIfEntry->ieee8021DData();
 
     if (!portData)
