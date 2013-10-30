@@ -41,7 +41,7 @@ void UDPSocket::sendToUDP(cMessage *msg)
     if (!gateToUdp)
         throw cRuntimeError("UDPSocket: setOutputGate() must be invoked before socket can be used");
 
-    check_and_cast<InetSimpleModule *>(gateToUdp->getOwnerModule())->send(msg, gateToUdp);
+    check_and_cast<InetSimpleModule *>(gateToUdp->getOwnerModule())->sendSync(msg, gateToUdp);
 }
 
 void UDPSocket::bind(int localPort)
@@ -94,7 +94,7 @@ void UDPSocket::sendTo(cPacket *pk, Address destAddr, int destPort, const SendOp
     pk->setControlInfo(ctrl);
     sendToUDP(pk);
 }
-void UDPSocket::send(cPacket *pk)
+void UDPSocket::sendSync(cPacket *pk)
 {
     pk->setKind(UDP_C_DATA);
     UDPSendCommand *ctrl = new UDPSendCommand();

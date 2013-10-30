@@ -336,7 +336,7 @@ void OSPF::MessageHandler::sendPacket(OSPFPacket* packet, IPv4Address destinatio
         default: break;
     }
 
-    ospfModule->send(packet, "ipOut");
+    ospfModule->sendSync(packet, "ipOut");
 }
 
 void OSPF::MessageHandler::clearTimer(cMessage* timer)

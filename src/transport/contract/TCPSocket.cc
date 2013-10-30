@@ -89,7 +89,7 @@ void TCPSocket::sendToTCP(cMessage *msg)
     if (!gateToTcp)
         throw cRuntimeError("TCPSocket: setOutputGate() must be invoked before socket can be used");
 
-    check_and_cast<InetSimpleModule *>(gateToTcp->getOwnerModule())->send(msg, gateToTcp);
+    check_and_cast<InetSimpleModule *>(gateToTcp->getOwnerModule())->sendSync(msg, gateToTcp);
 }
 
 void TCPSocket::bind(int lPort)
@@ -166,10 +166,10 @@ void TCPSocket::connect(Address remoteAddress, int remotePort)
     sockstate = CONNECTING;
 }
 
-void TCPSocket::send(cMessage *msg)
+void TCPSocket::sendSync(cMessage *msg)
 {
     if (sockstate != CONNECTED && sockstate != CONNECTING && sockstate != PEER_CLOSED)
-        throw cRuntimeError("TCPSocket::send(): socket not connected or connecting, state is %s", stateName(sockstate));
+        throw cRuntimeError("TCPSocket::sendSync(): socket not connected or connecting, state is %s", stateName(sockstate));
 
     msg->setKind(TCP_C_SEND);
     TCPSendCommand *cmd = new TCPSendCommand();

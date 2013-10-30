@@ -191,7 +191,7 @@ void GPSR::processPurgeNeighborsTimer()
 void GPSR::sendUDPPacket(UDPPacket * packet, double delay)
 {
     if (delay == 0)
-        send(packet, "ipOut");
+        sendSync(packet, "ipOut");
     else
         sendDelayed(packet, delay, "ipOut");
 }

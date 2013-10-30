@@ -363,7 +363,7 @@ void xDYMO::processRREQHolddownTimer(RREQHolddownTimer * message)
 void xDYMO::sendUDPPacket(UDPPacket * packet, double delay)
 {
     if (delay == 0)
-        send(packet, "ipOut");
+        sendSync(packet, "ipOut");
     else
         sendDelayed(packet, delay, "ipOut");
 }

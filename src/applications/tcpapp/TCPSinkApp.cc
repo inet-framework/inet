@@ -59,7 +59,7 @@ void TCPSinkApp::handleMessage(cMessage *msg)
         // we close too
         msg->setName("close");
         msg->setKind(TCP_C_CLOSE);
-        send(msg, "tcpOut");
+        sendSync(msg, "tcpOut");
     }
     else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA)
     {

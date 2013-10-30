@@ -121,7 +121,7 @@ void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool
     cMessage *reply = handleReceivedMessage(msg);
     if (reply!=NULL)
     {
-        socket->send(reply); // Send to socket if the reply is non-zero.
+        socket->sendSync(reply); // Send to socket if the reply is non-zero.
     }
     delete msg; // Delete the received message here. Must not be deleted in the handler!
 }

@@ -365,7 +365,7 @@ void ARP::sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& m
     msg->setControlInfo(controlInfo);
 
     // send out
-    send(msg, netwOutGate);
+    sendSync(msg, netwOutGate);
 }
 
 void ARP::sendARPRequest(InterfaceEntry *ie, IPv4Address ipAddress)

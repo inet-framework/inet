@@ -96,7 +96,7 @@ cMessage* TCP_NSC_Connection::createEstablishedMsg()
     tcpConnectInfo->setRemotePort(inetSockPairM.remoteM.portM);
 
     msg->setControlInfo(tcpConnectInfo);
-    //tcpMain->send(estmsg, "appOut", appGateIndex);
+    //tcpMain->sendSync(estmsg, "appOut", appGateIndex);
     return msg;
 }
 
@@ -161,7 +161,7 @@ void TCP_NSC_Connection::listen(INetStack &stackP, SockPair &inetSockPairP, Sock
     nscSockPairP.remoteM.portM = -1;
 }
 
-void TCP_NSC_Connection::send(cPacket *msgP)
+void TCP_NSC_Connection::sendSync(cPacket *msgP)
 {
     ASSERT(sendQueueM);
     sendQueueM->enqueueAppData(msgP);
@@ -207,7 +207,7 @@ void TCP_NSC_Connection::do_SEND()
             TCPCommand *ind = new TCPCommand();
             ind->setConnId(connIdM);
             msg->setControlInfo(ind);
-            tcpNscM->send(msg, "appOut", appGateIndexM);
+            tcpNscM->sendSync(msg, "appOut", appGateIndexM);
             //FIXME this connection never will be deleted, stayed in tcpNscM. Should delete later!
         }
     }

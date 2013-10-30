@@ -83,7 +83,7 @@ void SCTPSocket::sendToSCTP(cPacket *msg)
     if (!gateToSctp)
         throw cRuntimeError("SCTPSocket: setOutputGate() must be invoked before socket can be used");
 
-    check_and_cast<InetSimpleModule *>(gateToSctp->getOwnerModule())->send(msg, gateToSctp);
+    check_and_cast<InetSimpleModule *>(gateToSctp->getOwnerModule())->sendSync(msg, gateToSctp);
 }
 
 void SCTPSocket::bind(int lPort)
@@ -223,10 +223,10 @@ void SCTPSocket::connectx(AddressVector remoteAddressList, int32 remotePort, boo
         sockstate = CONNECTING;
 }
 
-void SCTPSocket::send(cPacket *msg, bool last, bool primary)
+void SCTPSocket::sendSync(cPacket *msg, bool last, bool primary)
 {
     if (oneToOne && sockstate!=CONNECTED && sockstate!=CONNECTING && sockstate!=PEER_CLOSED) {
-        throw cRuntimeError("SCTPSocket::send(): not connected or connecting");
+        throw cRuntimeError("SCTPSocket::sendSync(): not connected or connecting");
     }
     else if (!oneToOne && sockstate!=LISTENING) {
         throw cRuntimeError( "SCTPSocket::send: One-to-many style socket must be listening");
@@ -247,15 +247,15 @@ void SCTPSocket::send(cPacket *msg, bool last, bool primary)
     sendToSCTP(msg);
 }
 
-void SCTPSocket::send(cPacket *msg, int32 prMethod, double prValue, bool last)
+void SCTPSocket::sendSync(cPacket *msg, int32 prMethod, double prValue, bool last)
 {
-    send(msg, prMethod, prValue, last, -1);
+    sendSync(msg, prMethod, prValue, last, -1);
 }
 
-void SCTPSocket::send(cPacket *msg, int32 prMethod, double prValue, bool last, int32 streamId)
+void SCTPSocket::sendSync(cPacket *msg, int32 prMethod, double prValue, bool last, int32 streamId)
 {
     if (oneToOne && sockstate!=CONNECTED && sockstate!=CONNECTING && sockstate!=PEER_CLOSED) {
-        throw cRuntimeError("SCTPSocket::send(): not connected or connecting");
+        throw cRuntimeError("SCTPSocket::sendSync(): not connected or connecting");
     }
     else if (!oneToOne && sockstate!=LISTENING) {
         throw cRuntimeError( "SCTPSocket::send: One-to-many style socket must be listening");

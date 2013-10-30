@@ -72,7 +72,7 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
     ctrl->setInterfaceId(-1);
     ctrl->setSourceAddress(dest);
     ctrl->setDestinationAddress(src);
-    send(reply, "sendOut");
+    sendSync(reply, "sendOut");
 }
 
 void EchoProtocol::processEchoReply(EchoPacket *reply)
@@ -84,7 +84,7 @@ void EchoProtocol::processEchoReply(EchoPacket *reply)
     long originatorId = payload->getOriginatorId();
     PingMap::iterator i = pingMap.find(originatorId);
     if (i != pingMap.end())
-        send(payload, "pingOut", i->second);
+        sendSync(payload, "pingOut", i->second);
     else
     {
         EV << "Received ECHO REPLY has an unknown originator ID: " << originatorId << ", packet dropped." << endl;
@@ -104,5 +104,5 @@ void EchoProtocol::sendEchoRequest(PingPayload *msg)
     request->setType(ECHO_PROTOCOL_REQUEST);
     request->encapsulate(msg);
     request->setControlInfo(ctrl);
-    send(request, "sendOut");
+    sendSync(request, "sendOut");
 }

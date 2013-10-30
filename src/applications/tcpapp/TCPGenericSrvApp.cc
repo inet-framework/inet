@@ -88,7 +88,7 @@ void TCPGenericSrvApp::sendBack(cMessage *msg)
         EV << "sending \"" << msg->getName() << "\" to TCP\n";
     }
 
-    send(msg, "tcpOut");
+    sendSync(msg, "tcpOut");
 }
 
 void TCPGenericSrvApp::handleMessage(cMessage *msg)

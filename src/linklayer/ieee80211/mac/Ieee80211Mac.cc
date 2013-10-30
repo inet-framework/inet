@@ -2742,7 +2742,7 @@ void Ieee80211Mac::sendUp(cMessage *msg)
         if (msg->isPacket())
             emit(packetSentToUpperSignal, msg);
 
-        send(msg, upperLayerOut);
+        sendSync(msg, upperLayerOut);
     }
 }
 

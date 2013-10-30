@@ -61,9 +61,9 @@ void SingleRateThreeColorMeter::handleMessage(cMessage *msg)
     int color = meterPacket(packet);
     switch (color)
     {
-        case GREEN: send(packet, "greenOut"); break;
-        case YELLOW: numYellow++; send(packet, "yellowOut"); break;
-        case RED: numRed++; send(packet, "redOut"); break;
+        case GREEN: sendSync(packet, "greenOut"); break;
+        case YELLOW: numYellow++; sendSync(packet, "yellowOut"); break;
+        case RED: numRed++; sendSync(packet, "redOut"); break;
     }
 
     if (ev.isGUI())

@@ -69,9 +69,9 @@ void BehaviorAggregateClassifier::handleMessage(cMessage *msg)
     emit(pkClassSignal, clazz);
 
     if (clazz >= 0)
-        send(packet, "outs", clazz);
+        sendSync(packet, "outs", clazz);
     else
-        send(packet, "defaultOut");
+        sendSync(packet, "defaultOut");
 
     if (ev.isGUI())
     {

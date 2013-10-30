@@ -152,7 +152,7 @@ bool RTPAVProfilePayload32Sender::sendPacket()
 
             rinpOut->setDataOutPkt(rtpPacket);
 
-            send(rinpOut, "profileOut");
+            sendSync(rinpOut, "profileOut");
         }
         _frameNumber++;
 

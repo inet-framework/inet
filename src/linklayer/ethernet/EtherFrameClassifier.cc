@@ -26,8 +26,8 @@ Define_Module(EtherFrameClassifier);
 void EtherFrameClassifier::handleMessage(cMessage *msg)
 {
     if (dynamic_cast<EtherPauseFrame*>(msg) != NULL)
-        send(msg, "pauseOut");
+        sendSync(msg, "pauseOut");
     else
-        send(msg, "defaultOut");
+        sendSync(msg, "defaultOut");
 }
 

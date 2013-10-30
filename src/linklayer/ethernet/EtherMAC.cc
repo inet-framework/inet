@@ -850,7 +850,7 @@ void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, frame);
     // pass up to upper layer
-    send(frame, "upperLayerOut");
+    sendSync(frame, "upperLayerOut");
 }
 
 void EtherMAC::processReceivedPauseFrame(EtherPauseFrame *frame)

@@ -195,7 +195,7 @@ void EtherTrafGen::sendBurstPackets()
         datapacket->setControlInfo(etherctrl);
 
         emit(sentPkSignal, datapacket);
-        send(datapacket, "out");
+        sendSync(datapacket, "out");
         packetsSent++;
     }
 }

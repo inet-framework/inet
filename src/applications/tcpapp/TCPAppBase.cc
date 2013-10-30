@@ -95,7 +95,7 @@ void TCPAppBase::sendPacket(cPacket *msg)
 {
     int numBytes = msg->getByteLength();
     emit(sentPkSignal, msg);
-    socket.send(msg);
+    socket.sendSync(msg);
 
     packetsSent++;
     bytesSent += numBytes;

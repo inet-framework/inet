@@ -168,7 +168,7 @@ void ICMPv6::processEchoReply(ICMPv6EchoReplyMsg *reply)
     long originatorId = payload->getOriginatorId();
     PingMap::iterator i = pingMap.find(originatorId);
     if (i != pingMap.end())
-        send(payload, "pingOut", i->second);
+        sendSync(payload, "pingOut", i->second);
     else
     {
         EV << "Received ECHO REPLY has an unknown originator ID: " << originatorId << ", packet dropped." << endl;
@@ -263,13 +263,13 @@ void ICMPv6::sendToIP(ICMPv6Message *msg, const IPv6Address& dest)
     ctrlInfo->setProtocol(IP_PROT_IPv6_ICMP);
     msg->setControlInfo(ctrlInfo);
 
-    send(msg, "ipv6Out");
+    sendSync(msg, "ipv6Out");
 }
 
 void ICMPv6::sendToIP(ICMPv6Message *msg)
 {
     // assumes IPv4ControlInfo is already attached
-    send(msg, "ipv6Out");
+    sendSync(msg, "ipv6Out");
 }
 
 ICMPv6Message *ICMPv6::createDestUnreachableMsg(int code)
@@ -332,7 +332,7 @@ bool ICMPv6::validateDatagramPromptingError(IPv6Datagram *origDatagram)
 
 void ICMPv6::errorOut(ICMPv6Message *icmpv6msg)
 {
-    send(icmpv6msg, "errorOut");
+    sendSync(icmpv6msg, "errorOut");
 }
 
 bool ICMPv6::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

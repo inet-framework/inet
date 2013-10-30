@@ -725,7 +725,7 @@ void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
     {
         if (p->getControlInfo())
             delete p->removeControlInfo();
-        send(p, "to_ip");
+        sendSync(p, "to_ip");
         return;
     }
     rtable_entry_t *entry = rtable_find(dest_addr);
@@ -794,7 +794,7 @@ void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
         /* DEBUG(LOG_DEBUG, 0, "Sending pkt uid=%d", ch->uid()); */
         if (p->getControlInfo())
             delete p->removeControlInfo();
-        send(p, "to_ip");
+        sendSync(p, "to_ip");
         /* When forwarding data, make sure we are sending HELLO messages */
         //gettimeofday(&this_host.fwd_time, NULL);
         hello_init();
@@ -881,7 +881,7 @@ void DYMOUM::processMacPacket(cPacket * p, const ManetAddress &dest, const Manet
             p->setControlInfo(ctrl);
         }
 
-        send(p, "to_ip");
+        sendSync(p, "to_ip");
         /* When forwarding data, make sure we are sending HELLO messages */
         //gettimeofday(&this_host.fwd_time, NULL);
         hello_init();

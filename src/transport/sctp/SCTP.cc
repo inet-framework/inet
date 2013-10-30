@@ -376,7 +376,7 @@ void SCTP::sendAbortFromMain(SCTPMessage* sctpmsg, Address srcAddr, Address dest
         controlInfo->setSrcAddr(srcAddr.toIPv4());
         controlInfo->setDestAddr(destAddr.toIPv4());
         msg->setControlInfo(controlInfo);
-        send(msg, "to_ip");
+        sendSync(msg, "to_ip");
     }
 }
 
@@ -403,7 +403,7 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, Address srcAddr, A
     controlInfo->setSrcAddr(srcAddr.toIPv4());
     controlInfo->setDestAddr(destAddr.toIPv4());
     msg->setControlInfo(controlInfo);
-    send(msg, "to_ip");
+    sendSync(msg, "to_ip");
 }
 
 

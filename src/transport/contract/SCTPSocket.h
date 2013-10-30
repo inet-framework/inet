@@ -194,9 +194,9 @@ class  INET_API SCTPSocket
     /**
      * Sends data packet.
      */
-    void send(cPacket *msg, bool last = true, bool primary = true);
-    void send(cPacket *msg, int prMethod, double prValue, bool last);
-    void send(cPacket *msg, int prMethod, double prValue, bool last, int32 streamId);
+    void sendSync(cPacket *msg, bool last = true, bool primary = true);
+    void sendSync(cPacket *msg, int prMethod, double prValue, bool last);
+    void sendSync(cPacket *msg, int prMethod, double prValue, bool last, int32 streamId);
 
     void sendNotification(cPacket *msg);
     void sendRequest(cPacket *msg);

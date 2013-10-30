@@ -384,7 +384,7 @@ void NS_CLASS re_process(RE *re,struct in_addr ip_src, u_int32_t ifindex)
         {
             cMessage *msg = re->decapsulate();
             if (msg)
-                send(msg,"to_ip");
+                sendSync(msg,"to_ip");
         }
         delete re;
         re=NULL;

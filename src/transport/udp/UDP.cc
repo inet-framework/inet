@@ -722,7 +722,7 @@ void UDP::sendUp(cPacket *payload, SockDesc *sd, const Address& srcAddr, ushort 
     payload->setKind(UDP_I_DATA);
 
     emit(passedUpPkSignal, payload);
-    send(payload, "appOut", sd->appGateIndex);
+    sendSync(payload, "appOut", sd->appGateIndex);
     numPassedUp++;
 }
 
@@ -737,7 +737,7 @@ void UDP::sendUpErrorIndication(SockDesc *sd, const Address& localAddr, ushort l
     udpCtrl->setDestPort(remotePort);
     notifyMsg->setControlInfo(udpCtrl);
 
-    send(notifyMsg, "appOut", sd->appGateIndex);
+    sendSync(notifyMsg, "appOut", sd->appGateIndex);
 }
 
 void UDP::sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, const Address& destAddr, ushort destPort,
@@ -771,7 +771,7 @@ void UDP::sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, con
         udpPacket->setControlInfo(ipControlInfo);
 
         emit(sentPkSignal, udpPacket);
-        send(udpPacket, "ipOut");
+        sendSync(udpPacket, "ipOut");
     }
     else if (destAddr.getType() == Address::IPv6)
     {
@@ -788,7 +788,7 @@ void UDP::sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, con
         udpPacket->setControlInfo(ipControlInfo);
 
         emit(sentPkSignal, udpPacket);
-        send(udpPacket, "ipOut");
+        sendSync(udpPacket, "ipOut");
     }
     else
     {
@@ -806,7 +806,7 @@ void UDP::sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, con
         udpPacket->setControlInfo(dynamic_cast<cObject *>(ipControlInfo));
 
         emit(sentPkSignal, udpPacket);
-        send(udpPacket, "ipOut");
+        sendSync(udpPacket, "ipOut");
     }
     numSent++;
 }

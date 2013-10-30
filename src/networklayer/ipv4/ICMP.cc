@@ -179,7 +179,7 @@ void ICMP::processICMPMessage(ICMPMessage *icmpmsg)
 
 void ICMP::errorOut(ICMPMessage *icmpmsg)
 {
-    send(icmpmsg, "errorOut");
+    sendSync(icmpmsg, "errorOut");
 }
 
 void ICMP::processEchoRequest(ICMPMessage *request)
@@ -211,7 +211,7 @@ void ICMP::processEchoReply(ICMPMessage *reply)
     long originatorId = payload->getOriginatorId();
     PingMap::iterator i = pingMap.find(originatorId);
     if (i != pingMap.end())
-        send(payload, "pingOut", i->second);
+        sendSync(payload, "pingOut", i->second);
     else
     {
         EV << "Received ECHO REPLY has an unknown originator ID: " << originatorId << ", packet dropped." << endl;
@@ -241,12 +241,12 @@ void ICMP::sendToIP(ICMPMessage *msg, const IPv4Address& dest)
     controlInfo->setProtocol(IP_PROT_ICMP);
     msg->setControlInfo(controlInfo);
 
-    send(msg, "sendOut");
+    sendSync(msg, "sendOut");
 }
 
 void ICMP::sendToIP(ICMPMessage *msg)
 {
     // assumes IPv4ControlInfo is already attached
-    send(msg, "sendOut");
+    sendSync(msg, "sendOut");
 }
 

@@ -163,7 +163,7 @@ void IdealRadio::sendUp(IdealAirFrame *airframe)
     cPacket *frame = airframe->decapsulate();
     delete airframe;
     EV << "sending up frame " << frame->getName() << endl;
-    send(frame, upperLayerOutGateId);
+    sendSync(frame, upperLayerOutGateId);
 }
 
 void IdealRadio::sendDown(IdealAirFrame *airframe)

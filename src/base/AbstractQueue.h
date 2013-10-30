@@ -87,7 +87,7 @@ class INET_API AbstractQueue : public InetSimpleModule
      * Called when a message completes service. The function may send it
      * to another module, discard it, or in general do anything with it.
      *
-     * Most straightforward implementation: <tt>send(msg,"out");</tt>
+     * Most straightforward implementation: <tt>sendSync(msg,"out");</tt>
      */
     virtual void endService(cPacket *msg) = 0;
 

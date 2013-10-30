@@ -214,7 +214,7 @@ void RTP::leaveSession(RTPCILeaveSession *rifp)
         profileModule->deleteModule();
         RTPInnerPacket *rinp = new RTPInnerPacket("leaveSession()");
         rinp->setLeaveSessionPkt();
-        send(rinp, "rtcpOut");
+        sendSync(rinp, "rtcpOut");
     }
     delete rifp;
 }
@@ -224,7 +224,7 @@ void RTP::createSenderModule(RTPCICreateSenderModule *rifp)
     RTPInnerPacket *rinp = new RTPInnerPacket("createSenderModule()");
     EV << rifp->getSsrc()<<endl;
     rinp->setCreateSenderModulePkt(rifp->getSsrc(), rifp->getPayloadType(), rifp->getFileName());
-    send(rinp, "profileOut");
+    sendSync(rinp, "profileOut");
 
     delete rifp;
 }
@@ -233,7 +233,7 @@ void RTP::deleteSenderModule(RTPCIDeleteSenderModule *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("deleteSenderModule()");
     rinp->setDeleteSenderModulePkt(rifp->getSsrc());
-    send(rinp, "profileOut");
+    sendSync(rinp, "profileOut");
 
     delete rifp;
 }
@@ -246,7 +246,7 @@ void RTP::senderModuleControl(RTPCISenderControl *rifp)
     scm->setCommandParameter1(rifp->getCommandParameter1());
     scm->setCommandParameter2(rifp->getCommandParameter2());
     rinp->setSenderModuleControlPkt(rinp->getSsrc(), scm);
-    send(rinp, "profileOut");
+    sendSync(rinp, "profileOut");
 
     delete rifp;
 }
@@ -272,7 +272,7 @@ void RTP::senderModuleCreated(RTPInnerPacket *rinp)
     ci->setSsrc(rinp->getSsrc());
     cMessage *msg = new RTPControlMsg("senderModuleCreated()");
     msg->setControlInfo(ci);
-    send(msg, "appOut");
+    sendSync(msg, "appOut");
 
     delete rinp;
 }
@@ -283,14 +283,14 @@ void RTP::senderModuleDeleted(RTPInnerPacket *rinp)
     ci->setSsrc(rinp->getSsrc());
     cMessage *msg = new RTPControlMsg("senderModuleDeleted()");
     msg->setControlInfo(ci);
-    send(msg, "appOut");
+    sendSync(msg, "appOut");
     // perhaps we should send a message to rtcp module
     delete rinp;
 }
 
 void RTP::senderModuleInitialized(RTPInnerPacket *rinp)
 {
-    send(rinp, "rtcpOut");
+    sendSync(rinp, "rtcpOut");
 }
 
 void RTP::senderModuleStatus(RTPInnerPacket *rinp)
@@ -302,7 +302,7 @@ void RTP::senderModuleStatus(RTPInnerPacket *rinp)
     ci->setTimeStamp(ssm->getTimeStamp());
     cMessage *msg = new RTPControlMsg("senderModuleStatus()");
     msg->setControlInfo(ci);
-    send(msg, "appOut");
+    sendSync(msg, "appOut");
     delete ssm;
     delete rinp;
 }
@@ -314,7 +314,7 @@ void RTP::dataOut(RTPInnerPacket *rinp)
     _udpSocket.sendTo(msg, _destinationAddress, _port);
 
     // RTCP module must be informed about sent rtp data packet
-    send(rinp, "rtcpOut");
+    sendSync(rinp, "rtcpOut");
 }
 
 void RTP::rtcpInitialized(RTPInnerPacket *rinp)
@@ -323,7 +323,7 @@ void RTP::rtcpInitialized(RTPInnerPacket *rinp)
     ci->setSsrc(rinp->getSsrc());
     cMessage *msg = new RTPControlMsg("sessionEntered()");
     msg->setControlInfo(ci);
-    send(msg, "appOut");
+    sendSync(msg, "appOut");
 
     delete rinp;
 }
@@ -333,7 +333,7 @@ void RTP::sessionLeft(RTPInnerPacket *rinp)
     RTPCISessionLeft* ci = new RTPCISessionLeft();
     cMessage *msg = new RTPControlMsg("sessionLeft()");
     msg->setControlInfo(ci);
-    send(msg, "appOut");
+    sendSync(msg, "appOut");
 
     delete rinp;
 }
@@ -359,8 +359,8 @@ void RTP::readRet(cMessage *sifp)
          RTPInnerPacket *rinp1 = new RTPInnerPacket("dataIn1()");
          rinp1->setDataInPkt(new RTPPacket(*msg), IPv4Address(_destinationAddress), _port);
          RTPInnerPacket *rinp2 = new RTPInnerPacket(*rinp1);
-         send(rinp2, "rtcpOut");
-         send(rinp1, "profileOut");
+         sendSync(rinp2, "rtcpOut");
+         sendSync(rinp1, "profileOut");
     }
 
     delete sifp;
@@ -411,7 +411,7 @@ void RTP::initializeProfile()
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("initializeProfile()");
     rinp->setInitializeProfilePkt(_mtu);
-    send(rinp, "profileOut");
+    sendSync(rinp, "profileOut");
 }
 
 void RTP::initializeRTCP()
@@ -419,7 +419,7 @@ void RTP::initializeRTCP()
     RTPInnerPacket *rinp = new RTPInnerPacket("initializeRTCP()");
     int rtcpPort = _port + 1;
     rinp->setInitializeRTCPPkt(_commonName, _mtu, _bandwidth, _rtcpPercentage, _destinationAddress, rtcpPort);
-    send(rinp, "rtcpOut");
+    sendSync(rinp, "rtcpOut");
 }
 
 bool RTP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

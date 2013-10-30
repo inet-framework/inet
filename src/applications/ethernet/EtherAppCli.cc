@@ -192,7 +192,7 @@ void EtherAppCli::registerDSAP(int dsap)
     cMessage *msg = new cMessage("register_DSAP", IEEE802CTRL_REGISTER_DSAP);
     msg->setControlInfo(etherctrl);
 
-    send(msg, "out");
+    sendSync(msg, "out");
 }
 
 void EtherAppCli::sendPacket()
@@ -220,7 +220,7 @@ void EtherAppCli::sendPacket()
     datapacket->setControlInfo(etherctrl);
 
     emit(sentPkSignal, datapacket);
-    send(datapacket, "out");
+    sendSync(datapacket, "out");
     packetsSent++;
 }
 

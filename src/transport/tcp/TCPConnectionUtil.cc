@@ -238,7 +238,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
         controlInfo->setDestAddr(remoteAddr.toIPv4());
         tcpseg->setControlInfo(controlInfo);
 
-        tcpMain->send(tcpseg, "ipOut");
+        tcpMain->sendSync(tcpseg, "ipOut");
     }
     else if (remoteAddr.getType() == Address::IPv6)
     {
@@ -249,7 +249,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
         controlInfo->setDestAddr(remoteAddr.toIPv6());
         tcpseg->setControlInfo(controlInfo);
 
-        tcpMain->send(tcpseg, "ipOut");
+        tcpMain->sendSync(tcpseg, "ipOut");
     }
     else
         throw cRuntimeError("Unknown address type");
@@ -269,7 +269,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
         controlInfo->setDestAddr(dest.toIPv4());
         tcpseg->setControlInfo(controlInfo);
 
-        check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg, "ipOut");
+        check_and_cast<TCP *>(simulation.getContextModule())->sendSync(tcpseg, "ipOut");
     }
     else if (dest.getType() == Address::IPv6)
     {
@@ -280,7 +280,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
         controlInfo->setDestAddr(dest.toIPv6());
         tcpseg->setControlInfo(controlInfo);
 
-        check_and_cast<TCP *>(simulation.getContextModule())->send(tcpseg, "ipOut");
+        check_and_cast<TCP *>(simulation.getContextModule())->sendSync(tcpseg, "ipOut");
     }
     else
         throw cRuntimeError("Unknown address type");
@@ -326,7 +326,7 @@ void TCPConnection::sendEstabIndicationToApp()
 
 void TCPConnection::sendToApp(cMessage *msg)
 {
-    tcpMain->send(msg, "appOut", appGateIndex);
+    tcpMain->sendSync(msg, "appOut", appGateIndex);
 }
 
 void TCPConnection::initConnection(TCPOpenCommand *openCmd)

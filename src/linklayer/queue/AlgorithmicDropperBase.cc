@@ -53,7 +53,7 @@ void AlgorithmicDropperBase::dropPacket(cPacket *packet)
 void AlgorithmicDropperBase::sendOut(cPacket *packet)
 {
     int index = packet->getArrivalGate()->getIndex();
-    send(packet, "out", index);
+    sendSync(packet, "out", index);
 }
 
 int AlgorithmicDropperBase::getLength() const

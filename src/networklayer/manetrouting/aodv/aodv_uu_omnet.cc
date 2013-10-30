@@ -983,7 +983,7 @@ void NS_CLASS processMacPacket(cPacket * p, const ManetAddress &dest, const Mane
             p->setControlInfo(ctrl);
         }
 
-        send(p, "to_ip");
+        sendSync(p, "to_ip");
         /* When forwarding data, make sure we are sending HELLO messages */
         //gettimeofday(&this_host.fwd_time, NULL);
         if (!llfeedback && optimized_hellos)
@@ -1026,7 +1026,7 @@ void NS_CLASS processPacket(IPv4Datagram * p,unsigned int ifindex)
     /* If the packet is not interesting we just let it go through... */
     if (isMcast || dest_addr.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))
     {
-        send(p,"to_ip");
+        sendSync(p,"to_ip");
         return;
     }
     /* Find the entry of the neighboring node and the destination  (if any). */
@@ -1138,7 +1138,7 @@ route_discovery:
     else
     {
         /* DEBUG(LOG_DEBUG, 0, "Sending pkt uid=%d", ch->uid()); */
-        send(p,"to_ip");
+        sendSync(p,"to_ip");
         /* When forwarding data, make sure we are sending HELLO messages */
         gettimeofday(&this_host.fwd_time, NULL);
 

@@ -86,7 +86,7 @@ void TCPDump::handleMessage(cMessage *msg)
     else
         id = findGate("ifOut", index);
 
-    send(msg, id);
+    sendSync(msg, id);
 }
 
 void TCPDump::finish()

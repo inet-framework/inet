@@ -34,5 +34,5 @@ void IPSocket::sendToIP(cMessage * message)
     if (!gateToIP)
         throw cRuntimeError("IPSocket: setOutputGate() must be invoked before socket can be used");
 
-    check_and_cast<InetSimpleModule *>(gateToIP->getOwnerModule())->send(message, gateToIP);
+    check_and_cast<InetSimpleModule *>(gateToIP->getOwnerModule())->sendSync(message, gateToIP);
 }

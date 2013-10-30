@@ -47,7 +47,7 @@ void GlobalARP::handleMessage(cMessage *msg)
     if (!ie->isBroadcast())
     {
         EV << "output interface " << ie->getName() << " is not broadcast, skipping ARP\n";
-        send(msg, nicOutBaseGateId + ie->getNetworkLayerGateIndex());
+        sendSync(msg, nicOutBaseGateId + ie->getNetworkLayerGateIndex());
         return;
     }
 
@@ -111,5 +111,5 @@ void GlobalARP::sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddr
     msg->setControlInfo(controlInfo);
 
     // send out
-    send(msg, nicOutBaseGateId + ie->getNetworkLayerGateIndex());
+    sendSync(msg, nicOutBaseGateId + ie->getNetworkLayerGateIndex());
 }

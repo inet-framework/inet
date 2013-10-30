@@ -403,7 +403,7 @@ void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const Address& destAddr, i
     EV << "Sending packet: ";
     // printPacket(msg);
 
-    //send(msg, "udpOut");
+    //sendSync(msg, "udpOut");
     UDPSocket::SendOptions options;
     options.outInterfaceId = ie->getInterfaceId();
     socket.sendTo(msg, destAddr, destPort, &options);

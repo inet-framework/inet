@@ -37,9 +37,9 @@ void NetworkDatagramMultiplexer::handleMessage(cMessage * message)
     cGate * arrivalGate = message->getArrivalGate();
     const char * arrivalGateName = arrivalGate->getBaseName();
     if (!strcmp(arrivalGateName, "upperIn"))
-        send(message, "lowerOut", getProtocolIndex(message));
+        sendSync(message, "lowerOut", getProtocolIndex(message));
     else if (!strcmp(arrivalGateName, "lowerIn"))
-        send(message, "upperOut");
+        sendSync(message, "upperOut");
     else
         throw cRuntimeError("Unknown arrival gate");
 }

@@ -89,7 +89,7 @@ class INET_API TCP_NSC_Connection
     void connect(INetStack &stackP, SockPair &inetSockPairP, SockPair &nscSockPairP);
     void close();
     void abort();
-    void send(cPacket *msgP);
+    void sendSync(cPacket *msgP);
     void do_SEND();
 
   public:

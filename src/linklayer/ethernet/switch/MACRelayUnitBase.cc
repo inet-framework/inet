@@ -137,7 +137,7 @@ void MACRelayUnitBase::handleAndDispatchFrame(EtherFrame *frame, int inputport)
     if (outputport >= 0)
     {
         EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputport << endl;
-        send(frame, "ifOut", outputport);
+        sendSync(frame, "ifOut", outputport);
     }
     else
     {
@@ -150,7 +150,7 @@ void MACRelayUnitBase::broadcastFrame(EtherFrame *frame, int inputport)
 {
     for (int i=0; i<numPorts; ++i)
         if (i != inputport)
-            send((EtherFrame*)frame->dup(), "ifOut", i);
+            sendSync((EtherFrame*)frame->dup(), "ifOut", i);
     delete frame;
 }
 
@@ -327,7 +327,7 @@ void MACRelayUnitBase::sendPauseFrame(int portno, int pauseUnits)
 
         frame->setByteLength(ETHER_PAUSE_COMMAND_PADDED_BYTES);
 
-        send(frame, "ifOut", portno);
+        sendSync(frame, "ifOut", portno);
         pauseFinished[portno] = simTime() + ((double)PAUSE_UNIT_BITS) * pauseUnits / ie->getDatarate();
     }
     else //disconnected or disabled

@@ -308,7 +308,7 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
             controlInfo->setSrcAddr(IPv6Address());
             controlInfo->setDestAddr(dest.toIPv6());
             sctpmsg->setControlInfo(controlInfo);
-            sctpMain->send(sctpmsg, "to_ipv6");
+            sctpMain->sendSync(sctpmsg, "to_ipv6");
         }
         else if (dest.getType() == Address::IPv4) {
             IPv4ControlInfo* controlInfo = new IPv4ControlInfo();
@@ -316,7 +316,7 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
             controlInfo->setSrcAddr(IPv4Address::UNSPECIFIED_ADDRESS);
             controlInfo->setDestAddr(dest.toIPv4());
             sctpmsg->setControlInfo(controlInfo);
-            sctpMain->send(sctpmsg, "to_ip");
+            sctpMain->sendSync(sctpmsg, "to_ip");
         }
         else
             throw cRuntimeError("Unknown address type: %d", (int)(dest.getType()));
@@ -354,7 +354,7 @@ void SCTPAssociation::sendIndicationToApp(const int32 code, const int32 value)
     indication->setLocalAddr(localAddr);
     indication->setRemoteAddr(remoteAddr);
     msg->setControlInfo(indication);
-    sctpMain->send(msg, "to_appl", appGateIndex);
+    sctpMain->sendSync(msg, "to_appl", appGateIndex);
 }
 
 void SCTPAssociation::sendEstabIndicationToApp()
@@ -376,7 +376,7 @@ void SCTPAssociation::sendEstabIndicationToApp()
     establishIndication->setOutboundStreams(outboundStreams);
     establishIndication->setNumMsgs(state->sendQueueLimit);
     msg->setControlInfo(establishIndication);
-    sctpMain->send(msg, "to_appl", appGateIndex);
+    sctpMain->sendSync(msg, "to_appl", appGateIndex);
 
     char vectorName[128];
     for (uint16 i = 0; i < inboundStreams; i++) {
@@ -387,7 +387,7 @@ void SCTPAssociation::sendEstabIndicationToApp()
 
 void SCTPAssociation::sendToApp(cPacket *msg)
 {
-    sctpMain->send(msg, "to_appl", appGateIndex);
+    sctpMain->sendSync(msg, "to_appl", appGateIndex);
 }
 
 void SCTPAssociation::initAssociation(SCTPOpenCommand *openCmd)

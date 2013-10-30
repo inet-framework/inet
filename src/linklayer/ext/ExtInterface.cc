@@ -125,7 +125,7 @@ void ExtInterface::handleMessage(cMessage *msg)
            << " and length of"
            << ipPacket->getByteLength()
            << " bytes to IPv4 layer.\n";
-        send(ipPacket, "upperLayerOut");
+        sendSync(ipPacket, "upperLayerOut");
         numRcvd++;
     }
     else

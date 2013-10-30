@@ -74,7 +74,7 @@ class INET_API PassiveQueueBase : public InetSimpleModule, public IPassiveQueue
     virtual cMessage *dequeue() = 0;
 
     /**
-     * Should be redefined to send out the packet; e.g. <tt>send(msg,"out")</tt>.
+     * Should be redefined to send out the packet; e.g. <tt>sendSync(msg,"out")</tt>.
      */
     virtual void sendOut(cMessage *msg) = 0;
 

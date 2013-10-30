@@ -75,7 +75,7 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
         tcpseg->setControlInfo(controlInfo);
 
         emit(sentPkSignal, tcpseg);
-        send(tcpseg, "ipOut");
+        sendSync(tcpseg, "ipOut");
     }
     else if (dest.getType() == Address::IPv6)
     {
@@ -87,7 +87,7 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
         tcpseg->setControlInfo(controlInfo);
 
         emit(sentPkSignal, tcpseg);
-        send(tcpseg, "ipOut");
+        sendSync(tcpseg, "ipOut");
     }
     else
         throw cRuntimeError("Unknown address type");

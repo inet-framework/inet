@@ -123,7 +123,7 @@ void EtherAppSrv::sendPacket(cPacket *datapacket, const MACAddress& destAddr, in
     etherctrl->setDest(destAddr);
     datapacket->setControlInfo(etherctrl);
     emit(sentPkSignal, datapacket);
-    send(datapacket, "out");
+    sendSync(datapacket, "out");
     packetsSent++;
 }
 
@@ -136,7 +136,7 @@ void EtherAppSrv::registerDSAP(int dsap)
     cMessage *msg = new cMessage("register_DSAP", IEEE802CTRL_REGISTER_DSAP);
     msg->setControlInfo(etherctrl);
 
-    send(msg, "out");
+    sendSync(msg, "out");
 }
 
 bool EtherAppSrv::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

@@ -102,7 +102,7 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
      * segment boundaries when retransmitting.
      *
      * called from inside of send_callback()
-     * called before called the send() to IP layer
+     * called before called the sendSync() to IP layer
      * @param tcpDataP: the tcp segment (with tcp header) created by LWIP
      * @param tcpLenthP: the length of tcp segment.
      */
