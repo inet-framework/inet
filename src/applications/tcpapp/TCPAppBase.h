@@ -11,8 +11,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __INET_TCPGENERICCLIAPPBASE_H
-#define __INET_TCPGENERICCLIAPPBASE_H
+#ifndef __INET_TCPAPPBASE_H
+#define __INET_TCPAPPBASE_H
 
 #include "INETDefs.h"
 #include "TCPSocket.h"
@@ -22,10 +22,8 @@
  * Handles a single session (and TCP connection) at a time.
  *
  * It needs the following NED parameters: localAddress, localPort, connectAddress, connectPort.
- *
- * Generally used together with GenericAppMsg and TCPGenericSrvApp.
  */
-class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::CallbackInterface
+class INET_API TCPAppBase : public cSimpleModule, public TCPSocket::CallbackInterface
 {
   protected:
     TCPSocket socket;
@@ -72,8 +70,8 @@ class INET_API TCPGenericCliAppBase : public cSimpleModule, public TCPSocket::Ca
     /** Issues CLOSE command */
     virtual void close();
 
-    /** Sends a GenericAppMsg of the given length */
-    virtual void sendPacket(int numBytes, int expectedReplyBytes, bool serverClose = false);
+    /** Sends the given packet */
+    virtual void sendPacket(cPacket *pkt);
 
     /** When running under GUI, it displays the given string next to the icon */
     virtual void setStatusString(const char *s);

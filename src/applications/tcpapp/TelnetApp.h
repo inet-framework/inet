@@ -14,14 +14,14 @@
 #ifndef __INET_TELNETAPP_H
 #define __INET_TELNETAPP_H
 
-#include "TCPGenericCliAppBase.h"
+#include "TCPAppBase.h"
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
 
 /**
  * An example Telnet client application. The server app should be TCPGenericSrvApp.
  */
-class INET_API TelnetApp : public TCPGenericCliAppBase, public ILifecycle
+class INET_API TelnetApp : public TCPAppBase, public ILifecycle
 {
   protected:
     cMessage *timeoutMsg;
@@ -56,8 +56,11 @@ class INET_API TelnetApp : public TCPGenericCliAppBase, public ILifecycle
     /** Redefined to reconnect after a delay. */
     virtual void socketFailure(int connId, void *yourPtr, int code);
 
-    /** schedules msg only if t < stopTime */
+    /** Schedules msg only if t < stopTime */
     virtual int checkedScheduleAt(simtime_t t, cMessage *msg);
+
+    /** Utility function to send a GenericAppMsg */
+    virtual void sendGenericAppMsg(int numBytes, int expectedReplyBytes);
 };
 
 #endif

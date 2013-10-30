@@ -16,14 +16,14 @@
 
 #include "INETDefs.h"
 
-#include "TCPGenericCliAppBase.h"
+#include "TCPAppBase.h"
 #include "NodeStatus.h"
 #include "ILifecycle.h"
 
 /**
  * An example request-reply based client application.
  */
-class INET_API TCPBasicClientApp : public TCPGenericCliAppBase, public ILifecycle
+class INET_API TCPBasicClientApp : public TCPAppBase, public ILifecycle
 {
   protected:
     cMessage *timeoutMsg;

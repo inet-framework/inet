@@ -12,18 +12,16 @@
 //
 
 
-#include "TCPGenericCliAppBase.h"
-
-#include "GenericAppMsg_m.h"
+#include "TCPAppBase.h"
 #include "AddressResolver.h"
 
 
-simsignal_t TCPGenericCliAppBase::connectSignal = registerSignal("connect");
-simsignal_t TCPGenericCliAppBase::rcvdPkSignal = registerSignal("rcvdPk");
-simsignal_t TCPGenericCliAppBase::sentPkSignal = registerSignal("sentPk");
+simsignal_t TCPAppBase::connectSignal = registerSignal("connect");
+simsignal_t TCPAppBase::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t TCPAppBase::sentPkSignal = registerSignal("sentPk");
 
 
-void TCPGenericCliAppBase::initialize(int stage)
+void TCPAppBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -53,7 +51,7 @@ void TCPGenericCliAppBase::initialize(int stage)
     }
 }
 
-void TCPGenericCliAppBase::handleMessage(cMessage *msg)
+void TCPAppBase::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
         handleTimer(msg);
@@ -61,7 +59,7 @@ void TCPGenericCliAppBase::handleMessage(cMessage *msg)
         socket.processMessage(msg);
 }
 
-void TCPGenericCliAppBase::connect()
+void TCPAppBase::connect()
 {
     // we need a new connId if this is not the first connection
     socket.renewSocket();
@@ -85,7 +83,7 @@ void TCPGenericCliAppBase::connect()
     }
 }
 
-void TCPGenericCliAppBase::close()
+void TCPAppBase::close()
 {
     setStatusString("closing");
     EV << "issuing CLOSE command\n";
@@ -93,16 +91,9 @@ void TCPGenericCliAppBase::close()
     emit(connectSignal, -1L);
 }
 
-void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool serverClose)
+void TCPAppBase::sendPacket(cPacket *msg)
 {
-    EV << "sending " << numBytes << " bytes, expecting " << expectedReplyBytes
-       << (serverClose ? ", and server should close afterwards\n" : "\n");
-
-    GenericAppMsg *msg = new GenericAppMsg("data");
-    msg->setByteLength(numBytes);
-    msg->setExpectedReplyLength(expectedReplyBytes);
-    msg->setServerClose(serverClose);
-
+    int numBytes = msg->getByteLength();
     emit(sentPkSignal, msg);
     socket.send(msg);
 
@@ -110,20 +101,20 @@ void TCPGenericCliAppBase::sendPacket(int numBytes, int expectedReplyBytes, bool
     bytesSent += numBytes;
 }
 
-void TCPGenericCliAppBase::setStatusString(const char *s)
+void TCPAppBase::setStatusString(const char *s)
 {
     if (ev.isGUI())
         getDisplayString().setTagArg("t", 0, s);
 }
 
-void TCPGenericCliAppBase::socketEstablished(int, void *)
+void TCPAppBase::socketEstablished(int, void *)
 {
     // *redefine* to perform or schedule first sending
     EV << "connected\n";
     setStatusString("connected");
 }
 
-void TCPGenericCliAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
+void TCPAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
@@ -132,7 +123,7 @@ void TCPGenericCliAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
     delete msg;
 }
 
-void TCPGenericCliAppBase::socketPeerClosed(int, void *)
+void TCPAppBase::socketPeerClosed(int, void *)
 {
     // close the connection (if not already closed)
     if (socket.getState() == TCPSocket::PEER_CLOSED)
@@ -142,14 +133,14 @@ void TCPGenericCliAppBase::socketPeerClosed(int, void *)
     }
 }
 
-void TCPGenericCliAppBase::socketClosed(int, void *)
+void TCPAppBase::socketClosed(int, void *)
 {
     // *redefine* to start another session etc.
     EV << "connection closed\n";
     setStatusString("closed");
 }
 
-void TCPGenericCliAppBase::socketFailure(int, void *, int code)
+void TCPAppBase::socketFailure(int, void *, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV << "connection broken\n";
@@ -158,7 +149,7 @@ void TCPGenericCliAppBase::socketFailure(int, void *, int code)
     numBroken++;
 }
 
-void TCPGenericCliAppBase::finish()
+void TCPAppBase::finish()
 {
     std::string modulePath = getFullPath();
 

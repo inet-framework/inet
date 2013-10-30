@@ -17,6 +17,7 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 #include "NodeOperations.h"
+#include "GenericAppMsg_m.h"
 
 #define MSGKIND_CONNECT  0
 #define MSGKIND_SEND     1
@@ -45,7 +46,7 @@ int TelnetApp::checkedScheduleAt(simtime_t t, cMessage *msg)
 
 void TelnetApp::initialize(int stage)
 {
-    TCPGenericCliAppBase::initialize(stage);
+    TCPAppBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {
@@ -117,7 +118,7 @@ void TelnetApp::handleTimer(cMessage *msg)
            {
                // user types a character and expects it to be echoed
                EV << "user types one character, " << numCharsToType-1 << " more to go\n";
-               sendPacket(1, 1);
+               sendGenericAppMsg(1, 1);
                checkedScheduleAt(simTime() + (simtime_t)par("keyPressDelay"), timeoutMsg);
                numCharsToType--;
            }
@@ -126,7 +127,7 @@ void TelnetApp::handleTimer(cMessage *msg)
                EV << "user hits Enter key\n";
                // Note: reply length must be at least 2, otherwise we'll think
                // it's an echo when it comes back!
-               sendPacket(1, 2 + (long)par("commandOutputLength"));
+               sendGenericAppMsg(1, 2 + (long)par("commandOutputLength"));
                numCharsToType = (long)par("commandLength");
 
                // Note: no checkedScheduleAt(), because user only starts typing next command
@@ -141,9 +142,20 @@ void TelnetApp::handleTimer(cMessage *msg)
     }
 }
 
+void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
+{
+    EV << "sending " << numBytes << " bytes, expecting " << expectedReplyBytes << endl;
+
+    GenericAppMsg *msg = new GenericAppMsg("data");
+    msg->setByteLength(numBytes);
+    msg->setExpectedReplyLength(expectedReplyBytes);
+    msg->setServerClose(false);
+    sendPacket(msg);
+}
+
 void TelnetApp::socketEstablished(int connId, void *ptr)
 {
-    TCPGenericCliAppBase::socketEstablished(connId, ptr);
+    TCPAppBase::socketEstablished(connId, ptr);
 
     // schedule first sending
     numLinesToType = (long) par("numCommands");
@@ -155,7 +167,7 @@ void TelnetApp::socketEstablished(int connId, void *ptr)
 void TelnetApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
 {
     int len = msg->getByteLength();
-    TCPGenericCliAppBase::socketDataArrived(connId, ptr, msg, urgent);
+    TCPAppBase::socketDataArrived(connId, ptr, msg, urgent);
 
     if (len == 1)
     {
@@ -188,7 +200,7 @@ void TelnetApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urge
 
 void TelnetApp::socketClosed(int connId, void *ptr)
 {
-    TCPGenericCliAppBase::socketClosed(connId, ptr);
+    TCPAppBase::socketClosed(connId, ptr);
 
     // start another session after a delay
     timeoutMsg->setKind(MSGKIND_CONNECT);
@@ -197,7 +209,7 @@ void TelnetApp::socketClosed(int connId, void *ptr)
 
 void TelnetApp::socketFailure(int connId, void *ptr, int code)
 {
-    TCPGenericCliAppBase::socketFailure(connId, ptr, code);
+    TCPAppBase::socketFailure(connId, ptr, code);
 
     // reconnect after a delay
     timeoutMsg->setKind(MSGKIND_CONNECT);

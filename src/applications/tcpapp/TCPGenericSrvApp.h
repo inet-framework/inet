@@ -20,9 +20,9 @@
 
 /**
  * Generic server application. It serves requests coming in GenericAppMsg
- * request messages. Clients are usually subclassed from TCPGenericCliAppBase.
+ * request messages. Clients are usually subclassed from TCPAppBase.
  *
- * @see GenericAppMsg, TCPGenericCliAppBase
+ * @see GenericAppMsg, TCPAppBase
  */
 class INET_API TCPGenericSrvApp : public cSimpleModule, public ILifecycle
 {
