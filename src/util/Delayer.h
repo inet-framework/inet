@@ -28,7 +28,7 @@
 /**
  * Delayer module.
  */
-class INET_API Delayer : public cSimpleModule
+class INET_API Delayer : public InetSimpleModule
 {
   public:
     Delayer() { delayPar = NULL; }

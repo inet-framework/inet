@@ -36,7 +36,7 @@ class IdealRadio;
  * Stores infos about all registered radios.
  * Forward messages to all other radios in max transmission range
  */
-class INET_API IdealChannelModel : public cSimpleModule
+class INET_API IdealChannelModel : public InetSimpleModule
 {
   public:
     struct RadioEntry

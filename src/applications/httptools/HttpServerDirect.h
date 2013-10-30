@@ -49,7 +49,7 @@
 class INET_API HttpServerDirect : public HttpServerBase
 {
     protected:
-        /** @name cSimpleModule redefinitions */
+        /** @name InetSimpleModule redefinitions */
         //@{
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
 

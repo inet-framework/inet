@@ -64,8 +64,8 @@ class INET_API TraCIMobility : public MobilityBase
                 double totalCO2Emission; /**< for statistics: total CO2 emission */
 
                 void initialize();
-                void watch(cSimpleModule& module);
-                void recordScalars(cSimpleModule& module);
+                void watch(InetSimpleModule& module);
+                void recordScalars(InetSimpleModule& module);
         };
 
         TraCIMobility() : MobilityBase(), isPreInitialized(false) {}

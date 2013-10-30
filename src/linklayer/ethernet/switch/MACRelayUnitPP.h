@@ -62,7 +62,7 @@ class INET_API MACRelayUnitPP : public MACRelayUnitBase
     static simsignal_t usedBufferBytesSignal;
 
   protected:
-    /** @name Redefined cSimpleModule member functions. */
+    /** @name Redefined InetSimpleModule member functions. */
     //@{
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 

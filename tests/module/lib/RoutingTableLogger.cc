@@ -73,7 +73,7 @@ bool DestFilter::matches(IRoute *route)
     return false;
 }
 
-class INET_API RoutingTableLogger : public cSimpleModule, public IScriptable
+class INET_API RoutingTableLogger : public InetSimpleModule, public IScriptable
 {
     ofstream out;
   protected:

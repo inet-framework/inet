@@ -76,7 +76,7 @@ static std::ostream& operator<<(std::ostream& os, const TCPConnection& conn)
 
 void TCP::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

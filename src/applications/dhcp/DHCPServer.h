@@ -30,7 +30,7 @@
 #include "UDPSocket.h"
 
 
-class INET_API DHCPServer : public cSimpleModule, public cListener, public ILifecycle
+class INET_API DHCPServer : public InetSimpleModule, public cListener, public ILifecycle
 {
     protected:
         // Transmission Timer

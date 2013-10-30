@@ -27,7 +27,7 @@
 /**
  * Ordinal Based Dropper module.
  */
-class INET_API OrdinalBasedDropper : public cSimpleModule
+class INET_API OrdinalBasedDropper : public InetSimpleModule
 {
   protected:
     unsigned int numPackets;

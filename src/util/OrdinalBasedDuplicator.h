@@ -27,7 +27,7 @@
 /**
  * Ordinal Based Duplicator module.
  */
-class INET_API OrdinalBasedDuplicator : public cSimpleModule
+class INET_API OrdinalBasedDuplicator : public InetSimpleModule
 {
   protected:
     unsigned int numPackets;

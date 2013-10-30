@@ -25,7 +25,7 @@
 
 using namespace std;
 
-class MeterTestApp : public cSimpleModule
+class MeterTestApp : public InetSimpleModule
 {
     int numPackets;
     simtime_t stopTime;

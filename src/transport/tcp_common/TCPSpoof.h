@@ -23,7 +23,7 @@
 /**
  * Sends fabricated TCP packets.
  */
-class INET_API TCPSpoof : public cSimpleModule
+class INET_API TCPSpoof : public InetSimpleModule
 {
   protected:
     virtual void sendToIP(TCPSegment *tcpseg, Address src, Address dest);

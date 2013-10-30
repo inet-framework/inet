@@ -37,7 +37,7 @@ class IIPv4RoutingTable;
 /**
  * ARP implementation.
  */
-class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, public cListener
+class INET_API ARP : public InetSimpleModule, public IARPCache, public ILifecycle, public cListener
 {
   public:
     struct ARPCacheEntry;

@@ -29,7 +29,7 @@
  * Error Handling: print out received error
  */
 // FIXME is such thing needed at all???
-class INET_API ErrorHandling: public cSimpleModule
+class INET_API ErrorHandling: public InetSimpleModule
 {
   protected:
     long numReceived;

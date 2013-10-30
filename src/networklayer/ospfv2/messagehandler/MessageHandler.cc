@@ -22,7 +22,7 @@
 #include "OSPFRouter.h"
 
 
-OSPF::MessageHandler::MessageHandler(OSPF::Router* containingRouter, cSimpleModule* containingModule) :
+OSPF::MessageHandler::MessageHandler(OSPF::Router* containingRouter, InetSimpleModule* containingModule) :
     OSPF::IMessageHandler(containingRouter),
     ospfModule(containingModule),
     helloHandler(containingRouter),

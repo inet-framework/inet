@@ -35,7 +35,7 @@ PcapRecorder::~PcapRecorder()
 {
 }
 
-PcapRecorder::PcapRecorder() : cSimpleModule(), pcapDumper()
+PcapRecorder::PcapRecorder() : InetSimpleModule(), pcapDumper()
 {
 }
 

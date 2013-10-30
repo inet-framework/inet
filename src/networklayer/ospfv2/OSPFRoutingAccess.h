@@ -10,6 +10,6 @@ class INET_API OSPFRoutingAccess : public ModuleAccess<OSPFRouting>
 {
     public:
         OSPFRoutingAccess() : ModuleAccess<OSPFRouting>("ospf") {}
-        //OSPFRoutingAccess(unsigned int index) : ModuleAccess2<cSimpleModule>("ospf", index) {}
+        //OSPFRoutingAccess(unsigned int index) : ModuleAccess2<InetSimpleModule>("ospf", index) {}
 };
 

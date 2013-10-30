@@ -83,7 +83,7 @@ void SCTPSocket::sendToSCTP(cPacket *msg)
     if (!gateToSctp)
         throw cRuntimeError("SCTPSocket: setOutputGate() must be invoked before socket can be used");
 
-    check_and_cast<cSimpleModule *>(gateToSctp->getOwnerModule())->send(msg, gateToSctp);
+    check_and_cast<InetSimpleModule *>(gateToSctp->getOwnerModule())->send(msg, gateToSctp);
 }
 
 void SCTPSocket::bind(int lPort)

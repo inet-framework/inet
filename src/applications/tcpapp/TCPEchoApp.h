@@ -23,7 +23,7 @@
  * Accepts any number of incoming connections, and sends back whatever
  * arrives on them.
  */
-class INET_API TCPEchoApp : public cSimpleModule, public ILifecycle
+class INET_API TCPEchoApp : public InetSimpleModule, public ILifecycle
 {
   protected:
     simtime_t delay;

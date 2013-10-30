@@ -32,7 +32,7 @@ Define_Module(FlatNetworkConfigurator6);
 
 void FlatNetworkConfigurator6::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_NETWORK_LAYER_2)
     {

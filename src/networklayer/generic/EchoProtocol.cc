@@ -25,7 +25,7 @@ Define_Module(EchoProtocol);
 
 void EchoProtocol::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_NETWORK_LAYER_2)
     {

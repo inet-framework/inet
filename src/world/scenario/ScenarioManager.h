@@ -35,7 +35,7 @@
  * @see IScriptable
  * @author Andras Varga
  */
-class INET_API ScenarioManager : public cSimpleModule
+class INET_API ScenarioManager : public InetSimpleModule
 {
   protected:
     // total number of changes, and number of changes already done

@@ -215,7 +215,7 @@ Address const & TCP_NSC::mapNsc2Remote(uint32_t nscAddrP)
 
 void TCP_NSC::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     tcpEV << this << ": initialize stage " << stage << endl;
 

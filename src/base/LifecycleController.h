@@ -58,7 +58,7 @@
  *
  * @see ILifecycle, LifecycleOperation
  */
-class INET_API LifecycleController : public cSimpleModule, public IScriptable
+class INET_API LifecycleController : public InetSimpleModule, public IScriptable
 {
     protected:
         class INET_API Callback : public IDoneCallback

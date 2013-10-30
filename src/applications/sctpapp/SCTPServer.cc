@@ -38,7 +38,7 @@ void SCTPServer::initialize(int stage)
 {
     sctpEV3 << "initialize SCTP Server stage " << stage << endl;
 
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

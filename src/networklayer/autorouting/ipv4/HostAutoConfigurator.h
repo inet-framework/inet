@@ -27,7 +27,7 @@
  *
  * @author Christoph Sommer
  */
-class INET_API HostAutoConfigurator : public cSimpleModule
+class INET_API HostAutoConfigurator : public InetSimpleModule
 {
     public:
         virtual void initialize(int stage);

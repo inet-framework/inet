@@ -74,7 +74,7 @@ std::ostream& operator<<(std::ostream& os, const IPv6NeighbourCache::Neighbour& 
     return os;
 }
 
-IPv6NeighbourCache::IPv6NeighbourCache(cSimpleModule &neighbourDiscovery)
+IPv6NeighbourCache::IPv6NeighbourCache(InetSimpleModule &neighbourDiscovery)
     : neighbourDiscovery(neighbourDiscovery)
 {
     WATCH_MAP(neighbourMap);

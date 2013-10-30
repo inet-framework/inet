@@ -24,7 +24,7 @@
  *
  * @see GenericAppMsg, TCPAppBase
  */
-class INET_API TCPGenericSrvApp : public cSimpleModule, public ILifecycle
+class INET_API TCPGenericSrvApp : public InetSimpleModule, public ILifecycle
 {
   protected:
     simtime_t delay;

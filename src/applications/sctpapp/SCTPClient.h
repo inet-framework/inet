@@ -29,7 +29,7 @@ class SCTPAssociation;
 /**
  * Implements the SCTPClient simple module. See the NED file for more info.
  */
-class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInterface, public ILifecycle
+class INET_API SCTPClient : public InetSimpleModule, public SCTPSocket::CallbackInterface, public ILifecycle
 {
     protected:
         SCTPSocket socket;

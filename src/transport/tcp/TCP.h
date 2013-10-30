@@ -66,7 +66,7 @@ class TCPReceiveQueue;
  *  - TCPAlgorithm: abstract base class for TCP algorithms, and subclasses:
  *    DumbTCP, TCPBaseAlg, TCPTahoeRenoFamily, TCPTahoe, TCPReno, TCPNewReno.
  *
- * TCP subclassed from cSimpleModule. It manages socketpair-to-connection
+ * TCP subclassed from InetSimpleModule. It manages socketpair-to-connection
  * mapping, and dispatches segments and user commands to the appropriate
  * TCPConnection object.
  *
@@ -100,7 +100,7 @@ class TCPReceiveQueue;
  * The concrete TCPAlgorithm class to use can be chosen per connection (in OPEN)
  * or in a module parameter.
  */
-class INET_API TCP : public cSimpleModule, public ILifecycle
+class INET_API TCP : public InetSimpleModule, public ILifecycle
 {
   public:
     struct AppConnKey  // XXX this class is redundant since connId is already globally unique

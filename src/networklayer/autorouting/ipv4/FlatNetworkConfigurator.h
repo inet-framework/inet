@@ -33,7 +33,7 @@ class IIPv4RoutingTable;
  *
  * For more info please see the NED file.
  */
-class INET_API FlatNetworkConfigurator : public cSimpleModule
+class INET_API FlatNetworkConfigurator : public InetSimpleModule
 {
   protected:
     struct NodeInfo {

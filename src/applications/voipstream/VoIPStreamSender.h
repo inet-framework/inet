@@ -45,7 +45,7 @@ extern "C" {
 
 //using namespace std;
 
-class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
+class INET_API VoIPStreamSender : public InetSimpleModule, public ILifecycle
 {
   public:
     ~VoIPStreamSender();

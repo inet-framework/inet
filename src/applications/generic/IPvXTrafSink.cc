@@ -34,7 +34,7 @@ simsignal_t IPvXTrafSink::rcvdPkSignal = registerSignal("rcvdPk");
 
 void IPvXTrafSink::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

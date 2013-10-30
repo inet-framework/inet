@@ -20,7 +20,7 @@
 #include <stdexcept>
 #include <sstream>
 
-DYMO_Timer::DYMO_Timer(cSimpleModule* parent, const char *name, simtime_t interval) :
+DYMO_Timer::DYMO_Timer(InetSimpleModule* parent, const char *name, simtime_t interval) :
         parent(parent), interval(interval), active(false)
 {
     this->name = strdup(name);

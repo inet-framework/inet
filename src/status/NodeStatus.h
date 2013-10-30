@@ -32,7 +32,7 @@
  *
  * See NED file for more information.
  */
-class INET_API NodeStatus : public cSimpleModule, public ILifecycle
+class INET_API NodeStatus : public InetSimpleModule, public ILifecycle
 {
   public:
     enum State { UP, DOWN, GOING_UP, GOING_DOWN };

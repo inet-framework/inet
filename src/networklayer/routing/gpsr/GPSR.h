@@ -42,7 +42,7 @@
 // KLUDGE: implement position registry protocol instead of using a global variable
 // KLUDGE: the GPSR packet is now used to wrap the content of network datagrams
 // KLUDGE: we should rather add these fields as header extensions
-class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener, public INetfilter::IHook
+class INET_API GPSR : public InetSimpleModule, public ILifecycle, public cListener, public INetfilter::IHook
 {
     private:
         // GPSR parameters

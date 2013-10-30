@@ -26,7 +26,7 @@ Define_Module(SingleRateThreeColorMeter);
 
 void SingleRateThreeColorMeter::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

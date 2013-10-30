@@ -159,12 +159,12 @@ class INET_API IPv6NeighbourCache
     };
 
   protected:
-    cSimpleModule &neighbourDiscovery; // for cancelAndDelete() calls
+    InetSimpleModule &neighbourDiscovery; // for cancelAndDelete() calls
     NeighbourMap neighbourMap;
     DefaultRouterList defaultRouterList;
 
   public:
-    IPv6NeighbourCache(cSimpleModule &neighbourDiscovery);
+    IPv6NeighbourCache(InetSimpleModule &neighbourDiscovery);
     virtual ~IPv6NeighbourCache() {}
 
     /** Returns a neighbour entry, or NULL. */

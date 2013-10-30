@@ -57,7 +57,7 @@ class DYMO_QueuedData
 class DYMO_DataQueue : public cObject
 {
   public:
-    DYMO_DataQueue(cSimpleModule *owner, int BUFFER_SIZE_PACKETS, int BUFFER_SIZE_BYTES);
+    DYMO_DataQueue(InetSimpleModule *owner, int BUFFER_SIZE_PACKETS, int BUFFER_SIZE_BYTES);
     ~DYMO_DataQueue();
 
     /** @brief inherited from cObject */
@@ -75,7 +75,7 @@ class DYMO_DataQueue : public cObject
     void dropPacketsTo(IPv4Address destAddr, int prefix, std::list<IPv4Datagram*>* datagrams = NULL);
 
   protected:
-    cSimpleModule *moduleOwner;
+    InetSimpleModule *moduleOwner;
     std::list<DYMO_QueuedData> dataQueue; /**< queued data packets */
     long dataQueueByteSize; /**< total size of all messages currently in dataQueue */
 

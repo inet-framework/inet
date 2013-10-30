@@ -63,7 +63,7 @@
  * @version 1.0
  * @author  Kristjan V. Jonsson
  */
-class HttpController : public cSimpleModule
+class HttpController : public InetSimpleModule
 {
     protected:
         enum ServerStatus {SS_NORMAL, SS_SPECIAL};
@@ -96,7 +96,7 @@ class HttpController : public cSimpleModule
         rdObject *rdServerSelection;    ///< The random object for the server selection.
 
     protected:
-        /** @name cSimpleModule redefinitions */
+        /** @name InetSimpleModule redefinitions */
         //@{
         /**
          * Initialization of the component and startup of browse event scheduling.

@@ -23,7 +23,7 @@
 /**
  * TCP client application for testing the TCP model.
  */
-class INET_API TcpTestClient : public cSimpleModule
+class INET_API TcpTestClient : public InetSimpleModule
 {
   protected:
     struct Command

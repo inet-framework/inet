@@ -26,7 +26,7 @@ Define_Module(TokenBucketMeter);
 
 void TokenBucketMeter::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

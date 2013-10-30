@@ -33,7 +33,7 @@
  * and forwards messages.
  * It also communicates with the application.
  */
-class INET_API RTP : public cSimpleModule, public ILifecycle
+class INET_API RTP : public InetSimpleModule, public ILifecycle
 {
   public:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);

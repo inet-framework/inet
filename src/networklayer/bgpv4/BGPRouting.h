@@ -37,7 +37,7 @@
 class BGPSession;
 
 
-class INET_API BGPRouting : public cSimpleModule, public ILifecycle, public TCPSocket::CallbackInterface
+class INET_API BGPRouting : public InetSimpleModule, public ILifecycle, public TCPSocket::CallbackInterface
 {
 public:
     BGPRouting()

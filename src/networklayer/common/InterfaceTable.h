@@ -63,7 +63,7 @@
  *
  * @see InterfaceEntry
  */
-class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, protected cListener, public ILifecycle
+class INET_API InterfaceTable : public InetSimpleModule, public IInterfaceTable, protected cListener, public ILifecycle
 {
   protected:
     cModule *host; // cached pointer
@@ -98,7 +98,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
   public:
     InterfaceTable();
     virtual ~InterfaceTable();
-    virtual std::string getFullPath() const {return cSimpleModule::getFullPath();}
+    virtual std::string getFullPath() const {return InetSimpleModule::getFullPath();}
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

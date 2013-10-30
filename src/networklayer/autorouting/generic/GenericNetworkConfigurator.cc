@@ -48,7 +48,7 @@ static void printElapsedTime(const char *name, long startTime)
 #define T(CODE)  {long startTime=clock(); CODE; printElapsedTime(#CODE, startTime);}
 void GenericNetworkConfigurator::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_NETWORK_LAYER)
     {
@@ -329,7 +329,7 @@ const char *GenericNetworkConfigurator::getWirelessId(InterfaceEntry *interfaceE
     cModule *module = interfaceEntry->getInterfaceModule();
     if (!module)
         module = hostModule;
-    cSimpleModule *mgmtModule = ModuleAccess<cSimpleModule>("mgmt").getIfExists(module);
+    InetSimpleModule *mgmtModule = ModuleAccess<InetSimpleModule>("mgmt").getIfExists(module);
     if (mgmtModule)
     {
         if (mgmtModule->hasPar("ssid"))

@@ -35,7 +35,7 @@
  * at one of their inputs without dequeueing it, so they
  * hook themselves as listeners on their inputs.
  */
-class INET_API SchedulerBase : public cSimpleModule, public IPassiveQueue, public IPassiveQueueListener
+class INET_API SchedulerBase : public InetSimpleModule, public IPassiveQueue, public IPassiveQueueListener
 {
     protected:
         // state

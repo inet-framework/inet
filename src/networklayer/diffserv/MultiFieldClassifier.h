@@ -25,7 +25,7 @@
 /**
  * Absolute dropper.
  */
-class INET_API MultiFieldClassifier : public cSimpleModule
+class INET_API MultiFieldClassifier : public InetSimpleModule
 {
   protected:
         struct Filter

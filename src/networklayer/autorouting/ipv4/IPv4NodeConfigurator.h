@@ -34,7 +34,7 @@
  *
  * For more info please see the NED file.
  */
-class IPv4NodeConfigurator : public cSimpleModule, public ILifecycle {
+class IPv4NodeConfigurator : public InetSimpleModule, public ILifecycle {
     protected:
         NodeStatus *nodeStatus;
         IInterfaceTable *interfaceTable;

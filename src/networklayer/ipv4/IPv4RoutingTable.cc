@@ -66,7 +66,7 @@ IPv4RoutingTable::~IPv4RoutingTable()
 
 void IPv4RoutingTable::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

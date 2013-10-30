@@ -29,7 +29,7 @@ class SCTPConnectInfo;
 /**
  * Implements the SCTPPeer simple module. See the NED file for more info.
  */
-class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInterface, public ILifecycle
+class INET_API SCTPPeer : public InetSimpleModule, public SCTPSocket::CallbackInterface, public ILifecycle
 {
     protected:
         int32 notifications;

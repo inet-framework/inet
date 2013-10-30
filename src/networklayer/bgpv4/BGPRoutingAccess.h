@@ -23,11 +23,11 @@
 /**
  * Gives access to the BGP module.
  */
-class INET_API BGPRoutingAccess : public ModuleAccess<cSimpleModule>
+class INET_API BGPRoutingAccess : public ModuleAccess<InetSimpleModule>
 {
     public:
-        BGPRoutingAccess() : ModuleAccess<cSimpleModule>("bgp") {}
-        //BGPRoutingAccess(unsigned int index) : ModuleAccess2<cSimpleModule>("bgp", index) {}
+        BGPRoutingAccess() : ModuleAccess<InetSimpleModule>("bgp") {}
+        //BGPRoutingAccess(unsigned int index) : ModuleAccess2<InetSimpleModule>("bgp", index) {}
 };
 
 #endif

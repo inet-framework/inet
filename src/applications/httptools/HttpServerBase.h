@@ -103,7 +103,7 @@ class INET_API HttpServerBase : public HttpNodeBase
         simtime_t activationTime;
 
     protected:
-        /** @name cSimpleModule redefinitions */
+        /** @name InetSimpleModule redefinitions */
         //@{
         /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize(int stage);

@@ -30,7 +30,7 @@
  *
  * See RFC 2698.
  */
-class INET_API TwoRateThreeColorMeter : public cSimpleModule
+class INET_API TwoRateThreeColorMeter : public InetSimpleModule
 {
   protected:
     double PIR; // Peak Information Rate (bits/sec)

@@ -329,7 +329,7 @@ void IGMPv2::deleteRouterGroupData(InterfaceEntry *ie, const IPv4Address &group)
 
 void IGMPv2::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

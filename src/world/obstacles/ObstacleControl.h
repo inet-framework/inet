@@ -37,7 +37,7 @@
  * Transmissions that cross one of the polygon's lines will have
  * their receive power set to zero.
  */
-class INET_API ObstacleControl : public cSimpleModule
+class INET_API ObstacleControl : public InetSimpleModule
 {
     public:
         virtual ~ObstacleControl();

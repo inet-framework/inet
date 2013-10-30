@@ -51,7 +51,7 @@ const char *getRequiredAttribute(cXMLElement *element, const char *attrName)
     return attrValue;
 }
 
-double parseInformationRate(const char *attrValue, const char *attrName, cSimpleModule &owner, int defaultValue)
+double parseInformationRate(const char *attrValue, const char *attrName, InetSimpleModule &owner, int defaultValue)
 {
     if (isEmpty(attrValue))
         return defaultValue;
@@ -195,7 +195,7 @@ std::string colorToString(int color)
     }
 }
 
-double getInterfaceDatarate(cSimpleModule *interfaceModule)
+double getInterfaceDatarate(InetSimpleModule *interfaceModule)
 {
     IInterfaceTable *ift = InterfaceTableAccess().getIfExists(interfaceModule);
     InterfaceEntry *ie = ift ? ift->getInterfaceByInterfaceModule(interfaceModule) : NULL;

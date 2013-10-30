@@ -28,7 +28,7 @@
  *
  * @author andras
  */
-class INET_API NetAnimTrace : public cSimpleModule, protected cListener
+class INET_API NetAnimTrace : public InetSimpleModule, protected cListener
 {
   protected:
     static simsignal_t messageSentSignal;

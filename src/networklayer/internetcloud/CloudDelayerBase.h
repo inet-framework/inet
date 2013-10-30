@@ -29,7 +29,7 @@
 class IPv4;
 
 
-class INET_API CloudDelayerBase : public cSimpleModule, public INetfilter::IHook
+class INET_API CloudDelayerBase : public InetSimpleModule, public INetfilter::IHook
 {
   public:
     CloudDelayerBase();

@@ -38,12 +38,12 @@ Define_Module(RTP);
 simsignal_t RTP::rcvdPkSignal = registerSignal("rcvdPk");
 
 //
-// methods inherited from cSimpleModule
+// methods inherited from InetSimpleModule
 //
 
 void RTP::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

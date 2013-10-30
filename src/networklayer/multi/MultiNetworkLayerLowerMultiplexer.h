@@ -20,7 +20,7 @@
 
 #include "INETDefs.h"
 
-class MultiNetworkLayerLowerMultiplexer : public cSimpleModule {
+class MultiNetworkLayerLowerMultiplexer : public InetSimpleModule {
   public:
     MultiNetworkLayerLowerMultiplexer() { }
     virtual ~MultiNetworkLayerLowerMultiplexer() { }

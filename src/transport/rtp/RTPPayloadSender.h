@@ -35,7 +35,7 @@ class RTPInnerPacket;
  * packet sender like opening and closing the data file and choosing sequence
  * number and time stamp start values.
  */
-class INET_API RTPPayloadSender : public cSimpleModule
+class INET_API RTPPayloadSender : public InetSimpleModule
 {
   public:
     /**

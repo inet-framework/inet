@@ -32,7 +32,7 @@
  * subclasses; the actual queue or piority queue data structure
  * also goes into subclasses.
  */
-class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
+class INET_API PassiveQueueBase : public InetSimpleModule, public IPassiveQueue
 {
   protected:
     std::list<IPassiveQueueListener*> listeners;

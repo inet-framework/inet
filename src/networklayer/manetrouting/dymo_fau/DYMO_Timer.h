@@ -35,11 +35,11 @@ class DYMO_Timer : public cObject
 {
   public:
     /**
-     * @param parent specifies the cSimpleModule that will receive a DYMO_Timeout message when this timer expires
+     * @param parent specifies the InetSimpleModule that will receive a DYMO_Timeout message when this timer expires
      * @param name helps differentiate DYMO_Timer instances
      * @param interval sets the default interval after which to expire the DYMO_Timer
      */
-    DYMO_Timer(cSimpleModule* parent, const char *name, simtime_t interval = 0);
+    DYMO_Timer(InetSimpleModule* parent, const char *name, simtime_t interval = 0);
 
     ~DYMO_Timer();
 
@@ -70,7 +70,7 @@ class DYMO_Timer : public cObject
     simtime_t getInterval() const;
 
   protected:
-    cSimpleModule* parent; /**< cSimpleModule that will receive cMessage instances that indicate timeouts */
+    InetSimpleModule* parent; /**< InetSimpleModule that will receive cMessage instances that indicate timeouts */
     char* name; /**< descriptive name */
     simtime_t interval; /**< last set interval after which to expire this DYMO_Timer */
     simtime_t expiresAt; /**< point in simulation time from where on this DYMO_Timer will be considered expired */

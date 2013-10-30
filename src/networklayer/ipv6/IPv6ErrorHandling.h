@@ -33,7 +33,7 @@
  * Error Handling: print out received error for IPv6
  */
 // FIXME is such thing needed at all???
-class INET_API IPv6ErrorHandling: public cSimpleModule
+class INET_API IPv6ErrorHandling: public InetSimpleModule
 {
   protected:
     virtual void initialize();

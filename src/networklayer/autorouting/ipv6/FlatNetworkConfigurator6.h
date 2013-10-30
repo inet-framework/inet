@@ -30,7 +30,7 @@
  *
  * For more info please see the NED file.
  */
-class INET_API FlatNetworkConfigurator6 : public cSimpleModule
+class INET_API FlatNetworkConfigurator6 : public InetSimpleModule
 {
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

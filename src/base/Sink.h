@@ -24,7 +24,7 @@
  * A module that just deletes every packet it receives, and collects
  * basic statistics (packet count, bit count, packet rate, bit rate).
  */
-class INET_API Sink : public cSimpleModule
+class INET_API Sink : public InetSimpleModule
 {
   protected:
     int numPackets;

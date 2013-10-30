@@ -33,7 +33,7 @@ std::ostream& operator<<(std::ostream& os, const DYMO_QueuedData& o)
     return os;
 }
 
-DYMO_DataQueue::DYMO_DataQueue(cSimpleModule *owner, int BUFFER_SIZE_PACKETS, int BUFFER_SIZE_BYTES) : dataQueueByteSize(0), BUFFER_SIZE_PACKETS(BUFFER_SIZE_PACKETS), BUFFER_SIZE_BYTES(BUFFER_SIZE_BYTES)
+DYMO_DataQueue::DYMO_DataQueue(InetSimpleModule *owner, int BUFFER_SIZE_PACKETS, int BUFFER_SIZE_BYTES) : dataQueueByteSize(0), BUFFER_SIZE_PACKETS(BUFFER_SIZE_PACKETS), BUFFER_SIZE_BYTES(BUFFER_SIZE_BYTES)
 {
     moduleOwner = owner;
 }

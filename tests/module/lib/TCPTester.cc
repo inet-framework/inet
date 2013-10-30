@@ -21,7 +21,7 @@
 #include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 
-TCPTesterBase::TCPTesterBase() : cSimpleModule()
+TCPTesterBase::TCPTesterBase() : InetSimpleModule()
 {
 }
 

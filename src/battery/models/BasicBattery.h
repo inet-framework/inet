@@ -78,7 +78,7 @@ class DrawAmount
 };
 
 
-class INET_API BasicBattery : public cSimpleModule, public cListener
+class INET_API BasicBattery : public InetSimpleModule, public cListener
 {
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

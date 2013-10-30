@@ -47,7 +47,7 @@ class AirFrame;
  * @ingroup channelControl
  * @ingroup phyLayer
  */
-class INET_API ChannelAccess : public cSimpleModule, protected cListener
+class INET_API ChannelAccess : public InetSimpleModule, protected cListener
 {
   protected:
     static simsignal_t mobilityStateChangedSignal;

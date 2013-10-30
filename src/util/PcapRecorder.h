@@ -31,7 +31,7 @@
 /**
  * Dumps every packet using the PcapDump and PacketDump classes
  */
-class INET_API PcapRecorder : public cSimpleModule, protected cListener
+class INET_API PcapRecorder : public InetSimpleModule, protected cListener
 {
     protected:
         typedef std::map<simsignal_t,bool> SignalList;

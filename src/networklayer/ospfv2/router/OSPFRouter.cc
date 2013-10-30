@@ -21,7 +21,7 @@
 #include "IPv4RoutingTableAccess.h"
 
 
-OSPF::Router::Router(OSPF::RouterID id, cSimpleModule* containingModule) :
+OSPF::Router::Router(OSPF::RouterID id, InetSimpleModule* containingModule) :
     routerID(id),
     rfc1583Compatibility(false)
 {

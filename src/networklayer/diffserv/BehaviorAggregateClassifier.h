@@ -25,7 +25,7 @@
 /**
  * Behavior Aggregate Classifier.
  */
-class INET_API BehaviorAggregateClassifier : public cSimpleModule
+class INET_API BehaviorAggregateClassifier : public InetSimpleModule
 {
   protected:
     int numOutGates;

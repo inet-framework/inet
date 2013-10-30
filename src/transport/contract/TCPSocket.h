@@ -65,7 +65,7 @@ class TCPStatusInfo;
  * itself as callback object:
  *
  * <pre>
- * class MyModule : public cSimpleModule, public TCPSocket::CallbackInterface
+ * class MyModule : public InetSimpleModule, public TCPSocket::CallbackInterface
  * {
  *     TCPSocket socket;
  *     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
@@ -129,8 +129,8 @@ class INET_API TCPSocket
      * and processMessage() for more info.
      *
      * Note: this class is not subclassed from cObject, because
-     * classes may have both this class and cSimpleModule as base class,
-     * and cSimpleModule is already a cObject.
+     * classes may have both this class and InetSimpleModule as base class,
+     * and InetSimpleModule is already a cObject.
      */
     class CallbackInterface
     {
@@ -368,7 +368,7 @@ class INET_API TCPSocket
      * multiply inherits from CallbackInterface too, that is you
      * declared it as
      * <pre>
-     * class MyAppModule : public cSimpleModule, public TCPSocket::CallbackInterface
+     * class MyAppModule : public InetSimpleModule, public TCPSocket::CallbackInterface
      * </pre>
      * and redefined the necessary virtual functions; or you may use
      * dedicated class (and objects) for this purpose.

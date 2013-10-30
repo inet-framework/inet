@@ -55,7 +55,7 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
         unsigned long socketsOpened;
 
     protected:
-        /** @name cSimpleModule redefinitions */
+        /** @name InetSimpleModule redefinitions */
         //@{
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
 

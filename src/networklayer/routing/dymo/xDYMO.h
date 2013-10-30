@@ -50,7 +50,7 @@ DYMO_NAMESPACE_BEGIN
  *  - 13.6. Message Aggregation
  *    RFC5148 add jitter to broadcasts
  */
-class INET_API xDYMO : public cSimpleModule, public ILifecycle, public cListener, public INetfilter::IHook
+class INET_API xDYMO : public InetSimpleModule, public ILifecycle, public cListener, public INetfilter::IHook
 {
   private:
     // DYMO parameters from RFC

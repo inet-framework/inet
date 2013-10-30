@@ -43,7 +43,7 @@ class RTPSenderInfo;
  * processing of rtcp packets. It also keeps track of this and other
  * RTP end systems.
  */
-class INET_API RTCP : public cSimpleModule, public ILifecycle
+class INET_API RTCP : public InetSimpleModule, public ILifecycle
 {
   public:
     RTCP();

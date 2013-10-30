@@ -31,7 +31,7 @@
 /**
  * manages annotations on the OMNeT++ canvas.
  */
-class INET_API AnnotationManager : public cSimpleModule
+class INET_API AnnotationManager : public InetSimpleModule
 {
   public:
     class Group;

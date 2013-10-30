@@ -28,7 +28,7 @@ class InterfaceEntry;
 /**
  * Base class for MAC modules.
  */
-class INET_API MACBase : public cSimpleModule, public ILifecycle, public cListener
+class INET_API MACBase : public InetSimpleModule, public ILifecycle, public cListener
 {
     protected:
         cModule *hostModule;

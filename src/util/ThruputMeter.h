@@ -27,7 +27,7 @@
  */
 // FIXME problem: if traffic suddenly stops, it'll show the last reading forever;
 // (output vector will be correct though); would need a timer to handle this situation
-class INET_API ThruputMeter : public cSimpleModule
+class INET_API ThruputMeter : public InetSimpleModule
 {
   protected:
     // config

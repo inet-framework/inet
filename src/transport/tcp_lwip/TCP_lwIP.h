@@ -44,7 +44,7 @@ class TcpLwipSendQueue;
  * Encapsulates a Network Simulation Cradle (NSC) instance.
  */
 
-class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public ILifecycle
+class INET_API TCP_lwIP : public InetSimpleModule, public LwipTcpStackIf, public ILifecycle
 {
   public:
     TCP_lwIP();

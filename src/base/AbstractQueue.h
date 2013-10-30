@@ -26,7 +26,7 @@
  * optimization for zero service time (i.e. it does not schedule the
  * endService timer then).
  */
-class INET_API AbstractQueue : public cSimpleModule
+class INET_API AbstractQueue : public InetSimpleModule
 {
   public:
     AbstractQueue();

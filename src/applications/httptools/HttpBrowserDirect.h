@@ -48,7 +48,7 @@
 class INET_API HttpBrowserDirect : public HttpBrowserBase
 {
     protected:
-        /** @name cSimpleModule redefinitions */
+        /** @name InetSimpleModule redefinitions */
         //@{
         /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize(int stage);

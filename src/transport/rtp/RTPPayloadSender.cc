@@ -38,7 +38,7 @@ RTPPayloadSender::~RTPPayloadSender()
 
 void RTPPayloadSender::initialize()
 {
-    cSimpleModule::initialize();
+    InetSimpleModule::initialize();
     _mtu = 0;
     _ssrc = 0;
     _payloadType = 0;

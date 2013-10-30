@@ -55,7 +55,7 @@ class SCTPMessage;
  *      of send and receive queues
  *   - SCTPAlgorithm: abstract base class for SCTP algorithms
  *
- * SCTP subclassed from cSimpleModule. It manages socketpair-to-association
+ * SCTP subclassed from InetSimpleModule. It manages socketpair-to-association
  * mapping, and dispatches segments and user commands to the appropriate
  * SCTPAssociation object.
  *
@@ -84,7 +84,7 @@ class SCTPMessage;
  * The concrete SCTPAlgorithm class to use can be chosen per association (in OPEN)
  * or in a module parameter.
  */
-class INET_API SCTP : public cSimpleModule
+class INET_API SCTP : public InetSimpleModule
 {
     public:
         struct AppAssocKey

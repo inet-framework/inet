@@ -40,7 +40,7 @@
  * For more info please see the NED file.
  */
 // TODO: remove topology arguments from functions or perhaps move those functions into topology or leave it as it is?
-class INET_API IPv4NetworkConfigurator : public cSimpleModule, public AddressResolver
+class INET_API IPv4NetworkConfigurator : public InetSimpleModule, public AddressResolver
 {
     protected:
         class LinkInfo;

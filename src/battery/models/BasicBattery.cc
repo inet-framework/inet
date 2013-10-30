@@ -29,7 +29,7 @@
  */
 void BasicBattery::initialize(int stage)
 {
-    cSimpleModule::initialize(stage); //DO NOT DELETE!!
+    InetSimpleModule::initialize(stage); //DO NOT DELETE!!
 }
 
 void BasicBattery::finish()

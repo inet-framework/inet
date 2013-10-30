@@ -38,7 +38,7 @@ class RTPInnerPacket;
  * RTP<profileName>Payload<payloadType>Sender
  * RTP<profileName>Payload<payloadType>Receiver
  */
-class INET_API RTPProfile : public cSimpleModule
+class INET_API RTPProfile : public InetSimpleModule
 {
   protected:
     // helper class to store the association between an ssrc identifier

@@ -38,7 +38,7 @@ IPv4NodeConfigurator::IPv4NodeConfigurator()
 
 void IPv4NodeConfigurator::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

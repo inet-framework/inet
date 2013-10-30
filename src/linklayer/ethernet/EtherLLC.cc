@@ -35,7 +35,7 @@ simsignal_t EtherLLC::pauseSentSignal = registerSignal("pauseSent");
 
 void EtherLLC::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

@@ -23,7 +23,7 @@
 #include "INETDefs.h"
 #include "Lifecycle.h"
 
-class INET_API TestProtocol : public cSimpleModule, public ILifecycle {
+class INET_API TestProtocol : public InetSimpleModule, public ILifecycle {
   private:
     bool connectionOpen;
     bool dataSent;

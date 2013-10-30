@@ -92,7 +92,7 @@ xMIPv6::~xMIPv6()
 
 void xMIPv6::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

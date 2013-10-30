@@ -35,7 +35,7 @@
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
+class INET_API Ieee80211AgentSTA : public InetSimpleModule, public cListener
 {
   protected:
     InterfaceEntry *myIface;
@@ -62,7 +62,7 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int);
 
-    /** Overridden cSimpleModule method */
+    /** Overridden InetSimpleModule method */
     virtual void handleMessage(cMessage *msg);
 
     /** Handle timers */

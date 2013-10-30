@@ -46,7 +46,7 @@ class IPv6RoutingTable;
  * be read and modified during simulation, typically by routing protocol
  * implementations.
  */
-class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, protected cListener, public ILifecycle
+class INET_API IPv6RoutingTable : public InetSimpleModule, public IRoutingTable, protected cListener, public ILifecycle
 {
   protected:
     IInterfaceTable *ift; // cached pointer

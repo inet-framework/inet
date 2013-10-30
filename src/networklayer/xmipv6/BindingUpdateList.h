@@ -43,7 +43,7 @@ class InterfaceEntry;
 #define PRE_BINDING_EXPIRY          2 // amount of seconds before BUL expiry that indicate that a binding will shortly expiry
 
 
-class INET_API BindingUpdateList : public cSimpleModule
+class INET_API BindingUpdateList : public InetSimpleModule
 {
   public:
 //###########################Declaration of BUL and BC added by Zarrar Yousaf @ CNI Uni Dortmund on 04.06.07######

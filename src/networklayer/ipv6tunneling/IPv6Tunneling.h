@@ -41,7 +41,7 @@ class IPv6RoutingTable;
 /**
  * Management of IP tunnels.
  */
-class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
+class INET_API IPv6Tunneling : public InetSimpleModule, public ILifecycle
 {
     public:
         enum TunnelType

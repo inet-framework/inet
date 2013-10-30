@@ -32,7 +32,7 @@
  * Dumps every packet using the PcapDump class and the
  * PacketDump class.
  */
-class INET_API TCPDump : public cSimpleModule
+class INET_API TCPDump : public InetSimpleModule
 {
     protected:
         PcapDump pcapDump;

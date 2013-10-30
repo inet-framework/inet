@@ -30,7 +30,7 @@
 /**
  * Consumes and prints packets received from the IP module. See NED for more info.
  */
-class INET_API IPvXTrafSink : public cSimpleModule, public ILifecycle
+class INET_API IPvXTrafSink : public InetSimpleModule, public ILifecycle
 {
   protected:
     int numReceived;

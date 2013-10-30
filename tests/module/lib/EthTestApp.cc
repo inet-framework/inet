@@ -23,7 +23,7 @@
 #include "MACAddress.h"
 
 
-class INET_API EthTestApp : public cSimpleModule
+class INET_API EthTestApp : public InetSimpleModule
 {
   protected:
     MACAddress destAddr;

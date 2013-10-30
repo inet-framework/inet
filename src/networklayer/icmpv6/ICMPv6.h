@@ -35,7 +35,7 @@ class PingPayload;
 /**
  * ICMPv6 implementation.
  */
-class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
+class INET_API ICMPv6 : public InetSimpleModule, public ILifecycle
 {
   public:
     /**

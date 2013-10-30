@@ -30,7 +30,7 @@ simsignal_t TraCIDemo::mobilityStateChangedSignal = registerSignal("mobilityStat
 
 void TraCIDemo::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

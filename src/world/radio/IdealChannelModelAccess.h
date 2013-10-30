@@ -37,7 +37,7 @@ class IdealAirFrame;
  *
  * The radio module has to be derived from this class!
  */
-class INET_API IdealChannelModelAccess : public cSimpleModule, protected cListener
+class INET_API IdealChannelModelAccess : public InetSimpleModule, protected cListener
 {
   protected:
     static simsignal_t mobilityStateChangedSignal;

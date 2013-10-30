@@ -28,7 +28,7 @@
 /**
  * Simple traffic generator for the Ethernet model.
  */
-class INET_API EtherAppCli : public cSimpleModule, public ILifecycle
+class INET_API EtherAppCli : public InetSimpleModule, public ILifecycle
 {
   protected:
     enum Kinds {START=100, NEXT};

@@ -36,7 +36,7 @@ class EtherFrame;
  * behavior (incl. queueing and performance aspects) must be addressed
  * in subclasses.
  */
-class INET_API MACRelayUnitBase : public cSimpleModule, public ILifecycle
+class INET_API MACRelayUnitBase : public InetSimpleModule, public ILifecycle
 {
   public:
     // An entry of the Address Lookup Table

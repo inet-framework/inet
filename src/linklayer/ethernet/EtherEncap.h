@@ -29,7 +29,7 @@ class EtherFrame;
 /**
  * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.
  */
-class INET_API EtherEncap : public cSimpleModule
+class INET_API EtherEncap : public InetSimpleModule
 {
   protected:
     int seqNum;

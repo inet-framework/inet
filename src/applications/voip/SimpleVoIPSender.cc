@@ -42,7 +42,7 @@ void SimpleVoIPSender::initialize(int stage)
 {
     EV << "VoIP Sender initialize: stage " << stage << endl;
 
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     // avoid multiple initializations
     if (stage == INITSTAGE_LOCAL)

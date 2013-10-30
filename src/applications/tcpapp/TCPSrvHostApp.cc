@@ -22,7 +22,7 @@ Define_Module(TCPSrvHostApp);
 
 void TCPSrvHostApp::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_APPLICATION_LAYER)
     {

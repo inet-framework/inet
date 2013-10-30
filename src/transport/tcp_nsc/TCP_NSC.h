@@ -46,7 +46,7 @@ class TCP_NSC_ReceiveQueue;
 /**
  * Encapsulates a Network Simulation Cradle (NSC) instance.
  */
-class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback, public ILifecycle
+class INET_API TCP_NSC : public InetSimpleModule, ISendCallback, IInterruptCallback, public ILifecycle
 {
   protected:
     enum {MAX_SEND_BYTES = 500000};

@@ -25,7 +25,7 @@
 /**
  * TODO documentation
  */
-class INET_API NetworkInfo : public cSimpleModule, public IScriptable
+class INET_API NetworkInfo : public InetSimpleModule, public IScriptable
 {
   protected:
     virtual void initialize();

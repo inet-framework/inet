@@ -28,7 +28,7 @@ class TCPServerThreadBase;
  * is a sSimpleModule). Creates one instance (using dynamic module creation)
  * for each incoming connection. More info in the corresponding NED file.
  */
-class INET_API TCPSrvHostApp : public cSimpleModule, public ILifecycle
+class INET_API TCPSrvHostApp : public InetSimpleModule, public ILifecycle
 {
   protected:
     TCPSocket serverSocket;

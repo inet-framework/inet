@@ -24,7 +24,7 @@
 /**
  * DSCP Marker.
  */
-class INET_API DSCPMarker : public cSimpleModule
+class INET_API DSCPMarker : public InetSimpleModule
 {
   protected:
     std::vector<int> dscps;

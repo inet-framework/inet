@@ -23,7 +23,7 @@
  *
  * It needs the following NED parameters: localAddress, localPort, connectAddress, connectPort.
  */
-class INET_API TCPAppBase : public cSimpleModule, public TCPSocket::CallbackInterface
+class INET_API TCPAppBase : public InetSimpleModule, public TCPSocket::CallbackInterface
 {
   protected:
     TCPSocket socket;

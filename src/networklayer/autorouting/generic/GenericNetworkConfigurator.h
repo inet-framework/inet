@@ -35,7 +35,7 @@ namespace inet { class PatternMatcher; }
  *
  * For more info please see the NED file.
  */
-class INET_API GenericNetworkConfigurator : public cSimpleModule
+class INET_API GenericNetworkConfigurator : public InetSimpleModule
 {
     public:
         class LinkInfo;

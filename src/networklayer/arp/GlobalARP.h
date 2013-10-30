@@ -34,7 +34,7 @@ class IInterfaceTable;
  * - uses global mapping (or table, or algorithm)
  * - not a protocol -- doesn't communicate
  */
-class INET_API GlobalARP : public cSimpleModule
+class INET_API GlobalARP : public InetSimpleModule
 {
   private:
     IInterfaceTable *ift;

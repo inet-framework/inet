@@ -31,7 +31,7 @@
   *
  * @see IPv4RoutingTable, IPv4Route
  */
-class INET_API RoutingTableRecorder : public cSimpleModule, public cIndexedEventlogManager::cEventlogListener
+class INET_API RoutingTableRecorder : public InetSimpleModule, public cIndexedEventlogManager::cEventlogListener
 {
     friend class RoutingTableNotificationBoardListener;
 
@@ -86,7 +86,7 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cIndexedEvent
   *
  * @see IPv4RoutingTable, IPv4Route
  */
-class INET_API RoutingTableRecorder : public cSimpleModule
+class INET_API RoutingTableRecorder : public InetSimpleModule
 {
     friend class RoutingTableRecorderListener;
   private:

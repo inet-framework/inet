@@ -63,7 +63,7 @@ IPv6NeighbourDiscovery::~IPv6NeighbourDiscovery()
 
 void IPv6NeighbourDiscovery::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_NETWORK_LAYER)
     {

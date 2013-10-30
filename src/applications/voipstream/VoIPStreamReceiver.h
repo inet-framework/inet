@@ -45,7 +45,7 @@ extern "C" {
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
 
-class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
+class VoIPStreamReceiver : public InetSimpleModule, public ILifecycle
 {
   public:
     VoIPStreamReceiver() { resultFile = ""; }

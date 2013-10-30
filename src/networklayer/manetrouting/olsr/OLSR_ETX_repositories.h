@@ -59,8 +59,8 @@ typedef OLSR_iface_assoc_tuple OLSR_ETX_iface_assoc_tuple;
 typedef struct OLSR_ETX_link_tuple : public OLSR_link_tuple
 {
     /// Link quality extension
-    cSimpleModule * owner_;
-    inline void  set_owner(cSimpleModule *p) {owner_ = p;}
+    InetSimpleModule * owner_;
+    inline void  set_owner(InetSimpleModule *p) {owner_ = p;}
 
     /// Link quality extension
     unsigned char   loss_bitmap_ [16];

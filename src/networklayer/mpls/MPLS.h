@@ -33,7 +33,7 @@
 /**
  * Implements the MPLS protocol; see the NED file for more info.
  */
-class INET_API MPLS : public cSimpleModule
+class INET_API MPLS : public InetSimpleModule
 {
     protected:
         simtime_t delay1;

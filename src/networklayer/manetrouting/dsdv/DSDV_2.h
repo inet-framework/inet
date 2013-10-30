@@ -39,7 +39,7 @@ using namespace std;
 /**
  * DSDV module implementation.
  */
-class INET_API DSDV_2 : public cSimpleModule    // proactive protocol, don't need to ManetIPv4Hook
+class INET_API DSDV_2 : public InetSimpleModule    // proactive protocol, don't need to ManetIPv4Hook
 {
   private:
     cMessage *event;

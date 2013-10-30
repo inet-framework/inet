@@ -23,7 +23,7 @@
 /**
  * A module class whose handleMessage() throws a "not implemented" exception.
  */
-class UnimplementedModule : public cSimpleModule
+class UnimplementedModule : public InetSimpleModule
 {
   protected:
     virtual void handleMessage(cMessage *msg);

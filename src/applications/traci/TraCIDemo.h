@@ -30,7 +30,7 @@
 /**
  * Small IVC Demo
  */
-class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
+class TraCIDemo : public InetSimpleModule, protected cListener, public ILifecycle
 {
     public:
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

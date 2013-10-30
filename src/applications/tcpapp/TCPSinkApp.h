@@ -22,7 +22,7 @@
  * Accepts any number of incoming connections, and discards whatever arrives
  * on them.
  */
-class INET_API TCPSinkApp : public cSimpleModule, public ILifecycle
+class INET_API TCPSinkApp : public InetSimpleModule, public ILifecycle
 {
   protected:
     long bytesRcvd;

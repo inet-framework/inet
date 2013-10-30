@@ -32,7 +32,7 @@
 /**
  * FIXME
  */
-class TraCITestApp : public cSimpleModule, protected cListener, public ILifecycle
+class TraCITestApp : public InetSimpleModule, protected cListener, public ILifecycle
 {
     public:
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

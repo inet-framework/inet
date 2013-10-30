@@ -33,7 +33,7 @@
 /**
  * Implements the OSPFv2 routing protocol. See the NED file for more information.
  */
-class OSPFRouting :  public cSimpleModule, public ILifecycle
+class OSPFRouting :  public InetSimpleModule, public ILifecycle
 {
   private:
     bool isUp;

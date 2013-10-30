@@ -44,7 +44,7 @@ typedef std::vector<LabelOp> LabelOpVector;
 /**
  * TODO documentation
  */
-class INET_API LIBTable: public cSimpleModule
+class INET_API LIBTable: public InetSimpleModule
 {
     public:
         struct LIBEntry

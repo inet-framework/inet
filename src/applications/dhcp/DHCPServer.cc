@@ -44,7 +44,7 @@ DHCPServer::~DHCPServer()
 
 void DHCPServer::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

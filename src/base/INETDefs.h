@@ -39,6 +39,7 @@
 
 
 #include "InitStages.h"
+#include "InetSimpleModule.h"
 
 typedef unsigned short ushort;
 typedef unsigned int uint;

@@ -63,7 +63,7 @@ IPv6Tunneling::IPv6Tunneling()
 
 void IPv6Tunneling::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

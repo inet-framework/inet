@@ -29,7 +29,7 @@ Define_Module(RTPApplication)
 
 void RTPApplication::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     // because of AddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.

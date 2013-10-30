@@ -29,7 +29,7 @@
 /**
  * Implements a simple VoIP source. See the NED file for more information.
  */
-class SimpleVoIPSender : public cSimpleModule, public ILifecycle
+class SimpleVoIPSender : public InetSimpleModule, public ILifecycle
 {
   private:
     UDPSocket socket;

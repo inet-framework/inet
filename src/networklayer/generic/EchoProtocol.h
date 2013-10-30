@@ -27,7 +27,7 @@ class PingPayload;
 /**
  * TODO
  */
-class INET_API EchoProtocol : public cSimpleModule
+class INET_API EchoProtocol : public InetSimpleModule
 {
   protected:
     typedef std::map<long,int> PingMap;

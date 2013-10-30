@@ -18,7 +18,7 @@
 
 #include "INETDefs.h"
 
-class INET_API Join : public cSimpleModule
+class INET_API Join : public InetSimpleModule
 {
   protected:
     cGate *outg;

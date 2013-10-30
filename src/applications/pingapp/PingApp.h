@@ -33,7 +33,7 @@ class PingPayload;
  *
  * See NED file for detailed description of operation.
  */
-class INET_API PingApp : public cSimpleModule, public ILifecycle
+class INET_API PingApp : public InetSimpleModule, public ILifecycle
 {
   public:
     PingApp();

@@ -27,7 +27,7 @@
  *
  * @author Christoph Sommer
  */
-class INET_API AnnotationDummy : public cSimpleModule
+class INET_API AnnotationDummy : public InetSimpleModule
 {
   public:
     ~AnnotationDummy();

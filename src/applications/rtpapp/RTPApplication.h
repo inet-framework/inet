@@ -26,13 +26,13 @@
  * which uses RTP. It acts as a sender if the omnet parameter fileName is
  * set, and as a receiver if the parameter is empty.
  */
-class INET_API RTPApplication : public cSimpleModule, public ILifecycle
+class INET_API RTPApplication : public InetSimpleModule, public ILifecycle
 {
     public:
         /**
          * Constructor.
          */
-        RTPApplication() : cSimpleModule() {}
+        RTPApplication() : InetSimpleModule() {}
 
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 

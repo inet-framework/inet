@@ -78,7 +78,7 @@ IPv4NetworkConfigurator::RouteInfo *IPv4NetworkConfigurator::RoutingTableInfo::f
 
 void IPv4NetworkConfigurator::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {
@@ -532,7 +532,7 @@ const char *IPv4NetworkConfigurator::getWirelessId(InterfaceEntry *interfaceEntr
     cModule *module = interfaceEntry->getInterfaceModule();
     if (!module)
         module = hostModule;
-    cSimpleModule *mgmtModule = ModuleAccess<cSimpleModule>("mgmt").getIfExists(module);
+    InetSimpleModule *mgmtModule = ModuleAccess<InetSimpleModule>("mgmt").getIfExists(module);
     if (mgmtModule)
     {
         if (mgmtModule->hasPar("ssid"))

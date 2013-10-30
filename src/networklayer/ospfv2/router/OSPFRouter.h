@@ -56,7 +56,7 @@ public:
      * Constructor.
      * Initializes internal variables, adds a MessageHandler and starts the Database Age timer.
      */
-    Router(RouterID id, cSimpleModule* containingModule);
+    Router(RouterID id, InetSimpleModule* containingModule);
 
     /**
      * Destructor.

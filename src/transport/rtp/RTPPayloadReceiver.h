@@ -33,7 +33,7 @@ class RTPPacket;
  * The class RTPPayloadReceiver acts as a base class for modules
  * processing incoming RTP data packets.
  */
-class INET_API RTPPayloadReceiver : public cSimpleModule
+class INET_API RTPPayloadReceiver : public InetSimpleModule
 {
   public:
     /**

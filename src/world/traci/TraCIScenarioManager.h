@@ -50,7 +50,7 @@
  * @see TraCIScenarioManagerLaunchd
  *
  */
-class INET_API TraCIScenarioManager : public cSimpleModule
+class INET_API TraCIScenarioManager : public InetSimpleModule
 {
     public:
         /**

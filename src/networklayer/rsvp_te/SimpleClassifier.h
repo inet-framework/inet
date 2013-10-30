@@ -33,7 +33,7 @@ class RSVP;
 /**
  * TODO documentation
  */
-class INET_API SimpleClassifier: public cSimpleModule, public IScriptable, public IRSVPClassifier
+class INET_API SimpleClassifier: public InetSimpleModule, public IScriptable, public IRSVPClassifier
 {
   public:
     struct FECEntry

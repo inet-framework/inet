@@ -184,7 +184,7 @@ void DSRUU::omnet_deliver(struct dsr_pkt *dp)
 void  DSRUUTimer::resched(double delay)
 {
     if (msgtimer.isScheduled())
-        a_->cSimpleModule::cancelEvent(&msgtimer);
+        a_->InetSimpleModule::cancelEvent(&msgtimer);
     a_->scheduleAt(simTime()+delay, &msgtimer);
 }
 
@@ -196,7 +196,7 @@ void DSRUUTimer::cancel()
 
 void DSRUU::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     //current_time =simTime();
     if (stage == INITSTAGE_LOCAL)
@@ -413,7 +413,7 @@ void DSRUU::finish()
     maint_buf_cleanup();
 }
 
-DSRUU::DSRUU():cSimpleModule(), cListener()
+DSRUU::DSRUU():InetSimpleModule(), cListener()
 {
     lifoDsrPkt = NULL;
     lifo_token = 0;

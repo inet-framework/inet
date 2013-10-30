@@ -31,7 +31,7 @@
 /**
  * Server-side process EtherAppCli.
  */
-class INET_API EtherAppSrv : public cSimpleModule, public ILifecycle
+class INET_API EtherAppSrv : public InetSimpleModule, public ILifecycle
 {
   protected:
     int localSAP;

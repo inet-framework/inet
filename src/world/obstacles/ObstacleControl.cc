@@ -31,7 +31,7 @@ ObstacleControl::~ObstacleControl() {
 
 void ObstacleControl::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {

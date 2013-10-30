@@ -31,7 +31,7 @@ class PingPayload;
  *
  * See NED file for detailed description of operation.
  */
-class INET_API PingTestApp : public cSimpleModule, public ILifecycle
+class INET_API PingTestApp : public InetSimpleModule, public ILifecycle
 {
   public:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

@@ -29,7 +29,7 @@
 /**
  * UDP application. See NED for more info.
  */
-class INET_API AppBase : public cSimpleModule, public ILifecycle
+class INET_API AppBase : public InetSimpleModule, public ILifecycle
 {
   protected:
     bool isOperational;

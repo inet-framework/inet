@@ -24,7 +24,7 @@
  * Models a wiring hub. It simply broadcasts the received message
  * on all other ports.
  */
-class INET_API EtherHub : public cSimpleModule, protected cListener
+class INET_API EtherHub : public InetSimpleModule, protected cListener
 {
   protected:
     int numPorts;         // sizeof(ethg)

@@ -30,7 +30,7 @@
  *
  * See RFC 2697.
  */
-class INET_API SingleRateThreeColorMeter : public cSimpleModule
+class INET_API SingleRateThreeColorMeter : public InetSimpleModule
 {
   protected:
     double CIR; // Commited Information Rate (bits/sec)

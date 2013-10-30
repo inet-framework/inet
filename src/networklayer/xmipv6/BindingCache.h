@@ -33,7 +33,7 @@
 #define HO_TOKEN    1101
 #define CO_TOKEN    2101
 
-class INET_API BindingCache : public cSimpleModule
+class INET_API BindingCache : public InetSimpleModule
 {
   private:
     //###########################Declaration of BUL and BC added by Zarrar Yousaf @ CNI Uni Dortmund on 04.06.07######

@@ -29,8 +29,7 @@
 class IInterfaceTable;
 class IIPv4RoutingTable;
 
-
-class INET_API IGMPv2 : public cSimpleModule, protected cListener
+class INET_API IGMPv2 : public InetSimpleModule, protected cListener
 {
   protected:
     enum RouterState

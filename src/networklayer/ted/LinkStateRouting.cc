@@ -40,7 +40,7 @@ LinkStateRouting::~LinkStateRouting()
 
 void LinkStateRouting::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {

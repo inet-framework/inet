@@ -31,7 +31,7 @@ class IInterfaceTable;
 /**
  * A C++ interface to abstract the functionality of a routing table, regardless of address type.
  */
-class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable, public cListener
+class INET_API GenericRoutingTable : public InetSimpleModule, public IRoutingTable, public cListener
 {
     private:
         IInterfaceTable *ift; // cached pointer

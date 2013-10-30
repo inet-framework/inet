@@ -32,7 +32,7 @@ namespace OSPF {
 
 class MessageHandler : public IMessageHandler {
 private:
-    cSimpleModule*                  ospfModule;
+    InetSimpleModule*                  ospfModule;
 
     HelloHandler                    helloHandler;
     DatabaseDescriptionHandler      ddHandler;
@@ -41,7 +41,7 @@ private:
     LinkStateAcknowledgementHandler lsAckHandler;
 
 public:
-    MessageHandler(Router* containingRouter, cSimpleModule* containingModule);
+    MessageHandler(Router* containingRouter, InetSimpleModule* containingModule);
 
     void    messageReceived(cMessage* message);
     void    handleTimer(cMessage*  timer);

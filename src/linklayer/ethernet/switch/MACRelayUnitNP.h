@@ -54,7 +54,7 @@ class INET_API MACRelayUnitNP : public MACRelayUnitBase
     cOutVector bufferLevel;
 
   protected:
-    /** @name Redefined cSimpleModule member functions. */
+    /** @name Redefined InetSimpleModule member functions. */
     //@{
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 

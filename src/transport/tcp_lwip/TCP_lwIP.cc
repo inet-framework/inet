@@ -84,7 +84,7 @@ TCP_lwIP::TCP_lwIP()
 
 void TCP_lwIP::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     tcpEV << this << ": initialize stage " << stage << endl;
 

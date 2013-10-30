@@ -32,7 +32,7 @@
 /**
  * IP traffic generator application. See NED for more info.
  */
-class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
+class INET_API IPvXTrafGen : public InetSimpleModule, public ILifecycle
 {
   protected:
     enum Kinds {START=100, NEXT};

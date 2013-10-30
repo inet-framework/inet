@@ -48,7 +48,7 @@
  * @ingroup basicModules
  * @author Daniel Willkomm, Andras Varga
  */
-class INET_API MobilityBase : public cSimpleModule, public IMobility
+class INET_API MobilityBase : public InetSimpleModule, public IMobility
 {
   public:
     /**

@@ -52,7 +52,7 @@ void TraCIMobility::Statistics::initialize()
     totalCO2Emission = 0;
 }
 
-void TraCIMobility::Statistics::watch(cSimpleModule& )
+void TraCIMobility::Statistics::watch(InetSimpleModule& )
 {
     WATCH(totalTime);
     WATCH(minSpeed);
@@ -60,7 +60,7 @@ void TraCIMobility::Statistics::watch(cSimpleModule& )
     WATCH(totalDistance);
 }
 
-void TraCIMobility::Statistics::recordScalars(cSimpleModule& module)
+void TraCIMobility::Statistics::recordScalars(InetSimpleModule& module)
 {
     if (firstRoadNumber != MY_INFINITY) module.recordScalar("firstRoadNumber", firstRoadNumber);
     module.recordScalar("startTime", startTime);

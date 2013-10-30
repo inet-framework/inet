@@ -23,7 +23,7 @@
 #include "INETDefs.h"
 #include "Lifecycle.h"
 
-class INET_API TestRadio : public cSimpleModule, public ILifecycle {
+class INET_API TestRadio : public InetSimpleModule, public ILifecycle {
   private:
     bool receiverTurnedOn;
     bool transmitterTurnedOn;

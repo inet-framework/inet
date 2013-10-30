@@ -30,7 +30,7 @@
 /**
  * Base class for TCP testing modules.
  */
-class INET_API TCPTesterBase : public cSimpleModule
+class INET_API TCPTesterBase : public InetSimpleModule
 {
   protected:
     int fromASeq;

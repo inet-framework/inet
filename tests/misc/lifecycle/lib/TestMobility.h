@@ -23,7 +23,7 @@
 #include "INETDefs.h"
 #include "Lifecycle.h"
 
-class INET_API TestMobility : public cSimpleModule, public ILifecycle {
+class INET_API TestMobility : public InetSimpleModule, public ILifecycle {
   private:
     bool moving;
     cMessage stopMoving;

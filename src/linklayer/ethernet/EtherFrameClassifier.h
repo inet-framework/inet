@@ -28,7 +28,7 @@
  * - PAUSE frames
  * - others
  */
-class INET_API EtherFrameClassifier : public cSimpleModule
+class INET_API EtherFrameClassifier : public InetSimpleModule
 {
   public:
     /**

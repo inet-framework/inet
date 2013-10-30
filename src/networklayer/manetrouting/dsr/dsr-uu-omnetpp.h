@@ -180,10 +180,10 @@ static inline char *print_pkt(char *p, int len)
 
 
 #ifdef MobilityFramework
-class DSRUU:public cSimpleModule, public ImNotifiable
+class DSRUU:public InetSimpleModule, public ImNotifiable
 {
 #else
-class DSRUU:public cSimpleModule, public cListener, public ManetNetfilterHook
+class DSRUU:public InetSimpleModule, public cListener, public ManetNetfilterHook
 {
 #endif
   public:

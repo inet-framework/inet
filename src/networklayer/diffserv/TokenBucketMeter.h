@@ -25,7 +25,7 @@
 /**
  * Simple token bucket meter.
  */
-class INET_API TokenBucketMeter : public cSimpleModule
+class INET_API TokenBucketMeter : public InetSimpleModule
 {
   protected:
     double CIR; // Commited Information Rate (bits/sec)

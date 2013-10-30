@@ -25,7 +25,7 @@
 /**
  * Base class for algorithmic droppers (RED, DropTail, etc.).
  */
-class INET_API AlgorithmicDropperBase : public cSimpleModule, public IQueueAccess
+class INET_API AlgorithmicDropperBase : public InetSimpleModule, public IQueueAccess
 {
     protected:
       int numGates;

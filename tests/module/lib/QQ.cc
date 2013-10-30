@@ -18,7 +18,7 @@
 #include "INETDefs.h"
 
 
-class INET_API QQ : public cSimpleModule
+class INET_API QQ : public InetSimpleModule
 {
   protected:
     cQueue queue;

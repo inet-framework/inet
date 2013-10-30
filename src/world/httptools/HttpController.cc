@@ -35,7 +35,7 @@ Define_Module(HttpController);
 
 void HttpController::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    InetSimpleModule::initialize(stage);
 
     EV_DEBUG << "Initializing stage " << stage << endl;
 

@@ -22,7 +22,7 @@
 
 #define BUFSIZE 4096
 
-class INET_API MessageChecker : public cSimpleModule
+class INET_API MessageChecker : public InetSimpleModule
 {
 public:
     MessageChecker();

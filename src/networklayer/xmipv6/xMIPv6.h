@@ -68,7 +68,7 @@ class IPv6RoutingTable;
 /**
  * Implements RFC 3775 Mobility Support in IPv6.
  */
-class INET_API xMIPv6 : public cSimpleModule
+class INET_API xMIPv6 : public InetSimpleModule
 {
   public:
     virtual ~xMIPv6();

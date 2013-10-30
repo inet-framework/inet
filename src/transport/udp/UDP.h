@@ -42,7 +42,7 @@ const bool DEFAULT_MULTICAST_LOOP = true;
  *
  * More info in the NED file.
  */
-class INET_API UDP : public cSimpleModule, public ILifecycle
+class INET_API UDP : public InetSimpleModule, public ILifecycle
 {
   public:
     struct SockDesc

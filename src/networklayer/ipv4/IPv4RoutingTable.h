@@ -71,7 +71,7 @@ class IRoutingTable;
  *
  * @see InterfaceEntry, IPv4InterfaceData, IPv4Route
  */
-class INET_API IPv4RoutingTable: public cSimpleModule, public IIPv4RoutingTable, protected cListener, public ILifecycle
+class INET_API IPv4RoutingTable: public InetSimpleModule, public IIPv4RoutingTable, protected cListener, public ILifecycle
 {
   protected:
     IInterfaceTable *ift; // cached pointer

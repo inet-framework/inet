@@ -48,7 +48,7 @@ class xMIPv6;
 /**
  * Implements RFC 2461 Neighbor Discovery for IPv6.
  */
-class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
+class INET_API IPv6NeighbourDiscovery : public InetSimpleModule, public ILifecycle
 {
     public:
         typedef std::vector<cMessage*> MsgPtrVector;

@@ -30,7 +30,7 @@
  * Implements the shared coaxial cable in classic Ethernet. See the NED file
  * for more description.
  */
-class INET_API EtherBus : public cSimpleModule, cListener
+class INET_API EtherBus : public InetSimpleModule, cListener
 {
   protected:
     /**
