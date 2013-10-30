@@ -44,7 +44,7 @@ class RSTP: public cSimpleModule, public ILifecycle
 
 	  /*Dynamic data.*/
 
-	int MaxAge;
+	int maxAge;
 	bool verbose;		/// Sets module verbosity
 	bool testing;		/// Save Testing data
 	bool isOperational; // for lifecycle
@@ -52,7 +52,7 @@ class RSTP: public cSimpleModule, public ILifecycle
 	cModule* Parent; /// Pointer to the parent module
 
 	unsigned int portCount;
-	simtime_t TCWhileTime; /// TCN activation time
+	simtime_t tcWhileTime; /// TCN activation time
 	bool autoEdge;	/// Automatic edge ports detection
 
 	MACAddressTable * sw;  /// Needed for flushing.
@@ -64,7 +64,7 @@ class RSTP: public cSimpleModule, public ILifecycle
 	MACAddress address; /// BEB MAC address
 
 	simtime_t hellotime;	/// Time between hello BPDUs
-	simtime_t forwardDelay;	/// After that a discarding port switches to learning and so on if it is designated
+	simtime_t fwdDelay;	/// After that a discarding port switches to learning and so on if it is designated
 	simtime_t migrateTime;  /// After that, a not asigned port becomes designated
 
 	cMessage* helloM;

@@ -82,13 +82,12 @@ void RSTP::initialize(int stage)
 		}
 
 		autoEdge=par("autoEdge");
-		MaxAge=par("MaxAge");
+		maxAge=par("maxAge");
 		verbose=(bool) par("verbose");
-		testing=(bool) par("testing");
-		priority=par("BridgePriority");
-		TCWhileTime=(simtime_t) par("TCWhileTime");
+		priority=par("priority");
+		tcWhileTime=(simtime_t) par("tcWhileTime");
 		hellotime=(simtime_t) par("helloTime");
-		forwardDelay=(simtime_t)par("forwardDelay");
+		fwdDelay=(simtime_t)par("fwdDelay");
 		migrateTime=(simtime_t) par ("migrateTime");  //Time the bridge waits for a better root info. After migrateTime time it swiches all ports which are not bk or alternate to designated.
 
 		initPorts();
@@ -96,7 +95,7 @@ void RSTP::initialize(int stage)
 		double waitTime=0.000001;  //Now
 		//Programming next auto-messages.
 		scheduleAt(simTime()+waitTime, helloM); //Next hello message generation.
-		scheduleAt(simTime()+forwardDelay,forwardM);//Next port upgrade. Learning to forwarding and so on.
+		scheduleAt(simTime()+fwdDelay,forwardM);//Next port upgrade. Learning to forwarding and so on.
 		scheduleAt(simTime()+migrateTime,migrateM); //Next switch to designate time. This will be a periodic message too.
 	}
 	if(verbose && stage == 1)
@@ -184,7 +183,7 @@ void RSTP::handleUpgrade(cMessage * msg)
                 for(unsigned int j=0;j<portCount;j++)
                 {
                     IEEE8021DInterfaceData * port2 = getPortInterfaceData(j);
-                    port2->setTCWhile(simulation.getSimTime()+TCWhileTime);
+                    port2->setTCWhile(simulation.getSimTime()+tcWhileTime);
                     if(j!=i)
                     {
                         sw->flush(j);
@@ -193,7 +192,7 @@ void RSTP::handleUpgrade(cMessage * msg)
 			}
 		}
 	}
-	scheduleAt(simTime()+forwardDelay, msg); //Programming next upgrade
+	scheduleAt(simTime()+fwdDelay, msg); //Programming next upgrade
 }
 
 void RSTP::handleHelloTime(cMessage * msg)
@@ -240,7 +239,7 @@ void RSTP::handleHelloTime(cMessage * msg)
 						for(unsigned int j=0;j<portCount;j++)
 						{
 						    IEEE8021DInterfaceData * jPort = getPortInterfaceData(j);
-                            jPort->setTCWhile(simulation.getSimTime()+TCWhileTime);
+                            jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
                             if(j!=(unsigned int)candidato)
                             {
                                 sw->flush(j);
@@ -292,7 +291,7 @@ void RSTP::checkTC(BPDU * frame, int arrival)
 				//Flushing other ports
 				//TCN over other ports.
 				sw->flush(i);
-				port2->setTCWhile(simulation.getSimTime()+TCWhileTime);
+				port2->setTCWhile(simulation.getSimTime()+tcWhileTime);
 			}
 		}
 	}
@@ -346,7 +345,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
     int arrival=etherctrl->getInterfaceId();
     MACAddress src = etherctrl->getSrc();
     delete etherctrl;
-	if(frame->getMessageAge()<MaxAge)
+	if(frame->getMessageAge()<maxAge)
 	{
 		//Checking TC.
 		checkTC(frame, arrival); //Sets TCWhile if arrival port was Forwarding
@@ -385,7 +384,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
 					for(unsigned int j=0;j<portCount;j++)
 					{
 					    IEEE8021DInterfaceData * jPort = getPortInterfaceData(j);
-						jPort->setTCWhile(simulation.getSimTime()+TCWhileTime);
+						jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
 						if(j!=(unsigned int)arrival)
 						{
 							sw->flush(j);
@@ -423,7 +422,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
 									for(unsigned int j=0;j<portCount;j++)
 									{
 										IEEE8021DInterfaceData * jPort = getPortInterfaceData(j);
-                                        jPort->setTCWhile(simulation.getSimTime()+TCWhileTime);
+                                        jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
                                         if(j!=(unsigned int)arrival)
                                         {
                                             sw->flush(j);
@@ -454,7 +453,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
 								{
 									if(arrivalPort->getState()!=IEEE8021DInterfaceData::FORWARDING)
 									{
-										iPort->setTCWhile(simulation.getSimTime()+TCWhileTime);
+										iPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
 									}
 									//Flush i
 									sw->flush(i);
@@ -484,7 +483,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
 								for(unsigned int j=0;j<portCount;j++)
 								{
 								    IEEE8021DInterfaceData * jPort = getPortInterfaceData(j);
-                                    jPort->setTCWhile(simulation.getSimTime()+TCWhileTime);
+                                    jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
                                     if(j!=(unsigned int)arrival)
                                     {
                                         sw->flush(j);
@@ -566,7 +565,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
 							for(unsigned int j=0;j<portCount;j++)
                             {
                                 IEEE8021DInterfaceData * jPort = getPortInterfaceData(j);
-                                jPort->setTCWhile(simulation.getSimTime()+TCWhileTime);
+                                jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
                                 if(j!=(unsigned int)alternative)
                                 {
                                     sw->flush(j);
@@ -643,7 +642,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
 								for(unsigned int j=0;j<portCount;j++)
                                 {
                                     IEEE8021DInterfaceData * jPort = getPortInterfaceData(j);
-                                    jPort->setTCWhile(simulation.getSimTime()+TCWhileTime);
+                                    jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
                                     if(j!=(unsigned int)alternative)
                                     {
                                         sw->flush(j);
