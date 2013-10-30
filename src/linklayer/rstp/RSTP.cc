@@ -99,7 +99,7 @@ void RSTP::initialize(int stage)
 		scheduleAt(simTime()+forwardDelay,forwardM);//Next port upgrade. Learning to forwarding and so on.
 		scheduleAt(simTime()+migrateTime,migrateM); //Next switch to designate time. This will be a periodic message too.
 	}
-	if(verbose==true)
+	if(verbose && stage == 1)
 	{
 		printState();
 		colorRootPorts();
