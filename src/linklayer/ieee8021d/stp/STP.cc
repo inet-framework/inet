@@ -50,10 +50,10 @@ void STP::initialize(int stage)
             bridgeAddress = ifEntry->getMacAddress();
 
         initPortTable();
-        helloTime = 2;
-        maxAge = 20;
-        fwdDelay = 15;
-        bridgePriority = 32768;
+        helloTime = par("helloTime");
+        maxAge = par("maxAge");
+        fwdDelay = par("fwdDelay");
+        bridgePriority = par("priority");
         ubridgePriority = bridgePriority;
 
         isRoot = true;
@@ -808,10 +808,6 @@ void STP::start()
 
     isOperational = true;
     initPortTable();
-    helloTime = 2;
-    maxAge = 20;
-    fwdDelay = 15;
-    bridgePriority = 32768;
     ubridgePriority = bridgePriority;
     isRoot = true;
     topologyChangeNotification = true;

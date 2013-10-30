@@ -23,7 +23,11 @@ package inet.linklayer.ieee8021d;
 moduleinterface ISpanningTree
 {
    parameters:
-    	@display("i=block/network2");
+       @display("i=block/network2");
+       double helloTime @unit("s");
+       double fwdDelay @unit("s");
+       double maxAge @unit("s");
+       int priority;
 	gates:
 	    inout STPGate;    
 }

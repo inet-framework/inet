@@ -30,8 +30,12 @@ import inet.linklayer.ieee8021d.ISpanningTree;
 simple STP like ISpanningTree
 {
     parameters:
-        bool verbose = default(false);
-        @display("i=block/network2");
+       bool verbose = default(false);
+       double helloTime @unit("s") = default(2s);
+       double fwdDelay @unit("s") = default(15s);
+       double maxAge @unit("s") = default(20s);
+       int priority = default(32768);
+       @display("i=block/network2");
     gates:
         inout STPGate;
 }
