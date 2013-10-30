@@ -22,7 +22,7 @@
 
 Define_Module(UDPEchoApp);
 
-simsignal_t UDPEchoApp::pkSignal = SIMSIGNAL_NULL;
+simsignal_t UDPEchoApp::pkSignal = registerSignal("pk");
 
 void UDPEchoApp::initialize(int stage)
 {
@@ -30,7 +30,6 @@ void UDPEchoApp::initialize(int stage)
     if (stage == 0)
     {
         // init statistics
-        pkSignal = registerSignal("pk");
         numEchoed = 0;
         WATCH(numEchoed);
     }

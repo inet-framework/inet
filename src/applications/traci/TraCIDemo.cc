@@ -27,6 +27,8 @@
 
 Define_Module(TraCIDemo);
 
+simsignal_t TraCIDemo::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
+
 void TraCIDemo::initialize(int stage) {
     cSimpleModule::initialize(stage);
     if (stage == 1)
@@ -40,7 +42,6 @@ void TraCIDemo::initialize(int stage) {
     else if (stage == 3) {
         debug = par("debug");
 
-        mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
         traci = TraCIMobilityAccess().get();
         traci->subscribe(mobilityStateChangedSignal, this);
 

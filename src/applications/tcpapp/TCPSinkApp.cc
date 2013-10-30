@@ -21,7 +21,7 @@
 
 Define_Module(TCPSinkApp);
 
-simsignal_t TCPSinkApp::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t TCPSinkApp::rcvdPkSignal = registerSignal("rcvdPk");
 
 void TCPSinkApp::initialize(int stage)
 {
@@ -33,7 +33,6 @@ void TCPSinkApp::initialize(int stage)
 
         bytesRcvd = 0;
         WATCH(bytesRcvd);
-        rcvdPkSignal = registerSignal("rcvdPk");
 
         //TODO should use IPvXAddressResolver in stage 3
         TCPSocket socket;

@@ -28,7 +28,7 @@
 
 Define_Module(UDPVideoStreamCli);
 
-simsignal_t UDPVideoStreamCli::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t UDPVideoStreamCli::rcvdPkSignal = registerSignal("rcvdPk");
 
 void UDPVideoStreamCli::initialize(int stage)
 {
@@ -37,9 +37,6 @@ void UDPVideoStreamCli::initialize(int stage)
     if (stage == 0)
     {
         selfMsg = new cMessage("UDPVideoStreamStart");
-
-        // statistics
-        rcvdPkSignal = registerSignal("rcvdPk");
     }
 }
 

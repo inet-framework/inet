@@ -43,7 +43,7 @@
 
 Define_Module(IPv6NeighbourDiscovery);
 
-simsignal_t IPv6NeighbourDiscovery::startDADSignal = SIMSIGNAL_NULL;
+simsignal_t IPv6NeighbourDiscovery::startDADSignal = registerSignal("startDAD");
 
 IPv6NeighbourDiscovery::IPv6NeighbourDiscovery()
     : neighbourCache(*this)
@@ -117,8 +117,6 @@ void IPv6NeighbourDiscovery::initialize(int stage)
             scheduleAt(simTime() + uniform(0, 0.3), msg); //Random Router bootup time
         else
             scheduleAt(simTime() + uniform(0.4, 1), msg); //Random Host bootup time
-
-        startDADSignal = registerSignal("startDAD");
     }
 }
 

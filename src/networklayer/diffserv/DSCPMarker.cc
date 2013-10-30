@@ -33,7 +33,7 @@ using namespace DiffservUtil;
 
 Define_Module(DSCPMarker);
 
-simsignal_t DSCPMarker::markPkSignal = SIMSIGNAL_NULL;
+simsignal_t DSCPMarker::markPkSignal = registerSignal("markPk");
 
 void DSCPMarker::initialize()
 {
@@ -47,8 +47,6 @@ void DSCPMarker::initialize()
     numMarked = 0;
     WATCH(numRcvd);
     WATCH(numMarked);
-
-    markPkSignal = registerSignal("markPk");
 }
 
 void DSCPMarker::handleMessage(cMessage *msg)

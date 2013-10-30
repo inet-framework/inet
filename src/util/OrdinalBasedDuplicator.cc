@@ -19,9 +19,9 @@
 
 Define_Module(OrdinalBasedDuplicator);
 
-simsignal_t OrdinalBasedDuplicator::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t OrdinalBasedDuplicator::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t OrdinalBasedDuplicator::duplPkSignal = SIMSIGNAL_NULL;
+simsignal_t OrdinalBasedDuplicator::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t OrdinalBasedDuplicator::sentPkSignal = registerSignal("sentPk");
+simsignal_t OrdinalBasedDuplicator::duplPkSignal = registerSignal("duplPk");
 
 void OrdinalBasedDuplicator::initialize()
 {
@@ -32,11 +32,6 @@ void OrdinalBasedDuplicator::initialize()
     WATCH(numPackets);
     WATCH(numDuplicated);
     WATCH(generateFurtherDuplicates);
-
-    //statistics
-    rcvdPkSignal = registerSignal("rcvdPk");
-    sentPkSignal = registerSignal("sentPk");
-    duplPkSignal = registerSignal("duplPk");
 
     const char *vector = par("duplicatesVector");
     parseVector(vector);

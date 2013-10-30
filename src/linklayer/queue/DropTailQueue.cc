@@ -23,7 +23,7 @@
 
 Define_Module(DropTailQueue);
 
-simsignal_t DropTailQueue::queueLengthSignal = SIMSIGNAL_NULL;
+simsignal_t DropTailQueue::queueLengthSignal = registerSignal("queueLength");
 
 void DropTailQueue::initialize()
 {
@@ -32,7 +32,6 @@ void DropTailQueue::initialize()
     queue.setName(par("queueName"));
 
     //statistics
-    queueLengthSignal = registerSignal("queueLength");
     emit(queueLengthSignal, queue.length());
 
     outGate = gate("out");

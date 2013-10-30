@@ -26,36 +26,23 @@
 
 Define_Module(VoIPStreamReceiver);
 
-simsignal_t VoIPStreamReceiver::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t VoIPStreamReceiver::lostSamplesSignal = SIMSIGNAL_NULL;
-simsignal_t VoIPStreamReceiver::lostPacketsSignal = SIMSIGNAL_NULL;
-simsignal_t VoIPStreamReceiver::dropPkSignal = SIMSIGNAL_NULL;
-simsignal_t VoIPStreamReceiver::packetHasVoiceSignal = SIMSIGNAL_NULL;
-simsignal_t VoIPStreamReceiver::connStateSignal = SIMSIGNAL_NULL;
-simsignal_t VoIPStreamReceiver::delaySignal = SIMSIGNAL_NULL;
+simsignal_t VoIPStreamReceiver::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t VoIPStreamReceiver::lostSamplesSignal = registerSignal("lostSamples");
+simsignal_t VoIPStreamReceiver::lostPacketsSignal = registerSignal("lostPackets");
+simsignal_t VoIPStreamReceiver::dropPkSignal = registerSignal("dropPk");
+simsignal_t VoIPStreamReceiver::packetHasVoiceSignal = registerSignal("packetHasVoice");
+simsignal_t VoIPStreamReceiver::connStateSignal = registerSignal("connState");
+simsignal_t VoIPStreamReceiver::delaySignal = registerSignal("delay");
 
 VoIPStreamReceiver::~VoIPStreamReceiver()
 {
     closeConnection();
 }
 
-void VoIPStreamReceiver::initSignals()
-{
-    rcvdPkSignal = registerSignal("rcvdPk");
-    lostSamplesSignal = registerSignal("lostSamples");
-    lostPacketsSignal = registerSignal("lostPackets");
-    dropPkSignal = registerSignal("dropPk");
-    packetHasVoiceSignal = registerSignal("packetHasVoice");
-    connStateSignal = registerSignal("connState");
-    delaySignal = registerSignal("delay");
-}
-
 void VoIPStreamReceiver::initialize(int stage)
 {
     if (stage == 0)
     {
-        initSignals();
-
         // Hack for create results folder
         recordScalar("hackForCreateResultsFolder", 0);
 

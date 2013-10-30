@@ -28,8 +28,8 @@
 
 Define_Module(EtherAppCli);
 
-simsignal_t EtherAppCli::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherAppCli::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t EtherAppCli::sentPkSignal = registerSignal("sentPk");
+simsignal_t EtherAppCli::rcvdPkSignal = registerSignal("rcvdPk");
 
 EtherAppCli::EtherAppCli()
 {
@@ -63,8 +63,6 @@ void EtherAppCli::initialize(int stage)
 
         // statistics
         packetsSent = packetsReceived = 0;
-        sentPkSignal = registerSignal("sentPk");
-        rcvdPkSignal = registerSignal("rcvdPk");
         WATCH(packetsSent);
         WATCH(packetsReceived);
 

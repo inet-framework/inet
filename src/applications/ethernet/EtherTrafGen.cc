@@ -27,8 +27,8 @@
 
 Define_Module(EtherTrafGen);
 
-simsignal_t EtherTrafGen::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherTrafGen::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t EtherTrafGen::sentPkSignal = registerSignal("sentPk");
+simsignal_t EtherTrafGen::rcvdPkSignal = registerSignal("rcvdPk");
 
 EtherTrafGen::EtherTrafGen()
 {
@@ -60,8 +60,6 @@ void EtherTrafGen::initialize(int stage)
 
         // statistics
         packetsSent = packetsReceived = 0;
-        sentPkSignal = registerSignal("sentPk");
-        rcvdPkSignal = registerSignal("rcvdPk");
         WATCH(packetsSent);
         WATCH(packetsReceived);
 

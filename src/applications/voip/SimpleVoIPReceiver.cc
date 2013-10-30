@@ -24,6 +24,13 @@
 
 Define_Module(SimpleVoIPReceiver);
 
+simsignal_t SimpleVoIPReceiver::packetLossRateSignal = registerSignal("VoIPPacketLossRate");
+simsignal_t SimpleVoIPReceiver::packetDelaySignal = registerSignal("VoIPPacketDelay");
+simsignal_t SimpleVoIPReceiver::playoutDelaySignal = registerSignal("VoIPPlayoutDelay");
+simsignal_t SimpleVoIPReceiver::playoutLossRateSignal = registerSignal("VoIPPlayoutLossRate");
+simsignal_t SimpleVoIPReceiver::mosSignal = registerSignal("VoIPMosSignal");
+simsignal_t SimpleVoIPReceiver::taildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
+
 void SimpleVoIPReceiver::TalkspurtInfo::startTalkspurt(SimpleVoIPPacket *pk)
 {
     status = ACTIVE;
@@ -91,13 +98,6 @@ void SimpleVoIPReceiver::initialize(int stage)
 
         currentTalkspurt.talkspurtID = -1;
         selfTalkspurtFinished = new cMessage("selfTalkspurtFinished");
-
-        packetLossRateSignal = registerSignal("VoIPPacketLossRate");
-        packetDelaySignal = registerSignal("VoIPPacketDelay");
-        playoutDelaySignal = registerSignal("VoIPPlayoutDelay");
-        playoutLossRateSignal = registerSignal("VoIPPlayoutLossRate");
-        mosSignal = registerSignal("VoIPMosSignal");
-        taildropLossRateSignal = registerSignal("VoIPTaildropLossRate");
     }
 }
 

@@ -47,10 +47,10 @@ Define_Module(UDPBasicBurst);
 
 int UDPBasicBurst::counter;
 
-simsignal_t UDPBasicBurst::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDPBasicBurst::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDPBasicBurst::outOfOrderPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDPBasicBurst::dropPkSignal = SIMSIGNAL_NULL;
+simsignal_t UDPBasicBurst::sentPkSignal = registerSignal("sentPk");
+simsignal_t UDPBasicBurst::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t UDPBasicBurst::outOfOrderPkSignal = registerSignal("outOfOrderPk");
+simsignal_t UDPBasicBurst::dropPkSignal = registerSignal("dropPk");
 
 UDPBasicBurst::UDPBasicBurst()
 {
@@ -108,11 +108,6 @@ void UDPBasicBurst::initialize(int stage)
         destPort = par("destPort");
 
         timerNext = new cMessage("UDPBasicBurstTimer");
-
-        sentPkSignal = registerSignal("sentPk");
-        rcvdPkSignal = registerSignal("rcvdPk");
-        outOfOrderPkSignal = registerSignal("outOfOrderPk");
-        dropPkSignal = registerSignal("dropPk");
     }
 }
 

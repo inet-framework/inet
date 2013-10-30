@@ -43,7 +43,7 @@ using namespace DiffservUtil;
 
 Define_Module(BehaviorAggregateClassifier);
 
-simsignal_t BehaviorAggregateClassifier::pkClassSignal = SIMSIGNAL_NULL;
+simsignal_t BehaviorAggregateClassifier::pkClassSignal = registerSignal("pkClass");
 
 void BehaviorAggregateClassifier::initialize()
 {
@@ -59,8 +59,6 @@ void BehaviorAggregateClassifier::initialize()
 
     numRcvd = 0;
     WATCH(numRcvd);
-
-    pkClassSignal = registerSignal("pkClass");
 }
 
 void BehaviorAggregateClassifier::handleMessage(cMessage *msg)
