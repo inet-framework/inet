@@ -819,9 +819,10 @@ void Ieee80211Mac::handleLowerMsg(cPacket *msg)
 
     handleWithFSM(msg);
 
-    // if we are the owner then we did not send this message up
-    if (msg->getOwner() == this)
-        delete msg;
+//FIXME this is not going to work with sendSync()...
+//    // if we are the owner then we did not send this message up
+//    if (msg->getOwner() == this)
+//        delete msg;
     EV<<"Leave handleLowerMsg...\n";
 }
 
