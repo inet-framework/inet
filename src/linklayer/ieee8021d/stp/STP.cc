@@ -58,9 +58,8 @@ void STP::initialize(int stage)
         ubridgePriority = bridgePriority;
 
         isRoot = true;
-        topologyChange = 0;
         topologyChangeNotification = false;
-        topologyChangeRecvd = false;
+        topologyChangeRecvd = true;
 
         rootPriority = bridgePriority;
         rootAddress = bridgeAddress;
@@ -187,6 +186,12 @@ void STP::handleBPDU(BPDU * bpdu)
     int arrivalGate = controlInfo->getInterfaceId();
     IEEE8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
 
+    if (bpdu->getTcaFlag())
+    {
+        topologyChangeRecvd = true;
+        topologyChangeNotification = false;
+    }
+
     // Get inferior BPDU, reply with superior
     if (!superiorBPDU(arrivalGate, bpdu))
     {
@@ -202,31 +207,25 @@ void STP::handleBPDU(BPDU * bpdu)
     {
         EV_INFO << "Configuration BPDU " << bpdu << " arrived from Root Switch." << endl;
 
-        if (bpdu->getTcaFlag())
-            topologyChangeNotification = false;
-
-        // If the topology changes you may need faster aging
-        if (bpdu->getTcFlag())
+        if(bpdu->getTcFlag())
         {
-            EV_DEBUG << "MACAddressTable aging time set to 5." << endl;
-            topologyChange++;
-            macTable->setAgingTime(5);
+            EV_DEBUG << "MACAddressTable aging time set to " << cFwdDelay << "." << endl;
+            macTable->setAgingTime(cFwdDelay);
+
+            // Config BPDU with TC flag
+            for (unsigned int i = 0; i < desPorts.size(); i++)
+                generateBPDU(desPorts.at(i), MACAddress::STP_MULTICAST_ADDRESS,true,false);
         }
         else
+        {
             macTable->resetDefaultAging();
 
-        EV_INFO << "Sending BPDUs on all designated ports." << endl;
+            EV_INFO << "Sending BPDUs on all designated ports." << endl;
 
-        // BPDUs are sent on all designated ports
-        for (unsigned int i = 0; i < desPorts.size(); i++)
-            generateBPDU(desPorts.at(i));
-
-        // BPDU with TCA
-        if (topologyChangeRecvd)
-            topologyChangeRecvd = false;
-
-        if (topologyChange > 0)
-            topologyChange--; // TODO:
+            // BPDUs are sent on all designated ports
+            for (unsigned int i = 0; i < desPorts.size(); i++)
+                generateBPDU(desPorts.at(i));
+        }
     }
 
     tryRoot();
@@ -237,7 +236,6 @@ void STP::handleTCN(BPDU * tcn)
 {
     EV_INFO << "Topology Change Notification BDPU " << tcn  << " arrived." << endl;
     topologyChangeNotification = true;
-    topologyChangeRecvd = true;
 
     Ieee802Ctrl * controlInfo = check_and_cast<Ieee802Ctrl *>(tcn->getControlInfo());
     int arrivalGate = controlInfo->getInterfaceId();
@@ -245,17 +243,17 @@ void STP::handleTCN(BPDU * tcn)
 
     // Send ACK to the sender
     EV_INFO << "Sending Topology Change Notification ACK." << endl;
-    generateBPDU(arrivalGate,address);
+    generateBPDU(arrivalGate,address,false,true);
 
     controlInfo->setInterfaceId(rootPort); // Send TCN to the Root Switch
 
     if (!isRoot)
-        send(tcn, "STPGate$o"); // TODO:
+        send(tcn, "STPGate$o");
     else
         delete tcn;
 }
 
-void STP::generateBPDU(int port, const MACAddress& address)
+void STP::generateBPDU(int port, const MACAddress& address, bool tcFlag, bool tcaFlag)
 {
     BPDU * bpdu = new BPDU();
     Ieee802Ctrl * controlInfo = new Ieee802Ctrl();
@@ -278,19 +276,20 @@ void STP::generateBPDU(int port, const MACAddress& address)
     bpdu->setHelloTime(cHelloTime);
     bpdu->setForwardDelay(cFwdDelay);
 
-    if (topologyChangeRecvd)
-        bpdu->setTcaFlag(true);
-    else
-        bpdu->setTcaFlag(false);
-
-    if (isRoot)
+    if (topologyChangeNotification)
     {
-        if (topologyChange > 0)
+        if (isRoot || tcFlag)
+        {
             bpdu->setTcFlag(true);
-        else
-            bpdu->setTcFlag(false);
-    }
+            bpdu->setTcaFlag(false);
+        }
 
+        else if (tcaFlag)
+        {
+            bpdu->setTcFlag(false);
+            bpdu->setTcaFlag(true);
+        }
+    }
 
     bpdu->setControlInfo(controlInfo);
 
@@ -300,12 +299,12 @@ void STP::generateBPDU(int port, const MACAddress& address)
 void STP::generateTCN()
 {
     // There is something to notify
-    if (topologyChangeNotification)
+    if (topologyChangeNotification || !topologyChangeRecvd)
     {
         if (getPortInterfaceData(rootPort)->getRole() == IEEE8021DInterfaceData::ROOT)
         {
             // Exist root port to notifying
-
+            topologyChangeNotification = false;
             BPDU * tcn = new BPDU();
             tcn->setProtocolIdentifier(0);
             tcn->setProtocolVersionIdentifier(0);
@@ -396,18 +395,6 @@ void STP::generator()
     for (unsigned int i = 0; i < portCount; i++)
         generateBPDU(i);
 
-    if (topologyChangeRecvd)
-        topologyChangeRecvd = false;
-
-    // If the topology changed, then we turn faster aging on
-    if (topologyChange > 0)
-    {
-        EV_DEBUG << "MACAddressTable aging time set to 5." << endl;
-        macTable->setAgingTime(5);
-        topologyChange--;
-    }
-    else
-        macTable->resetDefaultAging();
 }
 
 void STP::handleTick()
@@ -513,16 +500,6 @@ void STP::checkTimers()
             EV_DETAIL << "Port=" << i << " goes into discarding state." << endl;
             port->setFdWhile(0);
             port->setState(IEEE8021DInterfaceData::DISCARDING);
-        }
-    }
-
-    // Topology change handling
-    if (topologyChangeNotification)
-    {
-        if (isRoot)
-        {
-            topologyChange = 5; // todo: what's this??
-            topologyChangeNotification = false;
         }
     }
 
@@ -838,9 +815,8 @@ void STP::start()
     bridgePriority = 32768;
     ubridgePriority = bridgePriority;
     isRoot = true;
-    topologyChange = 0;
-    topologyChangeNotification = false;
-    topologyChangeRecvd = false;
+    topologyChangeNotification = true;
+    topologyChangeRecvd = true;
     rootPriority = bridgePriority;
     rootAddress = bridgeAddress;
     rootPathCost = 0;

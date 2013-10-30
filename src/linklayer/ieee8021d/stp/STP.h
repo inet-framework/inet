@@ -67,7 +67,6 @@ class STP : public cSimpleModule, public ILifecycle
         simtime_t helloTimer;
 
         // Topology change commencing
-        int topologyChange;
         bool topologyChangeNotification;
         bool topologyChangeRecvd;
 
@@ -87,7 +86,7 @@ class STP : public cSimpleModule, public ILifecycle
 
     public:
         IEEE8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
-        void generateBPDU(int portNum, const MACAddress& address = MACAddress::STP_MULTICAST_ADDRESS);
+        void generateBPDU(int portNum, const MACAddress& address = MACAddress::STP_MULTICAST_ADDRESS, bool tcFlag = false, bool tcaFlag = false);
         void colorTree();
         void generateTCN();
         int superiorTPort(IEEE8021DInterfaceData * portA, IEEE8021DInterfaceData * portB);
