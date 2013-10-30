@@ -29,6 +29,7 @@ void STP::initialize(int stage)
 {
     if (stage == 0)
     {
+        verbose = par("verbose").boolValue();
         portCount = this->getParentModule()->gate("ethg$o", 0)->getVectorSize();
         tick = new cMessage("STP_TICK", 0);
 
@@ -72,7 +73,8 @@ void STP::initialize(int stage)
         helloTimer = 0;
         allDesignated();
         scheduleAt(simTime() + 1, tick);
-        getParentModule()->getDisplayString().setTagArg("i",1,"#a5ffff");
+        if (verbose)
+            getParentModule()->getDisplayString().setTagArg("i",1,"#a5ffff");
     }
 }
 
@@ -122,7 +124,8 @@ void STP::handleMessage(cMessage * msg)
         if(msg == tick)
         {
             handleTick();
-            colorTree();
+            if (verbose)
+                colorTree();
             scheduleAt(simTime() + 1, tick);
         }
         else
@@ -573,7 +576,8 @@ void STP::tryRoot()
     if (checkRootEligibility())
     {
         EV_DETAIL << "Switch is elected as root switch." << endl;
-        getParentModule()->getDisplayString().setTagArg("i",1,"#a5ffff");
+        if (verbose)
+            getParentModule()->getDisplayString().setTagArg("i",1,"#a5ffff");
         isRoot = true;
         allDesignated();
         rootPriority = bridgePriority;
@@ -585,7 +589,9 @@ void STP::tryRoot()
     }
     else
     {
-        getParentModule()->getDisplayString().setTagArg("i",1,"");
+        if (verbose)
+            getParentModule()->getDisplayString().setTagArg("i",1,"");
+
         isRoot = false;
         selectRootPort();
         selectDesignatedPorts();
@@ -793,8 +799,8 @@ void STP::lostAlternate(int port)
 void STP::reset()
 {
     // Upon booting all switches believe themselves to be the root
-
-    getParentModule()->getDisplayString().setTagArg("i",1,"#a5ffff");
+    if (verbose)
+        getParentModule()->getDisplayString().setTagArg("i",1,"#a5ffff");
     isRoot = true;
     rootPriority = bridgePriority;
     rootAddress = bridgeAddress;
@@ -818,8 +824,12 @@ void STP::start()
     InterfaceEntry * ifEntry = ifTable->getInterface(0);
     if (ifEntry != NULL)
         bridgeAddress = ifEntry->getMacAddress();
+    if (verbose)
+    {
+        getParentModule()->getDisplayString().setTagArg("i",1,"#a5ffff");
+        this->getParentModule()->getDisplayString().removeTag("i2");
+    }
 
-    this->getParentModule()->getDisplayString().removeTag("i2");
     isOperational = true;
     initPortTable();
     helloTime = 2;
@@ -827,13 +837,10 @@ void STP::start()
     fwdDelay = 15;
     bridgePriority = 32768;
     ubridgePriority = bridgePriority;
-
-    getParentModule()->getDisplayString().setTagArg("i",1,"#a5ffff");
     isRoot = true;
     topologyChange = 0;
     topologyChangeNotification = false;
     topologyChangeRecvd = false;
-
     rootPriority = bridgePriority;
     rootAddress = bridgeAddress;
     rootPathCost = 0;
@@ -853,29 +860,32 @@ void STP::stop()
     isRoot = false;
     topologyChangeNotification = true;
 
-    for (unsigned int i = 0; i < portCount; i++)
+    if (verbose)
     {
-        cGate * outGate = getParentModule()->gate("ethg$o", i);
-        cGate * inputGate = getParentModule()->gate("ethg$i", i);
-        cGate * outGateNext = outGate->getNextGate();
-        cGate * inputGatePrev = inputGate->getPreviousGate();
-
-        if(outGate && inputGate && inputGatePrev && outGateNext)
+        for (unsigned int i = 0; i < portCount; i++)
         {
-            outGate->getDisplayString().setTagArg("ls", 0, "#000000");
-            outGate->getDisplayString().setTagArg("ls", 1, 1);
+            cGate * outGate = getParentModule()->gate("ethg$o", i);
+            cGate * inputGate = getParentModule()->gate("ethg$i", i);
+            cGate * outGateNext = outGate->getNextGate();
+            cGate * inputGatePrev = inputGate->getPreviousGate();
 
-            inputGate->getDisplayString().setTagArg("ls", 0, "#000000");
-            inputGate->getDisplayString().setTagArg("ls", 1, 1);
+            if(outGate && inputGate && inputGatePrev && outGateNext)
+            {
+                outGate->getDisplayString().setTagArg("ls", 0, "#000000");
+                outGate->getDisplayString().setTagArg("ls", 1, 1);
 
-            outGateNext->getDisplayString().setTagArg("ls", 0, "#000000");
-            outGateNext->getDisplayString().setTagArg("ls", 1, 1);
+                inputGate->getDisplayString().setTagArg("ls", 0, "#000000");
+                inputGate->getDisplayString().setTagArg("ls", 1, 1);
 
-            inputGatePrev->getDisplayString().setTagArg("ls", 0, "#000000");
-            inputGatePrev->getDisplayString().setTagArg("ls", 1, 1);
+                outGateNext->getDisplayString().setTagArg("ls", 0, "#000000");
+                outGateNext->getDisplayString().setTagArg("ls", 1, 1);
+
+                inputGatePrev->getDisplayString().setTagArg("ls", 0, "#000000");
+                inputGatePrev->getDisplayString().setTagArg("ls", 1, 1);
+            }
         }
+        getParentModule()->getDisplayString().setTagArg("i",1,"");
     }
-    getParentModule()->getDisplayString().setTagArg("i",1,"");
     this->getParentModule()->getDisplayString().setTagArg("i2", 0, "status/stop");
     cancelEvent(tick);
 }

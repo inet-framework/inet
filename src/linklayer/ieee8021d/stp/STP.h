@@ -39,7 +39,7 @@ class STP : public cSimpleModule, public ILifecycle
         bool isRoot;
         unsigned int rootPort;
         std::vector<unsigned int> desPorts;
-
+        bool verbose;
         unsigned int portCount;
 
         MACAddress bridgeAddress;

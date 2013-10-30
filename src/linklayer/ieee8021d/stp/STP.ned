@@ -30,7 +30,8 @@ import inet.linklayer.ieee8021d.ISpanningTree;
 simple STP like ISpanningTree
 {
     parameters:
-    	@display("i=block/network2");
-	gates:
-	    inout STPGate;
+        bool verbose = default(false);
+        @display("i=block/network2");
+    gates:
+        inout STPGate;
 }
