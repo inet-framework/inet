@@ -115,14 +115,6 @@ public:
 	virtual void rescheduleMessage(cMessage* msg, simtime_t_cref t) = 0;
 
 	/**
-	 * @brief Enables the Decider to draw Power from the
-	 * phy layers power accounts.
-	 *
-	 * Does nothing if no Battery module in simulation is present.
-	 */
-	virtual void drawCurrent(double amount, int activity) = 0;
-
-	/**
 	 * @brief Utility method to enable a Decider, which isn't an OMNeT-module, to
 	 * use the OMNeT-method 'recordScalar' with the help of and through its interface to BasePhyLayer.
 	 *

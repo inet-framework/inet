@@ -907,10 +907,6 @@ void BasePhyLayer::rescheduleMessage(cMessage* msg, simtime_t_cref t) {
 	scheduleAt(t, msg);
 }
 
-void BasePhyLayer::drawCurrent(double amount, int activity) {
-	MiximBatteryAccess::drawCurrent(amount, activity);
-}
-
 void BasePhyLayer::recordScalar(const char *name, double value, const char *unit) {
 	DetailedRadioChannelAccess::recordScalar(name, value, unit);
 }

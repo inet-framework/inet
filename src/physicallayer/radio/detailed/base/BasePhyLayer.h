@@ -578,12 +578,6 @@ public:
 	virtual void rescheduleMessage(cMessage* msg, simtime_t_cref t);
 
 	/**
-	 * @brief Does nothing. For an actual power supporting
-	 * phy see "PhyLayerBattery".
-	 */
-	virtual void drawCurrent(double amount, int activity);
-
-	/**
 	 * @brief Records a double into the scalar result file.
 	 *
 	 * Implements the method from DeciderToPhyInterface, method-calls are forwarded
