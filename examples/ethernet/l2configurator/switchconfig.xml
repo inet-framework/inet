@@ -1,6 +1,0 @@
-<config>
-<interface hosts='Switch3' ports='0' cost='6'/>
-<interface hosts='Switch2' cost='1000'/>
-<interface hosts='Switch1' ports='0 1' cost='154'/>
-<interface hosts='Switch1' ports='2' cost='2'/>
-</config>
