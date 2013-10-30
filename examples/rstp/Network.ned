@@ -19,6 +19,7 @@ import inet.nodes.ethernet.Eth1G;
 import inet.nodes.rstp.RSTPSwitch;
 import inet.nodes.ethernet.EtherHost;
 import inet.base.LifecycleController;
+import inet.nodes.ethernet.EtherSwitch;
 import inet.world.scenario.ScenarioManager;
 import inet.linklayer.configurator.L2NetworkConfigurator;
 
@@ -36,49 +37,49 @@ network CompleteNetwork
             @display("p=75,155");
         }
 
-        switchBEB1: RSTPSwitch {
+        switchBEB1: EtherSwitch {
             parameters:
                 @display("p=333,78");
             gates:
                 ethg[];
         }
 
-        switchBEB2: RSTPSwitch {
+        switchBEB2: EtherSwitch {
             parameters:
                 @display("p=301,217");
             gates:
                 ethg[];
         }
 
-        switchBEB3: RSTPSwitch {
+        switchBEB3: EtherSwitch {
             parameters:
                 @display("p=443,78");
             gates:
                 ethg[];
         }
 
-        switchBEB4: RSTPSwitch {
+        switchBEB4: EtherSwitch {
             parameters:
                 @display("p=322,153");
             gates:
                 ethg[];
         }
 
-        switchBEB5: RSTPSwitch {
+        switchBEB5: EtherSwitch {
             parameters:
                 @display("p=529,217");
             gates:
                 ethg[];
         }
 
-        switchBEB6: RSTPSwitch {
+        switchBEB6: EtherSwitch {
             parameters:
                 @display("p=148,217");
             gates:
                 ethg[];
         }
 
-        switchBEB7: RSTPSwitch {
+        switchBEB7: EtherSwitch {
             parameters:
                 @display("p=443,153");
             gates:
@@ -97,20 +98,11 @@ network CompleteNetwork
         switchBEB5.ethg++ <--> Eth1G <--> switchBEB7.ethg++;
 }
 
-
-network NetworkWithBK extends CompleteNetwork
-{
-    connections:
-        switchBEB5.ethg++ <--> Eth1G <--> switchBEB7.ethg++;
-        switchBEB2.ethg++ <--> Eth1G <--> switchBEB2.ethg++;
-}
-
-
 network NetworkWithHosts extends CompleteNetwork
 {
     submodules:
         host1: EtherHost {
-            @display("p=77,217");
+            @display("p=187,147");
         }
 
         host2: EtherHost {
@@ -125,4 +117,43 @@ network NetworkWithHosts extends CompleteNetwork
         switchBEB3.ethg++ <--> Eth1G <--> host3.ethg;
         switchBEB5.ethg++ <--> Eth1G <--> host2.ethg;
         switchBEB6.ethg++ <--> Eth1G <--> host1.ethg;
+}
+
+network LargeNet extends NetworkWithHosts
+{
+    @display("bgb=952,472");
+    submodules:
+        host4: EtherHost {
+            @display("p=679,422");
+        }
+        host5: EtherHost {
+            @display("p=479,422");
+        }
+        host6: EtherHost {
+            @display("p=322,321");
+        }
+        switchBEB8: EtherSwitch {
+            @display("p=443,282");
+        }
+        switchBEB9: EtherSwitch {
+            @display("p=518,352");
+        }
+        switchBEB10: EtherSwitch {
+            @display("p=648,352");
+        }
+        switchBEB11: EtherSwitch {
+            @display("p=579,288");
+        }
+    connections:
+        switchBEB11.ethg++ <--> Eth1G <--> switchBEB9.ethg++;
+        switchBEB11.ethg++ <--> Eth1G <--> switchBEB10.ethg++;
+        switchBEB11.ethg++ <--> Eth1G <--> switchBEB5.ethg++;
+        switchBEB9.ethg++ <--> Eth1G <--> switchBEB10.ethg++;
+        switchBEB8.ethg++ <--> Eth1G <--> switchBEB9.ethg++;
+        switchBEB8.ethg++ <--> Eth1G <--> switchBEB11.ethg++;
+        switchBEB8.ethg++ <--> Eth1G <--> switchBEB5.ethg++;
+        switchBEB8.ethg++ <--> Eth1G <--> switchBEB2.ethg++;
+        host5.ethg <--> Eth1G <--> switchBEB9.ethg++;
+        host4.ethg <--> Eth1G <--> switchBEB10.ethg++;
+        host6.ethg <--> Eth1G <--> switchBEB8.ethg++;
 }
