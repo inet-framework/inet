@@ -21,8 +21,8 @@
 
 Define_Module(TCPEchoApp);
 
-simsignal_t TCPEchoApp::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t TCPEchoApp::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t TCPEchoApp::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t TCPEchoApp::sentPkSignal = registerSignal("sentPk");
 
 
 void TCPEchoApp::initialize(int stage)
@@ -37,9 +37,6 @@ void TCPEchoApp::initialize(int stage)
         bytesRcvd = bytesSent = 0;
         WATCH(bytesRcvd);
         WATCH(bytesSent);
-
-        rcvdPkSignal = registerSignal("rcvdPk");
-        sentPkSignal = registerSignal("sentPk");
 
         socket.setOutputGate(gate("tcpOut"));
         socket.readDataTransferModePar(*this);

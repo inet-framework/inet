@@ -26,9 +26,9 @@ Define_Module(Ieee80211AgentSTA);
 
 #define MK_STARTUP  1
 
-simsignal_t Ieee80211AgentSTA::sentRequestSignal = SIMSIGNAL_NULL;
-simsignal_t Ieee80211AgentSTA::acceptConfirmSignal = SIMSIGNAL_NULL;
-simsignal_t Ieee80211AgentSTA::dropConfirmSignal = SIMSIGNAL_NULL;
+simsignal_t Ieee80211AgentSTA::sentRequestSignal = registerSignal("sentRequest");
+simsignal_t Ieee80211AgentSTA::acceptConfirmSignal = registerSignal("acceptConfirm");
+simsignal_t Ieee80211AgentSTA::dropConfirmSignal = registerSignal("dropConfirm");
 
 
 void Ieee80211AgentSTA::initialize(int stage)
@@ -54,11 +54,6 @@ void Ieee80211AgentSTA::initialize(int stage)
 
         // JcM add: get the default ssid, if there is one.
         default_ssid = par("default_ssid").stringValue();
-
-        //Statistics:
-        sentRequestSignal = registerSignal("sentRequest");
-        acceptConfirmSignal = registerSignal("acceptConfirm");
-        dropConfirmSignal = registerSignal("dropConfirm");
 
         // start up: send scan request
         simtime_t startingTime = par("startingTime").doubleValue();

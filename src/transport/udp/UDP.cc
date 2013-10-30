@@ -54,11 +54,11 @@
 
 Define_Module(UDP);
 
-simsignal_t UDP::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDP::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDP::passedUpPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDP::droppedPkWrongPortSignal = SIMSIGNAL_NULL;
-simsignal_t UDP::droppedPkBadChecksumSignal = SIMSIGNAL_NULL;
+simsignal_t UDP::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t UDP::sentPkSignal = registerSignal("sentPk");
+simsignal_t UDP::passedUpPkSignal = registerSignal("passedUpPk");
+simsignal_t UDP::droppedPkWrongPortSignal = registerSignal("droppedPkWrongPort");
+simsignal_t UDP::droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");
 
 static std::ostream & operator<<(std::ostream & os, const UDP::SockDesc& sd)
 {
@@ -136,11 +136,6 @@ void UDP::initialize(int stage)
         WATCH(numPassedUp);
         WATCH(numDroppedWrongPort);
         WATCH(numDroppedBadChecksum);
-        rcvdPkSignal = registerSignal("rcvdPk");
-        sentPkSignal = registerSignal("sentPk");
-        passedUpPkSignal = registerSignal("passedUpPk");
-        droppedPkWrongPortSignal = registerSignal("droppedPkWrongPort");
-        droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");
 
         isOperational = false;
     }

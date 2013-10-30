@@ -41,8 +41,8 @@ static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 
 Define_Module(EtherMAC);
 
-simsignal_t EtherMAC::collisionSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMAC::backoffSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMAC::collisionSignal = registerSignal("collision");
+simsignal_t EtherMAC::backoffSignal = registerSignal("backoff");
 
 EtherMAC::EtherMAC()
 {
@@ -95,9 +95,6 @@ void EtherMAC::initializeStatistics()
 
     WATCH(numCollisions);
     WATCH(numBackoffs);
-
-    collisionSignal = registerSignal("collision");
-    backoffSignal = registerSignal("backoff");
 }
 
 void EtherMAC::initializeFlags()

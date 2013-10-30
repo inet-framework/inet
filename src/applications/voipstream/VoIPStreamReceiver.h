@@ -64,7 +64,6 @@ class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
     virtual void checkSourceAndParameters(VoIPStreamPacket *vp);
     virtual void closeConnection();
     virtual void decodePacket(VoIPStreamPacket *vp);
-    static void initSignals();
 
     class Connection
     {

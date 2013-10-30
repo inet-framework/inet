@@ -19,9 +19,9 @@
 
 Define_Module(OrdinalBasedDropper);
 
-simsignal_t OrdinalBasedDropper::rcvdPkSignal;
-simsignal_t OrdinalBasedDropper::sentPkSignal;
-simsignal_t OrdinalBasedDropper::dropPkSignal;
+simsignal_t OrdinalBasedDropper::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t OrdinalBasedDropper::sentPkSignal = registerSignal("sentPk");
+simsignal_t OrdinalBasedDropper::dropPkSignal = registerSignal("dropPk");
 
 void OrdinalBasedDropper::initialize()
 {
@@ -32,11 +32,6 @@ void OrdinalBasedDropper::initialize()
     WATCH(numPackets);
     WATCH(numDropped);
     WATCH(generateFurtherDrops);
-
-    //statistics
-    rcvdPkSignal = registerSignal("rcvdPk");
-    sentPkSignal = registerSignal("sentPk");
-    dropPkSignal = registerSignal("dropPk");
 
     const char *vector = par("dropsVector");
     parseVector(vector);

@@ -27,7 +27,7 @@
 Define_Module(RTPPayloadReceiver);
 
 
-simsignal_t RTPPayloadReceiver::_rcvdPkRtpTimestampSignal = SIMSIGNAL_NULL;
+simsignal_t RTPPayloadReceiver::_rcvdPkRtpTimestampSignal = registerSignal("rcvdPkRtpTimestamp");
 
 RTPPayloadReceiver::~RTPPayloadReceiver()
 {
@@ -42,7 +42,6 @@ void RTPPayloadReceiver::initialize()
     char logName[200];
     sprintf(logName, logFileName, getId());
     _outputLogLoss.open(logName);
-    _rcvdPkRtpTimestampSignal = registerSignal("rcvdPkRtpTimestamp");
 }
 
 void RTPPayloadReceiver::handleMessage(cMessage *msg)

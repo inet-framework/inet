@@ -35,7 +35,7 @@
 
 Define_Module(RTP);
 
-simsignal_t RTP::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t RTP::rcvdPkSignal = registerSignal("rcvdPk");
 
 //
 // methods inherited from cSimpleModule
@@ -53,8 +53,6 @@ void RTP::initialize(int stage)
         rtcpInGate = findGate("rtcpIn");
         udpInGate = findGate("udpIn");
         _udpSocket.setOutputGate(gate("udpOut"));
-
-        rcvdPkSignal = registerSignal("rcvdPk");
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER)
     {

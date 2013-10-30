@@ -22,7 +22,7 @@
 
 Define_Module(UDPSink);
 
-simsignal_t UDPSink::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t UDPSink::rcvdPkSignal = registerSignal("rcvdPk");
 
 
 void UDPSink::initialize(int stage)
@@ -33,7 +33,6 @@ void UDPSink::initialize(int stage)
     {
         numReceived = 0;
         WATCH(numReceived);
-        rcvdPkSignal = registerSignal("rcvdPk");
     }
 }
 

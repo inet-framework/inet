@@ -26,10 +26,10 @@
 #include "NodeOperations.h"
 
 
-simsignal_t WirelessMacBase::packetSentToLowerSignal = SIMSIGNAL_NULL;
-simsignal_t WirelessMacBase::packetReceivedFromLowerSignal = SIMSIGNAL_NULL;
-simsignal_t WirelessMacBase::packetSentToUpperSignal = SIMSIGNAL_NULL;
-simsignal_t WirelessMacBase::packetReceivedFromUpperSignal = SIMSIGNAL_NULL;
+simsignal_t WirelessMacBase::packetSentToLowerSignal = registerSignal("packetSentToLower");
+simsignal_t WirelessMacBase::packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
+simsignal_t WirelessMacBase::packetSentToUpperSignal = registerSignal("packetSentToUpper");
+simsignal_t WirelessMacBase::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 
 
 void WirelessMacBase::initialize(int stage)
@@ -42,11 +42,6 @@ void WirelessMacBase::initialize(int stage)
         upperLayerOut = findGate("upperLayerOut");
         lowerLayerIn = findGate("lowerLayerIn");
         lowerLayerOut = findGate("lowerLayerOut");
-
-        packetSentToLowerSignal = registerSignal("packetSentToLower");
-        packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
-        packetSentToUpperSignal = registerSignal("packetSentToUpper");
-        packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
     }
 }
 

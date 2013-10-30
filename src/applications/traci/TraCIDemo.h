@@ -47,7 +47,7 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
         TraCIMobility* traci;
         bool sentMessage;
         UDPSocket socket;
-        simsignal_t mobilityStateChangedSignal;
+        static simsignal_t mobilityStateChangedSignal;
 
     protected:
         void setupLowerLayer();

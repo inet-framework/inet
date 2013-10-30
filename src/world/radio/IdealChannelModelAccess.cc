@@ -21,7 +21,7 @@
 #include "ModuleAccess.h"
 #include "IMobility.h"
 
-simsignal_t IdealChannelModelAccess::mobilityStateChangedSignal = SIMSIGNAL_NULL;
+simsignal_t IdealChannelModelAccess::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
 
 // the destructor unregister the radio module
 IdealChannelModelAccess::~IdealChannelModelAccess()
@@ -54,7 +54,6 @@ void IdealChannelModelAccess::initialize(int stage)
 
         positionUpdateArrived = false;
         // register to get a notification when position changes
-        mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
         hostModule->subscribe(mobilityStateChangedSignal, this);
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER)

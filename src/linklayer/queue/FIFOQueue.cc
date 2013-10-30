@@ -24,14 +24,13 @@
 
 Define_Module(FIFOQueue);
 
-simsignal_t FIFOQueue::queueLengthSignal = SIMSIGNAL_NULL;
+simsignal_t FIFOQueue::queueLengthSignal = registerSignal("queueLength");
 
 void FIFOQueue::initialize()
 {
     PassiveQueueBase::initialize();
     queue.setName(par("queueName"));
     outGate = gate("out");
-    queueLengthSignal = registerSignal("queueLength");
 }
 
 cMessage *FIFOQueue::enqueue(cMessage *msg)

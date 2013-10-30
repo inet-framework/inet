@@ -25,7 +25,7 @@
 Define_Module(VoIPStreamSender);
 
 
-simsignal_t VoIPStreamSender::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t VoIPStreamSender::sentPkSignal = registerSignal("sentPk");
 
 VoIPStreamSender::~VoIPStreamSender()
 {
@@ -117,9 +117,6 @@ void VoIPStreamSender::initialize(int stage)
 
         // initialize the sequence number
         pktID = 1;
-
-        // statistics:
-        sentPkSignal = registerSignal("sentPk");
     }
 }
 

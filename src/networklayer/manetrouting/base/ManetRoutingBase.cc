@@ -42,7 +42,8 @@
 #define IP_DEF_TTL 32
 #define UDP_HDR_LEN 8
 
-simsignal_t ManetRoutingBase::mobilityStateChangedSignal = SIMSIGNAL_NULL;
+simsignal_t ManetRoutingBase::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
+
 ManetRoutingBase::GlobalRouteMap *ManetRoutingBase::globalRouteMap = NULL;
 bool ManetRoutingBase::createInternalStore = false;
 
@@ -369,7 +370,6 @@ void ManetRoutingBase::registerPosition()
     if (!isRegistered)
         opp_error("Manet routing protocol is not register");
     regPosition = true;
-    mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
     cModule *mod = findContainingNode(getParentModule());
     if (!mod)
         mod = getParentModule();

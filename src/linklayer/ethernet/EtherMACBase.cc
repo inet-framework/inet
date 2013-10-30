@@ -122,21 +122,20 @@ const EtherMACBase::EtherDescr EtherMACBase::etherDescrs[NUM_OF_ETHERDESCRS] =
     }
 };
 
-simsignal_t EtherMACBase::txPkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::rxPkOkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::txPausePkUnitsSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::rxPausePkUnitsSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::rxPkFromHLSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::dropPkNotForUsSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::dropPkBitErrorSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::dropPkIfaceDownSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::dropPkFromHLIfaceDownSignal = SIMSIGNAL_NULL;
+simsignal_t EtherMACBase::txPkSignal = registerSignal("txPk");
+simsignal_t EtherMACBase::rxPkOkSignal = registerSignal("rxPkOk");
+simsignal_t EtherMACBase::txPausePkUnitsSignal = registerSignal("txPausePkUnits");
+simsignal_t EtherMACBase::rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
+simsignal_t EtherMACBase::rxPkFromHLSignal = registerSignal("rxPkFromHL");
+simsignal_t EtherMACBase::dropPkBitErrorSignal = registerSignal("dropPkBitError");
+simsignal_t EtherMACBase::dropPkIfaceDownSignal = registerSignal("dropPkIfaceDown");
+simsignal_t EtherMACBase::dropPkFromHLIfaceDownSignal = registerSignal("dropPkFromHLIfaceDown");
+simsignal_t EtherMACBase::dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
 
-simsignal_t EtherMACBase::packetSentToLowerSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::packetReceivedFromLowerSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::packetSentToUpperSignal = SIMSIGNAL_NULL;
-simsignal_t EtherMACBase::packetReceivedFromUpperSignal = SIMSIGNAL_NULL;
-
+simsignal_t EtherMACBase::packetSentToLowerSignal = registerSignal("packetSentToLower");
+simsignal_t EtherMACBase::packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
+simsignal_t EtherMACBase::packetSentToUpperSignal = registerSignal("packetSentToUpper");
+simsignal_t EtherMACBase::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 
 EtherMACBase::EtherMACBase()
 {
@@ -294,20 +293,6 @@ void EtherMACBase::initializeStatistics()
     WATCH(numPauseFramesRcvd);
     WATCH(numPauseFramesSent);
 
-    txPkSignal = registerSignal("txPk");
-    rxPkOkSignal = registerSignal("rxPkOk");
-    txPausePkUnitsSignal = registerSignal("txPausePkUnits");
-    rxPausePkUnitsSignal = registerSignal("rxPausePkUnits");
-    rxPkFromHLSignal = registerSignal("rxPkFromHL");
-    dropPkBitErrorSignal = registerSignal("dropPkBitError");
-    dropPkIfaceDownSignal = registerSignal("dropPkIfaceDown");
-    dropPkFromHLIfaceDownSignal = registerSignal("dropPkFromHLIfaceDown");
-    dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
-
-    packetSentToLowerSignal = registerSignal("packetSentToLower");
-    packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
-    packetSentToUpperSignal = registerSignal("packetSentToUpper");
-    packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 }
 
 InterfaceEntry *EtherMACBase::createInterfaceEntry()

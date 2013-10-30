@@ -19,11 +19,11 @@
 
 #include "PassiveQueueBase.h"
 
-simsignal_t PassiveQueueBase::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t PassiveQueueBase::enqueuePkSignal = SIMSIGNAL_NULL;
-simsignal_t PassiveQueueBase::dequeuePkSignal = SIMSIGNAL_NULL;
-simsignal_t PassiveQueueBase::dropPkByQueueSignal = SIMSIGNAL_NULL;
-simsignal_t PassiveQueueBase::queueingTimeSignal = SIMSIGNAL_NULL;
+simsignal_t PassiveQueueBase::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t PassiveQueueBase::enqueuePkSignal = registerSignal("enqueuePk");
+simsignal_t PassiveQueueBase::dequeuePkSignal = registerSignal("dequeuePk");
+simsignal_t PassiveQueueBase::dropPkByQueueSignal = registerSignal("dropPkByQueue");
+simsignal_t PassiveQueueBase::queueingTimeSignal = registerSignal("queueingTime");
 
 void PassiveQueueBase::initialize()
 {
@@ -36,12 +36,6 @@ void PassiveQueueBase::initialize()
     numQueueDropped = 0;
     WATCH(numQueueReceived);
     WATCH(numQueueDropped);
-
-    rcvdPkSignal = registerSignal("rcvdPk");
-    enqueuePkSignal = registerSignal("enqueuePk");
-    dequeuePkSignal = registerSignal("dequeuePk");
-    dropPkByQueueSignal = registerSignal("dropPkByQueue");
-    queueingTimeSignal = registerSignal("queueingTime");
 }
 
 void PassiveQueueBase::handleMessage(cMessage *msg)

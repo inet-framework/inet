@@ -25,7 +25,7 @@
 Register_Enum(NodeStatus, (NodeStatus::UP, NodeStatus::DOWN, NodeStatus::GOING_UP, NodeStatus::GOING_DOWN));
 Define_Module(NodeStatus);
 
-simsignal_t NodeStatus::nodeStatusChangedSignal = SIMSIGNAL_NULL;
+simsignal_t NodeStatus::nodeStatusChangedSignal = registerSignal("nodeStatusChanged");
 
 
 void NodeStatus::initialize(int stage)
@@ -34,7 +34,6 @@ void NodeStatus::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        nodeStatusChangedSignal = registerSignal("nodeStatusChanged");
         state = getStateByName(par("initialStatus"));
         origIcon = getDisplayString().getTagArg("i", 0);
         updateDisplayString();

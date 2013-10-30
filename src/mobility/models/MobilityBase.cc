@@ -25,7 +25,7 @@
 #include "FWMath.h"
 
 
-simsignal_t MobilityBase::mobilityStateChangedSignal = SIMSIGNAL_NULL;
+simsignal_t MobilityBase::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
 
 Register_Abstract_Class(MobilityBase);
 
@@ -64,7 +64,6 @@ void MobilityBase::initialize(int stage)
     EV_TRACE << "initializing MobilityBase stage " << stage << endl;
     if (stage == INITSTAGE_LOCAL)
     {
-        mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
         constraintAreaMin.x = par("constraintAreaMinX");
         constraintAreaMin.y = par("constraintAreaMinY");
         constraintAreaMin.z = par("constraintAreaMinZ");

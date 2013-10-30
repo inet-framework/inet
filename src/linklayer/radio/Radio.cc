@@ -32,11 +32,11 @@
 #define MK_TRANSMISSION_OVER  1
 #define MK_RECEPTION_COMPLETE 2
 
-simsignal_t Radio::bitrateSignal = SIMSIGNAL_NULL;
-simsignal_t Radio::radioStateSignal = SIMSIGNAL_NULL;
-simsignal_t Radio::channelNumberSignal = SIMSIGNAL_NULL;
-simsignal_t Radio::lossRateSignal = SIMSIGNAL_NULL;
-simsignal_t Radio::changeLevelNoise = SIMSIGNAL_NULL;
+simsignal_t Radio::bitrateSignal = registerSignal("bitrate");
+simsignal_t Radio::radioStateSignal = registerSignal("radioState");
+simsignal_t Radio::channelNumberSignal = registerSignal("channelNo");
+simsignal_t Radio::lossRateSignal = registerSignal("lossRate");
+simsignal_t Radio::changeLevelNoise = registerSignal("changeLevelNoise");
 
 #define MIN_DISTANCE 0.001 // minimum distance 1 millimeter
 #define BASE_NOISE_LEVEL (noiseGenerator?noiseLevel+noiseGenerator->noiseLevel():noiseLevel)
@@ -87,7 +87,6 @@ void Radio::initialize(int stage)
             noiseGenerator = (INoiseGenerator *) createOne(noiseModel.c_str());
             noiseGenerator->initializeFrom(this);
             // register to get a notification when position changes
-            changeLevelNoise = registerSignal("changeLevelNoise");
             subscribe(changeLevelNoise, this); // the INoiseGenerator must send a signal to this module
         }
 
@@ -155,12 +154,6 @@ void Radio::initialize(int stage)
 
         radioModel = (IRadioModel *) createOne(rModel.c_str());
         radioModel->initializeFrom(this);
-
-        // statistics
-        bitrateSignal = registerSignal("bitrate");
-        radioStateSignal = registerSignal("radioState");
-        channelNumberSignal = registerSignal("channelNo");
-        lossRateSignal = registerSignal("lossRate");
 
         if (this->hasPar("drawCoverage"))
             drawCoverage = par("drawCoverage");

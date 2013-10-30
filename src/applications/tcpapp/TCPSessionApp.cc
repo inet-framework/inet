@@ -23,9 +23,9 @@
 
 Define_Module(TCPSessionApp);
 
-simsignal_t TCPSessionApp::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t TCPSessionApp::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t TCPSessionApp::recvIndicationsSignal = SIMSIGNAL_NULL;
+simsignal_t TCPSessionApp::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t TCPSessionApp::sentPkSignal = registerSignal("sentPk");
+simsignal_t TCPSessionApp::recvIndicationsSignal = registerSignal("recvIndications");
 
 void TCPSessionApp::parseScript(const char *script)
 {
@@ -168,10 +168,6 @@ void TCPSessionApp::activity()
     WATCH(packetsRcvd);
     WATCH(bytesRcvd);
     WATCH(indicationsRcvd);
-
-    rcvdPkSignal = registerSignal("rcvdPk");
-    sentPkSignal = registerSignal("sentPk");
-    recvIndicationsSignal = registerSignal("recvIndications");
 
     // parameters
     const char *localAddress = par("localAddress");

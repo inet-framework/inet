@@ -32,10 +32,11 @@
 #include "NodeStatus.h"
 
 
-simsignal_t ARP::sentReqSignal = SIMSIGNAL_NULL;
-simsignal_t ARP::sentReplySignal = SIMSIGNAL_NULL;
-simsignal_t ARP::failedResolutionSignal = SIMSIGNAL_NULL;
-simsignal_t ARP::initiatedResolutionSignal = SIMSIGNAL_NULL;
+simsignal_t ARP::sentReqSignal = registerSignal("sentReq");
+simsignal_t ARP::sentReplySignal = registerSignal("sentReply");
+simsignal_t ARP::initiatedResolutionSignal = registerSignal("initiatedResolution");
+simsignal_t ARP::failedResolutionSignal = registerSignal("failedResolution");
+
 
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 {
@@ -75,11 +76,6 @@ void ARP::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        sentReqSignal = registerSignal("sentReq");
-        sentReplySignal = registerSignal("sentReply");
-        initiatedResolutionSignal = registerSignal("initiatedResolution");
-        failedResolutionSignal = registerSignal("failedResolution");
-
         retryTimeout = par("retryTimeout");
         retryCount = par("retryCount");
         cacheTimeout = par("cacheTimeout");

@@ -36,9 +36,9 @@
 
 Define_Module(SCTPClient);
 
-simsignal_t SCTPClient::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t SCTPClient::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t SCTPClient::echoedPkSignal = SIMSIGNAL_NULL;
+simsignal_t SCTPClient::sentPkSignal = registerSignal("sentPk");
+simsignal_t SCTPClient::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t SCTPClient::echoedPkSignal = registerSignal("echoedPk");
 
 
 SCTPClient::SCTPClient()
@@ -90,10 +90,6 @@ void SCTPClient::initialize(int stage)
         WATCH(packetsRcvd);
         WATCH(bytesSent);
         WATCH(bytesRcvd);
-
-        sentPkSignal = registerSignal("sentPk");
-        rcvdPkSignal = registerSignal("rcvdPk");
-        echoedPkSignal = registerSignal("echoedPk");
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER)
     {

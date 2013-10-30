@@ -50,7 +50,7 @@ class TraCITestApp : public cSimpleModule, protected cListener, public ILifecycl
         TraCIMobility* traci;
         std::set<std::string> visitedEdges; /**< set of edges this vehicle visited */
         bool hasStopped; /**< true if at some point in time this vehicle travelled at negligible speed */
-        simsignal_t mobilityStateChangedSignal;
+        static simsignal_t mobilityStateChangedSignal;
 
     protected:
         void handleSelfMsg(cMessage* msg);

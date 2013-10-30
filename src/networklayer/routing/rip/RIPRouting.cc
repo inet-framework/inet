@@ -139,11 +139,11 @@ RIPRouting::~RIPRouting()
     cancelAndDelete(shutdownTimer);
 }
 
-simsignal_t RIPRouting::sentRequestSignal = SIMSIGNAL_NULL;
-simsignal_t RIPRouting::sentUpdateSignal = SIMSIGNAL_NULL;
-simsignal_t RIPRouting::rcvdResponseSignal = SIMSIGNAL_NULL;
-simsignal_t RIPRouting::badResponseSignal = SIMSIGNAL_NULL;
-simsignal_t RIPRouting::numRoutesSignal = SIMSIGNAL_NULL;
+simsignal_t RIPRouting::sentRequestSignal = registerSignal("sentRequest");
+simsignal_t RIPRouting::sentUpdateSignal = registerSignal("sentUpdate");
+simsignal_t RIPRouting::rcvdResponseSignal = registerSignal("rcvdResponse");
+simsignal_t RIPRouting::badResponseSignal = registerSignal("badResponse");
+simsignal_t RIPRouting::numRoutesSignal = registerSignal("numRoutes");
 
 void RIPRouting::initialize(int stage)
 {
@@ -178,12 +178,6 @@ void RIPRouting::initialize(int stage)
 
         WATCH_VECTOR(ripInterfaces);
         WATCH_PTRVECTOR(ripRoutes);
-
-        sentRequestSignal = registerSignal("sentRequest");
-        sentUpdateSignal = registerSignal("sentUpdate");
-        rcvdResponseSignal = registerSignal("rcvdResponse");
-        badResponseSignal = registerSignal("badResponse");
-        numRoutesSignal = registerSignal("numRoutes");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     { // interfaces and static routes are already initialized

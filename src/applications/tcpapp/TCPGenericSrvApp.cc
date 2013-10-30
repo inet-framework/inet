@@ -24,8 +24,8 @@
 
 Define_Module(TCPGenericSrvApp);
 
-simsignal_t TCPGenericSrvApp::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t TCPGenericSrvApp::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t TCPGenericSrvApp::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t TCPGenericSrvApp::sentPkSignal = registerSignal("sentPk");
 
 
 void TCPGenericSrvApp::initialize(int stage)
@@ -39,8 +39,6 @@ void TCPGenericSrvApp::initialize(int stage)
 
         //statistics
         msgsRcvd = msgsSent = bytesRcvd = bytesSent = 0;
-        rcvdPkSignal = registerSignal("rcvdPk");
-        sentPkSignal = registerSignal("sentPk");
 
         WATCH(msgsRcvd);
         WATCH(msgsSent);

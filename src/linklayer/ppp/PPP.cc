@@ -30,14 +30,14 @@
 
 Define_Module(PPP);
 
-simsignal_t PPP::txStateSignal = SIMSIGNAL_NULL;
-simsignal_t PPP::rxPkOkSignal = SIMSIGNAL_NULL;
-simsignal_t PPP::dropPkIfaceDownSignal = SIMSIGNAL_NULL;
-simsignal_t PPP::dropPkBitErrorSignal = SIMSIGNAL_NULL;
-simsignal_t PPP::packetSentToLowerSignal = SIMSIGNAL_NULL;
-simsignal_t PPP::packetReceivedFromLowerSignal = SIMSIGNAL_NULL;
-simsignal_t PPP::packetSentToUpperSignal = SIMSIGNAL_NULL;
-simsignal_t PPP::packetReceivedFromUpperSignal = SIMSIGNAL_NULL;
+simsignal_t PPP::txStateSignal = registerSignal("txState");
+simsignal_t PPP::rxPkOkSignal = registerSignal("rxPkOk");
+simsignal_t PPP::dropPkIfaceDownSignal = registerSignal("dropPkIfaceDown");
+simsignal_t PPP::dropPkBitErrorSignal = registerSignal("dropPkBitError");
+simsignal_t PPP::packetSentToLowerSignal = registerSignal("packetSentToLower");
+simsignal_t PPP::packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
+simsignal_t PPP::packetSentToUpperSignal = registerSignal("packetSentToUpper");
+simsignal_t PPP::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 
 PPP::PPP()
 {
@@ -66,15 +66,6 @@ void PPP::initialize(int stage)
         WATCH(numRcvdOK);
         WATCH(numBitErr);
         WATCH(numDroppedIfaceDown);
-
-        rxPkOkSignal = registerSignal("rxPkOk");
-        dropPkIfaceDownSignal = registerSignal("dropPkIfaceDown");
-        txStateSignal = registerSignal("txState");
-        dropPkBitErrorSignal = registerSignal("dropPkBitError");
-        packetSentToLowerSignal = registerSignal("packetSentToLower");
-        packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
-        packetSentToUpperSignal = registerSignal("packetSentToUpper");
-        packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 
         subscribe(POST_MODEL_CHANGE, this);
 

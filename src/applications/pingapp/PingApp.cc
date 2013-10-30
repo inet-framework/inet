@@ -32,11 +32,11 @@ using std::cout;
 
 Define_Module(PingApp);
 
-simsignal_t PingApp::rttSignal = SIMSIGNAL_NULL;
-simsignal_t PingApp::numLostSignal = SIMSIGNAL_NULL;
-simsignal_t PingApp::outOfOrderArrivalsSignal = SIMSIGNAL_NULL;
-simsignal_t PingApp::pingTxSeqSignal = SIMSIGNAL_NULL;
-simsignal_t PingApp::pingRxSeqSignal = SIMSIGNAL_NULL;
+simsignal_t PingApp::rttSignal = registerSignal("rtt");
+simsignal_t PingApp::numLostSignal = registerSignal("numLost");
+simsignal_t PingApp::outOfOrderArrivalsSignal = registerSignal("outOfOrderArrivals");
+simsignal_t PingApp::pingTxSeqSignal = registerSignal("pingTxSeq");
+simsignal_t PingApp::pingRxSeqSignal = registerSignal("pingRxSeq");
 
 PingApp::PingApp()
 {
@@ -78,11 +78,6 @@ void PingApp::initialize(int stage)
 
         // statistics
         rttStat.setName("pingRTT");
-        rttSignal = registerSignal("rtt");
-        numLostSignal = registerSignal("numLost");
-        outOfOrderArrivalsSignal = registerSignal("outOfOrderArrivals");
-        pingTxSeqSignal = registerSignal("pingTxSeq");
-        pingRxSeqSignal = registerSignal("pingRxSeq");
         sentCount = lossCount = outOfOrderArrivalCount = numPongs = 0;
         WATCH(lossCount);
         WATCH(outOfOrderArrivalCount);

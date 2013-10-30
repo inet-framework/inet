@@ -29,8 +29,8 @@
 
 Define_Module(IPvXTrafGen);
 
-simsignal_t IPvXTrafGen::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t IPvXTrafGen::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t IPvXTrafGen::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t IPvXTrafGen::sentPkSignal = registerSignal("sentPk");
 
 IPvXTrafGen::IPvXTrafGen()
 {
@@ -53,9 +53,6 @@ void IPvXTrafGen::initialize(int stage)
     // address auto-assignment takes place etc.
     if (stage == INITSTAGE_LOCAL)
     {
-        rcvdPkSignal = registerSignal("rcvdPk");
-        sentPkSignal = registerSignal("sentPk");
-
         protocol = par("protocol");
         numPackets = par("numPackets");
         startTime = par("startTime");

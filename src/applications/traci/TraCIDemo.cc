@@ -26,13 +26,14 @@
 
 Define_Module(TraCIDemo);
 
+simsignal_t TraCIDemo::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
+
 void TraCIDemo::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {
-        mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
         sentMessage = false;
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER)

@@ -38,9 +38,9 @@
 
 Define_Module(SCTPPeer);
 
-simsignal_t SCTPPeer::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t SCTPPeer::echoedPkSignal = SIMSIGNAL_NULL;
-simsignal_t SCTPPeer::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t SCTPPeer::sentPkSignal = registerSignal("sentPk");
+simsignal_t SCTPPeer::echoedPkSignal = registerSignal("echoedPk");
+simsignal_t SCTPPeer::rcvdPkSignal = registerSignal("rcvdPk");
 
 SCTPPeer::SCTPPeer()
 {
@@ -82,10 +82,6 @@ void SCTPPeer::initialize(int stage)
         WATCH(packetsRcvd);
         WATCH(bytesSent);
         WATCH(numRequestsToSend);
-
-        sentPkSignal = registerSignal("sentPk");
-        echoedPkSignal = registerSignal("echoedPk");
-        rcvdPkSignal = registerSignal("rcvdPk");
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER)
     {

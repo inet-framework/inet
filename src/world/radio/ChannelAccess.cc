@@ -20,7 +20,7 @@
 #include "IMobility.h"
 #include "ModuleAccess.h"
 
-simsignal_t ChannelAccess::mobilityStateChangedSignal = SIMSIGNAL_NULL;
+simsignal_t ChannelAccess::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
 
 static int parseInt(const char *s, int defaultValue)
 {
@@ -61,7 +61,6 @@ void ChannelAccess::initialize(int stage)
 
         positionUpdateArrived = false;
         // register to get a notification when position changes
-        mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
         hostModule->subscribe(mobilityStateChangedSignal, this);
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER)

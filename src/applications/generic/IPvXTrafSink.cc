@@ -29,7 +29,7 @@
 Define_Module(IPvXTrafSink);
 
 
-simsignal_t IPvXTrafSink::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t IPvXTrafSink::rcvdPkSignal = registerSignal("rcvdPk");
 
 
 void IPvXTrafSink::initialize(int stage)
@@ -40,7 +40,6 @@ void IPvXTrafSink::initialize(int stage)
     {
         numReceived = 0;
         WATCH(numReceived);
-        rcvdPkSignal = registerSignal("rcvdPk");
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER)
     {

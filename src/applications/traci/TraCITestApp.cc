@@ -25,6 +25,7 @@
 
 Define_Module(TraCITestApp);
 
+simsignal_t TraCITestApp::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
 
 void TraCITestApp::initialize(int stage)
 {
@@ -34,7 +35,6 @@ void TraCITestApp::initialize(int stage)
     {
         testNumber = par("testNumber");
 
-        mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
         traci = TraCIMobilityAccess().get();
         traci->subscribe(mobilityStateChangedSignal, this);
 

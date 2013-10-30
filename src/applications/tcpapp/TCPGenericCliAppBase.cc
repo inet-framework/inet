@@ -18,9 +18,9 @@
 #include "AddressResolver.h"
 
 
-simsignal_t TCPGenericCliAppBase::connectSignal = SIMSIGNAL_NULL;
-simsignal_t TCPGenericCliAppBase::rcvdPkSignal = SIMSIGNAL_NULL;
-simsignal_t TCPGenericCliAppBase::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t TCPGenericCliAppBase::connectSignal = registerSignal("connect");
+simsignal_t TCPGenericCliAppBase::rcvdPkSignal = registerSignal("rcvdPk");
+simsignal_t TCPGenericCliAppBase::sentPkSignal = registerSignal("sentPk");
 
 
 void TCPGenericCliAppBase::initialize(int stage)
@@ -30,11 +30,6 @@ void TCPGenericCliAppBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = bytesRcvd = 0;
-
-        //statistics
-        connectSignal = registerSignal("connect");
-        rcvdPkSignal = registerSignal("rcvdPk");
-        sentPkSignal = registerSignal("sentPk");
 
         WATCH(numSessions);
         WATCH(numBroken);

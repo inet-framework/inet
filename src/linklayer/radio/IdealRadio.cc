@@ -28,7 +28,7 @@
 #define MK_TRANSMISSION_OVER  1
 #define MK_RECEPTION_COMPLETE 2
 
-simsignal_t IdealRadio::radioStateSignal = SIMSIGNAL_NULL;
+simsignal_t IdealRadio::radioStateSignal = registerSignal("radioState");
 
 Define_Module(IdealRadio);
 
@@ -65,7 +65,6 @@ void IdealRadio::initialize(int stage)
         WATCH(rs);
 
         // signals
-        radioStateSignal = registerSignal("radioState");
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER)
     {

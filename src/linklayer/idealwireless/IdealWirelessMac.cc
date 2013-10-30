@@ -33,8 +33,8 @@
 
 Define_Module(IdealWirelessMac);
 
-simsignal_t IdealWirelessMac::radioStateSignal = SIMSIGNAL_NULL;
-simsignal_t IdealWirelessMac::dropPkNotForUsSignal = SIMSIGNAL_NULL;
+simsignal_t IdealWirelessMac::radioStateSignal = registerSignal("radioState");
+simsignal_t IdealWirelessMac::dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
 
 IdealWirelessMac::IdealWirelessMac()
 {
@@ -76,9 +76,6 @@ void IdealWirelessMac::initialize(int stage)
         bitrate = par("bitrate").doubleValue();
         headerLength = par("headerLength").longValue();
         promiscuous = par("promiscuous");
-
-        radioStateSignal = registerSignal("radioState");
-        dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
 
         radioModule = gate("lowerLayerOut")->getPathEndGate()->getOwnerModule();
         IdealRadio *irm = check_and_cast<IdealRadio *>(radioModule);

@@ -20,11 +20,10 @@
 
 Define_Module(TCPSpoof);
 
-simsignal_t TCPSpoof::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t TCPSpoof::sentPkSignal = registerSignal("sentPk");
 
 void TCPSpoof::initialize()
 {
-    sentPkSignal = registerSignal("sentPk");
     simtime_t t = par("t").doubleValue();
     scheduleAt(t, new cMessage("timer"));
 }

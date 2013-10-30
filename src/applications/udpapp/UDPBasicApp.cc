@@ -27,8 +27,8 @@
 
 Define_Module(UDPBasicApp);
 
-simsignal_t UDPBasicApp::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t UDPBasicApp::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t UDPBasicApp::sentPkSignal = registerSignal("sentPk");
+simsignal_t UDPBasicApp::rcvdPkSignal = registerSignal("rcvdPk");
 
 UDPBasicApp::UDPBasicApp()
 {
@@ -50,8 +50,6 @@ void UDPBasicApp::initialize(int stage)
         numReceived = 0;
         WATCH(numSent);
         WATCH(numReceived);
-        sentPkSignal = registerSignal("sentPk");
-        rcvdPkSignal = registerSignal("rcvdPk");
 
         localPort = par("localPort");
         destPort = par("destPort");

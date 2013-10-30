@@ -28,8 +28,8 @@
 
 Define_Module(EtherAppSrv);
 
-simsignal_t EtherAppSrv::sentPkSignal = SIMSIGNAL_NULL;
-simsignal_t EtherAppSrv::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t EtherAppSrv::sentPkSignal = registerSignal("sentPk");
+simsignal_t EtherAppSrv::rcvdPkSignal = registerSignal("rcvdPk");
 
 
 void EtherAppSrv::initialize(int stage)
@@ -42,8 +42,6 @@ void EtherAppSrv::initialize(int stage)
 
         // statistics
         packetsSent = packetsReceived = 0;
-        sentPkSignal = registerSignal("sentPk");
-        rcvdPkSignal = registerSignal("rcvdPk");
 
         WATCH(packetsSent);
         WATCH(packetsReceived);

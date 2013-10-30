@@ -28,8 +28,8 @@
 
 Define_Module(UDPVideoStreamSvr);
 
-simsignal_t UDPVideoStreamSvr::reqStreamBytesSignal = SIMSIGNAL_NULL;
-simsignal_t UDPVideoStreamSvr::sentPkSignal = SIMSIGNAL_NULL;
+simsignal_t UDPVideoStreamSvr::reqStreamBytesSignal = registerSignal("reqStreamBytes");
+simsignal_t UDPVideoStreamSvr::sentPkSignal = registerSignal("sentPk");
 
 inline std::ostream& operator<<(std::ostream& out, const UDPVideoStreamSvr::VideoStreamData& d)
 {
@@ -62,8 +62,6 @@ void UDPVideoStreamSvr::initialize(int stage)
         // statistics
         numStreams = 0;
         numPkSent = 0;
-        reqStreamBytesSignal = registerSignal("reqStreamBytes");
-        sentPkSignal = registerSignal("sentPk");
 
         WATCH_MAP(streams);
     }

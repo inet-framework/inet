@@ -23,9 +23,9 @@
 
 Define_Module( MACRelayUnitPP );
 
-simsignal_t MACRelayUnitPP::processedBytesSignal = SIMSIGNAL_NULL;
-simsignal_t MACRelayUnitPP::droppedBytesSignal = SIMSIGNAL_NULL;
-simsignal_t MACRelayUnitPP::usedBufferBytesSignal = SIMSIGNAL_NULL;
+simsignal_t MACRelayUnitPP::processedBytesSignal = registerSignal("processed");
+simsignal_t MACRelayUnitPP::droppedBytesSignal = registerSignal("dropped");
+simsignal_t MACRelayUnitPP::usedBufferBytesSignal = registerSignal("usedBufferBytes");
 
 /* unused for now
 static std::ostream& operator<< (std::ostream& os, cMessage *msg)
@@ -63,10 +63,6 @@ void MACRelayUnitPP::initialize(int stage)
         bufferSize = par("bufferSize");
         highWatermark = par("highWatermark");
         pauseUnits = par("pauseUnits");
-
-        processedBytesSignal = registerSignal("processed");
-        droppedBytesSignal = registerSignal("dropped");
-        usedBufferBytesSignal = registerSignal("usedBufferBytes");
 
         bufferUsed = 0;
         WATCH(bufferUsed);

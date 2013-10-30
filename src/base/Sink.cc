@@ -20,7 +20,7 @@
 
 Define_Module(Sink);
 
-simsignal_t Sink::rcvdPkSignal = SIMSIGNAL_NULL;
+simsignal_t Sink::rcvdPkSignal = registerSignal("rcvdPk");
 
 void Sink::initialize()
 {
@@ -28,7 +28,6 @@ void Sink::initialize()
     numBits = 0;
     throughput = 0;
     packetPerSec = 0;
-    rcvdPkSignal = registerSignal("rcvdPk");
 
     WATCH(numPackets);
     WATCH(numBits);
