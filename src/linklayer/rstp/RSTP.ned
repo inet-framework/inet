@@ -34,7 +34,7 @@ simple RSTP like ISpanningTree
         double maxAge @unit("s") = default(20s);            //Max. hop count. IEEE 802.1D typical range 6-40
         int priority = default(128);                        //priority + MAC determines the RSTP id
         bool autoEdge = default(true);                      //Automatic edge setting. If false, Edge ports will have to wait to get designated.
-        bool verbose = default(false);						//sets module verbosity
+        bool treeColoring = default(false);					//Shows RSTP tree
     gates:
       	inout STPGate @labels(BPDU);                        //To the relay
 }

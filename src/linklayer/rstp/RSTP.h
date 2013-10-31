@@ -24,7 +24,6 @@
 #include "MACAddress.h"
 #include "EtherFrame.h"
 #include "MACAddressTable.h"
-#include "PortFiltRSTP.h"
 #include "InterfaceTable.h"
 #include "IEEE8021DInterfaceData.h"
 
@@ -45,8 +44,7 @@ class RSTP: public cSimpleModule, public ILifecycle
 	  /*Dynamic data.*/
 
 	int maxAge;
-	bool verbose;		/// Sets module verbosity
-	bool testing;		/// Save Testing data
+	bool treeColoring;		/// Sets module verbosity
 	bool isOperational; // for lifecycle
 
 	cModule* Parent; /// Pointer to the parent module
@@ -78,7 +76,7 @@ class RSTP: public cSimpleModule, public ILifecycle
 
   protected:
 	virtual void initialize(int stage);
-
+    virtual void finish(){}
 	virtual void initInterfacedata(unsigned int portNum);
 
 	/**
@@ -112,16 +110,13 @@ class RSTP: public cSimpleModule, public ILifecycle
 	 * @brief General processing
 	 */
 	virtual void handleMessage(cMessage *msg);
+
 	/**
 	 * @brief BPDU processing.
-	 * Updates RSTP vectors information. Handles port role changes.
+	 * Updates port information. Handles port role changes.
 	 */
 	virtual void handleIncomingFrame(BPDU *frame);
 
-	/**
-	 * @brief Savin statistics
-	 */
-	virtual void finish();
 	/**
 	 * @brief Prints current data base info
 	 */
@@ -143,18 +138,22 @@ class RSTP: public cSimpleModule, public ILifecycle
 	virtual int contestInterfacedata(BPDU* msg,unsigned int portNum);
 
 	/**
-	 * @brief Compares the vector with the frame this module would send through that por
+	 * @brief Compares the frame with the frame this module would send through that por
 	 * @return (<0 if own vector is better than vect2)
 	 * -4=Worse Port -3=Worse Src -2=Worse RPC -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
 	 */
 	virtual int contestInterfacedata(unsigned int portNum);
 
 	/**
-	 * @brief If root TCWhile has not expired, sends a BPDU to the Root with TCFlag=true.
-	 */
-
+	* @brief Compares a Port with BPDU contained info.
+	* @return (<0 if vector better than frame)
+	* -4=Worse Port -3=Worse Src -2=Worse RPC -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
+	*/
 	virtual int compareInterfacedata(unsigned int portNum, BPDU * msg,int linkCost);
 
+	/**
+	 * @brief If root TCWhile has not expired, sends a BPDU to the Root with TCFlag=true.
+	 */
 	virtual void sendTCNtoRoot();
 
 	/**
@@ -181,7 +180,7 @@ class RSTP: public cSimpleModule, public ILifecycle
 	/**
 	 * @brief Handles the switch to backup in one of the ports
 	 */
-	virtual void handleBK(BPDU * frame, int arrival);
+	virtual void handleBK(BPDU * frame, unsigned int arrival);
 
   // for lifecycle:
   public:
