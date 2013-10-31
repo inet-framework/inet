@@ -397,7 +397,8 @@ void EtherMACBase::processConnectDisconnect()
         {
             // Clear external queue: send a request, and received packet will be deleted in handleMessage()
             if (txQueue.extQueue->getNumPendingRequests() == 0)
-                txQueue.extQueue->requestPacket();
+                //txQueue.extQueue->requestPacket(); //FIXME why not clear()? requestPacket() causes problems with sendSync()
+                txQueue.extQueue->clear();
         }
         else
         {
