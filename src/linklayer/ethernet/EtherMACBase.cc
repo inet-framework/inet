@@ -519,7 +519,7 @@ void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
     bool txDisabled = !outTrChannel || outTrChannel->isDisabled();
 
     if (errorWhenAsymmetric && (rxDisabled != txDisabled))
-        throw cRuntimeError("The input/output channels states differ (%s / %)", rxDisabled?"off":"on", txDisabled?"off":"on");
+        throw cRuntimeError("The enablements of the input/output channels differ (rx=%s vs tx=%s)", rxDisabled?"off":"on", txDisabled?"off":"on");
 
     if (txDisabled)
         connected = false;
@@ -547,7 +547,7 @@ void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
     channelsDiffer = dataratesDiffer || (rxDisabled != txDisabled);
 
     if (errorWhenAsymmetric && dataratesDiffer)
-        throw cRuntimeError("The input/output datarates differ (%g / %g bps)", rxRate, txRate);
+        throw cRuntimeError("The input/output datarates differ (rx=%g bps vs tx=%g bps)", rxRate, txRate);
 
     if (connected)
     {
