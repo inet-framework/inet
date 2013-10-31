@@ -139,6 +139,7 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node * rootNode)
         // Begin RSTP properties, for more information see RSTP module
         const char * cost = interfaceElement->getAttribute("cost");
         const char * priority = interfaceElement->getAttribute("priority");
+        const char * edge = interfaceElement->getAttribute("edge");
         // End RSTP properties
 
         if (amongAttr && *amongAttr) // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
@@ -202,6 +203,9 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node * rootNode)
                             if (isNotEmpty(priority))
                                 currentNode->interfaceInfos[i]->portData.portPriority = atoi(priority);
 
+                            //edge
+                            if (isNotEmpty(edge))
+                                currentNode->interfaceInfos[i]->portData.edge = strcmp(edge,"true") ? false : true;
                             EV_DEBUG << hostModule->getFullPath() << ":" << ifEntry->getFullName() << endl;
 
                             matchedBefore.insert(ifEntry);
