@@ -70,7 +70,7 @@ void IEEE8021DRelay::handleMessage(cMessage * msg)
         else if (strcmp(msg->getArrivalGate()->getName(), "ifIn") == 0)
         {
             EV_INFO << "Received " << msg << " from network." << endl;
-            EthernetIIFrame * frame = check_and_cast<EthernetIIFrame*>(msg);
+            EtherFrame * frame = check_and_cast<EtherFrame*>(msg);
             handleAndDispatchFrame(frame);
         }
     }
@@ -79,7 +79,7 @@ void IEEE8021DRelay::handleMessage(cMessage * msg)
 
 }
 
-void IEEE8021DRelay::broadcast(EthernetIIFrame * frame)
+void IEEE8021DRelay::broadcast(EtherFrame * frame)
 {
     EV_DETAIL << "Broadcast frame " << frame << endl;
 
@@ -92,7 +92,7 @@ void IEEE8021DRelay::broadcast(EthernetIIFrame * frame)
     delete frame;
 }
 
-void IEEE8021DRelay::handleAndDispatchFrame(EthernetIIFrame * frame)
+void IEEE8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
 {
     int arrivalGate = frame->getArrivalGate()->getIndex();
     IEEE8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
@@ -139,7 +139,7 @@ void IEEE8021DRelay::handleAndDispatchFrame(EthernetIIFrame * frame)
     }
 }
 
-void IEEE8021DRelay::dispatch(EthernetIIFrame * frame, unsigned int portNum)
+void IEEE8021DRelay::dispatch(EtherFrame * frame, unsigned int portNum)
 {
     IEEE8021DInterfaceData * port = getPortInterfaceData(portNum);
 
@@ -154,7 +154,7 @@ void IEEE8021DRelay::dispatch(EthernetIIFrame * frame, unsigned int portNum)
     return;
 }
 
-void IEEE8021DRelay::learn(EthernetIIFrame * frame)
+void IEEE8021DRelay::learn(EtherFrame * frame)
 {
     int arrivalGate = frame->getArrivalGate()->getIndex();
     IEEE8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
@@ -191,7 +191,7 @@ void IEEE8021DRelay::dispatchBPDU(BPDU * bpdu)
     send(frame, "ifOut", portNum);
 }
 
-void IEEE8021DRelay::deliverBPDU(EthernetIIFrame * frame)
+void IEEE8021DRelay::deliverBPDU(EtherFrame * frame)
 {
     BPDU * bpdu = check_and_cast<BPDU *>(frame->decapsulate());
 

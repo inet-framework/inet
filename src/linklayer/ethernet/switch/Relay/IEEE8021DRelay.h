@@ -47,10 +47,10 @@ class IEEE8021DRelay : public cSimpleModule, public ILifecycle
          * Includes calls to updateTableWithAddress() and getPortForAddress().
          *
          */
-        void handleAndDispatchFrame(EthernetIIFrame * frame);
-        void dispatch(EthernetIIFrame * frame, unsigned int portNum);
-        void learn(EthernetIIFrame * frame);
-        void broadcast(EthernetIIFrame * frame);
+        void handleAndDispatchFrame(EtherFrame * frame);
+        void dispatch(EtherFrame * frame, unsigned int portNum);
+        void learn(EtherFrame * frame);
+        void broadcast(EtherFrame * frame);
 
         /**
          * Receives BPDU from the STP/RSTP module and dispatch it to network.
@@ -62,7 +62,7 @@ class IEEE8021DRelay : public cSimpleModule, public ILifecycle
          * Deliver BPDU to the STP/RSTP module which is arrived from the network.
          * Sets the BPDU's Ieee802Ctrl info according to the arriving EthernetIIFrame.
          */
-        void deliverBPDU(EthernetIIFrame * frame);
+        void deliverBPDU(EtherFrame * frame);
 
         // For lifecycle
         virtual void start();
