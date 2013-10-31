@@ -18,7 +18,6 @@
 
 #include "EtherFrame.h"
 #include "STP.h"
-#include "InterfaceTableAccess.h"
 #include "InterfaceEntry.h"
 #include "STPTester.h"
 
@@ -43,7 +42,7 @@ void STP::initialize(int stage)
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
         // Obtain a bridge address from InterfaceTable
-        ifTable = InterfaceTableAccess().get();
+        ifTable = check_and_cast<IInterfaceTable*>(this->getParentModule()->getSubmodule("interfaceTable"));
         InterfaceEntry * ifEntry = ifTable->getInterface(0);
 
         if (ifEntry != NULL)
@@ -796,7 +795,7 @@ void STP::reset()
 void STP::start()
 {
     // Obtain a bridge address from InterfaceTable
-    ifTable = InterfaceTableAccess().get();
+    ifTable = check_and_cast<IInterfaceTable*>(this->getParentModule()->getSubmodule("interfaceTable"));
     InterfaceEntry * ifEntry = ifTable->getInterface(0);
     if (ifEntry != NULL)
         bridgeAddress = ifEntry->getMacAddress();
