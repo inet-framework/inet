@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 #include "InterfaceEntry.h"
 #include "MACAddress.h"
+#undef ALTERNATE
 
 class IEEE8021DInterfaceData : public InterfaceProtocolData
 {
