@@ -1094,7 +1094,7 @@ void SCTPAssociation::stateEntered(int32 status)
 
             pmStartPathManagement();
             state->sendQueueLimit = (uint32)sctpMain->par("sendQueueLimit");
-            sendEstabIndicationToApp();
+            sendEstabIndicationToApp();  //XXX if from sendSync() the app sendSyncs something back to SCTP, that call can crash because the "sendQueue" ptr we're going to initialize below is still NULL!!!
             if (sctpMain->hasPar("addIP")) {
                 const bool addIP = (bool)sctpMain->par("addIP");
 				sctpEV3 << getFullPath() << ": addIP = " << addIP << " time = " << (double)sctpMain->par("addTime") << "\n";
