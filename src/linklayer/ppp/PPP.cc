@@ -208,7 +208,8 @@ void PPP::refreshOutGateConnection(bool connected)
         {
             // Clear external queue: send a request, and received packet will be deleted in handleMessage()
             if (0 == queueModule->getNumPendingRequests())
-                queueModule->requestPacket();
+                //queueModule->requestPacket(); //FIXME why not clear()? requestPacket() causes problems with sendSync()
+                queueModule->clear();
         }
         else
         {
