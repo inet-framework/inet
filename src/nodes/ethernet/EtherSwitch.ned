@@ -27,7 +27,7 @@ import inet.linklayer.ieee8021d.stp.STP;
 import inet.linklayer.ieee8021d.stp.STP;
 import inet.linklayer.ethernet.switch.MACAddressTable;
 import inet.linklayer.configurator.L2NodeConfigurator;
-import inet.linklayer.rstp.RSTP;
+import inet.linklayer.ieee8021d.rstp.RSTP;
 import inet.linklayer.ethernet.switch.Relay.IEEE8021DRelay;
 import inet.linklayer.ieee8021d.ISpanningTree;
 

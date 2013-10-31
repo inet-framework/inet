@@ -67,7 +67,6 @@ InterfaceEntry::InterfaceEntry(cModule* ifmod)
     ipv6data = NULL;
     isisdata = NULL;
     trilldata = NULL;
-    vlandata = NULL;
     ieee8021dData = NULL;
     estimateCostProcessArray.clear();
 }
@@ -109,8 +108,6 @@ std::string InterfaceEntry::info() const
         out << " " << ((InterfaceProtocolData *)isisdata)->info(); // Khmm...
     if (trilldata)
         out << " " << ((InterfaceProtocolData *)trilldata)->info(); // Khmm...
-    if (vlandata)
-        out << " " << ((InterfaceProtocolData *)vlandata)->info() << "\n"; // Khmm...
     return out.str();
 }
 
@@ -147,8 +144,6 @@ std::string InterfaceEntry::detailedInfo() const
         out << " " << ((InterfaceProtocolData *)isisdata)->detailedInfo() << "\n"; // Khmm...
     if (trilldata)
         out << " " << ((InterfaceProtocolData *)trilldata)->detailedInfo() << "\n"; // Khmm...
-    if (vlandata)
-        out << " " << ((InterfaceProtocolData *)vlandata)->detailedInfo() << "\n"; // Khmm...
     return out.str();
 }
 std::string InterfaceEntry::getFullPath() const
@@ -186,9 +181,6 @@ void InterfaceEntry::resetInterface()
     if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this)
         delete (InterfaceProtocolData *)trilldata;
     trilldata = NULL;
-    if (vlandata && ((InterfaceProtocolData *)vlandata)->ownerp == this)
-        delete (InterfaceProtocolData *)vlandata;
-    vlandata = NULL;
     if (ieee8021dData && ((InterfaceProtocolData *)ieee8021dData)->ownerp == this)
         delete (InterfaceProtocolData *)ieee8021dData;
     ieee8021dData = NULL;
@@ -234,15 +226,6 @@ void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
     if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this) // Khmm...
         delete (InterfaceProtocolData *)isisdata; // Khmm...
     isisdata = p;
-    ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
-    configChanged();
-}
-
-void InterfaceEntry::setVLANInterfaceData(VLANInterfaceData *p)
-{
-    if (vlandata && ((InterfaceProtocolData *)vlandata)->ownerp == this) // Khmm...
-        delete (InterfaceProtocolData *)vlandata; // Khmm...
-    vlandata = p;
     ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
     configChanged();
 }

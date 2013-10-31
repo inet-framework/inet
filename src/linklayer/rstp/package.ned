@@ -1,1 +1,0 @@
-package inet.linklayer.rstp;
