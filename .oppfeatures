@@ -500,7 +500,7 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.mobility.models
+                       inet.mobility.contract
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -557,9 +557,8 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.battery.models
-                       inet.linklayer.radio
-                       inet.world.radio
+                       inet.power.contract
+                       inet.physicallayer.radio
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -591,7 +590,7 @@
         requires = "mobility radio"
         labels = "nic wireless"
         nedPackages = "
-                       inet.linklayer.idealwireless
+                       inet.linklayer.ideal
                       "
         extraSourceFolders = ""
         compileFlags = ""
