@@ -16,7 +16,6 @@
 // Author: Benjamin Martin Seregi
 
 #include "IEEE8021DRelay.h"
-#include "InterfaceTableAccess.h"
 #include "InterfaceEntry.h"
 #include "IEEE8021DInterfaceData.h"
 
@@ -40,7 +39,7 @@ void IEEE8021DRelay::initialize(int stage)
         cModule * tmpMacTable = getParentModule()->getSubmodule("macTable");
         macTable = check_and_cast<MACAddressTable *>(tmpMacTable);
 
-        ifTable = InterfaceTableAccess().get();
+        ifTable = check_and_cast<IInterfaceTable*>(this->getParentModule()->getSubmodule("interfaceTable"));
         InterfaceEntry * ifEntry = ifTable->getInterface(0);
         bridgeAddress = ifEntry->getMacAddress();
 
