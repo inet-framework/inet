@@ -191,7 +191,7 @@ void InetSimpleModule::pubHandleMessage(cMessage *msg)
         EV << "Finally: performing sendSync of " << (numMsgs - oldNumMsgs) << " buffered messages\n";
         for (int i = oldNumMsgs; i < numMsgs; i++) {
             cMessage *msg = msgBuffer[i];
-            msg->getArrivalModule()->pubHandleMessage(msg);
+            static_cast<InetSimpleModule*>(msg->getArrivalModule())->pubHandleMessage(msg);
         }
         numMsgs = oldNumMsgs;  //XXX exception safety!!! (this should be in a "finally" block)
     }
