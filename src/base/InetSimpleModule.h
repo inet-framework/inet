@@ -22,24 +22,20 @@
 
 class InetSimpleModule : public cSimpleModule
 {
-public:
+  private:
+    // the sendSyncFinally buffer
+    static cMessage *msgBuffer[1000]; //TODO make dynamic
+    static int numMsgs;
+  public:
     InetSimpleModule(unsigned stacksize = 0) : cSimpleModule(stacksize) {}
 
-    /**
-     * Sends a message through the gate given with its ID.
-     */
     int sendSync(cMessage *msg, int gateid);
-
-    /**
-     * Sends a message through the gate given with its name and index
-     * (if multiple gate).
-     */
     int sendSync(cMessage *msg, const char *gatename, int gateindex=-1);
-
-    /**
-     * Sends a message through the gate given with its pointer.
-     */
     int sendSync(cMessage *msg, cGate *outputgate);
+
+    int sendSyncFinally(cMessage *msg, int gateid);
+    int sendSyncFinally(cMessage *msg, const char *gatename, int gateindex=-1);
+    int sendSyncFinally(cMessage *msg, cGate *outputgate);
 
     void pubHandleMessage(cMessage *msg);  // public wrapper around handleMessage()
 };
