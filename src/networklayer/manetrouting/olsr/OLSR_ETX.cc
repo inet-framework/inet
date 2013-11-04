@@ -88,7 +88,8 @@ void OLSR_ETX_LinkQualityTimer::expire()
 void
 OLSR_ETX::initialize(int stage)
 {
-    OLSR::initialize(stage);
+    //TODO this function is a modified copy of OLSR::initialize(int stage)
+    ManetRoutingBase::initialize(stage);
 
     if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
