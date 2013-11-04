@@ -18,7 +18,7 @@
 
 package inet.examples.mobility;
 
-import inet.mobility.IMobility;
+import inet.mobility.contract.IMobility;
 import inet.base.NotificationBoard;
 
 

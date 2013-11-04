@@ -23,7 +23,7 @@ import inet.linklayer.IExternalNic;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.loopback.LoopbackInterface;
-import inet.mobility.IMobility;
+import inet.mobility.contract.IMobility;
 import inet.networklayer.common.IRoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.contract.INetworkLayer;

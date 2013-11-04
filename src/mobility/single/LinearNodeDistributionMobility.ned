@@ -16,7 +16,9 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 //
 
-package inet.mobility.models;
+package inet.mobility.single;
+
+import inet.mobility.static.StationaryMobility;
 
 //
 // Mobility model which places all hosts at constant distances

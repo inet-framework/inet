@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+package inet.mobility.static;
 
-package inet.mobility.models;
-
+import inet.mobility.common.MobilityBase;
 
 //
 // This mobility module does nothing; it can be used for stationary nodes.

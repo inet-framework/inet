@@ -17,9 +17,9 @@
 // * part of:     framework implementation developed by tkn
 // **************************************************************************/
 
+package inet.mobility.single;
 
-package inet.mobility.models;
-
+import inet.mobility.common.MovingMobilityBase;
 
 //
 // Uses a Gauss-Markov model to control the randomness in the movement.

@@ -17,9 +17,9 @@
 // * part of:     framework implementation developed by tkn
 // **************************************************************************/
 
+package inet.mobility.single;
 
-package inet.mobility.models;
-
+import inet.mobility.common.MovingMobilityBase;
 
 //
 // Controls all movement related things of a host

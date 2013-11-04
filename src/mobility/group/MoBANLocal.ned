@@ -40,7 +40,9 @@
 //*
 //**************************************************************************/
 
-package inet.mobility.models;
+package inet.mobility.group;
+
+import inet.mobility.common.MovingMobilityBase;
 
 // This is the local mobility module of MoBAN. It should be instantiated in each node that belongs to a WBAN. The NED parameter "coordinatorIndex"
 // determine to which WBAN (MoBANCoordinator) it belongs.

@@ -42,7 +42,8 @@
 
 package inet.examples.mobility;
 
-import inet.mobility.models.MoBANCoordinator;
+import inet.mobility.group.MoBANCoordinator;
+
 
 //
 // This network is exactly the same as baseNetwork existing among the examples of MiXiM, but the desired number of MoBAN coordinator modules have been added.

@@ -23,8 +23,8 @@ import inet.applications.ethernet.EtherAppCli;
 import inet.base.NotificationBoard;
 import inet.base.Sink;
 import inet.linklayer.ieee80211.Ieee80211Nic;
-import inet.mobility.models.CircleMobility;
-import inet.mobility.models.StationaryMobility;
+import inet.mobility.single.CircleMobility;
+import inet.mobility.static.StationaryMobility;
 import inet.nodes.wireless.AccessPoint;
 import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 

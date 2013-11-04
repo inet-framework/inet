@@ -15,11 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+package inet.mobility.common;
 
-package inet.mobility.models;
-
-import inet.mobility.IMobility;
-
+import inet.mobility.contract.IMobility;
 
 //
 // Abstract base module for mobility models.

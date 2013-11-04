@@ -16,15 +16,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
-
 package inet.examples.wireless.throughput;
 
-import inet.mobility.models.StationaryMobility;
-import inet.linklayer.ieee80211.Ieee80211Nic;
-import inet.base.Sink;
 import inet.base.NotificationBoard;
-
+import inet.base.Sink;
+import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.mobility.static.StationaryMobility;
 
 //
 // Well, this models a 802.11 Access Point with a Sink.

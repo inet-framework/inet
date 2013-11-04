@@ -22,7 +22,7 @@ package inet.examples.wireless.throughput;
 import inet.applications.ethernet.EtherAppCli;
 import inet.base.NotificationBoard;
 import inet.linklayer.ieee80211.Ieee80211Nic;
-import inet.mobility.models.StationaryMobility;
+import inet.mobility.static.StationaryMobility;
 import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 
 

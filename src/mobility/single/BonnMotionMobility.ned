@@ -15,8 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.mobility.models;
+package inet.mobility.single;
 
+import inet.mobility.common.MovingMobilityBase;
 
 //
 // Uses the native file format of BonnMotion (http://www.cs.uni-bonn.de/IV/BonnMotion/).
