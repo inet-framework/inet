@@ -9,7 +9,7 @@ Checks that a host reports multicast state changes of the interface.
 ned-path = .;../../../../src;../../lib
 sim-time-limit=10s
 cmdenv-express-mode = false
-log-format = "%t %N: "
+cmdenv-log-format = "%t %N: "
 
 network=TestIGMPNetwork
 **.igmpType = "IGMPv3"

@@ -9,7 +9,7 @@ Checks that a host responds to a General Query with a correct response.
 ned-path = .;../../../../src;../../lib
 sim-time-limit=300s
 cmdenv-express-mode = false
-log-format = "%t %N: "
+cmdenv-log-format = "%t %N: "
 
 network=TestIGMPNetwork
 **.igmpType = "IGMPv3"
