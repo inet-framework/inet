@@ -17,7 +17,7 @@
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c Batman -r 0,                 10s,             7a95-71e1
 /examples/manetrouting/hna/,         -f omnetpp.ini -c single_radio -r 0,           100s,            c89d-3d6b
 /examples/manetrouting/hna/,         -f omnetpp.ini -c multi_radio -r 0,            100s,            c465-b9e1
-/examples/manetrouting/manetMultiradio/, -f 3_nodes.ini -c MultiRadio -r 0,             100s,            5133-f942
+/examples/manetrouting/manetMultiradio/, -f 3_nodes.ini -c MultiRadio -r 0,             100s,            b1cc-1164
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0,                 100s,            0f72-23e5
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMO -r 0,                   100s,            b030-e2a4
 # /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c AODVUU -r 0,                 100s,            9d02-6e8d  # unstable fingerprint
