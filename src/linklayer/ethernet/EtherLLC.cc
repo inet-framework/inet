@@ -197,9 +197,9 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
     emit(decapPkSignal, higherlayermsg);
 
     // pass up to higher layer
-    send(higherlayermsg, "upperLayerOut", port);
     totalPassedUp++;
     emit(passedUpPkSignal, higherlayermsg);
+    send(higherlayermsg, "upperLayerOut", port);
     delete frame;
 }
 
