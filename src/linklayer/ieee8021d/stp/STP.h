@@ -38,9 +38,9 @@ class STP : public cSimpleModule, public ILifecycle
         int convergenceTime;
         bool isRoot;
         unsigned int rootPort;
-        std::vector<unsigned int> desPorts;
-        bool verbose;
-        unsigned int portCount;
+        std::vector<unsigned int> desPorts; // set of designated ports
+        bool treeColoring;
+        unsigned int portCount; // number of ports on the interface
 
         MACAddress bridgeAddress;
         unsigned int bridgePriority;
@@ -50,20 +50,19 @@ class STP : public cSimpleModule, public ILifecycle
         unsigned int rootPriority;
         MACAddress rootAddress;
 
-        // Set by management
+        // Set by management: see the ned file for more info
         simtime_t maxAge;
         simtime_t fwdDelay;
         simtime_t helloTime;
 
-        // Parameter change detection
-        unsigned int ubridgePriority;
-
-        // Set by root bridge
+        // Set by root bridge, c stands for current
         simtime_t cMaxAge;
         simtime_t cFwdDelay;
         simtime_t cHelloTime;
 
-        // Bridge timers
+        // Parameter change detection
+        unsigned int ubridgePriority;
+
         simtime_t helloTimer;
 
         // Topology change commencing
@@ -77,36 +76,88 @@ class STP : public cSimpleModule, public ILifecycle
         bool isOperational;
 
     public:
+
+        /*
+         * Bridge Protocol Data Unit handling
+         */
         void handleBPDU(BPDU * bpdu);
+
+        /**
+         * Topology change handling
+         */
         void handleTCN(BPDU * tcn);
         virtual void handleMessage(cMessage * msg);
         virtual void initialize(int stage);
         virtual int numInitStages() const { return 2; }
         virtual ~STP();
 
-    public:
-        IEEE8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
+        /*
+         * Generate BPDUs to all interfaces (for root switch)
+         */
         void generateBPDU(int portNum, const MACAddress& address = MACAddress::STP_MULTICAST_ADDRESS, bool tcFlag = false, bool tcaFlag = false);
+        void generator();
+
+        /*
+         * Color the spanning tree in Tkenv
+         */
         void colorTree();
+
+        /*
+         * Generate and send Topology Change Notification
+         */
         void generateTCN();
+
+        /*
+         * Comparison of all IDs in IEEE8021DInterfaceData::PortInfo structure
+         * Invokes: superiorID(), superiorPort()
+         */
         int superiorTPort(IEEE8021DInterfaceData * portA, IEEE8021DInterfaceData * portB);
-        bool superiorBPDU(int portNum, BPDU * bpdu);
-        void setSuperiorBPDU(int portNum, BPDU * bpdu);
         int superiorID(unsigned int, MACAddress, unsigned int, MACAddress);
         int superiorPort(unsigned int, unsigned int, unsigned int, unsigned int);
-        void generator();
+
+        /*
+         * Check of the received BPDU is superior to port information from InterfaceTable
+         */
+        bool superiorBPDU(int portNum, BPDU * bpdu);
+        void setSuperiorBPDU(int portNum, BPDU * bpdu);
+
         void handleTick();
+
+        /*
+         * Check timers to make state changes
+         */
         void checkTimers();
         void checkParametersChange();
+
+        /*
+         * Set the default port information for the InterfaceTable
+         */
         void initPortTable();
-        bool checkRootEligibility();
-        void tryRoot();
         void selectRootPort();
         void selectDesignatedPorts();
+
+        /*
+         * Set all ports to designated (for root switch)
+         */
         void allDesignated();
+
+        /*
+         * State changes
+         */
         void lostRoot();
         void lostAlternate(int port);
         void reset();
+
+        /*
+         * Determine who is eligible to become the root switch
+         */
+        bool checkRootEligibility();
+        void tryRoot();
+
+        /*
+         * Get port data from the InterfaceTable
+         */
+        IEEE8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
 
     public:
         friend inline std::ostream& operator<<(std::ostream& os, const IEEE8021DInterfaceData::PortRole r);

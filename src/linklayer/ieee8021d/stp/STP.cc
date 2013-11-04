@@ -27,7 +27,7 @@ void STP::initialize(int stage)
 {
     if (stage == 0)
     {
-        verbose = par("verbose").boolValue();
+        treeColoring = par("treeColoring").boolValue();
         portCount = this->getParentModule()->gate("ethg$o", 0)->getVectorSize();
         tick = new cMessage("STP_TICK", 0);
 
@@ -70,7 +70,7 @@ void STP::initialize(int stage)
         helloTimer = 0;
         allDesignated();
         scheduleAt(simTime() + 1, tick);
-        if (verbose)
+        if (treeColoring)
             getParentModule()->getDisplayString().setTagArg("i",1,"#a5ffff");
     }
 }
@@ -80,7 +80,6 @@ STP::~STP()
     cancelAndDelete(tick);
 }
 
-// Default port information for the InterfaceTable
 void STP::initPortTable()
 {
     EV_DEBUG << "IEE8021D Interface Data initialization. Setting port infos to the protocol defaults." << endl;
@@ -121,7 +120,7 @@ void STP::handleMessage(cMessage * msg)
         if(msg == tick)
         {
             handleTick();
-            if (verbose)
+            if (treeColoring)
                 colorTree();
             scheduleAt(simTime() + 1, tick);
         }
@@ -321,7 +320,6 @@ void STP::generateTCN()
     }
 }
 
-// Check of the received BPDU is superior to port information from InterfaceTable
 bool STP::superiorBPDU(int portNum, BPDU * bpdu)
 {
     IEEE8021DInterfaceData * port = getPortInterfaceData(portNum);
@@ -551,7 +549,7 @@ void STP::tryRoot()
     if (checkRootEligibility())
     {
         EV_DETAIL << "Switch is elected as root switch." << endl;
-        if (verbose)
+        if (treeColoring)
             getParentModule()->getDisplayString().setTagArg("i",1,"#a5ffff");
         isRoot = true;
         allDesignated();
@@ -564,7 +562,7 @@ void STP::tryRoot()
     }
     else
     {
-        if (verbose)
+        if (treeColoring)
             getParentModule()->getDisplayString().setTagArg("i",1,"");
 
         isRoot = false;
@@ -774,7 +772,7 @@ void STP::lostAlternate(int port)
 void STP::reset()
 {
     // Upon booting all switches believe themselves to be the root
-    if (verbose)
+    if (treeColoring)
         getParentModule()->getDisplayString().setTagArg("i",1,"#a5ffff");
     isRoot = true;
     rootPriority = bridgePriority;
@@ -799,7 +797,7 @@ void STP::start()
     InterfaceEntry * ifEntry = ifTable->getInterface(0);
     if (ifEntry != NULL)
         bridgeAddress = ifEntry->getMacAddress();
-    if (verbose)
+    if (treeColoring)
     {
         getParentModule()->getDisplayString().setTagArg("i",1,"#a5ffff");
         this->getParentModule()->getDisplayString().removeTag("i2");
@@ -830,7 +828,7 @@ void STP::stop()
     isRoot = false;
     topologyChangeNotification = true;
 
-    if (verbose)
+    if (treeColoring)
     {
         for (unsigned int i = 0; i < portCount; i++)
         {

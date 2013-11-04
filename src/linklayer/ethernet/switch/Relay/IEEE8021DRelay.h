@@ -54,13 +54,13 @@ class IEEE8021DRelay : public cSimpleModule, public ILifecycle
 
         /**
          * Receives BPDU from the STP/RSTP module and dispatch it to network.
-         * Sets EhernetIIFrame destination, source, etc. according to the BPDU's Ieee802Ctrl info.
+         * Sets EherFrame destination, source, etc. according to the BPDU's Ieee802Ctrl info.
          */
         void dispatchBPDU(BPDU * bpdu);
 
         /**
-         * Deliver BPDU to the STP/RSTP module which is arrived from the network.
-         * Sets the BPDU's Ieee802Ctrl info according to the arriving EthernetIIFrame.
+         * Deliver BPDU to the STP/RSTP module.
+         * Sets the BPDU's Ieee802Ctrl info according to the arriving EtherFrame.
          */
         void deliverBPDU(EtherFrame * frame);
 

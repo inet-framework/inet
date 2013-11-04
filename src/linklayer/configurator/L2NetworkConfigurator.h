@@ -121,7 +121,7 @@ class L2NetworkConfigurator : public cSimpleModule
     virtual void extractTopology(L2Topology& topology);
 
     /**
-     * Computes the IPv4 network configuration for all nodes in the network.
+     * Computes the Layer 2 network configuration for all nodes in the network.
      * The result of the computation is only stored in the network configurator.
      *
      */
