@@ -450,7 +450,9 @@ OLSR_MsgTimer::expire()
 void
 OLSR::initialize(int stage)
 {
-    if (stage==4)
+    ManetRoutingBase::initialize(stage);
+
+    if (stage == 4)
     {
 
        if (isInMacLayer())

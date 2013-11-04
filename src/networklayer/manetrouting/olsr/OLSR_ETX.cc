@@ -87,7 +87,10 @@ void OLSR_ETX_LinkQualityTimer::expire()
 void
 OLSR_ETX::initialize(int stage)
 {
-    if (stage==4)
+    //TODO this function is a modified copy of OLSR::initialize(int stage)
+    ManetRoutingBase::initialize(stage);
+
+    if (stage == 4)
     {
         if (isInMacLayer())
             OlsrAddressSize::ADDR_SIZE = 6;
