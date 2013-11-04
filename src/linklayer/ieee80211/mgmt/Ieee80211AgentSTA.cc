@@ -137,7 +137,7 @@ void Ieee80211AgentSTA::sendRequest(Ieee80211PrimRequest *req)
 {
     cMessage *msg = new cMessage(req->getClassName());
     msg->setControlInfo(req);
-    send(msg, "mgmtOut");
+    sendSync(msg, "mgmtOut");
 }
 
 

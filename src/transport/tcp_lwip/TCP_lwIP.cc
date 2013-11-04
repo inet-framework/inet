@@ -372,7 +372,7 @@ err_t TCP_lwIP::tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t er
         tcpConnectInfo->setRemotePort(conn.pcbM->remote_port);
         dataMsg->setControlInfo(tcpConnectInfo);
         // send Msg to Application layer:
-        send(dataMsg, "appOut", conn.appGateIndexM);
+        sendSync(dataMsg, "appOut", conn.appGateIndexM);
     }
 
     conn.do_SEND();
@@ -646,7 +646,7 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, Address const& srcP,
         conn->notifyAboutSending(*tcpseg);
     }
 
-    send(tcpseg, "ipOut");
+    sendSync(tcpseg, "ipOut");
 }
 
 void TCP_lwIP::processAppCommand(TcpLwipConnection& connP, cMessage *msgP)
@@ -738,7 +738,7 @@ void TCP_lwIP::process_SEND(TcpLwipConnection& connP, TCPSendCommand *tcpCommand
 {
     delete tcpCommandP;
 
-    connP.send(msgP);
+    connP.sendSync(msgP);
 }
 
 void TCP_lwIP::process_CLOSE(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
@@ -769,7 +769,7 @@ void TCP_lwIP::process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP,
     connP.fillStatusInfo(*statusInfo);
     msgP->setControlInfo(statusInfo);
     msgP->setKind(TCP_I_STATUS);
-    send(msgP, "appOut", connP.appGateIndexM);
+    sendSync(msgP, "appOut", connP.appGateIndexM);
 }
 
 TcpLwipSendQueue* TCP_lwIP::createSendQueue(TCPDataTransferMode transferModeP)

@@ -88,7 +88,7 @@ class INET_API TcpLwipConnection
 
     void abort();
 
-    void send(cPacket *msgP);
+    void sendSync(cPacket *msgP);
 
     void fillStatusInfo(TCPStatusInfo &statusInfo);
 

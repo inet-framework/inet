@@ -166,7 +166,7 @@ cMessage *Ieee80211MgmtBase::dequeue()
 void Ieee80211MgmtBase::sendOut(cMessage *msg)
 {
     ASSERT(isOperational);
-    send(msg, "macOut");
+    sendSync(msg, "macOut");
 }
 
 void Ieee80211MgmtBase::dropManagementFrame(Ieee80211ManagementFrame *frame)
@@ -179,7 +179,7 @@ void Ieee80211MgmtBase::dropManagementFrame(Ieee80211ManagementFrame *frame)
 void Ieee80211MgmtBase::sendUp(cMessage *msg)
 {
     ASSERT(isOperational);
-    send(msg, "upperLayerOut");
+    sendSync(msg, "upperLayerOut");
 }
 
 void Ieee80211MgmtBase::processFrame(Ieee80211DataOrMgmtFrame *frame)

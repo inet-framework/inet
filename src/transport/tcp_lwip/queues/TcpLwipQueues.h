@@ -133,7 +133,7 @@ class INET_API TcpLwipSendQueue : public cObject
      * segment boundaries when retransmitting.
      *
      * called from inside of send_callback()
-     * called before called the send() to IP layer
+     * called before called the sendSync() to IP layer
      */
     virtual TCPSegment* createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP) = 0;
 

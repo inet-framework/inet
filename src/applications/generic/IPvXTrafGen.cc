@@ -216,7 +216,7 @@ void IPvXTrafGen::sendPacket()
     EV << "Sending packet: ";
     printPacket(payload);
     emit(sentPkSignal, payload);
-    send(payload, "ipOut");
+    sendSync(payload, "ipOut");
     numSent++;
 }
 

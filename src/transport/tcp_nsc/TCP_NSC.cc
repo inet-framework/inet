@@ -287,7 +287,7 @@ void TCP_NSC::sendEstablishedMsg(TCP_NSC_Connection &connP)
 
     if (msg)
     {
-        send(msg, "appOut", connP.appGateIndexM);
+        sendSync(msg, "appOut", connP.appGateIndexM);
         connP.sentEstablishedM = true;
     }
 }
@@ -540,7 +540,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
                     tcpConnectInfo->setRemotePort(c.inetSockPairM.remoteM.portM);
                     dataMsg->setControlInfo(tcpConnectInfo);
                     // send Msg to Application layer:
-                    send(dataMsg, "appOut", c.appGateIndexM);
+                    sendSync(dataMsg, "appOut", c.appGateIndexM);
                 }
 
                 ++changes;
@@ -572,7 +572,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
                     TCPCommand *ind = new TCPCommand();
                     ind->setConnId(c.connIdM);
                     msg->setControlInfo(ind);
-                    send(msg, "appOut", c.appGateIndexM);
+                    sendSync(msg, "appOut", c.appGateIndexM);
                 }
             }
         }
@@ -936,7 +936,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     if (sndAckVector)
         sndAckVector->record(tcpseg->getAckNo());
 
-    send(tcpseg, "ipOut");
+    sendSync(tcpseg, "ipOut");
 }
 
 void TCP_NSC::processAppCommand(TCP_NSC_Connection& connP, cMessage *msgP)
@@ -1059,7 +1059,7 @@ void TCP_NSC::process_SEND(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, c
     TCPSendCommand *sendCommand = check_and_cast<TCPSendCommand *>(tcpCommandP);
     delete sendCommand;
 
-    connP.send(msgP);
+    connP.sendSync(msgP);
 
     connP.do_SEND();
 }
@@ -1147,7 +1147,7 @@ void TCP_NSC::process_STATUS(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP,
 
     msgP->setControlInfo(statusInfo);
     msgP->setKind(TCP_I_STATUS);
-    send(msgP, "appOut", connP.appGateIndexM);
+    sendSync(msgP, "appOut", connP.appGateIndexM);
 }
 
 bool TCP_NSC::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

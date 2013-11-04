@@ -234,7 +234,7 @@ bool LDP::isNodeUp()
 
 void LDP::sendToPeer(IPv4Address dest, cMessage *msg)
 {
-    getPeerSocket(dest)->send(msg);
+    getPeerSocket(dest)->sendSync(msg);
 }
 
 void LDP::sendMappingRequest(IPv4Address dest, IPv4Address addr, int length)

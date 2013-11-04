@@ -115,7 +115,7 @@ void DYMO_DataQueue::reinjectDatagramsTo(IPv4Address destAddr, int prefix, Resul
                 dataQueue.erase(iter);
                 if (verdict==ACCEPT)
                 {
-                    moduleOwner->send(qd.datagram, "to_ip");
+                    moduleOwner->sendSync(qd.datagram, "to_ip");
                     delay += ARP_DELAY;
                 }
                 else if (verdict==DROP && datagrams != NULL)

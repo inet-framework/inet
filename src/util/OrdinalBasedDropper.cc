@@ -68,7 +68,7 @@ void OrdinalBasedDropper::handleMessage(cMessage *msg)
         }
     }
     emit(sentPkSignal, msg);
-    send(msg, "out");
+    sendSync(msg, "out");
 }
 
 void OrdinalBasedDropper::parseVector(const char *vector)

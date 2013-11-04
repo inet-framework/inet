@@ -47,7 +47,7 @@ void ThruputMeter::initialize()
 void ThruputMeter::handleMessage(cMessage *msg)
 {
     updateStats(simTime(), PK(msg)->getBitLength());
-    send(msg, "out");
+    sendSync(msg, "out");
 }
 
 void ThruputMeter::updateStats(simtime_t now, unsigned long bits)

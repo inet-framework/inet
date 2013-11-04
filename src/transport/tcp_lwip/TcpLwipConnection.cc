@@ -146,7 +146,7 @@ void TcpLwipConnection::sendEstablishedMsg()
 
     msg->setControlInfo(tcpConnectInfo);
 
-    tcpLwipM.send(msg, "appOut", appGateIndexM);
+    tcpLwipM.sendSync(msg, "appOut", appGateIndexM);
 }
 
 const char *TcpLwipConnection::indicationName(int code)
@@ -179,7 +179,7 @@ void TcpLwipConnection::sendIndicationToApp(int code)
     TCPCommand *ind = new TCPCommand();
     ind->setConnId(connIdM);
     msg->setControlInfo(ind);
-    tcpLwipM.send(msg, "appOut", appGateIndexM);
+    tcpLwipM.sendSync(msg, "appOut", appGateIndexM);
 }
 
 void TcpLwipConnection::fillStatusInfo(TCPStatusInfo &statusInfo)
@@ -251,7 +251,7 @@ void TcpLwipConnection::abort()
     onCloseM = false;
 }
 
-void TcpLwipConnection::send(cPacket *msgP)
+void TcpLwipConnection::sendSync(cPacket *msgP)
 {
     sendQueueM->enqueueAppData(msgP);
 }

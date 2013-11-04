@@ -225,7 +225,7 @@ void PingApp::sendToICMP(cMessage *msg, const Address& destAddr, const Address& 
     // TODO: remove
     controlInfo->setProtocol(1); // IP_PROT_ICMP);
     msg->setControlInfo(dynamic_cast<cObject *>(controlInfo));
-    send(msg, "pingOut");
+    sendSync(msg, "pingOut");
 }
 
 void PingApp::processPingResponse(PingPayload *msg)

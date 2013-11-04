@@ -373,7 +373,7 @@ void Radio::sendUp(AirFrame *airframe)
 
     delete airframe;
     EV << "sending up frame " << frame->getName() << endl;
-    send(frame, upperLayerOut);
+    sendSync(frame, upperLayerOut);
 }
 
 void Radio::sendDown(AirFrame *airframe)

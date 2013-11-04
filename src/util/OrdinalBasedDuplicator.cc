@@ -57,7 +57,7 @@ void OrdinalBasedDuplicator::handleMessage(cMessage *msg)
         {
             EV << "DuplicatesGenerator: Duplicating packet number " << numPackets << " " << msg << endl;
             cMessage *dupmsg = msg->dup();
-            send(dupmsg, "out");
+            sendSync(dupmsg, "out");
             numDuplicated++;
             emit(duplPkSignal, dupmsg);
             emit(sentPkSignal, dupmsg);
@@ -70,7 +70,7 @@ void OrdinalBasedDuplicator::handleMessage(cMessage *msg)
         }
     }
     emit(sentPkSignal, msg);
-    send(msg, "out");
+    sendSync(msg, "out");
 }
 
 void OrdinalBasedDuplicator::parseVector(const char *vector)

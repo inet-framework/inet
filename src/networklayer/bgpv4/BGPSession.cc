@@ -125,14 +125,14 @@ void BGPSession::sendOpenMessage()
     openMsg->setMyAS(_info.ASValue);
     openMsg->setHoldTime(_holdTime);
     openMsg->setBGPIdentifier(_info.socket->getLocalAddress().toIPv4());
-    _info.socket->send(openMsg);
+    _info.socket->sendSync(openMsg);
     _openMsgSent ++;
 }
 
 void BGPSession::sendKeepAliveMessage()
 {
     BGPKeepAliveMessage* keepAliveMsg = new BGPKeepAliveMessage("BGPKeepAlive");
-    _info.socket->send(keepAliveMsg);
+    _info.socket->sendSync(keepAliveMsg);
     _keepAliveMsgSent ++;
 }
 

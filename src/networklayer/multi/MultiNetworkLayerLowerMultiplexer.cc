@@ -35,9 +35,9 @@ void MultiNetworkLayerLowerMultiplexer::handleMessage(cMessage * message)
     cGate * arrivalGate = message->getArrivalGate();
     const char * arrivalGateName = arrivalGate->getBaseName();
     if (!strcmp(arrivalGateName, "ifUpperIn"))
-        send(message, "ifLowerOut", arrivalGate->getIndex() / getProtocolCount());
+        sendSync(message, "ifLowerOut", arrivalGate->getIndex() / getProtocolCount());
     else if (!strcmp(arrivalGateName, "ifLowerIn"))
-        send(message, "ifUpperOut", getProtocolCount() * arrivalGate->getIndex() + getProtocolIndex(message));
+        sendSync(message, "ifUpperOut", getProtocolCount() * arrivalGate->getIndex() + getProtocolIndex(message));
     else
         throw cRuntimeError("Unknown arrival gate");
 }

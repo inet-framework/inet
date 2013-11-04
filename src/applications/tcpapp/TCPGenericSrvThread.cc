@@ -54,7 +54,7 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
     {
         appmsg->setByteLength(requestedBytes);
         delete appmsg->removeControlInfo();
-        getSocket()->send(appmsg);
+        getSocket()->sendSync(appmsg);
     }
 
     if (doClose)

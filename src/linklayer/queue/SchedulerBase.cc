@@ -90,7 +90,7 @@ void SchedulerBase::requestPacket()
 
 void SchedulerBase::sendOut(cMessage *msg)
 {
-    send(msg, outGate);
+    sendSync(msg, outGate);
 }
 
 bool SchedulerBase::isEmpty()

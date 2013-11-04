@@ -405,7 +405,7 @@ void GenericNetworkProtocol::sendDatagramToHL(GenericDatagram *datagram)
             // decapsulate and send on appropriate output gate
             cPacket *packet = decapsulate(datagram);
             delete datagram;
-            send(packet, "transportOut", gateIndex);
+            sendSync(packet, "transportOut", gateIndex);
             return;
         }
     }
@@ -432,7 +432,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
     routingDecision->setNextHop(nextHop);
     datagram->setControlInfo(routingDecision);
 
-    send(datagram, queueOutGate);
+    sendSync(datagram, queueOutGate);
 }
 
 void GenericNetworkProtocol::datagramPreRouting(GenericDatagram* datagram, const InterfaceEntry * inIE, const InterfaceEntry * destIE, const Address & nextHop)

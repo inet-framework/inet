@@ -496,7 +496,7 @@ void IGMPv2::handleMessage(cMessage *msg)
         }
     }
     else if (!strcmp(msg->getArrivalGate()->getName(), "routerIn"))
-        send(msg, "ipOut");
+        sendSync(msg, "ipOut");
     else if (dynamic_cast<IGMPMessage *>(msg))
         processIgmpMessage((IGMPMessage *)msg);
     else
@@ -629,7 +629,7 @@ void IGMPv2::sendToIP(IGMPMessage *msg, InterfaceEntry *ie, const IPv4Address& d
     controlInfo->setDestAddr(dest);
     msg->setControlInfo(controlInfo);
 
-    send(msg, "ipOut");
+    sendSync(msg, "ipOut");
 }
 
 void IGMPv2::processIgmpMessage(IGMPMessage *msg)
@@ -653,7 +653,7 @@ void IGMPv2::processIgmpMessage(IGMPMessage *msg)
             break;
         default:
             if (externalRouter)
-                send(msg, "routerOut");
+                sendSync(msg, "routerOut");
             else
             {
                 delete msg;
@@ -747,7 +747,7 @@ void IGMPv2::processQuery(InterfaceEntry *ie, const IPv4Address& sender, IGMPMes
     {
         if (externalRouter)
         {
-            send(msg, "routerOut");
+            sendSync(msg, "routerOut");
             return;
         }
 
@@ -820,7 +820,7 @@ void IGMPv2::processV2Report(InterfaceEntry *ie, IGMPMessage *msg)
     {
         if (externalRouter)
         {
-            send(msg, "routerOut");
+            sendSync(msg, "routerOut");
             return;
         }
 
@@ -873,7 +873,7 @@ void IGMPv2::processLeave(InterfaceEntry *ie, IGMPMessage *msg)
     {
         if (externalRouter)
         {
-            send(msg, "routerOut");
+            sendSync(msg, "routerOut");
             return;
         }
 

@@ -249,7 +249,7 @@ void IPv4::handleIncomingARPPacket(ARPPacket *packet, const InterfaceEntry *from
     // give it to the ARP module
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(packet->getControlInfo());
     ctrl->setInterfaceId(fromIE->getInterfaceId());
-    send(packet, arpOutGate);
+    sendSync(packet, arpOutGate);
 }
 
 void IPv4::handleIncomingICMP(ICMPMessage *packet)
@@ -264,14 +264,14 @@ void IPv4::handleIncomingICMP(ICMPMessage *packet)
             IPv4Datagram *bogusPacket = check_and_cast<IPv4Datagram *>(packet->getEncapsulatedPacket());
             int protocol = bogusPacket->getTransportProtocol();
             int gateindex = mapping.getOutputGateForProtocol(protocol);
-            send(packet, "transportOut", gateindex);
+            sendSync(packet, "transportOut", gateindex);
             break;
         }
         default: {
             // all others are delivered to ICMP: ICMP_ECHO_REQUEST, ICMP_ECHO_REPLY,
             // ICMP_TIMESTAMP_REQUEST, ICMP_TIMESTAMP_REPLY, etc.
             int gateindex = mapping.getOutputGateForProtocol(IP_PROT_ICMP);
-            send(packet, "transportOut", gateindex);
+            sendSync(packet, "transportOut", gateindex);
             break;
         }
     }
@@ -638,7 +638,7 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram)
     else if (protocol==IP_PROT_IP)
     {
         // tunnelled IP packets are handled separately
-        send(decapsulate(datagram), "preRoutingOut");  //FIXME There is no "preRoutingOut" gate in the IPv4 module.
+        sendSync(decapsulate(datagram), "preRoutingOut");  //FIXME There is no "preRoutingOut" gate in the IPv4 module.
     }
     else
     {
@@ -649,7 +649,7 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram)
             cGate* outGate = gate("transportOut", gateindex);
             if (outGate->isPathOK())
             {
-                send(decapsulate(datagram), outGate);
+                sendSync(decapsulate(datagram), outGate);
                 numLocalDeliver++;
                 return;
             }
@@ -849,7 +849,7 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, const InterfaceEntry *ie
                 routingDecision->setNextHopAddr(nextHopAddr);
                 datagram->setControlInfo(routingDecision);
 
-                send(datagram, arpDgramOutGate);  // send to ARP for resolution
+                sendSync(datagram, arpDgramOutGate);  // send to ARP for resolution
             }
             else {
                 sendPacketToIeee802NIC(datagram, ie, nextHopMacAddr, ETHERTYPE_IPv4);
@@ -893,7 +893,7 @@ void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, con
 void IPv4::sendPacketToNIC(cPacket *packet, const InterfaceEntry *ie)
 {
     EV << "Sending out packet to interface " << ie->getName() << endl;
-    send(packet, queueOutGateBaseId + ie->getNetworkLayerGateIndex());
+    sendSync(packet, queueOutGateBaseId + ie->getNetworkLayerGateIndex());
 }
 
 // NetFilter:
@@ -1086,6 +1086,6 @@ void IPv4::sendOnTransPortOutGateByProtocolId(cPacket *packet, int protocolId)
 {
     int gateindex = mapping.getOutputGateForProtocol(protocolId);
     cGate* outGate = gate("transportOut", gateindex);
-    send(packet, outGate);
+    sendSync(packet, outGate);
 }
 

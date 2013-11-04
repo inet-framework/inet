@@ -178,7 +178,7 @@ void DSRUU::omnet_deliver(struct dsr_pkt *dp)
         dgram->encapsulate(dp->payload);
     dp->payload = NULL;
     dsr_pkt_free(dp);
-    send(dgram, "to_ip");
+    sendSync(dgram, "to_ip");
 }
 
 void  DSRUUTimer::resched(double delay)
@@ -1057,7 +1057,7 @@ bool DSRUU::proccesICMP(cMessage *msg)
     icmpMsg->encapsulate(bogusPacket->dup());
     newdgram->encapsulate(icmpMsg);
     newdgram->setTransportProtocol(IP_PROT_ICMP);
-    send(newdgram,"to_ip");
+    sendSync(newdgram,"to_ip");
     delete msg;
     return true;
  }

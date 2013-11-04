@@ -147,7 +147,7 @@ void RTPProfile::initializeProfile(RTPInnerPacket *rinp)
     delete rinp;
     RTPInnerPacket *rinpOut = new RTPInnerPacket("profileInitialized()");
     rinpOut->setProfileInitializedPkt(_rtcpPercentage, _preferredPort);
-    send(rinpOut, "rtpOut");
+    sendSync(rinpOut, "rtpOut");
     EV << "initializeProfile Exit"<<endl;
 }
 
@@ -177,11 +177,11 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
 
     RTPInnerPacket *rinpOut1 = new RTPInnerPacket("senderModuleCreated()");
     rinpOut1->setSenderModuleCreatedPkt(ssrc);
-    send(rinpOut1, "rtpOut");
+    sendSync(rinpOut1, "rtpOut");
 
     RTPInnerPacket *rinpOut2 = new RTPInnerPacket("initializeSenderModule()");
     rinpOut2->setInitializeSenderModulePkt(ssrc, rinp->getFileName(), _mtu);
-    send(rinpOut2, "payloadSenderOut");
+    sendSync(rinpOut2, "payloadSenderOut");
 
     delete rinp;
     EV << "createSenderModule Exit"<<endl;
@@ -196,12 +196,12 @@ void RTPProfile::deleteSenderModule(RTPInnerPacket *rinpIn)
     rinpOut->setSenderModuleDeletedPkt(rinpIn->getSsrc());
     delete rinpIn;
 
-    send(rinpOut, "rtpOut");
+    sendSync(rinpOut, "rtpOut");
 }
 
 void RTPProfile::senderModuleControl(RTPInnerPacket *rinp)
 {
-    send(rinp, "payloadSenderOut");
+    sendSync(rinp, "payloadSenderOut");
 }
 
 
@@ -250,26 +250,26 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
         }
     }
 
-    send(rinp, ssrcGate->getGateId());
+    sendSync(rinp, ssrcGate->getGateId());
     EV << "dataIn(RTPInnerPacket *rinp) Exit"<<endl;
 }
 
 void RTPProfile::dataOut(RTPInnerPacket *rinp)
 {
     processOutgoingPacket(rinp);
-    send(rinp, "rtpOut");
+    sendSync(rinp, "rtpOut");
 }
 
 void RTPProfile::senderModuleInitialized(RTPInnerPacket *rinp)
 {
     EV << "senderModuleInitialized"<<endl;
-    send(rinp, "rtpOut");
+    sendSync(rinp, "rtpOut");
 }
 
 void RTPProfile::senderModuleStatus(RTPInnerPacket *rinp)
 {
     EV << "senderModuleStatus"<<endl;
-    send(rinp, "rtpOut");
+    sendSync(rinp, "rtpOut");
 }
 
 void RTPProfile::processIncomingPacket(RTPInnerPacket *rinp)

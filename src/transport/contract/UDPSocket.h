@@ -45,7 +45,7 @@ class UDPDataIndication;
  *
  *   cPacket *pk = new cPacket("dgram");
  *   pk->setByteLength(1024);
- *   socket.send(pk);
+ *   socket.sendSync(pk);
  *
  *   socket.close();
  * </pre>
@@ -118,7 +118,7 @@ class INET_API UDPSocket
     /**
      * Connects to a remote UDP socket. This has two effects:
      * (1) this socket will only receive packets from specified address/port,
-     * and (2) you can use send() (as opposed to sendTo()) to send packets.
+     * and (2) you can use sendSync() (as opposed to sendTo()) to send packets.
      */
     void connect(Address remoteAddr, int remotePort);
 
@@ -199,7 +199,7 @@ class INET_API UDPSocket
      * Sends a data packet to the address and port specified previously
      * in a connect() call.
      */
-    void send(cPacket *msg);
+    void sendSync(cPacket *msg);
 
     /**
      * Unbinds the socket. Once closed, a closed socket may be bound to another

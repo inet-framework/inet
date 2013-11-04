@@ -70,7 +70,7 @@ cMessage *DropTailQueue::dequeue()
 
 void DropTailQueue::sendOut(cMessage *msg)
 {
-    send(msg, outGate);
+    sendSync(msg, outGate);
 }
 
 bool DropTailQueue::isEmpty()

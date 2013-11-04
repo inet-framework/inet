@@ -2029,7 +2029,7 @@ void RSVP::sendToIP(cMessage *msg, IPv4Address destAddr)
 
     msg->addPar("color") = RSVP_TRAFFIC;
 
-    send(msg, "ipOut");
+    sendSync(msg, "ipOut");
 }
 
 void RSVP::scheduleTimeout(PathStateBlock_t *psbEle)

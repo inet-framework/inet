@@ -345,7 +345,7 @@ void PPP::handleMessage(cMessage *msg)
             cPacket *payload = decapsulate(pppFrame);
             numRcvdOK++;
             emit(packetSentToUpperSignal, payload);
-            send(payload, "netwOut");
+            sendSync(payload, "netwOut");
         }
     }
     else // arrived on gate "netwIn"

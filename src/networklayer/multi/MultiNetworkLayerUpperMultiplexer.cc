@@ -28,23 +28,23 @@ void MultiNetworkLayerUpperMultiplexer::handleMessage(cMessage * message)
     const char * arrivalGateName = arrivalGate->getBaseName();
     if (!strcmp(arrivalGateName, "transportUpperIn")) {
         if (dynamic_cast<cPacket *>(message))
-            send(message, "transportLowerOut", getProtocolCount() * arrivalGate->getIndex() + getProtocolIndex(message));
+            sendSync(message, "transportLowerOut", getProtocolCount() * arrivalGate->getIndex() + getProtocolIndex(message));
         else {
             // sending down commands
             for (int i = 0; i < 3; i++) {
                 cMessage * duplicate = message->dup();
                 duplicate->setControlInfo(message->getControlInfo()->dup());
-                send(duplicate, "transportLowerOut", getProtocolCount() * arrivalGate->getIndex() + i);
+                sendSync(duplicate, "transportLowerOut", getProtocolCount() * arrivalGate->getIndex() + i);
             }
             delete message;
         }
     }
     else if (!strcmp(arrivalGateName, "transportLowerIn"))
-        send(message, "transportUpperOut", arrivalGate->getIndex() / getProtocolCount());
+        sendSync(message, "transportUpperOut", arrivalGate->getIndex() / getProtocolCount());
     else if (!strcmp(arrivalGateName, "pingUpperIn"))
-        send(message, "pingLowerOut", getProtocolCount() * arrivalGate->getIndex() + getProtocolIndex(message));
+        sendSync(message, "pingLowerOut", getProtocolCount() * arrivalGate->getIndex() + getProtocolIndex(message));
     else if (!strcmp(arrivalGateName, "pingLowerIn"))
-        send(message, "pingUpperOut", arrivalGate->getIndex() / getProtocolCount());
+        sendSync(message, "pingUpperOut", arrivalGate->getIndex() / getProtocolCount());
     else
         throw cRuntimeError("Unknown arrival gate");
 }

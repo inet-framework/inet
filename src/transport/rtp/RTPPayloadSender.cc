@@ -125,7 +125,7 @@ void RTPPayloadSender::initializeSenderModule(RTPInnerPacket *rinpIn)
     delete rinpIn;
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleInitialized()");
     rinpOut->setSenderModuleInitializedPkt(_ssrc, _payloadType, _clockRate, _timeStampBase, _sequenceNumberBase);
-    send(rinpOut, "profileOut");
+    sendSync(rinpOut, "profileOut");
     _status = STOPPED;
     EV << "initializeSenderModule Exit" << endl;
 }
@@ -150,7 +150,7 @@ void RTPPayloadSender::play()
     rssm->setTimeStamp(_timeStamp);
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleStatus(PLAYING)");
     rinpOut->setSenderModuleStatusPkt(_ssrc, rssm);
-    send(rinpOut, "profileOut");
+    sendSync(rinpOut, "profileOut");
 
     if (!sendPacket())
     {
@@ -177,7 +177,7 @@ void RTPPayloadSender::pause()
     RTPSenderStatusMessage *rsim = new RTPSenderStatusMessage();
     rsim->setStatus(RTP_SENDER_STATUS_PAUSED);
     rinpOut->setSenderModuleStatusPkt(_ssrc, rsim);
-    send(rinpOut, "profileOut");
+    sendSync(rinpOut, "profileOut");
 }
 
 void RTPPayloadSender::seekTime(simtime_t moment)
@@ -199,7 +199,7 @@ void RTPPayloadSender::stop()
     rssm->setStatus(RTP_SENDER_STATUS_STOPPED);
     RTPInnerPacket *rinp = new RTPInnerPacket("senderModuleStatus(STOPPED)");
     rinp->setSenderModuleStatusPkt(_ssrc, rssm);
-    send(rinp, "profileOut");
+    sendSync(rinp, "profileOut");
 }
 
 void RTPPayloadSender::endOfFile()
@@ -209,7 +209,7 @@ void RTPPayloadSender::endOfFile()
     rssm->setStatus(RTP_SENDER_STATUS_FINISHED);
     RTPInnerPacket *rinpOut = new RTPInnerPacket("senderModuleStatus(FINISHED)");
     rinpOut->setSenderModuleStatusPkt(_ssrc, rssm);
-    send(rinpOut, "profileOut");
+    sendSync(rinpOut, "profileOut");
 }
 
 bool RTPPayloadSender::sendPacket()

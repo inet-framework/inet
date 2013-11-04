@@ -77,7 +77,7 @@ void TCPEchoApp::sendDown(cMessage *msg)
         emit(sentPkSignal, (cPacket *)msg);
     }
 
-    send(msg, "tcpOut");
+    sendSync(msg, "tcpOut");
 }
 
 void TCPEchoApp::handleMessage(cMessage *msg)

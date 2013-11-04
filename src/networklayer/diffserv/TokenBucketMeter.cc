@@ -57,12 +57,12 @@ void TokenBucketMeter::handleMessage(cMessage *msg)
     int color = meterPacket(packet);
     if (color == GREEN)
     {
-        send(packet, "greenOut");
+        sendSync(packet, "greenOut");
     }
     else
     {
         numRed++;
-        send(packet, "redOut");
+        sendSync(packet, "redOut");
     }
 
     if (ev.isGUI())

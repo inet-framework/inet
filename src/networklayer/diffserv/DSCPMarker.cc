@@ -62,7 +62,7 @@ void DSCPMarker::handleMessage(cMessage *msg)
             numMarked++;
         }
 
-        send(packet, "out");
+        sendSync(packet, "out");
     }
     else
         throw cRuntimeError("DSCPMarker expects cPackets");

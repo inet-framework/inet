@@ -284,7 +284,7 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
     else if (nce->reachabilityState == IPv6NeighbourCache::STALE)
     {
         EV << "Reachability State is STALE.\n";
-        send(msg, "ipv6Out");
+        sendSync(msg, "ipv6Out");
         initiateNeighbourUnreachabilityDetection(nce);
     }
     else if (nce->reachabilityState == IPv6NeighbourCache::REACHABLE)
@@ -766,7 +766,7 @@ void IPv6NeighbourDiscovery::sendPacketToIPv6Module(cMessage *msg, const IPv6Add
     controlInfo->setInterfaceId(interfaceId);
     msg->setControlInfo(controlInfo);
 
-    send(msg, "ipv6Out");
+    sendSync(msg, "ipv6Out");
 }
 
 /**Not used yet-unsure if we really need it. --DELETED, Andras*/
@@ -782,7 +782,7 @@ void IPv6NeighbourDiscovery::sendQueuedPacketsToIPv6Module(Neighbour *nce)
         pendingPackets.erase(i);
         pendingQueue.remove(msg);
         EV << "Sending queued packet " << msg << endl;
-        send(msg, "ipv6Out");
+        sendSync(msg, "ipv6Out");
     }
 }
 

@@ -48,7 +48,7 @@ class TCPStatusInfo;
  *
  *   msg = new cMessage("data1");
  *   msg->setByteLength(16*1024);  // 16K
- *   socket.send(msg);
+ *   socket.sendSync(msg);
  *
  *   socket.close();
  * </pre>
@@ -302,7 +302,7 @@ class INET_API TCPSocket
     /**
      * Sends data packet.
      */
-    void send(cMessage *msg);
+    void sendSync(cMessage *msg);
 
     /**
      * Closes the local end of the connection. With TCP, a CLOSE operation

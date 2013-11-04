@@ -194,7 +194,7 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
         cPacket *pckt = check_and_cast<cPacket *>(msg);
         sockdata->messageQueue.pop_back();
         EV_DEBUG << "Submitting request " << msg->getName() << " to socket " << connId << ". size is " << pckt->getByteLength() << " bytes" << endl;
-        socket->send(msg);
+        socket->sendSync(msg);
         sockdata->pending++;
     }
 }

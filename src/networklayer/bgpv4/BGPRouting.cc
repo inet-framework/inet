@@ -455,7 +455,7 @@ void BGPRouting::updateSendProcess(const unsigned char type, BGP::SessionID sess
                 updateMsg->setPathAttributeListArraySize(1);
                 updateMsg->setPathAttributeList(content);
                 updateMsg->setNLRI(NLRI);
-                (*sessionIt).second->getSocket()->send(updateMsg);
+                (*sessionIt).second->getSocket()->sendSync(updateMsg);
                 (*sessionIt).second->addUpdateMsgSent();
             }
         }

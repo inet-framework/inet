@@ -162,7 +162,7 @@ void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
     if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
         frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
 
-    send(frame, "lowerLayerOut");
+    sendSync(frame, "lowerLayerOut");
 }
 
 void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
@@ -199,7 +199,7 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
     // pass up to higher layer
     totalPassedUp++;
     emit(passedUpPkSignal, higherlayermsg);
-    send(higherlayermsg, "upperLayerOut", port);
+    sendSync(higherlayermsg, "upperLayerOut", port);
     delete frame;
 }
 
@@ -268,7 +268,7 @@ void EtherLLC::handleSendPause(cMessage *msg)
     frame->setDest(dest);
     frame->setByteLength(ETHER_PAUSE_COMMAND_PADDED_BYTES);
 
-    send(frame, "lowerLayerOut");
+    sendSync(frame, "lowerLayerOut");
     emit(pauseSentSignal, pauseUnits);
 
     delete msg;
