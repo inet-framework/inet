@@ -742,7 +742,6 @@ void RSTP::colorRootPorts()
     {
         //Gives color to the root link, or module border if it is root.
         IEEE8021DInterfaceData * port;
-        bool isRoot=true;
         for (unsigned int i = 0; i < portCount; i++)
         {
             port = getPortInterfaceData(i);
@@ -785,37 +784,65 @@ void RSTP::colorRootPorts()
             cModule * puerta=this->getParentModule()->getSubmodule("eth",i);
             if(puerta!=NULL)
             {
-                char buf[20];
+                char buf[25];
+                char sbuf[12];
+                char rbuf[13];
+
+                int role=port->getRole();
+                switch(role)
+                {
+                case 0 :
+                    sprintf(rbuf,"ALTERNATE\n");
+                    break;
+                case 1:
+                    sprintf(rbuf,"NOTASSIGNED\n");
+                    break;
+                case 2:
+                    sprintf(rbuf,"DISABLED\n");
+                    break;
+                case 3:
+                    sprintf(rbuf,"DESIGNATED\n");
+                    break;
+                case 4:
+                    sprintf(rbuf,"BACKUP\n");
+                    break;
+                case 5:
+                    sprintf(rbuf,"ROOT\n");
+                    break;
+                default:
+                    sprintf(rbuf,"UNKNOWN\n");
+                    break;
+                }
+
                 int state=port->getState();
                 switch(state)
                 {
                 case 0 :
-                    sprintf(buf,"DISCARDING\n");
+                    sprintf(sbuf,"DISCARDING\n");
                     break;
                 case 1:
-                    sprintf(buf,"LEARNING\n");
+                    sprintf(sbuf,"LEARNING\n");
                     break;
                 case 2:
-                    sprintf(buf,"FORWARDING\n");
+                    sprintf(sbuf,"FORWARDING\n");
                     break;
                 default:
-                    sprintf(buf,"UNKNOWN\n");
+                    sprintf(sbuf,"UNKNOWN\n");
                     break;
                 }
+
+                sprintf(buf,"%s%s",rbuf,sbuf);
                 puerta->getDisplayString().setTagArg("t",0,buf);
             }
         }
 
         if(isOperational) //only when the router is working
         {
-            if(isRoot)
+            if(getRootIndex()==-1)
             {
                 //Root mark
                 this->getParentModule()->getDisplayString().setTagArg("i2",0,"status/check");
                 this->getParentModule()->getDisplayString().setTagArg("i",1,"#a5ffff");
-                char buf[50];
-                sprintf(buf,"Root: %s",address.str().c_str());
-                getDisplayString().setTagArg("t",0,buf);
             }
             else
             {
