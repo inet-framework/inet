@@ -100,9 +100,9 @@ simple TCPSessionApp like ITCPApp
         string sendScript = default("");
         double tClose @unit(s) = default(2s);
         @display("i=block/app");
+        @signal[connect](type=long);
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
-        @signal[recvIndications](type=cMessage);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentPk](title="packets sent"; source=sentPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[endToEndDelay](title="end-to-end delay"; source="messageAge(rcvdPk)"; unit=s; record=histogram,vector; interpolationmode=none);

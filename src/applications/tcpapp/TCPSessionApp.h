@@ -17,50 +17,57 @@
 #include <vector>
 
 #include "INETDefs.h"
-#include "TCPSocket.h"
-#include "ILifecycle.h"
 #include "LifecycleOperation.h"
+#include "TCPAppBase.h"
+#include "NodeStatus.h"
 
 /**
  * Single-connection TCP application.
  */
-class INET_API TCPSessionApp : public cSimpleModule, public ILifecycle
+class INET_API TCPSessionApp : public TCPAppBase
 {
   protected:
+    // parameters
     struct Command
     {
         simtime_t tSend;
-        int numBytes;
+        long numBytes;
+        Command(simtime_t t, long n) {tSend=t; numBytes=n;}
     };
     typedef std::vector<Command> CommandVector;
     CommandVector commands;
 
-    TCPSocket socket;
+    bool activeOpen;
+    simtime_t tOpen;
+    simtime_t tSend;
+    simtime_t tClose;
+    int sendBytes;
 
-    // statistics
-    int packetsRcvd;
-    long bytesRcvd;
-    long bytesSent;
-    int indicationsRcvd;
-    static simsignal_t rcvdPkSignal;
-    static simsignal_t sentPkSignal;
-    static simsignal_t recvIndicationsSignal;
+    // state
+    int commandIndex;
+    cMessage *timeoutMsg;
+    NodeStatus *nodeStatus;
 
   public:
-    TCPSessionApp() : cSimpleModule(65536) {}
-
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+    TCPSessionApp();
+    virtual ~TCPSessionApp();
 
   protected:
+    virtual bool isNodeUp();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+
     virtual void parseScript(const char *script);
-    virtual void waitUntil(simtime_t t);
-    virtual void count(cMessage *msg);
+    virtual cPacket *createDataPacket(long sendBytes);
+    virtual void sendData();
 
-    virtual cPacket* genDataMsg(long sendBytes);
-
-    virtual void activity();
-    virtual void finish();
+    virtual void handleTimer(cMessage *msg);
+    virtual void socketEstablished(int connId, void *yourPtr);
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
+    virtual void socketClosed(int connId, void *yourPtr);
+    virtual void socketFailure(int connId, void *yourPtr, int code);
 };
 
 #endif
