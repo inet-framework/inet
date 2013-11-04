@@ -15,18 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.linklayer;
 
 import inet.linklayer.contract.ILinkLayer;
 import inet.physicallayer.radio.contract.IRadio;
+import inet.power.contract.IPowerConsumer;
 
 module WirelessNic like IWirelessNic
 {
     parameters:
         string macType;
         string radioType;
-        @display("i=block/ifcard;bgb=102,286");
+        string powerConsumerType = default("");
+        @display("i=block/ifcard;bgb=250,300");
     gates:
         input upperLayerIn;
         output upperLayerOut;
@@ -34,11 +35,15 @@ module WirelessNic like IWirelessNic
     submodules:
         mac: <macType> like ILinkLayer {
             parameters:
-                @display("p=50,100");
+                @display("p=150,100");
         }
         radio: <radioType> like IRadio {
             parameters:
-                @display("p=50,200");
+                @display("p=150,200");
+        }
+        powerConsumer: <powerConsumerType> like IPowerConsumer if powerConsumerType != "" {
+            parameters:
+                @display("p=50,50");
         }
     connections:
         radioIn --> { @display("m=s"); } --> radio.radioIn;
