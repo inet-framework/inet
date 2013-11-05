@@ -36,15 +36,15 @@ network=TestIGMPNetwork
 %# First check that the join was successful
 %#
 %contains-regex: test.out
-2 tester: eth0: groups = 224.0.0.1 E<>, 225.0.0.1 E<>
+2 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 E
 
 %#
 %# Now check that the IGMP module responded with a correct report
 %#
 %contains-regex: test.out
-3 tester: Sending: IGMPv3Query<group=<unspec>, sourceList=<>.*>.
+3 tester: Sending: IGMPv3Query<group=<unspec>, sourceList=,.*>.
 .*
-3\..* tester: Received: IGMPv3Report<225.0.0.1=IS_EX<>>.
+3\..* tester: Received: IGMPv3Report<225.0.0.1=IS_EX>.
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
