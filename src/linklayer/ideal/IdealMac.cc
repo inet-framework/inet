@@ -20,10 +20,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "IdealWirelessMac.h"
+#include "IdealMac.h"
 
 #include "IdealRadio.h"
-#include "IdealWirelessFrame_m.h"
+#include "IdealMacFrame_m.h"
 #include "Ieee802Ctrl_m.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
@@ -31,22 +31,22 @@
 #include "opp_utils.h"
 
 
-Define_Module(IdealWirelessMac);
+Define_Module(IdealMac);
 
-simsignal_t IdealWirelessMac::radioStateSignal = registerSignal("radioState");
-simsignal_t IdealWirelessMac::dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
+simsignal_t IdealMac::radioStateSignal = registerSignal("radioState");
+simsignal_t IdealMac::dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
 
-IdealWirelessMac::IdealWirelessMac()
+IdealMac::IdealMac()
 {
     queueModule = NULL;
     radioModule = NULL;
 }
 
-IdealWirelessMac::~IdealWirelessMac()
+IdealMac::~IdealMac()
 {
 }
 
-void IdealWirelessMac::flushQueue()
+void IdealMac::flushQueue()
 {
     ASSERT(queueModule);
     while (!queueModule->isEmpty())
@@ -58,13 +58,13 @@ void IdealWirelessMac::flushQueue()
     queueModule->clear(); // clear request count
 }
 
-void IdealWirelessMac::clearQueue()
+void IdealMac::clearQueue()
 {
     ASSERT(queueModule);
     queueModule->clear();
 }
 
-void IdealWirelessMac::initialize(int stage)
+void IdealMac::initialize(int stage)
 {
     WirelessMacBase::initialize(stage);
 
@@ -96,7 +96,7 @@ void IdealWirelessMac::initialize(int stage)
     }
 }
 
-void IdealWirelessMac::initializeMACAddress()
+void IdealMac::initializeMACAddress()
 {
     const char *addrstr = par("address");
 
@@ -114,7 +114,7 @@ void IdealWirelessMac::initializeMACAddress()
     }
 }
 
-InterfaceEntry *IdealWirelessMac::createInterfaceEntry()
+InterfaceEntry *IdealMac::createInterfaceEntry()
 {
     InterfaceEntry *e = new InterfaceEntry(this);
 
@@ -139,7 +139,7 @@ InterfaceEntry *IdealWirelessMac::createInterfaceEntry()
     return e;
 }
 
-void IdealWirelessMac::receiveSignal(cComponent *source, simsignal_t signalID, long x)
+void IdealMac::receiveSignal(cComponent *source, simsignal_t signalID, long x)
 {
     //WirelessMacBase::receiveSignal(source, signalID, x);
 
@@ -151,22 +151,22 @@ void IdealWirelessMac::receiveSignal(cComponent *source, simsignal_t signalID, l
     }
 }
 
-void IdealWirelessMac::startTransmitting(cPacket *msg)
+void IdealMac::startTransmitting(cPacket *msg)
 {
     // if there's any control info, remove it; then encapsulate the packet
-    IdealWirelessFrame *frame = encapsulate(msg);
+    IdealMacFrame *frame = encapsulate(msg);
 
     // send
     EV << "Starting transmission of " << frame << endl;
     sendDown(frame);
 }
 
-void IdealWirelessMac::handleSelfMsg(cMessage *msg)
+void IdealMac::handleSelfMsg(cMessage *msg)
 {
     error("Unexpected self-message");
 }
 
-void IdealWirelessMac::getNextMsgFromHL()
+void IdealMac::getNextMsgFromHL()
 {
     ASSERT(outStandingRequests >= queueModule->getNumPendingRequests());
     if (outStandingRequests == 0 && lastTransmitStartTime < simTime())
@@ -177,7 +177,7 @@ void IdealWirelessMac::getNextMsgFromHL()
     ASSERT(outStandingRequests <= 1);
 }
 
-void IdealWirelessMac::handleUpperMsg(cPacket *msg)
+void IdealMac::handleUpperMsg(cPacket *msg)
 {
     outStandingRequests--;
     if (radioState == RadioState::TRANSMIT)
@@ -197,14 +197,14 @@ void IdealWirelessMac::handleUpperMsg(cPacket *msg)
     }
 }
 
-void IdealWirelessMac::handleCommand(cMessage *msg)
+void IdealMac::handleCommand(cMessage *msg)
 {
     error("Unexpected command received from higher layer");
 }
 
-void IdealWirelessMac::handleLowerMsg(cPacket *msg)
+void IdealMac::handleLowerMsg(cPacket *msg)
 {
-    IdealWirelessFrame *frame = check_and_cast<IdealWirelessFrame *>(msg);
+    IdealMacFrame *frame = check_and_cast<IdealMacFrame *>(msg);
     if (frame->hasBitError())
     {
         EV << "Bit error in " << frame << ", discarding" << endl;
@@ -221,10 +221,10 @@ void IdealWirelessMac::handleLowerMsg(cPacket *msg)
     }
 }
 
-IdealWirelessFrame *IdealWirelessMac::encapsulate(cPacket *msg)
+IdealMacFrame *IdealMac::encapsulate(cPacket *msg)
 {
     Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
-    IdealWirelessFrame *frame = new IdealWirelessFrame(msg->getName());
+    IdealMacFrame *frame = new IdealMacFrame(msg->getName());
     frame->setByteLength(headerLength);
     frame->setSrc(ctrl->getSrc());
     frame->setDest(ctrl->getDest());
@@ -233,7 +233,7 @@ IdealWirelessFrame *IdealWirelessMac::encapsulate(cPacket *msg)
     return frame;
 }
 
-bool IdealWirelessMac::dropFrameNotForUs(IdealWirelessFrame *frame)
+bool IdealMac::dropFrameNotForUs(IdealMacFrame *frame)
 {
     // Current implementation does not support the configuration of multicast
     // MAC address groups. We rather accept all multicast frames (just like they were
@@ -257,7 +257,7 @@ bool IdealWirelessMac::dropFrameNotForUs(IdealWirelessFrame *frame)
     return true;
 }
 
-cPacket *IdealWirelessMac::decapsulate(IdealWirelessFrame *frame)
+cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
 {
     // decapsulate and attach control info
     cPacket *packet = frame->decapsulate();

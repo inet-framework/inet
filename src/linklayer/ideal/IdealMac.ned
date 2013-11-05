@@ -17,7 +17,7 @@
 // author: Zoltan Bojthe
 //
 
-package inet.linklayer.idealwireless;
+package inet.linklayer.ideal;
 
 
 //
@@ -31,7 +31,7 @@ package inet.linklayer.idealwireless;
 //
 // See ~IdealWirelessNic for rationale and details.
 //
-simple IdealWirelessMac
+simple IdealMac
 {
     parameters:
         string address = default("auto");   // MAC address as hex string (12 hex digits), or
@@ -39,15 +39,15 @@ simple IdealWirelessMac
                                             // a generated MAC address in init stage 0.
         double bitrate @unit("bps");
         int mtu @unit("B") = default(4470B);
-        int headerLength @unit("B");        // IdealWirelessFrame.byteLength = headerLength + packetFromUpperLayer.byteLength
+        int headerLength @unit("B");        // IdealMacFrame.byteLength = headerLength + packetFromUpperLayer.byteLength
         bool promiscuous = default(false);
         @display("i=block/rxtx");
 
-        @signal[packetSentToLower](type=IdealWirelessFrame);
-        @signal[packetReceivedFromLower](type=IdealWirelessFrame);
+        @signal[packetSentToLower](type=IdealMacFrame);
+        @signal[packetReceivedFromLower](type=IdealMacFrame);
         @signal[packetSentToUpper](type=cPacket);   // cPacket with Ieee802Ctrl ctrlinfo
         @signal[packetReceivedFromUpper](type=cPacket);   // cPacket with Ieee802Ctrl ctrlinfo
-        @signal[dropPkNotForUs](type=IdealWirelessFrame);
+        @signal[dropPkNotForUs](type=IdealMacFrame);
 
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
@@ -58,7 +58,7 @@ simple IdealWirelessMac
     gates:
         input upperLayerIn @labels(Ieee802Ctrl);        // should connect to output gate of an IPassiveQueue module
         output upperLayerOut @labels(Ieee802Ctrl);
-        input lowerLayerIn @labels(IdealWirelessFrame);
-        output lowerLayerOut @labels(IdealWirelessFrame);
+        input lowerLayerIn @labels(IdealMacFrame);
+        output lowerLayerOut @labels(IdealMacFrame);
 }
 

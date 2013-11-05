@@ -18,7 +18,7 @@
 //
 
 
-package inet.linklayer.idealwireless;
+package inet.linklayer.ideal;
 
 import inet.base.IHook;
 import inet.queue.IOutputQueue;
@@ -57,7 +57,7 @@ module IdealWirelessNic like IWirelessNic
             parameters:
                 @display("p=23,125;q=l2queue");
         }
-        mac: IdealWirelessMac {
+        mac: IdealMac {
             parameters:
                 bitrate = bitrate;
                 @display("p=98,207");

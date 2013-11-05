@@ -26,10 +26,10 @@ cplusplus {{
 class noncobject MACAddress;
 
 //
-// Packet for ~IdealWirelessMac. Packet size is configurable
+// Packet for ~IdealMac. Packet size is configurable
 // in the MAC layer. 
 //
-packet IdealWirelessFrame
+packet IdealMacFrame
 {
     MACAddress src;     // source address
     MACAddress dest;    // destination address
