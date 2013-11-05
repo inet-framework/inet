@@ -1,0 +1,25 @@
+# workingdir,                        args,                                          simtimelimit,    fingerprint
+.,                                   -f ethernet-switch.ini -r 0,                  ,                 52a8-a71b
+.,                                   -f ethernet-switch.ini -r 1,                  ,                 58ac-dc53
+.,                                   -f ethernet-switch.ini -r 2,                  ,                 ff2a-2287
+.,                                   -f ethernet-switch.ini -r 3,                  ,                 839c-62b7
+.,                                   -f ethernet-switch.ini -r 4,                  ,                 38e1-4ffb
+.,                                   -f ethernet-switch.ini -r 5,                  ,                 5823-ca25
+.,                                   -f ethernet-switch.ini -r 6,                  ,                 1332-27ce
+.,                                   -f ethernet-switch.ini -r 7,                  ,                 7740-2f29
+.,                                   -f ethernet-switch.ini -r 8,                  ,                 27ed-0a20
+.,                                   -f ethernet-switch.ini -r 9,                  ,                 dd20-ccc5
+.,                                   -f ethernet-switch.ini -r 10,                 ,                 b9cb-4abb
+.,                                   -f ethernet-switch.ini -r 11,                 ,                 18aa-9e14
+.,                                   -f ethernet-switch.ini -r 12,                 ,                 7b19-5da4
+.,                                   -f ethernet-switch.ini -r 13,                 ,                 faa4-8ff7
+.,                                   -f ethernet-switch.ini -r 14,                 ,                 09d8-f903
+.,                                   -f ethernet-switch.ini -r 15,                 ,                 2a5d-1855
+.,                                   -f ethernet-switch.ini -r 16,                 ,                 2fdf-1d2c
+.,                                   -f ethernet-switch.ini -r 17,                 ,                 0f70-e9e1
+.,                                   -f ethernet-switch.ini -r 18,                 ,                 379f-f83d
+.,                                   -f ethernet-switch.ini -r 19,                 ,                 9490-3877
+.,                                   -f ethernet-switch.ini -r 20,                 ,                 c05e-ce34
+.,                                   -f ethernet-switch.ini -r 21,                 ,                 5a6a-32e3
+.,                                   -f ethernet-switch.ini -r 22,                 ,                 8102-be06
+.,                                   -f ethernet-switch.ini -r 23,                 ,                 f762-0408

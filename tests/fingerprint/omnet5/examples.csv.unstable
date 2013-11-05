@@ -1,0 +1,5 @@
+# workingdir,                        args,                                          simtimelimit,    fingerprint
+/examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0,                500s,            0bd5-71a8
+/examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0,                1500s,           67ec-ff51
+/examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           a7c1-0e5b
+/examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            feed-b09b
