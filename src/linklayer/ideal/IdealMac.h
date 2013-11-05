@@ -43,7 +43,7 @@ class INET_API IdealMac : public WirelessMacBase
     static simsignal_t dropPkNotForUsSignal;
 
     // parameters
-    int headerLength;       // IdealAirFrame header length in bytes
+    int headerLength;       // IdealMacFrame header length in bytes
     double bitrate;         // [bits per sec]
     bool promiscuous;       // promiscuous mode
     MACAddress address;     // MAC address

@@ -23,7 +23,7 @@ package inet.linklayer.ideal;
 //
 // Implements a trivial MAC layer for use in ~IdealWirelessNic.
 //
-// This module only provides encapsulation/decapsulation (into IdealAirFrame), 
+// This module only provides encapsulation/decapsulation (into IdealMacFrame), 
 // but no real medium access protocol.
 //
 // Higher layer packets should have Ieee802Ctrl attached to them as

@@ -37,7 +37,7 @@ class SimplifiedRadioFrame;
  */
 struct ISimplifiedRadioChannel::RadioEntry {
     cModule *radioModule;  // the module that registered this radio interface
-    cGate *radioInGate;  // gate on host module used to receive airframes
+    cGate *radioInGate;  // gate on host module used to receive radio frames
     int channel;
     Coord pos; // cached radio position
 
@@ -106,7 +106,7 @@ class INET_API SimplifiedRadioChannel : public cSimpleModule, public ISimplified
     /** Get the list of modules in range of the given host */
     virtual const RadioRefVector& getNeighbors(RadioRef h);
 
-    /** Notifies the channel control with an ongoing transmission */
+    /** Notifies the radio channel with an ongoing transmission */
     virtual void addOngoingTransmission(RadioRef h, SimplifiedRadioFrame *frame);
 
     /** Returns the "handle" of a previously registered radio. The pointer to the registering (radio) module must be provided */
@@ -125,7 +125,7 @@ class INET_API SimplifiedRadioChannel : public cSimpleModule, public ISimplified
     /** Returns the host module that contains the given radio */
     virtual cModule *getRadioModule(RadioRef r) const { return r->radioModule; }
 
-    /** Returns the input gate of the host for receiving AirFrames */
+    /** Returns the input gate of the host for receiving radio frames */
     virtual cGate *getRadioGate(RadioRef r) const { return r->radioInGate; }
 
     /** Returns the channel the given radio listens on */
@@ -144,7 +144,7 @@ class INET_API SimplifiedRadioChannel : public cSimpleModule, public ISimplified
     virtual const TransmissionList& getOngoingTransmissions(int channel);
 
     /** Called from ChannelAccess, to transmit a frame to the radios in range, on the frame's channel */
-    virtual void sendToChannel(RadioRef srcRadio, SimplifiedRadioFrame *airFrame);
+    virtual void sendToChannel(RadioRef srcRadio, SimplifiedRadioFrame *radioFrame);
 
     /** Returns the maximal interference distance*/
     virtual double getInterferenceRange(RadioRef r) { return maxInterferenceDistance; }

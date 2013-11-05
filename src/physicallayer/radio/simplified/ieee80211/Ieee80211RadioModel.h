@@ -56,14 +56,14 @@ class INET_API Ieee80211RadioModel : public IRadioModel
   public:
     virtual void initializeFrom(cModule *radioModule);
 
-    virtual double calculateDuration(SimplifiedRadioFrame *airframe);
+    virtual double calculateDuration(SimplifiedRadioFrame *radioFrame);
 
-    virtual bool isReceivedCorrectly(SimplifiedRadioFrame *airframe, const SnrList& receivedList);
+    virtual bool isReceivedCorrectly(SimplifiedRadioFrame *radioFrame, const SnrList& receivedList);
     ~Ieee80211RadioModel();
 
     // used by the Airtime Link Metric computation
     virtual bool haveTestFrame() {return useTestFrame;}
-    virtual double calculateDurationTestFrame(SimplifiedRadioFrame *airframe);
+    virtual double calculateDurationTestFrame(SimplifiedRadioFrame *radioFrame);
     virtual double getTestFrameError(double snirMin, double bitrate);
     virtual int getTestFrameSize()
                 {

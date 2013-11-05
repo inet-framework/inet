@@ -40,7 +40,7 @@ import inet.physicallayer.radio.ideal.IdealRadio;
 // receive any number of frames, and also transmit a single frame at the same time.
 //
 // This module requires an ~IdealChannelModel instance in the network
-// as channel control module.
+// as radio channel module.
 //
 module IdealWirelessNic like IWirelessNic
 {
@@ -51,7 +51,7 @@ module IdealWirelessNic like IWirelessNic
     gates:
         input upperLayerIn;
         output upperLayerOut;
-        input radioIn @labels(IdealAirFrame);
+        input radioIn @labels(IdealRadioFrame);
     submodules:
         queue: <queueType> like IOutputQueue {
             parameters:

@@ -42,7 +42,7 @@ class INET_API IdealRadioChannel : public cSimpleModule
     struct RadioEntry
     {
         cModule *radioModule;   // the module that registered this radio interface
-        cGate *radioInGate;     // gate on host module used to receive airframes
+        cGate *radioInGate;     // gate on host module used to receive radio frames
         Coord pos;              // cached radio position
         bool isActive;          // radio module is active
     };
@@ -80,7 +80,7 @@ class INET_API IdealRadioChannel : public cSimpleModule
     virtual void setRadioPosition(RadioEntry *r, const Coord& pos);
 
     /** Called from IdealRadioChannelAccess, to transmit a frame to the radios in range, on the frame's channel */
-    virtual void sendToChannel(RadioEntry * srcRadio, IdealRadioFrame *airFrame);
+    virtual void sendToChannel(RadioEntry * srcRadio, IdealRadioFrame *radioFrame);
 
     /** Disable the reception in the reference module */
     virtual void disableReception(RadioEntry *r) { r->isActive = false; };

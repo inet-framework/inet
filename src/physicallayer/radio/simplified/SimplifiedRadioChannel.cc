@@ -283,14 +283,14 @@ void SimplifiedRadioChannel::purgeOngoingTransmissions()
     }
 }
 
-void SimplifiedRadioChannel::sendToChannel(RadioRef srcRadio, SimplifiedRadioFrame *airFrame)
+void SimplifiedRadioChannel::sendToChannel(RadioRef srcRadio, SimplifiedRadioFrame *radioFrame)
 {
     // NOTE: no Enter_Method()! We pretend this method is part of ChannelAccess
 
     // loop through all radios in range
     const RadioRefVector& neighbors = getNeighbors(srcRadio);
     int n = neighbors.size();
-    int channel = airFrame->getChannelNumber();
+    int channel = radioFrame->getChannelNumber();
     for (int i=0; i<n; i++)
     {
         RadioRef r = neighbors[i];
@@ -305,12 +305,12 @@ void SimplifiedRadioChannel::sendToChannel(RadioRef srcRadio, SimplifiedRadioFra
             // account for propagation delay, based on distance in meters
             // Over 300m, dt=1us=10 bit times @ 10Mbps
             simtime_t delay = srcRadio->pos.distance(r->pos) / SPEED_OF_LIGHT;
-            check_and_cast<cSimpleModule*>(srcRadio->radioModule)->sendDirect(airFrame->dup(), delay, airFrame->getDuration(), r->radioInGate);
+            check_and_cast<cSimpleModule*>(srcRadio->radioModule)->sendDirect(radioFrame->dup(), delay, radioFrame->getDuration(), r->radioInGate);
         }
         else
             EV << "skipping radio listening on a different channel\n";
     }
 
     // register transmission
-    addOngoingTransmission(srcRadio, airFrame);
+    addOngoingTransmission(srcRadio, radioFrame);
 }

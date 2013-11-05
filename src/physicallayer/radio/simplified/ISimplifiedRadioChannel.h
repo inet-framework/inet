@@ -50,7 +50,7 @@ class INET_API ISimplifiedRadioChannel
     /** Returns the host module that contains the given radio */
     virtual cModule *getRadioModule(RadioRef r) const = 0;
 
-    /** Returns the input gate of the host for receiving AirFrames */
+    /** Returns the input gate of the host for receiving SimplifiedRadioFrames */
     virtual cGate *getRadioGate(RadioRef r) const = 0;
 
     /** Returns the channel the given radio listens on */
@@ -69,7 +69,7 @@ class INET_API ISimplifiedRadioChannel
     virtual const TransmissionList& getOngoingTransmissions(int channel) = 0;
 
     /** Called from ChannelAccess, to transmit a frame to the radios in range, on the frame's channel */
-    virtual void sendToChannel(RadioRef srcRadio, SimplifiedRadioFrame *airFrame) = 0;
+    virtual void sendToChannel(RadioRef srcRadio, SimplifiedRadioFrame *radioFrame) = 0;
 
     /** Returns the maximal interference distance*/
     virtual double getInterferenceRange(RadioRef r) = 0;

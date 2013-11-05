@@ -20,5 +20,5 @@ moduleinterface IWirelessNic extends INic
     parameters:
         @display("i=block/ifcard");
     gates:
-        input radioIn @labels(AirFrame); // to receive AirFrames
+        input radioIn @labels(IRadioFrame); // to receive radio frames
 }

@@ -107,7 +107,6 @@ package inet.mobility.models;
 //
 // You can find the DTD with the sources: TurtleMobility.dtd.
 //
-// @see ~ChannelControl
 // @author Andras Varga
 //
 simple TurtleMobility extends MovingMobilityBase

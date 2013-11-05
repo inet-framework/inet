@@ -22,7 +22,6 @@ package inet.mobility.models;
 //
 // Moves the node around a rectangle.
 //
-// @see ~ChannelControl
 // @author Andras Varga
 //
 simple RectangleMobility extends MovingMobilityBase

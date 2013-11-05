@@ -37,7 +37,7 @@ SimplifiedRadioChannelAccess::~SimplifiedRadioChannelAccess()
 {
     if (cc && myRadioRef)
     {
-        // check if channel control exist
+        // check if radio channel exist
         ISimplifiedRadioChannel *cc = dynamic_cast<ISimplifiedRadioChannel *>(simulation.getModuleByPath("radioChannel"));
         if (cc)
              cc->unregisterRadio(myRadioRef);

@@ -116,7 +116,7 @@ void SimplifiedRadio::initialize(int stage)
         obstacles = ObstacleControlAccess().getIfExists();
         if (obstacles) EV << "Found ObstacleControl" << endl;
 
-        // this is the parameter of the channel controller (global)
+        // this is the parameter of the radio channel (global)
         std::string propModel = getRadioChannelPar("propagationModel").stdstringValue();
         if (propModel == "")
             propModel = "FreeSpaceModel";
@@ -232,9 +232,9 @@ bool SimplifiedRadio::handleOperationStage(LifecycleOperation *operation, int st
     return true;
 }
 
-bool SimplifiedRadio::processAirFrame(SimplifiedRadioFrame *airframe)
+bool SimplifiedRadio::processRadioFrame(SimplifiedRadioFrame *radioFrame)
 {
-    return airframe->getChannelNumber() == getChannelNumber();
+    return radioFrame->getChannelNumber() == getChannelNumber();
 }
 
 /**
@@ -282,25 +282,24 @@ void SimplifiedRadio::handleMessage(cMessage *msg)
 
     if (msg->getArrivalGateId() == upperLayerIn)
     {
-        SimplifiedRadioFrame *airframe = encapsulatePacket(PK(msg));
-        handleUpperMsg(airframe);
+        SimplifiedRadioFrame *radioFrame = encapsulatePacket(PK(msg));
+        handleUpperMsg(radioFrame);
     }
     else if (msg->isSelfMessage())
     {
         handleSelfMsg(msg);
     }
-    else if (processAirFrame(check_and_cast<SimplifiedRadioFrame*>(msg)))
+    else if (processRadioFrame(check_and_cast<SimplifiedRadioFrame*>(msg)))
     {
         if (receiverConnected)
         {
-        // must be an AirFrame
-            SimplifiedRadioFrame *airframe = (SimplifiedRadioFrame *) msg;
-            handleLowerMsgStart(airframe);
-            bufferMsg(airframe);
+            SimplifiedRadioFrame *radioFrame = (SimplifiedRadioFrame *) msg;
+            handleLowerMsgStart(radioFrame);
+            bufferMsg(radioFrame);
         }
         else
         {
-            EV << "Radio disabled. ignoring airframe" << endl;
+            EV << "Radio disabled. ignoring radio frame" << endl;
             delete msg;
         }
     }
@@ -317,17 +316,17 @@ void SimplifiedRadio::handleMessage(cMessage *msg)
  * complete. So, look at unbufferMsg to see what happens when the
  * transmission is complete..
  */
-void SimplifiedRadio::bufferMsg(SimplifiedRadioFrame *airframe) //FIXME: add explicit simtime_t atTime arg?
+void SimplifiedRadio::bufferMsg(SimplifiedRadioFrame *radioFrame) //FIXME: add explicit simtime_t atTime arg?
 {
     // set timer to indicate transmission is complete
     cMessage *endRxTimer = new cMessage("endRx", MK_RECEPTION_COMPLETE);
-    endRxTimer->setContextPointer(airframe);
-    airframe->setContextPointer(endRxTimer);
+    endRxTimer->setContextPointer(radioFrame);
+    radioFrame->setContextPointer(endRxTimer);
 
     // NOTE: use arrivalTime instead of simTime, because we might be calling this
     // function during a channel change, when we're picking up ongoing transmissions
     // on the channel -- and then the message's arrival time is in the past!
-    scheduleAt(airframe->getArrivalTime() + airframe->getDuration(), endRxTimer);
+    scheduleAt(radioFrame->getArrivalTime() + radioFrame->getDuration(), endRxTimer);
 }
 
 SimplifiedRadioFrame *SimplifiedRadio::encapsulatePacket(cPacket *frame)
@@ -335,66 +334,66 @@ SimplifiedRadioFrame *SimplifiedRadio::encapsulatePacket(cPacket *frame)
     PhyControlInfo *ctrl = dynamic_cast<PhyControlInfo *>(frame->removeControlInfo());
     ASSERT(!ctrl || ctrl->getChannelNumber()==-1); // per-packet channel switching not supported
 
-    // Note: we don't set length() of the AirFrame, because duration will be used everywhere instead
+    // Note: we don't set length() of the SimplifiedRadioFrame, because duration will be used everywhere instead
     //if (ctrl && ctrl->getAdaptiveSensitivity()) updateSensitivity(ctrl->getBitrate());
-    SimplifiedRadioFrame *airframe = createAirFrame();
-    airframe->setName(frame->getName());
-    airframe->setPSend(transmitterPower);
-    airframe->setChannelNumber(getChannelNumber());
-    airframe->encapsulate(frame);
-    airframe->setBitrate(ctrl ? ctrl->getBitrate() : rs.getBitrate());
-    airframe->setDuration(radioModel->calculateDuration(airframe));
-    airframe->setSenderPos(getRadioPosition());
-    airframe->setCarrierFrequency(carrierFrequency);
+    SimplifiedRadioFrame *radioFrame = createRadioFrame();
+    radioFrame->setName(frame->getName());
+    radioFrame->setPSend(transmitterPower);
+    radioFrame->setChannelNumber(getChannelNumber());
+    radioFrame->encapsulate(frame);
+    radioFrame->setBitrate(ctrl ? ctrl->getBitrate() : rs.getBitrate());
+    radioFrame->setDuration(radioModel->calculateDuration(radioFrame));
+    radioFrame->setSenderPos(getRadioPosition());
+    radioFrame->setCarrierFrequency(carrierFrequency);
     delete ctrl;
 
     EV << "Frame (" << frame->getClassName() << ")" << frame->getName()
-    << " will be transmitted at " << (airframe->getBitrate()/1e6) << "Mbps\n";
-    return airframe;
+    << " will be transmitted at " << (radioFrame->getBitrate()/1e6) << "Mbps\n";
+    return radioFrame;
 }
 
-void SimplifiedRadio::sendUp(SimplifiedRadioFrame *airframe)
+void SimplifiedRadio::sendUp(SimplifiedRadioFrame *radioFrame)
 {
-    cPacket *frame = airframe->decapsulate();
+    cPacket *frame = radioFrame->decapsulate();
     Radio80211aControlInfo * cinfo = new Radio80211aControlInfo;
     if (radioModel->haveTestFrame())
     {
         cinfo->setAirtimeMetric(true);
-        cinfo->setTestFrameDuration(radioModel->calculateDurationTestFrame(airframe));
-        double snirMin = pow(10.0, (airframe->getSnr()/ 10));
-        cinfo->setTestFrameError(radioModel->getTestFrameError(snirMin,airframe->getBitrate()));
+        cinfo->setTestFrameDuration(radioModel->calculateDurationTestFrame(radioFrame));
+        double snirMin = pow(10.0, (radioFrame->getSnr()/ 10));
+        cinfo->setTestFrameError(radioModel->getTestFrameError(snirMin,radioFrame->getBitrate()));
         cinfo->setTestFrameSize(radioModel->getTestFrameSize());
     }
-    cinfo->setSnr(airframe->getSnr());
-    cinfo->setLossRate(airframe->getLossRate());
-    cinfo->setRecPow(airframe->getPowRec());
-    cinfo->setModulationType(airframe->getModulationType());
+    cinfo->setSnr(radioFrame->getSnr());
+    cinfo->setLossRate(radioFrame->getLossRate());
+    cinfo->setRecPow(radioFrame->getPowRec());
+    cinfo->setModulationType(radioFrame->getModulationType());
     frame->setControlInfo(cinfo);
 
-    delete airframe;
+    delete radioFrame;
     EV << "sending up frame " << frame->getName() << endl;
     send(frame, upperLayerOut);
 }
 
-void SimplifiedRadio::sendDown(SimplifiedRadioFrame *airframe)
+void SimplifiedRadio::sendDown(SimplifiedRadioFrame *radioFrame)
 {
     if (transceiverConnected)
-        sendToChannel(airframe);
+        sendToChannel(radioFrame);
     else
-        delete airframe;
+        delete radioFrame;
 }
 
 /**
- * Get the context pointer to the now completely received AirFrame and
+ * Get the context pointer to the now completely received radio frame and
  * delete the self message
  */
 SimplifiedRadioFrame *SimplifiedRadio::unbufferMsg(cMessage *msg)
 {
-    SimplifiedRadioFrame *airframe = (SimplifiedRadioFrame *) msg->getContextPointer();
+    SimplifiedRadioFrame *radioFrame = (SimplifiedRadioFrame *) msg->getContextPointer();
     //delete the self message
     delete msg;
 
-    return airframe;
+    return radioFrame;
 }
 
 /**
@@ -407,7 +406,7 @@ SimplifiedRadioFrame *SimplifiedRadio::unbufferMsg(cMessage *msg)
  * If the host is receiving a packet this packet is from now on only
  * considered as noise.
  */
-void SimplifiedRadio::handleUpperMsg(SimplifiedRadioFrame *airframe)
+void SimplifiedRadio::handleUpperMsg(SimplifiedRadioFrame *radioFrame)
 {
     if (rs.getState() == RadioState::TRANSMIT)
         error("Trying to send a message while already transmitting -- MAC should "
@@ -438,8 +437,8 @@ void SimplifiedRadio::handleUpperMsg(SimplifiedRadioFrame *airframe)
     setRadioState(RadioState::TRANSMIT);
 
     cMessage *timer = new cMessage(NULL, MK_TRANSMISSION_OVER);
-    scheduleAt(simTime() + airframe->getDuration(), timer);
-    sendDown(airframe);
+    scheduleAt(simTime() + radioFrame->getDuration(), timer);
+    sendDown(radioFrame);
 }
 
 void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
@@ -507,9 +506,9 @@ void SimplifiedRadio::handleSelfMsg(cMessage *msg)
         EV << "frame is completely received now\n";
 
         // unbuffer the message
-        SimplifiedRadioFrame *airframe = unbufferMsg(msg);
+        SimplifiedRadioFrame *radioFrame = unbufferMsg(msg);
 
-        handleLowerMsgEnd(airframe);
+        handleLowerMsgEnd(radioFrame);
     }
     else if (msg->getKind() == MK_TRANSMISSION_OVER)
     {
@@ -588,42 +587,42 @@ void SimplifiedRadio::handleSelfMsg(cMessage *msg)
  * currently being received message (if any) has to be updated as
  * well as the RadioState.
  */
-void SimplifiedRadio::handleLowerMsgStart(SimplifiedRadioFrame* airframe)
+void SimplifiedRadio::handleLowerMsgStart(SimplifiedRadioFrame* radioFrame)
 {
     // Calculate the receive power of the message
 
     // calculate distance
-    const Coord& framePos = airframe->getSenderPos();
+    const Coord& framePos = radioFrame->getSenderPos();
     double distance = getRadioPosition().distance(framePos);
 
     // calculate receive power
     double frequency = carrierFrequency;
-    if (airframe && airframe->getCarrierFrequency()>0.0)
-        frequency = airframe->getCarrierFrequency();
+    if (radioFrame && radioFrame->getCarrierFrequency()>0.0)
+        frequency = radioFrame->getCarrierFrequency();
 
     if (distance<MIN_DISTANCE)
         distance = MIN_DISTANCE;
 
-    double rcvdPower = receptionModel->calculateReceivedPower(airframe->getPSend(), frequency, distance);
+    double rcvdPower = receptionModel->calculateReceivedPower(radioFrame->getPSend(), frequency, distance);
     if (obstacles && distance > MIN_DISTANCE)
         rcvdPower = obstacles->calculateReceivedPower(rcvdPower, carrierFrequency, framePos, 0, getRadioPosition(), 0);
-    airframe->setPowRec(rcvdPower);
+    radioFrame->setPowRec(rcvdPower);
     // store the receive power in the recvBuff
-    recvBuff[airframe] = rcvdPower;
-    updateSensitivity(airframe->getBitrate());
+    recvBuff[radioFrame] = rcvdPower;
+    updateSensitivity(radioFrame->getBitrate());
 
     // if receive power is bigger than sensitivity and if not sending
     // and currently not receiving another message and the message has
     // arrived in time
     // NOTE: a message may have arrival time in the past here when we are
     // processing ongoing transmissions during a channel change
-    if (airframe->getArrivalTime() == simTime() && rcvdPower >= sensitivity && rs.getState() != RadioState::TRANSMIT && snrInfo.ptr == NULL)
+    if (radioFrame->getArrivalTime() == simTime() && rcvdPower >= sensitivity && rs.getState() != RadioState::TRANSMIT && snrInfo.ptr == NULL)
     {
-        EV << "receiving frame " << airframe->getName() << endl;
+        EV << "receiving frame " << radioFrame->getName() << endl;
 
         // Put frame and related SnrList in receive buffer
         SnrList snrList;
-        snrInfo.ptr = airframe;
+        snrInfo.ptr = radioFrame;
         snrInfo.rcvdPower = rcvdPower;
         snrInfo.sList = snrList;
 
@@ -640,7 +639,7 @@ void SimplifiedRadio::handleLowerMsgStart(SimplifiedRadioFrame* airframe)
     // receive power is too low or another message is being sent or received
     else
     {
-        EV << "frame " << airframe->getName() << " is just noise\n";
+        EV << "frame " << radioFrame->getName() << " is just noise\n";
         //add receive power to the noise level
         noiseLevel += rcvdPower;
 
@@ -670,13 +669,13 @@ void SimplifiedRadio::handleLowerMsgStart(SimplifiedRadioFrame* airframe)
  *
  * Additionally the RadioState has to be updated.
  *
- * If the corresponding AirFrame was not only noise the corresponding
- * SnrList and the AirFrame are sent to the decider.
+ * If the corresponding SimplifiedRadioFrame was not only noise the corresponding
+ * SnrList and the SimplifiedRadioFrame are sent to the decider.
  */
-void SimplifiedRadio::handleLowerMsgEnd(SimplifiedRadioFrame * airframe)
+void SimplifiedRadio::handleLowerMsgEnd(SimplifiedRadioFrame *radioFrame)
 {
     // check if message has to be send to the decider
-    if (snrInfo.ptr == airframe)
+    if (snrInfo.ptr == radioFrame)
     {
         EV << "reception of frame over, preparing to send packet to upper layer\n";
         // get Packet and list out of the receive buffer:
@@ -692,20 +691,20 @@ void SimplifiedRadio::handleLowerMsgEnd(SimplifiedRadioFrame * airframe)
                 snirMin = iter->snr;
         snrInfo.ptr = NULL;
         snrInfo.sList.clear();
-        airframe->setSnr(10*log10(snirMin)); //ahmed
-        airframe->setLossRate(lossRate);
+        radioFrame->setSnr(10*log10(snirMin)); //ahmed
+        radioFrame->setLossRate(lossRate);
         // delete the frame from the recvBuff
-        recvBuff.erase(airframe);
+        recvBuff.erase(radioFrame);
 
         //XXX send up the frame:
-        //if (radioModel->isReceivedCorrectly(airframe, list))
-        //    sendUp(airframe);
+        //if (radioModel->isReceivedCorrectly(radioFrame, list))
+        //    sendUp(radioFrame);
         //else
-        //    delete airframe;
-        if (!radioModel->isReceivedCorrectly(airframe, list))
+        //    delete radioFrame;
+        if (!radioModel->isReceivedCorrectly(radioFrame, list))
         {
-            airframe->getEncapsulatedPacket()->setKind(list.size()>1 ? COLLISION : BITERROR);
-            airframe->setName(list.size()>1 ? "COLLISION" : "BITERROR");
+            radioFrame->getEncapsulatedPacket()->setKind(list.size()>1 ? COLLISION : BITERROR);
+            radioFrame->setName(list.size()>1 ? "COLLISION" : "BITERROR");
 
             numGivenUp++;
         }
@@ -719,17 +718,17 @@ void SimplifiedRadio::handleLowerMsgEnd(SimplifiedRadioFrame * airframe)
             numReceivedCorrectly = 0;
             numGivenUp = 0;
         }
-        sendUp(airframe);
+        sendUp(radioFrame);
     }
     // all other messages are noise
     else
     {
         EV << "reception of noise message over, removing recvdPower from noiseLevel....\n";
         // get the rcvdPower and subtract it from the noiseLevel
-        noiseLevel -= recvBuff[airframe];
+        noiseLevel -= recvBuff[radioFrame];
 
         // delete message from the recvBuff
-        recvBuff.erase(airframe);
+        recvBuff.erase(radioFrame);
 
         // update snr info for message currently being received if any
         if (snrInfo.ptr != NULL)
@@ -738,7 +737,7 @@ void SimplifiedRadio::handleLowerMsgEnd(SimplifiedRadioFrame * airframe)
         }
 
         // message should be deleted
-        delete airframe;
+        delete radioFrame;
         EV << "message deleted\n";
     }
 
@@ -772,9 +771,9 @@ void SimplifiedRadio::changeChannel(int channel)
    // Clear the recvBuff
    for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
    {
-        SimplifiedRadioFrame *airframe = it->first;
-        cMessage *endRxTimer = (cMessage *)airframe->getContextPointer();
-        delete airframe;
+        SimplifiedRadioFrame *radioFrame = it->first;
+        cMessage *endRxTimer = (cMessage *)radioFrame->getContextPointer();
+        delete radioFrame;
         delete cancelEvent(endRxTimer);
     }
     recvBuff.clear();
@@ -810,37 +809,37 @@ void SimplifiedRadio::changeChannel(int channel)
     ISimplifiedRadioChannel::TransmissionList tlAux = cc->getOngoingTransmissions(channel);
     for (ISimplifiedRadioChannel::TransmissionList::const_iterator it = tlAux.begin(); it != tlAux.end(); ++it)
     {
-        SimplifiedRadioFrame *airframe = check_and_cast<SimplifiedRadioFrame *> (*it);
+        SimplifiedRadioFrame *radioFrame = check_and_cast<SimplifiedRadioFrame *> (*it);
         // time for the message to reach us
-        double distance = getRadioPosition().distance(airframe->getSenderPos());
+        double distance = getRadioPosition().distance(radioFrame->getSenderPos());
         simtime_t propagationDelay = distance / 3.0E+8;
 
         // if this transmission is on our new channel and it would reach us in the future, then schedule it
-        if (channel == airframe->getChannelNumber())
+        if (channel == radioFrame->getChannelNumber())
         {
-            EV << " - (" << airframe->getClassName() << ")" << airframe->getName() << ": ";
+            EV << " - (" << radioFrame->getClassName() << ")" << radioFrame->getName() << ": ";
         }
 
         // if there is a message on the air which will reach us in the future
-        if (airframe->getTimestamp() + propagationDelay >= simTime())
+        if (radioFrame->getTimestamp() + propagationDelay >= simTime())
         {
             EV << "will arrive in the future, scheduling it\n";
 
             // we need to send to each radioIn[] gate of this host
             //for (int i = 0; i < radioGate->size(); i++)
-            //    sendDirect(airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() + i);
+            //    sendDirect(radioFrame->dup(), radioFrame->getTimestamp() + propagationDelay - simTime(), radioFrame->getDuration(), myHost, radioGate->getId() + i);
 
             // JcM Fix: we need to this radio only. no need to send the packet to each radioIn
             // since other radios might be not in the same channel
-            sendDirect(airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() );
+            sendDirect(radioFrame->dup(), radioFrame->getTimestamp() + propagationDelay - simTime(), radioFrame->getDuration(), myHost, radioGate->getId() );
         }
         // if we hear some part of the message
-        else if (airframe->getTimestamp() + airframe->getDuration() + propagationDelay > simTime())
+        else if (radioFrame->getTimestamp() + radioFrame->getDuration() + propagationDelay > simTime())
         {
             EV << "missed beginning of frame, processing it as noise\n";
 
-            SimplifiedRadioFrame *frameDup = airframe->dup();
-            frameDup->setArrivalTime(airframe->getTimestamp() + propagationDelay);
+            SimplifiedRadioFrame *frameDup = radioFrame->dup();
+            frameDup->setArrivalTime(radioFrame->getTimestamp() + propagationDelay);
             handleLowerMsgStart(frameDup);
             bufferMsg(frameDup);
         }
@@ -969,7 +968,7 @@ void SimplifiedRadio::registerBattery()
 void SimplifiedRadio::updateDisplayString() {
     // draw the interference area and sensitivity area
     // according pathloss propagation only
-    // we use the channel controller method to calculate interference distance
+    // we use the radio channel method to calculate interference distance
     // it should be the methods provided by propagation models, but to
     // avoid a big modification, we reuse those methods.
 
@@ -1057,9 +1056,9 @@ void SimplifiedRadio::disconnectReceiver()
    // Clear the recvBuff
    for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
    {
-        SimplifiedRadioFrame *airframe = it->first;
-        cMessage *endRxTimer = (cMessage *)airframe->getContextPointer();
-        delete airframe;
+        SimplifiedRadioFrame *radioFrame = it->first;
+        cMessage *endRxTimer = (cMessage *)radioFrame->getContextPointer();
+        delete radioFrame;
         delete cancelEvent(endRxTimer);
     }
     recvBuff.clear();
@@ -1091,32 +1090,32 @@ void SimplifiedRadio::connectReceiver()
     ISimplifiedRadioChannel::TransmissionList tlAux = cc->getOngoingTransmissions(rs.getChannelNumber());
     for (ISimplifiedRadioChannel::TransmissionList::const_iterator it = tlAux.begin(); it != tlAux.end(); ++it)
     {
-        SimplifiedRadioFrame *airframe = check_and_cast<SimplifiedRadioFrame *> (*it);
+        SimplifiedRadioFrame *radioFrame = check_and_cast<SimplifiedRadioFrame *> (*it);
         // time for the message to reach us
-        double distance = getRadioPosition().distance(airframe->getSenderPos());
+        double distance = getRadioPosition().distance(radioFrame->getSenderPos());
         simtime_t propagationDelay = distance / 3.0E+8;
 
         // if there is a message on the air which will reach us in the future
-        if (airframe->getTimestamp() + propagationDelay >= simTime())
+        if (radioFrame->getTimestamp() + propagationDelay >= simTime())
         {
-            EV << " - (" << airframe->getClassName() << ")" << airframe->getName() << ": ";
+            EV << " - (" << radioFrame->getClassName() << ")" << radioFrame->getName() << ": ";
             EV << "will arrive in the future, scheduling it\n";
 
             // we need to send to each radioIn[] gate of this host
             //for (int i = 0; i < radioGate->size(); i++)
-            //    sendDirect(airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() + i);
+            //    sendDirect(radioFrame->dup(), radioFrame->getTimestamp() + propagationDelay - simTime(), radioFrame->getDuration(), myHost, radioGate->getId() + i);
 
             // JcM Fix: we need to this radio only. no need to send the packet to each radioIn
             // since other radios might be not in the same channel
-            sendDirect(airframe->dup(), airframe->getTimestamp() + propagationDelay - simTime(), airframe->getDuration(), myHost, radioGate->getId() );
+            sendDirect(radioFrame->dup(), radioFrame->getTimestamp() + propagationDelay - simTime(), radioFrame->getDuration(), myHost, radioGate->getId() );
         }
         // if we hear some part of the message
-        else if (airframe->getTimestamp() + airframe->getDuration() + propagationDelay > simTime())
+        else if (radioFrame->getTimestamp() + radioFrame->getDuration() + propagationDelay > simTime())
         {
             EV << "missed beginning of frame, processing it as noise\n";
 
-            SimplifiedRadioFrame *frameDup = airframe->dup();
-            frameDup->setArrivalTime(airframe->getTimestamp() + propagationDelay);
+            SimplifiedRadioFrame *frameDup = radioFrame->dup();
+            frameDup->setArrivalTime(radioFrame->getTimestamp() + propagationDelay);
             handleLowerMsgStart(frameDup);
             bufferMsg(frameDup);
         }

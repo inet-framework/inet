@@ -28,7 +28,7 @@ IdealRadioChannelAccess::~IdealRadioChannelAccess()
 {
     if (cc && myRadioRef)
     {
-        // check if channel control exist
+        // check if radio channel exist
         IdealRadioChannel *cc = dynamic_cast<IdealRadioChannel *>(simulation.getModuleByPath("radioChannel"));
         if (cc)
              cc->unregisterRadio(myRadioRef);

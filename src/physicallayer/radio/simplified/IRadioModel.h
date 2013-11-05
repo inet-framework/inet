@@ -42,7 +42,7 @@ class INET_API IRadioModel : public cObject
     virtual ~IRadioModel() {}
 
     /**
-     * Should be defined to calculate the duration of the AirFrame.
+     * Should be defined to calculate the duration of the SimplifiedRadioFrame.
      * Usually the duration is just the frame length divided by the
      * bitrate. However, in some cases, notably IEEE 802.11, the header
      * has a different modulation (and thus a different bitrate) than the
@@ -56,10 +56,10 @@ class INET_API IRadioModel : public cObject
      * frame. The calculation may take into account the modulation scheme,
      * possible error correction code, etc.
      */
-    virtual bool isReceivedCorrectly(SimplifiedRadioFrame *airframe, const SnrList& receivedList) = 0;
+    virtual bool isReceivedCorrectly(SimplifiedRadioFrame *radioFrame, const SnrList& receivedList) = 0;
     // used by the Airtime Link Metric computation
     virtual bool haveTestFrame()=0;
-    virtual double calculateDurationTestFrame(SimplifiedRadioFrame *airframe)=0;
+    virtual double calculateDurationTestFrame(SimplifiedRadioFrame *radioFrame)=0;
     virtual double getTestFrameError(double snirMin, double bitrate)=0;
     virtual int getTestFrameSize()=0;
 };

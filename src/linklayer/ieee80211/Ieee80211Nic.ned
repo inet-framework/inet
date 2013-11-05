@@ -46,7 +46,7 @@ module Ieee80211Nic like IWirelessNic
     gates:
         input upperLayerIn; // to upper layers
         output upperLayerOut; // from upper layers
-        input radioIn @labels(AirFrame); // to receive AirFrames
+        input radioIn @labels(IRadioFrame); // to receive radio frames
     submodules:
         outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0 {
             @display("p=218,70");

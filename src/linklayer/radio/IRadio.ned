@@ -26,20 +26,20 @@ package inet.linklayer.radio;
 // <b>Transmission</b>
 //
 // Upper layers (wireless L2 protocols) can send frames to the radio
-// module. Frames will be encapsulated into ~AirFrame messages and
+// module. Frames will be encapsulated into ~IRadioFrame messages and
 // distributed to other network nodes within interference distance.
-// The ~AirFrame represents the signal in the radio channel, and
+// The ~IRadioFrame represents the signal in the radio channel, and
 // its fields hold properties of the transmission like the transmit power.
 //
-// The global ~ChannelControl module keeps track of node positions,
+// The global ~IRadioChannel module keeps track of node positions,
 // and knows which nodes are within interference distance of others
 // (neighbour list). When transmitting, the radio module obtains the
-// neighbour list, and sends a copy of the ~AirFrame to each neighbour.
+// neighbour list, and sends a copy of the ~IRadioFrame to each neighbour.
 //
 //
 // <b>Reception</b>
 //
-// Received ~AirFrame messages get delivered to the radioIn gate of the
+// Received ~IRadioFrame messages get delivered to the radioIn gate of the
 // module. If it was found to have been received correctly, it gets
 // decapsulated and the frame sent to the upper layer.
 //
@@ -85,6 +85,6 @@ moduleinterface IRadio
     gates:
         input upperLayerIn @labels(PhyControlInfo/down); // from higher layer protocol (MAC)
         output upperLayerOut @labels(PhyControlInfo/up); // to higher layer protocol (MAC)
-        input radioIn @labels(AirFrame); // to receive frames (~AirFrame) on the radio channel
+        input radioIn @labels(IRadioFrame); // to receive frames (~IRadioFrame) on the radio channel
 }
 

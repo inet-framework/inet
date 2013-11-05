@@ -65,7 +65,6 @@ class INET_API IdealRadioChannelAccess : public cSimpleModule, protected cListen
     const Coord& getRadioPosition() const { return radioPos; }
     cModule *getHostModule() const { return hostModule; }
 
-    /** Register with ChannelControl and subscribe to hostPos*/
     virtual void initialize(int stage);
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 };

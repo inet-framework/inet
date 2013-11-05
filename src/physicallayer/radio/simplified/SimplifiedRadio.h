@@ -80,24 +80,24 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
     virtual void handleCommand(int msgkind, cObject *ctrl);
 
     /** @brief Buffer the frame and update noise levels and snr information */
-    virtual void handleLowerMsgStart(SimplifiedRadioFrame *airframe);
+    virtual void handleLowerMsgStart(SimplifiedRadioFrame *radioFrame);
 
     /** @brief Unbuffer the frame and update noise levels and snr information */
-    virtual void handleLowerMsgEnd(SimplifiedRadioFrame *airframe);
+    virtual void handleLowerMsgEnd(SimplifiedRadioFrame *radioFrame);
 
     /** @brief Buffers message for 'transmission time' */
-    virtual void bufferMsg(SimplifiedRadioFrame *airframe);
+    virtual void bufferMsg(SimplifiedRadioFrame *radioFrame);
 
     /** @brief Unbuffers a message after 'transmission time' */
     virtual SimplifiedRadioFrame *unbufferMsg(cMessage *msg);
 
     /** Sends a message to the upper layer */
-    virtual void sendUp(SimplifiedRadioFrame *airframe);
+    virtual void sendUp(SimplifiedRadioFrame *radioFrame);
 
     /** Sends a message to the channel */
-    virtual void sendDown(SimplifiedRadioFrame *airframe);
+    virtual void sendDown(SimplifiedRadioFrame *radioFrame);
 
-    /** Encapsulates a MAC frame into an Air Frame */
+    /** Encapsulates a MAC frame into a radio frame */
     virtual SimplifiedRadioFrame *encapsulatePacket(cPacket *msg);
 
     /** Sets the radio state, and also fires change notification */
@@ -106,11 +106,11 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
     /** Returns the current channel the radio is tuned to */
     virtual int getChannelNumber() const {return rs.getChannelNumber();}
 
-    /** Updates the SNR information of the relevant AirFrame */
+    /** Updates the SNR information of the relevant SimplifiedRadioFrame */
     virtual void addNewSnr();
 
-    /** Create a new AirFrame */
-    virtual SimplifiedRadioFrame *createAirFrame() {return new SimplifiedRadioFrame();}
+    /** Create a new SimplifiedRadioFrame */
+    virtual SimplifiedRadioFrame *createRadioFrame() {return new SimplifiedRadioFrame();}
 
     /**
      * Change transmitter and receiver to a new channel.
@@ -132,7 +132,7 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
     /*
      *  check if the packet must be processes
      */
-    virtual bool processAirFrame(SimplifiedRadioFrame *airframe);
+    virtual bool processRadioFrame(SimplifiedRadioFrame *radioFrame);
 
     /*
      * Routines to connect or disconnect the transmission and reception  of packets

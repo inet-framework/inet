@@ -89,18 +89,18 @@ void Ieee80211RadioModel::initializeFrom(cModule *radioModule)
         fileBer = false;
 }
 
-double Ieee80211RadioModel::calculateDurationTestFrame(SimplifiedRadioFrame *airframe)
+double Ieee80211RadioModel::calculateDurationTestFrame(SimplifiedRadioFrame *radioFrame)
 {
     double duration;
 #ifndef NS3CALMODE
     if (phyOpMode=='g')
-        duration=4*ceil((16+btSize+6)/(airframe->getBitrate()/1e6*4))*1e-6 + PHY_HEADER_LENGTH;
+        duration=4*ceil((16+btSize+6)/(radioFrame->getBitrate()/1e6*4))*1e-6 + PHY_HEADER_LENGTH;
     else
         // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
-        duration=btSize/airframe->getBitrate() + 192/BITRATE_HEADER;
+        duration=btSize/radioFrame->getBitrate() + 192/BITRATE_HEADER;
 #else
     ModulationType modeBody;
-    modeBody = WifiModulationType::getModulationType(phyOpMode, airframe->getBitrate());
+    modeBody = WifiModulationType::getModulationType(phyOpMode, radioFrame->getBitrate());
     // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
     duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(btSize, modeBody, wifiPreamble));
 #endif
@@ -108,28 +108,28 @@ double Ieee80211RadioModel::calculateDurationTestFrame(SimplifiedRadioFrame *air
     return duration;
 }
 
-double Ieee80211RadioModel::calculateDuration(SimplifiedRadioFrame *airframe)
+double Ieee80211RadioModel::calculateDuration(SimplifiedRadioFrame *radioFrame)
 {
     double duration;
 #ifndef NS3CALMODE
     if (phyOpMode=='g')
-        duration = 4*ceil((16+airframe->getBitLength()+6)/(airframe->getBitrate()/1e6*4))*1e-6 + PHY_HEADER_LENGTH;
+        duration = 4*ceil((16+radioFrame->getBitLength()+6)/(radioFrame->getBitrate()/1e6*4))*1e-6 + PHY_HEADER_LENGTH;
     else
         // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
-        duration = airframe->getBitLength()/airframe->getBitrate() + 192/BITRATE_HEADER;
+        duration = radioFrame->getBitLength()/radioFrame->getBitrate() + 192/BITRATE_HEADER;
 #else
     ModulationType modeBody;
-    modeBody = WifiModulationType::getModulationType(phyOpMode, airframe->getBitrate());
+    modeBody = WifiModulationType::getModulationType(phyOpMode, radioFrame->getBitrate());
     // The physical layer header is sent with 1Mbit/s and the rest with the frame's bitrate
-    duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(airframe->getBitLength(), modeBody, wifiPreamble));
-     airframe->setModulationType(modeBody);
+    duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(radioFrame->getBitLength(), modeBody, wifiPreamble));
+    radioFrame->setModulationType(modeBody);
 #endif
-    EV<<"Radio:frameDuration="<<duration*1e6<<"us("<<airframe->getBitLength()<<"bits)"<<endl;
+    EV<<"Radio:frameDuration="<<duration*1e6<<"us("<<radioFrame->getBitLength()<<"bits)"<<endl;
     return duration;
 }
 
 
-bool Ieee80211RadioModel::isReceivedCorrectly(SimplifiedRadioFrame *airframe, const SnrList& receivedList)
+bool Ieee80211RadioModel::isReceivedCorrectly(SimplifiedRadioFrame *radioFrame, const SnrList& receivedList)
 {
     // calculate snirMin
     double snirMin = receivedList.begin()->snr;
@@ -137,7 +137,7 @@ bool Ieee80211RadioModel::isReceivedCorrectly(SimplifiedRadioFrame *airframe, co
         if (iter->snr < snirMin)
             snirMin = iter->snr;
 
-    cPacket *frame = airframe->getEncapsulatedPacket();
+    cPacket *frame = radioFrame->getEncapsulatedPacket();
     EV << "packet (" << frame->getClassName() << ")" << frame->getName() << " (" << frame->info() << ") snrMin=" << snirMin << endl;
 
     if (i%1000==0)
@@ -153,7 +153,7 @@ bool Ieee80211RadioModel::isReceivedCorrectly(SimplifiedRadioFrame *airframe, co
         EV << "COLLISION! Packet got lost. Noise only\n";
         return false;
     }
-    else if (isPacketOK(snirMin, frame->getBitLength(), airframe->getBitrate()))
+    else if (isPacketOK(snirMin, frame->getBitLength(), radioFrame->getBitrate()))
     {
         EV << "packet was received correctly, it is now handed to upper layer...\n";
         return true;

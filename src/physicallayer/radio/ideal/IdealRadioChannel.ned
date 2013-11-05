@@ -18,7 +18,7 @@
 package inet.physicallayer.radio.ideal;
 
 //
-// Channel controller module for ~IdealRadio.
+// Radio channel module for ~IdealRadio.
 //
 // ~IdealRadioChannel should have exactly one instance in every network model that
 // contains wireless nodes with ~IdealRadio. This module gets informed about the

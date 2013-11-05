@@ -54,13 +54,13 @@ void GenericRadioModel::initializeFrom(cModule *radioModule)
 }
 
 
-double GenericRadioModel::calculateDuration(SimplifiedRadioFrame *airframe)
+double GenericRadioModel::calculateDuration(SimplifiedRadioFrame *radioFrame)
 {
-    return (airframe->getBitLength()+headerLengthBits) / airframe->getBitrate();
+    return (radioFrame->getBitLength()+headerLengthBits) / radioFrame->getBitrate();
 }
 
 
-bool GenericRadioModel::isReceivedCorrectly(SimplifiedRadioFrame *airframe, const SnrList& receivedList)
+bool GenericRadioModel::isReceivedCorrectly(SimplifiedRadioFrame *radioFrame, const SnrList& receivedList)
 {
     // calculate snirMin
     double snirMin = receivedList.begin()->snr;
@@ -74,7 +74,7 @@ bool GenericRadioModel::isReceivedCorrectly(SimplifiedRadioFrame *airframe, cons
         EV << "COLLISION! Packet got lost\n";
         return false;
     }
-    else if (isPacketOK(snirMin, airframe->getBitLength()+headerLengthBits, airframe->getBitrate()))
+    else if (isPacketOK(snirMin, radioFrame->getBitLength()+headerLengthBits, radioFrame->getBitrate()))
     {
         EV << "packet was received correctly, it is now handed to upper layer...\n";
         return true;

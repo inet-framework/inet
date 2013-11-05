@@ -60,17 +60,17 @@ class INET_API IdealRadio : public IdealRadioChannelAccess, public ILifecycle
 
     virtual void handleCommand(cMessage *msg);
 
-    virtual void handleLowerMsgStart(IdealRadioFrame *airframe);
+    virtual void handleLowerMsgStart(IdealRadioFrame *radioFrame);
 
-    virtual void handleLowerMsgEnd(IdealRadioFrame *airframe);
+    virtual void handleLowerMsgEnd(IdealRadioFrame *radioFrame);
 
     /** Sends a message to the upper layer */
-    virtual void sendUp(IdealRadioFrame *airframe);
+    virtual void sendUp(IdealRadioFrame *radioFrame);
 
     /** Sends a message to the channel */
-    virtual void sendDown(IdealRadioFrame *airframe);
+    virtual void sendDown(IdealRadioFrame *radioFrame);
 
-    /** Encapsulates a MAC frame into an Air Frame */
+    /** Encapsulates a MAC frame into a radio frame */
     virtual IdealRadioFrame *encapsulatePacket(cPacket *msg);
 
     /** Updates the radio state, and also sends a radioState signal */
