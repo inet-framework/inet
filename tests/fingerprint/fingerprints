@@ -74,7 +74,7 @@ class FingerprintTestCaseGenerator():
         return testcases
 
     def commentRemover(self, csvData):
-        p = re.compile('#.*$')
+        p = re.compile(' *#.*$')
         for line in csvData:
             yield p.sub('',line)
 
