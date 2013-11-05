@@ -16,12 +16,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef RADIO_H
-#define RADIO_H
+#ifndef __INET_SIMPLIFIEDRADIO_H
+#define __INET_SIMPLIFIEDRADIO_H
 
-#include "ChannelAccess.h"
+#include "SimplifiedRadioChannelAccess.h"
 #include "RadioState.h"
-#include "AirFrame_m.h"
+#include "SimplifiedRadioFrame_m.h"
 #include "IRadioModel.h"
 #include "IReceptionModel.h"
 #include "SnrList.h"
@@ -54,15 +54,15 @@
  *
  * @author Andras Varga, Levente Meszaros
  */
-class INET_API Radio : public ChannelAccess, public ILifecycle
+class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILifecycle
 {
   protected:
     typedef std::map<double,double> SensitivityList; // Sensitivity list
     SensitivityList sensitivityList;
     virtual void getSensitivityList(cXMLElement* xmlConfig);
   public:
-    Radio();
-    virtual ~Radio();
+    SimplifiedRadio();
+    virtual ~SimplifiedRadio();
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
@@ -73,32 +73,32 @@ class INET_API Radio : public ChannelAccess, public ILifecycle
 
     virtual void handleMessage(cMessage *msg);
 
-    virtual void handleUpperMsg(AirFrame*);
+    virtual void handleUpperMsg(SimplifiedRadioFrame*);
 
     virtual void handleSelfMsg(cMessage*);
 
     virtual void handleCommand(int msgkind, cObject *ctrl);
 
     /** @brief Buffer the frame and update noise levels and snr information */
-    virtual void handleLowerMsgStart(AirFrame *airframe);
+    virtual void handleLowerMsgStart(SimplifiedRadioFrame *airframe);
 
     /** @brief Unbuffer the frame and update noise levels and snr information */
-    virtual void handleLowerMsgEnd(AirFrame *airframe);
+    virtual void handleLowerMsgEnd(SimplifiedRadioFrame *airframe);
 
     /** @brief Buffers message for 'transmission time' */
-    virtual void bufferMsg(AirFrame *airframe);
+    virtual void bufferMsg(SimplifiedRadioFrame *airframe);
 
     /** @brief Unbuffers a message after 'transmission time' */
-    virtual AirFrame *unbufferMsg(cMessage *msg);
+    virtual SimplifiedRadioFrame *unbufferMsg(cMessage *msg);
 
     /** Sends a message to the upper layer */
-    virtual void sendUp(AirFrame *airframe);
+    virtual void sendUp(SimplifiedRadioFrame *airframe);
 
     /** Sends a message to the channel */
-    virtual void sendDown(AirFrame *airframe);
+    virtual void sendDown(SimplifiedRadioFrame *airframe);
 
     /** Encapsulates a MAC frame into an Air Frame */
-    virtual AirFrame *encapsulatePacket(cPacket *msg);
+    virtual SimplifiedRadioFrame *encapsulatePacket(cPacket *msg);
 
     /** Sets the radio state, and also fires change notification */
     virtual void setRadioState(RadioState::State newState);
@@ -110,7 +110,7 @@ class INET_API Radio : public ChannelAccess, public ILifecycle
     virtual void addNewSnr();
 
     /** Create a new AirFrame */
-    virtual AirFrame *createAirFrame() {return new AirFrame();}
+    virtual SimplifiedRadioFrame *createAirFrame() {return new SimplifiedRadioFrame();}
 
     /**
      * Change transmitter and receiver to a new channel.
@@ -132,7 +132,7 @@ class INET_API Radio : public ChannelAccess, public ILifecycle
     /*
      *  check if the packet must be processes
      */
-    virtual bool processAirFrame(AirFrame *airframe);
+    virtual bool processAirFrame(SimplifiedRadioFrame *airframe);
 
     /*
      * Routines to connect or disconnect the transmission and reception  of packets
@@ -183,7 +183,7 @@ class INET_API Radio : public ChannelAccess, public ILifecycle
      */
     struct SnrStruct
     {
-        AirFrame *ptr;    ///< pointer to the message this information belongs to
+        SimplifiedRadioFrame *ptr;    ///< pointer to the message this information belongs to
         double rcvdPower; ///< received power of the message
         SnrList sList;    ///< stores SNR over time
     };
@@ -200,12 +200,12 @@ class INET_API Radio : public ChannelAccess, public ILifecycle
      * receive power.
      */
     struct Compare {
-        bool operator() (AirFrame* const &lhs, AirFrame* const &rhs) const {
+        bool operator() (SimplifiedRadioFrame* const &lhs, SimplifiedRadioFrame* const &rhs) const {
             ASSERT(lhs && rhs);
             return lhs->getId() < rhs->getId();
         }
     };
-    typedef std::map<AirFrame*, double, Compare> RecvBuff;
+    typedef std::map<SimplifiedRadioFrame*, double, Compare> RecvBuff;
 
     /**
      * State: A buffer to store a pointer to a message and the related
@@ -226,7 +226,7 @@ class INET_API Radio : public ChannelAccess, public ILifecycle
     double noiseLevel;
 
     /**
-     * Configuration: The carrier frequency used. It is read from the ChannelControl module.
+     * Configuration: The carrier frequency used. It is read from the SimplifiedRadioChannel module.
      */
     double carrierFrequency;
 
@@ -250,7 +250,7 @@ class INET_API Radio : public ChannelAccess, public ILifecycle
     double receptionThreshold;
 
     /*
-     * this variable is used to disconnect the possibility of sent packets to the ChannelControl
+     * this variable is used to disconnect the possibility of sent packets to the radio channel
      */
     bool transceiverConnected;
     bool receiverConnected;

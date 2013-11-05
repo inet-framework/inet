@@ -24,7 +24,7 @@ package inet.physicallayer.radio.simplified;
 // @see ~IRadio
 // @author Andras Varga
 //
-simple GenericRadio extends Radio
+simple GenericRadio extends SimplifiedRadio
 {
     parameters:
         @display("i=block/wrxtx");

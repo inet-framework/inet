@@ -22,8 +22,8 @@
  ***************************************************************************
  */
 
-#include "IChannelControl.h"
-#include "ChannelAccess.h"
+#include "ISimplifiedRadioChannel.h"
+#include "SimplifiedRadioChannelAccess.h"
 #include "FreeSpaceModel.h"
 
 #include <FWMath.h>
@@ -36,9 +36,9 @@ Register_Class(FreeSpaceModel);
 void FreeSpaceModel::initializeFreeSpace(cModule *radioModule)
 {
     pathLossAlpha = radioModule->par("pathLossAlpha");
-    IChannelControl *cc = ChannelAccess::getChannelControl();
+    ISimplifiedRadioChannel *cc = SimplifiedRadioChannelAccess::getSimplifiedRadioChannel();
     if (pathLossAlpha < (double) (dynamic_cast<cModule*>(cc)->par("alpha")))
-        opp_error("PathLossReceptionModel: pathLossAlpha can't be smaller than in ChannelControl -- please adjust the parameters");
+        opp_error("PathLossReceptionModel: pathLossAlpha can't be smaller than in SimplifiedRadioChannel -- please adjust the parameters");
     Gt = pow(10, radioModule->par("TransmissionAntennaGainIndB").doubleValue()/10);
     Gr = pow(10, radioModule->par("ReceiveAntennaGainIndB").doubleValue()/10);
     L = pow(10, radioModule->par("SystemLossFactor").doubleValue()/10);

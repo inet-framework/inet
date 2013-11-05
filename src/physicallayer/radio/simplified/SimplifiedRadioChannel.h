@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*- ********************************************************
- * file:        ChannelControl.h
+ * file:        SimplifiedRadioChannel.h
  *
  * copyright:   (C) 2006 Levente Meszaros, 2005 Andras Varga
  *
@@ -14,8 +14,8 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-#ifndef CHANNELCONTROL_H
-#define CHANNELCONTROL_H
+#ifndef __INET_SIMPLIFIEDRADIOCHANNEL_H
+#define __INET_SIMPLIFIEDRADIOCHANNEL_H
 
 #include <vector>
 #include <list>
@@ -23,10 +23,10 @@
 
 #include "INETDefs.h"
 #include "Coord.h"
-#include "IChannelControl.h"
+#include "ISimplifiedRadioChannel.h"
 
 // Forward declarations
-class AirFrame;
+class SimplifiedRadioFrame;
 
 #define TRANSMISSION_PURGE_INTERVAL 1.0
 
@@ -35,7 +35,7 @@ class AirFrame;
  * also caches neighbor info (which other Radios are within
  * interference distance).
  */
-struct IChannelControl::RadioEntry {
+struct ISimplifiedRadioChannel::RadioEntry {
     cModule *radioModule;  // the module that registered this radio interface
     cGate *radioInGate;  // gate on host module used to receive airframes
     int channel;
@@ -58,10 +58,10 @@ struct IChannelControl::RadioEntry {
 /**
  * Monitors which radios are "in range". Supports multiple channels.
  *
- * @ingroup channelControl
+ * @ingroup radioChannel
  * @see ChannelAccess
  */
-class INET_API ChannelControl : public cSimpleModule, public IChannelControl
+class INET_API SimplifiedRadioChannel : public cSimpleModule, public ISimplifiedRadioChannel
 {
   protected:
     typedef std::list<RadioEntry> RadioList;
@@ -107,14 +107,14 @@ class INET_API ChannelControl : public cSimpleModule, public IChannelControl
     virtual const RadioRefVector& getNeighbors(RadioRef h);
 
     /** Notifies the channel control with an ongoing transmission */
-    virtual void addOngoingTransmission(RadioRef h, AirFrame *frame);
+    virtual void addOngoingTransmission(RadioRef h, SimplifiedRadioFrame *frame);
 
     /** Returns the "handle" of a previously registered radio. The pointer to the registering (radio) module must be provided */
     virtual RadioRef lookupRadio(cModule *radioModule);
 
   public:
-    ChannelControl();
-    virtual ~ChannelControl();
+    SimplifiedRadioChannel();
+    virtual ~SimplifiedRadioChannel();
 
     /** Registers the given radio. If radioInGate==NULL, the "radioIn" gate is assumed */
     virtual RadioRef registerRadio(cModule *radioModule, cGate *radioInGate = NULL);
@@ -144,7 +144,7 @@ class INET_API ChannelControl : public cSimpleModule, public IChannelControl
     virtual const TransmissionList& getOngoingTransmissions(int channel);
 
     /** Called from ChannelAccess, to transmit a frame to the radios in range, on the frame's channel */
-    virtual void sendToChannel(RadioRef srcRadio, AirFrame *airFrame);
+    virtual void sendToChannel(RadioRef srcRadio, SimplifiedRadioFrame *airFrame);
 
     /** Returns the maximal interference distance*/
     virtual double getInterferenceRange(RadioRef r) { return maxInterferenceDistance; }

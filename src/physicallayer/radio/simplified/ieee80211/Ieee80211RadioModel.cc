@@ -89,7 +89,7 @@ void Ieee80211RadioModel::initializeFrom(cModule *radioModule)
         fileBer = false;
 }
 
-double Ieee80211RadioModel::calculateDurationTestFrame(AirFrame *airframe)
+double Ieee80211RadioModel::calculateDurationTestFrame(SimplifiedRadioFrame *airframe)
 {
     double duration;
 #ifndef NS3CALMODE
@@ -108,7 +108,7 @@ double Ieee80211RadioModel::calculateDurationTestFrame(AirFrame *airframe)
     return duration;
 }
 
-double Ieee80211RadioModel::calculateDuration(AirFrame *airframe)
+double Ieee80211RadioModel::calculateDuration(SimplifiedRadioFrame *airframe)
 {
     double duration;
 #ifndef NS3CALMODE
@@ -129,7 +129,7 @@ double Ieee80211RadioModel::calculateDuration(AirFrame *airframe)
 }
 
 
-bool Ieee80211RadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList)
+bool Ieee80211RadioModel::isReceivedCorrectly(SimplifiedRadioFrame *airframe, const SnrList& receivedList)
 {
     // calculate snirMin
     double snirMin = receivedList.begin()->snr;

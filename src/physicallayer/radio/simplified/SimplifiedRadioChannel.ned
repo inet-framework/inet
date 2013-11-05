@@ -1,5 +1,5 @@
 //***************************************************************************
-// * file:        ChannelControl.ned
+// * file:        SimplifiedRadioChannel.ned
 // *
 // * author:      Andras Varga, Steffen Sroka, Daniel Willkomm
 // *
@@ -20,21 +20,21 @@
 package inet.physicallayer.radio.simplified;
 
 //
-// ~ChannelControl has exactly one instance in every network model that
+// ~SimplifiedRadioChannel has exactly one instance in every network model that
 // contains mobile or wireless nodes. This module gets informed about the
 // location and movement of nodes, and determines which nodes are within
 // communication or interference distance. This info is then used by the
 // radio interfaces of nodes at transmissions.
-// Must be named as "channelControl" inside the network.
+// Must be named as "radioChannel" inside the network.
 //
-// This ~ChannelControl is a different implementation from the one in
+// This ~SimplifiedRadioChannel is a different implementation from the one in
 // Mobility Framework 1.0a5: here we use sendDirect(), while the MF version
 // used normal send() and dynamic connections.
 //
-// @author Andras Varga (based on MF's ChannelControl by Steffen Sroka and Daniel Willkomm)
+// @author Andras Varga (based on MF's SimplifiedRadioChannel by Steffen Sroka and Daniel Willkomm)
 // @see ~IMobility
 //
-simple ChannelControl
+simple SimplifiedRadioChannel
 {
     parameters:
         double pMax @unit("mW") = default(20mW); // maximum sending power used for this network (in mW)

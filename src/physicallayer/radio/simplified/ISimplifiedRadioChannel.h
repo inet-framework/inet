@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*- ********************************************************
- * file:        IChannelControl.h
+ * file:        ISimplifiedRadioChannel.h
  *
  * copyright:   (C) Rudolf Hornig
  *
@@ -13,8 +13,8 @@
  *
  **************************************************************************/
 
-#ifndef ICHANNELCONTROL_H
-#define ICHANNELCONTROL_H
+#ifndef __INET_ISIMPLIFIEDRADIOCHANNEL_H
+#define __INET_ISIMPLIFIEDRADIOCHANNEL_H
 
 #include <vector>
 #include <list>
@@ -24,22 +24,22 @@
 #include "Coord.h"
 
 // Forward declarations
-class AirFrame;
+class SimplifiedRadioFrame;
 
 /**
  * Interface to implement for a module that controls radio frequency channel access.
  */
-class INET_API IChannelControl
+class INET_API ISimplifiedRadioChannel
 {
   protected:
     struct RadioEntry;
 
   public:
-    typedef RadioEntry *RadioRef; // handle for ChannelControl's clients
-    typedef std::list<AirFrame*> TransmissionList;
+    typedef RadioEntry *RadioRef; // handle for SimplifiedRadioChannel's clients
+    typedef std::list<SimplifiedRadioFrame*> TransmissionList;
 
   public:
-    virtual ~IChannelControl() {}
+    virtual ~ISimplifiedRadioChannel() {}
 
     /** Registers the given radio. If radioInGate==NULL, the "radioIn" gate is assumed */
     virtual RadioRef registerRadio(cModule *radioModule, cGate *radioInGate = NULL) = 0;
@@ -69,7 +69,7 @@ class INET_API IChannelControl
     virtual const TransmissionList& getOngoingTransmissions(int channel) = 0;
 
     /** Called from ChannelAccess, to transmit a frame to the radios in range, on the frame's channel */
-    virtual void sendToChannel(RadioRef srcRadio, AirFrame *airFrame) = 0;
+    virtual void sendToChannel(RadioRef srcRadio, SimplifiedRadioFrame *airFrame) = 0;
 
     /** Returns the maximal interference distance*/
     virtual double getInterferenceRange(RadioRef r) = 0;

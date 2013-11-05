@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "Ieee80211MgmtSTA.h"
 
 #include "Ieee802Ctrl_m.h"
@@ -25,7 +24,7 @@
 #include "NotifierConsts.h"
 #include "PhyControlInfo_m.h"
 #include "RadioState.h"
-#include "ChannelAccess.h"
+#include "SimplifiedRadioChannelAccess.h"
 #include "Radio80211aControlInfo_m.h"
 #include "opp_utils.h"
 
@@ -114,7 +113,7 @@ void Ieee80211MgmtSTA::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER)
     {
         // determine numChannels (needed when we're told to scan "all" channels)
-        IChannelControl *cc = ChannelAccess::getChannelControl();
+        ISimplifiedRadioChannel *cc = SimplifiedRadioChannelAccess::getSimplifiedRadioChannel();
         numChannels = cc->getNumChannels();
     }
     else if (stage == INITSTAGE_LINK_LAYER_2)

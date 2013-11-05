@@ -19,7 +19,7 @@
 #define IRADIOMODEL_H
 
 #include "INETDefs.h"
-#include "AirFrame_m.h"
+#include "SimplifiedRadioFrame_m.h"
 #include "SnrList.h"
 
 /**
@@ -48,7 +48,7 @@ class INET_API IRadioModel : public cObject
      * has a different modulation (and thus a different bitrate) than the
      * rest of the message.
      */
-    virtual double calculateDuration(AirFrame *) = 0;
+    virtual double calculateDuration(SimplifiedRadioFrame *) = 0;
 
     /**
      * Should be defined to calculate whether the frame has been received
@@ -56,10 +56,10 @@ class INET_API IRadioModel : public cObject
      * frame. The calculation may take into account the modulation scheme,
      * possible error correction code, etc.
      */
-    virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList) = 0;
+    virtual bool isReceivedCorrectly(SimplifiedRadioFrame *airframe, const SnrList& receivedList) = 0;
     // used by the Airtime Link Metric computation
     virtual bool haveTestFrame()=0;
-    virtual double calculateDurationTestFrame(AirFrame *airframe)=0;
+    virtual double calculateDurationTestFrame(SimplifiedRadioFrame *airframe)=0;
     virtual double getTestFrameError(double snirMin, double bitrate)=0;
     virtual int getTestFrameSize()=0;
 };

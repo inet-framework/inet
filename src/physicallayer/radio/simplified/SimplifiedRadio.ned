@@ -26,7 +26,7 @@ import inet.physicallayer.radio.contract.IRadio;
 //
 // This is an abstract module that defines all parameters for radio modules
 //
-simple Radio like IRadio
+simple SimplifiedRadio like IRadio
 {
     parameters:
         int channelNumber = default(0); // channel identifier this radio listens. Works only with simlified management module. Otherwise it scans all the channels as specified in ieee 80211

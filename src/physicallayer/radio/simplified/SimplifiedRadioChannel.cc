@@ -1,5 +1,5 @@
 /***************************************************************************
- * file:        ChannelControl.cc
+ * file:        SimplifiedRadioChannel.cc
  *
  * copyright:   (C) 2005 Andras Varga
  *
@@ -15,34 +15,34 @@
  **************************************************************************/
 
 
-#include "ChannelControl.h"
+#include "SimplifiedRadioChannel.h"
 #include "FWMath.h"
 #include <cassert>
 
-#include "AirFrame_m.h"
+#include "SimplifiedRadioFrame_m.h"
 
-Define_Module(ChannelControl);
+Define_Module(SimplifiedRadioChannel);
 
 
-std::ostream& operator<<(std::ostream& os, const ChannelControl::RadioEntry& radio)
+std::ostream& operator<<(std::ostream& os, const SimplifiedRadioChannel::RadioEntry& radio)
 {
     os << radio.radioModule->getFullPath() << " (x=" << radio.pos.x << ",y=" << radio.pos.y << "), "
        << radio.neighbors.size() << " neighbor(s)";
     return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const ChannelControl::TransmissionList& tl)
+std::ostream& operator<<(std::ostream& os, const SimplifiedRadioChannel::TransmissionList& tl)
 {
-    for (ChannelControl::TransmissionList::const_iterator it = tl.begin(); it != tl.end(); ++it)
+    for (SimplifiedRadioChannel::TransmissionList::const_iterator it = tl.begin(); it != tl.end(); ++it)
         os << endl << *it;
     return os;
 }
 
-ChannelControl::ChannelControl()
+SimplifiedRadioChannel::SimplifiedRadioChannel()
 {
 }
 
-ChannelControl::~ChannelControl()
+SimplifiedRadioChannel::~SimplifiedRadioChannel()
 {
     for (unsigned int i = 0; i < transmissions.size(); i++)
         for (TransmissionList::iterator it = transmissions[i].begin(); it != transmissions[i].end(); it++)
@@ -54,9 +54,9 @@ ChannelControl::~ChannelControl()
  *
  * @ref calcInterfDist
  */
-void ChannelControl::initialize()
+void SimplifiedRadioChannel::initialize()
 {
-    EV << "initializing ChannelControl\n";
+    EV << "initializing SimplifiedRadioChannel\n";
 
     numChannels = par("numChannels");
     transmissions.resize(numChannels);
@@ -78,7 +78,7 @@ void ChannelControl::initialize()
  * You may want to overwrite this function in order to do your own
  * interference calculation
  */
-double ChannelControl::calcInterfDist()
+double SimplifiedRadioChannel::calcInterfDist()
 {
     double interfDistance;
 
@@ -103,7 +103,7 @@ double ChannelControl::calcInterfDist()
     return interfDistance;
 }
 
-ChannelControl::RadioRef ChannelControl::registerRadio(cModule *radio, cGate *radioInGate)
+SimplifiedRadioChannel::RadioRef SimplifiedRadioChannel::registerRadio(cModule *radio, cGate *radioInGate)
 {
     Enter_Method_Silent();
 
@@ -125,7 +125,7 @@ ChannelControl::RadioRef ChannelControl::registerRadio(cModule *radio, cGate *ra
     return &radios.back(); // last element
 }
 
-void ChannelControl::unregisterRadio(RadioRef r)
+void SimplifiedRadioChannel::unregisterRadio(RadioRef r)
 {
     Enter_Method_Silent();
     for (RadioList::iterator it = radios.begin(); it != radios.end(); it++)
@@ -151,7 +151,7 @@ void ChannelControl::unregisterRadio(RadioRef r)
     error("unregisterRadio failed: no such radio");
 }
 
-ChannelControl::RadioRef ChannelControl::lookupRadio(cModule *radio)
+SimplifiedRadioChannel::RadioRef SimplifiedRadioChannel::lookupRadio(cModule *radio)
 {
     Enter_Method_Silent();
     for (RadioList::iterator it = radios.begin(); it != radios.end(); it++)
@@ -160,7 +160,7 @@ ChannelControl::RadioRef ChannelControl::lookupRadio(cModule *radio)
     return 0;
 }
 
-const ChannelControl::RadioRefVector& ChannelControl::getNeighbors(RadioRef h)
+const SimplifiedRadioChannel::RadioRefVector& SimplifiedRadioChannel::getNeighbors(RadioRef h)
 {
     Enter_Method_Silent();
     if (!h->isNeighborListValid)
@@ -173,7 +173,7 @@ const ChannelControl::RadioRefVector& ChannelControl::getNeighbors(RadioRef h)
     return h->neighborList;
 }
 
-void ChannelControl::updateConnections(RadioRef h)
+void SimplifiedRadioChannel::updateConnections(RadioRef h)
 {
     Coord& hpos = h->pos;
     double maxDistSquared = maxInterferenceDistance * maxInterferenceDistance;
@@ -208,20 +208,20 @@ void ChannelControl::updateConnections(RadioRef h)
     }
 }
 
-void ChannelControl::checkChannel(int channel)
+void SimplifiedRadioChannel::checkChannel(int channel)
 {
     if (channel >= numChannels || channel < 0)
         error("Invalid channel, must above 0 and below %d", numChannels);
 }
 
-void ChannelControl::setRadioPosition(RadioRef r, const Coord& pos)
+void SimplifiedRadioChannel::setRadioPosition(RadioRef r, const Coord& pos)
 {
     Enter_Method_Silent();
     r->pos = pos;
     updateConnections(r);
 }
 
-void ChannelControl::setRadioChannel(RadioRef r, int channel)
+void SimplifiedRadioChannel::setRadioChannel(RadioRef r, int channel)
 {
     Enter_Method_Silent();
     checkChannel(channel);
@@ -229,7 +229,7 @@ void ChannelControl::setRadioChannel(RadioRef r, int channel)
     r->channel = channel;
 }
 
-const ChannelControl::TransmissionList& ChannelControl::getOngoingTransmissions(int channel)
+const SimplifiedRadioChannel::TransmissionList& SimplifiedRadioChannel::getOngoingTransmissions(int channel)
 {
     Enter_Method_Silent();
 
@@ -238,7 +238,7 @@ const ChannelControl::TransmissionList& ChannelControl::getOngoingTransmissions(
     return transmissions[channel];
 }
 
-void ChannelControl::addOngoingTransmission(RadioRef h, AirFrame *frame)
+void SimplifiedRadioChannel::addOngoingTransmission(RadioRef h, SimplifiedRadioFrame *frame)
 {
     Enter_Method_Silent();
 
@@ -264,14 +264,14 @@ void ChannelControl::addOngoingTransmission(RadioRef h, AirFrame *frame)
     transmissions[frame->getChannelNumber()].push_back(frame);
 }
 
-void ChannelControl::purgeOngoingTransmissions()
+void SimplifiedRadioChannel::purgeOngoingTransmissions()
 {
     for (int i = 0; i < numChannels; i++)
     {
         for (TransmissionList::iterator it = transmissions[i].begin(); it != transmissions[i].end();)
         {
             TransmissionList::iterator curr = it;
-            AirFrame *frame = *it;
+            SimplifiedRadioFrame *frame = *it;
             it++;
 
             if (frame->getTimestamp() + frame->getDuration() + TRANSMISSION_PURGE_INTERVAL < simTime())
@@ -283,7 +283,7 @@ void ChannelControl::purgeOngoingTransmissions()
     }
 }
 
-void ChannelControl::sendToChannel(RadioRef srcRadio, AirFrame *airFrame)
+void SimplifiedRadioChannel::sendToChannel(RadioRef srcRadio, SimplifiedRadioFrame *airFrame)
 {
     // NOTE: no Enter_Method()! We pretend this method is part of ChannelAccess
 

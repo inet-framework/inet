@@ -18,23 +18,23 @@
  **************************************************************************/
 
 
-#ifndef CHANNEL_ACCESS_H
-#define CHANNEL_ACCESS_H
+#ifndef __INET_SIMPLIFIEDRADIOCHANNELACCESS_H
+#define __INET_SIMPLIFIEDRADIOCHANNELACCESS_H
 
 #include <list>
 #include <limits>
 
 #include "INETDefs.h"
-#include "IChannelControl.h"
+#include "ISimplifiedRadioChannel.h"
 
 // Forward declarations
-class AirFrame;
+class SimplifiedRadioFrame;
 
 /**
  * @brief Basic class for all physical layers, please don't touch!!
  *
  * This class is not supposed to work on its own, but it contains
- * functions and lists that cooperate with ChannelControl to handle
+ * functions and lists that cooperate with SimplifiedRadioChannel to handle
  * the dynamically created gates. This means EVERY SnrEval (the lowest
  * layer in a host) has to be derived from this class!!!! And please
  * follow the instructions on how to declare a physical layer in a
@@ -44,22 +44,22 @@ class AirFrame;
  * Please don't touch this class.
  *
  * @author Marc Loebbers
- * @ingroup channelControl
+ * @ingroup radioChannel
  * @ingroup phyLayer
  */
-class INET_API ChannelAccess : public cSimpleModule, protected cListener
+class INET_API SimplifiedRadioChannelAccess : public cSimpleModule, protected cListener
 {
   protected:
     static simsignal_t mobilityStateChangedSignal;
-    IChannelControl* cc;  // Pointer to the ChannelControl module
-    IChannelControl::RadioRef myRadioRef;  // Identifies this radio in the ChannelControl module
+    ISimplifiedRadioChannel* cc;  // Pointer to the SimplifiedRadioChannel module
+    ISimplifiedRadioChannel::RadioRef myRadioRef;  // Identifies this radio in the SimplifiedRadioChannel module
     cModule *hostModule;    // the host that contains this radio model
     Coord radioPos;  // the physical position of the radio (derived from display string or from mobility models)
     bool positionUpdateArrived;
 
   public:
-    ChannelAccess() : cc(NULL), myRadioRef(NULL), hostModule(NULL), positionUpdateArrived(false) {}
-    virtual ~ChannelAccess();
+    SimplifiedRadioChannelAccess() : cc(NULL), myRadioRef(NULL), hostModule(NULL) {}
+    virtual ~SimplifiedRadioChannelAccess();
 
     /**
      * @brief Called by the signalling mechanism to inform of changes.
@@ -68,18 +68,17 @@ class INET_API ChannelAccess : public cSimpleModule, protected cListener
      */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
-    /** Finds the channelControl module in the network */
-    static IChannelControl *getChannelControl();
+    /** Finds the radio channel module in the network */
+    static ISimplifiedRadioChannel *getSimplifiedRadioChannel();
 
   protected:
     /** Sends a message to all radios in range */
-    virtual void sendToChannel(AirFrame *msg);
+    virtual void sendToChannel(SimplifiedRadioFrame *msg);
 
-    virtual cPar& getChannelControlPar(const char *parName) { return dynamic_cast<cModule *>(cc)->par(parName); }
+    virtual cPar& getRadioChannelPar(const char *parName) { return dynamic_cast<cModule *>(cc)->par(parName); }
     const Coord& getRadioPosition() const { return radioPos; }
     cModule *getHostModule() const { return hostModule; }
 
-    /** Register with ChannelControl and subscribe to hostPos*/
     virtual void initialize(int stage);
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 };

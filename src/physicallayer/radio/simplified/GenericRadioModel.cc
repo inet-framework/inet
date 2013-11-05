@@ -54,13 +54,13 @@ void GenericRadioModel::initializeFrom(cModule *radioModule)
 }
 
 
-double GenericRadioModel::calculateDuration(AirFrame *airframe)
+double GenericRadioModel::calculateDuration(SimplifiedRadioFrame *airframe)
 {
     return (airframe->getBitLength()+headerLengthBits) / airframe->getBitrate();
 }
 
 
-bool GenericRadioModel::isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList)
+bool GenericRadioModel::isReceivedCorrectly(SimplifiedRadioFrame *airframe, const SnrList& receivedList)
 {
     // calculate snirMin
     double snirMin = receivedList.begin()->snr;

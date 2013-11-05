@@ -22,7 +22,7 @@ import inet.linklayer.IWirelessNic;
 import inet.linklayer.ieee80211.mac.Ieee80211Mac;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
-import inet.physicallayer.radio.simplified.ieee80211.Ieee80211Radio;
+import inet.physicallayer.radio.simplified.ieee80211.SimplifiedIeee80211Radio;
 
 
 //
@@ -70,7 +70,7 @@ module Ieee80211Nic like IWirelessNic
                 queueModule = "mgmt";
                 @display("p=157,217");
         }
-        radio: Ieee80211Radio {
+        radio: SimplifiedIeee80211Radio {
             parameters:
                 phyOpMode = opMode;
                 bitrate = bitrate;
