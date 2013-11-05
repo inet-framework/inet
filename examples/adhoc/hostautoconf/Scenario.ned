@@ -18,7 +18,7 @@
 
 package inet.examples.adhoc.hostautoconf;
 
-import inet.physicallayer.radio.simplified.ChannelControl;
+import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 
 
 network Scenario
@@ -27,6 +27,6 @@ network Scenario
         double hosts;
 
     submodules:
-        channelControl: ChannelControl;
+        radioChannel: SimplifiedRadioChannel;
         host[hosts]: Host;
 }

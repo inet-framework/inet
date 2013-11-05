@@ -19,11 +19,11 @@
 
 package inet.examples.wireless.throughput;
 
-import inet.physicallayer.radio.simplified.ChannelControl;
-import inet.mobility.models.StationaryMobility;
-import inet.linklayer.ieee80211.Ieee80211Nic;
-import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
+import inet.base.NotificationBoard;
+import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.mobility.models.StationaryMobility;
+import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 
 
 module ThroughputClient
@@ -72,7 +72,7 @@ network Throughput
             parameters:
                 @display("p=200,200;r=,,#707070");
         }
-        channelControl: ChannelControl {
+        radioChannel: SimplifiedRadioChannel {
             parameters:
                 @display("p=61,46");
         }

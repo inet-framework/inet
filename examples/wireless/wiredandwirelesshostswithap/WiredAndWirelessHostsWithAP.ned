@@ -10,7 +10,7 @@ import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
-import inet.physicallayer.radio.simplified.ChannelControl;
+import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 
 
 network WiredAndWirelessHostsWithAP
@@ -37,7 +37,7 @@ network WiredAndWirelessHostsWithAP
                 assignDisjunctSubnetAddresses = false;
                 @display("p=367,165");
         }
-        channelControl: ChannelControl {
+        radioChannel: SimplifiedRadioChannel {
             @display("p=115,165");
         }
     connections:

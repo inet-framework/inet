@@ -14,7 +14,7 @@ network NetIdealRadios
             parameters:
                 @display("r=,,#707070;p=250,58");
         }
-        channelControl: IdealChannelModel {
+        radioChannel: IdealChannelModel {
             parameters:
                 @display("p=60,50");
         }

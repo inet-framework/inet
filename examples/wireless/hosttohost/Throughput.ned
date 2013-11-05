@@ -19,14 +19,14 @@
 
 package inet.examples.wireless.hosttohost;
 
-import inet.physicallayer.radio.simplified.ChannelControl;
-import inet.nodes.wireless.AccessPoint;
-import inet.mobility.models.StationaryMobility;
-import inet.mobility.models.CircleMobility;
-import inet.linklayer.ieee80211.Ieee80211Nic;
-import inet.base.Sink;
-import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
+import inet.base.NotificationBoard;
+import inet.base.Sink;
+import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.mobility.models.CircleMobility;
+import inet.mobility.models.StationaryMobility;
+import inet.nodes.wireless.AccessPoint;
+import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 
 
 module ThroughputClient
@@ -111,7 +111,7 @@ network Throughput
                 @display("p=200,200;r=,,#707070");
                 wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
         }
-        channelControl: ChannelControl {
+        radioChannel: SimplifiedRadioChannel {
             parameters:
                 @display("p=61,46");
         }

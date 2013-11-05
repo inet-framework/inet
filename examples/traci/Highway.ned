@@ -20,14 +20,14 @@
 
 package inet.examples.traci;
 
-import inet.physicallayer.radio.simplified.ChannelControl;
+import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 import inet.world.traci.TraCIScenarioManager;
 
 
 module Highway
 {
     submodules:
-        channelControl: ChannelControl {
+        radioChannel: SimplifiedRadioChannel {
             parameters:
                 @display("p=256,128");
         }

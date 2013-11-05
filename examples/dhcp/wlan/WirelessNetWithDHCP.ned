@@ -21,7 +21,7 @@ import inet.nodes.ethernet.Eth100M;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.WirelessHost;
-import inet.physicallayer.radio.simplified.ChannelControl;
+import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 
 
 //
@@ -32,7 +32,7 @@ network WirelessNetWithDHCP
     @display("bgb=590,407;bgl=2");
     int numWirelessHosts;
     submodules:
-        channelControl: ChannelControl {
+        radioChannel: SimplifiedRadioChannel {
             @display("p=64,34");
             pMax = 100mW;
             numChannels = 5;
