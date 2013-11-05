@@ -39,7 +39,7 @@ Define_Module(IGMPv3);
 
 static IPv4AddressVector set_complement(IPv4AddressVector first, IPv4AddressVector second)
 {
-    IPv4AddressVector complement;
+    IPv4AddressVector complement(first.size());
     IPv4AddressVector::iterator it;
 
     std::sort(first.begin(), first.end());
@@ -52,7 +52,7 @@ static IPv4AddressVector set_complement(IPv4AddressVector first, IPv4AddressVect
 
 static IPv4AddressVector set_intersection(IPv4AddressVector first, IPv4AddressVector second)
 {
-    IPv4AddressVector intersection;
+    IPv4AddressVector intersection(std::min(first.size(), second.size()));
     IPv4AddressVector::iterator it;
 
     std::sort(first.begin(), first.end());
