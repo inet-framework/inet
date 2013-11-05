@@ -168,6 +168,7 @@ IGMPv3::SourceRecord::~SourceRecord()
 {
     if(sourceTimer)
     {
+        delete (IGMPV3RouterSourceTimerContext*)sourceTimer->getContextPointer();
         owner->cancelAndDelete(sourceTimer);
     }
 }
@@ -182,6 +183,12 @@ IGMPv3::HostInterfaceData::HostInterfaceData(IGMPv3 *owner)
 
 IGMPv3::HostInterfaceData::~HostInterfaceData()
 {
+    if (generalQueryTimer)
+    {
+        delete (IGMPV3HostGeneralTimerContext*)generalQueryTimer->getContextPointer();
+        owner->cancelAndDelete(generalQueryTimer);
+    }
+
     for (GroupToHostDataMap::iterator it = groups.begin(); it != groups.end(); ++it)
         delete it->second;
 }
@@ -197,10 +204,7 @@ IGMPv3::RouterInterfaceData::RouterInterfaceData(IGMPv3 *owner)
 
 IGMPv3::RouterInterfaceData::~RouterInterfaceData()
 {
-    if(generalQueryTimer)
-    {
-        owner->cancelAndDelete(generalQueryTimer);
-    }
+    owner->cancelAndDelete(generalQueryTimer);
 
     for(GroupToRouterDataMap::iterator it = groups.begin(); it != groups.end(); ++it)
         delete it->second;
