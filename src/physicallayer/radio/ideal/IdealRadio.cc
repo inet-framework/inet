@@ -41,7 +41,7 @@ IdealRadio::IdealRadio()
 
 void IdealRadio::initialize(int stage)
 {
-    IdealChannelModelAccess::initialize(stage);
+    IdealRadioChannelAccess::initialize(stage);
 
     EV << "Initializing IdealRadio, stage=" << stage << endl;
 
@@ -122,8 +122,7 @@ void IdealRadio::handleMessage(cMessage *msg)
     }
     else if (msg->getArrivalGateId() == radioInGateId)
     {
-        // must be an IdealAirFrame
-        IdealAirFrame *airframe = check_and_cast<IdealAirFrame*>(msg);
+        IdealRadioFrame *airframe = check_and_cast<IdealRadioFrame*>(msg);
         if (isEnabled())
         {
             handleLowerMsgStart(airframe);
@@ -141,12 +140,12 @@ void IdealRadio::handleMessage(cMessage *msg)
     }
 }
 
-IdealAirFrame *IdealRadio::encapsulatePacket(cPacket *frame)
+IdealRadioFrame *IdealRadio::encapsulatePacket(cPacket *frame)
 {
     delete frame->removeControlInfo();
 
-    // Note: we don't set length() of the IdealAirFrame, because duration will be used everywhere instead
-    IdealAirFrame *airframe = createAirFrame();
+    // Note: we don't set length() of the IdealRadioFrame, because duration will be used everywhere instead
+    IdealRadioFrame *airframe = createRadioFrame();
     airframe->setName(frame->getName());
     airframe->setTransmissionRange(transmissionRange);
     airframe->encapsulate(frame);
@@ -158,7 +157,7 @@ IdealAirFrame *IdealRadio::encapsulatePacket(cPacket *frame)
     return airframe;
 }
 
-void IdealRadio::sendUp(IdealAirFrame *airframe)
+void IdealRadio::sendUp(IdealRadioFrame *airframe)
 {
     cPacket *frame = airframe->decapsulate();
     delete airframe;
@@ -166,7 +165,7 @@ void IdealRadio::sendUp(IdealAirFrame *airframe)
     send(frame, upperLayerOutGateId);
 }
 
-void IdealRadio::sendDown(IdealAirFrame *airframe)
+void IdealRadio::sendDown(IdealRadioFrame *airframe)
 {
     // change radio status
     EV << "sending, changing RadioState to TRANSMIT\n";
@@ -188,7 +187,7 @@ void IdealRadio::sendDown(IdealAirFrame *airframe)
  */
 void IdealRadio::handleUpperMsg(cMessage *msg)
 {
-    IdealAirFrame *airframe = encapsulatePacket(PK(msg));
+    IdealRadioFrame *airframe = encapsulatePacket(PK(msg));
 
     if (rs == RadioState::TRANSMIT)
         error("Trying to send a message while already transmitting -- MAC should "
@@ -210,7 +209,7 @@ void IdealRadio::handleSelfMsg(cMessage *msg)
         EV << "frame is completely received now\n";
 
         // unbuffer the message
-        IdealAirFrame *airframe = check_and_cast<IdealAirFrame *>(msg->removeControlInfo());
+        IdealRadioFrame *airframe = check_and_cast<IdealRadioFrame *>(msg->removeControlInfo());
         bool found = false;
         for (RecvBuff::iterator it = recvBuff.begin(); it != recvBuff.end(); ++it)
         {
@@ -256,7 +255,7 @@ void IdealRadio::handleSelfMsg(cMessage *msg)
  *
  * Update radioState.
  */
-void IdealRadio::handleLowerMsgStart(IdealAirFrame *airframe)
+void IdealRadio::handleLowerMsgStart(IdealRadioFrame *airframe)
 {
     EV << "receiving frame " << airframe->getName() << endl;
 
@@ -277,7 +276,7 @@ void IdealRadio::handleLowerMsgStart(IdealAirFrame *airframe)
  * This function is called right after the transmission is over.
  * Additionally the RadioState has to be updated.
  */
-void IdealRadio::handleLowerMsgEnd(IdealAirFrame *airframe)
+void IdealRadio::handleLowerMsgEnd(IdealRadioFrame *airframe)
 {
     concurrentReceives--;
     sendUp(airframe);
@@ -352,5 +351,5 @@ void IdealRadio::updateDisplayString()
 
 void IdealRadio::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
-    IdealChannelModelAccess::receiveSignal(source, signalID, obj);
+    IdealRadioChannelAccess::receiveSignal(source, signalID, obj);
 }

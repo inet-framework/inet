@@ -17,38 +17,38 @@
 // author: Zoltan Bojthe
 //
 
-#include "IdealChannelModel.h"
+#include "IdealRadioChannel.h"
 
 #include "IdealRadio.h"
 
 
-Define_Module(IdealChannelModel);
+Define_Module(IdealRadioChannel);
 
 
-std::ostream& operator<<(std::ostream& os, const IdealChannelModel::RadioEntry& radio)
+std::ostream& operator<<(std::ostream& os, const IdealRadioChannel::RadioEntry& radio)
 {
     os << radio.radioModule->getFullPath() << " (x=" << radio.pos.x << ",y=" << radio.pos.y << ")";
     return os;
 }
 
-IdealChannelModel::IdealChannelModel()
+IdealRadioChannel::IdealRadioChannel()
 {
 }
 
-IdealChannelModel::~IdealChannelModel()
+IdealRadioChannel::~IdealRadioChannel()
 {
 }
 
-void IdealChannelModel::initialize()
+void IdealRadioChannel::initialize()
 {
-    EV << "initializing IdealChannelModel" << endl;
+    EV << "initializing IdealRadioChannel" << endl;
 
     maxTransmissionRange = 0;
 
     WATCH_LIST(radios);
 }
 
-IdealChannelModel::RadioEntry *IdealChannelModel::registerRadio(cModule *radio, cGate *radioInGate)
+IdealRadioChannel::RadioEntry *IdealRadioChannel::registerRadio(cModule *radio, cGate *radioInGate)
 {
     Enter_Method_Silent();
 
@@ -76,7 +76,7 @@ IdealChannelModel::RadioEntry *IdealChannelModel::registerRadio(cModule *radio, 
     return &radios.back(); // last element
 }
 
-void IdealChannelModel::recalculateMaxTransmissionRange()
+void IdealRadioChannel::recalculateMaxTransmissionRange()
 {
     double newRange = 0.0;
 
@@ -89,7 +89,7 @@ void IdealChannelModel::recalculateMaxTransmissionRange()
     maxTransmissionRange = newRange;
 }
 
-void IdealChannelModel::unregisterRadio(RadioEntry *r)
+void IdealRadioChannel::unregisterRadio(RadioEntry *r)
 {
     Enter_Method_Silent();
     for (RadioList::iterator it = radios.begin(); it != radios.end(); ++it)
@@ -106,7 +106,7 @@ void IdealChannelModel::unregisterRadio(RadioEntry *r)
     error("unregisterRadio failed: no such radio");
 }
 
-IdealChannelModel::RadioEntry *IdealChannelModel::lookupRadio(cModule *radio)
+IdealRadioChannel::RadioEntry *IdealRadioChannel::lookupRadio(cModule *radio)
 {
     for (RadioList::iterator it = radios.begin(); it != radios.end(); it++)
         if (it->radioModule == radio)
@@ -114,12 +114,12 @@ IdealChannelModel::RadioEntry *IdealChannelModel::lookupRadio(cModule *radio)
     return NULL;
 }
 
-void IdealChannelModel::setRadioPosition(RadioEntry *r, const Coord& pos)
+void IdealRadioChannel::setRadioPosition(RadioEntry *r, const Coord& pos)
 {
     r->pos = pos;
 }
 
-void IdealChannelModel::sendToChannel(RadioEntry *srcRadio, IdealAirFrame *airFrame)
+void IdealRadioChannel::sendToChannel(RadioEntry *srcRadio, IdealRadioFrame *airFrame)
 {
     // NOTE: no Enter_Method()! We pretend this method is part of ChannelAccess
 

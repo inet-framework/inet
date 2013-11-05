@@ -17,19 +17,19 @@
 // author: Zoltan Bojthe
 //
 
-#include "IdealChannelModelAccess.h"
+#include "IdealRadioChannelAccess.h"
 #include "ModuleAccess.h"
 #include "IMobility.h"
 
-simsignal_t IdealChannelModelAccess::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
+simsignal_t IdealRadioChannelAccess::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
 
 // the destructor unregister the radio module
-IdealChannelModelAccess::~IdealChannelModelAccess()
+IdealRadioChannelAccess::~IdealRadioChannelAccess()
 {
     if (cc && myRadioRef)
     {
         // check if channel control exist
-        IdealChannelModel *cc = dynamic_cast<IdealChannelModel *>(simulation.getModuleByPath("channelControl"));
+        IdealRadioChannel *cc = dynamic_cast<IdealRadioChannel *>(simulation.getModuleByPath("radioChannel"));
         if (cc)
              cc->unregisterRadio(myRadioRef);
         myRadioRef = NULL;
@@ -37,18 +37,18 @@ IdealChannelModelAccess::~IdealChannelModelAccess()
 }
 
 /**
- * Upon initialization IdealChannelModelAccess registers the nic parent module
- * to have all its connections handled by ChannelControl
+ * Upon initialization IdealRadioChannelAccess registers the nic parent module
+ * to have all its connections handled by IdealRadioChannel
  */
-void IdealChannelModelAccess::initialize(int stage)
+void IdealRadioChannelAccess::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {
-        cc = dynamic_cast<IdealChannelModel *>(simulation.getModuleByPath("channelControl"));
+        cc = dynamic_cast<IdealRadioChannel *>(simulation.getModuleByPath("radioChannel"));
         if (!cc)
-            throw cRuntimeError("Could not find IdealChannelModel module with name 'channelControl' in the toplevel network.");
+            throw cRuntimeError("Could not find IdealRadioChannel module with name 'radioChannel' in the toplevel network.");
 
         hostModule = getContainingNode(this);
 
@@ -73,15 +73,13 @@ void IdealChannelModelAccess::initialize(int stage)
  * This function really sends the message away, so if you still want
  * to work with it you should send a duplicate!
  */
-void IdealChannelModelAccess::sendToChannel(IdealAirFrame *msg)
+void IdealRadioChannelAccess::sendToChannel(IdealRadioFrame *msg)
 {
     EV << "sendToChannel: sending to gates\n";
-
-    // delegate it to ChannelControl
     cc->sendToChannel(myRadioRef, msg);
 }
 
-void IdealChannelModelAccess::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void IdealRadioChannelAccess::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     if (signalID == mobilityStateChangedSignal)
     {

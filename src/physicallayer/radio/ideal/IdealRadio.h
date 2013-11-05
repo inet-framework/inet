@@ -24,8 +24,8 @@
 
 #include "INETDefs.h"
 
-#include "IdealAirFrame_m.h"
-#include "IdealChannelModelAccess.h"
+#include "IdealRadioFrame_m.h"
+#include "IdealRadioChannelAccess.h"
 #include "ILifecycle.h"
 #include "RadioState.h"
 
@@ -36,7 +36,7 @@
  *
  * See the NED file for details.
  */
-class INET_API IdealRadio : public IdealChannelModelAccess, public ILifecycle
+class INET_API IdealRadio : public IdealRadioChannelAccess, public ILifecycle
 {
   public:
     IdealRadio();
@@ -60,24 +60,24 @@ class INET_API IdealRadio : public IdealChannelModelAccess, public ILifecycle
 
     virtual void handleCommand(cMessage *msg);
 
-    virtual void handleLowerMsgStart(IdealAirFrame *airframe);
+    virtual void handleLowerMsgStart(IdealRadioFrame *airframe);
 
-    virtual void handleLowerMsgEnd(IdealAirFrame *airframe);
+    virtual void handleLowerMsgEnd(IdealRadioFrame *airframe);
 
     /** Sends a message to the upper layer */
-    virtual void sendUp(IdealAirFrame *airframe);
+    virtual void sendUp(IdealRadioFrame *airframe);
 
     /** Sends a message to the channel */
-    virtual void sendDown(IdealAirFrame *airframe);
+    virtual void sendDown(IdealRadioFrame *airframe);
 
     /** Encapsulates a MAC frame into an Air Frame */
-    virtual IdealAirFrame *encapsulatePacket(cPacket *msg);
+    virtual IdealRadioFrame *encapsulatePacket(cPacket *msg);
 
     /** Updates the radio state, and also sends a radioState signal */
     virtual void updateRadioState();
 
-    /** Create a new IdealAirFrame */
-    virtual IdealAirFrame *createAirFrame() { return new IdealAirFrame(); }
+    /** Create a new IdealRadioFrame */
+    virtual IdealRadioFrame *createRadioFrame() { return new IdealRadioFrame(); }
 
     virtual void setRadioState(RadioState::State newState);
 

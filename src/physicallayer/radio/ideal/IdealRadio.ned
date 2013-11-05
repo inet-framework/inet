@@ -26,7 +26,7 @@ import inet.physicallayer.radio.contract.IRadio;
 //
 // See ~IdealWirelessNic for rationale and details.
 //
-// See ~IdealChannelModel, ~IdealWirelessMac, ~IdealWirelessNic
+// See ~IdealRadioChannel, ~IdealWirelessMac, ~IdealWirelessNic
 //
 simple IdealRadio like IRadio
 {
@@ -39,6 +39,6 @@ simple IdealRadio like IRadio
     gates:
         input upperLayerIn; // from higher layer protocol (MAC)
         output upperLayerOut; // to higher layer protocol (MAC)
-        input radioIn @labels(IdealAirFrame); // to receive frames (IdealAirFrame) on the radio channel
+        input radioIn @labels(IdealRadioFrame); // to receive frames (IdealRadioFrame) on the radio channel
 }
 

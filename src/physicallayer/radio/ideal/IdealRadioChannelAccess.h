@@ -18,51 +18,50 @@
 //
 
 
-#ifndef __INET_IDEALCHANNELMODELACCESS_H
-#define __INET_IDEALCHANNELMODELACCESS_H
+#ifndef __INET_IDEALRADIOCHANNELACCESS_H
+#define __INET_IDEALRADIOCHANNELACCESS_H
 
 
-#include "INETDefs.h"
-
-#include "IdealChannelModel.h"
+#include "RadioBase.h"
+#include "IdealRadioChannel.h"
 
 // Forward declarations
-class IdealAirFrame;
+class IdealRadioFrame;
 
 
 /**
- * This class contains functions that cooperate with IdealChannelModel.
+ * This class contains functions that cooperate with IdealRadioChannel.
  * Subscribes to position change and updates cached radio position if
  * position change signal arrived.
  *
  * The radio module has to be derived from this class!
  */
-class INET_API IdealChannelModelAccess : public cSimpleModule, protected cListener
+class INET_API IdealRadioChannelAccess : public cSimpleModule, protected cListener
 {
   protected:
     static simsignal_t mobilityStateChangedSignal;
-    IdealChannelModel *cc;  // Pointer to the IdealChannelModel module
-    IdealChannelModel::RadioEntry *myRadioRef;  // Identifies this radio in the IdealChannelModel module
+    IdealRadioChannel *cc;  // Pointer to the IdealRadioChannel module
+    IdealRadioChannel::RadioEntry *myRadioRef;  // Identifies this radio in the IdealRadioChannel module
     cModule *hostModule;    // the host that contains this radio model
     Coord radioPos;  // the physical position of the radio (derived from display string or from mobility models)
     bool positionUpdateArrived;
 
   public:
-    IdealChannelModelAccess() : cc(NULL), myRadioRef(NULL), hostModule(NULL) {}
-    virtual ~IdealChannelModelAccess();
+    IdealRadioChannelAccess() : cc(NULL), myRadioRef(NULL), hostModule(NULL) {}
+    virtual ~IdealRadioChannelAccess();
 
     /**
      * @brief Called by the signaling mechanism to inform of changes.
      *
-     * IdealChannelModelAccess is subscribed to position changes.
+     * IdealRadioChannelAccess is subscribed to position changes.
      */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
   protected:
     /** Sends a message to all radios in range */
-    virtual void sendToChannel(IdealAirFrame *msg);
+    virtual void sendToChannel(IdealRadioFrame *msg);
 
-    virtual cPar& getChannelControlPar(const char *parName) { return (cc)->par(parName); }
+    virtual cPar& getRadioChannelPar(const char *parName) { return (cc)->par(parName); }
     const Coord& getRadioPosition() const { return radioPos; }
     cModule *getHostModule() const { return hostModule; }
 

@@ -17,8 +17,8 @@
 // author: Zoltan Bojthe
 //
 
-#ifndef __INET_IDEALCHANNELMODEL_H
-#define __INET_IDEALCHANNELMODEL_H
+#ifndef __INET_IdealRadioChannel_H
+#define __INET_IdealRadioChannel_H
 
 
 #include "INETDefs.h"
@@ -26,17 +26,17 @@
 #include "Coord.h"
 
 // Forward declarations
-class IdealAirFrame;
+class IdealRadioFrame;
 class IdealRadio;
 
 
 /**
- * This class represent an ideal channel model (aka channelControl)
+ * This class represent an ideal radio channel.
  *
  * Stores infos about all registered radios.
  * Forward messages to all other radios in max transmission range
  */
-class INET_API IdealChannelModel : public cSimpleModule
+class INET_API IdealRadioChannel : public cSimpleModule
 {
   public:
     struct RadioEntry
@@ -67,8 +67,8 @@ class INET_API IdealChannelModel : public cSimpleModule
     virtual void recalculateMaxTransmissionRange();
 
   public:
-    IdealChannelModel();
-    virtual ~IdealChannelModel();
+    IdealRadioChannel();
+    virtual ~IdealRadioChannel();
 
     /** Registers the given radio. If radioInGate==NULL, the "radioIn" gate is assumed */
     virtual RadioEntry * registerRadio(cModule *radioModule, cGate *radioInGate = NULL);
@@ -79,8 +79,8 @@ class INET_API IdealChannelModel : public cSimpleModule
     /** To be called when the host moved; updates proximity info */
     virtual void setRadioPosition(RadioEntry *r, const Coord& pos);
 
-    /** Called from IdealChannelModelAccess, to transmit a frame to the radios in range, on the frame's channel */
-    virtual void sendToChannel(RadioEntry * srcRadio, IdealAirFrame *airFrame);
+    /** Called from IdealRadioChannelAccess, to transmit a frame to the radios in range, on the frame's channel */
+    virtual void sendToChannel(RadioEntry * srcRadio, IdealRadioFrame *airFrame);
 
     /** Disable the reception in the reference module */
     virtual void disableReception(RadioEntry *r) { r->isActive = false; };
@@ -92,5 +92,5 @@ class INET_API IdealChannelModel : public cSimpleModule
     virtual double getSignalSpeed() { return SPEED_OF_LIGHT; }
 };
 
-#endif      // __INET_IDEALCHANNELMODEL_H
+#endif      // __INET_IdealRadioChannel_H
 
