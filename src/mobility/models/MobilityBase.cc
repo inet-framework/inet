@@ -24,9 +24,6 @@
 #include "MobilityBase.h"
 #include "FWMath.h"
 
-
-simsignal_t MobilityBase::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
-
 Register_Abstract_Class(MobilityBase);
 
 static bool parseIntTo(const char *s, double& destValue)

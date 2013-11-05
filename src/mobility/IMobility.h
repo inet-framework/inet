@@ -37,6 +37,10 @@
 class INET_API IMobility
 {
   public:
+    /** @brief A signal used to publish mobility state changes. */
+    static simsignal_t mobilityStateChangedSignal;
+
+  public:
     virtual ~IMobility() {}
 
     /** @brief Returns the current position at the current simulation time. */
