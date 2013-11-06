@@ -23,9 +23,12 @@ network=TestIGMPNetwork
 %file: scenario.xml
 <scenario>
 
-<join t="2" module="node.tester" ifname="eth0" group="225.0.0.1"/>
+<join t="2" module="node.tester" ifname="eth0" group="225.0.0.1" sources="10.0.0.1"/>
 <dump t="2" module="node.tester" ifname="eth0" what="groups"/>
+<send t="2" module="node.tester" ifname="eth0" type="IGMPv3Query" maxRespCode="10"/>
 
+<set-filter t="3" module="node.tester" ifname="eth0" group="225.0.0.1" sources="E 10.0.0.2"/>
+<dump t="3" module="node.tester" ifname="eth0" what="groups"/>
 <send t="3" module="node.tester" ifname="eth0" type="IGMPv3Query" maxRespCode="10"/>
 
 </scenario>
@@ -36,15 +39,17 @@ network=TestIGMPNetwork
 %# First check that the join was successful
 %#
 %contains-regex: test.out
-2 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 E
+2 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 I 10.0.0.1
+.*
+3 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 E 10.0.0.2
 
 %#
 %# Now check that the IGMP module responded with a correct report
 %#
 %contains-regex: test.out
-3 tester: Sending: IGMPv3Query<group=<unspec>, sourceList=,.*>.
+2\..* tester: Received: IGMPv3Report<225.0.0.1=IS_IN 10.0.0.1>.
 .*
-3\..* tester: Received: IGMPv3Report<225.0.0.1=IS_EX>.
+3\..* tester: Received: IGMPv3Report<225.0.0.1=IS_EX 10.0.0.2>.
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
