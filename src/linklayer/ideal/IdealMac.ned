@@ -19,6 +19,7 @@
 
 package inet.linklayer.ideal;
 
+import inet.linklayer.contract.ILinkLayer;
 
 //
 // Implements a trivial MAC layer for use in ~IdealWirelessNic.
@@ -31,7 +32,7 @@ package inet.linklayer.ideal;
 //
 // See ~IdealWirelessNic for rationale and details.
 //
-simple IdealMac
+simple IdealMac like ILinkLayer
 {
     parameters:
         string address = default("auto");   // MAC address as hex string (12 hex digits), or

@@ -20,11 +20,9 @@
 
 package inet.linklayer.ideal;
 
-import inet.base.IHook;
-import inet.queue.IOutputQueue;
-import inet.linklayer.ITrafficConditioner;
 import inet.linklayer.IWirelessNic;
-import inet.physicallayer.radio.ideal.IdealRadio;
+import inet.physicallayer.radio.contract.IRadio;
+import inet.queue.IOutputQueue;
 
 
 //
@@ -39,8 +37,7 @@ import inet.physicallayer.radio.ideal.IdealRadio;
 // affected at all. There are no collisions -- a radio can simultaneously
 // receive any number of frames, and also transmit a single frame at the same time.
 //
-// This module requires an ~IdealChannelModel instance in the network
-// as radio channel module.
+// This module requires an ~IdealRadioChannel instance in the network.
 //
 module IdealWirelessNic like IWirelessNic
 {
@@ -48,6 +45,8 @@ module IdealWirelessNic like IWirelessNic
         @display("i=block/ifcard;bgb=214,335;bgl=53");
         double bitrate @unit("bps");
         string queueType = default("DropTailQueue");    // DropTailQueue, a Diffserv queue, etc.
+        string radioType = default("IdealRadio");
+        **.bitrate = bitrate;
     gates:
         input upperLayerIn;
         output upperLayerOut;
@@ -59,20 +58,17 @@ module IdealWirelessNic like IWirelessNic
         }
         mac: IdealMac {
             parameters:
-                bitrate = bitrate;
                 @display("p=98,207");
         }
-        radio: IdealRadio {
+        radio: <radioType> like IRadio {
             parameters:
-                bitrate = bitrate;
                 @display("p=98,278");
         }
     connections:
         upperLayerIn --> { @display("m=n"); } --> queue.in;
-        mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
         queue.out --> mac.upperLayerIn;
+        mac.lowerLayerOut --> radio.upperLayerIn;
+        mac.upperLayerOut --> { @display("m=n"); } --> upperLayerOut;
         radioIn --> { @display("m=s"); } --> radio.radioIn;
-        radio.upperLayerIn <-- mac.lowerLayerOut;
         radio.upperLayerOut --> mac.lowerLayerIn;
 }
-

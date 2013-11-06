@@ -20,11 +20,9 @@
 #ifndef __INET_IDEALMAC_H
 #define __INET_IDEALMAC_H
 
-
 #include "INETDefs.h"
-
+#include "IRadio.h"
 #include "MACAddress.h"
-#include "RadioState.h"
 #include "WirelessMacBase.h"
 
 class IdealMacFrame;
@@ -39,7 +37,6 @@ class IPassiveQueue;
 class INET_API IdealMac : public WirelessMacBase
 {
   protected:
-    static simsignal_t radioStateSignal;
     static simsignal_t dropPkNotForUsSignal;
 
     // parameters
@@ -48,10 +45,9 @@ class INET_API IdealMac : public WirelessMacBase
     bool promiscuous;       // promiscuous mode
     MACAddress address;     // MAC address
 
+    IRadio *radio;
     IPassiveQueue *queueModule;
-    cModule *radioModule;
 
-    RadioState::State radioState;
     int outStandingRequests;
     simtime_t lastTransmitStartTime;
 
@@ -73,7 +69,7 @@ class INET_API IdealMac : public WirelessMacBase
     virtual void getNextMsgFromHL();
 
     //cListener:
-    virtual void receiveSignal(cComponent *src, simsignal_t id, long x);
+    virtual void receiveSignal(cComponent *src, simsignal_t id, long value);
 
     /** implements WirelessMacBase functions */
     //@{

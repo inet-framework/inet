@@ -33,13 +33,12 @@
 
 Define_Module(IdealMac);
 
-simsignal_t IdealMac::radioStateSignal = registerSignal("radioState");
 simsignal_t IdealMac::dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
 
 IdealMac::IdealMac()
 {
     queueModule = NULL;
-    radioModule = NULL;
+    radio = NULL;
 }
 
 IdealMac::~IdealMac()
@@ -77,9 +76,9 @@ void IdealMac::initialize(int stage)
         headerLength = par("headerLength").longValue();
         promiscuous = par("promiscuous");
 
-        radioModule = gate("lowerLayerOut")->getPathEndGate()->getOwnerModule();
-        IdealRadio *irm = check_and_cast<IdealRadio *>(radioModule);
-        irm->subscribe(radioStateSignal, this);
+        cModule *radioModule = gate("lowerLayerOut")->getPathEndGate()->getOwnerModule();
+        radioModule->subscribe(IRadio::radioChannelStateChangedSignal, this);
+        radio = check_and_cast<IRadio *>(radioModule);
 
         // find queueModule
         cGate *queueOut = gate("upperLayerIn")->getPathStartGate();
@@ -91,7 +90,7 @@ void IdealMac::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
-        // register our interface entry in IInterfaceTable
+        radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
         registerInterface();
     }
 }
@@ -141,13 +140,12 @@ InterfaceEntry *IdealMac::createInterfaceEntry()
 
 void IdealMac::receiveSignal(cComponent *source, simsignal_t signalID, long x)
 {
-    //WirelessMacBase::receiveSignal(source, signalID, x);
-
-    if (signalID == radioStateSignal && source == radioModule)
+    if (signalID == IRadio::radioChannelStateChangedSignal)
     {
-        radioState = (RadioState::State)x;
-        if (radioState != RadioState::TRANSMIT)
+        if ((IRadio::RadioChannelState)x != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING) {
+            radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
             getNextMsgFromHL();
+        }
     }
 }
 
@@ -158,6 +156,7 @@ void IdealMac::startTransmitting(cPacket *msg)
 
     // send
     EV << "Starting transmission of " << frame << endl;
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(frame);
 }
 
@@ -180,14 +179,10 @@ void IdealMac::getNextMsgFromHL()
 void IdealMac::handleUpperMsg(cPacket *msg)
 {
     outStandingRequests--;
-    if (radioState == RadioState::TRANSMIT)
+    if (radio->getRadioChannelState() == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
     {
         // Logic error: we do not request packet from the external queue when radio is transmitting
         error("Received msg for transmission but transmitter is busy");
-    }
-    else if (radioState == RadioState::SLEEP)
-    {
-        EV << "Dropped upper layer message " << msg << " because radio is SLEEPing.\n";
     }
     else
     {
