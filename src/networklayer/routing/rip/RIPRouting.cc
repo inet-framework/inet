@@ -434,13 +434,6 @@ void RIPRouting::startRIPRouting()
     // import interface routes
     configureInitialRoutes();
 
-    // configure socket
-    socket.setMulticastLoop(false);
-    socket.bind(ripUdpPort);
-    for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
-        if (it->mode != NO_RIP)
-            socket.joinMulticastGroup(addressType->getLinkLocalRIPRoutersMulticastAddress(), it->ie->getInterfaceId());
-
     // subscribe to notifications
     host->subscribe(NF_INTERFACE_CREATED, this);
     host->subscribe(NF_INTERFACE_DELETED, this);
@@ -448,6 +441,14 @@ void RIPRouting::startRIPRouting()
     host->subscribe(NF_ROUTE_DELETED, this);
     host->subscribe(NF_ROUTE_ADDED, this);
     host->subscribe(NF_ROUTE_CHANGED, this);
+
+    // configure socket
+    socket.setMulticastLoop(false);
+    socket.bind(ripUdpPort);
+
+    for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
+        if (it->mode != NO_RIP)
+            socket.joinMulticastGroup(addressType->getLinkLocalRIPRoutersMulticastAddress(), it->ie->getInterfaceId());
 
     for (InterfaceVector::iterator it = ripInterfaces.begin(); it != ripInterfaces.end(); ++it)
         if (it->mode != NO_RIP)
