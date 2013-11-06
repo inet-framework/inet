@@ -32,6 +32,7 @@ class INET_API IGMPTester : public cSimpleModule, public IScriptable
     void processLeaveCommand(IPv4Address group, const IPv4AddressVector &sources, InterfaceEntry* ie);
     void processBlockCommand(IPv4Address group, const IPv4AddressVector &sources, InterfaceEntry *ie);
     void processAllowCommand(IPv4Address group, const IPv4AddressVector &sources, InterfaceEntry *ie);
+    void processSetFilterCommand(IPv4Address group, McastSourceFilterMode filterMode, const IPv4AddressVector &sources, InterfaceEntry *ie);
     void processDumpCommand(string what, InterfaceEntry *ie);
     void parseIPv4AddressVector(const char *str, IPv4AddressVector &result);
     void sendIGMP(IGMPMessage *msg, InterfaceEntry *ie, IPv4Address dest);
@@ -181,6 +182,17 @@ void IGMPTester::processCommand(const cXMLElement &node)
         parseIPv4AddressVector(node.getAttribute("sources"), sources);
         processAllowCommand(IPv4Address(group), sources, ie);
     }
+    else if (tag == "set-filter")
+    {
+        const char *groupAttr = node.getAttribute("group");
+        const char *sourcesAttr = node.getAttribute("sources");
+        ASSERT((sourcesAttr[0] == 'I' || sourcesAttr[0] == 'E') && (sourcesAttr[1] == ' ' || sourcesAttr[1] == '\0'));
+        McastSourceFilterMode filterMode = sourcesAttr[0] == 'I' ? MCAST_INCLUDE_SOURCES : MCAST_EXCLUDE_SOURCES;
+        IPv4AddressVector sources;
+        if (sourcesAttr[1])
+            parseIPv4AddressVector(sourcesAttr+2, sources);
+        processSetFilterCommand(IPv4Address(groupAttr), filterMode, sources, ie);
+    }
     else if (tag == "dump")
     {
         const char *what = node.getAttribute("what");
@@ -327,6 +339,21 @@ void IGMPTester::processAllowCommand(IPv4Address group, const IPv4AddressVector 
         it->second.remove(*source);
     if (oldSources != it->second.sources)
         ie->ipv4Data()->changeMulticastGroupMembership(group, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, it->second.sources);
+}
+
+void IGMPTester::processSetFilterCommand(IPv4Address group, McastSourceFilterMode filterMode, const IPv4AddressVector &sources, InterfaceEntry *ie)
+{
+    IPv4MulticastSourceList &sourceList = socketState[group];
+    McastSourceFilterMode oldFilterMode = sourceList.filterMode;
+    IPv4AddressVector oldSources(sourceList.sources);
+
+    sourceList.filterMode = filterMode;
+    sourceList.sources = sources;
+
+    if (filterMode != oldFilterMode || oldSources != sourceList.sources)
+        ie->ipv4Data()->changeMulticastGroupMembership(group, oldFilterMode, oldSources, sourceList.filterMode, sourceList.sources);
+    if (sourceList.filterMode == MCAST_INCLUDE_SOURCES && sourceList.sources.empty())
+        socketState.erase(group);
 }
 
 void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
