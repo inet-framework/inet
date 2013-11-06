@@ -14,108 +14,74 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// author: Zoltan Bojthe
-//
-
 
 #ifndef __INET_IDEALRADIO_H
 #define __INET_IDEALRADIO_H
 
-
-#include "INETDefs.h"
-
-#include "IdealRadioFrame_m.h"
+#include "IdealRadioFrame.h"
 #include "IdealRadioChannelAccess.h"
 #include "ILifecycle.h"
-#include "RadioState.h"
-
 
 /**
- * This module implements a full-duplex, collision-free and interference-free radio.
- * It should be used together with IdealWirelessMac.
+ * This module implements a full-duplex, collision-free and interference-free ideal radio.
  *
  * See the NED file for details.
+ *
+ * author: Zoltan Bojthe, Levente Meszaros
  */
 class INET_API IdealRadio : public IdealRadioChannelAccess, public ILifecycle
 {
-  public:
-    IdealRadio();
-    virtual ~IdealRadio();
-
-    /** Returns the current transmission range */
-    virtual int getTransmissionRange() const { return transmissionRange; }
-
-    bool isEnabled() const { return rs != RadioState::OFF && rs != RadioState::SLEEP; }
-
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void finish();
-
-    virtual void handleMessage(cMessage *msg);
-
-    virtual void handleUpperMsg(cMessage *msg);
-
-    virtual void handleSelfMsg(cMessage *msg);
-
-    virtual void handleCommand(cMessage *msg);
-
-    virtual void handleLowerMsgStart(IdealRadioFrame *radioFrame);
-
-    virtual void handleLowerMsgEnd(IdealRadioFrame *radioFrame);
-
-    /** Sends a message to the upper layer */
-    virtual void sendUp(IdealRadioFrame *radioFrame);
-
-    /** Sends a message to the channel */
-    virtual void sendDown(IdealRadioFrame *radioFrame);
-
-    /** Encapsulates a MAC frame into a radio frame */
-    virtual IdealRadioFrame *encapsulatePacket(cPacket *msg);
-
-    /** Updates the radio state, and also sends a radioState signal */
-    virtual void updateRadioState();
-
-    /** Create a new IdealRadioFrame */
-    virtual IdealRadioFrame *createRadioFrame() { return new IdealRadioFrame(); }
-
-    virtual void setRadioState(RadioState::State newState);
-
-    virtual void updateDisplayString();
-
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-
-    // ILifecycle:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-
-  protected:
-    typedef std::list<cMessage *> RecvBuff;
-    RecvBuff recvBuff;
+    /** Timers */
+    //@{
+    cMessage *endTransmissionTimer;
+    typedef std::list<cMessage *> EndReceptionTimers;
+    EndReceptionTimers endReceptionTimers;
+    //@}
 
     /** Parameters */
     //@{
     double transmissionRange;           // [meter]
     double bitrate;                     // [bps]
-    bool drawCoverage;                  // if true, draw coverage circles
+    bool drawCoverage;
     //@}
 
-    /** @name Gate Ids */
-    //@{
-    int upperLayerOutGateId;
-    int upperLayerInGateId;
-    int radioInGateId;
-    //@}
+  public:
+    IdealRadio();
+    virtual ~IdealRadio();
 
-    /** Radio State and helper variables */
-    //@{
-    int concurrentReceives;    // number of current receives
-    bool inTransmit;           // is in transmit mode
-    RadioState::State rs;
-    //@}
+    virtual void setRadioMode(RadioMode radioMode);
 
-    // signals:
-    static simsignal_t radioStateSignal; // signaling RadioState::State enum when state changed
+    virtual void setRadioChannel(int radioChannel);
+
+    virtual int getTransmissionRange() const { return transmissionRange; }
+
+  protected:
+    virtual void initialize(int stage);
+
+    virtual void handleMessage(cMessage *message);
+
+    virtual void handleSelfMessage(cMessage *message);
+
+    virtual void handleCommand(cMessage *command);
+
+    virtual void handleUpperFrame(cPacket *frame);
+
+    virtual void handleLowerFrame(IdealRadioFrame *radioFrame);
+
+    virtual void sendUp(IdealRadioFrame *radioFrame);
+
+    virtual void sendDown(IdealRadioFrame *radioFrame);
+
+    virtual IdealRadioFrame *encapsulatePacket(cPacket *packet);
+
+    virtual void cancelAndDeleteEndReceptionTimers();
+
+    virtual void updateRadioChannelState();
+
+    virtual void updateDisplayString();
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
 #endif
-

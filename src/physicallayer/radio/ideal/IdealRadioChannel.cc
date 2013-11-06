@@ -14,72 +14,53 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// author: Zoltan Bojthe
-//
 
 #include "IdealRadioChannel.h"
-
 #include "IdealRadio.h"
-
 
 Define_Module(IdealRadioChannel);
 
-
-std::ostream& operator<<(std::ostream& os, const IdealRadioChannel::RadioEntry& radio)
+std::ostream& operator<<(std::ostream& os, const IdealRadioChannel::RadioEntry& radioEntry)
 {
-    os << radio.radioModule->getFullPath() << " (x=" << radio.pos.x << ",y=" << radio.pos.y << ")";
+    Coord pos = radioEntry.radio->getMobility()->getCurrentPosition();
+    os << radioEntry.radioModule->getFullPath() << " (x=" << pos.x << ",y=" << pos.y << ")";
     return os;
 }
 
-IdealRadioChannel::IdealRadioChannel()
+void IdealRadioChannel::initialize(int stage)
 {
+    RadioChannelBase::initialize(stage);
+    if (stage == 0)
+    {
+        EV << "initializing IdealRadioChannel" << endl;
+        maxTransmissionRange = 0;
+        WATCH_LIST(radios);
+        WATCH(maxTransmissionRange);
+    }
 }
 
-IdealRadioChannel::~IdealRadioChannel()
-{
-}
-
-void IdealRadioChannel::initialize()
-{
-    EV << "initializing IdealRadioChannel" << endl;
-
-    maxTransmissionRange = 0;
-
-    WATCH_LIST(radios);
-}
-
-IdealRadioChannel::RadioEntry *IdealRadioChannel::registerRadio(cModule *radio, cGate *radioInGate)
+IdealRadioChannel::RadioEntry *IdealRadioChannel::registerRadio(cModule *radioModule)
 {
     Enter_Method_Silent();
-
-    RadioEntry *radioRef = lookupRadio(radio);
-
+    RadioEntry *radioRef = lookupRadio(radioModule);
     if (radioRef)
-        throw cRuntimeError("Radio %s already registered", radio->getFullPath().c_str());
-
-    IdealRadio *idealRadio = check_and_cast<IdealRadio *>(radio);
-
+        throw cRuntimeError("Radio %s already registered", radioModule->getFullPath().c_str());
+    IdealRadio *idealRadio = check_and_cast<IdealRadio *>(radioModule);
     if (maxTransmissionRange < 0.0)    // invalid value
         recalculateMaxTransmissionRange();
-
     if (maxTransmissionRange < idealRadio->getTransmissionRange())
         maxTransmissionRange = idealRadio->getTransmissionRange();
-
-    if (!radioInGate)
-        radioInGate = radio->gate("radioIn");
-
-    RadioEntry re;
-    re.radioModule = radio;
-    re.radioInGate = radioInGate->getPathStartGate();
-    re.isActive = true;
-    radios.push_back(re);
+    RadioEntry radioEntry;
+    IRadio *radio = check_and_cast<IRadio *>(radioModule);
+    radioEntry.radioModule = radioModule;
+    radioEntry.radio = radio;
+    radios.push_back(radioEntry);
     return &radios.back(); // last element
 }
 
 void IdealRadioChannel::recalculateMaxTransmissionRange()
 {
     double newRange = 0.0;
-
     for (RadioList::iterator it = radios.begin(); it != radios.end(); ++it)
     {
         IdealRadio *idealRadio = check_and_cast<IdealRadio *>(it->radioModule);
@@ -102,7 +83,6 @@ void IdealRadioChannel::unregisterRadio(RadioEntry *r)
             return;
         }
     }
-
     error("unregisterRadio failed: no such radio");
 }
 
@@ -114,18 +94,11 @@ IdealRadioChannel::RadioEntry *IdealRadioChannel::lookupRadio(cModule *radio)
     return NULL;
 }
 
-void IdealRadioChannel::setRadioPosition(RadioEntry *r, const Coord& pos)
-{
-    r->pos = pos;
-}
-
 void IdealRadioChannel::sendToChannel(RadioEntry *srcRadio, IdealRadioFrame *radioFrame)
 {
     // NOTE: no Enter_Method()! We pretend this method is part of ChannelAccess
-
     if (maxTransmissionRange < 0.0)    // invalid value
         recalculateMaxTransmissionRange();
-
     double sqrTransmissionRange = radioFrame->getTransmissionRange()*radioFrame->getTransmissionRange();
 
     // loop through all radios
@@ -134,19 +107,17 @@ void IdealRadioChannel::sendToChannel(RadioEntry *srcRadio, IdealRadioFrame *rad
         RadioEntry *r = &*it;
         if (r == srcRadio)
             continue;   // skip sender radio
-
-        if (!r->isActive)
+        if (r->radio->getRadioMode() != IRadio::RADIO_MODE_RECEIVER)
             continue;   // skip disabled radio interfaces
-
-        double sqrdist = srcRadio->pos.sqrdist(r->pos);
+        double sqrdist = srcRadio->radio->getMobility()->getCurrentPosition().sqrdist(r->radio->getMobility()->getCurrentPosition());
         if (sqrdist <= sqrTransmissionRange)
         {
             // account for propagation delay, based on distance in meters
             // Over 300m, dt=1us=10 bit times @ 10Mbps
             simtime_t delay = sqrt(sqrdist) / SPEED_OF_LIGHT;
-            check_and_cast<cSimpleModule*>(srcRadio->radioModule)->sendDirect(radioFrame->dup(), delay, radioFrame->getDuration(), r->radioInGate);
+            cGate *gate = const_cast<cGate *>(r->radio->getRadioGate()->getPathStartGate());
+            check_and_cast<cSimpleModule*>(srcRadio->radioModule)->sendDirect(radioFrame->dup(), delay, radioFrame->getDuration(), gate);
         }
     }
     delete radioFrame;
 }
-

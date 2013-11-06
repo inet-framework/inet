@@ -14,37 +14,34 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// author: Zoltan Bojthe
-//
 
-#ifndef __INET_IdealRadioChannel_H
-#define __INET_IdealRadioChannel_H
-
+#ifndef __INET_IDEALRADIOCHANNEL_H
+#define __INET_IDEALRADIOCHANNEL_H
 
 #include "INETDefs.h"
-
 #include "Coord.h"
+#include "IRadio.h"
+#include "RadioChannelBase.h"
 
 // Forward declarations
 class IdealRadioFrame;
 class IdealRadio;
-
 
 /**
  * This class represent an ideal radio channel.
  *
  * Stores infos about all registered radios.
  * Forward messages to all other radios in max transmission range
+ *
+ * author: Zoltan Bojthe, Levente Meszaros
  */
-class INET_API IdealRadioChannel : public cSimpleModule
+class INET_API IdealRadioChannel : public RadioChannelBase
 {
   public:
     struct RadioEntry
     {
         cModule *radioModule;   // the module that registered this radio interface
-        cGate *radioInGate;     // gate on host module used to receive radio frames
-        Coord pos;              // cached radio position
-        bool isActive;          // radio module is active
+        IRadio *radio;          // the radio interface
     };
 
   protected:
@@ -58,7 +55,7 @@ class INET_API IdealRadioChannel : public cSimpleModule
 
   protected:
     /** Reads init parameters and calculates a maximal interference distance*/
-    virtual void initialize();
+    virtual void initialize(int stage);
 
     /** Returns the "handle" of a previously registered radio. The pointer to the registering (radio) module must be provided */
     virtual RadioEntry *lookupRadio(cModule *radioModule);
@@ -67,30 +64,17 @@ class INET_API IdealRadioChannel : public cSimpleModule
     virtual void recalculateMaxTransmissionRange();
 
   public:
-    IdealRadioChannel();
-    virtual ~IdealRadioChannel();
+    IdealRadioChannel() : maxTransmissionRange(-1) { }
+    virtual ~IdealRadioChannel() { }
 
-    /** Registers the given radio. If radioInGate==NULL, the "radioIn" gate is assumed */
-    virtual RadioEntry * registerRadio(cModule *radioModule, cGate *radioInGate = NULL);
+    /** Registers the given radio */
+    virtual RadioEntry * registerRadio(cModule *radioModule);
 
     /** Unregisters the given radio */
-    virtual void unregisterRadio(RadioEntry *r);
-
-    /** To be called when the host moved; updates proximity info */
-    virtual void setRadioPosition(RadioEntry *r, const Coord& pos);
+    virtual void unregisterRadio(RadioEntry *radioEntry);
 
     /** Called from IdealRadioChannelAccess, to transmit a frame to the radios in range, on the frame's channel */
-    virtual void sendToChannel(RadioEntry * srcRadio, IdealRadioFrame *radioFrame);
-
-    /** Disable the reception in the reference module */
-    virtual void disableReception(RadioEntry *r) { r->isActive = false; };
-
-    /** Enable the reception in the reference module */
-    virtual void enableReception(RadioEntry *r) { r->isActive = true; };
-
-    /** returns speed of signal in meter/sec */
-    virtual double getSignalSpeed() { return SPEED_OF_LIGHT; }
+    virtual void sendToChannel(RadioEntry *radioEntry, IdealRadioFrame *radioFrame);
 };
 
-#endif      // __INET_IdealRadioChannel_H
-
+#endif

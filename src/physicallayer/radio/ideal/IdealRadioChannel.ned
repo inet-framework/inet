@@ -17,6 +17,8 @@
 
 package inet.physicallayer.radio.ideal;
 
+import inet.physicallayer.radio.common.RadioChannelBase;
+
 //
 // Radio channel module for ~IdealRadio.
 //
@@ -25,10 +27,8 @@ package inet.physicallayer.radio.ideal;
 // location and movement of nodes, and determines which nodes are within
 // communication distance.
 //
-simple IdealRadioChannel
+simple IdealRadioChannel extends RadioChannelBase
 {
     parameters:
-        @display("i=misc/sun");
-        @labels(node);
+        @class(IdealRadioChannel);
 }
-
