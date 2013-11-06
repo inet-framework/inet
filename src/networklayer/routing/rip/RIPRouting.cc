@@ -22,6 +22,7 @@
 #include "InterfaceMatcher.h"
 #include "InterfaceTableAccess.h"
 #include "NodeOperations.h"
+#include "NodeStatus.h"
 #include "NotifierConsts.h"
 #include "UDP.h"
 
@@ -126,8 +127,16 @@ std::ostream& operator<<(std::ostream &os, const RIPInterfaceEntry &e)
 }
 
 RIPRouting::RIPRouting()
-    : ift(NULL), rt(NULL), updateTimer(NULL), triggeredUpdateTimer(NULL)
 {
+    host = NULL;
+    ift = NULL;
+    rt = NULL;
+    addressType = NULL;
+    updateTimer = NULL;
+    triggeredUpdateTimer = NULL;
+    startupTimer = NULL;
+    shutdownTimer = NULL;
+    isOperational = false;
 }
 
 RIPRouting::~RIPRouting()
@@ -136,6 +145,7 @@ RIPRouting::~RIPRouting()
         delete *it;
     cancelAndDelete(updateTimer);
     cancelAndDelete(triggeredUpdateTimer);
+    cancelAndDelete(startupTimer);
     cancelAndDelete(shutdownTimer);
 }
 
@@ -174,6 +184,7 @@ void RIPRouting::initialize(int stage)
 
         updateTimer = new cMessage("RIP-timer");
         triggeredUpdateTimer = new cMessage("RIP-trigger");
+        startupTimer = new cMessage("RIP-startup");
         shutdownTimer = new cMessage("RIP-shutdown");
 
         WATCH_VECTOR(ripInterfaces);
@@ -181,8 +192,10 @@ void RIPRouting::initialize(int stage)
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     { // interfaces and static routes are already initialized
-        addressType = rt->getRouterIdAsGeneric().getAddressType();
-        startRIPRouting();
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+        if (isOperational)
+            scheduleAt(simTime() + par("startupTime").doubleValue(), startupTimer);
     }
 }
 
@@ -394,7 +407,9 @@ bool RIPRouting::handleOperationStage(LifecycleOperation *operation, int stage, 
 
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
-            startRIPRouting();
+            isOperational = true;
+            cancelEvent(startupTimer);
+            scheduleAt(simTime() + par("startupTime").doubleValue(), startupTimer);
             return true;
         }
     }
@@ -419,6 +434,7 @@ bool RIPRouting::handleOperationStage(LifecycleOperation *operation, int stage, 
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeCrashOperation::STAGE_CRASH) {
             stopRIPRouting();
+            isOperational = false;
             return true;
         }
     }
@@ -428,6 +444,8 @@ bool RIPRouting::handleOperationStage(LifecycleOperation *operation, int stage, 
 
 void RIPRouting::startRIPRouting()
 {
+    addressType = rt->getRouterIdAsGeneric().getAddressType();
+
     // configure interfaces
     configureInterfaces(par("ripConfig").xmlValue());
 
@@ -460,15 +478,20 @@ void RIPRouting::startRIPRouting()
 
 void RIPRouting::stopRIPRouting()
 {
-    socket.close();
+    if (startupTimer->isScheduled())
+        cancelEvent(startupTimer);
+    else
+    {
+        socket.close();
 
-    // subscribe to notifications
-    host->unsubscribe(NF_INTERFACE_CREATED, this);
-    host->unsubscribe(NF_INTERFACE_DELETED, this);
-    host->unsubscribe(NF_INTERFACE_STATE_CHANGED, this);
-    host->unsubscribe(NF_ROUTE_DELETED, this);
-    host->unsubscribe(NF_ROUTE_ADDED, this);
-    host->unsubscribe(NF_ROUTE_CHANGED, this);
+        // unsubscribe to notifications
+        host->unsubscribe(NF_INTERFACE_CREATED, this);
+        host->unsubscribe(NF_INTERFACE_DELETED, this);
+        host->unsubscribe(NF_INTERFACE_STATE_CHANGED, this);
+        host->unsubscribe(NF_ROUTE_DELETED, this);
+        host->unsubscribe(NF_ROUTE_ADDED, this);
+        host->unsubscribe(NF_ROUTE_CHANGED, this);
+    }
 
     // cancel timers
     cancelEvent(updateTimer);
@@ -481,6 +504,14 @@ void RIPRouting::stopRIPRouting()
 
 void RIPRouting::handleMessage(cMessage *msg)
 {
+    if (!isOperational)
+    {
+        if (msg->isSelfMessage())
+            throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
+        EV_ERROR << "Application is turned off, dropping '" << msg->getName() << "' message\n";
+        delete msg;
+    }
+
     if (msg->isSelfMessage())
     {
         if (msg == updateTimer)
@@ -492,8 +523,13 @@ void RIPRouting::handleMessage(cMessage *msg)
         {
             processUpdate(true);
         }
+        else if (msg == startupTimer)
+        {
+            startRIPRouting();
+        }
         else if (msg == shutdownTimer)
         {
+            isOperational = false;
             IDoneCallback *doneCallback = (IDoneCallback*)msg->getContextPointer();
             msg->setContextPointer(NULL);
             doneCallback->invoke();

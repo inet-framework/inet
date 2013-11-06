@@ -71,6 +71,7 @@ simple RIPRouting
 
         int udpPort = (mode == "RIPng" ? 521 : 520);
         double updateInterval @unit(s) = default(30s);
+        volatile double startupTime @unit(s) = default(uniform(0s,5s));
         volatile double triggeredUpdateDelay @unit(s) = default(uniform(1s,5s));
         double routeExpiryTime @unit(s) = default(180s);
         double routePurgeTime @unit(s) = default(120s);

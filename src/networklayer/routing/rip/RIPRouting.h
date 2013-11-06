@@ -146,6 +146,7 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
     UDPSocket socket;               // bound to the RIP port (see udpPort parameter)
     cMessage *updateTimer;          // for sending unsolicited Response messages in every ~30 seconds.
     cMessage *triggeredUpdateTimer; // scheduled when there are pending changes
+    cMessage *startupTimer;         // timer for delayed startup
     cMessage *shutdownTimer;        // scheduled at shutdown
     // parameters
     Mode mode;
@@ -154,6 +155,8 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
     simtime_t routeExpiryTime;      // learned routes becomes invalid if no update received in this period of time
     simtime_t routePurgeTime;       // invalid routes are deleted after this period of time is elapsed
     simtime_t shutdownTime;         // time of shutdown processing
+    bool isOperational;
+
     // signals
     static simsignal_t sentRequestSignal;
     static simsignal_t sentUpdateSignal;

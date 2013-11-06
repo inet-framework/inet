@@ -113,6 +113,7 @@ sim-time-limit = 600s
 **.arp.cacheTimeout = 1s
 
 **.ripConfig = xmldoc("RIPConfig.xml")
+**.rip.startupTime = 0s
 
 *.scenarioManager.script = xmldoc("scenario1.xml")
 *.routingTableLogger.outputFile = "routes.txt"

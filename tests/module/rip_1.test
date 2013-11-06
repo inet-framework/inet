@@ -105,6 +105,7 @@ tkenv-plugin-path = ../../../etc/plugins
 sim-time-limit = 250s
 
 **.rip.ripConfig = xmldoc("RIPConfig.xml")
+**.rip.startupTime = 0s
 
 **.numUdpApps = 2
 **.udpApp[0].typename = "UDPBasicApp"
