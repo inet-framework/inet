@@ -354,7 +354,7 @@ void IGMPv3::deleteSourceRecord(InterfaceEntry *ie, IPv4Address group, IPv4Addre
 
 void IGMPv3::initialize(int stage)
 {
-    if (stage == 0)
+    if (stage == INITSTAGE_LOCAL)
     {
         ift = InterfaceTableAccess().get();
         rt = IPv4RoutingTableAccess().get();
@@ -409,7 +409,7 @@ void IGMPv3::initialize(int stage)
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(IP_PROT_IGMP);
     }
-    else if (stage == 1)
+    else if (stage == INITSTAGE_NETWORK_LAYER)
     {
         for (int i = 0; i < (int)ift->getNumInterfaces(); ++i)
         {
@@ -419,7 +419,7 @@ void IGMPv3::initialize(int stage)
         }
         nb->subscribe(this, NF_INTERFACE_CREATED);
     }
-    else if (stage == 2) // ipv4Data() created in stage 1
+    else if (stage == INITSTAGE_NETWORK_LAYER_2) // ipv4Data() created in INITSTAGE_NETWORK_LAYER
     {
         // in multicast routers: join to ALL_IGMPv3_ROUTERS_MCAST address on all interfaces
         if (enabled && rt->isMulticastForwardingEnabled())
