@@ -268,7 +268,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
         virtual void startTimer(cMessage *timer, double interval);
 
         virtual void sendQuery(InterfaceEntry *ie, IPv4Address groupAddr, const IPv4AddressVector &sources, double maxRespTime);
-        virtual void sendGroupReport(InterfaceEntry *ie, IPv4Address group, ReportType type, const IPv4AddressVector &sources);
+        virtual void sendGroupReport(InterfaceEntry *ie, const std::vector<GroupRecord> &records);
         virtual void sendQueryToIP(IGMPv3Query *msg, InterfaceEntry *ie, IPv4Address dest);
         virtual void sendReportToIP(IGMPv3Report *msg, InterfaceEntry *ie, IPv4Address dest);
 
