@@ -48,62 +48,46 @@ network=TestIGMPNetwork
 %#
 %# First check that join/leave commands has modified the interface state
 %#
-%contains-regex: test.out
+%postrun-command: grep "tester: .*groups =" test.out > groups.out || true
+%contains: groups.out
 1 tester: eth0: groups = 224.0.0.1 E
-.*
 2 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 I 10.0.0.1 10.0.0.2
-.*
 3 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 I 10.0.0.1
-.*
 4 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 E 10.0.0.2
-.*
 5 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 E 10.0.0.1 10.0.0.2
-.*
 6 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 I 10.0.0.1
 
 %#
 %# Now check the state transitions of the IGMP module
 %#
-%contains-regex: test.out
+%postrun-command: grep "igmp:.*[Ss]tate" test.out > igmp.out || true
+%contains: igmp.out
 2 igmp: State of group '225.0.0.1' on interface 'eth0' has changed:
-2 igmp:.*Old state: INCLUDE\(\).
-2 igmp:.*New state: INCLUDE\(10.0.0.1,10.0.0.2\).
-2 igmp: Sending ALLOW/BLOCK report.
-.*
+2 igmp:     Old state: INCLUDE().
+2 igmp:     New state: INCLUDE(10.0.0.1,10.0.0.2).
 3 igmp: State of group '225.0.0.1' on interface 'eth0' has changed:
-3 igmp:.*Old state: INCLUDE\(10.0.0.1,10.0.0.2\).
-3 igmp:.*New state: INCLUDE\(10.0.0.1\).
-3 igmp: Sending ALLOW/BLOCK report.
-.*
+3 igmp:     Old state: INCLUDE(10.0.0.1,10.0.0.2).
+3 igmp:     New state: INCLUDE(10.0.0.1).
 4 igmp: State of group '225.0.0.1' on interface 'eth0' has changed:
-4 igmp:.*Old state: INCLUDE\(10.0.0.1\).
-4 igmp:.*New state: EXCLUDE\(10.0.0.2\).
-4 igmp: Sending TO_EX report.
-.*
+4 igmp:     Old state: INCLUDE(10.0.0.1).
+4 igmp:     New state: EXCLUDE(10.0.0.2).
 5 igmp: State of group '225.0.0.1' on interface 'eth0' has changed:
-5 igmp:.*Old state: EXCLUDE\(10.0.0.2\).
-5 igmp:.*New state: EXCLUDE\(10.0.0.1,10.0.0.2\).
-5 igmp: Sending ALLOW/BLOCK report.
-.*
+5 igmp:     Old state: EXCLUDE(10.0.0.2).
+5 igmp:     New state: EXCLUDE(10.0.0.1,10.0.0.2).
 6 igmp: State of group '225.0.0.1' on interface 'eth0' has changed:
-6 igmp:.*Old state: EXCLUDE\(10.0.0.1,10.0.0.2\).
-6 igmp:.*New state: INCLUDE\(10.0.0.1\).
-6 igmp: Sending TO_IN report.
+6 igmp:     Old state: EXCLUDE(10.0.0.1,10.0.0.2).
+6 igmp:     New state: INCLUDE(10.0.0.1).
 
 %#
 %# Now check that the IGMP module sent the reports immediately
 %#
-%contains-regex: test.out
+%postrun-command: grep "tester: .*Received" test.out > received.out || true
+%contains: received.out
 2 tester: Received: IGMPv3Report<225.0.0.1=ALLOW 10.0.0.1 10.0.0.2>.
-.*
 3 tester: Received: IGMPv3Report<225.0.0.1=BLOCK 10.0.0.2>.
-.*
 4 tester: Received: IGMPv3Report<225.0.0.1=TO_EX 10.0.0.2>.
-.*
 5 tester: Received: IGMPv3Report<225.0.0.1=BLOCK 10.0.0.1>.
-.*
 6 tester: Received: IGMPv3Report<225.0.0.1=TO_IN 10.0.0.1>.
-
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
