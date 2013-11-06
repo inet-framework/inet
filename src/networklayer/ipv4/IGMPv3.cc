@@ -758,9 +758,9 @@ void IGMPv3::multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, c
 
     FilterMode filter = sourceList.filterMode == MCAST_INCLUDE_SOURCES ? IGMPV3_FM_INCLUDE : IGMPV3_FM_EXCLUDE;
 
-    EV_DETAIL << "State of group '" << group << "' on interface '" << ie->getName() << "' has changed:\n";
-    EV_DETAIL << "\tOld state: " << groupData->getStateInfo() << ".\n";
-    EV_DETAIL << "\tNew state: " << (filter == IGMPV3_FM_INCLUDE?"INCLUDE":"EXCLUDE") << sourceList.sources << ".\n";
+    EV_DETAIL_C("test") << "State of group '" << group << "' on interface '" << ie->getName() << "' has changed:\n";
+    EV_DETAIL_C("test") << "    Old state: " << groupData->getStateInfo() << ".\n";
+    EV_DETAIL_C("test") << "    New state: " << (filter == IGMPV3_FM_INCLUDE?"INCLUDE":"EXCLUDE") << sourceList.sources << ".\n";
 
     //Check if IF state is different
     if(!(groupData->filter == filter) || !(groupData->sourceAddressList == sourceList.sources))
