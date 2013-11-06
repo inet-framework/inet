@@ -30,167 +30,162 @@
 /**
  * RSTP implementation.
  */
-class RSTP: public cSimpleModule, public ILifecycle
-{
-  protected:
-    /* kind codes for self messages */
-    enum SelfKinds
-    {
-        SELF_HELLOTIME = 1,
-        SELF_UPGRADE,
-        SELF_TIMETODESIGNATE
+class RSTP: public cSimpleModule, public ILifecycle {
+protected:
+    // kind codes for self messages
+    enum SelfKinds {
+        SELF_HELLOTIME = 1, SELF_UPGRADE, SELF_TIMETODESIGNATE
     };
 
-	  /*Dynamic data.*/
+    int maxAge;
+    bool treeColoring;         // colors tree
+    bool isOperational;        // for lifecycle
 
-	int maxAge;
-	bool treeColoring;		/// Sets module verbosity
-	bool isOperational; // for lifecycle
+    cModule* Parent;           // pointer to the parent module
 
-	cModule* Parent; /// Pointer to the parent module
+    unsigned int portCount;    // number of ports
+    simtime_t tcWhileTime;     // TCN activation time
+    bool autoEdge;             // automatic edge ports detection
 
-	unsigned int portCount;
-	simtime_t tcWhileTime; /// TCN activation time
-	bool autoEdge;	/// Automatic edge ports detection
+    MACAddressTable * sw;      // needed for flushing.
 
-	MACAddressTable * sw;  /// Needed for flushing.
+    IInterfaceTable * ifTable;
 
-	IInterfaceTable * ifTable;
+    int priority;              // bridge's priority
+    MACAddress address;        // bridge's MAC address
 
-	/*Static data. Bridge data. */
-	int priority;  /// Bridge priority. It's own priority.
-	MACAddress address; /// BEB MAC address
+    simtime_t hellotime;       // time between hello BPDUs
+    simtime_t fwdDelay;        // After that a discarding port switches to learning and so on if it is designated
+    simtime_t migrateTime;     // after that, a not assigned port becomes designated
 
-	simtime_t hellotime;	/// Time between hello BPDUs
-	simtime_t fwdDelay;	/// After that a discarding port switches to learning and so on if it is designated
-	simtime_t migrateTime;  /// After that, a not asigned port becomes designated
+    cMessage* helloM;
+    cMessage* forwardM;
+    cMessage* migrateM;
 
-	cMessage* helloM;
-	cMessage* forwardM;
-	cMessage* migrateM;
+public:
+    RSTP();
+    virtual ~RSTP();
+    virtual int numInitStages() const {
+        return 2;
+    }
 
-  public:
-	RSTP();
-	virtual ~RSTP();
-	virtual int numInitStages() const {return 2;}
+protected:
+    virtual void initialize(int stage);
+    virtual void finish() {}
+    virtual void initInterfacedata(unsigned int portNum);
 
-  protected:
-	virtual void initialize(int stage);
-    virtual void finish(){}
-	virtual void initInterfacedata(unsigned int portNum);
+    /**
+     * @brief initialize RSTP dynamic information
+     */
+    virtual void initPorts();
 
-	/**
-	 * @brief initialize (Puertos) RSTP dynamic information
-	 */
-	virtual void initPorts();
+    /**
+     * @brief Gets the best alternate port
+     * @return Best alternate gate index
+     */
+    virtual int getBestAlternate();
 
-	/**
-	 * @brief Gets the best alternate port
-	 * @return Best alternate gate index
-	 */
-	virtual int getBestAlternate();
+    /**
+     * @brief Adds effects to be represented by Tkenv. Root links colored green. Show port role, state.
+     */
+    virtual void colorRootPorts();
 
-	/**
-	 * @brief Adds effects to be represented by Tkenv. Root links colored green. Port state.
-	 */
-	virtual void colorRootPorts();
+    /**
+     * @brief Sends BPDUs through all ports, if they are required
+     */
+    virtual void sendBPDUs();
 
-	/**
-	 * @brief Sends BPDUs through all ports, if they are required
-	 */
-	virtual void sendBPDUs();
+    /**
+     * @brief Sends BPDU through a port
+     */
+    virtual void sendBPDU(int port);
 
-	/**
-	 * @brief Sends BPDU through port
-	 */
-	virtual void sendBPDU(int port);
+    /**
+     * @brief General processing
+     */
+    virtual void handleMessage(cMessage *msg);
 
+    /**
+     * @brief BPDU processing.
+     * Updates port information. Handles port role changes.
+     */
+    virtual void handleIncomingFrame(BPDU *frame);
 
-	/**
-	 * @brief General processing
-	 */
-	virtual void handleMessage(cMessage *msg);
+    /**
+     * @brief Prints current data base info
+     */
+    virtual void printState();
 
-	/**
-	 * @brief BPDU processing.
-	 * Updates port information. Handles port role changes.
-	 */
-	virtual void handleIncomingFrame(BPDU *frame);
+    /**
+     * @brief Obtain the root gate index
+     * @return the root gate index or -1 if there is not root gate.
+     */
+    virtual int getRootIndex();
 
-	/**
-	 * @brief Prints current data base info
-	 */
-	virtual void printState();
-	/**
-	 * @brief Obtain the root gate index
-	 * @return Gate index
-	 */
-	virtual int getRootIndex();
+    virtual void updateInterfacedata(BPDU *frame, unsigned int portNum);
 
+    /**
+     * @brief Compares the BPDU frame with the BPDU this module would send through that port
+     * @return (<0 if the root BPDU is better than BPDU)
+     * -4=worse port  -3=worse src  -2=worse RPC  -1=worse root  0=Similar  1=better root  2=better RPC  3=better src  4=better port
+     */
+    virtual int contestInterfacedata(BPDU* msg, unsigned int portNum);
 
-	virtual void updateInterfacedata(BPDU *frame,unsigned int portNum);
+    /**
+     * @brief Compares the port's best BPDU with the BPDU this module would send through that port
+     * @return (<0 if the root BPDU is better than port's best BPDU)
+     * -4=worse port  -3=worse src  -2=worse RPC  -1=worse root  0=Similar  1=better root  2=better RPC  3=better src  4=better port
+     */
+    virtual int contestInterfacedata(unsigned int portNum);
 
-	/**
-	 * @brief Compares the frame with the frame this module would send through that port
-	 * @return (<0 if own vector is better than frame)
-	 * -4=Worse Port -3=Worse Src -2=Worse RPC -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
-	 */
-	virtual int contestInterfacedata(BPDU* msg,unsigned int portNum);
+    /**
+     * @brief Compares a port's best BPDU with a BPDU frame
+     * @return (<0 if vector better than frame)
+     * -4=worse port  -3=worse src  -2=worse RPC  -1=worse root  0=Similar  1=better root  2=better RPC  3=better src  4=better port
+     */
+    virtual int compareInterfacedata(unsigned int portNum, BPDU * msg,
+            int linkCost);
 
-	/**
-	 * @brief Compares the frame with the frame this module would send through that por
-	 * @return (<0 if own vector is better than vect2)
-	 * -4=Worse Port -3=Worse Src -2=Worse RPC -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
-	 */
-	virtual int contestInterfacedata(unsigned int portNum);
+    /**
+     * @brief If root TCWhile has not expired, sends a BPDU to the Root with TCFlag=true.
+     */
+    virtual void sendTCNtoRoot();
 
-	/**
-	* @brief Compares a Port with BPDU contained info.
-	* @return (<0 if vector better than frame)
-	* -4=Worse Port -3=Worse Src -2=Worse RPC -1=Worse   0= Similar  1=Better Root. 2= Better RPC  3= Better Src   4= Better Port
-	*/
-	virtual int compareInterfacedata(unsigned int portNum, BPDU * msg,int linkCost);
+    /**
+     * @brief HelloTime event handling.
+     */
+    virtual void handleHelloTime(cMessage *);
 
-	/**
-	 * @brief If root TCWhile has not expired, sends a BPDU to the Root with TCFlag=true.
-	 */
-	virtual void sendTCNtoRoot();
+    /**
+     * @brief Upgrade event handling. (Every forwardDelay)
+     */
+    virtual void handleUpgrade(cMessage *);
 
-	/**
-	 * @brief HelloTime event handling.
-	 */
-	virtual void handleHelloTime(cMessage *);
+    /**
+     * @brief Migration to designated. (Every migrateTime)
+     */
+    virtual void handleMigrate(cMessage *);
 
-	/**
-	 * @brief Upgrade event handling. (Every forwardDelay)
-	 */
-	virtual void handleUpgrade(cMessage *);
+    /**
+     * @brief Checks the frame TC flag.
+     * Sets TCWhile if the port was forwarding and the flag is true.
+     */
+    virtual void checkTC(BPDU * frame, int arrival);
 
-	/**
-	 * @brief Migration to designated. (Every migrateTime)
-	 */
-	virtual void handleMigrate(cMessage *);
+    /**
+     * @brief Handles the switch to backup in one of the ports
+     */
+    virtual void handleBK(BPDU * frame, unsigned int arrival);
 
-	/**
-	 * @brief Checks the frame TC flag.
-	 * Sets TCWhile if the port was forwarding and the flag is true.
-	 */
-	virtual void checkTC(BPDU * frame, int arrival);
-
-	/**
-	 * @brief Handles the switch to backup in one of the ports
-	 */
-	virtual void handleBK(BPDU * frame, unsigned int arrival);
-
-  // for lifecycle:
-  public:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-  protected:
+    // for lifecycle:
+public:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage,
+            IDoneCallback *doneCallback);
+protected:
     virtual void start();
     virtual void stop();
     IEEE8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
 };
-
 
 #endif
 
