@@ -361,8 +361,6 @@ void IGMPv3::initialize(int stage)
         nb = NotificationBoardAccess().get();
 
         nb->subscribe(this, NF_INTERFACE_DELETED);
-        //nb->subscribe(this, NF_IPv4_MCAST_JOIN);
-        //nb->subscribe(this, NF_IPv4_MCAST_LEAVE);
         nb->subscribe(this, NF_IPv4_MCAST_CHANGE);
 
         enabled = par("enabled");
@@ -450,7 +448,7 @@ void IGMPv3::receiveChangeNotification(int category, const cPolymorphic *details
 
     InterfaceEntry *ie;
     int interfaceId;
-    const IPv4MulticastGroupInfo *info;
+    const IPv4MulticastGroupSourceInfo *info;
     switch (category)
     {
         case NF_INTERFACE_CREATED:
@@ -467,19 +465,10 @@ void IGMPv3::receiveChangeNotification(int category, const cPolymorphic *details
                 deleteRouterInterfaceData(interfaceId);
             }
             break;
-        case NF_IPv4_MCAST_JOIN:
-            info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
-            multicastGroupJoined(info->ie, info->groupAddress);
-            break;
-        case NF_IPv4_MCAST_LEAVE:
-            info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
-            multicastGroupLeft(info->ie, info->groupAddress);
-            break;
         case NF_IPv4_MCAST_CHANGE:
-        {
-            const IPv4MulticastGroupSourceInfo *info = check_and_cast<const IPv4MulticastGroupSourceInfo*>(details);
+            info = check_and_cast<const IPv4MulticastGroupSourceInfo*>(details);
             multicastSourceListChanged(info->ie, info->groupAddress, info->sourceList);
-        }
+            break;
     }
 }
 
@@ -560,43 +549,6 @@ void IGMPv3::processIgmpMessage(IGMPMessage *msg)
         default:
             delete msg;
             throw cRuntimeError("IGMPv2: Unhandled message type (%dq)", msg->getType());
-    }
-}
-
-void IGMPv3::multicastGroupJoined(InterfaceEntry *ie, IPv4Address groupAddr)
-{
-    ASSERT(ie && ie->isMulticast());
-    ASSERT(groupAddr.isMulticast());
-
-    if (enabled && !groupAddr.isLinkLocalMulticast())
-    {
-        EV_DETAIL << "Interface state changed, sending a State-Change Report, interface='" << ie->getName() << "'.\n";
-        HostGroupData *groupData = createHostGroupData(ie, groupAddr);
-        numGroups++;
-        numHostGroups++;
-        IPv4AddressVector sources;
-        // FIXME report type should be TO_EX; dest address should be ALL_IGMPV3_ROUTERS_MCAST
-        sendGroupReport(ie, groupData->groupAddr, IGMPV3_RT_IS_EX, sources);    //sending Join Report message
-        groupData->state = IGMPV3_HGS_DELAYING_MEMBER;
-    }
-}
-
-void IGMPv3::multicastGroupLeft(InterfaceEntry *ie, IPv4Address groupAddr)
-{
-    ASSERT(ie && ie->isMulticast());
-    ASSERT(groupAddr.isMulticast());
-
-    if (enabled && !groupAddr.isLinkLocalMulticast())
-    {
-        HostGroupData *groupData = getHostGroupData(ie, groupAddr);
-        if (groupData && groupData->timer)
-        {
-            if (groupData->timer->isScheduled())
-                cancelEvent(groupData->timer);
-        }
-        deleteHostGroupData(ie, groupAddr);
-        numHostGroups--;
-        numGroups--;
     }
 }
 

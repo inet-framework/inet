@@ -282,8 +282,6 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
         virtual void processQuery(IGMPv3Query *msg);
         virtual void processReport(IGMPv3Report *msg);
 
-        virtual void multicastGroupJoined(InterfaceEntry *ie, IPv4Address groupAddr);
-        virtual void multicastGroupLeft(InterfaceEntry *ie, IPv4Address groupAddr);
         virtual void multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, const IPv4MulticastSourceList &sourceList);
 
         /**
