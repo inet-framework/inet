@@ -1,0 +1,11 @@
+2013-11-07 Benjamin Seregi
+
+    STP: added IEEE 802.1D-1998 implementation of Spanning Tree Protocol.
+    The source code is based on ANSA (https://github.com/kvetak/ANSA)
+    implementation.
+
+    RSTP: -
+
+    IEEE8021DInterfaceData: InterfaceEntry is extended with IEEE8021DInterfaceData.
+    It is created to contain additional port interface information of an
+    EtherSwitch (e.g. is the port forwarding or not?).

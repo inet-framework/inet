@@ -1,3 +1,11 @@
+2013-11-07 Benjamin Seregi
+
+    MACAddressTable: new module added because MACAddressTable was separated
+    from the RelayUnit. The new MACTable is ready for future VLAN support.
+
+    IEEE8021DRelay: added a new relay for supporting STP/RSTP protocols.
+    The CPU and memory modelling are no longer supported with this relay.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-06-24  Zoltan Bojthe
@@ -187,7 +195,7 @@
 	added further module @labels (ethernet-node, wireless-node, mpls-node);
 	added default icons to several module types; more gate labels
 
-2009-07-17  Levente MÈsz·ros
+2009-07-17  Levente M√©sz√°ros
 
 	added gate @labels properties
 
