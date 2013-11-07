@@ -25,6 +25,7 @@ simple IEEE8021DRelay like IMACRelayUnit
 {
     parameters:
         @display("i=block/broadcast;bgb=425,114");
+        string interfaceTableName = default("interfaceTable"); // the absolute path to the InterfaceTable
     gates:
         input ifIn[];
         output ifOut[];

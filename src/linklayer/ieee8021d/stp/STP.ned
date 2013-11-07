@@ -49,6 +49,8 @@ simple STP like ISpanningTree
         // the other switches, the other switches automatically select the switch as the root switch.
         int priority = default(32768);
 
+        // The absolute path to the InterfaceTable
+        string interfaceTableName = default("interfaceTable");
         @display("i=block/network2");
     gates:
         inout STPGate;

@@ -39,7 +39,7 @@ void IEEE8021DRelay::initialize(int stage)
         cModule * tmpMacTable = getParentModule()->getSubmodule("macTable");
         macTable = check_and_cast<MACAddressTable *>(tmpMacTable);
 
-        ifTable = check_and_cast<IInterfaceTable*>(this->getParentModule()->getSubmodule("interfaceTable"));
+        ifTable = check_and_cast<IInterfaceTable*>(this->getParentModule()->getSubmodule(par("interfaceTableName")));
         InterfaceEntry * ifEntry = ifTable->getInterface(0);
         bridgeAddress = ifEntry->getMacAddress();
 
