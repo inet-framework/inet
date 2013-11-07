@@ -28,12 +28,12 @@
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
 #include "IIPv4RoutingTable.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 #include "IPSocket.h"
 #include "IARPCache.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 
 Define_Module(IPv4);
 

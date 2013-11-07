@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include "dymo_um_omnet.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 
 //#define GARBAGE_COLLECT
 #ifndef DYMO_USE_STL

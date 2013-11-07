@@ -29,7 +29,7 @@
 
 #include "IPv6ControlInfo.h"
 #include "IPv6NDMessage_m.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #include "ICMPv6Message_m.h"
 
 #include "IPv6TunnelingAccess.h"

@@ -17,10 +17,10 @@
 
 #include "Ieee80211MgmtSTA.h"
 #include "IRadioChannel.h"
-#include "Ieee802Ctrl_m.h"
 #include "InterfaceEntry.h"
 #include "InterfaceTableAccess.h"
 #include "ModuleAccess.h"
+#include "Ieee802Ctrl.h"
 #include "NotifierConsts.h"
 #include "PhyControlInfo_m.h"
 #include "RadioState.h"

@@ -16,7 +16,7 @@
 //
 
 #include "Ieee80211MgmtAPBase.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #include <string.h>
 
 #ifdef WITH_ETHERNET

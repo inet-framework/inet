@@ -24,7 +24,7 @@
 
 #include <cassert>
 #include "INetworkProtocolControlInfo.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #include "GenericNetworkProtocolControlInfo.h"
 
 using std::endl;

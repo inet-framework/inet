@@ -20,7 +20,7 @@
 
 #include "DYMO_DataQueue.h"
 #include "IPv4InterfaceData.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4.h"
 
