@@ -40,21 +40,9 @@ class NotificationBoard;
 
 class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
 {
-    public:
+    protected:
         typedef std::vector<IPv4Address> IPv4AddressVector;
 
-        struct SourceRecord
-        {
-            IGMPv3 *owner;
-            IPv4Address sourceAddr;
-            cMessage *sourceTimer;
-
-            SourceRecord(IGMPv3 *owner, const IPv4Address &source);
-            virtual ~SourceRecord();
-        };
-        typedef std::map<IPv4Address, SourceRecord*> SourceToGroupDataMap;
-
-    protected:
         enum RouterState
         {
             IGMPV3_RS_INITIAL,
@@ -107,14 +95,26 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
         };
         typedef std::map<IPv4Address,HostGroupData*> GroupToHostDataMap;
 
+        struct SourceRecord
+        {
+            IGMPv3 *owner;
+            IPv4Address sourceAddr;
+            cMessage *sourceTimer;
+
+            SourceRecord(IGMPv3 *owner, const IPv4Address &source);
+            virtual ~SourceRecord();
+        };
+        typedef std::map<IPv4Address, SourceRecord*> SourceToSourceRecordMap;
+
         struct RouterGroupData
         {
             IGMPv3 *owner;
+            InterfaceEntry *ie;
             IPv4Address groupAddr;
             FilterMode filter;
             RouterGroupState state;
             cMessage *timer;
-            SourceToGroupDataMap sources; // XXX should map source addresses to source timers
+            SourceToSourceRecordMap sources; // XXX should map source addresses to source timers
                                           // i.e. map<IPv4Address,cMessage*>
 
             RouterGroupData(IGMPv3 *owner, IPv4Address group);
@@ -201,8 +201,6 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
             IGMPV3RouterSourceTimerContext(InterfaceEntry *ie, RouterGroupData *routerGroup, IPv4Address source)
                 : ie(ie), routerGroup(routerGroup), sourceAddr(source) {}
         };
-
-
 
     protected:
         IRoutingTable *rt;

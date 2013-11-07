@@ -149,7 +149,7 @@ void IGMPv3::RouterGroupData::collectForwardedSources(IPv4MulticastSourceList &r
         case IGMPV3_FM_INCLUDE:
             result.filterMode = MCAST_INCLUDE_SOURCES;
             result.sources.clear();
-            for (SourceToGroupDataMap::const_iterator it = sources.begin(); it != sources.end(); ++it)
+            for (SourceToSourceRecordMap::const_iterator it = sources.begin(); it != sources.end(); ++it)
             {
                 if (it->second->sourceTimer && it->second->sourceTimer->isScheduled())
                     result.sources.push_back(it->first);
@@ -158,7 +158,7 @@ void IGMPv3::RouterGroupData::collectForwardedSources(IPv4MulticastSourceList &r
         case IGMPV3_FM_EXCLUDE:
             result.filterMode = MCAST_EXCLUDE_SOURCES;
             result.sources.clear();
-            for (SourceToGroupDataMap::const_iterator it = sources.begin(); it != sources.end(); ++it)
+            for (SourceToSourceRecordMap::const_iterator it = sources.begin(); it != sources.end(); ++it)
             {
                 if (!it->second->sourceTimer || !it->second->sourceTimer->isScheduled())
                     result.sources.push_back(it->first);
@@ -171,7 +171,7 @@ void IGMPv3::RouterGroupData::collectForwardedSources(IPv4MulticastSourceList &r
 void IGMPv3::RouterGroupData::printSourceList(std::ostream &out, bool withRunningTimer) const
 {
     bool first = true;
-    for (IGMPv3::SourceToGroupDataMap::const_iterator it = sources.begin(); it != sources.end(); ++it)
+    for (IGMPv3::SourceToSourceRecordMap::const_iterator it = sources.begin(); it != sources.end(); ++it)
     {
         bool timerIsRunning = it->second->sourceTimer && it->second->sourceTimer->isScheduled();
         if (withRunningTimer == timerIsRunning)
@@ -315,7 +315,7 @@ IGMPv3::RouterGroupData *IGMPv3::getRouterGroupData(InterfaceEntry *ie, IPv4Addr
 IGMPv3::SourceRecord *IGMPv3::getSourceRecord(InterfaceEntry *ie, IPv4Address group, IPv4Address source)
 {
     RouterGroupData *groupData = getRouterGroupData(ie, group);
-    SourceToGroupDataMap::iterator it = groupData->sources.find(source);
+    SourceToSourceRecordMap::iterator it = groupData->sources.find(source);
     return it != groupData->sources.end() ? it->second : NULL;
 }
 
@@ -368,7 +368,7 @@ void IGMPv3::deleteRouterGroupData(InterfaceEntry *ie, IPv4Address group)
 void IGMPv3::deleteSourceRecord(InterfaceEntry *ie, IPv4Address group, IPv4Address source)
 {
     RouterGroupData *groupData = getRouterGroupData(ie, group);
-    SourceToGroupDataMap::iterator it = groupData->sources.find(source);
+    SourceToSourceRecordMap::iterator it = groupData->sources.find(source);
     if(it != groupData->sources.end())
     {
         SourceRecord *record = it->second;
@@ -1151,7 +1151,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                         }
                     }
                     //delete A-B
-                    for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         //IGMPv3::IpVector::iterator itIp;
                         if(std::find(gr.sourceList.begin(), gr.sourceList.end(), it->first) == gr.sourceList.end())
@@ -1175,7 +1175,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
 
                     //Delete X-A
                     //Delete Y-A
-                    for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         if(std::find(gr.sourceList.begin(), gr.sourceList.end(), it->first) == gr.sourceList.end())
                         {
@@ -1251,7 +1251,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
                             << "' on interface '" << ie->getName() << "'.\n";
                     IPv4AddressVector mapSources;
-                    for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         mapSources.push_back(it->first);
                     }
@@ -1262,7 +1262,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                 {
                     //Exclude x+(a-y), y to je pokial to necham tak jak to je a vytvorim ten jeden dole
                     //A-X-Y=GroupTimer
-                    for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         SourceRecord *record = getSourceRecord(ie,groupData->groupAddr, it->first);
                         if(!record)
@@ -1280,7 +1280,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
                             << "' on interface '" << ie->getName() << "'.\n";
                     IPv4AddressVector mapSourcesY;
-                    for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         if(!it->second->sourceTimer->isScheduled())
                         {
@@ -1315,7 +1315,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
                             << "' on interface '" << ie->getName() << "'.\n";
                     IPv4AddressVector sourcesA;
-                    for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         sourcesA.push_back(it->first);
                     }
@@ -1342,7 +1342,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
                             << "' on interface '" << ie->getName() << "'.\n";
                     IPv4AddressVector sourcesX;
-                    for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         if(it->second->sourceTimer->isScheduled())
                         {
@@ -1384,7 +1384,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     groupData->filter = IGMPV3_FM_EXCLUDE;
 
                     IPv4AddressVector oldSources;
-                    for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                         oldSources.push_back(it->first);
 
                     //A*B, B-A ; B-A=0
@@ -1402,7 +1402,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     }
 
                     //delete A-B
-                    for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         //IGMPv3::IpVector::iterator itIp;
                         if(std::find(gr.sourceList.begin(), gr.sourceList.end(), it->first) == gr.sourceList.end())
@@ -1433,7 +1433,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
 
                     //Delete X-A
                     //Delete Y-A
-                    for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         if(std::find(gr.sourceList.begin(), gr.sourceList.end(), it->first)== gr.sourceList.end())
                         {
@@ -1461,7 +1461,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     EV_INFO << "Sending Group-Specific Query for group '" << groupData->groupAddr
                             << "' on interface '" << ie->getName() << "'.\n";
                     IPv4AddressVector mapSourcesY;
-                    for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         if(!it->second->sourceTimer->isScheduled())
                         {
@@ -1507,7 +1507,7 @@ void IGMPv3::processRouterGroupTimer(cMessage *msg)
     if(groupData->filter == IGMPV3_FM_EXCLUDE)
     {
         bool timerRunning = false;
-        for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+        for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
         {
             if(!it->second->sourceTimer->isScheduled())
             {
@@ -1551,7 +1551,7 @@ void IGMPv3::processRouterSourceTimer(cMessage *msg)
     {
         deleteSourceRecord(ctx->ie, groupData->groupAddr, ctx->sourceAddr);
     }
-    for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
     {
         if(it->second->sourceTimer->isScheduled())
         {
