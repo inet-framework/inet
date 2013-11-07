@@ -24,7 +24,6 @@
 #include "FWMath.h"
 #include "PhyControlInfo_m.h"
 #include "Radio80211aControlInfo_m.h"
-#include "BasicBattery.h"
 #include "NodeStatus.h"
 #include "NodeOperations.h"
 
@@ -166,7 +165,6 @@ void SimplifiedRadio::initialize(int stage)
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER)
     {
-        registerBattery();
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (isOperational)
@@ -956,23 +954,6 @@ void SimplifiedRadio::updateSensitivity(double rate)
         receptionThreshold = sensitivity;
     EV<<"bitrate = "<<rate<<endl;
     EV <<" sensitivity after updateSensitivity: "<<sensitivity<<endl;
-}
-
-void SimplifiedRadio::registerBattery()
-{
-    BasicBattery *bat = BatteryAccess().getIfExists();
-    if (bat)
-    {
-        //int id,double mUsageRadioIdle,double mUsageRadioRecv,double mUsageRadioSend,double mUsageRadioSleep)=0;
-        // read parameters
-        double mUsageRadioIdle = par("usage_radio_idle");
-        double mUsageRadioRecv = par("usage_radio_recv");
-        double mUsageRadioSleep = par("usage_radio_sleep");
-        double mUsageRadioSend = par("usage_radio_send");
-        if (mUsageRadioIdle<0 || mUsageRadioRecv<0 || mUsageRadioSleep<0 || mUsageRadioSend < 0)
-            return;
-        bat->registerWirelessDevice(rs.getRadioId(), mUsageRadioIdle, mUsageRadioRecv, mUsageRadioSend, mUsageRadioSleep);
-    }
 }
 
 void SimplifiedRadio::updateDisplayString() {

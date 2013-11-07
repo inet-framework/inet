@@ -154,8 +154,6 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
     virtual void connectReceiver();
     virtual void disconnectReceiver();
 
-    virtual void registerBattery();
-
     virtual void updateDisplayString();
 
     double calcDistFreeSpace();
