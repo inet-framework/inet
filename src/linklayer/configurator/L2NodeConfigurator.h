@@ -23,9 +23,6 @@
 #include "IRoutingTable.h"
 #include "L2NetworkConfigurator.h"
 
-/**
- * TODO - Generated class
- */
 class L2NodeConfigurator : public cSimpleModule, public ILifecycle {
     protected:
         NodeStatus * nodeStatus;

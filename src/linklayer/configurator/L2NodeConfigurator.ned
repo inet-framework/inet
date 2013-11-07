@@ -16,11 +16,11 @@
 package inet.linklayer.configurator;
 
 //
-// TODO auto-generated module
+// It behaves similarly to ~IPv4NodeConfigurator.
 //
 simple L2NodeConfigurator
 {
     parameters:
         @display("i=block/cogwheel_s");
-        string l2ConfiguratorModule = default("l2NetworkConfigurator"); // the absolute path to the IPv4NetworkConfigurator; use "" if there is no configurator
+        string l2ConfiguratorModule = default("l2NetworkConfigurator"); // the absolute path to the L2NetworkConfigurator; use "" if there is no configurator
 }
