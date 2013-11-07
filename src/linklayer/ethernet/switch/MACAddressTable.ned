@@ -16,7 +16,7 @@
 package inet.linklayer.ethernet.switch;
 
 //
-// TODO auto-generated module
+// This module handles the mapping between ports and MAC addresses.
 //
 simple MACAddressTable
 {
