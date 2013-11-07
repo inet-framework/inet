@@ -21,15 +21,12 @@ package inet.nodes.ethernet;
 import inet.base.NotificationBoard;
 import inet.linklayer.IMACRelayUnit;
 import inet.linklayer.IWiredNic;
+import inet.linklayer.configurator.L2NodeConfigurator;
+import inet.linklayer.ethernet.switch.MACAddressTable;
+import inet.linklayer.ieee8021d.ISpanningTree;
 import inet.networklayer.common.InterfaceTable;
 import inet.status.NodeStatus;
-import inet.linklayer.ieee8021d.stp.STP;
-import inet.linklayer.ieee8021d.stp.STP;
-import inet.linklayer.ethernet.switch.MACAddressTable;
-import inet.linklayer.configurator.L2NodeConfigurator;
-import inet.linklayer.ieee8021d.rstp.RSTP;
-import inet.linklayer.ethernet.switch.Relay.IEEE8021DRelay;
-import inet.linklayer.ieee8021d.ISpanningTree;
+
 
 //
 // Model of an Ethernet switch.
@@ -40,7 +37,6 @@ import inet.linklayer.ieee8021d.ISpanningTree;
 // By default used half duples CSMA/CD mac
 //
 //
-
 module EtherSwitch
 {
     parameters:
@@ -50,7 +46,8 @@ module EtherSwitch
         bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
-        string spanningTreeProtocolVersion = default("STP");
+        string spanningTreeProtocol = default("");
+        string relayUnitType = default("IEEE8021DRelay"); // type of the ~IMACRelayUnit;
         eth[*].encapType = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
         eth[*].macType = macType;
@@ -73,14 +70,14 @@ module EtherSwitch
         macTable: MACAddressTable {
             @display("p=50,19;is=s");
         }
-        relayUnit: IEEE8021DRelay {
+        relayUnit: <relayUnitType> like IMACRelayUnit {
             parameters:
                 @display("p=198,50;is=m");
             gates:
                 ifIn[sizeof(ethg)];
                 ifOut[sizeof(ethg)];
         }
-        stp: <spanningTreeProtocolVersion> like ISpanningTree if spanningTreeProtocolVersion != "" {
+        stp: <spanningTreeProtocol> like ISpanningTree if spanningTreeProtocol != "" {
             @display("p=125,50");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
@@ -94,8 +91,8 @@ module EtherSwitch
             eth[i].upperLayerOut --> relayUnit.ifIn++;
             eth[i].phys <--> ethg[i];
         }
-        
-        if spanningTreeProtocolVersion != "" {
-        	stp.STPGate <--> relayUnit.STPGate;
+
+        if spanningTreeProtocol != "" {
+            stp.STPGate <--> relayUnit.STPGate;
         }
 }
