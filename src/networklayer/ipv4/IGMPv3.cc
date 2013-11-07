@@ -1324,6 +1324,11 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     // FIXME do not send the query with empty source list
                     sendQuery(ie, groupData->groupAddr, set_complement(sourcesX, gr.sourceList), queryResponseInterval);
 
+                    // FIXME Missing (see RFC 3376 6.4.2):
+                    // ..., when a router queries a specific group, it lowers its
+                    // group timer for that group to a small interval of Last Member Query
+                    // Time seconds.
+
                     //send q(g)
                     EV_INFO << "Sending Group-Specific Query for group '" << groupData->groupAddr
                             << "' on interface '" << ie->getName() << "'.\n";
