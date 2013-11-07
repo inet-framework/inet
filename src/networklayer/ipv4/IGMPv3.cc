@@ -873,12 +873,7 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
         //    selected delay.  Any previously pending response to a General
         //    Query is canceled.
         EV_DETAIL << "Received a General Query, scheduling report with delay=" << delay << ".\n";
-
-        if(interfaceData->generalQueryTimer->isScheduled())
-        {
-            cancelEvent(interfaceData->generalQueryTimer);
-        }
-        scheduleAt(simTime() + delay, interfaceData->generalQueryTimer);
+        startTimer(interfaceData->generalQueryTimer, delay);
     }
     if(!groupAddr.isUnspecified())
     {
@@ -905,7 +900,7 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
                       << "scheduling report with delay=" << delay << ".\n";
 
             groupData->timer->setContextPointer(new IGMPV3HostTimerSourceContext(ie, groupData, msg->getSourceList()));
-            scheduleAt(simTime() + delay, groupData->timer);
+            startTimer(groupData->timer, delay);
         }
         else if(!groupAddr.isUnspecified() && groupData->timer->isScheduled())
         {
@@ -923,10 +918,7 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
 
                 groupData->timer->setContextPointer(new IGMPV3HostTimerSourceContext(ie, groupData, msg->getSourceList()));
                 if(groupData->timer->getArrivalTime() > simTime() + delay)
-                {
-                    cancelEvent(groupData->timer);
-                    scheduleAt(simTime() + delay, groupData->timer);
-                }
+                    startTimer(groupData->timer, delay);
             }
             else
             {
@@ -948,8 +940,7 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
                     combinedSources.reserve(msg->getSourceList().size() + ctx->sourceList.size());
                     combinedSources.insert(combinedSources.end(), msg->getSourceList().begin(), msg->getSourceList().end());
                     combinedSources.insert(combinedSources.end(),ctx->sourceList.begin(),ctx->sourceList.end());
-                    cancelEvent(groupData->timer);
-                    scheduleAt(simTime() + delay, groupData->timer);
+                    startTimer(groupData->timer, delay);
                 }
             }
         }
