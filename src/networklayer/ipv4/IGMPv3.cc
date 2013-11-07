@@ -191,7 +191,7 @@ void IGMPv3::RouterGroupData::collectForwardedSources(IPv4MulticastSourceList &r
 void IGMPv3::RouterGroupData::printSourceList(std::ostream &out, bool withRunningTimer) const
 {
     bool first = true;
-    for (IGMPv3::SourceToSourceRecordMap::const_iterator it = sources.begin(); it != sources.end(); ++it)
+    for (SourceToSourceRecordMap::const_iterator it = sources.begin(); it != sources.end(); ++it)
     {
         bool timerIsRunning = it->second->sourceTimer && it->second->sourceTimer->isScheduled();
         if (withRunningTimer == timerIsRunning)

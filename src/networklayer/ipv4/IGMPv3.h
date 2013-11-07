@@ -95,6 +95,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
             virtual ~HostGroupData();
             std::string getStateInfo() const;
         };
+
         typedef std::map<IPv4Address,HostGroupData*> GroupToHostDataMap;
 
         struct HostInterfaceData
@@ -111,7 +112,6 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
             HostGroupData *getGroupData(IPv4Address group);
             void deleteGroupData(IPv4Address group);
         };
-        typedef std::map<int, HostInterfaceData*> InterfaceToHostDataMap;
 
         struct RouterInterfaceData;
         struct RouterGroupData;
@@ -125,6 +125,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
             SourceRecord(RouterGroupData *parent, IPv4Address source);
             virtual ~SourceRecord();
         };
+
         typedef std::map<IPv4Address, SourceRecord*> SourceToSourceRecordMap;
 
         struct RouterGroupData
@@ -149,6 +150,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
             private:
             void printSourceList(std::ostream &out, bool withRunningTimer) const;
         };
+
         typedef std::map<IPv4Address, RouterGroupData*> GroupToRouterDataMap;
 
         struct RouterInterfaceData
@@ -165,8 +167,6 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
             RouterGroupData *getGroupData(IPv4Address group);
             void deleteGroupData(IPv4Address group);
         };
-        typedef std::map<int, RouterInterfaceData*> InterfaceToRouterDataMap;
-
 
         enum IGMPTimerKind
         {
@@ -205,6 +205,8 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
         double lastMemberQueryTime;
         double unsolicitedReportInterval;
 
+        typedef std::map<int, HostInterfaceData*> InterfaceToHostDataMap;
+        typedef std::map<int, RouterInterfaceData*> InterfaceToRouterDataMap;
         InterfaceToHostDataMap hostData;
         InterfaceToRouterDataMap routerData;
 
