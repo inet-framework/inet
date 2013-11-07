@@ -49,8 +49,7 @@ SimplifiedRadioChannelAccess::~SimplifiedRadioChannelAccess()
  */
 void SimplifiedRadioChannelAccess::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
-
+    RadioBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
     {
         cc = getSimplifiedRadioChannel();

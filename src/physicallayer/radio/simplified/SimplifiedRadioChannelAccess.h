@@ -24,7 +24,7 @@
 #include <list>
 #include <limits>
 
-#include "INETDefs.h"
+#include "RadioBase.h"
 #include "ISimplifiedRadioChannel.h"
 
 // Forward declarations
@@ -47,7 +47,7 @@ class SimplifiedRadioFrame;
  * @ingroup radioChannel
  * @ingroup phyLayer
  */
-class INET_API SimplifiedRadioChannelAccess : public cSimpleModule, protected cListener
+class INET_API SimplifiedRadioChannelAccess : public RadioBase, protected cListener
 {
   protected:
     ISimplifiedRadioChannel* cc;  // Pointer to the SimplifiedRadioChannel module

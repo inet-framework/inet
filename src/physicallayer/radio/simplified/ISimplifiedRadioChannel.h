@@ -62,9 +62,6 @@ class INET_API ISimplifiedRadioChannel
     /** Called when host switches channel */
     virtual void setRadioChannel(RadioRef r, int channel) = 0;
 
-    /** Returns the number of radio channels (frequencies) simulated */
-    virtual int getNumChannels() = 0;
-
     /** Provides a list of transmissions currently on the air */
     virtual const TransmissionList& getOngoingTransmissions(int channel) = 0;
 

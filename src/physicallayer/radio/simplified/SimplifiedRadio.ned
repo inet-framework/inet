@@ -21,12 +21,12 @@
 
 package inet.physicallayer.radio.simplified;
 
-import inet.physicallayer.radio.contract.IRadio;
+import inet.physicallayer.radio.common.RadioBase;
 
 //
 // This is an abstract module that defines all parameters for radio modules
 //
-simple SimplifiedRadio like IRadio
+simple SimplifiedRadio extends RadioBase
 {
     parameters:
         int channelNumber = default(0); // channel identifier this radio listens. Works only with simlified management module. Otherwise it scans all the channels as specified in ieee 80211
@@ -68,6 +68,7 @@ simple SimplifiedRadio like IRadio
 
         xml SensitivityTable = default(xml("<NoSensitivityTable> </NoSensitivityTable>"));
 
+        @class(SimplifiedRadio);
         @signal[NF_RADIOSTATE_CHANGED](type=RadioState);
         @signal[NF_RADIO_CHANNEL_CHANGED](type=RadioState);
         @signal[NF_RADIO_CHANGE_NOISE](type=RadioState);
@@ -79,8 +80,4 @@ simple SimplifiedRadio like IRadio
         @statistic[channelNo](title="channel no"; record=histogram,vector; interpolationmode=sample-hold);
         @statistic[radioState](title="radio state (enum)"; record=count,vector; interpolationmode=sample-hold);
         @statistic[lossRate](title="packet loss rate"; record=min,max,timeavg,vector; interpolationmode=backward-sample-hold);
-    gates:
-        input upperLayerIn @labels(PhyControlInfo/down); // from higher layer protocol (MAC)
-        output upperLayerOut @labels(PhyControlInfo/up); // to higher layer protocol (MAC)
-        input radioIn @labels(SimplifiedRadioFrame); // to receive frames (SimplifiedRadioFrame) on the radio channel
 }

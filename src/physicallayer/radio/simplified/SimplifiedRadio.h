@@ -65,6 +65,17 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
     SimplifiedRadio();
     virtual ~SimplifiedRadio();
 
+    virtual void setRadioMode(RadioMode radioMode);
+
+    /**
+     * Change transmitter and receiver to a new channel.
+     * This method throws an error if the radio state is transmit.
+     * Messages that are already sent to the new channel and would
+     * reach us in the future - thus they are on the air - will be
+     * received correctly.
+     */
+    virtual void setRadioChannel(int radioChannel);
+
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:

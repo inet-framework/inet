@@ -54,20 +54,21 @@ SimplifiedRadioChannel::~SimplifiedRadioChannel()
  *
  * @ref calcInterfDist
  */
-void SimplifiedRadioChannel::initialize()
+void SimplifiedRadioChannel::initialize(int stage)
 {
-    EV << "initializing SimplifiedRadioChannel\n";
+    RadioChannelBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+    {
+        transmissions.resize(numChannels);
 
-    numChannels = par("numChannels");
-    transmissions.resize(numChannels);
+        lastOngoingTransmissionsUpdate = 0;
 
-    lastOngoingTransmissionsUpdate = 0;
+        maxInterferenceDistance = calcInterfDist();
 
-    maxInterferenceDistance = calcInterfDist();
-
-    WATCH(maxInterferenceDistance);
-    WATCH_LIST(radios);
-    WATCH_VECTOR(transmissions);
+        WATCH(maxInterferenceDistance);
+        WATCH_LIST(radios);
+        WATCH_VECTOR(transmissions);
+    }
 }
 
 /**

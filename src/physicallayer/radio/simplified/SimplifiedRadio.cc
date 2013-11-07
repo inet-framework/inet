@@ -761,6 +761,11 @@ void SimplifiedRadio::addNewSnr()
     snrInfo.sList.push_back(listEntry);
 }
 
+void SimplifiedRadio::setRadioChannel(int channel)
+{
+    this->radioChannel = radioChannel;
+}
+
 void SimplifiedRadio::changeChannel(int channel)
 {
     if (channel == rs.getChannelNumber())
@@ -868,6 +873,11 @@ void SimplifiedRadio::setBitrate(double bitrate)
     rs.setBitrate(bitrate);
 
     //XXX fire some notification?
+}
+
+void SimplifiedRadio::setRadioMode(RadioMode radioMode)
+{
+    this->radioMode = radioMode;
 }
 
 void SimplifiedRadio::setRadioState(RadioState::State newState)
