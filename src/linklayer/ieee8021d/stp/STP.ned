@@ -17,6 +17,7 @@
 package inet.linklayer.ieee8021d.stp;
 import inet.linklayer.ieee8021d.ISpanningTree;
 
+//
 // The Spanning Tree Protocol (STP) is a network protocol that ensures a loop-free 
 // topology for any bridged Ethernet local area network. The basic function of STP 
 // is to prevent bridge loops and the broadcast radiation that results from them. 
@@ -26,28 +27,29 @@ import inet.linklayer.ieee8021d.ISpanningTree;
 // 
 // There are various versions of Spanning Tree algorithm and protocol. This module
 // implements it according to the IEEE 802.1D-1998 specification.
-
+//
 simple STP like ISpanningTree
 {
     parameters:
-       bool treeColoring = default(false);
-       
-       // The hello time is the time between each bridge protocol data unit (BPDU) that is sent on a port. 
-       // This time is equal to 2 seconds (sec) by default, but you can tune the time to be between 1 and 10 sec.
-       double helloTime @unit("s") = default(2s);
-       
-       // The forward delay is the time that is spent in the listening and learning state. This time is equal to 15 sec by default, 
-       // but you can tune the time to be between 4 and 30 sec.
-       double fwdDelay @unit("s") = default(15s);
-       
-       // The max age timer controls the maximum length of time that passes before a bridge port saves its configuration BPDU information. 
-       // This time is 20 sec by default, but you can tune the time to be between 6 and 40 sec. 
-       double maxAge @unit("s") = default(20s);
-       
-	   // The bridge priority determines which bridge is elected as the root bridge. If the switch has a bridge priority that is lower than all the other switches, 
-	   // the other switches automatically select the switch as the root switch. 
-       int priority = default(32768);
-       @display("i=block/network2");
+        bool treeColoring = default(false);
+
+        // The hello time is the time between each bridge protocol data unit (BPDU) that is sent on a port.
+        // This time is equal to 2 seconds (sec) by default, but you can tune the time to be between 1 and 10 sec.
+        double helloTime @unit("s") = default(2s);
+
+        // The forward delay is the time that is spent in the listening and learning state. This time is equal to 15 sec by default,
+        // but you can tune the time to be between 4 and 30 sec.
+        double fwdDelay @unit("s") = default(15s);
+
+        // The max age timer controls the maximum length of time that passes before a bridge port saves its configuration BPDU information. 
+        // This time is 20 sec by default, but you can tune the time to be between 6 and 40 sec.
+        double maxAge @unit("s") = default(20s);
+
+        // The bridge priority determines which bridge is elected as the root bridge. If the switch has a bridge priority that is lower than all 
+        // the other switches, the other switches automatically select the switch as the root switch.
+        int priority = default(32768);
+
+        @display("i=block/network2");
     gates:
         inout STPGate;
 }
