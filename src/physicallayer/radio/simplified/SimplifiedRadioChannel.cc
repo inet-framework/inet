@@ -19,7 +19,7 @@
 #include "FWMath.h"
 #include <cassert>
 
-#include "SimplifiedRadioFrame_m.h"
+#include "SimplifiedRadioFrame.h"
 
 Define_Module(SimplifiedRadioChannel);
 

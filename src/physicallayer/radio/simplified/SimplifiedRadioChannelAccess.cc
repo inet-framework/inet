@@ -20,8 +20,6 @@
 #include "IMobility.h"
 #include "ModuleAccess.h"
 
-simsignal_t SimplifiedRadioChannelAccess::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
-
 static int parseInt(const char *s, int defaultValue)
 {
     if (!s || !*s)
@@ -60,8 +58,7 @@ void SimplifiedRadioChannelAccess::initialize(int stage)
         myRadioRef = NULL;
 
         positionUpdateArrived = false;
-        // register to get a notification when position changes
-        hostModule->subscribe(mobilityStateChangedSignal, this);
+        hostModule->subscribe(IMobility::mobilityStateChangedSignal, this);
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER)
     {
@@ -113,7 +110,7 @@ void SimplifiedRadioChannelAccess::sendToChannel(SimplifiedRadioFrame *msg)
 
 void SimplifiedRadioChannelAccess::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
-    if (signalID == mobilityStateChangedSignal)
+    if (signalID == IMobility::mobilityStateChangedSignal)
     {
         IMobility *mobility = check_and_cast<IMobility*>(obj);
         radioPos = mobility->getCurrentPosition();

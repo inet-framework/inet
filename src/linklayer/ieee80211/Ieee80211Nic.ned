@@ -72,7 +72,7 @@ module Ieee80211Nic like IWirelessNic
         }
         radio: SimplifiedIeee80211Radio {
             parameters:
-                phyOpMode = opMode;
+                opMode = opMode;
                 bitrate = bitrate;
                 @display("p=157,302");
         }

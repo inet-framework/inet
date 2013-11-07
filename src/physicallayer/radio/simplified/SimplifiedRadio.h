@@ -21,13 +21,14 @@
 
 #include "SimplifiedRadioChannelAccess.h"
 #include "RadioState.h"
-#include "SimplifiedRadioFrame_m.h"
+#include "SimplifiedRadioFrame.h"
 #include "IRadioModel.h"
 #include "IReceptionModel.h"
 #include "SnrList.h"
 #include "ObstacleControl.h"
 #include "INoiseGenerator.h"
 #include "ILifecycle.h"
+#include "NotifierConsts.h"
 
 /**
  * Abstract base class for radio modules. Radio modules deal with the

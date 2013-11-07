@@ -43,7 +43,7 @@ class INET_API Ieee80211RadioModel : public IRadioModel
     BerParseFile *parseTable;
     bool fileBer;
 
-    char phyOpMode;
+    char opMode;
 
     double PHY_HEADER_LENGTH;
     IErrorModel * errorModel;

@@ -50,7 +50,6 @@ class SimplifiedRadioFrame;
 class INET_API SimplifiedRadioChannelAccess : public cSimpleModule, protected cListener
 {
   protected:
-    static simsignal_t mobilityStateChangedSignal;
     ISimplifiedRadioChannel* cc;  // Pointer to the SimplifiedRadioChannel module
     ISimplifiedRadioChannel::RadioRef myRadioRef;  // Identifies this radio in the SimplifiedRadioChannel module
     cModule *hostModule;    // the host that contains this radio model

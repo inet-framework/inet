@@ -19,7 +19,7 @@
 #define IRADIOMODEL_H
 
 #include "INETDefs.h"
-#include "SimplifiedRadioFrame_m.h"
+#include "SimplifiedRadioFrame.h"
 #include "SnrList.h"
 
 /**
