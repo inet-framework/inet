@@ -51,5 +51,6 @@ simple MACRelayUnitPP like IMACRelayUnit
     gates:
         input ifIn[] @labels(EtherFrame);
         output ifOut[] @labels(EtherFrame);
+        inout STPGate @loose;
 }
 

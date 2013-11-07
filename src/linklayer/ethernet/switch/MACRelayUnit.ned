@@ -24,4 +24,5 @@ simple MACRelayUnit like IMACRelayUnit
     gates:
         input ifIn[] @labels(EtherFrame);
         output ifOut[] @labels(EtherFrame);
+        inout STPGate @loose;
 }

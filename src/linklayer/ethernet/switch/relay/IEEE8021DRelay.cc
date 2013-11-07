@@ -4,12 +4,12 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
@@ -43,6 +43,8 @@ void IEEE8021DRelay::initialize(int stage)
         InterfaceEntry * ifEntry = ifTable->getInterface(0);
         bridgeAddress = ifEntry->getMacAddress();
 
+        isStpAware = gate("STPGate$i")->isConnected(); // if the STPGate is not connected then the switch is STP/RSTP unaware
+
         WATCH(bridgeAddress);
     }
 }
@@ -58,14 +60,14 @@ void IEEE8021DRelay::handleMessage(cMessage * msg)
 
     if (!msg->isSelfMessage())
     {
-        // Messages from STP process
+        // messages from STP process
         if (strcmp(msg->getArrivalGate()->getName(), "STPGate$i") == 0)
         {
             EV_INFO << "Received " << msg << " from STP/RSTP module." << endl;
             BPDU * bpdu = check_and_cast<BPDU* >(msg);
             dispatchBPDU(bpdu);
         }
-        // Messages from network
+        // messages from network
         else if (strcmp(msg->getArrivalGate()->getName(), "ifIn") == 0)
         {
             EV_INFO << "Received " << msg << " from network." << endl;
@@ -85,7 +87,7 @@ void IEEE8021DRelay::broadcast(EtherFrame * frame)
     unsigned int arrivalGate = frame->getArrivalGate()->getIndex();
 
     for (unsigned int i = 0; i < portCount; i++)
-        if (i != arrivalGate && getPortInterfaceData(i)->isForwarding())
+        if (i != arrivalGate && (getPortInterfaceData(i)->isForwarding() || !isStpAware))
             dispatch(frame->dup(), i);
 
     delete frame;
@@ -95,7 +97,7 @@ void IEEE8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
 {
     int arrivalGate = frame->getArrivalGate()->getIndex();
     IEEE8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
-    // Broadcast address
+    // broadcast address
     if (frame->getDest().isBroadcast())
     {
         broadcast(frame);
@@ -105,7 +107,7 @@ void IEEE8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
     if ((frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && port->getRole() != IEEE8021DInterfaceData::DISABLED)
     {
         EV_DETAIL << "Deliver BPDU to the STP/RSTP module" << endl;
-        deliverBPDU(frame); // Deliver to the STP/RSTP module
+        deliverBPDU(frame); // deliver to the STP/RSTP module
     }
     else
     {
@@ -119,7 +121,7 @@ void IEEE8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
         }
         else
         {
-            if (port->isForwarding())
+            if (port->isForwarding() || !isStpAware) // if the switch is STP/RSTP unaware then all its ports are forwarding (and learning)
             {
                 if (outGate != arrivalGate)
                     dispatch(frame, outGate);
@@ -147,7 +149,7 @@ void IEEE8021DRelay::dispatch(EtherFrame * frame, unsigned int portNum)
 
     EV_INFO << "Sending " << frame << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
 
-    if (port->isForwarding())
+    if (port->isForwarding() || !isStpAware)
         send(frame, "ifOut", portNum);
 
     return;
@@ -158,7 +160,7 @@ void IEEE8021DRelay::learn(EtherFrame * frame)
     int arrivalGate = frame->getArrivalGate()->getIndex();
     IEEE8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
 
-    if (port->isLearning())
+    if (port->isLearning() || !isStpAware)
         macTable->updateTableWithAddress(arrivalGate, frame->getSrc());
 }
 
@@ -201,7 +203,7 @@ void IEEE8021DRelay::deliverBPDU(EtherFrame * frame)
 
     bpdu->setControlInfo(controlInfo);
 
-    delete frame; // We have the BPDU packet, so delete the frame
+    delete frame; // we have the BPDU packet, so delete the frame
 
     EV_INFO << "Sending BPDU frame " << bpdu << " to the STP/RSTP module" << endl;
     send(bpdu, "STPGate$o");

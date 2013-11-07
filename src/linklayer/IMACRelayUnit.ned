@@ -51,6 +51,7 @@ moduleinterface IMACRelayUnit
     gates:
         input ifIn[] @labels(EtherFrame);
         output ifOut[] @labels(EtherFrame);
+        inout STPGate @loose;
 }
 
 simple MACRelayUnit_None like IMACRelayUnit
@@ -64,5 +65,6 @@ simple MACRelayUnit_None like IMACRelayUnit
     gates:
         input ifIn[] @labels(EtherFrame);
         output ifOut[] @labels(EtherFrame);
+        inout STPGate @loose;
 }
 
