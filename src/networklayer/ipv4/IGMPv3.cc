@@ -84,7 +84,7 @@ IGMPv3::HostGroupData::HostGroupData(HostInterfaceData *parent, IPv4Address grou
 
 IGMPv3::HostGroupData::~HostGroupData()
 {
-    delete (IGMPV3HostTimerSourceContext*)timer->getContextPointer();
+    delete (IGMPV3HostGroupDataTimerContext*)timer->getContextPointer();
     parent->owner->cancelAndDelete(timer);
 }
 
@@ -536,7 +536,6 @@ void IGMPv3::handleMessage(cMessage *msg)
             case IGMPV3_H_GROUP_TIMER:
                 processHostGroupQueryTimer(msg);
                 break;
-            // XXX IGMPV3_H_SOURCE_TIMER?
             default:
                 ASSERT(false);
                 break;
@@ -694,53 +693,36 @@ void IGMPv3::processHostGeneralQueryTimer(cMessage *msg)
 // RFC3376 5.2  report generation, point 2. and 3.
 void IGMPv3::processHostGroupQueryTimer(cMessage *msg)
 {
-    IGMPV3HostTimerSourceContext *ctx = (IGMPV3HostTimerSourceContext*)msg->getContextPointer();
+    IGMPV3HostGroupDataTimerContext *ctx = (IGMPV3HostGroupDataTimerContext*)msg->getContextPointer();
+    HostGroupData *group = ctx->group;
+    InterfaceEntry *ie = group->parent->ie;
 
     vector<GroupRecord> records(1);
 
     //checking if query is group or group-and-source specific
-    if(ctx->sourceList.empty())
+    if(ctx->queriedSources.empty())
     {
         // Send report for a Group-Specific Query
-        EV_INFO << "Response timer for a Group-Specific Query for group '" << ctx->hostGroup->groupAddr << "' on interface '" << ctx->ie->getName() << "'\n";
+        EV_INFO << "Response timer for a Group-Specific Query for group '" << group->groupAddr << "' on interface '" << ie->getName() << "'\n";
 
-        if(ctx->hostGroup->filter == IGMPV3_FM_EXCLUDE)
-        {
-            records[0].groupAddress = ctx->hostGroup->groupAddr;
-            records[0].recordType = IGMPV3_RT_IS_EX;
-            records[0].sourceList = ctx->hostGroup->sourceAddressList;
-            sendGroupReport(ctx->ie, records);
-        }
-        else if(ctx->hostGroup->filter == IGMPV3_FM_INCLUDE)
-        {
-            records[0].groupAddress = ctx->hostGroup->groupAddr;
-            records[0].recordType = IGMPV3_RT_IS_IN;
-            records[0].sourceList = ctx->hostGroup->sourceAddressList;
-            sendGroupReport(ctx->ie, records);
-        }
+        records[0].groupAddress = group->groupAddr;
+        records[0].recordType = group->filter == IGMPV3_FM_INCLUDE ? IGMPV3_RT_IS_IN : IGMPV3_RT_IS_EX ;
+        records[0].sourceList = group->sourceAddressList;
+        sendGroupReport(ie, records);
     }
     else
     {
         // Send report for a Group-and-Source-Specific Query
-        EV_INFO << "Response timer for a Group-and-Source-Specific Query for group '" << ctx->hostGroup->groupAddr << "' on interface '" << ctx->ie->getName() << "'\n";
+        EV_INFO << "Response timer for a Group-and-Source-Specific Query for group '" << group->groupAddr << "' on interface '" << ie->getName() << "'\n";
 
-        if(ctx->hostGroup->filter == IGMPV3_FM_INCLUDE)
-        {
-            records[0].groupAddress = ctx->hostGroup->groupAddr;
-            records[0].recordType = IGMPV3_RT_IS_IN;
-            records[0].sourceList = set_intersection(ctx->hostGroup->sourceAddressList, ctx->sourceList);
-            sendGroupReport(ctx->ie, records);
-        }
-        else if(ctx->hostGroup->filter == IGMPV3_FM_EXCLUDE)
-        {
-            records[0].groupAddress = ctx->hostGroup->groupAddr;
-            records[0].recordType = IGMPV3_RT_IS_IN;
-            records[0].sourceList = set_complement(ctx->sourceList, ctx->hostGroup->sourceAddressList);
-            sendGroupReport(ctx->ie, records);
-        }
+        records[0].groupAddress = group->groupAddr;
+        records[0].recordType = IGMPV3_RT_IS_IN;
+        records[0].sourceList = group->filter == IGMPV3_FM_INCLUDE ? set_intersection(group->sourceAddressList, ctx->queriedSources) :
+                                                                     set_complement(ctx->queriedSources, group->sourceAddressList);
+        sendGroupReport(ie, records);
     }
 
-    ctx->sourceList.clear();
+    ctx->queriedSources.clear();
 }
 
 static bool isEmptyRecord(const GroupRecord &record)
@@ -849,19 +831,18 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
 {
     IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)msg->getControlInfo();
     InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
+    IPv4Address groupAddr = msg->getGroupAddress();
+    const IPv4AddressVector &queriedSources = msg->getSourceList();
+    double maxRespTime = decodeTime(msg->getMaxRespCode());
 
     ASSERT(ie->isMulticast());
 
-    EV_INFO << "Received IGMPv3 query on interface '" << ie->getName() << "' for group '" << msg->getGroupAddress() << "'.\n";
+    EV_INFO << "Received IGMPv3 query on interface '" << ie->getName() << "' for group '" << groupAddr << "'.\n";
 
     HostInterfaceData *interfaceData = getHostInterfaceData(ie);
 
     numQueriesRecv++;
 
-    IPv4Address &groupAddr = msg->getGroupAddress();
-    IPv4AddressVector sources = msg->getSourceList();
-
-    double maxRespTime = decodeTime(msg->getMaxRespCode());
     double delay = uniform(0.0, maxRespTime);
 
     // Rules from RFC page 22:
@@ -872,7 +853,7 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
         //    needs to be scheduled.
         EV_DETAIL << "There is a pending response to a previous General Query, no further response is scheduled.\n";
     }
-    else if(groupAddr.isUnspecified() && msg->getSourceList().empty())
+    else if(groupAddr.isUnspecified() && queriedSources.empty())
     {
         // 2. If the received Query is a General Query, the interface timer is
         //    used to schedule a response to the General Query after the
@@ -887,10 +868,6 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
         if (!groupData)
             groupData = interfaceData->createGroupData(groupAddr);
 
-        if(!groupData->timer)
-        {
-            groupData->timer = new cMessage("IGMPv3 Host Group Timer", IGMPV3_H_GROUP_TIMER);
-        }
         if(!groupData->timer->isScheduled())
         {
             // 3. If the received Query is a Group-Specific Query or a Group-and-
@@ -899,13 +876,13 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
             //    schedule a report.  If the received Query is a Group-and-Source-
             //    Specific Query, the list of queried sources is recorded to be used
             //    when generating a response.
-            EV_DETAIL << "Received Group" << (msg->getSourceList().empty()?"":"-and-Source") << "-Specific Query, "
+            EV_DETAIL << "Received Group" << (queriedSources.empty()?"":"-and-Source") << "-Specific Query, "
                       << "scheduling report with delay=" << delay << ".\n";
 
-            groupData->timer->setContextPointer(new IGMPV3HostTimerSourceContext(ie, groupData, msg->getSourceList()));
+            groupData->timer->setContextPointer(new IGMPV3HostGroupDataTimerContext(groupData, queriedSources));
             startTimer(groupData->timer, delay);
         }
-        else if (msg->getSourceList().empty())
+        else if (queriedSources.empty())
         {
             //4. If there already is a pending response to a previous Query
             //   scheduled for this group, and either the new Query is a Group-
@@ -917,7 +894,7 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
             EV_DETAIL << "Received Group-Specific Query, scheduling report with delay="
                       << std::min(delay, SIMTIME_DBL(groupData->timer->getArrivalTime() - simTime())) << ".\n";
 
-            groupData->timer->setContextPointer(new IGMPV3HostTimerSourceContext(ie, groupData, msg->getSourceList()));
+            groupData->timer->setContextPointer(new IGMPV3HostGroupDataTimerContext(groupData, queriedSources));
             if(groupData->timer->getArrivalTime() > simTime() + delay)
                 startTimer(groupData->timer, delay);
         }
@@ -934,13 +911,13 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
                       << "and scheduling a new report with delay="
                       << std::min(delay, SIMTIME_DBL(groupData->timer->getArrivalTime() - simTime())) << ".\n";
 
-            IGMPV3HostTimerSourceContext *ctx = (IGMPV3HostTimerSourceContext*)groupData->timer->getContextPointer();
+            IGMPV3HostGroupDataTimerContext *ctx = (IGMPV3HostGroupDataTimerContext*)groupData->timer->getContextPointer();
             if(groupData->timer->getArrivalTime() > simTime() + delay)
             {
                 IPv4AddressVector combinedSources;
-                combinedSources.reserve(msg->getSourceList().size() + ctx->sourceList.size());
-                combinedSources.insert(combinedSources.end(), msg->getSourceList().begin(), msg->getSourceList().end());
-                combinedSources.insert(combinedSources.end(),ctx->sourceList.begin(),ctx->sourceList.end());
+                combinedSources.reserve(queriedSources.size() + ctx->queriedSources.size());
+                combinedSources.insert(combinedSources.end(), queriedSources.begin(), queriedSources.end());
+                combinedSources.insert(combinedSources.end(),ctx->queriedSources.begin(),ctx->queriedSources.end());
                 startTimer(groupData->timer, delay);
             }
         }

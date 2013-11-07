@@ -175,16 +175,14 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
             IGMPV3_R_SOURCE_TIMER,
             IGMPV3_H_GENERAL_QUERY_TIMER,
             IGMPV3_H_GROUP_TIMER,
-            IGMPV3_H_SOURCE_TIMER, // XXX unused?
         };
 
-        struct IGMPV3HostTimerSourceContext
+        struct IGMPV3HostGroupDataTimerContext
         {
-            InterfaceEntry *ie;
-            HostGroupData *hostGroup;
-            IPv4AddressVector sourceList;
-            IGMPV3HostTimerSourceContext(InterfaceEntry *ie, HostGroupData *hostGroup, const IPv4AddressVector &sourceList)
-                : ie(ie), hostGroup(hostGroup), sourceList(sourceList) {}
+            HostGroupData *group;
+            IPv4AddressVector queriedSources; // empty for Group-Specific queries
+            IGMPV3HostGroupDataTimerContext(HostGroupData *group, const IPv4AddressVector &queriedSources)
+                : group(group), queriedSources(queriedSources) {}
         };
 
     protected:
