@@ -90,6 +90,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
             IPv4AddressVector sourceAddressList;
             HostGroupState state;
             cMessage *timer; // for scheduling responses to Group-Specific and Group-and-Source-Specific Queries
+            IPv4AddressVector queriedSources; // saved from last Group-Specific or Group-and-Source-Specific Query
 
             HostGroupData(HostInterfaceData *parent, IPv4Address group);
             virtual ~HostGroupData();
@@ -175,14 +176,6 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
             IGMPV3_R_SOURCE_TIMER,
             IGMPV3_H_GENERAL_QUERY_TIMER,
             IGMPV3_H_GROUP_TIMER,
-        };
-
-        struct IGMPV3HostGroupDataTimerContext
-        {
-            HostGroupData *group;
-            IPv4AddressVector queriedSources; // empty for Group-Specific queries
-            IGMPV3HostGroupDataTimerContext(HostGroupData *group, const IPv4AddressVector &queriedSources)
-                : group(group), queriedSources(queriedSources) {}
         };
 
     protected:
