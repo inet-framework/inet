@@ -149,14 +149,14 @@ void DHCPServer::handleTimer(cMessage *msg)
         DHCPMessage *pkt = check_and_cast<DHCPMessage*>(msg->par("incoming_packet").getObjectValue());
         cMsgPar* par = (cMsgPar*) msg->removeObject("incoming_packet");
         delete par;
-        processPacket(pkt);
         messagesBeingProcessed.erase(std::find(messagesBeingProcessed.begin(), messagesBeingProcessed.end(), msg));
+        delete msg;
+        processPacket(pkt);
     }
     else
     {
-        EV << "Unknown Timer, discarding it" << endl;
+        throw cRuntimeError("Unknown Timer: %s (%s), kind=%i", msg->getName(), msg->getClassName(), msg->getKind());
     }
-    delete (msg);
 }
 
 void DHCPServer::processPacket(DHCPMessage *packet)

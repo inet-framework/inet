@@ -209,10 +209,10 @@ void PingApp::sendPingRequest()
     // store the sending time in a circular buffer so we can compute RTT when the packet returns
     sendTimeHistory[sendSeqNo % PING_HISTORY_SIZE] = simTime();
 
-    sendToICMP(msg, destAddr, srcAddr, hopLimit);
     emit(pingTxSeqSignal, sendSeqNo);
     sendSeqNo++;
     sentCount++;
+    sendToICMP(msg, destAddr, srcAddr, hopLimit);
 }
 
 void PingApp::sendToICMP(cMessage *msg, const Address& destAddr, const Address& srcAddr, int hopLimit)
