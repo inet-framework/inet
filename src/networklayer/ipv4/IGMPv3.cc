@@ -241,6 +241,8 @@ IGMPv3::HostGroupData *IGMPv3::HostInterfaceData::createGroupData(IPv4Address gr
     ASSERT(groups.find(group) == groups.end());
     HostGroupData *data = new HostGroupData(this, group);
     groups[group] = data;
+    owner->numGroups++;
+    owner->numHostGroups++;
     return data;
 }
 
@@ -258,6 +260,8 @@ void IGMPv3::HostInterfaceData::deleteGroupData(IPv4Address group)
         HostGroupData *data = it->second;
         groups.erase(it);
         delete data;
+        owner->numHostGroups--;
+        owner->numGroups--;
     }
 }
 
@@ -285,6 +289,8 @@ IGMPv3::RouterGroupData *IGMPv3::RouterInterfaceData::createGroupData(IPv4Addres
     ASSERT(groups.find(group) == groups.end());
     RouterGroupData *data = new RouterGroupData(this, group);
     groups[group] = data;
+    owner->numGroups++;
+    owner->numRouterGroups++;
     return data;
 }
 
@@ -302,6 +308,8 @@ void IGMPv3::RouterInterfaceData::deleteGroupData(IPv4Address group)
         RouterGroupData *data = it->second;
         groups.erase(it);
         delete data;
+        owner->numRouterGroups--;
+        owner->numGroups--;
     }
 }
 
@@ -759,8 +767,6 @@ void IGMPv3::multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, c
         // then the "non-existent" state is considered to have a filter mode of INCLUDE
         // and an empty source list.
         groupData = interfaceData->createGroupData(group);
-        numGroups++;
-        numHostGroups++;
     }
 
     FilterMode filter = sourceList.filterMode == MCAST_INCLUDE_SOURCES ? IGMPV3_FM_INCLUDE : IGMPV3_FM_EXCLUDE;
@@ -878,11 +884,8 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
     else if(!groupAddr.isUnspecified())
     {
         HostGroupData *groupData = interfaceData->getGroupData(groupAddr);
-        if (!groupData) {
+        if (!groupData)
             groupData = interfaceData->createGroupData(groupAddr);
-            numGroups++;
-            numHostGroups++;
-        }
 
         if(!groupData->timer)
         {
@@ -1448,8 +1451,6 @@ void IGMPv3::processRouterGroupTimer(cMessage *msg)
             IPv4MulticastGroupInfo info(ie, groupData->groupAddr);
             nb->fireChangeNotification(NF_IPv4_MCAST_UNREGISTERED, &info);
             groupData->parent->deleteGroupData(groupData->groupAddr);
-            numRouterGroups--;
-            numGroups--;
 
             EV_DETAIL << "New Router State is <deleted>.\n";
             return;
@@ -1489,7 +1490,5 @@ void IGMPv3::processRouterSourceTimer(cMessage *msg)
         IPv4MulticastGroupInfo info(ie, groupData->groupAddr);
         nb->fireChangeNotification(NF_IPv4_MCAST_UNREGISTERED, &info);
         groupData->parent->deleteGroupData(groupData->groupAddr);
-        numRouterGroups--;
-        numGroups--;
     }
 }
