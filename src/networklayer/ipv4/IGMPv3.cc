@@ -1031,14 +1031,19 @@ void IGMPv3::processReport(IGMPv3Report *msg)
             if(!groupData)
             {
                 groupData = createRouterGroupData(ie, gr.groupAddress);
-                groupData->filter = IGMPV3_FM_EXCLUDE;
-                // notify IPv4InterfaceData to update its listener list
-                ie->ipv4Data()->addMulticastListener(groupData->groupAddr);
-                // notify routing
-                IPv4MulticastGroupInfo info(ie, groupData->groupAddr);
-                nb->fireChangeNotification(NF_IPv4_MCAST_REGISTERED, &info);
-                numRouterGroups++;
-                numGroups++;
+
+                // FIXME the code below is clearly wrong.
+                //       If the router did not received report for the group previously,
+                //       then it must assume the INCLUDE() as the previous state.
+
+//                groupData->filter = IGMPV3_FM_EXCLUDE;
+//                // notify IPv4InterfaceData to update its listener list
+//                ie->ipv4Data()->addMulticastListener(groupData->groupAddr);
+//                // notify routing
+//                IPv4MulticastGroupInfo info(ie, groupData->groupAddr);
+//                nb->fireChangeNotification(NF_IPv4_MCAST_REGISTERED, &info);
+//                numRouterGroups++;
+//                numGroups++;
             }
 
             EV_DETAIL << "Router State is " << groupData->getStateInfo() << ".\n";
