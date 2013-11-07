@@ -1350,6 +1350,10 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     //change to mode exclude
                     groupData->filter = IGMPV3_FM_EXCLUDE;
 
+                    IPv4AddressVector oldSources;
+                    for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                        oldSources.push_back(it->first);
+
                     //A*B, B-A ; B-A=0
                     for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++ it)
                     {
@@ -1378,13 +1382,9 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     //send q(g,a*b)
                     EV_INFO << "Sending Group-Specific Query for group '" << groupData->groupAddr
                             << "' on interface '" << ie->getName() << "'.\n";
-                    IPv4AddressVector mapSources;
-                    for(SourceToGroupDataMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
-                    {
-                        mapSources.push_back(it->first);
-                    }
+
                     // FIXME do not send a query if the intersection is empty
-                    sendQuery(ie, groupData->groupAddr, set_intersection(mapSources,gr.sourceList), queryResponseInterval);
+                    sendQuery(ie, groupData->groupAddr, set_intersection(oldSources,gr.sourceList), queryResponseInterval);
                 }
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
                 {
