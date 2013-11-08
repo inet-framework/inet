@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package inet.examples.rstp;
+package inet.examples.ieee8021d;
 
 import inet.nodes.ethernet.Eth1G;
 import inet.nodes.ethernet.EtherHost;
