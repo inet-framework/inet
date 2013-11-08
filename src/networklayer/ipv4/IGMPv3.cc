@@ -64,7 +64,7 @@ static IPv4AddressVector set_intersection(const IPv4AddressVector &first, const 
     ASSERT(isSorted(first));
     ASSERT(isSorted(second));
 
-    IPv4AddressVector intersection(std::min(first.size(), second.size()));
+    IPv4AddressVector intersection(min(first.size(), second.size()));
     IPv4AddressVector::iterator it;
 
     it = set_intersection(first.begin(), first.end(), second.begin(), second.end(), intersection.begin());
@@ -86,7 +86,7 @@ static IPv4AddressVector set_union(const IPv4AddressVector &first, const IPv4Add
 }
 
 // handy definition for logging
-static std::ostream &operator<<(std::ostream &out, const IPv4AddressVector addresses)
+static ostream &operator<<(ostream &out, const IPv4AddressVector addresses)
 {
     out << "(";
     for (int i = 0; i < (int)addresses.size(); i++)
@@ -110,9 +110,9 @@ IGMPv3::HostGroupData::~HostGroupData()
     parent->owner->cancelAndDelete(timer);
 }
 
-std::string IGMPv3::HostGroupData::getStateInfo() const
+string IGMPv3::HostGroupData::getStateInfo() const
 {
-    std::ostringstream out;
+    ostringstream out;
     switch (filter)
     {
         case IGMPV3_FM_INCLUDE:
@@ -167,9 +167,9 @@ void IGMPv3::RouterGroupData::deleteSourceRecord(IPv4Address source)
     }
 }
 
-std::string IGMPv3::RouterGroupData::getStateInfo() const
+string IGMPv3::RouterGroupData::getStateInfo() const
 {
-    std::ostringstream out;
+    ostringstream out;
     switch (filter)
     {
         case IGMPV3_FM_INCLUDE:
@@ -215,7 +215,7 @@ void IGMPv3::RouterGroupData::collectForwardedSources(IPv4MulticastSourceList &r
 }
 
 
-void IGMPv3::RouterGroupData::printSourceList(std::ostream &out, bool withRunningTimer) const
+void IGMPv3::RouterGroupData::printSourceList(ostream &out, bool withRunningTimer) const
 {
     bool first = true;
     for (SourceToSourceRecordMap::const_iterator it = sources.begin(); it != sources.end(); ++it)
@@ -902,7 +902,7 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
             //   scheduled to be sent at the earliest of the remaining time for the
             //   pending report and the selected delay.
             EV_DETAIL << "Received Group-Specific Query, scheduling report with delay="
-                      << std::min(delay, SIMTIME_DBL(groupData->timer->getArrivalTime() - simTime())) << ".\n";
+                      << min(delay, SIMTIME_DBL(groupData->timer->getArrivalTime() - simTime())) << ".\n";
 
             sort(queriedSources.begin(), queriedSources.end());
             groupData->queriedSources = queriedSources;
@@ -920,7 +920,7 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
             //    report and the selected delay.
             EV_DETAIL << "Received Group-and-Source-Specific Query, combining sources with the sources of pending report, "
                       << "and scheduling a new report with delay="
-                      << std::min(delay, SIMTIME_DBL(groupData->timer->getArrivalTime() - simTime())) << ".\n";
+                      << min(delay, SIMTIME_DBL(groupData->timer->getArrivalTime() - simTime())) << ".\n";
 
             if(groupData->timer->getArrivalTime() > simTime() + delay)
             {
@@ -1045,7 +1045,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                 // EXCLUDE(X,Y) -> IS_EX(A) -> EXCLUDE(A-Y,Y*A): Delete (X-A) Delete (Y-A)
                 for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                 {
-                    if(std::find(receivedSources.begin(), receivedSources.end(), it->first) == receivedSources.end())
+                    if(find(receivedSources.begin(), receivedSources.end(), it->first) == receivedSources.end())
                     {
                         EV_DETAIL << "Deleting source record of '" << it->first << "'.\n";
                         groupData->deleteSourceRecord(it->first);
@@ -1230,7 +1230,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     // Delete A-B
                     for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
-                        if(std::find(receivedSources.begin(), receivedSources.end(), it->first) == receivedSources.end())
+                        if(find(receivedSources.begin(), receivedSources.end(), it->first) == receivedSources.end())
                         {
                             EV_DETAIL << "Deleting source record of '" << it->first << "'.\n";
                             groupData->deleteSourceRecord(it->first);
@@ -1263,7 +1263,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     // Delete (X-A) Delete (Y-A)
                     for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
-                        if(std::find(receivedSources.begin(), receivedSources.end(), it->first)== receivedSources.end())
+                        if(find(receivedSources.begin(), receivedSources.end(), it->first)== receivedSources.end())
                         {
                             EV_DETAIL << "Deleting source record of '" << it->first << "'.\n";
                             groupData->deleteSourceRecord(it->first);
