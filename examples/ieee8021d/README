@@ -1,0 +1,37 @@
+IEEE 802.1d examples
+====================
+
+Exaple shows the STP/RSTP capability of the ethernet switch
+
+
+BEB1RootByMAC
+-------------
+BEB1 will be root because of its lower MAC number.
+Cost criterion can be checked here too.
+BEB6 will prefer BEB4 because of the shortest path.
+
+
+BEB3RootByPriority
+------------------
+BEB3 will be root because of its lower switch priority number.
+
+
+BEB7to4BySrcPriority
+--------------------
+Source switch priority test. BEB7 will prefer BEB4 because of its better priority (lower priority number).
+
+
+TopologyChange
+--------------
+BEB4 disappears and reappears.
+The tree rebuilding can checked here.
+
+
+NetworkWithHosts
+----------------
+Traffic on the network
+
+
+LargeNet
+--------
+A Large network with traffic
