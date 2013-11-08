@@ -4,7 +4,9 @@
     The source code is based on ANSA (https://github.com/kvetak/ANSA)
     implementation.
 
-    RSTP: -
+    RSTP: added IEEE 802.1D-2004 implementation of Spanning Tree Protocol.
+    The source code is based on Juan Luis Garrote Molinero's implementation 
+    from INETMANET
 
     IEEE8021DInterfaceData: InterfaceEntry is extended with IEEE8021DInterfaceData.
     It is created to contain additional port interface information of an
