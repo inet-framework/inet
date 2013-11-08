@@ -520,7 +520,7 @@ void IGMPv3::configureInterface(InterfaceEntry *ie)
         RouterInterfaceData *routerData = getRouterInterfaceData(ie);
         routerData->state = IGMPV3_RS_QUERIER;
 
-        sendQuery(ie, IPv4Address::UNSPECIFIED_ADDRESS, IPv4AddressVector(), queryResponseInterval); // general query
+        sendGeneralQuery(routerData, queryResponseInterval);
         startTimer(routerData->generalQueryTimer, startupQueryInterval);
     }
 }
@@ -592,30 +592,72 @@ void IGMPv3::startTimer(cMessage *timer, double interval)
     scheduleAt(simTime() + interval, timer);
 }
 
-void IGMPv3::sendQuery(InterfaceEntry *ie, IPv4Address groupAddr, const IPv4AddressVector &sources, double maxRespTime)
+void IGMPv3::sendGeneralQuery(RouterInterfaceData* interfaceData, double maxRespTime)
 {
-    ASSERT(groupAddr.isUnspecified() || (groupAddr.isMulticast() && !groupAddr.isLinkLocalMulticast()));
+    if (interfaceData->state == IGMPV3_RS_QUERIER)
+    {
+        IGMPv3Query *msg = new IGMPv3Query("IGMPv3 query");
+        msg->setType(IGMP_MEMBERSHIP_QUERY);
+        msg->setMaxRespCode((int)(maxRespTime * 10.0));
+        msg->setByteLength(12);
+        sendQueryToIP(msg, interfaceData->ie, IPv4Address::ALL_HOSTS_MCAST);
 
-    RouterInterfaceData *interfaceData = getRouterInterfaceData(ie);
+        numQueriesSent++;
+        numGeneralQueriesSent++;
+    }
+}
+
+// See RFC 3376 6.6.3.1.
+// Also from RFC 3376 6.4.2):
+// ..., when a router queries a specific group, it lowers its
+// group timer for that group to a small interval of Last Member Query
+// Time seconds.
+void IGMPv3::sendGroupSpecificQuery(RouterGroupData *groupData)
+{
+    RouterInterfaceData *interfaceData = groupData->parent;
+    bool suppressFlag = groupData->timer->isScheduled() && groupData->timer->getArrivalTime() > simTime() + lastMemberQueryTime;
+
+    // Set group timer to LMQT
+    startTimer(groupData->timer, lastMemberQueryTime);
 
     if (interfaceData->state == IGMPV3_RS_QUERIER)
     {
         IGMPv3Query *msg = new IGMPv3Query("IGMPv3 query");
         msg->setType(IGMP_MEMBERSHIP_QUERY);
-        msg->setGroupAddress(groupAddr);
-        msg->setMaxRespCode((int)(maxRespTime * 10.0));
-        msg->setSourceList(sources);
-        msg->setByteLength(12 + (4 * sources.size()));
-        sendQueryToIP(msg, ie, groupAddr.isUnspecified() ? IPv4Address::ALL_HOSTS_MCAST : groupAddr);
+        msg->setGroupAddress(groupData->groupAddr);
+        msg->setMaxRespCode((int)(lastMemberQueryInterval * 10.0)); // FIXME compute code
+        msg->setSuppressRouterProc(suppressFlag);
+        msg->setByteLength(12);
+        sendQueryToIP(msg, interfaceData->ie, groupData->groupAddr);
 
         numQueriesSent++;
-        if (groupAddr.isUnspecified() && sources.empty())
-            numGeneralQueriesSent++;
-        else if (!groupAddr.isUnspecified() && sources.empty())
-            numGroupSpecificQueriesSent++;
-        else
-            numGroupAndSourceSpecificQueriesSent++;
+        numGroupSpecificQueriesSent++;
     }
+
+    // TODO retransmission [Last Member Query Count]-1 times
+}
+
+// See RFC 3376 6.6.3.2.
+void IGMPv3::sendGroupAndSourceSpecificQuery(RouterGroupData *groupData, const IPv4AddressVector &sources)
+{
+    ASSERT(!sources.empty());
+
+    RouterInterfaceData *interfaceData = groupData->parent;
+
+    if (interfaceData->state == IGMPV3_RS_QUERIER)
+    {
+        IGMPv3Query *msg = new IGMPv3Query("IGMPv3 query");
+        msg->setType(IGMP_MEMBERSHIP_QUERY);
+        msg->setGroupAddress(groupData->groupAddr);
+        msg->setMaxRespCode((int)(lastMemberQueryInterval * 10.0)); // FIXME compute code
+        msg->setSourceList(sources);
+        msg->setByteLength(12 + (4 * sources.size()));
+        sendQueryToIP(msg, interfaceData->ie, groupData->groupAddr);
+
+        numQueriesSent++;
+        numGroupAndSourceSpecificQueriesSent++;
+    }
+
 }
 
 void IGMPv3::processRouterGeneralQueryTimer(cMessage *msg)
@@ -630,7 +672,7 @@ void IGMPv3::processRouterGeneralQueryTimer(cMessage *msg)
         EV_INFO << "Sending General Query on interface '" << ie->getName() << "', and scheduling next Query to '"
                 << (simTime() + queryInterval) << "'.\n";
         interfaceData->state = IGMPV3_RS_QUERIER;
-        sendQuery(ie, IPv4Address::UNSPECIFIED_ADDRESS, IPv4AddressVector(), queryResponseInterval);
+        sendGeneralQuery(interfaceData, queryResponseInterval);
         startTimer(msg, queryInterval);
     }
 }
@@ -1098,7 +1140,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     {
                         EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
                                 << "' on interface '" << ie->getName() << "'.\n";
-                        sendQuery(ie, groupData->groupAddr, aIntersectB, queryResponseInterval);
+                        sendGroupAndSourceSpecificQuery(groupData, aIntersectB);
                     }
                 }
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
@@ -1128,7 +1170,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     {
                         EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
                                 << "' on interface '" << ie->getName() << "'.\n";
-                        sendQuery(ie, groupData->groupAddr, aMinusY, queryResponseInterval);
+                        sendGroupAndSourceSpecificQuery(groupData, aMinusY);
                     }
                 }
             }
@@ -1154,7 +1196,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     {
                         EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
                                 << "' on interface '" << ie->getName() << "'.\n";
-                        sendQuery(ie, groupData->groupAddr, aMinusB, queryResponseInterval);
+                        sendGroupAndSourceSpecificQuery(groupData, aMinusB);
                     }
                 }
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
@@ -1181,18 +1223,13 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     {
                         EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
                                 << "' on interface '" << ie->getName() << "'.\n";
-                        sendQuery(ie, groupData->groupAddr, xMinusA, queryResponseInterval);
+                        sendGroupAndSourceSpecificQuery(groupData, xMinusA);
                     }
-
-                    // FIXME Missing (see RFC 3376 6.4.2):
-                    // ..., when a router queries a specific group, it lowers its
-                    // group timer for that group to a small interval of Last Member Query
-                    // Time seconds.
 
                     // Send Q(G)
                     EV_INFO << "Sending Group-Specific Query for group '" << groupData->groupAddr
                             << "' on interface '" << ie->getName() << "'.\n";
-                    sendQuery(ie,groupData->groupAddr, IPv4AddressVector(), queryResponseInterval);
+                    sendGroupSpecificQuery(groupData);
                 }
             }
             else if(gr.recordType == IGMPV3_RT_TO_EX)
@@ -1239,7 +1276,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     {
                         EV_INFO << "Sending Group-Specific Query for group '" << groupData->groupAddr
                                 << "' on interface '" << ie->getName() << "'.\n";
-                        sendQuery(ie, groupData->groupAddr, aIntersectB, queryResponseInterval);
+                        sendGroupAndSourceSpecificQuery(groupData, aIntersectB);
                     }
                 }
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
@@ -1283,7 +1320,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     {
                         EV_INFO << "Sending Group-Specific Query for group '" << groupData->groupAddr
                                 << "' on interface '" << ie->getName() << "'.\n";
-                        sendQuery(ie, groupData->groupAddr, aMinusY, queryResponseInterval);
+                        sendGroupAndSourceSpecificQuery(groupData, aMinusY);
                     }
                 }
             }

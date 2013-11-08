@@ -14,6 +14,7 @@ cmdenv-log-format = "%t %N: "
 network=TestIGMPNetwork
 **.igmpType = "IGMPv3"
 **.igmp.lastMemberQueryInterval = 1s
+**.igmp.lastMemberQueryCount = 1
 
 **.IPForward = true
 **.forwardMulticast = true
@@ -33,7 +34,7 @@ network=TestIGMPNetwork
   <record group="225.0.0.1" type="TO_IN" sources=""/>
 </send>
 
-<dump t="3" module="node.tester" ifname="eth0" what="listeners"/>
+<dump t="3.001" module="node.tester" ifname="eth0" what="listeners"/>
 
 </scenario>
 
