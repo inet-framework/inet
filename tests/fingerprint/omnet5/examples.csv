@@ -14,8 +14,8 @@
 /examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           2aea-2660
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           d5ef-b35f
 
-/examples/dhcp/eth/,                 -f omnetpp.ini -c General -r 0,                5000s,           30f0-e7d3
-/examples/dhcp/wlan/,                -f omnetpp.ini -c General -r 0,                20s,             2b5b-1861
+/examples/dhcp/eth/,                 -f omnetpp.ini -c General -r 0,                5000s,           4c19-714f
+/examples/dhcp/wlan/,                -f omnetpp.ini -c General -r 0,                20s,             cb1d-3d96
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             634c-b155
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp21 -r 0,                  10s,             1051-77f8
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp31 -r 0,                  10s,             16f1-324f

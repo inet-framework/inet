@@ -136,7 +136,7 @@ void DHCPServer::handleIncomingPacket(DHCPMessage *pkt)
 {
     // schedule the packet processing
     cMessage* procDelayTimer = new cMessage("PROC_DELAY", PROC_DELAY);
-    procDelayTimer->addPar("incoming_packet").setObjectValue(pkt);
+    procDelayTimer->setControlInfo(pkt);
     scheduleAt(simTime() + proc_delay, procDelayTimer);
     messagesBeingProcessed.push_back(procDelayTimer);
     std::cout << "scheduling process" << endl;
@@ -146,9 +146,7 @@ void DHCPServer::handleTimer(cMessage *msg)
 {
     if (msg->getKind() == PROC_DELAY)
     {
-        DHCPMessage *pkt = check_and_cast<DHCPMessage*>(msg->par("incoming_packet").getObjectValue());
-        cMsgPar* par = (cMsgPar*) msg->removeObject("incoming_packet");
-        delete par;
+        DHCPMessage *pkt = check_and_cast<DHCPMessage*>(msg->removeControlInfo());
         messagesBeingProcessed.erase(std::find(messagesBeingProcessed.begin(), messagesBeingProcessed.end(), msg));
         delete msg;
         processPacket(pkt);
