@@ -1208,6 +1208,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     //change to mode exclude
                     groupData->filter = IGMPV3_FM_EXCLUDE;
 
+                    // save A
                     IPv4AddressVector sourcesA;
                     for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                         sourcesA.push_back(it->first);
@@ -1223,12 +1224,12 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                     }
 
                     // Delete A-B
-                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    for(IPv4AddressVector::iterator it = sourcesA.begin(); it != sourcesA.end(); ++it)
                     {
-                        if(find(receivedSources.begin(), receivedSources.end(), it->first) == receivedSources.end())
+                        if(find(receivedSources.begin(), receivedSources.end(), *it) == receivedSources.end())
                         {
-                            EV_DETAIL << "Deleting source record of '" << it->first << "'.\n";
-                            groupData->deleteSourceRecord(it->first);
+                            EV_DETAIL << "Deleting source record of '" << *it << "'.\n";
+                            groupData->deleteSourceRecord(*it);
                         }
                     }
 
