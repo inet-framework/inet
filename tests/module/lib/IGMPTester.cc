@@ -379,7 +379,7 @@ void IGMPTester::processDumpCommand(string what, InterfaceEntry *ie)
         }
     }
 
-    EV_DEBUG << "\n";
+    EV_DEBUG << ".\n";
 }
 
 void IGMPTester::sendIGMP(IGMPMessage *msg, InterfaceEntry *ie, IPv4Address dest)

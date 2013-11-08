@@ -80,14 +80,14 @@ network=TestIGMPNetwork
 %#
 %postrun-command: grep "tester:.*listeners" test.out > tester.out || true
 %contains-regex: tester.out
-1.* tester: eth0: listeners = 225.0.0.1 I 10.0.0.1 10.0.0.2
-2.* tester: eth0: listeners = 225.0.0.1 I 10.0.0.1 10.0.0.2
-3.* tester: eth0: listeners = 225.0.0.1 I 10.0.0.1 10.0.0.2 10.0.0.3
-4.* tester: eth0: listeners = 225.0.0.1 E 10.0.0.4
-5.* tester: eth0: listeners = 225.0.0.1 E
-6.* tester: eth0: listeners = 225.0.0.1 E
-7.* tester: eth0: listeners = 225.0.0.1 E
-8.* tester: eth0: listeners = 225.0.0.1 E
+1.* tester: eth0: listeners = 225.0.0.1 I 10.0.0.1 10.0.0.2.
+2.* tester: eth0: listeners = 225.0.0.1 I 10.0.0.1 10.0.0.2.
+3.* tester: eth0: listeners = 225.0.0.1 I 10.0.0.1 10.0.0.2 10.0.0.3.
+4.* tester: eth0: listeners = 225.0.0.1 E 10.0.0.4.
+5.* tester: eth0: listeners = 225.0.0.1 E.
+6.* tester: eth0: listeners = 225.0.0.1 E.
+7.* tester: eth0: listeners = 225.0.0.1 E.
+8.* tester: eth0: listeners = 225.0.0.1 E.
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

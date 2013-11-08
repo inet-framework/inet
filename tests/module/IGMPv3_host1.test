@@ -50,12 +50,12 @@ network=TestIGMPNetwork
 %#
 %postrun-command: grep "tester: .*groups =" test.out > groups.out || true
 %contains: groups.out
-1 tester: eth0: groups = 224.0.0.1 E
-2 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 I 10.0.0.1 10.0.0.2
-3 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 I 10.0.0.1
-4 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 E 10.0.0.2
-5 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 E 10.0.0.1 10.0.0.2
-6 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 I 10.0.0.1
+1 tester: eth0: groups = 224.0.0.1 E.
+2 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 I 10.0.0.1 10.0.0.2.
+3 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 I 10.0.0.1.
+4 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 E 10.0.0.2.
+5 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 E 10.0.0.1 10.0.0.2.
+6 tester: eth0: groups = 224.0.0.1 E, 225.0.0.1 I 10.0.0.1.
 
 %#
 %# Now check the state transitions of the IGMP module

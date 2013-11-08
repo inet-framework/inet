@@ -99,8 +99,8 @@ network=TestIGMPNetwork
 8 igmp: New Router State is EXCLUDE(10.0.0.1,10.0.0.2,10.0.0.3;).
 
 %#--------------------------------------------------------------------------------------------------------------
-%# %not-contains: stdout
-%# undisposed object:
-%# %not-contains: stdout
-%# -- check module destructor
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
 %#--------------------------------------------------------------------------------------------------------------
