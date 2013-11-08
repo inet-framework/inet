@@ -72,6 +72,19 @@ static IPv4AddressVector set_intersection(const IPv4AddressVector &first, const 
     return intersection;
 }
 
+static IPv4AddressVector set_union(const IPv4AddressVector &first, const IPv4AddressVector &second)
+{
+    ASSERT(isSorted(first));
+    ASSERT(isSorted(second));
+
+    IPv4AddressVector result(first.size() + second.size());
+    IPv4AddressVector::iterator it;
+
+    it = set_union(first.begin(), first.end(), second.begin(), second.end(), result.begin());
+    result.resize(it - result.begin());
+    return result;
+}
+
 // handy definition for logging
 static std::ostream &operator<<(std::ostream &out, const IPv4AddressVector addresses)
 {
@@ -837,13 +850,13 @@ void IGMPv3::multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, c
     //       the groups of the old report and the new report are to be merged.
 }
 
-
+// RFC 3376 5.2
 void IGMPv3::processQuery(IGMPv3Query *msg)
 {
     IPv4ControlInfo *controlInfo = (IPv4ControlInfo *)msg->getControlInfo();
     InterfaceEntry *ie = ift->getInterfaceById(controlInfo->getInterfaceId());
     IPv4Address groupAddr = msg->getGroupAddress();
-    const IPv4AddressVector &queriedSources = msg->getSourceList();
+    IPv4AddressVector &queriedSources = msg->getSourceList();
     double maxRespTime = decodeTime(msg->getMaxRespCode());
 
     ASSERT(ie->isMulticast());
@@ -890,8 +903,8 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
             EV_DETAIL << "Received Group" << (queriedSources.empty()?"":"-and-Source") << "-Specific Query, "
                       << "scheduling report with delay=" << delay << ".\n";
 
+            sort(queriedSources.begin(), queriedSources.end());
             groupData->queriedSources = queriedSources;
-            sort(groupData->queriedSources.begin(), groupData->queriedSources.end());
             startTimer(groupData->timer, delay);
         }
         else if (queriedSources.empty())
@@ -906,8 +919,8 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
             EV_DETAIL << "Received Group-Specific Query, scheduling report with delay="
                       << std::min(delay, SIMTIME_DBL(groupData->timer->getArrivalTime() - simTime())) << ".\n";
 
+            sort(queriedSources.begin(), queriedSources.end());
             groupData->queriedSources = queriedSources;
-            sort(groupData->queriedSources.begin(), groupData->queriedSources.end());
             if(groupData->timer->getArrivalTime() > simTime() + delay)
                 startTimer(groupData->timer, delay);
         }
@@ -926,10 +939,8 @@ void IGMPv3::processQuery(IGMPv3Query *msg)
 
             if(groupData->timer->getArrivalTime() > simTime() + delay)
             {
-                IPv4AddressVector combinedSources;
-                combinedSources.reserve(queriedSources.size() + groupData->queriedSources.size());
-                combinedSources.insert(combinedSources.end(), queriedSources.begin(), queriedSources.end());
-                combinedSources.insert(combinedSources.end(),groupData->queriedSources.begin(), groupData->queriedSources.end());
+                sort(queriedSources.begin(), queriedSources.end());
+                groupData->queriedSources = set_union(groupData->queriedSources, queriedSources);
                 startTimer(groupData->timer, delay);
             }
         }
