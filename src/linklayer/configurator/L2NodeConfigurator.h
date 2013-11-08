@@ -20,7 +20,7 @@
 #include "ILifecycle.h"
 #include "NodeStatus.h"
 #include "IInterfaceTable.h"
-#include "IRoutingTable.h"
+//#include "IRoutingTable.h"
 #include "L2NetworkConfigurator.h"
 
 class L2NodeConfigurator : public cSimpleModule, public ILifecycle {
