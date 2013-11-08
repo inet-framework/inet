@@ -135,10 +135,10 @@ void DHCPServer::handleMessage(cMessage *msg)
 void DHCPServer::handleIncomingPacket(DHCPMessage *pkt)
 {
     // schedule the packet processing
-    cMessage* proc_delay_timer = new cMessage("PROC_DELAY", PROC_DELAY);
-    proc_delay_timer->addPar("incoming_packet").setObjectValue(pkt);
-    scheduleAt(simTime() + proc_delay, proc_delay_timer);
-    messagesBeingProcessed.push_back(proc_delay_timer);
+    cMessage* procDelayTimer = new cMessage("PROC_DELAY", PROC_DELAY);
+    procDelayTimer->addPar("incoming_packet").setObjectValue(pkt);
+    scheduleAt(simTime() + proc_delay, procDelayTimer);
+    messagesBeingProcessed.push_back(procDelayTimer);
     std::cout << "scheduling process" << endl;
 }
 
