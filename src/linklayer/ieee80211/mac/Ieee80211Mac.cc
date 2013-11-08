@@ -820,8 +820,9 @@ void Ieee80211Mac::handleLowerMsg(cPacket *msg)
     handleWithFSM(msg);
 
     // if we are the owner then we did not send this message up
-    if (msg->getOwner() == this)
-        delete msg;
+    //FIXME HACK, memory leak
+    //if (msg->getOwner() == this)
+    //    delete msg;
     EV<<"Leave handleLowerMsg...\n";
 }
 
@@ -1388,7 +1389,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             FSMA_No_Event_Transition(Immediate-Receive-Data,
                                      isLowerMsg(msg) && isForUs(frame) && isDataOrMgmtFrame(frame),
                                      WAITSIFS,
-                                     sendUp(frame);
+                                     sendUp(frame->dup());      //FIXME HACK, memory leak
                                      numReceived++;
                                     );
             FSMA_No_Event_Transition(Immediate-Receive-RTS,
