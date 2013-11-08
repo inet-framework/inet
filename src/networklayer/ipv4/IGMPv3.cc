@@ -1003,22 +1003,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
 
             RouterGroupData *groupData = interfaceData->getGroupData(gr.groupAddress);
             if(!groupData)
-            {
                 groupData = interfaceData->createGroupData(gr.groupAddress);
-
-                // FIXME the code below is clearly wrong.
-                //       If the router did not received report for the group previously,
-                //       then it must assume the INCLUDE() as the previous state.
-
-//                groupData->filter = IGMPV3_FM_EXCLUDE;
-//                // notify IPv4InterfaceData to update its listener list
-//                ie->ipv4Data()->addMulticastListener(groupData->groupAddr);
-//                // notify routing
-//                IPv4MulticastGroupInfo info(ie, groupData->groupAddr);
-//                nb->fireChangeNotification(NF_IPv4_MCAST_REGISTERED, &info);
-//                numRouterGroups++;
-//                numGroups++;
-            }
 
             IPv4MulticastSourceList oldSourceList;
             groupData->collectForwardedSources(oldSourceList);
@@ -1026,131 +1011,76 @@ void IGMPv3::processReport(IGMPv3Report *msg)
             EV_DETAIL << "Router State is " << groupData->getStateInfo() << ".\n";
 
 
-            //Current State Record part
+            // RFC 3376 6.4.1: Reception of Current State Record
             if(gr.recordType == IGMPV3_RT_IS_IN)
             {
                 EV_DETAIL << "Received IS_IN" << gr.sourceList << " report.\n";
-
-                // XXX the two branch contain the same code
-                if(groupData->filter == IGMPV3_FM_INCLUDE)
+                // INCLUDE(A)   -> IS_IN(B) -> INCLUDE(A+B)    : (B) = GMI
+                // EXCLUDE(X,Y) -> IS_IN(A) -> EXCLUDE(X+A,Y-A): (A) = GMI
+                for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
                 {
-                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
-                    {
-                        EV_DETAIL << "Setting source timer of '" << *it << "' to '" << groupMembershipInterval << "'.\n";
-
-                        SourceRecord *record = groupData->getSourceRecord(*it);
-                        if(!record)
-                            record = groupData->createSourceRecord(*it);
-                        startTimer(record->sourceTimer, groupMembershipInterval);
-                    }
-                }
-                else if(groupData->filter == IGMPV3_FM_EXCLUDE)
-                {
-                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
-                    {
-                        EV_DETAIL << "Setting source timer of '" << *it << "' to '" << groupMembershipInterval << "'.\n";
-
-                        SourceRecord *record = groupData->getSourceRecord(*it);
-                        if(!record)
-                            record = groupData->createSourceRecord(*it);
-                        startTimer(record->sourceTimer, groupMembershipInterval);
-                    }
+                    EV_DETAIL << "Setting source timer of '" << *it << "' to '" << groupMembershipInterval << "'.\n";
+                    SourceRecord *record = groupData->getSourceRecord(*it);
+                    if(!record)
+                        record = groupData->createSourceRecord(*it);
+                    startTimer(record->sourceTimer, groupMembershipInterval);
                 }
             }
             else if(gr.recordType == IGMPV3_RT_IS_EX)
             {
                 EV_DETAIL << "Received IS_EX" << gr.sourceList << " report.\n";
 
-                if(groupData->filter == IGMPV3_FM_INCLUDE)
+                // Group Timer = GMI
+                EV_DETAIL << "Setting group timer to '" << groupMembershipInterval << "'.\n";
+                startTimer(groupData->timer, groupMembershipInterval);
+
+                // INCLUDE(A)   -> IS_EX(B) -> EXCLUDE(A*B,B-A): Delete (A-B)
+                // EXCLUDE(X,Y) -> IS_EX(A) -> EXCLUDE(A-Y,Y*A): Delete (X-A) Delete (Y-A)
+                for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                 {
-                    //grouptimer = gmi
-                    EV_DETAIL << "Setting group timer to '" << groupMembershipInterval << "'.\n";
-
-                    startTimer(groupData->timer, groupMembershipInterval);
-
-                    //change to mode exclude
-                    groupData->filter = IGMPV3_FM_EXCLUDE;
-
-                    //A*B, B-A ; B-A=0
-                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++ it)
+                    if(std::find(gr.sourceList.begin(), gr.sourceList.end(), it->first) == gr.sourceList.end())
                     {
-                        SourceRecord *record = groupData->getSourceRecord(*it);
-                        if(!record)
-                        {
-                            EV_DETAIL << "Setting source timer of '" << *it << "' to 0.\n";
-                            record = groupData->createSourceRecord(*it);
-                        }
-                    }
-                    //delete A-B
-                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
-                    {
-                        //IGMPv3::IpVector::iterator itIp;
-                        if(std::find(gr.sourceList.begin(), gr.sourceList.end(), it->first) == gr.sourceList.end())
-                        {
-                            EV_DETAIL << "Deleting source record of '" << it->first << "'.\n";
-                            groupData->deleteSourceRecord(it->first);
-                        }
+                        EV_DETAIL << "Deleting source record of '" << it->first << "'.\n";
+                        groupData->deleteSourceRecord(it->first);
                     }
                 }
-                else if(groupData->filter == IGMPV3_FM_EXCLUDE)
+
+                // Router State == INCLUDE(A),   Report == IS_EX(B): (B-A) = 0
+                // Router State == EXCLUDE(X,Y), Report == IS_EX(A): (A-X-Y) = GMI
+                for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++ it)
                 {
-                    //grouptimer = gmi
-                    EV_DETAIL << "Setting group timer to '" << groupMembershipInterval << "'.\n";
-
-                    startTimer(groupData->timer, groupMembershipInterval);
-
-                    //Delete X-A
-                    //Delete Y-A
-                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    SourceRecord *record = groupData->getSourceRecord(*it);
+                    if(!record)
                     {
-                        if(std::find(gr.sourceList.begin(), gr.sourceList.end(), it->first) == gr.sourceList.end())
-                        {
-                            EV_DETAIL << "Deleting source record of '" << it->first << "'.\n";
-                            groupData->deleteSourceRecord(it->first);
-                        }
-                    }
+                        EV_DETAIL << "Setting source timer of '" << *it << "' to 0.\n";
+                        record = groupData->createSourceRecord(*it);
 
-                    //A-X-Y = GMI
-                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
-                    {
-                        SourceRecord *record = groupData->getSourceRecord(*it);
-                        if(!record)
+                        if (groupData->filter == IGMPV3_FM_INCLUDE)
+                            EV_DETAIL << "Setting source timer of '" << *it << "' to 0.\n";
+                        else
                         {
                             EV_DETAIL << "Setting source timer of '" << *it << "' to '" << groupMembershipInterval << "'.\n";
-                            record = groupData->createSourceRecord(*it);
                             startTimer(record->sourceTimer, groupMembershipInterval);
                         }
                     }
                 }
+
+                groupData->filter = IGMPV3_FM_EXCLUDE;
             }
-            //Filter Mode change and Source List change part
+            // RFC 3376 6.4.2: Reception of Filter-Mode-Change and Source-List-Change Records
             else if(gr.recordType == IGMPV3_RT_ALLOW)
             {
                 EV_DETAIL << "Received ALLOW" << gr.sourceList << " report.\n";
 
-                if(groupData->filter == IGMPV3_FM_INCLUDE)
+                // INCLUDE(A)   -> ALLOW(B) -> INCLUDE(A+B):     (B) = GMI
+                // EXCLUDE(X,Y) -> ALLOW(A) -> EXCLUDE(X+A,Y-A): (A) = GMI
+                for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
                 {
-                    //A+B; B=gmi
-                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
-                    {
-                        EV_DETAIL << "Setting source timer of '" << *it << "' to '" << groupMembershipInterval << "'.\n";
-                        SourceRecord *record = groupData->getSourceRecord(*it);
-                        if(!record)
-                            record = groupData->createSourceRecord(*it);     //todo neviem ci to takto moze byt
-                        startTimer(record->sourceTimer, groupMembershipInterval);
-                    }
-                }
-                else if(groupData->filter == IGMPV3_FM_EXCLUDE)
-                {
-                    //Exclude X+A,Y-A ; A=gmi
-                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
-                    {
-                        EV_DETAIL << "Setting source timer of '" << *it << "' to '" << groupMembershipInterval << "'.\n";
-                        SourceRecord *record = groupData->getSourceRecord(*it);
-                        if(!record)
-                            record = groupData->createSourceRecord(*it);
-                        startTimer(record->sourceTimer, groupMembershipInterval);
-                    }
+                    EV_DETAIL << "Setting source timer of '" << *it << "' to '" << groupMembershipInterval << "'.\n";
+                    SourceRecord *record = groupData->getSourceRecord(*it);
+                    if(!record)
+                        record = groupData->createSourceRecord(*it);
+                    startTimer(record->sourceTimer, groupMembershipInterval);
                 }
             }
             else if(gr.recordType == IGMPV3_RT_BLOCK)
@@ -1159,22 +1089,22 @@ void IGMPv3::processReport(IGMPv3Report *msg)
 
                 if(groupData->filter == IGMPV3_FM_INCLUDE)
                 {
-                    //send q(G, A*B)
-                    //include A
-                    EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
-                            << "' on interface '" << ie->getName() << "'.\n";
-                    IPv4AddressVector mapSources;
+                    // INCLUDE(A) -> BLOCK(B) -> INCLUDE(A): Send Q(G,A*B)
+                    IPv4AddressVector sourcesA;
                     for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                        sourcesA.push_back(it->first);
+
+                    IPv4AddressVector aIntersectB = set_intersection(sourcesA, gr.sourceList);
+                    if (!aIntersectB.empty())
                     {
-                        mapSources.push_back(it->first);
+                        EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
+                                << "' on interface '" << ie->getName() << "'.\n";
+                        sendQuery(ie, groupData->groupAddr, aIntersectB, queryResponseInterval);
                     }
-                    // FIXME do not send a query in the intersection is empty
-                    sendQuery(ie, groupData->groupAddr, set_intersection(mapSources,gr.sourceList), queryResponseInterval);
                 }
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
                 {
-                    //Exclude x+(a-y), y to je pokial to necham tak jak to je a vytvorim ten jeden dole
-                    //A-X-Y=GroupTimer
+                    // EXCLUDE (X,Y) -> BLOCK (A) -> EXCLUDE (X+(A-Y),Y): (A-X-Y)=Group Timer
                     for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         SourceRecord *record = groupData->getSourceRecord(it->first);
@@ -1186,19 +1116,22 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                             startTimer(record->sourceTimer, grouptimertime);
                         }
                     }
-                    //Send q(G,A-Y)
-                    EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
-                            << "' on interface '" << ie->getName() << "'.\n";
-                    IPv4AddressVector mapSourcesY;
+                    // Send Q(G,A-Y)
+                    IPv4AddressVector ySources;
                     for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         if(!it->second->sourceTimer->isScheduled())
                         {
-                            mapSourcesY.push_back(it->first);
+                            ySources.push_back(it->first);
                         }
                     }
-                    // FIXME do not send the query with empty source list
-                    sendQuery(ie, groupData->groupAddr, set_complement(gr.sourceList, mapSourcesY), queryResponseInterval);
+                    IPv4AddressVector aMinusY = set_complement(gr.sourceList, ySources);
+                    if (!aMinusY.empty())
+                    {
+                        EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
+                                << "' on interface '" << ie->getName() << "'.\n";
+                        sendQuery(ie, groupData->groupAddr, aMinusY, queryResponseInterval);
+                    }
                 }
             }
             else if(gr.recordType == IGMPV3_RT_TO_IN)
@@ -1207,29 +1140,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
 
                 if(groupData->filter == IGMPV3_FM_INCLUDE)
                 {
-                    //A+B; B=gmi
-                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
-                    {
-                        EV_DETAIL << "Setting source timer of '" << *it << "' to '" << groupMembershipInterval << "'.\n";
-                        SourceRecord *record = groupData->getSourceRecord(*it);
-                        if(!record)
-                            record = groupData->createSourceRecord(*it);     //todo neviem ci to takto moze byt
-                        startTimer(record->sourceTimer, groupMembershipInterval);
-                    }
-                    //send q(G,A-B)
-                    EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
-                            << "' on interface '" << ie->getName() << "'.\n";
-                    IPv4AddressVector sourcesA;
-                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
-                    {
-                        sourcesA.push_back(it->first);
-                    }
-                    // FIXME do not send the query with empty source list
-                    sendQuery(ie, groupData->groupAddr, set_complement(sourcesA, gr.sourceList), queryResponseInterval);
-                }
-                else if(groupData->filter == IGMPV3_FM_EXCLUDE)
-                {
-                    //exclude X+A Y-A A=gmi
+                    // INCLUDE(A) -> TO_IN (B) -> INCLUDE (A+B): (B)=GMI
                     for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
                     {
                         EV_DETAIL << "Setting source timer of '" << *it << "' to '" << groupMembershipInterval << "'.\n";
@@ -1238,30 +1149,56 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                             record = groupData->createSourceRecord(*it);
                         startTimer(record->sourceTimer, groupMembershipInterval);
                     }
-                    //send q(g,x-A)
-                    EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
-                            << "' on interface '" << ie->getName() << "'.\n";
+                    // Send Q(G,A-B)
+                    IPv4AddressVector sourcesA;
+                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                        sourcesA.push_back(it->first);
+                    IPv4AddressVector aMinusB = set_complement(sourcesA, gr.sourceList);
+                    if (!aMinusB.empty())
+                    {
+                        EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
+                                << "' on interface '" << ie->getName() << "'.\n";
+                        sendQuery(ie, groupData->groupAddr, aMinusB, queryResponseInterval);
+                    }
+                }
+                else if(groupData->filter == IGMPV3_FM_EXCLUDE)
+                {
+                    // compute X before modifying the state
                     IPv4AddressVector sourcesX;
                     for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         if(it->second->sourceTimer->isScheduled())
-                        {
                             sourcesX.push_back(it->first);
-                        }
                     }
-                    // FIXME do not send the query with empty source list
-                    sendQuery(ie, groupData->groupAddr, set_complement(sourcesX, gr.sourceList), queryResponseInterval);
+
+                    // EXCLUDE(X,Y) -> TO_IN(A) -> EXCLUDE(X+A,Y-A): (A) = GMI
+                    for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
+                    {
+                        EV_DETAIL << "Setting source timer of '" << *it << "' to '" << groupMembershipInterval << "'.\n";
+                        SourceRecord *record = groupData->getSourceRecord(*it);
+                        if(!record)
+                            record = groupData->createSourceRecord(*it);
+                        startTimer(record->sourceTimer, groupMembershipInterval);
+                    }
+
+                    // Send Q(G,X-A)
+                    IPv4AddressVector xMinusA = set_complement(sourcesX, gr.sourceList);
+                    if (!xMinusA.empty())
+                    {
+                        EV_INFO << "Sending Group-and-Source-Specific Query for group '" << groupData->groupAddr
+                                << "' on interface '" << ie->getName() << "'.\n";
+                        sendQuery(ie, groupData->groupAddr, xMinusA, queryResponseInterval);
+                    }
 
                     // FIXME Missing (see RFC 3376 6.4.2):
                     // ..., when a router queries a specific group, it lowers its
                     // group timer for that group to a small interval of Last Member Query
                     // Time seconds.
 
-                    //send q(g)
+                    // Send Q(G)
                     EV_INFO << "Sending Group-Specific Query for group '" << groupData->groupAddr
                             << "' on interface '" << ie->getName() << "'.\n";
-                    IPv4AddressVector emptySources;
-                    sendQuery(ie,groupData->groupAddr, emptySources, queryResponseInterval);
+                    sendQuery(ie,groupData->groupAddr, IPv4AddressVector(), queryResponseInterval);
                 }
             }
             else if(gr.recordType == IGMPV3_RT_TO_EX)
@@ -1270,30 +1207,29 @@ void IGMPv3::processReport(IGMPv3Report *msg)
 
                 if(groupData->filter == IGMPV3_FM_INCLUDE)
                 {
-                    //grouptimer = gmi
+                    // INCLUDE (A) -> TO_EX(B) -> EXCLUDE (A*B,B-A): Group Timer = GMI
                     EV_DETAIL << "Setting group timer to '" << groupMembershipInterval << "'.\n";
-
                     startTimer(groupData->timer, groupMembershipInterval);
 
                     //change to mode exclude
                     groupData->filter = IGMPV3_FM_EXCLUDE;
 
-                    IPv4AddressVector oldSources;
+                    IPv4AddressVector sourcesA;
                     for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
-                        oldSources.push_back(it->first);
+                        sourcesA.push_back(it->first);
 
-                    //A*B, B-A ; B-A=0
+                    // (B-A) = 0
                     for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++ it)
                     {
                         SourceRecord *record = groupData->getSourceRecord(*it);
                         if(!record)
                         {
                             EV_DETAIL << "Setting source timer of '" << *it << "' to '0'.\n";
-                            record = groupData->createSourceRecord(*it);     //todo neviem ci to takto moze byt
+                            record = groupData->createSourceRecord(*it);
                         }
                     }
 
-                    //delete A-B
+                    // Delete A-B
                     for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         //IGMPv3::IpVector::iterator itIp;
@@ -1304,22 +1240,30 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                         }
                     }
 
-                    //send q(g,a*b)
-                    EV_INFO << "Sending Group-Specific Query for group '" << groupData->groupAddr
-                            << "' on interface '" << ie->getName() << "'.\n";
-
-                    // FIXME do not send a query if the intersection is empty
-                    sendQuery(ie, groupData->groupAddr, set_intersection(oldSources,gr.sourceList), queryResponseInterval);
+                    // Send Q(G,A*B)
+                    IPv4AddressVector aIntersectB = set_intersection(sourcesA,gr.sourceList);
+                    if (!aIntersectB.empty())
+                    {
+                        EV_INFO << "Sending Group-Specific Query for group '" << groupData->groupAddr
+                                << "' on interface '" << ie->getName() << "'.\n";
+                        sendQuery(ie, groupData->groupAddr, aIntersectB, queryResponseInterval);
+                    }
                 }
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
                 {
-                    //grouptimer = gmi
+                    // EXCLUDE (X,Y) -> TO_EX (A) -> EXCLUDE (A-Y,Y*A): Group Timer = GMI
                     EV_DETAIL << "Setting group timer to '" << groupMembershipInterval << "'.\n";
-
                     startTimer(groupData->timer, groupMembershipInterval);
 
-                    //Delete X-A
-                    //Delete Y-A
+                    // save Y
+                    IPv4AddressVector sourcesY;
+                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    {
+                        if(!it->second->sourceTimer->isScheduled())
+                            sourcesY.push_back(it->first);
+                    }
+
+                    // Delete (X-A) Delete (Y-A)
                     for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
                     {
                         if(std::find(gr.sourceList.begin(), gr.sourceList.end(), it->first)== gr.sourceList.end())
@@ -1329,7 +1273,7 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                         }
                     }
 
-                    //A-X-Y = GMI
+                    // (A-X-Y) = GMI FIXME should be set to Group Timer
                     for(IPv4AddressVector::iterator it = gr.sourceList.begin(); it != gr.sourceList.end(); ++it)
                     {
                         SourceRecord *record = groupData->getSourceRecord(*it);
@@ -1341,19 +1285,14 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                         }
                     }
 
-                    //send q(g,a-y)
-                    EV_INFO << "Sending Group-Specific Query for group '" << groupData->groupAddr
-                            << "' on interface '" << ie->getName() << "'.\n";
-                    IPv4AddressVector mapSourcesY;
-                    for(SourceToSourceRecordMap::iterator it = groupData->sources.begin(); it != groupData->sources.end(); ++it)
+                    // Send Q(G,A-Y)
+                    IPv4AddressVector aMinusY = set_complement(gr.sourceList, sourcesY);
+                    if (!aMinusY.empty())
                     {
-                        if(!it->second->sourceTimer->isScheduled())
-                        {
-                            mapSourcesY.push_back(it->first);
-                        }
+                        EV_INFO << "Sending Group-Specific Query for group '" << groupData->groupAddr
+                                << "' on interface '" << ie->getName() << "'.\n";
+                        sendQuery(ie, groupData->groupAddr, aMinusY, queryResponseInterval);
                     }
-                    // FIXME do not send a query if the complement is empty
-                    sendQuery(ie, groupData->groupAddr, set_complement(gr.sourceList, mapSourcesY), queryResponseInterval);
                 }
             }
 
