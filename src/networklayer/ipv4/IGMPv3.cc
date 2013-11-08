@@ -1058,16 +1058,11 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                 {
                     if(!groupData->hasSourceRecord(*it))
                     {
-                        EV_DETAIL << "Setting source timer of '" << *it << "' to 0.\n";
                         SourceRecord *record = groupData->createSourceRecord(*it);
-
-                        if (groupData->filter == IGMPV3_FM_INCLUDE)
-                            EV_DETAIL << "Setting source timer of '" << *it << "' to 0.\n";
-                        else
-                        {
-                            EV_DETAIL << "Setting source timer of '" << *it << "' to '" << groupMembershipInterval << "'.\n";
+                        double timerValue = groupData->filter == IGMPV3_FM_INCLUDE ? 0.0 : groupMembershipInterval;
+                        EV_DETAIL << "Setting source timer of '" << *it << "' to '" << timerValue << "'.\n";
+                        if (timerValue > 0)
                             startTimer(record->sourceTimer, groupMembershipInterval);
-                        }
                     }
                 }
 
