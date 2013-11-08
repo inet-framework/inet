@@ -28,14 +28,17 @@ import inet.linklayer.ieee8021d.ISpanningTree;
 simple RSTP like ISpanningTree
 {
     parameters:
-        double helloTime @unit("s") = default(2s);          // number of seconds RSTP waits between hello messages
-        double fwdDelay @unit("s") = default(6s);           // upgrade delay
-        double migrateTime @unit ("s")= default(30s);       // after that a not assigned port becomes designated
-        double tcWhileTime @unit("s") = default(6s);        // a port will send TC=true during this time
-        double maxAge @unit("s") = default(20s);            // max. hop count
-        int priority = default(128);                        // priority + MAC determines the RSTP id
-        bool autoEdge = default(true);                      // if false, edge ports will have to wait to get designated
-        bool treeColoring = default(false);                 // shows RSTP tree
+        double helloTime @unit("s") = default(2s);              // number of seconds RSTP waits between hello messages
+        double fwdDelay @unit("s") = default(6s);               // upgrade delay
+        double migrateTime @unit ("s")= default(30s);           // after that a not assigned port becomes designated
+        double tcWhileTime @unit("s") = default(6s);            // a port will send TC=true during this time
+        double maxAge @unit("s") = default(20s);                // max. hop count
+        int priority = default(128);                            // priority + MAC determines the RSTP id
+        bool autoEdge = default(true);                          // if false, edge ports will have to wait to get designated
+        bool treeColoring = default(false);                     // shows RSTP tree
+        string interfaceTableName = default("interfaceTable");  // The absolute path to the InterfaceTable
+        string macTableName = default("macTable");  // The absolute path to the macTable
+        @display("i=block/network2");
     gates:
         inout STPGate @labels(BPDU);                        // to the relay
 }

@@ -47,7 +47,7 @@ protected:
     simtime_t tcWhileTime;     // TCN activation time
     bool autoEdge;             // automatic edge ports detection
 
-    MACAddressTable * sw;      // needed for flushing.
+    MACAddressTable * macTable;      // needed for flushing.
 
     IInterfaceTable * ifTable;
 
