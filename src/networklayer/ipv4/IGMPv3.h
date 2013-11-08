@@ -109,8 +109,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
 
             HostInterfaceData(IGMPv3 *owner, InterfaceEntry *ie);
             virtual ~HostInterfaceData();
-            HostGroupData *createGroupData(IPv4Address group);
-            HostGroupData *getGroupData(IPv4Address group);
+            HostGroupData *getOrCreateGroupData(IPv4Address group);
             void deleteGroupData(IPv4Address group);
         };
 
@@ -141,8 +140,9 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
 
             RouterGroupData(RouterInterfaceData *parent, IPv4Address group);
             virtual ~RouterGroupData();
+            bool hasSourceRecord(IPv4Address source) { return sources.find(source) != sources.end(); }
             SourceRecord *createSourceRecord(IPv4Address source);
-            SourceRecord *getSourceRecord(IPv4Address source);
+            SourceRecord *getOrCreateSourceRecord(IPv4Address source);
             void deleteSourceRecord(IPv4Address source);
 
             std::string getStateInfo() const;
@@ -164,8 +164,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
 
             RouterInterfaceData(IGMPv3 *owner, InterfaceEntry *ie);
             virtual ~RouterInterfaceData();
-            RouterGroupData *createGroupData(IPv4Address group);
-            RouterGroupData *getGroupData(IPv4Address group);
+            RouterGroupData *getOrCreateGroupData(IPv4Address group);
             void deleteGroupData(IPv4Address group);
         };
 
