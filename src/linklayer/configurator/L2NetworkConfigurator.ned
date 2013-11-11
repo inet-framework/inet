@@ -22,7 +22,7 @@ package inet.linklayer.configurator;
 //
 // This module is based on ~IPv4NetworkConfigurator. The optional selector
 // attributes: @hosts, @names, @towards, @among are also comes with this
-// configurator and behaves similarly to its ~IPvNetworkConfigurator equivalent.
+// configurator and each of them behaves similarly to its ~IPvNetworkConfigurator equivalent.
 // @ports selector added to configuring per-port parameters in IEEE8021DInterfaceData.
 //
 // The following example configures port 5 (if it exists) on all switches to cost 19 and
