@@ -21,7 +21,7 @@
 package inet.linklayer.idealwireless;
 
 import inet.base.IHook;
-import inet.linklayer.IOutputQueue;
+import inet.queue.IOutputQueue;
 import inet.linklayer.ITrafficConditioner;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.radio.IdealRadio;

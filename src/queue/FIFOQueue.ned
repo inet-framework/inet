@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.linklayer.queue;
+package inet.queue;
 
 //
 // This module implements a passive FIFO queue

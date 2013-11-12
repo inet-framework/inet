@@ -16,10 +16,7 @@
 //
 
 
-package inet.linklayer.queue;
-
-import inet.linklayer.IOutputQueue;
-
+package inet.queue;
 
 //
 // Drop-tail queue, to be used in network interfaces.
