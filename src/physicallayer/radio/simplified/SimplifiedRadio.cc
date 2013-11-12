@@ -28,9 +28,6 @@
 #include "NodeOperations.h"
 
 
-#define MK_TRANSMISSION_OVER  1
-#define MK_RECEPTION_COMPLETE 2
-
 simsignal_t SimplifiedRadio::bitrateSignal = registerSignal("bitrate");
 simsignal_t SimplifiedRadio::radioStateSignal = registerSignal("radioState");
 simsignal_t SimplifiedRadio::lossRateSignal = registerSignal("lossRate");
@@ -59,6 +56,8 @@ void SimplifiedRadio::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
+        endTransmissionTimer = new cMessage("endTransmission");
+
         getSensitivityList(par("SensitivityTable").xmlValue());
 
         // read parameters
@@ -195,7 +194,8 @@ SimplifiedRadio::~SimplifiedRadio()
     delete receptionModel;
     if (noiseGenerator)
         delete noiseGenerator;
-
+    if (endTransmissionTimer)
+        cancelAndDelete(endTransmissionTimer);
     if (updateString)
         cancelAndDelete(updateString);
     // delete messages being received
@@ -310,14 +310,15 @@ void SimplifiedRadio::handleMessage(cMessage *msg)
 void SimplifiedRadio::bufferMsg(SimplifiedRadioFrame *radioFrame) //FIXME: add explicit simtime_t atTime arg?
 {
     // set timer to indicate transmission is complete
-    cMessage *endRxTimer = new cMessage("endRx", MK_RECEPTION_COMPLETE);
-    endRxTimer->setContextPointer(radioFrame);
-    radioFrame->setContextPointer(endRxTimer);
+    cMessage *endReceptionTimer = new cMessage("endReception");
+    endReceptionTimer->setContextPointer(radioFrame);
+    radioFrame->setContextPointer(endReceptionTimer);
+    endReceptionTimers.push_back(endReceptionTimer);
 
     // NOTE: use arrivalTime instead of simTime, because we might be calling this
     // function during a channel change, when we're picking up ongoing transmissions
     // on the channel -- and then the message's arrival time is in the past!
-    scheduleAt(radioFrame->getArrivalTime() + radioFrame->getDuration(), endRxTimer);
+    scheduleAt(radioFrame->getArrivalTime() + radioFrame->getDuration(), endReceptionTimer);
 }
 
 SimplifiedRadioFrame *SimplifiedRadio::encapsulatePacket(cPacket *frame)
@@ -427,8 +428,7 @@ void SimplifiedRadio::handleUpperMsg(SimplifiedRadioFrame *radioFrame)
     EV << "sending, changing RadioState to TRANSMIT\n";
     setRadioState(RadioState::TRANSMIT);
 
-    cMessage *timer = new cMessage(NULL, MK_TRANSMISSION_OVER);
-    scheduleAt(simTime() + radioFrame->getDuration(), timer);
+    scheduleAt(simTime() + radioFrame->getDuration(), endTransmissionTimer);
     sendDown(radioFrame);
 }
 
@@ -492,16 +492,7 @@ void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
 void SimplifiedRadio::handleSelfMsg(cMessage *msg)
 {
     EV<<"SimplifiedRadio::handleSelfMsg"<<msg->getKind()<<endl;
-    if (msg->getKind()==MK_RECEPTION_COMPLETE)
-    {
-        EV << "frame is completely received now\n";
-
-        // unbuffer the message
-        SimplifiedRadioFrame *radioFrame = unbufferMsg(msg);
-
-        handleLowerMsgEnd(radioFrame);
-    }
-    else if (msg->getKind() == MK_TRANSMISSION_OVER)
+    if (msg == endTransmissionTimer)
     {
         // Transmission has completed. The RadioState has to be changed
         // to IDLE or RECV, based on the noise level on the channel.
@@ -522,9 +513,6 @@ void SimplifiedRadio::handleSelfMsg(cMessage *msg)
             // setRadioState(RadioState::RECV);
             newState = RadioState::RECV;
         }
-
-        // delete the timer
-        delete msg;
 
         // switch channel if it needs be
         if (newChannel!=-1)
@@ -549,7 +537,17 @@ void SimplifiedRadio::handleSelfMsg(cMessage *msg)
     }
     else
     {
-        error("Internal error: unknown self-message `%s'", msg->getName());
+        EV << "Frame is completely received now.\n";
+        for (EndReceptionTimers::iterator it = endReceptionTimers.begin(); it != endReceptionTimers.end(); ++it)
+        {
+            if (*it == msg)
+            {
+                endReceptionTimers.erase(it);
+                handleLowerMsgEnd(unbufferMsg(msg));
+                return;
+            }
+        }
+        throw cRuntimeError("Self message not found in endReceptionTimers.");
     }
     EV<<"SimplifiedRadio::handleSelfMsg END"<<endl;
 }
@@ -768,9 +766,9 @@ void SimplifiedRadio::changeChannel(int channel)
    for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
    {
         SimplifiedRadioFrame *radioFrame = it->first;
-        cMessage *endRxTimer = (cMessage *)radioFrame->getContextPointer();
+        cMessage *endReceptionTimer = (cMessage *)radioFrame->getContextPointer();
         delete radioFrame;
-        delete cancelEvent(endRxTimer);
+        delete cancelEvent(endReceptionTimer);
     }
     recvBuff.clear();
 
@@ -1040,9 +1038,9 @@ void SimplifiedRadio::disconnectReceiver()
    for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
    {
         SimplifiedRadioFrame *radioFrame = it->first;
-        cMessage *endRxTimer = (cMessage *)radioFrame->getContextPointer();
+        cMessage *endReceptionTimer = (cMessage *)radioFrame->getContextPointer();
         delete radioFrame;
-        delete cancelEvent(endRxTimer);
+        delete cancelEvent(endReceptionTimer);
     }
     recvBuff.clear();
 

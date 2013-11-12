@@ -168,6 +168,13 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
     IRadioModel *radioModel;
     IReceptionModel *receptionModel;
 
+    /** Timers */
+    //@{
+    cMessage *endTransmissionTimer;
+    typedef std::list<cMessage *> EndReceptionTimers;
+    EndReceptionTimers endReceptionTimers;
+    //@}
+
     /** @name Statistics */
     //@{
     long numGivenUp;
