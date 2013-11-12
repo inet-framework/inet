@@ -149,8 +149,8 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
     /*
      * Routines to connect or disconnect the transmission and reception  of packets
      */
-    virtual void connectTransceiver() { transceiverConnected = true; }
-    virtual void disconnectTransceiver() { transceiverConnected = false; }
+    virtual void connectTransmitter() { transmitterConnected = true; }
+    virtual void disconnectTransmitter() { transmitterConnected = false; }
     virtual void connectReceiver();
     virtual void disconnectReceiver();
 
@@ -180,12 +180,6 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
 
     /** Power used to transmit messages */
     double transmitterPower;
-
-    /** @name Gate Ids */
-    //@{
-    int upperLayerOut;
-    int upperLayerIn;
-    //@}
 
     /**
      * Struct to store a pointer to the message, rcvdPower AND a SnrList,
@@ -262,7 +256,7 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
     /*
      * this variable is used to disconnect the possibility of sent packets to the radio channel
      */
-    bool transceiverConnected;
+    bool transmitterConnected;
     bool receiverConnected;
 
     // if true draw coverage circles

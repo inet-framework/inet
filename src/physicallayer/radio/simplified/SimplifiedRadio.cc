@@ -46,7 +46,7 @@ SimplifiedRadio::SimplifiedRadio() : rs(this->getId())
     obstacles = NULL;
     radioModel = NULL;
     receptionModel = NULL;
-    transceiverConnected = true;
+    transmitterConnected = true;
     receiverConnected = true;
     updateString = NULL;
     noiseGenerator = NULL;
@@ -60,11 +60,6 @@ void SimplifiedRadio::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        gate("radioIn")->setDeliverOnReceptionStart(true);
-
-        upperLayerIn = findGate("upperLayerIn");
-        upperLayerOut = findGate("upperLayerOut");
-
         getSensitivityList(par("SensitivityTable").xmlValue());
 
         // read parameters
@@ -254,7 +249,7 @@ void SimplifiedRadio::handleMessage(cMessage *msg)
 {
     if (rs.getState()==RadioState::SLEEP || rs.getState()==RadioState::OFF)
     {
-        if (msg->getArrivalGateId() == upperLayerIn || msg->isSelfMessage())  //XXX can we ensure we don't receive pk from upper in OFF state?? (race condition)
+        if (msg->getArrivalGate() == upperLayerIn || msg->isSelfMessage())  //XXX can we ensure we don't receive pk from upper in OFF state?? (race condition)
             throw cRuntimeError("Radio is turned off");
         else {
             EV << "Radio is turned off, dropping packet\n";
@@ -268,7 +263,7 @@ void SimplifiedRadio::handleMessage(cMessage *msg)
         this->updateDisplayString();
         return;
     }
-    if (msg->getArrivalGateId()==upperLayerIn && !msg->isPacket() /*FIXME XXX ENSURE REALLY PLAIN cMessage ARE SENT AS COMMANDS!!! && msg->getBitLength()==0*/)
+    if (msg->getArrivalGate() == upperLayerIn && !msg->isPacket() /*FIXME XXX ENSURE REALLY PLAIN cMessage ARE SENT AS COMMANDS!!! && msg->getBitLength()==0*/)
     {
         cObject *ctrl = msg->removeControlInfo();
         if (msg->getKind()==0)
@@ -278,7 +273,7 @@ void SimplifiedRadio::handleMessage(cMessage *msg)
         return;
     }
 
-    if (msg->getArrivalGateId() == upperLayerIn)
+    if (msg->getArrivalGate() == upperLayerIn)
     {
         SimplifiedRadioFrame *radioFrame = encapsulatePacket(PK(msg));
         handleUpperMsg(radioFrame);
@@ -375,7 +370,7 @@ void SimplifiedRadio::sendUp(SimplifiedRadioFrame *radioFrame)
 
 void SimplifiedRadio::sendDown(SimplifiedRadioFrame *radioFrame)
 {
-    if (transceiverConnected)
+    if (transmitterConnected)
         sendToChannel(radioFrame);
     else
         delete radioFrame;
@@ -885,12 +880,12 @@ void SimplifiedRadio::setRadioState(RadioState::State newState)
         emit(radioStateSignal, newState);
         if (newState == RadioState::SLEEP || newState == RadioState::OFF)
         {
-            disconnectTransceiver();
+            disconnectTransmitter();
             disconnectReceiver();
         }
         else if (rs.getState() == RadioState::SLEEP || rs.getState() == RadioState::OFF)
         {
-            connectTransceiver();
+            connectTransmitter();
             connectReceiver(); // the connection change the state
         }
 
