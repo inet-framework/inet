@@ -23,8 +23,6 @@ simsignal_t NF_SUBSCRIBERLIST_CHANGED = cComponent::registerSignal("NF_SUBSCRIBE
 simsignal_t NF_NODE_FAILURE = cComponent::registerSignal("NF_NODE_FAILURE");
 simsignal_t NF_NODE_RECOVERY = cComponent::registerSignal("NF_NODE_RECOVERY");
 
-simsignal_t NF_RADIOSTATE_CHANGED = cComponent::registerSignal("NF_RADIOSTATE_CHANGED");
-
 simsignal_t NF_PP_TX_BEGIN = cComponent::registerSignal("NF_PP_TX_BEGIN");
 simsignal_t NF_PP_TX_END = cComponent::registerSignal("NF_PP_TX_END");
 simsignal_t NF_PP_RX_END = cComponent::registerSignal("NF_PP_RX_END");

@@ -33,9 +33,6 @@ extern simsignal_t    // admin
     NF_NODE_FAILURE,
     NF_NODE_RECOVERY,
 
-    // - layer 1 (physical)
-    NF_RADIOSTATE_CHANGED,
-
     // - layer 2 (data-link)
     //XXX generalize constants (remove "PP"?) - could be used by 80211 and ethernet as well
     // they generally carry TxNotifDetails as "details" to identify the interface and the frame

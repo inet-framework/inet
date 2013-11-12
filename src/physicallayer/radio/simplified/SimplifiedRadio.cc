@@ -29,7 +29,6 @@
 
 
 simsignal_t SimplifiedRadio::bitrateSignal = registerSignal("bitrate");
-simsignal_t SimplifiedRadio::radioStateSignal = registerSignal("radioState");
 simsignal_t SimplifiedRadio::lossRateSignal = registerSignal("lossRate");
 simsignal_t SimplifiedRadio::changeLevelNoise = registerSignal("changeLevelNoise");
 
@@ -162,14 +161,14 @@ void SimplifiedRadio::initialize(int stage)
         if (isOperational)
         {
             // emit initial values
-            emit(NF_RADIOSTATE_CHANGED, rs);
+            emit(IRadio::radioModeChangedSignal, rs);
             emit(IRadio::radioChannelChangedSignal, radioChannel);
 
             cc->setRadioChannel(myRadioRef, radioChannel);
 
             // statistics
             emit(bitrateSignal, bitrate);
-            emit(radioStateSignal, rs);
+            emit(IRadio::radioModeChangedSignal, rs);
         }
         else
         {
@@ -843,7 +842,7 @@ void SimplifiedRadio::changeChannel(int channel)
 
     // notify other modules about the channel switch; and actually, radio state has changed too
     emit(IRadio::radioChannelChangedSignal, radioChannel);
-    emit(NF_RADIOSTATE_CHANGED, rs);
+    emit(IRadio::radioModeChangedSignal, rs);
 }
 
 void SimplifiedRadio::setBitrate(double bitrate)
@@ -871,7 +870,7 @@ void SimplifiedRadio::setRadioState(RadioState::State newState)
 {
     if (rs != newState)
     {
-        emit(radioStateSignal, newState);
+        emit(IRadio::radioModeChangedSignal, newState);
         if (newState == RadioState::SLEEP || newState == RadioState::OFF)
         {
             disconnectTransmitter();
@@ -884,7 +883,7 @@ void SimplifiedRadio::setRadioState(RadioState::State newState)
         }
 
         rs = newState;
-        emit(NF_RADIOSTATE_CHANGED, rs);
+        emit(IRadio::radioModeChangedSignal, rs);
     }
 }
 /*
@@ -1102,7 +1101,7 @@ void SimplifiedRadio::connectReceiver()
     }
 
     // notify other modules about the channel switch; and actually, radio state has changed too
-    emit(NF_RADIOSTATE_CHANGED, rs);
+    emit(IRadio::radioModeChangedSignal, rs);
 }
 
 

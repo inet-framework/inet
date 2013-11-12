@@ -359,7 +359,7 @@ void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, l
 {
     Enter_Method_Silent();
     // Note that we are only subscribed during scanning!
-    if (signalID==NF_RADIOSTATE_CHANGED)
+    if (signalID == IRadio::radioModeChangedSignal)
     {
         const RadioState::State radioState = (RadioState::State)value;
         if (radioState==RadioState::RECV)
@@ -433,7 +433,7 @@ void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
 
     // start scanning
     if (scanning.activeScan)
-        host->subscribe(NF_RADIOSTATE_CHANGED, this);
+        host->subscribe(IRadio::radioModeChangedSignal, this);
     scanning.currentChannelIndex = -1; // so we'll start with index==0
     isScanning = true;
     scanNextChannel();
@@ -446,7 +446,7 @@ bool Ieee80211MgmtSTA::scanNextChannel()
     {
         EV << "Finished scanning last channel\n";
         if (scanning.activeScan)
-            host->unsubscribe(NF_RADIOSTATE_CHANGED, this);
+            host->unsubscribe(IRadio::radioModeChangedSignal, this);
         isScanning = false;
         return true; // we're done
     }

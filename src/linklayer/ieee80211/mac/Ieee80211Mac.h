@@ -414,7 +414,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     // simtime_t maxjitter[4];
     // cOutVector jitter[4];
     // cOutVector macDelay[4];
-    cOutVector radioStateVector;
     // cOutVector throughput[4];
     //@}
 

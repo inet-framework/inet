@@ -18,7 +18,7 @@
 //
 
 #include "Ieee80211Mac.h"
-#include "RadioState.h"
+#include "IRadio.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "PhyControlInfo_m.h"
@@ -284,7 +284,7 @@ void Ieee80211Mac::initialize(int stage)
         mediumStateChange = new cMessage("MediumStateChange");
 
         // subscribe for the information of the carrier sense
-        getParentModule()->getSubmodule("radio")->subscribe(NF_RADIOSTATE_CHANGED, this);
+        getParentModule()->getSubmodule("radio")->subscribe(IRadio::radioModeChangedSignal, this);
 
         // obtain pointer to external queue
         initializeQueueModule();  //FIXME STAGE: this should be in L2 initialization!!!!
@@ -340,8 +340,6 @@ void Ieee80211Mac::initialize(int stage)
 
         stateVector.setName("State");
         stateVector.setEnum("Ieee80211Mac");
-        radioStateVector.setName("RadioState");
-        radioStateVector.setEnum("RadioState");
         for (int i=0; i<numCategories(); i++)
         {
             EdcaOutVector outVectors;
@@ -827,16 +825,9 @@ void Ieee80211Mac::handleLowerMsg(cPacket *msg)
 void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent();
-    if (signalID == NF_RADIOSTATE_CHANGED)
+    if (signalID == IRadio::radioModeChangedSignal)
     {
-        RadioState::State newRadioState = (RadioState::State)value;
-
-        // FIXME: double recording, because there's no sample hold in the gui
-        radioStateVector.record(radioState);
-        radioStateVector.record(newRadioState);
-
-        radioState = newRadioState;
-
+        radioState = (RadioState::State)value;
         handleWithFSM(mediumStateChange);
     }
 }
