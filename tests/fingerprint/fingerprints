@@ -263,6 +263,7 @@ class FingerprintTestCase(SimulationTestCase):
             _iif(self.simtimelimit!="", " --sim-time-limit=" + self.simtimelimit, "") + \
             " --fingerprint=" + self.fingerprint + " --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=true" \
+            " --fake-sendsync=true" \
             " '--output-scalar-file=" + os.path.abspath(".") + "/results/" + wdname + "_${inifile}_${configname}-${runnumber}.sca'"
 
         anyFingerpintBad = False;

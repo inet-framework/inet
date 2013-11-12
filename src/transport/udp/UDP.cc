@@ -788,7 +788,7 @@ void UDP::sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, con
         udpPacket->setControlInfo(ipControlInfo);
 
         emit(sentPkSignal, udpPacket);
-        send(udpPacket, "ipOut");
+        sendSync(udpPacket, "ipOut");
     }
     else
     {
@@ -806,7 +806,7 @@ void UDP::sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, con
         udpPacket->setControlInfo(dynamic_cast<cObject *>(ipControlInfo));
 
         emit(sentPkSignal, udpPacket);
-        send(udpPacket, "ipOut");
+        sendSync(udpPacket, "ipOut");
     }
     numSent++;
 }
