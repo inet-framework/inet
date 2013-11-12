@@ -121,15 +121,11 @@ extern simsignal_t    // admin
     // - layer 7 - OverSim
     NF_OVERLAY_TRANSPORTADDRESS_CHANGED,  // OverSim
     NF_OVERLAY_NODE_GRACEFUL_LEAVE,       // OverSim
-    NF_OVERLAY_NODE_LEAVE,                // OverSim
+    NF_OVERLAY_NODE_LEAVE;                // OverSim
 
 
     // - layer 7 (application)
     //...
-    // - battery
-    NF_BATTERY_CHANGED,
-    NF_BATTERY_CPUTIME_CONSUMED
-;
 
 /**
  * Utility function
