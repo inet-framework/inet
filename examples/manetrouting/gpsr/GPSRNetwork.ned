@@ -8,7 +8,7 @@ import inet.base.LifecycleController;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.nodes.gpsr.GPSRRouter;
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.radio.simplified.ChannelControl;
 import inet.world.scenario.ScenarioManager;
 
 

@@ -23,7 +23,7 @@
 
 package inet.examples.mobileipv6;
 
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.radio.simplified.ChannelControl;
 import inet.nodes.xmipv6.WirelessHost6;
 import inet.nodes.xmipv6.HomeAgent6;
 import inet.nodes.xmipv6.CorrespondentNode6;

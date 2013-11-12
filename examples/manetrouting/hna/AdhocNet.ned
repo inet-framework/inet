@@ -22,8 +22,9 @@ import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.ethernet.Eth100M;
 import inet.nodes.inet.AdhocHost;
 import inet.nodes.inet.StandardHost;
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.radio.simplified.ChannelControl;
 import inet.util.ThruputMeteringChannel;
+
 
 network AdhocNet
 {

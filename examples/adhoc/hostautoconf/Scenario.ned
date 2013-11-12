@@ -18,7 +18,7 @@
 
 package inet.examples.adhoc.hostautoconf;
 
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.radio.simplified.ChannelControl;
 
 
 network Scenario

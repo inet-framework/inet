@@ -15,11 +15,9 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.networklayer.ipv6;
 
-import inet.networklayer.contract.IRoutingTable;
-
+import inet.networklayer.common.IRoutingTable;
 
 //
 // IPv6 Routing Table and Neighbour Discovery data structures.

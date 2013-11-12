@@ -21,7 +21,7 @@ package inet.examples.wireless.lan80211;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.radio.simplified.ChannelControl;
 
 
 network Lan80211

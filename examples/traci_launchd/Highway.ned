@@ -20,7 +20,7 @@
 
 package inet.examples.traci_launchd;
 
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.radio.simplified.ChannelControl;
 import inet.world.traci.TraCIScenarioManagerLaunchd;
 
 module Highway

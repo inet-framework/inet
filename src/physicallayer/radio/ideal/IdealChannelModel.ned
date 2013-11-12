@@ -15,8 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-package inet.world.radio;
+package inet.physicallayer.radio.ideal;
 
 //
 // Channel controller module for ~IdealRadio.

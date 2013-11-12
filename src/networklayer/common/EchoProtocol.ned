@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.networklayer.generic;
+package inet.networklayer.common;
 
 //
 // This module provides a mechanism to test network layer connectivity

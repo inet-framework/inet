@@ -19,7 +19,7 @@
 
 package inet.examples.wireless.hosttohost;
 
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.radio.simplified.ChannelControl;
 import inet.nodes.wireless.AccessPoint;
 import inet.mobility.models.StationaryMobility;
 import inet.mobility.models.CircleMobility;

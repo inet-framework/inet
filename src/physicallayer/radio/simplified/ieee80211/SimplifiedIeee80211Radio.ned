@@ -16,9 +16,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+package inet.physicallayer.radio.simplified.ieee80211;
 
-package inet.linklayer.ieee80211.radio;
-import inet.linklayer.radio.Radio;
+import inet.physicallayer.radio.simplified.Radio;
+
 //
 // Physical layer for the IEEE 802.11 models. Its external interface
 // (including gates and how it communicates with other modules)

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.networklayer.contract;
+package inet.networklayer.common;
 
 //
 // This module interface provides an abstraction for different routing tables.

@@ -17,8 +17,9 @@
 // author: Zoltan Bojthe
 //
 
+package inet.physicallayer.radio.ideal;
 
-package inet.linklayer.radio;
+import inet.physicallayer.radio.contract.IRadio;
 
 //
 // Implements a unit disk radio for use in ~IdealWirelessNic.

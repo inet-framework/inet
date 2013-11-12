@@ -24,9 +24,9 @@ import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.mobility.IMobility;
+import inet.networklayer.common.IRoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.contract.INetworkLayer;
-import inet.networklayer.contract.IRoutingTable;
 import inet.status.NodeStatus;
 import inet.util.PcapRecorder;
 

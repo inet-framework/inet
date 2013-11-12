@@ -15,8 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-package inet.linklayer.radio;
+package inet.physicallayer.radio.simplified;
 
 //
 // Generic radio module. The implementation is largely based on the

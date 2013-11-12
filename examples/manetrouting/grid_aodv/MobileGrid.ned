@@ -21,7 +21,7 @@ package inet.examples.manetrouting.grid_aodv;
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.radio.simplified.ChannelControl;
 
 
 network MobileGrid

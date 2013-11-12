@@ -24,7 +24,7 @@ import inet.base.IHook;
 import inet.queue.IOutputQueue;
 import inet.linklayer.ITrafficConditioner;
 import inet.linklayer.IWirelessNic;
-import inet.linklayer.radio.IdealRadio;
+import inet.physicallayer.radio.ideal.IdealRadio;
 
 
 //

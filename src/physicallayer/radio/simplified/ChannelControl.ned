@@ -17,8 +17,7 @@
 // * part of:     framework implementation developed by tkn
 // **************************************************************************/
 
-
-package inet.world.radio;
+package inet.physicallayer.radio.simplified;
 
 //
 // ~ChannelControl has exactly one instance in every network model that
