@@ -115,9 +115,6 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
     /** Sets the radio state, and also fires change notification */
     virtual void setRadioState(RadioState::State newState);
 
-    /** Returns the current channel the radio is tuned to */
-    virtual int getChannelNumber() const {return rs.getChannelNumber();}
-
     /** Updates the SNR information of the relevant SimplifiedRadioFrame */
     virtual void addNewSnr();
 
@@ -180,6 +177,9 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
 
     /** Power used to transmit messages */
     double transmitterPower;
+
+    /** Bitrate used to transmit messages */
+    double bitrate;
 
     /**
      * Struct to store a pointer to the message, rcvdPower AND a SnrList,
@@ -266,7 +266,6 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
     // statistics:
     static simsignal_t bitrateSignal;
     static simsignal_t radioStateSignal; //enum
-    static simsignal_t channelNumberSignal;
     static simsignal_t lossRateSignal;
 };
 

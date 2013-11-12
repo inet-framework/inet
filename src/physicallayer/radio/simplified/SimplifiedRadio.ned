@@ -1,5 +1,5 @@
 // * **************************************************************************
-// * file:        AbstactRadio.ned
+// * file:        SimplifiedRadio.ned
 // *
 // * author:      Oliver Graute, Andreas Kuntz, Felix Schmidt-Eisenlohr
 // *
@@ -56,12 +56,6 @@ simple SimplifiedRadio extends RadioBase
         double nak_m = default(1);
         // RiceModel
         double K @unit("dB") = default(8dB);
-
-        // battery module parameters (if any of them is negative, the battery module is disabled)
-        double usage_radio_idle @unit(mA) = default(-1mA); // disable battery registration
-        double usage_radio_recv @unit(mA) = default(-1mA); // disable battery registration
-        double usage_radio_sleep @unit(mA) = default(-1mA); // disable battery registration
-        double usage_radio_send @unit(mA) = default(-1mA); // disable battery registration
         // misc
         bool drawCoverage = default(true);  // draw the coverage area in Tkenv
         int refreshCoverageInterval @unit("s") = default(0s);  // update period in simulation time for coverage redraw
@@ -69,9 +63,7 @@ simple SimplifiedRadio extends RadioBase
         xml SensitivityTable = default(xml("<NoSensitivityTable> </NoSensitivityTable>"));
 
         @class(SimplifiedRadio);
-        @signal[NF_RADIOSTATE_CHANGED](type=RadioState);
-        @signal[NF_RADIO_CHANNEL_CHANGED](type=RadioState);
-        @signal[NF_RADIO_CHANGE_NOISE](type=RadioState);
+        @signal[NF_RADIOSTATE_CHANGED](type=long);
         @signal[bitrate](type="double"; unit=bps); // current transmit bitrate
         @signal[channelNo](type=long);
         @signal[radioState](type=long);  // enum

@@ -33,7 +33,6 @@
 
 simsignal_t SimplifiedRadio::bitrateSignal = registerSignal("bitrate");
 simsignal_t SimplifiedRadio::radioStateSignal = registerSignal("radioState");
-simsignal_t SimplifiedRadio::channelNumberSignal = registerSignal("channelNo");
 simsignal_t SimplifiedRadio::lossRateSignal = registerSignal("lossRate");
 simsignal_t SimplifiedRadio::changeLevelNoise = registerSignal("changeLevelNoise");
 
@@ -66,9 +65,9 @@ void SimplifiedRadio::initialize(int stage)
         transmitterPower = par("transmitterPower");
         if (transmitterPower > (double) (getRadioChannelPar("pMax")))
             error("transmitterPower cannot be bigger than pMax in SimplifiedRadioChannel!");
-        rs.setBitrate(par("bitrate"));
-        rs.setChannelNumber(par("channelNumber"));
         rs.setRadioId(this->getId());
+        bitrate = par("bitrate");
+        radioChannel = par("channelNumber");
         thermalNoise = FWMath::dBm2mW(par("thermalNoise"));
         sensitivity = FWMath::dBm2mW(par("sensitivity"));
         carrierFrequency = par("carrierFrequency");
@@ -166,20 +165,19 @@ void SimplifiedRadio::initialize(int stage)
         {
             // emit initial values
             emit(NF_RADIOSTATE_CHANGED, &rs);
-            emit(NF_RADIO_CHANNEL_CHANGED, &rs);
+            emit(IRadio::radioChannelChangedSignal, radioChannel);
 
-            cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
+            cc->setRadioChannel(myRadioRef, radioChannel);
 
             // statistics
-            emit(bitrateSignal, rs.getBitrate());
+            emit(bitrateSignal, bitrate);
             emit(radioStateSignal, rs.getState());
-            emit(channelNumberSignal, rs.getChannelNumber());
         }
         else
         {
             // tell initial values to MAC
             setRadioState(RadioState::OFF);
-            emit(NF_RADIO_CHANNEL_CHANGED, &rs);
+            emit(IRadio::radioChannelChangedSignal, radioChannel);
         }
 
         // draw the interference distance
@@ -227,7 +225,7 @@ bool SimplifiedRadio::handleOperationStage(LifecycleOperation *operation, int st
 
 bool SimplifiedRadio::processRadioFrame(SimplifiedRadioFrame *radioFrame)
 {
-    return radioFrame->getChannelNumber() == getChannelNumber();
+    return radioFrame->getChannelNumber() == radioChannel;
 }
 
 /**
@@ -332,9 +330,9 @@ SimplifiedRadioFrame *SimplifiedRadio::encapsulatePacket(cPacket *frame)
     SimplifiedRadioFrame *radioFrame = createRadioFrame();
     radioFrame->setName(frame->getName());
     radioFrame->setPSend(transmitterPower);
-    radioFrame->setChannelNumber(getChannelNumber());
+    radioFrame->setChannelNumber(radioChannel);
     radioFrame->encapsulate(frame);
-    radioFrame->setBitrate(ctrl ? ctrl->getBitrate() : rs.getBitrate());
+    radioFrame->setBitrate(ctrl ? ctrl->getBitrate() : bitrate);
     radioFrame->setDuration(radioModel->calculateDuration(radioFrame));
     radioFrame->setSenderPos(getRadioPosition());
     radioFrame->setCarrierFrequency(carrierFrequency);
@@ -449,7 +447,7 @@ void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
             EV << "Command received: change to channel #" << newChannel << "\n";
 
             // do it
-            if (rs.getChannelNumber()==newChannel)
+            if (radioChannel == newChannel)
                 EV << "Right on that channel, nothing to do\n"; // fine, nothing to do
             else if (rs.getState()==RadioState::TRANSMIT)
             {
@@ -464,7 +462,7 @@ void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
             EV << "Command received: change bitrate to " << (newBitrate/1e6) << "Mbps\n";
 
             // do it
-            if (rs.getBitrate()==newBitrate)
+            if (bitrate == newBitrate)
                 EV << "Right at that bitrate, nothing to do\n"; // fine, nothing to do
             else if (rs.getState()==RadioState::TRANSMIT)
             {
@@ -531,7 +529,7 @@ void SimplifiedRadio::handleSelfMsg(cMessage *msg)
         // switch channel if it needs be
         if (newChannel!=-1)
         {
-            if (newChannel == rs.getChannelNumber())
+            if (newChannel == radioChannel)
             {
                 setRadioState(newState); // nothing to do change the state
             }
@@ -761,7 +759,7 @@ void SimplifiedRadio::setRadioChannel(int channel)
 
 void SimplifiedRadio::changeChannel(int channel)
 {
-    if (channel == rs.getChannelNumber())
+    if (channel == radioChannel)
         return;
     if (rs.getState() == RadioState::TRANSMIT)
         error("changing channel while transmitting is not allowed");
@@ -789,10 +787,9 @@ void SimplifiedRadio::changeChannel(int channel)
     // do channel switch
     EV << "Changing to channel #" << channel << "\n";
 
-    emit(channelNumberSignal, channel);
-    rs.setChannelNumber(channel);
+    radioChannel = channel;
 
-    cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
+    cc->setRadioChannel(myRadioRef, radioChannel);
 
     cModule *myHost = getContainingNode(this);
 
@@ -848,13 +845,13 @@ void SimplifiedRadio::changeChannel(int channel)
     }
 
     // notify other modules about the channel switch; and actually, radio state has changed too
-    emit(NF_RADIO_CHANNEL_CHANGED, &rs);
+    emit(IRadio::radioChannelChangedSignal, radioChannel);
     emit(NF_RADIOSTATE_CHANGED, &rs);
 }
 
 void SimplifiedRadio::setBitrate(double bitrate)
 {
-    if (rs.getBitrate() == bitrate)
+    if (this->bitrate == bitrate)
         return;
     if (bitrate < 0)
         error("setBitrate(): bitrate cannot be negative (%g)", bitrate);
@@ -863,7 +860,7 @@ void SimplifiedRadio::setBitrate(double bitrate)
 
     EV << "Setting bitrate to " << (bitrate/1e6) << "Mbps\n";
     emit(bitrateSignal, bitrate);
-    rs.setBitrate(bitrate);
+    this->bitrate = bitrate;
 
     //XXX fire some notification?
 }
@@ -1062,7 +1059,7 @@ void SimplifiedRadio::connectReceiver()
     if (rs.getState()!=RadioState::IDLE)
         rs.setState(RadioState::IDLE); // Force radio to Idle
 
-    cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
+    cc->setRadioChannel(myRadioRef, radioChannel);
     cModule *myHost = getContainingNode(this);
 
     //cGate *radioGate = myHost->gate("radioIn");
@@ -1073,7 +1070,7 @@ void SimplifiedRadio::connectReceiver()
 
     // pick up ongoing transmissions on the new channel
     EV << "Picking up ongoing transmissions on new channel:\n";
-    ISimplifiedRadioChannel::TransmissionList tlAux = cc->getOngoingTransmissions(rs.getChannelNumber());
+    ISimplifiedRadioChannel::TransmissionList tlAux = cc->getOngoingTransmissions(radioChannel);
     for (ISimplifiedRadioChannel::TransmissionList::const_iterator it = tlAux.begin(); it != tlAux.end(); ++it)
     {
         SimplifiedRadioFrame *radioFrame = check_and_cast<SimplifiedRadioFrame *> (*it);

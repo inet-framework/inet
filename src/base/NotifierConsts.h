@@ -35,8 +35,6 @@ extern simsignal_t    // admin
 
     // - layer 1 (physical)
     NF_RADIOSTATE_CHANGED,
-    NF_RADIO_CHANNEL_CHANGED,
-    NF_RADIO_CHANGE_NOISE,
 
     // - layer 2 (data-link)
     //XXX generalize constants (remove "PP"?) - could be used by 80211 and ethernet as well

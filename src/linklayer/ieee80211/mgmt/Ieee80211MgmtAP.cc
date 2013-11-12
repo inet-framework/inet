@@ -25,6 +25,7 @@
 #include "EtherFrame_m.h"
 #endif
 
+#include "IRadio.h"
 #include "ModuleAccess.h"
 #include "NotifierConsts.h"
 #include "RadioState.h"
@@ -67,7 +68,7 @@ void Ieee80211MgmtAP::initialize(int stage)
 
         cModule *host = getContainingNode(this);
         // subscribe for notifications
-        host->subscribe(NF_RADIO_CHANNEL_CHANGED, this);
+        host->subscribe(IRadio::radioChannelChangedSignal, this);
 
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");
@@ -115,15 +116,13 @@ void Ieee80211MgmtAP::handleCommand(int msgkind, cObject *ctrl)
     error("handleCommand(): no commands supported");
 }
 
-void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent();
-    printNotificationBanner(signalID, obj);
-
-    if (signalID == NF_RADIO_CHANNEL_CHANGED)
+    if (signalID == IRadio::radioChannelChangedSignal)
     {
         EV << "updating channel number\n";
-        channelNumber = check_and_cast<const RadioState *>(obj)->getChannelNumber();
+        channelNumber = value;
     }
 }
 
