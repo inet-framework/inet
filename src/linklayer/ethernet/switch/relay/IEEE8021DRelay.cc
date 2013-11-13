@@ -87,7 +87,7 @@ void IEEE8021DRelay::broadcast(EtherFrame * frame)
     unsigned int arrivalGate = frame->getArrivalGate()->getIndex();
 
     for (unsigned int i = 0; i < portCount; i++)
-        if (i != arrivalGate && (getPortInterfaceData(i)->isForwarding() || !isStpAware))
+        if (i != arrivalGate && (!isStpAware || getPortInterfaceData(i)->isForwarding()))
             dispatch(frame->dup(), i);
 
     delete frame;
@@ -121,7 +121,7 @@ void IEEE8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
         }
         else
         {
-            if (port->isForwarding() || !isStpAware) // if the switch is STP/RSTP unaware then all its ports are forwarding (and learning)
+            if (!isStpAware || port->isForwarding()) // if the switch is STP/RSTP unaware then all its ports are forwarding (and learning)
             {
                 if (outGate != arrivalGate)
                     dispatch(frame, outGate);
@@ -149,7 +149,7 @@ void IEEE8021DRelay::dispatch(EtherFrame * frame, unsigned int portNum)
 
     EV_INFO << "Sending " << frame << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
 
-    if (port->isForwarding() || !isStpAware)
+    if (!isStpAware || port->isForwarding())
         send(frame, "ifOut", portNum);
 
     return;
@@ -160,7 +160,7 @@ void IEEE8021DRelay::learn(EtherFrame * frame)
     int arrivalGate = frame->getArrivalGate()->getIndex();
     IEEE8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
 
-    if (port->isLearning() || !isStpAware)
+    if (!isStpAware || port->isLearning())
         macTable->updateTableWithAddress(arrivalGate, frame->getSrc());
 }
 
@@ -211,14 +211,18 @@ void IEEE8021DRelay::deliverBPDU(EtherFrame * frame)
 
 IEEE8021DInterfaceData * IEEE8021DRelay::getPortInterfaceData(unsigned int portNum)
 {
-    cGate * gate = this->getParentModule()->gate("ethg$o", portNum);
-    InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
-    IEEE8021DInterfaceData * portData = gateIfEntry->ieee8021DData();
+    if (isStpAware)
+    {
+        cGate * gate = this->getParentModule()->gate("ethg$o", portNum);
+        InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
+        IEEE8021DInterfaceData * portData = gateIfEntry->ieee8021DData();
 
-    if (!portData)
-        throw cRuntimeError("IEEE8021DInterfaceData not found for port = %d",portNum);
+        if (!portData)
+            throw cRuntimeError("IEEE8021DInterfaceData not found for port = %d",portNum);
 
-    return portData;
+        return portData;
+    }
+    return NULL;
 }
 
 void IEEE8021DRelay::start()
