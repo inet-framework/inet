@@ -471,8 +471,7 @@ void ManetRoutingBase::sendToIpOnIface(cPacket *msg, int srcPort, const ManetAdd
                 srcadd = ie->ipv4Data()->getIPAddress();
 // It's necessary to duplicate the the control info message and include the information relative to the interface
                 IPv4ControlInfo *ipControlInfoAux = new IPv4ControlInfo(*ipControlInfo);
-                if (ipControlInfoAux->getOrigDatagram())
-                    delete ipControlInfoAux->removeOrigDatagram();
+                ASSERT(ipControlInfoAux->getOrigDatagram() == NULL);
                 ipControlInfoAux->setInterfaceId(ie->getInterfaceId());
                 ipControlInfoAux->setSrcAddr(srcadd);
                 UDPPacket *udpPacketAux = udpPacket->dup();
