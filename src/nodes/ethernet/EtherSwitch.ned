@@ -57,7 +57,7 @@ module EtherSwitch
         status: NodeStatus if hasStatus {
             @display("p=50,58;is=s");
         }
-        l2NodeConfigurator: L2NodeConfigurator {
+        l2NodeConfigurator: L2NodeConfigurator if spanningTreeProtocol != "" {
             @display("p=50,181");
         }
         interfaceTable: InterfaceTable {
