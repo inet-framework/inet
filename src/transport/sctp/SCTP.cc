@@ -166,7 +166,7 @@ void SCTP::handleMessage(cMessage *msg)
         if (!ret)
             removeAssociation(assoc);
     }
-    else if (msg->arrivedOn("from_ip") || msg->arrivedOn("from_ipv6"))
+    else if (msg->arrivedOn("from_ip"))
     {
         EV_INFO<<"Message from IP\n";
         printInfoAssocMap();
@@ -201,21 +201,13 @@ void SCTP::handleMessage(cMessage *msg)
             }
             else
             {
-                IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
-                IPv4Datagram *datagram = controlInfo->removeOrigDatagram();
-                delete datagram;
-                EV_INFO<<"controlInfo srcAddr="<<controlInfo->getSrcAddr()<<"   destAddr="<<controlInfo->getDestAddr()<<"\n";
-                srcAddr = controlInfo->getSrcAddr();
-                destAddr = controlInfo->getDestAddr();
+                INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(msg->removeControlInfo());
+                srcAddr = controlInfo->getSourceAddress();
+                destAddr = controlInfo->getDestinationAddress();
+                delete controlInfo;
+                EV_INFO << "controlInfo srcAddr=" << srcAddr << "   destAddr=" << destAddr << "\n";
             }
         }
-        else
-        {
-            IPv6ControlInfo *controlInfoV6 = check_and_cast<IPv6ControlInfo *>(msg->removeControlInfo());
-            srcAddr = controlInfoV6->getSrcAddr();
-            destAddr = controlInfoV6->getDestAddr();
-        }
-
 
         EV_INFO<<"srcAddr="<<srcAddr<<" destAddr="<<destAddr<<"\n";
         if (sctpmsg->getByteLength()>(SCTP_COMMON_HEADER))
