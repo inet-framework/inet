@@ -57,7 +57,7 @@ class INET_API Address
 
     public:
         Address() { set(NONE, 0); }
-        Address(const char *str) { tryParse(str); }
+        explicit Address(const char *str) { tryParse(str); }
         Address(const IPv4Address& addr) { set(addr); }
         Address(const IPv6Address& addr) { set(addr); }
         Address(const MACAddress& addr) { set(addr); }
