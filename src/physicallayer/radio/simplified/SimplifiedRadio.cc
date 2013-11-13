@@ -65,7 +65,6 @@ void SimplifiedRadio::initialize(int stage)
         if (transmitterPower > (double) (getRadioChannelPar("pMax")))
             error("transmitterPower cannot be bigger than pMax in SimplifiedRadioChannel!");
         bitrate = par("bitrate");
-        radioChannel = par("channelNumber");
         thermalNoise = FWMath::dBm2mW(par("thermalNoise"));
         sensitivity = FWMath::dBm2mW(par("sensitivity"));
         carrierFrequency = par("carrierFrequency");
@@ -164,7 +163,7 @@ void SimplifiedRadio::initialize(int stage)
             emit(IRadio::radioModeChangedSignal, rs);
             emit(IRadio::radioChannelChangedSignal, radioChannel);
 
-            cc->setRadioChannel(myRadioRef, radioChannel);
+            setRadioChannel(par("channelNumber"));
 
             // statistics
             emit(bitrateSignal, bitrate);
@@ -285,6 +284,7 @@ void SimplifiedRadio::handleMessage(cMessage *msg)
             SimplifiedRadioFrame *radioFrame = (SimplifiedRadioFrame *) msg;
             handleLowerMsgStart(radioFrame);
             bufferMsg(radioFrame);
+            updateRadioChannelState();
         }
         else
         {
@@ -367,6 +367,7 @@ void SimplifiedRadio::sendUp(SimplifiedRadioFrame *radioFrame)
 
 void SimplifiedRadio::sendDown(SimplifiedRadioFrame *radioFrame)
 {
+    updateRadioChannelState();
     if (transmitterConnected)
         sendToChannel(radioFrame);
     else
@@ -453,7 +454,7 @@ void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
                 this->newChannel = newChannel;
             }
             else
-                changeChannel(newChannel); // change channel right now
+                setRadioChannel(newChannel); // change channel right now
         }
         if (newBitrate!=-1)
         {
@@ -492,6 +493,8 @@ void SimplifiedRadio::handleSelfMsg(cMessage *msg)
     EV<<"SimplifiedRadio::handleSelfMsg"<<msg->getKind()<<endl;
     if (msg == endTransmissionTimer)
     {
+        EV << "Transmission successfully completed.\n";
+        updateRadioChannelState();
         // Transmission has completed. The RadioState has to be changed
         // to IDLE or RECV, based on the noise level on the channel.
         // If the noise level is bigger than the sensitivity switch to receive mode,
@@ -513,18 +516,9 @@ void SimplifiedRadio::handleSelfMsg(cMessage *msg)
         }
 
         // switch channel if it needs be
-        if (newChannel!=-1)
+        if (newChannel != -1)
         {
-            if (newChannel == radioChannel)
-            {
-                setRadioState(newState); // nothing to do change the state
-            }
-            else
-            {
-                // if change the channel the method changeChannel must set the correct radio state
-                rs = newState;
-                changeChannel(newChannel);
-            }
+            setRadioChannel(newChannel);
             newChannel = -1;
         }
         else
@@ -542,6 +536,7 @@ void SimplifiedRadio::handleSelfMsg(cMessage *msg)
             {
                 endReceptionTimers.erase(it);
                 handleLowerMsgEnd(unbufferMsg(msg));
+                updateRadioChannelState();
                 return;
             }
         }
@@ -750,11 +745,7 @@ void SimplifiedRadio::addNewSnr()
 
 void SimplifiedRadio::setRadioChannel(int channel)
 {
-    this->radioChannel = radioChannel;
-}
-
-void SimplifiedRadio::changeChannel(int channel)
-{
+    Enter_Method_Silent();
     if (channel == radioChannel)
         return;
     if (rs == RadioState::TRANSMIT)
@@ -776,14 +767,15 @@ void SimplifiedRadio::changeChannel(int channel)
 
     // reset the noiseLevel
     noiseLevel = thermalNoise;
+    updateRadioChannelState();
 
     if (rs != RadioState::IDLE)
         rs = RadioState::IDLE; // Force radio to Idle
 
     // do channel switch
-    EV << "Changing to channel #" << channel << "\n";
-
+    EV << "Changing from channel " << radioChannel << " to " << channel << "\n";
     radioChannel = channel;
+    emit(radioChannelChangedSignal, channel);
 
     cc->setRadioChannel(myRadioRef, radioChannel);
 
@@ -833,6 +825,7 @@ void SimplifiedRadio::changeChannel(int channel)
             frameDup->setArrivalTime(radioFrame->getTimestamp() + propagationDelay);
             handleLowerMsgStart(frameDup);
             bufferMsg(frameDup);
+            updateRadioChannelState();
         }
         else
         {
@@ -886,6 +879,28 @@ void SimplifiedRadio::setRadioState(RadioState::State newState)
         emit(IRadio::radioModeChangedSignal, rs);
     }
 }
+
+void SimplifiedRadio::updateRadioChannelState()
+{
+    RadioChannelState newRadioChannelState;
+    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP)
+        newRadioChannelState = RADIO_CHANNEL_STATE_UNKNOWN;
+    else if (endTransmissionTimer->isScheduled())
+        newRadioChannelState = RADIO_CHANNEL_STATE_TRANSMITTING;
+    else if (snrInfo.ptr != NULL && endReceptionTimers.size() > 0)
+        newRadioChannelState = RADIO_CHANNEL_STATE_RECEIVING;
+    else if (BASE_NOISE_LEVEL > receptionThreshold) // TODO: how?
+        newRadioChannelState = RADIO_CHANNEL_STATE_BUSY;
+    else
+        newRadioChannelState = RADIO_CHANNEL_STATE_FREE;
+    if (radioChannelState != newRadioChannelState)
+    {
+        EV << "Changing radio channel state from " << getRadioChannelStateName(radioChannelState) << " to " << getRadioChannelStateName(newRadioChannelState) << ".\n";
+        radioChannelState = newRadioChannelState;
+        emit(radioChannelStateChangedSignal, newRadioChannelState);
+    }
+}
+
 /*
 void SimplifiedRadio::updateSensitivity(double rate)
 {
@@ -1097,11 +1112,9 @@ void SimplifiedRadio::connectReceiver()
             frameDup->setArrivalTime(radioFrame->getTimestamp() + propagationDelay);
             handleLowerMsgStart(frameDup);
             bufferMsg(frameDup);
+            updateRadioChannelState();
         }
     }
-
-    // notify other modules about the channel switch; and actually, radio state has changed too
-    emit(IRadio::radioModeChangedSignal, rs);
 }
 
 

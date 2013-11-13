@@ -16,6 +16,7 @@
  **************************************************************************/
 
 
+#include "ModuleAccess.h"
 #include "SimplifiedRadioChannelAccess.h"
 #include "IMobility.h"
 #include "ModuleAccess.h"
@@ -58,6 +59,7 @@ void SimplifiedRadioChannelAccess::initialize(int stage)
 
         positionUpdateArrived = false;
         hostModule->subscribe(IMobility::mobilityStateChangedSignal, this);
+        myRadioRef = cc->registerRadio(this);
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER)
     {
@@ -79,7 +81,6 @@ void SimplifiedRadioChannelAccess::initialize(int stage)
                         hostModule->getFullPath().c_str());
         }
 
-        myRadioRef = cc->registerRadio(this);
         cc->setRadioPosition(myRadioRef, radioPos);
     }
 }

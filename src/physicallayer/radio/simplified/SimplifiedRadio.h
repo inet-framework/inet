@@ -122,19 +122,12 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
     virtual SimplifiedRadioFrame *createRadioFrame() {return new SimplifiedRadioFrame();}
 
     /**
-     * Change transmitter and receiver to a new channel.
-     * This method throws an error if the radio state is transmit.
-     * Messages that are already sent to the new channel and would
-     * reach us in the future - thus they are on the air - will be
-     * received correctly.
-     */
-    virtual void changeChannel(int channel);
-
-    /**
      * Change the bitrate to the given value. This method throws an error
      * if the radio state is transmit.
      */
     virtual void setBitrate(double bitrate);
+
+    virtual void updateRadioChannelState();
 
     /** @brief updates the sensitivity value if the bitrate varies */
     virtual void updateSensitivity(double bitrate);
