@@ -32,7 +32,7 @@ class InterfaceEntry;
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
+class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
 {
   public:
     //

@@ -31,7 +31,7 @@
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
+class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
 {
   public:
     /** State of a STA */

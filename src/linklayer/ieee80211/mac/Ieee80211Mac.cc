@@ -283,9 +283,6 @@ void Ieee80211Mac::initialize(int stage)
         endReserve = new cMessage("Reserve");
         mediumStateChange = new cMessage("MediumStateChange");
 
-        // subscribe for the information of the carrier sense
-        getParentModule()->getSubmodule("radio")->subscribe(IRadio::radioModeChangedSignal, this);
-
         // obtain pointer to external queue
         initializeQueueModule();  //FIXME STAGE: this should be in L2 initialization!!!!
 
@@ -366,7 +363,11 @@ void Ieee80211Mac::initialize(int stage)
         // initialize watches
         validRecMode = false;
         initWatches();
-        radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule()->getId();
+
+        cModule *radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule();
+        radioModule->subscribe(IRadio::radioModeChangedSignal, this);
+        radioModule->subscribe(IRadio::radioChannelStateChangedSignal, this);
+        radio = check_and_cast<IRadio *>(radioModule);
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {

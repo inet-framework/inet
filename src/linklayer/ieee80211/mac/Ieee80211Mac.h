@@ -33,6 +33,7 @@
 #include "RadioState.h"
 #include "FSMA.h"
 #include "IQoSClassifier.h"
+#include "IRadio.h"
 
 /**
  * IEEE 802.11g with e Media Access Control Layer.
@@ -335,10 +336,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
 
     /** Physical radio (medium) state copied from physical layer */
     RadioState::State radioState;
-    // Use to distinguish the radio module that send the event
-    int radioModule;
-
-    int getRadioModuleId() {return radioModule;}
+    IRadio *radio;
 
     Ieee80211DataOrMgmtFrame *fr;
 

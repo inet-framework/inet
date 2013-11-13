@@ -20,6 +20,9 @@
 
 package inet.linklayer.ieee80211.mac;
 
+import inet.linklayer.contract.ILinkLayer;
+
+
 //
 // Implementation of the 802.11 MAC protocol. This module is intended
 // to be used in combination with the Ieee80211Radio module as the physical
@@ -53,7 +56,7 @@ package inet.linklayer.ieee80211.mac;
 // listen interval which is related to power management, capability information
 // which is related to PCF and other non-modelled features).
 //
-simple Ieee80211Mac
+simple Ieee80211Mac like ILinkLayer
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or

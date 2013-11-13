@@ -34,7 +34,7 @@
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public ILifecycle, public cListener
+class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public ILifecycle
 {
   protected:
     // configuration
