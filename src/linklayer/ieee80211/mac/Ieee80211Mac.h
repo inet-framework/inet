@@ -106,6 +106,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
 
     /** The basic bitrate (1 or 2 Mbps) is used to transmit control frames and multicast/broadcast frames */
     double basicBitrate;
+    double controlBitRate;
     // Variables used by the auto bit rate
     bool forceBitRate; //if true the
     unsigned int intrateIndex;

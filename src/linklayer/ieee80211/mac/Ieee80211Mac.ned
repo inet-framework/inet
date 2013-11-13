@@ -93,7 +93,7 @@ simple Ieee80211Mac
         int cwMaxData = default(-1); // contention window for normal data frames, -1 means default
         int cwMinMulticast = default(-1); // contention window for broadcast messages, -1 means default
 
-        double phyHeaderLength = default(-1); // if -1, the MAC will compute it in function of the modulation type
+        double phyHeaderLength @unit("s") = default(-1s); // when <0, the MAC will compute it in function of the modulation type
         bool forceBitRate = default(false); // if true, the MAC will force the bitrate to the physical layer
         int autoBitrate @enum(0,1,2) = default(0); // 0 = constant bit rate (autobitrate algorithm disabled), 1 = ARF Rate, 2 = AARF Rate
         // parameters used by the autobitrate
