@@ -173,6 +173,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     virtual void sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& address);
 
     /** Called by the signal handler whenever a change occurs we're interested in */
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value);
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     /** Utility function: converts Ieee80211StatusCode (->frame) to Ieee80211PrimResultCode (->primitive) */

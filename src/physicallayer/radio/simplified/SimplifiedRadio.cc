@@ -37,8 +37,9 @@ simsignal_t SimplifiedRadio::changeLevelNoise = registerSignal("changeLevelNoise
 #define BASE_NOISE_LEVEL (noiseGenerator?noiseLevel+noiseGenerator->noiseLevel():noiseLevel)
 
 Define_Module(SimplifiedRadio);
-SimplifiedRadio::SimplifiedRadio() : rs(this->getId())
+SimplifiedRadio::SimplifiedRadio()
 {
+    rs = RadioState::IDLE;
     obstacles = NULL;
     radioModel = NULL;
     receptionModel = NULL;
@@ -64,7 +65,6 @@ void SimplifiedRadio::initialize(int stage)
         transmitterPower = par("transmitterPower");
         if (transmitterPower > (double) (getRadioChannelPar("pMax")))
             error("transmitterPower cannot be bigger than pMax in SimplifiedRadioChannel!");
-        rs.setRadioId(this->getId());
         bitrate = par("bitrate");
         radioChannel = par("channelNumber");
         thermalNoise = FWMath::dBm2mW(par("thermalNoise"));
@@ -98,12 +98,11 @@ void SimplifiedRadio::initialize(int stage)
 
         // Initialize radio state. If thermal noise is already to high, radio
         // state has to be initialized as RECV
-        rs.setState(RadioState::IDLE);
+        rs = RadioState::IDLE;
         if (BASE_NOISE_LEVEL >= sensitivity)
-            rs.setState(RadioState::RECV);
+            rs = RadioState::RECV;
 
         WATCH(noiseLevel);
-        WATCH(rs);
 
         obstacles = ObstacleControlAccess().getIfExists();
         if (obstacles) EV << "Found ObstacleControl" << endl;
@@ -163,14 +162,14 @@ void SimplifiedRadio::initialize(int stage)
         if (isOperational)
         {
             // emit initial values
-            emit(NF_RADIOSTATE_CHANGED, &rs);
+            emit(NF_RADIOSTATE_CHANGED, rs);
             emit(IRadio::radioChannelChangedSignal, radioChannel);
 
             cc->setRadioChannel(myRadioRef, radioChannel);
 
             // statistics
             emit(bitrateSignal, bitrate);
-            emit(radioStateSignal, rs.getState());
+            emit(radioStateSignal, rs);
         }
         else
         {
@@ -245,7 +244,7 @@ bool SimplifiedRadio::processRadioFrame(SimplifiedRadioFrame *radioFrame)
  */
 void SimplifiedRadio::handleMessage(cMessage *msg)
 {
-    if (rs.getState()==RadioState::SLEEP || rs.getState()==RadioState::OFF)
+    if (rs == RadioState::SLEEP || rs == RadioState::OFF)
     {
         if (msg->getArrivalGate() == upperLayerIn || msg->isSelfMessage())  //XXX can we ensure we don't receive pk from upper in OFF state?? (race condition)
             throw cRuntimeError("Radio is turned off");
@@ -400,7 +399,7 @@ SimplifiedRadioFrame *SimplifiedRadio::unbufferMsg(cMessage *msg)
  */
 void SimplifiedRadio::handleUpperMsg(SimplifiedRadioFrame *radioFrame)
 {
-    if (rs.getState() == RadioState::TRANSMIT)
+    if (rs == RadioState::TRANSMIT)
         error("Trying to send a message while already transmitting -- MAC should "
               "take care this does not happen");
 
@@ -449,7 +448,7 @@ void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
             // do it
             if (radioChannel == newChannel)
                 EV << "Right on that channel, nothing to do\n"; // fine, nothing to do
-            else if (rs.getState()==RadioState::TRANSMIT)
+            else if (rs == RadioState::TRANSMIT)
             {
                 EV << "We're transmitting right now, remembering to change after it's completed\n";
                 this->newChannel = newChannel;
@@ -464,7 +463,7 @@ void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
             // do it
             if (bitrate == newBitrate)
                 EV << "Right at that bitrate, nothing to do\n"; // fine, nothing to do
-            else if (rs.getState()==RadioState::TRANSMIT)
+            else if (rs == RadioState::TRANSMIT)
             {
                 EV << "We're transmitting right now, remembering to change after it's completed\n";
                 this->newBitrate = newBitrate;
@@ -524,7 +523,7 @@ void SimplifiedRadio::handleSelfMsg(cMessage *msg)
             else
             {
                 // if change the channel the method changeChannel must set the correct radio state
-                rs.setState(newState);
+                rs = newState;
                 changeChannel(newChannel);
             }
             newChannel = -1;
@@ -605,7 +604,7 @@ void SimplifiedRadio::handleLowerMsgStart(SimplifiedRadioFrame* radioFrame)
     // arrived in time
     // NOTE: a message may have arrival time in the past here when we are
     // processing ongoing transmissions during a channel change
-    if (radioFrame->getArrivalTime() == simTime() && rcvdPower >= sensitivity && rs.getState() != RadioState::TRANSMIT && snrInfo.ptr == NULL)
+    if (radioFrame->getArrivalTime() == simTime() && rcvdPower >= sensitivity && rs != RadioState::TRANSMIT && snrInfo.ptr == NULL)
     {
         EV << "receiving frame " << radioFrame->getName() << endl;
 
@@ -618,7 +617,7 @@ void SimplifiedRadio::handleLowerMsgStart(SimplifiedRadioFrame* radioFrame)
         // add initial snr value
         addNewSnr();
 
-        if (rs.getState() != RadioState::RECV)
+        if (rs != RadioState::RECV)
         {
             // publish new RadioState
             EV << "publish new RadioState:RECV\n";
@@ -642,7 +641,7 @@ void SimplifiedRadio::handleLowerMsgStart(SimplifiedRadioFrame* radioFrame)
 
         // update the RadioState if the noiseLevel exceeded the threshold
         // and the radio is currently not in receive or in send mode
-        if (BASE_NOISE_LEVEL >= receptionThreshold && rs.getState() == RadioState::IDLE)
+        if (BASE_NOISE_LEVEL >= receptionThreshold && rs == RadioState::IDLE)
         {
             EV << "setting radio state to RECV\n";
             setRadioState(RadioState::RECV);
@@ -734,7 +733,7 @@ void SimplifiedRadio::handleLowerMsgEnd(SimplifiedRadioFrame *radioFrame)
     // change to idle if noiseLevel smaller than threshold and state was
     // not idle before
     // do not change state if currently sending or receiving a message!!!
-    if (BASE_NOISE_LEVEL < receptionThreshold && rs.getState() == RadioState::RECV && snrInfo.ptr == NULL)
+    if (BASE_NOISE_LEVEL < receptionThreshold && rs == RadioState::RECV && snrInfo.ptr == NULL)
     {
         // publish the new RadioState:
         EV << "new RadioState is IDLE\n";
@@ -759,7 +758,7 @@ void SimplifiedRadio::changeChannel(int channel)
 {
     if (channel == radioChannel)
         return;
-    if (rs.getState() == RadioState::TRANSMIT)
+    if (rs == RadioState::TRANSMIT)
         error("changing channel while transmitting is not allowed");
 
    // Clear the recvBuff
@@ -779,8 +778,8 @@ void SimplifiedRadio::changeChannel(int channel)
     // reset the noiseLevel
     noiseLevel = thermalNoise;
 
-    if (rs.getState()!=RadioState::IDLE)
-        rs.setState(RadioState::IDLE); // Force radio to Idle
+    if (rs != RadioState::IDLE)
+        rs = RadioState::IDLE; // Force radio to Idle
 
     // do channel switch
     EV << "Changing to channel #" << channel << "\n";
@@ -844,7 +843,7 @@ void SimplifiedRadio::changeChannel(int channel)
 
     // notify other modules about the channel switch; and actually, radio state has changed too
     emit(IRadio::radioChannelChangedSignal, radioChannel);
-    emit(NF_RADIOSTATE_CHANGED, &rs);
+    emit(NF_RADIOSTATE_CHANGED, rs);
 }
 
 void SimplifiedRadio::setBitrate(double bitrate)
@@ -853,7 +852,7 @@ void SimplifiedRadio::setBitrate(double bitrate)
         return;
     if (bitrate < 0)
         error("setBitrate(): bitrate cannot be negative (%g)", bitrate);
-    if (rs.getState() == RadioState::TRANSMIT)
+    if (rs == RadioState::TRANSMIT)
         error("changing the bitrate while transmitting is not allowed");
 
     EV << "Setting bitrate to " << (bitrate/1e6) << "Mbps\n";
@@ -870,7 +869,7 @@ void SimplifiedRadio::setRadioMode(RadioMode radioMode)
 
 void SimplifiedRadio::setRadioState(RadioState::State newState)
 {
-    if (rs.getState() != newState)
+    if (rs != newState)
     {
         emit(radioStateSignal, newState);
         if (newState == RadioState::SLEEP || newState == RadioState::OFF)
@@ -878,14 +877,14 @@ void SimplifiedRadio::setRadioState(RadioState::State newState)
             disconnectTransmitter();
             disconnectReceiver();
         }
-        else if (rs.getState() == RadioState::SLEEP || rs.getState() == RadioState::OFF)
+        else if (rs == RadioState::SLEEP || rs == RadioState::OFF)
         {
             connectTransmitter();
             connectReceiver(); // the connection change the state
         }
 
-        rs.setState(newState);
-        emit(NF_RADIOSTATE_CHANGED, &rs);
+        rs = newState;
+        emit(NF_RADIOSTATE_CHANGED, rs);
     }
 }
 /*
@@ -1016,12 +1015,12 @@ void SimplifiedRadio::receiveSignal(cComponent *source, simsignal_t signalID, cO
     {
         if (BASE_NOISE_LEVEL < receptionThreshold)
         {
-            if (rs.getState()==RadioState::RECV && snrInfo.ptr==NULL)
+            if (rs == RadioState::RECV && snrInfo.ptr==NULL)
                 setRadioState(RadioState::IDLE);
         }
         else
         {
-            if (rs.getState()!=RadioState::IDLE)
+            if (rs != RadioState::IDLE)
                 setRadioState(RadioState::RECV);
         }
     }
@@ -1031,7 +1030,7 @@ void SimplifiedRadio::disconnectReceiver()
 {
     receiverConnected = false;
     cc->disableReception(this->myRadioRef);
-    if (rs.getState() == RadioState::TRANSMIT)
+    if (rs == RadioState::TRANSMIT)
         error("changing channel while transmitting is not allowed");
 
    // Clear the recvBuff
@@ -1054,8 +1053,8 @@ void SimplifiedRadio::connectReceiver()
     receiverConnected = true;
     cc->enableReception(this->myRadioRef);
 
-    if (rs.getState()!=RadioState::IDLE)
-        rs.setState(RadioState::IDLE); // Force radio to Idle
+    if (rs != RadioState::IDLE)
+        rs = RadioState::IDLE; // Force radio to Idle
 
     cc->setRadioChannel(myRadioRef, radioChannel);
     cModule *myHost = getContainingNode(this);
@@ -1103,7 +1102,7 @@ void SimplifiedRadio::connectReceiver()
     }
 
     // notify other modules about the channel switch; and actually, radio state has changed too
-    emit(NF_RADIOSTATE_CHANGED, &rs);
+    emit(NF_RADIOSTATE_CHANGED, rs);
 }
 
 

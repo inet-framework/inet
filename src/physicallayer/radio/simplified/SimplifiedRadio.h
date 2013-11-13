@@ -225,7 +225,7 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
     RecvBuff recvBuff;
 
     /** State: the current RadioState of the NIC; includes channel number */
-    RadioState rs;
+    RadioState::State rs;
 
     /** State: if not -1, we have to switch to that channel once we finished transmitting */
     int newChannel;

@@ -284,7 +284,7 @@ void Ieee80211Mac::initialize(int stage)
         mediumStateChange = new cMessage("MediumStateChange");
 
         // subscribe for the information of the carrier sense
-        hostModule->subscribe(NF_RADIOSTATE_CHANGED, this);
+        getParentModule()->getSubmodule("radio")->subscribe(NF_RADIOSTATE_CHANGED, this);
 
         // obtain pointer to external queue
         initializeQueueModule();  //FIXME STAGE: this should be in L2 initialization!!!!
@@ -824,22 +824,12 @@ void Ieee80211Mac::handleLowerMsg(cPacket *msg)
     EV<<"Leave handleLowerMsg...\n";
 }
 
-void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent();
-    WirelessMacBase::receiveSignal(source, signalID, obj);
-
-    printNotificationBanner(signalID, obj);
-
     if (signalID == NF_RADIOSTATE_CHANGED)
     {
-        const RadioState * rstate = check_and_cast<const RadioState *>(obj);
-        if (rstate->getRadioId()!=getRadioModuleId())
-            return;
-
-        RadioState::State newRadioState = rstate->getState();
-
-
+        RadioState::State newRadioState = (RadioState::State)value;
 
         // FIXME: double recording, because there's no sample hold in the gui
         radioStateVector.record(radioState);

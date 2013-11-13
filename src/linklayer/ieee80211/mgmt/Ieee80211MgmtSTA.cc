@@ -355,22 +355,28 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, simtime_t timeout)
     scheduleAt(simTime()+timeout, assocTimeoutMsg);
 }
 
-void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent();
-    printNotificationBanner(signalID, obj);
-
     // Note that we are only subscribed during scanning!
     if (signalID==NF_RADIOSTATE_CHANGED)
     {
-        const RadioState::State radioState = check_and_cast<const RadioState *>(obj)->getState();
+        const RadioState::State radioState = (RadioState::State)value;
         if (radioState==RadioState::RECV)
         {
             EV << "busy radio channel detected during scanning\n";
             scanning.busyChannelDetected = true;
         }
     }
-    else if (signalID==NF_LINK_FULL_PROMISCUOUS)
+}
+
+void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+{
+    Enter_Method_Silent();
+    printNotificationBanner(signalID, obj);
+
+    // Note that we are only subscribed during scanning!
+    if (signalID==NF_LINK_FULL_PROMISCUOUS)
     {
         Ieee80211DataOrMgmtFrame *frame = dynamic_cast<Ieee80211DataOrMgmtFrame*>(obj);
         if (!frame || frame->getControlInfo()==NULL)
