@@ -197,6 +197,7 @@ void SCTP::handleMessage(cMessage *msg)
                 UDPDataIndication *ctrl = check_and_cast<UDPDataIndication *>(msg->removeControlInfo());
                 srcAddr = ctrl->getSrcAddr();
                 destAddr = ctrl->getDestAddr();
+                delete ctrl;
                 EV_INFO<<"controlInfo srcAddr="<<srcAddr<<"  destAddr="<<destAddr<<"\n";
                 EV_DETAIL<<"VTag="<<sctpmsg->getTag()<<"\n";
             }
