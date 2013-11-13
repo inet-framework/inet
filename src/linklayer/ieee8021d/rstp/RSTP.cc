@@ -1148,17 +1148,17 @@ int RSTP::getBestAlternate()
 void RSTP::start()
 {
     initPorts();
+    scheduleAt(simTime(), helloM);
+    scheduleAt(simTime() + fwdDelay, forwardM);
+    scheduleAt(simTime() + migrateTime, migrateM);
     isOperational = true;
 }
 
 void RSTP::stop()
 {
-    for (unsigned int i = 0; i < portCount; i++)
-    {
-        IEEE8021DInterfaceData * iPort = getPortInterfaceData(i);
-        iPort->setRole(IEEE8021DInterfaceData::DISABLED);
-        iPort->setState(IEEE8021DInterfaceData::DISCARDING);
-    }
+    cancelEvent(helloM);
+    cancelEvent(forwardM);
+    cancelEvent(migrateM);
     isOperational = false;
 }
 
