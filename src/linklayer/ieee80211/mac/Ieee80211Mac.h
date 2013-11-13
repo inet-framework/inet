@@ -30,7 +30,6 @@
 #include "IPassiveQueue.h"
 #include "Ieee80211Frame_m.h"
 #include "Ieee80211Consts.h"
-#include "RadioState.h"
 #include "FSMA.h"
 #include "IQoSClassifier.h"
 #include "IRadio.h"
@@ -93,6 +92,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     bool useModulationParameters;
     bool prioritizeMulticast;
   protected:
+    IRadio::RadioChannelState previousRadioState;
     /**
      * @name Configuration parameters
      * These are filled in during the initialization phase and not supposed to change afterwards.
@@ -334,8 +334,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     /** XXX Remember for which AC we wait for ACK. */
     //int ACKcurrentAC;
 
-    /** Physical radio (medium) state copied from physical layer */
-    RadioState::State radioState;
     IRadio *radio;
 
     Ieee80211DataOrMgmtFrame *fr;

@@ -28,8 +28,6 @@
 #include "IRadio.h"
 #include "ModuleAccess.h"
 #include "NotifierConsts.h"
-#include "RadioState.h"
-
 
 Define_Module(Ieee80211MgmtAP);
 Register_Class(Ieee80211MgmtAP::NotificationInfoSta);

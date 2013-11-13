@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "IRadioChannel.h"
 #include "Ieee80211MgmtSTA.h"
 #include "IRadioChannel.h"
 #include "InterfaceEntry.h"
@@ -23,7 +24,6 @@
 #include "Ieee802Ctrl.h"
 #include "NotifierConsts.h"
 #include "PhyControlInfo_m.h"
-#include "RadioState.h"
 #include "Radio80211aControlInfo_m.h"
 #include "opp_utils.h"
 
@@ -359,10 +359,10 @@ void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, l
 {
     Enter_Method_Silent();
     // Note that we are only subscribed during scanning!
-    if (signalID == IRadio::radioModeChangedSignal)
+    if (signalID == IRadio::radioChannelStateChangedSignal)
     {
-        const RadioState::State radioState = (RadioState::State)value;
-        if (radioState==RadioState::RECV)
+        IRadio::RadioChannelState radioState = (IRadio::RadioChannelState)value;
+        if (radioState != IRadio::RADIO_CHANNEL_STATE_FREE && radioState != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
         {
             EV << "busy radio channel detected during scanning\n";
             scanning.busyChannelDetected = true;
@@ -433,7 +433,7 @@ void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
 
     // start scanning
     if (scanning.activeScan)
-        host->subscribe(IRadio::radioModeChangedSignal, this);
+        host->subscribe(IRadio::radioChannelStateChangedSignal, this);
     scanning.currentChannelIndex = -1; // so we'll start with index==0
     isScanning = true;
     scanNextChannel();
@@ -446,7 +446,7 @@ bool Ieee80211MgmtSTA::scanNextChannel()
     {
         EV << "Finished scanning last channel\n";
         if (scanning.activeScan)
-            host->unsubscribe(IRadio::radioModeChangedSignal, this);
+            host->unsubscribe(IRadio::radioChannelStateChangedSignal, this);
         isScanning = false;
         return true; // we're done
     }
