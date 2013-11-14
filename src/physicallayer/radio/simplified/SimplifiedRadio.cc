@@ -956,7 +956,6 @@ void SimplifiedRadio::receiveSignal(cComponent *source, simsignal_t signalID, cO
 void SimplifiedRadio::disconnectReceiver()
 {
     receiverConnected = false;
-    cc->disableReception(this->myRadioRef);
     if (getRadioChannelState() == RADIO_CHANNEL_STATE_TRANSMITTING)
         error("changing channel while transmitting is not allowed");
 
@@ -978,7 +977,6 @@ void SimplifiedRadio::disconnectReceiver()
 void SimplifiedRadio::connectReceiver()
 {
     receiverConnected = true;
-    cc->enableReception(this->myRadioRef);
     cc->setRadioChannel(myRadioRef, radioChannel);
     cModule *myHost = getContainingNode(this);
 

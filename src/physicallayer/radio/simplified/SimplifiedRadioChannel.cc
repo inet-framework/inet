@@ -121,7 +121,6 @@ SimplifiedRadioChannel::RadioRef SimplifiedRadioChannel::registerRadio(cModule *
     re.radioInGate = radioInGate->getPathStartGate();
     re.isNeighborListValid = false;
     re.channel = 0;  // for now
-    re.isActive = true;
     radios.push_back(re);
     return &radios.back(); // last element
 }
@@ -295,11 +294,6 @@ void SimplifiedRadioChannel::sendToChannel(RadioRef srcRadio, SimplifiedRadioFra
     for (int i=0; i<n; i++)
     {
         RadioRef r = neighbors[i];
-        if (!r->isActive)
-        {
-            EV << "skipping disabled radio interface \n";
-            continue;
-        }
         if (r->channel == channel)
         {
             EV << "sending message to radio listening on the same channel\n";

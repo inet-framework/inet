@@ -71,12 +71,6 @@ class INET_API ISimplifiedRadioChannel
     /** Returns the maximal interference distance*/
     virtual double getInterferenceRange(RadioRef r) = 0;
 
-    /** Disable the reception in the reference module */
-    virtual void disableReception(RadioRef r) = 0;
-
-    /** Enable the reception in the reference module */
-    virtual void enableReception(RadioRef r) = 0;
-
     /** Returns propagation speed of the signal in meter/sec */
     virtual double getPropagationSpeed() = 0;
 };

@@ -53,7 +53,6 @@ struct ISimplifiedRadioChannel::RadioEntry {
     std::set<RadioRef, Compare> neighbors; // cached neighbor list
     std::vector<RadioRef> neighborList;
     bool isNeighborListValid;
-    bool isActive;
 };
 
 /**
@@ -143,12 +142,6 @@ class INET_API SimplifiedRadioChannel : public RadioChannelBase, public ISimplif
 
     /** Returns the maximal interference distance*/
     virtual double getInterferenceRange(RadioRef r) { return maxInterferenceDistance; }
-
-    /** Disable the reception in the reference module */
-    virtual void disableReception(RadioRef r) { r->isActive = false; };
-
-    /** Enable the reception in the reference module */
-    virtual void enableReception(RadioRef r) { r->isActive = true; };
 
     /** Returns propagation speed of the signal in meter/sec */
     virtual double getPropagationSpeed() { return SPEED_OF_LIGHT; }
