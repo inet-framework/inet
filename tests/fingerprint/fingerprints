@@ -37,6 +37,7 @@ inetLib = inetRoot + "/src/inet"
 opp_run = "opp_run"
 cpuTimeLimit = "300s"
 logFile = "test.out"
+extraOppRunArgs = ""
 exitCode = 0
 
 class FingerprintTestCaseGenerator():
@@ -253,7 +254,7 @@ class FingerprintTestCase(SimulationTestCase):
 
     def runTest(self):
         # CPU time limit is a safety guard: fingerprint checks shouldn't take forever
-        global inetRoot, opp_run, nedPath, cpuTimeLimit
+        global inetRoot, opp_run, nedPath, cpuTimeLimit, extraOppRunArgs
 
         # run the simulation
         workingdir = _iif(self.wd.startswith('/'), inetRoot + "/" + self.wd, self.wd)
@@ -263,8 +264,9 @@ class FingerprintTestCase(SimulationTestCase):
         command = opp_run + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
             _iif(self.simtimelimit != "", " --sim-time-limit=" + self.simtimelimit, "") + \
             " --fingerprint=" + self.fingerprint + " --cpu-time-limit=" + cpuTimeLimit + \
-            " --vector-recording=false --scalar-recording=true" \
-            " '--output-scalar-file=" + os.path.abspath(".") + "/results/" + self.csvFile + "_" + wdname + "_${inifile}_${configname}-${runnumber}.sca'"
+            " --vector-recording=false --scalar-recording=true" + \
+            " '--output-scalar-file=" + os.path.abspath(".") + "/results/" + self.csvFile + "_" + wdname + "_${inifile}_${configname}-${runnumber}.sca'" + \
+            extraOppRunArgs;
 
         anyFingerpintBad = False;
         computedFingerprints = set()
@@ -528,6 +530,7 @@ if __name__ == "__main__":
     parser.add_argument('-x', '--exclude', action='append', metavar='regex', help='Negative line filter: a line (more precisely, workingdir+SPACE+args) must NOT match any of the regular expressions in order for that test case to be run')
     parser.add_argument('-t', '--threads', type=int, default=multiprocessing.cpu_count(), help='number of parallel threads (default: number of CPUs, currently '+str(multiprocessing.cpu_count())+')')
     parser.add_argument('-r', '--repeat', type=int, default=1, help='number of repeating each test (default: 1)')
+    parser.add_argument('-a', '--oppargs', action='append', metavar='oppargs', nargs='*', help='extra opp_run arguments without leading "--", you can terminate list with " -- " ')
     args = parser.parse_args()
 
     if os.path.isfile(logFile):
@@ -536,6 +539,11 @@ if __name__ == "__main__":
 
     if not args.testspecfiles:
         args.testspecfiles = glob.glob('*.csv')
+
+    if args.oppargs:
+        for oppArgList in args.oppargs:
+            for oppArg in oppArgList:
+                extraOppRunArgs += " --" + oppArg
 
     generator = FingerprintTestCaseGenerator()
     testcases = generator.generateFromCSV(args.testspecfiles, args.match, args.exclude, args.repeat)
