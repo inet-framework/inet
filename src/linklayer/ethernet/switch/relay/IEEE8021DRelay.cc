@@ -97,6 +97,7 @@ void IEEE8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
 {
     int arrivalGate = frame->getArrivalGate()->getIndex();
     IEEE8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
+    learn(frame);
     // broadcast address
     if (frame->getDest().isBroadcast())
     {
@@ -111,7 +112,6 @@ void IEEE8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
     }
     else
     {
-        learn(frame);
         int outGate = macTable->getPortForAddress(frame->getDest());
         // Not known -> broadcast
         if (outGate == -1)

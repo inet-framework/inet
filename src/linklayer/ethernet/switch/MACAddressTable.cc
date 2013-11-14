@@ -322,7 +322,7 @@ void MACAddressTable::clearTable()
         delete iter->second;
 
     vlanAddressTable.clear();
-
+    addressTable = NULL;
 }
 
 MACAddressTable::~MACAddressTable()
