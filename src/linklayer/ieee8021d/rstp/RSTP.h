@@ -1,4 +1,5 @@
 //
+//
 // Copyright (C) 2011 Juan Luis Garrote Molinero
 // Copyright (C) 2013 Zsolt Prontvai
 //
@@ -16,8 +17,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __A_RSTP_H
-#define __A_RSTP_H
+#ifndef __INET_RSTP_H
+#define __INET_RSTP_H
 
 #include "ILifecycle.h"
 #include "IEEE8021DBPDU_m.h"
@@ -28,9 +29,9 @@
 #include "IEEE8021DInterfaceData.h"
 
 /**
- * RSTP implementation.
+ * Implements the Rapid Spanning Tree Protocol. See the NED file for details.
  */
-class RSTP: public cSimpleModule, public ILifecycle {
+class RSTP : public cSimpleModule, public ILifecycle {
 protected:
     // kind codes for self messages
     enum SelfKinds {
@@ -65,14 +66,18 @@ protected:
 public:
     RSTP();
     virtual ~RSTP();
-    virtual int numInitStages() const {
-        return 2;
-    }
+    virtual int numInitStages() const { return 2; }
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
 protected:
     virtual void initialize(int stage);
     virtual void finish() {}
     virtual void initInterfacedata(unsigned int portNum);
+
+    virtual void start();
+    virtual void stop();
+
+    IEEE8021DInterfaceData *getPortInterfaceData(unsigned int portNum);
 
     /**
      * @brief initialize RSTP dynamic information
@@ -143,8 +148,7 @@ protected:
      * @return (<0 if vector better than frame)
      * -4=worse port  -3=worse src  -2=worse RPC  -1=worse root  0=Similar  1=better root  2=better RPC  3=better src  4=better port
      */
-    virtual int compareInterfacedata(unsigned int portNum, BPDU * msg,
-            int linkCost);
+    virtual int compareInterfacedata(unsigned int portNum, BPDU * msg, int linkCost);
 
     /**
      * @brief If root TCWhile has not expired, sends a BPDU to the Root with TCFlag=true.
@@ -176,16 +180,6 @@ protected:
      * @brief Handles the switch to backup in one of the ports
      */
     virtual void handleBK(BPDU * frame, unsigned int arrival);
-
-    // for lifecycle:
-public:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage,
-            IDoneCallback *doneCallback);
-protected:
-    virtual void start();
-    virtual void stop();
-    IEEE8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
 };
 
 #endif
-

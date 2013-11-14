@@ -1,28 +1,35 @@
+//
 // Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 // Author: Benjamin Martin Seregi
+//
 
-#ifndef IEEE8021DINTERFACEDATA_H_
-#define IEEE8021DINTERFACEDATA_H_
+#ifndef INET_IEEE8021DINTERFACEDATA_H_
+#define INET_IEEE8021DINTERFACEDATA_H_
 
 #include "INETDefs.h"
 #include "InterfaceEntry.h"
 #include "MACAddress.h"
-#undef ALTERNATE
 
+#undef ALTERNATE  // conflicts with <windows.h>
+
+
+/**
+ * Per-interface data needed by the STP and RSTP protocols.
+ */
 class IEEE8021DInterfaceData : public InterfaceProtocolData
 {
     public:
@@ -62,7 +69,7 @@ class IEEE8021DInterfaceData : public InterfaceProtocolData
                 simtime_t maxAge;
                 simtime_t fwdDelay;
                 simtime_t helloTime;
-                simtime_t TCWhile;      //This port will send TC=true until this time has been overtaken.
+                simtime_t TCWhile;      // send TC=true until this time has elapsed
 
                 unsigned int lostBPDU;
         };
@@ -118,4 +125,4 @@ class IEEE8021DInterfaceData : public InterfaceProtocolData
         unsigned int getLostBPDU() const;
 };
 
-#endif /* IEEE8021DINTERFACEDATA_H_ */
+#endif

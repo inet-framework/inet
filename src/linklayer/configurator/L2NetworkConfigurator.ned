@@ -11,14 +11,14 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 package inet.linklayer.configurator;
 
 //
 // This module allows to configure network scenarios at layer 2.
 // The STP and RSTP related parameters such as port cost, port priority
-// and 'is edge' can be configured with XML files.
+// and the "is-edge" flag can be configured with XML files.
 //
 // This module is based on ~IPv4NetworkConfigurator. The optional selector
 // attributes: @hosts, @names, @towards, @among are also comes with this
@@ -32,7 +32,7 @@ package inet.linklayer.configurator;
 // </config>
 //
 // For more information about the usage of the selector attributes see
-// ~IPv4NetworkConfigurator NED file.
+// ~IPv4NetworkConfigurator.
 //
 simple L2NetworkConfigurator
 {
@@ -40,3 +40,4 @@ simple L2NetworkConfigurator
         @display("i=block/cogwheel_s");
         xml config = default(xml("<config><interface hosts='**' ports='**' cost='19'/></config>"));
 }
+

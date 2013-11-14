@@ -1,18 +1,19 @@
+//
 // Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 // Author: Benjamin Seregi
 //
 
@@ -36,11 +37,14 @@
 #define EV_DEBUG EV_DISABLED
 #define EV_INFO EV_ENABLED
 
+/**
+ * Computes L2 configuration of the network. See the NED definition for details.
+ */
 class L2NetworkConfigurator : public cSimpleModule
 {
   public:
-        L2NetworkConfigurator() { rootNode = NULL; }
-        typedef IEEE8021DInterfaceData::PortInfo PortInfo;
+    L2NetworkConfigurator() { rootNode = NULL; }
+    typedef IEEE8021DInterfaceData::PortInfo PortInfo;
   protected:
     class InterfaceInfo;
 
@@ -123,7 +127,6 @@ class L2NetworkConfigurator : public cSimpleModule
     /**
      * Computes the Layer 2 network configuration for all nodes in the network.
      * The result of the computation is only stored in the network configurator.
-     *
      */
     virtual void computeConfiguration();
 
@@ -132,8 +135,8 @@ class L2NetworkConfigurator : public cSimpleModule
     void ensureConfigurationComputed(L2Topology& topology);
     virtual Topology::LinkOut * findLinkOut(Node * node, int gateId);
     void configureInterface(InterfaceInfo * interfaceInfo);
-    public:
 
+public:
     /**
      * Reads interface elements from the configuration file and stores result.
      */
@@ -143,7 +146,6 @@ class L2NetworkConfigurator : public cSimpleModule
      * Configures the provided interface based on the current network configuration.
      */
     virtual void configureInterface(InterfaceEntry * interfaceEntry);
-
 };
 
 #endif

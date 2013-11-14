@@ -1,39 +1,46 @@
+//
 // Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 // Author: Benjamin Martin Seregi
+//
 
-#ifndef STPTESTER_H_
-#define STPTESTER_H_
+#ifndef INET_STPTESTER_H_
+#define INET_STPTESTER_H_
 
+#include <map>
 #include "INETDefs.h"
 #include "Topology.h"
 #include "STP.h"
-#include <map>
 
+/**
+ * Utility class for testing the STP protocol. First, it extracts the network
+ * topology (network nodes marked with the @node NED property), regarding the
+ * enabled (state=FORWARDING) links only. Then it analyzes the resulting graph
+ * for connectedness and loop free-ness, using a modified depth-first search
+ * with cycle detection. The results can be obtained with getter methods.
+ */
 class STPTester
 {
     public:
-
         enum Color
         {
             WHITE, GRAY, BLACK
         };
 
     private:
-
         bool loop;
         int numOfVisitedNodes;
         int numOfNodes;
@@ -43,12 +50,15 @@ class STPTester
 
         void dfsVisit(Topology::Node * node);
         bool isForwarding(Topology::Node * node, unsigned int portNum);
+
     public:
+        // Constructor; includes network topology extraction
         STPTester();
 
-        // Modified depth-first search with cycle detection
+        // Analyzes the network graph
         void depthFirstSearch();
 
+        // Getters for returning the result after a call to depthFirstSearch()
         bool isLoopFreeGraph();
         bool isConnectedGraph();
         bool isTreeGraph();
@@ -57,4 +67,4 @@ class STPTester
         int getNumOfVisitedNodes();
 };
 
-#endif /* STPTESTER_H_ */
+#endif

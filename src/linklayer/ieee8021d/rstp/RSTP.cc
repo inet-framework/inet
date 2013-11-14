@@ -23,8 +23,7 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
-Define_Module(RSTP)
-;
+Define_Module(RSTP);
 
 RSTP::RSTP()
 {
@@ -97,7 +96,7 @@ void RSTP::handleMessage(cMessage *msg)
     // it can receive BPDU or self messages
     if (!isOperational)
     {
-        EV<< "Message '" << msg << "' arrived when module status is down, dropped it\n";
+        EV<< "Message '" << msg << "' arrived when module status is down, dropped\n";
         delete msg;
         return;
     }

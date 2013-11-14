@@ -1,3 +1,4 @@
+//
 // Copyright (C) 2013 OpenSim Ltd.
 // Copyright (C) ANSA Team
 //
@@ -15,9 +16,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 // Authors: ANSA Team, Benjamin Martin Seregi
+//
 
-#ifndef SPANNINGTREE_H_
-#define SPANNINGTREE_H_
+#ifndef INET_SPANNINGTREE_H_
+#define INET_SPANNINGTREE_H_
 
 #include "INETDefs.h"
 #include "MACAddress.h"
@@ -28,6 +30,9 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
+/**
+ * Implements the Spanning Tree Protocol. See the NED file for details.
+ */
 class STP : public cSimpleModule, public ILifecycle
 {
     public:

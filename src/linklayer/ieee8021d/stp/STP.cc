@@ -1,3 +1,4 @@
+//
 // Copyright (C) 2013 OpenSim Ltd.
 // Copyright (C) ANSA Team
 //
@@ -15,6 +16,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 // Authors: ANSA Team, Benjamin Martin Seregi
+//
 
 #include "EtherFrame.h"
 #include "STP.h"
@@ -889,4 +891,3 @@ bool STP::handleOperationStage(LifecycleOperation * operation, int stage, IDoneC
     }
     return true;
 }
-
