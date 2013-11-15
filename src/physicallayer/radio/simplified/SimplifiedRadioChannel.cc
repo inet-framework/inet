@@ -261,6 +261,7 @@ void SimplifiedRadioChannel::addOngoingTransmission(RadioRef h, SimplifiedRadioF
     // register ongoing transmission
     take(frame);
     frame->setTimestamp(); // store time of transmission start
+    frame->setSentFrom(h->radioModule, -1, simTime());
     transmissions[frame->getChannelNumber()].push_back(frame);
 }
 

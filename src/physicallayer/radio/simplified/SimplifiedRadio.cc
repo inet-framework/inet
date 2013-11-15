@@ -716,6 +716,9 @@ void SimplifiedRadio::setRadioChannel(int channel)
     for (ISimplifiedRadioChannel::TransmissionList::const_iterator it = tlAux.begin(); it != tlAux.end(); ++it)
     {
         SimplifiedRadioFrame *radioFrame = check_and_cast<SimplifiedRadioFrame *> (*it);
+        if (radioFrame->getSenderModule() == this)
+            continue;
+
         // time for the message to reach us
         double distance = getRadioPosition().distance(radioFrame->getSenderPos());
         simtime_t propagationDelay = distance / 3.0E+8;
@@ -790,8 +793,7 @@ void SimplifiedRadio::setRadioMode(RadioMode newRadioMode)
         }
         else if (newRadioMode == RADIO_MODE_TRANSMITTER)
         {
-            // KLUDGE: temporarily uncomment the correct behavior, because it would change fingerprints
-            // disconnectReceiver();
+            disconnectReceiver();
             connectTransmitter();
         }
         else
@@ -992,8 +994,9 @@ void SimplifiedRadio::connectReceiver()
     for (ISimplifiedRadioChannel::TransmissionList::const_iterator it = tlAux.begin(); it != tlAux.end(); ++it)
     {
         SimplifiedRadioFrame *radioFrame = check_and_cast<SimplifiedRadioFrame *> (*it);
-        // KLUDGE: to avoid getting our own transmissions
-        continue;
+        if (radioFrame->getSenderModule() == this)
+            continue;
+
         // time for the message to reach us
         double distance = getRadioPosition().distance(radioFrame->getSenderPos());
         simtime_t propagationDelay = distance / 3.0E+8;
