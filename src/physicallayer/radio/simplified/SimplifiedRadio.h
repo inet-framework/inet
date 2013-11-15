@@ -135,8 +135,6 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
     /*
      * Routines to connect or disconnect the transmission and reception  of packets
      */
-    virtual void connectTransmitter() { transmitterConnected = true; }
-    virtual void disconnectTransmitter() { transmitterConnected = false; }
     virtual void connectReceiver();
     virtual void disconnectReceiver();
 
@@ -245,12 +243,6 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
      *  minimum signal necessary to change the channel state to RECV
      */
     double receptionThreshold;
-
-    /*
-     * this variable is used to disconnect the possibility of sent packets to the radio channel
-     */
-    bool transmitterConnected;
-    bool receiverConnected;
 
     // if true draw coverage circles
     bool drawCoverage;

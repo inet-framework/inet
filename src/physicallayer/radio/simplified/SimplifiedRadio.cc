@@ -40,8 +40,6 @@ SimplifiedRadio::SimplifiedRadio()
     obstacles = NULL;
     radioModel = NULL;
     receptionModel = NULL;
-    transmitterConnected = true;
-    receiverConnected = true;
     updateString = NULL;
     noiseGenerator = NULL;
 }
@@ -259,7 +257,7 @@ void SimplifiedRadio::handleMessage(cMessage *msg)
     }
     else if (processRadioFrame(check_and_cast<SimplifiedRadioFrame*>(msg)))
     {
-        if (receiverConnected)
+        if (radioMode == IRadio::RADIO_MODE_RECEIVER)
         {
             SimplifiedRadioFrame *radioFrame = (SimplifiedRadioFrame *) msg;
             handleLowerMsgStart(radioFrame);
@@ -348,7 +346,7 @@ void SimplifiedRadio::sendUp(SimplifiedRadioFrame *radioFrame)
 void SimplifiedRadio::sendDown(SimplifiedRadioFrame *radioFrame)
 {
     updateRadioChannelState();
-    if (transmitterConnected)
+    if (radioMode == IRadio::RADIO_MODE_TRANSMITTER)
         sendToChannel(radioFrame);
     else
         delete radioFrame;
@@ -782,23 +780,13 @@ void SimplifiedRadio::setRadioMode(RadioMode newRadioMode)
     if (radioMode != newRadioMode)
     {
         if (newRadioMode == RADIO_MODE_SLEEP || newRadioMode == RADIO_MODE_OFF)
-        {
             disconnectReceiver();
-            disconnectTransmitter();
-        }
         else if (newRadioMode == RADIO_MODE_RECEIVER)
-        {
             connectReceiver();
-            disconnectTransmitter();
-        }
         else if (newRadioMode == RADIO_MODE_TRANSMITTER)
-        {
             disconnectReceiver();
-            connectTransmitter();
-        }
         else
             throw cRuntimeError("Unknown radio mode");
-
         EV << "Changing radio mode from " << getRadioModeName(radioMode) << " to " << getRadioModeName(newRadioMode) << ".\n";
         radioMode = newRadioMode;
         emit(radioModeChangedSignal, newRadioMode);
@@ -957,7 +945,6 @@ void SimplifiedRadio::receiveSignal(cComponent *source, simsignal_t signalID, cO
 
 void SimplifiedRadio::disconnectReceiver()
 {
-    receiverConnected = false;
     if (getRadioChannelState() == RADIO_CHANNEL_STATE_TRANSMITTING)
         error("changing channel while transmitting is not allowed");
 
@@ -978,7 +965,6 @@ void SimplifiedRadio::disconnectReceiver()
 
 void SimplifiedRadio::connectReceiver()
 {
-    receiverConnected = true;
     cc->setRadioChannel(myRadioRef, radioChannel);
     cModule *myHost = getContainingNode(this);
 
