@@ -63,11 +63,8 @@ simple SimplifiedRadio extends RadioBase
         xml SensitivityTable = default(xml("<NoSensitivityTable> </NoSensitivityTable>"));
 
         @class(SimplifiedRadio);
-        @signal[NF_RADIOSTATE_CHANGED](type=long);
         @signal[bitrate](type="double"; unit=bps); // current transmit bitrate
-        @signal[radioState](type=long);  // enum
         @signal[lossRate](type="double"); // 0..1; percentage of frames received incorrectly in the last period
         @statistic[bitrate](title="tx bitrate"; record=min,max,timeavg,vector; interpolationmode=sample-hold; unit=bps);
-        @statistic[radioState](title="radio state (enum)"; record=count,vector; interpolationmode=sample-hold);
         @statistic[lossRate](title="packet loss rate"; record=min,max,timeavg,vector; interpolationmode=backward-sample-hold);
 }

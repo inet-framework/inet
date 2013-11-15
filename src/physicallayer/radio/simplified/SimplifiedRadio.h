@@ -20,7 +20,6 @@
 #define __INET_SIMPLIFIEDRADIO_H
 
 #include "SimplifiedRadioChannelAccess.h"
-#include "RadioState.h"
 #include "SimplifiedRadioFrame.h"
 #include "IRadioModel.h"
 #include "IReceptionModel.h"
@@ -111,9 +110,6 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
 
     /** Encapsulates a MAC frame into a radio frame */
     virtual SimplifiedRadioFrame *encapsulatePacket(cPacket *msg);
-
-    /** Sets the radio state, and also fires change notification */
-    virtual void setRadioState(RadioState::State newState);
 
     /** Updates the SNR information of the relevant SimplifiedRadioFrame */
     virtual void addNewSnr();
@@ -217,9 +213,6 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
      */
     RecvBuff recvBuff;
 
-    /** State: the current RadioState of the NIC; includes channel number */
-    RadioState::State rs;
-
     /** State: if not -1, we have to switch to that channel once we finished transmitting */
     int newChannel;
 
@@ -265,7 +258,6 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
 
     // statistics:
     static simsignal_t bitrateSignal;
-    static simsignal_t radioStateSignal; //enum
     static simsignal_t lossRateSignal;
 };
 
