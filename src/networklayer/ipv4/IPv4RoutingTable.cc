@@ -198,8 +198,6 @@ void IPv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
     }
     else if (signalID==NF_INTERFACE_IPv4CONFIG_CHANGED)
     {
-        // if anything IPv4-related changes in the interfaces, interface netmask
-        // based routes have to be re-built.
         updateNetmaskRoutes();
     }
 }
@@ -837,46 +835,84 @@ void IPv4RoutingTable::multicastRouteChanged(IPv4MulticastRoute *entry, int fiel
 
 void IPv4RoutingTable::updateNetmaskRoutes()
 {
-    // first, delete all routes with src=IFACENETMASK
-    for (unsigned int k=0; k<routes.size(); k++)
+    bool changed = false;
+
+    typedef std::map<InterfaceEntry*, IPv4Route*> NetmaskRouteMap;
+    NetmaskRouteMap netmaskRouteMap;
+
+    // first, find all routes with src=IFACENETMASK
+    for (RouteVector::iterator it = routes.begin(); it != routes.end(); ++it)
     {
-        if (routes[k]->getSourceType()==IRoute::IFACENETMASK)
-        {
-            std::vector<IPv4Route *>::iterator it = routes.begin()+(k--);  // '--' is necessary because indices shift down
-            IPv4Route *route = *it;
-            routes.erase(it);
-            ASSERT(route->getRoutingTable() == this); // still filled in, for the listeners' benefit
-            emit(NF_ROUTE_DELETED, route);
-            delete route;
-        }
+        IPv4Route *route = *it;
+        if (route->getSourceType()==IRoute::IFACENETMASK)
+            netmaskRouteMap[route->getInterface()] = route;
     }
 
-    // then re-add them, according to actual interface configuration
+    // according to actual interface configuration
     // TODO: say there's a node somewhere in the network that belongs to the interface's subnet
     // TODO: and it is not on the same link, and the gateway does not use proxy ARP, how will packets reach that node?
     for (int i=0; i<ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
+        NetmaskRouteMap::iterator nmIt = netmaskRouteMap.find(ie);
+        IPv4Route *oldRoute = (nmIt != netmaskRouteMap.end()) ? nmIt->second : NULL;
+        IPv4Route *newRoute = NULL;
         if (ie->ipv4Data() && ie->ipv4Data()->getNetmask()!=IPv4Address::ALLONES_ADDRESS)
         {
-            IPv4Route *route = createNewRoute();
-            route->setSourceType(IRoute::IFACENETMASK);
-            route->setSource(ie);
-            route->setDestination(ie->ipv4Data()->getIPAddress().doAnd(ie->ipv4Data()->getNetmask()));
-            route->setNetmask(ie->ipv4Data()->getNetmask());
-            route->setGateway(IPv4Address());
-            route->setAdminDist(IPv4Route::dDirectlyConnected);
-            route->setMetric(ie->ipv4Data()->getMetric());
-            route->setInterface(ie);
-            route->setRoutingTable(this);
-            RouteVector::iterator pos = upper_bound(routes.begin(), routes.end(), route, routeLessThan);
-            routes.insert(pos, route);
-            emit(NF_ROUTE_ADDED, route);
+            newRoute = createNewRoute();
+            newRoute->setSourceType(IRoute::IFACENETMASK);
+            newRoute->setInterface(ie);
+            newRoute->setSource(ie);
+            newRoute->setDestination(ie->ipv4Data()->getIPAddress().doAnd(ie->ipv4Data()->getNetmask()));
+            newRoute->setNetmask(ie->ipv4Data()->getNetmask());
+            newRoute->setGateway(IPv4Address());
+            newRoute->setAdminDist(IPv4Route::dDirectlyConnected);
+            newRoute->setMetric(ie->ipv4Data()->getMetric());
+            newRoute->setRoutingTable(this);
         }
+
+        if (oldRoute && newRoute && (*oldRoute == *newRoute))
+        {
+            delete newRoute;
+        }
+        else
+        {
+            if (oldRoute)
+            {
+                internalRemoveRoute(oldRoute);
+                emit(NF_ROUTE_DELETED, oldRoute);
+                oldRoute->setRoutingTable(NULL);
+                delete oldRoute;
+                changed = true;
+            }
+            if (newRoute)
+            {
+                RouteVector::iterator pos = lower_bound(routes.begin(), routes.end(), newRoute, routeLessThan);
+                routes.insert(pos, newRoute);
+                emit(NF_ROUTE_ADDED, newRoute);
+                changed = true;
+            }
+        }
+
+        if (oldRoute)
+            netmaskRouteMap.erase(nmIt);
     }
 
-    invalidateCache();
-    updateDisplayString();
+    for (NetmaskRouteMap::iterator nmIt = netmaskRouteMap.begin(); nmIt != netmaskRouteMap.end(); ++nmIt)
+    {
+        IPv4Route *oldRoute = nmIt->second;
+        internalRemoveRoute(oldRoute);
+        emit(NF_ROUTE_DELETED, oldRoute);
+        oldRoute->setRoutingTable(NULL);
+        delete oldRoute;
+        changed = true;
+    }
+
+    if (changed)
+    {
+        invalidateCache();
+        updateDisplayString();
+    }
 }
 
 bool IPv4RoutingTable::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
