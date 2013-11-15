@@ -179,8 +179,8 @@ void IPv4RoutingTable::receiveSignal(cComponent *source, simsignal_t signalID, c
 
     if (signalID==NF_INTERFACE_CREATED)
     {
-        // add netmask route for the new interface
-        updateNetmaskRoutes();
+        InterfaceEntry *entry = check_and_cast<InterfaceEntry*>(obj);
+        createInterfaceNetmaskRoute(entry);
     }
     else if (signalID==NF_INTERFACE_DELETED)
     {
@@ -255,6 +255,29 @@ void IPv4RoutingTable::deleteInterfaceRoutes(const InterfaceEntry *entry)
 
     if (changed)
     {
+        invalidateCache();
+        updateDisplayString();
+    }
+}
+
+void IPv4RoutingTable::createInterfaceNetmaskRoute(const InterfaceEntry *ie)
+{
+    if (ie->ipv4Data() && ie->ipv4Data()->getNetmask()!=IPv4Address::ALLONES_ADDRESS)
+    {
+        IPv4Route *route = createNewRoute();
+        route->setSourceType(IRoute::IFACENETMASK);
+        route->setSource(const_cast<InterfaceEntry *>(ie));
+        route->setDestination(ie->ipv4Data()->getIPAddress().doAnd(ie->ipv4Data()->getNetmask()));
+        route->setNetmask(ie->ipv4Data()->getNetmask());
+        route->setGateway(IPv4Address());
+        route->setAdminDist(IPv4Route::dDirectlyConnected);
+        route->setMetric(ie->ipv4Data()->getMetric());
+        route->setInterface(const_cast<InterfaceEntry *>(ie));
+        route->setRoutingTable(this);
+        RouteVector::iterator pos = upper_bound(routes.begin(), routes.end(), route, routeLessThan);
+        routes.insert(pos, route);
+        emit(NF_ROUTE_ADDED, route);
+
         invalidateCache();
         updateDisplayString();
     }
