@@ -130,7 +130,7 @@ class INET_API IPv4Address
     /**
      * IPv4 address bytes: "i0.i1.i2.i3" format
      */
-    IPv4Address(int i0, int i1, int i2, int i3) {set(i0, i1, i2, i3);}
+    IPv4Address(uint8_t i0, uint8_t i1, uint8_t i2, uint8_t i3) {set(i0, i1, i2, i3);}
 
     /**
      * IPv4 address given as text: "192.66.86.1"
@@ -155,7 +155,7 @@ class INET_API IPv4Address
     /**
      * IPv4 address bytes: "i0.i1.i2.i3" format
      */
-    void set(int i0, int i1, int i2, int i3);
+    void set(uint8_t i0, uint8_t i1, uint8_t i2, uint8_t i3) { addr = ((uint32_t)(i0) << 24) | ((uint32_t)(i1) << 16) | ((uint32_t)(i2) << 8) | (uint32_t)(i3); }
 
     /**
      * IPv4 address given as text: "192.66.86.1"

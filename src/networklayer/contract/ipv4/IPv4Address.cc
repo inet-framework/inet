@@ -35,25 +35,20 @@ static const int IPADDRESS_STRING_SIZE = 20;
 
 // predefined addresses
 const IPv4Address IPv4Address::UNSPECIFIED_ADDRESS;
-const IPv4Address IPv4Address::LOOPBACK_ADDRESS("127.0.0.1");
-const IPv4Address IPv4Address::LOOPBACK_NETMASK("255.0.0.0");
-const IPv4Address IPv4Address::ALLONES_ADDRESS("255.255.255.255");
+const IPv4Address IPv4Address::LOOPBACK_ADDRESS(127,0,0,1);
+const IPv4Address IPv4Address::LOOPBACK_NETMASK(255,0,0,0);
+const IPv4Address IPv4Address::ALLONES_ADDRESS(255,255,255,255);
 
-const IPv4Address IPv4Address::ALL_HOSTS_MCAST("224.0.0.1");
-const IPv4Address IPv4Address::ALL_ROUTERS_MCAST("224.0.0.2");
-const IPv4Address IPv4Address::ALL_DVMRP_ROUTERS_MCAST("224.0.0.4");
-const IPv4Address IPv4Address::ALL_OSPF_ROUTERS_MCAST("224.0.0.5");
-const IPv4Address IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST("224.0.0.6");
-const IPv4Address IPv4Address::ALL_IGMPV3_ROUTERS_MCAST("224.0.0.22");
+const IPv4Address IPv4Address::ALL_HOSTS_MCAST(224,0,0,1);
+const IPv4Address IPv4Address::ALL_ROUTERS_MCAST(224,0,0,2);
+const IPv4Address IPv4Address::ALL_DVMRP_ROUTERS_MCAST(224,0,0,4);
+const IPv4Address IPv4Address::ALL_OSPF_ROUTERS_MCAST(224,0,0,5);
+const IPv4Address IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST(224,0,0,6);
+const IPv4Address IPv4Address::ALL_IGMPV3_ROUTERS_MCAST(224,0,0,22);
 
-const IPv4Address IPv4Address::LL_MANET_ROUTERS("224.0.0.109");
+const IPv4Address IPv4Address::LL_MANET_ROUTERS(224,0,0,109);
 
-const IPv4Address IPv4Address::ALL_RIP_ROUTERS_MCAST("224.0.0.9");
-
-void IPv4Address::set(int i0, int i1, int i2, int i3)
-{
-    addr = (i0 << 24) | (i1 << 16) | (i2 << 8) | i3;
-}
+const IPv4Address IPv4Address::ALL_RIP_ROUTERS_MCAST(224,0,0,9);
 
 bool IPv4Address::parseIPAddress(const char *text, unsigned char tobytes[])
 {
