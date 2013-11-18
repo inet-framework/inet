@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer.ethernet.switch.relay;
+package inet.linklayer.ethernet.switch;
 
 import inet.linklayer.IMACRelayUnit;
 
@@ -21,13 +21,15 @@ import inet.linklayer.IMACRelayUnit;
 //
 // See: ~IMACRelayUnit
 //
-simple IEEE8021DRelay like IMACRelayUnit
+simple Ieee8021DRelay like IMACRelayUnit
 {
     parameters:
         @display("i=block/broadcast;bgb=425,114");
-        string interfaceTableName = default("interfaceTable"); // the absolute path to the InterfaceTable
+        string interfaceTablePath = default("^.interfaceTable"); // the absolute path to the InterfaceTable
+        string macTablePath = default("^.macTable"); // the absolute path to the MACAddressTable
     gates:
         input ifIn[];
         output ifOut[];
-        inout STPGate @loose;
+        input stpIn @loose;
+        output stpOut @loose;
 }

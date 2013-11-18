@@ -55,8 +55,9 @@ simple STP like ISpanningTree
         int priority = default(32768);
 
         // The absolute path to the InterfaceTable
-        string interfaceTableName = default("interfaceTable");
+        string interfaceTableName = default("^.interfaceTable");
         @display("i=block/network2");
     gates:
-        inout STPGate;
+        input relayIn;
+        output relayOut;
 }

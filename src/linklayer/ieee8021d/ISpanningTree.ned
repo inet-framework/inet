@@ -29,5 +29,6 @@ moduleinterface ISpanningTree
         double maxAge @unit("s");
         int priority;
     gates:
-        inout STPGate;
+        input relayIn;
+        output relayOut;
 }

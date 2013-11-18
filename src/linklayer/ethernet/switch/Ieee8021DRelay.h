@@ -26,7 +26,7 @@
 #include "NodeStatus.h"
 #include "IEEE8021DBPDU_m.h"
 
-class IEEE8021DRelay : public cSimpleModule, public ILifecycle
+class Ieee8021DRelay : public cSimpleModule, public ILifecycle
 {
     protected:
         MACAddress bridgeAddress;
@@ -71,7 +71,7 @@ class IEEE8021DRelay : public cSimpleModule, public ILifecycle
         bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
         // Gets port data from InterfaceTable
-        IEEE8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
+        Ieee8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
 
 };
 

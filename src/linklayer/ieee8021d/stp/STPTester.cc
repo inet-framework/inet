@@ -18,7 +18,7 @@
 //
 
 #include "STPTester.h"
-#include "IEEE8021DInterfaceData.h"
+#include "Ieee8021DInterfaceData.h"
 #include "NodeStatus.h"
 
 STPTester::STPTester()
@@ -122,7 +122,7 @@ bool STPTester::isForwarding(Topology::Node * node, unsigned int portNum)
 
     cGate * gate = node->getModule()->gate("ethg$o", portNum);
     InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
-    IEEE8021DInterfaceData * portData = gateIfEntry->ieee8021DData();
+    Ieee8021DInterfaceData * portData = gateIfEntry->ieee8021DData();
 
     // If portData does not exist, then it implies that
     // the node is not a switch

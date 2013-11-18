@@ -26,7 +26,7 @@
 #include "MACAddressTable.h"
 #include "IEEE8021DBPDU_m.h"
 #include "InterfaceTable.h"
-#include "IEEE8021DInterfaceData.h"
+#include "Ieee8021DInterfaceData.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
@@ -36,7 +36,7 @@
 class STP : public cSimpleModule, public ILifecycle
 {
     public:
-        typedef IEEE8021DInterfaceData::PortInfo PortInfo;
+        typedef Ieee8021DInterfaceData::PortInfo PortInfo;
 
     protected:
 
@@ -116,7 +116,7 @@ class STP : public cSimpleModule, public ILifecycle
          * Comparison of all IDs in IEEE8021DInterfaceData::PortInfo structure
          * Invokes: superiorID(), superiorPort()
          */
-        int superiorTPort(IEEE8021DInterfaceData * portA, IEEE8021DInterfaceData * portB);
+        int superiorTPort(Ieee8021DInterfaceData * portA, Ieee8021DInterfaceData * portB);
         int superiorID(unsigned int, MACAddress, unsigned int, MACAddress);
         int superiorPort(unsigned int, unsigned int, unsigned int, unsigned int);
 
@@ -162,12 +162,12 @@ class STP : public cSimpleModule, public ILifecycle
         /*
          * Get port data from the InterfaceTable
          */
-        IEEE8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
+        Ieee8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
 
     public:
-        friend inline std::ostream& operator<<(std::ostream& os, const IEEE8021DInterfaceData::PortRole r);
-        friend inline std::ostream& operator<<(std::ostream& os, const IEEE8021DInterfaceData::PortState s);
-        friend inline std::ostream& operator<<(std::ostream& os, IEEE8021DInterfaceData * p);
+        friend inline std::ostream& operator<<(std::ostream& os, const Ieee8021DInterfaceData::PortRole r);
+        friend inline std::ostream& operator<<(std::ostream& os, const Ieee8021DInterfaceData::PortState s);
+        friend inline std::ostream& operator<<(std::ostream& os, Ieee8021DInterfaceData * p);
         friend inline std::ostream& operator<<(std::ostream& os, STP i);
 
         // for lifecycle:
@@ -178,21 +178,21 @@ class STP : public cSimpleModule, public ILifecycle
         virtual void stop();
 };
 
-inline std::ostream& operator<<(std::ostream& os, const IEEE8021DInterfaceData::PortRole r)
+inline std::ostream& operator<<(std::ostream& os, const Ieee8021DInterfaceData::PortRole r)
 {
 
     switch (r)
     {
-        case IEEE8021DInterfaceData::NOTASSIGNED:
+        case Ieee8021DInterfaceData::NOTASSIGNED:
             os << "Unkn";
             break;
-        case IEEE8021DInterfaceData::ALTERNATE:
+        case Ieee8021DInterfaceData::ALTERNATE:
             os << "Altr";
             break;
-        case IEEE8021DInterfaceData::DESIGNATED:
+        case Ieee8021DInterfaceData::DESIGNATED:
             os << "Desg";
             break;
-        case IEEE8021DInterfaceData::ROOT:
+        case Ieee8021DInterfaceData::ROOT:
             os << "Root";
             break;
         default:
@@ -203,18 +203,18 @@ inline std::ostream& operator<<(std::ostream& os, const IEEE8021DInterfaceData::
     return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const IEEE8021DInterfaceData::PortState s)
+inline std::ostream& operator<<(std::ostream& os, const Ieee8021DInterfaceData::PortState s)
 {
 
     switch (s)
     {
-        case IEEE8021DInterfaceData::DISCARDING:
+        case Ieee8021DInterfaceData::DISCARDING:
             os << "DIS";
             break;
-        case IEEE8021DInterfaceData::LEARNING:
+        case Ieee8021DInterfaceData::LEARNING:
             os << "LRN";
             break;
-        case IEEE8021DInterfaceData::FORWARDING:
+        case Ieee8021DInterfaceData::FORWARDING:
             os << "FWD";
             break;
         default:
@@ -225,7 +225,7 @@ inline std::ostream& operator<<(std::ostream& os, const IEEE8021DInterfaceData::
     return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, IEEE8021DInterfaceData * p)
+inline std::ostream& operator<<(std::ostream& os, Ieee8021DInterfaceData * p)
 {
     os << "[";
     if (p->isLearning())

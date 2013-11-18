@@ -15,13 +15,13 @@
 //
 // Author: Benjamin Martin Seregi
 
-#include "IEEE8021DRelay.h"
+#include "Ieee8021DRelay.h"
 #include "InterfaceEntry.h"
-#include "IEEE8021DInterfaceData.h"
+#include "Ieee8021DInterfaceData.h"
 
-Define_Module(IEEE8021DRelay);
+Define_Module(Ieee8021DRelay);
 
-void IEEE8021DRelay::initialize(int stage)
+void Ieee8021DRelay::initialize(int stage)
 {
 
     if (stage == 0)
@@ -36,20 +36,18 @@ void IEEE8021DRelay::initialize(int stage)
         NodeStatus * nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
-        cModule * tmpMacTable = getParentModule()->getSubmodule("macTable");
-        macTable = check_and_cast<MACAddressTable *>(tmpMacTable);
-
-        ifTable = check_and_cast<IInterfaceTable*>(this->getParentModule()->getSubmodule(par("interfaceTableName")));
+        macTable = check_and_cast<MACAddressTable *>(getModuleByPath(par("macTablePath")));
+        ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
         InterfaceEntry * ifEntry = ifTable->getInterface(0);
         bridgeAddress = ifEntry->getMacAddress();
 
-        isStpAware = gate("STPGate$i")->isConnected(); // if the STPGate is not connected then the switch is STP/RSTP unaware
+        isStpAware = gate("stpIn")->isConnected(); // if the stpIn is not connected then the switch is STP/RSTP unaware
 
         WATCH(bridgeAddress);
     }
 }
 
-void IEEE8021DRelay::handleMessage(cMessage * msg)
+void Ieee8021DRelay::handleMessage(cMessage * msg)
 {
     if (!isOperational)
     {
@@ -61,7 +59,7 @@ void IEEE8021DRelay::handleMessage(cMessage * msg)
     if (!msg->isSelfMessage())
     {
         // messages from STP process
-        if (strcmp(msg->getArrivalGate()->getName(), "STPGate$i") == 0)
+        if (strcmp(msg->getArrivalGate()->getName(), "stpIn") == 0)
         {
             EV_INFO << "Received " << msg << " from STP/RSTP module." << endl;
             BPDU * bpdu = check_and_cast<BPDU* >(msg);
@@ -80,7 +78,7 @@ void IEEE8021DRelay::handleMessage(cMessage * msg)
 
 }
 
-void IEEE8021DRelay::broadcast(EtherFrame * frame)
+void Ieee8021DRelay::broadcast(EtherFrame * frame)
 {
     EV_DETAIL << "Broadcast frame " << frame << endl;
 
@@ -93,10 +91,10 @@ void IEEE8021DRelay::broadcast(EtherFrame * frame)
     delete frame;
 }
 
-void IEEE8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
+void Ieee8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
 {
     int arrivalGate = frame->getArrivalGate()->getIndex();
-    IEEE8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
+    Ieee8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
     learn(frame);
     // broadcast address
     if (frame->getDest().isBroadcast())
@@ -105,7 +103,7 @@ void IEEE8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
         return;
     }
     // BPDU Handling
-    if ((frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && port->getRole() != IEEE8021DInterfaceData::DISABLED)
+    if ((frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && port->getRole() != Ieee8021DInterfaceData::DISABLED)
     {
         EV_DETAIL << "Deliver BPDU to the STP/RSTP module" << endl;
         deliverBPDU(frame); // deliver to the STP/RSTP module
@@ -140,9 +138,9 @@ void IEEE8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
     }
 }
 
-void IEEE8021DRelay::dispatch(EtherFrame * frame, unsigned int portNum)
+void Ieee8021DRelay::dispatch(EtherFrame * frame, unsigned int portNum)
 {
-    IEEE8021DInterfaceData * port = getPortInterfaceData(portNum);
+    Ieee8021DInterfaceData * port = getPortInterfaceData(portNum);
 
     if (portNum >= portCount)
         return;
@@ -155,16 +153,16 @@ void IEEE8021DRelay::dispatch(EtherFrame * frame, unsigned int portNum)
     return;
 }
 
-void IEEE8021DRelay::learn(EtherFrame * frame)
+void Ieee8021DRelay::learn(EtherFrame * frame)
 {
     int arrivalGate = frame->getArrivalGate()->getIndex();
-    IEEE8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
+    Ieee8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
 
     if (!isStpAware || port->isLearning())
         macTable->updateTableWithAddress(arrivalGate, frame->getSrc());
 }
 
-void IEEE8021DRelay::dispatchBPDU(BPDU * bpdu)
+void Ieee8021DRelay::dispatchBPDU(BPDU * bpdu)
 {
     Ieee802Ctrl * controlInfo = dynamic_cast<Ieee802Ctrl *>(bpdu->removeControlInfo());
     unsigned int portNum = controlInfo->getInterfaceId();
@@ -192,7 +190,7 @@ void IEEE8021DRelay::dispatchBPDU(BPDU * bpdu)
     send(frame, "ifOut", portNum);
 }
 
-void IEEE8021DRelay::deliverBPDU(EtherFrame * frame)
+void Ieee8021DRelay::deliverBPDU(EtherFrame * frame)
 {
     BPDU * bpdu = check_and_cast<BPDU *>(frame->decapsulate());
 
@@ -206,16 +204,16 @@ void IEEE8021DRelay::deliverBPDU(EtherFrame * frame)
     delete frame; // we have the BPDU packet, so delete the frame
 
     EV_INFO << "Sending BPDU frame " << bpdu << " to the STP/RSTP module" << endl;
-    send(bpdu, "STPGate$o");
+    send(bpdu, "stpOut");
 }
 
-IEEE8021DInterfaceData * IEEE8021DRelay::getPortInterfaceData(unsigned int portNum)
+Ieee8021DInterfaceData * Ieee8021DRelay::getPortInterfaceData(unsigned int portNum)
 {
     if (isStpAware)
     {
         cGate * gate = this->getParentModule()->gate("ethg$o", portNum);
         InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
-        IEEE8021DInterfaceData * portData = gateIfEntry->ieee8021DData();
+        Ieee8021DInterfaceData * portData = gateIfEntry->ieee8021DData();
 
         if (!portData)
             throw cRuntimeError("IEEE8021DInterfaceData not found for port = %d",portNum);
@@ -225,19 +223,19 @@ IEEE8021DInterfaceData * IEEE8021DRelay::getPortInterfaceData(unsigned int portN
     return NULL;
 }
 
-void IEEE8021DRelay::start()
+void Ieee8021DRelay::start()
 {
     macTable->clearTable();
     isOperational = true;
 }
 
-void IEEE8021DRelay::stop()
+void Ieee8021DRelay::stop()
 {
     macTable->clearTable();
     isOperational = false;
 }
 
-bool IEEE8021DRelay::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ieee8021DRelay::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 

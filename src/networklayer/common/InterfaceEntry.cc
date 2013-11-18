@@ -230,7 +230,7 @@ void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
     configChanged();
 }
 
-void InterfaceEntry::setIEEE8021DInterfaceData(IEEE8021DInterfaceData *p)
+void InterfaceEntry::setIEEE8021DInterfaceData(Ieee8021DInterfaceData *p)
 {
     if (ieee8021dData && ((InterfaceProtocolData *)ieee8021dData)->ownerp == this) // Khmm...
         delete (InterfaceProtocolData *)ieee8021dData; // Khmm...

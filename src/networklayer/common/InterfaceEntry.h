@@ -36,7 +36,7 @@ class IPv4InterfaceData;
 class IPv6InterfaceData;
 class TRILLInterfaceData;
 class ISISInterfaceData;
-class IEEE8021DInterfaceData;
+class Ieee8021DInterfaceData;
 
 class INET_API MacEstimateCostProcess
 {
@@ -105,7 +105,7 @@ class INET_API InterfaceEntry : public cNamedObject
     IPv6InterfaceData *ipv6data;   ///< IPv6-specific interface info (IPv6 addresses, etc)
     ISISInterfaceData *isisdata; ///< ISIS-specific interface info
     TRILLInterfaceData *trilldata; ///< TRILL-specific interface info
-    IEEE8021DInterfaceData * ieee8021dData;
+    Ieee8021DInterfaceData * ieee8021dData;
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
 
   private:
@@ -188,7 +188,7 @@ class INET_API InterfaceEntry : public cNamedObject
     IPv6InterfaceData *ipv6Data() const  {return ipv6data;}
     TRILLInterfaceData *trillData() const {return trilldata;}
     ISISInterfaceData *isisData() const {return isisdata;}
-    IEEE8021DInterfaceData *ieee8021DData() const {return ieee8021dData;}
+    Ieee8021DInterfaceData *ieee8021DData() const {return ieee8021dData;}
     //@}
 
     /** @name Installing protocol-specific interface data */
@@ -197,7 +197,7 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual void setIPv6Data(IPv6InterfaceData *p);
     virtual void setTRILLInterfaceData(TRILLInterfaceData *p);
     virtual void setISISInterfaceData(ISISInterfaceData *p);
-    virtual void setIEEE8021DInterfaceData(IEEE8021DInterfaceData *p);
+    virtual void setIEEE8021DInterfaceData(Ieee8021DInterfaceData *p);
     //@}
 
     /** @name access to the cost process estimation  */

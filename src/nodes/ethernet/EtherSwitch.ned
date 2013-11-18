@@ -47,7 +47,7 @@ module EtherSwitch
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string spanningTreeProtocol = default("");
-        string relayUnitType = default("IEEE8021DRelay"); // type of the ~IMACRelayUnit;
+        string relayUnitType = default("Ieee8021DRelay"); // type of the ~IMACRelayUnit;
         eth[*].encapType = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
         eth[*].macType = macType;
@@ -93,6 +93,7 @@ module EtherSwitch
         }
 
         if spanningTreeProtocol != "" {
-            stp.STPGate <--> relayUnit.STPGate;
+            stp.relayIn <-- relayUnit.stpOut;
+            stp.relayOut --> relayUnit.stpIn;
         }
 }

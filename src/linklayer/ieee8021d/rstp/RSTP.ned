@@ -53,5 +53,6 @@ simple RSTP like ISpanningTree
         string macTableName = default("macTable");              // module path to the MACAddressTable module
         @display("i=block/network2");
     gates:
-        inout STPGate @labels(BPDU);                        // to the relay
+        input relayIn;
+        output relayOut;
 }

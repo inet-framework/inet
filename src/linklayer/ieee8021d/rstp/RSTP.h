@@ -26,7 +26,7 @@
 #include "EtherFrame.h"
 #include "MACAddressTable.h"
 #include "InterfaceTable.h"
-#include "IEEE8021DInterfaceData.h"
+#include "Ieee8021DInterfaceData.h"
 
 /**
  * Implements the Rapid Spanning Tree Protocol. See the NED file for details.
@@ -77,7 +77,7 @@ protected:
     virtual void start();
     virtual void stop();
 
-    IEEE8021DInterfaceData *getPortInterfaceData(unsigned int portNum);
+    Ieee8021DInterfaceData *getPortInterfaceData(unsigned int portNum);
 
     /**
      * @brief initialize RSTP dynamic information
