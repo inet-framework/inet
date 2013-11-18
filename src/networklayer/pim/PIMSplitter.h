@@ -56,7 +56,7 @@
  * PIM module according to configuration saved in PimInterfaceTable. Splitter also manages
  * PimNeighborTable.
  */
-class PimSplitter : public cSimpleModule, protected INotifiable
+class PIMSplitter : public cSimpleModule, protected INotifiable
 {
 	private:
 		AnsaRoutingTable           	*rt;           	/**< Pointer to routing table. */
@@ -87,7 +87,7 @@ class PimSplitter : public cSimpleModule, protected INotifiable
 		virtual void initialize(int stage);
 
 	public:
-		PimSplitter(){};
+		PIMSplitter(){};
 };
 
 

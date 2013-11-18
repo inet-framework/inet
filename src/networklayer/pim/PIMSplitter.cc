@@ -23,11 +23,11 @@
  */
 
 #include "IPv4Datagram.h"
-#include "PimSplitter.h"
+#include "PIMSplitter.h"
 
 using namespace std;
 
-Define_Module(PimSplitter);
+Define_Module(PIMSplitter);
 
 
 /**
@@ -39,7 +39,7 @@ Define_Module(PimSplitter);
  * @return Return PIMHello message, which is ready to be sent.
  * @see PIMHello
  */
-PIMHello* PimSplitter::createHelloPkt(int iftID)
+PIMHello* PIMSplitter::createHelloPkt(int iftID)
 {
 	PIMHello *msg = new PIMHello();
 	msg->setName("PIMHello");
@@ -65,7 +65,7 @@ PIMHello* PimSplitter::createHelloPkt(int iftID)
  *
  * @see createHelloPkt()
  */
-void PimSplitter::sendHelloPkt()
+void PIMSplitter::sendHelloPkt()
 {
 	EV << "PIM::sendHelloPkt" << endl;
 	int intID;
@@ -99,7 +99,7 @@ void PimSplitter::sendHelloPkt()
  * @see PimNeighbor
  * @see PIMnlt
  */
-void PimSplitter::processHelloPkt(PIMPacket *msg)
+void PIMSplitter::processHelloPkt(PIMPacket *msg)
 {
     EV << "PIM::processHelloPkt" << endl;
 
@@ -150,7 +150,7 @@ void PimSplitter::processHelloPkt(PIMPacket *msg)
  * @see PimNeighbor
  * @see PIMnlt()
  */
-void PimSplitter::processNLTimer(PIMTimer *timer)
+void PIMSplitter::processNLTimer(PIMTimer *timer)
 {
 	EV << "PIM::processNLTimer"<< endl;
 	PIMnlt *nlt = check_and_cast <PIMnlt *> (timer);
@@ -180,7 +180,7 @@ void PimSplitter::processNLTimer(PIMTimer *timer)
  * @param pkt New coming PIM packet.
  * @see PimInterface
  */
-void PimSplitter::processPIMPkt(PIMPacket *pkt)
+void PIMSplitter::processPIMPkt(PIMPacket *pkt)
 {
 	EV << "PIM::processPIMPkt" << endl;
 
@@ -223,7 +223,7 @@ void PimSplitter::processPIMPkt(PIMPacket *pkt)
  * @see processHelloPkt()
  * @see processPIMPkt()
  */
-void PimSplitter::handleMessage(cMessage *msg)
+void PIMSplitter::handleMessage(cMessage *msg)
 {
 	EV << "PimSplitter::handleMessage" << endl;
 
@@ -274,7 +274,7 @@ void PimSplitter::handleMessage(cMessage *msg)
  * @see MulticastRoutingTable
  * @see PIMTimer
  */
-void PimSplitter::initialize(int stage)
+void PIMSplitter::initialize(int stage)
 {
 	// in stage 2 interfaces are registered
 	// in stage 3 table pimInterfaces is built
@@ -324,7 +324,7 @@ void PimSplitter::initialize(int stage)
  * @see newMulticast()
  * @see igmpChange()
  */
-void PimSplitter::receiveChangeNotification(int category, const cPolymorphic *details)
+void PIMSplitter::receiveChangeNotification(int category, const cPolymorphic *details)
 {
 	// ignore notifications during initialize
 	if (simulation.getContextType()==CTX_INITIALIZE)
@@ -366,7 +366,7 @@ void PimSplitter::receiveChangeNotification(int category, const cPolymorphic *de
  * @param interface Pointer to interface where IP address changed.
  * @see addRemoveAddr
  */
-void PimSplitter::igmpChange(InterfaceEntry *interface)
+void PIMSplitter::igmpChange(InterfaceEntry *interface)
 {
 	int intId = interface->getInterfaceId();
 	PimInterface * pimInt = pimIft->getInterfaceByIntID(intId);
@@ -459,7 +459,7 @@ void PimSplitter::igmpChange(InterfaceEntry *interface)
  * @param srcAddr Source IP address.
  * @see MulticastIPRoute
  */
-void PimSplitter::newMulticast(IPv4Address destAddr, IPv4Address srcAddr)
+void PIMSplitter::newMulticast(IPv4Address destAddr, IPv4Address srcAddr)
 {
 	EV << "PimSplitter::newMulticast - group: " << destAddr << ", source: " << srcAddr << endl;
 

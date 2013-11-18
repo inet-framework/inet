@@ -46,7 +46,7 @@
 /**
  * @brief Class implements PIM-DM (dense mode).
  */
-class pimDM : public cSimpleModule, protected INotifiable
+class PIMDM : public cSimpleModule, protected INotifiable
 {
 	private:
 		AnsaRoutingTable           	*rt;           	/**< Pointer to routing table. */

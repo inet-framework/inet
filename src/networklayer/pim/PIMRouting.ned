@@ -22,12 +22,12 @@
 
 package inet.networklayer.pim;
 
-import inet.networklayer.pim.modes.pimDM;
-import inet.networklayer.pim.modes.pimSM;
+import inet.networklayer.pim.modes.PIMDM;
+import inet.networklayer.pim.modes.PIMSM;
 import inet.networklayer.pim.tables.PimInterfaceTable;
 import inet.networklayer.pim.tables.PimNeighborTable;
 
-module pim
+module PIMRouting
 {
     parameters:
         // pim-mode
@@ -41,7 +41,7 @@ module pim
         output networkLayerOut;
 
     submodules:
-        pimSplitter: PimSplitter {
+        pimSplitter: PIMSplitter {
             parameters:
                 hostname = hostname;
                 configFile = configFile;
@@ -55,7 +55,7 @@ module pim
                 transportOut;
         }
 
-        pimDM: pimDM {
+        pimDM: PIMDM {
             parameters:
                 @display("p=165,142;q=queue;i=block/network2");
             gates:
@@ -63,7 +63,7 @@ module pim
                 spiltterOut;
         }
 
-        pimSM: pimSM {
+        pimSM: PIMSM {
             parameters:
                 @display("p=165,56;q=queue;i=block/network2");
             gates:

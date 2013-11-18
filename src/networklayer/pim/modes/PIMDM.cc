@@ -21,10 +21,10 @@
  */
 
 #include "IPv4Datagram.h"
-#include "pimDM.h"
+#include "PIMDM.h"
 
 
-Define_Module(pimDM);
+Define_Module(PIMDM);
 
 using namespace std;
 
@@ -42,7 +42,7 @@ typedef AnsaIPv4MulticastRoute::AnsaOutInterface AnsaOutInterface;
  * @param intId ID of outgoing interface.
  * @see PIMJoinPrune()
  */
-void pimDM::sendPimJoinPrune(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId)
+void PIMDM::sendPimJoinPrune(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId)
 {
 	EV << "pimDM::sendPimJoinPrune" << endl;
 	EV << "UpstreamNeighborAddress: " << nextHop << ", Source: " << src << ", Group: " << grp << ", IntId: " << intId << endl;
@@ -88,7 +88,7 @@ void pimDM::sendPimJoinPrune(IPv4Address nextHop, IPv4Address src, IPv4Address g
  * @param msg Pointer to PIMGraft packet.
  * @see PIMGraftAck()
  */
-void pimDM::sendPimGraftAck(PIMGraftAck *msg)
+void PIMDM::sendPimGraftAck(PIMGraftAck *msg)
 {
 	msg->setName("PIMGraftAck");
 	msg->setType(GraftAck);
@@ -119,7 +119,7 @@ void pimDM::sendPimGraftAck(PIMGraftAck *msg)
  * @param intId ID of outgoing interface.
  * @see PIMGraft()
  */
-void pimDM::sendPimGraft(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId)
+void PIMDM::sendPimGraft(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId)
 {
 	EV << "pimDM::sendPimGraft" << endl;
 	EV << "UpstreamNeighborAddress: " << nextHop << ", Source: " << src << ", Group: " << grp << ", IntId: " << intId << endl;
@@ -164,7 +164,7 @@ void pimDM::sendPimGraft(IPv4Address nextHop, IPv4Address src, IPv4Address grp, 
  * @param P Indicator of pruned outgoing interface. If interface is pruned it is set to 1, otherwise to 0.
  * @see PIMStateRefresh()
  */
-void pimDM::sendPimStateRefresh(IPv4Address originator, IPv4Address src, IPv4Address grp, int intId, bool P)
+void PIMDM::sendPimStateRefresh(IPv4Address originator, IPv4Address src, IPv4Address grp, int intId, bool P)
 {
 	EV << "pimDM::sendPimStateRefresh" << endl;
 
@@ -201,7 +201,7 @@ void pimDM::sendPimStateRefresh(IPv4Address originator, IPv4Address src, IPv4Add
  * @return Pointer to new Prune Timer.
  * @see PIMpt()
  */
-PIMpt* pimDM::createPruneTimer(IPv4Address source, IPv4Address group, int intId, int holdTime)
+PIMpt* PIMDM::createPruneTimer(IPv4Address source, IPv4Address group, int intId, int holdTime)
 {
 	PIMpt *timer = new PIMpt();
 	timer->setName("PimPruneTimer");
@@ -225,7 +225,7 @@ PIMpt* pimDM::createPruneTimer(IPv4Address source, IPv4Address group, int intId,
  * @return Pointer to new Graft Retry Timer.
  * @see PIMgrt()
  */
-PIMgrt* pimDM::createGraftRetryTimer(IPv4Address source, IPv4Address group)
+PIMgrt* PIMDM::createGraftRetryTimer(IPv4Address source, IPv4Address group)
 {
 	PIMgrt *timer = new PIMgrt();
 	timer->setName("PIMGraftRetryTimer");
@@ -247,7 +247,7 @@ PIMgrt* pimDM::createGraftRetryTimer(IPv4Address source, IPv4Address group)
  * @return Pointer to new Source Active Timer
  * @see PIMsat()
  */
-PIMsat* pimDM::createSourceActiveTimer(IPv4Address source, IPv4Address group)
+PIMsat* PIMDM::createSourceActiveTimer(IPv4Address source, IPv4Address group)
 {
 	PIMsat *timer = new PIMsat();
 	timer->setName("PIMSourceActiveTimer");
@@ -269,7 +269,7 @@ PIMsat* pimDM::createSourceActiveTimer(IPv4Address source, IPv4Address group)
  * @return Pointer to new Source Active Timer
  * @see PIMsrt()
  */
-PIMsrt* pimDM::createStateRefreshTimer(IPv4Address source, IPv4Address group)
+PIMsrt* PIMDM::createStateRefreshTimer(IPv4Address source, IPv4Address group)
 {
 	PIMsrt *timer = new PIMsrt();
 	timer->setName("PIMStateRefreshTimer");
@@ -298,7 +298,7 @@ PIMsrt* pimDM::createStateRefreshTimer(IPv4Address source, IPv4Address group)
  * @see PIMgrt()
  * @see processJoinPruneGraftPacket()
  */
-void pimDM::processGraftPacket(IPv4Address source, IPv4Address group, IPv4Address sender, int intId)
+void PIMDM::processGraftPacket(IPv4Address source, IPv4Address group, IPv4Address sender, int intId)
 {
 	EV << "pimDM::processGraftPacket" << endl;
 
@@ -360,7 +360,7 @@ void pimDM::processGraftPacket(IPv4Address source, IPv4Address group, IPv4Addres
  * @see processJoinPruneGraftPacket()
  * @see PIMgrt()
  */
-void pimDM::processGraftAckPacket(AnsaIPv4MulticastRoute *route)
+void PIMDM::processGraftAckPacket(AnsaIPv4MulticastRoute *route)
 {
 	PIMgrt *grt = route->getGrt();
 	if (grt != NULL)
@@ -387,7 +387,7 @@ void pimDM::processGraftAckPacket(AnsaIPv4MulticastRoute *route)
  * @see sendPimJoinPrune()
  * @see PIMpt()
  */
-void pimDM::processPrunePacket(AnsaIPv4MulticastRoute *route, int intId, int holdTime)
+void PIMDM::processPrunePacket(AnsaIPv4MulticastRoute *route, int intId, int holdTime)
 {
 	EV << "pimDM::processPrunePacket" << endl;
 	int i = route->getOutIdByIntId(intId);
@@ -452,7 +452,7 @@ void pimDM::processPrunePacket(AnsaIPv4MulticastRoute *route, int intId, int hol
  * @see processPrunePacket()
  * @see sendPimGraftAck()
  */
-void pimDM::processJoinPruneGraftPacket(PIMJoinPrune *pkt, PIMPacketType type)
+void PIMDM::processJoinPruneGraftPacket(PIMJoinPrune *pkt, PIMPacketType type)
 {
 	EV << "pimDM::processJoinePruneGraftPacket" << endl;
 
@@ -539,7 +539,7 @@ void pimDM::processJoinPruneGraftPacket(PIMJoinPrune *pkt, PIMPacketType type)
  * @see sendPimJoinPrune()
  * @see sendPimStateRefresh()
  */
-void pimDM::processStateRefreshPacket(PIMStateRefresh *pkt)
+void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 {
 	EV << "pimDM::processStateRefreshPacket" << endl;
 
@@ -612,7 +612,7 @@ void pimDM::processStateRefreshPacket(PIMStateRefresh *pkt)
  * @see sendPimGraft()
  * @see createGraftRetryTimer()
  */
-void pimDM::processPruneTimer(PIMpt *timer)
+void PIMDM::processPruneTimer(PIMpt *timer)
 {
 	EV << "pimDM::processPruneTimer" << endl;
 
@@ -666,7 +666,7 @@ void pimDM::processPruneTimer(PIMpt *timer)
  * @see sendPimGraft()
  * @see createGraftRetryTimer()
  */
-void pimDM::processGraftRetryTimer(PIMgrt *timer)
+void PIMDM::processGraftRetryTimer(PIMgrt *timer)
 {
 	AnsaIPv4MulticastRoute *route = rt->getRouteFor(timer->getGroup(), timer->getSource());
 	sendPimGraft(route->getInIntNextHop(), timer->getSource(), timer->getGroup(), route->getInIntId());
@@ -682,7 +682,7 @@ void pimDM::processGraftRetryTimer(PIMgrt *timer)
  * @param timer Pointer to Source Active Timer.
  * @see PIMsat()
  */
-void pimDM::processSourceActiveTimer(PIMsat * timer)
+void PIMDM::processSourceActiveTimer(PIMsat * timer)
 {
 	EV << "pimDM::processSourceActiveTimer: route will be deleted" << endl;
 	AnsaIPv4MulticastRoute *route = rt->getRouteFor(timer->getGroup(), timer->getSource());
@@ -705,7 +705,7 @@ void pimDM::processSourceActiveTimer(PIMsat * timer)
  * @see sendPimStateRefresh()
  * @see createStateRefreshTimer()
  */
-void pimDM::processStateRefreshTimer(PIMsrt * timer)
+void PIMDM::processStateRefreshTimer(PIMsrt * timer)
 {
 	EV << "pimDM::processStateRefreshTimer" << endl;
 	AnsaIPv4MulticastRoute *route = rt->getRouteFor(timer->getGroup(), timer->getSource());
@@ -744,7 +744,7 @@ void pimDM::processStateRefreshTimer(PIMsrt * timer)
  * @see processPruneTimer()
  * @see processGraftRetryTimer()
  */
-void pimDM::processPIMTimer(PIMTimer *timer)
+void PIMDM::processPIMTimer(PIMTimer *timer)
 {
 	EV << "pimDM::processPIMTimer: ";
 
@@ -795,7 +795,7 @@ void pimDM::processPIMTimer(PIMTimer *timer)
  * @see PIMPacket()
  * @see processJoinPruneGraftPacket()
  */
-void pimDM::processPIMPkt(PIMPacket *pkt)
+void PIMDM::processPIMPkt(PIMPacket *pkt)
 {
 	EV << "pimDM::processPIMPkt: ";
 
@@ -842,7 +842,7 @@ void pimDM::processPIMPkt(PIMPacket *pkt)
  * @see processPIMTimer()
  * @see processPIMPkt()
  */
-void pimDM::handleMessage(cMessage *msg)
+void PIMDM::handleMessage(cMessage *msg)
 {
 	// self message (timer)
    if (msg->isSelfMessage())
@@ -872,7 +872,7 @@ void pimDM::handleMessage(cMessage *msg)
  *
  * @param stage Stage of initialization.
  */
-void pimDM::initialize(int stage)
+void PIMDM::initialize(int stage)
 {
 	if (stage == 4)
 	{
@@ -912,7 +912,7 @@ void pimDM::initialize(int stage)
  * @see newMulticast()
  * @see newMulticastAddr()
  */
-void pimDM::receiveChangeNotification(int category, const cPolymorphic *details)
+void PIMDM::receiveChangeNotification(int category, const cPolymorphic *details)
 {
 	// ignore notifications during initialize
 	if (simulation.getContextType()==CTX_INITIALIZE)
@@ -988,7 +988,7 @@ void pimDM::receiveChangeNotification(int category, const cPolymorphic *details)
 }
 
 //FIXME delete  - only for testing purposes
-void pimDM::setUpInterface()
+void PIMDM::setUpInterface()
 {
     PimInterface *newentry;
     static int counter = 0;
@@ -1023,7 +1023,7 @@ void pimDM::setUpInterface()
  * @see sendPimGraft()
  * @see createGraftRetryTimer()
  */
-void pimDM::rpfIntChange(AnsaIPv4MulticastRoute *route)
+void PIMDM::rpfIntChange(AnsaIPv4MulticastRoute *route)
 {
 	IPv4Address source = route->getOrigin();
 	IPv4Address group = route->getMulticastGroup();
@@ -1087,7 +1087,7 @@ void pimDM::rpfIntChange(AnsaIPv4MulticastRoute *route)
  * @param newRoute Pointer to new entry in the multicast routing table.
  * @see PIMsat()
  */
-void pimDM::dataOnRpf(IPv4Datagram *datagram)
+void PIMDM::dataOnRpf(IPv4Datagram *datagram)
 {
     AnsaIPv4MulticastRoute *route = rt->getRouteFor(datagram->getDestAddress(), datagram->getSrcAddress());
 	cancelEvent(route->getSat());
@@ -1113,7 +1113,7 @@ void pimDM::dataOnRpf(IPv4Datagram *datagram)
  * @see sendPimJoinPrune()
  * @see createPruneTimer()
  */
-void pimDM::dataOnNonRpf(IPv4Address group, IPv4Address source, int intId)
+void PIMDM::dataOnNonRpf(IPv4Address group, IPv4Address source, int intId)
 {
 	EV << "pimDM::dataOnNonRpf, intID: " << intId << endl;
 
@@ -1165,7 +1165,7 @@ void pimDM::dataOnNonRpf(IPv4Address group, IPv4Address source, int intId)
  * @param source Source IP address.
  * @see sendPimJoinPrune()
  */
-void pimDM::dataOnPruned(IPv4Address group, IPv4Address source)
+void PIMDM::dataOnPruned(IPv4Address group, IPv4Address source)
 {
 	EV << "pimDM::dataOnPruned" << endl;
 	AnsaIPv4MulticastRoute *route = rt->getRouteFor(group, source);
@@ -1195,7 +1195,7 @@ void pimDM::dataOnPruned(IPv4Address group, IPv4Address source)
  * @param members Structure containing old multicast IP addresses.
  * @see sendPimJoinPrune()
  */
-void pimDM::oldMulticastAddr(addRemoveAddr *members)
+void PIMDM::oldMulticastAddr(addRemoveAddr *members)
 {
 	EV << "pimDM::oldMulticastAddr" << endl;
 	vector<IPv4Address> oldAddr = members->getAddr();
@@ -1277,7 +1277,7 @@ void pimDM::oldMulticastAddr(addRemoveAddr *members)
  * @see createGraftRetryTimer()
  * @see addRemoveAddr
  */
-void pimDM::newMulticastAddr(addRemoveAddr *members)
+void PIMDM::newMulticastAddr(addRemoveAddr *members)
 {
 	EV << "pimDM::newMulticastAddr" << endl;
 	vector<IPv4Address> newAddr = members->getAddr();
@@ -1364,7 +1364,7 @@ void pimDM::newMulticastAddr(addRemoveAddr *members)
  * @see createGraftRetryTimer()
  * @see addRemoveAddr
  */
-void pimDM::newMulticast(AnsaIPv4MulticastRoute *newRoute)
+void PIMDM::newMulticast(AnsaIPv4MulticastRoute *newRoute)
 {
 	EV << "pimDM::newMulticast" << endl;
 
@@ -1440,7 +1440,7 @@ void pimDM::newMulticast(AnsaIPv4MulticastRoute *newRoute)
 	EV << "PimSplitter::newMulticast: New route was added to the multicast routing table." << endl;
 }
 
-PimInterface *pimDM::getIncomingInterface(IPv4Datagram *datagram)
+PimInterface *PIMDM::getIncomingInterface(IPv4Datagram *datagram)
 {
     cGate *g = datagram->getArrivalGate();
     if (g)

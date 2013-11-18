@@ -13,21 +13,26 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
-// @file pimDM.ned
+// @file pimSM.ned
 // @date 29.10.2011
 // @author: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
-// @brief File implements simple pimDM module
-// @details Simple module pimDM which is connected to pimSplitter module
+// @brief File implements compbound module pimSplitter
+// @details pimSplitter is module which split PIM-DM and PIM-SM packets to simple modules.
+
+package inet.networklayer.pim;
 
 
-package inet.networklayer.pim.modes;
-
-
-simple pimDM
+simple PIMSplitter
 {
     parameters:
-    	@display("i=block/network2");
+    	@display("i=block/dispatch");
+    	string configFile;
+        string hostname;
     gates:
-        input splitterIn;
-        output spiltterOut;
+        input pimDMIn;
+        input pimSMIn;
+        output pimDMOut;
+        output pimSMOut;
+        input transportIn;
+        output transportOut;
 }

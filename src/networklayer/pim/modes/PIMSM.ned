@@ -16,23 +16,17 @@
 // @file pimSM.ned
 // @date 29.10.2011
 // @author: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
-// @brief File implements compbound module pimSplitter
-// @details pimSplitter is module which split PIM-DM and PIM-SM packets to simple modules.
+// @brief File implements simple pimSM module
+// @details Simple module pimSM which is connected to pimSplitter module. 
+// Implementation will be done in the future according to RFC4601.
 
-package inet.networklayer.pim;
+package inet.networklayer.pim.modes;
 
-
-simple PimSplitter
+simple PIMSM
 {
     parameters:
-    	@display("i=block/dispatch");
-    	string configFile;
-        string hostname;
+    	@display("i=block/network2");
     gates:
-        input pimDMIn;
-        input pimSMIn;
-        output pimDMOut;
-        output pimSMOut;
-        input transportIn;
-        output transportOut;
+        input splitterIn;
+        output spiltterOut;
 }

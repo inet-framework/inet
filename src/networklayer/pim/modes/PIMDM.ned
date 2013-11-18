@@ -13,16 +13,17 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
-// @file pimSM.ned
+// @file pimDM.ned
 // @date 29.10.2011
 // @author: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
-// @brief File implements simple pimSM module
-// @details Simple module pimSM which is connected to pimSplitter module. 
-// Implementation will be done in the future according to RFC4601.
+// @brief File implements simple pimDM module
+// @details Simple module pimDM which is connected to pimSplitter module
+
 
 package inet.networklayer.pim.modes;
 
-simple pimSM
+
+simple PIMDM
 {
     parameters:
     	@display("i=block/network2");

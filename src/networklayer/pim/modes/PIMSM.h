@@ -77,7 +77,7 @@ enum JPMsgType
 /**
  * @brief Class implements PIM-SM (sparse mode).
  */
-class pimSM : public cSimpleModule, protected INotifiable
+class PIMSM : public cSimpleModule, protected INotifiable
 {
     private:
         AnsaRoutingTable            *rt;            /**< Pointer to routing table. */
