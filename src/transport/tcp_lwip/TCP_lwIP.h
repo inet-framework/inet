@@ -149,8 +149,6 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
     struct netif netIf;
 
   public:
-    static bool testingS;    // switches between tcpEV and testingEV
-    static bool logverboseS; // if !testingS, turns on more verbose logging
     bool recordStatisticsM;  // output vectors on/off
 
   protected:

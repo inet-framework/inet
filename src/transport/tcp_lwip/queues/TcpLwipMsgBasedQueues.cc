@@ -42,7 +42,7 @@ TcpLwipMsgBasedSendQueue::~TcpLwipMsgBasedSendQueue()
 {
     while (! payloadQueueM.empty())
     {
-        EV << "SendQueue Destructor: Drop msg from " << connM->tcpLwipM.getFullPath()
+        EV_TRACE << "SendQueue Destructor: Drop msg from " << connM->tcpLwipM.getFullPath()
                 << " Queue: seqno=" << payloadQueueM.front().endSequenceNo
                 << ", length=" << payloadQueueM.front().msg->getByteLength() << endl;
         delete payloadQueueM.front().msg;
@@ -122,16 +122,14 @@ TCPSegment* TcpLwipMsgBasedSendQueue::createSegmentWithBytes(
     if (numBytes && !seqLE(toSeq, endM))
         throw cRuntimeError("Implementation bug");
 
-    EV << "sendQueue: " << connM->connIdM << ": [" << fromSeq << ":" << toSeq
-       << ",l=" << numBytes << "] (unsent bytes:" << unsentTcpLayerBytesM << "\n";
+    EV_DEBUG << "sendQueue: " << connM->connIdM << ": [" << fromSeq << ":" << toSeq
+            << ",l=" << numBytes << "] (unsent bytes:" << unsentTcpLayerBytesM << "\n";
 
-#ifdef DEBUG_LWIP
     for (i = payloadQueueM.begin(); i != payloadQueueM.end(); ++i)
     {
-        EV << "  buffered msg: endseq=" << i->endSequenceNo
+        EV_DEBUG << "  buffered msg: endseq=" << i->endSequenceNo
            << ", length=" << i->msg->getByteLength() << endl;
     }
-#endif
 
     const char *payloadName = NULL;
 
@@ -289,7 +287,7 @@ cPacket* TcpLwipMsgBasedReceiveQueue::extractBytesUpTo()
     // remove old messages
     while ( (! payloadListM.empty()) && seqLE(payloadListM.front().seqNo, firstSeqNo))
     {
-        EV << "Remove old payload MSG: seqno=" << payloadListM.front().seqNo
+        EV_DEBUG << "Remove old payload MSG: seqno=" << payloadListM.front().seqNo
            << ", len=" << payloadListM.front().packet->getByteLength() << endl;
         delete payloadListM.front().packet;
         payloadListM.erase(payloadListM.begin());

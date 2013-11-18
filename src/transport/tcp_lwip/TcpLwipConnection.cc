@@ -30,10 +30,6 @@
 #include "TCPSerializer.h"
 
 
-// macro for normal EV<< logging (note: deliberately no parens in macro def)
-#define tcpEV TCP_lwIP::testingS ? EV : EV
-
-
 TcpLwipConnection::Stats::Stats()
 :
     sndWndVector("send window"),
@@ -173,8 +169,9 @@ const char *TcpLwipConnection::indicationName(int code)
 
 void TcpLwipConnection::sendIndicationToApp(int code)
 {
-    tcpEV << "Notifying app: " << indicationName(code) << "\n";
-    cMessage *msg = new cMessage(indicationName(code));
+    const char *nameOfIndication = indicationName(code);
+    EV_DETAIL << "Notifying app: " << nameOfIndication << "\n";
+    cMessage *msg = new cMessage(nameOfIndication);
     msg->setKind(code);
     TCPCommand *ind = new TCPCommand();
     ind->setConnId(connIdM);
@@ -330,14 +327,14 @@ void TcpLwipConnection::do_SEND()
         }
         else
         {
-            tcpEV << "TCP_lwIP connection: " << connIdM << ": Error do sending, err is "
-                  << sent << endl;
+            if (sent != ERR_MEM)
+                EV_ERROR << "TCP_lwIP connection: " << connIdM << ": Error do sending, err is " << sent << endl;
             break;
         }
     }
 
     totalSentM += allsent;
-    tcpEV << "do_SEND(): " << connIdM <<
+    EV_DETAIL << "do_SEND(): " << connIdM <<
             " send:" << allsent <<
             ", unsent:" << sendQueueM->getBytesAvailable() <<
             ", total sent:" << totalSentM <<
