@@ -140,7 +140,10 @@ void PimInterfaceTable::handleMessage(cMessage *msg)
 
 void PimInterfaceTable::initialize(int stage)
 {
+    if (stage == INITSTAGE_LOCAL)
+    {
 		WATCH_VECTOR(pimIft);
+    }
 }
 
 /**

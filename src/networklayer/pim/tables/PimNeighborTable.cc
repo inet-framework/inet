@@ -56,8 +56,11 @@ void PimNeighborTable::handleMessage(cMessage *msg)
 
 void PimNeighborTable::initialize(int stage)
 {
-	WATCH_VECTOR(nt);
-	id = 0;
+    if (stage == INITSTAGE_LOCAL)
+    {
+        WATCH_VECTOR(nt);
+        id = 0;
+    }
 }
 
 /**

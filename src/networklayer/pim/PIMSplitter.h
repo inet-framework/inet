@@ -78,7 +78,7 @@ class PIMSplitter : public cSimpleModule, protected cListener
 	   void igmpChange(InterfaceEntry *interface);
 
 	protected:
-		virtual int numInitStages() const  {return 5;}
+		virtual int numInitStages() const  {return NUM_INIT_STAGES;}
 		virtual void handleMessage(cMessage *msg);
 		virtual void initialize(int stage);
 

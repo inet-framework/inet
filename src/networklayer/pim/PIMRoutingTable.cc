@@ -52,37 +52,6 @@ void PIMRoutingTable::updateDisplayString()
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-
-
-/**
- * INITIALIZE
- *
- * The method initializes Multicast Routing Table module. It get access to all needed objects.
- *
- * @param stage Stage of initialization.
- */
-void PIMRoutingTable::initialize(int stage)
-{
-    if (stage==0)
-    {
-        IPv4RoutingTable::initialize(stage);
-    }
-    else if (stage==3)
-    {
-        // routerID selection must be after stage==2 when network autoconfiguration
-        // assigns interface addresses
-        configureRouterId();
-
-        // We don't want to call this method:
-        // 1. adds IPv4Route instead of ANSAIPv4Route (method is not overridden)
-        // 2. directly connected routes are added in the deviceConfigurator
-        //updateNetmaskRoutes();
-
-        //printRoutingTable();
-    }
-}
-
-
 /**
  * ADD ROUTE
  *

@@ -102,6 +102,7 @@ class INET_API PimInterfaceTable: public cSimpleModule
 		virtual PimInterface *getInterfaceByIntID(int intID);									/**< Returns entry from PimInterfaceTable with given interface ID. */
 
 	protected:
+        virtual int numInitStages() const  {return NUM_INIT_STAGES;}
 		virtual void initialize(int stage);
 		virtual void handleMessage(cMessage *);
 };

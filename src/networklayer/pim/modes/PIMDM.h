@@ -95,7 +95,7 @@ class PIMDM : public cSimpleModule, protected cListener
 	    PimInterface *getIncomingInterface(IPv4Datagram *datagram);
 
 	protected:
-		virtual int numInitStages() const  {return 5;}
+		virtual int numInitStages() const  {return NUM_INIT_STAGES;}
 		virtual void handleMessage(cMessage *msg);
 		virtual void initialize(int stage);
 };

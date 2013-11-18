@@ -143,7 +143,7 @@ class PIMSM : public cSimpleModule, protected cListener
         IPv4ControlInfo *setCtrlForMessage (IPv4Address destAddr,IPv4Address srcAddr,int protocol, int interfaceId, int TTL);
 
 	protected:
-		virtual int numInitStages() const  {return 5;}
+		virtual int numInitStages() const  {return NUM_INIT_STAGES;}
 		virtual void handleMessage(cMessage *msg);
 		virtual void initialize(int stage);
 };

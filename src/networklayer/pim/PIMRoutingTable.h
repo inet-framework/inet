@@ -32,7 +32,6 @@ class INET_API PIMRoutingTable : public IPv4RoutingTable {
     protected:
         // displays summary above the icon
         virtual void updateDisplayString();
-        virtual void initialize(int stage);
 
     public:
         PIMRoutingTable(){};

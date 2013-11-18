@@ -874,7 +874,7 @@ void PIMDM::handleMessage(cMessage *msg)
  */
 void PIMDM::initialize(int stage)
 {
-	if (stage == 4)
+	if (stage == INITSTAGE_LOCAL)
 	{
 		// Pointer to routing tables, interface tables, notification board
 		rt = PIMRoutingTableAccess().get();
@@ -882,25 +882,29 @@ void PIMDM::initialize(int stage)
 		pimIft = PimInterfaceTableAccess().get();
 		pimNbt = PimNeighborTableAccess().get();
 
-		// is PIM enabled?
-		if (pimIft->getNumInterface() == 0)
-		{
-			EV << "PIM is NOT enabled on device " << endl;
-			return;
-		}
-
-		// subscribe for notifications
-        cModule *host = findContainingNode(this);
-        if (host != NULL)
+	}
+	else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
+	{
+        // is PIM enabled?
+        if (pimIft->getNumInterface() == 0)
         {
-            host->subscribe(NF_IPv4_NEW_MULTICAST_DENSE, this);
-            host->subscribe(NF_IPv4_NEW_IGMP_ADDED, this);
-            host->subscribe(NF_IPv4_NEW_IGMP_REMOVED, this);
-            host->subscribe(NF_IPv4_DATA_ON_NONRPF, this);
-            host->subscribe(NF_IPv4_DATA_ON_RPF, this);
-            //host->subscribe(NF_IPv4_RPF_CHANGE, this);
-            host->subscribe(NF_ROUTE_ADDED, this);
-            host->subscribe(NF_INTERFACE_STATE_CHANGED, this);
+            EV << "PIM is NOT enabled on device " << endl;
+        }
+        else
+        {
+            // subscribe for notifications
+            cModule *host = findContainingNode(this);
+            if (host != NULL)
+            {
+                host->subscribe(NF_IPv4_NEW_MULTICAST_DENSE, this);
+                host->subscribe(NF_IPv4_NEW_IGMP_ADDED, this);
+                host->subscribe(NF_IPv4_NEW_IGMP_REMOVED, this);
+                host->subscribe(NF_IPv4_DATA_ON_NONRPF, this);
+                host->subscribe(NF_IPv4_DATA_ON_RPF, this);
+                //host->subscribe(NF_IPv4_RPF_CHANGE, this);
+                host->subscribe(NF_ROUTE_ADDED, this);
+                host->subscribe(NF_INTERFACE_STATE_CHANGED, this);
+            }
         }
 	}
 }

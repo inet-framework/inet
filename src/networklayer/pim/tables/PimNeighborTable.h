@@ -101,6 +101,7 @@ class INET_API PimNeighborTable: public cSimpleModule
 		virtual int getNumNeighborsOnInt(int intId);
 
 	protected:
+        virtual int numInitStages() const  {return NUM_INIT_STAGES;}
 		virtual void initialize(int stage);
 		virtual void handleMessage(cMessage *);
 };

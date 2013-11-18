@@ -280,23 +280,25 @@ void PIMSplitter::initialize(int stage)
 {
 	// in stage 2 interfaces are registered
 	// in stage 3 table pimInterfaces is built
-	if (stage == 4)
-	{
-		hostname = par("hostname");
+    if (stage == INITSTAGE_LOCAL)
+    {
+        hostname = par("hostname");
 
-		// Pointer to routing tables, interface tables, notification board
-		ift = InterfaceTableAccess().get();
-		rt = IPv4RoutingTableAccess().get();
-		pimIft = PimInterfaceTableAccess().get();
-		pimNbt = PimNeighborTableAccess().get();
+        // Pointer to routing tables, interface tables, notification board
+        ift = InterfaceTableAccess().get();
+        rt = IPv4RoutingTableAccess().get();
+        pimIft = PimInterfaceTableAccess().get();
+        pimNbt = PimNeighborTableAccess().get();
 
-		// subscribtion of notifications (future use)
+        // subscribtion of notifications (future use)
         cModule *host = findContainingNode(this);
         if (host != NULL) {
             host->subscribe(NF_IPv4_NEW_MULTICAST, this);
             host->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
         }
-
+    }
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
+	{
 		// is PIM enabled?
 		if (pimIft->getNumInterface() == 0)
 			return;

@@ -77,35 +77,36 @@ void PIMSM::handleMessage(cMessage *msg)
  */
 void PIMSM::initialize(int stage)
 {
-    if (stage == 4)
+    if (stage == INITSTAGE_LOCAL)
     {
-        EV << "PIMSM::initialize: entering..." << endl;
-
-        // Pointer to routing tables, interface tables, notification board
         rt = PIMRoutingTableAccess().get();
         ift = InterfaceTableAccess().get();
         pimIft = PimInterfaceTableAccess().get();
         pimNbt = PimNeighborTableAccess().get();
-
+    }
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
+    {
         // is PIM enabled?
         if (pimIft->getNumInterface() == 0)
         {
             EV << "PIM is NOT enabled on device " << endl;
             return;
         }
+        else
+        {
+            // subscribe for notifications
+            cModule *host = findContainingNode(this);
+            if (host != NULL) {
+                host->subscribe(NF_IPv4_NEW_MULTICAST_SPARSE, this);
+                host->subscribe(NF_IPv4_MDATA_REGISTER, this);
+                host->subscribe(NF_IPv4_NEW_IGMP_ADDED_PISM, this);
+                host->subscribe(NF_IPv4_NEW_IGMP_REMOVED_PIMSM, this);
+                host->subscribe(NF_IPv4_DATA_ON_RPF, this);
+            }
 
-        // subscribe for notifications
-        cModule *host = findContainingNode(this);
-        if (host != NULL) {
-            host->subscribe(NF_IPv4_NEW_MULTICAST_SPARSE, this);
-            host->subscribe(NF_IPv4_MDATA_REGISTER, this);
-            host->subscribe(NF_IPv4_NEW_IGMP_ADDED_PISM, this);
-            host->subscribe(NF_IPv4_NEW_IGMP_REMOVED_PIMSM, this);
-            host->subscribe(NF_IPv4_DATA_ON_RPF, this);
+// XXX        DeviceConfigurator *devConf = ModuleAccess<DeviceConfigurator>("deviceConfigurator").get();
+//            devConf->loadPimGlobalConfig(this);
         }
-
-//        DeviceConfigurator *devConf = ModuleAccess<DeviceConfigurator>("deviceConfigurator").get();
-//        devConf->loadPimGlobalConfig(this);
 
     }
 }
