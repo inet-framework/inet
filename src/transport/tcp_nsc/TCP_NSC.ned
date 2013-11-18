@@ -47,6 +47,7 @@ simple TCP_NSC like ITCP
         int stackBufferSize = default(80000); // the size of buffer used when communicating with the specified NSC stack
         string sendQueueClass = default("");    // Obsolete!!!
         string receiveQueueClass = default(""); // Obsolete!!!
+        @display("i=block/wheelbarrow");
     gates:
         input appIn[];
         input ipIn;
