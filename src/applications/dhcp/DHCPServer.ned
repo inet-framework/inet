@@ -1,6 +1,7 @@
 //
 // Copyright (C) 2008 Juan-Carlos Maureira
 // Copyright (C) INRIA
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,9 +21,8 @@ package inet.applications.dhcp;
 
 import inet.applications.IUDPApp;
 
-// Simple DHCP Server
 //
-// Only assign a simple network with a exclusion list
+// Simple DHCP Server
 //
 simple DHCPServer like IUDPApp
 {
@@ -30,15 +30,17 @@ simple DHCPServer like IUDPApp
         string net;          // IP network to assign
         string mask;          // netmask to assign
         string ipBegin;    // ip to start to lease
-        int clientNum;     // number of ip to lease
+        int clientNum;     // maximum number of clients (IPs) allowed to be leased
         string gateway;        // gateway to assign
         string dns;            // dns to assign
         int leaseTime @unit(s);    // lease time in seconds
         string interface;        // interface to listen on
+        string interfaceTablePath = default("^.interfaceTable");
+        string notificationBoardPath = default("^.notificationBoard");
         @display("i=device/card");
     gates:
         input udpIn @labels(UDPControlInfo/up);
-        output udpOut  @labels(UDPControlInfo/down);
+        output udpOut @labels(UDPControlInfo/down);
 }
 
 

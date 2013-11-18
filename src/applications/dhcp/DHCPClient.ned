@@ -24,6 +24,9 @@ simple DHCPClient like IUDPApp
 {
     parameters:
         string interface;  // which NIC should be configured (i.e. wlan0, eth1 etc.)
+        string routingTablePath = default("^.routingTable");
+        string interfaceTablePath = default("^.interfaceTable");
+        string notificationBoardPath = default("^.notificationBoard");
         @display("i=device/card");
     gates:
         input udpIn @labels(UDPControlInfo/up);

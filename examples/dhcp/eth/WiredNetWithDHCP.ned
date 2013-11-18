@@ -19,10 +19,12 @@
 
 package inet.examples.dhcp.eth;
 
+import inet.base.LifecycleController;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.ethernet.EtherSwitch;
 import inet.nodes.inet.StandardHost;
 import inet.util.ThruputMeteringChannel;
+import inet.world.scenario.ScenarioManager;
 
 
 network WiredNetWithDHCP
@@ -37,6 +39,12 @@ network WiredNetWithDHCP
             thruputDisplayFormat = "u";
         }
     submodules:
+        lifecycleController: LifecycleController {
+            @display("p=720,209");
+        }
+        scenarioManager: ScenarioManager {
+            @display("p=75,101");
+        }
         srv: StandardHost;
         switch: EtherSwitch {
             parameters:

@@ -23,6 +23,7 @@
 #include <sstream>
 #include "Byte.h"
 
+// RFC 2132
 enum op_code
 {
     DHCP_MSG_TYPE = 53,

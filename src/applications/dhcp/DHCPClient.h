@@ -1,6 +1,7 @@
 //
 // Copyright (C) 2008 Juan-Carlos Maureira
 // Copyright (C) INRIA
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -33,73 +34,120 @@
 class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILifecycle
 {
     protected:
-        int bootps_port; // server
-        int bootpc_port; // client
-        UDPSocket socket;
+        int serverPort;
+        int clientPort;
+        UDPSocket socket; // UDP socket for client-server communication
+        bool isOperational; // lifecycle
+        cMessage* timerT1; // time at which the client enters the RENEWING state
+        cMessage* timerT2; // time at which the client enters the REBINDING state
+        cMessage* timerTo; // response timeout: WAIT_ACK, WAIT_OFFER
+        cMessage* leaseTimer;
 
-        cMessage* timer_t1;
-        cMessage* timer_t2;
-        cMessage* timer_to; // response timeout
-
+        // DHCP timer types (RFC 2131 4.4.5)
         enum TIMER_TYPE
         {
-            WAIT_OFFER, WAIT_ACK, T1, T2
-        }; // we discard the init-reboot and rebooting states.
-           // selecting state waits for the first offering and moves on
-        enum CLIENT_STATE
-        {
-            IDLE, INIT, SELECTING, REQUESTING, BOUND, RENEWING, REBINDING
+            WAIT_OFFER, WAIT_ACK, T1, T2, LEASE_TIMEOUT
         };
 
-        std::string host_name;
+        // DHCP client states (RFC 2131, Figure 5: state transition diagram)
+        enum CLIENT_STATE
+        {
+            IDLE, INIT, INIT_REBOOT, REBOOTING, SELECTING, REQUESTING, BOUND, RENEWING, REBINDING
+        };
 
-        int numSent;
-        int numReceived;
+        std::string hostName;
+        int numSent; // number of sent DHCP messages
+        int numReceived; // number of received DHCP messages
+        int responseTimeout; // timeout waiting for DHCPACKs, DHCPOFFERs
+        long xid; // transaction id; to associate messages and responses between a client and a server
+        CLIENT_STATE clientState; // current state
 
-        int retry_count;
-        int retry_max;
-        int response_timeout;
-        long xid; // transaction id;
-        CLIENT_STATE client_state;
-
-        MACAddress client_mac_address; // client_mac_address
-
-        NotificationBoard* nb; // Notification board
-        InterfaceEntry* ie; // interface to configure
-        IRoutingTable* irt; // Routing table to update
-
-        DHCPLease* lease; // leased ip information
+        MACAddress macAddress; // client's MAC address
+        NotificationBoard * nb; // notification board
+        InterfaceEntry * ie; // interface to configure
+        IRoutingTable * irt; // routing table to update
+        DHCPLease * lease; // leased IP information
 
     protected:
-        // simulation method
-        virtual int numInitStages() const
-        {
-            return 4;
-        }
+        // Simulation methods.
+        virtual int numInitStages() const { return 4; }
         virtual void initialize(int stage);
         virtual void finish();
-        virtual void handleMessage(cMessage *msg);
-        virtual void handleTimer(cMessage *msg);
-        virtual void handleDHCPMessage(DHCPMessage* msg);
-        virtual void receiveChangeNotification(int category, const cPolymorphic *details);
-        virtual cModule* getContainingNode();
-        virtual void sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort);
+        virtual void handleMessage(cMessage * msg);
 
-        // internal client methods
-        virtual void changeFSMState(CLIENT_STATE new_state);
-        virtual void cancelTimer_T1();
-        virtual void cancelTimer_T2();
-        virtual void cancelTimer_TO();
+        /*
+         * Handles incoming DHCP messages, and implements the
+         * state-transition diagram for DHCP clients.
+         */
+        virtual void handleDHCPMessage(DHCPMessage * msg);
+
+        /*
+         * Performs state changes and requests according to the timer expiration events
+         * (e. g. retransmits DHCPREQUEST after the WAIT_ACK timeout expires).
+         */
+        virtual void handleTimer(cMessage * msg);
+
+
+        virtual void receiveChangeNotification(int category, const cPolymorphic * details);
+
+        /*
+         * Performs UDP transmission.
+         */
+        virtual void sendToUDP(cPacket * msg, int srcPort, const IPvXAddress& destAddr, int destPort);
+
+        /*
+         * Client broadcast to locate available servers.
+         */
         virtual void sendDiscover();
+
+        /*
+         * Client message to servers either (a) requesting offered parameters
+         * from one server and implicitly declining offers from all others,
+         * (b) confirming correctness of previously allocated address after,
+         * e.g., system reboot, or (c) extending the lease on a particular
+         * network address.
+         */
         virtual void sendRequest();
 
-        virtual void scheduleTimer_TO(TIMER_TYPE type);
-        virtual void scheduleTimer_T1();
-        virtual void scheduleTimer_T2();
+        /*
+         * Client to server indicating network address is already in use.
+         */
+        virtual void sendDecline(IPv4Address declinedIp);
 
-    private:
-        // utils methods
-        virtual void cancelTimer(cMessage* timer);
+        /*
+         * Records configuration parameters from a DHCPACK message.
+         */
+        virtual void recordLease(DHCPMessage * dhcpACK);
+
+        /*
+         * Records minimal configuration parameters from a DHCPOFFER message.
+         */
+        virtual void recordOffer(DHCPMessage * dhcpOffer);
+
+        /*
+         * Assigns the IP address to the interface.
+         */
+        virtual void boundLease();
+
+        /*
+         * Removes the configured IP address (e. g. when clients get a DHCPNAK message in REBINDING or RENEWING states
+         * or the lease time expires).
+         */
+        virtual void unboundLease();
+
+        /*
+         * Starts the DHCP configuration process with sending a DHCPDISCOVER.
+         */
+        virtual void initClient();
+
+        /*
+         * Starts the DHCP configuration process with known network address.
+         */
+        virtual void initRebootedClient();
+
+        virtual void scheduleTimerTO(TIMER_TYPE type);
+        virtual void scheduleTimerT1();
+        virtual void scheduleTimerT2();
 
     public:
         DHCPClient();
