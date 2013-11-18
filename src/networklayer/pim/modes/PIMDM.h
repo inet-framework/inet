@@ -27,14 +27,13 @@
 #include "PIMPacket_m.h"
 #include "PIMTimer_m.h"
 #include "InterfaceTableAccess.h"
-#include "AnsaRoutingTableAccess.h"
-#include "NotificationBoard.h"
+#include "PIMRoutingTableAccess.h"
 #include "NotifierConsts.h"
 #include "PimNeighborTable.h"
 #include "PimInterfaceTable.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
-#include "AnsaIPv4Route.h"
+#include "IPv4Route.h"
 
 
 
@@ -46,24 +45,23 @@
 /**
  * @brief Class implements PIM-DM (dense mode).
  */
-class PIMDM : public cSimpleModule, protected INotifiable
+class PIMDM : public cSimpleModule, protected cListener
 {
 	private:
-		AnsaRoutingTable           	*rt;           	/**< Pointer to routing table. */
+		PIMRoutingTable           	*rt;           	/**< Pointer to routing table. */
 	    IInterfaceTable         	*ift;          	/**< Pointer to interface table. */
-	    NotificationBoard 			*nb; 		   	/**< Pointer to notification table. */
 	    PimInterfaceTable			*pimIft;		/**< Pointer to table of PIM interfaces. */
 	    PimNeighborTable			*pimNbt;		/**< Pointer to table of PIM neighbors. */
 
 	    // process events
-	    void receiveChangeNotification(int category, const cPolymorphic *details);
-	    void newMulticast(AnsaIPv4MulticastRoute *newRoute);
+        void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+	    void newMulticast(PIMMulticastRoute *newRoute);
 	    void newMulticastAddr(addRemoveAddr *members);
 	    void oldMulticastAddr(addRemoveAddr *members);
 	    void dataOnPruned(IPv4Address destAddr, IPv4Address srcAddr);
 	    void dataOnNonRpf(IPv4Address group, IPv4Address source, int intId);
 	    void dataOnRpf(IPv4Datagram *datagram);
-	    void rpfIntChange(AnsaIPv4MulticastRoute *route);
+	    void rpfIntChange(PIMMulticastRoute *route);
 
 	    // process timers
 	    void processPIMTimer(PIMTimer *timer);
@@ -81,9 +79,9 @@ class PIMDM : public cSimpleModule, protected INotifiable
 	    // process PIM packets
 	    void processPIMPkt(PIMPacket *pkt);
 	    void processJoinPruneGraftPacket(PIMJoinPrune *pkt, PIMPacketType type);
-	    void processPrunePacket(AnsaIPv4MulticastRoute *route, int intId, int holdTime);
+	    void processPrunePacket(PIMMulticastRoute *route, int intId, int holdTime);
 	    void processGraftPacket(IPv4Address source, IPv4Address group, IPv4Address sender, int intId);
-	    void processGraftAckPacket(AnsaIPv4MulticastRoute *route);
+	    void processGraftAckPacket(PIMMulticastRoute *route);
 	    void processStateRefreshPacket(PIMStateRefresh *pkt);
 
 	    //create PIM packets

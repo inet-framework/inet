@@ -27,8 +27,8 @@
 
 #include <omnetpp.h>
 #include "INETDefs.h"
+#include "ModuleAccess.h"
 #include "InterfaceEntry.h"
-#include "NotificationBoard.h"
 
 #include "PIMTimer_m.h"
 

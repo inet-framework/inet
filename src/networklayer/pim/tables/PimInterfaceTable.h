@@ -27,9 +27,8 @@
 #include <omnetpp.h>
 #include "IInterfaceTable.h"
 #include "INETDefs.h"
+#include "ModuleAccess.h"
 #include "InterfaceEntry.h"
-#include "NotificationBoard.h"
-
 #include "IPv4Address.h"
 
 /**

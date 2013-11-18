@@ -24,6 +24,8 @@
 
 #include "IPv4Datagram.h"
 #include "PIMSplitter.h"
+#include "PIMRoute.h"
+#include "IPv4RoutingTableAccess.h"
 
 using namespace std;
 
@@ -284,14 +286,16 @@ void PIMSplitter::initialize(int stage)
 
 		// Pointer to routing tables, interface tables, notification board
 		ift = InterfaceTableAccess().get();
-		rt = AnsaRoutingTableAccess().get();
-		nb = NotificationBoardAccess().get();
+		rt = IPv4RoutingTableAccess().get();
 		pimIft = PimInterfaceTableAccess().get();
 		pimNbt = PimNeighborTableAccess().get();
 
 		// subscribtion of notifications (future use)
-		nb->subscribe(this, NF_IPv4_NEW_MULTICAST);
-		nb->subscribe(this, NF_INTERFACE_IPv4CONFIG_CHANGED);
+        cModule *host = findContainingNode(this);
+        if (host != NULL) {
+            host->subscribe(NF_IPv4_NEW_MULTICAST, this);
+            host->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
+        }
 
 		// is PIM enabled?
 		if (pimIft->getNumInterface() == 0)
@@ -324,7 +328,7 @@ void PIMSplitter::initialize(int stage)
  * @see newMulticast()
  * @see igmpChange()
  */
-void PIMSplitter::receiveChangeNotification(int category, const cPolymorphic *details)
+void PIMSplitter::receiveSignal(cComponent *source, simsignal_t signalID, cObject *details)
 {
 	// ignore notifications during initialize
 	if (simulation.getContextType()==CTX_INITIALIZE)
@@ -335,26 +339,23 @@ void PIMSplitter::receiveChangeNotification(int category, const cPolymorphic *de
 		return;
 
 	Enter_Method_Silent();
-	printNotificationBanner(category, details);
+// XXX printNotificationBanner(category, details);
 
-	// according to category of event...
-	switch (category)
-	{
-		// new multicast data appears in router
-		case NF_IPv4_NEW_MULTICAST:
-			EV <<  "PimSplitter::receiveChangeNotification - NEW MULTICAST" << endl;
-			IPv4Datagram *datagram;
-			datagram = check_and_cast<IPv4Datagram*>(details);
-			newMulticast(datagram->getDestAddress(), datagram->getSrcAddress());
-			break;
-
-		// configuration of interface changed, it means some change from IGMP
-		case NF_INTERFACE_IPv4CONFIG_CHANGED:
-			EV << "PimSplitter::receiveChangeNotification - IGMP change" << endl;
-			InterfaceEntry * interface = (InterfaceEntry *)(details);
-			igmpChange(interface);
-			break;
-	}
+    // new multicast data appears in router
+    if (signalID == NF_IPv4_NEW_MULTICAST)
+    {
+        EV <<  "PimSplitter::receiveChangeNotification - NEW MULTICAST" << endl;
+        IPv4Datagram *datagram;
+        datagram = check_and_cast<IPv4Datagram*>(details);
+        newMulticast(datagram->getDestAddress(), datagram->getSrcAddress());
+    }
+    // configuration of interface changed, it means some change from IGMP
+    else if (signalID ==  NF_INTERFACE_IPv4CONFIG_CHANGED)
+    {
+        EV << "PimSplitter::receiveChangeNotification - IGMP change" << endl;
+        InterfaceEntry * interface = (InterfaceEntry *)(details);
+        igmpChange(interface);
+    }
 }
 
 /**
@@ -375,7 +376,10 @@ void PIMSplitter::igmpChange(InterfaceEntry *interface)
 	if(pimInt)
 	{
 	vector<IPv4Address> multicastAddrsOld = pimInt->getIntMulticastAddresses();
-	vector<IPv4Address> multicastAddrsNew = pimInt->deleteLocalIPs(interface->ipv4Data()->getReportedMulticastGroups());
+	vector<IPv4Address> reportedMulticastGroups;
+	for (int i = 0; i < interface->ipv4Data()->getNumOfReportedMulticastGroups(); i++)
+	    reportedMulticastGroups.push_back(interface->ipv4Data()->getReportedMulticastGroup(i));
+	vector<IPv4Address> multicastAddrsNew = pimInt->deleteLocalIPs(reportedMulticastGroups);
 
 	// vectors of new and removed multicast addresses
 	vector<IPv4Address> add;
@@ -425,9 +429,9 @@ void PIMSplitter::igmpChange(InterfaceEntry *interface)
 		addr->setAddr(remove);
 		addr->setInt(pimInt);
         if (pimInt->getMode() == Dense)
-            nb->fireChangeNotification(NF_IPv4_NEW_IGMP_REMOVED, addr);
+            emit(NF_IPv4_NEW_IGMP_REMOVED, addr);
         if (pimInt->getMode() == Sparse)
-            nb->fireChangeNotification(NF_IPv4_NEW_IGMP_REMOVED_PIMSM, addr);
+            emit(NF_IPv4_NEW_IGMP_REMOVED_PIMSM, addr);
 	}
 
 	// notification about new multicast address to PIM modules
@@ -441,9 +445,9 @@ void PIMSplitter::igmpChange(InterfaceEntry *interface)
 		addr->setAddr(add);
 		addr->setInt(pimInt);
 		if (pimInt->getMode() == Dense)
-		    nb->fireChangeNotification(NF_IPv4_NEW_IGMP_ADDED, addr);
+		    emit(NF_IPv4_NEW_IGMP_ADDED, addr);
 		if (pimInt->getMode() == Sparse)
-		    nb->fireChangeNotification(NF_IPv4_NEW_IGMP_ADDED_PISM, addr);
+		    emit(NF_IPv4_NEW_IGMP_ADDED_PISM, addr);
 	}
 	}
 }
@@ -477,7 +481,7 @@ void PIMSplitter::newMulticast(IPv4Address destAddr, IPv4Address srcAddr)
 	if (pimInt != NULL)
 	{
 		// create new multicast route
-	    AnsaIPv4MulticastRoute *newRoute = new AnsaIPv4MulticastRoute();
+	    PIMMulticastRoute *newRoute = new PIMMulticastRoute();
 		newRoute->setMulticastGroup(destAddr);
 		newRoute->setOrigin(srcAddr);
 		newRoute->setOriginNetmask(IPv4Address::ALLONES_ADDRESS);
@@ -488,9 +492,9 @@ void PIMSplitter::newMulticast(IPv4Address destAddr, IPv4Address srcAddr)
             // RPF neighbor is source of packet
             IPv4Address rpf;
             const IPv4Route *routeToSrc = rt->findBestMatchingRoute(srcAddr);
-            if (routeToSrc->getSource() == IPv4Route::IFACENETMASK)
+            if (routeToSrc->getSourceType() == IPv4Route::IFACENETMASK)
             {
-                newRoute->addFlag(AnsaIPv4MulticastRoute::A);
+                newRoute->addFlag(PIMMulticastRoute::A);
                 rpf = srcAddr;
             }
             // Not directly connected, next hop address is saved in routing table
@@ -504,8 +508,8 @@ void PIMSplitter::newMulticast(IPv4Address destAddr, IPv4Address srcAddr)
 
 		// notification for PIM module about new multicast route
 		if (pimInt->getMode() == Dense)
-			nb->fireChangeNotification(NF_IPv4_NEW_MULTICAST_DENSE, newRoute);
+			emit(NF_IPv4_NEW_MULTICAST_DENSE, newRoute);
 		if (pimInt->getMode() == Sparse)
-		    nb->fireChangeNotification(NF_IPv4_NEW_MULTICAST_SPARSE, newRoute);
+		    emit(NF_IPv4_NEW_MULTICAST_SPARSE, newRoute);
 	}
 }

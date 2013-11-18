@@ -36,13 +36,10 @@
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "InterfaceTableAccess.h"
-#include "AnsaRoutingTableAccess.h"
 #include "InterfaceTable.h"
-#include "AnsaRoutingTable.h"
-#include "NotificationBoard.h"
 #include "NotifierConsts.h"
-#include "InterfaceStateManager.h"
-#include "IPvXAddress.h"
+#include "IPv4Address.h"
+#include "IPv4RoutingTable.h"
 #include "PimNeighborTable.h"
 #include "PimInterfaceTable.h"
 
@@ -56,12 +53,11 @@
  * PIM module according to configuration saved in PimInterfaceTable. Splitter also manages
  * PimNeighborTable.
  */
-class PIMSplitter : public cSimpleModule, protected INotifiable
+class PIMSplitter : public cSimpleModule, protected cListener
 {
 	private:
-		AnsaRoutingTable           	*rt;           	/**< Pointer to routing table. */
+		IIPv4RoutingTable           	*rt;           	/**< Pointer to routing table. */
 	    IInterfaceTable         	*ift;          	/**< Pointer to interface table. */
-	    NotificationBoard 			*nb; 		   	/**< Pointer to notification table. */
 
 	    PimInterfaceTable			*pimIft;		/**< Pointer to table of PIM interfaces. */
 	    PimNeighborTable			*pimNbt;		/**< Pointer to table of PIM neighbors. */
@@ -77,7 +73,7 @@ class PIMSplitter : public cSimpleModule, protected INotifiable
 	   void processHelloPkt(PIMPacket *pkt);
 
 	   // process notification
-	   void receiveChangeNotification(int category, const cPolymorphic *details);
+       virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 	   virtual void newMulticast(IPv4Address destAddr, IPv4Address srcAddr);
 	   void igmpChange(InterfaceEntry *interface);
 

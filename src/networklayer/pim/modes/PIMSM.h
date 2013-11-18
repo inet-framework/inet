@@ -28,15 +28,13 @@
 #include "PIMTimer_m.h"
 
 #include "InterfaceTableAccess.h"
-#include "AnsaRoutingTableAccess.h"
-#include "NotificationBoard.h"
 #include "NotifierConsts.h"
 #include "PimNeighborTable.h"
 #include "PimInterfaceTable.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
-#include "AnsaIPv4Route.h"
-#include "AnsaIPv4.h"
+#include "PIMRoute.h"
+#include "PIMRoutingTable.h"
 
 #define KAT 180.0                       /**< Keep alive timer, if RPT is disconnect */
 #define KAT2 210.0                      /**< Keep alive timer, if RPT is connect */
@@ -77,12 +75,11 @@ enum JPMsgType
 /**
  * @brief Class implements PIM-SM (sparse mode).
  */
-class PIMSM : public cSimpleModule, protected INotifiable
+class PIMSM : public cSimpleModule, protected cListener
 {
     private:
-        AnsaRoutingTable            *rt;            /**< Pointer to routing table. */
+        PIMRoutingTable            *rt;            /**< Pointer to routing table. */
         IInterfaceTable             *ift;           /**< Pointer to interface table. */
-        NotificationBoard           *nb;            /**< Pointer to notification table. */
         PimInterfaceTable           *pimIft;        /**< Pointer to table of PIM interfaces. */
         PimNeighborTable            *pimNbt;        /**< Pointer to table of PIM neighbors. */
 
@@ -90,8 +87,8 @@ class PIMSM : public cSimpleModule, protected INotifiable
         std::string SPTthreshold;
 
     private:
-        void receiveChangeNotification(int category, const cPolymorphic *details);
-        void newMulticastRegisterDR(AnsaIPv4MulticastRoute *newRoute);
+        void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+        void newMulticastRegisterDR(PIMMulticastRoute *newRoute);
         void newMulticastReciever(addRemoveAddr *members);
         void removeMulticastReciever(addRemoveAddr *members);
 
@@ -105,8 +102,8 @@ class PIMSM : public cSimpleModule, protected INotifiable
         void processPrunePendingTimer(PIMppt *timer);
 
 
-        void restartExpiryTimer(AnsaIPv4MulticastRoute *route, InterfaceEntry *originIntf, int holdTime);
-        void dataOnRpf(AnsaIPv4MulticastRoute *route);
+        void restartExpiryTimer(PIMMulticastRoute *route, InterfaceEntry *originIntf, int holdTime);
+        void dataOnRpf(PIMMulticastRoute *route);
 
         // set timers
         PIMkat* createKeepAliveTimer(IPv4Address source, IPv4Address group);
