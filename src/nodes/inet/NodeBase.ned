@@ -90,7 +90,7 @@ module NodeBase
         }
 
 		// routing table
-        routingTable: <routingTableType> like IRoutingTable {
+        routingTable: <routingTableType> like IRoutingTable if routingTableType != "" {
             parameters:
                 @display("p=53,225;is=s");
         }
