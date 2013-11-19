@@ -107,7 +107,8 @@ void PingApp::handleMessage(cMessage *msg)
     if (msg == timer)
     {
         sendPingRequest();
-        scheduleNextPingRequest(simTime());
+        if (isEnabled())
+            scheduleNextPingRequest(simTime());
     }
     else
         processPingResponse(check_and_cast<PingPayload *>(msg));
