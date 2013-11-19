@@ -183,6 +183,7 @@ class INET_API InterfaceEntry : public cNamedObject
     double getDatarate() const        {return datarate;}
     const MACAddress& getMacAddress() const  {return macAddr;}
     const InterfaceToken& getInterfaceToken() const {return token;}
+    const Address getNetworkAddress() const;
     //@}
 
     /** @name Field setters */

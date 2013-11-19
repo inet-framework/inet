@@ -211,6 +211,20 @@ void InterfaceEntry::setGenericNetworkProtocolData(GenericNetworkProtocolInterfa
     configChanged(F_GENERIC_DATA);
 }
 
+const Address InterfaceEntry::getNetworkAddress() const
+{
+#ifdef WITH_IPv4
+    if (ipv4data)
+        return ipv4data->getIPAddress();
+#endif
+#ifdef WITH_IPv6
+    if (ipv6data)
+        return ipv6data->getPreferredAddress();
+#endif
+    if (genericNetworkProtocolData)
+        return genericNetworkProtocolData->getAddress();
+}
+
 void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
 {
 #ifdef WITH_IPv4
