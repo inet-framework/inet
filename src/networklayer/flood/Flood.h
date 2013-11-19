@@ -59,7 +59,7 @@ protected:
     unsigned long seqNum;
 
     /** @brief cached variable of my networ address */
-    ModuleIdAddress myNetwAddr;
+    Address myNetwAddr;
 
     /** @brief Length of the header*/
     int headerLength;
@@ -114,8 +114,10 @@ public:
     {}
 
     /** @brief Initialization of omnetpp.ini parameters*/
-    virtual int numInitStages() const { return 2; }
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+
     virtual void initialize(int);
+
     virtual void finish();    
 
     /** @brief Called every time a message arrives*/

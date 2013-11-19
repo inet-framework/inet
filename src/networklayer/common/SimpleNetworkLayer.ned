@@ -15,18 +15,32 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.networklayer.flood;
+package inet.networklayer.common;
 
-import inet.networklayer.common.EchoProtocol;
 import inet.networklayer.contract.INetworkLayer;
 
-
 //
-// This module provides the flood network layer.
+// This interface provides an abstraction for different simple network protocols.
 //
-module FloodNetworkLayer like INetworkLayer
+moduleinterface ISimpleNetworkProtocol
 {
     parameters:
+        @display("i=block/fork");
+
+    gates:
+        input upperLayerIn[];
+        output upperLayerOut[];
+        input lowerLayerIn[];
+        output lowerLayerOut[];
+}
+
+//
+// This module provides a simple network layer.
+//
+module SimpleNetworkLayer like INetworkLayer
+{
+    parameters:
+        string networkProtocolType;
         @display("i=block/fork");
 
     gates:
@@ -38,7 +52,7 @@ module FloodNetworkLayer like INetworkLayer
         output pingOut[] @labels(PingPayload/up);
 
     submodules:
-        flood: Flood {
+        np: <networkProtocolType> like ISimpleNetworkProtocol {
             parameters:
                 @display("p=85,95;q=queue");
             gates:
@@ -52,14 +66,14 @@ module FloodNetworkLayer like INetworkLayer
 
     connections allowunconnected:
         for i=0..sizeof(transportIn)-1 {
-            transportIn[i] --> { @display("m=n"); } --> flood.upperLayerIn++;
+            transportIn[i] --> { @display("m=n"); } --> np.upperLayerIn++;
         }
         for i=0..sizeof(transportOut)-1 {
-            flood.upperLayerOut++ --> { @display("m=n"); } --> transportOut[i];
+            np.upperLayerOut++ --> { @display("m=n"); } --> transportOut[i];
         }
 
-        flood.upperLayerOut++ --> echo.localIn;
-        flood.upperLayerIn++ <-- echo.sendOut;
+        np.upperLayerOut++ --> echo.localIn;
+        np.upperLayerIn++ <-- echo.sendOut;
 
         for i=0..sizeof(pingOut)-1 {
             echo.pingOut++ --> { @display("m=n"); } --> pingOut[i];
@@ -69,9 +83,9 @@ module FloodNetworkLayer like INetworkLayer
         }
 
         for i=0..sizeof(ifIn)-1 {
-            ifIn[i] --> { @display("m=s"); } --> flood.lowerLayerIn[i];
+            ifIn[i] --> { @display("m=s"); } --> np.lowerLayerIn[i];
         }
         for i=0..sizeof(ifOut)-1 {
-            flood.lowerLayerOut[i] --> { @display("m=s"); } --> ifOut[i];
+            np.lowerLayerOut[i] --> { @display("m=s"); } --> ifOut[i];
         }
 }

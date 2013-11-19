@@ -1,15 +1,15 @@
-class noncobject ModuleIdAddress;
+class noncobject Address;
 
 cplusplus {{
-   #include "ModuleIdAddress.h"
+   #include "Address.h"
 }}
 
 packet FloodDatagram
 {
     @customize(true);
 
-    ModuleIdAddress srcAddress;
-    ModuleIdAddress destAddress;
-    int             ttl = 1;    // time to live field
-    unsigned long   seqNum = 0; // sequence number
+    Address       srcAddress;
+    Address       destAddress;
+    int           ttl = 1;    // time to live field
+    unsigned long seqNum = 0; // sequence number
 }

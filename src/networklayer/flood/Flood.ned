@@ -1,4 +1,3 @@
-package inet.networklayer.flood;
 //***************************************************************************
 // * file:        Flood.ned
 // *
@@ -22,8 +21,11 @@ package inet.networklayer.flood;
 // *              the user can decide whether to use plain flooding or not
 // ***************************************************************************
 
+package inet.networklayer.flood;
 
+import inet.networklayer.common.ISimpleNetworkProtocol;
 
+//
 // A simple flooding protocol for network-level broadcast.
 //
 // This implementation uses plain flooding, i.e. it "remembers"
@@ -41,7 +43,7 @@ package inet.networklayer.flood;
 //
 // ported to Mixim 2.0 by Theodoros Kapourniotis
 //
-simple Flood
+simple Flood like ISimpleNetworkProtocol
 {
     parameters:
         @display("i=block/fork");
@@ -52,10 +54,10 @@ simple Flood
         // Time after which an entry for an already broadcasted msg can be deleted
         double bcDelTime @unit(s) = default(100 s);
         double defaultTtl = default(10); // Default time-to-live (ttl) used for this module expressed in  number of hops.
-        
+
     gates:
-        input upperLayerIn[]; // from upper layer
-        output upperLayerOut[]; // to uppe layer
-        input lowerLayerIn[]; // from lower layer
-        output lowerLayerOut[]; // to lower layer
+        input upperLayerIn[];
+        output upperLayerOut[];
+        input lowerLayerIn[];
+        output lowerLayerOut[];
 }

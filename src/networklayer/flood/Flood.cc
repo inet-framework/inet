@@ -23,6 +23,7 @@
 #include "Flood.h"
 
 #include <cassert>
+#include "IAddressType.h"
 #include "INetworkProtocolControlInfo.h"
 #include "Ieee802Ctrl.h"
 #include "GenericNetworkProtocolControlInfo.h"
@@ -36,7 +37,7 @@ Define_Module(Flood);
  * specified in the ini file a default value will be set.
  **/
 void Flood::initialize(int stage) {
-	if (stage == 0) {
+	if (stage == INITSTAGE_LOCAL) {
 		//initialize seqence number to 0
 		seqNum = 0;
 		nbDataPacketsReceived = 0;
@@ -61,8 +62,8 @@ void Flood::initialize(int stage) {
 		}
         interfaceTable = InterfaceTableAccess().get(this);
 	}
-	else if (stage == 1) {
-        myNetwAddr = ModuleIdAddress(interfaceTable->getInterface(1)->getInterfaceModule()->getParentModule()->getId());
+	else if (stage == INITSTAGE_NETWORK_LAYER_3) {
+        myNetwAddr = interfaceTable->getInterface(1)->getNetworkAddress();
 	}
 }
 
@@ -303,7 +304,7 @@ cMessage* Flood::decapsMsg(FloodDatagram *msg)
  * header fields.
  **/
 FloodDatagram * Flood::encapsMsg(cPacket *appPkt) {
-    ModuleIdAddress netwAddr;
+    Address netwAddr;
 
     EV << "in encaps...\n";
 
@@ -315,10 +316,10 @@ FloodDatagram * Flood::encapsMsg(cPacket *appPkt) {
     if (cInfo == NULL) {
         EV << "warning: Application layer did not specifiy a destination L3 address\n"
            << "\tusing broadcast address instead\n";
-        netwAddr = ModuleIdAddress(-1);
+        netwAddr = netwAddr.getAddressType()->getBroadcastAddress();
     }
     else {
-        netwAddr = cInfo->getDestinationAddress().toModuleId();
+        netwAddr = cInfo->getDestinationAddress();
         EV << "CInfo removed, netw addr=" << netwAddr << endl;
         delete cInfo;
     }
@@ -337,7 +338,6 @@ FloodDatagram * Flood::encapsMsg(cPacket *appPkt) {
     EV <<" pkt encapsulated\n";
     return pkt;
 }
-
 
 /**
  * Attaches a "control info" structure (object) to the down message pMsg.
