@@ -35,10 +35,6 @@
 #include <netinet/in.h>
 
 
-// macro for normal EV<< logging (note: deliberately no parens in macro def)
-#define tcpEV  TCP_NSC::testingS ? EV : EV
-
-
 struct nsc_iphdr
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -192,12 +188,14 @@ void TCP_NSC_Connection::do_SEND()
             }
             else
             {
-                tcpEV << "TCP_NSC connection: " << connIdM << ": Error do sending, err is " << sent << "\n";
+                EV_WARN << "TCP_NSC connection: " << connIdM << ": Error do sending, err is " << sent << "\n";
                 break;
 
             }
         }
-//        tcpEV << "do_SEND(): " << connIdM << " sent:" << allsent << ", unsent:" << sendQueueM->getBytesAvailable() << "\n";
+
+        EV_DEBUG << "do_SEND(): " << connIdM << " sent:" << allsent << ", unsent:" << sendQueueM->getBytesAvailable() << "\n";
+
         if (onCloseM && sendQueueM->getBytesAvailable()==0 && !disconnectCalledM)
         {
             disconnectCalledM = true;

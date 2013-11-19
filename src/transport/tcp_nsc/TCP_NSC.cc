@@ -67,15 +67,6 @@ const Address TCP_NSC::remoteFirstInnerIpS("2.0.0.1");
 const char * TCP_NSC::stackNameParamNameS = "stackName";
 const char * TCP_NSC::bufferSizeParamNameS = "stackBufferSize";
 
-bool TCP_NSC::testingS;
-bool TCP_NSC::logverboseS;
-
-#ifdef tcpEV
-#undef tcpEV
-#endif
-// macro for normal EV<< logging (note: deliberately no parens in macro def)
-#define tcpEV TCP_NSC::testingS ? EV : EV
-
 struct nsc_iphdr
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -217,7 +208,7 @@ void TCP_NSC::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    tcpEV << this << ": initialize stage " << stage << endl;
+    EV_TRACE << this << ": initialize stage " << stage << endl;
 
     if (stage == INITSTAGE_LOCAL)
     {
@@ -233,10 +224,6 @@ void TCP_NSC::initialize(int stage)
             throw cRuntimeError("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
 
         WATCH_MAP(tcpAppConnMapM);
-
-        cModule *netw = simulation.getSystemModule();
-        testingS = netw->hasPar("testing") && netw->par("testing").boolValue();
-        logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
 
         // load the stack
         const char* stackName = this->par(stackNameParamNameS).stringValue();
@@ -263,7 +250,7 @@ void TCP_NSC::initialize(int stage)
 
 TCP_NSC::~TCP_NSC()
 {
-    tcpEV << this << ": destructor\n";
+    EV_TRACE << this << ": destructor\n";
     isAliveM = false;
 
     while (!tcpAppConnMapM.empty())
@@ -298,7 +285,7 @@ void TCP_NSC::changeAddresses(TCP_NSC_Connection &connP,
 {
     if (!(connP.inetSockPairM == inetSockPairP))
     {
-        tcpEV << "conn:" << connP << " change inetMap from " << connP.inetSockPairM << " to " << inetSockPairP << "\n";
+        EV_DEBUG << "conn:" << connP << " change inetMap from " << connP.inetSockPairM << " to " << inetSockPairP << "\n";
         inetSockPair2ConnIdMapM.erase(connP.inetSockPairM);
         connP.inetSockPairM = inetSockPairP;
         inetSockPair2ConnIdMapM[connP.inetSockPairM] = connP.connIdM;
@@ -306,7 +293,7 @@ void TCP_NSC::changeAddresses(TCP_NSC_Connection &connP,
 
     if (!(connP.nscSockPairM == nscSockPairP))
     {
-        tcpEV << "conn:" << connP << " change nscMap from " << connP.nscSockPairM << " to " << nscSockPairP << "\n";
+        EV_DEBUG << "conn:" << connP << " change nscMap from " << connP.nscSockPairM << " to " << nscSockPairP << "\n";
         // remove old from map:
         nscSockPair2ConnIdMapM.erase(connP.nscSockPairM);
         // change addresses:
@@ -380,8 +367,8 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     nscSockPair.localM.ipAddrM = localInnerIpS;
     nscSockPair.remoteM.ipAddrM.set(IPv4Address(nscSrcAddr));
 
-    tcpEV << this << ": data arrived for interface of stack "
-        << pStackM << "\n" << "src:"<< inetSockPair.remoteM.ipAddrM <<",dest:"<< inetSockPair.localM.ipAddrM <<"\n";
+    EV_DETAIL << this << ": data arrived for interface of stack "<< pStackM << "\n"
+            << "  src:"<< inetSockPair.remoteM.ipAddrM <<",dest:"<< inetSockPair.localM.ipAddrM <<"\n";
 
     nsc_iphdr *ih = (nsc_iphdr *)data;
     tcphdr *tcph = (tcphdr *)(data + ipHdrLen);
@@ -397,7 +384,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     ih->saddr = htonl(nscSrcAddr);
     ih->daddr = htonl(localInnerIpS.toIPv4().getInt());
 
-    tcpEV << this << ": modified to: IP " << ih->version << " len " << ih->ihl
+    EV_DEBUG << this << ": modified to: IP " << ih->version << " len " << ih->ihl
           << " protocol " << (unsigned int)(ih->protocol)
           << " saddr " << (ih->saddr)
           << " daddr " << (ih->daddr)
@@ -441,14 +428,14 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
         if (c.pNscSocketM && c.isListenerM)
         {
             // accepting socket
-            tcpEV << this << ": NSC: attempting to accept:\n";
+            EV_DETAIL << this << ": NSC: attempting to accept:\n";
 
             INetStreamSocket *sock = NULL;
             int err;
 
             err = c.pNscSocketM->accept( &sock );
 
-            tcpEV << this << ": accept returned " << err << " , sock is " << sock
+            EV_DETAIL << this << ": accept returned " << err << " , sock is " << sock
                 << " socket" << c.pNscSocketM << "\n";
 
             if (sock)
@@ -477,7 +464,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
                 const char *receiveQueueClass = c.receiveQueueM->getClassName();
                 conn->receiveQueueM = check_and_cast<TCP_NSC_ReceiveQueue *>(createOne(receiveQueueClass));
                 conn->receiveQueueM->setConnection(conn);
-                tcpEV << this << ": NSC: got accept!\n";
+                EV_DETAIL << this << ": NSC: got accept!\n";
 
                 sendEstablishedMsg(*conn);
             }
@@ -486,7 +473,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
         {
             bool hasData = false;
             int err = NSC_EAGAIN;
-            tcpEV << this << ": NSC: attempting to read from socket " << c.pNscSocketM << "\n";
+            EV_DEBUG << this << ": NSC: attempting to read from socket " << c.pNscSocketM << "\n";
 
             if ((!c.sentEstablishedM) && c.pNscSocketM->is_connected())
             {
@@ -504,7 +491,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
 
                 err = c.pNscSocketM->read_data(buf, &buflen);
 
-                tcpEV << this << ": NSC: read: err " << err << " , buflen " << buflen << "\n";
+                EV_DEBUG << this << ": NSC: read: err " << err << " , buflen " << buflen << "\n";
 
                 if (err == 0 && buflen > 0)
                 {
@@ -639,7 +626,7 @@ void TCP_NSC::handleAppMessage(cMessage *msgP)
         conn->receiveQueueM = createReceiveQueue(transferMode);
         conn->receiveQueueM->setConnection(conn);
 
-        tcpEV << this << ": TCP connection created for " << msgP << "\n";
+        EV_INFO << this << ": TCP connection created for " << msgP << "\n";
     }
 
     processAppCommand(*conn, msgP);
@@ -681,12 +668,12 @@ void TCP_NSC::handleMessage(cMessage *msgP)
 #endif
             )
         {
-            tcpEV << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to TCP???
+            EV_WARN << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to TCP???
             delete msgP;
         }
         else
         {
-            tcpEV << this << ": handle msg: " << msgP->getName() << "\n";
+            EV_DEBUG << this << ": handle msg: " << msgP->getName() << "\n";
             // must be a TCPSegment
             TCPSegment *tcpseg = check_and_cast<TCPSegment *>(msgP);
             handleIpInputMessage(tcpseg);
@@ -694,7 +681,7 @@ void TCP_NSC::handleMessage(cMessage *msgP)
     }
     else // must be from app
     {
-        tcpEV << this << ": handle msg: " << msgP->getName() << "\n";
+        EV_DEBUG << this << ": handle msg: " << msgP->getName() << "\n";
         handleAppMessage(msgP);
     }
 
@@ -739,8 +726,8 @@ void TCP_NSC::removeConnection(int connIdP)
 
 void TCP_NSC::printConnBrief(TCP_NSC_Connection& connP)
 {
-    tcpEV << this << ": connId=" << connP.connIdM << " appGateIndex=" << connP.appGateIndexM;
-    tcpEV << " nscsocket=" << connP.pNscSocketM << "\n";
+    EV_DEBUG << this << ": connId=" << connP.connIdM << " appGateIndex=" << connP.appGateIndexM
+            << " nscsocket=" << connP.pNscSocketM << "\n";
 }
 
 void TCP_NSC::loadStack(const char* stacknameP, int bufferSizeP)
@@ -748,7 +735,7 @@ void TCP_NSC::loadStack(const char* stacknameP, int bufferSizeP)
     void *handle = NULL;
     FCreateStack create = NULL;
 
-    tcpEV << this << ": Loading stack " << stacknameP << "\n";
+    EV_DETAIL << this << ": Loading stack " << stacknameP << "\n";
 
     handle = dlopen(stacknameP, RTLD_NOW);
 
@@ -766,15 +753,15 @@ void TCP_NSC::loadStack(const char* stacknameP, int bufferSizeP)
 
     pStackM = create(this, this, NULL);
 
-    tcpEV << "TCP_NSC " << this << " has stack " << pStackM << "\n";
+    EV_DETAIL << "TCP_NSC " << this << " has stack " << pStackM << "\n";
 
-    tcpEV << "TCP_NSC " << this << "Initializing stack, name=" << pStackM->get_name() << endl;
+    EV_DETAIL << "TCP_NSC " << this << "Initializing stack, name=" << pStackM->get_name() << endl;
 
     pStackM->init(pStackM->get_hz());
 
     pStackM->buffer_size(bufferSizeP);
 
-    tcpEV << "TCP_NSC " << this << "Stack initialized, name=" << pStackM->get_name() << endl;
+    EV_INFO << "TCP_NSC " << this << "Stack initialized, name=" << pStackM->get_name() << endl;
 
     // set timer for 1.0 / pStackM->get_hz()
     pNsiTimerM = new cMessage("nsc_nsi_timer");
@@ -787,7 +774,7 @@ void TCP_NSC::send_callback(const void *dataP, int datalenP)
     if (!isAliveM)
         return;
 
-    tcpEV << this << ": NSC: send_callback(" << dataP << ", " << datalenP << ") called\n";
+    EV_DETAIL << this << ": NSC: send_callback(" << dataP << ", " << datalenP << ") called\n";
 
     sendToIP(dataP, datalenP);
 
@@ -822,7 +809,7 @@ void TCP_NSC::wakeup()
     if (!isAliveM)
         return;
 
-    tcpEV << this << ": wakeup() called\n";
+    EV_TRACE << this << ": wakeup() called\n";
 }
 
 void TCP_NSC::gettime(unsigned int *secP, unsigned int *usecP)
@@ -848,7 +835,7 @@ void TCP_NSC::gettime(unsigned int *secP, unsigned int *usecP)
     *usecP = usecs;
 #endif
 
-    tcpEV << this << ": gettime(" << *secP << "," << *usecP << ") called\n";
+    EV_TRACE << this << ": gettime(" << *secP << "," << *usecP << ") called\n";
 }
 
 void TCP_NSC::sendToIP(const void *dataP, int lenP)
@@ -900,9 +887,6 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
 
     ASSERT(tcpseg);
 
-    tcpEV << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP << " from " << src
-       << " to " << dest << "\n";
-
     if (dest.getType() == Address::IPv4)
     {
         // send over IPv4
@@ -935,6 +919,23 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
 
     if (sndAckVector)
         sndAckVector->record(tcpseg->getAckNo());
+
+    int connId = conn ? conn->connIdM : -1;
+    EV_INFO << this << ": Send segment: conn ID=" << connId << " from " << src
+            << " to " << dest << " SEQ=" << tcpseg->getSequenceNo();
+    if (tcpseg->getSynBit())
+        EV_INFO << " SYN";
+    if (tcpseg->getAckBit())
+        EV_INFO << " ACK=" << tcpseg->getAckNo();
+    if (tcpseg->getFinBit())
+        EV_INFO << " FIN";
+    if (tcpseg->getRstBit())
+        EV_INFO << " RST";
+    if (tcpseg->getPshBit())
+        EV_INFO << " PSH";
+    if (tcpseg->getUrgBit())
+        EV_INFO << " URG";
+    EV_INFO << " len=" << tcpseg->getPayloadLength() << "\n";
 
     send(tcpseg, "ipOut");
 }
@@ -977,7 +978,7 @@ void TCP_NSC::process_OPEN_ACTIVE(TCP_NSC_Connection& connP, TCPCommand *tcpComm
     if (inetSockPair.remoteM.ipAddrM.isUnspecified() || inetSockPair.remoteM.portM == -1)
         throw cRuntimeError("Error processing command OPEN_ACTIVE: remote address and port must be specified");
 
-    tcpEV << this << ": OPEN: "
+    EV_INFO << this << ": OPEN: "
         << inetSockPair.localM.ipAddrM << ":" << inetSockPair.localM.portM << " --> "
         << inetSockPair.remoteM.ipAddrM << ":" << inetSockPair.remoteM.portM << "\n";
 
@@ -1032,7 +1033,7 @@ void TCP_NSC::process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCom
     if (inetSockPair.localM.portM == -1)
         throw cRuntimeError("Error processing command OPEN_PASSIVE: local port must be specified");
 
-    tcpEV << this << "Starting to listen on: " << inetSockPair.localM.ipAddrM << ":" << inetSockPair.localM.portM << "\n";
+    EV_INFO << this << "Starting to listen on: " << inetSockPair.localM.ipAddrM << ":" << inetSockPair.localM.portM << "\n";
 
     /*
     ...
@@ -1075,7 +1076,7 @@ void TCP_NSC::do_SEND_all()
 
 void TCP_NSC::process_CLOSE(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
 {
-    tcpEV << this << ": process_CLOSE()\n";
+    EV_INFO << this << ": process_CLOSE()\n";
 
     delete tcpCommandP;
     delete msgP;
@@ -1085,7 +1086,7 @@ void TCP_NSC::process_CLOSE(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, 
 
 void TCP_NSC::process_ABORT(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
 {
-    tcpEV << this << ": process_ABORT()\n";
+    EV_INFO << this << ": process_ABORT()\n";
 
     delete tcpCommandP;
     delete msgP;

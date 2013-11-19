@@ -159,10 +159,6 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
 
     cMessage *pNsiTimerM;
 
-  public:
-    static bool testingS;    // switches between tcpEV and testingEV
-    static bool logverboseS; // if !testingS, turns on more verbose logging
-
   protected:
     bool isAliveM;   // true when I between initialize() and finish()
 
