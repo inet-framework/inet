@@ -34,6 +34,7 @@ class INET_API ModuleIdAddressType : public IAddressType
 
         virtual int getMaxPrefixLength() const { return 0; }
         virtual Address getUnspecifiedAddress() const { return ModuleIdAddress(); } // TODO: constant
+        virtual Address getBroadcastAddress() const { return ModuleIdAddress(-1); }
         virtual Address getLinkLocalManetRoutersMulticastAddress() const { return ModuleIdAddress(-109); } // TODO: constant
         virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ModuleIdAddress(-9); } // TODO: constant
         virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const { return new GenericNetworkProtocolControlInfo(); }
