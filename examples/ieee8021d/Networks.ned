@@ -22,7 +22,7 @@ import inet.nodes.ethernet.EtherSwitch;
 import inet.world.scenario.ScenarioManager;
 import inet.linklayer.configurator.L2NetworkConfigurator;
 
-network CompleteNetwork
+network SwitchNetwork
 {
     @display("bgb=689,368");
     submodules:
@@ -36,49 +36,49 @@ network CompleteNetwork
             @display("p=75,155");
         }
 
-        switchBEB1: EtherSwitch {
+        switch1: EtherSwitch {
             parameters:
                 @display("p=333,78");
             gates:
                 ethg[];
         }
 
-        switchBEB2: EtherSwitch {
+        switch2: EtherSwitch {
             parameters:
                 @display("p=301,217");
             gates:
                 ethg[];
         }
 
-        switchBEB3: EtherSwitch {
+        switch3: EtherSwitch {
             parameters:
                 @display("p=443,78");
             gates:
                 ethg[];
         }
 
-        switchBEB4: EtherSwitch {
+        switch4: EtherSwitch {
             parameters:
                 @display("p=322,153");
             gates:
                 ethg[];
         }
 
-        switchBEB5: EtherSwitch {
+        switch5: EtherSwitch {
             parameters:
                 @display("p=529,217");
             gates:
                 ethg[];
         }
 
-        switchBEB6: EtherSwitch {
+        switch6: EtherSwitch {
             parameters:
                 @display("p=148,217");
             gates:
                 ethg[];
         }
 
-        switchBEB7: EtherSwitch {
+        switch7: EtherSwitch {
             parameters:
                 @display("p=443,153");
             gates:
@@ -86,19 +86,20 @@ network CompleteNetwork
         }
 
     connections:
-        switchBEB1.ethg++ <--> Eth1G <--> switchBEB4.ethg++;
-        switchBEB1.ethg++ <--> Eth1G <--> switchBEB3.ethg++;
-        switchBEB2.ethg++ <--> Eth1G <--> switchBEB4.ethg++;
-        switchBEB2.ethg++ <--> Eth1G <--> switchBEB6.ethg++;
-        switchBEB2.ethg++ <--> Eth1G <--> switchBEB7.ethg++;
-        switchBEB3.ethg++ <--> Eth1G <--> switchBEB7.ethg++;
-        switchBEB4.ethg++ <--> Eth1G <--> switchBEB6.ethg++;
-        switchBEB4.ethg++ <--> Eth1G <--> switchBEB7.ethg++;
-        switchBEB5.ethg++ <--> Eth1G <--> switchBEB7.ethg++;
+        switch1.ethg++ <--> Eth1G <--> switch4.ethg++;
+        switch1.ethg++ <--> Eth1G <--> switch3.ethg++;
+        switch2.ethg++ <--> Eth1G <--> switch4.ethg++;
+        switch2.ethg++ <--> Eth1G <--> switch6.ethg++;
+        switch2.ethg++ <--> Eth1G <--> switch7.ethg++;
+        switch3.ethg++ <--> Eth1G <--> switch7.ethg++;
+        switch4.ethg++ <--> Eth1G <--> switch6.ethg++;
+        switch4.ethg++ <--> Eth1G <--> switch7.ethg++;
+        switch5.ethg++ <--> Eth1G <--> switch7.ethg++;
 }
 
-network NetworkWithHosts extends CompleteNetwork
+network LargeNet extends SwitchNetwork
 {
+    @display("bgb=952,472");
     submodules:
         host1: EtherHost {
             @display("p=187,147");
@@ -111,17 +112,6 @@ network NetworkWithHosts extends CompleteNetwork
         host3: EtherHost {
             @display("p=529,78");
         }
-
-    connections:
-        switchBEB3.ethg++ <--> Eth1G <--> host3.ethg;
-        switchBEB5.ethg++ <--> Eth1G <--> host2.ethg;
-        switchBEB6.ethg++ <--> Eth1G <--> host1.ethg;
-}
-
-network LargeNet extends NetworkWithHosts
-{
-    @display("bgb=952,472");
-    submodules:
         host4: EtherHost {
             @display("p=679,422");
         }
@@ -131,28 +121,31 @@ network LargeNet extends NetworkWithHosts
         host6: EtherHost {
             @display("p=322,321");
         }
-        switchBEB8: EtherSwitch {
+        switch8: EtherSwitch {
             @display("p=443,282");
         }
-        switchBEB9: EtherSwitch {
+        switch9: EtherSwitch {
             @display("p=518,352");
         }
-        switchBEB10: EtherSwitch {
+        switch10: EtherSwitch {
             @display("p=648,352");
         }
-        switchBEB11: EtherSwitch {
+        switch11: EtherSwitch {
             @display("p=579,288");
         }
     connections:
-        switchBEB11.ethg++ <--> Eth1G <--> switchBEB9.ethg++;
-        switchBEB11.ethg++ <--> Eth1G <--> switchBEB10.ethg++;
-        switchBEB11.ethg++ <--> Eth1G <--> switchBEB5.ethg++;
-        switchBEB9.ethg++ <--> Eth1G <--> switchBEB10.ethg++;
-        switchBEB8.ethg++ <--> Eth1G <--> switchBEB9.ethg++;
-        switchBEB8.ethg++ <--> Eth1G <--> switchBEB11.ethg++;
-        switchBEB8.ethg++ <--> Eth1G <--> switchBEB5.ethg++;
-        switchBEB8.ethg++ <--> Eth1G <--> switchBEB2.ethg++;
-        host5.ethg <--> Eth1G <--> switchBEB9.ethg++;
-        host4.ethg <--> Eth1G <--> switchBEB10.ethg++;
-        host6.ethg <--> Eth1G <--> switchBEB8.ethg++;
+        switch11.ethg++ <--> Eth1G <--> switch9.ethg++;
+        switch11.ethg++ <--> Eth1G <--> switch10.ethg++;
+        switch11.ethg++ <--> Eth1G <--> switch5.ethg++;
+        switch9.ethg++ <--> Eth1G <--> switch10.ethg++;
+        switch8.ethg++ <--> Eth1G <--> switch9.ethg++;
+        switch8.ethg++ <--> Eth1G <--> switch11.ethg++;
+        switch8.ethg++ <--> Eth1G <--> switch5.ethg++;
+        switch8.ethg++ <--> Eth1G <--> switch2.ethg++;
+        switch3.ethg++ <--> Eth1G <--> host3.ethg;
+        switch5.ethg++ <--> Eth1G <--> host2.ethg;
+        switch6.ethg++ <--> Eth1G <--> host1.ethg;
+        host5.ethg <--> Eth1G <--> switch9.ethg++;
+        host4.ethg <--> Eth1G <--> switch10.ethg++;
+        host6.ethg <--> Eth1G <--> switch8.ethg++;
 }
