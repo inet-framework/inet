@@ -355,8 +355,9 @@ void PIMSplitter::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
     else if (signalID ==  NF_INTERFACE_IPv4CONFIG_CHANGED)
     {
         EV << "PimSplitter::receiveChangeNotification - IGMP change" << endl;
-        InterfaceEntry * interface = (InterfaceEntry *)(details);
-        igmpChange(interface);
+        InterfaceEntryChangeDetails *changeDetails = check_and_cast<InterfaceEntryChangeDetails*>(details);
+        if (changeDetails->getFieldId() == IPv4InterfaceData::F_MULTICAST_LISTENERS)
+            igmpChange(changeDetails->getInterfaceEntry());
     }
 }
 
