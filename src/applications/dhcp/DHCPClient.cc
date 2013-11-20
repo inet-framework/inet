@@ -89,21 +89,18 @@ void DHCPClient::initialize(int stage)
 
         // get the interface to configure
         IInterfaceTable* ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
-        ie = ift->getInterfaceByName(par("interface"));
-
+        const char *interfaceName = par("interface");
+        ie = ift->getInterfaceByName(interfaceName);
         if (ie == NULL)
-        {
-            error("DHCP Interface does not exist. Aborting.");
-            return;
-        }
+            throw new cRuntimeError("Interface \"%s\" does not exist", interfaceName);
 
         // get the routing table to update and subscribe it to the blackboard
         irt = check_and_cast<IRoutingTable*>(getModuleByPath(par("routingTablePath")));
 
-        // grab the interface mac address
+        // grab the interface MAC address
         macAddress = ie->getMacAddress();
 
-        // bind the client to the udp port
+        // bind the client to the UDP port
         socket.setOutputGate(gate("udpOut"));
         socket.bind(clientPort);
         socket.setBroadcast(true);
@@ -160,18 +157,16 @@ void DHCPClient::handleMessage(cMessage *msg)
     }
 
     if (msg->isSelfMessage())
+    {
         handleTimer(msg);
-
+    }
     else if (msg->arrivedOn("udpIn"))
     {
-        DHCPMessage * dhcpPacket = dynamic_cast<DHCPMessage*>(msg);
+        DHCPMessage *dhcpPacket = dynamic_cast<DHCPMessage*>(msg);
+        if (!dhcpPacket)
+            throw cRuntimeError(dhcpPacket, "Unexpected packet received (not a DHCPMessage)");
 
-        // check if the message is DHCPMessage
-        if (dhcpPacket)
-            handleDHCPMessage(dhcpPacket);
-        else
-            EV_WARN << "Unknown packet, discarding it." << endl;
-
+        handleDHCPMessage(dhcpPacket);
         delete msg;
     }
 }
@@ -182,24 +177,24 @@ void DHCPClient::handleTimer(cMessage * msg)
 
     if (category == WAIT_OFFER)
     {
-        EV_DETAIL << "No DHCP offer. Restarting. " << endl;
+        EV_DETAIL << "No DHCP offer received within timeout. Restarting. " << endl;
         initClient();
     }
     else if (category == WAIT_ACK)
     {
-        EV_DETAIL << "No DHCP ACK. Restarting." << endl;
+        EV_DETAIL << "No DHCP ACK received within timeout. Restarting." << endl;
         initClient();
     }
     else if (category == T1)
     {
-        EV_DETAIL << "T1 expires. Starting RENEWING state." << endl;
+        EV_DETAIL << "T1 expired. Starting RENEWING state." << endl;
         clientState = RENEWING;
         scheduleTimerTO(WAIT_ACK);
         sendRequest();
     }
     else if (category == T2 && clientState == RENEWING)
     {
-        EV_DETAIL << "T2 expires. Starting REBINDING state." << endl;
+        EV_DETAIL << "T2 expired. Starting REBINDING state." << endl;
         clientState = REBINDING;
 
         cancelEvent(timerT1);
@@ -212,7 +207,7 @@ void DHCPClient::handleTimer(cMessage * msg)
     }
     else if (category == LEASE_TIMEOUT)
     {
-        EV_INFO << "Lease is expired. Starting DHCP process in INIT state." << endl;
+        EV_INFO << "Lease has expired. Starting DHCP process in INIT state." << endl;
         unboundLease();
         clientState = INIT;
         initClient();
@@ -243,7 +238,7 @@ void DHCPClient::recordOffer(DHCPMessage * dhcpOffer)
          }
      }
      else
-         EV_WARN << "DHCPOFFER arrived, but no IP address has been offered. Discarding it and remains in SELECTING." << endl;
+         EV_WARN << "DHCPOFFER arrived, but no IP address has been offered. Discarding it and remaining in SELECTING." << endl;
 }
 
 void DHCPClient::recordLease(DHCPMessage * dhcpACK)
@@ -536,7 +531,6 @@ void DHCPClient::sendRequest()
 
 void DHCPClient::sendDiscover()
 {
-
     // setting the xid
     xid = intuniform(0, RAND_MAX);
 
@@ -607,6 +601,7 @@ void DHCPClient::scheduleTimerT1()
     cancelEvent(timerT1);
     scheduleAt(simTime() + (lease->renewalTime), timerT1); // RFC 2131 4.4.5
 }
+
 void DHCPClient::scheduleTimerT2()
 {
     // cancel the previous T2
@@ -616,7 +611,6 @@ void DHCPClient::scheduleTimerT2()
 
 void DHCPClient::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort)
 {
-
     EV_DETAIL << "Sending packet: ";
     socket.sendTo(msg, destAddr, destPort, ie->getInterfaceId());
 }
