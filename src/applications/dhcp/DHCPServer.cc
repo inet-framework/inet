@@ -214,7 +214,7 @@ void DHCPServer::processPacket(DHCPMessage *packet)
             {
                 if (packet->getCiaddr().isUnspecified())  // init-reboot
                 {
-                    std::cout << "init-reboot" << endl;
+                    // std::cout << "init-reboot" << endl;
                     IPv4Address requestedAddress = IPv4Address(packet->getOptions().get(REQUESTED_IP).stringValue().c_str());
                     DHCPLeased::iterator it = leased.find(requestedAddress);
                     if (it == leased.end())

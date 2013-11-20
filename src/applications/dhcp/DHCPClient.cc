@@ -378,22 +378,20 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             }
             else if (msg->getOptions().get(DHCP_MSG_TYPE) == DHCPACK)
             {
-                if (true) // check the IP with ping request //TODO: !!PING!!
-                {
-                    EV_INFO << "The offered IP " << lease->ip << " is available. Bound it!" << endl;
-                    recordLease(msg);
-                    cancelEvent(timerTo);
-                    scheduleTimerT1();
-                    scheduleTimerT2();
-                    boundLease();
-                    clientState = BOUND;
-                }
-                else
-                {
+                EV_INFO << "The offered IP " << lease->ip << " is available. Bound it!" << endl;
+                recordLease(msg);
+                cancelEvent(timerTo);
+                scheduleTimerT1();
+                scheduleTimerT2();
+                boundLease();
+                clientState = BOUND;
+                /*
+                    The client SHOULD perform a final check on the parameters (ping, ARP).
+                    If the client detects that the address is already in use:
                     EV_INFO << "The offered IP " << lease->ip << " is not available." << endl;
                     sendDecline(lease->ip);
                     initClient();
-                }
+                */
             }
             else if (msg->getOptions().get(DHCP_MSG_TYPE) == DHCPNAK)
             {
@@ -579,7 +577,7 @@ void DHCPClient::sendDecline(IPv4Address declinedIp)
     xid = intuniform(0, RAND_MAX);
     DHCPMessage * decline = new DHCPMessage("DHCPDECLINE");
     decline->setOp(BOOTREQUEST);
-    decline->setByteLength(280); // DHCPDECLINE packet size // TODO: ebben nem vagyok biztos
+    decline->setByteLength(280); // DHCPDECLINE packet size
     decline->setHtype(1); // ethernet
     decline->setHlen(6); // hardware Address length (6 octets)
     decline->setHops(0);
