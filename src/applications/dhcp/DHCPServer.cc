@@ -30,7 +30,7 @@
 #include "NotifierConsts.h"
 
 Define_Module(DHCPServer);
-#define EV_DETAIL EV
+
 
 DHCPServer::DHCPServer()
 {

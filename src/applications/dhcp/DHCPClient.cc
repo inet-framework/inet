@@ -27,7 +27,6 @@
 #include "NodeOperations.h"
 
 Define_Module(DHCPClient);
-#define EV_DETAIL EV
 
 DHCPClient::DHCPClient()
 {
@@ -251,7 +250,6 @@ void DHCPClient::recordLease(DHCPMessage * dhcpACK)
 {
     if (!dhcpACK->getYiaddr().isUnspecified())
     {
-
         IPv4Address ip = dhcpACK->getYiaddr();
         EV_DETAIL << "DHCPACK arrived with " << endl << "IP: " << ip << endl;
 
@@ -595,7 +593,7 @@ void DHCPClient::sendDecline(IPv4Address declinedIp)
     sendToUDP(decline, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
 }
 
-void DHCPClient::scheduleTimerTO(TIMER_TYPE type)
+void DHCPClient::scheduleTimerTO(TimerType type)
 {
     // cancel the previous timeout
     cancelEvent(timerTo);

@@ -17,8 +17,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __DHCPSERVER_H__
-#define __DHCPSERVER_H__
+#ifndef INET_DHCPSERVER_H__
+#define INET_DHCPSERVER_H__
 
 #include <vector>
 #include <map>
@@ -32,6 +32,9 @@
 
 class NotificationBoard;
 
+/**
+ * Implements a DHCP server. See NED file for more details.
+ */
 class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILifecycle
 {
     protected:

@@ -15,14 +15,18 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef __DHCPLEASE_H__
-#define __DHCPLEASE_H__
+
+#ifndef INET_DHCPLEASE_H__
+#define INET_DHCPLEASE_H__
 
 #include "Byte.h"
 #include "IPv4Address.h"
 #include "MACAddress.h"
 #include "ARP.h"
 
+/**
+ * Describes a DHCP lease.
+ */
 class DHCPLease
 {
     public:
@@ -42,11 +46,13 @@ class DHCPLease
         Byte parameterRequestList;
         bool leased;
 
-        friend std::ostream& operator <<(std::ostream& os, DHCPLease obj)
-        {
-            os << "xid:" << obj.xid << " ip:" << obj.ip << " network:" << obj.network << " netmask:" << obj.netmask
-                    << " MAC:" << obj.mac << endl;
-            return (os);
-        }
 };
+
+std::ostream& operator <<(std::ostream& os, DHCPLease obj)
+{
+    os << "xid:" << obj.xid << " ip:" << obj.ip << " network:" << obj.network << " netmask:" << obj.netmask
+            << " MAC:" << obj.mac << endl;
+    return os;
+}
+
 #endif

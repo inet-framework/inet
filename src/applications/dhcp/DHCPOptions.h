@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __DHCPOPTIONS__
-#define __DHCPOPTIONS__
+#ifndef INET_DHCPOPTIONS_H__
+#define INET_DHCPOPTIONS_H__
 
 #include <map>
 #include <sstream>

@@ -17,8 +17,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __DHCPCLIENT_H__
-#define __DHCPCLIENT_H__
+#ifndef INET_DHCPCLIENT_H__
+#define INET_DHCPCLIENT_H__
 
 #include <vector>
 #include "NotificationBoard.h"
@@ -31,6 +31,9 @@
 #include "INotifiable.h"
 #include "ILifecycle.h"
 
+/**
+ * Implements a DHCP client. See NED file for more details.
+ */
 class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILifecycle
 {
     protected:
@@ -44,13 +47,13 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         cMessage* leaseTimer;
 
         // DHCP timer types (RFC 2131 4.4.5)
-        enum TIMER_TYPE
+        enum TimerType
         {
             WAIT_OFFER, WAIT_ACK, T1, T2, LEASE_TIMEOUT
         };
 
         // DHCP client states (RFC 2131, Figure 5: state transition diagram)
-        enum CLIENT_STATE
+        enum ClientState
         {
             IDLE, INIT, INIT_REBOOT, REBOOTING, SELECTING, REQUESTING, BOUND, RENEWING, REBINDING
         };
@@ -60,7 +63,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         int numReceived; // number of received DHCP messages
         int responseTimeout; // timeout waiting for DHCPACKs, DHCPOFFERs
         long xid; // transaction id; to associate messages and responses between a client and a server
-        CLIENT_STATE clientState; // current state
+        ClientState clientState; // current state
 
         MACAddress macAddress; // client's MAC address
         NotificationBoard * nb; // notification board
@@ -145,7 +148,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
          */
         virtual void initRebootedClient();
 
-        virtual void scheduleTimerTO(TIMER_TYPE type);
+        virtual void scheduleTimerTO(TimerType type);
         virtual void scheduleTimerT1();
         virtual void scheduleTimerT2();
 
