@@ -41,6 +41,7 @@
 #  define EV_ERROR  EV << "ERROR: "
 #  define EV_WARN   EV << "WARN: "
 #  define EV_INFO   EV
+#  define EV_DETAIL EV << "DETAIL: "
 #  define EV_DEBUG  EV << "DEBUG: "
 #  define EV_TRACE  EV << "TRACE: "
 #endif
