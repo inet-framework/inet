@@ -21,15 +21,22 @@
 
 package inet.networklayer.pim;
 
-simple PIMRoutingTable
+import inet.networklayer.contract.IRoutingTable;
+
+simple PIMRoutingTable like IRoutingTable
 {
     parameters:
-        xml routingTable = default(xml("<routingTable/>"));
+        @display("i=block/table");
         string routerId = default("auto"); // for routers, the router id using IPv4 address dotted
                           // notation; specify "auto" to select the highest
                           // interface address; should be left empty ("") for hosts
         bool IPForward = default(true);  // turns IP forwarding on/off
-        bool forwardMulticast = default(false); // turns multicast forwarding on/off
-        string configFile = default("");  // routing table file name
-        @display("i=block/table");
+        bool forwardMulticast = default(true); // turns multicast forwarding on/off
+        string routingFile = default("");  // routing table file name
+        @signal[NF_ROUTE_ADDED](type=IPv4Route);
+        @signal[NF_ROUTE_DELETED](type=IPv4Route);
+        @signal[NF_ROUTE_CHANGED](type=IPv4Route);
+        @signal[NF_MROUTE_ADDED](type=IPv4MulticastRoute);
+        @signal[NF_MROUTE_DELETED](type=IPv4MulticastRoute);
+        @signal[NF_MROUTE_CHANGED](type=IPv4MulticastRoute);
 }
