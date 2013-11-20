@@ -23,6 +23,7 @@
 
 #include "PIMRoute.h"
 
+Register_Class(PIMMulticastRoute);
 
 PIMMulticastRoute::PIMMulticastRoute()
 {

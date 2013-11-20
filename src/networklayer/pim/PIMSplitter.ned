@@ -28,6 +28,13 @@ simple PIMSplitter
     	@display("i=block/dispatch");
     	string configFile;
         string hostname;
+        @signal[NF_IPv4_NEW_MULTICAST_DENSE](type=cObject); // addRemoveAddr or PIMMulticastRoute
+        @signal[NF_IPv4_NEW_MULTICAST_SPARSE](type=PIMMulticastRoute);
+        @signal[NF_IPv4_NEW_IGMP_ADDED](type=addRemoveAddr);
+        @signal[NF_IPv4_NEW_IGMP_ADDED_PISM](type=addRemoveAddr);
+        @signal[NF_IPv4_NEW_IGMP_REMOVED](type=addRemoveAddr);
+        @signal[NF_IPv4_NEW_IGMP_REMOVED_PIMSM](type=addRemoveAddr);
+
     gates:
         input pimDMIn;
         input pimSMIn;

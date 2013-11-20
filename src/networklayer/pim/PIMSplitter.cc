@@ -30,7 +30,8 @@
 using namespace std;
 
 Define_Module(PIMSplitter);
-
+Register_Class(addRemoveAddr);
+Register_Abstract_Class(cObject); // XXX move to OMNeT++
 
 /**
  * CREATE HELLO PACKET
