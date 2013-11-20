@@ -76,19 +76,19 @@ void TCPGenericSrvApp::sendOrSchedule(cMessage *msg, simtime_t delay)
 
 void TCPGenericSrvApp::sendBack(cMessage *msg)
 {
-    GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg*>(msg);
+    cPacket *packet = dynamic_cast<cPacket*>(msg);
 
-    if (appmsg)
+    if (packet)
     {
         msgsSent++;
-        bytesSent += appmsg->getByteLength();
-        emit(sentPkSignal, appmsg);
+        bytesSent += packet->getByteLength();
+        emit(sentPkSignal, packet);
 
-        EV << "sending \"" << appmsg->getName() << "\" to TCP, " << appmsg->getByteLength() << " bytes\n";
+        EV_INFO << "sending \"" << packet->getName() << "\" to TCP, " << packet->getByteLength() << " bytes\n";
     }
     else
     {
-        EV << "sending \"" << msg->getName() << "\" to TCP\n";
+        EV_INFO << "sending \"" << msg->getName() << "\" to TCP\n";
     }
 
     send(msg, "tcpOut");
@@ -161,7 +161,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     else
     {
         // some indication -- ignore
-        EV << "drop msg: " << msg->getName() << ", kind:"<< msg->getKind() << endl;
+        EV_WARN << "drop msg: " << msg->getName() << ", kind:"<< msg->getKind() << "(" << cEnum::get("TcpStatusInd")->getStringFor(msg->getKind()) << ")\n";
         delete msg;
     }
 
@@ -175,6 +175,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
 
 void TCPGenericSrvApp::finish()
 {
-    EV << getFullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
-    EV << getFullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
+    EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
+    EV_INFO << getFullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
 }
+

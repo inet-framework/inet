@@ -113,7 +113,7 @@ void TelnetApp::handleTimer(cMessage *msg)
     switch (msg->getKind())
     {
         case MSGKIND_CONNECT:
-            EV << "user fires up telnet program\n";
+            EV_INFO << "user fires up telnet program\n";
             connect();
             break;
 
@@ -121,14 +121,14 @@ void TelnetApp::handleTimer(cMessage *msg)
            if (numCharsToType > 0)
            {
                // user types a character and expects it to be echoed
-               EV << "user types one character, " << numCharsToType-1 << " more to go\n";
+               EV_INFO << "user types one character, " << numCharsToType-1 << " more to go\n";
                sendGenericAppMsg(1, 1);
                checkedScheduleAt(simTime() + (simtime_t)par("keyPressDelay"), timeoutMsg);
                numCharsToType--;
            }
            else
            {
-               EV << "user hits Enter key\n";
+               EV_INFO << "user hits Enter key\n";
                // Note: reply length must be at least 2, otherwise we'll think
                // it's an echo when it comes back!
                sendGenericAppMsg(1, 2 + (long)par("commandOutputLength"));
@@ -140,7 +140,7 @@ void TelnetApp::handleTimer(cMessage *msg)
            break;
 
         case MSGKIND_CLOSE:
-           EV << "user exits telnet program\n";
+           EV_INFO << "user exits telnet program\n";
            close();
            break;
     }
@@ -148,7 +148,7 @@ void TelnetApp::handleTimer(cMessage *msg)
 
 void TelnetApp::sendGenericAppMsg(int numBytes, int expectedReplyBytes)
 {
-    EV << "sending " << numBytes << " bytes, expecting " << expectedReplyBytes << endl;
+    EV_INFO << "sending " << numBytes << " bytes, expecting " << expectedReplyBytes << endl;
 
     GenericAppMsg *msg = new GenericAppMsg("data");
     msg->setByteLength(numBytes);
@@ -176,12 +176,12 @@ void TelnetApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urge
     if (len == 1)
     {
         // this is an echo, ignore
-        EV << "received echo\n";
+        EV_INFO << "received echo\n";
     }
     else
     {
         // output from last typed command arrived.
-        EV << "received output of command typed\n";
+        EV_INFO << "received output of command typed\n";
 
         // If user has finished working, she closes the connection, otherwise
         // starts typing again after a delay
@@ -189,13 +189,13 @@ void TelnetApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urge
 
         if (numLinesToType == 0)
         {
-            EV << "user has no more commands to type\n";
+            EV_INFO << "user has no more commands to type\n";
             timeoutMsg->setKind(MSGKIND_CLOSE);
             checkedScheduleAt(simTime() + (simtime_t)par("thinkTime"), timeoutMsg);
         }
         else
         {
-            EV << "user looks at output, then starts typing next command\n";
+            EV_INFO << "user looks at output, then starts typing next command\n";
             timeoutMsg->setKind(MSGKIND_SEND);
             checkedScheduleAt(simTime() + (simtime_t)par("thinkTime"), timeoutMsg);
         }
