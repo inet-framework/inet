@@ -55,6 +55,15 @@
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,                50000s,          b116-2a70
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,              50000s,          66db-b677
 
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch1RootByMAC -r 0,  200s,         0000-0000
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch1RootByMAC -r 0,   200s,         0000-0000
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch3RootByPriority -r 0, 200s,     0000-0000
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch3RootByPriority -r 0, 200s,      0000-0000
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch7to4BySrcPriority -r 0, 200s,   0000-0000
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch7to4BySrcPriority -r 0, 200s,    0000-0000
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LargeNet -r 0,          200s,         0000-0000
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-LargeNet -r 0,           200s,         0000-0000
+
 /examples/inet/ber/,                 -f omnetpp.ini -c ber-sack-experiment -r 0,    20s,             57dd-d0a1
 /examples/inet/ber/,                 -f omnetpp.ini -c ber-flavour-experiment -r 0, 20s,             0d34-0006
 
