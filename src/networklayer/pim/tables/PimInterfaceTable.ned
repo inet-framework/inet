@@ -23,6 +23,8 @@ package inet.networklayer.pim.tables;
 
 simple PimInterfaceTable
 {
-	@class(PimInterfaceTable);
-  	@display("i=block/table");   
+    parameters:
+        @class(PimInterfaceTable);
+        @display("i=block/table");
+        xml pimConfig = default(xml("<config/>"));
 }

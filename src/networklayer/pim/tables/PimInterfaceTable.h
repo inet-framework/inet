@@ -105,6 +105,8 @@ class INET_API PimInterfaceTable: public cSimpleModule
         virtual int numInitStages() const  {return NUM_INIT_STAGES;}
 		virtual void initialize(int stage);
 		virtual void handleMessage(cMessage *);
+		virtual void configureInterfaces(cXMLElement *config);
+		virtual void addInterface(InterfaceEntry *ie, cXMLElement *config);
 };
 
 /**

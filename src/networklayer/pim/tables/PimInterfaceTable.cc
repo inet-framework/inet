@@ -21,6 +21,9 @@
  *  PIM protocol. Information are obtained from configuration file.
  */
 
+#include "InterfaceMatcher.h"
+#include "InterfaceTableAccess.h"
+#include "IPv4InterfaceData.h"
 #include "PimInterfaceTable.h"
 
 Define_Module(PimInterfaceTable);
@@ -140,10 +143,58 @@ void PimInterfaceTable::handleMessage(cMessage *msg)
 
 void PimInterfaceTable::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL)
     {
 		WATCH_VECTOR(pimIft);
     }
+    else if (stage == INITSTAGE_LINK_LAYER_2)
+    {
+        configureInterfaces(par("pimConfig").xmlValue());
+    }
+}
+
+void PimInterfaceTable::configureInterfaces(cXMLElement *config)
+{
+    cXMLElementList interfaceElements = config->getChildrenByTagName("interface");
+    InterfaceMatcher matcher(interfaceElements);
+    IInterfaceTable *ift = InterfaceTableAccess().get(this);
+
+    for (int k = 0; k < ift->getNumInterfaces(); ++k)
+    {
+        InterfaceEntry *ie = ift->getInterface(k);
+        if (ie->isMulticast() && !ie->isLoopback())
+        {
+            int i = matcher.findMatchingSelector(ie);
+            if (i >= 0)
+                addInterface(ie, interfaceElements[i]);
+        }
+    }
+}
+
+void PimInterfaceTable::addInterface(InterfaceEntry *ie, cXMLElement *config)
+{
+    PimInterface pimInterface;
+    pimInterface.setInterfaceID(ie->getInterfaceId());
+    pimInterface.setInterfacePtr(ie);
+
+    const char *modeAttr = config->getAttribute("mode");
+    if (!modeAttr)
+        return;
+
+    if (strcmp(modeAttr, "dense") == 0)
+        pimInterface.setMode(Dense);
+    else if (strcmp(modeAttr, "sparse") == 0)
+        pimInterface.setMode(Sparse);
+    else
+        throw cRuntimeError("PimInterfaceTable: invalid 'mode' attribute value in the configuration of interface '%s'", ie->getName());
+
+    const char *stateRefreshAttr = config->getAttribute("state-refresh");
+    if (stateRefreshAttr && strcmp(stateRefreshAttr, "true"))
+        pimInterface.setSR(true);
+
+    addInterface(pimInterface);
 }
 
 /**
