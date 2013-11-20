@@ -247,28 +247,21 @@ void DHCPClient::recordLease(DHCPMessage * dhcpACK)
     {
 
         IPv4Address ip = dhcpACK->getYiaddr();
-        EV_DETAIL << "DHCPACK arrived, " << endl << "IP: " << ip << endl;
+        EV_DETAIL << "DHCPACK arrived with " << endl << "IP: " << ip << endl;
 
-        // extract the server_id
-        Byte server_id_b = dhcpACK->getOptions().get(SERVER_ID);
-        IPv4Address server_id;
+        Byte netmask(dhcpACK->getOptions().get(SUBNET_MASK));
+        Byte gateway(dhcpACK->getOptions().get(ROUTER));
+        Byte dns(dhcpACK->getOptions().get(ROUTER));
+        Byte ntp(dhcpACK->getOptions().get(NTP_SRV));
 
-        if (server_id_b.stringValue() != "")
-            server_id = IPv4Address(server_id_b.stringValue().c_str());
-
-        Byte netmask_b(dhcpACK->getOptions().get(SUBNET_MASK));
-        Byte gateway_b(dhcpACK->getOptions().get(ROUTER));
-        Byte dns_b(dhcpACK->getOptions().get(ROUTER));
-        Byte ntp_b(dhcpACK->getOptions().get(NTP_SRV));
-
-        if (netmask_b.intValue() > 0)
-            lease->netmask = IPv4Address(netmask_b.stringValue().c_str());
-        if (gateway_b.intValue() > 0)
-            lease->gateway = IPv4Address(gateway_b.stringValue().c_str());
-        if (dns_b.intValue() > 0)
-            lease->dns = IPv4Address(dns_b.stringValue().c_str());
-        if (ntp_b.intValue() > 0)
-            lease->ntp = IPv4Address(ntp_b.stringValue().c_str());
+        if (netmask.intValue() > 0)
+            lease->netmask = IPv4Address(netmask.stringValue().c_str());
+        if (gateway.intValue() > 0)
+            lease->gateway = IPv4Address(gateway.stringValue().c_str());
+        if (dns.intValue() > 0)
+            lease->dns = IPv4Address(dns.stringValue().c_str());
+        if (ntp.intValue() > 0)
+            lease->ntp = IPv4Address(ntp.stringValue().c_str());
 
         lease->leaseTime = dhcpACK->getOptions().get(LEASE_TIME);
         lease->renewalTime = dhcpACK->getOptions().get(RENEWAL_TIME);
