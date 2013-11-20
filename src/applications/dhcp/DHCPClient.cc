@@ -28,13 +28,13 @@
 
 Define_Module(DHCPClient);
 #define EV_DETAIL EV
+
 DHCPClient::DHCPClient()
 {
-    timerT1 = new cMessage("T1 Timer");
-    timerT2 = new cMessage("T2 Timer");
-    timerTo = new cMessage("DHCP Timeout");
-    leaseTimer = new cMessage("Lease Timeout");
-    leaseTimer->setKind(LEASE_TIMEOUT);
+    timerT1 = NULL;
+    timerT2 = NULL;
+    timerTo = NULL;
+    leaseTimer = NULL;
     nb = NULL;
     ie = NULL;
     irt = NULL;
@@ -53,6 +53,12 @@ void DHCPClient::initialize(int stage)
 {
     if (stage == 1)
     {
+        timerT1 = new cMessage("T1 Timer");
+        timerT2 = new cMessage("T2 Timer");
+        timerTo = new cMessage("DHCP Timeout");
+        leaseTimer = new cMessage("Lease Timeout");
+        leaseTimer->setKind(LEASE_TIMEOUT);
+
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
