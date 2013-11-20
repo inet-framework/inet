@@ -93,9 +93,7 @@ cmdenv-express-mode = true
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-** Event #1   T=0   Elapsed: 0.000s (0m 00s)  0% completed
-     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
-     Messages:  created: 6   present: 6   in FES: 6
+
 Host dhcpClient got ip: 192.168.1.100/255.255.255.0
 Host dhcpClient got ip: 192.168.1.100/255.255.255.0
 Host dhcpClient got ip: 192.168.1.100/255.255.255.0
@@ -117,10 +115,9 @@ Host dhcpClient got ip: 192.168.1.100/255.255.255.0
 Host dhcpClient got ip: 192.168.1.100/255.255.255.0
 Host dhcpClient got ip: 192.168.1.100/255.255.255.0
 Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-** Event
 
 %contains: stdout
-<!> Simulation time limit reached -- simulation stopped at event #70, t=10500.
+<!> Simulation time limit reached -- simulation stopped at event #110, t=10500.
 
 
 Calling finish() at end of Run #0...
