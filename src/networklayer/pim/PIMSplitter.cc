@@ -23,6 +23,7 @@
  */
 
 #include "IPv4Datagram.h"
+#include "IPSocket.h"
 #include "PIMSplitter.h"
 #include "PIMRoute.h"
 #include "IPv4RoutingTableAccess.h"
@@ -279,6 +280,8 @@ void PIMSplitter::handleMessage(cMessage *msg)
  */
 void PIMSplitter::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
 	// in stage 2 interfaces are registered
 	// in stage 3 table pimInterfaces is built
     if (stage == INITSTAGE_LOCAL)
@@ -297,6 +300,11 @@ void PIMSplitter::initialize(int stage)
             host->subscribe(NF_IPv4_NEW_MULTICAST, this);
             host->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
         }
+    }
+    else if (stage == INITSTAGE_TRANSPORT_LAYER)
+    {
+        IPSocket ipSocket(gate("transportOut"));
+        ipSocket.registerProtocol(IP_PROT_PIM);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
 	{
@@ -319,7 +327,6 @@ void PIMSplitter::initialize(int stage)
 		scheduleAt(simTime() + uniform(0,5), timer);
 	}
 }
-
 
 /**
  * RECEIVE CHANGE NOTIFICATION
