@@ -26,7 +26,7 @@ cplusplus {{
 
 class noncobject MACAddress;
 class noncobject IPv4Address;
-class noncobject DHCPOption;
+class noncobject DHCPOptions;
 
 enum DHCP_OPCODE
 {
@@ -71,6 +71,6 @@ packet DHCPMessage
     MACAddress chaddr; // client hardware address (MAC)
     string sname; // optional server host name
     string file; // boot file name, null terminated string; "generic" name or null in DHCPDISCOVER, fully qualified directory-path name in DHCPOFFER.
-    DHCPOption options; // optional parameters field. for more information see DHCPOption class.
+    DHCPOptions options; // optional parameters field. for more information see the DHCPOptions class.
 }
 

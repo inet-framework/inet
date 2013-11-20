@@ -41,7 +41,7 @@ enum op_code
     SERVER_ID = 54,
 };
 
-class DHCPOption
+class DHCPOptions
 {
     public:
         typedef std::map<op_code, Byte> DHCPOptionsMap;
@@ -91,7 +91,7 @@ class DHCPOption
             return (options.end());
         }
 
-        friend std::ostream& operator <<(std::ostream& os, DHCPOption& obj)
+        friend std::ostream& operator <<(std::ostream& os, DHCPOptions& obj)
         {
             for (DHCPOptionsMap::iterator it = obj.begin(); it != obj.end(); it++)
             {

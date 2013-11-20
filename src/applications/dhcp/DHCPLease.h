@@ -48,7 +48,7 @@ class DHCPLease
 
 };
 
-std::ostream& operator <<(std::ostream& os, DHCPLease obj)
+inline std::ostream& operator <<(std::ostream& os, DHCPLease obj)
 {
     os << "xid:" << obj.xid << " ip:" << obj.ip << " network:" << obj.network << " netmask:" << obj.netmask
             << " MAC:" << obj.mac << endl;
