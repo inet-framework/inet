@@ -150,13 +150,24 @@ void Ieee8021DRelay::dispatch(EtherFrame * frame, unsigned int portNum)
 {
     Ieee8021DInterfaceData * port = getPortInterfaceData(portNum);
 
+    EV_INFO << "Sending frame " << frame << " on output port " << portNum << "." << endl;
+
     if (portNum >= portCount)
+    {
+        EV_ERROR << "Output port " << portNum << " does not exist. Discarding!" << endl;
+        delete frame;
         return;
+    }
 
     EV_INFO << "Sending " << frame << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
 
     if (!isStpAware || port->isForwarding())
         send(frame, "ifOut", portNum);
+    else
+    {
+        EV_INFO << "Output port " << portNum << " is not forwarding. Discarding!" << endl;
+        delete frame;
+    }
 
     return;
 }
