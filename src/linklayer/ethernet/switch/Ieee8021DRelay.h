@@ -26,6 +26,10 @@
 #include "NodeStatus.h"
 #include "IEEE8021DBPDU_m.h"
 
+//
+// This modul forward frames (~EtherFrame) based on their destination MAC addresses to appropriate ports.
+// See the NED definition for details.
+//
 class Ieee8021DRelay : public cSimpleModule, public ILifecycle
 {
     protected:

@@ -1,8 +1,16 @@
 IEEE 802.1d examples
 ====================
 
-Exaple shows the STP/RSTP capability of the ethernet switch
+Exaple shows the STP/RSTP capability of the ethernet switch.
 
+STP/RSTP is a network protocol that ensures a loop-free topology for any
+bridged Ethernet local area network. The basic function of STP/RSTP
+is to prevent bridge loops and the broadcast radiation that results from them.
+The protokol make any topology to a tree topology.
+The time needed to the STP make the topology loop-free is nearly 50s, while the RSTP only needs 6s 
+
+In the example we find a network with multiple loops in it. 
+After the STP/RSTP done its job, we can see the loopless topology's links  and the root switch highlighted with a light blue color.
 
 Switch1RootByMAC
 ----------------
@@ -23,4 +31,4 @@ Switch7 will route his traffic through Switch4 insted of Switch3. They have the 
 LargeNet
 --------
 This example shows, how traffic run though the network.
-Also Switch4 disappears at 60s and reappears at 90s, so you can chech how the tree will rebuild itself.
+Also Switch4 disappears at 60s and reappears at 90s, so you can check how the tree will rebuild itself.

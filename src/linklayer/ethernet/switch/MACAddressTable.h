@@ -18,6 +18,9 @@
 
 #include "MACAddress.h"
 
+//
+// This module handles the mapping between ports and MAC addresses. See the NED definition for details.
+//
 class MACAddressTable : public cSimpleModule
 {
     protected:

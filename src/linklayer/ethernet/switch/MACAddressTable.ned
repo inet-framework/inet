@@ -18,6 +18,11 @@ package inet.linklayer.ethernet.switch;
 //
 // This module handles the mapping between ports and MAC addresses.
 //
+// Entries are deleted if their age exceeds a certain limit.
+//
+// If needed, address tables can be pre-loaded from text files at the beginning
+// of the simulation; this controlled by the addressTableFile module parameter.
+//
 simple MACAddressTable
 {
     parameters:
