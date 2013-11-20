@@ -96,17 +96,25 @@ void Ieee8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
     int arrivalGate = frame->getArrivalGate()->getIndex();
     Ieee8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
     learn(frame);
-    // broadcast address
-    if (frame->getDest().isBroadcast())
-    {
-        broadcast(frame);
-        return;
-    }
+
     // BPDU Handling
     if ((frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && port->getRole() != Ieee8021DInterfaceData::DISABLED)
     {
         EV_DETAIL << "Deliver BPDU to the STP/RSTP module" << endl;
         deliverBPDU(frame); // deliver to the STP/RSTP module
+        return;
+    }
+    if (isStpAware && !port->isForwarding())
+    {
+        EV_INFO << "The arrival port is not forwarding! Discarding it!" << endl;
+        delete frame;
+        return;
+    }
+    // broadcast address
+    if (frame->getDest().isBroadcast())
+    {
+        broadcast(frame);
+        return;
     }
     else
     {
