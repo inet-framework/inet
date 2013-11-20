@@ -28,14 +28,14 @@ class noncobject MACAddress;
 class noncobject IPv4Address;
 class noncobject DHCPOptions;
 
-enum DHCP_OPCODE
+enum DHCPOpcode
 {
     BOOTREQUEST = 1;
     BOOTREPLY = 2;
 }
 
 // For more information, see RFC 2132: 'DHCP Options and BOOTP Vendor Extensions'
-enum DHCP_TYPE
+enum DHCPMessageType
 {
     DHCPDISCOVER = 1;
     DHCPOFFER = 2;
@@ -58,7 +58,7 @@ enum DHCP_TYPE
 //
 packet DHCPMessage
 {
-    int op; // message op code / message type. 1 = BOOTREQUEST, 2 = BOOTREPLY
+    int op @enum(DHCPOpcode); // message op code / message type. 1 = BOOTREQUEST, 2 = BOOTREPLY
     int htype; // hardware address type, see ARP section in "Assigned Numbers" RFC; e.g., '1' = 10mb ethernet
     int hlen; // hardware address length (e.g.  '6' for 10mb ethernet)
     int hops; // client sets to zero, optionally used by relay agents when booting via a relay agent
