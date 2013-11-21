@@ -54,7 +54,7 @@ void IPvXTrafSink::handleMessage(cMessage *msg)
 {
     if (!isOperational)
     {
-        EV << "Module is down, received " << msg->getName() << " message dropped\n";
+        EV_ERROR << "Module is down, received " << msg->getName() << " message dropped\n";
         delete msg;
         return;
     }
@@ -98,17 +98,17 @@ void IPvXTrafSink::printPacket(cPacket *msg)
         protocol = ctrl->getProtocol();
     }
 
-    EV << msg << endl;
-    EV << "Payload length: " << msg->getByteLength() << " bytes" << endl;
+    EV_INFO << msg << endl;
+    EV_INFO << "Payload length: " << msg->getByteLength() << " bytes" << endl;
 
     if (protocol != -1)
-        EV << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
+        EV_INFO << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << endl;
 }
 
 void IPvXTrafSink::processPacket(cPacket *msg)
 {
     emit(rcvdPkSignal, msg);
-    EV << "Received packet: ";
+    EV_INFO << "Received packet: ";
     printPacket(msg);
     delete msg;
     numReceived++;

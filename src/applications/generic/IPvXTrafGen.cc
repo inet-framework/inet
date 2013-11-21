@@ -105,7 +105,7 @@ void IPvXTrafGen::handleMessage(cMessage *msg)
                 Address result;
                 AddressResolver().tryResolve(token, result);
                 if (result.isUnspecified())
-                    EV << "cannot resolve destination address: " << token << endl;
+                    EV_ERROR << "cannot resolve destination address: " << token << endl;
                 else
                     destAddresses.push_back(result);
             }
@@ -213,7 +213,7 @@ void IPvXTrafGen::sendPacket()
     }
     else
         throw cRuntimeError("Unknown address type");
-    EV << "Sending packet: ";
+    EV_INFO << "Sending packet: ";
     printPacket(payload);
     emit(sentPkSignal, payload);
     send(payload, "ipOut");
@@ -240,17 +240,17 @@ void IPvXTrafGen::printPacket(cPacket *msg)
         protocol = ctrl->getProtocol();
     }
 
-    EV << msg << endl;
-    EV << "Payload length: " << msg->getByteLength() << " bytes" << endl;
+    EV_INFO << msg << endl;
+    EV_INFO << "Payload length: " << msg->getByteLength() << " bytes" << endl;
 
     if (protocol != -1)
-        EV << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
+        EV_INFO << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
 }
 
 void IPvXTrafGen::processPacket(cPacket *msg)
 {
     emit(rcvdPkSignal, msg);
-    EV << "Received packet: ";
+    EV_INFO << "Received packet: ";
     printPacket(msg);
     delete msg;
     numReceived++;
