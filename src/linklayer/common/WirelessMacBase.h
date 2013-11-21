@@ -49,6 +49,7 @@ class INET_API WirelessMacBase : public MACBase
     int lowerLayerOut;
     //@}
 
+    static simsignal_t packetDroppedSignal;
     static simsignal_t packetSentToLowerSignal;
     static simsignal_t packetReceivedFromLowerSignal;
     static simsignal_t packetSentToUpperSignal;

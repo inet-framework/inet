@@ -25,12 +25,11 @@
 #include "InterfaceEntry.h"
 #include "NodeOperations.h"
 
-
+simsignal_t WirelessMacBase::packetDroppedSignal = registerSignal("packetDropped");
 simsignal_t WirelessMacBase::packetSentToLowerSignal = registerSignal("packetSentToLower");
 simsignal_t WirelessMacBase::packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
 simsignal_t WirelessMacBase::packetSentToUpperSignal = registerSignal("packetSentToUpper");
 simsignal_t WirelessMacBase::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
-
 
 void WirelessMacBase::initialize(int stage)
 {
