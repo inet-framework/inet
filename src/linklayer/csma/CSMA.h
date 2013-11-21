@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*- ********************************************************
- * file:        csma.h
+ * file:        CSMA.h
  *
   * author:     Jerome Rousselot, Marcel Steine, Amre El-Hoiydi,
  *				Marc Loebbers, Yosia Hadisusanto
@@ -24,19 +24,13 @@
  * part of:    Modifications to the MF-2 framework by CSEM
  **************************************************************************/
 
-#ifndef csma_H
-#define csma_H
-
-#include <string>
-#include <sstream>
-#include <vector>
-#include <list>
+#ifndef __INET_CSMA_H
+#define __INET_CSMA_H
 
 #include "IRadio.h"
 #include "MACAddress.h"
 #include "WirelessMacBase.h"
-
-class CSMAFrame;
+#include "CSMAFrame_m.h"
 
 /**
  * @brief Generic CSMA Mac-Layer.
@@ -348,4 +342,3 @@ private:
 };
 
 #endif
-

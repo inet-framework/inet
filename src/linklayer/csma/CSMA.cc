@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*- ********************************************************
- * file:        csma.cc
+ * file:        CSMA.cc
  *
  * author:      Jerome Rousselot, Marcel Steine, Amre El-Hoiydi,
  * 				Marc Loebbers, Yosia Hadisusanto, Andreas Koepke
@@ -256,8 +256,7 @@ void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg) {
 		} else {
 			// queue is full, message has to be deleted
 			EV_DETAIL << "(12) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff not avail]: dropping packet -> IDLE." << endl;
-	        // TODO: send dropped signal
-	        // emit(packetDropped, msg);
+	        emit(packetDroppedSignal, msg);
 			delete msg;
 			updateMacState(IDLE_1);
 		}
@@ -361,11 +360,12 @@ void CSMA::updateStatusBackoff(t_mac_event event, cMessage *msg) {
 void CSMA::flushQueue()
 {
     // TODO:
+    macQueue.clear();
 }
 
 void CSMA::clearQueue()
 {
-    // TODO:
+    macQueue.clear();
 }
 
 void CSMA::attachSignal(CSMAFrame* mac, simtime_t_cref startTime) {
@@ -405,8 +405,7 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg) {
 				macQueue.pop_front();
 				txAttempts = 0;
 				nbDroppedFrames++;
-		        // TODO: send dropped signal
-		        // emit(packetDropped, mac);
+		        emit(packetDroppedSignal, mac);
 				delete mac;
 				manageQueue();
 			} else {
@@ -504,17 +503,14 @@ void CSMA::updateStatusTransmitFrame(t_mac_event event, cMessage *msg) {
 void CSMA::updateStatusWaitAck(t_mac_event event, cMessage *msg) {
 	assert(useMACAcks);
 
-	cMessage * mac;
 	switch (event) {
 	case EV_ACK_RECEIVED:
 		EV_DETAIL << "(5) FSM State WAITACK_5, EV_ACK_RECEIVED: "
 		<< " ProcessAck, manageQueue..." << endl;
 		if(rxAckTimer->isScheduled())
 		cancelEvent(rxAckTimer);
-		mac = static_cast<cMessage *>(macQueue.front());
 		macQueue.pop_front();
 		txAttempts = 0;
-		// TODO: emit(packetSent, mac);
 		delete msg;
 		manageQueue();
 		break;
