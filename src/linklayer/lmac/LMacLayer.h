@@ -9,17 +9,13 @@
  *
  */
 
-#ifndef LMAC_LAYER_H
-#define LMAC_LAYER_H
-
-#include <list>
+#ifndef __INET_LMACLAYER_H
+#define __INET_LMACLAYER_H
 
 #include "IRadio.h"
-#include "WirelessMacBase.h"
-#include "PhyUtils.h"
 #include "MACAddress.h"
-
-class LMacFrame;
+#include "WirelessMacBase.h"
+#include "LMacFrame_m.h"
 
 /**
  * @brief Implementation of L-MAC (Lightweight Medium Access Protocol for

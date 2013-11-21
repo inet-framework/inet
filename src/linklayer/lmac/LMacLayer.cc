@@ -14,7 +14,7 @@
 #include "FWMath.h"
 #include "LMacFrame_m.h"
 #include "InterfaceEntry.h"
-#include "Ieee802Ctrl.h"
+#include "LMacControlInfo.h"
 #include "FindModule.h"
 
 Define_Module( LMacLayer )
@@ -732,11 +732,12 @@ LMacFrame *LMacLayer::encapsMsg(cPacket *netwPkt)
 void LMacLayer::flushQueue()
 {
     // TODO:
+    macQueue.clear();
 }
 
 void LMacLayer::clearQueue()
 {
-    // TODO:
+    macQueue.clear();
 }
 
 void LMacLayer::attachSignal(LMacFrame *macPkt)
@@ -752,9 +753,9 @@ void LMacLayer::attachSignal(LMacFrame *macPkt)
  */
 cObject* LMacLayer::setUpControlInfo(cMessage * const pMsg, const MACAddress& pSrcAddr)
 {
-//    LMacControlInfo *const cCtrlInfo = new LMacControlInfo();
-    Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
+    LMacControlInfo *const cCtrlInfo = new LMacControlInfo();
     cCtrlInfo->setSrc(pSrcAddr);
+    cCtrlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }
