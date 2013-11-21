@@ -151,9 +151,8 @@ void SCTPClient::connect()
     outStreams = par("outboundStreams");
     socket.setInboundStreams(inStreams);
     socket.setOutboundStreams(outStreams);
-    EV << "issuing OPEN command\n";
     setStatusString("connecting");
-    EV << "connect to address " << connectAddress << "\n";
+    EV_INFO << "issuing OPEN command, connect to address " << connectAddress << "\n";
     bool streamReset = par("streamReset");
     socket.connect(AddressResolver().resolve(connectAddress, 1), connectPort, streamReset, par("prMethod"), par("numRequestsPerSession"));
 
@@ -202,7 +201,7 @@ void SCTPClient::setStatusString(const char *s)
 void SCTPClient::socketEstablished(int, void *, unsigned long int buffer )
 {
     int count = 0;
-    EV << "SCTPClient: connected\n";
+    EV_INFO << "SCTPClient: connected\n";
     setStatusString("connected");
     bufferSize = buffer;
     // determine number of requests in this session
@@ -426,7 +425,7 @@ void SCTPClient::handleTimer(cMessage *msg)
     switch (msg->getKind())
     {
         case MSGKIND_CONNECT:
-            EV << "starting session call connect\n";
+            EV_DEBUG << "starting session call connect\n";
             connect();
             break;
 
@@ -496,11 +495,10 @@ void SCTPClient::handleTimer(cMessage *msg)
             {
                 endSimulation();
             }
-
             break;
 
         default:
-            EV << "MsgKind =" << msg->getKind() << " unknown\n";
+            throw cRuntimeError("unknown selfmessage kind = %d ", msg->getKind());
             break;
     }
 }
@@ -537,7 +535,7 @@ void SCTPClient::socketPeerClosed(int, void *)
     // close the connection (if not already closed)
     if (socket.getState() == SCTPSocket::PEER_CLOSED)
     {
-        EV << "remote SCTP closed, closing here as well\n";
+        EV_INFO << "remote SCTP closed, closing here as well\n";
         close();
     }
 }
@@ -545,7 +543,7 @@ void SCTPClient::socketPeerClosed(int, void *)
 void SCTPClient::socketClosed(int, void *)
 {
     // *redefine* to start another session etc.
-    EV << "connection closed\n";
+    EV_INFO << "connection closed\n";
     setStatusString("closed");
 
     if (primaryChangeTimer)
@@ -559,7 +557,7 @@ void SCTPClient::socketClosed(int, void *)
 void SCTPClient::socketFailure(int, void *, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
-    EV << "connection broken\n";
+    EV_WARN << "connection broken\n";
     setStatusString("broken");
     numBroken++;
     // reconnect after a delay
@@ -669,9 +667,9 @@ void SCTPClient::sendqueueAbatedArrived(int assocId, unsigned long int buffer)
 }
 void SCTPClient::finish()
 {
-    EV << getFullPath() << ": opened " << numSessions << " sessions\n";
-    EV << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
-    EV << getFullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
+    EV_INFO << getFullPath() << ": opened " << numSessions << " sessions\n";
+    EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
+    EV_INFO << getFullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
     sctpEV3 << "Client finished\n";
 }
 

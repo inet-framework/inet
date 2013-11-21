@@ -454,7 +454,7 @@ void SCTPServer::handleMessage(cMessage *msg)
             case SCTP_I_SEND_STREAMS_RESETTED:
             case SCTP_I_RCV_STREAMS_RESETTED:
             {
-                EV << "Streams have been resetted\n";
+                EV_INFO << "Streams have been resetted\n";
                 delete msg;
                 break;
             }
@@ -532,21 +532,21 @@ void SCTPServer::handleTimer(cMessage *msg)
 
 void SCTPServer::finish()
 {
-    EV << getFullPath() << ": opened " << numSessions << " sessions\n";
-    EV << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
+    EV_INFO << getFullPath() << ": opened " << numSessions << " sessions\n";
+    EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
     for (ServerAssocStatMap::iterator l=serverAssocStatMap.begin(); l!=serverAssocStatMap.end(); ++l)
     {
-        EV << getFullPath() << " Assoc: " << l->first << "\n";
-        EV << "\tstart time: " << l->second.start << "\n";
-        EV << "\tstop time: " << l->second.stop << "\n";
-        EV << "\tlife time: " << l->second.lifeTime << "\n";
-        EV << "\treceived bytes:" << l->second.rcvdBytes << "\n";
-        EV << "\tthroughput: " << (l->second.rcvdBytes / l->second.lifeTime.dbl())*8 << " bit/sec\n";
+        EV_DETAIL << getFullPath() << " Assoc: " << l->first << "\n";
+        EV_DETAIL << "\tstart time: " << l->second.start << "\n";
+        EV_DETAIL << "\tstop time: " << l->second.stop << "\n";
+        EV_DETAIL << "\tlife time: " << l->second.lifeTime << "\n";
+        EV_DETAIL << "\treceived bytes:" << l->second.rcvdBytes << "\n";
+        EV_DETAIL << "\tthroughput: " << (l->second.rcvdBytes / l->second.lifeTime.dbl())*8 << " bit/sec\n";
         recordScalar("bytes rcvd", l->second.rcvdBytes);
         recordScalar("throughput", (l->second.rcvdBytes / l->second.lifeTime.dbl())*8);
     }
-    EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
-    EV << getFullPath() << "Over all " << notificationsReceived << " notifications received\n ";
+    EV_INFO << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
+    EV_INFO << getFullPath() << "Over all " << notificationsReceived << " notifications received\n ";
     sctpEV3 << "Server finished\n";
 }
 
