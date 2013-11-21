@@ -40,6 +40,8 @@ class INET_API BMacControlInfo : public BMacControlInfo_Base, public ILinkLayerC
     virtual void setSourceAddress(const MACAddress & address) { setSrc(address); }
     virtual MACAddress getDestinationAddress() const { return getDest(); }
     virtual void setDestinationAddress(const MACAddress & address) { setDest(address); };
+    virtual int getInterfaceId() const { return BMacControlInfo_Base::getInterfaceId(); }
+    virtual void setInterfaceId(int interfaceId) { BMacControlInfo_Base::setInterfaceId(interfaceId); }
 };
 
 #endif

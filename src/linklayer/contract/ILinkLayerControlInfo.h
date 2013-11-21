@@ -27,6 +27,8 @@ class INET_API ILinkLayerControlInfo {
     virtual void setSourceAddress(const MACAddress & address) = 0;
     virtual MACAddress getDestinationAddress() const = 0;
     virtual void setDestinationAddress(const MACAddress & address) = 0;
+    virtual int getInterfaceId() const = 0;
+    virtual void setInterfaceId(int interfaceId) = 0;
 };
 
 #endif

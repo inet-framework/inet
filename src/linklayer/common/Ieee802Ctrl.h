@@ -40,6 +40,8 @@ class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base, public ILinkLayerControlIn
     virtual void setSourceAddress(const MACAddress & address) { setSrc(address); }
     virtual MACAddress getDestinationAddress() const { return getDest(); }
     virtual void setDestinationAddress(const MACAddress & address) { setDest(address); };
+    virtual int getInterfaceId() const { return Ieee802Ctrl_Base::getInterfaceId(); }
+    virtual void setInterfaceId(int interfaceId) { Ieee802Ctrl_Base::setInterfaceId(interfaceId); }
 };
 
 #endif
