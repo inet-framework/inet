@@ -869,13 +869,13 @@ void CSMA::receiveSignal(cComponent *source, simsignal_t signalID, long value) {
     Enter_Method_Silent();
     if (signalID == IRadio::radioChannelStateChangedSignal)
     {
-        IRadio::RadioChannelState radioChannelState = (IRadio::RadioChannelState)value;
-        if (previousRadioChannelState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING && radioChannelState != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
+        IRadio::RadioChannelState newRadioChannelState = (IRadio::RadioChannelState)value;
+        if (radioChannelState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING && newRadioChannelState != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
         {
             // KLUDGE: we used to get a cMessage from the radio (the identity was not important)
             executeMac(EV_FRAME_TRANSMITTED, new cMessage("Transmission over"));
         }
-        previousRadioChannelState = radioChannelState;
+        radioChannelState = newRadioChannelState;
     }
 }
 

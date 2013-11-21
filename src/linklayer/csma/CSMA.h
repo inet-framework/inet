@@ -220,7 +220,7 @@ class INET_API CSMA : public WirelessMacBase
 
     /** @brief The radio. */
     IRadio *radio;
-    IRadio::RadioChannelState previousRadioChannelState;
+    IRadio::RadioChannelState radioChannelState;
 
     /** @brief Maximum time between a packet and its ACK
      *
