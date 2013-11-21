@@ -176,6 +176,73 @@ void STP::colorTree()
                 inputGatePrev->getDisplayString().setTagArg("ls", 1, 1);
             }
         }
+        cModule * puerta = this->getParentModule()->getSubmodule("eth", i);
+        if (puerta != NULL)
+        {
+            char buf[25];
+            char sbuf[12];
+            char rbuf[13];
+
+            int role = port->getRole();
+            switch (role)
+            {
+                case 0:
+                    sprintf(rbuf, "ALTERNATE\n");
+                    break;
+                case 1:
+                    sprintf(rbuf, "NOTASSIGNED\n");
+                    break;
+                case 2:
+                    sprintf(rbuf, "DISABLED\n");
+                    break;
+                case 3:
+                    sprintf(rbuf, "DESIGNATED\n");
+                    break;
+                case 4:
+                    sprintf(rbuf, "BACKUP\n");
+                    break;
+                case 5:
+                    sprintf(rbuf, "ROOT\n");
+                    break;
+                default:
+                    sprintf(rbuf, "UNKNOWN\n");
+                    break;
+            }
+
+            int state = port->getState();
+            switch (state)
+            {
+                case 0:
+                    sprintf(sbuf, "DISCARDING\n");
+                    break;
+                case 1:
+                    sprintf(sbuf, "LEARNING\n");
+                    break;
+                case 2:
+                    sprintf(sbuf, "FORWARDING\n");
+                    break;
+                default:
+                    sprintf(sbuf, "UNKNOWN\n");
+                    break;
+            }
+
+            sprintf(buf, "%s%s", rbuf, sbuf);
+            puerta->getDisplayString().setTagArg("t", 0, buf);
+        }
+    }
+
+    if (isOperational) //only when the router is working
+    {
+        if (getRootIndex() == -1)
+        {
+            // root mark
+            this->getParentModule()->getDisplayString().setTagArg("i", 1, "#a5ffff");
+        }
+        else
+        {
+            // remove possible root mark
+            this->getParentModule()->getDisplayString().setTagArg("i", 1, "");
+        }
     }
 }
 
@@ -890,4 +957,19 @@ bool STP::handleOperationStage(LifecycleOperation * operation, int stage, IDoneC
         throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
     }
     return true;
+}
+
+int STP::getRootIndex()
+{
+    int result = -1;
+    for (unsigned int i = 0; i < portCount; i++)
+    {
+        Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
+        if (iPort->getRole() == Ieee8021DInterfaceData::ROOT)
+        {
+            result = i;
+            break;
+        }
+    }
+    return result;
 }

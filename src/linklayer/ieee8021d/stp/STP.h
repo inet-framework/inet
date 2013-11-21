@@ -159,6 +159,12 @@ class STP : public cSimpleModule, public ILifecycle
         bool checkRootEligibility();
         void tryRoot();
 
+        /**
+         * @brief Obtain the root gate index
+         * @return the root gate index or -1 if there is not root gate.
+         */
+        virtual int getRootIndex();
+
         /*
          * Get port data from the InterfaceTable
          */
