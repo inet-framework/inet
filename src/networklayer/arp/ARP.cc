@@ -458,7 +458,7 @@ void ARP::processARPPacket(ARPPacket *arp)
     dumpARPPacket(arp);
 
     // extract input port
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(arp->removeControlInfo());
+    ILinkLayerControlInfo* ctrl = check_and_cast<ILinkLayerControlInfo*>(arp->removeControlInfo());
     InterfaceEntry *ie = ift->getInterfaceById(ctrl->getInterfaceId());
     delete ctrl;
 

@@ -33,7 +33,6 @@
 #include "NodeStatus.h"
 #include "IPSocket.h"
 #include "IARPCache.h"
-#include "Ieee802Ctrl.h"
 
 Define_Module(IPv4);
 
@@ -247,7 +246,7 @@ void IPv4::preroutingFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE
 void IPv4::handleIncomingARPPacket(ARPPacket *packet, const InterfaceEntry *fromIE)
 {
     // give it to the ARP module
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(packet->getControlInfo());
+    ILinkLayerControlInfo* ctrl = check_and_cast<ILinkLayerControlInfo*>(packet->getControlInfo());
     ctrl->setInterfaceId(fromIE->getInterfaceId());
     send(packet, arpOutGate);
 }
@@ -314,7 +313,7 @@ void IPv4::handlePacketFromHL(cPacket *packet)
 void IPv4::handlePacketFromARP(cPacket *packet)
 {
     // send out packet on the appropriate interface
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(packet->getControlInfo());
+    ILinkLayerControlInfo* ctrl = check_and_cast<ILinkLayerControlInfo*>(packet->getControlInfo());
     InterfaceEntry *destIE = ift->getInterfaceById(ctrl->getInterfaceId());
     sendPacketToNIC(packet, destIE);
 }
