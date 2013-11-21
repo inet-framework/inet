@@ -56,8 +56,8 @@ simple ProbabilisticBroadcast like ISimpleNetworkProtocol
         double timeInQueueAfterDeath @unit(s) = default(60 s);
 
     gates:
-        input upperLayerIn[]; // from upper layer
-        output upperLayerOut[]; // to uppe layer
-        input lowerLayerIn[]; // from lower layer
-        output lowerLayerOut[]; // to lower layer
+        input upperLayerIn[];
+        output upperLayerOut[];
+        input lowerLayerIn[];
+        output lowerLayerOut[];
 }

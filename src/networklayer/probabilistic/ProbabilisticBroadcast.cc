@@ -388,6 +388,7 @@ cPacket* ProbabilisticBroadcast::decapsMsg(ProbabilisticBroadcastPkt* msg)
  */
 cObject* ProbabilisticBroadcast::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
+    // TODO: generalize
     Ieee802Ctrl * const cCtrlInfo = new Ieee802Ctrl();
     cCtrlInfo->setDest(pDestAddr);
     pMsg->setControlInfo(cCtrlInfo);
