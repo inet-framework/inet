@@ -83,6 +83,9 @@ void PIMSM::initialize(int stage)
         ift = InterfaceTableAccess().get();
         pimIft = PimInterfaceTableAccess().get();
         pimNbt = PimNeighborTableAccess().get();
+
+        setRPAddress(par("RP").stdstringValue());
+        setSPTthreshold(par("sptThreshold").stdstringValue());
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
@@ -1695,6 +1698,8 @@ void PIMSM::newMulticastReciever(addRemoveAddr *members)
         int interfaceId = (members->getInt())->getInterfaceID();
         InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->RPAddress);
         PimNeighbor *neighborToRP = pimNbt->getNeighborByIntID(newInIntG->getInterfaceId());
+
+        // XXX neighborToRP can be NULL!
 
         routePointer = newRouteG;
         if (!(newRouteG = rt->getRouteFor(multGroup,IPv4Address::UNSPECIFIED_ADDRESS)))                             // create new (*,G) route

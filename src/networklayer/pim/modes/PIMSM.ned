@@ -26,6 +26,8 @@ simple PIMSM
 {
     parameters:
     	@display("i=block/network2");
+        string RP = default("");
+        string sptThreshold = default("infinity");
     gates:
         input splitterIn;
         output spiltterOut;
