@@ -80,7 +80,7 @@ class INET_API LMacLayer : public WirelessMacBase
 		, reservedMobileSlots(0)
 		, macQueue()
         , radio(NULL)
-        , previousRadioChannelState(IRadio::RADIO_CHANNEL_STATE_UNKNOWN)
+        , radioChannelState(IRadio::RADIO_CHANNEL_STATE_UNKNOWN)
 		, queueLength(0)
 		, wakeup(NULL)
 		, timeout(NULL)
@@ -194,7 +194,7 @@ class INET_API LMacLayer : public WirelessMacBase
 
         /** @brief The radio. */
         IRadio *radio;
-        IRadio::RadioChannelState previousRadioChannelState;
+        IRadio::RadioChannelState radioChannelState;
 
         /** @brief length of the queue*/
         unsigned queueLength;

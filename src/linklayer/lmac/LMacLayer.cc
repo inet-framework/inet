@@ -629,8 +629,8 @@ void LMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long val
 {
     if (signalID == IRadio::radioChannelStateChangedSignal)
     {
-        IRadio::RadioChannelState radioChannelState = (IRadio::RadioChannelState)value;
-        if (previousRadioChannelState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING && radioChannelState != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
+        IRadio::RadioChannelState newRadioChannelState = (IRadio::RadioChannelState)value;
+        if (radioChannelState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING && newRadioChannelState != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
         {
             // if data is scheduled for transfer, don;t do anything.
             if (sendData->isScheduled())
@@ -647,7 +647,7 @@ void LMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long val
                     cancelEvent(timeout);
             }
         }
-        previousRadioChannelState = radioChannelState;
+        radioChannelState = newRadioChannelState;
     }
 	else if (signalID == IRadio::radioModeChangedSignal)
     {
