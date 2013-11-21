@@ -20,7 +20,6 @@
 #include "ILinkLayerControlInfo.h"
 #include "BMacControlInfo.h"
 #include "BMacLayer.h"
-#include "Ieee802Ctrl.h"
 
 Define_Module(BMacLayer)
 
@@ -648,12 +647,8 @@ bool BMacLayer::addToQueue(cMessage *msg)
 		// queue is full, message has to be deleted
 		EV_DETAIL << "New packet arrived, but queue is FULL, so new packet is"
 				  " deleted\n";
-		// TODO:
-//		msg->setName("MAC ERROR");
-//		msg->setKind(PACKET_DROPPED);
-//		sendControlUp(msg);
+		emit(packetDroppedSignal, msg);
 		nbDroppedDataPackets++;
-
 		return false;
 	}
 
@@ -668,11 +663,12 @@ bool BMacLayer::addToQueue(cMessage *msg)
 void BMacLayer::flushQueue()
 {
     // TODO:
+    macQueue.clear();
 }
 
 void BMacLayer::clearQueue()
 {
-    // TODO:
+    macQueue.clear();
 }
 
 void BMacLayer::attachSignal(BMacFrame *macPkt)
@@ -787,9 +783,9 @@ BMacFrame *BMacLayer::encapsMsg(cPacket *netwPkt)
  */
 cObject* BMacLayer::setUpControlInfo(cMessage * const pMsg, const MACAddress& pSrcAddr)
 {
-//    BMacControlInfo *const cCtrlInfo = new BMacControlInfo();
-    Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
+    BMacControlInfo *const cCtrlInfo = new BMacControlInfo();
     cCtrlInfo->setSrc(pSrcAddr);
+    cCtrlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }

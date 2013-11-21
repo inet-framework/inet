@@ -13,19 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef BMACLAYER_H_
-#define BMACLAYER_H_
+#ifndef __INET_BMACLAYER_H
+#define __INET_BMACLAYER_H
 
-#include <string>
-#include <sstream>
-#include <vector>
-#include <list>
-
-#include "INETDefs.h"
-#include "MACAddress.h"
-#include "BMacFrame_m.h"
-#include "WirelessMacBase.h"
 #include "IRadio.h"
+#include "MACAddress.h"
+#include "WirelessMacBase.h"
+#include "BMacFrame_m.h"
 
 /**
  * @brief Implementation of B-MAC (called also Berkeley MAC, Low Power
@@ -274,7 +268,6 @@ class INET_API BMacLayer : public WirelessMacBase
 	cPacket* decapsMsg(BMacFrame * msg);
 	BMacFrame *encapsMsg(cPacket *netwPkt);
 	cObject* setUpControlInfo(cMessage * const pMsg, const MACAddress& pSrcAddr);
-//	cObject* setDownControlInfo(cMessage * const pMsg, Signal * const pSignal);
 };
 
-#endif /* BMACLAYER_H_ */
+#endif
