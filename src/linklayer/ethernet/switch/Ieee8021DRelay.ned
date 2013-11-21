@@ -19,14 +19,15 @@ import inet.linklayer.IMACRelayUnit;
 
 
 //
-// This modul forward frames (~EtherFrame) based on their destination MAC addresses to appropriate ports.
+// This modul forwards frames (~EtherFrame) based on their destination MAC addresses to appropriate ports.
 //
 // It can work in two mode:
-// -Non stp aware mode (If no module connected to it's stp gate):
-//     Looks up the frames destination address in the MACAddressTable, if it found the address, send throuth that port, else it broadcast it.
-// -Stp aware mode (If an STP or RSTP module connected to it's stp gate):
-//     Handle BPDU frames.
-//     If relaying a massage also checks the port's status in the InterfaceTable.
+// - STP unaware mode (If no module connected to its STP gate):
+//     Looks up the frames destination address in the MACAddressTable, if it found the address, sends through
+//	   that port, or otherwise broadcasts it.
+// - STP aware mode (If an STP or RSTP module connected to its STP gate):
+//     Handles BPDU frames.
+//     If relaying a message also checks the port's status in the InterfaceTable.
 //
 simple Ieee8021DRelay like IMACRelayUnit
 {

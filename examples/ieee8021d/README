@@ -1,22 +1,22 @@
 IEEE 802.1d examples
 ====================
 
-Exaple shows the STP/RSTP capability of the ethernet switch.
+These examples show the STP/RSTP capability of the ethernet switch.
 
 STP/RSTP is a network protocol that ensures a loop-free topology for any
 bridged Ethernet local area network. The basic function of STP/RSTP
 is to prevent bridge loops and the broadcast radiation that results from them.
-The protokol make any topology to a tree topology.
-The time needed to the STP make the topology loop-free is nearly 50s, while the RSTP only needs 6s 
+The protocol make any topology to a tree topology.
+The time needed to the STP make the topology loop-free is nearly 50s, while the RSTP only needs 6s.
 
-In the example we find a network with multiple loops in it. 
-After the STP/RSTP done its job, we can see the loopless topology's links  and the root switch highlighted with a light blue color.
+In the example, we find a network with multiple loops in it.
+After the STP/RSTP done its job, we can see the loopless topology's links and the root switch highlighted with a light blue color.
 
 Switch1RootByMAC
 ----------------
-The example shows whitout any configuration how Switch1 choosen to be the root, because it has the lowest MAC address
-Also you can check how the sortest path will be choosen. Switch2 will route his traffic through Switch4 insted of Switch7,
-because it has sorther path to the root.
+The example shows without any configuration how Switch1 chosen to be the root, because it has the lowest MAC address.
+Also you can check how the shortest path will be chosen. Switch2 will route his traffic through Switch4 instead of Switch7,
+because it has shorter path to the root.
 
 Switch3RootByPriority
 ---------------------
@@ -25,10 +25,10 @@ Now Switch3 will be the root because it has the lowest priority number.
 
 Switch7to4BySrcPriority
 -----------------------
-Switch7 will route his traffic through Switch4 insted of Switch3. They have the same long path, but Switch4 has better priority .
+Switch7 will route his traffic through Switch4 instead of Switch3. They have the same long path, but Switch4 has better priority.
 
 
 LargeNet
 --------
-This example shows, how traffic run though the network.
+This example shows, how traffic runs through the network.
 Also Switch4 disappears at 60s and reappears at 90s, so you can check how the tree will rebuild itself.
