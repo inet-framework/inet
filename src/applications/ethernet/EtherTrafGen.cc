@@ -182,7 +182,6 @@ void EtherTrafGen::sendBurstPackets()
 
         char msgname[40];
         sprintf(msgname, "pk-%d-%ld", getId(), seqNum);
-        EV << "Generating packet `" << msgname << "'\n";
 
         cPacket *datapacket = new cPacket(msgname, IEEE802CTRL_DATA);
 
@@ -194,6 +193,7 @@ void EtherTrafGen::sendBurstPackets()
         etherctrl->setDest(destMACAddress);
         datapacket->setControlInfo(etherctrl);
 
+        EV_INFO << "Send packet `" << msgname << "' dest=" << destMACAddress << " length=" << len << "B type=" << etherType << "\n";
         emit(sentPkSignal, datapacket);
         send(datapacket, "out");
         packetsSent++;
@@ -202,7 +202,7 @@ void EtherTrafGen::sendBurstPackets()
 
 void EtherTrafGen::receivePacket(cPacket *msg)
 {
-    EV << "Received packet `" << msg->getName() << "'\n";
+    EV_INFO << "Received packet `" << msg->getName() << "' length= " << msg->getByteLength() << "B\n";
 
     packetsReceived++;
     emit(rcvdPkSignal, msg);

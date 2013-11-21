@@ -62,6 +62,7 @@ bool EtherAppSrv::isNodeUp()
 
 void EtherAppSrv::startApp()
 {
+    EV_INFO << "Starting application\n";
     bool registerSAP = par("registerSAP");
     if (registerSAP)
         registerDSAP(localSAP);
@@ -69,6 +70,7 @@ void EtherAppSrv::startApp()
 
 void EtherAppSrv::stopApp()
 {
+    EV_INFO << "Stop the application\n";
 }
 
 void EtherAppSrv::handleMessage(cMessage *msg)
@@ -76,7 +78,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
     if (!isNodeUp())
         throw cRuntimeError("Application is not running");
 
-    EV << "Received packet `" << msg->getName() << "'\n";
+    EV_INFO << "Received packet `" << msg->getName() << "'\n";
     EtherAppReq *req = check_and_cast<EtherAppReq *>(msg);
     packetsReceived++;
     emit(rcvdPkSignal, req);
@@ -104,11 +106,12 @@ void EtherAppSrv::handleMessage(cMessage *msg)
 
         sprintf(s, "%d", k);
 
-        EV << "Generating packet `" << msgname << "'\n";
-
         EtherAppResp *datapacket = new EtherAppResp(msgname, IEEE802CTRL_DATA);
         datapacket->setRequestId(requestId);
         datapacket->setByteLength(l);
+
+        EV_INFO << "Send response `" << msgname << "' to " << srcAddr << " ssap=" << localSAP << " dsap=" << srcSap << " length=" << l << "B requestId=" << requestId << "\n";
+
         sendPacket(datapacket, srcAddr, srcSap);
 
         k++;
@@ -129,7 +132,7 @@ void EtherAppSrv::sendPacket(cPacket *datapacket, const MACAddress& destAddr, in
 
 void EtherAppSrv::registerDSAP(int dsap)
 {
-    EV << getFullPath() << " registering DSAP " << dsap << "\n";
+    EV_DEBUG << getFullPath() << " registering DSAP " << dsap << "\n";
 
     Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
     etherctrl->setDsap(dsap);
