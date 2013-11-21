@@ -68,9 +68,9 @@ void VoIPStreamSender::initialize(int stage)
         samplesPerPacket = (int)round(sampleRate * SIMTIME_DBL(packetTimeLength));
         if (samplesPerPacket & 1)
             samplesPerPacket++;
-        EV << "The packetTimeLength parameter is " << packetTimeLength * 1000.0 << "ms, ";
+        EV_INFO << "The packetTimeLength parameter is " << packetTimeLength * 1000.0 << "ms, ";
         packetTimeLength = ((double)samplesPerPacket) / sampleRate;
-        EV << "adjusted to " << packetTimeLength * 1000.0 << "ms" << endl;
+        EV_INFO << "adjusted to " << packetTimeLength * 1000.0 << "ms" << endl;
 
         soundFile = par("soundFile").stringValue();
         repeatCount = par("repeatCount");
@@ -89,7 +89,7 @@ void VoIPStreamSender::initialize(int stage)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
         // say HELLO to the world
-        EV << "VoIPSourceApp -> initialize(" << stage << ")" << endl;
+        EV_TRACE << "VoIPSourceApp -> initialize(" << stage << ")" << endl;
 
         // Hack for create results folder
         recordScalar("hackForCreateResultsFolder", 0);
@@ -258,7 +258,7 @@ void VoIPStreamSender::openSoundFile(const char *name)
         short int *inb = new short int[sec * pCodecCtx->channels * pCodecCtx->sample_rate * av_get_bits_per_sample_format(pCodecCtx->sample_fmt) / (8 * sizeof(short int))];
         short int *outb = new short int[sec * sampleRate * av_get_bits_per_sample_format(pEncoderCtx->sample_fmt) / (8 * sizeof(short int))+16];
         int decoded = audio_resample(pReSampleCtx, outb, inb, sec * pCodecCtx->sample_rate);
-        EV << "decoded:" <<decoded << endl;
+        EV_DEBUG << "decoded:" << decoded << endl;
         delete [] inb;
         delete [] outb;
         // end HACK

@@ -49,7 +49,7 @@ void VoIPStreamReceiver::initialize(int stage)
         recordScalar("hackForCreateResultsFolder", 0);
 
         // Say Hello to the world
-        EV << "VoIPSinkApp initialize()" << endl;
+        EV_TRACE << "VoIPSinkApp initialize()" << endl;
 
         // read parameters
         localPort = par("localPort");
@@ -259,7 +259,7 @@ void VoIPStreamReceiver::decodePacket(VoIPStreamPacket *vp)
     {
         int lostSamples = ceil(SIMTIME_DBL((simTime() - curConn.lastPacketFinish) * curConn.sampleRate));
         ASSERT(lostSamples > 0);
-        EV << "Lost " << lostSamples << " samples\n";
+        EV_INFO << "Lost " << lostSamples << " samples\n";
         emit(lostSamplesSignal, lostSamples);
         curConn.writeLostSamples(lostSamples);
         curConn.lastPacketFinish += lostSamples * (1.0 / curConn.sampleRate);
@@ -279,7 +279,7 @@ void VoIPStreamReceiver::decodePacket(VoIPStreamPacket *vp)
 
 void VoIPStreamReceiver::finish()
 {
-    EV << "Sink finish()" << endl;
+    EV_TRACE << "Sink finish()" << endl;
     closeConnection();
 }
 
