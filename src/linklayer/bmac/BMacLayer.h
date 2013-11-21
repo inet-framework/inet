@@ -119,7 +119,7 @@ class INET_API BMacLayer : public WirelessMacBase
 
     /** @brief The radio. */
     IRadio *radio;
-    IRadio::RadioChannelState previousRadioChannelState;
+    IRadio::RadioChannelState radioChannelState;
 
     /** @name Different tracked statistics.*/
 	/*@{*/

@@ -626,15 +626,15 @@ void BMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long val
     // Transmission of one packet is over
     else if (signalID == IRadio::radioChannelStateChangedSignal)
     {
-        IRadio::RadioChannelState radioChannelState = (IRadio::RadioChannelState)value;
-        if (previousRadioChannelState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING && radioChannelState != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
+        IRadio::RadioChannelState newRadioChannelState = (IRadio::RadioChannelState)value;
+        if (radioChannelState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING && newRadioChannelState != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
         {
             if (macState == WAIT_TX_DATA_OVER)
                 scheduleAt(simTime(), data_tx_over);
             else if (macState == WAIT_ACK_TX)
                 scheduleAt(simTime(), ack_tx_over);
         }
-        previousRadioChannelState = radioChannelState;
+        radioChannelState = newRadioChannelState;
     }
 }
 
