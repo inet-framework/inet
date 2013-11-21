@@ -490,6 +490,10 @@ void RSTP::handleIncomingFrame(BPDU *frame)
                                 }
                                 break;
                             }
+                            if (rootPort->getRole() == Ieee8021DInterfaceData::ROOT)
+                                colorLink(r, "#a5ffff", 3);
+                            else
+                                colorLink(r, "#000000", 1);
                         }
                     }
                     else if((src.compareTo(arrivalPort->getBridgeAddress())==0) // worse or similar, but the same source
@@ -727,51 +731,43 @@ void RSTP::sendBPDU(int port)
     }
 }
 
+void RSTP::colorLink(unsigned int i, const char *color, unsigned int width)
+{
+    if (ev.isGUI() && treeColoring)
+    {
+        cGate * outGate = getParentModule()->gate("ethg$o", i);
+        cGate * inputGate = getParentModule()->gate("ethg$i", i);
+        cGate * outGateNext = outGate->getNextGate();
+        cGate * inputGatePrev = inputGate->getPreviousGate();
+
+        if (outGate && inputGate && inputGatePrev && outGateNext)
+        {
+            outGate->getDisplayString().setTagArg("ls", 0, color);
+            outGate->getDisplayString().setTagArg("ls", 1, width);
+
+            inputGate->getDisplayString().setTagArg("ls", 0, color);
+            inputGate->getDisplayString().setTagArg("ls", 1, width);
+
+            outGateNext->getDisplayString().setTagArg("ls", 0, color);
+            outGateNext->getDisplayString().setTagArg("ls", 1, width);
+
+            inputGatePrev->getDisplayString().setTagArg("ls", 0, color);
+            inputGatePrev->getDisplayString().setTagArg("ls", 1, width);
+        }
+    }
+}
+
 void RSTP::colorRootPorts()
 {
-    if (treeColoring)
+    if (ev.isGUI() && treeColoring)
     {
-        // gives color to the root link, or module border if it is root
         Ieee8021DInterfaceData * port;
+        // gives color to the root link, or module border if it is root
         for (unsigned int i = 0; i < portCount; i++)
         {
             port = getPortInterfaceData(i);
-            cGate * outGate = getParentModule()->gate("ethg$o", i);
-            cGate * inputGate = getParentModule()->gate("ethg$i", i);
-            cGate * outGateNext = outGate->getNextGate();
-            cGate * inputGatePrev = inputGate->getPreviousGate();
-
-            if (port->getRole() == Ieee8021DInterfaceData::ROOT && outGate && inputGate && inputGatePrev && outGateNext)
-            {
-                if (port->isForwarding())
-                {
-                    outGate->getDisplayString().setTagArg("ls", 0, "#a5ffff");
-                    outGate->getDisplayString().setTagArg("ls", 1, 3);
-
-                    inputGate->getDisplayString().setTagArg("ls", 0, "#a5ffff");
-                    inputGate->getDisplayString().setTagArg("ls", 1, 3);
-
-                    outGateNext->getDisplayString().setTagArg("ls", 0, "#a5ffff");
-                    outGateNext->getDisplayString().setTagArg("ls", 1, 3);
-
-                    inputGatePrev->getDisplayString().setTagArg("ls", 0, "#a5ffff");
-                    inputGatePrev->getDisplayString().setTagArg("ls", 1, 3);
-                }
-                else
-                {
-                    outGate->getDisplayString().setTagArg("ls", 0, "#000000");
-                    outGate->getDisplayString().setTagArg("ls", 1, 1);
-
-                    inputGate->getDisplayString().setTagArg("ls", 0, "#000000");
-                    inputGate->getDisplayString().setTagArg("ls", 1, 1);
-
-                    outGateNext->getDisplayString().setTagArg("ls", 0, "#000000");
-                    outGateNext->getDisplayString().setTagArg("ls", 1, 1);
-
-                    inputGatePrev->getDisplayString().setTagArg("ls", 0, "#000000");
-                    inputGatePrev->getDisplayString().setTagArg("ls", 1, 1);
-                }
-            }
+            if (port->getRole() == Ieee8021DInterfaceData::ROOT)
+                colorLink(i, "#a5ffff", 3);
 
             cModule * puerta = this->getParentModule()->getSubmodule("eth", i);
             if (puerta != NULL)
@@ -833,13 +829,11 @@ void RSTP::colorRootPorts()
             if (getRootIndex() == -1)
             {
                 // root mark
-                this->getParentModule()->getDisplayString().setTagArg("i2", 0, "status/check");
                 this->getParentModule()->getDisplayString().setTagArg("i", 1, "#a5ffff");
             }
             else
             {
                 // remove possible root mark
-                this->getParentModule()->getDisplayString().removeTag("i2");
                 this->getParentModule()->getDisplayString().setTagArg("i", 1, "");
             }
         }
