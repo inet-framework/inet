@@ -326,6 +326,7 @@ void STP::generateBPDU(int port, const MACAddress& address, bool tcFlag, bool tc
     controlInfo->setDest(address);
     controlInfo->setInterfaceId(port);
 
+    bpdu->setName("BPDU");
     bpdu->setProtocolIdentifier(0);
     bpdu->setProtocolVersionIdentifier(0);
     bpdu->setBpduType(0); // 0 if configuration BPDU
@@ -374,6 +375,7 @@ void STP::generateTCN()
             BPDU * tcn = new BPDU();
             tcn->setProtocolIdentifier(0);
             tcn->setProtocolVersionIdentifier(0);
+            tcn->setName("BPDU");
 
             // 1 if Topology Change Notification BPDU
             tcn->setBpduType(1);

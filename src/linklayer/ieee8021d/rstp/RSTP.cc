@@ -660,6 +660,10 @@ void RSTP::sendTCNtoRoot()
                 frame->setPortNum(r);
                 frame->setBridgeAddress(address);
                 frame->setTcFlag(true);
+                frame->setName("BPDU");
+                frame->setMaxAge(maxAge);
+                frame->setHelloTime(hellotime);
+                frame->setForwardDelay(fwdDelay);
                 if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
                 frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
                 etherctrl->setSrc(address);
@@ -721,6 +725,10 @@ void RSTP::sendBPDU(int port)
         frame->setTcFlag(true);
         else
         frame->setTcFlag(false);
+        frame->setName("BPDU");
+        frame->setMaxAge(maxAge);
+        frame->setHelloTime(hellotime);
+        frame->setForwardDelay(fwdDelay);
         if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
             frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
         etherctrl->setSrc(address);
