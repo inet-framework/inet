@@ -286,6 +286,7 @@
 /examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario2 -r 0,              150s,            0c11-0f34 
 /examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario3 -r 0,              300s,            d305-d224 
 /examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario4 -r 0,              100s,            094e-1dd1 
+/examples/pim/sm/iptv/,              -f omnetpp.ini -c General -r 0,                 35s,            5665-4c3b 
 
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            4496-fd0d
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            f9d3-a124

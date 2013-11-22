@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+
+<config>
+  <interface hosts="*" names="*" address="192.168.x.x" netmask="255.255.255.0"/>
+</config>
