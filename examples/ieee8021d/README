@@ -31,4 +31,4 @@ Switch7 will route his traffic through Switch4 instead of Switch3. They have the
 LargeNet
 --------
 This example shows, how traffic runs through the network.
-Also Switch4 disappears at 60s and reappears at 90s, so you can check how the tree will rebuild itself.
+Also Switch4 disappears at 60s and reappears at 120s, so you can check how the tree will rebuild itself.
