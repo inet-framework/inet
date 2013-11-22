@@ -27,7 +27,8 @@ moduleinterface ISpanningTree
         double helloTime @unit("s");
         double fwdDelay @unit("s");
         double maxAge @unit("s");
-        int priority;
+        int bridgePriority;
+        bool visualize;
     gates:
         input relayIn;
         output relayOut;

@@ -27,37 +27,20 @@
 #include "MACAddressTable.h"
 #include "InterfaceTable.h"
 #include "Ieee8021DInterfaceData.h"
+#include "STPBase.h"
 
 /**
  * Implements the Rapid Spanning Tree Protocol. See the NED file for details.
  */
-class RSTP : public cSimpleModule, public ILifecycle {
+class RSTP : public STPBase {
 protected:
     // kind codes for self messages
-    enum SelfKinds {
-        SELF_HELLOTIME = 1, SELF_UPGRADE, SELF_TIMETODESIGNATE
-    };
+    enum SelfKinds {SELF_HELLOTIME = 1, SELF_UPGRADE, SELF_TIMETODESIGNATE};
 
-    int maxAge;
-    bool treeColoring;         // colors tree
-    bool isOperational;        // for lifecycle
-
-    cModule* parent;           // pointer to the parent module
-
-    unsigned int numPorts;    // number of ports
-    simtime_t tcWhileTime;     // TCN activation time
-    bool autoEdge;             // automatic edge ports detection
-
-    MACAddressTable * macTable;      // needed for flushing.
-
-    IInterfaceTable * ifTable;
-
-    int priority;              // bridge's priority
-    MACAddress address;        // bridge's MAC address
-
-    simtime_t helloTime;       // time between hello BPDUs
-    simtime_t forwardDelay;        // After that a discarding port switches to learning and so on if it is designated
-    simtime_t migrateTime;     // after that, a not assigned port becomes designated
+    // Set by management: see the ned file for more info
+    simtime_t migrateTime;
+    simtime_t tcWhileTime;
+    bool autoEdge;
 
     cMessage* helloTimer;
     cMessage* forwardTimer;
@@ -67,7 +50,6 @@ public:
     RSTP();
     virtual ~RSTP();
     virtual int numInitStages() const { return 2; }
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
 protected:
     virtual void initialize(int stage);
@@ -76,8 +58,6 @@ protected:
 
     virtual void start();
     virtual void stop();
-
-    Ieee8021DInterfaceData *getPortInterfaceData(unsigned int portNum);
 
     /**
      * @brief initialize RSTP dynamic information
@@ -89,13 +69,6 @@ protected:
      * @return Best alternate gate index
      */
     virtual int getBestAlternate();
-
-    /**
-     * @brief Adds effects to be represented by Tkenv. Root links colored green. Show port role, state.
-     */
-
-    virtual void colorLink(unsigned int i, bool forwarding);
-    virtual void visualizer();
 
     /**
      * @brief Sends BPDUs through all ports, if they are required
@@ -122,12 +95,6 @@ protected:
      * @brief Prints current data base info
      */
     virtual void printState();
-
-    /**
-     * @brief Obtain the root gate index
-     * @return the root gate index or -1 if there is not root gate.
-     */
-    virtual int getRootIndex();
 
     virtual void updateInterfacedata(BPDU *frame, unsigned int portNum);
 

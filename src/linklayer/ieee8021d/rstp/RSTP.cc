@@ -27,7 +27,6 @@ Define_Module(RSTP);
 
 RSTP::RSTP()
 {
-    macTable = NULL;
     helloTimer = new cMessage("itshellotime", SELF_HELLOTIME);
     forwardTimer = new cMessage("upgrade", SELF_UPGRADE);
     migrateTimer = new cMessage("timetodesignate", SELF_TIMETODESIGNATE);
@@ -42,52 +41,23 @@ RSTP::~RSTP()
 
 void RSTP::initialize(int stage)
 {
+    STPBase::initialize(stage);
+
     if (stage == 0)
     {
         autoEdge = par("autoEdge");
-        maxAge = par("maxAge");
-        treeColoring = par("treeColoring");
-        priority = par("priority");
         tcWhileTime = par("tcWhileTime");
-        helloTime = par("helloTime");
-        forwardDelay = par("fwdDelay");
         migrateTime = par("migrateTime");
-
-        macTable = check_and_cast<MACAddressTable *>(getModuleByPath(par("macTableName")));
-        ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableName")));
-        numPorts = this->getParentModule()->gate("ethg$o", 0)->getVectorSize();
     }
 
     if (stage == 1) // "auto" MAC addresses assignment takes place in stage 0
     {
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-
-        // gets the bridge's mac address
-        InterfaceEntry * ifEntry = ifTable->getInterface(0);
-        if (ifEntry != NULL)
-        {
-            address = ifEntry->getMacAddress();
-        }
-        else
-        {
-            EV_INFO<<"interface not found. Is not this module connected to another BEB?"<<endl;
-            EV_INFO<<"Setting AAAAAA000001 as backbone mac address."<<endl;
-            address.setAddress("AAAAAA000001");
-        }
-
         initPorts();
-
+        visualizer();
         // programming next auto-messages.
         scheduleAt(simTime(), helloTimer);
         scheduleAt(simTime() + forwardDelay, forwardTimer);
         scheduleAt(simTime() + migrateTime, migrateTimer);
-    }
-
-    if (stage == 1)
-    {
-        printState();
-        visualizer();
     }
 }
 
@@ -326,7 +296,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
         int r = getRootIndex();
 
         // checking possible backup
-        if (src.compareTo(address) == 0)// more than one port in the same LAN
+        if (src.compareTo(bridgeAddress) == 0)// more than one port in the same LAN
             handleBK(frame, arrival);
         else
         {
@@ -340,7 +310,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
             bool Flood = false;
             caso = compareInterfacedata(arrival, frame, arrivalPort->getLinkCost());
             EV_DEBUG<<"caso: "<<caso<<endl;
-            if ((caso > 0) && (frame->getRootAddress().compareTo(address) != 0)) // root will not participate in a loop with its own address
+            if ((caso > 0) && (frame->getRootAddress().compareTo(bridgeAddress) != 0)) // root will not participate in a loop with its own address
             {
                 // update that port rstp info
                 updateInterfacedata(frame, arrival);
@@ -495,7 +465,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
                         }
                     }
                     else if((src.compareTo(arrivalPort->getBridgeAddress())==0) // worse or similar, but the same source
-                            &&(frame->getRootAddress().compareTo(address)!=0))// root will not participate
+                            &&(frame->getRootAddress().compareTo(bridgeAddress)!=0))// root will not participate
                     {
                         // source has updated BPDU information
                         switch(caso)
@@ -653,10 +623,10 @@ void RSTP::sendTCNtoRoot()
                 frame->setRootAddress(rootPort->getRootAddress());
                 frame->setMessageAge(rootPort->getAge());
                 frame->setRootPathCost(rootPort->getRootPathCost());
-                frame->setBridgePriority(priority);
+                frame->setBridgePriority(bridgePriority);
                 frame->setTcaFlag(false);
                 frame->setPortNum(r);
-                frame->setBridgeAddress(address);
+                frame->setBridgeAddress(bridgeAddress);
                 frame->setTcFlag(true);
                 frame->setName("BPDU");
                 frame->setMaxAge(maxAge);
@@ -664,7 +634,7 @@ void RSTP::sendTCNtoRoot()
                 frame->setForwardDelay(forwardDelay);
                 if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
                 frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
-                etherctrl->setSrc(address);
+                etherctrl->setSrc(bridgeAddress);
                 etherctrl->setDest(MACAddress::STP_MULTICAST_ADDRESS);
                 etherctrl->setInterfaceId(r);
                 frame->setControlInfo(etherctrl);
@@ -710,15 +680,15 @@ void RSTP::sendBPDU(int port)
         }
         else
         {
-            frame->setRootPriority(priority);
-            frame->setRootAddress(address);
+            frame->setRootPriority(bridgePriority);
+            frame->setRootAddress(bridgeAddress);
             frame->setMessageAge(0);
             frame->setRootPathCost(0);
         }
-        frame->setBridgePriority(priority);
+        frame->setBridgePriority(bridgePriority);
         frame->setTcaFlag(false);
         frame->setPortNum(port);
-        frame->setBridgeAddress(address);
+        frame->setBridgeAddress(bridgeAddress);
         if (simulation.getSimTime() < iport->getTCWhile())
         frame->setTcFlag(true);
         else
@@ -729,76 +699,11 @@ void RSTP::sendBPDU(int port)
         frame->setForwardDelay(forwardDelay);
         if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
             frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
-        etherctrl->setSrc(address);
+        etherctrl->setSrc(bridgeAddress);
         etherctrl->setDest(MACAddress::STP_MULTICAST_ADDRESS);
         etherctrl->setInterfaceId(port);
         frame->setControlInfo(etherctrl);
         send(frame, "relayOut");
-    }
-}
-
-void RSTP::colorLink(unsigned int i, bool forwarding)
-{
-    if (ev.isGUI() && treeColoring)
-    {
-        cGate * outGate = getParentModule()->gate("ethg$o", i);
-        cGate * inGate = getParentModule()->gate("ethg$i", i);
-        cGate * outGateNext = outGate->getNextGate();
-        cGate * inGatePrev = inGate->getPreviousGate();
-        cGate * outGatePrev = outGate->getPreviousGate();
-        cGate * inGatePrev2 = inGatePrev->getPreviousGate();
-
-        if (outGate && inGate && inGatePrev && outGateNext && outGatePrev && inGatePrev2)
-        {
-            if(forwarding)
-            {
-                outGatePrev->getDisplayString().setTagArg("ls", 0, "#000000");
-                inGate->getDisplayString().setTagArg("ls", 0, "#000000");
-            }
-            else
-            {
-                outGatePrev->getDisplayString().setTagArg("ls", 0, "#888888");
-                inGate->getDisplayString().setTagArg("ls", 0, "#888888");
-            }
-
-            if((!inGatePrev2->getDisplayString().containsTag("ls") || strcmp(inGatePrev2->getDisplayString().getTagArg("ls", 0),"#000000") == 0) && forwarding)
-            {
-                outGate->getDisplayString().setTagArg("ls", 0, "#000000");
-                inGatePrev->getDisplayString().setTagArg("ls", 0, "#000000");
-            }
-            else
-            {
-                outGate->getDisplayString().setTagArg("ls", 0, "#888888");
-                inGatePrev->getDisplayString().setTagArg("ls", 0, "#888888");
-            }
-        }
-    }
-}
-
-void RSTP::visualizer()
-{
-    if (ev.isGUI() && treeColoring)
-    {
-        Ieee8021DInterfaceData * port;
-        // gives color to the root link, or module border if it is root
-        for (unsigned int i = 0; i < numPorts; i++)
-        {
-            port = getPortInterfaceData(i);
-            colorLink(i, port->getState() == Ieee8021DInterfaceData::FORWARDING);
-
-            cModule * puerta = this->getParentModule()->getSubmodule("eth", i);
-            if (puerta != NULL)
-            {
-                char buf[25];
-                sprintf(buf, "%s\n%s\n", port->getRoleName(), port->getStateName());
-                puerta->getDisplayString().setTagArg("t", 0, buf);
-            }
-        }
-
-        if (getRootIndex() == -1)
-            this->getParentModule()->getDisplayString().setTagArg("i", 1, "#a5ffff");
-        else
-            this->getParentModule()->getDisplayString().setTagArg("i", 1, "");
     }
 }
 
@@ -808,8 +713,8 @@ void RSTP::printState()
     EV_DETAIL<<endl<<this->getParentModule()->getName()<<endl;
     int r=getRootIndex();
     EV_DETAIL<<"RSTP state"<<endl;
-    EV_DETAIL<<"Priority: "<<priority<<endl;
-    EV_DETAIL<<"Local MAC: "<<address<<endl;
+    EV_DETAIL<<"Priority: "<<bridgePriority<<endl;
+    EV_DETAIL<<"Local MAC: "<<bridgeAddress<<endl;
     if(r>=0)
     {
         Ieee8021DInterfaceData * rootPort = getPortInterfaceData(r);
@@ -861,12 +766,12 @@ void RSTP::printState()
 void RSTP::initInterfacedata(unsigned int portNum)
 {
     Ieee8021DInterfaceData * ifd = getPortInterfaceData(portNum);
-    ifd->setRootPriority(priority);
-    ifd->setRootAddress(address);
+    ifd->setRootPriority(bridgePriority);
+    ifd->setRootAddress(bridgeAddress);
     ifd->setRootPathCost(0);
     ifd->setAge(0);
-    ifd->setBridgePriority(priority);
-    ifd->setBridgeAddress(address);
+    ifd->setBridgePriority(bridgePriority);
+    ifd->setBridgeAddress(bridgeAddress);
     ifd->setPortPriority(-1);
     ifd->setPortNum(-1);
     ifd->setLostBPDU(0);
@@ -914,8 +819,8 @@ int RSTP::contestInterfacedata(unsigned int portNum)
     int rootPriority1 = rootPort->getRootPriority();
     MACAddress rootAddress1 = rootPort->getRootAddress();
     int rootPathCost1 = rootPort->getRootPathCost() + ifd->getLinkCost();
-    int bridgePriority1 = priority;
-    MACAddress bridgeAddress1 = address;
+    int bridgePriority1 = bridgePriority;
+    MACAddress bridgeAddress1 = bridgeAddress;
     int portPriority1 = ifd->getPortPriority();
     int portNum1 = portNum;
 
@@ -962,8 +867,8 @@ int RSTP::contestInterfacedata(BPDU* msg, unsigned int portNum)
     int rootPriority1 = rootPort->getRootPriority();
     MACAddress rootAddress1 = rootPort->getRootAddress();
     int rootPathCost1 = rootPort->getRootPathCost();
-    int bridgePriority1 = priority;
-    MACAddress bridgeAddress1 = address;
+    int bridgePriority1 = bridgePriority;
+    MACAddress bridgeAddress1 = bridgeAddress;
     int portPriority1 = ifd->getPortPriority();
     int portNum1 = portNum;
 
@@ -1047,21 +952,6 @@ int RSTP::compareInterfacedata(unsigned int portNum, BPDU * msg, int linkCost)
     return 0;
 }
 
-int RSTP::getRootIndex()
-{
-    int result = -1;
-    for (unsigned int i = 0; i < numPorts; i++)
-    {
-        Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
-        if (iPort->getRole() == Ieee8021DInterfaceData::ROOT)
-        {
-            result = i;
-            break;
-        }
-    }
-    return result;
-}
-
 int RSTP::getBestAlternate()
 {
     int candidato = -1;  // index of the best alternate found
@@ -1102,69 +992,17 @@ int RSTP::getBestAlternate()
 
 void RSTP::start()
 {
+    STPBase::start();
     initPorts();
     scheduleAt(simTime(), helloTimer);
     scheduleAt(simTime() + forwardDelay, forwardTimer);
     scheduleAt(simTime() + migrateTime, migrateTimer);
-    isOperational = true;
 }
 
 void RSTP::stop()
 {
-    for (unsigned int i = 0; i < numPorts; i++)
-        colorLink(i, false);
-    this->getParentModule()->getDisplayString().setTagArg("i", 1, "");
+    STPBase::stop();
     cancelEvent(helloTimer);
     cancelEvent(forwardTimer);
     cancelEvent(migrateTimer);
-    isOperational = false;
-}
-
-bool RSTP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent
-    ();
-
-    if (dynamic_cast<NodeStartOperation *>(operation))
-    {
-        if (stage == NodeStartOperation::STAGE_LINK_LAYER)
-        {
-            start();
-        }
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
-    {
-        if (stage == NodeShutdownOperation::STAGE_LINK_LAYER)
-        {
-            stop();
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
-    {
-        if (stage == NodeCrashOperation::STAGE_CRASH)
-        {
-            stop();
-        }
-    }
-    else
-    {
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-    }
-
-    return true;
-}
-
-Ieee8021DInterfaceData * RSTP::getPortInterfaceData(unsigned int portNum)
-{
-    cGate * gate = this->getParentModule()->gate("ethg$o", portNum);
-    if (!gate)
-        error("gate is NULL");
-    InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
-    if (!gateIfEntry)
-        error("gateIfEntry is NULL");
-    Ieee8021DInterfaceData * portData = gateIfEntry->ieee8021DData();
-    if (!portData)
-        error("IEEE8021DInterfaceData not found!");
-
-    return portData;
 }

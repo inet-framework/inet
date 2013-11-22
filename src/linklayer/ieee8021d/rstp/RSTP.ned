@@ -41,14 +41,14 @@ import inet.linklayer.ieee8021d.ISpanningTree;
 simple RSTP like ISpanningTree
 {
     parameters:
-        double helloTime @unit("s") = default(2s);              // interval between sending Hello messages
-        double fwdDelay @unit("s") = default(6s);               // time a port is kept in the learning state before going into forwarding
-        double migrateTime @unit ("s")= default(30s);           // time after which a non-assigned port becomes designated
-        double tcWhileTime @unit("s") = default(6s);            // a port will send TC=true (Topology Change Notification) for this time interval
-        double maxAge @unit("s") = default(20s);                // max. hop count
-        int priority = default(128);                            // switch priority
-        bool autoEdge = default(true);                          // if false, edge ports will have to wait to get designated
-        bool treeColoring = default(false);                     // shows the RSTP tree by coloring connections in the network graphics
+        double helloTime @unit("s") = default(2s);                // interval between sending Hello messages
+        double fwdDelay @unit("s") = default(6s);                 // time a port is kept in the learning state before going into forwarding
+        double migrateTime @unit ("s")= default(30s);             // time after which a non-assigned port becomes designated
+        double tcWhileTime @unit("s") = default(6s);              // a port will send TC=true (Topology Change Notification) for this time interval
+        double maxAge @unit("s") = default(20s);                  // max. hop count
+        int bridgePriority = default(128);                        // switch priority
+        bool autoEdge = default(true);                            // if false, edge ports will have to wait to get designated
+        bool visualize = default(false);                          // shows the RSTP tree by coloring connections in the network graphics
         string interfaceTableName = default("^.interfaceTable");  // module path to the InterfaceTable module
         string macTableName = default("^.macTable");              // module path to the MACAddressTable module
         @display("i=block/network2");
