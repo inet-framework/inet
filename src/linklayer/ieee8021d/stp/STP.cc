@@ -27,34 +27,16 @@ Define_Module(STP);
 
 void STP::initialize(int stage)
 {
+    STPBase::initialize(stage);
+
     if (stage == 0)
     {
-        treeColoring = par("treeColoring").boolValue();
-        portCount = this->getParentModule()->gate("ethg$o", 0)->getVectorSize();
         tick = new cMessage("STP_TICK", 0);
-
-        // connection to MACAddressTable for faster aging
-        cModule * tmpMacTable = getParentModule()->getSubmodule("macTable");
-        macTable = check_and_cast<MACAddressTable *>(tmpMacTable);
         WATCH(bridgeAddress);
     }
     else if (stage == 1)
     {
-        NodeStatus * nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-
-        // obtain a bridge address from InterfaceTable
-        ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableName")));
-        InterfaceEntry * ifEntry = ifTable->getInterface(0);
-
-        if (ifEntry != NULL)
-            bridgeAddress = ifEntry->getMacAddress();
-
         initPortTable();
-        helloTime = par("helloTime");
-        maxAge = par("maxAge");
-        fwdDelay = par("fwdDelay");
-        bridgePriority = par("priority");
         ubridgePriority = bridgePriority;
 
         isRoot = true;
@@ -67,13 +49,12 @@ void STP::initialize(int stage)
         rootPort = 0;
         cHelloTime = helloTime;
         cMaxAge = maxAge;
-        cFwdDelay = fwdDelay;
+        cFwdDelay = forwardDelay;
 
         helloTimer = 0;
         allDesignated();
         scheduleAt(simTime() + 1, tick);
-        if (treeColoring)
-            getParentModule()->getDisplayString().setTagArg("i", 1, "#a5ffff");
+        visualizer();
     }
 }
 
@@ -85,7 +66,7 @@ STP::~STP()
 void STP::initPortTable()
 {
     EV_DEBUG<< "IEE8021D Interface Data initialization. Setting port infos to the protocol defaults." << endl;
-    for (unsigned int i = 0; i < portCount; i++)
+    for (unsigned int i = 0; i < numPorts; i++)
     {
         Ieee8021DInterfaceData * port = getPortInterfaceData(i);
         port->setDefaultStpPortInfoData();
@@ -122,127 +103,11 @@ void STP::handleMessage(cMessage * msg)
         if(msg == tick)
         {
             handleTick();
-            if (treeColoring)
-                colorTree();
+            visualizer();
             scheduleAt(simTime() + 1, tick);
         }
         else
             delete msg;
-    }
-}
-
-void STP::colorTree()
-{
-    Ieee8021DInterfaceData * port;
-    for (unsigned int i = 0; i < portCount; i++)
-    {
-        port = getPortInterfaceData(i);
-        cGate * outGate = getParentModule()->gate("ethg$o", i);
-        cGate * inputGate = getParentModule()->gate("ethg$i", i);
-        cGate * outGateNext = outGate->getNextGate();
-        cGate * inputGatePrev = inputGate->getPreviousGate();
-
-        if (outGate && inputGate && inputGatePrev && outGateNext)
-        {
-            if (port->isForwarding())
-            {
-                if (port->getRole() == Ieee8021DInterfaceData::ROOT)
-                {
-                    outGate->getDisplayString().setTagArg("ls", 0, "#a5ffff");
-                    outGate->getDisplayString().setTagArg("ls", 1, 3);
-
-                    inputGate->getDisplayString().setTagArg("ls", 0, "#a5ffff");
-                    inputGate->getDisplayString().setTagArg("ls", 1, 3);
-
-                    outGateNext->getDisplayString().setTagArg("ls", 0, "#a5ffff");
-                    outGateNext->getDisplayString().setTagArg("ls", 1, 3);
-
-                    inputGatePrev->getDisplayString().setTagArg("ls", 0, "#a5ffff");
-                    inputGatePrev->getDisplayString().setTagArg("ls", 1, 3);
-                }
-            }
-            else
-            {
-                outGate->getDisplayString().setTagArg("ls", 0, "#000000");
-                outGate->getDisplayString().setTagArg("ls", 1, 1);
-
-                inputGate->getDisplayString().setTagArg("ls", 0, "#000000");
-                inputGate->getDisplayString().setTagArg("ls", 1, 1);
-
-                outGateNext->getDisplayString().setTagArg("ls", 0, "#000000");
-                outGateNext->getDisplayString().setTagArg("ls", 1, 1);
-
-                inputGatePrev->getDisplayString().setTagArg("ls", 0, "#000000");
-                inputGatePrev->getDisplayString().setTagArg("ls", 1, 1);
-            }
-        }
-        cModule * puerta = this->getParentModule()->getSubmodule("eth", i);
-        if (puerta != NULL)
-        {
-            char buf[25];
-            char sbuf[12];
-            char rbuf[13];
-
-            int role = port->getRole();
-            switch (role)
-            {
-                case 0:
-                    sprintf(rbuf, "ALTERNATE\n");
-                    break;
-                case 1:
-                    sprintf(rbuf, "NOTASSIGNED\n");
-                    break;
-                case 2:
-                    sprintf(rbuf, "DISABLED\n");
-                    break;
-                case 3:
-                    sprintf(rbuf, "DESIGNATED\n");
-                    break;
-                case 4:
-                    sprintf(rbuf, "BACKUP\n");
-                    break;
-                case 5:
-                    sprintf(rbuf, "ROOT\n");
-                    break;
-                default:
-                    sprintf(rbuf, "UNKNOWN\n");
-                    break;
-            }
-
-            int state = port->getState();
-            switch (state)
-            {
-                case 0:
-                    sprintf(sbuf, "DISCARDING\n");
-                    break;
-                case 1:
-                    sprintf(sbuf, "LEARNING\n");
-                    break;
-                case 2:
-                    sprintf(sbuf, "FORWARDING\n");
-                    break;
-                default:
-                    sprintf(sbuf, "UNKNOWN\n");
-                    break;
-            }
-
-            sprintf(buf, "%s%s", rbuf, sbuf);
-            puerta->getDisplayString().setTagArg("t", 0, buf);
-        }
-    }
-
-    if (isOperational) //only when the router is working
-    {
-        if (getRootIndex() == -1)
-        {
-            // root mark
-            this->getParentModule()->getDisplayString().setTagArg("i", 1, "#a5ffff");
-        }
-        else
-        {
-            // remove possible root mark
-            this->getParentModule()->getDisplayString().setTagArg("i", 1, "");
-        }
     }
 }
 
@@ -459,7 +324,7 @@ void STP::generator()
     EV_INFO<< "It is hello time. Root switch sending hello BDPUs on all its ports." << endl;
 
     // send hello BDPUs on all ports
-    for (unsigned int i = 0; i < portCount; i++)
+    for (unsigned int i = 0; i < numPorts; i++)
         generateBPDU(i);
 
 }
@@ -475,7 +340,7 @@ void STP::handleTick()
     else
         helloTimer = 0;
 
-    for (unsigned int i = 0; i < portCount; i++)
+    for (unsigned int i = 0; i < numPorts; i++)
     {
         Ieee8021DInterfaceData * port = getPortInterfaceData(i);
 
@@ -513,7 +378,7 @@ void STP::checkTimers()
     }
 
     // information age check
-    for (unsigned int i = 0; i < portCount; i++)
+    for (unsigned int i = 0; i < numPorts; i++)
     {
         port = getPortInterfaceData(i);
 
@@ -534,7 +399,7 @@ void STP::checkTimers()
     }
 
     // fdWhile timer
-    for (unsigned int i = 0; i < portCount; i++)
+    for (unsigned int i = 0; i < numPorts; i++)
     {
         port = getPortInterfaceData(i);
 
@@ -578,7 +443,7 @@ void STP::checkParametersChange()
     {
         cHelloTime = helloTime;
         cMaxAge = maxAge;
-        cFwdDelay = fwdDelay;
+        cFwdDelay = forwardDelay;
     }
     if (ubridgePriority != bridgePriority)
     {
@@ -587,23 +452,11 @@ void STP::checkParametersChange()
     }
 }
 
-Ieee8021DInterfaceData * STP::getPortInterfaceData(unsigned int portNum)
-{
-    cGate * gate = this->getParentModule()->gate("ethg$o", portNum);
-    InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
-    Ieee8021DInterfaceData * portData = gateIfEntry->ieee8021DData();
-
-    if (!portData)
-        throw cRuntimeError("IEEE8021DInterfaceData not found.");
-
-    return portData;
-}
-
 bool STP::checkRootEligibility()
 {
     Ieee8021DInterfaceData * port;
 
-    for (unsigned int i = 0; i < portCount; i++)
+    for (unsigned int i = 0; i < numPorts; i++)
     {
         port = getPortInterfaceData(i);
 
@@ -620,8 +473,6 @@ void STP::tryRoot()
     if (checkRootEligibility())
     {
         EV_DETAIL<< "Switch is elected as root switch." << endl;
-        if (treeColoring)
-            getParentModule()->getDisplayString().setTagArg("i",1,"#a5ffff");
         isRoot = true;
         allDesignated();
         rootPriority = bridgePriority;
@@ -629,13 +480,10 @@ void STP::tryRoot()
         rootPathCost = 0;
         cHelloTime = helloTime;
         cMaxAge = maxAge;
-        cFwdDelay = fwdDelay;
+        cFwdDelay = forwardDelay;
     }
     else
     {
-        if (treeColoring)
-            getParentModule()->getDisplayString().setTagArg("i",1,"");
-
         isRoot = false;
         selectRootPort();
         selectDesignatedPorts();
@@ -724,7 +572,7 @@ void STP::selectRootPort()
     Ieee8021DInterfaceData * best = getPortInterfaceData(0);
     Ieee8021DInterfaceData * currentPort;
 
-    for (unsigned int i = 0; i < portCount; i++)
+    for (unsigned int i = 0; i < numPorts; i++)
     {
         currentPort = getPortInterfaceData(i);
         currentPort->setRole(Ieee8021DInterfaceData::NOTASSIGNED);
@@ -779,7 +627,7 @@ void STP::selectDesignatedPorts()
     bridgeGlobal->setRootAddress(rootAddress);
     bridgeGlobal->setRootPriority(rootPriority);
 
-    for (unsigned int i = 0; i < portCount; i++)
+    for (unsigned int i = 0; i < numPorts; i++)
     {
         port = getPortInterfaceData(i);
 
@@ -817,7 +665,7 @@ void STP::allDesignated()
 
     Ieee8021DInterfaceData * port;
     desPorts.clear();
-    for (unsigned int i = 0; i < portCount; i++)
+    for (unsigned int i = 0; i < numPorts; i++)
     {
         port = getPortInterfaceData(i);
         if (port->getRole() == Ieee8021DInterfaceData::DISABLED)
@@ -843,38 +691,25 @@ void STP::lostAlternate(int port)
 void STP::reset()
 {
     // upon booting all switches believe themselves to be the root
-    if (treeColoring)
-        getParentModule()->getDisplayString().setTagArg("i", 1, "#a5ffff");
     isRoot = true;
     rootPriority = bridgePriority;
     rootAddress = bridgeAddress;
     rootPathCost = 0;
     cHelloTime = helloTime;
     cMaxAge = maxAge;
-    cFwdDelay = fwdDelay;
+    cFwdDelay = forwardDelay;
     allDesignated();
-
-    for (unsigned int i = 0; i < portCount; i++)
-    {
-        Ieee8021DInterfaceData * port = getPortInterfaceData(i);
-        port->setDefaultStpPortInfoData();
-    }
 }
 
 void STP::start()
 {
+    STPBase::start();
+
     // obtain a bridge address from InterfaceTable
     ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableName")));
     InterfaceEntry * ifEntry = ifTable->getInterface(0);
     if (ifEntry != NULL)
         bridgeAddress = ifEntry->getMacAddress();
-    if (treeColoring)
-    {
-        getParentModule()->getDisplayString().setTagArg("i", 1, "#a5ffff");
-        this->getParentModule()->getDisplayString().removeTag("i2");
-    }
-
-    isOperational = true;
     initPortTable();
     ubridgePriority = bridgePriority;
     isRoot = true;
@@ -886,7 +721,7 @@ void STP::start()
     rootPort = 0;
     cHelloTime = helloTime;
     cMaxAge = maxAge;
-    cFwdDelay = fwdDelay;
+    cFwdDelay = forwardDelay;
     helloTimer = 0;
     allDesignated();
 
@@ -895,83 +730,8 @@ void STP::start()
 
 void STP::stop()
 {
-    isOperational = false;
+    STPBase::stop();
     isRoot = false;
     topologyChangeNotification = true;
-
-    if (treeColoring)
-    {
-        for (unsigned int i = 0; i < portCount; i++)
-        {
-            cGate * outGate = getParentModule()->gate("ethg$o", i);
-            cGate * inputGate = getParentModule()->gate("ethg$i", i);
-            cGate * outGateNext = outGate->getNextGate();
-            cGate * inputGatePrev = inputGate->getPreviousGate();
-
-            if (outGate && inputGate && inputGatePrev && outGateNext)
-            {
-                outGate->getDisplayString().setTagArg("ls", 0, "#000000");
-                outGate->getDisplayString().setTagArg("ls", 1, 1);
-
-                inputGate->getDisplayString().setTagArg("ls", 0, "#000000");
-                inputGate->getDisplayString().setTagArg("ls", 1, 1);
-
-                outGateNext->getDisplayString().setTagArg("ls", 0, "#000000");
-                outGateNext->getDisplayString().setTagArg("ls", 1, 1);
-
-                inputGatePrev->getDisplayString().setTagArg("ls", 0, "#000000");
-                inputGatePrev->getDisplayString().setTagArg("ls", 1, 1);
-            }
-        }
-        getParentModule()->getDisplayString().setTagArg("i", 1, "");
-    }
-    this->getParentModule()->getDisplayString().setTagArg("i2", 0, "status/stop");
     cancelEvent(tick);
-}
-
-bool STP::handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback)
-{
-    Enter_Method_Silent();
-
-    if (dynamic_cast<NodeStartOperation *>(operation))
-    {
-        if (stage == NodeStartOperation::STAGE_LINK_LAYER)
-        {
-            start();
-        }
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
-    {
-        if (stage == NodeShutdownOperation::STAGE_LINK_LAYER)
-        {
-            stop();
-        }
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
-    {
-        if (stage == NodeCrashOperation::STAGE_CRASH)
-        {
-            stop();
-        }
-    }
-    else
-    {
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-    }
-    return true;
-}
-
-int STP::getRootIndex()
-{
-    int result = -1;
-    for (unsigned int i = 0; i < portCount; i++)
-    {
-        Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
-        if (iPort->getRole() == Ieee8021DInterfaceData::ROOT)
-        {
-            result = i;
-            break;
-        }
-    }
-    return result;
 }

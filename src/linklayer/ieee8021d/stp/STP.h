@@ -29,11 +29,12 @@
 #include "Ieee8021DInterfaceData.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
+#include "STPBase.h"
 
 /**
  * Implements the Spanning Tree Protocol. See the NED file for details.
  */
-class STP : public cSimpleModule, public ILifecycle
+class STP : public STPBase
 {
     public:
         typedef Ieee8021DInterfaceData::PortInfo PortInfo;
@@ -44,21 +45,11 @@ class STP : public cSimpleModule, public ILifecycle
         bool isRoot;
         unsigned int rootPort;
         std::vector<unsigned int> desPorts; // set of designated ports
-        bool treeColoring;
-        unsigned int portCount; // number of ports on the interface
-
-        MACAddress bridgeAddress;
-        unsigned int bridgePriority;
 
         // Discovered values
         unsigned int rootPathCost;
         unsigned int rootPriority;
         MACAddress rootAddress;
-
-        // Set by management: see the ned file for more info
-        simtime_t maxAge;
-        simtime_t fwdDelay;
-        simtime_t helloTime;
 
         // Set by root bridge, c stands for current
         simtime_t cMaxAge;
@@ -76,9 +67,6 @@ class STP : public cSimpleModule, public ILifecycle
 
         PortInfo defaultPort;
         cMessage * tick;
-        IInterfaceTable * ifTable;
-        MACAddressTable * macTable;
-        bool isOperational;
 
     public:
 
@@ -101,11 +89,6 @@ class STP : public cSimpleModule, public ILifecycle
          */
         void generateBPDU(int portNum, const MACAddress& address = MACAddress::STP_MULTICAST_ADDRESS, bool tcFlag = false, bool tcaFlag = false);
         void generator();
-
-        /*
-         * Color the spanning tree in Tkenv
-         */
-        void colorTree();
 
         /*
          * Generate and send Topology Change Notification
@@ -159,17 +142,6 @@ class STP : public cSimpleModule, public ILifecycle
         bool checkRootEligibility();
         void tryRoot();
 
-        /**
-         * @brief Obtain the root gate index
-         * @return the root gate index or -1 if there is not root gate.
-         */
-        virtual int getRootIndex();
-
-        /*
-         * Get port data from the InterfaceTable
-         */
-        Ieee8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
-
     public:
         friend inline std::ostream& operator<<(std::ostream& os, const Ieee8021DInterfaceData::PortRole r);
         friend inline std::ostream& operator<<(std::ostream& os, const Ieee8021DInterfaceData::PortState s);
@@ -177,8 +149,6 @@ class STP : public cSimpleModule, public ILifecycle
         friend inline std::ostream& operator<<(std::ostream& os, STP i);
 
         // for lifecycle:
-    public:
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
     protected:
         virtual void start();
         virtual void stop();
@@ -269,11 +239,11 @@ inline std::ostream& operator<<(std::ostream& os, STP i)
     os << "  Address: " << i.bridgeAddress << " \n";
     os << "  Hello Time: " << i.helloTime << " \n";
     os << "  Max Age: " << i.maxAge << " \n";
-    os << "  Forward Delay: " << i.fwdDelay << " \n";
+    os << "  Forward Delay: " << i.forwardDelay << " \n";
     os << "Port Flag Role State Cost Priority \n";
     os << "-----------------------------------------\n";
 
-    for (unsigned int x = 0; x < i.portCount; x++)
+    for (unsigned int x = 0; x < i.numPorts; x++)
         os << x << "  " << i.getPortInterfaceData(x) << " \n";
 
     return os;

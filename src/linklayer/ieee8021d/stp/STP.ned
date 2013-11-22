@@ -36,7 +36,8 @@ import inet.linklayer.ieee8021d.ISpanningTree;
 simple STP like ISpanningTree
 {
     parameters:
-        bool treeColoring = default(false);
+        // shows the RSTP tree by coloring connections in the network graphics
+        bool visualize = default(false);
 
         // The hello time is the time between each bridge protocol data unit (BPDU) that is sent on a port.
         // This time is equal to 2 seconds (sec) by default, but you can tune the time to be between 1 and 10 sec.
@@ -52,10 +53,14 @@ simple STP like ISpanningTree
 
         // The bridge priority determines which bridge is elected as the root bridge. If the switch has a bridge priority that is lower than all
         // the other switches, the other switches automatically select the switch as the root switch.
-        int priority = default(32768);
+        int bridgePriority = default(32768);
 
         // The absolute path to the InterfaceTable
         string interfaceTableName = default("^.interfaceTable");
+        
+        // module path to the MACAddressTable module
+        string macTableName = default("^.macTable");
+        
         @display("i=block/network2");
     gates:
         input relayIn;
