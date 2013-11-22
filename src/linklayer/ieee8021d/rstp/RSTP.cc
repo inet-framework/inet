@@ -146,6 +146,7 @@ void RSTP::handleMigrate(cMessage * msg)
             iPort->setState(Ieee8021DInterfaceData::DISCARDING); // contest to become forwarding.
         }
     }
+    colorRootPorts();
     scheduleAt(simTime() + migrateTime, msg); // programming next switch to designate
 }
 
@@ -173,6 +174,7 @@ void RSTP::handleUpgrade(cMessage * msg)
             }
         }
     }
+    colorRootPorts();
     scheduleAt(simTime() + fwdDelay, msg); // programming next upgrade
 }
 
@@ -490,10 +492,6 @@ void RSTP::handleIncomingFrame(BPDU *frame)
                                 }
                                 break;
                             }
-                            if (rootPort->getRole() == Ieee8021DInterfaceData::ROOT)
-                                colorLink(r, "#a5ffff", 3);
-                            else
-                                colorLink(r, "#000000", 1);
                         }
                     }
                     else if((src.compareTo(arrivalPort->getBridgeAddress())==0) // worse or similar, but the same source
@@ -739,28 +737,40 @@ void RSTP::sendBPDU(int port)
     }
 }
 
-void RSTP::colorLink(unsigned int i, const char *color, unsigned int width)
+void RSTP::colorLink(unsigned int i, bool forwarding)
 {
     if (ev.isGUI() && treeColoring)
     {
         cGate * outGate = getParentModule()->gate("ethg$o", i);
-        cGate * inputGate = getParentModule()->gate("ethg$i", i);
+        cGate * inGate = getParentModule()->gate("ethg$i", i);
         cGate * outGateNext = outGate->getNextGate();
-        cGate * inputGatePrev = inputGate->getPreviousGate();
+        cGate * inGatePrev = inGate->getPreviousGate();
+        cGate * outGatePrev = outGate->getPreviousGate();
+        cGate * inGatePrev2 = inGatePrev->getPreviousGate();
 
-        if (outGate && inputGate && inputGatePrev && outGateNext)
+        if (outGate && inGate && inGatePrev && outGateNext && outGatePrev && inGatePrev2)
         {
-            outGate->getDisplayString().setTagArg("ls", 0, color);
-            outGate->getDisplayString().setTagArg("ls", 1, width);
+            if(forwarding)
+            {
+                outGatePrev->getDisplayString().setTagArg("ls", 0, "#000000");
+                inGate->getDisplayString().setTagArg("ls", 0, "#000000");
+            }
+            else
+            {
+                outGatePrev->getDisplayString().setTagArg("ls", 0, "#888888");
+                inGate->getDisplayString().setTagArg("ls", 0, "#888888");
+            }
 
-            inputGate->getDisplayString().setTagArg("ls", 0, color);
-            inputGate->getDisplayString().setTagArg("ls", 1, width);
-
-            outGateNext->getDisplayString().setTagArg("ls", 0, color);
-            outGateNext->getDisplayString().setTagArg("ls", 1, width);
-
-            inputGatePrev->getDisplayString().setTagArg("ls", 0, color);
-            inputGatePrev->getDisplayString().setTagArg("ls", 1, width);
+            if((!inGatePrev2->getDisplayString().containsTag("ls") || strcmp(inGatePrev2->getDisplayString().getTagArg("ls", 0),"#000000") == 0) && forwarding)
+            {
+                outGate->getDisplayString().setTagArg("ls", 0, "#000000");
+                inGatePrev->getDisplayString().setTagArg("ls", 0, "#000000");
+            }
+            else
+            {
+                outGate->getDisplayString().setTagArg("ls", 0, "#888888");
+                inGatePrev->getDisplayString().setTagArg("ls", 0, "#888888");
+            }
         }
     }
 }
@@ -774,8 +784,7 @@ void RSTP::colorRootPorts()
         for (unsigned int i = 0; i < portCount; i++)
         {
             port = getPortInterfaceData(i);
-            if (port->getRole() == Ieee8021DInterfaceData::ROOT)
-                colorLink(i, "#a5ffff", 3);
+            colorLink(i, port->getState() == Ieee8021DInterfaceData::FORWARDING);
 
             cModule * puerta = this->getParentModule()->getSubmodule("eth", i);
             if (puerta != NULL)
@@ -1157,6 +1166,8 @@ void RSTP::start()
 
 void RSTP::stop()
 {
+    for (unsigned int i = 0; i < portCount; i++)
+        colorLink(i, false);
     cancelEvent(helloM);
     cancelEvent(forwardM);
     cancelEvent(migrateM);

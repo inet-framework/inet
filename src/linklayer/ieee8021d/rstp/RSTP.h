@@ -94,7 +94,7 @@ protected:
      * @brief Adds effects to be represented by Tkenv. Root links colored green. Show port role, state.
      */
 
-    virtual void colorLink(unsigned int i, const char *color, unsigned int width);
+    virtual void colorLink(unsigned int i, bool forwarding);
     virtual void colorRootPorts();
 
     /**
