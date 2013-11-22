@@ -282,11 +282,11 @@
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,        500s,            954c-991b
 
 /examples/pim/dm/,                   -f omnetpp.ini -c General -r 0,                300s,            7646-6639 
-/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario1 -r 0,              100s,            4f50-1e5a 
-/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario2 -r 0,              150s,            0c11-0f34 
-/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario3 -r 0,              300s,            d305-d224 
-/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario4 -r 0,              100s,            094e-1dd1 
-/examples/pim/sm/iptv/,              -f omnetpp.ini -c General -r 0,                 35s,            5665-4c3b 
+/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario1 -r 0,              100s,            b426-b3b7 
+/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario2 -r 0,              150s,            ceab-ef6f 
+/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario3 -r 0,              300s,            8aa8-c6ea 
+/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario4 -r 0,              100s,            367d-fee7 
+/examples/pim/sm/iptv/,              -f omnetpp.ini -c General -r 0,                 35s,            0b28-446f 
 
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            4496-fd0d
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            f9d3-a124

@@ -245,26 +245,30 @@ void PIMSplitter::handleMessage(cMessage *msg)
 		   processNLTimer(timer);
 	   }
    }
+   else {
+       std::string arrivalGate = msg->getArrivalGate()->getName();
 
-   // PIM packet from network layer
-   else if (dynamic_cast<PIMPacket *>(msg) && (strcmp(msg->getArrivalGate()->getName(), "transportIn") == 0))
-   {
-	   PIMPacket *pkt = check_and_cast<PIMPacket *>(msg);
-	   IPv4ControlInfo *ctrl = dynamic_cast<IPv4ControlInfo *>(pkt->getControlInfo());
-	   std::cout << simTime() << " " << hostname << "(" << ctrl->getInterfaceId() << "): " << pkt->getName() << " (" << ctrl->getSrcAddr() << ", " << ctrl->getDestAddr() << ")" << endl;
-	   if (pkt->getType() == Hello)
-		   processHelloPkt(pkt);
-	   else
-		   processPIMPkt(pkt);
+       // PIM packet from network layer
+       if (dynamic_cast<PIMPacket *>(msg) && arrivalGate == "transportIn")
+       {
+           PIMPacket *pkt = check_and_cast<PIMPacket *>(msg);
+           IPv4ControlInfo *ctrl = dynamic_cast<IPv4ControlInfo *>(pkt->getControlInfo());
+           std::cout << simTime() << " " << hostname << "(" << ctrl->getInterfaceId() << "): " << pkt->getName() << " (" << ctrl->getSrcAddr() << ", " << ctrl->getDestAddr() << ")" << endl;
+           if (pkt->getType() == Hello)
+               processHelloPkt(pkt);
+           else
+               processPIMPkt(pkt);
+       }
+
+       // PIM packet from PIM mode, send to network layer
+       else if (arrivalGate == "pimSMIn" || arrivalGate == "pimDMIn")
+       {
+           send(msg, "transportOut");
+       }
+       else
+           EV << "PIM:ERROR - bad type of message" << endl;
    }
 
-   // PIM packet from PIM mode, send to network layer
-   else if (dynamic_cast<PIMPacket *>(msg) || dynamic_cast<MultData *>(msg))
-   {
-	   send(msg, "transportOut");
-   }
-   else
-	   EV << "PIM:ERROR - bad type of message" << endl;
 }
 
 /**

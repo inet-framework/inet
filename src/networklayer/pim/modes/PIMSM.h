@@ -118,7 +118,7 @@ class PIMSM : public cSimpleModule, protected cListener
         void sendPIMRegisterNull(IPv4Address multSource, IPv4Address multDest);
         void sendPIMJoinPrune(IPv4Address multGroup, IPv4Address joinPruneIPaddr, IPv4Address upstreamNbr, joinPruneMsg JoinPrune, JPMsgType JPtype);
         void sendPIMJoinTowardSource(multDataInfo *info);
-        void forwardMulticastData(multDataInfo *info);
+        void forwardMulticastData(IPv4Datagram *datagram, multDataInfo *info);
 
         // process PIM messages
         void processPIMPkt(PIMPacket *pkt);

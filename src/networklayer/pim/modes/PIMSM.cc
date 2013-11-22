@@ -1151,9 +1151,9 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
     PIMMulticastRoute *newRouteG = new PIMMulticastRoute();
     PIMMulticastRoute *newRoute = new PIMMulticastRoute();
     PIMMulticastRoute *routePointer;
-    MultData *encapData = &(pkt->getEncapsulatedData());
-    IPv4Address multOrigin = encapData->getMultOrigin();
-    IPv4Address multGroup = encapData->getMultGroup();
+    IPv4Datagram *encapData = check_and_cast<IPv4Datagram*>(pkt->decapsulate());
+    IPv4Address multOrigin = encapData->getSrcAddress();
+    IPv4Address multGroup = encapData->getDestAddress();
     multDataInfo *info = new multDataInfo;
 
     if (!pkt->getN())                                                                                       //It is Null Register ?
@@ -1204,7 +1204,7 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
                         info->interface_id = outInterface->intId;
                         InterfaceEntry *entry = ift->getInterfaceById(outInterface->intId);
                         info->srcAddr = entry->ipv4Data()->getIPAddress();
-                        forwardMulticastData(info);
+                        forwardMulticastData(encapData->dup(), info);
                     }
                 }
                 sendPIMJoinTowardSource(info);                                                              // send Join(S,G) to establish SPT between RP and registering DR
@@ -1241,6 +1241,9 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
             sendPIMRegisterStop(PIMctrl->getDestAddr(),PIMctrl->getSrcAddr(),multGroup,multOrigin);
         }
     }
+
+    delete encapData;
+    delete pkt;
 }
 
 /**
@@ -1370,24 +1373,25 @@ void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
 {
     EV << "pimSM::sendPIMRegisterNull" << endl;
 
-    // create PIM Register NULL datagram
-    PIMRegister *msg = new PIMRegister();
-    MultData *encapData = new MultData();
-
     // only if (S,G exist)
     //if (rt->getRouteFor(multDest,multSource))
     if (rt->getRouteFor(multGroup,IPv4Address::UNSPECIFIED_ADDRESS))
     {
+        // create PIM Register NULL datagram
+        PIMRegister *msg = new PIMRegister();
+
         // set fields for PIM Register packet
         msg->setName("PIMRegister(Null)");
         msg->setType(Register);
         msg->setN(true);
         msg->setB(false);
 
-        // set encapsulated packet (MultData simulate multicast packet)
-        encapData->setMultGroup(multGroup);
-        encapData->setMultOrigin(multOrigin);
-        msg->setEncapsulatedData(*encapData);
+        // set encapsulated packet (IPv4 header only)
+        IPv4Datagram *datagram = new IPv4Datagram();
+        datagram->setDestAddress(multGroup);
+        datagram->setSrcAddress(multOrigin);
+        datagram->setTransportProtocol(IP_PROT_PIM);
+        msg->encapsulate(datagram);
 
         // set IP Control info
         InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(RPAddress);
@@ -1442,16 +1446,16 @@ void PIMSM::sendPIMRegister(IPv4Datagram *datagram)
     {
         // create PIM Register datagram
         PIMRegister *msg = new PIMRegister();
-        MultData *encapData = new MultData();
-        encapData->setMultGroup(multGroup);
-        encapData->setMultOrigin(multOrigin);
 
         // set fields for PIM Register packet
         msg->setName("PIMRegister");
         msg->setType(Register);
         msg->setN(false);
         msg->setB(false);
-        msg->setEncapsulatedData(*encapData);
+
+        IPv4Datagram *datagramCopy = datagram->dup();
+        delete datagramCopy->removeControlInfo();
+        msg->encapsulate(datagramCopy);
 
         // set IP Control info
         //InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(RPAddress);
@@ -1536,27 +1540,22 @@ void PIMSM::sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Addres
  * @param info Pointer to structure, which keep all information for creating and sending message.
  * @see MultData()
  */
-void PIMSM::forwardMulticastData(multDataInfo *info)
+void PIMSM::forwardMulticastData(IPv4Datagram *datagram, multDataInfo *info)
 {
     EV << "pimSM::forwardMulticastData" << endl;
 
-    MultData *data = new MultData();
-    std::stringstream os;
-    std::string dataName;
-
-    // set informations about fictive multicast packet
-    os << "MultData " << info->group << endl;
-    dataName.append(os.str());
-    data->setName(dataName.c_str());
-    data->setMultOrigin(info->origin);
-    data->setMultGroup(info->group);
+    //
+    // Note: we should inject the datagram somehow into the normal IPv4 forwarding path.
+    //
+    cPacket *data = datagram->decapsulate();
 
     // set control info
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-    ctrl->setDestAddr(info->group);
-    ctrl->setSrcAddr(info->srcAddr);
+    ctrl->setDestAddr(datagram->getDestAddress());
+    // XXX ctrl->setSrcAddr(datagram->getSrcAddress());
     ctrl->setInterfaceId(info->interface_id);
-    ctrl->setTimeToLive(MAX_TTL-2);                     //one minus for source DR router and one for RP router
+    ctrl->setTimeToLive(MAX_TTL-2);                     //one minus for source DR router and one for RP router // XXX specification???
+    ctrl->setProtocol(datagram->getTransportProtocol());
     data->setControlInfo(ctrl);
     send(data, "spiltterOut");
 }

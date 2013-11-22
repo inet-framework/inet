@@ -63,13 +63,6 @@ class MulticastGroup
 	EncodedAddress 	prunedSourceAddress[]; 
 }
 
-// abstract structure for multicast data
-packet MultData
-{
-	IPv4Address multOrigin;
-	IPv4Address multGroup;
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Header
 packet PIMPacket 
@@ -146,7 +139,6 @@ packet PIMRegister extends PIMPacket
 	short 			type enum(PIMPacketType) = Register;	
 	bool			B;
 	bool			N;
-	MultData		encapsulatedData;
 }
 
 // Register-Stop message
