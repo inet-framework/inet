@@ -790,70 +790,15 @@ void RSTP::colorRootPorts()
             if (puerta != NULL)
             {
                 char buf[25];
-                char sbuf[12];
-                char rbuf[13];
-
-                int role = port->getRole();
-                switch (role)
-                {
-                    case 0:
-                        sprintf(rbuf, "ALTERNATE\n");
-                        break;
-                    case 1:
-                        sprintf(rbuf, "NOTASSIGNED\n");
-                        break;
-                    case 2:
-                        sprintf(rbuf, "DISABLED\n");
-                        break;
-                    case 3:
-                        sprintf(rbuf, "DESIGNATED\n");
-                        break;
-                    case 4:
-                        sprintf(rbuf, "BACKUP\n");
-                        break;
-                    case 5:
-                        sprintf(rbuf, "ROOT\n");
-                        break;
-                    default:
-                        sprintf(rbuf, "UNKNOWN\n");
-                        break;
-                }
-
-                int state = port->getState();
-                switch (state)
-                {
-                    case 0:
-                        sprintf(sbuf, "DISCARDING\n");
-                        break;
-                    case 1:
-                        sprintf(sbuf, "LEARNING\n");
-                        break;
-                    case 2:
-                        sprintf(sbuf, "FORWARDING\n");
-                        break;
-                    default:
-                        sprintf(sbuf, "UNKNOWN\n");
-                        break;
-                }
-
-                sprintf(buf, "%s%s", rbuf, sbuf);
+                sprintf(buf, "%s\n%s\n", port->getRoleName(), port->getStateName());
                 puerta->getDisplayString().setTagArg("t", 0, buf);
             }
         }
 
-        if (isOperational) //only when the router is working
-        {
-            if (getRootIndex() == -1)
-            {
-                // root mark
-                this->getParentModule()->getDisplayString().setTagArg("i", 1, "#a5ffff");
-            }
-            else
-            {
-                // remove possible root mark
-                this->getParentModule()->getDisplayString().setTagArg("i", 1, "");
-            }
-        }
+        if (getRootIndex() == -1)
+            this->getParentModule()->getDisplayString().setTagArg("i", 1, "#a5ffff");
+        else
+            this->getParentModule()->getDisplayString().setTagArg("i", 1, "");
     }
 }
 
@@ -1168,6 +1113,7 @@ void RSTP::stop()
 {
     for (unsigned int i = 0; i < portCount; i++)
         colorLink(i, false);
+    this->getParentModule()->getDisplayString().setTagArg("i", 1, "");
     cancelEvent(helloM);
     cancelEvent(forwardM);
     cancelEvent(migrateM);

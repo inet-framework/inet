@@ -45,3 +45,44 @@ Ieee8021DInterfaceData::Ieee8021DInterfaceData()
     // must be in forwarding state.
     portData.state = FORWARDING;
 }
+
+const char *Ieee8021DInterfaceData::getRoleName(){
+    switch (portData.role)
+    {
+        case 0:
+            return "ALTERNATE";
+            break;
+        case 1:
+            return "NOTASSIGNED";
+            break;
+        case 2:
+            return "DISABLED";
+            break;
+        case 3:
+            return "DESIGNATED";
+            break;
+        case 4:
+            return "BACKUP";
+            break;
+        case 5:
+            return "ROOT";
+            break;
+    }
+    return "";
+}
+
+const char *Ieee8021DInterfaceData::getStateName(){
+    switch (portData.state)
+    {
+        case 0:
+            return "DISCARDING";
+            break;
+        case 1:
+            return "LEARNING";
+            break;
+        case 2:
+            return "FORWARDING";
+            break;
+    }
+    return "";
+}

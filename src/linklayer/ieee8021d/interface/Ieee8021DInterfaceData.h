@@ -35,19 +35,11 @@ class Ieee8021DInterfaceData : public InterfaceProtocolData
     public:
 
         Ieee8021DInterfaceData();
-        enum PortRole
-        {
-            ALTERNATE, NOTASSIGNED, DISABLED, DESIGNATED, BACKUP, ROOT
-        };
+        enum PortRole {ALTERNATE, NOTASSIGNED, DISABLED, DESIGNATED, BACKUP, ROOT};
 
-        enum PortState
-        {
-            DISCARDING, LEARNING, FORWARDING
-        };
+        enum PortState {DISCARDING, LEARNING, FORWARDING};
 
-        struct PortInfo
-        {
-                /* The following values have same meaning in both STP and RSTP.
+        struct PortInfo {/* The following values have same meaning in both STP and RSTP.
                  * See IEEE8021DBDPU for more info.
                  */
                 unsigned int priority;
@@ -78,224 +70,100 @@ class Ieee8021DInterfaceData : public InterfaceProtocolData
 
                 simtime_t TCWhile;          // The Topology Change timer. TCN Messages are sent while this timer is running. (RSTP)
 
-                unsigned int lostBPDU;
-        };
+                unsigned int lostBPDU;};
 
     protected:
         PortInfo portData;
         PortInfo defaultStpPort;
 
     public:
-        inline bool isLearning()
-        {
-            return portData.state == LEARNING || portData.state == FORWARDING;
-        }
+        bool isLearning() {return portData.state == LEARNING || portData.state == FORWARDING;}
 
-        inline bool isForwarding()
-        {
-            return portData.state == FORWARDING;
-        }
+        bool isForwarding() {return portData.state == FORWARDING;}
 
-        inline simtime_t getAge() const
-        {
-            return portData.age;
-        }
+        simtime_t getAge() const {return portData.age;}
 
-        inline void setAge(simtime_t age)
-        {
-            portData.age = age;
-        }
+        void setAge(simtime_t age) {portData.age = age;}
 
-        inline const MACAddress& getBridgeAddress() const
-        {
-            return portData.bridgeAddress;
-        }
+        const MACAddress& getBridgeAddress() const {return portData.bridgeAddress;}
 
-        inline void setBridgeAddress(const MACAddress& bridgeAddress)
-        {
-            portData.bridgeAddress = bridgeAddress;
-        }
+        void setBridgeAddress(const MACAddress& bridgeAddress) {portData.bridgeAddress = bridgeAddress;}
 
-        inline unsigned int getBridgePriority() const
-        {
-            return portData.bridgePriority;
-        }
+        unsigned int getBridgePriority() const {return portData.bridgePriority;}
 
-        inline void setBridgePriority(unsigned int bridgePriority)
-        {
-            portData.bridgePriority = bridgePriority;
-        }
+        void setBridgePriority(unsigned int bridgePriority) {portData.bridgePriority = bridgePriority;}
 
-        inline simtime_t getFdWhile() const
-        {
-            return portData.fdWhile;
-        }
+        simtime_t getFdWhile() const {return portData.fdWhile;}
 
-        inline void setFdWhile(simtime_t fdWhile)
-        {
-            portData.fdWhile = fdWhile;
-        }
+        void setFdWhile(simtime_t fdWhile) {portData.fdWhile = fdWhile;}
 
-        inline simtime_t getFwdDelay() const
-        {
-            return portData.fwdDelay;
-        }
+        simtime_t getFwdDelay() const {return portData.fwdDelay;}
 
-        inline void setFwdDelay(simtime_t fwdDelay)
-        {
-            portData.fwdDelay = fwdDelay;
-        }
+        void setFwdDelay(simtime_t fwdDelay) {portData.fwdDelay = fwdDelay;}
 
-        inline simtime_t getHelloTime() const
-        {
-            return portData.helloTime;
-        }
+        simtime_t getHelloTime() const {return portData.helloTime;}
 
-        inline void setHelloTime(simtime_t helloTime)
-        {
-            portData.helloTime = helloTime;
-        }
+        void setHelloTime(simtime_t helloTime) {portData.helloTime = helloTime;}
 
-        inline unsigned int getLinkCost() const
-        {
-            return portData.linkCost;
-        }
+        unsigned int getLinkCost() const {return portData.linkCost;}
 
-        inline void setLinkCost(unsigned int linkCost)
-        {
-            portData.linkCost = linkCost;
-        }
+        void setLinkCost(unsigned int linkCost) {portData.linkCost = linkCost;}
 
-        inline simtime_t getMaxAge() const
-        {
-            return portData.maxAge;
-        }
+        simtime_t getMaxAge() const {return portData.maxAge;}
 
-        inline void setMaxAge(simtime_t maxAge)
-        {
-            portData.maxAge = maxAge;
-        }
+        void setMaxAge(simtime_t maxAge) {portData.maxAge = maxAge;}
 
-        inline unsigned int getPortNum() const
-        {
-            return portData.portNum;
-        }
+        unsigned int getPortNum() const {return portData.portNum;}
 
-        inline void setPortNum(unsigned int portNum)
-        {
-            portData.portNum = portNum;
-        }
+        void setPortNum(unsigned int portNum) {portData.portNum = portNum;}
 
-        inline unsigned int getPortPriority() const
-        {
-            return portData.portPriority;
-        }
+        unsigned int getPortPriority() const {return portData.portPriority;}
 
-        inline void setPortPriority(unsigned int portPriority)
-        {
-            portData.portPriority = portPriority;
-        }
+        void setPortPriority(unsigned int portPriority) {portData.portPriority = portPriority;}
 
-        inline unsigned int getPriority() const
-        {
-            return portData.priority;
-        }
+        unsigned int getPriority() const {return portData.priority;}
 
-        inline void setPriority(unsigned int priority)
-        {
-            portData.priority = priority;
-        }
+        void setPriority(unsigned int priority) {portData.priority = priority;}
 
-        inline PortRole getRole() const
-        {
-            return portData.role;
-        }
+        PortRole getRole() const {return portData.role;}
 
-        inline void setRole(PortRole role)
-        {
-            portData.role = role;
-        }
+        void setRole(PortRole role) {portData.role = role;}
 
-        inline const MACAddress& getRootAddress() const
-        {
-            return portData.rootAddress;
-        }
+        const MACAddress& getRootAddress() const {return portData.rootAddress;}
 
-        inline void setRootAddress(const MACAddress& rootAddress)
-        {
-            portData.rootAddress = rootAddress;
-        }
+        void setRootAddress(const MACAddress& rootAddress) {portData.rootAddress = rootAddress;}
 
-        inline unsigned int getRootPathCost() const
-        {
-            return portData.rootPathCost;
-        }
+        unsigned int getRootPathCost() const {return portData.rootPathCost;}
 
-        inline void setRootPathCost(unsigned int rootPathCost)
-        {
-            portData.rootPathCost = rootPathCost;
-        }
+        void setRootPathCost(unsigned int rootPathCost) {portData.rootPathCost = rootPathCost;}
 
-        inline unsigned int getRootPriority() const
-        {
-            return portData.rootPriority;
-        }
+        unsigned int getRootPriority() const {return portData.rootPriority;}
 
-        inline void setRootPriority(unsigned int rootPriority)
-        {
-            portData.rootPriority = rootPriority;
-        }
+        void setRootPriority(unsigned int rootPriority) {portData.rootPriority = rootPriority;}
 
-        inline PortState getState() const
-        {
-            return portData.state;
-        }
+        PortState getState() const {return portData.state;}
 
-        inline void setState(PortState state)
-        {
-            portData.state = state;
-        }
+        void setState(PortState state) {portData.state = state;}
 
-        inline PortInfo getPortInfoData()
-        {
-            return portData;
-        }
+        PortInfo getPortInfoData() {return portData;}
 
-        inline void setDefaultStpPortInfoData()
-        {
-            portData = defaultStpPort;
-        }
+        void setDefaultStpPortInfoData() {portData = defaultStpPort;}
 
-        inline bool isEdge() const
-        {
-            return portData.edge;
-        }
+        bool isEdge() const {return portData.edge;}
 
-        inline void setEdge(bool edge)
-        {
-            portData.edge=edge;
-        }
+        void setEdge(bool edge) {portData.edge = edge;}
 
-        inline simtime_t getTCWhile() const
-        {
-            return portData.TCWhile;
-        }
+        simtime_t getTCWhile() const {return portData.TCWhile;}
 
-        inline void setTCWhile(simtime_t TCWhile)
-        {
-            portData.TCWhile = TCWhile;
-        }
+        void setTCWhile(simtime_t TCWhile) {portData.TCWhile = TCWhile;}
 
-        inline unsigned int getLostBPDU() const
-        {
-            return portData.lostBPDU;
-        }
+        unsigned int getLostBPDU() const {return portData.lostBPDU;}
 
-        inline void setLostBPDU(unsigned int lostBPDU)
-        {
-            portData.lostBPDU = lostBPDU;
-        }
+        void setLostBPDU(unsigned int lostBPDU) {portData.lostBPDU = lostBPDU;}
 
+        const char *getRoleName();
+
+        const char *getStateName();
 };
 
 #endif
