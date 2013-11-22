@@ -28,16 +28,16 @@ Define_Module(RSTP);
 RSTP::RSTP()
 {
     macTable = NULL;
-    helloM = new cMessage("itshellotime", SELF_HELLOTIME);
-    forwardM = new cMessage("upgrade", SELF_UPGRADE);
-    migrateM = new cMessage("timetodesignate", SELF_TIMETODESIGNATE);
+    helloTimer = new cMessage("itshellotime", SELF_HELLOTIME);
+    forwardTimer = new cMessage("upgrade", SELF_UPGRADE);
+    migrateTimer = new cMessage("timetodesignate", SELF_TIMETODESIGNATE);
 }
 
 RSTP::~RSTP()
 {
-    cancelAndDelete(helloM);
-    cancelAndDelete(forwardM);
-    cancelAndDelete(migrateM);
+    cancelAndDelete(helloTimer);
+    cancelAndDelete(forwardTimer);
+    cancelAndDelete(migrateTimer);
 }
 
 void RSTP::initialize(int stage)
@@ -49,13 +49,13 @@ void RSTP::initialize(int stage)
         treeColoring = par("treeColoring");
         priority = par("priority");
         tcWhileTime = par("tcWhileTime");
-        hellotime = par("helloTime");
-        fwdDelay = par("fwdDelay");
+        helloTime = par("helloTime");
+        forwardDelay = par("fwdDelay");
         migrateTime = par("migrateTime");
 
-        macTable = check_and_cast<MACAddressTable *>(getParentModule()->getSubmodule(par("macTableName")));
-        ifTable = check_and_cast<IInterfaceTable*>(this->getParentModule()->getSubmodule(par("interfaceTableName")));
-        portCount = this->getParentModule()->gate("ethg$o", 0)->getVectorSize();
+        macTable = check_and_cast<MACAddressTable *>(getModuleByPath(par("macTableName")));
+        ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableName")));
+        numPorts = this->getParentModule()->gate("ethg$o", 0)->getVectorSize();
     }
 
     if (stage == 1) // "auto" MAC addresses assignment takes place in stage 0
@@ -79,15 +79,15 @@ void RSTP::initialize(int stage)
         initPorts();
 
         // programming next auto-messages.
-        scheduleAt(simTime(), helloM);
-        scheduleAt(simTime() + fwdDelay, forwardM);
-        scheduleAt(simTime() + migrateTime, migrateM);
+        scheduleAt(simTime(), helloTimer);
+        scheduleAt(simTime() + forwardDelay, forwardTimer);
+        scheduleAt(simTime() + migrateTime, migrateTimer);
     }
 
     if (stage == 1)
     {
         printState();
-        colorRootPorts();
+        visualizer();
     }
 }
 
@@ -137,7 +137,7 @@ void RSTP::handleMessage(cMessage *msg)
 
 void RSTP::handleMigrate(cMessage * msg)
 {
-    for (unsigned int i = 0; i < portCount; i++)
+    for (unsigned int i = 0; i < numPorts; i++)
     {
         Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
         if (iPort->getRole() == Ieee8021DInterfaceData::NOTASSIGNED)
@@ -146,13 +146,13 @@ void RSTP::handleMigrate(cMessage * msg)
             iPort->setState(Ieee8021DInterfaceData::DISCARDING); // contest to become forwarding.
         }
     }
-    colorRootPorts();
+    visualizer();
     scheduleAt(simTime() + migrateTime, msg); // programming next switch to designate
 }
 
 void RSTP::handleUpgrade(cMessage * msg)
 {
-    for (unsigned int i = 0; i < portCount; i++)
+    for (unsigned int i = 0; i < numPorts; i++)
     {
         Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
         if (iPort->getRole() == Ieee8021DInterfaceData::DESIGNATED)
@@ -164,7 +164,7 @@ void RSTP::handleUpgrade(cMessage * msg)
                 iPort->setState(Ieee8021DInterfaceData::FORWARDING);
                 //flushing other ports
                 //TCN over all active ports
-                for (unsigned int j = 0; j < portCount; j++)
+                for (unsigned int j = 0; j < numPorts; j++)
                 {
                     Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
                     jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
@@ -174,15 +174,15 @@ void RSTP::handleUpgrade(cMessage * msg)
             }
         }
     }
-    colorRootPorts();
-    scheduleAt(simTime() + fwdDelay, msg); // programming next upgrade
+    visualizer();
+    scheduleAt(simTime() + forwardDelay, msg); // programming next upgrade
 }
 
 void RSTP::handleHelloTime(cMessage * msg)
 {
     EV_DETAIL<<"Hello time."<<endl;
     printState();
-    for(unsigned int i=0;i<portCount;i++)
+    for(unsigned int i=0;i<numPorts;i++)
     {
         // sends hello through all active (learning, forwarding or not assigned) ports
         // increments LostBPDU just from ROOT, ALTERNATE and BACKUP
@@ -217,7 +217,7 @@ void RSTP::handleHelloTime(cMessage * msg)
                         candidatoPort->setLostBPDU(0);
                         // flushing other ports
                         // sending TCN over all active ports
-                        for(unsigned int j=0;j<portCount;j++)
+                        for(unsigned int j=0;j<numPorts;j++)
                         {
                             Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
                             jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
@@ -249,8 +249,8 @@ void RSTP::handleHelloTime(cMessage * msg)
     }
     sendBPDUs(); // generating and sending new BPDUs
     sendTCNtoRoot();
-    colorRootPorts();
-    scheduleAt(simTime()+hellotime, msg);// programming next hello time
+    visualizer();
+    scheduleAt(simTime()+helloTime, msg);// programming next hello time
 }
 
 void RSTP::checkTC(BPDU * frame, int arrival)
@@ -259,7 +259,7 @@ void RSTP::checkTC(BPDU * frame, int arrival)
     if ((frame->getTcFlag() == true) && (port->getState() == Ieee8021DInterfaceData::FORWARDING))
     {
         this->getParentModule()->bubble("TCN received");
-        for (unsigned int i = 0; i < portCount; i++)
+        for (unsigned int i = 0; i < numPorts; i++)
         {
             if ((int) i != arrival)
             {
@@ -352,7 +352,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
                     arrivalPort->setLostBPDU(0);
                     // flushing other ports
                     // TCN over all ports
-                    for (unsigned int j = 0; j < portCount; j++)
+                    for (unsigned int j = 0; j < numPorts; j++)
                     {
                         Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
                         jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
@@ -387,7 +387,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
                                 {
                                     // flushing other ports
                                     // TCN over all ports
-                                    for (unsigned int j = 0; j < portCount; j++)
+                                    for (unsigned int j = 0; j < numPorts; j++)
                                     {
                                         Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
                                         jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
@@ -408,7 +408,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
                             break;
 
                         case 1: // new port rstp info is better than the root in another gate -> root change
-                            for (unsigned int i = 0; i < portCount; i++)
+                            for (unsigned int i = 0; i < numPorts; i++)
                             {
                                 Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
                                 if (!iPort->isEdge())   // avoiding clients reseting
@@ -439,7 +439,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
                                 {
                                     // flushing other ports
                                     // TCN over all ports
-                                    for(unsigned int j=0;j<portCount;j++)
+                                    for(unsigned int j=0;j<numPorts;j++)
                                     {
                                         Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
                                         jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
@@ -516,7 +516,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
                                     macTable->copyTable(arrival,alternative); // copy cache from old to new root
                                     // flushing other ports
                                     // TCN over all ports, alternative was alternate
-                                    for(unsigned int j=0;j<portCount;j++)
+                                    for(unsigned int j=0;j<numPorts;j++)
                                     {
                                         Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
                                         jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
@@ -533,7 +533,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
                                     int caso2=0;
                                     initPorts();// allowing other ports to contest again
                                     // flushing all ports
-                                    for(unsigned int j=0;j<portCount;j++)
+                                    for(unsigned int j=0;j<numPorts;j++)
                                     macTable->flush(j);
                                     caso2=compareInterfacedata(arrival,frame,arrivalPort->getLinkCost());
                                     EV_DEBUG<<"caso2: "<<caso2<<endl;
@@ -584,7 +584,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
                                         arrivalPort->setState(Ieee8021DInterfaceData::DISCARDING);
                                         // flushing other ports
                                         // TC over all ports
-                                        for(unsigned int j=0;j<portCount;j++)
+                                        for(unsigned int j=0;j<numPorts;j++)
                                         {
                                             Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
                                             jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
@@ -631,7 +631,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
         EV_DETAIL<<"Expired BPDU"<<endl;
     delete frame;
 
-    colorRootPorts();
+    visualizer();
 }
 
 void RSTP::sendTCNtoRoot()
@@ -639,7 +639,7 @@ void RSTP::sendTCNtoRoot()
     // if TCWhile is not expired, sends BPDU with TC flag to the root
     this->bubble("SendTCNtoRoot");
     int r = getRootIndex();
-    if ((r >= 0) && ((unsigned int) r < portCount))
+    if ((r >= 0) && ((unsigned int) r < numPorts))
     {
         Ieee8021DInterfaceData * rootPort = getPortInterfaceData(r);
         if (rootPort->getRole() != Ieee8021DInterfaceData::DISABLED)
@@ -660,8 +660,8 @@ void RSTP::sendTCNtoRoot()
                 frame->setTcFlag(true);
                 frame->setName("BPDU");
                 frame->setMaxAge(maxAge);
-                frame->setHelloTime(hellotime);
-                frame->setForwardDelay(fwdDelay);
+                frame->setHelloTime(helloTime);
+                frame->setForwardDelay(forwardDelay);
                 if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
                 frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
                 etherctrl->setSrc(address);
@@ -677,7 +677,7 @@ void RSTP::sendTCNtoRoot()
 void RSTP::sendBPDUs()
 {
     // send BPDUs through all ports, if they are required
-    for (unsigned int i = 0; i < portCount; i++)
+    for (unsigned int i = 0; i < numPorts; i++)
     {
         Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
         if ((iPort->getRole() != Ieee8021DInterfaceData::ROOT)
@@ -725,8 +725,8 @@ void RSTP::sendBPDU(int port)
         frame->setTcFlag(false);
         frame->setName("BPDU");
         frame->setMaxAge(maxAge);
-        frame->setHelloTime(hellotime);
-        frame->setForwardDelay(fwdDelay);
+        frame->setHelloTime(helloTime);
+        frame->setForwardDelay(forwardDelay);
         if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
             frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
         etherctrl->setSrc(address);
@@ -775,13 +775,13 @@ void RSTP::colorLink(unsigned int i, bool forwarding)
     }
 }
 
-void RSTP::colorRootPorts()
+void RSTP::visualizer()
 {
     if (ev.isGUI() && treeColoring)
     {
         Ieee8021DInterfaceData * port;
         // gives color to the root link, or module border if it is root
-        for (unsigned int i = 0; i < portCount; i++)
+        for (unsigned int i = 0; i < numPorts; i++)
         {
             port = getPortInterfaceData(i);
             colorLink(i, port->getState() == Ieee8021DInterfaceData::FORWARDING);
@@ -823,7 +823,7 @@ void RSTP::printState()
         EV_DETAIL<<"Src TxGate: "<<rootPort->getPortNum()<<endl;
     }
     EV_DETAIL<<"Port State/Role: "<<endl;
-    for(unsigned int i=0;i<portCount;i++)
+    for(unsigned int i=0;i<numPorts;i++)
     {
         Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
         EV_DETAIL<<iPort->getState()<<" ";
@@ -851,7 +851,7 @@ void RSTP::printState()
         EV_DETAIL<<endl;
     }
     EV_DETAIL<<"Per port best source. Root/Src"<<endl;
-    for(unsigned int i=0;i<portCount;i++)
+    for(unsigned int i=0;i<numPorts;i++)
     {
         Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
         EV_DETAIL<<i<<" "<<iPort->getRootAddress().str()<<"/"<<iPort->getBridgeAddress().str()<<endl;
@@ -874,7 +874,7 @@ void RSTP::initInterfacedata(unsigned int portNum)
 
 void RSTP::initPorts()
 {
-    for (unsigned int j = 0; j < portCount; j++)
+    for (unsigned int j = 0; j < numPorts; j++)
     {
         Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
         if (!jPort->isEdge())
@@ -1050,7 +1050,7 @@ int RSTP::compareInterfacedata(unsigned int portNum, BPDU * msg, int linkCost)
 int RSTP::getRootIndex()
 {
     int result = -1;
-    for (unsigned int i = 0; i < portCount; i++)
+    for (unsigned int i = 0; i < numPorts; i++)
     {
         Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
         if (iPort->getRole() == Ieee8021DInterfaceData::ROOT)
@@ -1065,7 +1065,7 @@ int RSTP::getRootIndex()
 int RSTP::getBestAlternate()
 {
     int candidato = -1;  // index of the best alternate found
-    for (unsigned int j = 0; j < portCount; j++)
+    for (unsigned int j = 0; j < numPorts; j++)
     {
         Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
         if (jPort->getRole() == Ieee8021DInterfaceData::ALTERNATE) // just from alternates, others are not updated
@@ -1103,20 +1103,20 @@ int RSTP::getBestAlternate()
 void RSTP::start()
 {
     initPorts();
-    scheduleAt(simTime(), helloM);
-    scheduleAt(simTime() + fwdDelay, forwardM);
-    scheduleAt(simTime() + migrateTime, migrateM);
+    scheduleAt(simTime(), helloTimer);
+    scheduleAt(simTime() + forwardDelay, forwardTimer);
+    scheduleAt(simTime() + migrateTime, migrateTimer);
     isOperational = true;
 }
 
 void RSTP::stop()
 {
-    for (unsigned int i = 0; i < portCount; i++)
+    for (unsigned int i = 0; i < numPorts; i++)
         colorLink(i, false);
     this->getParentModule()->getDisplayString().setTagArg("i", 1, "");
-    cancelEvent(helloM);
-    cancelEvent(forwardM);
-    cancelEvent(migrateM);
+    cancelEvent(helloTimer);
+    cancelEvent(forwardTimer);
+    cancelEvent(migrateTimer);
     isOperational = false;
 }
 

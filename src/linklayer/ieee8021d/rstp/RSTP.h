@@ -42,9 +42,9 @@ protected:
     bool treeColoring;         // colors tree
     bool isOperational;        // for lifecycle
 
-    cModule* Parent;           // pointer to the parent module
+    cModule* parent;           // pointer to the parent module
 
-    unsigned int portCount;    // number of ports
+    unsigned int numPorts;    // number of ports
     simtime_t tcWhileTime;     // TCN activation time
     bool autoEdge;             // automatic edge ports detection
 
@@ -55,13 +55,13 @@ protected:
     int priority;              // bridge's priority
     MACAddress address;        // bridge's MAC address
 
-    simtime_t hellotime;       // time between hello BPDUs
-    simtime_t fwdDelay;        // After that a discarding port switches to learning and so on if it is designated
+    simtime_t helloTime;       // time between hello BPDUs
+    simtime_t forwardDelay;        // After that a discarding port switches to learning and so on if it is designated
     simtime_t migrateTime;     // after that, a not assigned port becomes designated
 
-    cMessage* helloM;
-    cMessage* forwardM;
-    cMessage* migrateM;
+    cMessage* helloTimer;
+    cMessage* forwardTimer;
+    cMessage* migrateTimer;
 
 public:
     RSTP();
@@ -95,7 +95,7 @@ protected:
      */
 
     virtual void colorLink(unsigned int i, bool forwarding);
-    virtual void colorRootPorts();
+    virtual void visualizer();
 
     /**
      * @brief Sends BPDUs through all ports, if they are required

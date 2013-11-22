@@ -49,8 +49,8 @@ simple RSTP like ISpanningTree
         int priority = default(128);                            // switch priority
         bool autoEdge = default(true);                          // if false, edge ports will have to wait to get designated
         bool treeColoring = default(false);                     // shows the RSTP tree by coloring connections in the network graphics
-        string interfaceTableName = default("interfaceTable");  // module path to the InterfaceTable module
-        string macTableName = default("macTable");              // module path to the MACAddressTable module
+        string interfaceTableName = default("^.interfaceTable");  // module path to the InterfaceTable module
+        string macTableName = default("^.macTable");              // module path to the MACAddressTable module
         @display("i=block/network2");
     gates:
         input relayIn;
