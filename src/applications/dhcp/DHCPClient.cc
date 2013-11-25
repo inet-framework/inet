@@ -190,7 +190,6 @@ void DHCPClient::handleMessage(cMessage *msg)
         delete msg;
         return;
     }
-
     if (msg->isSelfMessage())
     {
         if (msg->getKind() == START_DHCP)
@@ -285,7 +284,7 @@ void DHCPClient::recordLease(DHCPMessage * dhcpACK)
         IPv4Address ip = dhcpACK->getYiaddr();
         EV_DETAIL << "DHCPACK arrived with " << endl << "IP: " << ip << endl;
 
-        lease->netmask = dhcpACK->getOptions().getSubnetMask();
+        lease->subnetMask = dhcpACK->getOptions().getSubnetMask();
 
         if (dhcpACK->getOptions().getRouterArraySize() > 0)
             lease->gateway = dhcpACK->getOptions().getRouter(0);
@@ -310,15 +309,15 @@ void DHCPClient::boundLease()
     EV_INFO << "Bound IP address." << endl;
 
     ie->ipv4Data()->setIPAddress(lease->ip);
-    ie->ipv4Data()->setNetmask(lease->netmask);
+    ie->ipv4Data()->setNetmask(lease->ip.getNetworkMask());
 
     std::string banner = "Got IP " + lease->ip.str();
     this->getParentModule()->bubble(banner.c_str());
 
     EV_INFO << "Configuring interface : " << ie->getName() << " IP:" << lease->ip << "/"
-    << lease->netmask << " leased time: " << lease->leaseTime << " (secs)." << endl;
+    << lease->subnetMask << " leased time: " << lease->leaseTime << " (secs)." << endl;
 
-    std::cout << "Host " << hostName << " got ip: " << lease->ip << "/" << lease->netmask << endl;
+    std::cout << "Host " << hostName << " got ip: " << lease->ip << "/" << lease->subnetMask << endl;
 
     IPv4Route * iroute = NULL;
     for (int i = 0; i < irt->getNumRoutes(); i++)

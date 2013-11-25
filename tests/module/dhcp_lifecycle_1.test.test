@@ -21,8 +21,7 @@ record-eventlog = true
 **.client.udpApp[0].interface = "eth0"
 
 **.server.udpApp[0].typename = "DHCPServer"
-**.server.udpApp[0].net = "192.168.1.0"
-**.server.udpApp[0].netmask = "255.255.255.0"
+**.server.udpApp[0].subnetMask = "255.255.255.0"
 **.server.udpApp[0].ipAddressStart = "192.168.1.100"
 **.server.udpApp[0].maxNumClients = 100
 **.server.udpApp[0].gateway = "192.168.1.1"

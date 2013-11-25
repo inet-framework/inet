@@ -49,10 +49,9 @@ class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILi
         /* Set by management, see DHCPServer NED file. */
         unsigned int maxNumOfClients;
         unsigned int leaseTime;
-        IPv4Address network;
-        IPv4Address netmask;
+        IPv4Address subnetMask;
         IPv4Address gateway;
-        IPv4Address begin;
+        IPv4Address ipAddressStart;
 
         InterfaceEntry* ie; // interface to listen
         NotificationBoard* nb;

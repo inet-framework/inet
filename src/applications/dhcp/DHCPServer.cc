@@ -51,10 +51,9 @@ void DHCPServer::initialize(int stage)
         WATCH(numReceived);
         WATCH_MAP(leased);
 
-        network = IPv4Address(par("net").stringValue());
-        netmask = IPv4Address(par("netmask").stringValue());
+        subnetMask = IPv4Address(par("subnetMask").stringValue());
         gateway = IPv4Address(par("gateway").stringValue());
-        begin = IPv4Address(par("ipAddressStart").stringValue());
+        ipAddressStart = IPv4Address(par("ipAddressStart").stringValue());
         maxNumOfClients = par("maxNumClients");
         leaseTime = par("leaseTime");
 
@@ -223,7 +222,7 @@ void DHCPServer::processPacket(DHCPMessage *packet)
                         // and may output a warning to the network admin
                         EV_WARN << "DHCP server has no record of IP " << requestedAddress << "." << endl;
                     }
-                    else if (IPv4Address::maskedAddrAreEqual(requestedAddress,it->second.ip,netmask)) // on the same network
+                    else if (IPv4Address::maskedAddrAreEqual(requestedAddress,it->second.ip,subnetMask)) // on the same network
                     {
                         DHCPLease * lease = &it->second;
                         EV_INFO << "Initialization with known IP address (INIT-REBOOT) " << lease->ip <<  " on " << lease->mac <<  " was successful." << endl;
@@ -320,7 +319,7 @@ void DHCPServer::sendACK(DHCPLease* lease, DHCPMessage * packet)
     ack->getOptions().setMessageType(DHCPACK);
 
     // add the lease options
-    ack->getOptions().setSubnetMask(lease->netmask);
+    ack->getOptions().setSubnetMask(lease->subnetMask);
     ack->getOptions().setRenewalTime(leaseTime * 0.5); // RFC 4.4.5
     ack->getOptions().setRebindingTime(leaseTime * 0.875);
     ack->getOptions().setLeaseTime(leaseTime);
@@ -338,7 +337,7 @@ void DHCPServer::sendACK(DHCPLease* lease, DHCPMessage * packet)
     if (packet->getGiaddr().isUnspecified() && !packet->getCiaddr().isUnspecified())
         sendToUDP(ack, serverPort, packet->getCiaddr(), clientPort);
     else
-        sendToUDP(ack, serverPort, lease->ip.makeBroadcastAddress(lease->netmask), clientPort);
+        sendToUDP(ack, serverPort, lease->ip.makeBroadcastAddress(lease->ip.getNetworkMask()), clientPort);
 }
 
 void DHCPServer::sendOffer(DHCPLease* lease)
@@ -366,7 +365,7 @@ void DHCPServer::sendOffer(DHCPLease* lease)
     offer->getOptions().setMessageType(DHCPOFFER);
 
     // add the offer options
-    offer->getOptions().setSubnetMask(lease->netmask);
+    offer->getOptions().setSubnetMask(lease->subnetMask);
     offer->getOptions().setRenewalTime(leaseTime * 0.5); // RFC 4.4.5
     offer->getOptions().setRebindingTime(leaseTime * 0.875);
     offer->getOptions().setLeaseTime(leaseTime);
@@ -381,7 +380,7 @@ void DHCPServer::sendOffer(DHCPLease* lease)
     // register the offering time // todo: ?
     lease->leaseTime = simTime();
 
-    sendToUDP(offer, 67, lease->ip.makeBroadcastAddress(lease->netmask), 68);
+    sendToUDP(offer, 67, lease->ip.makeBroadcastAddress(lease->ip.getNetworkMask()), 68);
 }
 
 DHCPLease* DHCPServer::getLeaseByMac(MACAddress mac)
@@ -403,7 +402,7 @@ DHCPLease* DHCPServer::getLeaseByMac(MACAddress mac)
 
 DHCPLease* DHCPServer::getAvailableLease(IPv4Address requestedAddress, MACAddress& clientMAC)
 {
-    int beginAddr = begin.getInt(); // the first address that we might use
+    int beginAddr = ipAddressStart.getInt(); // the first address that we might use
 
     // try to allocate the requested address if that address is valid and not already allocated
     if (!requestedAddress.isUnspecified()) // valid
@@ -415,8 +414,7 @@ DHCPLease* DHCPServer::getAvailableLease(IPv4Address requestedAddress, MACAddres
         leased[requestedAddress] = DHCPLease();
         leased[requestedAddress].ip = requestedAddress;
         leased[requestedAddress].gateway = gateway;
-        leased[requestedAddress].netmask = netmask;
-        leased[requestedAddress].network = network;
+        leased[requestedAddress].subnetMask = subnetMask;
 
         return &leased[requestedAddress];
     }
@@ -437,8 +435,7 @@ DHCPLease* DHCPServer::getAvailableLease(IPv4Address requestedAddress, MACAddres
             leased[ip] = DHCPLease();
             leased[ip].ip = ip;
             leased[ip].gateway = gateway;
-            leased[ip].netmask = netmask;
-            leased[ip].network = network;
+            leased[ip].subnetMask = subnetMask;
             return (&(leased[ip]));
         }
     }

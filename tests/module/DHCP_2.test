@@ -84,8 +84,7 @@ cmdenv-express-mode = true
 **.dhcpClient.dhcpApp.interface="lo0"   # interface to be configured
 
 **.dhcpServer.dhcpApp.typename = "DHCPServer"
-**.dhcpServer.dhcpApp.net = "192.168.1.0"        # IP network to assign
-**.dhcpServer.dhcpApp.netmask = "255.255.255.0"        # netmask to assign
+**.dhcpServer.dhcpApp.subnetMask = "255.255.255.0"        # netmask to assign
 **.dhcpServer.dhcpApp.ipAddressStart = "192.168.1.100"    # ip to start to lease
 **.dhcpServer.dhcpApp.maxNumClients = 100     # number of ip to lease
 **.dhcpServer.dhcpApp.gateway = "192.168.1.1"     # gateway to assign

@@ -37,8 +37,7 @@ import inet.applications.IUDPApp;
 simple DHCPServer like IUDPApp
 {
     parameters:
-        string net; // IP network to assign
-        string netmask; // netmask to assign
+        string subnetMask; // subnet mask to assign
         string ipAddressStart; // IP pool 1st address
         int maxNumClients; // maximum number of clients (IPs) allowed to be leased
         string gateway; // gateway to assign

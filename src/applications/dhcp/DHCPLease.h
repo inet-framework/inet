@@ -33,8 +33,7 @@ class DHCPLease
         IPv4Address ip;
         MACAddress mac;
         IPv4Address gateway;
-        IPv4Address network;
-        IPv4Address netmask;
+        IPv4Address subnetMask;
         IPv4Address dns;
         IPv4Address ntp;
         IPv4Address serverId;
@@ -47,7 +46,7 @@ class DHCPLease
 
 inline std::ostream& operator <<(std::ostream& os, DHCPLease obj)
 {
-    os << "xid:" << obj.xid << " ip:" << obj.ip << " network:" << obj.network << " netmask:" << obj.netmask
+    os << "xid:" << obj.xid << " ip:" << obj.ip << " subnet mask:" << obj.subnetMask
             << " MAC:" << obj.mac << endl;
     return os;
 }
