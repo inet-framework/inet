@@ -585,9 +585,6 @@ void DHCPClient::sendDiscover()
     discover->setXid(xid); // transaction id
     discover->setSecs(0); // 0 seconds from transaction started
     discover->setFlags(0); // 0 = unicast
-    discover->setCiaddr(IPv4Address("0.0.0.0")); // no client IP addr
-    discover->setYiaddr(IPv4Address("0.0.0.0")); // no your IP addr
-    discover->setGiaddr(IPv4Address("0.0.0.0")); // no DHCP Gateway Agents
     discover->setChaddr(macAddress); // my mac address
     discover->setSname(""); // no server name given
     discover->setFile(""); // no file given
@@ -618,9 +615,6 @@ void DHCPClient::sendDecline(IPv4Address declinedIp)
     decline->setXid(xid); // transaction id
     decline->setSecs(0); // 0 seconds from transaction started
     decline->setFlags(0); // 0 = unicast
-    decline->setCiaddr(IPv4Address("0.0.0.0")); // no client IP addr
-    decline->setYiaddr(IPv4Address("0.0.0.0")); // no your IP addr
-    decline->setGiaddr(IPv4Address("0.0.0.0")); // no DHCP Gateway Agents
     decline->setChaddr(macAddress); // my MAC address
     decline->setSname(""); // no server name given
     decline->setFile(""); // no file given

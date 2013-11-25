@@ -287,8 +287,6 @@ void DHCPServer::sendNAK(DHCPMessage* msg)
     nak->setXid(msg->getXid()); // transaction id from client
     nak->setSecs(0); // 0 seconds from transaction started.
     nak->setFlags(msg->getFlags()); // 0 = unicast
-    nak->setCiaddr(IPv4Address("0.0.0.0"));
-    nak->setYiaddr(IPv4Address("0.0.0.0"));
     nak->setGiaddr(msg->getGiaddr()); // next server ip
     nak->setChaddr(msg->getChaddr());
     nak->getOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
@@ -311,7 +309,6 @@ void DHCPServer::sendACK(DHCPLease* lease, DHCPMessage * packet)
     ack->setFlags(0);// 0 = unicast
     ack->setCiaddr(lease->ip);// client IP addr.
     ack->setYiaddr(lease->ip);// clinet IP addr.
-    ack->setGiaddr(IPv4Address("0.0.0.0")); // next server ip
 
     ack->setChaddr(lease->mac); // client MAC address
     ack->setSname(""); // no server name given
@@ -354,7 +351,6 @@ void DHCPServer::sendOffer(DHCPLease* lease)
     offer->setXid(lease->xid); // transacction id;
     offer->setSecs(0); // 0 seconds from transaction started.
     offer->setFlags(0); // 0 = unicast
-    offer->setCiaddr(IPv4Address("0.0.0.0"));// NO client IP addr.
 
     offer->setYiaddr(lease->ip); // ip offered.
     offer->setGiaddr(lease->gateway); // next server ip
