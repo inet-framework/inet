@@ -150,36 +150,27 @@ inline bool routeMatches(const IPv4Route *entry, const IPv4Address& target, cons
 
 }
 
-void DHCPClient::setStateLabel()
+const char *DHCPClient::getStateName(ClientState state)
 {
-    switch (clientState)
+    switch (state)
     {
-        case INIT :
-            getParentModule()->getDisplayString().setTagArg("t", 0, "I'm in INIT state.");;
-        break;
-        case INIT_REBOOT :
-            getParentModule()->getDisplayString().setTagArg("t", 0, "I'm in INIT-REBOOT state.");
-        break;
-        case REBOOTING :
-            getParentModule()->getDisplayString().setTagArg("t", 0, "I'm in REBOOTING state.");
-        break;
-        case SELECTING :
-            getParentModule()->getDisplayString().setTagArg("t", 0, "I'm in SELECTING state.");
-        break;
-        case REQUESTING :
-            getParentModule()->getDisplayString().setTagArg("t", 0, "I'm in REQUESTING state.");
-        break;
-        case BOUND :
-            getParentModule()->getDisplayString().setTagArg("t", 0, "I'm in BOUND state.");
-        break;
-        case RENEWING :
-            getParentModule()->getDisplayString().setTagArg("t", 0, "I'm in RENEWING state.");
-        break;
-        case REBINDING :
-            getParentModule()->getDisplayString().setTagArg("t", 0, "I'm in REBINDING state.");
-        default:
-        break;
+#define CASE(X)  case X: return #X;
+    CASE(INIT);
+    CASE(INIT_REBOOT);
+    CASE(REBOOTING);
+    CASE(SELECTING);
+    CASE(REQUESTING);
+    CASE(BOUND);
+    CASE(RENEWING);
+    CASE(REBINDING);
+    default: return "???";
+#undef CASE
     }
+}
+
+void DHCPClient::updateDisplayString()
+{
+    getParentModule()->getDisplayString().setTagArg("t", 0, getStateName(clientState));
 }
 
 void DHCPClient::handleMessage(cMessage *msg)
@@ -208,7 +199,7 @@ void DHCPClient::handleMessage(cMessage *msg)
     }
 
     if (ev.isGUI())
-        setStateLabel();
+        updateDisplayString();
 }
 
 void DHCPClient::handleTimer(cMessage * msg)
@@ -315,7 +306,7 @@ void DHCPClient::boundLease()
     this->getParentModule()->bubble(banner.c_str());
 
     EV_INFO << "Configuring interface : " << ie->getName() << " IP:" << lease->ip << "/"
-    << lease->subnetMask << " leased time: " << lease->leaseTime << " (secs)." << endl;
+            << lease->subnetMask << " leased time: " << lease->leaseTime << " (secs)." << endl;
 
     std::cout << "Host " << hostName << " got ip: " << lease->ip << "/" << lease->subnetMask << endl;
 
@@ -323,7 +314,7 @@ void DHCPClient::boundLease()
     for (int i = 0; i < irt->getNumRoutes(); i++)
     {
         IPv4Route * e = irt->getRoute(i);
-        if (routeMatches(e, IPv4Address(), IPv4Address(), lease->gateway, 0, (char*) (ie->getName())))
+        if (routeMatches(e, IPv4Address(), IPv4Address(), lease->gateway, 0, ie->getName()))
         {
             iroute = e;
             break;
@@ -526,8 +517,8 @@ void DHCPClient::sendRequest()
     request->setXid(xid); // transaction id
     request->setSecs(0); // 0 seconds from transaction started
     request->setFlags(0); // 0 = unicast
-    request->setYiaddr(IPv4Address("0.0.0.0")); // no your IP addr
-    request->setGiaddr(IPv4Address("0.0.0.0")); // no DHCP Gateway Agents
+    request->setYiaddr(IPv4Address()); // no 'your IP' addr
+    request->setGiaddr(IPv4Address()); // no DHCP Gateway Agents
     request->setChaddr(macAddress); // my mac address;
     request->setSname(""); // no server name given
     request->setFile(""); // no file given
@@ -545,7 +536,7 @@ void DHCPClient::sendRequest()
     if (clientState == INIT_REBOOT)
     {
         request->getOptions().setRequestedIp(lease->ip);
-        request->setCiaddr(IPv4Address("0.0.0.0")); // zero.
+        request->setCiaddr(IPv4Address()); // zero
         EV_INFO << "Sending DHCPREQUEST asking for IP " << lease->ip << " via broadcast." << endl;
         sendToUDP(request, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
     }
@@ -553,7 +544,7 @@ void DHCPClient::sendRequest()
     {
         request->getOptions().setServerIdentifier(lease->serverId);
         request->getOptions().setRequestedIp(lease->ip);
-        request->setCiaddr(IPv4Address("0.0.0.0")); // zero.
+        request->setCiaddr(IPv4Address()); // zero
         EV_INFO << "Sending DHCPREQUEST asking for IP " << lease->ip << " via broadcast." << endl;
         sendToUDP(request, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
     }

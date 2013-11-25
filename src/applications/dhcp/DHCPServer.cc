@@ -102,17 +102,13 @@ void DHCPServer::receiveChangeNotification(int category, const cPolymorphic *det
         case NF_INTERFACE_CREATED:
             nie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
             if (!ie && !strcmp(nie->getName(), par("interface").stringValue()))
-            {
                 ie = nie;
-            }
             break;
 
         case NF_INTERFACE_DELETED:
             nie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
             if (ie == nie)
-            {
                 ie = NULL;
-            }
             break;
 
         default:
