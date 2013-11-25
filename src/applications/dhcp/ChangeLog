@@ -7,6 +7,10 @@
     With the new REBOOTING states scenarios with lifecycle events
     now work correctly.
 
+    The server's performance modeling has been removed. The inner
+    representation of the DHCP options are moved to a DHCPOptions
+    INET message definition file.
+
     The client module currently does not support multiple DHCP servers
     and BOOTP relay agents.
 

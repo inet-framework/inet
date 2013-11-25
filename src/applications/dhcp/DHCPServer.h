@@ -24,7 +24,6 @@
 #include <map>
 #include "INETDefs.h"
 #include "DHCP_m.h"
-#include "DHCPOptions.h"
 #include "DHCPLease.h"
 #include "InterfaceTable.h"
 #include "ARP.h"

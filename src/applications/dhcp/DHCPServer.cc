@@ -52,10 +52,10 @@ void DHCPServer::initialize(int stage)
         WATCH_MAP(leased);
 
         network = IPv4Address(par("net").stringValue());
-        netmask = IPv4Address(par("mask").stringValue());
+        netmask = IPv4Address(par("netmask").stringValue());
         gateway = IPv4Address(par("gateway").stringValue());
-        begin = IPv4Address(par("ipBegin").stringValue());
-        maxNumOfClients = par("clientNum");
+        begin = IPv4Address(par("ipAddressStart").stringValue());
+        maxNumOfClients = par("maxNumClients");
         leaseTime = par("leaseTime");
 
         // DHCP UDP ports
@@ -143,7 +143,7 @@ void DHCPServer::processPacket(DHCPMessage *packet)
     if (packet->getOp() == BOOTREQUEST)
     {
 
-        if (packet->getOptions().get(DHCP_MSG_TYPE) == DHCPDISCOVER) // RFC 2131, 4.3.1
+        if (packet->getOptions().getMessageType() == DHCPDISCOVER) // RFC 2131, 4.3.1
         {
             EV_INFO << "DHCPDISCOVER arrived. Handling it." << endl;
 
@@ -151,13 +151,13 @@ void DHCPServer::processPacket(DHCPMessage *packet)
             if (!lease)
             {
                 // MAC not registered, create offering a new lease to the client
-                lease = getAvailableLease(IPv4Address(packet->getOptions().get(REQUESTED_IP).stringValue().c_str()),packet->getChaddr());
+                lease = getAvailableLease(packet->getOptions().getRequestedIp(),packet->getChaddr());
                 if (lease != NULL)
                 {
                     // std::cout << "MAC: " << packet->getChaddr() << " ----> IP: " << lease->ip << endl;
                     lease->mac = packet->getChaddr();
                     lease->xid = packet->getXid();
-                    lease->parameterRequestList = packet->getOptions().get(PARAM_LIST);
+                    //lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); TODO: !!
                     lease->leased = true; // TODO
                     sendOffer(lease);
                 }
@@ -168,17 +168,17 @@ void DHCPServer::processPacket(DHCPMessage *packet)
             {
                 // MAC already exist, offering the same lease
                 lease->xid = packet->getXid();
-                lease->parameterRequestList = packet->getOptions().get(PARAM_LIST);
+                //lease->parameterRequestList = packet->getOptions().get(PARAM_LIST); // TODO: !!
                 sendOffer(lease);
             }
 
         }
-        else if (packet->getOptions().get(DHCP_MSG_TYPE) == DHCPREQUEST) // RFC 2131, 4.3.2
+        else if (packet->getOptions().getMessageType() == DHCPREQUEST) // RFC 2131, 4.3.2
         {
             EV_INFO << "DHCPREQUEST arrived. Handling it." << endl;
 
             // check if the request was in response of an offering
-            if (packet->getOptions().get(SERVER_ID) == ie->ipv4Data()->getIPAddress().str())
+            if (packet->getOptions().getServerIdentifier() == ie->ipv4Data()->getIPAddress())
             {
                 // the REQUEST is in response to an offering (because SERVER_ID is filled)
                 // otherwise the msg is a request to extend an existing lease (e. g. INIT-REBOOT)
@@ -186,7 +186,7 @@ void DHCPServer::processPacket(DHCPMessage *packet)
                 DHCPLease* lease = getLeaseByMac(packet->getChaddr());
                 if (lease != NULL)
                 {
-                    if (lease->ip != IPv4Address(packet->getOptions().get(REQUESTED_IP).stringValue().c_str()))
+                    if (lease->ip != packet->getOptions().getRequestedIp())
                     {
                         EV_ERROR << "The 'requested IP address' must be filled in with the 'yiaddr' value from the chosen DHCPOFFER." << endl;
                         sendNAK(packet);
@@ -215,7 +215,7 @@ void DHCPServer::processPacket(DHCPMessage *packet)
                 if (packet->getCiaddr().isUnspecified())  // init-reboot
                 {
                     // std::cout << "init-reboot" << endl;
-                    IPv4Address requestedAddress = IPv4Address(packet->getOptions().get(REQUESTED_IP).stringValue().c_str());
+                    IPv4Address requestedAddress = packet->getOptions().getRequestedIp();
                     DHCPLeased::iterator it = leased.find(requestedAddress);
                     if (it == leased.end())
                     {
@@ -292,7 +292,7 @@ void DHCPServer::sendNAK(DHCPMessage* msg)
     nak->setYiaddr(IPv4Address("0.0.0.0"));
     nak->setGiaddr(msg->getGiaddr()); // next server ip
     nak->setChaddr(msg->getChaddr());
-    nak->getOptions().set(SERVER_ID, ie->ipv4Data()->getIPAddress().str());
+    nak->getOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
 
     sendToUDP(nak, serverPort, IPv4Address::ALLONES_ADDRESS, clientPort);
 }
@@ -317,19 +317,20 @@ void DHCPServer::sendACK(DHCPLease* lease, DHCPMessage * packet)
     ack->setChaddr(lease->mac); // client MAC address
     ack->setSname(""); // no server name given
     ack->setFile(""); // no file given
-    ack->getOptions().set(DHCP_MSG_TYPE, DHCPACK);
+    ack->getOptions().setMessageType(DHCPACK);
 
     // add the lease options
-    ack->getOptions().set(SUBNET_MASK, lease->netmask.str());
-    ack->getOptions().set(RENEWAL_TIME, leaseTime* 0.5); // RFC 4.4.5
-    ack->getOptions().set(REBIND_TIME, leaseTime * 0.875); // RFC 4.4.5
-    ack->getOptions().set(LEASE_TIME, leaseTime);
-    ack->getOptions().set(ROUTER, lease->gateway.str());
-    ack->getOptions().set(DNS, lease->dns.str());
-    ack->getOptions().set(LEASE_TIME, leaseTime);
+    ack->getOptions().setSubnetMask(lease->netmask);
+    ack->getOptions().setRenewalTime(leaseTime * 0.5); // RFC 4.4.5
+    ack->getOptions().setRebindingTime(leaseTime * 0.875);
+    ack->getOptions().setLeaseTime(leaseTime);
+    ack->getOptions().setRouterArraySize(1);
+    ack->getOptions().setRouter(0,lease->gateway);
+    ack->getOptions().setDnsArraySize(1);
+    ack->getOptions().setDns(0,lease->dns);
 
     // add the server_id as the RFC says
-    ack->getOptions().set(SERVER_ID, ie->ipv4Data()->getIPAddress().str());
+    ack->getOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
 
     // register the lease time
     lease->leaseTime = simTime();
@@ -362,20 +363,22 @@ void DHCPServer::sendOffer(DHCPLease* lease)
     offer->setChaddr(lease->mac);// client mac address;
     offer->setSname(""); // no server name given
     offer->setFile(""); // no file given
-    offer->getOptions().set(DHCP_MSG_TYPE, DHCPOFFER);
+    offer->getOptions().setMessageType(DHCPOFFER);
 
     // add the offer options
-    offer->getOptions().set(SUBNET_MASK, lease->netmask.str());
-    offer->getOptions().set(RENEWAL_TIME, leaseTime * 0.5); // RFC 4.4.5
-    offer->getOptions().set(REBIND_TIME, leaseTime * 0.875); // RFC 4.4.5
-    offer->getOptions().set(LEASE_TIME, leaseTime);
-    offer->getOptions().set(DNS, lease->dns.str());
-    offer->getOptions().set(ROUTER, lease->gateway.str());
+    offer->getOptions().setSubnetMask(lease->netmask);
+    offer->getOptions().setRenewalTime(leaseTime * 0.5); // RFC 4.4.5
+    offer->getOptions().setRebindingTime(leaseTime * 0.875);
+    offer->getOptions().setLeaseTime(leaseTime);
+    offer->getOptions().setRouterArraySize(1);
+    offer->getOptions().setRouter(0,lease->gateway);
+    offer->getOptions().setDnsArraySize(1);
+    offer->getOptions().setDns(0,lease->dns);
 
     // add the server_id as the RFC says
-    offer->getOptions().set(SERVER_ID, ie->ipv4Data()->getIPAddress().str());
+    offer->getOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
 
-    // register the offering time
+    // register the offering time // todo: ?
     lease->leaseTime = simTime();
 
     sendToUDP(offer, 67, lease->ip.makeBroadcastAddress(lease->netmask), 68);

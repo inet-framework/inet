@@ -20,7 +20,7 @@
 cplusplus {{
     #include "MACAddress.h"
     #include "IPv4Address.h"
-    #include "DHCPOptions.h"
+    #include "DHCPOptions_m.h"
 }}
 
 
@@ -32,24 +32,6 @@ enum DHCPOpcode
 {
     BOOTREQUEST = 1;
     BOOTREPLY = 2;
-}
-
-// For more information, see RFC 2132: 'DHCP Options and BOOTP Vendor Extensions'
-enum DHCPMessageType
-{
-    DHCPDISCOVER = 1;
-    DHCPOFFER = 2;
-    DHCPREQUEST = 3;
-    DHCPDECLINE = 4;
-    DHCPACK = 5;
-    DHCPNAK = 6;
-    DHCPRELEASE = 7;
-    DHCPINFORM = 8;
-    DHCPFORCERENEW = 9;
-    DHCPLEASEQUERY = 10;
-    DHCPLEASEUNASSIGNED = 11;
-    DHCPLEASEUNKNOWN = 12;
-    DHCPLEASEACTIVE = 13;
 }
 
 //

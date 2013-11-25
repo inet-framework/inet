@@ -45,11 +45,11 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         cMessage* timerT2; // time at which the client enters the REBINDING state
         cMessage* timerTo; // response timeout: WAIT_ACK, WAIT_OFFER
         cMessage* leaseTimer;
-
+        cMessage* startTimer; // self msg to start DHCP init
         // DHCP timer types (RFC 2131 4.4.5)
         enum TimerType
         {
-            WAIT_OFFER, WAIT_ACK, T1, T2, LEASE_TIMEOUT
+            WAIT_OFFER, WAIT_ACK, T1, T2, LEASE_TIMEOUT, START_DHCP
         };
 
         // DHCP client states (RFC 2131, Figure 5: state transition diagram)
@@ -151,7 +151,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         virtual void scheduleTimerTO(TimerType type);
         virtual void scheduleTimerT1();
         virtual void scheduleTimerT2();
-
+        virtual void setStateLabel();
     public:
         DHCPClient();
         virtual ~DHCPClient();

@@ -19,7 +19,6 @@
 #ifndef INET_DHCPLEASE_H__
 #define INET_DHCPLEASE_H__
 
-#include "Byte.h"
 #include "IPv4Address.h"
 #include "MACAddress.h"
 #include "ARP.h"
@@ -43,9 +42,7 @@ class DHCPLease
         simtime_t leaseTime;
         simtime_t renewalTime;
         simtime_t rebindTime;
-        Byte parameterRequestList;
         bool leased;
-
 };
 
 inline std::ostream& operator <<(std::ostream& os, DHCPLease obj)
