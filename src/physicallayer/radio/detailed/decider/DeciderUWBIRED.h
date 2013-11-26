@@ -58,7 +58,7 @@ class SimplifiedRadioFrame;
  * @ingroup ieee802154a
  * @ingroup decider
 */
-class MIXIM_API DeciderUWBIRED: public BaseDecider {
+class INET_API DeciderUWBIRED: public BaseDecider {
 private:
 	bool trace, stats;
 	long nbFailedSyncs, nbSuccessfulSyncs;

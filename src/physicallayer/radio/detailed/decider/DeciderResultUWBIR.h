@@ -15,7 +15,7 @@
  * @ingroup ieee802154a
  * @ingroup decider
  */
-class MIXIM_API DeciderResultUWBIR : public DeciderResult {
+class INET_API DeciderResultUWBIR : public DeciderResult {
 public:
 	DeciderResultUWBIR(bool isCorrect, std::vector<bool>* _decodedBits, double snr): DeciderResult(isCorrect), decodedBits(_decodedBits), snr(snr) { }
 

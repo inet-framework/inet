@@ -41,7 +41,7 @@
  *
  * @ingroup ieee802154a
  */
-class MIXIM_API IEEE802154A
+class INET_API IEEE802154A
 {
     public:
         /**@brief bit rate (850 kbps) */

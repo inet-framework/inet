@@ -43,7 +43,7 @@ class Signal;
  * @ingroup ieee802154a
  * @ingroup decider
 */
-class MIXIM_API DeciderUWBIREDSync: public DeciderUWBIRED {
+class INET_API DeciderUWBIREDSync: public DeciderUWBIRED {
 public:
 	DeciderUWBIREDSync( DeciderToPhyInterface* phy
 	                  , double                 sensitivity

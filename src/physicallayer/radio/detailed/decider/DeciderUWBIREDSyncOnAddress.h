@@ -48,7 +48,7 @@ class UWBIRRadio;
  * @ingroup decider
 */
 
-class MIXIM_API DeciderUWBIREDSyncOnAddress: public DeciderUWBIRED {
+class INET_API DeciderUWBIREDSyncOnAddress: public DeciderUWBIRED {
 private:
 	/** @brief Copy constructor is not allowed.
 	 */

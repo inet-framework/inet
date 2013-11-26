@@ -29,7 +29,7 @@
  *
  * @ingroup mapping
  */
-class MIXIM_API SimpleTimeConstMapping: public SimpleConstMapping {
+class INET_API SimpleTimeConstMapping: public SimpleConstMapping {
 
 protected:
 	double myValue;

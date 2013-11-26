@@ -113,7 +113,7 @@ class DeciderUWBIREDSync;
  * @ingroup phyLayer
  * @ingroup power
  */
-class MIXIM_API UWBIRRadio : public PhyLayerBattery
+class INET_API UWBIRRadio : public PhyLayerBattery
 {
 	friend class DeciderUWBIRED;
 private:

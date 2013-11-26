@@ -50,7 +50,7 @@
  * @ingroup ieee802154a
  * @ingroup analogueModels
  */
-class MIXIM_API UWBIRStochasticPathlossModel : public AnalogueModel {
+class INET_API UWBIRStochasticPathlossModel : public AnalogueModel {
 
 public:
     virtual ~UWBIRStochasticPathlossModel() {}

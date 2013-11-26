@@ -32,7 +32,7 @@
  * @author Andreas Koepke, Karl Wessel
  */
 
-class MIXIM_API  Packet : public cObject
+class INET_API  Packet : public cObject
 {
 protected:
     /** @brief number of packets generated. */

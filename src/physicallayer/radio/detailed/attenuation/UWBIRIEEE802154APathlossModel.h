@@ -54,7 +54,7 @@
  * @ingroup analogueModels
  * @ingroup ieee802154a
  */
-class MIXIM_API UWBIRIEEE802154APathlossModel : public AnalogueModel {
+class INET_API UWBIRIEEE802154APathlossModel : public AnalogueModel {
 private:
 	/** @brief Copy constructor is not allowed.
 	 */

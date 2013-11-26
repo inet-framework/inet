@@ -30,7 +30,7 @@
  *
  * @author Andreas Koepke
  */
-class MIXIM_API  UWBIRPacket : public cObject
+class INET_API  UWBIRPacket : public cObject
 {
 protected:
     /** @brief number of packets generated. */

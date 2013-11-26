@@ -26,7 +26,7 @@
  * @ingroup phyLayer
  */
 
-class MIXIM_API RadioUWBIR: public MiximRadio {
+class INET_API RadioUWBIR: public MiximRadio {
 	friend class UWBIRRadio;
 
 public:
