@@ -27,7 +27,7 @@
 #define __INET_WISEROUTE_H
 
 #include "Address.h"
-#include "GlobalARP.h"
+#include "IARP.h"
 #include "WiseRouteDatagram_m.h"
 
 /**
@@ -125,7 +125,7 @@ protected:
 	tRouteTable routeTable;
 	tFloodTable floodTable;
 
-	GlobalARP *arp;
+	IARP *arp;
 
     /**
      * @brief Length of the NetwPkt header

@@ -44,7 +44,7 @@ Define_Module(WiseRoute);
 void WiseRoute::initialize(int stage)
 {
 	if (stage == INITSTAGE_LOCAL) {
-	    arp = check_and_cast<GlobalARP *>(simulation.getModuleByPath("arp"));
+	    arp = check_and_cast<IARP *>(getParentModule()->getSubmodule("arp"));
 		sinkAddress = Address(par("sinkAddress"));
 		headerLength = par ("headerLength");
 		rssiThreshold = par("rssiThreshold").doubleValue();
@@ -100,7 +100,7 @@ void WiseRoute::handleMessage(cMessage* msg)
     else if (!strcmp(msg->getArrivalGate()->getName(), "lowerLayerIn"))
         handleLowerMsg(msg);
     else
-        opp_error("Unknown message");
+        throw cRuntimeError("Unknown message");
 }
 
 void WiseRoute::handleSelfMsg(cMessage* msg)
@@ -205,7 +205,10 @@ void WiseRoute::handleLowerMsg(cMessage* msg)
 				netwMsg->setSrcAddr(myNetwAddr);
 				netwMsg->setDestAddr(nextHop);
 				pCtrlInfo = netwMsg->removeControlInfo();
-				setDownControlInfo(netwMsg, arp->mapUnicastAddress(nextHop));
+				MACAddress nextHopMacAddr = arp->resolveMACAddress(nextHop);
+				if (nextHopMacAddr.isUnspecified())
+				    throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GlobalARP module.");
+				setDownControlInfo(netwMsg, nextHopMacAddr);
 				netwMsg->setNbHops(netwMsg->getNbHops()+1);
 				sendDown(netwMsg);
 				nbDataPacketsForwarded++;
@@ -267,7 +270,9 @@ void WiseRoute::handleUpperMsg(cMessage* msg)
 	else {
 		pkt->setIsFlood(0);
 		nbPureUnicastSent++;
-		nextHopMacAddr = arp->mapUnicastAddress(nextHopAddr);
+		nextHopMacAddr = arp->resolveMACAddress(nextHopAddr);
+        if (nextHopMacAddr.isUnspecified())
+            throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GlobalARP module.");
 	}
 	setDownControlInfo(pkt, nextHopMacAddr);
 	pkt->encapsulate(static_cast<cPacket*>(msg));
