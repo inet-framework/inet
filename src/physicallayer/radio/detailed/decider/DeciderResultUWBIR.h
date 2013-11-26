@@ -3,7 +3,6 @@
 
 #include <vector>
 
-#include "MiXiMDefs.h"
 #include "Decider.h"
 
 /**

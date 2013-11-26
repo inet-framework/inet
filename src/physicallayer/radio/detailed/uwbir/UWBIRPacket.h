@@ -23,7 +23,7 @@
 #include <string>
 #include <omnetpp.h>
 
-#include "MiXiMDefs.h"
+#include "INETDefs.h"
 
 /**
  * @brief Class that keeps track of the number of packets sent.

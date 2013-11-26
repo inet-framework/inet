@@ -28,8 +28,7 @@
 #include <vector>
 #include <utility>
 
-#include "MiXiMDefs.h"
-#include "Signal_.h"
+#include "DetailedRadioSignal.h"
 
 /**
  * @brief This class regroups static methods needed to generate

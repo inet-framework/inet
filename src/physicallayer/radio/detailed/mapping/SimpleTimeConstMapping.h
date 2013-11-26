@@ -21,7 +21,6 @@
 #ifndef _SIMPLETIMECONSTMAPPING_H
 #define _SIMPLETIMECONSTMAPPING_H
 
-#include "MiXiMDefs.h"
 #include "Mapping.h"
 
 /**

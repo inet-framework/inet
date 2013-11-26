@@ -1,6 +1,5 @@
 #include "DeciderUWBIREDSync.h"
-
-#include "MiXiMAirFrame.h"
+#include "DetailedRadioFrame.h"
 
 bool DeciderUWBIREDSync::initFromMap(const ParameterMap& params) {
     bool                         bInitSuccess = true;

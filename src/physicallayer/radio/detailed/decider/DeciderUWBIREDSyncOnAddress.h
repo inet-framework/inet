@@ -9,9 +9,9 @@
 #ifndef UWBIREDSYNCONADDRESS_H_
 #define UWBIREDSYNCONADDRESS_H_
 
-#include "MiXiMDefs.h"
-#include "SimpleAddress.h"
+#include "MACAddress.h"
 #include "DeciderUWBIRED.h"
+#include "DetailedRadioFrame.h"
 
 class Signal;
 class UWBIRRadio;

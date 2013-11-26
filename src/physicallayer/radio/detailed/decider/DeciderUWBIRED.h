@@ -12,13 +12,11 @@
 #include <vector>
 #include <map>
 
-#include "MiXiMDefs.h"
-#include "Signal_.h"
+#include "DetailedRadioSignal.h"
 #include "Mapping.h"
 #include "BaseDecider.h"
 #include "IEEE802154A.h"
 #include "UWBIRPacket.h"
-#include "MacToPhyInterface.h"
 
 class UWBIRRadio;
 class SimplifiedRadioFrame;

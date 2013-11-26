@@ -24,7 +24,6 @@
 #include <limits>
 
 #include "IEEE802154A.h"
-#include "MiXiMAirFrame.h"
 
 const double UWBIRIEEE802154APathlossModel::PL0 = 0.000040738; // -43.9 dB
 const double UWBIRIEEE802154APathlossModel::pathloss_exponent = 1.79;

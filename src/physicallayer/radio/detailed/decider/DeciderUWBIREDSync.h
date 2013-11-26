@@ -9,7 +9,6 @@
 #ifndef UWBIREDSYNC_H_
 #define UWBIREDSYNC_H_
 
-#include "MiXiMDefs.h"
 #include "Mapping.h"
 #include "DeciderUWBIRED.h"
 

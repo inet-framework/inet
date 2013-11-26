@@ -9,7 +9,6 @@
 #ifndef UWBIRRADIO_H_
 #define UWBIRRADIO_H_
 
-#include "MiXiMDefs.h"
 #include "PhyUtils.h"
 #include "UWBIRRadio.h"
 

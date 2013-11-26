@@ -1,9 +1,8 @@
 #include "DeciderUWBIRED.h"
 
 #include "UWBIRRadio.h"
-#include "AirFrameUWBIR_m.h"
+#include "UWBIRRadioFrame_m.h"
 #include "DeciderResultUWBIR.h"
-#include "MiXiMAirFrame.h"
 
 using std::map;
 using std::vector;

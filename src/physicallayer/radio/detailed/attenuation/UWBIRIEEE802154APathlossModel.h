@@ -21,9 +21,9 @@
 #ifndef _UWBIRIEEE802154APATHLOSSMODEL_H
 #define	_UWBIRIEEE802154APATHLOSSMODEL_H
 
-#include "MiXiMDefs.h"
 #include "AnalogueModel.h"
 #include "SimpleTimeConstMapping.h"
+#include "DetailedRadioFrame.h"
 
 /**
  * @brief This class implements the IEEE 802.15.4A Channel Model[1] in the MiXiM

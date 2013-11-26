@@ -22,9 +22,9 @@
 
 #include <string>
 
-#include "MiXiMDefs.h"
 #include "AnalogueModel.h"
 #include "Mapping.h"
+#include "DetailedRadioFrame.h"
 
 /**
  * @brief This AnalogueModel models implements the Ghassmezadeh stochastic UWB channel models.

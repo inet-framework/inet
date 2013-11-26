@@ -22,8 +22,7 @@
 #include <sstream>
 #include <omnetpp.h>
 
-#include "MiXiMDefs.h"
-#include "SimpleAddress.h"
+#include "Address.h"
 
 /**
  * @brief Class that keeps track of the number of packets sent.
