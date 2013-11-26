@@ -66,8 +66,8 @@ public:
 	virtual ~DeciderUWBIREDSync() {};
 
 protected:
-	virtual bool attemptSync(const airframe_ptr_t frame);
-	bool evaluateEnergy(const airframe_ptr_t frame, const AirFrameVector& syncVector) const;
+	virtual bool attemptSync(const DetailedRadioFrame* frame);
+	bool evaluateEnergy(const DetailedRadioFrame* frame, const AirFrameVector& syncVector) const;
 
 private:
 	simtime_t tmin;

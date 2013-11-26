@@ -17,7 +17,7 @@ bool DeciderUWBIREDSyncOnAddress::initFromMap(const ParameterMap& params) {
     return DeciderUWBIRED::initFromMap(params) && bInitSuccess;
 }
 
-bool DeciderUWBIREDSyncOnAddress::attemptSync(const airframe_ptr_t /*frame*/) {
+bool DeciderUWBIREDSyncOnAddress::attemptSync(const DetailedRadioFrame* /*frame*/) {
     if (!currentSignal.isProcessing())
         return false;
 

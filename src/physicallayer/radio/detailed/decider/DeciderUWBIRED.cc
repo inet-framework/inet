@@ -89,7 +89,7 @@ void DeciderUWBIRED::cancelProcessSignal() {
 	++nbCancelReceptions;
 }
 
-simtime_t DeciderUWBIRED::processSignalHeader(airframe_ptr_t frame) {
+simtime_t DeciderUWBIRED::processSignalHeader(DetailedRadioFrame* frame) {
 
 	int currState = uwbiface->getRadioState();
 
@@ -132,7 +132,7 @@ simtime_t DeciderUWBIRED::processSignalHeader(airframe_ptr_t frame) {
 }
 
 
-simtime_t DeciderUWBIRED::getNextSignalHandleTime(const airframe_ptr_t frame) const {
+simtime_t DeciderUWBIRED::getNextSignalHandleTime(const DetailedRadioFrame* frame) const {
     if (frame != currentSignal.first)
         return BaseDecider::getNextSignalHandleTime(frame);
 
@@ -149,7 +149,7 @@ simtime_t DeciderUWBIRED::getNextSignalHandleTime(const airframe_ptr_t frame) co
     return BaseDecider::getNextSignalHandleTime(frame);
 }
 
-bool DeciderUWBIRED::attemptSync(const airframe_ptr_t frame) {
+bool DeciderUWBIRED::attemptSync(const DetailedRadioFrame* frame) {
 	if (currentSignal.getInterferenceCnt() > 0)
 		return false; // do not accept interferers
 
@@ -176,7 +176,7 @@ bool DeciderUWBIRED::attemptSync(const airframe_ptr_t frame) {
 	}
 }
 
-DeciderResult* DeciderUWBIRED::createResult(const airframe_ptr_t frame) const {
+DeciderResult* DeciderUWBIRED::createResult(const DetailedRadioFrame* frame) const {
 	if (currentSignal.first == frame) {
 		++nbFinishTrackingFrames;
 		vector<bool>*           receivedBits   = new vector<bool>();
@@ -197,7 +197,7 @@ DeciderResult* DeciderUWBIRED::createResult(const airframe_ptr_t frame) const {
  * @brief Returns false if the packet is incorrect. If true,
  * the MAC layer must still compare bit values to validate the frame.
  */
-std::pair<bool, double> DeciderUWBIRED::decodePacket(const airframe_ptr_t frame, vector<bool> * receivedBits, const IEEE802154A::config& cfg) const {
+std::pair<bool, double> DeciderUWBIRED::decodePacket(const DetailedRadioFrame* frame, vector<bool> * receivedBits, const IEEE802154A::config& cfg) const {
 
 	simtime_t now, offset;
 	simtime_t aSymbol, shift, burst;
@@ -305,7 +305,7 @@ pair<double, double> DeciderUWBIRED::integrateWindow( int                       
                                                     , simtime_t_cref             burst
                                                     , const AirFrameVector&      airFrameVector
                                                     , const ConstMapping *const  signalPower
-                                                    , const airframe_ptr_t       /*frame*/
+                                                    , const DetailedRadioFrame*       /*frame*/
                                                     , const IEEE802154A::config& cfg) {
 	std::pair<double, double>       energy = std::make_pair(0.0, 0.0); // first: stores SNIR, second: stores total captured window energy
 	vector<ConstMapping*>::iterator mappingIter;

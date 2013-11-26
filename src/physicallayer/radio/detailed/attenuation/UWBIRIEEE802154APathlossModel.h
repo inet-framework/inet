@@ -109,7 +109,7 @@ public:
     /*
      * @brief Applies the model to an incoming AirFrame's Signal.
      */
-    void filterSignal(airframe_ptr_t, const Coord&, const Coord&);
+    void filterSignal(DetailedRadioFrame*, const Coord&, const Coord&);
 
     /*@brief Utility function to use a Rayleigh random variable
      *

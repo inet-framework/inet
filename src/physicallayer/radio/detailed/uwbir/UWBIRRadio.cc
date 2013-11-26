@@ -159,7 +159,7 @@ bool UWBIRRadio::isRadioInRX() const {
     return iCurRS == RadioUWBIR::RX || iCurRS == RadioUWBIR::SYNC;
 }
 
-UWBIRRadio::airframe_ptr_t UWBIRRadio::encapsMsg(cPacket *macPkt)
+UWBIRRadio::DetailedRadioFrame* UWBIRRadio::encapsMsg(cPacket *macPkt)
 {
 	// the cMessage passed must be a MacPacket... but no cast needed here
 	// MacPkt* pkt = static_cast<MacPkt*>(msg);

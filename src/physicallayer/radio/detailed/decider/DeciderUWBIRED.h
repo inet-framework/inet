@@ -151,9 +151,9 @@ protected:
 	 * @param frame The current frame which is in processing.
 	 * @return The next scheduler handle time.
 	 */
-	virtual simtime_t getNextSignalHandleTime(const airframe_ptr_t frame) const;
+	virtual simtime_t getNextSignalHandleTime(const DetailedRadioFrame* frame) const;
 
-	virtual simtime_t processSignalHeader(airframe_ptr_t frame);
+	virtual simtime_t processSignalHeader(DetailedRadioFrame* frame);
 
 	/**
 	 * @brief Checks if the passed completed AirFrame was received correctly.
@@ -162,11 +162,11 @@ protected:
 	 *
 	 * @return  The result of the decider for the passed AirFrame.
 	 */
-	virtual DeciderResult* createResult(const airframe_ptr_t frame) const;
+	virtual DeciderResult* createResult(const DetailedRadioFrame* frame) const;
 
-	std::pair<bool, double> decodePacket(const airframe_ptr_t frame, std::vector<bool>* receivedBits, const IEEE802154A::config& cfg) const;
+	std::pair<bool, double> decodePacket(const DetailedRadioFrame* frame, std::vector<bool>* receivedBits, const IEEE802154A::config& cfg) const;
 
-	virtual bool attemptSync(const airframe_ptr_t frame);
+	virtual bool attemptSync(const DetailedRadioFrame* frame);
 
 	// first value is energy from signal, other value is total window energy
 	static
@@ -175,7 +175,7 @@ protected:
 	                                         , simtime_t_cref             burst
 	                                         , const AirFrameVector&      airFrameVector
 	                                         , const ConstMapping *const  signalPower
-	                                         , const airframe_ptr_t       frame
+	                                         , const DetailedRadioFrame*       frame
 	                                         , const IEEE802154A::config& cfg);
 
 private:

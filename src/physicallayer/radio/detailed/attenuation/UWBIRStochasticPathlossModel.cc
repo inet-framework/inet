@@ -100,7 +100,7 @@ bool UWBIRStochasticPathlossModel::initFromMap(const ParameterMap& params) {
     return AnalogueModel::initFromMap(params) && bInitSuccess;
 }
 
-void UWBIRStochasticPathlossModel::filterSignal(airframe_ptr_t frame, const Coord& sendersPos, const Coord& receiverPos)
+void UWBIRStochasticPathlossModel::filterSignal(DetailedRadioFrame* frame, const Coord& sendersPos, const Coord& receiverPos)
 {
 	if (isEnabled) {
 		Signal& signal = frame->getSignal();

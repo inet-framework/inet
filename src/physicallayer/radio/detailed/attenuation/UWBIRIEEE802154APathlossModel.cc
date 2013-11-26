@@ -215,7 +215,7 @@ bool UWBIRIEEE802154APathlossModel::initFromMap(const ParameterMap& params) {
     return AnalogueModel::initFromMap(params) && bInitSuccess;
 }
 
-void UWBIRIEEE802154APathlossModel::filterSignal(airframe_ptr_t frame, const Coord& sendersPos, const Coord& receiverPos)
+void UWBIRIEEE802154APathlossModel::filterSignal(DetailedRadioFrame* frame, const Coord& sendersPos, const Coord& receiverPos)
 {
     Signal& signal = frame->getSignal();
     // We create a new "fake" txPower to add multipath taps
