@@ -80,14 +80,13 @@ protected:
 
 public:
 	/** @brief Signal for emitting UWBIR packets. */
-	const static simsignalwrap_t catUWBIRPacketSignal;
+	const static simsignal_t catUWBIRPacketSignal;
 	const static double          noiseVariance; // P=-116.9 dBW // 404.34E-12;   v²=s²=4kb T R B (T=293 K)
 	const static double          peakPulsePower; //1.3E-3 W peak power of pulse to reach  0dBm during burst; // peak instantaneous power of the transmitted pulse (A=0.6V) : 7E-3 W. But peak limit is 0 dBm
 
 	DeciderUWBIRED( DeciderToPhyInterface* phy
 	              , double                 sensitivity
-	              , int                    myIndex
-	              , bool                   debug );
+	              , int                    myIndex);
 
 	/** @brief Initialize the decider from XML map data.
 	 *
@@ -118,8 +117,9 @@ public:
 
 	/**@brief Control message kinds specific to DeciderUWBIRED. Currently defines a
 	 * message kind that informs the MAC of a successful SYNC event at PHY layer. */
+	// TODO: use signals instead
 	enum UWBIRED_CTRL_KIND {
-	    SYNC_SUCCESS=MacToPhyInterface::LAST_BASE_PHY_KIND+1,
+	    SYNC_SUCCESS = 33333,
 	    SYNC_FAILURE,
 	    // add other control messages kinds here (from decider to mac, e.g. CCA)
 	};

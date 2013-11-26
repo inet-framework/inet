@@ -48,7 +48,7 @@ public:
     /** @brief Constructor*/
     Packet(long bitLength, long rcvd=0, long sent=0) :
 	 cObject(), nbPacketsReceived(rcvd), nbPacketsReceivedNoRS(rcvd),
-	 nbPacketsSent(sent), packetBitLength(bitLength), sent(true), host(0) {
+	 nbPacketsSent(sent), packetBitLength(bitLength), sent(true), host() {
     };
 
     double getNbPacketsReceived() const  {

@@ -46,9 +46,8 @@ class INET_API DeciderUWBIREDSync: public DeciderUWBIRED {
 public:
 	DeciderUWBIREDSync( DeciderToPhyInterface* phy
 	                  , double                 sensitivity
-	                  , int                    myIndex
-	                  , bool                   debug )
-		: DeciderUWBIRED(phy, sensitivity, myIndex, debug)
+	                  , int                    myIndex)
+		: DeciderUWBIRED(phy, sensitivity, myIndex)
 		, tmin()
 	{}
 

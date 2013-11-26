@@ -10,13 +10,12 @@ using std::pair;
 
 const double          DeciderUWBIRED::noiseVariance        = 101.085E-12; // P=-116.9 dBW // 404.34E-12;   v²=s²=4kb T R B (T=293 K)
 const double          DeciderUWBIRED::peakPulsePower       = 1.3E-3; //1.3E-3 W peak power of pulse to reach  0dBm during burst; // peak instantaneous power of the transmitted pulse (A=0.6V) : 7E-3 W. But peak limit is 0 dBm
-const simsignalwrap_t DeciderUWBIRED::catUWBIRPacketSignal = simsignalwrap_t(MIXIM_SIGNAL_UWBIRPACKET_NAME);
+const simsignal_t     DeciderUWBIRED::catUWBIRPacketSignal = cComponent::registerSignal("org.mixim.modules.utility.uwbirpacket");
 
 DeciderUWBIRED::DeciderUWBIRED( DeciderToPhyInterface* phy
               , double                 sensitivity
-              , int                    myIndex
-              , bool                   debug )
-    : BaseDecider(phy, sensitivity, myIndex, debug)
+              , int                    myIndex)
+    : BaseDecider(phy, sensitivity, myIndex)
     , trace(false), stats(false)
     , nbFailedSyncs(0), nbSuccessfulSyncs(0)
     , nbSymbols(0), allThresholds(0)
@@ -78,8 +77,6 @@ bool DeciderUWBIRED::initFromMap(const ParameterMap& params) {
         alwaysFailOnDataInterference = false;
     }
 
-    catUWBIRPacketSignal.initialize();
-
     return BaseDecider::initFromMap(params) && bInitSuccess;
 }
 
@@ -92,7 +89,7 @@ simtime_t DeciderUWBIRED::processSignalHeader(DetailedRadioFrame* frame) {
 
 	int currState = uwbiface->getRadioState();
 
-	if (currentSignal.isProcessing() && currState == RadioUWBIR::SYNC) {
+	if (currentSignal.isProcessing() && currState == RadioUWBIR::RADIO_MODE_SYNC) {
 		// We are not tracking a signal currently.
 		// Can we synchronize on this one ?
 
@@ -123,8 +120,7 @@ simtime_t DeciderUWBIRED::processSignalHeader(DetailedRadioFrame* frame) {
 
 			currentSignal.finishProcessing();
 		}
-		uwbiface->emit(catUWBIRPacketSignal, &packet);
-
+		// TODO: this is a weird way to emit some statistics: uwbiface->emit(catUWBIRPacketSignal, &packet);
 	}
 
 	return frame->getSignal().getReceptionEnd();
@@ -179,7 +175,7 @@ DeciderResult* DeciderUWBIRED::createResult(const DetailedRadioFrame* frame) con
 	if (currentSignal.first == frame) {
 		++nbFinishTrackingFrames;
 		vector<bool>*           receivedBits   = new vector<bool>();
-		AirFrameUWBIR*          frameuwb       = check_and_cast<AirFrameUWBIR*>(frame);
+		const UWBIRRadioFrame*    frameuwb       = check_and_cast<const UWBIRRadioFrame*>(frame);
 		std::pair<bool, double> pairCorrectSnr = decodePacket(frame, receivedBits, frameuwb->getCfg());
 		// we cannot compute bit error rate here
 		// so we send the packet to the MAC layer which will compare receivedBits

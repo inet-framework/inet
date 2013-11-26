@@ -60,10 +60,9 @@ private:
 public:
 	DeciderUWBIREDSyncOnAddress( DeciderToPhyInterface* phy
 	                           , double                 sensitivity
-	                           , int                    myIndex
-	                           , bool                   debug )
-		: DeciderUWBIRED(phy, sensitivity, myIndex, debug)
-		, syncAddress()
+	                           , int                    myIndex)
+		: DeciderUWBIRED(phy, sensitivity, myIndex),
+		  syncAddress()
 	{}
 
 	/** @brief Initialize the decider from XML map data.

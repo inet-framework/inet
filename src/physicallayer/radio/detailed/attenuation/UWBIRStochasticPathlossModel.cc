@@ -137,7 +137,7 @@ void UWBIRStochasticPathlossModel::filterSignal(DetailedRadioFrame* frame, const
 }
 
 double UWBIRStochasticPathlossModel::getNarrowBandFreeSpacePathloss(double fc, double distance) {
-    const double attenuation = 4*M_PI*distance*fc/BaseWorldUtility::speedOfLight;
+    const double attenuation = 4*M_PI*distance*fc/SPEED_OF_LIGHT;
     return 1.0/(attenuation*attenuation);
 }
 
