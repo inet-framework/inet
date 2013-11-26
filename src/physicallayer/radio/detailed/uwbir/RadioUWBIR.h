@@ -9,6 +9,7 @@
 #ifndef UWBIRRADIO_H_
 #define UWBIRRADIO_H_
 
+#include "IRadio.h"
 #include "PhyUtils.h"
 #include "UWBIRRadio.h"
 
@@ -19,20 +20,21 @@
  * The decider tells the uwb phy layer when it locks on a frame, and the uwb phy layer
  * then sets the uwb radio state into RX mode.
  * This is done through a private method so that the MAC can not change these states.
- * This is why this class is friend with UWBIRRadio.
+ * This is why this class is friend with PhyLayerUWBIR.
  *
  * @ingroup ieee802154a
  * @ingroup phyLayer
  */
-
+// TODO: merge into UWBIRRadio
 class INET_API RadioUWBIR: public MiximRadio {
 	friend class UWBIRRadio;
 
 public:
 
-	enum UWBIRRadioStates {
+	// KLUDGE: TODO: eliminate this enum by adding a separate state variable
+	enum UWBIRRadioMode {
 		/* receiving state*/
-		 SYNC = MiximRadio::NUM_RADIO_STATES,
+		 RADIO_MODE_SYNC = IRadio::RADIO_MODE_SWITCHING + 1,
 		 UWBIR_NUM_RADIO_STATES
 	};
 
@@ -56,12 +58,12 @@ public:
 	virtual simtime_t switchTo(int newState, simtime_t_cref now) {
 		// state must be one of sleep, receive or transmit (not sync)
 		//assert(newState != Radio::SYNC);
-		if(newState == state || (newState == RadioUWBIR::RX && state == RadioUWBIR::SYNC)) {
+		if(newState == state || (newState == IRadio::RADIO_MODE_RECEIVER && state == RadioUWBIR::RADIO_MODE_SYNC)) {
 			return -1; // nothing to do
 		} else {
-			if(newState == RadioUWBIR::RX) {
+			if(newState == IRadio::RADIO_MODE_RECEIVER) {
 				// prevent entering "frame reception" immediately
-				newState = RadioUWBIR::SYNC;
+				newState = RadioUWBIR::RADIO_MODE_SYNC;
 			}
 			return reallySwitchTo(newState, now);
 		}
@@ -71,7 +73,7 @@ public:
 		// set the nextState to the newState and the current state to SWITCHING
 		nextState = newState;
 		int lastState = state;
-		state = RadioUWBIR::SWITCHING;
+		state = IRadio::RADIO_MODE_SWITCHING;
 		radioStates.record(state);
 		// make entry to RSAM
 		makeRSAMEntry(now, state);
@@ -87,7 +89,7 @@ protected:
 
 	virtual Argument::mapped_type_cref mapStateToAtt(int state)
 	{
-		if (state == RadioUWBIR::RX || state == RadioUWBIR::SYNC) {
+		if (state == IRadio::RADIO_MODE_RECEIVER || state == RadioUWBIR::RADIO_MODE_SYNC) {
 			return minAtt;
 		} else {
 			return maxAtt;
@@ -100,9 +102,9 @@ private:
 	 * the radio has locked on a frame and is attempting reception.
 	 */
 	virtual void startReceivingFrame(simtime_t_cref now) {
-		assert(state == RadioUWBIR::SYNC);
-		state = RadioUWBIR::SWITCHING;
-		nextState = RadioUWBIR::RX;
+		assert(state == RadioUWBIR::RADIO_MODE_SYNC);
+		state = IRadio::RADIO_MODE_SWITCHING;
+		nextState = IRadio::RADIO_MODE_RECEIVER;
 		endSwitch(now);
 	}
 	/**
@@ -111,9 +113,9 @@ private:
 		 * synchronize on incoming frames.
 		 */
 	virtual void finishReceivingFrame(simtime_t_cref now) {
-		assert(state == RadioUWBIR::RX);
-		state = RadioUWBIR::SWITCHING;
-		nextState = RadioUWBIR::SYNC;
+		assert(state == IRadio::RADIO_MODE_RECEIVER);
+		state = IRadio::RADIO_MODE_SWITCHING;
+		nextState = RadioUWBIR::RADIO_MODE_SYNC;
 		endSwitch(now);
 	}
 
