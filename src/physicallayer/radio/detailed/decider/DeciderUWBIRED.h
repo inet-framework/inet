@@ -65,7 +65,7 @@ private:
 	mutable double nbSymbols, allThresholds;
 	double vsignal2, pulseSnrs;
 protected:
-	typedef std::map<Signal*, int> tSignalMap;
+	typedef std::map<DetailedRadioSignal*, int> tSignalMap;
 	double syncThreshold;
 	bool syncAlwaysSucceeds;
 	bool channelSensing;

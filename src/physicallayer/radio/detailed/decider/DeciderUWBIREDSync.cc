@@ -31,7 +31,7 @@ bool DeciderUWBIREDSync::attemptSync(const DetailedRadioFrame* frame) {
 	bool search = true;
 	simtime_t latestSyncStart = frame->getSignal().getReceptionStart() + IEEE802154A::mandatory_preambleLength - tmin;
 	DetailedRadioFrame* af = syncVector.front();
-	Signal & aSignal = af->getSignal();
+	DetailedRadioSignal & aSignal = af->getSignal();
 
 	while(search &&
 			!(aSignal.getReceptionStart() == frame->getSignal().getReceptionStart() &&
@@ -49,7 +49,7 @@ bool DeciderUWBIREDSync::attemptSync(const DetailedRadioFrame* frame) {
 
 	if(search && it != syncVector.end()) {
 		// sync is possible but there is a frame beginning after our sync start
-		Signal & nextSignal = (*it)->getSignal();
+	    DetailedRadioSignal & nextSignal = (*it)->getSignal();
 		if(nextSignal.getReceptionStart() <
 				aSignal.getReceptionEnd() + tmin) {
 			// CASE: sync is not possible because next frame starts too early

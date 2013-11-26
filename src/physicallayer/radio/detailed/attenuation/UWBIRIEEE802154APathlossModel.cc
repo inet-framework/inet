@@ -217,7 +217,7 @@ bool UWBIRIEEE802154APathlossModel::initFromMap(const ParameterMap& params) {
 
 void UWBIRIEEE802154APathlossModel::filterSignal(DetailedRadioFrame* frame, const Coord& sendersPos, const Coord& receiverPos)
 {
-    Signal& signal = frame->getSignal();
+    DetailedRadioSignal& signal = frame->getSignal();
     // We create a new "fake" txPower to add multipath taps
     // and then attenuation is applied to all pulses.
 

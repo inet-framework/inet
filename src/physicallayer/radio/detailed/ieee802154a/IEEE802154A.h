@@ -147,7 +147,7 @@ class INET_API IEEE802154A
                 double centerFrequency;
         };
 
-        typedef std::pair<Signal *, std::vector<bool> *> signalAndData;
+        typedef std::pair<DetailedRadioSignal *, std::vector<bool> *> signalAndData;
 
         /* @brief Sets the configuration of the IEEE802.15.4A standard.
          *  Use this (and the struct config) to implement optional modes of the standard. */
@@ -183,7 +183,7 @@ class INET_API IEEE802154A
         static void generateBurst(Mapping* mapping, Argument* arg, simtime_t_cref burstStart, short polarity);
         static void generatePulse(Mapping* mapping, Argument* arg, short polarity, double peak = IEEE802154A::maxPulse,
                 simtime_t_cref chip = IEEE802154A::mandatory_pulse);
-        static void setBitRate(Signal* s);
+        static void setBitRate(DetailedRadioSignal* s);
         static int s(int n);
 
     public:

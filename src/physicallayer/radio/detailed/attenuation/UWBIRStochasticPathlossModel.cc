@@ -103,7 +103,7 @@ bool UWBIRStochasticPathlossModel::initFromMap(const ParameterMap& params) {
 void UWBIRStochasticPathlossModel::filterSignal(DetailedRadioFrame* frame, const Coord& sendersPos, const Coord& receiverPos)
 {
 	if (isEnabled) {
-		Signal& signal = frame->getSignal();
+		DetailedRadioSignal& signal = frame->getSignal();
 		// Initialize objects and variables
 		TimeMapping<Linear>* attMapping = new TimeMapping<Linear> ();
 		Argument arg;

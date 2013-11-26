@@ -153,7 +153,7 @@ IEEE802154A::signalAndData IEEE802154A::generateIEEE802154AUWBSignal(
 	IEEE802154A::signalStart = SIMTIME_DBL(signalStart);  // use the signalStart time value as a global offset for all Mapping values
 	simtime_t signalDuration = cfg.preambleLength;
 	signalDuration += static_cast<double> (nbBits) * cfg.data_symbol_duration;
-	Signal* s = new Signal(signalStart, signalDuration);
+	DetailedRadioSignal* s = new DetailedRadioSignal(signalStart, signalDuration);
 	vector<bool>* bitValues = new vector<bool> ();
 
 	signalAndData res;
@@ -258,7 +258,7 @@ void IEEE802154A::generateBurst(Mapping* mapping, Argument* arg,
 	}
 }
 
-void IEEE802154A::setBitRate(Signal* s) {
+void IEEE802154A::setBitRate(DetailedRadioSignal* s) {
 	Argument arg = Argument();
 	// set a constant value for bitrate
 	TimeMapping<Linear>* bitrate = new TimeMapping<Linear> ();

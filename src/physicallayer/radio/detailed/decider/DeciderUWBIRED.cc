@@ -204,14 +204,14 @@ std::pair<bool, double> DeciderUWBIRED::decodePacket(const DetailedRadioFrame* f
 
 	double packetSNIR    = 0;
 
-	const Signal&              FrameSignal = frame->getSignal();
+	const DetailedRadioSignal&              FrameSignal = frame->getSignal();
 	const ConstMapping*        signalPower = NULL;
 	AirFrameVector             airFrameVector;
 	// Retrieve all potentially colliding airFrames
 	getChannelInfo(FrameSignal.getReceptionStart(), FrameSignal.getReceptionEnd(), airFrameVector);
 
 	for (AirFrameVector::const_iterator airFrameIter = airFrameVector.begin(); airFrameIter != airFrameVector.end(); ++airFrameIter) {
-		Signal&                   aSignal   = (*airFrameIter)->getSignal();
+		DetailedRadioSignal&                   aSignal   = (*airFrameIter)->getSignal();
 		const ConstMapping *const currPower = aSignal.getReceivingPower();
 		if (  aSignal.getReceptionStart() == FrameSignal.getReceptionStart()
 		   && aSignal.getDuration()       == FrameSignal.getDuration()) {
@@ -332,7 +332,7 @@ pair<double, double> DeciderUWBIRED::integrateWindow( int                       
 		arg.setTime(now);
 		// consider all interferers at this point in time
 		for (AirFrameVector::const_iterator airFrameIter = airFrameVector.begin(); airFrameIter != airFrameVector.end(); ++airFrameIter) {
-			Signal&                   aSignal   = (*airFrameIter)->getSignal();
+			DetailedRadioSignal&                   aSignal   = (*airFrameIter)->getSignal();
 			const ConstMapping *const currPower = aSignal.getReceivingPower();
 			double                    measure   = currPower->getValue(arg)*peakPulsePower; //TODO: de-normalize (peakPulsePower should be in AirFrame or in Signal, to be set at run-time)
 //			measure = measure * uniform(0, +1); // random point of Efield at sampling (due to pulse waveform and self interference)
