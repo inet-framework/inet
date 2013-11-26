@@ -43,10 +43,10 @@ import org.mixim.base.phyLayer.BasePhyLayer;
 // <a href="http://portal.acm.org/citation.cfm?id=1537714">http://portal.acm.org/citation.cfm?id=1537714</a>.
 //
 // @author Jérôme Rousselot
-simple PhyLayerUWBIR extends BasePhyLayer
+simple UWBIRRadio extends BasePhyLayer
 {
     parameters:
-        @class(PhyLayerUWBIR);
+        @class(UWBIRRadio);
         @display("i=device/antennatower");
 }
 

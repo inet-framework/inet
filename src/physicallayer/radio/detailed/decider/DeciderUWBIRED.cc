@@ -1,6 +1,6 @@
 #include "DeciderUWBIRED.h"
 
-#include "PhyLayerUWBIR.h"
+#include "UWBIRRadio.h"
 #include "AirFrameUWBIR_m.h"
 #include "DeciderResultUWBIR.h"
 #include "MiXiMAirFrame.h"
@@ -28,7 +28,7 @@ DeciderUWBIRED::DeciderUWBIRED( DeciderToPhyInterface* phy
     , packet()
     , receivedPulses()
     , syncThresholds()
-    , uwbiface(dynamic_cast<PhyLayerUWBIR*>(phy))
+    , uwbiface(dynamic_cast<UWBIRRadio*>(phy))
     , nbCancelReceptions(0)
     , nbFinishTrackingFrames(0)
 {

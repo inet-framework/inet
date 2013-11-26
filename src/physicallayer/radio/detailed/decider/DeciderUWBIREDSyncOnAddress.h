@@ -14,7 +14,7 @@
 #include "DeciderUWBIRED.h"
 
 class Signal;
-class PhyLayerUWBIR;
+class UWBIRRadio;
 
 /**
  * @brief  this Decider models a non-coherent energy-detection receiver

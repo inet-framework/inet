@@ -13,7 +13,7 @@
 #include "Mapping.h"
 #include "DeciderUWBIRED.h"
 
-class PhyLayerUWBIR;
+class UWBIRRadio;
 class Signal;
 
 /**

@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*- ********************************************************
- * file:        PhyLayerUWBIR.h
+ * file:        UWBIRRadio.h
  *
  * author:      Jerome Rousselot <jerome.rousselot@csem.ch>
  *
@@ -113,19 +113,19 @@ class DeciderUWBIREDSync;
  * @ingroup phyLayer
  * @ingroup power
  */
-class MIXIM_API PhyLayerUWBIR : public PhyLayerBattery
+class MIXIM_API UWBIRRadio : public PhyLayerBattery
 {
 	friend class DeciderUWBIRED;
 private:
 	/** @brief Copy constructor is not allowed.
 	 */
-	PhyLayerUWBIR(const PhyLayerUWBIR&);
+	UWBIRRadio(const UWBIRRadio&);
 	/** @brief Assignment operator is not allowed.
 	 */
-	PhyLayerUWBIR& operator=(const PhyLayerUWBIR&);
+	UWBIRRadio& operator=(const UWBIRRadio&);
 
 public:
-	PhyLayerUWBIR()
+	UWBIRRadio()
 		: PhyLayerBattery()
 		, uwbradio(NULL)
 		, syncCurrent(0)

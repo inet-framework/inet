@@ -11,7 +11,7 @@
 
 #include "MiXiMDefs.h"
 #include "PhyUtils.h"
-#include "PhyLayerUWBIR.h"
+#include "UWBIRRadio.h"
 
 /**
  * @brief This class extends the basic radio model.
@@ -20,14 +20,14 @@
  * The decider tells the uwb phy layer when it locks on a frame, and the uwb phy layer
  * then sets the uwb radio state into RX mode.
  * This is done through a private method so that the MAC can not change these states.
- * This is why this class is friend with PhyLayerUWBIR.
+ * This is why this class is friend with UWBIRRadio.
  *
  * @ingroup ieee802154a
  * @ingroup phyLayer
  */
 
 class MIXIM_API RadioUWBIR: public MiximRadio {
-	friend class PhyLayerUWBIR;
+	friend class UWBIRRadio;
 
 public:
 

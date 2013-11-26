@@ -1,4 +1,4 @@
-#include "PhyLayerUWBIR.h"
+#include "UWBIRRadio.h"
 
 #include <cassert>
 
@@ -10,13 +10,13 @@
 #include "UWBIRStochasticPathlossModel.h"
 #include "UWBIRIEEE802154APathlossModel.h"
 
-Define_Module(PhyLayerUWBIR);
+Define_Module(UWBIRRadio);
 
-//t_dynamic_expression_value (PhyLayerUWBIR::*ghassemzadehNLOSFPtr) (cComponent *context, t_dynamic_expression_value argv[], int argc) = &ghassemzadehNLOSFunc;
-PhyLayerUWBIR::fptr ghassemzadehNLOSFPtr = &PhyLayerUWBIR::ghassemzadehNLOSFunc;
+//t_dynamic_expression_value (UWBIRRadio::*ghassemzadehNLOSFPtr) (cComponent *context, t_dynamic_expression_value argv[], int argc) = &ghassemzadehNLOSFunc;
+UWBIRRadio::fptr ghassemzadehNLOSFPtr = &UWBIRRadio::ghassemzadehNLOSFunc;
 Define_NED_Function(ghassemzadehNLOSFPtr, "xml ghassemzadehNLOS()");
 
-void PhyLayerUWBIR::initialize(int stage) {
+void UWBIRRadio::initialize(int stage) {
     PhyLayerBattery::initialize(stage);
 	if (stage == 0) {
 		/* parameters belong to the NIC, not just phy layer
@@ -29,7 +29,7 @@ void PhyLayerUWBIR::initialize(int stage) {
 	}
 }
 
-MiximRadio* PhyLayerUWBIR::initializeRadio() const {
+MiximRadio* UWBIRRadio::initializeRadio() const {
 	int    initialRadioState = par("initialRadioState"); //readPar("initalRadioState", (int) RadioUWBIR::SYNC);
 	double radioMinAtt       = readPar("radioMinAtt", 1.0);
 	double radioMaxAtt       = readPar("radioMaxAtt", 0.0);
@@ -56,7 +56,7 @@ MiximRadio* PhyLayerUWBIR::initializeRadio() const {
 	return uwbradio;
 }
 
-AnalogueModel* PhyLayerUWBIR::getAnalogueModelFromName(const std::string& name, ParameterMap& params) const {
+AnalogueModel* UWBIRRadio::getAnalogueModelFromName(const std::string& name, ParameterMap& params) const {
 	if (name == "UWBIRStochasticPathlossModel")
 		return createAnalogueModel<UWBIRStochasticPathlossModel>(params);
 
@@ -66,7 +66,7 @@ AnalogueModel* PhyLayerUWBIR::getAnalogueModelFromName(const std::string& name, 
 	return PhyLayerBattery::getAnalogueModelFromName(name, params);
 }
 
-Decider* PhyLayerUWBIR::getDeciderFromName(const std::string& name, ParameterMap& params) {
+Decider* UWBIRRadio::getDeciderFromName(const std::string& name, ParameterMap& params) {
 	if (name == "DeciderUWBIREDSyncOnAddress") {
 	    protocolId = IEEE_802154_UWB;
 		return createDecider<DeciderUWBIREDSyncOnAddress>(params);;
@@ -83,7 +83,7 @@ Decider* PhyLayerUWBIR::getDeciderFromName(const std::string& name, ParameterMap
 	return PhyLayerBattery::getDeciderFromName(name, params);
 }
 
-void PhyLayerUWBIR::setSwitchingCurrent(int from, int to) {
+void UWBIRRadio::setSwitchingCurrent(int from, int to) {
 	int    act     = SWITCHING_ACCT;
 	double current = 0;
 
@@ -129,7 +129,7 @@ void PhyLayerUWBIR::setSwitchingCurrent(int from, int to) {
 	MiximBatteryAccess::drawCurrent(current, act);
 }
 
-void PhyLayerUWBIR::setRadioCurrent(int rs) {
+void UWBIRRadio::setRadioCurrent(int rs) {
 	switch(rs) {
         case RadioUWBIR::SYNC:
             MiximBatteryAccess::drawCurrent(syncCurrent, SYNC_ACCT);
@@ -143,7 +143,7 @@ void PhyLayerUWBIR::setRadioCurrent(int rs) {
 	}
 }
 
-simtime_t PhyLayerUWBIR::setRadioState(int rs) {
+simtime_t UWBIRRadio::setRadioState(int rs) {
 	int prevState = radio->getCurrentState();
 
 	if(prevState == RadioUWBIR::RX && rs != RadioUWBIR::RX && rs != RadioUWBIR::SYNC) {
@@ -153,13 +153,13 @@ simtime_t PhyLayerUWBIR::setRadioState(int rs) {
 	return PhyLayerBattery::setRadioState(rs);
 }
 
-bool PhyLayerUWBIR::isRadioInRX() const {
+bool UWBIRRadio::isRadioInRX() const {
     const int iCurRS = getRadioState();
 
     return iCurRS == RadioUWBIR::RX || iCurRS == RadioUWBIR::SYNC;
 }
 
-PhyLayerUWBIR::airframe_ptr_t PhyLayerUWBIR::encapsMsg(cPacket *macPkt)
+UWBIRRadio::airframe_ptr_t UWBIRRadio::encapsMsg(cPacket *macPkt)
 {
 	// the cMessage passed must be a MacPacket... but no cast needed here
 	// MacPkt* pkt = static_cast<MacPkt*>(msg);
@@ -211,7 +211,7 @@ PhyLayerUWBIR::airframe_ptr_t PhyLayerUWBIR::encapsMsg(cPacket *macPkt)
 }
 
 
-void PhyLayerUWBIR::finish() {
+void UWBIRRadio::finish() {
 	PhyLayerBattery::finish();
 }
 

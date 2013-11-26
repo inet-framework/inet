@@ -20,7 +20,7 @@
 #include "UWBIRPacket.h"
 #include "MacToPhyInterface.h"
 
-class PhyLayerUWBIR;
+class UWBIRRadio;
 class SimplifiedRadioFrame;
 
 /**
@@ -74,7 +74,7 @@ protected:
 	UWBIRPacket packet;
 	mutable cOutVector receivedPulses;
 	cOutVector syncThresholds;
-	PhyLayerUWBIR* uwbiface;
+	UWBIRRadio* uwbiface;
 	int nbCancelReceptions;
 	mutable int nbFinishTrackingFrames;
 
