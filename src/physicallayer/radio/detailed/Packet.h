@@ -42,7 +42,7 @@ protected:
     /** @brief The size of each of the received and sent packet.*/
     long             packetBitLength;
     bool             sent;
-    LAddress::L3Type host;
+    Address host;
 
 public:
 
@@ -92,11 +92,11 @@ public:
     	return packetBitLength;
     }
 
-    void setHost(const LAddress::L3Type& h) {
+    void setHost(const Address& h) {
     	host = h;
     }
 
-    const LAddress::L3Type& getHost() const {
+    const Address& getHost() const {
     	return host;
     }
 

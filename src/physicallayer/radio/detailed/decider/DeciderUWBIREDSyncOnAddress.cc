@@ -8,7 +8,7 @@ bool DeciderUWBIREDSyncOnAddress::initFromMap(const ParameterMap& params) {
     bool                         bInitSuccess = true;
     ParameterMap::const_iterator it           = params.find("addr");
     if(it != params.end()) {
-        syncAddress = LAddress::L2Type(ParameterMap::mapped_type(it->second).longValue());
+        syncAddress = MACAddress(ParameterMap::mapped_type(it->second).longValue());
     }
     else {
         bInitSuccess = false;

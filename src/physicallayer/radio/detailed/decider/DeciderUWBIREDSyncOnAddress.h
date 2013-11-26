@@ -79,7 +79,7 @@ public:
 	virtual bool attemptSync(const DetailedRadioFrame* frame);
 
 protected:
-	LAddress::L2Type syncAddress;
+	MACAddress syncAddress;
 };
 
 #endif /* UWBIREDSYNCONADDRESS_H_ */
