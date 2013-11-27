@@ -46,8 +46,8 @@ class DHCPLease
 
 inline std::ostream& operator <<(std::ostream& os, DHCPLease obj)
 {
-    os << "xid:" << obj.xid << " ip:" << obj.ip << " subnet mask:" << obj.subnetMask
-            << " MAC:" << obj.mac << endl;
+    os << " IP: " << obj.ip << " with subnet mask: " << obj.subnetMask
+            << " to " << obj.mac;
     return os;
 }
 

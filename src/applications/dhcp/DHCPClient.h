@@ -62,7 +62,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         int numSent; // number of sent DHCP messages
         int numReceived; // number of received DHCP messages
         int responseTimeout; // timeout waiting for DHCPACKs, DHCPOFFERs
-        long xid; // transaction id; to associate messages and responses between a client and a server
+        unsigned int xid; // transaction id; to associate messages and responses between a client and a server
         ClientState clientState; // current state
 
         MACAddress macAddress; // client's MAC address

@@ -103,7 +103,7 @@ packet DHCPMessage
     int htype; // hardware address type, see ARP section in "Assigned Numbers" RFC; e.g., '1' = 10mb ethernet
     int hlen; // hardware address length (e.g.  '6' for 10mb ethernet)
     int hops; // client sets to zero, optionally used by relay agents when booting via a relay agent
-    long xid; // transaction ID, a random number chosen by the client, used by the client and server to associate messages and responses between a client and a server
+    unsigned int xid; // transaction ID, a random number chosen by the client, used by the client and server to associate messages and responses between a client and a server
     int secs; // filled in by client, seconds elapsed since client began address acquisition or renewal process
     long flags; // broadcast flag
     IPv4Address ciaddr; // client IP address; only filled in if client is in BOUND, RENEW or REBINDING state and can respond to ARP requests

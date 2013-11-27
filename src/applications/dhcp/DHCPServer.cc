@@ -88,7 +88,7 @@ void DHCPServer::openSocket()
     socket.setOutputGate(gate("udpOut"));
     socket.bind(serverPort);
     socket.setBroadcast(true);
-    EV_INFO << "DHCP server bound to port " << serverPort << " at " << ie << "." << endl;
+    EV_INFO << "DHCP server bound to port " << serverPort << " on " << ie->getName() << "." << endl;
 }
 
 void DHCPServer::receiveChangeNotification(int category, const cPolymorphic *details)
@@ -248,7 +248,7 @@ void DHCPServer::processPacket(DHCPMessage *packet)
                     }
                     else
                     {
-                        EV_ERROR << "Renewal/rebinding process failed: requested IP address " << lease->ip << " not found in the server's database!" << endl;
+                        EV_ERROR << "Renewal/rebinding process failed: requested IP address " << packet->getCiaddr() << " not found in the server's database!" << endl;
                         sendNAK(packet);
                     }
                 }

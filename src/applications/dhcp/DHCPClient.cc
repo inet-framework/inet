@@ -106,7 +106,7 @@ void DHCPClient::initialize(int stage)
         socket.bind(clientPort);
         socket.setBroadcast(true);
 
-        EV_DETAIL << "DHCP Client bound to port " << clientPort << " at " << ie->getName() << endl;
+        EV_DETAIL << "DHCP Client bound to port " << clientPort << " on " << ie->getName() << endl;
 
         // set client to idle state
         clientState = IDLE;
@@ -249,7 +249,6 @@ void DHCPClient::recordOffer(DHCPMessage * dhcpOffer)
     if (!dhcpOffer->getYiaddr().isUnspecified())
      {
          IPv4Address ip = dhcpOffer->getYiaddr();
-         EV_INFO << "DHCPOFFER arrived." << endl;
 
          //Byte serverIdB = dhcpOffer->getOptions().get(SERVER_ID);
          IPv4Address serverId = dhcpOffer->getOptions().getServerIdentifier();
@@ -273,7 +272,7 @@ void DHCPClient::recordLease(DHCPMessage * dhcpACK)
     if (!dhcpACK->getYiaddr().isUnspecified())
     {
         IPv4Address ip = dhcpACK->getYiaddr();
-        EV_DETAIL << "DHCPACK arrived with " << endl << "IP: " << ip << endl;
+        EV_DETAIL << "DHCPACK arrived with " << "IP: " << ip << endl;
 
         lease->subnetMask = dhcpACK->getOptions().getSubnetMask();
 
@@ -297,8 +296,6 @@ void DHCPClient::recordLease(DHCPMessage * dhcpACK)
 
 void DHCPClient::boundLease()
 {
-    EV_INFO << "Bound IP address." << endl;
-
     ie->ipv4Data()->setIPAddress(lease->ip);
     ie->ipv4Data()->setNetmask(lease->ip.getNetworkMask());
 
@@ -409,8 +406,8 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             }
             else if (msg->getOptions().getMessageType() == DHCPACK)
             {
-                EV_INFO << "The offered IP " << lease->ip << " is available. Bound it!" << endl;
                 recordLease(msg);
+                EV_INFO << "The offered IP " << lease->ip << " is available. Assign it to " << this->getParentModule()->getFullName() << endl;
                 cancelEvent(timerTo);
                 scheduleTimerT1();
                 scheduleTimerT2();
@@ -573,7 +570,7 @@ void DHCPClient::sendDiscover()
 {
     // setting the xid
     xid = intuniform(0, RAND_MAX);
-
+    //std::cout << xid << endl;
     DHCPMessage* discover = new DHCPMessage("DHCPDISCOVER");
     discover->setOp(BOOTREQUEST);
     discover->setByteLength(280); // DHCP Discover packet size;
