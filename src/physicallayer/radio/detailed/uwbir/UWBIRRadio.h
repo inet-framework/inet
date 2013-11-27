@@ -128,7 +128,6 @@ public:
 	UWBIRRadio()
 		: PhyLayerBattery()
 		, uwbradio(NULL)
-		, syncCurrent(0)
 	{}
 
 	virtual void finish();
@@ -188,17 +187,12 @@ protected:
 	virtual void switchRadioToRX() {
 		Enter_Method_Silent();
 		uwbradio->startReceivingFrame(simTime());
-		setRadioCurrent(radio->getCurrentState());
 	}
 
 	virtual void switchRadioToSync() {
 		Enter_Method_Silent();
 		uwbradio->finishReceivingFrame(simTime());
-		setRadioCurrent(radio->getCurrentState());
 	}
-
-	/** @brief The different currents in mA.*/
-	double syncCurrent;
 
 	/**
 	 * @brief Defines the power consuming activities (accounts) of
@@ -215,13 +209,6 @@ protected:
 	enum ProtocolIds {
 		IEEE_802154_UWB = 3200,
 	};
-
-	/** @brief Updates the actual current drawn for the passed state.*/
-	virtual void setRadioCurrent(int rs);
-
-	/** @brief Updates the actual current drawn for switching between
-	 * the passed states.*/
-	virtual void setSwitchingCurrent(int from, int to);
 
 public:
 	virtual void initialize(int stage);

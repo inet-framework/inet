@@ -19,12 +19,6 @@ Define_NED_Function(ghassemzadehNLOSFPtr, "xml ghassemzadehNLOS()");
 void UWBIRRadio::initialize(int stage) {
     PhyLayerBattery::initialize(stage);
 	if (stage == 0) {
-		/* parameters belong to the NIC, not just phy layer
-		 *
-		 * if/when variable transmit power is supported, txCurrent
-		 * should be specified as an xml table of available transmit
-		 * power levels and corresponding txCurrent */
-		syncCurrent = getNic()->par( "syncCurrent" ); // assume instantaneous transitions between rx and sync
 		uwbradio    = dynamic_cast<RadioUWBIR*>(radio);
 	}
 }
@@ -81,66 +75,6 @@ Decider* UWBIRRadio::getDeciderFromName(const std::string& name, ParameterMap& p
 	}
 
 	return PhyLayerBattery::getDeciderFromName(name, params);
-}
-
-void UWBIRRadio::setSwitchingCurrent(int from, int to) {
-	int    act     = SWITCHING_ACCT;
-	double current = 0;
-
-	if (from != to && (from == RadioUWBIR::SYNC || to == RadioUWBIR::SYNC)) {
-	    if (from == RadioUWBIR::SYNC) {
-	        switch(to) {
-                case RadioUWBIR::RX:
-                case RadioUWBIR::SLEEP:
-                    current = syncCurrent;
-                break;
-                case RadioUWBIR::TX:
-                    current = rxTxCurrent;
-                break;
-                // ! transitions between rx and sync should be immediate
-                default:
-                    opp_error("Unknown radio switch! From SYNC to %d", to);
-                break;
-	        }
-	    }
-	    else {
-            switch(from) {
-                case RadioUWBIR::RX:
-                    current = syncCurrent;
-                break;
-                case RadioUWBIR::SLEEP:
-                    current = setupRxCurrent;
-                break;
-                case RadioUWBIR::TX:
-                    current = txRxCurrent;
-                break;
-                // ! transitions between rx and sync should be immediate
-                default:
-                    opp_error("Unknown radio switch! From %d to SYNC", from);
-                break;
-            }
-	    }
-	}
-	else {
-	    PhyLayerBattery::setSwitchingCurrent(from, to);
-	    return;
-	}
-
-	MiximBatteryAccess::drawCurrent(current, act);
-}
-
-void UWBIRRadio::setRadioCurrent(int rs) {
-	switch(rs) {
-        case RadioUWBIR::SYNC:
-            MiximBatteryAccess::drawCurrent(syncCurrent, SYNC_ACCT);
-            break;
-        case RadioUWBIR::SWITCHING:
-            // do nothing here
-            break;
-        default:
-            PhyLayerBattery::setRadioCurrent(rs);
-            break;
-	}
 }
 
 simtime_t UWBIRRadio::setRadioState(int rs) {
