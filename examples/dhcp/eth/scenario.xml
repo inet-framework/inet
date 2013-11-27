@@ -1,0 +1,16 @@
+ 
+<scenario>
+    <at t="1.0">
+        <tell module="lifecycleController" target="client" operation="NodeShutdownOperation"/>
+    </at>
+    <at t="2.0">
+        <tell module="lifecycleController" target="client" operation="NodeStartOperation"/>
+    </at>
+    <at t="3.0">
+        <tell module="lifecycleController" target="server" operation="NodeShutdownOperation"/>
+    </at>
+    <at t="4.0">
+        <tell module="lifecycleController" target="server" operation="NodeStartOperation"/>
+    </at> -->
+</scenario>
+
