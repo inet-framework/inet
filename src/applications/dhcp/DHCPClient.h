@@ -23,7 +23,7 @@
 #include <vector>
 #include "NotificationBoard.h"
 #include "MACAddress.h"
-#include "DHCP_m.h"
+#include "DHCPMessage_m.h"
 #include "DHCPLease.h"
 #include "InterfaceTable.h"
 #include "RoutingTable.h"

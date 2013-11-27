@@ -23,7 +23,7 @@
 #include <vector>
 #include <map>
 #include "INETDefs.h"
-#include "DHCP_m.h"
+#include "DHCPMessage_m.h"
 #include "DHCPLease.h"
 #include "InterfaceTable.h"
 #include "ARP.h"

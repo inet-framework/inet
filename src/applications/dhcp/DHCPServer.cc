@@ -23,7 +23,6 @@
 #include "InterfaceTable.h"
 #include "IPv4InterfaceData.h"
 #include "DHCPServer.h"
-#include "DHCP_m.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 #include "NotificationBoard.h"
@@ -132,8 +131,6 @@ void DHCPServer::handleMessage(cMessage *msg)
 
 void DHCPServer::processPacket(DHCPMessage *packet)
 {
-    EV_INFO << "Received packet: ";
-
     // check the OP code
     if (packet->getOp() == BOOTREQUEST)
     {

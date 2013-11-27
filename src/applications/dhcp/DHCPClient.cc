@@ -376,11 +376,18 @@ void DHCPClient::initRebootedClient()
 
 void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
 {
-    if (msg->getOp() != BOOTREPLY || msg->getXid() != xid)
+    if (msg->getOp() != BOOTREPLY)
     {
-        EV_WARN << "Message opcode or transaction id is not valid!" << endl;
+        EV_WARN << "Client received a non-BOOTREPLY message. Drop it!" << endl;
         return;
     }
+
+    if (msg->getXid() != xid)
+    {
+        EV_WARN << "Message transaction ID is not valid! Drop it!" << endl;
+        return;
+    }
+
     switch (clientState)
     {
         case SELECTING:
