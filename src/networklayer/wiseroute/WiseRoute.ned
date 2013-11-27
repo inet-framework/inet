@@ -53,8 +53,8 @@ simple WiseRoute like ISimpleNetworkProtocol
         bool trace = default(false);
         bool useSimTracer = default(false);
 
-        // sink node address (integer)
-        int sinkAddress = default(0);
+        // sink node address
+        string sinkAddress;
         // the sink directs the tree building procedure with periodic floods.
         // iterationDelay is the period between two floods.
 

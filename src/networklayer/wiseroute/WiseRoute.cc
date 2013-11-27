@@ -31,6 +31,7 @@
 #include "FWMath.h"
 #include "IAddressType.h"
 #include "MACAddress.h"
+#include "AddressResolver.h"
 #include "FindModule.h"
 #include "ModuleAccess.h"
 #include "Ieee802Ctrl.h"
@@ -45,7 +46,6 @@ void WiseRoute::initialize(int stage)
 {
 	if (stage == INITSTAGE_LOCAL) {
 	    arp = check_and_cast<IARP *>(getParentModule()->getSubmodule("arp"));
-		sinkAddress = Address(par("sinkAddress"));
 		headerLength = par ("headerLength");
 		rssiThreshold = par("rssiThreshold").doubleValue();
 		rssiThreshold = FWMath::dBm2mW(rssiThreshold);
@@ -77,6 +77,9 @@ void WiseRoute::initialize(int stage)
 		routeFloodTimer = new cMessage("route-flood-timer", SEND_ROUTE_FLOOD_TIMER);
 	}
     else if (stage == INITSTAGE_NETWORK_LAYER_3) {
+        AddressResolver addressResolver;
+        sinkAddress = addressResolver.resolve(par("sinkAddress"));
+
         IInterfaceTable* interfaceTable = InterfaceTableAccess().get(this);
         myNetwAddr = interfaceTable->getInterface(1)->getNetworkAddress();
 
@@ -139,8 +142,9 @@ void WiseRoute::handleLowerMsg(cMessage* msg)
 	const Address& initialSrcAddr = netwMsg->getInitialSrcAddr();
 	const Address& srcAddr        = netwMsg->getSrcAddr();
 	ILinkLayerControlInfo* ctrlInfo = check_and_cast<ILinkLayerControlInfo*>(netwMsg->getControlInfo());
-	ASSERT(false);
-	double rssi = 0; // TODO: ctrlInfo->getRSSI();
+	// KLUDGE: TODO: get rssi and ber
+	EV_ERROR << "Getting RSSI and BER from the received frame is not yet implemented. Using default values.\n";
+	double rssi = 1; // TODO: ctrlInfo->getRSSI();
 	double ber = 0; // TODO: ctrlInfo->getBitErrorRate();
 	// Check whether the message is a flood and if it has to be forwarded.
 	floodTypes floodType = updateFloodTable(netwMsg->getIsFlood(), initialSrcAddr, finalDestAddr,
@@ -227,6 +231,14 @@ void WiseRoute::handleLowerControl(cMessage *msg)
 
 void WiseRoute::handleUpperMsg(cMessage* msg)
 {
+    if (!dynamic_cast<cPacket*>(msg))
+    {
+        // TODO: KLUDGE: register protocols
+        EV_WARN << "Unkown message" << endl;
+        delete msg;
+        return;
+    }
+
 	Address finalDestAddr;
 	Address nextHopAddr;
 	MACAddress nextHopMacAddr;
@@ -299,9 +311,10 @@ void WiseRoute::finish()
 
 void WiseRoute::sendDown(cMessage *msg)
 {
-    // TODO: index
+    // TODO: index, extend routing table with interface
     for (int i = 0; i < gateSize("lowerLayerOut"); i++) {
         cMessage *dup = msg->dup();
+        dup->setControlInfo(msg->getControlInfo()->dup());
         send(dup, "lowerLayerOut", i);
     }
     delete msg;
@@ -355,7 +368,7 @@ void WiseRoute::updateRouteTable(const Address& origin, const Address& lastHop, 
 cMessage* WiseRoute::decapsMsg(WiseRouteDatagram *msg)
 {
 	cMessage *m = msg->decapsulate();
-	setUpControlInfo(m, msg->getSrcAddr());
+	setUpControlInfo(m, msg->getInitialSrcAddr());
 	nbHops = nbHops + msg->getNbHops();
 	// delete the netw packet
 	delete msg;

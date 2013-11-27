@@ -100,7 +100,6 @@ public:
 
 protected:
 	enum messagesTypes {
-	    UNKNOWN=0,
 	    DATA,
 	    ROUTE_FLOOD,
 	    SEND_ROUTE_FLOOD_TIMER
