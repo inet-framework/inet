@@ -75,11 +75,6 @@ protected:
 	 */
 	virtual DeciderResult* createResult(const DetailedRadioFrame* frame) const;
 
-	/**
-	 * @brief Calculates the receive power of given frame.
-	 */
-	virtual double getFrameReceivingPower(DetailedRadioFrame* frame) const;
-
 	/** @brief computes if packet is ok or has errors*/
 	virtual bool packetOk(double snirMin, int lengthMPDU, double bitrate) const;
 

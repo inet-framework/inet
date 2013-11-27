@@ -282,12 +282,9 @@ public:
 
 protected:
 	/**
-	 * @brief Calculates the receive power of given frame.
-	 *
-	 * Default implementation use only the arrival time point
-	 * for signal receive power calculation.
+	 * @brief Calculates the maximum receive power of the given frame.
 	 */
-	virtual double getFrameReceivingPower(DetailedRadioFrame* frame) const;
+	virtual double getMaxReceivingPower(DetailedRadioFrame* frame) const;
 
 	/**
 	 * @brief Returns the next signal state (END, HEADER, NEW).

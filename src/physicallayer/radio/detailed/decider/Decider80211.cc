@@ -44,18 +44,6 @@ bool Decider80211::initFromMap(const ParameterMap& params) {
     return BaseDecider::initFromMap(params) && bInitSuccess;
 }
 
-double Decider80211::getFrameReceivingPower(DetailedRadioFrame* frame) const
-{
-	// get the receiving power of the Signal at start-time and center frequency
-    DetailedRadioSignal& signal = frame->getSignal();
-	Argument argStart(DimensionSet::timeFreqDomain);
-
-	argStart.setTime(MappingUtils::post(signal.getReceptionStart()));
-	argStart.setArgValue(Dimension::frequency, centerFrequency);
-
-	return signal.getReceivingPower()->getValue(argStart);
-}
-
 BaseDecider::channel_sense_rssi_t Decider80211::calcChannelSenseRSSI(simtime_t_cref start, simtime_t_cref end) const {
     rssi_mapping_t pairMapMaxEnd = calculateRSSIMapping(start, end);
 	Argument       argMin(getLowerBandFrequency(start));

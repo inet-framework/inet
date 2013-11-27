@@ -106,21 +106,8 @@ simtime_t BaseDecider::processSignal(DetailedRadioFrame* frame) {
 	return HandleAgain;
 }
 
-double BaseDecider::getFrameReceivingPower(DetailedRadioFrame* frame) const {
-	// get the receiving power of the Signal at start-time
-	//Note: We assume the transmission power is represented by a rectangular function
-	//which discontinuities (at start and end of the signal) are represented
-	//by two key entries with different values very close to each other (see
-	//MappingUtils "addDiscontinuity" method for details). This means
-	//the transmission- and therefore also the receiving-power-mapping is still zero
-	//at the exact start of the signal and not till one time step after the start its
-	//at its actual transmission(/receiving) power.
-	//Therefore we use MappingUtils "post"-method to ask for the receiving power
-	//at the correct position.
-    DetailedRadioSignal&   signal         = frame->getSignal();
-	simtime_t receivingStart = MappingUtils::post(signal.getReceptionStart());
-
-	return signal.getReceivingPower()->getValue(Argument(receivingStart));
+double BaseDecider::getMaxReceivingPower(DetailedRadioFrame* frame) const {
+	return MappingUtils::findMax(*frame->getSignal().getReceivingPower(), Argument::MappedZero);
 }
 
 simtime_t BaseDecider::processNewSignal(DetailedRadioFrame* frame) {
@@ -132,24 +119,24 @@ simtime_t BaseDecider::processNewSignal(DetailedRadioFrame* frame) {
 	}
 
 	const bool   bCheckSensitivity = sensitivity > 0.;
-	const double recvPower         = bCheckSensitivity ? getFrameReceivingPower(frame) : 0.;
+	const double maxReceivingPower = bCheckSensitivity ? getMaxReceivingPower(frame) : 0.;
 
 	// check whether signal is strong enough to receive
-	if ( bCheckSensitivity && recvPower < sensitivity ) {
-		EV_DEBUG << "Signal is to weak (" << recvPower << " < " << sensitivity
-				<< ") -> do not receive." << endl;
+	if ( bCheckSensitivity && maxReceivingPower < sensitivity ) {
+		EV_DEBUG << "Signal is too weak (" << maxReceivingPower << " < " << sensitivity
+				<< ") -> Reception is not possible." << endl;
 		// Signal too weak, we can't receive it, tell PhyLayer that we don't want it again
 		return notAgain;
 	}
-	else if (bCheckSensitivity && recvPower != 0) {
+	else if (bCheckSensitivity && maxReceivingPower != 0) {
 		// Signal is strong enough, receive this Signal and schedule it
-		EV_DEBUG << "Signal is strong enough (" << recvPower << " > " << sensitivity
+		EV_DEBUG << "Signal is strong enough (" << maxReceivingPower << " > " << sensitivity
 				<< ") -> Trying to receive AirFrame." << endl;
 	}
 
 	if (!phy->isRadioInRX()) {
         frame->setBitError(true);
-        EV_DEBUG << "AirFrame with ID " << frame->getId() << " (" << recvPower << ") received, while not receiving. Setting BitErrors to true." << endl;
+        EV_DEBUG << "AirFrame with ID " << frame->getId() << " (" << maxReceivingPower << ") received, while not receiving. Setting BitErrors to true." << endl;
 	}
 
 	currentSignal.startProcessing(frame, getNextSignalState(NEW));
