@@ -1,6 +1,6 @@
-package org.mixim.modules.phy;
+package inet.physicallayer.radio.detailed.uwbir;
 
-import org.mixim.base.phyLayer.BasePhyLayer;
+import inet.physicallayer.radio.detailed.DetailedRadio;
 
 //
 // A physical layer that models an Ultra Wideband Impulse Radio wireless communication system.
@@ -43,10 +43,11 @@ import org.mixim.base.phyLayer.BasePhyLayer;
 // <a href="http://portal.acm.org/citation.cfm?id=1537714">http://portal.acm.org/citation.cfm?id=1537714</a>.
 //
 // @author Jérôme Rousselot
-simple UWBIRRadio extends BasePhyLayer
+simple UWBIRRadio extends DetailedRadio
 {
     parameters:
-        @class(UWBIRRadio);
-        @display("i=device/antennatower");
-}
+        bool RSDecoder = default(true);
+        int PRF = default(4);  // Pulse repetition frequency, either 4 or 16 MHz currently
 
+        @class(UWBIRRadio);
+}

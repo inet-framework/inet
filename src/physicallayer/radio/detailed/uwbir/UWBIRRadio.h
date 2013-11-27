@@ -1,5 +1,5 @@
 /* -*- mode:c++ -*- ********************************************************
- * file:        UWBIRRadio.h
+ * file:        PhyLayerUWBIR.h
  *
  * author:      Jerome Rousselot <jerome.rousselot@csem.ch>
  *
@@ -64,11 +64,16 @@
 #ifndef UWBIR_PHY_LAYER_H
 #define UWBIR_PHY_LAYER_H
 
-#include "MiXiMDefs.h"
-#include "PhyLayerBattery.h"
+#include "DetailedRadio.h"
 #include "RadioUWBIR.h"
-#include "HostState.h"
+#include "Packet.h"
 
+class AnalogueModel;
+class Decider;
+class MiximRadio;
+class UWBIRRadioFrame;
+
+class DeciderResultUWBIR;
 class DeciderUWBIREDSyncOnAddress;
 class DeciderUWBIREDSync;
 
@@ -113,7 +118,7 @@ class DeciderUWBIREDSync;
  * @ingroup phyLayer
  * @ingroup power
  */
-class INET_API UWBIRRadio : public PhyLayerBattery
+class INET_API UWBIRRadio : public DetailedRadio
 {
 	friend class DeciderUWBIRED;
 private:
@@ -126,11 +131,27 @@ private:
 
 public:
 	UWBIRRadio()
-		: PhyLayerBattery()
+		: DetailedRadio()
 		, uwbradio(NULL)
+        , rsDecoder(false)
+        , totalRxBits(0), errRxBits(0)
+        , packet(100)
+        , prf(0)
+        , packetsBER()
+        , dataLengths()
+        , erroneousSymbols()
+        , sentPulses()
+        , receivedPulses()
+        , meanPacketBER()
+        , packetSuccessRate()
+        , packetSuccessRateNoRS()
+        , ber()
+        , meanBER()
+        , RSErrorRate()
+        , success(), successNoRS()
+        , nbReceivedPacketsNoRS(0), nbReceivedPacketsRS(0), nbSentPackets(0), nbSymbolErrors(0)
+        , nbSymbolsReceived(0), nbHandledRxPackets(0), nbFramesDropped(0)
 	{}
-
-	virtual void finish();
 
 	// this function allows to include common xml documents for ned parameters as ned functions
 	static t_dynamic_expression_value ghassemzadehNLOSFunc(cComponent */*context*/, t_dynamic_expression_value argv[] __attribute__((unused)), int /*argc*/) {
@@ -160,6 +181,12 @@ public:
 protected:
 	virtual DetailedRadioFrame* encapsMsg(cPacket *msg);
 
+	virtual void sendUp(DetailedRadioFrame* frame, DeciderResult* result);
+
+	void prepareData(UWBIRRadioFrame* radioFrame, int byteLength, IEEE802154A::config cfg);
+
+	bool validatePacket(UWBIRRadioFrame* radioFrame, DeciderResultUWBIR* res);
+
 	/**
 	 * @brief Creates and returns an instance of the AnalogueModel with the
 	 *        specified name.
@@ -181,6 +208,7 @@ protected:
 	 */
 	virtual Decider*    getDeciderFromName(const std::string& name, ParameterMap& params);
 	virtual MiximRadio* initializeRadio() const;
+	virtual void initializeCounters();
 
 	RadioUWBIR* uwbradio;
 
@@ -210,8 +238,32 @@ protected:
 		IEEE_802154_UWB = 3200,
 	};
 
+    bool rsDecoder;
+    double totalRxBits, errRxBits; // double and not long as we divide one by the other to get the BER
+    Packet packet;
+    int prf; // pulse repetition frequency
+    cOutVector packetsBER;
+    cOutVector dataLengths;
+    cOutVector erroneousSymbols;
+    cOutVector sentPulses;
+    cOutVector receivedPulses;
+    cOutVector meanPacketBER;
+    cOutVector packetSuccessRate;
+    cOutVector packetSuccessRateNoRS;
+    cOutVector ber;
+    cStdDev meanBER;
+    cOutVector RSErrorRate;
+    cOutVector success, successNoRS;
+
+    long nbReceivedPacketsNoRS, nbReceivedPacketsRS;
+    long nbSentPackets;
+    long nbSymbolErrors, nbSymbolsReceived;
+    long nbHandledRxPackets;
+    long nbFramesDropped;
+
 public:
 	virtual void initialize(int stage);
+	virtual void finish();
 
 	/**
 	 * @brief Captures radio switches to adjust power consumption.
