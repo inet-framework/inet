@@ -18,8 +18,8 @@
 //
 
 cplusplus {{
-    #include "MACAddress.h"
-    #include "IPv4Address.h"
+#include "MACAddress.h"
+#include "IPv4Address.h"
 }}
 
 
@@ -49,7 +49,7 @@ enum DHCPMessageType
     DHCPLEASEACTIVE = 13;
 }
 
-enum OpCode
+enum DHCPOptionCode
 {
     DHCP_MSG_TYPE = 53;
     CLIENT_ID = 61;
@@ -67,15 +67,13 @@ enum OpCode
 }
 
 //
-// The Dynamic Host Configuration Protocol (DHCP) provides a framework for
-// passing configuration information to hosts on a TCP/IP network.
-// Configuration parameters and other control information are carried in
-// tagged data items that are stored in the 'options' field of the DHCP message.
+// Represents options in a DHCP message. In the DHCP protocol, options are
+// added to the message as tagged data items. In the simulation, this DHCPOptions
+// class statically holds the union of all options actually used by the DHCP
+// protocol models. Options absent from a packet are represented by empty/unfilled
+// DHCPOptions fields.
 //
-// This class contains some selected options for a DHCP message. These
-// fields are sufficient for DHCP to work properly.
-//
-// For more information, see RFC 2132.
+// @see DHCPMessage, DHCPClient, DHCPServer
 //
 class DHCPOptions {
     int messageType @enum(DHCPMessageType); // to convey the type of the DHCP message
@@ -94,8 +92,10 @@ class DHCPOptions {
 }
 
 //
-// DHCP message packet
-// Implemented according to the RFC 2131: Figure 1 'Format of a DHCP message'
+// Represents a DHCP message. DHCP (Dynamic Host Configuration Protocol, RFC 2131)
+// provides a framework for passing configuration information to hosts on a TCP/IP network.
+//
+// @see DHCPClient, DHCPServer
 //
 packet DHCPMessage
 {
@@ -111,7 +111,7 @@ packet DHCPMessage
     IPv4Address giaddr; // relay agent IP address, used in booting via a relay agent
     MACAddress chaddr; // client hardware address (MAC)
     string sname; // optional server host name
-    string file; // boot file name, null terminated string; "generic" name or null in DHCPDISCOVER, fully qualified directory-path name in DHCPOFFER.
-    DHCPOptions options; // optional parameters field. for more information see the DHCPOptions class.
+    string file; // boot file name (unused in the simulation)
+    DHCPOptions options; // holds DHCP options
 }
 
