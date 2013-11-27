@@ -21,6 +21,8 @@
 #include "INETDefs.h"
 #include "INetworkProtocolControlInfo.h"
 
+#define MK_REGISTER_TRANSPORT_PROTOCOL 1199
+
 class INET_API INetworkLayer {
   public:
     virtual ~INetworkLayer() { }

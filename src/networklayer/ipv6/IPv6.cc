@@ -100,7 +100,7 @@ void IPv6::updateDisplayString()
 
 void IPv6::handleMessage(cMessage *msg)
 {
-    if (msg->getKind() == IP_C_REGISTER_PROTOCOL) {
+    if (msg->getKind() == MK_REGISTER_TRANSPORT_PROTOCOL) {
         IPRegisterProtocolCommand * command = check_and_cast<IPRegisterProtocolCommand *>(msg->removeControlInfo());
         mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
         delete msg;

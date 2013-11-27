@@ -20,8 +20,6 @@
 
 #include "INETDefs.h"
 
-#define IP_C_REGISTER_PROTOCOL 1199
-
 /**
  * TODO
  */
