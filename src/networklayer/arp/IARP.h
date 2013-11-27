@@ -40,7 +40,7 @@ class INET_API IARP
      * an address resolution procedure. A signal is emitted when the address
      * resolution procedure terminates.
      */
-    virtual MACAddress resolveMACAddress(Address& address) const = 0;
+    virtual MACAddress resolveMACAddress(Address& address) = 0;
 };
 
 #endif

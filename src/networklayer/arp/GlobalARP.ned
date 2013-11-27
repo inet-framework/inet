@@ -23,6 +23,7 @@ package inet.networklayer.arp;
 simple GlobalARP
 {
     parameters:
+        @display("i=block/layer_s");
     gates:
         input ipIn @labels(IGenericDatagram);
         output nicOut[] @labels(IGenericDatagram);

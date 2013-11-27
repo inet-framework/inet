@@ -24,6 +24,7 @@
 #include "MACAddress.h"
 #include "ModuleAccess.h"
 #include "InterfaceEntry.h"
+#include "IARP.h"
 
 class IInterfaceTable;
 
@@ -34,7 +35,7 @@ class IInterfaceTable;
  * - uses global mapping (or table, or algorithm)
  * - not a protocol -- doesn't communicate
  */
-class INET_API GlobalARP : public cSimpleModule
+class INET_API GlobalARP : public cSimpleModule, public IARP
 {
   private:
     IInterfaceTable *ift;
@@ -44,6 +45,8 @@ class INET_API GlobalARP : public cSimpleModule
     GlobalARP() { }
     virtual ~GlobalARP() { }
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
+
+    virtual MACAddress resolveMACAddress(Address& address);
 
   protected:
     virtual void initialize(int stage);
