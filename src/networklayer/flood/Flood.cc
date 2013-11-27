@@ -21,11 +21,9 @@
  **************************************************************************/
 
 #include "Flood.h"
-
-#include <cassert>
 #include "IAddressType.h"
 #include "INetworkProtocolControlInfo.h"
-#include "Ieee802Ctrl.h"
+#include "GenericLinkLayerControlInfo.h"
 #include "GenericNetworkProtocolControlInfo.h"
 
 using std::endl;
@@ -120,11 +118,14 @@ void Flood::handleMessage(cMessage* msg)
  **/
 void Flood::handleUpperMsg(cMessage* m) {
     if (!dynamic_cast<cPacket*> (m)) {
+        if (m->getKind() == MK_REGISTER_TRANSPORT_PROTOCOL) {
+            IPRegisterProtocolCommand * command = check_and_cast<IPRegisterProtocolCommand *>(m->getControlInfo());
+            mapping.addProtocolMapping(command->getProtocol(), m->getArrivalGate()->getIndex());
+        }
         delete m;
         return;
     }
 
-	assert(dynamic_cast<cPacket*> (m));
 	FloodDatagram *msg = encapsMsg(static_cast<cPacket*> (m));
 
 	msg->setSeqNum(seqNum);
@@ -171,6 +172,7 @@ void Flood::handleUpperMsg(cMessage* m) {
  **/
 void Flood::handleLowerMsg(cMessage* m) {
     FloodDatagram *msg = static_cast<FloodDatagram *> (m);
+    int protocol = msg->getTransportProtocol();
 
 	//msg not broadcasted yet
 	if (notBroadcasted(msg)) {
@@ -178,7 +180,7 @@ void Flood::handleLowerMsg(cMessage* m) {
 		if (interfaceTable->isLocalAddress(msg->getDestinationAddress())) {
 			EV << " data msg for me! send to Upper" << endl;
 			nbHops = nbHops + (defaultTtl + 1 - msg->getTtl());
-			sendUp(decapsMsg(msg));
+			sendUp(decapsMsg(msg), protocol);
 			nbDataPacketsReceived++;
 		}
 		//broadcast message
@@ -199,7 +201,7 @@ void Flood::handleLowerMsg(cMessage* m) {
 
 			// message has to be forwarded to upper layer
 			nbHops = nbHops + (defaultTtl + 1 - msg->getTtl());
-			sendUp(decapsMsg(msg));
+			sendUp(decapsMsg(msg), protocol);
 			nbDataPacketsReceived++;
 		}
 		//not for me -> rebroadcast
@@ -232,19 +234,21 @@ void Flood::handleLowerMsg(cMessage* m) {
 
 void Flood::sendDown(cMessage *msg)
 {
-    // TODO: index
-    for (int i = 0; i < gateSize("lowerLayerOut"); i++) {
-        cMessage *dup = msg->dup();
-        setDownControlInfo(dup, MACAddress::BROADCAST_ADDRESS);
-        send(dup, "lowerLayerOut", i);
+    for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
+        InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
+        if (interfaceEntry && !interfaceEntry->isLoopback())
+        {
+            cMessage *dup = msg->dup();
+            setDownControlInfo(dup, MACAddress::BROADCAST_ADDRESS);
+            send(dup, "lowerLayerOut", interfaceEntry->getNetworkLayerGateIndex());
+        }
     }
     delete msg;
 }
 
-void Flood::sendUp(cMessage *msg)
+void Flood::sendUp(cMessage *msg, int protocol)
 {
-    // TODO: index
-    send(msg, "upperLayerOut", 0);
+    send(msg, "upperLayerOut", mapping.getOutputGateForProtocol(protocol));
 }
 
 /**
@@ -269,8 +273,7 @@ bool Flood::notBroadcasted(FloodDatagram *msg) {
 			it--;
 		}
 		//message was already broadcasted
-		if ((it->srcAddr == msg->getSourceAddress()) && (it->seqNum
-				== msg->getSeqNum())) {
+		if ((it->srcAddr == msg->getSourceAddress()) && (it->seqNum == msg->getSeqNum())) {
 			// update entry
 			it->delTime = simTime() + bcDelTime;
 			return false;
@@ -290,13 +293,15 @@ bool Flood::notBroadcasted(FloodDatagram *msg) {
 /**
  * Decapsulates the packet from the received Network packet
  **/
-cMessage* Flood::decapsMsg(FloodDatagram *msg)
+cMessage* Flood::decapsMsg(FloodDatagram *floodDatagram)
 {
-    cMessage *m = msg->decapsulate();
-    setUpControlInfo(m, msg->getSourceAddress());
-    // delete the netw packet
-    delete msg;
-    return m;
+    GenericNetworkProtocolControlInfo* controlInfo = new GenericNetworkProtocolControlInfo();
+    controlInfo->setSourceAddress(floodDatagram->getSourceAddress());
+    controlInfo->setProtocol(floodDatagram->getTransportProtocol());
+    cPacket *transportPacket = floodDatagram->decapsulate();
+    transportPacket->setControlInfo(controlInfo);
+    delete floodDatagram;
+    return transportPacket;
 }
 
 /**
@@ -308,10 +313,10 @@ FloodDatagram * Flood::encapsMsg(cPacket *appPkt) {
 
     EV << "in encaps...\n";
 
-    FloodDatagram *pkt = new FloodDatagram(appPkt->getName(), appPkt->getKind());
-    pkt->setBitLength(headerLength);
-
     INetworkProtocolControlInfo* cInfo = dynamic_cast<INetworkProtocolControlInfo *>(appPkt->removeControlInfo());
+    FloodDatagram *pkt = new FloodDatagram(appPkt->getName(), appPkt->getKind());
+    pkt->setTransportProtocol(cInfo->getProtocol());
+    pkt->setBitLength(headerLength);
 
     if (cInfo == NULL) {
         EV << "warning: Application layer did not specifiy a destination L3 address\n"
@@ -344,20 +349,8 @@ FloodDatagram * Flood::encapsMsg(cPacket *appPkt) {
  */
 cObject* Flood::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
-    // TODO: generalize
-    Ieee802Ctrl * const cCtrlInfo = new Ieee802Ctrl();
+    GenericLinkLayerControlInfo * const cCtrlInfo = new GenericLinkLayerControlInfo();
     cCtrlInfo->setDest(pDestAddr);
-    pMsg->setControlInfo(cCtrlInfo);
-    return cCtrlInfo;
-}
-
-/**
- * Attaches a "control info" structure (object) to the up message pMsg.
- */
-cObject* Flood::setUpControlInfo(cMessage *const pMsg, const Address& pSrcAddr)
-{
-    GenericNetworkProtocolControlInfo *const cCtrlInfo = new GenericNetworkProtocolControlInfo();
-    cCtrlInfo->setSourceAddress(pSrcAddr);
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }

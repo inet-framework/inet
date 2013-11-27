@@ -25,10 +25,11 @@
 
 #include <list>
 
-#include "INETDefs.h"
+#include "INetworkLayer.h"
 #include "Address.h"
 #include "InterfaceTableAccess.h"
 #include "FloodDatagram.h"
+#include "ProtocolMap.h"
 
 /**
  * @brief A simple flooding protocol
@@ -49,11 +50,13 @@
  *
  * ported to Mixim 2.0 by Theodoros Kapourniotis
  **/
-class INET_API Flood : public cSimpleModule
+class INET_API Flood : public cSimpleModule, public INetworkLayer
 {
 protected:
     /** @brief Interface table of node*/
     IInterfaceTable *interfaceTable;
+
+    ProtocolMapping mapping; // where to send packets after decapsulation
 
     /** @brief Network layer sequence number*/
     unsigned long seqNum;
@@ -145,7 +148,7 @@ protected:
 
     /** @brief Sends a message to the upper layer
      */
-    void sendUp(cMessage *msg);
+    void sendUp(cMessage *msg, int protocol);
     
     /** @brief Checks whether a message was already broadcasted*/
     bool notBroadcasted(FloodDatagram *);
@@ -168,20 +171,6 @@ protected:
      * @param pDestAddr The MAC address of the message receiver.
      */
     virtual cObject* setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
-    /**
-     * @brief Attaches a "control info" (NetwToUpper) structure (object) to the message pMsg.
-     *
-     * This is most useful when passing packets between protocol layers
-     * of a protocol stack, the control info will contain the destination MAC address.
-     *
-     * The "control info" object will be deleted when the message is deleted.
-     * Only one "control info" structure can be attached (the second
-     * setL3ToL2ControlInfo() call throws an error).
-     *
-     * @param pMsg      The message where the "control info" shall be attached.
-     * @param pSrcAddr  The MAC address of the message receiver.
-     */
-    virtual cObject* setUpControlInfo(cMessage *const pMsg, const Address& pSrcAddr);
 };
 
 #endif

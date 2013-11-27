@@ -22,8 +22,6 @@
 #include "INETDefs.h"
 #include "INetworkDatagram.h"
 #include "FloodDatagram_m.h"
-// TODO: do we really need this?
-#include "IPProtocolId_m.h"
 
 /**
  * Represents an flood datagram. More info in the FloodDatagram.msg file
@@ -42,9 +40,8 @@ class INET_API FloodDatagram : public FloodDatagram_Base, public INetworkDatagra
     virtual void setSourceAddress(const Address & address) { setSrcAddress(address.toModuleId()); }
     virtual Address getDestinationAddress() const { return Address(getDestAddress()); }
     virtual void setDestinationAddress(const Address & address) { setDestAddress(address.toModuleId()); }
-    // TODO: do we really need this?
-    virtual int getTransportProtocol() const { return IP_PROT_NONE; }
-    virtual void setTransportProtocol(int protocol) { ASSERT(false); };
+    virtual int getTransportProtocol() const { return getProtocol(); }
+    virtual void setTransportProtocol(int protocol) { setProtocol(protocol); };
 };
 
 #endif
