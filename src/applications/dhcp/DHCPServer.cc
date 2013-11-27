@@ -279,7 +279,7 @@ void DHCPServer::sendNAK(DHCPMessage* msg)
     nak->setHops(0);
     nak->setXid(msg->getXid()); // transaction id from client
     nak->setSecs(0); // 0 seconds from transaction started.
-    nak->setFlags(msg->getFlags()); // 0 = unicast
+    nak->setBroadcast(msg->getBroadcast());
     nak->setGiaddr(msg->getGiaddr()); // next server ip
     nak->setChaddr(msg->getChaddr());
     nak->getOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
@@ -294,14 +294,14 @@ void DHCPServer::sendACK(DHCPLease* lease, DHCPMessage * packet)
     DHCPMessage* ack = new DHCPMessage("DHCPACK");
     ack->setOp(BOOTREPLY);
     ack->setByteLength(308); // DHCP ACK packet size
-    ack->setHtype(1);// ethernet
-    ack->setHlen(6);// hardware Address lenght (6 octets)
+    ack->setHtype(1); // ethernet
+    ack->setHlen(6); // hardware address lenght (6 octets)
     ack->setHops(0);
-    ack->setXid(lease->xid);// transaction id;
-    ack->setSecs(0);// 0 seconds from transaction started
-    ack->setFlags(0);// 0 = unicast
-    ack->setCiaddr(lease->ip);// client IP addr.
-    ack->setYiaddr(lease->ip);// clinet IP addr.
+    ack->setXid(lease->xid); // transaction id;
+    ack->setSecs(0); // 0 seconds from transaction started
+    ack->setBroadcast(false);
+    ack->setCiaddr(lease->ip); // client IP addr.
+    ack->setYiaddr(lease->ip); // client IP addr.
 
     ack->setChaddr(lease->mac); // client MAC address
     ack->setSname(""); // no server name given
@@ -339,16 +339,16 @@ void DHCPServer::sendOffer(DHCPLease* lease)
     offer->setOp(BOOTREPLY);
     offer->setByteLength(308); // DHCP OFFER packet size
     offer->setHtype(1); // ethernet
-    offer->setHlen(6); // hardware Address lenght (6 octets)
+    offer->setHlen(6); // hardware address lenght (6 octets)
     offer->setHops(0);
-    offer->setXid(lease->xid); // transacction id;
-    offer->setSecs(0); // 0 seconds from transaction started.
-    offer->setFlags(0); // 0 = unicast
+    offer->setXid(lease->xid); // transaction id
+    offer->setSecs(0); // 0 seconds from transaction started
+    offer->setBroadcast(false); // unicast
 
     offer->setYiaddr(lease->ip); // ip offered.
     offer->setGiaddr(lease->gateway); // next server ip
 
-    offer->setChaddr(lease->mac);// client mac address;
+    offer->setChaddr(lease->mac); // client mac address
     offer->setSname(""); // no server name given
     offer->setFile(""); // no file given
     offer->getOptions().setMessageType(DHCPOFFER);
