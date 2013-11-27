@@ -23,20 +23,22 @@ import inet.world.scenario.ScenarioManager;
 network DHCPWithLifeCycle
 {
     submodules:
-        scenarioManager: ScenarioManager;
+        scenarioManager: ScenarioManager {
+            @display("p=73,59");
+        }
         lifecycleController: LifecycleController {
-            @display("p=453,158");
+            @display("p=73,185");
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
-                @display("p=453,90");
+                @display("p=73,116");
         }
         client: StandardHost {
-            @display("p=72,73");
+            @display("p=205,124");
         }
         server: StandardHost {
-            @display("p=176,82");
+            @display("p=553,124");
         }
     connections:
         client.ethg++ <--> Eth10M <--> server.ethg++;
