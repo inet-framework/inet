@@ -1,4 +1,0 @@
-<script>
-        <at t='1000s'><tell module='lifecycleController' operation='NodeShutdownOperation' target='client[0]'/></at>
-        <at t='1010s'><tell module='lifecycleController' operation='NodeStartOperation' target='client[0]'/></at>
-</script>

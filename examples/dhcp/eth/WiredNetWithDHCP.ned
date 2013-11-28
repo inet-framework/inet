@@ -32,12 +32,6 @@ network WiredNetWithDHCP
     parameters:
         int numHosts;
     submodules:
-        lifecycleController: LifecycleController {
-            @display("p=109,159");
-        }
-        scenarioManager: ScenarioManager {
-            @display("p=109,55");
-        }
         server: StandardHost {
             @display("p=42,494");
         }
@@ -51,7 +45,7 @@ network WiredNetWithDHCP
         configurator: IPv4NetworkConfigurator {
             parameters:
                 config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0' /></config>");
-                @display("p=109,107");
+                @display("p=109,71");
         }
     connections:
         server.ethg++ <--> Eth10M <--> switch.ethg++;
