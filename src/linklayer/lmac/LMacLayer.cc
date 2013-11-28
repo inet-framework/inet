@@ -14,7 +14,7 @@
 #include "FWMath.h"
 #include "LMacFrame_m.h"
 #include "InterfaceEntry.h"
-#include "LMacControlInfo.h"
+#include "SimpleLinkLayerControlInfo.h"
 #include "FindModule.h"
 
 Define_Module( LMacLayer )
@@ -753,7 +753,7 @@ void LMacLayer::attachSignal(LMacFrame *macPkt)
  */
 cObject* LMacLayer::setUpControlInfo(cMessage * const pMsg, const MACAddress& pSrcAddr)
 {
-    LMacControlInfo *const cCtrlInfo = new LMacControlInfo();
+    SimpleLinkLayerControlInfo *const cCtrlInfo = new SimpleLinkLayerControlInfo();
     cCtrlInfo->setSrc(pSrcAddr);
     cCtrlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
     pMsg->setControlInfo(cCtrlInfo);
