@@ -16,6 +16,7 @@
 //
 
 package inet.examples.dhcp.wlan;
+
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.ethernet.Eth100M;
 import inet.nodes.inet.Router;
@@ -24,9 +25,6 @@ import inet.nodes.inet.WirelessHost;
 import inet.world.radio.ChannelControl;
 
 
-//
-// TODO auto-generated module
-//
 network WirelessNetWithDHCP
 {
     @display("bgb=590,407;bgl=2");

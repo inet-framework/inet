@@ -5,38 +5,35 @@ DHCP (Dynamic Host Configuration Protocol) Examples
 1. WiredNetWithDHCP
 -------------------
 
-This scenario introduces how DHCP works when multiple hosts
-and a single DHCP server is present.
+This scenario introduces how DHCP works when multiple hosts and a single DHCP
+server are present. At random startup times, the clients request IP addresses
+from the server, which serves them from its address pool.
 
-The server is continuously offering addresses from its pool
-starting from ipAddressStart in response to each client request.
+client[0], client[1], ..., client[9] receive the addresses 192.168.1.100 through
+192.168.1.109, respectively. The lease time is configured to be relatively low
+(1000s), causing the clients to periodically renew their addresses.
 
-client[0], client[1], ..., client[9] get 192.168.1.100, 192.168.1.101,
-,..., 192.168.1.109 addresses respectively, and throughout the simulation
-they periodically renew their addresses.
 
 2. DHCPWithLifeCycle
 --------------------
 
-This scenario demonstrates how DHCP works when a client or a server
-reboots.
+This scenario demonstrates how DHCP works when a client or a server reboots.
 
-After rebooting, the client remembers its last assigned IP address
-and if it has not expired yet, then the client starts up in the
-INIT-REBOOT state and tries to reallocate this old IP address.
+The client starts DHCP initialization at 0.5s, and receives IP address 
+192.168.1.100 shortly after.
 
-Client starts DHCP initialization at 0.5s and gets IP address
-192.168.1.100.
+The client shuts down at 60s and reboots at 70s. The behavior implemented
+in DHCPClient is that the client remembers its last assigned IP address
+after the reboot, and if the address has not expired yet, then DHCP will 
+start up in the INIT-REBOOT state and trys to reallocate this old IP address.
 
-Client shutdowns at 60s and reboots at 70s. After rebooting it tries
-to renew its previously allocated address. The client's old lease has
-not expired yet, since the lease timeout is 150s in this scenario,
-thus it will sucessfully renew it.
+In this example, the client's old lease has not expired yet (the lease time 
+in this scenario is 150s), thus the client will sucessfully renew it.
 
-Server shutdowns at 80s and reboots at 90s and looses its lease database.
-When client reaches T1 timeout at 145s (T1 = 0.5*leaseTime) tries to
-extend its current lease. This request will be rejected by server because
-it has no any information about client. After this refusal, client restarts
-the whole DHCP process and asks for a new address. Server offers the first
-address of its pool which is again 192.168.1.100 since there are no other
-clients in the network.
+The server shuts down at 80s and reboots at 90s, and loses its lease database.
+When client reaches T1 timeout at 145s (T1 = 0.5*leaseTime), it tries to
+extend its current lease. This request will be rejected by the server, because
+it no longer knows about the client. After the refusal, the client restarts
+the whole DHCP process, and asks for a new address. The server will offer the 
+first available address from its pool, which is again 192.168.1.100 since there 
+are no other clients in the network.

@@ -1,6 +1,5 @@
 //
-// Copyright (C) 2012 OpenSim Ltd
-// @author: Zoltan Bojthe
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
