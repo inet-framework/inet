@@ -18,7 +18,7 @@
 #include "InterfaceEntry.h"
 #include "ModuleAccess.h"
 #include "ILinkLayerControlInfo.h"
-#include "BMacControlInfo.h"
+#include "SimpleLinkLayerControlInfo.h"
 #include "BMacLayer.h"
 
 Define_Module(BMacLayer)
@@ -783,7 +783,7 @@ BMacFrame *BMacLayer::encapsMsg(cPacket *netwPkt)
  */
 cObject* BMacLayer::setUpControlInfo(cMessage * const pMsg, const MACAddress& pSrcAddr)
 {
-    BMacControlInfo *const cCtrlInfo = new BMacControlInfo();
+    SimpleLinkLayerControlInfo *const cCtrlInfo = new SimpleLinkLayerControlInfo();
     cCtrlInfo->setSrc(pSrcAddr);
     cCtrlInfo->setInterfaceId(interfaceEntry->getInterfaceId());
     pMsg->setControlInfo(cCtrlInfo);
