@@ -30,7 +30,7 @@ void STPBase::initialize(int stage)
 
             maxAge = par("maxAge");
             helloTime = par("helloTime");
-            forwardDelay = par("fwdDelay");
+            forwardDelay = par("forwardDelay");
 
             macTable = check_and_cast<MACAddressTable *>(getModuleByPath(par("macTableName")));
             ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableName")));
@@ -52,9 +52,6 @@ void STPBase::initialize(int stage)
             EV_INFO<<"Setting AAAAAA000001 as backbone mac address."<<endl;
             bridgeAddress.setAddress("AAAAAA000001");
         }
-
-        //initPorts();
-        //visualizer();
     }
 }
 
@@ -100,6 +97,7 @@ void STPBase::start()
 void STPBase::stop()
 {
     isOperational = false;
+    // colors all connected link gray
     for (unsigned int i = 0; i < numPorts; i++)
         colorLink(i, false);
     this->getParentModule()->getDisplayString().setTagArg("i", 1, "");
@@ -148,12 +146,13 @@ void STPBase::visualizer()
     if (ev.isGUI() && visualize)
     {
         Ieee8021DInterfaceData * port;
-        // gives color to the root link, or module border if it is root
         for (unsigned int i = 0; i < numPorts; i++)
         {
             port = getPortInterfaceData(i);
+            // colors link
             colorLink(i, port->getState() == Ieee8021DInterfaceData::FORWARDING);
 
+            // Label ethernet interface with port status and role
             cModule * puerta = this->getParentModule()->getSubmodule("eth", i);
             if (puerta != NULL)
             {
@@ -163,6 +162,7 @@ void STPBase::visualizer()
             }
         }
 
+        // mark root switch
         if (getRootIndex() == -1)
             this->getParentModule()->getDisplayString().setTagArg("i", 1, "#a5ffff");
         else

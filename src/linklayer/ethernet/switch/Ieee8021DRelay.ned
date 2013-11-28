@@ -33,8 +33,8 @@ simple Ieee8021DRelay like IMACRelayUnit
 {
     parameters:
         @display("i=block/broadcast;bgb=425,114");
-        string interfaceTablePath = default("^.interfaceTable"); // the absolute path to the InterfaceTable
-        string macTablePath = default("^.macTable"); // the absolute path to the MACAddressTable
+        string interfaceTablePath = default("^.interfaceTable"); // The path to the InterfaceTable module
+        string macTablePath = default("^.macTable");             // The path to the MACAddressTable module
     gates:
         input ifIn[];
         output ifOut[];

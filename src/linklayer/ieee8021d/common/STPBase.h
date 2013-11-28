@@ -25,18 +25,18 @@
 
 class STPBase : public cSimpleModule, public ILifecycle {
 protected:
-    bool visualize;         // colors tree
-    unsigned int numPorts;    // number of ports
-    bool isOperational;        // for lifecycle
+    bool visualize;                  // if true it visualize the spanning tree
+    unsigned int numPorts;           // number of ports
+    bool isOperational;              // for lifecycle
 
-    unsigned int bridgePriority;              // bridge's priority
+    unsigned int bridgePriority;     // bridge's priority
     MACAddress bridgeAddress;        // bridge's MAC address
 
     simtime_t maxAge;
     simtime_t helloTime;
     simtime_t forwardDelay;
 
-    MACAddressTable * macTable;      // needed for flushing.
+    MACAddressTable * macTable;
     IInterfaceTable * ifTable;
 
 public:
@@ -50,10 +50,15 @@ protected:
     virtual void stop();
 
     /**
-     * @brief Adds effects to be represented by Tkenv. Root links colored green. Show port role, state.
+     * @brief Adds effects to be represented by Tkenv. Color the link black if forwarding parameter is true
+     * and the port witch is the link is connected also forwarding, else colors the link gray
      */
-
     virtual void colorLink(unsigned int i, bool forwarding);
+
+    /**
+     * @brief Adds effects to be represented by Tkenv. Inactive links are colored grey.
+     * Show port role, state. Mark root switch
+     */
     virtual void visualizer();
 
     /**
@@ -62,6 +67,10 @@ protected:
      */
     virtual int getRootIndex();
 
+    /**
+     * @brief Obtain Ieee8021DInterfaceData from the port's indexnumber
+     * @return the port's Ieee8021DInterfaceData, NULL if it doesn't exist
+     */
     Ieee8021DInterfaceData *getPortInterfaceData(unsigned int portNum);
 
 };

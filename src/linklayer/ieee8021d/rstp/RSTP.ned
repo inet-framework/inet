@@ -41,16 +41,42 @@ import inet.linklayer.ieee8021d.ISpanningTree;
 simple RSTP like ISpanningTree
 {
     parameters:
-        double helloTime @unit("s") = default(2s);                // interval between sending Hello messages
-        double fwdDelay @unit("s") = default(6s);                 // time a port is kept in the learning state before going into forwarding
-        double migrateTime @unit ("s")= default(30s);             // time after which a non-assigned port becomes designated
-        double tcWhileTime @unit("s") = default(6s);              // a port will send TC=true (Topology Change Notification) for this time interval
-        double maxAge @unit("s") = default(20s);                  // max. hop count
-        int bridgePriority = default(128);                        // switch priority
-        bool autoEdge = default(true);                            // if false, edge ports will have to wait to get designated
-        bool visualize = default(false);                          // shows the RSTP tree by coloring connections in the network graphics
-        string interfaceTableName = default("^.interfaceTable");  // module path to the InterfaceTable module
-        string macTableName = default("^.macTable");              // module path to the MACAddressTable module
+        // The hello time is the time between each bridge protocol data unit (BPDU) that is sent on a port.
+        // This time is equal to 2 seconds (sec) by default, but you can tune the time to be between 1 and 10 sec.
+        double helloTime @unit("s") = default(2s);
+
+        // The forward delay is the time that is spent in the listening and learning state. This time is equal to 6 sec by default,
+        // but you can tune the time to be between 4 and 30 sec.
+        double forwardDelay @unit("s") = default(6s);
+
+        // The max age timer controls the maximum length of time that passes before a bridge port saves its configuration BPDU information.
+        // This time is 20 sec by default, but you can tune the time to be between 6 and 40 sec.
+        double maxAge @unit("s") = default(20s);
+        
+        // The migrate time is the time after which a non-assigned port becomes designated. This time is equal to 6 sec by default,
+        // but you can tune the time to be between 4 and 30 sec.
+        double migrateTime @unit ("s")= default(6s);
+        
+        // The topology change while time is the time while a port will send TC=true (Topology Change Notification)
+        double tcWhileTime @unit("s") = default(6s);
+
+        // The bridge priority determines which bridge is elected as the root bridge. If the switch has a bridge priority that is lower than all
+        // the other switches, the other switches automatically select the switch as the root switch.
+        int bridgePriority = default(128);
+
+        // The path to the InterfaceTable module
+        string interfaceTableName = default("^.interfaceTable");
+        
+        // The path to the MACAddressTable module
+        string macTableName = default("^.macTable");
+        
+        // Shows the spanning tree by coloring connections in the network graphics.
+        // Label ethernet interface with port role and status. Mark root switch
+        bool visualize = default(false);
+        
+        // If true, edge ports immediately become designated/forwarding, else it will have to wait to get designated.
+        bool autoEdge = default(true);
+        
         @display("i=block/network2");
     gates:
         input relayIn;
