@@ -36,7 +36,7 @@
 #include "InterfaceEntry.h"
 #include "ILinkLayerControlInfo.h"
 #include "FindModule.h"
-#include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 #include "CSMAFrame_m.h"
 
 Define_Module(CSMA);
@@ -887,8 +887,7 @@ cPacket *CSMA::decapsMsg(CSMAFrame* macPkt) {
  */
 cObject* CSMA::setUpControlInfo(cMessage * const pMsg, const MACAddress& pSrcAddr)
 {
-//    BMacControlInfo *const cCtrlInfo = new BMacControlInfo();
-    Ieee802Ctrl *const cCtrlInfo = new Ieee802Ctrl();
+    SimpleLinkLayerControlInfo *const cCtrlInfo = new SimpleLinkLayerControlInfo();
     cCtrlInfo->setSrc(pSrcAddr);
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;

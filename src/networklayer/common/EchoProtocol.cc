@@ -18,7 +18,7 @@
 #include <string.h>
 #include "EchoProtocol.h"
 #include "IPSocket.h"
-#include "GenericNetworkProtocolControlInfo.h"
+#include "INetworkProtocolControlInfo.h"
 #include "PingPayload_m.h"
 
 Define_Module(EchoProtocol);
@@ -66,7 +66,7 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
     reply->setType(ECHO_PROTOCOL_REPLY);
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
-    GenericNetworkProtocolControlInfo *ctrl = check_and_cast<GenericNetworkProtocolControlInfo *>(reply->getControlInfo());
+    INetworkProtocolControlInfo *ctrl = check_and_cast<INetworkProtocolControlInfo *>(reply->getControlInfo());
     Address src = ctrl->getSourceAddress();
     Address dest = ctrl->getDestinationAddress();
     ctrl->setInterfaceId(-1);
@@ -77,9 +77,9 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
 
 void EchoProtocol::processEchoReply(EchoPacket *reply)
 {
-    GenericNetworkProtocolControlInfo *ctrl = check_and_cast<GenericNetworkProtocolControlInfo*>(reply->removeControlInfo());
+    cObject* controlInfo = reply->removeControlInfo();
     PingPayload *payload = check_and_cast<PingPayload *>(reply->decapsulate());
-    payload->setControlInfo(ctrl);
+    payload->setControlInfo(controlInfo);
     delete reply;
     long originatorId = payload->getOriginatorId();
     PingMap::iterator i = pingMap.find(originatorId);
@@ -97,12 +97,12 @@ void EchoProtocol::sendEchoRequest(PingPayload *msg)
     cGate *arrivalGate = msg->getArrivalGate();
     int i = arrivalGate->getIndex();
     pingMap[msg->getOriginatorId()] = i;
-
-    GenericNetworkProtocolControlInfo *ctrl = check_and_cast<GenericNetworkProtocolControlInfo*>(msg->removeControlInfo());
-    ctrl->setProtocol(IP_PROT_ICMP);
+    cObject* controlInfo = msg->removeControlInfo();
+    INetworkProtocolControlInfo *networkControlInfo = check_and_cast<INetworkProtocolControlInfo*>(controlInfo);
+    networkControlInfo->setProtocol(IP_PROT_ICMP);
     EchoPacket *request = new EchoPacket(msg->getName());
     request->setType(ECHO_PROTOCOL_REQUEST);
     request->encapsulate(msg);
-    request->setControlInfo(ctrl);
+    request->setControlInfo(controlInfo);
     send(request, "sendOut");
 }
