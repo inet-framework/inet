@@ -38,6 +38,6 @@ simple L2NetworkConfigurator
 {
     parameters:
         @display("i=block/cogwheel_s");
-        xml config = default(xml("<config><interface hosts='**' ports='**' cost='19'/></config>"));
+        xml config = default(xml("<config><interface hosts='**' ports='**' cost='19' priority='128' edge='false'/></config>"));
 }
 

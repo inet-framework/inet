@@ -68,8 +68,7 @@ void STP::initPortTable()
     EV_DEBUG<< "IEE8021D Interface Data initialization. Setting port infos to the protocol defaults." << endl;
     for (unsigned int i = 0; i < numPorts; i++)
     {
-        Ieee8021DInterfaceData * port = getPortInterfaceData(i);
-        port->setDefaultStpPortInfoData();
+        initInterfacedata(i);
     }
 }
 
@@ -387,12 +386,12 @@ void STP::checkTimers()
             EV_DETAIL<< "Port=" << i << " reached its maximum age. Setting it to the default port info." << endl;
             if (port->getRole() == Ieee8021DInterfaceData::ROOT)
             {
-                port->setDefaultStpPortInfoData();
+                initInterfacedata(i);
                 lostRoot();
             }
             else
             {
-                port->setDefaultStpPortInfoData();
+                initInterfacedata(i);
                 lostAlternate(i);
             }
         }
@@ -734,4 +733,20 @@ void STP::stop()
     isRoot = false;
     topologyChangeNotification = true;
     cancelEvent(tick);
+}
+
+void STP::initInterfacedata(unsigned int portNum)
+{
+    Ieee8021DInterfaceData * ifd = getPortInterfaceData(portNum);
+    ifd->setRole(Ieee8021DInterfaceData::NOTASSIGNED);
+    ifd->setState(Ieee8021DInterfaceData::DISCARDING);
+    ifd->setRootPriority(bridgePriority);
+    ifd->setRootAddress(bridgeAddress);
+    ifd->setRootPathCost(0);
+    ifd->setAge(0);
+    ifd->setBridgePriority(bridgePriority);
+    ifd->setBridgeAddress(bridgeAddress);
+    ifd->setPortPriority(-1);
+    ifd->setPortNum(-1);
+    ifd->setLostBPDU(0);
 }

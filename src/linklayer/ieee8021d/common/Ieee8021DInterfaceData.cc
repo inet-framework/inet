@@ -21,26 +21,6 @@
 
 Ieee8021DInterfaceData::Ieee8021DInterfaceData()
 {
-    // Default port data for STP
-    defaultStpPort.state = DISCARDING;
-    defaultStpPort.role = NOTASSIGNED;
-    defaultStpPort.priority = 128;
-    defaultStpPort.rootPathCost = INT16_MAX;
-    defaultStpPort.rootPriority = 65536;
-    defaultStpPort.rootAddress = MACAddress("FF-FF-FF-FF-FF-FF");
-    defaultStpPort.bridgePriority = 65536;
-    defaultStpPort.bridgeAddress = MACAddress("FF-FF-FF-FF-FF-FF");
-    defaultStpPort.portPriority = 256;
-    defaultStpPort.portNum = 256;
-    defaultStpPort.age = 0;
-    defaultStpPort.fdWhile = 0;
-    defaultStpPort.maxAge = 20;
-    defaultStpPort.fwdDelay = 15;
-    defaultStpPort.helloTime = 2;
-    defaultStpPort.linkCost = 19;     // todo: set cost according to the bandwidth
-    defaultStpPort.edge = false;
-    portData = defaultStpPort;
-
     // If there is no STP module then all ports
     // must be in forwarding state.
     portData.state = FORWARDING;

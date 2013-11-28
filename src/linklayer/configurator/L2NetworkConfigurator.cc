@@ -49,7 +49,7 @@ void L2NetworkConfigurator::initialize(int stage)
 {
     if (stage == 0)
         configuration = par("config");
-    else if (stage == 2)
+    else if (stage == 1)
         ensureConfigurationComputed(topology);
 }
 
@@ -202,7 +202,7 @@ void L2NetworkConfigurator::readInterfaceConfiguration(Node * rootNode)
 
                             // priority
                             if (isNotEmpty(priority))
-                                currentNode->interfaceInfos[i]->portData.portPriority = atoi(priority);
+                                currentNode->interfaceInfos[i]->portData.priority = atoi(priority);
 
                             //edge
                             if (isNotEmpty(edge))
@@ -303,7 +303,8 @@ void L2NetworkConfigurator::configureInterface(InterfaceInfo * interfaceInfo)
     Ieee8021DInterfaceData * interfaceData = interfaceEntry->ieee8021DData();
 
     interfaceData->setLinkCost(interfaceInfo->portData.linkCost);
-    interfaceData->setPortPriority(interfaceInfo->portData.portPriority);
+    interfaceData->setPriority(interfaceInfo->portData.priority);
+    interfaceData->setEdge(interfaceInfo->portData.edge);
 }
 
 L2NetworkConfigurator::Matcher::~Matcher()

@@ -49,7 +49,7 @@ protected:
 public:
     RSTP();
     virtual ~RSTP();
-    virtual int numInitStages() const { return 2; }
+    virtual int numInitStages() const { return 3; }
 
 protected:
     virtual void initialize(int stage);

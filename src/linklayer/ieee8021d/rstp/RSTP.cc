@@ -50,7 +50,7 @@ void RSTP::initialize(int stage)
         migrateTime = par("migrateTime");
     }
 
-    if (stage == 1) // "auto" MAC addresses assignment takes place in stage 0
+    if (stage == 2) // "auto" MAC addresses assignment takes place in stage 0
     {
         initPorts();
         visualizer();

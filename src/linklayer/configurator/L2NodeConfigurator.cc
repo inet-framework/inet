@@ -47,7 +47,7 @@ void L2NodeConfigurator::initialize(int stage)
             cModule * module = getModuleByPath(networkConfiguratorPath);
 #endif
             if (!module)
-                throw cRuntimeError("Configurator module '%s' not found (check the 'networkConfiguratorModule' parameter)", networkConfiguratorPath);
+                throw cRuntimeError("Configurator module '%s' not found (check the 'l2ConfiguratorModule' parameter)", networkConfiguratorPath);
             networkConfigurator = check_and_cast<L2NetworkConfigurator *>(module);
         }
     }
@@ -68,9 +68,10 @@ bool L2NodeConfigurator::handleOperationStage(LifecycleOperation *operation, int
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_LINK_LAYER)
+        {
             prepareNode();
-        else if (stage == NodeStartOperation::STAGE_NETWORK_LAYER && networkConfigurator)
             configureNode();
+        }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation))
         /*nothing to do*/;

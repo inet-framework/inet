@@ -39,7 +39,9 @@ class Ieee8021DInterfaceData : public InterfaceProtocolData
 
         enum PortState {DISCARDING, LEARNING, FORWARDING};
 
-        struct PortInfo {/* The following values have same meaning in both STP and RSTP.
+        struct PortInfo
+        {
+                /* The following values have same meaning in both STP and RSTP.
                  * See IEEE8021DBDPU for more info.
                  */
                 unsigned int priority;
@@ -70,11 +72,11 @@ class Ieee8021DInterfaceData : public InterfaceProtocolData
 
                 simtime_t TCWhile;          // The Topology Change timer. TCN Messages are sent while this timer is running. (RSTP)
 
-                unsigned int lostBPDU;};
+                unsigned int lostBPDU;
+        };
 
     protected:
         PortInfo portData;
-        PortInfo defaultStpPort;
 
     public:
         bool isLearning() {return portData.state == LEARNING || portData.state == FORWARDING;}
@@ -146,8 +148,6 @@ class Ieee8021DInterfaceData : public InterfaceProtocolData
         void setState(PortState state) {portData.state = state;}
 
         PortInfo getPortInfoData() {return portData;}
-
-        void setDefaultStpPortInfoData() {portData = defaultStpPort;}
 
         bool isEdge() const {return portData.edge;}
 

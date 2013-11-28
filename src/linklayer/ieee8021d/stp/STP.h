@@ -74,6 +74,7 @@ class STP : public STPBase
          * Bridge Protocol Data Unit handling
          */
         void handleBPDU(BPDU * bpdu);
+        virtual void initInterfacedata(unsigned int portNum);
 
         /**
          * Topology change handling
