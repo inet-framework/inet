@@ -57,8 +57,3 @@ enum IPProtocolId
     IP_PROT_IPv6EXT_ESP = 50;      // Encapsulating security payload.
     IP_PROT_IPv6EXT_MOB = 135;      // Mobility Header for MIPv6 support.
 }
-
-class IPRegisterProtocolCommand
-{
-    int protocol @enum(IPProtocolId);
-}

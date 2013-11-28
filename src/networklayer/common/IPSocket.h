@@ -19,6 +19,7 @@
 #define __INET_IPSOCKET_H_
 
 #include "INETDefs.h"
+#include "IPProtocolId_m.h"
 
 /**
  * TODO

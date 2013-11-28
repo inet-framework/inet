@@ -22,7 +22,7 @@
 void IPSocket::registerProtocol(int protocol)
 {
     if (gateToIP && gateToIP->isConnected()) {
-        IPRegisterProtocolCommand * controlInfo = new IPRegisterProtocolCommand();
+        RegisterTransportProtocolCommand * controlInfo = new RegisterTransportProtocolCommand();
         controlInfo->setProtocol(protocol);
         cMessage * message = new cMessage("RegisterProtocol", MK_REGISTER_TRANSPORT_PROTOCOL);
         message->setControlInfo(controlInfo);

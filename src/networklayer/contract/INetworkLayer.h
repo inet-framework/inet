@@ -20,6 +20,7 @@
 
 #include "INETDefs.h"
 #include "INetworkProtocolControlInfo.h"
+#include "NetworkLayer_m.h"
 
 #define MK_REGISTER_TRANSPORT_PROTOCOL 1199
 

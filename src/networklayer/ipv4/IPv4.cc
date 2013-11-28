@@ -99,7 +99,7 @@ void IPv4::updateDisplayString()
 void IPv4::handleMessage(cMessage *msg)
 {
     if (msg->getKind() == MK_REGISTER_TRANSPORT_PROTOCOL) {
-        IPRegisterProtocolCommand * command = check_and_cast<IPRegisterProtocolCommand *>(msg->getControlInfo());
+        RegisterTransportProtocolCommand * command = check_and_cast<RegisterTransportProtocolCommand *>(msg->getControlInfo());
         mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
         delete msg;
     }
