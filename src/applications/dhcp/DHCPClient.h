@@ -79,6 +79,11 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         virtual void handleMessage(cMessage * msg);
 
         /*
+         * Opens a UDP socket for client-server communication.
+         */
+        virtual void openSocket();
+
+        /*
          * Handles incoming DHCP messages, and implements the
          * state-transition diagram for DHCP clients.
          */

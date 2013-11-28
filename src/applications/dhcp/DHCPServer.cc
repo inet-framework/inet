@@ -75,8 +75,7 @@ void DHCPServer::initialize(int stage)
     }
     if (stage == 2)
     {
-        if (ie != NULL)
-            openSocket();
+        openSocket();
     }
 }
 
@@ -283,6 +282,7 @@ void DHCPServer::sendNAK(DHCPMessage* msg)
     nak->setGiaddr(msg->getGiaddr()); // next server ip
     nak->setChaddr(msg->getChaddr());
     nak->getOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
+    nak->getOptions().setMessageType(DHCPNAK);
 
     sendToUDP(nak, serverPort, IPv4Address::ALLONES_ADDRESS, clientPort);
 }
@@ -369,7 +369,7 @@ void DHCPServer::sendOffer(DHCPLease* lease)
     // register the offering time // todo: ?
     lease->leaseTime = simTime();
 
-    sendToUDP(offer, 67, lease->ip.makeBroadcastAddress(lease->ip.getNetworkMask()), 68);
+    sendToUDP(offer, serverPort, lease->ip.makeBroadcastAddress(lease->ip.getNetworkMask()), clientPort);
 }
 
 DHCPLease* DHCPServer::getLeaseByMac(MACAddress mac)

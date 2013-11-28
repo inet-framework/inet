@@ -101,11 +101,6 @@ void DHCPClient::initialize(int stage)
         // grab the interface MAC address
         macAddress = ie->getMacAddress();
 
-        // bind the client to the UDP port
-        socket.setOutputGate(gate("udpOut"));
-        socket.bind(clientPort);
-        socket.setBroadcast(true);
-
         EV_DETAIL << "DHCP Client bound to port " << clientPort << " on " << ie->getName() << endl;
 
         // set client to idle state
@@ -184,7 +179,10 @@ void DHCPClient::handleMessage(cMessage *msg)
     if (msg->isSelfMessage())
     {
         if (msg->getKind() == START_DHCP)
+        {
+            openSocket();
             initClient();
+        }
         else
             handleTimer(msg);
     }
@@ -433,7 +431,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
         case RENEWING:
             if (msg->getOptions().getMessageType() == DHCPACK)
             {
-                EV_INFO << "Arrived DHCPACK message in RENWING state." << endl;
+                EV_INFO << "Arrived DHCPACK message in RENEWING state." << endl;
                 recordLease(msg);
                 cancelEvent(timerTo);
                 scheduleTimerT1();
@@ -647,6 +645,18 @@ void DHCPClient::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAdd
     socket.sendTo(msg, destAddr, destPort, ie->getInterfaceId());
 }
 
+void DHCPClient::openSocket()
+{
+    if (!ie)
+        error("Interface to listen does not exist. Aborting!");
+
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(clientPort);
+    socket.setBroadcast(true);
+
+    EV_INFO << "DHCP server bound to port " << serverPort << " on " << ie->getName() << "." << endl;
+}
+
 bool DHCPClient::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
@@ -657,8 +667,7 @@ bool DHCPClient::handleOperationStage(LifecycleOperation *operation, int stage, 
             isOperational = true;
             IInterfaceTable* ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
             ie = ift->getInterfaceByName(par("interface"));
-            socket.bind(clientPort);
-
+            openSocket();
             if (lease != NULL)
             {
                 clientState = INIT_REBOOT;
