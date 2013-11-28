@@ -55,14 +55,14 @@ simple RSTP like ISpanningTree
         
         // The migrate time is the time after which a non-assigned port becomes designated. This time is equal to 6 sec by default,
         // but you can tune the time to be between 4 and 30 sec.
-        double migrateTime @unit ("s")= default(6s);
+        double migrateTime @unit ("s")= default(3s);
         
         // The topology change while time is the time while a port will send TC=true (Topology Change Notification)
         double tcWhileTime @unit("s") = default(6s);
 
         // The bridge priority determines which bridge is elected as the root bridge. If the switch has a bridge priority that is lower than all
         // the other switches, the other switches automatically select the switch as the root switch.
-        int bridgePriority = default(128);
+        int bridgePriority = default(32768);
 
         // The path to the InterfaceTable module
         string interfaceTableName = default("^.interfaceTable");
