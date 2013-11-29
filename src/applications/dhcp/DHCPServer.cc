@@ -470,6 +470,7 @@ bool DHCPServer::handleOperationStage(LifecycleOperation *operation, int stage, 
     {
         if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
         {
+            isOperational = true;
             ie = chooseInterface();
             openSocket();
         }
@@ -478,6 +479,7 @@ bool DHCPServer::handleOperationStage(LifecycleOperation *operation, int stage, 
     {
         if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
         {
+            isOperational = false;
             leased.clear();
             ie = NULL;
             // socket.close(); TODO:
@@ -487,6 +489,7 @@ bool DHCPServer::handleOperationStage(LifecycleOperation *operation, int stage, 
     {
         if (stage == NodeCrashOperation::STAGE_CRASH)
         {
+            isOperational = false;
             leased.clear();
             ie = NULL;
             // socket???
