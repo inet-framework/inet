@@ -23,6 +23,7 @@
 #include "RadioState.h"
 #include "ChannelAccess.h"
 #include "Radio80211aControlInfo_m.h"
+#include "InterfaceTableAccess.h"
 
 //TBD supportedRates!
 //TBD use command msg kinds?
@@ -96,6 +97,7 @@ void Ieee80211MgmtSTA::initialize(int stage)
         assocTimeoutMsg = NULL;
 
         nb = NotificationBoardAccess().get();
+        interfaceTable = InterfaceTableAccess().get();
 
         WATCH(isScanning);
         WATCH(isAssociated);
@@ -279,7 +281,9 @@ void Ieee80211MgmtSTA::changeChannel(int channelNum)
 void Ieee80211MgmtSTA::beaconLost()
 {
     EV << "Missed a few consecutive beacons -- AP is considered lost\n";
-    nb->fireChangeNotification(NF_L2_BEACON_LOST, NULL);  //XXX use InterfaceEntry as detail, etc...
+    // KLUDGE: TODO: there should be a better way to do this
+    InterfaceEntry *ie = interfaceTable->getInterfaceByInterfaceModule(getParentModule()->getSubmodule("mac"));
+    nb->fireChangeNotification(NF_L2_BEACON_LOST, ie);
 }
 
 void Ieee80211MgmtSTA::sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& address)
@@ -763,7 +767,9 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
         isAssociated = true;
         (APInfo&)assocAP = (*ap);
 
-        nb->fireChangeNotification(NF_L2_ASSOCIATED, NULL); //XXX detail: InterfaceEntry?
+        // KLUDGE: TODO: there should be a better way to do this
+        InterfaceEntry *ie = interfaceTable->getInterfaceByInterfaceModule(getParentModule()->getSubmodule("mac"));
+        nb->fireChangeNotification(NF_L2_ASSOCIATED, ie);
 
         assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", MK_BEACON_TIMEOUT);
         scheduleAt(simTime()+MAX_BEACONS_MISSED*assocAP.beaconInterval, assocAP.beaconTimeoutMsg);
