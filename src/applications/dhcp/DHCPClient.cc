@@ -517,7 +517,7 @@ void DHCPClient::receiveChangeNotification(int category, const cPolymorphic *det
             cPolymorphic *detailsAux = const_cast<cPolymorphic*>(details);
             ie = dynamic_cast<InterfaceEntry*>(detailsAux);
         }
-        if (!ie || (ie && (ie == ie)))
+        if (!ie || (ie && this->ie == ie))
         {
             EV_INFO << "Interface associated, starting DHCP." << endl;
             initClient();
