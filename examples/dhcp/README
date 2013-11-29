@@ -2,8 +2,8 @@ DHCP (Dynamic Host Configuration Protocol) Examples
 ===================================================
 
 
-1. WiredNetWithDHCP
--------------------
+1. WiredDHCP
+------------
 
 This scenario introduces how DHCP works when multiple hosts and a single DHCP
 server are present. At random startup times, the clients request IP addresses
@@ -14,8 +14,20 @@ client[0], client[1], ..., client[9] receive the addresses 192.168.1.100 through
 (1000s), causing the clients to periodically renew their addresses.
 
 
-2. DHCPWithLifeCycle
---------------------
+2. WirelessDHCP
+---------------
+
+This is a real-life example where wirless hosts are configured by the 
+DHCP server while the rest of the network (all wired interfaces) are 
+configured manually using the IPv4NetworkConfigurator. 
+
+Once the wireless clients associate with the AccessPoint, they send
+out a DHCPREQ and receive their own IP addresses along with the
+gateway address. At t=3s the clients start pinging the 'remote' server
+verifying whether the received IP and gateway address is correct.  
+
+3. RebootingDHCP
+----------------
 
 This scenario demonstrates how DHCP works when a client or a server reboots.
 
@@ -37,7 +49,4 @@ it no longer knows about the client. After the refusal, the client restarts
 the whole DHCP process, and asks for a new address. The server will offer the 
 first available address from its pool, which is again 192.168.1.100 since there 
 are no other clients in the network.
-
-3. WirelessNetWithDHCP
-----------------------
 

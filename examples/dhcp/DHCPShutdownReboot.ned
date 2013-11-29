@@ -15,7 +15,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.examples.dhcp.eth;
+package inet.examples.dhcp;
 
 import inet.nodes.ethernet.Eth10M;
 import inet.nodes.inet.StandardHost;
@@ -23,7 +23,7 @@ import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.base.LifecycleController;
 import inet.world.scenario.ScenarioManager;
 
-network DHCPWithLifecycle
+network DHCPShutdownReboot
 {
     submodules:
         scenarioManager: ScenarioManager {

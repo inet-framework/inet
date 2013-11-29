@@ -11,6 +11,6 @@
     </at>
     <at t="90.0">
         <tell module="lifecycleController" target="server" operation="NodeStartOperation"/>
-    </at> -->
+    </at>
 </scenario>
 

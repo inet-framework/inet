@@ -15,11 +15,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.examples.dhcp.wlan;
+package inet.examples.dhcp;
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.ethernet.Eth100M;
-import inet.nodes.ethernet.EtherSwitch;
+import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
@@ -29,32 +29,33 @@ import inet.world.radio.ChannelControl;
 network WirelessNetWithDHCP
 {
     @display("bgb=590,407;bgl=2");
-    int numWirelessHosts;
+    int numHosts;
     submodules:
         channelControl: ChannelControl {
             @display("p=64,34");
             numChannels = 5;
         }
-        client: StandardHost {
-            @display("p=474,129");
+        gateway: Router {
+            @display("p=365,35");
         }
-        wirelessHost[numWirelessHosts]: WirelessHost {
-            @display("r=,,#707070");
-            wlan[*].mgmtType = "Ieee80211MgmtSTASimplified";
+        client[numHosts]: WirelessHost {
+            @display("r=,,#707070;p=245,285");
         }
         ap: AccessPoint {
-            @display("p=310,128");
-            wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
+            @display("p=126,98");
         }
-        server: StandardHost {
-            @display("p=172,129");
+        dhcpServer: StandardHost {
+            @display("p=64,307");
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
-                config = xml("<config><interface hosts='server' names='eth0' address='192.168.1.1' netmask='255.255.255.0'/></config>");
-                @display("p=148,35");
+                @display("p=180,35");
+        }
+        remote: StandardHost {
+            @display("p=540,204");
         }
     connections:
-        client.ethg++ <--> Eth100M <--> ap.ethg++;
-        server.ethg++ <--> Eth100M <--> ap.ethg++;
+        gateway.ethg++ <--> Eth100M <--> ap.ethg++;
+        gateway.ethg++ <--> Eth100M <--> remote.ethg++;
+        dhcpServer.ethg++ <--> Eth100M <--> ap.ethg++;
 }
