@@ -255,6 +255,10 @@ void DHCPClient::handleTimer(cMessage * msg)
         sendRequest();
         scheduleTimerTO(WAIT_ACK);
     }
+    else if (category == T2)
+    {
+        // TODO: what happens with T2 and clientState != RENEWING case, is it an error?
+    }
     else if (category == LEASE_TIMEOUT)
     {
         EV_INFO << "Lease has expired. Starting DHCP process in INIT state." << endl;
@@ -276,6 +280,7 @@ void DHCPClient::recordOffer(DHCPMessage * dhcpOffer)
          IPv4Address serverId = dhcpOffer->getOptions().getServerIdentifier();
 
          // minimal information to configure the interface
+         // TODO: this condition will always be true, so I guess it could be deleted or what?
          if (!ip.isUnspecified())
          {
              // create the lease to request
@@ -329,6 +334,7 @@ void DHCPClient::boundLease()
 
     std::cout << "Host " << hostName << " got ip: " << lease->ip << "/" << lease->subnetMask << endl;
 
+    // TODO: we add routes here but where do they get deleted?
     IPv4Route * iroute = NULL;
     for (int i = 0; i < irt->getNumRoutes(); i++)
     {
@@ -425,6 +431,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             }
             else if (msg->getOptions().getMessageType() == DHCPACK)
             {
+                // TODO: do you often say the same thing?
                 recordLease(msg);
                 EV_INFO << "The offered IP " << lease->ip << " is available. Assign it to " << this->getParentModule()->getFullName() << endl;
                 cancelEvent(timerTo);
@@ -453,6 +460,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             if (msg->getOptions().getMessageType() == DHCPACK)
             {
                 EV_INFO << "Arrived DHCPACK message in RENEWING state." << endl;
+                // TODO: do you often say the same thing?
                 recordLease(msg);
                 cancelEvent(timerTo);
                 scheduleTimerT1();
@@ -476,7 +484,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             }
             if (msg->getOptions().getMessageType() == DHCPACK)
             {
-
+                // TODO: do you often say the same thing?
                 recordLease(msg);
                 cancelEvent(timerTo);
                 scheduleTimerT1();
@@ -488,6 +496,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
         case REBOOTING:
             if (msg->getOptions().getMessageType() == DHCPACK)
             {
+                // TODO: do you often say the same thing?
                 recordLease(msg);
                 cancelEvent(timerTo);
                 scheduleTimerT1();
@@ -517,6 +526,8 @@ void DHCPClient::receiveChangeNotification(int category, const cPolymorphic *det
             cPolymorphic *detailsAux = const_cast<cPolymorphic*>(details);
             ie = dynamic_cast<InterfaceEntry*>(detailsAux);
         }
+        // KLUDGE: TODO: the !ie part is obviously wrong and it's there only because
+        // the NF_L2_ASSOCIATED event is fired with a NULL
         if (!ie || (ie && this->ie == ie))
         {
             EV_INFO << "Interface associated, starting DHCP." << endl;
