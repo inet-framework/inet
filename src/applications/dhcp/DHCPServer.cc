@@ -70,9 +70,6 @@ void DHCPServer::initialize(int stage)
 
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state!");
     }
     if (stage == 2)
     {
