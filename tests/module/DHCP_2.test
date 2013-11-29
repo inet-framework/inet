@@ -119,7 +119,7 @@ Host dhcpClient got ip: 192.168.1.100/255.255.255.0
 Host dhcpClient got ip: 192.168.1.100/255.255.255.0
 
 %contains: stdout
-<!> Simulation time limit reached -- simulation stopped at event #159, t=10500.5.
+<!> Simulation time limit reached -- simulation stopped at event #159, t=10500.
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
