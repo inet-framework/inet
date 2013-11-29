@@ -262,7 +262,8 @@ void DHCPClient::handleTimer(cMessage * msg)
         clientState = INIT;
         initClient();
     }
-
+    else
+        throw cRuntimeError("Unknown self message '%s'", msg->getName());
 }
 
 void DHCPClient::recordOffer(DHCPMessage * dhcpOffer)
@@ -586,6 +587,8 @@ void DHCPClient::sendRequest()
         EV_INFO << "Sending DHCPREQUEST renewing the IP " << lease->ip << " via broadcast." << endl;
         sendToUDP(request, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
     }
+    else
+        throw cRuntimeError("Invalid state");
 }
 
 void DHCPClient::sendDiscover()
