@@ -37,3 +37,7 @@ it no longer knows about the client. After the refusal, the client restarts
 the whole DHCP process, and asks for a new address. The server will offer the 
 first available address from its pool, which is again 192.168.1.100 since there 
 are no other clients in the network.
+
+3. WirelessNetWithDHCP
+----------------------
+

@@ -41,7 +41,7 @@ simple DHCPClient like IUDPApp
         string routingTablePath = default("^.routingTable");
         string interfaceTablePath = default("^.interfaceTable");
         string notificationBoardPath = default("^.notificationBoard");
-        double startTime @unit(s) = default(0.5s); // starting time of DHCP initialization
+        double startTime @unit(s) = default(0.0s); // starting time of DHCP initialization
         @display("i=block/app2");
     gates:
         input udpIn @labels(UDPControlInfo/up);

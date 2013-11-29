@@ -19,9 +19,10 @@ package inet.examples.dhcp.wlan;
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.ethernet.Eth100M;
-import inet.nodes.inet.Router;
+import inet.nodes.ethernet.EtherSwitch;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.WirelessHost;
+import inet.nodes.wireless.AccessPoint;
 import inet.world.radio.ChannelControl;
 
 
@@ -32,47 +33,28 @@ network WirelessNetWithDHCP
     submodules:
         channelControl: ChannelControl {
             @display("p=64,34");
-            pMax = 100mW;
             numChannels = 5;
         }
-        router: Router {
-            @display("p=241,136");
-        }
-        standardHost: StandardHost {
-            @display("p=418,134");
+        client: StandardHost {
+            @display("p=474,129");
         }
         wirelessHost[numWirelessHosts]: WirelessHost {
-            numUdpApps = 1;
-            udpApp[0].typename = "DHCPClient";
+            @display("r=,,#707070");
+            wlan[*].mgmtType = "Ieee80211MgmtSTASimplified";
         }
-        wirelessRouter: WirelessHost {
-            @display("p=154,207");
-            numUdpApps = 1;
-            udpApp[0].typename = "DHCPServer";
-            IPForward = true;
-            networkLayer.proxyARP = true;
-            wlan[0].mgmtType = default("Ieee80211MgmtAP");
-            wlan[0].mgmt.encapDecap = "true";
+        ap: AccessPoint {
+            @display("p=310,128");
+            wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
+        }
+        server: StandardHost {
+            @display("p=172,129");
         }
         configurator: IPv4NetworkConfigurator {
-            @display("p=71,374");
-            config = xml(
-                "<config>\n" +
-                "  <interface hosts='standardHost' towards='router' address='10.0.1.1'/>\n" +
-                "  <interface hosts='router' towards='standardHost' address='10.0.1.2'/>\n" +
-                "  <interface hosts='router' towards='wirelessRouter' address='10.0.0.1'/>\n" +
-                "  <interface hosts='wirelessRouter' towards='router' address='10.0.0.2' netmask='255.255.255.252'/>\n" +
-                "  <interface hosts='wirelessRouter' names='wlan0' address='192.168.0.1' netmask='255.255.255.0'/>\n" +
-                "  <route hosts='standardHost' destination='*' netmask='*' gateway='router'/>\n" +
-                "  <route hosts='router' destination='192.168.0.0' netmask='255.255.255.0' gateway='wirelessRouter'/>\n" +
-                "  <route hosts='wirelessRouter' destination='192.168.0.0' netmask='255.255.255.0' interface='wlan0'/>\n" +
-                "  <route hosts='wirelessRouter' destination='10.0.0.0' netmask='255.255.0.0' gateway='router'/>\n" +
-                "</config>\n");
-            addStaticRoutes = false;
-            addDefaultRoutes = false;
-            addSubnetRoutes = false;
+            parameters:
+                config = xml("<config><interface hosts='server' names='eth0' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+                @display("p=148,35");
         }
     connections:
-        standardHost.ethg++ <--> Eth100M <--> router.ethg++;
-        wirelessRouter.ethg++ <--> Eth100M <--> router.ethg++;
+        client.ethg++ <--> Eth100M <--> ap.ethg++;
+        server.ethg++ <--> Eth100M <--> ap.ethg++;
 }
