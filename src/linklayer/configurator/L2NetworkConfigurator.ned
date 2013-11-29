@@ -17,7 +17,7 @@ package inet.linklayer.configurator;
 
 //
 // This module allows to configure network scenarios at layer 2.
-// The STP and RSTP related parameters such as port cost, port priority
+// The ~STP and ~RSTP related parameters such as link cost, port priority
 // and the "is-edge" flag can be configured with XML files.
 //
 // This module is based on ~IPv4NetworkConfigurator. The optional selector
@@ -34,6 +34,7 @@ package inet.linklayer.configurator;
 // For more information about the usage of the selector attributes see
 // ~IPv4NetworkConfigurator.
 //
+
 simple L2NetworkConfigurator
 {
     parameters:

@@ -23,6 +23,10 @@
 #include "InterfaceTable.h"
 #include "Ieee8021DInterfaceData.h"
 
+
+//
+// Base class for STP and RSTP.
+//
 class STPBase : public cSimpleModule, public ILifecycle {
 protected:
     bool visualize;                  // if true it visualize the spanning tree

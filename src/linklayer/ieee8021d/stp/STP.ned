@@ -30,8 +30,10 @@ import inet.linklayer.ieee8021d.ISpanningTree;
 // implements it according to the IEEE 802.1D-1998 specification.
 //
 // STP makes use of per-port configuration data such as cost and priority.
-// They can be set using L2NetworkConfigurator. Port state is kept in the switch's
-// InterfaceTable.
+// They can be set using ~L2NetworkConfigurator. Port state is kept in the switch's
+// ~InterfaceTable.
+//
+// @see L2NetworkConfigurator, InterfaceTable
 //
 simple STP like ISpanningTree
 {
