@@ -412,10 +412,11 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
         return;
     }
 
+    int messageType = msg->getOptions().getMessageType();
     switch (clientState)
     {
         case SELECTING:
-            if (msg->getOptions().getMessageType() == DHCPOFFER)
+            if (messageType == DHCPOFFER)
             {
                 EV_INFO << "DHCPOFFER message arrived with IP address: " << msg->getYiaddr() << "." << endl;
                 scheduleTimerTO(WAIT_ACK);
@@ -427,11 +428,11 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
                 EV_WARN << "The arriving packet is not a DHCPOFFER. Drop it." << endl;
             break;
         case REQUESTING:
-            if (msg->getOptions().getMessageType() == DHCPOFFER)
+            if (messageType == DHCPOFFER)
             {
                 EV_WARN << "We don't accept DHCPOFFERs in REQUESTING state. Drop it." << endl; // remains in REQUESTING
             }
-            else if (msg->getOptions().getMessageType() == DHCPACK)
+            else if (messageType == DHCPACK)
             {
                 // TODO: do you often say the same thing?
                 recordLease(msg);
@@ -449,7 +450,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
                     initClient();
                 */
             }
-            else if (msg->getOptions().getMessageType() == DHCPNAK)
+            else if (messageType == DHCPNAK)
             {
                 EV_INFO << "Arrived DHCPNAK message. Restarting the configuration process." << endl;
                 initClient();
@@ -459,7 +460,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             EV_DETAIL << "We are in BOUND, discard all DHCP messages." << endl; // remain in BOUND
             break;
         case RENEWING:
-            if (msg->getOptions().getMessageType() == DHCPACK)
+            if (messageType == DHCPACK)
             {
                 EV_INFO << "Arrived DHCPACK message in RENEWING state." << endl;
                 // TODO: do you often say the same thing?
@@ -470,7 +471,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
                 boundLease();
                 clientState = BOUND;
             }
-            if (msg->getOptions().getMessageType() == DHCPNAK)
+            else if (messageType == DHCPNAK)
             {
                 unboundLease(); // halt network (remove address)
                 EV_INFO << "The renewing process was unsuccessful. Restarting the DHCP configuration process." << endl;
@@ -478,13 +479,13 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             }
             break;
         case REBINDING:
-            if (msg->getOptions().getMessageType() == DHCPNAK)
+            if (messageType == DHCPNAK)
             {
                 unboundLease(); // halt network (remove address)
                 EV_INFO << "The rebinding process was unsuccessful. Restarting the DHCP configuration process." << endl;
                 initClient();
             }
-            if (msg->getOptions().getMessageType() == DHCPACK)
+            else if (messageType == DHCPACK)
             {
                 // TODO: do you often say the same thing?
                 recordLease(msg);
@@ -496,7 +497,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             }
             break;
         case REBOOTING:
-            if (msg->getOptions().getMessageType() == DHCPACK)
+            if (messageType == DHCPACK)
             {
                 // TODO: do you often say the same thing?
                 recordLease(msg);
@@ -506,7 +507,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
                 boundLease();
                 clientState = BOUND;
             }
-            if (msg->getOptions().getMessageType() == DHCPNAK)
+            else if (messageType == DHCPNAK)
                 initClient();
             break;
         default:
