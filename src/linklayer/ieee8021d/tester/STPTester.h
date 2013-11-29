@@ -32,7 +32,7 @@
  * for connectedness and loop free-ness, using a modified depth-first search
  * with cycle detection. The results can be obtained with getter methods.
  */
-class STPTester
+class STPTester : public cSimpleModule
 {
     public:
         enum Color
@@ -40,7 +40,7 @@ class STPTester
             WHITE, GRAY, BLACK
         };
 
-    private:
+    protected:
         bool loop;
         int numOfVisitedNodes;
         int numOfNodes;
@@ -48,12 +48,19 @@ class STPTester
         std::map<Topology::Node *, Topology::Node *> parent;
         Topology graph;
 
-        void dfsVisit(Topology::Node * node);
-        bool isForwarding(Topology::Node * node, unsigned int portNum);
+        simtime_t checkTime;
+        cMessage* checkTimer;
 
     public:
-        // Constructor; includes network topology extraction
+        // Includes network topology extraction
         STPTester();
+        ~STPTester();
+        virtual void initialize();
+        virtual void handleMessage(cMessage *msg);
+
+    protected:
+        void dfsVisit(Topology::Node * node);
+        bool isForwarding(Topology::Node * node, unsigned int portNum);
 
         // Analyzes the network graph
         void depthFirstSearch();

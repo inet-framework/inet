@@ -21,16 +21,44 @@
 #include "Ieee8021DInterfaceData.h"
 #include "NodeStatus.h"
 
+Define_Module(STPTester);
+
 STPTester::STPTester()
+{
+    checkTimer = new cMessage("checktime");
+}
+
+STPTester::~STPTester()
+{
+    cancelAndDelete(checkTimer);
+}
+
+void STPTester::initialize()
+{
+    graph.extractByProperty("node");
+    numOfNodes = graph.getNumNodes();
+
+    checkTime=par("checkTime");
+    scheduleAt(simTime() + checkTime, checkTimer);
+}
+
+void STPTester::handleMessage(cMessage *msg)
+{
+    if(msg->isSelfMessage())
+    {
+        depthFirstSearch();
+        EV_DEBUG<<isLoopFreeGraph()<<" "<<isConnectedGraph()<<" "<<isTreeGraph()<<" "<<getNumOfNodes()<<" "<<getNumOfVisitedNodes()<<endl;
+        scheduleAt(simTime() + checkTime, msg);
+    }
+    else
+    {
+        opp_error("This module only handle selfmessages");
+    }
+}
+void STPTester::depthFirstSearch()
 {
     loop = false;
     numOfVisitedNodes = 0;
-    graph.extractByProperty("node");
-    numOfNodes = graph.getNumNodes();
-}
-
-void STPTester::depthFirstSearch()
-{
     for (int i = 0; i < graph.getNumNodes(); i++)
     {
         color[graph.getNode(i)] = WHITE;

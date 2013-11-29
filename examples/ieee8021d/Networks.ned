@@ -21,11 +21,15 @@ import inet.base.LifecycleController;
 import inet.nodes.ethernet.EtherSwitch;
 import inet.world.scenario.ScenarioManager;
 import inet.linklayer.configurator.L2NetworkConfigurator;
+import inet.linklayer.ieee8021d.tester.STPTester;
 
 network SwitchNetwork
 {
     @display("bgb=689,368");
     submodules:
+        stpTester: STPTester {
+            @display("p=75,277");
+        }
         scenarioManager: ScenarioManager {
             @display("p=75,101");
         }
@@ -73,7 +77,7 @@ network SwitchNetwork
 
         switch6: EtherSwitch {
             parameters:
-                @display("p=148,217");
+                @display("p=200,154");
             gates:
                 ethg[];
         }
@@ -102,7 +106,7 @@ network LargeNet extends SwitchNetwork
     @display("bgb=952,472");
     submodules:
         host1: EtherHost {
-            @display("p=187,147");
+            @display("p=200,79");
         }
 
         host2: EtherHost {
