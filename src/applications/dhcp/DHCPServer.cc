@@ -61,15 +61,14 @@ void DHCPServer::initialize(int stage)
         clientPort = 68; // client
         serverPort = 67; // server
 
-        IInterfaceTable * ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
-        ie = ift->getInterfaceByName(par("interface"));
-
         nb = check_and_cast<NotificationBoard*>(getModuleByPath(par("notificationBoardPath")));
-        nb->subscribe(this, NF_INTERFACE_CREATED);
         nb->subscribe(this, NF_INTERFACE_DELETED);
 
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+
+        if (isOperational)
+            ie = chooseInterface();
     }
     if (stage == 2)
     {
@@ -80,7 +79,7 @@ void DHCPServer::initialize(int stage)
 void DHCPServer::openSocket()
 {
     if (!ie)
-        error("Interface to listen does not exist. Aborting!");
+        throw cRuntimeError("Interface to listen on does not exist");  // may have been deleted
 
     socket.setOutputGate(gate("udpOut"));
     socket.bind(serverPort);
@@ -92,42 +91,69 @@ void DHCPServer::receiveChangeNotification(int category, const cPolymorphic *det
 {
     Enter_Method_Silent();
 
-    InterfaceEntry * nie;
-    switch (category)
+    if (category == NF_INTERFACE_DELETED)
     {
-        case NF_INTERFACE_CREATED:
-            nie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
-            if (!ie && !strcmp(nie->getName(), par("interface").stringValue()))
-                ie = nie;
-            break;
-
-        case NF_INTERFACE_DELETED:
-            nie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
-            if (ie == nie)
-                ie = NULL;
-            break;
-
-        default:
-            throw cRuntimeError("Unaccepted notification category: %d", category);
+        if (isOperational)
+            throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
     }
+    else
+        throw cRuntimeError("Unaccepted notification category: %d", category);
+}
+
+InterfaceEntry *DHCPServer::chooseInterface()
+{
+    IInterfaceTable* ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
+    const char *interfaceName = par("interface");
+    InterfaceEntry *ie = NULL;
+
+    if (strlen(interfaceName) > 0)
+    {
+        ie = ift->getInterfaceByName(interfaceName);
+        if (ie == NULL)
+            throw new cRuntimeError("Interface \"%s\" does not exist", interfaceName);
+    }
+    else
+    {
+        // there should be exactly one non-loopback interface that we want to serve DHCP requests on
+        for (int i = 0; i < ift->getNumInterfaces(); i++) {
+            InterfaceEntry *current = ift->getInterface(i);
+            if (!current->isLoopback()) {
+                if (ie)
+                    throw new cRuntimeError("Multiple non-loopback interfaces found, please select explicitly which one you want to serve DHCP requests on");
+                ie = current;
+            }
+        }
+        if (!ie)
+            throw new cRuntimeError("No non-loopback interface found to be configured via DHCP");
+    }
+
+    return ie;
 }
 
 void DHCPServer::handleMessage(cMessage *msg)
 {
-
-    DHCPMessage * dhcpPacket = dynamic_cast<DHCPMessage*>(msg);
-    if (dhcpPacket)
-        processPacket(dhcpPacket);
-    else
-    {
-        EV_WARN << "Unknown packet, discarding it." << endl;
-        delete msg;
-    }
+    DHCPMessage *dhcpPacket = dynamic_cast<DHCPMessage*>(msg);
+    if (!dhcpPacket)
+        throw cRuntimeError(dhcpPacket, "Unexpected packet received (not a DHCPMessage)");
+    processDHCPMessage(dhcpPacket);
 }
 
 
-void DHCPServer::processPacket(DHCPMessage *packet)
+void DHCPServer::processDHCPMessage(DHCPMessage *packet)
 {
+    ASSERT(isOperational && ie != NULL);
+
+    // check that the packet arrived on the interface we are supposed to serve
+    UDPDataIndication *ctrl = check_and_cast<UDPDataIndication*>(packet->removeControlInfo());
+    int inputInterfaceId = ctrl->getInterfaceId();
+    delete ctrl;
+    if (inputInterfaceId != ie->getInterfaceId())
+    {
+        EV_WARN << "DHCP message arrived on a different interface, dropping\n";
+        delete packet;
+        return;
+    }
+
     // check the OP code
     if (packet->getOp() == BOOTREQUEST)
     {
@@ -444,8 +470,7 @@ bool DHCPServer::handleOperationStage(LifecycleOperation *operation, int stage, 
     {
         if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
         {
-            IInterfaceTable * ift = check_and_cast<IInterfaceTable * >(getModuleByPath(par("interfaceTablePath")));
-            ie = ift->getInterfaceByName(par("interface"));
+            ie = chooseInterface();
             openSocket();
         }
     }

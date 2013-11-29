@@ -22,28 +22,22 @@ package inet.applications.dhcp;
 import inet.applications.IUDPApp;
 
 //
-// The Dynamic Host Configuration Protocol (DHCP) provides configuration
-// parameters to Internet hosts.  DHCP consists of two components: a
-// protocol for delivering host-specific configuration parameters from a
-// DHCP server to a host and a mechanism for allocation of network
-// addresses to hosts.
+// Implements the DHCP server protocol. DHCP (Dynamic Host Configuration Protocol),
+// described in RFC 2131, provides configuration parameters to Internet hosts.
+// Requires UDP.
 //
-// DHCP is built on a client-server (@DHCPServer) model, where designated
-// DHCP server hosts allocate network addresses and deliver configuration
-// parameters to dynamically configured hosts.
-//
-// For more info, see RFC 2131.
+// @see DHCPClient, DHCPMessage
 //
 simple DHCPServer like IUDPApp
 {
     parameters:
+        string interface = default(""); // interface to listen on; can be left empty if there is only one non-loopback interface
         string subnetMask; // subnet mask to assign
         string ipAddressStart; // IP pool 1st address
         int maxNumClients; // maximum number of clients (IPs) allowed to be leased
         string gateway; // gateway to assign
-        string dns; // dns to assign
+        string dns; // DNS server to assign
         int leaseTime @unit(s); // lease time in seconds
-        string interface; // interface to listen on
 
         string interfaceTablePath = default("^.interfaceTable");
         string notificationBoardPath = default("^.notificationBoard");

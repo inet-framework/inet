@@ -53,7 +53,7 @@ class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILi
         IPv4Address gateway;
         IPv4Address ipAddressStart;
 
-        InterfaceEntry* ie; // interface to listen
+        InterfaceEntry* ie; // interface to serve DHCP requests on
         NotificationBoard* nb;
         UDPSocket socket;
 
@@ -80,7 +80,7 @@ class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILi
         /*
          * Implements the server's state machine.
          */
-        virtual void processPacket(DHCPMessage *packet);
+        virtual void processDHCPMessage(DHCPMessage *packet);
 
         /*
          * Send DHCPOFFER message to client in response to DHCPDISCOVER with offer of configuration
@@ -99,6 +99,7 @@ class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILi
          */
         virtual void sendNAK(DHCPMessage* msg);
 
+        virtual InterfaceEntry *chooseInterface();
         virtual void sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort);
         virtual void receiveChangeNotification(int category, const cPolymorphic *details);
 
