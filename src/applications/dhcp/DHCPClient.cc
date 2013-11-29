@@ -533,9 +533,7 @@ void DHCPClient::receiveChangeNotification(int category, const cPolymorphic *det
             cPolymorphic *detailsAux = const_cast<cPolymorphic*>(details);
             ie = dynamic_cast<InterfaceEntry*>(detailsAux);
         }
-        // KLUDGE: TODO: the !ie part is obviously wrong and it's there only because
-        // the NF_L2_ASSOCIATED event is fired with a NULL
-        if (!ie || (ie && this->ie == ie))
+        if (ie && this->ie == ie)
         {
             EV_INFO << "Interface associated, starting DHCP." << endl;
             initClient();
