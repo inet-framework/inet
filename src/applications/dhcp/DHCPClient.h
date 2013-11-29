@@ -46,6 +46,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         cMessage* timerTo; // response timeout: WAIT_ACK, WAIT_OFFER
         cMessage* leaseTimer;
         cMessage* startTimer; // self msg to start DHCP init
+
         // DHCP timer types (RFC 2131 4.4.5)
         enum TimerType
         {
@@ -153,6 +154,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
          */
         virtual void initRebootedClient();
 
+        virtual InterfaceEntry *chooseInterface();
         virtual void scheduleTimerTO(TimerType type);
         virtual void scheduleTimerT1();
         virtual void scheduleTimerT2();

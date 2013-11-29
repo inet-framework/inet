@@ -80,26 +80,23 @@ void DHCPClient::initialize(int stage)
         serverPort = 67; // server
 
         // get the hostname
-        hostName = this->getParentModule()->getFullName();
+        cModule *host = findContainingNode(this);
+        hostName = host->getFullName();
         nb = check_and_cast<NotificationBoard *>(getModuleByPath(par("notificationBoardPath")));
 
         // for a wireless interface subscribe the association event to start the DHCP protocol
         nb->subscribe(this, NF_L2_ASSOCIATED);
+        nb->subscribe(this, NF_INTERFACE_DELETED);
 
         // get the interface to configure
-        IInterfaceTable* ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
-        const char *interfaceName = par("interface");
-        ie = ift->getInterfaceByName(interfaceName);
-        if (ie == NULL)
-            throw new cRuntimeError("Interface \"%s\" does not exist", interfaceName);
+        if (isOperational)
+            ie = chooseInterface();
 
         // get the routing table to update and subscribe it to the blackboard
         irt = check_and_cast<IRoutingTable*>(getModuleByPath(par("routingTablePath")));
 
         // grab the interface MAC address
         macAddress = ie->getMacAddress();
-
-        EV_DETAIL << "DHCP Client bound to port " << clientPort << " on " << ie->getName() << endl;
 
         // set client to idle state
         clientState = IDLE;
@@ -113,6 +110,38 @@ void DHCPClient::initialize(int stage)
     }
 }
 
+InterfaceEntry *DHCPClient::chooseInterface()
+{
+    IInterfaceTable* ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
+    const char *interfaceName = par("interface");
+    InterfaceEntry *ie = NULL;
+
+    if (strlen(interfaceName) > 0)
+    {
+        ie = ift->getInterfaceByName(interfaceName);
+        if (ie == NULL)
+            throw new cRuntimeError("Interface \"%s\" does not exist", interfaceName);
+    }
+    else
+    {
+        // there should be exactly one non-loopback interface that we want to configure
+        for (int i = 0; i < ift->getNumInterfaces(); i++) {
+            InterfaceEntry *current = ift->getInterface(i);
+            if (!current->isLoopback()) {
+                if (ie)
+                    throw new cRuntimeError("Multiple non-loopback interfaces found, please select explicitly which one you want to configure via DHCP");
+                ie = current;
+            }
+        }
+        if (!ie)
+            throw new cRuntimeError("No non-loopback interface found to be configured via DHCP");
+    }
+
+    if (!ie->ipv4Data()->getIPAddress().isUnspecified())
+        throw new cRuntimeError("Refusing to start DHCP on interface \"%s\" that already has an IP address", ie->getName());
+    return ie;
+}
+
 void DHCPClient::finish()
 {
     cancelEvent(timerT1);
@@ -122,9 +151,7 @@ void DHCPClient::finish()
     cancelEvent(startTimer);
 }
 
-namespace {
-
-inline bool routeMatches(const IPv4Route *entry, const IPv4Address& target, const IPv4Address& nmask,
+static bool routeMatches(const IPv4Route *entry, const IPv4Address& target, const IPv4Address& nmask,
         const IPv4Address& gw, int metric, const char *dev)
 {
     if (!target.isUnspecified() && !target.equals(entry->getDestination()))
@@ -139,8 +166,6 @@ inline bool routeMatches(const IPv4Route *entry, const IPv4Address& target, cons
         return false;
 
     return true;
-}
-
 }
 
 const char *DHCPClient::getStateName(ClientState state)
@@ -163,14 +188,14 @@ const char *DHCPClient::getStateName(ClientState state)
 
 void DHCPClient::updateDisplayString()
 {
-    getParentModule()->getDisplayString().setTagArg("t", 0, getStateName(clientState));
+    getDisplayString().setTagArg("t", 0, getStateName(clientState));
 }
 
 void DHCPClient::handleMessage(cMessage *msg)
 {
     if (!isOperational)
     {
-        EV_ERROR << "Message '" << msg << "' arrived when module status is down, dropped it." << endl;
+        EV_ERROR << "Message '" << msg << "' arrived when module status is down, dropping." << endl;
         delete msg;
         return;
     }
@@ -240,6 +265,7 @@ void DHCPClient::handleTimer(cMessage * msg)
     }
 
 }
+
 void DHCPClient::recordOffer(DHCPMessage * dhcpOffer)
 {
     if (!dhcpOffer->getYiaddr().isUnspecified())
@@ -324,15 +350,14 @@ void DHCPClient::boundLease()
         e->setSource(IPv4Route::MANUAL);
         irt->addRoute(e);
     }
+
     // update the routing table
-    nb->fireChangeNotification(NF_INTERFACE_IPv4CONFIG_CHANGED, ie);
     cancelEvent(leaseTimer);
     scheduleAt(simTime() + lease->leaseTime, leaseTimer);
 }
 
 void DHCPClient::unboundLease()
 {
-
     EV_INFO << "Unbound lease on " << ie->getName() << "." << endl;
 
     cancelEvent(timerT1);
@@ -342,8 +367,6 @@ void DHCPClient::unboundLease()
 
     ie->ipv4Data()->setIPAddress(IPv4Address());
     ie->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS);
-
-    nb->fireChangeNotification(NF_INTERFACE_IPv4CONFIG_CHANGED, ie);
 }
 
 void DHCPClient::initClient()
@@ -500,11 +523,15 @@ void DHCPClient::receiveChangeNotification(int category, const cPolymorphic *det
             initClient();
         }
     }
+    else if (category == NF_INTERFACE_DELETED)
+    {
+        if (isOperational)
+            throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
+    }
 }
 
 void DHCPClient::sendRequest()
 {
-
     // setting the xid
     xid = intuniform(0, RAND_MAX); // generating a new xid for each transmission
 
@@ -645,14 +672,10 @@ void DHCPClient::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAdd
 
 void DHCPClient::openSocket()
 {
-    if (!ie)
-        error("Interface to listen does not exist. Aborting!");
-
     socket.setOutputGate(gate("udpOut"));
     socket.bind(clientPort);
     socket.setBroadcast(true);
-
-    EV_INFO << "DHCP server bound to port " << serverPort << " on " << ie->getName() << "." << endl;
+    EV_INFO << "DHCP server bound to port " << serverPort << "." << endl;
 }
 
 bool DHCPClient::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -663,8 +686,7 @@ bool DHCPClient::handleOperationStage(LifecycleOperation *operation, int stage, 
         if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
         {
             isOperational = true;
-            IInterfaceTable* ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
-            ie = ift->getInterfaceByName(par("interface"));
+            ie = chooseInterface();
             openSocket();
             if (lease != NULL)
             {
