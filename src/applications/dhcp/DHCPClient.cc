@@ -201,13 +201,7 @@ void DHCPClient::handleMessage(cMessage *msg)
     }
     if (msg->isSelfMessage())
     {
-        if (msg->getKind() == START_DHCP)
-        {
-            openSocket();
-            initClient();
-        }
-        else
-            handleTimer(msg);
+        handleTimer(msg);
     }
     else if (msg->arrivedOn("udpIn"))
     {
@@ -227,7 +221,12 @@ void DHCPClient::handleTimer(cMessage * msg)
 {
     int category = msg->getKind();
 
-    if (category == WAIT_OFFER)
+    if (category == START_DHCP)
+    {
+        openSocket();
+        initClient();
+    }
+    else if (category == WAIT_OFFER)
     {
         EV_DETAIL << "No DHCP offer received within timeout. Restarting. " << endl;
         initClient();
