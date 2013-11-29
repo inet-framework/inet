@@ -34,6 +34,7 @@ DHCPClient::DHCPClient()
     timerT2 = NULL;
     timerTo = NULL;
     leaseTimer = NULL;
+    startTimer = NULL;
     nb = NULL;
     ie = NULL;
     irt = NULL;

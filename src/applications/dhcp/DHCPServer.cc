@@ -34,6 +34,7 @@ Define_Module(DHCPServer);
 DHCPServer::DHCPServer()
 {
     ie = NULL;
+    nb = NULL;
 }
 
 DHCPServer::~DHCPServer()
