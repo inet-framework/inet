@@ -23,7 +23,7 @@ import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.base.LifecycleController;
 import inet.world.scenario.ScenarioManager;
 
-network DHCPWithLifeCycle
+network DHCPWithLifecycle
 {
     submodules:
         scenarioManager: ScenarioManager {
