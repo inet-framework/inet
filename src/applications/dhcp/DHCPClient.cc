@@ -262,7 +262,9 @@ void DHCPClient::handleTimer(cMessage * msg)
     else if (category == LEASE_TIMEOUT)
     {
         EV_INFO << "Lease has expired. Starting DHCP process in INIT state." << endl;
+        // TODO: extract common part with the other calls to unboundLease
         unboundLease();
+        // TODO: this statement seem to have no effect, see initClient()
         clientState = INIT;
         initClient();
     }
@@ -473,6 +475,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             }
             else if (messageType == DHCPNAK)
             {
+                // TODO: extract common part with the other calls to unboundLease
                 unboundLease(); // halt network (remove address)
                 EV_INFO << "The renewing process was unsuccessful. Restarting the DHCP configuration process." << endl;
                 initClient();
@@ -481,6 +484,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
         case REBINDING:
             if (messageType == DHCPNAK)
             {
+                // TODO: extract common part with the other calls to unboundLease
                 unboundLease(); // halt network (remove address)
                 EV_INFO << "The rebinding process was unsuccessful. Restarting the DHCP configuration process." << endl;
                 initClient();
