@@ -133,9 +133,14 @@ InterfaceEntry *DHCPServer::chooseInterface()
 void DHCPServer::handleMessage(cMessage *msg)
 {
     DHCPMessage *dhcpPacket = dynamic_cast<DHCPMessage*>(msg);
-    if (!dhcpPacket)
-        throw cRuntimeError(dhcpPacket, "Unexpected packet received (not a DHCPMessage)");
-    processDHCPMessage(dhcpPacket);
+    if (dhcpPacket)
+        processDHCPMessage(dhcpPacket);
+    else
+    {
+        // note: unknown packets are likely ICMP errors in response to DHCP messages we sent out; just ignore them
+        EV_WARN << "Unknown packet '" << msg->getName() << "', discarding it." << endl;
+        delete msg;
+    }
 }
 
 
