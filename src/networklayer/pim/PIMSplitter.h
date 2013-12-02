@@ -1,9 +1,10 @@
+//
 // Copyright (C) 2013 Brno University of Technology (http://nes.fit.vutbr.cz/ansa)
 //
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 3
+// of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -11,16 +12,9 @@
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this program.  If not, see http://www.gnu.org/licenses/.
-/**
- * @file PimSplitter.h
- * @brief File contains implementation of PIMSplitter.
- * @date 3.12.2011
- * @author Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
- * @details Splitter is common for all PIM modes. It is used to resent all PIM messages to
- *  correct PIM mode module. It also does work which is same for all modes, e.g.
- *  it send Hello messages and it manages table of PIM interfaces.
- */
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+// Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
 #ifndef PIMSPLITTER_H_
 #define PIMSPLITTER_H_
