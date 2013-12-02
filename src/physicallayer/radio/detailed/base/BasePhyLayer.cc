@@ -26,6 +26,8 @@ BasePhyLayer::BasePhyLayer()
 	: DetailedRadioChannelAccess()
 	, DeciderToPhyInterface()
 	, thermalNoise(NULL)
+    , bitrate(0)
+    , txPower(0)
 	, maxTXPower(0)
 	, sensitivity(0)
 	, recordStats(false)
@@ -79,6 +81,7 @@ void BasePhyLayer::initialize(int stage) {
 		    sensitivity = FWMath::dBm2mW(sensitivity);
 		if (!isFiniteNumber(sensitivity))
 		    sensitivity = 0; // disabled
+        bitrate = par("bitrate").doubleValue();
 		txPower = par("txPower").doubleValue();
 		maxTXPower = par("maxTXPower").doubleValue();
 
@@ -500,10 +503,7 @@ DetailedRadioFrame* BasePhyLayer::encapsMsg(cPacket *macPkt)
 
 	// Retrieve the pointer to the Signal-instance from the ControlInfo-instance.
 	// We are now the new owner of this instance.
-	// TODO: KLUDGE: XXX:
     DetailedRadioSignal* s = createSignal(macPkt);
-	// make sure we really obtained a pointer to an instance
-	assert(s);
 
 	// set the members
 	assert(s->getDuration() > 0);
@@ -522,16 +522,7 @@ DetailedRadioFrame* BasePhyLayer::encapsMsg(cPacket *macPkt)
 
 	// pointer and Signal not needed anymore
 	delete s;
-	s = 0;
-
-	// delete the Control info
-
-    // ...and must always have a ControlInfo attached (contains Signal)
-	// TODO:
-    cObject* ctrlInfo = macPkt->removeControlInfo();
-//    assert(ctrlInfo);
-	delete ctrlInfo;
-	ctrlInfo = 0;
+    delete macPkt->removeControlInfo();
 
 	frame->encapsulate(macPkt);
 
@@ -569,12 +560,9 @@ void BasePhyLayer::handleUpperControlMessage(cMessage* msg) {
     case PHY_C_CONFIGURERADIO:
     {
         PhyControlInfo *phyCtrl = check_and_cast<PhyControlInfo *>(msg->getControlInfo());
-        double newBitrate = phyCtrl->getBitrate();
+        if (phyCtrl->getBitrate() != -1)
+            bitrate = phyCtrl->getBitrate();
         delete phyCtrl;
-        if (newBitrate != -1)
-        {
-            // TODO:
-        }
         break;
     }
 	case CHANNEL_SENSE_REQUEST:
@@ -921,8 +909,8 @@ cObject* BasePhyLayer::setUpControlInfo(cMessage *const pMsg, DeciderResult *con
 
 DetailedRadioSignal* BasePhyLayer::createSignal(cPacket *macPkt)
 {
-    // TODO: KLUDGE:
-    double bitrate = 2E+6;
+    PhyControlInfo *controlInfo = dynamic_cast<PhyControlInfo*>(macPkt->getControlInfo());
+    double bitrate = controlInfo ? controlInfo->getBitrate() : this->bitrate;
     double duration = macPkt->getBitLength() / bitrate;
     return createSignal(simTime(), duration, txPower, bitrate);
 }

@@ -109,6 +109,9 @@ protected:
 	/** @brief Defines the strength of the thermal noise.*/
 	ConstantSimpleConstMapping* thermalNoise;
 
+    /** @brief The bitrate */
+    double bitrate;
+
     /** @brief The transmission power */
     double txPower;
 
