@@ -38,6 +38,10 @@ class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILi
 {
     protected:
         typedef std::map<IPv4Address, DHCPLease> DHCPLeased;
+        enum TimerType
+        {
+            START_DHCP
+        };
         DHCPLeased leased; // lookup table for lease infos
 
         bool isOperational; // lifecycle
@@ -56,7 +60,8 @@ class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILi
         InterfaceEntry* ie; // interface to serve DHCP requests on
         NotificationBoard* nb;
         UDPSocket socket;
-
+        simtime_t startTime; // application start time
+        cMessage * startTimer; // self message to start DHCP server
     protected:
         virtual int numInitStages() const { return 4; }
         virtual void initialize(int stage);
@@ -99,10 +104,12 @@ class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILi
          */
         virtual void sendNAK(DHCPMessage* msg);
 
+        virtual void handleSelfMessages(cMessage * msg);
         virtual InterfaceEntry *chooseInterface();
         virtual void sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort);
         virtual void receiveChangeNotification(int category, const cPolymorphic *details);
-
+        virtual void startApp();
+        virtual void stopApp();
     public:
         DHCPServer();
         virtual ~DHCPServer();

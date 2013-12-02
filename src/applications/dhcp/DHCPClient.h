@@ -65,6 +65,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         int responseTimeout; // timeout waiting for DHCPACKs, DHCPOFFERs
         unsigned int xid; // transaction id; to associate messages and responses between a client and a server
         ClientState clientState; // current state
+        simtime_t startTime; // application start time
 
         MACAddress macAddress; // client's MAC address
         NotificationBoard * nb; // notification board
@@ -136,7 +137,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         /*
          * Assigns the IP address to the interface.
          */
-        virtual void boundLease();
+        virtual void bindLease();
 
         /*
          * Removes the configured IP address (e. g. when clients get a DHCPNAK message in REBINDING or RENEWING states
@@ -166,6 +167,8 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         virtual void scheduleTimerT2();
         static const char *getStateName(ClientState state);
         virtual void updateDisplayString();
+        virtual void startApp();
+        virtual void stopApp();
 
     public:
         DHCPClient();

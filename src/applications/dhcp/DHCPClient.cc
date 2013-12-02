@@ -52,14 +52,17 @@ DHCPClient::~DHCPClient()
 
 void DHCPClient::initialize(int stage)
 {
-    if (stage == 1)
+    if (stage == 0)
     {
         timerT1 = new cMessage("T1 Timer",T1);
         timerT2 = new cMessage("T2 Timer",T2);
         timerTo = new cMessage("DHCP Timeout");
         leaseTimer = new cMessage("Lease Timeout",LEASE_TIMEOUT);
         startTimer = new cMessage("Starting DHCP",START_DHCP);
-
+        startTime = par("startTime");
+    }
+    if (stage == 1)
+    {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
     }
@@ -90,18 +93,19 @@ void DHCPClient::initialize(int stage)
 
         // get the interface to configure
         if (isOperational)
+        {
             ie = chooseInterface();
+            // grab the interface MAC address
+            macAddress = ie->getMacAddress();
+        }
 
         // get the routing table to update and subscribe it to the blackboard
         irt = check_and_cast<IRoutingTable*>(getModuleByPath(par("routingTablePath")));
-
-        // grab the interface MAC address
-        macAddress = ie->getMacAddress();
-
         // set client to idle state
         clientState = IDLE;
 
-        scheduleAt(simTime() + par("startTime").doubleValue(), startTimer);
+        if (isOperational)
+            startApp();
     }
 }
 
@@ -219,7 +223,16 @@ void DHCPClient::handleTimer(cMessage * msg)
     if (category == START_DHCP)
     {
         openSocket();
-        initClient();
+        if (lease)
+        {
+            clientState = INIT_REBOOT;
+            initRebootedClient();
+        }
+        else // we have no lease from the previous DHCP process
+        {
+            clientState = INIT;
+            initClient();
+        }
     }
     else if (category == WAIT_OFFER)
     {
@@ -313,7 +326,7 @@ void DHCPClient::recordLease(DHCPMessage * dhcpACK)
         EV_ERROR << "DHCPACK arrived, but no IP address confirmed." << endl;
 }
 
-void DHCPClient::boundLease()
+void DHCPClient::bindLease()
 {
     ie->ipv4Data()->setIPAddress(lease->ip);
     ie->ipv4Data()->setNetmask(lease->ip.getNetworkMask());
@@ -639,7 +652,7 @@ void DHCPClient::handleDHCPACK(DHCPMessage * msg)
     cancelEvent(timerTo);
     scheduleTimerT1();
     scheduleTimerT2();
-    boundLease();
+    bindLease();
 }
 
 void DHCPClient::scheduleTimerTO(TimerType type)
@@ -678,6 +691,26 @@ void DHCPClient::openSocket()
     EV_INFO << "DHCP server bound to port " << serverPort << "." << endl;
 }
 
+void DHCPClient::startApp()
+{
+    simtime_t start = std::max(startTime, simTime());
+    ie = chooseInterface();
+    scheduleAt(start, startTimer);
+}
+
+void DHCPClient::stopApp()
+{
+    cancelEvent(timerT1);
+    cancelEvent(timerT2);
+    cancelEvent(timerTo);
+    cancelEvent(leaseTimer);
+    cancelEvent(startTimer);
+
+    // TODO: Client should send DHCPRELEASE to the server. However, the correct operation
+    // of DHCP does not depend on the transmission of DHCPRELEASE messages.
+    // TODO: socket.close();
+}
+
 bool DHCPClient::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
@@ -685,34 +718,16 @@ bool DHCPClient::handleOperationStage(LifecycleOperation *operation, int stage, 
     {
         if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
         {
+            startApp();
             isOperational = true;
-            ie = chooseInterface();
-            openSocket();
-            if (lease != NULL)
-            {
-                clientState = INIT_REBOOT;
-                initRebootedClient();
-            }
-            else // we have no lease from the previous DHCP process
-            {
-                clientState = INIT;
-                initClient();
-            }
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation))
     {
         if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
         {
+            stopApp();
             isOperational = false;
-            cancelEvent(timerT1);
-            cancelEvent(timerT2);
-            cancelEvent(timerTo);
-            cancelEvent(leaseTimer);
-            cancelEvent(startTimer);
-            // TODO: Client should send DHCPRELEASE to the server. However, the correct operation
-            // of DHCP does not depend on the transmission of DHCPRELEASE messages.
-            // TODO: socket.close();
             ie = NULL;
         }
     }
@@ -720,12 +735,8 @@ bool DHCPClient::handleOperationStage(LifecycleOperation *operation, int stage, 
     {
         if (stage == NodeCrashOperation::STAGE_CRASH)
         {
+            stopApp();
             isOperational = false;
-            cancelEvent(timerT1);
-            cancelEvent(timerT2);
-            cancelEvent(timerTo);
-            cancelEvent(leaseTimer);
-            cancelEvent(startTimer);
             ie = NULL;
         }
     }

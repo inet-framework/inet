@@ -38,7 +38,7 @@ simple DHCPServer like IUDPApp
         string gateway; // gateway to assign
         string dns; // DNS server to assign
         int leaseTime @unit(s); // lease time in seconds
-
+        double startTime @unit(s) = default(0s); // application start time
         string interfaceTablePath = default("^.interfaceTable");
         string notificationBoardPath = default("^.notificationBoard");
         @display("i=block/app2");

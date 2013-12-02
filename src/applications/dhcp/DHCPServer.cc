@@ -35,14 +35,21 @@ DHCPServer::DHCPServer()
 {
     ie = NULL;
     nb = NULL;
+    startTimer = NULL;
 }
 
 DHCPServer::~DHCPServer()
 {
+    cancelAndDelete(startTimer);
 }
 
 void DHCPServer::initialize(int stage)
 {
+    if (stage == 0)
+    {
+        startTimer = new cMessage("Start DHCP server",START_DHCP);
+        startTime = par("startTime");
+    }
     if (stage == 1)
     {
         numSent = 0;
@@ -70,9 +77,10 @@ void DHCPServer::initialize(int stage)
         if (isOperational)
             ie = chooseInterface();
     }
-    if (stage == 2)
+    if (stage == 3)
     {
-        openSocket();
+        if (isOperational)
+            startApp();
     }
 }
 
@@ -84,7 +92,7 @@ void DHCPServer::openSocket()
     socket.setOutputGate(gate("udpOut"));
     socket.bind(serverPort);
     socket.setBroadcast(true);
-    EV_INFO << "DHCP server bound to port " << serverPort << " on " << ie->getName() << "." << endl;
+    EV_INFO << "DHCP server bound to port " << serverPort << endl;
 }
 
 void DHCPServer::receiveChangeNotification(int category, const cPolymorphic *details)
@@ -133,7 +141,11 @@ InterfaceEntry *DHCPServer::chooseInterface()
 void DHCPServer::handleMessage(cMessage *msg)
 {
     DHCPMessage *dhcpPacket = dynamic_cast<DHCPMessage*>(msg);
-    if (dhcpPacket)
+    if (msg->isSelfMessage())
+    {
+        handleSelfMessages(msg);
+    }
+    else if (dhcpPacket)
         processDHCPMessage(dhcpPacket);
     else
     {
@@ -143,6 +155,15 @@ void DHCPServer::handleMessage(cMessage *msg)
     }
 }
 
+void DHCPServer::handleSelfMessages(cMessage * msg)
+{
+    if (msg->getKind() == START_DHCP)
+    {
+        openSocket();
+    }
+    else
+        throw cRuntimeError("Unknown selfmessage type!");
+}
 
 void DHCPServer::processDHCPMessage(DHCPMessage *packet)
 {
@@ -469,6 +490,21 @@ void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAdd
     socket.sendTo(msg, destAddr, destPort, ie->getInterfaceId());
 }
 
+void DHCPServer::startApp()
+{
+    simtime_t start = std::max(startTime, simTime());
+    ie = chooseInterface();
+    scheduleAt(start, startTimer);
+}
+
+void DHCPServer::stopApp()
+{
+    leased.clear();
+    ie = NULL;
+    cancelEvent(startTimer);
+    // socket.close(); TODO:
+}
+
 bool DHCPServer::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
@@ -476,29 +512,24 @@ bool DHCPServer::handleOperationStage(LifecycleOperation *operation, int stage, 
     {
         if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
         {
+            startApp();
             isOperational = true;
-            ie = chooseInterface();
-            openSocket();
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation))
     {
         if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
         {
+            stopApp();
             isOperational = false;
-            leased.clear();
-            ie = NULL;
-            // socket.close(); TODO:
         }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation))
     {
         if (stage == NodeCrashOperation::STAGE_CRASH)
         {
+            stopApp();
             isOperational = false;
-            leased.clear();
-            ie = NULL;
-            // socket???
         }
     }
     else
