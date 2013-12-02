@@ -354,7 +354,7 @@ void PIMSplitter::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
 		return;
 
 	Enter_Method_Silent();
-// XXX printNotificationBanner(category, details);
+    printNotificationBanner(signalID, details);
 
     // new multicast data appears in router
     if (signalID == NF_IPv4_NEW_MULTICAST)

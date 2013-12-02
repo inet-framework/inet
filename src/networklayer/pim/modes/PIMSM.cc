@@ -1853,7 +1853,7 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         return;
 
     Enter_Method_Silent();
-// XXX    printNotificationBanner(category, details);
+    printNotificationBanner(signalID, details);
     PIMMulticastRoute *route;
     IPv4Datagram *datagram;
     addRemoveAddr *members;

@@ -930,7 +930,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
 		return;
 
 	Enter_Method_Silent();
-// XXX	printNotificationBanner(category, details);
+    printNotificationBanner(signalID, details);
 	IPv4Datagram *datagram;
 	PimInterface *pimInterface;
 	PIMMulticastRoute *route;
