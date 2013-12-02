@@ -23,7 +23,6 @@
 #include "InterfaceTableAccess.h"
 #include "IRoutingTable.h"
 
-
 #include <omnetpp.h>
 #include "PIMPacket_m.h"
 #include "PIMTimer_m.h"
@@ -69,7 +68,6 @@ class PIMSplitter : public cSimpleModule, protected cListener
 	   // process notification
        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 	   virtual void newMulticast(IPv4Address destAddr, IPv4Address srcAddr);
-	   void igmpChange(InterfaceEntry *interface);
 
 	protected:
 		virtual int numInitStages() const  {return NUM_INIT_STAGES;}

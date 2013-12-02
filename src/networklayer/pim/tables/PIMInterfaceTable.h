@@ -72,7 +72,7 @@ class INET_API PIMInterface: public cObject
  * @brief Class represents PIM Interface Table.
  * @brief It is vector of PIMInterface. Class contains methods to work with the table.
  */
-class INET_API PIMInterfaceTable: public cSimpleModule
+class INET_API PIMInterfaceTable: public cSimpleModule, protected cListener
 {
 	protected:
 		std::vector<PIMInterface>	pimIft;					/**< List of PIM interfaces. */
@@ -93,6 +93,8 @@ class INET_API PIMInterfaceTable: public cSimpleModule
 		virtual void handleMessage(cMessage *);
 		virtual void configureInterfaces(cXMLElement *config);
 		virtual void addInterface(InterfaceEntry *ie, cXMLElement *config);
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+        void igmpChange(InterfaceEntry *interface);
 };
 
 /**
