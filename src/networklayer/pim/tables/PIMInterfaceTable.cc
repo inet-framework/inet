@@ -106,6 +106,11 @@ bool PIMInterface::isLocalIntMulticastAddress (IPv4Address addr)
 	return false;
 }
 
+PIMInterfaceTable::~PIMInterfaceTable()
+{
+    for (std::vector<PIMInterface*>::iterator it = pimIft.begin(); it != pimIft.end(); ++it)
+        delete *it;
+}
 
 
 /**
@@ -172,7 +177,7 @@ void PIMInterfaceTable::addInterface(InterfaceEntry *ie, cXMLElement *config)
     const char *stateRefreshAttr = config->getAttribute("state-refresh");
     bool stateRefreshFlag = stateRefreshAttr && strcmp(stateRefreshAttr, "true");
 
-    addInterface(PIMInterface(ie, mode, stateRefreshFlag));
+    addInterface(new PIMInterface(ie, mode, stateRefreshFlag));
 }
 
 PIMInterface *PIMInterfaceTable::getInterfaceById(int interfaceId)

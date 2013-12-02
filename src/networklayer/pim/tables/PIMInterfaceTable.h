@@ -72,16 +72,15 @@ class INET_API PIMInterface: public cObject
 class INET_API PIMInterfaceTable: public cSimpleModule, protected cListener
 {
 	protected:
-		std::vector<PIMInterface>	pimIft;					/**< List of PIM interfaces. */
+		std::vector<PIMInterface*>	pimIft;					/**< List of PIM interfaces. */
 
 	public:
-		PIMInterfaceTable(){};
-		virtual ~PIMInterfaceTable(){};
+		virtual ~PIMInterfaceTable();
 
-        virtual int getNumInterfaces() {return this->pimIft.size();}                                /**< Returns number of entries in PIMInterfaceTable. */
-		virtual PIMInterface *getInterface(int k) {return &this->pimIft[k];}						/**< Get pointer to entry of PIMInterfaceTable from the object. */
+        virtual int getNumInterfaces() {return pimIft.size();}                                /**< Returns number of entries in PIMInterfaceTable. */
+		virtual PIMInterface *getInterface(int k) {return pimIft[k];}					/**< Get pointer to entry of PIMInterfaceTable from the object. */
         virtual PIMInterface *getInterfaceById(int interfaceId);                                   /**< Returns entry from PIMInterfaceTable with given interface ID. */
-		virtual void addInterface(const PIMInterface &entry){this->pimIft.push_back(entry);}		/**< Add entry to PIMInterfaceTable. */
+		virtual void addInterface(PIMInterface *entry) { pimIft.push_back(entry); }		/**< Add entry to PIMInterfaceTable. */
 		//virtual bool deleteInterface(const PIMInterface *entry){};
 
 	protected:
