@@ -326,7 +326,6 @@ void DHCPClient::boundLease()
 
     std::cout << "Host " << hostName << " got ip: " << lease->ip << "/" << lease->subnetMask << endl;
 
-    // TODO: we add routes here but where do they get deleted?
     IPv4Route * iroute = NULL;
     for (int i = 0; i < irt->getNumRoutes(); i++)
     {
@@ -340,13 +339,13 @@ void DHCPClient::boundLease()
     if (iroute == NULL)
     {
         // create gateway route
-        IPv4Route *e = new IPv4Route();
-        e->setDestination(IPv4Address());
-        e->setNetmask(IPv4Address());
-        e->setGateway(lease->gateway);
-        e->setInterface(ie);
-        e->setSource(IPv4Route::MANUAL);
-        irt->addRoute(e);
+        route = new IPv4Route();
+        route->setDestination(IPv4Address());
+        route->setNetmask(IPv4Address());
+        route->setGateway(lease->gateway);
+        route->setInterface(ie);
+        route->setSource(IPv4Route::MANUAL);
+        irt->addRoute(route);
     }
 
     // update the routing table
@@ -363,6 +362,7 @@ void DHCPClient::unboundLease()
     cancelEvent(timerTo);
     cancelEvent(leaseTimer);
 
+    irt->deleteRoute(route);
     ie->ipv4Data()->setIPAddress(IPv4Address());
     ie->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS);
 }
@@ -455,16 +455,16 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             }
             else if (messageType == DHCPNAK)
             {
-                unboundLease(); // halt network (remove address)
                 EV_INFO << "Arrived DHPCNAK message in RENEWING state. The renewing process was unsuccessful. Restarting the DHCP configuration process." << endl;
+                unboundLease(); // halt network (remove address)
                 initClient();
             }
             break;
         case REBINDING:
             if (messageType == DHCPNAK)
             {
-                unboundLease(); // halt network (remove address)
                 EV_INFO << "Arrived DHPCNAK message in REBINDING state. The rebinding process was unsuccessful. Restarting the DHCP configuration process." << endl;
+                unboundLease(); // halt network (remove address)
                 initClient();
             }
             else if (messageType == DHCPACK)

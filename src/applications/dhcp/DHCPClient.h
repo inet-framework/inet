@@ -71,7 +71,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         InterfaceEntry * ie; // interface to configure
         IRoutingTable * irt; // routing table to update
         DHCPLease * lease; // leased IP information
-
+        IPv4Route * route; // last added route
     protected:
         // Simulation methods.
         virtual int numInitStages() const { return 4; }
