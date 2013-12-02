@@ -26,8 +26,7 @@ DetailedRadioSignal *DetailedIeee80211Radio::createSignal(cPacket *macFrame)
 {
     if (dynamic_cast<Ieee80211Frame*>(macFrame)) {
         PhyControlInfo *controlInfo = dynamic_cast<PhyControlInfo*>(macFrame->getControlInfo());
-        // TODO: KLUDGE:
-        double bitrate = controlInfo ? controlInfo->getBitrate() : 2E+6;
+        double bitrate = controlInfo ? controlInfo->getBitrate() : this->bitrate;
         return createSignal(simTime(), packetDuration(macFrame, bitrate), txPower, bitrate);
     }
     else

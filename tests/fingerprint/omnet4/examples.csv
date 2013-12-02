@@ -349,4 +349,4 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithUWBIRRadio -r 0,              100s,             2874-ea9a
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIdealRadio -r 0,      100s,             e4ce-9edb
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithSimplifiedRadio -r 0, 100s,             647e-defd
-/examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithDetailedRadio -r 0,   100s,             dfc0-3443
+/examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithDetailedRadio -r 0,   100s,             6f70-adfa
