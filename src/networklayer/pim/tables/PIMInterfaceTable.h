@@ -73,7 +73,6 @@ class INET_API PIMInterface: public cObject
 	    void addIntMulticastAddress(IPv4Address addr)  {this->intMulticastAddresses.push_back(addr);}												/**< Add multicast address to the interface. */
 	    void removeIntMulticastAddress(IPv4Address addr);
 	    bool isLocalIntMulticastAddress (IPv4Address addr);
-	    IPv4AddressVector deleteLocalIPs(const IPv4AddressVector &multicastAddr);
 };
 
 

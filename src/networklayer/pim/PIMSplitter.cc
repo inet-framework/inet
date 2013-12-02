@@ -388,8 +388,11 @@ void PIMSplitter::igmpChange(InterfaceEntry *interface)
 	vector<IPv4Address> multicastAddrsOld = pimInt->getIntMulticastAddresses();
 	vector<IPv4Address> reportedMulticastGroups;
 	for (int i = 0; i < interface->ipv4Data()->getNumOfReportedMulticastGroups(); i++)
-	    reportedMulticastGroups.push_back(interface->ipv4Data()->getReportedMulticastGroup(i));
-	vector<IPv4Address> multicastAddrsNew = pimInt->deleteLocalIPs(reportedMulticastGroups);
+	{
+	    IPv4Address multicastAddr = interface->ipv4Data()->getReportedMulticastGroup(i);
+        if (!multicastAddr.isLinkLocalMulticast())
+            reportedMulticastGroups.push_back(multicastAddr);
+	}
 
 	// vectors of new and removed multicast addresses
 	vector<IPv4Address> add;
@@ -399,12 +402,12 @@ void PIMSplitter::igmpChange(InterfaceEntry *interface)
 	for (unsigned int i = 0; i < multicastAddrsOld.size(); i++)
 	{
 		unsigned int j;
-		for (j = 0; j < multicastAddrsNew.size(); j++)
+		for (j = 0; j < reportedMulticastGroups.size(); j++)
 		{
-			if (multicastAddrsOld[i] == multicastAddrsNew[j])
+			if (multicastAddrsOld[i] == reportedMulticastGroups[j])
 				break;
 		}
-		if (j == multicastAddrsNew.size())
+		if (j == reportedMulticastGroups.size())
 		{
 			EV << "Multicast address " << multicastAddrsOld[i] << " was removed from the interface " << intId << endl;
 			remove.push_back(multicastAddrsOld[i]);
@@ -412,18 +415,18 @@ void PIMSplitter::igmpChange(InterfaceEntry *interface)
 	}
 
 	// which address was added to interface
-	for (unsigned int i = 0; i < multicastAddrsNew.size(); i++)
+	for (unsigned int i = 0; i < reportedMulticastGroups.size(); i++)
 	{
 		unsigned int j;
 		for (j = 0; j < multicastAddrsOld.size(); j++)
 		{
-			if (multicastAddrsNew[i] == multicastAddrsOld[j])
+			if (reportedMulticastGroups[i] == multicastAddrsOld[j])
 				break;
 		}
 		if (j == multicastAddrsOld.size())
 		{
-			EV << "Multicast address " << multicastAddrsNew[i] << " was added to the interface " << intId <<endl;
-			add.push_back(multicastAddrsNew[i]);
+			EV << "Multicast address " << reportedMulticastGroups[i] << " was added to the interface " << intId <<endl;
+			add.push_back(reportedMulticastGroups[i]);
 		}
 	}
 

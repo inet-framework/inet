@@ -86,27 +86,6 @@ void PIMInterface::removeIntMulticastAddress(IPv4Address addr)
 }
 
 /**
- * DELETE LOCAL IPs
- *
- * The method removes all link local (224.0.0.0 to 224.0.0.255) multicast addresses
- * from the list.
- *
- * @param multicastAddr List of address which has to be checked.
- * @return List of multicast address without link local IPs.
- * @see isLinkLocalMulticast()
- */
-std::vector<IPv4Address> PIMInterface::deleteLocalIPs(const IPv4AddressVector &multicastAddr)
-{
-	std::vector<IPv4Address> newMulticastAddresses;
-	for(unsigned int i = 0; i < multicastAddr.size(); i++)
-	{
-		if (!multicastAddr[i].isLinkLocalMulticast())
-			newMulticastAddresses.push_back(multicastAddr[i]);
-	}
-	return newMulticastAddresses;
-}
-
-/**
  * IS LOCAL INETRFACE MULTICAST ADDRESS
  *
  * The method finds out if IP address is assigned to interface as local multicast address.
