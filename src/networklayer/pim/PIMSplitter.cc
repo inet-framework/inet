@@ -102,7 +102,7 @@ void PIMSplitter::processHelloPkt(PIMPacket *msg)
     EV << "PIM::processHelloPkt" << endl;
 
     IPv4ControlInfo *ctrl = dynamic_cast<IPv4ControlInfo *>(msg->getControlInfo());
-    PimNeighbor newEntry;
+    PIMNeighbor newEntry;
     PIMnlt *nlt;
 
     // get information about neighbor from Hello packet
@@ -187,7 +187,7 @@ void PIMSplitter::processPIMPkt(PIMPacket *pkt)
 	int mode = 0;
 
 	// find information about interface where packet came from
-	PimInterface *pimInt = pimIft->getInterfaceByIntID(intID);
+	PIMInterface *pimInt = pimIft->getInterfaceByIntID(intID);
 	if (pimInt != NULL)
 		mode = pimInt->getMode();
 
@@ -287,8 +287,8 @@ void PIMSplitter::initialize(int stage)
         // Pointer to routing tables, interface tables, notification board
         ift = InterfaceTableAccess().get();
         rt = IPv4RoutingTableAccess().get();
-        pimIft = PimInterfaceTableAccess().get();
-        pimNbt = PimNeighborTableAccess().get();
+        pimIft = PIMInterfaceTableAccess().get();
+        pimNbt = PIMNeighborTableAccess().get();
 
         // subscribtion of notifications (future use)
         cModule *host = findContainingNode(this);
@@ -316,7 +316,7 @@ void PIMSplitter::initialize(int stage)
 		// to receive PIM messages, join to ALL_PIM_ROUTERS multicast group
 		for (int i = 0; i < pimIft->getNumInterface(); i++)
 		{
-		    PimInterface *pimInterface = pimIft->getInterface(i);
+		    PIMInterface *pimInterface = pimIft->getInterface(i);
 		    pimInterface->getInterfacePtr()->ipv4Data()->joinMulticastGroup(IPv4Address("224.0.0.13")); // TODO use constant
 		}
 
@@ -380,7 +380,7 @@ void PIMSplitter::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
 void PIMSplitter::igmpChange(InterfaceEntry *interface)
 {
 	int intId = interface->getInterfaceId();
-	PimInterface * pimInt = pimIft->getInterfaceByIntID(intId);
+	PIMInterface * pimInt = pimIft->getInterfaceByIntID(intId);
 
 	// save old and new set of multicast IP address assigned to interface
 	if(pimInt)
@@ -485,7 +485,7 @@ void PIMSplitter::newMulticast(IPv4Address destAddr, IPv4Address srcAddr)
 		return;
 	}
 	int rpfId = inInt->getInterfaceId();
-	PimInterface *pimInt = pimIft->getInterfaceByIntID(rpfId);
+	PIMInterface *pimInt = pimIft->getInterfaceByIntID(rpfId);
 
 	// if it is interface configured with PIM, create new route
 	if (pimInt != NULL)

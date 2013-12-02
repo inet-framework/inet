@@ -18,11 +18,11 @@
 
 package inet.networklayer.pim.tables;
 
-// PimInterfaceTable contain all interfaces, where PIM is enabled
-simple PimInterfaceTable
+// PIMInterfaceTable contain all interfaces, where PIM is enabled
+simple PIMInterfaceTable
 {
     parameters:
-        @class(PimInterfaceTable);
+        @class(PIMInterfaceTable);
         @display("i=block/table");
         xml pimConfig = default(xml("<config/>"));
 }

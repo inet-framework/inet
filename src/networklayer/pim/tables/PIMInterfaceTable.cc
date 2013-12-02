@@ -19,12 +19,12 @@
 #include "InterfaceMatcher.h"
 #include "InterfaceTableAccess.h"
 #include "IPv4InterfaceData.h"
-#include "PimInterfaceTable.h"
+#include "PIMInterfaceTable.h"
 
-Define_Module(PimInterfaceTable);
+Define_Module(PIMInterfaceTable);
 
-/** Printout of structure PimInterface. */
-std::ostream& operator<<(std::ostream& os, const PimInterface& e)
+/** Printout of structure PIMInterface. */
+std::ostream& operator<<(std::ostream& os, const PIMInterface& e)
 {
 	int i;
 	std::vector<IPv4Address> intMulticastAddresses = e.getIntMulticastAddresses();
@@ -49,8 +49,8 @@ std::ostream& operator<<(std::ostream& os, const PimInterface& e)
 };
 
 
-/** Printout of structure PimInterfaces Table. */
-std::ostream& operator<<(std::ostream& os, const PimInterfaceTable& e)
+/** Printout of structure PIMInterfaces Table. */
+std::ostream& operator<<(std::ostream& os, const PIMInterfaceTable& e)
 {
     for (int i = 0; i < e.size(); i++)
     	os << "";
@@ -59,7 +59,7 @@ std::ostream& operator<<(std::ostream& os, const PimInterfaceTable& e)
 };
 
 /** Actually not in use */
-std::string PimInterface::info() const
+std::string PIMInterface::info() const
 {
 	std::stringstream out;
 	out << "ID = " << intID << "; mode = " << mode;
@@ -73,7 +73,7 @@ std::string PimInterface::info() const
  *
  * @param addr IP address which should be deleted.
  */
-void PimInterface::removeIntMulticastAddress(IPv4Address addr)
+void PIMInterface::removeIntMulticastAddress(IPv4Address addr)
 {
 	for(unsigned int i = 0; i < intMulticastAddresses.size(); i++)
 	{
@@ -95,7 +95,7 @@ void PimInterface::removeIntMulticastAddress(IPv4Address addr)
  * @return List of multicast address without link local IPs.
  * @see isLinkLocalMulticast()
  */
-std::vector<IPv4Address> PimInterface::deleteLocalIPs(std::vector<IPv4Address> multicastAddr)
+std::vector<IPv4Address> PIMInterface::deleteLocalIPs(std::vector<IPv4Address> multicastAddr)
 {
 	std::vector<IPv4Address> newMulticastAddresses;
 	for(unsigned int i = 0; i < multicastAddr.size(); i++)
@@ -114,7 +114,7 @@ std::vector<IPv4Address> PimInterface::deleteLocalIPs(std::vector<IPv4Address> m
  * @param addr Multicast IP address which we are looking for.
  * @return True if method finds the IP address on the list, return false otherwise.
  */
-bool PimInterface::isLocalIntMulticastAddress (IPv4Address addr)
+bool PIMInterface::isLocalIntMulticastAddress (IPv4Address addr)
 {
 	for(unsigned int i = 0; i < intMulticastAddresses.size(); i++)
 	{
@@ -131,12 +131,12 @@ bool PimInterface::isLocalIntMulticastAddress (IPv4Address addr)
  *
  * Module does not have any gate, it cannot get messages
  */
-void PimInterfaceTable::handleMessage(cMessage *msg)
+void PIMInterfaceTable::handleMessage(cMessage *msg)
 {
     opp_error("This module doesn't process messages");
 }
 
-void PimInterfaceTable::initialize(int stage)
+void PIMInterfaceTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -150,7 +150,7 @@ void PimInterfaceTable::initialize(int stage)
     }
 }
 
-void PimInterfaceTable::configureInterfaces(cXMLElement *config)
+void PIMInterfaceTable::configureInterfaces(cXMLElement *config)
 {
     cXMLElementList interfaceElements = config->getChildrenByTagName("interface");
     InterfaceMatcher matcher(interfaceElements);
@@ -168,9 +168,9 @@ void PimInterfaceTable::configureInterfaces(cXMLElement *config)
     }
 }
 
-void PimInterfaceTable::addInterface(InterfaceEntry *ie, cXMLElement *config)
+void PIMInterfaceTable::addInterface(InterfaceEntry *ie, cXMLElement *config)
 {
-    PimInterface pimInterface;
+    PIMInterface pimInterface;
     pimInterface.setInterfaceID(ie->getInterfaceId());
     pimInterface.setInterfacePtr(ie);
 
@@ -183,7 +183,7 @@ void PimInterfaceTable::addInterface(InterfaceEntry *ie, cXMLElement *config)
     else if (strcmp(modeAttr, "sparse") == 0)
         pimInterface.setMode(Sparse);
     else
-        throw cRuntimeError("PimInterfaceTable: invalid 'mode' attribute value in the configuration of interface '%s'", ie->getName());
+        throw cRuntimeError("PIMInterfaceTable: invalid 'mode' attribute value in the configuration of interface '%s'", ie->getName());
 
     const char *stateRefreshAttr = config->getAttribute("state-refresh");
     if (stateRefreshAttr && strcmp(stateRefreshAttr, "true"))
@@ -198,9 +198,9 @@ void PimInterfaceTable::addInterface(InterfaceEntry *ie, cXMLElement *config)
  * Actually not in use.
  * Printout of Table of PIM interfaces
  */
-void PimInterfaceTable::printPimInterfaces()
+void PIMInterfaceTable::printPimInterfaces()
 {
-	for(std::vector<PimInterface>::iterator i = pimIft.begin(); i < pimIft.end(); i++)
+	for(std::vector<PIMInterface>::iterator i = pimIft.begin(); i < pimIft.end(); i++)
 	{
 		EV << (*i).info() << endl;
 	}
@@ -217,7 +217,7 @@ void PimInterfaceTable::printPimInterfaces()
  * @see getNumInterface()
  * @see getInterface()
  */
-PimInterface *PimInterfaceTable::getInterfaceByIntID(int intID)
+PIMInterface *PIMInterfaceTable::getInterfaceByIntID(int intID)
 {
 	for(int i = 0; i < getNumInterface(); i++)
 	{

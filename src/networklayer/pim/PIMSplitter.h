@@ -34,8 +34,8 @@
 #include "NotifierConsts.h"
 #include "IPv4Address.h"
 #include "IPv4RoutingTable.h"
-#include "PimNeighborTable.h"
-#include "PimInterfaceTable.h"
+#include "PIMNeighborTable.h"
+#include "PIMInterfaceTable.h"
 
 
 #define HT 30.0										/**< Hello Timer = 30s. */
@@ -53,8 +53,8 @@ class PIMSplitter : public cSimpleModule, protected cListener
 		IIPv4RoutingTable           	*rt;           	/**< Pointer to routing table. */
 	    IInterfaceTable         	*ift;          	/**< Pointer to interface table. */
 
-	    PimInterfaceTable			*pimIft;		/**< Pointer to table of PIM interfaces. */
-	    PimNeighborTable			*pimNbt;		/**< Pointer to table of PIM neighbors. */
+	    PIMInterfaceTable			*pimIft;		/**< Pointer to table of PIM interfaces. */
+	    PIMNeighborTable			*pimNbt;		/**< Pointer to table of PIM neighbors. */
 
 	    const char *				hostname;      	/**< Router hostname. */
 

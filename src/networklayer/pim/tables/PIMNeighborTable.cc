@@ -16,22 +16,22 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#include "PimNeighborTable.h"
+#include "PIMNeighborTable.h"
 
-Define_Module(PimNeighborTable);
+Define_Module(PIMNeighborTable);
 
 using namespace std;
 
 
-/** Printout of structure Neighbor table (PimNeighbor). */
-std::ostream& operator<<(std::ostream& os, const PimNeighbor& e)
+/** Printout of structure Neighbor table (PIMNeighbor). */
+std::ostream& operator<<(std::ostream& os, const PIMNeighbor& e)
 {
     os << e.getId() << ": ID = " << e.getInterfaceID() << "; Addr = " << e.getAddr() << "; Ver = " << e.getVersion();
     return os;
 };
 
-/** Printout of structure Neighbor table (PimNeighbor). */
-std::string PimNeighbor::info() const
+/** Printout of structure Neighbor table (PIMNeighbor). */
+std::string PIMNeighbor::info() const
 {
 	std::stringstream out;
 	out << id << ": ID = " << intID << "; Addr = " << addr << "; Ver = " << ver;
@@ -43,12 +43,12 @@ std::string PimNeighbor::info() const
  *
  * Module does not have any gate, it cannot get messages
  */
-void PimNeighborTable::handleMessage(cMessage *msg)
+void PIMNeighborTable::handleMessage(cMessage *msg)
 {
     opp_error("This module doesn't process messages");
 }
 
-void PimNeighborTable::initialize(int stage)
+void PIMNeighborTable::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
@@ -62,9 +62,9 @@ void PimNeighborTable::initialize(int stage)
  *
  * Printout of Table of PIM interfaces
  */
-void PimNeighborTable::printPimNeighborTable()
+void PIMNeighborTable::printPimNeighborTable()
 {
-	for(std::vector<PimNeighbor>::iterator i = nt.begin(); i < nt.end(); i++)
+	for(std::vector<PIMNeighbor>::iterator i = nt.begin(); i < nt.end(); i++)
 	{
 		EV << (*i).info() << endl;
 	}
@@ -78,9 +78,9 @@ void PimNeighborTable::printPimNeighborTable()
  * @param intId Identifier of interface.
  * @return Vector of entries from PIM neighbor table.
  */
-std::vector<PimNeighbor> PimNeighborTable::getNeighborsByIntID(int intId)
+std::vector<PIMNeighbor> PIMNeighborTable::getNeighborsByIntID(int intId)
 {
-	vector<PimNeighbor> nbr;
+	vector<PIMNeighbor> nbr;
 
 	for(int i = 0; i < getNumNeighbors(); i++)
 	{
@@ -100,7 +100,7 @@ std::vector<PimNeighbor> PimNeighborTable::getNeighborsByIntID(int intId)
  * @param id Identifier of entry in the table.
  * @return Pointer to entry from PIM neighbor table.
  */
-PimNeighbor *PimNeighborTable::getNeighborsByID(int id)
+PIMNeighbor *PIMNeighborTable::getNeighborsByID(int id)
 {
 	for(int i = 0; i < getNumNeighbors(); i++)
 	{
@@ -113,7 +113,7 @@ PimNeighbor *PimNeighborTable::getNeighborsByID(int id)
 	return NULL;
 }
 
-PimNeighbor *PimNeighborTable::getNeighborByIntID(int intId)
+PIMNeighbor *PIMNeighborTable::getNeighborByIntID(int intId)
 {
     for(int i = 0; i < getNumNeighbors(); i++)
     {
@@ -135,7 +135,7 @@ PimNeighbor *PimNeighborTable::getNeighborByIntID(int intId)
  * @param id Identifier of entry in the table.
  * @return True if entry was found and deleted successfully, otherwise false.
  */
-bool PimNeighborTable::deleteNeighbor(int id)
+bool PIMNeighborTable::deleteNeighbor(int id)
 {
 	for(int i = 0; i < getNumNeighbors(); i++)
 	{
@@ -156,7 +156,7 @@ bool PimNeighborTable::deleteNeighbor(int id)
  * @param entry PIM neighbor entry.
  * @return True if entry was found in the table, otherwise false.
  */
-bool PimNeighborTable::isInTable(PimNeighbor entry)
+bool PIMNeighborTable::isInTable(PIMNeighbor entry)
 {
 	for(int i = 0; i < getNumNeighbors(); i++)
 	{
@@ -175,7 +175,7 @@ bool PimNeighborTable::isInTable(PimNeighbor entry)
  * @param addr IP address of neighbor.
  * @return Pointer to entry if entry was found in the table, otherwise NULL.
  */
-PimNeighbor *PimNeighborTable::findNeighbor(int intId, IPv4Address addr)
+PIMNeighbor *PIMNeighborTable::findNeighbor(int intId, IPv4Address addr)
 {
 	for(int i = 0; i < getNumNeighbors(); i++)
 	{
@@ -193,8 +193,8 @@ PimNeighbor *PimNeighborTable::findNeighbor(int intId, IPv4Address addr)
  * @param intId Identifier of interface.
  * @return Number of neighbors which are connected to given interface.
  */
-int PimNeighborTable::getNumNeighborsOnInt(int intId)
+int PIMNeighborTable::getNumNeighborsOnInt(int intId)
 {
-	std::vector<PimNeighbor> neighbors = getNeighborsByIntID(intId);
+	std::vector<PIMNeighbor> neighbors = getNeighborsByIntID(intId);
 	return neighbors.size();
 }

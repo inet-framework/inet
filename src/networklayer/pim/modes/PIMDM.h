@@ -25,8 +25,8 @@
 #include "InterfaceTableAccess.h"
 #include "PIMRoutingTableAccess.h"
 #include "NotifierConsts.h"
-#include "PimNeighborTable.h"
-#include "PimInterfaceTable.h"
+#include "PIMNeighborTable.h"
+#include "PIMInterfaceTable.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "IPv4Route.h"
@@ -44,8 +44,8 @@ class PIMDM : public cSimpleModule, protected cListener
 	private:
 		PIMRoutingTable           	*rt;           	/**< Pointer to routing table. */
 	    IInterfaceTable         	*ift;          	/**< Pointer to interface table. */
-	    PimInterfaceTable			*pimIft;		/**< Pointer to table of PIM interfaces. */
-	    PimNeighborTable			*pimNbt;		/**< Pointer to table of PIM neighbors. */
+	    PIMInterfaceTable			*pimIft;		/**< Pointer to table of PIM interfaces. */
+	    PIMNeighborTable			*pimNbt;		/**< Pointer to table of PIM neighbors. */
 
 	    // process events
         void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
@@ -84,7 +84,7 @@ class PIMDM : public cSimpleModule, protected cListener
 	    void sendPimGraftAck(PIMGraftAck *msg);
 	    void sendPimStateRefresh(IPv4Address originator, IPv4Address src, IPv4Address grp, int intId, bool P);
 
-	    PimInterface *getIncomingInterface(IPv4Datagram *datagram);
+	    PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
 
 	protected:
 		virtual int numInitStages() const  {return NUM_INIT_STAGES;}

@@ -29,12 +29,12 @@
 
 
 /**
- * @brief  Class represents one entry of PimNeighborTable.
+ * @brief  Class represents one entry of PIMNeighborTable.
  * @details Structure PIM neighbor with info about interface, IP address of neighbor
  * link to Neighbor Livness Timer and PIM version. The class contains
  * methods to work with items of structure.
  */
-class INET_API PimNeighbor: public cPolymorphic
+class INET_API PIMNeighbor: public cObject
 {
 	protected:
 		int					id;					/**< Unique identifier of entry. */
@@ -45,8 +45,8 @@ class INET_API PimNeighbor: public cPolymorphic
 		PIMnlt 				*nlt;				/**< Pointer to Neighbor Livness Timer. */
 
 	public:
-		PimNeighbor(){};
-	    virtual ~PimNeighbor() {};
+		PIMNeighbor(){};
+	    virtual ~PIMNeighbor() {};
 	    virtual std::string info() const;
 
 	    // set methods
@@ -68,30 +68,30 @@ class INET_API PimNeighbor: public cPolymorphic
 };
 
 /**
- * @brief Class represents Pim Neighbor Table.
- * @details Table is list of PimNeighbor and class contains methods to work with them.
+ * @brief Class represents PIM Neighbor Table.
+ * @details Table is list of PIMNeighbor and class contains methods to work with them.
  */
-class INET_API PimNeighborTable: public cSimpleModule
+class INET_API PIMNeighborTable: public cSimpleModule
 {
 	protected:
-		int							id;				/**< Counter of PimNeighbor IDs*/
-		std::vector<PimNeighbor>	nt;				/**< List of PIM neighbors (show ip pim neighbor) */
+		int							id;				/**< Counter of PIMNeighbor IDs*/
+		std::vector<PIMNeighbor>	nt;				/**< List of PIM neighbors (show ip pim neighbor) */
 
 	public:
-		PimNeighborTable(){};
-		virtual ~PimNeighborTable(){};
+		PIMNeighborTable(){};
+		virtual ~PIMNeighborTable(){};
 
-		virtual PimNeighbor *getNeighbor(int k){return &this->nt[k];}				/**< Get k-th entry in the table */
-		virtual void addNeighbor(PimNeighbor entry){entry.setId(id); this->nt.push_back(entry); id++;}	/**< Add new entry to the table*/
+		virtual PIMNeighbor *getNeighbor(int k){return &this->nt[k];}				/**< Get k-th entry in the table */
+		virtual void addNeighbor(PIMNeighbor entry){entry.setId(id); this->nt.push_back(entry); id++;}	/**< Add new entry to the table*/
 		virtual bool deleteNeighbor(int id);
 		virtual int getNumNeighbors() {return this->nt.size();}						/**< Get number of entries in the table */
 		virtual void printPimNeighborTable();
-		virtual std::vector<PimNeighbor> getNeighborsByIntID(int intID);
-		virtual PimNeighbor *getNeighborByIntID(int intId);
-		virtual PimNeighbor *getNeighborsByID(int id);
+		virtual std::vector<PIMNeighbor> getNeighborsByIntID(int intID);
+		virtual PIMNeighbor *getNeighborByIntID(int intId);
+		virtual PIMNeighbor *getNeighborsByID(int id);
 		virtual int getIdCounter(){return this->id;}								/**< Get counter of entry IDs */
-		virtual bool isInTable(PimNeighbor entry);
-		virtual PimNeighbor *findNeighbor(int intId, IPv4Address addr);
+		virtual bool isInTable(PIMNeighbor entry);
+		virtual PIMNeighbor *findNeighbor(int intId, IPv4Address addr);
 		virtual int getNumNeighborsOnInt(int intId);
 
 	protected:
@@ -101,12 +101,12 @@ class INET_API PimNeighborTable: public cSimpleModule
 };
 
 /**
- * @brief Class gives access to the PimNeighborTable.
+ * @brief Class gives access to the PIMNeighborTable.
  */
-class INET_API PimNeighborTableAccess : public ModuleAccess<PimNeighborTable>
+class INET_API PIMNeighborTableAccess : public ModuleAccess<PIMNeighborTable>
 {
 	public:
-		PimNeighborTableAccess() : ModuleAccess<PimNeighborTable>("PimNeighborTable") {}
+		PIMNeighborTableAccess() : ModuleAccess<PIMNeighborTable>("pimNeighborTable") {}
 };
 
 #endif /* PIMNEIGHBOR_H_ */

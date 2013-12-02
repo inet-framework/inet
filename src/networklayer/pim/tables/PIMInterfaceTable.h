@@ -36,11 +36,11 @@ enum PIMmode
 };
 
 /**
- * @brief  Class represents one entry of PimInterfaceTable.
+ * @brief  Class represents one entry of PIMInterfaceTable.
  * @details One entry contains interfaces ID, pointer to the interface, PIM mode and multicast
  * addresses assigned to the interface.
  */
-class INET_API PimInterface: public cPolymorphic
+class INET_API PIMInterface: public cObject
 {
 	protected:
 		int 					intID;          			/**< Identification of interface. */
@@ -50,8 +50,8 @@ class INET_API PimInterface: public cPolymorphic
 		bool					SR;							/**< Indicator of State Refresh Originator. */
 
 	public:
-		PimInterface(){intPtr = NULL; SR = false;};
-	    virtual ~PimInterface() {};
+		PIMInterface(){intPtr = NULL; SR = false;};
+	    virtual ~PIMInterface() {};
 	    virtual std::string info() const;
 
 	    // set methods
@@ -77,24 +77,24 @@ class INET_API PimInterface: public cPolymorphic
 
 
 /**
- * @brief Class represents Pim Interface Table.
- * @brief It is vector of PimInterface. Class contains methods to work with the table.
+ * @brief Class represents PIM Interface Table.
+ * @brief It is vector of PIMInterface. Class contains methods to work with the table.
  */
-class INET_API PimInterfaceTable: public cSimpleModule
+class INET_API PIMInterfaceTable: public cSimpleModule
 {
 	protected:
-		std::vector<PimInterface>	pimIft;					/**< List of PIM interfaces. */
+		std::vector<PIMInterface>	pimIft;					/**< List of PIM interfaces. */
 
 	public:
-		PimInterfaceTable(){};
-		virtual ~PimInterfaceTable(){};
+		PIMInterfaceTable(){};
+		virtual ~PIMInterfaceTable(){};
 
-		virtual PimInterface *getInterface(int k){return &this->pimIft[k];}						/**< Get pointer to entry of PimInterfaceTable from the object. */
-		virtual void addInterface(const PimInterface entry){this->pimIft.push_back(entry);}		/**< Add entry to PimInterfaceTable. */
-		//virtual bool deleteInterface(const PimInterface *entry){};
-		virtual int getNumInterface() {return this->pimIft.size();}								/**< Returns number of entries in PimInterfaceTable. */
+		virtual PIMInterface *getInterface(int k){return &this->pimIft[k];}						/**< Get pointer to entry of PIMInterfaceTable from the object. */
+		virtual void addInterface(const PIMInterface entry){this->pimIft.push_back(entry);}		/**< Add entry to PIMInterfaceTable. */
+		//virtual bool deleteInterface(const PIMInterface *entry){};
+		virtual int getNumInterface() {return this->pimIft.size();}								/**< Returns number of entries in PIMInterfaceTable. */
 		virtual void printPimInterfaces();
-		virtual PimInterface *getInterfaceByIntID(int intID);									/**< Returns entry from PimInterfaceTable with given interface ID. */
+		virtual PIMInterface *getInterfaceByIntID(int intID);									/**< Returns entry from PIMInterfaceTable with given interface ID. */
 
 	protected:
         virtual int numInitStages() const  {return NUM_INIT_STAGES;}
@@ -105,22 +105,22 @@ class INET_API PimInterfaceTable: public cSimpleModule
 };
 
 /**
- * @brief Class gives access to the PimInterfaceTable.
+ * @brief Class gives access to the PIMInterfaceTable.
  */
-class INET_API PimInterfaceTableAccess : public ModuleAccess<PimInterfaceTable>
+class INET_API PIMInterfaceTableAccess : public ModuleAccess<PIMInterfaceTable>
 {
 	private:
-		PimInterfaceTable *p;
+		PIMInterfaceTable *p;
 
 	public:
-	PimInterfaceTableAccess() : ModuleAccess<PimInterfaceTable>("PimInterfaceTable") {p=NULL;}
+	PIMInterfaceTableAccess() : ModuleAccess<PIMInterfaceTable>("pimInterfaceTable") {p=NULL;}
 
-	virtual PimInterfaceTable *getMyIfExists()
+	virtual PIMInterfaceTable *getMyIfExists()
 	{
 		if (!p)
 		{
-			cModule *m = findModuleWherever("PimInterfaceTable", simulation.getContextModule());
-			p = dynamic_cast<PimInterfaceTable*>(m);
+			cModule *m = findModuleWherever("pimInterfaceTable", simulation.getContextModule());
+			p = dynamic_cast<PIMInterfaceTable*>(m);
 		}
 		return p;
 	}
@@ -132,11 +132,11 @@ class INET_API PimInterfaceTableAccess : public ModuleAccess<PimInterfaceTable>
  * The problem is that method fireChangeNotification
  * needs object as the second parameter.
  */
-class addRemoveAddr : public cPolymorphic
+class addRemoveAddr : public cObject
 {
 	protected:
 		std::vector<IPv4Address> addr;						/**< Vector of added or removed addresses. */
-		PimInterface *pimInt;								/**< Pointer to interface. */
+		PIMInterface *pimInt;								/**< Pointer to interface. */
 
 	public:
 		addRemoveAddr(){};
@@ -150,10 +150,10 @@ class addRemoveAddr : public cPolymorphic
 		}
 
 		void setAddr(std::vector<IPv4Address> addr)  {this->addr = addr;} /**< Set addresses to the object. */
-		void setInt(PimInterface *pimInt)  {this->pimInt = pimInt;}		/**< Set pointer to interface to the object. */
+		void setInt(PIMInterface *pimInt)  {this->pimInt = pimInt;}		/**< Set pointer to interface to the object. */
 		std::vector<IPv4Address> getAddr () {return this->addr;}			/**< Get addresses from the object. */
 		int getAddrSize () {return this->addr.size();}					/**< Returns size of addresses vector. */
-		PimInterface *getInt () {return this->pimInt;}					/**< Get pointer to interface from the object. */
+		PIMInterface *getInt () {return this->pimInt;}					/**< Get pointer to interface from the object. */
 };
 
 #endif /* PIMINTERFACES_H_ */

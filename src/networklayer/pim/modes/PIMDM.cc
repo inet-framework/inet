@@ -454,7 +454,7 @@ void PIMDM::processJoinPruneGraftPacket(PIMJoinPrune *pkt, PIMPacketType type)
 	IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
 	IPv4Address sender = ctrl->getSrcAddr();
 	InterfaceEntry * nt = rt->getInterfaceForDestAddr(sender);
-	vector<PimNeighbor> neighbors = pimNbt->getNeighborsByIntID(nt->getInterfaceId());
+	vector<PIMNeighbor> neighbors = pimNbt->getNeighborsByIntID(nt->getInterfaceId());
 	IPv4Address addr = nt->ipv4Data()->getIPAddress();
 
 	// does packet belong to this router?
@@ -874,8 +874,8 @@ void PIMDM::initialize(int stage)
 		// Pointer to routing tables, interface tables, notification board
 		rt = PIMRoutingTableAccess().get();
 		ift = InterfaceTableAccess().get();
-		pimIft = PimInterfaceTableAccess().get();
-		pimNbt = PimNeighborTableAccess().get();
+		pimIft = PIMInterfaceTableAccess().get();
+		pimNbt = PIMNeighborTableAccess().get();
 
 	}
 	else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
@@ -927,7 +927,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
 	Enter_Method_Silent();
     printNotificationBanner(signalID, details);
 	IPv4Datagram *datagram;
-	PimInterface *pimInterface;
+	PIMInterface *pimInterface;
 	PIMMulticastRoute *route;
 	addRemoveAddr *members;
 
@@ -1169,7 +1169,7 @@ void PIMDM::oldMulticastAddr(addRemoveAddr *members)
 {
 	EV << "pimDM::oldMulticastAddr" << endl;
 	vector<IPv4Address> oldAddr = members->getAddr();
-	PimInterface * pimInt = members->getInt();
+	PIMInterface * pimInt = members->getInt();
 	bool connected = false;
 
 	// go through all old multicast addresses assigned to interface
@@ -1251,7 +1251,7 @@ void PIMDM::newMulticastAddr(addRemoveAddr *members)
 {
 	EV << "pimDM::newMulticastAddr" << endl;
 	vector<IPv4Address> newAddr = members->getAddr();
-	PimInterface * pimInt = members->getInt();
+	PIMInterface * pimInt = members->getInt();
 	bool forward = false;
 
 	// go through all new multicast addresses assigned to interface
@@ -1339,13 +1339,13 @@ void PIMDM::newMulticast(PIMMulticastRoute *newRoute)
 	EV << "pimDM::newMulticast" << endl;
 
 	// only outgoing interfaces are missing
-	PimInterface *rpfInt = pimIft->getInterfaceByIntID(newRoute->getInIntId());
+	PIMInterface *rpfInt = pimIft->getInterfaceByIntID(newRoute->getInIntId());
 	bool pruned = true;
 
 	// insert all PIM interfaces except rpf int
 	for (int i = 0; i < pimIft->getNumInterface(); i++)
 	{
-		PimInterface *pimIntTemp = pimIft->getInterface(i);
+		PIMInterface *pimIntTemp = pimIft->getInterface(i);
 		int intId = pimIntTemp->getInterfaceID();
 
 		//check if PIM interface is not RPF interface
@@ -1410,7 +1410,7 @@ void PIMDM::newMulticast(PIMMulticastRoute *newRoute)
 	EV << "PimSplitter::newMulticast: New route was added to the multicast routing table." << endl;
 }
 
-PimInterface *PIMDM::getIncomingInterface(IPv4Datagram *datagram)
+PIMInterface *PIMDM::getIncomingInterface(IPv4Datagram *datagram)
 {
     cGate *g = datagram->getArrivalGate();
     if (g)

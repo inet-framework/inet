@@ -18,9 +18,9 @@
 
 package inet.networklayer.pim.tables;
 
-// PimNeighborTable contain all interfaces wich have pim neighbour interface
-simple PimNeighborTable
+// PIMNeighborTable contain all interfaces wich have pim neighbour interface
+simple PIMNeighborTable
 {
-	@class(PimNeighborTable);
+	@class(PIMNeighborTable);
   	@display("i=block/table");   
 }

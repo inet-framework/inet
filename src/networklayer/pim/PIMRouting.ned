@@ -20,8 +20,8 @@ package inet.networklayer.pim;
 
 import inet.networklayer.pim.modes.PIMDM;
 import inet.networklayer.pim.modes.PIMSM;
-import inet.networklayer.pim.tables.PimInterfaceTable;
-import inet.networklayer.pim.tables.PimNeighborTable;
+import inet.networklayer.pim.tables.PIMInterfaceTable;
+import inet.networklayer.pim.tables.PIMNeighborTable;
 
 module PIMRouting
 {
@@ -60,12 +60,12 @@ module PIMRouting
                 spiltterOut;
         }
 
-        PimInterfaceTable: PimInterfaceTable {
+        pimInterfaceTable: PIMInterfaceTable {
             parameters:
                 @display("p=268,56");
         }
 
-        PimNeighborTable: PimNeighborTable {
+        pimNeighborTable: PIMNeighborTable {
             parameters:
                 @display("p=268,142");
         }
