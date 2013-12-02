@@ -44,33 +44,25 @@ class INET_API PIMInterface: public cObject
         };
 
 	protected:
-		int 					intID;          			/**< Identification of interface. */
-		InterfaceEntry *		intPtr;						/**< Pointer to interface table entry. */
-		PIMMode					mode;						/**< Type of mode. */
-		IPv4AddressVector    	intMulticastAddresses;		/**< Multicast addresses assigned to interface. */
-		bool					SR;							/**< Indicator of State Refresh Originator. */
+		InterfaceEntry *intPtr;                    /**< Pointer to interface table entry. */
+		PIMMode mode;                              /**< Type of mode. */
+		IPv4AddressVector reportedMulticastGroups; /**< Addresses of multicast groups that has members on this interface. */
+		bool stateRefreshFlag;                     /**< Indicator of State Refresh Originator. If it is true, router will send SR messages. */
 
 	public:
-		PIMInterface(){intPtr = NULL; SR = false;};
-	    virtual ~PIMInterface() {};
+		PIMInterface() {intPtr = NULL; stateRefreshFlag = false; }
+        PIMInterface(InterfaceEntry *ie, PIMMode mode, bool stateRefreshFlag)
+		    : intPtr(ie), mode(mode), stateRefreshFlag(stateRefreshFlag) { ASSERT(ie); }
 	    virtual std::string info() const;
 
-	    // set methods
-	    void setInterfaceID(int iftID)  {this->intID = iftID;}							/**< Set identifier of interface. */
-	    void setInterfacePtr(InterfaceEntry *intPtr)  {this->intPtr = intPtr;}			/**< Set pointer to interface. */
-	    void setMode(PIMMode mode) {this->mode = mode;}									/**< Set PIM mode configured on the interface. */
-	    void setSR(bool SR)  {this->SR = SR;}											/**< Set State Refresh indicator. If it is true, router will send SR msgs. */
+	    int getInterfaceId() const { return intPtr ? intPtr->getInterfaceId() : -1;}
+		InterfaceEntry *getInterfacePtr() const {return intPtr;}
+		PIMMode getMode() const {return mode;}
+		IPv4AddressVector getIntMulticastAddresses() const {return reportedMulticastGroups;}
+		bool getSR() const {return stateRefreshFlag;}
 
-	    //get methods
-	    int getInterfaceID() const {return intID;}													/**< Get identifier of interface. */
-		InterfaceEntry *getInterfacePtr() const {return intPtr;}									/**< Get pointer to interface. */
-		PIMMode getMode() const {return mode;}														/**< Get PIM mode configured on the interface. */
-		IPv4AddressVector getIntMulticastAddresses() const {return intMulticastAddresses;}		    /**< Get list of multicast addresses assigned to the interface. */
-		bool getSR() const {return SR;}																/**< Get State Refresh indicator. If it is true, router will send SR msgs. */
-
-	    // methods for work with vector "intMulticastAddresses"
-	    void setIntMulticastAddresses(const IPv4AddressVector &intMulticastAddresses)  {this->intMulticastAddresses = intMulticastAddresses;} 	/**< Set multicast addresses to the interface. */
-	    void addIntMulticastAddress(IPv4Address addr)  {this->intMulticastAddresses.push_back(addr);}												/**< Add multicast address to the interface. */
+	    void setIntMulticastAddresses(const IPv4AddressVector &intMulticastAddresses)  {this->reportedMulticastGroups = intMulticastAddresses;}
+	    void addIntMulticastAddress(IPv4Address addr)  {this->reportedMulticastGroups.push_back(addr);}
 	    void removeIntMulticastAddress(IPv4Address addr);
 	    bool isLocalIntMulticastAddress (IPv4Address addr);
 };
@@ -89,12 +81,11 @@ class INET_API PIMInterfaceTable: public cSimpleModule
 		PIMInterfaceTable(){};
 		virtual ~PIMInterfaceTable(){};
 
-		virtual PIMInterface *getInterface(int k){return &this->pimIft[k];}						/**< Get pointer to entry of PIMInterfaceTable from the object. */
+        virtual int getNumInterfaces() {return this->pimIft.size();}                                /**< Returns number of entries in PIMInterfaceTable. */
+		virtual PIMInterface *getInterface(int k) {return &this->pimIft[k];}						/**< Get pointer to entry of PIMInterfaceTable from the object. */
+        virtual PIMInterface *getInterfaceById(int interfaceId);                                   /**< Returns entry from PIMInterfaceTable with given interface ID. */
 		virtual void addInterface(const PIMInterface &entry){this->pimIft.push_back(entry);}		/**< Add entry to PIMInterfaceTable. */
 		//virtual bool deleteInterface(const PIMInterface *entry){};
-		virtual int getNumInterface() {return this->pimIft.size();}								/**< Returns number of entries in PIMInterfaceTable. */
-		virtual void printPimInterfaces();
-		virtual PIMInterface *getInterfaceByIntID(int intID);									/**< Returns entry from PIMInterfaceTable with given interface ID. */
 
 	protected:
         virtual int numInitStages() const  {return NUM_INIT_STAGES;}

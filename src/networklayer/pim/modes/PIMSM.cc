@@ -84,7 +84,7 @@ void PIMSM::initialize(int stage)
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
         // is PIM enabled?
-        if (pimIft->getNumInterface() == 0)
+        if (pimIft->getNumInterfaces() == 0)
         {
             EV << "PIM is NOT enabled on device " << endl;
             return;
@@ -1565,11 +1565,11 @@ void PIMSM::newMulticastRegisterDR(PIMMulticastRoute *newRoute)
     EV << "pimSM::newMulticastRegisterDR" << endl;
 
     PIMMulticastRoute *newRouteG = new PIMMulticastRoute();
-    PIMInterface *rpfInt = pimIft->getInterfaceByIntID(newRoute->getInIntId());
+    PIMInterface *rpfInt = pimIft->getInterfaceById(newRoute->getInIntId());
     InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->getRPAddress());
 
     // RPF check and check if I am DR for given address
-    if ((newInIntG->getInterfaceId() != rpfInt->getInterfaceID()) && IamDR(newRoute->getOrigin()))
+    if ((newInIntG->getInterfaceId() != rpfInt->getInterfaceId()) && IamDR(newRoute->getOrigin()))
     {
         // Set Keep Alive timer for routes
         PIMkat* timerKat = createKeepAliveTimer(newRoute->getOrigin(), newRoute->getMulticastGroup());
@@ -1646,7 +1646,7 @@ void PIMSM::removeMulticastReciever(addRemoveAddr *members)
             for (k = 0; k < route->getNumOutInterfaces(); k++)
             {
                 AnsaOutInterface *outInterface = route->getAnsaOutInterface(k);
-                if (outInterface->intId == pimInt->getInterfaceID())
+                if (outInterface->intId == pimInt->getInterfaceId())
                 {
                     EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
                     if (outInterface->expiryTimer)
@@ -1685,7 +1685,7 @@ void PIMSM::newMulticastReciever(addRemoveAddr *members)
     for (unsigned i=0; i<addMembers.size();i++)
     {
         IPv4Address multGroup = addMembers[i];
-        int interfaceId = (members->getInt())->getInterfaceID();
+        int interfaceId = (members->getInt())->getInterfaceId();
         InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->RPAddress);
         PIMNeighbor *neighborToRP = pimNbt->getNeighborByIntID(newInIntG->getInterfaceId());
 
@@ -1910,7 +1910,7 @@ PIMInterface *PIMSM::getIncomingInterface(IPv4Datagram *datagram)
     {
         InterfaceEntry *ie = g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
         if (ie)
-            return pimIft->getInterfaceByIntID(ie->getInterfaceId());
+            return pimIft->getInterfaceById(ie->getInterfaceId());
     }
     return NULL;
 }

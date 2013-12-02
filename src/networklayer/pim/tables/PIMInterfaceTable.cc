@@ -29,7 +29,7 @@ std::ostream& operator<<(std::ostream& os, const PIMInterface& e)
 	int i;
 	std::vector<IPv4Address> intMulticastAddresses = e.getIntMulticastAddresses();
 
-    os << "ID = " << e.getInterfaceID() << "; mode = ";
+    os << "ID = " << e.getInterfaceId() << "; mode = ";
     if (e.getMode() == PIMInterface::DenseMode)
     	os << "Dense";
     else if (e.getMode() == PIMInterface::SparseMode)
@@ -62,7 +62,7 @@ std::ostream& operator<<(std::ostream& os, const PIMInterfaceTable& e)
 std::string PIMInterface::info() const
 {
 	std::stringstream out;
-	out << "ID = " << intID << "; mode = " << mode;
+	out << "ID = " << getInterfaceId() << "; mode = " << mode;
 	return out.str();
 }
 
@@ -75,11 +75,11 @@ std::string PIMInterface::info() const
  */
 void PIMInterface::removeIntMulticastAddress(IPv4Address addr)
 {
-	for(unsigned int i = 0; i < intMulticastAddresses.size(); i++)
+	for(unsigned int i = 0; i < reportedMulticastGroups.size(); i++)
 	{
-		if (intMulticastAddresses[i] == addr)
+		if (reportedMulticastGroups[i] == addr)
 		{
-			intMulticastAddresses.erase(intMulticastAddresses.begin() + i);
+			reportedMulticastGroups.erase(reportedMulticastGroups.begin() + i);
 			return;
 		}
 	}
@@ -95,9 +95,9 @@ void PIMInterface::removeIntMulticastAddress(IPv4Address addr)
  */
 bool PIMInterface::isLocalIntMulticastAddress (IPv4Address addr)
 {
-	for(unsigned int i = 0; i < intMulticastAddresses.size(); i++)
+	for(unsigned int i = 0; i < reportedMulticastGroups.size(); i++)
 	{
-		if (intMulticastAddresses[i] == addr)
+		if (reportedMulticastGroups[i] == addr)
 			return true;
 	}
 	return false;
@@ -149,62 +149,28 @@ void PIMInterfaceTable::configureInterfaces(cXMLElement *config)
 
 void PIMInterfaceTable::addInterface(InterfaceEntry *ie, cXMLElement *config)
 {
-    PIMInterface pimInterface;
-    pimInterface.setInterfaceID(ie->getInterfaceId());
-    pimInterface.setInterfacePtr(ie);
-
     const char *modeAttr = config->getAttribute("mode");
     if (!modeAttr)
         return;
 
+    PIMInterface::PIMMode mode;
     if (strcmp(modeAttr, "dense") == 0)
-        pimInterface.setMode(PIMInterface::DenseMode);
+        mode = PIMInterface::DenseMode;
     else if (strcmp(modeAttr, "sparse") == 0)
-        pimInterface.setMode(PIMInterface::SparseMode);
+        mode = PIMInterface::SparseMode;
     else
         throw cRuntimeError("PIMInterfaceTable: invalid 'mode' attribute value in the configuration of interface '%s'", ie->getName());
 
     const char *stateRefreshAttr = config->getAttribute("state-refresh");
-    if (stateRefreshAttr && strcmp(stateRefreshAttr, "true"))
-        pimInterface.setSR(true);
+    bool stateRefreshFlag = stateRefreshAttr && strcmp(stateRefreshAttr, "true");
 
-    addInterface(pimInterface);
+    addInterface(PIMInterface(ie, mode, stateRefreshFlag));
 }
 
-/**
- * PRINT PIM INTERFACES
- *
- * Actually not in use.
- * Printout of Table of PIM interfaces
- */
-void PIMInterfaceTable::printPimInterfaces()
+PIMInterface *PIMInterfaceTable::getInterfaceById(int interfaceId)
 {
-	for(std::vector<PIMInterface>::iterator i = pimIft.begin(); i < pimIft.end(); i++)
-	{
-		EV << (*i).info() << endl;
-	}
-
-}
-
-/**
- * GET INTERFACE BY INTERFACE ID
- *
- * The method finds interface in interface table by given interface ID.
- *
- * @param intID ID of interface which is wanted.
- * @return Returns link to wanted record in table.
- * @see getNumInterface()
- * @see getInterface()
- */
-PIMInterface *PIMInterfaceTable::getInterfaceByIntID(int intID)
-{
-	for(int i = 0; i < getNumInterface(); i++)
-	{
-		if(intID == getInterface(i)->getInterfaceID())
-		{
+	for(int i = 0; i < getNumInterfaces(); i++)
+		if(interfaceId == getInterface(i)->getInterfaceId())
 			return getInterface(i);
-			break;
-		}
-	}
 	return NULL;
 }

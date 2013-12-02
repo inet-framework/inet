@@ -881,7 +881,7 @@ void PIMDM::initialize(int stage)
 	else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
 	{
         // is PIM enabled?
-        if (pimIft->getNumInterface() == 0)
+        if (pimIft->getNumInterfaces() == 0)
         {
             EV << "PIM is NOT enabled on device " << endl;
         }
@@ -958,7 +958,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         EV << "pimDM::receiveChangeNotification - Data appears on non-RPF interface." << endl;
         datagram = check_and_cast<IPv4Datagram*>(details);
         pimInterface = getIncomingInterface(datagram);
-        dataOnNonRpf(datagram->getDestAddress(), datagram->getSrcAddress(), pimInterface? pimInterface->getInterfaceID():-1);
+        dataOnNonRpf(datagram->getDestAddress(), datagram->getSrcAddress(), pimInterface? pimInterface->getInterfaceId():-1);
     }
     // data come to RPF interface
     else if (signalID == NF_IPv4_DATA_ON_RPF)
@@ -1192,7 +1192,7 @@ void PIMDM::oldMulticastAddr(addRemoveAddr *members)
 			for (k = 0; k < route->getNumOutInterfaces();)
 			{
 			    AnsaOutInterface *outInt = route->getAnsaOutInterface(k);
-				if (outInt->intId == pimInt->getInterfaceID())
+				if (outInt->intId == pimInt->getInterfaceId())
 				{
 					EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
 					route->removeOutInterface(k);
@@ -1272,14 +1272,14 @@ void PIMDM::newMulticastAddr(addRemoveAddr *members)
 			unsigned int k;
 
 			// check on RPF interface
-			if (route->getInIntId() == pimInt->getInterfaceID())
+			if (route->getInIntId() == pimInt->getInterfaceId())
 				continue;
 
 			// is interface in list of outgoing interfaces?
 			for (k = 0; k < route->getNumOutInterfaces(); k++)
 			{
 			    AnsaOutInterface *outInt = route->getAnsaOutInterface(k);
-				if (outInt->intId == pimInt->getInterfaceID())
+				if (outInt->intId == pimInt->getInterfaceId())
 				{
 					EV << "Interface is already on list of outgoing interfaces" << endl;
 					if (outInt->forwarding == PIMMulticastRoute::Pruned)
@@ -1294,7 +1294,7 @@ void PIMDM::newMulticastAddr(addRemoveAddr *members)
 			{
 				EV << "Interface is not on list of outgoing interfaces yet, it will be added" << endl;
 				PIMMulticastRoute::AnsaOutInterface *newInt = new AnsaOutInterface(pimInt->getInterfacePtr());
-				newInt->intId = pimInt->getInterfaceID();
+				newInt->intId = pimInt->getInterfaceId();
 				newInt->mode = PIMMulticastRoute::Densemode;
 				newInt->forwarding = PIMMulticastRoute::Forward;
 				newInt->pruneTimer = NULL;
@@ -1339,14 +1339,14 @@ void PIMDM::newMulticast(PIMMulticastRoute *newRoute)
 	EV << "pimDM::newMulticast" << endl;
 
 	// only outgoing interfaces are missing
-	PIMInterface *rpfInt = pimIft->getInterfaceByIntID(newRoute->getInIntId());
+	PIMInterface *rpfInt = pimIft->getInterfaceById(newRoute->getInIntId());
 	bool pruned = true;
 
 	// insert all PIM interfaces except rpf int
-	for (int i = 0; i < pimIft->getNumInterface(); i++)
+	for (int i = 0; i < pimIft->getNumInterfaces(); i++)
 	{
 		PIMInterface *pimIntTemp = pimIft->getInterface(i);
-		int intId = pimIntTemp->getInterfaceID();
+		int intId = pimIntTemp->getInterfaceId();
 
 		//check if PIM interface is not RPF interface
 		if (pimIntTemp == rpfInt)
@@ -1354,7 +1354,7 @@ void PIMDM::newMulticast(PIMMulticastRoute *newRoute)
 
 		// create new outgoing interface
 		PIMMulticastRoute::AnsaOutInterface *newOutInt = new AnsaOutInterface(pimIntTemp->getInterfacePtr());
-		newOutInt->intId = pimIntTemp->getInterfaceID();
+		newOutInt->intId = pimIntTemp->getInterfaceId();
 		newOutInt->pruneTimer = NULL;
 
 		switch (pimIntTemp->getMode())
@@ -1417,7 +1417,7 @@ PIMInterface *PIMDM::getIncomingInterface(IPv4Datagram *datagram)
     {
         InterfaceEntry *ie = g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
         if (ie)
-            return pimIft->getInterfaceByIntID(ie->getInterfaceId());
+            return pimIft->getInterfaceById(ie->getInterfaceId());
     }
     return NULL;
 }

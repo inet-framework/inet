@@ -70,9 +70,9 @@ void PIMSplitter::sendHelloPkt()
 	PIMHello* msg;
 
 	// send to all PIM interfaces
-	for (int i = 0; i < pimIft->getNumInterface(); i++)
+	for (int i = 0; i < pimIft->getNumInterfaces(); i++)
 	{
-		intID = pimIft->getInterface(i)->getInterfaceID();
+		intID = pimIft->getInterface(i)->getInterfaceId();
 		msg = createHelloPkt(intID);
 		send(msg, "transportOut");
 	}
@@ -187,7 +187,7 @@ void PIMSplitter::processPIMPkt(PIMPacket *pkt)
 	int mode = 0;
 
 	// find information about interface where packet came from
-	PIMInterface *pimInt = pimIft->getInterfaceByIntID(intID);
+	PIMInterface *pimInt = pimIft->getInterfaceById(intID);
 	if (pimInt != NULL)
 		mode = pimInt->getMode();
 
@@ -307,14 +307,14 @@ void PIMSplitter::initialize(int stage)
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
 	{
 		// is PIM enabled?
-		if (pimIft->getNumInterface() == 0)
+		if (pimIft->getNumInterfaces() == 0)
 			return;
 		else
 			EV << "PIM is enabled on device " << hostname << endl;
 
 
 		// to receive PIM messages, join to ALL_PIM_ROUTERS multicast group
-		for (int i = 0; i < pimIft->getNumInterface(); i++)
+		for (int i = 0; i < pimIft->getNumInterfaces(); i++)
 		{
 		    PIMInterface *pimInterface = pimIft->getInterface(i);
 		    pimInterface->getInterfacePtr()->ipv4Data()->joinMulticastGroup(IPv4Address("224.0.0.13")); // TODO use constant
@@ -380,7 +380,7 @@ void PIMSplitter::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
 void PIMSplitter::igmpChange(InterfaceEntry *interface)
 {
 	int intId = interface->getInterfaceId();
-	PIMInterface * pimInt = pimIft->getInterfaceByIntID(intId);
+	PIMInterface * pimInt = pimIft->getInterfaceById(intId);
 
 	// save old and new set of multicast IP address assigned to interface
 	if(pimInt)
@@ -488,7 +488,7 @@ void PIMSplitter::newMulticast(IPv4Address destAddr, IPv4Address srcAddr)
 		return;
 	}
 	int rpfId = inInt->getInterfaceId();
-	PIMInterface *pimInt = pimIft->getInterfaceByIntID(rpfId);
+	PIMInterface *pimInt = pimIft->getInterfaceById(rpfId);
 
 	// if it is interface configured with PIM, create new route
 	if (pimInt != NULL)
