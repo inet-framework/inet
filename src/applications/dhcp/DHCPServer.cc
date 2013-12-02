@@ -162,8 +162,9 @@ void DHCPServer::processDHCPMessage(DHCPMessage *packet)
     // check the OP code
     if (packet->getOp() == BOOTREQUEST)
     {
+        int messageType = packet->getOptions().getMessageType();
 
-        if (packet->getOptions().getMessageType() == DHCPDISCOVER) // RFC 2131, 4.3.1
+        if (messageType == DHCPDISCOVER) // RFC 2131, 4.3.1
         {
             EV_INFO << "DHCPDISCOVER arrived. Handling it." << endl;
 
@@ -193,7 +194,7 @@ void DHCPServer::processDHCPMessage(DHCPMessage *packet)
             }
 
         }
-        else if (packet->getOptions().getMessageType() == DHCPREQUEST) // RFC 2131, 4.3.2
+        else if (messageType == DHCPREQUEST) // RFC 2131, 4.3.2
         {
             EV_INFO << "DHCPREQUEST arrived. Handling it." << endl;
 
@@ -298,7 +299,7 @@ void DHCPServer::processDHCPMessage(DHCPMessage *packet)
 
 void DHCPServer::sendNAK(DHCPMessage* msg)
 {
-    //EV_INFO << "Sending NAK to " << lease->mac << "." << endl;
+    // EV_INFO << "Sending NAK to " << lease->mac << "." << endl;
     DHCPMessage * nak = new DHCPMessage("DHCPNAK");
     nak->setOp(BOOTREPLY);
     nak->setByteLength(308); // DHCPNAK packet size
@@ -308,7 +309,7 @@ void DHCPServer::sendNAK(DHCPMessage* msg)
     nak->setXid(msg->getXid()); // transaction id from client
     nak->setSecs(0); // 0 seconds from transaction started.
     nak->setBroadcast(msg->getBroadcast());
-    nak->setGiaddr(msg->getGiaddr()); // next server ip
+    nak->setGiaddr(msg->getGiaddr()); // next server IP
     nak->setChaddr(msg->getChaddr());
     nak->getOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
     nak->getOptions().setMessageType(DHCPNAK);
@@ -324,7 +325,7 @@ void DHCPServer::sendACK(DHCPLease* lease, DHCPMessage * packet)
     ack->setOp(BOOTREPLY);
     ack->setByteLength(308); // DHCP ACK packet size
     ack->setHtype(1); // ethernet
-    ack->setHlen(6); // hardware address lenght (6 octets)
+    ack->setHlen(6); // hardware address length (6 octets)
     ack->setHops(0);
     ack->setXid(lease->xid); // transaction id;
     ack->setSecs(0); // 0 seconds from transaction started
@@ -347,7 +348,7 @@ void DHCPServer::sendACK(DHCPLease* lease, DHCPMessage * packet)
     ack->getOptions().setDnsArraySize(1);
     ack->getOptions().setDns(0,lease->dns);
 
-    // add the server_id as the RFC says
+    // add the server ID as the RFC says
     ack->getOptions().setServerIdentifier(ie->ipv4Data()->getIPAddress());
 
     // register the lease time

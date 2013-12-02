@@ -44,8 +44,8 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         cMessage* timerT1; // time at which the client enters the RENEWING state
         cMessage* timerT2; // time at which the client enters the REBINDING state
         cMessage* timerTo; // response timeout: WAIT_ACK, WAIT_OFFER
-        cMessage* leaseTimer;
-        cMessage* startTimer; // self msg to start DHCP init
+        cMessage* leaseTimer; // length of time the lease is valid
+        cMessage* startTimer; // self message to start DHCP initialization
 
         // DHCP timer types (RFC 2131 4.4.5)
         enum TimerType
@@ -153,6 +153,12 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
          * Starts the DHCP configuration process with known network address.
          */
         virtual void initRebootedClient();
+
+        /*
+         * Handles DHCPACK in any state. Note that, handleDHCPACK() doesn't handle DHCPACK messages
+         * in response to DHCPINFORM messages.
+         */
+        virtual void handleDHCPACK(DHCPMessage * msg);
 
         virtual InterfaceEntry *chooseInterface();
         virtual void scheduleTimerTO(TimerType type);

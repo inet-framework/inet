@@ -101,11 +101,6 @@ void DHCPClient::initialize(int stage)
         // set client to idle state
         clientState = IDLE;
 
-        // FIXME following line is a HACK. It allows to work with all type of interfaces (not just wireless)
-        // a correct fix would need some kind of notification when the wireless interface is associated
-        // or when the eth interface gets connected and would set the INIT state only then. At the moment
-        // there is no such notification in INET.
-        // initClient();
         scheduleAt(simTime() + par("startTime").doubleValue(), startTimer);
     }
 }
@@ -257,14 +252,13 @@ void DHCPClient::handleTimer(cMessage * msg)
     }
     else if (category == T2)
     {
-        // TODO: what happens with T2 and clientState != RENEWING case, is it an error?
+        // T1 < T2 always holds by definition and when T1 expires client will move to RENEWING
+        throw cRuntimeError("T2 occurred in wrong state. (T1 must be earlier than T2.)");
     }
     else if (category == LEASE_TIMEOUT)
     {
         EV_INFO << "Lease has expired. Starting DHCP process in INIT state." << endl;
-        // TODO: extract common part with the other calls to unboundLease
         unboundLease();
-        // TODO: this statement seem to have no effect, see initClient()
         clientState = INIT;
         initClient();
     }
@@ -282,15 +276,11 @@ void DHCPClient::recordOffer(DHCPMessage * dhcpOffer)
          IPv4Address serverId = dhcpOffer->getOptions().getServerIdentifier();
 
          // minimal information to configure the interface
-         // TODO: this condition will always be true, so I guess it could be deleted or what?
-         if (!ip.isUnspecified())
-         {
-             // create the lease to request
-             lease = new DHCPLease();
-             lease->ip = ip;
-             lease->mac = macAddress;
-             lease->serverId = serverId;
-         }
+         // create the lease to request
+         lease = new DHCPLease();
+         lease->ip = ip;
+         lease->mac = macAddress;
+         lease->serverId = serverId;
      }
      else
          EV_WARN << "DHCPOFFER arrived, but no IP address has been offered. Discarding it and remaining in SELECTING." << endl;
@@ -420,29 +410,24 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
         case SELECTING:
             if (messageType == DHCPOFFER)
             {
-                EV_INFO << "DHCPOFFER message arrived with IP address: " << msg->getYiaddr() << "." << endl;
+                EV_INFO << "DHCPOFFER message arrived in SELECTING state with IP address: " << msg->getYiaddr() << "." << endl;
                 scheduleTimerTO(WAIT_ACK);
                 clientState = REQUESTING;
                 recordOffer(msg);
                 sendRequest(); // we accept the first offer
             }
             else
-                EV_WARN << "The arriving packet is not a DHCPOFFER. Drop it." << endl;
+                EV_WARN << "Client is in SELECTING and the arriving packet is not a DHCPOFFER, dropping." << endl;
             break;
         case REQUESTING:
             if (messageType == DHCPOFFER)
             {
-                EV_WARN << "We don't accept DHCPOFFERs in REQUESTING state. Drop it." << endl; // remains in REQUESTING
+                EV_WARN << "We don't accept DHCPOFFERs in REQUESTING state, dropping." << endl; // remains in REQUESTING
             }
             else if (messageType == DHCPACK)
             {
-                // TODO: do you often say the same thing?
-                recordLease(msg);
+                handleDHCPACK(msg);
                 EV_INFO << "The offered IP " << lease->ip << " is available. Assign it to " << this->getParentModule()->getFullName() << endl;
-                cancelEvent(timerTo);
-                scheduleTimerT1();
-                scheduleTimerT2();
-                boundLease();
                 clientState = BOUND;
                 /*
                     The client SHOULD perform a final check on the parameters (ping, ARP).
@@ -454,7 +439,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             }
             else if (messageType == DHCPNAK)
             {
-                EV_INFO << "Arrived DHCPNAK message. Restarting the configuration process." << endl;
+                EV_INFO << "Arrived DHCPNAK message in REQUESTING state. Restarting the configuration process." << endl;
                 initClient();
             }
             break;
@@ -464,55 +449,43 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
         case RENEWING:
             if (messageType == DHCPACK)
             {
-                EV_INFO << "Arrived DHCPACK message in RENEWING state." << endl;
-                // TODO: do you often say the same thing?
-                recordLease(msg);
-                cancelEvent(timerTo);
-                scheduleTimerT1();
-                scheduleTimerT2();
-                boundLease();
+                handleDHCPACK(msg);
+                EV_INFO << "Arrived DHCPACK message in RENEWING state. The renewing process was successful." << endl;
                 clientState = BOUND;
             }
             else if (messageType == DHCPNAK)
             {
-                // TODO: extract common part with the other calls to unboundLease
                 unboundLease(); // halt network (remove address)
-                EV_INFO << "The renewing process was unsuccessful. Restarting the DHCP configuration process." << endl;
+                EV_INFO << "Arrived DHPCNAK message in RENEWING state. The renewing process was unsuccessful. Restarting the DHCP configuration process." << endl;
                 initClient();
             }
             break;
         case REBINDING:
             if (messageType == DHCPNAK)
             {
-                // TODO: extract common part with the other calls to unboundLease
                 unboundLease(); // halt network (remove address)
-                EV_INFO << "The rebinding process was unsuccessful. Restarting the DHCP configuration process." << endl;
+                EV_INFO << "Arrived DHPCNAK message in REBINDING state. The rebinding process was unsuccessful. Restarting the DHCP configuration process." << endl;
                 initClient();
             }
             else if (messageType == DHCPACK)
             {
-                // TODO: do you often say the same thing?
-                recordLease(msg);
-                cancelEvent(timerTo);
-                scheduleTimerT1();
-                scheduleTimerT2();
-                boundLease();
+                handleDHCPACK(msg);
+                EV_INFO << "Arrived DHCPACK message in REBINDING state. The rebinding process was successful." << endl;
                 clientState = BOUND;
             }
             break;
         case REBOOTING:
             if (messageType == DHCPACK)
             {
-                // TODO: do you often say the same thing?
-                recordLease(msg);
-                cancelEvent(timerTo);
-                scheduleTimerT1();
-                scheduleTimerT2();
-                boundLease();
+                handleDHCPACK(msg);
+                EV_INFO << "Arrived DHCPACK message in REBOOTING state. Initialization with known IP address was successful." << endl;
                 clientState = BOUND;
             }
             else if (messageType == DHCPNAK)
+            {
+                EV_INFO << "Arrived DHCPNAK message in REBOOTING. Initialization with known IP address was unsuccessful." << endl;
                 initClient();
+            }
             break;
         default:
             break;
@@ -658,6 +631,15 @@ void DHCPClient::sendDecline(IPv4Address declinedIp)
     decline->getOptions().setRequestedIp(declinedIp);
     EV_INFO << "Sending DHCPDECLINE." << endl;
     sendToUDP(decline, clientPort, IPv4Address::ALLONES_ADDRESS, serverPort);
+}
+
+void DHCPClient::handleDHCPACK(DHCPMessage * msg)
+{
+    recordLease(msg);
+    cancelEvent(timerTo);
+    scheduleTimerT1();
+    scheduleTimerT2();
+    boundLease();
 }
 
 void DHCPClient::scheduleTimerTO(TimerType type)
