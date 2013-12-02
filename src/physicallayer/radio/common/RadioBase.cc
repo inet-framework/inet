@@ -31,7 +31,7 @@ RadioBase::RadioBase()
 
 void RadioBase::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    PhysicalLayerBase::initialize(stage);
     EV << "Initializing RadioBase, stage = " << stage << endl;
     if (stage == INITSTAGE_LOCAL)
     {

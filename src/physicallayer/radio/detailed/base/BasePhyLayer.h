@@ -217,7 +217,7 @@ protected:
 	 * - ControllMesasges from MAC layer
 	 * - self messages like TX_OVER and RADIO_SWITCHED
 	 */
-	virtual void handleMessage(cMessage* msg);
+	virtual void handleMessageWhenUp(cMessage* msg);
 
 	/**
 	 * @brief Initializes and returns the radio class to use.

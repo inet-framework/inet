@@ -88,7 +88,7 @@ void IdealRadio::setRadioChannel(int newRadioChannel)
     }
 }
 
-void IdealRadio::handleMessage(cMessage *message)
+void IdealRadio::handleMessageWhenUp(cMessage *message)
 {
     if (message->isSelfMessage())
         handleSelfMessage(message);

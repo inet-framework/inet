@@ -82,7 +82,7 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILi
     virtual void initialize(int stage);
     virtual void finish();
 
-    virtual void handleMessage(cMessage *msg);
+    virtual void handleMessageWhenUp(cMessage *msg);
 
     virtual void handleUpperMsg(SimplifiedRadioFrame*);
 

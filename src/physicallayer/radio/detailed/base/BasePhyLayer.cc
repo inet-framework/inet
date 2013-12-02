@@ -324,7 +324,7 @@ AnalogueModel* BasePhyLayer::getAnalogueModelFromName(const std::string& name, P
 
 //--Message handling--------------------------------------
 
-void BasePhyLayer::handleMessage(cMessage* msg) {
+void BasePhyLayer::handleMessageWhenUp(cMessage* msg) {
 
 	//self messages
 	if(msg->isSelfMessage()) {

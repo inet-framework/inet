@@ -59,7 +59,7 @@ class INET_API IdealRadio : public IdealRadioChannelAccess, public ILifecycle
   protected:
     virtual void initialize(int stage);
 
-    virtual void handleMessage(cMessage *message);
+    virtual void handleMessageWhenUp(cMessage *message);
 
     virtual void handleSelfMessage(cMessage *message);
 

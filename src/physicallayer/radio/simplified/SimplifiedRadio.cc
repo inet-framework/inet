@@ -218,7 +218,7 @@ bool SimplifiedRadio::processRadioFrame(SimplifiedRadioFrame *radioFrame)
  * @sa handleUpperMsg, handleLowerMsgStart, handleLowerMsgEnd,
  * handleSelfMsg
  */
-void SimplifiedRadio::handleMessage(cMessage *msg)
+void SimplifiedRadio::handleMessageWhenUp(cMessage *msg)
 {
     if (radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_OFF)
     {

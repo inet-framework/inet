@@ -20,13 +20,14 @@
 
 #include "IRadio.h"
 #include "IMobility.h"
+#include "PhysicalLayerBase.h"
 
 /**
  * This is an abstract base class for different radios.
  *
  * @author Levente Meszaros
  */
-class INET_API RadioBase : public cSimpleModule, public IRadio
+class INET_API RadioBase : public PhysicalLayerBase, public IRadio
 {
   protected:
     /** Internal state */
