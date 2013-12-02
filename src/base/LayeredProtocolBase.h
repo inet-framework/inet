@@ -18,9 +18,9 @@
 #ifndef __INET_LAYEREDPROTOCOLBASE_H_
 #define __INET_LAYEREDPROTOCOLBASE_H_
 
-#include "INETDefs.h"
+#include "OperationalBase.h"
 
-class INET_API LayeredProtocolBase : public cSimpleModule
+class INET_API LayeredProtocolBase : public OperationalBase
 {
   public:
     static simsignal_t packetSentToUpperSignal;
@@ -32,22 +32,16 @@ class INET_API LayeredProtocolBase : public cSimpleModule
     static simsignal_t packetFromLowerDroppedSignal;
 
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-
-    virtual void handleMessage(cMessage* message);
-
+    virtual void handleMessageWhenUp(cMessage* message);
     virtual void handleSelfMessage(cMessage* message);
 
     virtual void handleUpperCommand(cMessage* message);
-
     virtual void handleLowerCommand(cMessage* message);
 
     virtual void handleUpperPacket(cPacket* packet) = 0;
-
     virtual void handleLowerPacket(cPacket* packet) = 0;
 
     virtual bool isUpperMessage(cMessage* message) = 0;
-
     virtual bool isLowerMessage(cMessage* message) = 0;
 };
 

@@ -24,7 +24,7 @@ simsignal_t LayeredProtocolBase::packetSentToLowerSignal = registerSignal("packe
 simsignal_t LayeredProtocolBase::packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
 simsignal_t LayeredProtocolBase::packetFromLowerDroppedSignal = registerSignal("packetFromLowerDropped");
 
-void LayeredProtocolBase::handleMessage(cMessage* message)
+void LayeredProtocolBase::handleMessageWhenUp(cMessage* message)
 {
     if (message->isSelfMessage())
         handleSelfMessage(message);
