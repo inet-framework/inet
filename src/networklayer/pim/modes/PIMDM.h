@@ -90,8 +90,6 @@ class PIMDM : public cSimpleModule, protected cListener
 	    void sendPimGraftAck(PIMGraftAck *msg);
 	    void sendPimStateRefresh(IPv4Address originator, IPv4Address src, IPv4Address grp, int intId, bool P);
 
-	    void setUpInterface();
-
 	    PimInterface *getIncomingInterface(IPv4Datagram *datagram);
 
 	protected:
