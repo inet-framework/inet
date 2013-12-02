@@ -16,8 +16,8 @@
 //
 // Authors: Veronika Rybova, Tomas Prochazka (mailto:xproch21@stud.fit.vutbr.cz), Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#ifndef PIMSM_H
-#define PIMSM_H
+#ifndef __INET_PIMSM_H
+#define __INET_PIMSM_H
 
 #include <omnetpp.h>
 #include "PIMPacket_m.h"

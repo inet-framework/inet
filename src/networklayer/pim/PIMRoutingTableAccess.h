@@ -16,8 +16,8 @@
 //
 // Authors: Tomas Prochazka (mailto:xproch21@stud.fit.vutbr.cz), Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#ifndef PIMROUTINGTABLEACCESS_H_
-#define PIMROUTINGTABLEACCESS_H_
+#ifndef __INET_PIMROUTINGTABLEACCESS_H
+#define __INET_PIMROUTINGTABLEACCESS_H
 
 #include <omnetpp.h>
 #include "ModuleAccess.h"
@@ -32,4 +32,4 @@ class INET_API PIMRoutingTableAccess : public ModuleAccess<PIMRoutingTable>
         PIMRoutingTableAccess() : ModuleAccess<PIMRoutingTable>("routingTable") {}
 };
 
-#endif /* ANSAROUTINGTABLEACCESS_H_ */
+#endif

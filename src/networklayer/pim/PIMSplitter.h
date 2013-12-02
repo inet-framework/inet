@@ -16,8 +16,8 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#ifndef PIMSPLITTER_H_
-#define PIMSPLITTER_H_
+#ifndef __INET_PIMSPLITTER_H
+#define __INET_PIMSPLITTER_H
 
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
@@ -81,7 +81,7 @@ class PIMSplitter : public cSimpleModule, protected cListener
 };
 
 
-#endif /* PIMSPLITTER_H_ */
+#endif
 
 
 /**

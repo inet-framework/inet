@@ -16,8 +16,8 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#ifndef PIMNEIGHBOR_H_
-#define PIMNEIGHBOR_H_
+#ifndef __INET_PIMNEIGHBORTABLE_H
+#define __INET_PIMNEIGHBORTABLE_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"
@@ -109,4 +109,4 @@ class INET_API PIMNeighborTableAccess : public ModuleAccess<PIMNeighborTable>
 		PIMNeighborTableAccess() : ModuleAccess<PIMNeighborTable>("pimNeighborTable") {}
 };
 
-#endif /* PIMNEIGHBOR_H_ */
+#endif

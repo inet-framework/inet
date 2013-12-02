@@ -16,8 +16,8 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#ifndef PIMINTERFACES_H_
-#define PIMINTERFACES_H_
+#ifndef __INET_PIMINTERFACETABLE_H
+#define __INET_PIMINTERFACETABLE_H
 
 #include <omnetpp.h>
 #include "IInterfaceTable.h"
@@ -156,4 +156,4 @@ class addRemoveAddr : public cObject
 		PIMInterface *getInt () {return this->pimInt;}					/**< Get pointer to interface from the object. */
 };
 
-#endif /* PIMINTERFACES_H_ */
+#endif

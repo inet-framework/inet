@@ -16,8 +16,8 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#ifndef HLIDAC_PIMDM
-#define HLIDAC_PIMDM
+#ifndef __INET_PIMDM_H
+#define __INET_PIMDM_H
 
 #include <omnetpp.h>
 #include "PIMPacket_m.h"

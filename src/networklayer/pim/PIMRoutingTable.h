@@ -16,8 +16,8 @@
 //
 // Authors: Tomas Prochazka (mailto:xproch21@stud.fit.vutbr.cz), Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#ifndef PIMROUTINGTABLE_H_
-#define PIMROUTINGTABLE_H_
+#ifndef __INET_PIMROUTINGTABLE_H
+#define __INET_PIMROUTINGTABLE_H
 
 #include "IPv4RoutingTable.h"
 #include "PIMRoute.h"
@@ -44,4 +44,4 @@ class INET_API PIMRoutingTable : public IPv4RoutingTable {
       virtual bool deleteMulticastRoute(PIMMulticastRoute *entry);
 };
 
-#endif /* ANSAROUTINGTABLE_H_ */
+#endif

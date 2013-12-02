@@ -17,8 +17,8 @@
 // Authors: Veronika Rybova, Tomas Prochazka (mailto:xproch21@stud.fit.vutbr.cz), Jiri Trhlik (mailto:JiriTM@gmail.com)
 //          Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#ifndef PIMROUTE_H_
-#define PIMROUTE_H_
+#ifndef __INET_PIMROUTE_H
+#define __INET_PIMROUTE_H
 
 #include "IPv4Route.h"
 
@@ -185,4 +185,4 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         unsigned int getSequencenumber() const {return sequencenumber;}
 };
 
-#endif /* PIMROUTE_H_ */
+#endif
