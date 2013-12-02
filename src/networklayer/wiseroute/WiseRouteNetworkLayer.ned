@@ -21,7 +21,6 @@ import inet.networklayer.arp.GlobalARP;
 import inet.networklayer.common.EchoProtocol;
 import inet.networklayer.contract.INetworkLayer;
 
-
 //
 // This module provides a simple network layer.
 //

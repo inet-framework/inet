@@ -24,6 +24,7 @@
 package inet.networklayer.flood;
 
 import inet.networklayer.common.ISimpleNetworkProtocol;
+import inet.networklayer.common.NetworkProtocolBase;
 
 //
 // A simple flooding protocol for network-level broadcast.
@@ -43,7 +44,7 @@ import inet.networklayer.common.ISimpleNetworkProtocol;
 //
 // ported to Mixim 2.0 by Theodoros Kapourniotis
 //
-simple Flood like ISimpleNetworkProtocol
+simple Flood extends NetworkProtocolBase like ISimpleNetworkProtocol
 {
     parameters:
         @display("i=block/fork");
@@ -55,9 +56,5 @@ simple Flood like ISimpleNetworkProtocol
         double bcDelTime @unit(s) = default(100 s);
         double defaultTtl = default(10); // Default time-to-live (ttl) used for this module expressed in  number of hops.
 
-    gates:
-        input upperLayerIn[];
-        output upperLayerOut[];
-        input lowerLayerIn[];
-        output lowerLayerOut[];
+        @class(Flood);
 }

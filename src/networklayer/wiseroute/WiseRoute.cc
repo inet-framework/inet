@@ -23,19 +23,19 @@
  * ported to Mixim 2.0.1 by Theodoros Kapourniotis
  * last modification: 06/02/11
  **************************************************************************/
-#include "WiseRoute.h"
 
 #include <limits>
 #include <algorithm>
 
+#include "WiseRoute.h"
 #include "FWMath.h"
 #include "IAddressType.h"
 #include "MACAddress.h"
 #include "AddressResolver.h"
 #include "FindModule.h"
 #include "ModuleAccess.h"
-#include "Ieee802Ctrl.h"
-#include "GenericNetworkProtocolControlInfo.h"
+#include "SimpleLinkLayerControlInfo.h"
+#include "SimpleNetworkProtocolControlInfo.h"
 #include "InterfaceTableAccess.h"
 
 using std::make_pair;
@@ -44,6 +44,7 @@ Define_Module(WiseRoute);
 
 void WiseRoute::initialize(int stage)
 {
+    NetworkProtocolBase::initialize(stage);
 	if (stage == INITSTAGE_LOCAL) {
 	    arp = check_and_cast<IARP *>(getParentModule()->getSubmodule("arp"));
 		headerLength = par ("headerLength");
@@ -94,19 +95,7 @@ WiseRoute::~WiseRoute()
 	cancelAndDelete(routeFloodTimer);
 }
 
-void WiseRoute::handleMessage(cMessage* msg)
-{
-    if (msg->isSelfMessage())
-        handleSelfMsg(msg);
-    else if (!strcmp(msg->getArrivalGate()->getName(), "upperLayerIn"))
-        handleUpperMsg(msg);
-    else if (!strcmp(msg->getArrivalGate()->getName(), "lowerLayerIn"))
-        handleLowerMsg(msg);
-    else
-        throw cRuntimeError("Unknown message");
-}
-
-void WiseRoute::handleSelfMsg(cMessage* msg)
+void WiseRoute::handleSelfMessage(cMessage* msg)
 {
 	if (msg->getKind() == SEND_ROUTE_FLOOD_TIMER) {
 		// Send route flood packet and restart the timer
@@ -135,7 +124,7 @@ void WiseRoute::handleSelfMsg(cMessage* msg)
 }
 
 
-void WiseRoute::handleLowerMsg(cMessage* msg)
+void WiseRoute::handleLowerPacket(cPacket* msg)
 {
 	WiseRouteDatagram* netwMsg       = check_and_cast<WiseRouteDatagram*>(msg);
 	const Address& finalDestAddr  = netwMsg->getFinalDestAddr();
@@ -180,7 +169,8 @@ void WiseRoute::handleLowerMsg(cMessage* msg)
 			else
 				msgCopy = netwMsg;
 			if (msgCopy->getKind() == DATA) {
-				sendUp(decapsMsg(msgCopy));
+			    int protocol = msgCopy->getProtocol();
+				sendUp(decapsMsg(msgCopy), protocol);
 				nbDataPacketsReceived++;
 			}
 			else {
@@ -224,21 +214,8 @@ void WiseRoute::handleLowerMsg(cMessage* msg)
 	}
 }
 
-void WiseRoute::handleLowerControl(cMessage *msg)
+void WiseRoute::handleUpperPacket(cPacket* msg)
 {
-    delete msg;
-}
-
-void WiseRoute::handleUpperMsg(cMessage* msg)
-{
-    if (!dynamic_cast<cPacket*>(msg))
-    {
-        // TODO: KLUDGE: register protocols
-        EV_WARN << "Unkown message" << endl;
-        delete msg;
-        return;
-    }
-
 	Address finalDestAddr;
 	Address nextHopAddr;
 	MACAddress nextHopMacAddr;
@@ -255,13 +232,14 @@ void WiseRoute::handleUpperMsg(cMessage* msg)
 	else {
 		EV <<"WiseRoute: CInfo removed, netw addr="<< cInfo->getDestinationAddress()  <<endl;
 		finalDestAddr = cInfo->getDestinationAddress();
-		delete cInfo;
 	}
 
 	pkt->setFinalDestAddr(finalDestAddr);
 	pkt->setInitialSrcAddr(myNetwAddr);
 	pkt->setSrcAddr(myNetwAddr);
 	pkt->setNbHops(0);
+	pkt->setProtocol(cInfo->getProtocol());
+	delete cInfo;
 
 	if (finalDestAddr.isBroadcast())
 		nextHopAddr = myNetwAddr.getAddressType()->getBroadcastAddress();
@@ -309,23 +287,6 @@ void WiseRoute::finish()
     recordScalar("meanNbHops", (double) nbHops / (double) nbDataPacketsReceived);
 }
 
-void WiseRoute::sendDown(cMessage *msg)
-{
-    // TODO: index, extend routing table with interface
-    for (int i = 0; i < gateSize("lowerLayerOut"); i++) {
-        cMessage *dup = msg->dup();
-        dup->setControlInfo(msg->getControlInfo()->dup());
-        send(dup, "lowerLayerOut", i);
-    }
-    delete msg;
-}
-
-void WiseRoute::sendUp(cMessage *msg)
-{
-    // TODO: index
-    send(msg, "upperLayerOut", 0);
-}
-
 void WiseRoute::updateRouteTable(const Address& origin, const Address& lastHop, double rssi, double ber)
 {
 	tRouteTable::iterator pos;
@@ -368,7 +329,10 @@ void WiseRoute::updateRouteTable(const Address& origin, const Address& lastHop, 
 cMessage* WiseRoute::decapsMsg(WiseRouteDatagram *msg)
 {
 	cMessage *m = msg->decapsulate();
-	setUpControlInfo(m, msg->getInitialSrcAddr());
+    SimpleNetworkProtocolControlInfo *const controlInfo = new SimpleNetworkProtocolControlInfo();
+    controlInfo->setSourceAddress(msg->getInitialSrcAddr());
+    controlInfo->setProtocol(msg->getProtocol());
+    m->setControlInfo(controlInfo);
 	nbHops = nbHops + msg->getNbHops();
 	// delete the netw packet
 	delete msg;
@@ -414,20 +378,8 @@ WiseRoute::tFloodTable::key_type WiseRoute::getRoute(const tFloodTable::key_type
  */
 cObject* WiseRoute::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
-    // TODO: generalize
-    Ieee802Ctrl * const cCtrlInfo = new Ieee802Ctrl();
+    SimpleLinkLayerControlInfo * const cCtrlInfo = new SimpleLinkLayerControlInfo();
     cCtrlInfo->setDest(pDestAddr);
-    pMsg->setControlInfo(cCtrlInfo);
-    return cCtrlInfo;
-}
-
-/**
- * Attaches a "control info" structure (object) to the up message pMsg.
- */
-cObject* WiseRoute::setUpControlInfo(cMessage *const pMsg, const Address& pSrcAddr)
-{
-    GenericNetworkProtocolControlInfo *const cCtrlInfo = new GenericNetworkProtocolControlInfo();
-    cCtrlInfo->setSourceAddress(pSrcAddr);
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }

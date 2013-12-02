@@ -28,16 +28,16 @@ void AdaptiveProbabilisticBroadcast::initialize(int stage)
 	}
 }
 
-void AdaptiveProbabilisticBroadcast::handleLowerMsg(cMessage* msg)
+void AdaptiveProbabilisticBroadcast::handleLowerPacket(cPacket* msg)
 {
-	ProbabilisticBroadcastPkt* m = check_and_cast<ProbabilisticBroadcastPkt*>(msg);
+	ProbabilisticBroadcastDatagram* m = check_and_cast<ProbabilisticBroadcastDatagram*>(msg);
 	// Update neighbors table before calling the method of the super class
 	// because it may delete the message.
 	updateNeighMap(m);
-	ProbabilisticBroadcast::handleLowerMsg(msg);
+	ProbabilisticBroadcast::handleLowerPacket(msg);
 }
 
-void AdaptiveProbabilisticBroadcast::updateNeighMap(ProbabilisticBroadcastPkt* m)
+void AdaptiveProbabilisticBroadcast::updateNeighMap(ProbabilisticBroadcastDatagram* m)
 {
 	//find the network address of the node who sent the msg
 	NeighborMap::key_type nodeAddress = m->getSrcAddr();
@@ -79,7 +79,7 @@ void AdaptiveProbabilisticBroadcast::updateNeighMap(ProbabilisticBroadcastPkt* m
 	updateBeta();
 }
 
-void AdaptiveProbabilisticBroadcast::handleSelfMsg(cMessage* msg)
+void AdaptiveProbabilisticBroadcast::handleSelfMessage(cMessage* msg)
 {
 	if (msg->getKind() == NEIGHBOR_TIMER) {
 		const NeighborMap::key_type& node = *static_cast<NeighborMap::key_type*>( msg->getContextPointer() );
@@ -90,7 +90,7 @@ void AdaptiveProbabilisticBroadcast::handleSelfMsg(cMessage* msg)
 		updateBeta();
 	}
 	else {
-		ProbabilisticBroadcast::handleSelfMsg(msg);
+		ProbabilisticBroadcast::handleSelfMessage(msg);
 	}
 }
 

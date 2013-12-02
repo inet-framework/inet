@@ -38,12 +38,12 @@ protected:
     typedef std::map<Address, cMessage*> NeighborMap;
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerMsg(cMessage* msg);
+    virtual void handleLowerPacket(cPacket* msg);
 
     /** @brief Handle self messages */
-    virtual void handleSelfMsg(cMessage* msg);
+    virtual void handleSelfMessage(cMessage* msg);
 
-    void updateNeighMap(ProbabilisticBroadcastPkt* m);
+    void updateNeighMap(ProbabilisticBroadcastDatagram* m);
 
     void updateBeta();
 

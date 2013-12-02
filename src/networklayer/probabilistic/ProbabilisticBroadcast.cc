@@ -8,11 +8,10 @@
 
 #include <cassert>
 
-#include "Ieee802Ctrl.h"
-#include "GenericNetworkProtocolControlInfo.h"
+#include "SimpleLinkLayerControlInfo.h"
+#include "SimpleNetworkProtocolControlInfo.h"
 #include "IAddressType.h"
 #include "MACAddress.h"
-#include "InterfaceTableAccess.h"
 
 using std::make_pair;
 using std::endl;
@@ -23,6 +22,7 @@ long ProbabilisticBroadcast::id_counter = 0;
 
 void ProbabilisticBroadcast::initialize(int stage)
 {
+    NetworkProtocolBase::initialize(stage);
 	if (stage == INITSTAGE_LOCAL)
 	{
 	    broadcastPeriod = par("bcperiod");
@@ -41,44 +41,26 @@ void ProbabilisticBroadcast::initialize(int stage)
 	    nbHops = 0;
 	}
     else if (stage == INITSTAGE_NETWORK_LAYER_3) {
-        IInterfaceTable* interfaceTable = InterfaceTableAccess().get(this);
         myNetwAddr = interfaceTable->getInterface(1)->getNetworkAddress();
     }
 }
 
-void ProbabilisticBroadcast::handleMessage(cMessage* msg)
+void ProbabilisticBroadcast::handleUpperPacket(cPacket* msg)
 {
-    if (msg->isSelfMessage())
-        handleSelfMsg(msg);
-    else if (!strcmp(msg->getArrivalGate()->getName(), "upperLayerIn"))
-        handleUpperMsg(msg);
-    else if (!strcmp(msg->getArrivalGate()->getName(), "lowerLayerIn"))
-        handleLowerMsg(msg);
-    else
-        opp_error("Unknown message");
-}
-
-void ProbabilisticBroadcast::handleUpperMsg(cMessage* msg)
-{
-    if (!dynamic_cast<cPacket*> (msg)) {
-        delete msg;
-        return;
-    }
-
-	ProbabilisticBroadcastPkt* pkt;
+	ProbabilisticBroadcastDatagram* pkt;
 
 	// encapsulate message in a network layer packet.
-	pkt = check_and_cast<ProbabilisticBroadcastPkt*>(encapsMsg(check_and_cast<cPacket*>(msg)));
+	pkt = check_and_cast<ProbabilisticBroadcastDatagram*>(encapsMsg(check_and_cast<cPacket*>(msg)));
 	nbDataPacketsSent++;
 	EV << "PBr: " << simTime() << " n"  << myNetwAddr << " handleUpperMsg(): Pkt ID = " << pkt->getId() << " TTL = " << pkt->getAppTtl() << endl;
 	// submit packet for first insertion in queue.
 	insertNewMessage(pkt, true);
 }
 
-void ProbabilisticBroadcast::handleLowerMsg(cMessage* msg)
+void ProbabilisticBroadcast::handleLowerPacket(cPacket* msg)
 {
 	MACAddress macSrcAddr;
-	ProbabilisticBroadcastPkt* m = check_and_cast<ProbabilisticBroadcastPkt*>(msg);
+	ProbabilisticBroadcastDatagram* m = check_and_cast<ProbabilisticBroadcastDatagram*>(msg);
 	ILinkLayerControlInfo* cInfo = check_and_cast<ILinkLayerControlInfo *>(m->removeControlInfo());
 	m->setNbHops(m->getNbHops()+1);
 	macSrcAddr = cInfo->getSourceAddress();
@@ -115,17 +97,18 @@ void ProbabilisticBroadcast::handleLowerMsg(cMessage* msg)
 		// to the application layer who will be able to compute statistics.
 		// TODO: implement an application subscription mechanism.
 		if (true) {
-			ProbabilisticBroadcastPkt* mCopy = check_and_cast<ProbabilisticBroadcastPkt*>(m->dup());
-			sendUp(decapsMsg(mCopy));
+			int protocol = m->getProtocol();
+			ProbabilisticBroadcastDatagram* mCopy = check_and_cast<ProbabilisticBroadcastDatagram*>(m->dup());
+			sendUp(decapsMsg(mCopy), protocol);
 		}
 	}
 }
 
-void ProbabilisticBroadcast::handleSelfMsg(cMessage* msg)
+void ProbabilisticBroadcast::handleSelfMessage(cMessage* msg)
 {
 	if (msg == broadcastTimer) {
 		tMsgDesc* msgDesc;
-		ProbabilisticBroadcastPkt* pkt;
+		ProbabilisticBroadcastDatagram* pkt;
 
 		// called method pops the first message from the message queue and
 		// schedules the message timer for the next one. The message is embedded
@@ -138,7 +121,7 @@ void ProbabilisticBroadcast::handleSelfMsg(cMessage* msg)
 		if (pkt->getAppTtl() > 0) {
 			// check if we are allowed to re-transmit the message on more time.
 			if (msgDesc->nbBcast < maxNbBcast) {
-				ProbabilisticBroadcastPkt* pktCopy;
+				ProbabilisticBroadcastDatagram* pktCopy;
 				bool sendForSure = msgDesc->initialSend;
 
 				// duplicate packet and insert the copy in the queue.
@@ -208,13 +191,6 @@ void ProbabilisticBroadcast::handleSelfMsg(cMessage* msg)
 	}
 }
 
-void ProbabilisticBroadcast::handleLowerControl(cMessage* msg)
-{
-	EV << "PBr: " << simTime() << " n"  << myNetwAddr << " Received lower control message. Name: "
-	   << msg->getName() << " type: " << msg->getKind() << endl;
-	delete msg;
-}
-
 void ProbabilisticBroadcast::finish()
 {
 	EV << "PBr: " << simTime() << " n"  << myNetwAddr << " finish()" << endl;
@@ -235,23 +211,6 @@ void ProbabilisticBroadcast::finish()
     } else {
       recordScalar("meanNbHops", 0);
     }
-}
-
-void ProbabilisticBroadcast::sendDown(cMessage *msg)
-{
-    // TODO: index
-    for (int i = 0; i < gateSize("lowerLayerOut"); i++) {
-        cMessage *dup = msg->dup();
-        dup->setControlInfo(msg->getControlInfo()->dup());
-        send(dup, "lowerLayerOut", i);
-    }
-    delete msg;
-}
-
-void ProbabilisticBroadcast::sendUp(cMessage *msg)
-{
-    // TODO: index
-    send(msg, "upperLayerOut", 0);
 }
 
 bool ProbabilisticBroadcast::messageKnown(unsigned int msgId)
@@ -316,12 +275,12 @@ ProbabilisticBroadcast::tMsgDesc* ProbabilisticBroadcast::popFirstMessageUpdateQ
 
 cPacket* ProbabilisticBroadcast::encapsMsg(cPacket* msg)
 {
-	ProbabilisticBroadcastPkt* pkt = new ProbabilisticBroadcastPkt(msg->getName());
-//	ProbBcastNetwControlInfo* cInfo = dynamic_cast<ProbBcastNetwControlInfo*>(msg->removeControlInfo());
-	cObject* cInfo = msg->removeControlInfo();
+	ProbabilisticBroadcastDatagram* pkt = new ProbabilisticBroadcastDatagram(msg->getName());
+	cObject* controlInfo = msg->removeControlInfo();
+	INetworkProtocolControlInfo* networkControlInfo = check_and_cast<INetworkProtocolControlInfo*>(controlInfo);
     Address broadcastAddress = myNetwAddr.getAddressType()->getBroadcastAddress();
 
-	ASSERT(cInfo);
+	ASSERT(networkControlInfo);
 	pkt->setByteLength(headerLength);
 	pkt->setSrcAddr(myNetwAddr);
     pkt->setDestAddr(broadcastAddress);
@@ -329,18 +288,19 @@ cPacket* ProbabilisticBroadcast::encapsMsg(cPacket* msg)
 	pkt->setFinalDestAddr(broadcastAddress);
 	pkt->setAppTtl(timeToLive);
 	pkt->setId(getNextID());
+    pkt->setProtocol(networkControlInfo->getProtocol());
 
 	setDownControlInfo(pkt, MACAddress::BROADCAST_ADDRESS);
 	//encapsulate the application packet
 	pkt->encapsulate(msg);
 
 	// clean-up
-	delete cInfo;
+	delete controlInfo;
 
 	return pkt;
 }
 
-void ProbabilisticBroadcast::insertNewMessage(ProbabilisticBroadcastPkt* pkt, bool iAmInitialSender)
+void ProbabilisticBroadcast::insertNewMessage(ProbabilisticBroadcastDatagram* pkt, bool iAmInitialSender)
 {
 	simtime_t ttl = pkt->getAppTtl();
 
@@ -375,10 +335,13 @@ void ProbabilisticBroadcast::insertNewMessage(ProbabilisticBroadcastPkt* pkt, bo
 	}
 }
 
-cPacket* ProbabilisticBroadcast::decapsMsg(ProbabilisticBroadcastPkt* msg)
+cPacket* ProbabilisticBroadcast::decapsMsg(ProbabilisticBroadcastDatagram* msg)
 {
 	cPacket *m = msg->decapsulate();
-	setUpControlInfo(m, msg->getSrcAddr());
+    SimpleNetworkProtocolControlInfo *const controlInfo = new SimpleNetworkProtocolControlInfo();
+    controlInfo->setSourceAddress(msg->getSrcAddr());
+    controlInfo->setProtocol(msg->getProtocol());
+    m->setControlInfo(controlInfo);
 	delete msg;
 	return m;
 }
@@ -388,20 +351,8 @@ cPacket* ProbabilisticBroadcast::decapsMsg(ProbabilisticBroadcastPkt* msg)
  */
 cObject* ProbabilisticBroadcast::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
-    // TODO: generalize
-    Ieee802Ctrl * const cCtrlInfo = new Ieee802Ctrl();
+    SimpleLinkLayerControlInfo * const cCtrlInfo = new SimpleLinkLayerControlInfo();
     cCtrlInfo->setDest(pDestAddr);
-    pMsg->setControlInfo(cCtrlInfo);
-    return cCtrlInfo;
-}
-
-/**
- * Attaches a "control info" structure (object) to the up message pMsg.
- */
-cObject* ProbabilisticBroadcast::setUpControlInfo(cMessage *const pMsg, const Address& pSrcAddr)
-{
-    GenericNetworkProtocolControlInfo *const cCtrlInfo = new GenericNetworkProtocolControlInfo();
-    cCtrlInfo->setSourceAddress(pSrcAddr);
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }

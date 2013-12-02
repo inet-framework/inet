@@ -16,6 +16,7 @@
 package inet.networklayer.probabilistic;
 
 import inet.networklayer.common.ISimpleNetworkProtocol;
+import inet.networklayer.common.NetworkProtocolBase;
 
 //
 // Multi-hop ad-hoc data dissemination protocol based on probabilistic broadcast.
@@ -32,7 +33,7 @@ import inet.networklayer.common.ISimpleNetworkProtocol;
 // a packet whose time to live (TTL) expired, avoiding retransmitting it in case it comes back
 // in the network because of some problem.
 //
-simple ProbabilisticBroadcast like ISimpleNetworkProtocol
+simple ProbabilisticBroadcast extends NetworkProtocolBase like ISimpleNetworkProtocol
 {
     parameters:
         @class(ProbabilisticBroadcast);
@@ -54,10 +55,4 @@ simple ProbabilisticBroadcast like ISimpleNetworkProtocol
         // copy that isn't dead because of TTL de-synchronization due to
         // MAC backoff, propagation delay and clock drift.
         double timeInQueueAfterDeath @unit(s) = default(60 s);
-
-    gates:
-        input upperLayerIn[];
-        output upperLayerOut[];
-        input lowerLayerIn[];
-        output lowerLayerOut[];
 }

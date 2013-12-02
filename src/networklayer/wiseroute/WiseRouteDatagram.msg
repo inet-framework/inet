@@ -13,4 +13,5 @@ packet WiseRouteDatagram
 	Address finalDestAddr;
 	Address initialSrcAddr;
 	int     nbHops;
+    int     protocol = -1;
 }

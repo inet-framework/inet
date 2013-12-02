@@ -25,6 +25,7 @@
 package inet.networklayer.wiseroute;
 
 import inet.networklayer.common.ISimpleNetworkProtocol;
+import inet.networklayer.common.NetworkProtocolBase;
 
 //
 // Wiseroute is a simple loop-free routing algorithm that
@@ -43,7 +44,7 @@ import inet.networklayer.common.ISimpleNetworkProtocol;
 // sink restarts the tree building procedure. Set it to a large value
 // if you do not want the tree to be rebuilt.
 //
-simple WiseRoute like ISimpleNetworkProtocol
+simple WiseRoute extends NetworkProtocolBase like ISimpleNetworkProtocol
 {
     parameters:
         int headerLength @unit(bit) = default(100b); // length of the network packet header (in bits)
@@ -66,10 +67,4 @@ simple WiseRoute like ISimpleNetworkProtocol
         double routeFloodsInterval @unit(s) = default(0 s);
         @display("i=block/fork");
         @class(WiseRoute);
-
-    gates:
-        input upperLayerIn[];
-        output upperLayerOut[];
-        input lowerLayerIn[];
-        output lowerLayerOut[];
 }

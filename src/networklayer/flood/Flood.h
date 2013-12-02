@@ -26,10 +26,9 @@
 #include <list>
 
 #include "INetworkLayer.h"
+#include "NetworkProtocolBase.h"
 #include "Address.h"
-#include "InterfaceTableAccess.h"
 #include "FloodDatagram.h"
-#include "ProtocolMap.h"
 
 /**
  * @brief A simple flooding protocol
@@ -50,14 +49,9 @@
  *
  * ported to Mixim 2.0 by Theodoros Kapourniotis
  **/
-class INET_API Flood : public cSimpleModule, public INetworkLayer
+class INET_API Flood : public NetworkProtocolBase, public INetworkLayer
 {
 protected:
-    /** @brief Interface table of node*/
-    IInterfaceTable *interfaceTable;
-
-    ProtocolMapping mapping; // where to send packets after decapsulation
-
     /** @brief Network layer sequence number*/
     unsigned long seqNum;
 
@@ -103,7 +97,7 @@ protected:
 
 public:
     Flood()
-    	: cSimpleModule()
+    	: NetworkProtocolBase()
     	, seqNum(0)
     	, defaultTtl(0)
     	, plainFlooding(false)
@@ -123,9 +117,6 @@ public:
 
     virtual void finish();    
 
-    /** @brief Called every time a message arrives*/
-    virtual void handleMessage( cMessage* );
-
 protected:
 
     long nbDataPacketsReceived;
@@ -134,21 +125,10 @@ protected:
     long nbHops;
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperMsg(cMessage *);
+    virtual void handleUpperPacket(cPacket*);
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerMsg(cMessage *);
-
-    /** @brief we have no self messages */
-    virtual void handleSelfMsg(cMessage* /*msg*/) {};
-
-    /** @brief Sends a message to the lower layer
-     */
-    void sendDown(cMessage *msg);
-
-    /** @brief Sends a message to the upper layer
-     */
-    void sendUp(cMessage *msg, int protocol);
+    virtual void handleLowerPacket(cPacket*);
     
     /** @brief Checks whether a message was already broadcasted*/
     bool notBroadcasted(FloodDatagram *);

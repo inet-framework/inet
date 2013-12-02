@@ -23,8 +23,8 @@
 #include "Flood.h"
 #include "IAddressType.h"
 #include "INetworkProtocolControlInfo.h"
-#include "GenericLinkLayerControlInfo.h"
-#include "GenericNetworkProtocolControlInfo.h"
+#include "SimpleLinkLayerControlInfo.h"
+#include "SimpleNetworkProtocolControlInfo.h"
 
 using std::endl;
 
@@ -35,6 +35,7 @@ Define_Module(Flood);
  * specified in the ini file a default value will be set.
  **/
 void Flood::initialize(int stage) {
+    NetworkProtocolBase::initialize(stage);
 	if (stage == INITSTAGE_LOCAL) {
 		//initialize seqence number to 0
 		seqNum = 0;
@@ -58,7 +59,6 @@ void Flood::initialize(int stage) {
 			EV << "bcMaxEntries = " << bcMaxEntries
 			   <<" bcDelTime = " << bcDelTime << endl;
 		}
-        interfaceTable = InterfaceTableAccess().get(this);
 	}
 	else if (stage == INITSTAGE_NETWORK_LAYER_3) {
         myNetwAddr = interfaceTable->getInterface(1)->getNetworkAddress();
@@ -80,29 +80,6 @@ void Flood::finish() {
 }
 
 /**
- * The basic handle message function.
- *
- * Depending on the gate a message arrives handleMessage just calls
- * different handle*Msg functions to further process the message.
- *
- * You should not make any changes in this function but implement all
- * your functionality into the handle*Msg functions called from here.
- *
- * @sa handleUpperMsg, handleLowerMsg, handleSelfMsg
- **/
-void Flood::handleMessage(cMessage* msg)
-{
-    if (msg->isSelfMessage())
-        handleSelfMsg(msg);
-    else if (!strcmp(msg->getArrivalGate()->getName(), "upperLayerIn"))
-        handleUpperMsg(msg);
-    else if (!strcmp(msg->getArrivalGate()->getName(), "lowerLayerIn"))
-        handleLowerMsg(msg);
-    else
-        opp_error("Unknown message");
-}
-
-/**
  * All messages have to get a sequence number and the ttl filed has to
  * be specified. Afterwards the messages can be handed to the mac
  * layer. The mac address is set to -1 (broadcast address) because the
@@ -116,17 +93,8 @@ void Flood::handleMessage(cMessage* msg)
  * If the maximum number of entries is reached the first (oldest) entry
  * is deleted.
  **/
-void Flood::handleUpperMsg(cMessage* m) {
-    if (!dynamic_cast<cPacket*> (m)) {
-        if (m->getKind() == MK_REGISTER_TRANSPORT_PROTOCOL) {
-            IPRegisterProtocolCommand * command = check_and_cast<IPRegisterProtocolCommand *>(m->getControlInfo());
-            mapping.addProtocolMapping(command->getProtocol(), m->getArrivalGate()->getIndex());
-        }
-        delete m;
-        return;
-    }
-
-	FloodDatagram *msg = encapsMsg(static_cast<cPacket*> (m));
+void Flood::handleUpperPacket(cPacket* m) {
+	FloodDatagram *msg = encapsMsg(m);
 
 	msg->setSeqNum(seqNum);
 	seqNum++;
@@ -170,8 +138,8 @@ void Flood::handleUpperMsg(cMessage* m) {
  * there is no corresponding entry in the bcMsgs list (@ref
  * notBroadcasted). Otherwise the message will be deleted.
  **/
-void Flood::handleLowerMsg(cMessage* m) {
-    FloodDatagram *msg = static_cast<FloodDatagram *> (m);
+void Flood::handleLowerPacket(cPacket* m) {
+    FloodDatagram *msg = check_and_cast<FloodDatagram *> (m);
     int protocol = msg->getTransportProtocol();
 
 	//msg not broadcasted yet
@@ -191,7 +159,7 @@ void Flood::handleLowerMsg(cMessage* m) {
 				EV << " data msg BROADCAST! ttl = " << msg->getTtl()
 				   <<" > 1 -> rebroadcast msg & send to upper\n";
 				msg->setTtl(msg->getTtl()-1);
-				dMsg = static_cast<FloodDatagram *>(msg->dup());
+				dMsg = msg->dup();
 				setDownControlInfo(dMsg, MACAddress::BROADCAST_ADDRESS);
 				sendDown(dMsg);
 				nbDataPacketsForwarded++;
@@ -230,25 +198,6 @@ void Flood::handleLowerMsg(cMessage* m) {
 		EV << " data msg already BROADCASTed! delete msg\n";
 		delete msg;
 	}
-}
-
-void Flood::sendDown(cMessage *msg)
-{
-    for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
-        InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
-        if (interfaceEntry && !interfaceEntry->isLoopback())
-        {
-            cMessage *dup = msg->dup();
-            setDownControlInfo(dup, MACAddress::BROADCAST_ADDRESS);
-            send(dup, "lowerLayerOut", interfaceEntry->getNetworkLayerGateIndex());
-        }
-    }
-    delete msg;
-}
-
-void Flood::sendUp(cMessage *msg, int protocol)
-{
-    send(msg, "upperLayerOut", mapping.getOutputGateForProtocol(protocol));
 }
 
 /**
@@ -295,7 +244,7 @@ bool Flood::notBroadcasted(FloodDatagram *msg) {
  **/
 cMessage* Flood::decapsMsg(FloodDatagram *floodDatagram)
 {
-    GenericNetworkProtocolControlInfo* controlInfo = new GenericNetworkProtocolControlInfo();
+    SimpleNetworkProtocolControlInfo* controlInfo = new SimpleNetworkProtocolControlInfo();
     controlInfo->setSourceAddress(floodDatagram->getSourceAddress());
     controlInfo->setProtocol(floodDatagram->getTransportProtocol());
     cPacket *transportPacket = floodDatagram->decapsulate();
@@ -349,7 +298,7 @@ FloodDatagram * Flood::encapsMsg(cPacket *appPkt) {
  */
 cObject* Flood::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
-    GenericLinkLayerControlInfo * const cCtrlInfo = new GenericLinkLayerControlInfo();
+    SimpleLinkLayerControlInfo * const cCtrlInfo = new SimpleLinkLayerControlInfo();
     cCtrlInfo->setDest(pDestAddr);
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;

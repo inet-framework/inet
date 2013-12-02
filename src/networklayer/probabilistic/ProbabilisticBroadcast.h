@@ -11,7 +11,8 @@
 #include <set>
 #include <map>
 
-#include "ProbabilisticBroadcastPkt_m.h"
+#include "NetworkProtocolBase.h"
+#include "ProbabilisticBroadcastDatagram_m.h"
 #include "Address.h"
 
 /**
@@ -23,7 +24,7 @@
  * @ingroup netwLayer
  * @author Damien Piguet
  **/
-class INET_API ProbabilisticBroadcast : public cSimpleModule
+class INET_API ProbabilisticBroadcast : public NetworkProtocolBase
 {
 private:
 	/** @brief Copy constructor is not allowed.
@@ -35,7 +36,7 @@ private:
 
 public:
 	ProbabilisticBroadcast()
-		: cSimpleModule()
+		: NetworkProtocolBase()
 		, broadcastPeriod()
 		, beta(0)
 		, timeToLive()
@@ -60,8 +61,6 @@ public:
 
     virtual void initialize(int);
 
-    virtual void handleMessage(cMessage* msg);
-
     virtual void finish();
 
 protected:
@@ -76,7 +75,7 @@ protected:
 	 *         information needed by the protocol
 	 **/
 	typedef struct tMsgDesc {
-		ProbabilisticBroadcastPkt* pkt;
+		ProbabilisticBroadcastDatagram* pkt;
 		int                        nbBcast;     // number of times the present node has passed the
 		                                        // message through a broadcast attempt.
 		bool                       initialSend; // true if message to be sent for first
@@ -87,22 +86,13 @@ protected:
 	typedef std::multimap<simtime_t, tMsgDesc*> TimeMsgMap;
 
 	/** @brief Handle messages from upper layer */
-    virtual void handleUpperMsg(cMessage* msg);
+	virtual void handleUpperPacket(cPacket* msg);
 
-    /** @brief Handle messages from lower layer */
-    virtual void handleLowerMsg(cMessage* msg);
+	/** @brief Handle messages from lower layer */
+	virtual void handleLowerPacket(cPacket* msg);
 
-    /** @brief Handle self messages */
-    virtual void handleSelfMsg(cMessage* msg);
-
-    /** @brief Handle control messages from lower layer */
-    virtual void handleLowerControl(cMessage* msg);
-
-    /** @brief Sends a message to the lower layer */
-    void sendDown(cMessage *msg);
-
-    /** @brief Sends a message to the upper layer */
-    void sendUp(cMessage *msg);
+	/** @brief Handle self messages */
+	virtual void handleSelfMessage(cMessage* msg);
 
     /** @brief Checks whether a message is known (= kept in memory) or not */
     virtual bool messageKnown(unsigned int msgId);
@@ -133,7 +123,7 @@ protected:
 	/** @brief extracts and returns the application layer packet which is encapsulated
 	 *         in the network layer packet given in argument.
 	 **/
-	virtual cPacket* decapsMsg(ProbabilisticBroadcastPkt* msg);
+	virtual cPacket* decapsMsg(ProbabilisticBroadcastDatagram* msg);
 
 	/** @brief Insert a new message in both known ID list and message queue.
 	 *         The message comes either from upper layer or from lower layer.
@@ -145,7 +135,7 @@ protected:
 	 *  @param iAmInitialSender message comes from upper layer, I am its creator
 	 *                          and initial sender.
 	 **/
-	virtual void insertNewMessage(ProbabilisticBroadcastPkt* pkt, bool iAmInitialSender = false);
+	virtual void insertNewMessage(ProbabilisticBroadcastDatagram* pkt, bool iAmInitialSender = false);
 
     /**
      * @brief Attaches a "control info" (NetwToMac) structure (object) to the message pMsg.
@@ -161,20 +151,6 @@ protected:
      * @param pDestAddr The MAC address of the message receiver.
      */
     virtual cObject* setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
-    /**
-     * @brief Attaches a "control info" (NetwToUpper) structure (object) to the message pMsg.
-     *
-     * This is most useful when passing packets between protocol layers
-     * of a protocol stack, the control info will contain the destination MAC address.
-     *
-     * The "control info" object will be deleted when the message is deleted.
-     * Only one "control info" structure can be attached (the second
-     * setL3ToL2ControlInfo() call throws an error).
-     *
-     * @param pMsg      The message where the "control info" shall be attached.
-     * @param pSrcAddr  The MAC address of the message receiver.
-     */
-    virtual cObject* setUpControlInfo(cMessage *const pMsg, const Address& pSrcAddr);
 
 	/**
 	 * @brief Period (in sim time) between two broadcast attempts.

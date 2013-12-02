@@ -4,7 +4,7 @@ cplusplus {{
    #include "Address.h"
 }}
 
-packet ProbabilisticBroadcastPkt
+packet ProbabilisticBroadcastDatagram
 {
     Address   destAddr;
     Address   srcAddr;
@@ -13,4 +13,5 @@ packet ProbabilisticBroadcastPkt
     Address   initialSrcAddr;
     Address   finalDestAddr;
     int       nbHops;
+    int       protocol = -1;
 }

@@ -26,6 +26,7 @@
 #ifndef __INET_WISEROUTE_H
 #define __INET_WISEROUTE_H
 
+#include "NetworkProtocolBase.h"
 #include "Address.h"
 #include "IARP.h"
 #include "WiseRouteDatagram_m.h"
@@ -44,7 +45,7 @@
  * @ingroup netwLayer
  * @author Jerome Rousselot
  **/
-class INET_API WiseRoute : public cSimpleModule
+class INET_API WiseRoute : public NetworkProtocolBase
 {
 private:
 	/** @brief Copy constructor is not allowed.
@@ -56,7 +57,7 @@ private:
 
 public:
 	WiseRoute()
-		: cSimpleModule()
+		: NetworkProtocolBase()
 		, routeTable()
 		, floodTable()
 		, headerLength(0)
@@ -91,8 +92,6 @@ public:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     virtual void initialize(int);
-
-    virtual void handleMessage(cMessage* msg);
 
     virtual void finish();
 
@@ -184,22 +183,13 @@ protected:
     /*@{*/
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperMsg(cMessage* msg);
+    virtual void handleUpperPacket(cPacket* msg);
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerMsg(cMessage* msg);
+    virtual void handleLowerPacket(cPacket* msg);
 
     /** @brief Handle self messages */
-    virtual void handleSelfMsg(cMessage* msg);
-
-    /** @brief Handle control messages from lower layer */
-    virtual void handleLowerControl(cMessage* msg);
-
-    /** @brief Sends a message to the lower layer */
-    void sendDown(cMessage *msg);
-
-    /** @brief Sends a message to the upper layer */
-    void sendUp(cMessage *msg);
+    virtual void handleSelfMessage(cMessage* msg);
 
     /** @brief Update routing table.
      *
@@ -233,20 +223,6 @@ protected:
      * @param pDestAddr The MAC address of the message receiver.
      */
     virtual cObject* setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
-    /**
-     * @brief Attaches a "control info" (NetwToUpper) structure (object) to the message pMsg.
-     *
-     * This is most useful when passing packets between protocol layers
-     * of a protocol stack, the control info will contain the destination MAC address.
-     *
-     * The "control info" object will be deleted when the message is deleted.
-     * Only one "control info" structure can be attached (the second
-     * setL3ToL2ControlInfo() call throws an error).
-     *
-     * @param pMsg      The message where the "control info" shall be attached.
-     * @param pSrcAddr  The MAC address of the message receiver.
-     */
-    virtual cObject* setUpControlInfo(cMessage *const pMsg, const Address& pSrcAddr);
 };
 
 #endif
