@@ -95,7 +95,7 @@ void PIMInterface::removeIntMulticastAddress(IPv4Address addr)
  * @return List of multicast address without link local IPs.
  * @see isLinkLocalMulticast()
  */
-std::vector<IPv4Address> PIMInterface::deleteLocalIPs(std::vector<IPv4Address> multicastAddr)
+std::vector<IPv4Address> PIMInterface::deleteLocalIPs(const IPv4AddressVector &multicastAddr)
 {
 	std::vector<IPv4Address> newMulticastAddresses;
 	for(unsigned int i = 0; i < multicastAddr.size(); i++)
