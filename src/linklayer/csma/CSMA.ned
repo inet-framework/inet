@@ -41,6 +41,7 @@ simple CSMA extends MACProtocolBase like ILinkLayer
 
         // length of MAC header
         int headerLength @unit(bit) = default(72 bit);
+        int mtu @unit("B") = default(0B);
         // size of the MAC queue (maximum number of packets in Tx buffer)
         int queueLength = default(100);
         // bit rate 

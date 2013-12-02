@@ -51,6 +51,9 @@ simple BMacLayer extends MACProtocolBase like ILinkLayer
         // how long is one slot?
         double slotDuration @unit(s) = default(0.1s);
 
+        int headerLength @unit(B) = default(10B);
+        int mtu @unit("B") = default(0B);
+
         // how long is the check interval (CCA)?
         double checkInterval @unit(s) = default(0.01s);
 

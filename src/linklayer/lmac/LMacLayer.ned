@@ -31,6 +31,7 @@ simple LMacLayer extends MACProtocolBase like ILinkLayer
         // how long is a slot?
         double slotDuration @unit(s) = default(100ms);
         int headerLength @unit(B) = default(10B);
+        int mtu @unit("B") = default(0B);
         // length of MAC header
         double queueLength = default(10);
         // default channel
