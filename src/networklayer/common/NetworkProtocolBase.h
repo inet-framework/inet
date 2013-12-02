@@ -37,7 +37,7 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase
 
     virtual void sendUp(cMessage* message, int transportProtocol);
 
-    virtual void sendDown(cMessage* message);
+    virtual void sendDown(cMessage* message, int interfaceId = -1);
 
     virtual bool isUpperMessage(cMessage* message);
 

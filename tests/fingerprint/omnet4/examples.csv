@@ -84,10 +84,10 @@
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv4 -r 0,              10000s,          658c-3560
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv6 -r 0,              10000s,          9bf1-b785
 /examples/inet/hierarchical99/,      -f networklayer.ini -c Generic -r 0,           10000s,          b337-353f
-/examples/inet/hierarchical99/,      -f networklayer.ini -c Flood -r 0,             10000s,          cbee-5775
-/examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0,              10000s,          aca1-e3e5
-/examples/inet/hierarchical99/,      -f networklayer.ini -c AdaptiveProbabilisticBroadcast -r 0,      10000s,          8787-17fd
-/examples/inet/hierarchical99/,      -f networklayer.ini -c WiseRoute -r 0,         10000s,          4bc8-8c09
+/examples/inet/hierarchical99/,      -f networklayer.ini -c Flood -r 0,             10000s,          4379-d4dc
+/examples/inet/hierarchical99/,      -f networklayer.ini -c ProbabilisticBroadcast -r 0,              10000s,          7ded-6d86
+/examples/inet/hierarchical99/,      -f networklayer.ini -c AdaptiveProbabilisticBroadcast -r 0,      10000s,          3851-ebb9
+/examples/inet/hierarchical99/,      -f networklayer.ini -c WiseRoute -r 0,         10000s,          177c-fa15
 
 /examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             a1a2-1905
 

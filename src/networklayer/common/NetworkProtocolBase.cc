@@ -51,18 +51,29 @@ void NetworkProtocolBase::sendUp(cMessage* message, int transportProtocol)
     send(message, "upperLayerOut", protocolMapping.getOutputGateForProtocol(transportProtocol));
 }
 
-void NetworkProtocolBase::sendDown(cMessage* message)
+void NetworkProtocolBase::sendDown(cMessage* message, int interfaceId)
 {
     if (message->isPacket())
         emit(packetSentToLowerSignal, message);
-    // TODO: index
-    // TODO: index, extend routing table with interface
-    for (int i = 0; i < gateSize("lowerLayerOut"); i++) {
-         cMessage *dup = message->dup();
-         dup->setControlInfo(message->getControlInfo()->dup());
-         send(dup, "lowerLayerOut", i);
-     }
-    delete message;
+    if (interfaceId != -1)
+    {
+        InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceById(interfaceId);
+        send(message, "lowerLayerOut", interfaceEntry->getNetworkLayerGateIndex());
+    }
+    else
+    {
+        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
+        {
+            InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
+            if (interfaceEntry && !interfaceEntry->isLoopback())
+            {
+                cMessage* duplicate = message->dup();
+                duplicate->setControlInfo(message->getControlInfo()->dup());
+                send(duplicate, "lowerLayerOut", interfaceEntry->getNetworkLayerGateIndex());
+            }
+        }
+        delete message;
+    }
 }
 
 bool NetworkProtocolBase::isUpperMessage(cMessage* message)
