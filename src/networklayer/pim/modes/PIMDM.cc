@@ -94,7 +94,7 @@ void PIMDM::sendPimGraftAck(PIMGraftAck *msg)
 	msg->setType(GraftAck);
 
 	// set IP Control info
-	IPv4ControlInfo *oldCtrl = (IPv4ControlInfo*) (msg->removeControlInfo());
+	IPv4ControlInfo *oldCtrl = check_and_cast<IPv4ControlInfo*>(msg->removeControlInfo());
 	IPv4ControlInfo *ctrl = new IPv4ControlInfo();
 	ctrl->setDestAddr(oldCtrl->getSrcAddr());
 	ctrl->setSrcAddr(oldCtrl->getDestAddr());
@@ -456,7 +456,7 @@ void PIMDM::processJoinPruneGraftPacket(PIMJoinPrune *pkt, PIMPacketType type)
 {
 	EV << "pimDM::processJoinePruneGraftPacket" << endl;
 
-	IPv4ControlInfo *ctrl =  (IPv4ControlInfo *) pkt->getControlInfo();
+	IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
 	IPv4Address sender = ctrl->getSrcAddr();
 	InterfaceEntry * nt = rt->getInterfaceForDestAddr(sender);
 	vector<PimNeighbor> neighbors = pimNbt->getNeighborsByIntID(nt->getInterfaceId());
@@ -522,7 +522,7 @@ void PIMDM::processJoinPruneGraftPacket(PIMJoinPrune *pkt, PIMPacketType type)
 
 	// Send GraftAck for this Graft message
 	if (type == Graft)
-		sendPimGraftAck((PIMGraftAck *) (pkt));
+		sendPimGraftAck(check_and_cast<PIMGraftAck*>(pkt));
 }
 
 /**
@@ -555,7 +555,7 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 	bool pruneIndicator;
 
 	// chceck if State Refresh msg has came to RPF interface
-	IPv4ControlInfo *ctrl = (IPv4ControlInfo*) pkt->getControlInfo();
+	IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
 	if (ctrl->getInterfaceId() != route->getInIntId())
 	{
 		delete pkt;
@@ -932,7 +932,6 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
 	Enter_Method_Silent();
 // XXX	printNotificationBanner(category, details);
 	IPv4Datagram *datagram;
-	InterfaceEntry *ie;
 	PimInterface *pimInterface;
 	PIMMulticastRoute *route;
 	addRemoveAddr *members;
@@ -947,21 +946,21 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
     else if (signalID == NF_IPv4_NEW_MULTICAST_DENSE)
     {
         EV <<  "pimDM::receiveChangeNotification - NEW MULTICAST DENSE" << endl;
-        route = (PIMMulticastRoute *)(details);
+        route = check_and_cast<PIMMulticastRoute*>(details);
         newMulticast(route);
     }
     // configuration of interface changed, it means some change from IGMP, address were added.
     else if (signalID == NF_IPv4_NEW_IGMP_ADDED)
     {
         EV << "pimDM::receiveChangeNotification - IGMP change - address were added." << endl;
-        members = (addRemoveAddr *) (details);
+        members = check_and_cast<addRemoveAddr*>(details);
         newMulticastAddr(members);
     }
     // configuration of interface changed, it means some change from IGMP, address were removed.
     else if (signalID == NF_IPv4_NEW_IGMP_REMOVED)
     {
         EV << "pimDM::receiveChangeNotification - IGMP change - address were removed." << endl;
-        members = (addRemoveAddr *) (details);
+        members = check_and_cast<addRemoveAddr*>(details);
         oldMulticastAddr(members);
     }
     // data come to non-RPF interface
@@ -985,7 +984,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
     else if (signalID == NF_ROUTE_ADDED)
     {
         EV << "pimDM::receiveChangeNotification - RPF interface has changed." << endl;
-        IPv4Route *entry = (IPv4Route *) (details);
+        IPv4Route *entry = check_and_cast<IPv4Route*>(details);
         vector<PIMMulticastRoute*> routes = rt->getRoutesForSource(entry->getDestination());
         for (unsigned int i = 0; i < routes.size(); i++)
             rpfIntChange(routes[i]);

@@ -691,7 +691,7 @@ void PIMSM::processPrunePacket(PIMJoinPrune *pkt, IPv4Address multGroup, Encoded
 {
     EV <<  "pimSM::processPrunePacket: ";
 
-    IPv4ControlInfo *ctrl = (IPv4ControlInfo *) pkt->getControlInfo();
+    IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
     int outIntToDel = ctrl->getInterfaceId();
 
     if (!encodedAddr.R && !encodedAddr.W && encodedAddr.S)                                              // (S,G) Prune
@@ -859,7 +859,7 @@ void PIMSM::processPrunePacket(PIMJoinPrune *pkt, IPv4Address multGroup, Encoded
 void PIMSM::processSGJoin(PIMJoinPrune *pkt, IPv4Address multOrigin, IPv4Address multGroup)
 {
     PIMMulticastRoute *newRouteSG = new PIMMulticastRoute();
-    IPv4ControlInfo *ctrl = (IPv4ControlInfo *) pkt->getControlInfo();
+    IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
     InterfaceEntry *newInIntSG = rt->getInterfaceForDestAddr(multOrigin);
     PimNeighbor *neighborToSrcDR = pimNbt->getNeighborByIntID(newInIntSG->getInterfaceId());
     PIMMulticastRoute *routePointer;
@@ -1043,7 +1043,7 @@ void PIMSM::processJoinRouteGexistOnRP(IPv4Address multGroup, IPv4Address packet
  */
 void PIMSM::processJoinPacket(PIMJoinPrune *pkt, IPv4Address multGroup, EncodedAddress encodedAddr)
 {
-    IPv4ControlInfo *ctrl = (IPv4ControlInfo *) pkt->getControlInfo();
+    IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
     PIMMulticastRoute *newRouteG = new PIMMulticastRoute();
     PIMMulticastRoute *routePointer;
     int msgHoldTime = pkt->getHoldTime();
@@ -1205,7 +1205,7 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
                     }
                 }
                 sendPIMJoinTowardSource(info);                                                              // send Join(S,G) to establish SPT between RP and registering DR
-                IPv4ControlInfo *PIMctrl =  (IPv4ControlInfo *) pkt->getControlInfo();                      // send register-stop packet
+                IPv4ControlInfo *PIMctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());         // send register-stop packet
                 sendPIMRegisterStop(PIMctrl->getDestAddr(),PIMctrl->getSrcAddr(),multGroup,multOrigin);
             }
         }
@@ -1234,7 +1234,7 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
         //if ((newRoute->isFlagSet(P) && newRouteG->isFlagSet(P)) || pkt->getN())
         if (newRouteG->isFlagSet(PIMMulticastRoute::P) || pkt->getN())
         {                                                                                                       // send register-stop packet
-            IPv4ControlInfo *PIMctrl =  (IPv4ControlInfo *) pkt->getControlInfo();
+            IPv4ControlInfo *PIMctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
             sendPIMRegisterStop(PIMctrl->getDestAddr(),PIMctrl->getSrcAddr(),multGroup,multOrigin);
         }
     }
@@ -1861,20 +1861,20 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
     if (signalID == NF_IPv4_NEW_IGMP_ADDED_PISM)
     {
         EV <<  "pimSM::receiveChangeNotification - NEW IGMP ADDED" << endl;
-        members = (addRemoveAddr *)(details);
+        members = check_and_cast<addRemoveAddr*>(details);
         newMulticastReciever(members);
     }
     else if (signalID == NF_IPv4_NEW_IGMP_REMOVED_PIMSM)
     {
         EV <<  "pimSM::receiveChangeNotification - IGMP REMOVED" << endl;
-        members = (addRemoveAddr *)(details);
+        members = check_and_cast<addRemoveAddr*>(details);
         removeMulticastReciever(members);
     }
     // new multicast data appears in router
     else if (signalID == NF_IPv4_NEW_MULTICAST_SPARSE)
     {
         EV <<  "pimSM::receiveChangeNotification - NEW MULTICAST SPARSE" << endl;
-        route = (PIMMulticastRoute *)(details);
+        route = check_and_cast<PIMMulticastRoute*>(details);
         newMulticastRegisterDR(route);
     }
     // create PIM register packet
