@@ -24,13 +24,15 @@
 
 package inet.linklayer.csma;
 
+import inet.linklayer.common.MACProtocolBase;
 import inet.linklayer.contract.ILinkLayer;
+
 
 //
 // Generic CSMA protocol supporting Mac-ACKs as well as
 // constant, linear or exponential backoff times.
 //
-simple CSMA like ILinkLayer
+simple CSMA extends MACProtocolBase like ILinkLayer
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -88,14 +90,5 @@ simple CSMA like ILinkLayer
         // maximum backoff exponent (for exponential backoff method only)
         double macMaxBE = default(8);
 
-        @signal[packetSentToLower];
-        @signal[packetReceivedFromLower];
-        @signal[packetSentToUpper];
-        @signal[packetReceivedFromUpper];
-
-    gates:
-        input upperLayerIn @labels(INetworkDatagram/down);
-        output upperLayerOut @labels(INetworkDatagram/up);
-        input lowerLayerIn @labels(BMacFrame/up);
-        output lowerLayerOut @labels(BMacFrame/down);
+        @class(CSMA);
 }

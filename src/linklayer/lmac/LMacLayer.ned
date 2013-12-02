@@ -12,7 +12,9 @@
 
 package inet.linklayer.lmac;
 
+import inet.linklayer.common.MACProtocolBase;
 import inet.linklayer.contract.ILinkLayer;
+
 
 //
 // Implementation of L-MAC (Lightweight Medium Access Protocol for
@@ -20,7 +22,7 @@ import inet.linklayer.contract.ILinkLayer;
 //
 // See C++ documentation for details
 //
-simple LMacLayer like ILinkLayer
+simple LMacLayer extends MACProtocolBase like ILinkLayer
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -42,13 +44,4 @@ simple LMacLayer like ILinkLayer
         int numSlots = default(64);
 
         @class(LMacLayer);
-        @signal[packetSentToLower];
-        @signal[packetReceivedFromLower];
-        @signal[packetSentToUpper];
-        @signal[packetReceivedFromUpper];
-    gates:
-        input upperLayerIn @labels(INetworkDatagram/down);
-        output upperLayerOut @labels(INetworkDatagram/up);
-        input lowerLayerIn @labels(BMacFrame/up);
-        output lowerLayerOut @labels(BMacFrame/down);
 }

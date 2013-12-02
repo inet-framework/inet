@@ -29,7 +29,7 @@
 
 #include "IRadio.h"
 #include "MACAddress.h"
-#include "WirelessMacBase.h"
+#include "MACProtocolBase.h"
 #include "CSMAFrame_m.h"
 
 /**
@@ -46,11 +46,11 @@
  *
  * \image html csmaFSM.png "CSMA Mac-Layer - finite state machine"
  */
-class INET_API CSMA : public WirelessMacBase
+class INET_API CSMA : public MACProtocolBase
 {
   public:
 	CSMA()
-		: WirelessMacBase()
+		: MACProtocolBase()
 		, nbTxFrames(0)
 		, nbRxFrames(0)
 		, nbMissedAcks(0)
@@ -100,13 +100,13 @@ class INET_API CSMA : public WirelessMacBase
     virtual void finish();
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerMsg(cPacket*);
+    virtual void handleLowerPacket(cPacket*);
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperMsg(cPacket*);
+    virtual void handleUpperPacket(cPacket*);
 
     /** @brief Handle self messages such as timers */
-    virtual void handleSelfMsg(cMessage*);
+    virtual void handleSelfMessage(cMessage*);
 
     /** @brief Handle control messages from lower layer */
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value);

@@ -18,8 +18,10 @@
 #define __INET_MACPROTOCOLBASE_H_
 
 #include "LayeredProtocolBase.h"
+#include "NodeOperations.h"
+#include "InterfaceEntry.h"
 
-class INET_API MACProtocolBase : public LayeredProtocolBase
+class INET_API MACProtocolBase : public LayeredProtocolBase, public cListener
 {
   public:
     /** @brief Gate ids */
@@ -30,18 +32,25 @@ class INET_API MACProtocolBase : public LayeredProtocolBase
     int lowerLayerOutGateId;
     //@}
 
+    InterfaceEntry *interfaceEntry;
+
   protected:
     MACProtocolBase();
 
     virtual void initialize(int stage);
 
-    virtual void sendUp(cMessage* message);
+    virtual void registerInterface();
+    virtual InterfaceEntry *createInterfaceEntry() = 0;
 
+    virtual void sendUp(cMessage* message);
     virtual void sendDown(cMessage* message);
 
     virtual bool isUpperMessage(cMessage* message);
-
     virtual bool isLowerMessage(cMessage* message);
+
+    virtual bool isInitializeStage(int stage) { return stage == INITSTAGE_LINK_LAYER; }
+    virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_LINK_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_LINK_LAYER; }
 };
 
 #endif

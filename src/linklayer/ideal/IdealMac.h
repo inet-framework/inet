@@ -23,7 +23,7 @@
 #include "INETDefs.h"
 #include "IRadio.h"
 #include "MACAddress.h"
-#include "WirelessMacBase.h"
+#include "MACProtocolBase.h"
 
 class IdealMacFrame;
 class InterfaceEntry;
@@ -34,7 +34,7 @@ class IPassiveQueue;
  *
  * See the NED file for details.
  */
-class INET_API IdealMac : public WirelessMacBase
+class INET_API IdealMac : public MACProtocolBase
 {
   protected:
     static simsignal_t dropPkNotForUsSignal;
@@ -71,12 +71,10 @@ class INET_API IdealMac : public WirelessMacBase
     //cListener:
     virtual void receiveSignal(cComponent *src, simsignal_t id, long value);
 
-    /** implements WirelessMacBase functions */
+    /** implements MACProtocolBase functions */
     //@{
-    virtual void handleSelfMsg(cMessage *msg);
-    virtual void handleUpperMsg(cPacket *msg);
-    virtual void handleCommand(cMessage *msg);
-    virtual void handleLowerMsg(cPacket *msg);
+    virtual void handleUpperPacket(cPacket *msg);
+    virtual void handleLowerPacket(cPacket *msg);
     //@}
 
   public:

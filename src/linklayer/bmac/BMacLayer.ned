@@ -32,6 +32,7 @@ package inet.linklayer.bmac;
 //*
 //**************************************************************************/
 
+import inet.linklayer.common.MACProtocolBase;
 import inet.linklayer.contract.ILinkLayer;
 
 
@@ -40,7 +41,7 @@ import inet.linklayer.contract.ILinkLayer;
 // LPL).
 // See C++ documentation for details.
 //
-simple BMacLayer like ILinkLayer
+simple BMacLayer extends MACProtocolBase like ILinkLayer
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -69,13 +70,5 @@ simple BMacLayer like ILinkLayer
         // only used when usage of MAC acks is enabled
         int macMaxFrameRetries = default(3);
 
-        @signal[packetSentToLower];
-        @signal[packetReceivedFromLower];
-        @signal[packetSentToUpper];
-        @signal[packetReceivedFromUpper];
-    gates:
-        input upperLayerIn @labels(INetworkDatagram/down);
-        output upperLayerOut @labels(INetworkDatagram/up);
-        input lowerLayerIn @labels(BMacFrame/up);
-        output lowerLayerOut @labels(BMacFrame/down);
+        @class(BMacLayer);
 }

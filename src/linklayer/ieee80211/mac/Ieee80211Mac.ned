@@ -17,11 +17,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 package inet.linklayer.ieee80211.mac;
 
+import inet.linklayer.common.MACProtocolBase;
 import inet.linklayer.contract.ILinkLayer;
-
 
 //
 // Implementation of the 802.11 MAC protocol. This module is intended
@@ -56,7 +55,7 @@ import inet.linklayer.contract.ILinkLayer;
 // listen interval which is related to power management, capability information
 // which is related to PCF and other non-modelled features).
 //
-simple Ieee80211Mac like ILinkLayer
+simple Ieee80211Mac extends MACProtocolBase like ILinkLayer
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
@@ -114,12 +113,9 @@ simple Ieee80211Mac like ILinkLayer
         // statistics
         double throughputTimePeriod @unit("s") = default(0); // period of time used by throughput measurement statistic
         bool multiMac = default(false); // allows multiples mac interfaces in the same link layer
-        @display("i=block/layer");
 
-        @signal[packetSentToLower](type=Ieee80211Frame);
-        @signal[packetReceivedFromLower](type=cPacket);     // expected type=Ieee80211Frame
-        @signal[packetSentToUpper](type=cPacket);   // cPacket with Ieee802Ctrl ctrlinfo
-        @signal[packetReceivedFromUpper](type=cPacket);   // cPacket with Ieee802Ctrl ctrlinfo
+        @class(Ieee80211Mac);
+        @display("i=block/layer");
 
         @signal[NF_LINK_FULL_PROMISCUOUS](type=cPacket);
         @signal[NF_LINK_PROMISCUOUS](type=cPacket);
@@ -131,8 +127,8 @@ simple Ieee80211Mac like ILinkLayer
         @statistic[rcvdPkFromLL](title="packets received from lower layer"; source=packetReceivedFromLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:
-        input upperLayerIn @labels(Ieee80211Frame);
-        output upperLayerOut @labels(Ieee80211Frame);
-        input lowerLayerIn @labels(Ieee80211Frame);
-        output lowerLayerOut @labels(Ieee80211Frame);
+        upperLayerIn @labels(Ieee80211Frame);
+        upperLayerOut @labels(Ieee80211Frame);
+        lowerLayerIn @labels(Ieee80211Frame);
+        lowerLayerOut @labels(Ieee80211Frame);
 }

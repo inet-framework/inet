@@ -24,6 +24,8 @@ import inet.base.LayeredProtocolBase;
 //
 simple MACProtocolBase extends LayeredProtocolBase
 {
+    parameters:
+        @display("i=block/rxtx");
     gates:
         input upperLayerIn @labels(INetworkDatagram/down);
         output upperLayerOut @labels(INetworkDatagram/up);

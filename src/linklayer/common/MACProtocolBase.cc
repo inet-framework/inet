@@ -15,12 +15,14 @@
 //
 
 #include "MACProtocolBase.h"
+#include "InterfaceTableAccess.h"
 
 MACProtocolBase::MACProtocolBase() :
     upperLayerInGateId(-1),
     upperLayerOutGateId(-1),
     lowerLayerInGateId(-1),
-    lowerLayerOutGateId(-1)
+    lowerLayerOutGateId(-1),
+    interfaceEntry(NULL)
 {
 }
 
@@ -33,6 +35,16 @@ void MACProtocolBase::initialize(int stage)
         upperLayerOutGateId = findGate("upperLayerOut");
         lowerLayerInGateId = findGate("lowerLayerIn");
         lowerLayerOutGateId = findGate("lowerLayerOut");
+    }
+}
+
+void MACProtocolBase::registerInterface()
+{
+    ASSERT(interfaceEntry == NULL);
+    IInterfaceTable *interfaceTable = InterfaceTableAccess().getIfExists();
+    if (interfaceTable) {
+        interfaceEntry = createInterfaceEntry();
+        interfaceTable->addInterface(interfaceEntry);
     }
 }
 
@@ -57,5 +69,5 @@ bool MACProtocolBase::isUpperMessage(cMessage* message)
 
 bool MACProtocolBase::isLowerMessage(cMessage* message)
 {
-    return message->getArrivalGateId() == upperLayerInGateId;
+    return message->getArrivalGateId() == lowerLayerInGateId;
 }

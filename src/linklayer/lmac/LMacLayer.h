@@ -14,7 +14,7 @@
 
 #include "IRadio.h"
 #include "MACAddress.h"
-#include "WirelessMacBase.h"
+#include "MACProtocolBase.h"
 #include "LMacFrame_m.h"
 
 /**
@@ -55,7 +55,7 @@
  *
  * @ingroup macLayer
  **/
-class INET_API LMacLayer : public WirelessMacBase
+class INET_API LMacLayer : public MACProtocolBase
 {
     private:
         /** @brief Copy constructor is not allowed.
@@ -67,7 +67,7 @@ class INET_API LMacLayer : public WirelessMacBase
 
     public:
 	LMacLayer()
-		: WirelessMacBase()
+		: MACProtocolBase()
 		, SETUP_PHASE(true)
 		, slotChange()
 		, macState()
@@ -98,13 +98,13 @@ class INET_API LMacLayer : public WirelessMacBase
         virtual void initialize(int);
 
         /** @brief Handle messages from lower layer */
-        virtual void handleLowerMsg(cPacket*);
+        virtual void handleLowerPacket(cPacket*);
 
         /** @brief Handle messages from upper layer */
-        virtual void handleUpperMsg(cPacket*);
+        virtual void handleUpperPacket(cPacket*);
 
         /** @brief Handle self messages such as timers */
-        virtual void handleSelfMsg(cMessage*);
+        virtual void handleSelfMessage(cMessage*);
 
         /** @brief Handle control messages from lower layer */
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value);

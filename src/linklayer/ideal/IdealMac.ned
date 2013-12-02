@@ -19,7 +19,9 @@
 
 package inet.linklayer.ideal;
 
+import inet.linklayer.common.MACProtocolBase;
 import inet.linklayer.contract.ILinkLayer;
+
 
 //
 // Implements a trivial MAC layer for use in ~IdealWirelessNic.
@@ -32,7 +34,7 @@ import inet.linklayer.contract.ILinkLayer;
 //
 // See ~IdealWirelessNic for rationale and details.
 //
-simple IdealMac like ILinkLayer
+simple IdealMac extends MACProtocolBase like ILinkLayer
 {
     parameters:
         string address = default("auto");   // MAC address as hex string (12 hex digits), or
@@ -42,24 +44,13 @@ simple IdealMac like ILinkLayer
         int mtu @unit("B") = default(4470B);
         int headerLength @unit("B");        // IdealMacFrame.byteLength = headerLength + packetFromUpperLayer.byteLength
         bool promiscuous = default(false);
-        @display("i=block/rxtx");
 
-        @signal[packetSentToLower](type=IdealMacFrame);
-        @signal[packetReceivedFromLower](type=IdealMacFrame);
-        @signal[packetSentToUpper](type=cPacket);   // cPacket with Ieee802Ctrl ctrlinfo
-        @signal[packetReceivedFromUpper](type=cPacket);   // cPacket with Ieee802Ctrl ctrlinfo
+        @class(IdealMac);
         @signal[dropPkNotForUs](type=IdealMacFrame);
-
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rcvdPkFromHL](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rcvdPkFromLL](title="packets received from lower layer"; source=packetReceivedFromLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[droppedPkNotForUs](title="packets dropped/not for us"; source=dropPkNotForUs; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
-
-    gates:
-        input upperLayerIn @labels(Ieee802Ctrl);        // should connect to output gate of an IPassiveQueue module
-        output upperLayerOut @labels(Ieee802Ctrl);
-        input lowerLayerIn @labels(IdealMacFrame);
-        output lowerLayerOut @labels(IdealMacFrame);
 }
 

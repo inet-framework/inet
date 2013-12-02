@@ -26,7 +26,7 @@
 //#define FSM_DEBUG
 
 #include "WifiMode.h"
-#include "WirelessMacBase.h"
+#include "MACProtocolBase.h"
 #include "IPassiveQueue.h"
 #include "Ieee80211Frame_m.h"
 #include "Ieee80211Consts.h"
@@ -56,7 +56,7 @@
  *
  * @ingroup macLayer
  */
-class INET_API Ieee80211Mac : public WirelessMacBase
+class INET_API Ieee80211Mac : public MACProtocolBase
 {
     typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
     /**
@@ -448,16 +448,16 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value);
 
     /** @brief Handle commands (msg kind+control info) coming from upper layers */
-    virtual void handleCommand(cMessage *msg);
+    virtual void handleUpperCommand(cMessage *msg);
 
     /** @brief Handle timer self messages */
-    virtual void handleSelfMsg(cMessage *msg);
+    virtual void handleSelfMessage(cMessage *msg);
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperMsg(cPacket *msg);
+    virtual void handleUpperPacket(cPacket *msg);
 
     /** @brief Handle messages from lower (physical) layer */
-    virtual void handleLowerMsg(cPacket *msg);
+    virtual void handleLowerPacket(cPacket *msg);
 
     /** @brief Handle all kinds of messages and notifications with the state machine */
     virtual void handleWithFSM(cMessage *msg);

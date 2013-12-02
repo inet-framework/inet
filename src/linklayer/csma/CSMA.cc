@@ -42,8 +42,7 @@
 Define_Module(CSMA);
 
 void CSMA::initialize(int stage) {
-    WirelessMacBase::initialize(stage);
-
+    MACProtocolBase::initialize(stage);
 	if (stage == INITSTAGE_LOCAL) {
 		useMACAcks = par("useMACAcks").boolValue();
 		queueLength = par("queueLength");
@@ -210,7 +209,7 @@ InterfaceEntry *CSMA::createInterfaceEntry()
  * Encapsulates the message to be transmitted and pass it on
  * to the FSM main method for further processing.
  */
-void CSMA::handleUpperMsg(cPacket *msg) {
+void CSMA::handleUpperPacket(cPacket *msg) {
 	//MacPkt*macPkt = encapsMsg(msg);
 	CSMAFrame* macPkt = new CSMAFrame(msg->getName());
 	macPkt->setBitLength(headerLength);
@@ -256,7 +255,7 @@ void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg) {
 		} else {
 			// queue is full, message has to be deleted
 			EV_DETAIL << "(12) FSM State IDLE_1, EV_SEND_REQUEST and [TxBuff not avail]: dropping packet -> IDLE." << endl;
-	        emit(packetDroppedSignal, msg);
+	        emit(packetFromUpperDroppedSignal, msg);
 			delete msg;
 			updateMacState(IDLE_1);
 		}
@@ -387,7 +386,7 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg) {
 			attachSignal(mac, simTime()+aTurnaroundTime);
 			//sendDown(msg);
 			// give time for the radio to be in Tx state before transmitting
-			sendDelayed(mac, aTurnaroundTime, lowerLayerOut);
+			sendDelayed(mac, aTurnaroundTime, lowerLayerOutGateId);
 			nbTxFrames++;
 		} else {
 			// Channel was busy, increment 802.15.4 backoff timers as specified.
@@ -405,7 +404,7 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg) {
 				macQueue.pop_front();
 				txAttempts = 0;
 				nbDroppedFrames++;
-		        emit(packetDroppedSignal, mac);
+		        emit(packetFromUpperDroppedSignal, mac);
 				delete mac;
 				manageQueue();
 			} else {
@@ -757,7 +756,7 @@ simtime_t CSMA::scheduleBackoff() {
 /*
  * Binds timers to events and executes FSM.
  */
-void CSMA::handleSelfMsg(cMessage *msg) {
+void CSMA::handleSelfMessage(cMessage *msg) {
 	EV_DETAIL << "timer routine." << endl;
 	if(msg==backoffTimer)
 		executeMac(EV_TIMER_BACKOFF, msg);
@@ -776,7 +775,7 @@ void CSMA::handleSelfMsg(cMessage *msg) {
  * Compares the address of this Host with the destination address in
  * frame. Generates the corresponding event.
  */
-void CSMA::handleLowerMsg(cPacket *msg) {
+void CSMA::handleLowerPacket(cPacket *msg) {
     CSMAFrame*            macPkt     = static_cast<CSMAFrame*> (msg);
 	const MACAddress& src        = macPkt->getSrcAddr();
 	const MACAddress& dest       = macPkt->getDestAddr();

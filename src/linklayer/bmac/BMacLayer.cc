@@ -25,7 +25,7 @@ Define_Module(BMacLayer)
 
 void BMacLayer::initialize(int stage)
 {
-    WirelessMacBase::initialize(stage);
+    MACProtocolBase::initialize(stage);
 	if (stage == 0) {
 		queueLength   = hasPar("queueLength")   ? par("queueLength")   : 10;
 		animation     = hasPar("animation")     ? par("animation")     : true;
@@ -189,7 +189,7 @@ InterfaceEntry *BMacLayer::createInterfaceEntry()
  * packet. Then initiate sending of the packet, if the node is sleeping. Do
  * nothing, if node is working.
  */
-void BMacLayer::handleUpperMsg(cPacket *msg)
+void BMacLayer::handleUpperPacket(cPacket *msg)
 {
 	bool pktAdded = addToQueue(msg);
 	if (!pktAdded)
@@ -249,7 +249,7 @@ void BMacLayer::sendMacAck()
  * BMAC_TIMEOUT_DATA: timeout the node after a false busy channel alarm. Go
  * back to sleep.
  */
-void BMacLayer::handleSelfMsg(cMessage *msg)
+void BMacLayer::handleSelfMessage(cMessage *msg)
 {
 	switch (macState)
 	{
@@ -586,10 +586,10 @@ void BMacLayer::handleSelfMsg(cMessage *msg)
 /**
  * Handle BMAC preambles and received data packets.
  */
-void BMacLayer::handleLowerMsg(cPacket *msg)
+void BMacLayer::handleLowerPacket(cPacket *msg)
 {
 	// simply pass the massage as self message, to be processed by the FSM.
-	handleSelfMsg(msg);
+	handleSelfMessage(msg);
 }
 
 void BMacLayer::sendDataPacket()
@@ -647,7 +647,7 @@ bool BMacLayer::addToQueue(cMessage *msg)
 		// queue is full, message has to be deleted
 		EV_DETAIL << "New packet arrived, but queue is FULL, so new packet is"
 				  " deleted\n";
-		emit(packetDroppedSignal, msg);
+		emit(packetFromUpperDroppedSignal, msg);
 		nbDroppedDataPackets++;
 		return false;
 	}

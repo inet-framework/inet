@@ -26,8 +26,7 @@ const MACAddress LMacLayer::LMAC_FREE_SLOT   = MACAddress::BROADCAST_ADDRESS;
 
 void LMacLayer::initialize(int stage)
 {
-    WirelessMacBase::initialize(stage);
-
+    MACProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
         queueLength = par("queueLength");
         slotDuration = par("slotDuration");
@@ -157,7 +156,7 @@ InterfaceEntry *LMacLayer::createInterfaceEntry()
  * Check whether the queue is not full: if yes, print a warning and drop the packet.
  * Sending of messages is automatic.
  */
-void LMacLayer::handleUpperMsg(cPacket *msg)
+void LMacLayer::handleUpperPacket(cPacket *msg)
 {
     LMacFrame *mac = static_cast<LMacFrame *>(encapsMsg(static_cast<cPacket*>(msg)));
 
@@ -186,7 +185,7 @@ void LMacLayer::handleUpperMsg(cPacket *msg)
  * LMAC_WAKEUP: wake up the node and either check the channel before sending a control packet or wait for control packets.
  * LMAC_TIMEOUT: go back to sleep after nothing happened.
  */
-void LMacLayer::handleSelfMsg(cMessage *msg)
+void LMacLayer::handleSelfMessage(cMessage *msg)
 {
 	switch (macState)
 	{
@@ -616,10 +615,10 @@ void LMacLayer::handleSelfMsg(cMessage *msg)
 /**
  * Handle LMAC control packets and data packets. Recognize collisions, change own slot if necessary and remember who is using which slot.
  */
-void LMacLayer::handleLowerMsg(cPacket *msg)
+void LMacLayer::handleLowerPacket(cPacket *msg)
 {
 	// simply pass the massage as self message, to be processed by the FSM.
-	handleSelfMsg(msg);
+	handleSelfMessage(msg);
 }
 
 /**

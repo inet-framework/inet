@@ -65,8 +65,7 @@ void IdealMac::clearQueue()
 
 void IdealMac::initialize(int stage)
 {
-    WirelessMacBase::initialize(stage);
-
+    MACProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
     {
         outStandingRequests = 0;
@@ -160,11 +159,6 @@ void IdealMac::startTransmitting(cPacket *msg)
     sendDown(frame);
 }
 
-void IdealMac::handleSelfMsg(cMessage *msg)
-{
-    error("Unexpected self-message");
-}
-
 void IdealMac::getNextMsgFromHL()
 {
     ASSERT(outStandingRequests >= queueModule->getNumPendingRequests());
@@ -176,7 +170,7 @@ void IdealMac::getNextMsgFromHL()
     ASSERT(outStandingRequests <= 1);
 }
 
-void IdealMac::handleUpperMsg(cPacket *msg)
+void IdealMac::handleUpperPacket(cPacket *msg)
 {
     outStandingRequests--;
     if (radio->getRadioChannelState() == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
@@ -192,12 +186,7 @@ void IdealMac::handleUpperMsg(cPacket *msg)
     }
 }
 
-void IdealMac::handleCommand(cMessage *msg)
-{
-    error("Unexpected command received from higher layer");
-}
-
-void IdealMac::handleLowerMsg(cPacket *msg)
+void IdealMac::handleLowerPacket(cPacket *msg)
 {
     IdealMacFrame *frame = check_and_cast<IdealMacFrame *>(msg);
     if (frame->hasBitError())
