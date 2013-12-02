@@ -44,7 +44,6 @@ simsignal_t ManetRoutingBase::mobilityStateChangedSignal = SIMSIGNAL_NULL;
 ManetRoutingBase::GlobalRouteMap *ManetRoutingBase::globalRouteMap = NULL;
 bool ManetRoutingBase::createInternalStore = false;
 
-
 ManetRoutingBase::ManetRoutingBase()
 {
 #ifdef WITH_80211MESH
@@ -280,7 +279,7 @@ void ManetRoutingBase::registerRoutingModule()
             data.isProactive = isProactive();
             data.routesVector = routesVector;
             vect.push_back(data);
-            globalRouteMap->insert(std::make_pair<ManetAddress,ProtocolsRoutes>(getAddress(),vect));
+            globalRouteMap->insert(std::pair<ManetAddress,ProtocolsRoutes>(getAddress(),vect));
         }
         else
         {
@@ -1636,7 +1635,7 @@ void ManetRoutingBase::setRouteInternalStorege(const ManetAddress &dest, const M
                  it->second = next;
          }
          else
-             routesVector->insert(std::make_pair<ManetAddress,ManetAddress>(dest, next));
+             routesVector->insert(std::pair<ManetAddress,ManetAddress>(dest, next));
      }
 }
 
