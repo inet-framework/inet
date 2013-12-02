@@ -106,9 +106,6 @@ void PIMSM::initialize(int stage)
                 host->subscribe(NF_IPv4_NEW_IGMP_REMOVED_PIMSM, this);
                 host->subscribe(NF_IPv4_DATA_ON_RPF, this);
             }
-
-// XXX        DeviceConfigurator *devConf = ModuleAccess<DeviceConfigurator>("deviceConfigurator").get();
-//            devConf->loadPimGlobalConfig(this);
         }
 
     }

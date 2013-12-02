@@ -290,8 +290,6 @@ void PIMSplitter::initialize(int stage)
 	// in stage 3 table pimInterfaces is built
     if (stage == INITSTAGE_LOCAL)
     {
-        hostname = par("hostname");
-
         // Pointer to routing tables, interface tables, notification board
         ift = InterfaceTableAccess().get();
         rt = IPv4RoutingTableAccess().get();
@@ -300,10 +298,12 @@ void PIMSplitter::initialize(int stage)
 
         // subscribtion of notifications (future use)
         cModule *host = findContainingNode(this);
-        if (host != NULL) {
-            host->subscribe(NF_IPv4_NEW_MULTICAST, this);
-            host->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
-        }
+        if (!host)
+            throw cRuntimeError("PIMSplitter: containing node not found.");
+
+        hostname = host->getName();
+        host->subscribe(NF_IPv4_NEW_MULTICAST, this);
+        host->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER)
     {
@@ -317,6 +317,7 @@ void PIMSplitter::initialize(int stage)
 			return;
 		else
 			EV << "PIM is enabled on device " << hostname << endl;
+
 
 		// to receive PIM messages, join to ALL_PIM_ROUTERS multicast group
 		for (int i = 0; i < pimIft->getNumInterface(); i++)

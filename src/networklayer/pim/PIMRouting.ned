@@ -30,12 +30,7 @@ import inet.networklayer.pim.tables.PimNeighborTable;
 module PIMRouting
 {
     parameters:
-        // pim-mode
         @display("i=block/network2;bgl=4;bgb=350,207");
-        string configFile;
-        string hostname;
-        string deviceType;
-        string deviceId;
     gates:
         input networkLayerIn;
         output networkLayerOut;
@@ -43,8 +38,6 @@ module PIMRouting
     submodules:
         pimSplitter: PIMSplitter {
             parameters:
-                hostname = hostname;
-                configFile = configFile;
                 @display("p=69,95;q=queue;i=block/dispatch");
             gates:
                 pimDMIn;
