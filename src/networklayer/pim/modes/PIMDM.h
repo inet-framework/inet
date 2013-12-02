@@ -50,8 +50,8 @@ class PIMDM : public cSimpleModule, protected cListener
 	    // process events
         void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 	    void newMulticast(PIMMulticastRoute *newRoute);
-	    void newMulticastAddr(addRemoveAddr *members);
-	    void oldMulticastAddr(addRemoveAddr *members);
+	    void newMulticastAddr(PIMInterfaceMulticastMembershipInfo *members);
+	    void oldMulticastAddr(PIMInterfaceMulticastMembershipInfo *members);
 	    void dataOnPruned(IPv4Address destAddr, IPv4Address srcAddr);
 	    void dataOnNonRpf(IPv4Address group, IPv4Address source, int intId);
 	    void dataOnRpf(IPv4Datagram *datagram);

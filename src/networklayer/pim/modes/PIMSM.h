@@ -85,8 +85,8 @@ class PIMSM : public cSimpleModule, protected cListener
     private:
         void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
         void newMulticastRegisterDR(PIMMulticastRoute *newRoute);
-        void newMulticastReciever(addRemoveAddr *members);
-        void removeMulticastReciever(addRemoveAddr *members);
+        void newMulticastReciever(PIMInterfaceMulticastMembershipInfo *members);
+        void removeMulticastReciever(PIMInterfaceMulticastMembershipInfo *members);
 
 
         // process timers

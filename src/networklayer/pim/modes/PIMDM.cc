@@ -929,7 +929,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
 	IPv4Datagram *datagram;
 	PIMInterface *pimInterface;
 	PIMMulticastRoute *route;
-	addRemoveAddr *members;
+	PIMInterfaceMulticastMembershipInfo *members;
 
     // new multicast data appears in router
     if (signalID == NF_IPv4_NEW_MULTICAST_DENSE)
@@ -942,14 +942,14 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
     else if (signalID == NF_IPv4_NEW_IGMP_ADDED)
     {
         EV << "pimDM::receiveChangeNotification - IGMP change - address were added." << endl;
-        members = check_and_cast<addRemoveAddr*>(details);
+        members = check_and_cast<PIMInterfaceMulticastMembershipInfo*>(details);
         newMulticastAddr(members);
     }
     // configuration of interface changed, it means some change from IGMP, address were removed.
     else if (signalID == NF_IPv4_NEW_IGMP_REMOVED)
     {
         EV << "pimDM::receiveChangeNotification - IGMP change - address were removed." << endl;
-        members = check_and_cast<addRemoveAddr*>(details);
+        members = check_and_cast<PIMInterfaceMulticastMembershipInfo*>(details);
         oldMulticastAddr(members);
     }
     // data come to non-RPF interface
@@ -1165,11 +1165,11 @@ void PIMDM::dataOnPruned(IPv4Address group, IPv4Address source)
  * @param members Structure containing old multicast IP addresses.
  * @see sendPimJoinPrune()
  */
-void PIMDM::oldMulticastAddr(addRemoveAddr *members)
+void PIMDM::oldMulticastAddr(PIMInterfaceMulticastMembershipInfo *members)
 {
 	EV << "pimDM::oldMulticastAddr" << endl;
-	vector<IPv4Address> oldAddr = members->getAddr();
-	PIMInterface * pimInt = members->getInt();
+	vector<IPv4Address> oldAddr = members->getAddedOrRemovedGroups();
+	PIMInterface * pimInt = members->getPIMInterface();
 	bool connected = false;
 
 	// go through all old multicast addresses assigned to interface
@@ -1247,11 +1247,11 @@ void PIMDM::oldMulticastAddr(addRemoveAddr *members)
  * @see createGraftRetryTimer()
  * @see addRemoveAddr
  */
-void PIMDM::newMulticastAddr(addRemoveAddr *members)
+void PIMDM::newMulticastAddr(PIMInterfaceMulticastMembershipInfo *members)
 {
 	EV << "pimDM::newMulticastAddr" << endl;
-	vector<IPv4Address> newAddr = members->getAddr();
-	PIMInterface * pimInt = members->getInt();
+	vector<IPv4Address> newAddr = members->getAddedOrRemovedGroups();
+	PIMInterface * pimInt = members->getPIMInterface();
 	bool forward = false;
 
 	// go through all new multicast addresses assigned to interface

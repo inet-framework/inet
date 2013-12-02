@@ -26,11 +26,8 @@
 #include "InterfaceEntry.h"
 #include "IPv4Address.h"
 
-
 /**
- * @brief  Class represents one entry of PIMInterfaceTable.
- * @details One entry contains interfaces ID, pointer to the interface, PIM mode and multicast
- * addresses assigned to the interface.
+ * Class represents one entry of PIMInterfaceTable.
  */
 class INET_API PIMInterface: public cObject
 {
@@ -46,7 +43,7 @@ class INET_API PIMInterface: public cObject
 	protected:
 		InterfaceEntry *intPtr;                    /**< Pointer to interface table entry. */
 		PIMMode mode;                              /**< Type of mode. */
-		IPv4AddressVector reportedMulticastGroups; /**< Addresses of multicast groups that has members on this interface. */
+		IPv4AddressVector reportedMulticastGroups; /**< Addresses of multicast groups that has receivers on this interface. */
 		bool stateRefreshFlag;                     /**< Indicator of State Refresh Originator. If it is true, router will send SR messages. */
 
 	public:
@@ -110,33 +107,23 @@ class INET_API PIMInterfaceTableAccess : public ModuleAccess<PIMInterfaceTable>
 };
 
 /**
- * @brief Class is needed by notification about new multicast addresses on interface.
- * @details If you do not use notification board, you probably do not need this class.
- * The problem is that method fireChangeNotification
- * needs object as the second parameter.
+ * An instance of this class is the details object of NF_IPv4_NEW_IGMP_REMOVED,
+ * NF_IPv4_NEW_IGMP_REMOVED_PIMSM, NF_IPv4_NEW_IGMP_REMOVED_PIMSM, NF_IPv4_NEW_IGMP_ADDED_PISM
+ * notifications.
  */
-class addRemoveAddr : public cObject
+class PIMInterfaceMulticastMembershipInfo : public cObject
 {
 	protected:
-		std::vector<IPv4Address> addr;						/**< Vector of added or removed addresses. */
-		PIMInterface *pimInt;								/**< Pointer to interface. */
+        PIMInterface *pimInterface;    /**< Pointer to interface. */
+		std::vector<IPv4Address> removedOrAddedGroups; /**< Vector of added or removed addresses. */
 
 	public:
-		addRemoveAddr(){};
-		virtual ~addRemoveAddr() {};
-		virtual std::string info() const
-		{
-			std::stringstream out;
-			for (unsigned int i = 0; i < addr.size(); i++)
-				out << addr[i] << endl;
-			return out.str();
-		}
+		PIMInterfaceMulticastMembershipInfo(PIMInterface *pimInterface, const std::vector<IPv4Address> &groups)
+	        : pimInterface(pimInterface), removedOrAddedGroups(groups) { ASSERT(pimInterface); ASSERT(!groups.empty()); }
+		virtual std::string info() const;
 
-		void setAddr(const std::vector<IPv4Address> &addr)  {this->addr = addr;} /**< Set addresses to the object. */
-		void setInt(PIMInterface *pimInt)  {this->pimInt = pimInt;}		/**< Set pointer to interface to the object. */
-		std::vector<IPv4Address> getAddr () {return this->addr;}			/**< Get addresses from the object. */
-		int getAddrSize () {return this->addr.size();}					/**< Returns size of addresses vector. */
-		PIMInterface *getInt () {return this->pimInt;}					/**< Get pointer to interface from the object. */
+		std::vector<IPv4Address> getAddedOrRemovedGroups () {return this->removedOrAddedGroups;}			/**< Get addresses from the object. */
+		PIMInterface *getPIMInterface () {return this->pimInterface;}					/**< Get pointer to interface from the object. */
 };
 
 #endif

@@ -26,8 +26,8 @@ simple PIMInterfaceTable
         @display("i=block/table");
         xml pimConfig = default(xml("<config/>"));
 
-        @signal[NF_IPv4_NEW_IGMP_ADDED](type=addRemoveAddr);
-        @signal[NF_IPv4_NEW_IGMP_ADDED_PISM](type=addRemoveAddr);
-        @signal[NF_IPv4_NEW_IGMP_REMOVED](type=addRemoveAddr);
-        @signal[NF_IPv4_NEW_IGMP_REMOVED_PIMSM](type=addRemoveAddr);
+        @signal[NF_IPv4_NEW_IGMP_ADDED](type=PIMInterfaceMulticastMembershipInfo);
+        @signal[NF_IPv4_NEW_IGMP_ADDED_PISM](type=PIMInterfaceMulticastMembershipInfo);
+        @signal[NF_IPv4_NEW_IGMP_REMOVED](type=PIMInterfaceMulticastMembershipInfo);
+        @signal[NF_IPv4_NEW_IGMP_REMOVED_PIMSM](type=PIMInterfaceMulticastMembershipInfo);
 }

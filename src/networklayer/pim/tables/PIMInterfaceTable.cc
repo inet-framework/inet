@@ -24,7 +24,7 @@
 using namespace std;
 
 Define_Module(PIMInterfaceTable);
-Register_Class(addRemoveAddr);
+Register_Abstract_Class(PIMInterfaceMulticastMembershipInfo);
 
 /** Printout of structure PIMInterface. */
 std::ostream& operator<<(std::ostream& os, const PIMInterface& e)
@@ -215,10 +215,10 @@ void PIMInterfaceTable::igmpChange(InterfaceEntry *interface)
 {
     int intId = interface->getInterfaceId();
     PIMInterface * pimInt = getInterfaceById(intId);
+    if (!pimInt)
+        return;
 
     // save old and new set of multicast IP address assigned to interface
-    if(pimInt)
-    {
     vector<IPv4Address> multicastAddrsOld = pimInt->getIntMulticastAddresses();
     vector<IPv4Address> reportedMulticastGroups;
     for (int i = 0; i < interface->ipv4Data()->getNumOfReportedMulticastGroups(); i++)
@@ -265,38 +265,40 @@ void PIMInterfaceTable::igmpChange(InterfaceEntry *interface)
     }
 
     // notification about removed multicast address to PIM modules
-    addRemoveAddr *addr = new addRemoveAddr();
     if (remove.size() > 0)
     {
-        // remove new address
+        // remove new addresses
         for(unsigned int i = 0; i < remove.size(); i++)
             pimInt->removeIntMulticastAddress(remove[i]);
 
         // send notification
-        addr->setAddr(remove);
-        addr->setInt(pimInt);
+        PIMInterfaceMulticastMembershipInfo info(pimInt, remove);
         if (pimInt->getMode() == PIMInterface::DenseMode)
-            emit(NF_IPv4_NEW_IGMP_REMOVED, addr);
+            emit(NF_IPv4_NEW_IGMP_REMOVED, &info);
         if (pimInt->getMode() == PIMInterface::SparseMode)
-            emit(NF_IPv4_NEW_IGMP_REMOVED_PIMSM, addr);
+            emit(NF_IPv4_NEW_IGMP_REMOVED_PIMSM, &info);
     }
 
     // notification about new multicast address to PIM modules
     if (add.size() > 0)
     {
-        // add new address
+        // add new addresses
         for(unsigned int i = 0; i < add.size(); i++)
             pimInt->addIntMulticastAddress(add[i]);
 
-        // send notification
-        addr->setAddr(add);
-        addr->setInt(pimInt);
+        PIMInterfaceMulticastMembershipInfo info(pimInt, add);
         if (pimInt->getMode() == PIMInterface::DenseMode)
-            emit(NF_IPv4_NEW_IGMP_ADDED, addr);
+            emit(NF_IPv4_NEW_IGMP_REMOVED_PIMSM, &info);
         if (pimInt->getMode() == PIMInterface::SparseMode)
-            emit(NF_IPv4_NEW_IGMP_ADDED_PISM, addr);
-    }
+            emit(NF_IPv4_NEW_IGMP_ADDED_PISM, &info);
     }
 }
 
-
+string PIMInterfaceMulticastMembershipInfo::info() const
+{
+    std::stringstream out;
+    out << pimInterface->getInterfacePtr()->getName();
+    for (unsigned int i = 0; i < removedOrAddedGroups.size(); i++)
+        out << " " << removedOrAddedGroups[i];
+    return out.str();
+}

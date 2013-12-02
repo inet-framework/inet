@@ -1619,12 +1619,12 @@ void PIMSM::newMulticastRegisterDR(PIMMulticastRoute *newRoute)
  * @see addRemoveAddr
  * @see sendPIMJoinPrune()
  */
-void PIMSM::removeMulticastReciever(addRemoveAddr *members)
+void PIMSM::removeMulticastReciever(PIMInterfaceMulticastMembershipInfo *members)
 {
     EV << "pimSM::removeMulticastReciever" << endl;
 
-    std::vector<IPv4Address> remMembers = members->getAddr();
-    PIMInterface *pimInt = members->getInt();
+    std::vector<IPv4Address> remMembers = members->getAddedOrRemovedGroups();
+    PIMInterface *pimInt = members->getPIMInterface();
 
     for (unsigned int i = 0; i < remMembers.size(); i++)
     {
@@ -1674,18 +1674,18 @@ void PIMSM::removeMulticastReciever(addRemoveAddr *members)
     }
 }
 
-void PIMSM::newMulticastReciever(addRemoveAddr *members)
+void PIMSM::newMulticastReciever(PIMInterfaceMulticastMembershipInfo *members)
 {
     EV << "pimSM::newMulticastReciever" << endl;
 
     PIMMulticastRoute *newRouteG = new PIMMulticastRoute();
     PIMMulticastRoute *routePointer;
-    std::vector<IPv4Address> addMembers = members->getAddr();
+    std::vector<IPv4Address> addMembers = members->getAddedOrRemovedGroups();
 
     for (unsigned i=0; i<addMembers.size();i++)
     {
         IPv4Address multGroup = addMembers[i];
-        int interfaceId = (members->getInt())->getInterfaceId();
+        int interfaceId = (members->getPIMInterface())->getInterfaceId();
         InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->RPAddress);
         PIMNeighbor *neighborToRP = pimNbt->getNeighborByIntID(newInIntG->getInterfaceId());
 
@@ -1850,18 +1850,18 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
     printNotificationBanner(signalID, details);
     PIMMulticastRoute *route;
     IPv4Datagram *datagram;
-    addRemoveAddr *members;
+    PIMInterfaceMulticastMembershipInfo *members;
 
     if (signalID == NF_IPv4_NEW_IGMP_ADDED_PISM)
     {
         EV <<  "pimSM::receiveChangeNotification - NEW IGMP ADDED" << endl;
-        members = check_and_cast<addRemoveAddr*>(details);
+        members = check_and_cast<PIMInterfaceMulticastMembershipInfo*>(details);
         newMulticastReciever(members);
     }
     else if (signalID == NF_IPv4_NEW_IGMP_REMOVED_PIMSM)
     {
         EV <<  "pimSM::receiveChangeNotification - IGMP REMOVED" << endl;
-        members = check_and_cast<addRemoveAddr*>(details);
+        members = check_and_cast<PIMInterfaceMulticastMembershipInfo*>(details);
         removeMulticastReciever(members);
     }
     // new multicast data appears in router
