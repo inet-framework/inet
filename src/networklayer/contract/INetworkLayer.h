@@ -27,6 +27,8 @@
 class INET_API INetworkLayer {
   public:
     virtual ~INetworkLayer() { }
+
+//    virtual INetworkLayerControlInfo *createControlInfo();
 };
 
 #endif
