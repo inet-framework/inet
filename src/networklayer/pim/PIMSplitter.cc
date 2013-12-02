@@ -194,10 +194,10 @@ void PIMSplitter::processPIMPkt(PIMPacket *pkt)
 	// according to interface PIM mode send packet to appropriate PIM module
 	switch(mode)
 	{
-		case Dense:
+		case PIMInterface::DenseMode:
 			send(pkt, "pimDMOut");
 			break;
-		case Sparse:
+		case PIMInterface::SparseMode:
 			send(pkt, "pimSMOut");
 			break;
 		default:
@@ -438,9 +438,9 @@ void PIMSplitter::igmpChange(InterfaceEntry *interface)
 		// send notification
 		addr->setAddr(remove);
 		addr->setInt(pimInt);
-        if (pimInt->getMode() == Dense)
+        if (pimInt->getMode() == PIMInterface::DenseMode)
             emit(NF_IPv4_NEW_IGMP_REMOVED, addr);
-        if (pimInt->getMode() == Sparse)
+        if (pimInt->getMode() == PIMInterface::SparseMode)
             emit(NF_IPv4_NEW_IGMP_REMOVED_PIMSM, addr);
 	}
 
@@ -454,9 +454,9 @@ void PIMSplitter::igmpChange(InterfaceEntry *interface)
 		// send notification
 		addr->setAddr(add);
 		addr->setInt(pimInt);
-		if (pimInt->getMode() == Dense)
+		if (pimInt->getMode() == PIMInterface::DenseMode)
 		    emit(NF_IPv4_NEW_IGMP_ADDED, addr);
-		if (pimInt->getMode() == Sparse)
+		if (pimInt->getMode() == PIMInterface::SparseMode)
 		    emit(NF_IPv4_NEW_IGMP_ADDED_PISM, addr);
 	}
 	}
@@ -496,7 +496,7 @@ void PIMSplitter::newMulticast(IPv4Address destAddr, IPv4Address srcAddr)
 		newRoute->setOrigin(srcAddr);
 		newRoute->setOriginNetmask(IPv4Address::ALLONES_ADDRESS);
 
-		if (pimInt->getMode() == Dense)
+		if (pimInt->getMode() == PIMInterface::DenseMode)
 		{
             // Directly connected routes to source does not have next hop
             // RPF neighbor is source of packet
@@ -513,13 +513,13 @@ void PIMSplitter::newMulticast(IPv4Address destAddr, IPv4Address srcAddr)
 
             newRoute->setInInt(inInt, inInt->getInterfaceId(), rpf);
 		}
-		if (pimInt->getMode() == Sparse)
+		if (pimInt->getMode() == PIMInterface::SparseMode)
 		    newRoute->setInInt(inInt, inInt->getInterfaceId(), IPv4Address("0.0.0.0"));
 
 		// notification for PIM module about new multicast route
-		if (pimInt->getMode() == Dense)
+		if (pimInt->getMode() == PIMInterface::DenseMode)
 			emit(NF_IPv4_NEW_MULTICAST_DENSE, newRoute);
-		if (pimInt->getMode() == Sparse)
+		if (pimInt->getMode() == PIMInterface::SparseMode)
 		    emit(NF_IPv4_NEW_MULTICAST_SPARSE, newRoute);
 	}
 }

@@ -966,7 +966,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         EV << "pimDM::receiveChangeNotification - Data appears on RPF interface." << endl;
         datagram = check_and_cast<IPv4Datagram*>(details);
         pimInterface = getIncomingInterface(datagram);
-        if (pimInterface && pimInterface->getMode() == Dense)
+        if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
             dataOnRpf(datagram);
     }
     // RPF interface has changed
@@ -1359,10 +1359,10 @@ void PIMDM::newMulticast(PIMMulticastRoute *newRoute)
 
 		switch (pimIntTemp->getMode())
 		{
-			case Dense:
+			case PIMInterface::DenseMode:
 				newOutInt->mode = PIMMulticastRoute::Densemode;
 				break;
-			case Sparse:
+			case PIMInterface::SparseMode:
 				newOutInt->mode = PIMMulticastRoute::Sparsemode;
 				break;
 		}

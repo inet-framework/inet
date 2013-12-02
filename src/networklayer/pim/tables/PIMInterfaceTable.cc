@@ -30,9 +30,9 @@ std::ostream& operator<<(std::ostream& os, const PIMInterface& e)
 	std::vector<IPv4Address> intMulticastAddresses = e.getIntMulticastAddresses();
 
     os << "ID = " << e.getInterfaceID() << "; mode = ";
-    if (e.getMode() == Dense)
+    if (e.getMode() == PIMInterface::DenseMode)
     	os << "Dense";
-    else if (e.getMode() == Sparse)
+    else if (e.getMode() == PIMInterface::SparseMode)
     	os << "Sparse";
     os << "; Multicast addresses: ";
 
@@ -179,9 +179,9 @@ void PIMInterfaceTable::addInterface(InterfaceEntry *ie, cXMLElement *config)
         return;
 
     if (strcmp(modeAttr, "dense") == 0)
-        pimInterface.setMode(Dense);
+        pimInterface.setMode(PIMInterface::DenseMode);
     else if (strcmp(modeAttr, "sparse") == 0)
-        pimInterface.setMode(Sparse);
+        pimInterface.setMode(PIMInterface::SparseMode);
     else
         throw cRuntimeError("PIMInterfaceTable: invalid 'mode' attribute value in the configuration of interface '%s'", ie->getName());
 

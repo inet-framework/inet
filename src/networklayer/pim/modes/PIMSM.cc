@@ -1891,7 +1891,7 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         EV <<  "pimSM::receiveChangeNotification - DATA ON RPF" << endl;
         datagram = check_and_cast<IPv4Datagram*>(details);
         PIMInterface *incomingInterface = getIncomingInterface(datagram);
-        if (incomingInterface && incomingInterface->getMode() == Sparse)
+        if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
         {
             route = rt->getRouteFor(datagram->getDestAddress(), IPv4Address::UNSPECIFIED_ADDRESS);
             if (route)
