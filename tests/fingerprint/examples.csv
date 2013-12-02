@@ -8,14 +8,14 @@
 
 /examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           d442-e218
 /examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           7017-0cb4
-/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           2b48-844a
+/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           d46a-e9c8
 /examples/bgpv4/BGPOpen/,            -f omnetpp.ini -c config1 -r 0,                62s,             929a-284e
 /examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0,                30s,             15fa-d633
 /examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           86df-a331
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           92b6-a340
 
 /examples/dhcp/eth/,                 -f omnetpp.ini -c General -r 0,                5000s,           50b4-7f67
-/examples/dhcp/wlan/,                -f omnetpp.ini -c General -r 0,                20s,             db79-5689
+/examples/dhcp/wlan/,                -f omnetpp.ini -c General -r 0,                20s,             5333-7568
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             c683-3d38
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp21 -r 0,                  10s,             a0b9-c0de
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp31 -r 0,                  10s,             7fa1-cec1
@@ -57,7 +57,7 @@
 /examples/inet/ber/,                 -f omnetpp.ini -c ber-sack-experiment -r 0,    20s,             57dd-d0a1
 /examples/inet/ber/,                 -f omnetpp.ini -c ber-flavour-experiment -r 0, 20s,             0d34-0006
 
-/examples/inet/broadcast/,           -f omnetpp.ini -c General -r 0,                20s,             9670-7f3e
+/examples/inet/broadcast/,           -f omnetpp.ini -c General -r 0,                20s,             7858-184c
 
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0,           50s,             cce3-3325
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2b -r 0,           50s,             1e51-6d94

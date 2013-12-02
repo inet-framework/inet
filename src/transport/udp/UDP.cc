@@ -32,6 +32,8 @@
 #include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
+#include "RoutingTable.h"
+#include "RoutingTableAccess.h"
 #endif
 
 #ifdef WITH_IPv6
@@ -443,31 +445,23 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
     {
 #ifdef WITH_IPv4
         IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
-
-        if (!ctrl4->getDestAddr().isMulticast() && !ctrl4->getDestAddr().isLimitedBroadcastAddress())
-        {
-            if (!icmp)
-                icmp = ICMPAccess().get();
-            icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
-        }
-        else
+        if (!icmp)
+            icmp = ICMPAccess().get();
+        icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
+#else
+        delete udpPacket;
 #endif
-            delete udpPacket;
     }
     else if (dynamic_cast<IPv6ControlInfo *>(ctrl) != NULL)
     {
 #ifdef WITH_IPv6
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
-
-        if (!ctrl6->getDestAddr().isMulticast())
-        {
-            if (!icmpv6)
-                icmpv6 = ICMPv6Access().get();
-            icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
-        }
-        else
+        if (!icmpv6)
+            icmpv6 = ICMPv6Access().get();
+        icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
+#else
+        delete udpPacket;
 #endif
-            delete udpPacket;
     }
     else if (ctrl == NULL)
     {

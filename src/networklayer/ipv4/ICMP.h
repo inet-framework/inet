@@ -49,17 +49,22 @@ class INET_API ICMP : public cSimpleModule
     virtual void sendEchoRequest(PingPayload *);
     virtual void sendToIP(ICMPMessage *, const IPv4Address& dest);
     virtual void sendToIP(ICMPMessage *msg);
+    virtual bool possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId);
 
   public:
     /**
      * This method can be called from other modules to send an ICMP error packet
-     * in response to a received bogus packet.
+     * in response to a received bogus packet. It will not send ICMP error in response
+     * to broadcast or multicast packets -- in that case it will simply delete the packet.
+     * Kludge: if inputInterfaceId cannot be determined, pass in -1.
      */
-    virtual void sendErrorMessage(IPv4Datagram *datagram, ICMPType type, ICMPCode code);
+    virtual void sendErrorMessage(IPv4Datagram *datagram, int inputInterfaceId, ICMPType type, ICMPCode code);
 
     /**
      * This method can be called from other modules to send an ICMP error packet
      * in response to a received bogus packet from the transport layer (like UDP).
+     * It will not send ICMP error in response to broadcast or multicast packets --
+     * in that case it will simply delete the packet.
      * The ICMP error packet needs to include (part of) the original IPv4 datagram,
      * so this function will wrap back the transport packet into the IPv4 datagram
      * based on its IPv4ControlInfo.
