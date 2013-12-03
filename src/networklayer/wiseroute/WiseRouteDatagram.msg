@@ -24,6 +24,8 @@ class NetworkDatagramBase;
 
 packet WiseRouteDatagram extends NetworkDatagramBase
 {
+    @customize(true);
+
     unsigned long seqNum = 0;
 	int     isFlood;
 	int     nbHops;

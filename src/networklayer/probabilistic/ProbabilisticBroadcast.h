@@ -12,7 +12,7 @@
 #include <map>
 #include "INetworkProtocol.h"
 #include "NetworkProtocolBase.h"
-#include "ProbabilisticBroadcastDatagram_m.h"
+#include "ProbabilisticBroadcastDatagram.h"
 #include "Address.h"
 
 /**

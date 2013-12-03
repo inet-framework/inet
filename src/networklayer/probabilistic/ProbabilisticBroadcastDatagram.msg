@@ -24,6 +24,8 @@ class NetworkDatagramBase;
 
 packet ProbabilisticBroadcastDatagram extends NetworkDatagramBase
 {
+    @customize(true);
+
     long      id;    // Unique message ID ~ f(node address, unique number in node scope).
     int       nbHops;
     int       transportProtocol = -1;

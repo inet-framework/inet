@@ -30,7 +30,7 @@
 #include "IARP.h"
 #include "NetworkProtocolBase.h"
 #include "Address.h"
-#include "WiseRouteDatagram_m.h"
+#include "WiseRouteDatagram.h"
 
 /**
  * @brief Wiseroute is a simple loop-free routing algorithm that
