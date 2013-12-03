@@ -712,38 +712,35 @@ void RSTP::sendBPDU(int port)
 void RSTP::printState()
 {
     //  prints current database info
-    EV_DETAIL << endl << this->getParentModule()->getName() << endl;
-    int r=getRootIndex();
-    EV_DETAIL << "RSTP state" << endl;
-    EV_DETAIL << "Priority: " << bridgePriority << endl;
-    EV_DETAIL << "Local MAC: " << bridgeAddress << endl;
-    if (r>=0)
+    EV_DETAIL << "Switch " << findContainingNode(this)->getFullName() << " state:" << endl;
+    int rootIndex = getRootIndex();
+    EV_DETAIL << "  Priority: " << bridgePriority << endl;
+    EV_DETAIL << "  Local MAC: " << bridgeAddress << endl;
+    if (rootIndex >= 0)
     {
-        Ieee8021DInterfaceData * rootPort = getPortInterfaceData(r);
-        EV_DETAIL << "Root Priority: " << rootPort->getRootPriority() << endl;
-        EV_DETAIL << "Root address: " << rootPort->getRootAddress().str() << endl;
-        EV_DETAIL << "cost: " << rootPort->getRootPathCost() << endl;
-        EV_DETAIL << "age:  " << rootPort->getAge() << endl;
-        EV_DETAIL << "Bridge priority: " << rootPort->getBridgePriority() << endl;
-        EV_DETAIL << "Bridge address: " << rootPort->getBridgeAddress().str() << endl;
-        EV_DETAIL << "Src TxGate Priority: " << rootPort->getPortPriority() << endl;
-        EV_DETAIL << "Src TxGate: " << rootPort->getPortNum() << endl;
+        Ieee8021DInterfaceData * rootPort = getPortInterfaceData(rootIndex);
+        EV_DETAIL << "  Root Priority: " << rootPort->getRootPriority() << endl;
+        EV_DETAIL << "  Root Address: " << rootPort->getRootAddress().str() << endl;
+        EV_DETAIL << "  Cost: " << rootPort->getRootPathCost() << endl;
+        EV_DETAIL << "  Age:  " << rootPort->getAge() << endl;
+        EV_DETAIL << "  Bridge Priority: " << rootPort->getBridgePriority() << endl;
+        EV_DETAIL << "  Bridge Address: " << rootPort->getBridgeAddress().str() << endl;
+        EV_DETAIL << "  Src TxGate Priority: " << rootPort->getPortPriority() << endl;
+        EV_DETAIL << "  Src TxGate: " << rootPort->getPortNum() << endl;
     }
-    EV_DETAIL << "Port State/Role: " << endl;
+    EV_DETAIL << "Port State/Role:" << endl;
     for (unsigned int i=0; i<numPorts; i++)
     {
         Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
-        EV_DETAIL << i << ": " << iPort->getStateName() << "/" << iPort->getRoleName();
-        if (iPort->isEdge())
-            EV_DETAIL << " (Client)";
-        EV_DETAIL << endl;
+        EV_DETAIL << "  " << i << ": " << iPort->getStateName() << "/" << iPort->getRoleName() << (iPort->isEdge() ? " (Client)" : "") << endl;
     }
     EV_DETAIL << "Per-port best sources, Root/Src:" << endl;
     for (unsigned int i=0; i<numPorts; i++)
     {
         Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
-        EV_DETAIL << i << ": " << iPort->getRootAddress().str() << "/" << iPort->getBridgeAddress().str() << endl;
+        EV_DETAIL << "  " << i << ": " << iPort->getRootAddress().str() << "/" << iPort->getBridgeAddress().str() << endl;
     }
+    EV_DETAIL << endl;
 }
 
 void RSTP::initInterfacedata(unsigned int portNum)
