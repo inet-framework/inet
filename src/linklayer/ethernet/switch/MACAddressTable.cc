@@ -15,6 +15,7 @@
 
 #include <map>
 #include "MACAddressTable.h"
+
 #define MAX_LINE 100
 
 Define_Module(MACAddressTable);
@@ -29,11 +30,10 @@ MACAddressTable::MACAddressTable()
 
 void MACAddressTable::initialize()
 {
-
     agingTime = par("agingTime");
     lastPurge = SIMTIME_ZERO;
 
-    // Option to pre-read in Address Table. To turn ot off, set addressTableFile to empty string
+    // Option to pre-read in Address Table. To turn it off, set addressTableFile to empty string
     const char * addressTableFile = par("addressTableFile");
     if (addressTableFile && *addressTableFile)
         readAddressTable(addressTableFile);

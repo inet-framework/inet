@@ -18,33 +18,27 @@
 
 #include "MACAddress.h"
 
-//
-// This module handles the mapping between ports and MAC addresses. See the NED definition for details.
-//
-class MACAddressTable : public cSimpleModule
+/**
+ * This module handles the mapping between ports and MAC addresses. See the NED definition for details.
+ */
+class MACAddressTable : public cSimpleModule  //FIXME valami absztrakt class interface-nek lennie kellene (IMACAddressTable)
 {
     protected:
-
         struct AddressEntry
         {
                 unsigned int vid;           // VLAN ID
                 int portno;                 // Input port
                 simtime_t insertionTime;    // Arrival time of Lookup Address Table entry
-                AddressEntry() :
-                        vid(0)
-                {
-                }
+                AddressEntry() : vid(0) { }
                 AddressEntry(unsigned int vid, int portno, simtime_t insertionTime) :
-                        vid(vid), portno(portno), insertionTime(insertionTime)
-                {
-                }
+                        vid(vid), portno(portno), insertionTime(insertionTime) { }
         };
 
         struct MAC_compare
         {
-            bool operator()(const MACAddress& u1, const MACAddress& u2) const
-                {return u1.compareTo(u2) < 0;}
+            bool operator()(const MACAddress& u1, const MACAddress& u2) const {return u1.compareTo(u2) < 0;}
         };
+
 
         typedef std::map<MACAddress, AddressEntry, MAC_compare> AddressTable;
         typedef std::map<unsigned int, AddressTable*> VlanAddressTable;
