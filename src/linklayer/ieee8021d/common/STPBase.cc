@@ -21,21 +21,25 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
+static const char *ENABLED_LINK_COLOR = "#000000";
+static const char *DISABLED_LINK_COLOR = "#bbbbbb";
+static const char *ROOT_SWITCH_COLOR = "#a5ffff";
+
 void STPBase::initialize(int stage)
 {
     if (stage == 0)
-        {
-            visualize = par("visualize");
-            bridgePriority = par("bridgePriority");
+    {
+        visualize = par("visualize");
+        bridgePriority = par("bridgePriority");
 
-            maxAge = par("maxAge");
-            helloTime = par("helloTime");
-            forwardDelay = par("forwardDelay");
+        maxAge = par("maxAge");
+        helloTime = par("helloTime");
+        forwardDelay = par("forwardDelay");
 
-            macTable = check_and_cast<MACAddressTable *>(getModuleByPath(par("macTableName")));
-            ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableName")));
-            numPorts = this->getParentModule()->gate("ethg$o", 0)->getVectorSize();
-        }
+        macTable = check_and_cast<MACAddressTable *>(getModuleByPath(par("macTableName")));
+        ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableName")));
+        numPorts = this->getParentModule()->gate("ethg$o", 0)->getVectorSize();
+    }
 
     if (stage == 1) // "auto" MAC addresses assignment takes place in stage 0
     {
@@ -57,34 +61,25 @@ void STPBase::initialize(int stage)
 
 bool STPBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
-    Enter_Method_Silent
-    ();
+    Enter_Method_Silent();
 
     if (dynamic_cast<NodeStartOperation *>(operation))
     {
         if (stage == NodeStartOperation::STAGE_LINK_LAYER)
-        {
             start();
-        }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation))
     {
         if (stage == NodeShutdownOperation::STAGE_LINK_LAYER)
-        {
             stop();
-        }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation))
     {
         if (stage == NodeCrashOperation::STAGE_CRASH)
-        {
             stop();
-        }
     }
     else
-    {
         throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-    }
 
     return true;
 }
@@ -118,24 +113,24 @@ void STPBase::colorLink(unsigned int i, bool forwarding)
         {
             if(forwarding)
             {
-                outGatePrev->getDisplayString().setTagArg("ls", 0, "#000000");
-                inGate->getDisplayString().setTagArg("ls", 0, "#000000");
+                outGatePrev->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
+                inGate->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
             }
             else
             {
-                outGatePrev->getDisplayString().setTagArg("ls", 0, "#888888");
-                inGate->getDisplayString().setTagArg("ls", 0, "#888888");
+                outGatePrev->getDisplayString().setTagArg("ls", 0, DISABLED_LINK_COLOR);
+                inGate->getDisplayString().setTagArg("ls", 0, DISABLED_LINK_COLOR);
             }
 
-            if((!inGatePrev2->getDisplayString().containsTag("ls") || strcmp(inGatePrev2->getDisplayString().getTagArg("ls", 0),"#000000") == 0) && forwarding)
+            if((!inGatePrev2->getDisplayString().containsTag("ls") || strcmp(inGatePrev2->getDisplayString().getTagArg("ls", 0),ENABLED_LINK_COLOR) == 0) && forwarding)
             {
-                outGate->getDisplayString().setTagArg("ls", 0, "#000000");
-                inGatePrev->getDisplayString().setTagArg("ls", 0, "#000000");
+                outGate->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
+                inGatePrev->getDisplayString().setTagArg("ls", 0, ENABLED_LINK_COLOR);
             }
             else
             {
-                outGate->getDisplayString().setTagArg("ls", 0, "#888888");
-                inGatePrev->getDisplayString().setTagArg("ls", 0, "#888888");
+                outGate->getDisplayString().setTagArg("ls", 0, DISABLED_LINK_COLOR);
+                inGatePrev->getDisplayString().setTagArg("ls", 0, DISABLED_LINK_COLOR);
             }
         }
     }
@@ -149,10 +144,11 @@ void STPBase::visualizer()
         for (unsigned int i = 0; i < numPorts; i++)
         {
             port = getPortInterfaceData(i);
-            // colors link
+
+            // color link
             colorLink(i, port->getState() == Ieee8021DInterfaceData::FORWARDING);
 
-            // Label ethernet interface with port status and role
+            // label ethernet interface with port status and role
             cModule * puerta = this->getParentModule()->getSubmodule("eth", i);
             if (puerta != NULL)
             {
@@ -164,7 +160,7 @@ void STPBase::visualizer()
 
         // mark root switch
         if (getRootIndex() == -1)
-            this->getParentModule()->getDisplayString().setTagArg("i", 1, "#a5ffff");
+            this->getParentModule()->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
         else
             this->getParentModule()->getDisplayString().setTagArg("i", 1, "");
     }

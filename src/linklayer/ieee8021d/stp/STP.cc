@@ -21,7 +21,6 @@
 #include "EtherFrame.h"
 #include "STP.h"
 #include "InterfaceEntry.h"
-#include "STPTester.h"
 
 Define_Module(STP);
 
