@@ -12,12 +12,12 @@
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DYMOUM -r 0,                 10s,             d50e-f90d
 # /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c AODVUU -r 0,                 10s,             6a17-abf7    #unstable fingerprint
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DSRUU -r 0,                  10s,             6711-8376
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c OLSR -r 0,                   10s,             70e6-bba1
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DSDV_2 -r 0,                 5s,              1769-a206
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c Batman -r 0,                 10s,             434d-433d
-/examples/manetrouting/hna/,         -f omnetpp.ini -c single_radio -r 0,           100s,            3c7b-a03e
-/examples/manetrouting/hna/,         -f omnetpp.ini -c multi_radio -r 0,            100s,            ccd1-060c
-/examples/manetrouting/manetMultiradio/, -f 3_nodes.ini -c MultiRadio -r 0,             100s,            1e51-058e
+/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c OLSR -r 0,                   10s,             6f60-c2c0
+/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DSDV_2 -r 0,                 5s,              d182-6b33
+/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c Batman -r 0,                 10s,             4b90-e7e8
+/examples/manetrouting/hna/,         -f omnetpp.ini -c single_radio -r 0,           100s,            f315-74c5
+/examples/manetrouting/hna/,         -f omnetpp.ini -c multi_radio -r 0,            100s,            0fd0-f9ec
+/examples/manetrouting/manetMultiradio/, -f 3_nodes.ini -c MultiRadio -r 0,             100s,            8f56-4c0a
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0,                 100s,            9d02-f90d
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMO -r 0,                   100s,            7437-4334
 # /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c AODVUU -r 0,                 100s,            9d02-6e8d  # unstable fingerprint
