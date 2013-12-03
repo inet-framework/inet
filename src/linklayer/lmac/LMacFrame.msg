@@ -2,16 +2,15 @@
 //
 // @author Anna Foerster
 
-class noncobject MACAddress;
-
 cplusplus {{
-    #include "MACAddress.h"
+    #include "MACFrameBase_m.h"
 }}
 
-packet LMacFrame
+class noncobject MACAddress;
+class MACFrameBase;
+
+packet LMacFrame extends MACFrameBase
 {
     int        mySlot; // the node's current slot number
     MACAddress occupiedSlots[]; // currently known occupied slots
-    MACAddress destAddr;   // destination mac address
-    MACAddress srcAddr;    // source mac address
 }

@@ -16,12 +16,13 @@
 //
 
 cplusplus {{
-    #include "MACFrameBase_m.h"
+   #include "MACAddress.h"
 }}
 
 class noncobject MACAddress;
-class MACFrameBase;
 
-packet BMacFrame extends MACFrameBase
+packet MACFrameBase
 {
+    MACAddress srcAddr;
+    MACAddress destAddr;
 }

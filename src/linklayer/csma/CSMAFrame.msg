@@ -19,20 +19,18 @@
 // *              - subclass to create your own MAC layer packets
 // **************************************************************************/
 
-class noncobject MACAddress;
-
 cplusplus {{
-    #include "MACAddress.h"
+    #include "MACFrameBase_m.h"
 }}
+
+class MACFrameBase;
 
 //
 // A CSMA mac packet format definition
 //
 // @author Daniel Willkomm
 //
-packet CSMAFrame
+packet CSMAFrame extends MACFrameBase
 {
-    MACAddress destAddr; // destination mac address
-    MACAddress srcAddr;  // source mac address
     long       sequenceId; // Sequence Number to detect duplicate messages
 }
