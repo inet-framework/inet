@@ -159,7 +159,8 @@ bool ICMP::possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId)
     IInterfaceTable *ift = InterfaceTableAccess().get();
     if (interfaceId != -1)
     {
-        bool interfaceUnconfigured = ift->getInterfaceById(interfaceId)->ipv4Data()->getIPAddress().isUnspecified();
+        InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
+        bool interfaceUnconfigured = (ie->ipv4Data() == NULL) || ie->ipv4Data()->getIPAddress().isUnspecified();
         return interfaceUnconfigured;
     }
     else
@@ -167,7 +168,7 @@ bool ICMP::possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId)
         // if all interfaces are configured, we are OK
         bool allInterfacesConfigured = true;
         for (int i = 0; i < (int)ift->getNumInterfaces(); i++)
-            if (ift->getInterface(i)->ipv4Data()->getIPAddress().isUnspecified())
+            if ((ift->getInterface(i)->ipv4Data() == NULL) || ift->getInterface(i)->ipv4Data()->getIPAddress().isUnspecified())
                 allInterfacesConfigured = false;
         return !allInterfacesConfigured;
     }
