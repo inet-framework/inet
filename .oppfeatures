@@ -675,7 +675,7 @@
     <feature
         id="DiffServ"
         name="DiffServ"
-        description = "Components to implement Differentiated Services"
+        description = "Components for implementing Differentiated Services"
         initiallyEnabled = "true"
         requires = ""
         labels = ""
@@ -703,7 +703,7 @@
     <feature
         id="InternetCloud"
         name="Internet Cloud"
-        description = "Components for simulate internet cloud"
+        description = "Components for simulating internet cloud"
         initiallyEnabled = "true"
         requires = "IPv4"
         labels = ""
@@ -718,7 +718,7 @@
     <feature
         id="InternetCloud_examples"
         name="Internet Cloud examples"
-        description = "Internet Cloud examples."
+        description = "Internet Cloud examples"
         initiallyEnabled = "true"
         requires = "InternetCloud PPP Ethernet"
         labels = ""
@@ -733,7 +733,7 @@
     <feature
         id="Ieee8021d"
         name="IEEE 802.1d"
-        description = "Rapid spanning tree and spanning tree protocol"
+        description = "STP and RSTP (Spanning Tree Protocol, Rapid Spanning Tree Protocol)"
         initiallyEnabled = "true"
         requires = "Ethernet"
         labels = ""
@@ -748,7 +748,7 @@
     <feature
         id="Ieee8021d_examples"
         name="IEEE 802.1d examples"
-        description = "RSTP and STP examples"
+        description = "STP and RSTP examples"
         initiallyEnabled = "true"
         requires = "Ethernet Ieee8021d"
         labels = ""
