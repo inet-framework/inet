@@ -12,8 +12,9 @@
 /examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0
-/examples/dhcp/eth/,                 -f omnetpp.ini -c General -r 0
-/examples/dhcp/wlan/,                -f omnetpp.ini -c General -r 0
+/examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0
+/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0
+/examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Apps -r 0     # __interactive__
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp1 -r 0     # __interactive__
 /examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp11 -r 0
