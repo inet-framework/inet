@@ -213,7 +213,6 @@ void STP::generateBPDU(int port, const MACAddress& address, bool tcFlag, bool tc
             bpdu->setTcFlag(true);
             bpdu->setTcaFlag(false);
         }
-
         else if (tcaFlag)
         {
             bpdu->setTcFlag(false);
@@ -408,32 +407,31 @@ void STP::checkTimers()
             {
                 switch (port->getState())
                 {
-                    case Ieee8021DInterfaceData::DISCARDING:
-                        EV_DETAIL<< "Port=" << i << " goes into learning state." << endl;
-                        port->setState(Ieee8021DInterfaceData::LEARNING);
-                        port->setFdWhile(0);
-                        break;
-                        case Ieee8021DInterfaceData::LEARNING:
-                        EV_DETAIL << "Port=" << i << " goes into forwarding state." << endl;
-                        port->setState(Ieee8021DInterfaceData::FORWARDING);
-                        port->setFdWhile(0);
-                        break;
-                        default:
-                        port->setFdWhile(0);
-                        break;
-                    }
-
+                case Ieee8021DInterfaceData::DISCARDING:
+                    EV_DETAIL<< "Port=" << i << " goes into learning state." << endl;
+                    port->setState(Ieee8021DInterfaceData::LEARNING);
+                    port->setFdWhile(0);
+                    break;
+                case Ieee8021DInterfaceData::LEARNING:
+                    EV_DETAIL << "Port=" << i << " goes into forwarding state." << endl;
+                    port->setState(Ieee8021DInterfaceData::FORWARDING);
+                    port->setFdWhile(0);
+                    break;
+                default:
+                    port->setFdWhile(0);
+                    break;
                 }
-            }
-            else
-            {
-                EV_DETAIL << "Port=" << i << " goes into discarding state." << endl;
-                port->setFdWhile(0);
-                port->setState(Ieee8021DInterfaceData::DISCARDING);
+
             }
         }
-
+        else
+        {
+            EV_DETAIL << "Port=" << i << " goes into discarding state." << endl;
+            port->setFdWhile(0);
+            port->setState(Ieee8021DInterfaceData::DISCARDING);
+        }
     }
+}
 
 void STP::checkParametersChange()
 {
