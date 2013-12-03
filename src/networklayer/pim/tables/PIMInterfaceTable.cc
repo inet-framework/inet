@@ -293,7 +293,7 @@ void PIMInterfaceTable::igmpChange(InterfaceEntry *interface)
 
         PIMInterfaceMulticastMembershipInfo info(pimInt, add);
         if (pimInt->getMode() == PIMInterface::DenseMode)
-            emit(NF_IPv4_NEW_IGMP_REMOVED_PIMSM, &info);
+            emit(NF_IPv4_NEW_IGMP_ADDED, &info);
         if (pimInt->getMode() == PIMInterface::SparseMode)
             emit(NF_IPv4_NEW_IGMP_ADDED_PISM, &info);
     }
