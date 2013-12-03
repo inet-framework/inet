@@ -55,13 +55,12 @@ class INET_API PIMInterface: public cObject
 	    int getInterfaceId() const { return intPtr ? intPtr->getInterfaceId() : -1;}
 		InterfaceEntry *getInterfacePtr() const {return intPtr;}
 		PIMMode getMode() const {return mode;}
-		IPv4AddressVector getIntMulticastAddresses() const {return reportedMulticastGroups;}
+		IPv4AddressVector getReportedMulticastGroups() const {return reportedMulticastGroups;}
 		bool getSR() const {return stateRefreshFlag;}
 
-	    void setIntMulticastAddresses(const IPv4AddressVector &intMulticastAddresses)  {this->reportedMulticastGroups = intMulticastAddresses;}
-	    void addIntMulticastAddress(IPv4Address addr)  {this->reportedMulticastGroups.push_back(addr);}
-	    void removeIntMulticastAddress(IPv4Address addr);
-	    bool isLocalIntMulticastAddress (IPv4Address addr);
+	    void addMulticastGroup(IPv4Address addr)  {this->reportedMulticastGroups.push_back(addr);}
+	    void removeMulticastGroup(IPv4Address addr);
+	    bool isLocalIntMulticastAddress (IPv4Address addr); // XXX remove?
 };
 
 
@@ -90,7 +89,6 @@ class INET_API PIMInterfaceTable: public cSimpleModule, protected cListener
 		virtual void configureInterfaces(cXMLElement *config);
 		virtual void addInterface(InterfaceEntry *ie, cXMLElement *config);
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-        void igmpChange(InterfaceEntry *interface);
 };
 
 /**
@@ -103,26 +101,6 @@ class INET_API PIMInterfaceTableAccess : public ModuleAccess<PIMInterfaceTable>
 
 	public:
 	PIMInterfaceTableAccess() : ModuleAccess<PIMInterfaceTable>("pimInterfaceTable") {p=NULL;}
-};
-
-/**
- * An instance of this class is the details object of NF_IPv4_NEW_IGMP_REMOVED,
- * NF_IPv4_NEW_IGMP_REMOVED_PIMSM, NF_IPv4_NEW_IGMP_REMOVED_PIMSM, NF_IPv4_NEW_IGMP_ADDED_PISM
- * notifications.
- */
-class PIMInterfaceMulticastMembershipInfo : public cObject
-{
-	protected:
-        PIMInterface *pimInterface;    /**< Pointer to interface. */
-		std::vector<IPv4Address> removedOrAddedGroups; /**< Vector of added or removed addresses. */
-
-	public:
-		PIMInterfaceMulticastMembershipInfo(PIMInterface *pimInterface, const std::vector<IPv4Address> &groups)
-	        : pimInterface(pimInterface), removedOrAddedGroups(groups) { ASSERT(pimInterface); ASSERT(!groups.empty()); }
-		virtual std::string info() const;
-
-		std::vector<IPv4Address> getAddedOrRemovedGroups () {return this->removedOrAddedGroups;}			/**< Get addresses from the object. */
-		PIMInterface *getPIMInterface () {return this->pimInterface;}					/**< Get pointer to interface from the object. */
 };
 
 #endif

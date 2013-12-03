@@ -96,9 +96,9 @@ void PIMSM::initialize(int stage)
             if (host != NULL) {
                 host->subscribe(NF_IPv4_NEW_MULTICAST_SPARSE, this);
                 host->subscribe(NF_IPv4_MDATA_REGISTER, this);
-                host->subscribe(NF_IPv4_NEW_IGMP_ADDED_PISM, this);
-                host->subscribe(NF_IPv4_NEW_IGMP_REMOVED_PIMSM, this);
                 host->subscribe(NF_IPv4_DATA_ON_RPF, this);
+                host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
+                host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
             }
         }
 
@@ -1619,128 +1619,113 @@ void PIMSM::newMulticastRegisterDR(PIMMulticastRoute *newRoute)
  * @see addRemoveAddr
  * @see sendPIMJoinPrune()
  */
-void PIMSM::removeMulticastReciever(PIMInterfaceMulticastMembershipInfo *members)
+void PIMSM::removeMulticastReceiver(PIMInterface *pimInt, IPv4Address multicastGroup)
 {
     EV << "pimSM::removeMulticastReciever" << endl;
 
-    std::vector<IPv4Address> remMembers = members->getAddedOrRemovedGroups();
-    PIMInterface *pimInt = members->getPIMInterface();
+    EV << "Removed multicast address: " << multicastGroup << endl;
+    std::vector<PIMMulticastRoute*> routes = rt->getRouteFor(multicastGroup);
 
-    for (unsigned int i = 0; i < remMembers.size(); i++)
+    // go through all multicast routes
+    for (unsigned int j = 0; j < routes.size(); j++)
     {
-        EV << "Removed multicast address: " << remMembers[i] << endl;
-        std::vector<PIMMulticastRoute*> routes = rt->getRouteFor(remMembers[i]);
+        PIMMulticastRoute *route = routes[j];
+        PIMNeighbor *neighborToRP = pimNbt->getNeighborByIntID(route->getInIntId());
+        unsigned int k;
 
-        // there is no route for group in the table
-        if (routes.size() == 0)
-            continue;
-
-        // go through all multicast routes
-        for (unsigned int j = 0; j < routes.size(); j++)
+        // is interface in list of outgoing interfaces?
+        for (k = 0; k < route->getNumOutInterfaces(); k++)
         {
-            PIMMulticastRoute *route = routes[j];
-            PIMNeighbor *neighborToRP = pimNbt->getNeighborByIntID(route->getInIntId());
-            unsigned int k;
-
-            // is interface in list of outgoing interfaces?
-            for (k = 0; k < route->getNumOutInterfaces(); k++)
+            AnsaOutInterface *outInterface = route->getAnsaOutInterface(k);
+            if (outInterface->intId == pimInt->getInterfaceId())
             {
-                AnsaOutInterface *outInterface = route->getAnsaOutInterface(k);
-                if (outInterface->intId == pimInt->getInterfaceId())
+                EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
+                if (outInterface->expiryTimer)
                 {
-                    EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
-                    if (outInterface->expiryTimer)
-                    {
-                        cancelEvent(outInterface->expiryTimer);
-                        delete (outInterface->expiryTimer);
-                    }
-                    route->removeOutInterface(k); // FIXME missing k-- or break
+                    cancelEvent(outInterface->expiryTimer);
+                    delete (outInterface->expiryTimer);
                 }
+                route->removeOutInterface(k); // FIXME missing k-- or break
             }
-            route->removeFlag(PIMMulticastRoute::C);
-            // there is no receiver of multicast, prune the router from the multicast tree
-            if (route->isOilistNull())
+        }
+        route->removeFlag(PIMMulticastRoute::C);
+        // there is no receiver of multicast, prune the router from the multicast tree
+        if (route->isOilistNull())
+        {
+            route->addFlag(PIMMulticastRoute::P);
+            sendPIMJoinPrune(route->getMulticastGroup(),this->getRPAddress(),neighborToRP->getAddr(),PruneMsg,G);
+            if (route->getJt())
             {
-                route->addFlag(PIMMulticastRoute::P);
-                sendPIMJoinPrune(route->getMulticastGroup(),this->getRPAddress(),neighborToRP->getAddr(),PruneMsg,G);
-                if (route->getJt())
-                {
-                    cancelEvent(route->getJt());
-                    delete route->getJt();
-                    route->setJt(NULL);
-                }
+                cancelEvent(route->getJt());
+                delete route->getJt();
+                route->setJt(NULL);
             }
         }
     }
 }
 
-void PIMSM::newMulticastReciever(PIMInterfaceMulticastMembershipInfo *members)
+void PIMSM::newMulticastReceiver(PIMInterface *pimInterface, IPv4Address multicastGroup)
 {
     EV << "pimSM::newMulticastReciever" << endl;
 
     PIMMulticastRoute *newRouteG = new PIMMulticastRoute();
     PIMMulticastRoute *routePointer;
-    std::vector<IPv4Address> addMembers = members->getAddedOrRemovedGroups();
 
-    for (unsigned i=0; i<addMembers.size();i++)
+    int interfaceId = pimInterface->getInterfaceId();
+    InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->RPAddress);
+    PIMNeighbor *neighborToRP = pimNbt->getNeighborByIntID(newInIntG->getInterfaceId());
+
+    // XXX neighborToRP can be NULL!
+
+    routePointer = newRouteG;
+    if (!(newRouteG = rt->getRouteFor(multicastGroup,IPv4Address::UNSPECIFIED_ADDRESS)))                             // create new (*,G) route
     {
-        IPv4Address multGroup = addMembers[i];
-        int interfaceId = (members->getPIMInterface())->getInterfaceId();
-        InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->RPAddress);
-        PIMNeighbor *neighborToRP = pimNbt->getNeighborByIntID(newInIntG->getInterfaceId());
+        InterfaceEntry *outInt = ift->getInterfaceById(interfaceId);
+        newRouteG = routePointer;
+        // set source, mult. group, etc...
+        newRouteG->setAddresses(IPv4Address::UNSPECIFIED_ADDRESS,multicastGroup,this->getRPAddress());
+        newRouteG->addFlags(PIMMulticastRoute::S,
+                            PIMMulticastRoute::C,
+                            PIMMulticastRoute::NO_FLAG,
+                            PIMMulticastRoute::NO_FLAG);
 
-        // XXX neighborToRP can be NULL!
+        // set incoming interface
+        newRouteG->setInInt(newInIntG, newInIntG->getInterfaceId(), neighborToRP->getAddr());
 
-        routePointer = newRouteG;
-        if (!(newRouteG = rt->getRouteFor(multGroup,IPv4Address::UNSPECIFIED_ADDRESS)))                             // create new (*,G) route
-        {
-            InterfaceEntry *outInt = ift->getInterfaceById(interfaceId);
-            newRouteG = routePointer;
-            // set source, mult. group, etc...
-            newRouteG->setAddresses(IPv4Address::UNSPECIFIED_ADDRESS,multGroup,this->getRPAddress());
-            newRouteG->addFlags(PIMMulticastRoute::S,
-                                PIMMulticastRoute::C,
-                                PIMMulticastRoute::NO_FLAG,
-                                PIMMulticastRoute::NO_FLAG);
+        // create and set (*,G) ET timer
+        PIMet* timerEt = createExpiryTimer(outInt->getInterfaceId(),HOLDTIME_HOST,multicastGroup,IPv4Address::UNSPECIFIED_ADDRESS, G);
+        PIMet* timerEtNI = createExpiryTimer(NO_INT_TIMER,HOLDTIME,multicastGroup,IPv4Address::UNSPECIFIED_ADDRESS, G);
+        PIMjt* timerJt = createJoinTimer(multicastGroup, this->getRPAddress(), neighborToRP->getAddr(),G);
+        newRouteG->setJt(timerJt);
+        newRouteG->setEt(timerEtNI);
 
-            // set incoming interface
-            newRouteG->setInInt(newInIntG, newInIntG->getInterfaceId(), neighborToRP->getAddr());
+        // set outgoing interface to RP
+        newRouteG->addOutIntFull(outInt,outInt->getInterfaceId(),
+                                    PIMMulticastRoute::Forward,
+                                    PIMMulticastRoute::Sparsemode,
+                                    NULL,
+                                    timerEt,
+                                    PIMMulticastRoute::NoInfo,
+                                    PIMMulticastRoute::NoInfoRS,true);
+        rt->addMulticastRoute(newRouteG);
 
-            // create and set (*,G) ET timer
-            PIMet* timerEt = createExpiryTimer(outInt->getInterfaceId(),HOLDTIME_HOST,multGroup,IPv4Address::UNSPECIFIED_ADDRESS, G);
-            PIMet* timerEtNI = createExpiryTimer(NO_INT_TIMER,HOLDTIME,multGroup,IPv4Address::UNSPECIFIED_ADDRESS, G);
-            PIMjt* timerJt = createJoinTimer(multGroup, this->getRPAddress(), neighborToRP->getAddr(),G);
-            newRouteG->setJt(timerJt);
-            newRouteG->setEt(timerEtNI);
+        // oilist != NULL -> send Join(*,G) to 224.0.0.13
+        if (!newRouteG->isOilistNull())
+            sendPIMJoinPrune(multicastGroup,this->getRPAddress(),neighborToRP->getAddr(),JoinMsg,G);
+    }
+    else                                                                                                        // add new outgoing interface to existing (*,G) route
+    {
+        InterfaceEntry *nextOutInt = ift->getInterfaceById(interfaceId);
+        //PIMet* timerEt = createExpiryTimer(nextOutInt->getInterfaceId(),HOLDTIME,multGroup,IPv4Address::UNSPECIFIED_ADDRESS, G);
 
-            // set outgoing interface to RP
-            newRouteG->addOutIntFull(outInt,outInt->getInterfaceId(),
-                                        PIMMulticastRoute::Forward,
-                                        PIMMulticastRoute::Sparsemode,
-                                        NULL,
-                                        timerEt,
-                                        PIMMulticastRoute::NoInfo,
-                                        PIMMulticastRoute::NoInfoRS,true);
-            rt->addMulticastRoute(newRouteG);
-
-            // oilist != NULL -> send Join(*,G) to 224.0.0.13
-            if (!newRouteG->isOilistNull())
-                sendPIMJoinPrune(multGroup,this->getRPAddress(),neighborToRP->getAddr(),JoinMsg,G);
-        }
-        else                                                                                                        // add new outgoing interface to existing (*,G) route
-        {
-            InterfaceEntry *nextOutInt = ift->getInterfaceById(interfaceId);
-            //PIMet* timerEt = createExpiryTimer(nextOutInt->getInterfaceId(),HOLDTIME,multGroup,IPv4Address::UNSPECIFIED_ADDRESS, G);
-
-            newRouteG->addOutIntFull(nextOutInt,nextOutInt->getInterfaceId(),
-                                        PIMMulticastRoute::Forward,
-                                        PIMMulticastRoute::Sparsemode,
-                                        NULL,
-                                        NULL,
-                                        PIMMulticastRoute::NoInfo,
-                                        PIMMulticastRoute::NoInfoRS,true);
-            newRouteG->addFlag(PIMMulticastRoute::C);
-        }
+        newRouteG->addOutIntFull(nextOutInt,nextOutInt->getInterfaceId(),
+                                    PIMMulticastRoute::Forward,
+                                    PIMMulticastRoute::Sparsemode,
+                                    NULL,
+                                    NULL,
+                                    PIMMulticastRoute::NoInfo,
+                                    PIMMulticastRoute::NoInfoRS,true);
+        newRouteG->addFlag(PIMMulticastRoute::C);
     }
 }
 
@@ -1842,27 +1827,27 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
     if (simulation.getContextType()==CTX_INITIALIZE)
         return;
 
-    // PIM needs addition info for each notification
-    if (details == NULL)
-        return;
-
     Enter_Method_Silent();
     printNotificationBanner(signalID, details);
     PIMMulticastRoute *route;
     IPv4Datagram *datagram;
-    PIMInterfaceMulticastMembershipInfo *members;
+    PIMInterface *pimInterface;
 
-    if (signalID == NF_IPv4_NEW_IGMP_ADDED_PISM)
+    if (signalID == NF_IPv4_MCAST_REGISTERED)
     {
         EV <<  "pimSM::receiveChangeNotification - NEW IGMP ADDED" << endl;
-        members = check_and_cast<PIMInterfaceMulticastMembershipInfo*>(details);
-        newMulticastReciever(members);
+        IPv4MulticastGroupInfo *info = check_and_cast<IPv4MulticastGroupInfo*>(details);
+        pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
+        if (pimInterface && pimInterface->getMode() == PIMInterface::SparseMode)
+            newMulticastReceiver(pimInterface, info->groupAddress);
     }
-    else if (signalID == NF_IPv4_NEW_IGMP_REMOVED_PIMSM)
+    else if (signalID == NF_IPv4_MCAST_UNREGISTERED)
     {
         EV <<  "pimSM::receiveChangeNotification - IGMP REMOVED" << endl;
-        members = check_and_cast<PIMInterfaceMulticastMembershipInfo*>(details);
-        removeMulticastReciever(members);
+        IPv4MulticastGroupInfo *info = check_and_cast<IPv4MulticastGroupInfo*>(details);
+        pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
+        if (pimInterface && pimInterface->getMode() == PIMInterface::SparseMode)
+            removeMulticastReceiver(pimInterface, info->groupAddress);
     }
     // new multicast data appears in router
     else if (signalID == NF_IPv4_NEW_MULTICAST_SPARSE)
