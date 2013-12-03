@@ -37,6 +37,11 @@ protected:
     // kind codes for self messages
     enum SelfKinds {SELF_HELLOTIME = 1, SELF_UPGRADE, SELF_TIMETODESIGNATE};
 
+    enum CompareResult {
+        WORSE_PORT = -4, WORSE_SRC = -3, WORSE_RPC = -2, WORSE_ROOT = -1, SIMILAR = 0,
+        BETTER_ROOT = 1, BETTER_RPC = 2, BETTER_SRC = 3, BETTER_PORT = 4
+    };
+
     // Set by management: see the ned file for more info
     simtime_t migrateTime;
     simtime_t tcWhileTime;
@@ -101,21 +106,21 @@ protected:
     /**
      * @brief Compares the BPDU frame with the BPDU this module would send through that port
      * @return (<0 if the root BPDU is better than BPDU)
-     * -4=worse port  -3=worse src  -2=worse RPC  -1=worse root  0=Similar  1=better root  2=better RPC  3=better src  4=better port
+     * -4=worse port  -3=worse src  -2=worse RPC  -1=worse root  0=Similar  1=better root  2=better RPC  3=better src  4=better port  <--FIXME use CompareResult enum!
      */
     virtual int contestInterfacedata(BPDU* msg, unsigned int portNum);
 
     /**
      * @brief Compares the port's best BPDU with the BPDU this module would send through that port
      * @return (<0 if the root BPDU is better than port's best BPDU)
-     * -4=worse port  -3=worse src  -2=worse RPC  -1=worse root  0=Similar  1=better root  2=better RPC  3=better src  4=better port
+     * -4=worse port  -3=worse src  -2=worse RPC  -1=worse root  0=Similar  1=better root  2=better RPC  3=better src  4=better port  <--FIXME use CompareResult enum!
      */
     virtual int contestInterfacedata(unsigned int portNum);
 
     /**
      * @brief Compares a port's best BPDU with a BPDU frame
      * @return (<0 if vector better than frame)
-     * -4=worse port  -3=worse src  -2=worse RPC  -1=worse root  0=Similar  1=better root  2=better RPC  3=better src  4=better port
+     * -4=worse port  -3=worse src  -2=worse RPC  -1=worse root  0=Similar  1=better root  2=better RPC  3=better src  4=better port  <--FIXME use CompareResult enum!
      */
     virtual int compareInterfacedata(unsigned int portNum, BPDU * msg, int linkCost);
 

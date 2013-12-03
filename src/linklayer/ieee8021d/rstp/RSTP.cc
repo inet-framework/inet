@@ -169,7 +169,7 @@ void RSTP::handleHelloTime(cMessage * msg)
                 if (iPort->getRole() == Ieee8021DInterfaceData::ROOT)
                 {
                     // looking for the best ALTERNATE port
-                    int candidato=getBestAlternate();
+                    int candidato=getBestAlternate();   // FIXME Spanish name!
                     if (candidato!=-1)
                     {
                         // if an alternate gate has been found, switch to alternate
@@ -297,16 +297,17 @@ void RSTP::handleIncomingFrame(BPDU *frame)
 
         // checking possible backup
         if (src.compareTo(bridgeAddress) == 0)// more than one port in the same LAN
-            handleBK(frame, arrival);
+            handleBK(frame, arrival);  //FIXME what is "BK"? can't we give this method a more explanatory name?
         else
         {
+            //FIXME this block is FAAAAAAAAAAAAAAR too long!!! factor it out, and also split it up if possible!!!
             //three challenges.
             //
             //first:  vs best received BPDU for that port --------->caso
             //second: vs root BPDU--------------------------------->caso1
             //third:  vs BPDU that would be sent from this Bridge.->caso2
             Ieee8021DInterfaceData * arrivalPort = getPortInterfaceData(arrival);
-            int caso = 0;
+            int caso = 0;   // FIXME Spanish name!
             bool Flood = false;
             caso = compareInterfacedata(arrival, frame, arrivalPort->getLinkCost());
             EV_DEBUG << "caso: " << caso << endl;
@@ -341,6 +342,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
 
                     switch (caso2)
                     {
+                    // FIXME use CompareResult enum instead of numbers!
                     case 0:// double link to the same port of the root source -> Tie breaking (better local port first)
                         if (rootPort->getPortPriority() < arrivalPort->getPortPriority()
                                 || (rootPort->getPortPriority() == arrivalPort->getPortPriority() && r < arrival))
