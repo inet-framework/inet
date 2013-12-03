@@ -14,6 +14,7 @@
 // 
 // Author: Zsolt Prontvai
 //
+
 #ifndef STPUTIL_H_
 #define STPUTIL_H_
 
@@ -24,9 +25,9 @@
 #include "Ieee8021DInterfaceData.h"
 
 
-//
-// Base class for STP and RSTP.
-//
+/**
+ * Base class for STP and RSTP.
+ */
 class STPBase : public cSimpleModule, public ILifecycle {
 protected:
     bool visualize;                  // if true it visualize the spanning tree

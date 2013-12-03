@@ -38,7 +38,8 @@ void STPBase::initialize(int stage)
 
         macTable = check_and_cast<MACAddressTable *>(getModuleByPath(par("macTableName")));
         ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableName")));
-        numPorts = this->getParentModule()->gate("ethg$o", 0)->getVectorSize();
+        cModule *switchModule = findContainingNode(this);
+        numPorts = switchModule->gate("ethg$o", 0)->getVectorSize();
     }
 
     if (stage == 1) // "auto" MAC addresses assignment takes place in stage 0
@@ -46,8 +47,10 @@ void STPBase::initialize(int stage)
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
-        // gets the bridge's mac address
+        // get the bridge's mac address
         InterfaceEntry * ifEntry = ifTable->getInterface(0);
+
+        // FIXME does STP/RSTP work at all if there is no registered interface?? perhaps throw an error if ifEntry==NULL!
         if (ifEntry != NULL)
             bridgeAddress = ifEntry->getMacAddress();
         else
@@ -91,11 +94,13 @@ void STPBase::start()
 
 void STPBase::stop()
 {
+    //TODO can't we call visualizer() to eliminate code near-duplication?
     isOperational = false;
     // colors all connected link gray
     for (unsigned int i = 0; i < numPorts; i++)
         colorLink(i, false);
-    this->getParentModule()->getDisplayString().setTagArg("i", 1, "");
+    cModule *switchModule = findContainingNode(this);
+    switchModule->getDisplayString().setTagArg("i", 1, "");
 }
 
 void STPBase::colorLink(unsigned int i, bool forwarding)
@@ -136,39 +141,40 @@ void STPBase::colorLink(unsigned int i, bool forwarding)
     }
 }
 
-void STPBase::visualizer()
+void STPBase::visualizer()   //TODO methd name should be a verb! e.g. updateDisplay()
 {
     if (ev.isGUI() && visualize)
     {
-        Ieee8021DInterfaceData * port;
+        cModule *switchModule = findContainingNode(this);
         for (unsigned int i = 0; i < numPorts; i++)
         {
-            port = getPortInterfaceData(i);
+            Ieee8021DInterfaceData *port = getPortInterfaceData(i);
 
             // color link
             colorLink(i, port->getState() == Ieee8021DInterfaceData::FORWARDING);
 
             // label ethernet interface with port status and role
-            cModule * puerta = this->getParentModule()->getSubmodule("eth", i);
-            if (puerta != NULL)
+            cModule * nicModule = switchModule->getSubmodule("eth", i);
+            if (nicModule != NULL)
             {
                 char buf[25];
-                sprintf(buf, "%s\n%s\n", port->getRoleName(), port->getStateName());
-                puerta->getDisplayString().setTagArg("t", 0, buf);
+                sprintf(buf, "%s\n%s", port->getRoleName(), port->getStateName());
+                nicModule->getDisplayString().setTagArg("t", 0, buf);
             }
         }
 
         // mark root switch
         if (getRootIndex() == -1)
-            this->getParentModule()->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
+            switchModule->getDisplayString().setTagArg("i", 1, ROOT_SWITCH_COLOR);
         else
-            this->getParentModule()->getDisplayString().setTagArg("i", 1, "");
+            switchModule->getDisplayString().setTagArg("i", 1, "");
     }
 }
 
 Ieee8021DInterfaceData * STPBase::getPortInterfaceData(unsigned int portNum)
 {
-    cGate * gate = this->getParentModule()->gate("ethg$o", portNum);
+    cModule *switchModule = findContainingNode(this);
+    cGate *gate = switchModule->gate("ethg$o", portNum);
     if (!gate)
         error("gate is NULL");
     InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
