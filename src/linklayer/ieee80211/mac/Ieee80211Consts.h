@@ -43,7 +43,6 @@ const int CW_MIN = 31;
 /** Maximum size of contention window */
 const int CW_MAX = 1023;
 
-const int PHY_HEADER_LENGTH = 192;
 const int HEADER_WITHOUT_PREAMBLE = 48;
 const double BITRATE_HEADER = 1E+6;
 const double BANDWIDTH = 2E+6;

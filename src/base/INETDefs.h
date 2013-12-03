@@ -37,6 +37,21 @@
 #  define INET_API
 #endif
 
+#if OMNETPP_VERSION < 0x500
+#  define EV_FATAL  EV << "FATAL: "
+#  define EV_ERROR  EV << "ERROR: "
+#  define EV_WARN   EV << "WARN: "
+#  define EV_INFO   EV
+#  define EV_DETAIL EV << "DETAIL: "
+#  define EV_DEBUG  EV << "DEBUG: "
+#  define EV_TRACE  EV << "TRACE: "
+#endif
+
+#if OMNETPP_VERSION < 0x500
+#  define EVSTREAM  ev.getOStream()
+#else
+#  define EVSTREAM  EV
+#endif
 
 #include "InitStages.h"
 
@@ -66,5 +81,30 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
 
 
 #define PK(msg)  check_and_cast<cPacket *>(msg)    /*XXX temp def*/
+
+
+#ifdef _MSC_VER
+// complementary error function, not in MSVC
+double INET_API erfc(double x);
+
+// ISO C99 function, not in MSVC
+inline long lrint(double x)
+{
+    return (long)floor(x+0.5);
+}
+
+// ISO C99 function, not in MSVC
+inline double fmin(double a, double b)
+{
+    return a < b ? a : b;
+}
+
+// ISO C99 function, not in MSVC
+inline double fmax(double a, double b)
+{
+    return a > b ? a : b;
+}
+#endif
+
 
 #endif

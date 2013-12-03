@@ -27,6 +27,7 @@
 #include "RadioState.h"
 #include "ChannelAccess.h"
 #include "Radio80211aControlInfo_m.h"
+#include "InterfaceTableAccess.h"
 #include "opp_utils.h"
 
 //TBD supportedRates!

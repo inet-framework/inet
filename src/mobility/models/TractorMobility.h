@@ -20,8 +20,8 @@
 #ifndef RECTANGLE_MOBILITY_H
 #define RECTANGLE_MOBILITY_H
 
-
-#include <LineSegmentsMobilityBase.h>
+#include "INETDefs.h"
+#include "LineSegmentsMobilityBase.h"
 
 
 /**
@@ -31,7 +31,7 @@
  * @ingroup mobility
  * @author Peterpaul Klein Haneveld
  */
-class TractorMobility : public LineSegmentsMobilityBase
+class INET_API TractorMobility : public LineSegmentsMobilityBase
 {
   protected:
     double speed; //< speed along the trajectory

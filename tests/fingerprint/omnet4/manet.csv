@@ -1,4 +1,4 @@
-# workingdir,                        args,                                          simtimelimit,    fingerprintx
+# workingdir,                        args,                                          simtimelimit,    fingerprint
 /examples/manetrouting/fg80211/ini/, -f Mob_DSR_omnetpp.ini -c General -r 0,        100s,            7219-7ede
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c General -r 0,                100s,            07c5-ccb7
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c DYMOUM -r 0,                 100s,            f511-45b1

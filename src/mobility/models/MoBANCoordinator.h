@@ -91,7 +91,7 @@ class MoBANLocal;
  * @ingroup MoBAN
  * @author Majid Nabi
  */
-class MoBANCoordinator: public LineSegmentsMobilityBase
+class INET_API MoBANCoordinator: public LineSegmentsMobilityBase
 {
   protected:
     /** @brief The mobility modules of the nodes in this WBAN */

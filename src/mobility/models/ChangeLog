@@ -1,3 +1,7 @@
+2013-10-24  Rudolf Hornig
+
+	Added missing INET_API macros to propely support DLL exporting with Visual C++
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-06-11  Zoltan Bojthe

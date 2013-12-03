@@ -22,6 +22,7 @@
 
 #include "Ieee80211MgmtBase.h"
 #include "Ieee80211Primitives_m.h"
+#include "IInterfaceTable.h"
 
 
 class InterfaceEntry;
