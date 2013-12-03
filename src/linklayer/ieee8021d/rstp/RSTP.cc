@@ -66,7 +66,7 @@ void RSTP::handleMessage(cMessage *msg)
     // it can receive BPDU or self messages
     if (!isOperational)
     {
-        EV <<  "Message '" << msg << "' arrived when module status is down, dropped\n";
+        EV << "Message '" << msg << "' arrived when module status is down, dropped\n";
         delete msg;
         return;
     }
@@ -731,35 +731,16 @@ void RSTP::printState()
     for (unsigned int i=0; i<numPorts; i++)
     {
         Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
-        EV_DETAIL << iPort->getState() << " ";
-        if(iPort->getState() == Ieee8021DInterfaceData::DISCARDING)
-            EV_DETAIL << "Discarding";
-        else if (iPort->getState() == Ieee8021DInterfaceData::LEARNING)
-            EV_DETAIL << "Learning";
-        else if (iPort->getState() == Ieee8021DInterfaceData::FORWARDING)
-            EV_DETAIL << "Forwarding";
-        EV_DETAIL << "  ";
-        if(iPort->getRole() == Ieee8021DInterfaceData::ROOT)
-            EV_DETAIL << "Root";
-        else if (iPort->getRole() == Ieee8021DInterfaceData::DESIGNATED)
-            EV_DETAIL << "Designated";
-        else if (iPort->getRole() == Ieee8021DInterfaceData::BACKUP)
-            EV_DETAIL << "Backup";
-        else if (iPort->getRole() == Ieee8021DInterfaceData::ALTERNATE)
-            EV_DETAIL << "Alternate";
-        else if (iPort->getRole() == Ieee8021DInterfaceData::DISABLED)
-            EV_DETAIL << "Disabled";
-        else if (iPort->getRole() == Ieee8021DInterfaceData::NOTASSIGNED)
-            EV_DETAIL << "Not assigned";
-        if(iPort->isEdge())
+        EV_DETAIL << i << ": " << iPort->getStateName() << "/" << iPort->getRoleName();
+        if (iPort->isEdge())
             EV_DETAIL << " (Client)";
         EV_DETAIL << endl;
     }
-    EV_DETAIL << "Per port best source. Root/Src" << endl;
+    EV_DETAIL << "Per-port best sources, Root/Src:" << endl;
     for (unsigned int i=0; i<numPorts; i++)
     {
         Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
-        EV_DETAIL << i << " " << iPort->getRootAddress().str() << "/" << iPort->getBridgeAddress().str() << endl;
+        EV_DETAIL << i << ": " << iPort->getRootAddress().str() << "/" << iPort->getBridgeAddress().str() << endl;
     }
 }
 
