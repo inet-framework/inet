@@ -22,11 +22,20 @@ Define_Module(PIMNeighborTable);
 
 using namespace std;
 
+PIMNeighbor::PIMNeighbor(InterfaceEntry *ie, IPv4Address address, int version)
+    : ie(ie), address(address), version(version), nlt(NULL)
+{
+    ASSERT(ie);
+
+    nlt = new PIMnlt("NeighborLivenessTimer");
+    nlt->setTimerKind(NeighborLivenessTimer);
+}
+
 
 /** Printout of structure Neighbor table (PIMNeighbor). */
-std::ostream& operator<<(std::ostream& os, const PIMNeighbor& e)
+std::ostream& operator<<(std::ostream& os, const PIMNeighbor* e)
 {
-    os << e.getId() << ": ID = " << e.getInterfaceID() << "; Addr = " << e.getAddr() << "; Ver = " << e.getVersion();
+    os << e->getId() << ": ID = " << e->getInterfaceID() << "; Addr = " << e->getAddress() << "; Ver = " << e->getVersion();
     return os;
 };
 
@@ -34,8 +43,14 @@ std::ostream& operator<<(std::ostream& os, const PIMNeighbor& e)
 std::string PIMNeighbor::info() const
 {
 	std::stringstream out;
-	out << id << ": ID = " << intID << "; Addr = " << addr << "; Ver = " << ver;
+	out << this;
 	return out.str();
+}
+
+PIMNeighborTable::~PIMNeighborTable()
+{
+    for (PIMNeighborVector::iterator it = nt.begin(); it != nt.end(); ++it)
+        delete (*it);
 }
 
 /**
@@ -64,11 +79,17 @@ void PIMNeighborTable::initialize(int stage)
  */
 void PIMNeighborTable::printPimNeighborTable()
 {
-	for(std::vector<PIMNeighbor>::iterator i = nt.begin(); i < nt.end(); i++)
+	for(PIMNeighborVector::iterator i = nt.begin(); i < nt.end(); i++)
 	{
-		EV << (*i).info() << endl;
+		EV << (*i)->info() << endl;
 	}
 }
+
+void PIMNeighborTable::addNeighbor(PIMNeighbor *entry)
+{
+    entry->setId(id); this->nt.push_back(entry); id++;
+}
+
 
 /**
  * GET NEIGHBORS BY INTERFACE ID
@@ -78,15 +99,15 @@ void PIMNeighborTable::printPimNeighborTable()
  * @param intId Identifier of interface.
  * @return Vector of entries from PIM neighbor table.
  */
-std::vector<PIMNeighbor> PIMNeighborTable::getNeighborsByIntID(int intId)
+PIMNeighborTable::PIMNeighborVector PIMNeighborTable::getNeighborsByIntID(int intId)
 {
-	vector<PIMNeighbor> nbr;
+	vector<PIMNeighbor*> nbr;
 
 	for(int i = 0; i < getNumNeighbors(); i++)
 	{
 		if(intId == getNeighbor(i)->getInterfaceID())
 		{
-			nbr.push_back(*getNeighbor(i));
+			nbr.push_back(getNeighbor(i));
 		}
 	}
 	return nbr;
@@ -149,24 +170,6 @@ bool PIMNeighborTable::deleteNeighbor(int id)
 }
 
 /**
- * IS IN TABLE
- *
- * The method finds out if given entry is present in the table.
- *
- * @param entry PIM neighbor entry.
- * @return True if entry was found in the table, otherwise false.
- */
-bool PIMNeighborTable::isInTable(PIMNeighbor entry)
-{
-	for(int i = 0; i < getNumNeighbors(); i++)
-	{
-		if((entry.getAddr() == getNeighbor(i)->getAddr()) && (entry.getInterfaceID() == getNeighbor(i)->getInterfaceID()))
-			return true;
-	}
-	return false;
-}
-
-/**
  * FIND NEIGHBOR
  *
  * The method finds entry in the table according given interface ID and neighbor IP address.
@@ -179,7 +182,7 @@ PIMNeighbor *PIMNeighborTable::findNeighbor(int intId, IPv4Address addr)
 {
 	for(int i = 0; i < getNumNeighbors(); i++)
 	{
-		if((addr == getNeighbor(i)->getAddr()) && (intId == getNeighbor(i)->getInterfaceID()))
+		if((addr == getNeighbor(i)->getAddress()) && (intId == getNeighbor(i)->getInterfaceID()))
 			return getNeighbor(i);
 	}
 	return NULL;
@@ -195,6 +198,6 @@ PIMNeighbor *PIMNeighborTable::findNeighbor(int intId, IPv4Address addr)
  */
 int PIMNeighborTable::getNumNeighborsOnInt(int intId)
 {
-	std::vector<PIMNeighbor> neighbors = getNeighborsByIntID(intId);
+	PIMNeighborVector neighbors = getNeighborsByIntID(intId);
 	return neighbors.size();
 }

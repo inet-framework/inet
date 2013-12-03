@@ -454,7 +454,7 @@ void PIMDM::processJoinPruneGraftPacket(PIMJoinPrune *pkt, PIMPacketType type)
 	IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
 	IPv4Address sender = ctrl->getSrcAddr();
 	InterfaceEntry * nt = rt->getInterfaceForDestAddr(sender);
-	vector<PIMNeighbor> neighbors = pimNbt->getNeighborsByIntID(nt->getInterfaceId());
+	vector<PIMNeighbor*> neighbors = pimNbt->getNeighborsByIntID(nt->getInterfaceId());
 	IPv4Address addr = nt->ipv4Data()->getIPAddress();
 
 	// does packet belong to this router?
@@ -1011,7 +1011,7 @@ void PIMDM::rpfIntChange(PIMMulticastRoute *route)
 	// set new RPF
 	int oldRpfIntId = route->getInIntId();
 	InterfaceEntry *oldRpfInt = route->getInIntPtr();
-	route->setInInt(newRpf, rpfId, pimNbt->getNeighborsByIntID(rpfId)[0].getAddr());
+	route->setInInt(newRpf, rpfId, pimNbt->getNeighborsByIntID(rpfId)[0]->getAddress());
 
 	// route was not pruned, join to the multicast tree again
 	if (!route->isFlagSet(PIMMulticastRoute::P))
@@ -1100,7 +1100,7 @@ void PIMDM::dataOnNonRpf(IPv4Address group, IPv4Address source, int intId)
 	if (pimNbt->getNumNeighborsOnInt(intId) == 1)
 	{
 		// send Prune msg to the neighbor who sent these multicast data
-		IPv4Address nextHop = (pimNbt->getNeighborsByIntID(intId))[0].getAddr();
+		IPv4Address nextHop = (pimNbt->getNeighborsByIntID(intId))[0]->getAddress();
 		sendPimJoinPrune(nextHop, source, group, intId);
 
 		// find incoming interface
