@@ -32,8 +32,6 @@
 class INET_API PIMInterface: public cObject
 {
     public:
-        typedef std::vector<IPv4Address> IPv4AddressVector;
-
         enum PIMMode
         {
             DenseMode = 1,
@@ -43,7 +41,6 @@ class INET_API PIMInterface: public cObject
 	protected:
 		InterfaceEntry *intPtr;                    /**< Pointer to interface table entry. */
 		PIMMode mode;                              /**< Type of mode. */
-		IPv4AddressVector reportedMulticastGroups; /**< Addresses of multicast groups that has receivers on this interface. */
 		bool stateRefreshFlag;                     /**< Indicator of State Refresh Originator. If it is true, router will send SR messages. */
 
 	public:
@@ -55,12 +52,7 @@ class INET_API PIMInterface: public cObject
 	    int getInterfaceId() const { return intPtr ? intPtr->getInterfaceId() : -1;}
 		InterfaceEntry *getInterfacePtr() const {return intPtr;}
 		PIMMode getMode() const {return mode;}
-		IPv4AddressVector getReportedMulticastGroups() const {return reportedMulticastGroups;}
 		bool getSR() const {return stateRefreshFlag;}
-
-	    void addMulticastGroup(IPv4Address addr)  {this->reportedMulticastGroups.push_back(addr);}
-	    void removeMulticastGroup(IPv4Address addr);
-	    bool isLocalIntMulticastAddress (IPv4Address addr); // XXX remove?
 };
 
 

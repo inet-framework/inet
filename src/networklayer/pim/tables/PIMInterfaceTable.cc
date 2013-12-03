@@ -28,25 +28,11 @@ Define_Module(PIMInterfaceTable);
 /** Printout of structure PIMInterface. */
 std::ostream& operator<<(std::ostream& os, const PIMInterface& e)
 {
-	int i;
-	std::vector<IPv4Address> intMulticastAddresses = e.getReportedMulticastGroups();
-
     os << "ID = " << e.getInterfaceId() << "; mode = ";
     if (e.getMode() == PIMInterface::DenseMode)
     	os << "Dense";
     else if (e.getMode() == PIMInterface::SparseMode)
     	os << "Sparse";
-    os << "; Multicast addresses: ";
-
-    int vel = intMulticastAddresses.size();
-    if (vel > 0)
-    {
-		for(i = 0; i < (vel - 1); i++)
-			os << intMulticastAddresses[i] << ", ";
-		os << intMulticastAddresses[i];
-    }
-    else
-    	os << "Null";
     return os;
 };
 
@@ -66,43 +52,6 @@ std::string PIMInterface::info() const
 	std::stringstream out;
 	out << "ID = " << getInterfaceId() << "; mode = " << mode;
 	return out.str();
-}
-
-/**
- * REMOVE INTERFACE MULTICAST ADDRESS
- *
- * The method removes given address from vector of multicast addresses.
- *
- * @param addr IP address which should be deleted.
- */
-void PIMInterface::removeMulticastGroup(IPv4Address addr)
-{
-	for(unsigned int i = 0; i < reportedMulticastGroups.size(); i++)
-	{
-		if (reportedMulticastGroups[i] == addr)
-		{
-			reportedMulticastGroups.erase(reportedMulticastGroups.begin() + i);
-			return;
-		}
-	}
-}
-
-/**
- * IS LOCAL INETRFACE MULTICAST ADDRESS
- *
- * The method finds out if IP address is assigned to interface as local multicast address.
- *
- * @param addr Multicast IP address which we are looking for.
- * @return True if method finds the IP address on the list, return false otherwise.
- */
-bool PIMInterface::isLocalIntMulticastAddress (IPv4Address addr)
-{
-	for(unsigned int i = 0; i < reportedMulticastGroups.size(); i++)
-	{
-		if (reportedMulticastGroups[i] == addr)
-			return true;
-	}
-	return false;
 }
 
 PIMInterfaceTable::~PIMInterfaceTable()
@@ -133,8 +82,6 @@ void PIMInterfaceTable::initialize(int stage)
         cModule *host = findContainingNode(this);
         if (!host)
             throw cRuntimeError("PIMSplitter: containing node not found.");
-        host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
-        host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
     }
     else if (stage == INITSTAGE_LINK_LAYER_2)
     {
@@ -197,22 +144,4 @@ void PIMInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, 
     Enter_Method_Silent();
     printNotificationBanner(signalID, details);
 
-    if (signalID == NF_IPv4_MCAST_REGISTERED)
-    {
-        EV << "PIMInterfaceTable::receiveChangeNotification - IGMP change" << endl;
-        IPv4MulticastGroupInfo *changeDetails = check_and_cast<IPv4MulticastGroupInfo*>(details);
-        int intId = changeDetails->ie->getInterfaceId();
-        PIMInterface * pimInt = getInterfaceById(intId);
-        if (pimInt)
-            pimInt->addMulticastGroup(changeDetails->groupAddress);
-    }
-    else if (signalID == NF_IPv4_MCAST_UNREGISTERED)
-    {
-        EV << "PIMInterfaceTable::receiveChangeNotification - IGMP change" << endl;
-        IPv4MulticastGroupInfo *changeDetails = check_and_cast<IPv4MulticastGroupInfo*>(details);
-        int intId = changeDetails->ie->getInterfaceId();
-        PIMInterface * pimInt = getInterfaceById(intId);
-        if (pimInt)
-            pimInt->removeMulticastGroup(changeDetails->groupAddress);
-    }
 }

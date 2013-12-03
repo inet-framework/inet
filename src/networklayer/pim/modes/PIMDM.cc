@@ -1359,7 +1359,7 @@ void PIMDM::newMulticast(PIMMulticastRoute *newRoute)
 			newRoute->addOutInterface(newOutInt);
 		}
 		// if there is member of group, we will forward
-		else if (pimIntTemp->isLocalIntMulticastAddress(newRoute->getMulticastGroup()))
+		else if (pimIntTemp->getInterfacePtr()->ipv4Data()->hasMulticastListener(newRoute->getMulticastGroup()))
 		{
 			newOutInt->forwarding = PIMMulticastRoute::Forward;
 			pruned = false;
