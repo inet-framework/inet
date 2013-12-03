@@ -247,7 +247,7 @@ void STP::generateTCN()
             controlInfo->setInterfaceId(rootPort);
             tcn->setControlInfo(controlInfo);
 
-            EV_INFO<< "The topology was changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;
+            EV_INFO<< "The topology has changed. Sending Topology Change Notification BPDU " << tcn << " to the Root Switch." << endl;
             send(tcn, "relayOut");
         }
     }
@@ -323,7 +323,6 @@ void STP::generator()
     // send hello BDPUs on all ports
     for (unsigned int i = 0; i < numPorts; i++)
         generateBPDU(i);
-
 }
 
 void STP::handleTick()

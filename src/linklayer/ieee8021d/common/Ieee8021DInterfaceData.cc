@@ -26,43 +26,27 @@ Ieee8021DInterfaceData::Ieee8021DInterfaceData()
     portData.state = FORWARDING;
 }
 
-const char *Ieee8021DInterfaceData::getRoleName(){
-    switch (portData.role)
+const char *Ieee8021DInterfaceData::getRoleName(PortRole role)
+{
+    switch (role)
     {
-        case 0:
-            return "ALTERNATE";
-            break;
-        case 1:
-            return "NOTASSIGNED";
-            break;
-        case 2:
-            return "DISABLED";
-            break;
-        case 3:
-            return "DESIGNATED";
-            break;
-        case 4:
-            return "BACKUP";
-            break;
-        case 5:
-            return "ROOT";
-            break;
+        case ALTERNATE: return "ALTERNATE";
+        case NOTASSIGNED: return "NOTASSIGNED";
+        case DISABLED: return "DISABLED";
+        case DESIGNATED: return "DESIGNATED";
+        case BACKUP: return "BACKUP";
+        case ROOT: return "ROOT";
+        default: throw cRuntimeError("Unknown port role %d", role);
     }
-    return "";
 }
 
-const char *Ieee8021DInterfaceData::getStateName(){
-    switch (portData.state)
+const char *Ieee8021DInterfaceData::getStateName(PortState state)
+{
+    switch (state)
     {
-        case 0:
-            return "DISCARDING";
-            break;
-        case 1:
-            return "LEARNING";
-            break;
-        case 2:
-            return "FORWARDING";
-            break;
+        case DISCARDING: return "DISCARDING";
+        case LEARNING: return "LEARNING";
+        case FORWARDING: return "FORWARDING";
+        default: throw cRuntimeError("Unknown port state %d", state);
     }
-    return "";
 }

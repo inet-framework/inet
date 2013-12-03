@@ -157,7 +157,7 @@ void STPBase::visualizer()   //TODO methd name should be a verb! e.g. updateDisp
             cModule * nicModule = switchModule->getSubmodule("eth", i);
             if (nicModule != NULL)
             {
-                char buf[25];
+                char buf[32];
                 sprintf(buf, "%s\n%s", port->getRoleName(), port->getStateName());
                 nicModule->getDisplayString().setTagArg("t", 0, buf);
             }
@@ -189,15 +189,8 @@ Ieee8021DInterfaceData * STPBase::getPortInterfaceData(unsigned int portNum)
 
 int STPBase::getRootIndex()
 {
-    int result = -1;
     for (unsigned int i = 0; i < numPorts; i++)
-    {
-        Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
-        if (iPort->getRole() == Ieee8021DInterfaceData::ROOT)
-        {
-            result = i;
-            break;
-        }
-    }
-    return result;
+        if (getPortInterfaceData(i)->getRole() == Ieee8021DInterfaceData::ROOT)
+            return i;
+    return -1;
 }

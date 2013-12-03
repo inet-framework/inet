@@ -161,9 +161,13 @@ class Ieee8021DInterfaceData : public InterfaceProtocolData
 
         void setLostBPDU(unsigned int lostBPDU) {portData.lostBPDU = lostBPDU;}
 
-        const char *getRoleName();
+        const char *getRoleName() const {return getRoleName(getRole());}
 
-        const char *getStateName();
+        const char *getStateName() const {return getStateName(getState());}
+
+        static const char *getRoleName(PortRole role);
+
+        static const char *getStateName(PortState state);
 };
 
 #endif
