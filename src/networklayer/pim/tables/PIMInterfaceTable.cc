@@ -25,7 +25,6 @@ using namespace std;
 
 Define_Module(PIMInterfaceTable);
 
-/** Printout of structure PIMInterface. */
 std::ostream& operator<<(std::ostream& os, const PIMInterface& e)
 {
     os << "ID = " << e.getInterfaceId() << "; mode = ";
@@ -36,8 +35,13 @@ std::ostream& operator<<(std::ostream& os, const PIMInterface& e)
     return os;
 };
 
+std::string PIMInterface::info() const
+{
+    std::stringstream out;
+    out << "ID = " << getInterfaceId() << "; mode = " << mode;
+    return out.str();
+}
 
-/** Printout of structure PIMInterfaces Table. */
 std::ostream& operator<<(std::ostream& os, const PIMInterfaceTable& e)
 {
     for (int i = 0; i < e.size(); i++)
@@ -46,26 +50,12 @@ std::ostream& operator<<(std::ostream& os, const PIMInterfaceTable& e)
     return os;
 };
 
-/** Actually not in use */
-std::string PIMInterface::info() const
-{
-	std::stringstream out;
-	out << "ID = " << getInterfaceId() << "; mode = " << mode;
-	return out.str();
-}
-
 PIMInterfaceTable::~PIMInterfaceTable()
 {
     for (std::vector<PIMInterface*>::iterator it = pimIft.begin(); it != pimIft.end(); ++it)
         delete *it;
 }
 
-
-/**
- * HANDLE MESSAGE
- *
- * Module does not have any gate, it cannot get messages
- */
 void PIMInterfaceTable::handleMessage(cMessage *msg)
 {
     opp_error("This module doesn't process messages");
@@ -78,14 +68,16 @@ void PIMInterfaceTable::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
 		WATCH_VECTOR(pimIft);
-
-        cModule *host = findContainingNode(this);
-        if (!host)
-            throw cRuntimeError("PIMSplitter: containing node not found.");
     }
     else if (stage == INITSTAGE_LINK_LAYER_2)
     {
         configureInterfaces(par("pimConfig").xmlValue());
+
+        cModule *host = findContainingNode(this);
+        if (!host)
+            throw cRuntimeError("PIMInterfaceTable: containing node not found.");
+        host->subscribe(NF_INTERFACE_CREATED, this);
+        host->subscribe(NF_INTERFACE_DELETED, this);
     }
 }
 
@@ -102,16 +94,20 @@ void PIMInterfaceTable::configureInterfaces(cXMLElement *config)
         {
             int i = matcher.findMatchingSelector(ie);
             if (i >= 0)
-                addInterface(ie, interfaceElements[i]);
+            {
+                PIMInterface *pimInterface = createInterface(ie, interfaceElements[i]);
+                if (pimInterface)
+                    pimIft.push_back(pimInterface);
+            }
         }
     }
 }
 
-void PIMInterfaceTable::addInterface(InterfaceEntry *ie, cXMLElement *config)
+PIMInterface *PIMInterfaceTable::createInterface(InterfaceEntry *ie, cXMLElement *config)
 {
     const char *modeAttr = config->getAttribute("mode");
     if (!modeAttr)
-        return;
+        return NULL;
 
     PIMInterface::PIMMode mode;
     if (strcmp(modeAttr, "dense") == 0)
@@ -124,7 +120,7 @@ void PIMInterfaceTable::addInterface(InterfaceEntry *ie, cXMLElement *config)
     const char *stateRefreshAttr = config->getAttribute("state-refresh");
     bool stateRefreshFlag = stateRefreshAttr && strcmp(stateRefreshAttr, "true");
 
-    addInterface(new PIMInterface(ie, mode, stateRefreshFlag));
+    return new PIMInterface(ie, mode, stateRefreshFlag);
 }
 
 PIMInterface *PIMInterfaceTable::getInterfaceById(int interfaceId)
@@ -137,11 +133,51 @@ PIMInterface *PIMInterfaceTable::getInterfaceById(int interfaceId)
 
 void PIMInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, cObject *details)
 {
-    // ignore notifications during initialize
-    if (simulation.getContextType()==CTX_INITIALIZE)
-        return;
-
     Enter_Method_Silent();
     printNotificationBanner(signalID, details);
 
+    if (signalID == NF_INTERFACE_CREATED)
+    {
+        InterfaceEntry *ie = check_and_cast<InterfaceEntry*>(details);
+        if (ie->isMulticast() && !ie->isLoopback())
+            addInterface(ie);
+    }
+    else if (signalID == NF_INTERFACE_DELETED)
+    {
+        InterfaceEntry *ie = check_and_cast<InterfaceEntry*>(details);
+        if (ie->isMulticast() && !ie->isLoopback())
+            removeInterface(ie);
+    }
+}
+
+PIMInterfaceTable::PIMInterfaceVector::iterator PIMInterfaceTable::findInterface(InterfaceEntry *ie)
+{
+    for (PIMInterfaceVector::iterator it = pimIft.begin(); it != pimIft.end(); ++it)
+        if ((*it)->getInterfacePtr() == ie)
+            return it;
+    return pimIft.end();
+}
+
+void PIMInterfaceTable::addInterface(InterfaceEntry *ie)
+{
+    ASSERT(findInterface(ie) == pimIft.end());
+
+    cXMLElement * config = par("pimConfig").xmlValue();
+    cXMLElementList interfaceElements = config->getChildrenByTagName("interface");
+    InterfaceMatcher matcher(interfaceElements);
+
+    int i = matcher.findMatchingSelector(ie);
+    if (i >= 0)
+    {
+        PIMInterface *pimInterface = createInterface(ie, interfaceElements[i]);
+        if (pimInterface)
+            pimIft.push_back(pimInterface);
+    }
+}
+
+void PIMInterfaceTable::removeInterface(InterfaceEntry *ie)
+{
+    PIMInterfaceVector::iterator it = findInterface(ie);
+    if (it != pimIft.end())
+        pimIft.erase(it);
 }
