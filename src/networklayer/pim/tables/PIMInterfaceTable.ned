@@ -18,16 +18,29 @@
 
 package inet.networklayer.pim.tables;
 
-// PIMInterfaceTable contain all interfaces, where PIM is enabled
+//
+// The PIMInterfaceTable module contains the PIM specific configuration
+// parameters and state of the interfaces on which PIM is enabled.
+//
+// PIM routers must contain an instance of this module.
+//
+// The configuration file must contain <interface> elements under
+// the document root with the following attributes:
+//
+// - @mode:          optional attribute, possible values are "dense" and "sparse".
+//                   If missing then PIM is not used on that interface, otherwise
+//                   it operates in the specified mode.
+// - @state-refresh: optional boolean attribute, default is "false".
+//                   If it is "true", then the router will send SR messages
+//                   on this interface.
+//
+// Additionally each <interface> element may contain
+// @hosts, @names, @towards, @among attributes to select the
+// interfaces which the PIM parameters are applied to (see ~IPv4NetworkConfigurator).
+//
 simple PIMInterfaceTable
 {
     parameters:
-        @class(PIMInterfaceTable);
         @display("i=block/table");
         xml pimConfig = default(xml("<config/>"));
-
-        @signal[NF_IPv4_NEW_IGMP_ADDED](type=PIMInterfaceMulticastMembershipInfo);
-        @signal[NF_IPv4_NEW_IGMP_ADDED_PISM](type=PIMInterfaceMulticastMembershipInfo);
-        @signal[NF_IPv4_NEW_IGMP_REMOVED](type=PIMInterfaceMulticastMembershipInfo);
-        @signal[NF_IPv4_NEW_IGMP_REMOVED_PIMSM](type=PIMInterfaceMulticastMembershipInfo);
 }

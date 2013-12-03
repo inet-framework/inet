@@ -25,7 +25,7 @@
 #include "InterfaceEntry.h"
 
 /**
- * Class represents one entry of PIMInterfaceTable.
+ * An entry of PIMInterfaceTable holding PIM specific parameters of the interface.
  */
 class INET_API PIMInterface: public cObject
 {
@@ -37,37 +37,39 @@ class INET_API PIMInterface: public cObject
         };
 
 	protected:
-		InterfaceEntry *intPtr;                    /**< Pointer to interface table entry. */
-		PIMMode mode;                              /**< Type of mode. */
-		bool stateRefreshFlag;                     /**< Indicator of State Refresh Originator. If it is true, router will send SR messages. */
+        InterfaceEntry *ie;
+        PIMMode mode;
+        bool stateRefreshFlag;
 
 	public:
         PIMInterface(InterfaceEntry *ie, PIMMode mode, bool stateRefreshFlag)
-		    : intPtr(ie), mode(mode), stateRefreshFlag(stateRefreshFlag) { ASSERT(ie); }
+		    : ie(ie), mode(mode), stateRefreshFlag(stateRefreshFlag) { ASSERT(ie); }
 	    virtual std::string info() const;
 
-	    int getInterfaceId() const { return intPtr ? intPtr->getInterfaceId() : -1;}
-		InterfaceEntry *getInterfacePtr() const {return intPtr;}
+	    int getInterfaceId() const { return ie->getInterfaceId(); }
+		InterfaceEntry *getInterfacePtr() const {return ie;}
 		PIMMode getMode() const {return mode;}
 		bool getSR() const {return stateRefreshFlag;}
 };
 
 
 /**
- * TODO
+ * PIMInterfaceTable contains an PIMInterface entry for each interface on which PIM is enabled.
+ * When interfaces are added to/deleted from the InterfaceTable, then the corresponding
+ * PIMInterface entry is added/deleted automatically.
  */
 class INET_API PIMInterfaceTable: public cSimpleModule, protected cListener
 {
 	protected:
         typedef std::vector<PIMInterface*> PIMInterfaceVector;
 
-		PIMInterfaceVector pimIft;
+		PIMInterfaceVector pimInterfaces;
 
 	public:
 		virtual ~PIMInterfaceTable();
 
-        virtual int getNumInterfaces() {return pimIft.size();}
-		virtual PIMInterface *getInterface(int k) {return pimIft[k];}
+        virtual int getNumInterfaces() {return pimInterfaces.size();}
+		virtual PIMInterface *getInterface(int k) {return pimInterfaces[k];}
         virtual PIMInterface *getInterfaceById(int interfaceId);
 
 	protected:
@@ -84,7 +86,7 @@ class INET_API PIMInterfaceTable: public cSimpleModule, protected cListener
 };
 
 /**
- * Class gives access to the PIMInterfaceTable.
+ * Use PIMInterfaceTableAccess().get() to access PIMInterfaceTable from other modules of the node.
  */
 class INET_API PIMInterfaceTableAccess : public ModuleAccess<PIMInterfaceTable>
 {

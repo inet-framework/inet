@@ -25,34 +25,27 @@ using namespace std;
 
 Define_Module(PIMInterfaceTable);
 
-std::ostream& operator<<(std::ostream& os, const PIMInterface& e)
+// for WATCH_VECTOR
+std::ostream& operator<<(std::ostream& os, const PIMInterface* e)
 {
-    os << "ID = " << e.getInterfaceId() << "; mode = ";
-    if (e.getMode() == PIMInterface::DenseMode)
-    	os << "Dense";
-    else if (e.getMode() == PIMInterface::SparseMode)
-    	os << "Sparse";
+    os << "name = " << e->getInterfacePtr()->getName() << "; mode = ";
+    if (e->getMode() == PIMInterface::DenseMode)
+        os << "Dense";
+    else if (e->getMode() == PIMInterface::SparseMode)
+        os << "Sparse";
     return os;
 };
 
 std::string PIMInterface::info() const
 {
     std::stringstream out;
-    out << "ID = " << getInterfaceId() << "; mode = " << mode;
+    out << this;
     return out.str();
 }
 
-std::ostream& operator<<(std::ostream& os, const PIMInterfaceTable& e)
-{
-    for (int i = 0; i < e.size(); i++)
-    	os << "";
-		//os << "ID = " << e.getInterface(i)->getInterfaceID() << "; mode = " << e.getInterface(i)->getMode();
-    return os;
-};
-
 PIMInterfaceTable::~PIMInterfaceTable()
 {
-    for (std::vector<PIMInterface*>::iterator it = pimIft.begin(); it != pimIft.end(); ++it)
+    for (std::vector<PIMInterface*>::iterator it = pimInterfaces.begin(); it != pimInterfaces.end(); ++it)
         delete *it;
 }
 
@@ -67,7 +60,7 @@ void PIMInterfaceTable::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-		WATCH_VECTOR(pimIft);
+		WATCH_VECTOR(pimInterfaces);
     }
     else if (stage == INITSTAGE_LINK_LAYER_2)
     {
@@ -97,7 +90,7 @@ void PIMInterfaceTable::configureInterfaces(cXMLElement *config)
             {
                 PIMInterface *pimInterface = createInterface(ie, interfaceElements[i]);
                 if (pimInterface)
-                    pimIft.push_back(pimInterface);
+                    pimInterfaces.push_back(pimInterface);
             }
         }
     }
@@ -152,15 +145,15 @@ void PIMInterfaceTable::receiveSignal(cComponent *source, simsignal_t signalID, 
 
 PIMInterfaceTable::PIMInterfaceVector::iterator PIMInterfaceTable::findInterface(InterfaceEntry *ie)
 {
-    for (PIMInterfaceVector::iterator it = pimIft.begin(); it != pimIft.end(); ++it)
+    for (PIMInterfaceVector::iterator it = pimInterfaces.begin(); it != pimInterfaces.end(); ++it)
         if ((*it)->getInterfacePtr() == ie)
             return it;
-    return pimIft.end();
+    return pimInterfaces.end();
 }
 
 void PIMInterfaceTable::addInterface(InterfaceEntry *ie)
 {
-    ASSERT(findInterface(ie) == pimIft.end());
+    ASSERT(findInterface(ie) == pimInterfaces.end());
 
     cXMLElement * config = par("pimConfig").xmlValue();
     cXMLElementList interfaceElements = config->getChildrenByTagName("interface");
@@ -171,13 +164,13 @@ void PIMInterfaceTable::addInterface(InterfaceEntry *ie)
     {
         PIMInterface *pimInterface = createInterface(ie, interfaceElements[i]);
         if (pimInterface)
-            pimIft.push_back(pimInterface);
+            pimInterfaces.push_back(pimInterface);
     }
 }
 
 void PIMInterfaceTable::removeInterface(InterfaceEntry *ie)
 {
     PIMInterfaceVector::iterator it = findInterface(ie);
-    if (it != pimIft.end())
-        pimIft.erase(it);
+    if (it != pimInterfaces.end())
+        pimInterfaces.erase(it);
 }
