@@ -36,12 +36,12 @@ class INET_API FloodDatagram : public FloodDatagram_Base, public INetworkDatagra
 
     virtual FloodDatagram *dup() const {return new FloodDatagram(*this);}
 
-    virtual Address getSourceAddress() const { return Address(getSrcAddress()); }
-    virtual void setSourceAddress(const Address & address) { setSrcAddress(address.toModuleId()); }
-    virtual Address getDestinationAddress() const { return Address(getDestAddress()); }
-    virtual void setDestinationAddress(const Address & address) { setDestAddress(address.toModuleId()); }
-    virtual int getTransportProtocol() const { return getProtocol(); }
-    virtual void setTransportProtocol(int protocol) { setProtocol(protocol); };
+    virtual Address getSourceAddress() const { return Address(getSrcAddr()); }
+    virtual void setSourceAddress(const Address & address) { setSrcAddr(address.toModuleId()); }
+    virtual Address getDestinationAddress() const { return Address(getDestAddr()); }
+    virtual void setDestinationAddress(const Address & address) { setDestAddr(address.toModuleId()); }
+    virtual int getTransportProtocol() const { return FloodDatagram_Base::getTransportProtocol(); }
+    virtual void setTransportProtocol(int protocol) { FloodDatagram_Base::setTransportProtocol(protocol); };
 };
 
 #endif

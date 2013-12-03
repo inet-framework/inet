@@ -15,19 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+class noncobject Address;
+
 cplusplus {{
-   #include "NetworkDatagramBase_m.h"
+   #include "Address.h"
 }}
 
-class noncobject Address;
-class NetworkDatagramBase;
-
-packet WiseRouteDatagram extends NetworkDatagramBase
+packet NetworkDatagramBase
 {
-    unsigned long seqNum = 0;
-	int     isFlood;
-	int     nbHops;
-    int     transportProtocol = -1;
-    Address finalDestAddr;
-    Address initialSrcAddr;
+    Address srcAddr;
+    Address destAddr;
 }

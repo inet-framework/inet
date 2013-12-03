@@ -278,8 +278,8 @@ FloodDatagram * Flood::encapsMsg(cPacket *appPkt) {
         delete cInfo;
     }
 
-    pkt->setSrcAddress(myNetwAddr);
-    pkt->setDestAddress(netwAddr);
+    pkt->setSrcAddr(myNetwAddr);
+    pkt->setDestAddr(netwAddr);
     EV << " netw "<< myNetwAddr << " sending packet" << endl;
 
     EV << "sendDown: nHop=L3BROADCAST -> message has to be broadcasted"
