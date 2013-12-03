@@ -33,6 +33,7 @@ class MACAddressTable : public cSimpleModule  //FIXME valami absztrakt class int
                 AddressEntry(unsigned int vid, int portno, simtime_t insertionTime) :
                         vid(vid), portno(portno), insertionTime(insertionTime) { }
         };
+        friend std::ostream& ::operator<<(std::ostream& os, const AddressEntry& entry);
 
         struct MAC_compare
         {

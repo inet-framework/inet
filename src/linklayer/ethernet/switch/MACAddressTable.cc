@@ -20,6 +20,12 @@
 
 Define_Module(MACAddressTable);
 
+std::ostream& operator<<(std::ostream& os, const MACAddressTable::AddressEntry& entry)
+{
+    os << "{VID=" << entry.vid << ", port=" << entry.portno << ", insertionTime=" << entry.insertionTime << "}";
+    return os;
+}
+
 MACAddressTable::MACAddressTable()
 {
     addressTable = new AddressTable();
@@ -37,6 +43,9 @@ void MACAddressTable::initialize()
     const char * addressTableFile = par("addressTableFile");
     if (addressTableFile && *addressTableFile)
         readAddressTable(addressTableFile);
+
+    AddressTable& addressTable = *this->addressTable; // magic to hide the '*' from the name of the watch below
+    WATCH_MAP(addressTable);
 }
 
 /**
