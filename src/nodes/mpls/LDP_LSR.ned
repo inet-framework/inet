@@ -11,7 +11,6 @@
 //
 package inet.nodes.mpls;
 
-import inet.base.NotificationBoard;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.common.InterfaceTable;
@@ -49,10 +48,6 @@ module LDP_LSR
     submodules:
         status: NodeStatus if hasStatus {
             @display("p=73,45");
-        }
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=73,106;is=s");
         }
         interfaceTable: InterfaceTable {
             parameters:

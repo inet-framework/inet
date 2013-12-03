@@ -20,7 +20,6 @@
 package inet.nodes.internetcloud;
 
 
-import inet.base.NotificationBoard;
 import inet.linklayer.IWiredNic;
 import inet.networklayer.arp.ARP;
 import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
@@ -119,10 +118,6 @@ module InternetCloud
                 }
         }
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=60,60");
-        }
         interfaceTable: InterfaceTable {
             parameters:
                 @display("p=60,131");

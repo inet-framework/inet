@@ -25,7 +25,6 @@ import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.bgpv4.BGPRouting;
 import inet.linklayer.IWiredNic;
-import inet.base.NotificationBoard;
 
 
 //
@@ -42,10 +41,6 @@ module BGPRouter
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=52,44;i=block/control_s");
-        }
         interfaceTable: InterfaceTable {
             parameters:
                 @display("p=52,108;i=block/table_s");

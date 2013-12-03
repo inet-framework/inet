@@ -18,7 +18,6 @@
 
 package inet.nodes.ethernet;
 
-import inet.base.NotificationBoard;
 import inet.linklayer.IMACRelayUnit;
 import inet.linklayer.IWiredNic;
 import inet.networklayer.common.InterfaceTable;
@@ -57,10 +56,6 @@ module EtherSwitch
         }
         interfaceTable: InterfaceTable {
             @display("p=50,100;is=s");
-        }
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=50,150;is=s");
         }
         relayUnit: <relayUnitType> like IMACRelayUnit {
             parameters:

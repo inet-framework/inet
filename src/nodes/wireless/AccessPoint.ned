@@ -15,7 +15,6 @@
 
 package inet.nodes.wireless;
 
-import inet.base.NotificationBoard;
 import inet.linklayer.IMACRelayUnit;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
@@ -61,10 +60,6 @@ module AccessPoint
 
         interfaceTable: InterfaceTable {
             @display("p=51,121;is=s");
-        }
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=128,27;is=s");
         }
         mobility: <mobilityType> like IMobility {
             parameters:

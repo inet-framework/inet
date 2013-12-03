@@ -7,7 +7,6 @@ DHCPClient and DHCPServer connected each other directly
 import inet.applications.IUDPApp;
 import inet.applications.dhcp.DHCPClient;
 import inet.applications.dhcp.DHCPServer;
-import inet.base.NotificationBoard;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.common.InterfaceTable;
@@ -26,9 +25,6 @@ module DHCPNode
     submodules:
         dhcpApp: <dhcpAppType> like IUDPApp {
             @display("p=217,247");
-        }
-        notificationBoard: NotificationBoard {
-            @display("p=66,65");
         }
         interfaceTable: InterfaceTable {
             @display("p=66,145");

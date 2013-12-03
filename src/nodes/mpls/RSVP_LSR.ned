@@ -11,7 +11,6 @@
 //
 package inet.nodes.mpls;
 
-import inet.base.NotificationBoard;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.common.InterfaceTable;
@@ -47,10 +46,6 @@ module RSVP_LSR
     submodules:
         status: NodeStatus if hasStatus {
             @display("p=58,50");
-        }
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=58,106;is=s");
         }
         routingTable: IPv4RoutingTable {
             parameters:

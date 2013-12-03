@@ -19,7 +19,6 @@
 package inet.examples.mobility;
 
 import inet.mobility.IMobility;
-import inet.base.NotificationBoard;
 
 
 //

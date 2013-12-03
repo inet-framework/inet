@@ -17,7 +17,6 @@
 
 package inet.nodes.ipv6;
 
-import inet.base.NotificationBoard;
 import inet.linklayer.IExternalNic;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
@@ -52,11 +51,6 @@ module NodeBase6
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=53,155;is=s");
-        }
-
         // optional mobility module. Required only if wireless cards are present
         mobility: <mobilityType> like IMobility if mobilityType != "" && numRadios > 0 {
             parameters:

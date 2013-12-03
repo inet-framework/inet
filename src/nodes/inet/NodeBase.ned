@@ -17,7 +17,6 @@
 
 package inet.nodes.inet;
 
-import inet.base.NotificationBoard;
 import inet.battery.IBattery;
 import inet.linklayer.IExternalNic;
 import inet.linklayer.IWiredNic;
@@ -65,11 +64,6 @@ module NodeBase
     submodules:
         status: NodeStatus if hasStatus {
             @display("p=50,50");
-        }
-
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=53,155;is=s");
         }
 
         battery: <batteryType> like IBattery if batteryType != "" {

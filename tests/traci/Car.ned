@@ -20,7 +20,6 @@
 
 package inet.tests.traci;
 
-import inet.base.NotificationBoard;
 import inet.networklayer.common.InterfaceTable;
 import inet.applications.traci.TraCITestApp;
 import inet.mobility.models.TraCIMobility;
@@ -38,10 +37,6 @@ module Car
         input radioIn @directIn;
 
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=140,462");
-        }
         interfaceTable: InterfaceTable {
             parameters:
                 @display("p=140,326");

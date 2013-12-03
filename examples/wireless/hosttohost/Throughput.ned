@@ -25,7 +25,6 @@ import inet.mobility.models.StationaryMobility;
 import inet.mobility.models.CircleMobility;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.Sink;
-import inet.base.NotificationBoard;
 import inet.applications.ethernet.EtherAppCli;
 
 
@@ -38,10 +37,6 @@ module ThroughputClient
         input radioIn @directIn;
 
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=52,70");
-        }
         cli: EtherAppCli {
             parameters:
                 registerSAP = false;
@@ -70,10 +65,6 @@ module ThroughputServer
         input radioIn @directIn;
 
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=60,70");
-        }
         sink: Sink {
             parameters:
                 @display("p=210,68,col");

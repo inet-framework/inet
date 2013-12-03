@@ -20,7 +20,6 @@
 
 package inet.examples.traci_launchd;
 
-import inet.base.NotificationBoard;
 import inet.networklayer.autorouting.ipv4.HostAutoConfigurator;
 import inet.networklayer.common.InterfaceTable;
 import inet.applications.traci.TraCIDemo;
@@ -39,10 +38,6 @@ module Car
         input radioIn @directIn;
 
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=140,462");
-        }
         ac_wlan: HostAutoConfigurator {
             @display("p=296,402");
         }

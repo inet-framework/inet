@@ -23,7 +23,6 @@ package inet.examples.wireless.throughput;
 import inet.mobility.models.StationaryMobility;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.base.Sink;
-import inet.base.NotificationBoard;
 
 
 //
@@ -47,10 +46,6 @@ module WirelessAPWithSink
                 @display("p=89,225;q=queue");
                 mgmtType = default("Ieee80211MgmtAPSimplified");
                 mgmt.encapDecap = "false";
-        }
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=78,60");
         }
         mobility: StationaryMobility {
             parameters:
