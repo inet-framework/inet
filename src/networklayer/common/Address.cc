@@ -24,7 +24,7 @@
 
 #define RESERVED_IPV6_ADDRESS_RANGE 0x8000 // IETF reserved address range 8000::/16 (extended)
 
-inline uint64 Address::get(AddressType type) const
+uint64 Address::get(AddressType type) const
 {
     if (getType() == type)
         return lo;
@@ -32,13 +32,13 @@ inline uint64 Address::get(AddressType type) const
         throw cRuntimeError("Address is not of the given type");
 }
 
-inline void Address::set(AddressType type, uint64 lo)
+void Address::set(AddressType type, uint64 lo)
 {
     this->hi = ((uint64)RESERVED_IPV6_ADDRESS_RANGE << 48) + (uint64)type;
     this->lo = lo;
 }
 
-inline void Address::set(const IPv6Address& addr) {
+void Address::set(const IPv6Address& addr) {
     const uint32 *words = addr.words();
     hi = ((uint64)*(words + 0) << 32) + *(words + 1);
     lo = ((uint64)*(words + 2) << 32) + *(words + 3);
@@ -46,7 +46,7 @@ inline void Address::set(const IPv6Address& addr) {
         throw cRuntimeError("Cannot set IPv6 address");
 }
 
-inline Address::AddressType Address::getType() const
+Address::AddressType Address::getType() const
 {
     if (hi >> 48 == RESERVED_IPV6_ADDRESS_RANGE)
         return (AddressType)(hi & 0xFF);
