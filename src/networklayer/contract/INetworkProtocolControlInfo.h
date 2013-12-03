@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef INETWORKPROTOCOLCONTROLINFO_H_
-#define INETWORKPROTOCOLCONTROLINFO_H_
+#ifndef __INET_WORKPROTOCOLCONTROLINFO_H_
+#define __INET_WORKPROTOCOLCONTROLINFO_H_
 
 #include "Address.h"
 
@@ -35,4 +35,4 @@ class INET_API INetworkProtocolControlInfo {
     virtual void setHopLimit(short hopLimit) = 0;
 };
 
-#endif /* INETWORKPROTOCOLCONTROLINFO_H_ */
+#endif

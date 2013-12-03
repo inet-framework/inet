@@ -15,10 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __SIMPLENETWORKPROTOCOLCONTROLINFO_H
-#define __SIMPLENETWORKPROTOCOLCONTROLINFO_H
-
-#include "INETDefs.h"
+#ifndef __INET_SIMPLENETWORKPROTOCOLCONTROLINFO_H
+#define __INET_SIMPLENETWORKPROTOCOLCONTROLINFO_H
 
 #include "Address.h"
 #include "SimpleNetworkProtocolControlInfo_m.h"
@@ -48,4 +46,3 @@ class INET_API SimpleNetworkProtocolControlInfo : public SimpleNetworkProtocolCo
 };
 
 #endif
-

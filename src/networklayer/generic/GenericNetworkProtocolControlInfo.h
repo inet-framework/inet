@@ -15,10 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __GenericNetworkProtocolControlInfo_H
-#define __GenericNetworkProtocolControlInfo_H
-
-#include "INETDefs.h"
+#ifndef __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H_
+#define __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H_
 
 #include "Address.h"
 #include "GenericNetworkProtocolControlInfo_m.h"
@@ -48,4 +46,3 @@ class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocol
 };
 
 #endif
-
