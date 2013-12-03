@@ -1,6 +1,7 @@
 //
 // Copyright (C) 2008 Juan-Carlos Maureira
 // Copyright (C) INRIA
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -20,25 +21,30 @@ package inet.applications.dhcp;
 
 import inet.applications.IUDPApp;
 
-// Simple DHCP Server
 //
-// Only assign a simple network with a exclusion list
+// Implements the DHCP server protocol. DHCP (Dynamic Host Configuration Protocol),
+// described in RFC 2131, provides configuration parameters to Internet hosts.
+// Requires UDP.
+//
+// @see DHCPClient, DHCPMessage
 //
 simple DHCPServer like IUDPApp
 {
     parameters:
-        string net;          // IP network to assign
-        string mask;          // netmask to assign
-        string ipBegin;    // ip to start to lease
-        int clientNum;     // number of ip to lease
-        string gateway;        // gateway to assign
-        string dns;            // dns to assign
-        int leaseTime @unit(s);    // lease time in seconds
-        string interface;        // interface to listen on
-        @display("i=device/card");
+        string interface = default(""); // interface to listen on; can be left empty if there is only one non-loopback interface
+        string subnetMask; // subnet mask to assign
+        string ipAddressStart; // IP pool 1st address
+        int maxNumClients; // maximum number of clients (IPs) allowed to be leased
+        string gateway; // gateway to assign
+        string dns; // DNS server to assign
+        int leaseTime @unit(s); // lease time in seconds
+        double startTime @unit(s) = default(0s); // application start time
+        string interfaceTablePath = default("^.interfaceTable");
+        string notificationBoardPath = default("^.notificationBoard");
+        @display("i=block/app2");
     gates:
         input udpIn @labels(UDPControlInfo/up);
-        output udpOut  @labels(UDPControlInfo/down);
+        output udpOut @labels(UDPControlInfo/down);
 }
 
 

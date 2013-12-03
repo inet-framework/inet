@@ -1,6 +1,5 @@
 //
-// Copyright (C) 2012 OpenSim Ltd
-// @author: Zoltan Bojthe
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,40 +16,40 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.examples.dhcp.eth;
+package inet.examples.dhcp;
 
+import inet.base.LifecycleController;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.nodes.ethernet.Eth10M;
 import inet.nodes.ethernet.EtherSwitch;
 import inet.nodes.inet.StandardHost;
-import inet.util.ThruputMeteringChannel;
+import inet.world.scenario.ScenarioManager;
 
 
 network WiredNetWithDHCP
 {
     parameters:
         int numHosts;
-    types:
-        channel ethernetline extends ThruputMeteringChannel
-        {
-            delay = 0.1us;
-            datarate = 10Mbps;
-            thruputDisplayFormat = "u";
-        }
     submodules:
-        srv: StandardHost;
+        server: StandardHost {
+            @display("p=42,494");
+        }
         switch: EtherSwitch {
             parameters:
-                @display("p=186,250");
+                @display("p=521,428");
         }
-        cli[numHosts]: StandardHost;
+        client[numHosts]: StandardHost {
+            @display("p=193,122,ri,350,350,200");
+        }
         configurator: IPv4NetworkConfigurator {
             parameters:
-                config = xml("<config><interface hosts='srv' address='192.168.1.1' netmask='255.255.255.0' /></config>");
+                config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0' /></config>");
+                @display("p=109,71");
         }
     connections:
-        srv.ethg++ <--> ethernetline <--> switch.ethg++;
+        server.ethg++ <--> Eth10M <--> switch.ethg++;
         for i=0..numHosts-1 {
-            cli[i].ethg++ <--> ethernetline <--> switch.ethg++;
+            client[i].ethg++ <--> Eth10M <--> switch.ethg++;
         }
 }
 

@@ -15,14 +15,17 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-#ifndef __DHCPLEASE_H__
-#define __DHCPLEASE_H__
 
-#include "Byte.h"
+#ifndef INET_DHCPLEASE_H__
+#define INET_DHCPLEASE_H__
+
 #include "IPv4Address.h"
 #include "MACAddress.h"
 #include "ARP.h"
 
+/**
+ * Describes a DHCP lease.
+ */
 class DHCPLease
 {
     public:
@@ -30,23 +33,22 @@ class DHCPLease
         IPv4Address ip;
         MACAddress mac;
         IPv4Address gateway;
-        IPv4Address network;
-        IPv4Address netmask;
+        IPv4Address subnetMask;
         IPv4Address dns;
         IPv4Address ntp;
-        IPv4Address server_id;
-        std::string host_name;
-        simtime_t lease_time;
-        simtime_t renewal_time;
-        simtime_t rebind_time;
-        Byte parameter_request_list;
+        IPv4Address serverId;
+        std::string hostName;
+        simtime_t leaseTime;
+        simtime_t renewalTime;
+        simtime_t rebindTime;
         bool leased;
-
-        friend std::ostream& operator <<(std::ostream& os, DHCPLease obj)
-        {
-            os << "xid:" << obj.xid << " ip:" << obj.ip << " network:" << obj.network << " netmask:" << obj.netmask
-                    << " MAC:" << obj.mac << endl;
-            return (os);
-        }
 };
+
+inline std::ostream& operator <<(std::ostream& os, DHCPLease obj)
+{
+    os << " IP: " << obj.ip << " with subnet mask: " << obj.subnetMask
+            << " to " << obj.mac;
+    return os;
+}
+
 #endif

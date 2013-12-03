@@ -1,3 +1,23 @@
+2013-11-18 Benjamin Seregi
+
+    DHCPServer and Client: Major changes made both in client's and
+    server's state machine. It is now extended with new states INIT-REBOOT
+    and REBOOTING and with new message types DHCPNAK and DHCPDECLINE.
+
+    With the new REBOOTING states scenarios with lifecycle events
+    now work correctly.
+
+    The server's performance modeling has been removed. The inner
+    representation of the DHCP options are moved to a DHCPOptions
+    INET message definition file.
+
+    The client module currently does not support multiple DHCP servers
+    and BOOTP relay agents.
+
+    The whole implementation has been rewieved to bring it closer to
+    the standards defined in RFC 2131 and 2132.
+
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-06-12  Zoltan Bojthe
