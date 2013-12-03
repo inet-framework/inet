@@ -98,8 +98,8 @@ void IPv4::updateDisplayString()
 
 void IPv4::handleMessage(cMessage *msg)
 {
-    if (msg->getKind() == MK_REGISTER_TRANSPORT_PROTOCOL) {
-        RegisterTransportProtocolCommand * command = check_and_cast<RegisterTransportProtocolCommand *>(msg->getControlInfo());
+    if (dynamic_cast<RegisterTransportProtocolCommand*>(msg)) {
+        RegisterTransportProtocolCommand * command = check_and_cast<RegisterTransportProtocolCommand *>(msg);
         mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
         delete msg;
     }

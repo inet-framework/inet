@@ -55,8 +55,8 @@ void GenericNetworkProtocol::updateDisplayString()
 
 void GenericNetworkProtocol::handleMessage(cMessage *msg)
 {
-    if (msg->getKind() == MK_REGISTER_TRANSPORT_PROTOCOL) {
-        RegisterTransportProtocolCommand * command = check_and_cast<RegisterTransportProtocolCommand *>(msg->removeControlInfo());
+    if (dynamic_cast<RegisterTransportProtocolCommand*>(msg)) {
+        RegisterTransportProtocolCommand * command = check_and_cast<RegisterTransportProtocolCommand *>(msg);
         mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
         delete msg;
     }

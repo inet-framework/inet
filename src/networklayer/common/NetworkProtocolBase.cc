@@ -16,7 +16,7 @@
 
 #include "NetworkProtocolBase.h"
 #include "InterfaceTableAccess.h"
-#include "INetworkLayer.h"
+#include "NetworkProtocolCommand_m.h"
 
 NetworkProtocolBase::NetworkProtocolBase() :
     interfaceTable(NULL)
@@ -27,16 +27,14 @@ void NetworkProtocolBase::initialize(int stage)
 {
     LayeredProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-    {
         interfaceTable = InterfaceTableAccess().get(this);
-    }
 }
 
 void NetworkProtocolBase::handleUpperCommand(cMessage* message)
 {
-    if (message->getKind() == MK_REGISTER_TRANSPORT_PROTOCOL)
+    if (dynamic_cast<RegisterTransportProtocolCommand*>(message))
     {
-        RegisterTransportProtocolCommand * command = check_and_cast<RegisterTransportProtocolCommand *>(message->getControlInfo());
+        RegisterTransportProtocolCommand * command = check_and_cast<RegisterTransportProtocolCommand *>(message);
         protocolMapping.addProtocolMapping(command->getProtocol(), message->getArrivalGate()->getIndex());
         delete message;
     }

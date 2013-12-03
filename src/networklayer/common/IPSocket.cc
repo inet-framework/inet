@@ -17,15 +17,13 @@
 
 #include "IPSocket.h"
 #include "IPProtocolId_m.h"
-#include "INetworkLayer.h"
+#include "NetworkProtocolCommand_m.h"
 
 void IPSocket::registerProtocol(int protocol)
 {
     if (gateToIP && gateToIP->isConnected()) {
-        RegisterTransportProtocolCommand * controlInfo = new RegisterTransportProtocolCommand();
-        controlInfo->setProtocol(protocol);
-        cMessage * message = new cMessage("RegisterProtocol", MK_REGISTER_TRANSPORT_PROTOCOL);
-        message->setControlInfo(controlInfo);
+        RegisterTransportProtocolCommand * message = new RegisterTransportProtocolCommand();
+        message->setProtocol(protocol);
         sendToIP(message);
     }
 }
