@@ -733,7 +733,12 @@ void BasePhyLayer::finishRadioSwitching(bool bSendCtrlMsg /*= true*/)
 {
 	radio->endSwitch(simTime());
 	RadioMode newRadioMode = (RadioMode)radio->getCurrentState();
-    EV << "Changing radio mode from " << getRadioModeName(radioMode) << " to " << getRadioModeName(newRadioMode) << ".\n";
+    // KLUDGE: TODO: the UWBIR radio introduces a new state in the radio mode enum
+    // KLUDGE: TODO: and that causes problems when converting the state integer into a string
+	if (radioMode > RADIO_MODE_SWITCHING)
+	    EV << "Changing radio mode from " << radioMode << " to " << newRadioMode << ".\n";
+	else
+	    EV << "Changing radio mode from " << getRadioModeName(radioMode) << " to " << getRadioModeName(newRadioMode) << ".\n";
 	radioMode = newRadioMode;
     emit(radioModeChangedSignal, radio->getCurrentState());
     updateRadioChannelState();
