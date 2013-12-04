@@ -22,13 +22,18 @@
 #include "INetworkProtocolControlInfo.h"
 #include "NetworkLayer_m.h"
 
+// TODO: is this (a plain message kind) the right way to define the interface?
+// TODO: we do have a special message class too
 #define MK_REGISTER_TRANSPORT_PROTOCOL 1199
 
+// TODO: rename to INetworkProtocol?
 class INET_API INetworkLayer {
   public:
     virtual ~INetworkLayer() { }
 
-//    virtual INetworkLayerControlInfo *createControlInfo();
+//    virtual INetworkLayerControlInfo *createControlInfo() = 0;
+
+//    virtual Address resolveAddress(const char * address) = 0;
 };
 
 #endif

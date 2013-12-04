@@ -25,7 +25,7 @@ class INET_API ILinkLayer {
   public:
     virtual ~ILinkLayer() { }
 
-//    virtual ILinkLayerControlInfo *createControlInfo();
+//    virtual ILinkLayerControlInfo *createControlInfo() = 0;
 };
 
 #endif
