@@ -18,21 +18,7 @@
 package inet.networklayer.common;
 
 import inet.networklayer.contract.INetworkLayer;
-
-//
-// This interface provides an abstraction for different simple network protocols.
-//
-moduleinterface ISimpleNetworkProtocol
-{
-    parameters:
-        @display("i=block/fork");
-
-    gates:
-        input upperLayerIn[];
-        output upperLayerOut[];
-        input lowerLayerIn[];
-        output lowerLayerOut[];
-}
+import inet.networklayer.contract.INetworkProtocol;
 
 //
 // This module provides a simple network layer.
@@ -52,7 +38,7 @@ module SimpleNetworkLayer like INetworkLayer
         output pingOut[] @labels(PingPayload/up);
 
     submodules:
-        np: <networkProtocolType> like ISimpleNetworkProtocol {
+        np: <networkProtocolType> like INetworkProtocol {
             parameters:
                 @display("p=85,95;q=queue");
             gates:

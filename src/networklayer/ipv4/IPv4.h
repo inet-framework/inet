@@ -20,7 +20,7 @@
 
 #include <omnetpp.h>
 #include "INETDefs.h"
-#include "INetworkLayer.h"
+#include "INetworkProtocol.h"
 #include "INetfilter.h"
 #include "ICMPAccess.h"
 #include "IPv4FragBuf.h"
@@ -45,7 +45,7 @@ const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
 /**
  * Implements the IPv4 protocol.
  */
-class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, public INetworkLayer
+class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, public INetworkProtocol
 {
   public:
     /**

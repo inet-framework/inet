@@ -15,13 +15,12 @@
 //**************************************************************************
 package inet.networklayer.probabilistic;
 
-import inet.networklayer.common.ISimpleNetworkProtocol;
 import inet.networklayer.common.NetworkProtocolBase;
+import inet.networklayer.contract.INetworkProtocol;
 
 //
 // Multi-hop ad-hoc data dissemination protocol based on probabilistic broadcast.
 //
-// This protocol performs network-level broadcast using a probabilistic mechanism.
 // This method reduces the number of packets sent on the channel (reducing the
 // broadcast storm problem) at the risk of some nodes not receiving the data.
 // It is particularly interesting for mobile networks.
@@ -33,7 +32,7 @@ import inet.networklayer.common.NetworkProtocolBase;
 // a packet whose time to live (TTL) expired, avoiding retransmitting it in case it comes back
 // in the network because of some problem.
 //
-simple ProbabilisticBroadcast extends NetworkProtocolBase like ISimpleNetworkProtocol
+simple ProbabilisticBroadcast extends NetworkProtocolBase like INetworkProtocol
 {
     parameters:
         @class(ProbabilisticBroadcast);

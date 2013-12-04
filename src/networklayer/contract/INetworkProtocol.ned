@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 Andras Varga
+// Copyright (C) 2004 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,25 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_INETWORKLAYER_H_
-#define __INET_INETWORKLAYER_H_
+package inet.networklayer.contract;
 
-#include "INETDefs.h"
-#include "INetworkProtocolControlInfo.h"
-#include "NetworkLayer_m.h"
-
-// TODO: is this (a plain message kind) the right way to define the interface?
-// TODO: we do have a special message class too
-#define MK_REGISTER_TRANSPORT_PROTOCOL 1199
-
-// TODO: rename to INetworkProtocol?
-class INET_API INetworkLayer {
-  public:
-    virtual ~INetworkLayer() { }
-
-//    virtual INetworkLayerControlInfo *createControlInfo() = 0;
-
-//    virtual Address resolveAddress(const char * address) = 0;
-};
-
-#endif
+//
+// This interface provides an abstraction for different network protocols.
+//
+moduleinterface INetworkProtocol
+{
+    parameters:
+        @display("i=block/fork");
+    gates:
+        input upperLayerIn[];
+        output upperLayerOut[];
+        input lowerLayerIn[];
+        output lowerLayerOut[];
+}

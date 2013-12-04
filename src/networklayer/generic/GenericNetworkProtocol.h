@@ -22,7 +22,7 @@
 #include <list>
 #include <map>
 
-#include "INetworkLayer.h"
+#include "INetworkProtocol.h"
 #include "QueueBase.h"
 #include "InterfaceTableAccess.h"
 #include "INetfilter.h"
@@ -39,7 +39,7 @@
  */
 // TODO: rename this and its friends to something that is more specific
 // TODO: that expresses to some extent how this network protocol works
-class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, public INetworkLayer
+class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, public INetworkProtocol
 {
   protected:
     /**

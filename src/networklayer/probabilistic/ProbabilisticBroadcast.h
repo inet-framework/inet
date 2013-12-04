@@ -10,7 +10,7 @@
 
 #include <set>
 #include <map>
-
+#include "INetworkProtocol.h"
 #include "NetworkProtocolBase.h"
 #include "ProbabilisticBroadcastDatagram_m.h"
 #include "Address.h"
@@ -24,7 +24,7 @@
  * @ingroup netwLayer
  * @author Damien Piguet
  **/
-class INET_API ProbabilisticBroadcast : public NetworkProtocolBase
+class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetworkProtocol
 {
 private:
 	/** @brief Copy constructor is not allowed.

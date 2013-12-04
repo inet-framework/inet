@@ -24,8 +24,7 @@
 #define _FLOOD_H_
 
 #include <list>
-
-#include "INetworkLayer.h"
+#include "INetworkProtocol.h"
 #include "NetworkProtocolBase.h"
 #include "Address.h"
 #include "FloodDatagram.h"
@@ -49,7 +48,7 @@
  *
  * ported to Mixim 2.0 by Theodoros Kapourniotis
  **/
-class INET_API Flood : public NetworkProtocolBase, public INetworkLayer
+class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
 {
 protected:
     /** @brief Network layer sequence number*/

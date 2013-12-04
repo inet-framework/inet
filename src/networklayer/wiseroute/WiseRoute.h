@@ -26,9 +26,10 @@
 #ifndef __INET_WISEROUTE_H
 #define __INET_WISEROUTE_H
 
+#include "INetworkProtocol.h"
+#include "IARP.h"
 #include "NetworkProtocolBase.h"
 #include "Address.h"
-#include "IARP.h"
 #include "WiseRouteDatagram_m.h"
 
 /**
@@ -45,7 +46,7 @@
  * @ingroup netwLayer
  * @author Jerome Rousselot
  **/
-class INET_API WiseRoute : public NetworkProtocolBase
+class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
 {
 private:
 	/** @brief Copy constructor is not allowed.

@@ -23,8 +23,8 @@
 
 package inet.networklayer.flood;
 
-import inet.networklayer.common.ISimpleNetworkProtocol;
 import inet.networklayer.common.NetworkProtocolBase;
+import inet.networklayer.contract.INetworkProtocol;
 
 //
 // A simple flooding protocol for network-level broadcast.
@@ -44,7 +44,7 @@ import inet.networklayer.common.NetworkProtocolBase;
 //
 // ported to Mixim 2.0 by Theodoros Kapourniotis
 //
-simple Flood extends NetworkProtocolBase like ISimpleNetworkProtocol
+simple Flood extends NetworkProtocolBase like INetworkProtocol
 {
     parameters:
         @display("i=block/fork");
