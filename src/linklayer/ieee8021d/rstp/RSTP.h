@@ -127,6 +127,14 @@ protected:
      */
     virtual CompareResult compareInterfacedata(unsigned int portNum, BPDU * msg, int linkCost);
 
+    virtual CompareResult compareRSTPData(int rootPriority1, int rootPriority2,
+            MACAddress rootAddress1, MACAddress rootAddress2,
+            int rootPathCost1, int rootPathCost2,
+            int bridgePriority1, int bridgePriority2,
+            MACAddress bridgeAddress1, MACAddress bridgeAddress2,
+            int portPriority1, int portPriority2,
+            int portNum1, int portNum1);
+
     /**
      * @brief If root TCWhile has not expired, sends a BPDU to the Root with TCFlag=true.
      */

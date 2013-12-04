@@ -835,46 +835,13 @@ RSTP::CompareResult RSTP::contestInterfacedata(unsigned int portNum)
     Ieee8021DInterfaceData * rootPort = getPortInterfaceData(r);
     Ieee8021DInterfaceData * ifd = getPortInterfaceData(portNum);
 
-    int rootPriority1 = rootPort->getRootPriority();
-    MACAddress rootAddress1 = rootPort->getRootAddress();
-    int rootPathCost1 = rootPort->getRootPathCost() + ifd->getLinkCost();
-    int bridgePriority1 = bridgePriority;
-    MACAddress bridgeAddress1 = bridgeAddress;
-    int portPriority1 = ifd->getPortPriority();
-    int portNum1 = portNum;
-
-    int rootPriority2 = ifd->getRootPriority();
-    MACAddress rootAddress2 = ifd->getRootAddress();
-    int rootPathCost2 = ifd->getRootPathCost();
-    int bridgePriority2 = ifd->getBridgePriority();
-    MACAddress bridgeAddress2 = ifd->getBridgeAddress();
-    int portPriority2 = ifd->getPortPriority();
-    int portNum2 = ifd->getPortNum();
-
-    if (rootPriority1 != rootPriority2)
-        return (rootPriority1 < rootPriority2) ? WORSE_ROOT : BETTER_ROOT;
-
-    int c = rootAddress1.compareTo(rootAddress2);
-    if (c != 0)
-        return (c < 0) ? WORSE_ROOT : BETTER_ROOT;
-
-    if (rootPathCost1 != rootPathCost2)
-        return (rootPathCost1 < rootPathCost2) ? WORSE_RPC : BETTER_RPC;
-
-    if (bridgePriority1 != bridgePriority2)
-        return (bridgePriority1 < bridgePriority2) ? WORSE_SRC : BETTER_SRC;
-
-    c = bridgeAddress1.compareTo(bridgeAddress2);
-    if (c != 0)
-        return (c < 0) ? WORSE_SRC : BETTER_SRC;
-
-    if (portPriority1 != portPriority2)
-        return (portPriority1 < portPriority2) ? WORSE_PORT : BETTER_PORT;
-
-    if (portNum1 != portNum2)
-        return (portNum1 < portNum2) ? WORSE_PORT : BETTER_PORT;
-
-    return SIMILAR;
+    return compareRSTPData(rootPort->getRootPriority(),                          ifd->getRootPriority(),
+                           rootPort->getRootAddress(),                           ifd->getRootAddress(),
+                           rootPort->getRootPathCost() + ifd->getLinkCost(),     ifd->getRootPathCost(),
+                           bridgePriority,                                       ifd->getBridgePriority(),
+                           bridgeAddress,                                        ifd->getBridgeAddress(),
+                           ifd->getPortPriority(),                               ifd->getPortPriority(),
+                           portNum,                                              ifd->getPortNum());
 }
 
 RSTP::CompareResult RSTP::contestInterfacedata(BPDU* msg, unsigned int portNum)
@@ -883,93 +850,60 @@ RSTP::CompareResult RSTP::contestInterfacedata(BPDU* msg, unsigned int portNum)
     Ieee8021DInterfaceData * rootPort = getPortInterfaceData(r);
     Ieee8021DInterfaceData * ifd = getPortInterfaceData(portNum);
 
-    int rootPriority1 = rootPort->getRootPriority();
-    MACAddress rootAddress1 = rootPort->getRootAddress();
-    int rootPathCost1 = rootPort->getRootPathCost();
-    int bridgePriority1 = bridgePriority;
-    MACAddress bridgeAddress1 = bridgeAddress;
-    int portPriority1 = ifd->getPortPriority();
-    int portNum1 = portNum;
-
-    int rootPriority2 = msg->getRootPriority();
-    MACAddress rootAddress2 = msg->getRootAddress();
-    int rootPathCost2 = msg->getRootPathCost();
-    int bridgePriority2 = msg->getBridgePriority();
-    MACAddress bridgeAddress2 = msg->getBridgeAddress();
-    int portPriority2 = msg->getPortPriority();
-    int portNum2 = msg->getPortNum();
-
-    if (rootPriority1 != rootPriority2)
-        return (rootPriority1 < rootPriority2) ? WORSE_ROOT : BETTER_ROOT;
-
-    int c = rootAddress1.compareTo(rootAddress2);
-    if (c != 0)
-        return (c < 0) ? WORSE_ROOT : BETTER_ROOT;
-
-    if (rootPathCost1 != rootPathCost2)
-        return (rootPathCost1 < rootPathCost2) ? WORSE_RPC : BETTER_RPC;
-
-    if (bridgePriority1 != bridgePriority2)
-        return (bridgePriority1 < bridgePriority2) ? WORSE_SRC : BETTER_SRC;
-
-    c = bridgeAddress1.compareTo(bridgeAddress2);
-    if (c != 0)
-        return (c < 0) ? WORSE_SRC : BETTER_SRC;
-
-    if (portPriority1 != portPriority2)
-        return (portPriority1 < portPriority2) ? WORSE_PORT : BETTER_PORT;
-
-    if (portNum1 != portNum2)
-        return (portNum1 < portNum2) ? WORSE_PORT : BETTER_PORT;
-
-    return SIMILAR;
-
+    return compareRSTPData(rootPort->getRootPriority(),     msg->getRootPriority(),
+                           rootPort->getRootAddress(),      msg->getRootAddress(),
+                           rootPort->getRootPathCost(),     msg->getRootPathCost(),
+                           bridgePriority,                  msg->getBridgePriority(),
+                           bridgeAddress,                   msg->getBridgeAddress(),
+                           ifd->getPortPriority(),          msg->getPortPriority(),
+                           portNum,                         msg->getPortNum());
 }
 
 RSTP::CompareResult RSTP::compareInterfacedata(unsigned int portNum, BPDU * msg, int linkCost)
 {
     Ieee8021DInterfaceData * ifd = getPortInterfaceData(portNum);
 
-    int rootPriority1 = ifd->getRootPriority();
-    MACAddress rootAddress1 = ifd->getRootAddress();
-    int rootPathCost1 = ifd->getRootPathCost();
-    int bridgePriority1 = ifd->getBridgePriority();
-    MACAddress bridgeAddress1 = ifd->getBridgeAddress();
-    int portPriority1 = ifd->getPortPriority();
-    int portNum1 = ifd->getPortNum();
+    return compareRSTPData(ifd->getRootPriority(),     msg->getRootPriority(),
+                           ifd->getRootAddress(),      msg->getRootAddress(),
+                           ifd->getRootPathCost(),     msg->getRootPathCost() + linkCost,
+                           ifd->getBridgePriority(),   msg->getBridgePriority(),
+                           ifd->getBridgeAddress(),    msg->getBridgeAddress(),
+                           ifd->getPortPriority(),     msg->getPortPriority(),
+                           ifd->getPortNum(),          msg->getPortNum());
+}
 
-    int rootPriority2 = msg->getRootPriority();
-    MACAddress rootAddress2 = msg->getRootAddress();
-    int rootPathCost2 = msg->getRootPathCost() + linkCost;
-    int bridgePriority2 = msg->getBridgePriority();
-    MACAddress bridgeAddress2 = msg->getBridgeAddress();
-    int portPriority2 = msg->getPortPriority();
-    int portNum2 = msg->getPortNum();
-
+RSTP::CompareResult RSTP::compareRSTPData(int rootPriority1, int rootPriority2,
+        MACAddress rootAddress1, MACAddress rootAddress2,
+        int rootPathCost1, int rootPathCost2,
+        int bridgePriority1, int bridgePriority2,
+        MACAddress bridgeAddress1, MACAddress bridgeAddress2,
+        int portPriority1, int portPriority2,
+        int portNum1, int portNum2)
+{
     if (rootPriority1 != rootPriority2)
-        return (rootPriority1 < rootPriority2) ? WORSE_ROOT : BETTER_ROOT;
+            return (rootPriority1 < rootPriority2) ? WORSE_ROOT : BETTER_ROOT;
 
-    int c = rootAddress1.compareTo(rootAddress2);
-    if (c != 0)
-        return (c < 0) ? WORSE_ROOT : BETTER_ROOT;
+        int c = rootAddress1.compareTo(rootAddress2);
+        if (c != 0)
+            return (c < 0) ? WORSE_ROOT : BETTER_ROOT;
 
-    if (rootPathCost1 != rootPathCost2)
-        return (rootPathCost1 < rootPathCost2) ? WORSE_RPC : BETTER_RPC;
+        if (rootPathCost1 != rootPathCost2)
+            return (rootPathCost1 < rootPathCost2) ? WORSE_RPC : BETTER_RPC;
 
-    if (bridgePriority1 != bridgePriority2)
-        return (bridgePriority1 < bridgePriority2) ? WORSE_SRC : BETTER_SRC;
+        if (bridgePriority1 != bridgePriority2)
+            return (bridgePriority1 < bridgePriority2) ? WORSE_SRC : BETTER_SRC;
 
-    c = bridgeAddress1.compareTo(bridgeAddress2);
-    if (c != 0)
-        return (c < 0) ? WORSE_SRC : BETTER_SRC;
+        c = bridgeAddress1.compareTo(bridgeAddress2);
+        if (c != 0)
+            return (c < 0) ? WORSE_SRC : BETTER_SRC;
 
-    if (portPriority1 != portPriority2)
-        return (portPriority1 < portPriority2) ? WORSE_PORT : BETTER_PORT;
+        if (portPriority1 != portPriority2)
+            return (portPriority1 < portPriority2) ? WORSE_PORT : BETTER_PORT;
 
-    if (portNum1 != portNum2)
-        return (portNum1 < portNum2) ? WORSE_PORT : BETTER_PORT;
+        if (portNum1 != portNum2)
+            return (portNum1 < portNum2) ? WORSE_PORT : BETTER_PORT;
 
-    return SIMILAR;
+        return SIMILAR;
 }
 
 int RSTP::getBestAlternate()
