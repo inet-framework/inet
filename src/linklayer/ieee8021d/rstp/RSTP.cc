@@ -429,7 +429,6 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
             arrivalPort->setLostBPDU(0);
 
             return true;
-            break;
 
         case BETTER_RPC:// same that Root but better RPC
         case BETTER_SRC:// same that Root RPC but better source
@@ -469,7 +468,6 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
             }
             rootPort->setState(Ieee8021DInterfaceData::DISCARDING);
             return true;
-            break;
 
         case WORSE_ROOT:
             EV_DETAIL << "Worse BDPU received than the current root. Sending BPDU to show him a better root as soon as possible." << endl;
