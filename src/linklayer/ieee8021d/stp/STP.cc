@@ -24,6 +24,11 @@
 
 Define_Module(STP);
 
+STP::STP() :
+    tick(NULL)
+{
+}
+
 void STP::initialize(int stage)
 {
     STPBase::initialize(stage);

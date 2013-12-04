@@ -68,6 +68,8 @@ class STP : public STPBase
         cMessage * tick;
 
     public:
+        STP();
+        virtual ~STP();
 
         /*
          * Bridge Protocol Data Unit handling
@@ -82,7 +84,6 @@ class STP : public STPBase
         virtual void handleMessage(cMessage * msg);
         virtual void initialize(int stage);
         virtual int numInitStages() const { return 2; }
-        virtual ~STP();
 
         /*
          * Generate BPDUs to all interfaces (for root switch)
