@@ -25,6 +25,11 @@ static const char *ENABLED_LINK_COLOR = "#000000";
 static const char *DISABLED_LINK_COLOR = "#bbbbbb";
 static const char *ROOT_SWITCH_COLOR = "#a5ffff";
 
+STPBase::STPBase()
+{
+    ie = NULL;
+}
+
 void STPBase::initialize(int stage)
 {
     if (stage == 0)
@@ -36,8 +41,8 @@ void STPBase::initialize(int stage)
         helloTime = par("helloTime");
         forwardDelay = par("forwardDelay");
 
-        macTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTableName")));
-        ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableName")));
+        macTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTablePath")));
+        ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
         cModule *switchModule = findContainingNode(this);
         numPorts = switchModule->gate("ethg$o", 0)->getVectorSize();
     }
@@ -47,51 +52,27 @@ void STPBase::initialize(int stage)
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
-        // get the bridge's mac address
-        InterfaceEntry * ifEntry = ifTable->getInterface(0);
-
-        // FIXME does STP/RSTP work at all if there is no registered interface?? perhaps throw an error if ifEntry==NULL!
-        if (ifEntry != NULL)
+        if (isOperational)
         {
-            bridgeAddress = ifEntry->getMacAddress();
-        }
-        else
-        {
-            EV_INFO<<"interface not found. Is not this module connected to another BEB?"<<endl;
-            EV_INFO<<"Setting AAAAAA000001 as backbone mac address."<<endl;
-            bridgeAddress.setAddress("AAAAAA000001");
+            ie = chooseInterface();
+            if (ie)
+                bridgeAddress = ie->getMacAddress(); // get the bridge's MAC address
+            else
+                throw cRuntimeError("No non-loopback interface found!");
         }
     }
 }
 
-bool STPBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-{
-    Enter_Method_Silent();
-
-    if (dynamic_cast<NodeStartOperation *>(operation))
-    {
-        if (stage == NodeStartOperation::STAGE_LINK_LAYER)
-            start();
-    }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
-    {
-        if (stage == NodeShutdownOperation::STAGE_LINK_LAYER)
-            stop();
-    }
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
-    {
-        if (stage == NodeCrashOperation::STAGE_CRASH)
-            stop();
-    }
-    else
-        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
-
-    return true;
-}
 
 void STPBase::start()
 {
     isOperational = true;
+    ie = chooseInterface();
+
+    if (ie)
+        bridgeAddress = ie->getMacAddress(); // get the bridge's MAC address
+    else
+        throw cRuntimeError("No non-loopback interface found!");
 }
 
 void STPBase::stop()
@@ -103,6 +84,7 @@ void STPBase::stop()
         colorLink(i, false);
     cModule *switchModule = findContainingNode(this);
     switchModule->getDisplayString().setTagArg("i", 1, "");
+    ie = NULL;
 }
 
 void STPBase::colorLink(unsigned int i, bool forwarding)
@@ -195,4 +177,47 @@ int STPBase::getRootIndex()
         if (getPortInterfaceData(i)->getRole() == Ieee8021DInterfaceData::ROOT)
             return i;
     return -1;
+}
+
+
+InterfaceEntry * STPBase::chooseInterface()
+{
+    // TODO: Currently, we assume that the first non-loopback interface is an Ethernet interface
+    //       since STP and RSTP work on EtherSwitches.
+    //       NOTE that, we doesn't check if the returning interface is an Ethernet interface!
+    IInterfaceTable * ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
+
+    for (int i = 0; i < ift->getNumInterfaces(); i++)
+    {
+        InterfaceEntry * current = ift->getInterface(i);
+        if (!current->isLoopback())
+            return current;
+    }
+
+    return NULL;
+}
+
+bool STPBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_LINK_LAYER)
+            start();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_LINK_LAYER)
+            stop();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            stop();
+    }
+    else
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+
+    return true;
 }

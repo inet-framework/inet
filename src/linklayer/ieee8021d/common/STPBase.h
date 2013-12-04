@@ -15,8 +15,8 @@
 // Author: Zsolt Prontvai
 //
 
-#ifndef STPUTIL_H_
-#define STPUTIL_H_
+#ifndef __INET_STPBASE_H_
+#define __INET_STPBASE_H_
 
 #include "ILifecycle.h"
 #include "MACAddress.h"
@@ -28,7 +28,8 @@
 /**
  * Base class for STP and RSTP.
  */
-class STPBase : public cSimpleModule, public ILifecycle {
+class STPBase : public cSimpleModule, public ILifecycle
+{
 protected:
     bool visualize;                  // if true it visualize the spanning tree
     unsigned int numPorts;           // number of ports
@@ -43,10 +44,11 @@ protected:
 
     IMACAddressTable * macTable;
     IInterfaceTable * ifTable;
+    InterfaceEntry * ie;
 
 public:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-
+    STPBase();
 protected:
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int stage);
@@ -55,28 +57,33 @@ protected:
     virtual void stop();
 
     /**
-     * @brief Adds effects to be represented by Tkenv. Color the link black if forwarding parameter is true
-     * and the port witch is the link is connected also forwarding, else colors the link gray
+     * @brief Adds effects to be represented by Tkenv. Colors the link black if forwarding parameter is true
+     * and the port which the link is connected to is also forwarding, otherwise colors the link gray.
      */
     virtual void colorLink(unsigned int i, bool forwarding);
 
     /**
      * @brief Adds effects to be represented by Tkenv. Inactive links are colored grey.
-     * Show port role, state. Mark root switch
+     * Shows port role, state. Marks root switch.
      */
     virtual void visualizer();
 
     /**
-     * @brief Obtain the root gate index
-     * @return the root gate index or -1 if there is not root gate.
+     * @brief Obtains the root gate index.
+     * @return The root gate index or -1 if there is no root gate.
      */
     virtual int getRootIndex();
 
     /**
-     * @brief Obtain Ieee8021DInterfaceData from the port's indexnumber
-     * @return the port's Ieee8021DInterfaceData, NULL if it doesn't exist
+     * @brief Gets Ieee8021DInterfaceData for port number.
+     * @return The port's Ieee8021DInterfaceData, or NULL if it doesn't exist.
      */
     Ieee8021DInterfaceData *getPortInterfaceData(unsigned int portNum);
 
+    /*
+     * Returns the first non-loopback interface.
+     */
+    virtual InterfaceEntry * chooseInterface();
+
 };
-#endif /* STPUTIL_H_ */
+#endif

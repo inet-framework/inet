@@ -21,7 +21,7 @@ class noncobject MACAddress;
 
 
 //
-// Represents a BPDU (Bride PDU) used by the STP and RSTP protocols,
+// Represents a BPDU (Bridge PDU) used by the STP and RSTP protocols,
 // as defined in the 802.1D-1998 specification.
 //
 packet BPDU
