@@ -142,7 +142,7 @@ PIMNeighbor *PIMNeighborTable::findNeighbor(int interfaceId, IPv4Address addr)
     return NULL;
 }
 
-PIMNeighborTable::PIMNeighborVector PIMNeighborTable::getNeighborsByIntID(int interfaceId)
+PIMNeighborTable::PIMNeighborVector PIMNeighborTable::getNeighborsOnInterface(int interfaceId)
 {
     PIMNeighborVector result;
 	for(PIMNeighborVector::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
@@ -151,7 +151,7 @@ PIMNeighborTable::PIMNeighborVector PIMNeighborTable::getNeighborsByIntID(int in
 	return result;
 }
 
-PIMNeighbor *PIMNeighborTable::getNeighborByIntID(int interfaceId)
+PIMNeighbor *PIMNeighborTable::getFirstNeighborOnInterface(int interfaceId)
 {
     for(PIMNeighborVector::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
     {
@@ -164,7 +164,7 @@ PIMNeighbor *PIMNeighborTable::getNeighborByIntID(int interfaceId)
     return NULL;
 }
 
-int PIMNeighborTable::getNumNeighborsOnInt(int interfaceId)
+int PIMNeighborTable::getNumNeighborsOnInterface(int interfaceId)
 {
     int result = 0;
     for (PIMNeighborVector::iterator it = neighbors.begin(); it != neighbors.end(); ++it)

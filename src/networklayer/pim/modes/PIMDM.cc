@@ -454,7 +454,7 @@ void PIMDM::processJoinPruneGraftPacket(PIMJoinPrune *pkt, PIMPacketType type)
 	IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
 	IPv4Address sender = ctrl->getSrcAddr();
 	InterfaceEntry * nt = rt->getInterfaceForDestAddr(sender);
-	vector<PIMNeighbor*> neighbors = pimNbt->getNeighborsByIntID(nt->getInterfaceId());
+	vector<PIMNeighbor*> neighbors = pimNbt->getNeighborsOnInterface(nt->getInterfaceId());
 	IPv4Address addr = nt->ipv4Data()->getIPAddress();
 
 	// does packet belong to this router?
@@ -1011,7 +1011,7 @@ void PIMDM::rpfIntChange(PIMMulticastRoute *route)
 	// set new RPF
 	int oldRpfIntId = route->getInIntId();
 	InterfaceEntry *oldRpfInt = route->getInIntPtr();
-	route->setInInt(newRpf, rpfId, pimNbt->getNeighborsByIntID(rpfId)[0]->getAddress());
+	route->setInInt(newRpf, rpfId, pimNbt->getNeighborsOnInterface(rpfId)[0]->getAddress());
 
 	// route was not pruned, join to the multicast tree again
 	if (!route->isFlagSet(PIMMulticastRoute::P))
@@ -1097,10 +1097,10 @@ void PIMDM::dataOnNonRpf(IPv4Address group, IPv4Address source, int intId)
 
 	// in case of p2p link, send prune
 	// FIXME There should be better indicator of P2P link
-	if (pimNbt->getNumNeighborsOnInt(intId) == 1)
+	if (pimNbt->getNumNeighborsOnInterface(intId) == 1)
 	{
 		// send Prune msg to the neighbor who sent these multicast data
-		IPv4Address nextHop = (pimNbt->getNeighborsByIntID(intId))[0]->getAddress();
+		IPv4Address nextHop = (pimNbt->getNeighborsOnInterface(intId))[0]->getAddress();
 		sendPimJoinPrune(nextHop, source, group, intId);
 
 		// find incoming interface
@@ -1194,7 +1194,7 @@ void PIMDM::oldMulticastAddr(PIMInterface *pimInt, IPv4Address oldAddr)
             }
             else if(outInt->forwarding == PIMMulticastRoute::Forward)
             {
-                if ((pimNbt->getNeighborsByIntID(outInt->intId)).size() == 0)
+                if ((pimNbt->getNeighborsOnInterface(outInt->intId)).size() == 0)
                     connected = true;
                 k++;
             }
@@ -1352,7 +1352,7 @@ void PIMDM::newMulticast(PIMMulticastRoute *newRoute)
 		}
 
 		// if there are neighbors on interface, we will forward
-		if((pimNbt->getNeighborsByIntID(intId)).size() > 0)
+		if((pimNbt->getNeighborsOnInterface(intId)).size() > 0)
 		{
 			newOutInt->forwarding = PIMMulticastRoute::Forward;
 			pruned = false;

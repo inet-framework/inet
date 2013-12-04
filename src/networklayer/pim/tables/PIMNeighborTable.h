@@ -108,19 +108,19 @@ class INET_API PIMNeighborTable: public cSimpleModule
         /**
          * Returns all neighbors observed on the given interface.
          */
-		virtual PIMNeighborVector getNeighborsByIntID(int interfaceId);
+		virtual PIMNeighborVector getNeighborsOnInterface(int interfaceId);
 
 		/**
 		 * Returns the neighbor that was first observed on the given interface,
 		 * or NULL if there is none.
 		 * XXX What is the use case of this method?
 		 */
-		virtual PIMNeighbor *getNeighborByIntID(int interfaceId);
+		virtual PIMNeighbor *getFirstNeighborOnInterface(int interfaceId);
 
 		/**
 		 * Returns the number of neighbors on the given interface.
 		 */
-		virtual int getNumNeighborsOnInt(int interfaceId);
+		virtual int getNumNeighborsOnInterface(int interfaceId);
 
 	protected:
         virtual int numInitStages() const  {return NUM_INIT_STAGES;}
