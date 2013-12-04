@@ -15,15 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ILINKLAYER_H_
-#define __INET_ILINKLAYER_H_
+#ifndef __INET_IMACPROTOCOL_H_
+#define __INET_IMACPROTOCOL_H_
 
-#include "INETDefs.h"
-#include "ILinkLayerControlInfo.h"
+#include "IMACProtocolControlInfo.h"
 
-class INET_API ILinkLayer {
+class INET_API IMACProtocol {
   public:
-    virtual ~ILinkLayer() { }
+    virtual ~IMACProtocol() { }
 
 //    virtual ILinkLayerControlInfo *createControlInfo() = 0;
 };

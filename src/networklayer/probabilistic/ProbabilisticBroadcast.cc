@@ -61,7 +61,7 @@ void ProbabilisticBroadcast::handleLowerPacket(cPacket* msg)
 {
 	MACAddress macSrcAddr;
 	ProbabilisticBroadcastDatagram* m = check_and_cast<ProbabilisticBroadcastDatagram*>(msg);
-	ILinkLayerControlInfo* cInfo = check_and_cast<ILinkLayerControlInfo *>(m->removeControlInfo());
+	IMACProtocolControlInfo* cInfo = check_and_cast<IMACProtocolControlInfo *>(m->removeControlInfo());
 	m->setNbHops(m->getNbHops()+1);
 	macSrcAddr = cInfo->getSourceAddress();
 	delete cInfo;

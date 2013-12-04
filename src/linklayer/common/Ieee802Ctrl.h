@@ -20,14 +20,14 @@
 #define __INET_IEEE802CTRL_H_
 
 #include "INETDefs.h"
-#include "ILinkLayerControlInfo.h"
+#include "IMACProtocolControlInfo.h"
 #include "Ieee802Ctrl_m.h"
 
 /**
  * Represents a IEEE 802 control info. More info in the Ieee802Ctrl.msg file
  * (and the documentation generated from it).
  */
-class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base, public ILinkLayerControlInfo
+class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base, public IMACProtocolControlInfo
 {
   public:
     Ieee802Ctrl() : Ieee802Ctrl_Base() {}

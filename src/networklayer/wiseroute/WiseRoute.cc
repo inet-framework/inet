@@ -130,7 +130,7 @@ void WiseRoute::handleLowerPacket(cPacket* msg)
 	const Address& finalDestAddr  = netwMsg->getFinalDestAddr();
 	const Address& initialSrcAddr = netwMsg->getInitialSrcAddr();
 	const Address& srcAddr        = netwMsg->getSrcAddr();
-	ILinkLayerControlInfo* ctrlInfo = check_and_cast<ILinkLayerControlInfo*>(netwMsg->getControlInfo());
+	IMACProtocolControlInfo* ctrlInfo = check_and_cast<IMACProtocolControlInfo*>(netwMsg->getControlInfo());
 	// KLUDGE: TODO: get rssi and ber
 	EV_ERROR << "Getting RSSI and BER from the received frame is not yet implemented. Using default values.\n";
 	double rssi = 1; // TODO: ctrlInfo->getRSSI();

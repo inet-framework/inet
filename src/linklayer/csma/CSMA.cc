@@ -34,7 +34,7 @@
 #include "BasePhyLayer.h"
 #include "BaseConnectionManager.h"
 #include "InterfaceEntry.h"
-#include "ILinkLayerControlInfo.h"
+#include "IMACProtocolControlInfo.h"
 #include "FindModule.h"
 #include "SimpleLinkLayerControlInfo.h"
 #include "CSMAFrame_m.h"
@@ -210,7 +210,7 @@ void CSMA::handleUpperPacket(cPacket *msg) {
 	//MacPkt*macPkt = encapsMsg(msg);
 	CSMAFrame* macPkt = new CSMAFrame(msg->getName());
 	macPkt->setBitLength(headerLength);
-	ILinkLayerControlInfo *const cInfo = check_and_cast<ILinkLayerControlInfo *>(msg->removeControlInfo());
+	IMACProtocolControlInfo *const cInfo = check_and_cast<IMACProtocolControlInfo *>(msg->removeControlInfo());
 	EV_DETAIL << "CSMA received a message from upper layer, name is " << msg->getName() <<", CInfo removed, mac addr="<< cInfo->getDestinationAddress() << endl;
 	MACAddress dest = cInfo->getDestinationAddress();
 	macPkt->setDestAddr(dest);

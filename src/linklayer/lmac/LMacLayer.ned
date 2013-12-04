@@ -13,7 +13,7 @@
 package inet.linklayer.lmac;
 
 import inet.linklayer.common.MACProtocolBase;
-import inet.linklayer.contract.ILinkLayer;
+import inet.linklayer.contract.IMACProtocol;
 
 
 //
@@ -22,7 +22,7 @@ import inet.linklayer.contract.ILinkLayer;
 //
 // See C++ documentation for details
 //
-simple LMacLayer extends MACProtocolBase like ILinkLayer
+simple LMacLayer extends MACProtocolBase like IMACProtocol
 {
     parameters:
         string address = default("auto"); // MAC address as hex string (12 hex digits), or

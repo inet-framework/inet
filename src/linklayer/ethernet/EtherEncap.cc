@@ -93,7 +93,7 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
     // create Ethernet frame, fill it in from Ieee802Ctrl and encapsulate msg in it
     EV << "Encapsulating higher layer packet `" << msg->getName() <<"' for MAC\n";
 
-    ILinkLayerControlInfo* controlInfo = check_and_cast<ILinkLayerControlInfo*>(msg->removeControlInfo());
+    IMACProtocolControlInfo* controlInfo = check_and_cast<IMACProtocolControlInfo*>(msg->removeControlInfo());
     Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl*>(controlInfo);
     EtherFrame *frame = NULL;
 

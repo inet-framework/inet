@@ -19,14 +19,14 @@
 #define __INET_SIMPLELINKLAYERCONTROLINFO_H_
 
 #include "INETDefs.h"
-#include "ILinkLayerControlInfo.h"
+#include "IMACProtocolControlInfo.h"
 #include "SimpleLinkLayerControlInfo_m.h"
 
 /**
  * Represents a SimpleLinkLayer control info. More info in the SimpleLinkLayerControlInfo.msg file
  * (and the documentation generated from it).
  */
-class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Base, public ILinkLayerControlInfo
+class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Base, public IMACProtocolControlInfo
 {
   public:
     SimpleLinkLayerControlInfo() : SimpleLinkLayerControlInfo_Base() {}

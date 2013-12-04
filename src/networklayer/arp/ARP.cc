@@ -458,7 +458,7 @@ void ARP::processARPPacket(ARPPacket *arp)
     dumpARPPacket(arp);
 
     // extract input port
-    ILinkLayerControlInfo* ctrl = check_and_cast<ILinkLayerControlInfo*>(arp->removeControlInfo());
+    IMACProtocolControlInfo* ctrl = check_and_cast<IMACProtocolControlInfo*>(arp->removeControlInfo());
     InterfaceEntry *ie = ift->getInterfaceById(ctrl->getInterfaceId());
     delete ctrl;
 

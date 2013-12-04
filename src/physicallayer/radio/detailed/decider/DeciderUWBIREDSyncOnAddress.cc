@@ -1,7 +1,7 @@
 #include "DeciderUWBIREDSyncOnAddress.h"
 
 #include "DeciderUWBIRED.h"
-#include "ILinkLayerFrame.h"
+#include "IMACFrame.h"
 
 bool DeciderUWBIREDSyncOnAddress::initFromMap(const ParameterMap& params) {
     bool                         bInitSuccess = true;
@@ -22,7 +22,7 @@ bool DeciderUWBIREDSyncOnAddress::attemptSync(const DetailedRadioFrame * /*frame
 
 	cMessage* encaps = currentSignal.first->getEncapsulatedPacket();
 
-	return ((check_and_cast<ILinkLayerFrame*>(encaps))->getSourceAddress()==syncAddress);
+	return ((check_and_cast<IMACFrame*>(encaps))->getSourceAddress()==syncAddress);
 };
 
 

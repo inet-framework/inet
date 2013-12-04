@@ -17,9 +17,10 @@
 
 package inet.linklayer;
 
-import inet.linklayer.contract.ILinkLayer;
+import inet.linklayer.contract.IMACProtocol;
 import inet.physicallayer.radio.contract.IRadio;
 import inet.power.contract.IPowerConsumer;
+
 
 module WirelessNic like IWirelessNic
 {
@@ -33,7 +34,7 @@ module WirelessNic like IWirelessNic
         output upperLayerOut;
         input radioIn @labels(IRadioFrame);
     submodules:
-        mac: <macType> like ILinkLayer {
+        mac: <macType> like IMACProtocol {
             parameters:
                 @display("p=150,100");
         }

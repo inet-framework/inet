@@ -17,7 +17,7 @@
 #include "FWMath.h"
 #include "InterfaceEntry.h"
 #include "ModuleAccess.h"
-#include "ILinkLayerControlInfo.h"
+#include "IMACProtocolControlInfo.h"
 #include "SimpleLinkLayerControlInfo.h"
 #include "BMacLayer.h"
 
@@ -758,7 +758,7 @@ BMacFrame *BMacLayer::encapsMsg(cPacket *netwPkt)
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer
-    ILinkLayerControlInfo* cInfo = check_and_cast<ILinkLayerControlInfo *>(netwPkt->removeControlInfo());
+    IMACProtocolControlInfo* cInfo = check_and_cast<IMACProtocolControlInfo *>(netwPkt->removeControlInfo());
     EV_DETAIL << "CInfo removed, mac addr=" << cInfo->getDestinationAddress() << endl;
     pkt->setDestAddr(cInfo->getDestinationAddress());
 

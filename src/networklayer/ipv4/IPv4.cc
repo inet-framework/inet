@@ -246,7 +246,7 @@ void IPv4::preroutingFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE
 void IPv4::handleIncomingARPPacket(ARPPacket *packet, const InterfaceEntry *fromIE)
 {
     // give it to the ARP module
-    ILinkLayerControlInfo* ctrl = check_and_cast<ILinkLayerControlInfo*>(packet->getControlInfo());
+    IMACProtocolControlInfo* ctrl = check_and_cast<IMACProtocolControlInfo*>(packet->getControlInfo());
     ctrl->setInterfaceId(fromIE->getInterfaceId());
     send(packet, arpOutGate);
 }
@@ -313,7 +313,7 @@ void IPv4::handlePacketFromHL(cPacket *packet)
 void IPv4::handlePacketFromARP(cPacket *packet)
 {
     // send out packet on the appropriate interface
-    ILinkLayerControlInfo* ctrl = check_and_cast<ILinkLayerControlInfo*>(packet->getControlInfo());
+    IMACProtocolControlInfo* ctrl = check_and_cast<IMACProtocolControlInfo*>(packet->getControlInfo());
     InterfaceEntry *destIE = ift->getInterfaceById(ctrl->getInterfaceId());
     sendPacketToNIC(packet, destIE);
 }
