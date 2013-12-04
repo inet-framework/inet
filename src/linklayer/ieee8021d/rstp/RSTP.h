@@ -96,6 +96,9 @@ protected:
      */
     virtual void handleIncomingFrame(BPDU *frame);
 
+    virtual void processBPDU(BPDU *frame, unsigned int arrival);
+    virtual bool processBetterSource(BPDU *frame, unsigned int arrival);
+    virtual bool processSameSource(BPDU *frame, unsigned int arrival);
     /**
      * @brief Prints current data base info
      */
