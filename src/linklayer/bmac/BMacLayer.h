@@ -17,6 +17,7 @@
 #define __INET_BMACLAYER_H
 
 #include "IRadio.h"
+#include "IMACProtocol.h"
 #include "MACAddress.h"
 #include "MACProtocolBase.h"
 #include "BMacFrame_m.h"
@@ -50,7 +51,7 @@
  * @author Anna Foerster
  *
  */
-class INET_API BMacLayer : public MACProtocolBase
+class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
 {
   private:
 	/** @brief Copy constructor is not allowed.

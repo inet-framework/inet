@@ -28,6 +28,7 @@
 #define __INET_CSMA_H
 
 #include "IRadio.h"
+#include "IMACProtocol.h"
 #include "MACAddress.h"
 #include "MACProtocolBase.h"
 #include "CSMAFrame_m.h"
@@ -46,7 +47,7 @@
  *
  * \image html csmaFSM.png "CSMA Mac-Layer - finite state machine"
  */
-class INET_API CSMA : public MACProtocolBase
+class INET_API CSMA : public MACProtocolBase, public IMACProtocol
 {
   public:
 	CSMA()

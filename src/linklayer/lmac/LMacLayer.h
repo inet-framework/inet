@@ -13,6 +13,7 @@
 #define __INET_LMACLAYER_H
 
 #include "IRadio.h"
+#include "IMACProtocol.h"
 #include "MACAddress.h"
 #include "MACProtocolBase.h"
 #include "LMacFrame_m.h"
@@ -55,7 +56,7 @@
  *
  * @ingroup macLayer
  **/
-class INET_API LMacLayer : public MACProtocolBase
+class INET_API LMacLayer : public MACProtocolBase, public IMACProtocol
 {
     private:
         /** @brief Copy constructor is not allowed.
