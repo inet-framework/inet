@@ -22,7 +22,7 @@ import inet.base.NotificationBoard;
 import inet.linklayer.IMACRelayUnit;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.configurator.L2NodeConfigurator;
-import inet.linklayer.ethernet.switch.MACAddressTable;
+import inet.linklayer.ethernet.switch.IMACAddressTable;
 import inet.linklayer.ieee8021d.ISpanningTree;
 import inet.networklayer.common.InterfaceTable;
 import inet.status.NodeStatus;
@@ -48,6 +48,7 @@ module EtherSwitch
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string spanningTreeProtocol = default("");
         string relayUnitType = default("Ieee8021DRelay"); // type of the ~IMACRelayUnit;
+        string macTableType = default("MACAddressTable"); // type of the ~IMACAddressTable
         eth[*].encapType = "EtherEncapDummy";
         eth[*].csmacdSupport = csmacdSupport;
         eth[*].macType = macType;
@@ -67,7 +68,7 @@ module EtherSwitch
             parameters:
                 @display("p=73,158;is=s");
         }
-        macTable: MACAddressTable {
+        macTable: <macTableType> like IMACAddressTable {
             @display("p=73,19;is=s");
         }
         relayUnit: <relayUnitType> like IMACRelayUnit {

@@ -17,11 +17,12 @@
 #define __INET_MACADDRESSTABLE_H_
 
 #include "MACAddress.h"
+#include "IMACAddressTable.h"
 
 /**
  * This module handles the mapping between ports and MAC addresses. See the NED definition for details.
  */
-class MACAddressTable : public cSimpleModule  //FIXME valami absztrakt class interface-nek lennie kellene (IMACAddressTable)
+class MACAddressTable : public cSimpleModule, IMACAddressTable
 {
     protected:
         struct AddressEntry
