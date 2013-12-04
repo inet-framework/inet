@@ -36,12 +36,14 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase
     virtual void handleUpperCommand(cMessage* message);
 
     virtual void sendUp(cMessage* message, int transportProtocol);
-
     virtual void sendDown(cMessage* message, int interfaceId = -1);
 
     virtual bool isUpperMessage(cMessage* message);
-
     virtual bool isLowerMessage(cMessage* message);
+
+    virtual bool isInitializeStage(int stage) { return stage == INITSTAGE_NETWORK_LAYER; }
+    virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_NETWORK_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_NETWORK_LAYER; }
 };
 
 #endif

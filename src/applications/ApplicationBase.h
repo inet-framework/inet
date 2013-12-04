@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 Andras Varga
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,18 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.base;
+#ifndef __INET_APPLICATIONBASE_H_
+#define __INET_APPLICATIONBASE_H_
 
-//
-// Module base for different layered protocols.
-//
-simple LayeredProtocolBase
+#include "OperationalBase.h"
+#include "NodeOperations.h"
+
+class INET_API ApplicationBase : public OperationalBase
 {
-    parameters:
-        @signal[packetSentToUpper](type=cPacket);
-        @signal[packetReceivedFromUpper](type=cPacket);
-        @signal[packetFromUpperDropped](type=cPacket);
-        @signal[packetSentToLower](type=cPacket);
-        @signal[packetReceivedFromLower](type=cPacket);
-        @signal[packetFromLowerDropped](type=cPacket);
-}
+  public:
+    ApplicationBase();
+
+  protected:
+    virtual bool isInitializeStage(int stage) { return stage == INITSTAGE_APPLICATION_LAYER; }
+    virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_APPLICATION_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER; }
+};
+
+#endif

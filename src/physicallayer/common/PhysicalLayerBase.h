@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 Andras Varga
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,18 +15,22 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.base;
+#ifndef __INET_PHYSICALLAYERBASE_H_
+#define __INET_PHYSICALLAYERBASE_H_
 
-//
-// Module base for different layered protocols.
-//
-simple LayeredProtocolBase
+#include "OperationalBase.h"
+#include "NodeOperations.h"
+#include "IPhysicalLayer.h"
+
+class INET_API PhysicalLayerBase : public OperationalBase, public IPhysicalLayer
 {
-    parameters:
-        @signal[packetSentToUpper](type=cPacket);
-        @signal[packetReceivedFromUpper](type=cPacket);
-        @signal[packetFromUpperDropped](type=cPacket);
-        @signal[packetSentToLower](type=cPacket);
-        @signal[packetReceivedFromLower](type=cPacket);
-        @signal[packetFromLowerDropped](type=cPacket);
-}
+  public:
+    PhysicalLayerBase();
+
+  protected:
+    virtual bool isInitializeStage(int stage) { return stage == INITSTAGE_PHYSICAL_LAYER; }
+    virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_PHYSICAL_LAYER; }
+    virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_PHYSICAL_LAYER; }
+};
+
+#endif

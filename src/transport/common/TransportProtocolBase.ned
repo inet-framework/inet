@@ -15,18 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.base;
+package inet.transport.common;
+
+import inet.base.LayeredProtocolBase;
 
 //
-// Module base for different layered protocols.
+// Module base for different transport protocols.
 //
-simple LayeredProtocolBase
+simple TransportProtocolBase extends LayeredProtocolBase
 {
-    parameters:
-        @signal[packetSentToUpper](type=cPacket);
-        @signal[packetReceivedFromUpper](type=cPacket);
-        @signal[packetFromUpperDropped](type=cPacket);
-        @signal[packetSentToLower](type=cPacket);
-        @signal[packetReceivedFromLower](type=cPacket);
-        @signal[packetFromLowerDropped](type=cPacket);
+    gates:
+        input upperLayerIn[];
+        output upperLayerOut[];
+        input lowerLayerIn @labels(ITransportPacket/up);
+        output lowerLayerOut @labels(ITransportPacket/down);
 }
