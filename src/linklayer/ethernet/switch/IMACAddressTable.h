@@ -19,6 +19,7 @@
 #define __INET_IMACADDRESSTABLE_H
 
 #include "INETDefs.h"
+#include "MACAddress.h"
 
 /*
  * A C++ interface to abstract the functionality of IMACAddressTable.
@@ -26,7 +27,6 @@
 class INET_API IMACAddressTable
 {
     public:
-
     /**
      * @brief For a known arriving port, V-TAG and destination MAC. It finds out the port where relay component should deliver the message
      * @param address MAC destination
