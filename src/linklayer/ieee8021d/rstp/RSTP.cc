@@ -397,7 +397,7 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
             }
             break;
 
-        case 1: // new port rstp info is better than the root in another gate -> root change
+        case BETTER_ROOT: // new port rstp info is better than the root in another gate -> root change
             for (unsigned int i = 0; i < numPorts; i++)
             {
                 Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
@@ -421,9 +421,9 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
             return true;
             break;
 
-        case 2:// same that Root but better RPC
-        case 3:// same that Root RPC but better source
-        case 4:// same that root RPC and source but better port
+        case BETTER_RPC:// same that Root but better RPC
+        case BETTER_SRC:// same that Root RPC but better source
+        case BETTER_PORT:// same that root RPC and source but better port
 
             if (arrivalPort->getState()!=Ieee8021DInterfaceData::FORWARDING)
             {
@@ -457,13 +457,13 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
             return true;
             break;
 
-        case -1: // worse root
+        case WORSE_ROOT: // wWORSE_ROOTse root
             sendBPDU(arrivalPortNum);// BPDU to show him a better root as soon as possible
             break;
 
-        case -2:// same Root but worse RPC
-        case -3:// same Root RPC but worse source
-        case -4:// same Root RPC and source but worse port
+        case WORSE_RPC:// same Root but worse RPC
+        case WORSE_SRC:// same Root RPC but worse source
+        case WORSE_PORT:// same Root RPC and source but worse port
             case3=contestInterfacedata(frame,arrivalPortNum);// case 0 not possible
             EV_DEBUG << "case3: " << case3 << endl;
             if (case3<0)
@@ -494,11 +494,11 @@ bool RSTP::processSameSource(BPDU *frame, unsigned int arrivalPortNum)
     // source has updated BPDU information
     switch(case0)
     {
-    case 0:
+    case SIMILAR:
         arrivalPort->setLostBPDU(0);  // same BPDU, not updated
         break;
 
-    case -1:// worse root
+    case WORSE_ROOT:// worse root
         if (arrivalPort->getRole() == Ieee8021DInterfaceData::ROOT)
         {
             int alternative=getBestAlternate(); // searching old alternate
@@ -550,9 +550,9 @@ bool RSTP::processSameSource(BPDU *frame, unsigned int arrivalPortNum)
         }
         break;
 
-    case -2:
-    case -3:
-    case -4:
+    case WORSE_RPC:
+    case WORSE_SRC:
+    case WORSE_PORT:
         if (arrivalPort->getRole() == Ieee8021DInterfaceData::ROOT)
         {
             arrivalPort->setLostBPDU(0);
@@ -800,7 +800,8 @@ void RSTP::updateInterfacedata(BPDU *frame, unsigned int portNum)
     ifd->setPortNum(frame->getPortNum());
     ifd->setLostBPDU(0);
 }
-int RSTP::contestInterfacedata(unsigned int portNum)
+
+RSTP::CompareResult RSTP::contestInterfacedata(unsigned int portNum)
 {
     int r = getRootIndex();
     Ieee8021DInterfaceData * rootPort = getPortInterfaceData(r);
@@ -823,32 +824,32 @@ int RSTP::contestInterfacedata(unsigned int portNum)
     int portNum2 = ifd->getPortNum();
 
     if (rootPriority1 != rootPriority2)
-        return (rootPriority1 < rootPriority2) ? -1 : 1;
+        return (rootPriority1 < rootPriority2) ? WORSE_ROOT : BETTER_ROOT;
 
     int c = rootAddress1.compareTo(rootAddress2);
     if (c != 0)
-        return (c < 0) ? -1 : 1;
+        return (c < 0) ? WORSE_ROOT : BETTER_ROOT;
 
     if (rootPathCost1 != rootPathCost2)
-        return (rootPathCost1 < rootPathCost2) ? -2 : 2;
+        return (rootPathCost1 < rootPathCost2) ? WORSE_RPC : BETTER_RPC;
 
     if (bridgePriority1 != bridgePriority2)
-        return (bridgePriority1 < bridgePriority2) ? -3 : 3;
+        return (bridgePriority1 < bridgePriority2) ? WORSE_SRC : BETTER_SRC;
 
     c = bridgeAddress1.compareTo(bridgeAddress2);
     if (c != 0)
-        return (c < 0) ? -3 : 3;
+        return (c < 0) ? WORSE_SRC : BETTER_SRC;
 
     if (portPriority1 != portPriority2)
-        return (portPriority1 < portPriority2) ? -4 : 4;
+        return (portPriority1 < portPriority2) ? WORSE_PORT : BETTER_PORT;
 
     if (portNum1 != portNum2)
-        return (portNum1 < portNum2) ? -4 : 4;
+        return (portNum1 < portNum2) ? WORSE_PORT : BETTER_PORT;
 
-    return 0;
+    return SIMILAR;
 }
 
-int RSTP::contestInterfacedata(BPDU* msg, unsigned int portNum)
+RSTP::CompareResult RSTP::contestInterfacedata(BPDU* msg, unsigned int portNum)
 {
     int r = getRootIndex();
     Ieee8021DInterfaceData * rootPort = getPortInterfaceData(r);
@@ -871,32 +872,33 @@ int RSTP::contestInterfacedata(BPDU* msg, unsigned int portNum)
     int portNum2 = msg->getPortNum();
 
     if (rootPriority1 != rootPriority2)
-        return (rootPriority1 < rootPriority2) ? -1 : 1;
+        return (rootPriority1 < rootPriority2) ? WORSE_ROOT : BETTER_ROOT;
 
     int c = rootAddress1.compareTo(rootAddress2);
     if (c != 0)
-        return (c < 0) ? -1 : 1;
+        return (c < 0) ? WORSE_ROOT : BETTER_ROOT;
 
     if (rootPathCost1 != rootPathCost2)
-        return (rootPathCost1 < rootPathCost2) ? -2 : 2;
+        return (rootPathCost1 < rootPathCost2) ? WORSE_RPC : BETTER_RPC;
 
     if (bridgePriority1 != bridgePriority2)
-        return (bridgePriority1 < bridgePriority2) ? -3 : 3;
+        return (bridgePriority1 < bridgePriority2) ? WORSE_SRC : BETTER_SRC;
 
     c = bridgeAddress1.compareTo(bridgeAddress2);
     if (c != 0)
-        return (c < 0) ? -3 : 3;
+        return (c < 0) ? WORSE_SRC : BETTER_SRC;
 
     if (portPriority1 != portPriority2)
-        return (portPriority1 < portPriority2) ? -4 : 4;
+        return (portPriority1 < portPriority2) ? WORSE_PORT : BETTER_PORT;
 
     if (portNum1 != portNum2)
-        return (portNum1 < portNum2) ? -4 : 4;
+        return (portNum1 < portNum2) ? WORSE_PORT : BETTER_PORT;
 
-    return 0;
+    return SIMILAR;
 
 }
-int RSTP::compareInterfacedata(unsigned int portNum, BPDU * msg, int linkCost)
+
+RSTP::CompareResult RSTP::compareInterfacedata(unsigned int portNum, BPDU * msg, int linkCost)
 {
     Ieee8021DInterfaceData * ifd = getPortInterfaceData(portNum);
 
@@ -917,29 +919,29 @@ int RSTP::compareInterfacedata(unsigned int portNum, BPDU * msg, int linkCost)
     int portNum2 = msg->getPortNum();
 
     if (rootPriority1 != rootPriority2)
-        return (rootPriority1 < rootPriority2) ? -1 : 1;
+        return (rootPriority1 < rootPriority2) ? WORSE_ROOT : BETTER_ROOT;
 
     int c = rootAddress1.compareTo(rootAddress2);
     if (c != 0)
-        return (c < 0) ? -1 : 1;
+        return (c < 0) ? WORSE_ROOT : BETTER_ROOT;
 
     if (rootPathCost1 != rootPathCost2)
-        return (rootPathCost1 < rootPathCost2) ? -2 : 2;
+        return (rootPathCost1 < rootPathCost2) ? WORSE_RPC : BETTER_RPC;
 
     if (bridgePriority1 != bridgePriority2)
-        return (bridgePriority1 < bridgePriority2) ? -3 : 3;
+        return (bridgePriority1 < bridgePriority2) ? WORSE_SRC : BETTER_SRC;
 
     c = bridgeAddress1.compareTo(bridgeAddress2);
     if (c != 0)
-        return (c < 0) ? -3 : 3;
+        return (c < 0) ? WORSE_SRC : BETTER_SRC;
 
     if (portPriority1 != portPriority2)
-        return (portPriority1 < portPriority2) ? -4 : 4;
+        return (portPriority1 < portPriority2) ? WORSE_PORT : BETTER_PORT;
 
     if (portNum1 != portNum2)
-        return (portNum1 < portNum2) ? -4 : 4;
+        return (portNum1 < portNum2) ? WORSE_PORT : BETTER_PORT;
 
-    return 0;
+    return SIMILAR;
 }
 
 int RSTP::getBestAlternate()
