@@ -21,20 +21,18 @@
 #define INET_DHCPCLIENT_H__
 
 #include <vector>
-#include "NotificationBoard.h"
 #include "MACAddress.h"
 #include "DHCPMessage_m.h"
 #include "DHCPLease.h"
 #include "InterfaceTable.h"
-#include "RoutingTable.h"
+#include "IPv4RoutingTable.h"
 #include "UDPSocket.h"
-#include "INotifiable.h"
 #include "ILifecycle.h"
 
 /**
  * Implements a DHCP client. See NED file for more details.
  */
-class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILifecycle
+class INET_API DHCPClient : public cSimpleModule, public cListener, public ILifecycle
 {
     protected:
         int serverPort;
@@ -68,14 +66,14 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         simtime_t startTime; // application start time
 
         MACAddress macAddress; // client's MAC address
-        NotificationBoard * nb; // notification board
-        InterfaceEntry * ie; // interface to configure
-        IRoutingTable * irt; // routing table to update
-        DHCPLease * lease; // leased IP information
-        IPv4Route * route; // last added route
+        cModule *host; // containing host module (@node)
+        InterfaceEntry *ie; // interface to configure
+        IIPv4RoutingTable *irt; // routing table to update
+        DHCPLease *lease; // leased IP information
+        IPv4Route *route; // last added route
     protected:
         // Simulation methods.
-        virtual int numInitStages() const { return 4; }
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         virtual void finish();
         virtual void handleMessage(cMessage * msg);
@@ -97,13 +95,15 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
          */
         virtual void handleTimer(cMessage * msg);
 
-
-        virtual void receiveChangeNotification(int category, const cPolymorphic * details);
+        /*
+         * Signal handler for cObject, override cListener function.
+         */
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
         /*
          * Performs UDP transmission.
          */
-        virtual void sendToUDP(cPacket * msg, int srcPort, const IPvXAddress& destAddr, int destPort);
+        virtual void sendToUDP(cPacket * msg, int srcPort, const Address& destAddr, int destPort);
 
         /*
          * Client broadcast to locate available servers.

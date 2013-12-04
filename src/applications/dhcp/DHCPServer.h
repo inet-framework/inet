@@ -22,19 +22,19 @@
 
 #include <vector>
 #include <map>
+
 #include "INETDefs.h"
+
 #include "DHCPMessage_m.h"
 #include "DHCPLease.h"
 #include "InterfaceTable.h"
 #include "ARP.h"
 #include "UDPSocket.h"
 
-class NotificationBoard;
-
 /**
  * Implements a DHCP server. See NED file for more details.
  */
-class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILifecycle
+class INET_API DHCPServer : public cSimpleModule, public cListener, public ILifecycle
 {
     protected:
         typedef std::map<IPv4Address, DHCPLease> DHCPLeased;
@@ -57,13 +57,13 @@ class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILi
         IPv4Address gateway;
         IPv4Address ipAddressStart;
 
-        InterfaceEntry* ie; // interface to serve DHCP requests on
-        NotificationBoard* nb;
+        InterfaceEntry *ie; // interface to serve DHCP requests on
         UDPSocket socket;
         simtime_t startTime; // application start time
-        cMessage * startTimer; // self message to start DHCP server
+        cMessage *startTimer; // self message to start DHCP server
+
     protected:
-        virtual int numInitStages() const { return 4; }
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
 
@@ -106,10 +106,16 @@ class INET_API DHCPServer : public cSimpleModule, public INotifiable, public ILi
 
         virtual void handleSelfMessages(cMessage * msg);
         virtual InterfaceEntry *chooseInterface();
-        virtual void sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort);
-        virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+        virtual void sendToUDP(cPacket *msg, int srcPort, const Address& destAddr, int destPort);
+
+        /*
+         * Signal handler for cObject, override cListener function.
+         */
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+
         virtual void startApp();
         virtual void stopApp();
+
     public:
         DHCPServer();
         virtual ~DHCPServer();

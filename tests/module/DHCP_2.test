@@ -1,71 +1,40 @@
 %description:
 Testing DHCP protocol
-DHCPClient and DHCPServer connected each other directly
+
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.applications.IUDPApp;
-import inet.applications.dhcp.DHCPClient;
-import inet.applications.dhcp.DHCPServer;
-import inet.base.NotificationBoard;
-import inet.linklayer.loopback.LoopbackInterface;
-import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.transport.udp.UDP;
-
-module DHCPNode
-{
-    parameters:
-        @node;
-        string dhcpAppType;
-        @display("bgb=360,325");
-    gates:
-        input dhcpIn;
-        output dhcpOut;
-    submodules:
-        dhcpApp: <dhcpAppType> like IUDPApp {
-            @display("p=217,247");
-        }
-        udp : UDP;
-        notificationBoard: NotificationBoard {
-            @display("p=66,65");
-        }
-        interfaceTable: InterfaceTable {
-            @display("p=66,145");
-        }
-        routingTable: RoutingTable {
-            @display("p=68,216");
-        }
-        configurator: IPv4NodeConfigurator {
-            parameters:
-                @display("p=39,158");
-                networkConfiguratorModule = "";
-        }
-        lo0: LoopbackInterface {
-            @display("p=78,406");
-        }
-    connections allowunconnected:
-        dhcpApp.udpOut --> udp.appIn++;
-        dhcpApp.udpIn <-- udp.appOut++;
-        udp.ipOut --> dhcpOut;
-        udp.ipIn <-- dhcpIn;
-}
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.nodes.inet.StandardHost;
+import ned.DatarateChannel;
 
 network Dhcptest
 {
-    submodules:
-        dhcpClient: DHCPNode {
-            dhcpAppType = "DHCPClient";
-            @display("p=66,76");
+    types:
+        channel C extends DatarateChannel
+        {
+            delay = 0.1us;
+            datarate = 10Mbps;
         }
-        dhcpServer: DHCPNode {
-            dhcpAppType = "DHCPServer";
-            @display("p=277,76");
+    submodules:
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                config = xml("<config><interface hosts='dhcpServer' address='192.168.1.1' netmask='255.255.255.0' /></config>");
+        }
+        dhcpClient: StandardHost {
+            parameters:
+                numUdpApps = 1;
+                udpApp[0].typename = "DHCPClient";
+                @display("p=66,76");
+        }
+        dhcpServer: StandardHost {
+            parameters:
+                numUdpApps = 1;
+                udpApp[0].typename = "DHCPServer";
+                @display("p=277,76");
         }
     connections:
-        dhcpClient.dhcpOut --> dhcpServer.dhcpIn;
-        dhcpServer.dhcpOut --> dhcpClient.dhcpIn;
+        dhcpClient.pppg++ <--> C <--> dhcpServer.pppg++;
 }
 
 %#--------------------------------------------------------------------------------------------------------------
@@ -81,45 +50,41 @@ network = Dhcptest
 sim-time-limit = 10500s
 cmdenv-express-mode = true
 
-**.dhcpClient.dhcpApp.interface="lo0"   # interface to be configured
-
-**.dhcpServer.dhcpApp.typename = "DHCPServer"
-**.dhcpServer.dhcpApp.subnetMask = "255.255.255.0"        # netmask to assign
-**.dhcpServer.dhcpApp.ipAddressStart = "192.168.1.100"    # ip to start to lease
-**.dhcpServer.dhcpApp.maxNumClients = 100     # number of ip to lease
-**.dhcpServer.dhcpApp.gateway = "192.168.1.1"     # gateway to assign
-**.dhcpServer.dhcpApp.dns = ""         # dns to assign
-**.dhcpServer.dhcpApp.leaseTime = 1000s     # lease time in seconds
-**.dhcpServer.dhcpApp.interface="lo0"   # interface to listen
+**.dhcpServer.udpApp[0].typename = "DHCPServer"
+**.dhcpServer.udpApp[0].subnetMask = "255.255.255.0"        # netmask to assign
+**.dhcpServer.udpApp[0].ipAddressStart = "192.168.1.100"    # ip to start to lease
+**.dhcpServer.udpApp[0].maxNumClients = 100     # number of ip to lease
+**.dhcpServer.udpApp[0].gateway = "192.168.1.1"     # gateway to assign
+**.dhcpServer.udpApp[0].dns = ""         # dns to assign
+**.dhcpServer.udpApp[0].leaseTime = 1000s     # lease time in seconds
 
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
-%contains: stdout
+%contains-regex: stdout
 
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-
-%contains: stdout
-<!> Simulation time limit reached -- simulation stopped at event #159, t=10500.
+     Messages:  created: \d+   present: \d+   in FES: \d+
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+\*\* Event
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

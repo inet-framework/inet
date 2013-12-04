@@ -20,8 +20,8 @@
 #include "DHCPClient.h"
 
 #include "InterfaceTableAccess.h"
-#include "RoutingTableAccess.h"
 #include "IPv4InterfaceData.h"
+#include "IPv4RoutingTableAccess.h"
 #include "NodeStatus.h"
 #include "NotifierConsts.h"
 #include "NodeOperations.h"
@@ -35,7 +35,7 @@ DHCPClient::DHCPClient()
     timerTo = NULL;
     leaseTimer = NULL;
     startTimer = NULL;
-    nb = NULL;
+    host = NULL;
     ie = NULL;
     irt = NULL;
     lease = NULL;
@@ -52,7 +52,7 @@ DHCPClient::~DHCPClient()
 
 void DHCPClient::initialize(int stage)
 {
-    if (stage == 0)
+    if (stage == INITSTAGE_LOCAL)
     {
         timerT1 = new cMessage("T1 Timer",T1);
         timerT2 = new cMessage("T2 Timer",T2);
@@ -61,13 +61,11 @@ void DHCPClient::initialize(int stage)
         startTimer = new cMessage("Starting DHCP",START_DHCP);
         startTime = par("startTime");
     }
-    if (stage == 1)
+    else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-    }
-    else if (stage == 3)
-    {
+
         numSent = 0;
         numReceived = 0;
         xid = 0;
@@ -83,16 +81,15 @@ void DHCPClient::initialize(int stage)
         serverPort = 67; // server
 
         // get the hostname
-        cModule *host = findContainingNode(this);
+        host = getContainingNode(this);
         hostName = host->getFullName();
-        nb = check_and_cast<NotificationBoard *>(getModuleByPath(par("notificationBoardPath")));
 
         // for a wireless interface subscribe the association event to start the DHCP protocol
-        nb->subscribe(this, NF_L2_ASSOCIATED);
-        nb->subscribe(this, NF_INTERFACE_DELETED);
+        host->subscribe(NF_L2_ASSOCIATED, this);
+        host->subscribe(NF_INTERFACE_DELETED, this);
 
         // get the routing table to update and subscribe it to the blackboard
-        irt = check_and_cast<IRoutingTable*>(getModuleByPath(par("routingTablePath")));
+        irt = check_and_cast<IPv4RoutingTable*>(getModuleByPath(par("routingTablePath")));
         // set client to idle state
         clientState = IDLE;
         // get the interface to configure
@@ -378,7 +375,7 @@ void DHCPClient::bindLease()
         route->setNetmask(IPv4Address());
         route->setGateway(lease->gateway);
         route->setInterface(ie);
-        route->setSource(IPv4Route::MANUAL);
+        route->setSourceType(IPv4Route::MANUAL);
         irt->addRoute(route);
     }
 
@@ -539,27 +536,22 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
     }
 }
 
-void DHCPClient::receiveChangeNotification(int category, const cPolymorphic *details)
+void DHCPClient::receiveSignal(cComponent *source, int signalID, cObject *obj)
 {
     Enter_Method_Silent();
-    printNotificationBanner(category, details);
+    printNotificationBanner(signalID, obj);
 
     // host associated. link is up. change the state to init.
-    if (category == NF_L2_ASSOCIATED)
+    if (signalID == NF_L2_ASSOCIATED)
     {
-        InterfaceEntry * ie = NULL;
-        if (details)
-        {
-            cPolymorphic *detailsAux = const_cast<cPolymorphic*>(details);
-            ie = dynamic_cast<InterfaceEntry*>(detailsAux);
-        }
-        if (ie && this->ie == ie)
+        InterfaceEntry *associatedIE = check_and_cast_nullable<InterfaceEntry*>(obj);
+        if (associatedIE && ie == associatedIE)
         {
             EV_INFO << "Interface associated, starting DHCP." << endl;
             initClient();
         }
     }
-    else if (category == NF_INTERFACE_DELETED)
+    else if (signalID == NF_INTERFACE_DELETED)
     {
         if (isOperational)
             throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
@@ -711,10 +703,12 @@ void DHCPClient::scheduleTimerT2()
     scheduleAt(simTime() + (lease->rebindTime), timerT2); // RFC 2131 4.4.5
 }
 
-void DHCPClient::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort)
+void DHCPClient::sendToUDP(cPacket *msg, int srcPort, const Address& destAddr, int destPort)
 {
     EV_INFO << "Sending packet " << msg << endl;
-    socket.sendTo(msg, destAddr, destPort, ie->getInterfaceId());
+    UDPSocket::SendOptions options;
+    options.outInterfaceId = ie->getInterfaceId();
+    socket.sendTo(msg, destAddr, destPort, &options);
 }
 
 void DHCPClient::openSocket()

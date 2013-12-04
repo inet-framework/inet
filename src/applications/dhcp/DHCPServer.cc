@@ -18,14 +18,15 @@
 //
 
 #include <algorithm>
+
+#include "DHCPServer.h"
+
 #include "UDPControlInfo_m.h"
-#include "IPvXAddressResolver.h"
+#include "AddressResolver.h"
 #include "InterfaceTable.h"
 #include "IPv4InterfaceData.h"
-#include "DHCPServer.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
-#include "NotificationBoard.h"
 #include "NotifierConsts.h"
 
 Define_Module(DHCPServer);
@@ -33,7 +34,6 @@ Define_Module(DHCPServer);
 DHCPServer::DHCPServer()
 {
     ie = NULL;
-    nb = NULL;
     startTimer = NULL;
 }
 
@@ -44,12 +44,12 @@ DHCPServer::~DHCPServer()
 
 void DHCPServer::initialize(int stage)
 {
-    if (stage == 0)
+    if (stage == INITSTAGE_LOCAL)
     {
         startTimer = new cMessage("Start DHCP server",START_DHCP);
         startTime = par("startTime");
     }
-    if (stage == 1)
+    else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
         numSent = 0;
         numReceived = 0;
@@ -67,17 +67,12 @@ void DHCPServer::initialize(int stage)
         clientPort = 68; // client
         serverPort = 67; // server
 
-        nb = check_and_cast<NotificationBoard*>(getModuleByPath(par("notificationBoardPath")));
-        nb->subscribe(this, NF_INTERFACE_DELETED);
+        cModule *host = getContainingNode(this);
+        host->subscribe(NF_INTERFACE_DELETED, this);
 
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
-        if (isOperational)
-            ie = chooseInterface();
-    }
-    if (stage == 3)
-    {
         if (isOperational)
             startApp();
     }
@@ -94,17 +89,21 @@ void DHCPServer::openSocket()
     EV_INFO << "DHCP server bound to port " << serverPort << endl;
 }
 
-void DHCPServer::receiveChangeNotification(int category, const cPolymorphic *details)
+void DHCPServer::receiveSignal(cComponent *source, int signalID, cObject *obj)
 {
     Enter_Method_Silent();
 
-    if (category == NF_INTERFACE_DELETED)
+    if (signalID == NF_INTERFACE_DELETED)
     {
         if (isOperational)
-            throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
+        {
+            InterfaceEntry *nie = check_and_cast<InterfaceEntry*>(obj);
+            if (ie == nie)
+                throw cRuntimeError("Reacting to interface deletions is not implemented in this module");
+        }
     }
     else
-        throw cRuntimeError("Unaccepted notification category: %d", category);
+        throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
 }
 
 InterfaceEntry *DHCPServer::chooseInterface()
@@ -482,11 +481,13 @@ DHCPLease* DHCPServer::getAvailableLease(IPv4Address requestedAddress, MACAddres
     return NULL;
 }
 
-void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort)
+void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const Address& destAddr, int destPort)
 {
     EV_INFO << "Sending packet: " << msg << "." << endl;
     numSent++;
-    socket.sendTo(msg, destAddr, destPort, ie->getInterfaceId());
+    UDPSocket::SendOptions options;
+    options.outInterfaceId = ie->getInterfaceId();
+    socket.sendTo(msg, destAddr, destPort, &options);
 }
 
 void DHCPServer::startApp()
