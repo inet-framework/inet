@@ -20,7 +20,7 @@
 
 #include "ILifecycle.h"
 #include "MACAddress.h"
-#include "MACAddressTable.h"
+#include "IMACAddressTable.h"
 #include "InterfaceTable.h"
 #include "Ieee8021DInterfaceData.h"
 
@@ -41,7 +41,7 @@ protected:
     simtime_t helloTime;
     simtime_t forwardDelay;
 
-    MACAddressTable * macTable;
+    IMACAddressTable * macTable;
     IInterfaceTable * ifTable;
 
 public:

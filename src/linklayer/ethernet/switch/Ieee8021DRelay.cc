@@ -36,7 +36,7 @@ void Ieee8021DRelay::initialize(int stage)
         NodeStatus * nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
-        macTable = check_and_cast<MACAddressTable *>(getModuleByPath(par("macTablePath")));
+        macTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTablePath")));
         ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
         InterfaceEntry * ifEntry = ifTable->getInterface(0);
         bridgeAddress = ifEntry->getMacAddress();

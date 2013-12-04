@@ -20,7 +20,7 @@
 
 #include "INETDefs.h"
 #include "InterfaceTable.h"
-#include "MACAddressTable.h"
+#include "IMACAddressTable.h"
 #include "EtherFrame_m.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
@@ -35,7 +35,7 @@ class Ieee8021DRelay : public cSimpleModule, public ILifecycle
     protected:
         MACAddress bridgeAddress;
         IInterfaceTable * ifTable;
-        MACAddressTable * macTable;
+        IMACAddressTable * macTable;
         bool isOperational;
         bool isStpAware;
         unsigned int portCount; // number of ports in the switch

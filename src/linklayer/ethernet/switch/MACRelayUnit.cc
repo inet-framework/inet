@@ -14,7 +14,6 @@
 // 
 
 #include "MACRelayUnit.h"
-#include "MACAddressTableAccess.h"
 #include "EtherFrame.h"
 #include "EtherMACBase.h"
 #include "Ethernet.h"
@@ -25,7 +24,7 @@ Define_Module(MACRelayUnit);
 
 MACRelayUnit::MACRelayUnit()
 {
-    addressTable = MACAddressTableAccess().get();
+    addressTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTablePath")));
 }
 
 void MACRelayUnit::initialize(int stage)

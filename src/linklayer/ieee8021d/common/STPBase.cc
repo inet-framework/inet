@@ -36,7 +36,7 @@ void STPBase::initialize(int stage)
         helloTime = par("helloTime");
         forwardDelay = par("forwardDelay");
 
-        macTable = check_and_cast<MACAddressTable *>(getModuleByPath(par("macTableName")));
+        macTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTableName")));
         ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableName")));
         cModule *switchModule = findContainingNode(this);
         numPorts = switchModule->gate("ethg$o", 0)->getVectorSize();
@@ -52,7 +52,9 @@ void STPBase::initialize(int stage)
 
         // FIXME does STP/RSTP work at all if there is no registered interface?? perhaps throw an error if ifEntry==NULL!
         if (ifEntry != NULL)
+        {
             bridgeAddress = ifEntry->getMacAddress();
+        }
         else
         {
             EV_INFO<<"interface not found. Is not this module connected to another BEB?"<<endl;

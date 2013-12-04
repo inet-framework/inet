@@ -23,7 +23,6 @@
 
 #include "INETDefs.h"
 #include "MACAddress.h"
-#include "MACAddressTable.h"
 #include "IEEE8021DBPDU_m.h"
 #include "InterfaceTable.h"
 #include "Ieee8021DInterfaceData.h"

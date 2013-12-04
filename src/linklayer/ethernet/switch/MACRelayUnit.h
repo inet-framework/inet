@@ -19,7 +19,8 @@
 #include "INETDefs.h"
 
 #include "ILifecycle.h"
-#include "MACAddressTable.h"
+#include "IMACAddressTable.h"
+
 
 class EtherFrame;
 
@@ -28,7 +29,7 @@ class INET_API MACRelayUnit : public cSimpleModule, public ILifecycle
     public:
         MACRelayUnit();
     protected:
-        MACAddressTable * addressTable;
+        IMACAddressTable * addressTable;
         int numPorts;
 
         // Parameters for statistics collection
