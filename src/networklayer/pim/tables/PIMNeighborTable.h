@@ -25,75 +25,114 @@
 #include "PIMTimer_m.h"
 
 /**
- * @brief  Class represents one entry of PIMNeighborTable.
- * @details Structure PIM neighbor with info about interface, IP address of neighbor
- * link to Neighbor Livness Timer and PIM version. The class contains
- * methods to work with items of structure.
+ * Class holding information about a neighboring PIM router.
+ * Routers are identified by the link to which they are connected
+ * and their address.
+ *
+ * Currently only the version of the routers are stored.
+ * TODO add fields for options received in Hello Messages (RFC 3973 4.7.5, RFC 4601 4.9.2).
  */
 class INET_API PIMNeighbor: public cObject
 {
 	protected:
-		int					id;					/**< Unique identifier of entry. */
-		InterfaceEntry 		*ie;			/**< Link to interface table entry. */
-		IPv4Address         address; 				/**< IP address of neighbor. */
-		int					version;				/**< PIM version. */
-		PIMnlt 				*nlt;				/**< Pointer to Neighbor Livness Timer. */
-
-	protected:
-		friend class PIMNeighborTable;
-        void setId(int id)  {this->id = id; nlt->setNtId(id); }                     /**< Set unique identifier of entry. */
+		InterfaceEntry *ie;
+		IPv4Address address;
+		int version;
+		cMessage *livenessTimer;
 
 	public:
 		PIMNeighbor(InterfaceEntry *ie, IPv4Address address, int version);
-	    virtual ~PIMNeighbor() {};
+	    virtual ~PIMNeighbor();
 	    virtual std::string info() const;
 
-	    int getId() const {return id;}												/**< Get unique identifier of entry. */
-	    int getInterfaceID() const {return ie->getInterfaceId(); }									/**< Get interface ID. */
-	    InterfaceEntry *getInterfacePtr() const {return ie;}					/**< Get pointer to interface. */
-	    IPv4Address getAddress() const {return address;}									/**< Get IP address of neighbor. */
-	    int getVersion() const {return version;}										/**< Get PIM version. */
-	    PIMnlt *getNlt() const {return nlt;}										/**< Get pointer to NeighborLivenessTimer. */
+	    int getInterfaceId() const {return ie->getInterfaceId(); }
+	    InterfaceEntry *getInterfacePtr() const {return ie;}
+	    IPv4Address getAddress() const {return address;}
+	    int getVersion() const {return version;}
+	    cMessage *getLivenessTimer() const {return livenessTimer;}
 };
 
 /**
- * @brief Class represents PIM Neighbor Table.
- * @details Table is list of PIMNeighbor and class contains methods to work with them.
+ * Class holding informatation about neighboring PIM routers.
+ * Routers are identified by the link to which they are connected and their address.
+ *
+ * Expired entries are automatically deleted.
  */
 class INET_API PIMNeighborTable: public cSimpleModule
 {
 	protected:
         typedef std::vector<PIMNeighbor*> PIMNeighborVector;
 
-		int					id;				/**< Counter of PIMNeighbor IDs*/
-		PIMNeighborVector	nt;				/**< List of PIM neighbors (show ip pim neighbor) */
+        // contains at most one neighbor with a given (ie,address)
+		PIMNeighborVector	neighbors;
 
 	public:
-		PIMNeighborTable() : id(0) {};
 		virtual ~PIMNeighborTable();
 
-        virtual int getNumNeighbors() {return this->nt.size();}                     /**< Get number of entries in the table */
-		virtual PIMNeighbor *getNeighbor(int k){return this->nt[k];}				/**< Get k-th entry in the table */
-		virtual void addNeighbor(PIMNeighbor *entry);                               /**< Add new entry to the table*/
-		virtual bool deleteNeighbor(int id);
+		/**
+		 * Adds the a neighbor to the table. The operation might fail
+		 * if there is a neighbor with the same (ie,address) in the table.
+		 * Success is indicated by the returned value.
+		 */
+		virtual bool addNeighbor(PIMNeighbor *neighbor);
 
-		virtual void printPimNeighborTable();
-		virtual PIMNeighborVector getNeighborsByIntID(int intID);
-		virtual PIMNeighbor *getNeighborByIntID(int intId);
-		virtual PIMNeighbor *getNeighborsByID(int id);
-		virtual int getIdCounter(){return this->id;}								/**< Get counter of entry IDs */
-		virtual PIMNeighbor *findNeighbor(int intId, IPv4Address addr);
-		virtual int getNumNeighborsOnInt(int intId);
+		/**
+		 * Deletes a neighbor from the table. If the neighbor was
+		 * not found in the table then it is untouched, otherwise deleted.
+		 * Returns true if the neighbor object was deleted.
+		 */
+		virtual bool deleteNeighbor(PIMNeighbor *neighbor);
+
+        /**
+         * Restarts the Neighbor Liveness timer of the given neighbor.
+         * When the timer expires, the neigbor is automatically deleted.
+         */
+        virtual void restartLivenessTimer(PIMNeighbor *neighbor);
+
+        /**
+         * Returns the neighbor that is identified by the given (interfaceId,addr),
+         * or NULL if no such neighbor.
+         */
+        virtual PIMNeighbor *findNeighbor(int interfaceId, IPv4Address addr);
+
+        /**
+         * Returns the number of neighbors.
+         */
+        virtual int getNumNeighbors() const {return neighbors.size();}
+
+        /**
+         * Returns the kth neighbor.
+         */
+        virtual PIMNeighbor *getNeighbor(int k) const {return neighbors[k];}
+
+        /**
+         * Returns all neighbors observed on the given interface.
+         */
+		virtual PIMNeighborVector getNeighborsByIntID(int interfaceId);
+
+		/**
+		 * Returns the neighbor that was first observed on the given interface,
+		 * or NULL if there is none.
+		 * XXX What is the use case of this method?
+		 */
+		virtual PIMNeighbor *getNeighborByIntID(int interfaceId);
+
+		/**
+		 * Returns the number of neighbors on the given interface.
+		 */
+		virtual int getNumNeighborsOnInt(int interfaceId);
 
 	protected:
         virtual int numInitStages() const  {return NUM_INIT_STAGES;}
 		virtual void initialize(int stage);
 		virtual void handleMessage(cMessage *);
+		virtual void processLivenessTimer(cMessage *timer);
 };
 
 /**
- * @brief Class gives access to the PIMNeighborTable.
+ * Use PIMNeighborTableAccess().get() to access PIMNeighborTable from other modules of the node.
  */
+// TODO eliminate this; do not hard-wire the name of the module into C++ code.
 class INET_API PIMNeighborTableAccess : public ModuleAccess<PIMNeighborTable>
 {
 	public:

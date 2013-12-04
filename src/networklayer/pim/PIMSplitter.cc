@@ -112,48 +112,16 @@ void PIMSplitter::processHelloPkt(PIMPacket *msg)
     {
         neighbor = new PIMNeighbor(ie, address, msg->getVersion());
         pimNbt->addNeighbor(neighbor);
-        scheduleAt(simTime() + 3.5*HT, neighbor->getNlt());
-        EV << "PimSplitter::New Entry was added: addr = " << neighbor->getAddress() << ", iftID = " << neighbor->getInterfaceID() << ", ver = " << neighbor->getVersion() << endl;
+        EV << "PimSplitter::New Entry was added: addr = " << neighbor->getAddress() << ", iftID = " << neighbor->getInterfaceId() << ", ver = " << neighbor->getVersion() << endl;
     }
     // neighbor is already in PIM neighbor table
     // refresh Neighbor Livness Timer
     else
     {
-        PIMnlt *nlt = neighbor->getNlt();
-        cancelEvent(nlt);
-        scheduleAt(simTime() + 3.5*HT, neighbor->getNlt());
+        pimNbt->restartLivenessTimer(neighbor);
     }
 
-
     delete msg;
-}
-
-/**
- * PROCESS NEIGHBOR LIVENESS TIMER
- *
- * The method process Neighbor Liveness Timer. After its expiration neighbor is removed
- * from PimNeighborTable.
- *
- * @param timer PIM Neighbor Liveness Timer.
- * @see PimNeighbor
- * @see PIMnlt()
- */
-void PIMSplitter::processNLTimer(PIMTimer *timer)
-{
-	EV << "PIM::processNLTimer"<< endl;
-	PIMnlt *nlt = check_and_cast <PIMnlt *> (timer);
-	int id = nlt->getNtId();
-	IPv4Address neighbor;
-
-	// if neighbor exists store its IP address
-	if (pimNbt->getNeighborsByID(id) != NULL)
-		neighbor = pimNbt->getNeighborsByID(id)->getAddress();
-
-	// Record in PIM Neighbor Table was found, can be deleted.
-	if (pimNbt->deleteNeighbor(id))
-		EV << "PIM::processNLTimer: Neighbor " << neighbor << "was removed from PIM neighbor table." << endl;
-
-	delete nlt;
 }
 
 /**
@@ -223,10 +191,6 @@ void PIMSplitter::handleMessage(cMessage *msg)
 	   {
 		   sendHelloPkt();
 		   delete timer;
-	   }
-	   else if (timer->getTimerKind() == NeighborLivenessTimer)
-	   {
-		   processNLTimer(timer);
 	   }
    }
    else {

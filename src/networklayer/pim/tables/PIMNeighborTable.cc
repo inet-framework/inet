@@ -16,6 +16,7 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
+#include <algorithm>
 #include "PIMNeighborTable.h"
 
 Define_Module(PIMNeighborTable);
@@ -23,23 +24,27 @@ Define_Module(PIMNeighborTable);
 using namespace std;
 
 PIMNeighbor::PIMNeighbor(InterfaceEntry *ie, IPv4Address address, int version)
-    : ie(ie), address(address), version(version), nlt(NULL)
+    : ie(ie), address(address), version(version)
 {
     ASSERT(ie);
 
-    nlt = new PIMnlt("NeighborLivenessTimer");
-    nlt->setTimerKind(NeighborLivenessTimer);
+    livenessTimer = new cMessage("NeighborLivenessTimer", NeighborLivenessTimer);
+    livenessTimer->setContextPointer(this);
 }
 
+PIMNeighbor::~PIMNeighbor()
+{
+    ASSERT(!livenessTimer->isScheduled());
+    delete livenessTimer;
+}
 
-/** Printout of structure Neighbor table (PIMNeighbor). */
+// for WATCH_VECTOR()
 std::ostream& operator<<(std::ostream& os, const PIMNeighbor* e)
 {
-    os << e->getId() << ": ID = " << e->getInterfaceID() << "; Addr = " << e->getAddress() << "; Ver = " << e->getVersion();
+    os << "Neighbor: If = " << e->getInterfacePtr()->getName() << "; Addr = " << e->getAddress() << "; Ver = " << e->getVersion();
     return os;
 };
 
-/** Printout of structure Neighbor table (PIMNeighbor). */
 std::string PIMNeighbor::info() const
 {
 	std::stringstream out;
@@ -49,155 +54,122 @@ std::string PIMNeighbor::info() const
 
 PIMNeighborTable::~PIMNeighborTable()
 {
-    for (PIMNeighborVector::iterator it = nt.begin(); it != nt.end(); ++it)
+    for (PIMNeighborVector::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+    {
+        cancelEvent((*it)->getLivenessTimer());
         delete (*it);
-}
-
-/**
- * HANDLE MESSAGE
- *
- * Module does not have any gate, it cannot get messages
- */
-void PIMNeighborTable::handleMessage(cMessage *msg)
-{
-    opp_error("This module doesn't process messages");
+    }
 }
 
 void PIMNeighborTable::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL)
     {
-        WATCH_VECTOR(nt);
-        id = 0;
+        WATCH_VECTOR(neighbors);
     }
 }
 
-/**
- * PRINT PIM NEIGHBOR TABLE
- *
- * Printout of Table of PIM interfaces
- */
-void PIMNeighborTable::printPimNeighborTable()
+void PIMNeighborTable::handleMessage(cMessage *msg)
 {
-	for(PIMNeighborVector::iterator i = nt.begin(); i < nt.end(); i++)
-	{
-		EV << (*i)->info() << endl;
-	}
+    // self message (timer)
+   if (msg->isSelfMessage())
+   {
+       if (msg->getKind() == NeighborLivenessTimer)
+       {
+           processLivenessTimer(msg);
+       }
+       else
+           ASSERT(false);
+   }
+   else
+       throw cRuntimeError("PIMNeighborTable received a message although it does not have gates.");
 }
 
-void PIMNeighborTable::addNeighbor(PIMNeighbor *entry)
+void PIMNeighborTable::processLivenessTimer(cMessage *livenessTimer)
 {
-    entry->setId(id); this->nt.push_back(entry); id++;
+    EV << "PIMNeighborTable::processNLTimer\n";
+    PIMNeighbor *neighbor = check_and_cast<PIMNeighbor*>((cObject*)livenessTimer->getContextPointer());
+    IPv4Address neighborAddress = neighbor->getAddress();
+    deleteNeighbor(neighbor);
+    EV << "PIM::processNLTimer: Neighbor " << neighborAddress << "was removed from PIM neighbor table.\n";
 }
 
-
-/**
- * GET NEIGHBORS BY INTERFACE ID
- *
- * The method returns all neigbors which are connected to given router interface.
- *
- * @param intId Identifier of interface.
- * @return Vector of entries from PIM neighbor table.
- */
-PIMNeighborTable::PIMNeighborVector PIMNeighborTable::getNeighborsByIntID(int intId)
+bool PIMNeighborTable::addNeighbor(PIMNeighbor *entry)
 {
-	vector<PIMNeighbor*> nbr;
-
-	for(int i = 0; i < getNumNeighbors(); i++)
-	{
-		if(intId == getNeighbor(i)->getInterfaceID())
-		{
-			nbr.push_back(getNeighbor(i));
-		}
-	}
-	return nbr;
-}
-
-/**
- * GET NEIGHBOR BY ID
- *
- * The method returns pointer to neigbor which ais registered with given unique identifier.
- *
- * @param id Identifier of entry in the table.
- * @return Pointer to entry from PIM neighbor table.
- */
-PIMNeighbor *PIMNeighborTable::getNeighborsByID(int id)
-{
-	for(int i = 0; i < getNumNeighbors(); i++)
-	{
-		if(id == getNeighbor(i)->getId())
-		{
-			return getNeighbor(i);
-			break;
-		}
-	}
-	return NULL;
-}
-
-PIMNeighbor *PIMNeighborTable::getNeighborByIntID(int intId)
-{
-    for(int i = 0; i < getNumNeighbors(); i++)
+    Enter_Method_Silent();
+    if (!findNeighbor(entry->getInterfaceId(), entry->getAddress()))
     {
-        //int iddd = getNeighbor(i)->getInterfaceID();
-        if(intId == getNeighbor(i)->getInterfaceID())
+        this->neighbors.push_back(entry);
+        take(entry->getLivenessTimer());
+        restartLivenessTimer(entry);
+        return true;
+    }
+    else
+        return false;
+}
+
+bool PIMNeighborTable::deleteNeighbor(PIMNeighbor* neighbor)
+{
+    Enter_Method_Silent();
+    PIMNeighborVector::iterator it = find(neighbors.begin(), neighbors.end(), neighbor);
+    if (it != neighbors.end())
+    {
+        cancelEvent((*it)->getLivenessTimer());
+        delete (*it);
+        neighbors.erase(it);
+        return true;
+    }
+    else
+        return false;
+}
+
+#define HT 30.0                                     /**< Hello Timer = 30s. */
+
+void PIMNeighborTable::restartLivenessTimer(PIMNeighbor *neighbor)
+{
+    Enter_Method_Silent();
+    cancelEvent(neighbor->getLivenessTimer());
+    scheduleAt(simTime() + 3.5*HT, neighbor->getLivenessTimer()); // XXX should use Hold Time from Hello Message
+}
+
+PIMNeighbor *PIMNeighborTable::findNeighbor(int interfaceId, IPv4Address addr)
+{
+    for(PIMNeighborVector::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+        if((*it)->getAddress() == addr && (*it)->getInterfaceId() == interfaceId)
+            return *it;
+    return NULL;
+}
+
+PIMNeighborTable::PIMNeighborVector PIMNeighborTable::getNeighborsByIntID(int interfaceId)
+{
+    PIMNeighborVector result;
+	for(PIMNeighborVector::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+		if((*it)->getInterfaceId() == interfaceId)
+			result.push_back(*it);
+	return result;
+}
+
+PIMNeighbor *PIMNeighborTable::getNeighborByIntID(int interfaceId)
+{
+    for(PIMNeighborVector::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+    {
+        if((*it)->getInterfaceId() == interfaceId)
         {
-            return getNeighbor(i);
+            return *it;
             break;
         }
     }
     return NULL;
 }
 
-/**
- * DELETE NEIGHBOR
- *
- * The method removes entry with given unique identifier from the table.
- *
- * @param id Identifier of entry in the table.
- * @return True if entry was found and deleted successfully, otherwise false.
- */
-bool PIMNeighborTable::deleteNeighbor(int id)
+int PIMNeighborTable::getNumNeighborsOnInt(int interfaceId)
 {
-	for(int i = 0; i < getNumNeighbors(); i++)
-	{
-		if(id == getNeighbor(i)->getId())
-		{
-			nt.erase(nt.begin() + i);
-			return true;
-		}
-	}
-	return false;
+    int result = 0;
+    for (PIMNeighborVector::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+        if ((*it)->getInterfaceId() == interfaceId)
+            result++;
+	return result;
 }
 
-/**
- * FIND NEIGHBOR
- *
- * The method finds entry in the table according given interface ID and neighbor IP address.
- *
- * @param intId Identifier of interface.
- * @param addr IP address of neighbor.
- * @return Pointer to entry if entry was found in the table, otherwise NULL.
- */
-PIMNeighbor *PIMNeighborTable::findNeighbor(int intId, IPv4Address addr)
-{
-	for(int i = 0; i < getNumNeighbors(); i++)
-	{
-		if((addr == getNeighbor(i)->getAddress()) && (intId == getNeighbor(i)->getInterfaceID()))
-			return getNeighbor(i);
-	}
-	return NULL;
-}
-
-/**
- * GET NUMBER OF NEIGHBORS ON INTERFACE
- *
- * The method returns number of neighbors which are connected to given interface.
- *
- * @param intId Identifier of interface.
- * @return Number of neighbors which are connected to given interface.
- */
-int PIMNeighborTable::getNumNeighborsOnInt(int intId)
-{
-	PIMNeighborVector neighbors = getNeighborsByIntID(intId);
-	return neighbors.size();
-}

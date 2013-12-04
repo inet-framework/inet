@@ -18,7 +18,9 @@
 
 package inet.networklayer.pim.tables;
 
-// PIMNeighborTable contain all interfaces wich have pim neighbour interface
+//
+// The PIMNeighborTable module contains information about neighboring PIM routers.
+//
 simple PIMNeighborTable
 {
   	@display("i=block/table");   

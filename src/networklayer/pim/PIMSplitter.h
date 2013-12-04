@@ -58,7 +58,6 @@ class PIMSplitter : public cSimpleModule, protected cListener
 	    const char *				hostname;      	/**< Router hostname. */
 
 	   void processPIMPkt(PIMPacket *pkt);
-	   void processNLTimer(PIMTimer *timer);
 
 	   // methods for Hello packets
 	   PIMHello* createHelloPkt(int iftID);
