@@ -35,8 +35,8 @@ class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocol
     GenericNetworkProtocolControlInfo& operator=(const GenericNetworkProtocolControlInfo& other) {if (this==&other) return *this; GenericNetworkProtocolControlInfo_Base::operator=(other); copy(other); return *this;}
     virtual GenericNetworkProtocolControlInfo *dup() const {return new GenericNetworkProtocolControlInfo(*this);}
 
-    virtual short getProtocol() const { return GenericNetworkProtocolControlInfo_Base::getProtocol(); }
-    virtual void setProtocol(short protocol) { GenericNetworkProtocolControlInfo_Base::setProtocol(protocol); }
+    virtual short getTransportProtocol() const { return GenericNetworkProtocolControlInfo_Base::getProtocol(); }
+    virtual void setTransportProtocol(short protocol) { GenericNetworkProtocolControlInfo_Base::setProtocol(protocol); }
     virtual Address getSourceAddress() const { return GenericNetworkProtocolControlInfo_Base::_getSourceAddress(); }
     virtual void setSourceAddress(const Address & address) { GenericNetworkProtocolControlInfo_Base::setSourceAddress(address); }
     virtual Address getDestinationAddress() const { return GenericNetworkProtocolControlInfo_Base::_getDestinationAddress(); }

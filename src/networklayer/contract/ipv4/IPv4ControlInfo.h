@@ -68,8 +68,8 @@ class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base, public INetworkPro
     virtual IPv4Datagram *getOrigDatagram() const {return dgram;}
     virtual IPv4Datagram *removeOrigDatagram();
 
-    virtual short getProtocol() const { return IPv4ControlInfo_Base::getProtocol(); }
-    virtual void setProtocol(short protocol) { IPv4ControlInfo_Base::setProtocol(protocol); }
+    virtual short getTransportProtocol() const { return IPv4ControlInfo_Base::getProtocol(); }
+    virtual void setTransportProtocol(short protocol) { IPv4ControlInfo_Base::setProtocol(protocol); }
     virtual Address getSourceAddress() const { return Address(srcAddr_var); }
     virtual void setSourceAddress(const Address & address)  { srcAddr_var = address.toIPv4(); }
     virtual Address getDestinationAddress() const { return Address(destAddr_var); }

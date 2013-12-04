@@ -222,7 +222,7 @@ void GPSR::sendBeacon(GPSRBeacon * beacon, double delay)
 {
     GPSR_EV << "Sending beacon: address = " << beacon->getAddress() << ", position = " << beacon->getPosition() << endl;
     INetworkProtocolControlInfo * networkProtocolControlInfo = addressType->createNetworkProtocolControlInfo();
-    networkProtocolControlInfo->setProtocol(IP_PROT_MANET);
+    networkProtocolControlInfo->setTransportProtocol(IP_PROT_MANET);
     networkProtocolControlInfo->setHopLimit(255);
     networkProtocolControlInfo->setDestinationAddress(addressType->getLinkLocalManetRoutersMulticastAddress());
     networkProtocolControlInfo->setSourceAddress(getSelfAddress());

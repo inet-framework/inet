@@ -169,7 +169,7 @@ void WiseRoute::handleLowerPacket(cPacket* msg)
 			else
 				msgCopy = netwMsg;
 			if (msgCopy->getKind() == DATA) {
-			    int protocol = msgCopy->getProtocol();
+			    int protocol = msgCopy->getTransportProtocol();
 				sendUp(decapsMsg(msgCopy), protocol);
 				nbDataPacketsReceived++;
 			}
@@ -238,7 +238,7 @@ void WiseRoute::handleUpperPacket(cPacket* msg)
 	pkt->setInitialSrcAddr(myNetwAddr);
 	pkt->setSrcAddr(myNetwAddr);
 	pkt->setNbHops(0);
-	pkt->setProtocol(cInfo->getProtocol());
+	pkt->setTransportProtocol(cInfo->getTransportProtocol());
 	delete cInfo;
 
 	if (finalDestAddr.isBroadcast())
@@ -331,7 +331,7 @@ cMessage* WiseRoute::decapsMsg(WiseRouteDatagram *msg)
 	cMessage *m = msg->decapsulate();
     SimpleNetworkProtocolControlInfo *const controlInfo = new SimpleNetworkProtocolControlInfo();
     controlInfo->setSourceAddress(msg->getInitialSrcAddr());
-    controlInfo->setProtocol(msg->getProtocol());
+    controlInfo->setTransportProtocol(msg->getTransportProtocol());
     m->setControlInfo(controlInfo);
 	nbHops = nbHops + msg->getNbHops();
 	// delete the netw packet

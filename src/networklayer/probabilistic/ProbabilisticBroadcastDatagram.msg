@@ -25,9 +25,9 @@ class NetworkDatagramBase;
 packet ProbabilisticBroadcastDatagram extends NetworkDatagramBase
 {
     long      id;    // Unique message ID ~ f(node address, unique number in node scope).
+    int       nbHops;
+    int       transportProtocol = -1;
     simtime_t appTtl;   // Message time-to-live set by application.
     Address   initialSrcAddr;
     Address   finalDestAddr;
-    int       nbHops;
-    int       protocol = -1;
 }

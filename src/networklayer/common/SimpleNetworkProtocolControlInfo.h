@@ -35,8 +35,8 @@ class INET_API SimpleNetworkProtocolControlInfo : public SimpleNetworkProtocolCo
     SimpleNetworkProtocolControlInfo& operator=(const SimpleNetworkProtocolControlInfo& other) {if (this==&other) return *this; SimpleNetworkProtocolControlInfo_Base::operator=(other); copy(other); return *this;}
     virtual SimpleNetworkProtocolControlInfo *dup() const {return new SimpleNetworkProtocolControlInfo(*this);}
 
-    virtual short getProtocol() const { return SimpleNetworkProtocolControlInfo_Base::getProtocol(); }
-    virtual void setProtocol(short protocol) { SimpleNetworkProtocolControlInfo_Base::setProtocol(protocol); }
+    virtual short getTransportProtocol() const { return SimpleNetworkProtocolControlInfo_Base::getProtocol(); }
+    virtual void setTransportProtocol(short protocol) { SimpleNetworkProtocolControlInfo_Base::setProtocol(protocol); }
     virtual Address getSourceAddress() const { return SimpleNetworkProtocolControlInfo_Base::_getSourceAddress(); }
     virtual void setSourceAddress(const Address & address) { SimpleNetworkProtocolControlInfo_Base::setSourceAddress(address); }
     virtual Address getDestinationAddress() const { return SimpleNetworkProtocolControlInfo_Base::_getDestinationAddress(); }

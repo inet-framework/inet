@@ -97,7 +97,7 @@ void ProbabilisticBroadcast::handleLowerPacket(cPacket* msg)
 		// to the application layer who will be able to compute statistics.
 		// TODO: implement an application subscription mechanism.
 		if (true) {
-			int protocol = m->getProtocol();
+			int protocol = m->getTransportProtocol();
 			ProbabilisticBroadcastDatagram* mCopy = check_and_cast<ProbabilisticBroadcastDatagram*>(m->dup());
 			sendUp(decapsMsg(mCopy), protocol);
 		}
@@ -288,7 +288,7 @@ cPacket* ProbabilisticBroadcast::encapsMsg(cPacket* msg)
 	pkt->setFinalDestAddr(broadcastAddress);
 	pkt->setAppTtl(timeToLive);
 	pkt->setId(getNextID());
-    pkt->setProtocol(networkControlInfo->getProtocol());
+    pkt->setTransportProtocol(networkControlInfo->getTransportProtocol());
 
 	setDownControlInfo(pkt, MACAddress::BROADCAST_ADDRESS);
 	//encapsulate the application packet
@@ -340,7 +340,7 @@ cPacket* ProbabilisticBroadcast::decapsMsg(ProbabilisticBroadcastDatagram* msg)
 	cPacket *m = msg->decapsulate();
     SimpleNetworkProtocolControlInfo *const controlInfo = new SimpleNetworkProtocolControlInfo();
     controlInfo->setSourceAddress(msg->getSrcAddr());
-    controlInfo->setProtocol(msg->getProtocol());
+    controlInfo->setProtocol(msg->getTransportProtocol());
     m->setControlInfo(controlInfo);
 	delete msg;
 	return m;

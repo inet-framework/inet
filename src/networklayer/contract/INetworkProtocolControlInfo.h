@@ -23,8 +23,8 @@
 class INET_API INetworkProtocolControlInfo {
   public:
     virtual ~INetworkProtocolControlInfo() { }
-    virtual short getProtocol() const = 0;
-    virtual void setProtocol(short protocol) = 0;
+    virtual short getTransportProtocol() const = 0;
+    virtual void setTransportProtocol(short Transportprotocol) = 0;
     virtual Address getSourceAddress() const = 0;
     virtual void setSourceAddress(const Address & address) = 0;
     virtual Address getDestinationAddress() const = 0;

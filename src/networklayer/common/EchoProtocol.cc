@@ -99,7 +99,8 @@ void EchoProtocol::sendEchoRequest(PingPayload *msg)
     pingMap[msg->getOriginatorId()] = i;
     cObject* controlInfo = msg->removeControlInfo();
     INetworkProtocolControlInfo *networkControlInfo = check_and_cast<INetworkProtocolControlInfo*>(controlInfo);
-    networkControlInfo->setProtocol(IP_PROT_ICMP);
+    // TODO: remove
+    networkControlInfo->setTransportProtocol(IP_PROT_ICMP);
     EchoPacket *request = new EchoPacket(msg->getName());
     request->setType(ECHO_PROTOCOL_REQUEST);
     request->encapsulate(msg);
