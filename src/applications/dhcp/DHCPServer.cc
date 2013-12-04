@@ -118,7 +118,7 @@ InterfaceEntry *DHCPServer::chooseInterface()
     {
         ie = ift->getInterfaceByName(interfaceName);
         if (ie == NULL)
-            throw new cRuntimeError("Interface \"%s\" does not exist", interfaceName);
+            throw cRuntimeError("Interface \"%s\" does not exist", interfaceName);
     }
     else
     {
@@ -127,12 +127,12 @@ InterfaceEntry *DHCPServer::chooseInterface()
             InterfaceEntry *current = ift->getInterface(i);
             if (!current->isLoopback()) {
                 if (ie)
-                    throw new cRuntimeError("Multiple non-loopback interfaces found, please select explicitly which one you want to serve DHCP requests on");
+                    throw cRuntimeError("Multiple non-loopback interfaces found, please select explicitly which one you want to serve DHCP requests on");
                 ie = current;
             }
         }
         if (!ie)
-            throw new cRuntimeError("No non-loopback interface found to be configured via DHCP");
+            throw cRuntimeError("No non-loopback interface found to be configured via DHCP");
     }
 
     return ie;

@@ -119,7 +119,7 @@ InterfaceEntry *DHCPClient::chooseInterface()
     {
         ie = ift->getInterfaceByName(interfaceName);
         if (ie == NULL)
-            throw new cRuntimeError("Interface \"%s\" does not exist", interfaceName);
+            throw cRuntimeError("Interface \"%s\" does not exist", interfaceName);
     }
     else
     {
@@ -128,16 +128,16 @@ InterfaceEntry *DHCPClient::chooseInterface()
             InterfaceEntry *current = ift->getInterface(i);
             if (!current->isLoopback()) {
                 if (ie)
-                    throw new cRuntimeError("Multiple non-loopback interfaces found, please select explicitly which one you want to configure via DHCP");
+                    throw cRuntimeError("Multiple non-loopback interfaces found, please select explicitly which one you want to configure via DHCP");
                 ie = current;
             }
         }
         if (!ie)
-            throw new cRuntimeError("No non-loopback interface found to be configured via DHCP");
+            throw cRuntimeError("No non-loopback interface found to be configured via DHCP");
     }
 
     if (!ie->ipv4Data()->getIPAddress().isUnspecified())
-        throw new cRuntimeError("Refusing to start DHCP on interface \"%s\" that already has an IP address", ie->getName());
+        throw cRuntimeError("Refusing to start DHCP on interface \"%s\" that already has an IP address", ie->getName());
     return ie;
 }
 
