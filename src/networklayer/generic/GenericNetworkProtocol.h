@@ -36,6 +36,8 @@
  * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
  * and reassembling.
  */
+// TODO: rename this and its friends to something that is more specific
+// TODO: that expresses to some extent how this network protocol works
 class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter
 {
   protected:
