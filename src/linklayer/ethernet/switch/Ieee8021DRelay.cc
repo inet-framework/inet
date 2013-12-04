@@ -38,6 +38,7 @@ void Ieee8021DRelay::initialize(int stage)
 
         macTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTablePath")));
         ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
+
         // TODO: is it really this simple? 0th interface?
         InterfaceEntry * ifEntry = ifTable->getInterface(0);
         bridgeAddress = ifEntry->getMacAddress();
@@ -75,9 +76,7 @@ void Ieee8021DRelay::handleMessage(cMessage * msg)
         }
     }
     else
-        // TODO: if we don't send self messages then why don't we throw an error here?
-        delete msg;
-
+        throw cRuntimeError("This module doesn't handle self-messages!");
 }
 
 void Ieee8021DRelay::broadcast(EtherFrame * frame)
@@ -96,28 +95,23 @@ void Ieee8021DRelay::broadcast(EtherFrame * frame)
 void Ieee8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
 {
     int arrivalGate = frame->getArrivalGate()->getIndex();
-    Ieee8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
+    Ieee8021DInterfaceData * arrivalPortData = getPortInterfaceData(arrivalGate);
     learn(frame);
 
     // BPDU Handling
-    // TODO: why not 'if/else if' instead of if/return?
-    if ((frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && port->getRole() != Ieee8021DInterfaceData::DISABLED)
+    if ((frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && arrivalPortData->getRole() != Ieee8021DInterfaceData::DISABLED)
     {
         EV_DETAIL << "Deliver BPDU to the STP/RSTP module" << endl;
         deliverBPDU(frame); // deliver to the STP/RSTP module
-        return;
     }
-    if (isStpAware && !port->isForwarding())
+    else if (isStpAware && !arrivalPortData->isForwarding())
     {
         EV_INFO << "The arrival port is not forwarding! Discarding it!" << endl;
         delete frame;
-        return;
     }
-    // broadcast address
-    if (frame->getDest().isBroadcast())
+    else if (frame->getDest().isBroadcast()) // broadcast address
     {
         broadcast(frame);
-        return;
     }
     else
     {
@@ -130,21 +124,21 @@ void Ieee8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
         }
         else
         {
-            // TODO: the only way to get here is !(isStpAware && !port->isForwarding())
-            // TODO: and this is equivalent with (!isStpAware || port->isForwarding())
-            if (!isStpAware || port->isForwarding()) // if the switch is STP/RSTP unaware then all its ports are forwarding (and learning)
+            if (outGate != arrivalGate)
             {
-                if (outGate != arrivalGate)
+                Ieee8021DInterfaceData * outPortData = getPortInterfaceData(outGate);
+
+                if (!isStpAware || outPortData->isForwarding())
                     dispatch(frame, outGate);
                 else
                 {
-                    EV_DETAIL << "Output port is same as input port, " << frame->getFullName() << " destination = " << frame->getDest() << ", discarding frame " << frame << endl;
+                    EV_INFO << "Output port " << outGate << " is not forwarding. Discarding!" << endl;
                     delete frame;
                 }
             }
             else
             {
-                EV_DETAIL << "The input port = " << arrivalGate << " is not in state forwarding, discarding frame " << frame->getFullName() << endl;
+                EV_DETAIL << "Output port is same as input port, " << frame->getFullName() << " destination = " << frame->getDest() << ", discarding frame " << frame << endl;
                 delete frame;
             }
         }
@@ -153,29 +147,14 @@ void Ieee8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
 
 void Ieee8021DRelay::dispatch(EtherFrame * frame, unsigned int portNum)
 {
-    Ieee8021DInterfaceData * port = getPortInterfaceData(portNum);
-
     EV_INFO << "Sending frame " << frame << " on output port " << portNum << "." << endl;
 
-    // TODO: can this ever be true? and if yes then why don't we throw an error here? isn't it a programming error?
-    if (portNum >= portCount)
-    {
-        EV_ERROR << "Output port " << portNum << " does not exist. Discarding!" << endl;
-        delete frame;
-        return;
-    }
+    if (portNum >= portCount || portNum < 0)
+        throw cRuntimeError("Output port %d doesn't exist!",portNum);
 
     EV_INFO << "Sending " << frame << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
 
-    // TODO: this condition seems to always be true (see call sites), so why don't we throw an error in the else branch?
-    if (!isStpAware || port->isForwarding())
-        send(frame, "ifOut", portNum);
-    else
-    {
-        EV_INFO << "Output port " << portNum << " is not forwarding. Discarding!" << endl;
-        delete frame;
-    }
-
+    send(frame, "ifOut", portNum);
     return;
 }
 
@@ -195,9 +174,8 @@ void Ieee8021DRelay::dispatchBPDU(BPDU * bpdu)
     MACAddress address = controlInfo->getDest();
     delete controlInfo;
 
-    // TODO: is this correct to just return here silently? isn't it a programming error?
     if (portNum >= portCount || portNum < 0)
-        return;
+        throw cRuntimeError("Output port %d doesn't exist!",portNum);
 
     // TODO: use LLCFrame
     EthernetIIFrame * frame = new EthernetIIFrame(bpdu->getName());
