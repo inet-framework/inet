@@ -88,7 +88,6 @@ packet EtherFrame extends EtherTraffic
 //
 packet EthernetIIFrame extends EtherFrame
 {
-    string displayString = "b=,,,#00ff00";		// Mod1. Enables display string modification.
     int etherType enum (EtherType);
 }
 
@@ -139,7 +138,6 @@ packet EtherPauseFrame extends EtherFrame
 //
 packet Ethernet1QTag
 {
-    string displayString = "b=,,,#a5ffa5";
     uint8_t pcp;    // Priority Code Point (PCP): a 3-bit field which refers to the IEEE 802.1p priority. It indicates the frame priority level.
                     // Values are from 0 (best effort) to 7 (highest); 1 represents the lowest priority.
     bool de;        // Drop Eligible (DE): a 1-bit field. May be used separately or in conjunction with PCP to indicate frames eligible to be dropped in the presence of congestion.
@@ -157,6 +155,5 @@ packet Ethernet1QTag
 //
 packet Ethernet1ahITag
 {
-    string displayString = "b=,,,#3ea53e";
     int ISid=0; // ISID
 }
