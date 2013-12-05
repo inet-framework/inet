@@ -32,10 +32,14 @@
 //
 class Ieee8021DRelay : public cSimpleModule, public ILifecycle
 {
+    public:
+        Ieee8021DRelay();
+
     protected:
         MACAddress bridgeAddress;
         IInterfaceTable * ifTable;
         IMACAddressTable * macTable;
+        InterfaceEntry * ie;
         bool isOperational;
         bool isStpAware;
         unsigned int portCount; // number of ports in the switch
@@ -74,9 +78,15 @@ class Ieee8021DRelay : public cSimpleModule, public ILifecycle
         virtual void stop();
         bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
-        // Gets port data from InterfaceTable
+        /*
+         * Gets port data from the InterfaceTable
+         */
         Ieee8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
 
+        /*
+         * Returns the first non-loopback interface.
+         */
+        virtual InterfaceEntry * chooseInterface();
 };
 
 #endif

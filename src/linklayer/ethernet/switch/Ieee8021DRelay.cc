@@ -21,6 +21,11 @@
 
 Define_Module(Ieee8021DRelay);
 
+Ieee8021DRelay::Ieee8021DRelay()
+{
+    ie = NULL;
+}
+
 void Ieee8021DRelay::initialize(int stage)
 {
 
@@ -39,9 +44,15 @@ void Ieee8021DRelay::initialize(int stage)
         macTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTablePath")));
         ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
 
-        // TODO: is it really this simple? 0th interface?
-        InterfaceEntry * ifEntry = ifTable->getInterface(0);
-        bridgeAddress = ifEntry->getMacAddress();
+        if (isOperational)
+        {
+            ie = chooseInterface();
+
+            if (ie)
+                bridgeAddress = ie->getMacAddress(); // get the bridge's MAC address
+            else
+                throw cRuntimeError("No non-loopback interface found!");
+        }
 
         isStpAware = gate("stpIn")->isConnected(); // if the stpIn is not connected then the switch is STP/RSTP unaware
 
@@ -230,14 +241,40 @@ Ieee8021DInterfaceData * Ieee8021DRelay::getPortInterfaceData(unsigned int portN
 
 void Ieee8021DRelay::start()
 {
-    macTable->clearTable();
     isOperational = true;
+
+    ie = chooseInterface();
+    if (ie)
+        bridgeAddress = ie->getMacAddress(); // get the bridge's MAC address
+    else
+        throw cRuntimeError("No non-loopback interface found!");
+
+    macTable->clearTable();
 }
 
 void Ieee8021DRelay::stop()
 {
-    macTable->clearTable();
     isOperational = false;
+
+    macTable->clearTable();
+    ie = NULL;
+}
+
+InterfaceEntry * Ieee8021DRelay::chooseInterface()
+{
+    // TODO: Currently, we assume that the first non-loopback interface is an Ethernet interface
+    //       since relays work on EtherSwitches.
+    //       NOTE that, we doesn't check if the returning interface is an Ethernet interface!
+    IInterfaceTable * ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
+
+    for (int i = 0; i < ift->getNumInterfaces(); i++)
+    {
+        InterfaceEntry * current = ift->getInterface(i);
+        if (!current->isLoopback())
+            return current;
+    }
+
+    return NULL;
 }
 
 bool Ieee8021DRelay::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
