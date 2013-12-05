@@ -337,7 +337,7 @@ void DHCPClient::bindLease()
     EV_INFO << "Configuring interface : " << ie->getName() << " IP:" << lease->ip << "/"
             << lease->subnetMask << " leased time: " << lease->leaseTime << " (secs)." << endl;
 
-    std::cout << "Host " << hostName << " got ip: " << lease->ip << "/" << lease->subnetMask << endl;
+    // std::cout << "Host " << hostName << " got ip: " << lease->ip << "/" << lease->subnetMask << endl;
 
     IPv4Route * iroute = NULL;
     for (int i = 0; i < irt->getNumRoutes(); i++)
@@ -440,7 +440,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             else if (messageType == DHCPACK)
             {
                 handleDHCPACK(msg);
-                EV_INFO << "The offered IP " << lease->ip << " is available. Assign it to " << this->getParentModule()->getFullName() << endl;
+                EV_INFO << "The offered IP " << lease->ip << " is available. Assigning it to " << this->getParentModule()->getFullName() << "." << endl;
                 clientState = BOUND;
                 /*
                     The client SHOULD perform a final check on the parameters (ping, ARP).

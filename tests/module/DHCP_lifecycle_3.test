@@ -1,0 +1,95 @@
+%description:
+This test is similar to DHCP_lifecycle_2.test but server shutting down with
+server.status.initialStatus = "DOWN" parameter not via lifecycle events.
+It is intended to test UDP internals in the DHCPClient for e.g. UDP bind won't
+be invoked while the server is down.
+
+%inifile: omnetpp.ini
+[General]
+network = LifecycleTest2
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+sim-time-limit = 300s
+record-eventlog = true
+**.hasStatus = true
+
+**.scenarioManager.script = xmldoc("scenario.xml")
+**.numUdpApps = 1
+**.client.udpApp[0].typename = "DHCPClient"
+**.server.udpApp[0].typename = "DHCPServer"
+**.server.status.initialStatus = "DOWN"
+
+**.server.udpApp[0].subnetMask = "255.255.255.0"
+**.server.udpApp[0].ipAddressStart = "192.168.1.100"
+**.server.udpApp[0].maxNumClients = 100
+**.server.udpApp[0].gateway = "192.168.1.1"
+**.server.udpApp[0].dns = ""
+**.server.udpApp[0].leaseTime = 150s
+
+%file: test.ned
+
+import inet.nodes.ethernet.Eth10M;
+import inet.nodes.inet.StandardHost;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.base.LifecycleController;
+import inet.world.scenario.ScenarioManager;
+
+network LifecycleTest2
+{
+    submodules:
+        scenarioManager: ScenarioManager {
+            @display("p=73,59");
+        }
+        lifecycleController: LifecycleController {
+            @display("p=73,185");
+        }
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                config = xml("<config><interface hosts='server' address='192.168.1.1' netmask='255.255.255.0'/></config>");
+                @display("p=73,116");
+        }
+        client: StandardHost {
+            @display("p=205,124");
+        }
+        server: StandardHost {
+            @display("p=553,124");
+        }
+    connections:
+        client.ethg++ <--> Eth10M <--> server.ethg++;
+}
+
+%file: scenario.xml
+
+<scenario>
+    <at t="190.0">
+        <tell module="lifecycleController" target="server" operation="NodeStartOperation"/>
+    </at>
+</scenario>
+
+%contains-regex: stdout
+.*
+Sending DHCPDISCOVER.
+.*
+DETAIL: No DHCP offer received within timeout. Restarting.
+.*
+Sending DHCPDISCOVER.
+.*
+DETAIL: No DHCP offer received within timeout. Restarting.
+.*
+Sending DHCPDISCOVER.
+.*
+DETAIL: No DHCP offer received within timeout. Restarting.
+.*
+Sending DHCPDISCOVER.
+.*
+DHCPDISCOVER arrived. Handling it.
+.*
+The offered IP 192.168.1.100 is available. Assigning it to client.
+.*
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------
