@@ -57,7 +57,6 @@ class PIMBase : public cSimpleModule
         void sendHelloPackets();
         void processHelloTimer(PIMTimer *timer);
         void processHelloPacket(PIMHello *pkt);
-        void newMulticastReceived(IPv4Address destAddr, IPv4Address srcAddr);
 };
 
 

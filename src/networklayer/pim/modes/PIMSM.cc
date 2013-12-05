@@ -92,7 +92,6 @@ void PIMSM::initialize(int stage)
             cModule *host = findContainingNode(this);
             if (host != NULL) {
                 host->subscribe(NF_IPv4_NEW_MULTICAST, this);
-                host->subscribe(NF_IPv4_NEW_MULTICAST_SPARSE, this);
                 host->subscribe(NF_IPv4_MDATA_REGISTER, this);
                 host->subscribe(NF_IPv4_DATA_ON_RPF, this);
                 host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
@@ -1558,17 +1557,39 @@ void PIMSM::forwardMulticastData(IPv4Datagram *datagram, multDataInfo *info)
  * @see addOutIntFull()
  * @see setKat()
  */
-void PIMSM::newMulticastRegisterDR(PIMMulticastRoute *newRoute)
+void PIMSM::newMulticastRegisterDR(IPv4Address srcAddr, IPv4Address destAddr)
 {
     EV << "pimSM::newMulticastRegisterDR" << endl;
 
-    PIMMulticastRoute *newRouteG = new PIMMulticastRoute();
-    PIMInterface *rpfInt = pimIft->getInterfaceById(newRoute->getInIntId());
+    InterfaceEntry *inInt = rt->getInterfaceForDestAddr(srcAddr);
+    if (!inInt)
+    {
+        EV << "ERROR: PimSplitter::newMulticast(): cannot find RPF interface, routing information is missing.";
+        return;
+    }
+
+    PIMInterface *rpfInterface = pimIft->getInterfaceById(inInt->getInterfaceId());
+    if (!rpfInterface || rpfInterface->getMode() != PIMInterface::SparseMode)
+        return;
+
     InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->getRPAddress());
 
     // RPF check and check if I am DR for given address
-    if ((newInIntG->getInterfaceId() != rpfInt->getInterfaceId()) && IamDR(newRoute->getOrigin()))
+    if ((newInIntG->getInterfaceId() != rpfInterface->getInterfaceId()) && IamDR(srcAddr))
     {
+        EV << "PIMSM::newMulticast - group: " << destAddr << ", source: " << srcAddr << endl;
+
+        // create new multicast route
+        PIMMulticastRoute *newRoute = new PIMMulticastRoute();
+        newRoute->setMulticastGroup(destAddr);
+        newRoute->setOrigin(srcAddr);
+        newRoute->setOriginNetmask(IPv4Address::ALLONES_ADDRESS);
+        newRoute->setInInt(rpfInterface->getInterfacePtr(), rpfInterface->getInterfaceId(), IPv4Address("0.0.0.0"));
+
+
+        PIMMulticastRoute *newRouteG = new PIMMulticastRoute();
+
+
         // Set Keep Alive timer for routes
         PIMkat* timerKat = createKeepAliveTimer(newRoute->getOrigin(), newRoute->getMulticastGroup());
         PIMkat* timerKatG = createKeepAliveTimer(IPv4Address::UNSPECIFIED_ADDRESS, newRoute->getMulticastGroup());
@@ -1854,19 +1875,14 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         if (pimInterface && pimInterface->getMode() == PIMInterface::SparseMode)
             removeMulticastReceiver(pimInterface, info->groupAddress);
     }
+    // new multicast data appears in router
     else if (signalID == NF_IPv4_NEW_MULTICAST)
     {
         EV <<  "PimSM::receiveChangeNotification - NEW MULTICAST" << endl;
-        IPv4Datagram *datagram;
         datagram = check_and_cast<IPv4Datagram*>(details);
-        newMulticastReceived(datagram->getDestAddress(), datagram->getSrcAddress());
-    }
-    // new multicast data appears in router
-    else if (signalID == NF_IPv4_NEW_MULTICAST_SPARSE)
-    {
-        EV <<  "pimSM::receiveChangeNotification - NEW MULTICAST SPARSE" << endl;
-        route = check_and_cast<PIMMulticastRoute*>(details);
-        newMulticastRegisterDR(route);
+        IPv4Address srcAddr = datagram->getSrcAddress();
+        IPv4Address destAddr = datagram->getDestAddress();
+        newMulticastRegisterDR(srcAddr, destAddr);
     }
     // create PIM register packet
     else if (signalID == NF_IPv4_MDATA_REGISTER)

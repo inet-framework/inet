@@ -48,7 +48,7 @@ class PIMDM : public PIMBase, protected cListener
 	private:
 	    // process events
         void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-	    void newMulticast(PIMMulticastRoute *newRoute);
+	    void newMulticast(IPv4Address srcAddress, IPv4Address destAddress);
 	    void newMulticastAddr(PIMInterface *pimInt, IPv4Address newAddr);
 	    void oldMulticastAddr(PIMInterface *pimInt, IPv4Address oldAddr);
 	    void dataOnPruned(IPv4Address destAddr, IPv4Address srcAddr);

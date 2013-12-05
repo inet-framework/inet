@@ -24,8 +24,6 @@ simple PIMDM
 {
     parameters:
     	@display("i=block/network2");
-        @signal[NF_IPv4_NEW_MULTICAST_DENSE](type=PIMMulticastRoute);
-        @signal[NF_IPv4_NEW_MULTICAST_SPARSE](type=PIMMulticastRoute);
     gates:
         input splitterIn;
         output spiltterOut;

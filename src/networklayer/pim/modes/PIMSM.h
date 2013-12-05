@@ -80,7 +80,7 @@ class PIMSM : public PIMBase, protected cListener
 
     private:
         void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-        void newMulticastRegisterDR(PIMMulticastRoute *newRoute);
+        void newMulticastRegisterDR(IPv4Address srcAddr, IPv4Address destAddr);
         void newMulticastReceiver(PIMInterface *pimInterface, IPv4Address multicastGroup);
         void removeMulticastReceiver(PIMInterface *pimInterface, IPv4Address multicastGroup);
 

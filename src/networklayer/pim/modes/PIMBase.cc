@@ -24,7 +24,6 @@
 #include "InterfaceTableAccess.h"
 #include "InterfaceTable.h"
 #include "IPv4Address.h"
-#include "PIMRoute.h"
 #include "PIMRoutingTableAccess.h"
 #include "PIMTimer_m.h"
 #include "PIMBase.h"
@@ -133,57 +132,3 @@ void PIMBase::processHelloPacket(PIMHello *packet)
 
     delete packet;
 }
-
-void PIMBase::newMulticastReceived(IPv4Address destAddr, IPv4Address srcAddr)
-{
-    EV << "PimSplitter::newMulticast - group: " << destAddr << ", source: " << srcAddr << endl;
-
-    // find RPF interface for new multicast stream
-    InterfaceEntry *inInt = rt->getInterfaceForDestAddr(srcAddr);
-    if (inInt == NULL)
-    {
-        EV << "ERROR: PimSplitter::newMulticast(): cannot find RPF interface, routing information is missing.";
-        return;
-    }
-    int rpfId = inInt->getInterfaceId();
-    PIMInterface *pimInt = pimIft->getInterfaceById(rpfId);
-
-    // if it is interface configured with PIM, create new route
-    if (pimInt != NULL)
-    {
-        if (pimInt->getMode() != mode)
-            return;
-
-        // create new multicast route
-        PIMMulticastRoute *newRoute = new PIMMulticastRoute();
-        newRoute->setMulticastGroup(destAddr);
-        newRoute->setOrigin(srcAddr);
-        newRoute->setOriginNetmask(IPv4Address::ALLONES_ADDRESS);
-
-        if (pimInt->getMode() == PIMInterface::DenseMode)
-        {
-            // Directly connected routes to source does not have next hop
-            // RPF neighbor is source of packet
-            IPv4Address rpf;
-            const IPv4Route *routeToSrc = rt->findBestMatchingRoute(srcAddr);
-            if (routeToSrc->getSourceType() == IPv4Route::IFACENETMASK)
-            {
-                newRoute->addFlag(PIMMulticastRoute::A);
-                rpf = srcAddr;
-            }
-            // Not directly connected, next hop address is saved in routing table
-            else
-                rpf = rt->getGatewayForDestAddr(srcAddr);
-
-            newRoute->setInInt(inInt, inInt->getInterfaceId(), rpf);
-
-            emit(NF_IPv4_NEW_MULTICAST_DENSE, newRoute);
-        }
-        if (pimInt->getMode() == PIMInterface::SparseMode)
-        {
-            newRoute->setInInt(inInt, inInt->getInterfaceId(), IPv4Address("0.0.0.0"));
-            emit(NF_IPv4_NEW_MULTICAST_SPARSE, newRoute);
-        }
-    }
-}
-

@@ -64,8 +64,6 @@ simsignal_t NF_IPv4_MCAST_REGISTERED = cComponent::registerSignal("NF_IPv4_MCAST
 simsignal_t NF_IPv4_MCAST_UNREGISTERED = cComponent::registerSignal("NF_IPv4_MCAST_UNREGISTERED");
 
 simsignal_t NF_IPv4_NEW_MULTICAST = cComponent::registerSignal("NF_IPv4_NEW_MULTICAST");
-simsignal_t NF_IPv4_NEW_MULTICAST_DENSE = cComponent::registerSignal("NF_IPv4_NEW_MULTICAST_DENSE");
-simsignal_t NF_IPv4_NEW_MULTICAST_SPARSE = cComponent::registerSignal("NF_IPv4_NEW_MULTICAST_SPARSE");
 simsignal_t NF_IPv4_NEW_IGMP_ADDED = cComponent::registerSignal("NF_IPv4_NEW_IGMP_ADDED");
 simsignal_t NF_IPv4_NEW_IGMP_REMOVED = cComponent::registerSignal("NF_IPv4_NEW_IGMP_REMOVED");
 simsignal_t NF_IPv4_DATA_ON_NONRPF = cComponent::registerSignal("NF_IPv4_DATA_ON_NONRPF");

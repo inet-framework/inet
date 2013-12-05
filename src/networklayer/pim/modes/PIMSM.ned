@@ -25,8 +25,6 @@ simple PIMSM
     	@display("i=block/network2");
         string RP = default("");
         string sptThreshold = default("infinity");
-        @signal[NF_IPv4_NEW_MULTICAST_DENSE](type=PIMMulticastRoute);
-        @signal[NF_IPv4_NEW_MULTICAST_SPARSE](type=PIMMulticastRoute);
     gates:
         input splitterIn;
         output spiltterOut;

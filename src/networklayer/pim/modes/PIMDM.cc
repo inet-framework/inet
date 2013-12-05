@@ -891,7 +891,6 @@ void PIMDM::initialize(int stage)
             if (host != NULL)
             {
                 host->subscribe(NF_IPv4_NEW_MULTICAST, this);
-                host->subscribe(NF_IPv4_NEW_MULTICAST_DENSE, this);
                 host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
                 host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
                 host->subscribe(NF_IPv4_DATA_ON_NONRPF, this);
@@ -928,21 +927,15 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
     printNotificationBanner(signalID, details);
 	IPv4Datagram *datagram;
 	PIMInterface *pimInterface;
-	PIMMulticastRoute *route;
 
     // new multicast data appears in router
     if (signalID == NF_IPv4_NEW_MULTICAST)
     {
         EV <<  "PimDM::receiveChangeNotification - NEW MULTICAST" << endl;
-        IPv4Datagram *datagram;
         datagram = check_and_cast<IPv4Datagram*>(details);
-        newMulticastReceived(datagram->getDestAddress(), datagram->getSrcAddress());
-    }
-    else if (signalID == NF_IPv4_NEW_MULTICAST_DENSE)
-    {
-        EV <<  "pimDM::receiveChangeNotification - NEW MULTICAST DENSE" << endl;
-        route = check_and_cast<PIMMulticastRoute*>(details);
-        newMulticast(route);
+        IPv4Address srcAddr = datagram->getSrcAddress();
+        IPv4Address destAddr = datagram->getDestAddress();
+        newMulticast(srcAddr, destAddr);
     }
     // configuration of interface changed, it means some change from IGMP, address were added.
     else if (signalID == NF_IPv4_MCAST_REGISTERED)
@@ -1325,12 +1318,37 @@ void PIMDM::newMulticastAddr(PIMInterface *pimInt, IPv4Address newAddr)
  * @see createGraftRetryTimer()
  * @see addRemoveAddr
  */
-void PIMDM::newMulticast(PIMMulticastRoute *newRoute)
+void PIMDM::newMulticast(IPv4Address srcAddr, IPv4Address destAddr)
 {
 	EV << "pimDM::newMulticast" << endl;
 
+	IPv4Route *routeToSrc = rt->findBestMatchingRoute(srcAddr);
+	if (!routeToSrc || !routeToSrc->getInterface())
+	{
+        EV << "ERROR: PIMDM::newMulticast(): cannot find RPF interface, routing information is missing.";
+        return;
+	}
+
+    PIMInterface *rpfInterface = pimIft->getInterfaceById(routeToSrc->getInterface()->getInterfaceId());
+    if (!rpfInterface || rpfInterface->getMode() != PIMInterface::DenseMode)
+        return;
+
+    EV << "PIMDM::newMulticast - group: " << destAddr << ", source: " << srcAddr << endl;
+
+    // gateway is unspecified for directly connected destinations
+    IPv4Address rpfNeighbor = routeToSrc->getGateway().isUnspecified() ? srcAddr : routeToSrc->getGateway();
+
+    // create new multicast route
+    PIMMulticastRoute *newRoute = new PIMMulticastRoute();
+    newRoute->setMulticastGroup(destAddr);
+    newRoute->setOrigin(srcAddr);
+    newRoute->setOriginNetmask(IPv4Address::ALLONES_ADDRESS);
+    newRoute->setInInt(rpfInterface->getInterfacePtr(), rpfInterface->getInterfaceId(), rpfNeighbor);
+    if (routeToSrc->getSourceType() == IPv4Route::IFACENETMASK)
+        newRoute->addFlag(PIMMulticastRoute::A);
+
+
 	// only outgoing interfaces are missing
-	PIMInterface *rpfInt = pimIft->getInterfaceById(newRoute->getInIntId());
 	bool pruned = true;
 
 	// insert all PIM interfaces except rpf int
@@ -1340,7 +1358,7 @@ void PIMDM::newMulticast(PIMMulticastRoute *newRoute)
 		int intId = pimIntTemp->getInterfaceId();
 
 		//check if PIM interface is not RPF interface
-		if (pimIntTemp == rpfInt)
+		if (pimIntTemp == rpfInterface)
 			continue;
 
 		// create new outgoing interface
@@ -1377,7 +1395,7 @@ void PIMDM::newMulticast(PIMMulticastRoute *newRoute)
 	}
 
 	// directly connected to source, set State Refresh Timer
-	if (newRoute->isFlagSet(PIMMulticastRoute::A) && rpfInt->getSR())
+	if (newRoute->isFlagSet(PIMMulticastRoute::A) && rpfInterface->getSR())
 	{
 	    PIMsrt* timerSrt = createStateRefreshTimer(newRoute->getOrigin(), newRoute->getMulticastGroup());
 	    newRoute->setSrt(timerSrt);

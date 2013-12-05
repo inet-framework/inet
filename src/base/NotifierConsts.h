@@ -81,8 +81,6 @@ extern simsignal_t    // admin
 
     // for PIM
     NF_IPv4_NEW_MULTICAST,
-    NF_IPv4_NEW_MULTICAST_DENSE,
-    NF_IPv4_NEW_MULTICAST_SPARSE,
     NF_IPv4_DATA_ON_NONRPF,
     NF_IPv4_DATA_ON_RPF,
     NF_IPv4_RPF_CHANGE,
