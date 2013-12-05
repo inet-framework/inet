@@ -183,6 +183,23 @@ const char *DHCPClient::getStateName(ClientState state)
     }
 }
 
+const char *DHCPClient::getAndCheckMessageTypeName(DHCPMessageType type)
+{
+    switch (type)
+    {
+#define CASE(X)  case X: return #X;
+    CASE(DHCPDISCOVER);
+    CASE(DHCPOFFER);
+    CASE(DHCPREQUEST);
+    CASE(DHCPDECLINE);
+    CASE(DHCPACK);
+    CASE(DHCPNAK);
+    CASE(DHCPRELEASE);
+    CASE(DHCPINFORM);
+    default: throw cRuntimeError("Unknown or invalid DHCP message type %d",type);
+#undef CASE
+    }
+}
 void DHCPClient::updateDisplayString()
 {
     getDisplayString().setTagArg("t", 0, getStateName(clientState));
@@ -421,9 +438,13 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
         return;
     }
 
-    int messageType = msg->getOptions().getMessageType();
+    DHCPMessageType messageType = (DHCPMessageType)msg->getOptions().getMessageType();
     switch (clientState)
     {
+        case INIT:
+        {
+            EV_WARN << getAndCheckMessageTypeName(messageType) << " message arrived in INIT state. In this state, client does not wait for any message at all, dropping." << endl;
+        }
         case SELECTING:
             if (messageType == DHCPOFFER)
             {
@@ -443,14 +464,18 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             }
             else if (messageType == DHCPACK)
             {
-                EV_INFO << "Arrived DHCPACK message in REQUESTING state. The requested IP address is available in the server's pool of addresses." << endl;
+                EV_INFO << "DHCPACK message arrived in REQUESTING state. The requested IP address is available in the server's pool of addresses." << endl;
                 handleDHCPACK(msg);
                 clientState = BOUND;
             }
             else if (messageType == DHCPNAK)
             {
-                EV_INFO << "Arrived DHCPNAK message in REQUESTING state. Restarting the configuration process." << endl;
+                EV_INFO << "DHCPNAK message arrived in REQUESTING state. Restarting the configuration process." << endl;
                 initClient();
+            }
+            else
+            {
+                EV_WARN << getAndCheckMessageTypeName(messageType) << " message arrived in REQUESTING state. In this state, client does not expect messages of this type, dropping." << endl;
             }
             break;
         case BOUND:
@@ -460,41 +485,53 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             if (messageType == DHCPACK)
             {
                 handleDHCPACK(msg);
-                EV_INFO << "Arrived DHCPACK message in RENEWING state. The renewing process was successful." << endl;
+                EV_INFO << "DHCPACK message arrived in RENEWING state. The renewing process was successful." << endl;
                 clientState = BOUND;
             }
             else if (messageType == DHCPNAK)
             {
-                EV_INFO << "Arrived DHPCNAK message in RENEWING state. The renewing process was unsuccessful. Restarting the DHCP configuration process." << endl;
+                EV_INFO << "DHPCNAK message arrived in RENEWING state. The renewing process was unsuccessful. Restarting the DHCP configuration process." << endl;
                 unboundLease(); // halt network (remove address)
                 initClient();
+            }
+            else
+            {
+                EV_WARN << getAndCheckMessageTypeName(messageType) << " message arrived in RENEWING state. In this state, client does not expect messages of this type, dropping." << endl;
             }
             break;
         case REBINDING:
             if (messageType == DHCPNAK)
             {
-                EV_INFO << "Arrived DHPCNAK message in REBINDING state. The rebinding process was unsuccessful. Restarting the DHCP configuration process." << endl;
+                EV_INFO << "DHPCNAK message arrived in REBINDING state. The rebinding process was unsuccessful. Restarting the DHCP configuration process." << endl;
                 unboundLease(); // halt network (remove address)
                 initClient();
             }
             else if (messageType == DHCPACK)
             {
                 handleDHCPACK(msg);
-                EV_INFO << "Arrived DHCPACK message in REBINDING state. The rebinding process was successful." << endl;
+                EV_INFO << "DHCPACK message arrived in REBINDING state. The rebinding process was successful." << endl;
                 clientState = BOUND;
+            }
+            else
+            {
+                EV_WARN << getAndCheckMessageTypeName(messageType) << " message arrived in REBINDING state. In this state, client does not expect messages of this type, dropping." << endl;
             }
             break;
         case REBOOTING:
             if (messageType == DHCPACK)
             {
                 handleDHCPACK(msg);
-                EV_INFO << "Arrived DHCPACK message in REBOOTING state. Initialization with known IP address was successful." << endl;
+                EV_INFO << "DHCPACK message arrived in REBOOTING state. Initialization with known IP address was successful." << endl;
                 clientState = BOUND;
             }
             else if (messageType == DHCPNAK)
             {
-                EV_INFO << "Arrived DHCPNAK message in REBOOTING. Initialization with known IP address was unsuccessful." << endl;
+                EV_INFO << "DHCPNAK message arrived in REBOOTING. Initialization with known IP address was unsuccessful." << endl;
                 initClient();
+            }
+            else
+            {
+                EV_WARN << getAndCheckMessageTypeName(messageType) << " message arrived in REBOOTING state. In this state, client does not expect messages of this type, dropping." << endl;
             }
             break;
         default:

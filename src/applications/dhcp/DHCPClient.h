@@ -166,6 +166,7 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
         virtual void scheduleTimerT1();
         virtual void scheduleTimerT2();
         static const char *getStateName(ClientState state);
+        const char *getAndCheckMessageTypeName(DHCPMessageType type);
         virtual void updateDisplayString();
         virtual void startApp();
         virtual void stopApp();
