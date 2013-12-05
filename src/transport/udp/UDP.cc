@@ -314,7 +314,7 @@ void UDP::processPacketFromApp(cPacket *appData)
     const Address& destAddr = ctrl->getDestAddr().isUnspecified() ? sd->remoteAddr : ctrl->getDestAddr();
     int destPort = ctrl->getDestPort() == -1 ? sd->remotePort : ctrl->getDestPort();
     if (destAddr.isUnspecified() || destPort == -1)
-        error("send: missing destination address or port when sending over unconnected port");
+        throw cRuntimeError("send: missing destination address or port when sending over unconnected port");
 
     const Address& srcAddr = ctrl->getSrcAddr().isUnspecified() ? sd->localAddr : ctrl->getSrcAddr();
     int interfaceId = ctrl->getInterfaceId();
@@ -390,12 +390,12 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
     }
     else if (ctrl == NULL)
     {
-        error("(%s)%s arrived from lower layer without control info",
+        throw cRuntimeError("(%s)%s arrived from lower layer without control info",
                 udpPacket->getClassName(), udpPacket->getName());
     }
     else
     {
-        error("(%s)%s arrived from lower layer with unrecognized control info %s",
+        throw cRuntimeError("(%s)%s arrived from lower layer with unrecognized control info %s",
                 udpPacket->getClassName(), udpPacket->getName(), ctrl->getClassName());
     }
 
@@ -536,12 +536,12 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
     }
     else if (ctrl == NULL)
     {
-        error("(%s)%s arrived from lower layer without control info",
+        throw cRuntimeError("(%s)%s arrived from lower layer without control info",
                 udpPacket->getClassName(), udpPacket->getName());
     }
     else
     {
-        error("(%s)%s arrived from lower layer with unrecognized control info %s",
+        throw cRuntimeError("(%s)%s arrived from lower layer with unrecognized control info %s",
                 udpPacket->getClassName(), udpPacket->getName(), ctrl->getClassName());
     }
 }
@@ -549,10 +549,10 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
 void UDP::bind(int sockId, int gateIndex, const Address& localAddr, int localPort)
 {
     if (sockId == -1)
-        error("sockId in BIND message not filled in");
+        throw cRuntimeError("sockId in BIND message not filled in");
 
     if (localPort<-1 || localPort>65535) // -1: ephemeral port
-        error("bind: invalid local port number %d", localPort);
+        throw cRuntimeError("bind: invalid local port number %d", localPort);
 
     SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
     SockDesc *sd = it != socketsByIdMap.end() ? it->second : NULL;
@@ -561,12 +561,12 @@ void UDP::bind(int sockId, int gateIndex, const Address& localAddr, int localPor
     // both of them must have reuseAddr flag set
     SockDesc *existing = findFirstSocketByLocalAddress(localAddr, localPort);
     if (existing != NULL && (!sd || !sd->reuseAddr || !existing->reuseAddr))
-        error("bind: local address/port %s:%u already taken", localAddr.str().c_str(), localPort);
+        throw cRuntimeError("bind: local address/port %s:%u already taken", localAddr.str().c_str(), localPort);
 
     if (sd)
     {
         if (sd->isBound)
-            error("bind: socket is already bound (sockId=%d)", sockId);
+            throw cRuntimeError("bind: socket is already bound (sockId=%d)", sockId);
 
         sd->isBound = true;
         sd->localAddr = localAddr;
@@ -587,9 +587,9 @@ void UDP::bind(int sockId, int gateIndex, const Address& localAddr, int localPor
 void UDP::connect(int sockId, int gateIndex, const Address& remoteAddr, int remotePort)
 {
     if (remoteAddr.isUnspecified())
-        error("connect: unspecified remote address");
+        throw cRuntimeError("connect: unspecified remote address");
     if (remotePort<=0 || remotePort>65535)
-        error("connect: invalid remote port number %d", remotePort);
+        throw cRuntimeError("connect: invalid remote port number %d", remotePort);
 
     SockDesc *sd = getOrCreateSocket(sockId, gateIndex);
     sd->remoteAddr = remoteAddr;
@@ -624,7 +624,7 @@ void UDP::close(int sockId)
     // remove from socketsByIdMap
     SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
     if (it==socketsByIdMap.end())
-        error("socket id=%d doesn't exist (already closed?)", sockId);
+        throw cRuntimeError("socket id=%d doesn't exist (already closed?)", sockId);
     SockDesc *sd = it->second;
     socketsByIdMap.erase(it);
 
@@ -664,7 +664,7 @@ ushort UDP::getEphemeralPort()
     while (socketsByPortMap.find(lastEphemeralPort) != socketsByPortMap.end())
     {
         if (lastEphemeralPort == searchUntil) // got back to starting point?
-            error("Ephemeral port range %d..%d exhausted, all ports occupied", EPHEMERAL_PORTRANGE_START, EPHEMERAL_PORTRANGE_END);
+            throw cRuntimeError("Ephemeral port range %d..%d exhausted, all ports occupied", EPHEMERAL_PORTRANGE_START, EPHEMERAL_PORTRANGE_END);
         lastEphemeralPort++;
         if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
             lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
@@ -792,9 +792,9 @@ void UDP::sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, con
                     int interfaceId, bool multicastLoop, int ttl, unsigned char tos)
 {
     if (destAddr.isUnspecified())
-        error("send: unspecified destination address");
+        throw cRuntimeError("send: unspecified destination address");
     if (destPort<=0 || destPort>65535)
-        error("send invalid remote port number %d", destPort);
+        throw cRuntimeError("send invalid remote port number %d", destPort);
 
     UDPPacket *udpPacket = createUDPPacket(appData->getName());
     udpPacket->setByteLength(UDP_HEADER_BYTES);
@@ -868,7 +868,7 @@ UDP::SockDesc *UDP::getSocketById(int sockId)
 {
     SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
     if (it==socketsByIdMap.end())
-        error("socket id=%d doesn't exist (already closed?)", sockId);
+        throw cRuntimeError("socket id=%d doesn't exist (already closed?)", sockId);
     return it->second;
 }
 
@@ -876,7 +876,7 @@ UDP::SockDesc *UDP::getOrCreateSocket(int sockId, int gateIndex)
 {
     // validate sockId
     if (sockId == -1)
-        error("sockId in UDP command not filled in");
+        throw cRuntimeError("sockId in UDP command not filled in");
 
     SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
     if (it != socketsByIdMap.end())
@@ -942,7 +942,7 @@ void UDP::joinMulticastGroups(SockDesc *sd, const std::vector<Address>& multicas
         {
             InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
             if (!ie)
-                error("Interface id=%d does not exist", interfaceId);
+                throw cRuntimeError("Interface id=%d does not exist", interfaceId);
             ASSERT(ie->isMulticast());
             addMulticastAddressToInterface(ie, multicastAddr);
         }

@@ -178,7 +178,7 @@ void VoIPStreamReceiver::createConnection(VoIPStreamPacket *vp)
 
     curConn.pCodecDec = avcodec_find_decoder(curConn.codec);
     if (curConn.pCodecDec == NULL)
-        error("Codec %d not found", curConn.codec);
+        throw cRuntimeError("Codec %d not found", curConn.codec);
 
 #if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
     curConn.decCtx = avcodec_alloc_context();
@@ -193,7 +193,7 @@ void VoIPStreamReceiver::createConnection(VoIPStreamPacket *vp)
 
     int ret = avcodec_open(curConn.decCtx, curConn.pCodecDec);
     if (ret < 0)
-        error("could not open decoding codec %d (%s): err=%d", curConn.codec, curConn.pCodecDec->name, ret);
+        throw cRuntimeError("could not open decoding codec %d (%s): err=%d", curConn.codec, curConn.pCodecDec->name, ret);
 
     curConn.openAudio(resultFile);
     curConn.offline = false;
@@ -245,7 +245,7 @@ void VoIPStreamReceiver::decodePacket(VoIPStreamPacket *vp)
             break;
 
         default:
-            error("The received VoIPStreamPacket has unknown type %d", vp->getType());
+            throw cRuntimeError("The received VoIPStreamPacket has unknown type %d", vp->getType());
             return;
     }
     uint16_t newSeqNo = vp->getSeqNo();

@@ -75,7 +75,8 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
                 case AS_EXTERNAL_LSA_TYPE:
                     lsaCount = lsUpdatePacket->getAsExternalLSAsArraySize();
                     break;
-                default: break;
+                default:
+                    throw cRuntimeError("Invalid currentType:%d", currentType);
             }
 
             for (unsigned int i = 0; i < lsaCount; i++) {
@@ -95,7 +96,8 @@ void OSPF::LinkStateUpdateHandler::processPacket(OSPFPacket* packet, OSPF::Inter
                     case AS_EXTERNAL_LSA_TYPE:
                         currentLSA = (&(lsUpdatePacket->getAsExternalLSAs(i)));
                         break;
-                    default: break;
+                    default:
+                        throw cRuntimeError("Invalid currentType:%d", currentType);
                 }
 
                 if (!validateLSChecksum(currentLSA)) {

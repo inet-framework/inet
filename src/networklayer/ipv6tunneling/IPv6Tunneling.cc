@@ -100,7 +100,7 @@ void IPv6Tunneling::handleMessage(cMessage* msg)
         encapsulateDatagram(dgram);
     }
     else
-        opp_error("IPv6Tunneling: Unknown gate: %s!", msg->getArrivalGate()->getFullName());
+        throw cRuntimeError("IPv6Tunneling: Unknown gate: %s!", msg->getArrivalGate()->getFullName());
 }
 
 bool IPv6Tunneling::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -137,10 +137,10 @@ int IPv6Tunneling::createTunnel(TunnelType tunnelType,
     }
 
     if (vIfIndexTop <= (ift->getBiggestInterfaceId()))
-        opp_error("Error: Not more than %d tunnels supported!", INT_MAX - ift->getBiggestInterfaceId());
+        throw cRuntimeError("Error: Not more than %d tunnels supported!", INT_MAX - ift->getBiggestInterfaceId());
 
     if ((destTrigger == IPv6Address::UNSPECIFIED_ADDRESS) && (noOfNonSplitTunnels == 1))
-        opp_error("Error: Not more than 1 non-split tunnel supported!");
+        throw cRuntimeError("Error: Not more than 1 non-split tunnel supported!");
 
     // 6.1-6.2
     ASSERT(entry.isUnicast());
@@ -190,7 +190,7 @@ int IPv6Tunneling::createTunnel(TunnelType tunnelType,
     }
     else
     {
-        opp_error("tunnel type %d not supported for createTunnel()", tunnelType);
+        throw cRuntimeError("tunnel type %d not supported for createTunnel()", tunnelType);
     }
 
     if (ev.isGUI())
@@ -402,7 +402,7 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram* dgram)
     }
 
     if (vIfIndex == -1)
-        opp_error("encapsulateDatagram(): tunnel not existent");
+        throw cRuntimeError("encapsulateDatagram(): tunnel not existent");
 
     // TODO copy information from old ctrlInfo into new one (Traffic Class, Flow label, etc.)
     delete dgram->removeControlInfo();
@@ -650,7 +650,7 @@ std::ostream& operator<<(std::ostream& os, const IPv6Tunneling::Tunnel& tun)
             break;
 
         default:
-            opp_error("Not a valid type for an existing tunnel!");
+            throw cRuntimeError("Not a valid type for an existing tunnel!");
             break;
     }
 

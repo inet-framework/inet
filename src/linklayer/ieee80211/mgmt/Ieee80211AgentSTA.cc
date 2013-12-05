@@ -91,7 +91,7 @@ void Ieee80211AgentSTA::handleTimer(cMessage *msg)
     }
     else
     {
-        error("internal error: unrecognized timer '%s'", msg->getName());
+        throw cRuntimeError("internal error: unrecognized timer '%s'", msg->getName());
     }
 }
 
@@ -111,9 +111,9 @@ void Ieee80211AgentSTA::handleResponse(cMessage *msg)
     else if (dynamic_cast<Ieee80211Prim_ReassociateConfirm *>(ctrl))
         processReassociateConfirm((Ieee80211Prim_ReassociateConfirm *)ctrl);
     else if (ctrl)
-        error("handleResponse(): unrecognized control info class `%s'", ctrl->getClassName());
+        throw cRuntimeError("handleResponse(): unrecognized control info class `%s'", ctrl->getClassName());
     else
-        error("handleResponse(): control info is NULL");
+        throw cRuntimeError("handleResponse(): control info is NULL");
     delete ctrl;
 }
 

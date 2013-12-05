@@ -138,7 +138,7 @@ class INET_API ModuleAccess
     virtual T *get(cModule *from)
     {
         T *m = getIfExists(from);
-        if (!m) opp_error("Module (%s)%s not found", opp_typename(typeid(T)), name);
+        if (!m) throw cRuntimeError("Module (%s)%s not found", opp_typename(typeid(T)), name);
         return m;
     }
 
@@ -151,7 +151,7 @@ class INET_API ModuleAccess
 
     virtual T *getIfExists(cModule *from)
     {
-        if (!from) opp_error("Invalid argument: module must not be NULL");
+        if (!from) throw cRuntimeError("Invalid argument: module must not be NULL");
         cModule *m = findModuleWhereverInNode(name, from);
         return dynamic_cast<T*>(m);
     }

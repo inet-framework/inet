@@ -80,7 +80,7 @@ void IdealMac::initialize(int stage)
         cGate *queueOut = gate("upperLayerIn")->getPathStartGate();
         queueModule = dynamic_cast<IPassiveQueue *>(queueOut->getOwnerModule());
         if (!queueModule)
-            error("Missing queueModule");
+            throw cRuntimeError("Missing queueModule");
 
         initializeMACAddress();
     }
@@ -178,7 +178,7 @@ void IdealMac::handleUpperPacket(cPacket *msg)
     if (radio->getRadioTransmissionState() == IRadio::RADIO_TRANSMISSION_STATE_TRANSMITTING)
     {
         // Logic error: we do not request packet from the external queue when radio is transmitting
-        error("Received msg for transmission but transmitter is busy");
+        throw cRuntimeError("Received msg for transmission but transmitter is busy");
     }
     else
     {

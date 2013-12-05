@@ -53,14 +53,14 @@
     bool ___exit = false;
     int ___c = 0;
     cFSM ___fsm = fsm;
-    while (!___exit && (___c++ < FSM_MAXT || opp_error(E_INFLOOP, ___fsm->getStateName()))
+    while (!___exit && (___c++ < FSM_MAXT || (throw cRuntimeError(E_INFLOOP, ___fsm->getStateName())))
     {
         if (condition_seen = false, ___exit = true, ___fsm->getState() == X)
         {
             if (!___is_event)
             {
                 if (condition_seen)
-                    error("...");
+                    throw cRuntimeError("...");
                 // enter code
             }
             condition_seen = true; if (isFoo && ___is_event)
@@ -103,7 +103,7 @@
     int ___c = 0;                                                      \
     cFSM *___fsm = &fsm;                                               \
     EV << "processing event in state machine " << (fsm).getName() << endl;  \
-    while (!___exit && (___c++ < FSM_MAXT || (opp_error(E_INFLOOP, (fsm).getStateName()), 0)))
+    while (!___exit && (___c++ < FSM_MAXT || (throw cRuntimeError(E_INFLOOP, (fsm).getStateName()), 0)))
 
 #define FSMA_Print(exiting)                                            \
     (EV << "FSM " << ___fsm->getName()                                    \
@@ -137,7 +137,7 @@
     if (!___is_event)                                                                   \
     {                                                                                   \
         if (___condition_seen)                                                          \
-            error("FSMA_Enter() must precede all FSMA_*_Transition()'s in the code");   \
+            throw cRuntimeError("FSMA_Enter() must precede all FSMA_*_Transition()'s in the code");   \
         action;                                                                         \
     }
 

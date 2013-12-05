@@ -73,7 +73,7 @@ void UDPBasicBurst::initialize(int stage)
         startTime = par("startTime");
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime <= startTime)
-            error("Invalid startTime/stopTime parameters");
+            throw cRuntimeError("Invalid startTime/stopTime parameters");
 
         messageLengthPar = &par("messageLength");
         burstDurationPar = &par("burstDuration");
@@ -205,7 +205,7 @@ void UDPBasicBurst::handleMessageWhenUp(cMessage *msg)
     }
     else
     {
-        error("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
+        throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
 
     if (ev.isGUI())

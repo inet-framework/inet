@@ -371,7 +371,7 @@ void PPP::handleMessage(cMessage *msg)
                     getDisplayString().setTagArg("i", 1, "red");
 
                 if (txQueueLimit && txQueue.length() > txQueueLimit)
-                    error("txQueue length exceeds %d -- this is probably due to "
+                    throw cRuntimeError("txQueue length exceeds %d -- this is probably due to "
                           "a bogus app model generating excessive traffic "
                           "(or if this is normal, increase txQueueLimit!)",
                           txQueueLimit);

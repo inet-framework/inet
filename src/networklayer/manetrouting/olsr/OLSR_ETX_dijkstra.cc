@@ -97,7 +97,7 @@ Dijkstra::NodesSet::iterator Dijkstra::best_cost()
     {
         DijkstraMap::iterator itDij = dijkstraMap.find(*it);
         if (itDij==dijkstraMap.end())
-            opp_error("dijkstraMap error");
+            throw cRuntimeError("dijkstraMap error");
         if (itDij->second.hop_count() == -1) // there is no such link yet, i. e., it's cost is infinite...
             continue;
         if (best == nonprocessed_nodes_->end())
@@ -106,7 +106,7 @@ Dijkstra::NodesSet::iterator Dijkstra::best_cost()
         {
             DijkstraMap::iterator itBest = dijkstraMap.find(*best);
             if (itBest==dijkstraMap.end())
-                opp_error("dijkstraMap error");
+                throw cRuntimeError("dijkstraMap error");
             if (parameter->link_delay())
             {
                 /// Link quality extension
@@ -143,7 +143,7 @@ edge* Dijkstra::get_edge(const nsaddr_t & dest_node, const nsaddr_t & last_node)
     // Find the edge that connects dest_node and last_node
     LinkArray::iterator itLink = link_array_->find(dest_node);
     if (itLink==link_array_->end())
-        opp_error("link_array_ error");
+        throw cRuntimeError("link_array_ error");
     for (std::vector<edge*>::iterator it = itLink->second.begin(); it != itLink->second.end(); it++)
     {
         edge* current_edge = *it;
@@ -180,10 +180,10 @@ void Dijkstra::run()
             // D(node) = min (D(node), D(current_node) + edge(current_node, node).cost())
             DijkstraMap::iterator itDest = dijkstraMap.find(*dest_node);
             if (itDest==dijkstraMap.end())
-                opp_error("dijkstraMap error node not found");
+                throw cRuntimeError("dijkstraMap error node not found");
             DijkstraMap::iterator itCurrent = dijkstraMap.find(*current_node);
             if (itCurrent==dijkstraMap.end())
-                opp_error("dijkstraMap error node not found");
+                throw cRuntimeError("dijkstraMap error node not found");
             // hop destHop = itDest->second;
             // hop currentHop = itCurrent->second;
             if (itDest->second.hop_count() == -1)   // there is not a link to dest_node yet...

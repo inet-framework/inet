@@ -127,7 +127,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
 
     if (qp == NULL)
     {
-        opp_error("Dymo packet queue, Malloc failed!\n");
+        throw cRuntimeError("Dymo packet queue, Malloc failed!\n");
         exit(-1);
     }
 
@@ -335,7 +335,7 @@ void NS_CLASS packet_queue_add(cPacket * p, struct in_addr dest_addr)
 
     if (qp == NULL)
     {
-        opp_error("Dymo packet queue, Malloc failed!\n");
+        throw cRuntimeError("Dymo packet queue, Malloc failed!\n");
         exit(-1);
     }
 

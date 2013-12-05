@@ -381,12 +381,12 @@ rtable_entry_t *NS_CLASS rtable_find(struct in_addr dest_addr)
             // sanity check
             if (it->second->rt_dest_addr.s_addr != dest_addr.s_addr)
             {
-                opp_error("Dymo routing data base error");
+                throw cRuntimeError("Dymo routing data base error");
             }
             return it->second;
         }
         else
-            opp_error("Dymo routing data base error, NULL entry");
+            throw cRuntimeError("Dymo routing data base error, NULL entry");
     }
     else
     {
@@ -401,12 +401,12 @@ rtable_entry_t *NS_CLASS rtable_find(struct in_addr dest_addr)
                     // sanity check
                     if (it->second->rt_dest_addr.s_addr != apAdd)
                     {
-                        opp_error("Dymo routing data base error AP");
+                        throw cRuntimeError("Dymo routing data base error AP");
                     }
                     return it->second;
                 }
                 else
-                    opp_error("Dymo routing data base error, NULL entry AP");
+                    throw cRuntimeError("Dymo routing data base error, NULL entry AP");
             }
         }
         return NULL;
@@ -541,7 +541,7 @@ rtable_entry_t *NS_CLASS rtable_update(rtable_entry_t *entry,
             if (entry->rt_dest_addr.s_addr == apAdd )
                 return rtable_update(entry,entry->rt_dest_addr,nxthop_addr, ifindex, seqnum, prefix, hopcnt, is_gw, cost, hopfix);
             else
-                opp_error("DYMO routing data base error");
+                throw cRuntimeError("DYMO routing data base error");
         }
         else
         {
@@ -613,7 +613,7 @@ void NS_CLASS rtable_delete(rtable_entry_t *entry)
             dymoRoutingTable->erase(it);
         }
         else
-            opp_error("Error in dymo routing table");
+            throw cRuntimeError("Error in dymo routing table");
 
     }
     delete entry;

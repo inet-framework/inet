@@ -113,7 +113,7 @@ void TraCIScenarioManager::initialize(int stage)
 }
 
 std::string TraCIScenarioManager::receiveTraCIMessage() {
-    if (!socketPtr) error("Connection to TraCI server lost");
+    if (!socketPtr) throw cRuntimeError("Connection to TraCI server lost");
 
     uint32_t msgLength;
     {
@@ -124,11 +124,11 @@ std::string TraCIScenarioManager::receiveTraCIMessage() {
             if (receivedBytes > 0) {
                 bytesRead += receivedBytes;
             } else if (receivedBytes == 0) {
-                error("Connection to TraCI server closed unexpectedly. Check your server's log");
+                throw cRuntimeError("Connection to TraCI server closed unexpectedly. Check your server's log");
             } else {
                 if (sock_errno() == EINTR) continue;
                 if (sock_errno() == EAGAIN) continue;
-                error("Connection to TraCI server lost. Check your server's log. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
+                throw cRuntimeError("Connection to TraCI server lost. Check your server's log. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
             }
         }
         TraCIBuffer(std::string(buf2, sizeof(uint32_t))) >> msgLength;
@@ -144,11 +144,11 @@ std::string TraCIScenarioManager::receiveTraCIMessage() {
             if (receivedBytes > 0) {
                 bytesRead += receivedBytes;
             } else if (receivedBytes == 0) {
-                error("Connection to TraCI server closed unexpectedly. Check your server's log");
+                throw cRuntimeError("Connection to TraCI server closed unexpectedly. Check your server's log");
             } else {
                 if (sock_errno() == EINTR) continue;
                 if (sock_errno() == EAGAIN) continue;
-                error("Connection to TraCI server lost. Check your server's log. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
+                throw cRuntimeError("Connection to TraCI server lost. Check your server's log. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
             }
         }
     }
@@ -156,7 +156,7 @@ std::string TraCIScenarioManager::receiveTraCIMessage() {
 }
 
 void TraCIScenarioManager::sendTraCIMessage(std::string buf) {
-    if (!socketPtr) error("Connection to TraCI server lost");
+    if (!socketPtr) throw cRuntimeError("Connection to TraCI server lost");
 
     {
         uint32_t msgLength = sizeof(uint32_t) + buf.length();
@@ -170,7 +170,7 @@ void TraCIScenarioManager::sendTraCIMessage(std::string buf) {
             } else {
                 if (sock_errno() == EINTR) continue;
                 if (sock_errno() == EAGAIN) continue;
-                error("Connection to TraCI server lost. Check your server's log. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
+                throw cRuntimeError("Connection to TraCI server lost. Check your server's log. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
             }
         }
     }
@@ -185,7 +185,7 @@ void TraCIScenarioManager::sendTraCIMessage(std::string buf) {
             } else {
                 if (sock_errno() == EINTR) continue;
                 if (sock_errno() == EAGAIN) continue;
-                error("Connection to TraCI server lost. Check your server's log. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
+                throw cRuntimeError("Connection to TraCI server lost. Check your server's log. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
             }
         }
     }
@@ -209,8 +209,8 @@ TraCIScenarioManager::TraCIBuffer TraCIScenarioManager::queryTraCI(uint8_t comma
     ASSERT(commandResp == commandId);
     uint8_t result; obuf >> result;
     std::string description; obuf >> description;
-    if (result == RTYPE_NOTIMPLEMENTED) error("TraCI server reported command 0x%2x not implemented (\"%s\"). Might need newer version.", commandId, description.c_str());
-    if (result == RTYPE_ERR) error("TraCI server reported error executing command 0x%2x (\"%s\").", commandId, description.c_str());
+    if (result == RTYPE_NOTIMPLEMENTED) throw cRuntimeError("TraCI server reported command 0x%2x not implemented (\"%s\"). Might need newer version.", commandId, description.c_str());
+    if (result == RTYPE_ERR) throw cRuntimeError("TraCI server reported error executing command 0x%2x (\"%s\").", commandId, description.c_str());
     ASSERT(result == RTYPE_OK);
     return obuf;
 }
@@ -232,7 +232,7 @@ TraCIScenarioManager::TraCIBuffer TraCIScenarioManager::queryTraCIOptional(uint8
 void TraCIScenarioManager::connect() {
     EV_DEBUG << "TraCIScenarioManager connecting to TraCI server" << endl;
 
-    if (initsocketlibonce() != 0) error("Could not init socketlib");
+    if (initsocketlibonce() != 0) throw cRuntimeError("Could not init socketlib");
 
     in_addr addr;
     struct hostent* host_ent;
@@ -244,7 +244,7 @@ void TraCIScenarioManager::connect() {
     } else if ((host_ent = gethostbyname(host.c_str()))) {
         addr = *((struct in_addr*) host_ent->h_addr_list[0]);
     } else {
-        error("Invalid TraCI server address: %s", host.c_str());
+        throw cRuntimeError("Invalid TraCI server address: %s", host.c_str());
         return;
     }
 
@@ -256,10 +256,10 @@ void TraCIScenarioManager::connect() {
 
     socketPtr = new SOCKET();
     MYSOCKET = ::socket(AF_INET, SOCK_STREAM, 0);
-    if (MYSOCKET < 0) error("Could not create socket to connect to TraCI server");
+    if (MYSOCKET < 0) throw cRuntimeError("Could not create socket to connect to TraCI server");
 
     if (::connect(MYSOCKET, (sockaddr const*) &address, sizeof(address)) < 0) {
-        error("Could not connect to TraCI server. Make sure it is running and not behind a firewall. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
+        throw cRuntimeError("Could not connect to TraCI server. Make sure it is running and not behind a firewall. Error message: %d: %s", sock_errno(), strerror(sock_errno()));
     }
 
     {
@@ -278,7 +278,7 @@ void TraCIScenarioManager::init_traci() {
             EV_DEBUG << "TraCI server \"" << serverVersion << "\" reports API version " << apiVersion << endl;
         }
         else {
-            error("TraCI server \"%s\" reports API version %d. This server is unsupported.", serverVersion.c_str(), apiVersion);
+            throw cRuntimeError("TraCI server \"%s\" reports API version %d. This server is unsupported.", serverVersion.c_str(), apiVersion);
         }
 
     }
@@ -350,7 +350,7 @@ void TraCIScenarioManager::handleMessage(cMessage *msg) {
         handleSelfMsg(msg);
         return;
     }
-    error("TraCIScenarioManager doesn't handle messages from other modules");
+    throw cRuntimeError("TraCIScenarioManager doesn't handle messages from other modules");
 }
 
 void TraCIScenarioManager::handleSelfMsg(cMessage *msg) {
@@ -363,7 +363,7 @@ void TraCIScenarioManager::handleSelfMsg(cMessage *msg) {
         executeOneTimestep();
         return;
     }
-    error("TraCIScenarioManager received unknown self-message");
+    throw cRuntimeError("TraCIScenarioManager received unknown self-message");
 }
 
 std::pair<uint32_t, std::string> TraCIScenarioManager::commandGetVersion() {
@@ -603,7 +603,7 @@ bool TraCIScenarioManager::commandAddVehicle(std::string vehicleId, std::string 
 
 // name: host;Car;i=vehicle.gif
 void TraCIScenarioManager::addModule(std::string nodeId, std::string type, std::string name, std::string displayString, const Coord& position, std::string road_id, double speed, double angle) {
-    if (hosts.find(nodeId) != hosts.end()) error("tried adding duplicate module");
+    if (hosts.find(nodeId) != hosts.end()) throw cRuntimeError("tried adding duplicate module");
 
     double option1 = hosts.size() / (hosts.size() + unEquippedHosts.size() + 1.0);
     double option2 = (hosts.size() + 1) / (hosts.size() + unEquippedHosts.size() + 1.0);
@@ -616,10 +616,10 @@ void TraCIScenarioManager::addModule(std::string nodeId, std::string type, std::
     int32_t nodeVectorIndex = nextNodeVectorIndex++;
 
     cModule* parentmod = getParentModule();
-    if (!parentmod) error("Parent Module not found");
+    if (!parentmod) throw cRuntimeError("Parent Module not found");
 
     cModuleType* nodeType = cModuleType::get(type.c_str());
-    if (!nodeType) error("Module Type \"%s\" not found", type.c_str());
+    if (!nodeType) throw cRuntimeError("Module Type \"%s\" not found", type.c_str());
 
     //TODO: this trashes the vectsize member of the cModule, although nobody seems to use it
     cModule* mod = nodeType->create(name.c_str(), parentmod, nodeVectorIndex, nodeVectorIndex);
@@ -652,7 +652,7 @@ bool TraCIScenarioManager::isModuleUnequipped(std::string nodeId) {
 
 void TraCIScenarioManager::deleteModule(std::string nodeId) {
     cModule* mod = getManagedModule(nodeId);
-    if (!mod) error("no vehicle with Id \"%s\" found", nodeId.c_str());
+    if (!mod) throw cRuntimeError("no vehicle with Id \"%s\" found", nodeId.c_str());
 
     hosts.erase(nodeId);
     mod->callFinish();
@@ -921,8 +921,8 @@ void TraCIScenarioManager::processSimSubscription(std::string objectId, TraCIBuf
             uint8_t varType; buf >> varType;
             ASSERT(varType == TYPE_STRING);
             std::string description; buf >> description;
-            if (isokay == RTYPE_NOTIMPLEMENTED) error("TraCI server reported subscribing to variable 0x%2x not implemented (\"%s\"). Might need newer version.", variable1_resp, description.c_str());
-            error("TraCI server reported error subscribing to variable 0x%2x (\"%s\").", variable1_resp, description.c_str());
+            if (isokay == RTYPE_NOTIMPLEMENTED) throw cRuntimeError("TraCI server reported subscribing to variable 0x%2x not implemented (\"%s\"). Might need newer version.", variable1_resp, description.c_str());
+            throw cRuntimeError("TraCI server reported error subscribing to variable 0x%2x (\"%s\").", variable1_resp, description.c_str());
         }
 
         if (variable1_resp == VAR_DEPARTED_VEHICLES_IDS) {
@@ -972,7 +972,7 @@ void TraCIScenarioManager::processSimSubscription(std::string objectId, TraCIBuf
             ASSERT(omnetTimestep == serverTimestep);
 
         } else {
-            error("Received unhandled sim subscription result");
+            throw cRuntimeError("Received unhandled sim subscription result");
         }
     }
 }
@@ -996,8 +996,8 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
             ASSERT(varType == TYPE_STRING);
             std::string errormsg; buf >> errormsg;
             if (isSubscribed) {
-                if (isokay == RTYPE_NOTIMPLEMENTED) error("TraCI server reported subscribing to vehicle variable 0x%2x not implemented (\"%s\"). Might need newer version.", variable1_resp, errormsg.c_str());
-                error("TraCI server reported error subscribing to vehicle variable 0x%2x (\"%s\").", variable1_resp, errormsg.c_str());
+                if (isokay == RTYPE_NOTIMPLEMENTED) throw cRuntimeError("TraCI server reported subscribing to vehicle variable 0x%2x not implemented (\"%s\"). Might need newer version.", variable1_resp, errormsg.c_str());
+                throw cRuntimeError("TraCI server reported error subscribing to vehicle variable 0x%2x (\"%s\").", variable1_resp, errormsg.c_str());
             }
         } else if (variable1_resp == ID_LIST) {
             uint8_t varType; buf >> varType;
@@ -1054,7 +1054,7 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
             buf >> signals;
             numRead++;
         } else {
-            error("Received unhandled vehicle subscription result");
+            throw cRuntimeError("Received unhandled vehicle subscription result");
         }
     }
 
@@ -1065,7 +1065,7 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
     if (numRead != 5) return;
 
     Coord p = traci2omnet(TraCICoord(px, py));
-    if ((p.x < 0) || (p.y < 0)) error("received bad node position (%.2f, %.2f), translated to (%.2f, %.2f)", px, py, p.x, p.y);
+    if ((p.x < 0) || (p.y < 0)) throw cRuntimeError("received bad node position (%.2f, %.2f), translated to (%.2f, %.2f)", px, py, p.x, p.y);
 
     double angle = traci2omnetAngle(angle_traci);
 
@@ -1115,7 +1115,7 @@ void TraCIScenarioManager::processSubcriptionResult(TraCIBuffer& buf) {
     if (commandId_resp == RESPONSE_SUBSCRIBE_VEHICLE_VARIABLE) processVehicleSubscription(objectId_resp, buf);
     else if (commandId_resp == RESPONSE_SUBSCRIBE_SIM_VARIABLE) processSimSubscription(objectId_resp, buf);
     else {
-        error("Received unhandled subscription result");
+        throw cRuntimeError("Received unhandled subscription result");
     }
 }
 

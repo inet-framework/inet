@@ -139,13 +139,13 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
 
     if (frame->getDest().equals(address))
     {
-        error("logic error: frame %s from higher layer has local MAC address as dest (%s)",
+        throw cRuntimeError("logic error: frame %s from higher layer has local MAC address as dest (%s)",
                 frame->getFullName(), frame->getDest().str().c_str());
     }
 
     if (frame->getByteLength() > MAX_ETHERNET_FRAME_BYTES)
     {
-        error("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
+        throw cRuntimeError("packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
                 (int)(frame->getByteLength()), MAX_ETHERNET_FRAME_BYTES);
     }
 
@@ -180,7 +180,7 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
     else
     {
         if (txQueue.innerQueue->isFull())
-            error("txQueue length exceeds %d -- this is probably due to "
+            throw cRuntimeError("txQueue length exceeds %d -- this is probably due to "
                   "a bogus app model generating excessive traffic "
                   "(or if this is normal, increase txQueueLimit!)",
                   txQueue.innerQueue->getQueueLimit());
@@ -252,7 +252,7 @@ void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
 void EtherMACFullDuplex::handleEndIFGPeriod()
 {
     if (transmitState != WAIT_IFG_STATE)
-        error("Not in WAIT_IFG_STATE at the end of IFG period");
+        throw cRuntimeError("Not in WAIT_IFG_STATE at the end of IFG period");
 
     // End of IFG period, okay to transmit
     EV << "IFG elapsed" << endl;
@@ -264,10 +264,10 @@ void EtherMACFullDuplex::handleEndTxPeriod()
 {
     // we only get here if transmission has finished successfully
     if (transmitState != TRANSMITTING_STATE)
-        error("End of transmission, and incorrect state detected");
+        throw cRuntimeError("End of transmission, and incorrect state detected");
 
     if (NULL == curTxFrame)
-        error("Frame under transmission cannot be found");
+        throw cRuntimeError("Frame under transmission cannot be found");
 
     emit(packetSentToLowerSignal, curTxFrame);  //consider: emit with start time of frame
 
@@ -318,7 +318,7 @@ void EtherMACFullDuplex::finish()
 void EtherMACFullDuplex::handleEndPausePeriod()
 {
     if (transmitState != PAUSE_STATE)
-        error("End of PAUSE event occurred when not in PAUSE_STATE!");
+        throw cRuntimeError("End of PAUSE event occurred when not in PAUSE_STATE!");
 
     EV << "Pause finished, resuming transmissions\n";
     beginSendFrames();

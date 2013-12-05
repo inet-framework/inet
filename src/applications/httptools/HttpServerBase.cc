@@ -68,7 +68,7 @@ void HttpServerBase::initialize(int stage)
 
         cXMLElement *rootelement = par("config").xmlValue();
         if (rootelement==NULL)
-            error("Configuration file is not defined");
+            throw cRuntimeError("Configuration file is not defined");
 
         // Initialize the distribution objects for random browsing
         // @todo Skip initialization of random objects for scripted servers?
@@ -78,65 +78,65 @@ void HttpServerBase::initialize(int stage)
         // The reply delay
         cXMLElement *element = rootelement->getFirstChildWithTag("replyDelay");
         if (element==NULL)
-            error("Reply delay parameter undefined in XML configuration");
+            throw cRuntimeError("Reply delay parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdReplyDelay = rdFactory.create(attributes);
         if (rdReplyDelay==NULL)
-            error("Reply delay random object could not be created");
+            throw cRuntimeError("Reply delay random object could not be created");
 
         // HTML page size
         element = rootelement->getFirstChildWithTag("htmlPageSize");
         if (element==NULL)
-            error("HTML page size parameter undefined in XML configuration");
+            throw cRuntimeError("HTML page size parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdHtmlPageSize = rdFactory.create(attributes);
         if (rdHtmlPageSize==NULL)
-            error("HTML page size random object could not be created");
+            throw cRuntimeError("HTML page size random object could not be created");
 
         // Text resource size
         element = rootelement->getFirstChildWithTag("textResourceSize");
         if (element==NULL)
-            error("Text resource size parameter undefined in XML configuration");
+            throw cRuntimeError("Text resource size parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdTextResourceSize = rdFactory.create(attributes);
         if (rdTextResourceSize==NULL)
-            error("Text resource size random object could not be created");
+            throw cRuntimeError("Text resource size random object could not be created");
 
         // Image resource size
         element = rootelement->getFirstChildWithTag("imageResourceSize");
         if (element==NULL)
-            error("Image resource size parameter undefined in XML configuration");
+            throw cRuntimeError("Image resource size parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdImageResourceSize = rdFactory.create(attributes);
         if (rdImageResourceSize==NULL)
-            error("Image resource size random object could not be created");
+            throw cRuntimeError("Image resource size random object could not be created");
 
         // Number of resources per page
         element = rootelement->getFirstChildWithTag("numResources");
         if (element==NULL)
-            error("Number of resources parameter undefined in XML configuration");
+            throw cRuntimeError("Number of resources parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdNumResources = rdFactory.create(attributes);
         if (rdNumResources==NULL)
-            error("Number of resources random object could not be created");
+            throw cRuntimeError("Number of resources random object could not be created");
 
         // Text/Image resources ratio
         element = rootelement->getFirstChildWithTag("textImageResourceRatio");
         if (element==NULL)
-            error("Text/image resource ratio parameter undefined in XML configuration");
+            throw cRuntimeError("Text/image resource ratio parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdTextImageResourceRatio = rdFactory.create(attributes);
         if (rdTextImageResourceRatio==NULL)
-            error("Text/image resource ratio random object could not be created");
+            throw cRuntimeError("Text/image resource ratio random object could not be created");
 
         // Error message size
         element = rootelement->getFirstChildWithTag("errorMessageSize");
         if (element==NULL)
-            error("Error message size parameter undefined in XML configuration");
+            throw cRuntimeError("Error message size parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdErrorMsgSize = rdFactory.create(attributes);
         if (rdErrorMsgSize==NULL)
-            error("Error message size random object could not be created");
+            throw cRuntimeError("Error message size random object could not be created");
 
         activationTime = par("activationTime");
         EV_INFO << "Activation time is " << activationTime << endl;
@@ -215,7 +215,7 @@ cPacket* HttpServerBase::handleReceivedMessage(cMessage *msg)
 {
     HttpRequestMessage *request = check_and_cast<HttpRequestMessage *>(msg);
     if (request==NULL)
-        error("Message (%s)%s is not a valid request", msg->getClassName(), msg->getName());
+        throw cRuntimeError("Message (%s)%s is not a valid request", msg->getClassName(), msg->getName());
 
     EV_DEBUG << "Handling received message " << msg->getName() << ". Target URL: " << request->targetUrl() << endl;
 
@@ -224,7 +224,7 @@ cPacket* HttpServerBase::handleReceivedMessage(cMessage *msg)
     if (extractServerName(request->targetUrl()) != hostName)
     {
         // This should never happen but lets check
-        error("Received message intended for '%s'", request->targetUrl()); // TODO: DEBUG HERE
+        throw cRuntimeError("Received message intended for '%s'", request->targetUrl()); // TODO: DEBUG HERE
         return NULL;
     }
 
@@ -430,7 +430,7 @@ void HttpServerBase::registerWithController()
     // Find controller object and register
     HttpController *controller = check_and_cast_nullable<HttpController *>(simulation.getSystemModule()->getSubmodule("controller"));
     if (controller == NULL)
-        error("Controller module not found");
+        throw cRuntimeError("Controller module not found");
     controller->registerServer(getParentModule()->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);
 }
 
@@ -441,7 +441,7 @@ void HttpServerBase::readSiteDefinition(std::string file)
     std::ifstream tracefilestream;
     tracefilestream.open(file.c_str());
     if (tracefilestream.fail())
-        error("Could not open site definition file %s", file.c_str());
+        throw cRuntimeError("Could not open site definition file %s", file.c_str());
 
     std::vector<std::string> siteFileSplit = splitFile(file);
     std::string line;
@@ -477,7 +477,7 @@ void HttpServerBase::readSiteDefinition(std::string file)
             if (siteSection)
             {
                 if (res.size()<2 || res.size()>3)
-                    error("Invalid format of site configuration file '%s'. Site section, line (%d): %s",
+                    throw cRuntimeError("Invalid format of site configuration file '%s'. Site section, line (%d): %s",
                            file.c_str(), linecount, line.c_str());
                 key = trimLeft(res[0], "/");
                 if (key.empty())
@@ -485,7 +485,7 @@ void HttpServerBase::readSiteDefinition(std::string file)
                     if (htmlPages.find("root")==htmlPages.end())
                         key = "root";
                     else
-                        error("Second root page found in site definition file %s, line (%d): %s",
+                        throw cRuntimeError("Second root page found in site definition file %s, line (%d): %s",
                               file.c_str(), linecount, line.c_str());
                 }
                 htmlfile = res[1];
@@ -499,7 +499,7 @@ void HttpServerBase::readSiteDefinition(std::string file)
                     }
                     catch (...)
                     {
-                        error("Invalid format of site configuration file '%s'. Resource section, size, line (%d): %s",
+                        throw cRuntimeError("Invalid format of site configuration file '%s'. Resource section, size, line (%d): %s",
                               file.c_str(), linecount, line.c_str());
                     }
                 }
@@ -510,7 +510,7 @@ void HttpServerBase::readSiteDefinition(std::string file)
             else if (resourceSection)
             {
                 if (res.size()<2 || res.size()>3)
-                    error("Invalid format of site configuration file '%s'. Resource section, line (%d): %s",
+                    throw cRuntimeError("Invalid format of site configuration file '%s'. Resource section, line (%d): %s",
                           file.c_str(), linecount, line.c_str());
                 key = res[0];
                 value1 = res[1];
@@ -520,7 +520,7 @@ void HttpServerBase::readSiteDefinition(std::string file)
                 }
                 catch (...)
                 {
-                    error("Invalid format of site configuration file '%s'. Resource section, size, line (%d): %s",
+                    throw cRuntimeError("Invalid format of site configuration file '%s'. Resource section, size, line (%d): %s",
                           file.c_str(), linecount, line.c_str());
                 }
 
@@ -534,7 +534,7 @@ void HttpServerBase::readSiteDefinition(std::string file)
             }
             else
             {
-                error("Invalid format of site configuration file '%s'. Unknown section, line (%d): %s",
+                throw cRuntimeError("Invalid format of site configuration file '%s'. Unknown section, line (%d): %s",
                       file.c_str(), linecount, line.c_str());
             }
         }
@@ -553,8 +553,7 @@ std::string HttpServerBase::readHtmlBodyFile(std::string file, std::string path)
     htmlfilestream.open(filePath.c_str());
 
     if (htmlfilestream.fail())
-        error("Could not open page definition file '%s'", filePath.c_str());
-
+        throw cRuntimeError("Could not open page definition file '%s'", filePath.c_str());
     while (!std::getline(htmlfilestream, line).eof())
     {
         line = trim(line);

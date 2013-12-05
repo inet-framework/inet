@@ -89,7 +89,7 @@ void RTCP::handleMessage(cMessage *msg)
     }
     else
     {
-        error("Message from unknown gate");
+        throw cRuntimeError("Message from unknown gate");
     }
 
     delete msg;

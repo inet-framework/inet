@@ -148,7 +148,7 @@ void TED::initializeTED()
         InterfaceEntry *ie = ift->getInterface(i);
         InterfaceEntry *ie2 = rt->getInterfaceByAddress(ie->ipv4Data()->getIPAddress());
         if (ie2 != ie)
-            error("MPLS models assume interfaces to have unique addresses, "
+            throw cRuntimeError("MPLS models assume interfaces to have unique addresses, "
                   "but address of '%s' (%s) is not unique",
                   ie->getName(), ie->ipv4Data()->getIPAddress().str().c_str());
         if (!ie->isLoopback())
@@ -332,7 +332,7 @@ IPv4Address TED::getInterfaceAddrByPeerAddress(IPv4Address peerIP)
     for (it = ted.begin(); it != ted.end(); it++)
         if (it->linkid == peerIP && it->advrouter == routerId)
             return it->local;
-    error("not a local peer: %s", peerIP.str().c_str());
+    throw cRuntimeError("not a local peer: %s", peerIP.str().c_str());
     return IPv4Address(); // prevent warning
 }
 
@@ -343,7 +343,7 @@ IPv4Address TED::peerRemoteInterface(IPv4Address peerIP)
     for (it = ted.begin(); it != ted.end(); it++)
         if (it->linkid == peerIP && it->advrouter == routerId)
             return it->remote;
-    error("not a local peer: %s", peerIP.str().c_str());
+    throw cRuntimeError("not a local peer: %s", peerIP.str().c_str());
     return IPv4Address(); // prevent warning
 }
 

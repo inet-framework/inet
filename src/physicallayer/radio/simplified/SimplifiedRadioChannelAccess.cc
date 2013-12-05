@@ -69,13 +69,13 @@ void SimplifiedRadioChannelAccess::initialize(int stage)
             radioPos.y = parseInt(hostModule->getDisplayString().getTagArg("p", 1), -1);
 
             if (radioPos.x == -1 || radioPos.y == -1)
-                error("The coordinates of '%s' host are invalid. Please set coordinates in "
+                throw cRuntimeError("The coordinates of '%s' host are invalid. Please set coordinates in "
                         "'@display' attribute, or configure Mobility for this host.",
                         hostModule->getFullPath().c_str());
 
             const char *s = hostModule->getDisplayString().getTagArg("p", 2);
             if (s && *s)
-                error("The coordinates of '%s' host are invalid. Please remove automatic arrangement"
+                throw cRuntimeError("The coordinates of '%s' host are invalid. Please remove automatic arrangement"
                         " (3rd argument of 'p' tag)"
                         " from '@display' attribute, or configure Mobility for this host.",
                         hostModule->getFullPath().c_str());

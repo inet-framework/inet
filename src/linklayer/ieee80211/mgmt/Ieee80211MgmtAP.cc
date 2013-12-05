@@ -54,7 +54,7 @@ void Ieee80211MgmtAP::initialize(int stage)
         beaconInterval = par("beaconInterval");
         numAuthSteps = par("numAuthSteps");
         if (numAuthSteps!=2 && numAuthSteps!=4)
-            error("parameter 'numAuthSteps' (number of frames exchanged during authentication) must be 2 or 4, not %d", numAuthSteps);
+            throw cRuntimeError("parameter 'numAuthSteps' (number of frames exchanged during authentication) must be 2 or 4, not %d", numAuthSteps);
         channelNumber = -1;  // value will arrive from physical layer in receiveChangeNotification()
         WATCH(ssid);
         WATCH(channelNumber);
@@ -86,7 +86,7 @@ void Ieee80211MgmtAP::handleTimer(cMessage *msg)
     }
     else
     {
-        error("internal error: unrecognized timer '%s'", msg->getName());
+        throw cRuntimeError("internal error: unrecognized timer '%s'", msg->getName());
     }
 }
 
@@ -110,7 +110,7 @@ void Ieee80211MgmtAP::handleUpperMessage(cPacket *msg)
 
 void Ieee80211MgmtAP::handleCommand(int msgkind, cObject *ctrl)
 {
-    error("handleCommand(): no commands supported");
+    throw cRuntimeError("handleCommand(): no commands supported");
 }
 
 void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, long value)

@@ -232,7 +232,7 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                         break;
 
                     default:
-                        error("Invalid sender status: %d", rsim->getStatus());
+                        throw cRuntimeError("Invalid sender status: %d", rsim->getStatus());
                     }
                 }
                 break;

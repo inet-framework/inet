@@ -551,7 +551,7 @@ WifiModulationType::getPlcpHeaderDuration(ModulationType payloadMode, WifiPreamb
                 return 48.0/1000000.0;
             }
         default:
-            opp_error("unsupported modulation class");
+            throw cRuntimeError("unsupported modulation class");
             return 0;
     }
 }
@@ -595,7 +595,7 @@ WifiModulationType::getPlcpPreambleDuration(ModulationType payloadMode, WifiPrea
                 return 144.0/1000000.0;
             }
         default:
-            opp_error("unsupported modulation class");
+            throw cRuntimeError("unsupported modulation class");
         return 0;
     }
 }
@@ -650,7 +650,7 @@ WifiModulationType::getPayloadDuration(uint64_t size, ModulationType payloadMode
             return val;
             break;
         default:
-            opp_error("unsupported modulation class");
+            throw cRuntimeError("unsupported modulation class");
             return 0;
     }
 }
@@ -709,7 +709,7 @@ WifiModulationType::getPlcpHeaderMode(ModulationType payloadMode, WifiPreamble p
                 return WifiModulationType::GetDsssRate2Mbps();
             }
         default:
-            opp_error("unsupported modulation class");
+            throw cRuntimeError("unsupported modulation class");
             return ModulationType();
     }
 }
@@ -751,7 +751,7 @@ WifiModulationType::getSlotDuration(ModulationType modType, WifiPreamble preambl
         case MOD_CLASS_DSSS:
             return (20.0/1000000.0);
         default:
-            opp_error("unsupported modulation class");
+            throw cRuntimeError("unsupported modulation class");
             return SIMTIME_ZERO;
     }
 }
@@ -784,7 +784,7 @@ WifiModulationType::getSifsTime(ModulationType modType, WifiPreamble preamble)
         case MOD_CLASS_DSSS:
             return (10.0/1000000.0);
         default:
-            opp_error("unsupported modulation class");
+            throw cRuntimeError("unsupported modulation class");
         return SIMTIME_ZERO;
     }
 }
@@ -825,7 +825,7 @@ WifiModulationType::get_aPHY_RX_START_Delay(ModulationType modType, WifiPreamble
                 return (96.0/1000000.0);
             }
         default:
-            opp_error("unsupported modulation class");
+            throw cRuntimeError("unsupported modulation class");
         return SIMTIME_ZERO;
     }
 }

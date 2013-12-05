@@ -186,7 +186,7 @@ int NSCLASS dsr_ack_req_send(struct dsr_pkt *dp)
             p->setEncapProtocol((IPProtocolId)dp->encapsulate_protocol);
         }
         else
-            opp_error("error in Packet, is not DSR ");
+            throw cRuntimeError("error in Packet, is not DSR ");
 
         dgram->encapsulate(dp->payload->dup());
     }

@@ -112,7 +112,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     {
         GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(msg);
         if (!appmsg)
-            error("Message (%s)%s is not a GenericAppMsg -- "
+            throw cRuntimeError("Message (%s)%s is not a GenericAppMsg -- "
                   "probably wrong client app, or wrong setting of TCP's "
                   "dataTransferMode parameters "
                   "(try \"object\")",

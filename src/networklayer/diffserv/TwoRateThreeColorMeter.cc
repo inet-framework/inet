@@ -57,7 +57,7 @@ void TwoRateThreeColorMeter::handleMessage(cMessage *msg)
 {
     cPacket *packet = findIPDatagramInPacket(check_and_cast<cPacket*>(msg));
     if (!packet)
-        error("TwoRateThreeColorMeter received a packet that does not encapsulate an IP datagram.");
+        throw cRuntimeError("TwoRateThreeColorMeter received a packet that does not encapsulate an IP datagram.");
 
     numRcvd++;
     int color = meterPacket(packet);

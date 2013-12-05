@@ -106,7 +106,7 @@ void BindingUpdateList::initialize()
 
 void BindingUpdateList::handleMessage(cMessage *msg)
 {
-    opp_error("This module doesn't process messages");
+    throw cRuntimeError("This module doesn't process messages");
 }
 
 void BindingUpdateList::addOrUpdateBUL(const IPv6Address& dest, const IPv6Address& hoa, const IPv6Address& coa, const uint lifetime, const uint seq, const simtime_t buSentTime)//,const simtime_t& nextBUSentTime)

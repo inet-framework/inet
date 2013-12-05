@@ -51,7 +51,7 @@ void FlatNetworkConfigurator6::initialize(int stage)
 
 void FlatNetworkConfigurator6::handleMessage(cMessage *)
 {
-    error("this module doesn't handle messages, it runs only in initialize()");
+    throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()");
 }
 
 void FlatNetworkConfigurator6::setDisplayString(int numIPNodes, int numNonIPNodes)

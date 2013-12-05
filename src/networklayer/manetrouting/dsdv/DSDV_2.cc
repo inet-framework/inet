@@ -62,7 +62,7 @@ void DSDV_2::initialize(int stage)
         if (num_80211==1)
             interface80211ptr = i_face;
         else
-            opp_error("DSDV has found %i 80211 interfaces", num_80211);
+            throw cRuntimeError("DSDV has found %i 80211 interfaces", num_80211);
         rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
         if (par("manetPurgeRoutingTables").boolValue())
         {
@@ -215,7 +215,7 @@ void DSDV_2::handleMessage(cMessage *msg)
                     {
                         EV << "Vou mandar forward do " << (*it)->hello->getSrcIPAddress() << endl;
                         if ( (*it)->hello->getControlInfo() == NULL )
-                            error("Apanhei-o a nulo no for");
+                            throw cRuntimeError("Apanhei-o a nulo no for");
                         send((*it)->hello, "to_ip");
                         (*it)->hello = NULL;
                         delete (*it)->event;
@@ -225,7 +225,7 @@ void DSDV_2::handleMessage(cMessage *msg)
                     }
                     catch (exception &e)
                     {
-                        error(e.what());
+                        throw cRuntimeError(e.what());
                     }
                     break;
                 }
@@ -268,12 +268,12 @@ void DSDV_2::handleMessage(cMessage *msg)
             fhp->hello = dynamic_cast<DSDV_HelloMessage *>(msg);
             fhp->hello->setControlInfo(controlInfo);
             if ( fhp->hello->getControlInfo() == NULL )
-                error("Nulo quando copiei");
+                throw cRuntimeError("Nulo quando copiei");
 #endif
         }
         catch (exception &e)
         {
-            error(e.what());
+            throw cRuntimeError(e.what());
         }
 #ifdef  NOforwardHello
         if (msg->arrivedOn("from_ip") && recHello)
@@ -310,7 +310,7 @@ void DSDV_2::handleMessage(cMessage *msg)
                 }
                 catch (exception &e)
                 {
-                    error(e.what());
+                    throw cRuntimeError(e.what());
                 }
                 return;
             }
@@ -329,7 +329,7 @@ void DSDV_2::handleMessage(cMessage *msg)
                 }
                 catch (exception &e)
                 {
-                    error(e.what());
+                    throw cRuntimeError(e.what());
                 }
                 return;
             }
@@ -405,7 +405,7 @@ void DSDV_2::handleMessage(cMessage *msg)
                 }
                 catch (exception &e)
                 {
-                    error(e.what());
+                    throw cRuntimeError(e.what());
                 }
 #endif
             }
@@ -426,7 +426,7 @@ void DSDV_2::handleMessage(cMessage *msg)
     }
     else
     {
-        error("Message not supported %s", msg->getName());
+        throw cRuntimeError("Message not supported %s", msg->getName());
     }
 }
 

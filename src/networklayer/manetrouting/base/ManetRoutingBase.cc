@@ -67,7 +67,7 @@ ManetRoutingBase::ManetRoutingBase()
 bool ManetRoutingBase::isThisInterfaceRegistered(InterfaceEntry * ie)
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
     for (unsigned int i=0; i<interfaceVector->size(); i++)
     {
         if ((*interfaceVector)[i].interfacePtr==ie)
@@ -197,7 +197,7 @@ void ManetRoutingBase::registerRoutingModule()
         routerId = ManetAddress(inet_rt->getRouterId());
 
     if (interfaceVector->size()==0)
-        opp_error("Manet routing protocol has found no interfaces that can be used for routing.");
+        throw cRuntimeError("Manet routing protocol has found no interfaces that can be used for routing.");
     if (mac_layer_)
         hostAddress = ManetAddress(interfaceVector->front().interfacePtr->getMacAddress());
     else
@@ -223,7 +223,7 @@ void ManetRoutingBase::registerRoutingModule()
     {
         IPv4Address AUTOASSIGN_ADDRESS_BASE(par("autoassignAddressBase").stringValue());
         if (AUTOASSIGN_ADDRESS_BASE.getInt() == 0)
-            opp_error("Auto assignment need autoassignAddressBase to be set");
+            throw cRuntimeError("Auto assignment need autoassignAddressBase to be set");
         IPv4Address myAddr(AUTOASSIGN_ADDRESS_BASE.getInt() + uint32(getParentModule()->getId()));
         for (int k=0; k<inet_ift->getNumInterfaces(); k++)
         {
@@ -310,7 +310,7 @@ ManetRoutingBase::~ManetRoutingBase()
 bool ManetRoutingBase::isIpLocalAddress(const IPv4Address& dest) const
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
     return inet_rt->isLocalAddress(dest);
 }
 
@@ -319,7 +319,7 @@ bool ManetRoutingBase::isIpLocalAddress(const IPv4Address& dest) const
 bool ManetRoutingBase::isLocalAddress(const ManetAddress& dest) const
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
     if (dest.getType() == ManetAddress::IPv4_ADDRESS)
         return inet_rt->isLocalAddress(dest.getIPv4());
     InterfaceEntry *ie;
@@ -335,7 +335,7 @@ bool ManetRoutingBase::isLocalAddress(const ManetAddress& dest) const
 bool ManetRoutingBase::isMulticastAddress(const ManetAddress& dest) const
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
     if (dest.getType() == ManetAddress::MAC_ADDRESS)
         return dest.getMAC() == MACAddress::BROADCAST_ADDRESS;
     else
@@ -345,28 +345,28 @@ bool ManetRoutingBase::isMulticastAddress(const ManetAddress& dest) const
 void ManetRoutingBase::linkLayerFeeback()
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
     hostModule->subscribe(NF_LINK_BREAK, this);
 }
 
 void ManetRoutingBase::linkPromiscuous()
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
     hostModule->subscribe(NF_LINK_PROMISCUOUS, this);
 }
 
 void ManetRoutingBase::linkFullPromiscuous()
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
     hostModule->subscribe(NF_LINK_FULL_PROMISCUOUS, this);
 }
 
 void ManetRoutingBase::registerPosition()
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
     regPosition = true;
     cModule *mod = findContainingNode(getParentModule());
     if (!mod)
@@ -385,7 +385,7 @@ void ManetRoutingBase::processLocatorDisAssoc(const cObject *details) {return;}
 void ManetRoutingBase::sendToIpOnIface(cPacket *msg, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, InterfaceEntry  *ie)
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
 
     if (destAddr.getType() == ManetAddress::MAC_ADDRESS)
     {
@@ -511,7 +511,7 @@ void ManetRoutingBase::sendToIpOnIface(cPacket *msg, int srcPort, const ManetAdd
 void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, const ManetAddress &iface)
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
 
     InterfaceEntry  *ie = NULL;
     if (!iface.isUnspecified())
@@ -523,7 +523,7 @@ void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const ManetAddress& d
 void ManetRoutingBase::sendToIp(cPacket *msg, int srcPort, const ManetAddress& destAddr, int destPort, int ttl, double delay, int index)
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
 
     InterfaceEntry  *ie = NULL;
     if (index!=-1)
@@ -556,7 +556,7 @@ bool ManetRoutingBase::omnet_exist_rte(struct in_addr dst)
 void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress &gtwy, const ManetAddress &netm, short int hops, bool del_entry, const ManetAddress &iface)
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
 
     /* Add route to kernel routing table ... */
     setRouteInternalStorege(dst, gtwy, del_entry);
@@ -575,7 +575,7 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
             if (del_entry && !found)
             {
                 if (!inet_rt->deleteRoute(e))
-                    opp_error("Aodv omnet_chg_rte can't delete route entry");
+                    throw cRuntimeError("Aodv omnet_chg_rte can't delete route entry");
             }
             else
             {
@@ -641,7 +641,7 @@ void ManetRoutingBase::omnet_chg_rte(const struct in_addr &dst, const struct in_
 void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress &gtwy, const ManetAddress &netm, short int hops, bool del_entry, int index)
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
 
     /* Add route to kernel routing table ... */
     setRouteInternalStorege(dst, gtwy, del_entry);
@@ -659,7 +659,7 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
             if (del_entry && !found)
             {
                 if (!inet_rt->deleteRoute(e))
-                    opp_error("Aodv omnet_chg_rte can't delete route entry");
+                    throw cRuntimeError("Aodv omnet_chg_rte can't delete route entry");
             }
             else
             {
@@ -726,7 +726,7 @@ void ManetRoutingBase::omnet_chg_rte(const ManetAddress &dst, const ManetAddress
 ManetAddress ManetRoutingBase::omnet_exist_rte(ManetAddress dst)
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
 
     /* Add route to kernel routing table ... */
     if (mac_layer_)
@@ -750,7 +750,7 @@ ManetAddress ManetRoutingBase::omnet_exist_rte(ManetAddress dst)
 void ManetRoutingBase::omnet_clean_rte()
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
 
     IPv4Route *entry;
     if (mac_layer_)
@@ -773,7 +773,7 @@ void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t signalID, c
 {
     Enter_Method("Manet llf");
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
     if (signalID == NF_LINK_BREAK)
     {
         if (obj == NULL)
@@ -880,7 +880,7 @@ int ManetRoutingBase::gettimeofday(struct timeval *tv, struct timezone *tz)
 int ManetRoutingBase::getWlanInterfaceIndexByAddress(ManetAddress add)
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
 
     if (add.isUnspecified())
         return interfaceVector->front().index;
@@ -907,7 +907,7 @@ int ManetRoutingBase::getWlanInterfaceIndexByAddress(ManetAddress add)
 InterfaceEntry *ManetRoutingBase::getInterfaceWlanByAddress(ManetAddress add) const
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
 
     if (add.isUnspecified())
         return interfaceVector->front().interfacePtr;
@@ -934,7 +934,7 @@ InterfaceEntry *ManetRoutingBase::getInterfaceWlanByAddress(ManetAddress add) co
 int ManetRoutingBase::getWlanInterfaceIndex(int i) const
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
 
     if (i >= 0 && i < (int) interfaceVector->size())
         return (*interfaceVector)[i].index;
@@ -948,7 +948,7 @@ int ManetRoutingBase::getWlanInterfaceIndex(int i) const
 InterfaceEntry *ManetRoutingBase::getWlanInterfaceEntry(int i) const
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
 
     if (i >= 0 && i < (int)interfaceVector->size())
         return (*interfaceVector)[i].interfacePtr;
@@ -965,21 +965,21 @@ InterfaceEntry *ManetRoutingBase::getWlanInterfaceEntry(int i) const
 const Coord& ManetRoutingBase::getPosition()
 {
     if (!regPosition)
-        error("this node doesn't have activated the register position");
+        throw cRuntimeError("this node doesn't have activated the register position");
     return curPosition;
 }
 
 double ManetRoutingBase::getSpeed()
 {
     if (!regPosition)
-        error("this node doesn't have activated the register position");
+        throw cRuntimeError("this node doesn't have activated the register position");
     return curSpeed.length();
 }
 
 const Coord& ManetRoutingBase::getDirection()
 {
     if (!regPosition)
-        error("this node doesn't have activated the register position");
+        throw cRuntimeError("this node doesn't have activated the register position");
     return curSpeed;
 }
 
@@ -1014,7 +1014,7 @@ ManetAddress ManetRoutingBase::getNextHopInternal(const ManetAddress &dest)
 bool ManetRoutingBase::setRoute(const ManetAddress & destination, const ManetAddress &nextHop, const int &ifaceIndex, const int &hops, const ManetAddress &mask)
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
 
     /* Add route to kernel routing table ... */
     IPv4Address desAddress(destination.getIPv4());
@@ -1041,7 +1041,7 @@ bool ManetRoutingBase::setRoute(const ManetAddress & destination, const ManetAdd
             if (del_entry && !found)    // FIXME The 'found' never set to true when 'del_entry' is true
             {
                 if (!inet_rt->deleteRoute(e))
-                    opp_error("ManetRoutingBase::setRoute can't delete route entry");
+                    throw cRuntimeError("ManetRoutingBase::setRoute can't delete route entry");
             }
             else
             {
@@ -1099,7 +1099,7 @@ bool ManetRoutingBase::setRoute(const ManetAddress & destination, const ManetAdd
 bool ManetRoutingBase::setRoute(const ManetAddress & destination, const ManetAddress &nextHop, const char *ifaceName, const int &hops, const ManetAddress &mask)
 {
     if (!isRegistered)
-        opp_error("Manet routing protocol is not register");
+        throw cRuntimeError("Manet routing protocol is not register");
 
     /* Add route to kernel routing table ... */
     int index;

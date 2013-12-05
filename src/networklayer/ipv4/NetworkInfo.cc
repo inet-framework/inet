@@ -59,7 +59,7 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
     std::ofstream s;
     s.open(filename, append?(std::ios::app):(std::ios::out));
     if (s.fail())
-        error("cannot open `%s' for write", filename);
+        throw cRuntimeError("cannot open `%s' for write", filename);
 
     if (compat) s << "Kernel IPv4 routing table" << endl;
     s << "Destination     Gateway         Genmask         ";

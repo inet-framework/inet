@@ -78,7 +78,7 @@ int NS_CLASS pending_rreq_remove(pending_rreq_t *entry)
             dymoPendingRreq->erase(it);
         }
         else
-            opp_error("Error in dymoPendingRreq table");
+            throw cRuntimeError("Error in dymoPendingRreq table");
 
     }
     timer_remove(&entry->timer);
@@ -100,7 +100,7 @@ pending_rreq_t *NS_CLASS pending_rreq_find(struct in_addr dest_addr)
         if (entry->dest_addr.s_addr == dest)
             return entry;
         else
-            opp_error("Error in dymoPendingRreq table");
+            throw cRuntimeError("Error in dymoPendingRreq table");
     }
 
     return NULL;

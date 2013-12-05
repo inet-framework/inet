@@ -148,7 +148,7 @@ void SimplifiedRadioChannel::unregisterRadio(RadioRef r)
         }
     }
 
-    error("unregisterRadio failed: no such radio");
+    throw cRuntimeError("unregisterRadio failed: no such radio");
 }
 
 SimplifiedRadioChannel::RadioRef SimplifiedRadioChannel::lookupRadio(cModule *radio)
@@ -211,7 +211,7 @@ void SimplifiedRadioChannel::updateConnections(RadioRef h)
 void SimplifiedRadioChannel::checkChannel(int channel)
 {
     if (channel >= numChannels || channel < 0)
-        error("Invalid channel, must above 0 and below %d", numChannels);
+        throw cRuntimeError("Invalid channel, must above 0 and below %d", numChannels);
 }
 
 void SimplifiedRadioChannel::setRadioPosition(RadioRef r, const Coord& pos)

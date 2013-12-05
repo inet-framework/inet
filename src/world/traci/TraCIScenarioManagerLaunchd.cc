@@ -94,7 +94,7 @@ void TraCIScenarioManagerLaunchd::init_traci() {
 
     TraCIBuffer obuf(receiveTraCIMessage());
     uint8_t cmdLength; obuf >> cmdLength;
-    uint8_t commandResp; obuf >> commandResp; if (commandResp != CMD_FILE_SEND) error("Expected response to command %d, but got one for command %d", CMD_FILE_SEND, commandResp);
+    uint8_t commandResp; obuf >> commandResp; if (commandResp != CMD_FILE_SEND) throw cRuntimeError("Expected response to command %d, but got one for command %d", CMD_FILE_SEND, commandResp);
     uint8_t result; obuf >> result;
     std::string description; obuf >> description;
     if (result != RTYPE_OK) {

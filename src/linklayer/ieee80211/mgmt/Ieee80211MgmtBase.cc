@@ -62,7 +62,7 @@ void Ieee80211MgmtBase::initialize(int stage)
         // obtain our address from MAC
         cModule *mac = getParentModule()->getSubmodule("mac");
         if (!mac)
-            error("MAC module not found; it is expected to be next to this submodule and called 'mac'");
+            throw cRuntimeError("MAC module not found; it is expected to be next to this submodule and called 'mac'");
         myAddress.setAddress(mac->par("address").stringValue());
     }
 }
@@ -101,7 +101,7 @@ void Ieee80211MgmtBase::handleMessage(cMessage *msg)
         cPacket *pk = PK(msg);
         EV << "Packet arrived from upper layers: " << pk << "\n";
         if (pk->getByteLength() > 2312)
-            error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
+            throw cRuntimeError("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
                   pk->getClassName(), pk->getName(), (int)(pk->getByteLength()));
 
         handleUpperMessage(pk);

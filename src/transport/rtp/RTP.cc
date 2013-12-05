@@ -83,7 +83,7 @@ void RTP::handleMessage(cMessage *msg)
     }
     else
     {
-        error("Message from unknown gate");
+        throw cRuntimeError("Message from unknown gate");
     }
 }
 
@@ -384,7 +384,7 @@ void RTP::createProfile(const char *profileName)
 {
     cModuleType *moduleType = cModuleType::find(profileName);
     if (moduleType == NULL)
-        error("Profile type `%s' not found", profileName);
+        throw cRuntimeError("Profile type `%s' not found", profileName);
 
     RTPProfile *profile = check_and_cast<RTPProfile *>(moduleType->create("Profile", this));
     profile->finalizeParameters();

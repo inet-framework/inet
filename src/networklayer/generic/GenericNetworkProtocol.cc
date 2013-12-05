@@ -373,7 +373,7 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
     {
         // if interface parameter does not match existing interface, do not send datagram
         if (routingTable->getInterfaceByAddress(src)==NULL)
-            opp_error("Wrong source address %s in (%s)%s: no interface with such address",
+            throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
                       src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
         datagram->setSourceAddress(src);
     }
@@ -421,7 +421,7 @@ void GenericNetworkProtocol::sendDatagramToHL(GenericDatagram *datagram)
 void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, const InterfaceEntry *ie, const Address & nextHop)
 {
     if (datagram->getByteLength() > ie->getMTU())
-        error("datagram too large"); //TODO refine
+        throw cRuntimeError("datagram too large"); //TODO refine
 
     // hop counter check
     if (datagram->getHopLimit() <= 0) {
@@ -534,7 +534,7 @@ void GenericNetworkProtocol::reinjectQueuedDatagram(const INetworkDatagram* data
                     datagramLocalOut(datagram, outIE, nextHop);
                     break;
                 default:
-                    error("Re-injection of datagram queued for this hook not implemented");
+                    throw cRuntimeError("Re-injection of datagram queued for this hook not implemented");
                     break;
             }
             queuedDatagramsForHooks.erase(iter);

@@ -90,7 +90,7 @@ void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& n
     uint32 netmask = IPv4Address(par("netmask").stringValue()).getInt();
     int maxNodes = (~netmask)-1;  // 0 and ffff have special meaning and cannot be used
     if (topo.getNumNodes()>maxNodes)
-        error("netmask too large, not enough addresses for all %d nodes", topo.getNumNodes());
+        throw cRuntimeError("netmask too large, not enough addresses for all %d nodes", topo.getNumNodes());
 
     int numIPNodes = 0;
     for (int i=0; i<topo.getNumNodes(); i++)
@@ -194,7 +194,7 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& _topo, NodeInfoVector
             int outputGateId = atNode->getPath(0)->getLocalGate()->getId();
             InterfaceEntry *ie = ift->getInterfaceByNodeOutputGateId(outputGateId);
             if (!ie)
-                error("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
+                throw cRuntimeError("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
 
             EV << "  from " << atNode->getModule()->getFullName() << "=" << IPv4Address(atAddr);
             EV << " towards " << destModName << "=" << IPv4Address(destAddr) << " interface " << ie->getName() << endl;
@@ -214,7 +214,7 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& _topo, NodeInfoVector
 
 void FlatNetworkConfigurator::handleMessage(cMessage *msg)
 {
-    error("this module doesn't handle messages, it runs only in initialize()");
+    throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()");
 }
 
 void FlatNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo)

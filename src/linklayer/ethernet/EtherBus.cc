@@ -74,7 +74,7 @@ void EtherBus::initialize()
     for (i = 0; i < numTaps-1; i++)
     {
         if (tap[i].position > tap[i+1].position)
-            error("Tap positions must be ordered in ascending fashion, modify 'positions' parameter and rerun\n");
+            throw cRuntimeError("Tap positions must be ordered in ascending fashion, modify 'positions' parameter and rerun\n");
     }
 
     // Prints out data of parameters for parameter checking...

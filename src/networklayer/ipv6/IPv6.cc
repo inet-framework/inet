@@ -274,7 +274,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE___, 
     if (rt->isLocalAddress(destAddress))
     {
         if (fromHL)
-            error("model error: local unicast packet arrived from HL, but handleMessageFromHL() not detected it");
+            throw cRuntimeError("model error: local unicast packet arrived from HL, but handleMessageFromHL() not detected it");
         EV << "local delivery\n";
 
         numLocalDeliver++;
@@ -353,7 +353,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, const InterfaceEntry *destIE___, 
     if (interfaceId == -1)
         if ( !determineOutputInterface(destAddress, nextHop, interfaceId, datagram, fromHL) )
             // no interface found; sent to ND or to ICMP for error processing
-            //opp_error("No interface found!");//return;
+            //throw cRuntimeError("No interface found!");//return;
             return; // don't raise error if sent to ND or ICMP!
 
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);

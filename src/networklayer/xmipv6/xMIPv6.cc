@@ -185,7 +185,7 @@ void xMIPv6::handleMessage(cMessage *msg)
             handleTokenExpiry(msg);
         }
         else
-            error("Unrecognized Timer"); //stops sim w/ error msg.
+            throw cRuntimeError("Unrecognized Timer"); //stops sim w/ error msg.
     }
     // Zarrar Yousaf @ CNI Dortmund Uni on 29.05.07
     // if its a MIPv6 related mobility message
@@ -207,10 +207,10 @@ void xMIPv6::handleMessage(cMessage *msg)
         else if (dynamic_cast<HomeAddressOption*>(eh))
             processHoAOpt((IPv6Datagram*) msg, (HomeAddressOption*)eh);
         else
-            opp_error("Unknown Extension Header.");
+            throw cRuntimeError("Unknown Extension Header.");
     }
     else
-        opp_error("Unknown message type received.");
+        throw cRuntimeError("Unknown message type received.");
 }
 
 void xMIPv6::processMobilityMessage(MobilityHeader* mipv6Msg, IPv6ControlInfo* ctrlInfo)
@@ -2392,7 +2392,7 @@ xMIPv6::TimerIfEntry* xMIPv6::getTimerIfEntry(Key& key, int timerType)
             ifEntry = tokenExpIfEntry;
         }
         else
-            opp_error("Expected a subclass of TimerIfEntry!");
+            throw cRuntimeError("Expected a subclass of TimerIfEntry!");
 
         ifEntry->timer = NULL;
     }
@@ -2422,7 +2422,7 @@ xMIPv6::TimerIfEntry* xMIPv6::getTimerIfEntry(Key& key, int timerType)
                 break;
 
             default:
-                opp_error("Expected a valid TimerIfEntry type!");
+                throw cRuntimeError("Expected a valid TimerIfEntry type!");
                 break;
         }
 
@@ -2551,7 +2551,7 @@ void xMIPv6::createBRRTimer(const IPv6Address& brDest, InterfaceEntry* ie, const
             cancelAndDelete(brIfEntry->timer); // delete the corresponding timer
         }
         else
-            opp_error("Expected BRTransmitIfEntry* !");
+            throw cRuntimeError("Expected BRTransmitIfEntry* !");
     }
     else
     {
@@ -2844,7 +2844,7 @@ void xMIPv6::handleTokenExpiry(cMessage* msg)
         bul->resetHomeToken(tokenExpIfEntry->cnAddr, tokenExpIfEntry->ifEntry->ipv6Data()->getMNHomeAddress());
     }
     else
-        opp_error("Unkown value for tokenType!");
+        throw cRuntimeError("Unkown value for tokenType!");
 
     EV << "...removed token from BUL." << endl;
 

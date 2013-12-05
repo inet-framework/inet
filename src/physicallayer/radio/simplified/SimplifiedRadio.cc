@@ -59,7 +59,7 @@ void SimplifiedRadio::initialize(int stage)
         // read parameters
         transmitterPower = par("transmitterPower");
         if (transmitterPower > (double) (getRadioChannelPar("pMax")))
-            error("transmitterPower cannot be bigger than pMax in SimplifiedRadioChannel!");
+            throw cRuntimeError("transmitterPower cannot be bigger than pMax in SimplifiedRadioChannel!");
         bitrate = par("bitrate");
         thermalNoise = FWMath::dBm2mW(par("thermalNoise"));
         sensitivity = FWMath::dBm2mW(par("sensitivity"));
@@ -241,7 +241,7 @@ void SimplifiedRadio::handleMessageWhenUp(cMessage *msg)
     {
         cObject *ctrl = msg->removeControlInfo();
         if (msg->getKind()==0)
-            error("Message '%s' with length==0 is supposed to be a command, but msg kind is also zero", msg->getName());
+            throw cRuntimeError("Message '%s' with length==0 is supposed to be a command, but msg kind is also zero", msg->getName());
         handleCommand(msg->getKind(), ctrl);
         delete msg;
         return;
@@ -379,8 +379,7 @@ SimplifiedRadioFrame *SimplifiedRadio::unbufferMsg(cMessage *msg)
 void SimplifiedRadio::handleUpperMsg(SimplifiedRadioFrame *radioFrame)
 {
     if (radioTransmissionState == RADIO_TRANSMISSION_STATE_TRANSMITTING)
-        error("Trying to send a message while already transmitting -- MAC should "
-              "take care this does not happen");
+        throw cRuntimeError("Trying to send a message while already transmitting -- MAC should take care this does not happen");
 
     // if a packet was being received, it is corrupted now as should be treated as noise
     if (snrInfo.ptr != NULL)
@@ -463,7 +462,7 @@ void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
         }
     }
     else
-        error("unknown command (msgkind=%d)", msgkind);
+        throw cRuntimeError("unknown command (msgkind=%d)", msgkind);
 }
 
 void SimplifiedRadio::handleSelfMsg(cMessage *msg)
@@ -674,7 +673,7 @@ void SimplifiedRadio::setRadioChannel(int channel)
     if (channel == radioChannel)
         return;
     if (radioTransmissionState == RADIO_TRANSMISSION_STATE_TRANSMITTING)
-        error("changing channel while transmitting is not allowed");
+        throw cRuntimeError("changing channel while transmitting is not allowed");
 
    // Clear the recvBuff
    for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
@@ -764,9 +763,9 @@ void SimplifiedRadio::setBitrate(double bitrate)
     if (this->bitrate == bitrate)
         return;
     if (bitrate < 0)
-        error("setBitrate(): bitrate cannot be negative (%g)", bitrate);
+        throw cRuntimeError("setBitrate(): bitrate cannot be negative (%g)", bitrate);
     if (radioTransmissionState == RADIO_TRANSMISSION_STATE_TRANSMITTING)
-        error("changing the bitrate while transmitting is not allowed");
+        throw cRuntimeError("changing the bitrate while transmitting is not allowed");
 
     EV << "Setting bitrate to " << (bitrate/1e6) << "Mbps\n";
     emit(bitrateSignal, bitrate);
@@ -964,7 +963,7 @@ void SimplifiedRadio::receiveSignal(cComponent *source, simsignal_t signalID, cO
 void SimplifiedRadio::disconnectReceiver()
 {
     if (radioTransmissionState == RADIO_TRANSMISSION_STATE_TRANSMITTING)
-        error("changing channel while transmitting is not allowed");
+        throw cRuntimeError("changing channel while transmitting is not allowed");
 
    // Clear the recvBuff
    for (RecvBuff::iterator it = recvBuff.begin(); it!=recvBuff.end(); ++it)
@@ -1071,7 +1070,7 @@ void SimplifiedRadio::getSensitivityList(cXMLElement* xmlConfig)
             const char* sensitivityStr = (*it)->getAttribute("Sensitivity");
             double rate = atof(bitRate);
             if (rate == 0)
-                error("invalid bit rate");
+                throw cRuntimeError("invalid bit rate");
             double sens = atof(sensitivityStr);
             sensitivityList[rate] = FWMath::dBm2mW(sens);
 

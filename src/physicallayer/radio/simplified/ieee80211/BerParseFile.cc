@@ -125,6 +125,8 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
     snrdata4.snr = -1;
     snrdata4.ber = -1;
 
+    if (pos->snrlist.size() < 1)
+        throw cRuntimeError("model error: pos->snrlist is empty");
     if (tsnr>pos->snrlist[pos->snrlist.size()-1].snr)
     {
         snrdata1 = pos->snrlist[pos->snrlist.size()-1];
@@ -146,7 +148,11 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
         else
         {
             if (j==pos->snrlist.size())
+            {
+                if (j < 2)
+                    throw cRuntimeError("model error: pos->snrlist is too short, should be 2 or more elements");
                 snrdata2 = pos->snrlist[j-2];
+            }
             else
                 snrdata2 = pos->snrlist[j-1];
         }
@@ -234,7 +240,7 @@ void BerParseFile::parseFile(const char *filename)
 {
     std::ifstream in(filename, std::ios::in);
     if (in.fail())
-        opp_error("Cannot open file '%s'", filename);
+        throw cRuntimeError("Cannot open file '%s'", filename);
     std::string line;
     std::string subline;
 
@@ -300,7 +306,7 @@ void BerParseFile::parseFile(const char *filename)
         }
 
         if (position<0)
-            opp_error("ber parse file error");
+            throw cRuntimeError("ber parse file error");
 
         berlist = &berTable[position];
 
@@ -373,13 +379,13 @@ void BerParseFile::parseFile(const char *filename)
     {
         for (int i = 0; i<4; i++)
             if (berTable[i].size()==0)
-                opp_error("Error in ber class B file, speed not present");
+                throw cRuntimeError("Error in ber class B file, speed not present");
     }
     else
     {
         for (int i = 0; i<8; i++)
             if (berTable[i].size()==0)
-                opp_error("Error in ber class A/G file, speed not present");
+                throw cRuntimeError("Error in ber class A/G file, speed not present");
     }
 }
 

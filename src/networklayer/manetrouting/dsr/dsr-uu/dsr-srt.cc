@@ -169,7 +169,7 @@ struct dsr_srt *dsr_srt_new(struct in_addr src, struct in_addr dst,
                         addrs1 = cost[sizeEtx-1-i].address.getInt();
                     addrs2 = sr->addrs[i].s_addr;
                     if (addrs2 != addrs1)
-                        opp_error("Dsr error, Etx address and dsr are different");
+                        throw cRuntimeError("Dsr error, Etx address and dsr are different");
                 }
                 for (int i=0; i<sizeEtx; i++)
                     sr->cost[i]= (unsigned int) cost[sizeEtx-1-i].cost;
@@ -189,7 +189,7 @@ struct dsr_srt *dsr_srt_new(struct in_addr src, struct in_addr dst,
                 }
             }
             if (j==-1)
-                opp_error("Dsr error, Etx address and dsr are different");
+                throw cRuntimeError("Dsr error, Etx address and dsr are different");
             else
             {
                 testInverse=false;
@@ -222,7 +222,7 @@ struct dsr_srt *dsr_srt_new(struct in_addr src, struct in_addr dst,
                         addrs1 = cost[j+1+i].address.getInt();
                         addrs2 = sr->addrs[i].s_addr;
                         if (addrs2 != addrs1)
-                            opp_error("Dsr error, Etx address and dsr are different");
+                            throw cRuntimeError("Dsr error, Etx address and dsr are different");
                     }
                     for (int i=0; i<sizeAdd+1; i++)
                         sr->cost[i]= (unsigned int) cost[j+1+i].cost;

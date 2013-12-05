@@ -75,7 +75,7 @@ void MACRelayUnitBase::initialize(int stage)
         // number of ports
         numPorts = gate("ifOut", 0)->size();
         if (gate("ifIn", 0)->size()!=numPorts)
-            error("the sizes of the ifIn[] and ifOut[] gate vectors must be the same");
+            throw cRuntimeError("the sizes of the ifIn[] and ifOut[] gate vectors must be the same");
 
         // other parameters
         addressTableSize = par("addressTableSize");
@@ -258,7 +258,7 @@ void MACRelayUnitBase::readAddressTable(const char* fileName)
 {
     FILE *fp = fopen(fileName, "r");
     if (fp == NULL)
-        error("cannot open address table file `%s'", fileName);
+        throw cRuntimeError("cannot open address table file `%s'", fileName);
 
     //  Syntax of the file goes as:
     //  Address in hexadecimal representation, Portno
@@ -291,14 +291,14 @@ void MACRelayUnitBase::readAddressTable(const char* fileName)
 
         // broken line?
         if (!portno)
-            error("line %d invalid in address table file `%s'", lineno, fileName);
+            throw cRuntimeError("line %d invalid in address table file `%s'", lineno, fileName);
 
         // Create an entry with address and portno and insert into table
         AddressEntry entry;
         entry.insertionTime = 0;
         entry.portno = atoi(portno);
         if (addresstable.size() >= (unsigned int)addressTableSize)
-            error("Too many entries in address table file '%s'", fileName);
+            throw cRuntimeError("Too many entries in address table file '%s'", fileName);
         addresstable[MACAddress(hexaddress)] = entry;
 
         // Garbage collection before next iteration

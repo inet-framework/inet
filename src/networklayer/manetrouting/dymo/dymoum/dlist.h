@@ -90,9 +90,9 @@ static inline void __dlist_del(struct dlist_head * prev, struct dlist_head * nex
 {
 #ifdef OMNETPP
     if (next == (dlist_head *)NULL)
-        opp_error(" __dlist_del next == NULL");
+        throw cRuntimeError(" __dlist_del next == NULL");
     if (prev == (dlist_head *)NULL)
-        opp_error(" __dlist_del prev == NULL");
+        throw cRuntimeError(" __dlist_del prev == NULL");
 #endif
     next->prev = prev;
     prev->next = next;

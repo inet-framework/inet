@@ -83,11 +83,11 @@ void TCP::initialize(int stage)
         const char *q;
         q = par("sendQueueClass");
         if (*q != '\0')
-            error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
+            throw cRuntimeError("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
 
         q = par("receiveQueueClass");
         if (*q != '\0')
-            error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
+            throw cRuntimeError("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
         WATCH(lastEphemeralPort);
@@ -174,7 +174,7 @@ void TCP::handleMessage(cMessage *msg)
             }
             else
             {
-                error("(%s)%s arrived without control info", tcpseg->getClassName(), tcpseg->getName());
+                throw cRuntimeError("(%s)%s arrived without control info", tcpseg->getClassName(), tcpseg->getName());
             }
 
             // process segment
@@ -360,7 +360,7 @@ ushort TCP::getEphemeralPort()
     while (usedEphemeralPorts.find(lastEphemeralPort) != usedEphemeralPorts.end())
     {
         if (lastEphemeralPort == searchUntil) // got back to starting point?
-            error("Ephemeral port range %d..%d exhausted, all ports occupied", EPHEMERAL_PORTRANGE_START, EPHEMERAL_PORTRANGE_END);
+            throw cRuntimeError("Ephemeral port range %d..%d exhausted, all ports occupied", EPHEMERAL_PORTRANGE_START, EPHEMERAL_PORTRANGE_END);
 
         lastEphemeralPort++;
 
@@ -387,10 +387,10 @@ void TCP::addSockPair(TCPConnection *conn, Address localAddr, Address remoteAddr
     {
         // throw "address already in use" error
         if (remoteAddr.isUnspecified() && remotePort == -1)
-            error("Address already in use: there is already a connection listening on %s:%d",
+            throw cRuntimeError("Address already in use: there is already a connection listening on %s:%d",
                   localAddr.str().c_str(), localPort);
         else
-            error("Address already in use: there is already a connection %s:%d to %s:%d",
+            throw cRuntimeError("Address already in use: there is already a connection %s:%d to %s:%d",
                   localAddr.str().c_str(), localPort, remoteAddr.str().c_str(), remotePort);
     }
 

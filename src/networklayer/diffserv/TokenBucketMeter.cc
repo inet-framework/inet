@@ -53,7 +53,7 @@ void TokenBucketMeter::handleMessage(cMessage *msg)
 {
     cPacket *packet = findIPDatagramInPacket(check_and_cast<cPacket*>(msg));
     if (!packet)
-        error("TokenBucketMeter received a packet that does not encapsulate an IP datagram.");
+        throw cRuntimeError("TokenBucketMeter received a packet that does not encapsulate an IP datagram.");
 
     numRcvd++;
     int color = meterPacket(packet);

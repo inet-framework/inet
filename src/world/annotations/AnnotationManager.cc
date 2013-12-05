@@ -64,12 +64,12 @@ void AnnotationManager::handleMessage(cMessage *msg)
         handleSelfMsg(msg);
         return;
     }
-    error("AnnotationManager doesn't handle messages from other modules");
+    throw cRuntimeError("AnnotationManager doesn't handle messages from other modules");
 }
 
 void AnnotationManager::handleSelfMsg(cMessage *msg)
 {
-    error("AnnotationManager doesn't handle self-messages");
+    throw cRuntimeError("AnnotationManager doesn't handle self-messages");
 }
 
 void AnnotationManager::handleParameterChange(const char *parname)
@@ -144,7 +144,7 @@ void AnnotationManager::addFromXml(cXMLElement* xml)
         }
         else
         {
-            error("while reading annotations xml: expected 'line' or 'poly', but got '%s'", tag.c_str());
+            throw cRuntimeError("while reading annotations xml: expected 'line' or 'poly', but got '%s'", tag.c_str());
         }
     }
 
@@ -216,7 +216,7 @@ cModule* AnnotationManager::createDummyModule(std::string displayString)
     static int32_t nodeVectorIndex = -1;
 
     cModule* parentmod = getParentModule();
-    if (!parentmod) error("Parent Module not found");
+    if (!parentmod) throw cRuntimeError("Parent Module not found");
 
     cModuleType* nodeType = cModuleType::get("inet.world.annotations.AnnotationDummy");
 
@@ -293,7 +293,7 @@ void AnnotationManager::show(const Annotation* annotation)
     }
     else
     {
-        error("unknown Annotation type");
+        throw cRuntimeError("unknown Annotation type");
     }
 
 }

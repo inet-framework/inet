@@ -718,17 +718,17 @@ void LDP::processLDPPacketFromTCP(LDPPacket *ldpPacket)
     switch (ldpPacket->getType())
     {
     case HELLO:
-        error("Received LDP HELLO over TCP (should arrive over UDP)");
+        throw cRuntimeError("Received LDP HELLO over TCP (should arrive over UDP)");
         break;
 
     case ADDRESS:
         // processADDRESS(ldpPacket);
-        error("Received LDP ADDRESS message, unsupported in this version");
+        throw cRuntimeError("Received LDP ADDRESS message, unsupported in this version");
         break;
 
     case ADDRESS_WITHDRAW:
         // processADDRESS_WITHDRAW(ldpPacket);
-        error("LDP PROC DEBUG: Received LDP ADDRESS_WITHDRAW message, unsupported in this version");
+        throw cRuntimeError("LDP PROC DEBUG: Received LDP ADDRESS_WITHDRAW message, unsupported in this version");
         break;
 
     case LABEL_MAPPING:
@@ -752,7 +752,7 @@ void LDP::processLDPPacketFromTCP(LDPPacket *ldpPacket)
         break;
 
     default:
-        error("LDP PROC DEBUG: Unrecognized LDP Message Type, type is %d", ldpPacket->getType());
+        throw cRuntimeError("LDP PROC DEBUG: Unrecognized LDP Message Type, type is %d", ldpPacket->getType());
         break;
     }
 }
@@ -849,7 +849,7 @@ std::string LDP::findInterfaceFromPeerAddr(IPv4Address peerIP)
 
     InterfaceEntry *ie = rt->getInterfaceForDestAddr(peerIP);
     if (!ie)
-        error("findInterfaceFromPeerAddr(): %s is not routable", peerIP.str().c_str());
+        throw cRuntimeError("findInterfaceFromPeerAddr(): %s is not routable", peerIP.str().c_str());
     return ie->getName();
 }
 
@@ -1251,7 +1251,7 @@ TCPSocket *LDP::getPeerSocket(IPv4Address peerAddr)
     TCPSocket *sock = findPeerSocket(peerAddr);
     ASSERT(sock);
     if (!sock)
-        error("No LDP session to peer %s yet", peerAddr.str().c_str());
+        throw cRuntimeError("No LDP session to peer %s yet", peerAddr.str().c_str());
     return sock;
 }
 

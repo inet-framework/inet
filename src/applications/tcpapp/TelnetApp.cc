@@ -69,7 +69,7 @@ void TelnetApp::initialize(int stage)
         simtime_t startTime = par("startTime");
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
-            error("Invalid startTime/stopTime parameters");
+            throw cRuntimeError("Invalid startTime/stopTime parameters");
 
         timeoutMsg = new cMessage("timer");
         timeoutMsg->setKind(MSGKIND_CONNECT);

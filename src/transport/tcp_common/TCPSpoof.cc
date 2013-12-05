@@ -31,7 +31,7 @@ void TCPSpoof::initialize()
 void TCPSpoof::handleMessage(cMessage *msg)
 {
     if (!msg->isSelfMessage())
-        error("Does not process incoming messages");
+        throw cRuntimeError("Does not process incoming messages");
 
     sendSpoofPacket();
     delete msg;

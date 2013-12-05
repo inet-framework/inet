@@ -69,7 +69,7 @@ void RTPProfile::handleMessage(cMessage *msg)
     }
     else
     {
-        error("message coming from unknown gate");
+        throw cRuntimeError("message coming from unknown gate");
     }
 }
 
@@ -102,7 +102,7 @@ void RTPProfile::handleMessageFromRTP(cMessage *msg)
         break;
 
    default:
-        error("RTPInnerPacket from RTPModule has wrong type: %d", rinpIn->getType());
+        throw cRuntimeError("RTPInnerPacket from RTPModule has wrong type: %d", rinpIn->getType());
         break;
     }
 
@@ -129,7 +129,7 @@ void RTPProfile::handleMessageFromPayloadSender(cMessage *msg)
         break;
 
     default:
-        error("Profile received RTPInnerPacket from sender module with wrong type: %d", rinpIn->getType());
+        throw cRuntimeError("Profile received RTPInnerPacket from sender module with wrong type: %d", rinpIn->getType());
         break;
     }
 }

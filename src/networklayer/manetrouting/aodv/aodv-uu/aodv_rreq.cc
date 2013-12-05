@@ -304,7 +304,7 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
            if (rev_rt == NULL)
            {
                rev_rt = rt_table_insert(rreq_orig, ip_src, rreq_new_hcnt, rreq_orig_seqno, life, VALID, 0, ifindex,cost,hopfix);
-               // opp_error("reverse route NULL with RREQ in the processed table" );
+               // throw cRuntimeError("reverse route NULL with RREQ in the processed table" );
            }
            if (rev_rt->dest_seqno != 0)
            {
@@ -326,7 +326,7 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
             if (rev_rt == NULL)
             {
                  rev_rt = rt_table_insert(rreq_orig, ip_src, rreq_new_hcnt,rreq_orig_seqno, life, VALID, 0, ifindex,cost,hopfix);
-                 // opp_error("reverse route NULL with RREQ in the processed table" );
+                 // throw cRuntimeError("reverse route NULL with RREQ in the processed table" );
             }
             if (useHover && (rev_rt->dest_seqno == 0 ||
                     (int32_t) rreq_orig_seqno > (int32_t) rev_rt->dest_seqno ||

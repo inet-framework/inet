@@ -201,7 +201,7 @@ void Dymo_RE::delBlockI(int blockIndex)
         int numBloks;
         if ((extensionsize) % sizeof(struct re_block) != 0)
         {
-            opp_error("re size error");
+            throw cRuntimeError("re size error");
         }
         else
             numBloks = extensionsize/ sizeof(struct re_block);

@@ -184,7 +184,7 @@ void Ieee80211MgmtSTA::handleTimer(cMessage *msg)
     }
     else
     {
-        error("internal error: unrecognized timer '%s'", msg->getName());
+        throw cRuntimeError("internal error: unrecognized timer '%s'", msg->getName());
     }
 }
 
@@ -216,9 +216,9 @@ void Ieee80211MgmtSTA::handleCommand(int msgkind, cObject *ctrl)
     else if (dynamic_cast<Ieee80211Prim_DisassociateRequest *>(ctrl))
         processDisassociateCommand((Ieee80211Prim_DisassociateRequest *)ctrl);
     else if (ctrl)
-        error("handleCommand(): unrecognized control info class `%s'", ctrl->getClassName());
+        throw cRuntimeError("handleCommand(): unrecognized control info class `%s'", ctrl->getClassName());
     else
-        error("handleCommand(): control info is NULL");
+        throw cRuntimeError("handleCommand(): control info is NULL");
     delete ctrl;
 }
 
@@ -305,9 +305,9 @@ void Ieee80211MgmtSTA::sendManagementFrame(Ieee80211ManagementFrame *frame, cons
 void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, simtime_t timeout)
 {
     if (ap->authTimeoutMsg)
-        error("startAuthentication: authentication currently in progress with AP address=", ap->address.str().c_str());
+        throw cRuntimeError("startAuthentication: authentication currently in progress with AP address=", ap->address.str().c_str());
     if (ap->isAuthenticated)
-        error("startAuthentication: already authenticated with AP address=", ap->address.str().c_str());
+        throw cRuntimeError("startAuthentication: already authenticated with AP address=", ap->address.str().c_str());
 
     changeChannel(ap->channel);
 
@@ -331,9 +331,9 @@ void Ieee80211MgmtSTA::startAuthentication(APInfo *ap, simtime_t timeout)
 void Ieee80211MgmtSTA::startAssociation(APInfo *ap, simtime_t timeout)
 {
     if (isAssociated || assocTimeoutMsg)
-        error("startAssociation: already associated or association currently in progress");
+        throw cRuntimeError("startAssociation: already associated or association currently in progress");
     if (!ap->isAuthenticated)
-        error("startAssociation: not yet authenticated with AP address=", ap->address.str().c_str());
+        throw cRuntimeError("startAssociation: not yet authenticated with AP address=", ap->address.str().c_str());
 
     // switch to that channel
     changeChannel(ap->channel);
@@ -397,7 +397,7 @@ void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
     EV << "Received Scan Request from agent, clearing AP list and starting scanning...\n";
 
     if (isScanning)
-        error("processScanCommand: scanning already in progress");
+        throw cRuntimeError("processScanCommand: scanning already in progress");
     if (isAssociated)
     {
         disassociate();
@@ -508,7 +508,7 @@ void Ieee80211MgmtSTA::processAuthenticateCommand(Ieee80211Prim_AuthenticateRequ
     const MACAddress& address = ctrl->getAddress();
     APInfo *ap = lookupAP(address);
     if (!ap)
-        error("processAuthenticateCommand: AP not known: address = %s", address.str().c_str());
+        throw cRuntimeError("processAuthenticateCommand: AP not known: address = %s", address.str().c_str());
     startAuthentication(ap, ctrl->getTimeout());
 }
 
@@ -517,7 +517,7 @@ void Ieee80211MgmtSTA::processDeauthenticateCommand(Ieee80211Prim_Deauthenticate
     const MACAddress& address = ctrl->getAddress();
     APInfo *ap = lookupAP(address);
     if (!ap)
-        error("processDeauthenticateCommand: AP not known: address = %s", address.str().c_str());
+        throw cRuntimeError("processDeauthenticateCommand: AP not known: address = %s", address.str().c_str());
 
     if (isAssociated && assocAP.address==address)
         disassociate();
@@ -543,7 +543,7 @@ void Ieee80211MgmtSTA::processAssociateCommand(Ieee80211Prim_AssociateRequest *c
     const MACAddress& address = ctrl->getAddress();
     APInfo *ap = lookupAP(address);
     if (!ap)
-        error("processAssociateCommand: AP not known: address = %s", address.str().c_str());
+        throw cRuntimeError("processAssociateCommand: AP not known: address = %s", address.str().c_str());
     startAssociation(ap, ctrl->getTimeout());
 }
 
@@ -753,7 +753,7 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
     // look up AP data structure
     APInfo *ap = lookupAP(address);
     if (!ap)
-        error("handleAssociationResponseFrame: AP not known: address=%s", address.str().c_str());
+        throw cRuntimeError("handleAssociationResponseFrame: AP not known: address=%s", address.str().c_str());
 
     if (isAssociated)
     {

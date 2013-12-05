@@ -201,7 +201,7 @@ void VoIPStreamSender::openSoundFile(const char *name)
     int ret = av_open_input_file(&pFormatCtx, name, NULL, 0, NULL);
 
     if (ret)
-        error("Audiofile '%s' open error: %d", name, ret);
+        throw cRuntimeError("Audiofile '%s' open error: %d", name, ret);
 
     av_find_stream_info(pFormatCtx);
 
@@ -217,7 +217,7 @@ void VoIPStreamSender::openSoundFile(const char *name)
     }
 
     if (streamIndex == -1)
-        error("The file '%s' not contains any audio stream.", name);
+        throw cRuntimeError("The file '%s' not contains any audio stream.", name);
 
     pCodecCtx = pFormatCtx->streams[streamIndex]->codec;
 
@@ -226,7 +226,7 @@ void VoIPStreamSender::openSoundFile(const char *name)
     ret = avcodec_open(pCodecCtx, pCodec);
 
     if (ret)
-        error("avcodec_open() error on file '%s': %d", name, ret);
+        throw cRuntimeError("avcodec_open() error on file '%s': %d", name, ret);
 
     //allocate encoder
     pEncoderCtx = avcodec_alloc_context();
@@ -239,12 +239,12 @@ void VoIPStreamSender::openSoundFile(const char *name)
     pCodecEncoder = avcodec_find_encoder_by_name(codec);
 
     if (pCodecEncoder == NULL)
-        error("Codec '%s' not found!", codec);
+        throw cRuntimeError("Codec '%s' not found!", codec);
 
     pEncoderCtx->sample_fmt = pCodecCtx->sample_fmt; // FIXME hack!
 
     if (avcodec_open(pEncoderCtx, pCodecEncoder) < 0)
-        error("could not open %s encoding codec!", codec);
+        throw cRuntimeError("could not open %s encoding codec!", codec);
 
     if (pCodecCtx->sample_rate != sampleRate
             || pEncoderCtx->sample_fmt != pCodecCtx->sample_fmt
@@ -291,7 +291,7 @@ VoIPStreamPacket* VoIPStreamSender::generatePacket()
 
 //    if (pEncoderCtx->frame_size > 1)
 //    {
-//        error("Unsupported codec");
+//        throw cRuntimeError("Unsupported codec");
 //        // int encoderBufSize = (int)(compressedBitRate * SIMTIME_DBL(packetTimeLength)) / 8 + 256;
 //    }
 //    else
@@ -312,9 +312,9 @@ VoIPStreamPacket* VoIPStreamSender::generatePacket()
         // The bitsPerOutSample is not 0 when codec is PCM.
         outByteCount = avcodec_encode_audio(pEncoderCtx, outBuf, buf_size, (short int*)(sampleBuffer.readPtr()));
         if(encoderBufSize < outByteCount)
-            error("avcodec_encode_audio() error: too small buffer: %d instead %d", encoderBufSize, outByteCount);
+            throw cRuntimeError("avcodec_encode_audio() error: too small buffer: %d instead %d", encoderBufSize, outByteCount);
         if (outByteCount <= 0)
-            error("avcodec_encode_audio() error: %d", outByteCount);
+            throw cRuntimeError("avcodec_encode_audio() error: %d", outByteCount);
 
         if (outFile.isOpen())
             outFile.write(sampleBuffer.readPtr(), samples * bitsPerInSample/8);
@@ -461,7 +461,7 @@ void VoIPStreamSender::readFrame()
             int decoded = avcodec_decode_audio3(pCodecCtx, rbuf, &frame_size, &avpkt);
 
             if (decoded < 0)
-                error("Error decoding frame, err=%d", decoded);
+                throw cRuntimeError("Error decoding frame, err=%d", decoded);
 
             avpkt.data += decoded;
             avpkt.size -= decoded;

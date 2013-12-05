@@ -71,11 +71,11 @@ void ObstacleControl::handleMessage(cMessage *msg) {
         handleSelfMsg(msg);
         return;
     }
-    error("ObstacleControl doesn't handle messages from other modules");
+    throw cRuntimeError("ObstacleControl doesn't handle messages from other modules");
 }
 
 void ObstacleControl::handleSelfMsg(cMessage *msg) {
-    error("ObstacleControl doesn't handle self-messages");
+    throw cRuntimeError("ObstacleControl doesn't handle self-messages");
 }
 
 void ObstacleControl::addFromXml(cXMLElement* xml) {
@@ -102,7 +102,7 @@ void ObstacleControl::addFromXml(cXMLElement* xml) {
         double attenuationPerWall = 50; /**< in dB */
         double attenuationPerMeter = 1; /**< in dB / m */
         if (type == "building") { attenuationPerWall = 50; attenuationPerMeter = 1; }
-        else error("unknown obstacle type: %s", type.c_str());
+        else throw cRuntimeError("unknown obstacle type: %s", type.c_str());
         Obstacle obs(id, attenuationPerWall, attenuationPerMeter);
         std::vector<Coord> sh;
         cStringTokenizer st(shape.c_str());

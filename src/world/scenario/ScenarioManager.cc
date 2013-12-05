@@ -33,7 +33,7 @@ void ScenarioManager::initialize()
         // check attr t is present
         const char *tAttr = node->getAttribute("t");
         if (!tAttr)
-            error("attribute 't' missing at %s", node->getSourceLocation());
+            throw cRuntimeError("attribute 't' missing at %s", node->getSourceLocation());
 
         // schedule self-message
         simtime_t t = STR_SIMTIME(tAttr);
@@ -102,7 +102,7 @@ const char *ScenarioManager::getRequiredAttribute(cXMLElement *node, const char 
 {
     const char *s = node->getAttribute(attr);
     if (!s)
-        error("required attribute %s of <%s> missing at %s",
+        throw cRuntimeError("required attribute %s of <%s> missing at %s",
               attr, node->getTagName(), node->getSourceLocation());
     return s;
 }
@@ -112,7 +112,7 @@ cModule *ScenarioManager::getRequiredModule(cXMLElement *node, const char *attr)
     const char *moduleAttr = getRequiredAttribute(node, attr);
     cModule *mod = simulation.getModuleByPath(moduleAttr);
     if (!mod)
-        error("module '%s' not found at %s", moduleAttr, node->getSourceLocation());
+        throw cRuntimeError("module '%s' not found at %s", moduleAttr, node->getSourceLocation());
     return mod;
 }
 
@@ -125,7 +125,7 @@ cGate *ScenarioManager::getRequiredGate(cXMLElement *node, const char *modAttr, 
     parseIndexedName(gateStr, gname, gindex);
     cGate *g = mod->gate(gname.c_str(), gindex);
     if (!g)
-        error("module '%s' has no gate '%s' at %s", mod->getFullPath().c_str(), gateStr, node->getSourceLocation());
+        throw cRuntimeError("module '%s' has no gate '%s' at %s", mod->getFullPath().c_str(), gateStr, node->getSourceLocation());
     return g;
 }
 
@@ -143,7 +143,7 @@ void ScenarioManager::processModuleSpecificCommand(cXMLElement *node)
     // see if it supports the IScriptable interface
     IScriptable *scriptable = dynamic_cast<IScriptable *>(mod);
     if (!scriptable)
-        error("<%s> not understood: it is not a built-in command of %s, and module class %s "  //TODO be more specific
+        throw cRuntimeError("<%s> not understood: it is not a built-in command of %s, and module class %s "  //TODO be more specific
               "is not scriptable (does not subclass from IScriptable) at %s",
               node->getTagName(), getClassName(), mod->getClassName(), node->getSourceLocation());
 
@@ -179,12 +179,12 @@ void ScenarioManager::processSetChannelAttrCommand(cXMLElement *node)
 
     // make sure gate is connected at all
     if (!g->getNextGate())
-        error("gate '%s' is not connected at %s", g->getFullPath().c_str(), node->getSourceLocation());
+        throw cRuntimeError("gate '%s' is not connected at %s", g->getFullPath().c_str(), node->getSourceLocation());
 
     // find channel (or add one?)
     cChannel *chan = g->getChannel();
     if (!chan)
-        error("connection starting at gate '%s' has no attributes at %s", g->getFullPath().c_str(), node->getSourceLocation());
+        throw cRuntimeError("connection starting at gate '%s' has no attributes at %s", g->getFullPath().c_str(), node->getSourceLocation());
 
     // set the parameter to the given value
     cPar& param = chan->par(attrAttr);
@@ -242,7 +242,7 @@ void ScenarioManager::processConnectCommand(cXMLElement *node)
     bool isDestGateInOut = (destMod->gateType(destGateName.c_str()) == cGate::INOUT);
 
     if (srcMod->getParentModule() != destMod->getParentModule())
-        error("The parent modules of src-module and dest-module are differ at %s",
+        throw cRuntimeError("The parent modules of src-module and dest-module are differ at %s",
                 node->getSourceLocation());
 
     // process <connect-channel> command
@@ -285,7 +285,7 @@ void ScenarioManager::processDisconnectCommand(cXMLElement *node)
     cGate *srcGate;
 
     if (srcGateType == cGate::INPUT)
-        error("The src-gate must be inout or output gate at %s", node->getSourceLocation());
+        throw cRuntimeError("The src-gate must be inout or output gate at %s", node->getSourceLocation());
 
     if (srcGateType == cGate::INOUT)
     {
@@ -297,7 +297,7 @@ void ScenarioManager::processDisconnectCommand(cXMLElement *node)
             return; // not connected
 
         if (g->getOwnerModule()->getParentModule() != parentMod)
-            error("The src-gate connected to a node on another level at %s", node->getSourceLocation());
+            throw cRuntimeError("The src-gate connected to a node on another level at %s", node->getSourceLocation());
 
         srcGate->disconnect();
 
@@ -307,7 +307,7 @@ void ScenarioManager::processDisconnectCommand(cXMLElement *node)
             return; // not connected
 
         if (g->getOwnerModule()->getParentModule() != parentMod)
-            error("The src-gate connected to a node on another level at %s", node->getSourceLocation());
+            throw cRuntimeError("The src-gate connected to a node on another level at %s", node->getSourceLocation());
 
         g->disconnect();
     }

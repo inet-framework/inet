@@ -83,7 +83,7 @@ void IdealRadioChannel::unregisterRadio(RadioEntry *r)
             return;
         }
     }
-    error("unregisterRadio failed: no such radio");
+    throw cRuntimeError("unregisterRadio failed: no such radio");
 }
 
 IdealRadioChannel::RadioEntry *IdealRadioChannel::lookupRadio(cModule *radio)

@@ -41,7 +41,7 @@ void Ieee80211MgmtAdhoc::handleUpperMessage(cPacket *msg)
 
 void Ieee80211MgmtAdhoc::handleCommand(int msgkind, cObject *ctrl)
 {
-    error("handleCommand(): no commands supported");
+    throw cRuntimeError("handleCommand(): no commands supported");
 }
 
 Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cPacket *msg)

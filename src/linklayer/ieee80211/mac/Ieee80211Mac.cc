@@ -139,7 +139,7 @@ void Ieee80211Mac::initialize(int stage)
         else if (strcmp("LONG", par("wifiPreambleMode").stringValue())==0)
             wifiPreambleType = WIFI_PREAMBLE_LONG;
         else
-            opp_error("Invalid wifiPreambleType. Must be SHORT or LONG");
+            throw cRuntimeError("Invalid wifiPreambleType. Must be SHORT or LONG");
 
         useModulationParameters = par("useModulationParameters");
 
@@ -186,7 +186,7 @@ void Ieee80211Mac::initialize(int stage)
                 TXOP(i) = par(strTxop.c_str());
             }
             else
-                opp_error("parameters %s , %s don't exist", strAifs.c_str(), strTxop.c_str());
+                throw cRuntimeError("parameters %s , %s don't exist", strAifs.c_str(), strTxop.c_str());
         }
         if (numCategories()==1)
             AIFSN(0) = par("AIFSN");
@@ -602,7 +602,7 @@ void Ieee80211Mac::handleUpperPacket(cPacket *msg)
     // must be a Ieee80211DataOrMgmtFrame, within the max size because we don't support fragmentation
     Ieee80211DataOrMgmtFrame *frame = check_and_cast<Ieee80211DataOrMgmtFrame *>(msg);
     if (frame->getByteLength() > fragmentationThreshold)
-        error("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
+        throw cRuntimeError("message from higher layer (%s)%s is too long for 802.11b, %d bytes (fragmentation is not supported yet)",
               msg->getClassName(), msg->getName(), (int)(msg->getByteLength()));
     EV << "frame " << frame << " received from higher layer, receiver = " << frame->getReceiverAddress() << endl;
 
@@ -722,7 +722,7 @@ void Ieee80211Mac::handleUpperCommand(cMessage *msg)
     }
     else
     {
-        error("Unrecognized command from mgmt layer: (%s)%s msgkind=%d", msg->getClassName(), msg->getName(), msg->getKind());
+        throw cRuntimeError("Unrecognized command from mgmt layer: (%s)%s msgkind=%d", msg->getClassName(), msg->getName(), msg->getKind());
     }
 }
 
@@ -797,7 +797,7 @@ void Ieee80211Mac::handleLowerPacket(cPacket *msg)
         EV << "message from physical layer (%s)%s is not a subclass of Ieee80211Frame" << msg->getClassName() << " " << msg->getName() <<  endl;
         delete msg;
         return;
-        // error("message from physical layer (%s)%s is not a subclass of Ieee80211Frame",msg->getClassName(), msg->getName());
+        // throw cRuntimeError("message from physical layer (%s)%s is not a subclass of Ieee80211Frame",msg->getClassName(), msg->getName());
     }
 
     EV << "Self address: " << address
@@ -1514,7 +1514,7 @@ simtime_t Ieee80211Mac::getEIFS()
             return getSIFS() + getDIFS() + (8 * LENGTH_ACK) / 3E+6 + PHY_HEADER_LENGTH;
     }
     // if arrive here there is an error
-    opp_error("mode not supported");
+    throw cRuntimeError("mode not supported");
     return 0;
 }
 
@@ -1870,7 +1870,7 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
         cObject * ctr = frameToSend->getControlInfo();
         PhyControlInfo *ctrl = dynamic_cast <PhyControlInfo*> (ctr);
         if (ctrl == NULL)
-            opp_error("control info is not PhyControlInfo type %s");
+            throw cRuntimeError("control info is not PhyControlInfo type %s");
         frame->setControlInfo(ctrl->dup());
     }
     if (isMulticast(frameToSend))
@@ -2037,7 +2037,7 @@ void Ieee80211Mac::sendDownPendingRadioConfigMsg()
 void Ieee80211Mac::setMode(Mode mode)
 {
     if (mode == PCF)
-        error("PCF mode not yet supported");
+        throw cRuntimeError("PCF mode not yet supported");
 
     this->mode = mode;
 }
@@ -2177,7 +2177,7 @@ double Ieee80211Mac::computeFrameDuration(int bits, double bitrate)
         else if (opMode=='b')
             duration = bits / bitrate + PHY_HEADER_LENGTH / BITRATE_HEADER;
         else
-            opp_error("Opmode not supported");
+            throw cRuntimeError("Opmode '%c' not supported", opMode);
     }
 
     EV<<" duration="<<duration*1e6<<"us("<<bits<<"bits "<<bitrate/1e6<<"Mbps)"<<endl;
@@ -2363,14 +2363,14 @@ void Ieee80211Mac::setTimerTimeout(int timer_timeout)
     if (timer_timeout >= minTimerTimeout)
         timerTimeout = timer_timeout;
     else
-        error("timer_timeout is less than minTimerTimeout");
+        throw cRuntimeError("timer_timeout is less than minTimerTimeout");
 }
 void Ieee80211Mac::setSuccessThreshold(int success_threshold)
 {
     if (success_threshold >= minSuccessThreshold)
         successThreshold = success_threshold;
     else
-        error("success_threshold is less than minSuccessThreshold");
+        throw cRuntimeError("success_threshold is less than minSuccessThreshold");
 }
 
 void Ieee80211Mac::reportRecoveryFailure(void)
@@ -2436,7 +2436,7 @@ bool & Ieee80211Mac::backoff(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].backoff;
 }
 
@@ -2445,7 +2445,7 @@ simtime_t & Ieee80211Mac::TXOP(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].TXOP;
 }
 
@@ -2454,7 +2454,7 @@ simtime_t & Ieee80211Mac::backoffPeriod(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].backoffPeriod;
 }
 
@@ -2463,7 +2463,7 @@ int & Ieee80211Mac::retryCounter(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].retryCounter;
 }
 
@@ -2472,7 +2472,7 @@ int & Ieee80211Mac::AIFSN(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].AIFSN;
 }
 
@@ -2481,7 +2481,7 @@ int & Ieee80211Mac::cwMax(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].cwMax;
 }
 
@@ -2490,7 +2490,7 @@ int & Ieee80211Mac::cwMin(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].cwMin;
 }
 
@@ -2499,7 +2499,7 @@ cMessage * Ieee80211Mac::endAIFS(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].endAIFS;
 }
 
@@ -2508,7 +2508,7 @@ cMessage * Ieee80211Mac::endBackoff(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].endBackoff;
 }
 
@@ -2528,7 +2528,7 @@ long & Ieee80211Mac::numRetry(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].numRetry;
 }
 
@@ -2537,7 +2537,7 @@ long & Ieee80211Mac::numSentWithoutRetry(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)numCategories())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].numSentWithoutRetry;
 }
 
@@ -2546,7 +2546,7 @@ long & Ieee80211Mac::numGivenUp(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].numGivenUp;
 }
 
@@ -2555,7 +2555,7 @@ long & Ieee80211Mac::numSent(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].numSent;
 }
 
@@ -2564,7 +2564,7 @@ long & Ieee80211Mac::numDropped(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].numDropped;
 }
 
@@ -2573,7 +2573,7 @@ long & Ieee80211Mac::bits(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].bits;
 }
 
@@ -2582,7 +2582,7 @@ simtime_t & Ieee80211Mac::minJitter(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].minjitter;
 }
 
@@ -2591,7 +2591,7 @@ simtime_t & Ieee80211Mac::maxJitter(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAF[i].maxjitter;
 }
 
@@ -2603,7 +2603,7 @@ cOutVector * Ieee80211Mac::jitter(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAFOutVector[i].jitter;
 }
 
@@ -2612,7 +2612,7 @@ cOutVector * Ieee80211Mac::macDelay(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAFOutVector[i].macDelay;
 }
 
@@ -2621,7 +2621,7 @@ cOutVector * Ieee80211Mac::throughput(int i)
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return edcCAFOutVector[i].throughput;
 }
 
@@ -2630,7 +2630,7 @@ Ieee80211Mac::Ieee80211DataOrMgmtFrameList * Ieee80211Mac::transmissionQueue(int
     if (i==-1)
         i = currentAC;
     if (i>=(int)edcCAF.size())
-        opp_error("AC doesn't exist");
+        throw cRuntimeError("AC doesn't exist");
     return &(edcCAF[i].transmissionQueue);
 }
 
@@ -2713,7 +2713,7 @@ Ieee80211Mac::getControlAnswerMode(ModulationType reqMode)
      */
     if (!found)
     {
-        opp_error("Can't find response rate for reqMode. Check standard and selected rates match.");
+        throw cRuntimeError("Can't find response rate for reqMode. Check standard and selected rates match.");
     }
 
     return mode;

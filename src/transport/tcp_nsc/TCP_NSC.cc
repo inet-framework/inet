@@ -225,12 +225,12 @@ void TCP_NSC::initialize(int stage)
         q = par("sendQueueClass");
 
         if (*q != '\0')
-            error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
+            throw cRuntimeError("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
 
         q = par("receiveQueueClass");
 
         if (*q != '\0')
-            error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
+            throw cRuntimeError("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
 
         WATCH_MAP(tcpAppConnMapM);
 
@@ -355,7 +355,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     }
     else
     {
-        error("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
+        throw cRuntimeError("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
     }
 
     // statistics:

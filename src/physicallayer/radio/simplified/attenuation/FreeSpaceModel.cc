@@ -38,7 +38,7 @@ void FreeSpaceModel::initializeFreeSpace(cModule *radioModule)
     pathLossAlpha = radioModule->par("pathLossAlpha");
     ISimplifiedRadioChannel *cc = SimplifiedRadioChannelAccess::getSimplifiedRadioChannel();
     if (pathLossAlpha < (double) (dynamic_cast<cModule*>(cc)->par("alpha")))
-        opp_error("PathLossReceptionModel: pathLossAlpha can't be smaller than in SimplifiedRadioChannel -- please adjust the parameters");
+        throw cRuntimeError("PathLossReceptionModel: pathLossAlpha can't be smaller than in SimplifiedRadioChannel -- please adjust the parameters");
     Gt = pow(10, radioModule->par("TransmissionAntennaGainIndB").doubleValue()/10);
     Gr = pow(10, radioModule->par("ReceiveAntennaGainIndB").doubleValue()/10);
     L = pow(10, radioModule->par("SystemLossFactor").doubleValue()/10);

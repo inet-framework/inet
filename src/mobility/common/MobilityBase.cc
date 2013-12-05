@@ -71,7 +71,7 @@ void MobilityBase::initialize(int stage)
         if (visualRepresentation) {
             const char *s = visualRepresentation->getDisplayString().getTagArg("p", 2);
             if (s && *s)
-                error("The coordinates of '%s' are invalid. Please remove automatic arrangement"
+                throw cRuntimeError("The coordinates of '%s' are invalid. Please remove automatic arrangement"
                       " (3rd argument of 'p' tag) from '@display' attribute.", visualRepresentation->getFullPath().c_str());
         }
     }

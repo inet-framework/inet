@@ -53,7 +53,7 @@ void BindingCache::initialize()
 
 void BindingCache::handleMessage(cMessage *msg)
 {
-    opp_error("This module doesn't process messages");
+    throw cRuntimeError("This module doesn't process messages");
 }
 
 void BindingCache::addOrUpdateBC(const IPv6Address& hoa, const IPv6Address& coa,

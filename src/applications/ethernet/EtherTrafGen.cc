@@ -66,7 +66,7 @@ void EtherTrafGen::initialize(int stage)
         startTime = par("startTime");
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
-            error("Invalid startTime/stopTime parameters");
+            throw cRuntimeError("Invalid startTime/stopTime parameters");
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
@@ -161,11 +161,11 @@ MACAddress EtherTrafGen::resolveDestMACAddress()
         {
             cModule *destStation = simulation.getModuleByPath(destAddress);
             if (!destStation)
-                error("cannot resolve MAC address '%s': not a 12-hex-digit MAC address or a valid module path name", destAddress);
+                throw cRuntimeError("cannot resolve MAC address '%s': not a 12-hex-digit MAC address or a valid module path name", destAddress);
 
             cModule *destMAC = destStation->getSubmodule("mac");
             if (!destMAC)
-                error("module '%s' has no 'mac' submodule", destAddress);
+                throw cRuntimeError("module '%s' has no 'mac' submodule", destAddress);
 
             destMACAddress.setAddress(destMAC->par("address"));
         }

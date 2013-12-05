@@ -343,9 +343,9 @@ void ARP::processARPPacket(ARPPacket *arp)
     IPv4Address srcIPAddress = arp->getSrcIPAddress();
 
     if (srcMACAddress.isUnspecified())
-        error("wrong ARP packet: source MAC address is empty");
+        throw cRuntimeError("wrong ARP packet: source MAC address is empty");
     if (srcIPAddress.isUnspecified())
-        error("wrong ARP packet: source IPv4 address is empty");
+        throw cRuntimeError("wrong ARP packet: source IPv4 address is empty");
 
     bool mergeFlag = false;
     // "If ... sender protocol address is already in my translation table"

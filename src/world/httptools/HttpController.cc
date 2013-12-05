@@ -45,7 +45,7 @@ void HttpController::initialize(int stage)
 
         cXMLElement *rootelement = par("config").xmlValue();
         if (rootelement==NULL)
-            error("Configuration file is not defined");
+            throw cRuntimeError("Configuration file is not defined");
 
         cXMLAttributeMap attributes;
         cXMLElement *element;
@@ -53,11 +53,11 @@ void HttpController::initialize(int stage)
         rdObjectFactory rdFactory;
         element = rootelement->getFirstChildWithTag("serverPopularityDistribution");
         if (element==NULL)
-            error("Server popularity distribution parameter undefined in XML configuration");
+            throw cRuntimeError("Server popularity distribution parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdServerSelection = rdFactory.create(attributes);
         if (rdServerSelection==NULL)
-            error("Server popularity distribution random object could not be created");
+            throw cRuntimeError("Server popularity distribution random object could not be created");
         EV_INFO << "Using " << rdServerSelection->typeStr() << " for server popularity distribution." << endl;
 
         pspecial = 0.0; // No special events by default
@@ -143,7 +143,7 @@ void HttpController::registerServer(const char* objectName, const char* wwwName,
     en->accessCount = 0;
 
     if (en->module == NULL)
-        error("Server %s does not have a WWW module", wwwName);
+        throw cRuntimeError("Server %s does not have a WWW module", wwwName);
 
     webSiteList[en->name] = en;
 
@@ -444,7 +444,7 @@ void HttpController::parseOptionsFile(std::string file, std::string section)
     std::ifstream tracefilestream;
     tracefilestream.open(file.c_str());
     if (!tracefilestream.is_open())
-        error("Could not open events file %s", file.c_str());
+        throw cRuntimeError("Could not open events file %s", file.c_str());
 
     if (section.size()==0)
         bSectionFound = true; // Grab first section
@@ -477,7 +477,7 @@ void HttpController::parseOptionsFile(std::string file, std::string section)
                 cStringTokenizer tokenizer = cStringTokenizer(line.c_str(), ";");
                 std::vector<std::string> res = tokenizer.asVector();
                 if (res.size()!=5)
-                    error("Invalid format of event config line in '%s' Line: '%s'", file.c_str(), line.c_str());
+                    throw cRuntimeError("Invalid format of event config line in '%s' Line: '%s'", file.c_str(), line.c_str());
                 try
                 {
                     activationtime = (simtime_t)atof(res[0].c_str());
@@ -486,7 +486,7 @@ void HttpController::parseOptionsFile(std::string file, std::string section)
                 }
                 catch (...)
                 {
-                    error("Invalid format of event config line in '%s' Line: '%s'", file.c_str(), line.c_str());
+                    throw cRuntimeError("Invalid format of event config line in '%s' Line: '%s'", file.c_str(), line.c_str());
                 }
 
                 EV_DEBUG << "Scheduling a status change for " << res[1] << " @ T=" << activationtime << ". Parameters: " << line << endl;
@@ -522,7 +522,7 @@ HttpController::WebServerEntry* HttpController::__getRandomServerInfo()
             selected = (int)rdServerSelection->draw();
             en = pickList[selected];
             if (en == NULL)
-                error("Invalid node selected at index %d", selected);
+                throw cRuntimeError("Invalid node selected at index %d", selected);
             EV_DEBUG << "Selecting from normal list. Got node " << en->name << endl;
         }
         EV_DEBUG << "Activation time of the node is " << en->activationTime << " and the current time is " << simTime() << endl;

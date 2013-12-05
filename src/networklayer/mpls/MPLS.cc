@@ -62,7 +62,7 @@ void MPLS::handleMessage(cMessage * msg)
     }
     else
     {
-        error("unexpected message: %s", msg->getName());
+        throw cRuntimeError("unexpected message: %s", msg->getName());
     }
 }
 
@@ -176,7 +176,7 @@ void MPLS::doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel)
                 break;
 
             default:
-                error("Unknown MPLS OptCode %d", outLabel[i].optcode);
+                throw cRuntimeError("Unknown MPLS OptCode %d", outLabel[i].optcode);
                 break;
         }
     }
@@ -204,7 +204,7 @@ void MPLS::processPacketFromL2(cMessage *msg)
     }
     else
     {
-        error("Unknown message received");
+        throw cRuntimeError("Unknown message received");
     }
 }
 

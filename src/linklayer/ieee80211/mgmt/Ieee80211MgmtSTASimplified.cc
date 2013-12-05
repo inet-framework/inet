@@ -53,7 +53,7 @@ void Ieee80211MgmtSTASimplified::handleUpperMessage(cPacket *msg)
 
 void Ieee80211MgmtSTASimplified::handleCommand(int msgkind, cObject *ctrl)
 {
-    error("handleCommand(): no commands supported");
+    throw cRuntimeError("handleCommand(): no commands supported");
 }
 
 Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cPacket *msg)

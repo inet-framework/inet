@@ -81,8 +81,7 @@ void DHCPServer::initialize(int stage)
 void DHCPServer::openSocket()
 {
     if (!ie)
-        throw cRuntimeError("Interface to listen on does not exist");  // may have been deleted
-
+        throw cRuntimeError("Interface to listen does not exist. aborting");
     socket.setOutputGate(gate("udpOut"));
     socket.bind(serverPort);
     socket.setBroadcast(true);

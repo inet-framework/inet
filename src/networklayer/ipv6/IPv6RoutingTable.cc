@@ -148,11 +148,11 @@ void IPv6RoutingTable::parseXMLConfigFile()
                 //std::cout << "Getting attribute: name" << endl;
                 const char *ifname = ifTag->getAttribute("name");
                 if (!ifname)
-                    error("<interface> without name attribute at %s", child->getSourceLocation());
+                    throw cRuntimeError("<interface> without name attribute at %s", child->getSourceLocation());
 
                 InterfaceEntry *ie = ift->getInterfaceByName(ifname);
                 if (!ie)
-                    error("no interface named %s was registered, %s", ifname, child->getSourceLocation());
+                    throw cRuntimeError("no interface named %s was registered, %s", ifname, child->getSourceLocation());
 
                 configureInterfaceFromXML(ie, ifTag);
             }
@@ -410,7 +410,7 @@ void IPv6RoutingTable::configureTunnelFromXML(cXMLElement* cfg)
         cXMLElementList triggerList = node->getElementsByTagName("triggers");
 
         if (triggerList.size() != 1)
-            opp_error("element <%s> at %s: Only exactly one trigger allowed",
+            throw cRuntimeError("element <%s> at %s: Only exactly one trigger allowed",
                     node->getTagName(), node->getSourceLocation());
 
         cXMLElement *triggerNode = triggerList[0];

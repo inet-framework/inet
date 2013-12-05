@@ -370,11 +370,11 @@ class INET_API ManetRoutingBase : public cSimpleModule, public cListener, public
     virtual bool getAddressGroup(AddressGroup &, int group = 0);
     virtual bool getAddressGroup(std::vector<ManetAddress> &, int group = 0);
 
-    virtual int  getRouteGroup(const AddressGroup &gr, std::vector<ManetAddress> &){opp_error("getRouteGroup, method is not implemented"); return 0;}
-    virtual int  getRouteGroup(const ManetAddress&, std::vector<ManetAddress> &, ManetAddress&, bool &, int group = 0){opp_error("getRouteGroup, method is not implemented"); return 0;}
+    virtual int  getRouteGroup(const AddressGroup &gr, std::vector<ManetAddress> &) { throw cRuntimeError("getRouteGroup, method is not implemented"); }
+    virtual int  getRouteGroup(const ManetAddress&, std::vector<ManetAddress> &, ManetAddress&, bool &, int group = 0) { throw cRuntimeError("getRouteGroup, method is not implemented"); }
 
-    virtual bool getNextHopGroup(const AddressGroup &gr, ManetAddress &add, int &iface, ManetAddress&){opp_error("getNextHopGroup, method is not implemented"); return false;}
-    virtual bool getNextHopGroup(const ManetAddress&, ManetAddress &add, int &iface, ManetAddress&, bool &, int group = 0){opp_error("getNextHopGroup, method is not implemented"); return false;}
+    virtual bool getNextHopGroup(const AddressGroup &gr, ManetAddress &add, int &iface, ManetAddress&) { throw cRuntimeError("getNextHopGroup, method is not implemented"); }
+    virtual bool getNextHopGroup(const ManetAddress&, ManetAddress &add, int &iface, ManetAddress&, bool &, int group = 0) { throw cRuntimeError("getNextHopGroup, method is not implemented"); }
 
 
     /// proxy/gateway methods, this methods help to the reactive protocols to answer the RREQ for a address that are in other subnetwork

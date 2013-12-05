@@ -806,7 +806,7 @@ void NS_CLASS re_intermediate_rrep (struct in_addr src_addr,struct in_addr dest_
 #endif
     rtable_entry_t *rev_rt  = rtable_find(src_addr);
 
-    if (!rev_rt) error("no route to OrigNode found");
+    if (!rev_rt) throw cRuntimeError("no route to OrigNode found");
 
     // increment ownSeqNum.
     // TODO: The draft is unclear about when to increment ownSeqNum for intermediate DYMO router RREP creation
@@ -1010,7 +1010,7 @@ void NS_CLASS re_answer(RE *re,u_int32_t ifindex)
     double cost;
     std::vector<ManetAddress> addressVector;
     if (!getCollaborativeProtocol())
-        opp_error("re_answer no CollaborativeProtocol");
+        throw cRuntimeError("re_answer no CollaborativeProtocol");
 
     addressVector.clear();
 
@@ -1018,21 +1018,21 @@ void NS_CLASS re_answer(RE *re,u_int32_t ifindex)
     {
         getCollaborativeProtocol()->getRoute(re->target_addr,addressVector);
         if (addressVector.empty())
-            opp_error("re_answer route not found");
+            throw cRuntimeError("re_answer route not found");
         cost = addressVector.size();
     }
     int ifaceIndexNextHop = -1;
     ManetAddress nextAddr;
     int ifaceId;
     if (!getCollaborativeProtocol()->getNextHop(re->target_addr, nextAddr, ifaceId, cost))
-        opp_error("re_answer route not found");
+        throw cRuntimeError("re_answer route not found");
     if (addressVector.empty())
         addressVector.push_back(nextAddr);
     else
     {
         if (addressVector[0] != nextAddr)
         {
-            opp_error("CollaborativeProtocol inconsistency");
+            throw cRuntimeError("CollaborativeProtocol inconsistency");
         }
     }
 
@@ -1045,7 +1045,7 @@ void NS_CLASS re_answer(RE *re,u_int32_t ifindex)
         }
     }
     if (ifaceIndexNextHop == -1)
-        opp_error("Interface not found");
+        throw cRuntimeError("Interface not found");
 
     // Process list of nodes
     unsigned int sizeVector = addressVector.size();
@@ -1171,7 +1171,7 @@ void NS_CLASS re_answer(RE *re,u_int32_t ifindex)
             node_addr.s_addr    = addressVector[i];
             entry           = rtable_find(node_addr);
             if (!entry)
-                error("Entry not found");
+                throw cRuntimeError("Entry not found");
             rrep_src->re_blocks[i].g = entry->rt_is_gw;
             rrep_src->re_blocks[i].prefix = entry->rt_prefix;
             rrep_src->re_blocks[i].res = 0;

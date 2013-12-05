@@ -52,7 +52,7 @@ void TCPBasicClientApp::initialize(int stage)
         startTime = par("startTime");
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
-            error("Invalid startTime/stopTime parameters");
+            throw cRuntimeError("Invalid startTime/stopTime parameters");
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER)
     {

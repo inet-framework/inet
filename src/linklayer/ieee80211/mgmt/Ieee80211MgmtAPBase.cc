@@ -145,12 +145,12 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::convertFromEtherFrame(EtherFrame *ethfr
     else if (dynamic_cast<EtherFrameWithSNAP *>(ethframe))
         frame->setEtherType(((EtherFrameWithSNAP *) ethframe)->getLocalcode());
     else
-        error("Unaccepted EtherFrame type: %s, contains no EtherType", ethframe->getClassName());
+        throw cRuntimeError("Unaccepted EtherFrame type: %s, contains no EtherType", ethframe->getClassName());
 
     // encapsulate payload
     cPacket *payload = ethframe->decapsulate();
     if (!payload)
-        error("received empty EtherFrame from upper layer");
+        throw cRuntimeError("received empty EtherFrame from upper layer");
     frame->encapsulate(payload);
     delete ethframe;
 

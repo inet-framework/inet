@@ -384,7 +384,7 @@ void SCTPClient::sendRequest(bool last)
 
     if (nextStream == 0 && streamRequestRatioSendMap[nextStream] == 0)
     {
-        opp_error("Invalid setting of streamRequestRatio: only 0 weightings");
+        throw cRuntimeError("Invalid setting of streamRequestRatio: only 0 weightings");
     }
 
     unsigned int sendBytes = streamRequestLengthMap[nextStream];

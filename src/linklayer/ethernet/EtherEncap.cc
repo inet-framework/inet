@@ -82,7 +82,7 @@ void EtherEncap::updateDisplayString()
 void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
 {
     if (msg->getByteLength() > MAX_ETHERNET_DATA_BYTES)
-        error("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", (int)msg->getByteLength(), MAX_ETHERNET_DATA_BYTES);
+        throw cRuntimeError("packet from higher layer (%d bytes) exceeds maximum Ethernet payload length (%d)", (int)msg->getByteLength(), MAX_ETHERNET_DATA_BYTES);
 
     totalFromHigherLayer++;
     emit(encapPkSignal, msg);
@@ -159,7 +159,7 @@ void EtherEncap::handleSendPause(cMessage *msg)
 {
     Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl*>(msg->removeControlInfo());
     if (!etherctrl)
-        error("PAUSE command `%s' from higher layer received without Ieee802Ctrl", msg->getName());
+        throw cRuntimeError("PAUSE command `%s' from higher layer received without Ieee802Ctrl", msg->getName());
     int pauseUnits = etherctrl->getPauseUnits();
     delete etherctrl;
 

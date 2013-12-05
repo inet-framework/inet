@@ -64,7 +64,7 @@ void Ieee80211RadioModel::initializeFrom(cModule *radioModule)
     else if (strcmp("NistModel", radioModule->par("errorModel").stringValue())==0)
         errorModel = new NistErrorRateModel();
     else
-        opp_error("Error %s model is not valid",radioModule->par("errorModel").stringValue());
+        throw cRuntimeError("Error %s model is not valid",radioModule->par("errorModel").stringValue());
 
 
     btSize = radioModule->par("btSize").longValue();
@@ -213,7 +213,7 @@ double Ieee80211RadioModel::getTestFrameError(double snirMin, double bitrate)
     }
     else
     {
-        opp_error("Radio model not supported yet, must be a,b,g or p");
+        throw cRuntimeError("Radio model not supported yet, must be a,b,g or p");
     }
 
     headerNoError = errorModel->GetChunkSuccessRate(modeHeader, snirMin, headerSize);
@@ -257,7 +257,7 @@ bool Ieee80211RadioModel::isPacketOK(double snirMin, int lengthMPDU, double bitr
     }
     else
     {
-        opp_error("Radio model not supported yet, must be a,b,g or p");
+        throw cRuntimeError("Radio model not supported yet, must be a,b,g or p");
     }
 
     headerNoError = errorModel->GetChunkSuccessRate(modeHeader, snirMin, headerSize);

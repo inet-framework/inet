@@ -141,7 +141,7 @@ void EtherMAC::readChannelParameters(bool errorWhenAsymmetric)
     if (connected && !duplexMode)
     {
         if (curEtherDescr->halfDuplexFrameMinBytes < 0.0)
-            error("%g bps Ethernet only supports full-duplex links", curEtherDescr->txrate);
+            throw cRuntimeError("%g bps Ethernet only supports full-duplex links", curEtherDescr->txrate);
     }
 }
 
@@ -196,7 +196,7 @@ void EtherMAC::handleMessage(cMessage *msg)
 
     // some consistency check
     if (!duplexMode && transmitState == TRANSMITTING_STATE && receiveState != RX_IDLE_STATE)
-        error("Inconsistent state -- transmitting and receiving at the same time");
+        throw cRuntimeError("Inconsistent state -- transmitting and receiving at the same time");
 
     if (msg->isSelfMessage())
         handleSelfMessage(msg);
@@ -226,13 +226,13 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
 
     if (frame->getDest().equals(address))
     {
-        error("Logic error: frame %s from higher layer has local MAC address as dest (%s)",
+        throw cRuntimeError("Logic error: frame %s from higher layer has local MAC address as dest (%s)",
                 frame->getFullName(), frame->getDest().str().c_str());
     }
 
     if (frame->getByteLength() > MAX_ETHERNET_FRAME_BYTES)
     {
-        error("Packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
+        throw cRuntimeError("Packet from higher layer (%d bytes) exceeds maximum Ethernet frame size (%d)",
                 (int)(frame->getByteLength()), MAX_ETHERNET_FRAME_BYTES);
     }
 
@@ -268,7 +268,7 @@ void EtherMAC::processFrameFromUpperLayer(EtherFrame *frame)
     else
     {
         if (txQueue.innerQueue->isFull())
-            error("txQueue length exceeds %d -- this is probably due to "
+            throw cRuntimeError("txQueue length exceeds %d -- this is probably due to "
                   "a bogus app model generating excessive traffic "
                   "(or if this is normal, increase txQueueLimit!)",
                   txQueue.innerQueue->getQueueLimit());
@@ -343,7 +343,7 @@ void EtherMAC::processReceivedJam(EtherJam *jam)
 
     numConcurrentTransmissions--;
     if (numConcurrentTransmissions < 0)
-        error("Received JAM without message");
+        throw cRuntimeError("Received JAM without message");
 
     if (numConcurrentTransmissions == 0 || endRxMsg->getArrivalTime() < endRxTime)
     {
@@ -377,7 +377,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
         simtime_t propagationTime = simTime() - msg->getSendingTime();
         if (propagationTime >= curEtherDescr->maxPropagationDelay)
         {
-            error("Very long frame propagation time detected, maybe cable exceeds "
+            throw cRuntimeError("Very long frame propagation time detected, maybe cable exceeds "
                   "maximum allowed length? (%lgs corresponds to an approx. %lgm cable)",
                   SIMTIME_STR(propagationTime),
                   SIMTIME_STR(propagationTime * SPEED_OF_LIGHT_IN_CABLE));
@@ -389,7 +389,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
 
     if (duplexMode && jamMsg)
     {
-        error("Stray jam signal arrived in full-duplex mode");
+        throw cRuntimeError("Stray jam signal arrived in full-duplex mode");
     }
     else if (!duplexMode && receiveState == RX_RECONNECT_STATE)
     {
@@ -401,7 +401,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     {
         // since we're half-duplex, receiveState must be RX_IDLE_STATE (asserted at top of handleMessage)
         if (jamMsg)
-            error("Stray jam signal arrived while transmitting (usual cause is cable length exceeding allowed maximum)");
+            throw cRuntimeError("Stray jam signal arrived while transmitting (usual cause is cable length exceeding allowed maximum)");
 
         // set receive state and schedule end of reception
         receiveState = RX_COLLISION_STATE;
@@ -421,7 +421,7 @@ void EtherMAC::processMsgFromNetwork(EtherTraffic *msg)
     else if (receiveState == RX_IDLE_STATE)
     {
         if (jamMsg)
-            error("Stray jam signal arrived (usual cause is cable length exceeding allowed maximum)");
+            throw cRuntimeError("Stray jam signal arrived (usual cause is cable length exceeding allowed maximum)");
 
         channelBusySince = simTime();
         EV << "Start reception of frame\n";
@@ -484,7 +484,7 @@ void EtherMAC::processDetectedCollision()
 void EtherMAC::handleEndIFGPeriod()
 {
     if (transmitState != WAIT_IFG_STATE && transmitState != SEND_IFG_STATE)
-        error("Not in WAIT_IFG_STATE at the end of IFG period");
+        throw cRuntimeError("Not in WAIT_IFG_STATE at the end of IFG period");
 
     currentSendPkTreeID = 0;
 
@@ -570,12 +570,12 @@ void EtherMAC::handleEndTxPeriod()
 {
     // we only get here if transmission has finished successfully, without collision
     if (transmitState != TRANSMITTING_STATE || (!duplexMode && receiveState != RX_IDLE_STATE))
-        error("End of transmission, and incorrect state detected");
+        throw cRuntimeError("End of transmission, and incorrect state detected");
 
     currentSendPkTreeID = 0;
 
     if (curTxFrame == NULL)
-        error("Frame under transmission cannot be found");
+        throw cRuntimeError("Frame under transmission cannot be found");
 
     emit(packetSentToLowerSignal, curTxFrame);  //consider: emit with start time of frame
 
@@ -670,10 +670,10 @@ void EtherMAC::handleEndRxPeriod()
 void EtherMAC::handleEndBackoffPeriod()
 {
     if (transmitState != BACKOFF_STATE)
-        error("At end of BACKOFF and not in BACKOFF_STATE");
+        throw cRuntimeError("At end of BACKOFF and not in BACKOFF_STATE");
 
     if (curTxFrame == NULL)
-        error("At end of BACKOFF and no frame to transmit");
+        throw cRuntimeError("At end of BACKOFF and no frame to transmit");
 
     if (receiveState == RX_IDLE_STATE)
     {
@@ -710,7 +710,7 @@ void EtherMAC::sendJamSignal()
 void EtherMAC::handleEndJammingPeriod()
 {
     if (transmitState != JAMMING_STATE)
-        error("At end of JAMMING but not in JAMMING_STATE");
+        throw cRuntimeError("At end of JAMMING but not in JAMMING_STATE");
 
     EV << "Jamming finished, executing backoff\n";
     handleRetransmission();
@@ -793,7 +793,7 @@ void EtherMAC::finish()
 void EtherMAC::handleEndPausePeriod()
 {
     if (transmitState != PAUSE_STATE)
-        error("At end of PAUSE and not in PAUSE_STATE");
+        throw cRuntimeError("At end of PAUSE and not in PAUSE_STATE");
 
     EV << "Pause finished, resuming transmissions\n";
     beginSendFrames();

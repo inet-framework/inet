@@ -115,7 +115,7 @@ void Batman::initialize(int stage)
 
         debug_level = par("debugLevel");
         if (debug_level > debug_level_max) {
-                opp_error( "Invalid debug level: %i\nDebug level has to be between 0 and %i.\n", debug_level, debug_level_max );
+                throw cRuntimeError( "Invalid debug level: %i\nDebug level has to be between 0 and %i.\n", debug_level, debug_level_max );
         }
         purge_timeout = par("purgeTimeout");
         if (purge_timeout <= SIMTIME_ZERO)
@@ -164,11 +164,11 @@ void Batman::initialize(int stage)
         }
 
         if ((gateway_class != 0) && (routing_class != 0)) {
-            opp_error("Error - routing class can't be set while gateway class is in use !\n");
+            throw cRuntimeError("Error - routing class can't be set while gateway class is in use !\n");
         }
 
         if ((gateway_class != 0) && (!pref_gateway.isUnspecified())) {
-            opp_error("Error - preferred gateway can't be set while gateway class is in use !\n" );
+            throw cRuntimeError("Error - preferred gateway can't be set while gateway class is in use !\n" );
         }
 
         /* use routing class 1 if none specified */
@@ -176,7 +176,7 @@ void Batman::initialize(int stage)
             routing_class = DEFAULT_ROUTING_CLASS;
 
         //if (((routing_class != 0 ) || ( gateway_class != 0 ))&& (!probe_tun(1)))
-        //    opp_error("");
+        //    throw cRuntimeError("");
 
         for (int i = 0; i<getNumWlanInterfaces(); i++)
         {
@@ -236,7 +236,7 @@ void Batman::initialize(int stage)
 
         if (routing_class > 0) {
             if (add_del_interface_rules(RULE_ADD) < 0) {
-                opp_error("BATMAN Interface error");
+                throw cRuntimeError("BATMAN Interface error");
             }
         }
 

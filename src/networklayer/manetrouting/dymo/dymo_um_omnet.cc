@@ -353,7 +353,7 @@ void DYMOUM::handleMessage(cMessage *msg)
     struct in_addr dest_addr;
 
     if (is_init==false)
-        opp_error("Dymo-UM has not been initialized ");
+        throw cRuntimeError("Dymo-UM has not been initialized ");
     if (msg==sendMessageEvent)
     {
         // timer event
@@ -1458,12 +1458,12 @@ bool  DYMOUM::getNextHop(const ManetAddress &dest, ManetAddress &add, int &iface
               // sanity check
               if (it->second->rt_dest_addr.s_addr != destAddr)
               {
-                  opp_error("Dymo routing data base error");
+                  throw cRuntimeError("Dymo routing data base error");
               }
               fwd_rt = it->second;
           }
           else
-              opp_error("Dymo routing data base error, NULL entry");
+              throw cRuntimeError("Dymo routing data base error, NULL entry");
     }
     if (fwd_rt)
     {
@@ -1514,12 +1514,12 @@ void DYMOUM::setRefreshRoute(const ManetAddress &destination, const ManetAddress
               // sanity check
               if (it->second->rt_dest_addr.s_addr != next)
               {
-                  opp_error("Dymo routing data base error");
+                  throw cRuntimeError("Dymo routing data base error");
               }
               route = it->second;
           }
           else
-              opp_error("Dymo routing data base error, NULL entry");
+              throw cRuntimeError("Dymo routing data base error, NULL entry");
     }
 
     it = dymoRoutingTable->find(dest);
@@ -1530,12 +1530,12 @@ void DYMOUM::setRefreshRoute(const ManetAddress &destination, const ManetAddress
               // sanity check
               if (it->second->rt_dest_addr.s_addr != dest)
               {
-                  opp_error("Dymo routing data base error");
+                  throw cRuntimeError("Dymo routing data base error");
               }
               fwd_pre_rt = it->second;
           }
           else
-              opp_error("Dymo routing data base error, NULL entry");
+              throw cRuntimeError("Dymo routing data base error, NULL entry");
     }
 
 

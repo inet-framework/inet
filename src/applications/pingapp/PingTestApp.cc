@@ -64,7 +64,7 @@ void PingTestApp::initialize(int stage)
         startTime = par("startTime").doubleValue();
         stopTime = par("stopTime").doubleValue();
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
-            error("Invalid startTime/stopTime parameters");
+            throw cRuntimeError("Invalid startTime/stopTime parameters");
         printPing = par("printPing").boolValue();
         continuous = par("continuous").boolValue();
 

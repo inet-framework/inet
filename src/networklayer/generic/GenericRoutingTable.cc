@@ -89,7 +89,7 @@ void GenericRoutingTable::initialize(int stage)
 //        // read routing table file (and interface configuration)
 //        RoutingTableParser parser(ift, this);
 //        if (*filename && parser.readRoutingTableFromFile(filename)==-1)
-//            error("Error reading routing table file %s", filename);
+//            throw cRuntimeError("Error reading routing table file %s", filename);
 
 //TODO
 //        // set routerId if param is not "" (==no routerId) or "auto" (in which case we'll
@@ -338,7 +338,7 @@ void GenericRoutingTable::addRoute(IRoute* route)
 
     // check that the interface exists
     if (!entry->getInterface())
-        error("addRoute(): interface cannot be NULL");
+        throw cRuntimeError("addRoute(): interface cannot be NULL");
 
     internalAddRoute(entry);
 

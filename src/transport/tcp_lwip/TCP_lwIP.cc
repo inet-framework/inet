@@ -93,11 +93,11 @@ void TCP_lwIP::initialize(int stage)
         const char *q;
         q = par("sendQueueClass");
         if (*q != '\0')
-            error("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
+            throw cRuntimeError("Don't use obsolete sendQueueClass = \"%s\" parameter", q);
 
         q = par("receiveQueueClass");
         if (*q != '\0')
-            error("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
+            throw cRuntimeError("Don't use obsolete receiveQueueClass = \"%s\" parameter", q);
 
         WATCH_MAP(tcpAppConnMapM);
 
@@ -176,7 +176,7 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment* tcpsegP)
     }
     else
     {
-        error("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
+        throw cRuntimeError("(%s)%s arrived without control info", tcpsegP->getClassName(), tcpsegP->getName());
     }
 
     // process segment
@@ -257,7 +257,7 @@ void TCP_lwIP::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, 
     else
     {
         if (pCurTcpSegM->getPayloadLength())
-            error("conn is null, and received packet has data");
+            throw cRuntimeError("conn is null, and received packet has data");
 
         tcpEV << "notifyAboutIncomingSegmentProcessing: conn is null\n";
     }
@@ -314,7 +314,7 @@ err_t TCP_lwIP::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
         break;
 
     default:
-        error("Invalid lwip_event: %d", event);
+        throw cRuntimeError("Invalid lwip_event: %d", event);
         break;
     }
 
@@ -477,7 +477,7 @@ void TCP_lwIP::handleMessage(cMessage *msgP)
         }
         else
         {
-            error("Unknown self message");
+            throw cRuntimeError("Unknown self message");
         }
     }
     else if (msgP->arrivedOn("ipIn"))

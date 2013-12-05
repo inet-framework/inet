@@ -60,7 +60,7 @@ void UDPVideoStreamCli::handleMessageWhenUp(cMessage* msg)
     }
     else
     {
-        error("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
+        throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
 }
 

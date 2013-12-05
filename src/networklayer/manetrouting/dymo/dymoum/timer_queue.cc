@@ -157,7 +157,7 @@ struct timeval *NS_CLASS timer_age_queue()
 
     t = dymoTimerList->begin()->second;
     if (timeval_diff(&(dymoTimerList->begin()->second->timeout), &now)<=0)
-        opp_error("Dymo Time queue error");
+        throw cRuntimeError("Dymo Time queue error");
     remaining.tv_usec   = (t->timeout.tv_usec - now.tv_usec);
     remaining.tv_sec    = (t->timeout.tv_sec - now.tv_sec);
     if (remaining.tv_usec < 0)

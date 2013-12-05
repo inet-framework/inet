@@ -663,7 +663,7 @@ void EtherMACBase::updateDisplayString()
         case JAMMING_STATE:      txStateName = "JAM"; break;
         case BACKOFF_STATE:      txStateName = "BACKOFF"; break;
         case PAUSE_STATE:        txStateName = "PAUSE"; break;
-        default: error("wrong tx state");
+        default: throw cRuntimeError("wrong tx state");
     }
 
     const char *rxStateName;
@@ -673,7 +673,7 @@ void EtherMACBase::updateDisplayString()
         case RX_IDLE_STATE:      rxStateName = "IDLE"; break;
         case RECEIVING_STATE:    rxStateName = "RX"; break;
         case RX_COLLISION_STATE: rxStateName = "COLL"; break;
-        default: error("wrong rx state");
+        default: throw cRuntimeError("wrong rx state");
     }
 
     char buf[80];

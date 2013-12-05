@@ -65,14 +65,14 @@ void MoBANCoordinator::initialize(int stage)
         logfile = fopen(log_file_name, "w");
 
         if (!readPostureSpecificationFile())
-            error("MoBAN Coordinator: error in reading the posture specification file");
+            throw cRuntimeError("MoBAN Coordinator: error in reading the posture specification file");
 
         if (!readConfigurationFile())
-            error("MoBAN Coordinator: error in reading the input configuration file");
+            throw cRuntimeError("MoBAN Coordinator: error in reading the input configuration file");
 
         if (useMobilityPattern)
             if (!readMobilityPatternFile())
-                error("MoBAN Coordinator: error in reading the input mobility pattern file");
+                throw cRuntimeError("MoBAN Coordinator: error in reading the input mobility pattern file");
 
         lastPosition = selectDestination();
         publishToNodes();
@@ -114,7 +114,7 @@ void MoBANCoordinator::setTargetPosition() {
         }
 
         if (speed==0)
-            error("The velocity in a mobile posture should not be zero!");
+            throw cRuntimeError("The velocity in a mobile posture should not be zero!");
 
         distance = lastPosition.distance(targetPosition);
         duration = distance / speed;
@@ -329,7 +329,7 @@ bool MoBANCoordinator::readPostureSpecificationFile() {
     // find the number of defined postures
     numPostures = postures.size();
     if (numPostures == 0)
-        error("No posture is defined in the input posture specification file");
+        throw cRuntimeError("No posture is defined in the input posture specification file");
 
     unsigned int postureID;
 
@@ -522,20 +522,20 @@ bool MoBANCoordinator::readConfigurationFile() {
 
         rowList = (*matrixTag)->getElementsByTagName("row");
         if (rowList.size()!= numPostures && rowList.size()!= 1)
-            error("Number of rows in  the Markov transition matrix should be equal to either the number"
+            throw cRuntimeError("Number of rows in  the Markov transition matrix should be equal to either the number"
                     " of postures (full Markov matrix) or one (steady state vector)");
 
         if (rowList.size()!= numPostures && thisDefault)
-            error("Dimension of the default Markov matrix should be equal to the number of postures in the configuration file");
+            throw cRuntimeError("Dimension of the default Markov matrix should be equal to the number of postures in the configuration file");
 
         if ((rowList.size()== 1) && (!setDefault))
-            error("A default matrix is supposed to be defined before a steady state can be defined in the configuration file");
+            throw cRuntimeError("A default matrix is supposed to be defined before a steady state can be defined in the configuration file");
 
         for (cXMLElementList::const_iterator row = rowList.begin(); row != rowList.end(); row++)
         {
             cellList = (*row)->getElementsByTagName("cell");
             if (cellList.size()!= numPostures)
-                error("Number of columns in  the Markov transition matrix should be equal to the number of postures");
+                throw cRuntimeError("Number of columns in  the Markov transition matrix should be equal to the number of postures");
 
             j=0;
             for (cXMLElementList::const_iterator cell = cellList.begin(); cell != cellList.end(); cell++)
@@ -674,7 +674,7 @@ bool MoBANCoordinator::readConfigurationFile() {
                 if ((*aComb)->getAttribute("matrix") != NULL)
                     matrixName = (*aComb)->getAttribute("matrix");
                 else
-                    error("No transition matrix is specified for a combination");
+                    throw cRuntimeError("No transition matrix is specified for a combination");
 
                 transitions->addCombination(areaName, timeName, matrixName);
 

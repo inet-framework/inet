@@ -161,7 +161,7 @@ int re_mustAnswer(RE *re,u_int32_t ifindex);
 //
 //  if ((re->getSizeExtension()) % RE_BLOCK_LENGTH != 0)
 //  {
-//      opp_error("re size error");
+//      throw cRuntimeError("re size error");
 //      return -1;
 //  }
 //

@@ -56,7 +56,7 @@ void UDPBasicApp::initialize(int stage)
         startTime = par("startTime").doubleValue();
         stopTime = par("stopTime").doubleValue();
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
-            error("Invalid startTime/stopTime parameters");
+            throw cRuntimeError("Invalid startTime/stopTime parameters");
         selfMsg = new cMessage("sendTimer");
     }
 }
@@ -209,7 +209,7 @@ void UDPBasicApp::handleMessageWhenUp(cMessage *msg)
     }
     else
     {
-        error("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
+        throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
 
     if (ev.isGUI())

@@ -417,7 +417,7 @@ void NS_CLASS rt_table_delete(rt_table_t * rt)
     if (it != aodvRtTableMap.end())
     {
         if (it->second != rt)
-            opp_error("AODV routing table error");
+            throw cRuntimeError("AODV routing table error");
     }
     aodvRtTableMap.erase(it);
 

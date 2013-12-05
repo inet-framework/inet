@@ -167,7 +167,7 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
             processARTimeout(msg);
         }
         else
-            error("Unrecognized Timer"); //stops sim w/ error msg.
+            throw cRuntimeError("Unrecognized Timer"); //stops sim w/ error msg.
     }
     else if (dynamic_cast<ICMPv6Message *>(msg))
     {
@@ -182,7 +182,7 @@ void IPv6NeighbourDiscovery::handleMessage(cMessage *msg)
         processIPv6Datagram(datagram);
     }
     else
-        error("Unknown message type received.\n");
+        throw cRuntimeError("Unknown message type received.\n");
 }
 
 void IPv6NeighbourDiscovery::processNDMessage(ICMPv6Message *msg, IPv6ControlInfo *ctrlInfo)
@@ -214,7 +214,7 @@ void IPv6NeighbourDiscovery::processNDMessage(ICMPv6Message *msg, IPv6ControlInf
     }
     else
     {
-        error("Unrecognized ND message!");
+        throw cRuntimeError("Unrecognized ND message!");
     }
 }
 
@@ -298,7 +298,7 @@ void IPv6NeighbourDiscovery::processIPv6Datagram(IPv6Datagram *msg)
         sendPacketToIPv6Module(msg, nextHopAddr, msg->getSrcAddress(), nextHopIfID);
     }
     else
-        error("Unknown Neighbour cache entry state.");
+        throw cRuntimeError("Unknown Neighbour cache entry state.");
 }
 
 IPv6NeighbourDiscovery::AdvIfEntry *IPv6NeighbourDiscovery::fetchAdvIfEntry(InterfaceEntry *ie)
@@ -1999,7 +1999,7 @@ void IPv6NeighbourDiscovery::processNSForTentativeAddress(IPv6NeighbourSolicitat
         else
         {
             EV << "NS comes from another node. Address is duplicate!\n";
-            error("Duplicate Address Detected! Manual Attention Required!");
+            throw cRuntimeError("Duplicate Address Detected! Manual Attention Required!");
         }
     }
     else if (nsSrcAddr.isUnicast())
@@ -2249,7 +2249,7 @@ void IPv6NeighbourDiscovery::processNAPacket(IPv6NeighbourAdvertisement *na,
     InterfaceEntry *ie = ift->getInterfaceById(naCtrlInfo->getInterfaceId());
     if (ie->ipv6Data()->isTentativeAddress(naTargetAddr))
     {
-        error("Duplicate Address Detected! Manual attention needed!");
+        throw cRuntimeError("Duplicate Address Detected! Manual attention needed!");
     }
     //Logic as defined in Section 7.2.5
     Neighbour *neighbourEntry = neighbourCache.lookup(naTargetAddr, ie->getInterfaceId());

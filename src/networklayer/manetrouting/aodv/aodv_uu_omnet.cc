@@ -1376,7 +1376,7 @@ bool  NS_CLASS setRoute(const ManetAddress &dest,const ManetAddress &add, const 
         if (it != aodvRtTableMap.end())
         {
             if (it->second != fwd_rt)
-                opp_error("AODV routing table error");
+                throw cRuntimeError("AODV routing table error");
         }
         aodvRtTableMap.erase(it);
         if (fwd_rt->state == VALID || fwd_rt->state == IMMORTAL)
@@ -1439,7 +1439,7 @@ bool  NS_CLASS setRoute(const ManetAddress &dest,const ManetAddress &add, const 
         if (it != aodvRtTableMap.end())
         {
             if (it->second != fwd_rt)
-                opp_error("AODV routing table error");
+                throw cRuntimeError("AODV routing table error");
         }
         aodvRtTableMap.erase(it);
         if (fwd_rt->state == VALID || fwd_rt->state == IMMORTAL)

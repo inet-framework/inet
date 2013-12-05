@@ -551,7 +551,7 @@ SCTPAssociation *SCTP::findAssocForApp(int32 appGateIndex, int32 assocId)
 uint16 SCTP::getEphemeralPort()
 {
     if (nextEphemeralPort==5000)
-        error("Ephemeral port range 1024..4999 exhausted (email SCTP model "
+        throw cRuntimeError("Ephemeral port range 1024..4999 exhausted (email SCTP model "
                 "author that he should implement reuse of ephemeral ports!!!)");
     return nextEphemeralPort++;
 }

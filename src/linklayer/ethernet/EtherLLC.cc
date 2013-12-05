@@ -133,7 +133,7 @@ void EtherLLC::updateDisplayString()
 void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
 {
     if (msg->getByteLength() > (MAX_ETHERNET_DATA_BYTES-ETHER_LLC_HEADER_LENGTH))
-        error("packet from higher layer (%d bytes) plus LLC header exceeds maximum Ethernet payload length (%d)", (int)(msg->getByteLength()), MAX_ETHERNET_DATA_BYTES);
+        throw cRuntimeError("packet from higher layer (%d bytes) plus LLC header exceeds maximum Ethernet payload length (%d)", (int)(msg->getByteLength()), MAX_ETHERNET_DATA_BYTES);
 
     totalFromHigherLayer++;
     emit(encapPkSignal, msg);
@@ -147,7 +147,7 @@ void EtherLLC::processPacketFromHigherLayer(cPacket *msg)
 
     Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     if (!etherctrl)
-        error("packet `%s' from higher layer received without Ieee802Ctrl", msg->getName());
+        throw cRuntimeError("packet `%s' from higher layer received without Ieee802Ctrl", msg->getName());
 
     EtherFrameWithLLC *frame = new EtherFrameWithLLC(msg->getName());
 
@@ -214,13 +214,13 @@ void EtherLLC::handleRegisterSAP(cMessage *msg)
     int port = msg->getArrivalGate()->getIndex();
     Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     if (!etherctrl)
-        error("packet `%s' from higher layer received without Ieee802Ctrl", msg->getName());
+        throw cRuntimeError("packet `%s' from higher layer received without Ieee802Ctrl", msg->getName());
     int dsap = etherctrl->getDsap();
 
     EV << "Registering higher layer with DSAP=" << dsap << " on port=" << port << "\n";
 
     if (dsapToPort.find(dsap) != dsapToPort.end())
-        error("DSAP=%d already registered with port=%d", dsap, dsapToPort[dsap]);
+        throw cRuntimeError("DSAP=%d already registered with port=%d", dsap, dsapToPort[dsap]);
 
     dsapToPort[dsap] = port;
     dsapsRegistered = dsapToPort.size();
@@ -232,13 +232,13 @@ void EtherLLC::handleDeregisterSAP(cMessage *msg)
 {
     Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     if (!etherctrl)
-        error("packet `%s' from higher layer received without Ieee802Ctrl", msg->getName());
+        throw cRuntimeError("packet `%s' from higher layer received without Ieee802Ctrl", msg->getName());
     int dsap = etherctrl->getDsap();
 
     EV << "Deregistering higher layer with DSAP=" << dsap << "\n";
 
     if (dsapToPort.find(dsap) == dsapToPort.end())
-        error("DSAP=%d not registered with port=%d", dsap, dsapToPort[dsap]);
+        throw cRuntimeError("DSAP=%d not registered with port=%d", dsap, dsapToPort[dsap]);
 
     // delete from table (don't care if it's not in there)
     dsapToPort.erase(dsapToPort.find(dsap));
@@ -252,7 +252,7 @@ void EtherLLC::handleSendPause(cMessage *msg)
 {
     Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     if (!etherctrl)
-        error("PAUSE command `%s' from higher layer received without Ieee802Ctrl", msg->getName());
+        throw cRuntimeError("PAUSE command `%s' from higher layer received without Ieee802Ctrl", msg->getName());
 
     int pauseUnits = etherctrl->getPauseUnits();
     EV << "Creating and sending PAUSE frame, with duration=" << pauseUnits << " units\n";

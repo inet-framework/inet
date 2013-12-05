@@ -81,7 +81,7 @@ void HttpBrowserBase::initialize(int stage)
     {
         cXMLElement *rootelement = par("config").xmlValue();
         if (rootelement==NULL)
-            error("Configuration file is not defined");
+            throw cRuntimeError("Configuration file is not defined");
 
         cXMLAttributeMap attributes;
         rdObjectFactory rdFactory;
@@ -97,57 +97,57 @@ void HttpBrowserBase::initialize(int stage)
             attributes = element->getAttributes();
             rdActivityLength = rdFactory.create(attributes);
             if (rdActivityLength==NULL)
-                error("Activity period random object could not be created");
+                throw cRuntimeError("Activity period random object could not be created");
         }
 
         // Inter-session interval
         element = rootelement->getFirstChildWithTag("interSessionInterval");
         if (element==NULL)
-            error("Inter-request interval parameter undefined in XML configuration");
+            throw cRuntimeError("Inter-request interval parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdInterSessionInterval = rdFactory.create(attributes);
         if (rdInterSessionInterval==NULL)
-            error("Inter-session interval random object could not be created");
+            throw cRuntimeError("Inter-session interval random object could not be created");
 
         // Inter-request interval
         element = rootelement->getFirstChildWithTag("InterRequestInterval");
         if (element==NULL)
-            error("Inter-request interval parameter undefined in XML configuration");
+            throw cRuntimeError("Inter-request interval parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdInterRequestInterval = rdFactory.create(attributes);
         if (rdInterRequestInterval==NULL)
-            error("Inter-request interval random object could not be created");
+            throw cRuntimeError("Inter-request interval random object could not be created");
 
         // Request size
         element = rootelement->getFirstChildWithTag("requestSize");
         if (element==NULL)
-            error("Inter-request interval parameter undefined in XML configuration");
+            throw cRuntimeError("Inter-request interval parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdRequestSize = rdFactory.create(attributes);
         if (rdRequestSize==NULL)
-            error("Request size random object could not be created");
+            throw cRuntimeError("Request size random object could not be created");
 
         // Requests in session
         element = rootelement->getFirstChildWithTag("reqInSession");
         if (element==NULL)
-            error("requests in session parameter undefined in XML configuration");
+            throw cRuntimeError("requests in session parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdReqInSession = rdFactory.create(attributes);
         if (rdReqInSession==NULL)
-            error("Requests in session random object could not be created");
+            throw cRuntimeError("Requests in session random object could not be created");
 
         // Processing delay
         element = rootelement->getFirstChildWithTag("processingDelay");
         if (element==NULL)
-            error("processing delay parameter undefined in XML configuration");
+            throw cRuntimeError("processing delay parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdProcessingDelay = rdFactory.create(attributes);
         if (rdProcessingDelay==NULL)
-            error("Processing delay random object could not be created");
+            throw cRuntimeError("Processing delay random object could not be created");
 
         controller = dynamic_cast<HttpController*>(getParentModule()->getParentModule()->getSubmodule("controller"));
         if (controller == NULL)
-            error("Controller module not found");
+            throw cRuntimeError("Controller module not found");
 
         httpProtocol = par("httpProtocol");
 
@@ -283,7 +283,7 @@ void HttpBrowserBase::handleSelfScriptedEvent()
     messagesInCurrentSession = 0;
     // Get the browse event
     if (browseEvents.empty())
-        error("No event entry in queue");
+        throw cRuntimeError("No event entry in queue");
     BrowseEvent be = browseEvents.back();
     browseEvents.pop_back();
     sendRequestToServer(be);
@@ -313,7 +313,7 @@ void HttpBrowserBase::handleDataMessage(cMessage *msg)
 {
     HttpReplyMessage *appmsg = check_and_cast<HttpReplyMessage*>(msg);
     if (appmsg==NULL)
-        error("Message (%s)%s is not a valid reply message", msg->getClassName(), msg->getName());
+        throw cRuntimeError("Message (%s)%s is not a valid reply message", msg->getClassName(), msg->getName());
 
     logResponse(appmsg);
 
@@ -559,7 +559,7 @@ void HttpBrowserBase::readScriptedEvents(const char* filename)
     std::ifstream scriptfilestream;
     scriptfilestream.open(filename);
     if (!scriptfilestream.is_open())
-        error("Could not open script file %s", filename);
+        throw cRuntimeError("Could not open script file %s", filename);
 
     std::string line;
     std::string timepart;
@@ -595,7 +595,7 @@ void HttpBrowserBase::readScriptedEvents(const char* filename)
         be.resourceName = extractResourceName(wwwpart.c_str());
         be.serverModule = dynamic_cast<HttpNodeBase*>(controller->getServerModule(wwwpart.c_str()));
         if (be.serverModule==NULL)
-            error("Unable to locate server %s in the scenario", wwwpart.c_str());
+            throw cRuntimeError("Unable to locate server %s in the scenario", wwwpart.c_str());
 
         EV_DEBUG << "Creating scripted browse event @ T=" << t << ", " << be.wwwhost << " / " << be.resourceName << endl;
         browseEvents.push_front(be);

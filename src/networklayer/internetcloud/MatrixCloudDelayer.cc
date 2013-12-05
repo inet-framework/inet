@@ -140,7 +140,7 @@ void MatrixCloudDelayer::initialize(int stage)
         cXMLElement *configEntity = par("config").xmlValue();
         // parse XML config
         if (strcmp(configEntity->getTagName(), "internetCloud"))
-            error("Cannot read internetCloud configuration, unaccepted '%s' entity at %s", configEntity->getTagName(),
+            throw cRuntimeError("Cannot read internetCloud configuration, unaccepted '%s' entity at %s", configEntity->getTagName(),
                     configEntity->getSourceLocation());
         bool defaultSymmetric = getBoolAttribute(*configEntity, "symmetric");
         const cXMLElement *parameterEntity = getUniqueChild(configEntity, "parameters");

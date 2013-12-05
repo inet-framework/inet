@@ -47,7 +47,7 @@ void Ieee80211MgmtAPSimplified::handleUpperMessage(cPacket *msg)
 
 void Ieee80211MgmtAPSimplified::handleCommand(int msgkind, cObject *ctrl)
 {
-    error("handleCommand(): no commands supported");
+    throw cRuntimeError("handleCommand(): no commands supported");
 }
 
 void Ieee80211MgmtAPSimplified::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)

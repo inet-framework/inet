@@ -299,7 +299,7 @@ void DYMO::processPacket(const IPv4Datagram* datagram)
             //TODO: mark route as used when forwarding data packets? Draft says yes, but as we are using Route Timeout to "detect" link breaks, this seems to be a bad idea
             // update routes to destination
             // send queued packets
-            opp_error("Dymo has a valid entry route but ip doesn't have a entry route");
+            throw cRuntimeError("Dymo has a valid entry route but ip doesn't have a entry route");
             delete datagram;
             return;
         }
@@ -345,7 +345,7 @@ void DYMO::handleLowerMsg(cPacket* apMsg)
     else if (dynamic_cast<DYMO_RERR*>(apMsg)) handleLowerRERR(dynamic_cast<DYMO_RERR*>(apMsg));
     else if (dynamic_cast<DYMO_UERR*>(apMsg)) handleLowerUERR(dynamic_cast<DYMO_UERR*>(apMsg));
     else if (apMsg->getKind() == UDP_I_ERROR) { EV << "discarded UDP error message" << endl; delete apMsg; }
-    else error("message is no DYMO Packet");
+    else throw cRuntimeError("message is no DYMO Packet");
 }
 
 void DYMO::handleLowerRM(DYMO_RM *routingMsg)
@@ -396,13 +396,13 @@ uint32_t DYMO::getNextHopAddress(DYMO_RM *routingMsg)
 InterfaceEntry* DYMO::getNextHopInterface(DYMO_PacketBBMessage* pkt)
 {
 
-    if (!pkt) error("getNextHopInterface called with NULL packet");
+    if (!pkt) throw cRuntimeError("getNextHopInterface called with NULL packet");
 
     IPv4ControlInfo* controlInfo = check_and_cast<IPv4ControlInfo*>(pkt->removeControlInfo());
-    if (!controlInfo) error("received packet did not have IPv4ControlInfo attached");
+    if (!controlInfo) throw cRuntimeError("received packet did not have IPv4ControlInfo attached");
 
     int interfaceId = controlInfo->getInterfaceId();
-    if (interfaceId == -1) error("received packet's UDPControlInfo did not have information on interfaceId");
+    if (interfaceId == -1) throw cRuntimeError("received packet's UDPControlInfo did not have information on interfaceId");
 
     InterfaceEntry* srcIf = NULL;
 
@@ -416,7 +416,7 @@ InterfaceEntry* DYMO::getNextHopInterface(DYMO_PacketBBMessage* pkt)
         }
     }
 
-    if (!srcIf) error("parent module interface table did not contain interface on which packet arrived");
+    if (!srcIf) throw cRuntimeError("parent module interface table did not contain interface on which packet arrived");
 
     if (controlInfo) delete controlInfo;
     return srcIf;
@@ -442,7 +442,7 @@ void DYMO::handleLowerRMForMe(DYMO_RM *routingMsg)
 
         delete routingMsg;
     }
-    else error("received unknown dymo message");
+    else throw cRuntimeError("received unknown dymo message");
 }
 
 void DYMO::handleLowerRMForRelay(DYMO_RM *routingMsg)
@@ -736,7 +736,7 @@ void DYMO::handleSelfMsg(cMessage* apMsg)
         if (hasActive)
             rescheduleTimer();
     }
-    else error("unknown message type");
+    else throw cRuntimeError("unknown message type");
 }
 
 void DYMO::sendDown(cPacket* apMsg, int destAddr)
@@ -759,7 +759,7 @@ void DYMO::sendDown(cPacket* apMsg, int destAddr)
     }
     else
     {
-        error("tried to send unsupported message type");
+        throw cRuntimeError("tried to send unsupported message type");
     }
     // keep statistics
     totalPacketsSent++;
@@ -819,7 +819,7 @@ void DYMO::sendReply(unsigned int destAddr, unsigned int tSeqNum)
 
     DYMO_RM * rrep = new DYMO_RREP("RREP");
     DYMO_RoutingEntry *entry = dymo_routingTable->getForAddress(IPv4Address(destAddr));
-    if (!entry) error("Tried sending RREP via a route that just vanished");
+    if (!entry) throw cRuntimeError("Tried sending RREP via a route that just vanished");
 
     rrep->setMsgHdrHopLimit(MAX_HOPLIMIT);
     rrep->getTargetNode().setAddress(destAddr);
@@ -852,7 +852,7 @@ void DYMO::sendReplyAsIntermediateRouter(const DYMO_AddressBlock& origNode, cons
     EV << "sending a reply to OrigNode " << origNode.getAddress() << endl;
 
     DYMO_RoutingEntry* routeToOrigNode = dymo_routingTable->getForAddress(IPv4Address(origNode.getAddress()));
-    if (!routeToOrigNode) error("no route to OrigNode found");
+    if (!routeToOrigNode) throw cRuntimeError("no route to OrigNode found");
 
     // increment ownSeqNum.
     // TODO: The draft is unclear about when to increment ownSeqNum for intermediate DYMO router RREP creation

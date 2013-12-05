@@ -109,7 +109,7 @@ void IPv4RoutingTable::initialize(int stage)
             const char *filename = par("routingFile");
             RoutingTableParser parser(ift, this);
             if (*filename && parser.readRoutingTableFromFile(filename)==-1)
-                error("Error reading routing table file %s", filename);
+                throw cRuntimeError("Error reading routing table file %s", filename);
         }
 
         // routerID selection must be after network autoconfiguration assigned interface addresses
@@ -598,19 +598,19 @@ void IPv4RoutingTable::setRouterId(IPv4Address a)
 void IPv4RoutingTable::internalAddRoute(IPv4Route *entry)
 {
     if (!entry->getNetmask().isValidNetmask())
-        error("addRoute(): wrong netmask %s in route", entry->getNetmask().str().c_str());
+        throw cRuntimeError("addRoute(): wrong netmask %s in route", entry->getNetmask().str().c_str());
 
     if (entry->getNetmask().getInt() != 0 && (entry->getDestination().getInt() & entry->getNetmask().getInt()) == 0)
-        error("addRoute(): all bits of destination address %s is 0 inside non zero netmask %s",
+        throw cRuntimeError("addRoute(): all bits of destination address %s is 0 inside non zero netmask %s",
                 entry->getDestination().str().c_str(), entry->getNetmask().str().c_str());
 
     if ((entry->getDestination().getInt() & ~entry->getNetmask().getInt()) != 0)
-        error("addRoute(): suspicious route: destination IP address %s has bits set outside netmask %s",
+        throw cRuntimeError("addRoute(): suspicious route: destination IP address %s has bits set outside netmask %s",
                 entry->getDestination().str().c_str(), entry->getNetmask().str().c_str());
 
     // check that the interface exists
     if (!entry->getInterface())
-        error("addRoute(): interface cannot be NULL");
+        throw cRuntimeError("addRoute(): interface cannot be NULL");
 
     // if this is a default route, remove old default route (we're replacing it)
     if (entry->getNetmask().isUnspecified())
@@ -713,29 +713,29 @@ bool IPv4RoutingTable::multicastRouteLessThan(const IPv4MulticastRoute *a, const
 void IPv4RoutingTable::internalAddMulticastRoute(IPv4MulticastRoute *entry)
 {
     if (!entry->getOriginNetmask().isValidNetmask())
-        error("addMulticastRoute(): wrong netmask %s in multicast route", entry->getOriginNetmask().str().c_str());
+        throw cRuntimeError("addMulticastRoute(): wrong netmask %s in multicast route", entry->getOriginNetmask().str().c_str());
 
     if ((entry->getOrigin().getInt() & ~entry->getOriginNetmask().getInt()) != 0)
-        error("addMulticastRoute(): suspicious route: origin IP address %s has bits set outside netmask %s",
+        throw cRuntimeError("addMulticastRoute(): suspicious route: origin IP address %s has bits set outside netmask %s",
                 entry->getOrigin().str().c_str(), entry->getOriginNetmask().str().c_str());
 
     if (!entry->getMulticastGroup().isUnspecified() && !entry->getMulticastGroup().isMulticast())
-        error("addMulticastRoute(): group address (%s) is not a multicast address",
+        throw cRuntimeError("addMulticastRoute(): group address (%s) is not a multicast address",
                 entry->getMulticastGroup().str().c_str());
 
     // check that the interface exists
     if (entry->getInInterface() && !entry->getInInterface()->getInterface()->isMulticast())
-        error("addMulticastRoute(): input interface must be multicast capable");
+        throw cRuntimeError("addMulticastRoute(): input interface must be multicast capable");
 
     for (unsigned int i = 0; i < entry->getNumOutInterfaces(); i++)
     {
         IPv4MulticastRoute::OutInterface *outInterface = entry->getOutInterface(i);
         if (!outInterface)
-            error("addMulticastRoute(): output interface cannot be NULL");
+            throw cRuntimeError("addMulticastRoute(): output interface cannot be NULL");
         else if (!outInterface->getInterface()->isMulticast())
-            error("addMulticastRoute(): output interface must be multicast capable");
+            throw cRuntimeError("addMulticastRoute(): output interface must be multicast capable");
         else if (entry->getInInterface() && outInterface->getInterface() == entry->getInInterface()->getInterface())
-            error("addMulticastRoute(): output interface cannot be the same as the input interface");
+            throw cRuntimeError("addMulticastRoute(): output interface cannot be the same as the input interface");
     }
 
 
@@ -888,7 +888,7 @@ bool IPv4RoutingTable::handleOperationStage(LifecycleOperation *operation, int s
             const char *filename = par("routingFile");
             RoutingTableParser parser(ift, this);
             if (*filename && parser.readRoutingTableFromFile(filename)==-1)
-                error("Error reading routing table file %s", filename);
+                throw cRuntimeError("Error reading routing table file %s", filename);
         }
         else if (stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
             configureRouterId();
