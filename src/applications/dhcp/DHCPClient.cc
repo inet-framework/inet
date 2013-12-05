@@ -91,21 +91,19 @@ void DHCPClient::initialize(int stage)
         nb->subscribe(this, NF_L2_ASSOCIATED);
         nb->subscribe(this, NF_INTERFACE_DELETED);
 
+        // get the routing table to update and subscribe it to the blackboard
+        irt = check_and_cast<IRoutingTable*>(getModuleByPath(par("routingTablePath")));
+        // set client to idle state
+        clientState = IDLE;
         // get the interface to configure
+
         if (isOperational)
         {
             ie = chooseInterface();
             // grab the interface MAC address
             macAddress = ie->getMacAddress();
-        }
-
-        // get the routing table to update and subscribe it to the blackboard
-        irt = check_and_cast<IRoutingTable*>(getModuleByPath(par("routingTablePath")));
-        // set client to idle state
-        clientState = IDLE;
-
-        if (isOperational)
             startApp();
+        }
     }
 }
 
@@ -500,7 +498,7 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             }
             break;
         default:
-            break;
+            throw cRuntimeError("Unknown or invalid client state %d",clientState);
     }
 }
 
