@@ -2402,7 +2402,6 @@ SCTPPathVariables* SCTPAssociation::getNextPath(const SCTPPathVariables* oldPath
 SCTPPathVariables* SCTPAssociation::getNextDestination(SCTPDataVariables* chunk) const
 {
     SCTPPathVariables* next;
-    SCTPPathVariables* last;
 
     sctpEV3 << "Running getNextDestination()" << endl;
     if (chunk->numberOfTransmissions == 0) {
@@ -2420,14 +2419,14 @@ SCTPPathVariables* SCTPAssociation::getNextDestination(SCTPDataVariables* chunk)
             return (chunk->getLastDestinationPath());
         }
         // If this is a retransmission, we should choose another, active path.
-        last = chunk->getLastDestinationPath();
+        SCTPPathVariables *last = chunk->getLastDestinationPath();
         next = getNextPath(last);
         if ( (next == NULL) || (next->confirmed == false) ) {
             next = last;
         }
     }
 
-    sctpEV3 << "getNextDestination(): chunk was last sent to " << last->remoteAddress
+    sctpEV3 << "getNextDestination(): chunk was last sent to " << chunk->getLastDestination()
               << ", will next be sent to path " << next->remoteAddress << endl;
     return (next);
 }

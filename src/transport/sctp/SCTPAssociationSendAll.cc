@@ -518,7 +518,7 @@ void SCTPAssociation::sendOnPath(SCTPPathVariables* pathId, bool firstPass)
 
             if ((allowance > 0) || (bytes.chunk) || (bytes.packet)) {
                 bool firstTime = false;   // Is DATA chunk send for the first time?
-                SCTPDataVariables* datVar;
+                SCTPDataVariables* datVar = NULL;
                 // ------ Create AUTH chunk, if necessary -----------------------
                 authAdded = addAuthChunkIfNecessary(sctpMsg, DATA, authAdded);
                 if (tcount > 0)  {

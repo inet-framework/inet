@@ -257,6 +257,8 @@ bool SCTPAssociation::compareRandom()
             }
         }
     }
+    else
+        size = sizeKeyVector;
     for (i=size-1; i>0; i--) {
         if (state->keyVector[i]<state->peerKeyVector[i])
             return false;
