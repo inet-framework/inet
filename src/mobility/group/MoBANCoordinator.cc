@@ -283,7 +283,7 @@ bool MoBANCoordinator::readMobilityPatternFile() {
     fp = fopen(file_name,"r");
 
     int i=0;
-    while (fscanf(fp,"%s %d",posture_name,&id)!= -1) {
+    while (fscanf(fp,"%49s %d",posture_name,&id)!= -1) {
         mobilityPattern[i].postureID = id;
         if (postureList[id]->isMobile())
         {
