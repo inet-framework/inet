@@ -285,7 +285,7 @@ void RSTP::handleBK(BPDU * frame, unsigned int arrivalPortNum)
 
 void RSTP::handleIncomingFrame(BPDU *frame)
 {
-    EV_INFO << "BPDU received at" << frame->getPortNum() << "port." << endl;
+    EV_INFO << "BPDU received at port " << frame->getPortNum() << "." << endl;
     // incoming BPDU handling
     // checking message age
     Ieee802Ctrl * etherctrl = check_and_cast<Ieee802Ctrl *>(frame->removeControlInfo());

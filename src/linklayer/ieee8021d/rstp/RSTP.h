@@ -109,21 +109,18 @@ protected:
     /**
      * @brief Compares the BPDU frame with the BPDU this module would send through that port
      * @return (<0 if the root BPDU is better than BPDU)
-     * -4=worse port  -3=worse src  -2=worse RPC  -1=worse root  0=Similar  1=better root  2=better RPC  3=better src  4=better port  <--FIXME use CompareResult enum!
      */
     virtual CompareResult contestInterfacedata(BPDU* msg, unsigned int portNum);
 
     /**
      * @brief Compares the port's best BPDU with the BPDU this module would send through that port
      * @return (<0 if the root BPDU is better than port's best BPDU)
-     * -4=worse port  -3=worse src  -2=worse RPC  -1=worse root  0=Similar  1=better root  2=better RPC  3=better src  4=better port  <--FIXME use CompareResult enum!
      */
     virtual CompareResult contestInterfacedata(unsigned int portNum);
 
     /**
      * @brief Compares a port's best BPDU with a BPDU frame
      * @return (<0 if vector better than frame)
-     * -4=worse port  -3=worse src  -2=worse RPC  -1=worse root  0=Similar  1=better root  2=better RPC  3=better src  4=better port  <--FIXME use CompareResult enum!
      */
     virtual CompareResult compareInterfacedata(unsigned int portNum, BPDU * msg, int linkCost);
 
