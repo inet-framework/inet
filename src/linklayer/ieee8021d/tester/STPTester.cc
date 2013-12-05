@@ -47,7 +47,16 @@ void STPTester::handleMessage(cMessage *msg)
     if(msg->isSelfMessage())
     {
         depthFirstSearch();
-        EV_DEBUG<<isLoopFreeGraph()<<" "<<isConnectedGraph()<<" "<<isTreeGraph()<<" "<<getNumOfNodes()<<" "<<getNumOfVisitedNodes()<<endl;
+        if(isLoopFreeGraph())
+            EV_DEBUG<<"The netwotrk is loop-free"<<endl;
+        else
+            EV_DEBUG<<"The netwotrk is not loop-free"<<endl;
+        if(isConnectedGraph())
+            EV_DEBUG<<"All nodes are connected with each other"<<endl;
+        else
+            EV_DEBUG<<"Not all nodes are connected with each other"<<endl;
+        if(isTreeGraph())
+            EV_DEBUG<<"The network topology is a tree topology"<<endl;
         scheduleAt(simTime() + checkTime, msg);
     }
     else
