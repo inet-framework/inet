@@ -30,7 +30,6 @@
 
 Define_Module(DHCPServer);
 
-
 DHCPServer::DHCPServer()
 {
     ie = NULL;

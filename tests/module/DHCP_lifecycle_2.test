@@ -9,7 +9,7 @@ before its first success.
 
 %inifile: omnetpp.ini
 [General]
-network = LifecycleTest2
+network = LifecycleTest
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
@@ -36,7 +36,7 @@ import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.base.LifecycleController;
 import inet.world.scenario.ScenarioManager;
 
-network LifecycleTest2
+network LifecycleTest
 {
     submodules:
         scenarioManager: ScenarioManager {
@@ -73,7 +73,7 @@ network LifecycleTest2
 
 %contains-regex: stdout
 .*
-LifecycleTest2.server shutting down
+LifecycleTest.server shutting down
 .*
 Sending DHCPDISCOVER.
 .*
@@ -91,7 +91,7 @@ Sending DHCPDISCOVER.
 .*
 DHCPDISCOVER arrived. Handling it.
 .*
-The offered IP 192.168.1.100 is available. Assigning it to client.
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available. Assigning it to client.
 .*
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

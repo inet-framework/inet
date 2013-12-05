@@ -334,10 +334,16 @@ void DHCPClient::bindLease()
     std::string banner = "Got IP " + lease->ip.str();
     this->getParentModule()->bubble(banner.c_str());
 
-    EV_INFO << "Configuring interface : " << ie->getName() << " IP:" << lease->ip << "/"
-            << lease->subnetMask << " leased time: " << lease->leaseTime << " (secs)." << endl;
+    /*
+        The client SHOULD perform a final check on the parameters (ping, ARP).
+        If the client detects that the address is already in use:
+        EV_INFO << "The offered IP " << lease->ip << " is not available." << endl;
+        sendDecline(lease->ip);
+        initClient();
+    */
 
-    // std::cout << "Host " << hostName << " got ip: " << lease->ip << "/" << lease->subnetMask << endl;
+    EV_INFO << "The requested IP " << lease->ip << "/" << lease->subnetMask << " is available. Assigning it to "
+            << this->getParentModule()->getFullName() << "." << endl;
 
     IPv4Route * iroute = NULL;
     for (int i = 0; i < irt->getNumRoutes(); i++)
@@ -439,16 +445,9 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
             }
             else if (messageType == DHCPACK)
             {
+                EV_INFO << "Arrived DHCPACK message in REQUESTING state. The requested IP address is available in the server's pool of addresses." << endl;
                 handleDHCPACK(msg);
-                EV_INFO << "The offered IP " << lease->ip << " is available. Assigning it to " << this->getParentModule()->getFullName() << "." << endl;
                 clientState = BOUND;
-                /*
-                    The client SHOULD perform a final check on the parameters (ping, ARP).
-                    If the client detects that the address is already in use:
-                    EV_INFO << "The offered IP " << lease->ip << " is not available." << endl;
-                    sendDecline(lease->ip);
-                    initClient();
-                */
             }
             else if (messageType == DHCPNAK)
             {
