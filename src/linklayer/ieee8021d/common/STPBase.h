@@ -58,7 +58,7 @@ protected:
 
     /**
      * @brief Adds effects to be represented by Tkenv. Colors the link black if forwarding parameter is true
-     * and the port which the link is connected to is also forwarding, otherwise colors the link gray.
+     * and the port to which the link is connected to is also forwarding, otherwise colors the link gray.
      */
     virtual void colorLink(unsigned int i, bool forwarding);
 
@@ -66,7 +66,7 @@ protected:
      * @brief Adds effects to be represented by Tkenv. Inactive links are colored grey.
      * Shows port role, state. Marks root switch.
      */
-    virtual void visualizer();
+    virtual void updateDisplay();
 
     /**
      * @brief Obtains the root gate index.

@@ -36,7 +36,6 @@ void STP::initialize(int stage)
     else if (stage == 1)
     {
         initPortTable();
-        ubridgePriority = bridgePriority;
 
         isRoot = true;
         topologyChangeNotification = false;
@@ -46,14 +45,15 @@ void STP::initialize(int stage)
         rootAddress = bridgeAddress;
         rootPathCost = 0;
         rootPort = 0;
-        cHelloTime = helloTime;
-        cMaxAge = maxAge;
-        cFwdDelay = forwardDelay;
+        currentHelloTime = helloTime;
+        currentMaxAge = maxAge;
+        currentFwdDelay = forwardDelay;
+        currentBridgePriority = bridgePriority;
 
         helloTimer = 0;
-        allDesignated();
+        setAllDesignated();
         scheduleAt(simTime() + 1, tick);
-        visualizer();
+        updateDisplay();
     }
 }
 
@@ -101,7 +101,7 @@ void STP::handleMessage(cMessage * msg)
         if(msg == tick)
         {
             handleTick();
-            visualizer();
+            updateDisplay();
             scheduleAt(simTime() + 1, tick);
         }
         else
@@ -122,7 +122,7 @@ void STP::handleBPDU(BPDU * bpdu)
     }
 
     // get inferior BPDU, reply with superior
-    if (!superiorBPDU(arrivalGate, bpdu))
+    if (!isSuperiorBPDU(arrivalGate, bpdu))
     {
         if (port->getRole() == Ieee8021DInterfaceData::DESIGNATED)
         {
@@ -138,8 +138,8 @@ void STP::handleBPDU(BPDU * bpdu)
 
         if(bpdu->getTcFlag())
         {
-            EV_DEBUG << "MACAddressTable aging time set to " << cFwdDelay << "." << endl;
-            macTable->setAgingTime(cFwdDelay);
+            EV_DEBUG << "MACAddressTable aging time set to " << currentFwdDelay << "." << endl;
+            macTable->setAgingTime(currentFwdDelay);
 
             // config BPDU with TC flag
             for (unsigned int i = 0; i < desPorts.size(); i++)
@@ -202,9 +202,9 @@ void STP::generateBPDU(int port, const MACAddress& address, bool tcFlag, bool tc
     bpdu->setPortNum(port);
     bpdu->setPortPriority(getPortInterfaceData(port)->getPriority());
     bpdu->setMessageAge(0);
-    bpdu->setMaxAge(cMaxAge);
-    bpdu->setHelloTime(cHelloTime);
-    bpdu->setForwardDelay(cFwdDelay);
+    bpdu->setMaxAge(currentMaxAge);
+    bpdu->setHelloTime(currentHelloTime);
+    bpdu->setForwardDelay(currentFwdDelay);
 
     if (topologyChangeNotification)
     {
@@ -253,7 +253,7 @@ void STP::generateTCN()
     }
 }
 
-bool STP::superiorBPDU(int portNum, BPDU * bpdu)
+bool STP::isSuperiorBPDU(int portNum, BPDU * bpdu)
 {
     Ieee8021DInterfaceData * port = getPortInterfaceData(portNum);
     Ieee8021DInterfaceData * xBpdu = new Ieee8021DInterfaceData();
@@ -268,7 +268,7 @@ bool STP::superiorBPDU(int portNum, BPDU * bpdu)
     xBpdu->setPortPriority(bpdu->getPortPriority());
     xBpdu->setPortNum(bpdu->getPortNum());
 
-    result = superiorTPort(port, xBpdu);
+    result = comparePorts(port, xBpdu);
 
     // port is superior
     if (result > 0)
@@ -367,7 +367,7 @@ void STP::checkTimers()
     Ieee8021DInterfaceData * port;
 
     // hello timer check
-    if (helloTimer >= cHelloTime)
+    if (helloTimer >= currentHelloTime)
     {
         generator();
         helloTimer = 0;
@@ -378,7 +378,7 @@ void STP::checkTimers()
     {
         port = getPortInterfaceData(i);
 
-        if (port->getAge() >= cMaxAge)
+        if (port->getAge() >= currentMaxAge)
         {
             EV_DETAIL<< "Port=" << i << " reached its maximum age. Setting it to the default port info." << endl;
             if (port->getRole() == Ieee8021DInterfaceData::ROOT)
@@ -402,7 +402,7 @@ void STP::checkTimers()
         // ROOT / DESIGNATED, can transition
         if (port->getRole() == Ieee8021DInterfaceData::ROOT || port->getRole() == Ieee8021DInterfaceData::DESIGNATED)
         {
-            if (port->getFdWhile() >= cFwdDelay)
+            if (port->getFdWhile() >= currentFwdDelay)
             {
                 switch (port->getState())
                 {
@@ -436,13 +436,13 @@ void STP::checkParametersChange()
 {
     if (isRoot)
     {
-        cHelloTime = helloTime;
-        cMaxAge = maxAge;
-        cFwdDelay = forwardDelay;
+        currentHelloTime = helloTime;
+        currentMaxAge = maxAge;
+        currentFwdDelay = forwardDelay;
     }
-    if (ubridgePriority != bridgePriority)
+    if (currentBridgePriority != bridgePriority)
     {
-        ubridgePriority = bridgePriority;
+        currentBridgePriority = bridgePriority;
         reset();
     }
 }
@@ -455,7 +455,7 @@ bool STP::checkRootEligibility()
     {
         port = getPortInterfaceData(i);
 
-        if (superiorID(port->getRootPriority(), port->getRootAddress(), bridgePriority, bridgeAddress) > 0)
+        if (compareBridgeIDs(port->getRootPriority(), port->getRootAddress(), bridgePriority, bridgeAddress) > 0)
             return false;
 
     }
@@ -469,13 +469,13 @@ void STP::tryRoot()
     {
         EV_DETAIL<< "Switch is elected as root switch." << endl;
         isRoot = true;
-        allDesignated();
+        setAllDesignated();
         rootPriority = bridgePriority;
         rootAddress = bridgeAddress;
         rootPathCost = 0;
-        cHelloTime = helloTime;
-        cMaxAge = maxAge;
-        cFwdDelay = forwardDelay;
+        currentHelloTime = helloTime;
+        currentMaxAge = maxAge;
+        currentFwdDelay = forwardDelay;
     }
     else
     {
@@ -486,7 +486,7 @@ void STP::tryRoot()
 
 }
 
-int STP::superiorID(unsigned int aPriority, MACAddress aAddress, unsigned int bPriority, MACAddress bAddress)
+int STP::compareBridgeIDs(unsigned int aPriority, MACAddress aAddress, unsigned int bPriority, MACAddress bAddress)
 {
     if (aPriority < bPriority)
         return 1; // A is superior
@@ -505,7 +505,7 @@ int STP::superiorID(unsigned int aPriority, MACAddress aAddress, unsigned int bP
     return 0;
 }
 
-int STP::superiorPort(unsigned int aPriority, unsigned int aNum, unsigned int bPriority, unsigned int bNum)
+int STP::comparePortIDs(unsigned int aPriority, unsigned int aNum, unsigned int bPriority, unsigned int bNum)
 {
     if (aPriority < bPriority)
         return 1; // A is superior
@@ -524,11 +524,11 @@ int STP::superiorPort(unsigned int aPriority, unsigned int aNum, unsigned int bP
     return 0;
 }
 
-int STP::superiorTPort(Ieee8021DInterfaceData * portA, Ieee8021DInterfaceData * portB)
+int STP::comparePorts(Ieee8021DInterfaceData * portA, Ieee8021DInterfaceData * portB)
 {
     int result;
 
-    result = superiorID(portA->getRootPriority(), portA->getRootAddress(), portB->getRootPriority(),
+    result = compareBridgeIDs(portA->getRootPriority(), portA->getRootAddress(), portB->getRootPriority(),
             portB->getRootAddress());
 
     // not same, so pass result
@@ -542,7 +542,7 @@ int STP::superiorTPort(Ieee8021DInterfaceData * portA, Ieee8021DInterfaceData * 
         return -1;
 
     // designated bridge
-    result = superiorID(portA->getBridgePriority(), portA->getBridgeAddress(), portB->getBridgePriority(),
+    result = compareBridgeIDs(portA->getBridgePriority(), portA->getBridgeAddress(), portB->getBridgePriority(),
             portB->getBridgeAddress());
 
     // not same, so pass result
@@ -550,7 +550,7 @@ int STP::superiorTPort(Ieee8021DInterfaceData * portA, Ieee8021DInterfaceData * 
         return result;
 
     // designated port of designated Bridge
-    result = superiorPort(portA->getPortPriority(), portA->getPortNum(), portB->getPortPriority(), portB->getPortNum());
+    result = comparePortIDs(portA->getPortPriority(), portA->getPortNum(), portB->getPortPriority(), portB->getPortNum());
 
     // not same, so pass result
     if (result != 0)
@@ -571,7 +571,7 @@ void STP::selectRootPort()
     {
         currentPort = getPortInterfaceData(i);
         currentPort->setRole(Ieee8021DInterfaceData::NOTASSIGNED);
-        result = superiorTPort(currentPort, best);
+        result = comparePorts(currentPort, best);
         if (result > 0)
         {
             xRootPort = i;
@@ -603,9 +603,9 @@ void STP::selectRootPort()
     rootAddress = best->getRootAddress();
     rootPriority = best->getRootPriority();
 
-    cMaxAge = best->getMaxAge();
-    cFwdDelay = best->getFwdDelay();
-    cHelloTime = best->getHelloTime();
+    currentMaxAge = best->getMaxAge();
+    currentFwdDelay = best->getFwdDelay();
+    currentHelloTime = best->getHelloTime();
 
 }
 
@@ -634,7 +634,7 @@ void STP::selectDesignatedPorts()
 
         bridgeGlobal->setRootPathCost(rootPathCost + port->getLinkCost());
 
-        result = superiorTPort(bridgeGlobal, port);
+        result = comparePorts(bridgeGlobal, port);
 
         if (result > 0)
         {
@@ -653,7 +653,7 @@ void STP::selectDesignatedPorts()
     delete bridgeGlobal;
 }
 
-void STP::allDesignated()
+void STP::setAllDesignated()
 {
     // all ports of the root switch are designated ports
     EV_DETAIL<< "All ports become designated." << endl; // todo
@@ -690,10 +690,10 @@ void STP::reset()
     rootPriority = bridgePriority;
     rootAddress = bridgeAddress;
     rootPathCost = 0;
-    cHelloTime = helloTime;
-    cMaxAge = maxAge;
-    cFwdDelay = forwardDelay;
-    allDesignated();
+    currentHelloTime = helloTime;
+    currentMaxAge = maxAge;
+    currentFwdDelay = forwardDelay;
+    setAllDesignated();
 }
 
 void STP::start()
@@ -706,7 +706,7 @@ void STP::start()
     if (ifEntry != NULL)
         bridgeAddress = ifEntry->getMacAddress();
     initPortTable();
-    ubridgePriority = bridgePriority;
+    currentBridgePriority = bridgePriority;
     isRoot = true;
     topologyChangeNotification = true;
     topologyChangeRecvd = true;
@@ -714,11 +714,11 @@ void STP::start()
     rootAddress = bridgeAddress;
     rootPathCost = 0;
     rootPort = 0;
-    cHelloTime = helloTime;
-    cMaxAge = maxAge;
-    cFwdDelay = forwardDelay;
+    currentHelloTime = helloTime;
+    currentMaxAge = maxAge;
+    currentFwdDelay = forwardDelay;
     helloTimer = 0;
-    allDesignated();
+    setAllDesignated();
 
     scheduleAt(simTime() + 1, tick);
 }

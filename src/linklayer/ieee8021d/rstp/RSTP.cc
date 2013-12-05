@@ -53,7 +53,7 @@ void RSTP::initialize(int stage)
     if (stage == 2) // "auto" MAC addresses assignment takes place in stage 0
     {
         initPorts();
-        visualizer();
+        updateDisplay();
         // programming next auto-messages.
         scheduleAt(simTime(), helloTimer);
         scheduleAt(simTime() + forwardDelay, forwardTimer);
@@ -112,7 +112,7 @@ void RSTP::handleMigrate(cMessage * msg)
             iPort->setState(Ieee8021DInterfaceData::DISCARDING); // contest to become forwarding.
         }
     }
-    visualizer();
+    updateDisplay();
     scheduleAt(simTime() + migrateTime, msg); // programming next switch to designate
 }
 
@@ -144,7 +144,7 @@ void RSTP::handleUpgrade(cMessage * msg)
             }
         }
     }
-    visualizer();
+    updateDisplay();
     scheduleAt(simTime() + forwardDelay, msg); // programming next upgrade
 }
 
@@ -220,7 +220,7 @@ void RSTP::handleHelloTime(cMessage * msg)
     }
     sendBPDUs(); // generating and sending new BPDUs
     sendTCNtoRoot();
-    visualizer();
+    updateDisplay();
     scheduleAt(simTime()+helloTime, msg);// programming next hello time
 }
 
@@ -306,7 +306,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
         EV_DETAIL << "Expired BPDU" << endl;
     delete frame;
 
-    visualizer();
+    updateDisplay();
 }
 
 void RSTP::processBPDU(BPDU *frame, unsigned int arrivalPortNum)

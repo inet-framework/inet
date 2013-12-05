@@ -50,13 +50,12 @@ class STP : public STPBase
         unsigned int rootPriority;
         MACAddress rootAddress;
 
-        // Set by root bridge, c stands for current
-        simtime_t cMaxAge;
-        simtime_t cFwdDelay;
-        simtime_t cHelloTime;
+        simtime_t currentMaxAge;
+        simtime_t currentFwdDelay;
+        simtime_t currentHelloTime;
 
         // Parameter change detection
-        unsigned int ubridgePriority;
+        unsigned int currentBridgePriority;
 
         simtime_t helloTimer;
 
@@ -99,14 +98,14 @@ class STP : public STPBase
          * Comparison of all IDs in IEEE8021DInterfaceData::PortInfo structure
          * Invokes: superiorID(), superiorPort()
          */
-        int superiorTPort(Ieee8021DInterfaceData * portA, Ieee8021DInterfaceData * portB);
-        int superiorID(unsigned int, MACAddress, unsigned int, MACAddress);
-        int superiorPort(unsigned int, unsigned int, unsigned int, unsigned int);
+        int comparePorts(Ieee8021DInterfaceData * portA, Ieee8021DInterfaceData * portB);
+        int compareBridgeIDs(unsigned int, MACAddress, unsigned int, MACAddress);
+        int comparePortIDs(unsigned int, unsigned int, unsigned int, unsigned int);
 
         /*
          * Check of the received BPDU is superior to port information from InterfaceTable
          */
-        bool superiorBPDU(int portNum, BPDU * bpdu);
+        bool isSuperiorBPDU(int portNum, BPDU * bpdu);
         void setSuperiorBPDU(int portNum, BPDU * bpdu);
 
         void handleTick();
@@ -127,7 +126,7 @@ class STP : public STPBase
         /*
          * Set all ports to designated (for root switch)
          */
-        void allDesignated();
+        void setAllDesignated();
 
         /*
          * State changes
@@ -232,9 +231,9 @@ inline std::ostream& operator<<(std::ostream& os, STP i)
         os << "  Cost: " << i.rootPathCost << " \n";
         os << "  Port: " << i.rootPort << " \n";
     }
-    os << "  Hello Time: " << i.cHelloTime << " \n";
-    os << "  Max Age: " << i.cMaxAge << " \n";
-    os << "  Forward Delay: " << i.cFwdDelay << " \n";
+    os << "  Hello Time: " << i.currentHelloTime << " \n";
+    os << "  Max Age: " << i.currentMaxAge << " \n";
+    os << "  Forward Delay: " << i.currentFwdDelay << " \n";
     os << "BridgeID Priority: " << i.bridgePriority << "\n";
     os << "  Address: " << i.bridgeAddress << " \n";
     os << "  Hello Time: " << i.helloTime << " \n";

@@ -125,7 +125,7 @@ void STPBase::colorLink(unsigned int i, bool forwarding)
     }
 }
 
-void STPBase::visualizer()   //TODO methd name should be a verb! e.g. updateDisplay()
+void STPBase::updateDisplay()
 {
     if (ev.isGUI() && visualize)
     {
