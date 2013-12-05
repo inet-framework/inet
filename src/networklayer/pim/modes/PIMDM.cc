@@ -745,6 +745,9 @@ void PIMDM::processPIMTimer(PIMTimer *timer)
 
 	switch(timer->getTimerKind())
 	{
+	    case HelloTimer:
+	        processHelloTimer(timer);
+           break;
 		case AssertTimer:
 			EV << "AssertTimer" << endl;
 			break;
@@ -796,6 +799,9 @@ void PIMDM::processPIMPkt(PIMPacket *pkt)
 
 	switch(pkt->getType())
 	{
+	    case Hello:
+	        processHelloPacket(check_and_cast<PIMHello*>(pkt));
+	        break;
 		case JoinPrune:
 			EV << "JoinPrune" << endl;
 			processJoinPruneGraftPacket(check_and_cast<PIMJoinPrune *> (pkt), (PIMPacketType) pkt->getType());
@@ -869,16 +875,9 @@ void PIMDM::handleMessage(cMessage *msg)
  */
 void PIMDM::initialize(int stage)
 {
-	if (stage == INITSTAGE_LOCAL)
-	{
-		// Pointer to routing tables, interface tables, notification board
-		rt = PIMRoutingTableAccess().get();
-		ift = InterfaceTableAccess().get();
-		pimIft = PIMInterfaceTableAccess().get();
-		pimNbt = PIMNeighborTableAccess().get();
+    PIMBase::initialize(stage);
 
-	}
-	else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
+	if (stage == INITSTAGE_ROUTING_PROTOCOLS)
 	{
         // is PIM enabled?
         if (pimIft->getNumInterfaces() == 0)
@@ -891,6 +890,7 @@ void PIMDM::initialize(int stage)
             cModule *host = findContainingNode(this);
             if (host != NULL)
             {
+                host->subscribe(NF_IPv4_NEW_MULTICAST, this);
                 host->subscribe(NF_IPv4_NEW_MULTICAST_DENSE, this);
                 host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
                 host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
@@ -931,7 +931,14 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
 	PIMMulticastRoute *route;
 
     // new multicast data appears in router
-    if (signalID == NF_IPv4_NEW_MULTICAST_DENSE)
+    if (signalID == NF_IPv4_NEW_MULTICAST)
+    {
+        EV <<  "PimDM::receiveChangeNotification - NEW MULTICAST" << endl;
+        IPv4Datagram *datagram;
+        datagram = check_and_cast<IPv4Datagram*>(details);
+        newMulticastReceived(datagram->getDestAddress(), datagram->getSrcAddress());
+    }
+    else if (signalID == NF_IPv4_NEW_MULTICAST_DENSE)
     {
         EV <<  "pimDM::receiveChangeNotification - NEW MULTICAST DENSE" << endl;
         route = check_and_cast<PIMMulticastRoute*>(details);

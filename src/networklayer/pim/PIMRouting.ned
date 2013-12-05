@@ -35,13 +35,6 @@ module PIMRouting
         pimSplitter: PIMSplitter {
             parameters:
                 @display("p=69,95;q=queue;i=block/dispatch");
-            gates:
-                pimDMIn;
-                pimSMIn;
-                pimDMOut;
-                pimSMOut;
-                transportIn;
-                transportOut;
         }
 
         pimDM: PIMDM {
@@ -81,6 +74,6 @@ module PIMRouting
         pimSplitter.pimSMIn <-- pimSM.spiltterOut;
 
         // splitter out
-        pimSplitter.transportOut --> networkLayerOut;
-        pimSplitter.transportIn <-- networkLayerIn;
+        pimSplitter.ipOut --> networkLayerOut;
+        pimSplitter.ipIn <-- networkLayerIn;
 }

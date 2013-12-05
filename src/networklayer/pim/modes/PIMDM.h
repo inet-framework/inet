@@ -30,6 +30,7 @@
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "IPv4Route.h"
+#include "PIMBase.h"
 
 #define PT 180.0						/**< Prune Timer = 180s (3min). */
 #define GRT 3.0							/**< Graft Retry Timer = 3s. */
@@ -39,14 +40,12 @@
 /**
  * @brief Class implements PIM-DM (dense mode).
  */
-class PIMDM : public cSimpleModule, protected cListener
+class PIMDM : public PIMBase, protected cListener
 {
-	private:
-		PIMRoutingTable           	*rt;           	/**< Pointer to routing table. */
-	    IInterfaceTable         	*ift;          	/**< Pointer to interface table. */
-	    PIMInterfaceTable			*pimIft;		/**< Pointer to table of PIM interfaces. */
-	    PIMNeighborTable			*pimNbt;		/**< Pointer to table of PIM neighbors. */
+	public:
+        PIMDM() : PIMBase(PIMInterface::DenseMode) {}
 
+	private:
 	    // process events
         void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 	    void newMulticast(PIMMulticastRoute *newRoute);

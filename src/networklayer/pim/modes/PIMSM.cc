@@ -71,13 +71,10 @@ void PIMSM::handleMessage(cMessage *msg)
  */
 void PIMSM::initialize(int stage)
 {
+    PIMBase::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL)
     {
-        rt = PIMRoutingTableAccess().get();
-        ift = InterfaceTableAccess().get();
-        pimIft = PIMInterfaceTableAccess().get();
-        pimNbt = PIMNeighborTableAccess().get();
-
         setRPAddress(par("RP").stdstringValue());
         setSPTthreshold(par("sptThreshold").stdstringValue());
     }
@@ -94,6 +91,7 @@ void PIMSM::initialize(int stage)
             // subscribe for notifications
             cModule *host = findContainingNode(this);
             if (host != NULL) {
+                host->subscribe(NF_IPv4_NEW_MULTICAST, this);
                 host->subscribe(NF_IPv4_NEW_MULTICAST_SPARSE, this);
                 host->subscribe(NF_IPv4_MDATA_REGISTER, this);
                 host->subscribe(NF_IPv4_DATA_ON_RPF, this);
@@ -1746,6 +1744,9 @@ void PIMSM::processPIMTimer(PIMTimer *timer)
 
     switch(timer->getTimerKind())
     {
+        case HelloTimer:
+            processHelloTimer(timer);
+            break;
         case JoinTimer:
             EV << "JoinTimer" << endl;
             processJoinTimer(check_and_cast<PIMjt *> (timer));
@@ -1788,6 +1789,10 @@ void PIMSM::processPIMPkt(PIMPacket *pkt)
 
     switch(pkt->getType())
     {
+        case Hello:
+            EV << "Hello" << endl;
+            processHelloPacket(check_and_cast<PIMHello*>(pkt));
+            break;
         case JoinPrune:
             EV << "JoinPrune" << endl;
             processJoinPrunePacket(check_and_cast<PIMJoinPrune *> (pkt));
@@ -1848,6 +1853,13 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PIMInterface::SparseMode)
             removeMulticastReceiver(pimInterface, info->groupAddress);
+    }
+    else if (signalID == NF_IPv4_NEW_MULTICAST)
+    {
+        EV <<  "PimSM::receiveChangeNotification - NEW MULTICAST" << endl;
+        IPv4Datagram *datagram;
+        datagram = check_and_cast<IPv4Datagram*>(details);
+        newMulticastReceived(datagram->getDestAddress(), datagram->getSrcAddress());
     }
     // new multicast data appears in router
     else if (signalID == NF_IPv4_NEW_MULTICAST_SPARSE)

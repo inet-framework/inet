@@ -101,6 +101,8 @@ bool PIMNeighborTable::addNeighbor(PIMNeighbor *entry)
     Enter_Method_Silent();
     if (!findNeighbor(entry->getInterfaceId(), entry->getAddress()))
     {
+        EV_DETAIL << "Added new neighbor to table: " << entry->info() << "\n";
+
         this->neighbors.push_back(entry);
         take(entry->getLivenessTimer());
         restartLivenessTimer(entry);

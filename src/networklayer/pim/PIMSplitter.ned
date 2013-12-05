@@ -18,20 +18,24 @@
 
 package inet.networklayer.pim;
 
-
-// PIMSplitter is module which split PIM-DM and PIM-SM packets to simple modules.
+//
+// PIMSplitter module dispatches PIM packets received from the network layer
+// according to the PIM mode of the incoming interface. Bu using a PIMSplitter
+// it is possible to build nodes that operates in Dense Mode on some interfaces,
+// and in Sparse Mode on others. 
+//
+// See ~PIMRouting module for example usage.
+//
 simple PIMSplitter
 {
     parameters:
     	@display("i=block/dispatch");
-        @signal[NF_IPv4_NEW_MULTICAST_DENSE](type=PIMMulticastRoute);
-        @signal[NF_IPv4_NEW_MULTICAST_SPARSE](type=PIMMulticastRoute);
 
     gates:
+        input ipIn;
+        output ipOut;
         input pimDMIn;
-        input pimSMIn;
         output pimDMOut;
+        input pimSMIn;
         output pimSMOut;
-        input transportIn;
-        output transportOut;
 }

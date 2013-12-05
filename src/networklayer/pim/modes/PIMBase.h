@@ -16,42 +16,49 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#ifndef __INET_PIMSPLITTER_H
-#define __INET_PIMSPLITTER_H
+#ifndef __INET_PIMBASE_H
+#define __INET_PIMBASE_H
 
 #include "IInterfaceTable.h"
+#include "PIMRoutingTable.h"
+#include "PIMNeighborTable.h"
 #include "PIMInterfaceTable.h"
 #include "PIMPacket_m.h"
+#include "PIMTimer_m.h"
+
 
 /**
- * PIMSplitter register itself for PIM protocol (103) in the network layer,
- * and dispatches the received packets either to PIMDM or PIMSM according
- * to the PIM mode of the incoming interface.
- * Packets received from the PIM modules are simply forwarded to the
- * network layer.
+ * TODO
  */
-class PIMSplitter : public cSimpleModule
+class PIMBase : public cSimpleModule
 {
-	private:
-	    IInterfaceTable *ift;
-	    PIMInterfaceTable *pimIft;
+    protected:
+        static const IPv4Address ALL_PIM_ROUTERS_MCAST;
 
-	    cGate *ipIn;
-	    cGate *ipOut;
-	    cGate *pimDMIn;
-	    cGate *pimDMOut;
-        cGate *pimSMIn;
-        cGate *pimSMOut;
+    protected:
+        PIMRoutingTable *rt;
+        IInterfaceTable *ift;
+        PIMInterfaceTable *pimIft;
+        PIMNeighborTable *pimNbt;
+
+        const char *                hostname;
+
+        PIMInterface::PIMMode mode;
+        PIMTimer *helloTimer;
 
     public:
-        PIMSplitter() : ift(NULL), pimIft(NULL) {};
+        PIMBase(PIMInterface::PIMMode mode) : mode(mode), helloTimer(NULL) {}
+        virtual ~PIMBase();
 
-	protected:
-		virtual int numInitStages() const  {return NUM_INIT_STAGES;}
+    protected:
+        virtual int numInitStages() const  {return NUM_INIT_STAGES;}
         virtual void initialize(int stage);
-		virtual void handleMessage(cMessage *msg);
-		virtual void processPIMPacket(PIMPacket *pkt);
+
+        void sendHelloPackets();
+        void processHelloTimer(PIMTimer *timer);
+        void processHelloPacket(PIMHello *pkt);
+        void newMulticastReceived(IPv4Address destAddr, IPv4Address srcAddr);
 };
 
-#endif
 
+#endif

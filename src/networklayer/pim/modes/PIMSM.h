@@ -31,6 +31,7 @@
 #include "IPv4InterfaceData.h"
 #include "PIMRoute.h"
 #include "PIMRoutingTable.h"
+#include "PIMBase.h"
 
 #define KAT 180.0                       /**< Keep alive timer, if RPT is disconnect */
 #define KAT2 210.0                      /**< Keep alive timer, if RPT is connect */
@@ -71,14 +72,9 @@ enum JPMsgType
 /**
  * @brief Class implements PIM-SM (sparse mode).
  */
-class PIMSM : public cSimpleModule, protected cListener
+class PIMSM : public PIMBase, protected cListener
 {
     private:
-        PIMRoutingTable            *rt;            /**< Pointer to routing table. */
-        IInterfaceTable             *ift;           /**< Pointer to interface table. */
-        PIMInterfaceTable           *pimIft;        /**< Pointer to table of PIM interfaces. */
-        PIMNeighborTable            *pimNbt;        /**< Pointer to table of PIM neighbors. */
-
         IPv4Address RPAddress;
         std::string SPTthreshold;
 
@@ -129,6 +125,7 @@ class PIMSM : public cSimpleModule, protected cListener
         PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
 
     public:
+        PIMSM() : PIMBase(PIMInterface::SparseMode) {}
         //PIM-SM clear implementation
         void setRPAddress(std::string address);
         void setSPTthreshold(std::string address);
