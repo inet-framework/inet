@@ -107,7 +107,7 @@ Address UDPBasicApp::chooseDestAddr()
     {
         const char *destAddrs = par("destAddresses");
         cStringTokenizer tokenizer(destAddrs);
-        const char *token;
+        const char *token = NULL;
 
         for (int i = 0; i <= k; ++i)
             token = tokenizer.nextToken();

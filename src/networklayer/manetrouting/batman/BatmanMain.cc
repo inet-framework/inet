@@ -260,7 +260,7 @@ void Batman::initialize(int stage)
 
 void Batman::handleMessage(cMessage *msg)
 {
-    BatmanIf *if_incoming;
+    BatmanIf *if_incoming = NULL;
     ManetAddress neigh;
     simtime_t vis_timeout, select_timeout, curr_time;
 

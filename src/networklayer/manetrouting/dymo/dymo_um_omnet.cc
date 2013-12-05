@@ -641,7 +641,7 @@ void DYMOUM::getMacAddress(IPv4Datagram *dgram)
 void DYMOUM::recvDYMOUMPacket(cMessage * msg)
 {
     struct in_addr src, dst;
-    int interfaceId;
+    int interfaceId = -1;
 
     DYMO_element  *dymo_msg = check_and_cast<DYMO_element *> (msg);
     int ifIndex = NS_IFINDEX;
@@ -1055,7 +1055,7 @@ void DYMOUM::processPromiscuous(const cObject *details)
         // if rrep proccess the packet
         if (!no_path_acc)
         {
-            DYMO_element * dymo_msg;
+            DYMO_element *dymo_msg = NULL;
             if (!isInMacLayer())
             {
                 if (ip_msg && ip_msg->getTransportProtocol()==IP_PROT_MANET)
@@ -1143,8 +1143,8 @@ void DYMOUM::processFullPromiscuous(const cObject *details)
 
         if (!no_path_acc)
         {
-            IPv4Datagram * ip_msg;
-            DYMO_element * dymo_msg;
+            IPv4Datagram *ip_msg = NULL;
+            DYMO_element *dymo_msg = NULL;
             if (!isInMacLayer())
             {
                 ip_msg = dynamic_cast<IPv4Datagram *>(twoAddressFrame->getEncapsulatedPacket());
@@ -1164,7 +1164,7 @@ void DYMOUM::processFullPromiscuous(const cObject *details)
                 if ((dymo_msg->type==DYMO_RE_TYPE) && (((RE *) dymo_msg)->a==0))
                 {
                     //  proccess RREP
-                    addr.s_addr = ManetAddress(ip_msg->getSrcAddress());
+                    addr.s_addr = ManetAddress(ip_msg->getSrcAddress());    //FIXME ip_msg may be NULL!
                     promiscuous_rrep((RE*)dymo_msg, addr);
                 } // end if promiscuous
                 //else if (dymo_msg->type==DYMO_RERR_TYPE)

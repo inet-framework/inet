@@ -2640,7 +2640,7 @@ void SCTPAssociation::process_TIMEOUT_HEARTBEAT_INTERVAL(SCTPPathVariables* path
 
 void SCTPAssociation::process_TIMEOUT_HEARTBEAT(SCTPPathVariables* path)
 {
-    bool oldState;
+    bool oldState = path->activePath;
 
     /* check if error counters must be increased */
     if (path->activePath)
@@ -2687,7 +2687,6 @@ void SCTPAssociation::process_TIMEOUT_HEARTBEAT(SCTPPathVariables* path)
             /* notify the application, in case the PATH STATE has changed from ACTIVE to INACTIVE */
             pathStatusIndication(path, false);
         }
-
     }
 }
 

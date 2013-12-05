@@ -304,9 +304,9 @@ std::string DYMO_element::detailedInfo() const
 
 
     Dymo_RE *re_type = NULL;
-    //Dymo_UERR *uerr_type = NULL;
+    Dymo_UERR *uerr_type = NULL;
     Dymo_RERR *rerr_type = NULL;
-    //Dymo_HELLO *hello_type = NULL;
+    Dymo_HELLO *hello_type = NULL;
     switch (type)
     {
     case DYMO_RE_TYPE:

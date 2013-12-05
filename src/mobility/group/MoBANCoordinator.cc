@@ -158,7 +158,7 @@ void MoBANCoordinator::setTargetPosition() {
  * Markov transition matrix.
  */
 void MoBANCoordinator::selectPosture() {
-    int postureID;
+    int postureID = 0;
 
     if (postureSelStrategy == UNIFORM_RANDOM) {
         postureID = floor(uniform(0, numPostures)); // uniformly random posture selection

@@ -1095,7 +1095,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                 struct tlv* cp;
                 struct random_parameter* rp;
                 struct hmac_algo* hp;
-                unsigned int rplen, hplen, cplen;
+                unsigned int rplen = 0, hplen = 0, cplen = 0;
                 chunklen = SCTP_INIT_CHUNK_LENGTH;
                 SCTPInitChunk *chunk = new SCTPInitChunk("INIT");
                 chunk->setChunkType(chunkType);
@@ -1300,7 +1300,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                 struct tlv* cp;
                 struct random_parameter* rp;
                 struct hmac_algo* hp;
-                unsigned int rplen, hplen, cplen;
+                unsigned int rplen = 0, hplen = 0, cplen = 0;
                 chunklen = SCTP_INIT_CHUNK_LENGTH;
                 SCTPInitAckChunk *chunk = new SCTPInitAckChunk("INIT_ACK");
                 chunk->setChunkType(chunkType);
@@ -1981,6 +1981,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                             instrrst->setSrReqSn(ntohl(inrr->srReqSn)); //Stream Reset Request Sequence Number
                             chunklen+=SCTP_OUTGOING_RESET_REQUEST_PARAMETER_LENGTH;
                             len = SCTP_INCOMING_RESET_REQUEST_PARAMETER_LENGTH;
+                            sncounter = 0;
                             while (ntohs(inrr->length) > len)
                             {
                                 snnumbers = (int)*(chunks + chunkPtr+size_stream_reset_chunk+parptr+SCTP_OUTGOING_RESET_REQUEST_PARAMETER_LENGTH+sncounter*2);

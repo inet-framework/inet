@@ -265,12 +265,12 @@ struct dsr_srt *NSCLASS ph_srt_find(struct in_addr src,struct in_addr dst,int cr
 
     struct in_addr *route;
     unsigned int *vector_cost;
-    unsigned int vector_size;
+    unsigned int vector_size = 0;
 
-    unsigned int num_hop;
+    unsigned int num_hop = UINT_MAX;
     int status;
     int i;
-    double cost;
+    double cost = 1.0/0.0;
     bool find;
     struct dsr_srt *srt = NULL;
     struct in_addr myAddr = my_addr();
@@ -434,7 +434,7 @@ ph_srt_add(struct dsr_srt *srt, usecs_t timeout, unsigned short flags)
     struct in_addr myaddr;
     struct dsr_srt *dsr_aux;
     double cost;
-    unsigned int init_cost;
+    unsigned int init_cost = INT_MAX;
     bool is_first,is_last;
     int size_cost=0;
     unsigned int *cost_vector=NULL;

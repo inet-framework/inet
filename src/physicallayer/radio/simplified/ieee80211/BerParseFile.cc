@@ -92,8 +92,8 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
 {
     BerList *berlist;
     berlist = & berTable[getTablePosition(speed)];
-    LongBer * pre;
-    LongBer * pos;
+    LongBer *pre = NULL;
+    LongBer *pos = NULL;
     unsigned int j;
     for (j=0; j<berlist->size(); j++)
     {
@@ -116,6 +116,10 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
     SnrBer snrdata2;
     SnrBer snrdata3;
     SnrBer snrdata4;
+    snrdata1.snr = -1;
+    snrdata1.ber = -1;
+    snrdata2.snr = -1;
+    snrdata2.ber = -1;
     snrdata3.snr = -1;
     snrdata3.ber = -1;
     snrdata4.snr = -1;
@@ -218,6 +222,7 @@ double BerParseFile::getPer(double speed, double tsnr, int tlen)
             else
             {
                 EV << "No PER available";
+                per = 0;
             }
         }
     }

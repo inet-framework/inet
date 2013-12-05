@@ -213,7 +213,7 @@ void Ieee80211AgentSTA::processScanConfirm(Ieee80211Prim_ScanConfirm *resp)
 {
     // choose best AP
 
-    int bssIndex;
+    int bssIndex = -1;
     if (this->default_ssid=="")
     {
             // no default ssid, so pick the best one

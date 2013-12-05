@@ -165,7 +165,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 {
     char buf[MAX_ENTRY_STRING_SIZE];
     int charpointer = 0;
-    InterfaceEntry *ie;
+    InterfaceEntry *ie = NULL;
 
     // parsing of entries in interface definition
     while (ifconfigFile[charpointer] != '\0')

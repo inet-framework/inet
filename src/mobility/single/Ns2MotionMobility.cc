@@ -62,7 +62,7 @@ void Ns2MotionMobility::parseFile(const char *filename)
     while (std::getline(in, line))
     {
         // '#' line
-        int num_node;
+        int num_node = -1;
         std::string::size_type found = line.find('#');
         if (found == 0)
             continue;

@@ -979,11 +979,11 @@ void TraCIScenarioManager::processSimSubscription(std::string objectId, TraCIBuf
 
 void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraCIBuffer& buf) {
     bool isSubscribed = (subscribedVehicles.find(objectId) != subscribedVehicles.end());
-    double px;
-    double py;
+    double px = 1.0/0.0;
+    double py = 1.0/0.0;
     std::string edge;
-    double speed;
-    double angle_traci;
+    double speed = 1.0/0.0;
+    double angle_traci = 1.0/0.0;
     int signals;
     int numRead = 0;
 
