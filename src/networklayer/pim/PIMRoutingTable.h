@@ -20,7 +20,7 @@
 #define __INET_PIMROUTINGTABLE_H
 
 #include "IPv4RoutingTable.h"
-#include "PIMRoute.h"
+#include "PIMMulticastRoute.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 

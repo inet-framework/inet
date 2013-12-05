@@ -29,7 +29,7 @@
 #include "PIMInterfaceTable.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
-#include "PIMRoute.h"
+#include "PIMMulticastRoute.h"
 #include "PIMRoutingTable.h"
 #include "PIMBase.h"
 

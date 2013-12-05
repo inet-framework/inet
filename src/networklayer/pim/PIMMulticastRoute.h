@@ -17,8 +17,8 @@
 // Authors: Veronika Rybova, Tomas Prochazka (mailto:xproch21@stud.fit.vutbr.cz), Jiri Trhlik (mailto:JiriTM@gmail.com)
 //          Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#ifndef __INET_PIMROUTE_H
-#define __INET_PIMROUTE_H
+#ifndef __INET_PIMMULTICASTROUTE_H
+#define __INET_PIMMULTICASTROUTE_H
 
 #include "IPv4Route.h"
 
