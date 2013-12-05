@@ -856,17 +856,7 @@ void NS_CLASS recvAODVUUPacket(cMessage * msg)
         dst.s_addr =  ManetAddress(destAddr);
         interfaceId = ctrl->getInterfaceId();
 
-    }
-    else
-    {
-        Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->getControlInfo());
-        src.s_addr = ManetAddress(ctrl->getSrc());
-        dst.s_addr =  ManetAddress(ctrl->getDest());
-    }
-
-    InterfaceEntry *   ie;
-    if (!isInMacLayer())
-    {
+        InterfaceEntry *   ie;
         for (int i = 0; i < getNumWlanInterfaces(); i++)
         {
             ie = getWlanInterfaceEntry(i);
@@ -878,6 +868,13 @@ void NS_CLASS recvAODVUUPacket(cMessage * msg)
             }
         }
     }
+    else
+    {
+        Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->getControlInfo());
+        src.s_addr = ManetAddress(ctrl->getSrc());
+        dst.s_addr =  ManetAddress(ctrl->getDest());
+    }
+
     aodv_socket_process_packet(aodv_msg, len, src, dst, ttl, ifIndex);
     delete   aodv_msg;
 }

@@ -254,7 +254,7 @@ void PingApp::processPingResponse(PingPayload *msg)
     // get src, hopCount etc from packet, and print them
     INetworkProtocolControlInfo *ctrl = check_and_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
     Address src = ctrl->getSourceAddress();
-    Address dest = ctrl->getDestinationAddress();
+    //Address dest = ctrl->getDestinationAddress();
     int msgHopLimit = ctrl->getHopLimit();
 
     // calculate the RTT time by looking up the the send time of the packet

@@ -342,6 +342,7 @@ void PacketDump::sctpDump(const char *label, SCTPMessage *sctpmsg,
 
                 case ERRORTYPE:
                 {
+                    out << "ERRORTYPE ";
                     SCTPErrorChunk* errorChunk;
                     errorChunk = check_and_cast<SCTPErrorChunk*> (chunk);
                     uint32 numberOfParameters = errorChunk->getParametersArraySize();
@@ -351,8 +352,8 @@ void PacketDump::sctpDump(const char *label, SCTPMessage *sctpmsg,
                     {
                         SCTPParameter* param = (SCTPParameter*) errorChunk->getParameters(i);
                         parameterType = param->getParameterType();
+                        out << parameterType << " ";
                     }
-
                     break;
                 }
             }

@@ -422,7 +422,7 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram* dgram)
             // if we do not have a valid source address, we'll have to ask
             // the routing table for the correct interface.
             int interfaceId;
-            IPv6Address nextHop = rt->lookupDestCache(dest, interfaceId);
+            (void)(rt->lookupDestCache(dest, interfaceId));
         }
 
         if (tunnels[vIfIndex].tunnelType == T2RH) // update 15.01.08 - CB

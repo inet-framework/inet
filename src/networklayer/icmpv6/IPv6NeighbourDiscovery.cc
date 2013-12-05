@@ -1113,7 +1113,7 @@ void IPv6NeighbourDiscovery::processRSPacket(IPv6RouterSolicitation *rs,
 
         //First we extract RS specific information from the received message
         MACAddress macAddr = rs->getSourceLinkLayerAddress();
-        EV << "MAC Address extracted\n";
+        EV << "MAC Address '" << macAddr << "' extracted\n";
         delete rs;
 
         /*A router MAY choose to unicast the response directly to the soliciting
@@ -1351,8 +1351,8 @@ void IPv6NeighbourDiscovery::processRAPacket(IPv6RouterAdvertisement *ra,
         processRAForRouterUpdates(ra, raCtrlInfo); //See RFC2461: Section 6.3.4
 
         //Possible options
-        MACAddress macAddress = ra->getSourceLinkLayerAddress();
-        uint mtu = ra->getMTU();
+        //MACAddress macAddress = ra->getSourceLinkLayerAddress();
+        //uint mtu = ra->getMTU();
         for (int i = 0; i < (int)ra->getPrefixInformationArraySize(); i++)
         {
             IPv6NDPrefixInformation& prefixInfo = ra->getPrefixInformation(i);
@@ -1548,7 +1548,7 @@ void IPv6NeighbourDiscovery::processRAPrefixInfo(IPv6RouterAdvertisement *ra,
            << ra->getPrefixInformationArraySize() << endl;
         uint prefixLength = prefixInfo.getPrefixLength();
         simtime_t validLifetime = prefixInfo.getValidLifetime();
-        uint preferredLifetime = prefixInfo.getPreferredLifetime();
+        //uint preferredLifetime = prefixInfo.getPreferredLifetime();
         IPv6Address prefix = prefixInfo.getPrefix();
 
         //- If the prefix is the link-local prefix, silently ignore the Prefix
@@ -1984,7 +1984,7 @@ void IPv6NeighbourDiscovery::processNSForTentativeAddress(IPv6NeighbourSolicitat
 {
     //Control Information
     IPv6Address nsSrcAddr = nsCtrlInfo->getSrcAddr();
-    IPv6Address nsDestAddr = nsCtrlInfo->getDestAddr();
+    //IPv6Address nsDestAddr = nsCtrlInfo->getDestAddr();
 
     ASSERT(nsSrcAddr.isUnicast() || nsSrcAddr.isUnspecified());
     //solicitation is processed as described in RFC2462:section 5.4.3
@@ -2014,7 +2014,7 @@ void IPv6NeighbourDiscovery::processNSForNonTentativeAddress(IPv6NeighbourSolici
         IPv6ControlInfo *nsCtrlInfo, InterfaceEntry *ie)
 {
     //Neighbour Solicitation Information
-    MACAddress nsMacAddr = ns->getSourceLinkLayerAddress();
+    //MACAddress nsMacAddr = ns->getSourceLinkLayerAddress();
 
     //target addr is not tentative addr
     //solicitation processed as described in RFC2461:section 7.2.3
