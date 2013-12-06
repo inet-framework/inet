@@ -9,7 +9,6 @@ network = Test
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
-sim-time-limit = 9s
 
 *.host.numPingApps = 1
 *.host.pingApp[0].destAddr = "192.168.0.42"

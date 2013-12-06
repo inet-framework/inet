@@ -9,11 +9,11 @@ network = Test
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
 cmdenv-express-mode = false
-sim-time-limit = 9s
 
 *.host.numPingApps = 1
 *.host.pingApp[0].destAddr = "192.168.0.42"
 *.host.pingApp[0].startTime = 6s
+*.host.pingApp[0].stopTime = 9.1s
 
 *.host.networkLayer.configurator.networkConfiguratorModule = ""
 
@@ -56,8 +56,9 @@ Sending ping #0
 .*
 .*Event #\d+  T=9 .*
 Sending ping #3
+.*
 
-<!> Simulation time limit reached -- simulation stopped at event #\d+, t=9
+<!> No more events -- simulation ended at event #\d+, t=9
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
