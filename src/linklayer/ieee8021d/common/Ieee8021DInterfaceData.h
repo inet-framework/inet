@@ -79,6 +79,9 @@ class Ieee8021DInterfaceData : public InterfaceProtocolData
         PortInfo portData;
 
     public:
+        virtual std::string info() const;
+        virtual std::string detailedInfo() const;
+
         bool isLearning() {return portData.state == LEARNING || portData.state == FORWARDING;}
 
         bool isForwarding() {return portData.state == FORWARDING;}

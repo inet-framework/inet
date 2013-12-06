@@ -23,7 +23,25 @@ Ieee8021DInterfaceData::Ieee8021DInterfaceData()
 {
     // If there is no STP module then all ports
     // must be in forwarding state.
+    portData.role = NOTASSIGNED;
     portData.state = FORWARDING;
+}
+
+std::string Ieee8021DInterfaceData::info() const
+{
+    std::stringstream out;
+    out << "role:" << getRoleName() << " state:" << getStateName();
+    return out.str();
+}
+
+std::string Ieee8021DInterfaceData::detailedInfo() const
+{
+    std::stringstream out;
+    out << "role:" << getRoleName() << "\tstate:" << getStateName() << "\n";
+    out << "priority:" << getPriority() << "\n";
+    out << "linkCost:" << getLinkCost() << "\n";
+
+    return out.str();
 }
 
 const char *Ieee8021DInterfaceData::getRoleName(PortRole role)
