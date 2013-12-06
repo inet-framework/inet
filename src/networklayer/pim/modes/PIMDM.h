@@ -56,7 +56,7 @@ class PIMDM : public PIMBase, protected cListener
 	    void rpfIntChange(PIMMulticastRoute *route);
 
 	    // process timers
-	    void processPIMTimer(PIMTimer *timer);
+	    void processPIMTimer(cMessage *timer);
 	    void processPruneTimer(PIMpt * timer);
 	    void processGraftRetryTimer(PIMgrt *timer);
 	    void processSourceActiveTimer(PIMsat * timer);

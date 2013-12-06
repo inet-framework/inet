@@ -45,8 +45,7 @@ void PIMSM::handleMessage(cMessage *msg)
 	if (msg->isSelfMessage())
 	{
 	   EV << "PIMSM::handleMessage:Timer" << endl;
-	   PIMTimer *timer = check_and_cast <PIMTimer *> (msg);
-	   processPIMTimer(timer);
+	   processPIMTimer(msg);
 	}
 	else if (dynamic_cast<PIMPacket *>(msg))
 	{
@@ -115,8 +114,7 @@ void PIMSM::initialize(int stage)
  */
 PIMkat* PIMSM::createKeepAliveTimer(IPv4Address source, IPv4Address group)
 {
-    PIMkat *timer = new PIMkat();
-    timer->setName("PIMKeepAliveTimer");
+    PIMkat *timer = new PIMkat("PIMKeepAliveTimer", KeepAliveTimer);
     timer->setSource(source);
     timer->setGroup(group);
     if (group == IPv4Address::UNSPECIFIED_ADDRESS)      //for (*,G)
@@ -140,8 +138,7 @@ PIMkat* PIMSM::createKeepAliveTimer(IPv4Address source, IPv4Address group)
  */
 PIMrst* PIMSM::createRegisterStopTimer(IPv4Address source, IPv4Address group)
 {
-    PIMrst *timer = new PIMrst();
-    timer->setName("PIMRegisterStopTimer");
+    PIMrst *timer = new PIMrst("PIMRegisterStopTimer", RegisterStopTimer);
     timer->setSource(source);
     timer->setGroup(group);
 
@@ -168,7 +165,7 @@ PIMet* PIMSM::createExpiryTimer(int intID, int holdtime, IPv4Address group, IPv4
 {
     EV << "Creating ET timer " << group << " , " << source << " : " << intID << " : " << StateType << endl;
 
-    PIMet *timer = new PIMet();
+    PIMet *timer = new PIMet("PIMExpiryTimer", ExpiryTimer);
     timer->setName("PIMExpiryTimer");
     timer->setIntId(intID);
     timer->setGroup(group);
@@ -192,8 +189,7 @@ PIMet* PIMSM::createExpiryTimer(int intID, int holdtime, IPv4Address group, IPv4
  */
 PIMjt* PIMSM::createJoinTimer(IPv4Address group, IPv4Address JPaddr, IPv4Address upstreamNbr, int JoinType)
 {
-    PIMjt *timer = new PIMjt();
-    timer->setName("PIMJoinTimer");
+    PIMjt *timer = new PIMjt("PIMJoinTimer", JoinTimer);
     timer->setGroup(group);
     timer->setJoinPruneAddr(JPaddr);
     timer->setUpstreamNbr(upstreamNbr);
@@ -216,8 +212,7 @@ PIMjt* PIMSM::createJoinTimer(IPv4Address group, IPv4Address JPaddr, IPv4Address
  */
 PIMppt* PIMSM::createPrunePendingTimer(IPv4Address group, IPv4Address JPaddr, IPv4Address upstreamNbr, JPMsgType JPtype)
 {
-    PIMppt *timer = new PIMppt();
-    timer->setName("PIMPrunePendingTimer");
+    PIMppt *timer = new PIMppt("PIMPrunePendingTimer", PrunePendingTimer);
 
     timer->setGroup(group);
     timer->setJoinPruneAddr(JPaddr);
@@ -1758,11 +1753,11 @@ void PIMSM::newMulticastReceiver(PIMInterface *pimInterface, IPv4Address multica
  * @see processPruneTimer()
  * @see processGraftRetryTimer()
  */
-void PIMSM::processPIMTimer(PIMTimer *timer)
+void PIMSM::processPIMTimer(cMessage *timer)
 {
     EV << "pimSM::processPIMTimer: ";
 
-    switch(timer->getTimerKind())
+    switch(timer->getKind())
     {
         case HelloTimer:
             processHelloTimer(timer);

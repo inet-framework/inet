@@ -45,7 +45,7 @@ class PIMBase : public cSimpleModule
         const char *                hostname;
 
         PIMInterface::PIMMode mode;
-        PIMTimer *helloTimer;
+        cMessage *helloTimer;
 
     public:
         PIMBase(PIMInterface::PIMMode mode) : mode(mode), helloTimer(NULL) {}
@@ -56,7 +56,7 @@ class PIMBase : public cSimpleModule
         virtual void initialize(int stage);
 
         void sendHelloPackets();
-        void processHelloTimer(PIMTimer *timer);
+        void processHelloTimer(cMessage *timer);
         void processHelloPacket(PIMHello *pkt);
 
         // routing table access

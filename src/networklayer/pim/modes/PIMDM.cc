@@ -198,8 +198,7 @@ void PIMDM::sendPimStateRefresh(IPv4Address originator, IPv4Address src, IPv4Add
  */
 PIMpt* PIMDM::createPruneTimer(IPv4Address source, IPv4Address group, int intId, int holdTime)
 {
-	PIMpt *timer = new PIMpt();
-	timer->setName("PimPruneTimer");
+	PIMpt *timer = new PIMpt("PimPruneTimer", PruneTimer);
 	timer->setSource(source);
 	timer->setGroup(group);
 	timer->setIntId(intId);
@@ -222,8 +221,7 @@ PIMpt* PIMDM::createPruneTimer(IPv4Address source, IPv4Address group, int intId,
  */
 PIMgrt* PIMDM::createGraftRetryTimer(IPv4Address source, IPv4Address group)
 {
-	PIMgrt *timer = new PIMgrt();
-	timer->setName("PIMGraftRetryTimer");
+	PIMgrt *timer = new PIMgrt("PIMGraftRetryTimer", GraftRetryTimer);
 	timer->setSource(source);
 	timer->setGroup(group);
 	scheduleAt(simTime() + GRT, timer);
@@ -244,8 +242,7 @@ PIMgrt* PIMDM::createGraftRetryTimer(IPv4Address source, IPv4Address group)
  */
 PIMsat* PIMDM::createSourceActiveTimer(IPv4Address source, IPv4Address group)
 {
-	PIMsat *timer = new PIMsat();
-	timer->setName("PIMSourceActiveTimer");
+	PIMsat *timer = new PIMsat("PIMSourceActiveTimer", SourceActiveTimer);
 	timer->setSource(source);
 	timer->setGroup(group);
 	scheduleAt(simTime() + SAT, timer);
@@ -266,8 +263,7 @@ PIMsat* PIMDM::createSourceActiveTimer(IPv4Address source, IPv4Address group)
  */
 PIMsrt* PIMDM::createStateRefreshTimer(IPv4Address source, IPv4Address group)
 {
-	PIMsrt *timer = new PIMsrt();
-	timer->setName("PIMStateRefreshTimer");
+	PIMsrt *timer = new PIMsrt("PIMStateRefreshTimer", StateRefreshTimer);
 	timer->setSource(source);
 	timer->setGroup(group);
 	scheduleAt(simTime() + SRT, timer);
@@ -739,11 +735,11 @@ void PIMDM::processStateRefreshTimer(PIMsrt * timer)
  * @see processPruneTimer()
  * @see processGraftRetryTimer()
  */
-void PIMDM::processPIMTimer(PIMTimer *timer)
+void PIMDM::processPIMTimer(cMessage *timer)
 {
 	EV << "pimDM::processPIMTimer: ";
 
-	switch(timer->getTimerKind())
+	switch(timer->getKind())
 	{
 	    case HelloTimer:
 	        processHelloTimer(timer);
@@ -849,8 +845,7 @@ void PIMDM::handleMessage(cMessage *msg)
    if (msg->isSelfMessage())
    {
 	   EV << "PIMDM::handleMessage:Timer" << endl;
-	   PIMTimer *timer = check_and_cast <PIMTimer *> (msg);
-	   processPIMTimer(timer);
+	   processPIMTimer(msg);
    }
    // PIM packet from PIM neighbor
    else if (dynamic_cast<PIMPacket *>(msg))

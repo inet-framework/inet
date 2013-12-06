@@ -79,14 +79,13 @@ void PIMBase::initialize(int stage)
         {
             EV_INFO << "PIM is enabled on device " << hostname << endl;
 
-            helloTimer = new PIMTimer("PIM Hello", HelloTimer);
-            helloTimer->setTimerKind(HelloTimer);
+            helloTimer = new cMessage("PIM Hello", HelloTimer);
             scheduleAt(simTime() + uniform(0,5), helloTimer);
         }
     }
 }
 
-void PIMBase::processHelloTimer(PIMTimer *timer)
+void PIMBase::processHelloTimer(cMessage *timer)
 {
     ASSERT(timer == helloTimer);
     sendHelloPackets();

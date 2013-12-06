@@ -85,7 +85,7 @@ class PIMSM : public PIMBase, protected cListener
 
 
         // process timers
-        void processPIMTimer(PIMTimer *timer);
+        void processPIMTimer(cMessage *timer);
         void processKeepAliveTimer(PIMkat *timer);
         void processRegisterStopTimer(PIMrst *timer);
         void processExpiryTimer(PIMet *timer);
