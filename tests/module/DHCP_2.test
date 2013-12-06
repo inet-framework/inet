@@ -48,7 +48,7 @@ ned-path = .;../../../../src;../../lib
 network = Dhcptest
 
 sim-time-limit = 10500s
-cmdenv-express-mode = true
+cmdenv-express-mode = false
 
 **.dhcpServer.udpApp[0].typename = "DHCPServer"
 **.dhcpServer.udpApp[0].subnetMask = "255.255.255.0"        # netmask to assign
@@ -62,28 +62,69 @@ cmdenv-express-mode = true
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 
-     Messages:  created: \d+   present: \d+   in FES: \d+
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
-Host dhcpClient got ip: 192\.168\.1\.100/255\.255\.255\.0
+Running simulation\.\.\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available\. Assigning it to dhcpClient\.
+DHCPACK message arrived in RENEWING state\. The renewing process was successful\.
 \*\* Event
 
 %#--------------------------------------------------------------------------------------------------------------
