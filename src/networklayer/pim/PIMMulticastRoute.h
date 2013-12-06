@@ -74,31 +74,35 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
          * @brief Structure of incoming interface.
          * @details E.g.: GigabitEthernet1/4, RPF nbr 10.10.51.145
          */
-        struct AnsaInInterface : public InInterface
+        struct PIMInInterface : public InInterface
         {
-            int         interfaceId;        /**< Interface ID */
             IPv4Address nextHop;            /**< RF neighbor */
-            AnsaInInterface(InterfaceEntry *ie, int interfaceId, IPv4Address nextHop)
-                : InInterface(ie), interfaceId(interfaceId), nextHop(nextHop) {}
+            PIMInInterface(InterfaceEntry *ie, int interfaceId, IPv4Address nextHop)
+                : InInterface(ie), nextHop(nextHop) {}
+            int getInterfaceId() const { return ie->getInterfaceId(); }
         };
 
         /**
          * @brief Structure of outgoing interface.
          * @details E.g.: Ethernet0, Forward/Sparse, 5:29:15/0:02:57
          */
-        struct AnsaOutInterface : public OutInterface
+        struct PIMOutInterface : public OutInterface
         {
-            int                     interfaceId;              /**< Interface ID */
-            InterfaceState                forwarding;         /**< Forward or Pruned */
-            InterfaceState                mode;               /**< Dense, Sparse, ... */
+            InterfaceState          forwarding;         /**< Forward or Pruned */
+            InterfaceState          mode;               /**< Dense, Sparse, ... */
             PIMpt                   *pruneTimer;        /**< Pointer to PIM Prune Timer*/
             PIMet                   *expiryTimer;       /**< Pointer to PIM Expiry Timer*/
             AssertState             assert;             /**< Assert state. */
             RegisterState           regState;           /**< Register state. */
             bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
-            AnsaOutInterface(InterfaceEntry *ie)
+            PIMOutInterface(InterfaceEntry *ie)
                 : OutInterface(ie, false) {}
+            PIMOutInterface(InterfaceEntry *ie, InterfaceState forwarding, InterfaceState mode, PIMpt *pruneTimer,
+                    PIMet *expiryTimer, AssertState assert, RegisterState regState, bool show)
+                : OutInterface(ie, false), forwarding(forwarding), mode(mode), pruneTimer(pruneTimer),
+                  expiryTimer(expiryTimer), assert(assert), regState(regState), shRegTun(show) {}
 
+            int getInterfaceId() const { return ie->getInterfaceId(); }
             virtual bool isEnabled() { return forwarding != Pruned; }
         };
 
@@ -121,12 +125,12 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         simtime_t installtime;
 
     public:
-        PIMMulticastRoute();                                                 /**< Set all pointers to null */
+        PIMMulticastRoute(IPv4Address origin, IPv4Address group);           /**< Set all pointers to null */
         virtual ~PIMMulticastRoute() {}
         virtual std::string info() const;
 
-    public:
         void setRP(IPv4Address RP)  {this->RP = RP;}                        /**< Set RP IP address */
+
         void setGrt (PIMgrt *grt)   {this->grt = grt;}                      /**< Set pointer to PimGraftTimer */
         void setSat (PIMsat *sat)   {this->sat = sat;}                      /**< Set pointer to PimSourceActiveTimer */
         void setSrt (PIMsrt *srt)   {this->srt = srt;}                      /**< Set pointer to PimStateRefreshTimer */
@@ -136,28 +140,12 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         void setJt  (PIMjt *jt)     {this->jt = jt;}                        /**< Set pointer to JoinTimer */
         void setPpt  (PIMppt *ppt)  {this->ppt = ppt;}                      /**< Set pointer to PrunePendingTimer */
 
-        void setFlags(int flags)  { this->flags = flags; }                  /**< Set vector of flags (flag) */
         bool isFlagSet(Flag flag) const { return (flags & flag) != 0; }     /**< Returns if flag is set to entry or not*/
-        void addFlag(Flag flag)   { flags |= flag; }                        /**< Add flag to ineterface */
-        void addFlags(Flag fl1, Flag fl2, Flag fl3,Flag fl4) { flags |= (fl1|fl2|fl3|fl4);} /**< Add flags to ineterface */
-        void removeFlag(Flag flag)  { flags &= (~flag); }                   /**< Remove flag from ineterface */
-
-        void setInInt(InterfaceEntry *ie, int interfaceId, IPv4Address nextHop)     /**< Set information about incoming interface*/
-        {
-            setInInterface(new AnsaInInterface(ie, interfaceId, nextHop));
-        }
-        void addOutIntFull(InterfaceEntry *ie, int interfaceId, InterfaceState forwading, InterfaceState mode,
-                            PIMpt *pruneTimer, PIMet *expiryTimer, AssertState assert, RegisterState regState, bool show);
-
-        void setAddresses(IPv4Address multOrigin, IPv4Address multGroup, IPv4Address RP);
-
-        void setRegStatus(int interfaceId, RegisterState regState);                                                           /**< set register status to given interface*/
-        RegisterState getRegStatus(int interfaceId);
-
-        bool isRpf(int interfaceId){ return getInInterface() && interfaceId == getAnsaInInterface()->interfaceId; }                    /**< Returns if given interface is RPF or not*/
-        bool isOilistNull();                                                                                            /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
+        void setFlags(int flags)   { this->flags |= flags; }                /**< Add flag to ineterface */
+        void clearFlag(Flag flag)  { flags &= (~flag); }                   /**< Remove flag from ineterface */
 
         IPv4Address   getRP() const {return RP;}                            /**< Get RP IP address */
+
         PIMgrt*     getGrt() const {return grt;}                            /**< Get pointer to PimGraftTimer */
         PIMsat*     getSat() const {return sat;}                            /**< Get pointer to PimSourceActiveTimer */
         PIMsrt*     getSrt() const {return srt;}                            /**< Get pointer to PimStateRefreshTimer */
@@ -168,15 +156,12 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         PIMppt*     getPpt()  const {return ppt;}                           /**< Get pointer to PrunePendingTimer */
 
         // get incoming interface
-        AnsaInInterface *getAnsaInInterface() const { AnsaInInterface *p = dynamic_cast<AnsaInInterface*>(getInInterface()); ASSERT(p); return p; }
-        InterfaceEntry* getInIntPtr() const {return getInInterface() ? getAnsaInInterface()->getInterface() : NULL;}          /**< Get pointer to incoming interface*/
-        int             getInIntId() const {return getInInterface() ? getAnsaInInterface()->interfaceId : 0;}            /**< Get ID of incoming interface*/
-        IPv4Address       getInIntNextHop() const {return getInInterface() ? getAnsaInInterface()->nextHop : IPv4Address();}     /**< Get IP address of next hop for incoming interface*/
+        PIMInInterface *getPIMInInterface() const { return getInInterface() ? check_and_cast<PIMInInterface*>(getInInterface()) : NULL; }
 
         // get outgoing interface
-        AnsaOutInterface *getAnsaOutInterface(unsigned int k) const { AnsaOutInterface *outIf = dynamic_cast<AnsaOutInterface*>(getOutInterface(k)); ASSERT(outIf); return outIf; }
-        int             getOutIdByIntId(int interfaceId);                         /**< Get sequence number of outgoing interface with given interface ID*/
-        bool            outIntExist(int interfaceId);                             /**< Return true if interface intId exist, otherwise return false*/
+        PIMOutInterface *getPIMOutInterface(unsigned int k) const { PIMOutInterface *outIf = dynamic_cast<PIMOutInterface*>(getOutInterface(k)); ASSERT(outIf); return outIf; }
+        PIMOutInterface *findOutInterfaceByInterfaceId(int interfaceId);
+        bool isOilistNull();                                                                                            /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
 
         simtime_t getInstallTime() const {return installtime;}
         void setInstallTime(simtime_t time) {installtime = time;}

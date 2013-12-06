@@ -184,7 +184,7 @@ bool PIMBase::deleteMulticastRoute(PIMMulticastRoute *route)
         cancelAndDelete(route->getJt());
         cancelAndDelete(route->getPpt());
         for (unsigned int j = 0;j < route->getNumOutInterfaces(); j++)
-            cancelAndDelete(route->getAnsaOutInterface(j)->pruneTimer);
+            cancelAndDelete(route->getPIMOutInterface(j)->pruneTimer);
 
         delete route;
         return true;

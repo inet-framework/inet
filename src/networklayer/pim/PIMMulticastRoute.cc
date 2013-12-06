@@ -19,21 +19,16 @@
 #include "IIPv4RoutingTable.h"
 #include "PIMMulticastRoute.h"
 
-Register_Class(PIMMulticastRoute);
+Register_Abstract_Class(PIMMulticastRoute);
 
-PIMMulticastRoute::PIMMulticastRoute()
-    : IPv4MulticastRoute(), RP(IPv4Address::UNSPECIFIED_ADDRESS), flags(0)
+PIMMulticastRoute::PIMMulticastRoute(IPv4Address origin, IPv4Address group)
+    : IPv4MulticastRoute(), RP(IPv4Address::UNSPECIFIED_ADDRESS), flags(0),
+      grt(NULL), sat(NULL), srt(NULL), kat(NULL), rst(NULL), et(NULL), jt(NULL), ppt(NULL),
+      sequencenumber(0)
 {
-    grt = NULL;
-    sat = NULL;
-    srt = NULL;
-    rst = NULL;
-    kat = NULL;
-    et = NULL;
-    jt = NULL;
-    ppt = NULL;
-
-    sequencenumber = 0;
+    setMulticastGroup(group);
+    setOrigin(origin);
+    setOriginNetmask(origin.isUnspecified() ? IPv4Address::UNSPECIFIED_ADDRESS : IPv4Address::ALLONES_ADDRESS);
 }
 
 // Format is same as format on Cisco routers.
@@ -55,13 +50,14 @@ std::string PIMMulticastRoute::info() const
 
     out << endl;
 
-    out << "Incoming interface: " << (getInIntPtr() ? getInIntPtr()->getName() : "Null") << ", "
-        << "RPF neighbor " << (getInIntNextHop().isUnspecified() ? "0.0.0.0" : getInIntNextHop().str()) << endl;
+    PIMInInterface *inInterface = getPIMInInterface();
+    out << "Incoming interface: " << (inInterface ? inInterface->getInterface()->getName() : "Null") << ", "
+        << "RPF neighbor " << (inInterface->nextHop.isUnspecified() ? "0.0.0.0" : inInterface->nextHop.str()) << endl;
 
     out << "Outgoing interface list:" << endl;
     for (unsigned int k = 0; k < getNumOutInterfaces(); k++)
     {
-        PIMMulticastRoute::AnsaOutInterface *outInterface = getAnsaOutInterface(k);
+        PIMMulticastRoute::PIMOutInterface *outInterface = getPIMOutInterface(k);
         if ((outInterface->mode == PIMMulticastRoute::Sparsemode && outInterface->shRegTun)
                 || outInterface->mode ==PIMMulticastRoute:: Densemode)
         {
@@ -80,94 +76,24 @@ std::string PIMMulticastRoute::info() const
     return out.str();
 }
 
-void PIMMulticastRoute::setRegStatus(int interfaceId, RegisterState regState)
+PIMMulticastRoute::PIMOutInterface *PIMMulticastRoute::findOutInterfaceByInterfaceId(int interfaceId)
 {
-    unsigned int i;
-    for (i = 0; i < getNumOutInterfaces(); i++)
+    for (unsigned int i = 0; i < getNumOutInterfaces(); i++)
     {
-        AnsaOutInterface *outInterface = getAnsaOutInterface(i);
-        if (outInterface->interfaceId == interfaceId)
-        {
-            outInterface->regState = regState;
-            break;
-        }
-
+        PIMOutInterface *outInterface = dynamic_cast<PIMOutInterface*>(getOutInterface(i));
+        if (outInterface && outInterface->getInterfaceId() == interfaceId)
+            return outInterface;
     }
-}
-
-PIMMulticastRoute::RegisterState PIMMulticastRoute::getRegStatus(int interfaceId)
-{
-    unsigned int i;
-    for (i = 0; i < getNumOutInterfaces(); i++)
-    {
-        AnsaOutInterface *outInterface = getAnsaOutInterface(i);
-        if (outInterface->interfaceId == interfaceId)
-            break;
-    }
-    return i < getNumOutInterfaces() ? getAnsaOutInterface(i)->regState : NoInfoRS;
-}
-
-int PIMMulticastRoute::getOutIdByIntId(int interfaceId)
-{
-    unsigned int i;
-    for (i = 0; i < getNumOutInterfaces(); i++)
-    {
-        AnsaOutInterface *outInterface = getAnsaOutInterface(i);
-        if (outInterface->interfaceId == interfaceId)
-            break;
-    }
-    return i; // FIXME return -1 if not found
-}
-
-bool PIMMulticastRoute::outIntExist(int interfaceId)
-{
-    unsigned int i;
-    for (i = 0; i < getNumOutInterfaces(); i++)
-    {
-        AnsaOutInterface *outInterface = getAnsaOutInterface(i);
-        if (outInterface->interfaceId == interfaceId)
-            return true;
-    }
-    return false;
+    return NULL;
 }
 
 bool PIMMulticastRoute::isOilistNull()
 {
-    bool olistNull = true;
     for (unsigned int i = 0; i < getNumOutInterfaces(); i++)
     {
-        AnsaOutInterface *outInterface = getAnsaOutInterface(i);
+        PIMOutInterface *outInterface = getPIMOutInterface(i);
         if (outInterface->forwarding == Forward)
-        {
-            olistNull = false;
-            break;
-        }
+            return false;
     }
-    return olistNull;
-}
-
-void PIMMulticastRoute::addOutIntFull(InterfaceEntry *ie, int interfaceId, InterfaceState forwading, InterfaceState mode, PIMpt *pruneTimer,
-                                                PIMet *expiryTimer, AssertState assert, RegisterState regState, bool show)
-{
-    AnsaOutInterface *outIntf = new AnsaOutInterface(ie);
-
-    outIntf->interfaceId = interfaceId;
-    outIntf->forwarding = forwading;
-    outIntf->mode = mode;
-    outIntf->pruneTimer = NULL;
-    outIntf->pruneTimer = pruneTimer;
-    outIntf->expiryTimer = expiryTimer;
-    outIntf->regState = regState;
-    outIntf->assert = assert;
-    outIntf->shRegTun = show;
-
-    addOutInterface(outIntf);
-}
-
-void PIMMulticastRoute::setAddresses(IPv4Address multOrigin, IPv4Address multGroup, IPv4Address RP)
-{
-    this->RP = RP;
-    this->setMulticastGroup(multGroup);
-    this->setOrigin(multOrigin);
-    this->setOriginNetmask(multOrigin.isUnspecified() ? IPv4Address::UNSPECIFIED_ADDRESS : IPv4Address::ALLONES_ADDRESS);
+    return true;
 }
