@@ -20,9 +20,10 @@
 #define __INET_PIMBASE_H
 
 #include "IInterfaceTable.h"
-#include "PIMRoutingTable.h"
+#include "IIPv4RoutingTable.h"
 #include "PIMNeighborTable.h"
 #include "PIMInterfaceTable.h"
+#include "PIMMulticastRoute.h"
 #include "PIMPacket_m.h"
 #include "PIMTimer_m.h"
 
@@ -36,7 +37,7 @@ class PIMBase : public cSimpleModule
         static const IPv4Address ALL_PIM_ROUTERS_MCAST;
 
     protected:
-        PIMRoutingTable *rt;
+        IIPv4RoutingTable *rt;
         IInterfaceTable *ift;
         PIMInterfaceTable *pimIft;
         PIMNeighborTable *pimNbt;
@@ -57,6 +58,12 @@ class PIMBase : public cSimpleModule
         void sendHelloPackets();
         void processHelloTimer(PIMTimer *timer);
         void processHelloPacket(PIMHello *pkt);
+
+        // routing table access
+        PIMMulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
+        std::vector<PIMMulticastRoute*> getRouteFor(IPv4Address group);
+        std::vector<PIMMulticastRoute*> getRoutesForSource(IPv4Address source);
+        bool deleteMulticastRoute(PIMMulticastRoute *route);
 };
 
 

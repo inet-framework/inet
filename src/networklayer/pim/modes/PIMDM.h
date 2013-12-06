@@ -23,7 +23,6 @@
 #include "PIMPacket_m.h"
 #include "PIMTimer_m.h"
 #include "InterfaceTableAccess.h"
-#include "PIMRoutingTableAccess.h"
 #include "NotifierConsts.h"
 #include "PIMNeighborTable.h"
 #include "PIMInterfaceTable.h"

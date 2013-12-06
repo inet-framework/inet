@@ -297,7 +297,7 @@ void PIMDM::processGraftPacket(IPv4Address source, IPv4Address group, IPv4Addres
 {
 	EV << "pimDM::processGraftPacket" << endl;
 
-	PIMMulticastRoute *route = rt->getRouteFor(group, source);
+	PIMMulticastRoute *route = getRouteFor(group, source);
 
 	bool forward = false;
 
@@ -475,7 +475,7 @@ void PIMDM::processJoinPruneGraftPacket(PIMJoinPrune *pkt, PIMPacketType type)
 		for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++)
 		{
 			IPv4Address source = (group.getJoinedSourceAddress(j)).IPaddress;
-			PIMMulticastRoute *route = rt->getRouteFor(groupAddr, source);
+			PIMMulticastRoute *route = getRouteFor(groupAddr, source);
 
 			if (type == JoinPrune)
 			{
@@ -498,7 +498,7 @@ void PIMDM::processJoinPruneGraftPacket(PIMJoinPrune *pkt, PIMPacketType type)
 			for(unsigned int k = 0; k < group.getPrunedSourceAddressArraySize(); k++)
 			{
 				IPv4Address source = (group.getPrunedSourceAddress(k)).IPaddress;
-				PIMMulticastRoute *route = rt->getRouteFor(groupAddr, source);
+				PIMMulticastRoute *route = getRouteFor(groupAddr, source);
 
 				if (source != route->getOrigin())
 					continue;
@@ -541,7 +541,7 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 	// FIXME actions of upstream automat according to pruned/forwarding state and Prune Indicator from msg
 
 	// first check if there is route for given group address and source
-	PIMMulticastRoute *route = rt->getRouteFor(pkt->getGroupAddress(), pkt->getSourceAddress());
+	PIMMulticastRoute *route = getRouteFor(pkt->getGroupAddress(), pkt->getSourceAddress());
 	if (route == NULL)
 	{
 		delete pkt;
@@ -616,7 +616,7 @@ void PIMDM::processPruneTimer(PIMpt *timer)
 	int intId = timer->getIntId();
 
 	// find correct (S,G) route which timer belongs to
-	PIMMulticastRoute *route = rt->getRouteFor(group, source);
+	PIMMulticastRoute *route = getRouteFor(group, source);
 	if (route == NULL)
 	{
 		delete timer;
@@ -663,7 +663,7 @@ void PIMDM::processPruneTimer(PIMpt *timer)
  */
 void PIMDM::processGraftRetryTimer(PIMgrt *timer)
 {
-	PIMMulticastRoute *route = rt->getRouteFor(timer->getGroup(), timer->getSource());
+	PIMMulticastRoute *route = getRouteFor(timer->getGroup(), timer->getSource());
 	sendPimGraft(route->getInIntNextHop(), timer->getSource(), timer->getGroup(), route->getInIntId());
 	timer = createGraftRetryTimer(timer->getSource(), timer->getGroup());
 }
@@ -680,11 +680,11 @@ void PIMDM::processGraftRetryTimer(PIMgrt *timer)
 void PIMDM::processSourceActiveTimer(PIMsat * timer)
 {
 	EV << "pimDM::processSourceActiveTimer: route will be deleted" << endl;
-	PIMMulticastRoute *route = rt->getRouteFor(timer->getGroup(), timer->getSource());
+	PIMMulticastRoute *route = getRouteFor(timer->getGroup(), timer->getSource());
 
 	delete timer;
 	route->setSat(NULL);
-	rt->deleteMulticastRoute(route);
+	deleteMulticastRoute(route);
 }
 
 /**
@@ -703,7 +703,7 @@ void PIMDM::processSourceActiveTimer(PIMsat * timer)
 void PIMDM::processStateRefreshTimer(PIMsrt * timer)
 {
 	EV << "pimDM::processStateRefreshTimer" << endl;
-	PIMMulticastRoute *route = rt->getRouteFor(timer->getGroup(), timer->getSource());
+	PIMMulticastRoute *route = getRouteFor(timer->getGroup(), timer->getSource());
 	bool pruneIndicator;
 
 	for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++)
@@ -977,7 +977,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
     {
         EV << "pimDM::receiveChangeNotification - RPF interface has changed." << endl;
         IPv4Route *entry = check_and_cast<IPv4Route*>(details);
-        vector<PIMMulticastRoute*> routes = rt->getRoutesForSource(entry->getDestination());
+        vector<PIMMulticastRoute*> routes = getRoutesForSource(entry->getDestination());
         for (unsigned int i = 0; i < routes.size(); i++)
             rpfIntChange(routes[i]);
     }
@@ -1062,7 +1062,7 @@ void PIMDM::rpfIntChange(PIMMulticastRoute *route)
  */
 void PIMDM::dataOnRpf(IPv4Datagram *datagram)
 {
-    PIMMulticastRoute *route = rt->getRouteFor(datagram->getDestAddress(), datagram->getSrcAddress());
+    PIMMulticastRoute *route = getRouteFor(datagram->getDestAddress(), datagram->getSrcAddress());
 	cancelEvent(route->getSat());
 	scheduleAt(simTime() + SAT, route->getSat());
 
@@ -1091,7 +1091,7 @@ void PIMDM::dataOnNonRpf(IPv4Address group, IPv4Address source, int intId)
 	EV << "pimDM::dataOnNonRpf, intID: " << intId << endl;
 
 	// load route from mroute
-	PIMMulticastRoute *route = rt->getRouteFor(group, source);
+	PIMMulticastRoute *route = getRouteFor(group, source);
 	if (route == NULL)
 		return;
 
@@ -1141,7 +1141,7 @@ void PIMDM::dataOnNonRpf(IPv4Address group, IPv4Address source, int intId)
 void PIMDM::dataOnPruned(IPv4Address group, IPv4Address source)
 {
 	EV << "pimDM::dataOnPruned" << endl;
-	PIMMulticastRoute *route = rt->getRouteFor(group, source);
+	PIMMulticastRoute *route = getRouteFor(group, source);
     if (route->isFlagSet(PIMMulticastRoute::A))
         return;
 
@@ -1175,7 +1175,7 @@ void PIMDM::oldMulticastAddr(PIMInterface *pimInt, IPv4Address oldAddr)
 
 	// go through all old multicast addresses assigned to interface
     EV << "Removed multicast address: " << oldAddr << endl;
-    vector<PIMMulticastRoute*> routes = rt->getRouteFor(oldAddr);
+    vector<PIMMulticastRoute*> routes = getRouteFor(oldAddr);
 
     // go through all multicast routes
     for (unsigned int j = 0; j < routes.size(); j++)
@@ -1247,7 +1247,7 @@ void PIMDM::newMulticastAddr(PIMInterface *pimInt, IPv4Address newAddr)
 	bool forward = false;
 
     EV << "New multicast address: " << newAddr << endl;
-    vector<PIMMulticastRoute*> routes = rt->getRouteFor(newAddr);
+    vector<PIMMulticastRoute*> routes = getRouteFor(newAddr);
 
     // go through all multicast routes
     for (unsigned int j = 0; j < routes.size(); j++)

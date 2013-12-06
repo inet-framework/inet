@@ -16,6 +16,7 @@
 //
 // Authors: Veronika Rybova, Tomas Prochazka (mailto:xproch21@stud.fit.vutbr.cz), Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
+#include "IIPv4RoutingTable.h"
 #include "PIMMulticastRoute.h"
 
 Register_Class(PIMMulticastRoute);

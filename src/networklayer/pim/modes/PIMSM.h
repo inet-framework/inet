@@ -30,7 +30,6 @@
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "PIMMulticastRoute.h"
-#include "PIMRoutingTable.h"
 #include "PIMBase.h"
 
 #define KAT 180.0                       /**< Keep alive timer, if RPT is disconnect */

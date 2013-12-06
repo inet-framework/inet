@@ -24,7 +24,7 @@
 #include "InterfaceTableAccess.h"
 #include "InterfaceTable.h"
 #include "IPv4Address.h"
-#include "PIMRoutingTableAccess.h"
+#include "IPv4RoutingTableAccess.h"
 #include "PIMTimer_m.h"
 #include "PIMBase.h"
 
@@ -46,7 +46,7 @@ void PIMBase::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         ift = InterfaceTableAccess().get();
-        rt = PIMRoutingTableAccess().get();
+        rt = IPv4RoutingTableAccess().get();
         pimIft = PIMInterfaceTableAccess().get();
         pimNbt = PIMNeighborTableAccess().get();
 
@@ -131,4 +131,64 @@ void PIMBase::processHelloPacket(PIMHello *packet)
         pimNbt->addNeighbor(new PIMNeighbor(ie, address, version));
 
     delete packet;
+}
+
+PIMMulticastRoute *PIMBase::getRouteFor(IPv4Address group, IPv4Address source)
+{
+    int numRoutes = rt->getNumMulticastRoutes();
+    for (int i = 0; i < numRoutes; i++)
+    {
+        PIMMulticastRoute *route = dynamic_cast<PIMMulticastRoute*>(rt->getMulticastRoute(i));
+        if (route && route->getMulticastGroup() == group && route->getOrigin() == source)
+            return route;
+    }
+    return NULL;
+}
+
+vector<PIMMulticastRoute*> PIMBase::getRouteFor(IPv4Address group)
+{
+    vector<PIMMulticastRoute*> routes;
+    int numRoutes = rt->getNumMulticastRoutes();
+    for (int i = 0; i < numRoutes; i++)
+    {
+        PIMMulticastRoute *route = dynamic_cast<PIMMulticastRoute*>(rt->getMulticastRoute(i));
+        if (route && route->getMulticastGroup() == group)
+            routes.push_back(route);
+    }
+    return routes;
+}
+
+vector<PIMMulticastRoute*> PIMBase::getRoutesForSource(IPv4Address source)
+{
+    vector<PIMMulticastRoute*> routes;
+    int numRoutes = rt->getNumMulticastRoutes();
+    for (int i = 0; i < numRoutes; i++)
+    {
+        //FIXME works only for classfull adresses (function getNetwork) !!!!
+        PIMMulticastRoute *route = dynamic_cast<PIMMulticastRoute*>(rt->getMulticastRoute(i));
+        if (route && route->getOrigin().getNetwork().getInt() == source.getInt())
+            routes.push_back(route);
+    }
+    return routes;
+}
+
+bool PIMBase::deleteMulticastRoute(PIMMulticastRoute *route)
+{
+    IPv4MulticastRoute *routeFound = rt->removeMulticastRoute(route);
+    if (routeFound == route)
+    {
+        cancelAndDelete(route->getSrt());
+        cancelAndDelete(route->getGrt());
+        cancelAndDelete(route->getSat());
+        cancelAndDelete(route->getKat());
+        cancelAndDelete(route->getEt());
+        cancelAndDelete(route->getJt());
+        cancelAndDelete(route->getPpt());
+        for (unsigned int j = 0;j < route->getNumOutInterfaces(); j++)
+            cancelAndDelete(route->getAnsaOutInterface(j)->pruneTimer);
+
+        delete route;
+        return true;
+    }
+    return false;
 }
