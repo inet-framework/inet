@@ -22,6 +22,7 @@
 Register_Class(PIMMulticastRoute);
 
 PIMMulticastRoute::PIMMulticastRoute()
+    : IPv4MulticastRoute(), RP(IPv4Address::UNSPECIFIED_ADDRESS), flags(0)
 {
     grt = NULL;
     sat = NULL;
@@ -32,13 +33,7 @@ PIMMulticastRoute::PIMMulticastRoute()
     jt = NULL;
     ppt = NULL;
 
-    RP = IPv4Address::UNSPECIFIED_ADDRESS;
     sequencenumber = 0;
-
-    this->setRoutingTable(NULL);
-    this->setInInterface(NULL);
-    this->setSourceType(MANUAL);
-    this->setMetric(0);
 }
 
 // Format is same as format on Cisco routers.
@@ -50,20 +45,14 @@ std::string PIMMulticastRoute::info() const
     if (getOrigin().isUnspecified() && !getRP().isUnspecified())
         out << "RP is " << getRP() << ", ";
     out << "flags: ";
-    for (unsigned int j = 0; j < flags.size(); j++)
-    {
-        switch(flags[j])
-        {
-            case PIMMulticastRoute::D: out << "D"; break;
-            case PIMMulticastRoute::S: out << "S"; break;
-            case PIMMulticastRoute::C: out << "C"; break;
-            case PIMMulticastRoute::P: out << "P"; break;
-            case PIMMulticastRoute::A: out << "A"; break;
-            case PIMMulticastRoute::F: out << "F"; break;
-            case PIMMulticastRoute::T: out << "T"; break;
-            case PIMMulticastRoute::NO_FLAG: break;
-        }
-    }
+    if (isFlagSet(D)) out << "D";
+    if (isFlagSet(S)) out << "S";
+    if (isFlagSet(C)) out << "C";
+    if (isFlagSet(P)) out << "P";
+    if (isFlagSet(A)) out << "A";
+    if (isFlagSet(F)) out << "F";
+    if (isFlagSet(T)) out << "T";
+
     out << endl;
 
     out << "Incoming interface: " << (getInIntPtr() ? getInIntPtr()->getName() : "Null") << ", "
@@ -91,41 +80,13 @@ std::string PIMMulticastRoute::info() const
     return out.str();
 }
 
-bool PIMMulticastRoute::isFlagSet(flag fl)
-{
-    for(unsigned int i = 0; i < flags.size(); i++)
-    {
-        if (flags[i] == fl)
-            return true;
-    }
-    return false;
-}
-
-void PIMMulticastRoute::addFlag(flag fl)
-{
-    if (!isFlagSet(fl))
-        flags.push_back(fl);
-}
-
-void PIMMulticastRoute::removeFlag(flag fl)
-{
-    for(unsigned int i = 0; i < flags.size(); i++)
-    {
-        if (flags[i] == fl)
-        {
-            flags.erase(flags.begin() + i);
-            return;
-        }
-    }
-}
-
-void PIMMulticastRoute::setRegStatus(int intId, RegisterState regState)
+void PIMMulticastRoute::setRegStatus(int interfaceId, RegisterState regState)
 {
     unsigned int i;
     for (i = 0; i < getNumOutInterfaces(); i++)
     {
         AnsaOutInterface *outInterface = getAnsaOutInterface(i);
-        if (outInterface->intId == intId)
+        if (outInterface->interfaceId == interfaceId)
         {
             outInterface->regState = regState;
             break;
@@ -134,37 +95,37 @@ void PIMMulticastRoute::setRegStatus(int intId, RegisterState regState)
     }
 }
 
-PIMMulticastRoute::RegisterState PIMMulticastRoute::getRegStatus(int intId)
+PIMMulticastRoute::RegisterState PIMMulticastRoute::getRegStatus(int interfaceId)
 {
     unsigned int i;
     for (i = 0; i < getNumOutInterfaces(); i++)
     {
         AnsaOutInterface *outInterface = getAnsaOutInterface(i);
-        if (outInterface->intId == intId)
+        if (outInterface->interfaceId == interfaceId)
             break;
     }
     return i < getNumOutInterfaces() ? getAnsaOutInterface(i)->regState : NoInfoRS;
 }
 
-int PIMMulticastRoute::getOutIdByIntId(int intId)
+int PIMMulticastRoute::getOutIdByIntId(int interfaceId)
 {
     unsigned int i;
     for (i = 0; i < getNumOutInterfaces(); i++)
     {
         AnsaOutInterface *outInterface = getAnsaOutInterface(i);
-        if (outInterface->intId == intId)
+        if (outInterface->interfaceId == interfaceId)
             break;
     }
     return i; // FIXME return -1 if not found
 }
 
-bool PIMMulticastRoute::outIntExist(int intId)
+bool PIMMulticastRoute::outIntExist(int interfaceId)
 {
     unsigned int i;
     for (i = 0; i < getNumOutInterfaces(); i++)
     {
         AnsaOutInterface *outInterface = getAnsaOutInterface(i);
-        if (outInterface->intId == intId)
+        if (outInterface->interfaceId == interfaceId)
             return true;
     }
     return false;
@@ -185,12 +146,12 @@ bool PIMMulticastRoute::isOilistNull()
     return olistNull;
 }
 
-void PIMMulticastRoute::addOutIntFull(InterfaceEntry *intPtr, int intId, intState forwading, intState mode, PIMpt *pruneTimer,
+void PIMMulticastRoute::addOutIntFull(InterfaceEntry *ie, int interfaceId, InterfaceState forwading, InterfaceState mode, PIMpt *pruneTimer,
                                                 PIMet *expiryTimer, AssertState assert, RegisterState regState, bool show)
 {
-    AnsaOutInterface *outIntf = new AnsaOutInterface(intPtr);
+    AnsaOutInterface *outIntf = new AnsaOutInterface(ie);
 
-    outIntf->intId = intId;
+    outIntf->interfaceId = interfaceId;
     outIntf->forwarding = forwading;
     outIntf->mode = mode;
     outIntf->pruneTimer = NULL;
@@ -201,18 +162,6 @@ void PIMMulticastRoute::addOutIntFull(InterfaceEntry *intPtr, int intId, intStat
     outIntf->shRegTun = show;
 
     addOutInterface(outIntf);
-}
-
-void PIMMulticastRoute::addFlags(flag fl1, flag fl2, flag fl3,flag fl4)
-{
-    if (fl1 != NO_FLAG && !isFlagSet(fl1))
-        flags.push_back(fl1);
-    if (fl2 != NO_FLAG && !isFlagSet(fl2))
-        flags.push_back(fl2);
-    if (fl3 != NO_FLAG && !isFlagSet(fl3))
-        flags.push_back(fl3);
-    if (fl4 != NO_FLAG && !isFlagSet(fl4))
-        flags.push_back(fl4);
 }
 
 void PIMMulticastRoute::setAddresses(IPv4Address multOrigin, IPv4Address multGroup, IPv4Address RP)

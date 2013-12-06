@@ -308,12 +308,12 @@ void PIMDM::processGraftPacket(IPv4Address source, IPv4Address group, IPv4Addres
 	for (unsigned int l = 0; l < route->getNumOutInterfaces(); l++)
 	{
 	    AnsaOutInterface *outInt = route->getAnsaOutInterface(l);
-		if(outInt->intId == intId)
+		if(outInt->interfaceId == intId)
 		{
 			forward = true;
 			if (outInt->forwarding == PIMMulticastRoute::Pruned)
 			{
-				EV << "Interface " << outInt->intId << " transit to forwarding state (Graft)." << endl;
+				EV << "Interface " << outInt->interfaceId << " transit to forwarding state (Graft)." << endl;
 				outInt->forwarding = PIMMulticastRoute::Forward;
 
 				//cancel Prune Timer
@@ -585,7 +585,7 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 			// P = false
 			pruneIndicator = false;
 		}
-		sendPimStateRefresh(pkt->getOriginatorAddress(), pkt->getSourceAddress(), pkt->getGroupAddress(), outInt->intId, pruneIndicator);
+		sendPimStateRefresh(pkt->getOriginatorAddress(), pkt->getSourceAddress(), pkt->getGroupAddress(), outInt->interfaceId, pruneIndicator);
 	}
 	delete pkt;
 }
@@ -717,7 +717,7 @@ void PIMDM::processStateRefreshTimer(PIMsrt * timer)
 		{
 			pruneIndicator = false;
 		}
-		int intId = outInt->intId;
+		int intId = outInt->interfaceId;
 		sendPimStateRefresh(ift->getInterfaceById(intId)->ipv4Data()->getIPAddress(), timer->getSource(), timer->getGroup(), intId, pruneIndicator);
 	}
 	delete timer;
@@ -1020,7 +1020,7 @@ void PIMDM::rpfIntChange(PIMMulticastRoute *route)
 	for(unsigned int i = 0; i < route->getNumOutInterfaces(); i++)
 	{
 	    AnsaOutInterface *outInt = route->getAnsaOutInterface(i);
-		if (outInt->intId == rpfId)
+		if (outInt->interfaceId == rpfId)
 		{
 			if (outInt->pruneTimer != NULL)
 			{
@@ -1037,7 +1037,7 @@ void PIMDM::rpfIntChange(PIMMulticastRoute *route)
 	if (oldRpfInt && oldRpfInt->isUp())
 	{
 	    PIMMulticastRoute::AnsaOutInterface *newOutInt = new AnsaOutInterface(oldRpfInt);
-		newOutInt->intId = oldRpfIntId;
+		newOutInt->interfaceId = oldRpfIntId;
 		newOutInt->pruneTimer = NULL;
 		newOutInt->forwarding = PIMMulticastRoute::Forward;
 		newOutInt->mode = PIMMulticastRoute::Densemode;
@@ -1182,14 +1182,14 @@ void PIMDM::oldMulticastAddr(PIMInterface *pimInt, IPv4Address oldAddr)
         for (k = 0; k < route->getNumOutInterfaces();)
         {
             AnsaOutInterface *outInt = route->getAnsaOutInterface(k);
-            if (outInt->intId == pimInt->getInterfaceId())
+            if (outInt->interfaceId == pimInt->getInterfaceId())
             {
                 EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
                 route->removeOutInterface(k);
             }
             else if(outInt->forwarding == PIMMulticastRoute::Forward)
             {
-                if ((pimNbt->getNeighborsOnInterface(outInt->intId)).size() == 0)
+                if ((pimNbt->getNeighborsOnInterface(outInt->interfaceId)).size() == 0)
                     connected = true;
                 k++;
             }
@@ -1259,7 +1259,7 @@ void PIMDM::newMulticastAddr(PIMInterface *pimInt, IPv4Address newAddr)
         for (k = 0; k < route->getNumOutInterfaces(); k++)
         {
             AnsaOutInterface *outInt = route->getAnsaOutInterface(k);
-            if (outInt->intId == pimInt->getInterfaceId())
+            if (outInt->interfaceId == pimInt->getInterfaceId())
             {
                 EV << "Interface is already on list of outgoing interfaces" << endl;
                 if (outInt->forwarding == PIMMulticastRoute::Pruned)
@@ -1274,7 +1274,7 @@ void PIMDM::newMulticastAddr(PIMInterface *pimInt, IPv4Address newAddr)
         {
             EV << "Interface is not on list of outgoing interfaces yet, it will be added" << endl;
             PIMMulticastRoute::AnsaOutInterface *newInt = new AnsaOutInterface(pimInt->getInterfacePtr());
-            newInt->intId = pimInt->getInterfaceId();
+            newInt->interfaceId = pimInt->getInterfaceId();
             newInt->mode = PIMMulticastRoute::Densemode;
             newInt->forwarding = PIMMulticastRoute::Forward;
             newInt->pruneTimer = NULL;
@@ -1358,7 +1358,7 @@ void PIMDM::newMulticast(IPv4Address srcAddr, IPv4Address destAddr)
 
 		// create new outgoing interface
 		PIMMulticastRoute::AnsaOutInterface *newOutInt = new AnsaOutInterface(pimIntTemp->getInterfacePtr());
-		newOutInt->intId = pimIntTemp->getInterfaceId();
+		newOutInt->interfaceId = pimIntTemp->getInterfaceId();
 		newOutInt->pruneTimer = NULL;
 
 		switch (pimIntTemp->getMode())

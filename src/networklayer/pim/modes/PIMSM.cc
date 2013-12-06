@@ -451,7 +451,7 @@ void PIMSM::processExpiryTimer(PIMet *timer)
         for(unsigned i=0; i<route->getNumOutInterfaces();i++)
         {
             AnsaOutInterface *outInterface = route->getAnsaOutInterface(i);
-            if (outInterface->intId == timerIntID)
+            if (outInterface->interfaceId == timerIntID)
             {
                 if (outInterface->expiryTimer)
                 {
@@ -603,7 +603,7 @@ void PIMSM::restartExpiryTimer(PIMMulticastRoute *route, InterfaceEntry *originI
         for (unsigned i=0; i< route->getNumOutInterfaces(); i++)
         {   // if exist ET and for given interface
             AnsaOutInterface *outInterface = route->getAnsaOutInterface(i);
-            if (outInterface->expiryTimer && (outInterface->intId == originIntf->getInterfaceId()))
+            if (outInterface->expiryTimer && (outInterface->interfaceId == originIntf->getInterfaceId()))
             {
                 PIMet *timer = outInterface->expiryTimer;
                 EV << timer->getStateType() << " , " << timer->getGroup() << " , " << timer->getSource() << ", int: " << timer->getIntId() << endl;
@@ -724,7 +724,7 @@ void PIMSM::processPrunePacket(PIMJoinPrune *pkt, IPv4Address multGroup, Encoded
         for (unsigned k = 0; k < routeSG->getNumOutInterfaces(); k++)
         {
             AnsaOutInterface *outIntSG = routeSG->getAnsaOutInterface(k);
-            if (outIntSG->intId == outIntToDel)
+            if (outIntSG->interfaceId == outIntToDel)
             {
                 EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
                 if (outIntSG->expiryTimer)
@@ -780,7 +780,7 @@ void PIMSM::processPrunePacket(PIMJoinPrune *pkt, IPv4Address multGroup, Encoded
             for (unsigned k = 0; k < route->getNumOutInterfaces(); k++)
             {
                 AnsaOutInterface *outInt = route->getAnsaOutInterface(k);
-                if (outInt->intId == outIntToDel)
+                if (outInt->interfaceId == outIntToDel)
                 {
                     EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
                     if (outInt->expiryTimer)
@@ -1183,8 +1183,8 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
                     {                                                                                       // simulate multicast data
                         info->group = multGroup;
                         info->origin = multOrigin;
-                        info->interface_id = outInterface->intId;
-                        InterfaceEntry *entry = ift->getInterfaceById(outInterface->intId);
+                        info->interface_id = outInterface->interfaceId;
+                        InterfaceEntry *entry = ift->getInterfaceById(outInterface->interfaceId);
                         info->srcAddr = entry->ipv4Data()->getIPAddress();
                         forwardMulticastData(encapData->dup(), info);
                     }
@@ -1650,7 +1650,7 @@ void PIMSM::removeMulticastReceiver(PIMInterface *pimInt, IPv4Address multicastG
         for (k = 0; k < route->getNumOutInterfaces(); k++)
         {
             AnsaOutInterface *outInterface = route->getAnsaOutInterface(k);
-            if (outInterface->intId == pimInt->getInterfaceId())
+            if (outInterface->interfaceId == pimInt->getInterfaceId())
             {
                 EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
                 if (outInterface->expiryTimer)
