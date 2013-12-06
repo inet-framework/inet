@@ -58,12 +58,12 @@ std::string PIMMulticastRoute::info() const
     for (unsigned int k = 0; k < getNumOutInterfaces(); k++)
     {
         PIMMulticastRoute::PIMOutInterface *outInterface = getPIMOutInterface(k);
-        if ((outInterface->mode == PIMMulticastRoute::Sparsemode && outInterface->shRegTun)
-                || outInterface->mode ==PIMMulticastRoute:: Densemode)
+        if ((outInterface->mode == PIMInterface::SparseMode && outInterface->shRegTun)
+                || outInterface->mode ==PIMInterface::DenseMode)
         {
             out << outInterface->getInterface()->getName() << ", "
                 << (outInterface->forwarding == Forward ? "Forward/" : "Pruned/")
-                << (outInterface->mode == Densemode ? "Dense" : "Sparse")
+                << (outInterface->mode == PIMInterface::DenseMode ? "Dense" : "Sparse")
                 << endl;
         }
         else

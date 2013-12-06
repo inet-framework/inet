@@ -891,7 +891,7 @@ void PIMSM::processSGJoin(PIMJoinPrune *pkt, IPv4Address multOrigin, IPv4Address
             PIMet *timerEt = createExpiryTimer(outInt->getInterfaceId(), holdTime, multGroup,multOrigin,SG);
             newRouteSG->addOutInterface(new PIMMulticastRoute::PIMOutInterface(outInt,
                                         PIMMulticastRoute::Forward,
-                                        PIMMulticastRoute::Sparsemode,
+                                        PIMInterface::SparseMode,
                                         NULL,
                                         timerEt,
                                         PIMMulticastRoute::NoInfo,
@@ -972,7 +972,7 @@ void PIMSM::processJoinRouteGexistOnRP(IPv4Address multGroup, IPv4Address packet
                     PIMet *timerEt = createExpiryTimer(interface->getInterfaceId(),msgHoldtime, multGroup,multOrigin,SG);
                     routePointer->addOutInterface(new PIMMulticastRoute::PIMOutInterface(interface,
                                                 PIMMulticastRoute::Forward,
-                                                PIMMulticastRoute::Sparsemode,
+                                                PIMInterface::SparseMode,
                                                 NULL,
                                                 timerEt,
                                                 PIMMulticastRoute::NoInfo,
@@ -1001,7 +1001,7 @@ void PIMSM::processJoinRouteGexistOnRP(IPv4Address multGroup, IPv4Address packet
                     PIMet *timerEtNI = createExpiryTimer(NO_INT_TIMER,msgHoldtime, multGroup,IPv4Address::UNSPECIFIED_ADDRESS,G);
                     routePointer->addOutInterface(new PIMMulticastRoute::PIMOutInterface(interface,
                                                 PIMMulticastRoute::Forward,
-                                                PIMMulticastRoute::Sparsemode,
+                                                PIMInterface::SparseMode,
                                                 NULL,
                                                 timerEt,
                                                 PIMMulticastRoute::NoInfo,
@@ -1069,7 +1069,7 @@ void PIMSM::processJoinPacket(PIMJoinPrune *pkt, IPv4Address multGroup, EncodedA
                 PIMet *timerEtNI = createExpiryTimer(NO_INT_TIMER,msgHoldTime, multGroup,IPv4Address::UNSPECIFIED_ADDRESS,G);
                 newRouteG->addOutInterface(new PIMMulticastRoute::PIMOutInterface(outIntf,
                                         PIMMulticastRoute::Forward,
-                                        PIMMulticastRoute::Sparsemode,
+                                        PIMInterface::SparseMode,
                                         NULL,
                                         timerEt,
                                         PIMMulticastRoute::NoInfo,
@@ -1096,7 +1096,7 @@ void PIMSM::processJoinPacket(PIMJoinPrune *pkt, IPv4Address multGroup, EncodedA
                         PIMet *timerEt = createExpiryTimer(interface->getInterfaceId(),msgHoldTime, multGroup,IPv4Address::UNSPECIFIED_ADDRESS,G);
                         newRouteG->addOutInterface(new PIMMulticastRoute::PIMOutInterface(interface,
                                                     PIMMulticastRoute::Forward,
-                                                    PIMMulticastRoute::Sparsemode,
+                                                    PIMInterface::SparseMode,
                                                     NULL,
                                                     timerEt,
                                                     PIMMulticastRoute::NoInfo,
@@ -1596,7 +1596,7 @@ void PIMSM::newMulticastRegisterDR(IPv4Address srcAddr, IPv4Address destAddr)
         newRoute->setFlags(PIMMulticastRoute::P | PIMMulticastRoute::F | PIMMulticastRoute::T);
         newRoute->addOutInterface(new PIMMulticastRoute::PIMOutInterface(newInIntG,
                                     PIMMulticastRoute::Pruned,
-                                    PIMMulticastRoute::Sparsemode,
+                                    PIMInterface::SparseMode,
                                     NULL,
                                     NULL,
                                     PIMMulticastRoute::NoInfo,
@@ -1703,7 +1703,7 @@ void PIMSM::newMulticastReceiver(PIMInterface *pimInterface, IPv4Address multica
         // set outgoing interface to RP
         newRouteG->addOutInterface(new PIMMulticastRoute::PIMOutInterface(outInt,
                                     PIMMulticastRoute::Forward,
-                                    PIMMulticastRoute::Sparsemode,
+                                    PIMInterface::SparseMode,
                                     NULL,
                                     timerEt,
                                     PIMMulticastRoute::NoInfo,
@@ -1721,7 +1721,7 @@ void PIMSM::newMulticastReceiver(PIMInterface *pimInterface, IPv4Address multica
 
         newRouteG->addOutInterface(new PIMMulticastRoute::PIMOutInterface(nextOutInt,
                                     PIMMulticastRoute::Forward,
-                                    PIMMulticastRoute::Sparsemode,
+                                    PIMInterface::SparseMode,
                                     NULL,
                                     NULL,
                                     PIMMulticastRoute::NoInfo,

@@ -1047,7 +1047,7 @@ void PIMDM::rpfIntChange(PIMMulticastRoute *route)
 	    PIMMulticastRoute::PIMOutInterface *newOutInt = new PIMOutInterface(oldRpfInt);
 		newOutInt->pruneTimer = NULL;
 		newOutInt->forwarding = PIMMulticastRoute::Forward;
-		newOutInt->mode = PIMMulticastRoute::Densemode;
+		newOutInt->mode = PIMInterface::DenseMode;
 		route->addOutInterface(newOutInt);
 	}
 }
@@ -1289,7 +1289,7 @@ void PIMDM::newMulticastAddr(PIMInterface *pimInt, IPv4Address newAddr)
         {
             EV << "Interface is not on list of outgoing interfaces yet, it will be added" << endl;
             PIMMulticastRoute::PIMOutInterface *newInt = new PIMOutInterface(pimInt->getInterfacePtr());
-            newInt->mode = PIMMulticastRoute::Densemode;
+            newInt->mode = PIMInterface::DenseMode;
             newInt->forwarding = PIMMulticastRoute::Forward;
             newInt->pruneTimer = NULL;
             route->addOutInterface(newInt);
@@ -1378,10 +1378,10 @@ void PIMDM::newMulticast(IPv4Address srcAddr, IPv4Address destAddr)
 		switch (pimIntTemp->getMode())
 		{
 			case PIMInterface::DenseMode:
-				newOutInt->mode = PIMMulticastRoute::Densemode;
+				newOutInt->mode = PIMInterface::DenseMode;
 				break;
 			case PIMInterface::SparseMode:
-				newOutInt->mode = PIMMulticastRoute::Sparsemode;
+				newOutInt->mode = PIMInterface::SparseMode;
 				break;
 		}
 

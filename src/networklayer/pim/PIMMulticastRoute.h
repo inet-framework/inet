@@ -24,6 +24,7 @@
 
 #include "PIMTimer_m.h"
 #include "InterfaceEntry.h"
+#include "PIMInterfaceTable.h" // for PIMMode
 
 /**
  * PIM IPv4 multicast route in IRoutingTable.
@@ -44,11 +45,9 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
             T       = 0x40               /**< SPT bit*/
         };
 
-        /** States of each outgoing interface. E.g.: Forward/Dense. */
+        /** States of each outgoing interface. */
         enum InterfaceState
         {
-            Densemode = 1,
-            Sparsemode = 2,
             Forward,
             Pruned
         };
@@ -64,10 +63,10 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         /**  Register machine States. */
         enum RegisterState
         {
-          NoInfoRS = 0,
-          Join = 1,
-          Prune = 2,
-          JoinPending = 3
+            NoInfoRS = 0,
+            Join = 1,
+            Prune = 2,
+            JoinPending = 3
         };
 
         /**
@@ -77,6 +76,7 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         struct PIMInInterface : public InInterface
         {
             IPv4Address nextHop;            /**< RF neighbor */
+
             PIMInInterface(InterfaceEntry *ie, int interfaceId, IPv4Address nextHop)
                 : InInterface(ie), nextHop(nextHop) {}
             int getInterfaceId() const { return ie->getInterfaceId(); }
@@ -89,15 +89,16 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         struct PIMOutInterface : public OutInterface
         {
             InterfaceState          forwarding;         /**< Forward or Pruned */
-            InterfaceState          mode;               /**< Dense, Sparse, ... */
+            PIMInterface::PIMMode   mode;               /**< Dense, Sparse, ... */
             PIMpt                   *pruneTimer;        /**< Pointer to PIM Prune Timer*/
             PIMet                   *expiryTimer;       /**< Pointer to PIM Expiry Timer*/
             AssertState             assert;             /**< Assert state. */
             RegisterState           regState;           /**< Register state. */
             bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
+
             PIMOutInterface(InterfaceEntry *ie)
                 : OutInterface(ie, false) {}
-            PIMOutInterface(InterfaceEntry *ie, InterfaceState forwarding, InterfaceState mode, PIMpt *pruneTimer,
+            PIMOutInterface(InterfaceEntry *ie, InterfaceState forwarding, PIMInterface::PIMMode mode, PIMpt *pruneTimer,
                     PIMet *expiryTimer, AssertState assert, RegisterState regState, bool show)
                 : OutInterface(ie, false), forwarding(forwarding), mode(mode), pruneTimer(pruneTimer),
                   expiryTimer(expiryTimer), assert(assert), regState(regState), shRegTun(show) {}
@@ -125,7 +126,7 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         simtime_t installtime;
 
     public:
-        PIMMulticastRoute(IPv4Address origin, IPv4Address group);           /**< Set all pointers to null */
+        PIMMulticastRoute(IPv4Address origin, IPv4Address group);
         virtual ~PIMMulticastRoute() {}
         virtual std::string info() const;
 
