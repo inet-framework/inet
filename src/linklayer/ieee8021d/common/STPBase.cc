@@ -91,12 +91,24 @@ void STPBase::colorLink(unsigned int i, bool forwarding)
 {
     if (ev.isGUI() && visualize)
     {
-        cGate * outGate = getParentModule()->gate("ethg$o", i);
-        cGate * inGate = getParentModule()->gate("ethg$i", i);
-        cGate * outGateNext = outGate->getNextGate();
-        cGate * inGatePrev = inGate->getPreviousGate();
-        cGate * outGatePrev = outGate->getPreviousGate();
-        cGate * inGatePrev2 = inGatePrev->getPreviousGate();
+        cGate * outGate;
+        cGate * outGateNext;
+        cGate * outGatePrev;
+        cGate * inGate;
+        cGate * inGatePrev;
+        cGate * inGatePrev2;
+        if(outGate = getParentModule()->gate("ethg$o", i))
+        {
+            outGateNext = outGate->getNextGate();
+            outGatePrev = outGate->getPreviousGate();
+        }
+        if(inGate = getParentModule()->gate("ethg$i", i))
+            if(inGatePrev = inGate->getPreviousGate())
+                inGatePrev2 = inGatePrev->getPreviousGate();
+
+
+
+
 
         if (outGate && inGate && inGatePrev && outGateNext && outGatePrev && inGatePrev2)
         {
