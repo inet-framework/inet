@@ -160,9 +160,9 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         PIMInInterface *getPIMInInterface() const { return getInInterface() ? check_and_cast<PIMInInterface*>(getInInterface()) : NULL; }
 
         // get outgoing interface
-        PIMOutInterface *getPIMOutInterface(unsigned int k) const { PIMOutInterface *outIf = dynamic_cast<PIMOutInterface*>(getOutInterface(k)); ASSERT(outIf); return outIf; }
+        PIMOutInterface *getPIMOutInterface(unsigned int k) const { return getOutInterface(k) ? check_and_cast<PIMOutInterface*>(getOutInterface(k)) : NULL; }
         PIMOutInterface *findOutInterfaceByInterfaceId(int interfaceId);
-        bool isOilistNull();                                                                                            /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
+        bool isOilistNull();                                                /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
 
         simtime_t getInstallTime() const {return installtime;}
         void setInstallTime(simtime_t time) {installtime = time;}
