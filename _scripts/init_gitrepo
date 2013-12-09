@@ -1,0 +1,7 @@
+#!/bin/sh
+
+cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; exit 1;}
+INET_ROOT=`pwd`
+
+rm -rf .git/hooks
+ln -s ../_scripts/hooks/ .git/hooks
