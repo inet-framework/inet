@@ -28,7 +28,7 @@
 
 #include "INETDefs.h"
 
-#include "AppBase.h"
+#include "ApplicationBase.h"
 #include "UDPSocket.h"
 
 
@@ -39,7 +39,7 @@
  * and UDPVideoStreamSvr starts streaming to them. Capable of handling
  * streaming to multiple clients.
  */
-class INET_API UDPVideoStreamSvr : public AppBase
+class INET_API UDPVideoStreamSvr : public ApplicationBase
 {
   public:
     /**
@@ -95,10 +95,9 @@ class INET_API UDPVideoStreamSvr : public AppBase
 
     virtual void clearStreams();
 
-    //AppBase:
-    virtual bool startApp(IDoneCallback *doneCallback);
-    virtual bool stopApp(IDoneCallback *doneCallback);
-    virtual bool crashApp(IDoneCallback *doneCallback);
+    virtual bool handleNodeStart(IDoneCallback *doneCallback);
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
+    virtual void handleNodeCrash();
 };
 
 #endif

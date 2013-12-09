@@ -32,7 +32,7 @@ simsignal_t UDPVideoStreamCli::rcvdPkSignal = registerSignal("rcvdPk");
 
 void UDPVideoStreamCli::initialize(int stage)
 {
-    AppBase::initialize(stage);
+    ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {
@@ -42,7 +42,7 @@ void UDPVideoStreamCli::initialize(int stage)
 
 void UDPVideoStreamCli::finish()
 {
-    AppBase::finish();
+    ApplicationBase::finish();
 }
 
 void UDPVideoStreamCli::handleMessageWhenUp(cMessage* msg)
@@ -96,7 +96,7 @@ void UDPVideoStreamCli::receiveStream(cPacket *pk)
     delete pk;
 }
 
-bool UDPVideoStreamCli::startApp(IDoneCallback *doneCallback)
+bool UDPVideoStreamCli::handleNodeStart(IDoneCallback *doneCallback)
 {
     simtime_t startTimePar = par("startTime");
     simtime_t startTime = std::max(startTimePar, simTime());
@@ -104,16 +104,15 @@ bool UDPVideoStreamCli::startApp(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UDPVideoStreamCli::stopApp(IDoneCallback *doneCallback)
+bool UDPVideoStreamCli::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     cancelEvent(selfMsg);
     //TODO if(socket.isOpened()) socket.close();
     return true;
 }
 
-bool UDPVideoStreamCli::crashApp(IDoneCallback *doneCallback)
+void UDPVideoStreamCli::handleNodeCrash()
 {
     cancelEvent(selfMsg);
-    return true;
 }
 

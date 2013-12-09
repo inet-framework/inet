@@ -27,14 +27,14 @@
 
 #include "INETDefs.h"
 
-#include "AppBase.h"
+#include "ApplicationBase.h"
 #include "UDPSocket.h"
 
 
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UDPBasicBurst : public AppBase
+class INET_API UDPBasicBurst : public ApplicationBase
 {
   public:
     enum ChooseDestAddrMode
@@ -101,10 +101,9 @@ class INET_API UDPBasicBurst : public AppBase
     virtual void processSend();
     virtual void processStop();
 
-    //AppBase:
-    virtual bool startApp(IDoneCallback *doneCallback);
-    virtual bool stopApp(IDoneCallback *doneCallback);
-    virtual bool crashApp(IDoneCallback *doneCallback);
+    virtual bool handleNodeStart(IDoneCallback *doneCallback);
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
+    virtual void handleNodeCrash();
 
   public:
     UDPBasicBurst();
