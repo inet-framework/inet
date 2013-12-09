@@ -304,7 +304,7 @@ bool AddressResolver::getMACAddressFrom(Address& retAddr, IInterfaceTable *ift, 
     for (int i=0; i < ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (!ie->getGenericNetworkProtocolData() || ie->isLoopback())
+        if (ie->isLoopback())
             continue;
         if (getInterfaceMACAddress(retAddr, ie, netmask))
             return true;
@@ -322,7 +322,7 @@ bool AddressResolver::getModulePathAddressFrom(Address& retAddr, IInterfaceTable
     for (int i=0; i < ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (!ie->getGenericNetworkProtocolData() || ie->isLoopback())
+        if (ie->isLoopback())
             continue;
         if (getInterfaceModulePathAddress(retAddr, ie, netmask))
             return true;
@@ -340,7 +340,7 @@ bool AddressResolver::getModuleIdAddressFrom(Address& retAddr, IInterfaceTable *
     for (int i=0; i < ift->getNumInterfaces(); i++)
     {
         InterfaceEntry *ie = ift->getInterface(i);
-        if (!ie->getGenericNetworkProtocolData() || ie->isLoopback())
+        if (ie->isLoopback())
             continue;
         if (getInterfaceModuleIdAddress(retAddr, ie, netmask))
             return true;
@@ -392,44 +392,24 @@ bool AddressResolver::getInterfaceIPv4Address(Address &ret, InterfaceEntry *ie, 
 
 bool AddressResolver::getInterfaceMACAddress(Address &ret, InterfaceEntry *ie, bool netmask)
 {
-    if (ie->getGenericNetworkProtocolData())
+    if (!ie->getMacAddress().isUnspecified() && false)
     {
-        Address addr = ie->getGenericNetworkProtocolData()->getAddress();
-        if (!addr.isUnspecified() && addr.getType() == Address::MAC)
-        {
-            ret = addr;
-            return true;
-        }
+        ret = ie->getMacAddress();
+        return true;
     }
     return false;
 }
 
 bool AddressResolver::getInterfaceModulePathAddress(Address &ret, InterfaceEntry *ie, bool netmask)
 {
-    if (ie->getGenericNetworkProtocolData())
-    {
-        Address addr = ie->getGenericNetworkProtocolData()->getAddress();
-        if (!addr.isUnspecified() && addr.getType() == Address::MODULEPATH)
-        {
-            ret = addr;
-            return true;
-        }
-    }
-    return false;
+    ret = ie->getModulePathAddress();
+    return true;
 }
 
 bool AddressResolver::getInterfaceModuleIdAddress(Address &ret, InterfaceEntry *ie, bool netmask)
 {
-    if (ie->getGenericNetworkProtocolData())
-    {
-        Address addr = ie->getGenericNetworkProtocolData()->getAddress();
-        if (!addr.isUnspecified() && addr.getType() == Address::MODULEID)
-        {
-            ret = addr;
-            return true;
-        }
-    }
-    return false;
+    ret = ie->getModuleIdAddress();
+    return true;
 }
 
 IInterfaceTable *AddressResolver::interfaceTableOf(cModule *host)

@@ -223,6 +223,7 @@ const Address InterfaceEntry::getNetworkAddress() const
 #endif
     if (genericNetworkProtocolData)
         return genericNetworkProtocolData->getAddress();
+    return getModulePathAddress();
 }
 
 void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)

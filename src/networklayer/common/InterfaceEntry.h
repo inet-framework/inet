@@ -167,6 +167,11 @@ class INET_API InterfaceEntry : public cNamedObject
      */
     bool isUp() const                 {return getState()==UP && hasCarrier();}
 
+    cModule *getNetworkInterfaceModule() const { return interfaceModule->getParentModule(); }
+    const ModuleIdAddress getModuleIdAddress() const { return ModuleIdAddress(getNetworkInterfaceModule()->getId()); }
+    const ModulePathAddress getModulePathAddress() const { return ModulePathAddress(getNetworkInterfaceModule()->getId()); }
+    const Address getNetworkAddress() const;
+
     /** @name Field getters. Note they are non-virtual and inline, for performance reasons. */
     //@{
     int getInterfaceId() const        {return interfaceId;}
@@ -183,7 +188,6 @@ class INET_API InterfaceEntry : public cNamedObject
     double getDatarate() const        {return datarate;}
     const MACAddress& getMacAddress() const  {return macAddr;}
     const InterfaceToken& getInterfaceToken() const {return token;}
-    const Address getNetworkAddress() const;
     //@}
 
     /** @name Field setters */
