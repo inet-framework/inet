@@ -57,6 +57,7 @@ class STP : public STPBase
         // Parameter change detection
         unsigned int currentBridgePriority;
 
+        // TODO: it's called like a cMessage timer... what is it really an interval or?
         simtime_t helloTimer;
 
         // Topology change commencing
@@ -87,6 +88,7 @@ class STP : public STPBase
          * Generate BPDUs to all interfaces (for root switch)
          */
         void generateBPDU(int portNum, const MACAddress& address = MACAddress::STP_MULTICAST_ADDRESS, bool tcFlag = false, bool tcaFlag = false);
+        // TODO: rename
         void generator();
 
         /*

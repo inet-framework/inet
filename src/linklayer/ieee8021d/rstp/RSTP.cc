@@ -132,6 +132,7 @@ void RSTP::handleUpgrade(cMessage * msg)
             {
                 EV_INFO << "UpgradeTime. Setting port " << i << " state to forwarding." << endl;
                 iPort->setState(Ieee8021DInterfaceData::FORWARDING);
+                // TODO: this loop seems to be repeated at multiple locations, some refactoring might help
                 //flushing other ports
                 //TCN over all active ports
                 for (unsigned int j = 0; j < numPorts; j++)
@@ -139,6 +140,7 @@ void RSTP::handleUpgrade(cMessage * msg)
                     Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
                     jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
                     if (j != i)
+                        // TODO: BTW, this will flush the same ports multiple times due to the 2 nested loops, couldn't it be done better?
                         macTable->flush(j);
                 }
             }
@@ -919,6 +921,7 @@ int RSTP::getBestAlternate()
             else
             {
                 Ieee8021DInterfaceData * candidatePort = getPortInterfaceData(candidate);
+                // TODO: this looks horrible and should reuse the same comparator as above
                 if ((jPort->getRootPathCost() < candidatePort->getRootPathCost())
                         || (jPort->getRootPathCost() == candidatePort->getRootPathCost()
                                 && jPort->getBridgePriority() < candidatePort->getBridgePriority())

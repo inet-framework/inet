@@ -85,6 +85,7 @@ class MACAddressTable : public cSimpleModule, public IMACAddressTable
         /**
          *  @brief Clears portno cache
          */
+        // TODO: find a better name
         virtual void flush(int portno);
 
         /**

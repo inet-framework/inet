@@ -52,6 +52,7 @@ void STP::initialize(int stage)
 
         helloTimer = 0;
         setAllDesignated();
+        // TODO: why 1? can't we refactor this to avoid
         scheduleAt(simTime() + 1, tick);
         updateDisplay();
     }
@@ -88,12 +89,14 @@ void STP::handleMessage(cMessage * msg)
         {
             BPDU * bpdu = (BPDU *) tmp;
 
+            // TODO: it would be nice to have some constants for these 0s and 1s
             if(bpdu->getBpduType() == 0) // configuration BPDU
                 handleBPDU(bpdu);
             else if(bpdu->getBpduType() == 1)// TCN BPDU
                 handleTCN(bpdu);
         }
         else
+            // TODO: why don't we throw an error here?
             delete msg;
     }
     else
@@ -105,6 +108,7 @@ void STP::handleMessage(cMessage * msg)
             scheduleAt(simTime() + 1, tick);
         }
         else
+            // TODO: we just got an unknown self message or what? why don't we throw an error here?
             delete msg;
     }
 }
@@ -272,6 +276,7 @@ bool STP::isSuperiorBPDU(int portNum, BPDU * bpdu)
 
     // port is superior
     if (result > 0)
+        // TODO: where do we delete xBpdu?
         return false;
 
     if (result < 0)
@@ -280,6 +285,7 @@ bool STP::isSuperiorBPDU(int portNum, BPDU * bpdu)
         port->setFdWhile(0); // renew info
         port->setState(Ieee8021DInterfaceData::DISCARDING);
         setSuperiorBPDU(portNum, bpdu); // renew information
+        // TODO: where do we delete xBpdu?
         return true;
     }
 
@@ -315,6 +321,8 @@ void STP::setSuperiorBPDU(int portNum, BPDU * bpdu)
 void STP::generator()
 {
     // only the root switch can generate Hello BPDUs
+    // TODO: I'd rather check this at the call site or just copy this whole function there
+    // TODO: it's weird that we call this function in all switches just to simply return in most cases
     if (!isRoot)
         return;
 
@@ -348,11 +356,13 @@ void STP::handleTick()
         if (port->getRole() != Ieee8021DInterfaceData::DESIGNATED)
         {
             EV_DEBUG<< "Message Age timer incremented on port=" << i << endl;
+            // TODO: we could at least have a constant for this 1 and the other where scheduleAt is called
             port->setAge(port->getAge() + 1);
         }
         if (port->getRole() == Ieee8021DInterfaceData::ROOT || port->getRole() == Ieee8021DInterfaceData::DESIGNATED)
         {
             EV_DEBUG<< "Forward While timer incremented on port=" << i << endl;
+            // TODO: we could at least have a constant for this 1 and the other where scheduleAt is called
             port->setFdWhile(port->getFdWhile() + 1);
         }
 
@@ -685,6 +695,7 @@ void STP::lostAlternate(int port)
 
 void STP::reset()
 {
+    // TODO: there seems to be a common part here with initialize() and start() why don't we express this?
     // upon booting all switches believe themselves to be the root
     isRoot = true;
     rootPriority = bridgePriority;

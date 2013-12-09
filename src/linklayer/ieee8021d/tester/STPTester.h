@@ -32,6 +32,7 @@
  * for connectedness and loop free-ness, using a modified depth-first search
  * with cycle detection. The results can be obtained with getter methods.
  */
+// TODO: this module should be moved into the test folder somewhere
 class STPTester : public cSimpleModule
 {
     public:
