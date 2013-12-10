@@ -1,0 +1,134 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2013 Andras Varga, OpenSim Ltd.
+Version: 4.3rc1, build: internal, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+Setting up Cmdenv...
+Loading NED files from ../../../src:  295
+Loading NED files from ..:  6
+Embedded web server started on port 8000
+
+Preparing for running configuration General, run #0...
+Scenario: $repetition=0
+Assigned runID=General-0-20131210-14:43:55-15213
+Setting up network `ChannelInfoTest'...
+Initializing...
+Initializing module ChannelInfoTest, stage 0
+Passed: Planning new test case:1.1
+Passed: Planning new test case:1.2
+Passed: Planning new test case:1.3
+Passed: Planning new test case:2.1
+Passed: Planning new test case:2.2
+Passed: Planning new test case:2.3
+Passed: Planning new test case:3.1
+Passed: Planning new test case:3.2.1
+Passed: Planning new test case:3.2.2
+Passed: Planning new test case:3.3
+Passed: Planning new test case:4.1
+Passed: Planning new test case:4.2
+Passed: Planning new test case:5.
+Passed: Planning new test case:6.1
+Passed: Planning new test case:6.2
+Passed: Planning new test case:6.3
+Passed: No intersecting AirFrames before single AirFrame.
+Passed: No intersecting AirFrames after single AirFrame.
+Passed: Cut with start should intersect.
+Passed: Cut with start should return single AirFrame.
+Passed: Cut with end should intersect.
+Passed: Cut with end should return single AirFrame.
+Passed: Interval total in AirFrame duration should intersect.
+Passed: Interval total in AirFrame duration should return single AirFrame.
+Passed: AirFrame total in interval duration should intersect.
+Passed: AirFrame total in interval duration should return single AirFrame.
+Passed: Upper border should count as intersect.
+Passed: Upper border intersection should return single AirFrame.
+Passed: Lower border should count as intersect.
+Passed: Lower border intersection should return single AirFrame.
+Passed: Interval before second AirFrame should return only first.
+Passed: Interval before second AirFrame should return the first AirFrame.
+Passed: Interval after first AirFrame should return only second.
+Passed: Interval after first AirFrame should return the second AirFrame.
+Passed: Interval inside both AirFrames should return both.
+Passed: Interval inside both AirFrame should return both.
+Passed: Earliest info point should be from frame1
+Passed: Earliest info point should be always from frame1 after delete.
+Passed: Interval inside both AirFrame should return also the deleted.
+Passed: Interval inside both AirFrame should return also the deleted.
+Passed: Interval inside all AirFrame should return all.
+Passed: Interval before second frame should be empty (first one is deleted).
+Passed: Earliest info point should be now from frame2 after delete.
+Passed: Interval inside second and third AirFrame should return also the second (deleted).
+Passed: Interval inside both AirFrame should return also the deleted.
+Passed: There shouldn't be anymore AirFrames.
+Passed: Check for simultaneous airframes
+Passed: Check for simultaneous airframes.
+Passed: Check for simultaneous airframes after remove of one.
+Passed: Check for simultaneous airframes after remove of one.
+Passed: Aiframes with same start and end are intersecting.
+Passed: Should intersect still with both removed simultaneous AirFrames.
+Passed: Interval after simultaneous should return only third AirFrame.
+Passed: Interval after simultaneous should return only third AirFrame.
+Passed: Interval at start of both AirFrames should return both.
+Passed: Interval at start of both AirFrames should return both.
+Passed: Interval after shorter AirFrame shouldn't return the shorter.
+Passed: Interval after shorter AirFrame shouldn't return the shorter.
+Passed: Nothing should have changed after deletion of shorter AirFrame.
+Passed: Nothing should have changed after deletion of shorter AirFrame.
+Passed: Nothing should have changed after deletion of shorter AirFrame.
+Passed: Nothing should have changed after deletion of shorter AirFrame.
+Passed: Interval before newly added should not return newly added.
+Passed: Interval before newly added should not return newly added.
+Passed: Interval before newly added should not return newly added.
+Passed: Interval before newly added should not return newly added.
+Passed: Newly added should be returned together with the other one.
+Passed: Newly added should be returned together with the other one.
+Passed: Our simultaneous AirFrames should be still there
+Passed: Our simultaneous AirFrames should be still there.
+Passed: Simultaneous AirFrames should be deleted now.
+Passed: Only longer AirFrame should be still there.
+Passed: Only longer AirFrame should be still there.
+Passed: Last mans standing: last added and the long AirFrame.
+Passed: Last mans standing: last added and the long AirFrame.
+Passed: Should be empty now..
+Passed: [6.1] - Result of ChannelInfo::isRecording() before recording.
+Passed: [1.1] - Start recording on empty ChannelInfo
+Passed: [6.2] - Result of ChannelInfo::isRecording() while recording.
+Passed: [1.3] - Start recording before AirFrame starts
+Passed: [4.1] - Remove AirFrame during recording.
+Passed: [2.2] - Forwarding recording time before AirFrame ends.
+Passed: [2.3] - Forwarding recording time after AirFrame ends
+Passed: [2.1] - Forwarding recording time on empty ChannelInfo
+Passed: [3.1] - Stop recording on empty ChannelInfo
+Passed: [3.3] - Stop recording after AirFrame removed and cleared.
+Passed: [6.3] - Result of ChannelInfo::isRecording() after recording.
+Passed: [1.2] - Start recording after AirFrame starts
+Passed: [4.1] - Remove AirFrame during recording.
+Passed: [3.2.1] - Stop recording after AirFrame removed but not cleared.
+Passed: [4.2] - Remove AirFrame before recording with interfering active AirFrame.
+Passed: [3.2.2] - Stop recording after AirFrame removed but not cleared and interfering active AirFrame.
+Passed: [5.] - Remove AirFrame during recording which frees a inactive one.
+Passed: [2.3] - Forwarding recording time after AirFrame ends
+Passed: [3.3] - Stop recording after AirFrame removed and cleared.
+
+Running simulation...
+
+<!> No more events -- simulation ended at event #1, t=0.
+
+
+Calling finish() at end of Run #0...
+Passed: 1.1 - Test has been executed.
+Passed: 1.2 - Test has been executed.
+Passed: 1.3 - Test has been executed.
+Passed: 2.1 - Test has been executed.
+Passed: 2.2 - Test has been executed.
+Passed: 2.3 - Test has been executed.
+Passed: 3.1 - Test has been executed.
+Passed: 3.2.1 - Test has been executed.
+Passed: 3.2.2 - Test has been executed.
+Passed: 3.3 - Test has been executed.
+Passed: 4.1 - Test has been executed.
+Passed: 4.2 - Test has been executed.
+Passed: 5. - Test has been executed.
+Passed: 6.1 - Test has been executed.
+Passed: 6.2 - Test has been executed.
+Passed: 6.3 - Test has been executed.
+
+End.

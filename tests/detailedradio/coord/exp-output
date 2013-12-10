@@ -1,0 +1,118 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2013 Andras Varga, OpenSim Ltd.
+Version: 4.3rc1, build: internal, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+Setting up Cmdenv...
+Loading NED files from ../../../src:  295
+Loading NED files from ..:  4
+Embedded web server started on port 8000
+
+Preparing for running configuration General, run #0...
+Scenario: $repetition=0
+Assigned runID=General-0-20131210-14:37:52-14481
+Setting up network `CoordTest'...
+Initializing...
+Passed: x-value of default coordinate.
+Passed: y-value of default coordinate.
+Passed: z-value of default coordinate.
+Passed: x-value of Coord(x, y).
+Passed: y-value of Coord(x, y).
+Passed: z-value of Coord(x, y).
+Passed: x-value of Coord(x, y, z).
+Passed: y-value of Coord(x, y, z).
+Passed: z-value of Coord(x, y, z).
+Passed: x-value of (3D)Coord(Coord& other).
+Passed: y-value of (3D)Coord(Coord& other).
+Passed: z-value of (3D)Coord(Coord& other).
+Passed: x-value of (2D)Coord(Coord& other).
+Passed: y-value of (2D)Coord(Coord& other).
+Passed: z-value of (2D)Coord(Coord& other).
+Constructor tests successful.
+Passed: 3D: x-value of a + b
+Passed: 3D: y-value of a + b
+Passed: 3D: z-value of a + b
+Passed: 3D: x-value of a - b
+Passed: 3D: y-value of a - b
+Passed: 3D: z-value of a - b
+Passed: 3D: x-value of a * faktor
+Passed: 3D: y-value of a * faktor
+Passed: 3D: z-value of a * faktor
+Passed: 3D: x-value of a / (1 / faktor)
+Passed: 3D: y-value of a / (1 / faktor)
+Passed: 3D: z-value of a / (1 / faktor)
+Passed: 2D: x-value of a + b
+Passed: 2D: y-value of a + b
+Passed: 2D: z-value 0 of a + b
+Passed: 2D: x-value of a - b
+Passed: 2D: y-value of a - b
+Passed: 2D: z-value 0 of a - b
+Passed: 2D: x-value of a * faktor
+Passed: 2D: y-value of a * faktor
+Passed: 2D: z-value 0 of a * faktor
+Passed: 2D: x-value of a / (1 / faktor)
+Passed: 2D: y-value of a / (1 / faktor)
+Passed: 2D: z-value 0 of a / (1 / faktor)
+Operator tests successful.
+Passed: 3D: a == b
+Passed: 3D: a != b
+Passed: 3D: a == a + tolerance
+Passed: 3D: a != a + tolerance
+Passed: 2D: a == b
+Passed: 2D: a != b
+Passed: 2D: a == a + tolerance
+Passed: 2D: a != a + tolerance
+Compare operator test successful.
+Passed: 3D: length of origin-vector.
+Passed: 3D: square length of origin-vector.
+Passed: 3D: length of (x, y, z)-vector.
+Passed: 3D: square length of (x, y, z)-vector.
+Passed: 2D: length of origin-vector.
+Passed: 2D: square length of origin-vector.
+Passed: 2D: length of (x, y, z)-vector.
+Passed: 2D: square length of (x, y, z)-vector.
+Length methods test successful.
+Passed: 3D: square distance a<->a
+Passed: 3D: distance a<->a
+Passed: 3D: square distance a<->b
+Passed: 3D: distance a<->b
+Passed: 3D: square torus distance ul1<->ul2
+Passed: 3D: square torus distance ul1<->lr1
+Passed: 2D: square distance a<->a
+Passed: 2D: distance a<->a
+Passed: 2D: square distance a<->b
+Passed: 2D: distance a<->b
+Passed: 2D: square torus distance ul1<->ul2
+Passed: 2D: square torus distance ul1<->lr1
+Distance methods test successful.
+Passed: 3D: inside is inside of playground.
+Passed: 3D: border-x is inside of playground.
+Passed: 3D: border-y is inside of playground.
+Passed: 3D: border-z is inside of playground.
+Passed: 3D: smaller-x is outside of playground.
+Passed: 3D: smaller-y is outside of playground.
+Passed: 3D: smaller-z is outside of playground.
+Passed: 3D: bigger-x is outside of playground.
+Passed: 3D: bigger-y is outside of playground.
+Passed: 3D: bigger-z is outside of playground.
+Passed: 2D: inside is inside of playground.
+Passed: 2D: border-x is inside of playground.
+Passed: 2D: border-y is inside of playground.
+Passed: 2D: smaller-x is outside of playground.
+Passed: 2D: smaller-y is outside of playground.
+Passed: 2D: bigger-x is outside of playground.
+Passed: 2D: bigger-y is outside of playground.
+Is in rectangle test successful.
+
+Running simulation...
+** Event #1   T=0   Elapsed: 0.000s (0m 00s)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 0   present: 0   in FES: 0
+** Event #1   T=0   Elapsed: 0.000s (0m 00s)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 0   present: 0   in FES: 0
+
+<!> No more events -- simulation ended at event #1, t=0.
+
+
+Calling finish() at end of Run #0...
+
+End.

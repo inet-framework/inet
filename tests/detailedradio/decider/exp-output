@@ -1,0 +1,408 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2013 Andras Varga, OpenSim Ltd.
+Version: 4.3rc1, build: internal, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+Setting up Cmdenv...
+Loading NED files from ../../../src:  295
+Loading NED files from ..:  8
+Embedded web server started on port 8000
+
+Preparing for running configuration General, run #0...
+Scenario: $repetition=0
+Assigned runID=General-0-20131210-15:48:58-20361
+Setting up network `DeciderTest'...
+Signal for TestAirFrame1 created with header/payload power: 1/0
+[ Test] - Creating TestAirFrame 1 done.
+Signal for TestAirFrame2 created with header/payload power: 3.98107/0
+[ Test] - Creating TestAirFrame 2 done.
+Signal for TestAirFrame3 created with header/payload power: 3.98107/0
+[ Test] - Creating TestAirFrame 3 done.
+Signal for TestAirFrame4 created with header/payload power: 8/0
+[ Test] - Creating TestAirFrame 4 done.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[ Test] - Creating TestAirFrame 5 done.
+Signal for TestAirFrame6 created with header/payload power: 1/0
+[ Test] - Creating TestAirFrame 6 done.
+Initializing...
+Initializing module DeciderTest, stage 0
+Passed: [TestBaseDecider] - Member 'myIndex' has been initialized properly by passed value.
+Passed: [TestBaseDecider] - pointer to DeciderToPhyInterface has been set properly
+Passed: [TestBaseDecider] - Decider initialization from map was done successfully
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current timepoint
+Passed: This decider considers an empty channel as idle.
+Passed: RSSI-value is the value for 'now' in an empty Set of AirFrames
+Passed: [TestBaseDecider] - Member 'myIndex' has been initialized properly by passed value.
+Passed: [TestBaseDecider] - pointer to DeciderToPhyInterface has been set properly
+Passed: [TestBaseDecider] - Decider initialization from map was done successfully
+[SNRThresholdDeciderNew Test] - -TEST_GET_CHANNELSTATE_NOISYCHANNEL-----------------------------------------------
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current test-timepoint
+Passed: This decider considers an empty channel as idle.
+Passed: RSSI-value is the value for 'testTime' in an empty Set of AirFrames
+[SNRThresholdDeciderNew Test] - -full output-----------------------------------------------
+[SNRThresholdDeciderNew Test] - A new testTime has been set: 1
+[SNRThresholdDeciderNew Test] - Putting AirFrames on the virtual channel.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+[SNRThresholdDeciderNew Test] - Calling getChannelState() of BaseDecider.
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current test-timepoint
+[SNRThresholdDeciderNew Test] - Checking results against expected results.
+Passed: This decider considers the RX-Power of AirFrame1 as idle.
+Passed: RSSI-value is the value for 'testTime'
+[SNRThresholdDeciderNew Test] - -short output-----------------------------------------------
+[SNRThresholdDeciderNew Test] - A new testTime has been set: 2
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current test-timepoint
+Passed: This decider considers the RX-Power of AirFrame1 as idle.
+Passed: RSSI-value is the value for 'testTime'
+[SNRThresholdDeciderNew Test] - -short output-----------------------------------------------
+[SNRThresholdDeciderNew Test] - A new testTime has been set: 3
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current test-timepoint
+Passed: This decider considers the combined RX-Power of AirFrame1+2+3 as busy.
+Passed: RSSI-value is the value for 'testTime'
+[SNRThresholdDeciderNew Test] - -short output-----------------------------------------------
+[SNRThresholdDeciderNew Test] - A new testTime has been set: 4
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current test-timepoint
+Passed: This decider considers the combined RX-Power of AirFrame1+2+3 as busy.
+Passed: RSSI-value is the value for 'testTime'
+[SNRThresholdDeciderNew Test] - -short output-----------------------------------------------
+[SNRThresholdDeciderNew Test] - A new testTime has been set: 5
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current test-timepoint
+Passed: This decider considers the combined RX-Power of AirFrame1+2+3+4 as busy.
+Passed: RSSI-value is the value for 'testTime'
+[SNRThresholdDeciderNew Test] - -short output-----------------------------------------------
+[SNRThresholdDeciderNew Test] - A new testTime has been set: 9
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current test-timepoint
+Passed: This decider considers the RX-power of AirFrame2 as idle.
+Passed: RSSI-value is the value for 'testTime'
+[SNRThresholdDeciderNew Test] - -DONE-------------------------------------------
+Passed: [TestBaseDecider] - Member 'myIndex' has been initialized properly by passed value.
+Passed: [TestBaseDecider] - pointer to DeciderToPhyInterface has been set properly
+Passed: [TestBaseDecider] - Decider initialization from map was done successfully
+[SNRThresholdDeciderNew Test] - -TEST_GET_CHANNELSTATE_RECEIVING-----------------------------------------------
+[SNRThresholdDeciderNew Test] - -full output-----------------------------------------------
+[SNRThresholdDeciderNew Test] - A new testTime has been set: 2
+[SNRThresholdDeciderNew Test] - Putting AirFrames on the virtual channel.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+[SNRThresholdDeciderNew Test] - Calling getChannelState() of BaseDecider.
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current test-timepoint
+[SNRThresholdDeciderNew Test] - Checking results against expected results.
+Passed: This decider considers the RX-power of AirFrame1 as idle.
+Passed: RSSI-value is the value for 'testTime'
+[SNRThresholdDeciderNew Test] - -short output-----------------------------------------------
+[SNRThresholdDeciderNew Test] - A new testTime has been set: 3
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current test-timepoint
+Passed: This decider considers the combined RX-Power of AirFrame1+2+3 as busy.
+Passed: RSSI-value is the value for 'testTime'
+[SNRThresholdDeciderNew Test] - Trying to receive an AirFrame whose TXpower is too low.
+Passed: AirFrame has been rejected, since TXpower is too low.
+[SNRThresholdDeciderNew Test] - Trying to receive TestAirFrame 3
+Passed: TestAirFrame 3 can be received, end-time is returned
+[SNRThresholdDeciderNew Test] - Trying to receive another AirFrame at the same time.
+Passed: AirFrame has been rejected, since we already receive one.
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current test-timepoint
+Passed: This decider considers the combined RX-Power of AirFrame1+2+3 as busy.
+Passed: RSSI-value is the value for 'testTime'
+[SNRThresholdDeciderNew Test] - -short output-----------------------------------------------
+[SNRThresholdDeciderNew Test] - A new testTime has been set: 4
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current test-timepoint
+Passed: This decider considers the combined RX-Power of AirFrame1+2+3 as busy.
+Passed: RSSI-value is the value for 'testTime'
+[SNRThresholdDeciderNew Test] - -short output-----------------------------------------------
+[SNRThresholdDeciderNew Test] - A new testTime has been set: 5
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current test-timepoint
+Passed: This decider considers the combined RX-Power of AirFrame1+2+3+4 as busy.
+Passed: RSSI-value is the value for 'testTime'
+[SNRThresholdDeciderNew Test] - Handing over TestAirFrame 3 again, transmission has finished
+Passed: Decider demands ChannelInfo for the duration of the AirFrame
+Passed: Decider demands ChannelInfo for current test-timepoint (end of AirFrame)
+Passed: TestAirFrame 3 has been finally processed
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current test-timepoint
+Passed: This decider considers the combined RX-Power of AirFrame1+2+3+4 as busy.
+Passed: RSSI-value is the value for 'testTime'
+[SNRThresholdDeciderNew Test] - Trying to immediately receive TestAirFrame 4
+Passed: TestAirFrame 4 can be received, end-time is returned
+[SNRThresholdDeciderNew Test] - -short output-----------------------------------------------
+[SNRThresholdDeciderNew Test] - A new testTime has been set: 6
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Decider demands ChannelInfo for one single timepoint
+Passed: Decider demands ChannelInfo for current test-timepoint
+Passed: This decider considers the combined RX-Power of AirFrame1+2+4 as busy.
+Passed: RSSI-value is the value for 'testTime'
+Passed: Decider demands ChannelInfo for the duration of the AirFrame
+Passed: Decider demands ChannelInfo for current test-timepoint (end of AirFrame)
+Passed: TestAirFrame 4 has been finally processed
+[SNRThresholdDeciderNew Test] - -DONE-------------------------------------------
+Passed: [TestBaseDecider] - Member 'myIndex' has been initialized properly by passed value.
+Passed: [TestBaseDecider] - pointer to DeciderToPhyInterface has been set properly
+Passed: [TestBaseDecider] - Decider initialization from map was done successfully
+[SNRThresholdDeciderNew Test] - -------------------------------------------------------
+[SNRThresholdDeciderNew Test] - TEST_SNR_THRESHOLD_ACCEPT
+Signal for TestAirFrame5 created with header/payload power: 10/10
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: NextHandoverTime is t5.
+Passed: Decider demands ChannelInfo for the duration of the AirFrame
+Passed: Decider demands ChannelInfo for current test-timepoint (end of AirFrame)
+Passed: BaseDecider decided correctly to send up the packet
+Passed: BaseDecider has returned the pointer to currently processed AirFrame
+Passed: TestAirFrame 5 has been finally processed
+Passed: sendUp() has been called.
+Passed: [TestBaseDecider] - Member 'myIndex' has been initialized properly by passed value.
+Passed: [TestBaseDecider] - pointer to DeciderToPhyInterface has been set properly
+Passed: [TestBaseDecider] - Decider initialization from map was done successfully
+[SNRThresholdDeciderNew Test] - -------------------------------------------------------
+[SNRThresholdDeciderNew Test] - TEST_SNR_THRESHOLD_DENY
+Signal for TestAirFrame5 created with header/payload power: 10/10
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: NextHandoverTime is t5.
+Passed: Decider demands ChannelInfo for the duration of the AirFrame
+Passed: Decider demands ChannelInfo for current test-timepoint (end of AirFrame)
+Passed: TestAirFrame 5 has been finally processed
+Passed: sendUp() has not been called.
+Passed: [TestBaseDecider] - Member 'myIndex' has been initialized properly by passed value.
+Passed: [TestBaseDecider] - pointer to DeciderToPhyInterface has been set properly
+Passed: [TestBaseDecider] - Decider initialization from map was done successfully
+[SNRThresholdDeciderNew Test] - -------------------------------------------------------
+[SNRThresholdDeciderNew Test] - TEST_SNR_THRESHOLD_PAYLOAD_DENY
+Signal for TestAirFrame5 created with header/payload power: 20/10
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: NextHandoverTime is t5.
+Passed: Decider demands ChannelInfo for the duration of the AirFrame
+Passed: Decider demands ChannelInfo for current test-timepoint (end of AirFrame)
+Passed: TestAirFrame 5 has been finally processed
+Passed: sendUp() has not been called.
+Passed: [TestBaseDecider] - Member 'myIndex' has been initialized properly by passed value.
+Passed: [TestBaseDecider] - pointer to DeciderToPhyInterface has been set properly
+Passed: [TestBaseDecider] - Decider initialization from map was done successfully
+[SNRThresholdDeciderNew Test] - -------------------------------------------------------
+[SNRThresholdDeciderNew Test] - TEST_SNR_THRESHOLD_MORE_NOISE_BEGINS_IN_BETWEEN_DENY
+Signal for TestAirFrame5 created with header/payload power: 30/30
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: NextHandoverTime is t5.
+Passed: Decider demands ChannelInfo for the duration of the AirFrame
+Passed: Decider demands ChannelInfo for current test-timepoint (end of AirFrame)
+Passed: TestAirFrame 5 has been finally processed
+Passed: sendUp() has not been called.
+Passed: [TestBaseDecider] - Member 'myIndex' has been initialized properly by passed value.
+Passed: [TestBaseDecider] - pointer to DeciderToPhyInterface has been set properly
+Passed: [TestBaseDecider] - Decider initialization from map was done successfully
+Passed: [TestBaseDecider] - Member 'myIndex' has been initialized properly by passed value.
+Passed: [TestBaseDecider] - pointer to DeciderToPhyInterface has been set properly
+Passed: [TestBaseDecider] - Decider initialization from map was done successfully
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
+Passed: This ChannelSenseRequest answer has been expected.
+Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results RSSI value match expected results RSSI value.
+Passed: UNTIL_IDLE request on idle channel should be answered immediately.
+Passed: UNTIL_BUSY request on idle channel can't be answered yet.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
+Passed: This ChannelSenseRequest answer has been expected.
+Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results RSSI value match expected results RSSI value.
+Passed: UNTIL_BUSY request should have been answered because of AF3.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: UNTIL_BUSY request on idle channel can't be answered yet.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
+Passed: This ChannelSenseRequest answer has been expected.
+Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results RSSI value match expected results RSSI value.
+Passed: UNTIL_BUSY request should have been answered because of time out.
+Passed: [TestBaseDecider] - Member 'myIndex' has been initialized properly by passed value.
+Passed: [TestBaseDecider] - pointer to DeciderToPhyInterface has been set properly
+Passed: [TestBaseDecider] - Decider initialization from map was done successfully
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
+Passed: This ChannelSenseRequest answer has been expected.
+Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results RSSI value match expected results RSSI value.
+Passed: UNTIL_BUSY request should have been answered because of already busy channel.
+Passed: UNTIL_IDLE request can't be answered because of busy channel.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
+Passed: This ChannelSenseRequest answer has been expected.
+Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results RSSI value match expected results RSSI value.
+Passed: UNTIL_IDLE request was answered because of time out.
+Passed: UNTIL_IDLE request can't be answered because of busy channel.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
+Passed: This ChannelSenseRequest answer has been expected.
+Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results RSSI value match expected results RSSI value.
+Passed: UNTIL_IDLE request was answered because of idle channel.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: UNTIL_IDLE request can't be answered because of busy channel.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Rescheduled message is a ChannelSenseRequest.
+Passed: This rescheduling was expected.
+Passed: Decider rescheduled CSR to correct time.
+Passed: UNTIL_IDLE request was rescheduled because of new AirFrame.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
+Passed: This ChannelSenseRequest answer has been expected.
+Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results RSSI value match expected results RSSI value.
+Passed: UNTIL_IDLE request was answered because of idle channel.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: UNTIL_IDLE request can't be answered because of busy channel.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
+Passed: This ChannelSenseRequest answer has been expected.
+Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results RSSI value match expected results RSSI value.
+Passed: UNTIL_IDLE request was answered because of idle channel.
+Passed: [TestBaseDecider] - Member 'myIndex' has been initialized properly by passed value.
+Passed: [TestBaseDecider] - pointer to DeciderToPhyInterface has been set properly
+Passed: [TestBaseDecider] - Decider initialization from map was done successfully
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: UNTIL_IDLE request can't be answered because of busy header.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
+Passed: This ChannelSenseRequest answer has been expected.
+Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results RSSI value match expected results RSSI value.
+Passed: UNTIL_IDLE request should have been answered because of idle payload.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: UNTIL_IDLE request can't be answered yet because of busy header(1).
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Rescheduled message is a ChannelSenseRequest.
+Passed: This rescheduling was expected.
+Passed: Decider rescheduled CSR to correct time.
+Passed: UNTIL_IDLE request should have been rescheduled.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
+Passed: This ChannelSenseRequest answer has been expected.
+Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results RSSI value match expected results RSSI value.
+Passed: UNTIL_IDLE request should have been answered because of idle channel.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: UNTIL_BUSY request can't be answered because of idle header.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
+Passed: This ChannelSenseRequest answer has been expected.
+Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results RSSI value match expected results RSSI value.
+Passed: UNTIL_BUSY request should have been answered because of busy payload.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: UNTIL_BUSY request can't be answered because of idle header(s).
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Rescheduled message is a ChannelSenseRequest.
+Passed: This rescheduling was expected.
+Passed: Decider rescheduled CSR to correct time.
+Passed: UNTIL_BUSY request was rescheduled because of new AirFrame payload.
+Signal for TestAirFrame5 created with header/payload power: 32/16
+[SNRThresholdDeciderNew Test] - Creating TestAirFrame 5 done.
+[SNRThresholdDeciderNew Test] - Filled airFramesOnChannel. (the virtual channel)
+Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
+Passed: This ChannelSenseRequest answer has been expected.
+Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results RSSI value match expected results RSSI value.
+Passed: UNTIL_BUSY request was answered because of busy payload.
+
+Running simulation...
+
+<!> No more events -- simulation ended at event #1, t=0.
+
+
+Calling finish() at end of Run #0...
+undisposed object: (ChannelSenseRequest) .DeciderTest. -- check module destructor
+
+End.

@@ -1,0 +1,307 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2013 Andras Varga, OpenSim Ltd.
+Version: 4.3rc1, build: internal, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+Setting up Cmdenv...
+Loading NED files from ../../../src:  295
+Loading NED files from ..:  8
+Embedded web server started on port 8000
+
+Preparing for running configuration General, run #0...
+Scenario: $repetition=0
+Assigned runID=General-0-20131210-15:59:02-21042
+Setting up network `RadioStateTest'...
+Initializing...
+------ Testing stuff for the Radio ------
+Passed: RadioState is correct
+Passed: RadioState is correct
+Constructor Test passed.
+Passed: RadioState is correct
+Passed: Radio does return a valid switch time
+Passed: Radio is now switching
+Passed: Radio has returned the correct switch time
+Passed: Radio is switching, error value awaited
+Passed: Radio has switched to correct state
+Passed: Switching test
+Passed: RadioState is correct
+Passed: Radio does return a valid switch time
+Passed: Radio is now switching
+Passed: Radio has returned the correct switch time
+Passed: Radio is switching, error value awaited
+Passed: Radio has switched to correct state
+Passed: Switching test
+Passed: RadioState is correct
+Passed: Radio does return a valid switch time
+Passed: Radio is now switching
+Passed: Radio has returned the correct switch time
+Passed: Radio is switching, error value awaited
+Passed: Radio has switched to correct state
+Passed: Switching test
+Passed: RadioState is correct
+Passed: Radio does return a valid switch time
+Passed: Radio is now switching
+Passed: Radio has returned the correct switch time
+Passed: Radio is switching, error value awaited
+Passed: Radio has switched to correct state
+Passed: Switching test
+Passed: RadioState is correct
+Passed: Radio does return a valid switch time
+Passed: Radio is now switching
+Passed: Radio has returned the correct switch time
+Passed: Radio is switching, error value awaited
+Passed: Radio has switched to correct state
+Passed: Switching test
+Passed: RadioState is correct
+Passed: Radio does return a valid switch time
+Passed: Radio is now switching
+Passed: Radio has returned the correct switch time
+Passed: Radio is switching, error value awaited
+Passed: Radio has switched to correct state
+Passed: Switching test
+Passed: RadioState is correct
+Passed: Radio does return a valid switch time
+Passed: Radio is now switching
+Passed: Radio has returned the correct switch time
+Passed: Radio is switching, error value awaited
+Passed: Radio has switched to correct state
+Passed: Switching test
+Passed: RadioState is correct
+Passed: Radio does return a valid switch time
+Passed: Radio is now switching
+Passed: Radio has returned the correct switch time
+Passed: Radio is switching, error value awaited
+Passed: Radio has switched to correct state
+Passed: Switching test
+Passed: RadioState is correct
+Passed: Radio does return a valid switch time
+Passed: Radio is now switching
+Passed: Radio has returned the correct switch time
+Passed: Radio is switching, error value awaited
+Passed: Radio has switched to correct state
+Passed: Switching test
+Passed: RadioState is correct
+SetSwitchTime test passed.
+------ Testing stuff for the RadioStateAnalogueModel ------
+---testRSAMConstructor
+Passed: Default constructor sets tracking off.
+Passed: Default constructor sets initialTime to 0.
+Passed: Default constructor creates one-elem list.
+Passed: DiagRSAM(false) sets tracking off.
+Passed: DiagRSAM(false) creates one-elem list.
+Passed: DiagRSAM(true) sets tracking on.
+Passed: DiagRSAM(true) creates one-elem list.
+Passed: Initial time in receive-list is correct.
+Passed: Initial Value in receive-list is correct.
+---testRSAMModification
+Passed: Nothing has been written to list.
+Passed: Tracking is on.
+Passed: Tracking is off.
+Passed: Elements have been written to list.
+Passed: Lists are equal. (many entries)
+Passed: Lists are equal. (many entries)
+Passed: Lists are equal. (many entries), cleanUp before first entry
+Passed: Lists are equal. (many entries)
+Passed: Lists are equal. (many entries), cleanUp after last entry
+Passed: Lists are equal. (many entries)
+Passed: Lists are equal. (many entries), cleanUp exactly first entry
+Passed: Lists are equal. (many entries)
+Passed: Lists are equal. (many entries), cleanUp exactly last entry
+Passed: Lists are equal. (many entries)
+Passed: Lists are equal. (many entries)
+Passed: Lists are equal. (many entries)
+Passed: Lists are equal. (many entries)
+Passed: Lists are equal. (many entries)
+Passed: Lists are equal. (many entries)
+Passed: Lists are equal. (many entries)
+Passed: Lists are equal. (many entries)
+END
+Passed: Element has been written to list.
+Passed: Lists are equal. (one entry)
+Passed: Lists are equal. (one entry)
+Passed: Lists are equal. (one entry), cleanUp before entry
+Passed: Lists are equal. (one entry)
+Passed: Lists are equal. (one entry), cleanup exactly on entry
+Passed: Lists are equal. (one entry)
+Passed: Lists are equal. (one entry), cleanUp after entry
+END
+------ Testing stuff for RSAMMapping ------
+---testGetValue
+(initTime, minAtt)--(time1,minAtt)--(time2,maxAtt)--(time3,maxAtt)--(time3,minAtt)--(time4,minAtt)
+--------------------------------------------------------------------------------------------------
+Passed: Entry at init time
+Passed: Entry in between two time-points
+Passed: Entry at exactly a time-point (time1)
+Passed: Entry at exactly a time-point (time2)
+Passed: Entry at time-point with zero-time-switches (time3)
+Passed: Entry at last time-point (time4)
+Passed: Entry after last time-point
+------ Testing stuff for RSAMConstMappingIterator ------
+---test RSAMConstMappingiterator
+Passed: default Constructor: hasNext()
+Passed: default Constructor: inRange()
+Passed: default Constructor: currentPos()
+Passed: default Constructor: nextPos()
+Passed: default Constructor: getValue()
+Passed: default Constructor: Equal with function
+Passed: constructor with position exactly on beginning of initial rsam: hasNext()
+Passed: constructor with position exactly on beginning of initial rsam: inRange()
+Passed: constructor with position exactly on beginning of initial rsam: currentPos()
+Passed: constructor with position exactly on beginning of initial rsam: nextPos()
+Passed: constructor with position exactly on beginning of initial rsam: getValue()
+Passed: constructor with position exactly on beginning of initial rsam: Equal with function
+Passed: constructor with position after beginning of initial rsam: hasNext()
+Passed: constructor with position after beginning of initial rsam: inRange()
+Passed: constructor with position after beginning of initial rsam: currentPos()
+Passed: constructor with position after beginning of initial rsam: nextPos()
+Passed: constructor with position after beginning of initial rsam: getValue()
+Passed: constructor with position after beginning of initial rsam: Equal with function
+Passed: Iterator at beginning of filled RSAM: hasNext()
+Passed: Iterator at beginning of filled RSAM: inRange()
+Passed: Iterator at beginning of filled RSAM: currentPos()
+Passed: Iterator at beginning of filled RSAM: nextPos()
+Passed: Iterator at beginning of filled RSAM: getValue()
+Passed: Iterator at beginning of filled RSAM: Equal with function
+--- testing iterateTo()
+Passed: Iterator between time1 and time2: hasNext()
+Passed: Iterator between time1 and time2: inRange()
+Passed: Iterator between time1 and time2: currentPos()
+Passed: Iterator between time1 and time2: nextPos()
+Passed: Iterator between time1 and time2: getValue()
+Passed: Iterator between time1 and time2: Equal with function
+Passed: Iterator on pre(time2): hasNext()
+Passed: Iterator on pre(time2): inRange()
+Passed: Iterator on pre(time2): currentPos()
+Passed: Iterator on pre(time2): nextPos()
+Passed: Iterator on pre(time2): getValue()
+Passed: Iterator on pre(time2): Equal with function
+Passed: Iterator on time2: hasNext()
+Passed: Iterator on time2: inRange()
+Passed: Iterator on time2: currentPos()
+Passed: Iterator on time2: nextPos()
+Passed: Iterator on time2: getValue()
+Passed: Iterator on time2: Equal with function
+Passed: Iterator on time3: hasNext()
+Passed: Iterator on time3: inRange()
+Passed: Iterator on time3: currentPos()
+Passed: Iterator on time3: nextPos()
+Passed: Iterator on time3: getValue()
+Passed: Iterator on time3: Equal with function
+Passed: Iterator on time4: hasNext()
+Passed: Iterator on time4: inRange()
+Passed: Iterator on time4: currentPos()
+Passed: Iterator on time4: nextPos()
+Passed: Iterator on time4: getValue()
+Passed: Iterator on time4: Equal with function
+Passed: Iterator on time4+offset: hasNext()
+Passed: Iterator on time4+offset: inRange()
+Passed: Iterator on time4+offset: currentPos()
+Passed: Iterator on time4+offset: nextPos()
+Passed: Iterator on time4+offset: getValue()
+Passed: Iterator on time4+offset: Equal with function
+--- testing jumpTo() forewards
+Passed: Iterator at beginning of filled RSAM: hasNext()
+Passed: Iterator at beginning of filled RSAM: inRange()
+Passed: Iterator at beginning of filled RSAM: currentPos()
+Passed: Iterator at beginning of filled RSAM: nextPos()
+Passed: Iterator at beginning of filled RSAM: getValue()
+Passed: Iterator at beginning of filled RSAM: Equal with function
+Passed: Iterator between time1 and time2: hasNext()
+Passed: Iterator between time1 and time2: inRange()
+Passed: Iterator between time1 and time2: currentPos()
+Passed: Iterator between time1 and time2: nextPos()
+Passed: Iterator between time1 and time2: getValue()
+Passed: Iterator between time1 and time2: Equal with function
+Passed: Iterator on pre(time2): hasNext()
+Passed: Iterator on pre(time2): inRange()
+Passed: Iterator on pre(time2): currentPos()
+Passed: Iterator on pre(time2): nextPos()
+Passed: Iterator on pre(time2): getValue()
+Passed: Iterator on pre(time2): Equal with function
+Passed: Iterator on time2: hasNext()
+Passed: Iterator on time2: inRange()
+Passed: Iterator on time2: currentPos()
+Passed: Iterator on time2: nextPos()
+Passed: Iterator on time2: getValue()
+Passed: Iterator on time2: Equal with function
+Passed: Iterator on time3: hasNext()
+Passed: Iterator on time3: inRange()
+Passed: Iterator on time3: currentPos()
+Passed: Iterator on time3: nextPos()
+Passed: Iterator on time3: getValue()
+Passed: Iterator on time3: Equal with function
+Passed: Iterator on time4: hasNext()
+Passed: Iterator on time4: inRange()
+Passed: Iterator on time4: currentPos()
+Passed: Iterator on time4: nextPos()
+Passed: Iterator on time4: getValue()
+Passed: Iterator on time4: Equal with function
+Passed: Iterator on time4+offset: hasNext()
+Passed: Iterator on time4+offset: inRange()
+Passed: Iterator on time4+offset: currentPos()
+Passed: Iterator on time4+offset: nextPos()
+Passed: Iterator on time4+offset: getValue()
+Passed: Iterator on time4+offset: Equal with function
+--- testing jumpTo() backwards
+Passed: Iterator on time4: hasNext()
+Passed: Iterator on time4: inRange()
+Passed: Iterator on time4: currentPos()
+Passed: Iterator on time4: nextPos()
+Passed: Iterator on time4: getValue()
+Passed: Iterator on time4: Equal with function
+Passed: Iterator on time3: hasNext()
+Passed: Iterator on time3: inRange()
+Passed: Iterator on time3: currentPos()
+Passed: Iterator on time3: nextPos()
+Passed: Iterator on time3: getValue()
+Passed: Iterator on time3: Equal with function
+Passed: Iterator on time2: hasNext()
+Passed: Iterator on time2: inRange()
+Passed: Iterator on time2: currentPos()
+Passed: Iterator on time2: nextPos()
+Passed: Iterator on time2: getValue()
+Passed: Iterator on time2: Equal with function
+Passed: Iterator between time1 and time2: hasNext()
+Passed: Iterator between time1 and time2: inRange()
+Passed: Iterator between time1 and time2: currentPos()
+Passed: Iterator between time1 and time2: nextPos()
+Passed: Iterator between time1 and time2: getValue()
+Passed: Iterator between time1 and time2: Equal with function
+--- some tests on multiple entries at first timepoint
+Passed: Iterator at init time without zero time switch: hasNext()
+Passed: Iterator at init time without zero time switch: inRange()
+Passed: Iterator at init time without zero time switch: currentPos()
+Passed: Iterator at init time without zero time switch: nextPos()
+Passed: Iterator at init time without zero time switch: getValue()
+Passed: Iterator at init time without zero time switch: Equal with function
+Passed: Iterator at init time with zero time switch: hasNext()
+Passed: Iterator at init time with zero time switch: inRange()
+Passed: Iterator at init time with zero time switch: currentPos()
+Passed: Iterator at init time with zero time switch: nextPos()
+Passed: Iterator at init time with zero time switch: getValue()
+Passed: Iterator at init time with zero time switch: Equal with function
+Passed: Iterator at init time without zero time switch: hasNext()
+Passed: Iterator at init time without zero time switch: inRange()
+Passed: Iterator at init time without zero time switch: currentPos()
+Passed: Iterator at init time without zero time switch: nextPos()
+Passed: Iterator at init time without zero time switch: getValue()
+Passed: Iterator at init time without zero time switch: Equal with function
+Passed: Iterator at init time without zero time switch: hasNext()
+Passed: Iterator at init time without zero time switch: inRange()
+Passed: Iterator at init time without zero time switch: currentPos()
+Passed: Iterator at init time without zero time switch: nextPos()
+Passed: Iterator at init time without zero time switch: getValue()
+Passed: Iterator at init time without zero time switch: Equal with function
+
+Running simulation...
+** Event #1   T=0   Elapsed: 0.000s (0m 00s)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 0   present: 0   in FES: 0
+** Event #1   T=0   Elapsed: 0.000s (0m 00s)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 0   present: 0   in FES: 0
+
+<!> No more events -- simulation ended at event #1, t=0.
+
+
+Calling finish() at end of Run #0...
+
+End.
