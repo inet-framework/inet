@@ -1,17 +1,17 @@
 # workingdir,                        args,                                          simtimelimit,    fingerprint
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             487a-d2ea
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             fbb0-9dd5
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv4 -r 0,                   10s,             9f69-420f
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c IPv6 -r 0,                   10s,             d83b-a85a
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c Generic -r 0,                10s,             54c1-1979    # unstable fingerprint
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv4 -r 0,              10s,             b3ce-7633    # unstable fingerprint
-/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             cced-c96c
+/examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiIPv6 -r 0,              10s,             d3a0-427c
 # /examples/manetrouting/dymo/,        -f omnetpp.ini -c MultiGeneric -r 0,           10s,             7af2-746f    # unstable fingerprint
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv4 -r 0,                   20s,             0e88-ddae
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv6 -r 0,                   20s,             4db5-ffb8
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c Generic -r 0,                20s,             338d-959a
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiIPv4 -r 0,              20s,             8a73-dc86
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiIPv6 -r 0,              20s,             53ea-0862
-/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiGeneric -r 0,           20s,             e350-33ec
-/examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   500s,            0c33-3844
-/examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              500s,            846e-daca
-/examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 500s,            3293-a78a
-/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            d521-57a4
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv4 -r 0,                   20s,             03f3-33b8
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c IPv6 -r 0,                   20s,             b522-ac81
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c Generic -r 0,                20s,             b309-e5bb
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiIPv4 -r 0,              20s,             7ab7-4b1f
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiIPv6 -r 0,              20s,             b596-3947
+/examples/manetrouting/gpsr/,        -f omnetpp.ini -c MultiGeneric -r 0,           20s,             6a7f-000d
+/examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0,                   500s,            4413-1929
+/examples/rip/simpletest/,           -f omnetpp.ini -c MultiIPv4 -r 0,              500s,            3134-f840
+/examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 500s,            be9d-f0a9
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            cd3d-f9e3
