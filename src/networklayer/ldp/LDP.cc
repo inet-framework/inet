@@ -612,7 +612,7 @@ void LDP::openTCPConnectionToPeer(int peerIndex)
 {
     TCPSocket *socket = new TCPSocket();
     socket->setOutputGate(gate("tcpOut"));
-    socket->setCallbackObject(this, (void*)peerIndex);
+    socket->setCallbackObject(this, (void*)((intptr_t)peerIndex));
     socket->readDataTransferModePar(*this);
     socket->bind(rt->getRouterId(), 0);
     socketMap.addSocket(socket);
@@ -647,7 +647,7 @@ void LDP::processMessageFromTCP(cMessage *msg)
             return;
         }
         myPeers[i].socket = socket;
-        socket->setCallbackObject(this, (void *)i);
+        socket->setCallbackObject(this, (void *)((intptr_t)i));
         socketMap.addSocket(socket);
     }
 
