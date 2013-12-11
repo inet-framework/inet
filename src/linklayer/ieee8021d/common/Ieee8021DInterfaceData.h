@@ -73,6 +73,7 @@ class Ieee8021DInterfaceData : public InterfaceProtocolData
                 simtime_t TCWhile;          // The Topology Change timer. TCN Messages are sent while this timer is running. (RSTP)
 
                 unsigned int lostBPDU;
+                simtime_t nextUpgrade;
         };
 
     protected:
@@ -171,6 +172,10 @@ class Ieee8021DInterfaceData : public InterfaceProtocolData
         static const char *getRoleName(PortRole role);
 
         static const char *getStateName(PortState state);
+
+        simtime_t getNextUpgrade() const {return portData.nextUpgrade;}
+
+        void setNextUpgrade(simtime_t nextUpgrade) {portData.nextUpgrade = nextUpgrade;}
 };
 
 #endif

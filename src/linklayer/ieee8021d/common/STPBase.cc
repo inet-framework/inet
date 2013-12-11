@@ -41,6 +41,7 @@ void STPBase::initialize(int stage)
         helloTime = par("helloTime");
         forwardDelay = par("forwardDelay");
 
+        nb = NotificationBoardAccess().getIfExists();
         macTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTablePath")));
         ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
         cModule *switchModule = findContainingNode(this);
@@ -49,6 +50,9 @@ void STPBase::initialize(int stage)
 
     if (stage == 1) // "auto" MAC addresses assignment takes place in stage 0
     {
+        if (nb)
+            nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
+
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
@@ -169,18 +173,24 @@ void STPBase::updateDisplay()
 
 Ieee8021DInterfaceData * STPBase::getPortInterfaceData(unsigned int portNum)
 {
+    Ieee8021DInterfaceData * portData = getPortInterfaceEntry(portNum)->ieee8021DData();
+    if (!portData)
+        error("IEEE8021DInterfaceData not found!");
+
+    return portData;
+}
+
+InterfaceEntry * STPBase::getPortInterfaceEntry(unsigned int portNum)
+{
     cModule *switchModule = findContainingNode(this);
     cGate *gate = switchModule->gate("ethg$o", portNum);
     if (!gate)
         error("gate is NULL");
     InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
     if (!gateIfEntry)
-        error("gateIfEntry is NULL");
-    Ieee8021DInterfaceData * portData = gateIfEntry->ieee8021DData();
-    if (!portData)
-        error("IEEE8021DInterfaceData not found!");
+        error("gate's Interface is NULL");
 
-    return portData;
+    return gateIfEntry;
 }
 
 int STPBase::getRootIndex()

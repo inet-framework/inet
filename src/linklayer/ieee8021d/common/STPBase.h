@@ -23,12 +23,12 @@
 #include "IMACAddressTable.h"
 #include "InterfaceTable.h"
 #include "Ieee8021DInterfaceData.h"
-
+#include "INotifiable.h"
 
 /**
  * Base class for STP and RSTP.
  */
-class STPBase : public cSimpleModule, public ILifecycle
+class STPBase : public cSimpleModule, public ILifecycle, public INotifiable
 {
 protected:
     bool visualize;                  // if true it visualize the spanning tree
@@ -42,13 +42,15 @@ protected:
     simtime_t helloTime;
     simtime_t forwardDelay;
 
+    NotificationBoard *nb;
     IMACAddressTable * macTable;
     IInterfaceTable * ifTable;
     InterfaceEntry * ie;
 
 public:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
     STPBase();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual void receiveChangeNotification(int category, const cObject *details){};
 protected:
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int stage);
@@ -80,10 +82,15 @@ protected:
      */
     Ieee8021DInterfaceData *getPortInterfaceData(unsigned int portNum);
 
+    /**
+     * @brief Gets InterfaceEntry for port number.
+     * @return The port's InterfaceEntry, or NULL if it doesn't exist.
+     */
+    InterfaceEntry *getPortInterfaceEntry(unsigned int portNum);
+
     /*
      * Returns the first non-loopback interface.
      */
     virtual InterfaceEntry * chooseInterface();
-
 };
 #endif

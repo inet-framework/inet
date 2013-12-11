@@ -35,7 +35,7 @@
 class RSTP : public STPBase {
 protected:
     // kind codes for self messages
-    enum SelfKinds {SELF_HELLOTIME = 1, SELF_UPGRADE, SELF_TIMETODESIGNATE};
+    enum SelfKinds {SELF_HELLOTIME = 1, SELF_UPGRADE};
 
     enum CompareResult {
         WORSE_PORT = -4, WORSE_SRC = -3, WORSE_RPC = -2, WORSE_ROOT = -1, SIMILAR = 0,
@@ -48,13 +48,13 @@ protected:
     bool autoEdge;
 
     cMessage* helloTimer;
-    cMessage* forwardTimer;
-    cMessage* migrateTimer;
+    cMessage* upgradeTimer;
 
 public:
     RSTP();
     virtual ~RSTP();
     virtual int numInitStages() const { return 3; }
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
 protected:
     virtual void initialize(int stage);
@@ -143,14 +143,9 @@ protected:
     virtual void handleHelloTime(cMessage *);
 
     /**
-     * @brief Upgrade event handling. (Every forwardDelay)
+     * @brief Upgrade event handling.
      */
     virtual void handleUpgrade(cMessage *);
-
-    /**
-     * @brief Migration to designated. (Every migrateTime)
-     */
-    virtual void handleMigrate(cMessage *);
 
     /**
      * @brief Checks the frame TC flag.
@@ -162,6 +157,8 @@ protected:
      * @brief Handles the switch to backup in one of the ports
      */
     virtual void handleBK(BPDU * frame, unsigned int arrival);
+
+    virtual void scheduleNextUpgrde();
 };
 
 #endif

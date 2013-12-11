@@ -28,15 +28,13 @@ Define_Module(RSTP);
 RSTP::RSTP()
 {
     helloTimer = new cMessage("itshellotime", SELF_HELLOTIME);
-    forwardTimer = new cMessage("upgrade", SELF_UPGRADE);
-    migrateTimer = new cMessage("timetodesignate", SELF_TIMETODESIGNATE);
+    upgradeTimer = new cMessage("upgrade", SELF_UPGRADE);
 }
 
 RSTP::~RSTP()
 {
     cancelAndDelete(helloTimer);
-    cancelAndDelete(forwardTimer);
-    cancelAndDelete(migrateTimer);
+    cancelAndDelete(upgradeTimer);
 }
 
 void RSTP::initialize(int stage)
@@ -56,9 +54,45 @@ void RSTP::initialize(int stage)
         updateDisplay();
         // programming next auto-messages.
         scheduleAt(simTime(), helloTimer);
-        scheduleAt(simTime() + forwardDelay, forwardTimer);
-        scheduleAt(simTime() + migrateTime, migrateTimer);
     }
+}
+
+void RSTP::scheduleNextUpgrde()
+{
+    cancelEvent(upgradeTimer);
+    Ieee8021DInterfaceData *nextInterfaceData = NULL;
+    for (unsigned int i = 0; i < numPorts; i++)
+    {
+        Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
+
+        if (iPort->getRole() == Ieee8021DInterfaceData::NOTASSIGNED)
+        {
+            if(nextInterfaceData == NULL)
+                nextInterfaceData = iPort;
+            else if(iPort->getNextUpgrade() < nextInterfaceData->getNextUpgrade())
+                nextInterfaceData = iPort;
+        }
+
+        if (iPort->getRole() == Ieee8021DInterfaceData::DESIGNATED)
+        {
+            if (iPort->getState() == Ieee8021DInterfaceData::DISCARDING)
+            {
+                if(nextInterfaceData == NULL)
+                    nextInterfaceData = iPort;
+                else if(iPort->getNextUpgrade() < nextInterfaceData->getNextUpgrade())
+                    nextInterfaceData = iPort;
+            }
+            else if (iPort->getState() == Ieee8021DInterfaceData::LEARNING)
+            {
+                if(nextInterfaceData == NULL)
+                    nextInterfaceData = iPort;
+                else if(iPort->getNextUpgrade() < nextInterfaceData->getNextUpgrade())
+                    nextInterfaceData = iPort;
+            }
+        }
+    }
+    if(nextInterfaceData != NULL)
+        scheduleAt(nextInterfaceData->getNextUpgrade(), upgradeTimer);
 }
 
 void RSTP::handleMessage(cMessage *msg)
@@ -84,11 +118,6 @@ void RSTP::handleMessage(cMessage *msg)
             handleUpgrade(msg);
             break;
 
-        case SELF_TIMETODESIGNATE:
-            // not assigned ports switch to designated.
-            handleMigrate(msg);
-            break;
-
         default:
             error("Unknown self message");
             break;
@@ -100,54 +129,45 @@ void RSTP::handleMessage(cMessage *msg)
     }
 }
 
-void RSTP::handleMigrate(cMessage * msg)
-{
-    for (unsigned int i = 0; i < numPorts; i++)
-    {
-        Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
-        if (iPort->getRole() == Ieee8021DInterfaceData::NOTASSIGNED)
-        {
-            EV_DETAIL << "MigrateTime. Setting port " << i << "to designated." << endl;
-            iPort->setRole(Ieee8021DInterfaceData::DESIGNATED);
-            iPort->setState(Ieee8021DInterfaceData::DISCARDING); // contest to become forwarding.
-        }
-    }
-    updateDisplay();
-    scheduleAt(simTime() + migrateTime, msg); // programming next switch to designate
-}
-
 void RSTP::handleUpgrade(cMessage * msg)
 {
     for (unsigned int i = 0; i < numPorts; i++)
     {
         Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
-        if (iPort->getRole() == Ieee8021DInterfaceData::DESIGNATED)
-        {
-            if (iPort->getState() == Ieee8021DInterfaceData::DISCARDING)
+        if(iPort->getNextUpgrade() == simTime())
+            if (iPort->getRole() == Ieee8021DInterfaceData::NOTASSIGNED)
             {
-                EV_INFO << "UpgradeTime. Setting port " << i << " state to learning." << endl;
-                iPort->setState(Ieee8021DInterfaceData::LEARNING);
+                EV_DETAIL << "MigrateTime. Setting port " << i << "to designated." << endl;
+                iPort->setRole(Ieee8021DInterfaceData::DESIGNATED);
+                iPort->setState(Ieee8021DInterfaceData::DISCARDING); // contest to become forwarding.
+                iPort->setNextUpgrade(simTime() + forwardDelay);
             }
-            else if (iPort->getState() == Ieee8021DInterfaceData::LEARNING)
+            else if (iPort->getRole() == Ieee8021DInterfaceData::DESIGNATED)
             {
-                EV_INFO << "UpgradeTime. Setting port " << i << " state to forwarding." << endl;
-                iPort->setState(Ieee8021DInterfaceData::FORWARDING);
-                // TODO: this loop seems to be repeated at multiple locations, some refactoring might help
-                //flushing other ports
-                //TCN over all active ports
-                for (unsigned int j = 0; j < numPorts; j++)
+                if (iPort->getState() == Ieee8021DInterfaceData::DISCARDING)
                 {
-                    Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
-                    jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
-                    if (j != i)
-                        // TODO: BTW, this will flush the same ports multiple times due to the 2 nested loops, couldn't it be done better?
-                        macTable->flush(j);
+                    EV_INFO << "UpgradeTime. Setting port " << i << " state to learning." << endl;
+                    iPort->setState(Ieee8021DInterfaceData::LEARNING);
+                    iPort->setNextUpgrade(simTime() + forwardDelay);
+                }
+                else if (iPort->getState() == Ieee8021DInterfaceData::LEARNING)
+                {
+                    EV_INFO << "UpgradeTime. Setting port " << i << " state to forwarding." << endl;
+                    iPort->setState(Ieee8021DInterfaceData::FORWARDING);
+                    //flushing other ports
+                    //TCN over all active ports
+                    for (unsigned int j = 0; j < numPorts; j++)
+                    {
+                        Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
+                        jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
+                        if (j != i)
+                            macTable->flush(j);
+                    }
                 }
             }
-        }
     }
     updateDisplay();
-    scheduleAt(simTime() + forwardDelay, msg); // programming next upgrade
+    scheduleNextUpgrde();
 }
 
 void RSTP::handleHelloTime(cMessage * msg)
@@ -171,7 +191,7 @@ void RSTP::handleHelloTime(cMessage * msg)
                 if (iPort->getRole() == Ieee8021DInterfaceData::ROOT)
                 {
                     // looking for the best ALTERNATE port
-                    int candidate=getBestAlternate();   // FIXME Spanish name!
+                    int candidate=getBestAlternate();
                     if (candidate!=-1)
                     {
                         // if an alternate gate has been found, switch to alternate
@@ -183,6 +203,8 @@ void RSTP::handleHelloTime(cMessage * msg)
                         Ieee8021DInterfaceData * candidatePort = getPortInterfaceData(candidate);
                         iPort->setRole(Ieee8021DInterfaceData::DESIGNATED);
                         iPort->setState(Ieee8021DInterfaceData::DISCARDING);// if there is not a better BPDU, that will become FORWARDING
+                        iPort->setNextUpgrade(simTime() + forwardDelay);
+                        scheduleNextUpgrde();
                         initInterfacedata(i);// reset, then a new BPDU will be allowed to upgrade the best received info for this port
                         candidatePort->setRole(Ieee8021DInterfaceData::ROOT);
                         candidatePort->setState(Ieee8021DInterfaceData::FORWARDING);
@@ -192,7 +214,7 @@ void RSTP::handleHelloTime(cMessage * msg)
                         for (unsigned int j=0; j<numPorts; j++)
                         {
                             Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
-                            jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
+                            jPort->setTCWhile(simTime()+tcWhileTime);
                             if (j!=(unsigned int)candidate)
                                 macTable->flush(j);
                         }
@@ -213,6 +235,8 @@ void RSTP::handleHelloTime(cMessage * msg)
                     // it should take care of this LAN, switching to designated
                     iPort->setRole(Ieee8021DInterfaceData::DESIGNATED);
                     iPort->setState(Ieee8021DInterfaceData::DISCARDING);// a new content will start in case of another switch were in alternate
+                    iPort->setNextUpgrade(simTime() + forwardDelay);
+                    scheduleNextUpgrde();
                     // if there is no problem, this will become forwarding in a few seconds
                     initInterfacedata(i);
                 }
@@ -241,7 +265,7 @@ void RSTP::checkTC(BPDU * frame, int arrival)
                 // flushing other ports
                 // TCN over other ports
                 macTable->flush(i);
-                port2->setTCWhile(simulation.getSimTime()+tcWhileTime);
+                port2->setTCWhile(simTime()+tcWhileTime);
             }
         }
     }
@@ -352,7 +376,7 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
         for (unsigned int j = 0; j < numPorts; j++)
         {
             Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
-            jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
+            jPort->setTCWhile(simTime()+tcWhileTime);
             if (j != (unsigned int) arrivalPortNum)
                 macTable->flush(j);
         }
@@ -388,7 +412,7 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
                     for (unsigned int j = 0; j < numPorts; j++)
                     {
                         Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
-                        jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
+                        jPort->setTCWhile(simTime()+tcWhileTime);
                         if (j != (unsigned int) arrivalPortNum)
                             macTable->flush(j);
                     }
@@ -414,12 +438,14 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
                 if (!iPort->isEdge())   // avoiding clients reseting
                 {
                     if (arrivalPort->getState() != Ieee8021DInterfaceData::FORWARDING)
-                        iPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
+                        iPort->setTCWhile(simTime()+tcWhileTime);
                     macTable->flush(i);
                     if (i!=(unsigned)arrivalPortNum)
                     {
                         iPort->setRole(Ieee8021DInterfaceData::NOTASSIGNED);
                         iPort->setState(Ieee8021DInterfaceData::DISCARDING);
+                        iPort->setNextUpgrade(simTime() + migrateTime);
+                        scheduleNextUpgrde();
                         initInterfacedata(i);
                     }
                 }
@@ -441,7 +467,7 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
                 for (unsigned int j=0; j<numPorts; j++)
                 {
                     Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
-                    jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
+                    jPort->setTCWhile(simTime()+tcWhileTime);
                     if (j!=(unsigned int)arrivalPortNum)
                         macTable->flush(j);
                 }
@@ -465,6 +491,8 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
             {
                 EV_DETAIL << "Setting current root port (port" << r << ") to designated." << endl;
                 rootPort->setRole(Ieee8021DInterfaceData::DESIGNATED);
+                rootPort->setNextUpgrade(simTime() + forwardDelay);
+                scheduleNextUpgrde();
             }
             rootPort->setState(Ieee8021DInterfaceData::DISCARDING);
             return true;
@@ -483,6 +511,8 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
                 EV_DETAIL << "Worse route to the current root. Setting the arrival port to designated." << endl;
                 arrivalPort->setRole(Ieee8021DInterfaceData::DESIGNATED);
                 arrivalPort->setState(Ieee8021DInterfaceData::DISCARDING);
+                arrivalPort->setNextUpgrade(simTime() + forwardDelay);
+                scheduleNextUpgrde();
                 sendBPDU(arrivalPortNum); // BPDU to show him a better root as soon as possible
             }
             else
@@ -524,6 +554,8 @@ bool RSTP::processSameSource(BPDU *frame, unsigned int arrivalPortNum)
                 Ieee8021DInterfaceData * alternativePort = getPortInterfaceData(alternative);
                 arrivalPort->setRole(Ieee8021DInterfaceData::DESIGNATED);
                 arrivalPort->setState(Ieee8021DInterfaceData::DISCARDING);
+                arrivalPort->setNextUpgrade(simTime() + forwardDelay);
+                scheduleNextUpgrde();
                 macTable->copyTable(arrivalPortNum,alternative); // copy cache from old to new root
                 // flushing other ports
                 // TCN over all ports, alternative was alternate
@@ -565,6 +597,8 @@ bool RSTP::processSameSource(BPDU *frame, unsigned int arrivalPortNum)
             EV_DETAIL << "This port was an alternate, setting to designated" << endl;
             arrivalPort->setRole(Ieee8021DInterfaceData::DESIGNATED);
             arrivalPort->setState(Ieee8021DInterfaceData::DISCARDING);
+            arrivalPort->setNextUpgrade(simTime() + forwardDelay);
+            scheduleNextUpgrde();
             updateInterfacedata(frame,arrivalPortNum);
             sendBPDU(arrivalPortNum); //Show him a better Root as soon as possible
         }
@@ -596,6 +630,8 @@ bool RSTP::processSameSource(BPDU *frame, unsigned int arrivalPortNum)
                     {
                         EV_DETAIL << "This port was the root, but there is a better alternative. Setting the arrival port to designated and port " << alternative << "to root." << endl;
                         arrivalPort->setRole(Ieee8021DInterfaceData::DESIGNATED);
+                        arrivalPort->setNextUpgrade(simTime() + forwardDelay);
+                        scheduleNextUpgrde();
                     }
                     else
                     {
@@ -629,6 +665,8 @@ bool RSTP::processSameSource(BPDU *frame, unsigned int arrivalPortNum)
                 EV_DETAIL << "This port was an alternate, setting to designated" << endl;
                 arrivalPort->setRole(Ieee8021DInterfaceData::DESIGNATED); // if the frame is worse than this module generated frame, switch to Designated/Discarding
                 arrivalPort->setState(Ieee8021DInterfaceData::DISCARDING);
+                arrivalPort->setNextUpgrade(simTime() + forwardDelay);
+                scheduleNextUpgrde();
                 sendBPDU(arrivalPortNum);// show him a better BPDU as soon as possible
             }
             else
@@ -654,7 +692,7 @@ void RSTP::sendTCNtoRoot()
         Ieee8021DInterfaceData * rootPort = getPortInterfaceData(r);
         if (rootPort->getRole() != Ieee8021DInterfaceData::DISABLED)
         {
-            if (simulation.getSimTime()<rootPort->getTCWhile())
+            if (simTime()<rootPort->getTCWhile())
             {
                 BPDU * frame = new BPDU();
                 Ieee802Ctrl * etherctrl= new Ieee802Ctrl();
@@ -729,7 +767,7 @@ void RSTP::sendBPDU(int port)
         frame->setTcaFlag(false);
         frame->setPortNum(port);
         frame->setBridgeAddress(bridgeAddress);
-        if (simulation.getSimTime() < iport->getTCWhile())
+        if (simTime() < iport->getTCWhile())
             frame->setTcFlag(true);
         else
             frame->setTcFlag(false);
@@ -804,6 +842,7 @@ void RSTP::initPorts()
         {
             jPort->setRole(Ieee8021DInterfaceData::NOTASSIGNED);
             jPort->setState(Ieee8021DInterfaceData::DISCARDING);
+            jPort->setNextUpgrade(simTime() + migrateTime);
         }
         else
         {
@@ -813,6 +852,7 @@ void RSTP::initPorts()
         initInterfacedata(j);
         macTable->flush(j);
     }
+    scheduleNextUpgrde();
 }
 
 void RSTP::updateInterfacedata(BPDU *frame, unsigned int portNum)
@@ -945,19 +985,45 @@ int RSTP::getBestAlternate()
     return candidate;
 }
 
+void RSTP::receiveChangeNotification(int category, const cObject *details)
+{
+    if (category == NF_INTERFACE_STATE_CHANGED)
+    {
+        cModule *switchModule = findContainingNode(this);
+        for (unsigned int i = 0; i < numPorts; i++)
+        {
+            cGate *gate = switchModule->gate("ethg$o", i);
+            if (!gate)
+                error("gate is NULL");
+            InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
+            if (!gateIfEntry)
+                error("gateIfEntry is NULL");
+            if (gateIfEntry == check_and_cast<const InterfaceEntry *>(details))
+            {
+                if(gateIfEntry->hasCarrier())
+                {
+
+                }
+                else
+                {
+
+                }
+
+            }
+        }
+    }
+}
+
 void RSTP::start()
 {
     STPBase::start();
     initPorts();
     scheduleAt(simTime(), helloTimer);
-    scheduleAt(simTime() + forwardDelay, forwardTimer);
-    scheduleAt(simTime() + migrateTime, migrateTimer);
 }
 
 void RSTP::stop()
 {
     STPBase::stop();
     cancelEvent(helloTimer);
-    cancelEvent(forwardTimer);
-    cancelEvent(migrateTimer);
+    cancelEvent(upgradeTimer);
 }
