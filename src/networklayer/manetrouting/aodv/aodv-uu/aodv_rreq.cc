@@ -677,7 +677,7 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
                         return;
             */
         }
-forward:
+//forward:
 #ifndef OMNETPP
         if (ip_ttl > 1)
 #else
