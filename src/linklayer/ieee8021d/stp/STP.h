@@ -37,10 +37,9 @@ class STP : public STPBase
 {
     public:
         typedef Ieee8021DInterfaceData::PortInfo PortInfo;
-
+        enum BDPUType {CONFIG_BDPU = 0, TCN_BPDU = 1};
     protected:
-
-        int convergenceTime;
+        static const double tickInterval; // interval between two ticks
         bool isRoot;
         unsigned int rootPort;
         std::vector<unsigned int> desPorts; // set of designated ports
@@ -53,13 +52,10 @@ class STP : public STPBase
         simtime_t currentMaxAge;
         simtime_t currentFwdDelay;
         simtime_t currentHelloTime;
+        simtime_t helloTime;
 
         // Parameter change detection
         unsigned int currentBridgePriority;
-
-        // TODO: it's called like a cMessage timer... what is it really an interval or?
-        simtime_t helloTimer;
-
         // Topology change commencing
         bool topologyChangeNotification;
         bool topologyChangeRecvd;
@@ -86,11 +82,15 @@ class STP : public STPBase
         virtual int numInitStages() const { return 2; }
 
         /*
-         * Generate BPDUs to all interfaces (for root switch)
+         * Send BPDU with specified parameters (portNum, TCA flag, etc.)
          */
         void generateBPDU(int portNum, const MACAddress& address = MACAddress::STP_MULTICAST_ADDRESS, bool tcFlag = false, bool tcaFlag = false);
-        // TODO: rename
-        void generator();
+
+        /*
+         * Send hello BDPUs on all ports (only for root switches)
+         * Invokes generateBPDU(i) where i goes through all ports
+         */
+        void generateHelloBDPUs();
 
         /*
          * Generate and send Topology Change Notification
@@ -132,7 +132,7 @@ class STP : public STPBase
         void setAllDesignated();
 
         /*
-         * State changes
+         * Helper functions to handle state changes
          */
         void lostRoot();
         void lostAlternate(int port);
