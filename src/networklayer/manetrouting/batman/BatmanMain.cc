@@ -300,6 +300,8 @@ void Batman::handleMessage(cMessage *msg)
         delete ctrl;
     }
 
+    if (!if_incoming)
+        throw cRuntimeError("model error: if_incoming is NULL");
 
     BatmanPacket *bat_packet = NULL;
     UDPPacket *udpPacket = dynamic_cast<UDPPacket*>(msg);
