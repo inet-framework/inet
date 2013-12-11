@@ -540,7 +540,7 @@ void NS_CLASS print_rt_table(void *arg)
                 "Destination", "Next hop", "HC", "St.", "Seqno", "Expire",
                 "Flags", "Iface", "Precursors");
 
-    write(log_rt_fd, rt_buf, len);
+    if (write(log_rt_fd, rt_buf, len) < 0) throw cRuntimeError("write() error");
     len = 0;
     for (AodvRtTableMap::iterator it = aodvRtTableMap.begin(); it != aodvRtTableMap.end(); it++)
     {
@@ -612,14 +612,13 @@ void NS_CLASS print_rt_table(void *arg)
                     /* Since the precursor list is grown dynamically
                      * the write buffer should be flushed for every
                      * entry to avoid buffer overflows */
-                 write(log_rt_fd, rt_buf, len);
-                 len = 0;
-
-             }
+                if (write(log_rt_fd, rt_buf, len) < 0) throw cRuntimeError("write() error");
+                len = 0;
+            }
          }
          if (len > 0)
          {
-             write(log_rt_fd, rt_buf, len);
+             if (write(log_rt_fd, rt_buf, len) < 0) throw cRuntimeError("write() error");
              len = 0;
          }
     }
