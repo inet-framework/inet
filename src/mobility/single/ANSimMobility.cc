@@ -109,13 +109,16 @@ void ANSimMobility::extractDataFrom(cXMLElement *node)
     // extract data from <position_change> element
     // FIXME start_time has to be taken into account too! as pause from prev element's end_time
     const char *startTimeStr = firstChildWithTag(node, "start_time")->getNodeValue();
+    if (!startTimeStr)
+        throw cRuntimeError("No content in <start_time> element at %s", node->getSourceLocation());
     const char *endTimeStr = firstChildWithTag(node, "end_time")->getNodeValue();
+    if (!endTimeStr)
+        throw cRuntimeError("No content in <end_time> element at %s", node->getSourceLocation());
     cXMLElement *destElem = firstChildWithTag(node, "destination");
     const char *xStr = firstChildWithTag(destElem, "xpos")->getNodeValue();
     const char *yStr = firstChildWithTag(destElem, "ypos")->getNodeValue();
-
-    if (!endTimeStr || !xStr || !yStr)
-        throw cRuntimeError("No content in <end_time>, <destination>/<xpos> or <ypos> element at %s", node->getSourceLocation());
+    if (!xStr || !yStr)
+        throw cRuntimeError("No content in <destination>/<xpos> or <ypos> element at %s", node->getSourceLocation());
 
     nextChange = atof(endTimeStr);
     targetPosition.x = atof(xStr);
