@@ -807,10 +807,10 @@ void RSVP::commitResv(ResvStateBlock_t *rsb)
         }
 
         FlowSpecObj_t req;
-        req.req_bandwidth = 0.0;
+        unsigned int maxFlowIndex = 0;
+        req.req_bandwidth = rsb->FlowDescriptor[0].Flowspec_Object.req_bandwidth;
 
-        unsigned int maxFlowIndex;
-        for (unsigned int i = 0; i < rsb->FlowDescriptor.size(); i++)
+        for (unsigned int i = 1; i < rsb->FlowDescriptor.size(); i++)
         {
             if (rsb->FlowDescriptor[i].Flowspec_Object.req_bandwidth > req.req_bandwidth)
             {
