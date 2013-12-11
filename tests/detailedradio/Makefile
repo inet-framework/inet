@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for detailedradiotests
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep -o detailedradiotests -O out -I../../src/base -I../../src/util -I../../src/mobility/contract -I../../src/physicallayer/contract -I../../src/physicallayer/common -I../../src/physicallayer/radio/contract -I../../src/physicallayer/radio/common -I../../src/physicallayer/radio/detailed -I../../src/physicallayer/radio/detailed/base -I../../src/physicallayer/radio/detailed/attenuation -I../../src/physicallayer/radio/detailed/radiochannel -I../../src/physicallayer/radio/detailed/mapping -I../../src/physicallayer/radio/detailed/decider -L../../out/$(CONFIGNAME)/src -linet
+#  opp_makemake -f --deep -o detailedradiotests -O out -I../../src/base -I../../src/util -I../../src/mobility/contract -I../../src/linklayer/common -I../../src/physicallayer/contract -I../../src/physicallayer/common -I../../src/physicallayer/radio/contract -I../../src/physicallayer/radio/common -I../../src/physicallayer/radio/detailed -I../../src/physicallayer/radio/detailed/base -I../../src/physicallayer/radio/detailed/attenuation -I../../src/physicallayer/radio/detailed/radiochannel -I../../src/physicallayer/radio/detailed/mapping -I../../src/physicallayer/radio/detailed/decider -L../../out/$(CONFIGNAME)/src -linet
 #
 
 # Name of target to be created (-o option)
@@ -18,6 +18,7 @@ INCLUDE_PATH = \
     -I../../src/base \
     -I../../src/util \
     -I../../src/mobility/contract \
+    -I../../src/linklayer/common \
     -I../../src/physicallayer/contract \
     -I../../src/physicallayer/common \
     -I../../src/physicallayer/radio/contract \
@@ -30,6 +31,7 @@ INCLUDE_PATH = \
     -I../../src/physicallayer/radio/detailed/decider \
     -I. \
     -IchannelInfo \
+    -IconnectionManager \
     -Icoord \
     -Idecider \
     -Imapping \
@@ -51,6 +53,12 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 # Object files for local .cc, .msg and .sm files
 OBJS = \
     $O/channelInfo/ChannelInfoTest.o \
+    $O/connectionManager/CMPhyLayer.o \
+    $O/connectionManager/ConnectedBCNodePhyLayer.o \
+    $O/connectionManager/ConnectedRNodePhyLayer.o \
+    $O/connectionManager/NotConnectedBCNodePhyLayer.o \
+    $O/connectionManager/NotConnectedRNodePhyLayer.o \
+    $O/connectionManager/TestCM.o \
     $O/coord/CoordTest.o \
     $O/decider/DeciderTest.o \
     $O/mapping/mappingtest.o \
@@ -146,6 +154,7 @@ clean:
 	$(Q)-rm -f detailedradiotests detailedradiotests.exe libdetailedradiotests.so libdetailedradiotests.a libdetailedradiotests.dll libdetailedradiotests.dylib
 	$(Q)-rm -f ./*_m.cc ./*_m.h ./*_sm.cc ./*_sm.h
 	$(Q)-rm -f channelInfo/*_m.cc channelInfo/*_m.h channelInfo/*_sm.cc channelInfo/*_sm.h
+	$(Q)-rm -f connectionManager/*_m.cc connectionManager/*_m.h connectionManager/*_sm.cc connectionManager/*_sm.h
 	$(Q)-rm -f coord/*_m.cc coord/*_m.h coord/*_sm.cc coord/*_sm.h
 	$(Q)-rm -f decider/*_m.cc decider/*_m.h decider/*_sm.cc decider/*_sm.h
 	$(Q)-rm -f mapping/*_m.cc mapping/*_m.h mapping/*_sm.cc mapping/*_sm.h
@@ -157,7 +166,7 @@ cleanall: clean
 
 depend:
 	$(qecho) Creating dependencies...
-	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES) $(SM_CC_FILES)  ./*.cc channelInfo/*.cc coord/*.cc decider/*.cc mapping/*.cc radioState/*.cc testUtils/*.cc
+	$(Q)$(MAKEDEPEND) $(INCLUDE_PATH) -f Makefile -P\$$O/ -- $(MSG_CC_FILES) $(SM_CC_FILES)  ./*.cc channelInfo/*.cc connectionManager/*.cc coord/*.cc decider/*.cc mapping/*.cc radioState/*.cc testUtils/*.cc
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 $O/channelInfo/ChannelInfoTest.o: channelInfo/ChannelInfoTest.cc \
@@ -179,6 +188,128 @@ $O/channelInfo/ChannelInfoTest.o: channelInfo/ChannelInfoTest.cc \
   ../../src/physicallayer/radio/detailed/DetailedRadioFrame.h \
   ../../src/base/InitStages.h \
   ../../src/physicallayer/radio/detailed/mapping/Mapping.h
+$O/connectionManager/CMPhyLayer.o: connectionManager/CMPhyLayer.cc \
+  ../../src/physicallayer/common/PhysicalLayerBase.h \
+  ../../src/physicallayer/radio/contract/IRadio.h \
+  ../../src/base/Coord.h \
+  ../../src/util/FWMath.h \
+  ../../src/physicallayer/contract/IPhysicalLayer.h \
+  ../../src/base/ModuleAccess.h \
+  ../../src/linklayer/common/MACAddress.h \
+  connectionManager/CMPhyLayer.h \
+  ../../src/base/OperationalBase.h \
+  ../../src/base/INETDefs.h \
+  ../../src/base/LifecycleOperation.h \
+  ../../src/physicallayer/radio/common/RadioBase.h \
+  ../../src/base/Compat.h \
+  ../../src/mobility/contract/IMobility.h \
+  ../../src/base/InitStages.h \
+  ../../src/physicallayer/radio/detailed/radiochannel/DetailedRadioChannelAccess.h \
+  ../../src/base/NodeOperations.h \
+  ../../src/linklayer/common/MACFrameBase_m.h \
+  ../../src/base/ILifecycle.h
+$O/connectionManager/ConnectedBCNodePhyLayer.o: connectionManager/ConnectedBCNodePhyLayer.cc \
+  ../../src/physicallayer/common/PhysicalLayerBase.h \
+  ../../src/util/FWMath.h \
+  ../../src/base/Coord.h \
+  ../../src/physicallayer/radio/contract/IRadio.h \
+  ../../src/physicallayer/contract/IPhysicalLayer.h \
+  connectionManager/ConnectedBCNodePhyLayer.h \
+  connectionManager/CMPhyLayer.h \
+  ../../src/linklayer/common/MACAddress.h \
+  ../../src/base/ModuleAccess.h \
+  ../../src/base/INETDefs.h \
+  ../../src/base/OperationalBase.h \
+  ../../src/base/LifecycleOperation.h \
+  ../../src/physicallayer/radio/common/RadioBase.h \
+  ../../src/base/Compat.h \
+  ../../src/physicallayer/radio/detailed/radiochannel/DetailedRadioChannelAccess.h \
+  ../../src/base/InitStages.h \
+  ../../src/mobility/contract/IMobility.h \
+  ../../src/base/NodeOperations.h \
+  ../../src/linklayer/common/MACFrameBase_m.h \
+  ../../src/base/ILifecycle.h
+$O/connectionManager/ConnectedRNodePhyLayer.o: connectionManager/ConnectedRNodePhyLayer.cc \
+  ../../src/physicallayer/common/PhysicalLayerBase.h \
+  ../../src/util/FWMath.h \
+  ../../src/base/Coord.h \
+  ../../src/physicallayer/radio/contract/IRadio.h \
+  ../../src/physicallayer/contract/IPhysicalLayer.h \
+  connectionManager/CMPhyLayer.h \
+  ../../src/linklayer/common/MACAddress.h \
+  ../../src/base/ModuleAccess.h \
+  ../../src/base/INETDefs.h \
+  ../../src/base/OperationalBase.h \
+  ../../src/base/LifecycleOperation.h \
+  ../../src/physicallayer/radio/common/RadioBase.h \
+  ../../src/base/Compat.h \
+  ../../src/physicallayer/radio/detailed/radiochannel/DetailedRadioChannelAccess.h \
+  ../../src/base/InitStages.h \
+  ../../src/mobility/contract/IMobility.h \
+  ../../src/base/NodeOperations.h \
+  ../../src/linklayer/common/MACFrameBase_m.h \
+  ../../src/base/ILifecycle.h \
+  connectionManager/ConnectedRNodePhyLayer.h
+$O/connectionManager/NotConnectedBCNodePhyLayer.o: connectionManager/NotConnectedBCNodePhyLayer.cc \
+  ../../src/physicallayer/common/PhysicalLayerBase.h \
+  ../../src/util/FWMath.h \
+  ../../src/base/Coord.h \
+  ../../src/physicallayer/radio/contract/IRadio.h \
+  ../../src/physicallayer/contract/IPhysicalLayer.h \
+  connectionManager/CMPhyLayer.h \
+  ../../src/linklayer/common/MACAddress.h \
+  ../../src/base/ModuleAccess.h \
+  ../../src/base/INETDefs.h \
+  ../../src/base/OperationalBase.h \
+  ../../src/base/LifecycleOperation.h \
+  connectionManager/NotConnectedBCNodePhyLayer.h \
+  ../../src/physicallayer/radio/common/RadioBase.h \
+  ../../src/base/Compat.h \
+  ../../src/physicallayer/radio/detailed/radiochannel/DetailedRadioChannelAccess.h \
+  ../../src/base/InitStages.h \
+  ../../src/mobility/contract/IMobility.h \
+  ../../src/base/NodeOperations.h \
+  ../../src/linklayer/common/MACFrameBase_m.h \
+  ../../src/base/ILifecycle.h
+$O/connectionManager/NotConnectedRNodePhyLayer.o: connectionManager/NotConnectedRNodePhyLayer.cc \
+  ../../src/physicallayer/common/PhysicalLayerBase.h \
+  ../../src/util/FWMath.h \
+  ../../src/base/Coord.h \
+  ../../src/physicallayer/radio/contract/IRadio.h \
+  ../../src/physicallayer/contract/IPhysicalLayer.h \
+  connectionManager/CMPhyLayer.h \
+  ../../src/linklayer/common/MACAddress.h \
+  ../../src/base/ModuleAccess.h \
+  connectionManager/NotConnectedRNodePhyLayer.h \
+  ../../src/base/INETDefs.h \
+  ../../src/base/OperationalBase.h \
+  ../../src/base/LifecycleOperation.h \
+  ../../src/physicallayer/radio/common/RadioBase.h \
+  ../../src/base/Compat.h \
+  ../../src/physicallayer/radio/detailed/radiochannel/DetailedRadioChannelAccess.h \
+  ../../src/base/InitStages.h \
+  ../../src/mobility/contract/IMobility.h \
+  ../../src/base/NodeOperations.h \
+  ../../src/linklayer/common/MACFrameBase_m.h \
+  ../../src/base/ILifecycle.h
+$O/connectionManager/TestCM.o: connectionManager/TestCM.cc \
+  connectionManager/TestCM.h \
+  ../../src/physicallayer/radio/contract/IRadioFrame.h \
+  ../../src/physicallayer/radio/contract/IRadio.h \
+  ../../src/base/Coord.h \
+  ../../src/util/FWMath.h \
+  testUtils/asserts.h \
+  ../../src/physicallayer/contract/IPhysicalLayer.h \
+  ../../src/physicallayer/radio/detailed/radiochannel/BaseConnectionManager.h \
+  ../../src/physicallayer/radio/contract/IRadioSignal.h \
+  ../../src/base/INETDefs.h \
+  ../../src/physicallayer/radio/contract/IRadioChannel.h \
+  ../../src/physicallayer/contract/IPhysicalLayerFrame.h \
+  ../../src/base/Compat.h \
+  ../../src/physicallayer/radio/detailed/radiochannel/NicEntry.h \
+  ../../src/mobility/contract/IMobility.h \
+  ../../src/base/InitStages.h \
+  ../../src/physicallayer/radio/common/RadioChannelBase.h
 $O/coord/CoordTest.o: coord/CoordTest.cc \
   ../../src/util/FWMath.h \
   ../../src/base/Coord.h \
@@ -199,8 +330,8 @@ $O/decider/DeciderTest.o: decider/DeciderTest.cc \
   decider/DeciderTest.h \
   ../../src/physicallayer/radio/detailed/decider/SNRThresholdDecider.h \
   ../../src/physicallayer/radio/detailed/decider/BaseDecider.h \
-  ../../src/physicallayer/radio/detailed/decider/Decider.h \
   testUtils/OmnetTestBase.h \
+  ../../src/physicallayer/radio/detailed/decider/Decider.h \
   ../../src/base/OperationalBase.h \
   ../../src/physicallayer/radio/detailed/mapping/MappingUtils.h \
   ../../src/base/LifecycleOperation.h \
