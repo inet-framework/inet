@@ -35,9 +35,6 @@ STPTester::~STPTester()
 
 void STPTester::initialize()
 {
-    graph.extractByProperty("node");
-    numOfNodes = graph.getNumNodes();
-
     checkTime=par("checkTime");
     scheduleAt(simTime() + checkTime, checkTimer);
 }
@@ -68,6 +65,9 @@ void STPTester::depthFirstSearch()
 {
     loop = false;
     numOfVisitedNodes = 0;
+    graph.extractByProperty("node");
+    numOfNodes = graph.getNumNodes();
+
     for (int i = 0; i < graph.getNumNodes(); i++)
     {
         color[graph.getNode(i)] = WHITE;
