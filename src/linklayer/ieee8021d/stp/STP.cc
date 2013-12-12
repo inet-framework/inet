@@ -707,11 +707,6 @@ void STP::start()
 {
     STPBase::start();
 
-    // obtain a bridge address from InterfaceTable
-    ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableName")));
-    InterfaceEntry * ifEntry = ifTable->getInterface(0);
-    if (ifEntry != NULL)
-        bridgeAddress = ifEntry->getMacAddress();
     initPortTable();
     currentBridgePriority = bridgePriority;
     isRoot = true;
