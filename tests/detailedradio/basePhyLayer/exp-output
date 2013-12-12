@@ -1,0 +1,707 @@
+Passed: Check AnalogueModel name.
+Passed: Check for correct RSAM-pointer.
+Passed: Check AnalogueModel parameter count.
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check Decider name.
+Passed: Check Decider parameter count.
+Passed: Check for parameter "aString".
+Passed: Check type of parameter "aString".
+Passed: Check value of parameter "aString".
+Passed: Check for parameter "anotherString".
+Passed: Check type of parameter "anotherString".
+Passed: Check value of parameter "anotherString".
+Passed: Check for parameter "aBool".
+Passed: Check type of parameter "aBool".
+Passed: Check value of parameter "aBool".
+Passed: Check for parameter "anotherBool".
+Passed: Check type of parameter "anotherBool".
+Passed: Check value of parameter "anotherBool".
+Passed: Check for parameter "aDouble".
+Passed: Check type of parameter "aDouble".
+Passed: Check value of parameter "aDouble".
+Passed: Check for parameter "anotherDouble".
+Passed: Check type of parameter "anotherDouble".
+Passed: Check value of parameter "anotherDouble".
+Passed: Check for parameter "aLong".
+Passed: Check type of parameter "aLong".
+Passed: Check value of parameter "aLong".
+Passed: Check for parameter "anotherLong".
+Passed: Check type of parameter "anotherLong".
+Passed: Check value of parameter "anotherLong".
+Passed: Planning new test case:mac0
+Passed: Planning new test case:0
+Passed: Planning new test case:1
+Passed: Planning new test case:1.1
+Passed: Planning new test case:1.2
+Passed: Planning new test case:1.3
+Passed: Planning new test case:1.4
+Passed: Planning new test case:1.5
+Passed: Planning new test case:1.6
+Passed: Planning new test case:1.7
+Passed: Planning new test case:1.8
+Passed: Planning new test case:2
+Passed: Planning new test case:2.1
+Passed: Planning new test case:2.2
+Passed: Planning new test case:2.3
+Passed: Planning new test case:2.4
+Passed: Planning new test case:3
+Passed: Planning new test case:4
+Passed: [mac0] - Expected module - Mac layer executing all of test run 1
+Passed: Check parameter "usePropagationDelay".
+Passed: Check parameter "sensitivity".
+Passed: Check parameter "maxTXPower".
+Passed: Check if thermalNoise map is of type ConstantSimpleConstMapping.
+Passed: Check parameter "thermalNoise".
+Passed: Check if thermalNoise map returned by "getThermalNoise()" is of type ConstantSimpleConstMapping.
+Passed: Check value of ("getThermalNoise()"-mapping).
+Passed: Check value of ("getThermalNoise()"-mapping at a position).
+Passed: Check upperLayerIn ID.
+Passed: Check upperLayerOut ID.
+Passed: Switchtime SLEEP to RX.
+Passed: Switchtime RX to TX.
+Passed: Switchtime TX to SLEEP.
+Passed: Switchtime SLEEP to TX.
+Passed: Switchtime TX to RX.
+Passed: Switchtime RX to SLEEP.
+Passed: Decider is of type TestDecider.
+Passed: Check size of AnalogueModel list.
+Passed: Analogue model is of type RadioStateAnalogueModel.
+Passed: Analogue model is of type TestAnalogueModel.
+Passed: Analogue model is of type TestAnalogueModel.
+Passed: Check attenuation value of AnalogueModels.
+Passed: Check initialisation of TX-OVER timer
+Passed: Check kind of TX_OVER timer
+Passed: Check initialisation of radioSwitchOver timer
+Passed: Check kind of radioSwitchOver timer
+Passed: [0] - Test initialisation of phy layer.
+Passed: [1.1] - First channel idle state is true.
+Passed: [1.2] - First channel rssi is 1.0
+Passed: [1.3] - Second channel idle state is false.
+Passed: [1.4] - Second channel rssi is 2.0
+Passed: [1.5] - Third channel idle state is true.
+Passed: [1.6] - Third channel rssi is 3.0
+Passed: [1.7] - 4th channel idle state is false.
+Passed: [1.8] - 4th channel rssi is 4.0
+Passed: [1] - Check correct passing of channel state from decider to mac by phy. For this a sequence of predefined states is created by the decider.
+Passed: [2.1] - Radio starts in SLEEP mode.
+Passed: Correct switch time to RX.
+Passed: [2.4] - Try switching during ongoing switching.
+Passed: [phy0] - Expected "SWITCH_OVER message at phy.": kind = 22001
+Passed: [mac0] - Expected "SWITCH_OVER message.": kind = 22001
+Passed: [2.2] - Switch SLEEP to RX.
+Passed: Correct switch time to SLEEP.
+Passed: [phy0] - Expected "SWITCH_OVER message at phy.": kind = 22001
+Passed: [mac0] - Expected "SWITCH_OVER message.": kind = 22001
+Passed: [2.3] - Switch RX to SLEEP.
+Passed: [2] - Check correct handling of radio switches.
+Passed: [phy0] - Expected "ChannelSense at phy layer.": kind = 22002
+Passed: [decider0] - Expected "ChannelSense at decider.": kind = 22002
+Passed: [phy0] - Expected "Scheduled sense request at phy.": kind = 22002
+Passed: [decider0] - Expected "Scheduled sense request.": kind = 22002
+Passed: [mac0] - Expected "[3] - Check correct forwarding of ChannelSenseRequests from mac to decider by phy layer.": kind = 22002
+Passed: Radio is not in TX.
+Passed: [phy0] - Expected "MacPkt at Phy layer.": kind = 12121
+Passed: [4] - Test if sending of packet while radio is not in TX state is correctly handled by phy (throws error).
+Passed: 0 - Test has been executed.
+Passed: 1 - Test has been executed.
+Passed: 1.1 - Test has been executed.
+Passed: 1.2 - Test has been executed.
+Passed: 1.3 - Test has been executed.
+Passed: 1.4 - Test has been executed.
+Passed: 1.5 - Test has been executed.
+Passed: 1.6 - Test has been executed.
+Passed: 1.7 - Test has been executed.
+Passed: 1.8 - Test has been executed.
+Passed: 2 - Test has been executed.
+Passed: 2.1 - Test has been executed.
+Passed: 2.2 - Test has been executed.
+Passed: 2.3 - Test has been executed.
+Passed: 2.4 - Test has been executed.
+Passed: 3 - Test has been executed.
+Passed: 4 - Test has been executed.
+Passed: mac0 - Test has been executed.
+Passed: Check AnalogueModel name.
+Passed: Check for correct RSAM-pointer.
+Passed: Check AnalogueModel parameter count.
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check Decider name.
+Passed: Check Decider parameter count.
+Passed: Check for parameter "aString".
+Passed: Check type of parameter "aString".
+Passed: Check value of parameter "aString".
+Passed: Check for parameter "anotherString".
+Passed: Check type of parameter "anotherString".
+Passed: Check value of parameter "anotherString".
+Passed: Check for parameter "aBool".
+Passed: Check type of parameter "aBool".
+Passed: Check value of parameter "aBool".
+Passed: Check for parameter "anotherBool".
+Passed: Check type of parameter "anotherBool".
+Passed: Check value of parameter "anotherBool".
+Passed: Check for parameter "aDouble".
+Passed: Check type of parameter "aDouble".
+Passed: Check value of parameter "aDouble".
+Passed: Check for parameter "anotherDouble".
+Passed: Check type of parameter "anotherDouble".
+Passed: Check value of parameter "anotherDouble".
+Passed: Check for parameter "aLong".
+Passed: Check type of parameter "aLong".
+Passed: Check value of parameter "aLong".
+Passed: Check for parameter "anotherLong".
+Passed: Check type of parameter "anotherLong".
+Passed: Check value of parameter "anotherLong".
+Passed: A valid switch time.
+Passed: [phy0] - Expected "SWITCH_OVER to TX message at phy.": kind = 22001
+Passed: [mac0] - Expected "SWITCH_OVER to TX message.": kind = 22001
+Passed: Radio is in TX.
+Passed: [phy0] - Expected "MacPkt at Phy layer.": kind = 12121
+Passed: [mac0] - Expected "Waiting for 0.5s.": kind = 23242
+Passed: [phy0] - Expected "MacPkt at Phy layer.": kind = 12121
+Passed: Phy should throw an error if we are trying to to send more than one packet at once.
+Passed: Check AnalogueModel name.
+Passed: Check for correct RSAM-pointer.
+Passed: Check AnalogueModel parameter count.
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check Decider name.
+Passed: Check Decider parameter count.
+Passed: Check for parameter "aString".
+Passed: Check type of parameter "aString".
+Passed: Check value of parameter "aString".
+Passed: Check for parameter "anotherString".
+Passed: Check type of parameter "anotherString".
+Passed: Check value of parameter "anotherString".
+Passed: Check for parameter "aBool".
+Passed: Check type of parameter "aBool".
+Passed: Check value of parameter "aBool".
+Passed: Check for parameter "anotherBool".
+Passed: Check type of parameter "anotherBool".
+Passed: Check value of parameter "anotherBool".
+Passed: Check for parameter "aDouble".
+Passed: Check type of parameter "aDouble".
+Passed: Check value of parameter "aDouble".
+Passed: Check for parameter "anotherDouble".
+Passed: Check type of parameter "anotherDouble".
+Passed: Check value of parameter "anotherDouble".
+Passed: Check for parameter "aLong".
+Passed: Check type of parameter "aLong".
+Passed: Check value of parameter "aLong".
+Passed: Check for parameter "anotherLong".
+Passed: Check type of parameter "anotherLong".
+Passed: Check value of parameter "anotherLong".
+Passed: Check AnalogueModel name.
+Passed: Check for correct RSAM-pointer.
+Passed: Check AnalogueModel parameter count.
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check Decider name.
+Passed: Check Decider parameter count.
+Passed: Check for parameter "aString".
+Passed: Check type of parameter "aString".
+Passed: Check value of parameter "aString".
+Passed: Check for parameter "anotherString".
+Passed: Check type of parameter "anotherString".
+Passed: Check value of parameter "anotherString".
+Passed: Check for parameter "aBool".
+Passed: Check type of parameter "aBool".
+Passed: Check value of parameter "aBool".
+Passed: Check for parameter "anotherBool".
+Passed: Check type of parameter "anotherBool".
+Passed: Check value of parameter "anotherBool".
+Passed: Check for parameter "aDouble".
+Passed: Check type of parameter "aDouble".
+Passed: Check value of parameter "aDouble".
+Passed: Check for parameter "anotherDouble".
+Passed: Check type of parameter "anotherDouble".
+Passed: Check value of parameter "anotherDouble".
+Passed: Check for parameter "aLong".
+Passed: Check type of parameter "aLong".
+Passed: Check value of parameter "aLong".
+Passed: Check for parameter "anotherLong".
+Passed: Check type of parameter "anotherLong".
+Passed: Check value of parameter "anotherLong".
+Passed: Check AnalogueModel name.
+Passed: Check for correct RSAM-pointer.
+Passed: Check AnalogueModel parameter count.
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check Decider name.
+Passed: Check Decider parameter count.
+Passed: Check for parameter "aString".
+Passed: Check type of parameter "aString".
+Passed: Check value of parameter "aString".
+Passed: Check for parameter "anotherString".
+Passed: Check type of parameter "anotherString".
+Passed: Check value of parameter "anotherString".
+Passed: Check for parameter "aBool".
+Passed: Check type of parameter "aBool".
+Passed: Check value of parameter "aBool".
+Passed: Check for parameter "anotherBool".
+Passed: Check type of parameter "anotherBool".
+Passed: Check value of parameter "anotherBool".
+Passed: Check for parameter "aDouble".
+Passed: Check type of parameter "aDouble".
+Passed: Check value of parameter "aDouble".
+Passed: Check for parameter "anotherDouble".
+Passed: Check type of parameter "anotherDouble".
+Passed: Check value of parameter "anotherDouble".
+Passed: Check for parameter "aLong".
+Passed: Check type of parameter "aLong".
+Passed: Check value of parameter "aLong".
+Passed: Check for parameter "anotherLong".
+Passed: Check type of parameter "anotherLong".
+Passed: Check value of parameter "anotherLong".
+Passed: Check AnalogueModel name.
+Passed: Check for correct RSAM-pointer.
+Passed: Check AnalogueModel parameter count.
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check Decider name.
+Passed: Check Decider parameter count.
+Passed: Check for parameter "aString".
+Passed: Check type of parameter "aString".
+Passed: Check value of parameter "aString".
+Passed: Check for parameter "anotherString".
+Passed: Check type of parameter "anotherString".
+Passed: Check value of parameter "anotherString".
+Passed: Check for parameter "aBool".
+Passed: Check type of parameter "aBool".
+Passed: Check value of parameter "aBool".
+Passed: Check for parameter "anotherBool".
+Passed: Check type of parameter "anotherBool".
+Passed: Check value of parameter "anotherBool".
+Passed: Check for parameter "aDouble".
+Passed: Check type of parameter "aDouble".
+Passed: Check value of parameter "aDouble".
+Passed: Check for parameter "anotherDouble".
+Passed: Check type of parameter "anotherDouble".
+Passed: Check value of parameter "anotherDouble".
+Passed: Check for parameter "aLong".
+Passed: Check type of parameter "aLong".
+Passed: Check value of parameter "aLong".
+Passed: Check for parameter "anotherLong".
+Passed: Check type of parameter "anotherLong".
+Passed: Check value of parameter "anotherLong".
+Passed: A valid switch time.
+Passed: No AirFrames on channel.
+Passed: [phy0] - Expected "SWITCH_OVER to TX message at phy.": kind = 22001
+Passed: [mac0] - Expected "SWITCH_OVER to TX message.": kind = 22001
+Passed: [phy0] - Expected "MacPkt at Phy layer.": kind = 12121
+Passed: [phy1] - Expected "First receive of AirFrame": kind = 22003
+Passed: [decider1] - Expected "First process of AirFrame at Decider": kind = 22003
+Passed: AirFrames on channel.
+Passed: [phy2] - Expected "First receive of AirFrame": kind = 22003
+Passed: [decider2] - Expected "First process of AirFrame at Decider": kind = 22003
+Passed: [phy3] - Expected "First receive of AirFrame": kind = 22003
+Passed: [decider3] - Expected "First process of AirFrame at Decider": kind = 22003
+Passed: [phy1] - Expected "Scheduled AirFrame to end at phy."
+Passed: [decider1] - Expected "Scheduled AirFrame to end."
+Passed: [mac1] - Expected "MacPkt at mac layer.": kind = 12121
+Passed: [phy2] - Expected "Scheduled AirFrame to end at phy."
+Passed: [decider2] - Expected "Scheduled AirFrame to end."
+Passed: [mac2] - Expected "MacPkt at mac layer.": kind = 12121
+Passed: [phy3] - Expected "Scheduled AirFrame to end at phy."
+Passed: [decider3] - Expected "Scheduled AirFrame to end."
+Passed: [mac3] - Expected "MacPkt at mac layer.": kind = 12121
+Passed: [phy0] - Expected "Transmission over message at phy": kind = 22000
+Passed: [mac0] - Expected "Transmission over message from phy": kind = 22000
+Passed: [phy1] - Expected "End receive of AirFrame": kind = 22003
+Passed: [phy2] - Expected "End receive of AirFrame": kind = 22003
+Passed: [phy3] - Expected "End receive of AirFrame": kind = 22003
+Passed: Check AnalogueModel name.
+Passed: Check for correct RSAM-pointer.
+Passed: Check AnalogueModel parameter count.
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check Decider name.
+Passed: Check Decider parameter count.
+Passed: Check for parameter "aString".
+Passed: Check type of parameter "aString".
+Passed: Check value of parameter "aString".
+Passed: Check for parameter "anotherString".
+Passed: Check type of parameter "anotherString".
+Passed: Check value of parameter "anotherString".
+Passed: Check for parameter "aBool".
+Passed: Check type of parameter "aBool".
+Passed: Check value of parameter "aBool".
+Passed: Check for parameter "anotherBool".
+Passed: Check type of parameter "anotherBool".
+Passed: Check value of parameter "anotherBool".
+Passed: Check for parameter "aDouble".
+Passed: Check type of parameter "aDouble".
+Passed: Check value of parameter "aDouble".
+Passed: Check for parameter "anotherDouble".
+Passed: Check type of parameter "anotherDouble".
+Passed: Check value of parameter "anotherDouble".
+Passed: Check for parameter "aLong".
+Passed: Check type of parameter "aLong".
+Passed: Check value of parameter "aLong".
+Passed: Check for parameter "anotherLong".
+Passed: Check type of parameter "anotherLong".
+Passed: Check value of parameter "anotherLong".
+Passed: Check AnalogueModel name.
+Passed: Check for correct RSAM-pointer.
+Passed: Check AnalogueModel parameter count.
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check Decider name.
+Passed: Check Decider parameter count.
+Passed: Check for parameter "aString".
+Passed: Check type of parameter "aString".
+Passed: Check value of parameter "aString".
+Passed: Check for parameter "anotherString".
+Passed: Check type of parameter "anotherString".
+Passed: Check value of parameter "anotherString".
+Passed: Check for parameter "aBool".
+Passed: Check type of parameter "aBool".
+Passed: Check value of parameter "aBool".
+Passed: Check for parameter "anotherBool".
+Passed: Check type of parameter "anotherBool".
+Passed: Check value of parameter "anotherBool".
+Passed: Check for parameter "aDouble".
+Passed: Check type of parameter "aDouble".
+Passed: Check value of parameter "aDouble".
+Passed: Check for parameter "anotherDouble".
+Passed: Check type of parameter "anotherDouble".
+Passed: Check value of parameter "anotherDouble".
+Passed: Check for parameter "aLong".
+Passed: Check type of parameter "aLong".
+Passed: Check value of parameter "aLong".
+Passed: Check for parameter "anotherLong".
+Passed: Check type of parameter "anotherLong".
+Passed: Check value of parameter "anotherLong".
+Passed: Planning new test case:mac0
+Passed: Planning new test case:mac1
+Passed: Planning new test case:1.
+Passed: Planning new test case:2.
+Passed: Planning new test case:3.
+Passed: Planning new test case:3.1
+Passed: Planning new test case:3.2
+Passed: Planning new test case:4.
+Passed: Planning new test case:5.
+Passed: Planning new test case:6.
+Passed: Planning new test case:7.
+Passed: [mac0] - Expected module - Mac layer of Host0 (Sender)
+Passed: [mac1] - Expected module - Mac layer of Host1 (receiver)
+Passed: A valid switch time.
+Passed: [phy0] - Expected "SWITCH_OVER to TX message at phy.": kind = 22001
+Passed: [mac0] - Expected "SWITCH_OVER to TX message.": kind = 22001
+Passed: [phy0] - Expected "[1.] - Host1 sends AirFrame A to Host2": kind = 12121
+Passed: [phy1] - Expected "[2.] - Host2 starts receiving AirFrame A": kind = 22003
+Passed: [decider1] - Expected "First process of AirFrame at Decider": kind = 22003
+Passed: [phy1] - Expected "ChannelSense at phy layer.": kind = 22002
+Passed: [decider1] - Expected "ChannelSense at decider.": kind = 22002
+Passed: [phy1] - Expected "Scheduled AirFrame to end at phy."
+Passed: [decider1] - Expected "Scheduled AirFrame to end."
+Passed: [mac1] - Expected "MacPkt at mac layer.": kind = 12121
+Passed: [phy1] - Expected "Scheduled sense request at phy.": kind = 22002
+Passed: [decider1] - Expected "Scheduled sense request.": kind = 22002
+Passed: [mac1] - Expected "[3.] - Host2 starts a ChannelSense": kind = 22002
+Passed: Received ChannelSenseRequest answer.
+Passed: [3.1] - Host2 ends ChannelSense and asks ChannelInfo for AirFrames during ChannelSense duration which should return AirFrame A
+Passed: [phy1] - Expected "ChannelSense at phy layer.": kind = 22002
+Passed: [decider1] - Expected "ChannelSense at decider.": kind = 22002
+Passed: [phy0] - Expected "Transmission over message at phy": kind = 22000
+Passed: [mac0] - Expected "Transmission over message from phy": kind = 22000
+Passed: [phy1] - Expected "[4.] - Host2 completes reception of AirFrame A": kind = 22003
+Passed: [phy1] - Expected "Scheduled sense request at phy.": kind = 22002
+Passed: [decider1] - Expected "Scheduled sense request.": kind = 22002
+Passed: [mac1] - Expected "[3.2] - Host2 starts a ChannelSense": kind = 22002
+Passed: Received ChannelSenseRequest answer.
+Passed: [5.] - Host2 ends ChannelSense and asks ChannelInfo for AirFrames during ChannelSense duration which should return AirFrame A
+Passed: [phy1] - Expected "ChannelSense at phy layer.": kind = 22002
+Passed: [decider1] - Expected "ChannelSense at decider.": kind = 22002
+Passed: [phy1] - Expected "Scheduled sense request at phy.": kind = 22002
+Passed: [decider1] - Expected "Scheduled sense request.": kind = 22002
+Passed: [mac1] - Expected "[6.] - Host2 starts a ChannelSense": kind = 22002
+Passed: Received ChannelSenseRequest answer.
+Passed: [7.] - Host2 ends ChannelSense and asks ChannelInfo for AirFrames during ChannelSense duration which should return none
+Passed: 1. - Test has been executed.
+Passed: 2. - Test has been executed.
+Passed: 3. - Test has been executed.
+Passed: 3.1 - Test has been executed.
+Passed: 3.2 - Test has been executed.
+Passed: 4. - Test has been executed.
+Passed: 5. - Test has been executed.
+Passed: 6. - Test has been executed.
+Passed: 7. - Test has been executed.
+Passed: mac0 - Test has been executed.
+Passed: mac1 - Test has been executed.
+Passed: Check AnalogueModel name.
+Passed: Check for correct RSAM-pointer.
+Passed: Check AnalogueModel parameter count.
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check Decider name.
+Passed: Check Decider parameter count.
+Passed: Check for parameter "aString".
+Passed: Check type of parameter "aString".
+Passed: Check value of parameter "aString".
+Passed: Check for parameter "anotherString".
+Passed: Check type of parameter "anotherString".
+Passed: Check value of parameter "anotherString".
+Passed: Check for parameter "aBool".
+Passed: Check type of parameter "aBool".
+Passed: Check value of parameter "aBool".
+Passed: Check for parameter "anotherBool".
+Passed: Check type of parameter "anotherBool".
+Passed: Check value of parameter "anotherBool".
+Passed: Check for parameter "aDouble".
+Passed: Check type of parameter "aDouble".
+Passed: Check value of parameter "aDouble".
+Passed: Check for parameter "anotherDouble".
+Passed: Check type of parameter "anotherDouble".
+Passed: Check value of parameter "anotherDouble".
+Passed: Check for parameter "aLong".
+Passed: Check type of parameter "aLong".
+Passed: Check value of parameter "aLong".
+Passed: Check for parameter "anotherLong".
+Passed: Check type of parameter "anotherLong".
+Passed: Check value of parameter "anotherLong".
+Passed: Check AnalogueModel name.
+Passed: Check for correct RSAM-pointer.
+Passed: Check AnalogueModel parameter count.
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check Decider name.
+Passed: Check Decider parameter count.
+Passed: Check for parameter "aString".
+Passed: Check type of parameter "aString".
+Passed: Check value of parameter "aString".
+Passed: Check for parameter "anotherString".
+Passed: Check type of parameter "anotherString".
+Passed: Check value of parameter "anotherString".
+Passed: Check for parameter "aBool".
+Passed: Check type of parameter "aBool".
+Passed: Check value of parameter "aBool".
+Passed: Check for parameter "anotherBool".
+Passed: Check type of parameter "anotherBool".
+Passed: Check value of parameter "anotherBool".
+Passed: Check for parameter "aDouble".
+Passed: Check type of parameter "aDouble".
+Passed: Check value of parameter "aDouble".
+Passed: Check for parameter "anotherDouble".
+Passed: Check type of parameter "anotherDouble".
+Passed: Check value of parameter "anotherDouble".
+Passed: Check for parameter "aLong".
+Passed: Check type of parameter "aLong".
+Passed: Check value of parameter "aLong".
+Passed: Check for parameter "anotherLong".
+Passed: Check type of parameter "anotherLong".
+Passed: Check value of parameter "anotherLong".
+Passed: Check AnalogueModel name.
+Passed: Check for correct RSAM-pointer.
+Passed: Check AnalogueModel parameter count.
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check Decider name.
+Passed: Check Decider parameter count.
+Passed: Check for parameter "aString".
+Passed: Check type of parameter "aString".
+Passed: Check value of parameter "aString".
+Passed: Check for parameter "anotherString".
+Passed: Check type of parameter "anotherString".
+Passed: Check value of parameter "anotherString".
+Passed: Check for parameter "aBool".
+Passed: Check type of parameter "aBool".
+Passed: Check value of parameter "aBool".
+Passed: Check for parameter "anotherBool".
+Passed: Check type of parameter "anotherBool".
+Passed: Check value of parameter "anotherBool".
+Passed: Check for parameter "aDouble".
+Passed: Check type of parameter "aDouble".
+Passed: Check value of parameter "aDouble".
+Passed: Check for parameter "anotherDouble".
+Passed: Check type of parameter "anotherDouble".
+Passed: Check value of parameter "anotherDouble".
+Passed: Check for parameter "aLong".
+Passed: Check type of parameter "aLong".
+Passed: Check value of parameter "aLong".
+Passed: Check for parameter "anotherLong".
+Passed: Check type of parameter "anotherLong".
+Passed: Check value of parameter "anotherLong".
+Passed: Check AnalogueModel name.
+Passed: Check for correct RSAM-pointer.
+Passed: Check AnalogueModel parameter count.
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check AnalogueModel name.
+Passed: Check AnalogueModel parameter count.
+Passed: Check for parameter "attenuation".
+Passed: Check type of parameter "attenuation".
+Passed: Check Decider name.
+Passed: Check Decider parameter count.
+Passed: Check for parameter "aString".
+Passed: Check type of parameter "aString".
+Passed: Check value of parameter "aString".
+Passed: Check for parameter "anotherString".
+Passed: Check type of parameter "anotherString".
+Passed: Check value of parameter "anotherString".
+Passed: Check for parameter "aBool".
+Passed: Check type of parameter "aBool".
+Passed: Check value of parameter "aBool".
+Passed: Check for parameter "anotherBool".
+Passed: Check type of parameter "anotherBool".
+Passed: Check value of parameter "anotherBool".
+Passed: Check for parameter "aDouble".
+Passed: Check type of parameter "aDouble".
+Passed: Check value of parameter "aDouble".
+Passed: Check for parameter "anotherDouble".
+Passed: Check type of parameter "anotherDouble".
+Passed: Check value of parameter "anotherDouble".
+Passed: Check for parameter "aLong".
+Passed: Check type of parameter "aLong".
+Passed: Check value of parameter "aLong".
+Passed: Check for parameter "anotherLong".
+Passed: Check type of parameter "anotherLong".
+Passed: Check value of parameter "anotherLong".
+Passed: Planning new test case:mac0
+Passed: Planning new test case:phy0
+Passed: Planning new test case:phy1
+Passed: Planning new test case:mac2
+Passed: Planning new test case:phy2
+Passed: Planning new test case:phy3
+Passed: Planning new test case:1.1.1
+Passed: Planning new test case:1.1.2
+Passed: Planning new test case:1.2
+Passed: Planning new test case:1.3
+Passed: Planning new test case:1.4
+Passed: Planning new test case:1.5.1
+Passed: Planning new test case:1.5.2
+Passed: Planning new test case:1.6
+Passed: Planning new test case:1.7
+Passed: Planning new test case:1.8
+Passed: Planning new test case:1.9
+Passed: [mac0] - Expected module - Mac layer of host A1
+Passed: [mac2] - Expected module - Mac layer of host B1
+Passed: [phy0] - Expected module - Phy layer of host A1
+Passed: [phy1] - Expected module - Phy layer of host A2
+Passed: [phy2] - Expected module - Phy layer of host B1
+Passed: [phy3] - Expected module - Phy layer of host B2
+Passed: Host A1 uses protocol 1
+Passed: [1.1.1] - 2 Hosts protocol A (A1 and A2)
+Passed: Host B1 uses protocol 2
+Passed: [1.1.2] - 2 hosts protocol B (B1 and B2).
+Passed: A valid switch time.
+Passed: [phy0] - Expected "SWITCH_OVER to TX message at phy.": kind = 22001
+Passed: [mac0] - Expected "SWITCH_OVER to TX message.": kind = 22001
+Passed: [phy0] - Expected "[1.2] - Host A1 sends packet 1.": kind = 12121
+Passed: [phy1] - Expected "Packet 1 at phy of A2": kind = 22003
+Passed: [decider1] - Expected "[1.4] - Packet 1 arrives only at decider A2.": kind = 22003
+Passed: [phy2] - Expected "[1.3] - Packet 1 arrives at phy of A2, B1 and B2.": kind = 22003
+Passed: [phy3] - Expected "Packet 1 at phy of B2": kind = 22003
+Passed: [mac0] - Expected "Waiting for 0.5s.": kind = 23242
+Passed: [1.5.1] - Packet 1 is still active.
+Passed: A valid switch time.
+Passed: [phy2] - Expected "SWITCH_OVER to TX message at phy.": kind = 22001
+Passed: [mac2] - Expected "SWITCH_OVER to TX message.": kind = 22001
+Passed: [phy2] - Expected "[1.5.2] - Host B1 sends packet 2.": kind = 12121
+Passed: [phy0] - Expected "Packet 2 at phy of A1": kind = 22003
+Passed: [phy1] - Expected "Packet 2 at phy of A2": kind = 22003
+Passed: [phy3] - Expected "[1.6] - Packet 2 arrives at phy of A1, A2 and B2.": kind = 22003
+Passed: [decider3] - Expected "[1.7] - Packet 2 arrives only at decider B2.": kind = 22003
+Passed: [phy0] - Expected "Transmission over message at phy": kind = 22000
+Passed: [mac0] - Expected "Transmission over message from phy": kind = 22000
+Passed: [phy1] - Expected "Scheduled AirFrame to end at phy."
+Passed: [decider1] - Expected "Scheduled AirFrame to end."
+Passed: [decider1] - Expected "End of Packet 1 at decider of A2": kind = 22003
+Passed: [1.9] - Interference for Packet 1 at decider A2 contains packet 2.
+Passed: [mac1] - Expected "MacPkt at mac layer.": kind = 12121
+Passed: [phy2] - Expected "End of Packet 1 at phy of B1": kind = 22003
+Passed: [phy3] - Expected "End of Packet 1 at phy of B2": kind = 22003
+Passed: [phy2] - Expected "Transmission over message at phy": kind = 22000
+Passed: [mac2] - Expected "Transmission over message from phy": kind = 22000
+Passed: [phy0] - Expected "End of Packet 1 at phy of A1": kind = 22003
+Passed: [phy1] - Expected "End of Packet 1 at phy of A2": kind = 22003
+Passed: [phy3] - Expected "Scheduled AirFrame to end at phy."
+Passed: [decider3] - Expected "Scheduled AirFrame to end."
+Passed: [decider3] - Expected "End of Packet 2 at decider of B2": kind = 22003
+Passed: [1.8] - Interference for Packet 2 at decider B2 contains packet 1.
+Passed: [mac3] - Expected "MacPkt at mac layer.": kind = 12121
+Passed: 1.1.1 - Test has been executed.
+Passed: 1.1.2 - Test has been executed.
+Passed: 1.2 - Test has been executed.
+Passed: 1.3 - Test has been executed.
+Passed: 1.4 - Test has been executed.
+Passed: 1.5.1 - Test has been executed.
+Passed: 1.5.2 - Test has been executed.
+Passed: 1.6 - Test has been executed.
+Passed: 1.7 - Test has been executed.
+Passed: 1.8 - Test has been executed.
+Passed: 1.9 - Test has been executed.
+Passed: mac0 - Test has been executed.
+Passed: mac2 - Test has been executed.
+Passed: phy0 - Test has been executed.
+Passed: phy1 - Test has been executed.
+Passed: phy2 - Test has been executed.
+Passed: phy3 - Test has been executed.

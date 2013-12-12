@@ -1,11 +1,9 @@
 package inet.tests;
 
-import inet.base.modules.BaseNetwork;
-import inet.base.modules.BaseWorldUtility;
-
-network BaseNetwork
-{
-}
+import inet.mobility.contract.IMobility;
+import inet.networklayer.contract.INetworkLayer;
+import inet.linklayer.IWirelessNic;
+import inet.physicallayer.radio.contract.IRadioChannel;
 
 // Basis definition of test networks.
 network BaseTestNetwork
@@ -14,35 +12,10 @@ network BaseTestNetwork
 
 // Basis definition of test networks which are common
 // network definition. 
-network ExtTestNetwork extends BaseNetwork
+network ExtTestNetwork
 {
     parameters:
         int numHosts; // total number of hosts in the network
-}
-
-// Basis definition of test networks which are not common
-// network definition, because of missing connectionManager.
-network WorldOnlyTestNetwork extends BaseTestNetwork
-{
-    parameters:
-        // parametes for the framework
-        double playgroundSizeX @unit(m);
-        double playgroundSizeY @unit(m);
-        double playgroundSizeZ @unit(m);
-        int numHosts @prompt("Number of hosts:") = default(2);
-        @display("bgb=$playgroundSizeX,$playgroundSizeY,white,,;bgp=0,0");
-
-    submodules:
-        world: BaseWorldUtility {
-            parameters:
-                playgroundSizeX = playgroundSizeX;
-                playgroundSizeY = playgroundSizeY;
-                playgroundSizeZ = playgroundSizeZ;
-
-                @display("p=278,0;is=s");
-        }
-    connections allowunconnected:
-    // all connections and gates are to be generated dynamically
 }
 
 // Basis definition for all test nodes.
@@ -53,4 +26,37 @@ module TestNode
 // Basis definition for all test objects.
 simple TestObject
 {
+}
+
+module TestWirelessHost
+{
+    parameters:
+        string networkType = default("");
+        string mobilityType = default("StationaryMobility");
+        string nicType;
+        @display("bgb=210,450,white;i=device/palm;b=40,40,rect");
+        @node();
+
+    gates:
+        input radioIn; // gate for sendDirect
+
+    submodules:
+        mobility: <mobilityType> like IMobility {
+            parameters:
+                @display("p=140,30;i=block/cogwheel");
+        }
+        nic: <nicType> like IWirelessNic {
+            parameters:
+                @display("p=70,380;i=block/wrxtx,#008000");
+        }
+        // OSI network layer
+        networkLayer: <networkType> like INetworkLayer if networkType != "" {
+            parameters:
+                @display("p=70,310;i=block/layer");
+        }
+
+    connections allowunconnected:
+        nic.upperLayerOut --> networkLayer.ifIn++ if networkType != "";
+        nic.upperLayerIn <-- networkLayer.ifOut++ if networkType != "";
+        radioIn --> nic.radioIn;
 }
