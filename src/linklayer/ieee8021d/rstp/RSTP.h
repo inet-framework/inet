@@ -159,6 +159,8 @@ protected:
     virtual void handleBackup(BPDU * frame, unsigned int arrival);
 
     virtual void scheduleNextUpgrde();
+
+    virtual void flushOtherPorts(unsigned int portNum);
 };
 
 #endif

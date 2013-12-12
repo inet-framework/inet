@@ -156,15 +156,7 @@ void RSTP::handleUpgrade(cMessage * msg)
                 {
                     EV_INFO << "UpgradeTime. Setting port " << i << " state to forwarding." << endl;
                     iPort->setState(Ieee8021DInterfaceData::FORWARDING);
-                    //flushing other ports
-                    //TCN over all active ports
-                    for (unsigned int j = 0; j < numPorts; j++)
-                    {
-                        Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
-                        jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
-                        if (j != i)
-                            macTable->flush(j);
-                    }
+                    flushOtherPorts(i);
                 }
             }
         }
@@ -212,15 +204,7 @@ void RSTP::handleHelloTime(cMessage * msg)
                         candidatePort->setRole(Ieee8021DInterfaceData::ROOT);
                         candidatePort->setState(Ieee8021DInterfaceData::FORWARDING);
                         candidatePort->setLostBPDU(0);
-                        // flushing other ports
-                        // sending TCN over all active ports
-                        for (unsigned int j=0; j<numPorts; j++)
-                        {
-                            Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
-                            jPort->setTCWhile(simTime()+tcWhileTime);
-                            if (j!=(unsigned int)candidate)
-                                macTable->flush(j);
-                        }
+                        flushOtherPorts(candidate);
                         macTable->copyTable(i,candidate); // copy cache from old to new root
                     }
                     else
@@ -374,15 +358,7 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
         arrivalPort->setRole(Ieee8021DInterfaceData::ROOT);
         arrivalPort->setState(Ieee8021DInterfaceData::FORWARDING);
         arrivalPort->setLostBPDU(0);
-        // flushing other ports
-        // TCN over all ports
-        for (unsigned int j = 0; j < numPorts; j++)
-        {
-            Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
-            jPort->setTCWhile(simTime()+tcWhileTime);
-            if (j != (unsigned int) arrivalPortNum)
-                macTable->flush(j);
-        }
+        flushOtherPorts(arrivalPortNum);
         return true;
     }
     else
@@ -409,17 +385,7 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
             else
             {
                 if (arrivalPort->getState() != Ieee8021DInterfaceData::FORWARDING)
-                {
-                    // flushing other ports
-                    // TCN over all ports
-                    for (unsigned int j = 0; j < numPorts; j++)
-                    {
-                        Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
-                        jPort->setTCWhile(simTime()+tcWhileTime);
-                        if (j != (unsigned int) arrivalPortNum)
-                            macTable->flush(j);
-                    }
-                }
+                    flushOtherPorts(arrivalPortNum);
                 else
                     macTable->flush(r); // flushing r, needed in case arrival were previously FORWARDING
                 EV_DETAIL << "This has better local port. Setting the arrival port to root. Setting current root port (port" << r << ") to alternate." << endl;
@@ -465,15 +431,7 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
             if (arrivalPort->getState()!=Ieee8021DInterfaceData::FORWARDING)
             {
                 EV_DETAIL << "Better route to the current root. Setting the arrival port to root." << endl;
-                // flushing other ports
-                // TCN over all ports
-                for (unsigned int j=0; j<numPorts; j++)
-                {
-                    Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
-                    jPort->setTCWhile(simTime()+tcWhileTime);
-                    if (j!=(unsigned int)arrivalPortNum)
-                        macTable->flush(j);
-                }
+                flushOtherPorts(arrivalPortNum);
             }
             arrivalPort->setRole(Ieee8021DInterfaceData::ROOT);
             arrivalPort->setState(Ieee8021DInterfaceData::FORWARDING);
@@ -561,15 +519,7 @@ bool RSTP::processSameSource(BPDU *frame, unsigned int arrivalPortNum)
                 arrivalPort->setNextUpgrade(simTime() + forwardDelay);
                 scheduleNextUpgrde();
                 macTable->copyTable(arrivalPortNum,alternative); // copy cache from old to new root
-                // flushing other ports
-                // TCN over all ports, alternative was alternate
-                for (unsigned int j=0; j<numPorts; j++)
-                {
-                    Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
-                    jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
-                    if (j!=(unsigned int)alternative)
-                        macTable->flush(j);
-                }
+                flushOtherPorts(alternative);
                 alternativePort->setRole(Ieee8021DInterfaceData::ROOT);
                 alternativePort->setState(Ieee8021DInterfaceData::FORWARDING); // comes from alternate, preserves lostBPDU
                 updateInterfacedata(frame,arrivalPortNum);
@@ -644,15 +594,7 @@ bool RSTP::processSameSource(BPDU *frame, unsigned int arrivalPortNum)
                         arrivalPort->setRole(Ieee8021DInterfaceData::ALTERNATE);
                         arrivalPort->setState(Ieee8021DInterfaceData::DISCARDING);
                     }
-                    // flushing other ports
-                    // TC over all ports
-                    for (unsigned int j=0; j<numPorts; j++)
-                    {
-                        Ieee8021DInterfaceData * jPort = getPortInterfaceData(j);
-                        jPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
-                        if (j!=(unsigned int)alternative)
-                            macTable->flush(j);
-                    }
+                    flushOtherPorts(alternative);
                     macTable->copyTable(arrivalPortNum,alternative); // copy cache from old to new root
                 }
             }
@@ -988,6 +930,17 @@ int RSTP::getBestAlternate()
         }
     }
     return candidate;
+}
+
+void RSTP::flushOtherPorts(unsigned int portNum)
+{
+    for (unsigned int i=0; i<numPorts; i++)
+    {
+        Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
+        iPort->setTCWhile(simulation.getSimTime()+tcWhileTime);
+        if (i!=portNum)
+            macTable->flush(i);
+    }
 }
 
 void RSTP::receiveChangeNotification(int category, const cObject *details)
