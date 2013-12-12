@@ -298,13 +298,13 @@ void RSTP::handleBackup(BPDU * frame, unsigned int arrivalPortNum)
 
 void RSTP::handleIncomingFrame(BPDU *frame)
 {
-    EV_INFO << "BPDU received at port " << frame->getPortNum() << "." << endl;
     // incoming BPDU handling
     // checking message age
     Ieee802Ctrl * etherctrl = check_and_cast<Ieee802Ctrl *>(frame->removeControlInfo());
     int arrivalPortNum = etherctrl->getSwitchPort();
     MACAddress src = etherctrl->getSrc();
     delete etherctrl;
+    EV_INFO << "BPDU received at port " << arrivalPortNum << "." << endl;
     if (frame->getMessageAge() < maxAge)
     {
         // checking TC
@@ -388,7 +388,7 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
                     flushOtherPorts(arrivalPortNum);
                 else
                     macTable->flush(r); // flushing r, needed in case arrival were previously FORWARDING
-                EV_DETAIL << "This has better local port. Setting the arrival port to root. Setting current root port (port" << r << ") to alternate." << endl;
+                EV_DETAIL << "This has better local port. Setting the arrival port to root. Setting current root port (port " << r << ") to alternate." << endl;
                 rootPort->setRole(Ieee8021DInterfaceData::ALTERNATE);
                 rootPort->setState(Ieee8021DInterfaceData::DISCARDING); // comes from root, preserve lostBPDU
                 arrivalPort->setRole(Ieee8021DInterfaceData::ROOT);
@@ -441,7 +441,7 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
             case3=contestInterfacedata(r);
             if (case3>=0)
             {
-                EV_DETAIL << "Setting current root port (port" << r << ") to alternate." << endl;
+                EV_DETAIL << "Setting current root port (port " << r << ") to alternate." << endl;
                 rootPort->setRole(Ieee8021DInterfaceData::ALTERNATE);
                 rootPort->setState(Ieee8021DInterfaceData::DISCARDING);
                 // not lostBPDU reset
@@ -450,7 +450,7 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
             }
             else
             {
-                EV_DETAIL << "Setting current root port (port" << r << ") to designated." << endl;
+                EV_DETAIL << "Setting current root port (port " << r << ") to designated." << endl;
                 rootPort->setRole(Ieee8021DInterfaceData::DESIGNATED);
                 rootPort->setState(Ieee8021DInterfaceData::DISCARDING);
                 rootPort->setNextUpgrade(simTime() + forwardDelay);
