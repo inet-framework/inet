@@ -1,2 +1,2 @@
 #!/bin/sh
-../../../src/run_inet $*
+opp_run -l../../src/inet -n"../../src;.." "$@"
