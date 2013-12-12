@@ -63,31 +63,32 @@ void RSTP::scheduleNextUpgrde()
     Ieee8021DInterfaceData *nextInterfaceData = NULL;
     for (unsigned int i = 0; i < numPorts; i++)
     {
-        Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
-
-        if (iPort->getRole() == Ieee8021DInterfaceData::NOTASSIGNED)
+        if(getPortInterfaceEntry(i)->hasCarrier())
         {
-            if(nextInterfaceData == NULL)
-                nextInterfaceData = iPort;
-            else if(iPort->getNextUpgrade() < nextInterfaceData->getNextUpgrade())
-                nextInterfaceData = iPort;
-        }
-
-        if (iPort->getRole() == Ieee8021DInterfaceData::DESIGNATED)
-        {
-            if (iPort->getState() == Ieee8021DInterfaceData::DISCARDING)
+            Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
+            if (iPort->getRole() == Ieee8021DInterfaceData::NOTASSIGNED)
             {
                 if(nextInterfaceData == NULL)
                     nextInterfaceData = iPort;
                 else if(iPort->getNextUpgrade() < nextInterfaceData->getNextUpgrade())
                     nextInterfaceData = iPort;
             }
-            else if (iPort->getState() == Ieee8021DInterfaceData::LEARNING)
+            else if (iPort->getRole() == Ieee8021DInterfaceData::DESIGNATED)
             {
-                if(nextInterfaceData == NULL)
-                    nextInterfaceData = iPort;
-                else if(iPort->getNextUpgrade() < nextInterfaceData->getNextUpgrade())
-                    nextInterfaceData = iPort;
+                if (iPort->getState() == Ieee8021DInterfaceData::DISCARDING)
+                {
+                    if(nextInterfaceData == NULL)
+                        nextInterfaceData = iPort;
+                    else if(iPort->getNextUpgrade() < nextInterfaceData->getNextUpgrade())
+                        nextInterfaceData = iPort;
+                }
+                else if (iPort->getState() == Ieee8021DInterfaceData::LEARNING)
+                {
+                    if(nextInterfaceData == NULL)
+                        nextInterfaceData = iPort;
+                    else if(iPort->getNextUpgrade() < nextInterfaceData->getNextUpgrade())
+                        nextInterfaceData = iPort;
+                }
             }
         }
     }
@@ -134,7 +135,8 @@ void RSTP::handleUpgrade(cMessage * msg)
     for (unsigned int i = 0; i < numPorts; i++)
     {
         Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
-        if(iPort->getNextUpgrade() == simTime())
+        if(getPortInterfaceEntry(i)->hasCarrier() && iPort->getNextUpgrade() == simTime())
+        {
             if (iPort->getRole() == Ieee8021DInterfaceData::NOTASSIGNED)
             {
                 EV_DETAIL << "MigrateTime. Setting port " << i << "to designated." << endl;
@@ -165,6 +167,7 @@ void RSTP::handleUpgrade(cMessage * msg)
                     }
                 }
             }
+        }
     }
     updateDisplay();
     scheduleNextUpgrde();
@@ -271,7 +274,7 @@ void RSTP::checkTC(BPDU * frame, int arrival)
     }
 }
 
-void RSTP::handleBK(BPDU * frame, unsigned int arrivalPortNum)
+void RSTP::handleBackup(BPDU * frame, unsigned int arrivalPortNum)
 {
     EV_DETAIL << "More than one port in the same LAN"<<endl;
     Ieee8021DInterfaceData * port = getPortInterfaceData(arrivalPortNum);
@@ -324,7 +327,7 @@ void RSTP::handleIncomingFrame(BPDU *frame)
         checkTC(frame, arrivalPortNum); // sets TCWhile if arrival port was FORWARDING
         // checking possible backup
         if (src.compareTo(bridgeAddress) == 0)// more than one port in the same LAN
-            handleBK(frame, arrivalPortNum);  //FIXME what is "BK"? can't we give this method a more explanatory name?
+            handleBackup(frame, arrivalPortNum);
         else
             processBPDU(frame, arrivalPortNum);
     }
@@ -483,6 +486,7 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
             {
                 EV_DETAIL << "Setting current root port (port" << r << ") to alternate." << endl;
                 rootPort->setRole(Ieee8021DInterfaceData::ALTERNATE);
+                rootPort->setState(Ieee8021DInterfaceData::DISCARDING);
                 // not lostBPDU reset
                 // flushing r
                 macTable->flush(r);
@@ -491,10 +495,10 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
             {
                 EV_DETAIL << "Setting current root port (port" << r << ") to designated." << endl;
                 rootPort->setRole(Ieee8021DInterfaceData::DESIGNATED);
+                rootPort->setState(Ieee8021DInterfaceData::DISCARDING);
                 rootPort->setNextUpgrade(simTime() + forwardDelay);
                 scheduleNextUpgrde();
             }
-            rootPort->setState(Ieee8021DInterfaceData::DISCARDING);
             return true;
 
         case WORSE_ROOT:
@@ -630,6 +634,7 @@ bool RSTP::processSameSource(BPDU *frame, unsigned int arrivalPortNum)
                     {
                         EV_DETAIL << "This port was the root, but there is a better alternative. Setting the arrival port to designated and port " << alternative << "to root." << endl;
                         arrivalPort->setRole(Ieee8021DInterfaceData::DESIGNATED);
+                        arrivalPort->setState(Ieee8021DInterfaceData::DISCARDING);
                         arrivalPort->setNextUpgrade(simTime() + forwardDelay);
                         scheduleNextUpgrde();
                     }
@@ -637,8 +642,8 @@ bool RSTP::processSameSource(BPDU *frame, unsigned int arrivalPortNum)
                     {
                         EV_DETAIL << "This port was the root, but there is a better alternative. Setting the arrival port to alternate and port " << alternative << "to root." << endl;
                         arrivalPort->setRole(Ieee8021DInterfaceData::ALTERNATE);
+                        arrivalPort->setState(Ieee8021DInterfaceData::DISCARDING);
                     }
-                    arrivalPort->setState(Ieee8021DInterfaceData::DISCARDING);
                     // flushing other ports
                     // TC over all ports
                     for (unsigned int j=0; j<numPorts; j++)
@@ -989,26 +994,21 @@ void RSTP::receiveChangeNotification(int category, const cObject *details)
 {
     if (category == NF_INTERFACE_STATE_CHANGED)
     {
-        cModule *switchModule = findContainingNode(this);
         for (unsigned int i = 0; i < numPorts; i++)
         {
-            cGate *gate = switchModule->gate("ethg$o", i);
-            if (!gate)
-                error("gate is NULL");
-            InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
-            if (!gateIfEntry)
-                error("gateIfEntry is NULL");
+            InterfaceEntry * gateIfEntry = getPortInterfaceEntry(i);
             if (gateIfEntry == check_and_cast<const InterfaceEntry *>(details))
             {
                 if(gateIfEntry->hasCarrier())
                 {
-
+                    Ieee8021DInterfaceData * iPort = getPortInterfaceData(i);
+                    if (iPort->getRole() == Ieee8021DInterfaceData::NOTASSIGNED)
+                        iPort->setNextUpgrade(simTime() + migrateTime);
+                    else if (iPort->getRole() == Ieee8021DInterfaceData::DESIGNATED
+                             && (iPort->getState() == Ieee8021DInterfaceData::DISCARDING || iPort->getState() == Ieee8021DInterfaceData::LEARNING))
+                            iPort->setNextUpgrade(simTime() + forwardDelay);
+                    scheduleNextUpgrde();
                 }
-                else
-                {
-
-                }
-
             }
         }
     }

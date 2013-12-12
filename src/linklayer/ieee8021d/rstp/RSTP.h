@@ -156,7 +156,7 @@ protected:
     /**
      * @brief Handles the switch to backup in one of the ports
      */
-    virtual void handleBK(BPDU * frame, unsigned int arrival);
+    virtual void handleBackup(BPDU * frame, unsigned int arrival);
 
     virtual void scheduleNextUpgrde();
 };
