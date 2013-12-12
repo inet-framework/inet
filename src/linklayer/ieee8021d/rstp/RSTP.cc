@@ -906,22 +906,13 @@ int RSTP::getBestAlternate()
             else
             {
                 Ieee8021DInterfaceData * candidatePort = getPortInterfaceData(candidate);
-                // TODO: this looks horrible and should reuse the same comparator as above
-                if ((jPort->getRootPathCost() < candidatePort->getRootPathCost())
-                        || (jPort->getRootPathCost() == candidatePort->getRootPathCost()
-                                && jPort->getBridgePriority() < candidatePort->getBridgePriority())
-                                || (jPort->getRootPathCost() == candidatePort->getRootPathCost()
-                                        && jPort->getBridgePriority() == candidatePort->getBridgePriority()
-                                        && jPort->getBridgeAddress().compareTo(candidatePort->getBridgeAddress()) < 0)
-                                        || (jPort->getRootPathCost() == candidatePort->getRootPathCost()
-                                                && jPort->getBridgePriority() == candidatePort->getBridgePriority()
-                                                && jPort->getBridgeAddress().compareTo(candidatePort->getBridgeAddress()) == 0
-                                                && jPort->getPortPriority() < candidatePort->getPortPriority())
-                                                || (jPort->getRootPathCost() == candidatePort->getRootPathCost()
-                                                        && jPort->getBridgePriority() == candidatePort->getBridgePriority()
-                                                        && jPort->getBridgeAddress().compareTo(candidatePort->getBridgeAddress()) == 0
-                                                        && jPort->getPortPriority() == candidatePort->getPortPriority()
-                                                        && jPort->getPortNum() < candidatePort->getPortNum()))
+                if (compareRSTPData(jPort->getRootPriority(),     candidatePort->getRootPriority(),
+                                    jPort->getRootAddress(),      candidatePort->getRootAddress(),
+                                    jPort->getRootPathCost(),     candidatePort->getRootPathCost(),
+                                    jPort->getBridgePriority(),   candidatePort->getBridgePriority(),
+                                    jPort->getBridgeAddress(),    candidatePort->getBridgeAddress(),
+                                    jPort->getPortPriority(),     candidatePort->getPortPriority(),
+                                    jPort->getPortNum(),          candidatePort->getPortNum()) <  0)
                 {
                     // alternate better than the found one
                     candidate = j; // new candidate

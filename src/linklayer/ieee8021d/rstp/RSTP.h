@@ -95,15 +95,18 @@ protected:
      * Updates port information. Handles port role changes.
      */
     virtual void handleIncomingFrame(BPDU *frame);
-
     virtual void processBPDU(BPDU *frame, unsigned int arrival);
     virtual bool processBetterSource(BPDU *frame, unsigned int arrival);
     virtual bool processSameSource(BPDU *frame, unsigned int arrival);
+
     /**
      * @brief Prints current data base info
      */
     virtual void printState();
 
+    /**
+     * @brief Update Interfacedata with the content of the BDPU frame
+     */
     virtual void updateInterfacedata(BPDU *frame, unsigned int portNum);
 
     /**
@@ -124,6 +127,10 @@ protected:
      */
     virtual CompareResult compareInterfacedata(unsigned int portNum, BPDU * msg, int linkCost);
 
+    /**
+     * @brief Compares two RSTP data
+     * @return (<0 if vector better than frame)
+     */
     virtual CompareResult compareRSTPData(int rootPriority1, int rootPriority2,
             MACAddress rootAddress1, MACAddress rootAddress2,
             int rootPathCost1, int rootPathCost2,
@@ -158,8 +165,14 @@ protected:
      */
     virtual void handleBackup(BPDU * frame, unsigned int arrival);
 
+    /**
+     * @brief schedule next upgrade self-message
+     */
     virtual void scheduleNextUpgrde();
 
+    /**
+     * @brief flush all port expect one
+     */
     virtual void flushOtherPorts(unsigned int portNum);
 };
 
