@@ -403,13 +403,9 @@ protected:
 	/**
 	 * @brief Called the moment the simulated switching process of the MiximRadio is finished.
 	 *
-	 * The Radio is set the new RadioState and the MAC Layer is sent
-	 * a confirmation message.
-	 *
-	 * @param bSendCtrlMsg Flag for sending control message to MAC (in case of zero switch time
-	 *                     this flag maybe false).
+	 * The Radio is set the new RadioState and a signal is emitted.
 	 */
-	virtual void finishRadioSwitching(bool bSendCtrlMsg = true);
+	virtual void finishRadioSwitching();
 
 	/**
 	 * @brief Returns the identifier of the protocol this phy uses to send

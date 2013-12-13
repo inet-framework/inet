@@ -730,7 +730,7 @@ bool BasePhyLayer::isRadioInRX() const {
     return getRadioState() == RADIO_MODE_RECEIVER;
 }
 
-void BasePhyLayer::finishRadioSwitching(bool bSendCtrlMsg /*= true*/)
+void BasePhyLayer::finishRadioSwitching()
 {
 	radio->endSwitch(simTime());
 	RadioMode newRadioMode = (RadioMode)radio->getCurrentState();
@@ -743,9 +743,6 @@ void BasePhyLayer::finishRadioSwitching(bool bSendCtrlMsg /*= true*/)
 	radioMode = newRadioMode;
     emit(radioModeChangedSignal, radio->getCurrentState());
     updateRadioChannelState();
-	if (bSendCtrlMsg) {
-	    sendControlMsgToMac(new cMessage("Radio switching over", RADIO_SWITCHING_OVER));
-	}
 }
 
 void BasePhyLayer::setRadioMode(RadioMode radioMode) {
@@ -770,7 +767,7 @@ simtime_t BasePhyLayer::setRadioState(int rs) {
 	// if switching is done in exactly zero-time no extra self-message is scheduled
 	if (switchTime == SIMTIME_ZERO) {
 		// In case of zero-time-switch, send no control-message to MAC!
-		finishRadioSwitching(false);
+		finishRadioSwitching();
 	}
 	else {
 		sendSelfMessage(radioSwitchingOverTimer, simTime() + switchTime);

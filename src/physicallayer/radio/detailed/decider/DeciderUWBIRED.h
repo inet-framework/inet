@@ -115,15 +115,6 @@ public:
 
 	virtual void finish();
 
-	/**@brief Control message kinds specific to DeciderUWBIRED. Currently defines a
-	 * message kind that informs the MAC of a successful SYNC event at PHY layer. */
-	// TODO: use signals instead
-	enum UWBIRED_CTRL_KIND {
-	    SYNC_SUCCESS = 33333,
-	    SYNC_FAILURE,
-	    // add other control messages kinds here (from decider to mac, e.g. CCA)
-	};
-
 	// compatibility function to allow running MAC layers that depend on channel state information
 	// from PHY layer. Returns last SNR
 	virtual ChannelState getChannelState() const;

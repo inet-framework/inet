@@ -19,11 +19,6 @@
  * @author Jerome Rousselot, Amre El-Hoiydi, Marc Loebbers, Karl Wessel (port for MiXiM)
  */
 class INET_API Decider802154Narrow: public BaseDecider {
-public:
-	enum Decider802154NarrowControlKinds {
-		RECEPTION_STARTED=LAST_BASE_DECIDER_CONTROL_KIND,
-		LAST_DECIDER802154NARROW_CONTROL_KIND
-	};
 protected:
 	/** @brief Start Frame Delimiter length in bits. */
 	int sfdLength;

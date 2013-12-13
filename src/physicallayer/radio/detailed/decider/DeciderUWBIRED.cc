@@ -106,17 +106,14 @@ simtime_t DeciderUWBIRED::processSignalHeader(DetailedRadioFrame* frame) {
 			++nbSuccessfulSyncs;
 			uwbiface->switchRadioToRX();
 			packet.setNbSyncSuccesses(packet.getNbSyncSuccesses() + 1);
-			// notify MAC layer through PHY layer
-			cMessage* syncSuccessfulNotification = new cMessage("Ctrl_PHY2MAC_Sync_Success", SYNC_SUCCESS);
-			phy->sendControlMsgToMac(syncSuccessfulNotification);
+			// TODO: emit notification signal?
 
 			// in any case, look at that frame again when it is finished
 			// store this frame as signal to receive and set state
 			setSignalState(frame, getNextSignalState(EXPECT_HEADER));
 		} else {
 			++nbFailedSyncs;
-			cMessage* syncFailureNotification = new cMessage("Ctrl_PHY2MAC_Sync_Failure", SYNC_FAILURE);
-			phy->sendControlMsgToMac(syncFailureNotification);
+            // TODO: emit notification signal?
 
 			currentSignal.finishProcessing();
 		}

@@ -94,10 +94,6 @@ simtime_t Decider802154Narrow::processSignalHeader(DetailedRadioFrame* frame)
 	// store this frame as signal to receive and set state
 	setSignalState(frame, getNextSignalState(EXPECT_HEADER));
 
-	//TODO: publish rssi and channel state
-	// Inform the MAC that we started receiving a frame
-	phy->sendControlMsgToMac(new cMessage("start_rx",RECEPTION_STARTED));
-
 	return frame->getSignal().getReceptionEnd();
 }
 
