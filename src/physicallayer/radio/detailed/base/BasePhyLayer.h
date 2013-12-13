@@ -66,7 +66,7 @@ class cXMLElement;
 class INET_API BasePhyLayer: public DetailedRadioChannelAccess, public DeciderToPhyInterface
 {
 
-protected:
+public:
     /**
      * @brief Message kinds used by every phy layer.
      *
@@ -86,6 +86,8 @@ protected:
          * continue their own kinds.*/
         LAST_BASE_PHY_KIND,
     };
+
+protected:
 
 	enum ProtocolIds {
 		GENERIC = 0,
