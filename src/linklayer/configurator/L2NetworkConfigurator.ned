@@ -34,7 +34,6 @@ package inet.linklayer.configurator;
 // For more information about the usage of the selector attributes see
 // ~IPv4NetworkConfigurator.
 //
-
 simple L2NetworkConfigurator
 {
     parameters:
