@@ -21,11 +21,12 @@
 #include <vector>
 #include <sstream>
 #include <queue>
-#include "stlutils.h"
+
 #include "L2NetworkConfigurator.h"
 #include "IInterfaceTable.h"
 #include "InterfaceEntry.h"
 #include "ModuleAccess.h"
+#include "stlutils.h"
 
 Define_Module(L2NetworkConfigurator);
 

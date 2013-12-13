@@ -22,12 +22,12 @@
 
 #include <algorithm>
 #include <vector>
-#include "Ieee8021DInterfaceData.h"
-#include "stlutils.h"
+
 #include "INETDefs.h"
-#include "Topology.h"
+#include "Ieee8021DInterfaceData.h"
 #include "IInterfaceTable.h"
 #include "PatternMatcher.h"
+#include "Topology.h"
 
 
 /**
