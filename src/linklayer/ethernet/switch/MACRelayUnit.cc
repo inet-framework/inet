@@ -33,10 +33,8 @@ void MACRelayUnit::initialize(int stage)
     {
         // number of ports
         numPorts = gate("ifOut", 0)->size();
-        if (gate("ifIn", 0)->size()!=numPorts)
+        if (gate("ifIn", 0)->size() != numPorts)
             error("the sizes of the ifIn[] and ifOut[] gate vectors must be the same");
-
-        numPorts = gate("ifOut", 0)->size();
 
         numProcessedFrames = numDiscardedFrames = 0;
 
