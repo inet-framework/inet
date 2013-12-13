@@ -24,7 +24,7 @@ Define_Module(MACRelayUnit);
 
 MACRelayUnit::MACRelayUnit()
 {
-    addressTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTablePath")));
+    addressTable = NULL;
 }
 
 void MACRelayUnit::initialize(int stage)
@@ -39,9 +39,11 @@ void MACRelayUnit::initialize(int stage)
         numPorts = gate("ifOut", 0)->size();
 
         numProcessedFrames = numDiscardedFrames = 0;
+
+        addressTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTablePath")));
+
         WATCH(numProcessedFrames);
         WATCH(numDiscardedFrames);
-
     }
     else if (stage == 1)
     {
