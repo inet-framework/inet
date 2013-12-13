@@ -26,7 +26,7 @@ simple DetailedRadio extends RadioBase
 {
     parameters:
         bool recordStats = default(false); //enable/disable tracking of statistics (eg. cOutvectors)
-        double bitrate @unit("bps");       // transmission speed [bit/sec]
+        double bitrate @unit("bps") = default(0); // transmission speed [bit/sec], 0 means MAC frame must specify
         int headerLength @unit(bit) = default(0); //defines the length of the phy header (/preamble)
 
         bool usePropagationDelay;		//Should transmission delay be simulated?

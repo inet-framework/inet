@@ -917,7 +917,11 @@ DetailedRadioSignal* BasePhyLayer::createSignal(cPacket *macPkt)
 {
     PhyControlInfo *controlInfo = dynamic_cast<PhyControlInfo*>(macPkt->getControlInfo());
     double bitrate = controlInfo ? controlInfo->getBitrate() : this->bitrate;
+    if (bitrate <= 0)
+        throw cRuntimeError("Cannot create signal because the bitrate is undefined");
     double duration = macPkt->getBitLength() / bitrate;
+    if (duration <= 0)
+        throw cRuntimeError("Cannot create signal because the duration is undefined");
     return createSignal(simTime(), duration, txPower, bitrate);
 }
 
