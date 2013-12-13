@@ -7,7 +7,8 @@
 
 #include "DetailedRadio.h"
 
-#include "./Decider80211.h"
+#include "Decider80211.h"
+#include "Decider80211MultiChannel.h"
 #include "Decider802154Narrow.h"
 #include "SimplePathlossModel.h"
 #include "BreakpointPathlossModel.h"
@@ -107,6 +108,10 @@ Decider* DetailedRadio::getDeciderFromName(const std::string& name, ParameterMap
 		protocolId = IEEE_80211;
 		return createDecider<Decider80211>(params);
 	}
+    if(name == "Decider80211MultiChannel") {
+        protocolId = IEEE_80211;
+        return createDecider<Decider80211MultiChannel>(params);
+    }
 	if(name == "SNRThresholdDecider"){
 		protocolId = GENERIC;
 		return createDecider<SNRThresholdDecider>(params);
