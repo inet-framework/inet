@@ -50,7 +50,7 @@ simple DetailedRadio extends RadioBase
         double timeSleepToRX @unit(s) = default(0); // Elapsed time to switch from sleep to receive state
         double timeSleepToTX @unit(s) = default(0); // Elapsed time to switch from sleep to send state
 
-        int initialRadioState = default(0);   // State the radio is initially in (0=RX, 1=TX, 2=Sleep) 
+        int initialRadioState = default(0);   // State the radio is initially in (see IRadio::RADIO_MODE) 
 
         double radioMinAtt = default(1.0); //radios gain factor (attenuation) while receiving
         double radioMaxAtt = default(0.0); //radios gain factor (attenuation) while not receiving

@@ -113,12 +113,13 @@ void BasePhyLayer::initialize(int stage) {
 	}
 }
 
-MiximRadio* BasePhyLayer::initializeRadio() const {
+MiximRadio* BasePhyLayer::initializeRadio() {
 	int    initialRadioState   = par("initialRadioState").longValue();
 	double radioMinAtt         = par("radioMinAtt").doubleValue();
 	double radioMaxAtt         = par("radioMaxAtt").doubleValue();
 	int    nbRadioChannels     = readPar("nbRadioChannels",     1);
 
+    radioMode = (RadioMode)initialRadioState;
 	MiximRadio* radio = MiximRadio::createNewRadio(recordStats, initialRadioState,
 										 radioMinAtt, radioMaxAtt, nbRadioChannels);
 

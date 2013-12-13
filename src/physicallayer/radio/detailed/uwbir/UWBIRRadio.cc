@@ -26,7 +26,7 @@ void UWBIRRadio::initialize(int stage) {
 	}
 }
 
-MiximRadio* UWBIRRadio::initializeRadio() const {
+MiximRadio* UWBIRRadio::initializeRadio() {
 	int    initialRadioState = par("initialRadioState"); //readPar("initalRadioState", (int) RadioUWBIR::RADIO_MODE_SYNC);
 	double radioMinAtt       = readPar("radioMinAtt", 1.0);
 	double radioMaxAtt       = readPar("radioMaxAtt", 0.0);

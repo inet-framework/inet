@@ -207,7 +207,7 @@ protected:
 	 * - DeciderUWBIRED
 	 */
 	virtual Decider*    getDeciderFromName(const std::string& name, ParameterMap& params);
-	virtual MiximRadio* initializeRadio() const;
+	virtual MiximRadio* initializeRadio();
 	virtual void initializeCounters();
 
 	RadioUWBIR* uwbradio;

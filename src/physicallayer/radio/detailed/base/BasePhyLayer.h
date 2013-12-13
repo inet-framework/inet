@@ -228,7 +228,7 @@ protected:
 	 * Can be overridden by sub-classing phy layers to use their
 	 * own Radio implementations.
 	 */
-	virtual MiximRadio* initializeRadio() const;
+	virtual MiximRadio* initializeRadio();
 
 	/**
 	 * @brief Creates and returns an instance of the AnalogueModel with the
