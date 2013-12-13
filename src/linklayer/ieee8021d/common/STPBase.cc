@@ -81,7 +81,6 @@ void STPBase::start()
 
 void STPBase::stop()
 {
-    //TODO can't we call visualizer() to eliminate code near-duplication?
     isOperational = false;
     // colors all connected link gray
     for (unsigned int i = 0; i < numPorts; i++)
@@ -101,14 +100,17 @@ void STPBase::colorLink(unsigned int i, bool forwarding)
         cGate * inGate;
         cGate * inGatePrev;
         cGate * inGatePrev2;
-        if(outGate = getParentModule()->gate("ethg$o", i))
+        outGate = getParentModule()->gate("ethg$o", i);
+        if(outGate)
         {
             outGateNext = outGate->getNextGate();
             outGatePrev = outGate->getPreviousGate();
         }
-        if(inGate = getParentModule()->gate("ethg$i", i))
-            if(inGatePrev = inGate->getPreviousGate())
-                inGatePrev2 = inGatePrev->getPreviousGate();
+        inGate = getParentModule()->gate("ethg$i", i);
+        if(inGate)
+            inGatePrev = inGate->getPreviousGate();
+        if(inGate && inGatePrev)
+            inGatePrev2 = inGatePrev->getPreviousGate();
 
 
 
