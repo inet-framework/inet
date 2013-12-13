@@ -43,7 +43,7 @@ import inet.linklayer.IEtherMAC;
 // Expected environment:
 // - phys$i and phys$o should be connected to the "network"
 // - upperLayerIn and upperLayerOut are usually connected to ~EtherLLC (in hosts)
-//   or ~MACRelayUnitPP (in a switch)
+//   or ~MACRelayUnit (in a switch)
 //
 // <b>Operation</b>
 //
@@ -152,8 +152,8 @@ simple EtherMAC like IEtherMAC
         @statistic[backoff](title="backoff"; record=count,vector; interpolationmode=none);
 
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~EtherEncap or ~MACRelayUnitPP
-        output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~EtherEncap or ~MACRelayUnitPP
+        input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~EtherEncap or ~MACRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~EtherEncap or ~MACRelayUnit
         inout phys @labels(EtherFrame); // to physical layer or the network
 }
 
