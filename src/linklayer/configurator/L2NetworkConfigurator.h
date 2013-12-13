@@ -29,13 +29,6 @@
 #include "IInterfaceTable.h"
 #include "PatternMatcher.h"
 
-// compile time macros to disable or enable logging
-#define EV_ENABLED EV
-#define EV_DISABLED true ? ev : ev
-
-// compile time log levels
-#define EV_DEBUG EV_DISABLED
-#define EV_INFO EV_ENABLED
 
 /**
  * Computes L2 configuration of the network. See the NED definition for details.
