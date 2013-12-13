@@ -42,7 +42,7 @@ enum SenseMode {
 // rssi info contained in the ChannelState are calculated
 // and interpreted depends on the Decider.
 //
-packet ChannelSenseRequest
+message ChannelSenseRequest
 {
     int senseMode enum(SenseMode);	// defines the sensing mode (see SenseMode enum)
     simtime_t senseTimeout; 		// Time to listen on the channel
