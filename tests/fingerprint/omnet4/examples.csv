@@ -83,8 +83,8 @@
 
 /examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          4ba7-8db3
 
-/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv2 -r 0,                 200s,            cf62-2f77
-/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv3 -r 0,                 200s,            03cf-e677
+/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv2 -r 0,                 200s,            7088-b179
+/examples/inet/igmp/,                -f omnetpp.ini -c IGMPv3 -r 0,                 200s,            fd13-2ebf
 
 /examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             1f13-268e
 
@@ -281,12 +281,12 @@
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownAndRestart -r 0,     500s,            954c-991b
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,        500s,            954c-991b
 
-/examples/pim/dm/,                   -f omnetpp.ini -c General -r 0,                300s,            e04b-211b 
-/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario1 -r 0,              100s,            8cb3-354c 
-/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario2 -r 0,              150s,            6c49-f68d 
-/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario3 -r 0,              300s,            3f51-e932 
-/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario4 -r 0,              100s,            9e30-8372 
-/examples/pim/sm/iptv/,              -f omnetpp.ini -c General -r 0,                 35s,            7aa7-93a4 
+/examples/pim/dm/,                   -f omnetpp.ini -c General -r 0,                300s,            9523-fa45
+/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario1 -r 0,              100s,            06de-6bab
+/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario2 -r 0,              150s,            9fd6-ed5e
+/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario3 -r 0,              300s,            cc01-4cc1
+/examples/pim/sm/ansa/,              -f omnetpp.ini -c Scenario4 -r 0,              100s,            4f64-4093
+/examples/pim/sm/iptv/,              -f omnetpp.ini -c General -r 0,                 35s,            1d21-4070
 
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            4496-fd0d
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            f9d3-a124
