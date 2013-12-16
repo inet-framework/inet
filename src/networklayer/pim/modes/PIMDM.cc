@@ -328,7 +328,7 @@ void PIMDM::processGraftPacket(IPv4Address source, IPv4Address group, IPv4Addres
 
 	// if all route was pruned, remove prune flag
 	// if upstrem is not source, send Graft message
-	if (route->isFlagSet(PIMMulticastRoute::P) && forward && (route->getGrt() == NULL))
+	if (route->isFlagSet(PIMMulticastRoute::P) && forward && (route->getGraftRetryTimer() == NULL))
 	{
 		if (!route->isFlagSet(PIMMulticastRoute::A))
 		{
@@ -336,7 +336,7 @@ void PIMDM::processGraftPacket(IPv4Address source, IPv4Address group, IPv4Addres
 			PIMInInterface *inInterface = route->getPIMInInterface();
 			sendPimGraft(inInterface->nextHop, source, group, inInterface->getInterfaceId());
 			PIMgrt* timer = createGraftRetryTimer(source, group);
-			route->setGrt(timer);
+			route->setGraftRetryTimer(timer);
 		}
 		else
 			route->clearFlag(PIMMulticastRoute::P);
@@ -355,12 +355,12 @@ void PIMDM::processGraftPacket(IPv4Address source, IPv4Address group, IPv4Addres
  */
 void PIMDM::processGraftAckPacket(PIMMulticastRoute *route)
 {
-	PIMgrt *grt = route->getGrt();
+	PIMgrt *grt = route->getGraftRetryTimer();
 	if (grt != NULL)
 	{
 		cancelEvent(grt);
 		delete grt;
-		route->setGrt(NULL);
+		route->setGraftRetryTimer(NULL);
 		route->clearFlag(PIMMulticastRoute::P);
 	}
 }
@@ -415,11 +415,11 @@ void PIMDM::processPrunePacket(PIMMulticastRoute *route, int intId, int holdTime
 		route->setFlags(PIMMulticastRoute::P);
 
 		// if GRT is running now, do not send Prune msg
-		if (route->isFlagSet(PIMMulticastRoute::P) && (route->getGrt() != NULL))
+		if (route->isFlagSet(PIMMulticastRoute::P) && (route->getGraftRetryTimer() != NULL))
 		{
-			cancelEvent(route->getGrt());
-			delete route->getGrt();
-			route->setGrt(NULL);
+			cancelEvent(route->getGraftRetryTimer());
+			delete route->getGraftRetryTimer();
+			route->setGraftRetryTimer(NULL);
 		}
 		else if (!route->isFlagSet(PIMMulticastRoute::A))
 		{
@@ -561,16 +561,16 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 	if (route->isFlagSet(PIMMulticastRoute::P) && !pkt->getP())
 	{
 		// send Prune msg to upstream
-		if (route->getGrt() == NULL)
+		if (route->getGraftRetryTimer() == NULL)
 		{
 		    PIMInInterface *inInterface = route->getPIMInInterface();
 			sendPimJoinPrune(inInterface->nextHop, route->getOrigin(), route->getMulticastGroup(), inInterface->getInterfaceId());
 		}
 		else
 		{
-			cancelEvent(route->getGrt());
-			delete route->getGrt();
-			route->setGrt(NULL);
+			cancelEvent(route->getGraftRetryTimer());
+			delete route->getGraftRetryTimer();
+			route->setGraftRetryTimer(NULL);
 			///////delete P
 		}
 	}
@@ -686,7 +686,7 @@ void PIMDM::processSourceActiveTimer(PIMsat * timer)
 	PIMMulticastRoute *route = getRouteFor(timer->getGroup(), timer->getSource());
 
 	delete timer;
-	route->setSat(NULL);
+	route->setSourceActiveTimer(NULL);
 	deleteMulticastRoute(route);
 }
 
@@ -728,7 +728,7 @@ void PIMDM::processStateRefreshTimer(PIMsrt * timer)
 		sendPimStateRefresh(ift->getInterfaceById(intId)->ipv4Data()->getIPAddress(), timer->getSource(), timer->getGroup(), intId, pruneIndicator);
 	}
 	delete timer;
-	route->setSrt(createStateRefreshTimer(route->getOrigin(), route->getMulticastGroup()));
+	route->setStateRefreshTimer(createStateRefreshTimer(route->getOrigin(), route->getMulticastGroup()));
 }
 
 /**
@@ -1028,7 +1028,7 @@ void PIMDM::rpfIntChange(PIMMulticastRoute *route)
 	{
 		sendPimGraft(newInInterface->nextHop, source, group, rpfId);
 		PIMgrt* timer = createGraftRetryTimer(source, group);
-		route->setGrt(timer);
+		route->setGraftRetryTimer(timer);
 	}
 
 	// find rpf int in outgoing imterfaces and delete it
@@ -1072,8 +1072,8 @@ void PIMDM::rpfIntChange(PIMMulticastRoute *route)
 void PIMDM::dataOnRpf(IPv4Datagram *datagram)
 {
     PIMMulticastRoute *route = getRouteFor(datagram->getDestAddress(), datagram->getSrcAddress());
-	cancelEvent(route->getSat());
-	scheduleAt(simTime() + sourceActiveInterval, route->getSat());
+	cancelEvent(route->getSourceActiveTimer());
+	scheduleAt(simTime() + sourceActiveInterval, route->getSourceActiveTimer());
 
     if (route->getNumOutInterfaces() == 0 || route->isFlagSet(PIMMulticastRoute::P))
     {
@@ -1155,11 +1155,11 @@ void PIMDM::dataOnPruned(IPv4Address group, IPv4Address source)
         return;
 
     // if GRT is running now, do not send Prune msg
-	if (route->isFlagSet(PIMMulticastRoute::P) && (route->getGrt() != NULL))
+	if (route->isFlagSet(PIMMulticastRoute::P) && (route->getGraftRetryTimer() != NULL))
 	{
-		cancelEvent(route->getGrt());
-		delete route->getGrt();
-		route->setGrt(NULL);
+		cancelEvent(route->getGraftRetryTimer());
+		delete route->getGraftRetryTimer();
+		route->setGraftRetryTimer(NULL);
 	}
 	// otherwise send Prune msg to upstream router
 	else
@@ -1223,11 +1223,11 @@ void PIMDM::oldMulticastAddr(PIMInterface *pimInt, IPv4Address oldAddr)
         {
             EV << "Route is not forwarding any more, send Prune to upstream" << endl;
             // if GRT is running now, do not send Prune msg
-            if (route->isFlagSet(PIMMulticastRoute::P) && (route->getGrt() != NULL))
+            if (route->isFlagSet(PIMMulticastRoute::P) && (route->getGraftRetryTimer() != NULL))
             {
-                cancelEvent(route->getGrt());
-                delete route->getGrt();
-                route->setGrt(NULL);
+                cancelEvent(route->getGraftRetryTimer());
+                delete route->getGraftRetryTimer();
+                route->setGraftRetryTimer(NULL);
                 PIMInInterface *inInterface = route->getPIMInInterface();
                 sendPimJoinPrune(inInterface->nextHop, route->getOrigin(), route->getMulticastGroup(), inInterface->getInterfaceId());
             }
@@ -1315,7 +1315,7 @@ void PIMDM::newMulticastAddr(PIMInterface *pimInt, IPv4Address newAddr)
                 PIMInInterface *inInterface = route->getPIMInInterface();
                 sendPimGraft(inInterface->nextHop, route->getOrigin(), route->getMulticastGroup(), inInterface->getInterfaceId());
                 PIMgrt *timer = createGraftRetryTimer(route->getOrigin(), route->getMulticastGroup());
-                route->setGrt(timer);
+                route->setGraftRetryTimer(timer);
             }
             else
                 route->clearFlag(PIMMulticastRoute::P);
@@ -1414,12 +1414,12 @@ void PIMDM::newMulticast(IPv4Address srcAddr, IPv4Address destAddr)
 	if (newRoute->isFlagSet(PIMMulticastRoute::A) && rpfInterface->getSR())
 	{
 	    PIMsrt* timerSrt = createStateRefreshTimer(newRoute->getOrigin(), newRoute->getMulticastGroup());
-	    newRoute->setSrt(timerSrt);
+	    newRoute->setStateRefreshTimer(timerSrt);
 	}
 
 	// set Source Active Timer (liveness of route)
 	PIMsat* timerSat = createSourceActiveTimer(newRoute->getOrigin(), newRoute->getMulticastGroup());
-    newRoute->setSat(timerSat);
+    newRoute->setSourceActiveTimer(timerSat);
 
 	// if there is no outgoing interface, prune from multicast tree
 	if (pruned)

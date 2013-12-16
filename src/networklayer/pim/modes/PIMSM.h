@@ -40,7 +40,6 @@
 #define HOLDTIME 210.0                  /**< Holdtime for Expiry Timer */
 #define HOLDTIME_HOST 180.0             /**< Holdtime for interface ET connected to host */
 #define PPT 3.0                         /**< value for Prune-Pending Timer*/
-#define ALL_PIM_ROUTERS "224.0.0.13"    /**< Multicast address for PIM routers */
 #define MAX_TTL 255                     /**< Maximum TTL */
 #define NO_INT_TIMER -1
 #define CISCO_SPEC_SIM 1                /**< Enable Cisco specific simulation; 1 = enable, 0 = disable */

@@ -110,15 +110,16 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
     private:
         IPv4Address                 RP;                     /**< Randevous point */
         int                         flags;                  /**< Route flags */
-        // timers
-        PIMgrt                      *grt;                   /**< Pointer to Graft Retry Timer*/
-        PIMsat                      *sat;                   /**< Pointer to Source Active Timer*/
-        PIMsrt                      *srt;                   /**< Pointer to State Refresh Timer*/
-        PIMkat                      *kat;                   /**< Pointer to Keep Alive timer for PIM-SM*/
-        PIMrst                      *rst;                   /**< Pointer to Register-stop timer for PIM-SM*/
-        PIMet                       *et;                    /**< Pointer to Expiry timer for PIM-SM*/
-        PIMjt                       *jt;                    /**< Pointer to Join timer*/
-        PIMppt                      *ppt;                   /**< Pointer to Prune Pending Timer*/
+        // PIMDM timers
+        PIMgrt                      *graftRetryTimer;
+        PIMsat                      *sourceActiveTimer;
+        PIMsrt                      *stateRefreshTimer;
+        // PIMSM timers
+        PIMkat                      *keepAliveTimer;
+        PIMrst                      *registerStopTimer;
+        PIMet                       *expiryTimer;
+        PIMjt                       *joinTimer;
+        PIMppt                      *prunePendingTimer;
 
         //Originated from destination.Ensures loop freeness.
         unsigned int sequencenumber;
@@ -132,14 +133,14 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
 
         void setRP(IPv4Address RP)  {this->RP = RP;}                        /**< Set RP IP address */
 
-        void setGrt (PIMgrt *grt)   {this->grt = grt;}                      /**< Set pointer to PimGraftTimer */
-        void setSat (PIMsat *sat)   {this->sat = sat;}                      /**< Set pointer to PimSourceActiveTimer */
-        void setSrt (PIMsrt *srt)   {this->srt = srt;}                      /**< Set pointer to PimStateRefreshTimer */
-        void setKat (PIMkat *kat)   {this->kat = kat;}                      /**< Set pointer to KeepAliveTimer */
-        void setRst (PIMrst *rst)   {this->rst = rst;}                      /**< Set pointer to RegisterStopTimer */
-        void setEt  (PIMet *et)     {this->et = et;}                        /**< Set pointer to ExpiryTimer */
-        void setJt  (PIMjt *jt)     {this->jt = jt;}                        /**< Set pointer to JoinTimer */
-        void setPpt  (PIMppt *ppt)  {this->ppt = ppt;}                      /**< Set pointer to PrunePendingTimer */
+        void setGraftRetryTimer (PIMgrt *grt)   {this->graftRetryTimer = grt;}
+        void setSourceActiveTimer (PIMsat *sat)   {this->sourceActiveTimer = sat;}
+        void setStateRefreshTimer (PIMsrt *srt)   {this->stateRefreshTimer = srt;}
+        void setKeepAliveTimer (PIMkat *kat)   {this->keepAliveTimer = kat;}
+        void setRegisterStopTimer (PIMrst *rst)   {this->registerStopTimer = rst;}
+        void setExpiryTimer  (PIMet *et)     {this->expiryTimer = et;}
+        void setJoinTimer  (PIMjt *jt)     {this->joinTimer = jt;}
+        void setPrunePendingTimer  (PIMppt *ppt)  {this->prunePendingTimer = ppt;}
 
         bool isFlagSet(Flag flag) const { return (flags & flag) != 0; }     /**< Returns if flag is set to entry or not*/
         void setFlags(int flags)   { this->flags |= flags; }                /**< Add flag to ineterface */
@@ -147,14 +148,14 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
 
         IPv4Address   getRP() const {return RP;}                            /**< Get RP IP address */
 
-        PIMgrt*     getGrt() const {return grt;}                            /**< Get pointer to PimGraftTimer */
-        PIMsat*     getSat() const {return sat;}                            /**< Get pointer to PimSourceActiveTimer */
-        PIMsrt*     getSrt() const {return srt;}                            /**< Get pointer to PimStateRefreshTimer */
-        PIMkat*     getKat() const {return kat;}                            /**< Get pointer to KeepAliveTimer */
-        PIMrst*     getRst() const {return rst;}                            /**< Get pointer to RegisterStopTimer */
-        PIMet*      getEt()  const {return et;}                             /**< Get pointer to ExpiryTimer */
-        PIMjt*      getJt()  const {return jt;}                             /**< Get pointer to JoinTimer */
-        PIMppt*     getPpt()  const {return ppt;}                           /**< Get pointer to PrunePendingTimer */
+        PIMgrt*     getGraftRetryTimer() const {return graftRetryTimer;}
+        PIMsat*     getSourceActiveTimer() const {return sourceActiveTimer;}
+        PIMsrt*     getStateRefreshTimer() const {return stateRefreshTimer;}
+        PIMkat*     getKeepAliveTimer() const {return keepAliveTimer;}
+        PIMrst*     getRegisterStopTimer() const {return registerStopTimer;}
+        PIMet*      getExpiryTimer()  const {return expiryTimer;}
+        PIMjt*      getJoinTimer()  const {return joinTimer;}
+        PIMppt*     getPrunePendingTimer()  const {return prunePendingTimer;}
 
         // get incoming interface
         PIMInInterface *getPIMInInterface() const { return getInInterface() ? check_and_cast<PIMInInterface*>(getInInterface()) : NULL; }
