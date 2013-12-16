@@ -86,6 +86,51 @@ public:
 };
 
 /**
+ * @brief Asserts a signal with a specific ID.
+ *
+ * Normally you shouldn't have to use this class by yourself.
+ */
+class AssertSignal:public AssertMessage {
+    protected:
+        simsignal_t signalID;
+        simtime_t arrival;
+
+    public:
+        AssertSignal(std::string msg, simsignal_t signalID, simtime_t arrival,
+                     bool isPlanned = false,
+                     bool continuesTests = false):
+            AssertMessage(msg, isPlanned, continuesTests),
+            signalID(signalID),
+            arrival(arrival)
+        {}
+
+        /**
+         * @brief Returns true if the passed message is the message expected by this
+         * AssertMessage.
+         *
+         * Has to be implemented by every subclass.
+         */
+        virtual bool isMessage(cMessage* msg) { return false; }
+
+        /**
+         * @brief Returns true if the passed signal is the signal expected by this
+         * AssertSignal.
+         *
+         * Has to be implemented by every subclass.
+         */
+        virtual bool isSignal(simsignal_t signalID) { return this->signalID == signalID && simTime() == arrival; }
+
+        /**
+         * @brief Concatenates the description text together with expected kind and
+         * arrival time to an out stream.
+         */
+        virtual std::ostream& concat(std::ostream& o) const{
+            o << ": id = " << signalID << ", t = " << arrival << "s";
+            return o;
+        }
+};
+
+/**
  * @brief Asserts a message with a specific kind at a specific time.
  *
  * Normally you shouldn't have to use this class by yourself.
@@ -224,8 +269,18 @@ protected:
 	/** @brief List of message this module expects to arrive.*/
 	MessageDescList expectedMsgs;
 	
+    typedef std::list<AssertSignal*> SignalDescList;
+
+    /** @brief List of signal this module expects to arrive.*/
+	SignalDescList expectedSignals;
+
 private:
-	/**
+    /**
+     * @brief Proceeds the signal assert to the correct destination.
+     */
+    void assertNewSignal(AssertSignal* assert, std::string destination);
+
+    /**
 	 * @brief Proceeds the message assert to the correct destination.
 	 */
 	void assertNewMessage(AssertMessage* assert, std::string destination);
@@ -264,6 +319,15 @@ protected:
 	 */ 
 	void init(const std::string& name);
 	
+    /**
+     * @brief Checks if the passed signal is expected.
+     *
+     * This method has to be called at the beginning of "receiveSignal()"
+     * or whenever a new signal arrives at the module.
+     * The passed signal should be the newly arrived signal.
+     */
+	void announceSignal(simsignal_t signalID);
+
 	/**
 	 * @brief Checks if the passed message is expected.
 	 *
@@ -285,6 +349,13 @@ protected:
 	 * @brief Return a string with the pattern "[module name] - passed text"
 	 */
 	std::string log(std::string msg);
+
+    /**
+     * Asserts the arrival of a signal with the specified ID at the specified
+     * time at module with the passed name. If the module name is ommited the signal is
+     * expected at this module.
+     */
+    void assertSignal(std::string msg, simsignal_t signalID, simtime_t_cref arrival, std::string destination = "");
 	
 	/**
 	 * Asserts the arrival of a message described by the passed AssertMessage object 
@@ -342,6 +413,12 @@ protected:
 						int kind,
 						simtime_t_cref intvStart, simtime_t_cref intvEnd,
 						std::string destination = "");
+
+    /**
+     * @brief Does the same as "assertSignal" plus it calls the
+     * "continueTest()"-method when the signal arrives.
+     */
+    void waitForSignal(std::string msg, simsignal_t signalID, simtime_t_cref arrival, std::string destination = "");
 
 	/**
 	 * @brief Does the same as "assertMessage" plus it calls the

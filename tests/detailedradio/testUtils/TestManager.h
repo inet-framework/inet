@@ -182,6 +182,15 @@ public:
 	 */
 	void continueTests(cMessage* msg);
 
+    /**
+     * @brief Continues the current test run with the next stage.
+     *
+     * Called after a signal arrives which the test run has waited for.
+     *
+     * @param signalID The signal which continued the test run
+     */
+    void continueTests(simsignal_t singalID);
+
 	/**
 	 * @brief Asserts the simulation to not terminate normally.
 	 *

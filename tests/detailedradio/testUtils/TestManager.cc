@@ -75,6 +75,12 @@ void TestManager::continueTests(cMessage* msg)
 	runTests(run, ++stage, msg);
 }
 
+void TestManager::continueTests(simsignal_t signalID)
+{
+    Enter_Method_Silent();
+    runTests(run, ++stage, NULL);
+}
+
 void TestManager::assertError(std::string msg)
 {
 	assertTrue("Only one error may be expected per test run.",
