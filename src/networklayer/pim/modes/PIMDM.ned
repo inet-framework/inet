@@ -30,6 +30,6 @@ simple PIMDM
         double stateRefreshInterval @unit(s) = 60s;
 
     gates:
-        input splitterIn;
-        output spiltterOut;
+        input ipIn;
+        output ipOut;
 }

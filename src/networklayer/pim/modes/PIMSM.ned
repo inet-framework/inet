@@ -26,6 +26,6 @@ simple PIMSM
         string RP = default("");
         string sptThreshold = default("infinity");
     gates:
-        input splitterIn;
-        output spiltterOut;
+        input ipIn;
+        output ipOut;
 }

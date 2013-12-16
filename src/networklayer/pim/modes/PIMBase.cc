@@ -58,7 +58,7 @@ void PIMBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER)
     {
-        IPSocket ipSocket(gate("spiltterOut"));
+        IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(IP_PROT_PIM);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
@@ -109,7 +109,7 @@ void PIMBase::sendHelloPackets()
             ctrl->setInterfaceId(pimInterface->getInterfaceId());
             msg->setControlInfo(ctrl);
 
-            send(msg, "spiltterOut");
+            send(msg, "ipOut");
         }
     }
 }

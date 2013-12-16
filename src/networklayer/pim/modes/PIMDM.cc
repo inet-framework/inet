@@ -64,14 +64,12 @@ void PIMDM::sendPimJoinPrune(IPv4Address nextHop, IPv4Address src, IPv4Address g
 
 	// set IP Control info
 	IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-	IPv4Address ga1("224.0.0.13");
-	ctrl->setDestAddr(ga1);
-	//ctrl->setProtocol(IP_PROT_PIM);
-	ctrl->setProtocol(103);
+	ctrl->setDestAddr(ALL_PIM_ROUTERS_MCAST);
+	ctrl->setProtocol(IP_PROT_PIM);
 	ctrl->setTimeToLive(1);
 	ctrl->setInterfaceId(intId);
 	msg->setControlInfo(ctrl);
-	send(msg, "spiltterOut");
+	send(msg, "ipOut");
 }
 
 /**
@@ -99,7 +97,7 @@ void PIMDM::sendPimGraftAck(PIMGraftAck *msg)
 	ctrl->setInterfaceId(oldCtrl->getInterfaceId());
 	delete oldCtrl;
 	msg->setControlInfo(ctrl);
-	send(msg, "spiltterOut");
+	send(msg, "ipOut");
 }
 
 /**
@@ -144,7 +142,7 @@ void PIMDM::sendPimGraft(IPv4Address nextHop, IPv4Address src, IPv4Address grp, 
 	ctrl->setTimeToLive(1);
 	ctrl->setInterfaceId(intId);
 	msg->setControlInfo(ctrl);
-	send(msg, "spiltterOut");
+	send(msg, "ipOut");
 }
 
 /**
@@ -180,7 +178,7 @@ void PIMDM::sendPimStateRefresh(IPv4Address originator, IPv4Address src, IPv4Add
 	ctrl->setTimeToLive(1);
 	ctrl->setInterfaceId(intId);
 	msg->setControlInfo(ctrl);
-	send(msg, "spiltterOut");
+	send(msg, "ipOut");
 }
 
 /**

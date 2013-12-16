@@ -1336,7 +1336,7 @@ void PIMSM::sendPIMJoinPrune(IPv4Address multGroup, IPv4Address joinPruneIPaddr,
     IPv4ControlInfo *ctrl = setCtrlForMessage(ALL_PIM_ROUTERS_MCAST,interfaceToRP->ipv4Data()->getIPAddress(),
                                                         IP_PROT_PIM,interfaceToRP->getInterfaceId(),1);
     msg->setControlInfo(ctrl);
-    send(msg, "spiltterOut");
+    send(msg, "ipOut");
 }
 
 /**
@@ -1380,7 +1380,7 @@ void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
         IPv4ControlInfo *ctrl = setCtrlForMessage(RPAddress,interfaceToRP->ipv4Data()->getIPAddress(),
                                                             IP_PROT_PIM,interfaceToRP->getInterfaceId(),MAX_TTL);
         msg->setControlInfo(ctrl);
-        send(msg, "spiltterOut");
+        send(msg, "ipOut");
     }
 }
 
@@ -1446,7 +1446,7 @@ void PIMSM::sendPIMRegister(IPv4Datagram *datagram)
         IPv4ControlInfo *ctrl = setCtrlForMessage(this->getRPAddress(),intToRP->ipv4Data()->getIPAddress(),
                                                     IP_PROT_PIM,intToRP->getInterfaceId(),MAX_TTL);
         msg->setControlInfo(ctrl);
-        send(msg, "spiltterOut");
+        send(msg, "ipOut");
     }
     else if (outInterface && outInterface->regState == PIMMulticastRoute::Prune)
         EV << "PIM-SM:sendPIMRegister - register tunnel is disconnect." << endl;
@@ -1508,7 +1508,7 @@ void PIMSM::sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Addres
     ctrl->setTimeToLive(255);
     msg->setControlInfo(ctrl);
 
-    send(msg, "spiltterOut");
+    send(msg, "ipOut");
 }
 
 /**
@@ -1538,7 +1538,7 @@ void PIMSM::forwardMulticastData(IPv4Datagram *datagram, multDataInfo *info)
     ctrl->setTimeToLive(MAX_TTL-2);                     //one minus for source DR router and one for RP router // XXX specification???
     ctrl->setProtocol(datagram->getTransportProtocol());
     data->setControlInfo(ctrl);
-    send(data, "spiltterOut");
+    send(data, "ipOut");
 }
 
 /**

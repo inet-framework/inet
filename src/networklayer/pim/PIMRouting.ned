@@ -40,17 +40,11 @@ module PIMRouting
         pimDM: PIMDM {
             parameters:
                 @display("p=165,142;q=queue;i=block/network2");
-            gates:
-                splitterIn;
-                spiltterOut;
         }
 
         pimSM: PIMSM {
             parameters:
                 @display("p=165,56;q=queue;i=block/network2");
-            gates:
-                splitterIn;
-                spiltterOut;
         }
 
         pimInterfaceTable: PIMInterfaceTable {
@@ -66,12 +60,12 @@ module PIMRouting
     connections:
 
         // pimDM
-        pimSplitter.pimDMOut --> pimDM.splitterIn;
-        pimSplitter.pimDMIn <-- pimDM.spiltterOut;
+        pimSplitter.pimDMOut --> pimDM.ipIn;
+        pimSplitter.pimDMIn <-- pimDM.ipOut;
 
         // pimSM
-        pimSplitter.pimSMOut --> pimSM.splitterIn;
-        pimSplitter.pimSMIn <-- pimSM.spiltterOut;
+        pimSplitter.pimSMOut --> pimSM.ipIn;
+        pimSplitter.pimSMIn <-- pimSM.ipOut;
 
         // splitter out
         pimSplitter.ipOut --> networkLayerOut;
