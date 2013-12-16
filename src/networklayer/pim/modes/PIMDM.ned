@@ -24,6 +24,11 @@ simple PIMDM
 {
     parameters:
     	@display("i=block/network2");
+        double pruneInterval @unit(s) = 180s;
+        double graftRetryInterval @unit(s) = 3s;
+        double sourceActiveInterval @unit(s) = 210s; // Cisco has 180s, after that, route is flushed
+        double stateRefreshInterval @unit(s) = 60s;
+
     gates:
         input splitterIn;
         output spiltterOut;

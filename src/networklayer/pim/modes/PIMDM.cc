@@ -46,7 +46,7 @@ void PIMDM::sendPimJoinPrune(IPv4Address nextHop, IPv4Address src, IPv4Address g
 	PIMJoinPrune *msg = new PIMJoinPrune();
 	msg->setName("PIMJoinPrune");
 	msg->setUpstreamNeighborAddress(nextHop);
-	msg->setHoldTime(PT);
+	msg->setHoldTime(pruneInterval);
 	msg->setMulticastGroupsArraySize(1);
 
 	//FIXME change to add also join groups
@@ -169,7 +169,7 @@ void PIMDM::sendPimStateRefresh(IPv4Address originator, IPv4Address src, IPv4Add
 	msg->setGroupAddress(grp);
 	msg->setSourceAddress(src);
 	msg->setOriginatorAddress(originator);
-	msg->setInterval(SRT);
+	msg->setInterval(stateRefreshInterval);
 	msg->setP(P);
 
 	// set IP Control info
@@ -225,7 +225,7 @@ PIMgrt* PIMDM::createGraftRetryTimer(IPv4Address source, IPv4Address group)
 	PIMgrt *timer = new PIMgrt("PIMGraftRetryTimer", GraftRetryTimer);
 	timer->setSource(source);
 	timer->setGroup(group);
-	scheduleAt(simTime() + GRT, timer);
+	scheduleAt(simTime() + graftRetryInterval, timer);
 	return timer;
 }
 
@@ -246,7 +246,7 @@ PIMsat* PIMDM::createSourceActiveTimer(IPv4Address source, IPv4Address group)
 	PIMsat *timer = new PIMsat("PIMSourceActiveTimer", SourceActiveTimer);
 	timer->setSource(source);
 	timer->setGroup(group);
-	scheduleAt(simTime() + SAT, timer);
+	scheduleAt(simTime() + sourceActiveInterval, timer);
 	return timer;
 }
 
@@ -267,7 +267,7 @@ PIMsrt* PIMDM::createStateRefreshTimer(IPv4Address source, IPv4Address group)
 	PIMsrt *timer = new PIMsrt("PIMStateRefreshTimer", StateRefreshTimer);
 	timer->setSource(source);
 	timer->setGroup(group);
-	scheduleAt(simTime() + SRT, timer);
+	scheduleAt(simTime() + stateRefreshInterval, timer);
 	return timer;
 }
 
@@ -585,7 +585,7 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 			pruneIndicator = true;
 			// reset PT
 			cancelEvent(outInt->pruneTimer);
-			scheduleAt(simTime() + PT, outInt->pruneTimer);
+			scheduleAt(simTime() + pruneInterval, outInt->pruneTimer);
 		}
 		else if (outInt->forwarding == PIMMulticastRoute::Forward)
 		{
@@ -718,7 +718,7 @@ void PIMDM::processStateRefreshTimer(PIMsrt * timer)
 			pruneIndicator = true;
 			// reset PT
 			cancelEvent(outInt->pruneTimer);
-			scheduleAt(simTime() + PT, outInt->pruneTimer);
+			scheduleAt(simTime() + pruneInterval, outInt->pruneTimer);
 		}
 		else if (outInt->forwarding == PIMMulticastRoute::Forward)
 		{
@@ -879,7 +879,14 @@ void PIMDM::initialize(int stage)
 {
     PIMBase::initialize(stage);
 
-	if (stage == INITSTAGE_ROUTING_PROTOCOLS)
+    if (stage == INITSTAGE_LOCAL)
+    {
+        pruneInterval = par("pruneInterval");
+        graftRetryInterval = par("graftRetryInterval");
+        sourceActiveInterval = par("sourceActiveInterval");
+        stateRefreshInterval = par("stateRefreshInterval");
+    }
+    else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
 	{
         // is PIM enabled?
         if (pimIft->getNumInterfaces() == 0)
@@ -1066,7 +1073,7 @@ void PIMDM::dataOnRpf(IPv4Datagram *datagram)
 {
     PIMMulticastRoute *route = getRouteFor(datagram->getDestAddress(), datagram->getSrcAddress());
 	cancelEvent(route->getSat());
-	scheduleAt(simTime() + SAT, route->getSat());
+	scheduleAt(simTime() + sourceActiveInterval, route->getSat());
 
     if (route->getNumOutInterfaces() == 0 || route->isFlagSet(PIMMulticastRoute::P))
     {
@@ -1110,7 +1117,7 @@ void PIMDM::dataOnNonRpf(IPv4Address group, IPv4Address source, int intId)
 		if (outInt && outInt->forwarding == PIMMulticastRoute::Forward)
 		{
 			outInt->forwarding = PIMMulticastRoute::Pruned;
-			PIMpt* timer = createPruneTimer(route->getOrigin(), route->getMulticastGroup(), intId, PT);
+			PIMpt* timer = createPruneTimer(route->getOrigin(), route->getMulticastGroup(), intId, pruneInterval);
 			outInt->pruneTimer = timer;
 
 			// if there is no outgoing interface, Prune msg has to be sent on upstream

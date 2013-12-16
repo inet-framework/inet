@@ -31,16 +31,17 @@
 #include "IPv4Route.h"
 #include "PIMBase.h"
 
-#define PT 180.0						/**< Prune Timer = 180s (3min). */
-#define GRT 3.0							/**< Graft Retry Timer = 3s. */
-#define SAT 210.0						/**< Source Active Timer = 210s, Cisco has 180s, after that, route is flushed */
-#define SRT 60.0						/**< State Refresh Timer = 60s. */
-
 /**
  * @brief Class implements PIM-DM (dense mode).
  */
 class PIMDM : public PIMBase, protected cListener
 {
+    private:
+        // parameters
+        double pruneInterval;
+        double graftRetryInterval;
+        double sourceActiveInterval;
+        double stateRefreshInterval;
 	public:
         PIMDM() : PIMBase(PIMInterface::DenseMode) {}
 
