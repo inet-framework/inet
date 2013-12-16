@@ -18,6 +18,7 @@
 
 #include "SingleRateThreeColorMeter.h"
 #include "DiffservUtil.h"
+#include "ModuleAccess.h"
 
 using namespace DiffservUtil;
 
@@ -46,7 +47,8 @@ void SingleRateThreeColorMeter::initialize(int stage)
     else if (stage == INITSTAGE_NETWORK_LAYER)
     {
         const char *cirStr = par("cir");
-        CIR = parseInformationRate(cirStr, "cir", *this, 0);
+        IInterfaceTable *ift = findModuleByPath<IInterfaceTable>(par("interfaceTableModule"), this);
+        CIR = parseInformationRate(cirStr, "cir", ift, *this, 0);
         lastUpdateTime = simTime();
     }
 }

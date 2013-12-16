@@ -214,6 +214,11 @@ void TraCIMobility::move()
     updateVisualRepresentation();
 }
 
+TraCIScenarioManager* TraCIMobility::getManager() const {
+    if (!manager) manager = check_and_cast<TraCIScenarioManager *>(const_cast<TraCIMobility*>(this)->getModuleByPath(par("traciScenarioManagerModule"))); //TODO: getModuleByPath is not const
+    return manager;
+}
+
 void TraCIMobility::updateDisplayString() {
     ASSERT(-M_PI <= angle);
     ASSERT(angle < M_PI);

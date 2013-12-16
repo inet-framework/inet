@@ -97,7 +97,7 @@ class INET_API OSPFConfigReader
     void joinMulticastGroups(int interfaceId);
 
   public:
-    OSPFConfigReader(cModule *ospfModule);
+    OSPFConfigReader(cModule *ospfModule, IInterfaceTable *ift);
     virtual ~OSPFConfigReader();
 
     /**

@@ -20,8 +20,9 @@
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "NotifierConsts.h"
-#include "IPv4RoutingTableAccess.h"
-#include "InterfaceTableAccess.h"
+#include "IIPv4RoutingTable.h"
+#include "IInterfaceTable.h"
+#include "AddressResolver.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
@@ -50,8 +51,8 @@ void TED::initialize(int stage)
 
         WATCH_VECTOR(ted);
 
-        rt = IPv4RoutingTableAccess().get();
-        ift = InterfaceTableAccess().get();
+        rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         routerId = rt->getRouterId();
         ASSERT(!routerId.isUnspecified());
 
@@ -105,11 +106,11 @@ void TED::initializeTED()
         }
         if (!g)     // not connected
             continue;
-        IIPv4RoutingTable *destRt = IPv4RoutingTableAccess().get(destNode);
+        IIPv4RoutingTable *destRt = AddressResolver().findIPv4RoutingTableOf(destNode);
         if (!destRt)    // switch, hub, bus, accesspoint, etc
             continue;
         IPv4Address destRouterId = destRt->getRouterId();
-        IInterfaceTable* destIft = InterfaceTableAccess().get(destNode);
+        IInterfaceTable* destIft = AddressResolver().findInterfaceTableOf(destNode);
         ASSERT(destIft);
         InterfaceEntry *destIe = destIft->getInterfaceByNodeInputGateId(g->getId());
         ASSERT(destIe);

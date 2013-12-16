@@ -37,17 +37,17 @@
 
 #include "IPv6Tunneling.h"
 
-#include "InterfaceTableAccess.h"
 #include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"
 #include "IPv6InterfaceData.h"
+#include "IPv6RoutingTable.h"
+#include "IInterfaceTable.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
-#include "IPv6RoutingTableAccess.h"
+#include "xMIPv6.h"
 
 #ifdef WITH_xMIPv6
 #include "MobilityHeader_m.h" // for HA Option header
-#include "xMIPv6Access.h"
 #endif
 
 #include <algorithm>
@@ -67,7 +67,7 @@ void IPv6Tunneling::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        ift = InterfaceTableAccess().get();
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         rt = check_and_cast<IPv6RoutingTable *>(getModuleByPath(par("routingTableModule")));
 
         vIfIndexTop = INT_MAX; // virtual interface number set to maximum int value
@@ -554,12 +554,9 @@ void IPv6Tunneling::decapsulateDatagram(IPv6Datagram* dgram)
             && (dgram->getTransportProtocol() != IP_PROT_IPv6EXT_MOB))
     {
         EV << "Checking Route Optimization for: " << dgram->getSrcAddress() << endl;
-
-        xMIPv6* mipv6 = xMIPv6Access().getIfExists();
-        if (!mipv6)
-            return;
-
-        mipv6->triggerRouteOptimization(dgram->getSrcAddress(), ie->ipv6Data()->getMNHomeAddress(), ie);
+        xMIPv6* mipv6 = findModuleByPath<xMIPv6>(par("xmipv6Module"), this);
+        if(mipv6)
+            mipv6->triggerRouteOptimization(dgram->getSrcAddress(), ie->ipv6Data()->getMNHomeAddress(), ie);
     }
 #endif
 }

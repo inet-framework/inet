@@ -25,7 +25,6 @@
 #include "NotifierConsts.h"
 #include "InterfaceEntry.h"
 #include "IInterfaceTable.h"
-#include "InterfaceTableAccess.h"
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
 
@@ -112,7 +111,7 @@ void MACBase::updateOperationalFlag(bool isNodeUp)
 void MACBase::registerInterface()  //XXX registerInterfaceIfInterfaceTableExists() ???
 {
     ASSERT(interfaceEntry == NULL);
-    IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
+    IInterfaceTable *ift = findModuleByPath<IInterfaceTable>(par("interfaceTableModule"), this);
     if (ift) {
         interfaceEntry = createInterfaceEntry();
         ift->addInterface(interfaceEntry);

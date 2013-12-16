@@ -17,10 +17,11 @@
 //
 
 #include "GPSR.h"
-#include "InterfaceTableAccess.h"
 #include "IPProtocolId_m.h"
 #include "IPSocket.h"
 #include "NodeOperations.h"
+#include "IInterfaceTable.h"
+#include "ModuleAccess.h"
 
 Define_Module(GPSR);
 
@@ -77,7 +78,7 @@ void GPSR::initialize(int stage)
         // context
         host = getContainingNode(this);
         nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
-        interfaceTable = InterfaceTableAccess().get(this);
+        interfaceTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         mobility = check_and_cast<IMobility *>(host->getSubmodule("mobility"));
         routingTable = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
         networkProtocol = check_and_cast<INetfilter *>(getModuleByPath(par("networkProtocolModule")));

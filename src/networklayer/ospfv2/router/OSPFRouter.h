@@ -40,6 +40,8 @@ namespace OSPF {
  */
 class Router {
 private:
+    IInterfaceTable*                                                   ift;
+    IIPv4RoutingTable*                                                 rt;
     RouterID                                                           routerID;                ///< The router ID assigned by the IP layer.
     std::map<AreaID, Area*>                                            areasByID;               ///< A map of the contained areas with the AreaID as key.
     std::vector<Area*>                                                 areas;                   ///< A list of the contained areas.
@@ -56,7 +58,7 @@ public:
      * Constructor.
      * Initializes internal variables, adds a MessageHandler and starts the Database Age timer.
      */
-    Router(RouterID id, cSimpleModule* containingModule);
+    Router(RouterID id, cSimpleModule* containingModule, IInterfaceTable* ift, IIPv4RoutingTable* rt);
 
     /**
      * Destructor.

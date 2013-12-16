@@ -39,6 +39,7 @@ simple TwoRateThreeColorMeter
 {
     parameters:
         @display("i=block/timer");
+        string interfaceTableModule = default("^.^.^.interfaceTable");
         string pir;       // peak information rate, either absolute bitrate (e.g. "100kbps"), or relative to the link's datarate (e.g. "20%")
         int pbs @unit(B); // peak burst size
         string cir;       // committed information rate, either absolute or relative bitrate; must be smaller than pir

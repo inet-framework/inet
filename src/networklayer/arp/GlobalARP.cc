@@ -18,7 +18,9 @@
 
 #include "GlobalARP.h"
 #include "InterfaceEntry.h"
-#include "InterfaceTableAccess.h"
+#include "IInterfaceTable.h"
+#include "ModuleAccess.h"
+#include "AddressResolver.h"
 #include "GenericNetworkProtocolControlInfo_m.h"
 #include "Ieee802Ctrl.h"
 
@@ -40,7 +42,7 @@ void GlobalARP::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        ift = InterfaceTableAccess().get();
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         nicOutBaseGateId = gateSize("nicOut")==0 ? -1 : gate("nicOut", 0)->getId();
     }
 }
@@ -91,7 +93,7 @@ MACAddress GlobalARP::mapUnicastAddress(Address addr)
         default:
             throw cRuntimeError("Unknown address type");
     }
-    IInterfaceTable * interfaceTable = InterfaceTableAccess().get(module);
+    IInterfaceTable * interfaceTable = AddressResolver().findInterfaceTableOf(findContainingNode(module));
     InterfaceEntry * interfaceEntry = interfaceTable->getInterfaceByInterfaceModule(module);
     return interfaceEntry->getMacAddress();
 }

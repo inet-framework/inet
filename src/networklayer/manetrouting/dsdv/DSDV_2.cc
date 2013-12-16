@@ -38,7 +38,7 @@ void DSDV_2::initialize(int stage)
         IPSocket socket(gate("to_ip"));
         socket.registerProtocol(IP_PROT_MANET);
 
-        ift = InterfaceTableAccess().get();
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         /* Search the 80211 interface */
         int  num_80211 = 0;
         InterfaceEntry *   ie;
@@ -62,7 +62,7 @@ void DSDV_2::initialize(int stage)
             interface80211ptr = i_face;
         else
             opp_error("DSDV has found %i 80211 interfaces", num_80211);
-        rt = IPv4RoutingTableAccess().get();
+        rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
         if (par("manetPurgeRoutingTables").boolValue())
         {
             IPv4Route *entry;
@@ -153,9 +153,9 @@ void DSDV_2::handleMessage(cMessage *msg)
 
             //pointer to interface and routing table
             if (!ift)
-                ift = InterfaceTableAccess().get();
+                ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
             if (!rt)
-                rt = IPv4RoutingTableAccess().get();
+                rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
 
             rt->purge();
 
@@ -246,7 +246,7 @@ void DSDV_2::handleMessage(cMessage *msg)
 
             // int numIntf = 0;
             if (ift!=NULL)
-                ift = InterfaceTableAccess().get();
+                ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
             //InterfaceEntry *ie = NULL;
             //for (int k=0; k<ift->getNumInterfaces(); k++)
             //  if (!ift->getInterface(k)->isLoopback())
@@ -289,7 +289,7 @@ void DSDV_2::handleMessage(cMessage *msg)
 
             //pointer to interface and routing table
             //rt = RoutingTableAccess_DSDV().get(); // IPv4RoutingTable *rt = nodeInfo[i].rt;
-            //ift = InterfaceTableAccess().get();//InterfaceTable *ift = nodeInfo[i].ift;
+            //ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));//InterfaceTable *ift = nodeInfo[i].ift;
 
 
             //reads DSDV hello message fields

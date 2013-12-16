@@ -20,11 +20,11 @@
 
 #include "IAddressType.h"
 #include "InterfaceMatcher.h"
-#include "InterfaceTableAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 #include "NotifierConsts.h"
 #include "UDP.h"
+#include "ModuleAccess.h"
 
 #include "RIPPacket_m.h"
 #include "RIPRouting.h"
@@ -162,7 +162,7 @@ void RIPRouting::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         host = getContainingNode(this);
-        ift = InterfaceTableAccess().get();
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         rt = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
         socket.setOutputGate(gate("udpOut"));
 

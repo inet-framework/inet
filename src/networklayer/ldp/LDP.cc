@@ -23,16 +23,16 @@
 
 //#include "ConstType.h"
 #include "LIBTable.h"
-#include "InterfaceTableAccess.h"
 #include "IPv4InterfaceData.h"
-#include "IPv4RoutingTableAccess.h"
-#include "LIBTableAccess.h"
-#include "TEDAccess.h"
 #include "NotifierConsts.h"
 #include "UDPControlInfo_m.h"
 #include "UDPPacket.h"
 #include "TCPSegment.h"
 #include "NodeOperations.h"
+#include "IIPv4RoutingTable.h"
+#include "IInterfaceTable.h"
+#include "ModuleAccess.h"
+#include "TED.h"
 
 Define_Module(LDP);
 
@@ -113,10 +113,10 @@ void LDP::initialize(int stage)
         holdTime = par("holdTime").doubleValue();
         helloInterval = par("helloInterval").doubleValue();
 
-        ift = InterfaceTableAccess().get();
-        rt = IPv4RoutingTableAccess().get();
-        lt = LIBTableAccess().get();
-        tedmod = TEDAccess().get();
+        ift = check_and_cast<IInterfaceTable *>(getModuleByPath(par("interfaceTableModule")));
+        rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+        lt = check_and_cast<LIBTable *>(getModuleByPath(par("libTableModule")));
+        tedmod = check_and_cast<TED *>(getModuleByPath(par("tedModule")));
 
         WATCH_VECTOR(myPeers);
         WATCH_VECTOR(fecUp);

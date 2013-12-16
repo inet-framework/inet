@@ -24,7 +24,6 @@
 
 #include "opp_utils.h"
 #include "IInterfaceTable.h"
-#include "InterfaceTableAccess.h"
 #include "IPassiveQueue.h"
 #include "NotifierConsts.h"
 

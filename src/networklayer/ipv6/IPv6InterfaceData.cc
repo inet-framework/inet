@@ -23,10 +23,6 @@
 
 #include "IInterfaceTable.h"
 
-#ifdef WITH_xMIPv6
-#include "IPv6RoutingTableAccess.h"
-#endif /* WITH_xMIPv6 */
-
 
 Register_Abstract_Class(IPv6MulticastGroupInfo);
 

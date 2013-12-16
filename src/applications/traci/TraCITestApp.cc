@@ -35,7 +35,7 @@ void TraCITestApp::initialize(int stage)
     {
         testNumber = par("testNumber");
 
-        traci = TraCIMobilityAccess().get();
+        traci = check_and_cast<TraCIMobility *>(getModuleByPath(par("traciMobilityModule")));
         traci->subscribe(mobilityStateChangedSignal, this);
 
         visitedEdges.clear();

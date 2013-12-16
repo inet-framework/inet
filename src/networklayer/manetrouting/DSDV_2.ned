@@ -37,6 +37,8 @@ import inet.networklayer.IManetRouting;
 simple DSDV_2 like IManetRouting
 {
     parameters:
+        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
+        string routingTableModule = default("^.routingTable");
         @display("i=block/routing");
         double hellomsgperiod_DSDV @unit("s") = default(5s);  // how often hello messages should be sent out
         string netmask = default("255.255.0.0");  // netmask for the ad-hoc network

@@ -29,10 +29,8 @@
 #include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
 #include "IInterfaceTable.h"
-#include "InterfaceTableAccess.h"
 #include "IIPv4RoutingTable.h"
 #include "IPv4RoutingTable.h"
-#include "IPv4RoutingTableAccess.h"
 
 using namespace std;
 

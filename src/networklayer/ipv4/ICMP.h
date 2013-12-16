@@ -23,9 +23,9 @@
 //  Cleanup and rewrite: Andras Varga, 2004
 
 #include "INETDefs.h"
+#include "IIPv4RoutingTable.h"
 
 #include "ICMPMessage.h"
-#include "IPv4RoutingTableAccess.h"
 
 class IPv4Datagram;
 class IPv4ControlInfo;
@@ -39,7 +39,6 @@ class PingPayload;
 class INET_API ICMP : public cSimpleModule
 {
   protected:
-    IPv4RoutingTableAccess routingTableAccess;
     typedef std::map<long,int> PingMap;
     PingMap pingMap;
 

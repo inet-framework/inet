@@ -24,6 +24,7 @@ simple GlobalARP
 {
     parameters:
         @display("i=block/layer_s");
+        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
     gates:
         input ipIn @labels(IGenericDatagram);
         output nicOut[] @labels(IGenericDatagram);

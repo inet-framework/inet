@@ -24,11 +24,9 @@
 #include "Ieee802Ctrl.h"
 #include "IInterfaceTable.h"
 #include "IIPv4RoutingTable.h"
-#include "InterfaceTableAccess.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
-#include "IPv4RoutingTableAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
@@ -98,7 +96,7 @@ void ARP::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_3)  // IP addresses should be available
     {
-        ift = InterfaceTableAccess().get();
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
 
         isUp = isNodeUp();

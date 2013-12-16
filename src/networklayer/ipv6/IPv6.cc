@@ -22,17 +22,13 @@
 #include "IPv6.h"
 #include "IPSocket.h"
 
-#include "InterfaceTableAccess.h"
-#include "IPv6RoutingTableAccess.h"
-#include "ICMPv6Access.h"
-#include "IPv6NeighbourDiscoveryAccess.h"
-
 #include "IPv6ControlInfo.h"
 #include "IPv6NDMessage_m.h"
 #include "Ieee802Ctrl.h"
 #include "ICMPv6Message_m.h"
+#include "IInterfaceTable.h"
+#include "ModuleAccess.h"
 
-#include "IPv6TunnelingAccess.h"
 #ifdef WITH_xMIPv6
 #include "MobilityHeader.h"
 #endif /* WITH_xMIPv6 */
@@ -55,11 +51,11 @@ void IPv6::initialize(int stage)
     {
         QueueBase::initialize();
 
-        ift = InterfaceTableAccess().get();
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         rt = check_and_cast<IPv6RoutingTable *>(getModuleByPath(par("routingTableModule")));
-        nd = IPv6NeighbourDiscoveryAccess().get();
-        icmp = ICMPv6Access().get();
-        tunneling = IPv6TunnelingAccess().get();
+        nd = check_and_cast<IPv6NeighbourDiscovery *>(getModuleByPath(par("ipv6NeighbourDiscoveryModule")));
+        icmp = check_and_cast<ICMPv6 *>(getModuleByPath(par("icmpv6Module")));
+        tunneling = check_and_cast<IPv6Tunneling *>(getModuleByPath(par("ipv6TunnelingModule")));
 
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;

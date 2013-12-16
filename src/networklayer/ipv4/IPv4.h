@@ -22,7 +22,7 @@
 #include "INETDefs.h"
 
 #include "IARPCache.h"
-#include "ICMPAccess.h"
+#include "ICMP.h"
 #include "ILifecycle.h"
 #include "INetfilter.h"
 #include "INetworkProtocol.h"
@@ -68,7 +68,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     IIPv4RoutingTable *rt;
     IInterfaceTable *ift;
     IARPCache *arp;
-    ICMPAccess icmpAccess;
+    ICMP *icmp;
     cGate *arpInGate;
     cGate *arpOutGate;
     int transportInGateBaseId;

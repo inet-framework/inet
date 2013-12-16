@@ -25,15 +25,15 @@
 #include <algorithm>
 
 #include "AddressResolver.h"
-#include "BindingCacheAccess.h"
+#include "BindingCache.h"
 #include "BindingUpdateList.h"
-#include "BindingUpdateListAccess.h"
-#include "InterfaceTableAccess.h"
+#include "IInterfaceTable.h"
 #include "IPv6ControlInfo.h"
 #include "IPv6InterfaceData.h"
-#include "IPv6NeighbourDiscoveryAccess.h"
-#include "IPv6TunnelingAccess.h"
-#include "IPv6RoutingTableAccess.h"
+#include "IPv6NeighbourDiscovery.h"
+#include "IPv6Tunneling.h"
+#include "IPv6RoutingTable.h"
+#include "ModuleAccess.h"
 
 
 #define MK_SEND_PERIODIC_BU            1
@@ -112,7 +112,7 @@ void xMIPv6::initialize(int stage)
         statVectorHoTfromCN.setName("HoT from CN");
         statVectorCoTfromCN.setName("CoT from CN");*/
 
-        tunneling = IPv6TunnelingAccess().get(); // access to tunneling module, 21.08.07 - CB
+        tunneling = check_and_cast<IPv6Tunneling *>(getModuleByPath(par("ipv6TunnelingModule"))); // access to tunneling module, 21.08.07 - CB
     }
     else if (stage == INITSTAGE_NETWORK_LAYER)
     {
@@ -129,17 +129,17 @@ void xMIPv6::initialize(int stage)
         rt6->setIsHomeAgent(par("isHomeAgent").boolValue());
         rt6->setIsMobileNode(par("isMobileNode").boolValue());
 
-        ift = InterfaceTableAccess().get();
-        ipv6nd = IPv6NeighbourDiscoveryAccess().get(); //Zarrar Yousaf 17.07.07
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        ipv6nd = check_and_cast<IPv6NeighbourDiscovery *>(getModuleByPath(par("ipv6NeighbourDiscoveryModule"))); //Zarrar Yousaf 17.07.07
 
         if (rt6->isMobileNode())
         {
-            bul = BindingUpdateListAccess().get();  // Zarrar Yousaf 31.07.07
+            bul = check_and_cast<BindingUpdateList *>(getModuleByPath(par("bindingUpdateListModule")));  // Zarrar Yousaf 31.07.07
             bc = NULL;
         }
         else
         {
-            bc = BindingCacheAccess().get(); // Zarrar Yousaf 31.07.07
+            bc = check_and_cast<BindingCache *>(getModuleByPath(par("bindingCacheModule"))); // Zarrar Yousaf 31.07.07
             bul = NULL;
         }
 

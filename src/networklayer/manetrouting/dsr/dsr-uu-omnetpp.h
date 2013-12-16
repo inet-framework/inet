@@ -22,16 +22,14 @@
 
 #ifndef MobilityFramework
 #include "IPv4Datagram.h"
-#include "InterfaceTableAccess.h"
-#include "IPv4RoutingTableAccess.h"
 #include "IIPv4RoutingTable.h"
-#include "ICMPAccess.h"
 #include "IPv4InterfaceData.h"
 #include "IInterfaceTable.h"
 #include "ProtocolMap.h"
 #include "ControlManetRouting_m.h"
 #include "IPv4ControlInfo.h"
 #include "ManetNetfilterHook.h"
+#include "ICMP.h"
 #else
 #include "Blackboard.h"
 #include "LinkBreak.h"

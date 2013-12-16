@@ -92,8 +92,9 @@ void SimplifiedRadio::initialize(int stage)
 
         WATCH(noiseLevel);
 
-        obstacles = ObstacleControlAccess().getIfExists();
-        if (obstacles) EV << "Found ObstacleControl" << endl;
+        obstacles = findModuleByPath<ObstacleControl>(par("obstacleControlModule"), this);
+        if (obstacles)
+            EV << "Found ObstacleControl" << endl;
 
         // this is the parameter of the radio channel (global)
         std::string propModel = getRadioChannelPar("propagationModel").stdstringValue();

@@ -15,10 +15,9 @@
 #include <iostream>
 #include "SimpleClassifier.h"
 #include "XMLUtils.h"
-#include "IPv4RoutingTableAccess.h"
-#include "LIBTableAccess.h"
-#include "RSVPAccess.h"
 #include "LIBTable.h"
+#include "IIPv4RoutingTable.h"
+#include "RSVP.h"
 
 Define_Module(SimpleClassifier);
 
@@ -34,15 +33,12 @@ void SimpleClassifier::initialize(int stage)
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
-        IPv4RoutingTableAccess routingTableAccess;
-        IIPv4RoutingTable *rt = routingTableAccess.get();
+        IIPv4RoutingTable *rt = check_and_cast<IIPv4RoutingTable*>(getModuleByPath(par("routingTableModule")));
         routerId = rt->getRouterId();
 
-        LIBTableAccess libTableAccess;
-        lt = libTableAccess.get();
+        lt = check_and_cast<LIBTable*>(getModuleByPath(par("libTableModule")));
 
-        RSVPAccess rsvpAccess;
-        rsvp = rsvpAccess.get();
+        rsvp = check_and_cast<RSVP*>(getModuleByPath(par("rsvpModule")));
 
         readTableFromXML(par("config").xmlValue());
     }

@@ -30,7 +30,6 @@
 
 #include "InterfaceEntry.h"
 #include "InterfaceTable.h"
-#include "InterfaceTableAccess.h"
 #include "IPv4Serializer.h"
 #include "opp_utils.h"
 

@@ -518,3 +518,28 @@ void InterfaceTable::resetInterfaces()
         if (idToInterface[i])
             idToInterface[i]->resetInterface();
 }
+
+
+MulticastGroupList InterfaceTable::collectMulticastGroups()
+{
+    MulticastGroupList mglist;
+    for (int i=0; i<getNumInterfaces(); ++i)
+    {
+        InterfaceEntry *ie = getInterface(i);
+        int interfaceId = ie->getInterfaceId();
+#ifdef WITH_IPv4
+        if (ie->ipv4Data())
+        {
+            const IPv4InterfaceData::IPv4AddressVector &addresses = ie->ipv4Data()->getJoinedMulticastGroups();
+            for (unsigned int j = 0; j < addresses.size(); ++j)
+            {
+                mglist.push_back(MulticastGroup(addresses[j], interfaceId));
+            }
+        }
+#endif
+#ifdef WITH_IPv6
+        // TODO
+#endif
+    }
+    return mglist;
+}

@@ -27,13 +27,15 @@
 #include "ICMPMessage_m.h"
 #include "Ieee802Ctrl.h"
 #include "IIPv4RoutingTable.h"
-#include "InterfaceTableAccess.h"
 #include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
+#include "IPSocket.h"
+#include "IInterfaceTable.h"
+#include "ModuleAccess.h"
 
 Define_Module(IPv4);
 
@@ -50,13 +52,13 @@ void IPv4::initialize(int stage)
     {
         QueueBase::initialize();
 
-        ift = InterfaceTableAccess().get();
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+        arp = check_and_cast<IARPCache *>(getModuleByPath(par("arpCacheModule")));
+        icmp = check_and_cast<ICMP *>(getModuleByPath(par("icmpModule")));
 
         arpInGate = gate("arpIn");
         arpOutGate = gate("arpOut");
-        cModule *arpModule = arpOutGate->getPathEndGate()->getOwnerModule();
-        arp = check_and_cast<IARPCache *>(arpModule);
         transportInGateBaseId = gateBaseId("transportIn");
         queueOutGateBaseId = gateBaseId("queueOut");
 
@@ -68,7 +70,7 @@ void IPv4::initialize(int stage)
 
         curFragmentId = 0;
         lastCheckTime = 0;
-        fragbuf.init(icmpAccess.get());
+        fragbuf.init(icmp);
 
         numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
@@ -171,7 +173,7 @@ void IPv4::handleIncomingDatagram(IPv4Datagram *datagram, const InterfaceEntry *
         if (dblrand() <= relativeHeaderLength)
         {
             EV << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
-            icmpAccess.get()->sendErrorMessage(datagram, fromIE->getInterfaceId(), ICMP_PARAMETER_PROBLEM, 0);
+            icmp->sendErrorMessage(datagram, fromIE->getInterfaceId(), ICMP_PARAMETER_PROBLEM, 0);
             return;
         }
     }
@@ -464,7 +466,7 @@ void IPv4::routeUnicastPacket(IPv4Datagram *datagram, const InterfaceEntry *from
     {
         EV << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
         numUnroutable++;
-        icmpAccess.get()->sendErrorMessage(datagram, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
+        icmp->sendErrorMessage(datagram, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
     }
     else // fragment and send
     {
@@ -664,7 +666,7 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram)
 
         EV << "L3 Protocol not connected. discarding packet" << endl;
         int inputInterfaceId = getSourceInterfaceFrom(datagram)->getInterfaceId();
-        icmpAccess.get()->sendErrorMessage(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+        icmp->sendErrorMessage(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
     }
 }
 
@@ -714,7 +716,7 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, const InterfaceEntry *ie, IPv
     {
         // drop datagram, destruction responsibility in ICMP
         EV << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
-        icmpAccess.get()->sendErrorMessage(datagram, -1 /*TODO*/, ICMP_TIME_EXCEEDED, 0);
+        icmp->sendErrorMessage(datagram, -1 /*TODO*/, ICMP_TIME_EXCEEDED, 0);
         numDropped++;
         return;
     }
@@ -732,7 +734,7 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, const InterfaceEntry *ie, IPv
     if (datagram->getDontFragment())
     {
         EV << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
-        icmpAccess.get()->sendErrorMessage(datagram, -1 /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
+        icmp->sendErrorMessage(datagram, -1 /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
                 ICMP_DU_FRAGMENTATION_NEEDED);
         numDropped++;
         return;

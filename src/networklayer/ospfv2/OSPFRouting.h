@@ -36,6 +36,8 @@
 class OSPFRouting :  public cSimpleModule, public ILifecycle
 {
   private:
+    IIPv4RoutingTable *rt;
+    IInterfaceTable *ift;
     bool isUp;
     OSPF::Router *ospfRouter; // root object of the OSPF data structure
 
@@ -55,7 +57,6 @@ class OSPFRouting :  public cSimpleModule, public ILifecycle
      * Used by the BGPRouting module.
      */
     bool checkExternalRoute(const IPv4Address& route);
-
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);

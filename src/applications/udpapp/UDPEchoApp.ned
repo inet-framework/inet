@@ -29,6 +29,7 @@ import inet.applications.IUDPApp;
 simple UDPEchoApp like IUDPApp
 {
     parameters:
+        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
         int localPort;  // local port to listen on
         @display("i=block/app");
         @signal[pk](type=cPacket);

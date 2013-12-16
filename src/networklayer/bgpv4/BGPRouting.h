@@ -22,9 +22,6 @@
 
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"
-#include "IPv4RoutingTableAccess.h"
-#include "InterfaceTableAccess.h"
-#include "OSPFRoutingAccess.h"
 #include "BGPRoutingTableEntry.h"
 #include "BGPCommon.h"
 #include "IPv4InterfaceData.h"

@@ -20,9 +20,6 @@
 #include "MPLS.h"
 #include "Utils.h"
 
-#include "InterfaceTableAccess.h"
-#include "IPv4RoutingTableAccess.h"
-#include "LIBTableAccess.h"
 #include "IClassifier.h"
 
 
@@ -43,8 +40,8 @@ void MPLS::initialize(int stage)
     {
         // interfaceTable must be initialized
 
-        lt = LIBTableAccess().get();
-        ift = InterfaceTableAccess().get();
+        lt = check_and_cast<LIBTable *>(getModuleByPath(par("libTableModule")));
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
 
         pct = check_and_cast<IClassifier*>(getParentModule()->getSubmodule(par("classifier")));
     }

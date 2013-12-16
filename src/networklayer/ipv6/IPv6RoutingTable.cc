@@ -22,10 +22,11 @@
 #include "opp_utils.h"
 
 #include "IPv6RoutingTable.h"
+#include "IInterfaceTable.h"
+#include "ModuleAccess.h"
+#include "IPv6Tunneling.h"
 
 #include "IPv6InterfaceData.h"
-#include "InterfaceTableAccess.h"
-#include "IPv6TunnelingAccess.h"
 #include "NodeOperations.h"
 
 Define_Module(IPv6RoutingTable);
@@ -69,7 +70,7 @@ void IPv6RoutingTable::initialize(int stage)
         multicastForward = par("forwardMulticast");
         WATCH(isrouter);
 
-        ift = InterfaceTableAccess().get();
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
 
 #ifdef WITH_xMIPv6
         // the following MIPv6 related flags will be overridden by the MIPv6 module (if existing)
@@ -394,7 +395,7 @@ void IPv6RoutingTable::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement
 
 void IPv6RoutingTable::configureTunnelFromXML(cXMLElement* cfg)
 {
-    IPv6Tunneling* tunneling = IPv6TunnelingAccess().get();
+    IPv6Tunneling* tunneling = check_and_cast<IPv6Tunneling *>(getModuleByPath(par("ipv6TunnelingModule")));
 
     // parse basic config (attributes)
     cXMLElementList tunnelList = cfg->getElementsByTagName("tunnelEntry");

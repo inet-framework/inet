@@ -43,8 +43,6 @@
 #include "IPv6ControlInfo.h"
 
 #include "NotifierConsts.h"
-#include "IPv4RoutingTableAccess.h"
-#include "InterfaceTableAccess.h"
 
 #include "OLSRpkt_m.h"
 #include "OLSR_ETX.h"

@@ -32,6 +32,7 @@ package inet.networklayer.icmpv6;
 simple ICMPv6
 {
     parameters:
+        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
         @display("i=block/control");
     gates:
         input ipv6In;

@@ -23,7 +23,7 @@
 
 #include "INETDefs.h"
 
-#include "InterfaceTableAccess.h"
+#include "IInterfaceTable.h"
 #include "IIPv4RoutingTable.h"
 #include "LSA.h"
 #include "OSPFcommon.h"
@@ -49,6 +49,7 @@ public:
     static const unsigned char AS_BOUNDARY_ROUTER_DESTINATION = 2;
 
 private:
+    IInterfaceTable*        ift;
     RoutingDestinationType  destinationType;
     OSPFOptions             optionalCapabilities;
     AreaID                  area;
@@ -61,7 +62,7 @@ private:
     // IPv4Route::gateway is nextHops[0].hopAddress
 
 public:
-    RoutingTableEntry();
+    RoutingTableEntry(IInterfaceTable *ift);
     RoutingTableEntry(const RoutingTableEntry& entry);
     virtual ~RoutingTableEntry() {}
 

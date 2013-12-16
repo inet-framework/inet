@@ -46,6 +46,7 @@ simple GPSR like IGPSR
         @display("i=block/routing");
 
         // context parameters
+        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
         string routingTableModule = default("^.routingTable");
         string networkProtocolModule = default("^.networkLayer.ip");
 
@@ -71,6 +72,7 @@ module MultiGPSR like IGPSR
         bool enableIPv4 = default(true);
         bool enableIPv6 = default(true);
         bool enableGeneric = default(true);
+        *.interfaceTableModule = default("^.^.interfaceTable");
         ipv4.routingTableModule = default("^.^.routingTable.ipv4");
         ipv4.networkProtocolModule = default("^.^.networkLayer.ipv4.ip");
         ipv6.routingTableModule = default("^.^.routingTable.ipv6");

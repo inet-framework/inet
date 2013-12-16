@@ -96,6 +96,8 @@ void SCTP::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
         this->auth = (bool)par("auth");
         this->pktdrop = (bool)par("packetDrop");
         this->sackNow = (bool)par("sackNow");
@@ -308,7 +310,7 @@ void SCTP::handleMessage(cMessage *msg)
                 }
                 if (assocList.size() == 0 || assoc==NULL)
                 {
-                    assoc = new SCTPAssociation(this, appGateIndex, assocId);
+                    assoc = new SCTPAssociation(this, appGateIndex, assocId, rt, ift);
 
                     AppAssocKey key;
                     key.appGateIndex = appGateIndex;

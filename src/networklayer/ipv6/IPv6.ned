@@ -77,7 +77,11 @@ package inet.networklayer.ipv6;
 simple IPv6
 {
     parameters:
+        string interfaceTableModule = default("^.^.interfaceTable");   // The path to the InterfaceTable module
         string routingTableModule;
+        string ipv6NeighbourDiscoveryModule = default("^.neighbourDiscovery");
+        string icmpv6Module = default("^.icmpv6");
+        string ipv6TunnelingModule = default("^.iptunneling");
         double procDelay @unit("s") = default(0s);
         @display("i=block/network2");
     gates:

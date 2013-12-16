@@ -59,6 +59,7 @@ import inet.linklayer.contract.IMACProtocol;
 simple Ieee80211Mac extends MACProtocolBase like IMACProtocol
 {
     parameters:
+        string interfaceTableModule = default("^.^.interfaceTable");   // The path to the InterfaceTable module
         string address = default("auto"); // MAC address as hex string (12 hex digits), or
                                           // "auto". "auto" values will be replaced by
                                           // a generated MAC address in init stage 0.

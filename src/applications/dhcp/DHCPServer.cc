@@ -108,7 +108,7 @@ void DHCPServer::receiveSignal(cComponent *source, int signalID, cObject *obj)
 
 InterfaceEntry *DHCPServer::chooseInterface()
 {
-    IInterfaceTable* ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
+    IInterfaceTable* ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
     const char *interfaceName = par("interface");
     InterfaceEntry *ie = NULL;
 

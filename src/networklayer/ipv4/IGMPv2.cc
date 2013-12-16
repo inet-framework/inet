@@ -18,8 +18,9 @@
 
 #include "IGMPv2.h"
 #include "IPSocket.h"
-#include "IPv4RoutingTableAccess.h"
-#include "InterfaceTableAccess.h"
+#include "IPv4RoutingTable.h"
+#include "IInterfaceTable.h"
+#include "ModuleAccess.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 
@@ -333,7 +334,7 @@ void IGMPv2::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        ift = InterfaceTableAccess().get();
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
 
         cModule *host = getContainingNode(this);

@@ -121,18 +121,5 @@ class INET_API AnnotationManager : public cSimpleModule
     Groups groups;
 };
 
-class AnnotationManagerAccess
-{
-  public:
-    AnnotationManagerAccess()
-    {
-    }
-
-    AnnotationManager* getIfExists()
-    {
-        return dynamic_cast<AnnotationManager*>(simulation.getModuleByPath("annotations"));
-    }
-};
-
 #endif
 

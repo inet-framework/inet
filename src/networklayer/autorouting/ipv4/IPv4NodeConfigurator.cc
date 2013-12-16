@@ -20,8 +20,6 @@
 
 #include "IPv4NodeConfigurator.h"
 #include "ModuleAccess.h"
-#include "InterfaceTableAccess.h"
-#include "IPv4RoutingTableAccess.h"
 #include "NodeStatus.h"
 #include "NodeOperations.h"
 #include "opp_utils.h"   // for OPP_Global::getModuleByPath()
@@ -47,7 +45,7 @@ void IPv4NodeConfigurator::initialize(int stage)
             throw cRuntimeError("The container @node module not found");
         const char *networkConfiguratorPath = par("networkConfiguratorModule");
         nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
-        interfaceTable = InterfaceTableAccess().get();
+        interfaceTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         routingTable = AddressResolver().findIPv4RoutingTableOf(node);
 
         if (!networkConfiguratorPath[0])

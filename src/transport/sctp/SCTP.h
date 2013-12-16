@@ -29,6 +29,8 @@
 
 #include "Address.h"
 #include "UDPSocket.h"
+#include "IInterfaceTable.h"
+#include "IIPv4RoutingTable.h"
 
 #define SCTP_UDP_PORT  9899
 
@@ -181,6 +183,9 @@ class INET_API SCTP : public cSimpleModule
         UDPSocket udpSocket;
 
     protected:
+        IIPv4RoutingTable *rt;
+        IInterfaceTable *ift;
+
         int32 sizeAssocMap;
         static int32 nextAssocId;
 

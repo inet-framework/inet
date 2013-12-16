@@ -470,7 +470,6 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
     char timerName[64];
     bool trans = false;
     uint16 type;
-    InterfaceTableAccess interfaceTableAccess;
     AddressVector adv;
 
     sctpEV3<<"processInitArrived\n";
@@ -508,7 +507,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
             if (initchunk->getAddressesArraySize()==0)
             {
                 sctpEV3<<__LINE__<<" get new path for "<<remoteAddr<<"\n";
-                SCTPPathVariables* rPath = new SCTPPathVariables(remoteAddr, this);
+                SCTPPathVariables* rPath = new SCTPPathVariables(remoteAddr, this, rt);
                 sctpPathMap[rPath->remoteAddress] = rPath;
                 qCounter.roomTransQ[rPath->remoteAddress] = 0;
                 qCounter.bookedTransQ[rPath->remoteAddress] = 0;
@@ -527,7 +526,6 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
             statisticsPeerRwnd->record(state->peerRwnd);
             localVTag = initchunk->getInitTag();
             numberOfRemoteAddresses = initchunk->getAddressesArraySize();
-            IInterfaceTable *ift = interfaceTableAccess.get();
             state->localAddresses.clear();
             if (localAddressList.front().isUnspecified())
             {
@@ -576,7 +574,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
                 // set path variables for this pathlocalAddresses
                 if (!getPath(initchunk->getAddresses(j)))
                 {
-                    SCTPPathVariables* path = new SCTPPathVariables(initchunk->getAddresses(j), this);
+                    SCTPPathVariables* path = new SCTPPathVariables(initchunk->getAddresses(j), this, rt);
                     sctpEV3<<__LINE__<<" get new path for "<<initchunk->getAddresses(j)<<" ptr="<<path<<"\n";
                     for (AddressVector::iterator k=state->localAddresses.begin(); k!=state->localAddresses.end(); ++k)
                     {
@@ -593,7 +591,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk* initchunk, int32 srcPort
             SCTPPathMap::iterator ite = sctpPathMap.find(remoteAddr);
             if (ite==sctpPathMap.end())
             {
-                SCTPPathVariables* path = new SCTPPathVariables(remoteAddr, this);
+                SCTPPathVariables* path = new SCTPPathVariables(remoteAddr, this, rt);
                 sctpEV3<<__LINE__<<" get new path for "<<remoteAddr<<" ptr="<<path<<"\n";
                 sctpPathMap[remoteAddr] = path;
                 qCounter.roomTransQ[remoteAddr] = 0;
@@ -748,7 +746,7 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk* initAckChunk)
             if (ite==sctpPathMap.end())
             {
                 sctpEV3<<__LINE__<<" get new path for "<<remoteAddr<<"\n";
-                SCTPPathVariables* path = new SCTPPathVariables(remoteAddr, this);
+                SCTPPathVariables* path = new SCTPPathVariables(remoteAddr, this, rt);
                 sctpPathMap[remoteAddr] = path;
                 qCounter.roomTransQ[remoteAddr] = 0;
                 qCounter.roomRetransQ[remoteAddr] = 0;

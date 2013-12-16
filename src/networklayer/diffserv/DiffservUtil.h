@@ -21,6 +21,7 @@
 #define __INET_DIFFSERVQUEUE_H
 
 #include "INETDefs.h"
+#include "IInterfaceTable.h"
 
 namespace DiffservUtil
 {
@@ -44,7 +45,7 @@ namespace DiffservUtil
      *  - absolute (e.g. 10Mbps)
      *  - relative to the datarate of the interface (e.g. 10%)
      */
-    double parseInformationRate(const char *attrValue, const char *attrName, cSimpleModule &owner, int defaultValue);
+    double parseInformationRate(const char *attrValue, const char *attrName, IInterfaceTable *ift, cSimpleModule &owner, int defaultValue);
 
     /**
      * Parses an integer attribute.
@@ -90,7 +91,7 @@ namespace DiffservUtil
      * Returns the datarate of the interface containing the given module.
      * Returns -1, if the interface entry not found.
      */
-    double getInterfaceDatarate(cSimpleModule *interfaceModule);
+    double getInterfaceDatarate(IInterfaceTable *ift, cSimpleModule *interfaceModule);
 
     /**
      * Returns the IP datagram encapsulated inside packet, or

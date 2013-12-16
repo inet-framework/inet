@@ -21,13 +21,14 @@
 #include "ControlManetRouting_m.h"
 #include "IInterfaceTable.h"
 #include "IIPv4RoutingTable.h"
-#include "InterfaceTableAccess.h"
+#include "IInterfaceTable.h"
 #include "InterfaceEntry.h"
 #include "IRoutingTable.h"
 #include "IPv4.h"
-#include "IPv4RoutingTableAccess.h"
+#include "IIPv4RoutingTable.h"
 #include "INetworkProtocolControlInfo.h"
 #include "ProtocolMap.h"
+#include "ModuleAccess.h"
 
 #include "dsr-pkt_omnet.h"
 
@@ -35,8 +36,6 @@ void ManetNetfilterHook::initHook(cModule* _module)
 {
     module = _module;
     ipLayer = check_and_cast<IPv4*>(findModuleWhereverInNode("ip", module));
-    ift = InterfaceTableAccess().get();
-    rt = IPv4RoutingTableAccess().get();
     cProperties *props = module->getProperties();
     isReactive = props && props->getAsBool("reactive");
 

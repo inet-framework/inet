@@ -117,6 +117,8 @@ void UDPSink::processStart()
     socket.setOutputGate(gate("udpOut"));
     socket.bind(localPort);
     setSocketOptions();
+    MulticastGroupList mgl = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule"))) -> collectMulticastGroups();
+    socket.joinLocalMulticastGroups(mgl);
 
     if (stopTime >= SIMTIME_ZERO)
     {
@@ -166,3 +168,4 @@ void UDPSink::handleNodeCrash()
     if (selfMsg)
         cancelEvent(selfMsg);
 }
+

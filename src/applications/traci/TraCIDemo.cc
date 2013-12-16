@@ -44,7 +44,7 @@ void TraCIDemo::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
-        traci = TraCIMobilityAccess().get();
+        traci = check_and_cast<TraCIMobility *>(getModuleByPath(par("traciMobilityModule")));
         traci->subscribe(mobilityStateChangedSignal, this);
 
         setupLowerLayer();
@@ -53,7 +53,8 @@ void TraCIDemo::initialize(int stage)
 
 void TraCIDemo::setupLowerLayer() {
     socket.setOutputGate(gate("udp$o"));
-    socket.joinLocalMulticastGroups();
+    MulticastGroupList mgl = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule"))) -> collectMulticastGroups();
+    socket.joinLocalMulticastGroups(mgl);
     socket.bind(12345);
     socket.setBroadcast(true);
 }

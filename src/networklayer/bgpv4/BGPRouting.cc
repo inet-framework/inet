@@ -18,7 +18,6 @@
 #include "BGPRouting.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
-#include "IPv4RoutingTableAccess.h"
 #include "OSPFRouting.h"
 #include "BGPSession.h"
 
@@ -49,8 +48,8 @@ void BGPRouting::initialize(int stage)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
         // we must wait until IPv4RoutingTable is completely initialized
-        _rt = IPv4RoutingTableAccess().get();
-        _inft = InterfaceTableAccess().get();
+        _rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+        _inft = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
 
         // read BGP configuration
         cXMLElement *bgpConfig = par("bgpConfig").xmlValue();
@@ -362,7 +361,7 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::Rout
             OSPF::IPv4AddressRange  OSPFnetAddr;
             OSPFnetAddr.address = entry->getDestination();
             OSPFnetAddr.mask = entry->getNetmask();
-            OSPFRouting* ospf = OSPFRoutingAccess().getIfExists();
+            OSPFRouting* ospf = findModuleByPath<OSPFRouting>(par("ospfRoutingModule"), this);
             InterfaceEntry *ie = entry->getInterface();
             if (!ie)
                 throw cRuntimeError("Model error: interface entry is NULL");
@@ -466,7 +465,7 @@ bool BGPRouting::checkExternalRoute(const IPv4Route* route)
 {
     IPv4Address OSPFRoute;
     OSPFRoute = route->getDestination();
-    OSPFRouting* ospf = OSPFRoutingAccess().getIfExists();
+    OSPFRouting* ospf = findModuleByPath<OSPFRouting>(par("ospfRoutingModule"), this);
     bool returnValue = ospf->checkExternalRoute(OSPFRoute);
     simulation.setContext(this);
     return returnValue;

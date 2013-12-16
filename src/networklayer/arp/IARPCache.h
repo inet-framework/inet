@@ -72,10 +72,5 @@ class INET_API IARPCache
     virtual void startAddressResolution(const IPv4Address&, const InterfaceEntry *ie) = 0;
 };
 
-class INET_API ARPCacheAccess : public ModuleAccess<IARPCache>
-{
-  public:
-    ARPCacheAccess() : ModuleAccess<IARPCache>("arp") {}
-};
-
 #endif
+

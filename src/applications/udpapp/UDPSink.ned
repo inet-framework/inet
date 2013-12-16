@@ -28,6 +28,7 @@ import inet.applications.IUDPApp;
 simple UDPSink like IUDPApp
 {
     parameters:
+        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
         double startTime @unit(s) = default(0s); // application start time
         double stopTime @unit(s) = default(-1s);  // time of finishing receiving
         int localPort; // local port

@@ -21,10 +21,10 @@
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "NotifierConsts.h"
-#include "IPv4RoutingTableAccess.h"
-#include "InterfaceTableAccess.h"
+#include "IIPv4RoutingTable.h"
+#include "ModuleAccess.h"
+#include "IInterfaceTable.h"
 #include "TED.h"
-#include "TEDAccess.h"
 
 Define_Module(LinkStateRouting);
 
@@ -44,9 +44,9 @@ void LinkStateRouting::initialize(int stage)
 
     if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
-        tedmod = TEDAccess().get();
+        tedmod = check_and_cast<TED *>(getModuleByPath(par("tedModule")));
 
-        IIPv4RoutingTable *rt = IPv4RoutingTableAccess().get();
+        IIPv4RoutingTable *rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
         routerId = rt->getRouterId();
 
         // listen for TED modifications
@@ -56,7 +56,7 @@ void LinkStateRouting::initialize(int stage)
         // peers are given as interface names in the "peers" module parameter;
         // store corresponding interface addresses in peerIfAddrs[]
         cStringTokenizer tokenizer(par("peers"));
-        IInterfaceTable *ift = InterfaceTableAccess().get();
+        IInterfaceTable *ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         const char *token;
         while ((token = tokenizer.nextToken())!=NULL)
         {

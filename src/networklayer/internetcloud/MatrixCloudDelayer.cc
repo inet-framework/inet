@@ -19,9 +19,10 @@
 
 #include "MatrixCloudDelayer.h"
 
-#include "InterfaceTableAccess.h"
+#include "ModuleAccess.h"
 #include "PatternMatcher.h"
 #include "XMLUtils.h"
+#include "IInterfaceTable.h"
 
 Define_Module(MatrixCloudDelayer);
 
@@ -135,7 +136,7 @@ void MatrixCloudDelayer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         host = getContainingNode(this);
-        ift = InterfaceTableAccess().get(this);
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         cXMLElement *configEntity = par("config").xmlValue();
         // parse XML config
         if (strcmp(configEntity->getTagName(), "internetCloud"))

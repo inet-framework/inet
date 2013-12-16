@@ -44,7 +44,6 @@
 #include <assert.h>
 #include <FWMath.h>
 
-#include "MobilityAccess.h"
 #include "MoBANCoordinator.h"
 #include "MoBANLocal.h"
 

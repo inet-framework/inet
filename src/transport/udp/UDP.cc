@@ -21,28 +21,28 @@
 #include "UDP.h"
 #include "UDPPacket.h"
 #include "IInterfaceTable.h"
-#include "InterfaceTableAccess.h"
 #include "InterfaceEntry.h"
 #include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 #include "GenericNetworkProtocolControlInfo.h"
 #include "IAddressType.h"
+#include "ModuleAccess.h"
 
 #ifdef WITH_IPv4
-#include "ICMPAccess.h"
 #include "ICMPMessage.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
+#include "ICMP.h"
 #endif
 
 #ifdef WITH_IPv6
-#include "ICMPv6Access.h"
 #include "ICMPv6Message_m.h"
 #include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"
 #include "IPv6InterfaceData.h"
+#include "ICMPv6.h"
 #endif
 
 #include "NodeOperations.h"
@@ -511,7 +511,7 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
 #ifdef WITH_IPv4
         IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
         if (!icmp)
-            icmp = ICMPAccess().get();
+            icmp = check_and_cast<ICMP *>(getModuleByPath(par("icmpModule")));
         icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
 #else
         delete udpPacket;
@@ -522,7 +522,7 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
 #ifdef WITH_IPv6
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
         if (!icmpv6)
-            icmpv6 = ICMPv6Access().get();
+            icmpv6 = check_and_cast<ICMPv6 *>(getModuleByPath(par("icmpv6Module")));
         icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
 #else
         delete udpPacket;
@@ -915,7 +915,7 @@ void UDP::setReuseAddress(SockDesc *sd, bool reuseAddr)
 
 void UDP::joinMulticastGroups(SockDesc *sd, const std::vector<Address>& multicastAddresses, const std::vector<int> interfaceIds)
 {
-    IInterfaceTable *ift = InterfaceTableAccess().get(this);
+    IInterfaceTable *ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
     int multicastAddressesLen = multicastAddresses.size();
     int interfaceIdsLen = interfaceIds.size();
     for (int k = 0; k < multicastAddressesLen; k++)
@@ -981,7 +981,7 @@ void UDP::addMulticastAddressToInterface(InterfaceEntry *ie, const Address& mult
 
 void UDP::leaveMulticastGroups(SockDesc *sd, const std::vector<Address>& multicastAddresses)
 {
-    IInterfaceTable *ift = InterfaceTableAccess().get(this);
+    IInterfaceTable *ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
     std::vector<Address> empty;
 
     for (unsigned int i = 0; i < multicastAddresses.size(); i++)

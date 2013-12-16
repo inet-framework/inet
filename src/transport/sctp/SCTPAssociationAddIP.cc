@@ -18,7 +18,6 @@
 
 #include "AddressResolver.h"
 #include "SCTPAssociation.h"
-#include "IPv4RoutingTableAccess.h"
 #include "common.h"
 
 void SCTPAssociation::sendAsconf(const char* type, const bool remote)

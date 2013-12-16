@@ -15,8 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IInterfaceTable.h"
-#include "InterfaceTableAccess.h"
 #include "UDPSocket.h"
 #include "UDPControlInfo.h"
 #ifdef WITH_IPv4
@@ -185,48 +183,20 @@ void UDPSocket::joinMulticastGroup(const Address& multicastAddr, int interfaceId
     sendToUDP(msg);
 }
 
-void UDPSocket::joinLocalMulticastGroups()
+void UDPSocket::joinLocalMulticastGroups(MulticastGroupList mgl)
 {
-    IInterfaceTable *ift = InterfaceTableAccess().get();
-    unsigned int numOfAddresses = 0;
-    for (int i = 0; i < ift->getNumInterfaces(); ++i)
-    {
-        InterfaceEntry *ie = ift->getInterface(i);
-#ifdef WITH_IPv4
-        if (ie->ipv4Data())
-            numOfAddresses += ie->ipv4Data()->getNumOfJoinedMulticastGroups();
-#endif
-#ifdef WITH_IPv6
-        // TODO
-#endif
-    }
 
-    if (numOfAddresses > 0)
+    if (mgl.size() > 0)
     {
         UDPJoinMulticastGroupsCommand *ctrl = new UDPJoinMulticastGroupsCommand();
         ctrl->setSockId(sockId);
-        ctrl->setMulticastAddrArraySize(numOfAddresses);
-        ctrl->setInterfaceIdArraySize(numOfAddresses);
+        ctrl->setMulticastAddrArraySize(mgl.size());
+        ctrl->setInterfaceIdArraySize(mgl.size());
 
-        unsigned int k = 0;
-        for (int i=0; i<ift->getNumInterfaces(); ++i)
+        for (unsigned int j = 0; j < mgl.size(); ++j)
         {
-            InterfaceEntry *ie = ift->getInterface(i);
-            int interfaceId = ie->getInterfaceId();
-#ifdef WITH_IPv4
-            if (ie->ipv4Data())
-            {
-                int numOfMulticastGroups = ie->ipv4Data()->getNumOfJoinedMulticastGroups();
-                for (int j = 0; j < numOfMulticastGroups; ++j, ++k)
-                {
-                    ctrl->setMulticastAddr(k, ie->ipv4Data()->getJoinedMulticastGroup(j));
-                    ctrl->setInterfaceId(k, interfaceId);
-                }
-            }
-#endif
-#ifdef WITH_IPv6
-            // TODO
-#endif
+            ctrl->setMulticastAddr(j, mgl[j].multicastAddr);
+            ctrl->setInterfaceId(j, mgl[j].interfaceId);
         }
 
         cMessage *msg = new cMessage("JoinMulticastGroups", UDP_C_SETOPTION);
@@ -247,45 +217,18 @@ void UDPSocket::leaveMulticastGroup(const Address& multicastAddr)
     sendToUDP(msg);
 }
 
-void UDPSocket::leaveLocalMulticastGroups()
+void UDPSocket::leaveLocalMulticastGroups(MulticastGroupList mgl)
 {
-    IInterfaceTable *ift = InterfaceTableAccess().get();
-    unsigned int numOfAddresses = 0;
-    for (int i = 0; i < ift->getNumInterfaces(); ++i)
-    {
-        InterfaceEntry *ie = ift->getInterface(i);
-#ifdef WITH_IPv4
-        if (ie->ipv4Data())
-            numOfAddresses += ie->ipv4Data()->getNumOfJoinedMulticastGroups();
-#endif
-#ifdef WITH_IPv6
-        // TODO
-#endif
-    }
 
-    if (numOfAddresses > 0)
+    if (mgl.size() > 0)
     {
         UDPLeaveMulticastGroupsCommand *ctrl = new UDPLeaveMulticastGroupsCommand();
         ctrl->setSockId(sockId);
-        ctrl->setMulticastAddrArraySize(numOfAddresses);
+        ctrl->setMulticastAddrArraySize(mgl.size());
 
-        unsigned int k = 0;
-        for (int i=0; i<ift->getNumInterfaces(); ++i)
+        for (unsigned int j = 0; j < mgl.size(); ++j)
         {
-            InterfaceEntry *ie = ift->getInterface(i);
-#ifdef WITH_IPv4
-            if (ie->ipv4Data())
-            {
-                int numOfMulticastGroups = ie->ipv4Data()->getNumOfJoinedMulticastGroups();
-                for (int j = 0; j < numOfMulticastGroups; ++j, ++k)
-                {
-                    ctrl->setMulticastAddr(k, ie->ipv4Data()->getJoinedMulticastGroup(j));
-                }
-            }
-#endif
-#ifdef WITH_IPv6
-            // TODO
-#endif
+            ctrl->setMulticastAddr(j, mgl[j].multicastAddr);
         }
 
         cMessage *msg = new cMessage("LeaveMulticastGroups", UDP_C_SETOPTION);

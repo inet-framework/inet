@@ -110,16 +110,5 @@ class INET_API ObstacleControl : public cSimpleModule
         mutable CacheEntries cacheEntries;
 };
 
-class ObstacleControlAccess
-{
-    public:
-        ObstacleControlAccess() {
-        }
-
-        ObstacleControl* getIfExists() {
-            return dynamic_cast<ObstacleControl*>(simulation.getModuleByPath("obstacles"));
-        }
-};
-
 #endif
 

@@ -25,6 +25,7 @@ package inet.world.obstacles;
 simple ObstacleControl
 {
     parameters:
+        string annotationManagerModule = default("^.annotations");
         xml obstacles = default(xml("<obstacles/>")); // obstacles to add at startup
         @display("i=misc/town");
         @labels(node);

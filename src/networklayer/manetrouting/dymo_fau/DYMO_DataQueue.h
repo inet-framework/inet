@@ -30,9 +30,7 @@
 #include "IPv4ControlInfo_m.h"
 #include "IPv4Datagram.h"
 #include "InterfaceTable.h"
-#include "InterfaceTableAccess.h"
 #include "IPv4RoutingTable.h"
-#include "IPv4RoutingTableAccess.h"
 #include "IPv4.h"
 
 class DYMO;

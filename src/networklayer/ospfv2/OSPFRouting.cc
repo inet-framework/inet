@@ -25,11 +25,10 @@
 
 #include "MessageHandler.h"
 #include "OSPFConfigReader.h"
-#include "IPv4RoutingTableAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 #include "IPSocket.h"
-
+#include "ModuleAccess.h"
 
 Define_Module(OSPFRouting);
 
@@ -51,6 +50,8 @@ void OSPFRouting::initialize(int stage)
 
     if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(IP_PROT_OSPF);
 
@@ -62,12 +63,11 @@ void OSPFRouting::initialize(int stage)
 
 void OSPFRouting::createOspfRouter()
 {
-    IIPv4RoutingTable *rt = IPv4RoutingTableAccess().get();
-    ospfRouter = new OSPF::Router(rt->getRouterId(), this);
+    ospfRouter = new OSPF::Router(rt->getRouterId(), this, ift, rt);
 
     // read the OSPF AS configuration
     cXMLElement *ospfConfig = par("ospfConfig").xmlValue();
-    OSPFConfigReader configReader(this);
+    OSPFConfigReader configReader(this, ift);
     if (!configReader.loadConfigFromXML(ospfConfig, ospfRouter))
         throw cRuntimeError("Error reading AS configuration from %s", ospfConfig->getSourceLocation());
 

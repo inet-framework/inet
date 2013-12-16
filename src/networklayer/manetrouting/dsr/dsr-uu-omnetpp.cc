@@ -30,6 +30,7 @@
 #include "Ieee802Ctrl.h"
 #include "Ieee80211Frame_m.h"
 #include "ICMPMessage_m.h"
+#include "ModuleAccess.h"
 
 unsigned int DSRUU::confvals[CONFVAL_MAX];
 //simtime_t DSRUU::current_time;
@@ -322,10 +323,12 @@ void DSRUU::initialize(int stage)
         ipSocket.registerProtocol(IP_PROT_DSR);
 
         /* Search the 80211 interface */
-        inet_rt = IPv4RoutingTableAccess().get();
-        inet_ift = InterfaceTableAccess().get();
+        inet_rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+        inet_ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
 
         // ASSERT(stage >= STAGE:IP_LAYER_READY_FOR_HOOK_REGISTRATION);
+        rt = inet_rt;
+        ift = inet_ift;
         initHook(this);
 
         int  num_80211 = 0;

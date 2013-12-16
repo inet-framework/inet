@@ -29,6 +29,11 @@ package inet.networklayer.xmipv6;
 simple xMIPv6
 {
     parameters:
+        string interfaceTableModule = default("^.^.^.interfaceTable");   // The path to the InterfaceTable module
+        string ipv6TunnelingModule = default("^.^.iptunneling");
+        string ipv6NeighbourDiscoveryModule = default("^.^.neighbourDiscovery");
+        string bindingUpdateListModule = default("^.buList");
+        string bindingCacheModule = default("^.bindingCache");
         bool isHomeAgent;
         bool isMobileNode;
         @display("i=block/classifier2");

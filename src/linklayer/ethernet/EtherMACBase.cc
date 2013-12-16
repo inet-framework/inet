@@ -22,8 +22,8 @@
 
 #include "EtherFrame_m.h"
 #include "Ethernet.h"
+#include "ModuleAccess.h"
 #include "InterfaceEntry.h"
-#include "InterfaceTableAccess.h"
 #include "IPassiveQueue.h"
 #include "NodeOperations.h"
 #include "opp_utils.h"

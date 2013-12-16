@@ -18,17 +18,17 @@
 
 #include "IPv6NeighbourDiscovery.h"
 
-#include "ICMPv6Access.h"
 #include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"
 #include "IPv6InterfaceData.h"
-#include "InterfaceTableAccess.h"
+#include "IInterfaceTable.h"
+#include "IPv6RoutingTable.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
-#include "IPv6RoutingTableAccess.h"
+#include "ICMPv6.h"
 
 #ifdef WITH_xMIPv6
-#include "xMIPv6Access.h"
+#include "xMIPv6.h"
 #endif /* WITH_xMIPv6 */
 
 #define MK_ASSIGN_LINKLOCAL_ADDRESS 0
@@ -75,13 +75,13 @@ void IPv6NeighbourDiscovery::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_3)
     {
-        ift = InterfaceTableAccess().get();
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         rt6 = check_and_cast<IPv6RoutingTable *>(getModuleByPath(par("routingTableModule")));
-        icmpv6 = ICMPv6Access().get();
+        icmpv6 = check_and_cast<ICMPv6 *>(getModuleByPath(par("icmpv6Module")));
 
 #ifdef WITH_xMIPv6
         if (rt6->isMobileNode())
-            mipv6 = xMIPv6Access().get();
+            mipv6 = check_and_cast<xMIPv6 *>(getModuleByPath(par("xmipv6Module")));
 #endif /* WITH_xMIPv6 */
 
         pendingQueue.setName("pendingQueue");

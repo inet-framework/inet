@@ -19,15 +19,13 @@
 #include "Utils.h"
 #include "XMLUtils.h"
 #include "IPv4InterfaceData.h"
-#include "TEDAccess.h"
-#include "IPv4RoutingTableAccess.h"
-#include "InterfaceTableAccess.h"
-#include "LIBTableAccess.h"
-#include "NotifierConsts.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 #include "IPSocket.h"
+#include "IIPv4RoutingTable.h"
+#include "IInterfaceTable.h"
+#include "TED.h"
 
 #define PSB_REFRESH_INTERVAL    5.0
 #define RSB_REFRESH_INTERVAL    6.0
@@ -57,11 +55,11 @@ void RSVP::initialize(int stage)
 
     if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
-        tedmod = TEDAccess().get();
-        rt = IPv4RoutingTableAccess().get();
-        ift = InterfaceTableAccess().get();
+        tedmod = check_and_cast<TED *>(getModuleByPath(par("tedModule")));
+        rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         routerId = rt->getRouterId();
-        lt = LIBTableAccess().get();
+        lt = check_and_cast<LIBTable *>(getModuleByPath(par("libTableModule")));
 
         rpct = check_and_cast<IRSVPClassifier*>(getParentModule()->getSubmodule("classifier"));
 

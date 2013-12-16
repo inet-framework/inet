@@ -24,8 +24,8 @@ package inet.applications.traci;
 simple TraCITestApp
 {
     parameters:
+        string traciMobilityModule = default("^.mobility");
         int testNumber;  // number of test to run (-1: no test)
-
         @display("i=block/app2");
     gates:
 

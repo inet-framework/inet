@@ -25,6 +25,7 @@
 #include "OSPFcommon.h"
 #include "OSPFInterface.h"
 #include "OSPFRoutingTableEntry.h"
+#include "IInterfaceTable.h"
 
 
 namespace OSPF {
@@ -33,6 +34,7 @@ class Router;
 
 class Area : public cObject {
 private:
+    IInterfaceTable*                                        ift;
     AreaID                                                  areaID;
     std::map<IPv4AddressRange, bool>                        advertiseAddressRanges;
     std::vector<IPv4AddressRange>                           areaAddressRanges;
@@ -51,7 +53,7 @@ private:
 
     Router*                                                 parentRouter;
 public:
-            Area(AreaID id = BACKBONE_AREAID);
+    Area(IInterfaceTable* ift, AreaID id = BACKBONE_AREAID);
     virtual ~Area();
 
     void              setAreaID(AreaID areaId)  { areaID = areaId; }

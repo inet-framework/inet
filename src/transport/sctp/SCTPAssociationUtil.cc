@@ -27,9 +27,7 @@
 #include "SCTPQueue.h"
 #include "SCTPAlgorithm.h"
 #include "IPv4RoutingTable.h"
-#include "IPv4RoutingTableAccess.h"
 #include "InterfaceTable.h"
-#include "InterfaceTableAccess.h"
 #include "IPv6Address.h"
 #include "common.h"
 #include "IPv4ControlInfo.h"
@@ -222,7 +220,7 @@ void SCTPAssociation::printSegmentBrief(SCTPMessage *sctpmsg)
 
 SCTPAssociation* SCTPAssociation::cloneAssociation()
 {
-    SCTPAssociation* assoc = new SCTPAssociation(sctpMain, appGateIndex, assocId);
+    SCTPAssociation* assoc = new SCTPAssociation(sctpMain, appGateIndex, assocId, rt, ift);
     const char* queueClass = transmissionQ->getClassName();
     assoc->transmissionQ = check_and_cast<SCTPQueue *>(createOne(queueClass));
     assoc->retransmissionQ = check_and_cast<SCTPQueue *>(createOne(queueClass));
@@ -441,7 +439,6 @@ void SCTPAssociation::initAssociation(SCTPOpenCommand *openCmd)
 
 void SCTPAssociation::sendInit()
 {
-    InterfaceTableAccess interfaceTableAccess;
     AddressVector adv;
     uint32 length = SCTP_INIT_CHUNK_LENGTH;
 
@@ -473,7 +470,6 @@ void SCTPAssociation::sendInit()
     state->asconfSn = 1000;
 
     initTsn = initChunk->getInitTSN();
-    IInterfaceTable *ift = interfaceTableAccess.get();
     sctpEV3<<"add local address\n";
     if (localAddressList.front().isUnspecified())
     {
@@ -618,7 +614,7 @@ void SCTPAssociation::sendInit()
         for (AddressVector::iterator it=remoteAddressList.begin(); it!=remoteAddressList.end(); it++)
         {
             sctpEV3<<__LINE__<<" get new path for "<<(*it)<<"\n";
-            SCTPPathVariables* path = new SCTPPathVariables((*it), this);
+            SCTPPathVariables* path = new SCTPPathVariables((*it), this, rt);
             sctpPathMap[(*it)] = path;
             qCounter.roomTransQ[(*it)] = 0;
             qCounter.bookedTransQ[(*it)] = 0;
@@ -628,7 +624,7 @@ void SCTPAssociation::sendInit()
     else
     {
         sctpEV3<<__LINE__<<" get new path for "<<remoteAddr<<"\n";
-        SCTPPathVariables* path = new SCTPPathVariables(remoteAddr, this);
+        SCTPPathVariables* path = new SCTPPathVariables(remoteAddr, this, rt);
         sctpPathMap[remoteAddr] = path;
         qCounter.roomTransQ[remoteAddr] = 0;
         qCounter.bookedTransQ[remoteAddr] = 0;
@@ -1815,7 +1811,7 @@ void SCTPAssociation::addPath(const Address& addr)
     if (i==sctpPathMap.end())
     {
         sctpEV3<<__LINE__<<" get new path for "<<addr<<"\n";
-        SCTPPathVariables* path = new SCTPPathVariables(addr, this);
+        SCTPPathVariables* path = new SCTPPathVariables(addr, this, rt);
         sctpPathMap[addr] = path;
         qCounter.roomTransQ[addr] = 0;
         qCounter.bookedTransQ[addr] = 0;
@@ -2461,7 +2457,6 @@ void SCTPAssociation::pmDataIsSentOn(SCTPPathVariables* path)
 
 void SCTPAssociation::pmStartPathManagement()
 {
-    IPv4RoutingTableAccess routingTableAccess;
     SCTPPathVariables* path;
     int32 i = 0;
     /* populate path structures !!! */
@@ -2471,7 +2466,7 @@ void SCTPAssociation::pmStartPathManagement()
     {
         path = piter->second;
         path->pathErrorCount = 0;
-        InterfaceEntry *rtie = routingTableAccess.get()->getInterfaceForDestAddr(path->remoteAddress.toIPv4());
+        InterfaceEntry *rtie = rt->getInterfaceForDestAddr(path->remoteAddress.toIPv4());
         path->pmtu = rtie->getMTU();
         sctpEV3 << "Path MTU of Interface "<< i << " = " << path->pmtu <<"\n";
         if (path->pmtu < state->assocPmtu)

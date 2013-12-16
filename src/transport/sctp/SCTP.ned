@@ -27,6 +27,9 @@ import inet.transport.ISCTP;
 simple SCTP like ISCTP
 {
     parameters:
+        string interfaceTableModule = default("^.interfaceTable");
+        string routingTableModule = default("^.routingTable");
+        
         //#====== SCTP Association Parameters =================================
         int numGapReports = default(3);
         double rtoInitial @unit(s) = default(3s);

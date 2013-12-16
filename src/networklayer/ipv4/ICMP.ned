@@ -41,6 +41,8 @@ package inet.networklayer.ipv4;
 simple ICMP
 {
     parameters:
+        string interfaceTableModule = default("^.^.interfaceTable");   // The path to the InterfaceTable module
+        string routingTableModule = default("^.routingTable");
         @display("i=block/control_s");
     gates:
         input localIn @labels(IPv4ControlInfo/up);  // delivered ICMP packets

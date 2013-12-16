@@ -63,6 +63,7 @@
  *
  * @see InterfaceEntry
  */
+
 class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, protected cListener, public ILifecycle
 {
   protected:
@@ -227,6 +228,11 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
      * ILifecycle method
      */
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
+    /**
+     * Returns all multicast group address, with it's interfaceId
+     */
+    virtual MulticastGroupList collectMulticastGroups();
 };
 
 #endif

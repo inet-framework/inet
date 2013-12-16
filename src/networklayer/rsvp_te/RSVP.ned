@@ -99,6 +99,10 @@ package inet.networklayer.rsvp_te;
 simple RSVP
 {
     parameters:
+        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
+        string routingTableModule = default("^.routingTable");
+        string libTableModule = default("^.libTable");
+        string tedModule = default("^.ted");
         xml traffic = default(xml("<sessions/>")); // specifies paths to set up
         string peers; // names of the interfaces towards RSVP peers
         double helloInterval @unit(s);

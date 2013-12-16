@@ -27,11 +27,10 @@
 #include "SCTPCommand_m.h"
 #include "SCTPQueue.h"
 #include "SCTPAlgorithm.h"
-#include "IPv4RoutingTableAccess.h"
 
 
 
-SCTPPathVariables::SCTPPathVariables(const Address& addr, SCTPAssociation* assoc)
+SCTPPathVariables::SCTPPathVariables(const Address& addr, SCTPAssociation* assoc, const IIPv4RoutingTable* rt)
 {
     // ====== Path Variable Initialization ===================================
     association = assoc;
@@ -62,8 +61,7 @@ SCTPPathVariables::SCTPPathVariables(const Address& addr, SCTPAssociation* assoc
     queuedBytes = 0;
     outstandingBytes = 0;
 
-    IPv4RoutingTableAccess routingTableAccess;
-    const InterfaceEntry* rtie = routingTableAccess.get()->getInterfaceForDestAddr(remoteAddress.toIPv4());
+    const InterfaceEntry* rtie = rt->getInterfaceForDestAddr(remoteAddress.toIPv4());
 
     if (rtie == NULL) {
         throw cRuntimeError("No interface for remote address %s found!", remoteAddress.toIPv4().str().c_str());
@@ -375,9 +373,11 @@ SCTPStateVariables::~SCTPStateVariables()
 // FSM framework, SCTP FSM
 //
 
-SCTPAssociation::SCTPAssociation(SCTP* _module, int32 _appGateIndex, int32 _assocId)
+SCTPAssociation::SCTPAssociation(SCTP* _module, int32 _appGateIndex, int32 _assocId, IIPv4RoutingTable* _rt, IInterfaceTable *_ift)
 {
     // ====== Initialize variables ===========================================
+    rt=_rt;
+    ift=_ift;
     sctpMain = _module;
     appGateIndex = _appGateIndex;
     assocId = _assocId;

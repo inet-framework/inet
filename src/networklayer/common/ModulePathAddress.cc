@@ -17,7 +17,9 @@
 
 #include "ModulePathAddress.h"
 
-#include "InterfaceTableAccess.h"
+#include "IInterfaceTable.h"
+#include "ModuleAccess.h"
+#include "AddressResolver.h"
 
 
 namespace {
@@ -53,7 +55,7 @@ bool ModulePathAddress::tryParse(const char *addr)
         // accepts network interface modules only:
         if (isNetworkNode(module))
             return false;
-        IInterfaceTable *ift = InterfaceTableAccess().get(module);
+        IInterfaceTable *ift = AddressResolver().findInterfaceTableOf(findContainingNode(module));
         if (ift == NULL)
             return false;
         if (ift->getInterfaceByInterfaceModule(module)==NULL)

@@ -25,7 +25,6 @@
 #include "IPv4RoutingTable.h"
 
 #include "IInterfaceTable.h"
-#include "InterfaceTableAccess.h"
 #include "IPv4InterfaceData.h"
 #include "IPv4Route.h"
 #include "NotifierConsts.h"
@@ -33,6 +32,7 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 #include "opp_utils.h"
+#include "ModuleAccess.h"
 
 using namespace OPP_Global;
 
@@ -78,7 +78,7 @@ void IPv4RoutingTable::initialize(int stage)
         host->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
         host->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
 
-        ift = InterfaceTableAccess().get();
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
 
         IPForward = par("IPForward").boolValue();
         multicastForward = par("forwardMulticast");

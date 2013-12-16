@@ -29,15 +29,13 @@
 #include "IPv4InterfaceData.h"
 #include "IPv6ControlInfo.h"
 #include "Ieee802Ctrl.h"
-#include "IPv4RoutingTableAccess.h"
-#include "InterfaceTableAccess.h"
 #include "IARPCache.h"
 #include "Coord.h"
 #include "ControlInfoBreakLink_m.h"
 #include "Ieee80211Frame_m.h"
-#include "ICMPAccess.h"
 #include "IMobility.h"
 #include "Ieee80211MgmtAP.h"
+#include "ModuleAccess.h"
 
 #define IP_DEF_TTL 32
 #define UDP_HDR_LEN 8
@@ -85,8 +83,8 @@ void ManetRoutingBase::registerRoutingModule()
     /* Set host parameters */
     isRegistered = true;
     int  num_80211 = 0;
-    inet_rt = IPv4RoutingTableAccess().getIfExists();
-    inet_ift = InterfaceTableAccess().get();
+    inet_rt = findModuleByPath<IIPv4RoutingTable>(par("routingTableModule"), this);
+    inet_ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
     hostModule = getContainingNode(this);
 
     if (routesVector)
@@ -94,7 +92,7 @@ void ManetRoutingBase::registerRoutingModule()
 
     if (par("useICMP"))
     {
-        icmpModule = ICMPAccess().getIfExists();
+        icmpModule = findModuleByPath<ICMP>(par("icmpModule"), this);
     }
     sendToICMP = false;
 
@@ -244,7 +242,7 @@ void ManetRoutingBase::registerRoutingModule()
         {
             (*interfaceVector)[i].interfacePtr->ipv4Data()->joinMulticastGroup(IPv4Address::LL_MANET_ROUTERS);
         }
-        arp = ARPCacheAccess().get();
+        arp = check_and_cast<IARPCache *>(getModuleByPath(par("arpCacheModule")));
     }
     hostModule->subscribe(NF_L2_AP_DISASSOCIATED, this);
     hostModule->subscribe(NF_L2_AP_ASSOCIATED, this);
@@ -275,7 +273,8 @@ void ManetRoutingBase::registerRoutingModule()
             it->second.push_back(data);
         }
     }
-
+    ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+    rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
     initHook(this);
 
  //   WATCH_MAP(*routesVector);

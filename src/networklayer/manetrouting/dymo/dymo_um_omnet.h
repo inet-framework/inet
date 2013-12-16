@@ -62,7 +62,6 @@
 #include "dymoum/dlist.h"
 #include "dymo_msg_struct.h"
 #include "IPv4Datagram.h"
-#include "ICMPAccess.h"
 #include <map>
 
 /* Forward declaration needed to be able to reference the class */
@@ -178,7 +177,6 @@ class DYMOUM : public ManetRoutingBase
 
 
     char nodeName[50];
-    ICMPAccess icmpAccess;
 
 
     IPv4Address *ipNodeId;

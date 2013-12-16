@@ -23,7 +23,6 @@
 #include "LifecycleOperation.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
-#include "IPv4RoutingTableAccess.h"
 #include "RTPInnerPacket.h"
 #include "RTPInterfacePacket_m.h"
 #include "RTPProfile.h"
@@ -31,7 +30,7 @@
 #include "RTPSenderStatusMessage_m.h"
 #include "UDPControlInfo_m.h"
 #include "UDPSocket.h"
-
+#include "IIPv4RoutingTable.h"
 
 Define_Module(RTP);
 
@@ -371,8 +370,8 @@ int RTP::resolveMTU()
     // it returns MTU bytelength (ethernet) minus ip
     // and udp headers
     // TODO: How to do get the valid length of IP and ETHERNET header?
-    IPv4RoutingTableAccess routingTableAccess;
-    const InterfaceEntry* rtie = routingTableAccess.get()->getInterfaceForDestAddr(_destinationAddress);
+    IIPv4RoutingTable *rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+    const InterfaceEntry* rtie = rt->getInterfaceForDestAddr(_destinationAddress);
 
     if (rtie == NULL)
         throw cRuntimeError("No interface for remote address %s found!", _destinationAddress.str().c_str());
@@ -403,7 +402,8 @@ void RTP::createProfile(const char *profileName)
 void RTP::createSocket()
 {
     _udpSocket.bind(_port);
-    _udpSocket.joinLocalMulticastGroups(); //TODO make it parameter-dependent
+    MulticastGroupList mgl = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule"))) -> collectMulticastGroups();
+    _udpSocket.joinLocalMulticastGroups(mgl); //TODO make it parameter-dependent
     connectRet();
 }
 

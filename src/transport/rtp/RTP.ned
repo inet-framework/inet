@@ -50,6 +50,8 @@ package inet.transport.rtp;
 simple RTP
 {
     parameters:
+        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
+        string routingTableModule = default("^.routingTable");
         @display("i=block/buffer");
         @signal[rcvdPk](type=cPacket);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

@@ -19,6 +19,7 @@
 #define __INET_MODULEACCESS_H
 
 #include "INETDefs.h"
+#include "IInterfaceTable.h"
 
 /**
  * Returns true if the given module is a network node, i.e. a module
@@ -67,6 +68,20 @@ INET_API cModule *getContainingNode(cModule *from);
  * Returns NULL, if no such node found.
  */
 INET_API cModule *findModuleUnderContainingNode(cModule *from);
+
+/**
+ * Finds a module in the module tree, given by its absolute or relative path.
+ * Returns the pointer to a module of type T
+ * Returns NULL if the module was not found.
+ */
+template <typename T>
+INET_API T *findModuleByPath(const char *path, cModule *from)
+{
+    cModule *module = from->getModuleByPath(path);
+    return module ? check_and_cast<T*>(module) : NULL;
+}
+
+
 
 /**
  * Finds and returns the pointer to a module of type T and name N.

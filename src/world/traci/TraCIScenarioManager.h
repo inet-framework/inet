@@ -345,21 +345,4 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 template<> void TraCIScenarioManager::TraCIBuffer::write(std::string inv);
 template<> std::string TraCIScenarioManager::TraCIBuffer::read();
 
-class TraCIScenarioManagerAccess
-{
-    public:
-        TraCIScenarioManagerAccess() {
-            o = dynamic_cast<TraCIScenarioManager*>(simulation.getModuleByPath("manager"));
-            if (!o) throw cRuntimeError("Could not find a TraCIScenarioManager module named manager");
-        };
-
-        TraCIScenarioManager* get() {
-            return o;
-        }
-
-    protected:
-        TraCIScenarioManager* o;
-
-};
-
 #endif

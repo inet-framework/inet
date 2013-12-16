@@ -16,7 +16,6 @@
 #include <iostream>
 #include "LIBTable.h"
 #include "XMLUtils.h"
-#include "IPv4RoutingTableAccess.h"
 
 Define_Module(LIBTable);
 

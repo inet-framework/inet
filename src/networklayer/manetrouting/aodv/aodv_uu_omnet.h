@@ -66,7 +66,6 @@
 #include "ManetRoutingBase.h"
 #include "aodv-uu/list.h"
 
-#include "ICMPAccess.h"
 #include "Ieee80211Frame_m.h"
 
 #include "aodv_msg_struct.h"
@@ -117,7 +116,6 @@ class AODVUU : public ManetRoutingBase
 
   private:
     char nodeName[50];
-    ICMPAccess icmpAccess;
     bool useIndex;
     bool isRoot;
     uint32_t costStatic;

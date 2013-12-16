@@ -18,7 +18,6 @@
 
 #include "cnedvalue.h"
 
-#include "InterfaceTableAccess.h"
 #include "InterfaceEntry.h"
 #include "opp_utils.h"
 
@@ -51,7 +50,7 @@ const char *getRequiredAttribute(cXMLElement *element, const char *attrName)
     return attrValue;
 }
 
-double parseInformationRate(const char *attrValue, const char *attrName, cSimpleModule &owner, int defaultValue)
+double parseInformationRate(const char *attrValue, const char *attrName, IInterfaceTable *ift, cSimpleModule &owner, int defaultValue)
 {
     if (isEmpty(attrValue))
         return defaultValue;
@@ -66,7 +65,7 @@ double parseInformationRate(const char *attrValue, const char *attrName, cSimple
         if (percent < 0.0 || percent > 100.0)
             throw cRuntimeError("%s must be between 0\% and 100\%, found: %s", attrName, attrValue);
 
-        double datarate = getInterfaceDatarate(&owner);
+        double datarate = getInterfaceDatarate(ift, &owner);
         if (datarate < 0.0)
             throw cRuntimeError("cannot determine datarate for module %s, (no interface table in the node?)", owner.getFullPath().c_str());
 
@@ -195,9 +194,8 @@ std::string colorToString(int color)
     }
 }
 
-double getInterfaceDatarate(cSimpleModule *interfaceModule)
+double getInterfaceDatarate(IInterfaceTable *ift, cSimpleModule *interfaceModule)
 {
-    IInterfaceTable *ift = InterfaceTableAccess().getIfExists(interfaceModule);
     InterfaceEntry *ie = ift ? ift->getInterfaceByInterfaceModule(interfaceModule) : NULL;
     return ie ? ie->getDatarate() : -1;
 }

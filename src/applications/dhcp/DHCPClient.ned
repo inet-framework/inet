@@ -32,9 +32,8 @@ simple DHCPClient like IUDPApp
 {
     parameters:
         string interface = default("");  // which NIC should be configured (i.e. wlan0, eth1 etc.); can be left  empty if there is only one non-loopback interface
-        string routingTablePath = default("^.routingTable");
-        string interfaceTablePath = default("^.interfaceTable");
-        string notificationBoardPath = default("^.notificationBoard");
+        string routingTableModule = default("^.routingTable");
+        string interfaceTableModule = default("^.interfaceTable");
         double startTime @unit(s) = default(0s); // starting time of DHCP initialization
         @display("i=block/app2");
     gates:

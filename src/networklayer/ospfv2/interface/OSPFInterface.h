@@ -27,6 +27,7 @@
 #include "OSPFcommon.h"
 #include "OSPFNeighbor.h"
 #include "OSPFTimer.h"
+#include "IInterfaceTable.h"
 
 namespace OSPF {
 
@@ -125,7 +126,7 @@ public:
 
     void                    setType(OSPFInterfaceType ifType)  { interfaceType = ifType; }
     OSPFInterfaceType       getType() const  { return interfaceType; }
-    void                    setIfIndex(int index);
+    void                    setIfIndex(IInterfaceTable* ift, int index);
     int                     getIfIndex() const  { return ifIndex; }
     void                    setMTU(unsigned short ifMTU)  { mtu = ifMTU; }
     unsigned short          getMTU() const  { return mtu; }

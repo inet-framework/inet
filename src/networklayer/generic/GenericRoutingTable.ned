@@ -24,6 +24,7 @@ import inet.networklayer.common.IRoutingTable;
 simple GenericRoutingTable like IRoutingTable
 {
     parameters:
+        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
         @display("i=block/table");
         string addressType @enum("mac","modulepath","moduleid") = default("modulepath");
         string routerId = default("auto"); // for routers, the router id using address dotted

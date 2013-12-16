@@ -24,16 +24,6 @@
 #include "UDPControlInfo_m.h"
 #include "AddressResolver.h"
 
-#ifdef WITH_IPv4
-#include "IIPv4RoutingTable.h"
-#include "IPv4RoutingTableAccess.h"
-#endif
-
-#ifdef WITH_IPv6
-#include "IPv6RoutingTable.h"
-#include "IPv6RoutingTableAccess.h"
-#endif
-
 
 EXECUTE_ON_STARTUP(
     cEnum *e = cEnum::find("ChooseDestAddrMode");
@@ -143,12 +133,7 @@ void UDPBasicBurst::processStart()
     const char *token;
     bool excludeLocalDestAddresses = par("excludeLocalDestAddresses").boolValue();
 
-#ifdef WITH_IPv4
-    IIPv4RoutingTable *rt = IPv4RoutingTableAccess().getIfExists();
-#endif
-#ifdef WITH_IPv6
-    IPv6RoutingTable *rt6 = IPv6RoutingTableAccess().getIfExists();
-#endif
+    IInterfaceTable *ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
 
     while ((token = tokenizer.nextToken()) != NULL)
     {
@@ -157,14 +142,8 @@ void UDPBasicBurst::processStart()
         else
         {
             Address addr = AddressResolver().resolve(token);
-#ifdef WITH_IPv4
-            if (excludeLocalDestAddresses && rt && rt->isLocalAddress(addr.toIPv4()))
+            if (excludeLocalDestAddresses && ift && ift->isLocalAddress(addr))
                 continue;
-#endif
-#ifdef WITH_IPv6
-            if (excludeLocalDestAddresses && rt6 && rt6->isLocalAddress(addr.toIPv6()))
-                continue;
-#endif
             destAddresses.push_back(addr);
         }
     }

@@ -58,10 +58,4 @@ class INET_API TraCIScenarioManagerLaunchd : public TraCIScenarioManager
         virtual void init_traci();
 };
 
-class TraCIScenarioManagerLaunchdAccess : public ModuleAccess<TraCIScenarioManagerLaunchd>
-{
-    public:
-        TraCIScenarioManagerLaunchdAccess() : ModuleAccess<TraCIScenarioManagerLaunchd>("manager") {};
-};
-
 #endif

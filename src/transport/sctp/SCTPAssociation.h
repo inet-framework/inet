@@ -24,8 +24,8 @@
 #include "Address.h"
 #include "IPv4Address.h"
 #include "SCTP.h"
-#include "InterfaceTable.h"
-#include "InterfaceTableAccess.h"
+#include "IInterfaceTable.h"
+#include "IIPv4RoutingTable.h"
 #include "SCTPGapList.h"
 #include "SCTPQueue.h"
 #include "SCTPSendStream.h"
@@ -268,7 +268,7 @@ inline double max(const double a, const double b) { return (a < b) ? b : a; }
 class INET_API SCTPPathVariables : public cObject
 {
     public:
-        SCTPPathVariables(const Address& addr, SCTPAssociation* assoc);
+        SCTPPathVariables(const Address& addr, SCTPAssociation* assoc, const IIPv4RoutingTable* rt);
         ~SCTPPathVariables();
 
         SCTPAssociation*     association;
@@ -721,6 +721,9 @@ class INET_API SCTPAssociation : public cObject
         cMessage*               FairStopTimer;
 
     protected:
+        IIPv4RoutingTable*      rt;
+        IInterfaceTable*        ift;
+
         AddressVector           localAddressList;
         AddressVector           remoteAddressList;
         uint32                  numberOfRemoteAddresses;
@@ -780,7 +783,7 @@ class INET_API SCTPAssociation : public cObject
         /**
         * Constructor.
         */
-        SCTPAssociation(SCTP* mod, int32 appGateIndex, int32 assocId);
+        SCTPAssociation(SCTP* mod, int32 appGateIndex, int32 assocId, IIPv4RoutingTable* rt, IInterfaceTable *ift);
         /**
         * Destructor.
         */

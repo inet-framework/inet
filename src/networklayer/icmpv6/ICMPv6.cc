@@ -19,12 +19,13 @@
 #include "INETDefs.h"
 
 #include "ICMPv6.h"
-#include "InterfaceTableAccess.h"
 #include "IPv6InterfaceData.h"
 
 #include "ICMPv6Message_m.h"
 #include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"
+
+#include "IInterfaceTable.h"
 
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
@@ -143,7 +144,7 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
 
     if (ctrl->getDestAddr().isMulticast() /*TODO check for anycast too*/)
     {
-        IInterfaceTable *it = InterfaceTableAccess().get();
+        IInterfaceTable *it = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
         IPv6InterfaceData *ipv6Data = it->getInterfaceById(ctrl->getInterfaceId())->ipv6Data();
         replyCtrl->setSrcAddr(ipv6Data->getPreferredAddress());
         // TODO implement default address selection properly.

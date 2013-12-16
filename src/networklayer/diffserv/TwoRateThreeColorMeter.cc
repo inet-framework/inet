@@ -18,6 +18,7 @@
 
 #include "TwoRateThreeColorMeter.h"
 #include "DiffservUtil.h"
+#include "ModuleAccess.h"
 
 using namespace DiffservUtil;
 
@@ -45,8 +46,9 @@ void TwoRateThreeColorMeter::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER)
     {
-        PIR = parseInformationRate(par("pir"), "pir", *this, 0);
-        CIR = parseInformationRate(par("cir"), "cir", *this, 0);
+        IInterfaceTable *ift = findModuleByPath<IInterfaceTable>(par("interfaceTableModule"), this);
+        PIR = parseInformationRate(par("pir"), "pir", ift, *this, 0);
+        CIR = parseInformationRate(par("cir"), "cir", ift, *this, 0);
         lastUpdateTime = simTime();
     }
 }
