@@ -46,14 +46,14 @@ void ErrorHandling::handleMessage(cMessage *msg)
     // Note: we must NOT use decapsulate() because payload in ICMP is conceptually truncated
     IPv4Datagram *d = check_and_cast<IPv4Datagram *>(icmpMsg->getEncapsulatedPacket());
 
-    EV << "Error Handler: ICMP message received:\n";
-    EV << " Type: " << (int)icmpMsg->getType()
-       << " Code: " << (int)icmpMsg->getCode()
-       << " Bytelength: " << d->getByteLength()
-       << " Src: " << d->getSrcAddress()
-       << " Dest: " << d->getDestAddress()
-       << " Time: " << simTime()
-       << "\n";
+    EV_WARN << "Error Handler: ICMP message received:\n";
+    EV_WARN << " Type: " << (int)icmpMsg->getType()
+            << " Code: " << (int)icmpMsg->getCode()
+            << " Bytelength: " << d->getByteLength()
+            << " Src: " << d->getSrcAddress()
+            << " Dest: " << d->getDestAddress()
+            << " Time: " << simTime()
+            << "\n";
 
     switch (icmpMsg->getType())
     {
