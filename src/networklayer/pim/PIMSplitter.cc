@@ -35,7 +35,7 @@ void PIMSplitter::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         ift = InterfaceTableAccess().get();
-        pimIft = PIMInterfaceTableAccess().get();
+        pimIft = check_and_cast<PIMInterfaceTable*>(getModuleByPath(par("pimInterfaceTableModule")));
 
         ipIn = gate("ipIn");
         ipOut = gate("ipOut");

@@ -47,8 +47,8 @@ void PIMBase::initialize(int stage)
     {
         ift = InterfaceTableAccess().get();
         rt = IPv4RoutingTableAccess().get();
-        pimIft = PIMInterfaceTableAccess().get();
-        pimNbt = PIMNeighborTableAccess().get();
+        pimIft = check_and_cast<PIMInterfaceTable*>(getModuleByPath(par("pimInterfaceTableModule")));
+        pimNbt = check_and_cast<PIMNeighborTable*>(getModuleByPath(par("pimNeighborTableModule")));
 
         cModule *host = findContainingNode(this);
         if (!host)

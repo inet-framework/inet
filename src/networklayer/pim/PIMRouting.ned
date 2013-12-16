@@ -27,6 +27,9 @@ module PIMRouting
 {
     parameters:
         @display("i=block/network2;bgl=4;bgb=350,207");
+        *.pimInterfaceTableModule = default("^.pimInterfaceTable");
+        *.pimNeighborTableModule = default("^.pimNeighborTable");
+
     gates:
         input networkLayerIn;
         output networkLayerOut;

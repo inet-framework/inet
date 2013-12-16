@@ -30,6 +30,7 @@ simple PIMSplitter
 {
     parameters:
     	@display("i=block/dispatch");
+        string pimInterfaceTableModule;
 
     gates:
         input ipIn;

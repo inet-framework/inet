@@ -23,6 +23,8 @@ simple PIMSM
 {
     parameters:
     	@display("i=block/network2");
+        string pimInterfaceTableModule;
+        string pimNeighborTableModule;
         string RP = default("");
         string sptThreshold = default("infinity");
     gates:

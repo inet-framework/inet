@@ -85,16 +85,4 @@ class INET_API PIMInterfaceTable: public cSimpleModule, protected cListener
         virtual void removeInterface(InterfaceEntry *ie);
 };
 
-/**
- * Use PIMInterfaceTableAccess().get() to access PIMInterfaceTable from other modules of the node.
- */
-class INET_API PIMInterfaceTableAccess : public ModuleAccess<PIMInterfaceTable>
-{
-	private:
-		PIMInterfaceTable *p;
-
-	public:
-	PIMInterfaceTableAccess() : ModuleAccess<PIMInterfaceTable>("pimInterfaceTable") {p=NULL;}
-};
-
 #endif

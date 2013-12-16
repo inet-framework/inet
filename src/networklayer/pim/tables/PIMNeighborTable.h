@@ -129,14 +129,4 @@ class INET_API PIMNeighborTable: public cSimpleModule
 		virtual void processLivenessTimer(cMessage *timer);
 };
 
-/**
- * Use PIMNeighborTableAccess().get() to access PIMNeighborTable from other modules of the node.
- */
-// TODO eliminate this; do not hard-wire the name of the module into C++ code.
-class INET_API PIMNeighborTableAccess : public ModuleAccess<PIMNeighborTable>
-{
-	public:
-		PIMNeighborTableAccess() : ModuleAccess<PIMNeighborTable>("pimNeighborTable") {}
-};
-
 #endif
