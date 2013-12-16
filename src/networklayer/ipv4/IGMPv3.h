@@ -35,7 +35,6 @@
 
 class IInterfaceTable;
 class IRoutingTable;
-class NotificationBoard;
 
 class INET_API IGMPv3 : public cSimpleModule, protected cListener
 {

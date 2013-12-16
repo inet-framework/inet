@@ -1,4 +1,3 @@
-import inet.base.NotificationBoard;
 import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.IIGMP;
@@ -27,9 +26,6 @@ network TestIGMPNetwork
                 }
                 igmp: <igmpType> like IIGMP {
                     @display("p=176,153");
-                }
-                notificationBoard: NotificationBoard {
-                    @display("p=285,31");
                 }
                 nodeConfigurator: IPv4NodeConfigurator {
                     @display("p=285,95");
