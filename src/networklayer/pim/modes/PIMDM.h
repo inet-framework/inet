@@ -37,6 +37,16 @@
 class PIMDM : public PIMBase, protected cListener
 {
     private:
+        struct TimerContext
+        {
+            IPv4Address source;
+            IPv4Address group;
+            int interfaceId;
+
+            TimerContext(IPv4Address source, IPv4Address group) : source(source), group(group), interfaceId(-1) {}
+            TimerContext(IPv4Address source, IPv4Address group, int interfaceId) : source(source), group(group), interfaceId(interfaceId) {}
+        };
+    private:
         // parameters
         double pruneInterval;
         double graftRetryInterval;
@@ -58,16 +68,16 @@ class PIMDM : public PIMBase, protected cListener
 
 	    // process timers
 	    void processPIMTimer(cMessage *timer);
-	    void processPruneTimer(PIMpt * timer);
-	    void processGraftRetryTimer(PIMgrt *timer);
-	    void processSourceActiveTimer(PIMsat * timer);
-	    void processStateRefreshTimer(PIMsrt * timer);
+	    void processPruneTimer(cMessage *timer);
+	    void processGraftRetryTimer(cMessage *timer);
+	    void processSourceActiveTimer(cMessage *timer);
+	    void processStateRefreshTimer(cMessage *timer);
 
 	    // create timers
-	    PIMpt* createPruneTimer(IPv4Address source, IPv4Address group, int intId, int holdTime);
-	    PIMgrt* createGraftRetryTimer(IPv4Address source, IPv4Address group);
-	    PIMsat* createSourceActiveTimer(IPv4Address source, IPv4Address group);
-	    PIMsrt* createStateRefreshTimer(IPv4Address source, IPv4Address group);
+	    cMessage *createPruneTimer(IPv4Address source, IPv4Address group, int intId, int holdTime);
+	    cMessage *createGraftRetryTimer(IPv4Address source, IPv4Address group);
+	    cMessage *createSourceActiveTimer(IPv4Address source, IPv4Address group);
+	    cMessage *createStateRefreshTimer(IPv4Address source, IPv4Address group);
 
 	    // process PIM packets
 	    void processPIMPkt(PIMPacket *pkt);
@@ -84,6 +94,8 @@ class PIMDM : public PIMBase, protected cListener
 	    void sendPimStateRefresh(IPv4Address originator, IPv4Address src, IPv4Address grp, int intId, bool P);
 
 	    PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
+	    void cancelAndDeleteTimer(cMessage *timer);
+        bool deleteMulticastRoute(PIMMulticastRoute *route);
 
 	protected:
 		virtual int numInitStages() const  {return NUM_INIT_STAGES;}

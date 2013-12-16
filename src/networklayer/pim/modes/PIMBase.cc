@@ -170,24 +170,3 @@ vector<PIMMulticastRoute*> PIMBase::getRoutesForSource(IPv4Address source)
     }
     return routes;
 }
-
-bool PIMBase::deleteMulticastRoute(PIMMulticastRoute *route)
-{
-    IPv4MulticastRoute *routeFound = rt->removeMulticastRoute(route);
-    if (routeFound == route)
-    {
-        cancelAndDelete(route->getStateRefreshTimer());
-        cancelAndDelete(route->getGraftRetryTimer());
-        cancelAndDelete(route->getSourceActiveTimer());
-        cancelAndDelete(route->getKeepAliveTimer());
-        cancelAndDelete(route->getExpiryTimer());
-        cancelAndDelete(route->getJoinTimer());
-        cancelAndDelete(route->getPrunePendingTimer());
-        for (unsigned int j = 0;j < route->getNumOutInterfaces(); j++)
-            cancelAndDelete(route->getPIMOutInterface(j)->pruneTimer);
-
-        delete route;
-        return true;
-    }
-    return false;
-}

@@ -51,35 +51,6 @@ enum PIMTimerKind
 }
 
 
-// represents PIM Prune Timer
-message PIMpt
-{
-    IPv4Address 		source;          	// Source of multicast
-    IPv4Address			group;				// Multicast group address
-    int					intId;				// ID of interface
-}
-
-// represents PIM Graft Retry Timer
-message PIMgrt
-{
-    IPv4Address 		source;          	// Source of multicast
-    IPv4Address			group;				// Multicast group address
-}
-
-// represents PIM Source Active Timer
-message PIMsat
-{
-    IPv4Address 		source;          	// Source of multicast
-    IPv4Address			group;				// Multicast group address
-}
-
-// represents PIM State Refresh Timer
-message PIMsrt
-{
-    IPv4Address 		source;          	// Source of multicast
-    IPv4Address			group;				// Multicast group address
-}
-
 // represents PIM Source Active Timer
 message PIMkat
 {

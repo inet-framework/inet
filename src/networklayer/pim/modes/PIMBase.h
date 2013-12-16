@@ -63,7 +63,6 @@ class PIMBase : public cSimpleModule
         PIMMulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
         std::vector<PIMMulticastRoute*> getRouteFor(IPv4Address group);
         std::vector<PIMMulticastRoute*> getRoutesForSource(IPv4Address source);
-        bool deleteMulticastRoute(PIMMulticastRoute *route);
 };
 
 

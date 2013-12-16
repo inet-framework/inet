@@ -121,6 +121,7 @@ class PIMSM : public PIMBase, protected cListener
         void processJoinRouteGexistOnRP(IPv4Address multGroup, IPv4Address packetOrigin, int msgHoldtime);
 
         PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
+        bool deleteMulticastRoute(PIMMulticastRoute *route);
 
     public:
         PIMSM() : PIMBase(PIMInterface::SparseMode) {}

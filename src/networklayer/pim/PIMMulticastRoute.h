@@ -90,7 +90,7 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         {
             InterfaceState          forwarding;         /**< Forward or Pruned */
             PIMInterface::PIMMode   mode;               /**< Dense, Sparse, ... */
-            PIMpt                   *pruneTimer;        /**< Pointer to PIM Prune Timer*/
+            cMessage                *pruneTimer;        /**< Pointer to PIM Prune Timer*/
             PIMet                   *expiryTimer;       /**< Pointer to PIM Expiry Timer*/
             AssertState             assert;             /**< Assert state. */
             RegisterState           regState;           /**< Register state. */
@@ -98,7 +98,7 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
 
             PIMOutInterface(InterfaceEntry *ie)
                 : OutInterface(ie, false) {}
-            PIMOutInterface(InterfaceEntry *ie, InterfaceState forwarding, PIMInterface::PIMMode mode, PIMpt *pruneTimer,
+            PIMOutInterface(InterfaceEntry *ie, InterfaceState forwarding, PIMInterface::PIMMode mode, cMessage *pruneTimer,
                     PIMet *expiryTimer, AssertState assert, RegisterState regState, bool show)
                 : OutInterface(ie, false), forwarding(forwarding), mode(mode), pruneTimer(pruneTimer),
                   expiryTimer(expiryTimer), assert(assert), regState(regState), shRegTun(show) {}
@@ -111,9 +111,9 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         IPv4Address                 RP;                     /**< Randevous point */
         int                         flags;                  /**< Route flags */
         // PIMDM timers
-        PIMgrt                      *graftRetryTimer;
-        PIMsat                      *sourceActiveTimer;
-        PIMsrt                      *stateRefreshTimer;
+        cMessage* graftRetryTimer;
+        cMessage* sourceActiveTimer;
+        cMessage* stateRefreshTimer;
         // PIMSM timers
         PIMkat                      *keepAliveTimer;
         PIMrst                      *registerStopTimer;
@@ -133,9 +133,10 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
 
         void setRP(IPv4Address RP)  {this->RP = RP;}                        /**< Set RP IP address */
 
-        void setGraftRetryTimer (PIMgrt *grt)   {this->graftRetryTimer = grt;}
-        void setSourceActiveTimer (PIMsat *sat)   {this->sourceActiveTimer = sat;}
-        void setStateRefreshTimer (PIMsrt *srt)   {this->stateRefreshTimer = srt;}
+        void setGraftRetryTimer (cMessage *grt)   {this->graftRetryTimer = grt;}
+        void setSourceActiveTimer (cMessage *sat)   {this->sourceActiveTimer = sat;}
+        void setStateRefreshTimer (cMessage *srt)   {this->stateRefreshTimer = srt;}
+
         void setKeepAliveTimer (PIMkat *kat)   {this->keepAliveTimer = kat;}
         void setRegisterStopTimer (PIMrst *rst)   {this->registerStopTimer = rst;}
         void setExpiryTimer  (PIMet *et)     {this->expiryTimer = et;}
@@ -148,9 +149,10 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
 
         IPv4Address   getRP() const {return RP;}                            /**< Get RP IP address */
 
-        PIMgrt*     getGraftRetryTimer() const {return graftRetryTimer;}
-        PIMsat*     getSourceActiveTimer() const {return sourceActiveTimer;}
-        PIMsrt*     getStateRefreshTimer() const {return stateRefreshTimer;}
+        cMessage*   getGraftRetryTimer() const {return graftRetryTimer;}
+        cMessage*   getSourceActiveTimer() const {return sourceActiveTimer;}
+        cMessage*   getStateRefreshTimer() const {return stateRefreshTimer;}
+
         PIMkat*     getKeepAliveTimer() const {return keepAliveTimer;}
         PIMrst*     getRegisterStopTimer() const {return registerStopTimer;}
         PIMet*      getExpiryTimer()  const {return expiryTimer;}
