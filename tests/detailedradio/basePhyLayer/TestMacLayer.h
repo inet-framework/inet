@@ -10,7 +10,7 @@
 
 class MacPkt;
 
-class TestMacLayer: public cSimpleModule, public TestModule
+class TestMacLayer: public cSimpleModule, public TestModule, public cListener
 {
 private:
 	/** @brief Copy constructor is not allowed.
@@ -55,6 +55,10 @@ public:
 	virtual void handleMessage(cMessage* msg) {
 		announceMessage(msg);
 		delete msg;
+	}
+
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long l) {
+	    announceSignal(signalID);
 	}
 
 	virtual ~TestMacLayer() {

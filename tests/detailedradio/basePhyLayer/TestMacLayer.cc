@@ -33,6 +33,8 @@ void TestMacLayer::initialize(int stage) {
 		testPhy = FindModule<TestPhyLayer*>::findSubModule(this->getParentModule());
 		phy = testPhy;
 
+		phy->subscribe(IRadio::radioModeChangedSignal, this);
+		phy->subscribe(IRadio::radioChannelStateChangedSignal, this);
 	}
 }
 
@@ -97,8 +99,8 @@ void TestMacLayer::testRun1(int stage, const cMessage* /*msg*/){
 		assertMessage(	"SWITCH_OVER message at phy.", BasePhyLayer::RADIO_SWITCHING_OVER,
 						simTime() + switchTime,
 						"phy0");
-		waitForMessage(	"SWITCH_OVER message.",
-						BasePhyLayer::RADIO_SWITCHING_OVER,
+		waitForSignal(	"RadioModeChanged signal from phy.",
+						IRadio::radioModeChangedSignal,
 						simTime() + switchTime);
 
 //planTest("2.4", "Try switching during ongoing switching.");
@@ -117,8 +119,8 @@ void TestMacLayer::testRun1(int stage, const cMessage* /*msg*/){
 		assertMessage(	"SWITCH_OVER message at phy.", BasePhyLayer::RADIO_SWITCHING_OVER,
 						simTime() + switchTime,
 						"phy0" );
-		waitForMessage(	"SWITCH_OVER message.",
-						BasePhyLayer::RADIO_SWITCHING_OVER,
+		waitForSignal(	"RadioModeChanged signal from phy.",
+						IRadio::radioModeChangedSignal,
 						simTime() + switchTime);
 	}else if(stage == 2) {
 		int state = phy->getRadioMode();
@@ -313,8 +315,8 @@ void TestMacLayer::testRun6(int stage, const cMessage* msg)
 		assertMessage("Transmission over message at phy",
 					  BasePhyLayer::TX_OVER,
 					  simTime() + 0.5, "phy0");
-		assertMessage("Transmission over message from phy",
-					  BasePhyLayer::TX_OVER,
+		assertSignal("RadioChannelStateChanged signal from phy",
+		              IRadio::radioChannelStateChangedSignal,
 					  simTime() + 0.5, "mac0");
 		testForMessage("4.", BasePhyLayer::AIR_FRAME, simTime() + 0.5, "phy1");
 
@@ -369,8 +371,8 @@ void TestMacLayer::testRun7(int stage, const cMessage* /*msg*/)
 		assertMessage("Transmission over message at phy",
 					  BasePhyLayer::TX_OVER,
 					  simTime() + 5.0, "phy0");
-		assertMessage("Transmission over message from phy",
-					  BasePhyLayer::TX_OVER,
+		assertSignal("RadioChannelStateChanged signal from phy",
+                      IRadio::radioChannelStateChangedSignal,
 					  simTime() + 5.0, "mac0");
 
 		testForMessage("1.2", TEST_MACPKT, simTime(), "phy0");
@@ -403,8 +405,8 @@ void TestMacLayer::testRun7(int stage, const cMessage* /*msg*/)
 		assertMessage("Transmission over message at phy",
 					  BasePhyLayer::TX_OVER,
 					  simTime() + 5.0, "phy2");
-		assertMessage("Transmission over message from phy",
-					  BasePhyLayer::TX_OVER,
+		assertSignal("RadioChannelStateChanged signal from phy",
+		              IRadio::radioChannelStateChangedSignal,
 					  simTime() + 5.0, "mac2");
 
 		testForMessage("1.5.2", TEST_MACPKT, simTime(), "phy2");
@@ -489,7 +491,7 @@ void TestMacLayer::testSending1(int stage, const cMessage* /*lastMsg*/) {
 		waitForMessage("First process of AirFrame at Decider", BasePhyLayer::AIR_FRAME, simTime(), "decider3");
 
 		assertMessage("Transmission over message at phy", BasePhyLayer::TX_OVER, simTime() + 1.0, "phy0");
-		assertMessage("Transmission over message from phy", BasePhyLayer::TX_OVER, simTime() + 1.0);
+		assertSignal("RadioChannelStateChanged signal from phy", IRadio::radioChannelStateChangedSignal, simTime() + 1.0);
 		break;
 	}
 	case 2:
@@ -539,8 +541,8 @@ void TestMacLayer::waitForTX() {
 					BasePhyLayer::RADIO_SWITCHING_OVER,
 					simTime() + switchTime,
 					"phy" + toString(myIndex));
-	waitForMessage(	"SWITCH_OVER to TX message.",
-					BasePhyLayer::RADIO_SWITCHING_OVER,
+	waitForSignal(	"RadioModeChanged signal from phy.",
+					IRadio::radioModeChangedSignal,
 					simTime() + switchTime);
 }
 
