@@ -59,6 +59,7 @@ class PIMBase : public cSimpleModule
         virtual void initialize(int stage);
 
         void sendHelloPackets();
+        void sendHelloPacket(PIMInterface *pimInterface);
         void processHelloTimer(cMessage *timer);
         void processHelloPacket(PIMHello *pkt);
 

@@ -88,46 +88,58 @@ void PIMBase::initialize(int stage)
 void PIMBase::processHelloTimer(cMessage *timer)
 {
     ASSERT(timer == helloTimer);
+    EV_DETAIL << "Hello Timer expired.\n";
     sendHelloPackets();
     scheduleAt(simTime() + helloPeriod, helloTimer);
 }
 
 void PIMBase::sendHelloPackets()
 {
-    EV_INFO << "Sending hello packets\n";
-
     for (int i = 0; i < pimIft->getNumInterfaces(); i++)
     {
         PIMInterface *pimInterface = pimIft->getInterface(i);
         if (pimInterface->getMode() == mode)
-        {
-            PIMHello *msg = new PIMHello("PIMHello");
-            IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-            ctrl->setDestAddr(ALL_PIM_ROUTERS_MCAST);
-            ctrl->setProtocol(IP_PROT_PIM);
-            ctrl->setTimeToLive(1);
-            ctrl->setInterfaceId(pimInterface->getInterfaceId());
-            msg->setControlInfo(ctrl);
-
-            send(msg, "ipOut");
-        }
+            sendHelloPacket(pimInterface);
     }
+}
+
+void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
+{
+    EV_INFO << "Sending Hello packet on interface '" << pimInterface->getInterfacePtr()->getName() << "'\n";
+
+    PIMHello *msg = new PIMHello("PIMHello");
+    IPv4ControlInfo *ctrl = new IPv4ControlInfo();
+    ctrl->setDestAddr(ALL_PIM_ROUTERS_MCAST);
+    ctrl->setProtocol(IP_PROT_PIM);
+    ctrl->setTimeToLive(1);
+    ctrl->setInterfaceId(pimInterface->getInterfaceId());
+    msg->setControlInfo(ctrl);
+
+    send(msg, "ipOut");
 }
 
 void PIMBase::processHelloPacket(PIMHello *packet)
 {
     IPv4ControlInfo *ctrl = dynamic_cast<IPv4ControlInfo *>(packet->getControlInfo());
-    InterfaceEntry *ie = ift->getInterfaceById(ctrl->getInterfaceId());
+    int interfaceId = ctrl->getInterfaceId();
     IPv4Address address = ctrl->getSrcAddr();
     int version = packet->getVersion();
 
+    InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
+
     EV_INFO << "Received PIM Hello from neighbor: interface=" << ie->getName() << " address=" << address << "\n";
 
-    PIMNeighbor *neighbor = pimNbt->findNeighbor(ie->getInterfaceId(), address);
+    PIMNeighbor *neighbor = pimNbt->findNeighbor(interfaceId, address);
     if (neighbor)
         pimNbt->restartLivenessTimer(neighbor);
     else
+    {
         pimNbt->addNeighbor(new PIMNeighbor(ie, address, version));
+
+        // TODO If a Hello message is received from a new neighbor, the
+        // receiving router SHOULD send its own Hello message after a random
+        // delay between 0 and Triggered_Hello_Delay.
+    }
 
     delete packet;
 }
