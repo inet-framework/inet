@@ -29,7 +29,6 @@ std::ostream& operator<<(std::ostream& os, const MACAddressTable::AddressEntry& 
 MACAddressTable::MACAddressTable()
 {
     addressTable = new AddressTable();
-
     // Set addressTable for VLAN ID 0
     vlanAddressTable[0] = addressTable;
 }
@@ -142,10 +141,16 @@ bool MACAddressTable::updateTableWithAddress(int portno, MACAddress& address, un
 
     AddressTable::iterator iter;
     AddressTable * table = getTableForVid(vid);
+
     if (table == NULL)
     {
         // MAC Address Table does not exist for VLAN ID vid, so we create it
         table = new AddressTable();
+
+        // set 'the addressTable' to VLAN ID 0
+        if (vid == 0)
+            addressTable = table;
+
         vlanAddressTable[vid] = table;
         iter = table->end();
     }
@@ -185,7 +190,7 @@ void MACAddressTable::flush(int portno)
         for (AddressTable::iterator j = table->begin(); j != table->end();)
         {
             AddressTable::iterator cur = j++;
-            if (j->second.portno == portno)
+            if (cur->second.portno == portno)
                 table->erase(cur);
         }
 
@@ -341,7 +346,6 @@ MACAddressTable::~MACAddressTable()
     for (VlanAddressTable::iterator iter = vlanAddressTable.begin(); iter != vlanAddressTable.end(); iter++)
         delete iter->second;
 }
-
 void MACAddressTable::setAgingTime(simtime_t agingTime)
 {
     this->agingTime = agingTime;
