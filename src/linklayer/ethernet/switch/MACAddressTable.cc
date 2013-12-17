@@ -75,7 +75,7 @@ static char *fgetline(FILE *fp)
 
 void MACAddressTable::handleMessage(cMessage *)
 {
-    opp_error("This module doesn't process messages");
+    throw cRuntimeError("This module doesn't process messages");
 }
 
 /*
