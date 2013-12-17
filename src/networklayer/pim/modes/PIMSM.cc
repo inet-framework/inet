@@ -1873,16 +1873,10 @@ bool PIMSM::deleteMulticastRoute(PIMSMMulticastRoute *route)
     IPv4MulticastRoute *routeFound = rt->removeMulticastRoute(route);
     if (routeFound == route)
     {
-//        cancelAndDelete(route->getStateRefreshTimer());
-//        cancelAndDelete(route->getGraftRetryTimer());
-//        cancelAndDelete(route->getSourceActiveTimer());
         cancelAndDelete(route->getKeepAliveTimer());
         cancelAndDelete(route->getExpiryTimer());
         cancelAndDelete(route->getJoinTimer());
         cancelAndDelete(route->getPrunePendingTimer());
-//        for (unsigned int j = 0;j < route->getNumOutInterfaces(); j++)
-//            cancelAndDelete(route->getPIMOutInterface(j)->pruneTimer);
-
         delete route;
         return true;
     }
@@ -1922,16 +1916,7 @@ std::string PIMSM::PIMSMMulticastRoute::info() const
         << "), ";
     if (getOrigin().isUnspecified() && !getRP().isUnspecified())
         out << "RP is " << getRP() << ", ";
-    out << "flags: ";
-    if (isFlagSet(D)) out << "D";
-    if (isFlagSet(S)) out << "S";
-    if (isFlagSet(C)) out << "C";
-    if (isFlagSet(P)) out << "P";
-    if (isFlagSet(A)) out << "A";
-    if (isFlagSet(F)) out << "F";
-    if (isFlagSet(T)) out << "T";
-
-    out << endl;
+    out << "flags: " << flagsToString(flags) << endl;
 
     PIMInInterface *inInterface = getPIMInInterface();
     out << "Incoming interface: " << (inInterface ? inInterface->getInterface()->getName() : "Null") << ", "
@@ -1940,9 +1925,8 @@ std::string PIMSM::PIMSMMulticastRoute::info() const
     out << "Outgoing interface list:" << endl;
     for (unsigned int k = 0; k < getNumOutInterfaces(); k++)
     {
-        PIMMulticastRoute::PIMOutInterface *outInterface = getPIMOutInterface(k);
-        if ((outInterface->mode == PIMInterface::SparseMode/* XXX && outInterface->shRegTun*/)
-                || outInterface->mode ==PIMInterface::DenseMode)
+        DownstreamInterface *outInterface = check_and_cast<DownstreamInterface*>(getPIMOutInterface(k));
+        if (outInterface->shRegTun)
         {
             out << outInterface->getInterface()->getName() << ", "
                 << (outInterface->forwarding == Forward ? "Forward/" : "Pruned/")

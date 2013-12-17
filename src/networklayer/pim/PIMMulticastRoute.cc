@@ -30,22 +30,25 @@ PIMMulticastRoute::PIMMulticastRoute(IPv4Address origin, IPv4Address group)
     setOriginNetmask(origin.isUnspecified() ? IPv4Address::UNSPECIFIED_ADDRESS : IPv4Address::ALLONES_ADDRESS);
 }
 
+std::string PIMMulticastRoute::flagsToString(int flags)
+{
+    std::string str;
+    if (flags & D) str += "D";
+    if (flags & S) str += "S";
+    if (flags & C) str += "C";
+    if (flags & P) str += "P";
+    if (flags & A) str += "A";
+    if (flags & F) str += "F";
+    if (flags & T) str += "T";
+    return str;
+}
+
 // Format is same as format on Cisco routers.
 std::string PIMMulticastRoute::info() const
 {
     std::stringstream out;
-    out << "(" << (getOrigin().isUnspecified() ? "*" : getOrigin().str()) << ", " << getMulticastGroup()
-        << "), ";
-    out << "flags: ";
-    if (isFlagSet(D)) out << "D";
-    if (isFlagSet(S)) out << "S";
-    if (isFlagSet(C)) out << "C";
-    if (isFlagSet(P)) out << "P";
-    if (isFlagSet(A)) out << "A";
-    if (isFlagSet(F)) out << "F";
-    if (isFlagSet(T)) out << "T";
-
-    out << endl;
+    out << "(" << (getOrigin().isUnspecified() ? "*" : getOrigin().str()) << ", " << getMulticastGroup() << "), "
+        << "flags: " << flagsToString(flags) << endl;
 
     PIMInInterface *inInterface = getPIMInInterface();
     out << "Incoming interface: " << (inInterface ? inInterface->getInterface()->getName() : "Null") << ", "

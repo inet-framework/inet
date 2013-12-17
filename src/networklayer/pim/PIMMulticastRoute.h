@@ -92,7 +92,7 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
             virtual bool isEnabled() { return forwarding != Pruned; } // XXX should be: ((has neighbor and not pruned) or has listener) and not assert looser
         };
 
-    private:
+    protected:
         int flags;
 
         //Originated from destination.Ensures loop freeness.
@@ -108,6 +108,7 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         bool isFlagSet(Flag flag) const { return (flags & flag) != 0; }     /**< Returns if flag is set to entry or not*/
         void setFlags(int flags)   { this->flags |= flags; }                /**< Add flag to ineterface */
         void clearFlag(Flag flag)  { flags &= (~flag); }                   /**< Remove flag from ineterface */
+        static std::string flagsToString(int flags);
 
         // get incoming interface
         PIMInInterface *getPIMInInterface() const { return getInInterface() ? check_and_cast<PIMInInterface*>(getInInterface()) : NULL; }
