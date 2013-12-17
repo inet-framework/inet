@@ -1026,7 +1026,7 @@ void PIMDM::rpfIntChange(PIMMulticastRoute *route)
 
 	// set new RPF
 	InterfaceEntry *oldRpfInt = route->getInInterface() ? route->getInInterface()->getInterface() : NULL;
-	PIMInInterface *newInInterface = new PIMMulticastRoute::PIMInInterface(newRpf, rpfId, pimNbt->getNeighborsOnInterface(rpfId)[0]->getAddress());
+	PIMInInterface *newInInterface = new PIMMulticastRoute::PIMInInterface(newRpf, pimNbt->getNeighborsOnInterface(rpfId)[0]->getAddress());
 	route->setInInterface(newInInterface);
 
 	// route was not pruned, join to the multicast tree again
@@ -1368,7 +1368,7 @@ void PIMDM::newMulticast(IPv4Address srcAddr, IPv4Address destAddr)
     PIMMulticastRoute *newRoute = new PIMMulticastRoute(srcAddr, destAddr);
     newRoute->setSourceType(IMulticastRoute::PIM_DM);
     newRoute->setSource(this);
-    newRoute->setInInterface(new PIMMulticastRoute::PIMInInterface(rpfInterface->getInterfacePtr(), rpfInterface->getInterfaceId(), rpfNeighbor));
+    newRoute->setInInterface(new PIMMulticastRoute::PIMInInterface(rpfInterface->getInterfacePtr(), rpfNeighbor));
     if (routeToSrc->getSourceType() == IPv4Route::IFACENETMASK)
         newRoute->setFlags(PIMMulticastRoute::A);
 

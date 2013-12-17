@@ -77,7 +77,7 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         {
             IPv4Address nextHop;            /**< RF neighbor */
 
-            PIMInInterface(InterfaceEntry *ie, int interfaceId, IPv4Address nextHop)
+            PIMInInterface(InterfaceEntry *ie, IPv4Address nextHop)
                 : InInterface(ie), nextHop(nextHop) {}
             int getInterfaceId() const { return ie->getInterfaceId(); }
         };
